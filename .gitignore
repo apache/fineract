@@ -1,6 +1,12 @@
+bin
+build
+repos
+.classpath
+.project
+.settings
+.gradle
+*.log
 *.class
-
-# Package Files #
 *.jar
 *.war
 *.ear
