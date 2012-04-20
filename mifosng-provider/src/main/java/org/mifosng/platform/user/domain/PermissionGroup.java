@@ -1,0 +1,5 @@
+package org.mifosng.platform.user.domain;
+
+public enum PermissionGroup {
+    INVALID, USER_ADMINISTRATION, ORGANISATION_ADMINISTRATION, PORTFOLIO_MANAGEMENT, REPORTING, DATA_MIGRATION;
+}

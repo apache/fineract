@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Context>
+  <ResourceLink name="jdbc/mifosng" global="jdbc/mifosng" type="javax.sql.DataSource" />
+  <ResourceLink name="jdbc/SourceDB" global="jdbc/SourceDB" type="javax.sql.DataSource" />
+  <ResourceLink name="jdbc/DestinationDB" global="jdbc/DestinationDB" type="javax.sql.DataSource" />
+</Context>
