@@ -1,0 +1,128 @@
+dependsOn(':mifosng-data')
+
+buildscript {
+    repositories {
+        add(new org.apache.ivy.plugins.resolver.URLResolver()) {
+            name = 'GitHub'
+            addArtifactPattern 'http://cloud.github.com/downloads/[organisation]/[module]/[module]-[revision].[ext]'
+        }
+    }
+
+    dependencies {
+        classpath 'bmuschko:gradle-tomcat-plugin:0.9.1'
+    }
+}
+apply plugin: 'war'
+apply plugin: 'eclipse'
+apply plugin: 'tomcat'
+apply plugin: 'jdepend'
+
+sourceCompatibility = JavaVersion.VERSION_1_6
+targetCompatibility = JavaVersion.VERSION_1_6
+
+springVersion = '3.1.1.RELEASE'
+springSecurityOauthVersion = '1.0.0.M6'
+springSecurityVersion = '3.1.0.RELEASE'
+hibernateValidatorVersion = '4.2.0.Final'
+hibernateCoreVersion = '4.1.0.Final'
+jerseyVersion = '1.12'
+springDataJpaVersion = '1.0.3.RELEASE'
+springDatamongoDbVersion = '1.0.0.M4'
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+    maven {
+        url "http://maven.springframework.org/milestone"
+    }
+    maven {
+        url "http://maven.springframework.org/release"
+    }
+    maven {
+        url "http://maven.springframework.org/snapshot"
+    }
+    maven {
+        url "http://download.java.net/maven/2"
+    }
+    flatDir {
+    	dirs '../repos'
+    }
+    flatDir {
+        dirs 'pentaho-jars-lib'
+    }
+}
+
+configurations {
+    providedCompile
+	compile
+	runtime
+	all*.exclude group: 'commons-logging' // this is where we exclude
+}
+
+dependencies {
+     def tomcatVersion = '7.0.26'
+	    tomcat "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}",
+	           "org.apache.tomcat.embed:tomcat-embed-logging-juli:${tomcatVersion}"
+	    tomcat("org.apache.tomcat.embed:tomcat-embed-jasper:${tomcatVersion}") {
+	        exclude group: 'org.eclipse.jdt.core.compiler', module: 'ecj'
+	    }
+	    tomcat "org.apache.tomcat:tomcat-dbcp:${tomcatVersion}"
+
+	providedCompile(
+				[group: 'javax.servlet', name: 'servlet-api', version: '2.5'],
+			)
+
+	compile(    project(':mifosng-data'), 
+	
+				[group: 'javax.servlet', name: 'jstl', version: '1.2'],
+	            
+	   			[group: 'org.springframework', name: 'spring-core', version: springVersion],
+	   			[group: 'org.springframework', name: 'spring-aspects', version: springVersion],
+	   			[group: 'org.springframework', name: 'spring-web', version: springVersion],
+	   			[group: 'org.springframework', name: 'spring-webmvc', version: springVersion],
+	   			[group: 'org.springframework.webflow', name: 'spring-webflow', version: '2.3.0.RELEASE'],
+	            [group: 'org.springframework.security.oauth', name: 'spring-security-oauth', version: springSecurityOauthVersion],
+	            [group: 'org.springframework.security', name: 'spring-security-taglibs', version: springSecurityVersion],
+	            [group: 'org.aspectj', name: 'aspectjrt', version: '1.6.11.RELEASE'],
+	            
+	            [group: 'javax.validation', name: 'validation-api', version: '1.0.0.GA'],
+	            [group: 'org.hibernate', name: 'hibernate-validator', version: hibernateValidatorVersion],
+	            [group: 'org.hibernate', name: 'hibernate-core', version: hibernateCoreVersion],
+	            [group: 'org.hibernate', name: 'hibernate-entitymanager', version: hibernateCoreVersion],
+	            [group: 'org.hibernate.javax.persistence', name: 'hibernate-jpa-2.0-api', version: '1.0.1.Final'],
+	            
+	            [group: 'javax.ws.rs', name: 'jsr311-api', version: '1.1.1'],
+	            [group: 'com.sun.jersey', name: 'jersey-core', version: jerseyVersion],
+	            [group: 'com.sun.jersey', name: 'jersey-servlet', version: jerseyVersion],
+	            [group: 'com.sun.jersey', name: 'jersey-server', version: jerseyVersion],
+	            [group: 'com.sun.jersey', name: 'jersey-json', version: jerseyVersion],
+	            [group: 'com.sun.jersey.contribs', name: 'jersey-spring', version: jerseyVersion],
+	            [group: 'com.sun.jersey.contribs', name: 'jersey-multipart', version: jerseyVersion],
+	            
+	            [group: 'org.springframework.data', name: 'spring-data-jpa', version: springDataJpaVersion],
+	            
+	            [group: 'joda-time', name: 'joda-time', version: '2.1'],
+	            [group: 'net.sourceforge.javacsv', name: 'javacsv', version: '2.0'],
+	            [group: 'org.apache.commons', name: 'commons-email', version: '1.2'],
+	            [group: 'commons-lang', name: 'commons-lang', version: '2.4'],
+	            
+	            [group: 'org.slf4j', name: 'slf4j-api', version: '1.6.4'],
+	            [group: 'org.slf4j', name: 'jcl-over-slf4j', version: '1.6.4'],
+	            
+	            [group: 'ch.qos.logback', name: 'logback-core', version: '1.0.1'],
+	            [group: 'ch.qos.logback', name: 'logback-classic', version: '1.0.0'],
+	            
+	            [group: 'mysql', name: 'mysql-connector-java', version: '5.1.18'],
+ 	        )
+ 	        
+ 	 testCompile 'junit:junit:4.10', 
+                 'org.mockito:mockito-all:1.9.0',
+                 'org.hamcrest:hamcrest-all:1.1'
+ 	 
+}
+
+[tomcatRun, tomcatRunWar, tomcatStop]*.with {
+  configFile = file('src/test/resources/META-INF/context.xml')
+  httpPort = 8085
+  stopPort = 8081
+}
