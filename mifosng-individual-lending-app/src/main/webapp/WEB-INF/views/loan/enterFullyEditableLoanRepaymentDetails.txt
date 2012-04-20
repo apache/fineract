@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<style>
+	#toolbar {
+		padding: 12px 3px;
+		text-align: center;
+	}
+	</style>
+	<script>
+	$(document).ready(function() {
+		$('#expectedDisbursementDate').datepicker({
+			constrainInput: true,
+			dateFormat: 'yy-mm-dd'
+		});
+		
+		$('button.toolbarbutton').button();
+		
+		function editRow ( oTable, nRow )
+		{
+			var aData = oTable.fnGetData(nRow);
+			var jqTds = $('>td', nRow);
+			jqTds[0].innerHTML = '<input value="'+aData[0]+'" type="text" id="installment">';
+			jqTds[1].innerHTML = '<input value="'+aData[1]+'" type="text" class="datepicker" id="duedate">';
+			jqTds[2].innerHTML = '<input value="'+aData[2]+'" type="text" id="principal">';
+			jqTds[3].innerHTML = '<input value="'+aData[3]+'" type="text" id="interest">';
+			jqTds[4].innerHTML = '<input value="'+aData[4]+'" type="text" disabled="disabled">';
+			jqTds[5].innerHTML = '<input value="'+aData[5]+'" type="text" disabled="disabled">';
+			jqTds[6].innerHTML = '<a class="edit" href="">Save</a>';
+			$('.datepicker').datepicker({
+				constrainInput: true,
+				minDate: '-21',
+				dateFormat: 'yy-mm-dd'
+			});
+			$('#_eventId_continue').css('display', 'none');
+			$('#_eventId_validate').css('display', 'none');
+		}
+		
+		function saveRow ( oTable, nRow )
+		{
+			var jqInputs = $('input', nRow);
+			oTable.fnUpdate( jqInputs[0].value, nRow, 0, false );
+			oTable.fnUpdate( jqInputs[1].value, nRow, 1, false );
+			oTable.fnUpdate( jqInputs[2].value, nRow, 2, false );
+			oTable.fnUpdate( jqInputs[3].value, nRow, 3, false );
+			
+			var totalDue = parseFloat(jqInputs[2].value) + parseFloat(jqInputs[3].value);
+			oTable.fnUpdate(totalDue , nRow, 4, false );
+			
+			oTable.fnUpdate( jqInputs[5].value, nRow, 5, false );
+			oTable.fnUpdate( '<a class="edit" href="">Edit</a>', nRow, 6, false );
+			oTable.fnDraw();
+			
+			var totalPrincipal = 0;
+			var previousOutstanding = 0;
+			$('#repaymentschedule tbody tr').each(function(e) {
+				if (isNaN($(this).find("td").eq(2).html())) {
+					previousOutstanding = $(this).find("td").eq(5).html();
+				} else {
+					var principal = parseFloat($(this).find("td").eq(2).html());
+					totalPrincipal += principal;
+					var tableRowElement = $(this)[0];
+					oTable.fnUpdate( previousOutstanding - principal, tableRowElement, 5, false );
+					previousOutstanding = previousOutstanding - principal;
+					oTable.fnDraw();
+				}
+			});
+			
+			$('#_eventId_continue').css('display', 'inline');
+			$('#_eventId_validate').css('display', 'inline');
+		}
+		
+		var oTable = $('#repaymentschedule').dataTable({
+			"sScrollY": "400px",
+			"bScrollCollapse": true,
+			"bPaginate": false,
+			"bLengthChange": false,
+			"bFilter": false,
+			"bSort": false,
+			"bInfo": false,
+			"bAutoWidth": false,
+			"bJQueryUI": true,
+			"fnFooterCallback": function ( nRow, aaData, iStart, iEnd, aiDisplay ) {
+				var cumulativePrincipal = 0;
+				var cumulativeInterest = 0;
+				for ( var i=0 ; i<aaData.length ; i++ ) {
+					if (isNaN(aaData[i][2])) {
+						// do nothing for first row with no number data in it.			
+					} else {
+						var principal = parseFloat(aaData[i][2]);
+						var interest = parseFloat(aaData[i][3]);
+						cumulativePrincipal += principal;
+						cumulativeInterest += interest;
+					}
+				}
+				var nCells = nRow.getElementsByTagName('th');
+				nCells[2].innerHTML = parseFloat(cumulativePrincipal);
+				nCells[3].innerHTML = parseFloat(cumulativeInterest);
+				nCells[4].innerHTML = parseFloat(cumulativePrincipal + cumulativeInterest);
+			}
+		});
+		var nEditing = null;
+		 
+		$('#repaymentschedule a.edit').live('click', function (e) {
+			e.preventDefault();
+			 
+			/* Get the row as a parent of the link that was clicked on */
+			var nRow = $(this).parents('tr')[0];
+			 
+			if ( nEditing !== null && nEditing != nRow ) {
+				/* A different row is being edited - the edit should be cancelled and this row edited */
+				restoreRow( oTable, nEditing );
+				editRow( oTable, nRow );
+				nEditing = nRow;
+				}
+				else if ( nEditing == nRow && this.innerHTML == "Save" ) {
+				/* This row is being edited and should be saved */
+				saveRow( oTable, nEditing );
+				nEditing = null;
+				}
+				else {
+				/* No row currently being edited */
+				editRow( oTable, nRow );
+				nEditing = nRow;
+			}
+		});
+		
+		$('#flexibleloanform').submit(function() {
+			
+			$('#repaymentschedule tbody tr').each(function(index, e) {
+				if (isNaN($(this).find("td").eq(2).html())) {
+					//
+				} else {
+					var aData = oTable.fnGetData( this );
+					
+					var dueDate = $(this).find("td").eq(1).html();
+					var principal = parseFloat($(this).find("td").eq(2).html());
+					var interest = parseFloat($(this).find("td").eq(3).html());
+					var outstanding = parseFloat($(this).find("td").eq(5).html());
+					var trueIndex = index -1;
+					$('#flexibleloanform').append($('<input/>').attr('type', 'hidden').attr('name', 'repaymentSchedule.scheduledLoanInstallments[' + trueIndex + '].dueDate').val(dueDate));
+					$('#flexibleloanform').append($('<input/>').attr('type', 'hidden').attr('name', 'repaymentSchedule.scheduledLoanInstallments[' + trueIndex + '].principal').val(principal));
+					$('#flexibleloanform').append($('<input/>').attr('type', 'hidden').attr('name', 'repaymentSchedule.scheduledLoanInstallments[' + trueIndex + '].interest').val(interest));
+					$('#flexibleloanform').append($('<input/>').attr('type', 'hidden').attr('name', 'repaymentSchedule.scheduledLoanInstallments[' + trueIndex + '].outstanding').val(outstanding));
+				}
+			});
+		});
+		
+		$('#_eventId_validate').click(function() {
+			
+			$('#repaymentschedule tbody tr').each(function(index, e) {
+				if (isNaN($(this).find("td").eq(2).html())) {
+					//
+				} else {
+					var aData = oTable.fnGetData( this );
+					
+					var dueDate = $(this).find("td").eq(1).html();
+					var principal = parseFloat($(this).find("td").eq(2).html());
+					var interest = parseFloat($(this).find("td").eq(3).html());
+					var outstanding = parseFloat($(this).find("td").eq(5).html());
+					var trueIndex = index -1;
+					$('#flexibleloanform').append($('<input/>').attr('type', 'hidden').attr('name', 'repaymentSchedule.scheduledLoanInstallments[' + trueIndex + '].dueDate').val(dueDate));
+					$('#flexibleloanform').append($('<input/>').attr('type', 'hidden').attr('name', 'repaymentSchedule.scheduledLoanInstallments[' + trueIndex + '].principal').val(principal));
+					$('#flexibleloanform').append($('<input/>').attr('type', 'hidden').attr('name', 'repaymentSchedule.scheduledLoanInstallments[' + trueIndex + '].interest').val(interest));
+					$('#flexibleloanform').append($('<input/>').attr('type', 'hidden').attr('name', 'repaymentSchedule.scheduledLoanInstallments[' + trueIndex + '].outstanding').val(outstanding));
+				}
+			});
+		});
+		
+		$('#principal').change(function() {
+			$('#_eventId_calculate').css('display', 'inline');
+			$('#_eventId_validate').css('display', 'inline');
+		});
+		
+		$('#interestRatePerYear').change(function() {
+			$('#_eventId_calculate').css('display', 'inline');
+			$('#_eventId_validate').css('display', 'inline');
+		});
+		
+		$('#selectedRepaymentScheduleMethodOption').change(function() {
+			$('#_eventId_calculate').css('display', 'inline');
+			$('#_eventId_validate').css('display', 'inline');
+		});
+		
+		$('#repaidEvery').change(function() {
+			$('#_eventId_calculate').css('display', 'inline');
+			$('#_eventId_validate').css('display', 'inline');
+		});
+		
+		$('#selectedRepaymentFrequencyOption').change(function() {
+			$('#_eventId_calculate').css('display', 'inline');
+			$('#_eventId_validate').css('display', 'inline');
+		});
+		
+		$('#numberOfInstallments').change(function() {
+			$('#_eventId_calculate').css('display', 'inline');
+			$('#_eventId_validate').css('display', 'inline');
+		});
+		
+		$('#expectedDisbursementDate').change(function() {
+			$('#_eventId_calculate').css('display', 'inline');
+			$('#_eventId_validate').css('display', 'inline');
+		});
+	});
+	</script>
+</head>
+
+<body>
+<div id="container">
+	<jsp:include page="../top-navigation.jsp" />
+
+	<div style="float:none; clear:both;">
+		<div id="spacer" style="line-height: 25px;">&nbsp;</div>
+		<div id="content">
+			<div id="formcontainer">
+				<form:form commandName="loanFormBean" id="flexibleloanform">
+				<spring:hasBindErrors name="loanFormBean">
+				<div class="ui-widget">
+					<div class="ui-state-error ui-corner-all">
+						<span class="ui-icon ui-icon-alert" style="float: left; margin-right: 5px;" ></span>
+						<span>You have the following errors:</span>
+						<div style="margin-left: 5px;">
+						<form:errors path="*" />
+						</div>
+					</div>
+				</div>
+				</spring:hasBindErrors>
+				<fieldset>
+					<legend>Loan Terms</legend>
+					<table>
+					<tr>
+						<td>
+						<label for="principal">Principal:</label>
+						<form:input path="principal" title="The principal amount to be disbursed." cssStyle="width: 150px;"/>
+						<input type="text" value="${loanFormBean.principalAsMoney.currencyCode}" disabled="disabled" style="width: 40px;"/>
+						</td>
+						<td style="text-align: right; vertical-align: bottom; width: 100px;">
+						<span style="margin-right: 10px;">charged at</span>
+						</td>
+						<td>
+						<label for="interestRatePerYear">&#37; Interest Rate per annum:</label>
+						<form:input path="interestRatePerYear" title="The interest rate to be applied to principal over a year." cssStyle="width: 100px;"/>
+						</td>
+						<td style="text-align: right; vertical-align: bottom;">
+						<span style="margin-right: 10px;">calculated using</span>
+						</td>
+						<td>
+						<label for="selectedRepaymentScheduleMethodOption">Interest calculation method:</label>
+						<form:select path="selectedRepaymentScheduleMethodOption" title="Select interest calculation method." cssStyle="width: 300px;">
+							<c:forEach items="${loanFormBean.repaymentScheduleMethodOptions}" var="opt">
+								<form:option value="${opt.value}">${opt.label}</form:option>
+							</c:forEach>
+						</form:select>
+						</td>
+					</tr>
+					<tr>
+						<td>
+						<label for="repaidEvery">Repaid every:</label>
+						<form:input path="repaidEvery" title="The frequency of repayments." cssStyle="width: 50px;" />
+						
+						<form:select path="selectedRepaymentFrequencyOption" title="Select repayment frequency type." cssStyle="width: 150px;">
+							<c:forEach items="${loanFormBean.repaymentFrequencyOptions}" var="opt">
+								<form:option value="${opt.value}">${opt.label}</form:option>
+							</c:forEach>
+						</form:select>
+						</td>
+						<td style="text-align: right; vertical-align: bottom; width: 100px;">
+						<span style="margin-right: 10px;">over</span>
+						</td>
+						<td>
+						<label for="numberOfInstallments">Installments:</label>
+						<form:input path="numberOfInstallments" title="The number of installments the loan is repaid over." cssStyle="width: 100px;"/>
+						</td>
+						<td style="text-align: right; vertical-align: bottom;">
+						<span style="margin-right: 10px;">with</span>
+						</td>
+						<td>
+						<label for="expectedDisbursementDate">Expected disbursement on:</label>
+						<form:input path="expectedDisbursementDate" title="The date on which the loan is expected to be disbursed." cssStyle="width: 300px;" />
+						</td>
+					</tr>
+				</table>
+				</fieldset>
+				<br/>
+				<div>
+				<span id="toolbar" class="ui-widget-header ui-corner-all">
+					<button type="submit" class="toolbarbutton" id="_eventId_back" name="_eventId_back"  title="Back.">Back</button>
+					<button type="submit" class="toolbarbutton" id="_eventId_continue" name="_eventId_continue"  title="Continue loan application.">Continue</button>
+					<button type="submit" class="toolbarbutton" id="_eventId_cancel" name="_eventId_cancel" title="Cancel loan application.">Cancel</button>
+					<button type="submit" class="toolbarbutton" id="_eventId_validate" name="_eventId_validate" title="Validate repayment schedule.">Validate</button>
+					<button type="submit" class="toolbarbutton" id="_eventId_calculate" name="_eventId_calculate" title="Regenerate repayment schedule from loan current loan details." style="display: none;">Regenerate</button>
+				</span>
+				</div>
+				</form:form>
+			</div>
+
+			<br/>
+			<table id="repaymentschedule" class="pretty displayschedule">
+				<caption>Repayment Schedule</caption>
+				<thead>
+					<tr>
+						<th>#</th>
+						<th>Due Date</th><th>Principal</th><th>Interest</th>
+						<th>Total Due</th>
+						<th>Total Outstanding</th>
+						<th>-</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>-</td>
+						<td>-</td>
+						<td>-</td>
+						<td>-</td>
+						<td>-</td>
+						<td>${loanFormBean.principal}</td>
+						<td>-</td>
+					</tr>
+				<c:forEach items="${loanFormBean.repaymentSchedule.scheduledLoanInstallments}" var="installment">
+					<tr>
+						<td>${installment.installmentNumber}</td>
+						<td>${installment.periodEnd}</td>
+						<td>${installment.principalDue.amount}</td>
+						<td>${installment.interestDue.amount}</td>
+						<td>${installment.totalInstallmentDue.amount}</td>
+						<td>${installment.outStandingBalance.amount}</td>
+						<td><a class="edit" href="">Edit</a></td>
+					</tr>
+				</c:forEach>
+				</tbody>
+				<tfoot class="ui-widget-header">
+					<tr class="ui-widget-header">
+						<th>Total</th>
+						<th>-</th>
+						<th>${loanFormBean.cumulativePrincipal}</th>
+						<th>${loanFormBean.cumulativeInterest}</th>
+						<th>${loanFormBean.cumulativeTotal}</th>
+						<th>-</th>
+						<th>-</th>
+					</tr>
+				</tfoot>
+			</table>
+		</div>
+	</div>				
+</div>	
+</body>
+</html>
