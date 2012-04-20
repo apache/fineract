@@ -1,0 +1,25 @@
+apply plugin: 'eclipse'
+apply plugin: 'java'
+
+sourceCompatibility = JavaVersion.VERSION_1_6
+targetCompatibility = JavaVersion.VERSION_1_6
+
+group = 'org.mifosng.data'
+version = '0.2'
+
+repositories {    
+    mavenCentral()
+    mavenLocal()
+}
+
+dependencies {
+	   compile( [group: 'joda-time', name: 'joda-time', version: '2.1'],)
+}
+
+uploadArchives {
+    repositories {
+       flatDir {
+           dirs '../repos'
+       }
+    }
+}
