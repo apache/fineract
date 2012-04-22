@@ -10,24 +10,4 @@
             maxActive="10"
             maxIdle="4"
    />
-   <Resource type="javax.sql.DataSource"
-            name="jdbc/SourceDB"
-            driverClassName="com.mysql.jdbc.Driver"
-            url="jdbc:mysql://localhost:3306/mifos_test"
-            username="root"
-            password="mysql"
-            validationQuery="select 1"
-            maxActive="10"
-            maxIdle="4"
-   />
-   <Resource type="javax.sql.DataSource"
-            name="jdbc/DestinationDB"
-            driverClassName="com.mysql.jdbc.Driver"
-            url="jdbc:mysql://localhost:3306/mifos_test_dwh"
-            username="root"
-            password="mysql"
-            validationQuery="select 1"
-            maxActive="10"
-            maxIdle="4"
-   />
 </Context>
