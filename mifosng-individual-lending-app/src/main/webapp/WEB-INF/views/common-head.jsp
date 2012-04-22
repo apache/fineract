@@ -23,23 +23,23 @@
 <link rel="stylesheet" type="text/css" href="${resValue}<spring:theme code="jqueryui"/>" />
 <link rel="stylesheet" type="text/css" href="${resValue}<spring:theme code="excelcss"/>" />
 
-<script type="text/javascript" src="${resValue}/stretchyreporting/jquery-1.7.min.js"></script>
-<script type="text/javascript" src="${resValue}/stretchyreporting/jquery-ui-1.8.16.custom/js/jquery-ui-1.8.16.custom.min.js"></script>
-<script type="text/javascript" src="${resValue}/stretchyreporting/DataTables-1.8.2/media/js/jquery.dataTables.min.js"></script>
-<script type="text/javascript" src="${resValue}/stretchyreporting/jquery.dataTables.TitleNumeric.js"></script>
-<script type="text/javascript" src="${resValue}/stretchyreporting/DataTables-1.8.2/extras/TableTools/media/js/ZeroClipboard.js"></script>
-<script type="text/javascript" src="${resValue}/stretchyreporting/DataTables-1.8.2/extras/TableTools/media/js/TableTools.min.js"></script>
-<script type="text/javascript" src="${resValue}/stretchyreporting/jquery.i18n.properties-min-1.0.9.js"></script>
-<script type="text/javascript" src="${resValue}/jsrender.js"></script>
-<script type="text/javascript" src="${resValue}/jquery.views.js"></script>
-<script type="text/javascript" src="${resValue}/jquery.observable.min.js"></script>
-<script type="text/javascript" src="${resValue}/globalize/globalize.js"></script>
+<script type="text/javascript" src="${resValue}/libs/jquery-1.7.min.js"></script>
+<script type="text/javascript" src="${resValue}/libs/jquery-ui-1.8.16.custom/js/jquery-ui-1.8.16.custom.min.js"></script>
+<script type="text/javascript" src="${resValue}/libs/DataTables-1.8.2/media/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="${resValue}/libs/jquery.dataTables.TitleNumeric.js"></script>
+<script type="text/javascript" src="${resValue}/libs/DataTables-1.8.2/extras/TableTools/media/js/ZeroClipboard.js"></script>
+<script type="text/javascript" src="${resValue}/libs/DataTables-1.8.2/extras/TableTools/media/js/TableTools.min.js"></script>
+<script type="text/javascript" src="${resValue}/libs/jquery.i18n.properties-min-1.0.9.js"></script>
+<script type="text/javascript" src="${resValue}/libs/jsrender.js"></script>
+<script type="text/javascript" src="${resValue}/libs/jquery.views.js"></script>
+<script type="text/javascript" src="${resValue}/libs/jquery.observable.min.js"></script>
+<script type="text/javascript" src="${resValue}/libs/globalize/globalize.js"></script>
 <script type="text/javascript" src="${resValue}/stretchydata-0.89.js"></script>
 
 <c:choose>
   <c:when test="${not empty language}">
-  	<script type="text/javascript" src="${resValue}/globalize/cultures/globalize.culture.${fn:replace(language, '_', '-')}.js"></script>
-    <script type="text/javascript" src="${resValue}/stretchyreporting/jquery-ui-1.8.16.custom/js/i18n/jquery.ui.datepicker-${fn:replace(language, '_', '-')}.js"></script>
+  	<script type="text/javascript" src="${resValue}/libs/globalize/cultures/globalize.culture.${fn:replace(language, '_', '-')}.js"></script>
+    <script type="text/javascript" src="${resValue}/libs/jquery-ui-1.8.16.custom/js/i18n/jquery.ui.datepicker-${fn:replace(language, '_', '-')}.js"></script>
     <script>
     $(document).ready(function() {
     	// find language parts

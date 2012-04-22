@@ -7,9 +7,9 @@
 <link rel="SHORTCUT ICON" href="${favicon}"/>
 <c:url value="/resources/allinone.css" var="allinoneCssUrl" />
 <link rel="stylesheet" type="text/css" href="${allinoneCssUrl}">
-<c:url value="/resources/jquery-ui-1.8.16/redmond/jquery-ui-1.8.16.custom.css" var="jQueryUiCssUrl" />
+<c:url value="/resources/libs/jquery-ui-1.8.16.custom/css/redmond/jquery-ui-1.8.16.custom.css" var="jQueryUiCssUrl" />
 <link rel="stylesheet" type="text/css" href="${jQueryUiCssUrl}">
-<c:url value="/resources/jquery-1.6.3.min.js" var="jqueryUrl" />
+<c:url value="/resources/libs/jquery-1.7.min.js" var="jqueryUrl" />
 <script type="text/javascript" src="${jqueryUrl}"></script>
-<c:url value="/resources/jquery-ui-1.8.16/jquery-ui-1.8.16.custom.min.js" var="jQueryUiUrl" />
+<c:url value="/resources/libs/jquery-ui-1.8.16.custom/js/jquery-ui-1.8.16.custom.min.js" var="jQueryUiUrl" />
 <script type="text/javascript" src="${jQueryUiUrl}"></script>
