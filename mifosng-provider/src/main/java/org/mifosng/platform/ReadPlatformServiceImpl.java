@@ -818,7 +818,8 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 	@Override
 	public LoanProductData retrieveLoanProduct(final Long loanProductId) {
 
-		List<CurrencyData> allowedCurrencies = retrieveAllowedCurrencies();
+		// TODO - switch back to retrieve all allowed organisation currencies
+		List<CurrencyData> allowedCurrencies = retrieveAllPlatformCurrencies();
 		
 		LoanProductMapper rm = new LoanProductMapper(allowedCurrencies);
 		String sql = "select " + rm.loanProductSchema() + " where lp.id = ?";
@@ -958,13 +959,15 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 
 	@Override
 	public List<EnumOptionReadModel> retrieveInterestFrequencyOptions() {
+		EnumOptionReadModel daily = new EnumOptionReadModel("Daily",
+				PeriodFrequencyType.DAYS.getValue().longValue());
 		EnumOptionReadModel perWeek = new EnumOptionReadModel("Per week",
 				PeriodFrequencyType.WEEKS.getValue().longValue());
 		EnumOptionReadModel perMonth = new EnumOptionReadModel("Per month",
 				PeriodFrequencyType.MONTHS.getValue().longValue());
 		EnumOptionReadModel perYear = new EnumOptionReadModel("Per year",
 				PeriodFrequencyType.YEARS.getValue().longValue());
-		List<EnumOptionReadModel> repaymentFrequencyOptions = Arrays.asList(
+		List<EnumOptionReadModel> repaymentFrequencyOptions = Arrays.asList(daily,
 				perWeek, perMonth, perYear);
 		return repaymentFrequencyOptions;
 	}
