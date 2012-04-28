@@ -6,7 +6,6 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.mifosng.data.CurrencyData;
 import org.mifosng.data.LoanSchedule;
@@ -47,11 +46,6 @@ public class DecliningBalanceEqualInstallmentsLoanScheduleGenerator implements
 				.divide(BigDecimal.valueOf(Double.valueOf("100.0")), mc)
 				.multiply(BigDecimal.valueOf(loanScheduleInfo.getRepayEvery()));
 		
-		BigDecimal dailyInterestRate = loanScheduleInfo.getAnnualNominalInterestRate()
-										.divide(BigDecimal.valueOf(Long.valueOf(365)), mc)
-										.divide(BigDecimal.valueOf(Double.valueOf("100.0")), mc)
-										.multiply(BigDecimal.valueOf(loanScheduleInfo.getRepayEvery()));
-		
 		double interestRateFraction = periodicInterestRate.doubleValue();
 	
 		double futureValue = 0;
@@ -78,14 +72,7 @@ public class DecliningBalanceEqualInstallmentsLoanScheduleGenerator implements
 		int installmentNumber = 1;
 		for (LocalDate scheduledDueDate : scheduledDates) {
 
-			// number of days from startDate to this scheduledDate
-			int daysInPeriod = Days.daysBetween(startDate.toDateMidnight().toDateTime(), scheduledDueDate.toDateMidnight().toDateTime()).getDays();
-			
-			BigDecimal interestRateToApply = dailyInterestRate.multiply(BigDecimal.valueOf(Long.valueOf(daysInPeriod)));
-			
-			Money interestDueBasedOnDays = outstandingBalance.multiplyRetainScale(interestRateToApply, RoundingMode.HALF_EVEN);
-			
-			Money interestPerInstallment = interestDueBasedOnDays; //outstandingBalance.multiplyRetainScale(periodicInterestRate, RoundingMode.HALF_EVEN);
+			Money interestPerInstallment = outstandingBalance.multiplyRetainScale(periodicInterestRate, RoundingMode.HALF_EVEN);
 			Money principalPerInstallment = totalDuePerInstallment.minus(interestPerInstallment);
 			
 			if (interestCalculationGraceOnRepaymentPeriodFraction >= Integer.valueOf(1).doubleValue()) {
