@@ -15,7 +15,7 @@ buildscript {
 apply plugin: 'war'
 apply plugin: 'eclipse'
 apply plugin: 'tomcat'
-apply plugin: 'jdepend'
+//apply plugin: 'jdepend'
 
 sourceCompatibility = JavaVersion.VERSION_1_6
 targetCompatibility = JavaVersion.VERSION_1_6
