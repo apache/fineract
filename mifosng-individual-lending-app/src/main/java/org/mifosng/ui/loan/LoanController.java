@@ -128,6 +128,7 @@ public class LoanController {
 					@RequestParam(value="nominalInterestRate", required=false) String nominalInterestRate,
 					@RequestParam(value="selectedInterestFrequencyOption", required=false) Integer interestRateFrequencyMethod,
 					@RequestParam(value="selectedInterestMethodOption", required=false) Integer interestMethod,
+					@RequestParam(value="interestRateCalculatedInPeriod", required=false) Integer interestRateCalculatedInPeriod,
 					@RequestParam(value="expectedDisbursementDate", required=false) String expectedDisbursementDateStr,
 					@RequestParam(value="repaymentsStartingFromDate", required=false) String repaymentsStartingFromDateStr,
 					@RequestParam(value="interestCalculatedFromDate", required=false) String interestCalculatedFromDateStr
@@ -146,7 +147,7 @@ public class LoanController {
 		final LocalDate interestCalculatedFromDate = parseStringToLocalDate(interestCalculatedFromDateStr, "interestCalculatedFromDate");
 		
 		CalculateLoanScheduleCommand calculateLoanScheduleCommand = new CalculateLoanScheduleCommand(currencyCode, digitsAfterDecimal, principal, interestRatePerPeriod, 
-				interestRateFrequencyMethod, interestMethod, repaymentEvery, repaymentFrequency, numberOfRepayments, amortizationMethod, 
+				interestRateFrequencyMethod, interestMethod, interestRateCalculatedInPeriod, repaymentEvery, repaymentFrequency, numberOfRepayments, amortizationMethod, 
 				flexibleRepaymentSchedule, interestRebateAllowed, expectedDisbursementDate, repaymentsStartingFromDate, interestCalculatedFromDate);
 		
 		LoanSchedule loanSchedule = this.commonRestOperations.calculateLoanSchedule(calculateLoanScheduleCommand);
@@ -154,7 +155,7 @@ public class LoanController {
 		SubmitLoanApplicationCommand command = new SubmitLoanApplicationCommand(applicantId, productId, 
 						submittedOnDate, submittedOnNote, expectedDisbursementDate, repaymentsStartingFromDate, interestCalculatedFromDate, 
 						loanSchedule, currencyCode, digitsAfterDecimal, principal, 
-						interestRatePerPeriod, interestRateFrequencyMethod, interestMethod, 
+						interestRatePerPeriod, interestRateFrequencyMethod, interestMethod, interestRateCalculatedInPeriod, 
 						repaymentEvery, repaymentFrequency, numberOfRepayments, amortizationMethod, 
 						toleranceAmount, flexibleRepaymentSchedule, interestRebateAllowed);
 		
@@ -175,6 +176,7 @@ public class LoanController {
 					@RequestParam(value="nominalInterestRate", required=false) String nominalInterestRate,
 					@RequestParam(value="selectedInterestFrequencyOption", required=false) Integer interestRateFrequencyMethod,
 					@RequestParam(value="selectedInterestMethodOption", required=false) Integer interestMethod,
+					@RequestParam(value="interestRateCalculatedInPeriod", required=false) Integer interestRateCalculatedInPeriod,
 					@RequestParam(value="expectedDisbursementDate", required=false) String expectedDisbursementDateStr,
 					@RequestParam(value="repaymentsStartingFromDate", required=false) String repaymentsStartingFromDateStr,
 					@RequestParam(value="interestCalculatedFromDate", required=false) String interestCalculatedFromDateStr
@@ -189,7 +191,7 @@ public class LoanController {
 		final LocalDate interestCalculatedFromDate = parseStringToLocalDate(interestCalculatedFromDateStr, "interestCalculatedFromDate");
 		
 		CalculateLoanScheduleCommand command = new CalculateLoanScheduleCommand(currencyCode, digitsAfterDecimal, principal, interestRatePerPeriod, 
-				interestRateFrequencyMethod, interestMethod, repaymentEvery, repaymentFrequency, numberOfRepayments, amortizationMethod, 
+				interestRateFrequencyMethod, interestMethod, interestRateCalculatedInPeriod, repaymentEvery, repaymentFrequency, numberOfRepayments, amortizationMethod, 
 				flexibleRepaymentSchedule, interestRebateAllowed, expectedDisbursementDate, repaymentsStartingFromDate, interestCalculatedFromDate);
 		
 		return this.commonRestOperations.calculateLoanSchedule(command);

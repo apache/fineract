@@ -50,7 +50,8 @@ public class LoanProduct extends AbstractAuditableCustom<AppUser, Long> {
     }
 
     public LoanProduct(final Organisation organisation, final String name, final String description, final MonetaryCurrency currency, final BigDecimal defaultPrincipal,
-            final BigDecimal defaultNominalInterestRatePerPeriod, final PeriodFrequencyType interestPeriodFrequencyType, final BigDecimal defaultAnnualNominalInterestRate, final InterestMethod interestMethod, 
+            final BigDecimal defaultNominalInterestRatePerPeriod, final PeriodFrequencyType interestPeriodFrequencyType, final BigDecimal defaultAnnualNominalInterestRate, 
+            final InterestMethod interestMethod, final InterestCalculationPeriodMethod interestCalculationPeriodMethod, 
             final Integer repayEvery, final PeriodFrequencyType repaymentFrequencyType, final Integer defaultNumberOfInstallments, final AmortizationMethod amortizationMethod,
             final BigDecimal inArrearsTolerance,
 			final boolean flexibleRepaymentSchedule,
@@ -64,7 +65,8 @@ public class LoanProduct extends AbstractAuditableCustom<AppUser, Long> {
         }
         
         this.loanProductRelatedDetail = new LoanProductRelatedDetail(currency,
-        		defaultPrincipal, defaultNominalInterestRatePerPeriod, interestPeriodFrequencyType, defaultAnnualNominalInterestRate, interestMethod,
+        		defaultPrincipal, defaultNominalInterestRatePerPeriod, interestPeriodFrequencyType, defaultAnnualNominalInterestRate, 
+        		interestMethod, interestCalculationPeriodMethod,
 				repayEvery, repaymentFrequencyType, defaultNumberOfInstallments, amortizationMethod, inArrearsTolerance, flexibleRepaymentSchedule, interestRebateAllowed);
     }
 

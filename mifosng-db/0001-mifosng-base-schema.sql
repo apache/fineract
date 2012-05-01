@@ -471,6 +471,7 @@ CREATE TABLE `portfolio_product_loan` (
   `interest_period_frequency_enum` smallint(5) NOT NULL,
   `annual_nominal_interest_rate` decimal(19,6) NOT NULL,
   `interest_method_enum` smallint(5) NOT NULL,
+  `interest_calculated_in_period_enum` smallint(5) NOT NULL DEFAULT 1,
   `repay_every` smallint(5) NOT NULL,
   `repayment_period_frequency_enum` smallint(5) NOT NULL,
   `number_of_repayments` smallint(5) NOT NULL,
@@ -483,11 +484,7 @@ CREATE TABLE `portfolio_product_loan` (
   `lastmodifiedby_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FK1BD0772854DF2770` (`org_id`),
-  KEY `FKAUD0000000000003` (`createdby_id`),
-  KEY `FKAUD0000000000004` (`lastmodifiedby_id`),
-  CONSTRAINT `FK1BD0772854DF2770` FOREIGN KEY (`org_id`) REFERENCES `org_organisation` (`id`),
-  CONSTRAINT `FKAUD0000000000003` FOREIGN KEY (`createdby_id`) REFERENCES `admin_appuser` (`id`),
-  CONSTRAINT `FKAUD0000000000004` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `admin_appuser` (`id`)
+  CONSTRAINT `FK1BD0772854DF2770` FOREIGN KEY (`org_id`) REFERENCES `org_organisation` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -512,6 +509,7 @@ CREATE TABLE `portfolio_loan` (
   `interest_period_frequency_enum` smallint(5) NOT NULL,
   `annual_nominal_interest_rate` decimal(19,6) NOT NULL,
   `interest_method_enum` smallint(5) NOT NULL,
+  `interest_calculated_in_period_enum` smallint(5) NOT NULL DEFAULT 1,
   `repay_every` smallint(5) NOT NULL,
   `repayment_period_frequency_enum` smallint(5) NOT NULL,
   `number_of_repayments` smallint(5) NOT NULL,

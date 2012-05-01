@@ -749,7 +749,7 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 			return "lp.id as id, lp.name as name, lp.description as description, lp.flexible_repayment_schedule as isFlexible, lp.interest_rebate as isInterestRebateAllowed, "
 					+ "lp.principal_amount as principal, lp.currency_code as currencyCode, lp.currency_digits as currencyDigits, "
 					+ "lp.nominal_interest_rate_per_period as interestRatePerPeriod, lp.interest_period_frequency_enum as interestRatePerPeriodFreq, "
-					+ "lp.annual_nominal_interest_rate as annualInterestRate, lp.interest_method_enum as interestMethod, "
+					+ "lp.annual_nominal_interest_rate as annualInterestRate, lp.interest_method_enum as interestMethod, lp.interest_calculated_in_period_enum as interestCalculationInPeriodMethod,"
 					+ "lp.repay_every as repaidEvery, lp.repayment_period_frequency_enum as repaymentPeriodFrequency, lp.number_of_repayments as numberOfRepayments, "
 					+ "lp.amortization_method_enum as amortizationMethod, lp.arrearstolerance_amount as tolerance, "
 					+ "lp.created_date as createdon, lp.lastmodified_date as modifiedon "
@@ -786,6 +786,7 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 			BigDecimal annualInterestRate = rs
 					.getBigDecimal("annualInterestRate");
 			int interestMethod = rs.getInt("interestMethod");
+			int interestCalculationInPeriodMethod = rs.getInt("interestCalculationInPeriodMethod");
 
 			int repaidEvery = rs.getInt("repaidEvery");
 			int repaymentFrequency = rs.getInt("repaymentPeriodFrequency");
@@ -798,7 +799,8 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 			return new LoanProductData(id, name, description, isFlexible,
 					isInterestRebateAllowed, principalMoney,
 					interestRatePerPeriod, interestRatePeriod,
-					annualInterestRate, interestMethod, repaidEvery,
+					annualInterestRate, interestMethod, interestCalculationInPeriodMethod,
+					repaidEvery,
 					repaymentFrequency, numberOfRepayments, amortizationMethod,
 					toleranceMoney, createdOn, lastModifedOn);
 		}
@@ -818,7 +820,8 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 	@Override
 	public LoanProductData retrieveLoanProduct(final Long loanProductId) {
 
-		List<CurrencyData> allowedCurrencies = retrieveAllowedCurrencies();
+		// TODO - switch back to retrieve all allowed organisation currencies
+		List<CurrencyData> allowedCurrencies = retrieveAllPlatformCurrencies();
 		
 		LoanProductMapper rm = new LoanProductMapper(allowedCurrencies);
 		String sql = "select " + rm.loanProductSchema() + " where lp.id = ?";
@@ -838,12 +841,14 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 
 		List<EnumOptionReadModel> possibleAmortizationOptions = retrieveLoanAmortizationMethodOptions();
 		List<EnumOptionReadModel> possibleInterestOptions = retrieveLoanInterestMethodOptions();
+		List<EnumOptionReadModel> possibleInterestRateCalculatedInPeriodOptions = retrieveLoanInterestRateCalculatedInPeriodOptions();
 		List<EnumOptionReadModel> repaymentFrequencyOptions = retrieveRepaymentFrequencyOptions();
 		List<EnumOptionReadModel> interestFrequencyOptions = retrieveInterestFrequencyOptions();
 
 		productData.setPossibleCurrencies(possibleCurrencies);
 		productData.setPossibleAmortizationOptions(possibleAmortizationOptions);
 		productData.setPossibleInterestOptions(possibleInterestOptions);
+		productData.setPossibleInterestRateCalculatedInPeriodOptions(possibleInterestRateCalculatedInPeriodOptions);
 		productData.setRepaymentFrequencyOptions(repaymentFrequencyOptions);
 		productData.setInterestFrequencyOptions(interestFrequencyOptions);
 	}
@@ -866,6 +871,7 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 		productData.setInterestMethod(Integer.valueOf(0));
 		productData.setRepaymentPeriodFrequency(2);
 		productData.setInterestRatePeriod(2);
+		productData.setInterestRateCalculatedInPeriod(1);
 
 		productData.setRepaidEvery(1);
 		productData.setNumberOfRepayments(0);
@@ -942,7 +948,18 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 
 		return allowedRepaymentScheduleCalculationMethods;
 	}
+	
+	@Override
+	public List<EnumOptionReadModel> retrieveLoanInterestRateCalculatedInPeriodOptions() {
+		
+		EnumOptionReadModel option1 = new EnumOptionReadModel("Daily", Long.valueOf(0));
+		EnumOptionReadModel option2 = new EnumOptionReadModel("Same as repayment period", Long.valueOf(1));
 
+		List<EnumOptionReadModel> allowedOptions = Arrays.asList(option1,option2);
+
+		return allowedOptions;
+	}
+	
 	@Override
 	public List<EnumOptionReadModel> retrieveRepaymentFrequencyOptions() {
 		EnumOptionReadModel frequency1 = new EnumOptionReadModel("Days",
@@ -958,14 +975,12 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 
 	@Override
 	public List<EnumOptionReadModel> retrieveInterestFrequencyOptions() {
-		EnumOptionReadModel perWeek = new EnumOptionReadModel("Per week",
-				PeriodFrequencyType.WEEKS.getValue().longValue());
+		// support for monthly and annual percentage rate (MPR) and (APR)
 		EnumOptionReadModel perMonth = new EnumOptionReadModel("Per month",
 				PeriodFrequencyType.MONTHS.getValue().longValue());
 		EnumOptionReadModel perYear = new EnumOptionReadModel("Per year",
 				PeriodFrequencyType.YEARS.getValue().longValue());
-		List<EnumOptionReadModel> repaymentFrequencyOptions = Arrays.asList(
-				perWeek, perMonth, perYear);
+		List<EnumOptionReadModel> repaymentFrequencyOptions = Arrays.asList(perMonth, perYear);
 		return repaymentFrequencyOptions;
 	}
 

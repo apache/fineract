@@ -102,7 +102,8 @@ public class LoanProductController {
 			@RequestParam("inArrearsTolerance") String inArrearsToleranceAsNumber,
 			@RequestParam("nominalInterestRate") String nominalInterestRatePerPeriodAsNumber,
 			@RequestParam("selectedInterestFrequencyOption") Integer nominalInterestRatePerPeriodFrequency,
-			@RequestParam("selectedInterestMethodOption") Integer interestMethod
+			@RequestParam("selectedInterestMethodOption") Integer interestMethod,
+			@RequestParam(value="interestRateCalculatedInPeriod", required=false) Integer interestCalculationPeriodMethod
 			)  {
 		
 		CreateLoanProductCommand command = new CreateLoanProductCommand();
@@ -132,6 +133,7 @@ public class LoanProductController {
 		}
 		command.setInterestRateFrequencyMethod(nominalInterestRatePerPeriodFrequency);
 		command.setInterestMethod(interestMethod);
+		command.setInterestCalculationPeriodMethod(interestCalculationPeriodMethod);
 
 		return this.commonRestOperations.createLoanProduct(command);
 	}
@@ -155,7 +157,8 @@ public class LoanProductController {
 			@RequestParam("inArrearsTolerance") String inArrearsToleranceAsNumber,
 			@RequestParam("nominalInterestRate") String nominalInterestRatePerPeriodAsNumber,
 			@RequestParam("selectedInterestFrequencyOption") Integer nominalInterestRatePerPeriodFrequency,
-			@RequestParam("selectedInterestMethodOption") Integer interestMethod
+			@RequestParam("selectedInterestMethodOption") Integer interestMethod,
+			@RequestParam(value="interestRateCalculatedInPeriod", required=false) Integer interestCalculationPeriodMethod
 			)  {
 		
 		UpdateLoanProductCommand command = new UpdateLoanProductCommand();
@@ -187,6 +190,7 @@ public class LoanProductController {
 		}
 		command.setInterestRateFrequencyMethod(nominalInterestRatePerPeriodFrequency);
 		command.setInterestMethod(interestMethod);
+		command.setInterestCalculationPeriodMethod(interestCalculationPeriodMethod);
 		
 		return this.commonRestOperations.updateLoanProduct(command);
 	}

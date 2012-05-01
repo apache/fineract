@@ -39,6 +39,10 @@ public class LoanProductRelatedDetail implements
 	@Enumerated(EnumType.ORDINAL)
 	@Column(name = "interest_method_enum", nullable = false)
 	private InterestMethod interestMethod;
+	
+	@Enumerated(EnumType.ORDINAL)
+	@Column(name = "interest_calculated_in_period_enum", nullable = false)
+	private InterestCalculationPeriodMethod interestCalculationPeriodMethod;
 
 	@Column(name = "repay_every", nullable = false)
 	private Integer repayEvery;
@@ -85,7 +89,9 @@ public class LoanProductRelatedDetail implements
 			final BigDecimal defaultNominalInterestRatePerPeriod,
 			final PeriodFrequencyType interestPeriodFrequencyType,
 			final BigDecimal defaultAnnualNominalInterestRate,
-			final InterestMethod interestMethod, final Integer repayEvery,
+			final InterestMethod interestMethod, 
+			final InterestCalculationPeriodMethod interestCalculationPeriodMethod,
+			final Integer repayEvery,
 			final PeriodFrequencyType repaymentFrequencyType,
 			final Integer defaultNumberOfRepayments,
 			final AmortizationMethod amortizationMethod,
@@ -98,6 +104,7 @@ public class LoanProductRelatedDetail implements
 		this.interestPeriodFrequencyType = interestPeriodFrequencyType;
 		this.annualNominalInterestRate = defaultAnnualNominalInterestRate;
 		this.interestMethod = interestMethod;
+		this.interestCalculationPeriodMethod = interestCalculationPeriodMethod;
 		this.repayEvery = repayEvery;
 		this.repaymentPeriodFrequencyType = repaymentFrequencyType;
 		this.numberOfRepayments = defaultNumberOfRepayments;
@@ -133,6 +140,10 @@ public class LoanProductRelatedDetail implements
 
 	public InterestMethod getInterestMethod() {
 		return interestMethod;
+	}
+
+	public InterestCalculationPeriodMethod getInterestCalculationPeriodMethod() {
+		return interestCalculationPeriodMethod;
 	}
 
 	@Override
@@ -175,5 +186,6 @@ public class LoanProductRelatedDetail implements
 		this.nominalInterestRatePerPeriod = command.getInterestRatePerPeriod();
 		this.interestPeriodFrequencyType = PeriodFrequencyType.fromInt(command.getInterestRateFrequencyMethod());
 		this.interestMethod = InterestMethod.fromInt(command.getInterestMethod());
+		this.interestCalculationPeriodMethod = InterestCalculationPeriodMethod.fromInt(command.getInterestCalculationPeriodMethod());
 	}
 }

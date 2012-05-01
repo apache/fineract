@@ -82,26 +82,6 @@
 							<input id="numberOfRepayments" name="numberOfRepayments" title="" style="width: 50px;" value="{{=$ctx.number(numberOfRepayments)}}"/>
 						</td>
 					</tr>
-					<tr>
-						<td><spring:message code="form.label.loan.product.amortization"/></td>
-						<td>
-							<select id="selectedAmortizationMethodOption" name="selectedAmortizationMethodOption" title="" style="width: 178px;">
-                                {{#each possibleAmortizationOptions}}
-                                 	{{#if $ctx.number($parent.parent.data.amortizationMethod)===$ctx.number(id)}}
-										<option value="{{=$ctx.number(id)}}" selected="selected">{{=value}}</option>
-									{{#else}}
-										<option value="{{=$ctx.number(id)}}">{{=value}}</option>
-									{{/if}}
-                                {{/each}}
-							</select>
-						</td>
-					</tr>
-					<tr>
-						<td><spring:message code="form.label.loan.product.arrears.tolerance"/></td>
-						<td>
-							<input id="inArrearsTolerance" name="inArrearsTolerance" title="" style="width: 125px;" value="{{=$ctx.money(inArrearsTolerance)}}" />
-						</td>
-					</tr>
 				</table>
 			</td>
 			<td valign="top" style="padding-left: 5px; padding-right: 5px; border-right: 1px solid;">
@@ -109,9 +89,9 @@
 					<tr>
 						<td><spring:message code="form.label.loan.product.nominal.interestrate"/></td>
 						<td>
-							<input id="nominalInterestRate" name="nominalInterestRate" title="" style="width: 60px;" value="{{=$ctx.decimal(interestRatePerPeriod, 4)}}" />
+							<input id="nominalInterestRate" name="nominalInterestRate" title="" style="width: 70px;" value="{{=$ctx.decimal(interestRatePerPeriod, 4)}}" />
 
-							<select id="selectedInterestFrequencyOption" name="selectedInterestFrequencyOption" title="" style="width: 115px;">
+							<select id="selectedInterestFrequencyOption" name="selectedInterestFrequencyOption" title="" style="width: 139px;">
 								{{#each interestFrequencyOptions}}
                                  	{{#if $ctx.number($parent.parent.data.interestRatePeriod)===$ctx.number(id)}}
 										<option value="{{=$ctx.number(id)}}" selected="selected">{{=value}}</option>
@@ -123,9 +103,23 @@
 						</td>
 					</tr>
 					<tr>
+						<td><spring:message code="form.label.loan.product.amortization"/></td>
+						<td>
+							<select id="selectedAmortizationMethodOption" name="selectedAmortizationMethodOption" title="" style="width: 220px;">
+                                {{#each possibleAmortizationOptions}}
+                                 	{{#if $ctx.number($parent.parent.data.amortizationMethod)===$ctx.number(id)}}
+										<option value="{{=$ctx.number(id)}}" selected="selected">{{=value}}</option>
+									{{#else}}
+										<option value="{{=$ctx.number(id)}}">{{=value}}</option>
+									{{/if}}
+                                {{/each}}
+							</select>
+						</td>
+					</tr>
+					<tr>
 						<td><spring:message code="form.label.loan.product.interest.method"/></td>
 						<td>
-							<select id="selectedInterestMethodOption" name="selectedInterestMethodOption" title="" style="width: 180px;">
+							<select id="selectedInterestMethodOption" name="selectedInterestMethodOption" title="" style="width: 220px;">
 								{{#each possibleInterestOptions}}
                                  	{{#if $ctx.number($parent.parent.data.interestMethod)===$ctx.number(id)}}
 										<option value="{{=$ctx.number(id)}}" selected="selected">{{=value}}</option>
@@ -134,6 +128,26 @@
 									{{/if}}
                                 {{/each}}
 							</select>
+						</td>
+					</tr>
+					<tr>
+						<td><spring:message code="form.label.loan.product.interest.rate.calcutated.in.period"/></td>
+						<td>
+							<select id="interestRateCalculatedInPeriod" name="interestRateCalculatedInPeriod" title="" style="width: 220px;">
+								{{#each possibleInterestRateCalculatedInPeriodOptions}}
+                                 	{{#if $ctx.number($parent.parent.data.interestRateCalculatedInPeriod)===$ctx.number(id)}}
+										<option value="{{=$ctx.number(id)}}" selected="selected">{{=value}}</option>
+									{{#else}}
+										<option value="{{=$ctx.number(id)}}">{{=value}}</option>
+									{{/if}}
+                                {{/each}}
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<td><spring:message code="form.label.loan.product.arrears.tolerance"/></td>
+						<td>
+							<input id="inArrearsTolerance" name="inArrearsTolerance" title="" style="width: 215px;" value="{{=$ctx.money(inArrearsTolerance)}}" />
 						</td>
 					</tr>
 				</table>

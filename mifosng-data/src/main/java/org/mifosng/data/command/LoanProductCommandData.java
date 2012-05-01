@@ -4,40 +4,41 @@ import java.math.BigDecimal;
 
 public interface LoanProductCommandData {
 
-	public abstract String getName();
+	String getName();
 
-	public abstract String getDescription();
+	String getDescription();
 
-	public abstract String getCurrencyCode();
+	String getCurrencyCode();
 
-	public abstract Integer getDigitsAfterDecimal();
+	Integer getDigitsAfterDecimal();
 
-	public abstract Integer getRepaymentEvery();
+	Integer getRepaymentEvery();
 
-	public abstract Integer getRepaymentFrequency();
+	Integer getRepaymentFrequency();
 
-	public abstract Boolean isFlexibleRepaymentSchedule();
+	Boolean isFlexibleRepaymentSchedule();
 
-	public abstract Boolean isInterestRebateAllowed();
+	Boolean isInterestRebateAllowed();
 
-	public abstract BigDecimal getPrincipal();
+	BigDecimal getPrincipal();
 
-	public abstract Boolean getFlexibleRepaymentSchedule();
+	Boolean getFlexibleRepaymentSchedule();
 
-	public abstract Boolean getInterestRebateAllowed();
+	Boolean getInterestRebateAllowed();
 
-	public abstract Integer getInterestRateFrequencyMethod();
+	Integer getInterestRateFrequencyMethod();
 
-	public abstract Integer getInterestMethod();
+	Integer getInterestMethod();
 
-	public abstract Integer getAmortizationMethod();
+	Integer getAmortizationMethod();
 
-	public abstract Integer getNumberOfRepayments();
+	Integer getNumberOfRepayments();
 
-	public abstract BigDecimal getInterestRatePerPeriod();
+	BigDecimal getInterestRatePerPeriod();
 
-	public abstract CommonLoanProperties getCommonLoanProperties();
+	CommonLoanProperties getCommonLoanProperties();
 
-	public abstract BigDecimal getInArrearsToleranceAmount();
-
+	BigDecimal getInArrearsToleranceAmount();
+	
+	Integer getInterestCalculationPeriodMethod();
 }

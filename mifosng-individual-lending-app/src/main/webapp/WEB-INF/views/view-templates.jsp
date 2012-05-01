@@ -129,27 +129,6 @@
 							</td>
 						</tr>
 						<tr>
-							<td><spring:message code="form.label.loan.product.amortization"/></td>
-							<td>
-								<select name="selectedAmortizationMethodOption" id="selectedAmortizationMethodOption"  title="" style="width: 178px;">
-								{{#each selectedProduct.possibleAmortizationOptions}}
-								{{#if $ctx.number($parent.parent.data.selectedProduct.amortizationMethod)===$ctx.number(id)}}
-									<option value="{{=$ctx.number(id)}}" selected="selected">{{=value}}</option>
-								{{#else}}
-									<option value="{{=$ctx.number(id)}}">{{=value}}</option>
-								{{/if}}
-        						{{/each}}
-  								</select>
-							</td>
-						</tr>
-						<tr>
-							<td><spring:message code="form.label.loan.product.arrears.tolerance"/></td>
-							<td>
-								<input id="inArrearsTolerance" name="inArrearsTolerance" title="" type="text" value="{{=$ctx.money(selectedProduct.inArrearsTolerance)}}" style="width: 125px;" />
-								<input id="inArrearsTolerance.currencyCode" name="inArrearsTolerance.currencyCode" title="" type="text" value="{{=selectedProduct.inArrearsTolerance.displaySymbol}}" style="width: 40px;" disabled="disabled" />
-							</td>
-						</tr>
-						<tr>
 							<td><spring:message code="form.label.loan.expected.disbursement.date.on"/></td>
 							<td>
 							<input id="expectedDisbursementDate" name="expectedDisbursementDate" title="" type="text" class="datepickerfield" value="{{=$ctx.globalDate(expectedDisbursementDate)}}" style="width:172px;"/>
@@ -189,6 +168,20 @@
 							</td>
 						</tr>
 						<tr>
+							<td><spring:message code="form.label.loan.product.amortization"/></td>
+							<td>
+								<select name="selectedAmortizationMethodOption" id="selectedAmortizationMethodOption"  title="" style="width: 178px;">
+								{{#each selectedProduct.possibleAmortizationOptions}}
+								{{#if $ctx.number($parent.parent.data.selectedProduct.amortizationMethod)===$ctx.number(id)}}
+									<option value="{{=$ctx.number(id)}}" selected="selected">{{=value}}</option>
+								{{#else}}
+									<option value="{{=$ctx.number(id)}}">{{=value}}</option>
+								{{/if}}
+        						{{/each}}
+  								</select>
+							</td>
+						</tr>
+						<tr>
 							<td><spring:message code="form.label.loan.product.interest.method"/></td>
 							<td>
 								<select name="selectedInterestMethodOption" id="selectedInterestMethodOption"  title="" style="width: 180px;">
@@ -203,9 +196,30 @@
 							</td>
 						</tr>
 						<tr>
+							<td><spring:message code="form.label.loan.product.interest.rate.calcutated.in.period"/></td>
+							<td>
+							<select id="interestRateCalculatedInPeriod" name="interestRateCalculatedInPeriod" title="" style="width: 220px;">
+								{{#each selectedProduct.possibleInterestRateCalculatedInPeriodOptions}}
+                                 	{{#if $ctx.number($parent.parent.data.selectedProduct.interestRateCalculatedInPeriod)===$ctx.number(id)}}
+										<option value="{{=$ctx.number(id)}}" selected="selected">{{=value}}</option>
+									{{#else}}
+										<option value="{{=$ctx.number(id)}}">{{=value}}</option>
+									{{/if}}
+                                {{/each}}
+							</select>
+							</td>
+						</tr>
+						<tr>
 							<td><spring:message code="form.label.loan.interest.charged.from"/></td>
 							<td>
 							<input id="interestCalculatedFromDate" name="interestCalculatedFromDate" title="" type="text" class="datepickerfield" value="{{=$ctx.globalDate(interestCalculatedFromDate)}}" style="width:172px;"/>
+							</td>
+						</tr>
+						<tr>
+							<td><spring:message code="form.label.loan.product.arrears.tolerance"/></td>
+							<td>
+								<input id="inArrearsTolerance" name="inArrearsTolerance" title="" type="text" value="{{=$ctx.money(selectedProduct.inArrearsTolerance)}}" style="width: 125px;" />
+								<input id="inArrearsTolerance.currencyCode" name="inArrearsTolerance.currencyCode" title="" type="text" value="{{=selectedProduct.inArrearsTolerance.displaySymbol}}" style="width: 40px;" disabled="disabled" />
 							</td>
 						</tr>
 					</table>

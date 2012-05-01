@@ -1,11 +1,10 @@
 package org.mifosng.platform.loanschedule.domain;
 
 import java.math.BigDecimal;
-import java.math.MathContext;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.mifosng.data.CurrencyData;
 import org.mifosng.data.LoanSchedule;
@@ -13,14 +12,17 @@ import org.mifosng.data.MoneyData;
 import org.mifosng.data.ScheduledLoanInstallment;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.currency.domain.Money;
+import org.mifosng.platform.loan.domain.AmortizationMethod;
 import org.mifosng.platform.loan.domain.LoanProductRelatedDetail;
 
-public class DecliningBalanceEqualInstallmentsLoanScheduleGenerator implements
+public class DecliningBalanceMethodLoanScheduleGenerator implements
 		LoanScheduleGenerator {
 
 	private final ScheduledDateGenerator scheduledDateGenerator = new DefaultScheduledDateGenerator();
 	private final PaymentPeriodsInOneYearCalculator paymentPeriodsInOneYearCalculator = new DefaultPaymentPeriodsInOneYearCalculator();
-
+	private final PeriodicInterestRateCalculator periodicInterestRateCalculator = new PeriodicInterestRateCalculator();
+	private final PmtCalculator pmtCalculator = new PmtCalculator();
+	
 	@Override
 	public LoanSchedule generate(
 			final LoanProductRelatedDetail loanScheduleInfo,
@@ -30,93 +32,76 @@ public class DecliningBalanceEqualInstallmentsLoanScheduleGenerator implements
 
 		List<ScheduledLoanInstallment> scheduledLoanInstallments = new ArrayList<ScheduledLoanInstallment>();
 
-		List<LocalDate> scheduledDates = this.scheduledDateGenerator.generate(
-				loanScheduleInfo, disbursementDate, firstRepaymentDate);
+		// 1. generate valid set of 'due dates' based on some of the 'loan attributes'
+		List<LocalDate> scheduledDates = this.scheduledDateGenerator.generate(loanScheduleInfo, disbursementDate, firstRepaymentDate);
 		
-		LocalDate idealDisbursementDateBasedOnFirstRepaymentDate = this.scheduledDateGenerator.idealDisbursementDateBasedOnFirstRepaymentDate(loanScheduleInfo, scheduledDates);
+		// 2. determine the 'periodic' interest rate based on the 'repayment periods' so we can use 
+		final BigDecimal periodInterestRateForRepaymentPeriod = this.periodicInterestRateCalculator.calculateFrom(loanScheduleInfo);
 		
-		MathContext mc = new MathContext(8, RoundingMode.HALF_EVEN);
-
-		BigDecimal paymentPeriodsInYear = BigDecimal
-				.valueOf(this.paymentPeriodsInOneYearCalculator.calculate(loanScheduleInfo.getRepaymentPeriodFrequencyType()));
-		
-		BigDecimal periodicInterestRate = loanScheduleInfo
-				.getAnnualNominalInterestRate()
-				.divide(paymentPeriodsInYear, mc)
-				.divide(BigDecimal.valueOf(Double.valueOf("100.0")), mc)
-				.multiply(BigDecimal.valueOf(loanScheduleInfo.getRepayEvery()));
-		
-		double interestRateFraction = periodicInterestRate.doubleValue();
-	
-		double futureValue = 0;
-		double numberOfPeriods = loanScheduleInfo.getNumberOfRepayments().doubleValue();
-		double principal = loanScheduleInfo.getPrincipal().getAmount().multiply(BigDecimal.valueOf(-1)).doubleValue();
-		
-		double paymentPerInstallment = pmt(interestRateFraction, numberOfPeriods, principal, futureValue, false);
-		double totalRepayment = paymentPerInstallment * numberOfPeriods;
-		
+		// 3. determine 'total payment' for each repayment based on pmt function (and hence the total due overall)
 		final MonetaryCurrency monetaryCurrency = loanScheduleInfo.getPrincipal().getCurrency();
-		
-		Money totalDuePerInstallment = Money.of(monetaryCurrency, BigDecimal.valueOf(paymentPerInstallment));
-		Money totalDue = Money.of(monetaryCurrency, BigDecimal.valueOf(totalRepayment));
+		final Money totalDuePerInstallment = this.pmtCalculator.calculatePaymentForOnePeriodFrom(loanScheduleInfo, periodInterestRateForRepaymentPeriod, monetaryCurrency);
+		final Money totalDue = this.pmtCalculator.calculateTotalRepaymentFrom(loanScheduleInfo, periodInterestRateForRepaymentPeriod, monetaryCurrency);
 		
 		Money totalInterestDue = totalDue.minus(loanScheduleInfo.getPrincipal());
 		Money outstandingBalance = loanScheduleInfo.getPrincipal();
 		Money totalPrincipal = Money.zero(monetaryCurrency);
 		Money totalInterest = Money.zero(monetaryCurrency);
 		
+		LocalDate idealDisbursementDateBasedOnFirstRepaymentDate = this.scheduledDateGenerator.idealDisbursementDateBasedOnFirstRepaymentDate(loanScheduleInfo, scheduledDates);
 		double interestCalculationGraceOnRepaymentPeriodFraction = this.paymentPeriodsInOneYearCalculator.calculateRepaymentPeriodAsAFractionOfDays(loanScheduleInfo.getRepaymentPeriodFrequencyType(), 
 												loanScheduleInfo.getRepayEvery(), interestCalculatedFrom, scheduledDates, idealDisbursementDateBasedOnFirstRepaymentDate);
-
+		
 		LocalDate startDate = disbursementDate;
 		int installmentNumber = 1;
 		for (LocalDate scheduledDueDate : scheduledDates) {
 
-			Money interestPerInstallment = outstandingBalance.multiplyRetainScale(periodicInterestRate, RoundingMode.HALF_EVEN);
-			Money principalPerInstallment = totalDuePerInstallment.minus(interestPerInstallment);
+			// number of days from startDate to this scheduledDate
+			int daysInPeriod = Days.daysBetween(startDate.toDateMidnight().toDateTime(), scheduledDueDate.toDateMidnight().toDateTime()).getDays();
+			
+			Money interestForInstallment = this.periodicInterestRateCalculator.calculateInterestOn(outstandingBalance, periodInterestRateForRepaymentPeriod, daysInPeriod, loanScheduleInfo);
+			Money principalForInstallment = this.periodicInterestRateCalculator.calculatePrincipalOn(totalDuePerInstallment, interestForInstallment, loanScheduleInfo);
 			
 			if (interestCalculationGraceOnRepaymentPeriodFraction >= Integer.valueOf(1).doubleValue()) {
-				Money graceOnInterestForRepaymentPeriod = interestPerInstallment;
-				interestPerInstallment = interestPerInstallment.minus(graceOnInterestForRepaymentPeriod);
+				Money graceOnInterestForRepaymentPeriod = interestForInstallment;
+				interestForInstallment = interestForInstallment.minus(graceOnInterestForRepaymentPeriod);
 				totalInterestDue = totalInterestDue.minus(graceOnInterestForRepaymentPeriod);
 				interestCalculationGraceOnRepaymentPeriodFraction = interestCalculationGraceOnRepaymentPeriodFraction - Integer.valueOf(1).doubleValue();
 			} else if (interestCalculationGraceOnRepaymentPeriodFraction > Double.valueOf("0.25") && interestCalculationGraceOnRepaymentPeriodFraction < Integer.valueOf(1).doubleValue()) {
-				Money graceOnInterestForRepaymentPeriod = interestPerInstallment.multipliedBy(interestCalculationGraceOnRepaymentPeriodFraction);
-				interestPerInstallment = interestPerInstallment.minus(graceOnInterestForRepaymentPeriod);
+				Money graceOnInterestForRepaymentPeriod = interestForInstallment.multipliedBy(interestCalculationGraceOnRepaymentPeriodFraction);
+				interestForInstallment = interestForInstallment.minus(graceOnInterestForRepaymentPeriod);
 				totalInterestDue = totalInterestDue.minus(graceOnInterestForRepaymentPeriod);
 				interestCalculationGraceOnRepaymentPeriodFraction = Double.valueOf("0");
 			}
 			
-			totalPrincipal = totalPrincipal.plus(principalPerInstallment);
-			totalInterest = totalInterest.plus(interestPerInstallment);
-
+			totalPrincipal = totalPrincipal.plus(principalForInstallment);
+			totalInterest = totalInterest.plus(interestForInstallment);
+			
 			if (installmentNumber == loanScheduleInfo.getNumberOfRepayments()) {
-				Money principalDifference = totalPrincipal.minus(loanScheduleInfo
-						.getPrincipal());
+				Money principalDifference = totalPrincipal.minus(loanScheduleInfo.getPrincipal());
 				if (principalDifference.isLessThanZero()) {
-					principalPerInstallment = principalPerInstallment
-							.plus(principalDifference.abs());
+					principalForInstallment = principalForInstallment.plus(principalDifference.abs());
 				} else if (principalDifference.isGreaterThanZero()) {
-					principalPerInstallment = principalPerInstallment
-							.minus(principalDifference.abs());
+					principalForInstallment = principalForInstallment.minus(principalDifference.abs());
 				}
 				
-				Money interestDifference = totalInterest.minus(totalInterestDue);
-				if (interestDifference.isLessThanZero()) {
-					interestPerInstallment = interestPerInstallment
-							.plus(interestDifference.abs());
-				} else if (interestDifference.isGreaterThanZero()) {
-					interestPerInstallment = interestPerInstallment
-							.minus(interestDifference.abs());
+				if (loanScheduleInfo.getAmortizationMethod().equals(
+						AmortizationMethod.EQUAL_INSTALLMENTS)) {
+					Money interestDifference = totalInterest.minus(totalInterestDue);
+					if (interestDifference.isLessThanZero()) {
+						interestForInstallment = interestForInstallment.plus(interestDifference.abs());
+					} else if (interestDifference.isGreaterThanZero()) {
+						interestForInstallment = interestForInstallment.minus(interestDifference.abs());
+					}
 				}
 			}
 
-			Money totalInstallmentDue = principalPerInstallment.plus(interestPerInstallment);
+			Money totalInstallmentDue = principalForInstallment.plus(interestForInstallment);
 
-			outstandingBalance = outstandingBalance.minus(principalPerInstallment);
+			outstandingBalance = outstandingBalance.minus(principalForInstallment);
 			
-			MoneyData principalPerInstallmentValue = MoneyData.of(currencyData, principalPerInstallment.getAmount());
-			MoneyData interestPerInstallmentValue = MoneyData.of(currencyData, interestPerInstallment.getAmount());
+			MoneyData principalPerInstallmentValue = MoneyData.of(currencyData, principalForInstallment.getAmount());
+			MoneyData interestPerInstallmentValue = MoneyData.of(currencyData, interestForInstallment.getAmount());
 			MoneyData totalInstallmentDueValue = MoneyData.of(currencyData, totalInstallmentDue.getAmount());
 			MoneyData outstandingBalanceValue = MoneyData.of(currencyData, outstandingBalance.getAmount());
 					

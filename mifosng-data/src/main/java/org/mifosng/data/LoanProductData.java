@@ -22,6 +22,8 @@ public class LoanProductData implements Serializable {
 	private int interestRatePeriod;
 	private BigDecimal annualInterestRate = BigDecimal.ZERO;
 	private int interestMethod;
+	private int interestRateCalculatedInPeriod;
+	
 	private Integer numberOfInterestFreePeriods = Integer.valueOf(0);
 	private Integer repaidEvery;
 	private int repaymentPeriodFrequency;
@@ -34,6 +36,7 @@ public class LoanProductData implements Serializable {
 	private List<CurrencyData> possibleCurrencies = new ArrayList<CurrencyData>();
 	private List<EnumOptionReadModel> possibleAmortizationOptions = new ArrayList<EnumOptionReadModel>();
 	private List<EnumOptionReadModel> possibleInterestOptions = new ArrayList<EnumOptionReadModel>();
+	private List<EnumOptionReadModel> possibleInterestRateCalculatedInPeriodOptions = new ArrayList<EnumOptionReadModel>();
 	private List<EnumOptionReadModel> repaymentFrequencyOptions = new ArrayList<EnumOptionReadModel>();
 	private List<EnumOptionReadModel> interestFrequencyOptions = new ArrayList<EnumOptionReadModel>();
 	
@@ -47,7 +50,8 @@ public class LoanProductData implements Serializable {
 			final MoneyData principalMoney,
 			final BigDecimal interestRatePerPeriod,
 			final int interestRatePeriod, final BigDecimal annualInterestRate,
-			final int interestMethod, final Integer repaidEvery,
+			final int interestMethod, final int interestCalculationInPeriodMethod,
+			final Integer repaidEvery,
 			final int repaymentPeriodFrequency, final Integer numberOfRepayments,
 			final int amortizationMethod, MoneyData inArrearsTolerance, DateTime createdOn, DateTime lastModifedOn) {
 		this.id = id;
@@ -60,6 +64,7 @@ public class LoanProductData implements Serializable {
 		this.interestRatePeriod = interestRatePeriod;
 		this.annualInterestRate = annualInterestRate;
 		this.interestMethod = interestMethod;
+		this.interestRateCalculatedInPeriod = interestCalculationInPeriodMethod;
 		this.numberOfRepayments = numberOfRepayments;
 		this.repaidEvery = repaidEvery;
 		this.repaymentPeriodFrequency = repaymentPeriodFrequency;
@@ -255,5 +260,22 @@ public class LoanProductData implements Serializable {
 
 	public void setNumberOfInterestFreePeriods(Integer numberOfInterestFreePeriods) {
 		this.numberOfInterestFreePeriods = numberOfInterestFreePeriods;
+	}
+
+	public int getInterestRateCalculatedInPeriod() {
+		return interestRateCalculatedInPeriod;
+	}
+
+	public void setInterestRateCalculatedInPeriod(int interestRateCalculatedInPeriod) {
+		this.interestRateCalculatedInPeriod = interestRateCalculatedInPeriod;
+	}
+
+	public List<EnumOptionReadModel> getPossibleInterestRateCalculatedInPeriodOptions() {
+		return possibleInterestRateCalculatedInPeriodOptions;
+	}
+
+	public void setPossibleInterestRateCalculatedInPeriodOptions(
+			List<EnumOptionReadModel> possibleInterestRateCalculatedInPeriodOptions) {
+		this.possibleInterestRateCalculatedInPeriodOptions = possibleInterestRateCalculatedInPeriodOptions;
 	}
 }

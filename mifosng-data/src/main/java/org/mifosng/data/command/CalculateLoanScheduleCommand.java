@@ -21,14 +21,15 @@ public class CalculateLoanScheduleCommand {
 
 	public CalculateLoanScheduleCommand(final String currencyCode,
 			final Integer digitsAfterDecimal, final Number principal,
-			final Number interestRatePerPeriod, Integer interestRateFrequencyMethod, final Integer interestMethod,
+			final Number interestRatePerPeriod, Integer interestRateFrequencyMethod, final Integer interestMethod, final Integer interestCalculationPeriodMethod,
 			final Integer repaymentEvery, final Integer repaymentFrequency, final Integer numberOfRepayments, Integer amortizationMethod,
 			final boolean flexibleRepaymentSchedule,
 			final boolean interestRebateAllowed,
 			final LocalDate expectedDisbursementDate,
 			final LocalDate repaymentsStartingFromDate, final LocalDate interestCalculatedFromDate) {
 		
-		commonLoanProperties = new CommonLoanProperties(currencyCode, digitsAfterDecimal, principal, interestRatePerPeriod, interestRateFrequencyMethod, interestMethod, 
+		commonLoanProperties = new CommonLoanProperties(currencyCode, digitsAfterDecimal, principal, interestRatePerPeriod, interestRateFrequencyMethod, 
+				interestMethod, interestCalculationPeriodMethod, 
 				repaymentEvery, repaymentFrequency, numberOfRepayments, amortizationMethod, Integer.valueOf(0),
 				flexibleRepaymentSchedule, interestRebateAllowed);
 		
@@ -172,5 +173,13 @@ public class CalculateLoanScheduleCommand {
 
 	public void setInterestCalculatedFromDate(LocalDate interestCalculatedFromDate) {
 		this.interestCalculatedFromDate = interestCalculatedFromDate;
+	}
+	
+	public Integer getInterestCalculationPeriodMethod() {
+		return this.commonLoanProperties.getInterestCalculationPeriodMethod();
+	}
+
+	public void setInterestCalculationPeriodMethod(final Integer interestCalculationPeriodMethod) {
+		this.commonLoanProperties.setInterestCalculationPeriodMethod(interestCalculationPeriodMethod);
 	}
 }

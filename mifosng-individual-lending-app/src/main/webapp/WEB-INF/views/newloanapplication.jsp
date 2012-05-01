@@ -201,20 +201,6 @@ $(document).ready(function() {
 					calculateLoanSchedule();
 				});
 				
-				$('#nominalInterestRate').change(function() {
-					calculateAnnualPercentageRate();
-					calculateLoanSchedule();
-				});
-				
-				$('#selectedInterestFrequencyOption').change(function() {
-					calculateAnnualPercentageRate();
-					calculateLoanSchedule();
-				});
-				
-				$('#selectedInterestMethodOption').change(function() {
-					calculateLoanSchedule();
-				});
-				
 				$('#repaidEvery').change(function() {
 					calculateLoanSchedule();
 				});
@@ -227,15 +213,33 @@ $(document).ready(function() {
 					calculateLoanSchedule();
 				});
 				
-				$('#selectedAmortizationMethodOption').change(function() {
-					calculateLoanSchedule();
-				});
-				
 				$('#expectedDisbursementDate').change(function() {
 					calculateLoanSchedule();
 				});
 				
 				$('#repaymentsStartingFromDate').change(function() {
+					calculateLoanSchedule();
+				});
+				
+				$('#nominalInterestRate').change(function() {
+					calculateAnnualPercentageRate();
+					calculateLoanSchedule();
+				});
+				
+				$('#selectedInterestFrequencyOption').change(function() {
+					calculateAnnualPercentageRate();
+					calculateLoanSchedule();
+				});
+				
+				$('#selectedAmortizationMethodOption').change(function() {
+					calculateLoanSchedule();
+				});
+				
+				$('#selectedInterestMethodOption').change(function() {
+					calculateLoanSchedule();
+				});
+				
+				$('#interestRateCalculatedInPeriod').change(function() {
 					calculateLoanSchedule();
 				});
 				

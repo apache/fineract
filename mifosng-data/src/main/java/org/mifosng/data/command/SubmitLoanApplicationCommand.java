@@ -37,7 +37,7 @@ public class SubmitLoanApplicationCommand {
 			final LocalDate interestCalculatedFromDate,
 			final LoanSchedule loanSchedule, final String currencyCode,
 			final Integer digitsAfterDecimal, final Number principal,
-			final Number interestRatePerPeriod, Integer interestRateFrequencyMethod, final Integer interestMethod,
+			final Number interestRatePerPeriod, Integer interestRateFrequencyMethod, final Integer interestMethod, final Integer interestCalculationPeriodMethod,
 			final Integer repaymentEvery, final Integer repaymentFrequency, final Integer numberOfRepayments, Integer amortizationMethod, final Number toleranceAmount,
 			final boolean flexibleRepaymentSchedule,
 			final boolean interestRebateAllowed) {
@@ -46,7 +46,8 @@ public class SubmitLoanApplicationCommand {
 		this.submittedOnDate = submittedOnDate;
 		this.submittedOnNote = submittedOnNote;
 		
-		commonLoanProperties = new CommonLoanProperties(currencyCode, digitsAfterDecimal, principal, interestRatePerPeriod, interestRateFrequencyMethod, interestMethod, 
+		commonLoanProperties = new CommonLoanProperties(currencyCode, digitsAfterDecimal, principal, interestRatePerPeriod, interestRateFrequencyMethod, 
+				interestMethod, interestCalculationPeriodMethod,
 				repaymentEvery, repaymentFrequency, numberOfRepayments, amortizationMethod, toleranceAmount, flexibleRepaymentSchedule, interestRebateAllowed);
 		
 		this.expectedDisbursementDate = expectedDisbursementDate;
@@ -248,5 +249,13 @@ public class SubmitLoanApplicationCommand {
 
 	public void setInterestCalculatedFromDate(LocalDate interestCalculatedFromDate) {
 		this.interestCalculatedFromDate = interestCalculatedFromDate;
+	}
+	
+	public Integer getInterestCalculationPeriodMethod() {
+		return this.commonLoanProperties.getInterestCalculationPeriodMethod();
+	}
+
+	public void setInterestCalculationPeriodMethod(final Integer interestCalculationPeriodMethod) {
+		this.commonLoanProperties.setInterestCalculationPeriodMethod(interestCalculationPeriodMethod);
 	}
 }

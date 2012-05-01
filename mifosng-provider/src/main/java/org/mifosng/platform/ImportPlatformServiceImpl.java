@@ -37,6 +37,7 @@ import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.exceptions.ClientNotAuthenticatedException;
 import org.mifosng.platform.loan.domain.AmortizationMethod;
 import org.mifosng.platform.loan.domain.DefaultLoanLifecycleStateMachine;
+import org.mifosng.platform.loan.domain.InterestCalculationPeriodMethod;
 import org.mifosng.platform.loan.domain.InterestMethod;
 import org.mifosng.platform.loan.domain.Loan;
 import org.mifosng.platform.loan.domain.LoanBuilder;
@@ -167,6 +168,7 @@ public class ImportPlatformServiceImpl implements ImportPlatformService {
 			}
 			
 			final InterestMethod interestMethod = InterestMethod.fromInt(command.getInterestMethod());
+			final InterestCalculationPeriodMethod interestCalculationPeriodMethod = InterestCalculationPeriodMethod.fromInt(command.getInterestCalculationPeriodMethod());
 			
 			final Integer repayEvery = command.getRepaymentEvery();
 			final PeriodFrequencyType repaymentFrequencyType = PeriodFrequencyType
@@ -177,7 +179,7 @@ public class ImportPlatformServiceImpl implements ImportPlatformService {
 			final boolean interestRebateAllowed = command.isInterestRebateAllowed();
 			
 			LoanProductRelatedDetail loanRepaymentScheduleDetail = new LoanProductRelatedDetail(currency, command.getPrincipal(),
-					defaultNominalInterestRatePerPeriod, interestPeriodFrequencyType, defaultAnnualNominalInterestRate, interestMethod,
+					defaultNominalInterestRatePerPeriod, interestPeriodFrequencyType, defaultAnnualNominalInterestRate, interestMethod, interestCalculationPeriodMethod,
 					repayEvery, repaymentFrequencyType, defaultNumberOfInstallments, amortizationMethod, command.getInArrearsToleranceAmount(), flexibleRepaymentSchedule, interestRebateAllowed);
 
 			LoanSchedule loanSchedule = command.getLoanSchedule();
@@ -460,11 +462,12 @@ public class ImportPlatformServiceImpl implements ImportPlatformService {
 				Number interestRatePerPeriod = interestRatePerYear;
 				Integer interestRatePeriodFrequency = PeriodFrequencyType.YEARS.getValue();
 				Integer interestMethod = matchingProduct.getInterestMethod().getValue();
+				Integer interestCalculationPeriodMethod = InterestCalculationPeriodMethod.SAME_AS_REPAYMENT_PERIOD.getValue();
 				
 				CalculateLoanScheduleCommand calculateLoanScheduleCommand = new CalculateLoanScheduleCommand(currencyCode, digitsAfterDecimal, principal, 
 						interestRatePerPeriod, 
 						interestRatePeriodFrequency, 
-						interestMethod, 
+						interestMethod, interestCalculationPeriodMethod,
 						repaymentEvery, 
 						repaymentFrequency, numberOfRepayments, amortizationMethod, flexibleRepaymentSchedule, 
 						matchingProduct.isInterestRebateAllowed(), expectedDisbursementDate, repaymentsStartingFromDate, interestCalculatedFromDate);
@@ -474,7 +477,7 @@ public class ImportPlatformServiceImpl implements ImportPlatformService {
 				SubmitLoanApplicationCommand parsedNewLoanDetails = new SubmitLoanApplicationCommand(matchingClient.getId(), matchingProduct.getId(), submittedOnDate, noNoteComment, 
 						expectedDisbursementDate, repaymentsStartingFromDate, interestCalculatedFromDate, loanSchedule, 
 						currencyCode, digitsAfterDecimal, principal, 
-						interestRatePerPeriod, interestRatePeriodFrequency, interestMethod, 
+						interestRatePerPeriod, interestRatePeriodFrequency, interestMethod, interestCalculationPeriodMethod,
 						repaymentEvery, repaymentFrequency, numberOfRepayments, amortizationMethod, toleranceAmount.getAmount(),
 						flexibleRepaymentSchedule, matchingProduct.isInterestRebateAllowed());
 				

@@ -20,7 +20,7 @@ public class PmtTest {
 		double futureValue = Double.valueOf("0");
 		boolean type = false;
 		
-		double payment = DecliningBalanceEqualInstallmentsLoanScheduleGenerator.pmt(interestRateFraction, numberOfPayments, principal, futureValue, type);
+		double payment = DecliningBalanceMethodLoanScheduleGenerator.pmt(interestRateFraction, numberOfPayments, principal, futureValue, type);
 		
 		assertThat(payment, is(Double.valueOf("13436.317553939027")));
 	}

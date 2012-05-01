@@ -21,6 +21,7 @@ public class CommonLoanProperties {
 	private BigDecimal interestRatePerPeriod;
 	private Integer interestRateFrequencyMethod;
 	private Integer interestMethod;
+	private Integer interestCalculationPeriodMethod;
 
 	private boolean flexibleRepaymentSchedule = false;
 	private boolean interestRebateAllowed = false;
@@ -31,7 +32,8 @@ public class CommonLoanProperties {
 
 	public CommonLoanProperties(final String currencyCode,
 			final Integer digitsAfterDecimal, final Number principal,
-			final Number interestRatePerPeriod, Integer interestRateFrequencyMethod, final Integer interestMethod,
+			final Number interestRatePerPeriod, Integer interestRateFrequencyMethod, 
+			final Integer interestMethod, final Integer interestCalculationPeriodMethod,
 			final Integer repaymentEvery, final Integer repaymentFrequency, final Integer numberOfRepayments, Integer amortizationMethod, final Number toleranceAmount,
 			final boolean flexibleRepaymentSchedule,
 			final boolean interestRebateAllowed) {
@@ -46,6 +48,7 @@ public class CommonLoanProperties {
 		}
 		this.interestRateFrequencyMethod = interestRateFrequencyMethod;
 		this.interestMethod = interestMethod;
+		this.interestCalculationPeriodMethod = interestCalculationPeriodMethod;
 		
 		this.repaymentEvery = repaymentEvery;
 		this.repaymentFrequency = repaymentFrequency;
@@ -168,5 +171,14 @@ public class CommonLoanProperties {
 
 	public void setInArrearsToleranceAmount(BigDecimal inArrearsToleranceAmount) {
 		this.inArrearsToleranceAmount = inArrearsToleranceAmount;
+	}
+
+	public Integer getInterestCalculationPeriodMethod() {
+		return interestCalculationPeriodMethod;
+	}
+
+	public void setInterestCalculationPeriodMethod(
+			Integer interestCalculationPeriodMethod) {
+		this.interestCalculationPeriodMethod = interestCalculationPeriodMethod;
 	}
 }

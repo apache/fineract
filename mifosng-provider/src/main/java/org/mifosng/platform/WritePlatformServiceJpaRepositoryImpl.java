@@ -54,6 +54,7 @@ import org.mifosng.platform.infrastructure.PlatformUser;
 import org.mifosng.platform.infrastructure.UsernameAlreadyExistsException;
 import org.mifosng.platform.loan.domain.AmortizationMethod;
 import org.mifosng.platform.loan.domain.DefaultLoanLifecycleStateMachine;
+import org.mifosng.platform.loan.domain.InterestCalculationPeriodMethod;
 import org.mifosng.platform.loan.domain.InterestMethod;
 import org.mifosng.platform.loan.domain.Loan;
 import org.mifosng.platform.loan.domain.LoanBuilder;
@@ -447,8 +448,8 @@ public class WritePlatformServiceJpaRepositoryImpl implements
 		validator.validateForCreate(command);
 
 		// assemble LoanProduct from data
-		InterestMethod interestMethod = InterestMethod
-				.fromInt(command.getInterestMethod());
+		InterestMethod interestMethod = InterestMethod.fromInt(command.getInterestMethod());
+		InterestCalculationPeriodMethod interestCalculationPeriodMethod = InterestCalculationPeriodMethod.fromInt(command.getInterestCalculationPeriodMethod());
 		
 		AmortizationMethod amortizationMethod = AmortizationMethod.fromInt(command.getAmortizationMethod());
 
@@ -480,7 +481,7 @@ public class WritePlatformServiceJpaRepositoryImpl implements
 		
 		LoanProduct loanproduct = new LoanProduct(currentUser.getOrganisation(), command.getName(), command.getDescription(), 
 				currency, command.getPrincipal(), 
-				command.getInterestRatePerPeriod(), interestFrequencyType, annualInterestRate, interestMethod, 
+				command.getInterestRatePerPeriod(), interestFrequencyType, annualInterestRate, interestMethod, interestCalculationPeriodMethod,
 				command.getRepaymentEvery(), repaymentFrequencyType, command.getNumberOfRepayments(), amortizationMethod, command.getInArrearsToleranceAmount(),
 				command.isFlexibleRepaymentSchedule(), command.isInterestRebateAllowed());
 		 
@@ -652,7 +653,8 @@ public class WritePlatformServiceJpaRepositoryImpl implements
 			break;
 		}
 		
-		final InterestMethod interestMethod = InterestMethod.DECLINING_BALANCE;
+		final InterestMethod interestMethod = InterestMethod.fromInt(command.getInterestMethod());
+		final InterestCalculationPeriodMethod interestCalculationPeriodMethod = InterestCalculationPeriodMethod.fromInt(command.getInterestCalculationPeriodMethod());
 		
 		final Integer repayEvery = command.getRepaymentEvery();
 		final PeriodFrequencyType repaymentFrequencyType = PeriodFrequencyType
@@ -663,7 +665,8 @@ public class WritePlatformServiceJpaRepositoryImpl implements
 		final boolean interestRebateAllowed = command.isInterestRebateAllowed();
 		
 		LoanProductRelatedDetail loanRepaymentScheduleDetail = new LoanProductRelatedDetail(currency,
-				command.getPrincipal(), defaultNominalInterestRatePerPeriod, interestPeriodFrequencyType, defaultAnnualNominalInterestRate, interestMethod,
+				command.getPrincipal(), defaultNominalInterestRatePerPeriod, interestPeriodFrequencyType, defaultAnnualNominalInterestRate, 
+				interestMethod, interestCalculationPeriodMethod,
 				repayEvery, repaymentFrequencyType, defaultNumberOfInstallments, amortizationMethod, command.getInArrearsToleranceAmount(),
 				flexibleRepaymentSchedule, interestRebateAllowed);
 
@@ -890,41 +893,32 @@ public class WritePlatformServiceJpaRepositoryImpl implements
 		
 		if (loan.isRepaymentScheduleRegenerationRequiredForDisbursement(actualDisbursementDate)) {
 			
-			LocalDate repaymentsStartingFromDate = loan
-					.getExpectedFirstRepaymentOnDate();
-			
+			LocalDate repaymentsStartingFromDate = loan.getExpectedFirstRepaymentOnDate();
 			LocalDate interestCalculatedFromDate = loan.getInterestCalculatedFromDate();
 
-			Number principalAsDecimal = loan.getLoanRepaymentScheduleDetail()
-					.getPrincipal().getAmount();
-			String currencyCode = loan.getLoanRepaymentScheduleDetail()
-					.getPrincipal().getCurrencyCode();
-			int currencyDigits = loan.getLoanRepaymentScheduleDetail()
-					.getPrincipal().getCurrencyDigitsAfterDecimal();
+			Number principalAsDecimal = loan.getLoanRepaymentScheduleDetail().getPrincipal().getAmount();
+			String currencyCode = loan.getLoanRepaymentScheduleDetail().getPrincipal().getCurrencyCode();
+			int currencyDigits = loan.getLoanRepaymentScheduleDetail().getPrincipal().getCurrencyDigitsAfterDecimal();
 			
-			Number interestRatePerYear = loan.getLoanRepaymentScheduleDetail()
-					.getAnnualNominalInterestRate();
-			Integer numberOfInstallments = loan
-					.getLoanRepaymentScheduleDetail().getNumberOfRepayments();
+			Number interestRatePerYear = loan.getLoanRepaymentScheduleDetail().getAnnualNominalInterestRate();
+			Integer numberOfInstallments = loan.getLoanRepaymentScheduleDetail().getNumberOfRepayments();
 			
-			Integer repaidEvery = loan.getLoanRepaymentScheduleDetail()
-					.getRepayEvery();
-			Integer selectedRepaymentFrequency = loan
-					.getLoanRepaymentScheduleDetail()
-					.getRepaymentPeriodFrequencyType().getValue();
-			Integer selectedRepaymentSchedule = loan
-					.getLoanRepaymentScheduleDetail()
-					.getAmortizationMethod().getValue();
-			boolean flexibleRepaymentSchedule = loan
-					.isFlexibleRepaymentSchedule();
+			Integer repaidEvery = loan.getLoanRepaymentScheduleDetail().getRepayEvery();
+			Integer selectedRepaymentFrequency = loan.getLoanRepaymentScheduleDetail().getRepaymentPeriodFrequencyType().getValue();
+			Integer selectedRepaymentSchedule = loan.getLoanRepaymentScheduleDetail().getAmortizationMethod().getValue();
+			boolean flexibleRepaymentSchedule = loan.isFlexibleRepaymentSchedule();
 			
+			// use annual percentage rate to re-calculate loan schedule for late disbursement
 			Number interestRatePerPeriod = interestRatePerYear;
 			Integer interestRateFrequencyMethod = PeriodFrequencyType.YEARS.getValue();
-			Integer interestMethod = InterestMethod.DECLINING_BALANCE.getValue();
-			boolean interestRebateAllowed = false;
+			
+			Integer interestMethod = loan.getLoanRepaymentScheduleDetail().getInterestMethod().getValue();
+			Integer interestCalculationInPeriod = loan.getLoanRepaymentScheduleDetail().getInterestCalculationPeriodMethod().getValue();
+			boolean interestRebateAllowed = loan.getLoanRepaymentScheduleDetail().isInterestRebateAllowed();
 			
 			CalculateLoanScheduleCommand calculateCommand = new CalculateLoanScheduleCommand(currencyCode, currencyDigits, principalAsDecimal, 
-					interestRatePerPeriod, interestRateFrequencyMethod, interestMethod, repaidEvery, selectedRepaymentFrequency, numberOfInstallments, 
+					interestRatePerPeriod, interestRateFrequencyMethod, interestMethod, interestCalculationInPeriod,
+					repaidEvery, selectedRepaymentFrequency, numberOfInstallments, 
 					selectedRepaymentSchedule, flexibleRepaymentSchedule, interestRebateAllowed, actualDisbursementDate, repaymentsStartingFromDate, interestCalculatedFromDate);
 
 			LoanSchedule loanSchedule = this.calculationPlatformService.calculateLoanSchedule(calculateCommand);
@@ -951,8 +945,7 @@ public class WritePlatformServiceJpaRepositoryImpl implements
 						interest.getAmount());
 				modifiedLoanRepaymentSchedule.add(installment);
 			}
-			loan.disburseWithModifiedRepaymentSchedule(disbursedOn, comment,
-					modifiedLoanRepaymentSchedule, defaultLoanLifecycleStateMachine());
+			loan.disburseWithModifiedRepaymentSchedule(disbursedOn, comment, modifiedLoanRepaymentSchedule, defaultLoanLifecycleStateMachine());
 		} else {
 			loan.disburse(disbursedOn, defaultLoanLifecycleStateMachine());
 		}

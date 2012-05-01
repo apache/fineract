@@ -53,6 +53,8 @@ public interface ReadPlatformService {
 	List<EnumOptionReadModel> retrieveLoanAmortizationMethodOptions();
 
 	List<EnumOptionReadModel> retrieveLoanInterestMethodOptions();
+	
+	List<EnumOptionReadModel> retrieveLoanInterestRateCalculatedInPeriodOptions();
 
 	List<EnumOptionReadModel> retrieveRepaymentFrequencyOptions();
 
