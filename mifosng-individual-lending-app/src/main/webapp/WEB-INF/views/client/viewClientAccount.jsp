@@ -369,6 +369,8 @@ $(document).ready(function() {
 	var $newtabs = $("#newtabs").tabs({
 		
 		"add": function( event, ui ) {
+			console.log(ui);
+			//alert("adding new tab: " + ui.panel.id + " :" + ui.tab.className);
 			$newtabs.tabs('select', '#' + ui.panel.id);
 		},
 		"ajaxOptions": {
@@ -454,8 +456,8 @@ $(document).ready(function() {
 	        		
 	        		var tableHtml = $("#loanDataTabTemplate").render(data);
 	        		
-	        		var curTab = $('#newtabs .ui-tabs-panel:not(.ui-tabs-hide)');
-	        		curTab.html(tableHtml);
+	        		var currentTab = $("#newtabs").children(".ui-tabs-panel").not(".ui-tabs-hide");
+	        		currentTab.html(tableHtml);
 	        		
 					var extraDataParams = {
 							url: '${rootContext}',
@@ -469,7 +471,7 @@ $(document).ready(function() {
 					};
 					jQuery.stretchyData.displayAllExtraData(extraDataParams);
 					
-	        		var curTabID = curTab.prop("id")
+	        		var curTabID = currentTab.prop("id")
 	        		
 	        		offsetToSubmittedDate = data.maxSubmittedOnOffsetFromToday;
 	        		offsetToApprovalDate = data.maxApprovedOnOffsetFromToday;
@@ -702,7 +704,7 @@ $(document).ready(function() {
 		
 			<div id="newtabs">
 				<ul>
-					<li><a href="${clientUrl}" title="clienttab">${clientDisplayName}</a></li>
+					<li><a href="${clientUrl}" title="clienttab" class="topleveltab">${clientDisplayName}</a></li>
 				</ul>
 				<div id="clienttab">
 				</div>

@@ -51,7 +51,7 @@
 
 		var extraDataNamesVar = "";
 		for ( var i in data.names) {
-			var dsnDivName = generateDsnDivName(displayAllVars.datasetType, i);
+			var dsnDivName = generateDsnDivName(displayAllVars.datasetType, i, displayAllVars.datasetTypeDiv);
 			extraDataNamesVar += '<br><span ' + headingClassStr + '><b>'
 					+ doI18N(displayAllVars.headingPrefix)
 					+ doI18N(data.names[i]) + ' - </span></b> ';
@@ -59,12 +59,13 @@
 			extraDataNamesVar += editExtraDataLink(displayAllVars.url,
 					displayAllVars.datasetType, data.names[i],
 					displayAllVars.datasetPKValue, dsnDivName);
+			
 			extraDataNamesVar += '<div id="' + dsnDivName + '">';
 			extraDataNamesVar += '</div>';
 		}
 		$('#' + displayAllVars.datasetTypeDiv).html(extraDataNamesVar);
 		for ( var i in data.names) {
-			var dsnDivName = generateDsnDivName(displayAllVars.datasetType, i);
+			var dsnDivName = generateDsnDivName(displayAllVars.datasetType, i, displayAllVars.datasetTypeDiv);
 			viewExtraData(displayAllVars.url, displayAllVars.datasetType,
 					data.names[i], displayAllVars.datasetPKValue, dsnDivName);
 		}
@@ -197,8 +198,8 @@
 				popupEditErrorFunction);
 	}
 
-	function generateDsnDivName(datasetType, i) {
-		return extraDataUnderscore(datasetType) + "_" + i;
+	function generateDsnDivName(datasetType, i, uniqueDivid) {
+		return extraDataUnderscore(datasetType) + "_" + i + "_" + extraDataUnderscore(uniqueDivid);
 	}
 
 	/* start of code to fill data in edit form */

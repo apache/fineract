@@ -34,7 +34,7 @@
 <script type="text/javascript" src="${resValue}/libs/jquery.views.js"></script>
 <script type="text/javascript" src="${resValue}/libs/jquery.observable.min.js"></script>
 <script type="text/javascript" src="${resValue}/libs/globalize/globalize.js"></script>
-<script type="text/javascript" src="${resValue}/stretchydata-0.89.js"></script>
+<script type="text/javascript" src="${resValue}/stretchydata-0.90.js"></script>
 
 <c:choose>
   <c:when test="${not empty language}">
