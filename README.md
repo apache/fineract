@@ -19,3 +19,8 @@ Developers
 see https://github.com/keithwoodlock/mifosx/wiki for getting started.
 
 see https://www.ohloh.net/p/mifosx for activity overview and basic code analysis.
+
+Amazon Public AMI
+=================
+
+AMI id: ami-d9a59ead
