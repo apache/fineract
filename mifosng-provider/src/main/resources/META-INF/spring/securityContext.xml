@@ -17,6 +17,7 @@
 			<list>
 				<sec:filter-chain pattern="/resources/**" filters="none" />
 				<sec:filter-chain pattern="/api/open/**" filters="none" />
+				<sec:filter-chain pattern="/api/v1/**" filters="none" />
 				
 				<sec:filter-chain pattern="/**" filters="populateSecurityContextFilter, customAuthenticationFilter,
 				oauthRequestTokenFilter, oauthUserAuthorizationFilter, oauthAccessTokenFilter, oauthProtectedResourceFilter,
