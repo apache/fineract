@@ -187,13 +187,13 @@ public class SubmitLoanApplicationCommand {
 		this.commonLoanProperties.setPrincipal(principal);
 	}
 
-	public Boolean getFlexibleRepaymentSchedule() {
-		return this.commonLoanProperties.getFlexibleRepaymentSchedule();
-	}
-
-	public Boolean getInterestRebateAllowed() {
-		return this.commonLoanProperties.getInterestRebateAllowed();
-	}
+//	public Boolean getFlexibleRepaymentSchedule() {
+//		return this.commonLoanProperties.getFlexibleRepaymentSchedule();
+//	}
+//
+//	public Boolean getInterestRebateAllowed() {
+//		return this.commonLoanProperties.getInterestRebateAllowed();
+//	}
 
 	public Integer getInterestRateFrequencyMethod() {
 		return commonLoanProperties.getInterestRateFrequencyMethod();

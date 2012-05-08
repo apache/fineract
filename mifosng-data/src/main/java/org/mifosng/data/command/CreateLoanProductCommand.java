@@ -144,18 +144,18 @@ public class CreateLoanProductCommand implements LoanProductCommandData {
 	/* (non-Javadoc)
 	 * @see org.mifosng.data.command.LoanProductCommandData#getFlexibleRepaymentSchedule()
 	 */
-	@Override
-	public Boolean getFlexibleRepaymentSchedule() {
-		return this.commonLoanProperties.getFlexibleRepaymentSchedule();
-	}
+//	@Override
+//	public Boolean getFlexibleRepaymentSchedule() {
+//		return this.commonLoanProperties.getFlexibleRepaymentSchedule();
+//	}
 
 	/* (non-Javadoc)
 	 * @see org.mifosng.data.command.LoanProductCommandData#getInterestRebateAllowed()
 	 */
-	@Override
-	public Boolean getInterestRebateAllowed() {
-		return this.commonLoanProperties.getInterestRebateAllowed();
-	}
+//	@Override
+//	public Boolean getInterestRebateAllowed() {
+//		return this.commonLoanProperties.getInterestRebateAllowed();
+//	}
 
 	/* (non-Javadoc)
 	 * @see org.mifosng.data.command.LoanProductCommandData#getInterestRateFrequencyMethod()

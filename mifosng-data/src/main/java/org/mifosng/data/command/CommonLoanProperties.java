@@ -117,13 +117,13 @@ public class CommonLoanProperties {
 		this.principal = principal;
 	}
 
-	public Boolean getFlexibleRepaymentSchedule() {
-		return this.flexibleRepaymentSchedule;
-	}
+//	public Boolean getFlexibleRepaymentSchedule() {
+//		return this.flexibleRepaymentSchedule;
+//	}
 
-	public Boolean getInterestRebateAllowed() {
-		return this.interestRebateAllowed;
-	}
+//	public Boolean getInterestRebateAllowed() {
+//		return this.interestRebateAllowed;
+//	}
 
 	public Integer getInterestRateFrequencyMethod() {
 		return interestRateFrequencyMethod;

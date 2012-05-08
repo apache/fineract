@@ -22,9 +22,9 @@ public interface LoanProductCommandData {
 
 	BigDecimal getPrincipal();
 
-	Boolean getFlexibleRepaymentSchedule();
+//	Boolean getFlexibleRepaymentSchedule();
 
-	Boolean getInterestRebateAllowed();
+//	Boolean getInterestRebateAllowed();
 
 	Integer getInterestRateFrequencyMethod();
 
