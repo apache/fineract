@@ -16,7 +16,7 @@ http://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8080/mifosng-individua
 Roadmap
 ==============
 
-see for info around resource-oriented API work
+see https://github.com/keithwoodlock/mifosx/wiki/Developer-deep-dive-into-Http-API for info around resource-oriented API work
 
 Developers
 ==========
