@@ -1,6 +1,5 @@
 package org.mifosng.platform.api;
 
-import java.util.Arrays;
 import java.util.Collection;
 
 import javax.ws.rs.Consumes;
@@ -16,7 +15,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.mifosng.data.EntityIdentifier;
-import org.mifosng.data.ErrorResponse;
 import org.mifosng.data.ErrorResponseList;
 import org.mifosng.data.LoanProductData;
 import org.mifosng.data.LoanProductList;
@@ -30,7 +28,6 @@ import org.mifosng.platform.user.domain.AppUser;
 import org.mifosng.platform.user.domain.AppUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -38,7 +35,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 /*
- * 
  * @see http://viewfromthefringe.blogspot.com/2010/06/versioning-rest-services.html
  * @see http://jersey.576304.n2.nabble.com/Restful-Service-Versioning-td6332833.html
  * 
@@ -57,7 +53,6 @@ import org.springframework.stereotype.Component;
  * 8. @PUT /loanproducts/{productId} updates loan product of that identifier
  * 9. Using /resource/template pattern for UI specific function of get 'data with defaults' for new resource.
  */
-
 @Path("/v1/loanproducts")
 @Component
 @Scope("singleton")
@@ -113,10 +108,6 @@ public class LoanProductApiResource {
 			EntityIdentifier entityIdentifier = this.writePlatformService.createLoanProduct(command);
 
 			return Response.ok().entity(entityIdentifier).build();
-		} catch (AccessDeniedException e) {
-			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
-			ErrorResponseList list = new ErrorResponseList(Arrays.asList(errorResponse));
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(list).build());
 		} catch (ApplicationDomainRuleException e) {
 			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(new ErrorResponseList(e.getErrors())).build());
 		} catch (NewDataValidationException e) {
@@ -135,10 +126,6 @@ public class LoanProductApiResource {
     		Collection<LoanProductData> products = this.readPlatformService.retrieveAllLoanProducts();
 
     		return Response.ok().entity(new LoanProductList(products)).build();
-		} catch (AccessDeniedException e) {
-			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
-			ErrorResponseList list = new ErrorResponseList(Arrays.asList(errorResponse));
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(list).build());
 		} catch (ApplicationDomainRuleException e) {
 			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(new ErrorResponseList(e.getErrors())).build());
 		} catch (NewDataValidationException e) {
@@ -161,10 +148,6 @@ public class LoanProductApiResource {
 			LoanProductData loanProduct = this.readPlatformService.retrieveNewLoanProductDetails();
 
 			return Response.ok().entity(loanProduct).build();
-		} catch (AccessDeniedException e) {
-			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
-			ErrorResponseList list = new ErrorResponseList(Arrays.asList(errorResponse));
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(list).build());
 		} catch (ApplicationDomainRuleException e) {
 			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(new ErrorResponseList(e.getErrors())).build());
 		} catch (NewDataValidationException e) {
@@ -184,10 +167,6 @@ public class LoanProductApiResource {
 			LoanProductData loanProduct = this.readPlatformService.retrieveLoanProduct(productId);
 
 			return Response.ok().entity(loanProduct).build();
-		} catch (AccessDeniedException e) {
-			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
-			ErrorResponseList list = new ErrorResponseList(Arrays.asList(errorResponse));
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(list).build());
 		} catch (ApplicationDomainRuleException e) {
 			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(new ErrorResponseList(e.getErrors())).build());
 		} catch (NewDataValidationException e) {
@@ -230,10 +209,6 @@ public class LoanProductApiResource {
 			EntityIdentifier entityIdentifier = this.writePlatformService.updateLoanProduct(command);
 			
 			return Response.ok().entity(entityIdentifier).build();
-		} catch (AccessDeniedException e) {
-			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
-			ErrorResponseList list = new ErrorResponseList(Arrays.asList(errorResponse));
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(list).build());
 		} catch (ApplicationDomainRuleException e) {
 			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(new ErrorResponseList(e.getErrors())).build());
 		} catch (NewDataValidationException e) {

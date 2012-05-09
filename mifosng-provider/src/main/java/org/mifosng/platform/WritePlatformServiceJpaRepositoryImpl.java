@@ -1,6 +1,10 @@
 package org.mifosng.platform;
 
-import static org.mifosng.platform.Specifications.*;
+import static org.mifosng.platform.Specifications.loansThatMatch;
+import static org.mifosng.platform.Specifications.officesThatMatch;
+import static org.mifosng.platform.Specifications.productThatMatches;
+import static org.mifosng.platform.Specifications.rolesThatMatch;
+import static org.mifosng.platform.Specifications.usersThatMatch;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -44,10 +48,11 @@ import org.mifosng.platform.currency.domain.ApplicationCurrencyRepository;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.exceptions.ApplicationDomainRuleException;
-import org.mifosng.platform.exceptions.UnAuthenticatedUserException;
 import org.mifosng.platform.exceptions.InvalidSignupException;
 import org.mifosng.platform.exceptions.NewDataValidationException;
 import org.mifosng.platform.exceptions.NoAuthorizationException;
+import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
+import org.mifosng.platform.exceptions.UnAuthenticatedUserException;
 import org.mifosng.platform.infrastructure.BasicPasswordEncodablePlatformUser;
 import org.mifosng.platform.infrastructure.PlatformPasswordEncoder;
 import org.mifosng.platform.infrastructure.PlatformUser;
@@ -74,6 +79,7 @@ import org.mifosng.platform.organisation.domain.OfficeRepository;
 import org.mifosng.platform.organisation.domain.Organisation;
 import org.mifosng.platform.organisation.domain.OrganisationCurrency;
 import org.mifosng.platform.organisation.domain.OrganisationRepository;
+import org.mifosng.platform.organisation.service.OfficeCommandValidator;
 import org.mifosng.platform.user.domain.AppUser;
 import org.mifosng.platform.user.domain.AppUserRepository;
 import org.mifosng.platform.user.domain.Permission;
@@ -331,7 +337,7 @@ public class WritePlatformServiceJpaRepositoryImpl implements
 		try {
 			AppUser currentUser = extractAuthenticatedUser();
 			
-			OfficeValidator validator = new OfficeValidator(command.getName(), command.getParentId(), command.getOpeningDate(), command.getExternalId());
+			OfficeCommandValidator validator = new OfficeCommandValidator(command.getName(), command.getParentId(), command.getOpeningDate(), command.getExternalId());
 			validator.validate();
 			
 			Office parent = validateUserPriviledgeOnOfficeAndRetrieve(currentUser, command.getParentId());
@@ -347,8 +353,8 @@ public class WritePlatformServiceJpaRepositoryImpl implements
 			
 			return office.getId();
 		} catch (DataIntegrityViolationException dve) {
-			List<ErrorResponse> dataValidationErrors = handleOfficeDataIntegrityIssues(command, dve);
-			throw new ApplicationDomainRuleException(dataValidationErrors, "Errors exist.");
+			 handleOfficeDataIntegrityIssues(command, dve);
+			 return Long.valueOf(-1);
 		}
 	}
 
@@ -359,7 +365,7 @@ public class WritePlatformServiceJpaRepositoryImpl implements
 		try {
 			AppUser currentUser = extractAuthenticatedUser();
 			
-			OfficeValidator validator = new OfficeValidator(command.getName(), command.getParentId(), command.getOpeningDate(), command.getExternalId());
+			OfficeCommandValidator validator = new OfficeCommandValidator(command.getName(), command.getParentId(), command.getOpeningDate(), command.getExternalId());
 			validator.validate();
 			
 			Office office = validateUserPriviledgeOnOfficeAndRetrieve(currentUser, command.getId());
@@ -370,27 +376,25 @@ public class WritePlatformServiceJpaRepositoryImpl implements
 	
 			return office.getId();
 		} catch (DataIntegrityViolationException dve) {
-			List<ErrorResponse> dataValidationErrors = handleOfficeDataIntegrityIssues(command, dve);
-			throw new ApplicationDomainRuleException(dataValidationErrors, "Errors exist.");
+			handleOfficeDataIntegrityIssues(command, dve);
+			return Long.valueOf(-1);
 		}
 	}
 
-	private List<ErrorResponse> handleOfficeDataIntegrityIssues(final OfficeCommand command, DataIntegrityViolationException dve) {
+	/*
+	 * Guaranteed to throw an exception no matter what the data integrity issue is.
+	 */
+	private void handleOfficeDataIntegrityIssues(final OfficeCommand command, DataIntegrityViolationException dve)  {
 		
-		List<ErrorResponse> dataValidationErrors = new ArrayList<ErrorResponse>();
 		Throwable realCause = dve.getMostSpecificCause();
 		if (realCause.getMessage().contains("externalid_org")) {
-			ErrorResponse error = new ErrorResponse("error.msg.office.duplicate.externalId", "externalId", command.getExternalId());
-			dataValidationErrors.add(error);
+			throw new PlatformDataIntegrityException("error.msg.office.duplicate.externalId", "Office with externalId {0} already exists", "externalId", command.getExternalId());
 		} else if (realCause.getMessage().contains("name_org")) {
-			ErrorResponse error = new ErrorResponse("error.msg.office.duplicate.name", "name", command.getName());
-			dataValidationErrors.add(error);
-		} else {
-			logger.error(dve.getMessage(), dve);
-			ErrorResponse error = new ErrorResponse("error.msg.office.unknown.data.integretity.issue", "id");
-			dataValidationErrors.add(error);
-		}
-		return dataValidationErrors;
+			throw new PlatformDataIntegrityException("error.msg.office.duplicate.name", "Office with name {0} already exists", "name", command.getName());
+		} 
+		
+		logger.error(dve.getMessage(), dve);
+		throw new PlatformDataIntegrityException("error.msg.office.unknown.data.integrity.issue", "Unknown data integrity issue with resource.");
 	}
 
 	/*

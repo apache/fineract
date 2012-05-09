@@ -28,6 +28,7 @@ import org.springframework.security.oauth.provider.token.OAuthProviderToken;
 public class CustomProtectedResourceProcessingFilter extends
 		ProtectedResourceProcessingFilter {
 
+	@Override
 	public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain chain) throws IOException, ServletException {
 	    HttpServletRequest request = (HttpServletRequest) servletRequest;
 	    HttpServletResponse response = (HttpServletResponse) servletResponse;

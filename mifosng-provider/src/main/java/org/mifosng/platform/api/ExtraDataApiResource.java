@@ -1,31 +1,16 @@
 package org.mifosng.platform.api;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
-import org.mifosng.data.EntityIdentifier;
-import org.mifosng.data.ErrorResponse;
-import org.mifosng.data.ErrorResponseList;
 import org.mifosng.data.ExtraDatasets;
-import org.mifosng.data.reports.GenericResultset;
-import org.mifosng.platform.InvalidSqlException;
 import org.mifosng.platform.ReadPlatformService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,8 +22,7 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class ExtraDataApiResource {
 
-	private final static Logger logger = LoggerFactory
-			.getLogger(ExtraDataApiResource.class);
+	private final static Logger logger = LoggerFactory.getLogger(ExtraDataApiResource.class);
 	
 	@Autowired
 	private ReadPlatformService readPlatformService;

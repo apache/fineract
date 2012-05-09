@@ -33,7 +33,6 @@ import org.mifosng.data.ClientDataWithAccountsData;
 import org.mifosng.data.CurrencyData;
 import org.mifosng.data.DerivedLoanData;
 import org.mifosng.data.EnumOptionReadModel;
-import org.mifosng.data.ErrorResponse;
 import org.mifosng.data.ExtraDatasets;
 import org.mifosng.data.LoanAccountData;
 import org.mifosng.data.LoanProductData;
@@ -53,7 +52,7 @@ import org.mifosng.platform.client.domain.ClientRepository;
 import org.mifosng.platform.currency.domain.ApplicationCurrency;
 import org.mifosng.platform.currency.domain.ApplicationCurrencyRepository;
 import org.mifosng.platform.currency.domain.Money;
-import org.mifosng.platform.exceptions.ApplicationDomainRuleException;
+import org.mifosng.platform.exceptions.PlatformResourceNotFoundException;
 import org.mifosng.platform.exceptions.UnAuthenticatedUserException;
 import org.mifosng.platform.loan.domain.AmortizationMethod;
 import org.mifosng.platform.loan.domain.Loan;
@@ -200,11 +199,7 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 					new Object[] { currentUser.getOrganisation().getId(),
 							clientId, noteId });
 		} catch (EmptyResultDataAccessException e) {
-			ErrorResponse errorResponse = new ErrorResponse(
-					"error.msg.client.id.invalid", "id");
-			throw new ApplicationDomainRuleException(
-					Arrays.asList(errorResponse), "Client with identifier "
-							+ clientId.toString() + " does not exist.");
+			throw new PlatformResourceNotFoundException("error.msg.client.id.invalid", "Client with identifier {0} does not exist", clientId);
 		}
 	}
 
@@ -403,11 +398,7 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 
 			return selectedOffice;
 		} catch (EmptyResultDataAccessException e) {
-			ErrorResponse errorResponse = new ErrorResponse(
-					"error.msg.office.id.invalid", "id");
-			throw new ApplicationDomainRuleException(
-					Arrays.asList(errorResponse), "Office with identifier "
-							+ officeId.toString() + " does not exist.");
+			throw new PlatformResourceNotFoundException("error.msg.office.id.invalid", "Office with identifier {0} does not exist", officeId);
 		}
 	}
 
@@ -426,11 +417,7 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 			return this.jdbcTemplate.queryForObject(sql, rm, new Object[] {
 					clientId, currentUser.getOrganisation().getId() });
 		} catch (EmptyResultDataAccessException e) {
-			ErrorResponse errorResponse = new ErrorResponse(
-					"error.msg.client.id.invalid", "id");
-			throw new ApplicationDomainRuleException(
-					Arrays.asList(errorResponse), "Client with identifier "
-							+ clientId.toString() + " does not exist.");
+			throw new PlatformResourceNotFoundException("error.msg.client.id.invalid", "Client with identifier {0} does not exist", clientId);
 		}
 	}
 
@@ -575,6 +562,7 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 		return loanRepaymentData;
 	}
 
+	@Override
 	public NewLoanWorkflowStepOneData retrieveClientAndProductDetails(final Long clientId, final Long productId) {
 		
 		AppUser currentUser = extractAuthenticatedUser();

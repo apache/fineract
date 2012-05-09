@@ -35,7 +35,8 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
      * If redirecting or forwarding, {@code saveException} will be called to cache the exception for use in
      * the target view.
      */
-    public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
+    @Override
+	public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
             AuthenticationException exception) throws IOException, ServletException {
 
         if (defaultFailureUrl == null) {

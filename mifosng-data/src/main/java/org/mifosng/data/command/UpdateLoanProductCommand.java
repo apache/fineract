@@ -33,6 +33,7 @@ public class UpdateLoanProductCommand implements LoanProductCommandData {
 				repaymentEvery, repaymentFrequency, numberOfRepayments, amortizationMethod, toleranceAmount, flexibleRepaymentSchedule, interestRebateAllowed);
 	}
 	
+	@Override
 	public String getName() {
 		return this.name;
 	}
@@ -41,6 +42,7 @@ public class UpdateLoanProductCommand implements LoanProductCommandData {
 		this.name = name;
 	}
 
+	@Override
 	public String getDescription() {
 		return this.description;
 	}
@@ -49,6 +51,7 @@ public class UpdateLoanProductCommand implements LoanProductCommandData {
 		this.description = description;
 	}
 
+	@Override
 	public String getCurrencyCode() {
 		return this.commonLoanProperties.getCurrencyCode();
 	}
@@ -57,6 +60,7 @@ public class UpdateLoanProductCommand implements LoanProductCommandData {
 		this.commonLoanProperties.setCurrencyCode(currencyCode);
 	}
 
+	@Override
 	public Integer getDigitsAfterDecimal() {
 		return this.commonLoanProperties.getDigitsAfterDecimal();
 	}
@@ -65,6 +69,7 @@ public class UpdateLoanProductCommand implements LoanProductCommandData {
 		this.commonLoanProperties.setDigitsAfterDecimal(digitsAfterDecimal);
 	}
 
+	@Override
 	public Integer getRepaymentEvery() {
 		return this.commonLoanProperties.getRepaymentEvery();
 	}
@@ -73,6 +78,7 @@ public class UpdateLoanProductCommand implements LoanProductCommandData {
 		this.commonLoanProperties.setRepaymentEvery(repaymentEvery);
 	}
 
+	@Override
 	public Integer getRepaymentFrequency() {
 		return this.commonLoanProperties.getRepaymentFrequency();
 	}
@@ -81,6 +87,7 @@ public class UpdateLoanProductCommand implements LoanProductCommandData {
 		this.commonLoanProperties.setRepaymentFrequency(repaymentFrequency);
 	}
 
+	@Override
 	public Boolean isFlexibleRepaymentSchedule() {
 		return this.commonLoanProperties.isFlexibleRepaymentSchedule();
 	}
@@ -90,6 +97,7 @@ public class UpdateLoanProductCommand implements LoanProductCommandData {
 		this.commonLoanProperties.setFlexibleRepaymentSchedule(flexibleRepaymentSchedule);
 	}
 
+	@Override
 	public Boolean isInterestRebateAllowed() {
 		return this.commonLoanProperties.isInterestRebateAllowed();
 	}
@@ -98,6 +106,7 @@ public class UpdateLoanProductCommand implements LoanProductCommandData {
 		this.commonLoanProperties.setInterestRebateAllowed(interestRebateAllowed);
 	}
 
+	@Override
 	public BigDecimal getPrincipal() {
 		return this.commonLoanProperties.getPrincipal();
 	}
@@ -114,6 +123,7 @@ public class UpdateLoanProductCommand implements LoanProductCommandData {
 //		return this.commonLoanProperties.getInterestRebateAllowed();
 //	}
 
+	@Override
 	public Integer getInterestRateFrequencyMethod() {
 		return commonLoanProperties.getInterestRateFrequencyMethod();
 	}
@@ -122,6 +132,7 @@ public class UpdateLoanProductCommand implements LoanProductCommandData {
 		this.commonLoanProperties.setInterestRateFrequencyMethod(interestRateFrequencyMethod);
 	}
 
+	@Override
 	public Integer getInterestMethod() {
 		return commonLoanProperties.getInterestMethod();
 	}
@@ -130,6 +141,7 @@ public class UpdateLoanProductCommand implements LoanProductCommandData {
 		this.commonLoanProperties.setInterestMethod(interestMethod);
 	}
 
+	@Override
 	public Integer getAmortizationMethod() {
 		return commonLoanProperties.getAmortizationMethod();
 	}
@@ -138,6 +150,7 @@ public class UpdateLoanProductCommand implements LoanProductCommandData {
 		this.commonLoanProperties.setAmortizationMethod(amortizationMethod);
 	}
 
+	@Override
 	public Integer getNumberOfRepayments() {
 		return commonLoanProperties.getNumberOfRepayments();
 	}
@@ -146,6 +159,7 @@ public class UpdateLoanProductCommand implements LoanProductCommandData {
 		this.commonLoanProperties.setNumberOfRepayments(numberOfRepayments);
 	}
 
+	@Override
 	public BigDecimal getInterestRatePerPeriod() {
 		return commonLoanProperties.getInterestRatePerPeriod();
 	}
@@ -154,6 +168,7 @@ public class UpdateLoanProductCommand implements LoanProductCommandData {
 		this.commonLoanProperties.setInterestRatePerPeriod(interestRatePerPeriod);
 	}
 
+	@Override
 	public CommonLoanProperties getCommonLoanProperties() {
 		return commonLoanProperties;
 	}
@@ -162,6 +177,7 @@ public class UpdateLoanProductCommand implements LoanProductCommandData {
 		this.commonLoanProperties = commonLoanProperties;
 	}
 	
+	@Override
 	public BigDecimal getInArrearsToleranceAmount() {
 		return this.commonLoanProperties.getInArrearsToleranceAmount();
 	}
