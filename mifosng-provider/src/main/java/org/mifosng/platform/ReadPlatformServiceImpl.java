@@ -1287,20 +1287,22 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 	}
 
 	@Override
-	public ExtraDatasets retrieveExtraDatasetNames(String datasetType) {
-
-		if (datasetType == null) {
-			logger.info("Extra Data Dataset Type Not Found");
-			return null;
-		}
+	public ExtraDatasets retrieveExtraDatasetNames(String type) {
 
 		List<String> names = new ArrayList<String>();
 		Connection db_connection;
 		try {
 			db_connection = dataSource.getConnection();
 			Statement db_statement = db_connection.createStatement();
-			String sql = "select d.`name` as datasetName from stretchydata_dataset d join stretchydata_datasettype t on t.id = d.datasettype_id where t.`name` = '"
-					+ datasetType + "' order by d.`name`";
+
+			String whereClause;
+			if (type == null) {
+				whereClause = "";
+			} else {
+				whereClause = "where t.`name` = '" + type + "'";
+			}
+			String sql = "select d.`name` as datasetName from stretchydata_dataset d join stretchydata_datasettype t on t.id = d.datasettype_id "
+					+ whereClause + " order by d.`name`";
 
 			//logger.info("extra tables sql: " + sql);
 			ResultSet rs = db_statement.executeQuery(sql);
