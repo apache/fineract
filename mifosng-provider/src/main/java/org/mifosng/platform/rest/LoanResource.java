@@ -35,7 +35,7 @@ import org.mifosng.platform.ReadPlatformService;
 import org.mifosng.platform.ReadPlatformServiceImpl;
 import org.mifosng.platform.WritePlatformService;
 import org.mifosng.platform.exceptions.ApplicationDomainRuleException;
-import org.mifosng.platform.exceptions.ClientNotAuthenticatedException;
+import org.mifosng.platform.exceptions.UnAuthenticatedUserException;
 import org.mifosng.platform.exceptions.NewDataValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,7 +71,7 @@ public class LoanResource {
 			NewLoanWorkflowStepOneData workflowData = this.readPlatformService.retrieveClientAndProductDetails(clientId, null);
 
 			return Response.ok().entity(workflowData).build();
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		} catch (AccessDeniedException e) {
 			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
@@ -94,7 +94,7 @@ public class LoanResource {
 			NewLoanWorkflowStepOneData workflowData = this.readPlatformService.retrieveClientAndProductDetails(clientId, productId);
 
 			return Response.ok().entity(workflowData).build();
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		} catch (AccessDeniedException e) {
 			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
@@ -117,7 +117,7 @@ public class LoanResource {
 			LoanSchedule loanSchedule = this.calculationPlatformService.calculateLoanSchedule(command);
 
 			return Response.ok().entity(loanSchedule).build();
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		} catch (AccessDeniedException e) {
 			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
@@ -140,7 +140,7 @@ public class LoanResource {
 			EntityIdentifier identifier = this.writePlatformService.submitLoanApplication(command);
 
 			return Response.ok().entity(identifier).build();
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		} catch (AccessDeniedException e) {
 			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
@@ -163,7 +163,7 @@ public class LoanResource {
 			LoanAccountData loanAccount = this.readPlatformService.retrieveLoanAccountDetails(loanId);
 
 			return Response.ok().entity(loanAccount).build();
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		} catch (AccessDeniedException e) {
 			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
@@ -194,7 +194,7 @@ public class LoanResource {
 			EntityIdentifier identifier = this.writePlatformService.deleteLoan(loanId);
 
 			return Response.ok().entity(identifier).build();
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		} catch (AccessDeniedException e) {
 			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
@@ -225,7 +225,7 @@ public class LoanResource {
 			EntityIdentifier identifier = this.writePlatformService.approveLoanApplication(command);
 
 			return Response.ok().entity(identifier).build();
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		} catch (AccessDeniedException e) {
 			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
@@ -248,7 +248,7 @@ public class LoanResource {
 			EntityIdentifier identifier = this.writePlatformService.undoLoanApproval(command);
 
 			return Response.ok().entity(identifier).build();
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		} catch (AccessDeniedException e) {
 			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
@@ -271,7 +271,7 @@ public class LoanResource {
 			EntityIdentifier identifier = this.writePlatformService.rejectLoan(command);
 
 			return Response.ok().entity(identifier).build();
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		} catch (AccessDeniedException e) {
 			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
@@ -294,7 +294,7 @@ public class LoanResource {
 			EntityIdentifier identifier = this.writePlatformService.withdrawLoan(command);
 
 			return Response.ok().entity(identifier).build();
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		} catch (AccessDeniedException e) {
 			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
@@ -317,7 +317,7 @@ public class LoanResource {
 			EntityIdentifier identifier = this.writePlatformService.disburseLoan(command);
 
 			return Response.ok().entity(identifier).build();
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		} catch (AccessDeniedException e) {
 			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
@@ -340,7 +340,7 @@ public class LoanResource {
 			EntityIdentifier identifier = this.writePlatformService.undloLoanDisbursal(command);
 
 			return Response.ok().entity(identifier).build();
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		} catch (AccessDeniedException e) {
 			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
@@ -363,7 +363,7 @@ public class LoanResource {
 			LoanRepaymentData loanRepaymentData = this.readPlatformService.retrieveNewLoanRepaymentDetails(loanId);
 
 			return Response.ok().entity(loanRepaymentData).build();
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		} catch (AccessDeniedException e) {
 			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
@@ -386,7 +386,7 @@ public class LoanResource {
 			LoanRepaymentData loanRepaymentData = this.readPlatformService.retrieveLoanRepaymentDetails(loanId, repaymentId);
 
 			return Response.ok().entity(loanRepaymentData).build();
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		} catch (AccessDeniedException e) {
 			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
@@ -409,7 +409,7 @@ public class LoanResource {
 			EntityIdentifier identifier = this.writePlatformService.makeLoanRepayment(command);
 
 			return Response.ok().entity(identifier).build();
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		} catch (AccessDeniedException e) {
 			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
@@ -443,7 +443,7 @@ public class LoanResource {
 			EntityIdentifier identifier = this.writePlatformService.adjustLoanTransaction(command);
 
 			return Response.ok().entity(identifier).build();
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		} catch (AccessDeniedException e) {
 			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
@@ -477,7 +477,7 @@ public class LoanResource {
 			LoanRepaymentData loanRepaymentData = this.readPlatformService.retrieveNewLoanWaiverDetails(loanId);
 
 			return Response.ok().entity(loanRepaymentData).build();
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		} catch (AccessDeniedException e) {
 			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
@@ -500,7 +500,7 @@ public class LoanResource {
 			EntityIdentifier identifier = this.writePlatformService.waiveLoanAmount(command);
 
 			return Response.ok().entity(identifier).build();
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		} catch (AccessDeniedException e) {
 			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");

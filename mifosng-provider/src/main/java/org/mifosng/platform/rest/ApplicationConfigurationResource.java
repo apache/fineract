@@ -23,7 +23,7 @@ import org.mifosng.data.command.UpdateOrganisationCurrencyCommand;
 import org.mifosng.platform.ReadPlatformService;
 import org.mifosng.platform.WritePlatformService;
 import org.mifosng.platform.exceptions.ApplicationDomainRuleException;
-import org.mifosng.platform.exceptions.ClientNotAuthenticatedException;
+import org.mifosng.platform.exceptions.UnAuthenticatedUserException;
 import org.mifosng.platform.exceptions.NewDataValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -63,7 +63,7 @@ public class ApplicationConfigurationResource {
 			this.writePlatformService.updateOrganisationCurrencies(command);
 
 			return Response.ok().entity(command).build();
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		} catch (AccessDeniedException e) {
 			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
@@ -87,7 +87,7 @@ public class ApplicationConfigurationResource {
 					.retrieveAllPlatformCurrencies();
 
 			return Response.ok().entity(new CurrencyList(currencyOptions)).build();
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		} catch (AccessDeniedException e) {
 			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
@@ -111,7 +111,7 @@ public class ApplicationConfigurationResource {
 					.retrieveLoanAmortizationMethodOptions();
 
 			return Response.ok().entity(new EnumOptionList(options)).build();
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		} catch (AccessDeniedException e) {
 			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
@@ -135,7 +135,7 @@ public class ApplicationConfigurationResource {
 					.retrieveLoanInterestMethodOptions();
 
 			return Response.ok().entity(new EnumOptionList(options)).build();
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		} catch (AccessDeniedException e) {
 			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
@@ -159,7 +159,7 @@ public class ApplicationConfigurationResource {
 					.retrieveRepaymentFrequencyOptions();
 
 			return Response.ok().entity(new EnumOptionList(options)).build();
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		} catch (AccessDeniedException e) {
 			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
@@ -182,7 +182,7 @@ public class ApplicationConfigurationResource {
 			List<EnumOptionReadModel> options = this.readPlatformService.retrieveInterestFrequencyOptions();
 
 			return Response.ok().entity(new EnumOptionList(options)).build();
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		} catch (AccessDeniedException e) {
 			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");

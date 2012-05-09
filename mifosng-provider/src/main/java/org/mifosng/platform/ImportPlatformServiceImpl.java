@@ -34,7 +34,7 @@ import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.client.domain.ClientRepository;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.currency.domain.Money;
-import org.mifosng.platform.exceptions.ClientNotAuthenticatedException;
+import org.mifosng.platform.exceptions.UnAuthenticatedUserException;
 import org.mifosng.platform.loan.domain.AmortizationMethod;
 import org.mifosng.platform.loan.domain.DefaultLoanLifecycleStateMachine;
 import org.mifosng.platform.loan.domain.InterestCalculationPeriodMethod;
@@ -99,7 +99,7 @@ public class ImportPlatformServiceImpl implements ImportPlatformService {
 		}
 
 		if (currentUser == null) {
-			throw new ClientNotAuthenticatedException();
+			throw new UnAuthenticatedUserException();
 		}
 
 		return currentUser;

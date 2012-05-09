@@ -14,7 +14,7 @@ import org.mifosng.data.command.ImportClientCommand;
 import org.mifosng.data.command.ImportLoanCommand;
 import org.mifosng.data.command.ImportLoanRepaymentsCommand;
 import org.mifosng.platform.ImportPlatformService;
-import org.mifosng.platform.exceptions.ClientNotAuthenticatedException;
+import org.mifosng.platform.exceptions.UnAuthenticatedUserException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -36,7 +36,7 @@ public class ImportResource {
 			this.importPlatformService.importClients(command);
 			
 			return Response.ok().build();
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			ErrorResponse err = new ErrorResponse("client.not.authenticated",
 					"authentication", "");
 			throw new WebApplicationException(Response
@@ -53,7 +53,7 @@ public class ImportResource {
 			this.importPlatformService.importLoans(command);
 			
 			return Response.ok().build();
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			ErrorResponse err = new ErrorResponse("client.not.authenticated",
 					"authentication", "");
 			throw new WebApplicationException(Response
@@ -70,7 +70,7 @@ public class ImportResource {
 			this.importPlatformService.importLoanRepayments(command);
 			
 			return Response.ok().build();
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			ErrorResponse err = new ErrorResponse("client.not.authenticated",
 					"authentication", "");
 			throw new WebApplicationException(Response

@@ -23,7 +23,7 @@ import org.mifosng.data.command.OfficeCommand;
 import org.mifosng.platform.ReadPlatformService;
 import org.mifosng.platform.WritePlatformService;
 import org.mifosng.platform.exceptions.ApplicationDomainRuleException;
-import org.mifosng.platform.exceptions.ClientNotAuthenticatedException;
+import org.mifosng.platform.exceptions.UnAuthenticatedUserException;
 import org.mifosng.platform.exceptions.NewDataValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -51,7 +51,7 @@ public class OfficeResource {
     		Collection<OfficeData> offices = this.readPlatformService.retrieveAllOffices();
 
     		return Response.ok().entity(new OfficeList(offices)).build();
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		} catch (AccessDeniedException e) {
 			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
@@ -74,7 +74,7 @@ public class OfficeResource {
     		OfficeData office = this.readPlatformService.retrieveOffice(officeId);
 
     		return Response.ok().entity(office).build();
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		} catch (AccessDeniedException e) {
 			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
@@ -97,7 +97,7 @@ public class OfficeResource {
 			Long officeId = this.writePlatformService.createOffice(command);
 
 			return Response.ok().entity(new EntityIdentifier(officeId)).build();
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		} catch (AccessDeniedException e) {
 			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
@@ -120,7 +120,7 @@ public class OfficeResource {
 			Long officeId = this.writePlatformService.updateOffice(command);
 
 			return Response.ok().entity(new EntityIdentifier(officeId)).build();
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		} catch (AccessDeniedException e) {
 			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");

@@ -44,7 +44,7 @@ import org.mifosng.platform.currency.domain.ApplicationCurrencyRepository;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.exceptions.ApplicationDomainRuleException;
-import org.mifosng.platform.exceptions.ClientNotAuthenticatedException;
+import org.mifosng.platform.exceptions.UnAuthenticatedUserException;
 import org.mifosng.platform.exceptions.InvalidSignupException;
 import org.mifosng.platform.exceptions.NewDataValidationException;
 import org.mifosng.platform.exceptions.NoAuthorizationException;
@@ -601,7 +601,7 @@ public class WritePlatformServiceJpaRepositoryImpl implements
 		}
 
 		if (currentUser == null) {
-			throw new ClientNotAuthenticatedException();
+			throw new UnAuthenticatedUserException();
 		}
 
 		return currentUser;

@@ -54,7 +54,7 @@ import org.mifosng.platform.currency.domain.ApplicationCurrency;
 import org.mifosng.platform.currency.domain.ApplicationCurrencyRepository;
 import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.exceptions.ApplicationDomainRuleException;
-import org.mifosng.platform.exceptions.ClientNotAuthenticatedException;
+import org.mifosng.platform.exceptions.UnAuthenticatedUserException;
 import org.mifosng.platform.loan.domain.AmortizationMethod;
 import org.mifosng.platform.loan.domain.Loan;
 import org.mifosng.platform.loan.domain.LoanRepository;
@@ -122,7 +122,7 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 		}
 
 		if (currentUser == null) {
-			throw new ClientNotAuthenticatedException();
+			throw new UnAuthenticatedUserException();
 		}
 
 		return currentUser;

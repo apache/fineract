@@ -34,7 +34,7 @@ import org.mifosng.data.command.UserCommand;
 import org.mifosng.platform.ReadPlatformService;
 import org.mifosng.platform.WritePlatformService;
 import org.mifosng.platform.exceptions.ApplicationDomainRuleException;
-import org.mifosng.platform.exceptions.ClientNotAuthenticatedException;
+import org.mifosng.platform.exceptions.UnAuthenticatedUserException;
 import org.mifosng.platform.exceptions.NewDataValidationException;
 import org.mifosng.platform.infrastructure.PlatformEmailSendException;
 import org.mifosng.platform.infrastructure.UsernameAlreadyExistsException;
@@ -65,7 +65,7 @@ public class UserAdmistrationResource {
     		Collection<AppUserData> users = this.readPlatformService.retrieveAllUsers();
 
     		return Response.ok().entity(new UserList(users)).build();
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		} catch (AccessDeniedException e) {
 			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
@@ -88,7 +88,7 @@ public class UserAdmistrationResource {
     		AppUserData newUser = this.readPlatformService.retrieveNewUserDetails();
         	
     		return Response.ok().entity(newUser).build();
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		} catch (AccessDeniedException e) {
 			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
@@ -125,7 +125,7 @@ public class UserAdmistrationResource {
 			throw new WebApplicationException(Response
 					.status(Status.BAD_REQUEST)
 					.entity(new ErrorResponseList(allErrors)).build());
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		} catch (AccessDeniedException e) {
 			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
@@ -148,7 +148,7 @@ public class UserAdmistrationResource {
 			this.writePlatformService.deleteUser(userId);
 
 			return Response.ok().build();
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		} catch (AccessDeniedException e) {
 			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
@@ -171,7 +171,7 @@ public class UserAdmistrationResource {
 			AppUserData user = this.readPlatformService.retrieveUser(userId);
 	    	
 			return Response.ok().entity(user).build();
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		} catch (AccessDeniedException e) {
 			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
@@ -194,7 +194,7 @@ public class UserAdmistrationResource {
 			Long userId = this.writePlatformService.updateUser(command);
 	    	
 			return Response.ok().entity(new EntityIdentifier(userId)).build();
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		} catch (AccessDeniedException e) {
 			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
@@ -217,7 +217,7 @@ public class UserAdmistrationResource {
 			AppUserData user = this.readPlatformService.retrieveCurrentUser();
 	    	
 			return Response.ok().entity(user).build();
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		} catch (AccessDeniedException e) {
 			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
@@ -240,7 +240,7 @@ public class UserAdmistrationResource {
 			Long userId = this.writePlatformService.updateCurrentUser(command);
 
 			return Response.ok().entity(new EntityIdentifier(userId)).build();
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		} catch (AccessDeniedException e) {
 			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
@@ -267,7 +267,7 @@ public class UserAdmistrationResource {
 			Long userId = this.writePlatformService.updateCurrentUserPassword(command);
 
 			return Response.ok().entity(new EntityIdentifier(userId)).build();
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		} catch (AccessDeniedException e) {
 			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
@@ -289,7 +289,7 @@ public class UserAdmistrationResource {
 		try {
 			Collection<RoleData> roles = this.readPlatformService.retrieveAllRoles();
 			return Response.ok().entity(new RoleList(roles)).build();
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		} catch (AccessDeniedException e) {
 			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
@@ -315,7 +315,7 @@ public class UserAdmistrationResource {
 			role.setAvailablePermissions(allPermissions);
 
 			return Response.ok().entity(role).build();
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		} catch (AccessDeniedException e) {
 			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
@@ -344,7 +344,7 @@ public class UserAdmistrationResource {
 			role.setAvailablePermissions(availablePermissions);
 
 			return Response.ok().entity(role).build();
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		} catch (AccessDeniedException e) {
 			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
@@ -368,7 +368,7 @@ public class UserAdmistrationResource {
 			this.writePlatformService.updateRole(command);
 			return Response.ok().entity(new EntityIdentifier(roleId)).build();
 			
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		} catch (AccessDeniedException e) {
 			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
@@ -391,7 +391,7 @@ public class UserAdmistrationResource {
 			Long roleId = this.writePlatformService.createRole(command);
 			return Response.ok().entity(new EntityIdentifier(roleId)).build();
 			
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		} catch (AccessDeniedException e) {
 			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
@@ -418,7 +418,7 @@ public class UserAdmistrationResource {
 					.ok()
 					.entity(new EnumOptionList(new ArrayList<EnumOptionReadModel>(
 							options))).build();
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		} catch (AccessDeniedException e) {
 			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
@@ -441,7 +441,7 @@ public class UserAdmistrationResource {
 			Collection<PermissionData> permissions = this.readPlatformService.retrieveAllPermissions();
 
 			return Response.ok().entity(new PermissionList(permissions)).build();
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		} catch (AccessDeniedException e) {
 			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");

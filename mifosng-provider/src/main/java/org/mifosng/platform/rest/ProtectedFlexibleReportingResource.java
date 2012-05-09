@@ -28,7 +28,7 @@ import org.mifosng.data.ErrorResponseList;
 import org.mifosng.data.reports.GenericResultset;
 import org.mifosng.platform.ReadPlatformService;
 import org.mifosng.platform.exceptions.ApplicationDomainRuleException;
-import org.mifosng.platform.exceptions.ClientNotAuthenticatedException;
+import org.mifosng.platform.exceptions.UnAuthenticatedUserException;
 import org.mifosng.platform.exceptions.NewDataValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -134,7 +134,7 @@ public class ProtectedFlexibleReportingResource {
 			GenericResultset result = this.readPlatformService.retrieveGenericResultset(rptDB, name, type, extractedQueryParams);
 
 			return Response.ok().entity(result).build();
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		} catch (AccessDeniedException e) {
 			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");

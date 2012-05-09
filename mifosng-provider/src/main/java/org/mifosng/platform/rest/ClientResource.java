@@ -27,7 +27,7 @@ import org.mifosng.data.command.NoteCommand;
 import org.mifosng.platform.ReadPlatformService;
 import org.mifosng.platform.WritePlatformService;
 import org.mifosng.platform.exceptions.ApplicationDomainRuleException;
-import org.mifosng.platform.exceptions.ClientNotAuthenticatedException;
+import org.mifosng.platform.exceptions.UnAuthenticatedUserException;
 import org.mifosng.platform.exceptions.NewDataValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -55,7 +55,7 @@ public class ClientResource {
     		Collection<ClientData> clients = this.readPlatformService.retrieveAllIndividualClients();
 
     		return Response.ok().entity(new ClientList(clients)).build();
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		} catch (AccessDeniedException e) {
 			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
@@ -78,7 +78,7 @@ public class ClientResource {
 			ClientData clientData = this.readPlatformService.retrieveNewClientDetails();
 
 			return Response.ok().entity(clientData).build();
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		} catch (AccessDeniedException e) {
 			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
@@ -101,7 +101,7 @@ public class ClientResource {
 			Long clientId = this.writePlatformService.enrollClient(command);
 
 			return Response.ok().entity(new EntityIdentifier(clientId)).build();
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		} catch (AccessDeniedException e) {
 			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
@@ -124,7 +124,7 @@ public class ClientResource {
 			ClientData clientData = this.readPlatformService.retrieveIndividualClient(clientId);
 
 			return Response.ok().entity(clientData).build();
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		} catch (AccessDeniedException e) {
 			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
@@ -148,7 +148,7 @@ public class ClientResource {
 					.retrieveClientAccountDetails(clientId);
 
 			return Response.ok().entity(clientAccount).build();
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		} catch (AccessDeniedException e) {
 			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
@@ -171,7 +171,7 @@ public class ClientResource {
 			EntityIdentifier identifier = this.writePlatformService.addClientNote(command);
 
 			return Response.ok().entity(identifier).build();
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		} catch (AccessDeniedException e) {
 			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
@@ -194,7 +194,7 @@ public class ClientResource {
 			Collection<NoteData> notes = this.readPlatformService.retrieveAllClientNotes(clientId);
 
 			return Response.ok().entity(new NoteDataList(notes)).build();
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		} catch (AccessDeniedException e) {
 			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
@@ -217,7 +217,7 @@ public class ClientResource {
 			NoteData note = this.readPlatformService.retrieveClientNote(clientId, noteId);
 
 			return Response.ok().entity(note).build();
-		} catch (ClientNotAuthenticatedException e) {
+		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
 		} catch (AccessDeniedException e) {
 			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
