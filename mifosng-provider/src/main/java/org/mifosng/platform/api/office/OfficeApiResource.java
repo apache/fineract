@@ -16,8 +16,8 @@ import org.mifosng.data.EntityIdentifier;
 import org.mifosng.data.OfficeData;
 import org.mifosng.data.OfficeList;
 import org.mifosng.data.command.OfficeCommand;
-import org.mifosng.platform.WritePlatformService;
 import org.mifosng.platform.organisation.service.OfficeReadPlatformService;
+import org.mifosng.platform.organisation.service.OfficeWritePlatformService;
 import org.mifosng.platform.user.domain.AppUser;
 import org.mifosng.platform.user.domain.AppUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +37,7 @@ public class OfficeApiResource {
 	private OfficeReadPlatformService readPlatformService;
 
 	@Autowired
-	private WritePlatformService writePlatformService;
+	private OfficeWritePlatformService writePlatformService;
 	
 	@Autowired
 	private AppUserRepository appUserRepository;

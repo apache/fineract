@@ -22,8 +22,8 @@ import org.mifosng.data.RoleData;
 import org.mifosng.data.command.AdjustLoanTransactionCommand;
 import org.mifosng.data.command.CalculateLoanScheduleCommand;
 import org.mifosng.data.command.ChangePasswordCommand;
-import org.mifosng.data.command.CreateLoanProductCommand;
 import org.mifosng.data.command.EnrollClientCommand;
+import org.mifosng.data.command.LoanProductCommand;
 import org.mifosng.data.command.LoanStateTransitionCommand;
 import org.mifosng.data.command.LoanTransactionCommand;
 import org.mifosng.data.command.NoteCommand;
@@ -32,7 +32,6 @@ import org.mifosng.data.command.RoleCommand;
 import org.mifosng.data.command.SubmitLoanApplicationCommand;
 import org.mifosng.data.command.UndoLoanApprovalCommand;
 import org.mifosng.data.command.UndoLoanDisbursalCommand;
-import org.mifosng.data.command.UpdateLoanProductCommand;
 import org.mifosng.data.command.UpdateOrganisationCurrencyCommand;
 import org.mifosng.data.command.UserCommand;
 import org.mifosng.data.reports.GenericResultset;
@@ -101,9 +100,9 @@ public interface CommonRestOperations {
 
 	Collection<EnumOptionReadModel> retrieveAllowedNominalInterestFrequencyOptions();
 
-	EntityIdentifier createLoanProduct(CreateLoanProductCommand command);
+	EntityIdentifier createLoanProduct(LoanProductCommand command);
 
-	EntityIdentifier updateLoanProduct(UpdateLoanProductCommand command);
+	EntityIdentifier updateLoanProduct(LoanProductCommand command);
 
 	LoanProductData retrieveLoanProductDetails(Long selectedLoanProductOption);
 

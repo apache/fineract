@@ -19,13 +19,12 @@ import org.mifosng.data.ErrorResponse;
 import org.mifosng.data.ErrorResponseList;
 import org.mifosng.data.LoanProductData;
 import org.mifosng.data.LoanProductList;
-import org.mifosng.data.command.CreateLoanProductCommand;
-import org.mifosng.data.command.UpdateLoanProductCommand;
+import org.mifosng.data.command.LoanProductCommand;
 import org.mifosng.platform.ReadPlatformService;
 import org.mifosng.platform.WritePlatformService;
 import org.mifosng.platform.exceptions.ApplicationDomainRuleException;
-import org.mifosng.platform.exceptions.UnAuthenticatedUserException;
 import org.mifosng.platform.exceptions.NewDataValidationException;
+import org.mifosng.platform.exceptions.UnAuthenticatedUserException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.security.access.AccessDeniedException;
@@ -58,7 +57,7 @@ public class LoanProductResource {
 	@Path("new")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response createLoanProduct(final CreateLoanProductCommand command) {
+	public Response createLoanProduct(final LoanProductCommand command) {
 
 		try {
 			EntityIdentifier entityIdentifier = this.writePlatformService.createLoanProduct(command);
@@ -81,7 +80,7 @@ public class LoanProductResource {
 	@Path("update")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response updateLoanProduct(final UpdateLoanProductCommand command) {
+	public Response updateLoanProduct(final LoanProductCommand command) {
 
 		try {
 			EntityIdentifier entityIdentifier = this.writePlatformService.updateLoanProduct(command);

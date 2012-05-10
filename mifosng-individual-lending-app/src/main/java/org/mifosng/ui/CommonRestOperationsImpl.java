@@ -39,8 +39,8 @@ import org.mifosng.data.UserList;
 import org.mifosng.data.command.AdjustLoanTransactionCommand;
 import org.mifosng.data.command.CalculateLoanScheduleCommand;
 import org.mifosng.data.command.ChangePasswordCommand;
-import org.mifosng.data.command.CreateLoanProductCommand;
 import org.mifosng.data.command.EnrollClientCommand;
+import org.mifosng.data.command.LoanProductCommand;
 import org.mifosng.data.command.LoanStateTransitionCommand;
 import org.mifosng.data.command.LoanTransactionCommand;
 import org.mifosng.data.command.NoteCommand;
@@ -49,7 +49,6 @@ import org.mifosng.data.command.RoleCommand;
 import org.mifosng.data.command.SubmitLoanApplicationCommand;
 import org.mifosng.data.command.UndoLoanApprovalCommand;
 import org.mifosng.data.command.UndoLoanDisbursalCommand;
-import org.mifosng.data.command.UpdateLoanProductCommand;
 import org.mifosng.data.command.UpdateOrganisationCurrencyCommand;
 import org.mifosng.data.command.UserCommand;
 import org.mifosng.data.reports.GenericResultset;
@@ -137,13 +136,13 @@ public class CommonRestOperationsImpl implements CommonRestOperations {
 	}
 
 	@Override
-	public EntityIdentifier createLoanProduct(final CreateLoanProductCommand command) {
+	public EntityIdentifier createLoanProduct(final LoanProductCommand command) {
 		try {
 			URI restUri = URI
 					.create(getBaseServerUrl().concat("api/protected/product/loan/new"));
 
 			ResponseEntity<EntityIdentifier> s = this.oauthRestServiceTemplate.postForEntity(restUri,
-					createLoanProductRequest(command), EntityIdentifier.class);
+					updateLoanProductRequest(command), EntityIdentifier.class);
 
 			return s.getBody();
 		} catch (HttpStatusCodeException e) {
@@ -153,7 +152,7 @@ public class CommonRestOperationsImpl implements CommonRestOperations {
 	}
 	
 	@Override
-	public EntityIdentifier updateLoanProduct(UpdateLoanProductCommand command) {
+	public EntityIdentifier updateLoanProduct(LoanProductCommand command) {
 		try {
 			URI restUri = URI
 					.create(getBaseServerUrl().concat("api/protected/product/loan/update"));
@@ -192,24 +191,13 @@ public class CommonRestOperationsImpl implements CommonRestOperations {
 		return errorList;
 	}
 	
-	private HttpEntity<UpdateLoanProductCommand> updateLoanProductRequest(
-			final UpdateLoanProductCommand command) {
+	private HttpEntity<LoanProductCommand> updateLoanProductRequest(
+			final LoanProductCommand command) {
 		HttpHeaders requestHeaders = new HttpHeaders();
 		requestHeaders.set("Accept", "application/xml");
 		requestHeaders.set("Content-Type", "application/xml");
 
-		HttpEntity<UpdateLoanProductCommand> requestEntity = new HttpEntity<UpdateLoanProductCommand>(
-				command, requestHeaders);
-		return requestEntity;
-	}
-
-	private HttpEntity<CreateLoanProductCommand> createLoanProductRequest(
-			final CreateLoanProductCommand command) {
-		HttpHeaders requestHeaders = new HttpHeaders();
-		requestHeaders.set("Accept", "application/xml");
-		requestHeaders.set("Content-Type", "application/xml");
-
-		HttpEntity<CreateLoanProductCommand> requestEntity = new HttpEntity<CreateLoanProductCommand>(
+		HttpEntity<LoanProductCommand> requestEntity = new HttpEntity<LoanProductCommand>(
 				command, requestHeaders);
 		return requestEntity;
 	}

@@ -33,7 +33,6 @@ import org.mifosng.data.ClientDataWithAccountsData;
 import org.mifosng.data.CurrencyData;
 import org.mifosng.data.DerivedLoanData;
 import org.mifosng.data.EnumOptionReadModel;
-import org.mifosng.data.ErrorResponse;
 import org.mifosng.data.ExtraDatasetRow;
 import org.mifosng.data.ExtraDatasets;
 import org.mifosng.data.LoanAccountData;

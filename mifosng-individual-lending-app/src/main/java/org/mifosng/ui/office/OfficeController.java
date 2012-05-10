@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
@@ -94,7 +93,7 @@ public class OfficeController {
 	
 	@RequestMapping(consumes="application/x-www-form-urlencoded", produces="application/json", value = "/org/office/new", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.OK)
-	public @ResponseBody EntityIdentifier createOffice(HttpServletRequest request,
+	public @ResponseBody EntityIdentifier createOffice(
 			@RequestParam("name") String name, 
 			@RequestParam(value="parentId", required=false) Long parentId,
 			@RequestParam("openingDate") String openingDate, 
@@ -114,7 +113,7 @@ public class OfficeController {
 	
 	@RequestMapping(consumes="application/x-www-form-urlencoded", produces="application/json", value = "/org/office/{officeId}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.OK)
-	public @ResponseBody EntityIdentifier updateOffice(HttpServletRequest request, @PathVariable("officeId") final Long officeId,
+	public @ResponseBody EntityIdentifier updateOffice(@PathVariable("officeId") final Long officeId,
 			@RequestParam("name") String name, 
 			@RequestParam(value="parentId", required=false) Long parentId,
 			@RequestParam("openingDate") String openingDate, 

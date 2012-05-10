@@ -3,8 +3,8 @@ package org.mifosng.platform;
 import org.mifosng.data.EntityIdentifier;
 import org.mifosng.data.command.AdjustLoanTransactionCommand;
 import org.mifosng.data.command.ChangePasswordCommand;
-import org.mifosng.data.command.CreateLoanProductCommand;
 import org.mifosng.data.command.EnrollClientCommand;
+import org.mifosng.data.command.LoanProductCommand;
 import org.mifosng.data.command.LoanStateTransitionCommand;
 import org.mifosng.data.command.LoanTransactionCommand;
 import org.mifosng.data.command.NoteCommand;
@@ -14,7 +14,6 @@ import org.mifosng.data.command.SignupCommand;
 import org.mifosng.data.command.SubmitLoanApplicationCommand;
 import org.mifosng.data.command.UndoLoanApprovalCommand;
 import org.mifosng.data.command.UndoLoanDisbursalCommand;
-import org.mifosng.data.command.UpdateLoanProductCommand;
 import org.mifosng.data.command.UpdateOrganisationCurrencyCommand;
 import org.mifosng.data.command.UpdateUsernamePasswordCommand;
 import org.mifosng.data.command.UserCommand;
@@ -53,9 +52,9 @@ public interface WritePlatformService {
 	
 	void updateOrganisationCurrencies(UpdateOrganisationCurrencyCommand command);
 
-	EntityIdentifier createLoanProduct(CreateLoanProductCommand command);
+	EntityIdentifier createLoanProduct(LoanProductCommand command);
 	
-	EntityIdentifier updateLoanProduct(UpdateLoanProductCommand command);
+	EntityIdentifier updateLoanProduct(LoanProductCommand command);
 
 	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE', 'CAN_DELETE_LOAN_THAT_IS_SUBMITTED_AND_NOT_APPROVED')")
 	EntityIdentifier deleteLoan(Long loanId);

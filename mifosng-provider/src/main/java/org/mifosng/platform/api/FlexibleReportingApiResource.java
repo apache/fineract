@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -25,8 +24,8 @@ import org.mifosng.data.ErrorResponseList;
 import org.mifosng.data.reports.GenericResultset;
 import org.mifosng.platform.ReadPlatformService;
 import org.mifosng.platform.exceptions.ApplicationDomainRuleException;
-import org.mifosng.platform.exceptions.UnAuthenticatedUserException;
 import org.mifosng.platform.exceptions.NewDataValidationException;
+import org.mifosng.platform.exceptions.UnAuthenticatedUserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +47,7 @@ public class FlexibleReportingApiResource {
 	@Path("flexireport")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-	public Response retrieveReport(@Context UriInfo uriInfo, @Context HttpServletResponse httpServletResponse) {
+	public Response retrieveReport(@Context UriInfo uriInfo) {
 		
 		MultivaluedMap<String, String> queryParams = uriInfo.getQueryParameters();
 		String rptDB = queryParams.getFirst("MRP_rptDB");

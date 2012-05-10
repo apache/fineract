@@ -24,8 +24,8 @@ import org.mifosng.data.ScheduledLoanInstallment;
 import org.mifosng.data.command.AdjustLoanTransactionCommand;
 import org.mifosng.data.command.CalculateLoanScheduleCommand;
 import org.mifosng.data.command.ChangePasswordCommand;
-import org.mifosng.data.command.CreateLoanProductCommand;
 import org.mifosng.data.command.EnrollClientCommand;
+import org.mifosng.data.command.LoanProductCommand;
 import org.mifosng.data.command.LoanStateTransitionCommand;
 import org.mifosng.data.command.LoanTransactionCommand;
 import org.mifosng.data.command.NoteCommand;
@@ -35,7 +35,6 @@ import org.mifosng.data.command.SignupCommand;
 import org.mifosng.data.command.SubmitLoanApplicationCommand;
 import org.mifosng.data.command.UndoLoanApprovalCommand;
 import org.mifosng.data.command.UndoLoanDisbursalCommand;
-import org.mifosng.data.command.UpdateLoanProductCommand;
 import org.mifosng.data.command.UpdateOrganisationCurrencyCommand;
 import org.mifosng.data.command.UpdateUsernamePasswordCommand;
 import org.mifosng.data.command.UserCommand;
@@ -74,6 +73,7 @@ import org.mifosng.platform.loan.domain.LoanStatusRepository;
 import org.mifosng.platform.loan.domain.LoanTransaction;
 import org.mifosng.platform.loan.domain.LoanTransactionRepository;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
+import org.mifosng.platform.loanproduct.service.LoanProductCommandValidator;
 import org.mifosng.platform.organisation.domain.Office;
 import org.mifosng.platform.organisation.domain.OfficeRepository;
 import org.mifosng.platform.organisation.domain.Organisation;
@@ -444,11 +444,11 @@ public class WritePlatformServiceJpaRepositoryImpl implements
 
 	@Transactional
 	@Override
-	public EntityIdentifier createLoanProduct(final CreateLoanProductCommand command) {
+	public EntityIdentifier createLoanProduct(final LoanProductCommand command) {
 
 		AppUser currentUser = extractAuthenticatedUser();
 		
-		LoanProductValidator validator = new LoanProductValidator();
+		LoanProductCommandValidator validator = new LoanProductCommandValidator();
 		validator.validateForCreate(command);
 
 		// assemble LoanProduct from data
@@ -496,11 +496,11 @@ public class WritePlatformServiceJpaRepositoryImpl implements
 	
 	@Transactional
 	@Override
-	public EntityIdentifier updateLoanProduct(UpdateLoanProductCommand command) {
+	public EntityIdentifier updateLoanProduct(LoanProductCommand command) {
 		
 		AppUser currentUser = extractAuthenticatedUser();
 		
-		LoanProductValidator validator = new LoanProductValidator();
+		LoanProductCommandValidator validator = new LoanProductCommandValidator();
 		validator.validateForUpdate(command);
 		
 		LoanProduct product = this.loanProductRepository.findOne(productThatMatches(currentUser.getOrganisation(), command.getId()));

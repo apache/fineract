@@ -8,15 +8,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosng.data.EntityIdentifier;
 import org.mifosng.data.ErrorResponse;
 import org.mifosng.data.LoanProductData;
-import org.mifosng.data.command.CreateLoanProductCommand;
-import org.mifosng.data.command.UpdateLoanProductCommand;
+import org.mifosng.data.command.LoanProductCommand;
 import org.mifosng.ui.CommonRestOperations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -90,7 +88,7 @@ public class LoanProductController {
 	
 	@RequestMapping(consumes="application/x-www-form-urlencoded", produces="application/json", value = "/portfolio/product/loan/new", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.OK)
-	public @ResponseBody EntityIdentifier createLoanProduct(HttpServletRequest request,
+	public @ResponseBody EntityIdentifier createLoanProduct(
 			@RequestParam("name") String name, 
 			@RequestParam("description") String description,
 			@RequestParam("selectedCurrency") String currencyCode, @RequestParam("selectedDigitsAfterDecimal") Integer digitsAfterDecimal,
@@ -106,7 +104,7 @@ public class LoanProductController {
 			@RequestParam(value="interestRateCalculatedInPeriod", required=false) Integer interestCalculationPeriodMethod
 			)  {
 		
-		CreateLoanProductCommand command = new CreateLoanProductCommand();
+		LoanProductCommand command = new LoanProductCommand();
 		command.setName(name);
 		command.setDescription(description);
 		command.setCurrencyCode(currencyCode);
@@ -146,7 +144,7 @@ public class LoanProductController {
 	
 	@RequestMapping(consumes="application/x-www-form-urlencoded", produces="application/json", value = "/portfolio/product/loan/{productId}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.OK)
-	public @ResponseBody EntityIdentifier updateLoanProduct(@PathVariable("productId") final Long productId, HttpServletRequest request,
+	public @ResponseBody EntityIdentifier updateLoanProduct(@PathVariable("productId") final Long productId,
 			@RequestParam("name") String name, @RequestParam("description") String description,
 			@RequestParam("selectedCurrency") String currencyCode, @RequestParam("selectedDigitsAfterDecimal") Integer digitsAfterDecimal,
 			@RequestParam("amount") String principalAsNumber,
@@ -161,7 +159,7 @@ public class LoanProductController {
 			@RequestParam(value="interestRateCalculatedInPeriod", required=false) Integer interestCalculationPeriodMethod
 			)  {
 		
-		UpdateLoanProductCommand command = new UpdateLoanProductCommand();
+		LoanProductCommand command = new LoanProductCommand();
 		command.setId(productId);
 		command.setName(name);
 		command.setDescription(description);

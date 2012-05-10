@@ -2,7 +2,6 @@ package org.mifosng.ui.admin;
 
 import java.util.Collection;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mifosng.data.AppUserData;
@@ -16,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -62,7 +60,7 @@ public class AdministrationController {
 	}
 	
 	@RequestMapping(value = "/org/admin/settings", method = RequestMethod.GET)
-	public String userSettingsScreen(Model model) {
+	public String userSettingsScreen() {
 		return "admin/accountsettings";
 	}
 	
@@ -74,7 +72,7 @@ public class AdministrationController {
 	
 	@RequestMapping(consumes="application/x-www-form-urlencoded", produces="application/json", value = "org/admin/settings/details", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.OK)
-	public @ResponseBody EntityIdentifier updateUserDetails(HttpServletRequest request,
+	public @ResponseBody EntityIdentifier updateUserDetails(
 			@RequestParam(value="username", required=false) String username,
 			@RequestParam(value="firstname", required=false) String firstname,
 			@RequestParam(value="lastname", required=false) String lastname,
@@ -93,7 +91,7 @@ public class AdministrationController {
 	
 	@RequestMapping(consumes="application/x-www-form-urlencoded", produces="application/json", value = "org/admin/settings/password", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.OK)
-	public @ResponseBody EntityIdentifier updateUserDetails(HttpServletRequest request,
+	public @ResponseBody EntityIdentifier updateUserDetails(
 			@RequestParam(value="password", required=false) String password,
 			@RequestParam(value="passwordrepeat", required=false) String passwordrepeat)  {
 		

@@ -1,7 +1,5 @@
 package org.mifosng.data;
 
-import java.util.List;
-
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement

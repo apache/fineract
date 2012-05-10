@@ -1,4 +1,4 @@
-package org.mifosng.platform.organisation.service;
+package org.mifosng.platform.security;
 
 import org.mifosng.platform.exceptions.UnAuthenticatedUserException;
 import org.mifosng.platform.user.domain.AppUser;

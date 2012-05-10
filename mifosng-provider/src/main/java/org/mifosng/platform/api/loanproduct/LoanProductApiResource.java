@@ -1,4 +1,4 @@
-package org.mifosng.platform.api;
+package org.mifosng.platform.api.loanproduct;
 
 import java.util.Collection;
 
@@ -9,21 +9,15 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 
 import org.mifosng.data.EntityIdentifier;
-import org.mifosng.data.ErrorResponseList;
 import org.mifosng.data.LoanProductData;
 import org.mifosng.data.LoanProductList;
-import org.mifosng.data.command.CreateLoanProductCommand;
-import org.mifosng.data.command.UpdateLoanProductCommand;
-import org.mifosng.platform.ReadPlatformService;
-import org.mifosng.platform.WritePlatformService;
-import org.mifosng.platform.exceptions.ApplicationDomainRuleException;
-import org.mifosng.platform.exceptions.NewDataValidationException;
+import org.mifosng.data.command.LoanProductCommand;
+import org.mifosng.platform.loanproduct.service.LoanProductReadPlatformService;
+import org.mifosng.platform.loanproduct.service.LoanProductWritePlatformService;
 import org.mifosng.platform.user.domain.AppUser;
 import org.mifosng.platform.user.domain.AppUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,10 +53,10 @@ import org.springframework.stereotype.Component;
 public class LoanProductApiResource {
 
     @Autowired
-	private ReadPlatformService readPlatformService;
+	private LoanProductReadPlatformService loanProductReadPlatformService;
 
 	@Autowired
-	private WritePlatformService writePlatformService;
+	private LoanProductWritePlatformService loanProductWritePlatformService;
 	
 	@Autowired
 	private AppUserRepository appUserRepository;
@@ -99,20 +93,13 @@ public class LoanProductApiResource {
 	@POST
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Produces({ MediaType.APPLICATION_JSON})
-	public Response createLoanProduct(CreateLoanProductCommand command) {
+	public Response createLoanProduct(LoanProductCommand command) {
 
-		try {
-			// TODO - move CreateLoanProductCommand and UpdateLoanProductCommand into one.
-			hardcodeUserIntoSecurityContext();
-			
-			EntityIdentifier entityIdentifier = this.writePlatformService.createLoanProduct(command);
+		hardcodeUserIntoSecurityContext();
+		
+		EntityIdentifier entityIdentifier = this.loanProductWritePlatformService.createLoanProduct(command);
 
-			return Response.ok().entity(entityIdentifier).build();
-		} catch (ApplicationDomainRuleException e) {
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(new ErrorResponseList(e.getErrors())).build());
-		} catch (NewDataValidationException e) {
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(new ErrorResponseList(e.getValidationErrors())).build());
-		}
+		return Response.ok().entity(entityIdentifier).build();
 	}
 
     @GET
@@ -120,17 +107,11 @@ public class LoanProductApiResource {
     @Produces({MediaType.APPLICATION_JSON})
 	public Response retrieveAllLoanProducts() {
     	
-    	try {
-    		hardcodeUserIntoSecurityContext();
-    		
-    		Collection<LoanProductData> products = this.readPlatformService.retrieveAllLoanProducts();
+		hardcodeUserIntoSecurityContext();
+		
+		Collection<LoanProductData> products = this.loanProductReadPlatformService.retrieveAllLoanProducts();
 
-    		return Response.ok().entity(new LoanProductList(products)).build();
-		} catch (ApplicationDomainRuleException e) {
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(new ErrorResponseList(e.getErrors())).build());
-		} catch (NewDataValidationException e) {
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(new ErrorResponseList(e.getValidationErrors())).build());
-		}
+		return Response.ok().entity(new LoanProductList(products)).build();
     }
     
     /*
@@ -142,17 +123,11 @@ public class LoanProductApiResource {
 	@Produces({ MediaType.APPLICATION_JSON})
 	public Response retrieveNewLoanProductDetails() {
 
-		try {
-			hardcodeUserIntoSecurityContext();
-			
-			LoanProductData loanProduct = this.readPlatformService.retrieveNewLoanProductDetails();
+		hardcodeUserIntoSecurityContext();
+		
+		LoanProductData loanProduct = this.loanProductReadPlatformService.retrieveNewLoanProductDetails();
 
-			return Response.ok().entity(loanProduct).build();
-		} catch (ApplicationDomainRuleException e) {
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(new ErrorResponseList(e.getErrors())).build());
-		} catch (NewDataValidationException e) {
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(new ErrorResponseList(e.getValidationErrors())).build());
-		}
+		return Response.ok().entity(loanProduct).build();
 	}
     
 	@GET
@@ -161,17 +136,11 @@ public class LoanProductApiResource {
 	@Produces({ MediaType.APPLICATION_JSON})
 	public Response retrieveLoanProductDetails(@PathParam("productId") final Long productId) {
 
-		try {
-			hardcodeUserIntoSecurityContext();
-			
-			LoanProductData loanProduct = this.readPlatformService.retrieveLoanProduct(productId);
+		hardcodeUserIntoSecurityContext();
+		
+		LoanProductData loanProduct = this.loanProductReadPlatformService.retrieveLoanProduct(productId);
 
-			return Response.ok().entity(loanProduct).build();
-		} catch (ApplicationDomainRuleException e) {
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(new ErrorResponseList(e.getErrors())).build());
-		} catch (NewDataValidationException e) {
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(new ErrorResponseList(e.getValidationErrors())).build());
-		}
+		return Response.ok().entity(loanProduct).build();
 	}
 	
 	// example PUT request
@@ -201,18 +170,13 @@ public class LoanProductApiResource {
 	@Path("{productId}")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public Response updateLoanProduct(@PathParam("productId") final Long productId, final UpdateLoanProductCommand command) {
+	public Response updateLoanProduct(@PathParam("productId") final Long productId, final LoanProductCommand command) {
 
-		try {
-			hardcodeUserIntoSecurityContext();
-			
-			EntityIdentifier entityIdentifier = this.writePlatformService.updateLoanProduct(command);
-			
-			return Response.ok().entity(entityIdentifier).build();
-		} catch (ApplicationDomainRuleException e) {
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(new ErrorResponseList(e.getErrors())).build());
-		} catch (NewDataValidationException e) {
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(new ErrorResponseList(e.getValidationErrors())).build());
-		}
+		hardcodeUserIntoSecurityContext();
+		
+		command.setId(productId);
+		EntityIdentifier entityIdentifier = this.loanProductWritePlatformService.updateLoanProduct(command);
+		
+		return Response.ok().entity(entityIdentifier).build();
 	}
 }

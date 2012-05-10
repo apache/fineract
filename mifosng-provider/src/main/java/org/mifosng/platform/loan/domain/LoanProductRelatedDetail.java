@@ -8,7 +8,7 @@ import javax.persistence.Embedded;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 
-import org.mifosng.data.command.UpdateLoanProductCommand;
+import org.mifosng.data.command.LoanProductCommand;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.currency.domain.Money;
 
@@ -173,7 +173,7 @@ public class LoanProductRelatedDetail implements
 		return interestRebateAllowed;
 	}
 
-	public void update(UpdateLoanProductCommand command) {
+	public void update(LoanProductCommand command) {
 		
 		this.currency = new MonetaryCurrency(command.getCurrencyCode(), command.getDigitsAfterDecimal());
 		this.principal = command.getPrincipal();

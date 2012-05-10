@@ -10,7 +10,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.apache.commons.lang.StringUtils;
-import org.mifosng.data.command.UpdateLoanProductCommand;
+import org.mifosng.data.command.LoanProductCommand;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
@@ -134,7 +134,7 @@ public class LoanProduct extends AbstractAuditableCustom<AppUser, Long> {
 		return this.loanProductRelatedDetail.getAmortizationMethod();
 	}
 	
-	public void update(UpdateLoanProductCommand command) {
+	public void update(LoanProductCommand command) {
 		this.name = command.getName();
 		this.description = command.getDescription();
 		this.loanProductRelatedDetail.update(command);
