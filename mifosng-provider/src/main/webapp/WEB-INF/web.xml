@@ -51,12 +51,25 @@
 	<servlet>
 		<servlet-name>jersey-serlvet</servlet-name>
 		<servlet-class>com.sun.jersey.spi.spring.container.servlet.SpringServlet</servlet-class>
-		<!-- debugging on for development -->
 		<init-param>
 			<param-name>com.sun.jersey.api.json.POJOMappingFeature</param-name>
 			<param-value>true</param-value>
 		</init-param>
-	    
+		<!-- debugging on for development -->
+		<!-- 
+	    <init-param>
+		  <param-name>com.sun.jersey.spi.container.ContainerRequestFilters</param-name>
+		  <param-value>com.sun.jersey.api.container.filter.LoggingFilter</param-value>
+		</init-param>
+		<init-param>
+		  <param-name>com.sun.jersey.spi.container.ContainerResponseFilters</param-name>
+		  <param-value>com.sun.jersey.api.container.filter.LoggingFilter, org.mifosng.platform.filters.ResponseCorsFilter</param-value>
+		</init-param>
+		-->
+		<init-param>
+		  <param-name>com.sun.jersey.spi.container.ContainerResponseFilters</param-name>
+		  <param-value>org.mifosng.platform.filters.ResponseCorsFilter</param-value>
+		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
  

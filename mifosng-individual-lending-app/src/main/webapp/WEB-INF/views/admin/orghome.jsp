@@ -53,9 +53,9 @@
 			        return false;
 			      }
 			},
-			globalDate: function(dateParts) {
+			globalDate: function(localDateAsISOString) {
 			      try {
-			    	
+			    	  var dateParts = localDateAsISOString.split("-")
 			    	  var year = dateParts[0];
 			    	  var month = parseInt(dateParts[1]) - 1; // month is zero indexed
 			    	  var day = dateParts[2];
@@ -68,9 +68,9 @@
 			        return "??";
 			      }
 			},
-			globalDateTime: function(dateParts) {
+			globalDateTime: function(dateInMillis) {
 			      try {
-			    	  var d = new Date(dateParts);
+			    	  var d = new Date(dateInMillis);
 			    	  
 			    	  return Globalize.format(d,"F");
 			      } catch(e) {
@@ -165,10 +165,10 @@
 		 }).dialog('open');
 	}
 	
-	function popupDialogWithFormView(url, titleCode, templateSelector, width, height, saveSuccessFunction) {
+	function popupDialogWithFormView(getUrl, postUrl, titleCode, templateSelector, width, height, saveSuccessFunction) {
 		 var dialogDiv = $("<div id='dialog-form'></div>");
 		 var jqxhr = $.ajax({
-			url: url,
+			url: getUrl,
 			type: 'GET',
 			contentType: 'application/json',
 			dataType: 'json',
@@ -196,7 +196,7 @@
 	  			var form_data = $('#entityform').serialize();
 	  				 
 				var jqxhr = $.ajax({
-					  url: url,
+					  url: postUrl,
 					  type: 'POST',
 					  data: form_data,
 					  success: saveSuccessFunction,
@@ -248,7 +248,10 @@
 	});
 	
 	$('#addloanproduct').click(function(e) {
-		var url = '${rootContext}portfolio/product/loan/new';
+		var getUrl = 'http://localhost:8085/mifosng-provider/api/v1/loanproducts/template';
+		var postUrl = 'http://localhost:8085/mifosng-provider/api/v1/loanproducts';
+		
+		//var url = '${rootContext}portfolio/product/loan/new';
 		var templateSelector = "#productFormTemplate";
 		var width = 800; 
 		var height = 550;
@@ -258,7 +261,7 @@
 			  refreshLoanProductsView();
 		}
 		
-		popupDialogWithFormView(url, "dialog.title.add.loan.product", templateSelector, width, height, saveSuccessFunction);
+		popupDialogWithFormView(getUrl, postUrl,"dialog.title.add.loan.product", templateSelector, width, height, saveSuccessFunction);
 		e.preventDefault();
 	});
 		
@@ -338,7 +341,8 @@
 	});
 	
 	$('#addoffice').click(function(e) {
-		var url = '${rootContext}org/office/new';
+		var getUrl = 'http://localhost:8085/mifosng-provider/api/v1/offices/template';
+		var postUrl = 'http://localhost:8085/mifosng-provider/api/v1/offices';
 		var templateSelector = "#officeFormTemplate";
 		var width = 600; 
 		var height = 400;
@@ -354,14 +358,18 @@
 		
 	function refreshOfficesView() {
 		var jqxhr = $.ajax({
-			  url: '${allOfficesUrl}',
+			  url: 'http://localhost:8085/mifosng-provider/api/v1/offices', // '${allOfficesUrl}',
 			  type: 'GET',
 			  contentType: 'application/json',
 			  dataType: 'json',
 			  success: function(data, textStatus, jqXHR) {
 				
+				$.each(data.offices, function(i, item) {
+					//alert(item.name);
+				});
+				console.log(data);  
 				var officelistParent = new Object();
-				officelistParent.items = data;
+				officelistParent.items = data.offices;
 				
 				var officeListHtml = $("#officeListTemplate").render(officelistParent);
 				$("#listplaceholder").html(officeListHtml);  
