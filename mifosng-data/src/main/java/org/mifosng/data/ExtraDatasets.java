@@ -8,22 +8,22 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class ExtraDatasets {
 
-	private List<String> names = new ArrayList<String>();
+	private List<ExtraDatasetRow> extraDatasetRow = new ArrayList<ExtraDatasetRow>();
 
 	protected ExtraDatasets() {
 		//
 	}
 
-	public ExtraDatasets(final List<String> names) {
-		this.names = names;
+	public ExtraDatasets(final List<ExtraDatasetRow> extraDatasetRow) {
+		this.extraDatasetRow = extraDatasetRow;
 	}
 
-	public List<String> getNames() {
-		return names;
+	public List<ExtraDatasetRow> getExtraDatasetRow() {
+		return extraDatasetRow;
 	}
 
-	public void setNames(List<String> names) {
-		this.names = names;
+	public void setExtraDatasetRow(List<ExtraDatasetRow> extraDatasetRow) {
+		this.extraDatasetRow = extraDatasetRow;
 	}
 
 }

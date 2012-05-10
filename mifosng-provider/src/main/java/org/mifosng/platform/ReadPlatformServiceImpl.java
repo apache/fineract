@@ -33,6 +33,8 @@ import org.mifosng.data.ClientDataWithAccountsData;
 import org.mifosng.data.CurrencyData;
 import org.mifosng.data.DerivedLoanData;
 import org.mifosng.data.EnumOptionReadModel;
+import org.mifosng.data.ErrorResponse;
+import org.mifosng.data.ExtraDatasetRow;
 import org.mifosng.data.ExtraDatasets;
 import org.mifosng.data.LoanAccountData;
 import org.mifosng.data.LoanProductData;
@@ -1277,7 +1279,7 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 	@Override
 	public ExtraDatasets retrieveExtraDatasetNames(String type) {
 
-		List<String> names = new ArrayList<String>();
+		List<ExtraDatasetRow> extraDatasetRows = new ArrayList<ExtraDatasetRow>();
 		Connection db_connection;
 		try {
 			db_connection = dataSource.getConnection();
@@ -1289,15 +1291,13 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 			} else {
 				whereClause = "where t.`name` = '" + type + "'";
 			}
-			String sql = "select d.`name` as datasetName from stretchydata_dataset d join stretchydata_datasettype t on t.id = d.datasettype_id "
+			String sql = "select d.id, d.`name` as datasetName, t.`name` as datasetType from stretchydata_dataset d join stretchydata_datasettype t on t.id = d.datasettype_id "
 					+ whereClause + " order by d.`name`";
 
-			//logger.info("extra tables sql: " + sql);
 			ResultSet rs = db_statement.executeQuery(sql);
 
 			while (rs.next()) {
-				//logger.info("datasetName: " + rs.getString("datasetName"));
-				names.add(rs.getString("datasetName"));
+				extraDatasetRows.add(new ExtraDatasetRow(rs.getInt("id"), rs.getString("datasetName"), rs.getString("datasetType")));
 			}
 
 			db_statement.close();
@@ -1310,7 +1310,7 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 					.status(Status.BAD_REQUEST).entity(e.getMessage()).build());
 		}
 
-		return new ExtraDatasets(names);
+		return new ExtraDatasets(extraDatasetRows);
 	}
 
 	@Override
