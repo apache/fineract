@@ -1597,10 +1597,24 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 	@Override
 	public void tempSaveExtraData(String datasetType, String datasetName,
 			String datasetPKValue, Map<String, String> queryParams) {
-		//logger.info("SaveExtraData - DatasetType: " + datasetType
-		//		+ "    DatasetName: " + datasetName + "  datasetPKValue: "
-		//		+ datasetPKValue);
+		logger.info("SaveExtraData - DatasetType: " + datasetType
+				+ "    DatasetName: " + datasetName + "  datasetPKValue: "
+				+ datasetPKValue);
 
+		logger.info("startjpw: ");
+		Set<String> keys = queryParams.keySet();
+		String pValue = "";
+			for (String key : keys) {
+					pValue = queryParams.get(key);
+					logger.info("jpw: " + key + " - " + pValue);
+				}
+
+			logger.info("endjpw: ");
+		
+		
+		
+		
+		
 		String fullDatasetName = getFullDatasetName(datasetType, datasetName);
 		String saveSql = getSaveSql(fullDatasetName, datasetPKValue,
 				queryParams);

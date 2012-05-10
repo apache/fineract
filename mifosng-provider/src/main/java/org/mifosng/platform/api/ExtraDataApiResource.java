@@ -1,16 +1,31 @@
 package org.mifosng.platform.api;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
+import org.mifosng.data.EntityIdentifier;
+import org.mifosng.data.ErrorResponse;
+import org.mifosng.data.ErrorResponseList;
 import org.mifosng.data.ExtraDatasets;
+import org.mifosng.data.reports.GenericResultset;
+import org.mifosng.platform.InvalidSqlException;
 import org.mifosng.platform.ReadPlatformService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,11 +64,11 @@ public class ExtraDataApiResource {
 		ExtraDatasets result = this.readPlatformService.retrieveExtraDatasetNames(type);
 		return Response.ok().entity(result).build();
 	}
-	/*
+	
 	@GET
 	@Path("{datasetType}/{datasetName}/{datasetPKValue}")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Produces({ MediaType.APPLICATION_JSON})
 	public Response extraData(@PathParam("datasetType") final String datasetType,@PathParam("datasetName") final String datasetName, @PathParam("datasetPKValue") final String datasetPKValue, @Context UriInfo uriInfo) {
 		
 		try {
@@ -74,12 +89,12 @@ public class ExtraDataApiResource {
 	
 	@POST
 	@Path("{datasetType}/{datasetName}/{datasetPKValue}")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Consumes({ MediaType.APPLICATION_FORM_URLENCODED, MediaType.APPLICATION_XML })
+	@Produces({ MediaType.APPLICATION_JSON})
 	public Response saveExtraData(@PathParam("datasetType") final String datasetType,@PathParam("datasetName") final String datasetName, @PathParam("datasetPKValue") final String datasetPKValue, @Context UriInfo uriInfo) {
 		
 		try {			
-			
+
 			MultivaluedMap<String, String> incomingParams = uriInfo.getQueryParameters();
 			Map<String, String> queryParams = new HashMap<String, String>();
 			
@@ -102,9 +117,10 @@ public class ExtraDataApiResource {
 			ErrorResponse err = new ErrorResponse("extradata.invalid.sql", "sql", e.getSql());
 			allErrors.add(err);
 
+			logger.info("way bad: " + err.toString());
 			throw new WebApplicationException(Response
 					.status(Status.BAD_REQUEST)
 					.entity(new ErrorResponseList(allErrors)).build());
 		}
-	}*/
+	}
 }

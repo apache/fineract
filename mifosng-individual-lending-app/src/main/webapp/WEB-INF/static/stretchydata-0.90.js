@@ -32,7 +32,8 @@
 		var valueClass = "";
 		if (params.valueClass)
 			valueClass = params.valueClass;
-		displayAllExtraData(params.url, params.datasetType,
+		//displayAllExtraData(params.url, params.datasetType,
+		displayAllExtraData("http://localhost:8080/mifosng-provider/", params.datasetType,
 				params.datasetPKValue, params.datasetTypeDiv, headingPrefix,
 				headingClass, labelClass, valueClass);
 	};
@@ -50,24 +51,24 @@
 			headingClassStr = ' class="' + displayAllVars.headingClass + '" ';
 
 		var extraDataNamesVar = "";
-		for ( var i in data.names) {
+		for ( var i in data.extraDatasetRow) {
 			var dsnDivName = generateDsnDivName(displayAllVars.datasetType, i, displayAllVars.datasetTypeDiv);
 			extraDataNamesVar += '<br><span ' + headingClassStr + '><b>'
 					+ doI18N(displayAllVars.headingPrefix)
-					+ doI18N(data.names[i]) + ' - </span></b> ';
+					+ doI18N(data.extraDatasetRow[i].name) + ' - </span></b> ';
 
 			extraDataNamesVar += editExtraDataLink(displayAllVars.url,
-					displayAllVars.datasetType, data.names[i],
+					displayAllVars.datasetType, data.extraDatasetRow[i].name,
 					displayAllVars.datasetPKValue, dsnDivName);
 			
 			extraDataNamesVar += '<div id="' + dsnDivName + '">';
 			extraDataNamesVar += '</div>';
 		}
 		$('#' + displayAllVars.datasetTypeDiv).html(extraDataNamesVar);
-		for ( var i in data.names) {
+		for ( var i in data.extraDatasetRow) {
 			var dsnDivName = generateDsnDivName(displayAllVars.datasetType, i, displayAllVars.datasetTypeDiv);
 			viewExtraData(displayAllVars.url, displayAllVars.datasetType,
-					data.names[i], displayAllVars.datasetPKValue, dsnDivName);
+					data.extraDatasetRow[i].name, displayAllVars.datasetPKValue, dsnDivName);
 		}
 
 	};
@@ -90,7 +91,7 @@
 			valueClass : valueClass
 		};
 
-		displayAllUrl = url + "extradata/datasets/"
+		displayAllUrl = url + "api/v1/extradata?type="
 				+ encodeURIComponent(datasetType);
 		getData(displayAllUrl, displayAllSuccessFunction,
 				displayAllErrorFunction);
@@ -156,7 +157,7 @@
 
 	function viewExtraData(url, datasetType, datasetName, datasetPKValue,
 			dsnDivName) {
-		var viewExtraDataUrl = url + "extradata/" + encodeURIComponent(datasetType)
+		var viewExtraDataUrl = url + "api/v1/extradata/" + encodeURIComponent(datasetType)
 				+ "/" + encodeURIComponent(datasetName) + "/"
 				+ encodeURIComponent(datasetPKValue);
 
@@ -190,7 +191,7 @@
 			datasetName : datasetName,
 			datasetPKValue : datasetPKValue,
 			baseUrl : url,
-			url : url + "extradata/" + encodeURIComponent(datasetType) + "/"
+			url : url + "api/v1/extradata/" + encodeURIComponent(datasetType) + "/"
 					+ encodeURIComponent(datasetName) + "/"
 					+ encodeURIComponent(datasetPKValue)
 		};
@@ -361,7 +362,6 @@
 			});
 
 			var form_data = $('#entityform').serialize();
-
 			var jqxhr = $.ajax({
 				url : url,
 				type : 'POST',
