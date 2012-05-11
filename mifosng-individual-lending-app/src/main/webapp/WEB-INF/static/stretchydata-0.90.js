@@ -365,6 +365,10 @@
 			var jqxhr = $.ajax({
 				url : url,
 				type : 'POST',
+				contentType : "application/json; charset=utf-8",
+				// dataType : 'jsonp',
+				// crossDomain : true,
+				dataType : 'json',
 				data : form_data,
 				success : function(data, textStatus, jqXHR) {
 					currentEditPopup.dialogDiv.dialog("close");
@@ -436,7 +440,7 @@
 			// dataType : 'jsonp',
 			// crossDomain : true,
 			dataType : 'json',
-			crossDomain : false,
+			//crossDomain : false,
 			success : successFunction,
 			error : errorFunction
 		});

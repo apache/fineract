@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -89,12 +90,12 @@ public class ExtraDataApiResource {
 	
 	@POST
 	@Path("{datasetType}/{datasetName}/{datasetPKValue}")
-	@Consumes({ MediaType.APPLICATION_FORM_URLENCODED, MediaType.APPLICATION_XML })
+	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Produces({ MediaType.APPLICATION_JSON})
-	public Response saveExtraData(@PathParam("datasetType") final String datasetType,@PathParam("datasetName") final String datasetName, @PathParam("datasetPKValue") final String datasetPKValue, @Context UriInfo uriInfo) {
+	public Response saveExtraData(@PathParam("datasetType") final String datasetType,@PathParam("datasetName") final String datasetName, @PathParam("datasetPKValue") final String datasetPKValue, @Context HttpServletRequest uriInfo) {
 		
 		try {			
-
+			//uriInfo.getParameterNames()
 			MultivaluedMap<String, String> incomingParams = uriInfo.getQueryParameters();
 			Map<String, String> queryParams = new HashMap<String, String>();
 			
