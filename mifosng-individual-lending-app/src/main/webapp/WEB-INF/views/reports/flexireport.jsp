@@ -104,7 +104,8 @@ var reportingParams = {
 	indianFormat: false,
 	highlightMissingXlations: "N",
 	loadingImg: "${resValue}/stretchyreporting/dots64.gif",
-	resValue: "${resValue}/stretchyreporting/"
+	//old resValue: "${resValue}/stretchyreporting/"
+	resValue: "${resValue}/libs/"
 	
 	//OAuth 1.0a parameters
 	//apiKey: "${consumerKey}",
