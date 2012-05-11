@@ -2,6 +2,7 @@ package org.mifosng.platform.api.loanproduct;
 
 import java.util.Collection;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -9,6 +10,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -69,35 +71,16 @@ public class LoanProductApiResource {
 		context.setAuthentication(auth);
 	}
 	
-	// example POST request
-	// http://localhost:8085/mifosng-provider/api/v1/loanproducts/
-	// Content-Type: application/json	
-//		{
-//		    "name": "test",
-//		    "description": "test",
-//		    "commonLoanProperties": {
-//		    "currencyCode": "USD",
-//		    "digitsAfterDecimal": 2,
-//		    "principal": 100000,
-//		    "repaymentEvery": 1,
-//		    "repaymentFrequency": 2,
-//		    "numberOfRepayments": 12,
-//		    "amortizationMethod": 1,
-//		    "inArrearsToleranceAmount": 1000,
-//		    "interestRatePerPeriod": 2,
-//		    "interestRateFrequencyMethod": 2,
-//		    "interestMethod": 0,
-//		    "interestCalculationPeriodMethod": 1
-//		    }
-//		}
 	@POST
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Produces({ MediaType.APPLICATION_JSON})
-	public Response createLoanProduct(LoanProductCommand command) {
+	public Response createLoanProduct(@Context HttpServletRequest request) {
 
 		hardcodeUserIntoSecurityContext();
 		
-		EntityIdentifier entityIdentifier = this.loanProductWritePlatformService.createLoanProduct(command);
+		// TODO - FIX mapping to command object on post and also fix error handling of this when it fails.
+		EntityIdentifier entityIdentifier = new EntityIdentifier(Long.valueOf(-1));
+//				this.loanProductWritePlatformService.createLoanProduct(command);
 
 		return Response.ok().entity(entityIdentifier).build();
 	}
@@ -142,30 +125,7 @@ public class LoanProductApiResource {
 
 		return Response.ok().entity(loanProduct).build();
 	}
-	
-	// example PUT request
-	// http://localhost:8085/mifosng-provider/api/v1/loanproducts/
-	// Content-Type: application/json	
-//			{
-//	          "id": 7,
-//			    "name": "test",
-//			    "description": "test",
-//				"externalId": "",
-//			    "commonLoanProperties": {
-//			    "currencyCode": "USD",
-//			    "digitsAfterDecimal": 2,
-//			    "principal": 100000,
-//			    "repaymentEvery": 1,
-//			    "repaymentFrequency": 2,
-//			    "numberOfRepayments": 12,
-//			    "amortizationMethod": 1,
-//			    "inArrearsToleranceAmount": 1000,
-//			    "interestRatePerPeriod": 2,
-//			    "interestRateFrequencyMethod": 2,
-//			    "interestMethod": 0,
-//			    "interestCalculationPeriodMethod": 1
-//			    }
-//			}
+
 	@PUT
 	@Path("{productId}")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
