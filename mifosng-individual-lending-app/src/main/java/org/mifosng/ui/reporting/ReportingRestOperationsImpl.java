@@ -42,7 +42,7 @@ public class ReportingRestOperationsImpl implements ReportingRestOperations {
 	public void hackToForceAuthentication() {
 		try {
 			URI restUri = URI
-					.create(getBaseServerUrl().concat("api/protected/reporting/forceauth"));
+					.create(getBaseServerUrl().concat("api/v1/flexiblereporting/forceauth"));
 
 			this.oauthRestServiceTemplate.exchange(restUri, HttpMethod.GET, emptyRequest(), null);
 		} catch (HttpStatusCodeException e) {

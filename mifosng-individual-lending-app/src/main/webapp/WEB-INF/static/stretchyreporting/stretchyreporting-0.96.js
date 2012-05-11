@@ -1076,10 +1076,14 @@ function getReportDataNoAuth(inParams, successFunction) {
 	$.ajax({
 			url: RESTUrl,
 			type:'GET',
-			dataType: 'jsonp',
+			dataType: 'json',
 			data: inQueryParameters,
 			contentType: "application/json; charset=utf-8",
-			crossDomain: true,
+			crossDomain: false,
+			//cache: true,
+			beforeSend: function( xhr ) {
+				xhr.setRequestHeader("Accept", "application/json");
+			},
 			success: successFunction,
 			error:function(jqXHR, textStatus, errorThrown){
 				showMsgE("getReportDataNoAuth: ");

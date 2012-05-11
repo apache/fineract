@@ -91,7 +91,8 @@ function selectNewThousandsSep(selectedVal) {
 
 var reportingParams = {
 	rptDB: "mifosngprovider",
-	RESTUrl: "${baseUrl}api/protected/reporting/flexireport",
+	//old link RESTUrl: "${baseUrl}api/protected/reporting/flexireport",
+	RESTUrl: "${baseUrl}api/v1/flexiblereporting",
 	pentahoUrl: "${baseUrl}pentahoreport",
 	exportUrl: "${rootContext}/exportcsv",
 	bundleDir: "${resValue}/stretchyreporting/mifosngbundle/",
@@ -103,13 +104,13 @@ var reportingParams = {
 	indianFormat: false,
 	highlightMissingXlations: "N",
 	loadingImg: "${resValue}/stretchyreporting/dots64.gif",
-	resValue: "${resValue}/stretchyreporting/",
+	resValue: "${resValue}/stretchyreporting/"
 	
 	//OAuth 1.0a parameters
-	apiKey: "${consumerKey}",
-	sharedSecret: "${consumerSecret}",
-	accessToken: "${accessToken}",
-	tokenSecret: "${tokenSecret}"
+	//apiKey: "${consumerKey}",
+	//sharedSecret: "${consumerSecret}",
+	//accessToken: "${accessToken}",
+	//tokenSecret: "${tokenSecret}"
 };
 
 jQuery.stretchyReporting.initialise(reportingParams);

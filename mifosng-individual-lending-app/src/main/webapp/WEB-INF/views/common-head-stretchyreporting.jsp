@@ -16,6 +16,6 @@
 <script type="text/javascript" src="${resValue}/libs/DataTables-1.8.2/extras/TableTools/media/js/TableTools.min.js"></script>
 <script type="text/javascript" src="${resValue}/libs/jquery.i18n.properties-min-1.0.9.js"></script>
 <script type="text/javascript" src="${resValue}/libs/OAuthSimple.js"></script>
-<script type="text/javascript" src="${resValue}/stretchyreporting/stretchyreporting-0.95.js"></script>
+<script type="text/javascript" src="${resValue}/stretchyreporting/stretchyreporting-0.96.js"></script>
 
 <script type="text/javascript" src="https://www.google.com/jsapi"></script>

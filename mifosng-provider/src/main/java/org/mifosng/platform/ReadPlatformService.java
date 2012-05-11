@@ -81,7 +81,7 @@ public interface ReadPlatformService {
 
 	Collection<PermissionData> retrieveAllPermissions();
 
-	@PreAuthorize(value = "hasAnyRole('REPORTING_SUPER_USER_ROLE')")
+	//@PreAuthorize(value = "hasAnyRole('REPORTING_SUPER_USER_ROLE')")
 	GenericResultset retrieveGenericResultset(String rptDB, String name,
 			String type, Map<String, String> extractedQueryParams);
 

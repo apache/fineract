@@ -1,4 +1,4 @@
-package org.mifosng.platform.rest;
+package org.mifosng.platform.api;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -6,11 +6,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.OPTIONS;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -19,7 +16,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
@@ -28,8 +24,8 @@ import org.mifosng.data.ErrorResponseList;
 import org.mifosng.data.reports.GenericResultset;
 import org.mifosng.platform.ReadPlatformService;
 import org.mifosng.platform.exceptions.ApplicationDomainRuleException;
-import org.mifosng.platform.exceptions.UnAuthenticatedUserException;
 import org.mifosng.platform.exceptions.NewDataValidationException;
+import org.mifosng.platform.exceptions.UnAuthenticatedUserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,49 +33,20 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
-@Path("/v1/flexiblereportingxxxyyy")
+@Path("/v1/flexiblereportingxxx")
 @Component
 @Scope("singleton")
-public class ProtectedFlexibleReportingResource {
+public class FlexibleReportingApiResourceOLD {
 
-	private final static Logger logger = LoggerFactory.getLogger(ProtectedFlexibleReportingResource.class);
+	private final static Logger logger = LoggerFactory.getLogger(FlexibleReportingApiResourceOLD.class);
 	
 	@Autowired
 	private ReadPlatformService readPlatformService;
 	
-	private String _corsHeaders;
-	 
-	private Response makeCORS(ResponseBuilder req, String returnMethod) {
-	   ResponseBuilder rb = req
-	      .header("Access-Control-Allow-Origin", "*")
-	      .header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-	 
-	   if (!"".equals(returnMethod)) {
-	      rb.header("Access-Control-Allow-Headers", returnMethod);
-	   }
-	 
-	   return rb.build();
-	}
-	 
-	private Response makeCORS(ResponseBuilder req) {
-	   return makeCORS(req, _corsHeaders);
-	}
-
-	// This OPTIONS request/response is necessary
-	// if you consumes other format than text/plain or
-	// if you use other HTTP verbs than GET and POST
-	@OPTIONS
-	@Path("/flexireport")
-	public Response corsMyResource(@HeaderParam("Access-Control-Request-Headers") String requestH) {
-	   _corsHeaders = requestH;
-	   return makeCORS(Response.ok(), requestH);
-	}
-	
 	@GET
-	@Path("flexireport")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-	public Response retrieveReport(@Context UriInfo uriInfo, @Context HttpServletResponse httpServletResponse) {
+	@Produces({ MediaType.APPLICATION_JSON})
+	public Response retrieveReport(@Context UriInfo uriInfo) {
 		
 		MultivaluedMap<String, String> queryParams = uriInfo.getQueryParameters();
 		String rptDB = queryParams.getFirst("MRP_rptDB");
@@ -107,9 +74,9 @@ public class ProtectedFlexibleReportingResource {
 //		JSONWithPadding paddedResult = new JSONWithPadding(result,
 //				callbackName);
 		
-		return makeCORS(Response.ok().entity(result));
+		return Response.ok().entity(result).build();
 	}
-	
+	/*
 	@GET
 	@Path("/exportcsv/{reportDb}/{reportName}/{reportType}/office/{officeId}/currency/{currencyId}")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
@@ -136,20 +103,5 @@ public class ProtectedFlexibleReportingResource {
 			return Response.ok().entity(result).build();
 		} catch (UnAuthenticatedUserException e) {
 			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
-		} catch (AccessDeniedException e) {
-			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
-			ErrorResponseList list = new ErrorResponseList(Arrays.asList(errorResponse));
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(list).build());
-		} catch (ApplicationDomainRuleException e) {
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(new ErrorResponseList(e.getErrors())).build());
-		} catch (NewDataValidationException e) {
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(new ErrorResponseList(e.getValidationErrors())).build());
-		}
-	}
-	
-	@GET
-	@Path("forceauth")
-	public Response hackToForceAuthentication() {
-		return Response.ok().build();
-	}
+		} catch (AccessDeniedException e) {*/
 }
