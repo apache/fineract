@@ -1202,7 +1202,7 @@ public class CommonRestOperationsImpl implements CommonRestOperations {
 		try {
 			
 			StringBuilder uriAsString = new StringBuilder(getBaseServerUrl())
-												.append("api/protected/reporting/exportcsv/")
+												.append("api/v1/flexiblereporting/exportcsv/")
 												.append(encodeURIComponent(rptDB))
 												.append('/')
 												.append(encodeURIComponent(name))
