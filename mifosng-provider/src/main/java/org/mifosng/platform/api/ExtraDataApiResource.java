@@ -1,6 +1,7 @@
 package org.mifosng.platform.api;
 
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -92,20 +93,35 @@ public class ExtraDataApiResource {
 	@Path("{datasetType}/{datasetName}/{datasetPKValue}")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Produces({ MediaType.APPLICATION_JSON})
-	public Response saveExtraData(@PathParam("datasetType") final String datasetType,@PathParam("datasetName") final String datasetName, @PathParam("datasetPKValue") final String datasetPKValue, @Context HttpServletRequest uriInfo) {
+	public Response saveExtraData(@PathParam("datasetType") final String datasetType,@PathParam("datasetName") final String datasetName, @PathParam("datasetPKValue") final String datasetPKValue, @Context HttpServletRequest req) {
 		
 		try {			
-			//uriInfo.getParameterNames()
-			MultivaluedMap<String, String> incomingParams = uriInfo.getQueryParameters();
+			
+			//MultivaluedMap<String, String> incomingParams = uriInfo.getQueryParameters();
 			Map<String, String> queryParams = new HashMap<String, String>();
-			
-			Set<String> keys = incomingParams.keySet();
-			for (String key : keys) {
-				String pValue = incomingParams.get(key).get(0);
-				queryParams.put(key, pValue);
-				logger.info(key + " - " + pValue);
-			}
-			
+
+			//Set<String> keys = incomingParams.keySet();
+
+			logger.info("Request JPW: " + req.toString());
+		    Enumeration paramNames = req.getParameterNames();
+		    String pValue = "";
+		    String pName;
+		    String[] paramValues;
+		    while(paramNames.hasMoreElements()) {
+		    	pName = (String) paramNames.nextElement();
+		    	paramValues = req.getParameterValues(pName);
+		    	if (paramValues.length > 1) {
+					logger.info("Unexpected Parameter Error: " + pName + " has " + paramValues.length + " value(s)");
+		    	} else {
+				      if (paramValues.length == 1) {
+				    	  pValue = paramValues[0];
+				      } else {
+				    	  pValue = "";
+				      }
+		    	}
+				logger.info(pName + " - " + pValue);
+				queryParams.put(pName, pValue);
+		    }			
 			
 			this.readPlatformService.tempSaveExtraData(datasetType, datasetName, datasetPKValue, queryParams);
 			
