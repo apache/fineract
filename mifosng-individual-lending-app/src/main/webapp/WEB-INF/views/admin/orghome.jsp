@@ -165,6 +165,23 @@
 		 }).dialog('open');
 	}
 	
+	$.fn.serializeObject = function()
+	{
+	    var o = {};
+	    var a = this.serializeArray();
+	    $.each(a, function() {
+	        if (o[this.name] !== undefined) {
+	            if (!o[this.name].push) {
+	                o[this.name] = [o[this.name]];
+	            }
+	            o[this.name].push(this.value || '');
+	        } else {
+	            o[this.name] = this.value || '';
+	        }
+	    });
+	    return o;
+	};
+	
 	function popupDialogWithFormView(getUrl, postUrl, titleCode, templateSelector, width, height, saveSuccessFunction) {
 		 var dialogDiv = $("<div id='dialog-form'></div>");
 		 var jqxhr = $.ajax({
@@ -174,7 +191,7 @@
 			dataType: 'json',
 			cache: false,
 			success: function(data, textStatus, jqXHR) {
-			
+			console.log(data);
 			var formHtml = $(templateSelector).render(data);
 			
 			dialogDiv.append(formHtml);
@@ -193,12 +210,18 @@
 		    	   $(this).attr("selected", "selected");  
 		    	});
 				
+		    	
+		    	var newFormData = JSON.stringify($('#entityform').serializeObject());
+		    	console.log(newFormData);
+		    	
 	  			var form_data = $('#entityform').serialize();
-	  				 
+	  			
 				var jqxhr = $.ajax({
 					  url: postUrl,
 					  type: 'POST',
-					  data: form_data,
+					  contentType: 'application/json',
+					  dataType: 'json',
+					  data: newFormData,
 					  success: saveSuccessFunction,
 					  error: function(jqXHR, textStatus, errorThrown) {
 					    handleXhrError(jqXHR, textStatus, errorThrown, "#formErrorsTemplate", "#formerrors");
@@ -250,7 +273,6 @@
 	$('#addloanproduct').click(function(e) {
 		var getUrl = 'http://localhost:8085/mifosng-provider/api/v1/loanproducts/template';
 		var postUrl = 'http://localhost:8085/mifosng-provider/api/v1/loanproducts';
-		
 		//var url = '${rootContext}portfolio/product/loan/new';
 		var templateSelector = "#productFormTemplate";
 		var width = 800; 
@@ -261,7 +283,7 @@
 			  refreshLoanProductsView();
 		}
 		
-		popupDialogWithFormView(getUrl, postUrl,"dialog.title.add.loan.product", templateSelector, width, height, saveSuccessFunction);
+		popupDialogWithFormView(getUrl, postUrl, "dialog.title.add.loan.product", templateSelector, width, height, saveSuccessFunction);
 		e.preventDefault();
 	});
 		
