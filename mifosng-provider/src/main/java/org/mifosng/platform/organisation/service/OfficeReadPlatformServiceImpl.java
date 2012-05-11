@@ -103,4 +103,18 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
 			throw new PlatformResourceNotFoundException("error.msg.office.id.invalid", "Office with identifier {0} does not exist.", officeId);
 		}
 	}
+
+	@Override
+	public OfficeData retrieveNewOfficeTemplate() {
+		
+		context.authenticatedUser();
+		
+		List<OfficeData> allowedParents = new ArrayList<OfficeData>(retrieveAllOffices());
+		
+		OfficeData officeTemplate = new OfficeData();
+		officeTemplate.setAllowedParents(allowedParents);
+		officeTemplate.setOpeningDate(new LocalDate());
+		
+		return officeTemplate;
+	}
 }

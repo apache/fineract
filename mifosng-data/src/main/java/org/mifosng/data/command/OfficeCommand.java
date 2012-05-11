@@ -14,9 +14,12 @@ public class OfficeCommand {
 	private String name;
 	private String externalId;
 
+	private String dateFormat;
+	private String openingDateFormatted;
 	private LocalDate openingDate;
 
 	private Long parentId;
+	private boolean rootOffice = false;
 
 	protected OfficeCommand() {
 		//
@@ -78,5 +81,29 @@ public class OfficeCommand {
 
 	public void setId(final Long id) {
 		this.id = id;
+	}
+
+	public String getDateFormat() {
+		return dateFormat;
+	}
+
+	public void setDateFormat(String dateFormat) {
+		this.dateFormat = dateFormat;
+	}
+
+	public String getOpeningDateFormatted() {
+		return openingDateFormatted;
+	}
+
+	public void setOpeningDateFormatted(String openingDateFormatted) {
+		this.openingDateFormatted = openingDateFormatted;
+	}
+
+	public boolean isRootOffice() {
+		return rootOffice;
+	}
+
+	public void setRootOffice(boolean rootOffice) {
+		this.rootOffice = rootOffice;
 	}
 }

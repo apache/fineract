@@ -112,17 +112,28 @@
 			removeErrors(placeholderDiv);
 			
 		  	var jsonErrors = JSON.parse(jqXHR.responseText);
-		  	
+		  	console.log(jsonErrors);
+		  	var valErrors = jsonErrors.errors;
+		  	console.log(valErrors);
 		  	var errorArray = new Array();
 		  	var arrayIndex = 0;
-		  	$.each(jsonErrors, function() {
-		  	  var fieldId = '#' + this.field;
+		  	$.each(valErrors, function() {
+		  	  var fieldId = '#' + this.parameterName;
 		  	  $(fieldId).addClass("ui-state-error");
 		  	  
 		  	  var errorObj = new Object();
-		  	  errorObj.field = this.field;
-		  	  errorObj.code = this.code;
-		  	  errorObj.message = jQuery.i18n.prop(this.code, this.args);
+		  	  errorObj.field = this.parameterName;
+		  	  errorObj.code = this.userMessageGlobalisationCode;
+		  	  
+		  	  var argArray = new Array();
+		  	  var argArrayIndex = 0;
+		  	  $.each(this.args, function() {
+		  		argArray[argArrayIndex] = this.value;
+		  		argArrayIndex++;
+		  	  });
+		  	  console.log(argArray);
+		  	  // hardcoded support for six arguments
+		  	  errorObj.message = jQuery.i18n.prop(this.userMessageGlobalisationCode, argArray[0], argArray[1], argArray[2], argArray[3], argArray[4], argArray[5]);
 		  	  errorObj.value = this.value;
 		  	  
 		  	  errorArray[arrayIndex] = errorObj;
@@ -182,7 +193,7 @@
 	    return o;
 	};
 	
-	function popupDialogWithFormView(getUrl, postUrl, titleCode, templateSelector, width, height, saveSuccessFunction) {
+	function popupDialogWithFormView(getUrl, postUrl, submitType, titleCode, templateSelector, width, height, saveSuccessFunction) {
 		 var dialogDiv = $("<div id='dialog-form'></div>");
 		 var jqxhr = $.ajax({
 			url: getUrl,
@@ -218,7 +229,7 @@
 	  			
 				var jqxhr = $.ajax({
 					  url: postUrl,
-					  type: 'POST',
+					  type: submitType,
 					  contentType: 'application/json',
 					  dataType: 'json',
 					  data: newFormData,
@@ -273,7 +284,6 @@
 	$('#addloanproduct').click(function(e) {
 		var getUrl = 'http://localhost:8085/mifosng-provider/api/v1/loanproducts/template';
 		var postUrl = 'http://localhost:8085/mifosng-provider/api/v1/loanproducts';
-		//var url = '${rootContext}portfolio/product/loan/new';
 		var templateSelector = "#productFormTemplate";
 		var width = 800; 
 		var height = 550;
@@ -283,13 +293,13 @@
 			  refreshLoanProductsView();
 		}
 		
-		popupDialogWithFormView(getUrl, postUrl, "dialog.title.add.loan.product", templateSelector, width, height, saveSuccessFunction);
+		popupDialogWithFormView(getUrl, postUrl, 'POST', "dialog.title.add.loan.product", templateSelector, width, height, saveSuccessFunction);
 		e.preventDefault();
 	});
 		
 	function refreshLoanProductsView() {
 		var jqxhr = $.ajax({
-			  url: '${allLoanProductsUrl}',
+			  url: 'http://localhost:8085/mifosng-provider/api/v1/loanproducts', //'${allLoanProductsUrl}',
 			  type: 'GET',
 			  contentType: 'application/json',
 			  dataType: 'json',
@@ -297,7 +307,7 @@
 			  success: function(data, textStatus, jqXHR) {
 				
 				var productlistParent = new Object();
-				productlistParent.items = data;
+				productlistParent.items = data.products;
 				
 				var productListHtml = $("#productListTemplate").render(productlistParent);
 				$("#listplaceholder").html(productListHtml);
@@ -305,7 +315,8 @@
 				$("a.editproduct").click( function(e) {
 					var linkId = this.id;
 					var productId = linkId.replace("editproduct", "");
-					var url = '${rootContext}portfolio/product/loan/' + productId;
+					var getUrl = 'http://localhost:8085/mifosng-provider/api/v1/loanproducts/' + productId;
+					var putUrl = 'http://localhost:8085/mifosng-provider/api/v1/loanproducts/' + productId;
 					
 					var templateSelector = "#productFormTemplate";
 					var width = 800; 
@@ -316,7 +327,7 @@
 						  refreshLoanProductsView();
 					}
 					
-					popupDialogWithFormView(url, "dialog.title.product.details", templateSelector, width, height, saveSuccessFunction);
+					popupDialogWithFormView(getUrl, putUrl, 'PUT', "dialog.title.product.details", templateSelector, width, height, saveSuccessFunction);
 					e.preventDefault();
 				});
 				
@@ -374,7 +385,7 @@
 			  refreshOfficesView();
 		}
 		
-		popupDialogWithFormView(url, "dialog.title.add.office", templateSelector, width, height, saveSuccessFunction);
+		popupDialogWithFormView(getUrl, postUrl, 'POST', "dialog.title.add.office", templateSelector, width, height, saveSuccessFunction);
 		e.preventDefault();
 	});
 		
@@ -399,7 +410,9 @@
 				$("a.edit").click( function(e) {
 					var linkId = this.id;
 					var entityId = linkId.replace("edit", "");
-					var url = '${rootContext}org/office/' + entityId;
+					var getUrl = 'http://localhost:8085/mifosng-provider/api/v1/offices/' + entityId;
+					var putUrl = 'http://localhost:8085/mifosng-provider/api/v1/offices/' + entityId;
+					
 					var templateSelector = "#officeFormTemplate";
 					var width = 600; 
 					var height = 400;
@@ -409,7 +422,7 @@
 						  refreshOfficesView();
 					}
 					
-					popupDialogWithFormView(url, "dialog.title.office.details", templateSelector, width, height, saveSuccessFunction);
+					popupDialogWithFormView(getUrl, putUrl, 'PUT', "dialog.title.office.details", templateSelector, width, height, saveSuccessFunction);
 					e.preventDefault();
 				});
 				
@@ -444,7 +457,8 @@
 		
     // currency configuration
 	$('#editconfiguration').click(function(e) {
-		var url = '${rootContext}org/configuration/edit';
+		var getUrl = 'http://localhost:8085/mifosng-provider/api/v1/configurations/currency';
+		var putUrl = 'http://localhost:8085/mifosng-provider/api/v1/configurations/currency';
 		var templateSelector = "#configurationFormTemplate";
 		var width = 900; 
 		var height = 400;
@@ -453,7 +467,7 @@
 			  $("#dialog-form").dialog("close");
 		}
 		
-		popupDialogWithFormView(url, "dialog.title.configuration.currencies", templateSelector, width, height, saveSuccessFunction);
+		popupDialogWithFormView(getUrl, putUrl, 'PUT', "dialog.title.configuration.currencies", templateSelector, width, height, saveSuccessFunction);
 		e.preventDefault();
 	});
 

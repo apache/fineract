@@ -10,24 +10,19 @@ import org.mifosng.data.ClientDataWithAccountsData;
 import org.mifosng.data.CurrencyData;
 import org.mifosng.data.EnumOptionReadModel;
 import org.mifosng.data.LoanAccountData;
-import org.mifosng.data.LoanProductData;
 import org.mifosng.data.LoanRepaymentData;
 import org.mifosng.data.NewLoanWorkflowStepOneData;
 import org.mifosng.data.NoteData;
-import org.mifosng.data.OfficeData;
 import org.mifosng.data.OrganisationReadModel;
 import org.mifosng.data.PermissionData;
 import org.mifosng.data.RoleData;
 import org.mifosng.data.reports.GenericResultset;
-import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface ReadPlatformService {
 
 	Collection<OrganisationReadModel> retrieveAll();
 
 	Collection<ClientData> retrieveAllIndividualClients();
-
-	Collection<OfficeData> retrieveAllOffices();
 
 	ClientData retrieveIndividualClient(Long clientId);
 
@@ -43,27 +38,9 @@ public interface ReadPlatformService {
 
 	LoanRepaymentData retrieveLoanRepaymentDetails(Long loanId, Long repaymentId);
 
-	Collection<LoanProductData> retrieveAllLoanProducts();
-
 	List<CurrencyData> retrieveAllowedCurrencies();
 
 	List<CurrencyData> retrieveAllPlatformCurrencies();
-
-	List<EnumOptionReadModel> retrieveLoanAmortizationMethodOptions();
-
-	List<EnumOptionReadModel> retrieveLoanInterestMethodOptions();
-	
-	List<EnumOptionReadModel> retrieveLoanInterestRateCalculatedInPeriodOptions();
-
-	List<EnumOptionReadModel> retrieveRepaymentFrequencyOptions();
-
-	List<EnumOptionReadModel> retrieveInterestFrequencyOptions();
-
-	LoanProductData retrieveLoanProduct(Long productId);
-
-	LoanProductData retrieveNewLoanProductDetails();
-
-	OfficeData retrieveOffice(Long officeId);
 
 	Collection<AppUserData> retrieveAllUsers();
 

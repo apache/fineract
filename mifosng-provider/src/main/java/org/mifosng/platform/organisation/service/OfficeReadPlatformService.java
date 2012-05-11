@@ -9,4 +9,6 @@ public interface OfficeReadPlatformService {
 	Collection<OfficeData> retrieveAllOffices();
 
 	OfficeData retrieveOffice(Long officeId);
+
+	OfficeData retrieveNewOfficeTemplate();
 }

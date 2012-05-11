@@ -13,8 +13,6 @@ import org.mifosng.data.AppUserData;
 import org.mifosng.data.ClientData;
 import org.mifosng.data.ClientDataWithAccountsData;
 import org.mifosng.data.ClientList;
-import org.mifosng.data.CurrencyData;
-import org.mifosng.data.CurrencyList;
 import org.mifosng.data.EntityIdentifier;
 import org.mifosng.data.EnumOptionList;
 import org.mifosng.data.EnumOptionReadModel;
@@ -28,8 +26,6 @@ import org.mifosng.data.LoanSchedule;
 import org.mifosng.data.NewLoanWorkflowStepOneData;
 import org.mifosng.data.NoteData;
 import org.mifosng.data.NoteDataList;
-import org.mifosng.data.OfficeData;
-import org.mifosng.data.OfficeList;
 import org.mifosng.data.PermissionData;
 import org.mifosng.data.PermissionList;
 import org.mifosng.data.RoleData;
@@ -39,16 +35,13 @@ import org.mifosng.data.command.AdjustLoanTransactionCommand;
 import org.mifosng.data.command.CalculateLoanScheduleCommand;
 import org.mifosng.data.command.ChangePasswordCommand;
 import org.mifosng.data.command.EnrollClientCommand;
-import org.mifosng.data.command.LoanProductCommand;
 import org.mifosng.data.command.LoanStateTransitionCommand;
 import org.mifosng.data.command.LoanTransactionCommand;
 import org.mifosng.data.command.NoteCommand;
-import org.mifosng.data.command.OfficeCommand;
 import org.mifosng.data.command.RoleCommand;
 import org.mifosng.data.command.SubmitLoanApplicationCommand;
 import org.mifosng.data.command.UndoLoanApprovalCommand;
 import org.mifosng.data.command.UndoLoanDisbursalCommand;
-import org.mifosng.data.command.UpdateOrganisationCurrencyCommand;
 import org.mifosng.data.command.UserCommand;
 import org.mifosng.data.reports.GenericResultset;
 import org.mifosng.ui.loanproduct.ClientValidationException;
@@ -129,38 +122,7 @@ public class CommonRestOperationsImpl implements CommonRestOperations {
 		return s.getBody().getProducts();
 	}
 
-	@Override
-	public EntityIdentifier createLoanProduct(final LoanProductCommand command) {
-		try {
-			URI restUri = URI
-					.create(getBaseServerUrl().concat("api/protected/product/loan/new"));
-
-			ResponseEntity<EntityIdentifier> s = this.oauthRestServiceTemplate.postForEntity(restUri,
-					updateLoanProductRequest(command), EntityIdentifier.class);
-
-			return s.getBody();
-		} catch (HttpStatusCodeException e) {
-			ErrorResponseList errorList = parseErrors(e);
-			throw new ClientValidationException(errorList.getErrors());
-		}
-	}
 	
-	@Override
-	public EntityIdentifier updateLoanProduct(LoanProductCommand command) {
-		try {
-			URI restUri = URI
-					.create(getBaseServerUrl().concat("api/protected/product/loan/update"));
-
-			ResponseEntity<EntityIdentifier> s = this.oauthRestServiceTemplate
-					.postForEntity(restUri, updateLoanProductRequest(command),
-							EntityIdentifier.class);
-
-			return s.getBody();
-		} catch (HttpStatusCodeException e) {
-			ErrorResponseList errorList = parseErrors(e);
-			throw new ClientValidationException(errorList.getErrors());
-		}
-	}
 
 	private ErrorResponseList parseErrors(HttpStatusCodeException e) {
 		
@@ -183,53 +145,6 @@ public class CommonRestOperationsImpl implements CommonRestOperations {
 			throw e;
 		}
 		return errorList;
-	}
-	
-	private HttpEntity<LoanProductCommand> updateLoanProductRequest(
-			final LoanProductCommand command) {
-		HttpHeaders requestHeaders = new HttpHeaders();
-		requestHeaders.set("Accept", "application/xml");
-		requestHeaders.set("Content-Type", "application/xml");
-
-		HttpEntity<LoanProductCommand> requestEntity = new HttpEntity<LoanProductCommand>(
-				command, requestHeaders);
-		return requestEntity;
-	}
-
-	@Override
-	public LoanProductData retrieveLoanProductDetails(
-			final Long selectedLoanProductOption) {
-		try {
-			URI restUri = URI
-					.create(getBaseServerUrl().concat("api/protected/product/loan/"
-							+ selectedLoanProductOption));
-
-			ResponseEntity<LoanProductData> s = this.oauthRestServiceTemplate
-					.exchange(restUri, HttpMethod.GET, emptyRequest(),
-							LoanProductData.class);
-
-			return s.getBody();
-		} catch (HttpStatusCodeException e) {
-			ErrorResponseList errorList = parseErrors(e);
-			throw new ClientValidationException(errorList.getErrors());
-		}
-	}
-	
-	@Override
-	public LoanProductData retrieveNewLoanProductDetails() {
-		try {
-			URI restUri = URI
-					.create(getBaseServerUrl().concat("api/protected/product/loan/empty"));
-
-			ResponseEntity<LoanProductData> s = this.oauthRestServiceTemplate
-					.exchange(restUri, HttpMethod.GET, emptyRequest(),
-							LoanProductData.class);
-
-			return s.getBody();
-		} catch (HttpStatusCodeException e) {
-			ErrorResponseList errorList = parseErrors(e);
-			throw new ClientValidationException(errorList.getErrors());
-		}
 	}
 
 	@Override
@@ -587,116 +502,7 @@ public class CommonRestOperationsImpl implements CommonRestOperations {
 		return new HttpEntity<CalculateLoanScheduleCommand>(command,
 				requestHeaders);
 	}
-
-	@Override
-	public Collection<CurrencyData> retrieveAllowedCurrencies() {
-		try {
-			URI restUri = URI
-					.create(getBaseServerUrl().concat("api/protected/config/currency/allowed"));
-
-			ResponseEntity<CurrencyList> s = this.oauthRestServiceTemplate
-					.exchange(restUri, HttpMethod.GET, emptyRequest(),
-							CurrencyList.class);
-
-			return s.getBody().getCurrencies();
-		} catch (HttpStatusCodeException e) {
-			ErrorResponseList errorList = parseErrors(e);
-			throw new ClientValidationException(errorList.getErrors());
-		}
-	}
 	
-	@Override
-	public Collection<EnumOptionReadModel> retrieveAllowedLoanAmortizationMethodOptions() {
-		URI restUri = URI
-				.create(getBaseServerUrl().concat("api/protected/config/loan/amortization/allowed"));
-
-		ResponseEntity<EnumOptionList> s = this.oauthRestServiceTemplate
-				.exchange(restUri, HttpMethod.GET, emptyRequest(),
-						EnumOptionList.class);
-
-		return s.getBody().getOptions();
-	}
-
-	@Override
-	public Collection<EnumOptionReadModel> retrieveAllowedLoanInterestMethodOptions() {
-		URI restUri = URI
-				.create(getBaseServerUrl().concat("api/protected/config/loan/interestcalculation/allowed"));
-
-		ResponseEntity<EnumOptionList> s = this.oauthRestServiceTemplate
-				.exchange(restUri, HttpMethod.GET, emptyRequest(),
-						EnumOptionList.class);
-
-		return s.getBody().getOptions();
-	}
-
-	@Override
-	public Collection<EnumOptionReadModel> retrieveAllowedRepaymentFrequencyOptions() {
-		URI restUri = URI
-				.create(getBaseServerUrl().concat("api/protected/config/loan/repaymentfrequency/allowed"));
-
-		ResponseEntity<EnumOptionList> s = this.oauthRestServiceTemplate
-				.exchange(restUri, HttpMethod.GET, emptyRequest(),
-						EnumOptionList.class);
-
-		return s.getBody().getOptions();
-	}
-	
-
-	@Override
-	public Collection<EnumOptionReadModel> retrieveAllowedNominalInterestFrequencyOptions() {
-		URI restUri = URI
-				.create(getBaseServerUrl().concat("api/protected/config/loan/interestfrequency/allowed"));
-
-		ResponseEntity<EnumOptionList> s = this.oauthRestServiceTemplate
-				.exchange(restUri, HttpMethod.GET, emptyRequest(),
-						EnumOptionList.class);
-
-		return s.getBody().getOptions();
-	}
-
-	@Override
-	public Collection<CurrencyData> retrieveAllPlatformCurrencies() {
-		try {
-			URI restUri = URI
-					.create(getBaseServerUrl().concat("api/protected/config/currency/all"));
-
-			ResponseEntity<CurrencyList> s = this.oauthRestServiceTemplate
-					.exchange(restUri, HttpMethod.GET, emptyRequest(),
-							CurrencyList.class);
-
-			return s.getBody().getCurrencies();
-		} catch (HttpStatusCodeException e) {
-			ErrorResponseList errorList = parseErrors(e);
-			throw new ClientValidationException(errorList.getErrors());
-		}
-	}
-
-	@Override
-	public void updateOrganisationCurrencies(UpdateOrganisationCurrencyCommand command) {
-		try {
-			URI restUri = URI
-					.create(getBaseServerUrl().concat("api/protected/config/currency/update"));
-
-			this.oauthRestServiceTemplate.exchange(restUri, HttpMethod.PUT,
-					updateCurrencyRequest(command),
-					UpdateOrganisationCurrencyCommand.class);
-		} catch (HttpStatusCodeException e) {
-			ErrorResponseList errorList = parseErrors(e);
-			throw new ClientValidationException(errorList.getErrors());
-		}
-	}
-
-	private HttpEntity<UpdateOrganisationCurrencyCommand> updateCurrencyRequest(
-			final UpdateOrganisationCurrencyCommand command) {
-		HttpHeaders requestHeaders = new HttpHeaders();
-		requestHeaders.set("Accept", "application/xml");
-		requestHeaders.set("Content-Type", "application/xml");
-
-		HttpEntity<UpdateOrganisationCurrencyCommand> requestEntity = new HttpEntity<UpdateOrganisationCurrencyCommand>(
-				command, requestHeaders);
-		return requestEntity;
-	}
-
 	@Override
 	public EntityIdentifier createUser(final UserCommand command) {
 		try {
@@ -948,99 +754,6 @@ public class CommonRestOperationsImpl implements CommonRestOperations {
 			ErrorResponseList errorList = parseErrors(e);
 			throw new ClientValidationException(errorList.getErrors());
 		}
-	}
-
-	@Override
-	public Collection<OfficeData> retrieveAllOffices() {
-		try {
-			URI restUri = URI
-					.create(getBaseServerUrl().concat("api/protected/office/all"));
-
-			ResponseEntity<OfficeList> s = this.oauthRestServiceTemplate
-					.exchange(restUri, HttpMethod.GET, emptyRequest(),
-							OfficeList.class);
-
-			return s.getBody().getOffices();
-		} catch (HttpStatusCodeException e) {
-			ErrorResponseList errorList = parseErrors(e);
-			throw new ClientValidationException(errorList.getErrors());
-		}
-	}
-
-	@Override
-	public OfficeData retrieveOffice(final Long officeId) {
-		try {
-			URI restUri = URI
-					.create(getBaseServerUrl().concat("api/protected/office/"
-							+ officeId));
-
-			ResponseEntity<OfficeData> s = this.oauthRestServiceTemplate
-					.exchange(restUri, HttpMethod.GET, emptyRequest(),
-							OfficeData.class);
-
-			return s.getBody();
-		} catch (HttpStatusCodeException e) {
-			ErrorResponseList errorList = parseErrors(e);
-			throw new ClientValidationException(errorList.getErrors());
-		}
-	}
-
-	@Override
-	public EntityIdentifier createOffice(final OfficeCommand command) {
-		try {
-			URI restUri = URI
-					.create(getBaseServerUrl().concat("api/protected/office/new"));
-
-			ResponseEntity<EntityIdentifier> s = this.oauthRestServiceTemplate
-					.postForEntity(restUri, createOfficeRequest(command),
-							EntityIdentifier.class);
-
-			return s.getBody();
-		} catch (HttpStatusCodeException e) {
-			ErrorResponseList errorList = parseErrors(e);
-			throw new ClientValidationException(errorList.getErrors());
-		}
-	}
-
-	@Override
-	public EntityIdentifier updateOffice(final OfficeCommand command) {
-		try {
-			URI restUri = URI
-					.create(getBaseServerUrl().concat("api/protected/office/update"));
-
-			ResponseEntity<EntityIdentifier> s = this.oauthRestServiceTemplate
-					.postForEntity(restUri, updateOfficeRequest(command),
-							EntityIdentifier.class);
-
-			return s.getBody();
-		} catch (HttpStatusCodeException e) {
-			ErrorResponseList errorList = parseErrors(e);
-			throw new ClientValidationException(errorList.getErrors());
-		}
-	}
-
-	private HttpEntity<OfficeCommand> createOfficeRequest(
-			final OfficeCommand command) {
-
-		HttpHeaders requestHeaders = new HttpHeaders();
-		requestHeaders.set("Accept", "application/xml");
-		requestHeaders.set("Content-Type", "application/xml");
-
-		HttpEntity<OfficeCommand> requestEntity = new HttpEntity<OfficeCommand>(
-				command, requestHeaders);
-		return requestEntity;
-	}
-
-	private HttpEntity<OfficeCommand> updateOfficeRequest(
-			final OfficeCommand command) {
-
-		HttpHeaders requestHeaders = new HttpHeaders();
-		requestHeaders.set("Accept", "application/xml");
-		requestHeaders.set("Content-Type", "application/xml");
-
-		HttpEntity<OfficeCommand> requestEntity = new HttpEntity<OfficeCommand>(
-				command, requestHeaders);
-		return requestEntity;
 	}
 
 	@Override

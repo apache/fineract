@@ -17,15 +17,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class OfficePlatformServiceJpaRepositoryImpl implements OfficeWritePlatformService {
+public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWritePlatformService {
 
-	private final static Logger logger = LoggerFactory.getLogger(OfficePlatformServiceJpaRepositoryImpl.class);
+	private final static Logger logger = LoggerFactory.getLogger(OfficeWritePlatformServiceJpaRepositoryImpl.class);
 	
 	private final PlatformSecurityContext context;
 	private final OfficeRepository officeRepository;
 
 	@Autowired
-	public OfficePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final OfficeRepository officeRepository) {
+	public OfficeWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final OfficeRepository officeRepository) {
 		this.context = context;
 		this.officeRepository = officeRepository;
 	}
@@ -37,7 +37,7 @@ public class OfficePlatformServiceJpaRepositoryImpl implements OfficeWritePlatfo
 		try {
 			AppUser currentUser = context.authenticatedUser();
 			
-			OfficeCommandValidator validator = new OfficeCommandValidator(command.getName(), command.getParentId(), command.getOpeningDate(), command.getExternalId());
+			OfficeCommandValidator validator = new OfficeCommandValidator(command);
 			validator.validate();
 			
 			Office parent = validateUserPriviledgeOnOfficeAndRetrieve(currentUser, command.getParentId());
@@ -65,12 +65,17 @@ public class OfficePlatformServiceJpaRepositoryImpl implements OfficeWritePlatfo
 		try {
 			AppUser currentUser = context.authenticatedUser();
 			
-			OfficeCommandValidator validator = new OfficeCommandValidator(command.getName(), command.getParentId(), command.getOpeningDate(), command.getExternalId());
+			OfficeCommandValidator validator = new OfficeCommandValidator(command);
 			validator.validate();
 			
 			Office office = validateUserPriviledgeOnOfficeAndRetrieve(currentUser, command.getId());
 			
 			office.update(command.getName(), command.getExternalId(), command.getOpeningDate());
+			
+			if (!command.isRootOffice()) {
+				Office parent = validateUserPriviledgeOnOfficeAndRetrieve(currentUser, command.getParentId());
+				office.update(parent);
+			}
 	
 			this.officeRepository.save(office);
 	

@@ -32,5 +32,4 @@ public class ConfigurationData implements Serializable {
 	public void setCurrencyOptions(List<CurrencyData> currencyOptions) {
 		this.currencyOptions = currencyOptions;
 	}
-
 }

@@ -2,7 +2,6 @@ package org.mifosng.platform.api.loanproduct;
 
 import java.util.Collection;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -10,7 +9,6 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -74,13 +72,11 @@ public class LoanProductApiResource {
 	@POST
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Produces({ MediaType.APPLICATION_JSON})
-	public Response createLoanProduct(@Context HttpServletRequest request) {
+	public Response createLoanProduct(LoanProductCommand command) {
 
 		hardcodeUserIntoSecurityContext();
 		
-		// TODO - FIX mapping to command object on post and also fix error handling of this when it fails.
-		EntityIdentifier entityIdentifier = new EntityIdentifier(Long.valueOf(-1));
-//				this.loanProductWritePlatformService.createLoanProduct(command);
+		EntityIdentifier entityIdentifier = this.loanProductWritePlatformService.createLoanProduct(command);
 
 		return Response.ok().entity(entityIdentifier).build();
 	}

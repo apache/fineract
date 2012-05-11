@@ -38,7 +38,7 @@ public class Office extends AbstractAuditableCustom<AppUser, Long> {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
-    private final Office       parent;
+    private Office       parent;
 
     @Column(name = "name", nullable = false, length=100)
 	private String name;
@@ -107,6 +107,10 @@ public class Office extends AbstractAuditableCustom<AppUser, Long> {
 		this.name = newNname;
 		this.externalId = newExternalId;
 		this.openingDate = newOpeningDate.toDateMidnight().toDate();
+	}
+
+	public void update(Office newParent) {
+		this.parent = newParent;
 	}
 
 	public boolean identifiedBy(String identifier) {

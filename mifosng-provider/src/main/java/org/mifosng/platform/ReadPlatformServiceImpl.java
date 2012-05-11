@@ -5,14 +5,12 @@ import static org.mifosng.platform.Specifications.loanTransactionsThatMatch;
 import static org.mifosng.platform.Specifications.loansThatMatch;
 import static org.mifosng.platform.Specifications.usersThatMatch;
 
-import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -53,12 +51,11 @@ import org.mifosng.platform.currency.domain.ApplicationCurrencyRepository;
 import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.exceptions.PlatformResourceNotFoundException;
 import org.mifosng.platform.exceptions.UnAuthenticatedUserException;
-import org.mifosng.platform.loan.domain.AmortizationMethod;
 import org.mifosng.platform.loan.domain.Loan;
 import org.mifosng.platform.loan.domain.LoanRepository;
 import org.mifosng.platform.loan.domain.LoanTransaction;
 import org.mifosng.platform.loan.domain.LoanTransactionRepository;
-import org.mifosng.platform.loan.domain.PeriodFrequencyType;
+import org.mifosng.platform.loanproduct.service.LoanProductReadPlatformService;
 import org.mifosng.platform.organisation.domain.Organisation;
 import org.mifosng.platform.user.domain.AppUser;
 import org.mifosng.platform.user.domain.AppUserRepository;
@@ -91,14 +88,18 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 	private final AppUserRepository appUserRepository;
 	private final RoleRepository roleRepository;
 
+	private final LoanProductReadPlatformService loanProductReadPlatformService;
+
 	@Autowired
-	public ReadPlatformServiceImpl(final DataSource dataSource,
+	public ReadPlatformServiceImpl(final LoanProductReadPlatformService loanProductReadPlatformService, 
+			final DataSource dataSource,
 			final ClientRepository clientRepository,
 			final LoanRepository loanRepository,
 			final LoanTransactionRepository loanTransactionRepository,
 			final ApplicationCurrencyRepository applicationCurrencyRepository,
 			final AppUserRepository appUserRepository,
 			final RoleRepository roleRepository) {
+		this.loanProductReadPlatformService = loanProductReadPlatformService;
 		this.loanTransactionRepository = loanTransactionRepository;
 		this.applicationCurrencyRepository = applicationCurrencyRepository;
 		this.appUserRepository = appUserRepository;
@@ -361,47 +362,6 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 	}
 
 	@Override
-	public Collection<OfficeData> retrieveAllOffices() {
-
-		return retrieveOffices();
-	}
-
-	@Override
-	public OfficeData retrieveOffice(final Long officeId) {
-
-		try {
-			AppUser currentUser = extractAuthenticatedUser();
-
-			OfficeMapper rm = new OfficeMapper();
-			String sql = "select " + rm.officeSchema()
-					+ " where o.org_id = ? and o.id = ?";
-
-			OfficeData selectedOffice = this.jdbcTemplate.queryForObject(sql,
-					rm, new Object[] { currentUser.getOrganisation().getId(),
-							officeId });
-
-			List<OfficeData> allowedParents = new ArrayList<OfficeData>();
-
-			if (StringUtils.isNotBlank(selectedOffice.getParentName())) {
-				Collection<OfficeData> allOffices = retrieveAllOffices();
-
-				for (OfficeData office : allOffices) {
-
-					if (!office.getId().equals(selectedOffice.getId())) {
-						allowedParents.add(office);
-					}
-				}
-			}
-
-			selectedOffice.setAllowedParents(allowedParents);
-
-			return selectedOffice;
-		} catch (EmptyResultDataAccessException e) {
-			throw new PlatformResourceNotFoundException("error.msg.office.id.invalid", "Office with identifier {0} does not exist", officeId);
-		}
-	}
-
-	@Override
 	public ClientData retrieveIndividualClient(final Long clientId) {
 
 		try {
@@ -571,12 +531,12 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 		workflowData.setOrganisationName(currentUser.getOrganisation()
 				.getName());
 
-		Collection<LoanProductData> loanProducts = retrieveAllLoanProducts();
+		Collection<LoanProductData> loanProducts = this.loanProductReadPlatformService.retrieveAllLoanProducts();
 		workflowData.setAllowedProducts(new ArrayList<LoanProductData>(
 				loanProducts));
 
 		if (loanProducts.size() == 1) {
-			LoanProductData selectedProduct = retrieveLoanProduct(workflowData.getAllowedProducts().get(0).getId());
+			LoanProductData selectedProduct = this.loanProductReadPlatformService.retrieveLoanProduct(workflowData.getAllowedProducts().get(0).getId());
 			
 			workflowData.setProductId(selectedProduct.getId());
 			workflowData.setProductName(selectedProduct.getName());
@@ -597,10 +557,10 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 	}
 	
 	private LoanProductData findLoanProductById(Collection<LoanProductData> loanProducts, Long productId) {
-		LoanProductData match = retrieveNewLoanProductDetails();
+		LoanProductData match = this.loanProductReadPlatformService.retrieveNewLoanProductDetails();
 		for (LoanProductData loanProductData : loanProducts) {
 			if (loanProductData.getId().equals(productId)) {
-				match = retrieveLoanProduct(loanProductData.getId());
+				match = this.loanProductReadPlatformService.retrieveLoanProduct(loanProductData.getId());
 				break;
 			}
 		}
@@ -708,165 +668,6 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 	}
 
 	@Override
-	public Collection<LoanProductData> retrieveAllLoanProducts() {
-
-		AppUser currentUser = extractAuthenticatedUser();
-
-		List<CurrencyData> allowedCurrencies = retrieveAllowedCurrencies();
-		
-		LoanProductMapper rm = new LoanProductMapper(allowedCurrencies);
-
-		String sql = "select " + rm.loanProductSchema()
-				+ " where lp.org_id = ?";
-
-		return this.jdbcTemplate.query(sql, rm, new Object[] { currentUser
-				.getOrganisation().getId() });
-	}
-
-	protected static final class LoanProductMapper implements
-			RowMapper<LoanProductData> {
-
-		private final List<CurrencyData> allowedCurrencies;
-
-		public LoanProductMapper(List<CurrencyData> allowedCurrencies) {
-			this.allowedCurrencies = allowedCurrencies;
-		}
-
-		public String loanProductSchema() {
-			return "lp.id as id, lp.name as name, lp.description as description, lp.flexible_repayment_schedule as isFlexible, lp.interest_rebate as isInterestRebateAllowed, "
-					+ "lp.principal_amount as principal, lp.currency_code as currencyCode, lp.currency_digits as currencyDigits, "
-					+ "lp.nominal_interest_rate_per_period as interestRatePerPeriod, lp.interest_period_frequency_enum as interestRatePerPeriodFreq, "
-					+ "lp.annual_nominal_interest_rate as annualInterestRate, lp.interest_method_enum as interestMethod, lp.interest_calculated_in_period_enum as interestCalculationInPeriodMethod,"
-					+ "lp.repay_every as repaidEvery, lp.repayment_period_frequency_enum as repaymentPeriodFrequency, lp.number_of_repayments as numberOfRepayments, "
-					+ "lp.amortization_method_enum as amortizationMethod, lp.arrearstolerance_amount as tolerance, "
-					+ "lp.created_date as createdon, lp.lastmodified_date as modifiedon "
-					+ " from portfolio_product_loan lp";
-		}
-
-		@Override
-		public LoanProductData mapRow(final ResultSet rs, final int rowNum)
-				throws SQLException {
-
-			Long id = rs.getLong("id");
-			String name = rs.getString("name");
-			String description = rs.getString("description");
-			boolean isFlexible = rs.getBoolean("isFlexible");
-			boolean isInterestRebateAllowed = rs
-					.getBoolean("isInterestRebateAllowed");
-
-			String currencyCode = rs.getString("currencyCode");
-			int currencyDigits = rs.getInt("currencyDigits");
-			
-			CurrencyData currencyData = findCurrencyByCode(currencyCode, allowedCurrencies);
-			currencyData.setDecimalPlaces(currencyDigits);
-
-			BigDecimal principal = rs.getBigDecimal("principal");
-			BigDecimal tolerance = rs.getBigDecimal("tolerance");
-			
-			MoneyData principalMoney = MoneyData.of(currencyData, principal);
-			MoneyData toleranceMoney = MoneyData.of(currencyData, tolerance);
-
-
-			BigDecimal interestRatePerPeriod = rs
-					.getBigDecimal("interestRatePerPeriod");
-			int interestRatePeriod = rs.getInt("interestRatePerPeriodFreq");
-			BigDecimal annualInterestRate = rs
-					.getBigDecimal("annualInterestRate");
-			int interestMethod = rs.getInt("interestMethod");
-			int interestCalculationInPeriodMethod = rs.getInt("interestCalculationInPeriodMethod");
-
-			int repaidEvery = rs.getInt("repaidEvery");
-			int repaymentFrequency = rs.getInt("repaymentPeriodFrequency");
-			int numberOfRepayments = rs.getInt("numberOfRepayments");
-			int amortizationMethod = rs.getInt("amortizationMethod");
-
-			DateTime createdOn = new DateTime(rs.getDate("createdOn"));
-			DateTime lastModifedOn = new DateTime(rs.getDate("modifiedon"));
-
-			return new LoanProductData(id, name, description, isFlexible,
-					isInterestRebateAllowed, principalMoney,
-					interestRatePerPeriod, interestRatePeriod,
-					annualInterestRate, interestMethod, interestCalculationInPeriodMethod,
-					repaidEvery,
-					repaymentFrequency, numberOfRepayments, amortizationMethod,
-					toleranceMoney, createdOn, lastModifedOn);
-		}
-
-		private CurrencyData findCurrencyByCode(String currencyCode, List<CurrencyData> allowedCurrencies) {
-			CurrencyData match = null;
-			for (CurrencyData currencyData : allowedCurrencies) {
-				if (currencyData.getCode().equalsIgnoreCase(currencyCode)) {
-					match = currencyData;
-					break;
-				}
-			}			
-			return match;
-		}
-	}
-
-	@Override
-	public LoanProductData retrieveLoanProduct(final Long loanProductId) {
-
-		// TODO - switch back to retrieve all allowed organisation currencies
-		List<CurrencyData> allowedCurrencies = retrieveAllPlatformCurrencies();
-		
-		LoanProductMapper rm = new LoanProductMapper(allowedCurrencies);
-		String sql = "select " + rm.loanProductSchema() + " where lp.id = ?";
-
-		LoanProductData productData = this.jdbcTemplate.queryForObject(sql, rm,
-				new Object[] { loanProductId });
-
-		populateProductDataWithDropdownOptions(productData);
-
-		return productData;
-	}
-
-	private void populateProductDataWithDropdownOptions(
-			LoanProductData productData) {
-
-		List<CurrencyData> possibleCurrencies = retrieveAllowedCurrencies();
-
-		List<EnumOptionReadModel> possibleAmortizationOptions = retrieveLoanAmortizationMethodOptions();
-		List<EnumOptionReadModel> possibleInterestOptions = retrieveLoanInterestMethodOptions();
-		List<EnumOptionReadModel> possibleInterestRateCalculatedInPeriodOptions = retrieveLoanInterestRateCalculatedInPeriodOptions();
-		List<EnumOptionReadModel> repaymentFrequencyOptions = retrieveRepaymentFrequencyOptions();
-		List<EnumOptionReadModel> interestFrequencyOptions = retrieveInterestFrequencyOptions();
-
-		productData.setPossibleCurrencies(possibleCurrencies);
-		productData.setPossibleAmortizationOptions(possibleAmortizationOptions);
-		productData.setPossibleInterestOptions(possibleInterestOptions);
-		productData.setPossibleInterestRateCalculatedInPeriodOptions(possibleInterestRateCalculatedInPeriodOptions);
-		productData.setRepaymentFrequencyOptions(repaymentFrequencyOptions);
-		productData.setInterestFrequencyOptions(interestFrequencyOptions);
-	}
-
-	@Override
-	public LoanProductData retrieveNewLoanProductDetails() {
-
-		LoanProductData productData = new LoanProductData();
-
-		populateProductDataWithDropdownOptions(productData);
-
-		if (productData.getPossibleCurrencies().size() >= 1) {
-			CurrencyData currency = productData.getPossibleCurrencies().get(0);
-			MoneyData zero = MoneyData.zero(currency);
-			productData.setPrincipalMoney(zero);
-			productData.setInArrearsTolerance(zero);
-		}
-
-		productData.setAmortizationMethod(Integer.valueOf(1));
-		productData.setInterestMethod(Integer.valueOf(0));
-		productData.setRepaymentPeriodFrequency(2);
-		productData.setInterestRatePeriod(2);
-		productData.setInterestRateCalculatedInPeriod(1);
-
-		productData.setRepaidEvery(1);
-		productData.setNumberOfRepayments(0);
-
-		return productData;
-	}
-
-	@Override
 	public List<CurrencyData> retrieveAllowedCurrencies() {
 
 		AppUser currentUser = extractAuthenticatedUser();
@@ -906,71 +707,7 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 					nameCode);
 		}
 	}
-
-	@Override
-	public List<EnumOptionReadModel> retrieveLoanAmortizationMethodOptions() {
-		EnumOptionReadModel equalInstallments = new EnumOptionReadModel(
-				"Equal installments", AmortizationMethod.EQUAL_INSTALLMENTS
-						.getValue().longValue());
-		EnumOptionReadModel equalPrinciplePayments = new EnumOptionReadModel(
-				"Equal principle payments", AmortizationMethod.EQUAL_PRINCIPAL
-						.getValue().longValue());
-
-		List<EnumOptionReadModel> allowedAmortizationMethods = Arrays.asList(
-				equalInstallments, equalPrinciplePayments);
-
-		return allowedAmortizationMethods;
-	}
-
-	@Override
-	public List<EnumOptionReadModel> retrieveLoanInterestMethodOptions() {
-		EnumOptionReadModel interestRateCalculationMethod2 = new EnumOptionReadModel(
-				"Declining Balance", Long.valueOf(0));
-		EnumOptionReadModel interestRateCalculationMethod1 = new EnumOptionReadModel(
-				"Flat", Long.valueOf(1));
-
-		List<EnumOptionReadModel> allowedRepaymentScheduleCalculationMethods = Arrays
-				.asList(interestRateCalculationMethod2,
-						interestRateCalculationMethod1);
-
-		return allowedRepaymentScheduleCalculationMethods;
-	}
 	
-	@Override
-	public List<EnumOptionReadModel> retrieveLoanInterestRateCalculatedInPeriodOptions() {
-		
-		EnumOptionReadModel option1 = new EnumOptionReadModel("Daily", Long.valueOf(0));
-		EnumOptionReadModel option2 = new EnumOptionReadModel("Same as repayment period", Long.valueOf(1));
-
-		List<EnumOptionReadModel> allowedOptions = Arrays.asList(option1,option2);
-
-		return allowedOptions;
-	}
-	
-	@Override
-	public List<EnumOptionReadModel> retrieveRepaymentFrequencyOptions() {
-		EnumOptionReadModel frequency1 = new EnumOptionReadModel("Days",
-				Long.valueOf(0));
-		EnumOptionReadModel frequency2 = new EnumOptionReadModel("Weeks",
-				Long.valueOf(1));
-		EnumOptionReadModel frequency3 = new EnumOptionReadModel("Months",
-				Long.valueOf(2));
-		List<EnumOptionReadModel> repaymentFrequencyOptions = Arrays.asList(
-				frequency1, frequency2, frequency3);
-		return repaymentFrequencyOptions;
-	}
-
-	@Override
-	public List<EnumOptionReadModel> retrieveInterestFrequencyOptions() {
-		// support for monthly and annual percentage rate (MPR) and (APR)
-		EnumOptionReadModel perMonth = new EnumOptionReadModel("Per month",
-				PeriodFrequencyType.MONTHS.getValue().longValue());
-		EnumOptionReadModel perYear = new EnumOptionReadModel("Per year",
-				PeriodFrequencyType.YEARS.getValue().longValue());
-		List<EnumOptionReadModel> repaymentFrequencyOptions = Arrays.asList(perMonth, perYear);
-		return repaymentFrequencyOptions;
-	}
-
 	@Override
 	public Collection<AppUserData> retrieveAllUsers() {
 

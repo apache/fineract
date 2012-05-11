@@ -2,7 +2,6 @@ package org.mifosng.platform;
 
 import static org.mifosng.platform.Specifications.loansThatMatch;
 import static org.mifosng.platform.Specifications.officesThatMatch;
-import static org.mifosng.platform.Specifications.productThatMatches;
 import static org.mifosng.platform.Specifications.rolesThatMatch;
 import static org.mifosng.platform.Specifications.usersThatMatch;
 
@@ -25,32 +24,26 @@ import org.mifosng.data.command.AdjustLoanTransactionCommand;
 import org.mifosng.data.command.CalculateLoanScheduleCommand;
 import org.mifosng.data.command.ChangePasswordCommand;
 import org.mifosng.data.command.EnrollClientCommand;
-import org.mifosng.data.command.LoanProductCommand;
 import org.mifosng.data.command.LoanStateTransitionCommand;
 import org.mifosng.data.command.LoanTransactionCommand;
 import org.mifosng.data.command.NoteCommand;
-import org.mifosng.data.command.OfficeCommand;
 import org.mifosng.data.command.RoleCommand;
 import org.mifosng.data.command.SignupCommand;
 import org.mifosng.data.command.SubmitLoanApplicationCommand;
 import org.mifosng.data.command.UndoLoanApprovalCommand;
 import org.mifosng.data.command.UndoLoanDisbursalCommand;
-import org.mifosng.data.command.UpdateOrganisationCurrencyCommand;
 import org.mifosng.data.command.UpdateUsernamePasswordCommand;
 import org.mifosng.data.command.UserCommand;
 import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.client.domain.ClientRepository;
 import org.mifosng.platform.client.domain.Note;
 import org.mifosng.platform.client.domain.NoteRepository;
-import org.mifosng.platform.currency.domain.ApplicationCurrency;
-import org.mifosng.platform.currency.domain.ApplicationCurrencyRepository;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.exceptions.ApplicationDomainRuleException;
 import org.mifosng.platform.exceptions.InvalidSignupException;
 import org.mifosng.platform.exceptions.NewDataValidationException;
 import org.mifosng.platform.exceptions.NoAuthorizationException;
-import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
 import org.mifosng.platform.exceptions.UnAuthenticatedUserException;
 import org.mifosng.platform.infrastructure.BasicPasswordEncodablePlatformUser;
 import org.mifosng.platform.infrastructure.PlatformPasswordEncoder;
@@ -73,13 +66,11 @@ import org.mifosng.platform.loan.domain.LoanStatusRepository;
 import org.mifosng.platform.loan.domain.LoanTransaction;
 import org.mifosng.platform.loan.domain.LoanTransactionRepository;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
-import org.mifosng.platform.loanproduct.service.LoanProductCommandValidator;
 import org.mifosng.platform.organisation.domain.Office;
 import org.mifosng.platform.organisation.domain.OfficeRepository;
 import org.mifosng.platform.organisation.domain.Organisation;
 import org.mifosng.platform.organisation.domain.OrganisationCurrency;
 import org.mifosng.platform.organisation.domain.OrganisationRepository;
-import org.mifosng.platform.organisation.service.OfficeCommandValidator;
 import org.mifosng.platform.user.domain.AppUser;
 import org.mifosng.platform.user.domain.AppUserRepository;
 import org.mifosng.platform.user.domain.Permission;
@@ -88,8 +79,6 @@ import org.mifosng.platform.user.domain.PlatformUserRepository;
 import org.mifosng.platform.user.domain.Role;
 import org.mifosng.platform.user.domain.RoleRepository;
 import org.mifosng.platform.user.domain.UserDomainService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.Authentication;
@@ -99,19 +88,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class WritePlatformServiceJpaRepositoryImpl implements
-		WritePlatformService {
+public class WritePlatformServiceJpaRepositoryImpl implements WritePlatformService {
 
-	private final static Logger logger = LoggerFactory
-			.getLogger(WritePlatformServiceJpaRepositoryImpl.class);
-	
 	private final OrganisationRepository organisationRepository;
 	private final OfficeRepository officeRepository;
 	private final UserDomainService userDomainService;
 	private final PlatformUserRepository platformUserRepository;
 	private final PlatformPasswordEncoder platformPasswordEncoder;
 	private final ClientRepository clientRepository;
-	private final ApplicationCurrencyRepository applicationCurrencyRepository;
 	private final LoanProductRepository loanProductRepository;
 	private final LoanRepository loanRepository;
 	private final LoanStatusRepository loanStatusRepository;
@@ -131,7 +115,6 @@ public class WritePlatformServiceJpaRepositoryImpl implements
 			final PlatformPasswordEncoder platformPasswordEncoder,
 			final ClientRepository clientRepository,
 			final NoteRepository noteRepository,
-			final ApplicationCurrencyRepository applicationCurrencyRepository,
 			final LoanProductRepository loanProductRepository,
 			final LoanRepository loanRepository,
 			final LoanTransactionRepository loanTransactionRepository,
@@ -147,7 +130,6 @@ public class WritePlatformServiceJpaRepositoryImpl implements
 		this.platformPasswordEncoder = platformPasswordEncoder;
 		this.clientRepository = clientRepository;
 		this.noteRepository = noteRepository;
-		this.applicationCurrencyRepository = applicationCurrencyRepository;
 		this.loanProductRepository = loanProductRepository;
 		this.loanRepository = loanRepository;
 		this.loanTransactionRepository = loanTransactionRepository;
@@ -332,94 +314,6 @@ public class WritePlatformServiceJpaRepositoryImpl implements
 
 	@Transactional
 	@Override
-	public Long createOffice(final OfficeCommand command) {
-		
-		try {
-			AppUser currentUser = extractAuthenticatedUser();
-			
-			OfficeCommandValidator validator = new OfficeCommandValidator(command.getName(), command.getParentId(), command.getOpeningDate(), command.getExternalId());
-			validator.validate();
-			
-			Office parent = validateUserPriviledgeOnOfficeAndRetrieve(currentUser, command.getParentId());
-	
-			Office office = Office.createNew(currentUser.getOrganisation(), parent, command.getName(), command.getOpeningDate(), command.getExternalId());
-			
-			// pre save to generate id for use in office hierarchy
-			this.officeRepository.save(office);
-			
-			office.generateHierarchy();
-			
-			this.officeRepository.save(office);
-			
-			return office.getId();
-		} catch (DataIntegrityViolationException dve) {
-			 handleOfficeDataIntegrityIssues(command, dve);
-			 return Long.valueOf(-1);
-		}
-	}
-
-	@Transactional
-	@Override
-	public Long updateOffice(final OfficeCommand command) {
-
-		try {
-			AppUser currentUser = extractAuthenticatedUser();
-			
-			OfficeCommandValidator validator = new OfficeCommandValidator(command.getName(), command.getParentId(), command.getOpeningDate(), command.getExternalId());
-			validator.validate();
-			
-			Office office = validateUserPriviledgeOnOfficeAndRetrieve(currentUser, command.getId());
-			
-			office.update(command.getName(), command.getExternalId(), command.getOpeningDate());
-	
-			this.officeRepository.save(office);
-	
-			return office.getId();
-		} catch (DataIntegrityViolationException dve) {
-			handleOfficeDataIntegrityIssues(command, dve);
-			return Long.valueOf(-1);
-		}
-	}
-
-	/*
-	 * Guaranteed to throw an exception no matter what the data integrity issue is.
-	 */
-	private void handleOfficeDataIntegrityIssues(final OfficeCommand command, DataIntegrityViolationException dve)  {
-		
-		Throwable realCause = dve.getMostSpecificCause();
-		if (realCause.getMessage().contains("externalid_org")) {
-			throw new PlatformDataIntegrityException("error.msg.office.duplicate.externalId", "Office with externalId {0} already exists", "externalId", command.getExternalId());
-		} else if (realCause.getMessage().contains("name_org")) {
-			throw new PlatformDataIntegrityException("error.msg.office.duplicate.name", "Office with name {0} already exists", "name", command.getName());
-		} 
-		
-		logger.error(dve.getMessage(), dve);
-		throw new PlatformDataIntegrityException("error.msg.office.unknown.data.integrity.issue", "Unknown data integrity issue with resource.");
-	}
-
-	/*
-	 * used to restrict modifying operations to office that are either the users office or lower (child) in the office hierarchy
-	 */
-	private Office validateUserPriviledgeOnOfficeAndRetrieve(AppUser currentUser, Long officeId) {
-		
-		Office userOffice = this.officeRepository.findOne(officesThatMatch(currentUser.getOrganisation(), currentUser.getOffice().getId()));
-		
-		if (userOffice.doesNotHaveAnOfficeInHierarchyWithId(officeId)) {
-			ErrorResponse error = new ErrorResponse("error.msg.office.not.authorized", "id", officeId.toString());
-			
-			throw new ApplicationDomainRuleException(Arrays.asList(error), "Errors exist.");
-		}
-		
-		Office officeToReturn = userOffice;
-		if (!userOffice.identifiedBy(officeId)) {
-			officeToReturn = this.officeRepository.findOne(officesThatMatch(currentUser.getOrganisation(), officeId));
-		}
-		
-		return officeToReturn;
-	}
-
-	@Transactional
-	@Override
 	public Long signup(final SignupCommand command) {
 
 		try {
@@ -440,75 +334,6 @@ public class WritePlatformServiceJpaRepositoryImpl implements
 		} catch (DataIntegrityViolationException e) {
 			throw new InvalidSignupException(e);
 		}
-	}
-
-	@Transactional
-	@Override
-	public EntityIdentifier createLoanProduct(final LoanProductCommand command) {
-
-		AppUser currentUser = extractAuthenticatedUser();
-		
-		LoanProductCommandValidator validator = new LoanProductCommandValidator();
-		validator.validateForCreate(command);
-
-		// assemble LoanProduct from data
-		InterestMethod interestMethod = InterestMethod.fromInt(command.getInterestMethod());
-		InterestCalculationPeriodMethod interestCalculationPeriodMethod = InterestCalculationPeriodMethod.fromInt(command.getInterestCalculationPeriodMethod());
-		
-		AmortizationMethod amortizationMethod = AmortizationMethod.fromInt(command.getAmortizationMethod());
-
-		PeriodFrequencyType repaymentFrequencyType = PeriodFrequencyType
-				.fromInt(command.getRepaymentFrequency());
-		
-		PeriodFrequencyType interestFrequencyType = PeriodFrequencyType
-				.fromInt(command.getInterestRateFrequencyMethod());
-
-		MonetaryCurrency currency = new MonetaryCurrency(command.getCurrencyCode(), command.getDigitsAfterDecimal());
-
-		// apr calculator
-		BigDecimal annualInterestRate = BigDecimal.ZERO;
-		switch (interestFrequencyType) {
-		case DAYS:
-			break;
-		case WEEKS:
-			annualInterestRate = command.getInterestRatePerPeriod().multiply(BigDecimal.valueOf(52));
-			break;
-		case MONTHS:
-			annualInterestRate = command.getInterestRatePerPeriod().multiply(BigDecimal.valueOf(12));
-			break;
-		case YEARS:
-			annualInterestRate = command.getInterestRatePerPeriod().multiply(BigDecimal.valueOf(1));
-			break;
-		case INVALID:
-			break;
-		}
-		
-		LoanProduct loanproduct = new LoanProduct(currentUser.getOrganisation(), command.getName(), command.getDescription(), 
-				currency, command.getPrincipal(), 
-				command.getInterestRatePerPeriod(), interestFrequencyType, annualInterestRate, interestMethod, interestCalculationPeriodMethod,
-				command.getRepaymentEvery(), repaymentFrequencyType, command.getNumberOfRepayments(), amortizationMethod, command.getInArrearsToleranceAmount(),
-				command.isFlexibleRepaymentSchedule(), command.isInterestRebateAllowed());
-		 
-		this.loanProductRepository.save(loanproduct);
-
-		return new EntityIdentifier(loanproduct.getId());
-	}
-	
-	@Transactional
-	@Override
-	public EntityIdentifier updateLoanProduct(LoanProductCommand command) {
-		
-		AppUser currentUser = extractAuthenticatedUser();
-		
-		LoanProductCommandValidator validator = new LoanProductCommandValidator();
-		validator.validateForUpdate(command);
-		
-		LoanProduct product = this.loanProductRepository.findOne(productThatMatches(currentUser.getOrganisation(), command.getId()));
-		product.update(command);
-		
-		this.loanProductRepository.save(product);
-		
-		return new EntityIdentifier(Long.valueOf(product.getId()));
 	}
 	
 	@Transactional
@@ -565,35 +390,6 @@ public class WritePlatformServiceJpaRepositoryImpl implements
 		return newClient.getId();
 	}
 	
-	@Transactional
-	@Override
-	public void updateOrganisationCurrencies(final UpdateOrganisationCurrencyCommand command) {
-		
-		AppUser currentUser = extractAuthenticatedUser();
-		
-		if (command.getCodes().isEmpty()) {
-			List<ErrorResponse> dataValidationErrors = Arrays.asList(new ErrorResponse("validation.msg.organisation.allowed.currencies.cannot.be.blank", "selectedItems"));
-			throw new NewDataValidationException(dataValidationErrors, "Data validation errors exist.");
-		}
-
-		Set<OrganisationCurrency> allowedCurrencies = new HashSet<OrganisationCurrency>();
-
-		for (String currencyCode : command.getCodes()) {
-
-			ApplicationCurrency currency = this.applicationCurrencyRepository.findOneByCode(currencyCode);
-
-			OrganisationCurrency allowedCurrency = new OrganisationCurrency(
-					currency.getCode(), currency.getName(),
-					currency.getDecimalPlaces(), currency.getNameCode(), currency.getDisplaySymbol());
-
-			allowedCurrencies.add(allowedCurrency);
-		}
-
-		Organisation org = currentUser.getOrganisation();
-		org.setAllowedCurrencies(allowedCurrencies);
-		this.organisationRepository.save(org);
-	}
-
 	private AppUser extractAuthenticatedUser() {
 		AppUser currentUser = null;
 		SecurityContext context = SecurityContextHolder.getContext();

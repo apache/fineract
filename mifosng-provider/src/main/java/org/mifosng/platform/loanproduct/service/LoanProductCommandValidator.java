@@ -6,7 +6,6 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.mifosng.data.ApiParameterError;
 import org.mifosng.data.command.LoanProductCommand;
-import org.mifosng.data.command.LoanProductCommandData;
 import org.mifosng.platform.exceptions.PlatformApiDataValidationException;
 import org.mifosng.platform.loan.domain.AmortizationMethod;
 import org.mifosng.platform.loan.domain.InterestMethod;
@@ -33,7 +32,7 @@ public class LoanProductCommandValidator {
 		validateRemainingAttributes(command, dataValidationErrors);
 	}
 	
-	private void validateRemainingAttributes(LoanProductCommandData command, List<ApiParameterError> dataValidationErrors) {
+	private void validateRemainingAttributes(LoanProductCommand command, List<ApiParameterError> dataValidationErrors) {
 		
 		if (StringUtils.isBlank(command.getName())) {
 			ApiParameterError error = ApiParameterError.parameterError("validation.msg.product.name.cannot.be.blank", "The parameter name cannot be blank.", "name");
