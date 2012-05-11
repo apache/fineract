@@ -1,15 +1,10 @@
 package org.mifosng.platform.api;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import javax.servlet.ServletInputStream;
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -33,7 +28,7 @@ import org.mifosng.data.ErrorResponseList;
 import org.mifosng.data.ExtraDatasets;
 import org.mifosng.data.reports.GenericResultset;
 import org.mifosng.platform.InvalidSqlException;
-import org.mifosng.platform.ReadPlatformService;
+import org.mifosng.platform.ReadExtraDataAndReportingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,18 +42,7 @@ public class ExtraDataApiResource {
 	private final static Logger logger = LoggerFactory.getLogger(ExtraDataApiResource.class);
 	
 	@Autowired
-	private ReadPlatformService readPlatformService;
-
-//	@GET
-//	@Path("{dataSetPrefix}")
-//	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-//	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-//	public Response extraDataNames(@PathParam("dataSetPrefix") final String dataSetPrefix) {
-//		
-//		List<String> result = this.readPlatformService.retrieveExtraDataTableNames(dataSetPrefix);
-//		
-//		return Response.ok().entity(result).build();
-//	}
+	private ReadExtraDataAndReportingService readExtraDataAndReportingService;
 
 	@GET
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
@@ -68,7 +52,7 @@ public class ExtraDataApiResource {
 		MultivaluedMap<String, String> queryParams = uriInfo.getQueryParameters();
 		String type = queryParams.getFirst("type"); 
 
-		ExtraDatasets result = this.readPlatformService.retrieveExtraDatasetNames(type);
+		ExtraDatasets result = this.readExtraDataAndReportingService.retrieveExtraDatasetNames(type);
 		return Response.ok().entity(result).build();
 	}
 	
@@ -79,7 +63,7 @@ public class ExtraDataApiResource {
 	public Response extraData(@PathParam("datasetType") final String datasetType,@PathParam("datasetName") final String datasetName, @PathParam("datasetPKValue") final String datasetPKValue, @Context UriInfo uriInfo) {
 		
 		try {
-			GenericResultset result = this.readPlatformService.retrieveExtraData(datasetType, datasetName, datasetPKValue);
+			GenericResultset result = this.readExtraDataAndReportingService.retrieveExtraData(datasetType, datasetName, datasetPKValue);
 		
 			return Response.ok().entity(result).build();
 		} catch (InvalidSqlException e) {
@@ -127,7 +111,7 @@ public class ExtraDataApiResource {
 			}
 			
 			
-			this.readPlatformService.tempSaveExtraData(datasetType, datasetName, datasetPKValue, queryParams);
+			this.readExtraDataAndReportingService.tempSaveExtraData(datasetType, datasetName, datasetPKValue, queryParams);
 			
 			EntityIdentifier entityIdentifier = new EntityIdentifier(Long.valueOf(datasetPKValue));
 		

@@ -9,7 +9,6 @@ import org.mifosng.data.ClientData;
 import org.mifosng.data.ClientDataWithAccountsData;
 import org.mifosng.data.CurrencyData;
 import org.mifosng.data.EnumOptionReadModel;
-import org.mifosng.data.ExtraDatasets;
 import org.mifosng.data.LoanAccountData;
 import org.mifosng.data.LoanProductData;
 import org.mifosng.data.LoanRepaymentData;
@@ -92,11 +91,4 @@ public interface ReadPlatformService {
 
 	NoteData retrieveClientNote(Long clientId, Long noteId);
 
-	ExtraDatasets retrieveExtraDatasetNames(String datasetType);
-
-	GenericResultset retrieveExtraData(String datasetType, String datasetName,
-			String datasetPKValue);
-
-	void tempSaveExtraData(String datasetType, String datasetName,
-			String datasetPKValue, Map<String, String> queryParams);
 }

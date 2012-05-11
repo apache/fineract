@@ -20,7 +20,6 @@ import org.mifosng.data.EnumOptionList;
 import org.mifosng.data.EnumOptionReadModel;
 import org.mifosng.data.ErrorResponse;
 import org.mifosng.data.ErrorResponseList;
-import org.mifosng.data.ExtraDatasets;
 import org.mifosng.data.LoanAccountData;
 import org.mifosng.data.LoanProductData;
 import org.mifosng.data.LoanProductList;
@@ -53,8 +52,6 @@ import org.mifosng.data.command.UpdateOrganisationCurrencyCommand;
 import org.mifosng.data.command.UserCommand;
 import org.mifosng.data.reports.GenericResultset;
 import org.mifosng.ui.loanproduct.ClientValidationException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -71,9 +68,6 @@ import com.thoughtworks.xstream.XStream;
 
 @Service(value="commonRestOperations")
 public class CommonRestOperationsImpl implements CommonRestOperations {
-
-	private final static Logger logger = LoggerFactory
-			.getLogger(CommonRestOperationsImpl.class);
 	
 	private OAuthRestTemplate oauthRestServiceTemplate;
 	private final ApplicationConfigurationService applicationConfigurationService;
@@ -1247,80 +1241,10 @@ public class CommonRestOperationsImpl implements CommonRestOperations {
 	}
 
 
-	@Override
-	public ExtraDatasets retrieveExtraDatasets(String datasetType) {
-		logger.info("In CommonRestOperationsImpl - retrieveExtraDatasets");
-		try {
-			URI restUri = URI.create(getBaseServerUrl().concat("api/protected/extradata/datasets/").concat(encodeURIComponent(datasetType)));
-
-			ResponseEntity<ExtraDatasets> s = this.oauthRestServiceTemplate
-					.exchange(restUri, HttpMethod.GET, emptyRequest(), ExtraDatasets.class);
-			return s.getBody();
-		} catch (HttpStatusCodeException e) {
-			logger.info(e.toString());
-			ErrorResponseList errorList = parseErrors(e);
-			throw new ClientValidationException(errorList.getErrors());
-		}
-	}
 	
 	
-	@Override
-	public GenericResultset retrieveExtraData(String datasetType, String datasetName,
-			String datasetPKValue) {
-		try {
-			URI restUri = URI.create(getBaseServerUrl().concat("api/protected/extradata/").concat(encodeURIComponent(datasetType)).concat("/").concat(encodeURIComponent(datasetName))
-					.concat("/").concat(encodeURIComponent(datasetPKValue))
-			);
-			
-			
-			ResponseEntity<GenericResultset> s = this.oauthRestServiceTemplate
-					.exchange(restUri, HttpMethod.GET, emptyRequest(),
-							GenericResultset.class);
-			
-			return s.getBody();
-		} catch (HttpStatusCodeException e) {
-			ErrorResponseList errorList = parseErrors(e);
-			throw new ClientValidationException(errorList.getErrors());
-		}
-	}
 
-	@SuppressWarnings("rawtypes")
-	@Override
-	public EntityIdentifier saveExtraData(String datasetType, String datasetName, String datasetPKValue, Map requestMap) {
-
-		String UrlString = getBaseServerUrl().concat("api/protected/extradata/").concat(encodeURIComponent(datasetType)).concat("/").concat(encodeURIComponent(datasetName))
-				.concat("/").concat(encodeURIComponent(datasetPKValue));
-
-		String value;
-		boolean firstParameter = true;
-		for (Object key : requestMap.keySet()) {
-			if (firstParameter) {
-				UrlString += "?";
-				firstParameter = false;
-			}
-			else {
-				UrlString += "&";				
-			}	
-			
-			String[] valueArray = (String[]) requestMap.get(key);
-			value = valueArray[0];
-			if (value == null || value.equals("")) {
-				value = "";
-			}
-			UrlString += encodeURIComponent(key.toString()) + "=" + encodeURIComponent(value);
-		}
-		logger.info("Url: " + UrlString);
-		
-		try {
-			URI restUri = URI.create(UrlString); 	
-			ResponseEntity<EntityIdentifier> s = this.oauthRestServiceTemplate.postForEntity(restUri, emptyRequest(), EntityIdentifier.class);
-			return s.getBody();
-		} catch (HttpStatusCodeException e) {
-			ErrorResponseList errorList = parseErrors(e);
-			throw new ClientValidationException(errorList.getErrors());
-		}
-	}
-	
+	//jpw prob remove after
 	private static String encodeURIComponent(String component)   {
 		String result = null;      
 

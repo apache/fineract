@@ -9,7 +9,6 @@ import org.mifosng.data.ClientDataWithAccountsData;
 import org.mifosng.data.CurrencyData;
 import org.mifosng.data.EntityIdentifier;
 import org.mifosng.data.EnumOptionReadModel;
-import org.mifosng.data.ExtraDatasets;
 import org.mifosng.data.LoanAccountData;
 import org.mifosng.data.LoanProductData;
 import org.mifosng.data.LoanRepaymentData;
@@ -160,15 +159,6 @@ public interface CommonRestOperations {
 	ClientDataWithAccountsData retrieveClientAccount(Long clientId);
 
 	LoanAccountData retrieveLoanAccount(Long loanId);
-
-	ExtraDatasets retrieveExtraDatasets(String datasetType);
-
-	GenericResultset retrieveExtraData(String datasetType, String datasetName,
-			String datasetPKValue);
-
-	@SuppressWarnings("rawtypes")
-	EntityIdentifier saveExtraData(String datasetType, String datasetName,
-			String datasetPKValue, Map map);
 
 	GenericResultset retrieveReportingData(String rptDB, String name, String type, Map<String, String> extractedQueryParams);
 

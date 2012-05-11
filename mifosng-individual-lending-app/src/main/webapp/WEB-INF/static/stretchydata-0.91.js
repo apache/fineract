@@ -378,9 +378,8 @@
 				$(this).attr("selected", "selected");
 			});
 
-			//var form_data = $('#entityform').serialize();
 			var form_data = JSON.stringify($('#entityform').serializeObject());
-	    	console.log(form_data);
+	    	//console.log(form_data);
 			var jqxhr = $.ajax({
 				url : url,
 				type : 'POST',
