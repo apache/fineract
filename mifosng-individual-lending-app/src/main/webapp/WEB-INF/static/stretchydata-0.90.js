@@ -348,6 +348,23 @@
 		}
 	}
 
+	$.fn.serializeObject = function()
+	{
+	    var o = {};
+	    var a = this.serializeArray();
+	    $.each(a, function() {
+	        if (o[this.name] !== undefined) {
+	            if (!o[this.name].push) {
+	                o[this.name] = [o[this.name]];
+	            }
+	            o[this.name].push(this.value || '');
+	        } else {
+	            o[this.name] = this.value || '';
+	        }
+	    });
+	    return o;
+	};
+	
 	function extraDataOpenDialog(url) {
 
 		// var saveButton = jQuery.i18n.prop('dialog.button.save');
@@ -361,7 +378,9 @@
 				$(this).attr("selected", "selected");
 			});
 
-			var form_data = $('#entityform').serialize();
+			//var form_data = $('#entityform').serialize();
+			var form_data = JSON.stringify($('#entityform').serializeObject());
+	    	console.log(form_data);
 			var jqxhr = $.ajax({
 				url : url,
 				type : 'POST',

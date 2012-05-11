@@ -1,5 +1,6 @@
 package org.mifosng.platform.api;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -7,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -22,6 +24,9 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
+import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 import org.mifosng.data.EntityIdentifier;
 import org.mifosng.data.ErrorResponse;
 import org.mifosng.data.ErrorResponseList;
@@ -93,35 +98,34 @@ public class ExtraDataApiResource {
 	@Path("{datasetType}/{datasetName}/{datasetPKValue}")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Produces({ MediaType.APPLICATION_JSON})
-	public Response saveExtraData(@PathParam("datasetType") final String datasetType,@PathParam("datasetName") final String datasetName, @PathParam("datasetPKValue") final String datasetPKValue, @Context HttpServletRequest req) {
+	public Response saveExtraData(@PathParam("datasetType") final String datasetType,@PathParam("datasetName") final String datasetName, @PathParam("datasetPKValue") final String datasetPKValue, String reqbody) {
 		
 		try {			
-			
-			//MultivaluedMap<String, String> incomingParams = uriInfo.getQueryParameters();
+
 			Map<String, String> queryParams = new HashMap<String, String>();
-
-			//Set<String> keys = incomingParams.keySet();
-
-			logger.info("Request JPW: " + req.toString());
-		    Enumeration paramNames = req.getParameterNames();
 		    String pValue = "";
 		    String pName;
-		    String[] paramValues;
-		    while(paramNames.hasMoreElements()) {
-		    	pName = (String) paramNames.nextElement();
-		    	paramValues = req.getParameterValues(pName);
-		    	if (paramValues.length > 1) {
-					logger.info("Unexpected Parameter Error: " + pName + " has " + paramValues.length + " value(s)");
-		    	} else {
-				      if (paramValues.length == 1) {
-				    	  pValue = paramValues[0];
-				      } else {
-				    	  pValue = "";
-				      }
-		    	}
-				logger.info(pName + " - " + pValue);
-				queryParams.put(pName, pValue);
-		    }			
+			try {
+				JSONObject jsonObj = new JSONObject(reqbody);
+				JSONArray jsonArr = jsonObj.names();
+				if (jsonArr != null) {
+					for (int i = 0; i < jsonArr.length(); i++) {
+						pName = (String) jsonArr.get(i);
+						pValue = jsonObj.getString(pName);
+						logger.info( pName + " - " + pValue);
+						queryParams.put(pName, pValue);
+					}
+				} else {
+					throw new WebApplicationException(Response
+							.status(Status.BAD_REQUEST)
+							.entity("JSON body empty").build());
+				}
+			} catch (JSONException e) {
+				throw new WebApplicationException(Response
+					.status(Status.BAD_REQUEST)
+					.entity("JSON body is wrong").build());
+			}
+			
 			
 			this.readPlatformService.tempSaveExtraData(datasetType, datasetName, datasetPKValue, queryParams);
 			
