@@ -2,7 +2,6 @@ package org.mifosng.platform;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 import org.mifosng.data.AppUserData;
 import org.mifosng.data.ClientData;
@@ -16,7 +15,6 @@ import org.mifosng.data.NoteData;
 import org.mifosng.data.OrganisationReadModel;
 import org.mifosng.data.PermissionData;
 import org.mifosng.data.RoleData;
-import org.mifosng.data.reports.GenericResultset;
 
 public interface ReadPlatformService {
 
@@ -57,10 +55,6 @@ public interface ReadPlatformService {
 	Collection<EnumOptionReadModel> retrieveAllPermissionGroups();
 
 	Collection<PermissionData> retrieveAllPermissions();
-
-	//@PreAuthorize(value = "hasAnyRole('REPORTING_SUPER_USER_ROLE')")
-	GenericResultset retrieveGenericResultset(String rptDB, String name,
-			String type, Map<String, String> extractedQueryParams);
 
 	ClientData retrieveNewClientDetails();
 

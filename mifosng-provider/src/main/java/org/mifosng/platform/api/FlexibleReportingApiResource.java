@@ -26,10 +26,10 @@ import javax.ws.rs.core.UriInfo;
 import org.mifosng.data.ErrorResponse;
 import org.mifosng.data.ErrorResponseList;
 import org.mifosng.data.reports.GenericResultset;
-import org.mifosng.platform.ReadPlatformService;
+import org.mifosng.platform.ReadExtraDataAndReportingService;
 import org.mifosng.platform.exceptions.ApplicationDomainRuleException;
-import org.mifosng.platform.exceptions.UnAuthenticatedUserException;
 import org.mifosng.platform.exceptions.NewDataValidationException;
+import org.mifosng.platform.exceptions.UnAuthenticatedUserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +45,7 @@ public class FlexibleReportingApiResource {
 	private final static Logger logger = LoggerFactory.getLogger(FlexibleReportingApiResource.class);
 	
 	@Autowired
-	private ReadPlatformService readPlatformService;
+	private ReadExtraDataAndReportingService ReadExtraDataAndReportingService;
 	
 	private String _corsHeaders;
 	 
@@ -100,7 +100,7 @@ public class FlexibleReportingApiResource {
 			}
 		}  
 		logger.info("BEGINNING REQUEST FOR: " + name);
-		GenericResultset result = this.readPlatformService.retrieveGenericResultset(rptDB, name, type, extractedQueryParams);
+		GenericResultset result = this.ReadExtraDataAndReportingService.retrieveGenericResultset(rptDB, name, type, extractedQueryParams);
 
 //		JSONWithPadding paddedResult = new JSONWithPadding(result,
 //				callbackName);
@@ -129,7 +129,7 @@ public class FlexibleReportingApiResource {
 				extractedQueryParams.put("${currencyId}", currencyId.toString());
 			}
 			
-			GenericResultset result = this.readPlatformService.retrieveGenericResultset(rptDB, name, type, extractedQueryParams);
+			GenericResultset result = this.ReadExtraDataAndReportingService.retrieveGenericResultset(rptDB, name, type, extractedQueryParams);
 
 			return Response.ok().entity(result).build();
 		} catch (UnAuthenticatedUserException e) {

@@ -2,6 +2,7 @@ package org.mifosng.platform;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -25,7 +26,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ReadExtraDataAndReportingServiceImpl implements ReadExtraDataAndReportingService {
+public class ReadExtraDataAndReportingServiceImpl implements
+		ReadExtraDataAndReportingService {
 
 	private final static Logger logger = LoggerFactory
 			.getLogger(ReadExtraDataAndReportingServiceImpl.class);
@@ -35,6 +37,200 @@ public class ReadExtraDataAndReportingServiceImpl implements ReadExtraDataAndRep
 	@Autowired
 	public ReadExtraDataAndReportingServiceImpl(final DataSource dataSource) {
 		this.dataSource = dataSource;
+	}
+
+	@Override
+	public GenericResultset retrieveGenericResultset(final String rptDB,
+			final String name, final String type,
+			final Map<String, String> queryParams) {
+
+		if (name == null) {
+			logger.info("Report Name not Found");
+			return null;
+		}
+
+		long startTime = System.currentTimeMillis();
+		logger.info("STARTING REPORT: " + name + "   Type: " + type);
+
+		// AppUser currentUser = extractAuthenticatedUser();
+		// Collection<GrantedAuthority> permissions =
+		// currentUser.getAuthorities();
+		/*
+		 * AppUser currentUser = extractAuthenticatedUser(); Boolean validUser =
+		 * verifyUserDetails(currentUser);
+		 * 
+		 * if (!validUser) { return null; }
+		 * 
+		 * String orgId = currentUser.getOrganisation().getId().toString(); put
+		 * back in later
+		 */
+		String orgId = "1";
+
+		String sql;
+		try {
+			sql = getSQLtoRun(rptDB, name, type, orgId, queryParams);
+		} catch (SQLException e) {
+			logger.info(name + ": Failed in getSQLtoRun");
+			throw new WebApplicationException(Response
+					.status(Status.BAD_REQUEST).entity(e.getMessage()).build());
+		}
+		// logger.info(name + ": RUNNING SQL");
+
+		GenericResultset result = null;
+		try {
+			result = fillReportingGenericResultSet(sql);
+		} catch (SQLException e) {
+			logger.info("Error - SQL: " + sql);
+			throw new WebApplicationException(Response
+					.status(Status.BAD_REQUEST).entity(e.getMessage()).build());
+		}
+
+		long elapsed = System.currentTimeMillis() - startTime;
+		logger.info("FINISHING Report/Request Name: " + name + " - " + type
+				+ "     Elapsed Time: " + elapsed);
+		return result;
+	}
+
+	private GenericResultset fillReportingGenericResultSet(final String sql)
+			throws SQLException {
+
+		GenericResultset result = new GenericResultset();
+
+		Connection db_connection = dataSource.getConnection();
+		Statement db_statement = db_connection.createStatement();
+		ResultSet rs = db_statement.executeQuery(sql);
+
+		ResultSetMetaData rsmd = rs.getMetaData();
+		String columnName = null;
+		String columnValue = null;
+		List<ResultsetColumnHeader> columnHeaders = new ArrayList<ResultsetColumnHeader>();
+		for (int i = 0; i < rsmd.getColumnCount(); i++) {
+			ResultsetColumnHeader rsch = new ResultsetColumnHeader();
+			rsch.setColumnName(rsmd.getColumnName(i + 1));
+			rsch.setColumnType(rsmd.getColumnTypeName(i + 1));
+			columnHeaders.add(rsch);
+		}
+		result.setColumnHeaders(columnHeaders);
+
+		List<ResultsetDataRow> resultsetDataRows = new ArrayList<ResultsetDataRow>();
+		ResultsetDataRow resultsetDataRow;
+		while (rs.next()) {
+			resultsetDataRow = new ResultsetDataRow();
+			List<String> columnValues = new ArrayList<String>();
+			for (int i = 0; i < rsmd.getColumnCount(); i++) {
+				columnName = rsmd.getColumnName(i + 1);
+				columnValue = rs.getString(columnName);
+				columnValues.add(columnValue);
+			}
+			resultsetDataRow.setRow(columnValues);
+			resultsetDataRows.add(resultsetDataRow);
+		}
+		result.setData(resultsetDataRows);
+
+		db_statement.close();
+		db_statement = null;
+		db_connection.close();
+		db_connection = null;
+
+		return result;
+
+	}
+
+	private String getSQLtoRun(final String rptDB, final String name,
+			final String type, final String orgId,
+			final Map<String, String> queryParams) throws SQLException {
+		String sql = null;
+
+		if (type.equals("report")) {
+			sql = getReportSql(rptDB, name);
+		} else {
+			// todo - dont need to check for orgID if special parameter sql (but
+			// prob need to check restrictions
+			sql = getParameterSql(rptDB, name);
+		}
+
+		sql = replace(sql, "${orgId}", orgId);
+
+		Set<String> keys = queryParams.keySet();
+		for (String key : keys) {
+			String pValue = queryParams.get(key);
+			// logger.info("(" + key + " : " + pValue + ")");
+			sql = replace(sql, key, pValue);
+		}
+
+		// wrap sql to prevent JDBC sql errors and also prevent malicious sql
+		sql = "select x.* from (" + sql + ") x";
+
+		return sql;
+
+	}
+
+	// private Boolean verifyUserDetails(AppUser usr) {
+	//
+	// // some logs to be taken out after testing
+	// String idDetails = usr.getId() + ", " + usr.getLastname() + ", "
+	// + usr.getFirstname();
+	// logger.info("Id: " + idDetails + "   Organisation: "
+	// + usr.getOrganisation().getId() + "   Office: "
+	// + usr.getOffice().getId() + "   Role Names: "
+	// + usr.getRoleNames());
+	// String otherDetails = "Head Officer User? " + usr.isHeadOfficeUser()
+	// + "  Enabled: " + usr.isEnabled();
+	// logger.info(otherDetails);
+	// if (usr.getAuthorities() != null) {
+	// // for (GrantedAuthority grantedAuthority : usr.getAuthorities()) {
+	// // logger.info("Granted Authority: " +
+	// // grantedAuthority.getAuthority());
+	// // }
+	// }
+	// logger.info("");
+	//
+	// // some checks
+	// if (usr.getOrganisation().getId() == null) {
+	// logger.info("Organisation ID not Found");
+	// return false;
+	// }
+	//
+	// return true;
+	// }
+
+	private String getReportSql(String rptDB, String reportName)
+			throws SQLException {
+		String sql = "select report_sql as the_sql from " + rptDB
+				+ ".stretchy_report where report_name = '" + reportName + "'";
+		// logger.info("Report SQL: " + sql);
+
+		return getSql(sql);
+	}
+
+	private String getParameterSql(String rptDB, String parameterName)
+			throws SQLException {
+		String sql = "select parameter_sql as the_sql from " + rptDB
+				+ ".stretchy_parameter where parameter_name = '"
+				+ parameterName + "'";
+		// logger.info("Parameter SQL: " + sql);
+
+		return getSql(sql);
+	}
+
+	private String getSql(String inputSql) throws SQLException {
+
+		Connection db_connection = dataSource.getConnection();
+		Statement db_statement = db_connection.createStatement();
+		ResultSet rs = db_statement.executeQuery(inputSql);
+
+		String sql = null;
+
+		while (rs.next()) {
+			sql = rs.getString("the_sql");
+		}
+
+		db_statement.close();
+		db_statement = null;
+		db_connection.close();
+		db_connection = null;
+
+		return sql;
 	}
 
 	@Override
@@ -58,7 +254,10 @@ public class ReadExtraDataAndReportingServiceImpl implements ReadExtraDataAndRep
 			ResultSet rs = db_statement.executeQuery(sql);
 
 			while (rs.next()) {
-				extraDatasetRows.add(new ExtraDatasetRow(rs.getInt("id"), rs.getString("datasetName"), rs.getString("datasetType")));
+				extraDatasetRows
+						.add(new ExtraDatasetRow(rs.getInt("id"), rs
+								.getString("datasetName"), rs
+								.getString("datasetType")));
 			}
 
 			db_statement.close();
@@ -124,7 +323,7 @@ public class ReadExtraDataAndReportingServiceImpl implements ReadExtraDataAndRep
 				+ datasetType
 				+ "' order by f.id";
 
-		//logger.info("specific: " + sql);
+		// logger.info("specific: " + sql);
 		ResultSet rsmd = db_statement1.executeQuery(sql);
 
 		List<ResultsetColumnHeader> columnHeaders = new ArrayList<ResultsetColumnHeader>();
@@ -142,14 +341,16 @@ public class ReadExtraDataAndReportingServiceImpl implements ReadExtraDataAndRep
 			} else {
 				selectFieldSeparator = ", ";
 			}
-			selectFieldList += selectFieldSeparator + "`" + rsch.getColumnName() + "`";
+			selectFieldList += selectFieldSeparator + "`"
+					+ rsch.getColumnName() + "`";
 
 			rsch.setColumnType(rsmd.getString("data_type"));
 			rsch.setColumnLength(rsmd.getInt("data_length"));
 			rsch.setColumnDisplayType(rsmd.getString("display_type"));
 			allowedListId = rsmd.getInt("allowed_list_id");
 			if (allowedListId != null) {
-				sql = "select v.`name` from stretchydata_allowed_value v where allowed_list_id = " + allowedListId + " order by id";
+				sql = "select v.`name` from stretchydata_allowed_value v where allowed_list_id = "
+						+ allowedListId + " order by id";
 				ResultSet rsValues = db_statement2.executeQuery(sql);
 				while (rsValues.next()) {
 					rsch.getColumnValues().add(rsValues.getString("name"));
@@ -199,7 +400,7 @@ public class ReadExtraDataAndReportingServiceImpl implements ReadExtraDataAndRep
 		return datasetType + "_extra_" + datasetName;
 	}
 
-	static String replace(String str, String pattern, String replace) {
+	private static String replace(String str, String pattern, String replace) {
 		int s = 0;
 		int e = 0;
 		StringBuffer result = new StringBuffer();
@@ -223,14 +424,13 @@ public class ReadExtraDataAndReportingServiceImpl implements ReadExtraDataAndRep
 		logger.info("startjpw: ");
 		Set<String> keys = queryParams.keySet();
 		String pValue = "";
-			for (String key : keys) {
-					pValue = queryParams.get(key);
-					logger.info("jpw: " + key + " - " + pValue);
-				}
+		for (String key : keys) {
+			pValue = queryParams.get(key);
+			logger.info("jpw: " + key + " - " + pValue);
+		}
 
-			logger.info("endjpw: ");
-	
-		
+		logger.info("endjpw: ");
+
 		String fullDatasetName = getFullDatasetName(datasetType, datasetName);
 		String saveSql = getSaveSql(fullDatasetName, datasetPKValue,
 				queryParams);
@@ -323,7 +523,7 @@ public class ReadExtraDataAndReportingServiceImpl implements ReadExtraDataAndRep
 					+ insertColumns + ")" + " select " + datasetPKValue
 					+ " as id" + selectColumns;
 		}
-		//logger.info("Save SQL: " + saveSql);
+		// logger.info("Save SQL: " + saveSql);
 		return saveSql;
 	}
 }

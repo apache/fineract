@@ -7,6 +7,10 @@ import org.mifosng.data.reports.GenericResultset;
 
 public interface ReadExtraDataAndReportingService {
 
+	//@PreAuthorize(value = "hasAnyRole('REPORTING_SUPER_USER_ROLE')")
+	GenericResultset retrieveGenericResultset(String rptDB, String name,
+			String type, Map<String, String> extractedQueryParams);
+	
 	ExtraDatasets retrieveExtraDatasetNames(String datasetType);
 
 	GenericResultset retrieveExtraData(String datasetType, String datasetName,

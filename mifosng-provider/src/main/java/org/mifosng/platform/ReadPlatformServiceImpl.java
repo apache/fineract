@@ -5,22 +5,15 @@ import static org.mifosng.platform.Specifications.loanTransactionsThatMatch;
 import static org.mifosng.platform.Specifications.loansThatMatch;
 import static org.mifosng.platform.Specifications.usersThatMatch;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.sql.DataSource;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
@@ -41,9 +34,6 @@ import org.mifosng.data.OfficeData;
 import org.mifosng.data.OrganisationReadModel;
 import org.mifosng.data.PermissionData;
 import org.mifosng.data.RoleData;
-import org.mifosng.data.reports.GenericResultset;
-import org.mifosng.data.reports.ResultsetColumnHeader;
-import org.mifosng.data.reports.ResultsetDataRow;
 import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.client.domain.ClientRepository;
 import org.mifosng.platform.currency.domain.ApplicationCurrency;
@@ -62,8 +52,6 @@ import org.mifosng.platform.user.domain.AppUserRepository;
 import org.mifosng.platform.user.domain.PermissionGroup;
 import org.mifosng.platform.user.domain.Role;
 import org.mifosng.platform.user.domain.RoleRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
@@ -76,22 +64,19 @@ import org.springframework.stereotype.Service;
 @Service
 public class ReadPlatformServiceImpl implements ReadPlatformService {
 
-	private final static Logger logger = LoggerFactory
-			.getLogger(ReadPlatformServiceImpl.class);
-
 	private final SimpleJdbcTemplate jdbcTemplate;
 	private final ClientRepository clientRepository;
 	private final LoanRepository loanRepository;
 	private final LoanTransactionRepository loanTransactionRepository;
 	private final ApplicationCurrencyRepository applicationCurrencyRepository;
-	private final DataSource dataSource;
 	private final AppUserRepository appUserRepository;
 	private final RoleRepository roleRepository;
 
 	private final LoanProductReadPlatformService loanProductReadPlatformService;
 
 	@Autowired
-	public ReadPlatformServiceImpl(final LoanProductReadPlatformService loanProductReadPlatformService, 
+	public ReadPlatformServiceImpl(
+			final LoanProductReadPlatformService loanProductReadPlatformService,
 			final DataSource dataSource,
 			final ClientRepository clientRepository,
 			final LoanRepository loanRepository,
@@ -107,7 +92,6 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 		this.jdbcTemplate = new SimpleJdbcTemplate(dataSource);
 		this.clientRepository = clientRepository;
 		this.loanRepository = loanRepository;
-		this.dataSource = dataSource;
 	}
 
 	private AppUser extractAuthenticatedUser() {
@@ -157,23 +141,25 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 	public Collection<ClientData> retrieveAllIndividualClients() {
 
 		AppUser currentUser = extractAuthenticatedUser();
-		
+
 		List<OfficeData> offices = retrieveOffices();
 		String officeIdsList = generateOfficeIdInClause(offices);
-		ClientMapper rm = new ClientMapper(offices, currentUser.getOrganisation());
+		ClientMapper rm = new ClientMapper(offices,
+				currentUser.getOrganisation());
 
-		String sql = "select "
-				+ rm.clientSchema()
-				+ " where c.org_id = ? and c.office_id in (" + officeIdsList + ") order by c.lastname ASC, c.firstname ASC";
+		String sql = "select " + rm.clientSchema()
+				+ " where c.org_id = ? and c.office_id in (" + officeIdsList
+				+ ") order by c.lastname ASC, c.firstname ASC";
 
-		return this.jdbcTemplate.query(sql, rm, new Object[] { currentUser.getOrganisation().getId()});
+		return this.jdbcTemplate.query(sql, rm, new Object[] { currentUser
+				.getOrganisation().getId() });
 	}
 
 	private String generateOfficeIdInClause(List<OfficeData> offices) {
 		String officeIdsList = "";
-		for (int i=0; i < offices.size(); i++) {
+		for (int i = 0; i < offices.size(); i++) {
 			Long id = offices.get(i).getId();
-			if (i==0) {
+			if (i == 0) {
 				officeIdsList = id.toString();
 			} else {
 				officeIdsList += "," + id.toString();
@@ -199,7 +185,9 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 					new Object[] { currentUser.getOrganisation().getId(),
 							clientId, noteId });
 		} catch (EmptyResultDataAccessException e) {
-			throw new PlatformResourceNotFoundException("error.msg.client.id.invalid", "Client with identifier {0} does not exist", clientId);
+			throw new PlatformResourceNotFoundException(
+					"error.msg.client.id.invalid",
+					"Client with identifier {0} does not exist", clientId);
 		}
 	}
 
@@ -278,7 +266,8 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 		private final List<OfficeData> offices;
 		private final Organisation organisation;
 
-		public ClientMapper(final List<OfficeData> offices, Organisation organisation) {
+		public ClientMapper(final List<OfficeData> offices,
+				Organisation organisation) {
 			this.offices = offices;
 			this.organisation = organisation;
 		}
@@ -303,13 +292,14 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 			LocalDate joinedDate = new LocalDate(rs.getDate("joinedDate"));
 
 			String officeName = fromOfficeList(this.offices, officeId);
-			
+
 			String orgname = "";
 			if (organisation.getId().equals(orgId)) {
 				orgname = organisation.getName();
 			}
 
-			return new ClientData(orgId, orgname, officeId, officeName, id, firstname, lastname, externalId, joinedDate);
+			return new ClientData(orgId, orgname, officeId, officeName, id,
+					firstname, lastname, externalId, joinedDate);
 		}
 
 		private String fromOfficeList(final List<OfficeData> officeList,
@@ -328,14 +318,17 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 	private List<OfficeData> retrieveOffices() {
 
 		AppUser currentUser = extractAuthenticatedUser();
-		
+
 		String hierarchy = currentUser.getOffice().getHierarchy();
 		String hierarchySearchString = hierarchy + "%";
-		
-		OfficeMapper rm = new OfficeMapper();
-		String sql = "select " + rm.officeSchema() + "where o.org_id = ? and o.hierarchy like ? order by o.hierarchy";
 
-		return this.jdbcTemplate.query(sql, rm, new Object[] {currentUser.getOrganisation().getId(), hierarchySearchString});
+		OfficeMapper rm = new OfficeMapper();
+		String sql = "select "
+				+ rm.officeSchema()
+				+ "where o.org_id = ? and o.hierarchy like ? order by o.hierarchy";
+
+		return this.jdbcTemplate.query(sql, rm, new Object[] {
+				currentUser.getOrganisation().getId(), hierarchySearchString });
 	}
 
 	protected static final class OfficeMapper implements RowMapper<OfficeData> {
@@ -357,7 +350,8 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 			Long parentId = rs.getLong("parentId");
 			String parentName = rs.getString("parentName");
 
-			return new OfficeData(id, name, externalId, openingDate, hierarchy, parentId, parentName);
+			return new OfficeData(id, name, externalId, openingDate, hierarchy,
+					parentId, parentName);
 		}
 	}
 
@@ -368,7 +362,8 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 			AppUser currentUser = extractAuthenticatedUser();
 
 			List<OfficeData> offices = retrieveOffices();
-			ClientMapper rm = new ClientMapper(offices, currentUser.getOrganisation());
+			ClientMapper rm = new ClientMapper(offices,
+					currentUser.getOrganisation());
 
 			String sql = "select " + rm.clientSchema()
 					+ " where c.id = ? and c.org_id = ?";
@@ -376,7 +371,9 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 			return this.jdbcTemplate.queryForObject(sql, rm, new Object[] {
 					clientId, currentUser.getOrganisation().getId() });
 		} catch (EmptyResultDataAccessException e) {
-			throw new PlatformResourceNotFoundException("error.msg.client.id.invalid", "Client with identifier {0} does not exist", clientId);
+			throw new PlatformResourceNotFoundException(
+					"error.msg.client.id.invalid",
+					"Client with identifier {0} does not exist", clientId);
 		}
 	}
 
@@ -522,8 +519,9 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 	}
 
 	@Override
-	public NewLoanWorkflowStepOneData retrieveClientAndProductDetails(final Long clientId, final Long productId) {
-		
+	public NewLoanWorkflowStepOneData retrieveClientAndProductDetails(
+			final Long clientId, final Long productId) {
+
 		AppUser currentUser = extractAuthenticatedUser();
 
 		NewLoanWorkflowStepOneData workflowData = new NewLoanWorkflowStepOneData();
@@ -531,19 +529,23 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 		workflowData.setOrganisationName(currentUser.getOrganisation()
 				.getName());
 
-		Collection<LoanProductData> loanProducts = this.loanProductReadPlatformService.retrieveAllLoanProducts();
+		Collection<LoanProductData> loanProducts = this.loanProductReadPlatformService
+				.retrieveAllLoanProducts();
 		workflowData.setAllowedProducts(new ArrayList<LoanProductData>(
 				loanProducts));
 
 		if (loanProducts.size() == 1) {
-			LoanProductData selectedProduct = this.loanProductReadPlatformService.retrieveLoanProduct(workflowData.getAllowedProducts().get(0).getId());
-			
+			LoanProductData selectedProduct = this.loanProductReadPlatformService
+					.retrieveLoanProduct(workflowData.getAllowedProducts()
+							.get(0).getId());
+
 			workflowData.setProductId(selectedProduct.getId());
 			workflowData.setProductName(selectedProduct.getName());
 			workflowData.setSelectedProduct(selectedProduct);
 		} else {
-			LoanProductData selectedProduct = findLoanProductById(loanProducts, productId);
-			
+			LoanProductData selectedProduct = findLoanProductById(loanProducts,
+					productId);
+
 			workflowData.setProductId(selectedProduct.getId());
 			workflowData.setProductName(selectedProduct.getName());
 			workflowData.setSelectedProduct(selectedProduct);
@@ -555,12 +557,15 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 
 		return workflowData;
 	}
-	
-	private LoanProductData findLoanProductById(Collection<LoanProductData> loanProducts, Long productId) {
-		LoanProductData match = this.loanProductReadPlatformService.retrieveNewLoanProductDetails();
+
+	private LoanProductData findLoanProductById(
+			Collection<LoanProductData> loanProducts, Long productId) {
+		LoanProductData match = this.loanProductReadPlatformService
+				.retrieveNewLoanProductDetails();
 		for (LoanProductData loanProductData : loanProducts) {
 			if (loanProductData.getId().equals(productId)) {
-				match = this.loanProductReadPlatformService.retrieveLoanProduct(loanProductData.getId());
+				match = this.loanProductReadPlatformService
+						.retrieveLoanProduct(loanProductData.getId());
 				break;
 			}
 		}
@@ -590,7 +595,8 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 		return loanData;
 	}
 
-	private LoanAccountData convertToData(final Loan realLoan, CurrencyData currencyData) {
+	private LoanAccountData convertToData(final Loan realLoan,
+			CurrencyData currencyData) {
 
 		DerivedLoanData loanData = realLoan.deriveLoanData(currencyData);
 
@@ -602,13 +608,16 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 
 		Money loanPrincipal = realLoan.getLoanRepaymentScheduleDetail()
 				.getPrincipal();
-		MoneyData principal = MoneyData.of(currencyData, loanPrincipal.getAmount());
+		MoneyData principal = MoneyData.of(currencyData,
+				loanPrincipal.getAmount());
 
 		Money loanArrearsTolerance = realLoan.getInArrearsTolerance();
-		MoneyData tolerance = MoneyData.of(currencyData, loanArrearsTolerance.getAmount());
+		MoneyData tolerance = MoneyData.of(currencyData,
+				loanArrearsTolerance.getAmount());
 
 		Money interestRebate = realLoan.getInterestRebateOwed();
-		MoneyData interestRebateOwed = MoneyData.of(currencyData, interestRebate.getAmount());
+		MoneyData interestRebateOwed = MoneyData.of(currencyData,
+				interestRebate.getAmount());
 
 		boolean interestRebateOutstanding = false; // realLoan.isInterestRebateOutstanding(),
 
@@ -642,10 +651,14 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 				realLoan.getLoanProduct().getName(),
 				realLoan.getClosedOnDate(), realLoan.getSubmittedOnDate(),
 				realLoan.getApprovedOnDate(), expectedDisbursementDate,
-				realLoan.getDisbursedOnDate(), realLoan.getExpectedMaturityDate(), realLoan.getExpectedFirstRepaymentOnDate(), realLoan.getInterestCalculatedFromDate(),
-				principal, 
-				realLoan.getLoanRepaymentScheduleDetail().getAnnualNominalInterestRate(), 
-				realLoan.getLoanRepaymentScheduleDetail().getNominalInterestRatePerPeriod(), realLoan
+				realLoan.getDisbursedOnDate(),
+				realLoan.getExpectedMaturityDate(),
+				realLoan.getExpectedFirstRepaymentOnDate(),
+				realLoan.getInterestCalculatedFromDate(), principal, realLoan
+						.getLoanRepaymentScheduleDetail()
+						.getAnnualNominalInterestRate(), realLoan
+						.getLoanRepaymentScheduleDetail()
+						.getNominalInterestRatePerPeriod(), realLoan
 						.getLoanRepaymentScheduleDetail()
 						.getInterestPeriodFrequencyType().getValue(), realLoan
 						.getLoanRepaymentScheduleDetail()
@@ -707,7 +720,7 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 					nameCode);
 		}
 	}
-	
+
 	@Override
 	public Collection<AppUserData> retrieveAllUsers() {
 
@@ -717,7 +730,9 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 		String officeIdsList = generateOfficeIdInClause(offices);
 
 		AppUserMapper mapper = new AppUserMapper(offices);
-		String sql = "select " + mapper.schema() + " where u.org_id = ? and u.office_id in (" + officeIdsList + ")";
+		String sql = "select " + mapper.schema()
+				+ " where u.org_id = ? and u.office_id in (" + officeIdsList
+				+ ")";
 
 		return this.jdbcTemplate.query(sql, mapper, new Object[] { currentUser
 				.getOrganisation().getId() });
@@ -728,7 +743,8 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 
 		List<OfficeData> offices = retrieveOffices();
 
-		List<RoleData> availableRoles = new ArrayList<RoleData>(retrieveAllRoles());
+		List<RoleData> availableRoles = new ArrayList<RoleData>(
+				retrieveAllRoles());
 
 		AppUserData userData = new AppUserData();
 		userData.setAllowedOffices(offices);
@@ -778,7 +794,8 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 
 		List<OfficeData> offices = retrieveOffices();
 
-		List<RoleData> availableRoles = new ArrayList<RoleData>(retrieveAllRoles());
+		List<RoleData> availableRoles = new ArrayList<RoleData>(
+				retrieveAllRoles());
 
 		AppUser user = this.appUserRepository.findOne(usersThatMatch(
 				currentUser.getOrganisation(), currentUser.getId()));
@@ -959,213 +976,4 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 		}
 	}
 
-	@Override
-	public GenericResultset retrieveGenericResultset(final String rptDB,
-			final String name, final String type,
-			final Map<String, String> queryParams) {
-
-		if (name == null) {
-			logger.info("Report Name not Found");
-			return null;
-		}
-
-		long startTime = System.currentTimeMillis();
-		logger.info("STARTING REPORT: " + name + "   Type: " + type);
-
-//		AppUser currentUser = extractAuthenticatedUser();
-//		Collection<GrantedAuthority> permissions = currentUser.getAuthorities();
-		/*
-		 * AppUser currentUser = extractAuthenticatedUser(); Boolean validUser =
-		 * verifyUserDetails(currentUser);
-		 * 
-		 * if (!validUser) { return null; }
-		 * 
-		 * String orgId = currentUser.getOrganisation().getId().toString(); put
-		 * back in later
-		 */
-		String orgId = "1";
-
-		String sql;
-		try {
-			sql = getSQLtoRun(rptDB, name, type, orgId, queryParams);
-		} catch (SQLException e) {
-			logger.info(name + ": Failed in getSQLtoRun");
-			throw new WebApplicationException(Response
-					.status(Status.BAD_REQUEST).entity(e.getMessage()).build());
-		}
-		//logger.info(name + ": RUNNING SQL");
-
-		GenericResultset result = null;
-		try {
-			result = fillReportingGenericResultSet(sql);
-		} catch (SQLException e) {
-			logger.info("Error - SQL: " + sql);
-			throw new WebApplicationException(Response
-					.status(Status.BAD_REQUEST).entity(e.getMessage()).build());
-		}
-
-		long elapsed = System.currentTimeMillis() - startTime;
-		logger.info("FINISHING Report/Request Name: " + name + " - " + type
-				+ "     Elapsed Time: " + elapsed);
-		return result;
-	}
-
-
-	private GenericResultset fillReportingGenericResultSet(final String sql)
-			throws SQLException {
-
-		GenericResultset result = new GenericResultset();
-
-		Connection db_connection = dataSource.getConnection();
-		Statement db_statement = db_connection.createStatement();
-		ResultSet rs = db_statement.executeQuery(sql);
-
-		ResultSetMetaData rsmd = rs.getMetaData();
-		String columnName = null;
-		String columnValue = null;
-		List<ResultsetColumnHeader> columnHeaders = new ArrayList<ResultsetColumnHeader>();
-		for (int i = 0; i < rsmd.getColumnCount(); i++) {
-			ResultsetColumnHeader rsch = new ResultsetColumnHeader();
-			rsch.setColumnName(rsmd.getColumnName(i + 1));
-			rsch.setColumnType(rsmd.getColumnTypeName(i + 1));
-			columnHeaders.add(rsch);
-		}
-		result.setColumnHeaders(columnHeaders);
-
-		List<ResultsetDataRow> resultsetDataRows = new ArrayList<ResultsetDataRow>();
-		ResultsetDataRow resultsetDataRow;
-		while (rs.next()) {
-			resultsetDataRow = new ResultsetDataRow();
-			List<String> columnValues = new ArrayList<String>();
-			for (int i = 0; i < rsmd.getColumnCount(); i++) {
-				columnName = rsmd.getColumnName(i + 1);
-				columnValue = rs.getString(columnName);
-				columnValues.add(columnValue);
-			}
-			resultsetDataRow.setRow(columnValues);
-			resultsetDataRows.add(resultsetDataRow);
-		}
-		result.setData(resultsetDataRows);
-
-		db_statement.close();
-		db_statement = null;
-		db_connection.close();
-		db_connection = null;
-
-		return result;
-
-	}
-
-	private String getSQLtoRun(final String rptDB, final String name,
-			final String type, final String orgId,
-			final Map<String, String> queryParams) throws SQLException {
-		String sql = null;
-
-		if (type.equals("report")) {
-			sql = getReportSql(rptDB, name);
-		} else {
-			// todo - dont need to check for orgID if special parameter sql (but
-			// prob need to check restrictions
-			sql = getParameterSql(rptDB, name);
-		}
-
-		sql = replace(sql, "${orgId}", orgId);
-
-		Set<String> keys = queryParams.keySet();
-		for (String key : keys) {
-			String pValue = queryParams.get(key);
-			// logger.info("(" + key + " : " + pValue + ")");
-			sql = replace(sql, key, pValue);
-		}
-
-		// wrap sql to prevent JDBC sql errors and also prevent malicious sql
-		sql = "select x.* from (" + sql + ") x";
-
-		return sql;
-
-	}
-
-//	private Boolean verifyUserDetails(AppUser usr) {
-//
-//		// some logs to be taken out after testing
-//		String idDetails = usr.getId() + ", " + usr.getLastname() + ", "
-//				+ usr.getFirstname();
-//		logger.info("Id: " + idDetails + "   Organisation: "
-//				+ usr.getOrganisation().getId() + "   Office: "
-//				+ usr.getOffice().getId() + "   Role Names: "
-//				+ usr.getRoleNames());
-//		String otherDetails = "Head Officer User? " + usr.isHeadOfficeUser()
-//				+ "  Enabled: " + usr.isEnabled();
-//		logger.info(otherDetails);
-//		if (usr.getAuthorities() != null) {
-////			for (GrantedAuthority grantedAuthority : usr.getAuthorities()) {
-//				// logger.info("Granted Authority: " +
-//				// grantedAuthority.getAuthority());
-////			}
-//		}
-//		logger.info("");
-//
-//		// some checks
-//		if (usr.getOrganisation().getId() == null) {
-//			logger.info("Organisation ID not Found");
-//			return false;
-//		}
-//
-//		return true;
-//	}
-
-	private String getReportSql(String rptDB, String reportName)
-			throws SQLException {
-		String sql = "select report_sql as the_sql from " + rptDB
-				+ ".stretchy_report where report_name = '" + reportName + "'";
-		// logger.info("Report SQL: " + sql);
-
-		return getSql(sql);
-	}
-
-	private String getParameterSql(String rptDB, String parameterName)
-			throws SQLException {
-		String sql = "select parameter_sql as the_sql from " + rptDB
-				+ ".stretchy_parameter where parameter_name = '"
-				+ parameterName + "'";
-		// logger.info("Parameter SQL: " + sql);
-
-		return getSql(sql);
-	}
-
-	private String getSql(String inputSql) throws SQLException {
-
-		Connection db_connection = dataSource.getConnection();
-		Statement db_statement = db_connection.createStatement();
-		ResultSet rs = db_statement.executeQuery(inputSql);
-
-		String sql = null;
-
-		while (rs.next()) {
-			sql = rs.getString("the_sql");
-		}
-
-		db_statement.close();
-		db_statement = null;
-		db_connection.close();
-		db_connection = null;
-
-		return sql;
-	}
-
-	static String replace(String str, String pattern, String replace) {
-		int s = 0;
-		int e = 0;
-		StringBuffer result = new StringBuffer();
-
-		while ((e = str.indexOf(pattern, s)) >= 0) {
-			result.append(str.substring(s, e));
-			result.append(replace);
-			s = e + pattern.length();
-		}
-		result.append(str.substring(s));
-		return result.toString();
-	}
-	
-	
 }
