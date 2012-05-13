@@ -78,7 +78,11 @@ public class AdministrationController {
 			@RequestParam(value="lastname", required=false) String lastname,
 			@RequestParam(value="email", required=false) String email)  {
 		
-		UserCommand command = new UserCommand(username, firstname, lastname, email);
+		UserCommand command = new UserCommand();
+		command.setUsername(username);
+		command.setFirstname(firstname);
+		command.setLastname(lastname);
+		command.setEmail(email);
 		
 		return this.commonRestOperations.updateCurrentUserDetails(command);
 	}

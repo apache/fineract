@@ -4,13 +4,11 @@ import java.util.Collection;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.mifosng.data.AppUserData;
 import org.mifosng.data.EntityIdentifier;
 import org.mifosng.data.ErrorResponse;
 import org.mifosng.data.PermissionData;
 import org.mifosng.data.RoleData;
 import org.mifosng.data.command.RoleCommand;
-import org.mifosng.data.command.UserCommand;
 import org.mifosng.ui.CommonRestOperations;
 import org.mifosng.ui.loanproduct.ClientValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,63 +79,6 @@ public class AppUserController {
 		command.setId(roleId);
 		
 		return this.commonRestOperations.updateRole(command);
-	}
-	
-	@RequestMapping(consumes="application/json", produces="application/json", value = "/admin/user/all", method = RequestMethod.GET)
-	public @ResponseBody Collection<AppUserData> viewAllUsers() {
-
-		 return this.commonRestOperations.retrieveAllUsers();
-	}
-	
-	@RequestMapping(consumes="application/json", produces="application/json", value = "/admin/user/new", method = RequestMethod.GET)
-	public @ResponseBody AppUserData viewUser() {
-
-		 return this.commonRestOperations.retrieveNewUserDetails();
-	}
-	
-	@RequestMapping(consumes="application/x-www-form-urlencoded", produces="application/json", value = "/admin/user/new", method = RequestMethod.POST)
-	@ResponseStatus(HttpStatus.OK)
-	public @ResponseBody EntityIdentifier createNewUser(@RequestParam(value="selectedItems", required=false) String[] selectedRoles,
-			@RequestParam(value="username") String username,
-			@RequestParam(value="firstname") String firstname,
-			@RequestParam(value="lastname") String lastname,
-			@RequestParam(value="email") String email,
-			@RequestParam(value="officeId") Long officeId)  {
-		
-		UserCommand command = new UserCommand(username, firstname, lastname, "", email, selectedRoles, officeId);
-
-		return this.commonRestOperations.createUser(command);
-	}
-	
-	@RequestMapping(consumes = "application/json", produces = "application/json", value = "/admin/user/{userId}", method = RequestMethod.DELETE)
-	public @ResponseBody
-	EntityIdentifier attemptToDeleteUser(@PathVariable("userId") Long userId) {
-
-		this.commonRestOperations.deleteUser(userId);
-
-		return new EntityIdentifier(Long.valueOf(1));
-	}
-	
-	@RequestMapping(consumes="application/json", produces="application/json", value = "/admin/user/{userId}", method = RequestMethod.GET)
-	public @ResponseBody AppUserData viewUser(@PathVariable("userId") Long userId) {
-
-		 return this.commonRestOperations.retrieveUser(userId);
-	}
-	
-	@RequestMapping(consumes="application/x-www-form-urlencoded", produces="application/json", value = "/admin/user/{userId}", method = RequestMethod.POST)
-	@ResponseStatus(HttpStatus.OK)
-	public @ResponseBody EntityIdentifier updateUser(@PathVariable("userId") Long userId,
-			@RequestParam(value="selectedItems", required=false) String[] selectedRoles,
-			@RequestParam(value="username") String username,
-			@RequestParam(value="firstname") String firstname,
-			@RequestParam(value="lastname") String lastname,
-			@RequestParam(value="email") String email,
-			@RequestParam(value="officeId") Long officeId)  {
-		
-		UserCommand command = new UserCommand(username, firstname, lastname, "", email, selectedRoles, officeId);
-		command.setId(userId);
-		
-		return this.commonRestOperations.updateUser(command);
 	}
 	
 	@ExceptionHandler(ClientValidationException.class)

@@ -1,12 +1,16 @@
 package org.mifosng.data.command;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * create or update user details command.
  */
 @XmlRootElement
-public class UserCommand {
+public class UserCommand implements Serializable {
 
 	private Long id;
 	private String username;
@@ -14,38 +18,13 @@ public class UserCommand {
 	private String lastname;
 	private String password;
 	private String email;
-	private String[] roleIds;
 	private Long officeId;
+	
+	private List<String> notSelectedItems = new ArrayList<String>();
+	private List<String> selectedItems = new ArrayList<String>();
 
 	public UserCommand() {
 		//
-	}
-	
-	public UserCommand(final String username, final String firstname, final String lastname, final String password,
-			final String email, final String[] roleIds, final Long officeId) {
-		this.username = username;
-		this.firstname = firstname;
-		this.lastname = lastname;
-		this.password = password;
-		this.email = email;
-		this.roleIds = roleIds;
-		this.officeId = officeId;
-	}
-	
-	public UserCommand(final String username, final String firstname, final String lastname, final String email) {
-		this.username = username;
-		this.firstname = firstname;
-		this.lastname = lastname;
-		this.email = email;
-	}
-
-	public UserCommand(final String username, final String password,
-			final String email, final String[] roleIds, final Long officeId) {
-		this.username = username;
-		this.password = password;
-		this.email = email;
-		this.roleIds = roleIds;
-		this.officeId = officeId;
 	}
 	
 	public String getDisplayName() {
@@ -74,14 +53,6 @@ public class UserCommand {
 
 	public void setEmail(final String email) {
 		this.email = email;
-	}
-
-	public String[] getRoleIds() {
-		return this.roleIds;
-	}
-
-	public void setRoleIds(final String[] roleIds) {
-		this.roleIds = roleIds;
 	}
 
 	public Long getOfficeId() {
@@ -114,5 +85,21 @@ public class UserCommand {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public List<String> getNotSelectedItems() {
+		return notSelectedItems;
+	}
+
+	public void setNotSelectedItems(List<String> notSelectedItems) {
+		this.notSelectedItems = notSelectedItems;
+	}
+
+	public List<String> getSelectedItems() {
+		return selectedItems;
+	}
+
+	public void setSelectedItems(List<String> selectedItems) {
+		this.selectedItems = selectedItems;
 	}
 }

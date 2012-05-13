@@ -760,11 +760,13 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 
 		List<OfficeData> offices = retrieveOffices();
 
-		List<RoleData> availableRoles = new ArrayList<RoleData>(
-				retrieveAllRoles());
+		List<RoleData> availableRoles = new ArrayList<RoleData>(retrieveAllRoles());
 
-		AppUser user = this.appUserRepository.findOne(usersThatMatch(
-				currentUser.getOrganisation(), userId));
+		AppUser user = this.appUserRepository.findOne(usersThatMatch(currentUser.getOrganisation(), userId));
+		
+		if (user == null) {
+			throw new PlatformResourceNotFoundException("error.msg.user.id.invalid", "User with identifier {0} does not exist.", userId);
+		}
 
 		List<RoleData> userRoleData = new ArrayList<RoleData>();
 		Set<Role> userRoles = user.getRoles();

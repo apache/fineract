@@ -8,11 +8,11 @@ import org.mifosng.data.ErrorResponse;
 import org.mifosng.data.command.UserCommand;
 import org.mifosng.platform.exceptions.NewDataValidationException;
 
-public class UserValidator {
+public class UserCommandValidator {
 
 	private final UserCommand command;
 
-	public UserValidator(UserCommand command) {
+	public UserCommandValidator(UserCommand command) {
 		this.command = command;
 	}
 
@@ -27,7 +27,7 @@ public class UserValidator {
 			dataValidationErrors.add(error);
 		}
 		
-		if (command.getRoleIds() == null) {
+		if (command.getSelectedItems() == null) {
 			ErrorResponse error = new ErrorResponse("validation.msg.user.roles.cannot.be.blank", "selectedItems");
 			dataValidationErrors.add(error);
 		}

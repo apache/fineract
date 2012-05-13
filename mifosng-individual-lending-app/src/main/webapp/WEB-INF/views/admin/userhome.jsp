@@ -55,9 +55,9 @@ $(document).ready(function() {
 		        return false;
 		      }
 		},
-		globalDate: function(dateParts) {
+		globalDate: function(localDateAsISOString) {
 		      try {
-		    	
+		    	  var dateParts = localDateAsISOString.split("-")
 		    	  var year = dateParts[0];
 		    	  var month = parseInt(dateParts[1]) - 1; // month is zero indexed
 		    	  var day = dateParts[2];
@@ -70,9 +70,9 @@ $(document).ready(function() {
 		        return "??";
 		      }
 		},
-		globalDateTime: function(dateParts) {
+		globalDateTime: function(dateInMillis) {
 		      try {
-		    	  var d = new Date(dateParts);
+		    	  var d = new Date(dateInMillis);
 		    	  
 		    	  return Globalize.format(d,"F");
 		      } catch(e) {
@@ -114,17 +114,28 @@ $(document).ready(function() {
 			removeErrors(placeholderDiv);
 			
 		  	var jsonErrors = JSON.parse(jqXHR.responseText);
-		  	
+		  	console.log(jsonErrors);
+		  	var valErrors = jsonErrors.errors;
+		  	console.log(valErrors);
 		  	var errorArray = new Array();
 		  	var arrayIndex = 0;
-		  	$.each(jsonErrors, function() {
-		  	  var fieldId = '#' + this.field;
+		  	$.each(valErrors, function() {
+		  	  var fieldId = '#' + this.parameterName;
 		  	  $(fieldId).addClass("ui-state-error");
 		  	  
 		  	  var errorObj = new Object();
-		  	  errorObj.field = this.field;
-		  	  errorObj.code = this.code;
-		  	  errorObj.message = jQuery.i18n.prop(this.code, this.args);
+		  	  errorObj.field = this.parameterName;
+		  	  errorObj.code = this.userMessageGlobalisationCode;
+		  	  
+		  	  var argArray = new Array();
+		  	  var argArrayIndex = 0;
+		  	  $.each(this.args, function() {
+		  		argArray[argArrayIndex] = this.value;
+		  		argArrayIndex++;
+		  	  });
+		  	  console.log(argArray);
+		  	  // hardcoded support for six arguments
+		  	  errorObj.message = jQuery.i18n.prop(this.userMessageGlobalisationCode, argArray[0], argArray[1], argArray[2], argArray[3], argArray[4], argArray[5]);
 		  	  errorObj.value = this.value;
 		  	  
 		  	  errorArray[arrayIndex] = errorObj;
@@ -144,17 +155,33 @@ $(document).ready(function() {
 		}
 	}
 	
-	function popupDialogWithFormView(url, titleCode, templateSelector, width, height, saveSuccessFunction) {
+	$.fn.serializeObject = function()
+	{
+	    var o = {};
+	    var a = this.serializeArray();
+	    $.each(a, function() {
+	        if (o[this.name] !== undefined) {
+	            if (!o[this.name].push) {
+	                o[this.name] = [o[this.name]];
+	            }
+	            o[this.name].push(this.value || '');
+	        } else {
+	            o[this.name] = this.value || '';
+	        }
+	    });
+	    return o;
+	};
+	
+	function popupDialogWithFormView(getUrl, postUrl, submitType, titleCode, templateSelector, width, height, saveSuccessFunction) {
 		 var dialogDiv = $("<div id='dialog-form'></div>");
-		 
 		 var jqxhr = $.ajax({
-			url: url,
+			url: getUrl,
 			type: 'GET',
 			contentType: 'application/json',
 			dataType: 'json',
 			cache: false,
 			success: function(data, textStatus, jqXHR) {
-			
+			console.log(data);
 			var formHtml = $(templateSelector).render(data);
 			
 			dialogDiv.append(formHtml);
@@ -173,17 +200,20 @@ $(document).ready(function() {
 		    	   $(this).attr("selected", "selected");  
 		    	});
 				
-	  			var form_data = $('#entityform').serialize();
-	  				 
+		    	
+		    	var newFormData = JSON.stringify($('#entityform').serializeObject());
+		    	console.log(newFormData);
+		    	
 				var jqxhr = $.ajax({
-					  url: url,
-					  type: 'POST',
-					  data: form_data,
-					  success: saveSuccessFunction
-				});
-				
-				jqxhr.error(function(jqXHR, textStatus, errorThrown) {
-					handleXhrError(jqXHR, textStatus, errorThrown, "#formErrorsTemplate", "#formerrors");
+					  url: postUrl,
+					  type: submitType,
+					  contentType: 'application/json',
+					  dataType: 'json',
+					  data: newFormData,
+					  success: saveSuccessFunction,
+					  error: function(jqXHR, textStatus, errorThrown) {
+					    handleXhrError(jqXHR, textStatus, errorThrown, "#formErrorsTemplate", "#formerrors");
+					  }
 				});
 			};
 			
@@ -197,7 +227,7 @@ $(document).ready(function() {
 			  		buttons: buttonsOpts,
 			  		close: function() {
 			  			// if i dont do this, theres a problem with errors being appended to dialog view second time round
-			  			$(this).dialog("destroy").remove();
+			  			$(this).remove();
 					},
 			  		open: function (event, ui) {
 			  			
@@ -232,11 +262,8 @@ $(document).ready(function() {
 			  dataType: 'json',
 			  cache: false,
 			  success: function(data, textStatus, jqXHR) {
-
-				var tableObj = new Object();
-				tableObj.items = data;
-				  
-				var tableHtml = $(templateSelector).render(tableObj);
+				console.log(data);
+				var tableHtml = $(templateSelector).render(data);
 				
 				$(displayAreaDivSelector).html("");
 				$(displayAreaDivSelector).html(tableHtml);
@@ -248,7 +275,7 @@ $(document).ready(function() {
 					
 					var width = 1000; 
 					var height = 550;
-					popupDialogWithFormView(url, 'dialog.title.edit.details', singleEntityTemplateSelector, width, height, saveSuccessFunction);
+					popupDialogWithFormView(url, url, 'PUT', 'dialog.title.edit.details', singleEntityTemplateSelector, width, height, saveSuccessFunction);
 					
 					e.preventDefault();
 				});
@@ -295,46 +322,24 @@ $(document).ready(function() {
 	}
 	
 	$('#listusers').click(function(e) {
-		var listUrl = "${allUsersUrl}";
-		var templateSelector = "#usersListTemplate";
-		var displayAreaDivSelector = "#contentplaceholder";
-		var singleEntityPrefixUrl = '${rootContext}admin/user/';
-		var singleEntityTemplateSelector = "#userFormTemplate";
-		
-		var saveSuccessFunction = function(data, textStatus, jqXHR) {
-		  	$("#dialog-form").dialog("destroy").remove();
-		  	var listUrl = "${allUsersUrl}";
-			var templateSelector = "#usersListTemplate";
-			var displayAreaDivSelector = "#contentplaceholder";
-			var singleEntityPrefixUrl = '${rootContext}admin/user/';
-			var singleEntityTemplateSelector = "#userFormTemplate";
-			
-			displayListView(listUrl, templateSelector, displayAreaDivSelector, singleEntityPrefixUrl, singleEntityTemplateSelector);
-		}
-		
-		displayListView(listUrl, templateSelector, displayAreaDivSelector, singleEntityPrefixUrl, singleEntityTemplateSelector, saveSuccessFunction);
-		
+		var listUrl = "http://localhost:8085/mifosng-provider/api/v1/users";
+		refreshUsersView();		
 	    e.preventDefault();
 	});
 	
 	$('#adduser').click(function(e) {
-		var url = '${rootContext}admin/user/new';
+		var url = 'http://localhost:8085/mifosng-provider/api/v1/users/template';
+		var postUrl = "http://localhost:8085/mifosng-provider/api/v1/users";
 		var templateSelector = "#userFormTemplate";
 		var width = 1000; 
 		var height = 550;
 		
 		var saveSuccessFunction = function(data, textStatus, jqXHR) {
-			  	$("#dialog-form").dialog("close");
-			  	var listUrl = "${allUsersUrl}";
-				var templateSelector = "#usersListTemplate";
-				var displayAreaDivSelector = "#contentplaceholder";
-				var singleEntityPrefixUrl = '${rootContext}admin/user/';
-				var singleEntityTemplateSelector = "#userFormTemplate";
-				
-				displayListView(listUrl, templateSelector, displayAreaDivSelector, singleEntityPrefixUrl, singleEntityTemplateSelector);
+		  	$("#dialog-form").dialog("close");
+		  	refreshUsersView();
 		}
 		
-		popupDialogWithFormView(url, 'dialog.title.add.user', templateSelector, width, height, saveSuccessFunction);
+		popupDialogWithFormView(url, postUrl, 'POST', 'dialog.title.add.user', templateSelector, width, height, saveSuccessFunction);
 	    e.preventDefault();
 	});
 	
@@ -397,6 +402,71 @@ $(document).ready(function() {
 		
 	    e.preventDefault();
 	});
+	
+	function refreshUsersView() {
+		
+		var listUrl = 'http://localhost:8085/mifosng-provider/api/v1/users';
+		var templateSelector = "#usersListTemplate";
+		var displayAreaDivSelector = "#contentplaceholder";
+		var singleEntityPrefixUrl = 'http://localhost:8085/mifosng-provider/api/v1/users/';
+		var singleEntityTemplateSelector = "#userFormTemplate";
+		
+		var jqxhr = $.ajax({
+			  url: listUrl, 
+			  type: 'GET',
+			  contentType: 'application/json',
+			  dataType: 'json',
+			  success: function(data, textStatus, jqXHR) {
+				console.log(data);  
+				var officeListHtml = $(templateSelector).render(data);
+				$(displayAreaDivSelector).html(officeListHtml);  
+				
+				$("a.edit").click( function(e) {
+					var linkId = this.id;
+					var entityId = linkId.replace("edit", "");
+					var getUrl = 'http://localhost:8085/mifosng-provider/api/v1/users/' + entityId;
+					var putUrl = 'http://localhost:8085/mifosng-provider/api/v1/users/' + entityId;
+					
+					var templateSelector = "#userFormTemplate";
+					var width = 600; 
+					var height = 400;
+					
+					var saveSuccessFunction = function(data, textStatus, jqXHR) {
+						  $("#dialog-form").dialog("close");
+						  refreshUsersView();
+					}
+					
+					popupDialogWithFormView(getUrl, putUrl, 'PUT', "dialog.title.edit.details", templateSelector, width, height, saveSuccessFunction);
+					e.preventDefault();
+				});
+				
+				$("a.delete").click( function(e) {
+					var linkId = this.id;
+					var entityId = linkId.replace("delete", "");
+					var url = 'http://localhost:8085/mifosng-provider/api/v1/users/' + entityId;
+					showNotAvailableDialog('dialog.title.functionality.not.available');
+					
+					e.preventDefault();
+				});
+				
+				var oTable = $("#entitytable").dataTable( {
+					"bSort": true,
+					"bInfo": true,
+					"bJQueryUI": true,
+					"bRetrieve": false,
+					"bScrollCollapse": false,
+					"bPaginate": false,
+					"bLengthChange": false,
+					"bFilter": false,
+					"bAutoWidth": false,
+				} );
+			  }
+		});
+		
+		jqxhr.error(function(jqXHR, textStatus, errorThrown) {
+			handleXhrError(jqXHR, textStatus, errorThrown, "#formErrorsTemplate", "#formerrors");
+		});
+	}
 	// end of document.ready
 });
 </script>

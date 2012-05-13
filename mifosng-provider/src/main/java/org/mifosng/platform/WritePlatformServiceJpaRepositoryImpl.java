@@ -15,6 +15,7 @@ import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
+import org.mifosng.data.ApiParameterError;
 import org.mifosng.data.EntityIdentifier;
 import org.mifosng.data.ErrorResponse;
 import org.mifosng.data.LoanSchedule;
@@ -42,8 +43,10 @@ import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.exceptions.ApplicationDomainRuleException;
 import org.mifosng.platform.exceptions.InvalidSignupException;
-import org.mifosng.platform.exceptions.NewDataValidationException;
 import org.mifosng.platform.exceptions.NoAuthorizationException;
+import org.mifosng.platform.exceptions.PlatformApiDataValidationException;
+import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
+import org.mifosng.platform.exceptions.PlatformResourceNotFoundException;
 import org.mifosng.platform.exceptions.UnAuthenticatedUserException;
 import org.mifosng.platform.infrastructure.BasicPasswordEncodablePlatformUser;
 import org.mifosng.platform.infrastructure.PlatformPasswordEncoder;
@@ -147,11 +150,11 @@ public class WritePlatformServiceJpaRepositoryImpl implements WritePlatformServi
 		try {
 			AppUser currentUser = extractAuthenticatedUser();
 			
-			UserValidator validator = new UserValidator(command);
+			UserCommandValidator validator = new UserCommandValidator(command);
 			validator.validate();
 			
 			Set<Role> allRoles = new HashSet<Role>();
-			for (String roleId : command.getRoleIds()) {
+			for (String roleId : command.getSelectedItems()) {
 				Role role = this.roleRepository.findOne(Long.valueOf(roleId));
 				allRoles.add(role);
 			}
@@ -173,36 +176,42 @@ public class WritePlatformServiceJpaRepositoryImpl implements WritePlatformServi
 	@Transactional
 	@Override
 	public Long updateUser(UserCommand command) {
+		
 		try {
 			AppUser currentUser = extractAuthenticatedUser();
 			
-			UserValidator validator = new UserValidator(command);
+			UserCommandValidator validator = new UserCommandValidator(command);
 			validator.validate();
 			
-			List<ErrorResponse> dataValidationErrors = new ArrayList<ErrorResponse>();
+			List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 			if (command.getId() == null) {
-				ErrorResponse error = new ErrorResponse("validation.msg.user.id.cannot.be.blank", "id");
+				ApiParameterError error = ApiParameterError.parameterError("validation.msg.user.id.cannot.be.blank", "The parameter id cannot be empty.", "id");
 				dataValidationErrors.add(error);
-			}
-			
-			if (!dataValidationErrors.isEmpty()) {
-				throw new NewDataValidationException(dataValidationErrors, "Data validation error exist.");
+				
+				throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);
 			}
 			
 			Set<Role> allRoles = new HashSet<Role>();
-			for (String roleId : command.getRoleIds()) {
+			for (String roleId : command.getSelectedItems()) {
 				Role role = this.roleRepository.findOne(Long.valueOf(roleId));
 				allRoles.add(role);
 			}
 
 			Office office = this.officeRepository.findOne(command.getOfficeId());
+			if (office == null) {
+				throw new PlatformResourceNotFoundException("error.msg.office.id.invalid", "Office with identifier {0} does not exist.", command.getOfficeId());
+			}
 
 			AppUser userToUpdate = this.appUserRepository.findOne(usersThatMatch(currentUser.getOrganisation(), command.getId()));
+			if (userToUpdate == null) {
+				throw new PlatformResourceNotFoundException("error.msg.user.id.invalid", "User with identifier {0} does not exist.", command.getId());
+			}
+			
 			userToUpdate.update(allRoles, office, command.getUsername(), command.getFirstname(), command.getLastname(), command.getEmail());
 			
 			return userToUpdate.getId();
 		} catch (DataIntegrityViolationException e) {
-			throw new UsernameAlreadyExistsException(e);
+			throw new PlatformDataIntegrityException("validation.msg.username.already.exists.in.organisation", "Username already exists.", "username", command.getUsername());
 		}
 	}
 	
@@ -211,7 +220,7 @@ public class WritePlatformServiceJpaRepositoryImpl implements WritePlatformServi
 	public Long updateCurrentUser(UserCommand command) {
 		AppUser currentUser = extractAuthenticatedUser();
 		
-		UserValidator validator = new UserValidator(command);
+		UserCommandValidator validator = new UserCommandValidator(command);
 		validator.validateAccountSettingDetails();
 		
 		AppUser userToUpdate = this.appUserRepository.findOne(currentUser.getId());

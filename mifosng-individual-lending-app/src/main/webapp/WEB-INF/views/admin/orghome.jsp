@@ -220,13 +220,10 @@
 		    	$('#selectedItems option').each(function(i) {  
 		    	   $(this).attr("selected", "selected");  
 		    	});
-				
 		    	
 		    	var newFormData = JSON.stringify($('#entityform').serializeObject());
 		    	console.log(newFormData);
 		    	
-	  			var form_data = $('#entityform').serialize();
-	  			
 				var jqxhr = $.ajax({
 					  url: postUrl,
 					  type: submitType,

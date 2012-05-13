@@ -27,7 +27,6 @@ import org.mifosng.data.PermissionData;
 import org.mifosng.data.PermissionList;
 import org.mifosng.data.RoleData;
 import org.mifosng.data.RoleList;
-import org.mifosng.data.UserList;
 import org.mifosng.data.command.AdjustLoanTransactionCommand;
 import org.mifosng.data.command.CalculateLoanScheduleCommand;
 import org.mifosng.data.command.ChangePasswordCommand;
@@ -532,41 +531,6 @@ public class CommonRestOperationsImpl implements CommonRestOperations {
 	}
 
 	@Override
-	public EntityIdentifier createUser(final UserCommand command) {
-		try {
-			URI restUri = URI.create(getBaseServerUrl().concat(
-					"api/protected/admin/user/new"));
-
-			ResponseEntity<EntityIdentifier> s = this.oauthRestServiceTemplate
-					.postForEntity(restUri, createUserRequest(command),
-							EntityIdentifier.class);
-
-			return s.getBody();
-		} catch (HttpStatusCodeException e) {
-			ErrorResponseList errorList = parseErrors(e);
-			throw new ClientValidationException(errorList.getErrors());
-		}
-	}
-
-	@Override
-	public EntityIdentifier updateUser(UserCommand command) {
-		try {
-			URI restUri = URI.create(getBaseServerUrl().concat(
-					"api/protected/admin/user/").concat(
-					command.getId().toString()));
-
-			ResponseEntity<EntityIdentifier> s = this.oauthRestServiceTemplate
-					.postForEntity(restUri, createUserRequest(command),
-							EntityIdentifier.class);
-
-			return s.getBody();
-		} catch (HttpStatusCodeException e) {
-			ErrorResponseList errorList = parseErrors(e);
-			throw new ClientValidationException(errorList.getErrors());
-		}
-	}
-
-	@Override
 	public EntityIdentifier updateCurrentUserDetails(UserCommand command) {
 		try {
 			URI restUri = URI.create(getBaseServerUrl().concat(
@@ -602,14 +566,6 @@ public class CommonRestOperationsImpl implements CommonRestOperations {
 		}
 	}
 
-	@Override
-	public void deleteUser(Long userId) {
-		URI restUri = URI.create(getBaseServerUrl().concat(
-				"api/protected/admin/user/").concat(userId.toString()));
-
-		this.oauthRestServiceTemplate.delete(restUri);
-	}
-
 	private HttpEntity<UserCommand> createUserRequest(final UserCommand command) {
 
 		HttpHeaders requestHeaders = new HttpHeaders();
@@ -642,46 +598,6 @@ public class CommonRestOperationsImpl implements CommonRestOperations {
 		HttpEntity<RoleCommand> requestEntity = new HttpEntity<RoleCommand>(
 				command, requestHeaders);
 		return requestEntity;
-	}
-
-	@Override
-	public Collection<AppUserData> retrieveAllUsers() {
-		try {
-			URI restUri = URI.create(getBaseServerUrl().concat(
-					"api/protected/admin/user/all"));
-
-			ResponseEntity<UserList> s = this.oauthRestServiceTemplate
-					.exchange(restUri, HttpMethod.GET, emptyRequest(),
-							UserList.class);
-
-			return s.getBody().getUsers();
-		} catch (HttpStatusCodeException e) {
-			ErrorResponseList errorList = parseErrors(e);
-			throw new ClientValidationException(errorList.getErrors());
-		}
-	}
-
-	@Override
-	public AppUserData retrieveNewUserDetails() {
-
-		URI restUri = URI.create(getBaseServerUrl().concat(
-				"api/protected/admin/user/new"));
-
-		ResponseEntity<AppUserData> s = this.oauthRestServiceTemplate.exchange(
-				restUri, HttpMethod.GET, emptyRequest(), AppUserData.class);
-
-		return s.getBody();
-	}
-
-	@Override
-	public AppUserData retrieveUser(Long userId) {
-		URI restUri = URI.create(getBaseServerUrl().concat(
-				"api/protected/admin/user/").concat(userId.toString()));
-
-		ResponseEntity<AppUserData> s = this.oauthRestServiceTemplate.exchange(
-				restUri, HttpMethod.GET, emptyRequest(), AppUserData.class);
-
-		return s.getBody();
 	}
 
 	@Override

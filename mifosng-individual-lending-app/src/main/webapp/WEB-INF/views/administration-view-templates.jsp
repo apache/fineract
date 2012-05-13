@@ -440,7 +440,7 @@
 	</tr>
 </thead>
 <tbody>
-{{#each items}}
+{{#each users}}
 <tr>
 	<td>{{=officeName}}</td>
 	<td>{{=username}}</td>

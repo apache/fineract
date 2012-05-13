@@ -33,24 +33,11 @@ public interface CommonRestOperations {
 
 	void logout(String accessToken);
 
-	void updateProtectedResource(
-			ProtectedResourceDetails loadProtectedResourceDetailsById);
-
-	Collection<AppUserData> retrieveAllUsers();
-
-	AppUserData retrieveNewUserDetails();
-
-	AppUserData retrieveUser(Long userId);
+	void updateProtectedResource(ProtectedResourceDetails loadProtectedResourceDetailsById);
 
 	AppUserData retrieveCurrentUser();
 
-	EntityIdentifier createUser(UserCommand command);
-
-	EntityIdentifier updateUser(UserCommand command);
-
 	EntityIdentifier updateCurrentUserPassword(ChangePasswordCommand command);
-
-	void deleteUser(Long userId);
 
 	Collection<RoleData> retrieveAllRoles();
 
