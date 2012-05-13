@@ -76,7 +76,7 @@ public class FlexibleReportingApiResource {
 	
 	@GET
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+	@Produces({ MediaType.APPLICATION_JSON})
 	public Response retrieveReport(@Context UriInfo uriInfo, @Context HttpServletResponse httpServletResponse) {
 		
 		MultivaluedMap<String, String> queryParams = uriInfo.getQueryParameters();
