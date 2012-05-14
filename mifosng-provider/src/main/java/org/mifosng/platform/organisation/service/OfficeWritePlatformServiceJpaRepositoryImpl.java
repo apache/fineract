@@ -7,6 +7,7 @@ import org.mifosng.platform.exceptions.NoAuthorizationException;
 import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
 import org.mifosng.platform.organisation.domain.Office;
 import org.mifosng.platform.organisation.domain.OfficeRepository;
+import org.mifosng.platform.organisation.service.OfficeCommandValidator;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.user.domain.AppUser;
 import org.slf4j.Logger;
@@ -49,7 +50,7 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
 			
 			office.generateHierarchy();
 			
-			this.officeRepository.save(office);
+			this.officeRepository.saveAndFlush(office);
 			
 			return office.getId();
 		} catch (DataIntegrityViolationException dve) {

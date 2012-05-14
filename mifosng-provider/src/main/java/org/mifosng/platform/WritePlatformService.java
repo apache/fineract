@@ -8,35 +8,22 @@ import org.mifosng.data.command.LoanStateTransitionCommand;
 import org.mifosng.data.command.LoanTransactionCommand;
 import org.mifosng.data.command.NoteCommand;
 import org.mifosng.data.command.RoleCommand;
-import org.mifosng.data.command.SignupCommand;
 import org.mifosng.data.command.SubmitLoanApplicationCommand;
 import org.mifosng.data.command.UndoLoanApprovalCommand;
 import org.mifosng.data.command.UndoLoanDisbursalCommand;
 import org.mifosng.data.command.UpdateUsernamePasswordCommand;
 import org.mifosng.data.command.UserCommand;
-import org.mifosng.platform.exceptions.InvalidSignupException;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface WritePlatformService {
 
-	Long createUser(UserCommand command);
-	
-	Long updateUser(UserCommand command);
-	
 	Long updateCurrentUser(UserCommand command);
 
 	Long updateCurrentUserPassword(ChangePasswordCommand command);
 	
-	void deleteUser(Long userId);
-
 	Long createRole(RoleCommand command);
 	
 	Long updateRole(RoleCommand command);
-
-	/**
-	 * @throws InvalidSignupException when sign up fails
-	 */
-	Long signup(SignupCommand command);
 
 	void updateUsernamePasswordOnFirstTimeLogin(UpdateUsernamePasswordCommand command);
 

@@ -4,7 +4,7 @@ import org.mifosng.data.command.OfficeCommand;
 
 public interface OfficeWritePlatformService {
 
-	Long createOffice(OfficeCommand command);
-
-	Long updateOffice(OfficeCommand command);
+	Long createOffice(final OfficeCommand command);
+	
+	Long updateOffice(final OfficeCommand command);
 }

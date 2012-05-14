@@ -114,9 +114,7 @@ $(document).ready(function() {
 			removeErrors(placeholderDiv);
 			
 		  	var jsonErrors = JSON.parse(jqXHR.responseText);
-		  	console.log(jsonErrors);
 		  	var valErrors = jsonErrors.errors;
-		  	console.log(valErrors);
 		  	var errorArray = new Array();
 		  	var arrayIndex = 0;
 		  	$.each(valErrors, function() {
@@ -133,7 +131,6 @@ $(document).ready(function() {
 		  		argArray[argArrayIndex] = this.value;
 		  		argArrayIndex++;
 		  	  });
-		  	  console.log(argArray);
 		  	  // hardcoded support for six arguments
 		  	  errorObj.message = jQuery.i18n.prop(this.userMessageGlobalisationCode, argArray[0], argArray[1], argArray[2], argArray[3], argArray[4], argArray[5]);
 		  	  errorObj.value = this.value;
@@ -166,7 +163,13 @@ $(document).ready(function() {
 	            }
 	            o[this.name].push(this.value || '');
 	        } else {
-	            o[this.name] = this.value || '';
+	        	
+	        	if (this.name === 'selectedItems' || this.name === 'notSelectedItems') {
+	        		o[this.name] = new Array();
+	        		o[this.name].push(this.value || '');
+	        	} else {
+	        		o[this.name] = this.value || '';	
+	        	}
 	        }
 	    });
 	    return o;
@@ -199,7 +202,6 @@ $(document).ready(function() {
 		    	$('#selectedItems option').each(function(i) {  
 		    	   $(this).attr("selected", "selected");  
 		    	});
-				
 		    	
 		    	var newFormData = JSON.stringify($('#entityform').serializeObject());
 		    	console.log(newFormData);
@@ -322,14 +324,14 @@ $(document).ready(function() {
 	}
 	
 	$('#listusers').click(function(e) {
-		var listUrl = "http://localhost:8085/mifosng-provider/api/v1/users";
+		var listUrl = "http://localhost:8080/mifosng-provider/api/v1/users";
 		refreshUsersView();		
 	    e.preventDefault();
 	});
 	
 	$('#adduser').click(function(e) {
-		var url = 'http://localhost:8085/mifosng-provider/api/v1/users/template';
-		var postUrl = "http://localhost:8085/mifosng-provider/api/v1/users";
+		var url = 'http://localhost:8080/mifosng-provider/api/v1/users/template';
+		var postUrl = "http://localhost:8080/mifosng-provider/api/v1/users";
 		var templateSelector = "#userFormTemplate";
 		var width = 1000; 
 		var height = 550;
@@ -405,10 +407,10 @@ $(document).ready(function() {
 	
 	function refreshUsersView() {
 		
-		var listUrl = 'http://localhost:8085/mifosng-provider/api/v1/users';
+		var listUrl = 'http://localhost:8080/mifosng-provider/api/v1/users';
 		var templateSelector = "#usersListTemplate";
 		var displayAreaDivSelector = "#contentplaceholder";
-		var singleEntityPrefixUrl = 'http://localhost:8085/mifosng-provider/api/v1/users/';
+		var singleEntityPrefixUrl = 'http://localhost:8080/mifosng-provider/api/v1/users/';
 		var singleEntityTemplateSelector = "#userFormTemplate";
 		
 		var jqxhr = $.ajax({
@@ -424,8 +426,8 @@ $(document).ready(function() {
 				$("a.edit").click( function(e) {
 					var linkId = this.id;
 					var entityId = linkId.replace("edit", "");
-					var getUrl = 'http://localhost:8085/mifosng-provider/api/v1/users/' + entityId;
-					var putUrl = 'http://localhost:8085/mifosng-provider/api/v1/users/' + entityId;
+					var getUrl = 'http://localhost:8080/mifosng-provider/api/v1/users/' + entityId;
+					var putUrl = 'http://localhost:8080/mifosng-provider/api/v1/users/' + entityId;
 					
 					var templateSelector = "#userFormTemplate";
 					var width = 600; 
@@ -443,7 +445,7 @@ $(document).ready(function() {
 				$("a.delete").click( function(e) {
 					var linkId = this.id;
 					var entityId = linkId.replace("delete", "");
-					var url = 'http://localhost:8085/mifosng-provider/api/v1/users/' + entityId;
+					var url = 'http://localhost:8080/mifosng-provider/api/v1/users/' + entityId;
 					showNotAvailableDialog('dialog.title.functionality.not.available');
 					
 					e.preventDefault();

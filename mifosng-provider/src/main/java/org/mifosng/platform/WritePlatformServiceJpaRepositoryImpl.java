@@ -9,13 +9,10 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
-import org.mifosng.data.ApiParameterError;
 import org.mifosng.data.EntityIdentifier;
 import org.mifosng.data.ErrorResponse;
 import org.mifosng.data.LoanSchedule;
@@ -29,7 +26,6 @@ import org.mifosng.data.command.LoanStateTransitionCommand;
 import org.mifosng.data.command.LoanTransactionCommand;
 import org.mifosng.data.command.NoteCommand;
 import org.mifosng.data.command.RoleCommand;
-import org.mifosng.data.command.SignupCommand;
 import org.mifosng.data.command.SubmitLoanApplicationCommand;
 import org.mifosng.data.command.UndoLoanApprovalCommand;
 import org.mifosng.data.command.UndoLoanDisbursalCommand;
@@ -42,11 +38,7 @@ import org.mifosng.platform.client.domain.NoteRepository;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.exceptions.ApplicationDomainRuleException;
-import org.mifosng.platform.exceptions.InvalidSignupException;
 import org.mifosng.platform.exceptions.NoAuthorizationException;
-import org.mifosng.platform.exceptions.PlatformApiDataValidationException;
-import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
-import org.mifosng.platform.exceptions.PlatformResourceNotFoundException;
 import org.mifosng.platform.exceptions.UnAuthenticatedUserException;
 import org.mifosng.platform.infrastructure.BasicPasswordEncodablePlatformUser;
 import org.mifosng.platform.infrastructure.PlatformPasswordEncoder;
@@ -71,9 +63,6 @@ import org.mifosng.platform.loan.domain.LoanTransactionRepository;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 import org.mifosng.platform.organisation.domain.Office;
 import org.mifosng.platform.organisation.domain.OfficeRepository;
-import org.mifosng.platform.organisation.domain.Organisation;
-import org.mifosng.platform.organisation.domain.OrganisationCurrency;
-import org.mifosng.platform.organisation.domain.OrganisationRepository;
 import org.mifosng.platform.user.domain.AppUser;
 import org.mifosng.platform.user.domain.AppUserRepository;
 import org.mifosng.platform.user.domain.Permission;
@@ -81,7 +70,7 @@ import org.mifosng.platform.user.domain.PermissionRepository;
 import org.mifosng.platform.user.domain.PlatformUserRepository;
 import org.mifosng.platform.user.domain.Role;
 import org.mifosng.platform.user.domain.RoleRepository;
-import org.mifosng.platform.user.domain.UserDomainService;
+import org.mifosng.platform.user.service.UserCommandValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.Authentication;
@@ -93,9 +82,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class WritePlatformServiceJpaRepositoryImpl implements WritePlatformService {
 
-	private final OrganisationRepository organisationRepository;
 	private final OfficeRepository officeRepository;
-	private final UserDomainService userDomainService;
 	private final PlatformUserRepository platformUserRepository;
 	private final PlatformPasswordEncoder platformPasswordEncoder;
 	private final ClientRepository clientRepository;
@@ -111,9 +98,7 @@ public class WritePlatformServiceJpaRepositoryImpl implements WritePlatformServi
 
 	@Autowired
 	public WritePlatformServiceJpaRepositoryImpl(
-			final OrganisationRepository organisationRepository,
 			final OfficeRepository officeRepository,
-			final UserDomainService userDomainService,
 			final PlatformUserRepository platformUserRepository,
 			final PlatformPasswordEncoder platformPasswordEncoder,
 			final ClientRepository clientRepository,
@@ -126,9 +111,7 @@ public class WritePlatformServiceJpaRepositoryImpl implements WritePlatformServi
 			final AppUserRepository appUserRepository,
 			final RoleRepository roleRepository,
 			final PermissionRepository permissionRepository) {
-		this.organisationRepository = organisationRepository;
 		this.officeRepository = officeRepository;
-		this.userDomainService = userDomainService;
 		this.platformUserRepository = platformUserRepository;
 		this.platformPasswordEncoder = platformPasswordEncoder;
 		this.clientRepository = clientRepository;
@@ -143,78 +126,6 @@ public class WritePlatformServiceJpaRepositoryImpl implements WritePlatformServi
 		this.permissionRepository = permissionRepository;
 	}
 
-	@Transactional
-	@Override
-	public Long createUser(final UserCommand command) {
-		
-		try {
-			AppUser currentUser = extractAuthenticatedUser();
-			
-			UserCommandValidator validator = new UserCommandValidator(command);
-			validator.validate();
-			
-			Set<Role> allRoles = new HashSet<Role>();
-			for (String roleId : command.getSelectedItems()) {
-				Role role = this.roleRepository.findOne(Long.valueOf(roleId));
-				allRoles.add(role);
-			}
-
-			Office office = this.officeRepository.findOne(command.getOfficeId());
-
-	        AppUser appUser = AppUser.createNew(currentUser.getOrganisation(), office, 
-	        		allRoles, command.getUsername(), command.getEmail(), 
-	        		command.getFirstname(), command.getLastname(), 
-	        		command.getPassword());
-			
-			this.userDomainService.create(appUser);
-			return appUser.getId();
-		} catch (DataIntegrityViolationException e) {
-			throw new UsernameAlreadyExistsException(e);
-		}
-	}
-	
-	@Transactional
-	@Override
-	public Long updateUser(UserCommand command) {
-		
-		try {
-			AppUser currentUser = extractAuthenticatedUser();
-			
-			UserCommandValidator validator = new UserCommandValidator(command);
-			validator.validate();
-			
-			List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-			if (command.getId() == null) {
-				ApiParameterError error = ApiParameterError.parameterError("validation.msg.user.id.cannot.be.blank", "The parameter id cannot be empty.", "id");
-				dataValidationErrors.add(error);
-				
-				throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);
-			}
-			
-			Set<Role> allRoles = new HashSet<Role>();
-			for (String roleId : command.getSelectedItems()) {
-				Role role = this.roleRepository.findOne(Long.valueOf(roleId));
-				allRoles.add(role);
-			}
-
-			Office office = this.officeRepository.findOne(command.getOfficeId());
-			if (office == null) {
-				throw new PlatformResourceNotFoundException("error.msg.office.id.invalid", "Office with identifier {0} does not exist.", command.getOfficeId());
-			}
-
-			AppUser userToUpdate = this.appUserRepository.findOne(usersThatMatch(currentUser.getOrganisation(), command.getId()));
-			if (userToUpdate == null) {
-				throw new PlatformResourceNotFoundException("error.msg.user.id.invalid", "User with identifier {0} does not exist.", command.getId());
-			}
-			
-			userToUpdate.update(allRoles, office, command.getUsername(), command.getFirstname(), command.getLastname(), command.getEmail());
-			
-			return userToUpdate.getId();
-		} catch (DataIntegrityViolationException e) {
-			throw new PlatformDataIntegrityException("validation.msg.username.already.exists.in.organisation", "Username already exists.", "username", command.getUsername());
-		}
-	}
-	
 	@Transactional
 	@Override
 	public Long updateCurrentUser(UserCommand command) {
@@ -252,12 +163,6 @@ public class WritePlatformServiceJpaRepositoryImpl implements WritePlatformServi
 		userToUpdate.updatePasswordOnFirstTimeLogin(newPasswordEncoded);
 		
 		return userToUpdate.getId();
-	}
-	
-	@Transactional
-	@Override
-	public void deleteUser(Long userId) {
-		this.appUserRepository.delete(userId);
 	}
 	
 	@Transactional
@@ -319,30 +224,6 @@ public class WritePlatformServiceJpaRepositoryImpl implements WritePlatformServi
 		this.roleRepository.save(role);
 		
 		return role.getId();
-	}
-
-	@Transactional
-	@Override
-	public Long signup(final SignupCommand command) {
-
-		try {
-			Organisation organisation = new Organisation(
-					command.getOrganisationName(), command.getOpeningDate(),
-					command.getContactEmail(), command.getContactName(),
-					new ArrayList<OrganisationCurrency>());
-			this.organisationRepository.save(organisation);
-
-			String name = command.getOrganisationName() + " Head Office";
-			String externalId = null;
-			Office headOffice = Office.headOffice(organisation, name, command.getOpeningDate(), externalId);
-			this.officeRepository.save(headOffice);
-
-			this.userDomainService.createDefaultAdminUser(organisation,
-					headOffice);
-			return organisation.getId();
-		} catch (DataIntegrityViolationException e) {
-			throw new InvalidSignupException(e);
-		}
 	}
 	
 	@Transactional

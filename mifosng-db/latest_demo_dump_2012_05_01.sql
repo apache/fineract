@@ -41,7 +41,7 @@ CREATE TABLE `admin_appuser` (
   `lastmodified_date` datetime DEFAULT NULL,
   `lastmodifiedby_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `org_id` (`org_id`,`username`),
+  UNIQUE KEY `username_org` (`org_id`,`username`),
   KEY `FKB3D587CE0DD567A` (`office_id`),
   KEY `FKB3D587C54DF2770` (`org_id`),
   CONSTRAINT `FKB3D587C54DF2770` FOREIGN KEY (`org_id`) REFERENCES `org_organisation` (`id`),

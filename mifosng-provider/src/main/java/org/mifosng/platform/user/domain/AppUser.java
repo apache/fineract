@@ -25,7 +25,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 
 @Entity
-@Table(name = "admin_appuser", uniqueConstraints=@UniqueConstraint(columnNames = {"org_id", "username"}))
+@Table(name = "admin_appuser", uniqueConstraints=@UniqueConstraint(columnNames = {"org_id", "username"}, name="username_org"))
 public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements PlatformUser {
 
     @Column(name = "email", nullable=false, length=100)
@@ -81,6 +81,8 @@ public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements P
 		boolean userAccountNonLocked = true;
 		
 		Collection<SimpleGrantedAuthority> authorities = new ArrayList<SimpleGrantedAuthority>();
+		authorities.add(new SimpleGrantedAuthority("DUMMY_ROLE_NOT_USED_OR_PERSISTED_TO_AVOID_EXCEPTION"));
+		
 		User user = new User(username, password, userEnabled, userAccountNonExpired, userCredentialsNonExpired, userAccountNonLocked, authorities);
 		return new AppUser(organisation, office, user, allRoles, email, firstname, lastname);
 	}

@@ -21,7 +21,7 @@ public class UserCommand implements Serializable {
 	private Long officeId;
 	
 	private List<String> notSelectedItems = new ArrayList<String>();
-	private List<String> selectedItems = new ArrayList<String>();
+	private String[] selectedItems;
 
 	public UserCommand() {
 		//
@@ -95,11 +95,11 @@ public class UserCommand implements Serializable {
 		this.notSelectedItems = notSelectedItems;
 	}
 
-	public List<String> getSelectedItems() {
+	public String[] getSelectedItems() {
 		return selectedItems;
 	}
 
-	public void setSelectedItems(List<String> selectedItems) {
+	public void setSelectedItems(String... selectedItems) {
 		this.selectedItems = selectedItems;
 	}
 }

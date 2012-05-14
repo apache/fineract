@@ -16,6 +16,7 @@ import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
+ * FIXMED - REMOVE DEPRECATED CONTROLLER and related code artifacts
  * @deprecated - remove signup functionality for now. 
  */
 @Deprecated
@@ -95,7 +96,8 @@ public class SignupController {
 
 		ModelAndView mav = null;
 		try {
-			signupPlatformService.signup(command);
+			// REMOVED
+//			signupPlatformService.signup(command);
 
 			status.setComplete();
 			mav = new ModelAndView("/tenant/signupsuccess", "signupFormBean",

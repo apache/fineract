@@ -4,18 +4,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.OPTIONS;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriInfo;
 
@@ -38,57 +34,25 @@ public class ReportingApiResource {
 	@Autowired
 	private ReadExtraDataAndReportingService ReadExtraDataAndReportingService;
 
-	private String _corsHeaders;
-
-	private Response makeCORS(ResponseBuilder req, String returnMethod) {
-		ResponseBuilder rb = req.header("Access-Control-Allow-Origin", "*")
-				.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-
-		if (!"".equals(returnMethod)) {
-			rb.header("Access-Control-Allow-Headers", returnMethod);
-		}
-
-		return rb.build();
-	}
-
-	private Response makeCORS(ResponseBuilder req) {
-		return makeCORS(req, _corsHeaders);
-	}
-
-	private Response makeCORSExport(ResponseBuilder req, String exportFilename,
-			String returnMethod) {
-		ResponseBuilder rb = req
-				.header("Access-Control-Allow-Origin", "*")
-				.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-				.header("Content-Disposition",
-						"attachment;filename=" + exportFilename);
-
-		if (!"".equals(returnMethod)) {
-			rb.header("Access-Control-Allow-Headers", returnMethod);
-		}
-
-		return rb.build();
-	}
-
-	private Response makeCORSExport(ResponseBuilder req, String exportFilename) {
-		return makeCORSExport(req, exportFilename, _corsHeaders);
-	}
-
-	// This OPTIONS request/response is necessary
-	// if you consumes other format than text/plain or
-	// if you use other HTTP verbs than GET and POST
-	@OPTIONS
-	public Response corsMyResource(
-			@HeaderParam("Access-Control-Request-Headers") String requestH) {
-		_corsHeaders = requestH;
-		return makeCORS(Response.ok(), requestH);
-	}
+//	private Response makeCORSExport(ResponseBuilder req, String exportFilename,
+//			String returnMethod) {
+//		ResponseBuilder rb = req
+//				.header("Access-Control-Allow-Origin", "*")
+//				.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+//				.header("Content-Disposition",
+//						"attachment;filename=" + exportFilename);
+//
+//		if (!"".equals(returnMethod)) {
+//			rb.header("Access-Control-Allow-Headers", returnMethod);
+//		}
+//
+//		return rb.build();
+//	}
 
 	@GET
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Produces({ MediaType.APPLICATION_JSON, "application/x-msdownload" })
-	public Response retrieveReport(@Context UriInfo uriInfo,
-			@Context HttpServletResponse httpServletResponse) {
+	public Response retrieveReport(@Context UriInfo uriInfo) {
 
 		MultivaluedMap<String, String> queryParams = uriInfo
 				.getQueryParameters();
@@ -115,17 +79,15 @@ public class ReportingApiResource {
 		if ((exportCSV == null) || (!(exportCSV.equalsIgnoreCase("true")))) {
 			GenericResultset result = this.ReadExtraDataAndReportingService
 					.retrieveGenericResultset(name, type, extractedQueryParams);
-			return makeCORS(Response.ok().entity(result));
-		} else {
-			StreamingOutput result = this.ReadExtraDataAndReportingService
-					.retrieveReportCSV(name, type, extractedQueryParams);
+			
+			return Response.ok().entity(result).build();
+		} 
+		
+		StreamingOutput result = this.ReadExtraDataAndReportingService.retrieveReportCSV(name, type, extractedQueryParams);
 
-			return makeCORSExport(Response.ok().entity(result),
-					name.replaceAll(" ", "") + ".csv");
-		}
-
+		return Response.ok().entity(result).header("Content-Disposition","attachment;filename=" + name.replaceAll(" ", "") + ".csv").build();
 	}
-
+	
 	@GET
 	@Path("forceauth")
 	public Response hackToForceAuthentication() {

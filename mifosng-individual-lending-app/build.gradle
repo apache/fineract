@@ -91,6 +91,6 @@ dependencies {
 }
 
 [tomcatRun, tomcatRunWar, tomcatStop]*.with {
-  httpPort = 8080
+  httpPort = 8085
   stopPort = 8082
 }

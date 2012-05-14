@@ -123,6 +123,6 @@ dependencies {
 
 [tomcatRun, tomcatRunWar, tomcatStop]*.with {
   configFile = file('src/test/resources/META-INF/context.xml')
-  httpPort = 8085
+  httpPort = 8080
   stopPort = 8081
 }

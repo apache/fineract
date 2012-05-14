@@ -187,7 +187,13 @@
 	            }
 	            o[this.name].push(this.value || '');
 	        } else {
-	            o[this.name] = this.value || '';
+	        	
+	        	if (this.name === 'selectedItems' || this.name === 'notSelectedItems') {
+	        		o[this.name] = new Array();
+	        		o[this.name].push(this.value || '');
+	        	} else {
+	        		o[this.name] = this.value || '';	
+	        	}
 	        }
 	    });
 	    return o;
@@ -397,7 +403,7 @@
 				$.each(data.offices, function(i, item) {
 					//alert(item.name);
 				});
-				console.log(data);  
+				console.log(data);
 				var officelistParent = new Object();
 				officelistParent.items = data.offices;
 				
