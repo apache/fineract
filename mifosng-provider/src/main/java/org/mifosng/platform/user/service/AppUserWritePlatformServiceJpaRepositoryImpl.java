@@ -11,7 +11,6 @@ import org.apache.commons.lang.StringUtils;
 import org.mifosng.data.ApiParameterError;
 import org.mifosng.data.command.ChangePasswordCommand;
 import org.mifosng.data.command.UserCommand;
-import org.mifosng.platform.ChangePasswordCommandValidator;
 import org.mifosng.platform.exceptions.PlatformApiDataValidationException;
 import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
 import org.mifosng.platform.exceptions.PlatformResourceNotFoundException;
