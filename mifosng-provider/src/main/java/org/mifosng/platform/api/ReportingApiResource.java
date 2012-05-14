@@ -92,7 +92,6 @@ public class ReportingApiResource {
 
 		MultivaluedMap<String, String> queryParams = uriInfo
 				.getQueryParameters();
-		String rptDB = queryParams.getFirst("MRP_rptDB");
 		String name = queryParams.getFirst("MRP_Name");
 		String type = queryParams.getFirst("MRP_Type");
 		String exportCSV = queryParams.getFirst("exportCSV");
@@ -115,12 +114,11 @@ public class ReportingApiResource {
 
 		if ((exportCSV == null) || (!(exportCSV.equalsIgnoreCase("true")))) {
 			GenericResultset result = this.ReadExtraDataAndReportingService
-					.retrieveGenericResultset(rptDB, name, type,
-							extractedQueryParams);
+					.retrieveGenericResultset(name, type, extractedQueryParams);
 			return makeCORS(Response.ok().entity(result));
 		} else {
 			StreamingOutput result = this.ReadExtraDataAndReportingService
-					.retrieveReportCSV(rptDB, name, type, extractedQueryParams);
+					.retrieveReportCSV(name, type, extractedQueryParams);
 
 			return makeCORSExport(Response.ok().entity(result),
 					name.replaceAll(" ", "") + ".csv");

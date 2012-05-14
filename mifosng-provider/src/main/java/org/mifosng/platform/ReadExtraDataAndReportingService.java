@@ -9,11 +9,11 @@ import org.mifosng.data.reports.GenericResultset;
 
 public interface ReadExtraDataAndReportingService {
 
-	StreamingOutput retrieveReportCSV(String rptDB, String name, String type,
+	StreamingOutput retrieveReportCSV(String name, String type,
 			Map<String, String> extractedQueryParams);
 
 	// @PreAuthorize(value = "hasAnyRole('REPORTING_SUPER_USER_ROLE')")
-	GenericResultset retrieveGenericResultset(String rptDB, String name,
+	GenericResultset retrieveGenericResultset(String name,
 			String type, Map<String, String> extractedQueryParams);
 
 	ExtraDatasets retrieveExtraDatasetNames(String datasetType);

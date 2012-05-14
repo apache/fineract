@@ -38,24 +38,29 @@ public class ReadExtraDataAndReportingServiceImpl implements
 			.getLogger(ReadExtraDataAndReportingServiceImpl.class);
 
 	private final DataSource dataSource;
+	private final String reportingMetaDataDB;
 
 	@Autowired
-	public ReadExtraDataAndReportingServiceImpl(final DataSource dataSource) {
+	public ReadExtraDataAndReportingServiceImpl(final DataSource dataSource)
+			throws SQLException {
 		this.dataSource = dataSource;
+		Connection db_connection = dataSource.getConnection();
+		this.reportingMetaDataDB = db_connection.getCatalog();
+		db_connection.close();
+		db_connection = null;
 	}
 
 	@Override
-	public StreamingOutput retrieveReportCSV(final String rptDB,
-			final String name, final String type,
-			final Map<String, String> queryParams) {
+	public StreamingOutput retrieveReportCSV(final String name,
+			final String type, final Map<String, String> queryParams) {
 
 		return new StreamingOutput() {
 			public void write(OutputStream out) throws IOException,
 					WebApplicationException {
 				try {
 
-					GenericResultset result = retrieveGenericResultset(rptDB,
-							name, type, queryParams);
+					GenericResultset result = retrieveGenericResultset(name,
+							type, queryParams);
 					StringBuffer sb = generateCsvFileBuffer(result);
 
 					InputStream in = new ByteArrayInputStream(sb.toString()
@@ -126,9 +131,8 @@ public class ReadExtraDataAndReportingServiceImpl implements
 	}
 
 	@Override
-	public GenericResultset retrieveGenericResultset(final String rptDB,
-			final String name, final String type,
-			final Map<String, String> queryParams) {
+	public GenericResultset retrieveGenericResultset(final String name,
+			final String type, final Map<String, String> queryParams) {
 
 		if (name == null) {
 			logger.info("Report Name not Found");
@@ -154,7 +158,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 
 		String sql;
 		try {
-			sql = getSQLtoRun(rptDB, name, type, orgId, queryParams);
+			sql = getSQLtoRun(name, type, orgId, queryParams);
 		} catch (SQLException e) {
 			logger.info(name + ": Failed in getSQLtoRun");
 			throw new WebApplicationException(Response
@@ -222,10 +226,14 @@ public class ReadExtraDataAndReportingServiceImpl implements
 
 	}
 
-	private String getSQLtoRun(final String rptDB, final String name,
-			final String type, final String orgId,
-			final Map<String, String> queryParams) throws SQLException {
+	private String getSQLtoRun(final String name, final String type,
+			final String orgId, final Map<String, String> queryParams)
+			throws SQLException {
 		String sql = null;
+		String rptDB = queryParams.get("${rptDB}");
+		if ((rptDB == null) || rptDB.equals("")) {
+			rptDB = reportingMetaDataDB;
+		}
 
 		if (type.equals("report")) {
 			sql = getReportSql(rptDB, name);
@@ -284,7 +292,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 			throws SQLException {
 		String sql = "select report_sql as the_sql from " + rptDB
 				+ ".stretchy_report where report_name = '" + reportName + "'";
-		// logger.info("Report SQL: " + sql);
+		logger.info("Report SQL: " + sql);
 
 		return getSql(sql);
 	}
@@ -294,7 +302,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 		String sql = "select parameter_sql as the_sql from " + rptDB
 				+ ".stretchy_parameter where parameter_name = '"
 				+ parameterName + "'";
-		// logger.info("Parameter SQL: " + sql);
+		logger.info("Parameter SQL: " + sql);
 
 		return getSql(sql);
 	}

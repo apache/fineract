@@ -90,11 +90,9 @@ function selectNewThousandsSep(selectedVal) {
 }
 
 var reportingParams = {
-	rptDB: "mifosngprovider",
+	//rptDB: "mifosngproviderJ",
 	RESTUrl: "${baseUrl}api/v1/reports",
 	pentahoUrl: "${baseUrl}pentahoreport",
-	//old link exportUrl: "${rootContext}exportcsv",
-	//not needed now exportUrl: "${baseUrl}exportcsv",
 	bundleDir: "${resValue}/stretchyreporting/mifosngbundle/",
 	reportsListDiv: "myListOfReports",
 	runReportDiv: "myRunReportButton",
