@@ -44,40 +44,40 @@ public class ReadExtraDataAndReportingServiceImpl implements
 		this.dataSource = dataSource;
 	}
 
-
 	@Override
 	public StreamingOutput retrieveReportCSV(final String rptDB,
 			final String name, final String type,
 			final Map<String, String> queryParams) {
 
 		return new StreamingOutput() {
-		        public void write(OutputStream out) throws IOException, WebApplicationException {
-		            try {
+			public void write(OutputStream out) throws IOException,
+					WebApplicationException {
+				try {
 
-		        		GenericResultset result = retrieveGenericResultset(rptDB, name, type, queryParams);
-		        		StringBuffer sb = generateCsvFileBuffer(result);
+					GenericResultset result = retrieveGenericResultset(rptDB,
+							name, type, queryParams);
+					StringBuffer sb = generateCsvFileBuffer(result);
 
-		        		InputStream in = new ByteArrayInputStream(sb.toString().getBytes(
-		        				"UTF-8"));
+					InputStream in = new ByteArrayInputStream(sb.toString()
+							.getBytes("UTF-8"));
 
-		        		byte[] outputByte = new byte[4096];
-		        		Integer readLen = in.read(outputByte, 0, 4096);
+					byte[] outputByte = new byte[4096];
+					Integer readLen = in.read(outputByte, 0, 4096);
 
-		        		while (readLen != -1) {
-		        			out.write(outputByte, 0, readLen);
-		        			readLen = in.read(outputByte, 0, 4096);
-		        		}
-		        		//in.close();
-		        		//out.flush();
-		        		//out.close();
-		            } catch (Exception e) {
-		                throw new WebApplicationException(e);
-		            }
-		        }
-		    };
-		
+					while (readLen != -1) {
+						out.write(outputByte, 0, readLen);
+						readLen = in.read(outputByte, 0, 4096);
+					}
+					// in.close();
+					// out.flush();
+					// out.close();
+				} catch (Exception e) {
+					throw new WebApplicationException(e);
+				}
+			}
+		};
+
 	}
-	
 
 	private static StringBuffer generateCsvFileBuffer(GenericResultset result) {
 		StringBuffer writer = new StringBuffer();
@@ -125,7 +125,6 @@ public class ReadExtraDataAndReportingServiceImpl implements
 		return writer;
 	}
 
-	
 	@Override
 	public GenericResultset retrieveGenericResultset(final String rptDB,
 			final String name, final String type,

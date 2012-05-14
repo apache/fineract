@@ -1104,8 +1104,7 @@ function getExportCSV(inParams) {
 		//paramCount = paramCount + 1;
 	}
 
-	//var fullExportUrl = RESTUrl + inQueryParameters + "&exportCSV=true";
-	var fullExportUrl = RESTUrl + "/exportjpw" + inQueryParameters;
+	var fullExportUrl = RESTUrl + inQueryParameters + "&exportCSV=true";
 	showMsg("full export url: " + fullExportUrl);
 	var loadHTML = '<iframe id=rptLoadingFrame src="' + fullExportUrl + '" frameborder="0" onload="jQuery.stretchyReporting.clearLoadingImg();" width="100%" height="600px" style="background:url(';
 		loadHTML += "'" + loadingImg + "'" + ') no-repeat scroll 50% 100px;"><p>Your browser does not support iframes.</p></iframe>';
