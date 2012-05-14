@@ -82,11 +82,6 @@ function initialiseReporting(params) {
  	if (params.pentahoUrl) pentahoUrl = params.pentahoUrl
 	else pentahoUrl = "";
 
- 	if (params.exportUrl) exportUrl = params.exportUrl
-	else exportUrl = "";
-
- 	// alert("export url: " + exportUrl);
-
 	loadingImg = "dots64.gif";
 	if (params.loadingImg) loadingImg = params.loadingImg;
 
@@ -1109,8 +1104,8 @@ function getExportCSV(inParams) {
 		//paramCount = paramCount + 1;
 	}
 
-	var fullExportUrl = exportUrl + inQueryParameters;
-	//alert('Export url: ' + fullExportUrl);
+	//var fullExportUrl = RESTUrl + inQueryParameters + "&exportCSV=true";
+	var fullExportUrl = RESTUrl + "/exportjpw" + inQueryParameters;
 	showMsg("full export url: " + fullExportUrl);
 	var loadHTML = '<iframe id=rptLoadingFrame src="' + fullExportUrl + '" frameborder="0" onload="jQuery.stretchyReporting.clearLoadingImg();" width="100%" height="600px" style="background:url(';
 		loadHTML += "'" + loadingImg + "'" + ') no-repeat scroll 50% 100px;"><p>Your browser does not support iframes.</p></iframe>';
@@ -1133,7 +1128,7 @@ function getPentahoReport(inParams) {
 	}
 
 	var fullReportUrl = pentahoUrl + inQueryParameters;
-	showMsg("full pentaho url: " + fullExportUrl);
+	showMsg("full pentaho url: " + fullReportUrl);
 
 	var loadHTML = '<iframe src="' + fullReportUrl + '" frameborder="1" width="100%" height="600px" style="background:url(';
 		loadHTML += "'" + loadingImg + "'" + ') no-repeat scroll 50% 100px;"><p>Your browser does not support iframes.</p></iframe>';

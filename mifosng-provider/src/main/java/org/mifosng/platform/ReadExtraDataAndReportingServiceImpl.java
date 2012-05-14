@@ -1,5 +1,9 @@
 package org.mifosng.platform;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -14,6 +18,7 @@ import javax.sql.DataSource;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.StreamingOutput;
 
 import org.mifosng.data.ExtraDatasetRow;
 import org.mifosng.data.ExtraDatasets;
@@ -39,6 +44,88 @@ public class ReadExtraDataAndReportingServiceImpl implements
 		this.dataSource = dataSource;
 	}
 
+
+	@Override
+	public StreamingOutput retrieveReportCSV(final String rptDB,
+			final String name, final String type,
+			final Map<String, String> queryParams) {
+
+		return new StreamingOutput() {
+		        public void write(OutputStream out) throws IOException, WebApplicationException {
+		            try {
+
+		        		GenericResultset result = retrieveGenericResultset(rptDB, name, type, queryParams);
+		        		StringBuffer sb = generateCsvFileBuffer(result);
+
+		        		InputStream in = new ByteArrayInputStream(sb.toString().getBytes(
+		        				"UTF-8"));
+
+		        		byte[] outputByte = new byte[4096];
+		        		Integer readLen = in.read(outputByte, 0, 4096);
+
+		        		while (readLen != -1) {
+		        			out.write(outputByte, 0, readLen);
+		        			readLen = in.read(outputByte, 0, 4096);
+		        		}
+		        		//in.close();
+		        		//out.flush();
+		        		//out.close();
+		            } catch (Exception e) {
+		                throw new WebApplicationException(e);
+		            }
+		        }
+		    };
+		
+	}
+	
+
+	private static StringBuffer generateCsvFileBuffer(GenericResultset result) {
+		StringBuffer writer = new StringBuffer();
+
+		List<ResultsetColumnHeader> columnHeaders = result.getColumnHeaders();
+		logger.info("NO. of Columns: " + columnHeaders.size());
+		Integer chSize = columnHeaders.size();
+		for (int i = 0; i < chSize; i++) {
+			writer.append('"' + columnHeaders.get(i).getColumnName() + '"');
+			if (i < (chSize - 1))
+				writer.append(",");
+		}
+		writer.append('\n');
+
+		List<ResultsetDataRow> data = result.getData();
+		List<String> row;
+		Integer rSize;
+		// String currCol;
+		String currColType;
+		String currVal;
+		logger.info("NO. of Rows: " + data.size());
+		for (int i = 0; i < data.size(); i++) {
+			row = data.get(i).getRow();
+			rSize = row.size();
+			for (int j = 0; j < rSize; j++) {
+				// currCol = columnHeaders.get(j).getColumnName();
+				currColType = columnHeaders.get(j).getColumnType();
+				currVal = row.get(j);
+				if (currVal != null) {
+					if (currColType.equals("DECIMAL")
+							|| currColType.equals("DOUBLE")
+							|| currColType.equals("BIGINT")
+							|| currColType.equals("SMALLINT")
+							|| currColType.equals("INT"))
+						writer.append(currVal);
+					else
+						writer.append('"' + currVal + '"');
+				}
+				if (j < (rSize - 1))
+					writer.append(",");
+			}
+			writer.append('\n');
+		}
+
+		return writer;
+	}
+
+	
 	@Override
 	public GenericResultset retrieveGenericResultset(final String rptDB,
 			final String name, final String type,

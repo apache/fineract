@@ -1,7 +1,6 @@
 package org.mifosng.ui;
 
 import java.util.Collection;
-import java.util.Map;
 
 import org.mifosng.data.AppUserData;
 import org.mifosng.data.ClientData;
@@ -28,7 +27,6 @@ import org.mifosng.data.command.SubmitLoanApplicationCommand;
 import org.mifosng.data.command.UndoLoanApprovalCommand;
 import org.mifosng.data.command.UndoLoanDisbursalCommand;
 import org.mifosng.data.command.UserCommand;
-import org.mifosng.data.reports.GenericResultset;
 import org.springframework.security.oauth.consumer.ProtectedResourceDetails;
 
 public interface CommonRestOperations {
@@ -125,7 +123,6 @@ public interface CommonRestOperations {
 
 	LoanAccountData retrieveLoanAccount(Long loanId);
 
-	GenericResultset retrieveReportingData(String rptDB, String name, String type, Map<String, String> extractedQueryParams);
-
-	NewLoanWorkflowStepOneData retrieveNewLoanApplicationDetails(Long clientId, Long productId);
+	NewLoanWorkflowStepOneData retrieveNewLoanApplicationDetails(Long clientId,
+			Long productId);
 }
