@@ -282,8 +282,8 @@
 	});
 	
 	$('#addloanproduct').click(function(e) {
-		var getUrl = 'http://localhost:8085/mifosng-provider/api/v1/loanproducts/template';
-		var postUrl = 'http://localhost:8085/mifosng-provider/api/v1/loanproducts';
+		var getUrl = 'http://localhost:8080/mifosng-provider/api/v1/loanproducts/template';
+		var postUrl = 'http://localhost:8080/mifosng-provider/api/v1/loanproducts';
 		var templateSelector = "#productFormTemplate";
 		var width = 800; 
 		var height = 550;
@@ -299,7 +299,7 @@
 		
 	function refreshLoanProductsView() {
 		var jqxhr = $.ajax({
-			  url: 'http://localhost:8085/mifosng-provider/api/v1/loanproducts', //'${allLoanProductsUrl}',
+			  url: 'http://localhost:8080/mifosng-provider/api/v1/loanproducts', //'${allLoanProductsUrl}',
 			  type: 'GET',
 			  contentType: 'application/json',
 			  dataType: 'json',
@@ -315,8 +315,8 @@
 				$("a.editproduct").click( function(e) {
 					var linkId = this.id;
 					var productId = linkId.replace("editproduct", "");
-					var getUrl = 'http://localhost:8085/mifosng-provider/api/v1/loanproducts/' + productId;
-					var putUrl = 'http://localhost:8085/mifosng-provider/api/v1/loanproducts/' + productId;
+					var getUrl = 'http://localhost:8080/mifosng-provider/api/v1/loanproducts/' + productId;
+					var putUrl = 'http://localhost:8080/mifosng-provider/api/v1/loanproducts/' + productId;
 					
 					var templateSelector = "#productFormTemplate";
 					var width = 800; 
@@ -374,8 +374,8 @@
 	});
 	
 	$('#addoffice').click(function(e) {
-		var getUrl = 'http://localhost:8085/mifosng-provider/api/v1/offices/template';
-		var postUrl = 'http://localhost:8085/mifosng-provider/api/v1/offices';
+		var getUrl = 'http://localhost:8080/mifosng-provider/api/v1/offices/template';
+		var postUrl = 'http://localhost:8080/mifosng-provider/api/v1/offices';
 		var templateSelector = "#officeFormTemplate";
 		var width = 600; 
 		var height = 400;
@@ -391,7 +391,7 @@
 		
 	function refreshOfficesView() {
 		var jqxhr = $.ajax({
-			  url: 'http://localhost:8085/mifosng-provider/api/v1/offices', // '${allOfficesUrl}',
+			  url: 'http://localhost:8080/mifosng-provider/api/v1/offices', // '${allOfficesUrl}',
 			  type: 'GET',
 			  contentType: 'application/json',
 			  dataType: 'json',
@@ -410,8 +410,8 @@
 				$("a.edit").click( function(e) {
 					var linkId = this.id;
 					var entityId = linkId.replace("edit", "");
-					var getUrl = 'http://localhost:8085/mifosng-provider/api/v1/offices/' + entityId;
-					var putUrl = 'http://localhost:8085/mifosng-provider/api/v1/offices/' + entityId;
+					var getUrl = 'http://localhost:8080/mifosng-provider/api/v1/offices/' + entityId;
+					var putUrl = 'http://localhost:8080/mifosng-provider/api/v1/offices/' + entityId;
 					
 					var templateSelector = "#officeFormTemplate";
 					var width = 600; 
@@ -457,8 +457,8 @@
 		
     // currency configuration
 	$('#editconfiguration').click(function(e) {
-		var getUrl = 'http://localhost:8085/mifosng-provider/api/v1/configurations/currency';
-		var putUrl = 'http://localhost:8085/mifosng-provider/api/v1/configurations/currency';
+		var getUrl = 'http://localhost:8080/mifosng-provider/api/v1/configurations/currency';
+		var putUrl = 'http://localhost:8080/mifosng-provider/api/v1/configurations/currency';
 		var templateSelector = "#configurationFormTemplate";
 		var width = 900; 
 		var height = 400;
