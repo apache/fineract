@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 public class InMemoryApplicationConfigurationService implements
 		ApplicationConfigurationService {
 
-	private String oauthProviderUrl = "http://localhost:8085/mifosng-provider/";
+	private String oauthProviderUrl = "http://localhost:8080/mifosng-provider/";
 	private String requestTokenURL = "oauth/request_token";
 	private String userAuthorizationURL = "oauth/confirm_access";
 	private String accessTokenURL = "oauth/access_token";

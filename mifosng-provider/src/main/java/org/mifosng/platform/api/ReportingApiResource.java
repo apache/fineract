@@ -37,12 +37,12 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
-@Path("/v1/flexiblereporting")
+@Path("/v1/reports")
 @Component
 @Scope("singleton")
-public class FlexibleReportingApiResource {
+public class ReportingApiResource {
 
-	private final static Logger logger = LoggerFactory.getLogger(FlexibleReportingApiResource.class);
+	private final static Logger logger = LoggerFactory.getLogger(ReportingApiResource.class);
 	
 	@Autowired
 	private ReadExtraDataAndReportingService ReadExtraDataAndReportingService;
