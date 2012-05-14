@@ -15,7 +15,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.mifosng.data.AppUserData;
 import org.mifosng.data.EntityIdentifier;
 import org.mifosng.data.EnumOptionList;
 import org.mifosng.data.EnumOptionReadModel;
@@ -25,9 +24,7 @@ import org.mifosng.data.PermissionData;
 import org.mifosng.data.PermissionList;
 import org.mifosng.data.RoleData;
 import org.mifosng.data.RoleList;
-import org.mifosng.data.command.ChangePasswordCommand;
 import org.mifosng.data.command.RoleCommand;
-import org.mifosng.data.command.UserCommand;
 import org.mifosng.platform.ReadPlatformService;
 import org.mifosng.platform.WritePlatformService;
 import org.mifosng.platform.exceptions.ApplicationDomainRuleException;
@@ -35,7 +32,6 @@ import org.mifosng.platform.exceptions.NewDataValidationException;
 import org.mifosng.platform.exceptions.UnAuthenticatedUserException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
@@ -49,79 +45,6 @@ public class UserAdmistrationResource {
 
 	@Autowired
 	private WritePlatformService writePlatformService;
-
-	@GET
-	@Path("user/current")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response retrieveCurrentUser() {
-
-		try {
-			AppUserData user = this.readPlatformService.retrieveCurrentUser();
-	    	
-			return Response.ok().entity(user).build();
-		} catch (UnAuthenticatedUserException e) {
-			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
-		} catch (AccessDeniedException e) {
-			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
-			ErrorResponseList list = new ErrorResponseList(Arrays.asList(errorResponse));
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(list).build());
-		} catch (ApplicationDomainRuleException e) {
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(new ErrorResponseList(e.getErrors())).build());
-		} catch (NewDataValidationException e) {
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(new ErrorResponseList(e.getValidationErrors())).build());
-		}
-	}
-	
-	@POST
-	@Path("user/current")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response updateCurrentUser(UserCommand command) {
-
-		try {
-			Long userId = this.writePlatformService.updateCurrentUser(command);
-
-			return Response.ok().entity(new EntityIdentifier(userId)).build();
-		} catch (UnAuthenticatedUserException e) {
-			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
-		} catch (AccessDeniedException e) {
-			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
-			ErrorResponseList list = new ErrorResponseList(Arrays.asList(errorResponse));
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(list).build());
-		} catch (ApplicationDomainRuleException e) {
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(new ErrorResponseList(e.getErrors())).build());
-		} catch (NewDataValidationException e) {
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(new ErrorResponseList(e.getValidationErrors())).build());
-		} catch (DataIntegrityViolationException e) {
-			ErrorResponse errorResponse = new ErrorResponse("error.msg.username.already.exists.in.organisation", "username", command.getUsername());
-			ErrorResponseList list = new ErrorResponseList(Arrays.asList(errorResponse));
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(list).build());
-		}
-	}
-	
-	@POST
-	@Path("user/current/password")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response updateCurrentUserPassword(ChangePasswordCommand command) {
-
-		try {
-			Long userId = this.writePlatformService.updateCurrentUserPassword(command);
-
-			return Response.ok().entity(new EntityIdentifier(userId)).build();
-		} catch (UnAuthenticatedUserException e) {
-			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
-		} catch (AccessDeniedException e) {
-			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
-			ErrorResponseList list = new ErrorResponseList(Arrays.asList(errorResponse));
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(list).build());
-		} catch (ApplicationDomainRuleException e) {
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(new ErrorResponseList(e.getErrors())).build());
-		} catch (NewDataValidationException e) {
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(new ErrorResponseList(e.getValidationErrors())).build());
-		}
-	}
 
 	@GET
 	@Path("role/all")

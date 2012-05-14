@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.List;
 
 import org.mifosng.configuration.ApplicationConfigurationService;
-import org.mifosng.data.AppUserData;
 import org.mifosng.data.ClientData;
 import org.mifosng.data.ClientDataWithAccountsData;
 import org.mifosng.data.ClientList;
@@ -29,7 +28,6 @@ import org.mifosng.data.RoleData;
 import org.mifosng.data.RoleList;
 import org.mifosng.data.command.AdjustLoanTransactionCommand;
 import org.mifosng.data.command.CalculateLoanScheduleCommand;
-import org.mifosng.data.command.ChangePasswordCommand;
 import org.mifosng.data.command.EnrollClientCommand;
 import org.mifosng.data.command.LoanStateTransitionCommand;
 import org.mifosng.data.command.LoanTransactionCommand;
@@ -547,25 +545,6 @@ public class CommonRestOperationsImpl implements CommonRestOperations {
 		}
 	}
 
-	@Override
-	public EntityIdentifier updateCurrentUserPassword(
-			ChangePasswordCommand command) {
-		try {
-			URI restUri = URI.create(getBaseServerUrl().concat(
-					"api/protected/admin/user/current/password"));
-
-			ResponseEntity<EntityIdentifier> s = this.oauthRestServiceTemplate
-					.postForEntity(restUri,
-							createUpdateCurrentUserPasswordRequest(command),
-							EntityIdentifier.class);
-
-			return s.getBody();
-		} catch (HttpStatusCodeException e) {
-			ErrorResponseList errorList = parseErrors(e);
-			throw new ClientValidationException(errorList.getErrors());
-		}
-	}
-
 	private HttpEntity<UserCommand> createUserRequest(final UserCommand command) {
 
 		HttpHeaders requestHeaders = new HttpHeaders();
@@ -573,18 +552,6 @@ public class CommonRestOperationsImpl implements CommonRestOperations {
 		requestHeaders.set("Content-Type", "application/xml");
 
 		HttpEntity<UserCommand> requestEntity = new HttpEntity<UserCommand>(
-				command, requestHeaders);
-		return requestEntity;
-	}
-
-	private HttpEntity<ChangePasswordCommand> createUpdateCurrentUserPasswordRequest(
-			final ChangePasswordCommand command) {
-
-		HttpHeaders requestHeaders = new HttpHeaders();
-		requestHeaders.set("Accept", "application/xml");
-		requestHeaders.set("Content-Type", "application/xml");
-
-		HttpEntity<ChangePasswordCommand> requestEntity = new HttpEntity<ChangePasswordCommand>(
 				command, requestHeaders);
 		return requestEntity;
 	}
@@ -598,17 +565,6 @@ public class CommonRestOperationsImpl implements CommonRestOperations {
 		HttpEntity<RoleCommand> requestEntity = new HttpEntity<RoleCommand>(
 				command, requestHeaders);
 		return requestEntity;
-	}
-
-	@Override
-	public AppUserData retrieveCurrentUser() {
-		URI restUri = URI.create(getBaseServerUrl().concat(
-				"api/protected/admin/user/current"));
-
-		ResponseEntity<AppUserData> s = this.oauthRestServiceTemplate.exchange(
-				restUri, HttpMethod.GET, emptyRequest(), AppUserData.class);
-
-		return s.getBody();
 	}
 
 	@Override

@@ -2,7 +2,6 @@ package org.mifosng.platform;
 
 import org.mifosng.data.EntityIdentifier;
 import org.mifosng.data.command.AdjustLoanTransactionCommand;
-import org.mifosng.data.command.ChangePasswordCommand;
 import org.mifosng.data.command.EnrollClientCommand;
 import org.mifosng.data.command.LoanStateTransitionCommand;
 import org.mifosng.data.command.LoanTransactionCommand;
@@ -12,15 +11,10 @@ import org.mifosng.data.command.SubmitLoanApplicationCommand;
 import org.mifosng.data.command.UndoLoanApprovalCommand;
 import org.mifosng.data.command.UndoLoanDisbursalCommand;
 import org.mifosng.data.command.UpdateUsernamePasswordCommand;
-import org.mifosng.data.command.UserCommand;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface WritePlatformService {
 
-	Long updateCurrentUser(UserCommand command);
-
-	Long updateCurrentUserPassword(ChangePasswordCommand command);
-	
 	Long createRole(RoleCommand command);
 	
 	Long updateRole(RoleCommand command);

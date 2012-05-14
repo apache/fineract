@@ -9,11 +9,16 @@ import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosng.data.ApiParameterError;
+import org.mifosng.data.command.ChangePasswordCommand;
 import org.mifosng.data.command.UserCommand;
+import org.mifosng.platform.ChangePasswordCommandValidator;
 import org.mifosng.platform.exceptions.PlatformApiDataValidationException;
 import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
 import org.mifosng.platform.exceptions.PlatformResourceNotFoundException;
+import org.mifosng.platform.infrastructure.BasicPasswordEncodablePlatformUser;
 import org.mifosng.platform.infrastructure.PlatformEmailSendException;
+import org.mifosng.platform.infrastructure.PlatformPasswordEncoder;
+import org.mifosng.platform.infrastructure.PlatformUser;
 import org.mifosng.platform.organisation.domain.Office;
 import org.mifosng.platform.organisation.domain.OfficeRepository;
 import org.mifosng.platform.security.PlatformSecurityContext;
@@ -35,19 +40,21 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 	private final static Logger logger = LoggerFactory.getLogger(AppUserWritePlatformServiceJpaRepositoryImpl.class);
 	
 	private final PlatformSecurityContext context;
+	private final UserDomainService userDomainService;
+	private final PlatformPasswordEncoder platformPasswordEncoder;
 	private final AppUserRepository appUserRepository;
 	private final OfficeRepository officeRepository;
 	private final RoleRepository roleRepository;
-	private final UserDomainService userDomainService;
 	
 	@Autowired
 	public AppUserWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final AppUserRepository appUserRepository, final UserDomainService userDomainService,
-			final OfficeRepository officeRepository, final RoleRepository roleRepository) {
+			final OfficeRepository officeRepository, final RoleRepository roleRepository, final PlatformPasswordEncoder platformPasswordEncoder) {
 		this.context = context;
 		this.appUserRepository = appUserRepository;
 		this.userDomainService = userDomainService;
 		this.officeRepository = officeRepository;
 		this.roleRepository = roleRepository;
+		this.platformPasswordEncoder = platformPasswordEncoder;
 	}
 	
 	@Transactional
@@ -141,6 +148,44 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 	@Override
 	public void deleteUser(Long userId) {
 		this.appUserRepository.delete(userId);
+	}
+	
+	@Transactional
+	@Override
+	public Long updateCurrentUser(UserCommand command) {
+		AppUser currentUser = context.authenticatedUser();
+		
+		UserCommandValidator validator = new UserCommandValidator(command);
+		validator.validateAccountSettingDetails();
+		
+		AppUser userToUpdate = this.appUserRepository.findOne(currentUser.getId());
+		
+		userToUpdate.update(command.getUsername(), command.getFirstname(), command.getLastname(), command.getEmail());
+		
+		this.appUserRepository.save(userToUpdate);
+		
+		return userToUpdate.getId();
+	}
+	
+	@Transactional
+	@Override
+	public Long updateCurrentUserPassword(ChangePasswordCommand command) {
+		AppUser currentUser = context.authenticatedUser();
+		
+		ChangePasswordCommandValidator validator = new ChangePasswordCommandValidator(command);
+		validator.validate();
+		
+		AppUser userToUpdate = this.appUserRepository.findOne(currentUser.getId());
+		
+		PlatformUser dummyPlatformUser = new BasicPasswordEncodablePlatformUser(
+				((AppUser) userToUpdate).getId(),
+				userToUpdate.getUsername(), command.getPassword());
+
+		String newPasswordEncoded = this.platformPasswordEncoder.encode(dummyPlatformUser);
+		
+		userToUpdate.updatePasswordOnFirstTimeLogin(newPasswordEncoded);
+		
+		return userToUpdate.getId();
 	}
 
 	/*

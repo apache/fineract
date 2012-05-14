@@ -2,7 +2,6 @@ package org.mifosng.ui;
 
 import java.util.Collection;
 
-import org.mifosng.data.AppUserData;
 import org.mifosng.data.ClientData;
 import org.mifosng.data.ClientDataWithAccountsData;
 import org.mifosng.data.EntityIdentifier;
@@ -17,7 +16,6 @@ import org.mifosng.data.PermissionData;
 import org.mifosng.data.RoleData;
 import org.mifosng.data.command.AdjustLoanTransactionCommand;
 import org.mifosng.data.command.CalculateLoanScheduleCommand;
-import org.mifosng.data.command.ChangePasswordCommand;
 import org.mifosng.data.command.EnrollClientCommand;
 import org.mifosng.data.command.LoanStateTransitionCommand;
 import org.mifosng.data.command.LoanTransactionCommand;
@@ -34,10 +32,6 @@ public interface CommonRestOperations {
 	void logout(String accessToken);
 
 	void updateProtectedResource(ProtectedResourceDetails loadProtectedResourceDetailsById);
-
-	AppUserData retrieveCurrentUser();
-
-	EntityIdentifier updateCurrentUserPassword(ChangePasswordCommand command);
 
 	Collection<RoleData> retrieveAllRoles();
 

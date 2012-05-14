@@ -20,7 +20,6 @@ import org.mifosng.data.MoneyData;
 import org.mifosng.data.ScheduledLoanInstallment;
 import org.mifosng.data.command.AdjustLoanTransactionCommand;
 import org.mifosng.data.command.CalculateLoanScheduleCommand;
-import org.mifosng.data.command.ChangePasswordCommand;
 import org.mifosng.data.command.EnrollClientCommand;
 import org.mifosng.data.command.LoanStateTransitionCommand;
 import org.mifosng.data.command.LoanTransactionCommand;
@@ -30,7 +29,6 @@ import org.mifosng.data.command.SubmitLoanApplicationCommand;
 import org.mifosng.data.command.UndoLoanApprovalCommand;
 import org.mifosng.data.command.UndoLoanDisbursalCommand;
 import org.mifosng.data.command.UpdateUsernamePasswordCommand;
-import org.mifosng.data.command.UserCommand;
 import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.client.domain.ClientRepository;
 import org.mifosng.platform.client.domain.Note;
@@ -70,7 +68,6 @@ import org.mifosng.platform.user.domain.PermissionRepository;
 import org.mifosng.platform.user.domain.PlatformUserRepository;
 import org.mifosng.platform.user.domain.Role;
 import org.mifosng.platform.user.domain.RoleRepository;
-import org.mifosng.platform.user.service.UserCommandValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.Authentication;
@@ -92,7 +89,6 @@ public class WritePlatformServiceJpaRepositoryImpl implements WritePlatformServi
 	private final CalculationPlatformService calculationPlatformService;
 	private final RoleRepository roleRepository;
 	private final PermissionRepository permissionRepository;
-	private final AppUserRepository appUserRepository;
 	private final NoteRepository noteRepository;
 	private final LoanTransactionRepository loanTransactionRepository;
 
@@ -108,7 +104,6 @@ public class WritePlatformServiceJpaRepositoryImpl implements WritePlatformServi
 			final LoanTransactionRepository loanTransactionRepository,
 			final LoanStatusRepository loanStatusRepository,
 			final CalculationPlatformService calculationPlatformService,
-			final AppUserRepository appUserRepository,
 			final RoleRepository roleRepository,
 			final PermissionRepository permissionRepository) {
 		this.officeRepository = officeRepository;
@@ -121,50 +116,10 @@ public class WritePlatformServiceJpaRepositoryImpl implements WritePlatformServi
 		this.loanTransactionRepository = loanTransactionRepository;
 		this.loanStatusRepository = loanStatusRepository;
 		this.calculationPlatformService = calculationPlatformService;
-		this.appUserRepository = appUserRepository;
 		this.roleRepository = roleRepository;
 		this.permissionRepository = permissionRepository;
 	}
 
-	@Transactional
-	@Override
-	public Long updateCurrentUser(UserCommand command) {
-		AppUser currentUser = extractAuthenticatedUser();
-		
-		UserCommandValidator validator = new UserCommandValidator(command);
-		validator.validateAccountSettingDetails();
-		
-		AppUser userToUpdate = this.appUserRepository.findOne(currentUser.getId());
-		
-		userToUpdate.update(command.getUsername(), command.getFirstname(), command.getLastname(), command.getEmail());
-		
-		this.appUserRepository.save(userToUpdate);
-		
-		return userToUpdate.getId();
-	}
-	
-	@Transactional
-	@Override
-	public Long updateCurrentUserPassword(ChangePasswordCommand command) {
-		AppUser currentUser = extractAuthenticatedUser();
-		
-		ChangePasswordCommandValidator validator = new ChangePasswordCommandValidator(command);
-		validator.validate();
-		
-		AppUser userToUpdate = this.appUserRepository.findOne(currentUser.getId());
-		
-		PlatformUser dummyPlatformUser = new BasicPasswordEncodablePlatformUser(
-				((AppUser) userToUpdate).getId(),
-				userToUpdate.getUsername(), command.getPassword());
-
-		String newPasswordEncoded = this.platformPasswordEncoder
-				.encode(dummyPlatformUser);
-		
-		userToUpdate.updatePasswordOnFirstTimeLogin(newPasswordEncoded);
-		
-		return userToUpdate.getId();
-	}
-	
 	@Transactional
 	@Override
 	public Long createRole(final RoleCommand command) {

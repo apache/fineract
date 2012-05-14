@@ -59,9 +59,9 @@ $(document).ready(function() {
 		        return false;
 		      }
 		},
-		globalDate: function(dateParts) {
+		globalDate: function(localDateAsISOString) {
 		      try {
-		    	
+		    	  var dateParts = localDateAsISOString.split("-")
 		    	  var year = dateParts[0];
 		    	  var month = parseInt(dateParts[1]) - 1; // month is zero indexed
 		    	  var day = dateParts[2];
@@ -74,9 +74,9 @@ $(document).ready(function() {
 		        return "??";
 		      }
 		},
-		globalDateTime: function(dateParts) {
+		globalDateTime: function(dateInMillis) {
 		      try {
-		    	  var d = new Date(dateParts);
+		    	  var d = new Date(dateInMillis);
 		    	  
 		    	  return Globalize.format(d,"F");
 		      } catch(e) {
@@ -118,17 +118,25 @@ $(document).ready(function() {
 			removeErrors(placeholderDiv);
 			
 		  	var jsonErrors = JSON.parse(jqXHR.responseText);
-		  	
+		  	var valErrors = jsonErrors.errors;
 		  	var errorArray = new Array();
 		  	var arrayIndex = 0;
-		  	$.each(jsonErrors, function() {
-		  	  var fieldId = '#' + this.field;
+		  	$.each(valErrors, function() {
+		  	  var fieldId = '#' + this.parameterName;
 		  	  $(fieldId).addClass("ui-state-error");
 		  	  
 		  	  var errorObj = new Object();
-		  	  errorObj.field = this.field;
-		  	  errorObj.code = this.code;
-		  	  errorObj.message = jQuery.i18n.prop(this.code, this.args);
+		  	  errorObj.field = this.parameterName;
+		  	  errorObj.code = this.userMessageGlobalisationCode;
+		  	  
+		  	  var argArray = new Array();
+		  	  var argArrayIndex = 0;
+		  	  $.each(this.args, function() {
+		  		argArray[argArrayIndex] = this.value;
+		  		argArrayIndex++;
+		  	  });
+		  	  // hardcoded support for six arguments
+		  	  errorObj.message = jQuery.i18n.prop(this.userMessageGlobalisationCode, argArray[0], argArray[1], argArray[2], argArray[3], argArray[4], argArray[5]);
 		  	  errorObj.value = this.value;
 		  	  
 		  	  errorArray[arrayIndex] = errorObj;
@@ -147,6 +155,29 @@ $(document).ready(function() {
 		  	$(placeholderDiv).append(formErrorsHtml);
 		}
 	}
+	
+	$.fn.serializeObject = function()
+	{
+	    var o = {};
+	    var a = this.serializeArray();
+	    $.each(a, function() {
+	        if (o[this.name] !== undefined) {
+	            if (!o[this.name].push) {
+	                o[this.name] = [o[this.name]];
+	            }
+	            o[this.name].push(this.value || '');
+	        } else {
+	        	
+	        	if (this.name === 'selectedItems' || this.name === 'notSelectedItems') {
+	        		o[this.name] = new Array();
+	        		o[this.name].push(this.value || '');
+	        	} else {
+	        		o[this.name] = this.value || '';	
+	        	}
+	        }
+	    });
+	    return o;
+	};
 	
 	function showNotAvailableDialog(titleCode) {
 		var dialogDiv = $("<div id='notavailable-dialog-form'></div>");
@@ -171,16 +202,16 @@ $(document).ready(function() {
 		 }).dialog('open');
 	}
 	
-	function popupDialogWithFormView(url, titleCode, templateSelector, width, height, saveSuccessFunction) {
+	function popupDialogWithFormView(getUrl, postUrl, submitType, titleCode, templateSelector, width, height, saveSuccessFunction) {
 		 var dialogDiv = $("<div id='dialog-form'></div>");
 		 var jqxhr = $.ajax({
-			url: url,
+			url: getUrl,
 			type: 'GET',
 			contentType: 'application/json',
 			dataType: 'json',
 			cache: false,
 			success: function(data, textStatus, jqXHR) {
-			
+			console.log(data);
 			var formHtml = $(templateSelector).render(data);
 			
 			dialogDiv.append(formHtml);
@@ -198,13 +229,16 @@ $(document).ready(function() {
 		    	$('#selectedItems option').each(function(i) {  
 		    	   $(this).attr("selected", "selected");  
 		    	});
-				
-	  			var form_data = $('#entityform').serialize();
-	  				 
+		    	
+		    	var newFormData = JSON.stringify($('#entityform').serializeObject());
+		    	console.log(newFormData);
+		    	
 				var jqxhr = $.ajax({
-					  url: url,
-					  type: 'POST',
-					  data: form_data,
+					  url: postUrl,
+					  type: submitType,
+					  contentType: 'application/json',
+					  dataType: 'json',
+					  data: newFormData,
 					  success: saveSuccessFunction,
 					  error: function(jqXHR, textStatus, errorThrown) {
 					    handleXhrError(jqXHR, textStatus, errorThrown, "#formErrorsTemplate", "#formerrors");
@@ -262,7 +296,8 @@ $(document).ready(function() {
 				$("#settings").html(tableHtml);
 				
 				$('#changepassword').click(function(e) {
-					var url = '${rootContext}org/admin/settings/password';
+					var getUrl = 'http://localhost:8080/mifosng-provider/api/v1/useraccounts/current/password/template';
+					var putUrl = 'http://localhost:8080/mifosng-provider/api/v1/useraccounts/current/password';
 					var templateSelector = "#changePasswordFormTemplate";
 					var width = 600; 
 					var height = 350;
@@ -272,13 +307,13 @@ $(document).ready(function() {
 						  $("#tabs").tabs('load', 0);
 					}
 					
-					popupDialogWithFormView(url, 'dialog.title.update.password', templateSelector, width, height, saveSuccessFunction);
+					popupDialogWithFormView(getUrl, putUrl, 'PUT', 'dialog.title.update.password', templateSelector, width, height, saveSuccessFunction);
 					
 				    e.preventDefault();
 				});
 				
 				$('#changedetails').click(function(e) {
-					var url = '${rootContext}org/admin/settings/details';
+					var getAndPutUrl = 'http://localhost:8080/mifosng-provider/api/v1/useraccounts/current';
 					var templateSelector = "#userSettingsFormTemplate";
 					var width = 600; 
 					var height = 350;
@@ -288,7 +323,7 @@ $(document).ready(function() {
 						  $("#tabs").tabs('load', 0);
 					}
 					
-					popupDialogWithFormView(url, 'dialog.title.update.details', templateSelector, width, height, saveSuccessFunction);
+					popupDialogWithFormView(getAndPutUrl, getAndPutUrl, 'PUT', 'dialog.title.update.details', templateSelector, width, height, saveSuccessFunction);
 					
 				    e.preventDefault();
 				});
@@ -309,9 +344,8 @@ $(document).ready(function() {
 	<div id="spacer" style="line-height: 15px;">&nbsp;</div>
 		<div id="content">
 			<div id="tabs">
-			    <c:url value="/org/admin/settings/details" var="currentUserSettingsUrl" />
 				<ul>
-					<li><a href="${currentUserSettingsUrl}" title="settings"><spring:message code="tab.settings"/></a></li>
+					<li><a href="http://localhost:8080/mifosng-provider/api/v1/useraccounts/current" title="settings"><spring:message code="tab.settings"/></a></li>
 				</ul>
 				<div id="settings">
 				</div>
