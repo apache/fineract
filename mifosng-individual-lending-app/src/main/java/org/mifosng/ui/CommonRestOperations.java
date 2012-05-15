@@ -2,27 +2,18 @@ package org.mifosng.ui;
 
 import java.util.Collection;
 
-import org.mifosng.data.ClientData;
-import org.mifosng.data.ClientDataWithAccountsData;
 import org.mifosng.data.EntityIdentifier;
-import org.mifosng.data.EnumOptionReadModel;
-import org.mifosng.data.LoanAccountData;
 import org.mifosng.data.LoanProductData;
 import org.mifosng.data.LoanRepaymentData;
 import org.mifosng.data.LoanSchedule;
 import org.mifosng.data.NewLoanWorkflowStepOneData;
-import org.mifosng.data.NoteData;
-import org.mifosng.data.PermissionData;
 import org.mifosng.data.command.AdjustLoanTransactionCommand;
 import org.mifosng.data.command.CalculateLoanScheduleCommand;
-import org.mifosng.data.command.EnrollClientCommand;
 import org.mifosng.data.command.LoanStateTransitionCommand;
 import org.mifosng.data.command.LoanTransactionCommand;
-import org.mifosng.data.command.NoteCommand;
 import org.mifosng.data.command.SubmitLoanApplicationCommand;
 import org.mifosng.data.command.UndoLoanApprovalCommand;
 import org.mifosng.data.command.UndoLoanDisbursalCommand;
-import org.mifosng.data.command.UserCommand;
 import org.springframework.security.oauth.consumer.ProtectedResourceDetails;
 
 public interface CommonRestOperations {
@@ -31,18 +22,11 @@ public interface CommonRestOperations {
 
 	void updateProtectedResource(ProtectedResourceDetails loadProtectedResourceDetailsById);
 
-	Collection<PermissionData> retrieveAllPermissions();
-
-	Collection<EnumOptionReadModel> retrieveAllPermissionGroups();
-
-	Collection<ClientData> retrieveAllIndividualClients();
-
 	Collection<LoanProductData> retrieveAllLoanProducts();
 
 	LoanSchedule calculateLoanSchedule(CalculateLoanScheduleCommand command);
 
-	NewLoanWorkflowStepOneData retrieveNewLoanApplicationStepOneDetails(
-			Long clientId);
+	NewLoanWorkflowStepOneData retrieveNewLoanApplicationStepOneDetails(Long clientId);
 
 	Long submitLoanApplication(SubmitLoanApplicationCommand command);
 
@@ -72,26 +56,5 @@ public interface CommonRestOperations {
 
 	EntityIdentifier waiveLoanAmount(LoanTransactionCommand command);
 
-	EntityIdentifier updateCurrentUserDetails(UserCommand command);
-
-	ClientData retrieveNewIndividualClient();
-
-	ClientData retrieveClientDetails(Long clientId);
-
-	EntityIdentifier enrollClient(EnrollClientCommand command);
-
-	EntityIdentifier addNote(NoteCommand command);
-
-	EntityIdentifier updateNote(NoteCommand command);
-
-	NoteData retrieveClientNote(Long clientId, Long noteId);
-
-	Collection<NoteData> retrieveClientNotes(Long clientId);
-
-	ClientDataWithAccountsData retrieveClientAccount(Long clientId);
-
-	LoanAccountData retrieveLoanAccount(Long loanId);
-
-	NewLoanWorkflowStepOneData retrieveNewLoanApplicationDetails(Long clientId,
-			Long productId);
+	NewLoanWorkflowStepOneData retrieveNewLoanApplicationDetails(Long clientId, Long productId);
 }

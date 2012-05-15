@@ -2,10 +2,8 @@ package org.mifosng.platform;
 
 import org.mifosng.data.EntityIdentifier;
 import org.mifosng.data.command.AdjustLoanTransactionCommand;
-import org.mifosng.data.command.EnrollClientCommand;
 import org.mifosng.data.command.LoanStateTransitionCommand;
 import org.mifosng.data.command.LoanTransactionCommand;
-import org.mifosng.data.command.NoteCommand;
 import org.mifosng.data.command.SubmitLoanApplicationCommand;
 import org.mifosng.data.command.UndoLoanApprovalCommand;
 import org.mifosng.data.command.UndoLoanDisbursalCommand;
@@ -16,9 +14,6 @@ public interface WritePlatformService {
 
 	void updateUsernamePasswordOnFirstTimeLogin(UpdateUsernamePasswordCommand command);
 
-	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE', 'CAN_ENROLL_NEW_CLIENT_ROLE')")
-	Long enrollClient(EnrollClientCommand command);
-	
 	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE', 'CAN_DELETE_LOAN_THAT_IS_SUBMITTED_AND_NOT_APPROVED')")
 	EntityIdentifier deleteLoan(Long loanId);
 	
@@ -49,8 +44,4 @@ public interface WritePlatformService {
 	EntityIdentifier adjustLoanTransaction(AdjustLoanTransactionCommand command);
 
 	EntityIdentifier waiveLoanAmount(LoanTransactionCommand command);
-
-	EntityIdentifier addClientNote(NoteCommand command);
-
-	EntityIdentifier updateNote(NoteCommand command);
 }

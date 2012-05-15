@@ -325,7 +325,7 @@
 <form id="entityform">
     <div id="formerrors"></div>
 	<label for="office"><spring:message code="label.office"/></label>
-	<select id="office" name="office" title="">
+	<select id="officeId" name="officeId" title="">
 		<option value=""><spring:message code="option.office.first.choice"/></option>
 		{{#each allowedOffices}}
 			{{#if $ctx.number($parent.parent.data.officeId)===$ctx.number(id)}}
@@ -355,43 +355,13 @@
 		</tr>
 	</table>
 
-	<label for="joiningDate"><spring:message code="label.joiningdate"/></label>
-	<input id="joiningDate" name="joiningDate" title="" type="text" class="datepickerfield" value="{{=$ctx.globalDate(joinedDate)}}"/>
+	<input type="hidden" id="dateFormat" name="dateFormat" value="dd MMMM yyyy" />
+	<label for="joiningDateFormatted"><spring:message code="label.joiningdate"/></label>
+	<input id="joiningDateFormatted" name="joiningDateFormatted" title="" type="text" class="datepickerfield" value="{{=$ctx.globalDate(joinedDate)}}"/>
 </form>
 </script>
 
-<script id="clientDataTabTemplate" type="text/x-jquery-tmpl">
-<c:url value="/" var="rootContext" />
-
-<span id="toolbar" class="ui-widget-header ui-corner-all">
-    <!--
-	<button id="cashflowbtn{{=clientInfo.id}}" class="casflowbtn">New cashflow analysis</button>
-    -->
-	<sec:authorize access="hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE', 'CAN_SUBMIT_NEW_LOAN_APPLICATION_ROLE', 'CAN_SUBMIT_HISTORIC_LOAN_APPLICATION_ROLE')">
-	<button id="newloanbtn{{=clientInfo.id}}" class="newloanbtn">New loan application</button>
-	</sec:authorize>
-
-	<button id="addnotebtn{{=clientInfo.id}}" class="addnotebtn">Add note</button>
-</span>
-<hr/>
-
-<div id="clienttabcontent">
-	<div id="clienttableftpane" style="float:left; max-width: 700px; width: 700px;">
-<div class="row">
-	<span class="longrowlabel"><spring:message code="label.client.account.name"/></span>
-	<span class="rowvalue">{{=clientInfo.displayName}}</span>
-</div>
-<div class="row">
-	<span class="longrowlabel"><spring:message code="label.client.account.branch"/></span>
-	<span class="rowvalue">{{=clientInfo.officeName}}</span>
-</div>
-<div class="row">
-	<span class="longrowlabel"><spring:message code="label.client.account.joinedon"/></span>
-	<span class="rowvalue">{{=$ctx.globalDate(clientInfo.joinedDate)}}</span>
-</div>
-
-<br/>
-<p><b><spring:message code="heading.client.account.account.overview"/></b></p>
+<script id="clientAccountSummariesTemplate" type="text/x-jquery-tmpl">
 {{#if $ctx.numberGreaterThanZero(anyLoanCount)}}
 
 {{#if $ctx.numberGreaterThanZero(pendingApprovalLoanCount)}}
@@ -399,7 +369,7 @@
 	<span class="longrowlabel"><spring:message code="label.client.account.pending.approval.loans"/> ({{=$ctx.number(pendingApprovalLoanCount)}}):</span>
 	<span class="rowvalue">
 	{{#each pendingApprovalLoans}}
-		<span class="loanaccount"><a href="${rootContext}portfolio/loan/{{=id}}" id="loan{{=id}}" class="openloanaccount" title="{{=loanProductName}}: &#35;{{=id}}">{{=loanProductName}}: &#35;{{=id}}</a></span>
+		<span class="loanaccount"><a href="http://localhost:8080/mifosng-provider/api/v1/loans/{{=id}}" id="loan{{=id}}" class="openloanaccount" title="{{=loanProductName}}: &#35;{{=id}}">{{=loanProductName}}: &#35;{{=id}}</a></span>
 	{{/each}}
 	</span>
 </div>
@@ -410,7 +380,7 @@
 	<span class="longrowlabel"><spring:message code="label.client.account.pending.disbursal.loans"/> ({{=$ctx.number(awaitingDisbursalLoanCount)}}):</span>
 	<span class="rowvalue">
 	{{#each awaitingDisbursalLoans}}
-		<span class="loanaccount"><a href="${rootContext}portfolio/loan/{{=id}}" id="loan{{=id}}" class="openloanaccount" title="{{=loanProductName}}: &#35;{{=id}}">{{=loanProductName}}: &#35;{{=id}}</a></span>
+		<span class="loanaccount"><a href="http://localhost:8080/mifosng-provider/api/v1/loans/{{=id}}" id="loan{{=id}}" class="openloanaccount" title="{{=loanProductName}}: &#35;{{=id}}">{{=loanProductName}}: &#35;{{=id}}</a></span>
 	{{/each}}
 	</span>
 </div>
@@ -421,7 +391,7 @@
 	<span class="longrowlabel"><spring:message code="label.client.account.active.loans"/> ({{=$ctx.number(activeLoanCount)}}):</span>
 	<span class="rowvalue">
 	{{#each openLoans}}
-		<span class="loanaccount"><a href="${rootContext}portfolio/loan/{{=id}}" id="loan{{=id}}" class="openloanaccount" title="{{=loanProductName}}: &#35;{{=id}}">{{=loanProductName}}: &#35;{{=id}}</a></span>
+		<span class="loanaccount"><a href="http://localhost:8080/mifosng-provider/api/v1/loans/{{=id}}" id="loan{{=id}}" class="openloanaccount" title="{{=loanProductName}}: &#35;{{=id}}">{{=loanProductName}}: &#35;{{=id}}</a></span>
 	{{/each}}
 	</span>
 </div>
@@ -432,7 +402,7 @@
 	<div class="longrowlabel"><spring:message code="label.client.account.closed.loans"/> ({{=$ctx.number(closedLoanCount)}}):</div>
 	<div class="rowvalue">
 	{{#each closedLoans}}
-		<span class="loanaccount"><a href="${rootContext}portfolio/loan/{{=id}}" id="loan{{=id}}" class="openloanaccount" title="{{=loanProductName}}: &#35;{{=id}}">{{=loanProductName}}: &#35;{{=id}}</a></span>
+		<span class="loanaccount"><a href="http://localhost:8080/mifosng-provider/api/v1/loans/{{=id}}" id="loan{{=id}}" class="openloanaccount" title="{{=loanProductName}}: &#35;{{=id}}">{{=loanProductName}}: &#35;{{=id}}</a></span>
 	{{/each}}
 	</div>
 </div>
@@ -443,14 +413,45 @@
 	<spring:message code="label.client.account.no.loans.exist"/>
 </div>
 {{/if}}
+</script>
 
-<div id="clientadditionaldata"></div>
-</div>
-<!-- end of left pane content -->
+<script id="clientDataTabTemplate" type="text/x-jquery-tmpl">
+<span id="toolbar" class="ui-widget-header ui-corner-all">
+    <!--
+	<button id="cashflowbtn{{=id}}" class="casflowbtn">New cashflow analysis</button>
+    -->
+	<sec:authorize access="hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE', 'CAN_SUBMIT_NEW_LOAN_APPLICATION_ROLE', 'CAN_SUBMIT_HISTORIC_LOAN_APPLICATION_ROLE')">
+	<button id="newloanbtn{{=id}}" class="newloanbtn">New loan application</button>
+	</sec:authorize>
 
-<div id="clienttabrightpane" style="float:right;">
-</div>
+	<button id="addnotebtn{{=id}}" class="addnotebtn">Add note</button>
+</span>
+<hr/>
 
+<div id="clienttabcontent">
+	<div id="clienttableftpane" style="float:left; max-width: 700px; width: 700px;">
+		<div class="row">
+			<span class="longrowlabel"><spring:message code="label.client.account.name"/></span>
+			<span class="rowvalue">{{=displayName}}</span>
+		</div>
+		<div class="row">
+			<span class="longrowlabel"><spring:message code="label.client.account.branch"/></span>
+			<span class="rowvalue">{{=officeName}}</span>
+		</div>
+		<div class="row">
+			<span class="longrowlabel"><spring:message code="label.client.account.joinedon"/></span>
+			<span class="rowvalue">{{=$ctx.globalDate(joinedDate)}}</span>
+		</div>
+
+		<p><b><spring:message code="heading.client.account.account.overview"/></b></p>
+		<div id="clientaccountssummary"></div>
+
+		<div id="clientadditionaldata"></div>
+	</div>
+	<!-- end of left pane content -->
+
+	<!-- placeholder for notes content -->
+	<div id="clienttabrightpane" style="float:right;"></div>
 </div>
 <div style="clear: both;"></div>
 </script>

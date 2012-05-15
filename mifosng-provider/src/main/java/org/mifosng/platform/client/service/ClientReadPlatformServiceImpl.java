@@ -9,14 +9,20 @@ import java.util.List;
 import javax.sql.DataSource;
 
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
+import org.mifosng.data.AppUserData;
 import org.mifosng.data.ClientData;
+import org.mifosng.data.ClientLoanAccountSummaryCollectionData;
+import org.mifosng.data.ClientLoanAccountSummaryData;
+import org.mifosng.data.NoteData;
 import org.mifosng.data.OfficeData;
 import org.mifosng.platform.exceptions.PlatformResourceNotFoundException;
 import org.mifosng.platform.organisation.domain.Organisation;
 import org.mifosng.platform.organisation.service.OfficeReadPlatformService;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.user.domain.AppUser;
+import org.mifosng.platform.user.service.AppUserReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
@@ -29,11 +35,14 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 	private final SimpleJdbcTemplate jdbcTemplate;
 	private final PlatformSecurityContext context;
 	private final OfficeReadPlatformService officeReadPlatformService;
+	private final AppUserReadPlatformService appUserReadPlatformService;
 
 	@Autowired
-	public ClientReadPlatformServiceImpl(final PlatformSecurityContext context, final DataSource dataSource, final OfficeReadPlatformService officeReadPlatformService) {
+	public ClientReadPlatformServiceImpl(final PlatformSecurityContext context, final DataSource dataSource, final OfficeReadPlatformService officeReadPlatformService,
+			final AppUserReadPlatformService appUserReadPlatformService) {
 		this.context = context;
 		this.officeReadPlatformService = officeReadPlatformService;
+		this.appUserReadPlatformService = appUserReadPlatformService;
 		this.jdbcTemplate = new SimpleJdbcTemplate(dataSource);
 	}
 	
@@ -87,6 +96,27 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 		}
 	}
 	
+	@Override
+	public ClientData retrieveNewClientDetails() {
+
+		AppUser currentUser = context.authenticatedUser();
+
+		List<OfficeData> offices = new ArrayList<OfficeData>(officeReadPlatformService.retrieveAllOffices());
+
+		ClientData clientData = new ClientData();
+		clientData.setOfficeId(currentUser.getOffice().getId());
+		clientData.setOrganisationId(currentUser.getOrganisation().getId());
+		clientData.setAllowedOffices(offices);
+
+		clientData.setDisplayName("");
+		clientData.setFirstname("");
+		clientData.setLastname("");
+		clientData.setId(Long.valueOf(-1));
+		clientData.setJoinedDate(new LocalDate());
+
+		return clientData;
+	}
+	
 	private static final class ClientMapper implements RowMapper<ClientData> {
 
 		private final List<OfficeData> offices;
@@ -138,6 +168,213 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 			}
 
 			return match;
+		}
+	}
+	
+	@Override
+	public ClientLoanAccountSummaryCollectionData retrieveClientAccountDetails(final Long clientId) {
+
+		try {
+			AppUser currentUser = this.context.authenticatedUser();
+			
+			List<ClientLoanAccountSummaryData> pendingApprovalLoans = new ArrayList<ClientLoanAccountSummaryData>();
+			List<ClientLoanAccountSummaryData> awaitingDisbursalLoans = new ArrayList<ClientLoanAccountSummaryData>();
+			List<ClientLoanAccountSummaryData> openLoans = new ArrayList<ClientLoanAccountSummaryData>();
+			List<ClientLoanAccountSummaryData> closedLoans = new ArrayList<ClientLoanAccountSummaryData>();
+
+			ClientLoanAccountSummaryDataMapper rm = new ClientLoanAccountSummaryDataMapper();
+
+			String sql = "select " + rm.loanAccountSummarySchema() + " where l.client_id = ? and l.org_id = ?";
+
+			List<ClientLoanAccountSummaryData> results = this.jdbcTemplate.query(sql, rm, new Object[] {clientId, currentUser.getOrganisation().getId()});
+			if (results != null) {
+				for (ClientLoanAccountSummaryData row : results) {
+					if (row.isOpen()) {
+						openLoans.add(row);
+					} else if (row.isWaitingForDisbursal()) {
+						awaitingDisbursalLoans.add(row);
+					} else if (row.isPendingApproval()) {
+						pendingApprovalLoans.add(row);
+					} else {
+						closedLoans.add(row);
+					}
+				}
+			}
+			
+			return new ClientLoanAccountSummaryCollectionData(pendingApprovalLoans, awaitingDisbursalLoans, openLoans, closedLoans);
+			
+		} catch (EmptyResultDataAccessException e) {
+			throw new PlatformResourceNotFoundException(
+					"error.msg.client.id.invalid",
+					"Client with identifier {0} does not exist", clientId);
+		}
+
+//		Collection<Loan> allLoans = this.loanRepository.findAll(loansThatMatch(currentUser.getOrganisation(), client));
+//
+//		List<LoanAccountData> pendingApprovalLoans = new ArrayList<LoanAccountData>();
+//		List<LoanAccountData> awaitingDisbursalLoans = new ArrayList<LoanAccountData>();
+//		List<LoanAccountData> openLoans = new ArrayList<LoanAccountData>();
+//		List<LoanAccountData> closedLoans = new ArrayList<LoanAccountData>();
+//
+//		for (Loan realLoan : allLoans) {
+//
+//			ApplicationCurrency currency = this.applicationCurrencyRepository
+//					.findOneByCode(realLoan.getLoanRepaymentScheduleDetail()
+//							.getPrincipal().getCurrencyCode());
+//
+//			CurrencyData currencyData = new CurrencyData(currency.getCode(),
+//					currency.getName(), currency.getDecimalPlaces(),
+//					currency.getDisplaySymbol(), currency.getNameCode());
+//
+//			LoanAccountData loan = convertToData(realLoan, currencyData);
+//
+//			if (loan.isClosed() || loan.isInterestRebateOutstanding()) {
+//				closedLoans.add(loan);
+//			} else if (loan.isPendingApproval()) {
+//				pendingApprovalLoans.add(loan);
+//			} else if (loan.isWaitingForDisbursal()) {
+//				awaitingDisbursalLoans.add(loan);
+//			} else if (loan.isOpen()) {
+//				openLoans.add(loan);
+//			}
+//		}
+//
+//		Collections.sort(closedLoans, new ClosedLoanComparator());
+//
+//		return new ClientDataWithAccountsData(clientAccount,
+//				pendingApprovalLoans, awaitingDisbursalLoans, openLoans,
+//				closedLoans);
+	}
+	
+	private static final class ClientLoanAccountSummaryDataMapper implements RowMapper<ClientLoanAccountSummaryData> {
+
+		public String loanAccountSummarySchema() {
+			
+			StringBuilder loanAccountSummary = new StringBuilder("l.id as id, l.external_id as externalId,");
+			loanAccountSummary.append("l.product_id as productId, lp.name as productName,")
+							  .append("l.loan_status_id as statusId, ls.display_name as statusName ")
+							  .append("from portfolio_loan l ")
+							  .append("LEFT JOIN portfolio_product_loan AS lp ON lp.id = l.product_id ")
+							  .append("LEFT JOIN ref_loan_status AS ls ON ls.id = l.loan_status_id ");
+			
+			return loanAccountSummary.toString();
+		}
+
+		@Override
+		public ClientLoanAccountSummaryData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
+
+			Long id = rs.getLong("id");
+			String externalId = rs.getString("externalId");
+			Long productId = rs.getLong("productId");
+			String loanProductName = rs.getString("productName");
+			Integer loanStatusId = rs.getInt("statusId");
+			String lifeCycleStatusText = rs.getString("statusName");
+			
+			LoanStatusMapper statusMapper = new LoanStatusMapper(loanStatusId);
+			
+			boolean pendingApproval = statusMapper.isPendingApproval();
+			boolean waitingForDisbursal = statusMapper.isAwaitingDisbursal();
+			boolean open = statusMapper.isOpen();
+			boolean closed = statusMapper.isClosed();
+//			LocalDate lifeCycleStatusDate;
+			
+			return new ClientLoanAccountSummaryData(id, externalId, productId, loanProductName, loanStatusId, lifeCycleStatusText, pendingApproval, waitingForDisbursal, open, closed);
+		}
+	}
+	
+	
+	@Override
+	public NoteData retrieveClientNote(Long clientId, Long noteId) {
+
+		try {
+			AppUser currentUser = context.authenticatedUser();
+
+			// FIXME - use join on sql query to fetch user information for note rather than fetching users?
+			Collection<AppUserData> allUsers = this.appUserReadPlatformService.retrieveAllUsers();
+
+			NoteMapper noteMapper = new NoteMapper(allUsers);
+
+			String sql = "select " + noteMapper.schema()
+					+ " where n.org_id = ? and n.client_id = ? and n.id = ?";
+
+			return this.jdbcTemplate.queryForObject(sql, noteMapper,
+					new Object[] { currentUser.getOrganisation().getId(),
+							clientId, noteId });
+		} catch (EmptyResultDataAccessException e) {
+			throw new PlatformResourceNotFoundException(
+					"error.msg.client.id.invalid",
+					"Client with identifier {0} does not exist", clientId);
+		}
+	}
+
+	@Override
+	public Collection<NoteData> retrieveAllClientNotes(Long clientId) {
+
+		AppUser currentUser = context.authenticatedUser();
+
+		// FIXME - use join on sql query to fetch user information for note rather than fetching users?
+		Collection<AppUserData> allUsers = this.appUserReadPlatformService.retrieveAllUsers();
+
+		NoteMapper noteMapper = new NoteMapper(allUsers);
+
+		String sql = "select "
+				+ noteMapper.schema()
+				+ " where n.org_id = ? and n.client_id = ? order by n.created_date DESC";
+
+		return this.jdbcTemplate.query(sql, noteMapper, new Object[] {
+				currentUser.getOrganisation().getId(), clientId });
+	}
+
+	private static final class NoteMapper implements RowMapper<NoteData> {
+
+		private final Collection<AppUserData> allUsers;
+
+		public NoteMapper(Collection<AppUserData> allUsers) {
+			this.allUsers = allUsers;
+		}
+
+		public String schema() {
+			return "n.id as id, n.client_id as clientId, n.loan_id as loanId, n.loan_transaction_id as transactionId, n.note_type_enum as noteTypeEnum, n.note as note, "
+					+ "n.created_date as createdDate, n.createdby_id as createdById, n.lastmodified_date as lastModifiedDate, n.lastmodifiedby_id as lastModifiedById"
+					+ " from portfolio_note n";
+		}
+
+		@Override
+		public NoteData mapRow(final ResultSet rs, final int rowNum)
+				throws SQLException {
+
+			Long id = rs.getLong("id");
+			Long clientId = rs.getLong("clientId");
+			Long loanId = rs.getLong("loanId");
+			Long transactionId = rs.getLong("transactionId");
+			Integer noteTypeId = rs.getInt("noteTypeEnum");
+			String note = rs.getString("note");
+
+			DateTime createdDate = new DateTime(rs.getTimestamp("createdDate"));
+			Long createdById = rs.getLong("createdById");
+			String createdByUsername = findUserById(createdById, allUsers);
+
+			DateTime lastModifiedDate = new DateTime(
+					rs.getTimestamp("lastModifiedDate"));
+			Long lastModifiedById = rs.getLong("lastModifiedById");
+			String updatedByUsername = findUserById(createdById, allUsers);
+
+			return new NoteData(id, clientId, loanId, transactionId,
+					noteTypeId, note, createdDate, createdById,
+					createdByUsername, lastModifiedDate, lastModifiedById,
+					updatedByUsername);
+		}
+
+		private String findUserById(Long createdById,
+				Collection<AppUserData> allUsers) {
+			String username = "";
+			for (AppUserData appUserData : allUsers) {
+				if (appUserData.getId().equals(createdById)) {
+					username = appUserData.getUsername();
+					break;
+				}
+			}
+			return username;
 		}
 	}
 }

@@ -12,6 +12,9 @@ public class EnrollClientCommand {
 	private String fullname;
 	private Long officeId;
 	private String externalId;
+	
+	private String dateFormat;
+	private String joiningDateFormatted;
 	private LocalDate joiningDate;
 
 	protected EnrollClientCommand() {
@@ -72,5 +75,21 @@ public class EnrollClientCommand {
 
 	public void setFullname(String fullname) {
 		this.fullname = fullname;
+	}
+
+	public String getDateFormat() {
+		return dateFormat;
+	}
+
+	public void setDateFormat(String dateFormat) {
+		this.dateFormat = dateFormat;
+	}
+
+	public String getJoiningDateFormatted() {
+		return joiningDateFormatted;
+	}
+
+	public void setJoiningDateFormatted(String joiningDateFormatted) {
+		this.joiningDateFormatted = joiningDateFormatted;
 	}
 }

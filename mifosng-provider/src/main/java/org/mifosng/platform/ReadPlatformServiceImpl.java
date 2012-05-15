@@ -1,6 +1,5 @@
 package org.mifosng.platform;
 
-import static org.mifosng.platform.Specifications.clientsThatMatch;
 import static org.mifosng.platform.Specifications.loanTransactionsThatMatch;
 import static org.mifosng.platform.Specifications.loansThatMatch;
 
@@ -8,16 +7,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
 import javax.sql.DataSource;
 
-import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
-import org.mifosng.data.AppUserData;
 import org.mifosng.data.ClientData;
-import org.mifosng.data.ClientDataWithAccountsData;
 import org.mifosng.data.CurrencyData;
 import org.mifosng.data.DerivedLoanData;
 import org.mifosng.data.LoanAccountData;
@@ -25,16 +19,12 @@ import org.mifosng.data.LoanProductData;
 import org.mifosng.data.LoanRepaymentData;
 import org.mifosng.data.MoneyData;
 import org.mifosng.data.NewLoanWorkflowStepOneData;
-import org.mifosng.data.NoteData;
-import org.mifosng.data.OfficeData;
 import org.mifosng.data.OrganisationReadModel;
-import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.client.domain.ClientRepository;
 import org.mifosng.platform.client.service.ClientReadPlatformService;
 import org.mifosng.platform.currency.domain.ApplicationCurrency;
 import org.mifosng.platform.currency.domain.ApplicationCurrencyRepository;
 import org.mifosng.platform.currency.domain.Money;
-import org.mifosng.platform.exceptions.PlatformResourceNotFoundException;
 import org.mifosng.platform.exceptions.UnAuthenticatedUserException;
 import org.mifosng.platform.loan.domain.Loan;
 import org.mifosng.platform.loan.domain.LoanRepository;
@@ -44,7 +34,6 @@ import org.mifosng.platform.loanproduct.service.LoanProductReadPlatformService;
 import org.mifosng.platform.user.domain.AppUser;
 import org.mifosng.platform.user.service.AppUserReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.security.core.Authentication;
@@ -125,189 +114,6 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 
 			return new OrganisationReadModel(id, name, contactName, openingDate);
 		}
-	}
-
-	@Override
-	public NoteData retrieveClientNote(Long clientId, Long noteId) {
-
-		try {
-			AppUser currentUser = extractAuthenticatedUser();
-
-			Collection<AppUserData> allUsers = this.appUserReadPlatformService.retrieveAllUsers();
-
-			NoteMapper noteMapper = new NoteMapper(allUsers);
-
-			String sql = "select " + noteMapper.schema()
-					+ " where n.org_id = ? and n.client_id = ? and n.id = ?";
-
-			return this.jdbcTemplate.queryForObject(sql, noteMapper,
-					new Object[] { currentUser.getOrganisation().getId(),
-							clientId, noteId });
-		} catch (EmptyResultDataAccessException e) {
-			throw new PlatformResourceNotFoundException(
-					"error.msg.client.id.invalid",
-					"Client with identifier {0} does not exist", clientId);
-		}
-	}
-
-	@Override
-	public Collection<NoteData> retrieveAllClientNotes(Long clientId) {
-
-		AppUser currentUser = extractAuthenticatedUser();
-
-		Collection<AppUserData> allUsers = this.appUserReadPlatformService.retrieveAllUsers();
-
-		NoteMapper noteMapper = new NoteMapper(allUsers);
-
-		String sql = "select "
-				+ noteMapper.schema()
-				+ " where n.org_id = ? and n.client_id = ? order by n.created_date DESC";
-
-		return this.jdbcTemplate.query(sql, noteMapper, new Object[] {
-				currentUser.getOrganisation().getId(), clientId });
-	}
-
-	protected static final class NoteMapper implements RowMapper<NoteData> {
-
-		private final Collection<AppUserData> allUsers;
-
-		public NoteMapper(Collection<AppUserData> allUsers) {
-			this.allUsers = allUsers;
-		}
-
-		public String schema() {
-			return "n.id as id, n.client_id as clientId, n.loan_id as loanId, n.loan_transaction_id as transactionId, n.note_type_enum as noteTypeEnum, n.note as note, "
-					+ "n.created_date as createdDate, n.createdby_id as createdById, n.lastmodified_date as lastModifiedDate, n.lastmodifiedby_id as lastModifiedById"
-					+ " from portfolio_note n";
-		}
-
-		@Override
-		public NoteData mapRow(final ResultSet rs, final int rowNum)
-				throws SQLException {
-
-			Long id = rs.getLong("id");
-			Long clientId = rs.getLong("clientId");
-			Long loanId = rs.getLong("loanId");
-			Long transactionId = rs.getLong("transactionId");
-			Integer noteTypeId = rs.getInt("noteTypeEnum");
-			String note = rs.getString("note");
-
-			DateTime createdDate = new DateTime(rs.getTimestamp("createdDate"));
-			Long createdById = rs.getLong("createdById");
-			String createdByUsername = findUserById(createdById, allUsers);
-
-			DateTime lastModifiedDate = new DateTime(
-					rs.getTimestamp("lastModifiedDate"));
-			Long lastModifiedById = rs.getLong("lastModifiedById");
-			String updatedByUsername = findUserById(createdById, allUsers);
-
-			return new NoteData(id, clientId, loanId, transactionId,
-					noteTypeId, note, createdDate, createdById,
-					createdByUsername, lastModifiedDate, lastModifiedById,
-					updatedByUsername);
-		}
-
-		private String findUserById(Long createdById,
-				Collection<AppUserData> allUsers) {
-			String username = "";
-			for (AppUserData appUserData : allUsers) {
-				if (appUserData.getId().equals(createdById)) {
-					username = appUserData.getUsername();
-					break;
-				}
-			}
-			return username;
-		}
-	}
-
-	private List<OfficeData> retrieveOffices() {
-
-		AppUser currentUser = extractAuthenticatedUser();
-
-		String hierarchy = currentUser.getOffice().getHierarchy();
-		String hierarchySearchString = hierarchy + "%";
-
-		OfficeMapper rm = new OfficeMapper();
-		String sql = "select "
-				+ rm.officeSchema()
-				+ "where o.org_id = ? and o.hierarchy like ? order by o.hierarchy";
-
-		return this.jdbcTemplate.query(sql, rm, new Object[] {
-				currentUser.getOrganisation().getId(), hierarchySearchString });
-	}
-
-	protected static final class OfficeMapper implements RowMapper<OfficeData> {
-
-		public String officeSchema() {
-			return " o.id as id, o.name as name, o.external_id as externalId, o.opening_date as openingDate, o.hierarchy as hierarchy, parent.id as parentId, parent.name as parentName "
-					+ "from org_office o LEFT JOIN org_office AS parent ON parent.id = o.parent_id ";
-		}
-
-		@Override
-		public OfficeData mapRow(final ResultSet rs, final int rowNum)
-				throws SQLException {
-
-			Long id = rs.getLong("id");
-			String name = rs.getString("name");
-			String externalId = rs.getString("externalId");
-			LocalDate openingDate = new LocalDate(rs.getDate("openingDate"));
-			String hierarchy = rs.getString("hierarchy");
-			Long parentId = rs.getLong("parentId");
-			String parentName = rs.getString("parentName");
-
-			return new OfficeData(id, name, externalId, openingDate, hierarchy,
-					parentId, parentName);
-		}
-	}
-
-	@Override
-	public ClientDataWithAccountsData retrieveClientAccountDetails(
-			final Long clientId) {
-
-		AppUser currentUser = extractAuthenticatedUser();
-
-		ClientData clientAccount = this.clientReadPlatformService.retrieveIndividualClient(clientId);
-
-		// TODO - rewrite using jdbc sql approach
-		Client client = this.clientRepository.findOne(clientsThatMatch(
-				currentUser.getOrganisation(), clientId));
-
-		Collection<Loan> allLoans = this.loanRepository.findAll(loansThatMatch(
-				currentUser.getOrganisation(), client));
-
-		List<LoanAccountData> pendingApprovalLoans = new ArrayList<LoanAccountData>();
-		List<LoanAccountData> awaitingDisbursalLoans = new ArrayList<LoanAccountData>();
-		List<LoanAccountData> openLoans = new ArrayList<LoanAccountData>();
-		List<LoanAccountData> closedLoans = new ArrayList<LoanAccountData>();
-
-		for (Loan realLoan : allLoans) {
-
-			ApplicationCurrency currency = this.applicationCurrencyRepository
-					.findOneByCode(realLoan.getLoanRepaymentScheduleDetail()
-							.getPrincipal().getCurrencyCode());
-
-			CurrencyData currencyData = new CurrencyData(currency.getCode(),
-					currency.getName(), currency.getDecimalPlaces(),
-					currency.getDisplaySymbol(), currency.getNameCode());
-
-			LoanAccountData loan = convertToData(realLoan, currencyData);
-
-			if (loan.isClosed() || loan.isInterestRebateOutstanding()) {
-				closedLoans.add(loan);
-			} else if (loan.isPendingApproval()) {
-				pendingApprovalLoans.add(loan);
-			} else if (loan.isWaitingForDisbursal()) {
-				awaitingDisbursalLoans.add(loan);
-			} else if (loan.isOpen()) {
-				openLoans.add(loan);
-			}
-		}
-
-		Collections.sort(closedLoans, new ClosedLoanComparator());
-
-		return new ClientDataWithAccountsData(clientAccount,
-				pendingApprovalLoans, awaitingDisbursalLoans, openLoans,
-				closedLoans);
 	}
 
 	@Override
@@ -561,26 +367,5 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 						.getLoanRepaymentScheduleDetail()
 						.getRepaymentPeriodFrequencyType().toString(),
 				tolerance, loanData, waiveAllowed, interestRebateOwed);
-	}
-
-	@Override
-	public ClientData retrieveNewClientDetails() {
-
-		AppUser currentUser = extractAuthenticatedUser();
-
-		List<OfficeData> offices = retrieveOffices();
-
-		ClientData clientData = new ClientData();
-		clientData.setOfficeId(currentUser.getOffice().getId());
-		clientData.setOrganisationId(currentUser.getOrganisation().getId());
-		clientData.setAllowedOffices(offices);
-
-		clientData.setDisplayName("");
-		clientData.setFirstname("");
-		clientData.setLastname("");
-		clientData.setId(Long.valueOf(-1));
-		clientData.setJoinedDate(new LocalDate());
-
-		return clientData;
 	}
 }

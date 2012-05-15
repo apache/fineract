@@ -6,34 +6,22 @@ import java.util.Collection;
 import java.util.List;
 
 import org.mifosng.configuration.ApplicationConfigurationService;
-import org.mifosng.data.ClientData;
-import org.mifosng.data.ClientDataWithAccountsData;
 import org.mifosng.data.ClientList;
 import org.mifosng.data.EntityIdentifier;
-import org.mifosng.data.EnumOptionList;
-import org.mifosng.data.EnumOptionReadModel;
 import org.mifosng.data.ErrorResponse;
 import org.mifosng.data.ErrorResponseList;
-import org.mifosng.data.LoanAccountData;
 import org.mifosng.data.LoanProductData;
 import org.mifosng.data.LoanProductList;
 import org.mifosng.data.LoanRepaymentData;
 import org.mifosng.data.LoanSchedule;
 import org.mifosng.data.NewLoanWorkflowStepOneData;
-import org.mifosng.data.NoteData;
-import org.mifosng.data.NoteDataList;
-import org.mifosng.data.PermissionData;
-import org.mifosng.data.PermissionList;
 import org.mifosng.data.command.AdjustLoanTransactionCommand;
 import org.mifosng.data.command.CalculateLoanScheduleCommand;
-import org.mifosng.data.command.EnrollClientCommand;
 import org.mifosng.data.command.LoanStateTransitionCommand;
 import org.mifosng.data.command.LoanTransactionCommand;
-import org.mifosng.data.command.NoteCommand;
 import org.mifosng.data.command.SubmitLoanApplicationCommand;
 import org.mifosng.data.command.UndoLoanApprovalCommand;
 import org.mifosng.data.command.UndoLoanDisbursalCommand;
-import org.mifosng.data.command.UserCommand;
 import org.mifosng.ui.loanproduct.ClientValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -92,17 +80,6 @@ public class CommonRestOperationsImpl implements CommonRestOperations {
 		HttpEntity<ClientList> requestEntity = new HttpEntity<ClientList>(
 				requestHeaders);
 		return requestEntity;
-	}
-
-	@Override
-	public Collection<ClientData> retrieveAllIndividualClients() {
-		URI restUri = URI.create(getBaseServerUrl().concat(
-				"api/protected/client/all"));
-
-		ResponseEntity<ClientList> s = this.oauthRestServiceTemplate.exchange(
-				restUri, HttpMethod.GET, emptyRequest(), ClientList.class);
-
-		return s.getBody().getClients();
 	}
 
 	@Override
@@ -524,234 +501,4 @@ public class CommonRestOperationsImpl implements CommonRestOperations {
 		return new HttpEntity<CalculateLoanScheduleCommand>(command,
 				requestHeaders);
 	}
-
-	@Override
-	public EntityIdentifier updateCurrentUserDetails(UserCommand command) {
-		try {
-			URI restUri = URI.create(getBaseServerUrl().concat(
-					"api/protected/admin/user/current"));
-
-			ResponseEntity<EntityIdentifier> s = this.oauthRestServiceTemplate
-					.postForEntity(restUri, createUserRequest(command),
-							EntityIdentifier.class);
-
-			return s.getBody();
-		} catch (HttpStatusCodeException e) {
-			ErrorResponseList errorList = parseErrors(e);
-			throw new ClientValidationException(errorList.getErrors());
-		}
-	}
-
-	private HttpEntity<UserCommand> createUserRequest(final UserCommand command) {
-
-		HttpHeaders requestHeaders = new HttpHeaders();
-		requestHeaders.set("Accept", "application/xml");
-		requestHeaders.set("Content-Type", "application/xml");
-
-		HttpEntity<UserCommand> requestEntity = new HttpEntity<UserCommand>(
-				command, requestHeaders);
-		return requestEntity;
-	}
-
-	@Override
-	public Collection<PermissionData> retrieveAllPermissions() {
-
-		URI restUri = URI.create(getBaseServerUrl().concat(
-				"api/protected/admin/permissions/all"));
-
-		ResponseEntity<PermissionList> s = this.oauthRestServiceTemplate
-				.exchange(restUri, HttpMethod.GET, emptyRequest(),
-						PermissionList.class);
-
-		return s.getBody().getPermissions();
-	}
-
-	@Override
-	public Collection<EnumOptionReadModel> retrieveAllPermissionGroups() {
-		try {
-			URI restUri = URI.create(getBaseServerUrl().concat(
-					"api/protected/admin/permissiongroup/all"));
-
-			ResponseEntity<EnumOptionList> s = this.oauthRestServiceTemplate
-					.exchange(restUri, HttpMethod.GET, emptyRequest(),
-							EnumOptionList.class);
-
-			return s.getBody().getOptions();
-		} catch (HttpStatusCodeException e) {
-			ErrorResponseList errorList = parseErrors(e);
-			throw new ClientValidationException(errorList.getErrors());
-		}
-	}
-
-	@Override
-	public ClientData retrieveNewIndividualClient() {
-		URI restUri = URI.create(getBaseServerUrl().concat(
-				"api/protected/client/new"));
-
-		ResponseEntity<ClientData> s = this.oauthRestServiceTemplate.exchange(
-				restUri, HttpMethod.GET, emptyRequest(), ClientData.class);
-
-		return s.getBody();
-	}
-
-	@Override
-	public ClientData retrieveClientDetails(Long clientId) {
-		try {
-			URI restUri = URI.create(getBaseServerUrl().concat(
-					"api/protected/client/").concat(clientId.toString()));
-
-			ResponseEntity<ClientData> s = this.oauthRestServiceTemplate
-					.exchange(restUri, HttpMethod.GET, emptyRequest(),
-							ClientData.class);
-
-			return s.getBody();
-		} catch (HttpStatusCodeException e) {
-			ErrorResponseList errorList = parseErrors(e);
-			throw new ClientValidationException(errorList.getErrors());
-		}
-	}
-
-	@Override
-	public EntityIdentifier enrollClient(EnrollClientCommand command) {
-		try {
-
-			URI restUri = URI.create(getBaseServerUrl().concat(
-					"api/protected/client/new"));
-
-			ResponseEntity<EntityIdentifier> s = this.oauthRestServiceTemplate
-					.postForEntity(restUri, enrollClientRequest(command),
-							EntityIdentifier.class);
-
-			return s.getBody();
-		} catch (HttpStatusCodeException e) {
-			ErrorResponseList errorList = parseErrors(e);
-			throw new ClientValidationException(errorList.getErrors());
-		}
-	}
-
-	private HttpEntity<EnrollClientCommand> enrollClientRequest(
-			final EnrollClientCommand command) {
-		HttpHeaders requestHeaders = new HttpHeaders();
-		requestHeaders.set("Accept", "application/xml");
-		requestHeaders.set("Content-Type", "application/xml");
-
-		return new HttpEntity<EnrollClientCommand>(command, requestHeaders);
-	}
-
-	@Override
-	public EntityIdentifier addNote(NoteCommand command) {
-		try {
-			URI restUri = URI.create(getBaseServerUrl()
-					.concat("api/protected/client/")
-					.concat(command.getClientId().toString())
-					.concat("/note/new"));
-
-			ResponseEntity<EntityIdentifier> s = this.oauthRestServiceTemplate
-					.postForEntity(restUri, noteRequest(command),
-							EntityIdentifier.class);
-
-			return s.getBody();
-		} catch (HttpStatusCodeException e) {
-			ErrorResponseList errorList = parseErrors(e);
-			throw new ClientValidationException(errorList.getErrors());
-		}
-	}
-
-	@Override
-	public EntityIdentifier updateNote(NoteCommand command) {
-		try {
-			URI restUri = URI.create(getBaseServerUrl().concat(
-					"api/protected/note/").concat(command.getId().toString()));
-
-			ResponseEntity<EntityIdentifier> s = this.oauthRestServiceTemplate
-					.postForEntity(restUri, noteRequest(command),
-							EntityIdentifier.class);
-
-			return s.getBody();
-		} catch (HttpStatusCodeException e) {
-			ErrorResponseList errorList = parseErrors(e);
-			throw new ClientValidationException(errorList.getErrors());
-		}
-	}
-
-	@Override
-	public NoteData retrieveClientNote(Long clientId, Long noteId) {
-		try {
-			URI restUri = URI.create(getBaseServerUrl()
-					.concat("api/protected/client/")
-					.concat(clientId.toString()).concat("/note/")
-					.concat(noteId.toString()));
-
-			ResponseEntity<NoteData> s = this.oauthRestServiceTemplate
-					.exchange(restUri, HttpMethod.GET, emptyRequest(),
-							NoteData.class);
-
-			return s.getBody();
-		} catch (HttpStatusCodeException e) {
-			ErrorResponseList errorList = parseErrors(e);
-			throw new ClientValidationException(errorList.getErrors());
-		}
-	}
-
-	@Override
-	public Collection<NoteData> retrieveClientNotes(Long clientId) {
-		try {
-			URI restUri = URI.create(getBaseServerUrl()
-					.concat("api/protected/client/")
-					.concat(clientId.toString()).concat("/note/all"));
-
-			ResponseEntity<NoteDataList> s = this.oauthRestServiceTemplate
-					.exchange(restUri, HttpMethod.GET, emptyRequest(),
-							NoteDataList.class);
-
-			return s.getBody().getNotes();
-		} catch (HttpStatusCodeException e) {
-			ErrorResponseList errorList = parseErrors(e);
-			throw new ClientValidationException(errorList.getErrors());
-		}
-	}
-
-	private HttpEntity<NoteCommand> noteRequest(final NoteCommand command) {
-		HttpHeaders requestHeaders = new HttpHeaders();
-		requestHeaders.set("Accept", "application/xml");
-		requestHeaders.set("Content-Type", "application/xml");
-
-		return new HttpEntity<NoteCommand>(command, requestHeaders);
-	}
-
-	@Override
-	public ClientDataWithAccountsData retrieveClientAccount(Long clientId) {
-		try {
-			URI restUri = URI.create(getBaseServerUrl()
-					.concat("api/protected/client/")
-					.concat(clientId.toString()).concat("/withaccounts"));
-
-			ResponseEntity<ClientDataWithAccountsData> s = this.oauthRestServiceTemplate
-					.exchange(restUri, HttpMethod.GET, emptyRequest(),
-							ClientDataWithAccountsData.class);
-
-			return s.getBody();
-		} catch (HttpStatusCodeException e) {
-			ErrorResponseList errorList = parseErrors(e);
-			throw new ClientValidationException(errorList.getErrors());
-		}
-	}
-
-	@Override
-	public LoanAccountData retrieveLoanAccount(Long loanId) {
-		try {
-			URI restUri = URI.create(getBaseServerUrl().concat(
-					"api/protected/loan/" + loanId));
-
-			ResponseEntity<LoanAccountData> s = this.oauthRestServiceTemplate
-					.exchange(restUri, HttpMethod.GET, emptyRequest(),
-							LoanAccountData.class);
-
-			return s.getBody();
-		} catch (HttpStatusCodeException e) {
-			ErrorResponseList errorList = parseErrors(e);
-			throw new ClientValidationException(errorList.getErrors());
-		}
-	}
-
 }

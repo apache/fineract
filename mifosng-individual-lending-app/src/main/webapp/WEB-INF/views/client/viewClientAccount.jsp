@@ -12,8 +12,6 @@
 	<jsp:include page="../common-head.jsp" />
 	<c:url value="/" var="rootContext" />
 	<c:url value="/portfolio/client/${clientId}" var="clientUrl" />
-	<c:url value="/portfolio/client/${clientId}/note/all" var="allClientNotesUrl" />
-	
 <style>
 div.notecontainer {wdith:300px;min-width:300px;max-width:400px;}
 span.noteusername {font-weight:bold;font-style: italic;}
@@ -314,16 +312,17 @@ $(document).ready(function() {
 		  }).dialog('open');
 	}
 	
-	function popupDialogWithFormView(url, titleCode, templateSelector, width, height, tabIndex, minOffset, defaultOffset, maxOffset) {
+	// function popupDialogWithFormView(getUrl, postUrl, submitType, titleCode, templateSelector, width, height, tabIndex, minOffset, defaultOffset, maxOffset) {
+	function popupDialogWithFormView(getUrl, postUrl, submitType, titleCode, templateSelector, width, height, saveSuccessFunction) {
 		 var dialogDiv = $("<div id='dialog-form'></div>");
 		 var jqxhr = $.ajax({
-			url: url,
+			url: getUrl,
 			type: 'GET',
 			contentType: 'application/json',
 			dataType: 'json',
 			cache: false,
 			success: function(data, textStatus, jqXHR) {
-			
+			console.log(data);
 			var formHtml = $(templateSelector).render(data);
 			
 			dialogDiv.append(formHtml);
@@ -333,24 +332,28 @@ $(document).ready(function() {
 			
 			var buttonsOpts = {};
 			buttonsOpts[saveButton] = function() {
-				$('.multiSelectedItems option').each(function(i) {  
+				
+				$('#notSelectedItems option').each(function(i) {  
 			    	   $(this).attr("selected", "selected");  
 			    });
-	  				
-	  			var form_data = $('#entityform').serialize();
-	  				 
+		    	
+		    	$('#selectedItems option').each(function(i) {  
+		    	   $(this).attr("selected", "selected");  
+		    	});
+		    	
+		    	var newFormData = JSON.stringify($('#entityform').serializeObject());
+		    	console.log(newFormData);
+		    	
 				var jqxhr = $.ajax({
-					  url: url,
-					  type: 'POST',
-					  data: form_data,
-					  success: function(data, textStatus, jqXHR) {
-						  dialogDiv.dialog("close");
-						  $newtabs.tabs('load', tabIndex);
+					  url: postUrl,
+					  type: submitType,
+					  contentType: 'application/json',
+					  dataType: 'json',
+					  data: newFormData,
+					  success: saveSuccessFunction,
+					  error: function(jqXHR, textStatus, errorThrown) {
+					    handleXhrError(jqXHR, textStatus, errorThrown, "#formErrorsTemplate", "#formerrors");
 					  }
-				});
-				
-				jqxhr.error(function(jqXHR, textStatus, errorThrown) {
-					handleXhrError(jqXHR, textStatus, errorThrown, "#formErrorsTemplate", "#formerrors");
 				});
 			};
 			
@@ -367,20 +370,19 @@ $(document).ready(function() {
 			  			$(this).remove();
 					},
 			  		open: function (event, ui) {
-			  			$('.multiadd').click(function() {  
-			  			     return !$('.multiNotSelectedItems option:selected').remove().appendTo('#selectedItems');  
+			  			
+			  			$('#add').click(function() {  
+			  			     return !$('#notSelectedItems option:selected').remove().appendTo('#selectedItems');  
 			  			});
 			  			
-			  			$('.multiremove').click(function() {  
-			  				return !$('.multiSelectedItems option:selected').remove().appendTo('#notSelectedItems');  
+			  			$('#remove').click(function() {  
+			  				return !$('#selectedItems option:selected').remove().appendTo('#notSelectedItems');  
 			  			});
 			  			
-			  			$('.datepickerfield').datepicker({constrainInput: true, minDate: minOffset, defaultDate: defaultOffset, maxDate: maxOffset, dateFormat: 'dd MM yy'});
+			  			$('.datepickerfield').datepicker({constrainInput: true, maxDate: 0, dateFormat: 'dd MM yy'});
 			  			
 			  			$("#entityform textarea").first().focus();
 			  			$('#entityform input').first().focus();
-			  			
-			  			calculateAnnualPercentageRate();
 			  		}
 			  	}).dialog('open');
 		  }
@@ -389,7 +391,7 @@ $(document).ready(function() {
 		jqxhr.error(function(jqXHR, textStatus, errorThrown) {
 			handleXhrError(jqXHR, textStatus, errorThrown, "#formErrorsTemplate", "#formerrors");
 		});
-	} 
+	}
 	
 	var tab_counter = 1;
 	var $newtabs = $("#newtabs").tabs({
@@ -410,6 +412,9 @@ $(document).ready(function() {
 	            $(anchor.hash).html("error occured while ajax loading.");
 	        },
 	        success: function(data, status, xhr) {
+	        	
+	        	console.log(data);
+	        	
 	        	var currentTabIndex = $newtabs.tabs('option', 'selected');
 	            var currentTabAnchor = $newtabs.data('tabs').anchors[currentTabIndex];
 	            //$(currentTabAnchor).data('cache.tabs', true)
@@ -421,12 +426,20 @@ $(document).ready(function() {
 				var maxOffset = 0; // today
 				
 	            if (currentTabIndex < 1) {
+	            	console.log("success: client tab.");
 	        		var tableHtml = $("#clientDataTabTemplate").render(data);
 					$("#clienttab").html(tableHtml);
+					
+					$("#clienttabname").html(data.displayName);
+					
+					// retrieve accounts summary info
+					refreshLoanSummaryInfo();
+					
+					// retrieve additional info
 					var extraDataParams = {
 							url: '${rootContext}',
 							datasetType: "portfolio_client",
-							datasetPKValue: data.clientInfo.id,
+							datasetPKValue: data.id,
 							datasetTypeDiv: "clientadditionaldata", 
 							headingPrefix: "", 
 							headingClass: "", 
@@ -435,6 +448,7 @@ $(document).ready(function() {
 					};
 					jQuery.stretchyData.displayAllExtraData(extraDataParams);
 
+					// bind click listeners to buttons.
 					$('.casflowbtn').button().click(function(e) {
 						var linkId = this.id;
 						var clientId = linkId.replace("cashflowbtn", "");
@@ -456,27 +470,23 @@ $(document).ready(function() {
 					$('.addnotebtn').button().click(function(e) {
 						var linkId = this.id;
 						var clientId = linkId.replace("addnotebtn", "");
-						var url = '${rootContext}portfolio/client/' + clientId + '/note/new';
+						var getAndPostUrl = 'http://localhost:8080/mifosng-provider/api/v1/clients/' + clientId + '/notes';
 						
 						var templateSelector = "#noteFormTemplate";
 						var width = 600; 
 						var height = 400;
-						var defaultOffset = data.clientInfo.maxJoinedOnOffsetFromToday;
-						popupDialogWithFormView(url, "dialog.title.add.note", templateSelector, width, height, currentTabIndex, defaultOffset, defaultOffset, maxOffset);
+						
+						var saveSuccessFunction = function(data, textStatus, jqXHR) {
+						  	$("#dialog-form").dialog("close");
+						  	refreshNoteWidget();
+						}
+						
+						popupDialogWithFormView(getAndPostUrl, getAndPostUrl, 'POST', "dialog.title.add.note", templateSelector, width, height, saveSuccessFunction);
 					    e.preventDefault();
 					});
 					$('button.addnotebtn span').text(jQuery.i18n.prop('dialog.button.add.note'));
-					
-		            $("a.openloanaccount").click( function(e) {
-						var tab_title = $(this).attr('title');
-					    var tab_href = this.href;
-					    
-						$newtabs.tabs( "add", tab_href, tab_title );
-						tab_counter++;
-						e.preventDefault();
-					});
-					
-		            refreshNoteWidget();
+
+					refreshNoteWidget();
 					
 	        	} else {
 	        		
@@ -654,22 +664,52 @@ $(document).ready(function() {
 	    }
 	});
 	
+	// function to retrieve and display loan summary information in it placeholder
+	function refreshLoanSummaryInfo() {
+		
+	  	var jqxhr = $.ajax({
+			  url: 'http://localhost:8080/mifosng-provider/api/v1/clients/${clientId}/loans',
+			  type: 'GET',
+			  contentType: 'application/json',
+			  dataType: 'json',
+			  cache: false,
+			  success: function(data, textStatus, jqXHR) {
+				  console.log(data);
+				  var tableHtml = $("#clientAccountSummariesTemplate").render(data);
+				  $("#clientaccountssummary").html(tableHtml);
+				  
+				  $("a.openloanaccount").click( function(e) {
+						var tab_title = $(this).attr('title');
+					    var tab_href = this.href;
+					    
+						$newtabs.tabs( "add", tab_href, tab_title );
+						e.preventDefault();
+					});
+			  }
+		 });
+	  	
+	  	jqxhr.error(function(jqXHR, textStatus, errorThrown) {
+			handleXhrError(jqXHR, textStatus, errorThrown, "#formErrorsTemplate", "#formerrors");
+		});
+	}
+	
 	function refreshNoteWidget() {
 		
 		var noteArray = new Array();
 	  	var arrayIndex = 0;
 	  	
 	  	var jqxhr = $.ajax({
-			  url: '${allClientNotesUrl}',
+			  url: 'http://localhost:8080/mifosng-provider/api/v1/clients/${clientId}/notes',
 			  type: 'GET',
 			  contentType: 'application/json',
 			  dataType: 'json',
 			  cache: false,
-			  success: function(data, textStatus, jqXHR) {
+			  success: function(data, textStatus, jqXHR) {	
+				  console.log(data);
 				  
 				  var noteParent = new Object();
 				  noteParent.title = jQuery.i18n.prop('widget.notes.heading');
-				  noteParent.items = data;
+				  noteParent.items = data.notes;
 				  
 				  var tableHtml = $("#noteListViewTemplate").render(noteParent);
 				  $("#clienttabrightpane").html(tableHtml);
@@ -677,14 +717,17 @@ $(document).ready(function() {
 				  $('.editclientnote').click(function(e) {
 						var linkId = this.id;
 						var noteId = linkId.replace("editclientnotelink", "");
-						var url = '${rootContext}portfolio/client/${clientId}/note/' + noteId;
+						var getAndPutUrl = 'http://localhost:8080/mifosng-provider/api/v1/clients/${clientId}/notes/' + noteId;
 						var templateSelector = "#noteFormTemplate";
 						var width = 600;
 						var height = 400;
-						var defaultOffset = -400; // would be nice to return the max allowed offset for date for client note
-						var maxOffset = 0;
-						var currentTabIndex = 0;
-						popupDialogWithFormView(url, "dialog.title.edit.note", templateSelector, width, height, currentTabIndex, defaultOffset, defaultOffset, maxOffset);
+						
+						var saveSuccessFunction = function(data, textStatus, jqXHR) {
+						  	$("#dialog-form").dialog("close");
+						  	refreshNoteWidget();
+						}
+						
+						popupDialogWithFormView(getAndPutUrl, getAndPutUrl, 'PUT', "dialog.title.edit.note", templateSelector, width, height, saveSuccessFunction);
 					    e.preventDefault();
 			      });
 			  }
@@ -730,7 +773,7 @@ $(document).ready(function() {
 		
 			<div id="newtabs">
 				<ul>
-					<li><a href="http://localhost:8080/mifosng-provider/api/v1/clients/${clientId}" title="clienttab" class="topleveltab">${clientDisplayName}</a></li>
+					<li><a href="http://localhost:8080/mifosng-provider/api/v1/clients/${clientId}" title="clienttab" class="topleveltab"><span id="clienttabname">Loading...</span></a></li>
 				</ul>
 				<div id="clienttab">
 				</div>

@@ -1,7 +1,6 @@
 package org.mifosng.platform;
 
 import static org.mifosng.platform.Specifications.loansThatMatch;
-import static org.mifosng.platform.Specifications.officesThatMatch;
 import static org.mifosng.platform.Specifications.usersThatMatch;
 
 import java.math.BigDecimal;
@@ -18,10 +17,8 @@ import org.mifosng.data.MoneyData;
 import org.mifosng.data.ScheduledLoanInstallment;
 import org.mifosng.data.command.AdjustLoanTransactionCommand;
 import org.mifosng.data.command.CalculateLoanScheduleCommand;
-import org.mifosng.data.command.EnrollClientCommand;
 import org.mifosng.data.command.LoanStateTransitionCommand;
 import org.mifosng.data.command.LoanTransactionCommand;
-import org.mifosng.data.command.NoteCommand;
 import org.mifosng.data.command.SubmitLoanApplicationCommand;
 import org.mifosng.data.command.UndoLoanApprovalCommand;
 import org.mifosng.data.command.UndoLoanDisbursalCommand;
@@ -56,8 +53,6 @@ import org.mifosng.platform.loan.domain.LoanStatusRepository;
 import org.mifosng.platform.loan.domain.LoanTransaction;
 import org.mifosng.platform.loan.domain.LoanTransactionRepository;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
-import org.mifosng.platform.organisation.domain.Office;
-import org.mifosng.platform.organisation.domain.OfficeRepository;
 import org.mifosng.platform.user.domain.AppUser;
 import org.mifosng.platform.user.domain.AppUserRepository;
 import org.mifosng.platform.user.domain.PlatformUserRepository;
@@ -72,7 +67,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class WritePlatformServiceJpaRepositoryImpl implements WritePlatformService {
 
-	private final OfficeRepository officeRepository;
 	private final PlatformUserRepository platformUserRepository;
 	private final PlatformPasswordEncoder platformPasswordEncoder;
 	private final ClientRepository clientRepository;
@@ -85,7 +79,6 @@ public class WritePlatformServiceJpaRepositoryImpl implements WritePlatformServi
 
 	@Autowired
 	public WritePlatformServiceJpaRepositoryImpl(
-			final OfficeRepository officeRepository,
 			final PlatformUserRepository platformUserRepository,
 			final PlatformPasswordEncoder platformPasswordEncoder,
 			final ClientRepository clientRepository,
@@ -96,7 +89,6 @@ public class WritePlatformServiceJpaRepositoryImpl implements WritePlatformServi
 			final LoanStatusRepository loanStatusRepository,
 			final CalculationPlatformService calculationPlatformService
 			) {
-		this.officeRepository = officeRepository;
 		this.platformUserRepository = platformUserRepository;
 		this.platformPasswordEncoder = platformPasswordEncoder;
 		this.clientRepository = clientRepository;
@@ -136,32 +128,6 @@ public class WritePlatformServiceJpaRepositoryImpl implements WritePlatformServi
 		}
 	}
 
-	@Transactional
-	@Override
-	public Long enrollClient(final EnrollClientCommand command) {
-
-		AppUser currentUser = extractAuthenticatedUser();
-		
-		EnrollClientCommandValidator validator = new EnrollClientCommandValidator(command);
-		validator.validate();
-
-		Office clientOffice = this.officeRepository.findOne(officesThatMatch(
-				currentUser.getOrganisation(), command.getOfficeId()));
-		
-		String firstname = command.getFirstname();
-		String lastname = command.getLastname();
-		if (StringUtils.isNotBlank(command.getFullname())) {
-			lastname = command.getFullname();
-			firstname = null;
-		}
-
-		Client newClient = Client.newClient(currentUser.getOrganisation(), clientOffice, firstname, lastname, command.getJoiningDate(), command.getExternalId());
-				
-		this.clientRepository.save(newClient);
-
-		return newClient.getId();
-	}
-	
 	private AppUser extractAuthenticatedUser() {
 		AppUser currentUser = null;
 		SecurityContext context = SecurityContextHolder.getContext();
@@ -677,31 +643,5 @@ public class WritePlatformServiceJpaRepositoryImpl implements WritePlatformServi
 		}
 
 		return new EntityIdentifier(loan.getClient().getId());
-	}
-
-	@Transactional
-	@Override
-	public EntityIdentifier addClientNote(NoteCommand command) {
-		
-		AppUser currentUser = extractAuthenticatedUser();
-		
-		Client clientForUpdate = this.clientRepository.findOne(command.getClientId());
-		
-		Note note = Note.clientNote(currentUser.getOrganisation(), clientForUpdate, command.getNote());
-		
-		this.noteRepository.save(note);
-		
-		return new EntityIdentifier(note.getId());
-	}
-
-	@Transactional
-	@Override
-	public EntityIdentifier updateNote(NoteCommand command) {
-		
-		Note noteForUpdate = this.noteRepository.findOne(command.getId());
-		
-		noteForUpdate.update(command.getNote());
-		
-		return new EntityIdentifier(noteForUpdate.getId());
 	}
 }
