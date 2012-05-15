@@ -165,9 +165,7 @@ function initialiseReporting(params) {
 	reportQuery = 'FullReportList';
 	if (params.reportQuery) reportQuery = params.reportQuery;
 
-
-	var theParams = {Type: 'parameter'};
-	getReportData(reportQuery, theParams, setupReportListSuccess) 
+	getReportData(reportQuery, {}, setupReportListSuccess, true) 
 }
 
 function setCurrentDate() {
@@ -435,7 +433,7 @@ function runTheReport()
 		return;
 	}
 
-	var theParams = {Type: 'report'};
+	var theParams = {};
 
 	var pValue;
 	var reportParameterName;
@@ -469,14 +467,14 @@ function runTheReport()
 	switch(reportListing[reportListingIndex].type)
 	{
 		case "Table":
-			if (showOption == "XLS") getExportCSV(selectedRpt, theParams)
+			if (showOption == "XLS") getExportCSV(selectedRpt, theParams, false)
 			else
 			{
 				reportDataSuccess = function(data, textStatus, jqXHR){
 					createTable(data);
 					showTableReport();
 				};
-				getReportData(selectedRpt, theParams, reportDataSuccess);
+				getReportData(selectedRpt, theParams, reportDataSuccess, false);
 			}
   			break;
 		case "Chart":
@@ -485,7 +483,7 @@ function runTheReport()
 			    				createChart(data);
 							showChartReport(reportListing[reportListingIndex].subtype);
 							};
-			getReportData(selectedRpt, theParams, reportDataSuccess);
+			getReportData(selectedRpt, theParams, reportDataSuccess, false);
   			break;
 		case "Pentaho":
 			getPentahoReport(selectedRpt, theParams);
@@ -579,8 +577,7 @@ var parameterTableHtml = '<table><tr>';
 
 			eval(generateSelectSuccessVariable(listOfParameters[i].name, listOfParameters[i].label, selectOne, selectAll));
 
-			var theParams = {Type: 'parameter'};
-			getReportData(listOfParameters[i].name, theParams, selectSuccess) 
+			getReportData(listOfParameters[i].name, {}, selectSuccess, true) 
 		}
 	}
 
@@ -612,8 +609,7 @@ setupParameterListSuccess = function(data, textStatus, jqXHR){
 
 setupReportListSuccess = function(data, textStatus, jqXHR){
  					showMsgE("In setupReportListSuccess");
-					theParams = {Type: 'parameter'};
-					getReportData('FullParameterList', theParams, setupParameterListSuccess);
+					getReportData('FullParameterList', {}, setupParameterListSuccess, true);
 
 					var prevId = -1;
 					var currId;
@@ -973,13 +969,13 @@ var Rchart;
 }
 
 
-function getReportData(rptName, inParams, successFunction) {
-	if (isAuthRequest == true) getReportDataAuth(rptName, inParams, successFunction)
-	else getReportDataNoAuth(rptName, inParams, successFunction);
+function getReportData(rptName, inParams, successFunction, isParameterType) {
+	if (isAuthRequest == true) getReportDataAuth(rptName, inParams, successFunction, isParameterType)
+	else getReportDataNoAuth(rptName, inParams, successFunction, isParameterType);
 }
 
 
-function getReportDataAuth(rptName, inParams, successFunction) {
+function getReportDataAuth(rptName, inParams, successFunction, isParameterType) {
 alert("needs fixing up, dont rely on data")
 	var inQueryParameters =  {};
 	for (var i in inParams ) inQueryParameters["R_" + i] = inParams[i];
@@ -1039,9 +1035,15 @@ function buildReportParms(inParams) {
 	return reportParams
 }
 
-function getReportDataNoAuth(rptName, inParams, successFunction) {
+function getReportDataNoAuth(rptName, inParams, successFunction, isParameterType) {
 	
 	var inQueryParameters = buildReportParms(inParams);
+	if (isParameterType == true)
+	{
+		if (inQueryParameters > "") inQueryParameters += "&parameterType=true"
+		else inQueryParameters = "parameterType=true"
+	}
+	
 	showMsgE("getReportDataNoAuth: " + inQueryParameters);
 	$.ajax({
 			url: RESTUrl + "/" + rptName,
@@ -1066,11 +1068,12 @@ function getReportDataNoAuth(rptName, inParams, successFunction) {
 }
 
 	
-function getExportCSV(rptName, inParams) {
+function getExportCSV(rptName, inParams, isParameterType) {
 
 	var inQueryParameters = buildReportParms(inParams);
 	if (inQueryParameters > "") inQueryParameters = "?" + inQueryParameters + "&exportCSV=true"
-	else inQueryParameters = "?exportCSV=true"
+	else inQueryParameters = "?exportCSV=true";
+	if (isParameterType == true) inQueryParameters += "&parameterType=true";
 	
 	var fullExportUrl = RESTUrl + "/" + rptName + inQueryParameters;
 	showMsg("full export url: " + fullExportUrl);

@@ -36,14 +36,49 @@ public class ReportingApiResource {
 	private ReadExtraDataAndReportingService ReadExtraDataAndReportingService;
 
 	@GET
-	@Path("{reportName}")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Produces({ MediaType.APPLICATION_JSON, "application/x-msdownload" })
-	public Response retrieveReport(@PathParam("reportName") final String reportName, @Context UriInfo uriInfo) {
+	public Response retrieveReportList(@Context UriInfo uriInfo) {
 
 		MultivaluedMap<String, String> queryParams = uriInfo
 				.getQueryParameters();
-		String type = queryParams.getFirst("R_Type");
+		Map<String, String> extractedQueryParams = new HashMap<String, String>();
+
+		String exportCSV = queryParams.getFirst("exportCSV");
+
+		if ((exportCSV == null) || (!(exportCSV.equalsIgnoreCase("true")))) {
+			GenericResultset result = this.ReadExtraDataAndReportingService
+					.retrieveGenericResultset(".", ".", extractedQueryParams);
+			return Response.ok().entity(result).build();
+		}
+
+		StreamingOutput result = this.ReadExtraDataAndReportingService
+				.retrieveReportCSV(".", ".", extractedQueryParams);
+
+		return Response
+				.ok()
+				.entity(result)
+				.header("Content-Disposition",
+						"attachment;filename=ReportList.csv").build();
+	}
+
+	@GET
+	@Path("{reportName}")
+	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Produces({ MediaType.APPLICATION_JSON, "application/x-msdownload" })
+	public Response retrieveReport(
+			@PathParam("reportName") final String reportName,
+			@Context UriInfo uriInfo) {
+
+		MultivaluedMap<String, String> queryParams = uriInfo
+				.getQueryParameters();
+		String parameterType = queryParams.getFirst("parameterType");
+		if ((parameterType == null)
+				|| (!(parameterType.equalsIgnoreCase("true")))) {
+			parameterType = "report";
+		} else {
+			parameterType = "parameter";
+		}
 		String exportCSV = queryParams.getFirst("exportCSV");
 
 		Map<String, String> extractedQueryParams = new HashMap<String, String>();
@@ -63,13 +98,15 @@ public class ReportingApiResource {
 
 		if ((exportCSV == null) || (!(exportCSV.equalsIgnoreCase("true")))) {
 			GenericResultset result = this.ReadExtraDataAndReportingService
-					.retrieveGenericResultset(reportName, type, extractedQueryParams);
+					.retrieveGenericResultset(reportName, parameterType,
+							extractedQueryParams);
 
 			return Response.ok().entity(result).build();
 		}
 
 		StreamingOutput result = this.ReadExtraDataAndReportingService
-				.retrieveReportCSV(reportName, type, extractedQueryParams);
+				.retrieveReportCSV(reportName, parameterType,
+						extractedQueryParams);
 
 		return Response
 				.ok()

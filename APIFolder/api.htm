@@ -32,8 +32,8 @@
                   <h3>&nbsp;</h3>
                   <h4>Reports</h4>
                   <ul>
-                      <li><a href="#reports">Reports</a></li>
-                      <li><a href="#reports">Reports</a></li>
+                      <li><a href="#listreports">List Reports</a></li>
+                      <li><a href="#runreport">Run a Report</a></li>
                   </ul>
               </div>
 
@@ -305,10 +305,10 @@ error is parameter-specific.  You can use this to display a message near
                 <div class="method-description">
                     <h3>Reports</h3>
  <p>
-This reports resource allows you to run and receive output from pre-defined Mifos X reports.  A "Generic Resultset" containing Column Heading as well as Data information is returned and JSON is the default output format.  However, you can export to CSV format by simply adding "&exportCSV=true" to the end of your URI.
+The reports resource allows you to run and receive output from pre-defined Mifos X reports.  The default output is a JSON formatted "Generic Resultset".  The Generic Resultset contains Column Heading as well as Data information.  However, you can export to CSV format by simply adding "&exportCSV=true" to the end of your URI.
 </p>
 <p>
-Pentaho reports can also be run from this resource.  The Pentaho reports can return HTML, PDF or CSV formats.
+If Pentaho reports have been pre-defined, they can also be run through this resource.  Pentaho reports can return HTML, PDF or CSV formats.
 </p>
 
 <p>Add examples showing links to client listing report producing json, then csv, then a pentaho report producing html, pdf, csv</p>
@@ -320,38 +320,132 @@ The Mifos X Individual Lending client application uses a JQuery plugin called st
                 </div>
             </div>
 
-<div class="method-section">
-  <div class="method-description">
-    <h4>Parameters</h4>
-<p>Note: the prefix R_ below stands for Reporting</p>
-<dl class="argument-list">
-        <dt>R_Name</dt>
-        <dd>mandatory</dd>
-        <dd>Report Name.  One of the standard or user-defined Mifos X reports.</dd>
-        <dt>R_'parameter names' ...</dt>
-        <dd>optional, <span>No defaults</span></dd>
-        <dd>The number and names of the parameters depend on the specific report and how it has been configured.  FR_officeId is an example parameter name.</dd>
-        <dt>R_parameterType</dt>        
-        <dd>optional, The only valid value is 'true'.  If any other value is provided the parameter will be ignored</span></span></dd>
-        <dd>Determines whether the request looks for reports or paraters that have been configured.</dd>
-        <dt>exportCSV</dt>
-        <dd>optional, <span>The only valid value is 'true'.  If any other value is provided the parameter will be ignored</span></dd>
-        <dd>Output will be delivered as a CSV file instead of JSON.  Doesn't apply to Pentaho reports.</dd>
-</dl>
 
+
+            <a id="listreports" name="listreports" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>List Reports</h4>
+                    <p>
+                        Lists all reports and their parameters.  If a report has more than one parameter it will be listed the same number of times as it has parameters.
+                    </p>
+
+    <h5>Arguments</h5>
+<dl class="argument-list">
+        <dt>exportCSV</dt>
+        <dd>optional, <span>The only valid value is 'true'.  If any other value is provided the argument will be ignored</span></dd>
+        <dd>Output will be delivered as a CSV file instead of JSON.</dd>
+</dl>
                     <p>Example Request: 
-                        <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/reports/Client%20Listing?FR_officeId=1">http://localhost:8080/mifosng-provider/api/v1/reports/Client%20Listing?FR_officeId=1</a>
+                        <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/reports">http://localhost:8080/mifosng-provider/api/v1/reports</a>
                     </p>
 
   </div>
 
-
-
-
-
-
   <div class="method-example">
       <code class="method-declaration">GET https://thedomainname/v1/reports</code>
+      <code class="method-response">{
+  "columnHeaders": [
+    {
+      "columnName": "report_id",
+      "columnType": "INT",
+      "columnLength": null,
+      "columnDisplayType": null,
+      "columnValues": []
+    },
+    {
+      "columnName": "report_name",
+      "columnType": "VARCHAR",
+      "columnLength": null,
+      "columnDisplayType": null,
+      "columnValues": []
+    },
+    {
+      "columnName": "report_type",
+      "columnType": "VARCHAR",
+      "columnLength": null,
+      "columnDisplayType": null,
+      "columnValues": []
+    },
+... more "columnHeaders" entries
+  ],
+  "data": [
+    {
+      "row": [
+        "29",
+        "Client Listing",
+        "Table",
+        null,
+        null,
+        "5",
+        null,
+        "selectOfficeId"
+      ]
+    },
+    {
+      "row": [
+        "42",
+        "Client Listing - Additional and Unlikely",
+        "Table",
+        null,
+        null,
+        "5",
+        null,
+        "selectOfficeId"
+      ]
+    },
+    {
+      "row": [
+        "30",
+        "Client Loans Listing",
+        "Table",
+        null,
+        null,
+        "5",
+        null,
+        "selectOfficeId"
+      ]
+    },
+... more "Row" entries
+  ]
+}</code>
+  </div>
+</div>
+
+
+
+
+
+
+            <a id="runreport" name="runreport" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Running a Report</h4>
+                    <p>
+                        Runs a report and returns the report output.
+                    </p>
+    <h5>Arguments</h5>
+<dl class="argument-list">
+        <dt>R_'parameter names' ...</dt>
+        <dd>optional, <span>No defaults</span></dd>
+        <dd>The number and names of the parameters depend on the specific report and how it has been configured.  R_officeId is an example parameter name.</dd>
+        <dd>Note: the prefix R_ stands for Reporting</dd>
+        <dt>parameterType</dt>        
+        <dd>optional, <span>The only valid value is 'true'.  If any other value is provided the argument will be ignored</span></dd>
+        <dd>Determines whether the request looks in the list of reports or the list of parameters for its data.</dd>
+        <dt>exportCSV</dt>
+        <dd>optional, <span>The only valid value is 'true'.  If any other value is provided the argument will be ignored</span></dd>
+        <dd>Output will be delivered as a CSV file instead of JSON.  Doesn't apply to Pentaho reports.</dd>
+</dl>
+
+                    <p>Example Request: 
+                        <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/reports/Client%20Listing?R_officeId=1">http://localhost:8080/mifosng-provider/api/v1/reports/Client%20Listing?R_officeId=1</a>
+                    </p>
+
+  </div>
+
+  <div class="method-example">
+      <code class="method-declaration">GET https://thedomainname/v1/reports/{REPORTNAME}</code>
       <code class="method-response">{
   "columnHeaders": [
     {
@@ -403,6 +497,9 @@ The Mifos X Individual Lending client application uses a JQuery plugin called st
 }</code>
   </div>
 </div>
+
+
+
 
             <a id="create_customer" name="create_customer" class="old-syle-anchor">&nbsp;</a>
             <div class="method-section">

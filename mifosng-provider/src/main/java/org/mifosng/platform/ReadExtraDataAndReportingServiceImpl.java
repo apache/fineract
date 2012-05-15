@@ -55,7 +55,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 			final String type, final Map<String, String> queryParams) {
 
 		return new StreamingOutput() {
-			
+
 			@Override
 			public void write(OutputStream out) throws IOException,
 					WebApplicationException {
@@ -159,14 +159,23 @@ public class ReadExtraDataAndReportingServiceImpl implements
 		String orgId = "1";
 
 		String sql;
-		try {
-			sql = getSQLtoRun(name, type, orgId, queryParams);
-		} catch (SQLException e) {
-			logger.info(name + ": Failed in getSQLtoRun");
-			throw new WebApplicationException(Response
-					.status(Status.BAD_REQUEST).entity(e.getMessage()).build());
+		if (name.equals(".")) {
+			sql = "select r.report_id, r.report_name, r.report_type, r.report_subtype, r.report_category," + 
+					" rp.parameter_id, rp.report_parameter_name, p.parameter_name" +
+					" from stretchy_report r" + 
+					" left join stretchy_report_parameter rp on rp.report_id = r.report_id" + 
+					" left join stretchy_parameter p on p.parameter_id = rp.parameter_id" + 
+					" order by r.report_name, rp.parameter_id";
+		} else {
+			try {
+				sql = getSQLtoRun(name, type, orgId, queryParams);
+			} catch (SQLException e) {
+				logger.info(name + ": Failed in getSQLtoRun");
+				throw new WebApplicationException(Response
+						.status(Status.BAD_REQUEST).entity(e.getMessage())
+						.build());
+			}
 		}
-		// logger.info(name + ": RUNNING SQL");
 
 		GenericResultset result = null;
 		try {
