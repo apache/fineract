@@ -156,7 +156,6 @@ public class ReadExtraDataAndReportingServiceImpl implements
 		 * String orgId = currentUser.getOrganisation().getId().toString(); put
 		 * back in later
 		 */
-		String orgId = "1";
 
 		String sql;
 		if (name.equals(".")) {
@@ -168,7 +167,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 					" order by r.report_name, rp.parameter_id";
 		} else {
 			try {
-				sql = getSQLtoRun(name, type, orgId, queryParams);
+				sql = getSQLtoRun(name, type, queryParams);
 			} catch (SQLException e) {
 				logger.info(name + ": Failed in getSQLtoRun");
 				throw new WebApplicationException(Response
@@ -238,7 +237,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 	}
 
 	private String getSQLtoRun(final String name, final String type,
-			final String orgId, final Map<String, String> queryParams)
+			final Map<String, String> queryParams)
 			throws SQLException {
 		String sql = null;
 		String rptDB = queryParams.get("${rptDB}");
@@ -249,12 +248,8 @@ public class ReadExtraDataAndReportingServiceImpl implements
 		if (type.equals("report")) {
 			sql = getReportSql(rptDB, name);
 		} else {
-			// todo - dont need to check for orgID if special parameter sql (but
-			// prob need to check restrictions
 			sql = getParameterSql(rptDB, name);
 		}
-
-		sql = replace(sql, "${orgId}", orgId);
 
 		Set<String> keys = queryParams.keySet();
 		for (String key : keys) {
