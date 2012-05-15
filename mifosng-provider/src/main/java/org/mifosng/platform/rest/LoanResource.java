@@ -19,7 +19,6 @@ import javax.ws.rs.core.Response.Status;
 import org.mifosng.data.EntityIdentifier;
 import org.mifosng.data.ErrorResponse;
 import org.mifosng.data.ErrorResponseList;
-import org.mifosng.data.LoanAccountData;
 import org.mifosng.data.LoanRepaymentData;
 import org.mifosng.data.LoanSchedule;
 import org.mifosng.data.NewLoanWorkflowStepOneData;
@@ -35,8 +34,8 @@ import org.mifosng.platform.ReadPlatformService;
 import org.mifosng.platform.ReadPlatformServiceImpl;
 import org.mifosng.platform.WritePlatformService;
 import org.mifosng.platform.exceptions.ApplicationDomainRuleException;
-import org.mifosng.platform.exceptions.UnAuthenticatedUserException;
 import org.mifosng.platform.exceptions.NewDataValidationException;
+import org.mifosng.platform.exceptions.UnAuthenticatedUserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -150,37 +149,6 @@ public class LoanResource {
 			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(new ErrorResponseList(e.getErrors())).build());
 		} catch (NewDataValidationException e) {
 			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(new ErrorResponseList(e.getValidationErrors())).build());
-		}
-	}
-	
-	@GET
-	@Path("{loanId}")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response retrieveLoanAccountDetails(@PathParam("loanId") final Long loanId) {
-
-		try {
-			LoanAccountData loanAccount = this.readPlatformService.retrieveLoanAccountDetails(loanId);
-
-			return Response.ok().entity(loanAccount).build();
-		} catch (UnAuthenticatedUserException e) {
-			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
-		} catch (AccessDeniedException e) {
-			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
-			ErrorResponseList list = new ErrorResponseList(Arrays.asList(errorResponse));
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(list).build());
-		} catch (ApplicationDomainRuleException e) {
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(new ErrorResponseList(e.getErrors())).build());
-		} catch (NewDataValidationException e) {
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(new ErrorResponseList(e.getValidationErrors())).build());
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			
-			List<ErrorResponse> allErrors = new ArrayList<ErrorResponse>();
-			ErrorResponse err = new ErrorResponse("unknown.error", "error", e.getMessage());
-			allErrors.add(err);
-			
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(new ErrorResponseList(allErrors)).build());
 		}
 	}
 	
