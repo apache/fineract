@@ -1,0 +1,2071 @@
+<!DOCTYPE html>
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <link rel="stylesheet" href="apicss/apidocs.css" type="text/css" media="screen" title="API Docs" charset="utf-8">
+    <title>Mifos X API Documentation</title>
+
+
+<body>
+    <div id="page-wrapper">
+      <div id="flybar">
+
+  <div class="flybar-nav">
+      <h2 id="toc-menu-button" class="flybar-button">Navigation</h2>
+      <div id="toc-menu" class="flybar-menu">
+
+          <div class="toc-column1">
+
+              <div class="toc-section">
+                  <h3>Full API Docs</h3>
+                  <h4>General</h4>
+                  <ul>
+                      <li><a href="#top">Mifos X API Documentation</a></li>
+                      <li><a href="#authentication">Authentication</a></li>
+                      <li><a href="#errors">Errors</a></li>
+                  </ul>
+              </div>
+
+          </div>
+          <div class="toc-column2">
+
+              <div class="toc-section">
+                  <h3>&nbsp;</h3>
+                  <h4>Reports</h4>
+                  <ul>
+                      <li><a href="#reports">Reports</a></li>
+                      <li><a href="#reports">Reports</a></li>
+                  </ul>
+              </div>
+
+              <div class="toc-section">
+                  <h4>Customers</h4>
+                  <ul>
+                      <li><a href="#customer_object">The customer object</a></li>
+                      <li><a href="#create_customer">Create a new customer</a></li>
+                      <li><a href="#retrieve_customer">Retrieve an existing customer</a></li>
+                      <li><a href="#update_customer">Update a customer</a></li>
+                      <li><a href="#delete_customer">Delete a customer</a></li>
+                      <li><a href="#list_customers">List all customers</a></li>
+                  </ul>
+              </div>
+          </div>
+
+
+      </div>
+  </div>
+</div>
+
+
+        <a id="top" name="top" class="old-syle-anchor">&nbsp;</a>
+        <div id="main-content-wrapper">
+            <div class="method-section">
+                <div class="method-description">
+                    <h1>Mifos X API Documentation</h1>
+	    <p>
+	      Much of the presentation ideas here have been taken from the very good API reference (https://stripe.com/docs/api)
+	    </p>
+                    <p>
+                        The Mifox X API is organized around
+                        <a href="http://en.wikipedia.org/wiki/Representational_State_Transfer">REST</a>.
+                        Our API is designed to have predictable, resource-oriented
+                        URLs, to use HTTP response codes to indicate API errors, and
+                        to use built-in HTTP features, like HTTP authentication and
+                        HTTP verbs, which can be understood by off-the-shelf HTTP
+                        clients. <a href="http://www.json.org/">JSON</a> will be
+                        returned in all responses from the API, including errors.
+                    </p>                  
+
+                </div>
+
+                <div class="method-example" id="api-summary-example">
+                    <h4>API Endpoint</h4>
+                    <code>https://thedomainname/</code>
+                    <h6>Summary of Resource URL Patterns</h6>
+                    <ul>
+
+
+
+                        <li>/v1/offices</li>
+                        <li>/v1/offices/template</li>
+                        <li>/v1/offices/{OFFICEID}</li>
+
+                        <li>/v1/loanproducts</li>
+                        <li>/v1/loanproducts/template</li>
+                        <li>/v1/loanproducts/{PRODUCTID}</li>
+
+                        <li>/v1/configurations</li>
+                        <li>/v1/configurations/currency</li>
+                    </ul>
+
+                    <ul>
+                        <li>/v1/reports</li>
+                        <li>/v1/reports/{REPORTNAME}</li>
+                        <li>/v1/extradata</li>
+                        <li>/v1/extradata/{datasetType}/{datasetName}/{datasetPKValue}</li>
+
+                    </ul>
+                </div>
+            </div>
+
+            <a id="authentication" name="authentication" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h3>Authentication</h3>
+                    <p>
+		JPW: Keith, this needs to change to whatever is right after authentication has been added.  Don't know if you will go with keys or passwords (I assume passwords)... but can you fix it so we have one user or one user per role that doesn't need a password or always has a password of 'password' so we can let ppl do stuff from the browser and/or REST plugins?  We can talk about this.
+		</p>
+		<p>
+                      STRIPE content:  You authenticate to the Mifos X API by providing one of
+                        your API keys in the request.  You can manage your API
+                        keys from your
+                        <a href="https://manage.stripe.com/#account">account</a>.
+                        You can have multiple API keys
+                        active at one time.  Your API keys carry many
+                        privileges, so be sure to keep them secret!
+                    </p>
+
+                    <p>
+                        Authentication to the API occurs via
+                        <a href="http://en.wikipedia.org/wiki/Basic_access_authentication">
+                        HTTP Basic Auth</a>.  Provide your API key as the basic
+                        auth username.  You do not need to provide a password.
+                    </p>
+
+                    <p>
+                      All API requests must be made
+                      over <a href="http://en.wikipedia.org/wiki/HTTP_Secure">HTTPS</a>.
+                      Calls made over plain HTTP will fail.  You must
+                      authenticate for all requests.
+                    </p>
+                </div>
+                <div class="method-example">
+                    <code class="method-request"><span class="prompt curl"></span>curl https://api.stripe.com/v1/charges \
+   -u vtUQeOtUnYr7PGCLQ96Ul4zqpDUO4sOE:
+</code>
+                    <p>
+                    JPW: We'll update this after...
+                        curl uses the -u flag to pass basic auth 
+credentials (adding a colon after your API key will prevent
+                        it from asking you for a password).
+                    
+
+                    
+                        A sample test API key has been provided in all 
+the examples on the page, so you can test out any example right away.
+                    
+
+                    </p>
+                </div>
+            </div>
+
+            <a id="errors" name="errors" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+
+                    <h3>Errors</h3>
+                    <p>JPW:Need to update this
+                        Stripe uses conventional HTTP response codes to indicate
+                        success or failure of an API request.  In general,
+                        codes in the 2xx range indicate success, codes in the
+                        4xx range indicate an error that resulted from the
+                        provided information (e.g. a required parameter was
+                        missing, a charge failed, etc.), and codes in the 5xx
+                        range indicate an error with Stripe's servers.
+                    </p>
+
+                    <p>
+                        Not all errors map cleanly onto HTTP response codes,
+                        however.  When a request is valid but does not complete
+                        successfully (e.g. a card is declined), we return a 402
+                        error code.
+                    </p>
+
+
+                    <p>
+                        All errors return JSON with a type (one of card_error, invalid_request_error,
+                        or api_error) and message describing the particular problem.
+                    </p>
+
+                    <h5>Attributes</h5>
+                    <dl class="argument-list">
+                        <dt>type</dt>
+                        <dd></dd>
+                        <dd>The type of error returned (card_error, invalid_request_error, api_error)
+                            Card errors are the most common type of error you should expect to handle.
+                            They result when the user enters a card that can't be charged for some reason.
+                            Invalid request errors arise when your request has invalid parameters.  API
+                            errors cover any other type of problem (e.g. a temporary problem with Stripe's servers)
+                            and should turn up only very infrequently.</dd>
+
+                        <dt>message</dt>
+                        <dd></dd>
+                        <dd>A user-friendly message describing the error</dd>
+
+                        <dt>code</dt>
+                        <dd>optional</dd>
+                        <dd>For card errors, additional information 
+about the user-friendly message to display for this error (e.g. "Your 
+card was declined.")</dd>
+
+                        <dt>param</dt>
+                        <dd>optional</dd>
+                        <dd>The parameter the error relates to if the 
+error is parameter-specific.  You can use this to display a message near
+ the correct form field, for example.</dd>
+                    </dl>
+                </div>
+                <div class="method-example">
+                    <h6>HTTP Status Code Summary</h6>
+                    <ul>
+                        <li><strong>200</strong> OK - Everything worked as expected.</li>
+                        <li><strong>400</strong> Bad Request - Often missing a required parameter.</li>
+                        <li><strong>401</strong> Unauthorized - No valid API key provided.</li>
+                        <li><strong>402</strong> Request Failed - Parameters were valid but request failed.</li>
+                        <li><strong>404</strong> Not Found - The requested item doesn't exist.</li>
+                        <li><strong>500, 502, 503, 504</strong> Server errors - something went wrong on Stripe's end.</li>
+                    </ul>
+                </div>
+
+                <div class="method-example">
+                  <h6>Errors</h6>
+                  <h7>Invalid Request Errors</h7>
+                  <code><strong>Type:</strong> invalid_request_error</code>
+
+                  <h7>API Errors</h7>
+                  <code><strong>Type:</strong> api_error</code>
+
+                  <h7>Card Errors</h7>
+                  <code><strong>Type:</strong> card_error</code>
+                  <table>
+                    <tbody><tr>
+                      <th>Code</th>
+                      <th>Details</th>
+                    </tr>
+                    <tr>
+                      <td>invalid_number</td>
+                      <td>The card number is invalid</td>
+                    </tr>
+                    <tr>
+                      <td>incorrect_number</td>
+                      <td>The card number is incorrect</td>
+                    </tr>
+                    <tr>
+                      <td>invalid_expiry_month</td>
+                      <td>The card's expiration month is invalid</td>
+                    </tr>
+                    <tr>
+                      <td>invalid_expiry_year</td>
+                      <td>The card's expiration year is invalid</td>
+                    </tr>
+                    <tr>
+                      <td>invalid_cvc</td>
+                      <td>The card's security code is invalid</td>
+                    </tr>
+                    <tr>
+                      <td>expired_card</td>
+                      <td>The card has expired</td>
+                    </tr>
+                    <tr>
+                      <td>invalid_amount</td>
+                      <td>An invalid amount was entered</td>
+                    </tr>
+                    <tr>
+                      <td>incorrect_cvc</td>
+                      <td>The card's security code is incorrect</td>
+                    </tr>
+                    <tr>
+                      <td>card_declined</td>
+                      <td>The card was declined.</td>
+                    </tr>
+                    <tr>
+                      <td>missing</td>
+                      <td>There is no card on a customer that is being charged.</td>
+                    </tr>
+
+                    <tr>
+                      <td>duplicate_transaction</td>
+                      <td>A transaction with identical amount and credit card information was submitted very recently.</td>
+                    </tr>
+                    <tr>
+                      <td>processing_error</td>
+                      <td>An error occurred while processing the card.</td>
+                    </tr>
+                  </tbody></table>
+                </div>
+            </div>
+
+
+
+
+
+
+
+ <a id="reports" name="reports" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h3>Reports</h3>
+ <p>
+This reports resource allows you to run and receive output from pre-defined Mifos X reports.  A "Generic Resultset" containing Column Heading as well as Data information is returned and JSON is the default output format.  However, you can export to CSV format by simply adding "&exportCSV=true" to the end of your URI.
+</p>
+<p>
+Pentaho reports can also be run from this resource.  The Pentaho reports can return HTML, PDF or CSV formats.
+</p>
+
+<p>Add examples showing links to client listing report producing json, then csv, then a pentaho report producing html, pdf, csv</p>
+<p>
+The Mifos X Individual Lending client application uses a JQuery plugin called stretchyreporting which, itself, uses this reports resource to provide a pretty flexible reporting User Interface (UI).  Put a link to an example here.
+</p>
+
+
+                </div>
+            </div>
+
+<div class="method-section">
+  <div class="method-description">
+    <h4>Parameters</h4>
+<p>Note: the prefix R_ below stands for Reporting</p>
+<dl class="argument-list">
+        <dt>R_Name</dt>
+        <dd>mandatory</dd>
+        <dd>Report Name.  One of the standard or user-defined Mifos X reports.</dd>
+        <dt>R_'parameter names' ...</dt>
+        <dd>optional, <span>No defaults</span></dd>
+        <dd>The number and names of the parameters depend on the specific report and how it has been configured.  FR_officeId is an example parameter name.</dd>
+        <dt>R_parameterType</dt>        
+        <dd>optional, The only valid value is 'true'.  If any other value is provided the parameter will be ignored</span></span></dd>
+        <dd>Determines whether the request looks for reports or paraters that have been configured.</dd>
+        <dt>exportCSV</dt>
+        <dd>optional, <span>The only valid value is 'true'.  If any other value is provided the parameter will be ignored</span></dd>
+        <dd>Output will be delivered as a CSV file instead of JSON.  Doesn't apply to Pentaho reports.</dd>
+</dl>
+
+                    <p>Example Request: 
+                        <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/reports/Client%20Listing?FR_officeId=1">http://localhost:8080/mifosng-provider/api/v1/reports/Client%20Listing?FR_officeId=1</a>
+                    </p>
+
+  </div>
+
+
+
+
+
+
+  <div class="method-example">
+      <code class="method-declaration">GET https://thedomainname/v1/reports</code>
+      <code class="method-response">{
+  "columnHeaders": [
+    {
+      "columnName": "Office/Branch",
+      "columnType": "VARCHAR",
+      "columnLength": null,
+      "columnDisplayType": null,
+      "columnValues": []
+    },
+    {
+      "columnName": "Name",
+      "columnType": "VARCHAR",
+      "columnLength": null,
+      "columnDisplayType": null,
+      "columnValues": []
+    },
+    {
+      "columnName": "Joining Date",
+      "columnType": "DATE",
+      "columnLength": null,
+      "columnDisplayType": null,
+      "columnValues": []
+    }
+  ],
+  "data": [
+    {
+      "row": [
+        "Demo MFI Head Office",
+        "O'Meara, Patrick",
+        "2009-01-04"
+      ]
+    },
+    {
+      "row": [
+        "Demo MFI Head Office",
+        "O'Meara, Dennis",
+        "2009-01-04"
+      ]
+    },
+    {
+      "row": [
+        "Demo MFI Head Office",
+        "Smith, John",
+        "2009-01-11"
+      ]
+    },
+... more "row" entries
+  ]
+}</code>
+  </div>
+</div>
+
+            <a id="create_customer" name="create_customer" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Creating a New Customer</h4>
+                    <p>
+                        Creates a new customer object.
+                    </p>
+
+                    <h5>Arguments</h5>
+                    <dl class="argument-list">
+                        <dt>card</dt>
+                        <dd>optional, <span>default is null</span></dd>
+                        <dd>
+                            A card to attach to the customer. The card can either be a token,
+                            like the ones returned by our
+                            <a href="https://stripe.com/docs/stripe.js">Stripe.js</a>,
+                            or a dictionary containing a
+                            user's credit card details, with the options described
+                            below. Whenever you attach a card to a customer, Stripe will automatically validate the
+                            card. A customer with a card can be used when creating a charge or put on a recurring
+                            billing plan.
+
+                            <dl>
+                                <dt>number</dt>
+                                <dd>required</dd>
+                                <dd>The card number, as a string without any separators.</dd>
+
+                                <dt>exp_month</dt>
+                                <dd>required</dd>
+                                <dd>Two digit number representing the card's expiration month.</dd>
+
+                                <dt>exp_year</dt>
+                                <dd>required</dd>
+                                <dd>Four digit number representing the card's expiration year.</dd>
+
+                                <dt>cvc</dt>
+                                <dd>optional, <span>highly recommended</span></dd>
+                                <dd>Card security code</dd>
+
+                                <dt>name</dt>
+                                <dd>optional</dd>
+                                <dd>Cardholder's full name.</dd>
+
+                                <dt>address_line1</dt>
+                                <dd>optional</dd>
+
+                                <dt>address_line2</dt>
+                                <dd>optional</dd>
+
+                                <dt>address_zip</dt>
+                                <dd>optional</dd>
+
+                                <dt>address_state</dt>
+                                <dd>optional</dd>
+
+                                <dt>address_country</dt>
+                                <dd>optional</dd>
+                            </dl>
+                        </dd>
+
+                        <dt>coupon</dt>
+                        <dd>optional, <span>default is null</span></dd>
+                        <dd>
+                          If you provide a coupon code, the customer will have a
+                          discount applied on all recurring charges.  Charges
+                          you create through the API will not have the discount.
+                          You can manage your coupons in the
+                          <a href="https://manage.stripe.com/#coupons">coupon section</a> of your
+                          account.
+                        </dd>
+
+                        <dt>email</dt>
+                        <dd>optional, <span>default is null</span></dd>
+                        <dd>
+                            The customer's email address.  It is displayed alongside
+                            the customer in the web interface and can be useful for searching and tracking.
+                        </dd>
+
+                        <dt>description</dt>
+                        <dd>optional, <span>default is null</span></dd>
+                        <dd>
+                            An arbitrary string which you can attach to a customer
+                            object. It is displayed alongside the customer in the
+                            web interface.
+                        </dd>
+
+                        <dt>plan</dt>
+                        <dd>optional, <span>default is null</span></dd>
+                        <dd>
+                            The identifier of the plan to subscribe the customer
+                            to.  If provided, the returned customer object has a
+                            'subscription' attribute describing the state of the
+                            customer's subscription.
+                        </dd>
+
+                        <dt>trial_end</dt>
+                        <dd>optional, <span>default is null</span></dd>
+                        <dd>
+                            UTC integer timestamp representing the end of the trial period
+                            the customer will get before being charged for the first time.
+                            If set, trial_end will override the default trial period of the
+                            plan the customer is being subscribed to.
+                        </dd>
+                    </dl>
+
+                    <h5>Returns</h5>
+                    <p>
+                        Returns a customer object if the call succeeded. The
+                        returned object will have information about
+                        subscriptions, discount, and cards, if that information
+                        has been provided.  If a non-free plan is specified and
+                        a card is not provided (unless the plan has a trial period), the call will return an error.
+                        If a non-existent plan or a non-existent or expired
+                        coupon is provided, the call will return an error.
+                    </p>
+                    <p>
+                        If a card has been attached to the customer, the
+                        returned customer object will have an <strong>active_card</strong>
+                        attribute containing the card's details.
+                    </p>
+
+                </div>
+
+                <div class="method-example">
+                    <code class="method-declaration">POST https://api.stripe.com/v1/customers</code>
+
+                    <code class="method-request"><span class="prompt curl"></span>curl https://api.stripe.com/v1/customers \
+   -u vtUQeOtUnYr7PGCLQ96Ul4zqpDUO4sOE: \
+   -d "description=Customer for site@stripe.com" \
+   -d "card[number]=4242424242424242" \
+   -d "card[exp_month]=5" \
+   -d "card[exp_year]=2013"
+</code>
+
+                    <code class="method-response">{
+  "discount": {
+    "end": 1339507966,
+    "start": 1336829566,
+    "object": "discount",
+    "customer": "cus_QEvO1l6xtJNbTI",
+    "id": "di_Ogh2mPRH0Y200d",
+    "coupon": {
+      "times_redeemed": 1,
+      "duration_in_months": null,
+      "livemode": false,
+      "redeem_by": null,
+      "object": "coupon",
+      "duration": "once",
+      "percent_off": 10,
+      "id": "JAVA-COUPON-fa8e8918-2f9e-4def-9675-ed19d6f4d41b",
+      "max_redemptions": null
+    }
+  },
+  "livemode": false,
+  "delinquent": false,
+  "object": "customer",
+  "email": null,
+  "subscription": null,
+  "account_balance": 0,
+  "description": null,
+  "id": "cus_QEvO1l6xtJNbTI",
+  "active_card": null,
+  "created": 1336829566
+}</code>
+
+                    <code class="method-error">{
+  "error": {
+    "type": "invalid_request_error",
+    "message": "You must supply a valid card"
+  }
+}
+</code>
+                </div>
+            </div>
+
+            <a id="retrieve_customer" name="retrieve_customer" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Retrieving a Customer</h4>
+                    <p>
+                        Retrieves the details of an existing customer. You need
+                        only supply the unique customer identifier that was
+                        returned upon customer creation.
+                    </p>
+
+                    <p>
+                        Like with a charge, you can view the retrieved customer
+                        directly in your browser.
+                    </p>
+
+                    <p>
+                        <a style="word-wrap: break-word;" href="https://api.stripe.com/v1/customers/ch_I7HoyUbJDACuPe">https://vtUQeOtUnYr7PGCLQ96Ul4zqpDUO4sOE@api.stripe.com/v1/customers/ch_I7HoyUbJDACuPe</a>
+                    </p>
+
+                    <h5>Arguments</h5>
+                    <dl class="argument-list">
+                        <dt>id</dt>
+                        <dd>required</dd>
+                        <dd>
+                            The identifier of the customer to be retrieved.
+                        </dd>
+                    </dl>
+
+                    <h5>Returns</h5>
+                    <p>
+                        Returns a customer object if a valid identifier was provided.
+                        When requesting the ID of a customer that has been deleted,
+                        a subset of the customer's information will be returned,
+                        including a "deleted" property, which will be true.
+                    </p>
+                </div>
+
+                <div class="method-example">
+                    <code class="method-declaration">GET https://api.stripe.com/v1/customers/{CUSTOMER_ID}</code>
+
+                    <code class="method-request"><span class="prompt curl"></span>curl https://api.stripe.com/v1/customers/cus_QEvO1l6xtJNbTI \
+   -u vtUQeOtUnYr7PGCLQ96Ul4zqpDUO4sOE:
+</code>
+
+                    <code class="method-response">{
+  "discount": {
+    "end": 1339507966,
+    "start": 1336829566,
+    "object": "discount",
+    "customer": "cus_QEvO1l6xtJNbTI",
+    "id": "di_Ogh2mPRH0Y200d",
+    "coupon": {
+      "times_redeemed": 1,
+      "duration_in_months": null,
+      "livemode": false,
+      "redeem_by": null,
+      "object": "coupon",
+      "duration": "once",
+      "percent_off": 10,
+      "id": "JAVA-COUPON-fa8e8918-2f9e-4def-9675-ed19d6f4d41b",
+      "max_redemptions": null
+    }
+  },
+  "livemode": false,
+  "delinquent": false,
+  "object": "customer",
+  "email": null,
+  "subscription": null,
+  "account_balance": 0,
+  "description": null,
+  "id": "cus_QEvO1l6xtJNbTI",
+  "active_card": null,
+  "created": 1336829566
+}</code>
+
+                    <code class="method-error">{
+  "error": {
+    "type": "invalid_request_error",
+    "message": "No such customer: cus_QEvO1l6xtJNbTI"
+  }
+}
+</code>
+                </div>
+            </div>
+
+            <a id="update_customer" name="update_customer" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Updating a Customer</h4>
+                    <p>
+                        Updates the specified customer by setting the values of
+                        the parameters passed. Any parameters not provided will
+                        be left unchanged.  For example, if you pass
+                        the <strong>card</strong> parameter, that becomes the
+                        customer's active card which will be used for all
+                        charges in future.
+                    </p>
+
+                    <p>
+                       This request accepts mostly the same arguments as the
+                       customer creation call.  However, subscription-related
+                       arguments (<strong>plan</strong> and
+                       <strong>trial_end</strong>) are not accepted.  To
+                       change those, one must <a href="#update_subscription">
+                       update the customer's subscription</a> directly.
+                    </p>
+
+                    <h5>Arguments</h5>
+                    <p>
+                      </p><dl class="argument-list">
+                        <dt>card</dt>
+                        <dd>optional, <span>default is null</span></dd>
+                        <dd>
+                            A new card to attach to the customer. The card can either be a token,
+                            like the ones returned by our
+                            <a href="https://stripe.com/docs/stripe.js">Stripe.js</a>,
+                            or a dictionary containing a
+                            user's credit card details, with the options described
+                            below. A customer with a card can be used when
+                            creating a charge or put on a recurring billing
+                            plan. Although not all information is required, the
+                            extra info helps prevent fraud.
+
+                            <dl>
+                                <dt>number</dt>
+                                <dd>required</dd>
+                                <dd>The card number, as a string without any separators.</dd>
+
+                                <dt>exp_month</dt>
+                                <dd>required</dd>
+                                <dd>Two digit number representing the card's expiration month.</dd>
+
+                                <dt>exp_year</dt>
+                                <dd>required</dd>
+                                <dd>Four digit number representing the card's expiration year.</dd>
+
+                                <dt>cvc</dt>
+                                <dd>optional, <span>highly recommended</span></dd>
+                                <dd>Card security code</dd>
+
+                                <dt>name</dt>
+                                <dd>optional</dd>
+                                <dd>Cardholder's full name.</dd>
+
+                                <dt>address_line1</dt>
+                                <dd>optional</dd>
+
+                                <dt>address_line2</dt>
+                                <dd>optional</dd>
+
+                                <dt>address_zip</dt>
+                                <dd>optional</dd>
+
+                                <dt>address_state</dt>
+                                <dd>optional</dd>
+
+                                <dt>address_country</dt>
+                                <dd>optional</dd>
+                            </dl>
+                        </dd>
+
+                        <dt>coupon</dt>
+                        <dd>optional, <span>default is null</span></dd>
+                        <dd>
+                          If you provide a coupon code, the customer will have a
+                          discount applied on all recurring charges.  Charges
+                          you create through the API will not have the discount.
+                          You can manage your coupons in the
+                          <a href="https://manage.stripe.com/#coupons">coupon section</a> of your
+                          account.
+                        </dd>
+
+                        <dt>description</dt>
+                        <dd>optional, <span>default is null</span></dd>
+                        <dd>
+                            An arbitrary string which you can attach to a customer
+                            object. It is displayed alongside the charge in the
+                            web interface. It's often a good idea to use an
+                            email address as a description for tracking later.
+                        </dd>
+
+                        <dt>email</dt>
+                        <dd>optional</dd>
+                        <dd>
+                            The customer's email address.  It is displayed alongside
+                            the customer in the web interface and can be useful for searching and tracking.
+                        </dd>
+                    <p></p>
+
+                    <h5>Returns</h5>
+                    <p>
+                        Returns the customer object if the update succeeded.
+                        Errors will be thrown if update parameters are invalid.
+                        For example, specifying an invalid coupon or
+                        an invalid card will return an error.
+                    </p>
+                </dl></div>
+
+                <div class="method-example">
+                    <code class="method-declaration">POST https://api.stripe.com/v1/customers/{CUSTOMER_ID}</code>
+
+                    <code class="method-request"><span class="prompt curl"></span>curl https://api.stripe.com/v1/customers/cus_QEvO1l6xtJNbTI \
+   -u vtUQeOtUnYr7PGCLQ96Ul4zqpDUO4sOE: \
+   -d "description=Customer for site@stripe.com"
+</code>
+
+                    <code class="method-response">{
+  "discount": {
+    "end": 1339507966,
+    "start": 1336829566,
+    "object": "discount",
+    "customer": "cus_QEvO1l6xtJNbTI",
+    "id": "di_Ogh2mPRH0Y200d",
+    "coupon": {
+      "times_redeemed": 1,
+      "duration_in_months": null,
+      "livemode": false,
+      "redeem_by": null,
+      "object": "coupon",
+      "duration": "once",
+      "percent_off": 10,
+      "id": "JAVA-COUPON-fa8e8918-2f9e-4def-9675-ed19d6f4d41b",
+      "max_redemptions": null
+    }
+  },
+  "livemode": false,
+  "delinquent": false,
+  "object": "customer",
+  "email": null,
+  "subscription": null,
+  "account_balance": 0,
+  "description": "Customer for site@stripe.com",
+  "id": "cus_QEvO1l6xtJNbTI",
+  "active_card": null,
+  "created": 1336829566
+}</code>
+
+                    <code class="method-error">{
+  "error": {
+    "type": "invalid_request_error",
+    "message": "No such customer: cus_QEvO1l6xtJNbTI"
+  }
+}
+</code>
+                </div>
+            </div>
+
+            <a id="delete_customer" name="delete_customer" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                  <h4>Deleting a Customer</h4>
+
+                  <p>Permanently deletes a customer.  It cannot be undone.</p>
+
+                   <h5>Arguments</h5>
+                    <dl class="argument-list">
+                        <dt>id</dt>
+                        <dd>required</dd>
+                        <dd>
+                            The identifier of the customer to be deleted.
+                        </dd>
+                    </dl>
+
+                    <h5>Returns</h5>
+                    <p>
+                        Returns an object with a deleted parameter on success.
+                        If the customer ID does not exist, an error is returned.
+                    </p>
+                    <p>
+                        Unlike other objects, deleted customers can still be
+                        retrieved through the API, in order to be able to track
+                        the history of customers while still removing their
+                        credit card details and preventing any further operations
+                        to be performed (such as adding a new subscription).
+                    </p>
+                </div>
+
+                <div class="method-example">
+                    <code class="method-declaration">DELETE https://api.stripe.com/v1/customers/{CUSTOMER_ID}</code>
+
+                    <code class="method-request"><span class="prompt curl"></span>curl https://api.stripe.com/v1/customers/cus_QEvO1l6xtJNbTI \
+   -u vtUQeOtUnYr7PGCLQ96Ul4zqpDUO4sOE: \
+   -X DELETE
+</code>
+
+                    <code class="method-response">{
+  "discount": {
+    "end": 1339507966,
+    "start": 1336829566,
+    "object": "discount",
+    "customer": "cus_QEvO1l6xtJNbTI",
+    "id": "di_Ogh2mPRH0Y200d",
+    "coupon": {
+      "times_redeemed": 1,
+      "duration_in_months": null,
+      "livemode": false,
+      "redeem_by": null,
+      "object": "coupon",
+      "duration": "once",
+      "percent_off": 10,
+      "id": "JAVA-COUPON-fa8e8918-2f9e-4def-9675-ed19d6f4d41b",
+      "max_redemptions": null
+    }
+  },
+  "livemode": false,
+  "delinquent": false,
+  "object": "customer",
+  "email": null,
+  "subscription": null,
+  "account_balance": 0,
+  "description": null,
+  "id": "cus_QEvO1l6xtJNbTI",
+  "active_card": null,
+  "created": 1336829566
+}</code>
+
+                    <code class="method-error">{
+  "error": {
+    "type": "invalid_request_error",
+    "message": "No such customer: cus_QEvO1l6xtJNbTI"
+  }
+}
+</code>
+                </div>
+            </div>
+
+            <a id="list_customers" name="list_customers" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>List all Customers</h4>
+                    <p>
+                        Returns a list of your customers. The customers are
+                        returned sorted by creation date, with the most recently
+                        created customers appearing first.
+                    </p>
+
+                    <p>
+                        Like with an individual customer, you can view the list
+                        of customers directly in your browser.
+                    </p>
+
+                    <p>
+                        <a style="word-wrap: break-word;" href="https://api.stripe.com/v1/customers">https://vtUQeOtUnYr7PGCLQ96Ul4zqpDUO4sOE@api.stripe.com/v1/customers</a>
+                    </p>
+
+                    <h5>Arguments</h5>
+                    <dl class="argument-list">
+                        <dt>count</dt>
+                        <dd>optional, <span>default is 10</span></dd>
+                        <dd>
+                            A limit on the number of customers to be returned.
+                            Count can range between 1 and 100 customers.
+                        </dd>
+
+                        <dt>offset</dt>
+                        <dd>optional, <span>default is 0</span></dd>
+                        <dd>
+                            An offset into your customer array. The API will
+                            return the requested number of customers starting at
+                            that offset.
+                        </dd>
+                    </dl>
+
+                    <h5>Returns</h5>
+                    <p>
+                        A dictionary with a <strong>data</strong>
+                        property that contains an array of up to <strong>count</strong> customers,
+                        starting at index <strong>offset</strong>.  Each entry
+                        in the array is a separate customer object. If no more
+                        customers are available, the resulting array will be
+                        empty.  This request should never return an error.
+                    </p>
+                </div>
+
+                <div class="method-example">
+                    <code class="method-declaration">GET https://api.stripe.com/v1/customers</code>
+
+                    <code class="method-request"><span class="prompt curl"></span>curl https://api.stripe.com/v1/customers \
+   -u vtUQeOtUnYr7PGCLQ96Ul4zqpDUO4sOE:
+</code>
+
+                    <code class="method-response">{
+  data: [
+    {
+    "discount": {
+      "end": 1339507966,
+      "start": 1336829566,
+      "object": "discount",
+      "customer": "cus_QEvO1l6xtJNbTI",
+      "id": "di_Ogh2mPRH0Y200d",
+      "coupon": {
+        "times_redeemed": 1,
+        "duration_in_months": null,
+        "livemode": false,
+        "redeem_by": null,
+        "object": "coupon",
+        "duration": "once",
+        "percent_off": 10,
+        "id": "JAVA-COUPON-fa8e8918-2f9e-4def-9675-ed19d6f4d41b",
+        "max_redemptions": null
+      }
+    },
+    "livemode": false,
+    "delinquent": false,
+    "object": "customer",
+    "email": null,
+    "subscription": null,
+    "account_balance": 0,
+    "description": null,
+    "id": "cus_QEvO1l6xtJNbTI",
+    "active_card": null,
+    "created": 1336829566
+  },
+    {...},
+    {...}
+  ]
+}
+</code>
+                </div>
+            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <a id="customers" name="customers" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h3>Customers</h3>
+                    <p>
+                        Customer objects allow you to perform recurring charges
+                        and track multiple charges that are associated with the
+                        same customer.  The API allows you to create, delete,
+                        and update your customers.  You can retrieve individual
+                        customers as well as a list of all your customers.
+                    </p>
+                </div>
+            </div>
+
+            <a id="customer_object" name="customer_object">&nbsp;</a>
+<div class="method-section">
+  <div class="method-description">
+    <h4>The customer object</h4>
+        <h5>Attributes</h5>
+<dl class="argument-list">
+	
+        <dt>
+            id
+        </dt>
+        <dd>
+            
+                
+            		string
+            	
+            
+            <span></span>
+        </dd>
+        
+    
+        <dt>
+            object
+        </dt>
+        <dd>
+            
+                string,<span> value is "customer"</span>
+            
+            <span></span>
+        </dd>
+        
+    
+        <dt>
+            livemode
+        </dt>
+        <dd>
+            
+                
+            		boolean
+            	
+            
+            <span></span>
+        </dd>
+        
+    
+        <dt>
+            created
+        </dt>
+        <dd>
+            
+                
+            		timestamp
+            	
+            
+            <span></span>
+        </dd>
+        
+    
+        <dt>
+            account_balance
+        </dt>
+        <dd>
+            
+                
+            		integer
+            	
+            
+            <span> or null </span>
+        </dd>
+        
+            <dd>Current balance, if any, being stored on the customer's 
+account.  If negative, the customer has credit to apply
+        to the next invoice.  If positive, the customer has an amount 
+owed that will be added to the next invoice.  The balance does not
+        refer to any unpaid invoices; it solely takes into account 
+amounts that have yet to be successfully applied to any invoice.</dd>
+        
+    
+        <dt>
+            active_card
+        </dt>
+        <dd>
+            
+                
+                </dd><dd><strong>hash</strong></dd>
+                <dd>
+                    Hash describing the current card on the customer, if there is one.
+                    <dl class="argument-list">
+	
+        <dt>
+            object
+        </dt>
+        <dd>
+            
+                
+            		string
+            	
+            
+            <span></span>
+        </dd>
+        
+    
+        <dt>
+            exp_month
+        </dt>
+        <dd>
+            
+                
+            		integer
+            	
+            
+            <span></span>
+        </dd>
+        
+    
+        <dt>
+            exp_year
+        </dt>
+        <dd>
+            
+                
+            		integer
+            	
+            
+            <span></span>
+        </dd>
+        
+    
+        <dt>
+            fingerprint
+        </dt>
+        <dd>
+            
+                
+            		string
+            	
+            
+            <span></span>
+        </dd>
+        
+            <dd>Uniquely identifies this particular card number.  You can use this
+        attribute to check whether two customers who've signed up with you are using the same card
+        number, for example.</dd>
+        
+    
+        <dt>
+            last4
+        </dt>
+        <dd>
+            
+                
+            		string
+            	
+            
+            <span></span>
+        </dd>
+        
+    
+        <dt>
+            type
+        </dt>
+        <dd>
+            
+                
+            		string
+            	
+            
+            <span></span>
+        </dd>
+        
+            <dd>Card brand.  Can be Visa, American Express, MasterCard, Discover, JCB, Diners Club, or Unknown</dd>
+        
+    
+        <dt>
+            address_country
+        </dt>
+        <dd>
+            
+                
+            		string
+            	
+            
+            <span> or null </span>
+        </dd>
+        
+            <dd>Billing address country, if provided when creating card</dd>
+        
+    
+        <dt>
+            address_line1
+        </dt>
+        <dd>
+            
+                
+            		string
+            	
+            
+            <span> or null </span>
+        </dd>
+        
+    
+        <dt>
+            address_line1_check
+        </dt>
+        <dd>
+            
+                
+            		string
+            	
+            
+            <span> or null </span>
+        </dd>
+        
+            <dd>If address_line1 was provided, results of the check: pass, fail, or unchecked</dd>
+        
+    
+        <dt>
+            address_line2
+        </dt>
+        <dd>
+            
+                
+            		string
+            	
+            
+            <span> or null </span>
+        </dd>
+        
+    
+        <dt>
+            address_state
+        </dt>
+        <dd>
+            
+                
+            		string
+            	
+            
+            <span> or null </span>
+        </dd>
+        
+    
+        <dt>
+            address_zip
+        </dt>
+        <dd>
+            
+                
+            		string
+            	
+            
+            <span> or null </span>
+        </dd>
+        
+    
+        <dt>
+            address_zip_check
+        </dt>
+        <dd>
+            
+                
+            		string
+            	
+            
+            <span> or null </span>
+        </dd>
+        
+            <dd>If address_zip was provided, results of the check: pass, fail, or unchecked</dd>
+        
+    
+        <dt>
+            country
+        </dt>
+        <dd>
+            
+                
+            		string
+            	
+            
+            <span> or null </span>
+        </dd>
+        
+            <dd>Two-letter ISO code representing the country of the card (as accurately as we can determine it).
+        You could use this attribute to get a sense of the international breakdown of cards you've collected.</dd>
+        
+    
+        <dt>
+            cvc_check
+        </dt>
+        <dd>
+            
+                
+            		string
+            	
+            
+            <span> or null </span>
+        </dd>
+        
+            <dd>If a CVC was provided, results of the check: pass, fail, or unchecked</dd>
+        
+    
+        <dt>
+            name
+        </dt>
+        <dd>
+            
+                
+            		string
+            	
+            
+            <span> or null </span>
+        </dd>
+        
+            <dd>Cardholder name</dd>
+        
+    
+</dl>
+
+
+            	
+            
+            <span> or null </span>
+        </dd>
+        
+    
+        <dt>
+            delinquent
+        </dt>
+        <dd>
+            
+                
+            		boolean
+            	
+            
+            <span> or null </span>
+        </dd>
+        
+            <dd>Whether or not the latest charge for the customer's latest invoice has failed</dd>
+        
+    
+        <dt>
+            description
+        </dt>
+        <dd>
+            
+                
+            		string
+            	
+            
+            <span> or null </span>
+        </dd>
+        
+    
+        <dt>
+            discount
+        </dt>
+        <dd>
+            
+                
+        	    	hash, <a href="#discount_object">discount object</a>
+                
+            
+            <span> or null </span>
+        </dd>
+        
+            <dd>Describes the current discount active on the customer, if there is one.</dd>
+        
+    
+        <dt>
+            email
+        </dt>
+        <dd>
+            
+                
+            		string
+            	
+            
+            <span> or null </span>
+        </dd>
+        
+    
+        <dt>
+            subscription
+        </dt>
+        <dd>
+            
+                
+        	    	hash, <a href="#subscription_object">subscription object</a>
+                
+            
+            <span> or null </span>
+        </dd>
+        
+            <dd>Hash describing the current subscription on the customer, if there is one.  If the customer has no current subscription,
+        this will be null.</dd>
+        
+    
+</dl>
+
+
+  </div>
+  <div class="method-example">
+      <code class="method-response">{
+  "discount": {
+    "end": 1339507966,
+    "start": 1336829566,
+    "object": "discount",
+    "customer": "cus_QEvO1l6xtJNbTI",
+    "id": "di_Ogh2mPRH0Y200d",
+    "coupon": {
+      "times_redeemed": 1,
+      "duration_in_months": null,
+      "livemode": false,
+      "redeem_by": null,
+      "object": "coupon",
+      "duration": "once",
+      "percent_off": 10,
+      "id": "JAVA-COUPON-fa8e8918-2f9e-4def-9675-ed19d6f4d41b",
+      "max_redemptions": null
+    }
+  },
+  "livemode": false,
+  "delinquent": false,
+  "object": "customer",
+  "email": null,
+  "subscription": null,
+  "account_balance": 0,
+  "description": null,
+  "id": "cus_QEvO1l6xtJNbTI",
+  "active_card": null,
+  "created": 1336829566
+}</code>
+  </div>
+</div>
+
+            <a id="create_customer" name="create_customer" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Creating a New Customer</h4>
+                    <p>
+                        Creates a new customer object.
+                    </p>
+
+                    <h5>Arguments</h5>
+                    <dl class="argument-list">
+                        <dt>card</dt>
+                        <dd>optional, <span>default is null</span></dd>
+                        <dd>
+                            A card to attach to the customer. The card can either be a token,
+                            like the ones returned by our
+                            <a href="https://stripe.com/docs/stripe.js">Stripe.js</a>,
+                            or a dictionary containing a
+                            user's credit card details, with the options described
+                            below. Whenever you attach a card to a customer, Stripe will automatically validate the
+                            card. A customer with a card can be used when creating a charge or put on a recurring
+                            billing plan.
+
+                            <dl>
+                                <dt>number</dt>
+                                <dd>required</dd>
+                                <dd>The card number, as a string without any separators.</dd>
+
+                                <dt>exp_month</dt>
+                                <dd>required</dd>
+                                <dd>Two digit number representing the card's expiration month.</dd>
+
+                                <dt>exp_year</dt>
+                                <dd>required</dd>
+                                <dd>Four digit number representing the card's expiration year.</dd>
+
+                                <dt>cvc</dt>
+                                <dd>optional, <span>highly recommended</span></dd>
+                                <dd>Card security code</dd>
+
+                                <dt>name</dt>
+                                <dd>optional</dd>
+                                <dd>Cardholder's full name.</dd>
+
+                                <dt>address_line1</dt>
+                                <dd>optional</dd>
+
+                                <dt>address_line2</dt>
+                                <dd>optional</dd>
+
+                                <dt>address_zip</dt>
+                                <dd>optional</dd>
+
+                                <dt>address_state</dt>
+                                <dd>optional</dd>
+
+                                <dt>address_country</dt>
+                                <dd>optional</dd>
+                            </dl>
+                        </dd>
+
+                        <dt>coupon</dt>
+                        <dd>optional, <span>default is null</span></dd>
+                        <dd>
+                          If you provide a coupon code, the customer will have a
+                          discount applied on all recurring charges.  Charges
+                          you create through the API will not have the discount.
+                          You can manage your coupons in the
+                          <a href="https://manage.stripe.com/#coupons">coupon section</a> of your
+                          account.
+                        </dd>
+
+                        <dt>email</dt>
+                        <dd>optional, <span>default is null</span></dd>
+                        <dd>
+                            The customer's email address.  It is displayed alongside
+                            the customer in the web interface and can be useful for searching and tracking.
+                        </dd>
+
+                        <dt>description</dt>
+                        <dd>optional, <span>default is null</span></dd>
+                        <dd>
+                            An arbitrary string which you can attach to a customer
+                            object. It is displayed alongside the customer in the
+                            web interface.
+                        </dd>
+
+                        <dt>plan</dt>
+                        <dd>optional, <span>default is null</span></dd>
+                        <dd>
+                            The identifier of the plan to subscribe the customer
+                            to.  If provided, the returned customer object has a
+                            'subscription' attribute describing the state of the
+                            customer's subscription.
+                        </dd>
+
+                        <dt>trial_end</dt>
+                        <dd>optional, <span>default is null</span></dd>
+                        <dd>
+                            UTC integer timestamp representing the end of the trial period
+                            the customer will get before being charged for the first time.
+                            If set, trial_end will override the default trial period of the
+                            plan the customer is being subscribed to.
+                        </dd>
+                    </dl>
+
+                    <h5>Returns</h5>
+                    <p>
+                        Returns a customer object if the call succeeded. The
+                        returned object will have information about
+                        subscriptions, discount, and cards, if that information
+                        has been provided.  If a non-free plan is specified and
+                        a card is not provided (unless the plan has a trial period), the call will return an error.
+                        If a non-existent plan or a non-existent or expired
+                        coupon is provided, the call will return an error.
+                    </p>
+                    <p>
+                        If a card has been attached to the customer, the
+                        returned customer object will have an <strong>active_card</strong>
+                        attribute containing the card's details.
+                    </p>
+
+                </div>
+
+                <div class="method-example">
+                    <code class="method-declaration">POST https://api.stripe.com/v1/customers</code>
+
+                    <code class="method-request"><span class="prompt curl"></span>curl https://api.stripe.com/v1/customers \
+   -u vtUQeOtUnYr7PGCLQ96Ul4zqpDUO4sOE: \
+   -d "description=Customer for site@stripe.com" \
+   -d "card[number]=4242424242424242" \
+   -d "card[exp_month]=5" \
+   -d "card[exp_year]=2013"
+</code>
+
+                    <code class="method-response">{
+  "discount": {
+    "end": 1339507966,
+    "start": 1336829566,
+    "object": "discount",
+    "customer": "cus_QEvO1l6xtJNbTI",
+    "id": "di_Ogh2mPRH0Y200d",
+    "coupon": {
+      "times_redeemed": 1,
+      "duration_in_months": null,
+      "livemode": false,
+      "redeem_by": null,
+      "object": "coupon",
+      "duration": "once",
+      "percent_off": 10,
+      "id": "JAVA-COUPON-fa8e8918-2f9e-4def-9675-ed19d6f4d41b",
+      "max_redemptions": null
+    }
+  },
+  "livemode": false,
+  "delinquent": false,
+  "object": "customer",
+  "email": null,
+  "subscription": null,
+  "account_balance": 0,
+  "description": null,
+  "id": "cus_QEvO1l6xtJNbTI",
+  "active_card": null,
+  "created": 1336829566
+}</code>
+
+                    <code class="method-error">{
+  "error": {
+    "type": "invalid_request_error",
+    "message": "You must supply a valid card"
+  }
+}
+</code>
+                </div>
+            </div>
+
+            <a id="retrieve_customer" name="retrieve_customer" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Retrieving a Customer</h4>
+                    <p>
+                        Retrieves the details of an existing customer. You need
+                        only supply the unique customer identifier that was
+                        returned upon customer creation.
+                    </p>
+
+                    <p>
+                        Like with a charge, you can view the retrieved customer
+                        directly in your browser.
+                    </p>
+
+                    <p>
+                        <a style="word-wrap: break-word;" href="https://api.stripe.com/v1/customers/ch_I7HoyUbJDACuPe">https://vtUQeOtUnYr7PGCLQ96Ul4zqpDUO4sOE@api.stripe.com/v1/customers/ch_I7HoyUbJDACuPe</a>
+                    </p>
+
+                    <h5>Arguments</h5>
+                    <dl class="argument-list">
+                        <dt>id</dt>
+                        <dd>required</dd>
+                        <dd>
+                            The identifier of the customer to be retrieved.
+                        </dd>
+                    </dl>
+
+                    <h5>Returns</h5>
+                    <p>
+                        Returns a customer object if a valid identifier was provided.
+                        When requesting the ID of a customer that has been deleted,
+                        a subset of the customer's information will be returned,
+                        including a "deleted" property, which will be true.
+                    </p>
+                </div>
+
+                <div class="method-example">
+                    <code class="method-declaration">GET https://api.stripe.com/v1/customers/{CUSTOMER_ID}</code>
+
+                    <code class="method-request"><span class="prompt curl"></span>curl https://api.stripe.com/v1/customers/cus_QEvO1l6xtJNbTI \
+   -u vtUQeOtUnYr7PGCLQ96Ul4zqpDUO4sOE:
+</code>
+
+                    <code class="method-response">{
+  "discount": {
+    "end": 1339507966,
+    "start": 1336829566,
+    "object": "discount",
+    "customer": "cus_QEvO1l6xtJNbTI",
+    "id": "di_Ogh2mPRH0Y200d",
+    "coupon": {
+      "times_redeemed": 1,
+      "duration_in_months": null,
+      "livemode": false,
+      "redeem_by": null,
+      "object": "coupon",
+      "duration": "once",
+      "percent_off": 10,
+      "id": "JAVA-COUPON-fa8e8918-2f9e-4def-9675-ed19d6f4d41b",
+      "max_redemptions": null
+    }
+  },
+  "livemode": false,
+  "delinquent": false,
+  "object": "customer",
+  "email": null,
+  "subscription": null,
+  "account_balance": 0,
+  "description": null,
+  "id": "cus_QEvO1l6xtJNbTI",
+  "active_card": null,
+  "created": 1336829566
+}</code>
+
+                    <code class="method-error">{
+  "error": {
+    "type": "invalid_request_error",
+    "message": "No such customer: cus_QEvO1l6xtJNbTI"
+  }
+}
+</code>
+                </div>
+            </div>
+
+            <a id="update_customer" name="update_customer" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Updating a Customer</h4>
+                    <p>
+                        Updates the specified customer by setting the values of
+                        the parameters passed. Any parameters not provided will
+                        be left unchanged.  For example, if you pass
+                        the <strong>card</strong> parameter, that becomes the
+                        customer's active card which will be used for all
+                        charges in future.
+                    </p>
+
+                    <p>
+                       This request accepts mostly the same arguments as the
+                       customer creation call.  However, subscription-related
+                       arguments (<strong>plan</strong> and
+                       <strong>trial_end</strong>) are not accepted.  To
+                       change those, one must <a href="#update_subscription">
+                       update the customer's subscription</a> directly.
+                    </p>
+
+                    <h5>Arguments</h5>
+                    <p>
+                      </p><dl class="argument-list">
+                        <dt>card</dt>
+                        <dd>optional, <span>default is null</span></dd>
+                        <dd>
+                            A new card to attach to the customer. The card can either be a token,
+                            like the ones returned by our
+                            <a href="https://stripe.com/docs/stripe.js">Stripe.js</a>,
+                            or a dictionary containing a
+                            user's credit card details, with the options described
+                            below. A customer with a card can be used when
+                            creating a charge or put on a recurring billing
+                            plan. Although not all information is required, the
+                            extra info helps prevent fraud.
+
+                            <dl>
+                                <dt>number</dt>
+                                <dd>required</dd>
+                                <dd>The card number, as a string without any separators.</dd>
+
+                                <dt>exp_month</dt>
+                                <dd>required</dd>
+                                <dd>Two digit number representing the card's expiration month.</dd>
+
+                                <dt>exp_year</dt>
+                                <dd>required</dd>
+                                <dd>Four digit number representing the card's expiration year.</dd>
+
+                                <dt>cvc</dt>
+                                <dd>optional, <span>highly recommended</span></dd>
+                                <dd>Card security code</dd>
+
+                                <dt>name</dt>
+                                <dd>optional</dd>
+                                <dd>Cardholder's full name.</dd>
+
+                                <dt>address_line1</dt>
+                                <dd>optional</dd>
+
+                                <dt>address_line2</dt>
+                                <dd>optional</dd>
+
+                                <dt>address_zip</dt>
+                                <dd>optional</dd>
+
+                                <dt>address_state</dt>
+                                <dd>optional</dd>
+
+                                <dt>address_country</dt>
+                                <dd>optional</dd>
+                            </dl>
+                        </dd>
+
+                        <dt>coupon</dt>
+                        <dd>optional, <span>default is null</span></dd>
+                        <dd>
+                          If you provide a coupon code, the customer will have a
+                          discount applied on all recurring charges.  Charges
+                          you create through the API will not have the discount.
+                          You can manage your coupons in the
+                          <a href="https://manage.stripe.com/#coupons">coupon section</a> of your
+                          account.
+                        </dd>
+
+                        <dt>description</dt>
+                        <dd>optional, <span>default is null</span></dd>
+                        <dd>
+                            An arbitrary string which you can attach to a customer
+                            object. It is displayed alongside the charge in the
+                            web interface. It's often a good idea to use an
+                            email address as a description for tracking later.
+                        </dd>
+
+                        <dt>email</dt>
+                        <dd>optional</dd>
+                        <dd>
+                            The customer's email address.  It is displayed alongside
+                            the customer in the web interface and can be useful for searching and tracking.
+                        </dd>
+                    <p></p>
+
+                    <h5>Returns</h5>
+                    <p>
+                        Returns the customer object if the update succeeded.
+                        Errors will be thrown if update parameters are invalid.
+                        For example, specifying an invalid coupon or
+                        an invalid card will return an error.
+                    </p>
+                </dl></div>
+
+                <div class="method-example">
+                    <code class="method-declaration">POST https://api.stripe.com/v1/customers/{CUSTOMER_ID}</code>
+
+                    <code class="method-request"><span class="prompt curl"></span>curl https://api.stripe.com/v1/customers/cus_QEvO1l6xtJNbTI \
+   -u vtUQeOtUnYr7PGCLQ96Ul4zqpDUO4sOE: \
+   -d "description=Customer for site@stripe.com"
+</code>
+
+                    <code class="method-response">{
+  "discount": {
+    "end": 1339507966,
+    "start": 1336829566,
+    "object": "discount",
+    "customer": "cus_QEvO1l6xtJNbTI",
+    "id": "di_Ogh2mPRH0Y200d",
+    "coupon": {
+      "times_redeemed": 1,
+      "duration_in_months": null,
+      "livemode": false,
+      "redeem_by": null,
+      "object": "coupon",
+      "duration": "once",
+      "percent_off": 10,
+      "id": "JAVA-COUPON-fa8e8918-2f9e-4def-9675-ed19d6f4d41b",
+      "max_redemptions": null
+    }
+  },
+  "livemode": false,
+  "delinquent": false,
+  "object": "customer",
+  "email": null,
+  "subscription": null,
+  "account_balance": 0,
+  "description": "Customer for site@stripe.com",
+  "id": "cus_QEvO1l6xtJNbTI",
+  "active_card": null,
+  "created": 1336829566
+}</code>
+
+                    <code class="method-error">{
+  "error": {
+    "type": "invalid_request_error",
+    "message": "No such customer: cus_QEvO1l6xtJNbTI"
+  }
+}
+</code>
+                </div>
+            </div>
+
+            <a id="delete_customer" name="delete_customer" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                  <h4>Deleting a Customer</h4>
+
+                  <p>Permanently deletes a customer.  It cannot be undone.</p>
+
+                   <h5>Arguments</h5>
+                    <dl class="argument-list">
+                        <dt>id</dt>
+                        <dd>required</dd>
+                        <dd>
+                            The identifier of the customer to be deleted.
+                        </dd>
+                    </dl>
+
+                    <h5>Returns</h5>
+                    <p>
+                        Returns an object with a deleted parameter on success.
+                        If the customer ID does not exist, an error is returned.
+                    </p>
+                    <p>
+                        Unlike other objects, deleted customers can still be
+                        retrieved through the API, in order to be able to track
+                        the history of customers while still removing their
+                        credit card details and preventing any further operations
+                        to be performed (such as adding a new subscription).
+                    </p>
+                </div>
+
+                <div class="method-example">
+                    <code class="method-declaration">DELETE https://api.stripe.com/v1/customers/{CUSTOMER_ID}</code>
+
+                    <code class="method-request"><span class="prompt curl"></span>curl https://api.stripe.com/v1/customers/cus_QEvO1l6xtJNbTI \
+   -u vtUQeOtUnYr7PGCLQ96Ul4zqpDUO4sOE: \
+   -X DELETE
+</code>
+
+                    <code class="method-response">{
+  "discount": {
+    "end": 1339507966,
+    "start": 1336829566,
+    "object": "discount",
+    "customer": "cus_QEvO1l6xtJNbTI",
+    "id": "di_Ogh2mPRH0Y200d",
+    "coupon": {
+      "times_redeemed": 1,
+      "duration_in_months": null,
+      "livemode": false,
+      "redeem_by": null,
+      "object": "coupon",
+      "duration": "once",
+      "percent_off": 10,
+      "id": "JAVA-COUPON-fa8e8918-2f9e-4def-9675-ed19d6f4d41b",
+      "max_redemptions": null
+    }
+  },
+  "livemode": false,
+  "delinquent": false,
+  "object": "customer",
+  "email": null,
+  "subscription": null,
+  "account_balance": 0,
+  "description": null,
+  "id": "cus_QEvO1l6xtJNbTI",
+  "active_card": null,
+  "created": 1336829566
+}</code>
+
+                    <code class="method-error">{
+  "error": {
+    "type": "invalid_request_error",
+    "message": "No such customer: cus_QEvO1l6xtJNbTI"
+  }
+}
+</code>
+                </div>
+            </div>
+
+            <a id="list_customers" name="list_customers" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>List all Customers</h4>
+                    <p>
+                        Returns a list of your customers. The customers are
+                        returned sorted by creation date, with the most recently
+                        created customers appearing first.
+                    </p>
+
+                    <p>
+                        Like with an individual customer, you can view the list
+                        of customers directly in your browser.
+                    </p>
+
+                    <p>
+                        <a style="word-wrap: break-word;" href="https://api.stripe.com/v1/customers">https://vtUQeOtUnYr7PGCLQ96Ul4zqpDUO4sOE@api.stripe.com/v1/customers</a>
+                    </p>
+
+                    <h5>Arguments</h5>
+                    <dl class="argument-list">
+                        <dt>count</dt>
+                        <dd>optional, <span>default is 10</span></dd>
+                        <dd>
+                            A limit on the number of customers to be returned.
+                            Count can range between 1 and 100 customers.
+                        </dd>
+
+                        <dt>offset</dt>
+                        <dd>optional, <span>default is 0</span></dd>
+                        <dd>
+                            An offset into your customer array. The API will
+                            return the requested number of customers starting at
+                            that offset.
+                        </dd>
+                    </dl>
+
+                    <h5>Returns</h5>
+                    <p>
+                        A dictionary with a <strong>data</strong>
+                        property that contains an array of up to <strong>count</strong> customers,
+                        starting at index <strong>offset</strong>.  Each entry
+                        in the array is a separate customer object. If no more
+                        customers are available, the resulting array will be
+                        empty.  This request should never return an error.
+                    </p>
+                </div>
+
+                <div class="method-example">
+                    <code class="method-declaration">GET https://api.stripe.com/v1/customers</code>
+
+                    <code class="method-request"><span class="prompt curl"></span>curl https://api.stripe.com/v1/customers \
+   -u vtUQeOtUnYr7PGCLQ96Ul4zqpDUO4sOE:
+</code>
+
+                    <code class="method-response">{
+  data: [
+    {
+    "discount": {
+      "end": 1339507966,
+      "start": 1336829566,
+      "object": "discount",
+      "customer": "cus_QEvO1l6xtJNbTI",
+      "id": "di_Ogh2mPRH0Y200d",
+      "coupon": {
+        "times_redeemed": 1,
+        "duration_in_months": null,
+        "livemode": false,
+        "redeem_by": null,
+        "object": "coupon",
+        "duration": "once",
+        "percent_off": 10,
+        "id": "JAVA-COUPON-fa8e8918-2f9e-4def-9675-ed19d6f4d41b",
+        "max_redemptions": null
+      }
+    },
+    "livemode": false,
+    "delinquent": false,
+    "object": "customer",
+    "email": null,
+    "subscription": null,
+    "account_balance": 0,
+    "description": null,
+    "id": "cus_QEvO1l6xtJNbTI",
+    "active_card": null,
+    "created": 1336829566
+  },
+    {...},
+    {...}
+  ]
+}
+</code>
+                </div>
+            </div>
+
+
+
+
+
+
+
+
+        </div> <!-- main-content-wrapper -->
+    </div>
+
+
+</body></html>

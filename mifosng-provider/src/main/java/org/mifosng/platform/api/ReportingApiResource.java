@@ -7,6 +7,7 @@ import java.util.Set;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -35,14 +36,14 @@ public class ReportingApiResource {
 	private ReadExtraDataAndReportingService ReadExtraDataAndReportingService;
 
 	@GET
+	@Path("{reportName}")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Produces({ MediaType.APPLICATION_JSON, "application/x-msdownload" })
-	public Response retrieveReport(@Context UriInfo uriInfo) {
+	public Response retrieveReport(@PathParam("reportName") final String reportName, @Context UriInfo uriInfo) {
 
 		MultivaluedMap<String, String> queryParams = uriInfo
 				.getQueryParameters();
-		String name = queryParams.getFirst("FR_Name");
-		String type = queryParams.getFirst("FR_Type");
+		String type = queryParams.getFirst("R_Type");
 		String exportCSV = queryParams.getFirst("exportCSV");
 
 		Map<String, String> extractedQueryParams = new HashMap<String, String>();
@@ -52,29 +53,29 @@ public class ReportingApiResource {
 		String pValue;
 		for (String k : keys) {
 
-			if (k.startsWith("FR_")) {
-				pKey = "${" + k.substring(3) + "}";
+			if (k.startsWith("R_")) {
+				pKey = "${" + k.substring(2) + "}";
 				pValue = queryParams.get(k).get(0);
 				extractedQueryParams.put(pKey, pValue);
 			}
 		}
-		logger.info("BEGINNING REQUEST FOR: " + name);
+		logger.info("BEGINNING REQUEST FOR: " + reportName);
 
 		if ((exportCSV == null) || (!(exportCSV.equalsIgnoreCase("true")))) {
 			GenericResultset result = this.ReadExtraDataAndReportingService
-					.retrieveGenericResultset(name, type, extractedQueryParams);
+					.retrieveGenericResultset(reportName, type, extractedQueryParams);
 
 			return Response.ok().entity(result).build();
 		}
 
 		StreamingOutput result = this.ReadExtraDataAndReportingService
-				.retrieveReportCSV(name, type, extractedQueryParams);
+				.retrieveReportCSV(reportName, type, extractedQueryParams);
 
 		return Response
 				.ok()
 				.entity(result)
 				.header("Content-Disposition",
-						"attachment;filename=" + name.replaceAll(" ", "")
+						"attachment;filename=" + reportName.replaceAll(" ", "")
 								+ ".csv").build();
 	}
 

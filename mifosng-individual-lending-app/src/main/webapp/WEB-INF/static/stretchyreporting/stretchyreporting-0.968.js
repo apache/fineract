@@ -166,8 +166,8 @@ function initialiseReporting(params) {
 	if (params.reportQuery) reportQuery = params.reportQuery;
 
 
-	var theParams = {Name: reportQuery, Type: 'parameter'};
-	getReportData(theParams, setupReportListSuccess) 
+	var theParams = {Type: 'parameter'};
+	getReportData(reportQuery, theParams, setupReportListSuccess) 
 }
 
 function setCurrentDate() {
@@ -435,9 +435,7 @@ function runTheReport()
 		return;
 	}
 
-	var theParams;
-	if ((reportListing[reportListingIndex].type == 'Pentaho')) theParams = {pentahoReportName: reportListing[reportListingIndex].name, Type: 'report'}
-	else theParams = {Name: reportListing[reportListingIndex].name, Type: 'report'};
+	var theParams = {Type: 'report'};
 
 	var pValue;
 	var reportParameterName;
@@ -471,14 +469,14 @@ function runTheReport()
 	switch(reportListing[reportListingIndex].type)
 	{
 		case "Table":
-			if (showOption == "XLS") getExportCSV(theParams)
+			if (showOption == "XLS") getExportCSV(selectedRpt, theParams)
 			else
 			{
 				reportDataSuccess = function(data, textStatus, jqXHR){
 					createTable(data);
 					showTableReport();
 				};
-				getReportData(theParams, reportDataSuccess);
+				getReportData(selectedRpt, theParams, reportDataSuccess);
 			}
   			break;
 		case "Chart":
@@ -487,10 +485,10 @@ function runTheReport()
 			    				createChart(data);
 							showChartReport(reportListing[reportListingIndex].subtype);
 							};
-			getReportData(theParams, reportDataSuccess);
+			getReportData(selectedRpt, theParams, reportDataSuccess);
   			break;
 		case "Pentaho":
-			getPentahoReport(theParams);
+			getPentahoReport(selectedRpt, theParams);
   			break;
 
 		default:
@@ -581,8 +579,8 @@ var parameterTableHtml = '<table><tr>';
 
 			eval(generateSelectSuccessVariable(listOfParameters[i].name, listOfParameters[i].label, selectOne, selectAll));
 
-			var theParams = {Name: listOfParameters[i].name, Type: 'parameter'};
-			getReportData(theParams, selectSuccess) 
+			var theParams = {Type: 'parameter'};
+			getReportData(listOfParameters[i].name, theParams, selectSuccess) 
 		}
 	}
 
@@ -614,8 +612,8 @@ setupParameterListSuccess = function(data, textStatus, jqXHR){
 
 setupReportListSuccess = function(data, textStatus, jqXHR){
  					showMsgE("In setupReportListSuccess");
-					theParams = {Name: 'FullParameterList', Type: 'parameter'};
-					getReportData(theParams, setupParameterListSuccess);
+					theParams = {Type: 'parameter'};
+					getReportData('FullParameterList', theParams, setupParameterListSuccess);
 
 					var prevId = -1;
 					var currId;
@@ -672,8 +670,8 @@ setupReportListSuccess = function(data, textStatus, jqXHR){
 
 function copyXLSon() {
 	showMsg("Turning them on");
-	$('#ToolTables_FRshowTable_0').css('display', 'inline');
-	$('#ToolTables_FRshowTable_1').css('display', 'inline');
+	$('#ToolTables_RshowTable_0').css('display', 'inline');
+	$('#ToolTables_RshowTable_1').css('display', 'inline');
 	ttInstances = TableTools.fnGetMasters();
 	for (i in ttInstances) {
 		ttInstances[i].that.fnResizeButtons();
@@ -684,8 +682,8 @@ function copyXLSon() {
 
 function copyXLSoff() {
 	showMsg("Turning them off");
-	$('#ToolTables_FRshowTable_0').css('display', 'none');
-	$('#ToolTables_FRshowTable_1').css('display', 'none');
+	$('#ToolTables_RshowTable_0').css('display', 'none');
+	$('#ToolTables_RshowTable_1').css('display', 'none');
 	filteredCopyXLSon = false;
 }
 
@@ -768,22 +766,22 @@ return 'var selectSuccess = function(data, textStatus,jqXHR){' +
 
 function createChart(theData) {
 
-	FRData = new google.visualization.DataTable();
-      FRData.addColumn('string', dataTableDef.aoColumns[0].sTitle);
-      FRData.addColumn('number', dataTableDef.aoColumns[1].sTitle);
-      FRData.addRows(dataTableDef.aaData.length);
+	RData = new google.visualization.DataTable();
+      RData.addColumn('string', dataTableDef.aoColumns[0].sTitle);
+      RData.addColumn('number', dataTableDef.aoColumns[1].sTitle);
+      RData.addRows(dataTableDef.aaData.length);
 
 	var ii = 0;
 	var numberData;
 	var dblQuotePos;
 	for (var i in dataTableDef.aaData)
 	{
-		FRData.setValue(ii, 0, dataTableDef.aaData[i][0]);
+		RData.setValue(ii, 0, dataTableDef.aaData[i][0]);
 		
 		if (dataTableDef.aoColumns[1].sType == "title-numeric" && dataTableDef.aaData[i][1].substr(0, 11) == '<span title') numberData = getOrigTitleNumericValue(dataTableDef.aaData[i][1])
 		else numberData = dataTableDef.aaData[i][1];
 
-		FRData.setValue(ii, 1, numberData);
+		RData.setValue(ii, 1, numberData);
 		ii = ii + 1;
   	};
 }
@@ -889,8 +887,8 @@ function convertCRtoBR(str) {
 
 function showTableReport() {
 	isNewTable = true;
-	$('#StretchyReportOutput').html( '<table cellpadding="0" cellspacing="1" border="0" class="display" id="FRshowTable" width=100%></table>' );
-	oTable = $('#FRshowTable').dataTable(dataTableDef);	
+	$('#StretchyReportOutput').html( '<table cellpadding="0" cellspacing="1" border="0" class="display" id="RshowTable" width=100%></table>' );
+	oTable = $('#RshowTable').dataTable(dataTableDef);	
 	oSettings = oTable.fnSettings();
 
 	showMsg("1st recs displayed is: " + fnRecordsDisplay());
@@ -901,17 +899,17 @@ function showTableReport() {
 function showChartReport(rptSubType) {
 /*
  * $('#StretchyReportOutput').html( '<table><tr><td width="25%" valign="top"><table
- * cellpadding="0" cellspacing="1" border="0" class="display" id="FRshowTable"
+ * cellpadding="0" cellspacing="1" border="0" class="display" id="RshowTable"
  * width=100%></table></td><td width="75%" align="right"><div
- * id=FRshowChart></div></td></tr></table>' );
- * $('#FRshowTable').dataTable(dataTableDef);
+ * id=RshowChart></div></td></tr></table>' );
+ * $('#RshowTable').dataTable(dataTableDef);
  */
 
-	$('#StretchyReportOutput').html( '<table><tr></td><td width="100%" align="center"><div id=FRshowChart></div></td></tr></table>' );
+	$('#StretchyReportOutput').html( '<table><tr></td><td width="100%" align="center"><div id=RshowChart></div></td></tr></table>' );
 
 
 var options;
-var FRchart;
+var Rchart;
 
 		switch(rptSubType)
 		{
@@ -922,8 +920,8 @@ var FRchart;
 						// chartArea: {left:0,top:0, width:"100%",height:"100%"}
 						};
 
-      			FRchart = new google.visualization.PieChart(document.getElementById('FRshowChart'));
-        			FRchart.draw(FRData, options);
+      			Rchart = new google.visualization.PieChart(document.getElementById('RshowChart'));
+        			Rchart.draw(RData, options);
   				break;
 			case "Bar":
         			options = {
@@ -933,8 +931,8 @@ var FRchart;
 						// chartArea: {left:0,top:0, width:"100%",height:"100%"}
        					};
 
-        					FRchart = new google.visualization.BarChart(document.getElementById('FRshowChart'));
-        					FRchart.draw(FRData, options);
+        					Rchart = new google.visualization.BarChart(document.getElementById('RshowChart'));
+        					Rchart.draw(RData, options);
   				break;
 			default:
   				alert("System Error: Unknown Chart Type: " + rptSubType);
@@ -945,9 +943,9 @@ var FRchart;
 
 
 /*
- * var FRchart = new
- * google.visualization.PieChart(document.getElementById('FRshowChart'));
- * FRchart.draw(FRData, {legend: 'right', is3D: true, width: 400, height: 500,
+ * var Rchart = new
+ * google.visualization.PieChart(document.getElementById('RshowChart'));
+ * Rchart.draw(RData, {legend: 'right', is3D: true, width: 400, height: 500,
  * chartArea: {left:0,top:0, width:"100%",height:"100%"}});
  */
 /*
@@ -960,7 +958,7 @@ var FRchart;
  * dataTableDef.aaData[i][1]}); }
  * 
  * 
- * var FRchart = new Highcharts.Chart({ chart: { renderTo: 'FRshowChart',
+ * var Rchart = new Highcharts.Chart({ chart: { renderTo: 'RshowChart',
  * defaultSeriesType: 'bar' }, title: { text: 'Historic World Population by
  * Region' }, xAxis: { categories: chartCategories, title: { text: null } },
  * yAxis: { min: -5000000, title: { text: 'Population (millions)', align: 'high' } },
@@ -975,17 +973,17 @@ var FRchart;
 }
 
 
-function getReportData(inParams, successFunction) {
-	if (isAuthRequest == true) getReportDataAuth(inParams, successFunction)
-	else getReportDataNoAuth(inParams, successFunction);
+function getReportData(rptName, inParams, successFunction) {
+	if (isAuthRequest == true) getReportDataAuth(rptName, inParams, successFunction)
+	else getReportDataNoAuth(rptName, inParams, successFunction);
 }
 
 
-function getReportDataAuth(inParams, successFunction) {
-
+function getReportDataAuth(rptName, inParams, successFunction) {
+alert("needs fixing up, dont rely on data")
 	var inQueryParameters =  {};
-	for (var i in inParams ) inQueryParameters["FR_" + i] = inParams[i];
-	if (rptDB > "") inQueryParameters["FR_rptDB"] = rptDB;
+	for (var i in inParams ) inQueryParameters["R_" + i] = inParams[i];
+	if (rptDB > "") inQueryParameters["R_rptDB"] = rptDB;
 	
 	OAuthSimple().reset();
 	var OAuthProcess = (new OAuthSimple()).sign({
@@ -1029,24 +1027,24 @@ function buildReportParms(inParams) {
 	for (var i in inParams )
 	{
 		if (paramCount > 1) reportParams += "&"
-		reportParams += encodeURIComponent("FR_" + i) + "=" + encodeURIComponent(inParams[i]);
+		reportParams += encodeURIComponent("R_" + i) + "=" + encodeURIComponent(inParams[i]);
 		paramCount = paramCount + 1;
 	}
 	if (rptDB > "") 
 	{
 		if (paramCount > 1) reportParams += "&"
-		reportParams =  encodeURIComponent("FR_rptDB") + "=" + encodeURIComponent(rptDB);
+		reportParams =  encodeURIComponent("R_rptDB") + "=" + encodeURIComponent(rptDB);
 	}
 	
 	return reportParams
 }
 
-function getReportDataNoAuth(inParams, successFunction) {
+function getReportDataNoAuth(rptName, inParams, successFunction) {
 	
 	var inQueryParameters = buildReportParms(inParams);
 	showMsgE("getReportDataNoAuth: " + inQueryParameters);
 	$.ajax({
-			url: RESTUrl,
+			url: RESTUrl + "/" + rptName,
 			type:'GET',
 			dataType: 'json',
 			data: inQueryParameters,
@@ -1068,10 +1066,13 @@ function getReportDataNoAuth(inParams, successFunction) {
 }
 
 	
-function getExportCSV(inParams) {
+function getExportCSV(rptName, inParams) {
 
 	var inQueryParameters = buildReportParms(inParams);
-	var fullExportUrl = RESTUrl + "?" + inQueryParameters + "&exportCSV=true";
+	if (inQueryParameters > "") inQueryParameters = "?" + inQueryParameters + "&exportCSV=true"
+	else inQueryParameters = "?exportCSV=true"
+	
+	var fullExportUrl = RESTUrl + "/" + rptName + inQueryParameters;
 	showMsg("full export url: " + fullExportUrl);
 	var loadHTML = '<iframe id=rptLoadingFrame src="' + fullExportUrl + '" frameborder="0" onload="jQuery.stretchyReporting.clearLoadingImg();" width="100%" height="600px" style="background:url(';
 		loadHTML += "'" + loadingImg + "'" + ') no-repeat scroll 50% 100px;"><p>Your browser does not support iframes.</p></iframe>';
@@ -1081,8 +1082,9 @@ function getExportCSV(inParams) {
 }
 
 
-function getPentahoReport(inParams) {
-
+function getPentahoReport(rptName, inParams) {
+//todo 
+	var currentReportName = inparams.name; //remember to include this when doing pentaho example
 	var inQueryParameters =  "?output-type=" + $('#rptOutputType option:selected').val();
 	// var paramCount = 1;
 	for (var i in inParams )
