@@ -34,21 +34,6 @@ public class ReportingApiResource {
 	@Autowired
 	private ReadExtraDataAndReportingService ReadExtraDataAndReportingService;
 
-//	private Response makeCORSExport(ResponseBuilder req, String exportFilename,
-//			String returnMethod) {
-//		ResponseBuilder rb = req
-//				.header("Access-Control-Allow-Origin", "*")
-//				.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-//				.header("Content-Disposition",
-//						"attachment;filename=" + exportFilename);
-//
-//		if (!"".equals(returnMethod)) {
-//			rb.header("Access-Control-Allow-Headers", returnMethod);
-//		}
-//
-//		return rb.build();
-//	}
-
 	@GET
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Produces({ MediaType.APPLICATION_JSON, "application/x-msdownload" })
@@ -56,8 +41,8 @@ public class ReportingApiResource {
 
 		MultivaluedMap<String, String> queryParams = uriInfo
 				.getQueryParameters();
-		String name = queryParams.getFirst("MRP_Name");
-		String type = queryParams.getFirst("MRP_Type");
+		String name = queryParams.getFirst("FR_Name");
+		String type = queryParams.getFirst("FR_Type");
 		String exportCSV = queryParams.getFirst("exportCSV");
 
 		Map<String, String> extractedQueryParams = new HashMap<String, String>();
@@ -67,10 +52,9 @@ public class ReportingApiResource {
 		String pValue;
 		for (String k : keys) {
 
-			if (k.startsWith("MRP_")) {
-				pKey = "${" + k.substring(4) + "}";
+			if (k.startsWith("FR_")) {
+				pKey = "${" + k.substring(3) + "}";
 				pValue = queryParams.get(k).get(0);
-
 				extractedQueryParams.put(pKey, pValue);
 			}
 		}
@@ -79,15 +63,21 @@ public class ReportingApiResource {
 		if ((exportCSV == null) || (!(exportCSV.equalsIgnoreCase("true")))) {
 			GenericResultset result = this.ReadExtraDataAndReportingService
 					.retrieveGenericResultset(name, type, extractedQueryParams);
-			
-			return Response.ok().entity(result).build();
-		} 
-		
-		StreamingOutput result = this.ReadExtraDataAndReportingService.retrieveReportCSV(name, type, extractedQueryParams);
 
-		return Response.ok().entity(result).header("Content-Disposition","attachment;filename=" + name.replaceAll(" ", "") + ".csv").build();
+			return Response.ok().entity(result).build();
+		}
+
+		StreamingOutput result = this.ReadExtraDataAndReportingService
+				.retrieveReportCSV(name, type, extractedQueryParams);
+
+		return Response
+				.ok()
+				.entity(result)
+				.header("Content-Disposition",
+						"attachment;filename=" + name.replaceAll(" ", "")
+								+ ".csv").build();
 	}
-	
+
 	@GET
 	@Path("forceauth")
 	public Response hackToForceAuthentication() {

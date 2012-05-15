@@ -19,7 +19,7 @@ $.stretchyReporting.clearLoadingImg = function() {
 				};
 
 $.stretchyReporting.nothingCallback = function() {
-					//nothing
+					// nothing
 				};
 
 $.stretchyReporting.changeLanguage  = function(newLanguage) {
@@ -35,9 +35,10 @@ $.stretchyReporting.changeSeparator= function(sepChar, decChar, indFormat) {
 				};
 
 function fnRecordsDisplay(){
-//oSettings isn't defined when table first created but coding around to not call this method until after it is.
-	//if (typeof(oSettings) != "undefined") return oSettings.fnRecordsDisplay()
-	//else return 0;
+// oSettings isn't defined when table first created but coding around to not
+// call this method until after it is.
+	// if (typeof(oSettings) != "undefined") return oSettings.fnRecordsDisplay()
+	// else return 0;
 	return oSettings.fnRecordsDisplay();
 }
 
@@ -136,9 +137,9 @@ function initialiseReporting(params) {
 	}
  	
 
-//google charts
+// google charts
       google.load("visualization", "1", {packages:["corechart"]});
-      //google.load('visualization', '1', {packages:['table']});
+      // google.load('visualization', '1', {packages:['table']});
 
 	reportListing = [];
 	listOfParameters = [];
@@ -180,7 +181,7 @@ function pad2(number) {
 
 function formatNumber(nStr)
 { 
-//format no. of decimal places
+// format no. of decimal places
 	var mainNum;
 	if (decimalsNo < 0)
 	{
@@ -192,7 +193,7 @@ function formatNumber(nStr)
 	else return generalFormatNumber(mainNum);
 }
 
-//function for converting string into indian currency format
+// function for converting string into indian currency format
 function indianFormatNumber(inNum) {
 
 	var mainNum = inNum + '';
@@ -270,7 +271,7 @@ function getOrigTitleNumericValue(titleNumericValue) {
 }
 
 function invalidDate(checkDate) {
-//validates for yyyy-mm-dd returns true if invalid, false is valid
+// validates for yyyy-mm-dd returns true if invalid, false is valid
 var dateformat = /^\d{4}(\-|\/|\.)\d{1,2}\1\d{1,2}$/;
 
     	if(!(dateformat.test(checkDate))) {
@@ -458,7 +459,7 @@ function runTheReport()
 		if (reportListing[reportListingIndex].type == 'Pentaho') reportParameterName = reportListing[reportListingIndex].parameters[i][0]
 		else reportParameterName = paramDetails.variable;
 
-		//alert("Variable: " + reportParameterName + "    Value: " + pValue);
+		// alert("Variable: " + reportParameterName + " Value: " + pValue);
 		theParams[reportParameterName] = pValue ;
 	}
 
@@ -529,7 +530,7 @@ var parameterTableHtml = '<table><tr>';
 
 	$(inputParametersDiv).html(parameterTableHtml);
 
-//set the initial values for parameters
+// set the initial values for parameters
 	for (var i in listOfParameters)
 	{
 		parameterTableHtml = parameterTableHtml + '<td width="20">&nbsp;</td>';
@@ -568,7 +569,7 @@ var parameterTableHtml = '<table><tr>';
 	hideAllParameters();
 
 
-//Populate all select (drop down list box) parameters
+// Populate all select (drop down list box) parameters
 	for (var i in listOfParameters)
 	{
 		if (listOfParameters[i].displayType == 'select')
@@ -671,8 +672,8 @@ setupReportListSuccess = function(data, textStatus, jqXHR){
 
 function copyXLSon() {
 	showMsg("Turning them on");
-	$('#ToolTables_MRPshowTable_0').css('display', 'inline');
-	$('#ToolTables_MRPshowTable_1').css('display', 'inline');
+	$('#ToolTables_FRshowTable_0').css('display', 'inline');
+	$('#ToolTables_FRshowTable_1').css('display', 'inline');
 	ttInstances = TableTools.fnGetMasters();
 	for (i in ttInstances) {
 		ttInstances[i].that.fnResizeButtons();
@@ -683,8 +684,8 @@ function copyXLSon() {
 
 function copyXLSoff() {
 	showMsg("Turning them off");
-	$('#ToolTables_MRPshowTable_0').css('display', 'none');
-	$('#ToolTables_MRPshowTable_1').css('display', 'none');
+	$('#ToolTables_FRshowTable_0').css('display', 'none');
+	$('#ToolTables_FRshowTable_1').css('display', 'none');
 	filteredCopyXLSon = false;
 }
 
@@ -717,7 +718,7 @@ function applyFilterRules() {
 
 function initialiseDataTableDef() {
 dataTableDef = {
-		//"sDom": 'lfTip<"top"<"clear">>rtlfTip<"bottom"<"clear">>',
+		// "sDom": 'lfTip<"top"<"clear">>rtlfTip<"bottom"<"clear">>',
 		"sDom": 'lfTip<"top"<"clear">>rt',
 		"oTableTools": {
 				"aButtons": [{	"sExtends": "copy",
@@ -726,10 +727,10 @@ dataTableDef = {
 						{	"sExtends": "xls",
 							"sButtonText": doI18N("Save to CSV")
 						}
-						//{
-						//	"sExtends": "print", 
-						//	"sButtonText": doI18N("Print")
-						//}
+						// {
+						// "sExtends": "print",
+						// "sButtonText": doI18N("Print")
+						// }
 						],
 				"sSwfPath": resValue + "DataTables-1.8.2/extras/TableTools/media/swf/copy_cvs_xls.swf"
 			        },
@@ -740,7 +741,7 @@ dataTableDef = {
 		"bDeferRender": true,
 		"bProcessing": true,
 		"aLengthMenu": [[5, 10, 25, 50, 100, -1], [5, 10, 25, 50, 100, "All"]]
-		//"bJQueryUI": true
+		// "bJQueryUI": true
 	}
 
 }
@@ -767,22 +768,22 @@ return 'var selectSuccess = function(data, textStatus,jqXHR){' +
 
 function createChart(theData) {
 
-	MRPData = new google.visualization.DataTable();
-      MRPData.addColumn('string', dataTableDef.aoColumns[0].sTitle);
-      MRPData.addColumn('number', dataTableDef.aoColumns[1].sTitle);
-      MRPData.addRows(dataTableDef.aaData.length);
+	FRData = new google.visualization.DataTable();
+      FRData.addColumn('string', dataTableDef.aoColumns[0].sTitle);
+      FRData.addColumn('number', dataTableDef.aoColumns[1].sTitle);
+      FRData.addRows(dataTableDef.aaData.length);
 
 	var ii = 0;
 	var numberData;
 	var dblQuotePos;
 	for (var i in dataTableDef.aaData)
 	{
-		MRPData.setValue(ii, 0, dataTableDef.aaData[i][0]);
+		FRData.setValue(ii, 0, dataTableDef.aaData[i][0]);
 		
 		if (dataTableDef.aoColumns[1].sType == "title-numeric" && dataTableDef.aaData[i][1].substr(0, 11) == '<span title') numberData = getOrigTitleNumericValue(dataTableDef.aaData[i][1])
 		else numberData = dataTableDef.aaData[i][1];
 
-		MRPData.setValue(ii, 1, numberData);
+		FRData.setValue(ii, 1, numberData);
 		ii = ii + 1;
   	};
 }
@@ -826,7 +827,7 @@ function createTable(theData) {
 		}
 		tableColumns.push({ "sTitle": doI18N(theData.columnHeaders[i].columnName), 
 					"sOriginalHeading": theData.columnHeaders[i].columnName,
-					//"dataType": tmpSType,
+					// "dataType": tmpSType,
 					"sType": tmpSType,
 					"sClass": tmpSClass
 					});
@@ -888,8 +889,8 @@ function convertCRtoBR(str) {
 
 function showTableReport() {
 	isNewTable = true;
-	$('#StretchyReportOutput').html( '<table cellpadding="0" cellspacing="1" border="0" class="display" id="MRPshowTable" width=100%></table>' );
-	oTable = $('#MRPshowTable').dataTable(dataTableDef);	
+	$('#StretchyReportOutput').html( '<table cellpadding="0" cellspacing="1" border="0" class="display" id="FRshowTable" width=100%></table>' );
+	oTable = $('#FRshowTable').dataTable(dataTableDef);	
 	oSettings = oTable.fnSettings();
 
 	showMsg("1st recs displayed is: " + fnRecordsDisplay());
@@ -899,15 +900,18 @@ function showTableReport() {
 
 function showChartReport(rptSubType) {
 /*
-	$('#StretchyReportOutput').html( '<table><tr><td width="25%" valign="top"><table cellpadding="0" cellspacing="1" border="0" class="display" id="MRPshowTable" width=100%></table></td><td width="75%" align="right"><div id=MRPshowChart></div></td></tr></table>' );
-	$('#MRPshowTable').dataTable(dataTableDef);
-	*/
+ * $('#StretchyReportOutput').html( '<table><tr><td width="25%" valign="top"><table
+ * cellpadding="0" cellspacing="1" border="0" class="display" id="FRshowTable"
+ * width=100%></table></td><td width="75%" align="right"><div
+ * id=FRshowChart></div></td></tr></table>' );
+ * $('#FRshowTable').dataTable(dataTableDef);
+ */
 
-	$('#StretchyReportOutput').html( '<table><tr></td><td width="100%" align="center"><div id=MRPshowChart></div></td></tr></table>' );
+	$('#StretchyReportOutput').html( '<table><tr></td><td width="100%" align="center"><div id=FRshowChart></div></td></tr></table>' );
 
 
 var options;
-var MRPchart;
+var FRchart;
 
 		switch(rptSubType)
 		{
@@ -915,21 +919,22 @@ var MRPchart;
       			options = {
 						legend: 'right', is3D: true, 
 						width: 1000, height: 600
-						//chartArea: {left:0,top:0, width:"100%",height:"100%"}
+						// chartArea: {left:0,top:0, width:"100%",height:"100%"}
 						};
 
-      			MRPchart = new google.visualization.PieChart(document.getElementById('MRPshowChart'));
-        			MRPchart.draw(MRPData, options);
+      			FRchart = new google.visualization.PieChart(document.getElementById('FRshowChart'));
+        			FRchart.draw(FRData, options);
   				break;
 			case "Bar":
         			options = {
           					width: 1000, height: 600
-         					//vAxis: {title: 'xxxxxxx',  titleTextStyle: {color: 'red'}}
-						//chartArea: {left:0,top:0, width:"100%",height:"100%"}
+         					// vAxis: {title: 'xxxxxxx', titleTextStyle: {color:
+							// 'red'}}
+						// chartArea: {left:0,top:0, width:"100%",height:"100%"}
        					};
 
-        					MRPchart = new google.visualization.BarChart(document.getElementById('MRPshowChart'));
-        					MRPchart.draw(MRPData, options);
+        					FRchart = new google.visualization.BarChart(document.getElementById('FRshowChart'));
+        					FRchart.draw(FRData, options);
   				break;
 			default:
   				alert("System Error: Unknown Chart Type: " + rptSubType);
@@ -940,75 +945,31 @@ var MRPchart;
 
 
 /*
-      var MRPchart = new google.visualization.PieChart(document.getElementById('MRPshowChart'));
-      MRPchart.draw(MRPData, {legend: 'right', is3D: true, width: 400, height: 500, chartArea: {left:0,top:0, width:"100%",height:"100%"}});
-*/
+ * var FRchart = new
+ * google.visualization.PieChart(document.getElementById('FRshowChart'));
+ * FRchart.draw(FRData, {legend: 'right', is3D: true, width: 400, height: 500,
+ * chartArea: {left:0,top:0, width:"100%",height:"100%"}});
+ */
 /*
-	var chartCategories = [];
-	for (var i in dataTableDef.aaData) 
-	{
-		chartCategories.push(dataTableDef.aaData[i][0]);
-	}
-
-	var chartSeries = [];
-
-	for (var i in dataTableDef.aaData) 
-	{
-		chartSeries.push({data: dataTableDef.aaData[i][1]});
-	}
-
-
-			var MRPchart = new Highcharts.Chart({
-					chart: {
-						renderTo: 'MRPshowChart',
-						defaultSeriesType: 'bar'
-					},
-					title: {
-						text: 'Historic World Population by Region'
-					},
-					xAxis: {
-						categories: chartCategories,
-						title: {
-							text: null
-						}
-					},
-					yAxis: {
-						min: -5000000,
-						title: {
-							text: 'Population (millions)',
-							align: 'high'
-						}
-					},
-					tooltip: {
-						formatter: function() {
-							return ''+
-								 this.series.name +': '+ this.y +' millions';
-						}
-					},
-					plotOptions: {
-						bar: {
-							dataLabels: {
-								enabled: true
-							}
-						}
-					},
-					legend: {
-						layout: 'vertical',
-						align: 'right',
-						verticalAlign: 'top',
-						x: -100,
-						y: 100,
-						floating: true,
-						borderWidth: 1,
-						backgroundColor: '#FFFFFF',
-						shadow: true
-					},
-					credits: {
-						enabled: false
-					},
-				        series: chartSeries
-				});
-*/
+ * var chartCategories = []; for (var i in dataTableDef.aaData) {
+ * chartCategories.push(dataTableDef.aaData[i][0]); }
+ * 
+ * var chartSeries = [];
+ * 
+ * for (var i in dataTableDef.aaData) { chartSeries.push({data:
+ * dataTableDef.aaData[i][1]}); }
+ * 
+ * 
+ * var FRchart = new Highcharts.Chart({ chart: { renderTo: 'FRshowChart',
+ * defaultSeriesType: 'bar' }, title: { text: 'Historic World Population by
+ * Region' }, xAxis: { categories: chartCategories, title: { text: null } },
+ * yAxis: { min: -5000000, title: { text: 'Population (millions)', align: 'high' } },
+ * tooltip: { formatter: function() { return ''+ this.series.name +': '+ this.y +'
+ * millions'; } }, plotOptions: { bar: { dataLabels: { enabled: true } } },
+ * legend: { layout: 'vertical', align: 'right', verticalAlign: 'top', x: -100,
+ * y: 100, floating: true, borderWidth: 1, backgroundColor: '#FFFFFF', shadow:
+ * true }, credits: { enabled: false }, series: chartSeries });
+ */
 
 
 }
@@ -1023,10 +984,9 @@ function getReportData(inParams, successFunction) {
 function getReportDataAuth(inParams, successFunction) {
 
 	var inQueryParameters =  {};
-	inQueryParameters["MRP_rptDB"] = rptDB;
-	for (var i in inParams ) inQueryParameters["MRP_" + i] = inParams[i];
+	for (var i in inParams ) inQueryParameters["FR_" + i] = inParams[i];
+	if (rptDB > "") inQueryParameters["FR_rptDB"] = rptDB;
 	
-
 	OAuthSimple().reset();
 	var OAuthProcess = (new OAuthSimple()).sign({
 		path : RESTUrl,
@@ -1054,19 +1014,36 @@ function getReportDataAuth(inParams, successFunction) {
 		error:function(jqXHR, textStatus, errorThrown){
 			showMsgE("getReportData IS Auth Error: ");
 	    	var jsonValue = jQuery.parseJSON(jqXHR.responseText);
-	    	alert(jqXHR.responseText);
-	    	alert(textStatus);
+	    	alert("Response Text: " + jqXHR.responseText + "    Text Status: " + textStatus);
 		}
 	});
 
 
 }
+	
+
+function buildReportParms(inParams) {
+
+	var paramCount = 1;
+	var reportParams = "";
+	for (var i in inParams )
+	{
+		if (paramCount > 1) reportParams += "&"
+		reportParams += encodeURIComponent("FR_" + i) + "=" + encodeURIComponent(inParams[i]);
+		paramCount = paramCount + 1;
+	}
+	if (rptDB > "") 
+	{
+		if (paramCount > 1) reportParams += "&"
+		reportParams =  encodeURIComponent("FR_rptDB") + "=" + encodeURIComponent(rptDB);
+	}
+	
+	return reportParams
+}
 
 function getReportDataNoAuth(inParams, successFunction) {
-
-	var inQueryParameters =  "MRP_rptDB=" + rptDB;
-	for (var i in inParams ) inQueryParameters += "&" + encodeURIComponent("MRP_" + i) + "=" + encodeURIComponent(inParams[i]);
 	
+	var inQueryParameters = buildReportParms(inParams);
 	showMsgE("getReportDataNoAuth: " + inQueryParameters);
 	$.ajax({
 			url: RESTUrl,
@@ -1075,36 +1052,26 @@ function getReportDataNoAuth(inParams, successFunction) {
 			data: inQueryParameters,
 			contentType: "application/json; charset=utf-8",
 			crossDomain: false,
-			//cache: true,
+			// cache: true,
 			beforeSend: function( xhr ) {
 				xhr.setRequestHeader("Accept", "application/json");
 			},
 			success: successFunction,
 			error:function(jqXHR, textStatus, errorThrown){
 				showMsgE("getReportDataNoAuth: ");
-			    	alert(jqXHR.responseText);
-			    	alert(textStatus);
-			    	alert(errorThrown);
+		    	alert("Response Text: " + jqXHR.responseText + "    Text Status: " + textStatus + "     Error Thrown: " + errorThrown);
 			    	var jsonValue = jQuery.parseJSON(jqXHR.responseText);
-				alert(jsonValue.value + "for "  + jsonValue.field + " : " + jsonValue.code);
+				alert("Last Alert - " + jsonValue.value + "for "  + jsonValue.field + " : " + jsonValue.code);
 			}
 	});
 
 }
 
+	
 function getExportCSV(inParams) {
 
-	var inQueryParameters =  "?" + encodeURIComponent("MRP_rptDB") + "=" + encodeURIComponent(rptDB);  
-	//var paramCount = 1;
-	for (var i in inParams )
-	{
-		//if (paramCount > 1) inQueryParameters += "&"
-		//else inQueryParameters += "?";
-		inQueryParameters += "&" + encodeURIComponent("MRP_" + i) + "=" + encodeURIComponent(inParams[i]);
-		//paramCount = paramCount + 1;
-	}
-
-	var fullExportUrl = RESTUrl + inQueryParameters + "&exportCSV=true";
+	var inQueryParameters = buildReportParms(inParams);
+	var fullExportUrl = RESTUrl + "?" + inQueryParameters + "&exportCSV=true";
 	showMsg("full export url: " + fullExportUrl);
 	var loadHTML = '<iframe id=rptLoadingFrame src="' + fullExportUrl + '" frameborder="0" onload="jQuery.stretchyReporting.clearLoadingImg();" width="100%" height="600px" style="background:url(';
 		loadHTML += "'" + loadingImg + "'" + ') no-repeat scroll 50% 100px;"><p>Your browser does not support iframes.</p></iframe>';
@@ -1117,13 +1084,13 @@ function getExportCSV(inParams) {
 function getPentahoReport(inParams) {
 
 	var inQueryParameters =  "?output-type=" + $('#rptOutputType option:selected').val();
-	//var paramCount = 1;
+	// var paramCount = 1;
 	for (var i in inParams )
 	{
-		//if (paramCount > 1) inQueryParameters += "&"
-		//else inQueryParameters += "?";
+		// if (paramCount > 1) inQueryParameters += "&"
+		// else inQueryParameters += "?";
 		inQueryParameters += "&" + encodeURIComponent(i) + "=" + encodeURIComponent(inParams[i]);
-		//paramCount = paramCount + 1;
+		// paramCount = paramCount + 1;
 	}
 
 	var fullReportUrl = pentahoUrl + inQueryParameters;
@@ -1146,7 +1113,7 @@ var tmpStartDate = "";
 var tmpEndDate = "";
 	for (var i in reportParams)
 	{
-		//alert("rpt param:" + reportParams[i][1]);
+		// alert("rpt param:" + reportParams[i][1]);
 		var paramDetails = getParameterDetailsUsingName(reportParams[i][1]);
 		
 		switch(paramDetails.displayType)
@@ -1231,12 +1198,12 @@ function initI18N(lang) {
 function changeLanguage(newLanguage) {
 	initI18N(newLanguage);
 
-//run and clear buttons
+// run and clear buttons
 	$(runReportDiv).button({ label: doI18N("rpt_run") });
 	$(clearReportDiv).button({ label: doI18N("rpt_clear") });
 
 
-//report listing
+// report listing
 	$(reportsListDiv + ' div').text(doI18N(reportsListDivLabel));
 	$(reportsListDiv + ' option').each(function(index) {
 				if ($(this).val() == "0") $(this).text(doI18N('rpt_select_one'))
@@ -1250,12 +1217,12 @@ function changeLanguage(newLanguage) {
 				}
 			});
 
-//parameter labels
+// parameter labels
 	for (var i in listOfParameters)
 	{
 		$('#' + listOfParameters[i].name + ' div').text(doI18N(listOfParameters[i].label));
 
-//parameter options select one/all
+// parameter options select one/all
 		if (listOfParameters[i].displayType == 'select')
 		{
 			$('#' + listOfParameters[i].name + ' option').each(function(index) {
@@ -1268,7 +1235,7 @@ function changeLanguage(newLanguage) {
 		}
 	}
 
-//Data output (if any)
+// Data output (if any)
 	if ($('#StretchyReportOutput').html() > "" )
 	{
 		for (var i in dataTableDef.aoColumns)
@@ -1319,7 +1286,7 @@ function changeSeparator(sepChar, decChar, indFormat) {
 
 
 function updateNumberData() {
-//Data output (if any)
+// Data output (if any)
 	if ($('#StretchyReportOutput').html() > "" )
 	{
 		var tmpVal;
@@ -1364,8 +1331,9 @@ function redrawOutput() {
 }
 
 function setTableSizeLimit() {
-	if (/MSIE (\d+\.\d+);/.test(navigator.userAgent)){ //test for MSIE x.x;
- 		var ieversion=new Number(RegExp.$1) // capture x.x portion and store as a number
+	if (/MSIE (\d+\.\d+);/.test(navigator.userAgent)){ // test for MSIE x.x;
+ 		var ieversion=new Number(RegExp.$1) // capture x.x portion and store as
+											// a number
  		if (ieversion>=9) return 50000
  		else return 3000;
 	}
@@ -1378,7 +1346,7 @@ function showMsg(msg) {
 }
 
 function showMsgE(msg) {
-	//console.log(msg);
+	// console.log(msg);
 }
 
 
