@@ -12,9 +12,9 @@ import org.mifosng.data.AppUserData;
 import org.mifosng.data.EntityIdentifier;
 import org.mifosng.data.command.ChangePasswordCommand;
 import org.mifosng.data.command.UserCommand;
-import org.mifosng.platform.ReadPlatformService;
 import org.mifosng.platform.user.domain.AppUser;
 import org.mifosng.platform.user.domain.AppUserRepository;
+import org.mifosng.platform.user.service.AppUserReadPlatformService;
 import org.mifosng.platform.user.service.AppUserWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -30,7 +30,7 @@ import org.springframework.stereotype.Component;
 public class UserAccountApiResource {
 	
     @Autowired
-	private ReadPlatformService readPlatformService;
+	private AppUserReadPlatformService appUserReadPlatformService;
 
 	@Autowired
 	private AppUserWritePlatformService appUserWritePlatformService;
@@ -54,7 +54,7 @@ public class UserAccountApiResource {
 
 		hardcodeUserIntoSecurityContext();
 		
-		AppUserData user = this.readPlatformService.retrieveCurrentUser();
+		AppUserData user = this.appUserReadPlatformService.retrieveCurrentUser();
     	
 		return Response.ok().entity(user).build();
 	}

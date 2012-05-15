@@ -2,13 +2,11 @@ package org.mifosng.platform;
 
 import static org.mifosng.platform.Specifications.loansThatMatch;
 import static org.mifosng.platform.Specifications.officesThatMatch;
-import static org.mifosng.platform.Specifications.rolesThatMatch;
 import static org.mifosng.platform.Specifications.usersThatMatch;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -24,7 +22,6 @@ import org.mifosng.data.command.EnrollClientCommand;
 import org.mifosng.data.command.LoanStateTransitionCommand;
 import org.mifosng.data.command.LoanTransactionCommand;
 import org.mifosng.data.command.NoteCommand;
-import org.mifosng.data.command.RoleCommand;
 import org.mifosng.data.command.SubmitLoanApplicationCommand;
 import org.mifosng.data.command.UndoLoanApprovalCommand;
 import org.mifosng.data.command.UndoLoanDisbursalCommand;
@@ -63,11 +60,7 @@ import org.mifosng.platform.organisation.domain.Office;
 import org.mifosng.platform.organisation.domain.OfficeRepository;
 import org.mifosng.platform.user.domain.AppUser;
 import org.mifosng.platform.user.domain.AppUserRepository;
-import org.mifosng.platform.user.domain.Permission;
-import org.mifosng.platform.user.domain.PermissionRepository;
 import org.mifosng.platform.user.domain.PlatformUserRepository;
-import org.mifosng.platform.user.domain.Role;
-import org.mifosng.platform.user.domain.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.Authentication;
@@ -87,8 +80,6 @@ public class WritePlatformServiceJpaRepositoryImpl implements WritePlatformServi
 	private final LoanRepository loanRepository;
 	private final LoanStatusRepository loanStatusRepository;
 	private final CalculationPlatformService calculationPlatformService;
-	private final RoleRepository roleRepository;
-	private final PermissionRepository permissionRepository;
 	private final NoteRepository noteRepository;
 	private final LoanTransactionRepository loanTransactionRepository;
 
@@ -103,9 +94,8 @@ public class WritePlatformServiceJpaRepositoryImpl implements WritePlatformServi
 			final LoanRepository loanRepository,
 			final LoanTransactionRepository loanTransactionRepository,
 			final LoanStatusRepository loanStatusRepository,
-			final CalculationPlatformService calculationPlatformService,
-			final RoleRepository roleRepository,
-			final PermissionRepository permissionRepository) {
+			final CalculationPlatformService calculationPlatformService
+			) {
 		this.officeRepository = officeRepository;
 		this.platformUserRepository = platformUserRepository;
 		this.platformPasswordEncoder = platformPasswordEncoder;
@@ -116,69 +106,6 @@ public class WritePlatformServiceJpaRepositoryImpl implements WritePlatformServi
 		this.loanTransactionRepository = loanTransactionRepository;
 		this.loanStatusRepository = loanStatusRepository;
 		this.calculationPlatformService = calculationPlatformService;
-		this.roleRepository = roleRepository;
-		this.permissionRepository = permissionRepository;
-	}
-
-	@Transactional
-	@Override
-	public Long createRole(final RoleCommand command) {
-		
-		AppUser currentUser = extractAuthenticatedUser();
-		
-		RoleValidator validator = new RoleValidator(command);
-		validator.validateForCreate();
-
-		List<Long> selectedPermissionIds = new ArrayList<Long>();
-		for (String selectedId : command.getPermissionIds()) {
-			selectedPermissionIds.add(Long.valueOf(selectedId));
-		}
-
-		List<Permission> selectedPermissions = new ArrayList<Permission>();
-		Collection<Permission> allPermissions = this.permissionRepository
-				.findAll();
-		for (Permission permission : allPermissions) {
-			if (selectedPermissionIds.contains(permission.getId())) {
-				selectedPermissions.add(permission);
-			}
-		}
-
-		Role entity = new Role(currentUser.getOrganisation(), command.getName(), command.getDescription(), selectedPermissions);
-				
-		this.roleRepository.save(entity);
-
-		return entity.getId();
-	}
-	
-	@Transactional
-	@Override
-	public Long updateRole(RoleCommand command) {
-		
-		AppUser currentUser = extractAuthenticatedUser();
-		
-		RoleValidator validator = new RoleValidator(command);
-		validator.validateForUpdate();
-
-		List<Long> selectedPermissionIds = new ArrayList<Long>();
-		for (String selectedId : command.getPermissionIds()) {
-			selectedPermissionIds.add(Long.valueOf(selectedId));
-		}
-
-		List<Permission> selectedPermissions = new ArrayList<Permission>();
-		Collection<Permission> allPermissions = this.permissionRepository
-				.findAll();
-		for (Permission permission : allPermissions) {
-			if (selectedPermissionIds.contains(permission.getId())) {
-				selectedPermissions.add(permission);
-			}
-		}
-		
-		Role role = this.roleRepository.findOne(rolesThatMatch(currentUser.getOrganisation(), command.getId()));
-		role.update(command.getName(), command.getDescription(), selectedPermissions);
-		
-		this.roleRepository.save(role);
-		
-		return role.getId();
 	}
 	
 	@Transactional

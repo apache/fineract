@@ -1,8 +1,6 @@
 package org.mifosng.data.command;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -20,7 +18,7 @@ public class UserCommand implements Serializable {
 	private String email;
 	private Long officeId;
 	
-	private List<String> notSelectedItems = new ArrayList<String>();
+	private String[] notSelectedItems;
 	private String[] selectedItems;
 
 	public UserCommand() {
@@ -87,11 +85,11 @@ public class UserCommand implements Serializable {
 		this.id = id;
 	}
 
-	public List<String> getNotSelectedItems() {
+	public String[] getNotSelectedItems() {
 		return notSelectedItems;
 	}
 
-	public void setNotSelectedItems(List<String> notSelectedItems) {
+	public void setNotSelectedItems(String... notSelectedItems) {
 		this.notSelectedItems = notSelectedItems;
 	}
 

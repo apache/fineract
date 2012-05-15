@@ -6,7 +6,6 @@ import org.mifosng.data.command.EnrollClientCommand;
 import org.mifosng.data.command.LoanStateTransitionCommand;
 import org.mifosng.data.command.LoanTransactionCommand;
 import org.mifosng.data.command.NoteCommand;
-import org.mifosng.data.command.RoleCommand;
 import org.mifosng.data.command.SubmitLoanApplicationCommand;
 import org.mifosng.data.command.UndoLoanApprovalCommand;
 import org.mifosng.data.command.UndoLoanDisbursalCommand;
@@ -14,10 +13,6 @@ import org.mifosng.data.command.UpdateUsernamePasswordCommand;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface WritePlatformService {
-
-	Long createRole(RoleCommand command);
-	
-	Long updateRole(RoleCommand command);
 
 	void updateUsernamePasswordOnFirstTimeLogin(UpdateUsernamePasswordCommand command);
 

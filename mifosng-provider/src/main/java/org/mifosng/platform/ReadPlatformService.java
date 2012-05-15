@@ -1,20 +1,14 @@
 package org.mifosng.platform;
 
 import java.util.Collection;
-import java.util.List;
 
-import org.mifosng.data.AppUserData;
 import org.mifosng.data.ClientData;
 import org.mifosng.data.ClientDataWithAccountsData;
-import org.mifosng.data.CurrencyData;
-import org.mifosng.data.EnumOptionReadModel;
 import org.mifosng.data.LoanAccountData;
 import org.mifosng.data.LoanRepaymentData;
 import org.mifosng.data.NewLoanWorkflowStepOneData;
 import org.mifosng.data.NoteData;
 import org.mifosng.data.OrganisationReadModel;
-import org.mifosng.data.PermissionData;
-import org.mifosng.data.RoleData;
 
 public interface ReadPlatformService {
 
@@ -35,26 +29,6 @@ public interface ReadPlatformService {
 	LoanRepaymentData retrieveNewLoanWaiverDetails(Long loanId);
 
 	LoanRepaymentData retrieveLoanRepaymentDetails(Long loanId, Long repaymentId);
-
-	List<CurrencyData> retrieveAllowedCurrencies();
-
-	List<CurrencyData> retrieveAllPlatformCurrencies();
-
-	Collection<AppUserData> retrieveAllUsers();
-
-	AppUserData retrieveNewUserDetails();
-
-	AppUserData retrieveUser(Long userId);
-
-	AppUserData retrieveCurrentUser();
-
-	Collection<RoleData> retrieveAllRoles();
-
-	RoleData retrieveRole(Long roleId);
-
-	Collection<EnumOptionReadModel> retrieveAllPermissionGroups();
-
-	Collection<PermissionData> retrieveAllPermissions();
 
 	ClientData retrieveNewClientDetails();
 

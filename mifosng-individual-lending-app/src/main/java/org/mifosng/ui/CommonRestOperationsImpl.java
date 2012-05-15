@@ -24,15 +24,12 @@ import org.mifosng.data.NoteData;
 import org.mifosng.data.NoteDataList;
 import org.mifosng.data.PermissionData;
 import org.mifosng.data.PermissionList;
-import org.mifosng.data.RoleData;
-import org.mifosng.data.RoleList;
 import org.mifosng.data.command.AdjustLoanTransactionCommand;
 import org.mifosng.data.command.CalculateLoanScheduleCommand;
 import org.mifosng.data.command.EnrollClientCommand;
 import org.mifosng.data.command.LoanStateTransitionCommand;
 import org.mifosng.data.command.LoanTransactionCommand;
 import org.mifosng.data.command.NoteCommand;
-import org.mifosng.data.command.RoleCommand;
 import org.mifosng.data.command.SubmitLoanApplicationCommand;
 import org.mifosng.data.command.UndoLoanApprovalCommand;
 import org.mifosng.data.command.UndoLoanDisbursalCommand;
@@ -554,92 +551,6 @@ public class CommonRestOperationsImpl implements CommonRestOperations {
 		HttpEntity<UserCommand> requestEntity = new HttpEntity<UserCommand>(
 				command, requestHeaders);
 		return requestEntity;
-	}
-
-	private HttpEntity<RoleCommand> roleRequest(final RoleCommand command) {
-
-		HttpHeaders requestHeaders = new HttpHeaders();
-		requestHeaders.set("Accept", "application/xml");
-		requestHeaders.set("Content-Type", "application/xml");
-
-		HttpEntity<RoleCommand> requestEntity = new HttpEntity<RoleCommand>(
-				command, requestHeaders);
-		return requestEntity;
-	}
-
-	@Override
-	public Collection<RoleData> retrieveAllRoles() {
-		try {
-			URI restUri = URI.create(getBaseServerUrl().concat(
-					"api/protected/admin/role/all"));
-
-			ResponseEntity<RoleList> s = this.oauthRestServiceTemplate
-					.exchange(restUri, HttpMethod.GET, emptyRequest(),
-							RoleList.class);
-
-			return s.getBody().getRoles();
-		} catch (HttpStatusCodeException e) {
-			ErrorResponseList errorList = parseErrors(e);
-			throw new ClientValidationException(errorList.getErrors());
-		}
-	}
-
-	@Override
-	public RoleData retrieveRole(final Long roleId) {
-
-		URI restUri = URI.create(getBaseServerUrl().concat(
-				"api/protected/admin/role/").concat(roleId.toString()));
-
-		ResponseEntity<RoleData> s = this.oauthRestServiceTemplate.exchange(
-				restUri, HttpMethod.GET, emptyRequest(), RoleData.class);
-
-		return s.getBody();
-	}
-
-	@Override
-	public RoleData retrieveNewRoleDetails() {
-		URI restUri = URI.create(getBaseServerUrl().concat(
-				"api/protected/admin/role/new"));
-
-		ResponseEntity<RoleData> s = this.oauthRestServiceTemplate.exchange(
-				restUri, HttpMethod.GET, emptyRequest(), RoleData.class);
-
-		return s.getBody();
-	}
-
-	@Override
-	public EntityIdentifier createRole(final RoleCommand command) {
-		try {
-			URI restUri = URI.create(getBaseServerUrl().concat(
-					"api/protected/admin/role/new"));
-
-			ResponseEntity<EntityIdentifier> s = this.oauthRestServiceTemplate
-					.postForEntity(restUri, roleRequest(command),
-							EntityIdentifier.class);
-
-			return s.getBody();
-		} catch (HttpStatusCodeException e) {
-			ErrorResponseList errorList = parseErrors(e);
-			throw new ClientValidationException(errorList.getErrors());
-		}
-	}
-
-	@Override
-	public EntityIdentifier updateRole(RoleCommand command) {
-		try {
-			URI restUri = URI.create(getBaseServerUrl().concat(
-					"api/protected/admin/role/").concat(
-					command.getId().toString()));
-
-			ResponseEntity<EntityIdentifier> s = this.oauthRestServiceTemplate
-					.postForEntity(restUri, roleRequest(command),
-							EntityIdentifier.class);
-
-			return s.getBody();
-		} catch (HttpStatusCodeException e) {
-			ErrorResponseList errorList = parseErrors(e);
-			throw new ClientValidationException(errorList.getErrors());
-		}
 	}
 
 	@Override

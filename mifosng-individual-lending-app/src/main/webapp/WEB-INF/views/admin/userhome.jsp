@@ -346,62 +346,30 @@ $(document).ready(function() {
 	});
 	
 	$('#listroles').click(function(e) {
-		var listUrl = "${allRolesUrl}";
-		var templateSelector = "#roleListTemplate";
-		var displayAreaDivSelector = "#contentplaceholder";
-		var singleEntityPrefixUrl = '${rootContext}admin/role/';
-		var singleEntityTemplateSelector = "#roleFormTemplate";
-		
-		var saveSuccessFunction = function(data, textStatus, jqXHR) {
-		  	
-			$("#dialog-form").dialog("close");
-		  	
-			var listUrl = "${allRolesUrl}";
-			var templateSelector = "#roleListTemplate";
-			var displayAreaDivSelector = "#contentplaceholder";
-			var singleEntityPrefixUrl = '${rootContext}admin/role/';
-			var singleEntityTemplateSelector = "#roleFormTemplate";
-			
-			displayListView(listUrl, templateSelector, displayAreaDivSelector, singleEntityPrefixUrl, singleEntityTemplateSelector);
-		}
-		
-		displayListView(listUrl, templateSelector, displayAreaDivSelector, singleEntityPrefixUrl, singleEntityTemplateSelector, saveSuccessFunction);
-		
+		var listUrl = "http://localhost:8080/mifosng-provider/api/v1/roles";
+		refreshRolesView();		
 	    e.preventDefault();
 	});
 	
 	$('#addrole').click(function(e) {
-		var url = '${rootContext}admin/role/new';
+		var url = 'http://localhost:8080/mifosng-provider/api/v1/roles/template';
+		var postUrl = "http://localhost:8080/mifosng-provider/api/v1/roles";
 		var templateSelector = "#roleFormTemplate";
 		var width = 1000; 
 		var height = 550;
 		
 		var saveSuccessFunction = function(data, textStatus, jqXHR) {
-		  	
-			$("#dialog-form").dialog("close");
-		  	
-			var listUrl = "${allRolesUrl}";
-			var templateSelector = "#roleListTemplate";
-			var displayAreaDivSelector = "#contentplaceholder";
-			var singleEntityPrefixUrl = '${rootContext}admin/role/';
-			var singleEntityTemplateSelector = "#roleFormTemplate";
-			
-			displayListView(listUrl, templateSelector, displayAreaDivSelector, singleEntityPrefixUrl, singleEntityTemplateSelector);
+		  	$("#dialog-form").dialog("close");
+		  	refreshRolesView();
 		}
-	
-		popupDialogWithFormView(url, 'dialog.title.add.role', templateSelector, width, height, saveSuccessFunction);
+		
+		popupDialogWithFormView(url, postUrl, 'POST', 'dialog.title.add.role', templateSelector, width, height, saveSuccessFunction);
 	    e.preventDefault();
 	});
 	
 	$('#listpermissions').click(function(e) {
-		var listUrl = "${allPermissionsUrl}";
-		var templateSelector = "#permissionListTemplate";
-		var displayAreaDivSelector = "#contentplaceholder";
-		var singleEntityPrefixUrl = '${rootContext}admin/permission/';
-		var singleEntityTemplateSelector = "#roleFormTemplate";
 		
-		displayListView(listUrl, templateSelector, displayAreaDivSelector, singleEntityPrefixUrl, singleEntityTemplateSelector);
-		
+		refreshPermissionsView();
 	    e.preventDefault();
 	});
 	
@@ -410,8 +378,6 @@ $(document).ready(function() {
 		var listUrl = 'http://localhost:8080/mifosng-provider/api/v1/users';
 		var templateSelector = "#usersListTemplate";
 		var displayAreaDivSelector = "#contentplaceholder";
-		var singleEntityPrefixUrl = 'http://localhost:8080/mifosng-provider/api/v1/users/';
-		var singleEntityTemplateSelector = "#userFormTemplate";
 		
 		var jqxhr = $.ajax({
 			  url: listUrl, 
@@ -430,8 +396,8 @@ $(document).ready(function() {
 					var putUrl = 'http://localhost:8080/mifosng-provider/api/v1/users/' + entityId;
 					
 					var templateSelector = "#userFormTemplate";
-					var width = 600; 
-					var height = 400;
+					var width = 1000; 
+					var height = 550;
 					
 					var saveSuccessFunction = function(data, textStatus, jqXHR) {
 						  $("#dialog-form").dialog("close");
@@ -450,6 +416,102 @@ $(document).ready(function() {
 					
 					e.preventDefault();
 				});
+				
+				var oTable = $("#entitytable").dataTable( {
+					"bSort": true,
+					"bInfo": true,
+					"bJQueryUI": true,
+					"bRetrieve": false,
+					"bScrollCollapse": false,
+					"bPaginate": false,
+					"bLengthChange": false,
+					"bFilter": false,
+					"bAutoWidth": false,
+				} );
+			  }
+		});
+		
+		jqxhr.error(function(jqXHR, textStatus, errorThrown) {
+			handleXhrError(jqXHR, textStatus, errorThrown, "#formErrorsTemplate", "#formerrors");
+		});
+	}
+	
+	function refreshRolesView() {
+		var listUrl = 'http://localhost:8080/mifosng-provider/api/v1/roles';
+		var templateSelector = "#roleListTemplate";
+		var displayAreaDivSelector = "#contentplaceholder";
+		
+		var jqxhr = $.ajax({
+			  url: listUrl, 
+			  type: 'GET',
+			  contentType: 'application/json',
+			  dataType: 'json',
+			  success: function(data, textStatus, jqXHR) {
+				console.log(data);  
+				var listHtml = $(templateSelector).render(data);
+				$(displayAreaDivSelector).html(listHtml);
+				
+				$("a.edit").click( function(e) {
+					var linkId = this.id;
+					var entityId = linkId.replace("edit", "");
+					var getUrl = 'http://localhost:8080/mifosng-provider/api/v1/roles/' + entityId;
+					var putUrl = 'http://localhost:8080/mifosng-provider/api/v1/roles/' + entityId;
+					
+					var templateSelector = "#roleFormTemplate";
+					var width = 1000; 
+					var height = 550;
+					
+					var saveSuccessFunction = function(data, textStatus, jqXHR) {
+						  $("#dialog-form").dialog("close");
+						  refreshUsersView();
+					}
+					
+					popupDialogWithFormView(getUrl, putUrl, 'PUT', "dialog.title.edit.details", templateSelector, width, height, saveSuccessFunction);
+					e.preventDefault();
+				});
+				
+				$("a.delete").click( function(e) {
+					var linkId = this.id;
+					var entityId = linkId.replace("delete", "");
+					var url = 'http://localhost:8080/mifosng-provider/api/v1/roles/' + entityId;
+					showNotAvailableDialog('dialog.title.functionality.not.available');
+					
+					e.preventDefault();
+				});
+				
+				var oTable = $("#entitytable").dataTable( {
+					"bSort": true,
+					"bInfo": true,
+					"bJQueryUI": true,
+					"bRetrieve": false,
+					"bScrollCollapse": false,
+					"bPaginate": false,
+					"bLengthChange": false,
+					"bFilter": false,
+					"bAutoWidth": false,
+				} );
+			  }
+		});
+		
+		jqxhr.error(function(jqXHR, textStatus, errorThrown) {
+			handleXhrError(jqXHR, textStatus, errorThrown, "#formErrorsTemplate", "#formerrors");
+		});
+	}
+	
+	function refreshPermissionsView() {
+		var listUrl = 'http://localhost:8080/mifosng-provider/api/v1/permissions';
+		var templateSelector = "#permissionListTemplate";
+		var displayAreaDivSelector = "#contentplaceholder";
+		
+		var jqxhr = $.ajax({
+			  url: listUrl, 
+			  type: 'GET',
+			  contentType: 'application/json',
+			  dataType: 'json',
+			  success: function(data, textStatus, jqXHR) {
+				console.log(data);  
+				var listHtml = $(templateSelector).render(data);
+				$(displayAreaDivSelector).html(listHtml);
 				
 				var oTable = $("#entitytable").dataTable( {
 					"bSort": true,

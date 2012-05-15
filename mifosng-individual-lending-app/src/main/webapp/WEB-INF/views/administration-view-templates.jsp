@@ -372,7 +372,7 @@
 	</tr>
 </thead>
 <tbody>
-{{#each items}}
+{{#each permissions}}
 <tr>
     <td>
     {{#if $ctx.number(groupType)===$ctx.number(0)}}
@@ -412,7 +412,7 @@
 	</tr>
 </thead>
 <tbody>
-{{#each items}}
+{{#each roles}}
 <tr>
 	<td>{{=name}}</td>
 	<td>{{=description}}</td>

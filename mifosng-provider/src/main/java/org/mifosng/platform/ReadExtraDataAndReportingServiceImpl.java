@@ -55,6 +55,8 @@ public class ReadExtraDataAndReportingServiceImpl implements
 			final String type, final Map<String, String> queryParams) {
 
 		return new StreamingOutput() {
+			
+			@Override
 			public void write(OutputStream out) throws IOException,
 					WebApplicationException {
 				try {

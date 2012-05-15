@@ -3,7 +3,6 @@ package org.mifosng.platform;
 import static org.mifosng.platform.Specifications.clientsThatMatch;
 import static org.mifosng.platform.Specifications.loanTransactionsThatMatch;
 import static org.mifosng.platform.Specifications.loansThatMatch;
-import static org.mifosng.platform.Specifications.usersThatMatch;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -11,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import javax.sql.DataSource;
 
@@ -23,7 +21,6 @@ import org.mifosng.data.ClientData;
 import org.mifosng.data.ClientDataWithAccountsData;
 import org.mifosng.data.CurrencyData;
 import org.mifosng.data.DerivedLoanData;
-import org.mifosng.data.EnumOptionReadModel;
 import org.mifosng.data.LoanAccountData;
 import org.mifosng.data.LoanProductData;
 import org.mifosng.data.LoanRepaymentData;
@@ -32,8 +29,6 @@ import org.mifosng.data.NewLoanWorkflowStepOneData;
 import org.mifosng.data.NoteData;
 import org.mifosng.data.OfficeData;
 import org.mifosng.data.OrganisationReadModel;
-import org.mifosng.data.PermissionData;
-import org.mifosng.data.RoleData;
 import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.client.domain.ClientRepository;
 import org.mifosng.platform.currency.domain.ApplicationCurrency;
@@ -48,10 +43,7 @@ import org.mifosng.platform.loan.domain.LoanTransactionRepository;
 import org.mifosng.platform.loanproduct.service.LoanProductReadPlatformService;
 import org.mifosng.platform.organisation.domain.Organisation;
 import org.mifosng.platform.user.domain.AppUser;
-import org.mifosng.platform.user.domain.AppUserRepository;
-import org.mifosng.platform.user.domain.PermissionGroup;
-import org.mifosng.platform.user.domain.Role;
-import org.mifosng.platform.user.domain.RoleRepository;
+import org.mifosng.platform.user.service.AppUserReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
@@ -69,26 +61,22 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 	private final LoanRepository loanRepository;
 	private final LoanTransactionRepository loanTransactionRepository;
 	private final ApplicationCurrencyRepository applicationCurrencyRepository;
-	private final AppUserRepository appUserRepository;
-	private final RoleRepository roleRepository;
-
 	private final LoanProductReadPlatformService loanProductReadPlatformService;
+	private final AppUserReadPlatformService appUserReadPlatformService;
 
 	@Autowired
 	public ReadPlatformServiceImpl(
 			final LoanProductReadPlatformService loanProductReadPlatformService,
+			final AppUserReadPlatformService appUserReadPlatformService,
 			final DataSource dataSource,
 			final ClientRepository clientRepository,
 			final LoanRepository loanRepository,
 			final LoanTransactionRepository loanTransactionRepository,
-			final ApplicationCurrencyRepository applicationCurrencyRepository,
-			final AppUserRepository appUserRepository,
-			final RoleRepository roleRepository) {
+			final ApplicationCurrencyRepository applicationCurrencyRepository) {
 		this.loanProductReadPlatformService = loanProductReadPlatformService;
+		this.appUserReadPlatformService = appUserReadPlatformService;
 		this.loanTransactionRepository = loanTransactionRepository;
 		this.applicationCurrencyRepository = applicationCurrencyRepository;
-		this.appUserRepository = appUserRepository;
-		this.roleRepository = roleRepository;
 		this.jdbcTemplate = new SimpleJdbcTemplate(dataSource);
 		this.clientRepository = clientRepository;
 		this.loanRepository = loanRepository;
@@ -174,7 +162,7 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 		try {
 			AppUser currentUser = extractAuthenticatedUser();
 
-			Collection<AppUserData> allUsers = retrieveAllUsers();
+			Collection<AppUserData> allUsers = this.appUserReadPlatformService.retrieveAllUsers();
 
 			NoteMapper noteMapper = new NoteMapper(allUsers);
 
@@ -196,7 +184,7 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 
 		AppUser currentUser = extractAuthenticatedUser();
 
-		Collection<AppUserData> allUsers = retrieveAllUsers();
+		Collection<AppUserData> allUsers = this.appUserReadPlatformService.retrieveAllUsers();
 
 		NoteMapper noteMapper = new NoteMapper(allUsers);
 
@@ -681,260 +669,6 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 	}
 
 	@Override
-	public List<CurrencyData> retrieveAllowedCurrencies() {
-
-		AppUser currentUser = extractAuthenticatedUser();
-
-		String sql = "select c.code as code, c.name as name, c.decimal_places as decimalPlaces, c.display_symbol as displaySymbol, c.internationalized_name_code as nameCode from org_organisation_currency c where c.org_id = ?";
-
-		RowMapper<CurrencyData> rm = new CurrencyMapper();
-
-		return this.jdbcTemplate.query(sql, rm, new Object[] { currentUser
-				.getOrganisation().getId() });
-	}
-
-	@Override
-	public List<CurrencyData> retrieveAllPlatformCurrencies() {
-
-		String sql = "select c.code as code, c.name as name, c.decimal_places as decimalPlaces, c.display_symbol as displaySymbol, c.internationalized_name_code as nameCode from ref_currency c";
-
-		RowMapper<CurrencyData> rm = new CurrencyMapper();
-
-		return this.jdbcTemplate.query(sql, rm, new Object[] {});
-	}
-
-	protected static final class CurrencyMapper implements
-			RowMapper<CurrencyData> {
-
-		@Override
-		public CurrencyData mapRow(final ResultSet rs, final int rowNum)
-				throws SQLException {
-
-			String code = rs.getString("code");
-			String name = rs.getString("name");
-			int decimalPlaces = rs.getInt("decimalPlaces");
-			String displaySymbol = rs.getString("displaySymbol");
-			String nameCode = rs.getString("nameCode");
-
-			return new CurrencyData(code, name, decimalPlaces, displaySymbol,
-					nameCode);
-		}
-	}
-
-	@Override
-	public Collection<AppUserData> retrieveAllUsers() {
-
-		AppUser currentUser = extractAuthenticatedUser();
-
-		List<OfficeData> offices = retrieveOffices();
-		String officeIdsList = generateOfficeIdInClause(offices);
-
-		AppUserMapper mapper = new AppUserMapper(offices);
-		String sql = "select " + mapper.schema()
-				+ " where u.org_id = ? and u.office_id in (" + officeIdsList
-				+ ")";
-
-		return this.jdbcTemplate.query(sql, mapper, new Object[] { currentUser
-				.getOrganisation().getId() });
-	}
-
-	@Override
-	public AppUserData retrieveNewUserDetails() {
-
-		List<OfficeData> offices = retrieveOffices();
-
-		List<RoleData> availableRoles = new ArrayList<RoleData>(
-				retrieveAllRoles());
-
-		AppUserData userData = new AppUserData();
-		userData.setAllowedOffices(offices);
-		userData.setAvailableRoles(availableRoles);
-
-		return userData;
-	}
-
-	@Override
-	public AppUserData retrieveUser(Long userId) {
-
-		AppUser currentUser = extractAuthenticatedUser();
-
-		List<OfficeData> offices = retrieveOffices();
-
-		List<RoleData> availableRoles = new ArrayList<RoleData>(retrieveAllRoles());
-
-		AppUser user = this.appUserRepository.findOne(usersThatMatch(currentUser.getOrganisation(), userId));
-		
-		if (user == null) {
-			throw new PlatformResourceNotFoundException("error.msg.user.id.invalid", "User with identifier {0} does not exist.", userId);
-		}
-
-		List<RoleData> userRoleData = new ArrayList<RoleData>();
-		Set<Role> userRoles = user.getRoles();
-		for (Role role : userRoles) {
-			userRoleData.add(role.toData());
-		}
-
-		AppUserData userData = new AppUserData(user.getId(),
-				user.getUsername(), user.getEmail(), user.getOrganisation()
-						.getId(), user.getOffice().getId(), user.getOffice()
-						.getName());
-		userData.setFirstname(user.getFirstname());
-		userData.setLastname(user.getLastname());
-
-		userData.setAllowedOffices(offices);
-
-		availableRoles.removeAll(userRoleData);
-		userData.setAvailableRoles(availableRoles);
-		userData.setSelectedRoles(userRoleData);
-
-		return userData;
-	}
-
-	@Override
-	public AppUserData retrieveCurrentUser() {
-		AppUser currentUser = extractAuthenticatedUser();
-
-		List<OfficeData> offices = retrieveOffices();
-
-		List<RoleData> availableRoles = new ArrayList<RoleData>(
-				retrieveAllRoles());
-
-		AppUser user = this.appUserRepository.findOne(usersThatMatch(
-				currentUser.getOrganisation(), currentUser.getId()));
-
-		List<RoleData> userRoleData = new ArrayList<RoleData>();
-		Set<Role> userRoles = user.getRoles();
-		for (Role role : userRoles) {
-			userRoleData.add(role.toData());
-		}
-
-		AppUserData userData = new AppUserData(user.getId(),
-				user.getUsername(), user.getEmail(), user.getOrganisation()
-						.getId(), user.getOffice().getId(), user.getOffice()
-						.getName());
-		userData.setFirstname(user.getFirstname());
-		userData.setLastname(user.getLastname());
-
-		userData.setAllowedOffices(offices);
-
-		availableRoles.removeAll(userRoleData);
-		userData.setAvailableRoles(availableRoles);
-		userData.setSelectedRoles(userRoleData);
-
-		return userData;
-	}
-
-	protected static final class AppUserMapper implements
-			RowMapper<AppUserData> {
-
-		private final List<OfficeData> offices;
-
-		public AppUserMapper(final List<OfficeData> offices) {
-			this.offices = offices;
-		}
-
-		@Override
-		public AppUserData mapRow(final ResultSet rs, final int rowNum)
-				throws SQLException {
-
-			Long id = rs.getLong("id");
-			String username = rs.getString("username");
-			String firstname = rs.getString("firstname");
-			String lastname = rs.getString("lastname");
-			String email = rs.getString("email");
-			Long orgId = rs.getLong("orgId");
-			Long officeId = rs.getLong("officeId");
-
-			String officeName = fromOfficeList(this.offices, officeId);
-
-			AppUserData user = new AppUserData(id, username, email, orgId,
-					officeId, officeName);
-			user.setLastname(lastname);
-			user.setFirstname(firstname);
-
-			return user;
-		}
-
-		public String schema() {
-			return " u.id as id, u.username as username, u.firstname as firstname, u.lastname as lastname, u.email as email, u.org_id as orgId, u.office_id as officeId from admin_appuser u ";
-		}
-
-		private String fromOfficeList(final List<OfficeData> officeList,
-				final Long officeId) {
-			String match = "";
-			for (OfficeData office : officeList) {
-				if (office.getId().equals(officeId)) {
-					match = office.getName();
-				}
-			}
-
-			return match;
-		}
-	}
-
-	@Override
-	public Collection<RoleData> retrieveAllRoles() {
-		AppUser currentUser = extractAuthenticatedUser();
-
-		RoleMapper mapper = new RoleMapper();
-		String sql = "select " + mapper.schema() + " where r.org_id = ?";
-
-		return this.jdbcTemplate.query(sql, mapper, new Object[] { currentUser
-				.getOrganisation().getId() });
-	}
-
-	@Override
-	public RoleData retrieveRole(Long roleId) {
-
-		Role role = this.roleRepository.findOne(roleId);
-
-		return role.toData();
-	}
-
-	protected static final class RoleMapper implements RowMapper<RoleData> {
-
-		@Override
-		public RoleData mapRow(final ResultSet rs, final int rowNum)
-				throws SQLException {
-
-			Long id = rs.getLong("id");
-			Long orgId = rs.getLong("orgId");
-			String name = rs.getString("name");
-			String description = rs.getString("description");
-
-			return new RoleData(id, orgId, name, description);
-		}
-
-		public String schema() {
-			return " r.id as id, r.org_id as orgId, r.name as name, r.description as description from admin_role r ";
-		}
-	}
-
-	@Override
-	public Collection<EnumOptionReadModel> retrieveAllPermissionGroups() {
-
-		Collection<EnumOptionReadModel> options = new ArrayList<EnumOptionReadModel>();
-
-		for (PermissionGroup group : PermissionGroup.values()) {
-			options.add(new EnumOptionReadModel(group.name(), Integer.valueOf(
-					group.ordinal()).longValue()));
-		}
-		return options;
-	}
-
-	@Override
-	public Collection<PermissionData> retrieveAllPermissions() {
-
-		AppUser currentUser = extractAuthenticatedUser();
-
-		PermissionMapper mapper = new PermissionMapper();
-		String sql = "select " + mapper.schema() + " where p.org_id = ?";
-
-		return this.jdbcTemplate.query(sql, mapper, new Object[] { currentUser
-				.getOrganisation().getId() });
-	}
-
-	@Override
 	public ClientData retrieveNewClientDetails() {
 
 		AppUser currentUser = extractAuthenticatedUser();
@@ -954,28 +688,4 @@ public class ReadPlatformServiceImpl implements ReadPlatformService {
 
 		return clientData;
 	}
-
-	protected static final class PermissionMapper implements
-			RowMapper<PermissionData> {
-
-		@Override
-		public PermissionData mapRow(final ResultSet rs, final int rowNum)
-				throws SQLException {
-
-			Long id = rs.getLong("id");
-			Long orgId = rs.getLong("orgId");
-			String name = rs.getString("name");
-			String description = rs.getString("description");
-			String code = rs.getString("code");
-			int groupType = rs.getInt("groupType");
-
-			return new PermissionData(id, orgId, name, description, code,
-					groupType);
-		}
-
-		public String schema() {
-			return " p.id as id, p.org_id as orgId, p.default_name as name, p.default_description as description, p.code as code, p.group_enum as groupType from admin_permission p ";
-		}
-	}
-
 }

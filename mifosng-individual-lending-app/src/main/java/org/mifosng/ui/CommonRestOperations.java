@@ -13,14 +13,12 @@ import org.mifosng.data.LoanSchedule;
 import org.mifosng.data.NewLoanWorkflowStepOneData;
 import org.mifosng.data.NoteData;
 import org.mifosng.data.PermissionData;
-import org.mifosng.data.RoleData;
 import org.mifosng.data.command.AdjustLoanTransactionCommand;
 import org.mifosng.data.command.CalculateLoanScheduleCommand;
 import org.mifosng.data.command.EnrollClientCommand;
 import org.mifosng.data.command.LoanStateTransitionCommand;
 import org.mifosng.data.command.LoanTransactionCommand;
 import org.mifosng.data.command.NoteCommand;
-import org.mifosng.data.command.RoleCommand;
 import org.mifosng.data.command.SubmitLoanApplicationCommand;
 import org.mifosng.data.command.UndoLoanApprovalCommand;
 import org.mifosng.data.command.UndoLoanDisbursalCommand;
@@ -33,19 +31,9 @@ public interface CommonRestOperations {
 
 	void updateProtectedResource(ProtectedResourceDetails loadProtectedResourceDetailsById);
 
-	Collection<RoleData> retrieveAllRoles();
-
-	RoleData retrieveRole(Long roleId);
-
-	RoleData retrieveNewRoleDetails();
-
-	EntityIdentifier updateRole(RoleCommand command);
-
 	Collection<PermissionData> retrieveAllPermissions();
 
 	Collection<EnumOptionReadModel> retrieveAllPermissionGroups();
-
-	EntityIdentifier createRole(RoleCommand command);
 
 	Collection<ClientData> retrieveAllIndividualClients();
 
