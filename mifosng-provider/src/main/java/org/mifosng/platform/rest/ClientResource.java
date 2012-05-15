@@ -26,6 +26,7 @@ import org.mifosng.data.command.EnrollClientCommand;
 import org.mifosng.data.command.NoteCommand;
 import org.mifosng.platform.ReadPlatformService;
 import org.mifosng.platform.WritePlatformService;
+import org.mifosng.platform.client.service.ClientReadPlatformService;
 import org.mifosng.platform.exceptions.ApplicationDomainRuleException;
 import org.mifosng.platform.exceptions.UnAuthenticatedUserException;
 import org.mifosng.platform.exceptions.NewDataValidationException;
@@ -41,6 +42,9 @@ public class ClientResource {
 
     @Autowired
 	private ReadPlatformService readPlatformService;
+    
+    @Autowired
+   	private ClientReadPlatformService clientReadPlatformService;
 
 	@Autowired
 	private WritePlatformService writePlatformService;
@@ -51,21 +55,9 @@ public class ClientResource {
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	public Response retrieveAllIndividualClients() {
 
-    	try {
-    		Collection<ClientData> clients = this.readPlatformService.retrieveAllIndividualClients();
+    		Collection<ClientData> clients = this.clientReadPlatformService.retrieveAllIndividualClients();
 
     		return Response.ok().entity(new ClientList(clients)).build();
-		} catch (UnAuthenticatedUserException e) {
-			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
-		} catch (AccessDeniedException e) {
-			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
-			ErrorResponseList list = new ErrorResponseList(Arrays.asList(errorResponse));
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(list).build());
-		} catch (ApplicationDomainRuleException e) {
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(new ErrorResponseList(e.getErrors())).build());
-		} catch (NewDataValidationException e) {
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(new ErrorResponseList(e.getValidationErrors())).build());
-		}
     }
     
 	@GET
@@ -118,23 +110,13 @@ public class ClientResource {
 	@Path("{clientId}")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response retrieveClientData(@PathParam("clientId") final Long clientId) {
-		
-		try {
-			ClientData clientData = this.readPlatformService.retrieveIndividualClient(clientId);
+	public Response retrieveClientData(
+			@PathParam("clientId") final Long clientId) {
 
-			return Response.ok().entity(clientData).build();
-		} catch (UnAuthenticatedUserException e) {
-			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
-		} catch (AccessDeniedException e) {
-			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
-			ErrorResponseList list = new ErrorResponseList(Arrays.asList(errorResponse));
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(list).build());
-		} catch (ApplicationDomainRuleException e) {
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(new ErrorResponseList(e.getErrors())).build());
-		} catch (NewDataValidationException e) {
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(new ErrorResponseList(e.getValidationErrors())).build());
-		}
+		ClientData clientData = this.clientReadPlatformService
+				.retrieveIndividualClient(clientId);
+
+		return Response.ok().entity(clientData).build();
 	}
 
 	@GET

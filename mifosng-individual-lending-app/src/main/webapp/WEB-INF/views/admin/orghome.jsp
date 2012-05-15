@@ -14,7 +14,8 @@
 <c:url value="/" var="rootContext" />
 <script>
 	$(document).ready(function() {
-		// these helpers are registered for the jsViews and jsRender functionality to fix bug with display zero!
+	
+	// these helpers are registered for the jsViews and jsRender functionality to fix bug with display zero!
 	$.views.registerHelpers({
 			
 			money: function(monetaryObj) {

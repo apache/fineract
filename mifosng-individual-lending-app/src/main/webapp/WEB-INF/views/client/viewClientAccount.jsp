@@ -23,49 +23,48 @@ div.notespacer {margin-top: 5px; margin-bottom: 5px;}
 <script>
 $(document).ready(function() {
 	
+	// these helpers are registered for the jsViews and jsRender functionality to fix bug with display zero!
 	$.views.registerHelpers({
-		
-		money: function(monetaryObj) {
 			
-			Globalize.culture().numberFormat.currency.symbol = monetaryObj.displaySymbol;
-			
-			var digits = monetaryObj.currencyDigitsAfterDecimal.toFixed(0);
-			return Globalize.format(monetaryObj.amount, "n" + digits); 
-		},
-		moneyWithCurrency: function(monetaryObj) {
-			
-			Globalize.culture().numberFormat.currency.symbol = monetaryObj.displaySymbol;
-			
-			var digits = monetaryObj.currencyDigitsAfterDecimal.toFixed(0);
-			return Globalize.format(monetaryObj.amount, "c" + digits); 
-		},
-		decimal: function(number, digits) {
+			money: function(monetaryObj) {
+				
+				Globalize.culture().numberFormat.currency.symbol = monetaryObj.displaySymbol;
+				
+				var digits = monetaryObj.currencyDigitsAfterDecimal.toFixed(0);
+				return Globalize.format(monetaryObj.amount, "n" + digits); 
+			},
+			moneyWithCurrency: function(monetaryObj) {
+				
+				Globalize.culture().numberFormat.currency.symbol = monetaryObj.displaySymbol;
+				
+				var digits = monetaryObj.currencyDigitsAfterDecimal.toFixed(0);
+				return Globalize.format(monetaryObj.amount, "c" + digits); 
+			},
+			decimal: function(number, digits) {
 		      try {
 		    	return Globalize.format(number, "n" + digits); 
 		      } catch(e) {
 		        return number +"(NaN)";
 		      }
-		},
-		number: function(number) {
+		    },
+			number: function(number) {
 		      try {
 		    	  return Globalize.format(number, "n0"); 
 		      } catch(e) {
 		        return number +"(NaN)";
 		      }
-		},
-	    numberGreaterThanZero: function(number) {
-		      try {
-		    	var num = number.toFixed(0);
-		        return num > 0;
-		      } catch(e) {
-		        return false;
-		      }
-		},
-		globalDate: function(dateParts) {
-		      try {
-		    	  if (dateParts === null) {
-		    		  return "";
-		    	  } else {
+		    },
+		    numberGreaterThanZero: function(number) {
+			      try {
+			    	var num = number.toFixed(0);
+			        return num > 0;
+			      } catch(e) {
+			        return false;
+			      }
+			},
+			globalDate: function(localDateAsISOString) {
+			      try {
+			    	  var dateParts = localDateAsISOString.split("-")
 			    	  var year = dateParts[0];
 			    	  var month = parseInt(dateParts[1]) - 1; // month is zero indexed
 			    	  var day = dateParts[2];
@@ -74,27 +73,21 @@ $(document).ready(function() {
 			    	  d.setFullYear(year,month,day);
 			    	  
 			    	  return Globalize.format(d,"dd MMMM yyyy");
-		    	  }
-		      } catch(e) {
-		        return "??";
-		      }
-		},
-		globalDateTime: function(dateParts) {
-		      try {
-		    	  if (dateParts === null) {
-		    		  return "";
-		    	  } else {
-		    		  var d = new Date(dateParts);
+			      } catch(e) {
+			        return "??";
+			      }
+			},
+			globalDateTime: function(dateInMillis) {
+			      try {
+			    	  var d = new Date(dateInMillis);
 			    	  
 			    	  return Globalize.format(d,"F");
-		    	  }
-		      } catch(e) {
-		        return "??";
-		      }
-		}
-		
+			      } catch(e) {
+			        return "??";
+			      }
+			}
 	});
-	
+		
 	function removeErrors(placeholderDiv) {
 		// remove error class from all input fields
 		var $inputs = $('#entityform :input');
@@ -128,17 +121,28 @@ $(document).ready(function() {
 			removeErrors(placeholderDiv);
 			
 		  	var jsonErrors = JSON.parse(jqXHR.responseText);
-		  	
+		  	console.log(jsonErrors);
+		  	var valErrors = jsonErrors.errors;
+		  	console.log(valErrors);
 		  	var errorArray = new Array();
 		  	var arrayIndex = 0;
-		  	$.each(jsonErrors, function() {
-		  	  var fieldId = '#' + this.field;
+		  	$.each(valErrors, function() {
+		  	  var fieldId = '#' + this.parameterName;
 		  	  $(fieldId).addClass("ui-state-error");
 		  	  
 		  	  var errorObj = new Object();
-		  	  errorObj.field = this.field;
-		  	  errorObj.code = this.code;
-		  	  errorObj.message = jQuery.i18n.prop(this.code, this.args);
+		  	  errorObj.field = this.parameterName;
+		  	  errorObj.code = this.userMessageGlobalisationCode;
+		  	  
+		  	  var argArray = new Array();
+		  	  var argArrayIndex = 0;
+		  	  $.each(this.args, function() {
+		  		argArray[argArrayIndex] = this.value;
+		  		argArrayIndex++;
+		  	  });
+		  	  console.log(argArray);
+		  	  // hardcoded support for six arguments
+		  	  errorObj.message = jQuery.i18n.prop(this.userMessageGlobalisationCode, argArray[0], argArray[1], argArray[2], argArray[3], argArray[4], argArray[5]);
 		  	  errorObj.value = this.value;
 		  	  
 		  	  errorArray[arrayIndex] = errorObj;
@@ -156,7 +160,7 @@ $(document).ready(function() {
 		  	
 		  	$(placeholderDiv).append(formErrorsHtml);
 		}
-	}	
+	}
 	
 	function showNotAvailableDialog(titleCode) {
 		var dialogDiv = $("<div id='notavailable-dialog-form'></div>");
@@ -180,6 +184,29 @@ $(document).ready(function() {
 			}
 		 }).dialog('open');
 	}
+	
+	$.fn.serializeObject = function()
+	{
+	    var o = {};
+	    var a = this.serializeArray();
+	    $.each(a, function() {
+	        if (o[this.name] !== undefined) {
+	            if (!o[this.name].push) {
+	                o[this.name] = [o[this.name]];
+	            }
+	            o[this.name].push(this.value || '');
+	        } else {
+	        	
+	        	if (this.name === 'selectedItems' || this.name === 'notSelectedItems') {
+	        		o[this.name] = new Array();
+	        		o[this.name].push(this.value || '');
+	        	} else {
+	        		o[this.name] = this.value || '';	
+	        	}
+	        }
+	    });
+	    return o;
+	};
 	
 	function popupConfirmationDialogAndPost(url, titleCode, width, height, tabIndex, redirectUrl) {
 		  var dialogDiv = $("<div id='dialog-form'><div id='formerrors'></div>" + jQuery.i18n.prop('text.confirmation.required') + "</div>");
@@ -364,7 +391,6 @@ $(document).ready(function() {
 		});
 	} 
 	
-	// "tabTemplate": '<li><a href="<%= "#" %>{href}"><%= "#" %>{label}</a> <span class="ui-icon ui-icon-close">Remove Tab</span></li>',
 	var tab_counter = 1;
 	var $newtabs = $("#newtabs").tabs({
 		
@@ -704,7 +730,7 @@ $(document).ready(function() {
 		
 			<div id="newtabs">
 				<ul>
-					<li><a href="${clientUrl}" title="clienttab" class="topleveltab">${clientDisplayName}</a></li>
+					<li><a href="http://localhost:8080/mifosng-provider/api/v1/clients/${clientId}" title="clienttab" class="topleveltab">${clientDisplayName}</a></li>
 				</ul>
 				<div id="clienttab">
 				</div>

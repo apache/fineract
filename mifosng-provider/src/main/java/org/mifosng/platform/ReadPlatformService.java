@@ -14,10 +14,6 @@ public interface ReadPlatformService {
 
 	Collection<OrganisationReadModel> retrieveAll();
 
-	Collection<ClientData> retrieveAllIndividualClients();
-
-	ClientData retrieveIndividualClient(Long clientId);
-
 	ClientDataWithAccountsData retrieveClientAccountDetails(Long clientId);
 
 	NewLoanWorkflowStepOneData retrieveClientAndProductDetails(Long clientId, Long productId);
