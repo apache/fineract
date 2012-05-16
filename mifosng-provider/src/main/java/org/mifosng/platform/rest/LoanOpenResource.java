@@ -17,13 +17,19 @@ import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.mifosng.data.LoanPayoffReadModel;
 import org.mifosng.data.MoneyData;
-import org.mifosng.platform.CalculationPlatformService;
+import org.mifosng.platform.loan.service.CalculationPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.sun.jersey.api.json.JSONWithPadding;
 
+/**
+ * Payoff functionality was something CreoCore was looking for e.g. if paid in full on date x what should be paid? full minus any rebate or incentive provided.
+ * 
+ * NOTE: JSONP functionality not needed now due to use of CORS
+ */
+@Deprecated
 @Path("/open/loan/{loanId}")
 @Component
 @Scope("singleton")

@@ -1,4 +1,4 @@
-package org.mifosng.platform;
+package org.mifosng.platform.loan.service;
 
 import org.joda.time.LocalDate;
 import org.mifosng.data.LoanPayoffReadModel;

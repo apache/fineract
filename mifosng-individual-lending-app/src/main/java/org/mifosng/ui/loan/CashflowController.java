@@ -13,6 +13,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+/**
+ * @deprecated - some initial work around cashflow for CreoCore that can be deleted later.
+ */
+@Deprecated
 @Controller
 public class CashflowController {
 

@@ -1,16 +1,10 @@
 package org.mifosng.ui;
 
-import java.util.Collection;
-
 import org.mifosng.data.EntityIdentifier;
-import org.mifosng.data.LoanProductData;
 import org.mifosng.data.LoanRepaymentData;
-import org.mifosng.data.LoanSchedule;
 import org.mifosng.data.command.AdjustLoanTransactionCommand;
-import org.mifosng.data.command.CalculateLoanScheduleCommand;
 import org.mifosng.data.command.LoanStateTransitionCommand;
 import org.mifosng.data.command.LoanTransactionCommand;
-import org.mifosng.data.command.SubmitLoanApplicationCommand;
 import org.mifosng.data.command.UndoLoanApprovalCommand;
 import org.mifosng.data.command.UndoLoanDisbursalCommand;
 import org.springframework.security.oauth.consumer.ProtectedResourceDetails;
@@ -20,12 +14,6 @@ public interface CommonRestOperations {
 	void logout(String accessToken);
 
 	void updateProtectedResource(ProtectedResourceDetails loadProtectedResourceDetailsById);
-
-	Collection<LoanProductData> retrieveAllLoanProducts();
-
-	LoanSchedule calculateLoanSchedule(CalculateLoanScheduleCommand command);
-
-	Long submitLoanApplication(SubmitLoanApplicationCommand command);
 
 	EntityIdentifier deleteLoan(Long loanId);
 

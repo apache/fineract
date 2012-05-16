@@ -1,4 +1,4 @@
-package org.mifosng.platform;
+package org.mifosng.platform.loan.service;
 
 import java.math.BigDecimal;
 
@@ -88,7 +88,6 @@ public class CalculationPlatformServiceImpl implements
 	@Override
 	public LoanPayoffReadModel calculatePayoffOn(final Long loanId, final LocalDate payoffDate) {
 		
-		// TODO - use jdbc approach to calculating payoff if possible.
 		final Loan loan = this.loanRepository.findOne(loanId);
 
 		final LoanPayoffSummary payoffSummary = loan.getPayoffSummaryOn(payoffDate);

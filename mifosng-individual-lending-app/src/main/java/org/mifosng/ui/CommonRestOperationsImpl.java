@@ -2,7 +2,6 @@ package org.mifosng.ui;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import org.mifosng.configuration.ApplicationConfigurationService;
@@ -10,15 +9,10 @@ import org.mifosng.data.ClientList;
 import org.mifosng.data.EntityIdentifier;
 import org.mifosng.data.ErrorResponse;
 import org.mifosng.data.ErrorResponseList;
-import org.mifosng.data.LoanProductData;
-import org.mifosng.data.LoanProductList;
 import org.mifosng.data.LoanRepaymentData;
-import org.mifosng.data.LoanSchedule;
 import org.mifosng.data.command.AdjustLoanTransactionCommand;
-import org.mifosng.data.command.CalculateLoanScheduleCommand;
 import org.mifosng.data.command.LoanStateTransitionCommand;
 import org.mifosng.data.command.LoanTransactionCommand;
-import org.mifosng.data.command.SubmitLoanApplicationCommand;
 import org.mifosng.data.command.UndoLoanApprovalCommand;
 import org.mifosng.data.command.UndoLoanDisbursalCommand;
 import org.mifosng.ui.loanproduct.ClientValidationException;
@@ -81,18 +75,6 @@ public class CommonRestOperationsImpl implements CommonRestOperations {
 		return requestEntity;
 	}
 
-	@Override
-	public Collection<LoanProductData> retrieveAllLoanProducts() {
-		URI restUri = URI.create(getBaseServerUrl().concat(
-				"api/protected/product/loan/all"));
-
-		ResponseEntity<LoanProductList> s = this.oauthRestServiceTemplate
-				.exchange(restUri, HttpMethod.GET, emptyRequest(),
-						LoanProductList.class);
-
-		return s.getBody().getProducts();
-	}
-
 	private ErrorResponseList parseErrors(HttpStatusCodeException e) {
 
 		XStream xstream = new XStream();
@@ -116,43 +98,6 @@ public class CommonRestOperationsImpl implements CommonRestOperations {
 			throw e;
 		}
 		return errorList;
-	}
-
-	@Override
-	public LoanSchedule calculateLoanSchedule(
-			final CalculateLoanScheduleCommand command) {
-		try {
-			URI restUri = URI.create(getBaseServerUrl().concat(
-					"api/protected/loan/calculate"));
-
-			ResponseEntity<LoanSchedule> s = this.oauthRestServiceTemplate
-					.exchange(restUri, HttpMethod.POST,
-							calculateLoanRepaymentScheduleRequest(command),
-							LoanSchedule.class);
-
-			return s.getBody();
-		} catch (HttpStatusCodeException e) {
-			ErrorResponseList errorList = parseErrors(e);
-			throw new ClientValidationException(errorList.getErrors());
-		}
-	}
-
-	@Override
-	public Long submitLoanApplication(final SubmitLoanApplicationCommand command) {
-		try {
-			URI restUri = URI.create(getBaseServerUrl().concat(
-					"api/protected/loan/new"));
-
-			ResponseEntity<EntityIdentifier> s = this.oauthRestServiceTemplate
-					.postForEntity(restUri,
-							submitLoanApplicationRequest(command),
-							EntityIdentifier.class);
-
-			return s.getBody().getEntityId();
-		} catch (HttpStatusCodeException e) {
-			ErrorResponseList errorList = parseErrors(e);
-			throw new ClientValidationException(errorList.getErrors());
-		}
 	}
 
 	@Override
@@ -435,26 +380,6 @@ public class CommonRestOperationsImpl implements CommonRestOperations {
 		requestHeaders.set("Content-Type", "application/xml");
 
 		return new HttpEntity<LoanStateTransitionCommand>(command,
-				requestHeaders);
-	}
-
-	private HttpEntity<SubmitLoanApplicationCommand> submitLoanApplicationRequest(
-			final SubmitLoanApplicationCommand command) {
-		HttpHeaders requestHeaders = new HttpHeaders();
-		requestHeaders.set("Accept", "application/xml");
-		requestHeaders.set("Content-Type", "application/xml");
-
-		return new HttpEntity<SubmitLoanApplicationCommand>(command,
-				requestHeaders);
-	}
-
-	private HttpEntity<CalculateLoanScheduleCommand> calculateLoanRepaymentScheduleRequest(
-			final CalculateLoanScheduleCommand command) {
-		HttpHeaders requestHeaders = new HttpHeaders();
-		requestHeaders.set("Accept", "application/xml");
-		requestHeaders.set("Content-Type", "application/xml");
-
-		return new HttpEntity<CalculateLoanScheduleCommand>(command,
 				requestHeaders);
 	}
 }

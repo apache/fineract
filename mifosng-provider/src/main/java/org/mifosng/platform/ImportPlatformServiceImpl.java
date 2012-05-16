@@ -51,6 +51,7 @@ import org.mifosng.platform.loan.domain.LoanStatus;
 import org.mifosng.platform.loan.domain.LoanStatusRepository;
 import org.mifosng.platform.loan.domain.LoanTransaction;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
+import org.mifosng.platform.loan.service.CalculationPlatformService;
 import org.mifosng.platform.organisation.domain.Office;
 import org.mifosng.platform.organisation.domain.OfficeRepository;
 import org.mifosng.platform.organisation.domain.Organisation;
@@ -452,7 +453,6 @@ public class ImportPlatformServiceImpl implements ImportPlatformService {
 				
 				String currencyCode = matchingProduct.getCurrency().getCode();
 				int digitsAfterDecimal = matchingProduct.getCurrency().getDigitsAfterDecimal();
-				boolean flexibleRepaymentSchedule = matchingProduct.isFlexibleRepaymentSchedule();
 				Integer repaymentEvery = matchingProduct.getRepayEvery();
 				Integer repaymentFrequency = matchingProduct.getRepaymentPeriodFrequencyType().getValue();
 				Integer amortizationMethod = matchingProduct.getAmortizationMethod().getValue();
@@ -469,8 +469,7 @@ public class ImportPlatformServiceImpl implements ImportPlatformService {
 						interestRatePeriodFrequency, 
 						interestMethod, interestCalculationPeriodMethod,
 						repaymentEvery, 
-						repaymentFrequency, numberOfRepayments, amortizationMethod, flexibleRepaymentSchedule, 
-						matchingProduct.isInterestRebateAllowed(), expectedDisbursementDate, repaymentsStartingFromDate, interestCalculatedFromDate);
+						repaymentFrequency, numberOfRepayments, amortizationMethod, expectedDisbursementDate, repaymentsStartingFromDate, interestCalculatedFromDate);
 				
 				LoanSchedule loanSchedule = this.calculationPlatformService.calculateLoanSchedule(calculateLoanScheduleCommand);
 				
@@ -478,8 +477,7 @@ public class ImportPlatformServiceImpl implements ImportPlatformService {
 						expectedDisbursementDate, repaymentsStartingFromDate, interestCalculatedFromDate, loanSchedule, 
 						currencyCode, digitsAfterDecimal, principal, 
 						interestRatePerPeriod, interestRatePeriodFrequency, interestMethod, interestCalculationPeriodMethod,
-						repaymentEvery, repaymentFrequency, numberOfRepayments, amortizationMethod, toleranceAmount.getAmount(),
-						flexibleRepaymentSchedule, matchingProduct.isInterestRebateAllowed());
+						repaymentEvery, repaymentFrequency, numberOfRepayments, amortizationMethod, toleranceAmount.getAmount());
 				
 				parsedNewLoanDetails.setExternalId(loanExternalId);
 				

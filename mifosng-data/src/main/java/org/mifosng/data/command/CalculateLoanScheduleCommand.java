@@ -9,13 +9,28 @@ import org.joda.time.LocalDate;
 @XmlRootElement
 public class CalculateLoanScheduleCommand {
 
-	private CommonLoanProperties commonLoanProperties;
+	private String currencyCode;
+	private Integer digitsAfterDecimal;
+	private BigDecimal principal;
+	private BigDecimal inArrearsToleranceAmount;
+	
+	private Integer repaymentEvery;
+	private Integer repaymentFrequency;
+	private Integer numberOfRepayments;
+	
+	private BigDecimal interestRatePerPeriod;
+	private Integer interestRateFrequencyMethod;
+	private Integer amortizationMethod;
+	private Integer interestMethod;
+	private Integer interestCalculationPeriodMethod;
+	private boolean flexibleRepaymentSchedule = false;
+	private boolean interestRebateAllowed = false;
 	
 	private LocalDate expectedDisbursementDate;
 	private LocalDate repaymentsStartingFromDate;
 	private LocalDate interestCalculatedFromDate;
 
-	public CalculateLoanScheduleCommand() {
+	protected CalculateLoanScheduleCommand() {
 		//
 	}
 
@@ -23,132 +38,139 @@ public class CalculateLoanScheduleCommand {
 			final Integer digitsAfterDecimal, final Number principal,
 			final Number interestRatePerPeriod, Integer interestRateFrequencyMethod, final Integer interestMethod, final Integer interestCalculationPeriodMethod,
 			final Integer repaymentEvery, final Integer repaymentFrequency, final Integer numberOfRepayments, Integer amortizationMethod,
-			final boolean flexibleRepaymentSchedule,
-			final boolean interestRebateAllowed,
 			final LocalDate expectedDisbursementDate,
 			final LocalDate repaymentsStartingFromDate, final LocalDate interestCalculatedFromDate) {
 		
-		commonLoanProperties = new CommonLoanProperties(currencyCode, digitsAfterDecimal, principal, interestRatePerPeriod, interestRateFrequencyMethod, 
-				interestMethod, interestCalculationPeriodMethod, 
-				repaymentEvery, repaymentFrequency, numberOfRepayments, amortizationMethod, Integer.valueOf(0),
-				flexibleRepaymentSchedule, interestRebateAllowed);
+		this.currencyCode = currencyCode;
+		this.digitsAfterDecimal = digitsAfterDecimal;
+		this.principal = BigDecimal.valueOf(principal.doubleValue());
+		this.interestRatePerPeriod = BigDecimal.valueOf(interestRatePerPeriod.doubleValue());
+		this.interestRateFrequencyMethod = interestRateFrequencyMethod;
+		this.interestMethod = interestMethod;
+		this.interestCalculationPeriodMethod = interestCalculationPeriodMethod;
+		this.repaymentEvery = repaymentEvery;
+		this.repaymentFrequency = repaymentFrequency;
+		this.numberOfRepayments = numberOfRepayments;
+		this.amortizationMethod = amortizationMethod;
+		this.flexibleRepaymentSchedule = false;
+		this.interestRebateAllowed = false;
 		
 		this.expectedDisbursementDate = expectedDisbursementDate;
 		this.repaymentsStartingFromDate = repaymentsStartingFromDate;
 		this.interestCalculatedFromDate = interestCalculatedFromDate;
 	}
-	
+
 	public String getCurrencyCode() {
-		return this.commonLoanProperties.getCurrencyCode();
+		return currencyCode;
 	}
 
-	public void setCurrencyCode(final String currencyCode) {
-		this.commonLoanProperties.setCurrencyCode(currencyCode);
+	public void setCurrencyCode(String currencyCode) {
+		this.currencyCode = currencyCode;
 	}
 
 	public Integer getDigitsAfterDecimal() {
-		return this.commonLoanProperties.getDigitsAfterDecimal();
+		return digitsAfterDecimal;
 	}
 
-	public void setDigitsAfterDecimal(final Integer digitsAfterDecimal) {
-		this.commonLoanProperties.setDigitsAfterDecimal(digitsAfterDecimal);
-	}
-
-	public Integer getRepaymentEvery() {
-		return this.commonLoanProperties.getRepaymentEvery();
-	}
-
-	public void setRepaymentEvery(final Integer repaymentEvery) {
-		this.commonLoanProperties.setRepaymentEvery(repaymentEvery);
-	}
-
-	public Integer getRepaymentFrequency() {
-		return this.commonLoanProperties.getRepaymentFrequency();
-	}
-
-	public void setRepaymentFrequency(final Integer repaymentFrequency) {
-		this.commonLoanProperties.setRepaymentFrequency(repaymentFrequency);
-	}
-
-	public Boolean isFlexibleRepaymentSchedule() {
-		return this.commonLoanProperties.isFlexibleRepaymentSchedule();
-	}
-
-	public void setFlexibleRepaymentSchedule(
-			final Boolean flexibleRepaymentSchedule) {
-		this.commonLoanProperties.setFlexibleRepaymentSchedule(flexibleRepaymentSchedule);
-	}
-
-	public Boolean isInterestRebateAllowed() {
-		return this.commonLoanProperties.isInterestRebateAllowed();
-	}
-
-	public void setInterestRebateAllowed(final Boolean interestRebateAllowed) {
-		this.commonLoanProperties.setInterestRebateAllowed(interestRebateAllowed);
+	public void setDigitsAfterDecimal(Integer digitsAfterDecimal) {
+		this.digitsAfterDecimal = digitsAfterDecimal;
 	}
 
 	public BigDecimal getPrincipal() {
-		return this.commonLoanProperties.getPrincipal();
+		return principal;
 	}
 
-	public void setPrincipal(final BigDecimal principal) {
-		this.commonLoanProperties.setPrincipal(principal);
+	public void setPrincipal(BigDecimal principal) {
+		this.principal = principal;
 	}
 
-//	public Boolean getFlexibleRepaymentSchedule() {
-//		return this.commonLoanProperties.getFlexibleRepaymentSchedule();
-//	}
-//
-//	public Boolean getInterestRebateAllowed() {
-//		return this.commonLoanProperties.getInterestRebateAllowed();
-//	}
-
-	public Integer getInterestRateFrequencyMethod() {
-		return commonLoanProperties.getInterestRateFrequencyMethod();
+	public BigDecimal getInArrearsToleranceAmount() {
+		return inArrearsToleranceAmount;
 	}
 
-	public void setInterestRateFrequencyMethod(Integer interestRateFrequencyMethod) {
-		this.commonLoanProperties.setInterestRateFrequencyMethod(interestRateFrequencyMethod);
+	public void setInArrearsToleranceAmount(BigDecimal inArrearsToleranceAmount) {
+		this.inArrearsToleranceAmount = inArrearsToleranceAmount;
 	}
 
-	public Integer getInterestMethod() {
-		return commonLoanProperties.getInterestMethod();
+	public Integer getRepaymentEvery() {
+		return repaymentEvery;
 	}
 
-	public void setInterestMethod(Integer interestMethod) {
-		this.commonLoanProperties.setInterestMethod(interestMethod);
+	public void setRepaymentEvery(Integer repaymentEvery) {
+		this.repaymentEvery = repaymentEvery;
 	}
 
-	public Integer getAmortizationMethod() {
-		return commonLoanProperties.getAmortizationMethod();
+	public Integer getRepaymentFrequency() {
+		return repaymentFrequency;
 	}
 
-	public void setAmortizationMethod(Integer amortizationMethod) {
-		this.commonLoanProperties.setAmortizationMethod(amortizationMethod);
+	public void setRepaymentFrequency(Integer repaymentFrequency) {
+		this.repaymentFrequency = repaymentFrequency;
 	}
 
 	public Integer getNumberOfRepayments() {
-		return commonLoanProperties.getNumberOfRepayments();
+		return numberOfRepayments;
 	}
 
 	public void setNumberOfRepayments(Integer numberOfRepayments) {
-		this.commonLoanProperties.setNumberOfRepayments(numberOfRepayments);
+		this.numberOfRepayments = numberOfRepayments;
 	}
 
 	public BigDecimal getInterestRatePerPeriod() {
-		return commonLoanProperties.getInterestRatePerPeriod();
+		return interestRatePerPeriod;
 	}
 
 	public void setInterestRatePerPeriod(BigDecimal interestRatePerPeriod) {
-		this.commonLoanProperties.setInterestRatePerPeriod(interestRatePerPeriod);
+		this.interestRatePerPeriod = interestRatePerPeriod;
 	}
 
-	public CommonLoanProperties getCommonLoanProperties() {
-		return commonLoanProperties;
+	public Integer getInterestRateFrequencyMethod() {
+		return interestRateFrequencyMethod;
 	}
 
-	public void setCommonLoanProperties(CommonLoanProperties commonLoanProperties) {
-		this.commonLoanProperties = commonLoanProperties;
+	public void setInterestRateFrequencyMethod(Integer interestRateFrequencyMethod) {
+		this.interestRateFrequencyMethod = interestRateFrequencyMethod;
+	}
+
+	public Integer getAmortizationMethod() {
+		return amortizationMethod;
+	}
+
+	public void setAmortizationMethod(Integer amortizationMethod) {
+		this.amortizationMethod = amortizationMethod;
+	}
+
+	public Integer getInterestMethod() {
+		return interestMethod;
+	}
+
+	public void setInterestMethod(Integer interestMethod) {
+		this.interestMethod = interestMethod;
+	}
+
+	public Integer getInterestCalculationPeriodMethod() {
+		return interestCalculationPeriodMethod;
+	}
+
+	public void setInterestCalculationPeriodMethod(
+			Integer interestCalculationPeriodMethod) {
+		this.interestCalculationPeriodMethod = interestCalculationPeriodMethod;
+	}
+
+	public boolean isFlexibleRepaymentSchedule() {
+		return flexibleRepaymentSchedule;
+	}
+
+	public void setFlexibleRepaymentSchedule(boolean flexibleRepaymentSchedule) {
+		this.flexibleRepaymentSchedule = flexibleRepaymentSchedule;
+	}
+
+	public boolean isInterestRebateAllowed() {
+		return interestRebateAllowed;
+	}
+
+	public void setInterestRebateAllowed(boolean interestRebateAllowed) {
+		this.interestRebateAllowed = interestRebateAllowed;
 	}
 
 	public LocalDate getExpectedDisbursementDate() {
@@ -173,13 +195,5 @@ public class CalculateLoanScheduleCommand {
 
 	public void setInterestCalculatedFromDate(LocalDate interestCalculatedFromDate) {
 		this.interestCalculatedFromDate = interestCalculatedFromDate;
-	}
-	
-	public Integer getInterestCalculationPeriodMethod() {
-		return this.commonLoanProperties.getInterestCalculationPeriodMethod();
-	}
-
-	public void setInterestCalculationPeriodMethod(final Integer interestCalculationPeriodMethod) {
-		this.commonLoanProperties.setInterestCalculationPeriodMethod(interestCalculationPeriodMethod);
 	}
 }

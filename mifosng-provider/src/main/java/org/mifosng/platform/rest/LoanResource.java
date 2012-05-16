@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -20,15 +19,11 @@ import org.mifosng.data.EntityIdentifier;
 import org.mifosng.data.ErrorResponse;
 import org.mifosng.data.ErrorResponseList;
 import org.mifosng.data.LoanRepaymentData;
-import org.mifosng.data.LoanSchedule;
 import org.mifosng.data.command.AdjustLoanTransactionCommand;
-import org.mifosng.data.command.CalculateLoanScheduleCommand;
 import org.mifosng.data.command.LoanStateTransitionCommand;
 import org.mifosng.data.command.LoanTransactionCommand;
-import org.mifosng.data.command.SubmitLoanApplicationCommand;
 import org.mifosng.data.command.UndoLoanApprovalCommand;
 import org.mifosng.data.command.UndoLoanDisbursalCommand;
-import org.mifosng.platform.CalculationPlatformService;
 import org.mifosng.platform.ReadPlatformService;
 import org.mifosng.platform.ReadPlatformServiceImpl;
 import org.mifosng.platform.WritePlatformService;
@@ -50,91 +45,11 @@ public class LoanResource {
 	private final static Logger logger = LoggerFactory.getLogger(ReadPlatformServiceImpl.class);
 	
 	@Autowired
-	private CalculationPlatformService calculationPlatformService;
-	
-	@Autowired
 	private ReadPlatformService readPlatformService;
 
 	@Autowired
 	private WritePlatformService writePlatformService;
 	
-	@POST
-	@Path("calculate")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-	public Response calculateLoanSchedule(final CalculateLoanScheduleCommand command) {
-
-		try {
-			LoanSchedule loanSchedule = this.calculationPlatformService.calculateLoanSchedule(command);
-
-			return Response.ok().entity(loanSchedule).build();
-		} catch (UnAuthenticatedUserException e) {
-			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
-		} catch (AccessDeniedException e) {
-			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
-			ErrorResponseList list = new ErrorResponseList(Arrays.asList(errorResponse));
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(list).build());
-		} catch (ApplicationDomainRuleException e) {
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(new ErrorResponseList(e.getErrors())).build());
-		} catch (NewDataValidationException e) {
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(new ErrorResponseList(e.getValidationErrors())).build());
-		}
-    }
-
-	@POST
-	@Path("new")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response submitLoanApplication(final SubmitLoanApplicationCommand command) {
-
-		try {
-			EntityIdentifier identifier = this.writePlatformService.submitLoanApplication(command);
-
-			return Response.ok().entity(identifier).build();
-		} catch (UnAuthenticatedUserException e) {
-			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
-		} catch (AccessDeniedException e) {
-			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
-			ErrorResponseList list = new ErrorResponseList(Arrays.asList(errorResponse));
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(list).build());
-		} catch (ApplicationDomainRuleException e) {
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(new ErrorResponseList(e.getErrors())).build());
-		} catch (NewDataValidationException e) {
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(new ErrorResponseList(e.getValidationErrors())).build());
-		}
-	}
-	
-	@DELETE
-	@Path("{loanId}")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response deleteLoanApplication(@PathParam("loanId") final Long loanId) {
-
-		try {
-			EntityIdentifier identifier = this.writePlatformService.deleteLoan(loanId);
-
-			return Response.ok().entity(identifier).build();
-		} catch (UnAuthenticatedUserException e) {
-			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
-		} catch (AccessDeniedException e) {
-			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
-			ErrorResponseList list = new ErrorResponseList(Arrays.asList(errorResponse));
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(list).build());
-		} catch (ApplicationDomainRuleException e) {
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(new ErrorResponseList(e.getErrors())).build());
-		} catch (NewDataValidationException e) {
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(new ErrorResponseList(e.getValidationErrors())).build());
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			
-			List<ErrorResponse> allErrors = new ArrayList<ErrorResponse>();
-			ErrorResponse err = new ErrorResponse("unknown.error", "error", e.getMessage());
-			allErrors.add(err);
-			
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(new ErrorResponseList(allErrors)).build());
-		}
-	}
-
 	@POST
 	@Path("approve")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })

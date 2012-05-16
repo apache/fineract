@@ -1,52 +1,26 @@
-package org.mifosng.platform.loanproduct.service;
+package org.mifosng.platform.loan.service;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosng.data.ApiParameterError;
-import org.mifosng.data.command.LoanProductCommand;
+import org.mifosng.data.command.CalculateLoanScheduleCommand;
 import org.mifosng.platform.exceptions.PlatformApiDataValidationException;
 import org.mifosng.platform.loan.domain.AmortizationMethod;
 import org.mifosng.platform.loan.domain.InterestMethod;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 
-// FIXME - There is a lot of common validation across parameters for LoanProduct create/update, loan schedule calculation and submit new loan application flows.
-//       - reduce duplicator across this validators.
-public class LoanProductCommandValidator {
+public class CalculateLoanScheduleCommandValidator {
 
-	public void validateForUpdate(LoanProductCommand command) {
-		
-		List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-		
-		Long productId = command.getId();
-		if (productId == null) {
-			ApiParameterError error = ApiParameterError.parameterError("validation.msg.product.id.cannot.be.empty", "The parameter id cannot be blank.", "id");
-			dataValidationErrors.add(error);
-		}
-		
-		validateRemainingAttributes(command, dataValidationErrors);
+	private final CalculateLoanScheduleCommand command;
+
+	public CalculateLoanScheduleCommandValidator(CalculateLoanScheduleCommand command) {
+		this.command = command;
 	}
-	
-	public void validateForCreate(LoanProductCommand command) {
+
+	public void validate() {
 		List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-		
-		validateRemainingAttributes(command, dataValidationErrors);
-	}
-	
-	private void validateRemainingAttributes(LoanProductCommand command, List<ApiParameterError> dataValidationErrors) {
-		
-		if (StringUtils.isBlank(command.getName())) {
-			ApiParameterError error = ApiParameterError.parameterError("validation.msg.product.name.cannot.be.blank", "The parameter name cannot be blank.", "name");
-			dataValidationErrors.add(error);
-		}
-		
-		if (command.getDescription() != null) {
-			if (command.getDescription().length() > 500) {
-				ApiParameterError error = ApiParameterError.parameterError("validation.msg.product.description.exceeds.max.length", "The parameter description cannot exceed max length of {}.", "description", 500);
-				dataValidationErrors.add(error);
-			}
-		}
 		
 		if (StringUtils.isBlank(command.getCurrencyCode())) {
 			ApiParameterError error = ApiParameterError.parameterError("validation.msg.product.currency.cannot.be.empty", "The parameter currencyCode cannot be blank.", "currencyCode");
@@ -56,27 +30,28 @@ public class LoanProductCommandValidator {
 		if (command.getDigitsAfterDecimal() != null) {
 			
 			if (command.getDigitsAfterDecimal() < 0 || command.getDigitsAfterDecimal() > 6) {
-				ApiParameterError error = ApiParameterError.parameterError("validation.msg.product.currency.digitsAfterDecimal.must.be.between.zero.and.six.inclusive", "The parameter digitsAfterDecimal must be between {0} and {1} inclusive.", "selectedDigitsAfterDecimal", 0, 6);
+				ApiParameterError error = ApiParameterError.parameterError("validation.msg.product.currency.digitsAfterDecimal.must.be.between.zero.and.six.inclusive", "The parameter digitsAfterDecimal must be a value between 1 and 6.", "digitsAfterDecimal", command.getDigitsAfterDecimal(), 1, 6);
 				dataValidationErrors.add(error);
 			}
 		} else {
-			ApiParameterError error = ApiParameterError.parameterError("validation.msg.product.currency.digitsAfterDecimal.cannot.be.empty", "The parameter digitsAfterDecimal cannot be blank.", "selectedDigitsAfterDecimal");
+			ApiParameterError error = ApiParameterError.parameterError("validation.msg.product.currency.digitsAfterDecimal.cannot.be.empty", "The parameter digitsAfterDecimal cannot be blank.", "digitsAfterDecimal");
 			dataValidationErrors.add(error);
 		}
 		
+		// FIXME - validate the number of digits before and after decimal provided (before is limited by database field, after is limited by number selected for product (and ultimately by the database field))
 		if (command.getPrincipal() != null) {
 			if (command.getPrincipal().doubleValue() <= Double.valueOf("0.0")) {
-				ApiParameterError error = ApiParameterError.parameterError("validation.msg.product.principal.amount.must.be.greater.than.zero", "The parameter amount must be greater than zero.", "amount");
+				ApiParameterError error = ApiParameterError.parameterError("validation.msg.product.principal.amount.must.be.greater.than.zero", "The parameter principalMoney must be greater than zero.", "principalMoney");
 				dataValidationErrors.add(error);
 			}
 		} else {
-			ApiParameterError error = ApiParameterError.parameterError("validation.msg.product.principal.amount.cannot.be.empty", "The parameter amount cannot be blank.", "amount");
+			ApiParameterError error = ApiParameterError.parameterError("validation.msg.product.principal.amount.cannot.be.empty", "The parameter principalMoney cannot be blank.", "principalMoney");
 			dataValidationErrors.add(error);
 		}
 		
 		if (command.getRepaymentFrequency() != null) {
 			PeriodFrequencyType frequencyType = PeriodFrequencyType.fromInt(command.getRepaymentFrequency());
-			ApiParameterError error = null;
+			ApiParameterError error = null; 
 			switch (frequencyType) {
 			case DAYS:
 				error = validateNumberExistsAndInRange("validation.msg.product.repayment.repaidEvery", "repaidEvery", command.getRepaymentEvery(), 1, 365);
@@ -91,27 +66,24 @@ public class LoanProductCommandValidator {
 				error = validateNumberExistsAndInRange("validation.msg.product.repayment.repaidEvery", "repaidEvery", command.getRepaymentEvery(), 1, 2);
 				break;
 			default:
-				error = ApiParameterError.parameterError("validation.msg.product.repayment.frequency.invalid", "The parameter selectedRepaymentFrequencyOption is invalid.", "selectedRepaymentFrequencyOption");
+				error = ApiParameterError.parameterError("validation.msg.product.repayment.frequency.invalid", "The parameter repaymentFrequency is invalid.", "repaymentFrequency", command.getRepaymentFrequency());
 				break;
 			}
 			if (error != null) {
 				dataValidationErrors.add(error);
 			}
 		} else {
-			ApiParameterError error = ApiParameterError.parameterError("validation.msg.product.repayment.frequency.cannot.be.empty", 
-					"The parameter selectedRepaymentFrequencyOption cannot be blank.", "selectedRepaymentFrequencyOption");
+			ApiParameterError error = ApiParameterError.parameterError("validation.msg.product.repayment.frequency.cannot.be.empty", "The parameter repaymentFrequency cannot be empty.", "repaymentFrequency");
 			dataValidationErrors.add(error);
 		}
 		
 		if (command.getNumberOfRepayments() != null) {
 			if (command.getNumberOfRepayments() < 1 || command.getNumberOfRepayments() > 100) {
-				ApiParameterError error = ApiParameterError.parameterError("validation.msg.product.number.of.repayments.is.out.of.range", 
-						"The parameter numberOfRepayments must be between {} and {} inclusive.", "numberOfRepayments", 1, 100);
+				ApiParameterError error = ApiParameterError.parameterError("validation.msg.product.number.of.repayments.is.out.of.range", "The parameter numberOfRepayments must between {1} and {2}.", "numberOfRepayments", command.getNumberOfRepayments(), 1, 100);
 				dataValidationErrors.add(error);
 			}
 		} else {
-			ApiParameterError error = ApiParameterError.parameterError("validation.msg.product.number.of.repayments.cannot.be.empty", 
-					"The parameter numberOfRepayments cannot be empty.", "numberOfRepayments");
+			ApiParameterError error = ApiParameterError.parameterError("validation.msg.product.number.of.repayments.cannot.be.empty", "The parameter numberOfRepayments cannot be empty.", "numberOfRepayments");
 			dataValidationErrors.add(error);
 		}
 		
@@ -124,41 +96,57 @@ public class LoanProductCommandValidator {
 			case EQUAL_INSTALLMENTS:
 				break;
 			default:
-				error = ApiParameterError.parameterError("validation.msg.product.amortization.method.invalid", 
-						"The parameter selectedAmortizationMethodOption cannot be empty.", "selectedAmortizationMethodOption");
+				error = ApiParameterError.parameterError("validation.msg.product.amortization.method.invalid", "The parameter amortizationMethod is invalid.", "amortizationMethod", command.getAmortizationMethod());
+				dataValidationErrors.add(error);
 				break;
 			}
 			if (error != null) {
 				dataValidationErrors.add(error);
 			}
 		} else {
-			ApiParameterError error = ApiParameterError.parameterError("validation.msg.product.amortization.method.cannot.be.empty", 
-					"The parameter selectedAmortizationMethodOption cannot be empty.", "selectedAmortizationMethodOption");
+			ApiParameterError error = ApiParameterError.parameterError("validation.msg.product.amortization.method.cannot.be.empty", "The parameter amortizationMethod cannot be empty.", "amortizationMethod");
 			dataValidationErrors.add(error);
 		}
 		
-		// refactor in validation of monetary value.
-		if (command.getInArrearsToleranceAmount() != null) {
-			if (command.getInArrearsToleranceAmount().doubleValue() < Double.valueOf("0.0")) {
-				ApiParameterError error = ApiParameterError.parameterError("validation.msg.product.arrears.tolerance.amount.cannot.be.negative", 
-						"The parameter inArrearsTolerance cannot be less than zero.", "inArrearsTolerance");
+		if (command.getExpectedDisbursementDate() == null) {
+			ApiParameterError error = ApiParameterError.parameterError("validation.msg.loan.expectedDisbursementDate.method.cannot.be.blank", "The parameter expectedDisbursementDate cannot be empty.", "expectedDisbursementDate");
+			dataValidationErrors.add(error);
+		} else {
+			if (command.getRepaymentsStartingFromDate() != null
+					&& command.getExpectedDisbursementDate().isAfter(command.getRepaymentsStartingFromDate())) {
+				ApiParameterError error = ApiParameterError.parameterError("validation.msg.loan.expectedDisbursementDate.cannot.be.after.first.repayment.date", 
+						"The parameter expectedDisbursementDate has a date which falls after the given first repayment date.", "expectedDisbursementDate", 
+						command.getExpectedDisbursementDate(), command.getRepaymentsStartingFromDate());
 				dataValidationErrors.add(error);
 			}
-		} else {
-			ApiParameterError error = ApiParameterError.parameterError("validation.msg.product.arrears.tolerance.amount.cannot.be.empty", 
-					"The parameter inArrearsTolerance cannot be empty.", "inArrearsTolerance");
+		}
+		
+		if (command.getRepaymentsStartingFromDate() != null && command.getInterestCalculatedFromDate() == null) {
+			
+			ApiParameterError error = ApiParameterError.parameterError("validation.msg.loan.interestCalculatedFromDate.must.be.entered.when.using.repayments.startfrom.field", 
+					"The parameter interestCalculatedFromDate cannot be empty when first repayment date is provided.", "interestCalculatedFromDate", command.getRepaymentsStartingFromDate());
 			dataValidationErrors.add(error);
+		} else if (command.getRepaymentsStartingFromDate() == null && command.getInterestCalculatedFromDate() != null) {
+			
+			// validate interestCalculatedFromDate is after or on repaymentsStartingFromDate
+			if (command.getExpectedDisbursementDate().isAfter(command.getInterestCalculatedFromDate())) {
+				ApiParameterError error = ApiParameterError.parameterError("validation.msg.loan.interestCalculatedFromDate.cannot.be.before.disbursement.date", 
+						"The parameter interestCalculatedFromDate cannot be before the date given for expected disbursement.", "interestCalculatedFromDate", command.getInterestCalculatedFromDate(), command.getExpectedDisbursementDate());
+				dataValidationErrors.add(error);
+			}
 		}
 		
 		if (command.getInterestRatePerPeriod()!= null) {
 			if (command.getInterestRatePerPeriod().doubleValue() < Double.valueOf("0.0")) {
 				ApiParameterError error = ApiParameterError.parameterError("validation.msg.product.interest.rate.per.period.amount.cannot.be.negative", 
-						"The parameter nominalInterestRate cannot be less than zero.", "nominalInterestRate");
+						"The parameter interestRatePerPeriodFormatted cannot be less than zero.", "interestRatePerPeriodFormatted", 
+						command.getInterestRatePerPeriod());
 				dataValidationErrors.add(error);
 			}
 		} else {
 			ApiParameterError error = ApiParameterError.parameterError("validation.msg.product.interest.rate.per.period.amount.cannot.be.empty", 
-					"The parameter nominalInterestRate cannot be empty.", "nominalInterestRate");
+					"The parameter interestRatePerPeriodFormatted cannot be empty.", "interestRatePerPeriodFormatted", 
+					command.getInterestRatePerPeriod());
 			dataValidationErrors.add(error);
 		}
 		
@@ -177,7 +165,7 @@ public class LoanProductCommandValidator {
 				break;
 			default:
 				error = ApiParameterError.parameterError("validation.msg.product.interest.frequency.invalid", 
-						"The parameter selectedInterestFrequencyOption is invalid.", "selectedInterestFrequencyOption");
+						"The parameter interestRateFrequencyMethod cannot be empty.", "interestRateFrequencyMethod", command.getInterestRateFrequencyMethod());
 				break;
 			}
 			if (error != null) {
@@ -185,7 +173,7 @@ public class LoanProductCommandValidator {
 			}
 		} else {
 			ApiParameterError error = ApiParameterError.parameterError("validation.msg.product.interest.frequency.cannot.be.empty", 
-					"The parameter selectedInterestFrequencyOption cannot be empty.", "selectedInterestFrequencyOption");
+					"The parameter interestRateFrequencyMethod cannot be empty.", "interestRateFrequencyMethod");
 			dataValidationErrors.add(error);
 		}
 		
@@ -199,7 +187,7 @@ public class LoanProductCommandValidator {
 				break;
 			default:
 				error = ApiParameterError.parameterError("validation.msg.product.interest.method.invalid", 
-						"The parameter selectedInterestMethodOption is invalid.", "selectedInterestMethodOption");
+						"The parameter interestMethod is invalid.", "interestMethod", command.getInterestMethod());
 				break;
 			}
 			if (error != null) {
@@ -207,7 +195,7 @@ public class LoanProductCommandValidator {
 			}
 		} else {
 			ApiParameterError error = ApiParameterError.parameterError("validation.msg.product.interest.method.cannot.be.empty", 
-					"The parameter selectedInterestMethodOption cannot be empty.", "selectedInterestMethodOption");
+					"The parameter interestMethod cannot be empty.", "interestMethod");
 			dataValidationErrors.add(error);
 		}
 		
@@ -215,7 +203,7 @@ public class LoanProductCommandValidator {
 			throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);
 		}
 	}
-
+	
 	private ApiParameterError validateNumberExistsAndInRange(String errorCodePreFix, String fieldName, Integer value, int min, int max) {
 		ApiParameterError error = null;
 		if (value == null) {

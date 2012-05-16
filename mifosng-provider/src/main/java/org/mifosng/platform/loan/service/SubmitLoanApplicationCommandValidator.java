@@ -1,12 +1,12 @@
-package org.mifosng.platform;
+package org.mifosng.platform.loan.service;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.mifosng.data.ErrorResponse;
+import org.mifosng.data.ApiParameterError;
 import org.mifosng.data.command.CalculateLoanScheduleCommand;
 import org.mifosng.data.command.SubmitLoanApplicationCommand;
-import org.mifosng.platform.exceptions.NewDataValidationException;
+import org.mifosng.platform.exceptions.PlatformApiDataValidationException;
 
 public class SubmitLoanApplicationCommandValidator {
 
@@ -17,19 +17,23 @@ public class SubmitLoanApplicationCommandValidator {
 	}
 
 	public void validate() {
-		List<ErrorResponse> dataValidationErrors = new ArrayList<ErrorResponse>();
+		List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 		
 		if (command.getLoanSchedule() == null) {
-			ErrorResponse error = new ErrorResponse("validation.msg.submit.loan.loan.schedule.cannot.be.blank", "loanSchedule");
+			ApiParameterError error = ApiParameterError.parameterError("validation.msg.submit.loan.loan.schedule.cannot.be.blank", 
+					"The parameter loanSchedule cannot be empty.", "loanSchedule");
 			dataValidationErrors.add(error);
 		}
 		
 		if (command.getSubmittedOnDate() == null) {
-			ErrorResponse error = new ErrorResponse("validation.msg.loan.submitted.on.date.cannot.be.blank", "submittedOnDate");
+			ApiParameterError error = ApiParameterError.parameterError("validation.msg.loan.submitted.on.date.cannot.be.blank", 
+					"The parameter submittedOnDateFormatted cannot be empty.", "submittedOnDateFormatted");
 			dataValidationErrors.add(error);
 		} else {
 			if (command.getSubmittedOnDate().isAfter(command.getExpectedDisbursementDate())) {
-				ErrorResponse error = new ErrorResponse("validation.msg.loan.submitted.on.date.cannot.be.after.expectedDisbursementDate", "submittedOnDate");
+				ApiParameterError error = ApiParameterError.parameterError("validation.msg.loan.submitted.on.date.cannot.be.after.expectedDisbursementDate", 
+						"The date of parameter submittedOnDateFormatted cannot fall after the date given for expectedDisbursementDateFormatted.", "submittedOnDateFormatted", 
+						command.getSubmittedOnDateFormatted(), command.getExpectedDisbursementDateFormatted());
 				dataValidationErrors.add(error);
 			}
 		}
@@ -45,8 +49,6 @@ public class SubmitLoanApplicationCommandValidator {
 					command.getRepaymentFrequency(),
 					command.getNumberOfRepayments(),
 					command.getAmortizationMethod(),
-					command.isFlexibleRepaymentSchedule(),
-					command.isInterestRebateAllowed(),
 					command.getExpectedDisbursementDate(),
 					command.getRepaymentsStartingFromDate(),
 					command.getInterestCalculatedFromDate());
@@ -54,12 +56,12 @@ public class SubmitLoanApplicationCommandValidator {
 			CalculateLoanScheduleCommandValidator validator = new CalculateLoanScheduleCommandValidator(
 					calculateLoanScheduleCommand);
 			validator.validate();
-		} catch (NewDataValidationException e) {
-			dataValidationErrors.addAll(e.getValidationErrors());
+		} catch (PlatformApiDataValidationException e) {
+			dataValidationErrors.addAll(e.getErrors());
 		}
 		
 		if (!dataValidationErrors.isEmpty()) {
-			throw new NewDataValidationException(dataValidationErrors, "Data validation errors exist.");
+			throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);
 		}
 	}
 }

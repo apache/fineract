@@ -131,6 +131,12 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	@Transient
 	private final InterestRebateCalculatorFactory interestRebateCalculatorFactory = new DailyEquivalentInterestRebateCalculatorFactory();
 
+	public static Loan createNew(Organisation organisation,
+			LoanProduct loanProduct, Client client,
+			LoanProductRelatedDetail loanRepaymentScheduleDetail) {
+		return new Loan(organisation, client, loanProduct, loanRepaymentScheduleDetail, null);
+	}
+	
 	public Loan() {
 		this.organisation = null;
 		this.client = null;

@@ -3,7 +3,6 @@ package org.mifosng.platform;
 import static org.mifosng.platform.Specifications.loansThatMatch;
 import static org.mifosng.platform.Specifications.usersThatMatch;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -13,39 +12,27 @@ import org.joda.time.LocalDate;
 import org.mifosng.data.EntityIdentifier;
 import org.mifosng.data.ErrorResponse;
 import org.mifosng.data.LoanSchedule;
-import org.mifosng.data.MoneyData;
 import org.mifosng.data.ScheduledLoanInstallment;
 import org.mifosng.data.command.AdjustLoanTransactionCommand;
 import org.mifosng.data.command.CalculateLoanScheduleCommand;
 import org.mifosng.data.command.LoanStateTransitionCommand;
 import org.mifosng.data.command.LoanTransactionCommand;
-import org.mifosng.data.command.SubmitLoanApplicationCommand;
 import org.mifosng.data.command.UndoLoanApprovalCommand;
 import org.mifosng.data.command.UndoLoanDisbursalCommand;
 import org.mifosng.data.command.UpdateUsernamePasswordCommand;
-import org.mifosng.platform.client.domain.Client;
-import org.mifosng.platform.client.domain.ClientRepository;
 import org.mifosng.platform.client.domain.Note;
 import org.mifosng.platform.client.domain.NoteRepository;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.exceptions.ApplicationDomainRuleException;
-import org.mifosng.platform.exceptions.NoAuthorizationException;
 import org.mifosng.platform.exceptions.UnAuthenticatedUserException;
 import org.mifosng.platform.infrastructure.BasicPasswordEncodablePlatformUser;
 import org.mifosng.platform.infrastructure.PlatformPasswordEncoder;
 import org.mifosng.platform.infrastructure.PlatformUser;
 import org.mifosng.platform.infrastructure.UsernameAlreadyExistsException;
-import org.mifosng.platform.loan.domain.AmortizationMethod;
 import org.mifosng.platform.loan.domain.DefaultLoanLifecycleStateMachine;
-import org.mifosng.platform.loan.domain.InterestCalculationPeriodMethod;
-import org.mifosng.platform.loan.domain.InterestMethod;
 import org.mifosng.platform.loan.domain.Loan;
-import org.mifosng.platform.loan.domain.LoanBuilder;
 import org.mifosng.platform.loan.domain.LoanLifecycleStateMachine;
-import org.mifosng.platform.loan.domain.LoanProduct;
-import org.mifosng.platform.loan.domain.LoanProductRelatedDetail;
-import org.mifosng.platform.loan.domain.LoanProductRepository;
 import org.mifosng.platform.loan.domain.LoanRepaymentScheduleInstallment;
 import org.mifosng.platform.loan.domain.LoanRepository;
 import org.mifosng.platform.loan.domain.LoanStatus;
@@ -53,6 +40,7 @@ import org.mifosng.platform.loan.domain.LoanStatusRepository;
 import org.mifosng.platform.loan.domain.LoanTransaction;
 import org.mifosng.platform.loan.domain.LoanTransactionRepository;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
+import org.mifosng.platform.loan.service.CalculationPlatformService;
 import org.mifosng.platform.user.domain.AppUser;
 import org.mifosng.platform.user.domain.AppUserRepository;
 import org.mifosng.platform.user.domain.PlatformUserRepository;
@@ -69,8 +57,6 @@ public class WritePlatformServiceJpaRepositoryImpl implements WritePlatformServi
 
 	private final PlatformUserRepository platformUserRepository;
 	private final PlatformPasswordEncoder platformPasswordEncoder;
-	private final ClientRepository clientRepository;
-	private final LoanProductRepository loanProductRepository;
 	private final LoanRepository loanRepository;
 	private final LoanStatusRepository loanStatusRepository;
 	private final CalculationPlatformService calculationPlatformService;
@@ -81,9 +67,7 @@ public class WritePlatformServiceJpaRepositoryImpl implements WritePlatformServi
 	public WritePlatformServiceJpaRepositoryImpl(
 			final PlatformUserRepository platformUserRepository,
 			final PlatformPasswordEncoder platformPasswordEncoder,
-			final ClientRepository clientRepository,
 			final NoteRepository noteRepository,
-			final LoanProductRepository loanProductRepository,
 			final LoanRepository loanRepository,
 			final LoanTransactionRepository loanTransactionRepository,
 			final LoanStatusRepository loanStatusRepository,
@@ -91,9 +75,7 @@ public class WritePlatformServiceJpaRepositoryImpl implements WritePlatformServi
 			) {
 		this.platformUserRepository = platformUserRepository;
 		this.platformPasswordEncoder = platformPasswordEncoder;
-		this.clientRepository = clientRepository;
 		this.noteRepository = noteRepository;
-		this.loanProductRepository = loanProductRepository;
 		this.loanRepository = loanRepository;
 		this.loanTransactionRepository = loanTransactionRepository;
 		this.loanStatusRepository = loanStatusRepository;
@@ -145,105 +127,6 @@ public class WritePlatformServiceJpaRepositoryImpl implements WritePlatformServi
 		return currentUser;
 	}
 
-	@Transactional
-	@Override
-	public EntityIdentifier submitLoanApplication(final SubmitLoanApplicationCommand command) {
-
-		AppUser currentUser = extractAuthenticatedUser();
-		
-		SubmitLoanApplicationCommandValidator validator = new SubmitLoanApplicationCommandValidator(command);
-		validator.validate();
-
-		LocalDate submittedOn = command.getSubmittedOnDate();
-		if (this.isBeforeToday(submittedOn) && currentUser.hasNotPermissionForAnyOf("CAN_SUBMIT_HISTORIC_LOAN_APPLICATION_ROLE", "PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE")) {
-			throw new NoAuthorizationException("Cannot add backdated loan.");
-		}
-
-		LoanProduct loanProduct = this.loanProductRepository.findOne(command.getProductId());
-		Client client = this.clientRepository.findOne(command.getApplicantId());
-
-		MonetaryCurrency currency = new MonetaryCurrency(command.getCurrencyCode(), command.getDigitsAfterDecimal());
-		
-		final BigDecimal defaultNominalInterestRatePerPeriod = BigDecimal.valueOf(command
-				.getInterestRatePerPeriod().doubleValue());
-		final PeriodFrequencyType interestPeriodFrequencyType = PeriodFrequencyType.fromInt(command.getInterestRateFrequencyMethod());
-		
-		// apr calculator
-		BigDecimal defaultAnnualNominalInterestRate = BigDecimal.ZERO;
-		switch (interestPeriodFrequencyType) {
-		case DAYS:
-			break;
-		case WEEKS:
-			defaultAnnualNominalInterestRate = command
-					.getInterestRatePerPeriod()
-					.multiply(BigDecimal.valueOf(52));
-			break;
-		case MONTHS:
-			defaultAnnualNominalInterestRate = command
-					.getInterestRatePerPeriod()
-					.multiply(BigDecimal.valueOf(12));
-			break;
-		case YEARS:
-			defaultAnnualNominalInterestRate = command
-					.getInterestRatePerPeriod().multiply(BigDecimal.valueOf(1));
-			break;
-		case INVALID:
-			break;
-		}
-		
-		final InterestMethod interestMethod = InterestMethod.fromInt(command.getInterestMethod());
-		final InterestCalculationPeriodMethod interestCalculationPeriodMethod = InterestCalculationPeriodMethod.fromInt(command.getInterestCalculationPeriodMethod());
-		
-		final Integer repayEvery = command.getRepaymentEvery();
-		final PeriodFrequencyType repaymentFrequencyType = PeriodFrequencyType
-				.fromInt(command.getRepaymentFrequency());
-		final Integer defaultNumberOfInstallments = command.getNumberOfRepayments();
-		final AmortizationMethod amortizationMethod = AmortizationMethod.fromInt(command.getAmortizationMethod());
-		final boolean flexibleRepaymentSchedule = command.isFlexibleRepaymentSchedule();
-		final boolean interestRebateAllowed = command.isInterestRebateAllowed();
-		
-		LoanProductRelatedDetail loanRepaymentScheduleDetail = new LoanProductRelatedDetail(currency,
-				command.getPrincipal(), defaultNominalInterestRatePerPeriod, interestPeriodFrequencyType, defaultAnnualNominalInterestRate, 
-				interestMethod, interestCalculationPeriodMethod,
-				repayEvery, repaymentFrequencyType, defaultNumberOfInstallments, amortizationMethod, command.getInArrearsToleranceAmount(),
-				flexibleRepaymentSchedule, interestRebateAllowed);
-
-		LoanSchedule loanSchedule = command.getLoanSchedule();
-		List<ScheduledLoanInstallment> loanRepaymentSchedule = loanSchedule.getScheduledLoanInstallments();
-
-		Loan loan = new LoanBuilder()
-				.with(currentUser.getOrganisation())
-				.with(loanProduct).with(client)
-				.with(loanRepaymentScheduleDetail)
-				.build();
-
-		for (ScheduledLoanInstallment scheduledLoanInstallment : loanRepaymentSchedule) {
-
-			MoneyData readPrincipalDue = scheduledLoanInstallment
-					.getPrincipalDue();
-
-			MoneyData readInterestDue = scheduledLoanInstallment
-					.getInterestDue();
-
-			LoanRepaymentScheduleInstallment installment = new LoanRepaymentScheduleInstallment(
-					loan, scheduledLoanInstallment.getInstallmentNumber(),
-					scheduledLoanInstallment.getPeriodStart(),
-					scheduledLoanInstallment.getPeriodEnd(), readPrincipalDue.getAmount(),
-					readInterestDue.getAmount());
-			loan.addRepaymentScheduleInstallment(installment);
-		}
-		
-		loan.submitApplication(submittedOn, command.getExpectedDisbursementDate(), command.getRepaymentsStartingFromDate(), command.getInterestCalculatedFromDate(), defaultLoanLifecycleStateMachine());
-		this.loanRepository.save(loan);
-		
-		if (StringUtils.isNotBlank(command.getSubmittedOnNote())) {
-			Note note = Note.loanNote(currentUser.getOrganisation(), loan, command.getSubmittedOnNote());
-			this.noteRepository.save(note);
-		}
-		
-		return new EntityIdentifier(loan.getId());
-	}
-
 	private boolean isBeforeToday(final LocalDate date) {
 		return date.isBefore(new LocalDate());
 	}
@@ -253,34 +136,6 @@ public class WritePlatformServiceJpaRepositoryImpl implements WritePlatformServi
 		return new DefaultLoanLifecycleStateMachine(allowedLoanStatuses);
 	}
 	
-	@Transactional
-	@Override
-	public EntityIdentifier deleteLoan(Long loanId) {
-		
-		AppUser currentUser = extractAuthenticatedUser();
-
-		Loan loan = this.loanRepository.findOne(loansThatMatch(
-				currentUser.getOrganisation(), loanId));
-		
-		if (loan == null) {
-			throw new ApplicationDomainRuleException(loanIdentifierDoesNotExistError(loanId), "No loan exists with id: " + loanId);
-		}
-		
-		if (loan.isNotSubmittedAndPendingApproval()) {
-			ErrorResponse errorResponse = new ErrorResponse("error.msg.cannot.delete.loan.in.its.present.state", "eventDate");
-			throw new ApplicationDomainRuleException(Arrays.asList(errorResponse), "Loan must be in pending approval state.");
-		}
-		
-		Long clientId = loan.getClient().getId();
-		
-		List<Note> relatedNotes = this.noteRepository.findByLoanId(loan.getId());
-		this.noteRepository.deleteInBatch(relatedNotes);
-		
-		this.loanRepository.delete(loanId);
-		
-		return new EntityIdentifier(clientId);
-	}
-
 	private List<ErrorResponse> loanIdentifierDoesNotExistError(Long loanId) {
 		ErrorResponse errorResponse = new ErrorResponse("error.msg.no.loan.with.identifier.exists", "id", loanId);
 		return Arrays.asList(errorResponse);
@@ -444,7 +299,6 @@ public class WritePlatformServiceJpaRepositoryImpl implements WritePlatformServi
 			Integer repaidEvery = loan.getLoanRepaymentScheduleDetail().getRepayEvery();
 			Integer selectedRepaymentFrequency = loan.getLoanRepaymentScheduleDetail().getRepaymentPeriodFrequencyType().getValue();
 			Integer selectedRepaymentSchedule = loan.getLoanRepaymentScheduleDetail().getAmortizationMethod().getValue();
-			boolean flexibleRepaymentSchedule = loan.isFlexibleRepaymentSchedule();
 			
 			// use annual percentage rate to re-calculate loan schedule for late disbursement
 			Number interestRatePerPeriod = interestRatePerYear;
@@ -452,12 +306,11 @@ public class WritePlatformServiceJpaRepositoryImpl implements WritePlatformServi
 			
 			Integer interestMethod = loan.getLoanRepaymentScheduleDetail().getInterestMethod().getValue();
 			Integer interestCalculationInPeriod = loan.getLoanRepaymentScheduleDetail().getInterestCalculationPeriodMethod().getValue();
-			boolean interestRebateAllowed = loan.getLoanRepaymentScheduleDetail().isInterestRebateAllowed();
 			
 			CalculateLoanScheduleCommand calculateCommand = new CalculateLoanScheduleCommand(currencyCode, currencyDigits, principalAsDecimal, 
 					interestRatePerPeriod, interestRateFrequencyMethod, interestMethod, interestCalculationInPeriod,
 					repaidEvery, selectedRepaymentFrequency, numberOfInstallments, 
-					selectedRepaymentSchedule, flexibleRepaymentSchedule, interestRebateAllowed, actualDisbursementDate, repaymentsStartingFromDate, interestCalculatedFromDate);
+					selectedRepaymentSchedule, actualDisbursementDate, repaymentsStartingFromDate, interestCalculatedFromDate);
 
 			LoanSchedule loanSchedule = this.calculationPlatformService.calculateLoanSchedule(calculateCommand);
 

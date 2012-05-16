@@ -2,9 +2,10 @@ package org.mifosng.data;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
-/*
- * TODO - Arguments is still not correctly supported
+/**
+ * Being removed in favour of {@link ApiGlobalErrorResponse} and {@link ApiParameterError}
  */
+@Deprecated
 @XmlRootElement(name="errorResponse")
 public class ErrorResponse {
 

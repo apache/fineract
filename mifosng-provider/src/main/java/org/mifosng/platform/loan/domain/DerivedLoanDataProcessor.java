@@ -70,6 +70,10 @@ public class DerivedLoanDataProcessor {
 		
 		Collections.sort(loanRepayments, new LoanRepaymentDataComparator());
 		
+		if (loanRepayments.isEmpty()) {
+			loanRepayments = null;
+		}
+		
 		return new DerivedLoanData(processRepaymentScheduleData, summaryData, loanRepayments);
 	}
 	

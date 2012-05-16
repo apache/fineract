@@ -173,13 +173,13 @@ $.views.registerHelpers({
 	};
 	
 	function calculateAnnualPercentageRate() {
-		var periodInterestRate = parseFloat($('#nominalInterestRate').val());
+		var periodInterestRate = parseFloat($('#interestRatePerPeriodFormatted').val());
 		if (isNaN(periodInterestRate)) {
 			periodInterestRate = 0;
 		}
 		
 		var periodsInYear = 12;
-		var periodType = $('#selectedInterestFrequencyOption').val();
+		var periodType = $('#interestRateFrequencyMethod').val();
 		if (periodType == 3) {
 			periodsInYear = 1;
 		} else if (periodType == 2) {
@@ -220,15 +220,15 @@ $.views.registerHelpers({
 				calculateLoanSchedule();
 				
 				// change detection
-				$('#principalMoney').change(function() {
+				$('#principalFormatted').change(function() {
 					calculateLoanSchedule();
 				});
 				
-				$('#repaidEvery').change(function() {
+				$('#repaymentEvery').change(function() {
 					calculateLoanSchedule();
 				});
 				
-				$('#selectedRepaymentFrequencyOption').change(function() {
+				$('#repaymentFrequency').change(function() {
 					calculateLoanSchedule();
 				});
 				
@@ -236,37 +236,37 @@ $.views.registerHelpers({
 					calculateLoanSchedule();
 				});
 				
-				$('#expectedDisbursementDate').change(function() {
+				$('#expectedDisbursementDateFormatted').change(function() {
 					calculateLoanSchedule();
 				});
 				
-				$('#repaymentsStartingFromDate').change(function() {
+				$('#repaymentsStartingFromDateFormatted').change(function() {
 					calculateLoanSchedule();
 				});
 				
-				$('#nominalInterestRate').change(function() {
+				$('#interestRatePerPeriodFormatted').change(function() {
 					calculateAnnualPercentageRate();
 					calculateLoanSchedule();
 				});
 				
-				$('#selectedInterestFrequencyOption').change(function() {
+				$('#interestRateFrequencyMethod').change(function() {
 					calculateAnnualPercentageRate();
 					calculateLoanSchedule();
 				});
 				
-				$('#selectedAmortizationMethodOption').change(function() {
+				$('#amortizationMethod').change(function() {
 					calculateLoanSchedule();
 				});
 				
-				$('#selectedInterestMethodOption').change(function() {
+				$('#interestMethod').change(function() {
 					calculateLoanSchedule();
 				});
 				
-				$('#interestRateCalculatedInPeriod').change(function() {
+				$('#interestCalculationPeriodMethod').change(function() {
 					calculateLoanSchedule();
 				});
 				
-				$('#interestCalculatedFromDate').change(function() {
+				$('#interestCalculatedFromDateFormatted').change(function() {
 					calculateLoanSchedule();
 				});
 				
@@ -291,14 +291,17 @@ $.views.registerHelpers({
 	}
 	
 	function calculateLoanSchedule() {
-		var calculateLoanScheduleurl = '${rootContext}portfolio/loanschedule/calculate';
+		var calculateLoanScheduleurl = 'http://localhost:8080/mifosng-provider/api/v1/loans?command=calculateLoanSchedule';
 		
-		var form_data = $('#entityform').serialize();
-			
+		var newFormData = JSON.stringify($('#entityform').serializeObject());
+    	console.log(newFormData);
+    	
 		var jqxhr2 = $.ajax({
 			  url: calculateLoanScheduleurl,
 			  type: 'POST',
-			  data: form_data,
+			  contentType: 'application/json',
+			  dataType: 'json',
+			  data: newFormData,
 			  success: function(data, textStatus, jqXHR) {
 				  removeErrors("#formerrors");
 				  var loanScheduleHtml = $("#newLoanScheduleTemplate").render(data);
@@ -313,17 +316,20 @@ $.views.registerHelpers({
 	}
 	
 	function submitLoanApplication() {
-		var submitLoanApplicationUrl = '${rootContext}portfolio/client/${clientId}/loan/new';
+		var submitLoanApplicationUrl = 'http://localhost:8080/mifosng-provider/api/v1/loans';
 		
-		var form_data = $('#entityform').serialize();
-			
+		var newFormData = JSON.stringify($('#entityform').serializeObject());
+    	console.log(newFormData);
+    	
 		var jqxhr2 = $.ajax({
 			  url: submitLoanApplicationUrl,
 			  type: 'POST',
-			  data: form_data,
+			  contentType: 'application/json',
+			  dataType: 'json',
+			  data: newFormData,
 			  success: function(data, textStatus, jqXHR) {
-				  var url = '${rootContext}portfolio/client/${clientId}';
-				  window.location.href = url;
+				  var localAppUrlToSwitchToClientPage = '${rootContext}portfolio/client/${clientId}';
+				  window.location.href = localAppUrlToSwitchToClientPage;
 			  }
 		});
 		
@@ -331,9 +337,8 @@ $.views.registerHelpers({
 			handleXhrError(jqXHR, textStatus, errorThrown, "#formErrorsTemplate", "#formerrors");
 		});
 	}
-	
-	
-	
+
+	// on page load
 	var jqxhr = $.ajax({
 		url: 'http://localhost:8080/mifosng-provider/api/v1/loans/template?clientId=${clientId}',
 		type: 'GET',

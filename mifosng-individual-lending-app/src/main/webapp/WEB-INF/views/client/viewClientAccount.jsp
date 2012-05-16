@@ -206,7 +206,7 @@ $(document).ready(function() {
 	    return o;
 	};
 	
-	function popupConfirmationDialogAndPost(url, titleCode, width, height, tabIndex, redirectUrl) {
+	function popupConfirmationDialogAndPost(url, submitType, titleCode, width, height, tabIndex, redirectUrl) {
 		  var dialogDiv = $("<div id='dialog-form'><div id='formerrors'></div>" + jQuery.i18n.prop('text.confirmation.required') + "</div>");
 		  
 		  	var confirmButton = jQuery.i18n.prop('dialog.button.confirm');
@@ -216,7 +216,9 @@ $(document).ready(function() {
 			buttonsOpts[confirmButton] = function() {
 				 var jqxhr = $.ajax({
 					  url: url,
-					  type: 'POST',
+					  type: submitType,
+					  contentType: 'application/json',
+					  dataType: 'json',
 					  success: function(data, textStatus, jqXHR) {
 						  dialogDiv.dialog("close");
 						  if (tabIndex > 0) {
@@ -322,70 +324,70 @@ $(document).ready(function() {
 			dataType: 'json',
 			cache: false,
 			success: function(data, textStatus, jqXHR) {
-			console.log(data);
-			var formHtml = $(templateSelector).render(data);
-			
-			dialogDiv.append(formHtml);
-			
-			var saveButton = jQuery.i18n.prop('dialog.button.save');
-			var cancelButton = jQuery.i18n.prop('dialog.button.cancel');
-			
-			var buttonsOpts = {};
-			buttonsOpts[saveButton] = function() {
+				console.log(data);
+				var formHtml = $(templateSelector).render(data);
 				
-				$('#notSelectedItems option').each(function(i) {  
+				dialogDiv.append(formHtml);
+				
+				var saveButton = jQuery.i18n.prop('dialog.button.save');
+				var cancelButton = jQuery.i18n.prop('dialog.button.cancel');
+				
+				var buttonsOpts = {};
+				buttonsOpts[saveButton] = function() {
+					
+					$('#notSelectedItems option').each(function(i) {  
+				    	   $(this).attr("selected", "selected");  
+				    });
+			    	
+			    	$('#selectedItems option').each(function(i) {  
 			    	   $(this).attr("selected", "selected");  
-			    });
-		    	
-		    	$('#selectedItems option').each(function(i) {  
-		    	   $(this).attr("selected", "selected");  
-		    	});
-		    	
-		    	var newFormData = JSON.stringify($('#entityform').serializeObject());
-		    	console.log(newFormData);
-		    	
-				var jqxhr = $.ajax({
-					  url: postUrl,
-					  type: submitType,
-					  contentType: 'application/json',
-					  dataType: 'json',
-					  data: newFormData,
-					  success: saveSuccessFunction,
-					  error: function(jqXHR, textStatus, errorThrown) {
-					    handleXhrError(jqXHR, textStatus, errorThrown, "#formErrorsTemplate", "#formerrors");
-					  }
-				});
-			};
-			
-			buttonsOpts[cancelButton] = function() {$(this).dialog( "close" );};
-			
-			dialogDiv.dialog({
-			  		title: jQuery.i18n.prop(titleCode), 
-			  		width: width, 
-			  		height: height, 
-			  		modal: true,
-			  		buttons: buttonsOpts,
-			  		close: function() {
-			  			// if i dont do this, theres a problem with errors being appended to dialog view second time round
-			  			$(this).remove();
-					},
-			  		open: function (event, ui) {
-			  			
-			  			$('#add').click(function() {  
-			  			     return !$('#notSelectedItems option:selected').remove().appendTo('#selectedItems');  
-			  			});
-			  			
-			  			$('#remove').click(function() {  
-			  				return !$('#selectedItems option:selected').remove().appendTo('#notSelectedItems');  
-			  			});
-			  			
-			  			$('.datepickerfield').datepicker({constrainInput: true, maxDate: 0, dateFormat: 'dd MM yy'});
-			  			
-			  			$("#entityform textarea").first().focus();
-			  			$('#entityform input').first().focus();
-			  		}
-			  	}).dialog('open');
-		  }
+			    	});
+			    	
+			    	var newFormData = JSON.stringify($('#entityform').serializeObject());
+			    	console.log(newFormData);
+			    	
+					var jqxhr = $.ajax({
+						  url: postUrl,
+						  type: submitType,
+						  contentType: 'application/json',
+						  dataType: 'json',
+						  data: newFormData,
+						  success: saveSuccessFunction,
+						  error: function(jqXHR, textStatus, errorThrown) {
+						    handleXhrError(jqXHR, textStatus, errorThrown, "#formErrorsTemplate", "#formerrors");
+						  }
+					});
+				};
+				
+				buttonsOpts[cancelButton] = function() {$(this).dialog( "close" );};
+				
+				dialogDiv.dialog({
+				  		title: jQuery.i18n.prop(titleCode), 
+				  		width: width, 
+				  		height: height, 
+				  		modal: true,
+				  		buttons: buttonsOpts,
+				  		close: function() {
+				  			// if i dont do this, theres a problem with errors being appended to dialog view second time round
+				  			$(this).remove();
+						},
+				  		open: function (event, ui) {
+				  			
+				  			$('#add').click(function() {  
+				  			     return !$('#notSelectedItems option:selected').remove().appendTo('#selectedItems');  
+				  			});
+				  			
+				  			$('#remove').click(function() {  
+				  				return !$('#selectedItems option:selected').remove().appendTo('#notSelectedItems');  
+				  			});
+				  			
+				  			$('.datepickerfield').datepicker({constrainInput: true, maxDate: 0, dateFormat: 'dd MM yy'});
+				  			
+				  			$("#entityform textarea").first().focus();
+				  			$('#entityform input').first().focus();
+				  		}
+				  	}).dialog('open');
+			  }
 		 });
 		 
 		jqxhr.error(function(jqXHR, textStatus, errorThrown) {
@@ -435,19 +437,6 @@ $(document).ready(function() {
 					// retrieve accounts summary info
 					refreshLoanSummaryInfo();
 					
-					// retrieve additional info
-					var additionalFieldsParams = {
-							url: "http://localhost:8080/mifosng-provider/",
-							datasetType: "portfolio_client",
-							datasetPKValue: data.id,
-							datasetTypeDiv: "clientadditionaldata", 
-							headingPrefix: "", 
-							headingClass: "", 
-							labelClass: "longrowlabel",
-							valueClass:	"rowvalue"					
-					};
-					jQuery.stretchyData.displayAllExtraData(additionalFieldsParams);
-
 					// bind click listeners to buttons.
 					$('.casflowbtn').button().click(function(e) {
 						var linkId = this.id;
@@ -489,24 +478,25 @@ $(document).ready(function() {
 
 					refreshNoteWidget();
 					
-	        	} else {
-
-	        		var tableHtml = $("#loanDataTabTemplate").render(data);
-	        		
-	        		var currentTab = $("#newtabs").children(".ui-tabs-panel").not(".ui-tabs-hide");
-	        		currentTab.html(tableHtml);
-
+					// retrieve additional info
 					var additionalFieldsParams = {
 							url: "http://localhost:8080/mifosng-provider/",
-							datasetType: "portfolio_loan",
+							datasetType: "portfolio_client",
 							datasetPKValue: data.id,
-							datasetTypeDiv: "loanadditionaldata" + data.id, 
+							datasetTypeDiv: "clientadditionaldata", 
 							headingPrefix: "", 
 							headingClass: "", 
 							labelClass: "longrowlabel",
 							valueClass:	"rowvalue"					
 					};
 					jQuery.stretchyData.displayAllExtraData(additionalFieldsParams);
+					
+	        	} else {
+
+	        		var tableHtml = $("#loanDataTabTemplate").render(data);
+	        		
+	        		var currentTab = $("#newtabs").children(".ui-tabs-panel").not(".ui-tabs-hide");
+	        		currentTab.html(tableHtml);
 
 	        		var curTabID = currentTab.prop("id")
 	        		
@@ -560,13 +550,13 @@ $(document).ready(function() {
 						
 						var linkId = this.id;
 						var loanId = linkId.replace("deletebtn", "");
-						var url = '${rootContext}portfolio/loan/' + loanId + '/delete';
+						var url = 'http://localhost:8080/mifosng-provider/api/v1/loans/' + loanId;
 						var width = 400; 
 						var height = 225;
 						
 						var redirectUrl = '${clientUrl}';
 						
-						popupConfirmationDialogAndPost(url, 'dialog.title.confirmation.required', width, height, 0, redirectUrl);
+						popupConfirmationDialogAndPost(url, 'DELETE', 'dialog.title.confirmation.required', width, height, 0, redirectUrl);
 					    e.preventDefault();
 					});
 					$('button.deleteloan span').text(jQuery.i18n.prop('dialog.button.delete.loan'));
@@ -660,6 +650,19 @@ $(document).ready(function() {
 			        		var curTabID = curTab.prop("id")
 						}
 					});
+					
+					// additional data
+					var additionalFieldsParams = {
+							url: "http://localhost:8080/mifosng-provider/",
+							datasetType: "portfolio_loan",
+							datasetPKValue: data.id,
+							datasetTypeDiv: "loanadditionaldata" + data.id, 
+							headingPrefix: "", 
+							headingClass: "", 
+							labelClass: "longrowlabel",
+							valueClass:	"rowvalue"					
+					};
+					jQuery.stretchyData.displayAllExtraData(additionalFieldsParams);
 	        	}
 	        }
 	    }

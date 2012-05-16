@@ -5,18 +5,14 @@ import static org.mifosng.platform.Specifications.loansThatMatch;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.sql.DataSource;
 
 import org.joda.time.LocalDate;
-import org.mifosng.data.ClientData;
 import org.mifosng.data.CurrencyData;
-import org.mifosng.data.LoanProductData;
 import org.mifosng.data.LoanRepaymentData;
 import org.mifosng.data.MoneyData;
-import org.mifosng.data.NewLoanWorkflowStepOneData;
 import org.mifosng.data.OrganisationReadModel;
 import org.mifosng.platform.client.service.ClientReadPlatformService;
 import org.mifosng.platform.currency.domain.ApplicationCurrency;

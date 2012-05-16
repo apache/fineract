@@ -1,5 +1,8 @@
 package org.mifosng.platform.api.infrastructure;
 
+import java.math.BigDecimal;
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -32,5 +35,29 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		}
 		
 		return eventLocalDate;
+	}
+
+	@Override
+	public BigDecimal convertFrom(String numericalValueFormatted, String parameterName, Locale clientApplicationLocale) {
+		
+		try {
+			BigDecimal number = null;
+
+			if (StringUtils.isNotBlank(numericalValueFormatted)) {
+				String sourceWithoutSpaces = numericalValueFormatted.replaceAll(" ", "");
+				NumberFormat format = NumberFormat.getNumberInstance(clientApplicationLocale);
+				Number parsedNumber = format.parse(sourceWithoutSpaces);
+				number = BigDecimal.valueOf(Double.valueOf(parsedNumber.doubleValue()));
+			}
+			
+			return number;
+		} catch (ParseException e) {
+			
+			List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+			ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.number.format", "The parameter " + parameterName + " is invalid.", parameterName, numericalValueFormatted);
+			dataValidationErrors.add(error);
+			
+			throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);
+		}
 	}
 }

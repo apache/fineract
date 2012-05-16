@@ -3,6 +3,10 @@ package org.mifosng.platform.loan.domain;
 import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.organisation.domain.Organisation;
 
+/**
+ * remove in favour of static factory method on {@link Loan}. No advantage to builder patter in this case?
+ */
+@Deprecated
 public class LoanBuilder {
 
     private Organisation organisation;
