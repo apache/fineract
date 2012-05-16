@@ -20,8 +20,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 
-import org.mifosng.data.AdditionalFieldSet;
-import org.mifosng.data.AdditionalFieldSets;
+import org.mifosng.data.AdditionalFieldsSet;
+import org.mifosng.data.AdditionalFieldsSets;
 import org.mifosng.data.reports.GenericResultset;
 import org.mifosng.data.reports.ResultsetColumnHeader;
 import org.mifosng.data.reports.ResultsetDataRow;
@@ -159,12 +159,12 @@ public class ReadExtraDataAndReportingServiceImpl implements
 
 		String sql;
 		if (name.equals(".")) {
-			sql = "select r.report_id, r.report_name, r.report_type, r.report_subtype, r.report_category," + 
-					" rp.parameter_id, rp.report_parameter_name, p.parameter_name" +
-					" from stretchy_report r" + 
-					" left join stretchy_report_parameter rp on rp.report_id = r.report_id" + 
-					" left join stretchy_parameter p on p.parameter_id = rp.parameter_id" + 
-					" order by r.report_name, rp.parameter_id";
+			sql = "select r.report_id, r.report_name, r.report_type, r.report_subtype, r.report_category,"
+					+ " rp.parameter_id, rp.report_parameter_name, p.parameter_name"
+					+ " from stretchy_report r"
+					+ " left join stretchy_report_parameter rp on rp.report_id = r.report_id"
+					+ " left join stretchy_parameter p on p.parameter_id = rp.parameter_id"
+					+ " order by r.report_name, rp.parameter_id";
 		} else {
 			try {
 				sql = getSQLtoRun(name, type, queryParams);
@@ -237,8 +237,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 	}
 
 	private String getSQLtoRun(final String name, final String type,
-			final Map<String, String> queryParams)
-			throws SQLException {
+			final Map<String, String> queryParams) throws SQLException {
 		String sql = null;
 		String rptDB = queryParams.get("${rptDB}");
 		if ((rptDB == null) || rptDB.equals("")) {
@@ -334,9 +333,9 @@ public class ReadExtraDataAndReportingServiceImpl implements
 	}
 
 	@Override
-	public AdditionalFieldSets retrieveExtraDatasetNames(String type) {
+	public AdditionalFieldsSets retrieveExtraDatasetNames(String type) {
 
-		List<AdditionalFieldSet> additionalFieldsSets = new ArrayList<AdditionalFieldSet>();
+		List<AdditionalFieldsSet> additionalFieldsSets = new ArrayList<AdditionalFieldsSet>();
 		Connection db_connection;
 		try {
 			db_connection = dataSource.getConnection();
@@ -348,16 +347,15 @@ public class ReadExtraDataAndReportingServiceImpl implements
 			} else {
 				whereClause = "where t.`name` = '" + type + "'";
 			}
-			String sql = "select d.id, d.`name` as datasetName, t.`name` as datasetType from stretchydata_dataset d join stretchydata_datasettype t on t.id = d.datasettype_id "
+			String sql = "select d.id, d.`name` as 'set', t.`name` as 'type' from stretchydata_dataset d join stretchydata_datasettype t on t.id = d.datasettype_id "
 					+ whereClause + " order by d.`name`";
 
 			ResultSet rs = db_statement.executeQuery(sql);
 
 			while (rs.next()) {
-				additionalFieldsSets
-						.add(new AdditionalFieldSet(rs.getInt("id"), rs
-								.getString("datasetName"), rs
-								.getString("datasetType")));
+				additionalFieldsSets.add(new AdditionalFieldsSet(rs
+						.getInt("id"), rs.getString("set"), rs
+						.getString("type")));
 			}
 
 			db_statement.close();
@@ -370,37 +368,35 @@ public class ReadExtraDataAndReportingServiceImpl implements
 					.status(Status.BAD_REQUEST).entity(e.getMessage()).build());
 		}
 
-		return new AdditionalFieldSets(additionalFieldsSets);
+		return new AdditionalFieldsSets(additionalFieldsSets);
 	}
 
 	@Override
-	public GenericResultset retrieveExtraData(String datasetType,
-			String datasetName, String datasetPKValue) {
+	public GenericResultset retrieveExtraData(String type, String set, String id) {
 
-		if (datasetType == null) {
-			logger.info("Extra Data Table Type not Found");
+		if (type == null) {
+			logger.info("Type not Found");
 			return null;
 		}
-		if (datasetName == null) {
-			logger.info("Extra Data Table Name not Found");
+		if (set == null) {
+			logger.info("Set not Found");
 			return null;
 		}
-		if (datasetPKValue == null) {
-			logger.info("Extra Data Table ID not Found");
+		if (id == null) {
+			logger.info("Id not Found");
 			return null;
 		}
 
 		long startTime = System.currentTimeMillis();
-		logger.info("STARTING EXTRA DATA TABLE: " + datasetName + "   ID: "
-				+ datasetPKValue);
+		logger.info("STARTING SET: " + set + "   ID: " + id);
 
 		try {
-			GenericResultset result = fillExtraDataGenericResultSet(
-					datasetType, datasetName, datasetPKValue);
+			GenericResultset result = fillExtraDataGenericResultSet(type, set,
+					id);
 
 			long elapsed = System.currentTimeMillis() - startTime;
-			logger.info("FINISHING EXTRA DATA TABLE: " + datasetName
-					+ "     Elapsed Time: " + elapsed);
+			logger.info("FINISHING SET: " + set + "     Elapsed Time: "
+					+ elapsed);
 			return result;
 		} catch (SQLException e) {
 			logger.info("Error - SQL: " + e.toString());
@@ -408,22 +404,18 @@ public class ReadExtraDataAndReportingServiceImpl implements
 		}
 	}
 
-	private GenericResultset fillExtraDataGenericResultSet(String datasetType,
-			String datasetName, String datasetPKValue) throws SQLException {
+	private GenericResultset fillExtraDataGenericResultSet(String type,
+			String set, String id) throws SQLException {
 
 		GenericResultset result = new GenericResultset();
-		String fullDatasetName = getFullDatasetName(datasetType, datasetName);
+		String fullDatasetName = getFullDatasetName(type, set);
 		Connection db_connection = dataSource.getConnection();
 		Statement db_statement1 = db_connection.createStatement();
 		Statement db_statement2 = db_connection.createStatement();
 		Statement db_statement3 = db_connection.createStatement();
 		String sql = "select f.`name`, f.data_type, f.data_length, f.display_type, f.allowed_list_id from stretchydata_datasettype t join stretchydata_dataset d on d.datasettype_id = t.id join stretchydata_dataset_fields f on f.dataset_id = d.id where d.`name` = '"
-				+ datasetName
-				+ "' and t.`name` = '"
-				+ datasetType
-				+ "' order by f.id";
+				+ set + "' and t.`name` = '" + type + "' order by f.id";
 
-		// logger.info("specific: " + sql);
 		ResultSet rsmd = db_statement1.executeQuery(sql);
 
 		List<ResultsetColumnHeader> columnHeaders = new ArrayList<ResultsetColumnHeader>();
@@ -461,7 +453,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 		result.setColumnHeaders(columnHeaders);
 
 		sql = "select " + selectFieldList + " from `" + fullDatasetName
-				+ "` where id = " + datasetPKValue;
+				+ "` where id = " + id;
 
 		ResultSet rs = db_statement3.executeQuery(sql);
 		String columnName = null;
@@ -495,9 +487,8 @@ public class ReadExtraDataAndReportingServiceImpl implements
 
 	}
 
-	private String getFullDatasetName(final String datasetType,
-			final String datasetName) {
-		return datasetType + "_extra_" + datasetName;
+	private String getFullDatasetName(final String type, final String set) {
+		return type + "_extra_" + set;
 	}
 
 	private static String replace(String str, String pattern, String replace) {
@@ -515,11 +506,10 @@ public class ReadExtraDataAndReportingServiceImpl implements
 	}
 
 	@Override
-	public void tempSaveExtraData(String datasetType, String datasetName,
-			String datasetPKValue, Map<String, String> queryParams) {
-		logger.info("SaveExtraData - DatasetType: " + datasetType
-				+ "    DatasetName: " + datasetName + "  datasetPKValue: "
-				+ datasetPKValue);
+	public void updateExtraData(String type, String set, String id,
+			Map<String, String> queryParams) {
+		logger.info("updateExtraData - type: " + type + "    set: " + set
+				+ "  id: " + id);
 
 		logger.info("startjpw: ");
 		Set<String> keys = queryParams.keySet();
@@ -531,9 +521,8 @@ public class ReadExtraDataAndReportingServiceImpl implements
 
 		logger.info("endjpw: ");
 
-		String fullDatasetName = getFullDatasetName(datasetType, datasetName);
-		String saveSql = getSaveSql(fullDatasetName, datasetPKValue,
-				queryParams);
+		String fullDatasetName = getFullDatasetName(type, set);
+		String saveSql = getSaveSql(fullDatasetName, id, queryParams);
 		try {
 			Connection db_connection = dataSource.getConnection();
 			Statement db_statement = db_connection.createStatement();
@@ -550,7 +539,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 
 	}
 
-	private String getSaveSql(String fullDatasetName, String datasetPKValue,
+	private String getSaveSql(String fullSetName, String id,
 			Map<String, String> queryParams) {
 
 		String errMsg = "";
@@ -572,7 +561,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 
 		if (transType.equals("E")) {
 			boolean firstColumn = true;
-			saveSql = "update `" + fullDatasetName + "` ";
+			saveSql = "update `" + fullSetName + "` ";
 
 			for (String key : keys) {
 				if (!(key.equals("ed_transType") || key.equals("id"))) {
@@ -596,7 +585,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 				}
 			}
 
-			saveSql += " where id = " + datasetPKValue;
+			saveSql += " where id = " + id;
 		} else {
 			String insertColumns = "";
 			String selectColumns = "";
@@ -619,9 +608,8 @@ public class ReadExtraDataAndReportingServiceImpl implements
 				}
 			}
 
-			saveSql = "insert into `" + fullDatasetName + "` (id"
-					+ insertColumns + ")" + " select " + datasetPKValue
-					+ " as id" + selectColumns;
+			saveSql = "insert into `" + fullSetName + "` (id" + insertColumns
+					+ ")" + " select " + id + " as id" + selectColumns;
 		}
 		// logger.info("Save SQL: " + saveSql);
 		return saveSql;
