@@ -1,7 +1,6 @@
 package org.mifosng.ui.loan;
 
 import java.math.BigDecimal;
-import java.security.Principal;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -17,20 +16,15 @@ import org.joda.time.format.DateTimeFormat;
 import org.mifosng.data.EntityIdentifier;
 import org.mifosng.data.ErrorResponse;
 import org.mifosng.data.LoanSchedule;
-import org.mifosng.data.NewLoanWorkflowStepOneData;
 import org.mifosng.data.command.CalculateLoanScheduleCommand;
 import org.mifosng.data.command.SubmitLoanApplicationCommand;
-import org.mifosng.oauth.ConsumerUserDetails;
 import org.mifosng.ui.CommonRestOperations;
 import org.mifosng.ui.loanproduct.ClientValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -95,20 +89,6 @@ public class LoanController {
 			validationErrors.add(new ErrorResponse("validation.msg.invalid.number.format", "amount", source));
 			throw new ClientValidationException(validationErrors);
 		}
-	}
-	
-	@RequestMapping(value = "/portfolio/client/{clientId}/loan/new", method = RequestMethod.GET)
-	public String loadLoanCreationWorkflow(final Model model, @PathVariable("clientId") final Long clientId, final Principal principal) {
-		
-		UsernamePasswordAuthenticationToken authenticationToken = (UsernamePasswordAuthenticationToken) principal;
-    	ConsumerUserDetails user =  (ConsumerUserDetails) authenticationToken.getPrincipal();
-    	if (user.hasNoAuthorityToSumitLoanApplication()) {
-    		throw new AccessDeniedException("");
-    	}
-		
-		model.addAttribute("clientId", clientId);
-		
-		return "newloanapplication";
 	}
 	
 	@RequestMapping(consumes="application/x-www-form-urlencoded", produces="application/json", value = "/portfolio/client/{clientId}/loan/new", method = RequestMethod.POST)
@@ -195,17 +175,5 @@ public class LoanController {
 				flexibleRepaymentSchedule, interestRebateAllowed, expectedDisbursementDate, repaymentsStartingFromDate, interestCalculatedFromDate);
 		
 		return this.commonRestOperations.calculateLoanSchedule(command);
-	}
-	
-	@RequestMapping(consumes="application/json", produces="application/json", value = "/portfolio/client/{clientId}/product/{productId}/new", method = RequestMethod.GET)
-	public @ResponseBody NewLoanWorkflowStepOneData retrieveNewLoan(@PathVariable("clientId") Long clientId, @PathVariable("productId") Long productId) {
-
-		return this.commonRestOperations.retrieveNewLoanApplicationDetails(clientId, productId);
-	}
-	
-	@RequestMapping(consumes="application/json", produces="application/json", value = "/portfolio/client/{clientId}/loan/new/workflow/one", method = RequestMethod.GET)
-	public @ResponseBody NewLoanWorkflowStepOneData retrieveNewLoan(@PathVariable("clientId") Long clientId) {
-
-		return this.commonRestOperations.retrieveNewLoanApplicationStepOneDetails(clientId);
 	}
 }

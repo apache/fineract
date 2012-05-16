@@ -14,7 +14,6 @@ import org.mifosng.data.LoanProductData;
 import org.mifosng.data.LoanProductList;
 import org.mifosng.data.LoanRepaymentData;
 import org.mifosng.data.LoanSchedule;
-import org.mifosng.data.NewLoanWorkflowStepOneData;
 import org.mifosng.data.command.AdjustLoanTransactionCommand;
 import org.mifosng.data.command.CalculateLoanScheduleCommand;
 import org.mifosng.data.command.LoanStateTransitionCommand;
@@ -130,49 +129,6 @@ public class CommonRestOperationsImpl implements CommonRestOperations {
 					.exchange(restUri, HttpMethod.POST,
 							calculateLoanRepaymentScheduleRequest(command),
 							LoanSchedule.class);
-
-			return s.getBody();
-		} catch (HttpStatusCodeException e) {
-			ErrorResponseList errorList = parseErrors(e);
-			throw new ClientValidationException(errorList.getErrors());
-		}
-	}
-
-	@Override
-	public NewLoanWorkflowStepOneData retrieveNewLoanApplicationStepOneDetails(
-			final Long clientId) {
-		try {
-			URI restUri = URI.create(getBaseServerUrl().concat(
-					"api/protected/loan/new/" + clientId.toString()
-							+ "/workflow/one"));
-
-			ResponseEntity<NewLoanWorkflowStepOneData> s = this.oauthRestServiceTemplate
-					.exchange(restUri, HttpMethod.GET, emptyRequest(),
-							NewLoanWorkflowStepOneData.class);
-
-			// for now ensure user must select product on step one (even if
-			// there is only one product!)
-			NewLoanWorkflowStepOneData data = s.getBody();
-			data.setProductId(null);
-
-			return s.getBody();
-		} catch (HttpStatusCodeException e) {
-			ErrorResponseList errorList = parseErrors(e);
-			throw new ClientValidationException(errorList.getErrors());
-		}
-	}
-
-	@Override
-	public NewLoanWorkflowStepOneData retrieveNewLoanApplicationDetails(
-			Long clientId, Long productId) {
-		try {
-			URI restUri = URI.create(getBaseServerUrl().concat(
-					"api/protected/loan/new/" + clientId.toString()
-							+ "/product/" + productId.toString()));
-
-			ResponseEntity<NewLoanWorkflowStepOneData> s = this.oauthRestServiceTemplate
-					.exchange(restUri, HttpMethod.GET, emptyRequest(),
-							NewLoanWorkflowStepOneData.class);
 
 			return s.getBody();
 		} catch (HttpStatusCodeException e) {

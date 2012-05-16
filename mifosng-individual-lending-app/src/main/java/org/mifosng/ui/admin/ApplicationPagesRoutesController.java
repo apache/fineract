@@ -1,8 +1,12 @@
 package org.mifosng.ui.admin;
 
+import java.security.Principal;
+
+import org.mifosng.oauth.ConsumerUserDetails;
 import org.mifosng.ui.reporting.ReportingRestOperations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -70,5 +74,19 @@ public class ApplicationPagesRoutesController {
 	@RequestMapping(value = "/org/admin/settings", method = RequestMethod.GET)
 	public String userSettingsScreen() {
 		return "admin/accountsettings";
+	}
+	
+	@RequestMapping(value = "/portfolio/client/{clientId}/loan/new", method = RequestMethod.GET)
+	public String loadLoanCreationWorkflow(final Model model, @PathVariable("clientId") final Long clientId, final Principal principal) {
+		
+		UsernamePasswordAuthenticationToken authenticationToken = (UsernamePasswordAuthenticationToken) principal;
+    	ConsumerUserDetails user =  (ConsumerUserDetails) authenticationToken.getPrincipal();
+    	if (user.hasNoAuthorityToSumitLoanApplication()) {
+    		throw new AccessDeniedException("");
+    	}
+		
+		model.addAttribute("clientId", clientId);
+		
+		return "newloanapplication";
 	}
 }

@@ -21,12 +21,18 @@ public class NewLoanWorkflowStepOneData implements Serializable {
 	private List<LoanProductData> allowedProducts = new ArrayList<LoanProductData>();
 	
 	// extra
+	private String dateFormat;
+	private String submittedOnDateFormatted;
 	private LocalDate submittedOnDate;
 	private String submittedOnNote = "";
 	
+	private String expectedDisbursementDateFormatted;
 	private LocalDate expectedDisbursementDate = new LocalDate();
+	
+	private String repaymentsStartingFromDateFormatted;
 	private LocalDate repaymentsStartingFromDate;
 	
+	private String interestCalculatedFromDateFormatted;
 	private LocalDate interestCalculatedFromDate;
 	
 	private LoanSchedule repaymentSchedule;
@@ -147,5 +153,48 @@ public class NewLoanWorkflowStepOneData implements Serializable {
 
 	public void setRepaymentSchedule(LoanSchedule repaymentSchedule) {
 		this.repaymentSchedule = repaymentSchedule;
+	}
+
+	public String getDateFormat() {
+		return dateFormat;
+	}
+
+	public void setDateFormat(String dateFormat) {
+		this.dateFormat = dateFormat;
+	}
+
+	public String getSubmittedOnDateFormatted() {
+		return submittedOnDateFormatted;
+	}
+
+	public void setSubmittedOnDateFormatted(String submittedOnDateFormatted) {
+		this.submittedOnDateFormatted = submittedOnDateFormatted;
+	}
+
+	public String getExpectedDisbursementDateFormatted() {
+		return expectedDisbursementDateFormatted;
+	}
+
+	public void setExpectedDisbursementDateFormatted(
+			String expectedDisbursementDateFormatted) {
+		this.expectedDisbursementDateFormatted = expectedDisbursementDateFormatted;
+	}
+
+	public String getRepaymentsStartingFromDateFormatted() {
+		return repaymentsStartingFromDateFormatted;
+	}
+
+	public void setRepaymentsStartingFromDateFormatted(
+			String repaymentsStartingFromDateFormatted) {
+		this.repaymentsStartingFromDateFormatted = repaymentsStartingFromDateFormatted;
+	}
+
+	public String getInterestCalculatedFromDateFormatted() {
+		return interestCalculatedFromDateFormatted;
+	}
+
+	public void setInterestCalculatedFromDateFormatted(
+			String interestCalculatedFromDateFormatted) {
+		this.interestCalculatedFromDateFormatted = interestCalculatedFromDateFormatted;
 	}
 }

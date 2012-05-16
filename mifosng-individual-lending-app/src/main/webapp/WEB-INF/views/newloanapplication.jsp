@@ -10,11 +10,10 @@
 <head>
 <jsp:include page="common-head.jsp" />
 <c:url value="/" var="rootContext" />
-<c:url value="/portfolio/client/${clientId}/loan/new/workflow/one" var="newLoanUrl" />
 <script>
 $(document).ready(function() {
 
-	$.views.registerHelpers({
+$.views.registerHelpers({
 		
 		money: function(monetaryObj) {
 			
@@ -31,19 +30,19 @@ $(document).ready(function() {
 			return Globalize.format(monetaryObj.amount, "c" + digits); 
 		},
 		decimal: function(number, digits) {
-		      try {
-		    	return Globalize.format(number, "n" + digits); 
-		      } catch(e) {
-		        return number +"(NaN)";
-		      }
-		},
+	      try {
+	    	return Globalize.format(number, "n" + digits); 
+	      } catch(e) {
+	        return number +"(NaN)";
+	      }
+	    },
 		number: function(number) {
-		      try {
-		    	  return Globalize.format(number, "n0"); 
-		      } catch(e) {
-		        return number +"(NaN)";
-		      }
-		},
+	      try {
+	    	  return Globalize.format(number, "n0"); 
+	      } catch(e) {
+	        return number +"(NaN)";
+	      }
+	    },
 	    numberGreaterThanZero: function(number) {
 		      try {
 		    	var num = number.toFixed(0);
@@ -52,40 +51,33 @@ $(document).ready(function() {
 		        return false;
 		      }
 		},
-		globalDate: function(dateParts) {
+		globalDate: function(localDateAsISOString) {
 		      try {
-		    	  if (dateParts === null) {
-		    		  return "";
-		    	  } else {
-			    	  var year = dateParts[0];
-			    	  var month = parseInt(dateParts[1]) - 1; // month is zero indexed
-			    	  var day = dateParts[2];
-			    	  
-			    	  var d = new Date();
-			    	  d.setFullYear(year,month,day);
-			    	  
-			    	  return Globalize.format(d,"dd MMMM yyyy");
-		    	  }
+		    	  if (localDateAsISOString === null) return "";
+		    	  var dateParts = localDateAsISOString.split("-")
+		    	  var year = dateParts[0];
+		    	  var month = parseInt(dateParts[1]) - 1; // month is zero indexed
+		    	  var day = dateParts[2];
+		    	  
+		    	  var d = new Date();
+		    	  d.setFullYear(year,month,day);
+		    	  
+		    	  return Globalize.format(d,"dd MMMM yyyy");
 		      } catch(e) {
 		        return "??";
 		      }
 		},
-		globalDateTime: function(dateParts) {
+		globalDateTime: function(dateInMillis) {
 		      try {
-		    	  if (dateParts === null) {
-		    		  return "";
-		    	  } else {
-		    		  var d = new Date(dateParts);
-			    	  
-			    	  return Globalize.format(d,"F");
-		    	  }
+		    	  var d = new Date(dateInMillis);
+		    	  
+		    	  return Globalize.format(d,"F");
 		      } catch(e) {
 		        return "??";
 		      }
 		}
-		
 	});
-
+	
 	function removeErrors(placeholderDiv) {
 		// remove error class from all input fields
 		var $inputs = $('#entityform :input');
@@ -119,17 +111,25 @@ $(document).ready(function() {
 			removeErrors(placeholderDiv);
 			
 		  	var jsonErrors = JSON.parse(jqXHR.responseText);
-		  	
+		  	var valErrors = jsonErrors.errors;
 		  	var errorArray = new Array();
 		  	var arrayIndex = 0;
-		  	$.each(jsonErrors, function() {
-		  	  var fieldId = '#' + this.field;
+		  	$.each(valErrors, function() {
+		  	  var fieldId = '#' + this.parameterName;
 		  	  $(fieldId).addClass("ui-state-error");
 		  	  
 		  	  var errorObj = new Object();
-		  	  errorObj.field = this.field;
-		  	  errorObj.code = this.code;
-		  	  errorObj.message = jQuery.i18n.prop(this.code, this.args);
+		  	  errorObj.field = this.parameterName;
+		  	  errorObj.code = this.userMessageGlobalisationCode;
+		  	  
+		  	  var argArray = new Array();
+		  	  var argArrayIndex = 0;
+		  	  $.each(this.args, function() {
+		  		argArray[argArrayIndex] = this.value;
+		  		argArrayIndex++;
+		  	  });
+		  	  // hardcoded support for six arguments
+		  	  errorObj.message = jQuery.i18n.prop(this.userMessageGlobalisationCode, argArray[0], argArray[1], argArray[2], argArray[3], argArray[4], argArray[5]);
 		  	  errorObj.value = this.value;
 		  	  
 		  	  errorArray[arrayIndex] = errorObj;
@@ -148,6 +148,29 @@ $(document).ready(function() {
 		  	$(placeholderDiv).append(formErrorsHtml);
 		}
 	}
+	
+	$.fn.serializeObject = function()
+	{
+	    var o = {};
+	    var a = this.serializeArray();
+	    $.each(a, function() {
+	        if (o[this.name] !== undefined) {
+	            if (!o[this.name].push) {
+	                o[this.name] = [o[this.name]];
+	            }
+	            o[this.name].push(this.value || '');
+	        } else {
+	        	
+	        	if (this.name === 'selectedItems' || this.name === 'notSelectedItems') {
+	        		o[this.name] = new Array();
+	        		o[this.name].push(this.value || '');
+	        	} else {
+	        		o[this.name] = this.value || '';	
+	        	}
+	        }
+	    });
+	    return o;
+	};
 	
 	function calculateAnnualPercentageRate() {
 		var periodInterestRate = parseFloat($('#nominalInterestRate').val());
@@ -171,7 +194,7 @@ $(document).ready(function() {
 	
 	function repopulateFullForm(clientId, productId) {
 		
-		var url = '${rootContext}portfolio/client/' + clientId + '/product/' + productId + '/new';
+		var url = 'http://localhost:8080/mifosng-provider/api/v1/loans/template?clientId=' + clientId + '&productId=' + productId;
 		
 		var jqxhr = $.ajax({
 			url: url,
@@ -312,7 +335,7 @@ $(document).ready(function() {
 	
 	
 	var jqxhr = $.ajax({
-		url: '${newLoanUrl}',
+		url: 'http://localhost:8080/mifosng-provider/api/v1/loans/template?clientId=${clientId}',
 		type: 'GET',
 		contentType: 'application/json',
 		dataType: 'json',

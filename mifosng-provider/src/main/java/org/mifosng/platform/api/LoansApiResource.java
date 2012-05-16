@@ -5,10 +5,12 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.mifosng.data.LoanAccountData;
+import org.mifosng.data.NewLoanWorkflowStepOneData;
 import org.mifosng.platform.ReadPlatformService;
 import org.mifosng.platform.loan.service.LoanReadPlatformService;
 import org.mifosng.platform.user.domain.AppUser;
@@ -41,6 +43,17 @@ public class LoansApiResource {
     	Authentication auth = new UsernamePasswordAuthenticationToken(currentUser, currentUser, currentUser.getAuthorities());
 		SecurityContext context = SecurityContextHolder.getContext();
 		context.setAuthentication(auth);
+	}
+	
+	@GET
+	@Path("template")
+	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+	@Produces({ MediaType.APPLICATION_JSON})
+	public Response retrieveDetailsForNewLoanApplicationStepOne(@QueryParam("clientId") final Long clientId, @QueryParam("productId") final Long productId) {
+
+		NewLoanWorkflowStepOneData workflowData = this.loanReadPlatformService.retrieveClientAndProductDetails(clientId, productId);
+
+		return Response.ok().entity(workflowData).build();
 	}
 	
 	@GET

@@ -6,7 +6,6 @@ import org.mifosng.data.EntityIdentifier;
 import org.mifosng.data.LoanProductData;
 import org.mifosng.data.LoanRepaymentData;
 import org.mifosng.data.LoanSchedule;
-import org.mifosng.data.NewLoanWorkflowStepOneData;
 import org.mifosng.data.command.AdjustLoanTransactionCommand;
 import org.mifosng.data.command.CalculateLoanScheduleCommand;
 import org.mifosng.data.command.LoanStateTransitionCommand;
@@ -25,8 +24,6 @@ public interface CommonRestOperations {
 	Collection<LoanProductData> retrieveAllLoanProducts();
 
 	LoanSchedule calculateLoanSchedule(CalculateLoanScheduleCommand command);
-
-	NewLoanWorkflowStepOneData retrieveNewLoanApplicationStepOneDetails(Long clientId);
 
 	Long submitLoanApplication(SubmitLoanApplicationCommand command);
 
@@ -55,6 +52,4 @@ public interface CommonRestOperations {
 	LoanRepaymentData retrieveNewLoanWaiverDetails(Long loanId);
 
 	EntityIdentifier waiveLoanAmount(LoanTransactionCommand command);
-
-	NewLoanWorkflowStepOneData retrieveNewLoanApplicationDetails(Long clientId, Long productId);
 }

@@ -83,8 +83,9 @@
 					</td>
 					<td style="text-align:right;vertical-align:bottom;width:50px;">&nbsp;</td>
 					<td valign="top">
-						<label for="submittedOnDate"><spring:message code="form.label.loan.submitted.on"/></label>
-						<input id="submittedOnDate" name="submittedOnDate" title="" type="text" class="datepickerfield" value="{{=$ctx.globalDate(submittedOnDate)}}" />
+						<input type="hidden" id="dateFormat" name="dateFormat" value="dd MMMM yyyy" />
+						<label for="submittedOnDateFormatted"><spring:message code="form.label.loan.submitted.on"/></label>
+						<input id="submittedOnDateFormatted" name="submittedOnDateFormatted" title="" type="text" class="datepickerfield" value="{{=$ctx.globalDate(submittedOnDate)}}" />
 
 						<label for="submittedOnNote"><spring:message code="form.label.loan.submitted.on.note"/></label>
 						<textarea id="submittedOnNote" name="submittedOnNote" rows="2" cols="50" draggable="false">{{=submittedOnNote}}</textarea>
@@ -131,13 +132,13 @@
 						<tr>
 							<td><spring:message code="form.label.loan.expected.disbursement.date.on"/></td>
 							<td>
-							<input id="expectedDisbursementDate" name="expectedDisbursementDate" title="" type="text" class="datepickerfield" value="{{=$ctx.globalDate(expectedDisbursementDate)}}" style="width:172px;"/>
+							<input id="expectedDisbursementDateFormatted" name="expectedDisbursementDateFormatted" title="" type="text" class="datepickerfield" value="{{=$ctx.globalDate(expectedDisbursementDate)}}" style="width:172px;"/>
 							</td>
 						</tr>
 						<tr>
 							<td><spring:message code="form.label.loan.first.repayment.on"/></td>
 							<td>
-							<input id="repaymentsStartingFromDate" name="repaymentsStartingFromDate" title="" type="text" class="datepickerfield" value="{{=$ctx.globalDate(repaymentsStartingFromDate)}}" style="width:172px;"/>
+							<input id="repaymentsStartingFromDateFormatted" name="repaymentsStartingFromDateFormatted" title="" type="text" class="datepickerfield" value="{{=$ctx.globalDate(repaymentsStartingFromDate)}}" style="width:172px;"/>
 							</td>
 						</tr>
 					</table>

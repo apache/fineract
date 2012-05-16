@@ -21,7 +21,6 @@ import org.mifosng.data.ErrorResponse;
 import org.mifosng.data.ErrorResponseList;
 import org.mifosng.data.LoanRepaymentData;
 import org.mifosng.data.LoanSchedule;
-import org.mifosng.data.NewLoanWorkflowStepOneData;
 import org.mifosng.data.command.AdjustLoanTransactionCommand;
 import org.mifosng.data.command.CalculateLoanScheduleCommand;
 import org.mifosng.data.command.LoanStateTransitionCommand;
@@ -56,56 +55,9 @@ public class LoanResource {
 	@Autowired
 	private ReadPlatformService readPlatformService;
 
-
 	@Autowired
 	private WritePlatformService writePlatformService;
 	
-	@GET
-	@Path("new/{clientId}/workflow/one")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response retrieveDetailsForNewLoanApplicationStepOne(@PathParam("clientId") final Long clientId) {
-
-		try {
-			NewLoanWorkflowStepOneData workflowData = this.readPlatformService.retrieveClientAndProductDetails(clientId, null);
-
-			return Response.ok().entity(workflowData).build();
-		} catch (UnAuthenticatedUserException e) {
-			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
-		} catch (AccessDeniedException e) {
-			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
-			ErrorResponseList list = new ErrorResponseList(Arrays.asList(errorResponse));
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(list).build());
-		} catch (ApplicationDomainRuleException e) {
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(new ErrorResponseList(e.getErrors())).build());
-		} catch (NewDataValidationException e) {
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(new ErrorResponseList(e.getValidationErrors())).build());
-		}
-	}
-	
-	@GET
-	@Path("new/{clientId}/product/{productId}")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response retrieveDetailsForNewLoanApplicationStepOne(@PathParam("clientId") final Long clientId, @PathParam("productId") final Long productId) {
-
-		try {
-			NewLoanWorkflowStepOneData workflowData = this.readPlatformService.retrieveClientAndProductDetails(clientId, productId);
-
-			return Response.ok().entity(workflowData).build();
-		} catch (UnAuthenticatedUserException e) {
-			throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
-		} catch (AccessDeniedException e) {
-			ErrorResponse errorResponse = new ErrorResponse("error.msg.no.permission", "id");
-			ErrorResponseList list = new ErrorResponseList(Arrays.asList(errorResponse));
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(list).build());
-		} catch (ApplicationDomainRuleException e) {
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(new ErrorResponseList(e.getErrors())).build());
-		} catch (NewDataValidationException e) {
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity(new ErrorResponseList(e.getValidationErrors())).build());
-		}
-	}
-
 	@POST
 	@Path("calculate")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })

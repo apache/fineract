@@ -461,6 +461,7 @@ $(document).ready(function() {
 					$('.newloanbtn').button().click(function(e) {
 						var linkId = this.id;
 						var clientId = linkId.replace("newloanbtn", "");
+						// switch to jsp page focussed on new loan application flow.
 						var url = '${rootContext}portfolio/client/' + clientId + '/loan/new';
 						window.location.href = url;
 					    e.preventDefault();
