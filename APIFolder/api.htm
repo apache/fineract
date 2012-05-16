@@ -30,10 +30,19 @@
 
               <div class="toc-section">
                   <h3>&nbsp;</h3>
-                  <h4>Reports</h4>
+                  <h4><a href="#reports">Reports</a></h4>
                   <ul>
                       <li><a href="#listreports">List Reports</a></li>
                       <li><a href="#runreport">Run a Report</a></li>
+                  </ul>
+              </div>
+              <div class="toc-section">
+                  <h3>&nbsp;</h3>
+                  <h4><a href="#additionalfields">Additional Fields</a></h4>
+                  <ul>
+                      <li><a href="#listadditionalfields">List Additional Field Sources</a></li>
+                      <li><a href="#retrieveadditionalfields">Retrieve Additional Fields</a></li>
+                      <li><a href="#updateadditionalfields">Update Additional Fields</a></li>
                   </ul>
               </div>
 
@@ -100,8 +109,8 @@
                     <ul>
                         <li>/v1/reports</li>
                         <li>/v1/reports/{REPORTNAME}</li>
-                        <li>/v1/extradata</li>
-                        <li>/v1/extradata/{datasetType}/{datasetName}/{datasetPKValue}</li>
+                        <li>/v1/additionalfields</li>
+                        <li>/v1/additionalfields/{datasetType}/{datasetName}/{datasetPKValue}</li>
 
                     </ul>
                 </div>
@@ -293,6 +302,291 @@ error is parameter-specific.  You can use this to display a message near
                   </tbody></table>
                 </div>
             </div>
+
+
+
+
+
+
+
+
+ <a id="additionalfields" name="additionalfields" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h3>Additional Fields</h3>
+ <p>
+The additional fields resource allows you to run and receive output from pre-defined Mifos X additional fieldsreports.  
+</p>
+
+<p>
+The Mifos X Individual Lending client application uses a JQuery plugin called stretchydata which, itself, uses this additional fields resource to provide a pretty flexible additional fields User Interface (UI).  Put a link to an example here.
+</p>
+
+
+                </div>
+            </div>
+
+
+
+            <a id="listadditionalfields" name="listadditionalfields" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>List Additional Fields</h4>
+                    <p>
+                        Lists the types of additional field data that has been defined in Mifox X.  If an Additional Data Type has more than one Addition Data Set it will be listed the same number of times as it has Sets.
+                    </p>
+
+    <h5>Arguments</h5>
+<dl class="argument-list">
+        <dt>exportCSV</dt>
+        <dd>optional, <span>The only valid value is 'true'.  If any other value is provided the argument will be ignored</span></dd>
+        <dd>Output will be delivered as a CSV file instead of JSON.</dd>
+</dl>
+                    <p>Example Request: 
+                        <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/reports">http://localhost:8080/mifosng-provider/api/v1/reports</a>
+                    </p>
+
+  </div>
+
+  <div class="method-example">
+      <code class="method-declaration">GET https://thedomainname/v1/reports</code>
+      <code class="method-response">{
+  "columnHeaders": [
+    {
+      "columnName": "report_id",
+      "columnType": "INT",
+      "columnLength": null,
+      "columnDisplayType": null,
+      "columnValues": []
+    },
+    {
+      "columnName": "report_name",
+      "columnType": "VARCHAR",
+      "columnLength": null,
+      "columnDisplayType": null,
+      "columnValues": []
+    },
+    {
+      "columnName": "report_type",
+      "columnType": "VARCHAR",
+      "columnLength": null,
+      "columnDisplayType": null,
+      "columnValues": []
+    },
+... more "columnHeaders" entries
+  ],
+  "data": [
+    {
+      "row": [
+        "29",
+        "Client Listing",
+        "Table",
+        null,
+        null,
+        "5",
+        null,
+        "selectOfficeId"
+      ]
+    },
+    {
+      "row": [
+        "42",
+        "Client Listing - Additional and Unlikely",
+        "Table",
+        null,
+        null,
+        "5",
+        null,
+        "selectOfficeId"
+      ]
+    },
+    {
+      "row": [
+        "30",
+        "Client Loans Listing",
+        "Table",
+        null,
+        null,
+        "5",
+        null,
+        "selectOfficeId"
+      ]
+    },
+... more "Row" entries
+  ]
+}</code>
+  </div>
+</div>
+
+
+
+
+
+
+            <a id="retrieveadditionalfields" name="retrieveadditionalfields" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Retrieve Additional Data</h4>
+                    <p>
+                        Runs a report and returns the report output.
+                    </p>
+    <h5>Arguments</h5>
+<dl class="argument-list">
+        <dt>R_'parameter names' ...</dt>
+        <dd>optional, <span>No defaults</span></dd>
+        <dd>The number and names of the parameters depend on the specific report and how it has been configured.  R_officeId is an example parameter name.</dd>
+        <dd>Note: the prefix R_ stands for Reporting</dd>
+        <dt>parameterType</dt>        
+        <dd>optional, <span>The only valid value is 'true'.  If any other value is provided the argument will be ignored</span></dd>
+        <dd>Determines whether the request looks in the list of reports or the list of parameters for its data.</dd>
+        <dt>exportCSV</dt>
+        <dd>optional, <span>The only valid value is 'true'.  If any other value is provided the argument will be ignored</span></dd>
+        <dd>Output will be delivered as a CSV file instead of JSON.  Doesn't apply to Pentaho reports.</dd>
+</dl>
+
+                    <p>Example Request: 
+                        <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/reports/Client%20Listing?R_officeId=1">http://localhost:8080/mifosng-provider/api/v1/reports/Client%20Listing?R_officeId=1</a>
+                    </p>
+
+  </div>
+
+  <div class="method-example">
+      <code class="method-declaration">GET https://thedomainname/v1/reports/{REPORTNAME}</code>
+      <code class="method-response">{
+  "columnHeaders": [
+    {
+      "columnName": "Office/Branch",
+      "columnType": "VARCHAR",
+      "columnLength": null,
+      "columnDisplayType": null,
+      "columnValues": []
+    },
+    {
+      "columnName": "Name",
+      "columnType": "VARCHAR",
+      "columnLength": null,
+      "columnDisplayType": null,
+      "columnValues": []
+    },
+    {
+      "columnName": "Joining Date",
+      "columnType": "DATE",
+      "columnLength": null,
+      "columnDisplayType": null,
+      "columnValues": []
+    }
+  ],
+  "data": [
+    {
+      "row": [
+        "Demo MFI Head Office",
+        "O'Meara, Patrick",
+        "2009-01-04"
+      ]
+    },
+    {
+      "row": [
+        "Demo MFI Head Office",
+        "O'Meara, Dennis",
+        "2009-01-04"
+      ]
+    },
+    {
+      "row": [
+        "Demo MFI Head Office",
+        "Smith, John",
+        "2009-01-11"
+      ]
+    },
+... more "row" entries
+  ]
+}</code>
+  </div>
+</div>
+
+
+            <a id="updateadditionalfields" name="updateadditionalfields" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Update Additional Data</h4>
+                    <p>
+                        Runs a report and returns the report output.
+                    </p>
+    <h5>Arguments</h5>
+<dl class="argument-list">
+        <dt>R_'parameter names' ...</dt>
+        <dd>optional, <span>No defaults</span></dd>
+        <dd>The number and names of the parameters depend on the specific report and how it has been configured.  R_officeId is an example parameter name.</dd>
+        <dd>Note: the prefix R_ stands for Reporting</dd>
+        <dt>parameterType</dt>        
+        <dd>optional, <span>The only valid value is 'true'.  If any other value is provided the argument will be ignored</span></dd>
+        <dd>Determines whether the request looks in the list of reports or the list of parameters for its data.</dd>
+        <dt>exportCSV</dt>
+        <dd>optional, <span>The only valid value is 'true'.  If any other value is provided the argument will be ignored</span></dd>
+        <dd>Output will be delivered as a CSV file instead of JSON.  Doesn't apply to Pentaho reports.</dd>
+</dl>
+
+                    <p>Example Request: 
+                        <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/reports/Client%20Listing?R_officeId=1">http://localhost:8080/mifosng-provider/api/v1/reports/Client%20Listing?R_officeId=1</a>
+                    </p>
+
+  </div>
+
+  <div class="method-example">
+      <code class="method-declaration">GET https://thedomainname/v1/reports/{REPORTNAME}</code>
+      <code class="method-response">{
+  "columnHeaders": [
+    {
+      "columnName": "Office/Branch",
+      "columnType": "VARCHAR",
+      "columnLength": null,
+      "columnDisplayType": null,
+      "columnValues": []
+    },
+    {
+      "columnName": "Name",
+      "columnType": "VARCHAR",
+      "columnLength": null,
+      "columnDisplayType": null,
+      "columnValues": []
+    },
+    {
+      "columnName": "Joining Date",
+      "columnType": "DATE",
+      "columnLength": null,
+      "columnDisplayType": null,
+      "columnValues": []
+    }
+  ],
+  "data": [
+    {
+      "row": [
+        "Demo MFI Head Office",
+        "O'Meara, Patrick",
+        "2009-01-04"
+      ]
+    },
+    {
+      "row": [
+        "Demo MFI Head Office",
+        "O'Meara, Dennis",
+        "2009-01-04"
+      ]
+    },
+    {
+      "row": [
+        "Demo MFI Head Office",
+        "Smith, John",
+        "2009-01-11"
+      ]
+    },
+... more "row" entries
+  ]
+}</code>
+  </div>
+</div>
+
+
 
 
 
@@ -497,6 +791,12 @@ The Mifos X Individual Lending client application uses a JQuery plugin called st
 }</code>
   </div>
 </div>
+
+
+
+
+
+
 
 
 

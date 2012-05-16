@@ -424,7 +424,7 @@ $(document).ready(function() {
 	            var offsetToApprovalDate = 0;
 	            var offsetToDisbursalDate = 0;
 				var maxOffset = 0; // today
-				
+
 	            if (currentTabIndex < 1) {
 	            	console.log("success: client tab.");
 	        		var tableHtml = $("#clientDataTabTemplate").render(data);
@@ -436,8 +436,8 @@ $(document).ready(function() {
 					refreshLoanSummaryInfo();
 					
 					// retrieve additional info
-					var extraDataParams = {
-							url: '${rootContext}',
+					var additionalFieldsParams = {
+							url: "http://localhost:8080/mifosng-provider/",
 							datasetType: "portfolio_client",
 							datasetPKValue: data.id,
 							datasetTypeDiv: "clientadditionaldata", 
@@ -446,7 +446,7 @@ $(document).ready(function() {
 							labelClass: "longrowlabel",
 							valueClass:	"rowvalue"					
 					};
-					jQuery.stretchyData.displayAllExtraData(extraDataParams);
+					jQuery.stretchyData.displayAllExtraData(additionalFieldsParams);
 
 					// bind click listeners to buttons.
 					$('.casflowbtn').button().click(function(e) {
@@ -489,14 +489,14 @@ $(document).ready(function() {
 					refreshNoteWidget();
 					
 	        	} else {
-	        		
+
 	        		var tableHtml = $("#loanDataTabTemplate").render(data);
 	        		
 	        		var currentTab = $("#newtabs").children(".ui-tabs-panel").not(".ui-tabs-hide");
 	        		currentTab.html(tableHtml);
-	        		
-					var extraDataParams = {
-							url: '${rootContext}',
+
+					var additionalFieldsParams = {
+							url: "http://localhost:8080/mifosng-provider/",
 							datasetType: "portfolio_loan",
 							datasetPKValue: data.id,
 							datasetTypeDiv: "loanadditionaldata" + data.id, 
@@ -505,8 +505,8 @@ $(document).ready(function() {
 							labelClass: "longrowlabel",
 							valueClass:	"rowvalue"					
 					};
-					jQuery.stretchyData.displayAllExtraData(extraDataParams);
-					
+					jQuery.stretchyData.displayAllExtraData(additionalFieldsParams);
+
 	        		var curTabID = currentTab.prop("id")
 	        		
 	        		offsetToSubmittedDate = data.maxSubmittedOnOffsetFromToday;
