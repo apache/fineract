@@ -11,6 +11,8 @@ import org.joda.time.LocalDate;
 public class LoanStateTransitionCommand {
 
 	private Long loanId;
+	private String dateFormat;
+	private String eventDateFormatted;
 	private LocalDate eventDate;
 	private String comment;
 
@@ -47,5 +49,21 @@ public class LoanStateTransitionCommand {
 
 	public void setEventDate(LocalDate eventDate) {
 		this.eventDate = eventDate;
+	}
+
+	public String getDateFormat() {
+		return dateFormat;
+	}
+
+	public void setDateFormat(String dateFormat) {
+		this.dateFormat = dateFormat;
+	}
+
+	public String getEventDateFormatted() {
+		return eventDateFormatted;
+	}
+
+	public void setEventDateFormatted(String eventDateFormatted) {
+		this.eventDateFormatted = eventDateFormatted;
 	}
 }

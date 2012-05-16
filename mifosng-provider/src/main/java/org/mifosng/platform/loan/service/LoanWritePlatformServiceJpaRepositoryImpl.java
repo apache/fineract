@@ -11,7 +11,10 @@ import org.mifosng.data.EntityIdentifier;
 import org.mifosng.data.LoanSchedule;
 import org.mifosng.data.MoneyData;
 import org.mifosng.data.ScheduledLoanInstallment;
+import org.mifosng.data.command.LoanStateTransitionCommand;
 import org.mifosng.data.command.SubmitLoanApplicationCommand;
+import org.mifosng.data.command.UndoLoanApprovalCommand;
+import org.mifosng.platform.LoanStateTransitionCommandValidator;
 import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.client.domain.ClientRepository;
 import org.mifosng.platform.client.domain.Note;
@@ -38,6 +41,7 @@ import org.mifosng.platform.loanschedule.domain.AprCalculator;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.user.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -167,5 +171,112 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		this.loanRepository.delete(loanId);
 		
 		return new EntityIdentifier(clientId);
+	}
+	
+	@Transactional
+	@Override
+	public EntityIdentifier approveLoanApplication(final LoanStateTransitionCommand command) {
+
+		AppUser currentUser = context.authenticatedUser();
+		
+		LoanStateTransitionCommandValidator validator = new LoanStateTransitionCommandValidator(command);
+		validator.validate();
+
+		Loan loan = this.loanRepository.findOne(loansThatMatch(currentUser.getOrganisation(), command.getLoanId()));
+		if (loan == null) {
+			throw new PlatformResourceNotFoundException("error.msg.loan.id.invalid", "Loan with identifier {0} does not exist", command.getLoanId());
+		}
+
+		if (this.isBeforeToday(command.getEventDate()) && currentUser.canNotApproveLoanInPast()) {
+			throw new NoAuthorizationException("User has no authority to approve loan with a date in the past.");
+		}
+		
+		loan.approve(command.getEventDate(), defaultLoanLifecycleStateMachine());
+		this.loanRepository.save(loan);
+		
+		if (StringUtils.isNotBlank(command.getComment())) {
+			Note note = Note.loanNote(currentUser.getOrganisation(), loan, command.getComment());
+			this.noteRepository.save(note);
+		}
+
+		return new EntityIdentifier(loan.getClient().getId());
+	}
+
+	@Transactional
+	@Override
+	public EntityIdentifier undoLoanApproval(final UndoLoanApprovalCommand command) {
+
+		AppUser currentUser = context.authenticatedUser();
+
+		Loan loan = this.loanRepository.findOne(loansThatMatch(currentUser.getOrganisation(), command.getLoanId()));
+		if (loan == null) {
+			throw new PlatformResourceNotFoundException("error.msg.loan.id.invalid", "Loan with identifier {0} does not exist", command.getLoanId());
+		}
+		
+		loan.undoApproval(defaultLoanLifecycleStateMachine());
+		this.loanRepository.save(loan);
+		
+		Note note = Note.loanNote(currentUser.getOrganisation(), loan, "Undo of approval.");
+		this.noteRepository.save(note);
+
+		return new EntityIdentifier(loan.getClient().getId());
+	}
+
+	@Transactional
+	@Override
+	public EntityIdentifier rejectLoan(final LoanStateTransitionCommand command) {
+
+		AppUser currentUser = (AppUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		
+		LoanStateTransitionCommandValidator validator = new LoanStateTransitionCommandValidator(command);
+		validator.validate();
+
+		Loan loan = this.loanRepository.findOne(loansThatMatch(currentUser.getOrganisation(), command.getLoanId()));
+		if (loan == null) {
+			throw new PlatformResourceNotFoundException("error.msg.loan.id.invalid", "Loan with identifier {0} does not exist", command.getLoanId());
+		}
+
+		if (this.isBeforeToday(command.getEventDate()) && currentUser.canNotRejectLoanInPast()) {
+			throw new NoAuthorizationException("User has no authority to reject loan with a date in the past.");
+		}
+		
+		loan.reject(command.getEventDate(), defaultLoanLifecycleStateMachine());
+		this.loanRepository.save(loan);
+		
+		if (StringUtils.isNotBlank(command.getComment())) {
+			Note note = Note.loanNote(currentUser.getOrganisation(), loan, command.getComment());
+			this.noteRepository.save(note);
+		}
+
+		return new EntityIdentifier(loan.getClient().getId());
+	}
+
+	@Transactional
+	@Override
+	public EntityIdentifier withdrawLoan(final LoanStateTransitionCommand command) {
+		
+		AppUser currentUser = context.authenticatedUser();
+
+		LoanStateTransitionCommandValidator validator = new LoanStateTransitionCommandValidator(command);
+		validator.validate();
+		
+		Loan loan = this.loanRepository.findOne(loansThatMatch(currentUser.getOrganisation(), command.getLoanId()));
+		if (loan == null) {
+			throw new PlatformResourceNotFoundException("error.msg.loan.id.invalid", "Loan with identifier {0} does not exist", command.getLoanId());
+		}
+		
+		if (this.isBeforeToday(command.getEventDate()) && currentUser.canNotWithdrawByClientLoanInPast()) {
+			throw new NoAuthorizationException("User has no authority to mark loan as withdrawn by client with a date in the past.");
+		}
+		
+		loan.withdraw(command.getEventDate(), defaultLoanLifecycleStateMachine());
+		this.loanRepository.save(loan);
+
+		if (StringUtils.isNotBlank(command.getComment())) {
+			Note note = Note.loanNote(currentUser.getOrganisation(), loan, command.getComment());
+			this.noteRepository.save(note);
+		}
+		
+		return new EntityIdentifier(loan.getClient().getId());
 	}
 }

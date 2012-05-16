@@ -799,51 +799,16 @@
 </sec:authorize>
 </script>
 
-<script id="rejectLoanFormTemplate" type="text/x-jquery-tmpl">
+<script id="stateTransitionLoanFormTemplate" type="text/x-jquery-tmpl">
 <form id="entityform">
     <div id="formerrors"></div>
 
-	<label for="eventDate"><spring:message code="label.loan.rejected.on"/></label>
-	<input id="eventDate" name="eventDate" cssClass="text ui-widget-content ui-corner-all" title="" class="datepickerfield" />
+	<input type="hidden" id="dateFormat" name="dateFormat" value="dd MMMM yyyy" />
+	<label for="eventDateFormatted"><spring:message code="label.loan.rejected.on"/></label>
+	<input id="eventDateFormatted" name="eventDateFormatted" title="" class="datepickerfield" />
 
 	<label for="comment"><spring:message code="label.loan.action.note"/></label>
-	<textarea rows="3" cols="53" id="comment" name="comment" cssClass="text ui-widget-content ui-corner-all"></textarea>
-</form>
-</script>
-
-<script id="withdrawnByClientLoanFormTemplate" type="text/x-jquery-tmpl">
-<form id="entityform">
-    <div id="formerrors"></div>
-
-	<label for="eventDate"><spring:message code="label.loan.withdrawn.by.client.on"/></label>
-	<input id="eventDate" name="eventDate" cssClass="text ui-widget-content ui-corner-all" title="" class="datepickerfield" />
-
-	<label for="comment"><spring:message code="label.loan.action.note"/></label>
-	<textarea rows="3" cols="53" id="comment" name="comment" cssClass="text ui-widget-content ui-corner-all"></textarea>
-</form>
-</script>
-
-<script id="approveLoanFormTemplate" type="text/x-jquery-tmpl">
-<form id="entityform">
-    <div id="formerrors"></div>
-
-	<label for="eventDate"><spring:message code="label.loan.approved.on"/></label>
-	<input id="eventDate" name="eventDate" cssClass="text ui-widget-content ui-corner-all" title="" class="datepickerfield" />
-
-	<label for="comment"><spring:message code="label.loan.action.note"/></label>
-	<textarea rows="3" cols="53" id="comment" name="comment" cssClass="text ui-widget-content ui-corner-all"></textarea>
-</form>
-</script>
-
-<script id="disburseLoanFormTemplate" type="text/x-jquery-tmpl">
-<form id="entityform">
-    <div id="formerrors"></div>
-
-	<label for="eventDate"><spring:message code="label.loan.disbursed.on"/></label>
-	<input id="eventDate" name="eventDate" cssClass="text ui-widget-content ui-corner-all" title="" class="datepickerfield" />
-
-	<label for="comment"><spring:message code="label.loan.action.note"/></label>
-	<textarea rows="3" cols="53" id="comment" name="comment" cssClass="text ui-widget-content ui-corner-all"></textarea>
+	<textarea rows="3" cols="53" id="comment" name="comment"></textarea>
 </form>
 </script>
 

@@ -19,7 +19,6 @@ import org.mifosng.data.LoanRepaymentData;
 import org.mifosng.data.command.AdjustLoanTransactionCommand;
 import org.mifosng.data.command.LoanStateTransitionCommand;
 import org.mifosng.data.command.LoanTransactionCommand;
-import org.mifosng.data.command.UndoLoanApprovalCommand;
 import org.mifosng.data.command.UndoLoanDisbursalCommand;
 import org.mifosng.ui.CommonRestOperations;
 import org.mifosng.ui.loanproduct.ClientValidationException;
@@ -97,65 +96,6 @@ public class LoanTransactionController {
 		}
 	}
     
-    @RequestMapping(value = "/portfolio/loan/{loanId}/delete", method = RequestMethod.POST)
-    public @ResponseBody EntityIdentifier deleteLoan(@PathVariable("loanId") final Long loanId) {
-    	
-    	return this.commonRestOperations.deleteLoan(loanId);
-    }
-    
-	@RequestMapping(consumes="application/x-www-form-urlencoded", produces="application/json", value = "/portfolio/loan/{loanId}/approve", method = RequestMethod.POST)
-	@ResponseStatus(HttpStatus.OK)
-	public @ResponseBody EntityIdentifier approveLoan(
-			@PathVariable("loanId") final Long loanId,
-			@RequestParam(value="eventDate", required=false) String eventDate,
-			@RequestParam(value="comment", required=false) String comment) {
-
-		LocalDate approvalDate = parseStringToLocalDate(eventDate, "eventDate");
-
-		LoanStateTransitionCommand command = new LoanStateTransitionCommand(loanId, approvalDate, comment);
-
-		return this.commonRestOperations.approveLoan(command);
-	}
-
-	@RequestMapping(value = "/portfolio/loan/{loanId}/undoapproval", method = RequestMethod.POST)
-	public String undoLoanApproval(@PathVariable("loanId") final Long loanId) {
-
-		UndoLoanApprovalCommand command = new UndoLoanApprovalCommand(loanId);
-
-		EntityIdentifier clientAccountId = this.commonRestOperations
-				.undoLoanApproval(command);
-
-		return "redirect:/portfolio/client/" + clientAccountId.getEntityId();
-	}
-
-	@RequestMapping(consumes="application/x-www-form-urlencoded", produces="application/json", value = "/portfolio/loan/{loanId}/reject", method = RequestMethod.POST)
-	@ResponseStatus(HttpStatus.OK)
-	public @ResponseBody EntityIdentifier rejectLoan(
-			@PathVariable("loanId") final Long loanId,
-			@RequestParam(value="eventDate", required=false) String eventDate,
-			@RequestParam(value="comment", required=false) String comment) {
-
-		LocalDate rejectionDate = parseStringToLocalDate(eventDate, "eventDate");
-
-		LoanStateTransitionCommand command = new LoanStateTransitionCommand(loanId, rejectionDate, comment);
-		
-		return this.commonRestOperations.rejectLoan(command);
-	}
-
-	@RequestMapping(consumes="application/x-www-form-urlencoded", produces="application/json", value = "/portfolio/loan/{loanId}/withdraw", method = RequestMethod.POST)
-	@ResponseStatus(HttpStatus.OK)
-	public @ResponseBody EntityIdentifier loanWithdrawnByClient(
-			@PathVariable("loanId") final Long loanId,
-			@RequestParam(value="eventDate", required=false) String eventDate,
-			@RequestParam(value="comment", required=false) String comment) {
-
-		LocalDate withdrawnOnDate = parseStringToLocalDate(eventDate, "eventDate");
-
-		LoanStateTransitionCommand command = new LoanStateTransitionCommand(loanId, withdrawnOnDate, comment);
-		
-		return this.commonRestOperations.withdrawLoan(command);
-	}
-
 	@RequestMapping(consumes="application/x-www-form-urlencoded", produces="application/json", value = "/portfolio/loan/{loanId}/disburse", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.OK)
 	public @ResponseBody EntityIdentifier disburseLoan(

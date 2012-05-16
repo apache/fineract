@@ -21,7 +21,10 @@ import org.mifosng.data.LoanAccountData;
 import org.mifosng.data.LoanSchedule;
 import org.mifosng.data.NewLoanWorkflowStepOneData;
 import org.mifosng.data.command.CalculateLoanScheduleCommand;
+import org.mifosng.data.command.LoanStateTransitionCommand;
 import org.mifosng.data.command.SubmitLoanApplicationCommand;
+import org.mifosng.data.command.UndoLoanApprovalCommand;
+import org.mifosng.data.command.UndoLoanDisbursalCommand;
 import org.mifosng.platform.ReadPlatformService;
 import org.mifosng.platform.WritePlatformService;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
@@ -150,5 +153,55 @@ public class LoansApiResource {
 		EntityIdentifier identifier = this.loanWritePlatformService.deleteLoan(loanId);
 
 		return Response.ok().entity(identifier).build();
+	}
+	
+	@POST
+	@Path("{loanId}")
+	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+	@Produces({ MediaType.APPLICATION_JSON})
+	public Response rejectLoanApplication(@PathParam("loanId") final Long loanId, @QueryParam("command") final String commandParam,
+			final LoanStateTransitionCommand command) {
+		
+		LocalDate eventDate = this.apiDataConversionService.convertFrom(command.getEventDateFormatted(), "eventDateFormatted", command.getDateFormat());
+
+		command.setLoanId(loanId);
+		command.setEventDate(eventDate);
+		
+		if (StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase("reject")) {
+			EntityIdentifier identifier = this.loanWritePlatformService.rejectLoan(command);
+			return Response.ok().entity(identifier).build();
+		} else if (StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase("withdrewbyclient")) {
+			EntityIdentifier identifier = this.loanWritePlatformService.withdrawLoan(command);
+			return Response.ok().entity(identifier).build();
+		} else if (StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase("approve")) {
+			EntityIdentifier identifier = this.loanWritePlatformService.approveLoanApplication(command);
+			return Response.ok().entity(identifier).build();
+		} else if (StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase("undoapproval")) {
+			UndoLoanApprovalCommand undoCommand = new UndoLoanApprovalCommand(loanId);
+			EntityIdentifier identifier = this.loanWritePlatformService.undoLoanApproval(undoCommand);
+			return Response.ok().entity(identifier).build();
+		}
+
+		return Response.ok().build();
+	}
+	
+	@POST
+	@Path("{loanId}/undo")
+	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+	@Produces({ MediaType.APPLICATION_JSON})
+	public Response rejectLoanApplication(@PathParam("loanId") final Long loanId, @QueryParam("command") final String commandParam) {
+		
+		
+		if (StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase("undoapproval")) {
+			UndoLoanApprovalCommand undoCommand = new UndoLoanApprovalCommand(loanId);
+			EntityIdentifier identifier = this.loanWritePlatformService.undoLoanApproval(undoCommand);
+			return Response.ok().entity(identifier).build();
+		} else if (StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase("undodisbursal")) {
+			UndoLoanDisbursalCommand undoCommand = new UndoLoanDisbursalCommand(loanId);
+			EntityIdentifier identifier = this.writePlatformService.undloLoanDisbursal(undoCommand);
+			return Response.ok().entity(identifier).build();
+		}
+
+		return Response.ok().build();
 	}
 }

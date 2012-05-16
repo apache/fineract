@@ -251,7 +251,7 @@ $(document).ready(function() {
 		  	}).dialog('open');
 	 }
 	
-	function popupDialogWithPostOnlyFormView(url, titleCode, templateSelector, width, height, tabIndex, minOffset, defaultOffset, maxOffset) {
+	function popupDialogWithPostOnlyFormView(postUrl, titleCode, templateSelector, width, height, tabIndex, minOffset, defaultOffset, maxOffset) {
 		var dialogDiv = $("<div id='dialog-form'></div>");
 		
 		var data = new Object();
@@ -267,13 +267,17 @@ $(document).ready(function() {
 			$('.multiSelectedItems option').each(function(i) {  
 		    	   $(this).attr("selected", "selected");  
 		    });
-  				
-  			var form_data = $('#entityform').serialize();
-  				 
+  			
+			var newFormData = JSON.stringify($('#entityform').serializeObject());
+	    	console.log(newFormData);
+	    	
 			var jqxhr = $.ajax({
-				  url: url,
+				  url: postUrl,
 				  type: 'POST',
-				  data: form_data,
+				  contentType: 'application/json',
+			      dataType: 'json',
+				  cache: false,
+				  data: newFormData,
 				  success: function(data, textStatus, jqXHR) {
 					  dialogDiv.dialog("close");
 					  $newtabs.tabs('load', tabIndex);
@@ -505,29 +509,27 @@ $(document).ready(function() {
 	        		offsetToDisbursalDate = data.maxDisbursedOnOffsetFromToday;
 	        		
 	        		$('.rejectloan').button().click(function(e) {
-						
 						var linkId = this.id;
 						var loanId = linkId.replace("rejectbtn", "");
-						var url = '${rootContext}portfolio/loan/' + loanId + '/reject';
-						var templateSelector = "#rejectLoanFormTemplate";
+						var postUrl = 'http://localhost:8080/mifosng-provider/api/v1/loans/' + loanId + '?command=reject';
+						var templateSelector = "#stateTransitionLoanFormTemplate";
 						var width = 500; 
 						var height = 350;
 						var defaultOffset = offsetToSubmittedDate;
-						popupDialogWithPostOnlyFormView(url, 'dialog.title.reject.loan', templateSelector, width, height, currentTabIndex, offsetToSubmittedDate, defaultOffset, maxOffset);
+						popupDialogWithPostOnlyFormView(postUrl, 'dialog.title.reject.loan', templateSelector, width, height, currentTabIndex, offsetToSubmittedDate, defaultOffset, maxOffset);
 					    e.preventDefault();
 					});
 	        		$('button.rejectloan span').text(jQuery.i18n.prop('dialog.button.reject.loan'));
 					
 					$('.withdrawnbyapplicantloan').button().click(function(e) {
-						
 						var linkId = this.id;
 						var loanId = linkId.replace("withdrawnbyapplicantloanbtn", "");
-						var url = '${rootContext}portfolio/loan/' + loanId + '/withdraw';
-						var templateSelector = "#withdrawnByClientLoanFormTemplate";
+						var postUrl = 'http://localhost:8080/mifosng-provider/api/v1/loans/' + loanId + '?command=withdrewbyclient';
+						var templateSelector = "#stateTransitionLoanFormTemplate";
 						var width = 500; 
 						var height = 350;
 						var defaultOffset = offsetToSubmittedDate;
-						popupDialogWithPostOnlyFormView(url, 'dialog.title.loan.withdrawn.by.client', templateSelector, width, height, currentTabIndex, offsetToSubmittedDate, defaultOffset, maxOffset)
+						popupDialogWithPostOnlyFormView(postUrl, 'dialog.title.loan.withdrawn.by.client', templateSelector, width, height, currentTabIndex, offsetToSubmittedDate, defaultOffset, maxOffset)
 					    e.preventDefault();
 					});
 					$('button.withdrawnbyapplicantloan span').text(jQuery.i18n.prop('dialog.button.withdrawn.by.client.loan'));
@@ -536,12 +538,12 @@ $(document).ready(function() {
 						
 						var linkId = this.id;
 						var loanId = linkId.replace("approvebtn", "");
-						var url = '${rootContext}portfolio/loan/' + loanId + '/approve';
-						var templateSelector = "#approveLoanFormTemplate";
+						var postUrl = 'http://localhost:8080/mifosng-provider/api/v1/loans/' + loanId + '?command=approve';
+						var templateSelector = "#stateTransitionLoanFormTemplate";
 						var width = 500; 
 						var height = 350;
 						var defaultOffset = offsetToSubmittedDate;
-						popupDialogWithPostOnlyFormView(url, 'dialog.title.approve.loan', templateSelector, width, height, currentTabIndex, offsetToSubmittedDate, defaultOffset, maxOffset)
+						popupDialogWithPostOnlyFormView(postUrl, 'dialog.title.approve.loan', templateSelector, width, height, currentTabIndex, offsetToSubmittedDate, defaultOffset, maxOffset)
 					    e.preventDefault();
 					});
 					$('button.approveloan span').text(jQuery.i18n.prop('dialog.button.approve.loan'));
@@ -565,10 +567,10 @@ $(document).ready(function() {
 						
 						var linkId = this.id;
 						var loanId = linkId.replace("undoapprovebtn", "");
-						var url = '${rootContext}portfolio/loan/' + loanId + '/undoapproval';
+						var postUrl = 'http://localhost:8080/mifosng-provider/api/v1/loans/' + loanId + '/undo?command=undoapproval';
 						var width = 400; 
 						var height = 225;
-						popupConfirmationDialogAndPost(url, 'dialog.title.undo.loan.approval', width, height, currentTabIndex);
+						popupConfirmationDialogAndPost(postUrl, 'POST', 'dialog.title.undo.loan.approval', width, height, currentTabIndex);
 					    e.preventDefault();
 					});
 					$('button.undoapproveloan span').text(jQuery.i18n.prop('dialog.button.undo.loan.approval'));
@@ -577,10 +579,10 @@ $(document).ready(function() {
 						
 						var linkId = this.id;
 						var loanId = linkId.replace("undodisbursalbtn", "");
-						var url = '${rootContext}portfolio/loan/' + loanId + '/undodisbursal';
+						var postUrl = 'http://localhost:8080/mifosng-provider/api/v1/loans/' + loanId + '?command=undodisbursal';
 						var width = 400; 
 						var height = 150;
-						popupConfirmationDialogAndPost(url, 'dialog.title.undo.loan.disbursal', width, height, currentTabIndex);
+						popupConfirmationDialogAndPost(postUrl, 'POST', 'dialog.title.undo.loan.disbursal', width, height, currentTabIndex);
 					    e.preventDefault();
 					});
 					$('button.undodisbursalloan span').text(jQuery.i18n.prop('dialog.button.undo.loan.disbursal'));
@@ -589,12 +591,12 @@ $(document).ready(function() {
 						
 						var linkId = this.id;
 						var loanId = linkId.replace("disbursebtn", "");
-						var url = '${rootContext}portfolio/loan/' + loanId + '/disburse';
-						var templateSelector = "#disburseLoanFormTemplate";
+						var postUrl = 'http://localhost:8080/mifosng-provider/api/v1/loans/' + loanId + '?command=disburse';
+						var templateSelector = "#stateTransitionLoanFormTemplate";
 						var width = 500; 
 						var height = 350;
 						var defaultOffset = offsetToApprovalDate;
-						popupDialogWithPostOnlyFormView(url, 'dialog.title.disburse.loan', templateSelector, width, height, currentTabIndex, offsetToSubmittedDate, defaultOffset, maxOffset)
+						popupDialogWithPostOnlyFormView(postUrl, 'dialog.title.disburse.loan', templateSelector, width, height, currentTabIndex, offsetToSubmittedDate, defaultOffset, maxOffset)
 					    e.preventDefault();
 					});
 					$('button.disburseloan span').text(jQuery.i18n.prop('dialog.button.disburse.loan'));
@@ -603,7 +605,7 @@ $(document).ready(function() {
 						
 						var linkId = this.id;
 						var loanId = linkId.replace("repaymentbtn", "");
-						var url = '${rootContext}portfolio/loan/' + loanId + '/repayment';
+						var url = 'http://localhost:8080/mifosng-provider/api/v1/loans/' + loanId;
 						var templateSelector = "#transactionLoanFormTemplate";
 						var width = 500; 
 						var height = 350;
