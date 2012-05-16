@@ -4,7 +4,7 @@ import java.util.Map;
 
 import javax.ws.rs.core.StreamingOutput;
 
-import org.mifosng.data.ExtraDatasets;
+import org.mifosng.data.AdditionalFieldSets;
 import org.mifosng.data.reports.GenericResultset;
 
 public interface ReadExtraDataAndReportingService {
@@ -16,7 +16,7 @@ public interface ReadExtraDataAndReportingService {
 	GenericResultset retrieveGenericResultset(String name,
 			String type, Map<String, String> extractedQueryParams);
 
-	ExtraDatasets retrieveExtraDatasetNames(String datasetType);
+	AdditionalFieldSets retrieveExtraDatasetNames(String datasetType);
 
 	GenericResultset retrieveExtraData(String datasetType, String datasetName,
 			String datasetPKValue);

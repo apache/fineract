@@ -3,16 +3,16 @@ package org.mifosng.data;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class ExtraDatasetRow {
+public class AdditionalFieldSet {
 
 	private Integer id;
 	private String name;
 	private String type;
-	protected ExtraDatasetRow() {
+	protected AdditionalFieldSet() {
 		//
 	}
 
-	public ExtraDatasetRow(final Integer id, final String name, final String type) {
+	public AdditionalFieldSet(final Integer id, final String name, final String type) {
 		this.id = id;
 		this.name = name;
 		this.type = type;

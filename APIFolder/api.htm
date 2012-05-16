@@ -40,7 +40,7 @@
                   <h3>&nbsp;</h3>
                   <h4><a href="#additionalfields">Additional Fields</a></h4>
                   <ul>
-                      <li><a href="#listadditionalfields">List Additional Field Sources</a></li>
+                      <li><a href="#listadditionalfields">List Additional Fields Sets</a></li>
                       <li><a href="#retrieveadditionalfields">Retrieve Additional Fields</a></li>
                       <li><a href="#updateadditionalfields">Update Additional Fields</a></li>
                   </ul>
@@ -315,9 +315,14 @@ error is parameter-specific.  You can use this to display a message near
                 <div class="method-description">
                     <h3>Additional Fields</h3>
  <p>
-The additional fields resource allows you to run and receive output from pre-defined Mifos X additional fieldsreports.  
+In Mifos X, any number of "Sets" of "Additional Fields" can be configured for a Mifos X database table ("Type").
 </p>
-
+<p>  For example, portfolio_client is the database table that holds client data.  Typically, MFI's want more client related fields than is provided by Mifos X out-of-the-box.  
+The MFI might add a Set called "Additional Info" containing some fields that are typically input when creating a client.  They might then add another Set called "Highly Improbable Info" containing some fields that are only input in exceptional circumstances.
+</p>
+<p>
+The additional fields resource allows you to retrieve and update any Additional Fields data that has been configured in Mifos X.
+</p>
 <p>
 The Mifos X Individual Lending client application uses a JQuery plugin called stretchydata which, itself, uses this additional fields resource to provide a pretty flexible additional fields User Interface (UI).  Put a link to an example here.
 </p>
@@ -328,94 +333,45 @@ The Mifos X Individual Lending client application uses a JQuery plugin called st
 
 
 
-            <a id="listadditionalfields" name="listadditionalfields" class="old-syle-anchor">&nbsp;</a>
-            <div class="method-section">
-                <div class="method-description">
-                    <h4>List Additional Fields</h4>
-                    <p>
-                        Lists the types of additional field data that has been defined in Mifox X.  If an Additional Data Type has more than one Addition Data Set it will be listed the same number of times as it has Sets.
-                    </p>
+<a id="listadditionalfields" name="listadditionalfields" class="old-syle-anchor">&nbsp;</a>
+<div class="method-section">
+ <div class="method-description">
+  <h4>List Additional Fields Sets</h4>
+  <p>
+  Lists the Sets of additional fields have been defined in Mifos X. 
+  </p>
 
-    <h5>Arguments</h5>
-<dl class="argument-list">
-        <dt>exportCSV</dt>
-        <dd>optional, <span>The only valid value is 'true'.  If any other value is provided the argument will be ignored</span></dd>
-        <dd>Output will be delivered as a CSV file instead of JSON.</dd>
-</dl>
-                    <p>Example Request: 
-                        <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/reports">http://localhost:8080/mifosng-provider/api/v1/reports</a>
-                    </p>
+  <h5>Arguments</h5>
+  <dl class="argument-list">
+        <dt>type</dt>
+        <dd>optional</span></dd>
+        <dd>The Additional Field Type (Mifos X database table) to restrict the output to</dd>
+  </dl>
 
-  </div>
+  <p>Example Request: 
+  <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/additionalfields?type=portfolio_client">http://localhost:8080/mifosng-provider/api/v1/additionalfields?type=portfolio_client</a>
+  </p>
 
-  <div class="method-example">
-      <code class="method-declaration">GET https://thedomainname/v1/reports</code>
-      <code class="method-response">{
-  "columnHeaders": [
+ </div>
+
+ <div class="method-example">
+  <code class="method-declaration">GET https://thedomainname/v1/additionalfields</code>
+  <code class="method-response">{
+  "additionalFieldsSets": [
     {
-      "columnName": "report_id",
-      "columnType": "INT",
-      "columnLength": null,
-      "columnDisplayType": null,
-      "columnValues": []
+      "id": 1,
+      "name": "Additional Information",
+      "type": "portfolio_client"
     },
     {
-      "columnName": "report_name",
-      "columnType": "VARCHAR",
-      "columnLength": null,
-      "columnDisplayType": null,
-      "columnValues": []
-    },
-    {
-      "columnName": "report_type",
-      "columnType": "VARCHAR",
-      "columnLength": null,
-      "columnDisplayType": null,
-      "columnValues": []
-    },
-... more "columnHeaders" entries
-  ],
-  "data": [
-    {
-      "row": [
-        "29",
-        "Client Listing",
-        "Table",
-        null,
-        null,
-        "5",
-        null,
-        "selectOfficeId"
-      ]
-    },
-    {
-      "row": [
-        "42",
-        "Client Listing - Additional and Unlikely",
-        "Table",
-        null,
-        null,
-        "5",
-        null,
-        "selectOfficeId"
-      ]
-    },
-    {
-      "row": [
-        "30",
-        "Client Loans Listing",
-        "Table",
-        null,
-        null,
-        "5",
-        null,
-        "selectOfficeId"
-      ]
-    },
-... more "Row" entries
+      "id": 9,
+      "name": "Highly Improbable Info",
+      "type": "portfolio_client"
+    }
   ]
-}</code>
-  </div>
+}
+  </code>
+ </div>
 </div>
 
 

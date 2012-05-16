@@ -8,14 +8,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class GenericResultset {
 
-	// [
-		// [contact_email, field 2, field 3], 
-	    // [
-	         // ["abb.net", "r2", "x"], ["abb.net", "r3"]
-	    // ]
-	// ]
-	
-	// create types for these
 	private List<ResultsetColumnHeader> columnHeaders = new ArrayList<ResultsetColumnHeader>();
 	private List<ResultsetDataRow> data = new ArrayList<ResultsetDataRow>();
 	

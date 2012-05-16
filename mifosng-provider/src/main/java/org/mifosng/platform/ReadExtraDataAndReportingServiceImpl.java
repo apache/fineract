@@ -20,8 +20,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 
-import org.mifosng.data.ExtraDatasetRow;
-import org.mifosng.data.ExtraDatasets;
+import org.mifosng.data.AdditionalFieldSet;
+import org.mifosng.data.AdditionalFieldSets;
 import org.mifosng.data.reports.GenericResultset;
 import org.mifosng.data.reports.ResultsetColumnHeader;
 import org.mifosng.data.reports.ResultsetDataRow;
@@ -334,9 +334,9 @@ public class ReadExtraDataAndReportingServiceImpl implements
 	}
 
 	@Override
-	public ExtraDatasets retrieveExtraDatasetNames(String type) {
+	public AdditionalFieldSets retrieveExtraDatasetNames(String type) {
 
-		List<ExtraDatasetRow> extraDatasetRows = new ArrayList<ExtraDatasetRow>();
+		List<AdditionalFieldSet> additionalFieldsSets = new ArrayList<AdditionalFieldSet>();
 		Connection db_connection;
 		try {
 			db_connection = dataSource.getConnection();
@@ -354,8 +354,8 @@ public class ReadExtraDataAndReportingServiceImpl implements
 			ResultSet rs = db_statement.executeQuery(sql);
 
 			while (rs.next()) {
-				extraDatasetRows
-						.add(new ExtraDatasetRow(rs.getInt("id"), rs
+				additionalFieldsSets
+						.add(new AdditionalFieldSet(rs.getInt("id"), rs
 								.getString("datasetName"), rs
 								.getString("datasetType")));
 			}
@@ -370,7 +370,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 					.status(Status.BAD_REQUEST).entity(e.getMessage()).build());
 		}
 
-		return new ExtraDatasets(extraDatasetRows);
+		return new AdditionalFieldSets(additionalFieldsSets);
 	}
 
 	@Override
