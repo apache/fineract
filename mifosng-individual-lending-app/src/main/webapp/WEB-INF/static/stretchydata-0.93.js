@@ -388,6 +388,7 @@
 				// crossDomain : true,
 				dataType : 'json',
 				data : form_data,
+				cache: false,
 				success : function(data, textStatus, jqXHR) {
 					currentEditPopup.dialogDiv.dialog("close");
 					viewExtraData(currentEditPopup.baseUrl,
@@ -455,6 +456,7 @@
 			cache : false,
 			type : 'GET',
 			contentType : "application/json; charset=utf-8",
+			cache: false,
 			// dataType : 'jsonp',
 			// crossDomain : true,
 			dataType : 'json',

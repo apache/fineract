@@ -1000,7 +1000,7 @@ alert("needs fixing up, dont rely on data")
 		dataType: 'json',
 		contentType: "application/json; charset=utf-8",
 		crossDomain: false,
-		cache: true,
+		cache: false,
 		beforeSend: function( xhr ) {
 			xhr.setRequestHeader("Accept", "application/json");
 		},
@@ -1052,7 +1052,7 @@ function getReportDataNoAuth(rptName, inParams, successFunction, isParameterType
 			data: inQueryParameters,
 			contentType: "application/json; charset=utf-8",
 			crossDomain: false,
-			// cache: true,
+			cache: false,
 			beforeSend: function( xhr ) {
 				xhr.setRequestHeader("Accept", "application/json");
 			},
