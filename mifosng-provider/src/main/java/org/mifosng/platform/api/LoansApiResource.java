@@ -29,8 +29,6 @@ import org.mifosng.data.command.LoanTransactionCommand;
 import org.mifosng.data.command.SubmitLoanApplicationCommand;
 import org.mifosng.data.command.UndoLoanApprovalCommand;
 import org.mifosng.data.command.UndoLoanDisbursalCommand;
-import org.mifosng.platform.ReadPlatformService;
-import org.mifosng.platform.WritePlatformService;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
 import org.mifosng.platform.loan.service.CalculationPlatformService;
 import org.mifosng.platform.loan.service.LoanReadPlatformService;
@@ -55,12 +53,6 @@ public class LoansApiResource {
     
     @Autowired
    	private LoanWritePlatformService loanWritePlatformService;
-    
-    @Autowired
-   	private ReadPlatformService readPlatformService;
-    
-    @Autowired
-   	private WritePlatformService writePlatformService;
     
     @Autowired
 	private CalculationPlatformService calculationPlatformService;
@@ -229,11 +221,11 @@ public class LoansApiResource {
 		command.setTransactionAmount(transactionAmount);
 		
 		if (StringUtils.isNotBlank(transactionType) && transactionType.trim().equalsIgnoreCase("waiver")) {
-			EntityIdentifier identifier = this.writePlatformService.waiveLoanAmount(command);
+			EntityIdentifier identifier = this.loanWritePlatformService.waiveLoanAmount(command);
 			return Response.ok().entity(identifier).build();
 		}
 		
-		EntityIdentifier identifier = this.writePlatformService.makeLoanRepayment(command);
+		EntityIdentifier identifier = this.loanWritePlatformService.makeLoanRepayment(command);
 		return Response.ok().entity(identifier).build();
 	}
 	
@@ -246,11 +238,11 @@ public class LoansApiResource {
 		hardcodeUserIntoSecurityContext();
 		
 		if (StringUtils.isNotBlank(transactionType) && transactionType.trim().equalsIgnoreCase("waiver")) {
-			LoanRepaymentData loanWaiverData = this.readPlatformService.retrieveNewLoanWaiverDetails(loanId);
+			LoanRepaymentData loanWaiverData = this.loanReadPlatformService.retrieveNewLoanWaiverDetails(loanId);
 			return Response.ok().entity(loanWaiverData).build();
 		}
 
-		LoanRepaymentData loanRepaymentData = this.readPlatformService.retrieveNewLoanRepaymentDetails(loanId);
+		LoanRepaymentData loanRepaymentData = this.loanReadPlatformService.retrieveNewLoanRepaymentDetails(loanId);
 		return Response.ok().entity(loanRepaymentData).build();
 	}
 	
@@ -262,7 +254,7 @@ public class LoansApiResource {
 
 		hardcodeUserIntoSecurityContext();
 		
-		LoanRepaymentData loanRepaymentData = this.readPlatformService.retrieveLoanRepaymentDetails(loanId, repaymentId);
+		LoanRepaymentData loanRepaymentData = this.loanReadPlatformService.retrieveLoanRepaymentDetails(loanId, repaymentId);
 
 		return Response.ok().entity(loanRepaymentData).build();
 	}
@@ -284,7 +276,7 @@ public class LoansApiResource {
 		BigDecimal transactionAmount = apiDataConversionService.convertFrom(command.getTransactionAmountFormatted(), "transactionAmountFormatted", Locale.UK);
 		command.setTransactionAmount(transactionAmount);
 
-		EntityIdentifier identifier = this.writePlatformService.adjustLoanTransaction(command);
+		EntityIdentifier identifier = this.loanWritePlatformService.adjustLoanTransaction(command);
 
 		return Response.ok().entity(identifier).build();
 	}

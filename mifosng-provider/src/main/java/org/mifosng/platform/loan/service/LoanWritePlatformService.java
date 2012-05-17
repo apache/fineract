@@ -1,7 +1,9 @@
 package org.mifosng.platform.loan.service;
 
 import org.mifosng.data.EntityIdentifier;
+import org.mifosng.data.command.AdjustLoanTransactionCommand;
 import org.mifosng.data.command.LoanStateTransitionCommand;
+import org.mifosng.data.command.LoanTransactionCommand;
 import org.mifosng.data.command.SubmitLoanApplicationCommand;
 import org.mifosng.data.command.UndoLoanApprovalCommand;
 import org.mifosng.data.command.UndoLoanDisbursalCommand;
@@ -32,4 +34,11 @@ public interface LoanWritePlatformService {
 
 	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE', 'CAN_UNDO_LOAN_DISBURSAL_ROLE')")
 	public EntityIdentifier undloLoanDisbursal(UndoLoanDisbursalCommand command);
+	
+	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE', 'CAN_MAKE_LOAN_REPAYMENT_ROLE', 'CAN_MAKE_LOAN_REPAYMENT_IN_THE_PAST_ROLE')")
+	public EntityIdentifier makeLoanRepayment(LoanTransactionCommand command);
+
+	EntityIdentifier adjustLoanTransaction(AdjustLoanTransactionCommand command);
+
+	EntityIdentifier waiveLoanAmount(LoanTransactionCommand command);
 }

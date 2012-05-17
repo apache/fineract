@@ -40,7 +40,6 @@ import org.mifosng.platform.loan.domain.DefaultLoanLifecycleStateMachine;
 import org.mifosng.platform.loan.domain.InterestCalculationPeriodMethod;
 import org.mifosng.platform.loan.domain.InterestMethod;
 import org.mifosng.platform.loan.domain.Loan;
-import org.mifosng.platform.loan.domain.LoanBuilder;
 import org.mifosng.platform.loan.domain.LoanLifecycleStateMachine;
 import org.mifosng.platform.loan.domain.LoanProduct;
 import org.mifosng.platform.loan.domain.LoanProductRelatedDetail;
@@ -187,11 +186,9 @@ public class ImportPlatformServiceImpl implements ImportPlatformService {
 			List<ScheduledLoanInstallment> loanRepaymentSchedule = loanSchedule
 					.getScheduledLoanInstallments();
 
-			Loan loan = new LoanBuilder().with(currentUser.getOrganisation())
-					.with(loanProduct).with(client)
-					.withExternalSystemId(command.getExternalId())
-					.with(loanRepaymentScheduleDetail).build();
-
+			Loan loan = Loan.createNew(currentUser.getOrganisation(), loanProduct, client, loanRepaymentScheduleDetail);
+			loan.setExternalId(command.getExternalId());
+			
 			for (ScheduledLoanInstallment scheduledLoanInstallment : loanRepaymentSchedule) {
 
 				MoneyData readPrincipalDue = scheduledLoanInstallment

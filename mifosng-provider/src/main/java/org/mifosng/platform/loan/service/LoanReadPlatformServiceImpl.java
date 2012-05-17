@@ -1,11 +1,10 @@
 package org.mifosng.platform.loan.service;
 
+import static org.mifosng.platform.Specifications.loanTransactionsThatMatch;
 import static org.mifosng.platform.Specifications.loansThatMatch;
 
 import java.util.ArrayList;
 import java.util.Collection;
-
-import javax.sql.DataSource;
 
 import org.joda.time.LocalDate;
 import org.mifosng.data.ClientData;
@@ -13,6 +12,7 @@ import org.mifosng.data.CurrencyData;
 import org.mifosng.data.DerivedLoanData;
 import org.mifosng.data.LoanAccountData;
 import org.mifosng.data.LoanProductData;
+import org.mifosng.data.LoanRepaymentData;
 import org.mifosng.data.MoneyData;
 import org.mifosng.data.NewLoanWorkflowStepOneData;
 import org.mifosng.platform.client.service.ClientReadPlatformService;
@@ -21,33 +21,37 @@ import org.mifosng.platform.currency.domain.ApplicationCurrencyRepository;
 import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.loan.domain.Loan;
 import org.mifosng.platform.loan.domain.LoanRepository;
+import org.mifosng.platform.loan.domain.LoanTransaction;
+import org.mifosng.platform.loan.domain.LoanTransactionRepository;
 import org.mifosng.platform.loanproduct.service.LoanProductReadPlatformService;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.user.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
 public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
-	private final SimpleJdbcTemplate jdbcTemplate;
+//	private final SimpleJdbcTemplate jdbcTemplate;
 	private final PlatformSecurityContext context;
 	private final LoanRepository loanRepository;
 	private final ApplicationCurrencyRepository applicationCurrencyRepository;
 	private final LoanProductReadPlatformService loanProductReadPlatformService;
 	private final ClientReadPlatformService clientReadPlatformService;
+	private final LoanTransactionRepository loanTransactionRepository;
 
 	@Autowired
-	public LoanReadPlatformServiceImpl(final PlatformSecurityContext context, final DataSource dataSource, 
-			final LoanRepository loanRepository, final ApplicationCurrencyRepository applicationCurrencyRepository, 
+	public LoanReadPlatformServiceImpl(final PlatformSecurityContext context, 
+//			final DataSource dataSource, 
+			final LoanRepository loanRepository, final LoanTransactionRepository loanTransactionRepository, final ApplicationCurrencyRepository applicationCurrencyRepository, 
 			final LoanProductReadPlatformService loanProductReadPlatformService, final ClientReadPlatformService clientReadPlatformService) {
 		this.context = context;
 		this.loanRepository = loanRepository;
+		this.loanTransactionRepository = loanTransactionRepository;
 		this.applicationCurrencyRepository = applicationCurrencyRepository;
 		this.loanProductReadPlatformService = loanProductReadPlatformService;
 		this.clientReadPlatformService = clientReadPlatformService;
-		this.jdbcTemplate = new SimpleJdbcTemplate(dataSource);
+//		this.jdbcTemplate = new SimpleJdbcTemplate(dataSource);
 	}
 	
 	@Override
@@ -204,5 +208,96 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 			}
 		}
 		return match;
+	}
+	
+	
+	@Override
+	public LoanRepaymentData retrieveNewLoanRepaymentDetails(Long loanId) {
+
+		AppUser currentUser = context.authenticatedUser();
+
+		// TODO - OPTIMIZE - write simple sql query to fetch back date of
+		// possible next transaction date.
+		Loan loan = this.loanRepository.findOne(loansThatMatch(currentUser.getOrganisation(), loanId));
+
+		ApplicationCurrency currency = this.applicationCurrencyRepository
+				.findOneByCode(loan.getLoanRepaymentScheduleDetail()
+						.getPrincipal().getCurrencyCode());
+
+		CurrencyData currencyData = new CurrencyData(currency.getCode(),
+				currency.getName(), currency.getDecimalPlaces(),
+				currency.getDisplaySymbol(), currency.getNameCode());
+
+		LocalDate earliestUnpaidInstallmentDate = loan
+				.possibleNextRepaymentDate();
+		Money possibleNextRepaymentAmount = loan.possibleNextRepaymentAmount();
+		MoneyData possibleNextRepayment = MoneyData.of(currencyData,
+				possibleNextRepaymentAmount.getAmount());
+
+		LoanRepaymentData newRepaymentDetails = new LoanRepaymentData();
+		newRepaymentDetails.setDate(earliestUnpaidInstallmentDate);
+		newRepaymentDetails.setTotal(possibleNextRepayment);
+
+		return newRepaymentDetails;
+	}
+
+	@Override
+	public LoanRepaymentData retrieveNewLoanWaiverDetails(Long loanId) {
+
+		AppUser currentUser = context.authenticatedUser();
+
+		// TODO - OPTIMIZE - write simple sql query to fetch back date of
+		// possible next transaction date.
+		Loan loan = this.loanRepository.findOne(loansThatMatch(
+				currentUser.getOrganisation(), loanId));
+
+		ApplicationCurrency currency = this.applicationCurrencyRepository
+				.findOneByCode(loan.getLoanRepaymentScheduleDetail()
+						.getPrincipal().getCurrencyCode());
+
+		CurrencyData currencyData = new CurrencyData(currency.getCode(),
+				currency.getName(), currency.getDecimalPlaces(),
+				currency.getDisplaySymbol(), currency.getNameCode());
+
+		Money totalOutstanding = loan.getTotalOutstanding();
+		MoneyData totalOutstandingData = MoneyData.of(currencyData,
+				totalOutstanding.getAmount());
+
+		LoanRepaymentData newWaiverDetails = new LoanRepaymentData();
+		newWaiverDetails.setDate(new LocalDate());
+		newWaiverDetails.setTotal(totalOutstandingData);
+
+		return newWaiverDetails;
+	}
+
+	@Override
+	public LoanRepaymentData retrieveLoanRepaymentDetails(Long loanId,
+			Long repaymentId) {
+
+		AppUser currentUser = context.authenticatedUser();
+
+		LoanTransaction transaction = this.loanTransactionRepository
+				.findOne(loanTransactionsThatMatch(
+						currentUser.getOrganisation(), repaymentId));
+
+		Loan loan = this.loanRepository.findOne(loansThatMatch(
+				currentUser.getOrganisation(), loanId));
+
+		ApplicationCurrency currency = this.applicationCurrencyRepository
+				.findOneByCode(loan.getLoanRepaymentScheduleDetail()
+						.getPrincipal().getCurrencyCode());
+
+		CurrencyData currencyData = new CurrencyData(currency.getCode(),
+				currency.getName(), currency.getDecimalPlaces(),
+				currency.getDisplaySymbol(), currency.getNameCode());
+		MoneyData total = MoneyData.of(currencyData, transaction.getAmount());
+		LocalDate date = transaction.getTransactionDate();
+
+		LoanRepaymentData loanRepaymentData = new LoanRepaymentData();
+		loanRepaymentData.setId(repaymentId);
+		loanRepaymentData.setTotal(total);
+		loanRepaymentData.setDate(date);
+
+		return loanRepaymentData;
 	}
 }

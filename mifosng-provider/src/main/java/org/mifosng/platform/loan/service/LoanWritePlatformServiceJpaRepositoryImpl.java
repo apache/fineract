@@ -12,12 +12,13 @@ import org.mifosng.data.EntityIdentifier;
 import org.mifosng.data.LoanSchedule;
 import org.mifosng.data.MoneyData;
 import org.mifosng.data.ScheduledLoanInstallment;
+import org.mifosng.data.command.AdjustLoanTransactionCommand;
 import org.mifosng.data.command.CalculateLoanScheduleCommand;
 import org.mifosng.data.command.LoanStateTransitionCommand;
+import org.mifosng.data.command.LoanTransactionCommand;
 import org.mifosng.data.command.SubmitLoanApplicationCommand;
 import org.mifosng.data.command.UndoLoanApprovalCommand;
 import org.mifosng.data.command.UndoLoanDisbursalCommand;
-import org.mifosng.platform.LoanStateTransitionCommandValidator;
 import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.client.domain.ClientRepository;
 import org.mifosng.platform.client.domain.Note;
@@ -40,6 +41,8 @@ import org.mifosng.platform.loan.domain.LoanRepaymentScheduleInstallment;
 import org.mifosng.platform.loan.domain.LoanRepository;
 import org.mifosng.platform.loan.domain.LoanStatus;
 import org.mifosng.platform.loan.domain.LoanStatusRepository;
+import org.mifosng.platform.loan.domain.LoanTransaction;
+import org.mifosng.platform.loan.domain.LoanTransactionRepository;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 import org.mifosng.platform.loanschedule.domain.AprCalculator;
 import org.mifosng.platform.security.PlatformSecurityContext;
@@ -60,13 +63,16 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 	private final NoteRepository noteRepository;
 	private final CalculationPlatformService calculationPlatformService;	
 	private final AprCalculator aprCalculator = new AprCalculator();
+	private final LoanTransactionRepository loanTransactionRepository;
 	
 	@Autowired
 	public LoanWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, 
-			final LoanRepository loanRepository, final LoanStatusRepository loanStatusRepository, final LoanProductRepository loanProductRepository, 
+			final LoanRepository loanRepository, final LoanTransactionRepository loanTransactionRepository,
+			final LoanStatusRepository loanStatusRepository, final LoanProductRepository loanProductRepository, 
 			final ClientRepository clientRepository, final NoteRepository noteRepository, final CalculationPlatformService calculationPlatformService) {
 		this.context = context;
 		this.loanRepository = loanRepository;
+		this.loanTransactionRepository = loanTransactionRepository;
 		this.loanProductRepository = loanProductRepository;
 		this.clientRepository = clientRepository;
 		this.loanStatusRepository = loanStatusRepository;
@@ -128,6 +134,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		List<ScheduledLoanInstallment> loanRepaymentSchedule = loanSchedule.getScheduledLoanInstallments();
 
 		Loan loan = Loan.createNew(currentUser.getOrganisation(), loanProduct, client, loanRepaymentScheduleDetail);
+		loan.setExternalId(command.getExternalId());
 		
 		for (ScheduledLoanInstallment scheduledLoanInstallment : loanRepaymentSchedule) {
 
@@ -398,6 +405,117 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		Note note = Note.loanNote(currentUser.getOrganisation(), loan, "Undo of disbursal.");
 		this.noteRepository.save(note);
 		
+		return new EntityIdentifier(loan.getClient().getId());
+	}
+	
+	@Transactional
+	@Override
+	public EntityIdentifier makeLoanRepayment(final LoanTransactionCommand command) {
+
+		AppUser currentUser = context.authenticatedUser();
+		
+		LoanTransactionCommandValidator validator = new LoanTransactionCommandValidator(command);
+		validator.validate();
+		
+		Loan loan = this.loanRepository.findOne(loansThatMatch(currentUser.getOrganisation(), command.getLoanId()));
+		if (loan == null) {
+			throw new PlatformResourceNotFoundException("error.msg.loan.id.invalid", "Loan with identifier {0} does not exist", command.getLoanId());
+		}
+		
+		if (this.isBeforeToday(command.getTransactionDate()) && currentUser.canNotMakeRepaymentOnLoanInPast()) {
+			throw new NoAuthorizationException("error.msg.no.permission.to.make.repayment.on.loan.in.past");
+		}
+
+		Money repayment = Money.of(loan.getLoanRepaymentScheduleDetail()
+				.getPrincipal().getCurrency(),
+				command.getTransactionAmount());
+
+		LoanTransaction loanRepayment = LoanTransaction.repayment(repayment, command.getTransactionDate());
+		loan.makeRepayment(loanRepayment, defaultLoanLifecycleStateMachine());
+		this.loanTransactionRepository.save(loanRepayment);
+		this.loanRepository.save(loan);
+		
+		if (StringUtils.isNotBlank(command.getComment())) {
+			Note note = Note.loanTransactionNote(currentUser.getOrganisation(), loan, loanRepayment, command.getComment());
+			this.noteRepository.save(note);
+		}
+
+		return new EntityIdentifier(loan.getClient().getId());
+	}
+
+	@Transactional
+	@Override
+	public EntityIdentifier adjustLoanTransaction(AdjustLoanTransactionCommand command) {
+
+		AppUser currentUser = context.authenticatedUser();
+
+		AdjustLoanTransactionCommandValidator validator = new AdjustLoanTransactionCommandValidator(command);
+		validator.validate();
+
+		Loan loan = this.loanRepository.findOne(loansThatMatch(currentUser.getOrganisation(), command.getLoanId()));
+		if (loan == null) {
+			throw new PlatformResourceNotFoundException("error.msg.loan.id.invalid", "Loan with identifier {0} does not exist", command.getLoanId());
+		}
+
+		LoanTransaction transactionToAdjust = this.loanTransactionRepository
+				.findOne(command.getRepaymentId());
+
+		Money transactionAmount = Money.of(loan
+				.getLoanRepaymentScheduleDetail().getPrincipal()
+				.getCurrency(), command.getTransactionAmount());
+
+		// adjustment is only supported for repayments and waivers at present
+		LoanTransaction newTransactionDetail = LoanTransaction.repayment(transactionAmount, command.getTransactionDate());
+		if (transactionToAdjust.isWaiver()) {
+			newTransactionDetail = LoanTransaction.waiver(transactionAmount, command.getTransactionDate());
+		}
+
+		loan.adjustExistingTransaction(transactionToAdjust, newTransactionDetail, defaultLoanLifecycleStateMachine());
+
+		this.loanTransactionRepository.save(newTransactionDetail);
+
+		this.loanRepository.save(loan);
+
+		if (StringUtils.isNotBlank(command.getComment())) {
+			Note note = Note.loanTransactionNote(currentUser.getOrganisation(),
+					loan, newTransactionDetail, command.getComment());
+			this.noteRepository.save(note);
+		}
+
+		return new EntityIdentifier(loan.getClient().getId());
+	}
+	
+	@Transactional
+	@Override
+	public EntityIdentifier waiveLoanAmount(LoanTransactionCommand command) {
+		
+		AppUser currentUser = context.authenticatedUser();
+
+		LoanTransactionCommandValidator validator = new LoanTransactionCommandValidator(command);
+		validator.validate();
+		
+		Loan loan = this.loanRepository.findOne(loansThatMatch(currentUser.getOrganisation(), command.getLoanId()));
+		if (loan == null) {
+			throw new PlatformResourceNotFoundException("error.msg.loan.id.invalid", "Loan with identifier {0} does not exist", command.getLoanId());
+		}
+		
+		Money waived = Money.of(loan.getLoanRepaymentScheduleDetail()
+				.getPrincipal().getCurrency(),
+				command.getTransactionAmount());
+
+		LoanTransaction waiver = LoanTransaction.waiver(waived, command.getTransactionDate());
+		
+		loan.waive(waiver, defaultLoanLifecycleStateMachine());
+		
+		this.loanTransactionRepository.save(waiver);
+		
+		this.loanRepository.save(loan);
+		
+		if (StringUtils.isNotBlank(command.getComment())) {
+			Note note = Note.loanTransactionNote(currentUser.getOrganisation(), loan, waiver, command.getComment());
+			this.noteRepository.save(note);
+		}
+
 		return new EntityIdentifier(loan.getClient().getId());
 	}
 }

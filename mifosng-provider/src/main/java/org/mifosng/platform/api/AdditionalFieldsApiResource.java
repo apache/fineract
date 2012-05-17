@@ -23,12 +23,12 @@ import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.mifosng.data.AdditionalFieldsSets;
+import org.mifosng.data.ApiParameterError;
 import org.mifosng.data.EntityIdentifier;
-import org.mifosng.data.ErrorResponse;
-import org.mifosng.data.ErrorResponseList;
 import org.mifosng.data.reports.GenericResultset;
 import org.mifosng.platform.InvalidSqlException;
 import org.mifosng.platform.ReadExtraDataAndReportingService;
+import org.mifosng.platform.exceptions.PlatformApiDataValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,7 +66,7 @@ public class AdditionalFieldsApiResource {
 	@Produces({ MediaType.APPLICATION_JSON })
 	public Response extraData(@PathParam("type") final String type,
 			@PathParam("set") final String set,
-			@PathParam("id") final String id, @Context UriInfo uriInfo) {
+			@PathParam("id") final String id) {
 
 		try {
 			GenericResultset result = this.readExtraDataAndReportingService
@@ -74,15 +74,10 @@ public class AdditionalFieldsApiResource {
 
 			return Response.ok().entity(result).build();
 		} catch (InvalidSqlException e) {
-			List<ErrorResponse> allErrors = new ArrayList<ErrorResponse>();
-
-			ErrorResponse err = new ErrorResponse("extradata.invalid.sql",
-					"sql", e.getSql());
-			allErrors.add(err);
-
-			throw new WebApplicationException(Response
-					.status(Status.BAD_REQUEST)
-					.entity(new ErrorResponseList(allErrors)).build());
+			List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+			ApiParameterError error = ApiParameterError.parameterError("extradata.invalid.sql", "The sql is invalid.", "sql", e.getSql());
+			dataValidationErrors.add(error);
+			throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);
 		}
 	}
 
@@ -128,16 +123,11 @@ public class AdditionalFieldsApiResource {
 
 			return Response.ok().entity(entityIdentifier).build();
 		} catch (InvalidSqlException e) {
-			List<ErrorResponse> allErrors = new ArrayList<ErrorResponse>();
-
-			ErrorResponse err = new ErrorResponse("extradata.invalid.sql",
-					"sql", e.getSql());
-			allErrors.add(err);
-
-			logger.info("way bad: " + err.toString());
-			throw new WebApplicationException(Response
-					.status(Status.BAD_REQUEST)
-					.entity(new ErrorResponseList(allErrors)).build());
+			
+			List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+			ApiParameterError error = ApiParameterError.parameterError("extradata.invalid.sql", "The sql is invalid.", "sql", e.getSql());
+			dataValidationErrors.add(error);
+			throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);
 		}
 	}
 }
