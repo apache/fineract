@@ -17,7 +17,8 @@
 	
 	<tx:annotation-driven />
 	
-	<context:component-scan base-package="org.mifosng.platform.rest, org.mifosng.platform.security, org.mifosng.platform.infrastructure, org.mifosng.platform.*.domain, org.mifosng.platform, org.mifosng.demo">
+	<context:component-scan base-package="org.mifosng.platform.rest, org.mifosng.platform.security, org.mifosng.platform.infrastructure, 
+										  org.mifosng.platform.*.domain, org.mifosng.platform, org.mifosng.demo">
 		<context:exclude-filter expression="org.springframework.stereotype.Controller" type="annotation" />
 	</context:component-scan>
 	
@@ -27,28 +28,6 @@
     <jpa:repositories base-package="org.mifosng.platform.*.domain" />
 
     <import resource="infrastructure.xml" />
-    
-    <!--  
-    <bean id="mongoTemplate" class="org.springframework.data.mongodb.core.MongoTemplate">
-	  <constructor-arg ref="mongo" />
-	  <constructor-arg value="test" />
-	</bean>
-
-    <bean class="org.springframework.data.mongodb.core.MongoExceptionTranslator" />
-    
-    <mongo:mongo id="mongo" host="localhost" port="27017" />
-    
-    <mongo:repositories base-package="org.mifosng.platform.*.mongo" />
-    
-	<bean class="org.springframework.data.persistence.document.mongodb.MongoDocumentBacking" factory-method="aspectOf">
-	  <property name="changeSetPersister" ref="mongoChangeSetPersister"/>
-	</bean>
-	
-	<bean id="mongoChangeSetPersister" class="org.springframework.data.persistence.document.mongodb.MongoChangeSetPersister">
-	  <property name="mongoTemplate" ref="mongoTemplate"/>
-	  <property name="entityManagerFactory" ref="entityManagerFactory"/>
-	</bean>
-	-->
 		
 	<import resource="securityContext.xml" />
 </beans>

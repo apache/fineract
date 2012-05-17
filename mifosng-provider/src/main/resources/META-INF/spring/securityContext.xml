@@ -1,138 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans 
-    xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:beans="http://www.springframework.org/schema/beans"
 	xmlns:sec="http://www.springframework.org/schema/security"
-	xmlns:oauth="http://www.springframework.org/schema/security/oauth"
 	xsi:schemaLocation="
-   http://www.springframework.org/schema/beans 
-   http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
    http://www.springframework.org/schema/security 
    http://www.springframework.org/schema/security/spring-security-3.1.xsd
-   http://www.springframework.org/schema/security/oauth 
-   http://www.springframework.org/schema/security/spring-security-oauth-1.0.xsd">
+   http://www.springframework.org/schema/beans 
+   http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
 
-	<bean id="filterChainProxy" class="org.springframework.security.web.FilterChainProxy">
-		<constructor-arg>
-			<list>
-				<sec:filter-chain pattern="/resources/**" filters="none" />
-				<sec:filter-chain pattern="/api/open/**" filters="none" />
-				<sec:filter-chain pattern="/api/v1/**" filters="none" />
-				
-				<sec:filter-chain pattern="/**" filters="populateSecurityContextFilter, customAuthenticationFilter,
-				oauthRequestTokenFilter, oauthUserAuthorizationFilter, oauthAccessTokenFilter, oauthProtectedResourceFilter,
-				filterSecurityInterceptor" />
-			</list>
-		</constructor-arg>
-	</bean>
-	
-	<bean id="oauthProviderTokenServicesDelegate" class="org.mifosng.oauth.RemovableInMemoryProviderTokenServices" />
-	
-	<bean id="tokenServices" class="org.mifosng.oauth.CustomTokenServices">
-		<constructor-arg ref="oauthProviderTokenServicesDelegate" />
-	</bean>
-	
-	<bean id="roleBasedAuthenticationSuccessHandler" class="org.mifosng.platform.infrastructure.FirstTimeLoginDetectionAuthenticationSuccessHandler">
-		<constructor-arg ref="tokenServices" />
-        <property name="defaultTargetUrl" value="/home" />
-        <property name="alwaysUseDefaultTargetUrl" value="true" />
-        <property name="firstTimeLoginUrl" value="/firsttimelogin" />
-    </bean>
-    
-    <bean id="customAuthenticationFalureHandler" class="org.mifosng.platform.infrastructure.CustomAuthenticationFailureHandler">
-        <property name="defaultFailureUrl" value="/login" />
-    </bean>
+	<http create-session="stateless" use-expressions="true" pattern="/api/**">
+	   <intercept-url pattern="/api/**" access="isFullyAuthenticated()" />
+	   <http-basic />
+	</http>
 
-	<bean id="sessionAuthenticationStrategy" class="org.springframework.security.web.authentication.session.NullAuthenticatedSessionStrategy" />
-	
-	<bean id="customAuthenticationFilter" class="org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter">
-        <property name="authenticationManager" ref="authenticationManager" />
-        <property name="authenticationSuccessHandler" ref="roleBasedAuthenticationSuccessHandler" />
-        <property name="authenticationFailureHandler" ref="customAuthenticationFalureHandler" />
-        <property name="sessionAuthenticationStrategy" ref="sessionAuthenticationStrategy" />
-    </bean>
-	
-	<bean id="populateSecurityContextFilter" class="org.mifosng.oauth.OAuthParametersAwareSecurityContextPerRequestFilter">
-		<constructor-arg ref="tokenServices" />
-	</bean>
-	
-	<bean id="oauthConsumerDetailsService" class="org.mifosng.oauth.MifosNgConsumerDetailsService" />
-	
-	<bean id="oauthRequestTokenFilter" class="org.springframework.security.oauth.provider.filter.UnauthenticatedRequestTokenProcessingFilter">
-		<property name="filterProcessesUrl" value="/oauth/request_token" />
-		<property name="tokenServices" ref="tokenServices" />
-		<property name="consumerDetailsService" ref="oauthConsumerDetailsService" />
-	</bean>
-	
-	<sec:authentication-manager alias="authenticationManager">
-		<sec:authentication-provider ref="customAuthenticationProvider" />
-	</sec:authentication-manager>
-	
-	<bean id="passwordEncoder" class="org.springframework.security.authentication.encoding.ShaPasswordEncoder">
-    	<constructor-arg value="256"/>
- 	</bean>
+	<beans:bean id="passwordEncoder" class="org.springframework.security.authentication.encoding.ShaPasswordEncoder">
+    	<beans:constructor-arg value="256"/>
+ 	</beans:bean>
  	
- 	<bean id="saltSource" class="org.springframework.security.authentication.dao.ReflectionSaltSource">
-    	<property name="userPropertyToUse" value="id"/>
- 	</bean>
- 	
-	<bean id="userDetailsService" class="org.mifosng.platform.security.PlatformUserDetailsServiceImpl" />
+ 	<beans:bean id="saltSource" class="org.springframework.security.authentication.dao.ReflectionSaltSource">
+    	<beans:property name="userPropertyToUse" value="id"/>
+ 	</beans:bean>
+ 		
+	<beans:bean id="userDetailsService" class="org.mifosng.platform.security.PlatformUserDetailsServiceImpl" />
 		
-	<bean id="customAuthenticationProvider" class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
-		<property name="userDetailsService" ref="userDetailsService" />
-		<property name="passwordEncoder" ref="passwordEncoder" />
-		<property name="saltSource" ref="saltSource" />
-	</bean>
-	
-	<bean id="oauthRandomValueVerifierServices" class="org.springframework.security.oauth.provider.verifier.RandomValueVerifierServices" />
-	
-	<bean id="oauthAuthorizationSuccessHandler" class="org.springframework.security.oauth.provider.filter.UserAuthorizationSuccessfulAuthenticationHandler" />
-	
-	<bean id="oauthUserAuthorizationFilter" class="org.springframework.security.oauth.provider.filter.UserAuthorizationProcessingFilter">
-		<property name="filterProcessesUrl" value="/oauth/authorize" />
-		<property name="authenticationManager" ref="authenticationManager" />
-		<property name="tokenServices" ref="tokenServices" />
-		<property name="verifierServices" ref="oauthRandomValueVerifierServices" />
-		<property name="authenticationSuccessHandler" ref="oauthAuthorizationSuccessHandler" />
-	</bean>
-	
-	<bean id="oauthAccessTokenFilter" class="org.springframework.security.oauth.provider.filter.AccessTokenProcessingFilter">
-		<property name="filterProcessesUrl" value="/oauth/access_token" />
-		<property name="tokenServices" ref="tokenServices" />
-		<property name="consumerDetailsService" ref="oauthConsumerDetailsService" />
-	</bean>
-	
-	<bean id="oauthProtectedResourceFilter" class="org.mifosng.oauth.CustomProtectedResourceProcessingFilter">
-		<property name="tokenServices" ref="tokenServices" />
-		<property name="consumerDetailsService" ref="oauthConsumerDetailsService" />
-	</bean>
-	
-	<bean id="accessDecisionManager" class="org.springframework.security.access.vote.AffirmativeBased">
-	    <property name="decisionVoters">
-	        <list>
-	            <bean class="org.springframework.security.access.vote.RoleVoter"/>
-	            <bean class="org.springframework.security.access.vote.AuthenticatedVoter"/>
-	            <bean class="org.springframework.security.web.access.expression.WebExpressionVoter"/>
-	        </list>
-	    </property>
-	</bean>
-	 
-	<bean id="filterSecurityInterceptor" class="org.springframework.security.web.access.intercept.FilterSecurityInterceptor">
-	    <property name="securityMetadataSource">
-	    	<sec:filter-security-metadata-source use-expressions="true">
-	            <sec:intercept-url pattern="/login" access="isAnonymous()" />
-	            <sec:intercept-url pattern="/logout" access="isAnonymous()" />
-	            <sec:intercept-url pattern="/signup" access="isAnonymous()" />
-	            <sec:intercept-url pattern="/pentahoreport*" access="isAnonymous()" />
-	            <sec:intercept-url pattern="/exportcsv*" access="isAnonymous()" />
-	            <sec:intercept-url pattern="/oauth/authorize" access="isAnonymous()" />
-	            <sec:intercept-url pattern="/oauth/access_token" access="isAnonymous()" />
-	            <sec:intercept-url pattern="/oauth/confirm_access*" access="isAnonymous() or isFullyAuthenticated()" />
-	            <sec:intercept-url pattern="/api/protected/**" access="isFullyAuthenticated()" />
-	            <sec:intercept-url pattern="/**" access="isFullyAuthenticated()" />
-	        </sec:filter-security-metadata-source>
-	    </property>
-	    <property name="authenticationManager" ref="authenticationManager" />
-	    <property name="accessDecisionManager" ref="accessDecisionManager" />
-	</bean>
-</beans>
+	<beans:bean id="customAuthenticationProvider" class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
+		<beans:property name="userDetailsService" ref="userDetailsService" />
+		<beans:property name="passwordEncoder" ref="passwordEncoder" />
+		<beans:property name="saltSource" ref="saltSource" />
+	</beans:bean>
+
+	<authentication-manager alias="authenticationManager">
+		<authentication-provider ref="customAuthenticationProvider" />
+	</authentication-manager>
+</beans:beans>

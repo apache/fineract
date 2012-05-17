@@ -64,7 +64,9 @@ dependencies {
 	   			[group: 'org.springframework', name: 'spring-aspects', version: springVersion],
 	   			[group: 'org.springframework', name: 'spring-web', version: springVersion],
 	   			[group: 'org.springframework', name: 'spring-webmvc', version: springVersion],
-	            [group: 'org.springframework.security.oauth', name: 'spring-security-oauth', version: springSecurityOauthVersion],
+	   			[group: 'org.springframework.security', name: 'spring-security-core', version: springSecurityVersion],
+	   			[group: 'org.springframework.security', name: 'spring-security-web', version: springSecurityVersion],
+	   			[group: 'org.springframework.security', name: 'spring-security-config', version: springSecurityVersion],
 	            [group: 'org.springframework.security', name: 'spring-security-taglibs', version: springSecurityVersion],
 	            [group: 'org.aspectj', name: 'aspectjrt', version: '1.6.11.RELEASE'],
 	            

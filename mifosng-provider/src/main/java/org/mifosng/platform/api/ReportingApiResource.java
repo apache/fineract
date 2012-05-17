@@ -29,8 +29,7 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class ReportingApiResource {
 
-	private final static Logger logger = LoggerFactory
-			.getLogger(ReportingApiResource.class);
+	private final static Logger logger = LoggerFactory.getLogger(ReportingApiResource.class);
 
 	@Autowired
 	private ReadExtraDataAndReportingService ReadExtraDataAndReportingService;
@@ -114,11 +113,5 @@ public class ReportingApiResource {
 				.header("Content-Disposition",
 						"attachment;filename=" + reportName.replaceAll(" ", "")
 								+ ".csv").build();
-	}
-
-	@GET
-	@Path("forceauth")
-	public Response hackToForceAuthentication() {
-		return Response.ok().build();
 	}
 }

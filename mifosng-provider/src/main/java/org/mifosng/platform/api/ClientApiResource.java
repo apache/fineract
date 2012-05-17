@@ -24,14 +24,8 @@ import org.mifosng.data.command.NoteCommand;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
 import org.mifosng.platform.client.service.ClientReadPlatformService;
 import org.mifosng.platform.client.service.ClientWritePlatformService;
-import org.mifosng.platform.user.domain.AppUser;
-import org.mifosng.platform.user.domain.AppUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 @Path("/v1/clients")
@@ -48,23 +42,10 @@ public class ClientApiResource {
     @Autowired
     private ApiDataConversionService apiDataConversionService;
     
-	@Autowired
-	private AppUserRepository appUserRepository;
-	
-	private void hardcodeUserIntoSecurityContext() {
-		AppUser currentUser = this.appUserRepository.findOne(Long.valueOf(1));
-    	
-    	Authentication auth = new UsernamePasswordAuthenticationToken(currentUser, currentUser, currentUser.getAuthorities());
-		SecurityContext context = SecurityContextHolder.getContext();
-		context.setAuthentication(auth);
-	}
-	
 	@GET
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON})
 	public Response retrieveAllIndividualClients() {
-
-		hardcodeUserIntoSecurityContext();
 
 		Collection<ClientData> clients = this.clientReadPlatformService.retrieveAllIndividualClients();
 
@@ -77,8 +58,6 @@ public class ClientApiResource {
 	@Produces({ MediaType.APPLICATION_JSON})
 	public Response retrieveClientData(@PathParam("clientId") final Long clientId) {
 
-		hardcodeUserIntoSecurityContext();
-
 		ClientData clientData = this.clientReadPlatformService.retrieveIndividualClient(clientId);
 
 		return Response.ok().entity(clientData).build();
@@ -90,8 +69,6 @@ public class ClientApiResource {
 	@Produces({ MediaType.APPLICATION_JSON})
 	public Response newClientDetails() {
 
-		hardcodeUserIntoSecurityContext();
-
 		ClientData clientData = this.clientReadPlatformService.retrieveNewClientDetails();
 
 		return Response.ok().entity(clientData).build();
@@ -101,8 +78,6 @@ public class ClientApiResource {
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Produces({ MediaType.APPLICATION_JSON })
 	public Response enrollClient(final EnrollClientCommand command) {
-		
-		hardcodeUserIntoSecurityContext();
 		
 		LocalDate joiningDate = apiDataConversionService.convertFrom(command.getJoiningDateFormatted(), "joiningDateFormatted", command.getDateFormat());
 		command.setJoiningDate(joiningDate);
@@ -119,8 +94,6 @@ public class ClientApiResource {
 	@Produces({ MediaType.APPLICATION_JSON })
 	public Response retrieveClientAccount(@PathParam("clientId") final Long clientId) {
 
-		hardcodeUserIntoSecurityContext();
-		
 		ClientLoanAccountSummaryCollectionData clientAccount = this.clientReadPlatformService.retrieveClientAccountDetails(clientId);
 
 		return Response.ok().entity(clientAccount).build();
@@ -132,8 +105,6 @@ public class ClientApiResource {
 	@Produces({ MediaType.APPLICATION_JSON})
 	public Response retrieveAllClientNotes(@PathParam("clientId") final Long clientId) {
 
-		hardcodeUserIntoSecurityContext();
-		
 		Collection<NoteData> notes = this.clientReadPlatformService.retrieveAllClientNotes(clientId);
 
 		return Response.ok().entity(new NoteDataList(notes)).build();
@@ -144,8 +115,6 @@ public class ClientApiResource {
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON})
 	public Response addNewClientNote(@PathParam("clientId") final Long clientId, final NoteCommand command) {
-		
-		hardcodeUserIntoSecurityContext();
 		
 		command.setClientId(clientId);
 		
@@ -160,8 +129,6 @@ public class ClientApiResource {
 	@Produces({ MediaType.APPLICATION_JSON })
 	public Response retrieveClientNote(@PathParam("clientId") final Long clientId, @PathParam("noteId") final Long noteId) {
 
-		hardcodeUserIntoSecurityContext();
-		
 		NoteData note = this.clientReadPlatformService.retrieveClientNote(clientId, noteId);
 
 		return Response.ok().entity(note).build();
@@ -173,8 +140,6 @@ public class ClientApiResource {
 	@Produces({ MediaType.APPLICATION_JSON })
 	public Response updateClientNote(@PathParam("clientId") final Long clientId, @PathParam("noteId") final Long noteId, final NoteCommand command) {
 
-		hardcodeUserIntoSecurityContext();
-		
 		command.setClientId(clientId);
 		command.setId(noteId);
 		

@@ -1,12 +1,6 @@
 package org.mifosng.ui.admin;
 
-import java.security.Principal;
-
-import org.mifosng.oauth.ConsumerUserDetails;
-import org.mifosng.ui.reporting.ReportingRestOperations;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -22,23 +16,10 @@ import org.springframework.web.servlet.ModelAndView;
 @Controller
 public class ApplicationPagesRoutesController {
 
-	private final ReportingRestOperations reportingRestOperations;
-
-	@Autowired
-	public ApplicationPagesRoutesController(final ReportingRestOperations reportingRestOperations) {
-		this.reportingRestOperations = reportingRestOperations;
-	}
-	
     @ExceptionHandler(AccessDeniedException.class)
 	public String accessDeniedException() {
 		return "unAuthorizedAction";
 	}
-    
-	@RequestMapping(value="/forceOAuth", method = RequestMethod.GET)
-    public String forceOAuth() {
-		this.reportingRestOperations.hackToForceAuthentication();
-        return "redirect:/home";
-    }
 
     @RequestMapping(value="/", method = RequestMethod.GET)
     public String redirectToIndexPage() {
@@ -77,13 +58,13 @@ public class ApplicationPagesRoutesController {
 	}
 	
 	@RequestMapping(value = "/portfolio/client/{clientId}/loan/new", method = RequestMethod.GET)
-	public String loadLoanCreationWorkflow(final Model model, @PathVariable("clientId") final Long clientId, final Principal principal) {
+	public String loadLoanCreationWorkflow(final Model model, @PathVariable("clientId") final Long clientId) {
 		
-		UsernamePasswordAuthenticationToken authenticationToken = (UsernamePasswordAuthenticationToken) principal;
-    	ConsumerUserDetails user =  (ConsumerUserDetails) authenticationToken.getPrincipal();
-    	if (user.hasNoAuthorityToSumitLoanApplication()) {
-    		throw new AccessDeniedException("");
-    	}
+//		UsernamePasswordAuthenticationToken authenticationToken = (UsernamePasswordAuthenticationToken) principal;
+//    	ConsumerUserDetails user =  (ConsumerUserDetails) authenticationToken.getPrincipal();
+//    	if (user.hasNoAuthorityToSumitLoanApplication()) {
+//    		throw new AccessDeniedException("");
+//    	}
 		
 		model.addAttribute("clientId", clientId);
 		

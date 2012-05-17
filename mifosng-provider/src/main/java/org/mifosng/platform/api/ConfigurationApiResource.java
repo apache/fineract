@@ -1,4 +1,4 @@
-package org.mifosng.platform.api.configuration;
+package org.mifosng.platform.api;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;

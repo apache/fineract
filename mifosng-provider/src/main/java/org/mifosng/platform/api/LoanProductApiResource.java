@@ -1,4 +1,4 @@
-package org.mifosng.platform.api.loanproduct;
+package org.mifosng.platform.api;
 
 import java.util.Collection;
 
@@ -18,14 +18,8 @@ import org.mifosng.data.LoanProductList;
 import org.mifosng.data.command.LoanProductCommand;
 import org.mifosng.platform.loanproduct.service.LoanProductReadPlatformService;
 import org.mifosng.platform.loanproduct.service.LoanProductWritePlatformService;
-import org.mifosng.platform.user.domain.AppUser;
-import org.mifosng.platform.user.domain.AppUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 /*
@@ -58,24 +52,11 @@ public class LoanProductApiResource {
 	@Autowired
 	private LoanProductWritePlatformService loanProductWritePlatformService;
 	
-	@Autowired
-	private AppUserRepository appUserRepository;
-	
-	private void hardcodeUserIntoSecurityContext() {
-		AppUser currentUser = this.appUserRepository.findOne(Long.valueOf(1));
-    	
-    	Authentication auth = new UsernamePasswordAuthenticationToken(currentUser, currentUser, currentUser.getAuthorities());
-		SecurityContext context = SecurityContextHolder.getContext();
-		context.setAuthentication(auth);
-	}
-	
 	@POST
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Produces({ MediaType.APPLICATION_JSON})
 	public Response createLoanProduct(LoanProductCommand command) {
 
-		hardcodeUserIntoSecurityContext();
-		
 		EntityIdentifier entityIdentifier = this.loanProductWritePlatformService.createLoanProduct(command);
 
 		return Response.ok().entity(entityIdentifier).build();
@@ -86,8 +67,6 @@ public class LoanProductApiResource {
     @Produces({MediaType.APPLICATION_JSON})
 	public Response retrieveAllLoanProducts() {
     	
-		hardcodeUserIntoSecurityContext();
-		
 		Collection<LoanProductData> products = this.loanProductReadPlatformService.retrieveAllLoanProducts();
 
 		return Response.ok().entity(new LoanProductList(products)).build();
@@ -102,8 +81,6 @@ public class LoanProductApiResource {
 	@Produces({ MediaType.APPLICATION_JSON})
 	public Response retrieveNewLoanProductDetails() {
 
-		hardcodeUserIntoSecurityContext();
-		
 		LoanProductData loanProduct = this.loanProductReadPlatformService.retrieveNewLoanProductDetails();
 
 		return Response.ok().entity(loanProduct).build();
@@ -115,8 +92,6 @@ public class LoanProductApiResource {
 	@Produces({ MediaType.APPLICATION_JSON})
 	public Response retrieveLoanProductDetails(@PathParam("productId") final Long productId) {
 
-		hardcodeUserIntoSecurityContext();
-		
 		LoanProductData loanProduct = this.loanProductReadPlatformService.retrieveLoanProduct(productId);
 
 		return Response.ok().entity(loanProduct).build();
@@ -128,8 +103,6 @@ public class LoanProductApiResource {
 	@Produces({ MediaType.APPLICATION_JSON })
 	public Response updateLoanProduct(@PathParam("productId") final Long productId, final LoanProductCommand command) {
 
-		hardcodeUserIntoSecurityContext();
-		
 		command.setId(productId);
 		EntityIdentifier entityIdentifier = this.loanProductWritePlatformService.updateLoanProduct(command);
 		

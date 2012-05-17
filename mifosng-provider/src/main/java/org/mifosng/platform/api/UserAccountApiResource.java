@@ -1,4 +1,4 @@
-package org.mifosng.platform.api.user;
+package org.mifosng.platform.api;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -12,16 +12,10 @@ import org.mifosng.data.AppUserData;
 import org.mifosng.data.EntityIdentifier;
 import org.mifosng.data.command.ChangePasswordCommand;
 import org.mifosng.data.command.UserCommand;
-import org.mifosng.platform.user.domain.AppUser;
-import org.mifosng.platform.user.domain.AppUserRepository;
 import org.mifosng.platform.user.service.AppUserReadPlatformService;
 import org.mifosng.platform.user.service.AppUserWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 @Path("/v1/useraccounts")
@@ -35,25 +29,12 @@ public class UserAccountApiResource {
 	@Autowired
 	private AppUserWritePlatformService appUserWritePlatformService;
 
-	@Autowired
-	private AppUserRepository appUserRepository;
-	
-	private void hardcodeUserIntoSecurityContext() {
-		AppUser currentUser = this.appUserRepository.findOne(Long.valueOf(1));
-    	
-    	Authentication auth = new UsernamePasswordAuthenticationToken(currentUser, currentUser, currentUser.getAuthorities());
-		SecurityContext context = SecurityContextHolder.getContext();
-		context.setAuthentication(auth);
-	}
-	
 	@GET
 	@Path("current")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON})
 	public Response retrieveCurrentUser() {
 
-		hardcodeUserIntoSecurityContext();
-		
 		AppUserData user = this.appUserReadPlatformService.retrieveCurrentUser();
     	
 		return Response.ok().entity(user).build();
@@ -65,8 +46,6 @@ public class UserAccountApiResource {
 	@Produces({ MediaType.APPLICATION_JSON})
 	public Response updateCurrentUser(UserCommand command) {
 
-		hardcodeUserIntoSecurityContext();
-		
 		Long userId = this.appUserWritePlatformService.updateCurrentUser(command);
 
 		return Response.ok().entity(new EntityIdentifier(userId)).build();
@@ -87,8 +66,6 @@ public class UserAccountApiResource {
 	@Produces({ MediaType.APPLICATION_JSON})
 	public Response updateCurrentUserPassword(ChangePasswordCommand command) {
 
-		hardcodeUserIntoSecurityContext();
-		
 		Long userId = this.appUserWritePlatformService.updateCurrentUserPassword(command);
 
 		return Response.ok().entity(new EntityIdentifier(userId)).build();

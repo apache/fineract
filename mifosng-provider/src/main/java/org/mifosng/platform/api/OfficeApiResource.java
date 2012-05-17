@@ -1,4 +1,4 @@
-package org.mifosng.platform.api.office;
+package org.mifosng.platform.api;
 
 import java.util.Collection;
 
@@ -20,14 +20,8 @@ import org.mifosng.data.command.OfficeCommand;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
 import org.mifosng.platform.organisation.service.OfficeReadPlatformService;
 import org.mifosng.platform.organisation.service.OfficeWritePlatformService;
-import org.mifosng.platform.user.domain.AppUser;
-import org.mifosng.platform.user.domain.AppUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 @Path("/v1/offices")
@@ -44,22 +38,10 @@ public class OfficeApiResource {
 	@Autowired
 	private ApiDataConversionService apiDataConversionService;
 	
-	@Autowired
-	private AppUserRepository appUserRepository;
-
-	private void hardcodeUserIntoSecurityContext() {
-		AppUser currentUser = this.appUserRepository.findOne(Long.valueOf(1));
-    	
-    	Authentication auth = new UsernamePasswordAuthenticationToken(currentUser, currentUser, currentUser.getAuthorities());
-		SecurityContext context = SecurityContextHolder.getContext();
-		context.setAuthentication(auth);
-	}
-	
     @GET
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @Produces({MediaType.APPLICATION_JSON})
 	public Response retrieveOffices() {
-		hardcodeUserIntoSecurityContext();
 		
 		Collection<OfficeData> offices = this.readPlatformService.retrieveAllOffices();
 
@@ -71,9 +53,8 @@ public class OfficeApiResource {
    	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @Produces({MediaType.APPLICATION_JSON})
    	public Response retrieveOfficeTemplate() {
-   		hardcodeUserIntoSecurityContext();
-   		
-   		OfficeData newOfficeTemplate = this.readPlatformService.retrieveNewOfficeTemplate();
+
+    	OfficeData newOfficeTemplate = this.readPlatformService.retrieveNewOfficeTemplate();
 
    		return Response.ok().entity(newOfficeTemplate).build();
    	}
@@ -82,7 +63,6 @@ public class OfficeApiResource {
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Produces({ MediaType.APPLICATION_JSON})
 	public Response createOffice(final OfficeCommand command) {
-		hardcodeUserIntoSecurityContext();
 		
 		LocalDate openingDate = apiDataConversionService.convertFrom(command.getOpeningDateFormatted(), "openingDateFormatted", command.getDateFormat());
 		command.setOpeningDate(openingDate);
@@ -97,7 +77,6 @@ public class OfficeApiResource {
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Produces({ MediaType.APPLICATION_JSON})
 	public Response retreiveOffice(@PathParam("officeId") final Long officeId) {
-		hardcodeUserIntoSecurityContext();
 		
 		OfficeData office = this.readPlatformService.retrieveOffice(officeId);
 
@@ -110,8 +89,6 @@ public class OfficeApiResource {
 	@Produces({ MediaType.APPLICATION_JSON})
 	public Response updateOffice(@PathParam("officeId") final Long officeId, final OfficeCommand command) {
 
-		hardcodeUserIntoSecurityContext();
-		
 		LocalDate openingDate = apiDataConversionService.convertFrom(command.getOpeningDateFormatted(), "openingDateFormatted", command.getDateFormat());
 		command.setOpeningDate(openingDate);
 		command.setId(officeId);

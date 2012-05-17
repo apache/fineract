@@ -40,8 +40,7 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class AdditionalFieldsApiResource {
 
-	private final static Logger logger = LoggerFactory
-			.getLogger(AdditionalFieldsApiResource.class);
+	private final static Logger logger = LoggerFactory.getLogger(AdditionalFieldsApiResource.class);
 
 	@Autowired
 	private ReadExtraDataAndReportingService readExtraDataAndReportingService;

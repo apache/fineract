@@ -1,4 +1,4 @@
-package org.mifosng.platform.api.user;
+package org.mifosng.platform.api;
 
 import java.util.Collection;
 
@@ -17,17 +17,11 @@ import org.mifosng.data.PermissionData;
 import org.mifosng.data.RoleData;
 import org.mifosng.data.RoleList;
 import org.mifosng.data.command.RoleCommand;
-import org.mifosng.platform.user.domain.AppUser;
-import org.mifosng.platform.user.domain.AppUserRepository;
 import org.mifosng.platform.user.service.PermissionReadPlatformService;
 import org.mifosng.platform.user.service.RoleReadPlatformService;
 import org.mifosng.platform.user.service.RoleWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 @Path("/v1/roles")
@@ -44,23 +38,11 @@ public class RoleApiResource {
 	@Autowired
 	private RoleWritePlatformService roleWritePlatformService;
 
-	@Autowired
-	private AppUserRepository appUserRepository;
-	
-	private void hardcodeUserIntoSecurityContext() {
-		AppUser currentUser = this.appUserRepository.findOne(Long.valueOf(1));
-    	
-    	Authentication auth = new UsernamePasswordAuthenticationToken(currentUser, currentUser, currentUser.getAuthorities());
-		SecurityContext context = SecurityContextHolder.getContext();
-		context.setAuthentication(auth);
-	}
-	
 	@GET
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Produces({MediaType.APPLICATION_JSON})
 	public Response retrieveAllRoles() {
 
-		hardcodeUserIntoSecurityContext();
 		Collection<RoleData> roles = this.roleReadPlatformService.retrieveAllRoles();
 		return Response.ok().entity(new RoleList(roles)).build();
 	}
@@ -71,8 +53,6 @@ public class RoleApiResource {
     @Produces({MediaType.APPLICATION_JSON})
 	public Response retrieveNewRoleDetails() {
 
-		hardcodeUserIntoSecurityContext();
-		
 		Collection<PermissionData> allPermissions = this.permissionReadPlatformService.retrieveAllPermissions();
 		
 		RoleData role = new RoleData();
@@ -85,7 +65,7 @@ public class RoleApiResource {
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON})
 	public Response createRole(final RoleCommand command) {
-		hardcodeUserIntoSecurityContext();
+
 		Long roleId = this.roleWritePlatformService.createRole(command);
 		return Response.ok().entity(new EntityIdentifier(roleId)).build();
 	}
@@ -96,8 +76,6 @@ public class RoleApiResource {
     @Produces({MediaType.APPLICATION_JSON})
 	public Response retrieveRole(@PathParam("roleId") final Long roleId) {
 
-		hardcodeUserIntoSecurityContext();
-		
 		RoleData role = this.roleReadPlatformService.retrieveRole(roleId);
 		
 		Collection<PermissionData> availablePermissions = this.permissionReadPlatformService.retrieveAllPermissions();
@@ -112,7 +90,6 @@ public class RoleApiResource {
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON})
 	public Response updateRole(@PathParam("roleId") final Long roleId, final RoleCommand command) {
-		hardcodeUserIntoSecurityContext();
 		
 		command.setId(roleId);
 		this.roleWritePlatformService.updateRole(command);

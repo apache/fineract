@@ -1,4 +1,4 @@
-package org.mifosng.platform.api.user;
+package org.mifosng.platform.api;
 
 import java.util.Collection;
 
@@ -17,16 +17,10 @@ import org.mifosng.data.AppUserData;
 import org.mifosng.data.EntityIdentifier;
 import org.mifosng.data.UserList;
 import org.mifosng.data.command.UserCommand;
-import org.mifosng.platform.user.domain.AppUser;
-import org.mifosng.platform.user.domain.AppUserRepository;
 import org.mifosng.platform.user.service.AppUserReadPlatformService;
 import org.mifosng.platform.user.service.AppUserWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 @Path("/v1/users")
@@ -40,23 +34,10 @@ public class UserApiResource {
 	@Autowired
 	private AppUserWritePlatformService appUserWritePlatformService;
 
-	@Autowired
-	private AppUserRepository appUserRepository;
-	
-	private void hardcodeUserIntoSecurityContext() {
-		AppUser currentUser = this.appUserRepository.findOne(Long.valueOf(1));
-    	
-    	Authentication auth = new UsernamePasswordAuthenticationToken(currentUser, currentUser, currentUser.getAuthorities());
-		SecurityContext context = SecurityContextHolder.getContext();
-		context.setAuthentication(auth);
-	}
-	
     @GET
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Produces({MediaType.APPLICATION_JSON})
 	public Response retrieveUsers() {
-    	
-    	hardcodeUserIntoSecurityContext();
     	
 		Collection<AppUserData> users = this.appUserReadPlatformService.retrieveAllUsers();
 
@@ -69,8 +50,6 @@ public class UserApiResource {
 	@Produces({ MediaType.APPLICATION_JSON})
 	public Response retrieveUser(@PathParam("userId") final Long userId) {
 		
-		hardcodeUserIntoSecurityContext();
-		
 		AppUserData user = this.appUserReadPlatformService.retrieveUser(userId);
     	
 		return Response.ok().entity(user).build();
@@ -82,7 +61,6 @@ public class UserApiResource {
 	@Produces({ MediaType.APPLICATION_JSON})
 	public Response newUserDetails() {
 		
-    	hardcodeUserIntoSecurityContext();
     	AppUserData newUser = this.appUserReadPlatformService.retrieveNewUserDetails();
     	
 		return Response.ok().entity(newUser).build();
@@ -93,9 +71,8 @@ public class UserApiResource {
 	@Produces({ MediaType.APPLICATION_JSON})
 	public Response createUser(UserCommand command) {
 
-			hardcodeUserIntoSecurityContext();
-			Long userId = this.appUserWritePlatformService.createUser(command);
-			return Response.ok().entity(new EntityIdentifier(userId)).build();
+		Long userId = this.appUserWritePlatformService.createUser(command);
+		return Response.ok().entity(new EntityIdentifier(userId)).build();
 	}
 	
 	@DELETE
@@ -114,8 +91,6 @@ public class UserApiResource {
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON})
 	public Response updateUser(@PathParam("userId") final Long userId, UserCommand command) {
-		
-		hardcodeUserIntoSecurityContext();
 		
 		command.setId(userId);
 		
