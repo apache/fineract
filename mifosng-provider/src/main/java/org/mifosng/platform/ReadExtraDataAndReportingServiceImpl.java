@@ -332,9 +332,9 @@ public class ReadExtraDataAndReportingServiceImpl implements
 	public AdditionalFieldsSets retrieveExtraDatasetNames(String type) {
 
 		List<AdditionalFieldsSet> additionalFieldsSets = new ArrayList<AdditionalFieldsSet>();
-		Connection db_connection;
+
 		try {
-			db_connection = dataSource.getConnection();
+			Connection db_connection = dataSource.getConnection();
 			Statement db_statement = db_connection.createStatement();
 
 			String whereClause;
@@ -359,9 +359,9 @@ public class ReadExtraDataAndReportingServiceImpl implements
 			db_connection.close();
 			db_connection = null;
 		} catch (SQLException e) {
-			logger.info(": Failed in retrieveExtraDatasetNames");
-			throw new WebApplicationException(Response
-					.status(Status.BAD_REQUEST).entity(e.getMessage()).build());
+			throw new PlatformDataIntegrityException("error.msg.sql.error",
+					"JPWWRONGMSG - " + e.getMessage(),
+					"Additional Fields Type: " + type);
 		}
 
 		return new AdditionalFieldsSets(additionalFieldsSets);
@@ -387,101 +387,113 @@ public class ReadExtraDataAndReportingServiceImpl implements
 		}
 
 		long startTime = System.currentTimeMillis();
-		logger.info("STARTING SET: " + set + "   ID: " + id);
-
-		try {
-			GenericResultset result = fillExtraDataGenericResultSet(type, set,
-					id);
-
-			long elapsed = System.currentTimeMillis() - startTime;
-			logger.info("FINISHING SET: " + set + "     Elapsed Time: "
-					+ elapsed);
-			return result;
-		} catch (SQLException e) {
-			logger.info("Error - SQL: " + e.toString());
-			throw new InvalidSqlException(e, e.toString());
-		}
+		GenericResultset result = fillExtraDataGenericResultSet(type, set, id);
+		long elapsed = System.currentTimeMillis() - startTime;
+		logger.info("FINISHING SET: " + set + "     Elapsed Time: " + elapsed);
+		return result;
 	}
 
 	private GenericResultset fillExtraDataGenericResultSet(String type,
-			String set, Long id) throws SQLException {
+			String set, Long id) {
 
 		GenericResultset result = new GenericResultset();
-		String fullDatasetName = getFullDatasetName(type, set);
-		Connection db_connection = dataSource.getConnection();
-		Statement db_statement1 = db_connection.createStatement();
-		Statement db_statement2 = db_connection.createStatement();
-		Statement db_statement3 = db_connection.createStatement();
-		String sql = "select f.`name`, f.data_type, f.data_length, f.display_type, f.allowed_list_id from stretchydata_datasettype t join stretchydata_dataset d on d.datasettype_id = t.id join stretchydata_dataset_fields f on f.dataset_id = d.id where d.`name` = '"
-				+ set + "' and t.`name` = '" + type + "' order by f.id";
+		try {
+			Connection db_connection = dataSource.getConnection();
+			Statement db_statement1 = db_connection.createStatement();
+			String sql = "select f.`name`, f.data_type, f.data_length, f.display_type, f.allowed_list_id from stretchydata_datasettype t join stretchydata_dataset d on d.datasettype_id = t.id join stretchydata_dataset_fields f on f.dataset_id = d.id where d.`name` = '"
+					+ set + "' and t.`name` = '" + type + "' order by f.id";
 
-		ResultSet rsmd = db_statement1.executeQuery(sql);
+			ResultSet rsmd = db_statement1.executeQuery(sql);
 
-		List<ResultsetColumnHeader> columnHeaders = new ArrayList<ResultsetColumnHeader>();
-		Boolean firstColumn = true;
-		Integer allowedListId;
-		String selectFieldList = "";
-		String selectFieldSeparator = "";
-		while (rsmd.next()) {
-			ResultsetColumnHeader rsch = new ResultsetColumnHeader();
-			rsch.setColumnName(rsmd.getString("name"));
+			if (rsmd.next()) {
 
-			if (firstColumn) {
-				selectFieldSeparator = " ";
-				firstColumn = false;
-			} else {
-				selectFieldSeparator = ", ";
-			}
-			selectFieldList += selectFieldSeparator + "`"
-					+ rsch.getColumnName() + "`";
+				String fullDatasetName = getFullDatasetName(type, set);
+				Statement db_statement2 = db_connection.createStatement();
+				List<ResultsetColumnHeader> columnHeaders = new ArrayList<ResultsetColumnHeader>();
+				Boolean firstColumn = true;
+				Integer allowedListId;
+				String selectFieldList = "";
+				String selectFieldSeparator = "";
+				do {
+					ResultsetColumnHeader rsch = new ResultsetColumnHeader();
+					rsch.setColumnName(rsmd.getString("name"));
 
-			rsch.setColumnType(rsmd.getString("data_type"));
-			rsch.setColumnLength(rsmd.getInt("data_length"));
-			rsch.setColumnDisplayType(rsmd.getString("display_type"));
-			allowedListId = rsmd.getInt("allowed_list_id");
-			if (allowedListId != null) {
-				sql = "select v.`name` from stretchydata_allowed_value v where allowed_list_id = "
-						+ allowedListId + " order by id";
-				ResultSet rsValues = db_statement2.executeQuery(sql);
-				while (rsValues.next()) {
-					rsch.getColumnValues().add(rsValues.getString("name"));
+					if (firstColumn) {
+						selectFieldSeparator = " ";
+						firstColumn = false;
+					} else {
+						selectFieldSeparator = ", ";
+					}
+					selectFieldList += selectFieldSeparator + "s.`"
+							+ rsch.getColumnName() + "`";
+
+					rsch.setColumnType(rsmd.getString("data_type"));
+					rsch.setColumnLength(rsmd.getInt("data_length"));
+					rsch.setColumnDisplayType(rsmd.getString("display_type"));
+					allowedListId = rsmd.getInt("allowed_list_id");
+					if (allowedListId != null) {
+						sql = "select v.`name` from stretchydata_allowed_value v where allowed_list_id = "
+								+ allowedListId + " order by id";
+						ResultSet rsValues = db_statement2.executeQuery(sql);
+						while (rsValues.next()) {
+							rsch.getColumnValues().add(
+									rsValues.getString("name"));
+						}
+					}
+					columnHeaders.add(rsch);
+				} while (rsmd.next());
+				result.setColumnHeaders(columnHeaders);
+				db_statement2.close();
+				db_statement2 = null;
+
+				sql = "select " + selectFieldList + " from `" + type + "` t left join `" + fullDatasetName + "` s on s.id = t.id "
+						+ " where t.id = " + id;
+
+				Statement db_statement3 = db_connection.createStatement();
+				ResultSet rs = db_statement3.executeQuery(sql);
+
+				if (rs.next()) {
+					String columnName = null;
+					String columnValue = null;
+					List<ResultsetDataRow> resultsetDataRows = new ArrayList<ResultsetDataRow>();
+					ResultsetDataRow resultsetDataRow;
+					do {
+						resultsetDataRow = new ResultsetDataRow();
+						List<String> columnValues = new ArrayList<String>();
+
+						for (int i = 0; i < columnHeaders.size(); i++) {
+							columnName = columnHeaders.get(i).getColumnName();
+							columnValue = rs.getString(columnName);
+							columnValues.add(columnValue);
+						}
+						resultsetDataRow.setRow(columnValues);
+						resultsetDataRows.add(resultsetDataRow);
+					} while (rs.next());
+					result.setData(resultsetDataRows);
+				} else {
+					throw new PlatformResourceNotFoundException(
+							"error.msg.type.value.not.found",
+							"Additional Fields Type: " + type + " Id Not Found for " + id);
 				}
+				db_statement3.close();
+				db_statement3 = null;
+			} else {
+				throw new PlatformResourceNotFoundException(
+						"error.msg.set.not.found",
+						"Additional Fields Set Not Found", "Type: " + type
+								+ "   Set: " + set);
 			}
-			columnHeaders.add(rsch);
+			db_statement1.close();
+			db_statement1 = null;
+			db_connection.close();
+			db_connection = null;
+
+		} catch (SQLException e) {
+			throw new PlatformDataIntegrityException("error.msg.sql.error",
+					"JPWWRONGMSG - " + e.getMessage(),
+					"Additional Fields Type: " + type + "   Set: " + set
+							+ "   Id: " + id);
 		}
-		result.setColumnHeaders(columnHeaders);
-
-		sql = "select " + selectFieldList + " from `" + fullDatasetName
-				+ "` where id = " + id;
-
-		ResultSet rs = db_statement3.executeQuery(sql);
-		String columnName = null;
-		String columnValue = null;
-		List<ResultsetDataRow> resultsetDataRows = new ArrayList<ResultsetDataRow>();
-		ResultsetDataRow resultsetDataRow;
-		while (rs.next()) {
-			resultsetDataRow = new ResultsetDataRow();
-			List<String> columnValues = new ArrayList<String>();
-
-			for (int i = 0; i < columnHeaders.size(); i++) {
-				columnName = columnHeaders.get(i).getColumnName();
-				columnValue = rs.getString(columnName);
-				columnValues.add(columnValue);
-			}
-			resultsetDataRow.setRow(columnValues);
-			resultsetDataRows.add(resultsetDataRow);
-		}
-		result.setData(resultsetDataRows);
-
-		db_statement1.close();
-		db_statement1 = null;
-		db_statement2.close();
-		db_statement2 = null;
-		db_statement3.close();
-		db_statement3 = null;
-		db_connection.close();
-		db_connection = null;
-
 		return result;
 
 	}
