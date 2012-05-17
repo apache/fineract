@@ -290,14 +290,8 @@
 	function extraDataBuildTemplate(data) {
 
 		var dataLength = data.data.length;
-		var transType = 'E';
-		if (dataLength == 0)
-			transType = 'A';
 
 		var extraDataTemplateVar = '<form id="entityform">    <div id="formerrors"></div>';
-		extraDataTemplateVar += '<input id="ed_transType" name="ed_transType" type="hidden" value="'
-				+ transType + '"/>';
-
 		extraDataTemplateVar += '<table width="100%"><tr>';
 
 		var colsPerRow = 2;

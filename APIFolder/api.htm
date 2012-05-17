@@ -505,10 +505,7 @@ Returns the Set of Additional Fields data for the ID provided.  The ID is the id
  <div class="method-description">
   <h4>Update Additional Fields</h4>
   <p>
-Updates the Set of Additional Fields data for the ID provided.  The ID is the id field of the Type table e.g. portfolio_client might have an id value of 4.  
-  </p>
-  <p>
-JPW note: currently using ed_transType = "E" for edit and ed_transType = "A" for new... probably need to not do that.
+Updates (or creates) the Set of Additional Fields data for the ID provided.  The ID is the id field of the Type table e.g. portfolio_client might have an id value of 4.
   </p>
   <h5>Arguments</h5>
   <span>None</span>
@@ -519,10 +516,10 @@ JPW note: currently using ed_transType = "E" for edit and ed_transType = "A" for
   <code class="method-declaration">POST https://thedomainname/v1/additionalfields/{TYPE}/{SET}/{ID}</code>
   <code class="method-request">http://localhost:8080/mifosng-provider/api/v1/additionalfields/portfolio_client/Additional Information/2
 
-Request Body:
+
 Content-Type: application/json
+Request Body:
 {
-"ed_transType":"E",
 "Ethnic_Group":"Berber",
 "Ethnic_Group_Other":"",
 "Household_Location":"East Sikkim",

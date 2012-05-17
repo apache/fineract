@@ -399,6 +399,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 			String set, Long id) {
 
 		GenericResultset result = new GenericResultset();
+
 		try {
 			Connection db_connection = dataSource.getConnection();
 			Statement db_statement1 = db_connection.createStatement();
@@ -533,11 +534,15 @@ public class ReadExtraDataAndReportingServiceImpl implements
 			pValue = queryParams.get(key);
 			logger.info("jpw: " + key + " - " + pValue);
 		}
-
 		logger.info("endjpw: ");
 
+		checkResourceTypeThere(type, set);
 		String fullDatasetName = getFullDatasetName(type, set);
-		String saveSql = getSaveSql(fullDatasetName, id, queryParams);
+		String transType = getTransType(type, fullDatasetName, id);
+
+		String saveSql = getSaveSql(fullDatasetName, id, transType, queryParams);
+
+		logger.info("saveSQL: " + saveSql);
 		try {
 			Connection db_connection = dataSource.getConnection();
 			Statement db_statement = db_connection.createStatement();
@@ -556,18 +561,84 @@ public class ReadExtraDataAndReportingServiceImpl implements
 
 	}
 
-	private String getSaveSql(String fullSetName, Long id,
-			Map<String, String> queryParams) {
+	private void checkResourceTypeThere(String type, String set) {
+		String sql = "select 'f' from stretchydata_datasettype t join stretchydata_dataset d on d.datasettype_id = t.id where d.`name` = '"
+				+ set + "' and t.`name` = '" + type + "'";
+		try {
+			Connection db_connection = dataSource.getConnection();
+			Statement db_statement = db_connection.createStatement();
 
-		String errMsg = "";
-		String transType = queryParams.get("ed_transType");
-		if (!(transType.equals("E") || transType.equals("A"))) {
-			errMsg = "transType not E or A - Value is: " + transType;
+			ResultSet rs = db_statement.executeQuery(sql);
+
+			if (!(rs.next())) {
+				db_statement.close();
+				db_statement = null;
+				db_connection.close();
+				db_connection = null;
+				throw new PlatformResourceNotFoundException(
+						"error.msg.set.not.found",
+						"Additional Fields Set Not Found", "Type: " + type
+								+ "   Set: " + set);
+			}
+			db_statement.close();
+			db_statement = null;
+			db_connection.close();
+			db_connection = null;
+
+		} catch (SQLException e) {
 			throw new PlatformDataIntegrityException("error.msg.sql.error",
-					"JPWWRONGMSG - " + errMsg,
-					"Additional Fields Full Set Name: " + fullSetName
-							+ "   Id: " + id);
+					"JPWWRONGMSG - " + e.getMessage(),
+					"Additional Fields Type: " + type + "   Set: " + set
+							+ "   Sql: " + sql);
 		}
+
+	}
+
+	private String getTransType(String type, String fullDatasetName, Long id) {
+		String transType = null;
+
+		String sql = "select s.id from `" + type + "` t left join `"
+				+ fullDatasetName + "` s on s.id = t.id where t.id = "
+				+ id;
+
+		try {
+			Connection db_connection = dataSource.getConnection();
+			Statement db_statement = db_connection.createStatement();
+			ResultSet rs = db_statement.executeQuery(sql);
+
+			if (rs.next()) {
+				Long idValue = rs.getLong("id");
+				if (idValue != null) {
+					transType = "E";
+				} else {
+					transType = "A";
+				}
+			} else {
+				db_statement.close();
+				db_statement = null;
+				db_connection.close();
+				db_connection = null;
+				throw new PlatformResourceNotFoundException(
+						"error.msg.type.value.not.found",
+						"Additional Fields Type: " + type
+								+ " Id Not Found for " + id);
+			}
+			db_statement.close();
+			db_statement = null;
+			db_connection.close();
+			db_connection = null;
+		} catch (SQLException e) {
+			throw new PlatformDataIntegrityException("error.msg.sql.error",
+					"JPWWRONGMSG - " + e.getMessage(),
+					"Additional Fields Type: " + type + "   Full Set Name: "
+							+ fullDatasetName + "   Sql: " + sql);
+		}
+
+		return transType;
+	}
+
+	private String getSaveSql(String fullSetName, Long id, String transType,
+			Map<String, String> queryParams) {
 
 		String pValue = "";
 		String pValueWrite = "";
@@ -582,7 +653,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 			saveSql = "update `" + fullSetName + "` ";
 
 			for (String key : keys) {
-				if (!(key.equals("ed_transType") || key.equals("id"))) {
+				if (!(key.equalsIgnoreCase("id"))) {
 					if (firstColumn) {
 						saveSql += " set ";
 						firstColumn = false;
@@ -610,7 +681,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 			String columnName = "";
 			for (String key : keys) {
 				pValue = queryParams.get(key);
-				if (!(key.equals("ed_transType") || key.equals("id"))) {
+				if (!(key.equalsIgnoreCase("id"))) {
 
 					pValue = queryParams.get(key);
 					if (pValue == null || pValue.equals("")) {
@@ -629,7 +700,6 @@ public class ReadExtraDataAndReportingServiceImpl implements
 			saveSql = "insert into `" + fullSetName + "` (id" + insertColumns
 					+ ")" + " select " + id + " as id" + selectColumns;
 		}
-		// logger.info("Save SQL: " + saveSql);
 		return saveSql;
 	}
 }
