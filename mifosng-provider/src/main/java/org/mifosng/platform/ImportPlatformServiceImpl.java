@@ -247,9 +247,9 @@ public class ImportPlatformServiceImpl implements ImportPlatformService {
 		for (LoanTransactionCommand repaymentDetail : command.getRepayments()) {
 			Loan loan = findLoanByIdentifier(allLoans, repaymentDetail.getLoanId().toString());
 			
-			Money repaymentAmount = Money.of(loan.getCurrency(), repaymentDetail.getPaymentAmount());
+			Money repaymentAmount = Money.of(loan.getCurrency(), repaymentDetail.getTransactionAmount());
 			
-			LoanTransaction loanRepayment = LoanTransaction.repayment(repaymentAmount, repaymentDetail.getPaymentDate());
+			LoanTransaction loanRepayment = LoanTransaction.repayment(repaymentAmount, repaymentDetail.getTransactionDate());
 			loan.makeRepayment(loanRepayment, loanLifecycleStateMachine);
 		}
 		

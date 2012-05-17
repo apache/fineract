@@ -508,6 +508,14 @@ $(document).ready(function() {
 	        		offsetToApprovalDate = data.maxApprovedOnOffsetFromToday;
 	        		offsetToDisbursalDate = data.maxDisbursedOnOffsetFromToday;
 	        		
+	        		var $loantabs = $(".loantabs").tabs({
+						"show": function(event, ui) {
+							
+							var curTab = $('#newtabs .ui-tabs-panel:not(.ui-tabs-hide)');
+			        		var curTabID = curTab.prop("id")
+						}
+					});
+	        		
 	        		$('.rejectloan').button().click(function(e) {
 						var linkId = this.id;
 						var loanId = linkId.replace("rejectbtn", "");
@@ -579,7 +587,7 @@ $(document).ready(function() {
 						
 						var linkId = this.id;
 						var loanId = linkId.replace("undodisbursalbtn", "");
-						var postUrl = 'http://localhost:8080/mifosng-provider/api/v1/loans/' + loanId + '?command=undodisbursal';
+						var postUrl = 'http://localhost:8080/mifosng-provider/api/v1/loans/' + loanId + '/undo?command=undodisbursal';
 						var width = 400; 
 						var height = 150;
 						popupConfirmationDialogAndPost(postUrl, 'POST', 'dialog.title.undo.loan.disbursal', width, height, currentTabIndex);
@@ -605,53 +613,72 @@ $(document).ready(function() {
 						
 						var linkId = this.id;
 						var loanId = linkId.replace("repaymentbtn", "");
-						var url = 'http://localhost:8080/mifosng-provider/api/v1/loans/' + loanId;
+						var getUrl = 'http://localhost:8080/mifosng-provider/api/v1/loans/' + loanId + '/transactions/template?transactionType=repayment';
+						var postUrl = 'http://localhost:8080/mifosng-provider/api/v1/loans/' + loanId + '/transactions?transactionType=repayment';
+						
 						var templateSelector = "#transactionLoanFormTemplate";
 						var width = 500; 
 						var height = 350;
 						var defaultOffset = offsetToApprovalDate;
-						popupDialogWithFormView(url, 'dialog.title.loan.repayment', templateSelector, width, height, currentTabIndex, offsetToSubmittedDate, defaultOffset, maxOffset)
+						
+						var saveSuccessFunction = function(data, textStatus, jqXHR) {
+						  	$("#dialog-form").dialog("close");
+						  	$newtabs.tabs('load', currentTabIndex);
+						}
+						
+						popupDialogWithFormView(getUrl, postUrl, 'POST', "dialog.title.loan.repayment", templateSelector, width, height, saveSuccessFunction);
+						//popupDialogWithFormView(getUrl, postUrl, 'POST', 'dialog.title.loan.repayment', templateSelector, width, height, currentTabIndex, offsetToSubmittedDate, defaultOffset, maxOffset)
 					    e.preventDefault();
 					});
 					$('button.repaymentloan span').text(jQuery.i18n.prop('dialog.button.loan.repayment'));
+					
+					$('.waiveloan').button().click(function(e) {
+						var linkId = this.id;
+						var loanId = linkId.replace("waivebtn", "");
+						
+						var getUrl = 'http://localhost:8080/mifosng-provider/api/v1/loans/' + loanId + '/transactions/template?transactionType=waiver';
+						var postUrl = 'http://localhost:8080/mifosng-provider/api/v1/loans/' + loanId + '/transactions?transactionType=waiver';
+						
+						var templateSelector = "#transactionLoanFormTemplate";
+						var width = 500; 
+						var height = 350;
+						var defaultOffset = offsetToApprovalDate;
+						
+						var saveSuccessFunction = function(data, textStatus, jqXHR) {
+						  	$("#dialog-form").dialog("close");
+						  	$newtabs.tabs('load', currentTabIndex);
+						}
+						
+						popupDialogWithFormView(getUrl, postUrl, 'POST', "dialog.title.waive.loan", templateSelector, width, height, saveSuccessFunction);
+						//popupDialogWithFormView(getUrl, postUrl, 'POST', 'dialog.title.waive.loan', templateSelector, width, height, currentTabIndex, offsetToSubmittedDate, defaultOffset, maxOffset)
+					    e.preventDefault();
+					});
+					$('button.waiveloan span').text(jQuery.i18n.prop('dialog.button.loan.waive'));
 					
 					$('.adjustloanrepayment').button().click(function(e) {
 						
 						var linkId = this.id;
 						var loanAndRepaymentId = linkId.replace("adjustrepaymentbtn", "");
-						
 						var ids = loanAndRepaymentId.split("_");
+						var loanId = ids[0];
+						var transactionId = ids[1];
+						var getAndPutUrl = 'http://localhost:8080/mifosng-provider/api/v1/loans/' + loanId + '/transactions/' + transactionId;
 						
-						var url = '${rootContext}portfolio/loan/' + ids[0] + '/repayment/' + ids[1] + '/adjust';
 						var templateSelector = "#transactionLoanFormTemplate";
 						var width = 500; 
 						var height = 350;
 						var defaultOffset = offsetToApprovalDate;
-						popupDialogWithFormView(url, 'dialog.title.adjust.loan.repayment', templateSelector, width, height, currentTabIndex, offsetToSubmittedDate, defaultOffset, maxOffset)
+						
+						var saveSuccessFunction = function(data, textStatus, jqXHR) {
+						  	$("#dialog-form").dialog("close");
+						  	$newtabs.tabs('load', currentTabIndex);
+						}
+						
+						popupDialogWithFormView(getAndPutUrl, getAndPutUrl, 'PUT', "dialog.title.adjust.loan.repayment", templateSelector, width, height, saveSuccessFunction);
+//						popupDialogWithFormView(getAndPutUrl, getAndPutUrl, 'PUT', 'dialog.title.adjust.loan.repayment', templateSelector, width, height, currentTabIndex, offsetToSubmittedDate, defaultOffset, maxOffset)
 					    e.preventDefault();
 					});
 					$('button.adjustloanrepayment span').text(jQuery.i18n.prop('dialog.button.adjust.loan.repayment'));
-					
-					$('.waiveloan').button().click(function(e) {
-						var linkId = this.id;
-						var loanId = linkId.replace("waivebtn", "");
-						var url = '${rootContext}portfolio/loan/' + loanId + '/waive';
-						var templateSelector = "#transactionLoanFormTemplate";
-						var width = 500; 
-						var height = 350;
-						var defaultOffset = offsetToApprovalDate;
-						popupDialogWithFormView(url, 'dialog.title.waive.loan', templateSelector, width, height, currentTabIndex, offsetToSubmittedDate, defaultOffset, maxOffset)
-					    e.preventDefault();
-					});
-					$('button.waiveloan span').text(jQuery.i18n.prop('dialog.button.loan.waive'));
-					
-					var $loantabs = $(".loantabs").tabs({
-						"show": function(event, ui) {
-							
-							var curTab = $('#newtabs .ui-tabs-panel:not(.ui-tabs-hide)');
-			        		var curTabID = curTab.prop("id")
-						}
-					});
 					
 					// additional data
 					var additionalFieldsParams = {

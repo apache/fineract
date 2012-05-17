@@ -1,15 +1,9 @@
 package org.mifosng.ui.configuration;
 
-import java.util.Collection;
-
-import javax.servlet.http.HttpServletResponse;
-
 import org.mifosng.configuration.ApplicationConfigurationService;
 import org.mifosng.configuration.OAuthProviderDetails;
-import org.mifosng.data.ErrorResponse;
 import org.mifosng.oauth.RefreshableProtectedResourceDetailsService;
 import org.mifosng.ui.CommonRestOperations;
-import org.mifosng.ui.loanproduct.ClientValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.oauth.consumer.ProtectedResourceDetailsService;
@@ -18,7 +12,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -44,17 +37,6 @@ public class ConfigurationController {
 		return "unAuthorizedAction";
 	}
 
-	@ExceptionHandler(ClientValidationException.class)
-	public @ResponseBody
-	Collection<ErrorResponse> validationException(ClientValidationException ex,
-			HttpServletResponse response) {
-
-		response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-		response.setContentType("application/json");
-
-		return ex.getValidationErrors();
-	}
-	
 	@ModelAttribute("oauthSettingsFormBean")
 	@RequestMapping(value = "oauth/configuration/edit", method = RequestMethod.GET)
 	public ModelAndView showOAuthConfiguration() {

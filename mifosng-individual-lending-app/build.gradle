@@ -74,8 +74,6 @@ dependencies {
 	            [group: 'com.sun.jersey', name: 'jersey-core', version: jerseyVersion],
 	            [group: 'com.sun.jersey', name: 'jersey-client', version: jerseyVersion],
 	            [group: 'org.codehaus.jackson', name: 'jackson-mapper-asl', version: '1.9.4'],
-	            [group: 'com.thoughtworks.xstream', name: 'xstream', version: '1.4.2'],
-	            [group: 'net.sf.kxml', name: 'kxml2-min', version: '2.3.0'],
 	            
 	            [group: 'joda-time', name: 'joda-time', version: '2.1'],
 	            [group: 'commons-lang', name: 'commons-lang', version: '2.4'],

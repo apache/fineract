@@ -29,12 +29,12 @@ public class AdjustLoanTransactionCommandValidator {
 			dataValidationErrors.add(error);
 		}
 		
-		if (command.getPaymentDate() == null) {
+		if (command.getTransactionDate() == null) {
 			ErrorResponse error = new ErrorResponse("validation.msg.loan.repayment.date.cannot.be.blank", "paymentDate");
 			dataValidationErrors.add(error);
 		}
 		
-		if (command.getPaymentAmount() == null || command.getPaymentAmount().doubleValue() < 0) {
+		if (command.getTransactionAmount() == null || command.getTransactionAmount().doubleValue() < 0) {
 			ErrorResponse error = new ErrorResponse("validation.msg.loan.adjustment.must.be.zero.or.greater", "paymentAmount");
 			dataValidationErrors.add(error);
 		}

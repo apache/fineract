@@ -24,12 +24,12 @@ public class LoanTransactionValidator {
 			dataValidationErrors.add(error);
 		}
 		
-		if (command.getPaymentDate() == null) {
+		if (command.getTransactionDate() == null) {
 			ErrorResponse error = new ErrorResponse("validation.msg.loan.repayment.date.cannot.be.blank", "transactionDate");
 			dataValidationErrors.add(error);
 		}
 		
-		if (command.getPaymentAmount() == null || command.getPaymentAmount().doubleValue() <= 0) {
+		if (command.getTransactionAmount() == null || command.getTransactionAmount().doubleValue() <= 0) {
 			ErrorResponse error = new ErrorResponse("validation.msg.loan.repayment.must.be.greater.than.zero", "transactionAmount");
 			dataValidationErrors.add(error);
 		}

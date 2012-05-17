@@ -10,9 +10,12 @@ import org.joda.time.LocalDate;
 public class LoanTransactionCommand {
 
 	private Long loanId;
-	private LocalDate paymentDate;
+	private String dateFormat;
+	private String transactionDateFormatted;
+	private LocalDate transactionDate;
 	private String comment;
-	private BigDecimal paymentAmount;
+	private String transactionAmountFormatted;
+	private BigDecimal transactionAmount;
 
 	protected LoanTransactionCommand() {
 		//
@@ -22,9 +25,9 @@ public class LoanTransactionCommand {
 			final LocalDate paymentDate, final String comment,
 			final BigDecimal paymentAmount) {
 		this.loanId = loanId;
-		this.paymentDate = paymentDate;
+		this.transactionDate = paymentDate;
 		this.comment = comment;
-		this.paymentAmount = paymentAmount;
+		this.transactionAmount = paymentAmount;
 	}
 
 	public Long getLoanId() {
@@ -43,19 +46,43 @@ public class LoanTransactionCommand {
 		this.comment = comment;
 	}
 
-	public LocalDate getPaymentDate() {
-		return this.paymentDate;
+	public String getDateFormat() {
+		return dateFormat;
 	}
 
-	public void setPaymentDate(final LocalDate paymentDate) {
-		this.paymentDate = paymentDate;
+	public void setDateFormat(String dateFormat) {
+		this.dateFormat = dateFormat;
 	}
 
-	public BigDecimal getPaymentAmount() {
-		return this.paymentAmount;
+	public String getTransactionDateFormatted() {
+		return transactionDateFormatted;
 	}
 
-	public void setPaymentAmount(final BigDecimal paymentAmount) {
-		this.paymentAmount = paymentAmount;
+	public void setTransactionDateFormatted(String transactionDateFormatted) {
+		this.transactionDateFormatted = transactionDateFormatted;
+	}
+
+	public LocalDate getTransactionDate() {
+		return transactionDate;
+	}
+
+	public void setTransactionDate(LocalDate transactionDate) {
+		this.transactionDate = transactionDate;
+	}
+
+	public String getTransactionAmountFormatted() {
+		return transactionAmountFormatted;
+	}
+
+	public void setTransactionAmountFormatted(String transactionAmountFormatted) {
+		this.transactionAmountFormatted = transactionAmountFormatted;
+	}
+
+	public BigDecimal getTransactionAmount() {
+		return transactionAmount;
+	}
+
+	public void setTransactionAmount(BigDecimal transactionAmount) {
+		this.transactionAmount = transactionAmount;
 	}
 }

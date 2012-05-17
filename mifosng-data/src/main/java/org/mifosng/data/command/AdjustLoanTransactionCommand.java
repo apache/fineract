@@ -11,9 +11,12 @@ public class AdjustLoanTransactionCommand {
 
 	private Long loanId;
 	private Long repaymentId;
-	private LocalDate paymentDate;
+	private String dateFormat;
+	private String transactionDateFormatted;
+	private LocalDate transactionDate;
 	private String comment;
-	private BigDecimal paymentAmount;
+	private String transactionAmountFormatted;
+	private BigDecimal transactionAmount;
 
 	protected AdjustLoanTransactionCommand() {
 		//
@@ -24,9 +27,9 @@ public class AdjustLoanTransactionCommand {
 			final BigDecimal paymentAmount) {
 		this.loanId = loanId;
 		this.repaymentId = repaymentId;
-		this.paymentDate = paymentDate;
+		this.transactionDate = paymentDate;
 		this.comment = comment;
-		this.paymentAmount = paymentAmount;
+		this.transactionAmount = paymentAmount;
 	}
 
 	public Long getLoanId() {
@@ -37,35 +40,59 @@ public class AdjustLoanTransactionCommand {
 		this.loanId = loanId;
 	}
 
-	public String getComment() {
-		return this.comment;
-	}
-
-	public void setComment(final String comment) {
-		this.comment = comment;
-	}
-
-	public LocalDate getPaymentDate() {
-		return this.paymentDate;
-	}
-
-	public void setPaymentDate(final LocalDate paymentDate) {
-		this.paymentDate = paymentDate;
-	}
-
-	public BigDecimal getPaymentAmount() {
-		return this.paymentAmount;
-	}
-
-	public void setPaymentAmount(final BigDecimal paymentAmount) {
-		this.paymentAmount = paymentAmount;
-	}
-
 	public Long getRepaymentId() {
 		return repaymentId;
 	}
 
 	public void setRepaymentId(Long repaymentId) {
 		this.repaymentId = repaymentId;
+	}
+
+	public String getDateFormat() {
+		return dateFormat;
+	}
+
+	public void setDateFormat(String dateFormat) {
+		this.dateFormat = dateFormat;
+	}
+
+	public String getTransactionDateFormatted() {
+		return transactionDateFormatted;
+	}
+
+	public void setTransactionDateFormatted(String transactionDateFormatted) {
+		this.transactionDateFormatted = transactionDateFormatted;
+	}
+
+	public LocalDate getTransactionDate() {
+		return transactionDate;
+	}
+
+	public void setTransactionDate(LocalDate transactionDate) {
+		this.transactionDate = transactionDate;
+	}
+
+	public String getComment() {
+		return comment;
+	}
+
+	public void setComment(String comment) {
+		this.comment = comment;
+	}
+
+	public String getTransactionAmountFormatted() {
+		return transactionAmountFormatted;
+	}
+
+	public void setTransactionAmountFormatted(String transactionAmountFormatted) {
+		this.transactionAmountFormatted = transactionAmountFormatted;
+	}
+
+	public BigDecimal getTransactionAmount() {
+		return transactionAmount;
+	}
+
+	public void setTransactionAmount(BigDecimal transactionAmount) {
+		this.transactionAmount = transactionAmount;
 	}
 }

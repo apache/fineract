@@ -15,7 +15,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.mifosng.ui.JaxRs311ErrorResponseHandler;
 import org.springframework.security.oauth.common.OAuthProviderParameter;
 import org.springframework.security.oauth.consumer.OAuthConsumerToken;
 import org.springframework.security.oauth.consumer.OAuthRequestFailedException;
@@ -27,11 +26,9 @@ import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
-public class MifosNgOauthConsumerContextFilter extends
-		OAuthConsumerContextFilter {
+public class MifosNgOauthConsumerContextFilter extends OAuthConsumerContextFilter {
 
-	private static final Log LOG = LogFactory
-			.getLog(MifosNgOauthConsumerContextFilter.class);
+	private static final Log LOG = LogFactory.getLog(MifosNgOauthConsumerContextFilter.class);
 
 	private RestTemplate noAuthRestTemplate;
 
@@ -41,10 +38,8 @@ public class MifosNgOauthConsumerContextFilter extends
 			throws IOException, ServletException {
 
 		ResponseErrorHandler defaultResponseErrorHandler = new DefaultResponseErrorHandler();
-		ResponseErrorHandler jaxrs311ErrorResponseHandler = new JaxRs311ErrorResponseHandler(
-				defaultResponseErrorHandler);
 		this.noAuthRestTemplate = new RestTemplate();
-		this.noAuthRestTemplate.setErrorHandler(jaxrs311ErrorResponseHandler);
+		this.noAuthRestTemplate.setErrorHandler(defaultResponseErrorHandler);
 
 		HttpServletRequest request = (HttpServletRequest) servletRequest;
 		HttpServletResponse response = (HttpServletResponse) servletResponse;

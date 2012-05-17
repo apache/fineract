@@ -7,6 +7,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -18,10 +19,13 @@ import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.mifosng.data.EntityIdentifier;
 import org.mifosng.data.LoanAccountData;
+import org.mifosng.data.LoanRepaymentData;
 import org.mifosng.data.LoanSchedule;
 import org.mifosng.data.NewLoanWorkflowStepOneData;
+import org.mifosng.data.command.AdjustLoanTransactionCommand;
 import org.mifosng.data.command.CalculateLoanScheduleCommand;
 import org.mifosng.data.command.LoanStateTransitionCommand;
+import org.mifosng.data.command.LoanTransactionCommand;
 import org.mifosng.data.command.SubmitLoanApplicationCommand;
 import org.mifosng.data.command.UndoLoanApprovalCommand;
 import org.mifosng.data.command.UndoLoanDisbursalCommand;
@@ -159,8 +163,11 @@ public class LoansApiResource {
 	@Path("{loanId}")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON})
-	public Response rejectLoanApplication(@PathParam("loanId") final Long loanId, @QueryParam("command") final String commandParam,
+	public Response stateTransitions(@PathParam("loanId") final Long loanId, 
+			@QueryParam("command") final String commandParam,
 			final LoanStateTransitionCommand command) {
+		
+		hardcodeUserIntoSecurityContext();
 		
 		LocalDate eventDate = this.apiDataConversionService.convertFrom(command.getEventDateFormatted(), "eventDateFormatted", command.getDateFormat());
 
@@ -176,21 +183,21 @@ public class LoansApiResource {
 		} else if (StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase("approve")) {
 			EntityIdentifier identifier = this.loanWritePlatformService.approveLoanApplication(command);
 			return Response.ok().entity(identifier).build();
-		} else if (StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase("undoapproval")) {
-			UndoLoanApprovalCommand undoCommand = new UndoLoanApprovalCommand(loanId);
-			EntityIdentifier identifier = this.loanWritePlatformService.undoLoanApproval(undoCommand);
+		} else if (StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase("disburse")) {
+			EntityIdentifier identifier = this.loanWritePlatformService.disburseLoan(command);
 			return Response.ok().entity(identifier).build();
 		}
-
+		
 		return Response.ok().build();
 	}
 	
 	@POST
 	@Path("{loanId}/undo")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-	@Produces({ MediaType.APPLICATION_JSON})
-	public Response rejectLoanApplication(@PathParam("loanId") final Long loanId, @QueryParam("command") final String commandParam) {
+	@Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+	@Produces({MediaType.APPLICATION_JSON})
+	public Response undoStateTransitions(@PathParam("loanId") final Long loanId, @QueryParam("command") final String commandParam) {
 		
+		hardcodeUserIntoSecurityContext();
 		
 		if (StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase("undoapproval")) {
 			UndoLoanApprovalCommand undoCommand = new UndoLoanApprovalCommand(loanId);
@@ -198,10 +205,87 @@ public class LoansApiResource {
 			return Response.ok().entity(identifier).build();
 		} else if (StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase("undodisbursal")) {
 			UndoLoanDisbursalCommand undoCommand = new UndoLoanDisbursalCommand(loanId);
-			EntityIdentifier identifier = this.writePlatformService.undloLoanDisbursal(undoCommand);
+			EntityIdentifier identifier = this.loanWritePlatformService.undloLoanDisbursal(undoCommand);
 			return Response.ok().entity(identifier).build();
 		}
 
 		return Response.ok().build();
+	}
+	
+	@POST
+	@Path("{loanId}/transactions")
+	@Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+	@Produces({MediaType.APPLICATION_JSON})
+	public Response executeLoanTransaction(@PathParam("loanId") final Long loanId, @QueryParam("transactionType") final String transactionType, final LoanTransactionCommand command) {
+
+		hardcodeUserIntoSecurityContext();
+		
+		command.setLoanId(loanId);
+		
+		LocalDate transactionDate = apiDataConversionService.convertFrom(command.getTransactionDateFormatted(), "transactionDateFormatted", command.getDateFormat());
+		command.setTransactionDate(transactionDate);
+		
+		BigDecimal transactionAmount = apiDataConversionService.convertFrom(command.getTransactionAmountFormatted(), "transactionAmountFormatted", Locale.UK);
+		command.setTransactionAmount(transactionAmount);
+		
+		if (StringUtils.isNotBlank(transactionType) && transactionType.trim().equalsIgnoreCase("waiver")) {
+			EntityIdentifier identifier = this.writePlatformService.waiveLoanAmount(command);
+			return Response.ok().entity(identifier).build();
+		}
+		
+		EntityIdentifier identifier = this.writePlatformService.makeLoanRepayment(command);
+		return Response.ok().entity(identifier).build();
+	}
+	
+	@GET
+	@Path("{loanId}/transactions/template")
+	@Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+	@Produces({MediaType.APPLICATION_JSON})
+	public Response retrieveNewRepaymentDetails(@PathParam("loanId") final Long loanId, @QueryParam("type") final String transactionType) {
+
+		hardcodeUserIntoSecurityContext();
+		
+		if (StringUtils.isNotBlank(transactionType) && transactionType.trim().equalsIgnoreCase("waiver")) {
+			LoanRepaymentData loanWaiverData = this.readPlatformService.retrieveNewLoanWaiverDetails(loanId);
+			return Response.ok().entity(loanWaiverData).build();
+		}
+
+		LoanRepaymentData loanRepaymentData = this.readPlatformService.retrieveNewLoanRepaymentDetails(loanId);
+		return Response.ok().entity(loanRepaymentData).build();
+	}
+	
+	@GET
+	@Path("{loanId}/transactions/{repaymentId}")
+	@Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+	@Produces({MediaType.APPLICATION_JSON})
+	public Response retrieveRepaymentDetails(@PathParam("loanId") final Long loanId, @PathParam("repaymentId") final Long repaymentId) {
+
+		hardcodeUserIntoSecurityContext();
+		
+		LoanRepaymentData loanRepaymentData = this.readPlatformService.retrieveLoanRepaymentDetails(loanId, repaymentId);
+
+		return Response.ok().entity(loanRepaymentData).build();
+	}
+	
+	@PUT
+	@Path("{loanId}/transactions/{repaymentId}")
+	@Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+	@Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+	public Response adjustLoanTransaction(@PathParam("loanId") final Long loanId, @PathParam("repaymentId") final Long repaymentId, final AdjustLoanTransactionCommand command) {
+		
+		hardcodeUserIntoSecurityContext();
+		
+		command.setLoanId(loanId);
+		command.setRepaymentId(repaymentId);
+		
+		LocalDate transactionDate = apiDataConversionService.convertFrom(command.getTransactionDateFormatted(), "transactionDateFormatted", command.getDateFormat());
+		command.setTransactionDate(transactionDate);
+		
+		BigDecimal transactionAmount = apiDataConversionService.convertFrom(command.getTransactionAmountFormatted(), "transactionAmountFormatted", Locale.UK);
+		command.setTransactionAmount(transactionAmount);
+
+		EntityIdentifier identifier = this.writePlatformService.adjustLoanTransaction(command);
+
+		return Response.ok().entity(identifier).build();
 	}
 }

@@ -3,6 +3,7 @@ package org.mifosng.platform.loan.service;
 import static org.mifosng.platform.Specifications.loansThatMatch;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -11,15 +12,18 @@ import org.mifosng.data.EntityIdentifier;
 import org.mifosng.data.LoanSchedule;
 import org.mifosng.data.MoneyData;
 import org.mifosng.data.ScheduledLoanInstallment;
+import org.mifosng.data.command.CalculateLoanScheduleCommand;
 import org.mifosng.data.command.LoanStateTransitionCommand;
 import org.mifosng.data.command.SubmitLoanApplicationCommand;
 import org.mifosng.data.command.UndoLoanApprovalCommand;
+import org.mifosng.data.command.UndoLoanDisbursalCommand;
 import org.mifosng.platform.LoanStateTransitionCommandValidator;
 import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.client.domain.ClientRepository;
 import org.mifosng.platform.client.domain.Note;
 import org.mifosng.platform.client.domain.NoteRepository;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
+import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.exceptions.NoAuthorizationException;
 import org.mifosng.platform.exceptions.PlatformDomainRuleException;
 import org.mifosng.platform.exceptions.PlatformResourceNotFoundException;
@@ -54,19 +58,20 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 	private final LoanStatusRepository loanStatusRepository;
 	private final ClientRepository clientRepository;
 	private final NoteRepository noteRepository;
-	
+	private final CalculationPlatformService calculationPlatformService;	
 	private final AprCalculator aprCalculator = new AprCalculator();
 	
 	@Autowired
 	public LoanWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, 
 			final LoanRepository loanRepository, final LoanStatusRepository loanStatusRepository, final LoanProductRepository loanProductRepository, 
-			final ClientRepository clientRepository, final NoteRepository noteRepository) {
+			final ClientRepository clientRepository, final NoteRepository noteRepository, final CalculationPlatformService calculationPlatformService) {
 		this.context = context;
 		this.loanRepository = loanRepository;
 		this.loanProductRepository = loanProductRepository;
 		this.clientRepository = clientRepository;
 		this.loanStatusRepository = loanStatusRepository;
 		this.noteRepository = noteRepository;
+		this.calculationPlatformService = calculationPlatformService;
 	}
 	
 	private boolean isBeforeToday(final LocalDate date) {
@@ -276,6 +281,122 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 			Note note = Note.loanNote(currentUser.getOrganisation(), loan, command.getComment());
 			this.noteRepository.save(note);
 		}
+		
+		return new EntityIdentifier(loan.getClient().getId());
+	}
+	
+	@Transactional
+	@Override
+	public EntityIdentifier disburseLoan(final LoanStateTransitionCommand command) {
+
+		AppUser currentUser = context.authenticatedUser();
+		
+		LoanStateTransitionCommandValidator validator = new LoanStateTransitionCommandValidator(command);
+		validator.validate();
+
+		Loan loan = this.loanRepository.findOne(loansThatMatch(currentUser.getOrganisation(), command.getLoanId()));
+		if (loan == null) {
+			throw new PlatformResourceNotFoundException("error.msg.loan.id.invalid", "Loan with identifier {0} does not exist", command.getLoanId());
+		}
+
+		if (this.isBeforeToday(command.getEventDate()) && currentUser.canNotDisburseLoanInPast()) {
+			throw new NoAuthorizationException("User has no authority to disburse loan with a date in the past.");
+		}
+
+		LocalDate disbursedOn = command.getEventDate();
+		String comment = command.getComment();
+
+		LocalDate actualDisbursementDate = new LocalDate(disbursedOn);
+		
+		if (loan.isRepaymentScheduleRegenerationRequiredForDisbursement(actualDisbursementDate)) {
+			
+			LocalDate repaymentsStartingFromDate = loan.getExpectedFirstRepaymentOnDate();
+			LocalDate interestCalculatedFromDate = loan.getInterestCalculatedFromDate();
+
+			Number principalAsDecimal = loan.getLoanRepaymentScheduleDetail().getPrincipal().getAmount();
+			String currencyCode = loan.getLoanRepaymentScheduleDetail().getPrincipal().getCurrencyCode();
+			int currencyDigits = loan.getLoanRepaymentScheduleDetail().getPrincipal().getCurrencyDigitsAfterDecimal();
+			
+			Number interestRatePerYear = loan.getLoanRepaymentScheduleDetail().getAnnualNominalInterestRate();
+			Integer numberOfInstallments = loan.getLoanRepaymentScheduleDetail().getNumberOfRepayments();
+			
+			Integer repaidEvery = loan.getLoanRepaymentScheduleDetail().getRepayEvery();
+			Integer selectedRepaymentFrequency = loan.getLoanRepaymentScheduleDetail().getRepaymentPeriodFrequencyType().getValue();
+			Integer selectedRepaymentSchedule = loan.getLoanRepaymentScheduleDetail().getAmortizationMethod().getValue();
+			
+			// use annual percentage rate to re-calculate loan schedule for late disbursement
+			Number interestRatePerPeriod = interestRatePerYear;
+			Integer interestRateFrequencyMethod = PeriodFrequencyType.YEARS.getValue();
+			
+			Integer interestMethod = loan.getLoanRepaymentScheduleDetail().getInterestMethod().getValue();
+			Integer interestCalculationInPeriod = loan.getLoanRepaymentScheduleDetail().getInterestCalculationPeriodMethod().getValue();
+			
+			CalculateLoanScheduleCommand calculateCommand = new CalculateLoanScheduleCommand(currencyCode, currencyDigits, principalAsDecimal, 
+					interestRatePerPeriod, interestRateFrequencyMethod, interestMethod, interestCalculationInPeriod,
+					repaidEvery, selectedRepaymentFrequency, numberOfInstallments, 
+					selectedRepaymentSchedule, actualDisbursementDate, repaymentsStartingFromDate, interestCalculatedFromDate);
+
+			LoanSchedule loanSchedule = this.calculationPlatformService.calculateLoanSchedule(calculateCommand);
+
+			List<LoanRepaymentScheduleInstallment> modifiedLoanRepaymentSchedule = new ArrayList<LoanRepaymentScheduleInstallment>();
+			
+			for (ScheduledLoanInstallment scheduledLoanInstallment : loanSchedule
+					.getScheduledLoanInstallments()) {
+				
+				final MonetaryCurrency monetaryCurrency = new MonetaryCurrency(
+										scheduledLoanInstallment.getPrincipalDue().getCurrencyCode(), 
+										scheduledLoanInstallment.getPrincipalDue().getCurrencyDigitsAfterDecimal());
+
+				Money principal = Money.of(monetaryCurrency,
+						scheduledLoanInstallment.getPrincipalDue().getAmount());
+
+				Money interest = Money.of(monetaryCurrency,
+						scheduledLoanInstallment.getInterestDue().getAmount());
+
+				LoanRepaymentScheduleInstallment installment = new LoanRepaymentScheduleInstallment(
+						loan, scheduledLoanInstallment.getInstallmentNumber(),
+						scheduledLoanInstallment.getPeriodStart(),
+						scheduledLoanInstallment.getPeriodEnd(), principal.getAmount(),
+						interest.getAmount());
+				modifiedLoanRepaymentSchedule.add(installment);
+			}
+			loan.disburseWithModifiedRepaymentSchedule(disbursedOn, comment, modifiedLoanRepaymentSchedule, defaultLoanLifecycleStateMachine());
+		} else {
+			loan.disburse(disbursedOn, defaultLoanLifecycleStateMachine());
+		}
+
+		this.loanRepository.save(loan);
+		
+		if (StringUtils.isNotBlank(command.getComment())) {
+			Note note = Note.loanNote(currentUser.getOrganisation(), loan, command.getComment());
+			this.noteRepository.save(note);
+		}
+		
+		return new EntityIdentifier(loan.getClient().getId());
+	}
+
+	@Transactional
+	@Override
+	public EntityIdentifier undloLoanDisbursal(final UndoLoanDisbursalCommand command) {
+
+		AppUser currentUser = context.authenticatedUser();
+
+		Loan loan = this.loanRepository.findOne(loansThatMatch(currentUser.getOrganisation(), command.getLoanId()));
+		if (loan == null) {
+			throw new PlatformResourceNotFoundException("error.msg.loan.id.invalid", "Loan with identifier {0} does not exist", command.getLoanId());
+		}
+
+		if (loan.isActualDisbursedOnDateEarlierOrLaterThanExpected()) {
+			// FIXME - handle this use case - recalculate loan schedule using original settings.
+		}
+
+		loan.undoDisbursal(defaultLoanLifecycleStateMachine());
+
+		this.loanRepository.save(loan);
+
+		// TODO - this may not be wanted.
+		Note note = Note.loanNote(currentUser.getOrganisation(), loan, "Undo of disbursal.");
+		this.noteRepository.save(note);
 		
 		return new EntityIdentifier(loan.getClient().getId());
 	}

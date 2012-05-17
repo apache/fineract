@@ -816,14 +816,15 @@
 <form id="entityform">
     <div id="formerrors"></div>
 
-	<label for="transactionDate"><spring:message code="label.loan.transaction.on"/></label>
-	<input id="transactionDate" name="transactionDate" cssClass="text ui-widget-content ui-corner-all" title="" class="datepickerfield" value="{{=$ctx.globalDate(date)}}"/>
+	<input type="hidden" id="dateFormat" name="dateFormat" value="dd MMMM yyyy" />
+	<label for="transactionDateFormatted"><spring:message code="label.loan.transaction.on"/></label>
+	<input id="transactionDateFormatted" name="transactionDateFormatted" cssClass="text ui-widget-content ui-corner-all" title="" class="datepickerfield" value="{{=$ctx.globalDate(date)}}"/>
 
-	<label for="transactionAmount"><spring:message code="label.loan.transaction.amount"/></label>
-	<input id="transactionAmount" name="transactionAmount" cssClass="text ui-widget-content ui-corner-all" title="" value="{{=$ctx.money(total)}}" />
+	<label for="transactionAmountFormatted"><spring:message code="label.loan.transaction.amount"/></label>
+	<input id="transactionAmountFormatted" name="transactionAmountFormatted" cssClass="text ui-widget-content ui-corner-all" title="" value="{{=$ctx.money(total)}}" />
 
-	<label for="transactionComment"><spring:message code="label.loan.action.note"/></label>
-	<textarea rows="3" cols="53" id="transactionComment" name="transactionComment" cssClass="text ui-widget-content ui-corner-all"></textarea>
+	<label for="comment"><spring:message code="label.loan.action.note"/></label>
+	<textarea rows="3" cols="53" id="comment" name="comment" cssClass="text ui-widget-content ui-corner-all"></textarea>
 </form>
 </script>
 
