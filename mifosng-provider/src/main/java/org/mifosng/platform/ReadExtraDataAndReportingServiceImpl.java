@@ -1,7 +1,6 @@
 package org.mifosng.platform;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.Connection;
@@ -15,9 +14,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.sql.DataSource;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 
 import org.mifosng.data.AdditionalFieldsSet;
@@ -43,13 +39,18 @@ public class ReadExtraDataAndReportingServiceImpl implements
 	private final String reportingMetaDataDB;
 
 	@Autowired
-	public ReadExtraDataAndReportingServiceImpl(final DataSource dataSource)
-			throws SQLException {
-		this.dataSource = dataSource;
-		Connection db_connection = dataSource.getConnection();
-		this.reportingMetaDataDB = db_connection.getCatalog();
-		db_connection.close();
-		db_connection = null;
+	public ReadExtraDataAndReportingServiceImpl(final DataSource dataSource) {
+		try {
+			this.dataSource = dataSource;
+			Connection db_connection = dataSource.getConnection();
+			this.reportingMetaDataDB = db_connection.getCatalog();
+			db_connection.close();
+			db_connection = null;
+		} catch (SQLException e) {
+			throw new PlatformDataIntegrityException("error.msg.sql.error",
+					"JPWWRONGMSG - " + e.getMessage(), "DataSource: "
+							+ dataSource);
+		}
 	}
 
 	@Override
@@ -59,8 +60,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 		return new StreamingOutput() {
 
 			@Override
-			public void write(OutputStream out) throws IOException,
-					WebApplicationException {
+			public void write(OutputStream out) {
 				try {
 
 					GenericResultset result = retrieveGenericResultset(name,
@@ -81,7 +81,9 @@ public class ReadExtraDataAndReportingServiceImpl implements
 					// out.flush();
 					// out.close();
 				} catch (Exception e) {
-					throw new WebApplicationException(e);
+					throw new PlatformDataIntegrityException(
+							"error.msg.exception.error", "JPWWRONGMSG - "
+									+ e.getMessage());
 				}
 			}
 		};
@@ -446,8 +448,9 @@ public class ReadExtraDataAndReportingServiceImpl implements
 				db_statement2.close();
 				db_statement2 = null;
 
-				sql = "select " + selectFieldList + " from `" + type + "` t left join `" + fullDatasetName + "` s on s.id = t.id "
-						+ " where t.id = " + id;
+				sql = "select " + selectFieldList + " from `" + type
+						+ "` t left join `" + fullDatasetName
+						+ "` s on s.id = t.id " + " where t.id = " + id;
 
 				Statement db_statement3 = db_connection.createStatement();
 				ResultSet rs = db_statement3.executeQuery(sql);
@@ -473,7 +476,8 @@ public class ReadExtraDataAndReportingServiceImpl implements
 				} else {
 					throw new PlatformResourceNotFoundException(
 							"error.msg.type.value.not.found",
-							"Additional Fields Type: " + type + " Id Not Found for " + id);
+							"Additional Fields Type: " + type
+									+ " Id Not Found for " + id);
 				}
 				db_statement3.close();
 				db_statement3 = null;
@@ -544,8 +548,10 @@ public class ReadExtraDataAndReportingServiceImpl implements
 			db_connection.close();
 			db_connection = null;
 		} catch (SQLException e) {
-			logger.info("SQL: " + saveSql + "  ERROR: " + e.toString());
-			throw new InvalidSqlException(e, e.toString());
+			throw new PlatformDataIntegrityException("error.msg.sql.error",
+					"JPWWRONGMSG - " + e.getMessage(),
+					"Additional Fields Type: " + type + "   Set: " + set
+							+ "   Id: " + id);
 		}
 
 	}
@@ -557,9 +563,10 @@ public class ReadExtraDataAndReportingServiceImpl implements
 		String transType = queryParams.get("ed_transType");
 		if (!(transType.equals("E") || transType.equals("A"))) {
 			errMsg = "transType not E or A - Value is: " + transType;
-			logger.info(errMsg);
-			throw new WebApplicationException(Response
-					.status(Status.BAD_REQUEST).entity(errMsg).build());
+			throw new PlatformDataIntegrityException("error.msg.sql.error",
+					"JPWWRONGMSG - " + errMsg,
+					"Additional Fields Full Set Name: " + fullSetName
+							+ "   Id: " + id);
 		}
 
 		String pValue = "";
