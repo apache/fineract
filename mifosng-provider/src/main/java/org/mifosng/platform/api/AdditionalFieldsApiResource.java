@@ -66,7 +66,7 @@ public class AdditionalFieldsApiResource {
 	@Produces({ MediaType.APPLICATION_JSON })
 	public Response extraData(@PathParam("type") final String type,
 			@PathParam("set") final String set,
-			@PathParam("id") final String id) {
+			@PathParam("id") final Long id) {
 
 		try {
 			GenericResultset result = this.readExtraDataAndReportingService
@@ -87,7 +87,7 @@ public class AdditionalFieldsApiResource {
 	@Produces({ MediaType.APPLICATION_JSON })
 	public Response saveExtraData(@PathParam("type") final String type,
 			@PathParam("set") final String set,
-			@PathParam("id") final String id, String reqbody) {
+			@PathParam("id") final Long id, String reqbody) {
 
 		try {
 

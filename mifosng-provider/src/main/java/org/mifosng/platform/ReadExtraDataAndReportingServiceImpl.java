@@ -25,6 +25,8 @@ import org.mifosng.data.AdditionalFieldsSets;
 import org.mifosng.data.reports.GenericResultset;
 import org.mifosng.data.reports.ResultsetColumnHeader;
 import org.mifosng.data.reports.ResultsetDataRow;
+import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
+import org.mifosng.platform.exceptions.PlatformResourceNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -137,8 +139,9 @@ public class ReadExtraDataAndReportingServiceImpl implements
 			final String type, final Map<String, String> queryParams) {
 
 		if (name == null) {
-			logger.info("Report Name not Found");
-			return null;
+			throw new PlatformDataIntegrityException(
+					"error.msg.report.name.null",
+					"JPWWRONGMSG - Report Name is null.");
 		}
 
 		long startTime = System.currentTimeMillis();
@@ -166,24 +169,10 @@ public class ReadExtraDataAndReportingServiceImpl implements
 					+ " left join stretchy_parameter p on p.parameter_id = rp.parameter_id"
 					+ " order by r.report_name, rp.parameter_id";
 		} else {
-			try {
-				sql = getSQLtoRun(name, type, queryParams);
-			} catch (SQLException e) {
-				logger.info(name + ": Failed in getSQLtoRun");
-				throw new WebApplicationException(Response
-						.status(Status.BAD_REQUEST).entity(e.getMessage())
-						.build());
-			}
+			sql = getSQLtoRun(name, type, queryParams);
 		}
 
-		GenericResultset result = null;
-		try {
-			result = fillReportingGenericResultSet(sql);
-		} catch (SQLException e) {
-			logger.info("Error - SQL: " + sql);
-			throw new WebApplicationException(Response
-					.status(Status.BAD_REQUEST).entity(e.getMessage()).build());
-		}
+		GenericResultset result = fillReportingGenericResultSet(sql);
 
 		long elapsed = System.currentTimeMillis() - startTime;
 		logger.info("FINISHING Report/Request Name: " + name + " - " + type
@@ -191,53 +180,57 @@ public class ReadExtraDataAndReportingServiceImpl implements
 		return result;
 	}
 
-	private GenericResultset fillReportingGenericResultSet(final String sql)
-			throws SQLException {
+	private GenericResultset fillReportingGenericResultSet(final String sql) {
 
 		GenericResultset result = new GenericResultset();
 
-		Connection db_connection = dataSource.getConnection();
-		Statement db_statement = db_connection.createStatement();
-		ResultSet rs = db_statement.executeQuery(sql);
+		try {
+			Connection db_connection = dataSource.getConnection();
+			Statement db_statement = db_connection.createStatement();
+			ResultSet rs = db_statement.executeQuery(sql);
 
-		ResultSetMetaData rsmd = rs.getMetaData();
-		String columnName = null;
-		String columnValue = null;
-		List<ResultsetColumnHeader> columnHeaders = new ArrayList<ResultsetColumnHeader>();
-		for (int i = 0; i < rsmd.getColumnCount(); i++) {
-			ResultsetColumnHeader rsch = new ResultsetColumnHeader();
-			rsch.setColumnName(rsmd.getColumnName(i + 1));
-			rsch.setColumnType(rsmd.getColumnTypeName(i + 1));
-			columnHeaders.add(rsch);
-		}
-		result.setColumnHeaders(columnHeaders);
-
-		List<ResultsetDataRow> resultsetDataRows = new ArrayList<ResultsetDataRow>();
-		ResultsetDataRow resultsetDataRow;
-		while (rs.next()) {
-			resultsetDataRow = new ResultsetDataRow();
-			List<String> columnValues = new ArrayList<String>();
+			ResultSetMetaData rsmd = rs.getMetaData();
+			String columnName = null;
+			String columnValue = null;
+			List<ResultsetColumnHeader> columnHeaders = new ArrayList<ResultsetColumnHeader>();
 			for (int i = 0; i < rsmd.getColumnCount(); i++) {
-				columnName = rsmd.getColumnName(i + 1);
-				columnValue = rs.getString(columnName);
-				columnValues.add(columnValue);
+				ResultsetColumnHeader rsch = new ResultsetColumnHeader();
+				rsch.setColumnName(rsmd.getColumnName(i + 1));
+				rsch.setColumnType(rsmd.getColumnTypeName(i + 1));
+				columnHeaders.add(rsch);
 			}
-			resultsetDataRow.setRow(columnValues);
-			resultsetDataRows.add(resultsetDataRow);
+			result.setColumnHeaders(columnHeaders);
+
+			List<ResultsetDataRow> resultsetDataRows = new ArrayList<ResultsetDataRow>();
+			ResultsetDataRow resultsetDataRow;
+			while (rs.next()) {
+				resultsetDataRow = new ResultsetDataRow();
+				List<String> columnValues = new ArrayList<String>();
+				for (int i = 0; i < rsmd.getColumnCount(); i++) {
+					columnName = rsmd.getColumnName(i + 1);
+					columnValue = rs.getString(columnName);
+					columnValues.add(columnValue);
+				}
+				resultsetDataRow.setRow(columnValues);
+				resultsetDataRows.add(resultsetDataRow);
+			}
+			result.setData(resultsetDataRows);
+
+			db_statement.close();
+			db_statement = null;
+			db_connection.close();
+			db_connection = null;
+
+		} catch (SQLException e) {
+			throw new PlatformDataIntegrityException("error.msg.sql.error",
+					"JPWWRONGMSG - " + e.getMessage(), "Sql: " + sql);
 		}
-		result.setData(resultsetDataRows);
-
-		db_statement.close();
-		db_statement = null;
-		db_connection.close();
-		db_connection = null;
-
 		return result;
 
 	}
 
 	private String getSQLtoRun(final String name, final String type,
-			final Map<String, String> queryParams) throws SQLException {
+			final Map<String, String> queryParams) {
 		String sql = null;
 		String rptDB = queryParams.get("${rptDB}");
 		if ((rptDB == null) || rptDB.equals("")) {
@@ -293,41 +286,44 @@ public class ReadExtraDataAndReportingServiceImpl implements
 	// return true;
 	// }
 
-	private String getReportSql(String rptDB, String reportName)
-			throws SQLException {
+	private String getReportSql(String rptDB, String reportName) {
 		String sql = "select report_sql as the_sql from " + rptDB
 				+ ".stretchy_report where report_name = '" + reportName + "'";
-		logger.info("Report SQL: " + sql);
-
 		return getSql(sql);
 	}
 
-	private String getParameterSql(String rptDB, String parameterName)
-			throws SQLException {
+	private String getParameterSql(String rptDB, String parameterName) {
 		String sql = "select parameter_sql as the_sql from " + rptDB
 				+ ".stretchy_parameter where parameter_name = '"
 				+ parameterName + "'";
-		logger.info("Parameter SQL: " + sql);
-
 		return getSql(sql);
 	}
 
-	private String getSql(String inputSql) throws SQLException {
-
-		Connection db_connection = dataSource.getConnection();
-		Statement db_statement = db_connection.createStatement();
-		ResultSet rs = db_statement.executeQuery(inputSql);
+	private String getSql(String inputSql) {
 
 		String sql = null;
+		try {
+			Connection db_connection = dataSource.getConnection();
+			Statement db_statement = db_connection.createStatement();
+			ResultSet rs = db_statement.executeQuery(inputSql);
 
-		while (rs.next()) {
-			sql = rs.getString("the_sql");
+			if (rs.next()) {
+				sql = rs.getString("the_sql");
+			} else {
+				throw new PlatformResourceNotFoundException(
+						"error.msg.report.name.not.found",
+						"Reporting Meta Data Entry Not Found", "Input Sql: "
+								+ inputSql);
+			}
+
+			db_statement.close();
+			db_statement = null;
+			db_connection.close();
+			db_connection = null;
+		} catch (SQLException e) {
+			throw new PlatformDataIntegrityException("error.msg.sql.error",
+					"JPWWRONGMSG - " + e.getMessage(), "Input Sql: " + inputSql);
 		}
-
-		db_statement.close();
-		db_statement = null;
-		db_connection.close();
-		db_connection = null;
 
 		return sql;
 	}
@@ -372,19 +368,22 @@ public class ReadExtraDataAndReportingServiceImpl implements
 	}
 
 	@Override
-	public GenericResultset retrieveExtraData(String type, String set, String id) {
+	public GenericResultset retrieveExtraData(String type, String set, Long id) {
 
 		if (type == null) {
-			logger.info("Type not Found");
-			return null;
+			throw new PlatformDataIntegrityException(
+					"error.msg.additional.fields.type.null",
+					"JPWWRONGMSG - Additional Fields Type is null.");
 		}
 		if (set == null) {
-			logger.info("Set not Found");
-			return null;
+			throw new PlatformDataIntegrityException(
+					"error.msg.additional.fields.set.null",
+					"JPWWRONGMSG - Additional Fields Set is null.");
 		}
 		if (id == null) {
-			logger.info("Id not Found");
-			return null;
+			throw new PlatformDataIntegrityException(
+					"error.msg.additional.fields.id.null",
+					"JPWWRONGMSG - Additional Fields Id is null.");
 		}
 
 		long startTime = System.currentTimeMillis();
@@ -405,7 +404,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 	}
 
 	private GenericResultset fillExtraDataGenericResultSet(String type,
-			String set, String id) throws SQLException {
+			String set, Long id) throws SQLException {
 
 		GenericResultset result = new GenericResultset();
 		String fullDatasetName = getFullDatasetName(type, set);
@@ -506,7 +505,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 	}
 
 	@Override
-	public void updateExtraData(String type, String set, String id,
+	public void updateExtraData(String type, String set, Long id,
 			Map<String, String> queryParams) {
 		logger.info("updateExtraData - type: " + type + "    set: " + set
 				+ "  id: " + id);
@@ -539,7 +538,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 
 	}
 
-	private String getSaveSql(String fullSetName, String id,
+	private String getSaveSql(String fullSetName, Long id,
 			Map<String, String> queryParams) {
 
 		String errMsg = "";

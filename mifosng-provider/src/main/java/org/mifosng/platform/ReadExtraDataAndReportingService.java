@@ -18,8 +18,8 @@ public interface ReadExtraDataAndReportingService {
 
 	AdditionalFieldsSets retrieveExtraDatasetNames(String type);
 
-	GenericResultset retrieveExtraData(String type, String set, String id);
+	GenericResultset retrieveExtraData(String type, String set, Long id);
 
-	void updateExtraData(String type, String set, String id,
+	void updateExtraData(String type, String set, Long id,
 			Map<String, String> queryParams);
 }
