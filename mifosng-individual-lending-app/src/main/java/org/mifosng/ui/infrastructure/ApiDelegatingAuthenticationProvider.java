@@ -4,6 +4,8 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.mifosng.configuration.ApplicationConfigurationService;
+import org.mifosng.configuration.OAuthProviderDetails;
 import org.mifosng.data.AuthenticatedUserData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -13,20 +15,26 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.authentication.dao.AbstractUserDetailsAuthenticationProvider;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * A {@link AbstractUserDetailsAuthenticationProvider} which is responsible for delegating authentication to the mifos platform API. 
+ * A {@link AbstractUserDetailsAuthenticationProvider} which is responsible for delegating authentication to the mifos platform API.
+ * 
+ *  If successful, the permissions associated with the authenticated user are returned. As this class is used as a hook into spring security,
+ *  a proper authentication object is persisted for this client applications {@link SecurityContext}.
  */
 public class ApiDelegatingAuthenticationProvider extends AbstractUserDetailsAuthenticationProvider {
 
 	private final RestTemplate restTemplate;
+	private final ApplicationConfigurationService applicationConfigurationService;
 
 	@Autowired
-	public ApiDelegatingAuthenticationProvider(final RestTemplate restTemplate) {
+	public ApiDelegatingAuthenticationProvider(final RestTemplate restTemplate, final ApplicationConfigurationService applicationConfigurationService) {
 		this.restTemplate = restTemplate;
+		this.applicationConfigurationService = applicationConfigurationService;
 	}
 	
 	@Override
@@ -38,7 +46,12 @@ public class ApiDelegatingAuthenticationProvider extends AbstractUserDetailsAuth
 		
 		String password = (String) authentication.getCredentials();
 		
-		URI restUri = URI.create("http://localhost:8080/mifosng-provider/api/v1/authentication?username=" + username + "&password=" + password);
+		OAuthProviderDetails oauthDetails = this.applicationConfigurationService.retrieveOAuthProviderDetails();
+		String apiVersion = "api/v1/";
+		String authUrlExtension = "authentication?username=" + username + "&password=" + password;
+		StringBuilder authenticationApiUrl = new StringBuilder(oauthDetails.getProviderBaseUrl()).append(apiVersion).append(authUrlExtension);
+		
+		URI restUri = URI.create(authenticationApiUrl.toString());
 		ResponseEntity<AuthenticatedUserData> s = this.restTemplate.postForEntity(restUri, authRequest(), AuthenticatedUserData.class);
 		
 		UserDetails userDetails = null;
@@ -49,7 +62,8 @@ public class ApiDelegatingAuthenticationProvider extends AbstractUserDetailsAuth
 			for (String permission : authenticatedUserData.getPermissions()) {
 				authorities.add(new SimpleGrantedAuthority(permission));
 			}
-			userDetails = new User(authenticatedUserData.getUsername(), "[not needed]", authorities);
+			User user = new User(authenticatedUserData.getUsername(), "[not needed]", authorities);
+			userDetails = new BasicAuthUserDetails(user, authenticatedUserData.getBase64EncodedAuthenticationKey(), oauthDetails.getProviderBaseUrl(), apiVersion);
 		}
 		
 		return userDetails;

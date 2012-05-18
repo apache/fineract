@@ -13,6 +13,10 @@
 <script>
 $(document).ready(function() {
 
+	// basic auth details
+	var base64 = "${basicAuthKey}";
+	var baseApiUrl = "${baseApiUrl}";
+	
 	// these helpers are registered for the jsViews and jsRender functionality to fix bug with display zero!
 	$.views.registerHelpers({
 			
@@ -207,7 +211,6 @@ $(document).ready(function() {
 			dataType: 'json',
 			cache: false,
 			beforeSend: function(xhr) {
-				var base64 = $.base64Encode(username + ":" + password);
 				console.log("base64: " + base64);
 	            xhr.setRequestHeader("Authorization", "Basic " + base64);
 			},
@@ -283,9 +286,6 @@ $(document).ready(function() {
 		});
 	}
 	
-	var username = "mifos";
-	var password = "password";
-	
 	$("#tabs").tabs({
 		"ajaxOptions": {
 			type: 'GET',
@@ -293,7 +293,6 @@ $(document).ready(function() {
 			contentType: 'application/json',
 			cache: false,
 			beforeSend: function(xhr) {
-				var base64 = $.base64Encode(username + ":" + password);
 				console.log("base64: " + base64);
 	            xhr.setRequestHeader("Authorization", "Basic " + base64);
 			},
@@ -317,8 +316,8 @@ $(document).ready(function() {
 	}
 	
 	$("#addclient").button().click(function(e) {
-		var getUrl = 'http://localhost:8080/mifosng-provider/api/v1/clients/template';
-		var postUrl = 'http://localhost:8080/mifosng-provider/api/v1/clients';
+		var getUrl = baseApiUrl + 'clients/template';
+		var postUrl = baseApiUrl + 'clients';
 		var templateSelector = "#clientFormTemplate";
 		var width = 600; 
 		var height = 350;

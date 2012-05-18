@@ -21,8 +21,10 @@ div.notespacer {margin-top: 5px; margin-bottom: 5px;}
 <script>
 $(document).ready(function() {
 	
-	var username="mifos";
-	var password="password";
+	// basic auth details
+	var base64 = "${basicAuthKey}";
+	var baseApiUrl = "${baseApiUrl}";
+	
 	// these helpers are registered for the jsViews and jsRender functionality to fix bug with display zero!
 	$.views.registerHelpers({
 			
@@ -222,7 +224,6 @@ $(document).ready(function() {
 					  contentType: 'application/json',
 					  dataType: 'json',
 					  beforeSend: function(xhr) {
-							var base64 = $.base64Encode(username + ":" + password);
 							console.log("base64: " + base64);
 				            xhr.setRequestHeader("Authorization", "Basic " + base64);
 					  },
@@ -286,7 +287,6 @@ $(document).ready(function() {
 				  cache: false,
 				  data: newFormData,
 				  beforeSend: function(xhr) {
-						var base64 = $.base64Encode(username + ":" + password);
 						console.log("base64: " + base64);
 			            xhr.setRequestHeader("Authorization", "Basic " + base64);
 				  },
@@ -340,7 +340,6 @@ $(document).ready(function() {
 			dataType: 'json',
 			cache: false,
 			beforeSend: function(xhr) {
-				var base64 = $.base64Encode(username + ":" + password);
 				console.log("base64: " + base64);
 	            xhr.setRequestHeader("Authorization", "Basic " + base64);
 			},
@@ -374,7 +373,6 @@ $(document).ready(function() {
 						  dataType: 'json',
 						  data: newFormData,
 						  beforeSend: function(xhr) {
-								var base64 = $.base64Encode(username + ":" + password);
 								console.log("base64: " + base64);
 					            xhr.setRequestHeader("Authorization", "Basic " + base64);
 						  },
@@ -435,7 +433,6 @@ $(document).ready(function() {
 			contentType: 'application/json',
 			cache: false,
 			beforeSend: function(xhr) {
-				var base64 = $.base64Encode(username + ":" + password);
 				console.log("base64: " + base64);
 				xhr.setRequestHeader("Authorization", "Basic " + base64);
 			},
@@ -491,7 +488,7 @@ $(document).ready(function() {
 					$('.addnotebtn').button().click(function(e) {
 						var linkId = this.id;
 						var clientId = linkId.replace("addnotebtn", "");
-						var getAndPostUrl = 'http://localhost:8080/mifosng-provider/api/v1/clients/' + clientId + '/notes';
+						var getAndPostUrl = baseApiUrl + 'clients/' + clientId + '/notes';
 						
 						var templateSelector = "#noteFormTemplate";
 						var width = 600; 
@@ -511,7 +508,8 @@ $(document).ready(function() {
 					
 					// retrieve additional info
 					var additionalFieldsParams = {
-							url: "http://localhost:8080/mifosng-provider/",
+							url: baseApiUrl,
+							basicAuthKey: base64,
 							datasetType: "portfolio_client",
 							datasetPKValue: data.id,
 							datasetTypeDiv: "clientadditionaldata", 
@@ -546,7 +544,7 @@ $(document).ready(function() {
 	        		$('.rejectloan').button().click(function(e) {
 						var linkId = this.id;
 						var loanId = linkId.replace("rejectbtn", "");
-						var postUrl = 'http://localhost:8080/mifosng-provider/api/v1/loans/' + loanId + '?command=reject';
+						var postUrl = baseApiUrl + 'loans/' + loanId + '?command=reject';
 						var templateSelector = "#stateTransitionLoanFormTemplate";
 						var width = 500; 
 						var height = 350;
@@ -559,7 +557,7 @@ $(document).ready(function() {
 					$('.withdrawnbyapplicantloan').button().click(function(e) {
 						var linkId = this.id;
 						var loanId = linkId.replace("withdrawnbyapplicantloanbtn", "");
-						var postUrl = 'http://localhost:8080/mifosng-provider/api/v1/loans/' + loanId + '?command=withdrewbyclient';
+						var postUrl = baseApiUrl + 'loans/' + loanId + '?command=withdrewbyclient';
 						var templateSelector = "#stateTransitionLoanFormTemplate";
 						var width = 500; 
 						var height = 350;
@@ -573,7 +571,7 @@ $(document).ready(function() {
 						
 						var linkId = this.id;
 						var loanId = linkId.replace("approvebtn", "");
-						var postUrl = 'http://localhost:8080/mifosng-provider/api/v1/loans/' + loanId + '?command=approve';
+						var postUrl = baseApiUrl + 'loans/' + loanId + '?command=approve';
 						var templateSelector = "#stateTransitionLoanFormTemplate";
 						var width = 500; 
 						var height = 350;
@@ -587,7 +585,7 @@ $(document).ready(function() {
 						
 						var linkId = this.id;
 						var loanId = linkId.replace("deletebtn", "");
-						var url = 'http://localhost:8080/mifosng-provider/api/v1/loans/' + loanId;
+						var url = baseApiUrl + 'loans/' + loanId;
 						var width = 400; 
 						var height = 225;
 						
@@ -602,7 +600,7 @@ $(document).ready(function() {
 						
 						var linkId = this.id;
 						var loanId = linkId.replace("undoapprovebtn", "");
-						var postUrl = 'http://localhost:8080/mifosng-provider/api/v1/loans/' + loanId + '/undo?command=undoapproval';
+						var postUrl = baseApiUrl + 'loans/' + loanId + '/undo?command=undoapproval';
 						var width = 400; 
 						var height = 225;
 						popupConfirmationDialogAndPost(postUrl, 'POST', 'dialog.title.undo.loan.approval', width, height, currentTabIndex);
@@ -614,7 +612,7 @@ $(document).ready(function() {
 						
 						var linkId = this.id;
 						var loanId = linkId.replace("undodisbursalbtn", "");
-						var postUrl = 'http://localhost:8080/mifosng-provider/api/v1/loans/' + loanId + '/undo?command=undodisbursal';
+						var postUrl = baseApiUrl + 'loans/' + loanId + '/undo?command=undodisbursal';
 						var width = 400; 
 						var height = 150;
 						popupConfirmationDialogAndPost(postUrl, 'POST', 'dialog.title.undo.loan.disbursal', width, height, currentTabIndex);
@@ -626,7 +624,7 @@ $(document).ready(function() {
 						
 						var linkId = this.id;
 						var loanId = linkId.replace("disbursebtn", "");
-						var postUrl = 'http://localhost:8080/mifosng-provider/api/v1/loans/' + loanId + '?command=disburse';
+						var postUrl = baseApiUrl + 'loans/' + loanId + '?command=disburse';
 						var templateSelector = "#stateTransitionLoanFormTemplate";
 						var width = 500; 
 						var height = 350;
@@ -640,8 +638,8 @@ $(document).ready(function() {
 						
 						var linkId = this.id;
 						var loanId = linkId.replace("repaymentbtn", "");
-						var getUrl = 'http://localhost:8080/mifosng-provider/api/v1/loans/' + loanId + '/transactions/template?transactionType=repayment';
-						var postUrl = 'http://localhost:8080/mifosng-provider/api/v1/loans/' + loanId + '/transactions?transactionType=repayment';
+						var getUrl = baseApiUrl + 'loans/' + loanId + '/transactions/template?transactionType=repayment';
+						var postUrl = baseApiUrl + 'loans/' + loanId + '/transactions?transactionType=repayment';
 						
 						var templateSelector = "#transactionLoanFormTemplate";
 						var width = 500; 
@@ -663,8 +661,8 @@ $(document).ready(function() {
 						var linkId = this.id;
 						var loanId = linkId.replace("waivebtn", "");
 						
-						var getUrl = 'http://localhost:8080/mifosng-provider/api/v1/loans/' + loanId + '/transactions/template?transactionType=waiver';
-						var postUrl = 'http://localhost:8080/mifosng-provider/api/v1/loans/' + loanId + '/transactions?transactionType=waiver';
+						var getUrl = baseApiUrl + 'loans/' + loanId + '/transactions/template?transactionType=waiver';
+						var postUrl = baseApiUrl + 'loans/' + loanId + '/transactions?transactionType=waiver';
 						
 						var templateSelector = "#transactionLoanFormTemplate";
 						var width = 500; 
@@ -689,7 +687,7 @@ $(document).ready(function() {
 						var ids = loanAndRepaymentId.split("_");
 						var loanId = ids[0];
 						var transactionId = ids[1];
-						var getAndPutUrl = 'http://localhost:8080/mifosng-provider/api/v1/loans/' + loanId + '/transactions/' + transactionId;
+						var getAndPutUrl = baseApiUrl + 'loans/' + loanId + '/transactions/' + transactionId;
 						
 						var templateSelector = "#transactionLoanFormTemplate";
 						var width = 500; 
@@ -709,7 +707,8 @@ $(document).ready(function() {
 					
 					// additional data
 					var additionalFieldsParams = {
-							url: "http://localhost:8080/mifosng-provider/",
+							url: baseApiUrl,
+							basicAuthKey: base64,
 							datasetType: "portfolio_loan",
 							datasetPKValue: data.id,
 							datasetTypeDiv: "loanadditionaldata" + data.id, 
@@ -728,13 +727,12 @@ $(document).ready(function() {
 	function refreshLoanSummaryInfo() {
 		
 	  	var jqxhr = $.ajax({
-			  url: 'http://localhost:8080/mifosng-provider/api/v1/clients/${clientId}/loans',
+			  url: baseApiUrl + 'clients/${clientId}/loans',
 			  type: 'GET',
 			  contentType: 'application/json',
 			  dataType: 'json',
 			  cache: false,
 			  beforeSend: function(xhr) {
-					var base64 = $.base64Encode(username + ":" + password);
 					console.log("base64: " + base64);
 					xhr.setRequestHeader("Authorization", "Basic " + base64);
 			  },
@@ -764,13 +762,12 @@ $(document).ready(function() {
 	  	var arrayIndex = 0;
 	  	
 	  	var jqxhr = $.ajax({
-			  url: 'http://localhost:8080/mifosng-provider/api/v1/clients/${clientId}/notes',
+			  url: baseApiUrl + 'clients/${clientId}/notes',
 			  type: 'GET',
 			  contentType: 'application/json',
 			  dataType: 'json',
 			  cache: false,
 			  beforeSend: function(xhr) {
-					var base64 = $.base64Encode(username + ":" + password);
 					console.log("base64: " + base64);
 					xhr.setRequestHeader("Authorization", "Basic " + base64);
 			  },
@@ -787,7 +784,7 @@ $(document).ready(function() {
 				  $('.editclientnote').click(function(e) {
 						var linkId = this.id;
 						var noteId = linkId.replace("editclientnotelink", "");
-						var getAndPutUrl = 'http://localhost:8080/mifosng-provider/api/v1/clients/${clientId}/notes/' + noteId;
+						var getAndPutUrl = baseApiUrl + 'clients/${clientId}/notes/' + noteId;
 						var templateSelector = "#noteFormTemplate";
 						var width = 600;
 						var height = 400;

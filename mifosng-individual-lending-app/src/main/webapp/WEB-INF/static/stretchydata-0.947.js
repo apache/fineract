@@ -4,10 +4,12 @@
 
 	$.stretchyData.displayAllExtraData = function(params) {
 
-		username="mifos";
-		password="password";
 		if (!(params.url)) {
 			alert(doI18N("reportingInitError - url parameter"));
+			return;
+		}
+		if (!(params.basicAuthKey)) {
+			alert(doI18N("reportingInitError - basicAuthKey parameter"));
 			return;
 		}
 		if (!(params.datasetType)) {
@@ -35,15 +37,13 @@
 		var valueClass = "";
 		if (params.valueClass)
 			valueClass = params.valueClass;
-		displayAllExtraData(params.url, params.datasetType,
+		displayAllExtraData(params.url, params.basicAuthKey, params.datasetType,
 				params.datasetPKValue, params.datasetTypeDiv, headingPrefix,
 				headingClass, labelClass, valueClass);
 	};
 
-	$.stretchyData.popupEditDialog = function(url, datasetType, datasetName,
-			datasetPKValue, dsnDivName, title, width, height) {
-		popupEditDialog(url, datasetType, datasetName, datasetPKValue,
-				dsnDivName, title, width, height);
+	$.stretchyData.popupEditDialog = function(url, basicAuthKey, datasetType, datasetName, datasetPKValue, dsnDivName, title, width, height) {
+		popupEditDialog(url, basicAuthKey, datasetType, datasetName, datasetPKValue, dsnDivName, title, width, height);
 	};
 
 	displayAllSuccessFunction = function(data, textStatus, jqXHR) {
@@ -61,7 +61,7 @@
 					+ doI18N(data.additionalFieldsSets[i].name)
 					+ ' - </span></b> ';
 
-			extraDataNamesVar += editExtraDataLink(displayAllVars.url,
+			extraDataNamesVar += editExtraDataLink(displayAllVars.url, displayAllVars.basicAuthKey,
 					displayAllVars.datasetType,
 					data.additionalFieldsSets[i].name,
 					displayAllVars.datasetPKValue, dsnDivName);
@@ -73,7 +73,7 @@
 		for ( var i in data.additionalFieldsSets) {
 			var dsnDivName = generateDsnDivName(displayAllVars.datasetType, i,
 					displayAllVars.datasetTypeDiv);
-			viewExtraData(displayAllVars.url, displayAllVars.datasetType,
+			viewExtraData(displayAllVars.url, displayAllVars.basicAuthKey, displayAllVars.datasetType,
 					data.additionalFieldsSets[i].name,
 					displayAllVars.datasetPKValue, dsnDivName);
 		}
@@ -84,11 +84,12 @@
 		alert(jqXHR.responseText);
 	};
 
-	function displayAllExtraData(url, datasetType, datasetPKValue,
+	function displayAllExtraData(url, basicAuthKey, datasetType, datasetPKValue,
 			datasetTypeDiv, headingPrefix, headingClass, labelClass, valueClass) {
 
 		displayAllVars = {
 			url : url,
+			basicAuthKey : basicAuthKey,
 			datasetType : datasetType,
 			datasetPKValue : datasetPKValue,
 			datasetTypeDiv : datasetTypeDiv,
@@ -98,16 +99,14 @@
 			valueClass : valueClass
 		};
 
-		displayAllUrl = url + "api/v1/additionalfields?type="
-				+ encodeURIComponent(datasetType);
-		getData(displayAllUrl, displayAllSuccessFunction,
-				displayAllErrorFunction);
+		displayAllUrl = url + "additionalfields?type=" + encodeURIComponent(datasetType);
+		getData(displayAllUrl, basicAuthKey, displayAllSuccessFunction, displayAllErrorFunction);
 	}
 
-	function editExtraDataLink(url, datasetType, datasetName, datasetPKValue,
+	function editExtraDataLink(url, basicAuthKey, datasetType, datasetName, datasetPKValue,
 			dsnDivName) {
 
-		var popupVar = "jQuery.stretchyData.popupEditDialog('" + url + "', '"
+		var popupVar = "jQuery.stretchyData.popupEditDialog('" + url + "', '" + basicAuthKey + "', '"
 				+ datasetType + "', '" + datasetName + "', " + datasetPKValue
 				+ ", '" + dsnDivName + "', '" + doI18N("Edit") + " "
 				+ doI18N(datasetName) + "', 900, 500)";
@@ -162,9 +161,8 @@
 		alert(jqXHR.responseText);
 	};
 
-	function viewExtraData(url, datasetType, datasetName, datasetPKValue,
-			dsnDivName) {
-		var viewExtraDataUrl = url + "api/v1/additionalfields/"
+	function viewExtraData(url, basicAuthKey, datasetType, datasetName, datasetPKValue, dsnDivName) {
+		var viewExtraDataUrl = url + "additionalfields/"
 				+ encodeURIComponent(datasetType) + "/"
 				+ encodeURIComponent(datasetName) + "/"
 				+ encodeURIComponent(datasetPKValue);
@@ -172,22 +170,20 @@
 		var evalViewExtraDataSuccessFunction = "var viewExtraDataSuccessFunction = function(data, textStatus, jqXHR){  viewExtraDataset(data, '"
 				+ dsnDivName + "'); };"
 		eval(evalViewExtraDataSuccessFunction);
-		getData(viewExtraDataUrl, viewExtraDataSuccessFunction,
-				viewExtraDataErrorFunction);
+		getData(viewExtraDataUrl, basicAuthKey, viewExtraDataSuccessFunction, viewExtraDataErrorFunction);
 	}
 
 	popupEditErrorFunction = function(jqXHR, textStatus, errorThrown) {
 		alert("error");
-		handleXhrError(jqXHR, textStatus, errorThrown, "#formErrorsTemplate",
-				"#formerrors");
+		handleXhrError(jqXHR, textStatus, errorThrown, "#formErrorsTemplate", "#formerrors");
 	};
 	popupEditSuccessFunction = function(data, textStatus, jqXHR) {
 		currentEditPopup.dialogDiv.append(extraDataBuildTemplate(data));
-		extraDataOpenDialog(currentEditPopup.url);
+		extraDataOpenDialog(currentEditPopup.url, currentEditPopup.basicAuthKey);
 		extraDataFormatDates(data.columnHeaders);
 	};
-	function popupEditDialog(url, datasetType, datasetName, datasetPKValue,
-			dsnDivName, title, width, height) {
+	
+	function popupEditDialog(url, basicAuthKey, datasetType, datasetName, datasetPKValue, dsnDivName, title, width, height) {
 
 		currentEditPopup = {
 			dialogDiv : $("<div id='dialog-form'></div>"),
@@ -199,13 +195,13 @@
 			datasetName : datasetName,
 			datasetPKValue : datasetPKValue,
 			baseUrl : url,
-			url : url + "api/v1/additionalfields/"
+			basicAuthKey : basicAuthKey,
+			url : url + "additionalfields/"
 					+ encodeURIComponent(datasetType) + "/"
 					+ encodeURIComponent(datasetName) + "/"
 					+ encodeURIComponent(datasetPKValue)
 		};
-		getData(currentEditPopup.url, popupEditSuccessFunction,
-				popupEditErrorFunction);
+		getData(currentEditPopup.url, currentEditPopup.basicAuthKey, popupEditSuccessFunction, popupEditErrorFunction);
 	}
 
 	function generateDsnDivName(datasetType, i, uniqueDivid) {
@@ -368,7 +364,7 @@
 		return o;
 	};
 
-	function extraDataOpenDialog(url) {
+	function extraDataOpenDialog(url, basicAuthKey) {
 
 		// var saveButton = jQuery.i18n.prop('dialog.button.save');
 		// var cancelButton = jQuery.i18n.prop('dialog.button.cancel');
@@ -382,20 +378,17 @@
 			});
 
 			var form_data = JSON.stringify($('#entityform').serializeObject());
-			// console.log(form_data);
+
 			var jqxhr = $.ajax({
 				url : url,
 				type : 'POST',
 				contentType : "application/json; charset=utf-8",
-				// dataType : 'jsonp',
-				// crossDomain : true,
 				dataType : 'json',
 				data : form_data,
 				cache : false,
 				beforeSend : function(xhr) {
-					var base64 = $.base64Encode(username + ":" + password);
-					console.log("base64: " + base64);
-					xhr.setRequestHeader("Authorization", "Basic " + base64);
+					console.log("base64: " + basicAuthKey);
+					xhr.setRequestHeader("Authorization", "Basic " + basicAuthKey);
 				},
 				success : function(data, textStatus, jqXHR) {
 					currentEditPopup.dialogDiv.dialog("close");
@@ -406,8 +399,7 @@
 							currentEditPopup.dsnDivName)
 				},
 				error : function(jqXHR, textStatus, errorThrown) {
-					handleXhrError(jqXHR, textStatus, errorThrown,
-							"#formErrorsTemplate", "#formerrors");
+					handleXhrError(jqXHR, textStatus, errorThrown, "#formErrorsTemplate", "#formerrors");
 				}
 			});
 		};
@@ -457,23 +449,18 @@
 
 	/* end of code to fill data in edit form and display it */
 
-	function getData(url, successFunction, errorFunction) {
+	function getData(url, basicAuthKey, successFunction, errorFunction) {
 
 		$.ajax({
 			url : url,
-			cache : false,
 			type : 'GET',
 			contentType : "application/json; charset=utf-8",
+			dataType : 'json',
 			cache : false,
 			beforeSend : function(xhr) {
-				var base64 = $.base64Encode(username + ":" + password);
-				console.log("base64: " + base64);
-				xhr.setRequestHeader("Authorization", "Basic " + base64);
+				console.log("base64: " + basicAuthKey);
+				xhr.setRequestHeader("Authorization", "Basic " + basicAuthKey);
 			},
-			// dataType : 'jsonp',
-			// crossDomain : true,
-			dataType : 'json',
-			// crossDomain : false,
 			success : successFunction,
 			error : errorFunction
 		});

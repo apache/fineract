@@ -9,6 +9,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class AuthenticatedUserData {
 
 	private String username;
+	private String base64EncodedAuthenticationKey;
 	private boolean authenticated = false;
 	private Collection<String> permissions = new ArrayList<String>();
 
@@ -42,5 +43,14 @@ public class AuthenticatedUserData {
 
 	public void setAuthenticated(boolean authenticated) {
 		this.authenticated = authenticated;
+	}
+
+	public String getBase64EncodedAuthenticationKey() {
+		return base64EncodedAuthenticationKey;
+	}
+
+	public void setBase64EncodedAuthenticationKey(
+			String base64EncodedAuthenticationKey) {
+		this.base64EncodedAuthenticationKey = base64EncodedAuthenticationKey;
 	}
 }

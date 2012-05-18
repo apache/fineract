@@ -20,6 +20,9 @@
 <script>
 $(document).ready(function() {
 	
+	// basic auth details
+	var base64 = "${basicAuthKey}";
+	
 	// these helpers are registered for the jsViews and jsRender functionality to fix bug with display zero!
 	$.views.registerHelpers({
 		
@@ -210,71 +213,80 @@ $(document).ready(function() {
 			contentType: 'application/json',
 			dataType: 'json',
 			cache: false,
+			beforeSend: function(xhr) {
+				console.log("base64: " + base64);
+				xhr.setRequestHeader("Authorization", "Basic " + base64);
+		    },
 			success: function(data, textStatus, jqXHR) {
-			console.log(data);
-			var formHtml = $(templateSelector).render(data);
-			
-			dialogDiv.append(formHtml);
-			
-			var saveButton = jQuery.i18n.prop('dialog.button.save');
-			var cancelButton = jQuery.i18n.prop('dialog.button.cancel');
-			
-			var buttonsOpts = {};
-			buttonsOpts[saveButton] = function() {
+				console.log(data);
+				var formHtml = $(templateSelector).render(data);
 				
-				$('#notSelectedItems option').each(function(i) {  
+				dialogDiv.append(formHtml);
+				
+				var saveButton = jQuery.i18n.prop('dialog.button.save');
+				var cancelButton = jQuery.i18n.prop('dialog.button.cancel');
+				
+				var buttonsOpts = {};
+				buttonsOpts[saveButton] = function() {
+					
+					$('#notSelectedItems option').each(function(i) {  
+				    	   $(this).attr("selected", "selected");  
+				    });
+			    	
+			    	$('#selectedItems option').each(function(i) {  
 			    	   $(this).attr("selected", "selected");  
-			    });
-		    	
-		    	$('#selectedItems option').each(function(i) {  
-		    	   $(this).attr("selected", "selected");  
-		    	});
-		    	
-		    	var newFormData = JSON.stringify($('#entityform').serializeObject());
-		    	console.log(newFormData);
-		    	
-				var jqxhr = $.ajax({
-					  url: postUrl,
-					  type: submitType,
-					  contentType: 'application/json',
-					  dataType: 'json',
-					  data: newFormData,
-					  success: saveSuccessFunction,
-					  error: function(jqXHR, textStatus, errorThrown) {
-					    handleXhrError(jqXHR, textStatus, errorThrown, "#formErrorsTemplate", "#formerrors");
-					  }
-				});
-			};
-			
-			buttonsOpts[cancelButton] = function() {$(this).dialog( "close" );};
-			
-			dialogDiv.dialog({
-			  		title: jQuery.i18n.prop(titleCode), 
-			  		width: width, 
-			  		height: height, 
-			  		modal: true,
-			  		buttons: buttonsOpts,
-			  		close: function() {
-			  			// if i dont do this, theres a problem with errors being appended to dialog view second time round
-			  			$(this).remove();
-					},
-			  		open: function (event, ui) {
-			  			
-			  			$('#add').click(function() {  
-			  			     return !$('#notSelectedItems option:selected').remove().appendTo('#selectedItems');  
-			  			});
-			  			
-			  			$('#remove').click(function() {  
-			  				return !$('#selectedItems option:selected').remove().appendTo('#notSelectedItems');  
-			  			});
-			  			
-			  			$('.datepickerfield').datepicker({constrainInput: true, maxDate: 0, dateFormat: 'dd MM yy'});
-			  			
-			  			$("#entityform textarea").first().focus();
-			  			$('#entityform input').first().focus();
-			  		}
-			  	}).dialog('open');
-		  }
+			    	});
+			    	
+			    	var newFormData = JSON.stringify($('#entityform').serializeObject());
+			    	console.log(newFormData);
+			    	
+					var jqxhr = $.ajax({
+						  url: postUrl,
+						  type: submitType,
+						  contentType: 'application/json',
+						  dataType: 'json',
+						  data: newFormData,
+						  cache: false,
+						  beforeSend: function(xhr) {
+							console.log("base64: " + base64);
+							xhr.setRequestHeader("Authorization", "Basic " + base64);
+						  },
+						  success: saveSuccessFunction,
+						  error: function(jqXHR, textStatus, errorThrown) {
+						    handleXhrError(jqXHR, textStatus, errorThrown, "#formErrorsTemplate", "#formerrors");
+						  }
+					});
+				};
+				
+				buttonsOpts[cancelButton] = function() {$(this).dialog( "close" );};
+				
+				dialogDiv.dialog({
+				  		title: jQuery.i18n.prop(titleCode), 
+				  		width: width, 
+				  		height: height, 
+				  		modal: true,
+				  		buttons: buttonsOpts,
+				  		close: function() {
+				  			// if i dont do this, theres a problem with errors being appended to dialog view second time round
+				  			$(this).remove();
+						},
+				  		open: function (event, ui) {
+				  			
+				  			$('#add').click(function() {  
+				  			     return !$('#notSelectedItems option:selected').remove().appendTo('#selectedItems');  
+				  			});
+				  			
+				  			$('#remove').click(function() {  
+				  				return !$('#selectedItems option:selected').remove().appendTo('#notSelectedItems');  
+				  			});
+				  			
+				  			$('.datepickerfield').datepicker({constrainInput: true, maxDate: 0, dateFormat: 'dd MM yy'});
+				  			
+				  			$("#entityform textarea").first().focus();
+				  			$('#entityform input').first().focus();
+				  		}
+				  	}).dialog('open');
+			  }
 		 });
 		 
 		jqxhr.error(function(jqXHR, textStatus, errorThrown) {
@@ -288,6 +300,10 @@ $(document).ready(function() {
 			dataType: 'json',
 			contentType: 'application/json',
 			cache: false,
+			beforeSend: function(xhr) {
+				console.log("base64: " + base64);
+				xhr.setRequestHeader("Authorization", "Basic " + base64);
+			},
 	        error: function( xhr, status, index, anchor) {
 	            $(anchor.hash).html("error occured while ajax loading.");
 	        },

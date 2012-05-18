@@ -13,7 +13,10 @@
 <script>
 $(document).ready(function() {
 
-$.views.registerHelpers({
+	// basic auth details
+	var base64 = "${basicAuthKey}";
+	
+	$.views.registerHelpers({
 		
 		money: function(monetaryObj) {
 			
@@ -202,6 +205,10 @@ $.views.registerHelpers({
 			contentType: 'application/json',
 			dataType: 'json',
 			cache: false,
+			beforeSend: function(xhr) {
+				console.log("base64: " + base64);
+				xhr.setRequestHeader("Authorization", "Basic " + base64);
+			},
 			success: function(data, textStatus, jqXHR) {
 			
 				var formHtml = $("#newLoanFormTemplate").render(data);
@@ -302,6 +309,11 @@ $.views.registerHelpers({
 			  contentType: 'application/json',
 			  dataType: 'json',
 			  data: newFormData,
+			  cache: false,
+			  beforeSend: function(xhr) {
+			  	console.log("base64: " + base64);
+			  	xhr.setRequestHeader("Authorization", "Basic " + base64);
+			  },
 			  success: function(data, textStatus, jqXHR) {
 				  removeErrors("#formerrors");
 				  var loanScheduleHtml = $("#newLoanScheduleTemplate").render(data);
@@ -327,6 +339,15 @@ $.views.registerHelpers({
 			  contentType: 'application/json',
 			  dataType: 'json',
 			  data: newFormData,
+			  cache: false,
+			  beforeSend: function(xhr) {
+				  	console.log("base64: " + base64);
+				  	xhr.setRequestHeader("Authorization", "Basic " + base64);
+			  },			  
+			  beforeSend: function(xhr) {
+				  	console.log("base64: " + base64);
+				  	xhr.setRequestHeader("Authorization", "Basic " + base64);
+			  },
 			  success: function(data, textStatus, jqXHR) {
 				  var localAppUrlToSwitchToClientPage = '${rootContext}portfolio/client/${clientId}';
 				  window.location.href = localAppUrlToSwitchToClientPage;
@@ -345,6 +366,10 @@ $.views.registerHelpers({
 		contentType: 'application/json',
 		dataType: 'json',
 		cache: false,
+		beforeSend: function(xhr) {
+			console.log("base64: " + base64);
+			xhr.setRequestHeader("Authorization", "Basic " + base64);
+	    },
 		success: function(data, textStatus, jqXHR) {
 		
 			var formHtml = $("#newLoanFormTemplateMin").render(data);

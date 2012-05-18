@@ -32,7 +32,7 @@
   <td valign="top"><div id=myClearReportButton></div></td>
   <td valign="bottom">
 		<select id=decimalsChoice onChange="selectNewDecimals(options[selectedIndex].value)" >
-		<option value="" SELECTED>Decimals</option>
+		<option value="" selected="selected">Decimals</option>
 		<option value="4">4</option>
 		<option value="3">3</option>
 		<option value="2">2</option>
@@ -45,7 +45,7 @@
    </td>
   <td valign="bottom">
 		<select id=decimalsThousandsSep onChange="selectNewThousandsSep(options[selectedIndex].value)" >
-		<option value="" SELECTED>Format</option>
+		<option value="" selected="selected">Format</option>
 		<option value=",.">1,234,567.89</option>
 		<option value=".,">1.234.567,89</option>
 		<option value=" ,">1 234 567,89</option>

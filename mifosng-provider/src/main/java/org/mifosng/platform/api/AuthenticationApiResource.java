@@ -21,6 +21,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
+import com.sun.jersey.core.util.Base64;
+
 @Path("/v1/authentication")
 @Component
 @Scope("singleton")
@@ -49,6 +51,9 @@ public class AuthenticationApiResource {
 			}
 			authenticatedUserData.setPermissions(permissions);
 			authenticatedUserData.setAuthenticated(true);
+			byte[] base64EncodedAuthenticationKey = Base64.encode(username + ":" + password);
+			authenticatedUserData.setBase64EncodedAuthenticationKey(new String(base64EncodedAuthenticationKey));
+			
 		}
     	
 		return Response.ok().entity(authenticatedUserData).build();
