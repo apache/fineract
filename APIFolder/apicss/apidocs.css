@@ -184,6 +184,10 @@ body {
     width: 235px;
 }
 
+.toc-column3 {
+    width: 200px;
+}
+
 .toc-column1, .toc-column2, .toc-column3, .toc-column4, .toc-column5, .toc-column6 {
     float: left;
 }
