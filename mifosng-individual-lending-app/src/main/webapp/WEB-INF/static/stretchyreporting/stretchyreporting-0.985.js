@@ -3,6 +3,8 @@
 $.stretchyReporting = {};
     
 $.stretchyReporting.initialise  = function(params) {
+					username="mifos";
+					password="password";
 					initialiseReporting(params)
 				};
 
@@ -977,6 +979,7 @@ function getReportData(rptName, inParams, successFunction, isParameterType) {
 
 function getReportDataAuth(rptName, inParams, successFunction, isParameterType) {
 alert("needs fixing up, dont rely on data")
+return
 	var inQueryParameters =  {};
 	for (var i in inParams ) inQueryParameters["R_" + i] = inParams[i];
 	if (rptDB > "") inQueryParameters["R_rptDB"] = rptDB;
@@ -1053,8 +1056,11 @@ function getReportDataNoAuth(rptName, inParams, successFunction, isParameterType
 			contentType: "application/json; charset=utf-8",
 			crossDomain: false,
 			cache: false,
-			beforeSend: function( xhr ) {
+			beforeSend : function(xhr) {
 				xhr.setRequestHeader("Accept", "application/json");
+				var base64 = $.base64Encode(username + ":" + password);
+				console.log("base64: " + base64);
+				xhr.setRequestHeader("Authorization", "Basic " + base64);
 			},
 			success: successFunction,
 			error:function(jqXHR, textStatus, errorThrown){

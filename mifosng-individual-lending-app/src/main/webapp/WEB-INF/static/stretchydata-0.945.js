@@ -4,6 +4,8 @@
 
 	$.stretchyData.displayAllExtraData = function(params) {
 
+		username="mifos";
+		password="password";
 		if (!(params.url)) {
 			alert(doI18N("reportingInitError - url parameter"));
 			return;
@@ -52,23 +54,28 @@
 
 		var extraDataNamesVar = "";
 		for ( var i in data.additionalFieldsSets) {
-			var dsnDivName = generateDsnDivName(displayAllVars.datasetType, i, displayAllVars.datasetTypeDiv);
+			var dsnDivName = generateDsnDivName(displayAllVars.datasetType, i,
+					displayAllVars.datasetTypeDiv);
 			extraDataNamesVar += '<br><span ' + headingClassStr + '><b>'
 					+ doI18N(displayAllVars.headingPrefix)
-					+ doI18N(data.additionalFieldsSets[i].name) + ' - </span></b> ';
+					+ doI18N(data.additionalFieldsSets[i].name)
+					+ ' - </span></b> ';
 
 			extraDataNamesVar += editExtraDataLink(displayAllVars.url,
-					displayAllVars.datasetType, data.additionalFieldsSets[i].name,
+					displayAllVars.datasetType,
+					data.additionalFieldsSets[i].name,
 					displayAllVars.datasetPKValue, dsnDivName);
-			
+
 			extraDataNamesVar += '<div id="' + dsnDivName + '">';
 			extraDataNamesVar += '</div>';
 		}
 		$('#' + displayAllVars.datasetTypeDiv).html(extraDataNamesVar);
 		for ( var i in data.additionalFieldsSets) {
-			var dsnDivName = generateDsnDivName(displayAllVars.datasetType, i, displayAllVars.datasetTypeDiv);
+			var dsnDivName = generateDsnDivName(displayAllVars.datasetType, i,
+					displayAllVars.datasetTypeDiv);
 			viewExtraData(displayAllVars.url, displayAllVars.datasetType,
-					data.additionalFieldsSets[i].name, displayAllVars.datasetPKValue, dsnDivName);
+					data.additionalFieldsSets[i].name,
+					displayAllVars.datasetPKValue, dsnDivName);
 		}
 
 	};
@@ -157,8 +164,9 @@
 
 	function viewExtraData(url, datasetType, datasetName, datasetPKValue,
 			dsnDivName) {
-		var viewExtraDataUrl = url + "api/v1/additionalfields/" + encodeURIComponent(datasetType)
-				+ "/" + encodeURIComponent(datasetName) + "/"
+		var viewExtraDataUrl = url + "api/v1/additionalfields/"
+				+ encodeURIComponent(datasetType) + "/"
+				+ encodeURIComponent(datasetName) + "/"
 				+ encodeURIComponent(datasetPKValue);
 
 		var evalViewExtraDataSuccessFunction = "var viewExtraDataSuccessFunction = function(data, textStatus, jqXHR){  viewExtraDataset(data, '"
@@ -191,7 +199,8 @@
 			datasetName : datasetName,
 			datasetPKValue : datasetPKValue,
 			baseUrl : url,
-			url : url + "api/v1/additionalfields/" + encodeURIComponent(datasetType) + "/"
+			url : url + "api/v1/additionalfields/"
+					+ encodeURIComponent(datasetType) + "/"
 					+ encodeURIComponent(datasetName) + "/"
 					+ encodeURIComponent(datasetPKValue)
 		};
@@ -200,7 +209,8 @@
 	}
 
 	function generateDsnDivName(datasetType, i, uniqueDivid) {
-		return extraDataUnderscore(datasetType) + "_" + i + "_" + extraDataUnderscore(uniqueDivid);
+		return extraDataUnderscore(datasetType) + "_" + i + "_"
+				+ extraDataUnderscore(uniqueDivid);
 	}
 
 	/* start of code to fill data in edit form */
@@ -342,23 +352,22 @@
 		}
 	}
 
-	$.fn.serializeObject = function()
-	{
-	    var o = {};
-	    var a = this.serializeArray();
-	    $.each(a, function() {
-	        if (o[this.name] !== undefined) {
-	            if (!o[this.name].push) {
-	                o[this.name] = [o[this.name]];
-	            }
-	            o[this.name].push(this.value || '');
-	        } else {
-	            o[this.name] = this.value || '';
-	        }
-	    });
-	    return o;
+	$.fn.serializeObject = function() {
+		var o = {};
+		var a = this.serializeArray();
+		$.each(a, function() {
+			if (o[this.name] !== undefined) {
+				if (!o[this.name].push) {
+					o[this.name] = [ o[this.name] ];
+				}
+				o[this.name].push(this.value || '');
+			} else {
+				o[this.name] = this.value || '';
+			}
+		});
+		return o;
 	};
-	
+
 	function extraDataOpenDialog(url) {
 
 		// var saveButton = jQuery.i18n.prop('dialog.button.save');
@@ -373,7 +382,7 @@
 			});
 
 			var form_data = JSON.stringify($('#entityform').serializeObject());
-	    	//console.log(form_data);
+			// console.log(form_data);
 			var jqxhr = $.ajax({
 				url : url,
 				type : 'POST',
@@ -382,7 +391,12 @@
 				// crossDomain : true,
 				dataType : 'json',
 				data : form_data,
-				cache: false,
+				cache : false,
+				beforeSend : function(xhr) {
+					var base64 = $.base64Encode(username + ":" + password);
+					console.log("base64: " + base64);
+					xhr.setRequestHeader("Authorization", "Basic " + base64);
+				},
 				success : function(data, textStatus, jqXHR) {
 					currentEditPopup.dialogDiv.dialog("close");
 					viewExtraData(currentEditPopup.baseUrl,
@@ -450,11 +464,16 @@
 			cache : false,
 			type : 'GET',
 			contentType : "application/json; charset=utf-8",
-			cache: false,
+			cache : false,
+			beforeSend : function(xhr) {
+				var base64 = $.base64Encode(username + ":" + password);
+				console.log("base64: " + base64);
+				xhr.setRequestHeader("Authorization", "Basic " + base64);
+			},
 			// dataType : 'jsonp',
 			// crossDomain : true,
 			dataType : 'json',
-			//crossDomain : false,
+			// crossDomain : false,
 			success : successFunction,
 			error : errorFunction
 		});
