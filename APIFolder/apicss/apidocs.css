@@ -47,7 +47,7 @@ body {
     height: 40px;
     min-width: 745px;
     left: 0; right: 0; top: 0;
-    padding-left: 560px;
+    padding-left: 580px;
     background: #eee;
     background: -webkit-gradient(linear, left top, left bottom, from(#f8f8f8), to(#dadada));
     background: -moz-linear-gradient(top, #f8f8f8, #dadada);
@@ -106,7 +106,7 @@ body {
     position: absolute;
     top: 41px;
 
-    width: 500px;
+    width: 900px;
     background-color: rgba(249, 249, 249, 0.99);
     border: 1px solid rgb(187, 187, 187);
     border-top: 0;
@@ -119,7 +119,7 @@ body {
 }
 
 #toc-menu {
-    right: -245px;
+    right: -480px;
 }
 
 #language-menu {
@@ -177,11 +177,11 @@ body {
 }
 
 .toc-column1 {
-    width: 180px;
+    width: 200px;
 }
 
 .toc-column2 {
-    width: 205px;
+    width: 235px;
 }
 
 .toc-column1, .toc-column2, .toc-column3, .toc-column4, .toc-column5, .toc-column6 {

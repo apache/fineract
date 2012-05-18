@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html><head>
 <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <link rel="stylesheet" href="apicss/apidocs.css" type="text/css" media="screen" title="API Docs" charset="utf-8">
+    <link rel="stylesheet" href="apicss/apidocs.css" type="text/css" media="screen" title="Mifos X API Docs" charset="utf-8">
     <title>Mifos X API Documentation</title>
 
 
@@ -10,39 +10,108 @@
       <div id="flybar">
 
   <div class="flybar-nav">
-      <h2 id="toc-menu-button" class="flybar-button">Navigation</h2>
+      <h2 id="toc-menu-button" class="flybar-button">API Navigation</h2>
       <div id="toc-menu" class="flybar-menu">
 
           <div class="toc-column1">
-
               <div class="toc-section">
-                  <h3>Full API Docs</h3>
-                  <h4>General</h4>
                   <ul>
                       <li><a href="#top">Mifos X API Documentation</a></li>
-                      <li><a href="#authentication">Authentication</a></li>
+                      <li><a href="#authenticationoverview">Authentication Overview</a></li>
                       <li><a href="#errors">Errors</a></li>
                   </ul>
               </div>
 
+              <div class="toc-section">
+                  <h4><a href="#clients">Clients</a></h4>
+                  <ul>
+                      <li><a href="#clientslist">List Clients</a></li>
+                      <li><a href="#clientsretrieve">Retrieve a Client</a></li>
+                      <li><a href="#clientstemplate">Retrieve Client Details Template</a></li>
+                      <li><a href="#clientscreate">Create a Client</a></li>
+                      <li><a href="#clientsloansummary">Retrieve a Client's Loan Account Summary</a></li>
+                      <li><a href="#clientsnotes">Retrieve a Client's Notes</a></li>
+                      <li><a href="#clientsaddnote">Add a Client Note</a></li>
+                      <li><a href="#clientsretrievenote">Retrieve a Client Note</a></li>
+                      <li><a href="#clientsupdatenote">Update a Client Note</a></li>
+No update a client?
+                  </ul>
+              </div>
           </div>
+
           <div class="toc-column2">
+              <div class="toc-section">
+                  <h4><a href="#loans">Loans</a></h4>
+                  <ul>
+                      <li><a href="#loansretrieve">Retrieve a Loan</a></li>
+                      <li><a href="#loanstemplate">Retrieve Loan Details Template</a></li>
+                      <li><a href="#loanscreate">Create a New Loan</a></li>
+                      <li><a href="#loanssubmit">Submit a Loan Application</a></li>
+                      <li><a href="#loansapprove">Approve a Loan</a></li>
+                      <li><a href="#loansdisburse">Disburse a Loan</a></li>
+                      <li><a href="#loansreject">Reject a Loan</a></li>
+                      <li><a href="#loanswithdraw">Client Withdraws a Loan</a></li>
+                      <li><a href="#loansdelete">Delete a Loan</a></li>
+                      <li><a href="#loansundoapproval">Undo Loan Approval</a></li>
+                      <li><a href="#loansundodisbursal">Undo Loan Disbursal</a></li>
+                      <li><a href="#loansrepaymenttemplate">Retrieve Loan Repayment Template</a></li>
+                      <li><a href="#loanswaivertemplate">Retrieve Loan Waiver Template</a></li>
+                      <li><a href="#loansrepayment">Make a Repayment</a></li>
+                      <li><a href="#loanswaiver">Loan Waiver</a></li>
+                      <li><a href="#loansrepaymentretrieve">Retrieve a Repayment's Details</a></li>
+                      <li><a href="#loansrepaymentadjust">Adjust a Repayment</a></li>
+is there a retrieve waive and an Adjust Waiver as well?
+                  </ul>
+              </div>
+          </div>
+
+
+          <div class="toc-column3">
 
               <div class="toc-section">
-                  <h3>&nbsp;</h3>
+                  <h4><a href="#offices">Offices</a></h4>
+                  <ul>
+                      <li><a href="#officeslist">List Offices</a></li>
+                      <li><a href="#officesretrieve">Retrieve an Office</a></li>
+                      <li><a href="#officestemplate">Retrieve Office Details Template</a></li>
+                      <li><a href="#officescreate">Create an Office</a></li>
+                      <li><a href="#officesupdate">Update an Office</a></li>
+                  </ul>
+              </div>
+
+              <div class="toc-section">
+                  <h4><a href="#loanproducts">Loan Products</a></h4>
+                  <ul>
+                      <li><a href="#officeslist">List Offices</a></li>
+                      <li><a href="#officesretrieve">Retrieve an Office</a></li>
+                      <li><a href="#officestemplate">Retrieve Office Details Template</a></li>
+                      <li><a href="#officescreate">Create an Office</a></li>
+                      <li><a href="#officesupdate">Update an Office</a></li>
+                  </ul>
+              </div>
+              <div class="toc-section">
+                  <h4><a href="#additionalfields">Additional Fields</a></h4>
+                  <ul>
+                      <li><a href="#listadditionalfields">List Additional Fields Sets</a></li>
+                      <li><a href="#retrieveadditionalfields">Retrieve Additional Fields</a></li>
+                      <li><a href="#updateadditionalfields">Update Additional Fields</a></li>
+                  </ul>
+              </div>
+
+              <div class="toc-section">
                   <h4><a href="#reports">Reports</a></h4>
                   <ul>
                       <li><a href="#listreports">List Reports</a></li>
                       <li><a href="#runreport">Run a Report</a></li>
                   </ul>
               </div>
+
               <div class="toc-section">
-                  <h3>&nbsp;</h3>
-                  <h4><a href="#additionalfields">Additional Fields</a></h4>
+                  <h4><a href="#x">Dont Know yetauthentication</a></h4>
                   <ul>
-                      <li><a href="#listadditionalfields">List Additional Fields Sets</a></li>
-                      <li><a href="#retrieveadditionalfields">Retrieve Additional Fields</a></li>
-                      <li><a href="#updateadditionalfields">Update Additional Fields</a></li>
+                      <li><a href="#authentication">authentication</a></li>
+                      <li><a href="#useraccounts">useraccounts</a></li>
+
                   </ul>
               </div>
 
@@ -82,33 +151,60 @@
                     <ul>
 
 
+                        <li>/v1/clients</li>
+                        <li>/v1/clients/template</li>
+                        <li>/v1/clients/{clientId}</li>
+                        <li>/v1/clients/{clientId}/loans</li>
+                        <li>/v1/clients/{clientId}/notes</li>
+                        <li>/v1/clients/{clientId}/notes/{noteId}</li>
+
+                        <li>/v1/loans</li>
+                        <li>/v1/loans/template</li>
+                        <li>/v1/loans/{loanId}</li>
+                        <li>/v1/loans/{loanId}/undo</li>
+                        <li>/v1/loans/{loanId}/transactions/template</li>
+                        <li>/v1/loans/{loanId}/transactions</li>
+                        <li>/v1/loans/{loanId}/transactions/{repaymentId}</li>
 
                         <li>/v1/offices</li>
                         <li>/v1/offices/template</li>
-                        <li>/v1/offices/{OFFICEID}</li>
+                        <li>/v1/offices/{officeId}</li>
 
                         <li>/v1/loanproducts</li>
                         <li>/v1/loanproducts/template</li>
-                        <li>/v1/loanproducts/{PRODUCTID}</li>
+                        <li>/v1/loanproducts/{productId}</li>
 
-                        <li>/v1/configurations</li>
                         <li>/v1/configurations/currency</li>
-                    </ul>
 
-                    <ul>
-                        <li>/v1/reports</li>
-                        <li>/v1/reports/{REPORTNAME}</li>
                         <li>/v1/additionalfields</li>
-                        <li>/v1/additionalfields/{datasetType}/{datasetName}/{datasetPKValue}</li>
+                        <li>/v1/additionalfields/{Type}/{Set}/{id}</li>
 
+                        <li>/v1/reports/{reportName}</li>
+
+                        <li>/v1/authentication</li>
+
+                        <li>/v1/useraccounts/current</li>
+                        <li>/v1/useraccounts/current/password</li>
+                        <li>/v1/useraccounts/current/password/template</li>
+
+                        <li>/v1/users</li>
+                        <li>/v1/users/template</li>
+                        <li>/v1/users/{userId}</li>
+
+                        <li>/v1/roles</li>
+                        <li>/v1/roles/template</li>
+                        <li>/v1/roles/{roleId}</li>
+
+                        <li>/v1/permissions</li>
                     </ul>
+
                 </div>
             </div>
 
-            <a id="authentication" name="authentication" class="old-syle-anchor">&nbsp;</a>
+            <a id="authenticationoverview" name="authenticationoverview" class="old-syle-anchor">&nbsp;</a>
             <div class="method-section">
                 <div class="method-description">
-                    <h3>Authentication</h3>
+                    <h3>Authentication Overview</h3>
                     <p>
 		JPW: Keith, this needs to change to whatever is right after authentication has been added.  Don't know if you will go with keys or passwords (I assume passwords)... but can you fix it so we have one user or one user per role that doesn't need a password or always has a password of 'password' so we can let ppl do stuff from the browser and/or REST plugins?  We can talk about this.
 		</p>
@@ -379,7 +475,7 @@ Returns the Set of Additional Fields data for the ID provided.  The ID is the id
  </div>
 
  <div class="method-example">
-  <code class="method-declaration">GET https://thedomainname/v1/additionalfields/{TYPE}/{SET}/{ID}</code>
+  <code class="method-declaration">GET https://thedomainname/v1/additionalfields/{type}/{set}/{id}</code>
   <code class="method-response">{
   "columnHeaders": [
     {
@@ -513,7 +609,7 @@ Updates (or creates) the Set of Additional Fields data for the ID provided.  The
  </div>
 
  <div class="method-example">
-  <code class="method-declaration">POST https://thedomainname/v1/additionalfields/{TYPE}/{SET}/{ID}</code>
+  <code class="method-declaration">POST https://thedomainname/v1/additionalfields/{type}/{set}/{id}</code>
   <code class="method-request">http://localhost:8080/mifosng-provider/api/v1/additionalfields/portfolio_client/Additional Information/2
 
 
@@ -687,7 +783,7 @@ The Mifos X Individual Lending client application uses a JQuery plugin called st
   </div>
 
   <div class="method-example">
-      <code class="method-declaration">GET https://thedomainname/v1/reports/{REPORTNAME}</code>
+      <code class="method-declaration">GET https://thedomainname/v1/reports/{reportName}</code>
       <code class="method-response">{
   "columnHeaders": [
     {
