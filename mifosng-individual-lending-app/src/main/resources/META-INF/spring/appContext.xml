@@ -12,9 +12,11 @@
 		http://www.springframework.org/schema/context 
 		http://www.springframework.org/schema/context/spring-context-3.0.xsd">
 
-	<context:component-scan base-package="org.mifosng.ui, org.mifosng.configuration, org.mifosng.oauth">
+	<context:component-scan base-package="org.mifosng.ui, org.mifosng.configuration">
 		<context:exclude-filter expression="org.springframework.stereotype.Controller" type="annotation" />
 	</context:component-scan>
+
+	<bean id="restTemplate" class="org.springframework.web.client.RestTemplate" />
 
     <import resource="securityContext.xml" />
 </beans>

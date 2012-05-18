@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
  * Responsible for returning the current authenticated user that is currently set in the {@link SecurityContext}.
  */
 @Service
-public class PlatformSecurityContextThroughSpringSecurity implements PlatformSecurityContext {
+public class SpringSecurityPlatformSecurityContext implements PlatformSecurityContext {
 
 	@Override
 	public AppUser authenticatedUser() {

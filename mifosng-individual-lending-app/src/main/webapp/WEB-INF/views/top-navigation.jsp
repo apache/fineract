@@ -51,7 +51,7 @@
 				<li><a href="${accountsettingsUrl}"><spring:message code="link.topnav.account.settings"/></a></li>
 			</ul>
 		</li>
-		<c:url value="/logoutcontroller" var="signOutUrl"/>
+		<c:url value="/signout" var="signOutUrl"/>
 		<li><a href="${signOutUrl}"><spring:message code="link.signout"/></a></li>
 	</ul>
 

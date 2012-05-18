@@ -1,127 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:security="http://www.springframework.org/schema/security"
-	xmlns:oauth="http://www.springframework.org/schema/security/oauth"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans
-          http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-          http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.1.xsd
-		  http://www.springframework.org/schema/security/oauth http://www.springframework.org/schema/security/spring-security-oauth-1.0.xsd">
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:beans="http://www.springframework.org/schema/beans"
+	xsi:schemaLocation="
+   http://www.springframework.org/schema/security 
+   http://www.springframework.org/schema/security/spring-security-3.1.xsd
+   http://www.springframework.org/schema/beans 
+   http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
 
-	<bean id="loginForm" class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">
-	    <!-- force redirect to client applications home page if auth required -->
-        <property name="loginFormUrl" value="/forceOAuth" />
-    </bean>
+	<http security="none" pattern="/logout" />
 
-	<bean id="securityContextPersistenceFilter" class="org.springframework.security.web.context.SecurityContextPersistenceFilter">
-		<property name="securityContextRepository" ref="securityContextRepository" />
-	</bean>
- 
-	<bean id="securityContextRepository" class="org.springframework.security.web.context.HttpSessionSecurityContextRepository" />
-	
-	<bean id="delegateLogoutHandler" class="org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler" />
-	
-	<bean id="logoutFilter" class="org.springframework.security.web.authentication.logout.LogoutFilter">
-	    <constructor-arg value="/logout" />
-	    <constructor-arg>
-	        <list>
-	        	<bean class="org.mifosng.oauth.OAuthLogoutHandler">
-					<constructor-arg ref="delegateLogoutHandler" />
-					<constructor-arg ref="mifosNgInMemoryResourceDetailsService"/>
-					<constructor-arg ref="rememberMeServices"/>
-				</bean>
-	        </list>
-	    </constructor-arg>
-	</bean>
-	
-	<bean id="requestCacheFilter" class="org.springframework.security.web.savedrequest.RequestCacheAwareFilter" />
-	
-	<bean id="servletApiFilter" class="org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter" />
+	<http use-expressions="true" pattern="/**" create-session="always">
+		<intercept-url pattern="/**" access="isFullyAuthenticated()" />
 
-	<bean id="anonymousAuthenticationFilter" class="org.springframework.security.web.authentication.AnonymousAuthenticationFilter" >
-	    <property name="key" value="SomeUniqueKeyForThisApplication" />
-	    <property name="userAttribute" value="anonymousUser,ROLE_ANONYMOUS" />
-	</bean>
-	 
-	<bean id="sessionManagementFilter" class="org.springframework.security.web.session.SessionManagementFilter" >
-	    <constructor-arg ref="securityContextRepository" />
-	</bean>
-	 
-	<bean id="exceptionTranslationFilter" class="org.springframework.security.web.access.ExceptionTranslationFilter">
-	    <property name="authenticationEntryPoint" ref="loginForm" />
-	</bean>
+		<form-login />
+		<logout invalidate-session="true" logout-url="/signout" logout-success-url="/logout" />
+	</http>
 
-	<security:authentication-manager alias="authenticationManager">
-		<security:authentication-provider>
-			<security:user-service>
-				<security:user name="marissa" password="wombat" authorities="ROLE_USER" />
-				<security:user name="sam" password="kangaroo" authorities="ROLE_USER" />
-			</security:user-service>
-		</security:authentication-provider>
-	</security:authentication-manager>
-
-	<bean id="accessDecisionManager" class="org.springframework.security.access.vote.AffirmativeBased">
-	    <property name="decisionVoters">
-	        <list>
-	            <bean class="org.springframework.security.access.vote.RoleVoter"/>
-	            <bean class="org.springframework.security.access.vote.AuthenticatedVoter"/>
-		        <bean class="org.springframework.security.web.access.expression.WebExpressionVoter"/>
-	        </list>
-	    </property>
-	</bean>
-	 
-	<bean id="filterSecurityInterceptor" class="org.springframework.security.web.access.intercept.FilterSecurityInterceptor">
-	    <property name="securityMetadataSource">
-	        <security:filter-security-metadata-source use-expressions="true" id="expressionBasedSecurityMetadata">
-	       		<security:intercept-url pattern="/forceOAuth" access="isAnonymous()" />
-	       		<security:intercept-url pattern="/logout" access="isAnonymous()" />
-	       		<security:intercept-url pattern="/oauth/**" access="isAnonymous()" />
-	            <security:intercept-url pattern="/home" access="isFullyAuthenticated()" />
-	            <security:intercept-url pattern="/exportcsv*" access="isFullyAuthenticated()" />
-	            <security:intercept-url pattern="/**" access="isFullyAuthenticated()" />
-	        </security:filter-security-metadata-source>
-	    </property>
-	    <property name="authenticationManager" ref="authenticationManager" />
-	    <property name="accessDecisionManager" ref="accessDecisionManager" />
-	</bean>
+	<beans:bean id="customAuthenticationProvider" class="org.mifosng.ui.infrastructure.ApiDelegatingAuthenticationProvider" />
 	
-	<bean id="rememberMeServices" class="org.springframework.security.oauth.consumer.rememberme.HttpSessionOAuthRememberMeServices" />
+	<authentication-manager alias="authenticationManager">
+		<authentication-provider ref="customAuthenticationProvider" />
+	</authentication-manager>
 	
-	<bean id="oauthFailureHandler" class="org.springframework.security.web.access.AccessDeniedHandlerImpl">
-		<property name="errorPage" value="/oauth_error" />
-	</bean>
-	
-	<!--  
-	<bean id="mifosNgInMemoryResourceDetailsService" class="org.mifosng.oauth.MifosNgProtectedResourceDetailsService" />
+	<!-- 
+	 <authentication-manager alias="authenticationManager">
+      <authentication-provider>
+         <user-service>
+            <user name="mifos" password="password" authorities="USER_ADMINISTRATION_SUPER_USER_ROLE, ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE, 
+            														PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE, REPORTING_SUPER_USER_ROLE"/>
+            <user name="super1" password="demo" authorities="USER_ADMINISTRATION_SUPER_USER_ROLE, PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE, REPORTING_SUPER_USER_ROLE"/>
+         </user-service>
+      </authentication-provider>
+   </authentication-manager>
 	-->
-	
-	<bean id="resourceDetailsService" class="org.springframework.security.oauth.consumer.client.CoreOAuthConsumerSupport">
-		<property name="protectedResourceDetailsService" ref="mifosNgInMemoryResourceDetailsService" />
-	</bean>
-	
-	<!-- org.springframework.security.oauth.consumer.filter.OAuthConsumerContextFilter -->
-	<bean id="oauthConsumerContextFilter" class="org.mifosng.oauth.CustomOAuthConsumerContextFilter">
-		<property name="rememberMeServices" ref="rememberMeServices" />
-		<property name="OAuthFailureHandler" ref="oauthFailureHandler" />
-		<property name="consumerSupport" ref="resourceDetailsService" />
-	</bean>
-	
-	<bean id="oauthSecurityMetaData" class="org.mifosng.oauth.OAuthConsumerFilterFilterInvocationSecurityMetadataSource" />
-	
-	<!-- org.springframework.security.oauth.consumer.filter.OAuthConsumerProcessingFilter -->
-	<bean id="oauthConsumerProcessingFilter" class="org.springframework.security.oauth.consumer.filter.OAuthConsumerProcessingFilter">
-		<property name="protectedResourceDetailsService" ref="mifosNgInMemoryResourceDetailsService" />
-		<property name="objectDefinitionSource" ref="oauthSecurityMetaData" />
-	</bean>
-	
-	<bean id="filterChainProxy" class="org.springframework.security.web.FilterChainProxy">
-		<constructor-arg>
-			<list>
-				<security:filter-chain pattern="/resources/**" filters="none" />
-				<security:filter-chain pattern="/**" filters="securityContextPersistenceFilter, logoutFilter, requestCacheFilter, servletApiFilter,
-				anonymousAuthenticationFilter, sessionManagementFilter, exceptionTranslationFilter, filterSecurityInterceptor, 
-				oauthConsumerContextFilter, oauthConsumerProcessingFilter" />
-			</list>
-		</constructor-arg>
-	</bean>
-</beans>
+</beans:beans>

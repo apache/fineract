@@ -21,6 +21,8 @@ div.notespacer {margin-top: 5px; margin-bottom: 5px;}
 <script>
 $(document).ready(function() {
 	
+	var username="mifos";
+	var password="password";
 	// these helpers are registered for the jsViews and jsRender functionality to fix bug with display zero!
 	$.views.registerHelpers({
 			
@@ -207,7 +209,7 @@ $(document).ready(function() {
 	};
 	
 	function popupConfirmationDialogAndPost(url, submitType, titleCode, width, height, tabIndex, redirectUrl) {
-		  var dialogDiv = $("<div id='dialog-form'><div id='formerrors'></div>" + jQuery.i18n.prop('text.confirmation.required') + "</div>");
+		    var dialogDiv = $("<div id='dialog-form'><div id='formerrors'></div>" + jQuery.i18n.prop('text.confirmation.required') + "</div>");
 		  
 		  	var confirmButton = jQuery.i18n.prop('dialog.button.confirm');
 			var cancelButton = jQuery.i18n.prop('dialog.button.cancel');
@@ -219,6 +221,11 @@ $(document).ready(function() {
 					  type: submitType,
 					  contentType: 'application/json',
 					  dataType: 'json',
+					  beforeSend: function(xhr) {
+							var base64 = $.base64Encode(username + ":" + password);
+							console.log("base64: " + base64);
+				            xhr.setRequestHeader("Authorization", "Basic " + base64);
+					  },
 					  success: function(data, textStatus, jqXHR) {
 						  dialogDiv.dialog("close");
 						  if (tabIndex > 0) {
@@ -278,6 +285,11 @@ $(document).ready(function() {
 			      dataType: 'json',
 				  cache: false,
 				  data: newFormData,
+				  beforeSend: function(xhr) {
+						var base64 = $.base64Encode(username + ":" + password);
+						console.log("base64: " + base64);
+			            xhr.setRequestHeader("Authorization", "Basic " + base64);
+				  },
 				  success: function(data, textStatus, jqXHR) {
 					  dialogDiv.dialog("close");
 					  $newtabs.tabs('load', tabIndex);
@@ -327,6 +339,11 @@ $(document).ready(function() {
 			contentType: 'application/json',
 			dataType: 'json',
 			cache: false,
+			beforeSend: function(xhr) {
+				var base64 = $.base64Encode(username + ":" + password);
+				console.log("base64: " + base64);
+	            xhr.setRequestHeader("Authorization", "Basic " + base64);
+			},
 			success: function(data, textStatus, jqXHR) {
 				console.log(data);
 				var formHtml = $(templateSelector).render(data);
@@ -356,6 +373,11 @@ $(document).ready(function() {
 						  contentType: 'application/json',
 						  dataType: 'json',
 						  data: newFormData,
+						  beforeSend: function(xhr) {
+								var base64 = $.base64Encode(username + ":" + password);
+								console.log("base64: " + base64);
+					            xhr.setRequestHeader("Authorization", "Basic " + base64);
+						  },
 						  success: saveSuccessFunction,
 						  error: function(jqXHR, textStatus, errorThrown) {
 						    handleXhrError(jqXHR, textStatus, errorThrown, "#formErrorsTemplate", "#formerrors");
@@ -412,6 +434,11 @@ $(document).ready(function() {
 			dataType: 'json',
 			contentType: 'application/json',
 			cache: false,
+			beforeSend: function(xhr) {
+				var base64 = $.base64Encode(username + ":" + password);
+				console.log("base64: " + base64);
+				xhr.setRequestHeader("Authorization", "Basic " + base64);
+			},
 	        error: function(jqXHR, status, errorThrown, index, anchor) {
 	        	handleXhrError(jqXHR, textStatus, errorThrown, "#formErrorsTemplate", "#formerrors");
 	        	
@@ -706,6 +733,11 @@ $(document).ready(function() {
 			  contentType: 'application/json',
 			  dataType: 'json',
 			  cache: false,
+			  beforeSend: function(xhr) {
+					var base64 = $.base64Encode(username + ":" + password);
+					console.log("base64: " + base64);
+					xhr.setRequestHeader("Authorization", "Basic " + base64);
+			  },
 			  success: function(data, textStatus, jqXHR) {
 				  console.log(data);
 				  var tableHtml = $("#clientAccountSummariesTemplate").render(data);
@@ -737,6 +769,11 @@ $(document).ready(function() {
 			  contentType: 'application/json',
 			  dataType: 'json',
 			  cache: false,
+			  beforeSend: function(xhr) {
+					var base64 = $.base64Encode(username + ":" + password);
+					console.log("base64: " + base64);
+					xhr.setRequestHeader("Authorization", "Basic " + base64);
+			  },
 			  success: function(data, textStatus, jqXHR) {	
 				  console.log(data);
 				  

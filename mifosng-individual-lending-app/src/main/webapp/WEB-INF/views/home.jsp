@@ -206,6 +206,11 @@ $(document).ready(function() {
 			contentType: 'application/json',
 			dataType: 'json',
 			cache: false,
+			beforeSend: function(xhr) {
+				var base64 = $.base64Encode(username + ":" + password);
+				console.log("base64: " + base64);
+	            xhr.setRequestHeader("Authorization", "Basic " + base64);
+			},
 			success: function(data, textStatus, jqXHR) {
 				console.log(data);
 				var formHtml = $(templateSelector).render(data);
@@ -278,13 +283,21 @@ $(document).ready(function() {
 		});
 	}
 	
+	var username = "mifos";
+	var password = "password";
+	
 	$("#tabs").tabs({
 		"ajaxOptions": {
 			type: 'GET',
 			dataType: 'json',
 			contentType: 'application/json',
 			cache: false,
-	        error: function( xhr, status, index, anchor) {
+			beforeSend: function(xhr) {
+				var base64 = $.base64Encode(username + ":" + password);
+				console.log("base64: " + base64);
+	            xhr.setRequestHeader("Authorization", "Basic " + base64);
+			},
+	        error: function(xhr, status, index, anchor) {
 	            $(anchor.hash).html("error occured while ajax loading.");
 	        },
 	        success: function(data, status, xhr) {

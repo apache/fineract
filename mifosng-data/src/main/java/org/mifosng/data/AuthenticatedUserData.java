@@ -9,6 +9,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class AuthenticatedUserData {
 
 	private String username;
+	private boolean authenticated = false;
 	private Collection<String> permissions = new ArrayList<String>();
 
 	protected AuthenticatedUserData() {
@@ -33,5 +34,13 @@ public class AuthenticatedUserData {
 
 	public void setUsername(String username) {
 		this.username = username;
+	}
+
+	public boolean isAuthenticated() {
+		return authenticated;
+	}
+
+	public void setAuthenticated(boolean authenticated) {
+		this.authenticated = authenticated;
 	}
 }
