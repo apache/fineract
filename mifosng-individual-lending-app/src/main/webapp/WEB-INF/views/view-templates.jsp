@@ -370,7 +370,7 @@
 	<span class="longrowlabel"><spring:message code="label.client.account.pending.approval.loans"/> ({{=$ctx.number(pendingApprovalLoanCount)}}):</span>
 	<span class="rowvalue">
 	{{#each pendingApprovalLoans}}
-		<span class="loanaccount"><a href="http://localhost:8080/mifosng-provider/api/v1/loans/{{=id}}" id="loan{{=id}}" class="openloanaccount" title="{{=loanProductName}}: &#35;{{=id}}">{{=loanProductName}}: &#35;{{=id}}</a></span>
+		<span class="loanaccount"><a href="${baseApiUrl}loans/{{=id}}" id="loan{{=id}}" class="openloanaccount" title="{{=loanProductName}}: &#35;{{=id}}">{{=loanProductName}}: &#35;{{=id}}</a></span>
 	{{/each}}
 	</span>
 </div>
@@ -381,7 +381,7 @@
 	<span class="longrowlabel"><spring:message code="label.client.account.pending.disbursal.loans"/> ({{=$ctx.number(awaitingDisbursalLoanCount)}}):</span>
 	<span class="rowvalue">
 	{{#each awaitingDisbursalLoans}}
-		<span class="loanaccount"><a href="http://localhost:8080/mifosng-provider/api/v1/loans/{{=id}}" id="loan{{=id}}" class="openloanaccount" title="{{=loanProductName}}: &#35;{{=id}}">{{=loanProductName}}: &#35;{{=id}}</a></span>
+		<span class="loanaccount"><a href="${baseApiUrl}loans/{{=id}}" id="loan{{=id}}" class="openloanaccount" title="{{=loanProductName}}: &#35;{{=id}}">{{=loanProductName}}: &#35;{{=id}}</a></span>
 	{{/each}}
 	</span>
 </div>
@@ -392,7 +392,7 @@
 	<span class="longrowlabel"><spring:message code="label.client.account.active.loans"/> ({{=$ctx.number(activeLoanCount)}}):</span>
 	<span class="rowvalue">
 	{{#each openLoans}}
-		<span class="loanaccount"><a href="http://localhost:8080/mifosng-provider/api/v1/loans/{{=id}}" id="loan{{=id}}" class="openloanaccount" title="{{=loanProductName}}: &#35;{{=id}}">{{=loanProductName}}: &#35;{{=id}}</a></span>
+		<span class="loanaccount"><a href="${baseApiUrl}loans/{{=id}}" id="loan{{=id}}" class="openloanaccount" title="{{=loanProductName}}: &#35;{{=id}}">{{=loanProductName}}: &#35;{{=id}}</a></span>
 	{{/each}}
 	</span>
 </div>
@@ -403,7 +403,7 @@
 	<div class="longrowlabel"><spring:message code="label.client.account.closed.loans"/> ({{=$ctx.number(closedLoanCount)}}):</div>
 	<div class="rowvalue">
 	{{#each closedLoans}}
-		<span class="loanaccount"><a href="http://localhost:8080/mifosng-provider/api/v1/loans/{{=id}}" id="loan{{=id}}" class="openloanaccount" title="{{=loanProductName}}: &#35;{{=id}}">{{=loanProductName}}: &#35;{{=id}}</a></span>
+		<span class="loanaccount"><a href="${baseApiUrl}loans/{{=id}}" id="loan{{=id}}" class="openloanaccount" title="{{=loanProductName}}: &#35;{{=id}}">{{=loanProductName}}: &#35;{{=id}}</a></span>
 	{{/each}}
 	</div>
 </div>

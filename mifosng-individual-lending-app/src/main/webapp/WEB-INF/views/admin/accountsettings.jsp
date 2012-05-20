@@ -22,6 +22,7 @@ $(document).ready(function() {
 	
 	// basic auth details
 	var base64 = "${basicAuthKey}";
+	var baseApiUrl = "${baseApiUrl}";
 	
 	// these helpers are registered for the jsViews and jsRender functionality to fix bug with display zero!
 	$.views.registerHelpers({
@@ -312,8 +313,8 @@ $(document).ready(function() {
 				$("#settings").html(tableHtml);
 				
 				$('#changepassword').click(function(e) {
-					var getUrl = 'http://localhost:8080/mifosng-provider/api/v1/useraccounts/current/password/template';
-					var putUrl = 'http://localhost:8080/mifosng-provider/api/v1/useraccounts/current/password';
+					var getUrl = baseApiUrl + 'useraccounts/current/password/template';
+					var putUrl = baseApiUrl + 'useraccounts/current/password';
 					var templateSelector = "#changePasswordFormTemplate";
 					var width = 600; 
 					var height = 350;
@@ -329,7 +330,7 @@ $(document).ready(function() {
 				});
 				
 				$('#changedetails').click(function(e) {
-					var getAndPutUrl = 'http://localhost:8080/mifosng-provider/api/v1/useraccounts/current';
+					var getAndPutUrl = baseApiUrl + 'useraccounts/current';
 					var templateSelector = "#userSettingsFormTemplate";
 					var width = 600; 
 					var height = 350;
@@ -361,7 +362,7 @@ $(document).ready(function() {
 		<div id="content">
 			<div id="tabs">
 				<ul>
-					<li><a href="http://localhost:8080/mifosng-provider/api/v1/useraccounts/current" title="settings"><spring:message code="tab.settings"/></a></li>
+					<li><a href="${baseApiUrl}useraccounts/current" title="settings"><spring:message code="tab.settings"/></a></li>
 				</ul>
 				<div id="settings">
 				</div>

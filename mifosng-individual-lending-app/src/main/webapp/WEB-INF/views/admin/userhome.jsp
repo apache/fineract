@@ -19,6 +19,7 @@ $(document).ready(function() {
 
 	// basic auth details
 	var base64 = "${basicAuthKey}";
+	var baseApiUrl = "${baseApiUrl}";
 	
 	// 
 	$.views.registerHelpers({
@@ -346,14 +347,14 @@ $(document).ready(function() {
 	}
 	
 	$('#listusers').click(function(e) {
-		var listUrl = "http://localhost:8080/mifosng-provider/api/v1/users";
+		var listUrl = baseApiUrl + "users";
 		refreshUsersView();		
 	    e.preventDefault();
 	});
 	
 	$('#adduser').click(function(e) {
-		var url = 'http://localhost:8080/mifosng-provider/api/v1/users/template';
-		var postUrl = "http://localhost:8080/mifosng-provider/api/v1/users";
+		var url = baseApiUrl + 'template';
+		var postUrl = baseApiUrl + "users";
 		var templateSelector = "#userFormTemplate";
 		var width = 1000; 
 		var height = 550;
@@ -368,14 +369,14 @@ $(document).ready(function() {
 	});
 	
 	$('#listroles').click(function(e) {
-		var listUrl = "http://localhost:8080/mifosng-provider/api/v1/roles";
+		var listUrl = baseApiUrl + "roles";
 		refreshRolesView();		
 	    e.preventDefault();
 	});
 	
 	$('#addrole').click(function(e) {
-		var url = 'http://localhost:8080/mifosng-provider/api/v1/roles/template';
-		var postUrl = "http://localhost:8080/mifosng-provider/api/v1/roles";
+		var url = baseApiUrl +'template';
+		var postUrl = baseApiUrl + "roles";
 		var templateSelector = "#roleFormTemplate";
 		var width = 1000; 
 		var height = 550;
@@ -397,7 +398,7 @@ $(document).ready(function() {
 	
 	function refreshUsersView() {
 		
-		var listUrl = 'http://localhost:8080/mifosng-provider/api/v1/users';
+		var listUrl = baseApiUrl + 'users';
 		var templateSelector = "#usersListTemplate";
 		var displayAreaDivSelector = "#contentplaceholder";
 		
@@ -419,8 +420,8 @@ $(document).ready(function() {
 				$("a.edit").click( function(e) {
 					var linkId = this.id;
 					var entityId = linkId.replace("edit", "");
-					var getUrl = 'http://localhost:8080/mifosng-provider/api/v1/users/' + entityId;
-					var putUrl = 'http://localhost:8080/mifosng-provider/api/v1/users/' + entityId;
+					var getUrl = baseApiUrl + 'users/' + entityId;
+					var putUrl = baseApiUrl + 'users/' + entityId;
 					
 					var templateSelector = "#userFormTemplate";
 					var width = 1000; 
@@ -438,7 +439,7 @@ $(document).ready(function() {
 				$("a.delete").click( function(e) {
 					var linkId = this.id;
 					var entityId = linkId.replace("delete", "");
-					var url = 'http://localhost:8080/mifosng-provider/api/v1/users/' + entityId;
+					var url = baseApiUrl + 'users/' + entityId;
 					showNotAvailableDialog('dialog.title.functionality.not.available');
 					
 					e.preventDefault();
@@ -464,7 +465,7 @@ $(document).ready(function() {
 	}
 	
 	function refreshRolesView() {
-		var listUrl = 'http://localhost:8080/mifosng-provider/api/v1/roles';
+		var listUrl = baseApiUrl + 'roles';
 		var templateSelector = "#roleListTemplate";
 		var displayAreaDivSelector = "#contentplaceholder";
 		
@@ -486,8 +487,8 @@ $(document).ready(function() {
 				$("a.edit").click( function(e) {
 					var linkId = this.id;
 					var entityId = linkId.replace("edit", "");
-					var getUrl = 'http://localhost:8080/mifosng-provider/api/v1/roles/' + entityId;
-					var putUrl = 'http://localhost:8080/mifosng-provider/api/v1/roles/' + entityId;
+					var getUrl = baseApiUrl + 'roles/' + entityId;
+					var putUrl = baseApiUrl + 'roles/' + entityId;
 					
 					var templateSelector = "#roleFormTemplate";
 					var width = 1000; 
@@ -505,7 +506,7 @@ $(document).ready(function() {
 				$("a.delete").click( function(e) {
 					var linkId = this.id;
 					var entityId = linkId.replace("delete", "");
-					var url = 'http://localhost:8080/mifosng-provider/api/v1/roles/' + entityId;
+					var url = baseApiUrl + 'roles/' + entityId;
 					showNotAvailableDialog('dialog.title.functionality.not.available');
 					
 					e.preventDefault();
@@ -531,7 +532,7 @@ $(document).ready(function() {
 	}
 	
 	function refreshPermissionsView() {
-		var listUrl = 'http://localhost:8080/mifosng-provider/api/v1/permissions';
+		var listUrl = baseApiUrl + 'permissions';
 		var templateSelector = "#permissionListTemplate";
 		var displayAreaDivSelector = "#contentplaceholder";
 		

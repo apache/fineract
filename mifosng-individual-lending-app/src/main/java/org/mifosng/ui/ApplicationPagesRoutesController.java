@@ -1,9 +1,6 @@
 package org.mifosng.ui;
 
-import org.mifosng.configuration.ApplicationConfigurationService;
-import org.mifosng.configuration.OAuthProviderDetails;
 import org.mifosng.ui.infrastructure.BasicAuthUserDetails;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -21,13 +18,6 @@ import org.springframework.web.servlet.ModelAndView;
 @Controller
 public class ApplicationPagesRoutesController {
 
-	private final ApplicationConfigurationService applicationConfigurationService;
-
-	@Autowired
-	public ApplicationPagesRoutesController(ApplicationConfigurationService applicationConfigurationService) {
-		this.applicationConfigurationService = applicationConfigurationService;
-	}
-	
     @ExceptionHandler(AccessDeniedException.class)
 	public String accessDeniedException() {
 		return "unAuthorizedAction";
@@ -106,14 +96,10 @@ public class ApplicationPagesRoutesController {
 	@RequestMapping(value = "/reporting/flexireport", method = RequestMethod.GET)
 	public String viewFlexibleReportingPage(final Model model, final Authentication authentication) {
 
-		OAuthProviderDetails oauthDetails = this.applicationConfigurationService.retrieveOAuthProviderDetails();
-		
 		BasicAuthUserDetails userDetails = (BasicAuthUserDetails) authentication.getPrincipal();
     	model.addAttribute("basicAuthKey", userDetails.getBasicAuthenticationKey());
     	model.addAttribute("baseApiUrl", userDetails.getFullApiUrl());
     	
-		model.addAttribute("baseUrl", oauthDetails.getProviderBaseUrl());
-		
 		return "reports/flexireport";
 	}
 }

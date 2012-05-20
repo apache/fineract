@@ -17,7 +17,8 @@
 	
 	// basic auth details
 	var base64 = "${basicAuthKey}";
-		
+	var baseApiUrl = "${baseApiUrl}";
+	
 	// these helpers are registered for the jsViews and jsRender functionality to fix bug with display zero!
 	$.views.registerHelpers({
 			
@@ -298,8 +299,8 @@
 	});
 	
 	$('#addloanproduct').click(function(e) {
-		var getUrl = 'http://localhost:8080/mifosng-provider/api/v1/loanproducts/template';
-		var postUrl = 'http://localhost:8080/mifosng-provider/api/v1/loanproducts';
+		var getUrl = baseApiUrl + 'loanproducts/template';
+		var postUrl = baseApiUrl + 'loanproducts';
 		var templateSelector = "#productFormTemplate";
 		var width = 800; 
 		var height = 550;
@@ -315,7 +316,7 @@
 		
 	function refreshLoanProductsView() {
 		var jqxhr = $.ajax({
-			  url: 'http://localhost:8080/mifosng-provider/api/v1/loanproducts', //'${allLoanProductsUrl}',
+			  url: baseApiUrl + 'loanproducts',
 			  type: 'GET',
 			  contentType: 'application/json',
 			  dataType: 'json',
@@ -335,8 +336,8 @@
 				$("a.editproduct").click( function(e) {
 					var linkId = this.id;
 					var productId = linkId.replace("editproduct", "");
-					var getUrl = 'http://localhost:8080/mifosng-provider/api/v1/loanproducts/' + productId;
-					var putUrl = 'http://localhost:8080/mifosng-provider/api/v1/loanproducts/' + productId;
+					var getUrl = baseApiUrl + 'loanproducts/' + productId;
+					var putUrl = baseApiUrl + 'loanproducts/' + productId;
 					
 					var templateSelector = "#productFormTemplate";
 					var width = 800; 
@@ -394,8 +395,8 @@
 	});
 	
 	$('#addoffice').click(function(e) {
-		var getUrl = 'http://localhost:8080/mifosng-provider/api/v1/offices/template';
-		var postUrl = 'http://localhost:8080/mifosng-provider/api/v1/offices';
+		var getUrl = baseApiUrl + 'offices/template';
+		var postUrl = baseApiUrl + 'offices';
 		var templateSelector = "#officeFormTemplate";
 		var width = 600; 
 		var height = 400;
@@ -411,7 +412,7 @@
 		
 	function refreshOfficesView() {
 		var jqxhr = $.ajax({
-			  url: 'http://localhost:8080/mifosng-provider/api/v1/offices', // '${allOfficesUrl}',
+			  url: baseApiUrl + 'offices',
 			  type: 'GET',
 			  contentType: 'application/json',
 			  dataType: 'json',
@@ -435,8 +436,8 @@
 				$("a.edit").click( function(e) {
 					var linkId = this.id;
 					var entityId = linkId.replace("edit", "");
-					var getUrl = 'http://localhost:8080/mifosng-provider/api/v1/offices/' + entityId;
-					var putUrl = 'http://localhost:8080/mifosng-provider/api/v1/offices/' + entityId;
+					var getUrl = baseApiUrl + 'offices/' + entityId;
+					var putUrl = baseApiUrl + 'offices/' + entityId;
 					
 					var templateSelector = "#officeFormTemplate";
 					var width = 600; 
@@ -482,8 +483,8 @@
 		
     // currency configuration
 	$('#editconfiguration').click(function(e) {
-		var getUrl = 'http://localhost:8080/mifosng-provider/api/v1/configurations/currency';
-		var putUrl = 'http://localhost:8080/mifosng-provider/api/v1/configurations/currency';
+		var getUrl = baseApiUrl + 'configurations/currency';
+		var putUrl = baseApiUrl + 'configurations/currency';
 		var templateSelector = "#configurationFormTemplate";
 		var width = 900; 
 		var height = 400;

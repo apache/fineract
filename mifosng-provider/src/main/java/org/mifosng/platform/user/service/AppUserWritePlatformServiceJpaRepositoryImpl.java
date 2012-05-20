@@ -177,7 +177,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 		AppUser userToUpdate = this.appUserRepository.findOne(currentUser.getId());
 		
 		PlatformUser dummyPlatformUser = new BasicPasswordEncodablePlatformUser(
-				((AppUser) userToUpdate).getId(),
+				userToUpdate.getId(),
 				userToUpdate.getUsername(), command.getPassword());
 
 		String newPasswordEncoded = this.platformPasswordEncoder.encode(dummyPlatformUser);

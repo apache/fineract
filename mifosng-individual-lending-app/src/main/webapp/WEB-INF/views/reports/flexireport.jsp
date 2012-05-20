@@ -64,7 +64,7 @@
 <div id=myOutput></div>
 
 
-<script language="javascript" type="text/javascript">
+<script type="text/javascript">
 
 function selectNewDecimals(selectedVal) {
 	if (!(selectedVal == "")) jQuery.stretchyReporting.changeDecimals(selectedVal);
@@ -91,8 +91,9 @@ function selectNewThousandsSep(selectedVal) {
 
 var reportingParams = {
 	//rptDB: "mifosngproviderJ",
-	RESTUrl: "${baseUrl}api/v1/reports",
-	pentahoUrl: "${baseUrl}pentahoreport",
+	RESTUrl: "${baseApiUrl}reports",
+	basicAuthKey: "${basicAuthKey}",
+	pentahoUrl: "${baseApiUrl}pentahoreport",
 	bundleDir: "${resValue}/stretchyreporting/mifosngbundle/",
 	reportsListDiv: "myListOfReports",
 	runReportDiv: "myRunReportButton",

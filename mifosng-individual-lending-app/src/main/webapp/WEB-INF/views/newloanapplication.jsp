@@ -15,6 +15,7 @@ $(document).ready(function() {
 
 	// basic auth details
 	var base64 = "${basicAuthKey}";
+	var baseApiUrl = "${baseApiUrl}";
 	
 	$.views.registerHelpers({
 		
@@ -197,7 +198,7 @@ $(document).ready(function() {
 	
 	function repopulateFullForm(clientId, productId) {
 		
-		var url = 'http://localhost:8080/mifosng-provider/api/v1/loans/template?clientId=' + clientId + '&productId=' + productId;
+		var url = baseApiUrl + 'loans/template?clientId=' + clientId + '&productId=' + productId;
 		
 		var jqxhr = $.ajax({
 			url: url,
@@ -298,7 +299,7 @@ $(document).ready(function() {
 	}
 	
 	function calculateLoanSchedule() {
-		var calculateLoanScheduleurl = 'http://localhost:8080/mifosng-provider/api/v1/loans?command=calculateLoanSchedule';
+		var calculateLoanScheduleurl = baseApiUrl + 'loans?command=calculateLoanSchedule';
 		
 		var newFormData = JSON.stringify($('#entityform').serializeObject());
     	console.log(newFormData);
@@ -328,7 +329,7 @@ $(document).ready(function() {
 	}
 	
 	function submitLoanApplication() {
-		var submitLoanApplicationUrl = 'http://localhost:8080/mifosng-provider/api/v1/loans';
+		var submitLoanApplicationUrl = baseApiUrl + 'loans';
 		
 		var newFormData = JSON.stringify($('#entityform').serializeObject());
     	console.log(newFormData);
@@ -361,7 +362,7 @@ $(document).ready(function() {
 
 	// on page load
 	var jqxhr = $.ajax({
-		url: 'http://localhost:8080/mifosng-provider/api/v1/loans/template?clientId=${clientId}',
+		url: baseApiUrl + 'loans/template?clientId=${clientId}',
 		type: 'GET',
 		contentType: 'application/json',
 		dataType: 'json',

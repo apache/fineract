@@ -10,14 +10,12 @@ public class BasicAuthUserDetails implements UserDetails {
 
 	private final User user;
 	private final String basicAuthenticationKey;
-	private final String apiBaseUrl;
-	private final String apiVersion;
+	private final String fullApiUrl;
 
-	public BasicAuthUserDetails(User user, String basicAuthenticationKey, String apiBaseUrl, String apiVersion) {
+	public BasicAuthUserDetails(User user, String basicAuthenticationKey, String fullApiUrl) {
 		this.user = user;
 		this.basicAuthenticationKey = basicAuthenticationKey;
-		this.apiBaseUrl = apiBaseUrl;
-		this.apiVersion = apiVersion;
+		this.fullApiUrl = fullApiUrl;
 	}
 
 	@Override
@@ -59,15 +57,7 @@ public class BasicAuthUserDetails implements UserDetails {
 		return basicAuthenticationKey;
 	}
 
-	public String getApiBaseUrl() {
-		return apiBaseUrl;
-	}
-
-	public String getApiVersion() {
-		return apiVersion;
-	}
-	
 	public String getFullApiUrl() {
-		return this.apiBaseUrl + apiVersion;
+		return this.fullApiUrl;
 	}
 }

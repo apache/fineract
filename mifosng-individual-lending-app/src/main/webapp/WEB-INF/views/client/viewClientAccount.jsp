@@ -840,7 +840,7 @@ $(document).ready(function() {
 		
 			<div id="newtabs">
 				<ul>
-					<li><a href="http://localhost:8080/mifosng-provider/api/v1/clients/${clientId}" title="clienttab" class="topleveltab"><span id="clienttabname">Loading...</span></a></li>
+					<li><a href="${baseApiUrl}clients/${clientId}" title="clienttab" class="topleveltab"><span id="clienttabname">Loading...</span></a></li>
 				</ul>
 				<div id="clienttab">
 				</div>

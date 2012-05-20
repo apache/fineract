@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import org.mifosng.configuration.ApplicationConfigurationService;
-import org.mifosng.configuration.OAuthProviderDetails;
 import org.mifosng.data.AuthenticatedUserData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -46,10 +45,9 @@ public class ApiDelegatingAuthenticationProvider extends AbstractUserDetailsAuth
 		
 		String password = (String) authentication.getCredentials();
 		
-		OAuthProviderDetails oauthDetails = this.applicationConfigurationService.retrieveOAuthProviderDetails();
-		String apiVersion = "api/v1/";
+		String platformApiUrl = this.applicationConfigurationService.retrievePlatformApiUrl();
 		String authUrlExtension = "authentication?username=" + username + "&password=" + password;
-		StringBuilder authenticationApiUrl = new StringBuilder(oauthDetails.getProviderBaseUrl()).append(apiVersion).append(authUrlExtension);
+		StringBuilder authenticationApiUrl = new StringBuilder(platformApiUrl).append(authUrlExtension);
 		
 		URI restUri = URI.create(authenticationApiUrl.toString());
 		ResponseEntity<AuthenticatedUserData> s = this.restTemplate.postForEntity(restUri, authRequest(), AuthenticatedUserData.class);
@@ -63,7 +61,7 @@ public class ApiDelegatingAuthenticationProvider extends AbstractUserDetailsAuth
 				authorities.add(new SimpleGrantedAuthority(permission));
 			}
 			User user = new User(authenticatedUserData.getUsername(), "[not needed]", authorities);
-			userDetails = new BasicAuthUserDetails(user, authenticatedUserData.getBase64EncodedAuthenticationKey(), oauthDetails.getProviderBaseUrl(), apiVersion);
+			userDetails = new BasicAuthUserDetails(user, authenticatedUserData.getBase64EncodedAuthenticationKey(), platformApiUrl);
 		}
 		
 		return userDetails;

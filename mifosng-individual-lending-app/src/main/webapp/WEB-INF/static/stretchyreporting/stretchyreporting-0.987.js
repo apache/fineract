@@ -3,8 +3,6 @@
 $.stretchyReporting = {};
     
 $.stretchyReporting.initialise  = function(params) {
-					username="mifos";
-					password="password";
 					initialiseReporting(params)
 				};
 
@@ -81,6 +79,9 @@ function initialiseReporting(params) {
 
  	if (params.RESTUrl) RESTUrl = params.RESTUrl
 	else RESTUrl = "";
+ 	
+ 	if (params.basicAuthKey) basicAuthKey = params.basicAuthKey
+	else basicAuthKey = "";
 
  	if (params.pentahoUrl) pentahoUrl = params.pentahoUrl
 	else pentahoUrl = "";
@@ -984,21 +985,21 @@ return
 	for (var i in inParams ) inQueryParameters["R_" + i] = inParams[i];
 	if (rptDB > "") inQueryParameters["R_rptDB"] = rptDB;
 	
-	OAuthSimple().reset();
-	var OAuthProcess = (new OAuthSimple()).sign({
-		path : RESTUrl,
-		parameters : inQueryParameters,
-		signatures : {
-			'consumer_key' : apiKey,
-			'shared_secret' : sharedSecret,
-			'access_token' : accessToken,
-			'access_secret' : tokenSecret
-		}
-	});
+//	OAuthSimple().reset();
+//	var OAuthProcess = (new OAuthSimple()).sign({
+//		path : RESTUrl,
+//		parameters : inQueryParameters,
+//		signatures : {
+//			'consumer_key' : apiKey,
+//			'shared_secret' : sharedSecret,
+//			'access_token' : accessToken,
+//			'access_secret' : tokenSecret
+//		}
+//	});
 
 	showMsgE("getReportData IS Auth: " + inQueryParameters);
 	$.ajax({
-		url: OAuthProcess.signed_url,
+		url: RESTUrl,
 		type:'GET',
 		dataType: 'json',
 		contentType: "application/json; charset=utf-8",
@@ -1006,6 +1007,8 @@ return
 		cache: false,
 		beforeSend: function( xhr ) {
 			xhr.setRequestHeader("Accept", "application/json");
+			console.log("base64: " + basicAuthKey);
+			xhr.setRequestHeader("Authorization", "Basic " + basicAuthKey);
 		},
 		success: successFunction,
 		error:function(jqXHR, textStatus, errorThrown){
@@ -1058,9 +1061,8 @@ function getReportDataNoAuth(rptName, inParams, successFunction, isParameterType
 			cache: false,
 			beforeSend : function(xhr) {
 				xhr.setRequestHeader("Accept", "application/json");
-				var base64 = $.base64Encode(username + ":" + password);
-				console.log("base64: " + base64);
-				xhr.setRequestHeader("Authorization", "Basic " + base64);
+				console.log("base64: " + basicAuthKey);
+				xhr.setRequestHeader("Authorization", "Basic " + basicAuthKey);
 			},
 			success: successFunction,
 			error:function(jqXHR, textStatus, errorThrown){

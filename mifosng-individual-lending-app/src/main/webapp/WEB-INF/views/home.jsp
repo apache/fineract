@@ -343,7 +343,7 @@ $(document).ready(function() {
 			</sec:authorize>
 			<div id="tabs">
 				<ul>
-					<li><a href="http://localhost:8080/mifosng-provider/api/v1/clients" title="searchtab"><spring:message code="tab.search"/></a></li>
+					<li><a href="${baseApiUrl}clients" title="searchtab"><spring:message code="tab.search"/></a></li>
 				</ul>
 				<div id="searchtab"></div>
 			</div>
