@@ -76,8 +76,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
 		LoanProduct loanproduct = new LoanProduct(currentUser.getOrganisation(), command.getName(), command.getDescription(), 
 				currency, command.getPrincipal(), 
 				command.getInterestRatePerPeriod(), interestFrequencyType, annualInterestRate, interestMethod, interestCalculationPeriodMethod,
-				command.getRepaymentEvery(), repaymentFrequencyType, command.getNumberOfRepayments(), amortizationMethod, command.getInArrearsToleranceAmount(),
-				command.isFlexibleRepaymentSchedule(), command.isInterestRebateAllowed());
+				command.getRepaymentEvery(), repaymentFrequencyType, command.getNumberOfRepayments(), amortizationMethod, command.getInArrearsToleranceAmount());
 		 
 		this.loanProductRepository.save(loanproduct);
 

@@ -121,14 +121,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		final PeriodFrequencyType repaymentFrequencyType = PeriodFrequencyType.fromInt(command.getRepaymentFrequency());
 		final Integer defaultNumberOfInstallments = command.getNumberOfRepayments();
 		final AmortizationMethod amortizationMethod = AmortizationMethod.fromInt(command.getAmortizationMethod());
-		final boolean flexibleRepaymentSchedule = command.isFlexibleRepaymentSchedule();
-		final boolean interestRebateAllowed = command.isInterestRebateAllowed();
 		
 		LoanProductRelatedDetail loanRepaymentScheduleDetail = new LoanProductRelatedDetail(currency,
 				command.getPrincipal(), defaultNominalInterestRatePerPeriod, interestPeriodFrequencyType, defaultAnnualNominalInterestRate, 
 				interestMethod, interestCalculationPeriodMethod,
-				repayEvery, repaymentFrequencyType, defaultNumberOfInstallments, amortizationMethod, command.getInArrearsToleranceAmount(),
-				flexibleRepaymentSchedule, interestRebateAllowed);
+				repayEvery, repaymentFrequencyType, defaultNumberOfInstallments, amortizationMethod, command.getInArrearsToleranceAmount());
 
 		LoanSchedule loanSchedule = command.getLoanSchedule();
 		List<ScheduledLoanInstallment> loanRepaymentSchedule = loanSchedule.getScheduledLoanInstallments();

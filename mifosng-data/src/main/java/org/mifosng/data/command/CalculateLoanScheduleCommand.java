@@ -23,8 +23,6 @@ public class CalculateLoanScheduleCommand {
 	private Integer amortizationMethod;
 	private Integer interestMethod;
 	private Integer interestCalculationPeriodMethod;
-	private boolean flexibleRepaymentSchedule = false;
-	private boolean interestRebateAllowed = false;
 	
 	private LocalDate expectedDisbursementDate;
 	private LocalDate repaymentsStartingFromDate;
@@ -52,8 +50,6 @@ public class CalculateLoanScheduleCommand {
 		this.repaymentFrequency = repaymentFrequency;
 		this.numberOfRepayments = numberOfRepayments;
 		this.amortizationMethod = amortizationMethod;
-		this.flexibleRepaymentSchedule = false;
-		this.interestRebateAllowed = false;
 		
 		this.expectedDisbursementDate = expectedDisbursementDate;
 		this.repaymentsStartingFromDate = repaymentsStartingFromDate;
@@ -155,22 +151,6 @@ public class CalculateLoanScheduleCommand {
 	public void setInterestCalculationPeriodMethod(
 			Integer interestCalculationPeriodMethod) {
 		this.interestCalculationPeriodMethod = interestCalculationPeriodMethod;
-	}
-
-	public boolean isFlexibleRepaymentSchedule() {
-		return flexibleRepaymentSchedule;
-	}
-
-	public void setFlexibleRepaymentSchedule(boolean flexibleRepaymentSchedule) {
-		this.flexibleRepaymentSchedule = flexibleRepaymentSchedule;
-	}
-
-	public boolean isInterestRebateAllowed() {
-		return interestRebateAllowed;
-	}
-
-	public void setInterestRebateAllowed(boolean interestRebateAllowed) {
-		this.interestRebateAllowed = interestRebateAllowed;
 	}
 
 	public LocalDate getExpectedDisbursementDate() {

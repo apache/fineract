@@ -59,8 +59,6 @@ public class CalculationPlatformServiceImpl implements
 		final PeriodFrequencyType repaymentFrequencyType = PeriodFrequencyType.fromInt(command.getRepaymentFrequency());
 		final Integer defaultNumberOfInstallments = command.getNumberOfRepayments();
 		final AmortizationMethod amortizationMethod = AmortizationMethod.fromInt(command.getAmortizationMethod());
-		final boolean flexibleRepaymentSchedule = command.isFlexibleRepaymentSchedule();
-		final boolean interestRebateAllowed = command.isInterestRebateAllowed();
 		
 		final BigDecimal defaultAnnualNominalInterestRate = this.aprCalculator.calculateFrom(interestPeriodFrequencyType, defaultNominalInterestRatePerPeriod);
 		
@@ -73,7 +71,7 @@ public class CalculationPlatformServiceImpl implements
 				defaultNominalInterestRatePerPeriod, interestPeriodFrequencyType, defaultAnnualNominalInterestRate, 
 				interestMethod, interestCalculationPeriodMethod,
 				repayEvery, repaymentFrequencyType, defaultNumberOfInstallments, amortizationMethod, 
-				inArrearsTolerance, flexibleRepaymentSchedule, interestRebateAllowed);
+				inArrearsTolerance);
 		
 		LoanScheduleGenerator loanScheduleGenerator = this.loanScheduleFactory.create(interestMethod);
 

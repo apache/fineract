@@ -53,9 +53,7 @@ public class LoanProduct extends AbstractAuditableCustom<AppUser, Long> {
             final BigDecimal defaultNominalInterestRatePerPeriod, final PeriodFrequencyType interestPeriodFrequencyType, final BigDecimal defaultAnnualNominalInterestRate, 
             final InterestMethod interestMethod, final InterestCalculationPeriodMethod interestCalculationPeriodMethod, 
             final Integer repayEvery, final PeriodFrequencyType repaymentFrequencyType, final Integer defaultNumberOfInstallments, final AmortizationMethod amortizationMethod,
-            final BigDecimal inArrearsTolerance,
-			final boolean flexibleRepaymentSchedule,
-			final boolean interestRebateAllowed) {
+            final BigDecimal inArrearsTolerance) {
         this.organisation = organisation;
         this.name = name.trim();
         if (StringUtils.isNotBlank(description)) {
@@ -67,7 +65,7 @@ public class LoanProduct extends AbstractAuditableCustom<AppUser, Long> {
         this.loanProductRelatedDetail = new LoanProductRelatedDetail(currency,
         		defaultPrincipal, defaultNominalInterestRatePerPeriod, interestPeriodFrequencyType, defaultAnnualNominalInterestRate, 
         		interestMethod, interestCalculationPeriodMethod,
-				repayEvery, repaymentFrequencyType, defaultNumberOfInstallments, amortizationMethod, inArrearsTolerance, flexibleRepaymentSchedule, interestRebateAllowed);
+				repayEvery, repaymentFrequencyType, defaultNumberOfInstallments, amortizationMethod, inArrearsTolerance);
     }
 
     public Organisation getOrganisation() {

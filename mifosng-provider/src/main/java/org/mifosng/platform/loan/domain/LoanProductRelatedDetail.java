@@ -95,9 +95,7 @@ public class LoanProductRelatedDetail implements
 			final PeriodFrequencyType repaymentFrequencyType,
 			final Integer defaultNumberOfRepayments,
 			final AmortizationMethod amortizationMethod,
-			final BigDecimal inArrearsTolerance,
-			final boolean flexibleRepaymentSchedule,
-			final boolean interestRebateAllowed) {
+			final BigDecimal inArrearsTolerance) {
 		this.currency = currency;
 		this.principal = defaultPrincipal;
 		this.nominalInterestRatePerPeriod = defaultNominalInterestRatePerPeriod;
@@ -110,8 +108,8 @@ public class LoanProductRelatedDetail implements
 		this.numberOfRepayments = defaultNumberOfRepayments;
 		this.amortizationMethod = amortizationMethod;
 		this.inArrearsTolerance = inArrearsTolerance;
-		this.flexibleRepaymentSchedule = flexibleRepaymentSchedule;
-		this.interestRebateAllowed = interestRebateAllowed;
+		this.flexibleRepaymentSchedule = false;
+		this.interestRebateAllowed = false;
 	}
 	
 	public MonetaryCurrency getCurrency() {
