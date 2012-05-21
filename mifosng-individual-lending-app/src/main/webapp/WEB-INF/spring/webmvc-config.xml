@@ -50,8 +50,8 @@
 
 	<mvc:resources location="/WEB-INF/static/" mapping="/resources/**" cache-period="31556926"/>
 
+	<mvc:view-controller path="/login" view-name="login"/>
 	<mvc:view-controller path="/logout" view-name="logout"/>
-	<mvc:view-controller path="/oauth_error" view-name="oauth_error"/>
 	
 	<!-- Resolves view names to protected .jsp resources within the /WEB-INF/views directory -->
 	<bean id="jspViewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">

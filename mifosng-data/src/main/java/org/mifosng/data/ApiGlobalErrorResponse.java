@@ -47,7 +47,7 @@ public class ApiGlobalErrorResponse {
 		
 		ApiGlobalErrorResponse globalErrorResponse = new ApiGlobalErrorResponse();
 		globalErrorResponse.setHttpStatusCode("401");
-		globalErrorResponse.setDeveloperMessage("No authentication details were passed in api request.");
+		globalErrorResponse.setDeveloperMessage("Invalid authentication details were passed in api request.");
 		globalErrorResponse.setDeveloperDocLink("https://github.com/keithwoodlock/mifosx/wiki/HTTP-API-Error-codes");
 		globalErrorResponse.setUserMessageGlobalisationCode("error.msg.not.authenticated");
 		globalErrorResponse.setDefaultUserMessage("Unauthenticated. Please login.");

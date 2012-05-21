@@ -9,7 +9,9 @@ import org.mifosng.data.AuthenticatedUserData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.AbstractUserDetailsAuthenticationProvider;
 import org.springframework.security.core.AuthenticationException;
@@ -17,6 +19,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -43,28 +46,36 @@ public class ApiDelegatingAuthenticationProvider extends AbstractUserDetailsAuth
 	@Override
 	protected UserDetails retrieveUser(String username, UsernamePasswordAuthenticationToken authentication) throws AuthenticationException {
 		
-		String password = (String) authentication.getCredentials();
-		
-		String platformApiUrl = this.applicationConfigurationService.retrievePlatformApiUrl();
-		String authUrlExtension = "authentication?username=" + username + "&password=" + password;
-		StringBuilder authenticationApiUrl = new StringBuilder(platformApiUrl).append(authUrlExtension);
-		
-		URI restUri = URI.create(authenticationApiUrl.toString());
-		ResponseEntity<AuthenticatedUserData> s = this.restTemplate.postForEntity(restUri, authRequest(), AuthenticatedUserData.class);
-		
-		UserDetails userDetails = null;
-		AuthenticatedUserData authenticatedUserData = s.getBody();
-		if (authenticatedUserData.isAuthenticated()) {
+		try {
+			String password = (String) authentication.getCredentials();
 			
-			Collection<SimpleGrantedAuthority> authorities = new ArrayList<SimpleGrantedAuthority>();
-			for (String permission : authenticatedUserData.getPermissions()) {
-				authorities.add(new SimpleGrantedAuthority(permission));
+			String platformApiUrl = this.applicationConfigurationService.retrievePlatformApiUrl();
+			String authUrlExtension = "authentication?username=" + username + "&password=" + password;
+			StringBuilder authenticationApiUrl = new StringBuilder(platformApiUrl).append(authUrlExtension);
+			
+			URI restUri = URI.create(authenticationApiUrl.toString());
+			ResponseEntity<AuthenticatedUserData> s = this.restTemplate.postForEntity(restUri, authRequest(), AuthenticatedUserData.class);
+			
+			UserDetails userDetails = null;
+			AuthenticatedUserData authenticatedUserData = s.getBody();
+			if (authenticatedUserData.isAuthenticated()) {
+				
+				Collection<SimpleGrantedAuthority> authorities = new ArrayList<SimpleGrantedAuthority>();
+				for (String permission : authenticatedUserData.getPermissions()) {
+					authorities.add(new SimpleGrantedAuthority(permission));
+				}
+				User user = new User(authenticatedUserData.getUsername(), "[not needed]", authorities);
+				userDetails = new BasicAuthUserDetails(user, authenticatedUserData.getBase64EncodedAuthenticationKey(), platformApiUrl);
 			}
-			User user = new User(authenticatedUserData.getUsername(), "[not needed]", authorities);
-			userDetails = new BasicAuthUserDetails(user, authenticatedUserData.getBase64EncodedAuthenticationKey(), platformApiUrl);
+			
+			return userDetails;
+		} catch (HttpClientErrorException clientErrorException) {
+			if (clientErrorException.getStatusCode().equals(HttpStatus.UNAUTHORIZED)) {
+				throw new BadCredentialsException(messages.getMessage("AbstractUserDetailsAuthenticationProvider.badCredentials", "Bad credentials"));
+			}
+			
+			throw clientErrorException;
 		}
-		
-		return userDetails;
 	}
 	
 	private HttpEntity<Object> authRequest() {

@@ -7,11 +7,13 @@
    http://www.springframework.org/schema/beans 
    http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
 
+    <http security="none" pattern="/login" />
 	<http security="none" pattern="/logout" />
 
 	<http use-expressions="true" pattern="/**" create-session="always">
 		<intercept-url pattern="/**" access="isFullyAuthenticated()" />
 
+		<!-- login-page="/login" -->
 		<form-login />
 		<logout invalidate-session="true" logout-url="/signout" logout-success-url="/logout" />
 	</http>
