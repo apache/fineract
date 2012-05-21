@@ -128,7 +128,10 @@
                     <div class="toc-section">
                         <h4><a href="#useraccounts">User Accounts</a></h4>
                         <ul>
-                        <li><a href="#tbd">tbd</a></li>
+                        <li><a href="#useraccount_details_retrieve">Retrieve current user details</a></li>
+                        <li><a href="#useraccount_details_update">Update current user details</a></li>
+                        <li><a href="#useraccount_password_retrieve">Retrieve change password template</a></li>
+                        <li><a href="#useraccount_password_update">Update current users password</a></li>
                         </ul>
                     </div>
                     <div class="toc-section">
@@ -1031,7 +1034,139 @@ Request Body:
         </div>
 <!-- end of loan products api docs -->    
     
-    
+<!-- start of configurations api docs -->
+	<a id="configs" name="configs" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+		<div class="method-description">
+		    <h3>Configuration</h3>
+		    <p>Application related configuration like being able to select what currencies are permitted for use within the MFI.</p>
+		</div>
+	</div>
+	
+	<a id="configs_currencyretrieve" name="configs_currencyretrieve" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>Retrieve currency configuration settings</h4>
+	        <p>Returns the list of selectedCurrencies that are allowed within the MFI and the list of currencies that are currently not selected.</p>
+	        <p>Example Request: 
+	        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/configurations/currency">https://localhost:8443/mifosng-provider/api/v1/configurations/currency</a>
+	        </p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://thedomainname/api/v1/configurations/currency</code>
+<code class="method-response">
+{
+  "selectedCurrencyOptions": [
+    {
+      "code": "KES",
+      "name": "Kenyan Shilling",
+      "decimalPlaces": 2,
+      "displaySymbol": "KSh",
+      "nameCode": "currency.KES",
+      "displayLabel": "Kenyan Shilling (KSh)"
+    },
+    {
+      "code": "BND",
+      "name": "Brunei Dollar",
+      "decimalPlaces": 2,
+      "displaySymbol": "BND",
+      "nameCode": "currency.BND",
+      "displayLabel": "Brunei Dollar (BND)"
+    },
+    {
+      "code": "LBP",
+      "name": "Lebanese Pound",
+      "decimalPlaces": 2,
+      "displaySymbol": "L£",
+      "nameCode": "currency.LBP",
+      "displayLabel": "Lebanese Pound (L£)"
+    },
+    {
+      "code": "GHC",
+      "name": "Ghana Cedi",
+      "decimalPlaces": 2,
+      "displaySymbol": "GHC",
+      "nameCode": "currency.GHC",
+      "displayLabel": "Ghana Cedi (GHC)"
+    },
+    {
+      "code": "USD",
+      "name": "US Dollar",
+      "decimalPlaces": 2,
+      "displaySymbol": "$",
+      "nameCode": "currency.USD",
+      "displayLabel": "US Dollar ($)"
+    },
+    {
+      "code": "XOF",
+      "name": "CFA Franc BCEAO",
+      "decimalPlaces": 0,
+      "displaySymbol": "CFA",
+      "nameCode": "currency.XOF",
+      "displayLabel": "CFA Franc BCEAO (CFA)"
+    }
+  ],
+  "currencyOptions": [
+    {
+      "code": "AED",
+      "name": "UAE Dirham",
+      "decimalPlaces": 2,
+      "displaySymbol": null,
+      "nameCode": "currency.AED",
+      "displayLabel": "UAE Dirham [AED]"
+    },
+    {
+      "code": "AFN",
+      "name": "Afghanistan Afghani",
+      "decimalPlaces": 2,
+      "displaySymbol": null,
+      "nameCode": "currency.AFN",
+      "displayLabel": "Afghanistan Afghani [AFN]"
+    },
+    ...
+    ...
+    {
+      "code": "ZMK",
+      "name": "Zambian Kwacha",
+      "decimalPlaces": 2,
+      "displaySymbol": null,
+      "nameCode": "currency.ZMK",
+      "displayLabel": "Zambian Kwacha [ZMK]"
+    },
+    {
+      "code": "ZWD",
+      "name": "Zimbabwe Dollar",
+      "decimalPlaces": 2,
+      "displaySymbol": null,
+      "nameCode": "currency.ZWD",
+      "displayLabel": "Zimbabwe Dollar [ZWD]"
+    }
+  ]
+}
+</code>
+	    </div>
+	</div>
+        
+    <a id="configs_currencyupdate" name="configs_currencyupdate" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>Update currency configuration settings</h4>
+	        <p>Update list of selectedCurrencies that are allowed within the MFI and the list of currencies that are currently not selected.</p>
+	        <p>Example Request: 
+	        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/configurations/currency">https://localhost:8443/mifosng-provider/api/v1/configurations/currency</a>
+	        </p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">PUT https://thedomainname/api/v1/configurations/currency</code>
+<code class="method-response">
+{ 
+"selectedItems": ["USD", "GBP"]
+}
+</code>
+	    </div>
+	</div>    
+
+<!-- start of additionalfield api docs -->    
         <a id="additionalfields" name="additionalfields" class="old-syle-anchor">&nbsp;</a>
         <div class="method-section">
             <div class="method-description">
@@ -1255,12 +1390,6 @@ Request Body:
             </div>
         </div>
     
-    
-    
-    
-    
-    
-    
         <a id="reports" name="reports" class="old-syle-anchor">&nbsp;</a>
         <div class="method-section">
             <div class="method-description">
@@ -1278,9 +1407,7 @@ Request Body:
                 </p>
             </div>
         </div>
-    
-    
-    
+
         <a id="reports_list" name="reports_list" class="old-syle-anchor">&nbsp;</a>
         <div class="method-section">
             <div class="method-description">
@@ -1449,8 +1576,254 @@ Request Body:
             </div>
         </div>
     
+    <!-- start of authentication api docs -->
+	<a id="authentication" name="authentication" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+		<div class="method-description">
+		    <h3>Authentication</h3>
+		    <p>An API capability to allowed client applications verify authentication details.</p>
+		</div>
+	</div>
     
+    <a id="authentication_permissions" name="authentication_permissions" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>Verify authentication</h4>
+	        <p>Verifies that the credentials provided successfully authenticate and returns the set of permissions allowed by that user.</p>
+	        <p>Example Request: 
+	        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/authentication?username=super1&password=demo">https://localhost:8443/mifosng-provider/api/v1/authentication?username=super1&password=demo</a>
+	        </p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://thedomainname/api/v1/authentication?username=super1&password=demo</code>
+<code class="method-request">POST https://localhost:8443/mifosng-provider/api/v1/authentication?username=super1&password=demo
+Content-Type: application/xml
+</code>
+<code class="method-response">
+</code>
+	    </div>
+	</div>    
     
+    <!-- start of useraccounts api docs -->
+	<a id="useraccounts" name="useraccounts" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+		<div class="method-description">
+		    <h3>User account details</h3>
+		    <p>An API capability to allowed client applications expose functionality for users to update their account details and password.</p>
+		</div>
+	</div>
+    
+    <a id="useraccount_details_retrieve" name="useraccount_details_retrieve" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>Retrieve current users account details</h4>
+	        <p>Will return user account details.</p>
+	        <p>Example Request: 
+	        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/useraccounts/current">https://localhost:8443/mifosng-provider/api/v1/useraccounts/current</a>
+	        </p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://thedomainname/api/v1/useraccounts/current</code>
+<code class="method-request">GET https://localhost:8443/mifosng-provider/api/v1/useraccounts/current</code>
+<code class="method-response">
+{
+  "id": 1,
+  "orgId": 1,
+  "officeId": 1,
+  "officeName": "Demo MFI Head Office",
+  "username": "mifos",
+  "firstname": "App hello",
+  "lastname": "Administrator",
+  "email": "demomfi@mifos.org",
+  "allowedOffices": [
+    {
+      "id": 1,
+      "name": "Demo MFI Head Office",
+      "externalId": "1",
+      "openingDate": "2009-01-01",
+      "hierarchy": ".",
+      "parentName": null,
+      "parentId": 0,
+      "allowedParents": []
+    },
+    {
+      "id": 2,
+      "name": "sub branch 1",
+      "externalId": "2",
+      "openingDate": "2012-01-02",
+      "hierarchy": ".2.",
+      "parentName": "Demo MFI Head Office",
+      "parentId": 1,
+      "allowedParents": []
+    }
+  ],
+  "availableRoles": [
+    {
+      "id": 2,
+      "orgId": 1,
+      "name": "Field officer",
+      "description": "A field officer role allows the user to add client and loans and view reports but nothing else.",
+      "availablePermissions": [],
+      "selectedPermissions": []
+    },
+    {
+      "id": 3,
+      "orgId": 1,
+      "name": "Data Entry (Portfolio only)",
+      "description": "This role allows a user full permissions around client and loan functionality but nothing else.",
+      "availablePermissions": [],
+      "selectedPermissions": []
+    },
+    {
+      "id": 4,
+      "orgId": 1,
+      "name": "Credit Committe Member",
+      "description": "This role allows a user to approve reject or withdraw loans (with reporting).",
+      "availablePermissions": [],
+      "selectedPermissions": []
+    },
+    {
+      "id": 5,
+      "orgId": 1,
+      "name": "Manager",
+      "description": "This role allows a manager to do anything related to portfolio management and also view all reports.",
+      "availablePermissions": [],
+      "selectedPermissions": []
+    }
+  ],
+  "selectedRoles": [
+    {
+      "id": 1,
+      "orgId": 1,
+      "name": "Super user",
+      "description": "This role provides all application permissions.",
+      "availablePermissions": [],
+      "selectedPermissions": [
+        {
+          "id": 1,
+          "orgId": 1,
+          "name": "User administration ALL",
+          "description": "An application user will have permission to execute all tasks related to user administration.",
+          "code": "USER_ADMINISTRATION_SUPER_USER_ROLE",
+          "groupType": 1
+        },
+        {
+          "id": 4,
+          "orgId": 1,
+          "name": "Reporting ALL",
+          "description": "An application user will have permission to execute and view all reports.",
+          "code": "REPORTING_SUPER_USER_ROLE",
+          "groupType": 4
+        },
+        {
+          "id": 3,
+          "orgId": 1,
+          "name": "Portfolio management ALL",
+          "description": "An application user will have permission to execute all tasks related to portfolio management.",
+          "code": "PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE",
+          "groupType": 3
+        },
+        {
+          "id": 2,
+          "orgId": 1,
+          "name": "Organisation adminsitration ALL",
+          "description": "An application user will have permission to execute all tasks related to organisation administration.",
+          "code": "ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE",
+          "groupType": 2
+        }
+      ]
+    }
+  ]
+}
+</code>
+	    </div>
+	</div>
+   
+    <a id="useraccount_details_update" name="useraccount_details_update" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>Update current users account details</h4>
+	        <p>Will update user account details.</p>
+	    </div>
+	    <div class="method-example">
+			<code class="method-declaration">PUT https://thedomainname/api/v1/useraccounts/current</code>
+<code class="method-request">PUT https://localhost:8443/mifosng-provider/api/v1/useraccounts/current
+Content-Type: application/json
+Request body:
+{  
+  "officeId": 1,
+  "username": "mifos",
+  "firstname": "App hello",
+  "lastname": "Administrator",
+  "email": "demomfi@mifos.org",
+  "selectedItems": ["1"]
+}
+</code>
+<code class="method-response">
+{
+  "entityId": 1
+}
+</code>
+	    </div>
+	</div>
+   
+   
+    <a id="useraccount_password_retrieve" name="useraccount_password_retrieve" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>Retrieve change password template details</h4>
+	        <p>Will details for change of password screen.</p>
+	        <p>Example Request: 
+	        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/useraccounts/current/password/template">https://localhost:8443/mifosng-provider/api/v1/useraccounts/current/password/template</a>
+	        </p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://thedomainname/api/v1/useraccounts/current/password/template</code>
+<code class="method-request">GET https://localhost:8443/mifosng-provider/api/v1/useraccounts/current/password/template</code>
+<code class="method-response">
+{
+  "password": null,
+  "passwordrepeat": null
+}
+</code>
+	    </div>
+	</div>
+   
+    <a id="useraccount_password_update" name="useraccount_password_update" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>Update current users password</h4>
+	        <p>Will update users password.</p>
+	    </div>
+	    <div class="method-example">
+			<code class="method-declaration">PUT https://thedomainname/api/v1/useraccounts/current/password</code>
+<code class="method-request">PUT https://localhost:8443/mifosng-provider/api/v1/useraccounts/current/password
+Content-Type: application/json
+Request body:
+{
+  "password": "demo",
+  "passwordrepeat": "demo"
+}
+</code>
+<code class="method-response">
+{
+  "entityId": 1
+}
+</code>
+	    </div>
+	</div>
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
     
     </div> <!-- main-content-wrapper -->
 </div>
