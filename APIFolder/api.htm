@@ -419,67 +419,173 @@
         <div class="method-section">
             <div class="method-description">
                 <h3>Offices</h3>
-                <p>The Office and Branch hierarchy.
-                </p>
+                <p>Offices are used to model an MFIs structure. A hierarchial representation of offices is supported. 
+                There will always be at least one office (which represents the MFI or an MFIs head office). 
+                All subsequent offices added must have a parent office.</p>
             </div>
         </div>
                 
+        <!-- 
         <div class="method-section">
             <div class="method-description">
                 <h5>Attributes</h5>
                 <dl class="argument-list">
-                    <dt>
-                    id
-                    </dt>
-                    <dd>              
-                    string <span>jpw ipsum as an example of showing the (at least important) columns</span>
-                    </dd>
-                    <dt>
-                    amount
-                    </dt>
-                    <dd>blah <span></span>
-                    </dd>
-                    <dd>blah</dd>
-                    <dt>
-                    card
-                    </dt>
+                    <dt>id</dt><dd>long <span>platform identifier of the office.</span></dd>
+                    <dt>name</dt><dd>string <span>name of the office.</span></dd>
+                    <dt>name</dt>
+                        <dd>blah <span></span></dd>
+                        <dd>blah</dd>
+                    <dt>card</dt>
                 </dl>
             </div>
         </div>
-    
+        -->
         <a id="offices_list" name="offices_list" class="old-syle-anchor">&nbsp;</a>
         <div class="method-section">
             <div class="method-description">
-                <h4>List Offices (and Branches)</h4>
+                <h4>List Offices</h4>
                 <p>Example Request: 
-                <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/offices">http://localhost:8080/mifosng-provider/api/v1/offices</a>
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/offices">https://localhost:8443/mifosng-provider/api/v1/offices</a>
                 </p>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://thedomainname/api/v1/offices</code>
-                <code class="method-response">    to be done
-                </code>
+<code class="method-response">
+{
+  "offices": [
+    {
+      "id": 1,
+      "name": "Demo MFI Head Office",
+      "externalId": "1",
+      "openingDate": "2009-01-01",
+      "hierarchy": ".",
+      "parentName": null,
+      "parentId": 0,
+      "allowedParents": []
+    },
+    {
+      "id": 2,
+      "name": "sub branch 1",
+      "externalId": "2",
+      "openingDate": "2012-01-02",
+      "hierarchy": ".2.",
+      "parentName": "Demo MFI Head Office",
+      "parentId": 1,
+      "allowedParents": []
+    },
+    {
+      "id": 3,
+      "name": "sub branch 2",
+      "externalId": "3",
+      "openingDate": "2012-03-01",
+      "hierarchy": ".3.",
+      "parentName": "Demo MFI Head Office",
+      "parentId": 1,
+      "allowedParents": []
+    }
+  ]
+}
+</code>
             </div>
         </div>
-    
-    
+
         <a id="offices_template" name="offices_template" class="old-syle-anchor">&nbsp;</a>
         <div class="method-section">
             <div class="method-description">
                 <h4>Retrieve Office Details Template</h4>
-                <p>Returns a template that contains the office fields and allowed value lists.  This helps build a maintenance User Interface.
+                <p>Returns a template that contains the office fields and allowed value lists. This is a convienence when building user intereface screens for client applications.
                 </p>
                 <p>Example Request: 
-                <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/offices/template">http://localhost:8080/mifosng-provider/api/v1/offices/template</a>
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/offices/template">
+                https://localhost:8443/mifosng-provider/api/v1/offices/template
+                </a>
                 </p>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://thedomainname/api/v1/offices/template</code>
-                <code class="method-response"> to be done
-            </code>
+<code class="method-response">
+{
+  "id": null,
+  "name": null,
+  "externalId": null,
+  "openingDate": "2012-05-21",
+  "hierarchy": null,
+  "parentName": null,
+  "parentId": null,
+  "allowedParents": [
+    {
+      "id": 1,
+      "name": "Demo MFI Head Office",
+      "externalId": "1",
+      "openingDate": "2009-01-01",
+      "hierarchy": ".",
+      "parentName": null,
+      "parentId": 0,
+      "allowedParents": []
+    },
+    {
+      "id": 2,
+      "name": "sub branch 1",
+      "externalId": "2",
+      "openingDate": "2012-01-02",
+      "hierarchy": ".2.",
+      "parentName": "Demo MFI Head Office",
+      "parentId": 1,
+      "allowedParents": []
+    },
+    {
+      "id": 3,
+      "name": "sub branch 2",
+      "externalId": "3",
+      "openingDate": "2012-03-01",
+      "hierarchy": ".3.",
+      "parentName": "Demo MFI Head Office",
+      "parentId": 1,
+      "allowedParents": []
+    },
+    {
+      "id": 4,
+      "name": "sub branch 3",
+      "externalId": null,
+      "openingDate": "2012-04-17",
+      "hierarchy": ".4.",
+      "parentName": "Demo MFI Head Office",
+      "parentId": 1,
+      "allowedParents": []
+    }
+  ]
+}
+</code>
             </div>
         </div>
-    
+
+        <a id="offices_retrieve" name="offices_retrieve" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>Retrieve Office</h4>
+                <p>Returns an office details if it exists.</p>
+                <p>Example Request: 
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/offices/1">
+                https://localhost:8443/mifosng-provider/api/v1/offices/1
+                </a>
+                </p>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">GET https://thedomainname/api/v1/offices/1</code>
+<code class="method-response">
+{
+  "id": 1,
+  "name": "Demo MFI Head Office",
+  "externalId": "1",
+  "openingDate": "2009-01-01",
+  "hierarchy": ".",
+  "parentName": null,
+  "parentId": 0,
+  "allowedParents": []
+}
+</code>
+            </div>
+        </div>
     
         <a id="loanproducts_retrieve" name="loanproducts_retrieve" class="old-syle-anchor">&nbsp;</a>
         <div class="method-section">
