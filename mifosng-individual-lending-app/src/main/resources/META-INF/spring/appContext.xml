@@ -16,7 +16,5 @@
 		<context:exclude-filter expression="org.springframework.stereotype.Controller" type="annotation" />
 	</context:component-scan>
 
-	<bean id="restTemplate" class="org.springframework.web.client.RestTemplate" />
-
     <import resource="securityContext.xml" />
 </beans>

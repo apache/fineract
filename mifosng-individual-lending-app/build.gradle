@@ -7,7 +7,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'bmuschko:gradle-tomcat-plugin:0.9.1'
+        classpath 'bmuschko:gradle-tomcat-plugin:0.9.2'
     }
 }
 
@@ -53,7 +53,7 @@ configurations {
 
 dependencies {
 
-     def tomcatVersion = '7.0.26'
+     def tomcatVersion = '7.0.27'
 	    tomcat "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}",
 	           "org.apache.tomcat.embed:tomcat-embed-logging-juli:${tomcatVersion}"
 	    tomcat("org.apache.tomcat.embed:tomcat-embed-jasper:${tomcatVersion}") {
@@ -97,6 +97,9 @@ dependencies {
 }
 
 [tomcatRun, tomcatRunWar, tomcatStop]*.with {
+  configFile = file('src/test/resources/META-INF/context.xml')
   httpPort = 8085
+  httpsPort = 8444
   stopPort = 8082
+  enableSSL = true;
 }

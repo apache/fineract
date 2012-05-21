@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class InMemoryApplicationConfigurationService implements ApplicationConfigurationService {
 
-	private String platformApiUrl = "http://localhost:8080/mifosng-provider/api/v1/";
+	private String platformApiUrl = "https://localhost:8443/mifosng-provider/api/v1/";
 			
 	public InMemoryApplicationConfigurationService() {
 		//

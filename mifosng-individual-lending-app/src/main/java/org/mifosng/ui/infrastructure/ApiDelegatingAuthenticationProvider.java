@@ -20,7 +20,6 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestTemplate;
 
 /**
  * A {@link AbstractUserDetailsAuthenticationProvider} which is responsible for delegating authentication to the mifos platform API.
@@ -30,11 +29,11 @@ import org.springframework.web.client.RestTemplate;
  */
 public class ApiDelegatingAuthenticationProvider extends AbstractUserDetailsAuthenticationProvider {
 
-	private final RestTemplate restTemplate;
+	private final SslRestTemplate restTemplate;
 	private final ApplicationConfigurationService applicationConfigurationService;
 
 	@Autowired
-	public ApiDelegatingAuthenticationProvider(final RestTemplate restTemplate, final ApplicationConfigurationService applicationConfigurationService) {
+	public ApiDelegatingAuthenticationProvider(final SslRestTemplate restTemplate, final ApplicationConfigurationService applicationConfigurationService) {
 		this.restTemplate = restTemplate;
 		this.applicationConfigurationService = applicationConfigurationService;
 	}
