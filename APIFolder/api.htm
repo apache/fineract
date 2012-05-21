@@ -586,6 +586,71 @@
 </code>
             </div>
         </div>
+
+        <a id="offices_create" name="offices_create" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>Create Office</h4>
+                <p>Create an office.</p>
+                <p>Example Request: 
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/offices">
+                https://localhost:8443/mifosng-provider/api/v1/offices
+                </a>
+                </p>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">POST https://thedomainname/api/v1/offices</code>
+<code class="method-request">POST https://localhost:8443/mifosng-provider/api/v1/offices
+Content-Type: application/json 
+Request Body:
+{
+  "name": "Demo branch 9",
+  "externalId": "9",
+  "dateFormat": "dd MMMM yyyy",
+  "openingDateFormatted": "01 September 2011",
+  "parentId": 1
+}
+</code>
+<code class="method-response">
+{
+  "entityId": 9
+}
+</code>
+            </div>
+        </div>
+
+        <a id="offices_update" name="offices_update" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>Update Office</h4>
+                <p>Update office details.</p>
+                <p>Example Request: 
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/offices/1">
+                https://localhost:8443/mifosng-provider/api/v1/offices/1
+                </a>
+                </p>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">PUT https://thedomainname/api/v1/offices/1</code>
+<code class="method-request">PUT https://localhost:8443/mifosng-provider/api/v1/offices/1
+Content-Type: application/json
+Request Body:
+{
+  "name": "Demo branch 9 changed",
+  "externalId": "11",
+  "dateFormat": "dd MMMM yyyy",
+  "openingDateFormatted": "05 September 2011",
+  "parentId": 1
+}
+</code>
+<code class="method-response">
+{
+  "entityId": 9
+}
+</code>
+            </div>
+        </div>
+<!-- end of office api docs -->
     
         <a id="loanproducts_retrieve" name="loanproducts_retrieve" class="old-syle-anchor">&nbsp;</a>
         <div class="method-section">
