@@ -26,8 +26,6 @@ public class LoanProductCommand {
 	private Integer amortizationMethod;
 	private Integer interestMethod;
 	private Integer interestCalculationPeriodMethod;
-	private boolean flexibleRepaymentSchedule = false;
-	private boolean interestRebateAllowed = false;
 	
 	protected LoanProductCommand() {
 		//
@@ -160,21 +158,5 @@ public class LoanProductCommand {
 	public void setInterestCalculationPeriodMethod(
 			Integer interestCalculationPeriodMethod) {
 		this.interestCalculationPeriodMethod = interestCalculationPeriodMethod;
-	}
-
-	public boolean isFlexibleRepaymentSchedule() {
-		return flexibleRepaymentSchedule;
-	}
-
-	public void setFlexibleRepaymentSchedule(boolean flexibleRepaymentSchedule) {
-		this.flexibleRepaymentSchedule = flexibleRepaymentSchedule;
-	}
-
-	public boolean isInterestRebateAllowed() {
-		return interestRebateAllowed;
-	}
-
-	public void setInterestRebateAllowed(boolean interestRebateAllowed) {
-		this.interestRebateAllowed = interestRebateAllowed;
 	}
 }
