@@ -1,493 +1,703 @@
 <!DOCTYPE html>
-<html><head>
-<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <link rel="stylesheet" href="apicss/apidocs.css" type="text/css" media="screen" title="Mifos X API Docs" charset="utf-8">
-    <title>Mifos X API Documentation</title>
+<html>
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+        <link rel="stylesheet" href="apicss/apidocs.css" type="text/css" media="screen" title="Mifos X API Docs" charset="utf-8"/>
+        <title>Mifos X API Documentation</title>
+    </head>
 
 
 <body>
-    <div id="page-wrapper">
-      <div id="flybar">
+<div id="page-wrapper">
+    <div id="flybar">
 
-  <div class="flybar-nav">
-      <h2 id="toc-menu-button" class="flybar-button">API Navigation</h2>
-      <div id="toc-menu" class="flybar-menu">
+        <div class="flybar-nav">
+            <h2 id="toc-menu-button" class="flybar-button">API Navigation</h2>
+            <div id="toc-menu" class="flybar-menu">
 
-          <div class="toc-column1">
-              <div class="toc-section">
-                  <ul>
-                      <li><a href="#top">Mifos X API Documentation</a></li>
-                      <li><a href="#authentication_overview">Authentication Overview</a></li>
-                      <li><a href="#errors">Errors</a></li>
-                  </ul>
-              </div>
+                <div class="toc-column1">
+                    <div class="toc-section">
+                        <ul>
+                        <li><a href="#top">Mifos X API Documentation</a></li>
+                        <li><a href="#authentication_overview">Authentication Overview</a></li>
+                        <li><a href="#errors">Errors</a></li>
+                        </ul>
+                    </div>
+    
+                    <div class="toc-section">
+                        <h4><a href="#clients">Clients</a></h4>
+                        <ul>
+                        <li><a href="#clients_list">List Clients</a></li>
+                        <li><a href="#clients_template">Retrieve Client Details Template</a></li>
+                        <li><a href="#clients_retrieve">Retrieve a Client</a></li>
+                        <li><a href="#clients_create">Create a Client</a></li>
+                        <li><a href="#clients_loansummary">Retrieve a Client's Loan Account Summary</a></li>
+                        <li><a href="#clients_notes">Retrieve a Client's Notes</a></li>
+                        <li><a href="#clients_addnote">Add a Client Note</a></li>
+                        <li><a href="#clients_retrievenote">Retrieve a Client Note</a></li>
+                        <li><a href="#clients_updatenote">Update a Client Note</a></li>
+                        No update a client?
+                        </ul>
+                    </div>
+                </div>
 
-              <div class="toc-section">
-                  <h4><a href="#clients">Clients</a></h4>
-                  <ul>
-                      <li><a href="#clients_list">List Clients</a></li>
-                      <li><a href="#clients_template">Retrieve Client Details Template</a></li>
-                      <li><a href="#clients_retrieve">Retrieve a Client</a></li>
-                      <li><a href="#clients_create">Create a Client</a></li>
-                      <li><a href="#clients_loansummary">Retrieve a Client's Loan Account Summary</a></li>
-                      <li><a href="#clients_notes">Retrieve a Client's Notes</a></li>
-                      <li><a href="#clients_addnote">Add a Client Note</a></li>
-                      <li><a href="#clients_retrievenote">Retrieve a Client Note</a></li>
-                      <li><a href="#clients_updatenote">Update a Client Note</a></li>
-No update a client?
-                  </ul>
-              </div>
-          </div>
-
-          <div class="toc-column2">
-              <div class="toc-section">
-                  <h4><a href="#loans">Loans</a></h4>
-                  <ul>
-                      <li><a href="#loans_template">Retrieve Loan Details Template</a></li>
-                      <li><a href="#loans_retrieve">Retrieve a Loan</a></li>
-                      <li><a href="#loans_create">Create a New Loan</a></li>
-                      <li><a href="#loans_submit">Submit a Loan Application</a></li>
-                      <li><a href="#loans_approve">Approve a Loan</a></li>
-                      <li><a href="#loans_disburse">Disburse a Loan</a></li>
-                      <li><a href="#loans_reject">Reject a Loan</a></li>
-                      <li><a href="#loans_withdraw">Client Withdraws a Loan</a></li>
-                      <li><a href="#loans_delete">Delete a Loan</a></li>
-                      <li><a href="#loans_undoapproval">Undo Loan Approval</a></li>
-                      <li><a href="#loans_undodisbursal">Undo Loan Disbursal</a></li>
-                      <li><a href="#loans_repaymenttemplate">Retrieve Loan Repayment Template</a></li>
-                      <li><a href="#loans_waivertemplate">Retrieve Loan Waiver Template</a></li>
-                      <li><a href="#loans_repayment">Make a Repayment</a></li>
-                      <li><a href="#loans_waiver">Loan Waiver</a></li>
-                      <li><a href="#loans_repaymentretrieve">Retrieve a Repayment's Details</a></li>
-                      <li><a href="#loans_repaymentadjust">Adjust a Repayment</a></li>
-is there a retrieve waive and an Adjust Waiver as well?
-                  </ul>
-              </div>
-          </div>
-
-
-          <div class="toc-column3">
-
-              <div class="toc-section">
-                  <h4><a href="#offices">Offices</a></h4>
-                  <ul>
-                      <li><a href="#offices_list">List Offices</a></li>
-                      <li><a href="#offices_template">Retrieve Office Details Template</a></li>
-                      <li><a href="#offices_retrieve">Retrieve an Office</a></li>
-                      <li><a href="#offices_create">Create an Office</a></li>
-                      <li><a href="#offices_update">Update an Office</a></li>
-                  </ul>
-              </div>
-
-              <div class="toc-section">
-                  <h4><a href="#loanproducts">Loan Products</a></h4>
-                  <ul>
-                      <li><a href="#loanproducts_list">List Loan Products</a></li>
-                      <li><a href="#loanproducts_template">Retrieve Loan Product Details Template</a></li>
-                      <li><a href="#loanproducts_retrieve">Retrieve a Loan Product</a></li>
-                      <li><a href="#loanproducts_create">Create a Loan Product</a></li>
-                      <li><a href="#loanproducts_update">Update a Loan Product</a></li>
-                  </ul>
-              </div>
-
-              <div class="toc-section">
-                  <h4><a href="#configs">Configurations</a></h4>
-                  <ul>
-                      <li><a href="#configs_currencyretrieve">Retrieve Currency Configuration</a></li>
-                      <li><a href="#configs_currencyupdate">Update Currency Configuration</a></li>
-                  </ul>
-              </div>
-
-              <div class="toc-section">
-                  <h4><a href="#additionalfields">Additional Fields</a></h4>
-                  <ul>
-                      <li><a href="#additionalfields_list">List Additional Fields Sets</a></li>
-                      <li><a href="#additionalfields_retrieve">Retrieve Additional Fields</a></li>
-                      <li><a href="#additionalfields_update">Update Additional Fields</a></li>
-                  </ul>
-              </div>
-
-              <div class="toc-section">
-                  <h4><a href="#reports">Reports</a></h4>
-                  <ul>
-                      <li><a href="#reports_list">List Reports</a></li>
-                      <li><a href="#report_run">Run a Report</a></li>
-                  </ul>
-              </div>
-          </div>
-
-          <div class="toc-column4">
-              <div class="toc-section">
-                  <h4><a href="#authentication">Authentication</a></h4>
-                  <ul>
-                      <li><a href="#authentication_permissions">Retrieve Authenticated Permissions</a></li>
-                  </ul>
-              </div>
-
-              <div class="toc-section">
-                  <h4><a href="#useraccounts">User Accounts</a></h4>
-                  <ul>
-                      <li><a href="#tbd">tbd</a></li>
-                  </ul>
-              </div>
-              <div class="toc-section">
-                  <h4><a href="#users">Users</a></h4>
-                  <ul>
-                      <li><a href="#tbd">tbd</a></li>
-                  </ul>
-              </div>
-              <div class="toc-section">
-                  <h4><a href="#roles">Roles</a></h4>
-                  <ul>
-                      <li><a href="#tbd">tbd</a></li>
-                  </ul>
-              </div>
-              <div class="toc-section">
-                  <h4><a href="#permissions">Permissions</a></h4>
-                  <ul>
-                      <li><a href="#tbd">tbd</a></li>
-                  </ul>
-              </div>
-          </div>
-
-      </div>
-  </div>
-</div>
+                <div class="toc-column2">
+                    <div class="toc-section">
+                        <h4><a href="#loans">Loans</a></h4>
+                        <ul>
+                        <li><a href="#loans_template">Retrieve Loan Details Template</a></li>
+                        <li><a href="#loans_retrieve">Retrieve a Loan</a></li>
+                        <li><a href="#loans_create">Create a New Loan</a></li>
+                        <li><a href="#loans_submit">Submit a Loan Application</a></li>
+                        <li><a href="#loans_approve">Approve a Loan</a></li>
+                        <li><a href="#loans_disburse">Disburse a Loan</a></li>
+                        <li><a href="#loans_reject">Reject a Loan</a></li>
+                        <li><a href="#loans_withdraw">Client Withdraws a Loan</a></li>
+                        <li><a href="#loans_delete">Delete a Loan</a></li>
+                        <li><a href="#loans_undoapproval">Undo Loan Approval</a></li>
+                        <li><a href="#loans_undodisbursal">Undo Loan Disbursal</a></li>
+                        <li><a href="#loans_repaymenttemplate">Retrieve Loan Repayment Template</a></li>
+                        <li><a href="#loans_waivertemplate">Retrieve Loan Waiver Template</a></li>
+                        <li><a href="#loans_repayment">Make a Repayment</a></li>
+                        <li><a href="#loans_waiver">Loan Waiver</a></li>
+                        <li><a href="#loans_repaymentretrieve">Retrieve a Repayment's Details</a></li>
+                        <li><a href="#loans_repaymentadjust">Adjust a Repayment</a></li>
+                        is there a retrieve waive and an Adjust Waiver as well?
+                        </ul>
+                    </div>
+                </div>
 
 
+                <div class="toc-column3">
+                    <div class="toc-section">
+                        <h4><a href="#offices">Offices</a></h4>
+                        <ul>
+                        <li><a href="#offices_list">List Offices</a></li>
+                        <li><a href="#offices_template">Retrieve Office Details Template</a></li>
+                        <li><a href="#offices_retrieve">Retrieve an Office</a></li>
+                        <li><a href="#offices_create">Create an Office</a></li>
+                        <li><a href="#offices_update">Update an Office</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="toc-section">
+                        <h4><a href="#loanproducts">Loan Products</a></h4>
+                        <ul>
+                        <li><a href="#loanproducts_list">List Loan Products</a></li>
+                        <li><a href="#loanproducts_template">Retrieve Loan Product Details Template</a></li>
+                        <li><a href="#loanproducts_retrieve">Retrieve a Loan Product</a></li>
+                        <li><a href="#loanproducts_create">Create a Loan Product</a></li>
+                        <li><a href="#loanproducts_update">Update a Loan Product</a></li>
+                        </ul>
+                    </div>
+                
+                    <div class="toc-section">
+                        <h4><a href="#configs">Configurations</a></h4>
+                        <ul>
+                        <li><a href="#configs_currencyretrieve">Retrieve Currency Configuration</a></li>
+                        <li><a href="#configs_currencyupdate">Update Currency Configuration</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="toc-section">
+                        <h4><a href="#additionalfields">Additional Fields</a></h4>
+                        <ul>
+                        <li><a href="#additionalfields_list">List Additional Fields Sets</a></li>
+                        <li><a href="#additionalfields_retrieve">Retrieve Additional Fields</a></li>
+                        <li><a href="#additionalfields_update">Update Additional Fields</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="toc-section">
+                        <h4><a href="#reports">Reports</a></h4>
+                        <ul>
+                        <li><a href="#reports_list">List Reports</a></li>
+                        <li><a href="#report_run">Run a Report</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="toc-column4">
+                    <div class="toc-section">
+                        <h4><a href="#authentication">Authentication</a></h4>
+                        <ul>
+                        <li><a href="#authentication_permissions">Retrieve Authenticated Permissions</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="toc-section">
+                        <h4><a href="#useraccounts">User Accounts</a></h4>
+                        <ul>
+                        <li><a href="#tbd">tbd</a></li>
+                        </ul>
+                    </div>
+                    <div class="toc-section">
+                        <h4><a href="#users">Users</a></h4>
+                        <ul>
+                        <li><a href="#tbd">tbd</a></li>
+                        </ul>
+                    </div>
+                    <div class="toc-section">
+                        <h4><a href="#roles">Roles</a></h4>
+                        <ul>
+                        <li><a href="#tbd">tbd</a></li>
+                        </ul>
+                    </div>
+                    <div class="toc-section">
+                        <h4><a href="#permissions">Permissions</a></h4>
+                        <ul>
+                        <li><a href="#tbd">tbd</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="main-content-wrapper">
         <a id="top" name="top" class="old-syle-anchor">&nbsp;</a>
-        <div id="main-content-wrapper">
-            <div class="method-section">
-                <div class="method-description">
-                    <h1>Mifos X API Documentation</h1>
-                    <p>
-                        The Mifox X API is organized around
-                        <a href="http://en.wikipedia.org/wiki/Representational_State_Transfer">REST</a>.
-                        Our API is designed to have predictable, resource-oriented
-                        URLs, to use HTTP response codes to indicate API errors, and
-                        to use built-in HTTP features, like HTTP authentication and
-                        HTTP verbs, which can be understood by off-the-shelf HTTP
-                        clients. <a href="http://www.json.org/">JSON</a> will be
-                        returned in all responses from the API, including errors.
-                    </p>
-	    <p>
-	      Much of the presentation ideas here have been taken from the very good API reference (https://stripe.com/docs/api)
-	    </p>
-                </div>
-
-                <div class="method-example" id="api-summary-example">
-                    <h4>API Endpoint</h4>
-                    <code>https://thedomainname/</code>
-                    <h6>Summary of Resource URL Patterns</h6>
-                    <ul>
-                        <li>/api/v1/clients</li>
-                        <li>/api/v1/clients/template</li>
-                        <li>/api/v1/clients/{clientId}</li>
-                        <li>/api/v1/clients/{clientId}/loans</li>
-                        <li>/api/v1/clients/{clientId}/notes</li>
-                        <li>/api/v1/clients/{clientId}/notes/{noteId}</li>
-
-                        <li>/api/v1/loans</li>
-                        <li>/api/v1/loans/template</li>
-                        <li>/api/v1/loans/{loanId}</li>
-                        <li>/api/v1/loans/{loanId}/undo</li>
-                        <li>/api/v1/loans/{loanId}/transactions/template</li>
-                        <li>/api/v1/loans/{loanId}/transactions</li>
-                        <li>/api/v1/loans/{loanId}/transactions/{repaymentId}</li>
-
-                        <li>/api/v1/offices</li>
-                        <li>/api/v1/offices/template</li>
-                        <li>/api/v1/offices/{officeId}</li>
-
-                        <li>/api/v1/loanproducts</li>
-                        <li>/api/v1/loanproducts/template</li>
-                        <li>/api/v1/loanproducts/{productId}</li>
-
-                        <li>/api/v1/configurations/currency</li>
-
-                        <li>/api/v1/additionalfields</li>
-                        <li>/api/v1/additionalfields/{Type}/{Set}/{id}</li>
-
-                        <li>/api/v1/reports/{reportName}</li>
-
-                        <li>/api/v1/authentication</li>
-
-                        <li>/api/v1/useraccounts/current</li>
-                        <li>/api/v1/useraccounts/current/password</li>
-                        <li>/api/v1/useraccounts/current/password/template</li>
-
-                        <li>/api/v1/users</li>
-                        <li>/api/v1/users/template</li>
-                        <li>/api/v1/users/{userId}</li>
-
-                        <li>/api/v1/roles</li>
-                        <li>/api/v1/roles/template</li>
-                        <li>/api/v1/roles/{roleId}</li>
-
-                        <li>/api/v1/permissions</li>
-                    </ul>
-                </div>
+        <div class="method-section">
+            <div class="method-description">
+                <h1>Mifos X API Documentation</h1>
+                <p>
+                The Mifox X API is organized around
+                <a href="http://en.wikipedia.org/wiki/Representational_State_Transfer">REST</a>.
+                Our API is designed to have predictable, resource-oriented
+                URLs, to use HTTP response codes to indicate API errors, and
+                to use built-in HTTP features, like HTTP authentication and
+                HTTP verbs, which can be understood by off-the-shelf HTTP
+                clients. <a href="http://www.json.org/">JSON</a> will be
+                returned in all responses from the API, including errors.
+                </p>
+                <p>
+                Much of the presentation ideas here have been taken from the very good API reference (https://stripe.com/docs/api)
+                </p>
             </div>
-
-            <a id="authentication_overview" name="authentication_overview" class="old-syle-anchor">&nbsp;</a>
-            <div class="method-section">
-                <div class="method-description">
-                    <h3>Authentication Overview</h3>
-                    <p>
-		JPW: Keith, this needs to change to whatever is right after authentication has been added.  Don't know if you will go with keys or passwords (I assume passwords)... but can you fix it so we have one user or one user per role that doesn't need a password or always has a password of 'password' so we can let ppl do stuff from the browser and/or REST plugins?  We can talk about this.
-		</p>
-		<p>
-                      STRIPE content:  You authenticate to the Mifos X API by providing one of
-                        your API keys in the request.  You can manage your API
-                        keys from your
-                        <a href="https://manage.stripe.com/#account">account</a>.
-                        You can have multiple API keys
-                        active at one time.  Your API keys carry many
-                        privileges, so be sure to keep them secret!
-                    </p>
-
-                    <p>
-                        Authentication to the API occurs via
-                        <a href="http://en.wikipedia.org/wiki/Basic_access_authentication">
-                        HTTP Basic Auth</a>.  Provide your API key as the basic
-                        auth username.  You do not need to provide a password.
-                    </p>
-
-                    <p>
-                      All API requests must be made
-                      over <a href="http://en.wikipedia.org/wiki/HTTP_Secure">HTTPS</a>.
-                      Calls made over plain HTTP will fail.  You must
-                      authenticate for all requests.
-                    </p>
-                </div>
-                <div class="method-example">
-                    <code class="method-request"><span class="prompt curl"></span>curl https://api.stripe.com/api/v1/charges \
-   -u vtUQeOtUnYr7PGCLQ96Ul4zqpDUO4sOE:
-</code>
-                    <p>
-                    JPW: We'll update this after...
-                        curl uses the -u flag to pass basic auth 
-credentials (adding a colon after your API key will prevent
-                        it from asking you for a password).
+    
+            <div class="method-example" id="api-summary-example">
+                <h4>API Endpoint</h4>
+                <code>https://thedomainname/</code>
+                <h6>Summary of Resource URL Patterns</h6>
+                <ul>
+                <li>/api/v1/clients</li>
+                <li>/api/v1/clients/template</li>
+                <li>/api/v1/clients/{clientId}</li>
+                <li>/api/v1/clients/{clientId}/loans</li>
+                <li>/api/v1/clients/{clientId}/notes</li>
+                <li>/api/v1/clients/{clientId}/notes/{noteId}</li>
+                
+                <li>/api/v1/loans</li>
+                <li>/api/v1/loans/template</li>
+                <li>/api/v1/loans/{loanId}</li>
+                <li>/api/v1/loans/{loanId}/undo</li>
+                <li>/api/v1/loans/{loanId}/transactions/template</li>
+                <li>/api/v1/loans/{loanId}/transactions</li>
+                <li>/api/v1/loans/{loanId}/transactions/{repaymentId}</li>
+                
+                <li>/api/v1/offices</li>
+                <li>/api/v1/offices/template</li>
+                <li>/api/v1/offices/{officeId}</li>
+                
+                <li>/api/v1/loanproducts</li>
+                <li>/api/v1/loanproducts/template</li>
+                <li>/api/v1/loanproducts/{productId}</li>
+                
+                <li>/api/v1/configurations/currency</li>
+                
+                <li>/api/v1/additionalfields</li>
+                <li>/api/v1/additionalfields/{Type}/{Set}/{id}</li>
+                
+                <li>/api/v1/reports/{reportName}</li>
+                
+                <li>/api/v1/authentication</li>
+                
+                <li>/api/v1/useraccounts/current</li>
+                <li>/api/v1/useraccounts/current/password</li>
+                <li>/api/v1/useraccounts/current/password/template</li>
+                
+                <li>/api/v1/users</li>
+                <li>/api/v1/users/template</li>
+                <li>/api/v1/users/{userId}</li>
+                
+                <li>/api/v1/roles</li>
+                <li>/api/v1/roles/template</li>
+                <li>/api/v1/roles/{roleId}</li>
+                
+                <li>/api/v1/permissions</li>
+                </ul>
+            </div>
+        </div>
+    
+        <a id="authentication_overview" name="authentication_overview" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h3>Authentication Overview</h3>
+                <p>
+                JPW: Keith, this needs to change to whatever is right after authentication has been added.  Don't know if you will go with keys or passwords (I assume passwords)... but can you fix it so we have one user or one user per role that doesn't need a password or always has a password of 'password' so we can let ppl do stuff from the browser and/or REST plugins?  We can talk about this.
+                </p>
+                <p>
+                STRIPE content:  You authenticate to the Mifos X API by providing one of
+                your API keys in the request.  You can manage your API
+                keys from your
+                <a href="https://manage.stripe.com/#account">account</a>.
+                You can have multiple API keys
+                active at one time.  Your API keys carry many
+                privileges, so be sure to keep them secret!
+                </p>
+                
+                <p>
+                Authentication to the API occurs via
+                <a href="http://en.wikipedia.org/wiki/Basic_access_authentication">
+                HTTP Basic Auth</a>.  Provide your API key as the basic
+                auth username.  You do not need to provide a password.
+                </p>
+                
+                <p>
+                All API requests must be made
+                over <a href="http://en.wikipedia.org/wiki/HTTP_Secure">HTTPS</a>.
+                Calls made over plain HTTP will fail.  You must
+                authenticate for all requests.
+                </p>
+            </div>
+            <div class="method-example">
+                <code class="method-request"><span class="prompt curl"></span>curl https://api.stripe.com/api/v1/charges \
+        -u vtUQeOtUnYr7PGCLQ96Ul4zqpDUO4sOE:
+                </code>
+                <p>
+                JPW: We'll update this after...
+                curl uses the -u flag to pass basic auth 
+                credentials (adding a colon after your API key will prevent
+                it from asking you for a password).
+                
+                A sample test API key has been provided in all 
+                the examples on the page, so you can test out any example right away.
+                
+                </p>
+            </div>
+        </div>
+    
+        <a id="errors" name="errors" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h3>Errors</h3>
+                <p>JPW:Need to update this
+                Stripe uses conventional HTTP response codes to indicate
+                success or failure of an API request.  In general,
+                codes in the 2xx range indicate success, codes in the
+                4xx range indicate an error that resulted from the
+                provided information (e.g. a required parameter was
+                missing, a charge failed, etc.), and codes in the 5xx
+                range indicate an error with Stripe's servers.
+                </p>
+                
+                <p>
+                Not all errors map cleanly onto HTTP response codes,
+                however.  When a request is valid but does not complete
+                successfully (e.g. a card is declined), we return a 402
+                error code.
+                </p>
+                
+                
+                <p>
+                All errors return JSON with a type (one of card_error, invalid_request_error,
+                or api_error) and message describing the particular problem.
+                </p>
+                
+                <h5>Attributes</h5>
+                <dl class="argument-list">
+                    <dt>type</dt>
+                    <dd></dd>
+                    <dd>The type of error returned (card_error, invalid_request_error, api_error)
+                    Card errors are the most common type of error you should expect to handle.
+                    They result when the user enters a card that can't be charged for some reason.
+                    Invalid request errors arise when your request has invalid parameters.  API
+                    errors cover any other type of problem (e.g. a temporary problem with Stripe's servers)
+                    and should turn up only very infrequently.</dd>
                     
-                        A sample test API key has been provided in all 
-the examples on the page, so you can test out any example right away.
+                    <dt>message</dt>
+                    <dd></dd>
+                    <dd>A user-friendly message describing the error</dd>
                     
-                    </p>
-                </div>
+                    <dt>code</dt>
+                    <dd>optional</dd>
+                    <dd>For card errors, additional information 
+                    about the user-friendly message to display for this error (e.g. "Your 
+                    card was declined.")</dd>
+                    
+                    <dt>param</dt>
+                    <dd>optional</dd>
+                    <dd>The parameter the error relates to if the 
+                    error is parameter-specific.  You can use this to display a message near
+                    the correct form field, for example.</dd>
+                </dl>
             </div>
-
-            <a id="errors" name="errors" class="old-syle-anchor">&nbsp;</a>
-            <div class="method-section">
-                <div class="method-description">
-
-                    <h3>Errors</h3>
-                    <p>JPW:Need to update this
-                        Stripe uses conventional HTTP response codes to indicate
-                        success or failure of an API request.  In general,
-                        codes in the 2xx range indicate success, codes in the
-                        4xx range indicate an error that resulted from the
-                        provided information (e.g. a required parameter was
-                        missing, a charge failed, etc.), and codes in the 5xx
-                        range indicate an error with Stripe's servers.
-                    </p>
-
-                    <p>
-                        Not all errors map cleanly onto HTTP response codes,
-                        however.  When a request is valid but does not complete
-                        successfully (e.g. a card is declined), we return a 402
-                        error code.
-                    </p>
-
-
-                    <p>
-                        All errors return JSON with a type (one of card_error, invalid_request_error,
-                        or api_error) and message describing the particular problem.
-                    </p>
-
-                    <h5>Attributes</h5>
-                    <dl class="argument-list">
-                        <dt>type</dt>
-                        <dd></dd>
-                        <dd>The type of error returned (card_error, invalid_request_error, api_error)
-                            Card errors are the most common type of error you should expect to handle.
-                            They result when the user enters a card that can't be charged for some reason.
-                            Invalid request errors arise when your request has invalid parameters.  API
-                            errors cover any other type of problem (e.g. a temporary problem with Stripe's servers)
-                            and should turn up only very infrequently.</dd>
-
-                        <dt>message</dt>
-                        <dd></dd>
-                        <dd>A user-friendly message describing the error</dd>
-
-                        <dt>code</dt>
-                        <dd>optional</dd>
-                        <dd>For card errors, additional information 
-about the user-friendly message to display for this error (e.g. "Your 
-card was declined.")</dd>
-
-                        <dt>param</dt>
-                        <dd>optional</dd>
-                        <dd>The parameter the error relates to if the 
-error is parameter-specific.  You can use this to display a message near
- the correct form field, for example.</dd>
-                    </dl>
-                </div>
-                <div class="method-example">
-                    <h6>HTTP Status Code Summary</h6>
-                    <ul>
-                        <li><strong>200</strong> OK - Everything worked as expected.</li>
-                        <li><strong>400</strong> Bad Request - Often missing a required parameter.</li>
-                        <li><strong>401</strong> Unauthorized - No valid API key provided.</li>
-                        <li><strong>402</strong> Request Failed - Parameters were valid but request failed.</li>
-                        <li><strong>404</strong> Not Found - The requested item doesn't exist.</li>
-                        <li><strong>500, 502, 503, 504</strong> Server errors - something went wrong on Stripe's end.</li>
-                    </ul>
-                </div>
-
-                <div class="method-example">
-                  <h6>Errors</h6>
-                  <h7>Invalid Request Errors</h7>
-                  <code><strong>Type:</strong> invalid_request_error</code>
-
-                  <h7>API Errors</h7>
-                  <code><strong>Type:</strong> api_error</code>
-
-                  <h7>Card Errors</h7>
-                  <code><strong>Type:</strong> card_error</code>
-                  <table>
-                    <tbody><tr>
-                      <th>Code</th>
-                      <th>Details</th>
-                    </tr>
-                    <tr>
-                      <td>invalid_number</td>
-                      <td>The card number is invalid</td>
-                    </tr>
-                    <tr>
-                      <td>incorrect_number</td>
-                      <td>The card number is incorrect</td>
-                    </tr>
-                    <tr>
-                      <td>invalid_expiry_month</td>
-                      <td>The card's expiration month is invalid</td>
-                    </tr>
-                    <tr>
-                      <td>invalid_expiry_year</td>
-                      <td>The card's expiration year is invalid</td>
-                    </tr>
-                    <tr>
-                      <td>invalid_cvc</td>
-                      <td>The card's security code is invalid</td>
-                    </tr>
-                    <tr>
-                      <td>expired_card</td>
-                      <td>The card has expired</td>
-                    </tr>
-                    <tr>
-                      <td>invalid_amount</td>
-                      <td>An invalid amount was entered</td>
-                    </tr>
-                    <tr>
-                      <td>incorrect_cvc</td>
-                      <td>The card's security code is incorrect</td>
-                    </tr>
-                    <tr>
-                      <td>card_declined</td>
-                      <td>The card was declined.</td>
-                    </tr>
-                    <tr>
-                      <td>missing</td>
-                      <td>There is no card on a customer that is being charged.</td>
-                    </tr>
-
-                    <tr>
-                      <td>duplicate_transaction</td>
-                      <td>A transaction with identical amount and credit card information was submitted very recently.</td>
-                    </tr>
-                    <tr>
-                      <td>processing_error</td>
-                      <td>An error occurred while processing the card.</td>
-                    </tr>
-                  </tbody></table>
-                </div>
+            <div class="method-example">
+                <h6>HTTP Status Code Summary</h6>
+                <ul>
+                <li><strong>200</strong> OK - Everything worked as expected.</li>
+                <li><strong>400</strong> Bad Request - Often missing a required parameter.</li>
+                <li><strong>401</strong> Unauthorized - No valid API key provided.</li>
+                <li><strong>402</strong> Request Failed - Parameters were valid but request failed.</li>
+                <li><strong>404</strong> Not Found - The requested item doesn't exist.</li>
+                <li><strong>500, 502, 503, 504</strong> Server errors - something went wrong on Stripe's end.</li>
+                </ul>
             </div>
-
-
-
-
-
-
-
-
-<a id="loanproducts" name="loanproducts" class="old-syle-anchor">&nbsp;</a>
-<div class="method-section">
- <div class="method-description">
-  <h3>Loan Products</h3>
-  <p>A Loan product is a template that is used when creating a loan.  Much of the template definition can be changed during loan creation.
-  </p>
- </div>
-</div>
-
- <div class="method-section">
-  <div class="method-description">
-    <h5>Attributes</h5>
-    <dl class="argument-list">
-        <dt>
-            id
-        </dt>
-        <dd>              
-            string <span>jpw ipsum as an example of showing the (at least important) columns</span>
-        </dd>
-        <dt>
-            amount
-        </dt>
-        <dd>positive integer or zero <span></span>
-        </dd>
-        <dd>Amount charged in cents</dd>
-        <dt>
-            card
-        </dt>
-        <dd>
-                <dd><strong>hash</strong></dd>
-                <dd>
+    
+            <div class="method-example">
+                <h6>Errors</h6>
+                <h7>Invalid Request Errors</h7>
+                <code><strong>Type:</strong> invalid_request_error</code>
+                
+                <h7>API Errors</h7>
+                <code><strong>Type:</strong> api_error</code>
+                
+                <h7>Card Errors</h7>
+                <code><strong>Type:</strong> card_error</code>
+                <table>
+                <tbody><tr>
+                <th>Code</th>
+                <th>Details</th>
+                </tr>
+                <tr>
+                <td>invalid_number</td>
+                <td>The card number is invalid</td>
+                </tr>
+                <tr>
+                <td>incorrect_number</td>
+                <td>The card number is incorrect</td>
+                </tr>
+                <tr>
+                <td>invalid_expiry_month</td>
+                <td>The card's expiration month is invalid</td>
+                </tr>
+                <tr>
+                <td>invalid_expiry_year</td>
+                <td>The card's expiration year is invalid</td>
+                </tr>
+                <tr>
+                <td>invalid_cvc</td>
+                <td>The card's security code is invalid</td>
+                </tr>
+                <tr>
+                <td>expired_card</td>
+                <td>The card has expired</td>
+                </tr>
+                <tr>
+                <td>invalid_amount</td>
+                <td>An invalid amount was entered</td>
+                </tr>
+                <tr>
+                <td>incorrect_cvc</td>
+                <td>The card's security code is incorrect</td>
+                </tr>
+                <tr>
+                <td>card_declined</td>
+                <td>The card was declined.</td>
+                </tr>
+                <tr>
+                <td>missing</td>
+                <td>There is no card on a customer that is being charged.</td>
+                </tr>
+                
+                <tr>
+                <td>duplicate_transaction</td>
+                <td>A transaction with identical amount and credit card information was submitted very recently.</td>
+                </tr>
+                <tr>
+                <td>processing_error</td>
+                <td>An error occurred while processing the card.</td>
+                </tr>
+                </tbody></table>
+            </div>
+        </div>
+    
+    
+    
+    
+        <a id="offices" name="offices" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h3>Offices</h3>
+                <p>The Office and Branch hierarchy.
+                </p>
+            </div>
+        </div>
+                
+        <div class="method-section">
+            <div class="method-description">
+                <h5>Attributes</h5>
+                <dl class="argument-list">
+                    <dt>
+                    id
+                    </dt>
+                    <dd>              
+                    string <span>jpw ipsum as an example of showing the (at least important) columns</span>
+                    </dd>
+                    <dt>
+                    amount
+                    </dt>
+                    <dd>blah <span></span>
+                    </dd>
+                    <dd>blah</dd>
+                    <dt>
+                    card
+                    </dt>
+                </dl>
+            </div>
+        </div>
+    
+        <a id="offices_list" name="offices_list" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>List Offices (and Branches)</h4>
+                <p>Example Request: 
+                <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/offices">http://localhost:8080/mifosng-provider/api/v1/offices</a>
+                </p>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">GET https://thedomainname/api/v1/offices</code>
+                <code class="method-response">    to be done
+                </code>
+            </div>
+        </div>
+    
+    
+        <a id="offices_template" name="offices_template" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>Retrieve Office Details Template</h4>
+                <p>Returns a template that contains the office fields and allowed value lists.  This helps build a maintenance User Interface.
+                </p>
+                <p>Example Request: 
+                <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/offices/template">http://localhost:8080/mifosng-provider/api/v1/offices/template</a>
+                </p>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">GET https://thedomainname/api/v1/offices/template</code>
+                <code class="method-response"> to be done
+            </code>
+            </div>
+        </div>
+    
+    
+        <a id="loanproducts_retrieve" name="loanproducts_retrieve" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>Retrieve a Loan Product</h4>
+                <p>Returns loan product fields.  It also returns allowed value lists which help build a maintenance User Interface.
+                JPW - includes validation values (might be ok or option), enum?
+                </p>
+                <p>Example Request: 
+                <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/loanproducts/1">http://localhost:8080/mifosng-provider/api/v1/loanproducts/1</a>
+                </p>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">GET https://thedomainname/api/v1/loanproducts/{productId}</code>
+                <code class="method-response">    {
+                "id": 1,
+                "name": "Agricultural Loan",
+                "description": "An agricultural loan given to farmers to help buy crop, stock and machinery. With an arrears tolerance setting of 1,000 CFA, loans are not marked as 'in arrears' or 'in bad standing' if the amount outstanding is less than this. Interest rate is described using monthly percentage rate (MPR) even though the loan typically lasts a year and requires one repayment (typically at time when farmer sells crop)",
+                "principalMoney": {
+                "currencyCode": "XOF",
+                "currencyDigitsAfterDecimal": 0,
+                "amount": 100000,
+                "defaultName": "CFA Franc BCEAO",
+                "nameCode": "currency.XOF",
+                "displaySymbol": "CFA",
+                "zero": false,
+                "greaterThanZero": true,
+                "displaySymbolValue": "100000 CFA"
+                },
+                "interestRatePerPeriod": 1.75,
+                "interestRatePeriod": 2,
+                "annualInterestRate": 21,
+                "interestMethod": 0,
+                "interestRateCalculatedInPeriod": 0,
+                "numberOfInterestFreePeriods": 0,
+                "repaidEvery": 12,
+                "repaymentPeriodFrequency": 2,
+                "numberOfRepayments": 1,
+                "amortizationMethod": 1,
+                "inArrearsTolerance": {
+                "currencyCode": "XOF",
+                "currencyDigitsAfterDecimal": 0,
+                "amount": 1000,
+                "defaultName": "CFA Franc BCEAO",
+                "nameCode": "currency.XOF",
+                "displaySymbol": "CFA",
+                "zero": false,
+                "greaterThanZero": true,
+                "displaySymbolValue": "1000 CFA"
+                },
+                "createdOn": "2012-04-12T00:00:00.000+10:00",
+                "lastModifedOn": "2012-04-12T00:00:00.000+10:00",
+                "possibleCurrencies": [
+                {
+                "code": "XOF",
+                "name": "CFA Franc BCEAO",
+                "decimalPlaces": 0,
+                "displaySymbol": "CFA",
+                "nameCode": "currency.XOF",
+                "displayLabel": "CFA Franc BCEAO (CFA)"
+                },
+                {
+                "code": "ETB",
+                "name": "Ethiopian Birr",
+                "decimalPlaces": 2,
+                "displaySymbol": null,
+                "nameCode": "currency.ETB",
+                "displayLabel": "Ethiopian Birr [ETB]"
+                }
+                ],
+                "possibleAmortizationOptions": [
+                {
+                "id": 1,
+                "value": "Equal installments"
+                },
+                {
+                "id": 0,
+                "value": "Equal principle payments"
+                }
+                ],
+                "possibleInterestOptions": [
+                {
+                "id": 0,
+                "value": "Declining Balance"
+                },
+                {
+                "id": 1,
+                "value": "Flat"
+                }
+                ],
+                "possibleInterestRateCalculatedInPeriodOptions": [
+                {
+                "id": 0,
+                "value": "Daily"
+                },
+                {
+                "id": 1,
+                "value": "Same as repayment period"
+                }
+                ],
+                "repaymentFrequencyOptions": [
+                {
+                "id": 0,
+                "value": "Days"
+                },
+                {
+                "id": 1,
+                "value": "Weeks"
+                },
+                {
+                "id": 2,
+                "value": "Months"
+                }
+                ],
+                "interestFrequencyOptions": [
+                {
+                "id": 2,
+                "value": "Per month"
+                },
+                {
+                "id": 3,
+                "value": "Per year"
+                }
+                ],
+                "interestRebateAllowed": false,
+                "flexible": false
+                }
+                </code>
+            </div>
+        </div>
+    
+    
+        <a id="loanproducts_create" name="loanproducts_create" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>Create a Loan Product</h4>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">POST https://thedomainname/api/v1/loanproducts</code>
+                <code class="method-request">http://localhost:8080/mifosng-provider/api/v1/loanproducts
+                
+                
+                Content-Type: application/json
+                Request Body:
+                new loan product json here
+                </code>
+            </div>
+        </div>
+    
+    
+        <a id="loanproducts_update" name="loanproducts_update" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+    
+    
+        <a id="loanproducts" name="loanproducts" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h3>Loan Products</h3>
+                <p>A Loan product is a template that is used when creating a loan.  Much of the template definition can be changed during loan creation.
+                </p>
+            </div>
+        </div>
+                
+        <div class="method-section">
+            <div class="method-description">
+                <h5>Attributes</h5>
+                <dl class="argument-list">
+                    <dt>
+                    id
+                    </dt>
+                    <dd>              
+                    string <span>jpw ipsum as an example of showing the (at least important) columns</span>
+                    </dd>
+                    <dt>
+                    amount
+                    </dt>
+                    <dd>positive integer or zero <span></span>
+                    </dd>
+                    <dd>Amount charged in cents</dd>
+                    <dt>
+                    card
+                    </dt>
+                    <dd>
+                    <dd><strong>hash</strong></dd>
+                    <dd>
                     Hash describing the card used to make the charge
-          	  <dl class="argument-list">
-	
-        		<dt>
-            		inner object
-        		</dt>
-        		<dd>inner string <span> inner span extra </span>
-        		</dd>
-	 </dl>
-	</dd>
-        <dt>
-            fingerprint
-        </dt>
-        <dd>string<span> or something</span>
-        </dd>
-    </dl>
-
- </div>
-</div>
- 
-
-
-
-<a id="loanproducts_list" name="loanproducts_list" class="old-syle-anchor">&nbsp;</a>
-<div class="method-section">
- <div class="method-description">
-  <h4>List Loan Products</h4>
-
-  <p>Example Request: 
-  <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/loanproducts">http://localhost:8080/mifosng-provider/api/v1/loanproducts</a>
-  </p>
-
- </div>
-
- <div class="method-example">
-  <code class="method-declaration">GET https://thedomainname/api/v1/loanproducts</code>
-  <code class="method-response">    {
+                    <dl class="argument-list">
+                    
+                    <dt>
+                    inner object
+                    </dt>
+                    <dd>inner string <span> inner span extra </span>
+                    </dd>
+                    </dl>
+                    </dd>
+                    <dt>
+                    fingerprint
+                    </dt>
+                    <dd>string<span> or something</span>
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    
+    
+    
+    
+        <a id="loanproducts_list" name="loanproducts_list" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>List Loan Products</h4>
+                <p>Example Request: 
+                <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/loanproducts">http://localhost:8080/mifosng-provider/api/v1/loanproducts</a>
+                </p>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">GET https://thedomainname/api/v1/loanproducts</code>
+                <code class="method-response">    {
     "products": [
     {
     "id": 1,
@@ -585,780 +795,731 @@ error is parameter-specific.  You can use this to display a message near
     }
     ]
     }
-</code>
- </div>
-</div>
-
-
-<a id="loanproducts_template" name="loanproducts_template" class="old-syle-anchor">&nbsp;</a>
-<div class="method-section">
- <div class="method-description">
-  <h4>Retrieve Loan Product Details Template</h4>
-<p>Returns a template that contains the loan product fields and allowed value lists.  This helps build a maintenance User Interface.
-</p>
-  <p>Example Request: 
-  <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/loanproducts/template">http://localhost:8080/mifosng-provider/api/v1/loanproducts/template</a>
-  </p>
-
- </div>
-
- <div class="method-example">
-  <code class="method-declaration">GET https://thedomainname/api/v1/loanproducts/template</code>
-  <code class="method-response">    {
-    "id": null,
-    "name": null,
-    "description": null,
-    "principalMoney": {
-    "currencyCode": "XOF",
-    "currencyDigitsAfterDecimal": 0,
-    "amount": 0,
-    "defaultName": "CFA Franc BCEAO",
-    "nameCode": "currency.XOF",
-    "displaySymbol": "CFA",
-    "zero": true,
-    "greaterThanZero": false,
-    "displaySymbolValue": "0 CFA"
-    },
-    "interestRatePerPeriod": 0,
-    "interestRatePeriod": 2,
-    "annualInterestRate": 0,
-    "interestMethod": 0,
-    "interestRateCalculatedInPeriod": 1,
-    "numberOfInterestFreePeriods": 0,
-    "repaidEvery": 1,
-    "repaymentPeriodFrequency": 2,
-    "numberOfRepayments": 0,
-    "amortizationMethod": 1,
-    "inArrearsTolerance": {
-    "currencyCode": "XOF",
-    "currencyDigitsAfterDecimal": 0,
-    "amount": 0,
-    "defaultName": "CFA Franc BCEAO",
-    "nameCode": "currency.XOF",
-    "displaySymbol": "CFA",
-    "zero": true,
-    "greaterThanZero": false,
-    "displaySymbolValue": "0 CFA"
-    },
-    "createdOn": null,
-    "lastModifedOn": null,
-    "possibleCurrencies": [
-    {
-    "code": "XOF",
-    "name": "CFA Franc BCEAO",
-    "decimalPlaces": 0,
-    "displaySymbol": "CFA",
-    "nameCode": "currency.XOF",
-    "displayLabel": "CFA Franc BCEAO (CFA)"
-    },
-    {
-    "code": "ETB",
-    "name": "Ethiopian Birr",
-    "decimalPlaces": 2,
-    "displaySymbol": null,
-    "nameCode": "currency.ETB",
-    "displayLabel": "Ethiopian Birr [ETB]"
-    }
-    ],
-    "possibleAmortizationOptions": [
-    {
-    "id": 1,
-    "value": "Equal installments"
-    },
-    {
-    "id": 0,
-    "value": "Equal principle payments"
-    }
-    ],
-    "possibleInterestOptions": [
-    {
-    "id": 0,
-    "value": "Declining Balance"
-    },
-    {
-    "id": 1,
-    "value": "Flat"
-    }
-    ],
-    "possibleInterestRateCalculatedInPeriodOptions": [
-    {
-    "id": 0,
-    "value": "Daily"
-    },
-    {
-    "id": 1,
-    "value": "Same as repayment period"
-    }
-    ],
-    "repaymentFrequencyOptions": [
-    {
-    "id": 0,
-    "value": "Days"
-    },
-    {
-    "id": 1,
-    "value": "Weeks"
-    },
-    {
-    "id": 2,
-    "value": "Months"
-    }
-    ],
-    "interestFrequencyOptions": [
-    {
-    "id": 2,
-    "value": "Per month"
-    },
-    {
-    "id": 3,
-    "value": "Per year"
-    }
-    ],
-    "interestRebateAllowed": false,
-    "flexible": false
-    }
-  </code>
- </div>
-</div>
-
-
-<a id="loanproducts_retrieve" name="loanproducts_retrieve" class="old-syle-anchor">&nbsp;</a>
-<div class="method-section">
- <div class="method-description">
-  <h4>Retrieve a Loan Product</h4>
-
-<p>Returns loan product fields.  It also returns allowed value lists which help build a maintenance User Interface.
-JPW - includes validation values (might be ok or option), enum?
-</p>
-  <p>Example Request: 
-  <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/loanproducts/1">http://localhost:8080/mifosng-provider/api/v1/loanproducts/1</a>
-  </p>
-
- </div>
-
- <div class="method-example">
-  <code class="method-declaration">GET https://thedomainname/api/v1/loanproducts/{productId}</code>
-  <code class="method-response">    {
-    "id": 1,
-    "name": "Agricultural Loan",
-    "description": "An agricultural loan given to farmers to help buy crop, stock and machinery. With an arrears tolerance setting of 1,000 CFA, loans are not marked as 'in arrears' or 'in bad standing' if the amount outstanding is less than this. Interest rate is described using monthly percentage rate (MPR) even though the loan typically lasts a year and requires one repayment (typically at time when farmer sells crop)",
-    "principalMoney": {
-    "currencyCode": "XOF",
-    "currencyDigitsAfterDecimal": 0,
-    "amount": 100000,
-    "defaultName": "CFA Franc BCEAO",
-    "nameCode": "currency.XOF",
-    "displaySymbol": "CFA",
-    "zero": false,
-    "greaterThanZero": true,
-    "displaySymbolValue": "100000 CFA"
-    },
-    "interestRatePerPeriod": 1.75,
-    "interestRatePeriod": 2,
-    "annualInterestRate": 21,
-    "interestMethod": 0,
-    "interestRateCalculatedInPeriod": 0,
-    "numberOfInterestFreePeriods": 0,
-    "repaidEvery": 12,
-    "repaymentPeriodFrequency": 2,
-    "numberOfRepayments": 1,
-    "amortizationMethod": 1,
-    "inArrearsTolerance": {
-    "currencyCode": "XOF",
-    "currencyDigitsAfterDecimal": 0,
-    "amount": 1000,
-    "defaultName": "CFA Franc BCEAO",
-    "nameCode": "currency.XOF",
-    "displaySymbol": "CFA",
-    "zero": false,
-    "greaterThanZero": true,
-    "displaySymbolValue": "1000 CFA"
-    },
-    "createdOn": "2012-04-12T00:00:00.000+10:00",
-    "lastModifedOn": "2012-04-12T00:00:00.000+10:00",
-    "possibleCurrencies": [
-    {
-    "code": "XOF",
-    "name": "CFA Franc BCEAO",
-    "decimalPlaces": 0,
-    "displaySymbol": "CFA",
-    "nameCode": "currency.XOF",
-    "displayLabel": "CFA Franc BCEAO (CFA)"
-    },
-    {
-    "code": "ETB",
-    "name": "Ethiopian Birr",
-    "decimalPlaces": 2,
-    "displaySymbol": null,
-    "nameCode": "currency.ETB",
-    "displayLabel": "Ethiopian Birr [ETB]"
-    }
-    ],
-    "possibleAmortizationOptions": [
-    {
-    "id": 1,
-    "value": "Equal installments"
-    },
-    {
-    "id": 0,
-    "value": "Equal principle payments"
-    }
-    ],
-    "possibleInterestOptions": [
-    {
-    "id": 0,
-    "value": "Declining Balance"
-    },
-    {
-    "id": 1,
-    "value": "Flat"
-    }
-    ],
-    "possibleInterestRateCalculatedInPeriodOptions": [
-    {
-    "id": 0,
-    "value": "Daily"
-    },
-    {
-    "id": 1,
-    "value": "Same as repayment period"
-    }
-    ],
-    "repaymentFrequencyOptions": [
-    {
-    "id": 0,
-    "value": "Days"
-    },
-    {
-    "id": 1,
-    "value": "Weeks"
-    },
-    {
-    "id": 2,
-    "value": "Months"
-    }
-    ],
-    "interestFrequencyOptions": [
-    {
-    "id": 2,
-    "value": "Per month"
-    },
-    {
-    "id": 3,
-    "value": "Per year"
-    }
-    ],
-    "interestRebateAllowed": false,
-    "flexible": false
-    }
-  </code>
- </div>
-</div>
-
-
-<a id="loanproducts_create" name="loanproducts_create" class="old-syle-anchor">&nbsp;</a>
-<div class="method-section">
- <div class="method-description">
-  <h4>Create a Loan Product</h4>
- </div>
-
- <div class="method-example">
-  <code class="method-declaration">POST https://thedomainname/api/v1/loanproducts</code>
-  <code class="method-request">http://localhost:8080/mifosng-provider/api/v1/loanproducts
-
-
-Content-Type: application/json
-Request Body:
-new loan product json here
-  </code>
-
- </div>
-</div>
-
-
-<a id="loanproducts_update" name="loanproducts_update" class="old-syle-anchor">&nbsp;</a>
-<div class="method-section">
- <div class="method-description">
-  <h4>Update a Loan Product</h4>
- </div>
-
- <div class="method-example">
-  <code class="method-declaration">POST https://thedomainname/api/v1/loanproducts/{loanId}</code>
-  <code class="method-request">http://localhost:8080/mifosng-provider/api/v1/loanproducts/1
-
-
-Content-Type: application/json
-Request Body:
-update loan product json here
-  </code>
-
- </div>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<a id="additionalfields" name="additionalfields" class="old-syle-anchor">&nbsp;</a>
-<div class="method-section">
- <div class="method-description">
-  <h3>Additional Fields</h3>
-  <p>
-In Mifos X, any number of "Sets" of "Additional Fields" can be configured for a Mifos X database table ("Type").
-  </p>
-  <p>  For example, portfolio_client is the database table that holds client data.  Typically, MFI's want more client related fields than is provided by Mifos X out-of-the-box.  
-The MFI might add a Set called "Additional Info" containing some fields that are typically input when creating a client.  They might then add another Set called "Highly Improbable Info" containing some fields that are only input in exceptional circumstances.
-  </p>
-  <p>
-The additional fields resource allows you to retrieve and update any Additional Fields data that has been configured in Mifos X.
-  </p>
-  <p>
-The Mifos X Individual Lending client application uses a JQuery plugin called stretchydata which, itself, uses this additional fields resource to provide a pretty flexible additional fields User Interface (UI).  Put a link to an example here.
-  </p>
-
- </div>
-</div>
-
-
-<a id="additionalfields_list" name="additionalfields_list" class="old-syle-anchor">&nbsp;</a>
-<div class="method-section">
- <div class="method-description">
-  <h4>List Additional Fields Sets</h4>
-  <p>
-  Lists the Sets of additional fields have been defined in Mifos X. 
-  </p>
-
-  <h5>Arguments</h5>
-  <dl class="argument-list">
-        <dt>type</dt>
-        <dd>optional</span></dd>
-        <dd>The Additional Field Type (Mifos X database table) to restrict the output to</dd>
-  </dl>
-
-  <p>Example Request: 
-  <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/additionalfields?type=portfolio_client">http://localhost:8080/mifosng-provider/api/v1/additionalfields?type=portfolio_client</a>
-  </p>
-
- </div>
-
- <div class="method-example">
-  <code class="method-declaration">GET https://thedomainname/api/v1/additionalfields</code>
-  <code class="method-response">{
-  "additionalFieldsSets": [
-    {
-      "id": 1,
-      "name": "Additional Information",
-      "type": "portfolio_client"
-    },
-    {
-      "id": 9,
-      "name": "Highly Improbable Info",
-      "type": "portfolio_client"
-    }
-  ]
-}
-  </code>
- </div>
-</div>
-
-
-<a id="additionalfields_retrieve" name="additionalfields_retrieve" class="old-syle-anchor">&nbsp;</a>
-<div class="method-section">
- <div class="method-description">
-  <h4>Retrieve Additional Fields</h4>
-  <p>
-Returns the Set of Additional Fields data for the ID provided.  The ID is the id field of the Type table e.g. portfolio_client might have an id value of 4.  The output is a JSON formatted "Generic Resultset".  The Generic Resultset contains Column Heading as well as Data information.  The Column Heading information may include allowed values (columnValues array).
-  </p>
-
-  <p>Example Request: 
-  <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/additionalfields/portfolio_client/Additional Information/2">http://localhost:8080/mifosng-provider/api/v1/additionalfields/portfolio_client/Additional Information/2</a>
-  </p>
-
- </div>
-
- <div class="method-example">
-  <code class="method-declaration">GET https://thedomainname/api/v1/additionalfields/{type}/{set}/{id}</code>
-  <code class="method-response">{
-  "columnHeaders": [
-    {
-      "columnName": "Ethnic Group",
-      "columnType": "String",
-      "columnLength": 50,
-      "columnDisplayType": "List",
-      "columnValues": [
-        "Bedouin",
-        "Berber",
-        "Italian",
-        "Miknasa",
-        "Mrazig",
-        "Other",
-        "Unknown"
-      ]
-    },
-    {
-      "columnName": "Ethnic Group Other",
-      "columnType": "String",
-      "columnLength": 50,
-      "columnDisplayType": null,
-      "columnValues": []
-    },
-    {
-      "columnName": "Household Location",
-      "columnType": "String",
-      "columnLength": 50,
-      "columnDisplayType": "List",
-      "columnValues": [
-        "East Sikkim",
-        "North Sikkim",
-        "South Sikkim",
-        "West Sikkim",
-        "Other"
-      ]
-    },
-    {
-      "columnName": "Household Location Other",
-      "columnType": "String",
-      "columnLength": 50,
-      "columnDisplayType": null,
-      "columnValues": []
-    },
-    {
-      "columnName": "Religion",
-      "columnType": "String",
-      "columnLength": 50,
-      "columnDisplayType": "List",
-      "columnValues": [
-        "Protestant",
-        "Catholic",
-        "Muslim",
-        "Animist",
-        "Atheist",
-        "Other",
-        "Unknown"
-      ]
-    },
-    {
-      "columnName": "Religion Other",
-      "columnType": "String",
-      "columnLength": 50,
-      "columnDisplayType": null,
-      "columnValues": []
-    },
-    {
-      "columnName": "Knowledge of Person",
-      "columnType": "String",
-      "columnLength": 50,
-      "columnDisplayType": "List",
-      "columnValues": [
-        "Staff member",
-        "Spouse of staff member",
-        "Son/daughter of staff member",
-        "Friend of staff member",
-        "Not known by any staff member",
-        "Other"
-      ]
-    },
-    {
-      "columnName": "Gender",
-      "columnType": "String",
-      "columnLength": 10,
-      "columnDisplayType": "List",
-      "columnValues": [
-        "Female",
-        "Male"
-      ]
-    },
-    {
-      "columnName": "Whois",
-      "columnType": "Text",
-      "columnLength": 0,
-      "columnDisplayType": null,
-      "columnValues": []
-    }
-  ],
-  "data": [
-    {
-      "row": [
-        "Berber",
-        null,
-        "East Sikkim",
-        null,
-        "Animist",
-        "jjjjjjj",
-        "Son/daughter of staff member",
-        "Female",
-        "its\r\nme of\r\ncourse\r\nyes\r\nend and the end of it all"
-      ]
-    }
-  ]
-}
-  </code>
- </div>
-</div>
-
-
-
-<a id="additionalfields_update" name="additionalfields_update" class="old-syle-anchor">&nbsp;</a>
-<div class="method-section">
- <div class="method-description">
-  <h4>Update Additional Fields</h4>
-  <p>
-Updates (or creates) the Set of Additional Fields data for the ID provided.  The ID is the id field of the Type table e.g. portfolio_client might have an id value of 4.
-  </p>
-
- </div>
-
- <div class="method-example">
-  <code class="method-declaration">POST https://thedomainname/api/v1/additionalfields/{type}/{set}/{id}</code>
-  <code class="method-request">http://localhost:8080/mifosng-provider/api/v1/additionalfields/portfolio_client/Additional Information/2
-
-
-Content-Type: application/json
-Request Body:
-{
-"Ethnic_Group":"Berber",
-"Ethnic_Group_Other":"",
-"Household_Location":"East Sikkim",
-"Household_Location_Other":"",
-"Religion":"Animist",
-"Religion_Other":"jjjjjjj",
-"Knowledge_of_Person":"Son/daughter of staff member",
-"Gender":"Female",
-"Whois":"its\r\nme of\r\ncourse\r\nyes\r\nend and the end of it all"
-}
-  </code>
-  <code class="method-response">{
-  "entityId": 2
-}
-  </code>
-
- </div>
-</div>
-
-
-
-
-
-
-
- <a id="reports" name="reports" class="old-syle-anchor">&nbsp;</a>
-            <div class="method-section">
-                <div class="method-description">
-                    <h3>Reports</h3>
- <p>
-The reports resource allows you to run and receive output from pre-defined Mifos X reports.  The default output is a JSON formatted "Generic Resultset".  The Generic Resultset contains Column Heading as well as Data information.  However, you can export to CSV format by simply adding "&exportCSV=true" to the end of your URI.
-</p>
-<p>
-If Pentaho reports have been pre-defined, they can also be run through this resource.  Pentaho reports can return HTML, PDF or CSV formats.
-</p>
-
-<p>Add examples showing links to client listing report producing json, then csv, then a pentaho report producing html, pdf, csv</p>
-<p>
-The Mifos X Individual Lending client application uses a JQuery plugin called stretchyreporting which, itself, uses this reports resource to provide a pretty flexible reporting User Interface (UI).  Put a link to an example here.
-</p>
-
-
-                </div>
+    </code>
             </div>
-
-
-
-<a id="reports_list" name="reports_list" class="old-syle-anchor">&nbsp;</a>
-            <div class="method-section">
-                <div class="method-description">
-                    <h4>List Reports</h4>
-                    <p>
-                        Lists all reports and their parameters.  If a report has more than one parameter it will be listed the same number of times as it has parameters.
-                    </p>
-
-    <h5>Arguments</h5>
-<dl class="argument-list">
-        <dt>exportCSV</dt>
-        <dd>optional, <span>The only valid value is 'true'.  If any other value is provided the argument will be ignored</span></dd>
-        <dd>Output will be delivered as a CSV file instead of JSON.</dd>
-</dl>
-                    <p>Example Request: 
-                        <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/reports">http://localhost:8080/mifosng-provider/api/v1/reports</a>
-                    </p>
-
-  </div>
-
-  <div class="method-example">
-      <code class="method-declaration">GET https://thedomainname/api/v1/reports</code>
-      <code class="method-response">{
-  "columnHeaders": [
-    {
-      "columnName": "report_id",
-      "columnType": "INT",
-      "columnLength": null,
-      "columnDisplayType": null,
-      "columnValues": []
-    },
-    {
-      "columnName": "report_name",
-      "columnType": "VARCHAR",
-      "columnLength": null,
-      "columnDisplayType": null,
-      "columnValues": []
-    },
-    {
-      "columnName": "report_type",
-      "columnType": "VARCHAR",
-      "columnLength": null,
-      "columnDisplayType": null,
-      "columnValues": []
-    },
-... more "columnHeaders" entries
-  ],
-  "data": [
-    {
-      "row": [
-        "29",
-        "Client Listing",
-        "Table",
-        null,
-        null,
-        "5",
-        null,
-        "selectOfficeId"
-      ]
-    },
-    {
-      "row": [
-        "42",
-        "Client Listing - Additional and Unlikely",
-        "Table",
-        null,
-        null,
-        "5",
-        null,
-        "selectOfficeId"
-      ]
-    },
-    {
-      "row": [
-        "30",
-        "Client Loans Listing",
-        "Table",
-        null,
-        null,
-        "5",
-        null,
-        "selectOfficeId"
-      ]
-    },
-... more "Row" entries
-  ]
-}</code>
-  </div>
+        </div>
+    
+    
+        <a id="loanproducts_template" name="loanproducts_template" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>Retrieve Loan Product Details Template</h4>
+                <p>Returns a template that contains the loan product fields and allowed value lists.  This helps build a maintenance User Interface.
+                </p>
+                <p>Example Request: 
+                <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/loanproducts/template">http://localhost:8080/mifosng-provider/api/v1/loanproducts/template</a>
+                </p>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">GET https://thedomainname/api/v1/loanproducts/template</code>
+                <code class="method-response">    {
+            "id": null,
+            "name": null,
+            "description": null,
+            "principalMoney": {
+            "currencyCode": "XOF",
+            "currencyDigitsAfterDecimal": 0,
+            "amount": 0,
+            "defaultName": "CFA Franc BCEAO",
+            "nameCode": "currency.XOF",
+            "displaySymbol": "CFA",
+            "zero": true,
+            "greaterThanZero": false,
+            "displaySymbolValue": "0 CFA"
+            },
+            "interestRatePerPeriod": 0,
+            "interestRatePeriod": 2,
+            "annualInterestRate": 0,
+            "interestMethod": 0,
+            "interestRateCalculatedInPeriod": 1,
+            "numberOfInterestFreePeriods": 0,
+            "repaidEvery": 1,
+            "repaymentPeriodFrequency": 2,
+            "numberOfRepayments": 0,
+            "amortizationMethod": 1,
+            "inArrearsTolerance": {
+            "currencyCode": "XOF",
+            "currencyDigitsAfterDecimal": 0,
+            "amount": 0,
+            "defaultName": "CFA Franc BCEAO",
+            "nameCode": "currency.XOF",
+            "displaySymbol": "CFA",
+            "zero": true,
+            "greaterThanZero": false,
+            "displaySymbolValue": "0 CFA"
+            },
+            "createdOn": null,
+            "lastModifedOn": null,
+            "possibleCurrencies": [
+            {
+            "code": "XOF",
+            "name": "CFA Franc BCEAO",
+            "decimalPlaces": 0,
+            "displaySymbol": "CFA",
+            "nameCode": "currency.XOF",
+            "displayLabel": "CFA Franc BCEAO (CFA)"
+            },
+            {
+            "code": "ETB",
+            "name": "Ethiopian Birr",
+            "decimalPlaces": 2,
+            "displaySymbol": null,
+            "nameCode": "currency.ETB",
+            "displayLabel": "Ethiopian Birr [ETB]"
+            }
+            ],
+            "possibleAmortizationOptions": [
+            {
+            "id": 1,
+            "value": "Equal installments"
+            },
+            {
+            "id": 0,
+            "value": "Equal principle payments"
+            }
+            ],
+            "possibleInterestOptions": [
+            {
+            "id": 0,
+            "value": "Declining Balance"
+            },
+            {
+            "id": 1,
+            "value": "Flat"
+            }
+            ],
+            "possibleInterestRateCalculatedInPeriodOptions": [
+            {
+            "id": 0,
+            "value": "Daily"
+            },
+            {
+            "id": 1,
+            "value": "Same as repayment period"
+            }
+            ],
+            "repaymentFrequencyOptions": [
+            {
+            "id": 0,
+            "value": "Days"
+            },
+            {
+            "id": 1,
+            "value": "Weeks"
+            },
+            {
+            "id": 2,
+            "value": "Months"
+            }
+            ],
+            "interestFrequencyOptions": [
+            {
+            "id": 2,
+            "value": "Per month"
+            },
+            {
+            "id": 3,
+            "value": "Per year"
+            }
+            ],
+            "interestRebateAllowed": false,
+            "flexible": false
+            }
+            </code>
+            </div>
+        </div>
+    
+    
+        <a id="loanproducts_retrieve" name="loanproducts_retrieve" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>Retrieve a Loan Product</h4>
+                <p>Returns loan product fields.  It also returns allowed value lists which help build a maintenance User Interface.
+                JPW - includes validation values (might be ok or option), enum?
+                </p>
+                <p>Example Request: 
+                <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/loanproducts/1">http://localhost:8080/mifosng-provider/api/v1/loanproducts/1</a>
+                </p>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">GET https://thedomainname/api/v1/loanproducts/{productId}</code>
+                <code class="method-response">    {
+                "id": 1,
+                "name": "Agricultural Loan",
+                "description": "An agricultural loan given to farmers to help buy crop, stock and machinery. With an arrears tolerance setting of 1,000 CFA, loans are not marked as 'in arrears' or 'in bad standing' if the amount outstanding is less than this. Interest rate is described using monthly percentage rate (MPR) even though the loan typically lasts a year and requires one repayment (typically at time when farmer sells crop)",
+                "principalMoney": {
+                "currencyCode": "XOF",
+                "currencyDigitsAfterDecimal": 0,
+                "amount": 100000,
+                "defaultName": "CFA Franc BCEAO",
+                "nameCode": "currency.XOF",
+                "displaySymbol": "CFA",
+                "zero": false,
+                "greaterThanZero": true,
+                "displaySymbolValue": "100000 CFA"
+                },
+                "interestRatePerPeriod": 1.75,
+                "interestRatePeriod": 2,
+                "annualInterestRate": 21,
+                "interestMethod": 0,
+                "interestRateCalculatedInPeriod": 0,
+                "numberOfInterestFreePeriods": 0,
+                "repaidEvery": 12,
+                "repaymentPeriodFrequency": 2,
+                "numberOfRepayments": 1,
+                "amortizationMethod": 1,
+                "inArrearsTolerance": {
+                "currencyCode": "XOF",
+                "currencyDigitsAfterDecimal": 0,
+                "amount": 1000,
+                "defaultName": "CFA Franc BCEAO",
+                "nameCode": "currency.XOF",
+                "displaySymbol": "CFA",
+                "zero": false,
+                "greaterThanZero": true,
+                "displaySymbolValue": "1000 CFA"
+                },
+                "createdOn": "2012-04-12T00:00:00.000+10:00",
+                "lastModifedOn": "2012-04-12T00:00:00.000+10:00",
+                "possibleCurrencies": [
+                {
+                "code": "XOF",
+                "name": "CFA Franc BCEAO",
+                "decimalPlaces": 0,
+                "displaySymbol": "CFA",
+                "nameCode": "currency.XOF",
+                "displayLabel": "CFA Franc BCEAO (CFA)"
+                },
+                {
+                "code": "ETB",
+                "name": "Ethiopian Birr",
+                "decimalPlaces": 2,
+                "displaySymbol": null,
+                "nameCode": "currency.ETB",
+                "displayLabel": "Ethiopian Birr [ETB]"
+                }
+                ],
+                "possibleAmortizationOptions": [
+                {
+                "id": 1,
+                "value": "Equal installments"
+                },
+                {
+                "id": 0,
+                "value": "Equal principle payments"
+                }
+                ],
+                "possibleInterestOptions": [
+                {
+                "id": 0,
+                "value": "Declining Balance"
+                },
+                {
+                "id": 1,
+                "value": "Flat"
+                }
+                ],
+                "possibleInterestRateCalculatedInPeriodOptions": [
+                {
+                "id": 0,
+                "value": "Daily"
+                },
+                {
+                "id": 1,
+                "value": "Same as repayment period"
+                }
+                ],
+                "repaymentFrequencyOptions": [
+                {
+                "id": 0,
+                "value": "Days"
+                },
+                {
+                "id": 1,
+                "value": "Weeks"
+                },
+                {
+                "id": 2,
+                "value": "Months"
+                }
+                ],
+                "interestFrequencyOptions": [
+                {
+                "id": 2,
+                "value": "Per month"
+                },
+                {
+                "id": 3,
+                "value": "Per year"
+                }
+                ],
+                "interestRebateAllowed": false,
+                "flexible": false
+                }
+                </code>
+            </div>
+        </div>
+    
+    
+        <a id="loanproducts_create" name="loanproducts_create" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>Create a Loan Product</h4>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">POST https://thedomainname/api/v1/loanproducts</code>
+                <code class="method-request">http://localhost:8080/mifosng-provider/api/v1/loanproducts
+                
+                
+                Content-Type: application/json
+                Request Body:
+                new loan product json here
+                </code>
+            </div>
+        </div>
+    
+    
+        <a id="loanproducts_update" name="loanproducts_update" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>Update a Loan Product</h4>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">POST https://thedomainname/api/v1/loanproducts/{loanId}</code>
+                <code class="method-request">http://localhost:8080/mifosng-provider/api/v1/loanproducts/1
+                
+                
+                Content-Type: application/json
+                Request Body:
+                update loan product json here
+                </code>
+            </div>
+        </div>
+    
+    
+    
+        <a id="additionalfields" name="additionalfields" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h3>Additional Fields</h3>
+                <p>
+                In Mifos X, any number of "Sets" of "Additional Fields" can be configured for a Mifos X database table ("Type").
+                </p>
+                <p>  For example, portfolio_client is the database table that holds client data.  Typically, MFI's want more client related fields than is provided by Mifos X out-of-the-box.  
+                The MFI might add a Set called "Additional Info" containing some fields that are typically input when creating a client.  They might then add another Set called "Highly Improbable Info" containing some fields that are only input in exceptional circumstances.
+                </p>
+                <p>
+                The additional fields resource allows you to retrieve and update any Additional Fields data that has been configured in Mifos X.
+                </p>
+                <p>
+                The Mifos X Individual Lending client application uses a JQuery plugin called stretchydata which, itself, uses this additional fields resource to provide a pretty flexible additional fields User Interface (UI).  Put a link to an example here.
+                </p>
+            </div>
+        </div>
+    
+    
+        <a id="additionalfields_list" name="additionalfields_list" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>List Additional Fields Sets</h4>
+                <p>
+                Lists the Sets of additional fields have been defined in Mifos X. 
+                </p>
+                
+                <h5>Arguments</h5>
+                <dl class="argument-list">
+                    <dt>type</dt>
+                    <dd><span>optional</span></dd>
+                    <dd>The Additional Fields Type (Mifos X database table) to restrict the output to</dd>
+                </dl>
+                <p>Example Request: 
+                <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/additionalfields?type=portfolio_client">http://localhost:8080/mifosng-provider/api/v1/additionalfields?type=portfolio_client</a>
+                </p>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">GET https://thedomainname/api/v1/additionalfields</code>
+                <code class="method-response">{
+                "additionalFieldsSets": [
+                {
+                "id": 1,
+                "name": "Additional Information",
+                "type": "portfolio_client"
+                },
+                {
+                "id": 9,
+                "name": "Highly Improbable Info",
+                "type": "portfolio_client"
+                }
+                ]
+                }
+                </code>
+            </div>
+        </div>
+    
+    
+        <a id="additionalfields_retrieve" name="additionalfields_retrieve" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>Retrieve Additional Fields</h4>
+                <p>
+                Returns the Set of Additional Fields data for the ID provided.  The ID is the id field of the Type table e.g. portfolio_client might have an id value of 4.  The output is a JSON formatted "Generic Resultset".  The Generic Resultset contains Column Heading as well as Data information.  The Column Heading information may include allowed values (columnValues array).
+                </p>
+                <p>Example Request: 
+                <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/additionalfields/portfolio_client/Additional Information/2">http://localhost:8080/mifosng-provider/api/v1/additionalfields/portfolio_client/Additional Information/2</a>
+                </p>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">GET https://thedomainname/api/v1/additionalfields/{type}/{set}/{id}</code>
+                <code class="method-response">{
+                "columnHeaders": [
+                {
+                "columnName": "Ethnic Group",
+                "columnType": "String",
+                "columnLength": 50,
+                "columnDisplayType": "List",
+                "columnValues": [
+                "Bedouin",
+                "Berber",
+                "Italian",
+                "Miknasa",
+                "Mrazig",
+                "Other",
+                "Unknown"
+                ]
+                },
+                {
+                "columnName": "Ethnic Group Other",
+                "columnType": "String",
+                "columnLength": 50,
+                "columnDisplayType": null,
+                "columnValues": []
+                },
+                {
+                "columnName": "Household Location",
+                "columnType": "String",
+                "columnLength": 50,
+                "columnDisplayType": "List",
+                "columnValues": [
+                "East Sikkim",
+                "North Sikkim",
+                "South Sikkim",
+                "West Sikkim",
+                "Other"
+                ]
+                },
+                {
+                "columnName": "Household Location Other",
+                "columnType": "String",
+                "columnLength": 50,
+                "columnDisplayType": null,
+                "columnValues": []
+                },
+                {
+                "columnName": "Religion",
+                "columnType": "String",
+                "columnLength": 50,
+                "columnDisplayType": "List",
+                "columnValues": [
+                "Protestant",
+                "Catholic",
+                "Muslim",
+                "Animist",
+                "Atheist",
+                "Other",
+                "Unknown"
+                ]
+                },
+                {
+                "columnName": "Religion Other",
+                "columnType": "String",
+                "columnLength": 50,
+                "columnDisplayType": null,
+                "columnValues": []
+                },
+                {
+                "columnName": "Knowledge of Person",
+                "columnType": "String",
+                "columnLength": 50,
+                "columnDisplayType": "List",
+                "columnValues": [
+                "Staff member",
+                "Spouse of staff member",
+                "Son/daughter of staff member",
+                "Friend of staff member",
+                "Not known by any staff member",
+                "Other"
+                ]
+                },
+                {
+                "columnName": "Gender",
+                "columnType": "String",
+                "columnLength": 10,
+                "columnDisplayType": "List",
+                "columnValues": [
+                "Female",
+                "Male"
+                ]
+                },
+                {
+                "columnName": "Whois",
+                "columnType": "Text",
+                "columnLength": 0,
+                "columnDisplayType": null,
+                "columnValues": []
+                }
+                ],
+                "data": [
+                {
+                "row": [
+                "Berber",
+                null,
+                "East Sikkim",
+                null,
+                "Animist",
+                "jjjjjjj",
+                "Son/daughter of staff member",
+                "Female",
+                "its\r\nme of\r\ncourse\r\nyes\r\nend and the end of it all"
+                ]
+                }
+                ]
+                }
+                </code>
+            </div>
+        </div>
+        <a id="additionalfields_update" name="additionalfields_update" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+            <h4>Update Additional Fields</h4>
+            <p>
+            Updates (or creates) the Set of Additional Fields data for the ID provided.  The ID is the id field of the Type table e.g. portfolio_client might have an id value of 4.
+            </p>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">POST https://thedomainname/api/v1/additionalfields/{type}/{set}/{id}</code>
+                <code class="method-request">http://localhost:8080/mifosng-provider/api/v1/additionalfields/portfolio_client/Additional Information/2
+                
+                
+                Content-Type: application/json
+                Request Body:
+                {
+                "Ethnic_Group":"Berber",
+                "Ethnic_Group_Other":"",
+                "Household_Location":"East Sikkim",
+                "Household_Location_Other":"",
+                "Religion":"Animist",
+                "Religion_Other":"jjjjjjj",
+                "Knowledge_of_Person":"Son/daughter of staff member",
+                "Gender":"Female",
+                "Whois":"its\r\nme of\r\ncourse\r\nyes\r\nend and the end of it all"
+                }
+                </code>
+                <code class="method-response">{
+                "entityId": 2
+                }
+                </code>
+            </div>
+        </div>
+    
+    
+    
+    
+    
+    
+    
+        <a id="reports" name="reports" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h3>Reports</h3>
+                <p>
+                The reports resource allows you to run and receive output from pre-defined Mifos X reports.  The default output is a JSON formatted "Generic Resultset".  The Generic Resultset contains Column Heading as well as Data information.  However, you can export to CSV format by simply adding "&exportCSV=true" to the end of your URI.
+                </p>
+                <p>
+                If Pentaho reports have been pre-defined, they can also be run through this resource.  Pentaho reports can return HTML, PDF or CSV formats.
+                </p>
+                
+                <p>Add examples showing links to client listing report producing json, then csv, then a pentaho report producing html, pdf, csv</p>
+                <p>
+                The Mifos X Individual Lending client application uses a JQuery plugin called stretchyreporting which, itself, uses this reports resource to provide a pretty flexible reporting User Interface (UI).  Put a link to an example here.
+                </p>
+            </div>
+        </div>
+    
+    
+    
+        <a id="reports_list" name="reports_list" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>List Reports</h4>
+                <p>
+                Lists all reports and their parameters.  If a report has more than one parameter it will be listed the same number of times as it has parameters.
+                </p>
+                
+                <h5>Arguments</h5>
+                <dl class="argument-list">
+                    <dt>exportCSV</dt>
+                    <dd>optional, <span>The only valid value is 'true'.  If any other value is provided the argument will be ignored</span></dd>
+                    <dd>Output will be delivered as a CSV file instead of JSON.</dd>
+                </dl>
+                <p>Example Request: 
+                <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/reports">http://localhost:8080/mifosng-provider/api/v1/reports</a>
+                </p>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">GET https://thedomainname/api/v1/reports</code>
+                <code class="method-response">{
+                "columnHeaders": [
+                {
+                "columnName": "report_id",
+                "columnType": "INT",
+                "columnLength": null,
+                "columnDisplayType": null,
+                "columnValues": []
+                },
+                {
+                "columnName": "report_name",
+                "columnType": "VARCHAR",
+                "columnLength": null,
+                "columnDisplayType": null,
+                "columnValues": []
+                },
+                {
+                "columnName": "report_type",
+                "columnType": "VARCHAR",
+                "columnLength": null,
+                "columnDisplayType": null,
+                "columnValues": []
+                },
+                ... more "columnHeaders" entries
+                ],
+                "data": [
+                {
+                "row": [
+                "29",
+                "Client Listing",
+                "Table",
+                null,
+                null,
+                "5",
+                null,
+                "selectOfficeId"
+                ]
+                },
+                {
+                "row": [
+                "42",
+                "Client Listing - Additional and Unlikely",
+                "Table",
+                null,
+                null,
+                "5",
+                null,
+                "selectOfficeId"
+                ]
+                },
+                {
+                "row": [
+                "30",
+                "Client Loans Listing",
+                "Table",
+                null,
+                null,
+                "5",
+                null,
+                "selectOfficeId"
+                ]
+                },
+                ... more "Row" entries
+                ]
+                }</code>
+            </div>
+        </div>
+    
+    
+    
+        <a id="report_run" name="report_run" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>Running a Report</h4>
+                <p>
+                Runs a report and returns the report output.
+                </p>
+                <h5>Arguments</h5>
+                <dl class="argument-list">
+                    <dt>R_'parameter names' ...</dt>
+                    <dd>optional, <span>No defaults</span></dd>
+                    <dd>The number and names of the parameters depend on the specific report and how it has been configured.  R_officeId is an example parameter name.</dd>
+                    <dd>Note: the prefix R_ stands for Reporting</dd>
+                    <dt>parameterType</dt>        
+                    <dd>optional, <span>The only valid value is 'true'.  If any other value is provided the argument will be ignored</span></dd>
+                    <dd>Determines whether the request looks in the list of reports or the list of parameters for its data.</dd>
+                    <dt>exportCSV</dt>
+                    <dd>optional, <span>The only valid value is 'true'.  If any other value is provided the argument will be ignored</span></dd>
+                    <dd>Output will be delivered as a CSV file instead of JSON.  Doesn't apply to Pentaho reports.</dd>
+                </dl>
+                <p>Example Request: 
+                <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/reports/Client%20Listing?R_officeId=1">http://localhost:8080/mifosng-provider/api/v1/reports/Client%20Listing?R_officeId=1</a>
+                </p>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">GET https://thedomainname/api/v1/reports/{reportName}</code>
+                <code class="method-response">{
+                "columnHeaders": [
+                {
+                "columnName": "Office/Branch",
+                "columnType": "VARCHAR",
+                "columnLength": null,
+                "columnDisplayType": null,
+                "columnValues": []
+                },
+                {
+                "columnName": "Name",
+                "columnType": "VARCHAR",
+                "columnLength": null,
+                "columnDisplayType": null,
+                "columnValues": []
+                },
+                {
+                "columnName": "Joining Date",
+                "columnType": "DATE",
+                "columnLength": null,
+                "columnDisplayType": null,
+                "columnValues": []
+                }
+                ],
+                "data": [
+                {
+                "row": [
+                "Demo MFI Head Office",
+                "O'Meara, Patrick",
+                "2009-01-04"
+                ]
+                },
+                {
+                "row": [
+                "Demo MFI Head Office",
+                "O'Meara, Dennis",
+                "2009-01-04"
+                ]
+                },
+                {
+                "row": [
+                "Demo MFI Head Office",
+                "Smith, John",
+                "2009-01-11"
+                ]
+                },
+                ... more "row" entries
+                ]
+                }</code>
+            </div>
+        </div>
+    
+    
+    
+    
+    </div> <!-- main-content-wrapper -->
 </div>
 
-
-
-<a id="report_run" name="report_run" class="old-syle-anchor">&nbsp;</a>
-            <div class="method-section">
-                <div class="method-description">
-                    <h4>Running a Report</h4>
-                    <p>
-                        Runs a report and returns the report output.
-                    </p>
-    <h5>Arguments</h5>
-<dl class="argument-list">
-        <dt>R_'parameter names' ...</dt>
-        <dd>optional, <span>No defaults</span></dd>
-        <dd>The number and names of the parameters depend on the specific report and how it has been configured.  R_officeId is an example parameter name.</dd>
-        <dd>Note: the prefix R_ stands for Reporting</dd>
-        <dt>parameterType</dt>        
-        <dd>optional, <span>The only valid value is 'true'.  If any other value is provided the argument will be ignored</span></dd>
-        <dd>Determines whether the request looks in the list of reports or the list of parameters for its data.</dd>
-        <dt>exportCSV</dt>
-        <dd>optional, <span>The only valid value is 'true'.  If any other value is provided the argument will be ignored</span></dd>
-        <dd>Output will be delivered as a CSV file instead of JSON.  Doesn't apply to Pentaho reports.</dd>
-</dl>
-
-                    <p>Example Request: 
-                        <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/reports/Client%20Listing?R_officeId=1">http://localhost:8080/mifosng-provider/api/v1/reports/Client%20Listing?R_officeId=1</a>
-                    </p>
-
-  </div>
-
-  <div class="method-example">
-      <code class="method-declaration">GET https://thedomainname/api/v1/reports/{reportName}</code>
-      <code class="method-response">{
-  "columnHeaders": [
-    {
-      "columnName": "Office/Branch",
-      "columnType": "VARCHAR",
-      "columnLength": null,
-      "columnDisplayType": null,
-      "columnValues": []
-    },
-    {
-      "columnName": "Name",
-      "columnType": "VARCHAR",
-      "columnLength": null,
-      "columnDisplayType": null,
-      "columnValues": []
-    },
-    {
-      "columnName": "Joining Date",
-      "columnType": "DATE",
-      "columnLength": null,
-      "columnDisplayType": null,
-      "columnValues": []
-    }
-  ],
-  "data": [
-    {
-      "row": [
-        "Demo MFI Head Office",
-        "O'Meara, Patrick",
-        "2009-01-04"
-      ]
-    },
-    {
-      "row": [
-        "Demo MFI Head Office",
-        "O'Meara, Dennis",
-        "2009-01-04"
-      ]
-    },
-    {
-      "row": [
-        "Demo MFI Head Office",
-        "Smith, John",
-        "2009-01-11"
-      ]
-    },
-... more "row" entries
-  ]
-}</code>
-  </div>
-</div>
-
-
-
-
-
-        </div> <!-- main-content-wrapper -->
-    </div>
-
-
-</body></html>
+</body>
+</html>
