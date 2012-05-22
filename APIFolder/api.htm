@@ -797,28 +797,88 @@
 
 
         <a id="loans_repaymenttemplate" name="loans_repaymenttemplate" class="old-syle-anchor">&nbsp;</a>
+        <a id="loans_waivertemplate" name="loans_waivertemplate" class="old-syle-anchor">&nbsp;</a>
         <div class="method-section">
             <div class="method-description">
-                <h4>Retrieve Loan Repayment Template</h4>
-                <p>Returns a template that contains client and loan product fields and allowed value lists.  This helps build a maintenance User Interface.
+                <h4>Retrieve Loan Repayment/Loan Waiver Template</h4>
+                <p>Returns a template to help with entering loan repayments and waivers.
                 </p>
                 <h5>Arguments</h5>
                 <dl class="argument-list">
                     <dt>type</dt>
-                    <dd>String</dd>
-                    <dd>The 'id' of the Client</dd>
-                    <dt>productId</dt>
-                    <dd>Integer</dd>
-                    <dd>The 'id' of the Loan Product</dd>
+                    <dd>String<span> Optional, case-insensitive</span></dd>
+                    <dd>The default action is to return details for Repayment of a loan.  If the value is 'waiver' then details relevant to Waiving a loan amount are returned.</dd>
                 </dl>
                 <p>Example Request: 
-                <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/loans/template?clientId=1&productId=1">http://localhost:8080/mifosng-provider/api/v1/loans/template?clientId=1&productId=1</a>
+                <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/loans/1/transactions/template?type=waiver">http://localhost:8080/mifosng-provider/api/v1/loans/1/transactions/template?type=waiver"</a>
                 </p>
             </div>
             <div class="method-example">
-                <code class="method-declaration">GET https://thedomainname/api/v1/loans/template</code>
+                <code class="method-declaration">GET https://thedomainname/api/v1/loans/{loanId}/transactions/template"</code>
                 <code class="method-response"> to be done
             </code>
+            </div>
+        </div>
+        <a id="loans_repayment" name="loans_repayment" class="old-syle-anchor">&nbsp;</a>
+        <a id="loans_waiver" name="loans_waiver" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>Make a Repayment / Loan Waiver</h4>
+                <dl class="argument-list">
+                    <dt>type</dt>
+                    <dd>String<span> Optional, case-insensitive</span></dd>
+                    <dd>The default action is to make a Loan Repayment.  If the value is 'waiver' then a Loan Waiver is made.</dd>
+                </dl>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">POST https://thedomainname/api/v1/loans/{loanId}/transactions</code>
+                <code class="method-request">http://localhost:8080/mifosng-provider/api/v1/loans/1/transactions
+                
+                
+                Content-Type: application/json
+                Request Body:
+                new json here
+                </code>
+                <code class="method-response">{
+    "entityId": 2
+}
+                </code>
+            </div>
+        </div>
+
+        <a id="loans_repaymentretrieve" name="loans_repaymentretrieve" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>Retrieve a Repayment's Details</h4>
+                <p>Example Request: 
+                <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/loans/1/transactions/1">http://localhost:8080/mifosng-provider/api/v1/loans/1/transactions/1</a>
+                </p>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">GET https://thedomainname/api/v1/loans/{loanId}/transactions/{repaymentId}</code>
+                <code class="method-response"> 
+                </code>
+            </div>
+        </div>
+        <a id="loans_repaymentadjust" name="loans_repaymentadjust" class="old-syle-anchor">&nbsp;</a>
+        <a id="loans_waiver" name="loans_waiver" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>Adjust a Repayment / Loan Waiver</h4>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">POST https://thedomainname/api/v1/loans/{loanId}/transactions/{repaymentId}</code>
+                <code class="method-request">http://localhost:8080/mifosng-provider/api/v1/loans/1/transactions/1
+                
+                
+                Content-Type: application/json
+                Request Body:
+                new json here
+                </code>
+                <code class="method-response">{
+    "entityId": 2
+}
+                </code>
             </div>
         </div>
 
