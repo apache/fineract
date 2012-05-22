@@ -115,7 +115,7 @@
                         </ul>
                     </div>
                 </div>
-
+                
                 <div class="toc-column4">
                     <div class="toc-section">
                         <h4><a href="#authentication">Authentication</a></h4>
@@ -127,13 +127,20 @@
                     <div class="toc-section">
                         <h4><a href="#useraccounts">User Accounts</a></h4>
                         <ul>
-                        <li><a href="#tbd">tbd</a></li>
+                        <li><a href="#useraccount_details_retrieve">Retrieve current user details</a></li>
+                        <li><a href="#useraccount_details_update">Update current user details</a></li>
+                        <li><a href="#useraccount_password_retrieve">Retrieve change password template</a></li>
+                        <li><a href="#useraccount_password_update">Update current users password</a></li>
                         </ul>
                     </div>
                     <div class="toc-section">
                         <h4><a href="#users">Users</a></h4>
                         <ul>
-                        <li><a href="#tbd">tbd</a></li>
+                        <li><a href="#users_list">List users</a></li>
+                        <li><a href="#users_template">Retrieve new user template</a></li>
+                        <li><a href="#users_retrieve">Retrieve existing user</a></li>
+                        <li><a href="#users_create">Create new user</a></li>
+                        <li><a href="#users_update">Update existing user</a></li> 
                         </ul>
                     </div>
                     <div class="toc-section">
@@ -424,10 +431,7 @@
             </div>
         </div>
     
-    
-    
-    
-
+<!-- start of clients api docs -->
 
         <a id="clients" name="clients" class="old-syle-anchor">&nbsp;</a>
         <div class="method-section">
@@ -613,7 +617,7 @@
     
 
 
-
+<!-- start of loans api docs -->
 
         <a id="loans" name="loans" class="old-syle-anchor">&nbsp;</a>
         <div class="method-section">
@@ -880,131 +884,234 @@
                 </code>
             </div>
         </div>
-
-
-
-
+        
+        
+        <!-- start of offices content -->    
         <a id="offices" name="offices" class="old-syle-anchor">&nbsp;</a>
         <div class="method-section">
             <div class="method-description">
                 <h3>Offices</h3>
-                <p>The Office and Branch hierarchy.
-                </p>
+                <p>Offices are used to model an MFIs structure. A hierarchial representation of offices is supported. 
+                There will always be at least one office (which represents the MFI or an MFIs head office). 
+                All subsequent offices added must have a parent office.</p>
             </div>
         </div>
-                
-        <div class="method-section">
-            <div class="method-description">
-                <h5>Attributes</h5>
-                <dl class="argument-list">
-                    <dt>
-                    id
-                    </dt>
-                    <dd>              
-                    string <span>jpw ipsum as an example of showing the (at least important) columns</span>
-                    </dd>
-                    <dt>
-                    amount
-                    </dt>
-                    <dd>blah <span></span>
-                    </dd>
-                    <dd>blah</dd>
-                    <dt>
-                    card
-                    </dt>
-                </dl>
-            </div>
-        </div>
-    
+        
         <a id="offices_list" name="offices_list" class="old-syle-anchor">&nbsp;</a>
         <div class="method-section">
             <div class="method-description">
-                <h4>List Offices (and Branches)</h4>
+                <h4>List Offices</h4>
                 <p>Example Request: 
-                <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/offices">http://localhost:8080/mifosng-provider/api/v1/offices</a>
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/offices">https://localhost:8443/mifosng-provider/api/v1/offices</a>
                 </p>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://thedomainname/api/v1/offices</code>
-                <code class="method-response">    to be done
-                </code>
+<code class="method-response">
+{
+  "offices": [
+    {
+      "id": 1,
+      "name": "Demo MFI Head Office",
+      "externalId": "1",
+      "openingDate": "2009-01-01",
+      "hierarchy": ".",
+      "parentName": null,
+      "parentId": 0,
+      "allowedParents": []
+    },
+    {
+      "id": 2,
+      "name": "sub branch 1",
+      "externalId": "2",
+      "openingDate": "2012-01-02",
+      "hierarchy": ".2.",
+      "parentName": "Demo MFI Head Office",
+      "parentId": 1,
+      "allowedParents": []
+    },
+    {
+      "id": 3,
+      "name": "sub branch 2",
+      "externalId": "3",
+      "openingDate": "2012-03-01",
+      "hierarchy": ".3.",
+      "parentName": "Demo MFI Head Office",
+      "parentId": 1,
+      "allowedParents": []
+    }
+  ]
+}
+</code>
             </div>
         </div>
-    
-    
+
         <a id="offices_template" name="offices_template" class="old-syle-anchor">&nbsp;</a>
         <div class="method-section">
             <div class="method-description">
                 <h4>Retrieve Office Details Template</h4>
-                <p>Returns a template that contains the office fields and allowed value lists.  This helps build a maintenance User Interface.
+                <p>Returns a template that contains the office fields and allowed value lists. This is a convienence when building user intereface screens for client applications.
                 </p>
                 <p>Example Request: 
-                <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/offices/template">http://localhost:8080/mifosng-provider/api/v1/offices/template</a>
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/offices/template">
+                https://localhost:8443/mifosng-provider/api/v1/offices/template
+                </a>
                 </p>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://thedomainname/api/v1/offices/template</code>
-                <code class="method-response"> to be done
-            </code>
+<code class="method-response">
+{
+  "id": null,
+  "name": null,
+  "externalId": null,
+  "openingDate": "2012-05-21",
+  "hierarchy": null,
+  "parentName": null,
+  "parentId": null,
+  "allowedParents": [
+    {
+      "id": 1,
+      "name": "Demo MFI Head Office",
+      "externalId": "1",
+      "openingDate": "2009-01-01",
+      "hierarchy": ".",
+      "parentName": null,
+      "parentId": 0,
+      "allowedParents": []
+    },
+    {
+      "id": 2,
+      "name": "sub branch 1",
+      "externalId": "2",
+      "openingDate": "2012-01-02",
+      "hierarchy": ".2.",
+      "parentName": "Demo MFI Head Office",
+      "parentId": 1,
+      "allowedParents": []
+    },
+    {
+      "id": 3,
+      "name": "sub branch 2",
+      "externalId": "3",
+      "openingDate": "2012-03-01",
+      "hierarchy": ".3.",
+      "parentName": "Demo MFI Head Office",
+      "parentId": 1,
+      "allowedParents": []
+    },
+    {
+      "id": 4,
+      "name": "sub branch 3",
+      "externalId": null,
+      "openingDate": "2012-04-17",
+      "hierarchy": ".4.",
+      "parentName": "Demo MFI Head Office",
+      "parentId": 1,
+      "allowedParents": []
+    }
+  ]
+}
+</code>
             </div>
         </div>
-    
-    
+
         <a id="offices_retrieve" name="offices_retrieve" class="old-syle-anchor">&nbsp;</a>
         <div class="method-section">
             <div class="method-description">
-                <h4>Retrieve an Office</h4>
-                <p>Returns office fields.  It also returns allowed value lists which help build a maintenance User Interface.
-                </p>
+                <h4>Retrieve Office</h4>
+                <p>Returns an office details if it exists.</p>
                 <p>Example Request: 
-                <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/offices/1">http://localhost:8080/mifosng-provider/api/v1/offices/1</a>
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/offices/1">
+                https://localhost:8443/mifosng-provider/api/v1/offices/1
+                </a>
                 </p>
             </div>
             <div class="method-example">
-                <code class="method-declaration">GET https://thedomainname/api/v1/offices/{officeId}</code>
-                <code class="method-response"> 
-                </code>
+                <code class="method-declaration">GET https://thedomainname/api/v1/offices/1</code>
+<code class="method-response">
+{
+  "id": 1,
+  "name": "Demo MFI Head Office",
+  "externalId": "1",
+  "openingDate": "2009-01-01",
+  "hierarchy": ".",
+  "parentName": null,
+  "parentId": 0,
+  "allowedParents": []
+}
+</code>
             </div>
         </div>
-    
-    
+
         <a id="offices_create" name="offices_create" class="old-syle-anchor">&nbsp;</a>
         <div class="method-section">
             <div class="method-description">
-                <h4>Create an Office</h4>
+                <h4>Create Office</h4>
+                <p>Create an office.</p>
+                <p>Example Request: 
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/offices">
+                https://localhost:8443/mifosng-provider/api/v1/offices
+                </a>
+                </p>
             </div>
             <div class="method-example">
-                <code class="method-declaration">POST https://thedomainname/api/v1/office</code>
-                <code class="method-request">http://localhost:8080/mifosng-provider/api/v1/office
-                
-                
-                Content-Type: application/json
-                Request Body:
-                new json here
-                </code>
-                <code class="method-response">    { "entityId": 2 }
-                </code>
+                <code class="method-declaration">POST https://thedomainname/api/v1/offices</code>
+<code class="method-request">POST https://localhost:8443/mifosng-provider/api/v1/offices
+Content-Type: application/json 
+Request Body:
+{
+  "name": "Demo branch 9",
+  "externalId": "9",
+  "dateFormat": "dd MMMM yyyy",
+  "openingDateFormatted": "01 September 2011",
+  "parentId": 1
+}
+</code>
+<code class="method-response">
+{
+  "entityId": 9
+}
+</code>
             </div>
         </div>
+
         <a id="offices_update" name="offices_update" class="old-syle-anchor">&nbsp;</a>
         <div class="method-section">
             <div class="method-description">
-                <h4>Update an Office</h4>
+                <h4>Update Office</h4>
+                <p>Update office details.</p>
+                <p>Example Request: 
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/offices/1">
+                https://localhost:8443/mifosng-provider/api/v1/offices/1
+                </a>
+                </p>
             </div>
             <div class="method-example">
-                <code class="method-declaration">PUT https://thedomainname/api/v1/office/{officeId}</code>
-                <code class="method-request">http://localhost:8080/mifosng-provider/api/v1/office/1
-                
-                
-                Content-Type: application/json
-                Request Body:
-                new json here
-                </code>
-                <code class="method-response">    { "entityId": 2 }
-                </code>
+                <code class="method-declaration">PUT https://thedomainname/api/v1/offices/1</code>
+<code class="method-request">PUT https://localhost:8443/mifosng-provider/api/v1/offices/1
+Content-Type: application/json
+Request Body:
+{
+  "name": "Demo branch 9 changed",
+  "externalId": "11",
+  "dateFormat": "dd MMMM yyyy",
+  "openingDateFormatted": "05 September 2011",
+  "parentId": 1
+}
+</code>
+<code class="method-response">
+{
+  "entityId": 9
+}
+</code>
             </div>
-        </div>    
+        </div>
+<!-- end of office api docs -->
+
     
+  <!-- start of loan products api docs -->    
+   
         <a id="loanproducts" name="loanproducts" class="old-syle-anchor">&nbsp;</a>
         <div class="method-section">
             <div class="method-description">
@@ -1013,57 +1120,13 @@
                 </p>
             </div>
         </div>
-                
-        <div class="method-section">
-            <div class="method-description">
-                <h5>Attributes</h5>
-                <dl class="argument-list">
-                    <dt>
-                    id
-                    </dt>
-                    <dd>              
-                    string <span>jpw ipsum as an example of showing the (at least important) columns</span>
-                    </dd>
-                    <dt>
-                    amount
-                    </dt>
-                    <dd>positive integer or zero <span></span>
-                    </dd>
-                    <dd>Amount charged in cents</dd>
-                    <dt>
-                    card
-                    </dt>
-                    <dd>
-                    <dd><strong>hash</strong></dd>
-                    <dd>
-                    Hash describing the card used to make the charge
-                    <dl class="argument-list">
-                    
-                    <dt>
-                    inner object
-                    </dt>
-                    <dd>inner string <span> inner span extra </span>
-                    </dd>
-                    </dl>
-                    </dd>
-                    <dt>
-                    fingerprint
-                    </dt>
-                    <dd>string<span> or something</span>
-                    </dd>
-                </dl>
-            </div>
-        </div>
-    
-    
-    
     
         <a id="loanproducts_list" name="loanproducts_list" class="old-syle-anchor">&nbsp;</a>
         <div class="method-section">
             <div class="method-description">
                 <h4>List Loan Products</h4>
                 <p>Example Request: 
-                <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/loanproducts">http://localhost:8080/mifosng-provider/api/v1/loanproducts</a>
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/loanproducts">https://localhost:8443/mifosng-provider/api/v1/loanproducts</a>
                 </p>
             </div>
             <div class="method-example">
@@ -1116,60 +1179,12 @@
     "interestFrequencyOptions": [],
     "interestRebateAllowed": false,
     "flexible": false
-    },
-    {
-    "id": 2,
-    "name": "curr loan",
-    "description": "asdff",
-    "principalMoney": {
-    "currencyCode": "ETB",
-    "currencyDigitsAfterDecimal": 2,
-    "amount": 100000,
-    "defaultName": "Ethiopian Birr",
-    "nameCode": "currency.ETB",
-    "displaySymbol": null,
-    "zero": false,
-    "greaterThanZero": true,
-    "displaySymbolValue": "100000.00 null"
-    },
-    "interestRatePerPeriod": 0,
-    "interestRatePeriod": 2,
-    "annualInterestRate": 0,
-    "interestMethod": 0,
-    "interestRateCalculatedInPeriod": 0,
-    "numberOfInterestFreePeriods": 0,
-    "repaidEvery": 1,
-    "repaymentPeriodFrequency": 2,
-    "numberOfRepayments": 5,
-    "amortizationMethod": 1,
-    "inArrearsTolerance": {
-    "currencyCode": "ETB",
-    "currencyDigitsAfterDecimal": 2,
-    "amount": 0,
-    "defaultName": "Ethiopian Birr",
-    "nameCode": "currency.ETB",
-    "displaySymbol": null,
-    "zero": true,
-    "greaterThanZero": false,
-    "displaySymbolValue": "0.00 null"
-    },
-    "createdOn": "2012-04-15T00:00:00.000+10:00",
-    "lastModifedOn": "2012-04-15T00:00:00.000+10:00",
-    "possibleCurrencies": [],
-    "possibleAmortizationOptions": [],
-    "possibleInterestOptions": [],
-    "possibleInterestRateCalculatedInPeriodOptions": [],
-    "repaymentFrequencyOptions": [],
-    "interestFrequencyOptions": [],
-    "interestRebateAllowed": false,
-    "flexible": false
     }
     ]
     }
     </code>
             </div>
         </div>
-    
     
         <a id="loanproducts_template" name="loanproducts_template" class="old-syle-anchor">&nbsp;</a>
         <div class="method-section">
@@ -1178,128 +1193,127 @@
                 <p>Returns a template that contains the loan product fields and allowed value lists.  This helps build a maintenance User Interface.
                 </p>
                 <p>Example Request: 
-                <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/loanproducts/template">http://localhost:8080/mifosng-provider/api/v1/loanproducts/template</a>
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/loanproducts/template">https://localhost:8443/mifosng-provider/api/v1/loanproducts/template</a>
                 </p>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://thedomainname/api/v1/loanproducts/template</code>
-                <code class="method-response">    {
-            "id": null,
-            "name": null,
-            "description": null,
-            "principalMoney": {
-            "currencyCode": "XOF",
-            "currencyDigitsAfterDecimal": 0,
-            "amount": 0,
-            "defaultName": "CFA Franc BCEAO",
-            "nameCode": "currency.XOF",
-            "displaySymbol": "CFA",
-            "zero": true,
-            "greaterThanZero": false,
-            "displaySymbolValue": "0 CFA"
-            },
-            "interestRatePerPeriod": 0,
-            "interestRatePeriod": 2,
-            "annualInterestRate": 0,
-            "interestMethod": 0,
-            "interestRateCalculatedInPeriod": 1,
-            "numberOfInterestFreePeriods": 0,
-            "repaidEvery": 1,
-            "repaymentPeriodFrequency": 2,
-            "numberOfRepayments": 0,
-            "amortizationMethod": 1,
-            "inArrearsTolerance": {
-            "currencyCode": "XOF",
-            "currencyDigitsAfterDecimal": 0,
-            "amount": 0,
-            "defaultName": "CFA Franc BCEAO",
-            "nameCode": "currency.XOF",
-            "displaySymbol": "CFA",
-            "zero": true,
-            "greaterThanZero": false,
-            "displaySymbolValue": "0 CFA"
-            },
-            "createdOn": null,
-            "lastModifedOn": null,
-            "possibleCurrencies": [
-            {
-            "code": "XOF",
-            "name": "CFA Franc BCEAO",
-            "decimalPlaces": 0,
-            "displaySymbol": "CFA",
-            "nameCode": "currency.XOF",
-            "displayLabel": "CFA Franc BCEAO (CFA)"
-            },
-            {
-            "code": "ETB",
-            "name": "Ethiopian Birr",
-            "decimalPlaces": 2,
-            "displaySymbol": null,
-            "nameCode": "currency.ETB",
-            "displayLabel": "Ethiopian Birr [ETB]"
-            }
-            ],
-            "possibleAmortizationOptions": [
-            {
-            "id": 1,
-            "value": "Equal installments"
-            },
-            {
-            "id": 0,
-            "value": "Equal principle payments"
-            }
-            ],
-            "possibleInterestOptions": [
-            {
-            "id": 0,
-            "value": "Declining Balance"
-            },
-            {
-            "id": 1,
-            "value": "Flat"
-            }
-            ],
-            "possibleInterestRateCalculatedInPeriodOptions": [
-            {
-            "id": 0,
-            "value": "Daily"
-            },
-            {
-            "id": 1,
-            "value": "Same as repayment period"
-            }
-            ],
-            "repaymentFrequencyOptions": [
-            {
-            "id": 0,
-            "value": "Days"
-            },
-            {
-            "id": 1,
-            "value": "Weeks"
-            },
-            {
-            "id": 2,
-            "value": "Months"
-            }
-            ],
-            "interestFrequencyOptions": [
-            {
-            "id": 2,
-            "value": "Per month"
-            },
-            {
-            "id": 3,
-            "value": "Per year"
-            }
-            ],
-            "interestRebateAllowed": false,
-            "flexible": false
-            }
-            </code>
+<code class="method-response">{
+"id": null,
+"name": null,
+"description": null,
+"principalMoney": {
+"currencyCode": "XOF",
+"currencyDigitsAfterDecimal": 0,
+"amount": 0,
+"defaultName": "CFA Franc BCEAO",
+"nameCode": "currency.XOF",
+"displaySymbol": "CFA",
+"zero": true,
+"greaterThanZero": false,
+"displaySymbolValue": "0 CFA"
+},
+"interestRatePerPeriod": 0,
+"interestRatePeriod": 2,
+"annualInterestRate": 0,
+"interestMethod": 0,
+"interestRateCalculatedInPeriod": 1,
+"numberOfInterestFreePeriods": 0,
+"repaidEvery": 1,
+"repaymentPeriodFrequency": 2,
+"numberOfRepayments": 0,
+"amortizationMethod": 1,
+"inArrearsTolerance": {
+"currencyCode": "XOF",
+"currencyDigitsAfterDecimal": 0,
+"amount": 0,
+"defaultName": "CFA Franc BCEAO",
+"nameCode": "currency.XOF",
+"displaySymbol": "CFA",
+"zero": true,
+"greaterThanZero": false,
+"displaySymbolValue": "0 CFA"
+},
+"createdOn": null,
+"lastModifedOn": null,
+"possibleCurrencies": [
+{
+"code": "XOF",
+"name": "CFA Franc BCEAO",
+"decimalPlaces": 0,
+"displaySymbol": "CFA",
+"nameCode": "currency.XOF",
+"displayLabel": "CFA Franc BCEAO (CFA)"
+},
+{
+"code": "ETB",
+"name": "Ethiopian Birr",
+"decimalPlaces": 2,
+"displaySymbol": null,
+"nameCode": "currency.ETB",
+"displayLabel": "Ethiopian Birr [ETB]"
+}
+],
+"possibleAmortizationOptions": [
+{
+"id": 1,
+"value": "Equal installments"
+},
+{
+"id": 0,
+"value": "Equal principle payments"
+}
+],
+"possibleInterestOptions": [
+{
+"id": 0,
+"value": "Declining Balance"
+},
+{
+"id": 1,
+"value": "Flat"
+}
+],
+"possibleInterestRateCalculatedInPeriodOptions": [
+{
+"id": 0,
+"value": "Daily"
+},
+{
+"id": 1,
+"value": "Same as repayment period"
+}
+],
+"repaymentFrequencyOptions": [
+{
+"id": 0,
+"value": "Days"
+},
+{
+"id": 1,
+"value": "Weeks"
+},
+{
+"id": 2,
+"value": "Months"
+}
+],
+"interestFrequencyOptions": [
+{
+"id": 2,
+"value": "Per month"
+},
+{
+"id": 3,
+"value": "Per year"
+}
+],
+"interestRebateAllowed": false,
+"flexible": false
+}
+</code>
             </div>
         </div>
-    
     
         <a id="loanproducts_retrieve" name="loanproducts_retrieve" class="old-syle-anchor">&nbsp;</a>
         <div class="method-section">
@@ -1309,129 +1323,128 @@
                 JPW - includes validation values (might be ok or option), enum?
                 </p>
                 <p>Example Request: 
-                <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/loanproducts/1">http://localhost:8080/mifosng-provider/api/v1/loanproducts/1</a>
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/loanproducts/1">https://localhost:8443/mifosng-provider/api/v1/loanproducts/1</a>
                 </p>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://thedomainname/api/v1/loanproducts/{productId}</code>
-                <code class="method-response">    {
-                "id": 1,
-                "name": "Agricultural Loan",
-                "description": "An agricultural loan given to farmers to help buy crop, stock and machinery. With an arrears tolerance setting of 1,000 CFA, loans are not marked as 'in arrears' or 'in bad standing' if the amount outstanding is less than this. Interest rate is described using monthly percentage rate (MPR) even though the loan typically lasts a year and requires one repayment (typically at time when farmer sells crop)",
-                "principalMoney": {
-                "currencyCode": "XOF",
-                "currencyDigitsAfterDecimal": 0,
-                "amount": 100000,
-                "defaultName": "CFA Franc BCEAO",
-                "nameCode": "currency.XOF",
-                "displaySymbol": "CFA",
-                "zero": false,
-                "greaterThanZero": true,
-                "displaySymbolValue": "100000 CFA"
-                },
-                "interestRatePerPeriod": 1.75,
-                "interestRatePeriod": 2,
-                "annualInterestRate": 21,
-                "interestMethod": 0,
-                "interestRateCalculatedInPeriod": 0,
-                "numberOfInterestFreePeriods": 0,
-                "repaidEvery": 12,
-                "repaymentPeriodFrequency": 2,
-                "numberOfRepayments": 1,
-                "amortizationMethod": 1,
-                "inArrearsTolerance": {
-                "currencyCode": "XOF",
-                "currencyDigitsAfterDecimal": 0,
-                "amount": 1000,
-                "defaultName": "CFA Franc BCEAO",
-                "nameCode": "currency.XOF",
-                "displaySymbol": "CFA",
-                "zero": false,
-                "greaterThanZero": true,
-                "displaySymbolValue": "1000 CFA"
-                },
-                "createdOn": "2012-04-12T00:00:00.000+10:00",
-                "lastModifedOn": "2012-04-12T00:00:00.000+10:00",
-                "possibleCurrencies": [
-                {
-                "code": "XOF",
-                "name": "CFA Franc BCEAO",
-                "decimalPlaces": 0,
-                "displaySymbol": "CFA",
-                "nameCode": "currency.XOF",
-                "displayLabel": "CFA Franc BCEAO (CFA)"
-                },
-                {
-                "code": "ETB",
-                "name": "Ethiopian Birr",
-                "decimalPlaces": 2,
-                "displaySymbol": null,
-                "nameCode": "currency.ETB",
-                "displayLabel": "Ethiopian Birr [ETB]"
-                }
-                ],
-                "possibleAmortizationOptions": [
-                {
-                "id": 1,
-                "value": "Equal installments"
-                },
-                {
-                "id": 0,
-                "value": "Equal principle payments"
-                }
-                ],
-                "possibleInterestOptions": [
-                {
-                "id": 0,
-                "value": "Declining Balance"
-                },
-                {
-                "id": 1,
-                "value": "Flat"
-                }
-                ],
-                "possibleInterestRateCalculatedInPeriodOptions": [
-                {
-                "id": 0,
-                "value": "Daily"
-                },
-                {
-                "id": 1,
-                "value": "Same as repayment period"
-                }
-                ],
-                "repaymentFrequencyOptions": [
-                {
-                "id": 0,
-                "value": "Days"
-                },
-                {
-                "id": 1,
-                "value": "Weeks"
-                },
-                {
-                "id": 2,
-                "value": "Months"
-                }
-                ],
-                "interestFrequencyOptions": [
-                {
-                "id": 2,
-                "value": "Per month"
-                },
-                {
-                "id": 3,
-                "value": "Per year"
-                }
-                ],
-                "interestRebateAllowed": false,
-                "flexible": false
-                }
-                </code>
+<code class="method-response">{
+"id": 1,
+"name": "Agricultural Loan",
+"description": "An agricultural loan given to farmers to help buy crop, stock and machinery. With an arrears tolerance setting of 1,000 CFA, loans are not marked as 'in arrears' or 'in bad standing' if the amount outstanding is less than this. Interest rate is described using monthly percentage rate (MPR) even though the loan typically lasts a year and requires one repayment (typically at time when farmer sells crop)",
+"principalMoney": {
+"currencyCode": "XOF",
+"currencyDigitsAfterDecimal": 0,
+"amount": 100000,
+"defaultName": "CFA Franc BCEAO",
+"nameCode": "currency.XOF",
+"displaySymbol": "CFA",
+"zero": false,
+"greaterThanZero": true,
+"displaySymbolValue": "100000 CFA"
+},
+"interestRatePerPeriod": 1.75,
+"interestRatePeriod": 2,
+"annualInterestRate": 21,
+"interestMethod": 0,
+"interestRateCalculatedInPeriod": 0,
+"numberOfInterestFreePeriods": 0,
+"repaidEvery": 12,
+"repaymentPeriodFrequency": 2,
+"numberOfRepayments": 1,
+"amortizationMethod": 1,
+"inArrearsTolerance": {
+"currencyCode": "XOF",
+"currencyDigitsAfterDecimal": 0,
+"amount": 1000,
+"defaultName": "CFA Franc BCEAO",
+"nameCode": "currency.XOF",
+"displaySymbol": "CFA",
+"zero": false,
+"greaterThanZero": true,
+"displaySymbolValue": "1000 CFA"
+},
+"createdOn": "2012-04-12T00:00:00.000+10:00",
+"lastModifedOn": "2012-04-12T00:00:00.000+10:00",
+"possibleCurrencies": [
+{
+"code": "XOF",
+"name": "CFA Franc BCEAO",
+"decimalPlaces": 0,
+"displaySymbol": "CFA",
+"nameCode": "currency.XOF",
+"displayLabel": "CFA Franc BCEAO (CFA)"
+},
+{
+"code": "ETB",
+"name": "Ethiopian Birr",
+"decimalPlaces": 2,
+"displaySymbol": null,
+"nameCode": "currency.ETB",
+"displayLabel": "Ethiopian Birr [ETB]"
+}
+],
+"possibleAmortizationOptions": [
+{
+"id": 1,
+"value": "Equal installments"
+},
+{
+"id": 0,
+"value": "Equal principle payments"
+}
+],
+"possibleInterestOptions": [
+{
+"id": 0,
+"value": "Declining Balance"
+},
+{
+"id": 1,
+"value": "Flat"
+}
+],
+"possibleInterestRateCalculatedInPeriodOptions": [
+{
+"id": 0,
+"value": "Daily"
+},
+{
+"id": 1,
+"value": "Same as repayment period"
+}
+],
+"repaymentFrequencyOptions": [
+{
+"id": 0,
+"value": "Days"
+},
+{
+"id": 1,
+"value": "Weeks"
+},
+{
+"id": 2,
+"value": "Months"
+}
+],
+"interestFrequencyOptions": [
+{
+"id": 2,
+"value": "Per month"
+},
+{
+"id": 3,
+"value": "Per year"
+}
+],
+"interestRebateAllowed": false,
+"flexible": false
+}
+</code>
             </div>
         </div>
-    
-    
+     
         <a id="loanproducts_create" name="loanproducts_create" class="old-syle-anchor">&nbsp;</a>
         <div class="method-section">
             <div class="method-description">
@@ -1439,16 +1452,28 @@
             </div>
             <div class="method-example">
                 <code class="method-declaration">POST https://thedomainname/api/v1/loanproducts</code>
-                <code class="method-request">http://localhost:8080/mifosng-provider/api/v1/loanproducts
-                
-                
-                Content-Type: application/json
-                Request Body:
-                new loan product json here
-                </code>
+<code class="method-request">https://localhost:8443/mifosng-provider/api/v1/loanproducts
+Content-Type: application/json
+Request Body:
+{
+  "name": "New kind of Loan",
+  "description": "A description not exceeding 500 characters.",
+  "currencyCode": "XOF",
+  "digitsAfterDecimal": 0,
+  "principal": 100000,
+  "inArrearsToleranceAmount": 1000,
+  "numberOfRepayments": 1,
+  "repaymentEvery": 1,
+  "repaymentFrequency": 2,
+  "amortizationMethod": 1,
+  "interestRatePerPeriod": 1.75,
+  "interestRateFrequencyMethod": 2,
+  "interestCalculationPeriodMethod": 1,
+  "interestMethod": 0
+}
+</code>
             </div>
         </div>
-    
     
         <a id="loanproducts_update" name="loanproducts_update" class="old-syle-anchor">&nbsp;</a>
         <div class="method-section">
@@ -1457,18 +1482,163 @@
             </div>
             <div class="method-example">
                 <code class="method-declaration">POST https://thedomainname/api/v1/loanproducts/{loanId}</code>
-                <code class="method-request">http://localhost:8080/mifosng-provider/api/v1/loanproducts/1
-                
-                
-                Content-Type: application/json
-                Request Body:
-                update loan product json here
-                </code>
+<code class="method-request">https://localhost:8443/mifosng-provider/api/v1/loanproducts/1
+Content-Type: application/json
+Request Body:
+{
+  "name": "New kind of Loan updated",
+  "description": "An updated description not exceeding 500 characters.",
+  "currencyCode": "XOF",
+  "digitsAfterDecimal": 0,
+  "principal": 100000,
+  "inArrearsToleranceAmount": 1000,
+  "numberOfRepayments": 1,
+  "repaymentEvery": 1,
+  "repaymentFrequency": 2,
+  "amortizationMethod": 1,
+  "interestRatePerPeriod": 1.75,
+  "interestRateFrequencyMethod": 2,
+  "interestCalculationPeriodMethod": 1,
+  "interestMethod": 0
+}
+</code>
             </div>
         </div>
+<!-- end of loan products api docs -->    
     
+<!-- start of configurations api docs -->
+	<a id="configs" name="configs" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+		<div class="method-description">
+		    <h3>Configuration</h3>
+		    <p>Application related configuration like being able to select what currencies are permitted for use within the MFI.</p>
+		</div>
+	</div>
+	
+	<a id="configs_currencyretrieve" name="configs_currencyretrieve" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>Retrieve currency configuration settings</h4>
+	        <p>Returns the list of selectedCurrencies that are allowed within the MFI and the list of currencies that are currently not selected.</p>
+	        <p>Example Request: 
+	        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/configurations/currency">https://localhost:8443/mifosng-provider/api/v1/configurations/currency</a>
+	        </p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://thedomainname/api/v1/configurations/currency</code>
+<code class="method-response">
+{
+  "selectedCurrencyOptions": [
+    {
+      "code": "KES",
+      "name": "Kenyan Shilling",
+      "decimalPlaces": 2,
+      "displaySymbol": "KSh",
+      "nameCode": "currency.KES",
+      "displayLabel": "Kenyan Shilling (KSh)"
+    },
+    {
+      "code": "BND",
+      "name": "Brunei Dollar",
+      "decimalPlaces": 2,
+      "displaySymbol": "BND",
+      "nameCode": "currency.BND",
+      "displayLabel": "Brunei Dollar (BND)"
+    },
+    {
+      "code": "LBP",
+      "name": "Lebanese Pound",
+      "decimalPlaces": 2,
+      "displaySymbol": "L£",
+      "nameCode": "currency.LBP",
+      "displayLabel": "Lebanese Pound (L£)"
+    },
+    {
+      "code": "GHC",
+      "name": "Ghana Cedi",
+      "decimalPlaces": 2,
+      "displaySymbol": "GHC",
+      "nameCode": "currency.GHC",
+      "displayLabel": "Ghana Cedi (GHC)"
+    },
+    {
+      "code": "USD",
+      "name": "US Dollar",
+      "decimalPlaces": 2,
+      "displaySymbol": "$",
+      "nameCode": "currency.USD",
+      "displayLabel": "US Dollar ($)"
+    },
+    {
+      "code": "XOF",
+      "name": "CFA Franc BCEAO",
+      "decimalPlaces": 0,
+      "displaySymbol": "CFA",
+      "nameCode": "currency.XOF",
+      "displayLabel": "CFA Franc BCEAO (CFA)"
+    }
+  ],
+  "currencyOptions": [
+    {
+      "code": "AED",
+      "name": "UAE Dirham",
+      "decimalPlaces": 2,
+      "displaySymbol": null,
+      "nameCode": "currency.AED",
+      "displayLabel": "UAE Dirham [AED]"
+    },
+    {
+      "code": "AFN",
+      "name": "Afghanistan Afghani",
+      "decimalPlaces": 2,
+      "displaySymbol": null,
+      "nameCode": "currency.AFN",
+      "displayLabel": "Afghanistan Afghani [AFN]"
+    },
+    ...
+    ...
+    {
+      "code": "ZMK",
+      "name": "Zambian Kwacha",
+      "decimalPlaces": 2,
+      "displaySymbol": null,
+      "nameCode": "currency.ZMK",
+      "displayLabel": "Zambian Kwacha [ZMK]"
+    },
+    {
+      "code": "ZWD",
+      "name": "Zimbabwe Dollar",
+      "decimalPlaces": 2,
+      "displaySymbol": null,
+      "nameCode": "currency.ZWD",
+      "displayLabel": "Zimbabwe Dollar [ZWD]"
+    }
+  ]
+}
+</code>
+	    </div>
+	</div>
+        
+    <a id="configs_currencyupdate" name="configs_currencyupdate" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>Update currency configuration settings</h4>
+	        <p>Update list of selectedCurrencies that are allowed within the MFI and the list of currencies that are currently not selected.</p>
+	        <p>Example Request: 
+	        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/configurations/currency">https://localhost:8443/mifosng-provider/api/v1/configurations/currency</a>
+	        </p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">PUT https://thedomainname/api/v1/configurations/currency</code>
+<code class="method-response">
+{ 
+"selectedItems": ["USD", "GBP"]
+}
+</code>
+	    </div>
+	</div>
     
-    
+    <!-- start of additionalfields api docs -->
         <a id="additionalfields" name="additionalfields" class="old-syle-anchor">&nbsp;</a>
         <div class="method-section">
             <div class="method-description">
@@ -1885,6 +2055,478 @@
                 }</code>
             </div>
         </div>
+    
+     <!-- start of authentication api docs -->
+	<a id="authentication" name="authentication" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+		<div class="method-description">
+		    <h3>Authentication</h3>
+		    <p>An API capability to allowed client applications verify authentication details.</p>
+		</div>
+	</div>
+    
+    <a id="authentication_permissions" name="authentication_permissions" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>Verify authentication</h4>
+	        <p>Verifies that the credentials provided successfully authenticate and returns the set of permissions allowed by that user.</p>
+	        <p>Example Request: 
+	        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/authentication?username=super1&password=demo">https://localhost:8443/mifosng-provider/api/v1/authentication?username=super1&password=demo</a>
+	        </p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://thedomainname/api/v1/authentication?username=super1&password=demo</code>
+<code class="method-request">POST https://localhost:8443/mifosng-provider/api/v1/authentication?username=super1&password=demo
+Content-Type: application/xml
+</code>
+<code class="method-response">
+</code>
+	    </div>
+	</div>    
+    
+    <!-- start of useraccounts api docs -->
+	<a id="useraccounts" name="useraccounts" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+		<div class="method-description">
+		    <h3>User account details</h3>
+		    <p>An API capability to allowed client applications expose functionality for users to update their account details and password.</p>
+		</div>
+	</div>
+    
+    <a id="useraccount_details_retrieve" name="useraccount_details_retrieve" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>Retrieve current users account details</h4>
+	        <p>Will return user account details.</p>
+	        <p>Example Request: 
+	        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/useraccounts/current">https://localhost:8443/mifosng-provider/api/v1/useraccounts/current</a>
+	        </p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://thedomainname/api/v1/useraccounts/current</code>
+<code class="method-request">GET https://localhost:8443/mifosng-provider/api/v1/useraccounts/current</code>
+<code class="method-response">
+{
+  "id": 1,
+  "orgId": 1,
+  "officeId": 1,
+  "officeName": "Demo MFI Head Office",
+  "username": "mifos",
+  "firstname": "App hello",
+  "lastname": "Administrator",
+  "email": "demomfi@mifos.org",
+  "allowedOffices": [
+    {
+      "id": 1,
+      "name": "Demo MFI Head Office",
+      "externalId": "1",
+      "openingDate": "2009-01-01",
+      "hierarchy": ".",
+      "parentName": null,
+      "parentId": 0,
+      "allowedParents": []
+    },
+    {
+      "id": 2,
+      "name": "sub branch 1",
+      "externalId": "2",
+      "openingDate": "2012-01-02",
+      "hierarchy": ".2.",
+      "parentName": "Demo MFI Head Office",
+      "parentId": 1,
+      "allowedParents": []
+    }
+  ],
+  "availableRoles": [
+    {
+      "id": 2,
+      "orgId": 1,
+      "name": "Field officer",
+      "description": "A field officer role allows the user to add client and loans and view reports but nothing else.",
+      "availablePermissions": [],
+      "selectedPermissions": []
+    },
+    {
+      "id": 3,
+      "orgId": 1,
+      "name": "Data Entry (Portfolio only)",
+      "description": "This role allows a user full permissions around client and loan functionality but nothing else.",
+      "availablePermissions": [],
+      "selectedPermissions": []
+    },
+    {
+      "id": 4,
+      "orgId": 1,
+      "name": "Credit Committe Member",
+      "description": "This role allows a user to approve reject or withdraw loans (with reporting).",
+      "availablePermissions": [],
+      "selectedPermissions": []
+    },
+    {
+      "id": 5,
+      "orgId": 1,
+      "name": "Manager",
+      "description": "This role allows a manager to do anything related to portfolio management and also view all reports.",
+      "availablePermissions": [],
+      "selectedPermissions": []
+    }
+  ],
+  "selectedRoles": [
+    {
+      "id": 1,
+      "orgId": 1,
+      "name": "Super user",
+      "description": "This role provides all application permissions.",
+      "availablePermissions": [],
+      "selectedPermissions": [
+        {
+          "id": 1,
+          "orgId": 1,
+          "name": "User administration ALL",
+          "description": "An application user will have permission to execute all tasks related to user administration.",
+          "code": "USER_ADMINISTRATION_SUPER_USER_ROLE",
+          "groupType": 1
+        },
+        {
+          "id": 4,
+          "orgId": 1,
+          "name": "Reporting ALL",
+          "description": "An application user will have permission to execute and view all reports.",
+          "code": "REPORTING_SUPER_USER_ROLE",
+          "groupType": 4
+        },
+        {
+          "id": 3,
+          "orgId": 1,
+          "name": "Portfolio management ALL",
+          "description": "An application user will have permission to execute all tasks related to portfolio management.",
+          "code": "PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE",
+          "groupType": 3
+        },
+        {
+          "id": 2,
+          "orgId": 1,
+          "name": "Organisation adminsitration ALL",
+          "description": "An application user will have permission to execute all tasks related to organisation administration.",
+          "code": "ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE",
+          "groupType": 2
+        }
+      ]
+    }
+  ]
+}
+</code>
+	    </div>
+	</div>
+   
+    <a id="useraccount_details_update" name="useraccount_details_update" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>Update current users account details</h4>
+	        <p>Will update user account details.</p>
+	    </div>
+	    <div class="method-example">
+			<code class="method-declaration">PUT https://thedomainname/api/v1/useraccounts/current</code>
+<code class="method-request">PUT https://localhost:8443/mifosng-provider/api/v1/useraccounts/current
+Content-Type: application/json
+Request body:
+{  
+  "officeId": 1,
+  "username": "mifos",
+  "firstname": "App hello",
+  "lastname": "Administrator",
+  "email": "demomfi@mifos.org",
+  "selectedItems": ["1"]
+}
+</code>
+<code class="method-response">
+{
+  "entityId": 1
+}
+</code>
+	    </div>
+	</div>
+   
+   
+    <a id="useraccount_password_retrieve" name="useraccount_password_retrieve" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>Retrieve change password template details</h4>
+	        <p>Will details for change of password screen.</p>
+	        <p>Example Request: 
+	        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/useraccounts/current/password/template">https://localhost:8443/mifosng-provider/api/v1/useraccounts/current/password/template</a>
+	        </p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://thedomainname/api/v1/useraccounts/current/password/template</code>
+<code class="method-request">GET https://localhost:8443/mifosng-provider/api/v1/useraccounts/current/password/template</code>
+<code class="method-response">
+{
+  "password": null,
+  "passwordrepeat": null
+}
+</code>
+	    </div>
+	</div>
+   
+    <a id="useraccount_password_update" name="useraccount_password_update" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>Update current users password</h4>
+	        <p>Will update users password.</p>
+	    </div>
+	    <div class="method-example">
+			<code class="method-declaration">PUT https://thedomainname/api/v1/useraccounts/current/password</code>
+<code class="method-request">PUT https://localhost:8443/mifosng-provider/api/v1/useraccounts/current/password
+Content-Type: application/json
+Request body:
+{
+  "password": "demo",
+  "passwordrepeat": "demo"
+}
+</code>
+<code class="method-response">
+{
+  "entityId": 1
+}
+</code>
+	    </div>
+	</div>
+   
+    <!-- start of users api docs -->
+	<a id="users" name="users" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+		<div class="method-description">
+		    <h3>Users</h3>
+		    <p>An API capability to support user administration.</p>
+		</div>
+	</div>
+   
+    <a id="users_list" name="users_list" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>Retrieve list of users</h4>
+	        <p>Returns all users.</p>
+	        <p>Example Request: 
+	        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/users">https://localhost:8443/mifosng-provider/api/v1/users</a>
+	        </p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://thedomainname/api/v1/users</code>
+<code class="method-request">GET https://localhost:8443/mifosng-provider/api/v1/users</code>
+<code class="method-response">
+{
+  "users": [
+    {
+      "id": 1,
+      "orgId": 1,
+      "officeId": 1,
+      "officeName": "Demo MFI Head Office",
+      "username": "mifos",
+      "firstname": "App hello",
+      "lastname": "Administrator",
+      "email": "demomfi@mifos.org",
+      "allowedOffices": [],
+      "availableRoles": [],
+      "selectedRoles": []
+    },
+    {
+      "id": 2,
+      "orgId": 1,
+      "officeId": 1,
+      "officeName": "Demo MFI Head Office",
+      "username": "super1",
+      "firstname": "super",
+      "lastname": "user",
+      "email": "fake@email.com",
+      "allowedOffices": [],
+      "availableRoles": [],
+      "selectedRoles": []
+    }
+  ]
+}
+</code>
+	    </div>
+	</div>
+   
+    <a id="users_template" name="users_template" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>Retrieve new user template details</h4>
+	        <p>Returns details for new user screen</p>
+	        <p>Example Request: 
+	        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/users/template">https://localhost:8443/mifosng-provider/api/v1/users/template</a>
+	        </p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://thedomainname/api/v1/users/template</code>
+<code class="method-request">GET https://localhost:8443/mifosng-provider/api/v1/users/template</code>
+<code class="method-response">
+{
+  "id": null,
+  "orgId": null,
+  "officeId": null,
+  "officeName": null,
+  "username": null,
+  "firstname": null,
+  "lastname": null,
+  "email": null,
+  "allowedOffices": [
+    {
+      "id": 1,
+      "name": "Demo MFI Head Office",
+      "externalId": "1",
+      "openingDate": "2009-01-01",
+      "hierarchy": ".",
+      "parentName": null,
+      "parentId": 0,
+      "allowedParents": []
+    },
+    {
+      "id": 2,
+      "name": "sub branch 1",
+      "externalId": "2",
+      "openingDate": "2012-01-02",
+      "hierarchy": ".2.",
+      "parentName": "Demo MFI Head Office",
+      "parentId": 1,
+      "allowedParents": []
+    }
+  ],
+  "availableRoles": [
+    {
+      "id": 1,
+      "orgId": 1,
+      "name": "Super user",
+      "description": "This role provides all application permissions.",
+      "availablePermissions": [],
+      "selectedPermissions": []
+    },
+    {
+      "id": 2,
+      "orgId": 1,
+      "name": "Field officer",
+      "description": "A field officer role allows the user to add client and loans and view reports but nothing else.",
+      "availablePermissions": [],
+      "selectedPermissions": []
+    }
+  ],
+  "selectedRoles": []
+}
+</code>
+	    </div>
+	</div>
+   
+       <a id="users_retrieve" name="users_retrieve" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>Retrieve existing user details</h4>
+	        <p>Returns details for existing application user</p>
+	        <p>Example Request: 
+	        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/users/1">https://localhost:8443/mifosng-provider/api/v1/users/1</a>
+	        </p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://thedomainname/api/v1/users/1</code>
+<code class="method-request">GET https://localhost:8443/mifosng-provider/api/v1/users/1</code>
+<code class="method-response">
+{
+  "id": 1,
+  "orgId": 1,
+  "officeId": 1,
+  "officeName": "Demo MFI Head Office",
+  "username": "mifos",
+  "firstname": "App hello",
+  "lastname": "Administrator",
+  "email": "demomfi@mifos.org",
+  "allowedOffices": [
+    {
+      "id": 1,
+      "name": "Demo MFI Head Office",
+      "externalId": "1",
+      "openingDate": "2009-01-01",
+      "hierarchy": ".",
+      "parentName": null,
+      "parentId": 0,
+      "allowedParents": []
+    },
+    {
+      "id": 2,
+      "name": "sub branch 1",
+      "externalId": "2",
+      "openingDate": "2012-01-02",
+      "hierarchy": ".2.",
+      "parentName": "Demo MFI Head Office",
+      "parentId": 1,
+      "allowedParents": []
+    }
+  ],
+  "availableRoles": [
+    {
+      "id": 2,
+      "orgId": 1,
+      "name": "Field officer",
+      "description": "A field officer role allows the user to add client and loans and view reports but nothing else.",
+      "availablePermissions": [],
+      "selectedPermissions": []
+    }
+  ],
+  "selectedRoles": [
+    {
+      "id": 1,
+      "orgId": 1,
+      "name": "Super user",
+      "description": "This role provides all application permissions.",
+      "availablePermissions": [],
+      "selectedPermissions": [
+        {
+          "id": 1,
+          "orgId": 1,
+          "name": "User administration ALL",
+          "description": "An application user will have permission to execute all tasks related to user administration.",
+          "code": "USER_ADMINISTRATION_SUPER_USER_ROLE",
+          "groupType": 1
+        },
+        {
+          "id": 4,
+          "orgId": 1,
+          "name": "Reporting ALL",
+          "description": "An application user will have permission to execute and view all reports.",
+          "code": "REPORTING_SUPER_USER_ROLE",
+          "groupType": 4
+        },
+        {
+          "id": 3,
+          "orgId": 1,
+          "name": "Portfolio management ALL",
+          "description": "An application user will have permission to execute all tasks related to portfolio management.",
+          "code": "PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE",
+          "groupType": 3
+        },
+        {
+          "id": 2,
+          "orgId": 1,
+          "name": "Organisation adminsitration ALL",
+          "description": "An application user will have permission to execute all tasks related to organisation administration.",
+          "code": "ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE",
+          "groupType": 2
+        }
+      ]
+    }
+  ]
+}
+</code>
+	    </div>
+	</div>
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     
     
