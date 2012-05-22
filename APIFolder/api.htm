@@ -521,8 +521,8 @@
                 <h4>Create a Client</h4>
             </div>
             <div class="method-example">
-                <code class="method-declaration">POST https://thedomainname/api/v1/client</code>
-                <code class="method-request">http://localhost:8080/mifosng-provider/api/v1/client
+                <code class="method-declaration">POST https://thedomainname/api/v1/clients</code>
+                <code class="method-request">http://localhost:8080/mifosng-provider/api/v1/clients
                 
                 
                 Content-Type: application/json
@@ -561,7 +561,57 @@
                 </code>
             </div>
         </div>
-    
+        <a id="clients_addnote" name="clients_addnote" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>Add a Client Note</h4>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">POST https://thedomainname/api/v1/clients/{clientId}/notes</code>
+                <code class="method-request">http://localhost:8080/mifosng-provider/api/v1/clients/1/notes
+                
+                
+                Content-Type: application/json
+                Request Body:
+                new json here
+                </code>
+                <code class="method-response">    { "entityId": 2 }
+                </code>
+            </div>
+        </div>
+
+        <a id="clients_retrievenote" name="clients_retrievenote" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>Retrieve a Client Note</h4>
+                <p>Example Request: 
+                <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/clients/1/notes/1">http://localhost:8080/mifosng-provider/api/v1/clients/1/notes/1</a>
+                </p>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">GET https://thedomainname/api/v1/clients/{clientId}/notes/{noteId}</code>
+                <code class="method-response"> 
+                </code>
+            </div>
+        </div>
+        <a id="clients_updatenote" name="clients_updatenote" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>Update a Client Note</h4>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">PUT https://thedomainname/api/v1/clients/{clientId}/notes/{noteId}</code>
+                <code class="method-request">http://localhost:8080/mifosng-provider/api/v1/clients/1/notes/1
+                
+                
+                Content-Type: application/json
+                Request Body:
+                new json here
+                </code>
+                <code class="method-response">    { "entityId": 2 }
+                </code>
+            </div>
+        </div>    
     
 
 
