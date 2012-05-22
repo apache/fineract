@@ -429,6 +429,148 @@
     
     
     
+
+
+        <a id="clients" name="clients" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h3>Clients</h3>
+                <p>Clients words.
+                </p>
+            </div>
+        </div>
+                
+        <div class="method-section">
+            <div class="method-description">
+                <h5>Attributes</h5>
+                <dl class="argument-list">
+                    <dt>
+                    id
+                    </dt>
+                    <dd>              
+                    string <span>jpw ipsum as an example of showing the (at least important) columns</span>
+                    </dd>
+                    <dt>
+                    amount
+                    </dt>
+                    <dd>blah <span></span>
+                    </dd>
+                    <dd>blah</dd>
+                    <dt>
+                    card
+                    </dt>
+                </dl>
+            </div>
+        </div>
+    
+        <a id="client_list" name="clients_list" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>List Clients</h4>
+                <p>Example Request: 
+                <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/clients">http://localhost:8080/mifosng-provider/api/v1/clients</a>
+                </p>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">GET https://thedomainname/api/v1/clients</code>
+                <code class="method-response">    to be done
+                </code>
+            </div>
+        </div>
+    
+    
+        <a id="clients_template" name="clients_template" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>Retrieve Client Details Template</h4>
+                <p>Returns a template that contains the client fields and allowed value lists.  This helps build a maintenance User Interface.
+                </p>
+                <p>Example Request: 
+                <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/clients/template">http://localhost:8080/mifosng-provider/api/v1/clients/template</a>
+                </p>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">GET https://thedomainname/api/v1/clients/template</code>
+                <code class="method-response"> to be done
+            </code>
+            </div>
+        </div>
+    
+    
+        <a id="clients_retrieve" name="clients_retrieve" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>Retrieve a Client</h4>
+                <p>Returns client fields.  It also returns allowed value lists which help build a maintenance User Interface.
+                </p>
+                <p>Example Request: 
+                <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/clients/1">http://localhost:8080/mifosng-provider/api/v1/clients/1</a>
+                </p>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">GET https://thedomainname/api/v1/clients/{clientId}</code>
+                <code class="method-response"> 
+                </code>
+            </div>
+        </div>
+    
+    
+        <a id="clients_create" name="clients_create" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>Create a Client</h4>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">POST https://thedomainname/api/v1/client</code>
+                <code class="method-request">http://localhost:8080/mifosng-provider/api/v1/client
+                
+                
+                Content-Type: application/json
+                Request Body:
+                new json here
+                </code>
+                <code class="method-response">    { "entityId": 2 }
+                </code>
+            </div>
+        </div>
+        <a id="clients_loansummary" name="clients_loansummary" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>Retrieve a Client's Loan Account Summary</h4>
+                <p>Example Request: 
+                <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/clients/1/loans">http://localhost:8080/mifosng-provider/api/v1/clients/1/loans</a>
+                </p>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">GET https://thedomainname/api/v1/clients/{clientId}/loans</code>
+                <code class="method-response"> 
+                </code>
+            </div>
+        </div>
+        <a id="clients_notes" name="clients_notes" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>Retrieve a Client's Notes</h4>
+                <p>Example Request: 
+                <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/clients/1/notes">http://localhost:8080/mifosng-provider/api/v1/clients/1/notes</a>
+                </p>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">GET https://thedomainname/api/v1/clients/{clientId}/notes</code>
+                <code class="method-response"> 
+                </code>
+            </div>
+        </div>
+    
+    
+
+
+
+
+
+
+
+
         <a id="offices" name="offices" class="old-syle-anchor">&nbsp;</a>
         <div class="method-section">
             <div class="method-description">
@@ -506,7 +648,7 @@
                 </p>
             </div>
             <div class="method-example">
-                <code class="method-declaration">GET https://thedomainname/api/v1/loanproducts/{officeId}</code>
+                <code class="method-declaration">GET https://thedomainname/api/v1/offices/{officeId}</code>
                 <code class="method-response"> 
                 </code>
             </div>
