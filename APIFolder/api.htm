@@ -841,47 +841,892 @@ Request Body:
                 </dl>
             </div>
         </div>
-        <a id="loans_template" name="loans_template" class="old-syle-anchor">&nbsp;</a>
-        <div class="method-section">
-            <div class="method-description">
-                <h4>Retrieve Loan Details Template</h4>
-                <p>Returns a template that contains client and loan product fields and allowed value lists.  This helps build a maintenance User Interface.
-                </p>
-                <h5>Arguments</h5>
-                <dl class="argument-list">
-                    <dt>clientId</dt>
-                    <dd>Integer</dd>
-                    <dd>The 'id' of the Client</dd>
-                    <dt>productId</dt>
-                    <dd>Integer</dd>
-                    <dd>The 'id' of the Loan Product</dd>
-                </dl>
-                <p>Example Request: 
-                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/loans/template?clientId=1&productId=1">https://localhost:8443/mifosng-provider/api/v1/loans/template?clientId=1&productId=1</a>
-                </p>
-            </div>
-            <div class="method-example">
-                <code class="method-declaration">GET https://thedomainname/api/v1/loans/template</code>
-                <code class="method-response"> to be done
-            </code>
-            </div>
-        </div>
-        <a id="loans_retrieve" name="loans_retrieve" class="old-syle-anchor">&nbsp;</a>
-        <div class="method-section">
-            <div class="method-description">
-                <h4>Retrieve a Loan</h4>
-                <p>Returns loan fields.
-                </p>
-                <p>Example Request: 
-                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/loans/1">https://localhost:8443/mifosng-provider/api/v1/loans/1</a>
-                </p>
-            </div>
-            <div class="method-example">
-                <code class="method-declaration">GET https://thedomainname/api/v1/loans/{loanId}</code>
-                <code class="method-response"> 
-                </code>
-            </div>
-        </div>
+        
+<a id="loans_template" name="loans_template" class="old-syle-anchor">&nbsp;</a>
+<div class="method-section">
+    <div class="method-description">
+        <h4>Retrieve Loan Details Template</h4>
+        <p>Returns a template that contains client and loan product fields and allowed value lists.  This helps build a maintenance User Interface.
+        </p>
+        <h5>Arguments</h5>
+        <dl class="argument-list">
+            <dt>clientId</dt>
+            <dd>Integer</dd>
+            <dd>The 'id' of the Client</dd>
+            <dt>productId</dt>
+            <dd>Integer</dd>
+            <dd>The 'id' of the Loan Product</dd>
+        </dl>
+        <p>Example Request: 
+        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/loans/template?clientId=1&productId=1">https://localhost:8443/mifosng-provider/api/v1/loans/template?clientId=1&productId=1</a>
+        </p>
+    </div>
+    <div class="method-example">
+        <code class="method-declaration">GET https://thedomainname/api/v1/loans/template</code>
+<code class="method-response">
+{
+  "organisationId": 1,
+  "organisationName": "Demo MFI",
+  "clientId": 1,
+  "clientName": "Patrick O'Meara",
+  "productId": 1,
+  "productName": "Agricultural Loan",
+  "allowedProducts": [
+    {
+      "id": 1,
+      "name": "Agricultural Loan",
+      "description": "An agricultural loan given to farmers to help buy crop, stock and machinery. With an arrears tolerance setting of 1,000 CFA, loans are not marked as 'in arrears' or 'in bad standing' if the amount outstanding is less than this. Interest rate is described using monthly percentage rate (MPR) even though the loan typically lasts a year and requires one repayment (typically at time when farmer sells crop)",
+      "principalMoney": {
+        "currencyCode": "XOF",
+        "currencyDigitsAfterDecimal": 0,
+        "amount": 100000,
+        "defaultName": "CFA Franc BCEAO",
+        "nameCode": "currency.XOF",
+        "displaySymbol": "CFA",
+        "zero": false,
+        "greaterThanZero": true,
+        "displaySymbolValue": "100000 CFA"
+      },
+      "interestRatePerPeriod": 1.75,
+      "interestRatePeriod": 2,
+      "annualInterestRate": 21,
+      "interestMethod": 0,
+      "interestRateCalculatedInPeriod": 1,
+      "numberOfInterestFreePeriods": 0,
+      "repaidEvery": 12,
+      "repaymentPeriodFrequency": 2,
+      "numberOfRepayments": 1,
+      "amortizationMethod": 1,
+      "inArrearsTolerance": {
+        "currencyCode": "XOF",
+        "currencyDigitsAfterDecimal": 0,
+        "amount": 1000,
+        "defaultName": "CFA Franc BCEAO",
+        "nameCode": "currency.XOF",
+        "displaySymbol": "CFA",
+        "zero": false,
+        "greaterThanZero": true,
+        "displaySymbolValue": "1000 CFA"
+      },
+      "createdOn": "2012-04-12T00:00:00.000+01:00",
+      "lastModifedOn": "2012-04-12T00:00:00.000+01:00",
+      "possibleCurrencies": [],
+      "possibleAmortizationOptions": [],
+      "possibleInterestOptions": [],
+      "possibleInterestRateCalculatedInPeriodOptions": [],
+      "repaymentFrequencyOptions": [],
+      "interestFrequencyOptions": [],
+      "interestRebateAllowed": false,
+      "flexible": false
+    },
+    {
+      "id": 2,
+      "name": "Brunei Loan",
+      "description": null,
+      "principalMoney": {
+        "currencyCode": "BND",
+        "currencyDigitsAfterDecimal": 2,
+        "amount": 76000,
+        "defaultName": "Brunei Dollar",
+        "nameCode": "currency.BND",
+        "displaySymbol": "BND",
+        "zero": false,
+        "greaterThanZero": true,
+        "displaySymbolValue": "76000.00 BND"
+      },
+      "interestRatePerPeriod": 6,
+      "interestRatePeriod": 2,
+      "annualInterestRate": 72,
+      "interestMethod": 0,
+      "interestRateCalculatedInPeriod": 1,
+      "numberOfInterestFreePeriods": 0,
+      "repaidEvery": 1,
+      "repaymentPeriodFrequency": 1,
+      "numberOfRepayments": 10,
+      "amortizationMethod": 1,
+      "inArrearsTolerance": {
+        "currencyCode": "BND",
+        "currencyDigitsAfterDecimal": 2,
+        "amount": 50,
+        "defaultName": "Brunei Dollar",
+        "nameCode": "currency.BND",
+        "displaySymbol": "BND",
+        "zero": false,
+        "greaterThanZero": true,
+        "displaySymbolValue": "50.00 BND"
+      },
+      "createdOn": "2012-04-16T00:00:00.000+01:00",
+      "lastModifedOn": "2012-04-16T00:00:00.000+01:00",
+      "possibleCurrencies": [],
+      "possibleAmortizationOptions": [],
+      "possibleInterestOptions": [],
+      "possibleInterestRateCalculatedInPeriodOptions": [],
+      "repaymentFrequencyOptions": [],
+      "interestFrequencyOptions": [],
+      "interestRebateAllowed": false,
+      "flexible": false
+    },
+    {
+      "id": 3,
+      "name": "IL Loan",
+      "description": null,
+      "principalMoney": {
+        "currencyCode": "USD",
+        "currencyDigitsAfterDecimal": 2,
+        "amount": 5000,
+        "defaultName": "US Dollar",
+        "nameCode": "currency.USD",
+        "displaySymbol": "$",
+        "zero": false,
+        "greaterThanZero": true,
+        "displaySymbolValue": "5000.00 $"
+      },
+      "interestRatePerPeriod": 15.6,
+      "interestRatePeriod": 3,
+      "annualInterestRate": 15.6,
+      "interestMethod": 1,
+      "interestRateCalculatedInPeriod": 1,
+      "numberOfInterestFreePeriods": 0,
+      "repaidEvery": 1,
+      "repaymentPeriodFrequency": 2,
+      "numberOfRepayments": 12,
+      "amortizationMethod": 1,
+      "inArrearsTolerance": {
+        "currencyCode": "USD",
+        "currencyDigitsAfterDecimal": 2,
+        "amount": 0,
+        "defaultName": "US Dollar",
+        "nameCode": "currency.USD",
+        "displaySymbol": "$",
+        "zero": true,
+        "greaterThanZero": false,
+        "displaySymbolValue": "0.00 $"
+      },
+      "createdOn": "2012-04-18T00:00:00.000+01:00",
+      "lastModifedOn": "2012-04-18T00:00:00.000+01:00",
+      "possibleCurrencies": [],
+      "possibleAmortizationOptions": [],
+      "possibleInterestOptions": [],
+      "possibleInterestRateCalculatedInPeriodOptions": [],
+      "repaymentFrequencyOptions": [],
+      "interestFrequencyOptions": [],
+      "interestRebateAllowed": false,
+      "flexible": false
+    },
+    {
+      "id": 4,
+      "name": "IBL Mabeshte",
+      "description": "Individual loan",
+      "principalMoney": {
+        "currencyCode": "KES",
+        "currencyDigitsAfterDecimal": 2,
+        "amount": 5000,
+        "defaultName": "Kenyan Shilling",
+        "nameCode": "currency.KES",
+        "displaySymbol": "KSh",
+        "zero": false,
+        "greaterThanZero": true,
+        "displaySymbolValue": "5000.00 KSh"
+      },
+      "interestRatePerPeriod": 2,
+      "interestRatePeriod": 2,
+      "annualInterestRate": 24,
+      "interestMethod": 1,
+      "interestRateCalculatedInPeriod": 1,
+      "numberOfInterestFreePeriods": 0,
+      "repaidEvery": 12,
+      "repaymentPeriodFrequency": 2,
+      "numberOfRepayments": 12,
+      "amortizationMethod": 1,
+      "inArrearsTolerance": {
+        "currencyCode": "KES",
+        "currencyDigitsAfterDecimal": 2,
+        "amount": 0,
+        "defaultName": "Kenyan Shilling",
+        "nameCode": "currency.KES",
+        "displaySymbol": "KSh",
+        "zero": true,
+        "greaterThanZero": false,
+        "displaySymbolValue": "0.00 KSh"
+      },
+      "createdOn": "2012-04-21T00:00:00.000+01:00",
+      "lastModifedOn": "2012-04-21T00:00:00.000+01:00",
+      "possibleCurrencies": [],
+      "possibleAmortizationOptions": [],
+      "possibleInterestOptions": [],
+      "possibleInterestRateCalculatedInPeriodOptions": [],
+      "repaymentFrequencyOptions": [],
+      "interestFrequencyOptions": [],
+      "interestRebateAllowed": false,
+      "flexible": false
+    },
+    {
+      "id": 5,
+      "name": "Salary Loan",
+      "description": "Loan for salaried workers",
+      "principalMoney": {
+        "currencyCode": "GHC",
+        "currencyDigitsAfterDecimal": 2,
+        "amount": 500,
+        "defaultName": "Ghana Cedi",
+        "nameCode": "currency.GHC",
+        "displaySymbol": "GHC",
+        "zero": false,
+        "greaterThanZero": true,
+        "displaySymbolValue": "500.00 GHC"
+      },
+      "interestRatePerPeriod": 3.5,
+      "interestRatePeriod": 2,
+      "annualInterestRate": 42,
+      "interestMethod": 1,
+      "interestRateCalculatedInPeriod": 1,
+      "numberOfInterestFreePeriods": 0,
+      "repaidEvery": 1,
+      "repaymentPeriodFrequency": 2,
+      "numberOfRepayments": 12,
+      "amortizationMethod": 1,
+      "inArrearsTolerance": {
+        "currencyCode": "GHC",
+        "currencyDigitsAfterDecimal": 2,
+        "amount": 0,
+        "defaultName": "Ghana Cedi",
+        "nameCode": "currency.GHC",
+        "displaySymbol": "GHC",
+        "zero": true,
+        "greaterThanZero": false,
+        "displaySymbolValue": "0.00 GHC"
+      },
+      "createdOn": "2012-04-24T00:00:00.000+01:00",
+      "lastModifedOn": "2012-04-24T00:00:00.000+01:00",
+      "possibleCurrencies": [],
+      "possibleAmortizationOptions": [],
+      "possibleInterestOptions": [],
+      "possibleInterestRateCalculatedInPeriodOptions": [],
+      "repaymentFrequencyOptions": [],
+      "interestFrequencyOptions": [],
+      "interestRebateAllowed": false,
+      "flexible": false
+    },
+    {
+      "id": 6,
+      "name": "daily-declining-balance",
+      "description": "an example loan product based on description for daily declining balance as given by Hugo technologies.",
+      "principalMoney": {
+        "currencyCode": "USD",
+        "currencyDigitsAfterDecimal": 2,
+        "amount": 100000,
+        "defaultName": "US Dollar",
+        "nameCode": "currency.USD",
+        "displaySymbol": "$",
+        "zero": false,
+        "greaterThanZero": true,
+        "displaySymbolValue": "100000.00 $"
+      },
+      "interestRatePerPeriod": 2,
+      "interestRatePeriod": 2,
+      "annualInterestRate": 24,
+      "interestMethod": 0,
+      "interestRateCalculatedInPeriod": 0,
+      "numberOfInterestFreePeriods": 0,
+      "repaidEvery": 1,
+      "repaymentPeriodFrequency": 2,
+      "numberOfRepayments": 12,
+      "amortizationMethod": 1,
+      "inArrearsTolerance": {
+        "currencyCode": "USD",
+        "currencyDigitsAfterDecimal": 2,
+        "amount": 0,
+        "defaultName": "US Dollar",
+        "nameCode": "currency.USD",
+        "displaySymbol": "$",
+        "zero": true,
+        "greaterThanZero": false,
+        "displaySymbolValue": "0.00 $"
+      },
+      "createdOn": "2012-05-01T00:00:00.000+01:00",
+      "lastModifedOn": "2012-05-01T00:00:00.000+01:00",
+      "possibleCurrencies": [],
+      "possibleAmortizationOptions": [],
+      "possibleInterestOptions": [],
+      "possibleInterestRateCalculatedInPeriodOptions": [],
+      "repaymentFrequencyOptions": [],
+      "interestFrequencyOptions": [],
+      "interestRebateAllowed": false,
+      "flexible": false
+    },
+    {
+      "id": 7,
+      "name": "New kind of Loan",
+      "description": "A description not exceeding 500 characters.",
+      "principalMoney": {
+        "currencyCode": "XOF",
+        "currencyDigitsAfterDecimal": 0,
+        "amount": 100000,
+        "defaultName": "CFA Franc BCEAO",
+        "nameCode": "currency.XOF",
+        "displaySymbol": "CFA",
+        "zero": false,
+        "greaterThanZero": true,
+        "displaySymbolValue": "100000 CFA"
+      },
+      "interestRatePerPeriod": 1.75,
+      "interestRatePeriod": 2,
+      "annualInterestRate": 21,
+      "interestMethod": 0,
+      "interestRateCalculatedInPeriod": 1,
+      "numberOfInterestFreePeriods": 0,
+      "repaidEvery": 1,
+      "repaymentPeriodFrequency": 2,
+      "numberOfRepayments": 1,
+      "amortizationMethod": 1,
+      "inArrearsTolerance": {
+        "currencyCode": "XOF",
+        "currencyDigitsAfterDecimal": 0,
+        "amount": 1000,
+        "defaultName": "CFA Franc BCEAO",
+        "nameCode": "currency.XOF",
+        "displaySymbol": "CFA",
+        "zero": false,
+        "greaterThanZero": true,
+        "displaySymbolValue": "1000 CFA"
+      },
+      "createdOn": "2012-05-21T00:00:00.000+01:00",
+      "lastModifedOn": "2012-05-21T00:00:00.000+01:00",
+      "possibleCurrencies": [],
+      "possibleAmortizationOptions": [],
+      "possibleInterestOptions": [],
+      "possibleInterestRateCalculatedInPeriodOptions": [],
+      "repaymentFrequencyOptions": [],
+      "interestFrequencyOptions": [],
+      "interestRebateAllowed": false,
+      "flexible": false
+    }
+  ],
+  "dateFormat": null,
+  "submittedOnDateFormatted": null,
+  "submittedOnDate": null,
+  "submittedOnNote": "",
+  "expectedDisbursementDateFormatted": null,
+  "expectedDisbursementDate": "2012-05-22",
+  "repaymentsStartingFromDateFormatted": null,
+  "repaymentsStartingFromDate": null,
+  "interestCalculatedFromDateFormatted": null,
+  "interestCalculatedFromDate": null,
+  "repaymentSchedule": null,
+  "selectedProduct": {
+    "id": 1,
+    "name": "Agricultural Loan",
+    "description": "An agricultural loan given to farmers to help buy crop, stock and machinery. With an arrears tolerance setting of 1,000 CFA, loans are not marked as 'in arrears' or 'in bad standing' if the amount outstanding is less than this. Interest rate is described using monthly percentage rate (MPR) even though the loan typically lasts a year and requires one repayment (typically at time when farmer sells crop)",
+    "principalMoney": {
+      "currencyCode": "XOF",
+      "currencyDigitsAfterDecimal": 0,
+      "amount": 100000,
+      "defaultName": "CFA Franc BCEAO",
+      "nameCode": "currency.XOF",
+      "displaySymbol": "CFA",
+      "zero": false,
+      "greaterThanZero": true,
+      "displaySymbolValue": "100000 CFA"
+    },
+    "interestRatePerPeriod": 1.75,
+    "interestRatePeriod": 2,
+    "annualInterestRate": 21,
+    "interestMethod": 0,
+    "interestRateCalculatedInPeriod": 1,
+    "numberOfInterestFreePeriods": 0,
+    "repaidEvery": 12,
+    "repaymentPeriodFrequency": 2,
+    "numberOfRepayments": 1,
+    "amortizationMethod": 1,
+    "inArrearsTolerance": {
+      "currencyCode": "XOF",
+      "currencyDigitsAfterDecimal": 0,
+      "amount": 1000,
+      "defaultName": "CFA Franc BCEAO",
+      "nameCode": "currency.XOF",
+      "displaySymbol": "CFA",
+      "zero": false,
+      "greaterThanZero": true,
+      "displaySymbolValue": "1000 CFA"
+    },
+    "createdOn": "2012-04-12T00:00:00.000+01:00",
+    "lastModifedOn": "2012-04-12T00:00:00.000+01:00",
+    "possibleCurrencies": [
+      {
+        "code": "GBP",
+        "name": "Pound Sterling",
+        "decimalPlaces": 2,
+        "displaySymbol": null,
+        "nameCode": "currency.GBP",
+        "displayLabel": "Pound Sterling [GBP]"
+      },
+      {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      }
+    ],
+    "possibleAmortizationOptions": [
+      {
+        "id": 1,
+        "value": "Equal installments"
+      },
+      {
+        "id": 0,
+        "value": "Equal principle payments"
+      }
+    ],
+    "possibleInterestOptions": [
+      {
+        "id": 0,
+        "value": "Declining Balance"
+      },
+      {
+        "id": 1,
+        "value": "Flat"
+      }
+    ],
+    "possibleInterestRateCalculatedInPeriodOptions": [
+      {
+        "id": 0,
+        "value": "Daily"
+      },
+      {
+        "id": 1,
+        "value": "Same as repayment period"
+      }
+    ],
+    "repaymentFrequencyOptions": [
+      {
+        "id": 0,
+        "value": "Days"
+      },
+      {
+        "id": 1,
+        "value": "Weeks"
+      },
+      {
+        "id": 2,
+        "value": "Months"
+      }
+    ],
+    "interestFrequencyOptions": [
+      {
+        "id": 2,
+        "value": "Per month"
+      },
+      {
+        "id": 3,
+        "value": "Per year"
+      }
+    ],
+  }
+}        
+</code>
+    </div>
+</div>
+        
+<a id="loans_retrieve" name="loans_retrieve" class="old-syle-anchor">&nbsp;</a>
+<div class="method-section">
+    <div class="method-description">
+        <h4>Retrieve a Loan</h4>
+        <p>Returns loan fields.
+        </p>
+        <p>Example Request: 
+        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/loans/1">https://localhost:8443/mifosng-provider/api/v1/loans/1</a>
+        </p>
+    </div>
+    <div class="method-example">
+        <code class="method-declaration">GET https://thedomainname/api/v1/loans/{loanId}</code>
+        <code class="method-response">{
+  "open": false,
+  "openWithRepaymentMade": false,
+  "closed": true,
+  "interestRebateOutstanding": false,
+  "pendingApproval": false,
+  "waitingForDisbursal": false,
+  "lifeCycleStatusText": "Closed",
+  "lifeCycleStatusDate": "2009-11-13",
+  "id": 1,
+  "externalId": null,
+  "loanProductName": "Agricultural Loan",
+  "submittedOnDate": "2009-01-05",
+  "approvedOnDate": "2009-01-08",
+  "expectedDisbursementDate": "2009-01-15",
+  "actualDisbursementDate": "2009-01-15",
+  "undoDisbursalAllowed": false,
+  "expectedFirstRepaymentOnDate": null,
+  "interestCalculatedFromDate": null,
+  "closedOnDate": "2009-11-13",
+  "expectedMaturityDate": "2009-11-15",
+  "principal": {
+    "currencyCode": "XOF",
+    "currencyDigitsAfterDecimal": 0,
+    "amount": 100000,
+    "defaultName": "CFA Franc BCEAO",
+    "nameCode": "currency.XOF",
+    "displaySymbol": "CFA",
+    "zero": false,
+    "greaterThanZero": true,
+    "displaySymbolValue": "100000 CFA"
+  },
+  "interestRatePerYear": 21,
+  "interestRatePerPeriod": 1.75,
+  "interestPeriodFrequencyType": 2,
+  "interestPeriodFrequencyText": "MONTHS",
+  "interestMethodType": 0,
+  "interestMethodText": "DECLINING_BALANCE",
+  "amortizationMethodValue": 1,
+  "amortizationMethodText": "EQUAL_INSTALLMENTS",
+  "numberOfRepayments": 1,
+  "repaymentFrequencyNumber": 10,
+  "repaymentFrequencyTypeEnumOrdinal": 2,
+  "repaymentFrequencyTypeText": "MONTHS",
+  "interestRebateOwed": {
+    "currencyCode": "XOF",
+    "currencyDigitsAfterDecimal": 0,
+    "amount": 0,
+    "defaultName": "CFA Franc BCEAO",
+    "nameCode": "currency.XOF",
+    "displaySymbol": "CFA",
+    "zero": true,
+    "greaterThanZero": false,
+    "displaySymbolValue": "0 CFA"
+  },
+  "loanData": {
+    "repaymentSchedule": {
+      "periods": [
+        {
+          "period": 1,
+          "date": "2009-11-15",
+          "disbursed": {
+            "currencyCode": "XOF",
+            "currencyDigitsAfterDecimal": 0,
+            "amount": 0,
+            "defaultName": "CFA Franc BCEAO",
+            "nameCode": "currency.XOF",
+            "displaySymbol": "CFA",
+            "zero": true,
+            "greaterThanZero": false,
+            "displaySymbolValue": "0 CFA"
+          },
+          "principal": {
+            "currencyCode": "XOF",
+            "currencyDigitsAfterDecimal": 0,
+            "amount": 100000,
+            "defaultName": "CFA Franc BCEAO",
+            "nameCode": "currency.XOF",
+            "displaySymbol": "CFA",
+            "zero": false,
+            "greaterThanZero": true,
+            "displaySymbolValue": "100000 CFA"
+          },
+          "principalPaid": {
+            "currencyCode": "XOF",
+            "currencyDigitsAfterDecimal": 0,
+            "amount": 100000,
+            "defaultName": "CFA Franc BCEAO",
+            "nameCode": "currency.XOF",
+            "displaySymbol": "CFA",
+            "zero": false,
+            "greaterThanZero": true,
+            "displaySymbolValue": "100000 CFA"
+          },
+          "principalOutstanding": {
+            "currencyCode": "XOF",
+            "currencyDigitsAfterDecimal": 0,
+            "amount": 0,
+            "defaultName": "CFA Franc BCEAO",
+            "nameCode": "currency.XOF",
+            "displaySymbol": "CFA",
+            "zero": true,
+            "greaterThanZero": false,
+            "displaySymbolValue": "0 CFA"
+          },
+          "interest": {
+            "currencyCode": "XOF",
+            "currencyDigitsAfterDecimal": 0,
+            "amount": 17500,
+            "defaultName": "CFA Franc BCEAO",
+            "nameCode": "currency.XOF",
+            "displaySymbol": "CFA",
+            "zero": false,
+            "greaterThanZero": true,
+            "displaySymbolValue": "17500 CFA"
+          },
+          "interestPaid": {
+            "currencyCode": "XOF",
+            "currencyDigitsAfterDecimal": 0,
+            "amount": 17500,
+            "defaultName": "CFA Franc BCEAO",
+            "nameCode": "currency.XOF",
+            "displaySymbol": "CFA",
+            "zero": false,
+            "greaterThanZero": true,
+            "displaySymbolValue": "17500 CFA"
+          },
+          "interestOutstanding": {
+            "currencyCode": "XOF",
+            "currencyDigitsAfterDecimal": 0,
+            "amount": 0,
+            "defaultName": "CFA Franc BCEAO",
+            "nameCode": "currency.XOF",
+            "displaySymbol": "CFA",
+            "zero": true,
+            "greaterThanZero": false,
+            "displaySymbolValue": "0 CFA"
+          },
+          "total": {
+            "currencyCode": "XOF",
+            "currencyDigitsAfterDecimal": 0,
+            "amount": 117500,
+            "defaultName": "CFA Franc BCEAO",
+            "nameCode": "currency.XOF",
+            "displaySymbol": "CFA",
+            "zero": false,
+            "greaterThanZero": true,
+            "displaySymbolValue": "117500 CFA"
+          },
+          "totalPaid": {
+            "currencyCode": "XOF",
+            "currencyDigitsAfterDecimal": 0,
+            "amount": 117500,
+            "defaultName": "CFA Franc BCEAO",
+            "nameCode": "currency.XOF",
+            "displaySymbol": "CFA",
+            "zero": false,
+            "greaterThanZero": true,
+            "displaySymbolValue": "117500 CFA"
+          },
+          "totalOutstanding": {
+            "currencyCode": "XOF",
+            "currencyDigitsAfterDecimal": 0,
+            "amount": 0,
+            "defaultName": "CFA Franc BCEAO",
+            "nameCode": "currency.XOF",
+            "displaySymbol": "CFA",
+            "zero": true,
+            "greaterThanZero": false,
+            "displaySymbolValue": "0 CFA"
+          },
+          "totalWaived": null,
+          "totalArrears": {
+            "currencyCode": "XOF",
+            "currencyDigitsAfterDecimal": 0,
+            "amount": 0,
+            "defaultName": "CFA Franc BCEAO",
+            "nameCode": "currency.XOF",
+            "displaySymbol": "CFA",
+            "zero": true,
+            "greaterThanZero": false,
+            "displaySymbolValue": "0 CFA"
+          },
+          "arrearsFrom": null,
+          "arrearsTo": null,
+          "paidInFullOn": "2009-11-13",
+          "lastAffectingPaymentOn": "2009-11-13",
+          "fullyPaid": true
+        }
+      ]
+    },
+    "summary": {
+      "originalPrincipal": {
+        "currencyCode": "XOF",
+        "currencyDigitsAfterDecimal": 0,
+        "amount": 100000,
+        "defaultName": "CFA Franc BCEAO",
+        "nameCode": "currency.XOF",
+        "displaySymbol": "CFA",
+        "zero": false,
+        "greaterThanZero": true,
+        "displaySymbolValue": "100000 CFA"
+      },
+      "originalInterest": {
+        "currencyCode": "XOF",
+        "currencyDigitsAfterDecimal": 0,
+        "amount": 17500,
+        "defaultName": "CFA Franc BCEAO",
+        "nameCode": "currency.XOF",
+        "displaySymbol": "CFA",
+        "zero": false,
+        "greaterThanZero": true,
+        "displaySymbolValue": "17500 CFA"
+      },
+      "originalTotal": {
+        "currencyCode": "XOF",
+        "currencyDigitsAfterDecimal": 0,
+        "amount": 117500,
+        "defaultName": "CFA Franc BCEAO",
+        "nameCode": "currency.XOF",
+        "displaySymbol": "CFA",
+        "zero": false,
+        "greaterThanZero": true,
+        "displaySymbolValue": "117500 CFA"
+      },
+      "principalPaid": {
+        "currencyCode": "XOF",
+        "currencyDigitsAfterDecimal": 0,
+        "amount": 100000,
+        "defaultName": "CFA Franc BCEAO",
+        "nameCode": "currency.XOF",
+        "displaySymbol": "CFA",
+        "zero": false,
+        "greaterThanZero": true,
+        "displaySymbolValue": "100000 CFA"
+      },
+      "principalOutstanding": {
+        "currencyCode": "XOF",
+        "currencyDigitsAfterDecimal": 0,
+        "amount": 0,
+        "defaultName": "CFA Franc BCEAO",
+        "nameCode": "currency.XOF",
+        "displaySymbol": "CFA",
+        "zero": true,
+        "greaterThanZero": false,
+        "displaySymbolValue": "0 CFA"
+      },
+      "interestPaid": {
+        "currencyCode": "XOF",
+        "currencyDigitsAfterDecimal": 0,
+        "amount": 17500,
+        "defaultName": "CFA Franc BCEAO",
+        "nameCode": "currency.XOF",
+        "displaySymbol": "CFA",
+        "zero": false,
+        "greaterThanZero": true,
+        "displaySymbolValue": "17500 CFA"
+      },
+      "interestOutstanding": {
+        "currencyCode": "XOF",
+        "currencyDigitsAfterDecimal": 0,
+        "amount": 0,
+        "defaultName": "CFA Franc BCEAO",
+        "nameCode": "currency.XOF",
+        "displaySymbol": "CFA",
+        "zero": true,
+        "greaterThanZero": false,
+        "displaySymbolValue": "0 CFA"
+      },
+      "totalPaid": {
+        "currencyCode": "XOF",
+        "currencyDigitsAfterDecimal": 0,
+        "amount": 117500,
+        "defaultName": "CFA Franc BCEAO",
+        "nameCode": "currency.XOF",
+        "displaySymbol": "CFA",
+        "zero": false,
+        "greaterThanZero": true,
+        "displaySymbolValue": "117500 CFA"
+      },
+      "totalOutstanding": {
+        "currencyCode": "XOF",
+        "currencyDigitsAfterDecimal": 0,
+        "amount": 0,
+        "defaultName": "CFA Franc BCEAO",
+        "nameCode": "currency.XOF",
+        "displaySymbol": "CFA",
+        "zero": true,
+        "greaterThanZero": false,
+        "displaySymbolValue": "0 CFA"
+      },
+      "totalInArrears": {
+        "currencyCode": "XOF",
+        "currencyDigitsAfterDecimal": 0,
+        "amount": 0,
+        "defaultName": "CFA Franc BCEAO",
+        "nameCode": "currency.XOF",
+        "displaySymbol": "CFA",
+        "zero": true,
+        "greaterThanZero": false,
+        "displaySymbolValue": "0 CFA"
+      },
+      "totalWaived": {
+        "currencyCode": "XOF",
+        "currencyDigitsAfterDecimal": 0,
+        "amount": 0,
+        "defaultName": "CFA Franc BCEAO",
+        "nameCode": "currency.XOF",
+        "displaySymbol": "CFA",
+        "zero": true,
+        "greaterThanZero": false,
+        "displaySymbolValue": "0 CFA"
+      }
+    },
+    "loanRepayments": [
+      {
+        "id": 2,
+        "date": "2009-11-13",
+        "principal": {
+          "currencyCode": "XOF",
+          "currencyDigitsAfterDecimal": 0,
+          "amount": 100000,
+          "defaultName": "CFA Franc BCEAO",
+          "nameCode": "currency.XOF",
+          "displaySymbol": "CFA",
+          "zero": false,
+          "greaterThanZero": true,
+          "displaySymbolValue": "100000 CFA"
+        },
+        "interest": {
+          "currencyCode": "XOF",
+          "currencyDigitsAfterDecimal": 0,
+          "amount": 17500,
+          "defaultName": "CFA Franc BCEAO",
+          "nameCode": "currency.XOF",
+          "displaySymbol": "CFA",
+          "zero": false,
+          "greaterThanZero": true,
+          "displaySymbolValue": "17500 CFA"
+        },
+        "total": {
+          "currencyCode": "XOF",
+          "currencyDigitsAfterDecimal": 0,
+          "amount": 117500,
+          "defaultName": "CFA Franc BCEAO",
+          "nameCode": "currency.XOF",
+          "displaySymbol": "CFA",
+          "zero": false,
+          "greaterThanZero": true,
+          "displaySymbolValue": "117500 CFA"
+        },
+        "totalWaived": null,
+        "overpaid": null,
+        "transactionOffsetFromToday": -921
+      }
+    ]
+  },
+  "arrearsTolerance": {
+    "currencyCode": "XOF",
+    "currencyDigitsAfterDecimal": 0,
+    "amount": 1000,
+    "defaultName": "CFA Franc BCEAO",
+    "nameCode": "currency.XOF",
+    "displaySymbol": "CFA",
+    "zero": false,
+    "greaterThanZero": true,
+    "displaySymbolValue": "1000 CFA"
+  },
+  "waiveAllowed": false,
+  "makeRepaymentAllowed": false,
+  "rejectAllowed": false,
+  "withdrawnByApplicantAllowed": false,
+  "undoApprovalAllowed": false,
+  "disbursalAllowed": false,
+  "anyActionOnLoanAllowed": false,
+  "maxSubmittedOnOffsetFromToday": -1233,
+  "maxApprovedOnOffsetFromToday": -1230,
+  "maxDisbursedOnOffsetFromToday": -1223,
+  "actualLoanTermInDays": 302,
+  "actualLoanTermInMonths": 9,
+  "loanTermInDays": 304,
+  "loanTermInMonths": 10
+} 
+        </code>
+    </div>
+</div>
 
 <a id="loans_create" name="loans_create" class="old-syle-anchor">&nbsp;</a>
 <div class="method-section">
