@@ -2417,7 +2417,7 @@ Request body:
 	    </div>
 	</div>
    
-       <a id="users_retrieve" name="users_retrieve" class="old-syle-anchor">&nbsp;</a>
+    <a id="users_retrieve" name="users_retrieve" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">
 	    <div class="method-description">
 	        <h4>Retrieve existing user details</h4>
@@ -2520,10 +2520,61 @@ Request body:
 	</div>
     
     
+    <a id="users_create" name="users_create" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>Create new user</h4>
+	        <p>Adds new application user to the platform.</p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://thedomainname/api/v1/users</code>
+<code class="method-request">POST https://localhost:8443/mifosng-provider/api/v1/users
+Content-Type: application/json
+Request body:
+{
+  "officeId": 1,
+  "username": "newuser1",
+  "firstname": "Test",
+  "lastname": "User",
+  "email": "demomfi@mifos.org",
+  "selectedItems": ["1"]
+}
+</code>
+<code class="method-response">
+{
+  "entityId": 11
+}
+</code>
+	    </div>
+	</div>
     
-    
-    
-    
+     <a id="users_update" name="users_update" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>Update existing user</h4>
+	        <p>Update details of an existing application user.</p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">PUT https://thedomainname/api/v1/users/11</code>
+<code class="method-request">PUT https://localhost:8443/mifosng-provider/api/v1/users/11
+Content-Type: application/json
+Request body:
+{
+  "officeId": 1,
+  "username": "newuser123",
+  "firstname": "Test",
+  "lastname": "User",
+  "email": "demomfi@mifos.org",
+  "selectedItems": ["1"]
+}
+</code>
+<code class="method-response">
+{
+  "entityId": 11
+}
+</code>
+	    </div>
+	</div>
     
     
     
