@@ -30,12 +30,12 @@
                         <li><a href="#clients_template">Retrieve Client Details Template</a></li>
                         <li><a href="#clients_retrieve">Retrieve a Client</a></li>
                         <li><a href="#clients_create">Create a Client</a></li>
+                        <li><a href="#clients_update">Update a Client</a></li>
                         <li><a href="#clients_loansummary">Retrieve a Client's Loan Account Summary</a></li>
                         <li><a href="#clients_notes">Retrieve a Client's Notes</a></li>
                         <li><a href="#clients_addnote">Add a Client Note</a></li>
                         <li><a href="#clients_retrievenote">Retrieve a Client Note</a></li>
                         <li><a href="#clients_updatenote">Update a Client Note</a></li>
-                        No update a client?
                         </ul>
                     </div>
                 </div>
@@ -47,7 +47,6 @@
                         <li><a href="#loans_template">Retrieve Loan Details Template</a></li>
                         <li><a href="#loans_retrieve">Retrieve a Loan</a></li>
                         <li><a href="#loans_create">Create a New Loan</a></li>
-                        <li><a href="#loans_submit">Submit a Loan Application</a></li>
                         <li><a href="#loans_approve">Approve a Loan</a></li>
                         <li><a href="#loans_disburse">Disburse a Loan</a></li>
                         <li><a href="#loans_reject">Reject a Loan</a></li>
@@ -188,67 +187,67 @@
     
             <div class="method-example" id="api-summary-example">
                 <h4>API Endpoint</h4>
-                <code>https://thedomainname/</code>
+                <code>https://thedomainname/api</code>
                 <h6>Summary of Resource URL Patterns</h6>
                 <table>
                     <tr><td><b>Resources</b></td><td><b>Verbs</b></td></tr>
-                    <tr><td>/api/v1/clients</td><td>GET, POST</td></tr>
-                    <tr><td>/api/v1/clients/template</td><td>GET</td></tr>
-                    <tr><td>/api/v1/clients/{clientId}</td><td>GET</td></tr>
-                    <tr><td>/api/v1/clients/{clientId}/loans</td><td>GET</td></tr>
-                    <tr><td>/api/v1/clients/{clientId}/notes</td><td>GET, POST</td></tr>
-                    <tr><td>/api/v1/clients/{clientId}/notes/{noteId}</td><td>GET, PUT</td></tr>
+                    <tr><td>/v1/clients</td><td>GET, POST</td></tr>
+                    <tr><td>/v1/clients/template</td><td>GET</td></tr>
+                    <tr><td>/v1/clients/{clientId}</td><td>GET</td></tr>
+                    <tr><td>/v1/clients/{clientId}/loans</td><td>GET</td></tr>
+                    <tr><td>/v1/clients/{clientId}/notes</td><td>GET, POST</td></tr>
+                    <tr><td>/v1/clients/{clientId}/notes/{noteId}</td><td>GET, PUT</td></tr>
                     <tr><td></td><td></td></tr>
                     <tr><td></td><td></td></tr>
-                    <tr><td>/api/v1/loans</td><td>POST</td></tr>
-                    <tr><td>/api/v1/loans/template</td><td>GET</td></tr>
-                    <tr><td>/api/v1/loans/{loanId}</td><td>GET, POST, DELETE</td></tr>
-                    <tr><td>/api/v1/loans/{loanId}/undo</td><td>POST</td></tr>
-                    <tr><td>/api/v1/loans/{loanId}/transactions/template</td><td>GET</td></tr>
-                    <tr><td>/api/v1/loans/{loanId}/transactions</td><td>POST</td></tr>
-                    <tr><td>/api/v1/loans/{loanId}/transactions/{repaymentId}</td><td>GET, PUT</td></tr>
+                    <tr><td>/v1/loans</td><td>POST</td></tr>
+                    <tr><td>/v1/loans/template</td><td>GET</td></tr>
+                    <tr><td>/v1/loans/{loanId}</td><td>GET, POST, DELETE</td></tr>
+                    <tr><td>/v1/loans/{loanId}/undo</td><td>POST</td></tr>
+                    <tr><td>/v1/loans/{loanId}/transactions/template</td><td>GET</td></tr>
+                    <tr><td>/v1/loans/{loanId}/transactions</td><td>POST</td></tr>
+                    <tr><td>/v1/loans/{loanId}/transactions/{repaymentId}</td><td>GET, PUT</td></tr>
                     <tr><td></td><td></td></tr>
                     <tr><td></td><td></td></tr>
-                    <tr><td>/api/v1/offices</td><td>GET, POST</td></tr>
-                    <tr><td>/api/v1/offices/template</td><td>GET</td></tr>
-                    <tr><td>/api/v1/offices/{officeId}</td><td>GET, PUT</td></tr>
+                    <tr><td>/v1/offices</td><td>GET, POST</td></tr>
+                    <tr><td>/v1/offices/template</td><td>GET</td></tr>
+                    <tr><td>/v1/offices/{officeId}</td><td>GET, PUT</td></tr>
                     <tr><td></td><td></td></tr>                    
                     <tr><td></td><td></td></tr>
-                    <tr><td>/api/v1/loanproducts</td><td>GET, POST</td></tr>
-                    <tr><td>/api/v1/loanproducts/template</td><td>GET</td></tr>
-                    <tr><td>/api/v1/loanproducts/{productId}</td><td>GET, PUT</td></tr>
+                    <tr><td>/v1/loanproducts</td><td>GET, POST</td></tr>
+                    <tr><td>/v1/loanproducts/template</td><td>GET</td></tr>
+                    <tr><td>/v1/loanproducts/{productId}</td><td>GET, PUT</td></tr>
                     <tr><td></td><td></td></tr>
                     <tr><td></td><td></td></tr>                    
-                    <tr><td>/api/v1/configurations/currency</td><td>GET, PUT</td></tr>
+                    <tr><td>/v1/configurations/currency</td><td>GET, PUT</td></tr>
                     <tr><td></td><td></td></tr>
                     <tr><td></td><td></td></tr>                    
-                    <tr><td>/api/v1/additionalfields</td><td>GET</td></tr>
-                    <tr><td>/api/v1/additionalfields/{Type}/{Set}/{id}</td><td>GET, POST</td></tr>
+                    <tr><td>/v1/additionalfields</td><td>GET</td></tr>
+                    <tr><td>/v1/additionalfields/{Type}/{Set}/{id}</td><td>GET, POST</td></tr>
                     <tr><td></td><td></td></tr>
                     <tr><td></td><td></td></tr>                    
-                    <tr><td>/api/v1/reports</td><td>GET</td></tr>
-                    <tr><td>/api/v1/reports/{reportName}</td><td>GET</td></tr>
+                    <tr><td>/v1/reports</td><td>GET</td></tr>
+                    <tr><td>/v1/reports/{reportName}</td><td>GET</td></tr>
                     <tr><td></td><td></td></tr>
                     <tr><td></td><td></td></tr>                    
-                    <tr><td>/api/v1/authentication</td><td>POST</td></tr>
+                    <tr><td>/v1/authentication</td><td>POST</td></tr>
                     <tr><td></td><td></td></tr>
                     <tr><td></td><td></td></tr>                    
-                    <tr><td>/api/v1/useraccounts/current</td><td>GET, PUT</td></tr>
-                    <tr><td>/api/v1/useraccounts/current/password</td><td>PUT</td></tr>
-                    <tr><td>/api/v1/useraccounts/current/password/template</td><td>GET</td></tr>
+                    <tr><td>/v1/useraccounts/current</td><td>GET, PUT</td></tr>
+                    <tr><td>/v1/useraccounts/current/password</td><td>PUT</td></tr>
+                    <tr><td>/v1/useraccounts/current/password/template</td><td>GET</td></tr>
                     <tr><td></td><td></td></tr>
                     <tr><td></td><td></td></tr>                    
-                    <tr><td>/api/v1/users</td><td>GET, POST</td></tr>
-                    <tr><td>/api/v1/users/template</td><td>GET</td></tr>
-                    <tr><td>/api/v1/users/{userId}</td><td>GET, PUT, DELETE</td></tr>
+                    <tr><td>/v1/users</td><td>GET, POST</td></tr>
+                    <tr><td>/v1/users/template</td><td>GET</td></tr>
+                    <tr><td>/v1/users/{userId}</td><td>GET, PUT, DELETE</td></tr>
                     <tr><td></td><td></td></tr>
                     <tr><td></td><td></td></tr>                    
-                    <tr><td>/api/v1/roles</td><td>GET, POST</td></tr>
-                    <tr><td>/api/v1/roles/template</td><td>GET</td></tr>
-                    <tr><td>/api/v1/roles/{roleId}</td><td>GET, PUT</td></tr>
+                    <tr><td>/v1/roles</td><td>GET, POST</td></tr>
+                    <tr><td>/v1/roles/template</td><td>GET</td></tr>
+                    <tr><td>/v1/roles/{roleId}</td><td>GET, PUT</td></tr>
                     <tr><td></td><td></td></tr>
                     <tr><td></td><td></td></tr>                    
-                    <tr><td>/api/v1/permissions</td><td>GET</td></tr>
+                    <tr><td>/v1/permissions</td><td>GET</td></tr>
                 </table>
             </div>
         </div>
@@ -442,8 +441,7 @@
         <div class="method-section">
             <div class="method-description">
                 <h3>Clients</h3>
-                <p>Clients words.
-                </p>
+                <p>Clients ...</p>
             </div>
         </div>
                 
@@ -475,13 +473,46 @@
             <div class="method-description">
                 <h4>List Clients</h4>
                 <p>Example Request: 
-                <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/clients">http://localhost:8080/mifosng-provider/api/v1/clients</a>
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/clients">https://localhost:8443/mifosng-provider/api/v1/clients</a>
                 </p>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://thedomainname/api/v1/clients</code>
-                <code class="method-response">    to be done
-                </code>
+<code class="method-response">{
+  "clients": [
+    {
+      "organisationId": 1,
+      "organisationName": "Demo MFI",
+      "officeId": 2,
+      "officeName": "sub branch 1",
+      "id": 14,
+      "firstname": "Patrick",
+      "lastname": "Asare-Frimpong",
+      "displayName": "Patrick Asare-Frimpong",
+      "externalId": null,
+      "joinedDate": "2012-04-18",
+      "allowedOffices": [],
+      "maxJoinedOnOffsetFromToday": -34
+    },
+    ...
+    ...
+    {
+      "organisationId": 1,
+      "organisationName": "Demo MFI",
+      "officeId": 1,
+      "officeName": "Demo MFI Head Office",
+      "id": 17,
+      "firstname": "Fred",
+      "lastname": "Ziffle",
+      "displayName": "Fred Ziffle",
+      "externalId": null,
+      "joinedDate": "2012-04-21",
+      "allowedOffices": [],
+      "maxJoinedOnOffsetFromToday": -31
+    }
+  ]
+}
+</code>
             </div>
         </div>
     
@@ -490,16 +521,49 @@
         <div class="method-section">
             <div class="method-description">
                 <h4>Retrieve Client Details Template</h4>
-                <p>Returns a template that contains the client fields and allowed value lists.  This helps build a maintenance User Interface.
-                </p>
+                <p>Returns a template that contains the client fields and allowed value lists. This helps build a maintenance User Interface.</p>
                 <p>Example Request: 
-                <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/clients/template">http://localhost:8080/mifosng-provider/api/v1/clients/template</a>
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/clients/template">https://localhost:8443/mifosng-provider/api/v1/clients/template</a>
                 </p>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://thedomainname/api/v1/clients/template</code>
-                <code class="method-response"> to be done
-            </code>
+<code class="method-response">{
+  "organisationId": 1,
+  "organisationName": null,
+  "officeId": 1,
+  "officeName": null,
+  "id": -1,
+  "firstname": "",
+  "lastname": "",
+  "displayName": "",
+  "externalId": null,
+  "joinedDate": "2012-05-22",
+  "allowedOffices": [
+    {
+      "id": 1,
+      "name": "Demo MFI Head Office",
+      "externalId": "1",
+      "openingDate": "2009-01-01",
+      "hierarchy": ".",
+      "parentName": null,
+      "parentId": 0,
+      "allowedParents": []
+    },
+    {
+      "id": 2,
+      "name": "sub branch 1",
+      "externalId": "2",
+      "openingDate": "2012-01-02",
+      "hierarchy": ".2.",
+      "parentName": "Demo MFI Head Office",
+      "parentId": 1,
+      "allowedParents": []
+    }
+  ],
+  "maxJoinedOnOffsetFromToday": 0
+}
+</code>
             </div>
         </div>
     
@@ -508,119 +572,241 @@
         <div class="method-section">
             <div class="method-description">
                 <h4>Retrieve a Client</h4>
-                <p>Returns client fields.  It also returns allowed value lists which help build a maintenance User Interface.
+                <p>Returns client fields. It also returns allowed value lists which help build a maintenance User Interface.
                 </p>
                 <p>Example Request: 
-                <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/clients/1">http://localhost:8080/mifosng-provider/api/v1/clients/1</a>
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/clients/1">https://localhost:8443/mifosng-provider/api/v1/clients/1</a>
                 </p>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://thedomainname/api/v1/clients/{clientId}</code>
-                <code class="method-response"> 
-                </code>
+<code class="method-response">{
+  "organisationId": 1,
+  "organisationName": "Demo MFI",
+  "officeId": 1,
+  "officeName": "Demo MFI Head Office",
+  "id": 1,
+  "firstname": "Patrick",
+  "lastname": "O'Meara",
+  "displayName": "Patrick O'Meara",
+  "externalId": null,
+  "joinedDate": "2009-01-04",
+  "allowedOffices": [],
+  "maxJoinedOnOffsetFromToday": -1234
+}
+</code>
             </div>
         </div>
     
-    
-        <a id="clients_create" name="clients_create" class="old-syle-anchor">&nbsp;</a>
-        <div class="method-section">
-            <div class="method-description">
-                <h4>Create a Client</h4>
-            </div>
-            <div class="method-example">
-                <code class="method-declaration">POST https://thedomainname/api/v1/clients</code>
-                <code class="method-request">http://localhost:8080/mifosng-provider/api/v1/clients
-                
-                
-                Content-Type: application/json
-                Request Body:
-                new json here
-                </code>
-                <code class="method-response">    { "entityId": 2 }
-                </code>
-            </div>
-        </div>
-        <a id="clients_loansummary" name="clients_loansummary" class="old-syle-anchor">&nbsp;</a>
-        <div class="method-section">
-            <div class="method-description">
-                <h4>Retrieve a Client's Loan Account Summary</h4>
-                <p>Example Request: 
-                <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/clients/1/loans">http://localhost:8080/mifosng-provider/api/v1/clients/1/loans</a>
-                </p>
-            </div>
-            <div class="method-example">
-                <code class="method-declaration">GET https://thedomainname/api/v1/clients/{clientId}/loans</code>
-                <code class="method-response"> 
-                </code>
-            </div>
-        </div>
-        <a id="clients_notes" name="clients_notes" class="old-syle-anchor">&nbsp;</a>
-        <div class="method-section">
-            <div class="method-description">
-                <h4>Retrieve a Client's Notes</h4>
-                <p>Example Request: 
-                <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/clients/1/notes">http://localhost:8080/mifosng-provider/api/v1/clients/1/notes</a>
-                </p>
-            </div>
-            <div class="method-example">
-                <code class="method-declaration">GET https://thedomainname/api/v1/clients/{clientId}/notes</code>
-                <code class="method-response"> 
-                </code>
-            </div>
-        </div>
-        <a id="clients_addnote" name="clients_addnote" class="old-syle-anchor">&nbsp;</a>
-        <div class="method-section">
-            <div class="method-description">
-                <h4>Add a Client Note</h4>
-            </div>
-            <div class="method-example">
-                <code class="method-declaration">POST https://thedomainname/api/v1/clients/{clientId}/notes</code>
-                <code class="method-request">http://localhost:8080/mifosng-provider/api/v1/clients/1/notes
-                
-                
-                Content-Type: application/json
-                Request Body:
-                new json here
-                </code>
-                <code class="method-response">    { "entityId": 2 }
-                </code>
-            </div>
-        </div>
+<a id="clients_create" name="clients_create" class="old-syle-anchor">&nbsp;</a>
+<div class="method-section">
+    <div class="method-description">
+        <h4>Create a Client</h4>
+    </div>
+    <div class="method-example">
+        <code class="method-declaration">POST https://thedomainname/api/v1/clients</code>
+<code class="method-request">https://localhost:8443/mifosng-provider/api/v1/clients
+Content-Type: application/json
+Request Body:
+{
+  "officeId": 1,
+  "firstname": "Firstname",
+  "lastname": "Surname",
+  "externalId": null,
+  "dateFormat": "dd MMMM yyyy",
+  "joiningDateFormatted": "04 March 2009"
+}
+</code>
+<code class="method-response">{ "entityId": 2}</code>
+    </div>
+</div>
 
-        <a id="clients_retrievenote" name="clients_retrievenote" class="old-syle-anchor">&nbsp;</a>
-        <div class="method-section">
-            <div class="method-description">
-                <h4>Retrieve a Client Note</h4>
-                <p>Example Request: 
-                <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/clients/1/notes/1">http://localhost:8080/mifosng-provider/api/v1/clients/1/notes/1</a>
-                </p>
-            </div>
-            <div class="method-example">
-                <code class="method-declaration">GET https://thedomainname/api/v1/clients/{clientId}/notes/{noteId}</code>
-                <code class="method-response"> 
-                </code>
-            </div>
-        </div>
-        <a id="clients_updatenote" name="clients_updatenote" class="old-syle-anchor">&nbsp;</a>
-        <div class="method-section">
-            <div class="method-description">
-                <h4>Update a Client Note</h4>
-            </div>
-            <div class="method-example">
-                <code class="method-declaration">PUT https://thedomainname/api/v1/clients/{clientId}/notes/{noteId}</code>
-                <code class="method-request">http://localhost:8080/mifosng-provider/api/v1/clients/1/notes/1
-                
-                
-                Content-Type: application/json
-                Request Body:
-                new json here
-                </code>
-                <code class="method-response">    { "entityId": 2 }
-                </code>
-            </div>
-        </div>    
-    
+<a id="clients_update" name="clients_update" class="old-syle-anchor">&nbsp;</a>
+<div class="method-section">
+    <div class="method-description">
+        <h4>Update a Client</h4>
+    </div>
+    <div class="method-example">
+        <code class="method-declaration">PUT https://thedomainname/api/v1/clients/1</code>
+<code class="method-request">PUT https://localhost:8443/mifosng-provider/api/v1/clients/1
+Content-Type: application/json
+Request Body:
+{
+  "officeId": 1,
+  "firstname": "Firstname",
+  "lastname": "Surname",
+  "externalId": null,
+  "dateFormat": "dd MMMM yyyy",
+  "joiningDateFormatted": "04 March 2009"
+}
+</code>
+<code class="method-response">{ "entityId": 2}</code>
+    </div>
+</div>
+        
+<a id="clients_loansummary" name="clients_loansummary" class="old-syle-anchor">&nbsp;</a>
+<div class="method-section">
+    <div class="method-description">
+        <h4>Retrieve a Client's Loan Account Summary</h4>
+        <p>Example Request: 
+        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/clients/1/loans">https://localhost:8443/mifosng-provider/api/v1/clients/1/loans</a>
+        </p>
+    </div>
+    <div class="method-example">
+        <code class="method-declaration">GET https://thedomainname/api/v1/clients/{clientId}/loans</code>
+<code class="method-response">{
+  "pendingApprovalLoans": [],
+  "awaitingDisbursalLoans": [
+    {
+      "id": 17,
+      "externalId": null,
+      "loanProductId": 1,
+      "loanProductName": "Agricultural Loan",
+      "loanStatusId": 200,
+      "pendingApproval": false,
+      "waitingForDisbursal": true,
+      "open": false,
+      "closed": false,
+      "lifeCycleStatusText": "Approved",
+      "lifeCycleStatusDate": null
+    }
+  ],
+  "openLoans": [],
+  "closedLoans": [
+    {
+      "id": 1,
+      "externalId": null,
+      "loanProductId": 1,
+      "loanProductName": "Agricultural Loan",
+      "loanStatusId": 600,
+      "pendingApproval": false,
+      "waitingForDisbursal": false,
+      "open": false,
+      "closed": true,
+      "lifeCycleStatusText": "Closed",
+      "lifeCycleStatusDate": null
+    }
+  ],
+  "anyLoanCount": 2,
+  "pendingApprovalLoanCount": 0,
+  "awaitingDisbursalLoanCount": 1,
+  "activeLoanCount": 0,
+  "closedLoanCount": 1
+}
+</code>
+    </div>
+</div>
 
+
+<a id="clients_notes" name="clients_notes" class="old-syle-anchor">&nbsp;</a>
+<div class="method-section">
+    <div class="method-description">
+        <h4>Retrieve a Client's Notes</h4>
+        <p>Example Request: 
+        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/clients/2/notes">https://localhost:8443/mifosng-provider/api/v1/clients/2/notes</a>
+        </p>
+    </div>
+    <div class="method-example">
+        <code class="method-declaration">GET https://thedomainname/api/v1/clients/{clientId}/notes</code>
+<code class="method-response">{
+  "notes": [
+    {
+      "id": 20,
+      "clientId": 2,
+      "loanId": 0,
+      "loanTransactionId": 0,
+      "noteTypeId": 100,
+      "note": "This is an extra note!",
+      "createdById": 2,
+      "createdByUsername": "super1",
+      "createdOn": "2012-04-22T13:50:25.000+01:00",
+      "updatedById": 2,
+      "updatedByUsername": "super1",
+      "updatedOn": "2012-04-22T13:50:25.000+01:00"
+    },
+    {
+      "id": 16,
+      "clientId": 2,
+      "loanId": 0,
+      "loanTransactionId": 0,
+      "noteTypeId": 100,
+      "note": "loan only 1/2 amount expected\r\nyes",
+      "createdById": 2,
+      "createdByUsername": "super1",
+      "createdOn": "2012-04-18T15:15:04.000+01:00",
+      "updatedById": 2,
+      "updatedByUsername": "super1",
+      "updatedOn": "2012-04-23T09:38:13.000+01:00"
+    }
+  ]
+}
+</code>
+    </div>
+</div>
+        
+<a id="clients_addnote" name="clients_addnote" class="old-syle-anchor">&nbsp;</a>
+<div class="method-section">
+    <div class="method-description">
+        <h4>Add a Client Note</h4>
+    </div>
+    <div class="method-example">
+        <code class="method-declaration">POST https://thedomainname/api/v1/clients/{clientId}/notes</code>
+        <code class="method-request">POST https://localhost:8443/mifosng-provider/api/v1/clients/1/notes
+Content-Type: application/json
+Request Body:
+{
+"note": "a note about the client"
+}
+</code>
+<code class="method-response">{ "entityId": 40}</code>
+    </div>
+</div>
+
+<a id="clients_retrievenote" name="clients_retrievenote" class="old-syle-anchor">&nbsp;</a>
+<div class="method-section">
+    <div class="method-description">
+        <h4>Retrieve a Client Note</h4>
+        <p>Example Request: 
+        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/clients/1/notes/40">https://localhost:8443/mifosng-provider/api/v1/clients/1/notes/40</a>
+        </p>
+    </div>
+    <div class="method-example">
+        <code class="method-declaration">GET https://thedomainname/api/v1/clients/{clientId}/notes/{noteId}</code>
+        <code class="method-response">{
+  "id": 40,
+  "clientId": 2,
+  "loanId": 0,
+  "loanTransactionId": 0,
+  "noteTypeId": 100,
+  "note": "a note about the client",
+  "createdById": 1,
+  "createdByUsername": "mifos",
+  "createdOn": "2012-05-22T21:40:05.000+01:00",
+  "updatedById": 1,
+  "updatedByUsername": "mifos",
+  "updatedOn": "2012-05-22T21:40:05.000+01:00"
+}
+</code>
+    </div>
+</div>
+        
+<a id="clients_updatenote" name="clients_updatenote" class="old-syle-anchor">&nbsp;</a>
+<div class="method-section">
+    <div class="method-description">
+        <h4>Update a Client Note</h4>
+    </div>
+    <div class="method-example">
+        <code class="method-declaration">PUT https://thedomainname/api/v1/clients/{clientId}/notes/{noteId}</code>
+<code class="method-request">PUT https://localhost:8443/mifosng-provider/api/v1/clients/1/notes/40
+Content-Type: application/json
+Request Body:
+{
+"note": "an updated note about the client"
+}
+</code>
+        <code class="method-response">{"entityId": 40}</code>
+    </div>
+</div>   
 
 <!-- start of loans api docs -->
 
@@ -671,7 +857,7 @@
                     <dd>The 'id' of the Loan Product</dd>
                 </dl>
                 <p>Example Request: 
-                <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/loans/template?clientId=1&productId=1">http://localhost:8080/mifosng-provider/api/v1/loans/template?clientId=1&productId=1</a>
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/loans/template?clientId=1&productId=1">https://localhost:8443/mifosng-provider/api/v1/loans/template?clientId=1&productId=1</a>
                 </p>
             </div>
             <div class="method-example">
@@ -687,7 +873,7 @@
                 <p>Returns loan fields.
                 </p>
                 <p>Example Request: 
-                <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/loans/1">http://localhost:8080/mifosng-provider/api/v1/loans/1</a>
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/loans/1">https://localhost:8443/mifosng-provider/api/v1/loans/1</a>
                 </p>
             </div>
             <div class="method-example">
@@ -696,33 +882,32 @@
                 </code>
             </div>
         </div>
-        <a id="loans_create" name="loans_create" class="old-syle-anchor">&nbsp;</a>
-        <a id="loans_submit" name="loans_submit" class="old-syle-anchor">&nbsp;</a>
-        <div class="method-section">
-            <div class="method-description">
-                <h4>Create a New Loan/Submit a Loan Application</h4>
-                <h5>Arguments</h5>
-                <dl class="argument-list">
-                    <dt>command</dt>
-                    <dd>String<span> Optional, case-insensitive</span></dd>
-                    <dd>The default action is to Submit a New Loan Application.  If the value is 'calculateLoanSchedule' then a new loan entry is created without entering the loan life cycle.</dd>
-                </dl>
-            </div>
-            <div class="method-example">
-                <code class="method-declaration">POST https://thedomainname/api/v1/loans</code>
-                <code class="method-request">http://localhost:8080/mifosng-provider/api/v1/loans
-                
-                
-                Content-Type: application/json
-                Request Body:
-                new json here
-                </code>
-                <code class="method-response">{
-    "entityId": 2
-}
-                </code>
-            </div>
-        </div>
+
+<a id="loans_create" name="loans_create" class="old-syle-anchor">&nbsp;</a>
+<div class="method-section">
+    <div class="method-description">
+        <h4>Create a New Loan/Submit a Loan Application</h4>
+        <h5>Arguments</h5>
+        <dl class="argument-list">
+            <dt>command</dt>
+            <dd>String<span> Optional, case-insensitive</span></dd>
+            <dd>The default action is to Submit a New Loan Application.  If the value is 'calculateLoanSchedule' then a new loan entry is created without entering the loan life cycle.</dd>
+        </dl>
+    </div>
+    <div class="method-example">
+        <code class="method-declaration">POST https://thedomainname/api/v1/loans</code>
+        <code class="method-request">https://localhost:8443/mifosng-provider/api/v1/loans
+        
+        
+        Content-Type: application/json
+        Request Body:
+        new json here
+        </code>
+        <code class="method-response">{"entityId": 2}
+        </code>
+    </div>
+</div>
+        
         <a id="loans_approve" name="loans_approve" class="old-syle-anchor">&nbsp;</a>
         <a id="loans_disburse" name="loans_disburse" class="old-syle-anchor">&nbsp;</a>
         <a id="loans_reject" name="loans_reject" class="old-syle-anchor">&nbsp;</a>
@@ -742,7 +927,7 @@
             </div>
             <div class="method-example">
                 <code class="method-declaration">POST https://thedomainname/api/v1/loans/{loanId}</code>
-                <code class="method-request">http://localhost:8080/mifosng-provider/api/v1/loans/1?command=approve
+                <code class="method-request">https://localhost:8443/mifosng-provider/api/v1/loans/1?command=approve
                 
                 
                 Content-Type: application/json
@@ -762,7 +947,7 @@
             </div>
             <div class="method-example">
                 <code class="method-declaration">DELETE https://thedomainname/api/v1/loans/{loanId}</code>
-                <code class="method-request">http://localhost:8080/mifosng-provider/api/v1/loans/1
+                <code class="method-request">https://localhost:8443/mifosng-provider/api/v1/loans/1
                 
                 
                 Content-Type: application/json
@@ -789,7 +974,7 @@
             </div>
             <div class="method-example">
                 <code class="method-declaration">POST https://thedomainname/api/v1/loans/{loanId}/undo</code>
-                <code class="method-request">http://localhost:8080/mifosng-provider/api/v1/loans/1/undo
+                <code class="method-request">https://localhost:8443/mifosng-provider/api/v1/loans/1/undo
                 
                 
                 Content-Type: application/json
@@ -818,7 +1003,7 @@
                     <dd>The default action is to return details for Repayment of a loan.  If the value is 'waiver' then details relevant to Waiving a loan amount are returned.</dd>
                 </dl>
                 <p>Example Request: 
-                <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/loans/1/transactions/template?type=waiver">http://localhost:8080/mifosng-provider/api/v1/loans/1/transactions/template?type=waiver"</a>
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/loans/1/transactions/template?type=waiver">https://localhost:8443/mifosng-provider/api/v1/loans/1/transactions/template?type=waiver"</a>
                 </p>
             </div>
             <div class="method-example">
@@ -840,7 +1025,7 @@
             </div>
             <div class="method-example">
                 <code class="method-declaration">POST https://thedomainname/api/v1/loans/{loanId}/transactions</code>
-                <code class="method-request">http://localhost:8080/mifosng-provider/api/v1/loans/1/transactions
+                <code class="method-request">https://localhost:8443/mifosng-provider/api/v1/loans/1/transactions
                 
                 
                 Content-Type: application/json
@@ -859,7 +1044,7 @@
             <div class="method-description">
                 <h4>Retrieve a Repayment's Details</h4>
                 <p>Example Request: 
-                <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/loans/1/transactions/1">http://localhost:8080/mifosng-provider/api/v1/loans/1/transactions/1</a>
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/loans/1/transactions/1">https://localhost:8443/mifosng-provider/api/v1/loans/1/transactions/1</a>
                 </p>
             </div>
             <div class="method-example">
@@ -876,7 +1061,7 @@
             </div>
             <div class="method-example">
                 <code class="method-declaration">POST https://thedomainname/api/v1/loans/{loanId}/transactions/{repaymentId}</code>
-                <code class="method-request">http://localhost:8080/mifosng-provider/api/v1/loans/1/transactions/1
+                <code class="method-request">https://localhost:8443/mifosng-provider/api/v1/loans/1/transactions/1
                 
                 
                 Content-Type: application/json
@@ -1679,7 +1864,7 @@ Request Body:
                     <dd>The Additional Fields Type (Mifos X database table) to restrict the output to</dd>
                 </dl>
                 <p>Example Request: 
-                <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/additionalfields?type=portfolio_client">http://localhost:8080/mifosng-provider/api/v1/additionalfields?type=portfolio_client</a>
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/additionalfields?type=portfolio_client">https://localhost:8443/mifosng-provider/api/v1/additionalfields?type=portfolio_client</a>
                 </p>
             </div>
             <div class="method-example">
@@ -1711,7 +1896,7 @@ Request Body:
                 Returns the Set of Additional Fields data for the ID provided.  The ID is the id field of the Type table e.g. portfolio_client might have an id value of 4.  The output is a JSON formatted "Generic Resultset".  The Generic Resultset contains Column Heading as well as Data information.  The Column Heading information may include allowed values (columnValues array).
                 </p>
                 <p>Example Request: 
-                <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/additionalfields/portfolio_client/Additional Information/2">http://localhost:8080/mifosng-provider/api/v1/additionalfields/portfolio_client/Additional Information/2</a>
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/additionalfields/portfolio_client/Additional Information/2">https://localhost:8443/mifosng-provider/api/v1/additionalfields/portfolio_client/Additional Information/2</a>
                 </p>
             </div>
             <div class="method-example">
@@ -1843,7 +2028,7 @@ Request Body:
             </div>
             <div class="method-example">
                 <code class="method-declaration">POST https://thedomainname/api/v1/additionalfields/{type}/{set}/{id}</code>
-                <code class="method-request">http://localhost:8080/mifosng-provider/api/v1/additionalfields/portfolio_client/Additional Information/2
+                <code class="method-request">https://localhost:8443/mifosng-provider/api/v1/additionalfields/portfolio_client/Additional Information/2
                 
                 
                 Content-Type: application/json
@@ -1908,7 +2093,7 @@ Request Body:
                     <dd>Output will be delivered as a CSV file instead of JSON.</dd>
                 </dl>
                 <p>Example Request: 
-                <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/reports">http://localhost:8080/mifosng-provider/api/v1/reports</a>
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/reports">https://localhost:8443/mifosng-provider/api/v1/reports</a>
                 </p>
             </div>
             <div class="method-example">
@@ -2004,7 +2189,7 @@ Request Body:
                     <dd>Output will be delivered as a CSV file instead of JSON.  Doesn't apply to Pentaho reports.</dd>
                 </dl>
                 <p>Example Request: 
-                <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/reports/Client%20Listing?R_officeId=1">http://localhost:8080/mifosng-provider/api/v1/reports/Client%20Listing?R_officeId=1</a>
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/reports/Client%20Listing?R_officeId=1">https://localhost:8443/mifosng-provider/api/v1/reports/Client%20Listing?R_officeId=1</a>
                 </p>
             </div>
             <div class="method-example">
@@ -2834,7 +3019,7 @@ Request body:
 </code>
 	    </div>
 	</div>
-    
+
     <a id="roles_update" name="roles_update" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">
 	    <div class="method-description">
@@ -2860,7 +3045,195 @@ Request body:
 	</div>
     
     
-    <!--  -->
+    <!-- start of roles api docs -->
+	<a id="permissions" name="permissions" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+		<div class="method-description">
+		    <h3>Permissions</h3>
+		    <p>An API capability to support management of application permissions for user administration.</p>
+		</div>
+	</div>
+   
+    <a id="permissions_list" name="permissions_list" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>Retrieve list of permissions</h4>
+	        <p>Returns all permissions.</p>
+	        <p>Example Request: 
+	        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/permissions">https://localhost:8443/mifosng-provider/api/v1/permissions</a>
+	        </p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://thedomainname/api/v1/permissions</code>
+<code class="method-request">GET https://localhost:8443/mifosng-provider/api/v1/permissions</code>
+<code class="method-response">
+{
+  "permissions": [
+    {
+      "id": 1,
+      "orgId": 1,
+      "name": "User administration ALL",
+      "description": "An application user will have permission to execute all tasks related to user administration.",
+      "code": "USER_ADMINISTRATION_SUPER_USER_ROLE",
+      "groupType": 1
+    },
+    {
+      "id": 2,
+      "orgId": 1,
+      "name": "Organisation adminsitration ALL",
+      "description": "An application user will have permission to execute all tasks related to organisation administration.",
+      "code": "ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE",
+      "groupType": 2
+    },
+    {
+      "id": 3,
+      "orgId": 1,
+      "name": "Portfolio management ALL",
+      "description": "An application user will have permission to execute all tasks related to portfolio management.",
+      "code": "PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE",
+      "groupType": 3
+    },
+    {
+      "id": 4,
+      "orgId": 1,
+      "name": "Reporting ALL",
+      "description": "An application user will have permission to execute and view all reports.",
+      "code": "REPORTING_SUPER_USER_ROLE",
+      "groupType": 4
+    },
+    {
+      "id": 5,
+      "orgId": 1,
+      "name": "Can submit new loan application",
+      "description": "Allows an application user to sumit new loan application.",
+      "code": "CAN_SUBMIT_NEW_LOAN_APPLICATION_ROLE",
+      "groupType": 3
+    },
+    {
+      "id": 6,
+      "orgId": 1,
+      "name": "Can submit historic loan application",
+      "description": "Allows an application user to sumit new loan application where the submitted on date is in the past.",
+      "code": "CAN_SUBMIT_HISTORIC_LOAN_APPLICATION_ROLE",
+      "groupType": 3
+    },
+    {
+      "id": 7,
+      "orgId": 1,
+      "name": "Can approve loan application",
+      "description": "Allows an application user to approve a loan application.",
+      "code": "CAN_APPROVE_LOAN_ROLE",
+      "groupType": 3
+    },
+    {
+      "id": 8,
+      "orgId": 1,
+      "name": "Can approve loan application in the past",
+      "description": "Allows an application user to approve a loan application where the approval date is in the past.",
+      "code": "CAN_APPROVE_LOAN_IN_THE_PAST_ROLE",
+      "groupType": 3
+    },
+    {
+      "id": 9,
+      "orgId": 1,
+      "name": "Can reject loan application",
+      "description": "Allows an application user to reject a loan application.",
+      "code": "CAN_REJECT_LOAN_ROLE",
+      "groupType": 3
+    },
+    {
+      "id": 10,
+      "orgId": 1,
+      "name": "Can reject loan application in the past",
+      "description": "Allows an application user to reject a loan application where the rejected date is in the past.",
+      "code": "CAN_REJECT_LOAN_IN_THE_PAST_ROLE",
+      "groupType": 3
+    },
+    {
+      "id": 11,
+      "orgId": 1,
+      "name": "Can withdraw loan application",
+      "description": "Allows an application user to mark loan application as withdrawn by client.",
+      "code": "CAN_WITHDRAW_LOAN_ROLE",
+      "groupType": 3
+    },
+    {
+      "id": 12,
+      "orgId": 1,
+      "name": "Can withdraw loan application in the past",
+      "description": "Allows an application user to mark loan application as withdrawn by client where the withdran on date is in the past.",
+      "code": "CAN_WITHDRAW_LOAN_IN_THE_PAST_ROLE",
+      "groupType": 3
+    },
+    {
+      "id": 13,
+      "orgId": 1,
+      "name": "Can delete submitted loan application",
+      "description": "Allows an application user to complete delete the loan application if it is submitted but not approved.",
+      "code": "CAN_DELETE_LOAN_THAT_IS_SUBMITTED_AND_NOT_APPROVED",
+      "groupType": 3
+    },
+    {
+      "id": 14,
+      "orgId": 1,
+      "name": "Can undo loan approval",
+      "description": "Allows an application user to undo a loan approval.",
+      "code": "CAN_UNDO_LOAN_APPROVAL_ROLE",
+      "groupType": 3
+    },
+    {
+      "id": 15,
+      "orgId": 1,
+      "name": "Can disburse loan",
+      "description": "Allows an application user to disburse a loan application.",
+      "code": "CAN_DISBURSE_LOAN_ROLE",
+      "groupType": 3
+    },
+    {
+      "id": 16,
+      "orgId": 1,
+      "name": "Can disburse loan in the past",
+      "description": "Allows an application user to disburse a loan where the disbursement date is in the past.",
+      "code": "CAN_DISBURSE_LOAN_IN_THE_PAST_ROLE",
+      "groupType": 3
+    },
+    {
+      "id": 17,
+      "orgId": 1,
+      "name": "Can undo loan disbursal",
+      "description": "Allows an application user to undo a loan disbursal if not payments already made.",
+      "code": "CAN_UNDO_LOAN_DISBURSAL_ROLE",
+      "groupType": 3
+    },
+    {
+      "id": 18,
+      "orgId": 1,
+      "name": "Can enter a repayment against a loan",
+      "description": "Allows an application user to enter a repayment on the loan.",
+      "code": "CAN_MAKE_LOAN_REPAYMENT_LOAN_ROLE",
+      "groupType": 3
+    },
+    {
+      "id": 19,
+      "orgId": 1,
+      "name": "Can enter a repayment against a loan in the past",
+      "description": "Allows an application user to enter a repayment on the loan where the repayment date is in the past.",
+      "code": "CAN_MAKE_LOAN_REPAYMENT_IN_THE_PAST_ROLE",
+      "groupType": 3
+    },
+    {
+      "id": 20,
+      "orgId": 1,
+      "name": "Can add a new client.",
+      "description": "Allows an application user to add a new client.",
+      "code": "CAN_ENROLL_NEW_CLIENT_ROLE",
+      "groupType": 3
+    }
+  ]
+}
+</code>
+	    </div>
+	</div>
     
     </div> <!-- main-content-wrapper -->
 </div>

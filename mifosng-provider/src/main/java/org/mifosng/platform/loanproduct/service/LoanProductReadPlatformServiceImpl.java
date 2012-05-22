@@ -45,7 +45,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 	public LoanProductData retrieveLoanProduct(final Long loanProductId) {
 
 		try {
-			List<CurrencyData> allowedCurrencies = currencyReadPlatformService.retrieveAllowedCurrencies();
+			List<CurrencyData> allowedCurrencies = currencyReadPlatformService.retrieveAllPlatformCurrencies();
 			
 			LoanProductMapper rm = new LoanProductMapper(allowedCurrencies);
 			String sql = "select " + rm.loanProductSchema() + " where lp.id = ?";
@@ -65,7 +65,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
 		AppUser currentUser = this.context.authenticatedUser();
 
-		List<CurrencyData> allowedCurrencies = currencyReadPlatformService.retrieveAllowedCurrencies();
+		List<CurrencyData> allowedCurrencies = currencyReadPlatformService.retrieveAllPlatformCurrencies();
 		
 		LoanProductMapper rm = new LoanProductMapper(allowedCurrencies);
 
@@ -134,7 +134,9 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 			int currencyDigits = rs.getInt("currencyDigits");
 			
 			CurrencyData currencyData = findCurrencyByCode(currencyCode, allowedCurrencies);
-			currencyData.setDecimalPlaces(currencyDigits);
+			if (currencyData != null) {
+				currencyData.setDecimalPlaces(currencyDigits);
+			}
 
 			BigDecimal principal = rs.getBigDecimal("principal");
 			BigDecimal tolerance = rs.getBigDecimal("tolerance");

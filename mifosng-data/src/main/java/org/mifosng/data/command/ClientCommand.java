@@ -5,8 +5,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.joda.time.LocalDate;
 
 @XmlRootElement
-public class EnrollClientCommand {
+public class ClientCommand {
 
+	private Long id;
 	private String firstname;
 	private String lastname;
 	private String fullname;
@@ -17,11 +18,11 @@ public class EnrollClientCommand {
 	private String joiningDateFormatted;
 	private LocalDate joiningDate;
 
-	protected EnrollClientCommand() {
+	protected ClientCommand() {
 		//
 	}
 
-	public EnrollClientCommand(final String firstname, final String lastname, String fullname, final Long officeId, final LocalDate joiningDate) {
+	public ClientCommand(final String firstname, final String lastname, String fullname, final Long officeId, final LocalDate joiningDate) {
 		this.firstname = firstname;
 		this.lastname = lastname;
 		this.fullname = fullname;
@@ -91,5 +92,13 @@ public class EnrollClientCommand {
 
 	public void setJoiningDateFormatted(String joiningDateFormatted) {
 		this.joiningDateFormatted = joiningDateFormatted;
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
 	}
 }

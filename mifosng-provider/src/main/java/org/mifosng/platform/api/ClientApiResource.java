@@ -19,7 +19,7 @@ import org.mifosng.data.ClientLoanAccountSummaryCollectionData;
 import org.mifosng.data.EntityIdentifier;
 import org.mifosng.data.NoteData;
 import org.mifosng.data.NoteDataList;
-import org.mifosng.data.command.EnrollClientCommand;
+import org.mifosng.data.command.ClientCommand;
 import org.mifosng.data.command.NoteCommand;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
 import org.mifosng.platform.client.service.ClientReadPlatformService;
@@ -43,8 +43,8 @@ public class ClientApiResource {
     private ApiDataConversionService apiDataConversionService;
     
 	@GET
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-	@Produces({ MediaType.APPLICATION_JSON})
+	@Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+	@Produces({MediaType.APPLICATION_JSON})
 	public Response retrieveAllIndividualClients() {
 
 		Collection<ClientData> clients = this.clientReadPlatformService.retrieveAllIndividualClients();
@@ -54,8 +54,8 @@ public class ClientApiResource {
 	
 	@GET
 	@Path("{clientId}")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-	@Produces({ MediaType.APPLICATION_JSON})
+	@Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+	@Produces({MediaType.APPLICATION_JSON})
 	public Response retrieveClientData(@PathParam("clientId") final Long clientId) {
 
 		ClientData clientData = this.clientReadPlatformService.retrieveIndividualClient(clientId);
@@ -65,8 +65,8 @@ public class ClientApiResource {
     
 	@GET
 	@Path("template")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-	@Produces({ MediaType.APPLICATION_JSON})
+	@Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+	@Produces({MediaType.APPLICATION_JSON})
 	public Response newClientDetails() {
 
 		ClientData clientData = this.clientReadPlatformService.retrieveNewClientDetails();
@@ -75,9 +75,9 @@ public class ClientApiResource {
 	}
 
 	@POST
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public Response enrollClient(final EnrollClientCommand command) {
+	@Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+	@Produces({MediaType.APPLICATION_JSON })
+	public Response enrollClient(final ClientCommand command) {
 		
 		LocalDate joiningDate = apiDataConversionService.convertFrom(command.getJoiningDateFormatted(), "joiningDateFormatted", command.getDateFormat());
 		command.setJoiningDate(joiningDate);
@@ -87,11 +87,25 @@ public class ClientApiResource {
 		return Response.ok().entity(new EntityIdentifier(clientId)).build();
 	}
 	
+	@PUT
+	@Path("{clientId}")
+	@Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+	@Produces({MediaType.APPLICATION_JSON })
+	public Response updateClient(@PathParam("clientId") final Long clientId, final ClientCommand command) {
+
+		LocalDate joiningDate = apiDataConversionService.convertFrom(command.getJoiningDateFormatted(), "joiningDateFormatted", command.getDateFormat());
+		command.setJoiningDate(joiningDate);
+		command.setId(clientId);
+		
+		EntityIdentifier identifier = this.clientWritePlatformService.updateClientDetails(command);
+
+		return Response.ok().entity(identifier).build();
+	}
 
 	@GET
 	@Path("{clientId}/loans")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON })
+	@Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+	@Produces({MediaType.APPLICATION_JSON })
 	public Response retrieveClientAccount(@PathParam("clientId") final Long clientId) {
 
 		ClientLoanAccountSummaryCollectionData clientAccount = this.clientReadPlatformService.retrieveClientAccountDetails(clientId);
@@ -101,8 +115,8 @@ public class ClientApiResource {
 
 	@GET
 	@Path("{clientId}/notes")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-	@Produces({ MediaType.APPLICATION_JSON})
+	@Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+	@Produces({MediaType.APPLICATION_JSON})
 	public Response retrieveAllClientNotes(@PathParam("clientId") final Long clientId) {
 
 		Collection<NoteData> notes = this.clientReadPlatformService.retrieveAllClientNotes(clientId);
@@ -112,8 +126,8 @@ public class ClientApiResource {
 	
 	@POST
 	@Path("{clientId}/notes")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-	@Produces({ MediaType.APPLICATION_JSON})
+	@Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+	@Produces({MediaType.APPLICATION_JSON})
 	public Response addNewClientNote(@PathParam("clientId") final Long clientId, final NoteCommand command) {
 		
 		command.setClientId(clientId);
@@ -125,8 +139,8 @@ public class ClientApiResource {
 	
 	@GET
 	@Path("{clientId}/notes/{noteId}")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON })
+	@Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+	@Produces({MediaType.APPLICATION_JSON })
 	public Response retrieveClientNote(@PathParam("clientId") final Long clientId, @PathParam("noteId") final Long noteId) {
 
 		NoteData note = this.clientReadPlatformService.retrieveClientNote(clientId, noteId);
@@ -136,8 +150,8 @@ public class ClientApiResource {
 	
 	@PUT
 	@Path("{clientId}/notes/{noteId}")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON })
+	@Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+	@Produces({MediaType.APPLICATION_JSON })
 	public Response updateClientNote(@PathParam("clientId") final Long clientId, @PathParam("noteId") final Long noteId, final NoteCommand command) {
 
 		command.setClientId(clientId);

@@ -1,10 +1,10 @@
 package org.mifosng.platform.client.service;
 
-import static org.mifosng.platform.Specifications.officesThatMatch;
+import static org.mifosng.platform.Specifications.*;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosng.data.EntityIdentifier;
-import org.mifosng.data.command.EnrollClientCommand;
+import org.mifosng.data.command.ClientCommand;
 import org.mifosng.data.command.NoteCommand;
 import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.client.domain.ClientRepository;
@@ -37,11 +37,11 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 	
 	@Transactional
 	@Override
-	public Long enrollClient(final EnrollClientCommand command) {
+	public Long enrollClient(final ClientCommand command) {
 
 		AppUser currentUser = context.authenticatedUser();
 		
-		EnrollClientCommandValidator validator = new EnrollClientCommandValidator(command);
+		ClientCommandValidator validator = new ClientCommandValidator(command);
 		validator.validate();
 
 		Office clientOffice = this.officeRepository.findOne(officesThatMatch(currentUser.getOrganisation(), command.getOfficeId()));
@@ -58,6 +58,33 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 		this.clientRepository.save(newClient);
 
 		return newClient.getId();
+	}
+	
+	@Transactional
+	@Override
+	public EntityIdentifier updateClientDetails(ClientCommand command) {
+		
+		AppUser currentUser = context.authenticatedUser();
+		
+		//EnrollClientCommandValidator validator = new EnrollClientCommandValidator(command);
+		//validator.validate();
+
+		Office clientOffice = this.officeRepository.findOne(officesThatMatch(currentUser.getOrganisation(), command.getOfficeId()));
+		
+		String firstname = command.getFirstname();
+		String lastname = command.getLastname();
+		if (StringUtils.isNotBlank(command.getFullname())) {
+			lastname = command.getFullname();
+			firstname = null;
+		}
+
+		Client clientForUpdate = this.clientRepository.findOne(clientsThatMatch(currentUser.getOrganisation(), command.getId()));
+		
+		clientForUpdate.update(clientOffice, firstname, lastname, command.getExternalId(), command.getJoiningDate());
+				
+		this.clientRepository.save(clientForUpdate);
+
+		return new EntityIdentifier(clientForUpdate.getId());
 	}
 	
 	@Transactional

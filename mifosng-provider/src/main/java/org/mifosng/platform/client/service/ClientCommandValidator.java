@@ -5,14 +5,14 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosng.data.ApiParameterError;
-import org.mifosng.data.command.EnrollClientCommand;
+import org.mifosng.data.command.ClientCommand;
 import org.mifosng.platform.exceptions.PlatformApiDataValidationException;
 
-public class EnrollClientCommandValidator {
+public class ClientCommandValidator {
 
-	private final EnrollClientCommand command;
+	private final ClientCommand command;
 
-	public EnrollClientCommandValidator(EnrollClientCommand command) {
+	public ClientCommandValidator(ClientCommand command) {
 		this.command = command;
 	}
 

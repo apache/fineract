@@ -13,6 +13,7 @@ import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
+import org.mifosng.data.command.ClientCommand;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
 import org.mifosng.platform.organisation.domain.Office;
 import org.mifosng.platform.organisation.domain.Organisation;
@@ -34,19 +35,19 @@ public class Client extends AbstractAuditableCustom<AppUser, Long> {
 
     @SuppressWarnings("unused")
 	@Column(name = "firstname", length=50)
-    private final String       firstName;
+    private String       firstName;
     
     @SuppressWarnings("unused")
 	@Column(name = "lastname", length=50)
-    private final String       lastName;
+    private String       lastName;
 
     @SuppressWarnings("unused")
 	@Column(name = "joining_date")
     @Temporal(TemporalType.DATE)
-    private final Date         joiningDate;
+    private Date         joiningDate;
 
     @Column(name = "external_id", length=100)
-    private final String externalId;
+    private String externalId;
 
 	public static Client newClient(Organisation organisation,
 			Office clientOffice, String firstname, String lastname,
@@ -84,5 +85,32 @@ public class Client extends AbstractAuditableCustom<AppUser, Long> {
 
 	public boolean identifiedBy(final String identifier) {
 		return identifier.equalsIgnoreCase(this.externalId);
+	}
+
+	public void update(ClientCommand command) {
+		this.joiningDate = command.getJoiningDate().toDate();
+		this.firstName = command.getFirstname();
+		this.lastName = command.getLastname();
+		
+		if (StringUtils.isNotBlank(command.getFullname())) {
+			this.firstName = null;
+			this.lastName = command.getFullname().trim();
+		}
+		
+		if (StringUtils.isNotBlank(command.getExternalId())) {
+            this.externalId = command.getExternalId().trim();
+        } else {
+            this.externalId = null;
+        }
+	}
+
+	public void update(Office clientOffice, String firstname, String lastname, String externalId, LocalDate joiningDate) {
+		this.joiningDate = joiningDate.toDate();
+		this.firstName = firstname;
+		this.lastName = lastname;
+		this.externalId = externalId;
+		if (StringUtils.isNotBlank(externalId)) {
+            this.externalId = externalId.trim();
+        }
 	}
 }

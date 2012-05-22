@@ -22,7 +22,7 @@ import org.mifosng.data.LoanSchedule;
 import org.mifosng.data.MoneyData;
 import org.mifosng.data.ScheduledLoanInstallment;
 import org.mifosng.data.command.CalculateLoanScheduleCommand;
-import org.mifosng.data.command.EnrollClientCommand;
+import org.mifosng.data.command.ClientCommand;
 import org.mifosng.data.command.ImportClientCommand;
 import org.mifosng.data.command.ImportLoanCommand;
 import org.mifosng.data.command.ImportLoanRepaymentsCommand;
@@ -115,7 +115,7 @@ public class ImportPlatformServiceImpl implements ImportPlatformService {
 		
 		List<Client> newClientCollection = new ArrayList<Client>();
 		
-		for (EnrollClientCommand client : command.getClients()) {
+		for (ClientCommand client : command.getClients()) {
 			Office clientOffice = findById(allOffices, client.getOfficeId());
 
 			Client newClient = Client.newClient(currentUser.getOrganisation(), clientOffice, client.getFirstname(), client.getLastname(), client.getJoiningDate(), client.getExternalId());
@@ -544,7 +544,7 @@ public class ImportPlatformServiceImpl implements ImportPlatformService {
 //				success = false;
 //			}
 
-			List<EnrollClientCommand> parsedClients = new ArrayList<EnrollClientCommand>();
+			List<ClientCommand> parsedClients = new ArrayList<ClientCommand>();
 			while (clients.readRecord()) {
 				String externalId = clients.get("ExternalId");
 				String firstname = clients.get("FirstName");
@@ -555,7 +555,7 @@ public class ImportPlatformServiceImpl implements ImportPlatformService {
 				
 				LocalDate joiningDate = new LocalDate(isoParser.parseDateTime(joined));
 
-				EnrollClientCommand parsedClient = new EnrollClientCommand(firstname, lastname, "", matchingOffice.getId(), joiningDate);
+				ClientCommand parsedClient = new ClientCommand(firstname, lastname, "", matchingOffice.getId(), joiningDate);
 				parsedClient.setExternalId(externalId);
 				
 				parsedClients.add(parsedClient);
