@@ -10,7 +10,6 @@
 <body>
 <div id="page-wrapper">
     <div id="flybar">
-
         <div class="flybar-nav">
             <h2 id="toc-menu-button" class="flybar-button">API Navigation</h2>
             <div id="toc-menu" class="flybar-menu">
@@ -617,6 +616,211 @@
 
 
 
+        <a id="loans" name="loans" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h3>Loans</h3>
+                <p>Loan stuff.
+                </p>
+            </div>
+        </div>
+                
+        <div class="method-section">
+            <div class="method-description">
+                <h5>Attributes</h5>
+                <dl class="argument-list">
+                    <dt>
+                    id
+                    </dt>
+                    <dd>              
+                    string <span>jpw ipsum as an example of showing the (at least important) columns</span>
+                    </dd>
+                    <dt>
+                    amount
+                    </dt>
+                    <dd>blah <span></span>
+                    </dd>
+                    <dd>blah</dd>
+                    <dt>
+                    card
+                    </dt>
+                </dl>
+            </div>
+        </div>
+        <a id="loans_template" name="loans_template" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>Retrieve Loan Details Template</h4>
+                <p>Returns a template that contains client and loan product fields and allowed value lists.  This helps build a maintenance User Interface.
+                </p>
+                <h5>Arguments</h5>
+                <dl class="argument-list">
+                    <dt>clientId</dt>
+                    <dd>Integer</dd>
+                    <dd>The 'id' of the Client</dd>
+                    <dt>productId</dt>
+                    <dd>Integer</dd>
+                    <dd>The 'id' of the Loan Product</dd>
+                </dl>
+                <p>Example Request: 
+                <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/loans/template?clientId=1&productId=1">http://localhost:8080/mifosng-provider/api/v1/loans/template?clientId=1&productId=1</a>
+                </p>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">GET https://thedomainname/api/v1/loans/template</code>
+                <code class="method-response"> to be done
+            </code>
+            </div>
+        </div>
+        <a id="loans_retrieve" name="loans_retrieve" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>Retrieve a Loan</h4>
+                <p>Returns loan fields.
+                </p>
+                <p>Example Request: 
+                <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/loans/1">http://localhost:8080/mifosng-provider/api/v1/loans/1</a>
+                </p>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">GET https://thedomainname/api/v1/loans/{loanId}</code>
+                <code class="method-response"> 
+                </code>
+            </div>
+        </div>
+        <a id="loans_create" name="loans_create" class="old-syle-anchor">&nbsp;</a>
+        <a id="loans_submit" name="loans_submit" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>Create a New Loan/Submit a Loan Application</h4>
+                <h5>Arguments</h5>
+                <dl class="argument-list">
+                    <dt>command</dt>
+                    <dd>String<span> Optional, case-insensitive</span></dd>
+                    <dd>The default action is to Submit a New Loan Application.  If the value is 'calculateLoanSchedule' then a new loan entry is created without entering the loan life cycle.</dd>
+                </dl>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">POST https://thedomainname/api/v1/loans</code>
+                <code class="method-request">http://localhost:8080/mifosng-provider/api/v1/loans
+                
+                
+                Content-Type: application/json
+                Request Body:
+                new json here
+                </code>
+                <code class="method-response">{
+    "entityId": 2
+}
+                </code>
+            </div>
+        </div>
+        <a id="loans_approve" name="loans_approve" class="old-syle-anchor">&nbsp;</a>
+        <a id="loans_disburse" name="loans_disburse" class="old-syle-anchor">&nbsp;</a>
+        <a id="loans_reject" name="loans_reject" class="old-syle-anchor">&nbsp;</a>
+        <a id="loans_withdraw" name="loans_withdraw" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>Approve, Disburse, Reject a Loan or Withdraw a Loan Application</h4>
+                <h5>Arguments</h5>
+                <dl class="argument-list">
+                    <dt>command</dt>
+                    <dd>String<span> Mandatory? what happens if command wrong, , case-insensitive</span></dd>
+                    <dd>'approve' : Approve Loan</dd>
+                    <dd>'disburse' : Disburse Loan</dd>
+                    <dd>'reject' : Reject Loan</dd>
+                    <dd>'withdrewbyclient' : Client Withdrew Loan Application</dd>
+                </dl>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">POST https://thedomainname/api/v1/loans/{loanId}</code>
+                <code class="method-request">http://localhost:8080/mifosng-provider/api/v1/loans/1?command=approve
+                
+                
+                Content-Type: application/json
+                Request Body:
+                new json here
+                </code>
+                <code class="method-response">{
+    "entityId": 2
+}
+                </code>
+            </div>
+        </div>
+        <a id="loans_delete" name="loans_delete" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>Delete a Loan</h4>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">DELETE https://thedomainname/api/v1/loans/{loanId}</code>
+                <code class="method-request">http://localhost:8080/mifosng-provider/api/v1/loans/1
+                
+                
+                Content-Type: application/json
+                Request Body:
+                new json here
+                </code>
+                <code class="method-response">{
+    "entityId": 2
+}
+                </code>
+            </div>
+        </div>
+        <a id="loans_undoapproval" name="loans_undoapproval" class="old-syle-anchor">&nbsp;</a>
+        <a id="loans_undodisbursal" name="loans_undodisbursal" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>Undo Loan Approval/ Undo Loan Disbursal</h4>
+                <dl class="argument-list">
+                    <dt>command</dt>
+                    <dd>String<span> Mandatory? what happens if command wrong, , case-insensitive</span></dd>
+                    <dd>'undoapproval' : Undo Loan Approval</dd>
+                    <dd>'undodisbursal' : Undo Loan Disbursal</dd>
+                </dl>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">POST https://thedomainname/api/v1/loans/{loanId}/undo</code>
+                <code class="method-request">http://localhost:8080/mifosng-provider/api/v1/loans/1/undo
+                
+                
+                Content-Type: application/json
+                Request Body:
+                new json here
+                </code>
+                <code class="method-response">{
+    "entityId": 2
+}
+                </code>
+            </div>
+        </div>
+
+
+        <a id="loans_repaymenttemplate" name="loans_repaymenttemplate" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>Retrieve Loan Repayment Template</h4>
+                <p>Returns a template that contains client and loan product fields and allowed value lists.  This helps build a maintenance User Interface.
+                </p>
+                <h5>Arguments</h5>
+                <dl class="argument-list">
+                    <dt>type</dt>
+                    <dd>String</dd>
+                    <dd>The 'id' of the Client</dd>
+                    <dt>productId</dt>
+                    <dd>Integer</dd>
+                    <dd>The 'id' of the Loan Product</dd>
+                </dl>
+                <p>Example Request: 
+                <a style="word-wrap: break-word;" href="http://localhost:8080/mifosng-provider/api/v1/loans/template?clientId=1&productId=1">http://localhost:8080/mifosng-provider/api/v1/loans/template?clientId=1&productId=1</a>
+                </p>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">GET https://thedomainname/api/v1/loans/template</code>
+                <code class="method-response"> to be done
+            </code>
+            </div>
+        </div>
 
 
 
