@@ -3,6 +3,7 @@
 }
 
 .matrixHeading { 
+	font-family: Helvetica, Arial, sans-serif;
 	border-collapse:collapse;
 	margin-right:10px;
 	margin-left:10px;
@@ -81,7 +82,7 @@ body {
     height: 40px;
     min-width: 745px;
     left: 0; right: 0; top: 0;
-    padding-left: 580px;
+    padding-left: 50px;
     background: #eee;
     background: -webkit-gradient(linear, left top, left bottom, from(#f8f8f8), to(#dadada));
     background: -moz-linear-gradient(top, #f8f8f8, #dadada);
@@ -153,6 +154,10 @@ body {
 }
 
 #toc-menu {
+    right: -480px;
+}
+
+#toc-menu2 {
     right: -480px;
 }
 
@@ -229,10 +234,6 @@ body {
 .toc-section {
     width: 235px;
     font-size: 90%;
-}
-
-#toc-menu-button {
-    border-right: 1px solid #bbb;
 }
 
 code {
