@@ -1,5 +1,5 @@
 .tocMatrix {
-	font-size: 75%;
+	font-size: 85%;
 }
 
 .matrixHeading { 
@@ -82,7 +82,7 @@ body {
     height: 40px;
     min-width: 745px;
     left: 0; right: 0; top: 0;
-    padding-left: 100px;
+    padding-left: 200px;
     background: #eee;
     background: -webkit-gradient(linear, left top, left bottom, from(#f8f8f8), to(#dadada));
     background: -moz-linear-gradient(top, #f8f8f8, #dadada);
@@ -170,12 +170,46 @@ body {
     box-shadow: 0 3px 5px rgba(0,0,0,0.1);
 }
 
-#toc-menu {
-    right: -480px;
+.flybar-menu-convenience {
+    display: none;
+    position: absolute;
+    top: 41px;
+
+    width: 600px;
+    background-color: rgba(249, 249, 249, 0.99);
+    border: 1px solid rgb(187, 187, 187);
+    border-top: 0;
+    padding: 1em;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+    -webkit-box-shadow: 0 3px 5px rgba(0,0,0,0.1);
+    -moz-box-shadow: 0 3px 5px rgba(0,0,0,0.1);
+    box-shadow: 0 3px 5px rgba(0,0,0,0.1);
+}
+
+#toc-menu1 {
+	position:absolute;
+	left:-150px;
 }
 
 #toc-menu2 {
-    right: -480px;
+	position:absolute;
+	left:-300px;
+}
+
+#toc-menu3 {
+	position:absolute;
+	left:-450px;
+}
+
+#toc-menu4 {
+	position:absolute;
+	left:-600px;
+}
+
+#toc-menu5 {
+	position:absolute;
+	left:-450px;
 }
 
 #language-menu {
@@ -187,24 +221,24 @@ body {
     margin-right: 25px;
 }
 
-.flybar-menu h3, .flybar-menu-overview h3 {
+.flybar-menu h3, .flybar-menu-overview h3, .flybar-menu-convenience h3 {
     text-transform: uppercase;
     font-size: 100%;
 }
 
-.flybar-menu h4, , .flybar-menu-overview h4 {
+.flybar-menu h4, .flybar-menu-overview h4, .flybar-menu-convenience h4 {
     text-transform: uppercase;
     font-size: 90%;
     color: rgb(155, 155, 155);
     margin: 0.5em 0 0.5em 0;
 }
 
-.flybar-menu ul, , .flybar-menu-overview ul {
+.flybar-menu ul, .flybar-menu-overview ul, .flybar-menu-convenience ul {
     margin: 0 0 1em 1em;
 }
 
-.flybar-nav:hover .flybar-menu, .flybar-nav:hover .flybar-menu-overview,
-.flybar-nav.active .flybar-menu, .flybar-nav.active .flybar-menu-overview  {
+.flybar-nav:hover .flybar-menu, .flybar-nav:hover .flybar-menu-overview, .flybar-nav:hover .flybar-menu-convenience,
+.flybar-nav.active .flybar-menu, .flybar-nav.active .flybar-menu-overview, .flybar-nav.active .flybar-menu-convenience{
     display: block;
 }
 
@@ -219,7 +253,7 @@ body {
   border-right: 1px solid rgb(187, 187, 187);
 }
 
-.flybar-nav:hover .flybar-menu, .flybar-nav:hover .flybar-menu-overview,
+.flybar-nav:hover .flybar-menu, .flybar-nav:hover .flybar-menu-overview, .flybar-nav:hover .flybar-menu-convenience,
 .flybar-button.active {
   margin-right: -1px;
 }
