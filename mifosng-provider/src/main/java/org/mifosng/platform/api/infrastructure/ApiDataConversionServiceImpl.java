@@ -27,7 +27,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 				eventLocalDate = DateTimeFormat.forPattern(dateFormat).withLocale(locale).parseLocalDate(dateAsString.toLowerCase(locale));
 			} catch (IllegalArgumentException e) {
 				List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-				ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.date.format", "The parameter " + parameterName + " is invalid.", parameterName, dateAsString);
+				ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.date.format", "The parameter " + parameterName + " is invalid based on the dateFormat provided:" + dateFormat, parameterName, dateAsString, dateFormat);
 				dataValidationErrors.add(error);
 				
 				throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);

@@ -19,7 +19,7 @@ public class OfficeCommand {
 	private LocalDate openingDate;
 
 	private Long parentId;
-	private boolean rootOffice = false;
+	private Boolean rootOffice = false;
 
 	protected OfficeCommand() {
 		//

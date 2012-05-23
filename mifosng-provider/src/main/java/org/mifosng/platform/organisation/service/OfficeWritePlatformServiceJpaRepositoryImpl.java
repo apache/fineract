@@ -39,7 +39,7 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
 			AppUser currentUser = context.authenticatedUser();
 			
 			OfficeCommandValidator validator = new OfficeCommandValidator(command);
-			validator.validate();
+			validator.validateForCreate();
 			
 			Office parent = validateUserPriviledgeOnOfficeAndRetrieve(currentUser, command.getParentId());
 	
@@ -67,13 +67,13 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
 			AppUser currentUser = context.authenticatedUser();
 			
 			OfficeCommandValidator validator = new OfficeCommandValidator(command);
-			validator.validate();
+			validator.validateForUpdate();
 			
 			Office office = validateUserPriviledgeOnOfficeAndRetrieve(currentUser, command.getId());
 			
-			office.update(command.getName(), command.getExternalId(), command.getOpeningDate());
+			office.update(command);
 			
-			if (!command.isRootOffice()) {
+			if (!command.isRootOffice() && command.getParentId() != null) {
 				Office parent = validateUserPriviledgeOnOfficeAndRetrieve(currentUser, command.getParentId());
 				office.update(parent);
 			}

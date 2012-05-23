@@ -17,6 +17,7 @@ import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
+import org.mifosng.data.command.OfficeCommand;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
 import org.mifosng.platform.user.domain.AppUser;
 
@@ -102,15 +103,25 @@ public class Office extends AbstractAuditableCustom<AppUser, Long> {
         return this.parent == null;
     }
 
-	public void update(final String newNname, final String newExternalId,
-			final LocalDate newOpeningDate) {
-		this.name = newNname;
-		this.externalId = newExternalId;
-		this.openingDate = newOpeningDate.toDateMidnight().toDate();
-	}
 
+	public void update(OfficeCommand command) {
+		// ignore nulls when updating
+		if (command.getName() != null) {
+			this.name = command.getName().trim();
+		}
+		
+		if (command.getExternalId() != null) {
+			this.externalId = command.getExternalId().trim();
+		}
+		
+		if (command.getOpeningDate() != null) {
+			this.openingDate = command.getOpeningDate().toDate();
+		}
+	}
+	
 	public void update(Office newParent) {
 		this.parent = newParent;
+		generateHierarchy();
 	}
 
 	public boolean identifiedBy(String identifier) {
