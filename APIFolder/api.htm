@@ -62,10 +62,9 @@
 <br>
 <br>
     <table width="60%"><tr><td><h5>Mifos X API Endpoint:</h5></td><td><h5>https://thedomainname/api</h5></td></tr></table>
-    <br>
     <table class=matrixHeading>
-        <tr class="matrixHeadingBG"><td></td><td valign="top"><div class="matrixHeadingVerbs"><table><tr><td>Resources</td></tr></table></div></td><td><table><tr><td><div class="matrixHeadingVerbs">POST</div></td></tr><tr><td>create/update</td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">GET</div></td></tr><tr><td>read</td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">PUT</div></td></tr><tr><td>simple update</td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">DELETE</div></td></tr><tr><td>delete</td></tr></table></td></tr>
-        <tr><td><a href="#clients">CLIENT</a></td><td>/v1/clients</td><td><a href="api.htm#clients_create">Create a Client</a></td><td><a href="#clients_list">List Clients</a></td><td align="center">-</td><td align="center">-</td></tr>
+        <tr class="matrixHeadingBG"><td colspan=2 valign="top"><div class="matrixHeadingVerbs"><table><tr><td>Resources</td></tr></table></div></td><td><table><tr><td><div class="matrixHeadingVerbs">POST</div></td></tr><tr><td>create/update</td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">GET</div></td></tr><tr><td>read</td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">PUT</div></td></tr><tr><td>simple update</td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">DELETE</div></td></tr><tr><td>delete</td></tr></table></td></tr>
+        <tr class="alt"><td><a href="#clients">CLIENT</a></td><td>/v1/clients</td><td><a href="api.htm#clients_create">Create a Client</a></td><td><a href="#clients_list">List Clients</a></td><td align="center">-</td><td align="center">-</td></tr>
         <tr><td></td><td>/v1/clients/{clientId}</td><td align="center">-</td><td><a href="#clients_retrieve">Retrieve a Client</a></td><td><a href="#clients_update">Update a Client</a></td><td align="center">-</td></tr>
         <tr class="alt"><td></td><td>/v1/clients/{clientId}/loans</td><td align="center">-</td><td><a href="#clients_loansummary">Retrieve a Client's Loan Account Summary</a></td><td align="center">-</td><td align="center">-</td></tr>
         <tr><td></td><td>/v1/clients/{clientId}/notes</td><td><a href="#clients_addnote">Add a Client Note</a></td><td><a href="#clients_notes">Retrieve a Client's Notes</a></td><td align="center">-</td><td align="center">-</td></tr>
@@ -94,15 +93,15 @@
         <tr class="alt"><td><a href="#permissions">PERMISSION</a></td><td>/v1/permissions</td><td align="center">-</td><td><a href="#permissions_list">List Application Permissions</a></td><td align="center">-</td><td align="center">-</td></tr>
     </table>
     <br>
-    <table>
-        <tr><td valign="top">Convenience Resources</td><td><table><tr><td>GET</td></tr><tr><td>read</td></tr></table></td></tr>
-        <tr><td>/v1/clients/template</td><td><a href="#clients_template">Retrieve Client Details Template</a></td></tr>
+    <table class=matrixHeading>
+        <tr class="matrixHeadingBG"><td valign="top"><div class="matrixHeadingVerbs"><table><tr><td>Convenience Resources</td></tr></table></div></td><td><table><tr><td><div class="matrixHeadingVerbs">GET</div></td></tr><tr><td>read</td></tr></table></td></tr>
+        <tr class="alt"><td>/v1/clients/template</td><td><a href="#clients_template">Retrieve Client Details Template</a></td></tr>
         <tr><td>/v1/loans/template</td><td><a href="#loans_template">Retrieve Loan Details Template</a></td></tr>
-        <tr><td>/v1/loans/{loanId}/transactions/template</td><td><a href="#loans_repaymenttemplate_etc">Retrieve Loan Repayment/Loan Waiver Template</a></td></tr>
+        <tr class="alt"><td>/v1/loans/{loanId}/transactions/template</td><td><a href="#loans_repaymenttemplate_etc">Retrieve Loan Repayment/Loan Waiver Template</a></td></tr>
         <tr><td>/v1/offices/template</td><td><a href="#offices_template">Retrieve Office Details Template</a></td></tr>
-        <tr><td>/v1/loanproducts/template</td><td><a href="#loanproducts_template">Retrieve Loan Product Details Template</a></td></tr>
+        <tr class="alt"><td>/v1/loanproducts/template</td><td><a href="#loanproducts_template">Retrieve Loan Product Details Template</a></td></tr>
         <tr><td>/v1/useraccounts/current/password/template</td><td><a href="#useraccount_password_retrieve">Retrieve change password template</a></td></tr>
-        <tr><td>/v1/users/template</td><td><a href="#users_template">Retrieve new user template</a></td></tr>
+        <tr class="alt"><td>/v1/users/template</td><td><a href="#users_template">Retrieve new user template</a></td></tr>
         <tr><td>/v1/roles/template</td><td><a href="#roles_template">Retrieve new role template</a></td></tr>
     </table>
     <div id="main-content-wrapper">
