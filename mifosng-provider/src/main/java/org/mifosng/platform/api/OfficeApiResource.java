@@ -1,10 +1,8 @@
 package org.mifosng.platform.api;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.StringTokenizer;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -17,19 +15,13 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.ser.FilterProvider;
-import org.codehaus.jackson.map.ser.impl.SimpleBeanPropertyFilter;
-import org.codehaus.jackson.map.ser.impl.SimpleFilterProvider;
 import org.joda.time.LocalDate;
 import org.mifosng.data.EntityIdentifier;
 import org.mifosng.data.OfficeData;
 import org.mifosng.data.OfficeTemplateData;
 import org.mifosng.data.command.OfficeCommand;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
-import org.mifosng.platform.exceptions.PlatformApiDataValidationException;
+import org.mifosng.platform.api.infrastructure.ApiJSONFormattingService;
 import org.mifosng.platform.organisation.service.OfficeReadPlatformService;
 import org.mifosng.platform.organisation.service.OfficeWritePlatformService;
 import org.slf4j.Logger;
@@ -43,8 +35,7 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class OfficeApiResource {
 
-	private final static Logger logger = LoggerFactory
-			.getLogger(OfficeApiResource.class);
+	private final static Logger logger = LoggerFactory.getLogger(OfficeApiResource.class);
 
 	@Autowired
 	private OfficeReadPlatformService readPlatformService;
@@ -54,6 +45,9 @@ public class OfficeApiResource {
 
 	@Autowired
 	private ApiDataConversionService apiDataConversionService;
+	
+	@Autowired
+	private ApiJSONFormattingService jsonFormattingService;
 
 	@GET
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
@@ -65,8 +59,11 @@ public class OfficeApiResource {
 
 		Set<String> excludeFields = new HashSet<String>();
 		excludeFields.add("officeTemplateData");
-		return convertDataObjectJSON(offices, fields, excludeFields);
-
+		
+		// can use parameters for turning this on/off etc.
+		boolean prettyOutput = true;
+		
+		return this.jsonFormattingService.convertDataObjectJSON(offices, fields, excludeFields, prettyOutput);
 	}
 
 	@GET
@@ -82,7 +79,11 @@ public class OfficeApiResource {
 
 		Set<String> excludeFields = new HashSet<String>();
 		String includeFields = "officeTemplateData";
-		return convertDataObjectJSON(officeData, includeFields, excludeFields);
+		
+		// can use parameters for turning this on/off etc.
+		boolean prettyOutput = true;
+		
+		return this.jsonFormattingService.convertDataObjectJSON(officeData, includeFields, excludeFields, prettyOutput);
 	}
 
 	@POST
@@ -138,8 +139,10 @@ public class OfficeApiResource {
 				excludeFields.add("officeTemplateData");
 			}
 		}
-
-		return convertDataObjectJSON(office, includeFields, excludeFields);
+		
+		boolean prettyOutput = true;
+		
+		return this.jsonFormattingService.convertDataObjectJSON(office, includeFields, excludeFields, prettyOutput);
 	}
 
 	@PUT
@@ -159,53 +162,4 @@ public class OfficeApiResource {
 
 		return Response.ok().entity(new EntityIdentifier(entityId)).build();
 	}
-
-	private String convertDataObjectJSON(Object dataObject, String fields,
-			Set<String> excludeFields) {
-
-		if (excludeFields == null) {
-			throw new PlatformApiDataValidationException(
-					"validation.msg.excludeFields.null",
-					"JPW (might be wrong error msg) Parameter excludeFields is unexpectedly null.",
-					null);
-		}
-
-		String json = "";
-		String myFilter = "myFilter";
-		Set<String> includeFields = new HashSet<String>();
-		FilterProvider filters = null;
-
-		ObjectMapper mapper = new ObjectMapper();
-		if (fields == null || fields.equals("")) {
-			filters = new SimpleFilterProvider().addFilter(myFilter,
-					SimpleBeanPropertyFilter.serializeAllExcept(excludeFields));
-
-		} else {
-
-			StringTokenizer st = new StringTokenizer(fields, ",");
-			while (st.hasMoreTokens()) {
-				includeFields.add(st.nextToken().trim());
-			}
-
-			filters = new SimpleFilterProvider().addFilter(myFilter,
-					SimpleBeanPropertyFilter.filterOutAllExcept(includeFields));
-		}
-
-		try {
-			json = mapper.filteredWriter(filters)
-					.writeValueAsString(dataObject);
-		} catch (JsonGenerationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (JsonMappingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		logger.info("office list json: " + json);
-		return json;
-	}
-
 }

@@ -114,6 +114,22 @@ public class ApiGlobalErrorResponse {
 		return globalErrorResponse;
 	}
 	
+	public static ApiGlobalErrorResponse serverSideError(String globalisationMessageCode, String defaultUserMessage, Object... defaultUserMessageArgs) {
+		
+		ApiGlobalErrorResponse globalErrorResponse = new ApiGlobalErrorResponse();
+		globalErrorResponse.setHttpStatusCode("500");
+		globalErrorResponse.setDeveloperMessage("An unexpected error occured on the platform server.");
+		globalErrorResponse.setDeveloperDocLink("https://github.com/keithwoodlock/mifosx/wiki/HTTP-API-Error-codes");
+		globalErrorResponse.setUserMessageGlobalisationCode("error.msg.platform.server.side.error");
+		globalErrorResponse.setDefaultUserMessage("An unexpected error occured on the platform server.");
+		
+		List<ApiParameterError> errors = new ArrayList<ApiParameterError>();
+		errors.add(ApiParameterError.generalError(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs));
+		globalErrorResponse.setErrors(errors);
+		
+		return globalErrorResponse;
+	}
+	
 	protected ApiGlobalErrorResponse() {
 		//
 	}

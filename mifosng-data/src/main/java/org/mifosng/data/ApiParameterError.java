@@ -37,7 +37,10 @@ public class ApiParameterError {
 	 * Arguments related to the user error message.
 	 */
 	private List<ApiErrorMessageArg> args = new ArrayList<ApiErrorMessageArg>();
-	
+
+	public static ApiParameterError generalError(String globalisationMessageCode, String defaultUserMessage, Object... defaultUserMessageArgs) {
+		return new ApiParameterError(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs);
+	}
 
 	public static ApiParameterError resourceIdentifierNotFound(String globalisationMessageCode, String defaultUserMessage, Object... defaultUserMessageArgs) {
 		return new ApiParameterError(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs);
