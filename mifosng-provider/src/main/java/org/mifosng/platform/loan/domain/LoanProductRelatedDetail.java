@@ -173,17 +173,38 @@ public class LoanProductRelatedDetail implements
 
 	public void update(LoanProductCommand command) {
 		
-		this.currency = new MonetaryCurrency(command.getCurrencyCode(), command.getDigitsAfterDecimal());
-		this.principal = command.getPrincipal();
-		this.repayEvery = command.getRepaymentEvery();
-		this.repaymentPeriodFrequencyType = PeriodFrequencyType.fromInt(command.getRepaymentFrequency());
-		this.numberOfRepayments = command.getNumberOfRepayments();
-		this.amortizationMethod = AmortizationMethod.fromInt(command.getAmortizationMethod());
-		this.inArrearsTolerance = command.getInArrearsToleranceAmount();
-		
-		this.nominalInterestRatePerPeriod = command.getInterestRatePerPeriod();
-		this.interestPeriodFrequencyType = PeriodFrequencyType.fromInt(command.getInterestRateFrequencyMethod());
-		this.interestMethod = InterestMethod.fromInt(command.getInterestMethod());
-		this.interestCalculationPeriodMethod = InterestCalculationPeriodMethod.fromInt(command.getInterestCalculationPeriodMethod());
+		if (command.getCurrencyCode() != null && command.getDigitsAfterDecimal() != null) {
+			this.currency = new MonetaryCurrency(command.getCurrencyCode(), command.getDigitsAfterDecimal());
+		}
+		if (command.getPrincipal() != null) {
+			this.principal = command.getPrincipal();
+		}
+		if (command.getRepaymentEvery() != null) {
+			this.repayEvery = command.getRepaymentEvery();
+		}
+		if (command.getRepaymentFrequency() != null) {
+			this.repaymentPeriodFrequencyType = PeriodFrequencyType.fromInt(command.getRepaymentFrequency());
+		}
+		if (command.getNumberOfRepayments() != null) {
+			this.numberOfRepayments = command.getNumberOfRepayments();
+		}
+		if (command.getAmortizationMethod() != null) {
+			this.amortizationMethod = AmortizationMethod.fromInt(command.getAmortizationMethod());
+		}
+		if (command.getInArrearsToleranceAmount() != null) {
+			this.inArrearsTolerance = command.getInArrearsToleranceAmount();
+		}
+		if (command.getInterestRatePerPeriod() != null) {
+			this.nominalInterestRatePerPeriod = command.getInterestRatePerPeriod();
+		}
+		if (command.getInterestRateFrequencyMethod() != null) {
+			this.interestPeriodFrequencyType = PeriodFrequencyType.fromInt(command.getInterestRateFrequencyMethod());
+		}
+		if (command.getInterestMethod() != null) {
+			this.interestMethod = InterestMethod.fromInt(command.getInterestMethod());
+		}
+		if (command.getInterestCalculationPeriodMethod() != null) {
+			this.interestCalculationPeriodMethod = InterestCalculationPeriodMethod.fromInt(command.getInterestCalculationPeriodMethod());
+		}
 	}
 }

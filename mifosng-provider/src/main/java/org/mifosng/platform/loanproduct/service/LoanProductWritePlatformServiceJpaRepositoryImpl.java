@@ -14,6 +14,7 @@ import org.mifosng.platform.loan.domain.InterestMethod;
 import org.mifosng.platform.loan.domain.LoanProduct;
 import org.mifosng.platform.loan.domain.LoanProductRepository;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
+import org.mifosng.platform.loanschedule.domain.AprCalculator;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.user.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,11 +26,13 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
 
 	private final PlatformSecurityContext context;
 	private final LoanProductRepository loanProductRepository;
+	private final AprCalculator aprCalculator;
 
 	@Autowired
-	public LoanProductWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final LoanProductRepository loanProductRepository) {
+	public LoanProductWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final LoanProductRepository loanProductRepository,  final AprCalculator aprCalculator) {
 		this.context = context;
 		this.loanProductRepository = loanProductRepository;
+		this.aprCalculator = aprCalculator;
 	}
 	
 	@Transactional
@@ -38,8 +41,8 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
 
 		AppUser currentUser = this.context.authenticatedUser();
 		
-		LoanProductCommandValidator validator = new LoanProductCommandValidator();
-		validator.validateForCreate(command);
+		LoanProductCommandValidator validator = new LoanProductCommandValidator(command);
+		validator.validateForCreate();
 
 		// assemble LoanProduct from data
 		InterestMethod interestMethod = InterestMethod.fromInt(command.getInterestMethod());
@@ -54,24 +57,8 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
 				.fromInt(command.getInterestRateFrequencyMethod());
 
 		MonetaryCurrency currency = new MonetaryCurrency(command.getCurrencyCode(), command.getDigitsAfterDecimal());
-
-		// apr calculator
-		BigDecimal annualInterestRate = BigDecimal.ZERO;
-		switch (interestFrequencyType) {
-		case DAYS:
-			break;
-		case WEEKS:
-			annualInterestRate = command.getInterestRatePerPeriod().multiply(BigDecimal.valueOf(52));
-			break;
-		case MONTHS:
-			annualInterestRate = command.getInterestRatePerPeriod().multiply(BigDecimal.valueOf(12));
-			break;
-		case YEARS:
-			annualInterestRate = command.getInterestRatePerPeriod().multiply(BigDecimal.valueOf(1));
-			break;
-		case INVALID:
-			break;
-		}
+		
+		BigDecimal annualInterestRate = this.aprCalculator.calculateFrom(interestFrequencyType, command.getInterestRatePerPeriod());
 		
 		LoanProduct loanproduct = new LoanProduct(currentUser.getOrganisation(), command.getName(), command.getDescription(), 
 				currency, command.getPrincipal(), 
@@ -89,8 +76,8 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
 		
 		AppUser currentUser = this.context.authenticatedUser();
 		
-		LoanProductCommandValidator validator = new LoanProductCommandValidator();
-		validator.validateForUpdate(command);
+		LoanProductCommandValidator validator = new LoanProductCommandValidator(command);
+		validator.validateForUpdate();
 		
 		LoanProduct product = this.loanProductRepository.findOne(productThatMatches(currentUser.getOrganisation(), command.getId()));
 		if (product == null) {

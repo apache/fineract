@@ -15,13 +15,16 @@ public class LoanProductCommand {
 	private String currencyCode;
 	private Integer digitsAfterDecimal;
 	private BigDecimal principal;
+	private String principalFormatted;
 	private BigDecimal inArrearsToleranceAmount;
+	private String inArrearsToleranceAmountFormatted;
 	
 	private Integer repaymentEvery;
 	private Integer repaymentFrequency;
 	private Integer numberOfRepayments;
 	
 	private BigDecimal interestRatePerPeriod;
+	private String interestRatePerPeriodFormatted;
 	private Integer interestRateFrequencyMethod;
 	private Integer amortizationMethod;
 	private Integer interestMethod;
@@ -158,5 +161,31 @@ public class LoanProductCommand {
 	public void setInterestCalculationPeriodMethod(
 			Integer interestCalculationPeriodMethod) {
 		this.interestCalculationPeriodMethod = interestCalculationPeriodMethod;
+	}
+
+	public String getPrincipalFormatted() {
+		return principalFormatted;
+	}
+
+	public void setPrincipalFormatted(String principalFormatted) {
+		this.principalFormatted = principalFormatted;
+	}
+
+	public String getInterestRatePerPeriodFormatted() {
+		return interestRatePerPeriodFormatted;
+	}
+
+	public void setInterestRatePerPeriodFormatted(
+			String interestRatePerPeriodFormatted) {
+		this.interestRatePerPeriodFormatted = interestRatePerPeriodFormatted;
+	}
+
+	public String getInArrearsToleranceAmountFormatted() {
+		return inArrearsToleranceAmountFormatted;
+	}
+
+	public void setInArrearsToleranceAmountFormatted(
+			String inArrearsToleranceAmountFormatted) {
+		this.inArrearsToleranceAmountFormatted = inArrearsToleranceAmountFormatted;
 	}
 }

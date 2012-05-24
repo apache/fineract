@@ -54,7 +54,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		} catch (ParseException e) {
 			
 			List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-			ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.number.format", "The parameter " + parameterName + " is invalid.", parameterName, numericalValueFormatted);
+			ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.number.format", "The parameter " + parameterName + " is invalid for provided locale" + clientApplicationLocale.toString() + ".", parameterName, numericalValueFormatted, clientApplicationLocale);
 			dataValidationErrors.add(error);
 			
 			throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);

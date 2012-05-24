@@ -133,8 +133,12 @@ public class LoanProduct extends AbstractAuditableCustom<AppUser, Long> {
 	}
 	
 	public void update(LoanProductCommand command) {
-		this.name = command.getName();
-		this.description = command.getDescription();
+		if (command.getName() != null) {
+			this.name = command.getName();
+		}
+		if (command.getDescription() != null) {
+			this.description = command.getDescription();
+		}
 		this.loanProductRelatedDetail.update(command);
 	}
 }

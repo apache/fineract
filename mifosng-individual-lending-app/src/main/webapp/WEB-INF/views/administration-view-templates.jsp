@@ -57,7 +57,7 @@
 					<tr>
 						<td><spring:message code="form.label.loan.product.loan.amount"/></td>
 						<td>
-							<input id="principal" name="principal" title="" style="width: 125px;" value="{{=$ctx.money(principalMoney)}}" />
+							<input id="principalFormatted" name="principalFormatted" title="" style="width: 125px;" value="{{=$ctx.money(principalMoney)}}" />
 						</td>
 					</tr>
 					<tr>
@@ -89,7 +89,7 @@
 					<tr>
 						<td><spring:message code="form.label.loan.product.nominal.interestrate"/></td>
 						<td>
-							<input id="interestRatePerPeriod" name="interestRatePerPeriod" title="" style="width: 70px;" value="{{=$ctx.decimal(interestRatePerPeriod, 4)}}" />
+							<input id="interestRatePerPeriodFormatted" name="interestRatePerPeriodFormatted" title="" style="width: 70px;" value="{{=$ctx.decimal(interestRatePerPeriod, 4)}}" />
 
 							<select id="interestRateFrequencyMethod" name="interestRateFrequencyMethod" title="" style="width: 139px;">
 								{{#each interestFrequencyOptions}}
@@ -147,7 +147,7 @@
 					<tr>
 						<td><spring:message code="form.label.loan.product.arrears.tolerance"/></td>
 						<td>
-							<input id="inArrearsToleranceAmount" name="inArrearsToleranceAmount" title="" style="width: 215px;" value="{{=$ctx.money(inArrearsTolerance)}}" />
+							<input id="inArrearsToleranceAmountFormatted" name="inArrearsToleranceAmountFormatted" title="" style="width: 215px;" value="{{=$ctx.money(inArrearsTolerance)}}" />
 						</td>
 					</tr>
 				</table>
