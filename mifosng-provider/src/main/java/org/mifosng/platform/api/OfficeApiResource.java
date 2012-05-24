@@ -1,6 +1,10 @@
 package org.mifosng.platform.api;
 
+import java.io.IOException;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.StringTokenizer;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -12,14 +16,21 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.ser.FilterProvider;
+import org.codehaus.jackson.map.ser.impl.SimpleBeanPropertyFilter;
+import org.codehaus.jackson.map.ser.impl.SimpleFilterProvider;
 import org.joda.time.LocalDate;
 import org.mifosng.data.EntityIdentifier;
 import org.mifosng.data.OfficeData;
 import org.mifosng.data.OfficeList;
 import org.mifosng.data.command.OfficeCommand;
+import org.mifosng.platform.ReadExtraDataAndReportingServiceImpl;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
 import org.mifosng.platform.organisation.service.OfficeReadPlatformService;
 import org.mifosng.platform.organisation.service.OfficeWritePlatformService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -29,6 +40,8 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class OfficeApiResource {
 
+	private final static Logger logger = LoggerFactory
+			.getLogger(OfficeApiResource.class);
     @Autowired
 	private OfficeReadPlatformService readPlatformService;
 
@@ -37,7 +50,7 @@ public class OfficeApiResource {
 	
 	@Autowired
 	private ApiDataConversionService apiDataConversionService;
-	
+/*
     @GET
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @Produces({MediaType.APPLICATION_JSON})
@@ -46,6 +59,35 @@ public class OfficeApiResource {
 		Collection<OfficeData> offices = this.readPlatformService.retrieveAllOffices();
 
 		return Response.ok().entity(new OfficeList(offices)).build();
+	}*/
+    @GET
+	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @Produces({MediaType.APPLICATION_JSON})
+	public String retrieveOffices() {
+		
+		Collection<OfficeData> offices = this.readPlatformService.retrieveAllOffices();
+
+	    Set<String> filterProperties = new HashSet<String>();
+		/*StringTokenizer st = new StringTokenizer(fields, ",");
+	    while (st.hasMoreTokens()) {
+	        filterProperties.add(st.nextToken());
+	    }*/
+	    filterProperties.add("name");
+	    
+	    ObjectMapper mapper = new ObjectMapper();
+	    FilterProvider filters = new SimpleFilterProvider().addFilter("myFilter",
+	                SimpleBeanPropertyFilter.filterOutAllExcept(filterProperties));
+
+	    try {
+	        String json = mapper.filteredWriter(filters).writeValueAsString(offices);
+	        logger.info("office list json: " + json);
+	        return json;
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	        return e.getMessage();
+	    }
+	    
+		//return Response.ok().entity(new OfficeList(offices)).build();
 	}
     
     @GET

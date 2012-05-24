@@ -7,13 +7,18 @@ targetCompatibility = JavaVersion.VERSION_1_6
 group = 'org.mifosng.data'
 version = '0.2'
 
+jerseyVersion = '1.12'
+
 repositories {    
     mavenCentral()
     mavenLocal()
 }
 
 dependencies {
-	   compile( [group: 'joda-time', name: 'joda-time', version: '2.1'],)
+    compile( [group: 'joda-time', name: 'joda-time', version: '2.1'],
+             [group: 'com.sun.jersey', name: 'jersey-json', version: jerseyVersion],
+           )
+    
 }
 
 uploadArchives {
