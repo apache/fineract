@@ -1,8 +1,6 @@
 package org.mifosng.data;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -20,8 +18,7 @@ public class OfficeData implements Serializable {
 	private String hierarchy;
 	private String parentName;
 	private Long parentId;
-	
-	private List<OfficeData> allowedParents = new ArrayList<OfficeData>();
+	private OfficeTemplateData officeTemplateData;
 
 	public OfficeData() {
 		//
@@ -87,19 +84,19 @@ public class OfficeData implements Serializable {
 		this.parentId = parentId;
 	}
 
-	public List<OfficeData> getAllowedParents() {
-		return allowedParents;
-	}
-
-	public void setAllowedParents(List<OfficeData> allowedParents) {
-		this.allowedParents = allowedParents;
-	}
-
 	public String getHierarchy() {
 		return hierarchy;
 	}
 
 	public void setHierarchy(String hierarchy) {
 		this.hierarchy = hierarchy;
+	}
+
+	public OfficeTemplateData getOfficeTemplateData() {
+		return officeTemplateData;
+	}
+
+	public void setOfficeTemplateData(OfficeTemplateData officeTemplateData) {
+		this.officeTemplateData = officeTemplateData;
 	}
 }
