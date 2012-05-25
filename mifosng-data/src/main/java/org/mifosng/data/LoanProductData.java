@@ -7,9 +7,11 @@ import java.util.List;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.codehaus.jackson.map.annotate.JsonFilter;
 import org.joda.time.DateTime;
 
 @XmlRootElement(name = "loanProduct")
+@JsonFilter("myFilter")
 public class LoanProductData implements Serializable {
 
 	private Long id;
