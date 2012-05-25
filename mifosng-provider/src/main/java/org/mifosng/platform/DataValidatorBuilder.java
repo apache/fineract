@@ -136,7 +136,7 @@ public class DataValidatorBuilder {
 		Object[] array = (Object[]) value;
 		if (ObjectUtils.isEmpty(array)) {
 			StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(resource).append(".").append(parameter).append(".cannot.be.empty");
-			StringBuilder defaultEnglishMessage = new StringBuilder("The parameter ").append(parameter).append(" cannot be empty. You must select at least one permission.");
+			StringBuilder defaultEnglishMessage = new StringBuilder("The parameter ").append(parameter).append(" cannot be empty. You must select at least one.");
 			ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(), defaultEnglishMessage.toString(), parameter);
 			dataValidationErrors.add(error);
 		}
