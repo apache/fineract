@@ -58,7 +58,23 @@
 			        return false;
 			      }
 			},
-			globalDate: function(localDateAsISOString) {
+			globalDate: function(dateParts) {
+			      try {
+			    	
+			    	  var year = dateParts[0];
+			    	  var month = parseInt(dateParts[1]) - 1; // month is zero indexed
+			    	  var day = dateParts[2];
+			    	  
+			    	  var d = new Date();
+			    	  d.setFullYear(year,month,day);
+			    	  
+			    	  return Globalize.format(d,"dd MMMM yyyy");
+			      } catch(e) {
+			        return "??";
+			      }
+			},
+			globalDateAsISOString: function(localDateAsISOString) {
+				
 			      try {
 			    	  var dateParts = localDateAsISOString.split("-")
 			    	  var year = dateParts[0];
@@ -193,7 +209,7 @@
 	            o[this.name].push(this.value || '');
 	        } else {
 	        	
-	        	if (this.name === 'selectedItems' || this.name === 'notSelectedItems') {
+	        	if (this.name === 'currencies' || this.name === 'notSelectedCurrencies') {
 	        		o[this.name] = new Array();
 	        		o[this.name].push(this.value || '');
 	        	} else {
@@ -228,11 +244,11 @@
 					var buttonsOpts = {};
 					buttonsOpts[saveButton] = function() {
 						
-						$('#notSelectedItems option').each(function(i) {  
+						$('#notSelectedCurrencies option').each(function(i) {  
 					    	   $(this).attr("selected", "selected");  
 					    });
 				    	
-				    	$('#selectedItems option').each(function(i) {  
+				    	$('#currencies option').each(function(i) {  
 				    	   $(this).attr("selected", "selected");  
 				    	});
 				    	
@@ -272,11 +288,11 @@
 					  		open: function (event, ui) {
 					  			
 					  			$('#add').click(function() {  
-					  			     return !$('#notSelectedItems option:selected').remove().appendTo('#selectedItems');  
+					  			     return !$('#notSelectedCurrencies option:selected').remove().appendTo('#currencies');  
 					  			});
 					  			
 					  			$('#remove').click(function() {  
-					  				return !$('#selectedItems option:selected').remove().appendTo('#notSelectedItems');  
+					  				return !$('#currencies option:selected').remove().appendTo('#notSelectedCurrencies');  
 					  			});
 					  			
 					  			$('.datepickerfield').datepicker({constrainInput: true, maxDate: 0, dateFormat: 'dd MM yy'});
@@ -322,13 +338,12 @@
 			  dataType: 'json',
 			  cache: false,
 			  beforeSend: function(xhr) {
-					console.log("base64: " + base64);
 					xhr.setRequestHeader("Authorization", "Basic " + base64);
 			  },
 			  success: function(data, textStatus, jqXHR) {
 				
 				var productlistParent = new Object();
-				productlistParent.items = data.products;
+				productlistParent.products = data;
 				
 				var productListHtml = $("#productListTemplate").render(productlistParent);
 				$("#listplaceholder").html(productListHtml);
@@ -336,7 +351,7 @@
 				$("a.editproduct").click( function(e) {
 					var linkId = this.id;
 					var productId = linkId.replace("editproduct", "");
-					var getUrl = baseApiUrl + 'loanproducts/' + productId;
+					var getUrl = baseApiUrl + 'loanproducts/' + productId + '?template=true';
 					var putUrl = baseApiUrl + 'loanproducts/' + productId;
 					
 					var templateSelector = "#productFormTemplate";
@@ -423,12 +438,8 @@
 			  },
 			  success: function(data, textStatus, jqXHR) {
 				
-				$.each(data.offices, function(i, item) {
-					//alert(item.name);
-				});
-				console.log(data);
 				var officelistParent = new Object();
-				officelistParent.items = data.offices;
+				officelistParent.offices = data;
 				
 				var officeListHtml = $("#officeListTemplate").render(officelistParent);
 				$("#listplaceholder").html(officeListHtml);  
@@ -436,7 +447,7 @@
 				$("a.edit").click( function(e) {
 					var linkId = this.id;
 					var entityId = linkId.replace("edit", "");
-					var getUrl = baseApiUrl + 'offices/' + entityId;
+					var getUrl = baseApiUrl + 'offices/' + entityId + '?template=true';
 					var putUrl = baseApiUrl + 'offices/' + entityId;
 					
 					var templateSelector = "#officeFormTemplate";

@@ -170,7 +170,7 @@
 		</tr>
 	</thead>
 	<tbody>
-{{#each items}}
+{{#each products}}
 <tr>
 	<td title='{{=description}}'>{{=name}}</td>
 	<td>{{=$ctx.globalDateTime(createdOn)}}</td>
@@ -201,7 +201,7 @@
 		</tr>
 	</thead>
 	<tbody>
-{{#each items}}
+{{#each offices}}
 <tr>
 	<td>{{=name}}</td>
 	<td>{{=externalId}}</td>
@@ -261,8 +261,8 @@
 		<legend><spring:message code="form.legend.loan.product.currency"/></legend>
 
 		<div class="multiselectwidget" style="width:400px;height:125px;">
-			<label for="notSelectedItems"><spring:message code="form.label.configuration.available.currencies"/></label>
-			<select id="notSelectedItems" name="notSelectedItems" title="" class="multiselectwidget" multiple="multiple" style="width:400px;height:125px;">
+			<label for="notSelectedCurrencies"><spring:message code="form.label.configuration.available.currencies"/></label>
+			<select id="notSelectedCurrencies" name="notSelectedCurrencies" title="" class="multiselectwidget" multiple="multiple" style="width:400px;height:125px;">
 			{{#each currencyOptions}}
 				{{#if $ctx.number($parent.parent.data.code)===code}}
 					<option value="{{=code}}" selected="selected">{{=displayLabel}}</option>
@@ -275,8 +275,8 @@
 		</div>
 				  
 		<div class="multiselectwidget">
-			<label for="selectedItems"><spring:message code="form.label.configuration.allowed.currencies"/></label>
-			<select id="selectedItems" name="selectedItems" title="" class="multiselectwidget" multiple="multiple" style="width:400px;height:125px;">
+			<label for="currencies"><spring:message code="form.label.configuration.allowed.currencies"/></label>
+			<select id="currencies" name="currencies" title="" class="multiselectwidget" multiple="multiple" style="width:400px;height:125px;">
 			{{#each selectedCurrencyOptions}}
 				{{#if $ctx.number($parent.parent.data.code)===code}}
 					<option value="{{=code}}" selected="selected">{{=displayLabel}}</option>

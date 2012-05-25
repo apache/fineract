@@ -7,6 +7,7 @@ import java.util.Set;
 
 import org.mifosng.data.ApiParameterError;
 import org.mifosng.data.command.OrganisationCurrencyCommand;
+import org.mifosng.platform.DataValidatorBuilder;
 import org.mifosng.platform.currency.domain.ApplicationCurrency;
 import org.mifosng.platform.currency.domain.ApplicationCurrencyRepository;
 import org.mifosng.platform.exceptions.PlatformApiDataValidationException;
@@ -40,33 +41,33 @@ public class ConfigurationWritePlatformServiceJpaRepositoryImpl implements Confi
 		
 		AppUser currentUser = context.authenticatedUser();
 		
-		if (command.getSelectedItems().isEmpty()) {
-			
-			List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-			ApiParameterError error = ApiParameterError.parameterError("validation.msg.organisation.allowed.currencies.cannot.be.blank", "The parameter selectedItems is invalid.", "selectedItems");
-			dataValidationErrors.add(error);
-			
+		List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+		DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("configuration");
+		
+		baseDataValidator.reset().parameter("currencies").value(command.getCurrencies()).arrayNotEmpty();
+		
+		if (!dataValidationErrors.isEmpty()) {
 			throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);
 		}
-
+		
 		Set<OrganisationCurrency> allowedCurrencies = new HashSet<OrganisationCurrency>();
 
-		for (String currencyCode : command.getSelectedItems()) {
+		for (String currencyCode : command.getCurrencies()) {
 
 			ApplicationCurrency currency = this.applicationCurrencyRepository.findOneByCode(currencyCode);
 			if (currency == null) {
-				List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-				ApiParameterError error = ApiParameterError.parameterError("validation.msg.currency.code.invalid", "The parameter selectedItems contains an invalid currency code entry.", "selectedItems", currencyCode);
-				dataValidationErrors.add(error);
-				
-				throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);
+				baseDataValidator.reset().parameter("currencies").value(command.getCurrencies()).inValidValue("currency.code", currencyCode);
+			} else {
+				OrganisationCurrency allowedCurrency = new OrganisationCurrency(
+						currency.getCode(), currency.getName(),
+						currency.getDecimalPlaces(), currency.getNameCode(), currency.getDisplaySymbol());
+
+				allowedCurrencies.add(allowedCurrency);				
 			}
-
-			OrganisationCurrency allowedCurrency = new OrganisationCurrency(
-					currency.getCode(), currency.getName(),
-					currency.getDecimalPlaces(), currency.getNameCode(), currency.getDisplaySymbol());
-
-			allowedCurrencies.add(allowedCurrency);
+		}
+		
+		if (!dataValidationErrors.isEmpty()) {
+			throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);
 		}
 
 		Organisation org = currentUser.getOrganisation();

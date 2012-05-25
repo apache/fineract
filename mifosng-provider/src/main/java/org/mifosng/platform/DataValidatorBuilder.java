@@ -160,4 +160,11 @@ public class DataValidatorBuilder {
 		}
 		return this;
 	}
+
+	public void inValidValue(String parameterValueCode, Object invalidValue) {
+		StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(resource).append(".").append(parameter).append(".invalid.").append(parameterValueCode);
+		StringBuilder defaultEnglishMessage = new StringBuilder("The parameter ").append(parameter).append(" has an invalid value.");
+		ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(), defaultEnglishMessage.toString(), parameter, invalidValue);
+		dataValidationErrors.add(error);		
+	}
 }
