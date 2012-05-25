@@ -23,6 +23,7 @@ $(document).ready(function() {
 	// basic auth details
 	var base64 = "${basicAuthKey}";
 	var baseApiUrl = "${baseApiUrl}";
+	var userId = "${userId}";
 	
 	// these helpers are registered for the jsViews and jsRender functionality to fix bug with display zero!
 	$.views.registerHelpers({
@@ -215,7 +216,6 @@ $(document).ready(function() {
 			dataType: 'json',
 			cache: false,
 			beforeSend: function(xhr) {
-				console.log("base64: " + base64);
 				xhr.setRequestHeader("Authorization", "Basic " + base64);
 		    },
 			success: function(data, textStatus, jqXHR) {
@@ -249,7 +249,6 @@ $(document).ready(function() {
 						  data: newFormData,
 						  cache: false,
 						  beforeSend: function(xhr) {
-							console.log("base64: " + base64);
 							xhr.setRequestHeader("Authorization", "Basic " + base64);
 						  },
 						  success: saveSuccessFunction,
@@ -295,6 +294,78 @@ $(document).ready(function() {
 		});
 	}
 	
+	function popupDialogWithPostOnlyFormView(postOrPutUrl, submitType, titleCode, templateSelector, width, height, saveSuccessFunction) {
+		
+		 var dialogDiv = $("<div id='dialog-form'></div>");
+		 
+		 var data = new Object();
+		 var formHtml = $(templateSelector).render(data);
+		
+		 dialogDiv.append(formHtml);
+		 
+		 var saveButton = jQuery.i18n.prop('dialog.button.save');
+			var cancelButton = jQuery.i18n.prop('dialog.button.cancel');
+			
+		 var buttonsOpts = {};
+		 buttonsOpts[saveButton] = function() {
+			 
+			$('.multiSelectedItems option').each(function(i) {  
+		    	   $(this).attr("selected", "selected");  
+		    });
+  			
+			var newFormData = JSON.stringify($('#entityform').serializeObject());
+	    	console.log(newFormData);
+	    	
+			var jqxhr = $.ajax({
+				  url: postOrPutUrl,
+				  type: submitType,
+				  contentType: 'application/json',
+			      dataType: 'json',
+				  cache: false,
+				  data: newFormData,
+				  beforeSend: function(xhr) {
+			            xhr.setRequestHeader("Authorization", "Basic " + base64);
+				  },
+				  success: function(data, textStatus, jqXHR) {
+					  dialogDiv.dialog("close");
+					  $newtabs.tabs('load', tabIndex);
+				  }
+			});
+			
+			jqxhr.error(function(jqXHR, textStatus, errorThrown) {
+				handleXhrError(jqXHR, textStatus, errorThrown, "#formErrorsTemplate", "#formerrors");
+			});
+		 };
+		 
+		 buttonsOpts[cancelButton] = function() {$(this).dialog( "close" );};
+			
+		 dialogDiv.dialog({
+		  		title: jQuery.i18n.prop(titleCode), 
+		  		width: width, 
+		  		height: height, 
+		  		modal: true,
+		  		buttons: buttonsOpts,
+		  		close: function() {
+		  			// if i dont do this, theres a problem with errors being appended to dialog view second time round
+		  			$(this).remove();
+				},
+		  		open: function (event, ui) {
+		  			$('.multiadd').click(function() {  
+		  			     return !$('.multiNotSelectedItems option:selected').remove().appendTo('#selectedItems');  
+		  			});
+		  			
+		  			$('.multiremove').click(function() {  
+		  				return !$('.multiSelectedItems option:selected').remove().appendTo('#notSelectedItems');  
+		  			});
+		  			
+		  			$('.datepickerfield').datepicker({constrainInput: true, dateFormat: 'dd MM yy'});
+		  			
+		  			$("#entityform textarea").first().focus();
+		  			$('#entityform input').first().focus();
+		  		}
+		  }).dialog('open');
+	}
+	
 	$("#tabs").tabs({
 		"ajaxOptions": {
 			type: 'GET',
@@ -313,8 +384,7 @@ $(document).ready(function() {
 				$("#settings").html(tableHtml);
 				
 				$('#changepassword').click(function(e) {
-					var getUrl = baseApiUrl + 'useraccounts/current/password/template';
-					var putUrl = baseApiUrl + 'useraccounts/current/password';
+					var putUrl = baseApiUrl + 'users/' + userId;
 					var templateSelector = "#changePasswordFormTemplate";
 					var width = 600; 
 					var height = 350;
@@ -324,13 +394,13 @@ $(document).ready(function() {
 						  $("#tabs").tabs('load', 0);
 					}
 					
-					popupDialogWithFormView(getUrl, putUrl, 'PUT', 'dialog.title.update.password', templateSelector, width, height, saveSuccessFunction);
+					popupDialogWithPostOnlyFormView(putUrl, 'PUT', 'dialog.title.update.password', templateSelector, width, height, saveSuccessFunction);
 					
 				    e.preventDefault();
 				});
 				
 				$('#changedetails').click(function(e) {
-					var getAndPutUrl = baseApiUrl + 'useraccounts/current';
+					var getAndPutUrl = baseApiUrl + 'users/' + userId;
 					var templateSelector = "#userSettingsFormTemplate";
 					var width = 600; 
 					var height = 350;
@@ -362,7 +432,7 @@ $(document).ready(function() {
 		<div id="content">
 			<div id="tabs">
 				<ul>
-					<li><a href="${baseApiUrl}useraccounts/current" title="settings"><spring:message code="tab.settings"/></a></li>
+					<li><a href="${baseApiUrl}users/${userId}" title="settings"><spring:message code="tab.settings"/></a></li>
 				</ul>
 				<div id="settings">
 				</div>

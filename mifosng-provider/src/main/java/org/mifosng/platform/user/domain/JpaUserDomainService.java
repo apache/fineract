@@ -71,11 +71,10 @@ public class JpaUserDomainService implements UserDomainService {
         generateKeyUsedForPasswordSalting(appUser);
 
         String unencodedPassword = appUser.getPassword();
-        if (org.apache.commons.lang.StringUtils.isBlank(unencodedPassword)) {
+        if (org.apache.commons.lang.StringUtils.isBlank(unencodedPassword) || "autogenerate".equalsIgnoreCase(unencodedPassword)) {
         	unencodedPassword = new RandomPasswordGenerator(13).generate();
+        	appUser.updatePassword(unencodedPassword);
         }
-        // update so encoding works.
-        appUser.updatePassword(unencodedPassword);
         
         String encodePassword = this.applicationPasswordEncoder.encode(appUser);
 		appUser.updatePassword(encodePassword);

@@ -12,6 +12,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.mifosng.data.AuthenticatedUserData;
+import org.mifosng.platform.user.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
@@ -33,8 +34,8 @@ public class AuthenticationApiResource {
 	private DaoAuthenticationProvider customAuthenticationProvider;
     
     @POST
-	@Consumes({MediaType.APPLICATION_XML})
-    @Produces({MediaType.APPLICATION_XML})
+	@Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
 	public Response authenticate(@QueryParam("username") final String username, @QueryParam("password") final String password) {
 
     	Authentication authentication = new UsernamePasswordAuthenticationToken(username, password);
@@ -51,6 +52,8 @@ public class AuthenticationApiResource {
 			}
 			authenticatedUserData.setPermissions(permissions);
 			authenticatedUserData.setAuthenticated(true);
+			AppUser principal = (AppUser) authenticationCheck.getPrincipal();
+			authenticatedUserData.setUserId(principal.getId());
 			byte[] base64EncodedAuthenticationKey = Base64.encode(username + ":" + password);
 			authenticatedUserData.setBase64EncodedAuthenticationKey(new String(base64EncodedAuthenticationKey));
 			

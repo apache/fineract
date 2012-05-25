@@ -270,22 +270,29 @@ public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements P
 		return lastname;
 	}
 
-	public void update(Set<Role> allRoles, Office office, String username,
-			String firstname, String lastname, String email) {
-		this.roles.clear();
-		this.roles = allRoles;
-		this.office = office;
-		this.username = username;
-		this.firstname = firstname;
-		this.lastname = lastname;
-		this.email = email;
-	}
-
-	public void update(String username, String firstname, String lastname, String email) {
-		this.username = username;
-		this.firstname = firstname;
-		this.lastname = lastname;
-		this.email = email;
+	/**
+	 * When updating details, any parameters with null values are ignored.
+	 */
+	public void update(Set<Role> allRoles, Office office, String username, String firstname, String lastname, String email) {
+		if (!allRoles.isEmpty()) {
+			this.roles.clear();
+			this.roles = allRoles;
+		}
+		if (office != null) {
+			this.office = office;
+		}
+		if (username != null) {
+			this.username = username;
+		}
+		if (firstname != null) {
+			this.firstname = firstname;
+		}
+		if (lastname != null) {
+			this.lastname = lastname;
+		}
+		if (email != null) {
+			this.email = email;
+		}
 	}
 
 	public boolean canNotApproveLoanInPast() {

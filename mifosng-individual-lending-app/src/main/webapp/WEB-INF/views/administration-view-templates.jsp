@@ -297,8 +297,8 @@
         <label for="password"><spring:message code="form.label.new.password"/></label>
 		<input id="password" name="password" title="" type="password" value="{{=password}}" size="75"/>
 
-        <label for="passwordrepeat"><spring:message code="form.label.repeat.new.password"/></label>
-		<input id="passwordrepeat" name="passwordrepeat" title="" type="password" value="{{=passwordrepeat}}" size="75"/>
+        <label for="repeatPassword"><spring:message code="form.label.repeat.new.password"/></label>
+		<input id="repeatPassword" name="repeatPassword" title="" type="password" value="{{=passwordrepeat}}" size="75"/>
 </form>
 </script>
 

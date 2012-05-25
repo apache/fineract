@@ -13,6 +13,7 @@ import javax.sql.DataSource;
 
 import org.mifosng.data.AppUserData;
 import org.mifosng.data.OfficeData;
+import org.mifosng.data.OfficeLookup;
 import org.mifosng.data.RoleData;
 import org.mifosng.platform.exceptions.PlatformResourceNotFoundException;
 import org.mifosng.platform.organisation.service.OfficeReadPlatformService;
@@ -78,7 +79,7 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
 	@Override
 	public AppUserData retrieveNewUserDetails() {
 
-		List<OfficeData> offices = new ArrayList<OfficeData>(officeReadPlatformService.retrieveAllOffices());
+		List<OfficeLookup> offices = new ArrayList<OfficeLookup>(officeReadPlatformService.retrieveAllOfficesForLookup());
 
 		List<RoleData> availableRoles = new ArrayList<RoleData>(this.roleReadPlatformService.retrieveAllRoles());
 
@@ -94,7 +95,7 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
 
 		AppUser currentUser = context.authenticatedUser();
 
-		List<OfficeData> offices = new ArrayList<OfficeData>(officeReadPlatformService.retrieveAllOffices());
+		List<OfficeLookup> offices = new ArrayList<OfficeLookup>(officeReadPlatformService.retrieveAllOfficesForLookup());
 
 		List<RoleData> availableRoles = new ArrayList<RoleData>(this.roleReadPlatformService.retrieveAllRoles());
 
@@ -102,38 +103,6 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
 		if (user == null) {
 			throw new PlatformResourceNotFoundException("error.msg.user.id.invalid", "User with identifier {0} does not exist.", userId);
 		}
-
-		List<RoleData> userRoleData = new ArrayList<RoleData>();
-		Set<Role> userRoles = user.getRoles();
-		for (Role role : userRoles) {
-			userRoleData.add(role.toData());
-		}
-
-		AppUserData userData = new AppUserData(user.getId(),
-				user.getUsername(), user.getEmail(), user.getOrganisation()
-						.getId(), user.getOffice().getId(), user.getOffice()
-						.getName());
-		userData.setFirstname(user.getFirstname());
-		userData.setLastname(user.getLastname());
-
-		userData.setAllowedOffices(offices);
-
-		availableRoles.removeAll(userRoleData);
-		userData.setAvailableRoles(availableRoles);
-		userData.setSelectedRoles(userRoleData);
-
-		return userData;
-	}
-	
-	@Override
-	public AppUserData retrieveCurrentUser() {
-		AppUser currentUser = context.authenticatedUser();
-
-		List<OfficeData> offices = new ArrayList<OfficeData>(officeReadPlatformService.retrieveAllOffices());
-
-		List<RoleData> availableRoles = new ArrayList<RoleData>(this.roleReadPlatformService.retrieveAllRoles());
-		
-		AppUser user = this.appUserRepository.findOne(usersThatMatch(currentUser.getOrganisation(), currentUser.getId()));
 
 		List<RoleData> userRoleData = new ArrayList<RoleData>();
 		Set<Role> userRoles = user.getRoles();

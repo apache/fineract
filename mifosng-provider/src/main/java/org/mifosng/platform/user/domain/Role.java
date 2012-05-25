@@ -82,7 +82,7 @@ public class Role extends AbstractAuditableCustom<AppUser, Long> {
 	}
 
 	/**
-	 * When updating role details, any parameters with null values are ignored.
+	 * When updating details, any parameters with null values are ignored.
 	 */
 	public void update(String name, String description, List<Permission> selectedPermissions) {
 		if (name != null) {

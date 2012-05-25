@@ -79,6 +79,7 @@ public class ApplicationPagesRoutesController {
 		BasicAuthUserDetails userDetails = (BasicAuthUserDetails) authentication.getPrincipal();
     	model.addAttribute("basicAuthKey", userDetails.getBasicAuthenticationKey());
     	model.addAttribute("baseApiUrl", userDetails.getFullApiUrl());
+    	model.addAttribute("userId", userDetails.getUserId());
 		return "admin/accountsettings";
 	}
 	

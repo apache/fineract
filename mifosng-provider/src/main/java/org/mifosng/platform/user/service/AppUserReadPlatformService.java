@@ -11,6 +11,4 @@ public interface AppUserReadPlatformService {
 	AppUserData retrieveNewUserDetails();
 
 	AppUserData retrieveUser(Long userId);
-	
-	AppUserData retrieveCurrentUser();
 }

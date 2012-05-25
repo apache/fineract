@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement(name = "office lookup")
+@XmlRootElement(name = "officeLookup")
 public class OfficeLookup implements Serializable {
 
 	private Long id;

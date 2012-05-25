@@ -15,6 +15,7 @@ public class UserCommand implements Serializable {
 	private String firstname;
 	private String lastname;
 	private String password;
+	private String repeatPassword;
 	private String email;
 	private Long officeId;
 	
@@ -99,5 +100,13 @@ public class UserCommand implements Serializable {
 
 	public void setRoles(String... roles) {
 		this.roles = roles;
+	}
+
+	public String getRepeatPassword() {
+		return repeatPassword;
+	}
+
+	public void setRepeatPassword(String repeatPassword) {
+		this.repeatPassword = repeatPassword;
 	}
 }

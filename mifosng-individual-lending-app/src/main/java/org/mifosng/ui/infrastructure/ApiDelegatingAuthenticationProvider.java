@@ -65,7 +65,7 @@ public class ApiDelegatingAuthenticationProvider extends AbstractUserDetailsAuth
 					authorities.add(new SimpleGrantedAuthority(permission));
 				}
 				User user = new User(authenticatedUserData.getUsername(), "[not needed]", authorities);
-				userDetails = new BasicAuthUserDetails(user, authenticatedUserData.getBase64EncodedAuthenticationKey(), platformApiUrl);
+				userDetails = new BasicAuthUserDetails(user, authenticatedUserData.getBase64EncodedAuthenticationKey(), platformApiUrl, authenticatedUserData.getUserId());
 			}
 			
 			return userDetails;
@@ -80,8 +80,8 @@ public class ApiDelegatingAuthenticationProvider extends AbstractUserDetailsAuth
 	
 	private HttpEntity<Object> authRequest() {
 		HttpHeaders requestHeaders = new HttpHeaders();
-		requestHeaders.set("Accept", "application/xml");
-		requestHeaders.set("Content-Type", "application/xml");
+		requestHeaders.set("Accept", "application/json");
+		requestHeaders.set("Content-Type", "application/json");
 
 		HttpEntity<Object> requestEntity = new HttpEntity<Object>(requestHeaders);
 		return requestEntity;

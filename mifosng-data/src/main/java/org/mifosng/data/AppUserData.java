@@ -17,7 +17,7 @@ public class AppUserData {
 	private String lastname;
 	private String email;
 	
-	private List<OfficeData> allowedOffices = new ArrayList<OfficeData>();
+	private List<OfficeLookup> allowedOffices = new ArrayList<OfficeLookup>();
 	
 	private List<RoleData> availableRoles = new ArrayList<RoleData>();
 	private List<RoleData> selectedRoles = new ArrayList<RoleData>();
@@ -85,11 +85,11 @@ public class AppUserData {
 		this.officeName = officeName;
 	}
 
-	public List<OfficeData> getAllowedOffices() {
+	public List<OfficeLookup> getAllowedOffices() {
 		return allowedOffices;
 	}
 
-	public void setAllowedOffices(List<OfficeData> allowedOffices) {
+	public void setAllowedOffices(List<OfficeLookup> allowedOffices) {
 		this.allowedOffices = allowedOffices;
 	}
 

@@ -9,7 +9,6 @@ import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosng.data.ApiParameterError;
-import org.mifosng.data.command.ChangePasswordCommand;
 import org.mifosng.data.command.UserCommand;
 import org.mifosng.platform.exceptions.PlatformApiDataValidationException;
 import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
@@ -65,7 +64,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 			AppUser currentUser = context.authenticatedUser();
 			
 			UserCommandValidator validator = new UserCommandValidator(command);
-			validator.validate();
+			validator.validateForCreate();
 			
 			Set<Role> allRoles = assembleSetOfRoles(command.getRoles());
 
@@ -104,21 +103,16 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 			AppUser currentUser = context.authenticatedUser();
 			
 			UserCommandValidator validator = new UserCommandValidator(command);
-			validator.validate();
-			
-			List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-			if (command.getId() == null) {
-				ApiParameterError error = ApiParameterError.parameterError("validation.msg.user.id.cannot.be.blank", "The parameter id cannot be empty.", "id");
-				dataValidationErrors.add(error);
-				
-				throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);
-			}
+			validator.validateForUpdate();
 			
 			Set<Role> allRoles = assembleSetOfRoles(command.getRoles());
 
-			Office office = this.officeRepository.findOne(command.getOfficeId());
-			if (office == null) {
-				throw new PlatformResourceNotFoundException("error.msg.office.id.invalid", "Office with identifier {0} does not exist.", command.getOfficeId());
+			Office office = null;
+			if (command.getOfficeId() != null) {
+				office = this.officeRepository.findOne(command.getOfficeId());
+				if (office == null) {
+					throw new PlatformResourceNotFoundException("error.msg.office.id.invalid", "Office with identifier {0} does not exist.", command.getOfficeId());
+				}
 			}
 
 			AppUser userToUpdate = this.appUserRepository.findOne(usersThatMatch(currentUser.getOrganisation(), command.getId()));
@@ -128,6 +122,17 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 			
 			userToUpdate.update(allRoles, office, command.getUsername(), command.getFirstname(), command.getLastname(), command.getEmail());
 			this.appUserRepository.saveAndFlush(userToUpdate);
+			
+			if (command.getPassword() != null || command.getRepeatPassword() != null) {
+				PlatformUser dummyPlatformUser = new BasicPasswordEncodablePlatformUser(
+						userToUpdate.getId(),
+						userToUpdate.getUsername(), command.getPassword());
+
+				String newPasswordEncoded = this.platformPasswordEncoder.encode(dummyPlatformUser);
+				
+				userToUpdate.updatePasswordOnFirstTimeLogin(newPasswordEncoded);
+				this.appUserRepository.saveAndFlush(userToUpdate);
+			}
 			
 			return userToUpdate.getId();
 		} catch (DataIntegrityViolationException dve) {
@@ -153,44 +158,6 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 		this.appUserRepository.delete(userId);
 	}
 	
-	@Transactional
-	@Override
-	public Long updateCurrentUser(UserCommand command) {
-		AppUser currentUser = context.authenticatedUser();
-		
-		UserCommandValidator validator = new UserCommandValidator(command);
-		validator.validateAccountSettingDetails();
-		
-		AppUser userToUpdate = this.appUserRepository.findOne(currentUser.getId());
-		
-		userToUpdate.update(command.getUsername(), command.getFirstname(), command.getLastname(), command.getEmail());
-		
-		this.appUserRepository.save(userToUpdate);
-		
-		return userToUpdate.getId();
-	}
-	
-	@Transactional
-	@Override
-	public Long updateCurrentUserPassword(ChangePasswordCommand command) {
-		AppUser currentUser = context.authenticatedUser();
-		
-		ChangePasswordCommandValidator validator = new ChangePasswordCommandValidator(command);
-		validator.validate();
-		
-		AppUser userToUpdate = this.appUserRepository.findOne(currentUser.getId());
-		
-		PlatformUser dummyPlatformUser = new BasicPasswordEncodablePlatformUser(
-				userToUpdate.getId(),
-				userToUpdate.getUsername(), command.getPassword());
-
-		String newPasswordEncoded = this.platformPasswordEncoder.encode(dummyPlatformUser);
-		
-		userToUpdate.updatePasswordOnFirstTimeLogin(newPasswordEncoded);
-		
-		return userToUpdate.getId();
-	}
-
 	/*
 	 * Guaranteed to throw an exception no matter what the data integrity issue is.
 	 */

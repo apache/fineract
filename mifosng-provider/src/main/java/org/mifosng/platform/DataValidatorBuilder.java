@@ -41,6 +41,20 @@ public class DataValidatorBuilder {
 		this.ignoreNullValue = true;
 		return this;
 	}
+
+	public DataValidatorBuilder equalToParameter(String linkedParameterName, Object linkedValue) {
+		if (value == null && linkedValue == null && ignoreNullValue) {
+			return this;
+		}
+		
+		if (value != null && !value.equals(linkedValue)) {
+			StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(resource).append(".").append(linkedParameterName).append(".not.equal.to").append(parameter);
+			StringBuilder defaultEnglishMessage = new StringBuilder("The parameter ").append(linkedParameterName).append(" is not equal to ").append(parameter).append(".");
+			ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(), defaultEnglishMessage.toString(), linkedParameterName, linkedValue, value);
+			dataValidationErrors.add(error);
+		}
+		return this;
+	}
 	
 	public DataValidatorBuilder notNull() {
 		if (value == null && !ignoreNullValue) {

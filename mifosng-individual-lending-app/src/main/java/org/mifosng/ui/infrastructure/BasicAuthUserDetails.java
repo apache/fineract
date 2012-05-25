@@ -11,11 +11,13 @@ public class BasicAuthUserDetails implements UserDetails {
 	private final User user;
 	private final String basicAuthenticationKey;
 	private final String fullApiUrl;
+	private final Long userId;
 
-	public BasicAuthUserDetails(User user, String basicAuthenticationKey, String fullApiUrl) {
+	public BasicAuthUserDetails(User user, String basicAuthenticationKey, String fullApiUrl, Long userId) {
 		this.user = user;
 		this.basicAuthenticationKey = basicAuthenticationKey;
 		this.fullApiUrl = fullApiUrl;
+		this.userId = userId;
 	}
 
 	@Override
@@ -59,5 +61,9 @@ public class BasicAuthUserDetails implements UserDetails {
 
 	public String getFullApiUrl() {
 		return this.fullApiUrl;
+	}
+
+	public Long getUserId() {
+		return userId;
 	}
 }
