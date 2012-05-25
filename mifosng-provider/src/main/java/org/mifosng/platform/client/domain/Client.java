@@ -31,7 +31,7 @@ public class Client extends AbstractAuditableCustom<AppUser, Long> {
     @SuppressWarnings("unused")
 	@ManyToOne
     @JoinColumn(name = "office_id", nullable = false)
-    private final Office       office;
+    private Office       office;
 
     @SuppressWarnings("unused")
 	@Column(name = "firstname", length=50)
@@ -105,12 +105,20 @@ public class Client extends AbstractAuditableCustom<AppUser, Long> {
 	}
 
 	public void update(Office clientOffice, String firstname, String lastname, String externalId, LocalDate joiningDate) {
-		this.joiningDate = joiningDate.toDate();
-		this.firstName = firstname;
-		this.lastName = lastname;
-		this.externalId = externalId;
-		if (StringUtils.isNotBlank(externalId)) {
-            this.externalId = externalId.trim();
-        }
+		if (clientOffice != null) {
+			this.office = clientOffice;
+		}
+		if (joiningDate != null) {
+			this.joiningDate = joiningDate.toDate();
+		}
+		if (StringUtils.isNotBlank(firstname)) {
+			this.firstName = firstname;
+		}
+		if (StringUtils.isNotBlank(firstname)) {
+			this.lastName = lastname;
+		}
+		if (externalId != null) {
+			 this.externalId = externalId.trim();
+		}
 	}
 }

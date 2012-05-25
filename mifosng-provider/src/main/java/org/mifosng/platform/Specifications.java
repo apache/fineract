@@ -6,6 +6,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import org.mifosng.platform.client.domain.Client;
+import org.mifosng.platform.client.domain.Note;
 import org.mifosng.platform.loan.domain.Loan;
 import org.mifosng.platform.loan.domain.LoanProduct;
 import org.mifosng.platform.loan.domain.LoanTransaction;
@@ -98,6 +99,16 @@ public final class Specifications {
 
 			@Override
 			public Predicate toPredicate(final Root<Client> root, final CriteriaQuery<?> query, final CriteriaBuilder cb) {
+				return cb.and(cb.equal(root.get("organisation"), organisation), cb.equal(root.get("id"), id));
+			}
+		};
+	}
+	
+	public static Specification<Note> notesThatMatch(final Organisation organisation, final Long id) {
+		return new Specification<Note>() {
+
+			@Override
+			public Predicate toPredicate(final Root<Note> root, final CriteriaQuery<?> query, final CriteriaBuilder cb) {
 				return cb.and(cb.equal(root.get("organisation"), organisation), cb.equal(root.get("id"), id));
 			}
 		};

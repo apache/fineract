@@ -1,6 +1,7 @@
 package org.mifosng.platform.client.service;
 
 import static org.mifosng.platform.Specifications.clientsThatMatch;
+import static org.mifosng.platform.Specifications.notesThatMatch;
 import static org.mifosng.platform.Specifications.officesThatMatch;
 
 import org.apache.commons.lang.StringUtils;
@@ -11,6 +12,8 @@ import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.client.domain.ClientRepository;
 import org.mifosng.platform.client.domain.Note;
 import org.mifosng.platform.client.domain.NoteRepository;
+import org.mifosng.platform.exceptions.ClientNotFoundException;
+import org.mifosng.platform.exceptions.NoteNotFoundException;
 import org.mifosng.platform.organisation.domain.Office;
 import org.mifosng.platform.organisation.domain.OfficeRepository;
 import org.mifosng.platform.security.PlatformSecurityContext;
@@ -80,7 +83,6 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 		}
 
 		Client clientForUpdate = this.clientRepository.findOne(clientsThatMatch(currentUser.getOrganisation(), command.getId()));
-		
 		clientForUpdate.update(clientOffice, firstname, lastname, command.getExternalId(), command.getJoiningDate());
 				
 		this.clientRepository.save(clientForUpdate);
@@ -94,8 +96,10 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 		
 		AppUser currentUser = context.authenticatedUser();
 		
-		// FIXME - check resource is found for current organisation - throw PlatformXXXException if not found.
-		Client clientForUpdate = this.clientRepository.findOne(command.getClientId());
+		Client clientForUpdate = this.clientRepository.findOne(clientsThatMatch(currentUser.getOrganisation(), command.getClientId()));
+		if (clientForUpdate == null) {
+			throw new ClientNotFoundException(command.getClientId());
+		}
 		
 		Note note = Note.clientNote(currentUser.getOrganisation(), clientForUpdate, command.getNote());
 		
@@ -110,9 +114,10 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 		
 		AppUser currentUser = context.authenticatedUser();
 		
-		// FIXME - check resource is found for current organisation - throw PlatformXXXException if not found.
-		Note noteForUpdate = this.noteRepository.findOne(command.getId());
-		
+		Note noteForUpdate = this.noteRepository.findOne(notesThatMatch(currentUser.getOrganisation(), command.getId()));
+		if (noteForUpdate == null) {
+			throw new NoteNotFoundException(command.getClientId());
+		}
 		noteForUpdate.update(command.getNote());
 		
 		return new EntityIdentifier(noteForUpdate.getId());

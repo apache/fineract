@@ -18,7 +18,7 @@ import org.mifosng.data.ClientLoanAccountSummaryData;
 import org.mifosng.data.NoteData;
 import org.mifosng.data.OfficeData;
 import org.mifosng.data.OfficeLookup;
-import org.mifosng.platform.exceptions.PlatformResourceNotFoundException;
+import org.mifosng.platform.exceptions.ClientNotFoundException;
 import org.mifosng.platform.organisation.domain.Organisation;
 import org.mifosng.platform.organisation.service.OfficeReadPlatformService;
 import org.mifosng.platform.security.PlatformSecurityContext;
@@ -91,9 +91,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
 			return this.jdbcTemplate.queryForObject(sql, rm, new Object[] {clientId, currentUser.getOrganisation().getId() });
 		} catch (EmptyResultDataAccessException e) {
-			throw new PlatformResourceNotFoundException(
-					"error.msg.client.id.invalid",
-					"Client with identifier {0} does not exist", clientId);
+			throw new ClientNotFoundException(clientId);
 		}
 	}
 	
@@ -109,10 +107,6 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 		clientData.setOrganisationId(currentUser.getOrganisation().getId());
 		clientData.setAllowedOffices(offices);
 
-//		clientData.setDisplayName("");
-//		clientData.setFirstname("");
-//		clientData.setLastname("");
-//		clientData.setId(Long.valueOf(-1));
 		clientData.setJoinedDate(new LocalDate());
 
 		return clientData;
@@ -205,46 +199,8 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 			return new ClientLoanAccountSummaryCollectionData(pendingApprovalLoans, awaitingDisbursalLoans, openLoans, closedLoans);
 			
 		} catch (EmptyResultDataAccessException e) {
-			throw new PlatformResourceNotFoundException(
-					"error.msg.client.id.invalid",
-					"Client with identifier {0} does not exist", clientId);
+			throw new ClientNotFoundException(clientId);
 		}
-
-//		Collection<Loan> allLoans = this.loanRepository.findAll(loansThatMatch(currentUser.getOrganisation(), client));
-//
-//		List<LoanAccountData> pendingApprovalLoans = new ArrayList<LoanAccountData>();
-//		List<LoanAccountData> awaitingDisbursalLoans = new ArrayList<LoanAccountData>();
-//		List<LoanAccountData> openLoans = new ArrayList<LoanAccountData>();
-//		List<LoanAccountData> closedLoans = new ArrayList<LoanAccountData>();
-//
-//		for (Loan realLoan : allLoans) {
-//
-//			ApplicationCurrency currency = this.applicationCurrencyRepository
-//					.findOneByCode(realLoan.getLoanRepaymentScheduleDetail()
-//							.getPrincipal().getCurrencyCode());
-//
-//			CurrencyData currencyData = new CurrencyData(currency.getCode(),
-//					currency.getName(), currency.getDecimalPlaces(),
-//					currency.getDisplaySymbol(), currency.getNameCode());
-//
-//			LoanAccountData loan = convertToData(realLoan, currencyData);
-//
-//			if (loan.isClosed() || loan.isInterestRebateOutstanding()) {
-//				closedLoans.add(loan);
-//			} else if (loan.isPendingApproval()) {
-//				pendingApprovalLoans.add(loan);
-//			} else if (loan.isWaitingForDisbursal()) {
-//				awaitingDisbursalLoans.add(loan);
-//			} else if (loan.isOpen()) {
-//				openLoans.add(loan);
-//			}
-//		}
-//
-//		Collections.sort(closedLoans, new ClosedLoanComparator());
-//
-//		return new ClientDataWithAccountsData(clientAccount,
-//				pendingApprovalLoans, awaitingDisbursalLoans, openLoans,
-//				closedLoans);
 	}
 	
 	private static final class ClientLoanAccountSummaryDataMapper implements RowMapper<ClientLoanAccountSummaryData> {
@@ -277,7 +233,6 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 			boolean waitingForDisbursal = statusMapper.isAwaitingDisbursal();
 			boolean open = statusMapper.isOpen();
 			boolean closed = statusMapper.isClosed();
-//			LocalDate lifeCycleStatusDate;
 			
 			return new ClientLoanAccountSummaryData(id, externalId, productId, loanProductName, loanStatusId, lifeCycleStatusText, pendingApproval, waitingForDisbursal, open, closed);
 		}
@@ -302,9 +257,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 					new Object[] { currentUser.getOrganisation().getId(),
 							clientId, noteId });
 		} catch (EmptyResultDataAccessException e) {
-			throw new PlatformResourceNotFoundException(
-					"error.msg.client.id.invalid",
-					"Client with identifier {0} does not exist", clientId);
+			throw new ClientNotFoundException(clientId);
 		}
 	}
 

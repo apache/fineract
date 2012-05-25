@@ -295,7 +295,6 @@ $(document).ready(function() {
 			contentType: 'application/json',
 			cache: false,
 			beforeSend: function(xhr) {
-				console.log("base64: " + base64);
 	            xhr.setRequestHeader("Authorization", "Basic " + base64);
 			},
 	        error: function(xhr, status, index, anchor) {
