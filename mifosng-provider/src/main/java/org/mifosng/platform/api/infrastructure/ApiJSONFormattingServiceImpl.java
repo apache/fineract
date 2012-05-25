@@ -46,9 +46,15 @@ public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 						selectedFieldsSet.add(st.nextToken().trim());
 					}
 
+					Boolean first = true;
 					for (String paramField : paramFieldsSet) {
-						if (selectedFieldsSet.contains(paramField))
-							fieldList += paramField;
+						if (selectedFieldsSet.contains(paramField)) {
+							if (first) {
+								fieldList = paramField;
+								first = false;
+							} else
+								fieldList += "," + paramField;
+						}
 					}
 
 				}
