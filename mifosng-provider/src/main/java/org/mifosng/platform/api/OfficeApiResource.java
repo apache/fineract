@@ -10,8 +10,10 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 
 import org.joda.time.LocalDate;
 import org.mifosng.data.EntityIdentifier;
@@ -45,39 +47,31 @@ public class OfficeApiResource {
 	@GET
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrieveOffices(@QueryParam("fields") String fields,
-			@QueryParam("pretty") String pretty) {
+	public String retrieveOffices(@Context UriInfo uriInfo) {
 
 		Collection<OfficeData> offices = this.readPlatformService
 				.retrieveAllOffices();
 
 		String filterType = "E";
-		String fieldList = "allowedParents";
-		if (this.jsonFormattingService.isPassed(fields)) {
-			filterType = "I";
-			fieldList = fields;
-		}
-
-		return this.jsonFormattingService.convertDataObjectJSON(offices,
-				filterType, fieldList,
-				this.jsonFormattingService.isTrue(pretty));
+		String templateFields = "allowedParents";
+		return this.jsonFormattingService.convertRequest(offices, filterType,
+				templateFields, uriInfo.getQueryParameters());
 	}
 
 	@GET
 	@Path("template")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrieveOfficeTemplate(@QueryParam("pretty") String pretty) {
+	public String retrieveOfficeTemplate(@Context UriInfo uriInfo) {
 
 		OfficeData officeData = this.readPlatformService
 				.retrieveNewOfficeTemplate();
 
 		String filterType = "I";
-		String fieldList = "openingDate,allowedParents";
+		String templateFields = "openingDate,allowedParents";
 
-		return this.jsonFormattingService.convertDataObjectJSON(officeData,
-				filterType, fieldList,
-				this.jsonFormattingService.isTrue(pretty));
+		return this.jsonFormattingService.convertRequest(officeData,
+				filterType, templateFields, uriInfo.getQueryParameters());
 	}
 
 	@POST

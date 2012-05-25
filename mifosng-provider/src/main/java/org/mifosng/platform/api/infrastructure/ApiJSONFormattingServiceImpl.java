@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import javax.ws.rs.core.MultivaluedMap;
+
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -18,6 +20,23 @@ import org.springframework.stereotype.Service;
 @Service
 public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 
+	@Override
+	public String convertRequest(Object dataObject, String filterType, String filterFields,
+			MultivaluedMap<String, String> queryParams) {
+		
+		String fields = queryParams.getFirst("fields");
+		String calcFilterType = filterType;
+		String fieldList = filterFields;
+		if (isPassed(fields)) {
+			calcFilterType = "I";
+			fieldList = fields;
+		}
+
+		return convertDataObjectJSON(dataObject,
+				calcFilterType, fieldList,
+				isTrue(queryParams.getFirst("pretty")));
+	}
+	
 	@Override
 	public String convertDataObjectJSON(Object dataObject, String filterType,
 			String fields, boolean prettyOutput) {

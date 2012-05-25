@@ -74,14 +74,20 @@ public class AdditionalFieldsApiResource {
 	@Path("{type}/{set}/{id}")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public Response extraData(@PathParam("type") final String type,
-			@PathParam("set") final String set, @PathParam("id") final Long id) {
+	public String extraData(@PathParam("type") final String type,
+			@PathParam("set") final String set, @PathParam("id") final Long id,
+			@QueryParam("pretty") String pretty) {
 
 		try {
 			GenericResultset result = this.readExtraDataAndReportingService
 					.retrieveExtraData(type, set, id);
 
-			return Response.ok().entity(result).build();
+			String filterType = "E";
+			String fieldList = "";
+
+			return this.jsonFormattingService.convertDataObjectJSON(result,
+					filterType, fieldList,
+					this.jsonFormattingService.isTrue(pretty));
 		} catch (InvalidSqlException e) {
 			List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 			ApiParameterError error = ApiParameterError.parameterError(
