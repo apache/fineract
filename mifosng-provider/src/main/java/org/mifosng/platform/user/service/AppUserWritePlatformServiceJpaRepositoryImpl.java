@@ -32,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
 @Service
 public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWritePlatformService {
@@ -66,11 +67,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 			UserCommandValidator validator = new UserCommandValidator(command);
 			validator.validate();
 			
-			Set<Role> allRoles = new HashSet<Role>();
-			for (String roleId : command.getSelectedItems()) {
-				Role role = this.roleRepository.findOne(Long.valueOf(roleId));
-				allRoles.add(role);
-			}
+			Set<Role> allRoles = assembleSetOfRoles(command.getRoles());
 
 			Office office = this.officeRepository.findOne(command.getOfficeId());
 
@@ -98,7 +95,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 			throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);			
 		}
 	}
-	
+
 	@Transactional
 	@Override
 	public Long updateUser(UserCommand command) {
@@ -117,11 +114,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 				throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);
 			}
 			
-			Set<Role> allRoles = new HashSet<Role>();
-			for (String roleId : command.getSelectedItems()) {
-				Role role = this.roleRepository.findOne(Long.valueOf(roleId));
-				allRoles.add(role);
-			}
+			Set<Role> allRoles = assembleSetOfRoles(command.getRoles());
 
 			Office office = this.officeRepository.findOne(command.getOfficeId());
 			if (office == null) {
@@ -141,6 +134,17 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 			handleOfficeDataIntegrityIssues(command, dve);
 			return Long.valueOf(-1);
 		}
+	}
+	
+	private Set<Role> assembleSetOfRoles(final String[] rolesArray) {
+		Set<Role> allRoles = new HashSet<Role>();
+		if (!ObjectUtils.isEmpty(rolesArray)) {
+			for (String roleId : rolesArray) {
+				Role role = this.roleRepository.findOne(Long.valueOf(roleId));
+				allRoles.add(role);
+			}
+		}
+		return allRoles;
 	}
 	
 	@Transactional

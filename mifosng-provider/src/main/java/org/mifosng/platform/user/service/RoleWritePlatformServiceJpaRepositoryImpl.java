@@ -16,6 +16,7 @@ import org.mifosng.platform.user.domain.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
 @Service
 public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatformService {
@@ -41,18 +42,7 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
 		RoleCommandValidator validator = new RoleCommandValidator(command);
 		validator.validateForCreate();
 
-		List<Long> selectedPermissionIds = new ArrayList<Long>();
-		for (String selectedId : command.getSelectedItems()) {
-			selectedPermissionIds.add(Long.valueOf(selectedId));
-		}
-
-		List<Permission> selectedPermissions = new ArrayList<Permission>();
-		Collection<Permission> allPermissions = this.permissionRepository.findAll();
-		for (Permission permission : allPermissions) {
-			if (selectedPermissionIds.contains(permission.getId())) {
-				selectedPermissions.add(permission);
-			}
-		}
+		List<Permission> selectedPermissions = assembleListOfSelectedPermissions(command.getPermissions());
 
 		Role entity = new Role(currentUser.getOrganisation(), command.getName(), command.getDescription(), selectedPermissions);
 				
@@ -60,7 +50,7 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
 
 		return entity.getId();
 	}
-	
+
 	@Transactional
 	@Override
 	public Long updateRole(RoleCommand command) {
@@ -70,19 +60,7 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
 		RoleCommandValidator validator = new RoleCommandValidator(command);
 		validator.validateForUpdate();
 
-		List<Long> selectedPermissionIds = new ArrayList<Long>();
-		for (String selectedId : command.getSelectedItems()) {
-			selectedPermissionIds.add(Long.valueOf(selectedId));
-		}
-
-		List<Permission> selectedPermissions = new ArrayList<Permission>();
-		Collection<Permission> allPermissions = this.permissionRepository
-				.findAll();
-		for (Permission permission : allPermissions) {
-			if (selectedPermissionIds.contains(permission.getId())) {
-				selectedPermissions.add(permission);
-			}
-		}
+		List<Permission> selectedPermissions = assembleListOfSelectedPermissions(command.getPermissions());
 		
 		Role role = this.roleRepository.findOne(rolesThatMatch(currentUser.getOrganisation(), command.getId()));
 		role.update(command.getName(), command.getDescription(), selectedPermissions);
@@ -90,5 +68,25 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
 		this.roleRepository.save(role);
 		
 		return role.getId();
+	}
+	
+	private List<Permission> assembleListOfSelectedPermissions(final String[] selectedPermissionsArray) {
+		List<Long> selectedPermissionIds = new ArrayList<Long>();
+		List<Permission> selectedPermissions = new ArrayList<Permission>();
+		
+		if (!ObjectUtils.isEmpty(selectedPermissionsArray)) {
+			for (String selectedId : selectedPermissionsArray) {
+				selectedPermissionIds.add(Long.valueOf(selectedId));
+			}
+	
+			
+			Collection<Permission> allPermissions = this.permissionRepository.findAll();
+			for (Permission permission : allPermissions) {
+				if (selectedPermissionIds.contains(permission.getId())) {
+					selectedPermissions.add(permission);
+				}
+			}
+		}
+		return selectedPermissions;
 	}
 }

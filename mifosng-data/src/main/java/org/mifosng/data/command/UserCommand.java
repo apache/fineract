@@ -18,8 +18,8 @@ public class UserCommand implements Serializable {
 	private String email;
 	private Long officeId;
 	
-	private String[] notSelectedItems;
-	private String[] selectedItems;
+	private String[] notSelectedRoles;
+	private String[] roles;
 
 	public UserCommand() {
 		//
@@ -85,19 +85,19 @@ public class UserCommand implements Serializable {
 		this.id = id;
 	}
 
-	public String[] getNotSelectedItems() {
-		return notSelectedItems;
+	public String[] getNotSelectedRoles() {
+		return notSelectedRoles;
 	}
 
-	public void setNotSelectedItems(String... notSelectedItems) {
-		this.notSelectedItems = notSelectedItems;
+	public void setNotSelectedRoles(String... notSelectedRoles) {
+		this.notSelectedRoles = notSelectedRoles;
 	}
 
-	public String[] getSelectedItems() {
-		return selectedItems;
+	public String[] getRoles() {
+		return roles;
 	}
 
-	public void setSelectedItems(String... selectedItems) {
-		this.selectedItems = selectedItems;
+	public void setRoles(String... roles) {
+		this.roles = roles;
 	}
 }

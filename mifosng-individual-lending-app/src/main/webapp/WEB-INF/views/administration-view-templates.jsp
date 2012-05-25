@@ -490,8 +490,8 @@
 		<br/>
 
 		<div class="multiselectwidget">
-			<label for="notSelectedItems"><spring:message code="form.label.user.available.roles"/></label>
-			<select id="notSelectedItems" name="notSelectedItems" title="Available application roles." class="multiselectwidget multiNotSelectedItems" multiple="multiple" style="width:450px;height:125px;">
+			<label for="notSelectedRoles"><spring:message code="form.label.user.available.roles"/></label>
+			<select id="notSelectedRoles" name="notSelectedRoles" title="Available application roles." class="multiselectwidget multiNotSelectedItems" multiple="multiple" style="width:450px;height:125px;">
 			{{#each availableRoles}}
 				<option value="{{=id}}">{{=name}}</option>
             {{/each}}
@@ -500,8 +500,8 @@
 		</div>
 		
 		<div class="multiselectwidget">
-			<label for="selectedItems"><spring:message code="form.label.user.selected.roles"/></label>
-			<select id="selectedItems" name="selectedItems" title="User selected roles." class="multiselectwidget multiSelectedItems" multiple="multiple" style="width:450px;height:125px;">
+			<label for="roles"><spring:message code="form.label.user.selected.roles"/></label>
+			<select id="roles" name="roles" title="User selected roles." class="multiselectwidget multiSelectedItems" multiple="multiple" style="width:450px;height:125px;">
 			{{#each selectedRoles}}
 				<option value="{{=id}}" selected="selected">{{=name}}</option>
             {{/each}}
@@ -526,8 +526,8 @@
 		<br/>
 
 		<div class="multiselectwidget">
-			<label for="notSelectedItems"><spring:message code="form.label.role.available.permissions"/></label>
-			<select id="notSelectedItems" name="notSelectedItems" title="" class="multiselectwidget multiNotSelectedItems" multiple="multiple" style="width:450px;height:125px;">
+			<label for="notSelectedPermissions"><spring:message code="form.label.role.available.permissions"/></label>
+			<select id="notSelectedPermissions" name="notSelectedPermissions" title="" class="multiselectwidget multiNotSelectedItems" multiple="multiple" style="width:450px;height:125px;">
 			{{#each availablePermissions}}
 				<option value="{{=id}}" title="{{=description}}">{{=name}}</option>
             {{/each}}
@@ -536,8 +536,8 @@
 		</div>
 		
 		<div class="multiselectwidget">
-			<label for="selectedItems"><spring:message code="form.label.role.selected.permissions"/></label>
-			<select id="selectedItems" name="selectedItems" title="" class="multiselectwidget multiSelectedItems" multiple="multiple" style="width:450px;height:125px;">
+			<label for="permissions"><spring:message code="form.label.role.selected.permissions"/></label>
+			<select id="permissions" name="permissions" title="" class="multiselectwidget multiSelectedItems" multiple="multiple" style="width:450px;height:125px;">
 			{{#each selectedPermissions}}
 				<option value="{{=id}}" title="{{=description}}">{{=name}}</option>
             {{/each}}

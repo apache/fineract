@@ -10,9 +10,6 @@
 	<head>
 	<jsp:include page="../common-head.jsp" />
 	
-	<c:url value="/admin/user/all" var="allUsersUrl" />
-	<c:url value="/admin/role/all" var="allRolesUrl" />
-	<c:url value="/admin/permission/all" var="allPermissionsUrl" />
 	<c:url value="/" var="rootContext" />
 <script>
 $(document).ready(function() {
@@ -169,7 +166,7 @@ $(document).ready(function() {
 	            o[this.name].push(this.value || '');
 	        } else {
 	        	
-	        	if (this.name === 'selectedItems' || this.name === 'notSelectedItems') {
+	        	if (this.name === 'permissions' || this.name === 'notSelectedPermissions' || this.name === 'roles' || this.name === 'notSelectedRoles') {
 	        		o[this.name] = new Array();
 	        		o[this.name].push(this.value || '');
 	        	} else {
@@ -180,7 +177,7 @@ $(document).ready(function() {
 	    return o;
 	};
 	
-	function popupDialogWithFormView(getUrl, postUrl, submitType, titleCode, templateSelector, width, height, saveSuccessFunction) {
+	function popupDialogWithFormView(getUrl, postUrl, submitType, titleCode, templateSelector, width, height, saveSuccessFunction, roles) {
 		 var dialogDiv = $("<div id='dialog-form'></div>");
 		 var jqxhr = $.ajax({
 			url: getUrl,
@@ -204,13 +201,24 @@ $(document).ready(function() {
 				var buttonsOpts = {};
 				buttonsOpts[saveButton] = function() {
 					
-					$('#notSelectedItems option').each(function(i) {  
+					if (roles) {
+						// used for role form
+						$('#notSelectedPermissions option').each(function(i) {  
+					    	   $(this).attr("selected", "selected");  
+					    });
+				    	
+				    	$('#permissions option').each(function(i) {  
 				    	   $(this).attr("selected", "selected");  
-				    });
-			    	
-			    	$('#selectedItems option').each(function(i) {  
-			    	   $(this).attr("selected", "selected");  
-			    	});
+				    	});
+					} else {
+				    	$('#notSelectedRoles option').each(function(i) {  
+					    	   $(this).attr("selected", "selected");  
+					    });
+				    	
+				    	$('#roles option').each(function(i) {  
+				    	   $(this).attr("selected", "selected");  
+				    	});
+					}
 			    	
 			    	var newFormData = JSON.stringify($('#entityform').serializeObject());
 			    	console.log(newFormData);
@@ -223,7 +231,6 @@ $(document).ready(function() {
 						  data: newFormData,
 						  cache: false,
 						  beforeSend: function(xhr) {
-								console.log("base64: " + base64);
 								xhr.setRequestHeader("Authorization", "Basic " + base64);
 						  },
 						  success: saveSuccessFunction,
@@ -247,13 +254,23 @@ $(document).ready(function() {
 						},
 				  		open: function (event, ui) {
 				  			
-				  			$('#add').click(function() {  
-				  			     return !$('#notSelectedItems option:selected').remove().appendTo('#selectedItems');  
-				  			});
-				  			
-				  			$('#remove').click(function() {  
-				  				return !$('#selectedItems option:selected').remove().appendTo('#notSelectedItems');  
-				  			});
+				  		    if (roles) {
+					  			$('#add').click(function() {  
+					  			     return !$('#notSelectedPermissions option:selected').remove().appendTo('#permissions');  
+					  			});
+					  			
+					  			$('#remove').click(function() {  
+					  				return !$('#permissions option:selected').remove().appendTo('#notSelectedPermissions');  
+					  			});
+				  			} else {
+				  				$('#add').click(function() {  
+					  			     return !$('#notSelectedRoles option:selected').remove().appendTo('#roles');  
+					  			});
+					  			
+					  			$('#remove').click(function() {  
+					  				return !$('#roles option:selected').remove().appendTo('#notSelectedRoles');  
+					  			});
+				  			}
 				  			
 				  			$('.datepickerfield').datepicker({constrainInput: true, maxDate: 0, dateFormat: 'dd MM yy'});
 				  			
@@ -278,7 +295,6 @@ $(document).ready(function() {
 			  dataType: 'json',
 			  cache: false,
 			  beforeSend: function(xhr) {
-					console.log("base64: " + base64);
 					xhr.setRequestHeader("Authorization", "Basic " + base64);
 			  },
 			  success: function(data, textStatus, jqXHR) {
@@ -312,7 +328,6 @@ $(document).ready(function() {
 						  dataType: 'json',
 						  cache: false,
 						  beforeSend: function(xhr) {
-								console.log("base64: " + base64);
 								xhr.setRequestHeader("Authorization", "Basic " + base64);
 						  },
 						  success: function(data, textStatus, jqXHR) {
@@ -353,7 +368,7 @@ $(document).ready(function() {
 	});
 	
 	$('#adduser').click(function(e) {
-		var url = baseApiUrl + 'template';
+		var url = baseApiUrl + 'users/template';
 		var postUrl = baseApiUrl + "users";
 		var templateSelector = "#userFormTemplate";
 		var width = 1000; 
@@ -364,7 +379,7 @@ $(document).ready(function() {
 		  	refreshUsersView();
 		}
 		
-		popupDialogWithFormView(url, postUrl, 'POST', 'dialog.title.add.user', templateSelector, width, height, saveSuccessFunction);
+		popupDialogWithFormView(url, postUrl, 'POST', 'dialog.title.add.user', templateSelector, width, height, saveSuccessFunction, false);
 	    e.preventDefault();
 	});
 	
@@ -375,7 +390,7 @@ $(document).ready(function() {
 	});
 	
 	$('#addrole').click(function(e) {
-		var url = baseApiUrl +'template';
+		var url = baseApiUrl + 'roles/template';
 		var postUrl = baseApiUrl + "roles";
 		var templateSelector = "#roleFormTemplate";
 		var width = 1000; 
@@ -386,7 +401,7 @@ $(document).ready(function() {
 		  	refreshRolesView();
 		}
 		
-		popupDialogWithFormView(url, postUrl, 'POST', 'dialog.title.add.role', templateSelector, width, height, saveSuccessFunction);
+		popupDialogWithFormView(url, postUrl, 'POST', 'dialog.title.add.role', templateSelector, width, height, saveSuccessFunction, true);
 	    e.preventDefault();
 	});
 	
@@ -409,7 +424,6 @@ $(document).ready(function() {
 			  dataType: 'json',
 			  cache: false,
 		      beforeSend: function(xhr) {
-			    	console.log("base64: " + base64);
 			  		xhr.setRequestHeader("Authorization", "Basic " + base64);
 			  },
 			  success: function(data, textStatus, jqXHR) {
@@ -432,7 +446,7 @@ $(document).ready(function() {
 						  refreshUsersView();
 					}
 					
-					popupDialogWithFormView(getUrl, putUrl, 'PUT', "dialog.title.edit.details", templateSelector, width, height, saveSuccessFunction);
+					popupDialogWithFormView(getUrl, putUrl, 'PUT', "dialog.title.edit.details", templateSelector, width, height, saveSuccessFunction, false);
 					e.preventDefault();
 				});
 				
@@ -476,7 +490,6 @@ $(document).ready(function() {
 			  dataType: 'json',
 			  cache: false,
 		      beforeSend: function(xhr) {
-					console.log("base64: " + base64);
 					xhr.setRequestHeader("Authorization", "Basic " + base64);
 			  },
 			  success: function(data, textStatus, jqXHR) {
@@ -499,7 +512,7 @@ $(document).ready(function() {
 						  refreshUsersView();
 					}
 					
-					popupDialogWithFormView(getUrl, putUrl, 'PUT', "dialog.title.edit.details", templateSelector, width, height, saveSuccessFunction);
+					popupDialogWithFormView(getUrl, putUrl, 'PUT', "dialog.title.edit.details", templateSelector, width, height, saveSuccessFunction, true);
 					e.preventDefault();
 				});
 				
@@ -543,7 +556,6 @@ $(document).ready(function() {
 			  dataType: 'json',
 			  cache: false,
 			  beforeSend: function(xhr) {
-				console.log("base64: " + base64);
 				xhr.setRequestHeader("Authorization", "Basic " + base64);
 			  },
 			  success: function(data, textStatus, jqXHR) {

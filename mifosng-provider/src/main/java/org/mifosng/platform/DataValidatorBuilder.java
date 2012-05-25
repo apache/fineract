@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosng.data.ApiParameterError;
+import org.springframework.util.ObjectUtils;
 
 public class DataValidatorBuilder {
 
@@ -109,6 +110,21 @@ public class DataValidatorBuilder {
 				ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(), defaultEnglishMessage.toString(), parameter, number, 0);
 				dataValidationErrors.add(error);
 			}
+		}
+		return this;
+	}
+	
+	public DataValidatorBuilder arrayNotEmpty() {
+		if (value == null && ignoreNullValue) {
+			return this;
+		}
+		
+		Object[] array = (Object[]) value;
+		if (ObjectUtils.isEmpty(array)) {
+			StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(resource).append(".").append(parameter).append(".cannot.be.empty");
+			StringBuilder defaultEnglishMessage = new StringBuilder("The parameter ").append(parameter).append(" cannot be empty. You must select at least one permission.");
+			ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(), defaultEnglishMessage.toString(), parameter);
+			dataValidationErrors.add(error);
 		}
 		return this;
 	}

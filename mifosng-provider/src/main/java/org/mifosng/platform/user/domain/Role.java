@@ -81,10 +81,19 @@ public class Role extends AbstractAuditableCustom<AppUser, Long> {
 		return data;
 	}
 
+	/**
+	 * When updating role details, any parameters with null values are ignored.
+	 */
 	public void update(String name, String description, List<Permission> selectedPermissions) {
-		this.name = name;
-		this.description = description;
-		this.permissions.clear();
-		this.permissions = new HashSet<Permission>(selectedPermissions);
+		if (name != null) {
+			this.name = name;
+		}
+		if (description != null) {
+			this.description = description;
+		}
+		if (selectedPermissions != null) {
+			this.permissions.clear();
+			this.permissions = new HashSet<Permission>(selectedPermissions);
+		}
 	}
 }

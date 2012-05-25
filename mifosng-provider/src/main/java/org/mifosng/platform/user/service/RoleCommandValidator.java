@@ -3,11 +3,10 @@ package org.mifosng.platform.user.service;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
 import org.mifosng.data.ApiParameterError;
 import org.mifosng.data.command.RoleCommand;
+import org.mifosng.platform.DataValidatorBuilder;
 import org.mifosng.platform.exceptions.PlatformApiDataValidationException;
-import org.springframework.util.ObjectUtils;
 
 public class RoleCommandValidator {
 
@@ -20,7 +19,13 @@ public class RoleCommandValidator {
 	public void validateForCreate() {
 		List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 		
-		validate(dataValidationErrors);
+		DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("role");
+		
+		baseDataValidator.reset().parameter("name").value(command.getName()).notBlank();
+		baseDataValidator.reset().parameter("description").value(command.getDescription()).notBlank().notExceedingLengthOf(500);
+		baseDataValidator.reset().parameter("permissions").value(command.getPermissions()).arrayNotEmpty();
+		
+		baseDataValidator.reset().anyOfNotNull(command.getName(), command.getDescription(), command.getPermissions());
 		
 		if (!dataValidationErrors.isEmpty()) {
 			throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);
@@ -30,37 +35,17 @@ public class RoleCommandValidator {
 	public void validateForUpdate() {
 		List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 		
-		if (command.getId() == null || command.getId() < 1) {
-			ApiParameterError error = ApiParameterError.parameterError("validation.msg.role.id.not.provided", "The parameter id cannot be blank.", "id");
-			dataValidationErrors.add(error);
-		}
+		DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("role");
 		
-		validate(dataValidationErrors);
+		baseDataValidator.reset().parameter("id").value(command.getId()).notNull();
+		baseDataValidator.reset().parameter("name").value(command.getName()).ignoreIfNull().notBlank();
+		baseDataValidator.reset().parameter("description").value(command.getDescription()).ignoreIfNull().notBlank().notExceedingLengthOf(500);
+		baseDataValidator.reset().parameter("permissions").value(command.getPermissions()).ignoreIfNull().arrayNotEmpty();
+		
+		baseDataValidator.reset().anyOfNotNull(command.getName(), command.getDescription(), command.getPermissions());
 		
 		if (!dataValidationErrors.isEmpty()) {
 			throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);
-		}
-	}
-
-	private void validate(List<ApiParameterError> dataValidationErrors) {
-		if (StringUtils.isBlank(command.getName())) {
-			ApiParameterError error = ApiParameterError.parameterError("validation.msg.role.name.cannot.be.blank", "The parameter name cannot be blank.", "name");
-			dataValidationErrors.add(error);
-		}
-		
-		if (StringUtils.isBlank(command.getDescription())) {
-			ApiParameterError error = ApiParameterError.parameterError("validation.msg.role.description.cannot.be.blank", "The parameter description cannot be blank.", "description");
-			dataValidationErrors.add(error);
-		} else {
-			if (command.getDescription().trim().length() > 500) {
-				ApiParameterError error = ApiParameterError.parameterError("validation.msg.role.description.exceeds.max.length", "The parameter description has data that exceeds its max allowed length of {0}.", "description", 500);
-				dataValidationErrors.add(error);
-			}
-		}
-		
-		if (ObjectUtils.isEmpty(command.getSelectedItems())) {
-			ApiParameterError error = ApiParameterError.parameterError("validation.msg.role.permissions.cannot.be.empty", "The parameter selectedItems cannot be blank. You must select at least one permission.", "selectedItems");
-			dataValidationErrors.add(error);
 		}
 	}
 }

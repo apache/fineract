@@ -39,7 +39,7 @@ public class RoleApiResource {
 	private RoleWritePlatformService roleWritePlatformService;
 
 	@GET
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+	@Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Produces({MediaType.APPLICATION_JSON})
 	public Response retrieveAllRoles() {
 
@@ -49,7 +49,7 @@ public class RoleApiResource {
 	
 	@GET
 	@Path("template")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+	@Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Produces({MediaType.APPLICATION_JSON})
 	public Response retrieveNewRoleDetails() {
 
@@ -62,8 +62,8 @@ public class RoleApiResource {
 	}
 	
 	@POST
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-	@Produces({ MediaType.APPLICATION_JSON})
+	@Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+	@Produces({MediaType.APPLICATION_JSON})
 	public Response createRole(final RoleCommand command) {
 
 		Long roleId = this.roleWritePlatformService.createRole(command);
@@ -72,7 +72,7 @@ public class RoleApiResource {
 	
 	@GET
 	@Path("{roleId}")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+	@Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Produces({MediaType.APPLICATION_JSON})
 	public Response retrieveRole(@PathParam("roleId") final Long roleId) {
 
@@ -87,8 +87,8 @@ public class RoleApiResource {
 
 	@PUT
 	@Path("{roleId}")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-	@Produces({ MediaType.APPLICATION_JSON})
+	@Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+	@Produces({MediaType.APPLICATION_JSON})
 	public Response updateRole(@PathParam("roleId") final Long roleId, final RoleCommand command) {
 		
 		command.setId(roleId);

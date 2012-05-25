@@ -12,8 +12,8 @@ public class RoleCommand {
 	private String name;
 	private String description;
 	
-	private String[] notSelectedItems;
-	private String[] selectedItems;
+	private String[] notSelectedPermissions;
+	private String[] permissions;
 
 	protected RoleCommand() {
 		//
@@ -22,7 +22,7 @@ public class RoleCommand {
 	public RoleCommand(final String name, final String description, final String[] permissionIds) {
 		this.name = name;
 		this.description = description;
-		this.selectedItems = permissionIds;
+		this.permissions = permissionIds;
 	}
 
 	public String getName() {
@@ -49,19 +49,19 @@ public class RoleCommand {
 		this.id = id;
 	}
 
-	public String[] getNotSelectedItems() {
-		return notSelectedItems;
+	public String[] getNotSelectedPermissions() {
+		return notSelectedPermissions;
 	}
 
-	public void setNotSelectedItems(String... notSelectedItems) {
-		this.notSelectedItems = notSelectedItems;
+	public void setNotSelectedPermissions(String[] notSelectedPermissions) {
+		this.notSelectedPermissions = notSelectedPermissions;
 	}
 
-	public String[] getSelectedItems() {
-		return selectedItems;
+	public String[] getPermissions() {
+		return permissions;
 	}
 
-	public void setSelectedItems(String... selectedItems) {
-		this.selectedItems = selectedItems;
+	public void setPermissions(String[] permissions) {
+		this.permissions = permissions;
 	}
 }
