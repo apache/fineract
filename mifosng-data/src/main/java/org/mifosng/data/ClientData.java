@@ -24,7 +24,7 @@ public class ClientData implements Serializable {
 	private String externalId;
 	private LocalDate joinedDate;
 	
-	private List<OfficeData> allowedOffices = new ArrayList<OfficeData>();
+	private List<OfficeLookup> allowedOffices = new ArrayList<OfficeLookup>();
 
 	public ClientData() {
 		//
@@ -133,11 +133,11 @@ public class ClientData implements Serializable {
 		this.displayName = displayName;
 	}
 
-	public List<OfficeData> getAllowedOffices() {
+	public List<OfficeLookup> getAllowedOffices() {
 		return allowedOffices;
 	}
 
-	public void setAllowedOffices(List<OfficeData> allowedOffices) {
+	public void setAllowedOffices(List<OfficeLookup> allowedOffices) {
 		this.allowedOffices = allowedOffices;
 	}
 }

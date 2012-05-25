@@ -17,6 +17,7 @@ import org.mifosng.data.ClientLoanAccountSummaryCollectionData;
 import org.mifosng.data.ClientLoanAccountSummaryData;
 import org.mifosng.data.NoteData;
 import org.mifosng.data.OfficeData;
+import org.mifosng.data.OfficeLookup;
 import org.mifosng.platform.exceptions.PlatformResourceNotFoundException;
 import org.mifosng.platform.organisation.domain.Organisation;
 import org.mifosng.platform.organisation.service.OfficeReadPlatformService;
@@ -101,17 +102,17 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
 		AppUser currentUser = context.authenticatedUser();
 
-		List<OfficeData> offices = new ArrayList<OfficeData>(officeReadPlatformService.retrieveAllOffices());
+		List<OfficeLookup> offices = new ArrayList<OfficeLookup>(officeReadPlatformService.retrieveAllOfficesForLookup());
 
 		ClientData clientData = new ClientData();
 		clientData.setOfficeId(currentUser.getOffice().getId());
 		clientData.setOrganisationId(currentUser.getOrganisation().getId());
 		clientData.setAllowedOffices(offices);
 
-		clientData.setDisplayName("");
-		clientData.setFirstname("");
-		clientData.setLastname("");
-		clientData.setId(Long.valueOf(-1));
+//		clientData.setDisplayName("");
+//		clientData.setFirstname("");
+//		clientData.setLastname("");
+//		clientData.setId(Long.valueOf(-1));
 		clientData.setJoinedDate(new LocalDate());
 
 		return clientData;

@@ -41,6 +41,21 @@ public class DataValidatorBuilder {
 		this.ignoreNullValue = true;
 		return this;
 	}
+	
+
+	public DataValidatorBuilder andNotBlank(String linkedParameterName, String linkedValue) {
+		if (value == null && linkedValue == null && ignoreNullValue) {
+			return this;
+		}
+		
+		if (StringUtils.isBlank(linkedValue)) {
+			StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(resource).append(".").append(linkedParameterName).append(".cannot.be.empty.when.").append(parameter).append(".is.populated");
+			StringBuilder defaultEnglishMessage = new StringBuilder("The parameter ").append(linkedParameterName).append(" cannot be empty when ").append(parameter).append(" is populated.");
+			ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(), defaultEnglishMessage.toString(), linkedParameterName, linkedValue, value);
+			dataValidationErrors.add(error);
+		}
+		return this;
+	}
 
 	public DataValidatorBuilder equalToParameter(String linkedParameterName, Object linkedValue) {
 		if (value == null && linkedValue == null && ignoreNullValue) {
@@ -161,10 +176,31 @@ public class DataValidatorBuilder {
 		return this;
 	}
 
-	public void inValidValue(String parameterValueCode, Object invalidValue) {
+	public DataValidatorBuilder inValidValue(String parameterValueCode, Object invalidValue) {
 		StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(resource).append(".").append(parameter).append(".invalid.").append(parameterValueCode);
 		StringBuilder defaultEnglishMessage = new StringBuilder("The parameter ").append(parameter).append(" has an invalid value.");
 		ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(), defaultEnglishMessage.toString(), parameter, invalidValue);
-		dataValidationErrors.add(error);		
+		dataValidationErrors.add(error);
+		return this;
+	}
+
+	public DataValidatorBuilder mustBeBlankWhenParameterProvided(String parameterName, Object parameterValue) {
+		if (value == null && ignoreNullValue) {
+			return this;
+		}
+		
+		if (value == null && parameterValue != null) {
+			return this;
+		}
+		
+		if (value != null && StringUtils.isBlank(value.toString()) && parameterValue != null && StringUtils.isNotBlank(parameterValue.toString())) {
+			return this;
+		}
+		
+		StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(resource).append(".").append(parameter).append(".cannot.also.be.provided.when.").append(parameterName).append(".is.populated");
+		StringBuilder defaultEnglishMessage = new StringBuilder("The parameter ").append(parameter).append(" cannot also be provided when ").append(parameterName).append(" is populated.");
+		ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(), defaultEnglishMessage.toString(), parameter, value, parameterName, parameterValue);
+		dataValidationErrors.add(error);
+		return this;
 	}
 }

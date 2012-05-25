@@ -134,7 +134,6 @@ $(document).ready(function() {
 		  		argArray[argArrayIndex] = this.value;
 		  		argArrayIndex++;
 		  	  });
-		  	  console.log(argArray);
 		  	  // hardcoded support for six arguments
 		  	  errorObj.message = jQuery.i18n.prop(this.userMessageGlobalisationCode, argArray[0], argArray[1], argArray[2], argArray[3], argArray[4], argArray[5]);
 		  	  errorObj.value = this.value;
@@ -211,7 +210,6 @@ $(document).ready(function() {
 			dataType: 'json',
 			cache: false,
 			beforeSend: function(xhr) {
-				console.log("base64: " + base64);
 	            xhr.setRequestHeader("Authorization", "Basic " + base64);
 			},
 			success: function(data, textStatus, jqXHR) {
@@ -244,6 +242,10 @@ $(document).ready(function() {
 						  dataType: 'json',
 						  data: newFormData,
 						  success: saveSuccessFunction,
+						  cache: false,
+						  beforeSend: function(xhr) {
+					            xhr.setRequestHeader("Authorization", "Basic " + base64);
+						  },
 						  error: function(jqXHR, textStatus, errorThrown) {
 						    handleXhrError(jqXHR, textStatus, errorThrown, "#formErrorsTemplate", "#formerrors");
 						  }

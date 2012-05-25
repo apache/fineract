@@ -1,6 +1,7 @@
 package org.mifosng.platform.client.service;
 
-import static org.mifosng.platform.Specifications.*;
+import static org.mifosng.platform.Specifications.clientsThatMatch;
+import static org.mifosng.platform.Specifications.officesThatMatch;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosng.data.EntityIdentifier;
@@ -42,7 +43,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 		AppUser currentUser = context.authenticatedUser();
 		
 		ClientCommandValidator validator = new ClientCommandValidator(command);
-		validator.validate();
+		validator.validateForCreate();
 
 		Office clientOffice = this.officeRepository.findOne(officesThatMatch(currentUser.getOrganisation(), command.getOfficeId()));
 		
@@ -66,8 +67,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 		
 		AppUser currentUser = context.authenticatedUser();
 		
-		//EnrollClientCommandValidator validator = new EnrollClientCommandValidator(command);
-		//validator.validate();
+		ClientCommandValidator validator = new ClientCommandValidator(command);
+		validator.validateForUpdate();
 
 		Office clientOffice = this.officeRepository.findOne(officesThatMatch(currentUser.getOrganisation(), command.getOfficeId()));
 		
