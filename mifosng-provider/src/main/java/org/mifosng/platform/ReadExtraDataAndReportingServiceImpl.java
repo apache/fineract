@@ -17,7 +17,6 @@ import javax.sql.DataSource;
 import javax.ws.rs.core.StreamingOutput;
 
 import org.mifosng.data.AdditionalFieldsSet;
-import org.mifosng.data.AdditionalFieldsSets;
 import org.mifosng.data.reports.GenericResultset;
 import org.mifosng.data.reports.ResultsetColumnHeader;
 import org.mifosng.data.reports.ResultsetDataRow;
@@ -331,7 +330,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 	}
 
 	@Override
-	public AdditionalFieldsSets retrieveExtraDatasetNames(String type) {
+	public List<AdditionalFieldsSet> retrieveExtraDatasetNames(String type) {
 
 		List<AdditionalFieldsSet> additionalFieldsSets = new ArrayList<AdditionalFieldsSet>();
 
@@ -366,7 +365,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 					"Additional Fields Type: " + type);
 		}
 
-		return new AdditionalFieldsSets(additionalFieldsSets);
+		return additionalFieldsSets;
 	}
 
 	@Override
@@ -598,8 +597,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 		String transType = null;
 
 		String sql = "select s.id from `" + type + "` t left join `"
-				+ fullDatasetName + "` s on s.id = t.id where t.id = "
-				+ id;
+				+ fullDatasetName + "` s on s.id = t.id where t.id = " + id;
 
 		try {
 			Connection db_connection = dataSource.getConnection();

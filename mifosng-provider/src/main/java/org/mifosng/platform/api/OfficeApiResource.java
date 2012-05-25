@@ -1,8 +1,6 @@
 package org.mifosng.platform.api;
 
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -53,11 +51,15 @@ public class OfficeApiResource {
 		Collection<OfficeData> offices = this.readPlatformService
 				.retrieveAllOffices();
 
-		Set<String> excludeFields = new HashSet<String>();
-		excludeFields.add("allowedParents");
+		String filterType = "E";
+		String fieldList = "allowedParents";
+		if (this.jsonFormattingService.isPassed(fields)) {
+			filterType = "I";
+			fieldList = fields;
+		}
 
 		return this.jsonFormattingService.convertDataObjectJSON(offices,
-				fields, excludeFields,
+				filterType, fieldList,
 				this.jsonFormattingService.isTrue(pretty));
 	}
 
@@ -70,11 +72,11 @@ public class OfficeApiResource {
 		OfficeData officeData = this.readPlatformService
 				.retrieveNewOfficeTemplate();
 
-		Set<String> excludeFields = new HashSet<String>();
-		String includeFields = "openingDate,allowedParents";
+		String filterType = "I";
+		String fieldList = "openingDate,allowedParents";
 
 		return this.jsonFormattingService.convertDataObjectJSON(officeData,
-				includeFields, excludeFields,
+				filterType, fieldList,
 				this.jsonFormattingService.isTrue(pretty));
 	}
 
@@ -102,26 +104,31 @@ public class OfficeApiResource {
 			@QueryParam("template") String template,
 			@QueryParam("pretty") String pretty) {
 
-		String includeFields = fields;
-		Set<String> excludeFields = new HashSet<String>();
 		OfficeData office = this.readPlatformService.retrieveOffice(officeId);
+
+		String filterType = "E";
+		String fieldList = "";
+		if (this.jsonFormattingService.isPassed(fields)) {
+			filterType = "I";
+			fieldList = fields;
+		}
 
 		if (this.jsonFormattingService.isTrue(template)) {
 			office.setAllowedParents(this.readPlatformService
 					.retrieveAllowedParents(officeId));
 
-			if (this.jsonFormattingService.isPassed(includeFields)) {
-				includeFields += ",allowedParents";
+			if (this.jsonFormattingService.isPassed(fields)) {
+				fieldList += ",allowedParents";
 			}
 
 		} else {
-			if (!(this.jsonFormattingService.isPassed(includeFields))) {
-				excludeFields.add("allowedParents");
+			if (!(this.jsonFormattingService.isPassed(fields))) {
+				fieldList = "allowedParents";
 			}
 		}
 
 		return this.jsonFormattingService.convertDataObjectJSON(office,
-				includeFields, excludeFields,
+				filterType, fieldList,
 				this.jsonFormattingService.isTrue(pretty));
 	}
 

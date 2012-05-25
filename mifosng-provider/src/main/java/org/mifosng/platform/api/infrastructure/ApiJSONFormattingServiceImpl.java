@@ -13,44 +13,38 @@ import org.codehaus.jackson.map.ser.FilterProvider;
 import org.codehaus.jackson.map.ser.impl.SimpleBeanPropertyFilter;
 import org.codehaus.jackson.map.ser.impl.SimpleFilterProvider;
 import org.mifosng.platform.exceptions.PlatformInternalServerException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 
-	private final static Logger logger = LoggerFactory
-			.getLogger(ApiJSONFormattingServiceImpl.class);
-
 	@Override
-	public String convertDataObjectJSON(Object dataObject, String fields,
-			Set<String> excludeFields, boolean prettyOutput) {
+	public String convertDataObjectJSON(Object dataObject, String filterType,
+			String fields, boolean prettyOutput) {
 
 		try {
 			String json = "";
 			String myFilter = "myFilter";
-			Set<String> includeFields = new HashSet<String>();
 			FilterProvider filters = null;
+			Set<String> filterFields = new HashSet<String>();
 
-			if (fields == null || fields.equals("")) {
+			StringTokenizer st = new StringTokenizer(fields, ",");
+			while (st.hasMoreTokens()) {
+				filterFields.add(st.nextToken().trim());
+			}
+
+			if (filterType.equals("I")) {
 				filters = new SimpleFilterProvider().addFilter(myFilter,
 						SimpleBeanPropertyFilter
-								.serializeAllExcept(excludeFields));
+								.filterOutAllExcept(filterFields));
 
 			} else {
-
-				StringTokenizer st = new StringTokenizer(fields, ",");
-				while (st.hasMoreTokens()) {
-					includeFields.add(st.nextToken().trim());
-				}
-
 				filters = new SimpleFilterProvider().addFilter(myFilter,
 						SimpleBeanPropertyFilter
-								.filterOutAllExcept(includeFields));
+								.serializeAllExcept(filterFields));
 			}
-			ObjectWriter jsonWriter = null;
 
+			ObjectWriter jsonWriter = null;
 			if (prettyOutput) {
 				jsonWriter = new ObjectMapper()
 						.writerWithDefaultPrettyPrinter();

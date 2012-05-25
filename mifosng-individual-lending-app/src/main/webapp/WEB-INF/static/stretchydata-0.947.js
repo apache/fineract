@@ -53,28 +53,28 @@
 			headingClassStr = ' class="' + displayAllVars.headingClass + '" ';
 
 		var extraDataNamesVar = "";
-		for ( var i in data.additionalFieldsSets) {
+		for ( var i in data) {
 			var dsnDivName = generateDsnDivName(displayAllVars.datasetType, i,
 					displayAllVars.datasetTypeDiv);
 			extraDataNamesVar += '<br><span ' + headingClassStr + '><b>'
 					+ doI18N(displayAllVars.headingPrefix)
-					+ doI18N(data.additionalFieldsSets[i].name)
+					+ doI18N(data[i].name)
 					+ ' - </span></b> ';
 
 			extraDataNamesVar += editExtraDataLink(displayAllVars.url, displayAllVars.basicAuthKey,
 					displayAllVars.datasetType,
-					data.additionalFieldsSets[i].name,
+					data[i].name,
 					displayAllVars.datasetPKValue, dsnDivName);
 
 			extraDataNamesVar += '<div id="' + dsnDivName + '">';
 			extraDataNamesVar += '</div>';
 		}
 		$('#' + displayAllVars.datasetTypeDiv).html(extraDataNamesVar);
-		for ( var i in data.additionalFieldsSets) {
+		for ( var i in data) {
 			var dsnDivName = generateDsnDivName(displayAllVars.datasetType, i,
 					displayAllVars.datasetTypeDiv);
 			viewExtraData(displayAllVars.url, displayAllVars.basicAuthKey, displayAllVars.datasetType,
-					data.additionalFieldsSets[i].name,
+					data[i].name,
 					displayAllVars.datasetPKValue, dsnDivName);
 		}
 

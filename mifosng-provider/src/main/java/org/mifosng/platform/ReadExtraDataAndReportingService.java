@@ -1,10 +1,11 @@
 package org.mifosng.platform;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.core.StreamingOutput;
 
-import org.mifosng.data.AdditionalFieldsSets;
+import org.mifosng.data.AdditionalFieldsSet;
 import org.mifosng.data.reports.GenericResultset;
 
 public interface ReadExtraDataAndReportingService {
@@ -16,7 +17,7 @@ public interface ReadExtraDataAndReportingService {
 	GenericResultset retrieveGenericResultset(String name, String type,
 			Map<String, String> extractedQueryParams);
 
-	AdditionalFieldsSets retrieveExtraDatasetNames(String type);
+	List<AdditionalFieldsSet> retrieveExtraDatasetNames(String type);
 
 	GenericResultset retrieveExtraData(String type, String set, Long id);
 

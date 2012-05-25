@@ -4,8 +4,8 @@ import java.util.Set;
 
 public interface ApiJSONFormattingService {
 
-	String convertDataObjectJSON(Object dataObject, String fields,
-			Set<String> excludeFields, boolean prettyOutput);
+	String convertDataObjectJSON(Object dataObject, String filterType,
+			String fields, boolean prettyOutput);
 
 	Boolean isTrue(String param);
 

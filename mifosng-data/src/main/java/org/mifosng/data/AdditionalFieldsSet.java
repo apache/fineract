@@ -2,7 +2,10 @@ package org.mifosng.data;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.codehaus.jackson.map.annotate.JsonFilter;
+
 @XmlRootElement
+@JsonFilter("myFilter")
 public class AdditionalFieldsSet {
 
 	private Integer id;
