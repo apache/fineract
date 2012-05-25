@@ -32,6 +32,9 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class OfficeApiResource {
 
+	private String defaultFieldList = "openingDate";
+	private String allowedFieldList = "allowedParents";
+
 	@Autowired
 	private OfficeReadPlatformService readPlatformService;
 
@@ -51,11 +54,9 @@ public class OfficeApiResource {
 
 		Collection<OfficeData> offices = this.readPlatformService
 				.retrieveAllOffices();
-
-		String filterType = "E";
-		String templateFields = "allowedParents";
-		return this.jsonFormattingService.convertRequest(offices, filterType,
-				templateFields, uriInfo.getQueryParameters());
+		String selectedFields = "";
+		return this.jsonFormattingService.convertRequest(offices,
+				allowedFieldList, selectedFields, uriInfo.getQueryParameters());
 	}
 
 	@GET
@@ -67,11 +68,9 @@ public class OfficeApiResource {
 		OfficeData officeData = this.readPlatformService
 				.retrieveNewOfficeTemplate();
 
-		String filterType = "I";
-		String templateFields = "openingDate,allowedParents";
-
+		String selectedFields = defaultFieldList + "," + allowedFieldList;
 		return this.jsonFormattingService.convertRequest(officeData,
-				filterType, templateFields, uriInfo.getQueryParameters());
+				allowedFieldList, selectedFields, uriInfo.getQueryParameters());
 	}
 
 	@POST
@@ -94,36 +93,18 @@ public class OfficeApiResource {
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Produces({ MediaType.APPLICATION_JSON })
 	public String retreiveOffice(@PathParam("officeId") final Long officeId,
-			@QueryParam("fields") String fields,
-			@QueryParam("template") String template,
-			@QueryParam("pretty") String pretty) {
+			@QueryParam("template") String template, @Context UriInfo uriInfo) {
 
 		OfficeData office = this.readPlatformService.retrieveOffice(officeId);
-
-		String filterType = "E";
-		String fieldList = "";
-		if (this.jsonFormattingService.isPassed(fields)) {
-			filterType = "I";
-			fieldList = fields;
-		}
 
 		if (this.jsonFormattingService.isTrue(template)) {
 			office.setAllowedParents(this.readPlatformService
 					.retrieveAllowedParents(officeId));
-
-			if (this.jsonFormattingService.isPassed(fields)) {
-				fieldList += ",allowedParents";
-			}
-
-		} else {
-			if (!(this.jsonFormattingService.isPassed(fields))) {
-				fieldList = "allowedParents";
-			}
 		}
 
-		return this.jsonFormattingService.convertDataObjectJSON(office,
-				filterType, fieldList,
-				this.jsonFormattingService.isTrue(pretty));
+		String selectedFields = "";
+		return this.jsonFormattingService.convertRequest(office,
+				allowedFieldList, selectedFields, uriInfo.getQueryParameters());
 	}
 
 	@PUT

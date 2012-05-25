@@ -21,22 +21,54 @@ import org.springframework.stereotype.Service;
 public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 
 	@Override
-	public String convertRequest(Object dataObject, String filterType, String filterFields,
-			MultivaluedMap<String, String> queryParams) {
-		
+	public String convertRequest(Object dataObject, String allowedFieldList,
+			String selectedFields, MultivaluedMap<String, String> queryParams) {
+
+		String filterType = "E";
+		String fieldList = "";
 		String fields = queryParams.getFirst("fields");
-		String calcFilterType = filterType;
-		String fieldList = filterFields;
-		if (isPassed(fields)) {
-			calcFilterType = "I";
-			fieldList = fields;
+
+		if (isPassed(fields) || (!(selectedFields.equals("")))) {
+			filterType = "I";
+
+			if (isPassed(fields)) {
+				if (selectedFields.equals(""))
+					fieldList = fields;
+				else {
+					Set<String> paramFieldsSet = new HashSet<String>();
+					StringTokenizer st = new StringTokenizer(fields, ",");
+					while (st.hasMoreTokens()) {
+						paramFieldsSet.add(st.nextToken().trim());
+					}
+					Set<String> selectedFieldsSet = new HashSet<String>();
+					st = new StringTokenizer(fields, ",");
+					while (st.hasMoreTokens()) {
+						selectedFieldsSet.add(st.nextToken().trim());
+					}
+					
+					for (String paramField : paramFieldsSet) {
+						if (selectedFieldsSet.contains(paramField)) fieldList += paramField;
+					}
+					
+				}
+			} else {
+				fieldList = selectedFields;
+			}
+
 		}
 
-		return convertDataObjectJSON(dataObject,
-				calcFilterType, fieldList,
+		if (isTrue(queryParams.getFirst("template"))) {
+			if (filterType.equals("I"))
+				fieldList += "," + allowedFieldList;
+		} else {
+			if (filterType.equals("E"))
+				fieldList = allowedFieldList;
+		}
+
+		return convertDataObjectJSON(dataObject, filterType, fieldList,
 				isTrue(queryParams.getFirst("pretty")));
 	}
-	
+
 	@Override
 	public String convertDataObjectJSON(Object dataObject, String filterType,
 			String fields, boolean prettyOutput) {
