@@ -13,9 +13,11 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriInfo;
 
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -42,6 +44,8 @@ public class AdditionalFieldsApiResource {
 	private final static Logger logger = LoggerFactory
 			.getLogger(AdditionalFieldsApiResource.class);
 
+	private String allowedFieldList = "";
+
 	@Autowired
 	private ReadExtraDataAndReportingService readExtraDataAndReportingService;
 
@@ -52,22 +56,14 @@ public class AdditionalFieldsApiResource {
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Produces({ MediaType.APPLICATION_JSON })
 	public String datasets(@QueryParam("type") String type,
-			@QueryParam("fields") String fields,
-			@QueryParam("pretty") String pretty) {
+			@Context UriInfo uriInfo) {
 
 		List<AdditionalFieldsSet> result = this.readExtraDataAndReportingService
 				.retrieveExtraDatasetNames(type);
 
-		String filterType = "E";
-		String fieldList = "";
-		if (this.jsonFormattingService.isPassed(fields)) {
-			filterType = "I";
-			fieldList = fields;
-		}
-
-		return this.jsonFormattingService.convertDataObjectJSON(result,
-				filterType, fieldList,
-				this.jsonFormattingService.isTrue(pretty));
+		String selectedFields = "";
+		return this.jsonFormattingService.convertRequest(result,
+				allowedFieldList, selectedFields, uriInfo.getQueryParameters());
 	}
 
 	@GET
@@ -76,18 +72,16 @@ public class AdditionalFieldsApiResource {
 	@Produces({ MediaType.APPLICATION_JSON })
 	public String extraData(@PathParam("type") final String type,
 			@PathParam("set") final String set, @PathParam("id") final Long id,
-			@QueryParam("pretty") String pretty) {
+			@Context UriInfo uriInfo) {
 
 		try {
 			GenericResultset result = this.readExtraDataAndReportingService
 					.retrieveExtraData(type, set, id);
 
-			String filterType = "E";
-			String fieldList = "";
-
-			return this.jsonFormattingService.convertDataObjectJSON(result,
-					filterType, fieldList,
-					this.jsonFormattingService.isTrue(pretty));
+			String selectedFields = "";
+			return this.jsonFormattingService.convertRequest(result,
+					allowedFieldList, selectedFields,
+					uriInfo.getQueryParameters());
 		} catch (InvalidSqlException e) {
 			List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 			ApiParameterError error = ApiParameterError.parameterError(

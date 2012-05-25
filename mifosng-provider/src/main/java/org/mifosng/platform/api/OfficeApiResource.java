@@ -96,8 +96,7 @@ public class OfficeApiResource {
 			@QueryParam("template") String template, @Context UriInfo uriInfo) {
 
 		OfficeData office = this.readPlatformService.retrieveOffice(officeId);
-
-		if (this.jsonFormattingService.isTrue(template)) {
+		if (template != null && template.equalsIgnoreCase("true")) {
 			office.setAllowedParents(this.readPlatformService
 					.retrieveAllowedParents(officeId));
 		}

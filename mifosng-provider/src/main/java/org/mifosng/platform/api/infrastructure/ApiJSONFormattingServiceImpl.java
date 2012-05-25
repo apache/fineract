@@ -45,11 +45,12 @@ public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 					while (st.hasMoreTokens()) {
 						selectedFieldsSet.add(st.nextToken().trim());
 					}
-					
+
 					for (String paramField : paramFieldsSet) {
-						if (selectedFieldsSet.contains(paramField)) fieldList += paramField;
+						if (selectedFieldsSet.contains(paramField))
+							fieldList += paramField;
 					}
-					
+
 				}
 			} else {
 				fieldList = selectedFields;
@@ -69,8 +70,7 @@ public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 				isTrue(queryParams.getFirst("pretty")));
 	}
 
-	@Override
-	public String convertDataObjectJSON(Object dataObject, String filterType,
+	private String convertDataObjectJSON(Object dataObject, String filterType,
 			String fields, boolean prettyOutput) {
 
 		try {
@@ -124,16 +124,14 @@ public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 		}
 	}
 
-	@Override
-	public Boolean isTrue(String param) {
+	private Boolean isTrue(String param) {
 		if (param != null && param.equalsIgnoreCase("true"))
 			return true;
 		else
 			return false;
 	}
 
-	@Override
-	public Boolean isPassed(String param) {
+	private Boolean isPassed(String param) {
 		if (param == null || param.equals(""))
 			return false;
 		else
