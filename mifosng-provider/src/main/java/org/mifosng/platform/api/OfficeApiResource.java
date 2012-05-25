@@ -18,14 +18,11 @@ import javax.ws.rs.core.Response;
 import org.joda.time.LocalDate;
 import org.mifosng.data.EntityIdentifier;
 import org.mifosng.data.OfficeData;
-import org.mifosng.data.OfficeTemplateData;
 import org.mifosng.data.command.OfficeCommand;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.ApiJSONFormattingService;
 import org.mifosng.platform.organisation.service.OfficeReadPlatformService;
 import org.mifosng.platform.organisation.service.OfficeWritePlatformService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -35,8 +32,6 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class OfficeApiResource {
 
-	private final static Logger logger = LoggerFactory.getLogger(OfficeApiResource.class);
-
 	@Autowired
 	private OfficeReadPlatformService readPlatformService;
 
@@ -45,45 +40,42 @@ public class OfficeApiResource {
 
 	@Autowired
 	private ApiDataConversionService apiDataConversionService;
-	
+
 	@Autowired
 	private ApiJSONFormattingService jsonFormattingService;
 
 	@GET
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrieveOffices(@QueryParam("fields") String fields) {
+	public String retrieveOffices(@QueryParam("fields") String fields,
+			@QueryParam("pretty") String pretty) {
 
 		Collection<OfficeData> offices = this.readPlatformService
 				.retrieveAllOffices();
 
 		Set<String> excludeFields = new HashSet<String>();
-		excludeFields.add("officeTemplateData");
-		
-		// can use parameters for turning this on/off etc.
-		boolean prettyOutput = true;
-		
-		return this.jsonFormattingService.convertDataObjectJSON(offices, fields, excludeFields, prettyOutput);
+		excludeFields.add("allowedParents");
+
+		return this.jsonFormattingService.convertDataObjectJSON(offices,
+				fields, excludeFields,
+				this.jsonFormattingService.isTrue(pretty));
 	}
 
 	@GET
 	@Path("template")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrieveOfficeTemplate() {
+	public String retrieveOfficeTemplate(@QueryParam("pretty") String pretty) {
 
-		OfficeData officeData = new OfficeData();
-		OfficeTemplateData officeTemplateData = this.readPlatformService
+		OfficeData officeData = this.readPlatformService
 				.retrieveNewOfficeTemplate();
-		officeData.setOfficeTemplateData(officeTemplateData);
 
 		Set<String> excludeFields = new HashSet<String>();
-		String includeFields = "officeTemplateData";
-		
-		// can use parameters for turning this on/off etc.
-		boolean prettyOutput = true;
-		
-		return this.jsonFormattingService.convertDataObjectJSON(officeData, includeFields, excludeFields, prettyOutput);
+		String includeFields = "openingDate,allowedParents";
+
+		return this.jsonFormattingService.convertDataObjectJSON(officeData,
+				includeFields, excludeFields,
+				this.jsonFormattingService.isTrue(pretty));
 	}
 
 	@POST
@@ -107,42 +99,30 @@ public class OfficeApiResource {
 	@Produces({ MediaType.APPLICATION_JSON })
 	public String retreiveOffice(@PathParam("officeId") final Long officeId,
 			@QueryParam("fields") String fields,
-			@QueryParam("returnTemplateData") String returnTemplateData) {
-
-		Boolean isReturnTemplate = false;
-		if (returnTemplateData != null
-				&& returnTemplateData.equalsIgnoreCase("true")) {
-			isReturnTemplate = true;
-		}
-
-		Boolean isIncludeFields = false;
-		if (!(fields == null || fields.equals(""))) {
-			isIncludeFields = true;
-		}
-
-		OfficeData office = this.readPlatformService.retrieveOffice(officeId);
-
-		if (isReturnTemplate) {
-			OfficeTemplateData officeTemplateData = this.readPlatformService
-					.retrieveExistingOfficeTemplate(officeId);
-			office.setOfficeTemplateData(officeTemplateData);
-		}
+			@QueryParam("template") String template,
+			@QueryParam("pretty") String pretty) {
 
 		String includeFields = fields;
 		Set<String> excludeFields = new HashSet<String>();
-		if (isIncludeFields) {
-			if (isReturnTemplate) {
-				includeFields += ",officeTemplateData";
+		OfficeData office = this.readPlatformService.retrieveOffice(officeId);
+
+		if (this.jsonFormattingService.isTrue(template)) {
+			office.setAllowedParents(this.readPlatformService
+					.retrieveAllowedParents(officeId));
+
+			if (this.jsonFormattingService.isPassed(includeFields)) {
+				includeFields += ",allowedParents";
 			}
+
 		} else {
-			if (!(isReturnTemplate)) {
-				excludeFields.add("officeTemplateData");
+			if (!(this.jsonFormattingService.isPassed(includeFields))) {
+				excludeFields.add("allowedParents");
 			}
 		}
-		
-		boolean prettyOutput = true;
-		
-		return this.jsonFormattingService.convertDataObjectJSON(office, includeFields, excludeFields, prettyOutput);
+
+		return this.jsonFormattingService.convertDataObjectJSON(office,
+				includeFields, excludeFields,
+				this.jsonFormattingService.isTrue(pretty));
 	}
 
 	@PUT

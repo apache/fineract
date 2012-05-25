@@ -11,7 +11,6 @@ import javax.sql.DataSource;
 import org.joda.time.LocalDate;
 import org.mifosng.data.OfficeData;
 import org.mifosng.data.OfficeLookup;
-import org.mifosng.data.OfficeTemplateData;
 import org.mifosng.platform.exceptions.PlatformResourceNotFoundException;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.user.domain.AppUser;
@@ -132,22 +131,22 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
 	}
 
 	@Override
-	public OfficeTemplateData retrieveNewOfficeTemplate() {
+	public OfficeData retrieveNewOfficeTemplate() {
 
 		context.authenticatedUser();
 
 		List<OfficeLookup> parentLookups = new ArrayList<OfficeLookup>(
 				retrieveAllOfficesForLookup());
 
-		OfficeTemplateData officeTemplateData = new OfficeTemplateData();
-		officeTemplateData.setAllowedParents(parentLookups);
-		officeTemplateData.setDefaultOpeningDate(new LocalDate());
+		OfficeData officeData = new OfficeData();
+		officeData.setAllowedParents(parentLookups);
+		officeData.setOpeningDate(new LocalDate());
 
-		return officeTemplateData;
+		return officeData;
 	}
 
 	@Override
-	public OfficeTemplateData retrieveExistingOfficeTemplate(Long officeId) {
+	public List<OfficeLookup> retrieveAllowedParents(Long officeId) {
 
 		context.authenticatedUser();
 
@@ -162,11 +161,7 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
 			}
 		}
 
-		OfficeTemplateData officeTemplateData = new OfficeTemplateData();
-		officeTemplateData.setAllowedParents(filterParentLookups);
-		officeTemplateData.setDefaultOpeningDate(new LocalDate());
-
-		return officeTemplateData;
+		return filterParentLookups;
 
 	}
 

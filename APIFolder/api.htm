@@ -10,8 +10,9 @@
 <body>
 <div id="page-wrapper">
     <div id="flybar">
+        <div id=nav-logo>API MENU</div>
         <div class="flybar-nav">
-            <h2 class="flybar-button">API Overview</h2>
+            <h2 class="flybar-button">Overview</h2>
             <div class="flybar-menu-overview">
                 <div class="toc-column1">
                     <div class="toc-section">
@@ -30,21 +31,21 @@
             <div class="flybar-menu">
                 <div class="tocMatrix">
                     <table class=matrixHeading>
-                        <tr class="matrixHeadingBG"><td colspan=2 valign="top"><div class="matrixHeadingVerbs"><table><tr><td>Resources</td></tr></table></div></td><td><table><tr><td><div class="matrixHeadingVerbs">POST</div></td></tr><tr><td>create/update</td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">GET</div></td></tr><tr><td>read</td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">PUT</div></td></tr><tr><td>simple update</td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">DELETE</div></td></tr><tr><td>delete</td></tr></table></td></tr>
-                        <tr class="alt"><td><a href="#clients">CLIENT</a></td><td>/v1/clients</td><td><a href="api.htm#clients_create">Create a Client</a></td><td><a href="#clients_list">List Clients</a></td><td align="center">-</td><td align="center">-</td></tr>
-                        <tr><td></td><td>/v1/clients/{clientId}</td><td align="center">-</td><td><a href="#clients_retrieve">Retrieve a Client</a></td><td><a href="#clients_update">Update a Client</a></td><td align="center">-</td></tr>
-                        <tr class="alt"><td></td><td>/v1/clients/{clientId}/loans</td><td align="center">-</td><td><a href="#clients_loansummary">Retrieve a Client's Loan Account Summary</a></td><td align="center">-</td><td align="center">-</td></tr>
-                        <tr><td></td><td>/v1/clients/{clientId}/notes</td><td><a href="#clients_addnote">Add a Client Note</a></td><td><a href="#clients_notes">Retrieve a Client's Notes</a></td><td align="center">-</td><td align="center">-</td></tr>
-                        <tr class="alt"><td></td><td>/v1/clients/{clientId}/notes/{noteId}</td><td align="center">-</td><td><a href="#clients_retrievenote">Retrieve a Client Note</a></td><td><a href="#clients_updatenote">Update a Client Note</a></td><td align="center">-</td></tr>
-                        <tr><td><a href="#loans">LOAN</a></td><td>/v1/loans</td><td><a href="#loans_create">Create a New Loan/Submit a Loan Application</a></td><td align="center">-</td><td align="center">-</td><td align="center">-</td></tr>
-                        <tr class="alt"><td></td><td>/v1/loans/{loanId}</td><td><a href="#loans_approve_etc">Approve, Disburse, Reject a Loan or Withdraw a Loan Application</a></td><td><a href="#loans_retrieve">Retrieve a Loan</a></td><td align="center">-</td><td><a href="#loans_delete">Delete a Loan</a></td></tr>
-                        <tr><td></td><td>/v1/loans/{loanId}/undo</td><td><a href="#loans_undoapproval_etc">Undo Loan Approval or Disbursal</a></td><td align="center">-</td><td align="center">-</td><td align="center">-</td></tr>
-                        <tr class="alt"><td></td><td>/v1/loans/{loanId}/transactions</td><td><a href="#loans_repayment_etc">Make a Repayment / Loan Waiver</a></td><td align="center">-</td><td align="center">-</td><td align="center">-</td></tr>
-                        <tr><td></td><td>/v1/loans/{loanId}/transactions/{transactionId}</td><td align="center">-</td><td><a href="#loans_repaymentretrieve_etc">Retrieve a Repayment or Waiver Details</a></td><td><a href="#loans_repaymentadjust_etc">Adjust a Repayment or Waiver</a></td><td align="center">-</td></tr>
-                        <tr class="alt"><td><a href="#offices">OFFICE</a></td><td>/v1/offices</td><td><a href="#offices_create">Create an Office</a></td><td><a href="#offices_list">List Offices</a></td><td align="center">-</td><td align="center">-</td></tr>
-                        <tr><td></td><td>/v1/offices/{officeId}</td><td align="center">-</td><td><a href="#offices_retrieve">Retrieve an Office</a></td><td><a href="#offices_update">Update an Office</a></td><td align="center">-</td></tr>
-                        <tr class="alt"><td><a href="#loanproducts">LOAN PRODUCT</a></td><td>/v1/loanproducts</td><td><a href="#loanproducts_create">Create a Loan Product</a></td><td><a href="#loanproducts_list">List Loan Products</a></td><td align="center">-</td><td align="center">-</td></tr>
-                        <tr><td></td><td>/v1/loanproducts/{productId}</td><td align="center">-</td><td><a href="#loanproducts_retrieve">Retrieve a Loan Product</a></td><td><a href="#loanproducts_update">Update a Loan Product</a></td><td align="center">-</td></tr>
+                        <tr class="matrixHeadingBG"><td colspan=2 valign="top"><div class="matrixHeadingVerbs"><table><tr><td>RESOURCES</td></tr></table></div></td><td><table><tr><td><div class="matrixHeadingVerbs">POST</div></td></tr><tr><td><div class=matrixHeadingCommands>create/update</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">GET</div></td></tr><tr><td><div class=matrixHeadingCommands>read</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">PUT</div></td></tr><tr><td><div class=matrixHeadingCommands>simple update</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">DELETE</div></td></tr><tr><td><div class=matrixHeadingCommands>delete</div></td></tr></table></td></tr>
+                        <tr class="alt"><td><a href="#clients">CLIENT</a></td><td>/v1/clients</td><td><a href="api.htm#clients_create">Create a Client</a></td><td><a href="#clients_list">List Clients</a></td><td></td><td></td></tr>
+                        <tr><td></td><td>/v1/clients/{clientId}</td><td></td><td><a href="#clients_retrieve">Retrieve a Client</a></td><td><a href="#clients_update">Update a Client</a></td><td></td></tr>
+                        <tr class="alt"><td></td><td>/v1/clients/{clientId}/loans</td><td></td><td><a href="#clients_loansummary">Retrieve a Client's Loan Account Summary</a></td><td></td><td></td></tr>
+                        <tr><td></td><td>/v1/clients/{clientId}/notes</td><td><a href="#clients_addnote">Add a Client Note</a></td><td><a href="#clients_notes">Retrieve a Client's Notes</a></td><td></td><td></td></tr>
+                        <tr class="alt"><td></td><td>/v1/clients/{clientId}/notes/{noteId}</td><td></td><td><a href="#clients_retrievenote">Retrieve a Client Note</a></td><td><a href="#clients_updatenote">Update a Client Note</a></td><td></td></tr>
+                        <tr><td><a href="#loans">LOAN</a></td><td>/v1/loans</td><td><a href="#loans_create">Create a New Loan/Submit a Loan Application</a></td><td></td><td></td><td></td></tr>
+                        <tr class="alt"><td></td><td>/v1/loans/{loanId}</td><td><a href="#loans_approve_etc">Approve, Disburse, Reject a Loan or Withdraw a Loan Application</a></td><td><a href="#loans_retrieve">Retrieve a Loan</a></td><td></td><td><a href="#loans_delete">Delete a Loan</a></td></tr>
+                        <tr><td></td><td>/v1/loans/{loanId}/undo</td><td><a href="#loans_undoapproval_etc">Undo Loan Approval or Disbursal</a></td><td></td><td></td><td></td></tr>
+                        <tr class="alt"><td></td><td>/v1/loans/{loanId}/transactions</td><td><a href="#loans_repayment_etc">Make a Repayment / Loan Waiver</a></td><td></td><td></td><td></td></tr>
+                        <tr><td></td><td>/v1/loans/{loanId}/transactions/{transactionId}</td><td></td><td><a href="#loans_repaymentretrieve_etc">Retrieve a Repayment or Waiver Details</a></td><td><a href="#loans_repaymentadjust_etc">Adjust a Repayment or Waiver</a></td><td></td></tr>
+                        <tr class="alt"><td><a href="#offices">OFFICE</a></td><td>/v1/offices</td><td><a href="#offices_create">Create an Office</a></td><td><a href="#offices_list">List Offices</a></td><td></td><td></td></tr>
+                        <tr><td></td><td>/v1/offices/{officeId}</td><td></td><td><a href="#offices_retrieve">Retrieve an Office</a></td><td><a href="#offices_update">Update an Office</a></td><td></td></tr>
+                        <tr class="alt"><td><a href="#loanproducts">LOAN PRODUCT</a></td><td>/v1/loanproducts</td><td><a href="#loanproducts_create">Create a Loan Product</a></td><td><a href="#loanproducts_list">List Loan Products</a></td><td></td><td></td></tr>
+                        <tr><td></td><td>/v1/loanproducts/{productId}</td><td></td><td><a href="#loanproducts_retrieve">Retrieve a Loan Product</a></td><td><a href="#loanproducts_update">Update a Loan Product</a></td><td></td></tr>
                     </table>
                 </div>                
             </div>
@@ -52,10 +53,10 @@
         <div class="flybar-nav">
             <h2 class="flybar-button">Configuration</h2>
             <div id="toc-menu1" class="flybar-menu">
-                <div class="tocMatrixNone">
+                <div class="tocMatrix">
                     <table class=matrixHeading>
-                        <tr class="matrixHeadingBG"><td colspan=2 valign="top"><div class="matrixHeadingVerbs"><table><tr><td>Resources</td></tr></table></div></td><td><table><tr><td><div class="matrixHeadingVerbs">POST</div></td></tr><tr><td>create/update</td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">GET</div></td></tr><tr><td>read</td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">PUT</div></td></tr><tr><td>simple update</td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">DELETE</div></td></tr><tr><td>delete</td></tr></table></td></tr>
-                        <tr class="alt"><td><a href="#configs">CONFIGURATION</a></td><td>/v1/configurations/currency</td><td align="center">-</td><td><a href="#configs_currencyretrieve">Retrieve Currency Configuration</a></td><td><a href="#configs_currencyupdate">Update Currency Configuration</a></td><td align="center">-</td></tr>
+                        <tr class="matrixHeadingBG"><td colspan=2 valign="top"><div class="matrixHeadingVerbs"><table><tr><td>RESOURCES</td></tr></table></div></td><td><table><tr><td><div class="matrixHeadingVerbs">POST</div></td></tr><tr><td><div class=matrixHeadingCommands>create/update</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">GET</div></td></tr><tr><td><div class=matrixHeadingCommands>read</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">PUT</div></td></tr><tr><td><div class=matrixHeadingCommands>simple update</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">DELETE</div></td></tr><tr><td><div class=matrixHeadingCommands>delete</div></td></tr></table></td></tr>
+                        <tr class="alt"><td><a href="#configs">CONFIGURATION</a></td><td>/v1/configurations/currency</td><td></td><td><a href="#configs_currencyretrieve">Retrieve Currency Configuration</a></td><td><a href="#configs_currencyupdate">Update Currency Configuration</a></td><td></td></tr>
                     </table>
                 </div>                
             </div>
@@ -63,11 +64,11 @@
         <div class="flybar-nav">
             <h2 class="flybar-button">Additional Fields</h2>
             <div  id="toc-menu2" class="flybar-menu">
-                <div class="tocMatrixNone">
+                <div class="tocMatrix">
                     <table class=matrixHeading>
-                        <tr class="matrixHeadingBG"><td colspan=2 valign="top"><div class="matrixHeadingVerbs"><table><tr><td>Resources</td></tr></table></div></td><td><table><tr><td><div class="matrixHeadingVerbs">POST</div></td></tr><tr><td>create/update</td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">GET</div></td></tr><tr><td>read</td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">PUT</div></td></tr><tr><td>simple update</td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">DELETE</div></td></tr><tr><td>delete</td></tr></table></td></tr>
-                        <tr><td><a href="#additionalfields">ADDITIONAL FIELDS</a></td><td>/v1/additionalfields</td><td align="center">-</td><td><a href="#additionalfields_list">List Additional Fields Sets</a></td><td align="center">-</td><td align="center">-</td></tr>
-                        <tr class="alt"><td></td><td>/v1/additionalfields/{Type}/{Set}/{id}</td><td><a href="#additionalfields_update">Update Additional Fields</a></td><td><a href="#additionalfields_retrieve">Retrieve Additional Fields</a></td><td align="center">-</td><td align="center">-</td></tr>
+                        <tr class="matrixHeadingBG"><td colspan=2 valign="top"><div class="matrixHeadingVerbs"><table><tr><td>RESOURCES</td></tr></table></div></td><td><table><tr><td><div class="matrixHeadingVerbs">POST</div></td></tr><tr><td><div class=matrixHeadingCommands>create/update</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">GET</div></td></tr><tr><td><div class=matrixHeadingCommands>read</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">PUT</div></td></tr><tr><td><div class=matrixHeadingCommands>simple update</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">DELETE</div></td></tr><tr><td><div class=matrixHeadingCommands>delete</div></td></tr></table></td></tr>
+                        <tr><td><a href="#additionalfields">ADDITIONAL FIELDS</a></td><td>/v1/additionalfields</td><td></td><td><a href="#additionalfields_list">List Additional Fields Sets</a></td><td></td><td></td></tr>
+                        <tr class="alt"><td></td><td>/v1/additionalfields/{Type}/{Set}/{id}</td><td><a href="#additionalfields_update">Update Additional Fields</a></td><td><a href="#additionalfields_retrieve">Retrieve Additional Fields</a></td><td></td><td></td></tr>
                     </table>
                 </div>                
             </div>
@@ -75,11 +76,11 @@
         <div class="flybar-nav">
             <h2 class="flybar-button">Report</h2>
             <div  id="toc-menu3" class="flybar-menu">
-                <div class="tocMatrixNone">
+                <div class="tocMatrix">
                     <table class=matrixHeading>
-                        <tr class="matrixHeadingBG"><td colspan=2 valign="top"><div class="matrixHeadingVerbs"><table><tr><td>Resources</td></tr></table></div></td><td><table><tr><td><div class="matrixHeadingVerbs">POST</div></td></tr><tr><td>create/update</td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">GET</div></td></tr><tr><td>read</td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">PUT</div></td></tr><tr><td>simple update</td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">DELETE</div></td></tr><tr><td>delete</td></tr></table></td></tr>
-                        <tr><td><a href="#reports">REPORT</a></td><td>/v1/reports</td><td align="center">-</td><td><a href="#reports_list">List Reports</a></td><td align="center">-</td><td align="center">-</td></tr>
-                        <tr class="alt"><td></td><td>/v1/reports/{reportName}</td><td align="center">-</td><td><a href="#report_run">Run a Report</a></td><td align="center">-</td><td align="center">-</td></tr>
+                        <tr class="matrixHeadingBG"><td colspan=2 valign="top"><div class="matrixHeadingVerbs"><table><tr><td>RESOURCES</td></tr></table></div></td><td><table><tr><td><div class="matrixHeadingVerbs">POST</div></td></tr><tr><td><div class=matrixHeadingCommands>create/update</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">GET</div></td></tr><tr><td><div class=matrixHeadingCommands>read</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">PUT</div></td></tr><tr><td><div class=matrixHeadingCommands>simple update</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">DELETE</div></td></tr><tr><td><div class=matrixHeadingCommands>delete</div></td></tr></table></td></tr>
+                        <tr><td><a href="#reports">REPORT</a></td><td>/v1/reports</td><td></td><td><a href="#reports_list">List Reports</a></td><td></td><td></td></tr>
+                        <tr class="alt"><td></td><td>/v1/reports/{reportName}</td><td></td><td><a href="#report_run">Run a Report</a></td><td></td><td></td></tr>
                     </table>
                 </div>                
             </div>
@@ -87,17 +88,17 @@
         <div class="flybar-nav">
             <h2 class="flybar-button">User Related</h2>
             <div id="toc-menu4" class="flybar-menu">
-                <div class="tocMatrixNone">
+                <div class="tocMatrix">
                     <table class=matrixHeading>
-                        <tr class="matrixHeadingBG"><td colspan=2 valign="top"><div class="matrixHeadingVerbs"><table><tr><td>Resources</td></tr></table></div></td><td><table><tr><td><div class="matrixHeadingVerbs">POST</div></td></tr><tr><td>create/update</td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">GET</div></td></tr><tr><td>read</td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">PUT</div></td></tr><tr><td>simple update</td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">DELETE</div></td></tr><tr><td>delete</td></tr></table></td></tr>
-                        <tr><td><a href="#authentication">AUTHENTICATION</a></td><td>/v1/authentication</td><td><a href="#authentication_permissions">Verify Authentication</a></td><td align="center">-</td><td align="center">-</td><td align="center">-</td></tr>
-                        <tr class="alt"><td><a href="#useraccounts">USER ACCOUNT</a></td><td>/v1/useraccounts/current</td><td align="center">-</td><td><a href="#useraccount_details_retrieve">Retrieve Current Users' Account Details</a></td><td><a href="#useraccount_details_update">Update Current Users' Account Details</a></td><td align="center">-</td></tr>
-                        <tr><td></td><td>/v1/useraccounts/current/password</td><td align="center">-</td><td align="center">-</td><td><a href="#useraccount_password_update">Update Current Users' Password</a></td><td align="center">-</td></tr>
-                        <tr class="alt"><td><a href="#users">USER</a></td><td>/v1/users</td><td><a href="#users_create">Create a User</a></td><td><a href="#users_list">List Users</a></td><td align="center">-</td><td align="center">-</td></tr>
-                        <tr><td></td><td>/v1/users/{userId}</td><td align="center">-</td><td><a href="#users_retrieve">Retrieve a User</a></td><td><a href="#users_update">Update a User</a></td><td><a href="#users_delete">Delete a User</a></td></tr>
-                        <tr class="alt"><td><a href="#roles">ROLE</a></td><td>/v1/roles</td><td><a href="#roles_create">Create a New Role</a></td><td><a href="#roles_list">List Roles</a></td><td align="center">-</td><td align="center">-</td></tr>
-                        <tr><td></td><td>/v1/roles/{roleId}</td><td align="center">-</td><td><a href="#roles_retrieve">Retrieve a Role</a></td><td><a href="#roles_update">Update a Role</a></td><td align="center">-</td></tr>
-                        <tr class="alt"><td><a href="#permissions">PERMISSION</a></td><td>/v1/permissions</td><td align="center">-</td><td><a href="#permissions_list">List Application Permissions</a></td><td align="center">-</td><td align="center">-</td></tr>
+                        <tr class="matrixHeadingBG"><td colspan=2 valign="top"><div class="matrixHeadingVerbs"><table><tr><td>RESOURCES</td></tr></table></div></td><td><table><tr><td><div class="matrixHeadingVerbs">POST</div></td></tr><tr><td><div class=matrixHeadingCommands>create/update</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">GET</div></td></tr><tr><td><div class=matrixHeadingCommands>read</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">PUT</div></td></tr><tr><td><div class=matrixHeadingCommands>simple update</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">DELETE</div></td></tr><tr><td><div class=matrixHeadingCommands>delete</div></td></tr></table></td></tr>
+                        <tr><td><a href="#authentication">AUTHENTICATION</a></td><td>/v1/authentication</td><td><a href="#authentication_permissions">Verify Authentication</a></td><td></td><td></td><td></td></tr>
+                        <tr class="alt"><td><a href="#useraccounts">USER ACCOUNT</a></td><td>/v1/useraccounts/current</td><td></td><td><a href="#useraccount_details_retrieve">Retrieve Current Users' Account Details</a></td><td><a href="#useraccount_details_update">Update Current Users' Account Details</a></td><td></td></tr>
+                        <tr><td></td><td>/v1/useraccounts/current/password</td><td></td><td></td><td><a href="#useraccount_password_update">Update Current Users' Password</a></td><td></td></tr>
+                        <tr class="alt"><td><a href="#users">USER</a></td><td>/v1/users</td><td><a href="#users_create">Create a User</a></td><td><a href="#users_list">List Users</a></td><td></td><td></td></tr>
+                        <tr><td></td><td>/v1/users/{userId}</td><td></td><td><a href="#users_retrieve">Retrieve a User</a></td><td><a href="#users_update">Update a User</a></td><td><a href="#users_delete">Delete a User</a></td></tr>
+                        <tr class="alt"><td><a href="#roles">ROLE</a></td><td>/v1/roles</td><td><a href="#roles_create">Create a New Role</a></td><td><a href="#roles_list">List Roles</a></td><td></td><td></td></tr>
+                        <tr><td></td><td>/v1/roles/{roleId}</td><td></td><td><a href="#roles_retrieve">Retrieve a Role</a></td><td><a href="#roles_update">Update a Role</a></td><td></td></tr>
+                        <tr class="alt"><td><a href="#permissions">PERMISSION</a></td><td>/v1/permissions</td><td></td><td><a href="#permissions_list">List Application Permissions</a></td><td></td><td></td></tr>
                     </table>
                 </div>                
             </div>
@@ -105,9 +106,9 @@
         <div class="flybar-nav">
             <h2 class="flybar-button">Convenience</h2>
             <div id="toc-menu5" class="flybar-menu-convenience"> 
-                <div class="tocMatrixNone">
+                <div class="tocMatrix">
                     <table class=matrixHeading>
-                        <tr class="matrixHeadingBG"><td valign="top"><div class="matrixHeadingVerbs"><table><tr><td>Convenience Resources</td></tr></table></div></td><td><table><tr><td><div class="matrixHeadingVerbs">GET</div></td></tr><tr><td>read</td></tr></table></td></tr>
+                        <tr class="matrixHeadingBG"><td valign="top"><div class="matrixHeadingVerbs"><table><tr><td>RESOURCES</td></tr></table></div></td><td><table><tr><td><div class="matrixHeadingVerbs">GET</div></td></tr><tr><td><div class=matrixHeadingCommands>read</div></td></tr></table></td></tr>
                         <tr class="alt"><td>/v1/clients/template</td><td><a href="#clients_template">Retrieve Client Details Template</a></td></tr>
                         <tr><td>/v1/loans/template</td><td><a href="#loans_template">Retrieve Loan Details Template</a></td></tr>
                         <tr class="alt"><td>/v1/loans/{loanId}/transactions/template</td><td><a href="#loans_repaymenttemplate_etc">Retrieve Loan Repayment/Loan Waiver Template</a></td></tr>
@@ -1821,47 +1822,37 @@ Request Body:
         <div class="method-section">
             <div class="method-description">
                 <h4>List Offices</h4>
-                <p>Example Request: 
-                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/offices">https://localhost:8443/mifosng-provider/api/v1/offices</a>
-                </p>
+                <p>Example Requests: </p>
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/offices?pretty=true">https://localhost:8443/mifosng-provider/api/v1/offices?pretty=true</a>
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/offices?fields=id,name,openingDate&pretty=true">https://localhost:8443/mifosng-provider/api/v1/offices?fields=id,name,openingDate&pretty=true</a>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://thedomainname/api/v1/offices</code>
-<code class="method-response">
-{
-  "offices": [
-    {
-      "id": 1,
-      "name": "Demo MFI Head Office",
-      "externalId": "1",
-      "openingDate": "2009-01-01",
-      "hierarchy": ".",
-      "parentName": null,
-      "parentId": 0,
-      "allowedParents": []
-    },
-    {
-      "id": 2,
-      "name": "sub branch 1",
-      "externalId": "2",
-      "openingDate": "2012-01-02",
-      "hierarchy": ".2.",
-      "parentName": "Demo MFI Head Office",
-      "parentId": 1,
-      "allowedParents": []
-    },
-    {
-      "id": 3,
-      "name": "sub branch 2",
-      "externalId": "3",
-      "openingDate": "2012-03-01",
-      "hierarchy": ".3.",
-      "parentName": "Demo MFI Head Office",
-      "parentId": 1,
-      "allowedParents": []
-    }
-  ]
-}
+<code class="method-response">[ {
+  "id" : 1,
+  "name" : "Demo MFI Head Office",
+  "externalId" : "1",
+  "openingDate" : [ 2009, 1, 1 ],
+  "hierarchy" : ".",
+  "parentName" : null,
+  "parentId" : null
+}, {
+  "id" : 2,
+  "name" : "B1",
+  "externalId" : null,
+  "openingDate" : [ 2012, 4, 1 ],
+  "hierarchy" : ".2.",
+  "parentName" : "Demo MFI Head Office",
+  "parentId" : 1
+}, {
+  "id" : 3,
+  "name" : "B2",
+  "externalId" : null,
+  "openingDate" : [ 2012, 4, 4 ],
+  "hierarchy" : ".3.",
+  "parentName" : "Demo MFI Head Office",
+  "parentId" : 1
+} ]
 </code>
             </div>
         </div>
@@ -3969,53 +3960,52 @@ Request body:
     
     
     <a id="fullapi_matrix" name="fullapi_matrix" class="old-syle-anchor">&nbsp;</a>
-    <br>
-    <br><br>
-    
-    <table width="80%"><tr><td><h2>Full API Matrix</h2></td><td><h5>Mifos X API Endpoint:</h5></td><td><h5>https://thedomainname/api</h5></td></tr></table>
-    <table class=matrixHeading>
-        <tr class="matrixHeadingBG"><td colspan=2 valign="top"><div class="matrixHeadingVerbs"><table><tr><td>Resources</td></tr></table></div></td><td><table><tr><td><div class="matrixHeadingVerbs">POST</div></td></tr><tr><td>create/update</td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">GET</div></td></tr><tr><td>read</td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">PUT</div></td></tr><tr><td>simple update</td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">DELETE</div></td></tr><tr><td>delete</td></tr></table></td></tr>
-        <tr class="alt"><td><a href="#clients">CLIENT</a></td><td>/v1/clients</td><td><a href="api.htm#clients_create">Create a Client</a></td><td><a href="#clients_list">List Clients</a></td><td align="center">-</td><td align="center">-</td></tr>
-        <tr><td></td><td>/v1/clients/{clientId}</td><td align="center">-</td><td><a href="#clients_retrieve">Retrieve a Client</a></td><td><a href="#clients_update">Update a Client</a></td><td align="center">-</td></tr>
-        <tr class="alt"><td></td><td>/v1/clients/{clientId}/loans</td><td align="center">-</td><td><a href="#clients_loansummary">Retrieve a Client's Loan Account Summary</a></td><td align="center">-</td><td align="center">-</td></tr>
-        <tr><td></td><td>/v1/clients/{clientId}/notes</td><td><a href="#clients_addnote">Add a Client Note</a></td><td><a href="#clients_notes">Retrieve a Client's Notes</a></td><td align="center">-</td><td align="center">-</td></tr>
-        <tr class="alt"><td></td><td>/v1/clients/{clientId}/notes/{noteId}</td><td align="center">-</td><td><a href="#clients_retrievenote">Retrieve a Client Note</a></td><td><a href="#clients_updatenote">Update a Client Note</a></td><td align="center">-</td></tr>
-        <tr><td><a href="#loans">LOAN</a></td><td>/v1/loans</td><td><a href="#loans_create">Create a New Loan/Submit a Loan Application</a></td><td align="center">-</td><td align="center">-</td><td align="center">-</td></tr>
-        <tr class="alt"><td></td><td>/v1/loans/{loanId}</td><td><a href="#loans_approve_etc">Approve, Disburse, Reject a Loan or Withdraw a Loan Application</a></td><td><a href="#loans_retrieve">Retrieve a Loan</a></td><td align="center">-</td><td><a href="#loans_delete">Delete a Loan</a></td></tr>
-        <tr><td></td><td>/v1/loans/{loanId}/undo</td><td><a href="#loans_undoapproval_etc">Undo Loan Approval or Disbursal</a></td><td align="center">-</td><td align="center">-</td><td align="center">-</td></tr>
-        <tr class="alt"><td></td><td>/v1/loans/{loanId}/transactions</td><td><a href="#loans_repayment_etc">Make a Repayment / Loan Waiver</a></td><td align="center">-</td><td align="center">-</td><td align="center">-</td></tr>
-        <tr><td></td><td>/v1/loans/{loanId}/transactions/{transactionId}</td><td align="center">-</td><td><a href="#loans_repaymentretrieve_etc">Retrieve a Repayment or Waiver Details</a></td><td><a href="#loans_repaymentadjust_etc">Adjust a Repayment or Waiver</a></td><td align="center">-</td></tr>
-        <tr class="alt"><td><a href="#offices">OFFICE</a></td><td>/v1/offices</td><td><a href="#offices_create">Create an Office</a></td><td><a href="#offices_list">List Offices</a></td><td align="center">-</td><td align="center">-</td></tr>
-        <tr><td></td><td>/v1/offices/{officeId}</td><td align="center">-</td><td><a href="#offices_retrieve">Retrieve an Office</a></td><td><a href="#offices_update">Update an Office</a></td><td align="center">-</td></tr>
-        <tr class="alt"><td><a href="#loanproducts">LOAN PRODUCT</a></td><td>/v1/loanproducts</td><td><a href="#loanproducts_create">Create a Loan Product</a></td><td><a href="#loanproducts_list">List Loan Products</a></td><td align="center">-</td><td align="center">-</td></tr>
-        <tr><td></td><td>/v1/loanproducts/{productId}</td><td align="center">-</td><td><a href="#loanproducts_retrieve">Retrieve a Loan Product</a></td><td><a href="#loanproducts_update">Update a Loan Product</a></td><td align="center">-</td></tr>
-        <tr class="alt"><td><a href="#configs">CONFIGURATION</a></td><td>/v1/configurations/currency</td><td align="center">-</td><td><a href="#configs_currencyretrieve">Retrieve Currency Configuration</a></td><td><a href="#configs_currencyupdate">Update Currency Configuration</a></td><td align="center">-</td></tr>
-        <tr><td><a href="#additionalfields">ADDITIONAL FIELDS</a></td><td>/v1/additionalfields</td><td align="center">-</td><td><a href="#additionalfields_list">List Additional Fields Sets</a></td><td align="center">-</td><td align="center">-</td></tr>
-        <tr class="alt"><td></td><td>/v1/additionalfields/{Type}/{Set}/{id}</td><td><a href="#additionalfields_update">Update Additional Fields</a></td><td><a href="#additionalfields_retrieve">Retrieve Additional Fields</a></td><td align="center">-</td><td align="center">-</td></tr>
-        <tr><td><a href="#reports">REPORT</a></td><td>/v1/reports</td><td align="center">-</td><td><a href="#reports_list">List Reports</a></td><td align="center">-</td><td align="center">-</td></tr>
-        <tr class="alt"><td></td><td>/v1/reports/{reportName}</td><td align="center">-</td><td><a href="#report_run">Run a Report</a></td><td align="center">-</td><td align="center">-</td></tr>
-        <tr><td><a href="#authentication">AUTHENTICATION</a></td><td>/v1/authentication</td><td><a href="#authentication_permissions">Verify Authentication</a></td><td align="center">-</td><td align="center">-</td><td align="center">-</td></tr>
-        <tr class="alt"><td><a href="#useraccounts">USER ACCOUNT</a></td><td>/v1/useraccounts/current</td><td align="center">-</td><td><a href="#useraccount_details_retrieve">Retrieve Current Users' Account Details</a></td><td><a href="#useraccount_details_update">Update Current Users' Account Details</a></td><td align="center">-</td></tr>
-        <tr><td></td><td>/v1/useraccounts/current/password</td><td align="center">-</td><td align="center">-</td><td><a href="#useraccount_password_update">Update Current Users' Password</a></td><td align="center">-</td></tr>
-        <tr class="alt"><td><a href="#users">USER</a></td><td>/v1/users</td><td><a href="#users_create">Create a User</a></td><td><a href="#users_list">List Users</a></td><td align="center">-</td><td align="center">-</td></tr>
-        <tr><td></td><td>/v1/users/{userId}</td><td align="center">-</td><td><a href="#users_retrieve">Retrieve a User</a></td><td><a href="#users_update">Update a User</a></td><td><a href="#users_delete">Delete a User</a></td></tr>
-        <tr class="alt"><td><a href="#roles">ROLE</a></td><td>/v1/roles</td><td><a href="#roles_create">Create a New Role</a></td><td><a href="#roles_list">List Roles</a></td><td align="center">-</td><td align="center">-</td></tr>
-        <tr><td></td><td>/v1/roles/{roleId}</td><td align="center">-</td><td><a href="#roles_retrieve">Retrieve a Role</a></td><td><a href="#roles_update">Update a Role</a></td><td align="center">-</td></tr>
-        <tr class="alt"><td><a href="#permissions">PERMISSION</a></td><td>/v1/permissions</td><td align="center">-</td><td><a href="#permissions_list">List Application Permissions</a></td><td align="center">-</td><td align="center">-</td></tr>
-    </table>
-    <br>
-    <table class=matrixHeading>
-        <tr class="matrixHeadingBG"><td valign="top"><div class="matrixHeadingVerbs"><table><tr><td>Convenience Resources</td></tr></table></div></td><td><table><tr><td><div class="matrixHeadingVerbs">GET</div></td></tr><tr><td>read</td></tr></table></td></tr>
-        <tr class="alt"><td>/v1/clients/template</td><td><a href="#clients_template">Retrieve Client Details Template</a></td></tr>
-        <tr><td>/v1/loans/template</td><td><a href="#loans_template">Retrieve Loan Details Template</a></td></tr>
-        <tr class="alt"><td>/v1/loans/{loanId}/transactions/template</td><td><a href="#loans_repaymenttemplate_etc">Retrieve Loan Repayment/Loan Waiver Template</a></td></tr>
-        <tr><td>/v1/offices/template</td><td><a href="#offices_template">Retrieve Office Details Template</a></td></tr>
-        <tr class="alt"><td>/v1/loanproducts/template</td><td><a href="#loanproducts_template">Retrieve Loan Product Details Template</a></td></tr>
-        <tr><td>/v1/useraccounts/current/password/template</td><td><a href="#useraccount_password_retrieve">Retrieve change password template</a></td></tr>
-        <tr class="alt"><td>/v1/users/template</td><td><a href="#users_template">Retrieve new user template</a></td></tr>
-        <tr><td>/v1/roles/template</td><td><a href="#roles_template">Retrieve new role template</a></td></tr>
-    </table>
-
+    <br><br><br>
+    <div class=fullMatrixOuter>
+        <table width="80%"><tr><td><h3>Full API Matrix</h4></td><td><h4>API Endpoint:</h5></td><td><h5>https://thedomainname/api</h5></td></tr></table>
+        <table class=matrixHeading>
+            <tr class="matrixHeadingBG"><td colspan=2 valign="top"><div class="matrixHeadingVerbs"><table><tr><td>RESOURCES</td></tr></table></div></td><td><table><tr><td><div class="matrixHeadingVerbs">POST</div></td></tr><tr><td><div class=matrixHeadingCommands>create/update</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">GET</div></td></tr><tr><td><div class=matrixHeadingCommands>read</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">PUT</div></td></tr><tr><td><div class=matrixHeadingCommands>simple update</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">DELETE</div></td></tr><tr><td><div class=matrixHeadingCommands>delete</div></td></tr></table></td></tr>
+            <tr class="alt"><td><a href="#clients">CLIENT</a></td><td>/v1/clients</td><td><a href="api.htm#clients_create">Create a Client</a></td><td><a href="#clients_list">List Clients</a></td><td></td><td></td></tr>
+            <tr><td></td><td>/v1/clients/{clientId}</td><td></td><td><a href="#clients_retrieve">Retrieve a Client</a></td><td><a href="#clients_update">Update a Client</a></td><td></td></tr>
+            <tr class="alt"><td></td><td>/v1/clients/{clientId}/loans</td><td></td><td><a href="#clients_loansummary">Retrieve a Client's Loan Account Summary</a></td><td></td><td></td></tr>
+            <tr><td></td><td>/v1/clients/{clientId}/notes</td><td><a href="#clients_addnote">Add a Client Note</a></td><td><a href="#clients_notes">Retrieve a Client's Notes</a></td><td></td><td></td></tr>
+            <tr class="alt"><td></td><td>/v1/clients/{clientId}/notes/{noteId}</td><td></td><td><a href="#clients_retrievenote">Retrieve a Client Note</a></td><td><a href="#clients_updatenote">Update a Client Note</a></td><td></td></tr>
+            <tr><td><a href="#loans">LOAN</a></td><td>/v1/loans</td><td><a href="#loans_create">Create a New Loan/Submit a Loan Application</a></td><td></td><td></td><td></td></tr>
+            <tr class="alt"><td></td><td>/v1/loans/{loanId}</td><td><a href="#loans_approve_etc">Approve, Disburse, Reject a Loan or Withdraw a Loan Application</a></td><td><a href="#loans_retrieve">Retrieve a Loan</a></td><td></td><td><a href="#loans_delete">Delete a Loan</a></td></tr>
+            <tr><td></td><td>/v1/loans/{loanId}/undo</td><td><a href="#loans_undoapproval_etc">Undo Loan Approval or Disbursal</a></td><td></td><td></td><td></td></tr>
+            <tr class="alt"><td></td><td>/v1/loans/{loanId}/transactions</td><td><a href="#loans_repayment_etc">Make a Repayment / Loan Waiver</a></td><td></td><td></td><td></td></tr>
+            <tr><td></td><td>/v1/loans/{loanId}/transactions/{transactionId}</td><td></td><td><a href="#loans_repaymentretrieve_etc">Retrieve a Repayment or Waiver Details</a></td><td><a href="#loans_repaymentadjust_etc">Adjust a Repayment or Waiver</a></td><td></td></tr>
+            <tr class="alt"><td><a href="#offices">OFFICE</a></td><td>/v1/offices</td><td><a href="#offices_create">Create an Office</a></td><td><a href="#offices_list">List Offices</a></td><td></td><td></td></tr>
+            <tr><td></td><td>/v1/offices/{officeId}</td><td></td><td><a href="#offices_retrieve">Retrieve an Office</a></td><td><a href="#offices_update">Update an Office</a></td><td></td></tr>
+            <tr class="alt"><td><a href="#loanproducts">LOAN PRODUCT</a></td><td>/v1/loanproducts</td><td><a href="#loanproducts_create">Create a Loan Product</a></td><td><a href="#loanproducts_list">List Loan Products</a></td><td></td><td></td></tr>
+            <tr><td></td><td>/v1/loanproducts/{productId}</td><td></td><td><a href="#loanproducts_retrieve">Retrieve a Loan Product</a></td><td><a href="#loanproducts_update">Update a Loan Product</a></td><td></td></tr>
+            <tr class="alt"><td><a href="#configs">CONFIGURATION</a></td><td>/v1/configurations/currency</td><td></td><td><a href="#configs_currencyretrieve">Retrieve Currency Configuration</a></td><td><a href="#configs_currencyupdate">Update Currency Configuration</a></td><td></td></tr>
+            <tr><td><a href="#additionalfields">ADDITIONAL FIELDS</a></td><td>/v1/additionalfields</td><td></td><td><a href="#additionalfields_list">List Additional Fields Sets</a></td><td></td><td></td></tr>
+            <tr class="alt"><td></td><td>/v1/additionalfields/{Type}/{Set}/{id}</td><td><a href="#additionalfields_update">Update Additional Fields</a></td><td><a href="#additionalfields_retrieve">Retrieve Additional Fields</a></td><td></td><td></td></tr>
+            <tr><td><a href="#reports">REPORT</a></td><td>/v1/reports</td><td></td><td><a href="#reports_list">List Reports</a></td><td></td><td></td></tr>
+            <tr class="alt"><td></td><td>/v1/reports/{reportName}</td><td></td><td><a href="#report_run">Run a Report</a></td><td></td><td></td></tr>
+            <tr><td><a href="#authentication">AUTHENTICATION</a></td><td>/v1/authentication</td><td><a href="#authentication_permissions">Verify Authentication</a></td><td></td><td></td><td></td></tr>
+            <tr class="alt"><td><a href="#useraccounts">USER ACCOUNT</a></td><td>/v1/useraccounts/current</td><td></td><td><a href="#useraccount_details_retrieve">Retrieve Current Users' Account Details</a></td><td><a href="#useraccount_details_update">Update Current Users' Account Details</a></td><td></td></tr>
+            <tr><td></td><td>/v1/useraccounts/current/password</td><td></td><td></td><td><a href="#useraccount_password_update">Update Current Users' Password</a></td><td></td></tr>
+            <tr class="alt"><td><a href="#users">USER</a></td><td>/v1/users</td><td><a href="#users_create">Create a User</a></td><td><a href="#users_list">List Users</a></td><td></td><td></td></tr>
+            <tr><td></td><td>/v1/users/{userId}</td><td></td><td><a href="#users_retrieve">Retrieve a User</a></td><td><a href="#users_update">Update a User</a></td><td><a href="#users_delete">Delete a User</a></td></tr>
+            <tr class="alt"><td><a href="#roles">ROLE</a></td><td>/v1/roles</td><td><a href="#roles_create">Create a New Role</a></td><td><a href="#roles_list">List Roles</a></td><td></td><td></td></tr>
+            <tr><td></td><td>/v1/roles/{roleId}</td><td></td><td><a href="#roles_retrieve">Retrieve a Role</a></td><td><a href="#roles_update">Update a Role</a></td><td></td></tr>
+            <tr class="alt"><td><a href="#permissions">PERMISSION</a></td><td>/v1/permissions</td><td></td><td><a href="#permissions_list">List Application Permissions</a></td><td></td><td></td></tr>
+        </table>
+        <br>
+        <table class=matrixHeading>
+            <tr class="matrixHeadingBG"><td valign="top"><div class="matrixHeadingVerbs"><table><tr><td>CONVENIENCE RESOURCES</td></tr></table></div></td><td><table><tr><td><div class="matrixHeadingVerbs">GET</div></td></tr><tr><td><div class=matrixHeadingCommands>read</div></td></tr></table></td></tr>
+            <tr class="alt"><td>/v1/clients/template</td><td><a href="#clients_template">Retrieve Client Details Template</a></td></tr>
+            <tr><td>/v1/loans/template</td><td><a href="#loans_template">Retrieve Loan Details Template</a></td></tr>
+            <tr class="alt"><td>/v1/loans/{loanId}/transactions/template</td><td><a href="#loans_repaymenttemplate_etc">Retrieve Loan Repayment/Loan Waiver Template</a></td></tr>
+            <tr><td>/v1/offices/template</td><td><a href="#offices_template">Retrieve Office Details Template</a></td></tr>
+            <tr class="alt"><td>/v1/loanproducts/template</td><td><a href="#loanproducts_template">Retrieve Loan Product Details Template</a></td></tr>
+            <tr><td>/v1/useraccounts/current/password/template</td><td><a href="#useraccount_password_retrieve">Retrieve change password template</a></td></tr>
+            <tr class="alt"><td>/v1/users/template</td><td><a href="#users_template">Retrieve new user template</a></td></tr>
+            <tr><td>/v1/roles/template</td><td><a href="#roles_template">Retrieve new role template</a></td></tr>
+        </table>
+    </div>
 </div>
 
 </body>

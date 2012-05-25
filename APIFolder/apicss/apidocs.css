@@ -1,35 +1,46 @@
 .tocMatrix {
 	font-size: 85%;
 }
+.fullMatrixOuter {
+	margin-right: 20px;
+	margin-left: 20px;
+	margin-bottom: 20px;
+}
 
 .matrixHeading { 
 	font-family: Helvetica, Arial, sans-serif;
 	border-collapse:collapse;
-	margin-right:10px;
-	margin-left:10px;
-	border:3px solid blue;
+	border:3px solid #6eb4db;
+	width:100%;
 }
 
-.matrixHeading td, 
+.matrixHeading td
 { 
-	border:1px solid #98bf21; 
-	padding:3px 7px 2px 7px; 
+	//padding:3px 7px 2px 7px;
+
+	padding-right:5px;
+
+	vertical-align:text-top;
 } 
-.matrixHeading tr.alt td  
+.matrixHeading tr.alt 
 { 
 	color:#000; 
-	background-color:#EAF2D3; 
+    	background-color: rgb(240, 240, 255);
 }
 
 
 .matrixHeadingBG {
-	background-color: blue;
+	background-color: #6eb4db;
 }
 
 .matrixHeadingVerbs {
 	color: white;
 	font-weight: bold;
 	font-size: 125%
+}
+
+.matrixHeadingCommands {
+    	color: rgb(240, 240, 255);
 }
 
 
@@ -86,7 +97,7 @@ body {
     background: #eee;
     background: -webkit-gradient(linear, left top, left bottom, from(#f8f8f8), to(#dadada));
     background: -moz-linear-gradient(top, #f8f8f8, #dadada);
-    border-top: 15px solid black;
+    border-top: 3px solid black;
     border-bottom: 1px solid #888;
     -webkit-box-shadow: 0 3px 5px rgba(0,0,0,0.1);
     -moz-box-shadow: 0 3px 5px rgba(0,0,0,0.1);
@@ -97,8 +108,13 @@ body {
     display: block;
     height: 30px;
     position: absolute;
-    top: 7px;
-    left: 10px;
+    top: 10px;
+    left: 20px;
+    font-weight: bold;
+    color: black;
+    font-size: 16px;
+    text-decoration: none;
+
 }
 
 .flybar-button {
@@ -141,7 +157,7 @@ body {
     position: absolute;
     top: 41px;
 
-    width: 800px;
+    width: 850px;
     background-color: rgba(249, 249, 249, 0.99);
     border: 1px solid rgb(187, 187, 187);
     border-top: 0;
@@ -175,7 +191,7 @@ body {
     position: absolute;
     top: 41px;
 
-    width: 600px;
+    width: 575px;
     background-color: rgba(249, 249, 249, 0.99);
     border: 1px solid rgb(187, 187, 187);
     border-top: 0;

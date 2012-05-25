@@ -20,10 +20,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 
-	private final static Logger logger = LoggerFactory.getLogger(ApiJSONFormattingServiceImpl.class);
-	
+	private final static Logger logger = LoggerFactory
+			.getLogger(ApiJSONFormattingServiceImpl.class);
+
 	@Override
-	public String convertDataObjectJSON(Object dataObject, String fields, Set<String> excludeFields, boolean prettyOutput) {
+	public String convertDataObjectJSON(Object dataObject, String fields,
+			Set<String> excludeFields, boolean prettyOutput) {
 
 		try {
 			String json = "";
@@ -33,7 +35,8 @@ public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 
 			if (fields == null || fields.equals("")) {
 				filters = new SimpleFilterProvider().addFilter(myFilter,
-						SimpleBeanPropertyFilter.serializeAllExcept(excludeFields));
+						SimpleBeanPropertyFilter
+								.serializeAllExcept(excludeFields));
 
 			} else {
 
@@ -43,18 +46,53 @@ public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 				}
 
 				filters = new SimpleFilterProvider().addFilter(myFilter,
-						SimpleBeanPropertyFilter.filterOutAllExcept(includeFields));
+						SimpleBeanPropertyFilter
+								.filterOutAllExcept(includeFields));
 			}
-			
-			ObjectWriter jsonWriter = new ObjectMapper().writerWithDefaultPrettyPrinter();
-			json = jsonWriter.withFilters(filters).writeValueAsString(dataObject);
+			ObjectWriter jsonWriter = null;
+
+			if (prettyOutput) {
+				jsonWriter = new ObjectMapper()
+						.writerWithDefaultPrettyPrinter();
+			} else {
+				jsonWriter = new ObjectMapper().writer();
+			}
+
+			json = jsonWriter.withFilters(filters).writeValueAsString(
+					dataObject);
 			return json;
 		} catch (JsonGenerationException e) {
-			throw new PlatformInternalServerException("error.msg.platform.json.generation", "An error occured whilst generating response from the platform server.", e.getMessage(), e.getStackTrace());
+			throw new PlatformInternalServerException(
+					"error.msg.platform.json.generation",
+					"An error occured whilst generating response from the platform server.",
+					e.getMessage(), e.getStackTrace());
 		} catch (JsonMappingException e) {
-			throw new PlatformInternalServerException("error.msg.platform.json.generation", "An error occured whilst generating response from the platform server.", e.getMessage(), e.getStackTrace());
+			throw new PlatformInternalServerException(
+					"error.msg.platform.json.generation",
+					"An error occured whilst generating response from the platform server.",
+					e.getMessage(), e.getStackTrace());
 		} catch (IOException e) {
-			throw new PlatformInternalServerException("error.msg.platform.json.generation", "An error occured whilst generating response from the platform server.", e.getMessage(), e.getStackTrace());
+			throw new PlatformInternalServerException(
+					"error.msg.platform.json.generation",
+					"An error occured whilst generating response from the platform server.",
+					e.getMessage(), e.getStackTrace());
 		}
 	}
+
+	@Override
+	public Boolean isTrue(String param) {
+		if (param != null && param.equalsIgnoreCase("true"))
+			return true;
+		else
+			return false;
+	}
+
+	@Override
+	public Boolean isPassed(String param) {
+		if (param == null || param.equals(""))
+			return false;
+		else
+			return true;
+	}
+
 }
