@@ -15,15 +15,10 @@ import org.codehaus.jackson.map.ser.FilterProvider;
 import org.codehaus.jackson.map.ser.impl.SimpleBeanPropertyFilter;
 import org.codehaus.jackson.map.ser.impl.SimpleFilterProvider;
 import org.mifosng.platform.exceptions.PlatformInternalServerException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
-
-	private final static Logger logger = LoggerFactory
-			.getLogger(ApiJSONFormattingServiceImpl.class);
 
 	@Override
 	public String convertRequest(Object dataObject, String filterName,
@@ -133,11 +128,11 @@ public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 						SimpleBeanPropertyFilter
 								.filterOutAllExcept(filterFields));
 
-			} else {
+			}
+			
 				return new SimpleFilterProvider().addFilter(filterName,
 						SimpleBeanPropertyFilter
 								.serializeAllExcept(filterFields));
-			}
 		}
 
 		if (filterName.equals("roleFilter")) {
@@ -159,16 +154,34 @@ public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 						SimpleBeanPropertyFilter
 								.filterOutAllExcept(permissionFields));
 
-			} else {
-				return new SimpleFilterProvider().addFilter(
+			} 
+				
+			return new SimpleFilterProvider().addFilter(
 						filterName,
 						SimpleBeanPropertyFilter
 								.serializeAllExcept(filterFields)).addFilter(
 						"permissionFilter",
 						SimpleBeanPropertyFilter
 								.filterOutAllExcept(permissionFields));
-			}
-
+		}
+		
+		// ADDED BY KEITH - list permissions didnt seem to be working right.
+		// added this to avoid adding null filters to object mapper.
+		if (filterName.equals("permissionFilter")) {
+			Set<String> permissionFields = new HashSet<String>();
+			permissionFields.add("id");
+			permissionFields.add("name");
+			permissionFields.add("description");
+			permissionFields.add("code");
+			permissionFields.add("groupType");
+			
+			return new SimpleFilterProvider().addFilter(
+					filterName,
+					SimpleBeanPropertyFilter
+							.filterOutAllExcept(filterFields)).addFilter(
+					"permissionFilter",
+					SimpleBeanPropertyFilter
+							.filterOutAllExcept(permissionFields));
 		}
 
 		if (filterName.equals("userFilter")) {
@@ -203,7 +216,8 @@ public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 								SimpleBeanPropertyFilter
 										.filterOutAllExcept(permissionFields));
 
-			} else {
+			} 
+			
 				return new SimpleFilterProvider()
 						.addFilter(
 								filterName,
@@ -217,7 +231,6 @@ public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 								"permissionFilter",
 								SimpleBeanPropertyFilter
 										.filterOutAllExcept(permissionFields));
-			}
 
 		}
 		return filters;
@@ -226,15 +239,15 @@ public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 	private Boolean isTrue(String param) {
 		if (param != null && param.equalsIgnoreCase("true"))
 			return true;
-		else
-			return false;
+
+		return false;
 	}
 
 	private Boolean isPassed(String param) {
 		if (param == null || param.equals(""))
 			return false;
-		else
-			return true;
+
+		return true;
 	}
 
 }

@@ -301,7 +301,9 @@ $(document).ready(function() {
 	            $(anchor.hash).html("error occured while ajax loading.");
 	        },
 	        success: function(data, status, xhr) {
-	        	var tableHtml = $("#clientSearchTabTemplate").render(data);
+	        	var clientObject = new Object();
+	        	clientObject.clients = data;
+	        	var tableHtml = $("#clientSearchTabTemplate").render(clientObject);
 				$("#searchtab").html(tableHtml);
 				
 				$('#client').change(function() {

@@ -427,14 +427,15 @@ $(document).ready(function() {
 			  		xhr.setRequestHeader("Authorization", "Basic " + base64);
 			  },
 			  success: function(data, textStatus, jqXHR) {
-				console.log(data);  
-				var officeListHtml = $(templateSelector).render(data);
-				$(displayAreaDivSelector).html(officeListHtml);  
+				var usersObject = new Object();
+				usersObject.users = data;
+				var usersListHtml = $(templateSelector).render(usersObject);
+				$(displayAreaDivSelector).html(usersListHtml);  
 				
 				$("a.edit").click( function(e) {
 					var linkId = this.id;
 					var entityId = linkId.replace("edit", "");
-					var getUrl = baseApiUrl + 'users/' + entityId;
+					var getUrl = baseApiUrl + 'users/' + entityId + '?template=true';
 					var putUrl = baseApiUrl + 'users/' + entityId;
 					
 					var templateSelector = "#userFormTemplate";
@@ -493,14 +494,16 @@ $(document).ready(function() {
 					xhr.setRequestHeader("Authorization", "Basic " + base64);
 			  },
 			  success: function(data, textStatus, jqXHR) {
-				console.log(data);  
-				var listHtml = $(templateSelector).render(data);
+				  
+				var rolesObject = new Object();
+				rolesObject.roles = data;
+				var listHtml = $(templateSelector).render(rolesObject);
 				$(displayAreaDivSelector).html(listHtml);
 				
 				$("a.edit").click( function(e) {
 					var linkId = this.id;
 					var entityId = linkId.replace("edit", "");
-					var getUrl = baseApiUrl + 'roles/' + entityId;
+					var getUrl = baseApiUrl + 'roles/' + entityId + '?template=true';
 					var putUrl = baseApiUrl + 'roles/' + entityId;
 					
 					var templateSelector = "#roleFormTemplate";
@@ -559,8 +562,9 @@ $(document).ready(function() {
 				xhr.setRequestHeader("Authorization", "Basic " + base64);
 			  },
 			  success: function(data, textStatus, jqXHR) {
-				console.log(data);  
-				var listHtml = $(templateSelector).render(data);
+				var permissionsObject = new Object();
+				permissionsObject.permissions = data;
+				var listHtml = $(templateSelector).render(permissionsObject);
 				$(displayAreaDivSelector).html(listHtml);
 				
 				var oTable = $("#entitytable").dataTable( {
