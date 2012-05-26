@@ -14,7 +14,6 @@ import org.codehaus.jackson.map.ObjectWriter;
 import org.codehaus.jackson.map.ser.FilterProvider;
 import org.codehaus.jackson.map.ser.impl.SimpleBeanPropertyFilter;
 import org.codehaus.jackson.map.ser.impl.SimpleFilterProvider;
-import org.mifosng.platform.api.ReportingApiResource;
 import org.mifosng.platform.exceptions.PlatformInternalServerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,8 +22,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 
-	private final static Logger logger = LoggerFactory.getLogger(ApiJSONFormattingServiceImpl.class);
-	
+	private final static Logger logger = LoggerFactory
+			.getLogger(ApiJSONFormattingServiceImpl.class);
+
 	@Override
 	public String convertRequest(Object dataObject, String filterName,
 			String allowedFieldList, String selectedFields,
@@ -47,7 +47,7 @@ public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 						paramFieldsSet.add(st.nextToken().trim());
 					}
 					Set<String> selectedFieldsSet = new HashSet<String>();
-					st = new StringTokenizer(fields, ",");
+					st = new StringTokenizer(selectedFields, ",");
 					while (st.hasMoreTokens()) {
 						selectedFieldsSet.add(st.nextToken().trim());
 					}
@@ -63,8 +63,6 @@ public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 							}
 						}
 					}
-					logger.info("passed fields and is selected fields - Fieldlist: " + fieldList);
-
 				}
 			} else {
 				fieldList = selectedFields;
@@ -98,17 +96,52 @@ public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 				filterFields.add(st.nextToken().trim());
 			}
 
-			if (filterType.equals("I")) {
-				filters = new SimpleFilterProvider().addFilter(filterName,
-						SimpleBeanPropertyFilter
-								.filterOutAllExcept(filterFields));
+			if (filterName.equals("roleFilter")) {
+
+				Set<String> permissionFields = new HashSet<String>();
+				//Ask keith which ones to show
+				permissionFields.add("id");
+				permissionFields.add("name");
+				permissionFields.add("description");
+				permissionFields.add("code");
+				permissionFields.add("groupType");
+				
+				if (filterType.equals("I")) {
+					filters = new SimpleFilterProvider()
+							.addFilter(
+									filterName,
+									SimpleBeanPropertyFilter
+											.filterOutAllExcept(filterFields))
+							.addFilter(
+									"permissionFilter",
+									SimpleBeanPropertyFilter
+											.filterOutAllExcept(permissionFields));
+
+				} else {
+					filters = new SimpleFilterProvider()
+							.addFilter(
+									filterName,
+									SimpleBeanPropertyFilter
+											.serializeAllExcept(filterFields))
+							.addFilter(
+									"permissionFilter",
+									SimpleBeanPropertyFilter
+											.filterOutAllExcept(permissionFields));
+				}
 
 			} else {
-				filters = new SimpleFilterProvider().addFilter(filterName,
-						SimpleBeanPropertyFilter
-								.serializeAllExcept(filterFields));
-			}
 
+				if (filterType.equals("I")) {
+					filters = new SimpleFilterProvider().addFilter(filterName,
+							SimpleBeanPropertyFilter
+									.filterOutAllExcept(filterFields));
+
+				} else {
+					filters = new SimpleFilterProvider().addFilter(filterName,
+							SimpleBeanPropertyFilter
+									.serializeAllExcept(filterFields));
+				}
+			}
 			ObjectWriter jsonWriter = null;
 			if (prettyOutput) {
 				jsonWriter = new ObjectMapper()

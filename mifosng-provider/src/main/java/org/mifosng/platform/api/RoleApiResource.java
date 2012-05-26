@@ -72,7 +72,7 @@ public class RoleApiResource {
 		RoleData role = new RoleData();
 		role.setAvailablePermissions(allPermissions);
 
-		String selectedFields = "allowedFieldList";
+		String selectedFields = allowedFieldList;
 		return this.jsonFormattingService.convertRequest(role, filterName,
 				allowedFieldList, selectedFields, uriInfo.getQueryParameters());
 	}
@@ -102,9 +102,7 @@ public class RoleApiResource {
 			role.setAvailablePermissions(availablePermissions);
 		}
 
-		// TODO - setting selectedFields just to not show org_id, can be set be
-		// to "" after org_id is removed
-		String selectedFields = "id,name,description,selectedPermissions";
+		String selectedFields = "";
 		return this.jsonFormattingService.convertRequest(role, filterName,
 				allowedFieldList, selectedFields, uriInfo.getQueryParameters());
 	}

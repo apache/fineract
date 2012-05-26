@@ -4,9 +4,11 @@ import java.io.Serializable;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.map.annotate.JsonFilter;
 
 @XmlRootElement(name = "permission")
+@JsonIgnoreProperties({ "orgId" })
 @JsonFilter("permissionFilter")
 public class PermissionData implements Serializable {
 
