@@ -18,6 +18,7 @@ import javax.ws.rs.core.UriInfo;
 
 import org.mifosng.data.reports.GenericResultset;
 import org.mifosng.platform.ReadExtraDataAndReportingService;
+import org.mifosng.platform.api.infrastructure.ApiJSONFormattingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,10 +30,17 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class ReportingApiResource {
 
-	private final static Logger logger = LoggerFactory.getLogger(ReportingApiResource.class);
+	private final static Logger logger = LoggerFactory
+			.getLogger(ReportingApiResource.class);
+
+	private String allowedFieldList = "";
+	private String filterName = "myFilter";
 
 	@Autowired
 	private ReadExtraDataAndReportingService ReadExtraDataAndReportingService;
+
+	@Autowired
+	private ApiJSONFormattingService jsonFormattingService;
 
 	@GET
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
@@ -48,7 +56,11 @@ public class ReportingApiResource {
 		if ((exportCSV == null) || (!(exportCSV.equalsIgnoreCase("true")))) {
 			GenericResultset result = this.ReadExtraDataAndReportingService
 					.retrieveGenericResultset(".", ".", extractedQueryParams);
-			return Response.ok().entity(result).build();
+			String selectedFields = "";
+			String json = this.jsonFormattingService.convertRequest(result,
+					filterName, allowedFieldList, selectedFields,
+					uriInfo.getQueryParameters());
+			return Response.ok().entity(json).build();
 		}
 
 		StreamingOutput result = this.ReadExtraDataAndReportingService
@@ -100,7 +112,11 @@ public class ReportingApiResource {
 					.retrieveGenericResultset(reportName, parameterType,
 							extractedQueryParams);
 
-			return Response.ok().entity(result).build();
+			String selectedFields = "";
+			String json = this.jsonFormattingService.convertRequest(result,
+					filterName, allowedFieldList, selectedFields,
+					uriInfo.getQueryParameters());
+			return Response.ok().entity(json).build();
 		}
 
 		StreamingOutput result = this.ReadExtraDataAndReportingService
