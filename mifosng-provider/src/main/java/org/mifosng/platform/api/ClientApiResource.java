@@ -22,6 +22,7 @@ import org.mifosng.data.NoteDataList;
 import org.mifosng.data.command.ClientCommand;
 import org.mifosng.data.command.NoteCommand;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
+import org.mifosng.platform.api.infrastructure.ApiJSONFormattingService;
 import org.mifosng.platform.client.service.ClientReadPlatformService;
 import org.mifosng.platform.client.service.ClientWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,10 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope("singleton")
 public class ClientApiResource {
+
+	private String defaultFieldList = "openingDate";
+	private String allowedFieldList = "allowedParents";
+	private String filterName = "myFilter";
 	
     @Autowired
    	private ClientReadPlatformService clientReadPlatformService;
@@ -41,7 +46,10 @@ public class ClientApiResource {
     
     @Autowired
     private ApiDataConversionService apiDataConversionService;
-    
+
+	@Autowired
+	private ApiJSONFormattingService jsonFormattingService;
+	
 	@GET
 	@Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({MediaType.APPLICATION_JSON})
