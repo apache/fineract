@@ -6,11 +6,15 @@ import java.util.List;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import org.codehaus.jackson.map.annotate.JsonFilter;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
 
 @XmlRootElement(name = "client")
+@JsonIgnoreProperties({ "organisationId","organisationName" })
+@JsonFilter("myFilter")
 public class ClientData implements Serializable {
 
 	private Long organisationId;

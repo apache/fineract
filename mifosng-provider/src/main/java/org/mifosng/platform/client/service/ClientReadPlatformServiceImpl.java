@@ -83,7 +83,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
 		try {
 			AppUser currentUser = this.context.authenticatedUser();
-
+//TODO - JW include office name in query rather than get the lot for office name
 			List<OfficeData> offices = new ArrayList<OfficeData>(officeReadPlatformService.retrieveAllOffices());
 			ClientMapper rm = new ClientMapper(offices, currentUser.getOrganisation());
 
