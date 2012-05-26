@@ -5,7 +5,12 @@ import java.util.List;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import org.codehaus.jackson.map.annotate.JsonFilter;
+
 @XmlRootElement(name = "user")
+@JsonIgnoreProperties({ "orgId" })
+@JsonFilter("userFilter")
 public class AppUserData {
 
 	private Long id;

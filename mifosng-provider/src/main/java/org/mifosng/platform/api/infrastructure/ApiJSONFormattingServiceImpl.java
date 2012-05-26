@@ -86,62 +86,8 @@ public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 			String filterType, String fields, boolean prettyOutput) {
 
 		try {
-			String json = "";
-			// String myFilter = "myFilter";
-			FilterProvider filters = null;
-			Set<String> filterFields = new HashSet<String>();
 
-			StringTokenizer st = new StringTokenizer(fields, ",");
-			while (st.hasMoreTokens()) {
-				filterFields.add(st.nextToken().trim());
-			}
-
-			if (filterName.equals("roleFilter")) {
-
-				Set<String> permissionFields = new HashSet<String>();
-				//Ask keith which ones to show
-				permissionFields.add("id");
-				permissionFields.add("name");
-				permissionFields.add("description");
-				permissionFields.add("code");
-				permissionFields.add("groupType");
-				
-				if (filterType.equals("I")) {
-					filters = new SimpleFilterProvider()
-							.addFilter(
-									filterName,
-									SimpleBeanPropertyFilter
-											.filterOutAllExcept(filterFields))
-							.addFilter(
-									"permissionFilter",
-									SimpleBeanPropertyFilter
-											.filterOutAllExcept(permissionFields));
-
-				} else {
-					filters = new SimpleFilterProvider()
-							.addFilter(
-									filterName,
-									SimpleBeanPropertyFilter
-											.serializeAllExcept(filterFields))
-							.addFilter(
-									"permissionFilter",
-									SimpleBeanPropertyFilter
-											.filterOutAllExcept(permissionFields));
-				}
-
-			} else {
-
-				if (filterType.equals("I")) {
-					filters = new SimpleFilterProvider().addFilter(filterName,
-							SimpleBeanPropertyFilter
-									.filterOutAllExcept(filterFields));
-
-				} else {
-					filters = new SimpleFilterProvider().addFilter(filterName,
-							SimpleBeanPropertyFilter
-									.serializeAllExcept(filterFields));
-				}
-			}
+			FilterProvider filters = buildFilter(filterName, filterType, fields);
 			ObjectWriter jsonWriter = null;
 			if (prettyOutput) {
 				jsonWriter = new ObjectMapper()
@@ -150,9 +96,8 @@ public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 				jsonWriter = new ObjectMapper().writer();
 			}
 
-			json = jsonWriter.withFilters(filters).writeValueAsString(
+			return jsonWriter.withFilters(filters).writeValueAsString(
 					dataObject);
-			return json;
 		} catch (JsonGenerationException e) {
 			throw new PlatformInternalServerException(
 					"error.msg.platform.json.generation",
@@ -169,6 +114,113 @@ public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 					"An error occured whilst generating response from the platform server.",
 					e.getMessage(), e.getStackTrace());
 		}
+	}
+
+	private FilterProvider buildFilter(String filterName, String filterType,
+			String fields) {
+		FilterProvider filters = null;
+
+		Set<String> filterFields = new HashSet<String>();
+		StringTokenizer st = new StringTokenizer(fields, ",");
+		while (st.hasMoreTokens()) {
+			filterFields.add(st.nextToken().trim());
+		}
+
+		if (filterName.equals("myFilter")) {
+
+			if (filterType.equals("I")) {
+				return new SimpleFilterProvider().addFilter(filterName,
+						SimpleBeanPropertyFilter
+								.filterOutAllExcept(filterFields));
+
+			} else {
+				return new SimpleFilterProvider().addFilter(filterName,
+						SimpleBeanPropertyFilter
+								.serializeAllExcept(filterFields));
+			}
+		}
+
+		if (filterName.equals("roleFilter")) {
+
+			Set<String> permissionFields = new HashSet<String>();
+			// Ask keith which ones to show
+			permissionFields.add("id");
+			permissionFields.add("name");
+			permissionFields.add("description");
+			permissionFields.add("code");
+			permissionFields.add("groupType");
+
+			if (filterType.equals("I")) {
+				return new SimpleFilterProvider().addFilter(
+						filterName,
+						SimpleBeanPropertyFilter
+								.filterOutAllExcept(filterFields)).addFilter(
+						"permissionFilter",
+						SimpleBeanPropertyFilter
+								.filterOutAllExcept(permissionFields));
+
+			} else {
+				return new SimpleFilterProvider().addFilter(
+						filterName,
+						SimpleBeanPropertyFilter
+								.serializeAllExcept(filterFields)).addFilter(
+						"permissionFilter",
+						SimpleBeanPropertyFilter
+								.filterOutAllExcept(permissionFields));
+			}
+
+		}
+
+		if (filterName.equals("userFilter")) {
+
+			Set<String> roleFields = new HashSet<String>();
+			roleFields.add("id");
+			roleFields.add("name");
+			roleFields.add("description");
+			roleFields.add("availablePermissions");
+			roleFields.add("selectedPermissions");
+			// Ask keith which ones to show
+			Set<String> permissionFields = new HashSet<String>();
+			// Ask keith which ones to show
+			permissionFields.add("id");
+			permissionFields.add("name");
+			permissionFields.add("description");
+			permissionFields.add("code");
+			permissionFields.add("groupType");
+
+			if (filterType.equals("I")) {
+				return new SimpleFilterProvider()
+						.addFilter(
+								filterName,
+								SimpleBeanPropertyFilter
+										.filterOutAllExcept(filterFields))
+						.addFilter(
+								"roleFilter",
+								SimpleBeanPropertyFilter
+										.filterOutAllExcept(roleFields))
+						.addFilter(
+								"permissionFilter",
+								SimpleBeanPropertyFilter
+										.filterOutAllExcept(permissionFields));
+
+			} else {
+				return new SimpleFilterProvider()
+						.addFilter(
+								filterName,
+								SimpleBeanPropertyFilter
+										.serializeAllExcept(filterFields))
+						.addFilter(
+								"roleFilter",
+								SimpleBeanPropertyFilter
+										.filterOutAllExcept(roleFields))
+						.addFilter(
+								"permissionFilter",
+								SimpleBeanPropertyFilter
+										.filterOutAllExcept(permissionFields));
+			}
+
+		}
+		return filters;
 	}
 
 	private Boolean isTrue(String param) {

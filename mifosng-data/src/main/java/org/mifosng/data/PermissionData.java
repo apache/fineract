@@ -23,8 +23,8 @@ public class PermissionData implements Serializable {
 		//
 	}
 
-	public PermissionData(final Long id, final Long orgId,
-			final String name, final String description, final String code, int groupType) {
+	public PermissionData(final Long id, final Long orgId, final String name,
+			final String description, final String code, int groupType) {
 		this.id = id;
 		this.orgId = orgId;
 		this.name = name;
@@ -32,13 +32,13 @@ public class PermissionData implements Serializable {
 		this.code = code;
 		this.groupType = groupType;
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		PermissionData data = (PermissionData) obj;
 		return this.code.equalsIgnoreCase(data.code);
 	}
-	
+
 	@Override
 	public int hashCode() {
 		return this.code.hashCode();
