@@ -6,7 +6,10 @@ import java.util.List;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.codehaus.jackson.map.annotate.JsonFilter;
+
 @XmlRootElement(name = "configuration")
+@JsonFilter("myFilter")
 public class ConfigurationData implements Serializable {
 
 	private List<CurrencyData> selectedCurrencyOptions = new ArrayList<CurrencyData>();
