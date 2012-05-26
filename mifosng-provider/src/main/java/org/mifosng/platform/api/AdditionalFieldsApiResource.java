@@ -45,6 +45,7 @@ public class AdditionalFieldsApiResource {
 			.getLogger(AdditionalFieldsApiResource.class);
 
 	private String allowedFieldList = "";
+	private String filterName = "myFilter";
 
 	@Autowired
 	private ReadExtraDataAndReportingService readExtraDataAndReportingService;
@@ -62,7 +63,7 @@ public class AdditionalFieldsApiResource {
 				.retrieveExtraDatasetNames(type);
 
 		String selectedFields = "";
-		return this.jsonFormattingService.convertRequest(result,
+		return this.jsonFormattingService.convertRequest(result, filterName,
 				allowedFieldList, selectedFields, uriInfo.getQueryParameters());
 	}
 
@@ -79,7 +80,8 @@ public class AdditionalFieldsApiResource {
 					.retrieveExtraData(type, set, id);
 
 			String selectedFields = "";
-			return this.jsonFormattingService.convertRequest(result,
+			//Note that GenericResultSet doesn't have a filter so all fields are returned (this is correct)
+			return this.jsonFormattingService.convertRequest(result, filterName,
 					allowedFieldList, selectedFields,
 					uriInfo.getQueryParameters());
 		} catch (InvalidSqlException e) {

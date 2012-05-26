@@ -14,15 +14,21 @@ import org.codehaus.jackson.map.ObjectWriter;
 import org.codehaus.jackson.map.ser.FilterProvider;
 import org.codehaus.jackson.map.ser.impl.SimpleBeanPropertyFilter;
 import org.codehaus.jackson.map.ser.impl.SimpleFilterProvider;
+import org.mifosng.platform.api.ReportingApiResource;
 import org.mifosng.platform.exceptions.PlatformInternalServerException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 
+	private final static Logger logger = LoggerFactory.getLogger(ApiJSONFormattingServiceImpl.class);
+	
 	@Override
-	public String convertRequest(Object dataObject, String allowedFieldList,
-			String selectedFields, MultivaluedMap<String, String> queryParams) {
+	public String convertRequest(Object dataObject, String filterName,
+			String allowedFieldList, String selectedFields,
+			MultivaluedMap<String, String> queryParams) {
 
 		String filterType = "E";
 		String fieldList = "";
@@ -52,10 +58,12 @@ public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 							if (first) {
 								fieldList = paramField;
 								first = false;
-							} else
+							} else {
 								fieldList += "," + paramField;
+							}
 						}
 					}
+					logger.info("passed fields and is selected fields - Fieldlist: " + fieldList);
 
 				}
 			} else {
@@ -72,16 +80,16 @@ public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 				fieldList = allowedFieldList;
 		}
 
-		return convertDataObjectJSON(dataObject, filterType, fieldList,
-				isTrue(queryParams.getFirst("pretty")));
+		return convertDataObjectJSON(dataObject, filterName, filterType,
+				fieldList, isTrue(queryParams.getFirst("pretty")));
 	}
 
-	private String convertDataObjectJSON(Object dataObject, String filterType,
-			String fields, boolean prettyOutput) {
+	private String convertDataObjectJSON(Object dataObject, String filterName,
+			String filterType, String fields, boolean prettyOutput) {
 
 		try {
 			String json = "";
-			String myFilter = "myFilter";
+			// String myFilter = "myFilter";
 			FilterProvider filters = null;
 			Set<String> filterFields = new HashSet<String>();
 
@@ -91,12 +99,12 @@ public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 			}
 
 			if (filterType.equals("I")) {
-				filters = new SimpleFilterProvider().addFilter(myFilter,
+				filters = new SimpleFilterProvider().addFilter(filterName,
 						SimpleBeanPropertyFilter
 								.filterOutAllExcept(filterFields));
 
 			} else {
-				filters = new SimpleFilterProvider().addFilter(myFilter,
+				filters = new SimpleFilterProvider().addFilter(filterName,
 						SimpleBeanPropertyFilter
 								.serializeAllExcept(filterFields));
 			}

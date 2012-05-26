@@ -34,6 +34,7 @@ public class LoanProductApiResource {
 
 	private String defaultFieldList = "principalMoney,inArrearsTolerance,amortizationMethod,interestMethod,repaymentPeriodFrequency,interestRatePeriod,interestRateCalculatedInPeriod,repaidEvery,numberOfRepayments,interestRatePerPeriod,annualInterestRate,numberOfInterestFreePeriods,flexible,interestRebateAllowed";
 	private String allowedFieldList = "possibleCurrencies,possibleAmortizationOptions,possibleInterestOptions,possibleInterestRateCalculatedInPeriodOptions,repaymentFrequencyOptions,interestFrequencyOptions";
+	private String filterName = "myFilter";
 
 	@Autowired
 	private LoanProductReadPlatformService loanProductReadPlatformService;
@@ -67,7 +68,7 @@ public class LoanProductApiResource {
 				.retrieveAllLoanProducts();
 
 		String selectedFields = "";
-		return this.jsonFormattingService.convertRequest(products,
+		return this.jsonFormattingService.convertRequest(products, filterName,
 				allowedFieldList, selectedFields, uriInfo.getQueryParameters());
 	}
 
@@ -87,7 +88,8 @@ public class LoanProductApiResource {
 
 		String selectedFields = defaultFieldList + "," + allowedFieldList;
 		return this.jsonFormattingService.convertRequest(loanProduct,
-				allowedFieldList, selectedFields, uriInfo.getQueryParameters());
+				filterName, allowedFieldList, selectedFields,
+				uriInfo.getQueryParameters());
 	}
 
 	@GET
@@ -103,7 +105,8 @@ public class LoanProductApiResource {
 
 		String selectedFields = "";
 		return this.jsonFormattingService.convertRequest(loanProduct,
-				allowedFieldList, selectedFields, uriInfo.getQueryParameters());
+				filterName, allowedFieldList, selectedFields,
+				uriInfo.getQueryParameters());
 	}
 
 	@PUT

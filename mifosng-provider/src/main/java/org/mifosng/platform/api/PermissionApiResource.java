@@ -22,7 +22,8 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class PermissionApiResource {
 	private String allowedFieldList = "";
-	
+	private String filterName = "permissionFilter";
+
     @Autowired
    	private PermissionReadPlatformService permissionReadPlatformService;
 
@@ -38,7 +39,7 @@ public class PermissionApiResource {
 		
 		//TODO - setting selectedFields just to not show org_id, can be set be to "" after org_id is removed
 		String selectedFields = "id,name,description,code,groupType";
-		return this.jsonFormattingService.convertRequest(permissions,
+		return this.jsonFormattingService.convertRequest(permissions, filterName,
 				allowedFieldList, selectedFields, uriInfo.getQueryParameters());
 	}
 }

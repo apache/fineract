@@ -34,6 +34,7 @@ public class OfficeApiResource {
 
 	private String defaultFieldList = "openingDate";
 	private String allowedFieldList = "allowedParents";
+	private String filterName = "myFilter";
 
 	@Autowired
 	private OfficeReadPlatformService readPlatformService;
@@ -55,7 +56,7 @@ public class OfficeApiResource {
 		Collection<OfficeData> offices = this.readPlatformService
 				.retrieveAllOffices();
 		String selectedFields = "";
-		return this.jsonFormattingService.convertRequest(offices,
+		return this.jsonFormattingService.convertRequest(offices, filterName,
 				allowedFieldList, selectedFields, uriInfo.getQueryParameters());
 	}
 
@@ -70,7 +71,8 @@ public class OfficeApiResource {
 
 		String selectedFields = defaultFieldList + "," + allowedFieldList;
 		return this.jsonFormattingService.convertRequest(officeData,
-				allowedFieldList, selectedFields, uriInfo.getQueryParameters());
+				filterName, allowedFieldList, selectedFields,
+				uriInfo.getQueryParameters());
 	}
 
 	@POST
@@ -102,7 +104,7 @@ public class OfficeApiResource {
 		}
 
 		String selectedFields = "";
-		return this.jsonFormattingService.convertRequest(office,
+		return this.jsonFormattingService.convertRequest(office, filterName,
 				allowedFieldList, selectedFields, uriInfo.getQueryParameters());
 	}
 

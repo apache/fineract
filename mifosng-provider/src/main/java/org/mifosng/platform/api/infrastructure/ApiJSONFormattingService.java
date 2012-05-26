@@ -4,7 +4,7 @@ import javax.ws.rs.core.MultivaluedMap;
 
 public interface ApiJSONFormattingService {
 
-	String convertRequest(Object dataObject, String allowedFieldList,
+	String convertRequest(Object dataObject, String filterName, String allowedFieldList,
 			String selectedFields, MultivaluedMap<String, String> queryParams);
 
 }

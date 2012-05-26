@@ -5,7 +5,10 @@ import java.util.Collection;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.codehaus.jackson.map.annotate.JsonFilter;
+
 @XmlRootElement(name = "role")
+@JsonFilter("roleFilter")
 public class RoleData {
 
 	private Long id;

@@ -7,7 +7,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.codehaus.jackson.map.annotate.JsonFilter;
 
 @XmlRootElement(name = "permission")
-@JsonFilter("myFilter")
+@JsonFilter("permissionFilter")
 public class PermissionData implements Serializable {
 
 	private Long id;
