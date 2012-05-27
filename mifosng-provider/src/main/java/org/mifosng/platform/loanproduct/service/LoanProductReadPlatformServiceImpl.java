@@ -15,6 +15,7 @@ import org.mifosng.data.LoanProductData;
 import org.mifosng.data.MoneyData;
 import org.mifosng.platform.currency.service.CurrencyReadPlatformService;
 import org.mifosng.platform.exceptions.PlatformResourceNotFoundException;
+import org.mifosng.platform.infrastructure.JdbcSupport;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.user.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -126,12 +127,9 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 			Long id = rs.getLong("id");
 			String name = rs.getString("name");
 			String description = rs.getString("description");
-			boolean isFlexible = rs.getBoolean("isFlexible");
-			boolean isInterestRebateAllowed = rs
-					.getBoolean("isInterestRebateAllowed");
 
 			String currencyCode = rs.getString("currencyCode");
-			int currencyDigits = rs.getInt("currencyDigits");
+			Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
 			
 			CurrencyData currencyData = findCurrencyByCode(currencyCode, allowedCurrencies);
 			if (currencyData != null) {
@@ -144,25 +142,21 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 			MoneyData principalMoney = MoneyData.of(currencyData, principal);
 			MoneyData toleranceMoney = MoneyData.of(currencyData, tolerance);
 
+			BigDecimal interestRatePerPeriod = rs.getBigDecimal("interestRatePerPeriod");
+			Integer interestRatePeriod = JdbcSupport.getInteger(rs, "interestRatePerPeriodFreq");
+			BigDecimal annualInterestRate = rs.getBigDecimal("annualInterestRate");
+			Integer interestMethod = JdbcSupport.getInteger(rs, "interestMethod");
+			Integer interestCalculationInPeriodMethod = JdbcSupport.getInteger(rs, "interestCalculationInPeriodMethod");
 
-			BigDecimal interestRatePerPeriod = rs
-					.getBigDecimal("interestRatePerPeriod");
-			int interestRatePeriod = rs.getInt("interestRatePerPeriodFreq");
-			BigDecimal annualInterestRate = rs
-					.getBigDecimal("annualInterestRate");
-			int interestMethod = rs.getInt("interestMethod");
-			int interestCalculationInPeriodMethod = rs.getInt("interestCalculationInPeriodMethod");
+			Integer repaidEvery = JdbcSupport.getInteger(rs, "repaidEvery");
+			Integer repaymentFrequency = JdbcSupport.getInteger(rs, "repaymentPeriodFrequency");
+			Integer numberOfRepayments = JdbcSupport.getInteger(rs, "numberOfRepayments");
+			Integer amortizationMethod = JdbcSupport.getInteger(rs, "amortizationMethod");
 
-			int repaidEvery = rs.getInt("repaidEvery");
-			int repaymentFrequency = rs.getInt("repaymentPeriodFrequency");
-			int numberOfRepayments = rs.getInt("numberOfRepayments");
-			int amortizationMethod = rs.getInt("amortizationMethod");
+			DateTime createdOn = JdbcSupport.getDateTime(rs, "createdon");
+			DateTime lastModifedOn = JdbcSupport.getDateTime(rs, "modifiedon");
 
-			DateTime createdOn = new DateTime(rs.getDate("createdOn"));
-			DateTime lastModifedOn = new DateTime(rs.getDate("modifiedon"));
-
-			return new LoanProductData(id, name, description, isFlexible,
-					isInterestRebateAllowed, principalMoney,
+			return new LoanProductData(id, name, description, principalMoney,
 					interestRatePerPeriod, interestRatePeriod,
 					annualInterestRate, interestMethod, interestCalculationInPeriodMethod,
 					repaidEvery,

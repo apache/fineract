@@ -12,6 +12,7 @@ import org.joda.time.LocalDate;
 import org.mifosng.data.OfficeData;
 import org.mifosng.data.OfficeLookup;
 import org.mifosng.platform.exceptions.PlatformResourceNotFoundException;
+import org.mifosng.platform.infrastructure.JdbcSupport;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.user.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,20 +48,16 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
 			Long id = rs.getLong("id");
 			String name = rs.getString("name");
 			String externalId = rs.getString("externalId");
-			LocalDate openingDate = new LocalDate(rs.getDate("openingDate"));
+			LocalDate openingDate = JdbcSupport.getLocalDate(rs, "openingDate");
 			String hierarchy = rs.getString("hierarchy");
-
-			Long parentId = getRSLong(rs.getString("parentId"), rs.getLong("parentId"));
-
+			Long parentId = JdbcSupport.getLong(rs, "parentId");
 			String parentName = rs.getString("parentName");
 
-			return new OfficeData(id, name, externalId, openingDate, hierarchy,
-					parentId, parentName);
+			return new OfficeData(id, name, externalId, openingDate, hierarchy, parentId, parentName);
 		}
 	}
-
-	private static final class OfficeLookupMapper implements
-			RowMapper<OfficeLookup> {
+	
+	private static final class OfficeLookupMapper implements RowMapper<OfficeLookup> {
 
 		public String officeLookupSchema() {
 			return " o.id as id, o.name as name from org_office o ";
@@ -106,8 +103,7 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
 				+ rm.officeLookupSchema()
 				+ "where o.org_id = ? and o.hierarchy like ? order by o.hierarchy";
 
-		return this.jdbcTemplate.query(sql, rm, new Object[] {
-				currentUser.getOrganisation().getId(), hierarchySearchString });
+		return this.jdbcTemplate.query(sql, rm, new Object[] {currentUser.getOrganisation().getId(), hierarchySearchString });
 	}
 
 	@Override
@@ -165,12 +161,5 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
 
 		return filterParentLookups;
 
-	}
-
-	public static Long getRSLong(String stringVal, Long longVal) {
-		if (stringVal == null)
-			return null;
-
-		return longVal;
 	}
 }

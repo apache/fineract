@@ -17,8 +17,6 @@ public class LoanProductData implements Serializable {
 	private Long id;
 	private String name;
 	private String description;
-	private boolean isFlexible;
-	private boolean isInterestRebateAllowed;
 	private MoneyData principalMoney;
 	private BigDecimal interestRatePerPeriod = BigDecimal.ZERO;
 	private int interestRatePeriod;
@@ -47,8 +45,7 @@ public class LoanProductData implements Serializable {
 	}
 
 	public LoanProductData(final Long id, final String name,
-			String description, final boolean isFlexible,
-			final boolean isInterestRebateAllowed,
+			String description,
 			final MoneyData principalMoney,
 			final BigDecimal interestRatePerPeriod,
 			final int interestRatePeriod, final BigDecimal annualInterestRate,
@@ -59,8 +56,6 @@ public class LoanProductData implements Serializable {
 		this.id = id;
 		this.name = name;
 		this.description = description;
-		this.isFlexible = isFlexible;
-		this.isInterestRebateAllowed = isInterestRebateAllowed;
 		this.principalMoney = principalMoney;
 		this.interestRatePerPeriod = interestRatePerPeriod;
 		this.interestRatePeriod = interestRatePeriod;
@@ -98,22 +93,6 @@ public class LoanProductData implements Serializable {
 
 	public void setDescription(String description) {
 		this.description = description;
-	}
-
-	public boolean isFlexible() {
-		return isFlexible;
-	}
-
-	public void setFlexible(boolean isFlexible) {
-		this.isFlexible = isFlexible;
-	}
-
-	public boolean isInterestRebateAllowed() {
-		return isInterestRebateAllowed;
-	}
-
-	public void setInterestRebateAllowed(boolean isInterestRebateAllowed) {
-		this.isInterestRebateAllowed = isInterestRebateAllowed;
 	}
 
 	public MoneyData getPrincipalMoney() {
