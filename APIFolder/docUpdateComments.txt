@@ -1,0 +1,13 @@
+\loan\?\transactions\id get exception if loan doesn't match id.... should loan be taken out here?
+template for waiver/repayment... is it same for both? no type needed?
+new loan template ... is it 2 templates... one to pick product... and 2nd to return default properties in selected product
+
+
+Configuration
+If you put a new currency config in and it deletes a currently in using { "selectedItems": ["USD", "GBP","XOF","ETB"] } then an exception report is returned
+Works fine using currencies (updated docs)....
+also should this be a POST?
+and should it return just an ok and empty set rather than empty notSelectedCurrencies and currencies
+should update only select currencies and not allow notSelectedCurrencies?
+
+
