@@ -346,7 +346,6 @@ $(document).ready(function() {
 		  }).dialog('open');
 	}
 	
-	// function popupDialogWithFormView(getUrl, postUrl, submitType, titleCode, templateSelector, width, height, tabIndex, minOffset, defaultOffset, maxOffset) {
 	function popupDialogWithFormView(getUrl, postUrl, submitType, titleCode, templateSelector, width, height, saveSuccessFunction) {
 		 var dialogDiv = $("<div id='dialog-form'></div>");
 		 var jqxhr = $.ajax({
@@ -356,11 +355,10 @@ $(document).ready(function() {
 			dataType: 'json',
 			cache: false,
 			beforeSend: function(xhr) {
-				console.log("base64: " + base64);
 	            xhr.setRequestHeader("Authorization", "Basic " + base64);
 			},
 			success: function(data, textStatus, jqXHR) {
-				console.log(data);
+
 				var formHtml = $(templateSelector).render(data);
 				
 				dialogDiv.append(formHtml);
@@ -389,7 +387,6 @@ $(document).ready(function() {
 						  dataType: 'json',
 						  data: newFormData,
 						  beforeSend: function(xhr) {
-								console.log("base64: " + base64);
 					            xhr.setRequestHeader("Authorization", "Basic " + base64);
 						  },
 						  success: saveSuccessFunction,
@@ -784,7 +781,6 @@ $(document).ready(function() {
 			  dataType: 'json',
 			  cache: false,
 			  beforeSend: function(xhr) {
-					console.log("base64: " + base64);
 					xhr.setRequestHeader("Authorization", "Basic " + base64);
 			  },
 			  success: function(data, textStatus, jqXHR) {	
@@ -792,7 +788,7 @@ $(document).ready(function() {
 				  
 				  var noteParent = new Object();
 				  noteParent.title = jQuery.i18n.prop('widget.notes.heading');
-				  noteParent.items = data.notes;
+				  noteParent.notes = data;
 				  
 				  var tableHtml = $("#noteListViewTemplate").render(noteParent);
 				  $("#clienttabrightpane").html(tableHtml);

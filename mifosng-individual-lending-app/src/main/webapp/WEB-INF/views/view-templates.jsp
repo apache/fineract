@@ -265,7 +265,7 @@
 </script>
 
 <script id="noteListViewTemplate" type="text/x-jquery-tmpl">
-{{#if items.length > 0}}
+{{#if notes.length > 0}}
 	<div class="ui-widget .ui-widget-content ui-corner-all notecontainer">
 		<div class="ui-widget-header">
 			<span class="ui-icon ui-icon-info" style="float: left; margin-right: 5px;" ></span>
@@ -273,7 +273,7 @@
 		</div>
 		<div class="ui-widget ui-widget-content ui-corner-all">
 		
-		{{#each items}}
+		{{#each notes}}
 			<div>
 				<div class="notespacer">
 					<span class="ui-icon ui-icon-note" style="float: left; margin-right: 5px;"></span>
