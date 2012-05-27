@@ -32,7 +32,7 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
 		this.context = context;
 		this.jdbcTemplate = new SimpleJdbcTemplate(dataSource);
 	}
-
+	
 	private static final class OfficeMapper implements RowMapper<OfficeData> {
 
 		public String officeSchema() {
@@ -49,7 +49,9 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
 			String externalId = rs.getString("externalId");
 			LocalDate openingDate = new LocalDate(rs.getDate("openingDate"));
 			String hierarchy = rs.getString("hierarchy");
-			Long parentId = rs.getLong("parentId");
+
+			Long parentId = getRSLong(rs.getString("parentId"), rs.getLong("parentId"));
+
 			String parentName = rs.getString("parentName");
 
 			return new OfficeData(id, name, externalId, openingDate, hierarchy,
@@ -165,4 +167,10 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
 
 	}
 
+	public static Long getRSLong(String stringVal, Long longVal) {
+		if (stringVal == null)
+			return null;
+
+		return longVal;
+	}
 }

@@ -18,6 +18,8 @@
                     <div class="toc-section">
                         <ul>
                         <li><a href="#top">Mifos X API Documentation</a></li>
+                        <li><a href="#interact">Try The API From Your Browser</a></li>
+                        <li><a href="#genopts">Generic Options</a></li>
                         <li><a href="#authentication_overview">Authentication Overview</a></li>
                         <li><a href="#errors">Errors</a></li>
                         <li><a href="#fullapi_matrix">Full API Matrix</a></li>
@@ -125,7 +127,7 @@
         <a id="top" name="top" class="old-syle-anchor">&nbsp;</a>
         <div class="method-section">
             <div class="method-description">
-                <h1>Mifos X API Documentation</h1>
+                <h3>Mifos X API Documentation</h3>
                 <p>
                 The Mifos X API is organized around
                 <a href="http://en.wikipedia.org/wiki/Representational_State_Transfer">REST</a>.
@@ -139,6 +141,53 @@
                 <p>
                 Much of the presentation ideas here have been taken from the very good API reference (https://stripe.com/docs/api)
                 </p>
+            </div>
+    
+        </div>
+    
+            <a id="interact" name="interact" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h3>Try The API From Your Browser</h3>
+                <p>GET (read) examples can be run directly from this documentation.  If you want to check out the POST, PUT and DELETE (update) examples you will need to
+                install a REST plugin for your browser e.g. RESTClient for FireFox</p>
+                The REST plugins will allow you to
+                <ul>
+                    <li class=normalli>Select the "Verb" (e.g. POST)</li>
+                    <li class=normalli>Enter the resource name (e.g. https://localhost:8443/mifosng-provider/api/v1/offices)</li>
+                    <li class=normalli>Add a header to indicate you are sending JSON data as part of the request body (e.g. Content-Type: application/json)</li>
+                    <li class=normalli>Paste the example JSON into a Request Body</li>
+                    <li class=normalli>Send the Request (and recieve a Response)</li>
+                </ul>
+             </div>
+    
+        </div>
+
+    
+        <a id="genopts" name="genopts" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h3>Generic Options</h3>
+                <h4>Convenience Templates</h4>
+                <p>There are a list of convenience resources (see Convenience menu option).  These resources end with "/template" and can be useful when building maintenance user interface screens for client applications. The template data returned may consist of any or all of:
+                    <ul>
+                    <li class=normalli>Field Defaults</li>   
+                    <li class=normalli>Allowed Value Lists</li>    
+                    </ul>
+                </p>
+                <p>Also, many "Retrieve a" type resource (<a href="#clients_retrieve">Retrieve a Client</a> for example) allow the parameter option "template=true".
+                This appends any "Allowed Value Lists" which can be useful when building update functionality.</p>
+                
+                <h4>Restrict Returned Fields</h4>
+                <p>Parameter "fields={fieldlist}" can be used on GET requests to restrict the fields returned.</p>
+                <p>Example Request: </p>
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/offices/1?pretty=true&fields=id,name,parentName">
+                https://localhost:8443/mifosng-provider/api/v1/offices/1?pretty=true&fields=id,name,parentName
+                </a>
+                <p></p>
+                <h4>Pretty JSON Formatting</h4>
+                <p>Parameter "pretty=true" can be used to display JSON from GET requests in an easily readable format.  This parameter is used in this documentation so that GET requests are immediately viewable.</p>
+                <p>If you want easily readable JSON output for POSTs, PUTs and DELETEs it will available in the REST plugin you use e.g. RESTClient for FireFox</p>
             </div>
     
         </div>
@@ -1822,6 +1871,7 @@ Request Body:
                 <h4>List Offices</h4>
                 <p>Example Requests: </p>
                 <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/offices?pretty=true">https://localhost:8443/mifosng-provider/api/v1/offices?pretty=true</a>
+                <br><br>
                 <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/offices?fields=id,name,openingDate&pretty=true">https://localhost:8443/mifosng-provider/api/v1/offices?fields=id,name,openingDate&pretty=true</a>
             </div>
             <div class="method-example">
@@ -1859,67 +1909,31 @@ Request Body:
         <div class="method-section">
             <div class="method-description">
                 <h4>Retrieve Office Details Template</h4>
-                <p>Returns a template that contains the office fields and allowed value lists. This is a convienence when building user intereface screens for client applications.
+                <p>This is a convenience resource.  It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:
+                    <ul>
+                    <li class=normalli>Field Defaults</li>   
+                    <li class=normalli>Allowed Value Lists</li>    
+                    </ul>
                 </p>
-                <p>Example Request: 
-                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/offices/template">
-                https://localhost:8443/mifosng-provider/api/v1/offices/template
+                <p>Example Request: </p>
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/offices/template?pretty=true">
+                https://localhost:8443/mifosng-provider/api/v1/offices/template?pretty=true
                 </a>
-                </p>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://thedomainname/api/v1/offices/template</code>
-<code class="method-response">
-{
-  "id": null,
-  "name": null,
-  "externalId": null,
-  "openingDate": "2012-05-21",
-  "hierarchy": null,
-  "parentName": null,
-  "parentId": null,
-  "allowedParents": [
-    {
-      "id": 1,
-      "name": "Demo MFI Head Office",
-      "externalId": "1",
-      "openingDate": "2009-01-01",
-      "hierarchy": ".",
-      "parentName": null,
-      "parentId": 0,
-      "allowedParents": []
-    },
-    {
-      "id": 2,
-      "name": "sub branch 1",
-      "externalId": "2",
-      "openingDate": "2012-01-02",
-      "hierarchy": ".2.",
-      "parentName": "Demo MFI Head Office",
-      "parentId": 1,
-      "allowedParents": []
-    },
-    {
-      "id": 3,
-      "name": "sub branch 2",
-      "externalId": "3",
-      "openingDate": "2012-03-01",
-      "hierarchy": ".3.",
-      "parentName": "Demo MFI Head Office",
-      "parentId": 1,
-      "allowedParents": []
-    },
-    {
-      "id": 4,
-      "name": "sub branch 3",
-      "externalId": null,
-      "openingDate": "2012-04-17",
-      "hierarchy": ".4.",
-      "parentName": "Demo MFI Head Office",
-      "parentId": 1,
-      "allowedParents": []
-    }
-  ]
+<code class="method-response">{
+  "openingDate" : [ 2012, 5, 28 ],
+  "allowedParents" : [ {
+    "id" : 1,
+    "name" : "Demo MFI Head Office"
+  }, {
+    "id" : 2,
+    "name" : "B1"
+  }, {
+    "id" : 3,
+    "name" : "B2"
+  } ]
 }
 </code>
             </div>
@@ -1928,26 +1942,30 @@ Request Body:
         <a id="offices_retrieve" name="offices_retrieve" class="old-syle-anchor">&nbsp;</a>
         <div class="method-section">
             <div class="method-description">
-                <h4>Retrieve Office</h4>
-                <p>Returns an office details if it exists.</p>
-                <p>Example Request: 
-                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/offices/1">
-                https://localhost:8443/mifosng-provider/api/v1/offices/1
+                <h4>Retrieve an Office</h4>
+                <p>Example Requests: </p>
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/offices/1?pretty=true">
+                https://localhost:8443/mifosng-provider/api/v1/offices/1?pretty=true
                 </a>
-                </p>
+                <br><br>
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/offices/1?pretty=true&template=true">
+                https://localhost:8443/mifosng-provider/api/v1/offices/1?pretty=true&template=true
+                </a>
+                <br><br>
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/offices/1?pretty=true&fields=id,name,parentName">
+                https://localhost:8443/mifosng-provider/api/v1/offices/1?pretty=true&fields=id,name,parentName
+                </a>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://thedomainname/api/v1/offices/1</code>
-<code class="method-response">
-{
-  "id": 1,
-  "name": "Demo MFI Head Office",
-  "externalId": "1",
-  "openingDate": "2009-01-01",
-  "hierarchy": ".",
-  "parentName": null,
-  "parentId": 0,
-  "allowedParents": []
+<code class="method-response">{
+  "id" : 1,
+  "name" : "Demo MFI Head Office",
+  "externalId" : "1",
+  "openingDate" : [ 2009, 1, 1 ],
+  "hierarchy" : ".",
+  "parentName" : null,
+  "parentId" : null
 }
 </code>
             </div>
@@ -2431,7 +2449,7 @@ Request Body:
 	        <p>Returns the list of currencies permitted for use AND the list of currencies not selected (but available for selection).</p>
 	        <p>Example Requests: </p>
 	        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/configurations/currency?pretty=true">https://localhost:8443/mifosng-provider/api/v1/configurations/currency?pretty=true</a>
-                <br>
+                <br><br>
 	        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/configurations/currency?pretty=true&fields=selectedCurrencyOptions">https://localhost:8443/mifosng-provider/api/v1/configurations/currency?pretty=true&fields=selectedCurrencyOptions</a>
 	    </div>
 	    <div class="method-example">

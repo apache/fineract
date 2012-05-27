@@ -19,45 +19,69 @@ import org.springframework.stereotype.Service;
 public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 
 	@Override
-	public LocalDate convertFrom(String dateAsString, String parameterName, String dateFormat) {
+	public LocalDate convertFrom(String dateAsString, String parameterName,
+			String dateFormat) {
 		LocalDate eventLocalDate = null;
 		if (StringUtils.isNotBlank(dateAsString)) {
 			try {
 				Locale locale = LocaleContextHolder.getLocale();
-				eventLocalDate = DateTimeFormat.forPattern(dateFormat).withLocale(locale).parseLocalDate(dateAsString.toLowerCase(locale));
+				eventLocalDate = DateTimeFormat.forPattern(dateFormat)
+						.withLocale(locale)
+						.parseLocalDate(dateAsString.toLowerCase(locale));
 			} catch (IllegalArgumentException e) {
 				List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-				ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.date.format", "The parameter " + parameterName + " is invalid based on the dateFormat provided:" + dateFormat, parameterName, dateAsString, dateFormat);
+				ApiParameterError error = ApiParameterError
+						.parameterError(
+								"validation.msg.invalid.date.format",
+								"The parameter "
+										+ parameterName
+										+ " is invalid based on the dateFormat provided:"
+										+ dateFormat, parameterName,
+								dateAsString, dateFormat);
 				dataValidationErrors.add(error);
-				
-				throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);
+
+				throw new PlatformApiDataValidationException(
+						"validation.msg.validation.errors.exist",
+						"Validation errors exist.", dataValidationErrors);
 			}
 		}
-		
+
 		return eventLocalDate;
 	}
 
 	@Override
-	public BigDecimal convertFrom(String numericalValueFormatted, String parameterName, Locale clientApplicationLocale) {
-		
+	public BigDecimal convertFrom(String numericalValueFormatted,
+			String parameterName, Locale clientApplicationLocale) {
+
 		try {
 			BigDecimal number = null;
 
 			if (StringUtils.isNotBlank(numericalValueFormatted)) {
-				String sourceWithoutSpaces = numericalValueFormatted.replaceAll(" ", "");
-				NumberFormat format = NumberFormat.getNumberInstance(clientApplicationLocale);
+				String sourceWithoutSpaces = numericalValueFormatted
+						.replaceAll(" ", "");
+				NumberFormat format = NumberFormat
+						.getNumberInstance(clientApplicationLocale);
 				Number parsedNumber = format.parse(sourceWithoutSpaces);
-				number = BigDecimal.valueOf(Double.valueOf(parsedNumber.doubleValue()));
+				number = BigDecimal.valueOf(Double.valueOf(parsedNumber
+						.doubleValue()));
 			}
-			
+
 			return number;
 		} catch (ParseException e) {
-			
+
 			List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-			ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.number.format", "The parameter " + parameterName + " is invalid for provided locale" + clientApplicationLocale.toString() + ".", parameterName, numericalValueFormatted, clientApplicationLocale);
+			ApiParameterError error = ApiParameterError.parameterError(
+					"validation.msg.invalid.number.format", "The parameter "
+							+ parameterName + " is invalid for provided locale"
+							+ clientApplicationLocale.toString() + ".",
+					parameterName, numericalValueFormatted,
+					clientApplicationLocale);
 			dataValidationErrors.add(error);
-			
-			throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);
+
+			throw new PlatformApiDataValidationException(
+					"validation.msg.validation.errors.exist",
+					"Validation errors exist.", dataValidationErrors);
 		}
 	}
+
 }

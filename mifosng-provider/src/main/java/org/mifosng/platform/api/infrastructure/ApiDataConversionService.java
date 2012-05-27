@@ -7,8 +7,10 @@ import org.joda.time.LocalDate;
 
 public interface ApiDataConversionService {
 
-	LocalDate convertFrom(String dateAsString, String parameterName, String dateFormat);
+	LocalDate convertFrom(String dateAsString, String parameterName,
+			String dateFormat);
 
-	BigDecimal convertFrom(String principalFormatted, String parameterName, Locale clientApplicationLocale);
+	BigDecimal convertFrom(String principalFormatted, String parameterName,
+			Locale clientApplicationLocale);
 
 }
