@@ -21,7 +21,6 @@ import org.mifosng.data.ClientData;
 import org.mifosng.data.ClientLoanAccountSummaryCollectionData;
 import org.mifosng.data.EntityIdentifier;
 import org.mifosng.data.NoteData;
-import org.mifosng.data.NoteDataList;
 import org.mifosng.data.OfficeLookup;
 import org.mifosng.data.command.ClientCommand;
 import org.mifosng.data.command.NoteCommand;
@@ -146,26 +145,31 @@ public class ClientApiResource {
 	@Path("{clientId}/loans")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public Response retrieveClientAccount(
-			@PathParam("clientId") final Long clientId) {
+	public String retrieveClientAccount(
+			@PathParam("clientId") final Long clientId, @Context UriInfo uriInfo) {
 
 		ClientLoanAccountSummaryCollectionData clientAccount = this.clientReadPlatformService
 				.retrieveClientAccountDetails(clientId);
 
-		return Response.ok().entity(clientAccount).build();
+		String selectedFields = "";
+		return this.jsonFormattingService.convertRequest(clientAccount,
+				filterName, allowedFieldList, selectedFields,
+				uriInfo.getQueryParameters());
 	}
 
 	@GET
 	@Path("{clientId}/notes")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public Response retrieveAllClientNotes(
-			@PathParam("clientId") final Long clientId) {
+	public String retrieveAllClientNotes(
+			@PathParam("clientId") final Long clientId, @Context UriInfo uriInfo) {
 
 		Collection<NoteData> notes = this.clientReadPlatformService
 				.retrieveAllClientNotes(clientId);
 
-		return Response.ok().entity(new NoteDataList(notes)).build();
+		String selectedFields = "";
+		return this.jsonFormattingService.convertRequest(notes, filterName,
+				allowedFieldList, selectedFields, uriInfo.getQueryParameters());
 	}
 
 	@POST
@@ -188,14 +192,16 @@ public class ClientApiResource {
 	@Path("{clientId}/notes/{noteId}")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public Response retrieveClientNote(
+	public String retrieveClientNote(
 			@PathParam("clientId") final Long clientId,
-			@PathParam("noteId") final Long noteId) {
+			@PathParam("noteId") final Long noteId, @Context UriInfo uriInfo) {
 
 		NoteData note = this.clientReadPlatformService.retrieveClientNote(
 				clientId, noteId);
 
-		return Response.ok().entity(note).build();
+		String selectedFields = "";
+		return this.jsonFormattingService.convertRequest(note, filterName,
+				allowedFieldList, selectedFields, uriInfo.getQueryParameters());
 	}
 
 	@PUT

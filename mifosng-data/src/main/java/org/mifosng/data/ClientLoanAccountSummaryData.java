@@ -19,19 +19,19 @@ public class ClientLoanAccountSummaryData implements Serializable {
 	private boolean waitingForDisbursal;
 	private boolean open;
 	private boolean closed;
-	
+
 	private String lifeCycleStatusText;
 	private LocalDate lifeCycleStatusDate;
-	
-//	private LocalDate submittedOnDate;
-//	private LocalDate approvedOnDate;
-//	private LocalDate expectedDisbursementDate;
-//	private LocalDate actualDisbursementDate;
-//	private LocalDate expectedFirstRepaymentOnDate;
-//	private LocalDate interestCalculatedFromDate;
-//	private LocalDate expectedMaturityDate;
-//	private LocalDate closedOnDate;
-	
+
+	// private LocalDate submittedOnDate;
+	// private LocalDate approvedOnDate;
+	// private LocalDate expectedDisbursementDate;
+	// private LocalDate actualDisbursementDate;
+	// private LocalDate expectedFirstRepaymentOnDate;
+	// private LocalDate interestCalculatedFromDate;
+	// private LocalDate expectedMaturityDate;
+	// private LocalDate closedOnDate;
+
 	public ClientLoanAccountSummaryData() {
 		//
 	}

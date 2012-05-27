@@ -13,7 +13,7 @@ import org.joda.time.Days;
 import org.joda.time.LocalDate;
 
 @XmlRootElement(name = "client")
-@JsonIgnoreProperties({ "organisationId","organisationName" })
+@JsonIgnoreProperties({ "organisationId", "organisationName" })
 @JsonFilter("myFilter")
 public class ClientData implements Serializable {
 
@@ -27,18 +27,17 @@ public class ClientData implements Serializable {
 	private String displayName;
 	private String externalId;
 	private LocalDate joinedDate;
-	
+
 	private List<OfficeLookup> allowedOffices = new ArrayList<OfficeLookup>();
 
 	public ClientData() {
 		//
 	}
 
-	public ClientData(final Long organisationId,
-			final String organisationName, final Long officeId,
-			final String officeName, final Long id, final String firstname,
-			final String lastname, final String externalId,
-			final LocalDate joinedDate) {
+	public ClientData(final Long organisationId, final String organisationName,
+			final Long officeId, final String officeName, final Long id,
+			final String firstname, final String lastname,
+			final String externalId, final LocalDate joinedDate) {
 		this.organisationId = organisationId;
 		this.organisationName = organisationName;
 		this.officeId = officeId;
@@ -46,15 +45,15 @@ public class ClientData implements Serializable {
 		this.id = id;
 		this.firstname = firstname;
 		this.lastname = lastname;
-		this.displayName = new StringBuilder(this.firstname).append(' ').append(this.lastname).toString();
+		this.displayName = new StringBuilder(this.firstname).append(' ')
+				.append(this.lastname).toString();
 		this.externalId = externalId;
 		this.joinedDate = joinedDate;
 	}
-	
+
 	public int getMaxJoinedOnOffsetFromToday() {
 		return Days.daysBetween(new DateTime(),
-				this.getJoinedDate().toDateMidnight().toDateTime())
-				.getDays();
+				this.getJoinedDate().toDateMidnight().toDateTime()).getDays();
 	}
 
 	public Long getId() {

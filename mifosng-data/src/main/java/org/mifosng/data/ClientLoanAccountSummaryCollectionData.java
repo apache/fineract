@@ -5,7 +5,10 @@ import java.util.List;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.codehaus.jackson.map.annotate.JsonFilter;
+
 @XmlRootElement
+@JsonFilter("myFilter")
 public class ClientLoanAccountSummaryCollectionData {
 
 	private List<ClientLoanAccountSummaryData> pendingApprovalLoans = new ArrayList<ClientLoanAccountSummaryData>();
