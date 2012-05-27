@@ -47,6 +47,11 @@ public class LoansApiResource {
 
 	private String filterName = "myFilter";
 	private String allowedFieldList = "";
+	private String loanFilterName = "loanFilter";
+	private String loanAllowedFieldList = "";
+	private String loanRepaymentFilterName = "loanRepaymentFilter";
+	private String loanRepaymentDefaultFieldList = "date,total";
+	private String loanRepaymentAllowedFieldList = "";
 
 	@Autowired
 	private LoanReadPlatformService loanReadPlatformService;
@@ -91,10 +96,9 @@ public class LoansApiResource {
 		LoanAccountData loanAccount = this.loanReadPlatformService
 				.retrieveLoanAccountDetails(loanId);
 
-		String specificFilterName = "loanFilter";
 		String selectedFields = "";
 		return this.jsonFormattingService.convertRequest(loanAccount,
-				specificFilterName, allowedFieldList, selectedFields,
+				loanFilterName, loanAllowedFieldList, selectedFields,
 				uriInfo.getQueryParameters());
 	}
 
@@ -285,21 +289,20 @@ public class LoansApiResource {
 			@QueryParam("type") final String transactionType,
 			@Context UriInfo uriInfo) {
 
-		String specificFilterName = "loanFilter";
-		String selectedFields = "";
+		String selectedFields = loanRepaymentDefaultFieldList;
 		if (StringUtils.isNotBlank(transactionType)
 				&& transactionType.trim().equalsIgnoreCase("waiver")) {
 			LoanRepaymentData loanWaiverData = this.loanReadPlatformService
 					.retrieveNewLoanWaiverDetails(loanId);
 			return this.jsonFormattingService.convertRequest(loanWaiverData,
-					specificFilterName, allowedFieldList, selectedFields,
+					loanRepaymentFilterName, loanRepaymentAllowedFieldList, selectedFields,
 					uriInfo.getQueryParameters());
 		}
 
 		LoanRepaymentData loanRepaymentData = this.loanReadPlatformService
 				.retrieveNewLoanRepaymentDetails(loanId);
 		return this.jsonFormattingService.convertRequest(loanRepaymentData,
-				specificFilterName, allowedFieldList, selectedFields,
+				loanRepaymentFilterName, loanRepaymentAllowedFieldList, selectedFields,
 				uriInfo.getQueryParameters());
 	}
 
@@ -315,10 +318,9 @@ public class LoansApiResource {
 		LoanRepaymentData loanRepaymentData = this.loanReadPlatformService
 				.retrieveLoanRepaymentDetails(loanId, repaymentId);
 
-		String specificFilterName = "loanFilter";
 		String selectedFields = "";
 		return this.jsonFormattingService.convertRequest(loanRepaymentData,
-				specificFilterName, allowedFieldList, selectedFields,
+				loanRepaymentFilterName, loanRepaymentAllowedFieldList, selectedFields,
 				uriInfo.getQueryParameters());
 	}
 

@@ -144,7 +144,9 @@ public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 									.serializeAllExcept(loanRepaymentFields));
 		}
 
-		if (filterName.equals("myFilter")) {
+		if ((filterName.equals("loanRepaymentFilter"))
+				|| (filterName.equals("myFilter"))
+				|| (filterName.equals("permissionFilter"))) {
 
 			if (filterType.equals("I")) {
 				return new SimpleFilterProvider().addFilter(filterName,
@@ -180,24 +182,6 @@ public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 
 			return new SimpleFilterProvider().addFilter(filterName,
 					SimpleBeanPropertyFilter.serializeAllExcept(filterFields))
-					.addFilter(
-							"permissionFilter",
-							SimpleBeanPropertyFilter
-									.filterOutAllExcept(permissionFields));
-		}
-
-		// ADDED BY KEITH - list permissions didnt seem to be working right.
-		// added this to avoid adding null filters to object mapper.
-		if (filterName.equals("permissionFilter")) {
-			Set<String> permissionFields = new HashSet<String>();
-			permissionFields.add("id");
-			permissionFields.add("name");
-			permissionFields.add("description");
-			permissionFields.add("code");
-			permissionFields.add("groupType");
-
-			return new SimpleFilterProvider().addFilter(filterName,
-					SimpleBeanPropertyFilter.filterOutAllExcept(filterFields))
 					.addFilter(
 							"permissionFilter",
 							SimpleBeanPropertyFilter
