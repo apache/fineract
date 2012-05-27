@@ -84,4 +84,33 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		}
 	}
 
+	@Override
+	public Locale localeFromString(final String localeAsString) {
+		
+		Locale locale = Locale.getDefault();
+		
+		String[] localeParts = localeAsString.split("_");
+		String language = "en";
+		String country = "GB";
+		String variant = "";
+		if (localeParts != null && localeParts.length == 1) {
+			language = localeParts[0];
+			locale = new Locale(language);
+		}
+		
+		if (localeParts != null && localeParts.length == 2) {
+			language = localeParts[0];
+			country = localeParts[1];
+			locale = new Locale(language, country);
+		}
+		
+		if (localeParts != null && localeParts.length == 3) {
+			language = localeParts[0];
+			country = localeParts[1];
+			variant = localeParts[2];
+			locale = new Locale(language, country, variant);
+		}
+		
+		return locale;
+	}
 }

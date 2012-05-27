@@ -24,6 +24,7 @@
 <form id="entityform">
     <div id="formerrors"></div>
 	<fieldset>
+		<input type="hidden" id="locale" name="locale" value="${currentLocale}" />
 		<legend><spring:message code="form.legend.loan.product.information"/></legend>
 		
 		<label for="name"><spring:message code="form.label.loan.product.name"/></label>

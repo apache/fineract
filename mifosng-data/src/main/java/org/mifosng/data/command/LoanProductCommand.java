@@ -12,6 +12,7 @@ public class LoanProductCommand {
 	private String description;
 	private String externalId;
 	
+	private String locale;
 	private String currencyCode;
 	private Integer digitsAfterDecimal;
 	private BigDecimal principal;
@@ -187,5 +188,13 @@ public class LoanProductCommand {
 	public void setInArrearsToleranceAmountFormatted(
 			String inArrearsToleranceAmountFormatted) {
 		this.inArrearsToleranceAmountFormatted = inArrearsToleranceAmountFormatted;
+	}
+
+	public String getLocale() {
+		return locale;
+	}
+
+	public void setLocale(String locale) {
+		this.locale = locale;
 	}
 }

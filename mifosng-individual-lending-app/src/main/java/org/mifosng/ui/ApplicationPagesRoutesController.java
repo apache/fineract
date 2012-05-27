@@ -1,6 +1,7 @@
 package org.mifosng.ui;
 
 import org.mifosng.ui.infrastructure.BasicAuthUserDetails;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -63,6 +64,9 @@ public class ApplicationPagesRoutesController {
 		BasicAuthUserDetails userDetails = (BasicAuthUserDetails) authentication.getPrincipal();
     	model.addAttribute("basicAuthKey", userDetails.getBasicAuthenticationKey());
     	model.addAttribute("baseApiUrl", userDetails.getFullApiUrl());
+    	
+    	model.addAttribute("currentLocale", LocaleContextHolder.getLocale().toString());
+    	
 		return "admin/orghome";
 	}
 	

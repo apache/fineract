@@ -13,4 +13,6 @@ public interface ApiDataConversionService {
 	BigDecimal convertFrom(String principalFormatted, String parameterName,
 			Locale clientApplicationLocale);
 
+	Locale localeFromString(String locale);
+
 }

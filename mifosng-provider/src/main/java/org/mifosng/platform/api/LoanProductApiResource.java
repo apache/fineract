@@ -49,7 +49,7 @@ public class LoanProductApiResource {
 	private ApiJSONFormattingService jsonFormattingService;
 
 	@POST
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON })
 	public Response createLoanProduct(LoanProductCommand command) {
 
@@ -60,7 +60,7 @@ public class LoanProductApiResource {
 	}
 
 	@GET
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON })
 	public String retrieveAllLoanProducts(@Context UriInfo uriInfo) {
 
@@ -79,7 +79,7 @@ public class LoanProductApiResource {
 	 */
 	@GET
 	@Path("template")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON })
 	public String retrieveNewLoanProductDetails(@Context UriInfo uriInfo) {
 
@@ -94,7 +94,7 @@ public class LoanProductApiResource {
 
 	@GET
 	@Path("{productId}")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON })
 	public String retrieveLoanProductDetails(
 			@PathParam("productId") final Long productId,
@@ -111,32 +111,22 @@ public class LoanProductApiResource {
 
 	@PUT
 	@Path("{productId}")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON })
-	public Response updateLoanProduct(
-			@PathParam("productId") final Long productId,
-			final LoanProductCommand command) {
+	public Response updateLoanProduct(@PathParam("productId") final Long productId, final LoanProductCommand command) {
 
-		// FIXME - pass in locale through query string or in 'request body'
-		Locale clientApplicationLocale = Locale.UK;
-		BigDecimal principal = this.apiDataConversionService.convertFrom(
-				command.getPrincipalFormatted(), "principalFormatted",
-				clientApplicationLocale);
-		BigDecimal interestRatePerPeriod = this.apiDataConversionService
-				.convertFrom(command.getInterestRatePerPeriodFormatted(),
-						"interestRatePerPeriodFormatted",
-						clientApplicationLocale);
-		BigDecimal inArrearsToleranceAmount = this.apiDataConversionService
-				.convertFrom(command.getInArrearsToleranceAmountFormatted(),
-						"inArrearsToleranceAmountFormatted",
-						clientApplicationLocale);
+		Locale clientApplicationLocale = this.apiDataConversionService.localeFromString(command.getLocale());
+				
+		BigDecimal principal = this.apiDataConversionService.convertFrom(command.getPrincipalFormatted(), "principalFormatted", clientApplicationLocale);
+		BigDecimal interestRatePerPeriod = this.apiDataConversionService.convertFrom(command.getInterestRatePerPeriodFormatted(),"interestRatePerPeriodFormatted", clientApplicationLocale);
+		BigDecimal inArrearsToleranceAmount = this.apiDataConversionService.convertFrom(command.getInArrearsToleranceAmountFormatted(), "inArrearsToleranceAmountFormatted", clientApplicationLocale);
+		
 		command.setPrincipal(principal);
 		command.setInterestRatePerPeriod(interestRatePerPeriod);
 		command.setInArrearsToleranceAmount(inArrearsToleranceAmount);
 
 		command.setId(productId);
-		EntityIdentifier entityIdentifier = this.loanProductWritePlatformService
-				.updateLoanProduct(command);
+		EntityIdentifier entityIdentifier = this.loanProductWritePlatformService.updateLoanProduct(command);
 
 		return Response.ok().entity(entityIdentifier).build();
 	}
