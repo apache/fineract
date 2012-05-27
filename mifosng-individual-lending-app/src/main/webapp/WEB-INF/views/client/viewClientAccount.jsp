@@ -64,7 +64,23 @@ $(document).ready(function() {
 			        return false;
 			      }
 			},
-			globalDate: function(localDateAsISOString) {
+			globalDate: function(dateParts) {
+			      try {
+			    	
+			    	  var year = dateParts[0];
+			    	  var month = parseInt(dateParts[1]) - 1; // month is zero indexed
+			    	  var day = dateParts[2];
+			    	  
+			    	  var d = new Date();
+			    	  d.setFullYear(year,month,day);
+			    	  
+			    	  return Globalize.format(d,"dd MMMM yyyy");
+			      } catch(e) {
+			        return "??";
+			      }
+			},
+			globalDateAsISOString: function(localDateAsISOString) {
+				
 			      try {
 			    	  var dateParts = localDateAsISOString.split("-")
 			    	  var year = dateParts[0];

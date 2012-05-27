@@ -56,7 +56,23 @@ $(document).ready(function() {
 			        return false;
 			      }
 			},
-			globalDate: function(localDateAsISOString) {
+			globalDate: function(dateParts) {
+			      try {
+			    	
+			    	  var year = dateParts[0];
+			    	  var month = parseInt(dateParts[1]) - 1; // month is zero indexed
+			    	  var day = dateParts[2];
+			    	  
+			    	  var d = new Date();
+			    	  d.setFullYear(year,month,day);
+			    	  
+			    	  return Globalize.format(d,"dd MMMM yyyy");
+			      } catch(e) {
+			        return "??";
+			      }
+			},
+			globalDateAsISOString: function(localDateAsISOString) {
+				
 			      try {
 			    	  var dateParts = localDateAsISOString.split("-")
 			    	  var year = dateParts[0];
@@ -292,24 +308,52 @@ $(document).ready(function() {
 		"ajaxOptions": {
 			type: 'GET',
 			dataType: 'json',
-			contentType: 'application/json',
+			contentType: 'application/json; charset=utf-8',
 			cache: false,
 			beforeSend: function(xhr) {
+				console.log("before send");
 	            xhr.setRequestHeader("Authorization", "Basic " + base64);
 			},
+	        success: function(data, status, xhr) {
+	        },
 	        error: function(xhr, status, index, anchor) {
 	            $(anchor.hash).html("error occured while ajax loading.");
-	        },
-	        success: function(data, status, xhr) {
-	        	var clientObject = new Object();
-	        	clientObject.clients = data;
-	        	var tableHtml = $("#clientSearchTabTemplate").render(clientObject);
-				$("#searchtab").html(tableHtml);
-				
-				$('#client').change(function() {
-		        	$('#viewClient').submit();
-		    	});
 	        }
+	    },
+	    select: function(event, ui) {
+	    	console.log("selected..");
+	    },
+	    load: function(event, ui) {
+	    	console.log("load..");
+	    },
+	    show: function(event, ui) {
+	    	console.log("show..");
+	    	
+	    	var jqxhr = $.ajax({
+				  url: baseApiUrl + 'clients',
+				  type: 'GET',
+				  contentType: 'application/json',
+				  dataType: 'json',
+				  cache: false,
+				  beforeSend: function(xhr) {
+			            xhr.setRequestHeader("Authorization", "Basic " + base64);
+				  },
+				  success: function(data) {
+				  		var clientObject = new Object();
+			        	clientObject.clients = data;
+			        	console.log(clientObject);
+			        	
+				    	var tableHtml = $("#clientSearchTabTemplate").render(clientObject);
+						$("#searchtab").html(tableHtml);
+						
+						$('#client').change(function() {
+				        	$('#viewClient').submit();
+				    	});
+				  },
+				  error: function(jqXHR, textStatus, errorThrown) {
+				    handleXhrError(jqXHR, textStatus, errorThrown, "#formErrorsTemplate", "#formerrors");
+				  }
+			});
 	    }
 	});
 	
@@ -346,7 +390,7 @@ $(document).ready(function() {
 			</sec:authorize>
 			<div id="tabs">
 				<ul>
-					<li><a href="${baseApiUrl}clients" title="searchtab"><spring:message code="tab.search"/></a></li>
+					<li><a href="#searchtab" title="searchtab"><spring:message code="tab.search"/></a></li>
 				</ul>
 				<div id="searchtab"></div>
 			</div>
