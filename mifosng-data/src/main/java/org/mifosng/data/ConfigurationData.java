@@ -4,11 +4,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
 import org.codehaus.jackson.map.annotate.JsonFilter;
 
-@XmlRootElement(name = "configuration")
 @JsonFilter("myFilter")
 public class ConfigurationData implements Serializable {
 

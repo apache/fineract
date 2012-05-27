@@ -3,12 +3,9 @@ package org.mifosng.data;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.map.annotate.JsonFilter;
 
-@XmlRootElement(name = "role")
 @JsonIgnoreProperties({ "orgId" })
 @JsonFilter("roleFilter")
 public class RoleData {

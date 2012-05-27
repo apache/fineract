@@ -10,7 +10,7 @@ import javax.sql.DataSource;
 
 import org.joda.time.DateTime;
 import org.mifosng.data.CurrencyData;
-import org.mifosng.data.EnumOptionReadModel;
+import org.mifosng.data.EnumOptionData;
 import org.mifosng.data.LoanProductData;
 import org.mifosng.data.MoneyData;
 import org.mifosng.platform.currency.service.CurrencyReadPlatformService;
@@ -180,11 +180,11 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
 		List<CurrencyData> possibleCurrencies = currencyReadPlatformService.retrieveAllowedCurrencies();
 
-		List<EnumOptionReadModel> possibleAmortizationOptions = dropdownReadPlatformService.retrieveLoanAmortizationMethodOptions();
-		List<EnumOptionReadModel> possibleInterestOptions = dropdownReadPlatformService.retrieveLoanInterestMethodOptions();
-		List<EnumOptionReadModel> possibleInterestRateCalculatedInPeriodOptions = dropdownReadPlatformService.retrieveLoanInterestRateCalculatedInPeriodOptions();
-		List<EnumOptionReadModel> repaymentFrequencyOptions = dropdownReadPlatformService.retrieveRepaymentFrequencyOptions();
-		List<EnumOptionReadModel> interestFrequencyOptions = dropdownReadPlatformService.retrieveInterestFrequencyOptions();
+		List<EnumOptionData> possibleAmortizationOptions = dropdownReadPlatformService.retrieveLoanAmortizationMethodOptions();
+		List<EnumOptionData> possibleInterestOptions = dropdownReadPlatformService.retrieveLoanInterestMethodOptions();
+		List<EnumOptionData> possibleInterestRateCalculatedInPeriodOptions = dropdownReadPlatformService.retrieveLoanInterestRateCalculatedInPeriodOptions();
+		List<EnumOptionData> repaymentFrequencyOptions = dropdownReadPlatformService.retrieveRepaymentFrequencyOptions();
+		List<EnumOptionData> interestFrequencyOptions = dropdownReadPlatformService.retrieveInterestFrequencyOptions();
 
 		productData.setPossibleCurrencies(possibleCurrencies);
 		productData.setPossibleAmortizationOptions(possibleAmortizationOptions);

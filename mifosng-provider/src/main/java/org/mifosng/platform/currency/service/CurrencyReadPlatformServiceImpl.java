@@ -7,6 +7,7 @@ import java.util.List;
 import javax.sql.DataSource;
 
 import org.mifosng.data.CurrencyData;
+import org.mifosng.platform.infrastructure.JdbcSupport;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.user.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,12 +58,11 @@ public class CurrencyReadPlatformServiceImpl implements CurrencyReadPlatformServ
 
 			String code = rs.getString("code");
 			String name = rs.getString("name");
-			int decimalPlaces = rs.getInt("decimalPlaces");
+			int decimalPlaces = JdbcSupport.getInteger(rs, "decimalPlaces");
 			String displaySymbol = rs.getString("displaySymbol");
 			String nameCode = rs.getString("nameCode");
 
-			return new CurrencyData(code, name, decimalPlaces, displaySymbol,
-					nameCode);
+			return new CurrencyData(code, name, decimalPlaces, displaySymbol, nameCode);
 		}
 	}
 }

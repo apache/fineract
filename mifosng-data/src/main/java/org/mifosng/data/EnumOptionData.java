@@ -5,16 +5,16 @@ import java.io.Serializable;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "option")
-public class EnumOptionReadModel implements Serializable {
+public class EnumOptionData implements Serializable {
 
 	private Long id;
 	private String value;
 
-	public EnumOptionReadModel() {
+	public EnumOptionData() {
 		//
 	}
 
-	public EnumOptionReadModel(final String value, final Long id) {
+	public EnumOptionData(final String value, final Long id) {
 		this.value = value;
 		this.id = id;
 	}

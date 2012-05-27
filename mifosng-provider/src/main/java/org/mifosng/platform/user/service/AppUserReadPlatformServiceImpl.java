@@ -16,6 +16,7 @@ import org.mifosng.data.OfficeData;
 import org.mifosng.data.OfficeLookup;
 import org.mifosng.data.RoleData;
 import org.mifosng.platform.exceptions.PlatformResourceNotFoundException;
+import org.mifosng.platform.infrastructure.JdbcSupport;
 import org.mifosng.platform.organisation.service.OfficeReadPlatformService;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.user.domain.AppUser;
@@ -143,13 +144,13 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
 			String firstname = rs.getString("firstname");
 			String lastname = rs.getString("lastname");
 			String email = rs.getString("email");
-			Long orgId = rs.getLong("orgId");
-			Long officeId = rs.getLong("officeId");
-
+			Long orgId = JdbcSupport.getLong(rs, "orgId");
+			Long officeId = JdbcSupport.getLong(rs, "officeId");
+			
+			// FIXME - change sql query to join to get office id and name information.
 			String officeName = fromOfficeList(this.offices, officeId);
 
-			AppUserData user = new AppUserData(id, username, email, orgId,
-					officeId, officeName);
+			AppUserData user = new AppUserData(id, username, email, orgId, officeId, officeName);
 			user.setLastname(lastname);
 			user.setFirstname(firstname);
 

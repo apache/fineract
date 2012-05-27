@@ -5,12 +5,9 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
 import org.codehaus.jackson.map.annotate.JsonFilter;
 import org.joda.time.DateTime;
 
-@XmlRootElement(name = "loanProduct")
 @JsonFilter("myFilter")
 public class LoanProductData implements Serializable {
 
@@ -34,11 +31,11 @@ public class LoanProductData implements Serializable {
 	private DateTime lastModifedOn;
 	
 	private List<CurrencyData> possibleCurrencies = new ArrayList<CurrencyData>();
-	private List<EnumOptionReadModel> possibleAmortizationOptions = new ArrayList<EnumOptionReadModel>();
-	private List<EnumOptionReadModel> possibleInterestOptions = new ArrayList<EnumOptionReadModel>();
-	private List<EnumOptionReadModel> possibleInterestRateCalculatedInPeriodOptions = new ArrayList<EnumOptionReadModel>();
-	private List<EnumOptionReadModel> repaymentFrequencyOptions = new ArrayList<EnumOptionReadModel>();
-	private List<EnumOptionReadModel> interestFrequencyOptions = new ArrayList<EnumOptionReadModel>();
+	private List<EnumOptionData> possibleAmortizationOptions = new ArrayList<EnumOptionData>();
+	private List<EnumOptionData> possibleInterestOptions = new ArrayList<EnumOptionData>();
+	private List<EnumOptionData> possibleInterestRateCalculatedInPeriodOptions = new ArrayList<EnumOptionData>();
+	private List<EnumOptionData> repaymentFrequencyOptions = new ArrayList<EnumOptionData>();
+	private List<EnumOptionData> interestFrequencyOptions = new ArrayList<EnumOptionData>();
 	
 	public LoanProductData() {
 		//
@@ -199,39 +196,39 @@ public class LoanProductData implements Serializable {
 		this.possibleCurrencies = possibleCurrencies;
 	}
 
-	public List<EnumOptionReadModel> getPossibleAmortizationOptions() {
+	public List<EnumOptionData> getPossibleAmortizationOptions() {
 		return possibleAmortizationOptions;
 	}
 
 	public void setPossibleAmortizationOptions(
-			List<EnumOptionReadModel> possibleAmortizationOptions) {
+			List<EnumOptionData> possibleAmortizationOptions) {
 		this.possibleAmortizationOptions = possibleAmortizationOptions;
 	}
 
-	public List<EnumOptionReadModel> getPossibleInterestOptions() {
+	public List<EnumOptionData> getPossibleInterestOptions() {
 		return possibleInterestOptions;
 	}
 
 	public void setPossibleInterestOptions(
-			List<EnumOptionReadModel> possibleInterestOptions) {
+			List<EnumOptionData> possibleInterestOptions) {
 		this.possibleInterestOptions = possibleInterestOptions;
 	}
 
-	public List<EnumOptionReadModel> getRepaymentFrequencyOptions() {
+	public List<EnumOptionData> getRepaymentFrequencyOptions() {
 		return repaymentFrequencyOptions;
 	}
 
 	public void setRepaymentFrequencyOptions(
-			List<EnumOptionReadModel> repaymentFrequencyOptions) {
+			List<EnumOptionData> repaymentFrequencyOptions) {
 		this.repaymentFrequencyOptions = repaymentFrequencyOptions;
 	}
 
-	public List<EnumOptionReadModel> getInterestFrequencyOptions() {
+	public List<EnumOptionData> getInterestFrequencyOptions() {
 		return interestFrequencyOptions;
 	}
 
 	public void setInterestFrequencyOptions(
-			List<EnumOptionReadModel> interestFrequencyOptions) {
+			List<EnumOptionData> interestFrequencyOptions) {
 		this.interestFrequencyOptions = interestFrequencyOptions;
 	}
 
@@ -251,12 +248,12 @@ public class LoanProductData implements Serializable {
 		this.interestRateCalculatedInPeriod = interestRateCalculatedInPeriod;
 	}
 
-	public List<EnumOptionReadModel> getPossibleInterestRateCalculatedInPeriodOptions() {
+	public List<EnumOptionData> getPossibleInterestRateCalculatedInPeriodOptions() {
 		return possibleInterestRateCalculatedInPeriodOptions;
 	}
 
 	public void setPossibleInterestRateCalculatedInPeriodOptions(
-			List<EnumOptionReadModel> possibleInterestRateCalculatedInPeriodOptions) {
+			List<EnumOptionData> possibleInterestRateCalculatedInPeriodOptions) {
 		this.possibleInterestRateCalculatedInPeriodOptions = possibleInterestRateCalculatedInPeriodOptions;
 	}
 }

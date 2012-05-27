@@ -7,6 +7,7 @@ import java.util.Collection;
 import javax.sql.DataSource;
 
 import org.mifosng.data.RoleData;
+import org.mifosng.platform.infrastructure.JdbcSupport;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.user.domain.AppUser;
 import org.mifosng.platform.user.domain.Role;
@@ -37,8 +38,7 @@ public class RoleReadPlatformServiceImpl implements RoleReadPlatformService {
 		RoleMapper mapper = new RoleMapper();
 		String sql = "select " + mapper.schema() + " where r.org_id = ?";
 
-		return this.jdbcTemplate.query(sql, mapper, new Object[] { currentUser
-				.getOrganisation().getId() });
+		return this.jdbcTemplate.query(sql, mapper, new Object[] {currentUser.getOrganisation().getId() });
 	}
 
 	// FIXME - does it make sense to use JDBC over repository for this?
@@ -56,8 +56,8 @@ public class RoleReadPlatformServiceImpl implements RoleReadPlatformService {
 		public RoleData mapRow(final ResultSet rs, final int rowNum)
 				throws SQLException {
 
-			Long id = rs.getLong("id");
-			Long orgId = rs.getLong("orgId");
+			Long id = JdbcSupport.getLong(rs, "id");
+			Long orgId = JdbcSupport.getLong(rs, "orgId");
 			String name = rs.getString("name");
 			String description = rs.getString("description");
 

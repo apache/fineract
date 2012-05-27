@@ -19,6 +19,7 @@ import org.mifosng.data.NoteData;
 import org.mifosng.data.OfficeData;
 import org.mifosng.data.OfficeLookup;
 import org.mifosng.platform.exceptions.ClientNotFoundException;
+import org.mifosng.platform.infrastructure.JdbcSupport;
 import org.mifosng.platform.organisation.domain.Organisation;
 import org.mifosng.platform.organisation.service.OfficeReadPlatformService;
 import org.mifosng.platform.security.PlatformSecurityContext;
@@ -131,16 +132,16 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 		public ClientData mapRow(final ResultSet rs, final int rowNum)
 				throws SQLException {
 
-			Long orgId = rs.getLong("orgId");
-			Long officeId = rs.getLong("officeId");
-			Long id = rs.getLong("id");
+			Long orgId = JdbcSupport.getLong(rs, "orgId");
+			Long officeId = JdbcSupport.getLong(rs, "officeId");
+			Long id = JdbcSupport.getLong(rs, "id");
 			String firstname = rs.getString("firstname");
 			if (StringUtils.isBlank(firstname)) {
 				firstname = "";
 			}
 			String lastname = rs.getString("lastname");
 			String externalId = rs.getString("externalId");
-			LocalDate joinedDate = new LocalDate(rs.getDate("joinedDate"));
+			LocalDate joinedDate = JdbcSupport.getLocalDate(rs, "joinedDate");
 
 			String officeName = fromOfficeList(this.offices, officeId);
 
@@ -149,8 +150,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 				orgname = organisation.getName();
 			}
 
-			return new ClientData(orgId, orgname, officeId, officeName, id,
-					firstname, lastname, externalId, joinedDate);
+			return new ClientData(orgId, orgname, officeId, officeName, id, firstname, lastname, externalId, joinedDate);
 		}
 
 		private String fromOfficeList(final List<OfficeData> officeList,
@@ -220,11 +220,11 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 		@Override
 		public ClientLoanAccountSummaryData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
 
-			Long id = rs.getLong("id");
+			Long id = JdbcSupport.getLong(rs, "id");
 			String externalId = rs.getString("externalId");
-			Long productId = rs.getLong("productId");
+			Long productId = JdbcSupport.getLong(rs, "productId");
 			String loanProductName = rs.getString("productName");
-			Integer loanStatusId = rs.getInt("statusId");
+			Integer loanStatusId = JdbcSupport.getInteger(rs, "statusId");
 			String lifeCycleStatusText = rs.getString("statusName");
 			
 			LoanStatusMapper statusMapper = new LoanStatusMapper(loanStatusId);
@@ -297,20 +297,19 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 		public NoteData mapRow(final ResultSet rs, final int rowNum)
 				throws SQLException {
 
-			Long id = rs.getLong("id");
-			Long clientId = rs.getLong("clientId");
-			Long loanId = rs.getLong("loanId");
-			Long transactionId = rs.getLong("transactionId");
-			Integer noteTypeId = rs.getInt("noteTypeEnum");
+			Long id = JdbcSupport.getLong(rs, "id");
+			Long clientId = JdbcSupport.getLong(rs, "clientId");
+			Long loanId = JdbcSupport.getLong(rs, "loanId");
+			Long transactionId = JdbcSupport.getLong(rs, "transactionId");
+			Integer noteTypeId = JdbcSupport.getInteger(rs, "noteTypeEnum");
 			String note = rs.getString("note");
 
-			DateTime createdDate = new DateTime(rs.getTimestamp("createdDate"));
-			Long createdById = rs.getLong("createdById");
+			DateTime createdDate = JdbcSupport.getDateTime(rs, "createdDate");
+			Long createdById = JdbcSupport.getLong(rs, "createdById");
 			String createdByUsername = findUserById(createdById, allUsers);
 
-			DateTime lastModifiedDate = new DateTime(
-					rs.getTimestamp("lastModifiedDate"));
-			Long lastModifiedById = rs.getLong("lastModifiedById");
+			DateTime lastModifiedDate = JdbcSupport.getDateTime(rs, "lastModifiedDate");
+			Long lastModifiedById = JdbcSupport.getLong(rs, "lastModifiedById");
 			String updatedByUsername = findUserById(createdById, allUsers);
 
 			return new NoteData(id, clientId, loanId, transactionId,
@@ -319,8 +318,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 					updatedByUsername);
 		}
 
-		private String findUserById(Long createdById,
-				Collection<AppUserData> allUsers) {
+		private String findUserById(Long createdById, Collection<AppUserData> allUsers) {
 			String username = "";
 			for (AppUserData appUserData : allUsers) {
 				if (appUserData.getId().equals(createdById)) {

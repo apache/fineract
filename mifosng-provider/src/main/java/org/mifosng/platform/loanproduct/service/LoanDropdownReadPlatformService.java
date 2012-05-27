@@ -2,17 +2,17 @@ package org.mifosng.platform.loanproduct.service;
 
 import java.util.List;
 
-import org.mifosng.data.EnumOptionReadModel;
+import org.mifosng.data.EnumOptionData;
 
 public interface LoanDropdownReadPlatformService {
 
-	List<EnumOptionReadModel> retrieveLoanAmortizationMethodOptions();
+	List<EnumOptionData> retrieveLoanAmortizationMethodOptions();
 
-	List<EnumOptionReadModel> retrieveLoanInterestMethodOptions();
+	List<EnumOptionData> retrieveLoanInterestMethodOptions();
 	
-	List<EnumOptionReadModel> retrieveLoanInterestRateCalculatedInPeriodOptions();
+	List<EnumOptionData> retrieveLoanInterestRateCalculatedInPeriodOptions();
 
-	List<EnumOptionReadModel> retrieveRepaymentFrequencyOptions();
+	List<EnumOptionData> retrieveRepaymentFrequencyOptions();
 
-	List<EnumOptionReadModel> retrieveInterestFrequencyOptions();
+	List<EnumOptionData> retrieveInterestFrequencyOptions();
 }

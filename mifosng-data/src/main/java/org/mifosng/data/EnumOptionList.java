@@ -9,21 +9,21 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class EnumOptionList {
 
-	private Collection<EnumOptionReadModel> options = new ArrayList<EnumOptionReadModel>();
+	private Collection<EnumOptionData> options = new ArrayList<EnumOptionData>();
 
 	protected EnumOptionList() {
 		//
 	}
 
-	public EnumOptionList(final List<EnumOptionReadModel> options) {
+	public EnumOptionList(final List<EnumOptionData> options) {
 		this.options = options;
 	}
 
-	public Collection<EnumOptionReadModel> getOptions() {
+	public Collection<EnumOptionData> getOptions() {
 		return this.options;
 	}
 
-	public void setOptions(final Collection<EnumOptionReadModel> options) {
+	public void setOptions(final Collection<EnumOptionData> options) {
 		this.options = options;
 	}
 }

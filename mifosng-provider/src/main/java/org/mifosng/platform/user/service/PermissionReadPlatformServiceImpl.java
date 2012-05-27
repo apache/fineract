@@ -7,6 +7,7 @@ import java.util.Collection;
 import javax.sql.DataSource;
 
 import org.mifosng.data.PermissionData;
+import org.mifosng.platform.infrastructure.JdbcSupport;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.user.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,12 +44,12 @@ public class PermissionReadPlatformServiceImpl implements PermissionReadPlatform
 		@Override
 		public PermissionData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
 
-			Long id = rs.getLong("id");
-			Long orgId = rs.getLong("orgId");
+			Long id = JdbcSupport.getLong(rs, "id");
+			Long orgId = JdbcSupport.getLong(rs, "orgId");
 			String name = rs.getString("name");
 			String description = rs.getString("description");
 			String code = rs.getString("code");
-			int groupType = rs.getInt("groupType");
+			Integer groupType = JdbcSupport.getInteger(rs, "groupType");
 
 			return new PermissionData(id, orgId, name, description, code, groupType);
 		}
