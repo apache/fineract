@@ -121,6 +121,29 @@ public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 			filterFields.add(st.nextToken().trim());
 		}
 
+		if (filterName.equals("loanFilter")) {
+
+			Set<String> loanRepaymentFields = new HashSet<String>();
+
+			if (filterType.equals("I")) {
+				return new SimpleFilterProvider().addFilter(
+						filterName,
+						SimpleBeanPropertyFilter
+								.filterOutAllExcept(filterFields)).addFilter(
+						"loanRepaymentFilter",
+						SimpleBeanPropertyFilter
+								.serializeAllExcept(loanRepaymentFields));
+
+			}
+
+			return new SimpleFilterProvider().addFilter(filterName,
+					SimpleBeanPropertyFilter.serializeAllExcept(filterFields))
+					.addFilter(
+							"loanRepaymentFilter",
+							SimpleBeanPropertyFilter
+									.serializeAllExcept(loanRepaymentFields));
+		}
+
 		if (filterName.equals("myFilter")) {
 
 			if (filterType.equals("I")) {
@@ -129,10 +152,9 @@ public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 								.filterOutAllExcept(filterFields));
 
 			}
-			
-				return new SimpleFilterProvider().addFilter(filterName,
-						SimpleBeanPropertyFilter
-								.serializeAllExcept(filterFields));
+
+			return new SimpleFilterProvider().addFilter(filterName,
+					SimpleBeanPropertyFilter.serializeAllExcept(filterFields));
 		}
 
 		if (filterName.equals("roleFilter")) {
@@ -154,17 +176,16 @@ public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 						SimpleBeanPropertyFilter
 								.filterOutAllExcept(permissionFields));
 
-			} 
-				
-			return new SimpleFilterProvider().addFilter(
-						filterName,
-						SimpleBeanPropertyFilter
-								.serializeAllExcept(filterFields)).addFilter(
-						"permissionFilter",
-						SimpleBeanPropertyFilter
-								.filterOutAllExcept(permissionFields));
+			}
+
+			return new SimpleFilterProvider().addFilter(filterName,
+					SimpleBeanPropertyFilter.serializeAllExcept(filterFields))
+					.addFilter(
+							"permissionFilter",
+							SimpleBeanPropertyFilter
+									.filterOutAllExcept(permissionFields));
 		}
-		
+
 		// ADDED BY KEITH - list permissions didnt seem to be working right.
 		// added this to avoid adding null filters to object mapper.
 		if (filterName.equals("permissionFilter")) {
@@ -174,14 +195,13 @@ public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 			permissionFields.add("description");
 			permissionFields.add("code");
 			permissionFields.add("groupType");
-			
-			return new SimpleFilterProvider().addFilter(
-					filterName,
-					SimpleBeanPropertyFilter
-							.filterOutAllExcept(filterFields)).addFilter(
-					"permissionFilter",
-					SimpleBeanPropertyFilter
-							.filterOutAllExcept(permissionFields));
+
+			return new SimpleFilterProvider().addFilter(filterName,
+					SimpleBeanPropertyFilter.filterOutAllExcept(filterFields))
+					.addFilter(
+							"permissionFilter",
+							SimpleBeanPropertyFilter
+									.filterOutAllExcept(permissionFields));
 		}
 
 		if (filterName.equals("userFilter")) {
@@ -216,21 +236,21 @@ public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 								SimpleBeanPropertyFilter
 										.filterOutAllExcept(permissionFields));
 
-			} 
-			
-				return new SimpleFilterProvider()
-						.addFilter(
-								filterName,
-								SimpleBeanPropertyFilter
-										.serializeAllExcept(filterFields))
-						.addFilter(
-								"roleFilter",
-								SimpleBeanPropertyFilter
-										.filterOutAllExcept(roleFields))
-						.addFilter(
-								"permissionFilter",
-								SimpleBeanPropertyFilter
-										.filterOutAllExcept(permissionFields));
+			}
+
+			return new SimpleFilterProvider()
+					.addFilter(
+							filterName,
+							SimpleBeanPropertyFilter
+									.serializeAllExcept(filterFields))
+					.addFilter(
+							"roleFilter",
+							SimpleBeanPropertyFilter
+									.filterOutAllExcept(roleFields))
+					.addFilter(
+							"permissionFilter",
+							SimpleBeanPropertyFilter
+									.filterOutAllExcept(permissionFields));
 
 		}
 		return filters;

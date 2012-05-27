@@ -11,7 +11,7 @@ import org.joda.time.LocalDate;
 import org.joda.time.Months;
 
 @XmlRootElement(name = "loan")
-@JsonFilter("myFilter")
+@JsonFilter("loanFilter")
 public class LoanAccountData {
 
 	private boolean open;

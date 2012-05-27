@@ -45,214 +45,307 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class LoansApiResource {
 
-	private String allowedFieldList = "";
 	private String filterName = "myFilter";
-	
-    @Autowired
-   	private LoanReadPlatformService loanReadPlatformService;
-    
-    @Autowired
-   	private LoanWritePlatformService loanWritePlatformService;
-    
-    @Autowired
+	private String allowedFieldList = "";
+
+	@Autowired
+	private LoanReadPlatformService loanReadPlatformService;
+
+	@Autowired
+	private LoanWritePlatformService loanWritePlatformService;
+
+	@Autowired
 	private CalculationPlatformService calculationPlatformService;
-    
-    @Autowired
-    private ApiDataConversionService apiDataConversionService;
+
+	@Autowired
+	private ApiDataConversionService apiDataConversionService;
 
 	@Autowired
 	private ApiJSONFormattingService jsonFormattingService;
 
 	@GET
 	@Path("template")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-	@Produces({ MediaType.APPLICATION_JSON})
-	public String retrieveDetailsForNewLoanApplicationStepOne(@QueryParam("clientId") final Long clientId, @QueryParam("productId") final Long productId, @Context UriInfo uriInfo) {
+	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String retrieveDetailsForNewLoanApplicationStepOne(
+			@QueryParam("clientId") final Long clientId,
+			@QueryParam("productId") final Long productId,
+			@Context UriInfo uriInfo) {
 
-		NewLoanWorkflowStepOneData workflowData = this.loanReadPlatformService.retrieveClientAndProductDetails(clientId, productId);
+		NewLoanWorkflowStepOneData workflowData = this.loanReadPlatformService
+				.retrieveClientAndProductDetails(clientId, productId);
 
 		String selectedFields = "";
-		return this.jsonFormattingService.convertRequest(workflowData, filterName,
-				allowedFieldList, selectedFields, uriInfo.getQueryParameters());
+		return this.jsonFormattingService.convertRequest(workflowData,
+				filterName, allowedFieldList, selectedFields,
+				uriInfo.getQueryParameters());
 	}
-	
+
 	@GET
 	@Path("{loanId}")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-	@Produces({ MediaType.APPLICATION_JSON})
-	public String retrieveLoanAccountDetails(@PathParam("loanId") final Long loanId, @Context UriInfo uriInfo) {
+	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String retrieveLoanAccountDetails(
+			@PathParam("loanId") final Long loanId, @Context UriInfo uriInfo) {
 
-		LoanAccountData loanAccount = this.loanReadPlatformService.retrieveLoanAccountDetails(loanId);
+		LoanAccountData loanAccount = this.loanReadPlatformService
+				.retrieveLoanAccountDetails(loanId);
 
+		String specificFilterName = "loanFilter";
 		String selectedFields = "";
-		return this.jsonFormattingService.convertRequest(loanAccount, filterName,
-				allowedFieldList, selectedFields, uriInfo.getQueryParameters());
+		return this.jsonFormattingService.convertRequest(loanAccount,
+				specificFilterName, allowedFieldList, selectedFields,
+				uriInfo.getQueryParameters());
 	}
-	
-	@POST
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    @Produces({MediaType.APPLICATION_JSON})
-	public Response calculateLoanSchedule(@QueryParam("command") final String commandParam, final SubmitLoanApplicationCommand command) {
 
-		LocalDate expectedDisbursementDate = apiDataConversionService.convertFrom(command.getExpectedDisbursementDateFormatted(), "expectedDisbursementDateFormatted", command.getDateFormat());
-		LocalDate repaymentsStartingFromDate = apiDataConversionService.convertFrom(command.getRepaymentsStartingFromDateFormatted(), "repaymentsStartingFromDateFormatted", command.getDateFormat());
-		LocalDate interestCalculatedFromDate = apiDataConversionService.convertFrom(command.getInterestCalculatedFromDateFormatted(), "interestCalculatedFromDateFormatted", command.getDateFormat());
-		LocalDate submittedOnDate = apiDataConversionService.convertFrom(command.getSubmittedOnDateFormatted(), "submittedOnDateFormatted", command.getDateFormat());
+	@POST
+	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public Response calculateLoanSchedule(
+			@QueryParam("command") final String commandParam,
+			final SubmitLoanApplicationCommand command) {
+
+		LocalDate expectedDisbursementDate = apiDataConversionService
+				.convertFrom(command.getExpectedDisbursementDateFormatted(),
+						"expectedDisbursementDateFormatted",
+						command.getDateFormat());
+		LocalDate repaymentsStartingFromDate = apiDataConversionService
+				.convertFrom(command.getRepaymentsStartingFromDateFormatted(),
+						"repaymentsStartingFromDateFormatted",
+						command.getDateFormat());
+		LocalDate interestCalculatedFromDate = apiDataConversionService
+				.convertFrom(command.getInterestCalculatedFromDateFormatted(),
+						"interestCalculatedFromDateFormatted",
+						command.getDateFormat());
+		LocalDate submittedOnDate = apiDataConversionService.convertFrom(
+				command.getSubmittedOnDateFormatted(),
+				"submittedOnDateFormatted", command.getDateFormat());
 		command.setExpectedDisbursementDate(expectedDisbursementDate);
 		command.setRepaymentsStartingFromDate(repaymentsStartingFromDate);
 		command.setInterestCalculatedFromDate(interestCalculatedFromDate);
 		command.setSubmittedOnDate(submittedOnDate);
-		
+
 		// FIXME - pass in locale through query string or in 'request body'
 		Locale clientApplicationLocale = Locale.UK;
-		BigDecimal principal = this.apiDataConversionService.convertFrom(command.getPrincipalFormatted(), "principalFormatted", clientApplicationLocale);
-		BigDecimal interestRatePerPeriod = this.apiDataConversionService.convertFrom(command.getInterestRatePerPeriodFormatted(), "interestRatePerPeriodFormatted", clientApplicationLocale);
-		BigDecimal inArrearsToleranceAmount = this.apiDataConversionService.convertFrom(command.getInArrearsToleranceAmountFormatted(), "inArrearsToleranceAmountFormatted", clientApplicationLocale);
+		BigDecimal principal = this.apiDataConversionService.convertFrom(
+				command.getPrincipalFormatted(), "principalFormatted",
+				clientApplicationLocale);
+		BigDecimal interestRatePerPeriod = this.apiDataConversionService
+				.convertFrom(command.getInterestRatePerPeriodFormatted(),
+						"interestRatePerPeriodFormatted",
+						clientApplicationLocale);
+		BigDecimal inArrearsToleranceAmount = this.apiDataConversionService
+				.convertFrom(command.getInArrearsToleranceAmountFormatted(),
+						"inArrearsToleranceAmountFormatted",
+						clientApplicationLocale);
 		command.setPrincipal(principal);
 		command.setInterestRatePerPeriod(interestRatePerPeriod);
 		command.setInArrearsToleranceAmount(inArrearsToleranceAmount);
 
-		CalculateLoanScheduleCommand calculateLoanScheduleCommand = command.toCalculateLoanScheduleCommand();
-		LoanSchedule loanSchedule = this.calculationPlatformService.calculateLoanSchedule(calculateLoanScheduleCommand);
-		
-		// for now just auto generating the loan schedule and setting support for 'manual' loan schedule creation later.
+		CalculateLoanScheduleCommand calculateLoanScheduleCommand = command
+				.toCalculateLoanScheduleCommand();
+		LoanSchedule loanSchedule = this.calculationPlatformService
+				.calculateLoanSchedule(calculateLoanScheduleCommand);
+
+		// for now just auto generating the loan schedule and setting support
+		// for 'manual' loan schedule creation later.
 		command.setLoanSchedule(loanSchedule);
-		
-		if (StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase("calculateLoanSchedule")) {
 
-			return Response.ok().entity(loanSchedule).build();	
+		if (StringUtils.isNotBlank(commandParam)
+				&& commandParam.trim()
+						.equalsIgnoreCase("calculateLoanSchedule")) {
+
+			return Response.ok().entity(loanSchedule).build();
 		}
-		
-		EntityIdentifier identifier = this.loanWritePlatformService.submitLoanApplication(command);
-		
-		return Response.ok().entity(identifier).build();
-    }
-	
-	@DELETE
-	@Path("{loanId}")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-	@Produces({ MediaType.APPLICATION_JSON})
-	public Response deleteLoanApplication(@PathParam("loanId") final Long loanId) {
 
-		EntityIdentifier identifier = this.loanWritePlatformService.deleteLoan(loanId);
+		EntityIdentifier identifier = this.loanWritePlatformService
+				.submitLoanApplication(command);
 
 		return Response.ok().entity(identifier).build();
 	}
-	
+
+	@DELETE
+	@Path("{loanId}")
+	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public Response deleteLoanApplication(@PathParam("loanId") final Long loanId) {
+
+		EntityIdentifier identifier = this.loanWritePlatformService
+				.deleteLoan(loanId);
+
+		return Response.ok().entity(identifier).build();
+	}
+
 	@POST
 	@Path("{loanId}")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-	@Produces({ MediaType.APPLICATION_JSON})
-	public Response stateTransitions(@PathParam("loanId") final Long loanId, 
+	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public Response stateTransitions(@PathParam("loanId") final Long loanId,
 			@QueryParam("command") final String commandParam,
 			final LoanStateTransitionCommand command) {
-		
-		LocalDate eventDate = this.apiDataConversionService.convertFrom(command.getEventDateFormatted(), "eventDateFormatted", command.getDateFormat());
+
+		LocalDate eventDate = this.apiDataConversionService.convertFrom(
+				command.getEventDateFormatted(), "eventDateFormatted",
+				command.getDateFormat());
 
 		command.setLoanId(loanId);
 		command.setEventDate(eventDate);
-		
-		if (StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase("reject")) {
-			EntityIdentifier identifier = this.loanWritePlatformService.rejectLoan(command);
+
+		if (StringUtils.isNotBlank(commandParam)
+				&& commandParam.trim().equalsIgnoreCase("reject")) {
+			EntityIdentifier identifier = this.loanWritePlatformService
+					.rejectLoan(command);
 			return Response.ok().entity(identifier).build();
-		} else if (StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase("withdrewbyclient")) {
-			EntityIdentifier identifier = this.loanWritePlatformService.withdrawLoan(command);
+		} else if (StringUtils.isNotBlank(commandParam)
+				&& commandParam.trim().equalsIgnoreCase("withdrewbyclient")) {
+			EntityIdentifier identifier = this.loanWritePlatformService
+					.withdrawLoan(command);
 			return Response.ok().entity(identifier).build();
-		} else if (StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase("approve")) {
-			EntityIdentifier identifier = this.loanWritePlatformService.approveLoanApplication(command);
+		} else if (StringUtils.isNotBlank(commandParam)
+				&& commandParam.trim().equalsIgnoreCase("approve")) {
+			EntityIdentifier identifier = this.loanWritePlatformService
+					.approveLoanApplication(command);
 			return Response.ok().entity(identifier).build();
-		} else if (StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase("disburse")) {
-			EntityIdentifier identifier = this.loanWritePlatformService.disburseLoan(command);
+		} else if (StringUtils.isNotBlank(commandParam)
+				&& commandParam.trim().equalsIgnoreCase("disburse")) {
+			EntityIdentifier identifier = this.loanWritePlatformService
+					.disburseLoan(command);
 			return Response.ok().entity(identifier).build();
 		}
-		
+
 		return Response.ok().build();
 	}
-	
+
 	@POST
 	@Path("{loanId}/undo")
-	@Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-	@Produces({MediaType.APPLICATION_JSON})
-	public Response undoStateTransitions(@PathParam("loanId") final Long loanId, @QueryParam("command") final String commandParam) {
-		
-		if (StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase("undoapproval")) {
-			UndoLoanApprovalCommand undoCommand = new UndoLoanApprovalCommand(loanId);
-			EntityIdentifier identifier = this.loanWritePlatformService.undoLoanApproval(undoCommand);
+	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public Response undoStateTransitions(
+			@PathParam("loanId") final Long loanId,
+			@QueryParam("command") final String commandParam) {
+
+		if (StringUtils.isNotBlank(commandParam)
+				&& commandParam.trim().equalsIgnoreCase("undoapproval")) {
+			UndoLoanApprovalCommand undoCommand = new UndoLoanApprovalCommand(
+					loanId);
+			EntityIdentifier identifier = this.loanWritePlatformService
+					.undoLoanApproval(undoCommand);
 			return Response.ok().entity(identifier).build();
-		} else if (StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase("undodisbursal")) {
-			UndoLoanDisbursalCommand undoCommand = new UndoLoanDisbursalCommand(loanId);
-			EntityIdentifier identifier = this.loanWritePlatformService.undloLoanDisbursal(undoCommand);
+		} else if (StringUtils.isNotBlank(commandParam)
+				&& commandParam.trim().equalsIgnoreCase("undodisbursal")) {
+			UndoLoanDisbursalCommand undoCommand = new UndoLoanDisbursalCommand(
+					loanId);
+			EntityIdentifier identifier = this.loanWritePlatformService
+					.undloLoanDisbursal(undoCommand);
 			return Response.ok().entity(identifier).build();
 		}
 
 		return Response.ok().build();
 	}
-	
+
 	@POST
 	@Path("{loanId}/transactions")
-	@Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-	@Produces({MediaType.APPLICATION_JSON})
-	public Response executeLoanTransaction(@PathParam("loanId") final Long loanId, @QueryParam("transactionType") final String transactionType, final LoanTransactionCommand command) {
+	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public Response executeLoanTransaction(
+			@PathParam("loanId") final Long loanId,
+			@QueryParam("transactionType") final String transactionType,
+			final LoanTransactionCommand command) {
 
 		command.setLoanId(loanId);
-		
-		LocalDate transactionDate = apiDataConversionService.convertFrom(command.getTransactionDateFormatted(), "transactionDateFormatted", command.getDateFormat());
+
+		LocalDate transactionDate = apiDataConversionService.convertFrom(
+				command.getTransactionDateFormatted(),
+				"transactionDateFormatted", command.getDateFormat());
 		command.setTransactionDate(transactionDate);
-		
-		BigDecimal transactionAmount = apiDataConversionService.convertFrom(command.getTransactionAmountFormatted(), "transactionAmountFormatted", Locale.UK);
+
+		BigDecimal transactionAmount = apiDataConversionService.convertFrom(
+				command.getTransactionAmountFormatted(),
+				"transactionAmountFormatted", Locale.UK);
 		command.setTransactionAmount(transactionAmount);
-		
-		if (StringUtils.isNotBlank(transactionType) && transactionType.trim().equalsIgnoreCase("waiver")) {
-			EntityIdentifier identifier = this.loanWritePlatformService.waiveLoanAmount(command);
+
+		if (StringUtils.isNotBlank(transactionType)
+				&& transactionType.trim().equalsIgnoreCase("waiver")) {
+			EntityIdentifier identifier = this.loanWritePlatformService
+					.waiveLoanAmount(command);
 			return Response.ok().entity(identifier).build();
 		}
-		
-		EntityIdentifier identifier = this.loanWritePlatformService.makeLoanRepayment(command);
+
+		EntityIdentifier identifier = this.loanWritePlatformService
+				.makeLoanRepayment(command);
 		return Response.ok().entity(identifier).build();
 	}
-	
+
 	@GET
 	@Path("{loanId}/transactions/template")
-	@Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-	@Produces({MediaType.APPLICATION_JSON})
-	public Response retrieveNewRepaymentDetails(@PathParam("loanId") final Long loanId, @QueryParam("type") final String transactionType, @Context UriInfo uriInfo) {
+	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String retrieveNewRepaymentDetails(
+			@PathParam("loanId") final Long loanId,
+			@QueryParam("type") final String transactionType,
+			@Context UriInfo uriInfo) {
 
-		if (StringUtils.isNotBlank(transactionType) && transactionType.trim().equalsIgnoreCase("waiver")) {
-			LoanRepaymentData loanWaiverData = this.loanReadPlatformService.retrieveNewLoanWaiverDetails(loanId);
-			return Response.ok().entity(loanWaiverData).build();
+		String specificFilterName = "loanFilter";
+		String selectedFields = "";
+		if (StringUtils.isNotBlank(transactionType)
+				&& transactionType.trim().equalsIgnoreCase("waiver")) {
+			LoanRepaymentData loanWaiverData = this.loanReadPlatformService
+					.retrieveNewLoanWaiverDetails(loanId);
+			return this.jsonFormattingService.convertRequest(loanWaiverData,
+					specificFilterName, allowedFieldList, selectedFields,
+					uriInfo.getQueryParameters());
 		}
 
-		LoanRepaymentData loanRepaymentData = this.loanReadPlatformService.retrieveNewLoanRepaymentDetails(loanId);
-		return Response.ok().entity(loanRepaymentData).build();
+		LoanRepaymentData loanRepaymentData = this.loanReadPlatformService
+				.retrieveNewLoanRepaymentDetails(loanId);
+		return this.jsonFormattingService.convertRequest(loanRepaymentData,
+				specificFilterName, allowedFieldList, selectedFields,
+				uriInfo.getQueryParameters());
 	}
-	
+
 	@GET
 	@Path("{loanId}/transactions/{repaymentId}")
-	@Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-	@Produces({MediaType.APPLICATION_JSON})
-	public Response retrieveRepaymentDetails(@PathParam("loanId") final Long loanId, @PathParam("repaymentId") final Long repaymentId) {
+	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String retrieveRepaymentDetails(
+			@PathParam("loanId") final Long loanId,
+			@PathParam("repaymentId") final Long repaymentId,
+			@Context UriInfo uriInfo) {
 
-		LoanRepaymentData loanRepaymentData = this.loanReadPlatformService.retrieveLoanRepaymentDetails(loanId, repaymentId);
+		LoanRepaymentData loanRepaymentData = this.loanReadPlatformService
+				.retrieveLoanRepaymentDetails(loanId, repaymentId);
 
-		return Response.ok().entity(loanRepaymentData).build();
+		String specificFilterName = "loanFilter";
+		String selectedFields = "";
+		return this.jsonFormattingService.convertRequest(loanRepaymentData,
+				specificFilterName, allowedFieldList, selectedFields,
+				uriInfo.getQueryParameters());
 	}
-	
+
 	@PUT
 	@Path("{loanId}/transactions/{repaymentId}")
-	@Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-	@Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-	public Response adjustLoanTransaction(@PathParam("loanId") final Long loanId, @PathParam("repaymentId") final Long repaymentId, final AdjustLoanTransactionCommand command) {
-		
+	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	public Response adjustLoanTransaction(
+			@PathParam("loanId") final Long loanId,
+			@PathParam("repaymentId") final Long repaymentId,
+			final AdjustLoanTransactionCommand command) {
+
 		command.setLoanId(loanId);
 		command.setRepaymentId(repaymentId);
-		
-		LocalDate transactionDate = apiDataConversionService.convertFrom(command.getTransactionDateFormatted(), "transactionDateFormatted", command.getDateFormat());
+
+		LocalDate transactionDate = apiDataConversionService.convertFrom(
+				command.getTransactionDateFormatted(),
+				"transactionDateFormatted", command.getDateFormat());
 		command.setTransactionDate(transactionDate);
-		
-		BigDecimal transactionAmount = apiDataConversionService.convertFrom(command.getTransactionAmountFormatted(), "transactionAmountFormatted", Locale.UK);
+
+		BigDecimal transactionAmount = apiDataConversionService.convertFrom(
+				command.getTransactionAmountFormatted(),
+				"transactionAmountFormatted", Locale.UK);
 		command.setTransactionAmount(transactionAmount);
 
-		EntityIdentifier identifier = this.loanWritePlatformService.adjustLoanTransaction(command);
+		EntityIdentifier identifier = this.loanWritePlatformService
+				.adjustLoanTransaction(command);
 
 		return Response.ok().entity(identifier).build();
 	}

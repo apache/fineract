@@ -2,11 +2,13 @@ package org.mifosng.data;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.codehaus.jackson.map.annotate.JsonFilter;
 import org.joda.time.DateMidnight;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
 
 @XmlRootElement
+@JsonFilter("loanRepaymentFilter")
 public class LoanRepaymentData {
 
 	private Long id;
