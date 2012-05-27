@@ -12,8 +12,10 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
@@ -30,6 +32,7 @@ import org.mifosng.data.command.SubmitLoanApplicationCommand;
 import org.mifosng.data.command.UndoLoanApprovalCommand;
 import org.mifosng.data.command.UndoLoanDisbursalCommand;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
+import org.mifosng.platform.api.infrastructure.ApiJSONFormattingService;
 import org.mifosng.platform.loan.service.CalculationPlatformService;
 import org.mifosng.platform.loan.service.LoanReadPlatformService;
 import org.mifosng.platform.loan.service.LoanWritePlatformService;
@@ -41,6 +44,9 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope("singleton")
 public class LoansApiResource {
+
+	private String allowedFieldList = "";
+	private String filterName = "myFilter";
 	
     @Autowired
    	private LoanReadPlatformService loanReadPlatformService;
@@ -53,27 +59,34 @@ public class LoansApiResource {
     
     @Autowired
     private ApiDataConversionService apiDataConversionService;
-    
+
+	@Autowired
+	private ApiJSONFormattingService jsonFormattingService;
+
 	@GET
 	@Path("template")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON})
-	public Response retrieveDetailsForNewLoanApplicationStepOne(@QueryParam("clientId") final Long clientId, @QueryParam("productId") final Long productId) {
+	public String retrieveDetailsForNewLoanApplicationStepOne(@QueryParam("clientId") final Long clientId, @QueryParam("productId") final Long productId, @Context UriInfo uriInfo) {
 
 		NewLoanWorkflowStepOneData workflowData = this.loanReadPlatformService.retrieveClientAndProductDetails(clientId, productId);
 
-		return Response.ok().entity(workflowData).build();
+		String selectedFields = "";
+		return this.jsonFormattingService.convertRequest(workflowData, filterName,
+				allowedFieldList, selectedFields, uriInfo.getQueryParameters());
 	}
 	
 	@GET
 	@Path("{loanId}")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON})
-	public Response retrieveLoanAccountDetails(@PathParam("loanId") final Long loanId) {
+	public String retrieveLoanAccountDetails(@PathParam("loanId") final Long loanId, @Context UriInfo uriInfo) {
 
 		LoanAccountData loanAccount = this.loanReadPlatformService.retrieveLoanAccountDetails(loanId);
 
-		return Response.ok().entity(loanAccount).build();
+		String selectedFields = "";
+		return this.jsonFormattingService.convertRequest(loanAccount, filterName,
+				allowedFieldList, selectedFields, uriInfo.getQueryParameters());
 	}
 	
 	@POST
@@ -202,7 +215,7 @@ public class LoansApiResource {
 	@Path("{loanId}/transactions/template")
 	@Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({MediaType.APPLICATION_JSON})
-	public Response retrieveNewRepaymentDetails(@PathParam("loanId") final Long loanId, @QueryParam("type") final String transactionType) {
+	public Response retrieveNewRepaymentDetails(@PathParam("loanId") final Long loanId, @QueryParam("type") final String transactionType, @Context UriInfo uriInfo) {
 
 		if (StringUtils.isNotBlank(transactionType) && transactionType.trim().equalsIgnoreCase("waiver")) {
 			LoanRepaymentData loanWaiverData = this.loanReadPlatformService.retrieveNewLoanWaiverDetails(loanId);

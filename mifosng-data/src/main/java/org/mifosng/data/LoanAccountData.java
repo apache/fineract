@@ -4,12 +4,14 @@ import java.math.BigDecimal;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.codehaus.jackson.map.annotate.JsonFilter;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.joda.time.Months;
 
 @XmlRootElement(name = "loan")
+@JsonFilter("myFilter")
 public class LoanAccountData {
 
 	private boolean open;

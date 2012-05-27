@@ -6,9 +6,13 @@ import java.util.List;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import org.codehaus.jackson.map.annotate.JsonFilter;
 import org.joda.time.LocalDate;
 
 @XmlRootElement(name = "newloanworkflow")
+@JsonIgnoreProperties({ "organisationId", "organisationName" })
+@JsonFilter("myFilter")
 public class NewLoanWorkflowStepOneData implements Serializable {
 
 	private Long organisationId;
