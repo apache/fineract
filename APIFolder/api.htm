@@ -2058,57 +2058,83 @@ Request Body:
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://thedomainname/api/v1/loanproducts</code>
-                <code class="method-response">    {
-    "products": [
-    {
-    "id": 1,
-    "name": "Agricultural Loan",
-    "description": "An agricultural loan given to farmers to help buy crop, stock and machinery. With an arrears tolerance setting of 1,000 CFA, loans are not marked as 'in arrears' or 'in bad standing' if the amount outstanding is less than this. Interest rate is described using monthly percentage rate (MPR) even though the loan typically lasts a year and requires one repayment (typically at time when farmer sells crop)",
-    "principalMoney": {
-    "currencyCode": "XOF",
-    "currencyDigitsAfterDecimal": 0,
-    "amount": 100000,
-    "defaultName": "CFA Franc BCEAO",
-    "nameCode": "currency.XOF",
-    "displaySymbol": "CFA",
-    "zero": false,
-    "greaterThanZero": true,
-    "displaySymbolValue": "100000 CFA"
-    },
-    "interestRatePerPeriod": 1.75,
-    "interestRatePeriod": 2,
-    "annualInterestRate": 21,
-    "interestMethod": 0,
-    "interestRateCalculatedInPeriod": 0,
-    "numberOfInterestFreePeriods": 0,
-    "repaidEvery": 12,
-    "repaymentPeriodFrequency": 2,
-    "numberOfRepayments": 1,
-    "amortizationMethod": 1,
-    "inArrearsTolerance": {
-    "currencyCode": "XOF",
-    "currencyDigitsAfterDecimal": 0,
-    "amount": 1000,
-    "defaultName": "CFA Franc BCEAO",
-    "nameCode": "currency.XOF",
-    "displaySymbol": "CFA",
-    "zero": false,
-    "greaterThanZero": true,
-    "displaySymbolValue": "1000 CFA"
-    },
-    "createdOn": "2012-04-12T00:00:00.000+10:00",
-    "lastModifedOn": "2012-04-12T00:00:00.000+10:00",
-    "possibleCurrencies": [],
-    "possibleAmortizationOptions": [],
-    "possibleInterestOptions": [],
-    "possibleInterestRateCalculatedInPeriodOptions": [],
-    "repaymentFrequencyOptions": [],
-    "interestFrequencyOptions": [],
-    "interestRebateAllowed": false,
-    "flexible": false
-    }
-    ]
-    }
+                <code class="method-response">[ {
+  "id" : 1,
+  "name" : "Agricultural Loan",
+  "description" : "An agricultural loan given to farmers to help buy crop, stock and machinery. With an arrears tolerance setting of 1,000 CFA, loans are not marked as 'in arrears' or 'in bad standing' if the amount outstanding is less than this. Interest rate is described using monthly percentage rate (MPR) even though the loan typically lasts a year and requires one repayment (typically at time when farmer sells crop)",
+  "principalMoney" : {
+    "currencyCode" : "XOF",
+    "currencyDigitsAfterDecimal" : 0,
+    "amount" : 100000,
+    "defaultName" : "CFA Franc BCEAO",
+    "nameCode" : "currency.XOF",
+    "displaySymbol" : "CFA",
+    "zero" : false,
+    "greaterThanZero" : true,
+    "displaySymbolValue" : "100000 CFA"
+  },
+  "interestRatePerPeriod" : 1.750000,
+  "interestRatePeriod" : 2,
+  "annualInterestRate" : 21.000000,
+  "interestMethod" : 0,
+  "interestRateCalculatedInPeriod" : 1,
+  "numberOfInterestFreePeriods" : 0,
+  "repaidEvery" : 12,
+  "repaymentPeriodFrequency" : 2,
+  "numberOfRepayments" : 1,
+  "amortizationMethod" : 1,
+  "inArrearsTolerance" : {
+    "currencyCode" : "XOF",
+    "currencyDigitsAfterDecimal" : 0,
+    "amount" : 1000,
+    "defaultName" : "CFA Franc BCEAO",
+    "nameCode" : "currency.XOF",
+    "displaySymbol" : "CFA",
+    "zero" : false,
+    "greaterThanZero" : true,
+    "displaySymbolValue" : "1000 CFA"
+  },
+  "createdOn" : 1334232874000,
+  "lastModifedOn" : 1334232874000
+}, {
+  "id" : 2,
+  "name" : "curr loan",
+  "description" : "asdff",
+  "principalMoney" : {
+    "currencyCode" : "ETB",
+    "currencyDigitsAfterDecimal" : 2,
+    "amount" : 100000.00,
+    "defaultName" : "Ethiopian Birr",
+    "nameCode" : "currency.ETB",
+    "displaySymbol" : null,
+    "zero" : false,
+    "greaterThanZero" : true,
+    "displaySymbolValue" : "100000.00 null"
+  },
+  "interestRatePerPeriod" : 0.000000,
+  "interestRatePeriod" : 2,
+  "annualInterestRate" : 0.000000,
+  "interestMethod" : 0,
+  "interestRateCalculatedInPeriod" : 1,
+  "numberOfInterestFreePeriods" : 0,
+  "repaidEvery" : 1,
+  "repaymentPeriodFrequency" : 2,
+  "numberOfRepayments" : 5,
+  "amortizationMethod" : 1,
+  "inArrearsTolerance" : {
+    "currencyCode" : "ETB",
+    "currencyDigitsAfterDecimal" : 2,
+    "amount" : 0.00,
+    "defaultName" : "Ethiopian Birr",
+    "nameCode" : "currency.ETB",
+    "displaySymbol" : null,
+    "zero" : true,
+    "greaterThanZero" : false,
+    "displaySymbolValue" : "0.00 null"
+  },
+  "createdOn" : 1334475938000,
+  "lastModifedOn" : 1334475938000
+} ]
     </code>
             </div>
         </div>
