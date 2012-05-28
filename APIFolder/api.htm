@@ -20,6 +20,7 @@
                         <li><a href="#top">Mifos X API Documentation</a></li>
                         <li><a href="#interact">Try The API From Your Browser</a></li>
                         <li><a href="#genopts">Generic Options</a></li>
+                        <li><a href="#dates_and_numbers">Updating Dates and Numbers</a></li>
                         <li><a href="#authentication_overview">Authentication Overview</a></li>
                         <li><a href="#errors">Errors</a></li>
                         <li><a href="#fullapi_matrix">Full API Matrix</a></li>
@@ -188,6 +189,18 @@
                 <p>Parameter "pretty=true" can be used to display JSON from GET requests in an easily readable format.  This parameter is used in this documentation so that GET requests are immediately viewable.</p>
                 <p>If you want easily readable JSON output for POSTs, PUTs and DELETEs it will available in the REST plugin you use e.g. RESTClient for FireFox</p>
             </div>
+    
+        </div>
+        
+        <a id="dates_and_numbers" name="dates_and_numbers" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h3>Updating Dates and Numbers</h3>
+                <h4>Dates</h4>
+                <p>Put in thing about suppying date_format and 'Formatted' being added onto end of field</p>
+                <h4>Numbers</h4>
+                <p>Put in whatever happens to numbers here.</p>
+           </div>
     
         </div>
     
@@ -2011,16 +2024,11 @@ Request Body:
 Content-Type: application/json
 Request Body:
 {
-  "name": "Demo branch 9 changed",
-  "externalId": "11",
-  "dateFormat": "dd MMMM yyyy",
-  "openingDateFormatted": "05 September 2011",
-  "parentId": 1
+  "name": "Name is updated"
 }
 </code>
-<code class="method-response">
-{
-  "entityId": 9
+<code class="method-response">{
+  "entityId": 1
 }
 </code>
             </div>
@@ -2933,17 +2941,26 @@ Request Body:
 	<div class="method-section">
 	    <div class="method-description">
 	        <h4>Verify authentication</h4>
-	        <p>Verifies that the credentials provided successfully authenticate and returns the set of permissions allowed by that user.</p>
-	        <p>Example Request: 
-	        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/authentication?username=super1&password=demo">https://localhost:8443/mifosng-provider/api/v1/authentication?username=super1&password=demo</a>
-	        </p>
+	        <p>Authenticates the credentials provided and returns the set of permissions allowed.</p>
 	    </div>
 	    <div class="method-example">
-	        <code class="method-declaration">POST https://thedomainname/api/v1/authentication?username=super1&password=demo</code>
+	        <code class="method-declaration">POST https://thedomainname/api/v1/authentication?username={userName}&password={password}</code>
 <code class="method-request">POST https://localhost:8443/mifosng-provider/api/v1/authentication?username=super1&password=demo
-Content-Type: application/xml
+Content-Type: application/json
+No Request Body
 </code>
-<code class="method-response">
+<code class="method-response">{
+    "username": "super1",
+    "userId": 2,
+    "base64EncodedAuthenticationKey": "c3VwZXIxOmRlbW8=",
+    "authenticated": true,
+    "permissions": [
+    "USER_ADMINISTRATION_SUPER_USER_ROLE",
+    "REPORTING_SUPER_USER_ROLE",
+    "PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE",
+    "ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE"
+    ]
+}
 </code>
 	    </div>
 	</div>    

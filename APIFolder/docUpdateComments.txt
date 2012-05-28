@@ -3,17 +3,16 @@ template for waiver/repayment... is it same for both? no type needed? (might hav
 
 new loan template ... is it 2 templates... one to pick product... and 2nd to return default properties in selected product or is it meant that if only one product then use that. 
 
+
+
 Configuration
-If you put a new currency config in and it deletes a currently in using { "selectedItems": ["USD", "GBP","XOF","ETB"] } then an exception report is returned
-Works fine using currencies (updated docs)....
-and should it return just an ok and empty set rather than empty notSelectedCurrencies and currencies
-should update only select currencies and not allow notSelectedCurrencies?
+All Good!
 
-
-Offices
+Offices (creates and updates not working with last commit)
 When creating new offices.. do i have to supply  "dateFormat": & "openingDateFormatted" for openingDate?  What is list of dateFormats?
 openingDate seems mandatory... but when the 'pair' not supplied I get NullPointerException
 could just openingDate be used?
 Note that openingData is passed as openingDateFormatted and a dateFormat is provided to convert the date from the way your UI records it to a common format.
+hierarchy update results in exception (prob  solved by using unrecognized parameter exception)
 
 
