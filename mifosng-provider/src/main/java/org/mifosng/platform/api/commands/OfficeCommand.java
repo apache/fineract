@@ -1,4 +1,4 @@
-package org.mifosng.data.command;
+package org.mifosng.platform.api.commands;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -15,8 +15,8 @@ public class OfficeCommand {
 	private String externalId;
 
 	private String dateFormat;
-	private String openingDateFormatted;
-	private LocalDate openingDate;
+	private String openingDate;
+	private LocalDate openingLocalDate;
 
 	private Long parentId;
 	private Boolean rootOffice = false;
@@ -30,7 +30,7 @@ public class OfficeCommand {
 		this.name = officeName;
 		this.externalId = externalId;
 		this.parentId = parentId;
-		this.openingDate = openingDate;
+		this.openingLocalDate = openingDate;
 	}
 
 	public OfficeCommand(final Long id, final String officeName,
@@ -40,15 +40,7 @@ public class OfficeCommand {
 		this.name = officeName;
 		this.externalId = externalId;
 		this.parentId = parentId;
-		this.openingDate = openingDate;
-	}
-
-	public LocalDate getOpeningDate() {
-		return this.openingDate;
-	}
-
-	public void setOpeningDate(final LocalDate openingDate) {
-		this.openingDate = openingDate;
+		this.openingLocalDate = openingDate;
 	}
 
 	public String getName() {
@@ -91,19 +83,27 @@ public class OfficeCommand {
 		this.dateFormat = dateFormat;
 	}
 
-	public String getOpeningDateFormatted() {
-		return openingDateFormatted;
-	}
-
-	public void setOpeningDateFormatted(String openingDateFormatted) {
-		this.openingDateFormatted = openingDateFormatted;
-	}
-
 	public boolean isRootOffice() {
 		return rootOffice;
 	}
 
 	public void setRootOffice(boolean rootOffice) {
 		this.rootOffice = rootOffice;
+	}
+
+	public String getOpeningDate() {
+		return openingDate;
+	}
+
+	public void setOpeningDate(String openingDate) {
+		this.openingDate = openingDate;
+	}
+
+	public LocalDate getOpeningLocalDate() {
+		return openingLocalDate;
+	}
+
+	public void setOpeningLocalDate(LocalDate openingLocalDate) {
+		this.openingLocalDate = openingLocalDate;
 	}
 }

@@ -246,8 +246,8 @@
 		{{/if}}
 
 		<input type="hidden" id="dateFormat" name="dateFormat" value="dd MMMM yyyy" />
-		<label for="openingDateFormatted"><spring:message code="form.label.office.openedon"/></label>
-		<input id="openingDateFormatted" name="openingDateFormatted" title="" type="text" value="{{=$ctx.globalDate(openingDate)}}" size="75" class="datepickerfield" />
+		<label for="openingDate"><spring:message code="form.label.office.openedon"/></label>
+		<input id="openingDate" name="openingDate" title="" type="text" value="{{=$ctx.globalDate(openingDate)}}" size="75" class="datepickerfield" />
 
 		<label for="externalId"><spring:message code="form.label.office.externalid"/></label>
 		<input id="externalId" name="externalId" title="" type="text" value="{{=externalId}}" size="75"/>

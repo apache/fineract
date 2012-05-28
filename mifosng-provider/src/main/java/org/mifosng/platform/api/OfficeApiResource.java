@@ -18,7 +18,7 @@ import javax.ws.rs.core.UriInfo;
 import org.joda.time.LocalDate;
 import org.mifosng.data.EntityIdentifier;
 import org.mifosng.data.OfficeData;
-import org.mifosng.data.command.OfficeCommand;
+import org.mifosng.platform.api.commands.OfficeCommand;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.ApiJSONFormattingService;
 import org.mifosng.platform.organisation.service.OfficeReadPlatformService;
@@ -80,10 +80,10 @@ public class OfficeApiResource {
 	@Produces({ MediaType.APPLICATION_JSON })
 	public Response createOffice(final OfficeCommand command) {
 
-		LocalDate openingDate = apiDataConversionService.convertFrom(
-				command.getOpeningDateFormatted(), "openingDateFormatted",
+		LocalDate openingLocalDate = apiDataConversionService.convertFrom(
+				command.getOpeningDate(), "openingDate",
 				command.getDateFormat());
-		command.setOpeningDate(openingDate);
+		command.setOpeningLocalDate(openingLocalDate);
 
 		Long officeId = this.writePlatformService.createOffice(command);
 
@@ -115,10 +115,10 @@ public class OfficeApiResource {
 	public Response updateOffice(@PathParam("officeId") final Long officeId,
 			final OfficeCommand command) {
 
-		LocalDate openingDate = apiDataConversionService.convertFrom(
-				command.getOpeningDateFormatted(), "openingDateFormatted",
+		LocalDate openingLocalDate = apiDataConversionService.convertFrom(
+				command.getOpeningDate(), "openingDate",
 				command.getDateFormat());
-		command.setOpeningDate(openingDate);
+		command.setOpeningLocalDate(openingLocalDate);
 		command.setId(officeId);
 
 		Long entityId = this.writePlatformService.updateOffice(command);

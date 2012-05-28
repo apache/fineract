@@ -17,7 +17,7 @@ import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
-import org.mifosng.data.command.OfficeCommand;
+import org.mifosng.platform.api.commands.OfficeCommand;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
 import org.mifosng.platform.user.domain.AppUser;
 
@@ -115,7 +115,7 @@ public class Office extends AbstractAuditableCustom<AppUser, Long> {
 		}
 		
 		if (command.getOpeningDate() != null) {
-			this.openingDate = command.getOpeningDate().toDate();
+			this.openingDate = command.getOpeningLocalDate().toDate();
 		}
 	}
 	

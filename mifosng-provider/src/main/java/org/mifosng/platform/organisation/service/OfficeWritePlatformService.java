@@ -1,6 +1,6 @@
 package org.mifosng.platform.organisation.service;
 
-import org.mifosng.data.command.OfficeCommand;
+import org.mifosng.platform.api.commands.OfficeCommand;
 
 public interface OfficeWritePlatformService {
 

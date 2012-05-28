@@ -2,7 +2,7 @@ package org.mifosng.platform.organisation.service;
 
 import static org.mifosng.platform.Specifications.officesThatMatch;
 
-import org.mifosng.data.command.OfficeCommand;
+import org.mifosng.platform.api.commands.OfficeCommand;
 import org.mifosng.platform.exceptions.NoAuthorizationException;
 import org.mifosng.platform.exceptions.OfficeNotFoundException;
 import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
@@ -47,7 +47,7 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
 				throw new OfficeNotFoundException(command.getParentId());
 			}
 	
-			Office office = Office.createNew(currentUser.getOrganisation(), parent, command.getName(), command.getOpeningDate(), command.getExternalId());
+			Office office = Office.createNew(currentUser.getOrganisation(), parent, command.getName(), command.getOpeningLocalDate(), command.getExternalId());
 			
 			// pre save to generate id for use in office hierarchy
 			this.officeRepository.save(office);
