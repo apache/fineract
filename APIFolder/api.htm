@@ -3094,20 +3094,22 @@ No Request Body
 	<div class="method-section">
 	    <div class="method-description">
 	        <h4>Create new user</h4>
-	        <p>Adds new application user to the platform.</p>
+	        <p>Adds new application user.</p>
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">POST https://thedomainname/api/v1/users</code>
 <code class="method-request">POST https://localhost:8443/mifosng-provider/api/v1/users
 Content-Type: application/json
 Request body:
-{
-  "officeId": 1,
-  "username": "newuser1",
-  "firstname": "Test",
-  "lastname": "User",
-  "email": "demomfi@mifos.org",
-  "selectedItems": ["1"]
+{ 
+ "username": "Another New User zll", 
+ "firstname": "Test", 
+ "lastname": "User", 
+ "password": "window75",
+ "repeatPassword": "window75f",
+ "email": "whatever@mifos.org", 
+ "officeId": 1, 
+ "roles": ["2","3"] 
 }
 </code>
 <code class="method-response">
@@ -3122,25 +3124,20 @@ Request body:
 	<div class="method-section">
 	    <div class="method-description">
 	        <h4>Update existing user</h4>
-	        <p>Update details of an existing application user.</p>
 	    </div>
 	    <div class="method-example">
-	        <code class="method-declaration">PUT https://thedomainname/api/v1/users/11</code>
-<code class="method-request">PUT https://localhost:8443/mifosng-provider/api/v1/users/11
+	        <code class="method-declaration">PUT https://thedomainname/api/v1/users/{userId)</code>
+<code class="method-request">PUT https://localhost:8443/mifosng-provider/api/v1/users/3
 Content-Type: application/json
-Request body:
-{
-  "officeId": 1,
-  "username": "newuser123",
-  "firstname": "Test",
-  "lastname": "User",
-  "email": "demomfi@mifos.org",
-  "selectedItems": ["1"]
+Request body:{ 
+ "firstname": "Test",
+ "roles": ["2"] 
 }
+
 </code>
 <code class="method-response">
 {
-  "entityId": 11
+  "entityId": 3
 }
 </code>
 	    </div>
@@ -3149,18 +3146,16 @@ Request body:
     <a id="users_delete" name="users_delete" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">
 	    <div class="method-description">
-	        <h4>Delete existing user</h4>
-	        <p>Delete reference to application user on platform.</p>
+	        <h4>Delete a User</h4>
+	        <p>Removes the user and the associated roles and permissions.</p>
 	    </div>
 	    <div class="method-example">
-	        <code class="method-declaration">DELETE https://thedomainname/api/v1/users/11</code>
-<code class="method-request">DELETE https://localhost:8443/mifosng-provider/api/v1/users/11
+	        <code class="method-declaration">DELETE https://thedomainname/api/v1/users/{userId}</code>
+<code class="method-request">DELETE https://localhost:8443/mifosng-provider/api/v1/users/20
 Content-Type: application/json
+No Request Body
 </code>
-<code class="method-response">
-{
-  "entityId": 11
-}
+<code class="method-response">Question outstanding
 </code>
 	    </div>
 	</div>

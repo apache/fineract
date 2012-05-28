@@ -19,4 +19,9 @@ hierarchy update results in exception (prob  solved by using unrecognized parame
 Users
 template:   allowedOffices (only id 1 came back)... does allowedOffices and available Roles depending on requested permissions?
 Retrieve a user: selectedRoles- possible json prob availablePermissions is blank... is it always?
+create new user... didn't check repeatPassword (see example in docs) but does in update
+  and msg shown on duplicate username isn't useful.
+  takes 4/5 seconds!
 
+update: give hardtofigureout error msg when using equivalent to create parameters...worked ok with ones in docs tho.
+delete: does delete (I delete super1), no 200 ok returned,  "org.springframework.dao.InvalidDataAccessApiUsageException: attempt to create merge event with null entity; " if delete a non-existant user

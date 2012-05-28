@@ -58,7 +58,7 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
 		AppUserMapper mapper = new AppUserMapper(offices);
 		String sql = "select " + mapper.schema()
 				+ " where u.org_id = ? and u.office_id in (" + officeIdsList
-				+ ")";
+				+ ") order by u.id";
 
 		return this.jdbcTemplate.query(sql, mapper, new Object[] { currentUser
 				.getOrganisation().getId() });
