@@ -28,3 +28,9 @@ delete: does delete (I delete super1), no 200 ok returned,  "org.springframework
 
 Loan Product
 List - interestRateCalculatedInPeriod is it usefult to show this field...also enums questionsor show only a few cos on loan template
+Create - get NullPointerException when creating using values in api doc (? about using principal or principal formatted or the right locale values)
+Update - tried to update name (using api docs data) and got a NullPointerException
+
+Clients
+List - can't get client other than from office 1
+template - only get office 1 in allowed offices

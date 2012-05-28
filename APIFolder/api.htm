@@ -393,30 +393,7 @@
         <div class="method-section">
             <div class="method-description">
                 <h3>Clients</h3>
-                <p>Clients ...</p>
-            </div>
-        </div>
-                
-        <div class="method-section">
-            <div class="method-description">
-                <h5>Attributes</h5>
-                <dl class="argument-list">
-                    <dt>
-                    id
-                    </dt>
-                    <dd>              
-                    string <span>jpw ipsum as an example of showing the (at least important) columns</span>
-                    </dd>
-                    <dt>
-                    amount
-                    </dt>
-                    <dd>blah <span></span>
-                    </dd>
-                    <dd>blah</dd>
-                    <dt>
-                    card
-                    </dt>
-                </dl>
+                <p>Clients are people and businesses that have applied (or may apply) to an MFI for loans.</p>
             </div>
         </div>
     
@@ -424,46 +401,34 @@
         <div class="method-section">
             <div class="method-description">
                 <h4>List Clients</h4>
-                <p>Example Request: 
-                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/clients">https://localhost:8443/mifosng-provider/api/v1/clients</a>
-                </p>
+                <p>Example Request: </p>
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/clients?pretty=true">https://localhost:8443/mifosng-provider/api/v1/clients?pretty=true</a>
+                <br><br>
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/clients?pretty=true&fields=displayName,officeName,joinedDate">https://localhost:8443/mifosng-provider/api/v1/clients?pretty=true&fields=displayName,officeName,joinedDate</a>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://thedomainname/api/v1/clients</code>
-<code class="method-response">{
-  "clients": [
-    {
-      "organisationId": 1,
-      "organisationName": "Demo MFI",
-      "officeId": 2,
-      "officeName": "sub branch 1",
-      "id": 14,
-      "firstname": "Patrick",
-      "lastname": "Asare-Frimpong",
-      "displayName": "Patrick Asare-Frimpong",
-      "externalId": null,
-      "joinedDate": "2012-04-18",
-      "allowedOffices": [],
-      "maxJoinedOnOffsetFromToday": -34
-    },
-    ...
-    ...
-    {
-      "organisationId": 1,
-      "organisationName": "Demo MFI",
-      "officeId": 1,
-      "officeName": "Demo MFI Head Office",
-      "id": 17,
-      "firstname": "Fred",
-      "lastname": "Ziffle",
-      "displayName": "Fred Ziffle",
-      "externalId": null,
-      "joinedDate": "2012-04-21",
-      "allowedOffices": [],
-      "maxJoinedOnOffsetFromToday": -31
-    }
-  ]
-}
+<code class="method-response">[ {
+  "officeId" : 1,
+  "officeName" : "change super user",
+  "id" : 2,
+  "firstname" : "Dennis",
+  "lastname" : "O'Meara",
+  "displayName" : "Dennis O'Meara",
+  "externalId" : null,
+  "joinedDate" : [ 2009, 1, 4 ],
+  "maxJoinedOnOffsetFromToday" : -1241
+}, {
+  "officeId" : 1,
+  "officeName" : "change super user",
+  "id" : 4,
+  "firstname" : "Jimmy",
+  "lastname" : "O'Meara",
+  "displayName" : "Jimmy O'Meara",
+  "externalId" : null,
+  "joinedDate" : [ 2009, 1, 11 ],
+  "maxJoinedOnOffsetFromToday" : -1234
+}...]
 </code>
             </div>
         </div>
@@ -479,46 +444,17 @@
                     <li class=normalli>Allowed Value Lists</li>    
                     </ul>
                 </p>
-                <p>Example Request: 
-                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/clients/template">https://localhost:8443/mifosng-provider/api/v1/clients/template</a>
-                </p>
+                <p>Example Request: </p>
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/clients/template?pretty=true">https://localhost:8443/mifosng-provider/api/v1/clients/template?pretty=true</a>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://thedomainname/api/v1/clients/template</code>
 <code class="method-response">{
-  "organisationId": 1,
-  "organisationName": null,
-  "officeId": 1,
-  "officeName": null,
-  "id": -1,
-  "firstname": "",
-  "lastname": "",
-  "displayName": "",
-  "externalId": null,
-  "joinedDate": "2012-05-22",
-  "allowedOffices": [
-    {
-      "id": 1,
-      "name": "Demo MFI Head Office",
-      "externalId": "1",
-      "openingDate": "2009-01-01",
-      "hierarchy": ".",
-      "parentName": null,
-      "parentId": 0,
-      "allowedParents": []
-    },
-    {
-      "id": 2,
-      "name": "sub branch 1",
-      "externalId": "2",
-      "openingDate": "2012-01-02",
-      "hierarchy": ".2.",
-      "parentName": "Demo MFI Head Office",
-      "parentId": 1,
-      "allowedParents": []
-    }
-  ],
-  "maxJoinedOnOffsetFromToday": 0
+  "joinedDate" : [ 2012, 5, 29 ],
+  "allowedOffices" : [ {
+    "id" : 1,
+    "name" : "change super user"
+  } ]
 }
 </code>
             </div>
@@ -529,27 +465,25 @@
         <div class="method-section">
             <div class="method-description">
                 <h4>Retrieve a Client</h4>
-                <p>Returns client fields. It also returns allowed value lists which help build a maintenance User Interface.
-                </p>
-                <p>Example Request: 
-                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/clients/1">https://localhost:8443/mifosng-provider/api/v1/clients/1</a>
-                </p>
+                <p>Example Request: </p>
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/clients/1?pretty=true">https://localhost:8443/mifosng-provider/api/v1/clients/1?pretty=true</a>
+                <br><br>
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/clients/1?pretty=true&template=true">https://localhost:8443/mifosng-provider/api/v1/clients/1?pretty=true&template=true</a>
+                <br><br>
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/clients/1?pretty=true&fields=id,displayName,officeName">https://localhost:8443/mifosng-provider/api/v1/clients/1?pretty=true&fields=id,displayName,officeName</a>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://thedomainname/api/v1/clients/{clientId}</code>
 <code class="method-response">{
-  "organisationId": 1,
-  "organisationName": "Demo MFI",
-  "officeId": 1,
-  "officeName": "Demo MFI Head Office",
-  "id": 1,
-  "firstname": "Patrick",
-  "lastname": "O'Meara",
-  "displayName": "Patrick O'Meara",
-  "externalId": null,
-  "joinedDate": "2009-01-04",
-  "allowedOffices": [],
-  "maxJoinedOnOffsetFromToday": -1234
+  "officeId" : 1,
+  "officeName" : "change super user",
+  "id" : 1,
+  "firstname" : "Patrick",
+  "lastname" : "O'Meara",
+  "displayName" : "Patrick O'Meara",
+  "externalId" : null,
+  "joinedDate" : [ 2009, 1, 4 ],
+  "maxJoinedOnOffsetFromToday" : -1241
 }
 </code>
             </div>
@@ -2337,22 +2271,27 @@ Request Body:
                 <code class="method-declaration">POST https://thedomainname/api/v1/loanproducts</code>
 <code class="method-request">https://localhost:8443/mifosng-provider/api/v1/loanproducts
 Content-Type: application/json
-Request Body:
-{
-  "name": "New kind of Loan",
-  "description": "A description not exceeding 500 characters.",
-  "currencyCode": "XOF",
-  "digitsAfterDecimal": 0,
-  "principal": 100000,
-  "inArrearsToleranceAmount": 1000,
-  "numberOfRepayments": 1,
-  "repaymentEvery": 1,
-  "repaymentFrequency": 2,
-  "amortizationMethod": 1,
-  "interestRatePerPeriod": 1.75,
-  "interestRateFrequencyMethod": 2,
-  "interestCalculationPeriodMethod": 1,
-  "interestMethod": 0
+Request Body:{ 
+"name": "Newish kind of Loan", 
+"description": "A description not exceeding 500 characters.", 
+"externalId": "1077",
+"locale": "en-us",
+"currencyCode": "XOF", 
+"digitsAfterDecimal": 0, 
+"principalFormatted": "100,000", 
+"inArrearsToleranceAmountFormatted": "1,000", 
+ "repaymentEvery": 1,
+ "repaymentFrequency": 2, 
+"numberOfRepayments": 1,
+"interestRatePerPeriodFormatted": "1.75", 
+"interestRateFrequencyMethod": 2, 
+"amortizationMethod": 1, 
+"interestMethod": 0 ,
+"interestCalculationPeriodMethod": 1
+}
+</code>
+<code class="method-response">{
+  "entityId": 9
 }
 </code>
             </div>
@@ -2368,21 +2307,12 @@ Request Body:
 <code class="method-request">https://localhost:8443/mifosng-provider/api/v1/loanproducts/1
 Content-Type: application/json
 Request Body:
-{
-  "name": "New kind of Loan updated",
-  "description": "An updated description not exceeding 500 characters.",
-  "currencyCode": "XOF",
-  "digitsAfterDecimal": 0,
-  "principal": 100000,
-  "inArrearsToleranceAmount": 1000,
-  "numberOfRepayments": 1,
-  "repaymentEvery": 1,
-  "repaymentFrequency": 2,
-  "amortizationMethod": 1,
-  "interestRatePerPeriod": 1.75,
-  "interestRateFrequencyMethod": 2,
-  "interestCalculationPeriodMethod": 1,
-  "interestMethod": 0
+{ 
+"name": "Loan name - updated" 
+}
+</code>
+<code class="method-response">{
+  "entityId": 1
 }
 </code>
             </div>
@@ -3050,7 +2980,7 @@ No Request Body
     <a id="users_create" name="users_create" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">
 	    <div class="method-description">
-	        <h4>Create new user</h4>
+	        <h4>Create a User</h4>
 	        <p>Adds new application user.</p>
 	    </div>
 	    <div class="method-example">
@@ -3080,7 +3010,7 @@ Request body:
      <a id="users_update" name="users_update" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">
 	    <div class="method-description">
-	        <h4>Update existing user</h4>
+	        <h4>Update a User</h4>
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">PUT https://thedomainname/api/v1/users/{userId)</code>
