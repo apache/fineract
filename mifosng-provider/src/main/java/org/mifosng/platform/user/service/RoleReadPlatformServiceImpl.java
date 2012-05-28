@@ -36,7 +36,7 @@ public class RoleReadPlatformServiceImpl implements RoleReadPlatformService {
 		AppUser currentUser = context.authenticatedUser();
 
 		RoleMapper mapper = new RoleMapper();
-		String sql = "select " + mapper.schema() + " where r.org_id = ?";
+		String sql = "select " + mapper.schema() + " where r.org_id = ? order by r.id";
 
 		return this.jdbcTemplate.query(sql, mapper, new Object[] {currentUser.getOrganisation().getId() });
 	}
@@ -65,7 +65,7 @@ public class RoleReadPlatformServiceImpl implements RoleReadPlatformService {
 		}
 
 		public String schema() {
-			return " r.id as id, r.org_id as orgId, r.name as name, r.description as description from admin_role r order by r.id";
+			return " r.id as id, r.org_id as orgId, r.name as name, r.description as description from admin_role r";
 		}
 	}
 }
