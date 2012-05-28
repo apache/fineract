@@ -114,9 +114,8 @@
                         <tr class="alt"><td>/v1/loans/{loanId}/transactions/template</td><td><a href="#loans_repaymenttemplate_etc">Retrieve Loan Repayment/Loan Waiver Template</a></td></tr>
                         <tr><td>/v1/offices/template</td><td><a href="#offices_template">Retrieve Office Details Template</a></td></tr>
                         <tr class="alt"><td>/v1/loanproducts/template</td><td><a href="#loanproducts_template">Retrieve Loan Product Details Template</a></td></tr>
-                        <tr><td>/v1/useraccounts/current/password/template</td><td><a href="#useraccount_password_retrieve">Retrieve change password template</a></td></tr>
-                        <tr class="alt"><td>/v1/users/template</td><td><a href="#users_template">Retrieve new user template</a></td></tr>
-                        <tr><td>/v1/roles/template</td><td><a href="#roles_template">Retrieve new role template</a></td></tr>
+                        <tr><td>/v1/users/template</td><td><a href="#users_template">Retrieve new user template</a></td></tr>
+                        <tr class="alt"><td>/v1/roles/template</td><td><a href="#roles_template">Retrieve new role template</a></td></tr>
                     </table>
                 </div>
             </div>
@@ -149,7 +148,7 @@
         <div class="method-section">
             <div class="method-description">
                 <h3>Try The API From Your Browser</h3>
-                <p>GET (read) examples can be run directly from this documentation.  If you want to check out the POST, PUT and DELETE (update) examples you will need to
+                <p>GET (read) examples can be run directly from this documentation.  If you want to check out the POST, PUT and DELETE (update) examples a good approach is to
                 install a REST plugin for your browser e.g. RESTClient for FireFox</p>
                 The REST plugins will allow you to
                 <ul>
@@ -1974,13 +1973,7 @@ Request Body:
         <a id="offices_create" name="offices_create" class="old-syle-anchor">&nbsp;</a>
         <div class="method-section">
             <div class="method-description">
-                <h4>Create Office</h4>
-                <p>Create an office.</p>
-                <p>Example Request: 
-                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/offices">
-                https://localhost:8443/mifosng-provider/api/v1/offices
-                </a>
-                </p>
+                <h4>Create an Office</h4>
             </div>
             <div class="method-example">
                 <code class="method-declaration">POST https://thedomainname/api/v1/offices</code>
@@ -1988,15 +1981,13 @@ Request Body:
 Content-Type: application/json 
 Request Body:
 {
-  "name": "Demo branch 9",
-  "externalId": "9",
-  "dateFormat": "dd MMMM yyyy",
-  "openingDateFormatted": "01 September 2011",
-  "parentId": 1
+ "name": "Example New Branch", 
+ "dateFormat": "dd MMMM yyyy", 
+ "openingDateFormatted": "01 July 2007", 
+ "parentId": 2 
 }
 </code>
-<code class="method-response">
-{
+<code class="method-response">{
   "entityId": 9
 }
 </code>
@@ -3752,9 +3743,8 @@ Request body:
             <tr class="alt"><td>/v1/loans/{loanId}/transactions/template</td><td><a href="#loans_repaymenttemplate_etc">Retrieve Loan Repayment/Loan Waiver Template</a></td></tr>
             <tr><td>/v1/offices/template</td><td><a href="#offices_template">Retrieve Office Details Template</a></td></tr>
             <tr class="alt"><td>/v1/loanproducts/template</td><td><a href="#loanproducts_template">Retrieve Loan Product Details Template</a></td></tr>
-            <tr><td>/v1/useraccounts/current/password/template</td><td><a href="#useraccount_password_retrieve">Retrieve change password template</a></td></tr>
-            <tr class="alt"><td>/v1/users/template</td><td><a href="#users_template">Retrieve new user template</a></td></tr>
-            <tr><td>/v1/roles/template</td><td><a href="#roles_template">Retrieve new role template</a></td></tr>
+            <tr><td>/v1/users/template</td><td><a href="#users_template">Retrieve new user template</a></td></tr>
+            <tr class="alt"><td>/v1/roles/template</td><td><a href="#roles_template">Retrieve new role template</a></td></tr>
         </table>
     </div>
 </div>
