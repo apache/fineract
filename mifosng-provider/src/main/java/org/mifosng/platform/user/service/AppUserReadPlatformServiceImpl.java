@@ -15,7 +15,7 @@ import org.mifosng.data.AppUserData;
 import org.mifosng.data.OfficeData;
 import org.mifosng.data.OfficeLookup;
 import org.mifosng.data.RoleData;
-import org.mifosng.platform.exceptions.PlatformResourceNotFoundException;
+import org.mifosng.platform.exceptions.RoleNotFoundException;
 import org.mifosng.platform.infrastructure.JdbcSupport;
 import org.mifosng.platform.organisation.service.OfficeReadPlatformService;
 import org.mifosng.platform.security.PlatformSecurityContext;
@@ -102,7 +102,7 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
 
 		AppUser user = this.appUserRepository.findOne(usersThatMatch(currentUser.getOrganisation(), userId));
 		if (user == null) {
-			throw new PlatformResourceNotFoundException("error.msg.user.id.invalid", "User with identifier {0} does not exist.", userId);
+			throw new RoleNotFoundException(userId);
 		}
 
 		List<RoleData> userRoleData = new ArrayList<RoleData>();
@@ -161,8 +161,7 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
 			return " u.id as id, u.username as username, u.firstname as firstname, u.lastname as lastname, u.email as email, u.org_id as orgId, u.office_id as officeId from admin_appuser u ";
 		}
 
-		private String fromOfficeList(final List<OfficeData> officeList,
-				final Long officeId) {
+		private String fromOfficeList(final List<OfficeData> officeList, final Long officeId) {
 			String match = "";
 			for (OfficeData office : officeList) {
 				if (office.getId().equals(officeId)) {

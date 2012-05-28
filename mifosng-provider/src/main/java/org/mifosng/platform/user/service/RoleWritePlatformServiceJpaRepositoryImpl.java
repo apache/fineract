@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.mifosng.data.command.RoleCommand;
+import org.mifosng.platform.exceptions.RoleNotFoundException;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.user.domain.AppUser;
 import org.mifosng.platform.user.domain.Permission;
@@ -63,6 +64,9 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
 		List<Permission> selectedPermissions = assembleListOfSelectedPermissions(command.getPermissions());
 		
 		Role role = this.roleRepository.findOne(rolesThatMatch(currentUser.getOrganisation(), command.getId()));
+		if (role == null) {
+			throw new RoleNotFoundException(command.getId());
+		}
 		role.update(command.getName(), command.getDescription(), selectedPermissions);
 		
 		this.roleRepository.save(role);
@@ -78,7 +82,6 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
 			for (String selectedId : selectedPermissionsArray) {
 				selectedPermissionIds.add(Long.valueOf(selectedId));
 			}
-	
 			
 			Collection<Permission> allPermissions = this.permissionRepository.findAll();
 			for (Permission permission : allPermissions) {

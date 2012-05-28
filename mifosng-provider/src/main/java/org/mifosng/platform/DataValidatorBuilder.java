@@ -86,7 +86,7 @@ public class DataValidatorBuilder {
 			return this;
 		}
 		
-		if (StringUtils.isBlank(value.toString())) {
+		if (value == null || StringUtils.isBlank(value.toString())) {
 			StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(resource).append(".").append(parameter).append(".cannot.be.blank");
 			StringBuilder defaultEnglishMessage = new StringBuilder("The parameter ").append(parameter).append(" cannot be blank.");
 			ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(), defaultEnglishMessage.toString(), parameter);

@@ -159,20 +159,25 @@ $(document).ready(function() {
 	    var o = {};
 	    var a = this.serializeArray();
 	    $.each(a, function() {
-	        if (o[this.name] !== undefined) {
-	            if (!o[this.name].push) {
-	                o[this.name] = [o[this.name]];
-	            }
-	            o[this.name].push(this.value || '');
-	        } else {
-	        	
-	        	if (this.name === 'permissions' || this.name === 'notSelectedPermissions' || this.name === 'roles' || this.name === 'notSelectedRoles') {
-	        		o[this.name] = new Array();
-	        		o[this.name].push(this.value || '');
-	        	} else {
-	        		o[this.name] = this.value || '';	
-	        	}
-	        }
+	    	
+	    	if (this.name === 'notSelectedPermissions' || this.name === 'notSelectedRoles') {
+	    		// do not serialize
+	    	} else {
+		        if (o[this.name] !== undefined) {
+		            if (!o[this.name].push) {
+		                o[this.name] = [o[this.name]];
+		            }
+		            o[this.name].push(this.value || '');
+		        } else {
+		        	
+		        	if (this.name === 'permissions' || this.name === 'roles') {
+		        		o[this.name] = new Array();
+		        		o[this.name].push(this.value || '');
+		        	} else {
+		        		o[this.name] = this.value || '';	
+		        	}
+		        }
+	    	}
 	    });
 	    return o;
 	};

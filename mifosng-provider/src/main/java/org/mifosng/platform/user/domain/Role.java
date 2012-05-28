@@ -91,7 +91,7 @@ public class Role extends AbstractAuditableCustom<AppUser, Long> {
 		if (description != null) {
 			this.description = description;
 		}
-		if (selectedPermissions != null) {
+		if (!selectedPermissions.isEmpty()) {
 			this.permissions.clear();
 			this.permissions = new HashSet<Permission>(selectedPermissions);
 		}

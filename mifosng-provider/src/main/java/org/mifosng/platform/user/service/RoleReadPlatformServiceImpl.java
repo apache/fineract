@@ -1,5 +1,7 @@
 package org.mifosng.platform.user.service;
 
+import static org.mifosng.platform.Specifications.rolesThatMatch;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -7,6 +9,7 @@ import java.util.Collection;
 import javax.sql.DataSource;
 
 import org.mifosng.data.RoleData;
+import org.mifosng.platform.exceptions.RoleNotFoundException;
 import org.mifosng.platform.infrastructure.JdbcSupport;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.user.domain.AppUser;
@@ -43,10 +46,13 @@ public class RoleReadPlatformServiceImpl implements RoleReadPlatformService {
 
 	// FIXME - does it make sense to use JDBC over repository for this?
 	@Override
-	public RoleData retrieveRole(Long roleId) {
-
-		Role role = this.roleRepository.findOne(roleId);
-
+	public RoleData retrieveRole(final Long id) {
+		AppUser currentUser = context.authenticatedUser();
+		
+		Role role = this.roleRepository.findOne(rolesThatMatch(currentUser.getOrganisation(), id));
+		if (role == null) {
+			throw new RoleNotFoundException(id);
+		}
 		return role.toData();
 	}
 

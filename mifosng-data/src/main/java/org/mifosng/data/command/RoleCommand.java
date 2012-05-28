@@ -12,10 +12,9 @@ public class RoleCommand {
 	private String name;
 	private String description;
 	
-	private String[] notSelectedPermissions;
 	private String[] permissions;
 
-	protected RoleCommand() {
+	public RoleCommand() {
 		//
 	}
 
@@ -47,14 +46,6 @@ public class RoleCommand {
 
 	public void setId(Long id) {
 		this.id = id;
-	}
-
-	public String[] getNotSelectedPermissions() {
-		return notSelectedPermissions;
-	}
-
-	public void setNotSelectedPermissions(String[] notSelectedPermissions) {
-		this.notSelectedPermissions = notSelectedPermissions;
 	}
 
 	public String[] getPermissions() {
