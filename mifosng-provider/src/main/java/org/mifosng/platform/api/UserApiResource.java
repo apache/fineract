@@ -100,7 +100,7 @@ public class UserApiResource {
 
 		this.appUserWritePlatformService.deleteUser(userId);
 
-		return Response.ok().build();
+		return Response.ok(new EntityIdentifier(userId)).build();
 	}
 
 	@PUT
