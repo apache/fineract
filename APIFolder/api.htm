@@ -473,7 +473,12 @@
         <div class="method-section">
             <div class="method-description">
                 <h4>Retrieve Client Details Template</h4>
-                <p>Returns a template that contains the client fields and allowed value lists. This helps build a maintenance User Interface.</p>
+                <p>This is a convenience resource.  It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:
+                    <ul>
+                    <li class=normalli>Field Defaults</li>   
+                    <li class=normalli>Allowed Value Lists</li>    
+                    </ul>
+                </p>
                 <p>Example Request: 
                 <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/clients/template">https://localhost:8443/mifosng-provider/api/v1/clients/template</a>
                 </p>
@@ -798,8 +803,12 @@ Request Body:
 <div class="method-section">
     <div class="method-description">
         <h4>Retrieve Loan Details Template</h4>
-        <p>Returns a template that contains client and loan product fields and allowed value lists.  This helps build a maintenance User Interface.
-        </p>
+                <p>This is a convenience resource.  It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:
+                    <ul>
+                    <li class=normalli>Field Defaults</li>   
+                    <li class=normalli>Allowed Value Lists</li>    
+                    </ul>
+                </p>
         <h5>Arguments</h5>
         <dl class="argument-list">
             <dt>clientId</dt>
@@ -1786,7 +1795,11 @@ Request Body:
         <div class="method-section">
             <div class="method-description">
                 <h4>Retrieve Loan Repayment/Loan Waiver Template</h4>
-                <p>Returns a template to help with entering loan repayments and waivers.
+                <p>This is a convenience resource.  It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:
+                    <ul>
+                    <li class=normalli>Field Defaults</li>   
+                    <li class=normalli>Allowed Value Lists</li>    
+                    </ul>
                 </p>
                 <h5>Arguments</h5>
                 <dl class="argument-list">
@@ -2042,7 +2055,7 @@ Request Body:
         <div class="method-section">
             <div class="method-description">
                 <h3>Loan Products</h3>
-                <p>A Loan product is a template that is used when creating a loan.  Much of the template definition can be changed during loan creation.
+                <p>A Loan product is a template that is used when creating a loan.  Much of the template definition can be overridden during loan creation.
                 </p>
             </div>
         </div>
@@ -2143,126 +2156,117 @@ Request Body:
         <div class="method-section">
             <div class="method-description">
                 <h4>Retrieve Loan Product Details Template</h4>
-                <p>Returns a template that contains the loan product fields and allowed value lists.  This helps build a maintenance User Interface.
+                <p>This is a convenience resource.  It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:
+                    <ul>
+                    <li class=normalli>Field Defaults</li>   
+                    <li class=normalli>Allowed Value Lists</li>    
+                    </ul>
                 </p>
-                <p>Example Request: 
-                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/loanproducts/template">https://localhost:8443/mifosng-provider/api/v1/loanproducts/template</a>
-                </p>
+                <p>Example Request: </p>
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/loanproducts/template?pretty=true">https://localhost:8443/mifosng-provider/api/v1/loanproducts/template?pretty=true</a>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://thedomainname/api/v1/loanproducts/template</code>
 <code class="method-response">{
-"id": null,
-"name": null,
-"description": null,
-"principalMoney": {
-"currencyCode": "XOF",
-"currencyDigitsAfterDecimal": 0,
-"amount": 0,
-"defaultName": "CFA Franc BCEAO",
-"nameCode": "currency.XOF",
-"displaySymbol": "CFA",
-"zero": true,
-"greaterThanZero": false,
-"displaySymbolValue": "0 CFA"
-},
-"interestRatePerPeriod": 0,
-"interestRatePeriod": 2,
-"annualInterestRate": 0,
-"interestMethod": 0,
-"interestRateCalculatedInPeriod": 1,
-"numberOfInterestFreePeriods": 0,
-"repaidEvery": 1,
-"repaymentPeriodFrequency": 2,
-"numberOfRepayments": 0,
-"amortizationMethod": 1,
-"inArrearsTolerance": {
-"currencyCode": "XOF",
-"currencyDigitsAfterDecimal": 0,
-"amount": 0,
-"defaultName": "CFA Franc BCEAO",
-"nameCode": "currency.XOF",
-"displaySymbol": "CFA",
-"zero": true,
-"greaterThanZero": false,
-"displaySymbolValue": "0 CFA"
-},
-"createdOn": null,
-"lastModifedOn": null,
-"possibleCurrencies": [
-{
-"code": "XOF",
-"name": "CFA Franc BCEAO",
-"decimalPlaces": 0,
-"displaySymbol": "CFA",
-"nameCode": "currency.XOF",
-"displayLabel": "CFA Franc BCEAO (CFA)"
-},
-{
-"code": "ETB",
-"name": "Ethiopian Birr",
-"decimalPlaces": 2,
-"displaySymbol": null,
-"nameCode": "currency.ETB",
-"displayLabel": "Ethiopian Birr [ETB]"
-}
-],
-"possibleAmortizationOptions": [
-{
-"id": 1,
-"value": "Equal installments"
-},
-{
-"id": 0,
-"value": "Equal principle payments"
-}
-],
-"possibleInterestOptions": [
-{
-"id": 0,
-"value": "Declining Balance"
-},
-{
-"id": 1,
-"value": "Flat"
-}
-],
-"possibleInterestRateCalculatedInPeriodOptions": [
-{
-"id": 0,
-"value": "Daily"
-},
-{
-"id": 1,
-"value": "Same as repayment period"
-}
-],
-"repaymentFrequencyOptions": [
-{
-"id": 0,
-"value": "Days"
-},
-{
-"id": 1,
-"value": "Weeks"
-},
-{
-"id": 2,
-"value": "Months"
-}
-],
-"interestFrequencyOptions": [
-{
-"id": 2,
-"value": "Per month"
-},
-{
-"id": 3,
-"value": "Per year"
-}
-],
-"interestRebateAllowed": false,
-"flexible": false
+  "principalMoney" : {
+    "currencyCode" : "ETB",
+    "currencyDigitsAfterDecimal" : 2,
+    "amount" : 0.00,
+    "defaultName" : "Ethiopian Birr",
+    "nameCode" : "currency.ETB",
+    "displaySymbol" : null,
+    "zero" : true,
+    "greaterThanZero" : false,
+    "displaySymbolValue" : "0.00 null"
+  },
+  "interestRatePerPeriod" : 0,
+  "interestRatePeriod" : 2,
+  "annualInterestRate" : 0,
+  "interestMethod" : 0,
+  "interestRateCalculatedInPeriod" : 1,
+  "numberOfInterestFreePeriods" : 0,
+  "repaidEvery" : 1,
+  "repaymentPeriodFrequency" : 2,
+  "numberOfRepayments" : 0,
+  "amortizationMethod" : 1,
+  "inArrearsTolerance" : {
+    "currencyCode" : "ETB",
+    "currencyDigitsAfterDecimal" : 2,
+    "amount" : 0.00,
+    "defaultName" : "Ethiopian Birr",
+    "nameCode" : "currency.ETB",
+    "displaySymbol" : null,
+    "zero" : true,
+    "greaterThanZero" : false,
+    "displaySymbolValue" : "0.00 null"
+  },
+  "possibleCurrencies" : [ {
+    "code" : "ETB",
+    "name" : "Ethiopian Birr",
+    "decimalPlaces" : 2,
+    "displaySymbol" : null,
+    "nameCode" : "currency.ETB",
+    "displayLabel" : "Ethiopian Birr [ETB]"
+  }, {
+    "code" : "XOF",
+    "name" : "CFA Franc BCEAO",
+    "decimalPlaces" : 0,
+    "displaySymbol" : "CFA",
+    "nameCode" : "currency.XOF",
+    "displayLabel" : "CFA Franc BCEAO (CFA)"
+  }, {
+    "code" : "GBP",
+    "name" : "Pound Sterling",
+    "decimalPlaces" : 2,
+    "displaySymbol" : null,
+    "nameCode" : "currency.GBP",
+    "displayLabel" : "Pound Sterling [GBP]"
+  }, {
+    "code" : "USD",
+    "name" : "US Dollar",
+    "decimalPlaces" : 2,
+    "displaySymbol" : null,
+    "nameCode" : "currency.USD",
+    "displayLabel" : "US Dollar [USD]"
+  } ],
+  "possibleAmortizationOptions" : [ {
+    "id" : 1,
+    "value" : "Equal installments"
+  }, {
+    "id" : 0,
+    "value" : "Equal principle payments"
+  } ],
+  "possibleInterestOptions" : [ {
+    "id" : 0,
+    "value" : "Declining Balance"
+  }, {
+    "id" : 1,
+    "value" : "Flat"
+  } ],
+  "possibleInterestRateCalculatedInPeriodOptions" : [ {
+    "id" : 0,
+    "value" : "Daily"
+  }, {
+    "id" : 1,
+    "value" : "Same as repayment period"
+  } ],
+  "repaymentFrequencyOptions" : [ {
+    "id" : 0,
+    "value" : "Days"
+  }, {
+    "id" : 1,
+    "value" : "Weeks"
+  }, {
+    "id" : 2,
+    "value" : "Months"
+  } ],
+  "interestFrequencyOptions" : [ {
+    "id" : 2,
+    "value" : "Per month"
+  }, {
+    "id" : 3,
+    "value" : "Per year"
+  } ]
 }
 </code>
             </div>
@@ -2272,127 +2276,53 @@ Request Body:
         <div class="method-section">
             <div class="method-description">
                 <h4>Retrieve a Loan Product</h4>
-                <p>Returns loan product fields.  It also returns allowed value lists which help build a maintenance User Interface.
-                JPW - includes validation values (might be ok or option), enum?
-                </p>
-                <p>Example Request: 
-                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/loanproducts/1">https://localhost:8443/mifosng-provider/api/v1/loanproducts/1</a>
-                </p>
+                <p>Example Requests: </p>
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/loanproducts/1?pretty=true">https://localhost:8443/mifosng-provider/api/v1/loanproducts/1?pretty=true</a>
+                <br><br>
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/loanproducts/1?pretty=true&template=true">https://localhost:8443/mifosng-provider/api/v1/loanproducts/1?pretty=true&template=true</a>
+                 <br><br>
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/loanproducts/1?pretty=true&fields=name,description,numberOfRepayments">https://localhost:8443/mifosng-provider/api/v1/loanproducts/1?pretty=true&fields=name,description,numberOfRepayments</a>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://thedomainname/api/v1/loanproducts/{productId}</code>
 <code class="method-response">{
-"id": 1,
-"name": "Agricultural Loan",
-"description": "An agricultural loan given to farmers to help buy crop, stock and machinery. With an arrears tolerance setting of 1,000 CFA, loans are not marked as 'in arrears' or 'in bad standing' if the amount outstanding is less than this. Interest rate is described using monthly percentage rate (MPR) even though the loan typically lasts a year and requires one repayment (typically at time when farmer sells crop)",
-"principalMoney": {
-"currencyCode": "XOF",
-"currencyDigitsAfterDecimal": 0,
-"amount": 100000,
-"defaultName": "CFA Franc BCEAO",
-"nameCode": "currency.XOF",
-"displaySymbol": "CFA",
-"zero": false,
-"greaterThanZero": true,
-"displaySymbolValue": "100000 CFA"
-},
-"interestRatePerPeriod": 1.75,
-"interestRatePeriod": 2,
-"annualInterestRate": 21,
-"interestMethod": 0,
-"interestRateCalculatedInPeriod": 0,
-"numberOfInterestFreePeriods": 0,
-"repaidEvery": 12,
-"repaymentPeriodFrequency": 2,
-"numberOfRepayments": 1,
-"amortizationMethod": 1,
-"inArrearsTolerance": {
-"currencyCode": "XOF",
-"currencyDigitsAfterDecimal": 0,
-"amount": 1000,
-"defaultName": "CFA Franc BCEAO",
-"nameCode": "currency.XOF",
-"displaySymbol": "CFA",
-"zero": false,
-"greaterThanZero": true,
-"displaySymbolValue": "1000 CFA"
-},
-"createdOn": "2012-04-12T00:00:00.000+10:00",
-"lastModifedOn": "2012-04-12T00:00:00.000+10:00",
-"possibleCurrencies": [
-{
-"code": "XOF",
-"name": "CFA Franc BCEAO",
-"decimalPlaces": 0,
-"displaySymbol": "CFA",
-"nameCode": "currency.XOF",
-"displayLabel": "CFA Franc BCEAO (CFA)"
-},
-{
-"code": "ETB",
-"name": "Ethiopian Birr",
-"decimalPlaces": 2,
-"displaySymbol": null,
-"nameCode": "currency.ETB",
-"displayLabel": "Ethiopian Birr [ETB]"
-}
-],
-"possibleAmortizationOptions": [
-{
-"id": 1,
-"value": "Equal installments"
-},
-{
-"id": 0,
-"value": "Equal principle payments"
-}
-],
-"possibleInterestOptions": [
-{
-"id": 0,
-"value": "Declining Balance"
-},
-{
-"id": 1,
-"value": "Flat"
-}
-],
-"possibleInterestRateCalculatedInPeriodOptions": [
-{
-"id": 0,
-"value": "Daily"
-},
-{
-"id": 1,
-"value": "Same as repayment period"
-}
-],
-"repaymentFrequencyOptions": [
-{
-"id": 0,
-"value": "Days"
-},
-{
-"id": 1,
-"value": "Weeks"
-},
-{
-"id": 2,
-"value": "Months"
-}
-],
-"interestFrequencyOptions": [
-{
-"id": 2,
-"value": "Per month"
-},
-{
-"id": 3,
-"value": "Per year"
-}
-],
-"interestRebateAllowed": false,
-"flexible": false
+  "id" : 1,
+  "name" : "Agricultural Loan",
+  "description" : "An agricultural loan given to farmers to help buy crop, stock and machinery. With an arrears tolerance setting of 1,000 CFA, loans are not marked as 'in arrears' or 'in bad standing' if the amount outstanding is less than this. Interest rate is described using monthly percentage rate (MPR) even though the loan typically lasts a year and requires one repayment (typically at time when farmer sells crop)",
+  "principalMoney" : {
+    "currencyCode" : "XOF",
+    "currencyDigitsAfterDecimal" : 0,
+    "amount" : 100000,
+    "defaultName" : "CFA Franc BCEAO",
+    "nameCode" : "currency.XOF",
+    "displaySymbol" : "CFA",
+    "zero" : false,
+    "greaterThanZero" : true,
+    "displaySymbolValue" : "100000 CFA"
+  },
+  "interestRatePerPeriod" : 1.750000,
+  "interestRatePeriod" : 2,
+  "annualInterestRate" : 21.000000,
+  "interestMethod" : 0,
+  "interestRateCalculatedInPeriod" : 1,
+  "numberOfInterestFreePeriods" : 0,
+  "repaidEvery" : 12,
+  "repaymentPeriodFrequency" : 2,
+  "numberOfRepayments" : 1,
+  "amortizationMethod" : 1,
+  "inArrearsTolerance" : {
+    "currencyCode" : "XOF",
+    "currencyDigitsAfterDecimal" : 0,
+    "amount" : 1000,
+    "defaultName" : "CFA Franc BCEAO",
+    "nameCode" : "currency.XOF",
+    "displaySymbol" : "CFA",
+    "zero" : false,
+    "greaterThanZero" : true,
+    "displaySymbolValue" : "1000 CFA"
+  },
+  "createdOn" : 1334232874000,
+  "lastModifedOn" : 1334232874000
 }
 </code>
             </div>
