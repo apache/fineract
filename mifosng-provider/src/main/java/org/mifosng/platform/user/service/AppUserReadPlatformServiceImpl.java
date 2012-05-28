@@ -15,7 +15,7 @@ import org.mifosng.data.AppUserData;
 import org.mifosng.data.OfficeData;
 import org.mifosng.data.OfficeLookup;
 import org.mifosng.data.RoleData;
-import org.mifosng.platform.exceptions.RoleNotFoundException;
+import org.mifosng.platform.exceptions.UserNotFoundException;
 import org.mifosng.platform.infrastructure.JdbcSupport;
 import org.mifosng.platform.organisation.service.OfficeReadPlatformService;
 import org.mifosng.platform.security.PlatformSecurityContext;
@@ -102,7 +102,7 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
 
 		AppUser user = this.appUserRepository.findOne(usersThatMatch(currentUser.getOrganisation(), userId));
 		if (user == null) {
-			throw new RoleNotFoundException(userId);
+			throw new UserNotFoundException(userId);
 		}
 
 		List<RoleData> userRoleData = new ArrayList<RoleData>();

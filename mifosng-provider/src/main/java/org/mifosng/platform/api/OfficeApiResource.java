@@ -27,7 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/v1/offices")
+@Path("/offices")
 @Component
 @Scope("singleton")
 public class OfficeApiResource {

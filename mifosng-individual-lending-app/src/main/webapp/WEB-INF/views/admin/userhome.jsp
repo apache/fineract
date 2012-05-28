@@ -191,11 +191,9 @@ $(document).ready(function() {
 			dataType: 'json',
 			cache: false,
 			beforeSend: function(xhr) {
-				console.log("base64: " + base64);
 				xhr.setRequestHeader("Authorization", "Basic " + base64);
 		    },
 			success: function(data, textStatus, jqXHR) {
-				console.log(data);
 				var formHtml = $(templateSelector).render(data);
 				
 				dialogDiv.append(formHtml);
@@ -226,7 +224,6 @@ $(document).ready(function() {
 					}
 			    	
 			    	var newFormData = JSON.stringify($('#entityform').serializeObject());
-			    	console.log(newFormData);
 			    	
 					var jqxhr = $.ajax({
 						  url: postUrl,
@@ -303,7 +300,6 @@ $(document).ready(function() {
 					xhr.setRequestHeader("Authorization", "Basic " + base64);
 			  },
 			  success: function(data, textStatus, jqXHR) {
-				console.log(data);
 				var tableHtml = $(templateSelector).render(data);
 				
 				$(displayAreaDivSelector).html("");
@@ -517,7 +513,7 @@ $(document).ready(function() {
 					
 					var saveSuccessFunction = function(data, textStatus, jqXHR) {
 						  $("#dialog-form").dialog("close");
-						  refreshUsersView();
+						  refreshRolesView();
 					}
 					
 					popupDialogWithFormView(getUrl, putUrl, 'PUT', "dialog.title.edit.details", templateSelector, width, height, saveSuccessFunction, true);

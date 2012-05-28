@@ -24,7 +24,7 @@ import org.springframework.stereotype.Component;
 
 import com.sun.jersey.core.util.Base64;
 
-@Path("/v1/authentication")
+@Path("/authentication")
 @Component
 @Scope("singleton")
 public class AuthenticationApiResource {

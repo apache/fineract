@@ -19,6 +19,7 @@ import org.mifosng.data.NoteData;
 import org.mifosng.data.OfficeData;
 import org.mifosng.data.OfficeLookup;
 import org.mifosng.platform.exceptions.ClientNotFoundException;
+import org.mifosng.platform.exceptions.NoteNotFoundException;
 import org.mifosng.platform.infrastructure.JdbcSupport;
 import org.mifosng.platform.organisation.domain.Organisation;
 import org.mifosng.platform.organisation.service.OfficeReadPlatformService;
@@ -257,7 +258,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 					new Object[] { currentUser.getOrganisation().getId(),
 							clientId, noteId });
 		} catch (EmptyResultDataAccessException e) {
-			throw new ClientNotFoundException(clientId);
+			throw new NoteNotFoundException(clientId);
 		}
 	}
 

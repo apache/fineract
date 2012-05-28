@@ -14,6 +14,7 @@ import org.mifosng.platform.client.domain.Note;
 import org.mifosng.platform.client.domain.NoteRepository;
 import org.mifosng.platform.exceptions.ClientNotFoundException;
 import org.mifosng.platform.exceptions.NoteNotFoundException;
+import org.mifosng.platform.exceptions.OfficeNotFoundException;
 import org.mifosng.platform.organisation.domain.Office;
 import org.mifosng.platform.organisation.domain.OfficeRepository;
 import org.mifosng.platform.security.PlatformSecurityContext;
@@ -49,6 +50,9 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 		validator.validateForCreate();
 
 		Office clientOffice = this.officeRepository.findOne(officesThatMatch(currentUser.getOrganisation(), command.getOfficeId()));
+		if (clientOffice == null) {
+			throw new OfficeNotFoundException(command.getOfficeId());
+		}
 		
 		String firstname = command.getFirstname();
 		String lastname = command.getLastname();
@@ -74,6 +78,9 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 		validator.validateForUpdate();
 
 		Office clientOffice = this.officeRepository.findOne(officesThatMatch(currentUser.getOrganisation(), command.getOfficeId()));
+		if (clientOffice == null) {
+			throw new OfficeNotFoundException(command.getOfficeId());
+		}
 		
 		String firstname = command.getFirstname();
 		String lastname = command.getLastname();
@@ -83,6 +90,9 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 		}
 
 		Client clientForUpdate = this.clientRepository.findOne(clientsThatMatch(currentUser.getOrganisation(), command.getId()));
+		if (clientForUpdate == null) {
+			throw new ClientNotFoundException(command.getId());
+		}
 		clientForUpdate.update(clientOffice, firstname, lastname, command.getExternalId(), command.getJoiningDate());
 				
 		this.clientRepository.save(clientForUpdate);

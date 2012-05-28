@@ -10,9 +10,11 @@ import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.mifosng.data.ApiParameterError;
 import org.mifosng.data.command.UserCommand;
+import org.mifosng.platform.exceptions.OfficeNotFoundException;
 import org.mifosng.platform.exceptions.PlatformApiDataValidationException;
 import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
-import org.mifosng.platform.exceptions.PlatformResourceNotFoundException;
+import org.mifosng.platform.exceptions.RoleNotFoundException;
+import org.mifosng.platform.exceptions.UserNotFoundException;
 import org.mifosng.platform.infrastructure.BasicPasswordEncodablePlatformUser;
 import org.mifosng.platform.infrastructure.PlatformEmailSendException;
 import org.mifosng.platform.infrastructure.PlatformPasswordEncoder;
@@ -69,6 +71,9 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 			Set<Role> allRoles = assembleSetOfRoles(command.getRoles());
 
 			Office office = this.officeRepository.findOne(command.getOfficeId());
+			if (office == null) {
+				throw new OfficeNotFoundException(command.getOfficeId());
+			}
 
 			String password = command.getPassword();
 			if (StringUtils.isBlank(password)) {
@@ -111,13 +116,13 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 			if (command.getOfficeId() != null) {
 				office = this.officeRepository.findOne(command.getOfficeId());
 				if (office == null) {
-					throw new PlatformResourceNotFoundException("error.msg.office.id.invalid", "Office with identifier {0} does not exist.", command.getOfficeId());
+					throw new OfficeNotFoundException(command.getOfficeId());
 				}
 			}
 
 			AppUser userToUpdate = this.appUserRepository.findOne(usersThatMatch(currentUser.getOrganisation(), command.getId()));
 			if (userToUpdate == null) {
-				throw new PlatformResourceNotFoundException("error.msg.user.id.invalid", "User with identifier {0} does not exist.", command.getId());
+				throw new UserNotFoundException(command.getId());
 			}
 			
 			userToUpdate.update(allRoles, office, command.getUsername(), command.getFirstname(), command.getLastname(), command.getEmail());
@@ -145,7 +150,11 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 		Set<Role> allRoles = new HashSet<Role>();
 		if (!ObjectUtils.isEmpty(rolesArray)) {
 			for (String roleId : rolesArray) {
-				Role role = this.roleRepository.findOne(Long.valueOf(roleId));
+				Long id = Long.valueOf(roleId);
+				Role role = this.roleRepository.findOne(id);
+				if (role == null) {
+					throw new RoleNotFoundException(id);
+				}
 				allRoles.add(role);
 			}
 		}

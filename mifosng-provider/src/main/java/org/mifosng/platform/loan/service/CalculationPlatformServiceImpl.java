@@ -11,6 +11,8 @@ import org.mifosng.data.command.CalculateLoanScheduleCommand;
 import org.mifosng.platform.currency.domain.ApplicationCurrency;
 import org.mifosng.platform.currency.domain.ApplicationCurrencyRepository;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
+import org.mifosng.platform.exceptions.CurrencyNotFoundException;
+import org.mifosng.platform.exceptions.LoanNotFoundException;
 import org.mifosng.platform.loan.domain.AmortizationMethod;
 import org.mifosng.platform.loan.domain.InterestCalculationPeriodMethod;
 import org.mifosng.platform.loan.domain.InterestMethod;
@@ -87,12 +89,18 @@ public class CalculationPlatformServiceImpl implements
 	public LoanPayoffReadModel calculatePayoffOn(final Long loanId, final LocalDate payoffDate) {
 		
 		final Loan loan = this.loanRepository.findOne(loanId);
+		if (loan == null) {
+			throw new LoanNotFoundException(loanId);
+		}
 
 		final LoanPayoffSummary payoffSummary = loan.getPayoffSummaryOn(payoffDate);
 
 		final String currencyCode = payoffSummary.getTotalPaidToDate().getCurrencyCode();
 		
 		ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneByCode(currencyCode);
+		if (applicationCurrency == null) {
+			throw new CurrencyNotFoundException(currencyCode);
+		}
 		final int currencyDigitsAfterDecimal = payoffSummary.getTotalPaidToDate().getCurrencyDigitsAfterDecimal();
 
 		CurrencyData currency = new CurrencyData(currencyCode, applicationCurrency.getName(), currencyDigitsAfterDecimal, applicationCurrency.getDisplaySymbol(), applicationCurrency.getNameCode());

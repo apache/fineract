@@ -19,7 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/v1/configurations")
+@Path("/configurations")
 @Component
 @Scope("singleton")
 public class ConfigurationApiResource {

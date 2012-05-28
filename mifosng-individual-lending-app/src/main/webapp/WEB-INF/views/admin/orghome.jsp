@@ -133,9 +133,8 @@
 			removeErrors(placeholderDiv);
 			
 		  	var jsonErrors = JSON.parse(jqXHR.responseText);
-		  	console.log(jsonErrors);
 		  	var valErrors = jsonErrors.errors;
-		  	console.log(valErrors);
+
 		  	var errorArray = new Array();
 		  	var arrayIndex = 0;
 		  	$.each(valErrors, function() {
@@ -152,7 +151,6 @@
 		  		argArray[argArrayIndex] = this.value;
 		  		argArrayIndex++;
 		  	  });
-		  	  console.log(argArray);
 		  	  // hardcoded support for six arguments
 		  	  errorObj.message = jQuery.i18n.prop(this.userMessageGlobalisationCode, argArray[0], argArray[1], argArray[2], argArray[3], argArray[4], argArray[5]);
 		  	  errorObj.value = this.value;
@@ -236,7 +234,6 @@
 				xhr.setRequestHeader("Authorization", "Basic " + base64);
 			},
 			success: function(data, textStatus, jqXHR) {
-					console.log(data);
 					var formHtml = $(templateSelector).render(data);
 					
 					dialogDiv.append(formHtml);
@@ -256,7 +253,6 @@
 				    	});
 				    	
 				    	var newFormData = JSON.stringify($('#entityform').serializeObject());
-				    	console.log(newFormData);
 				    	
 						var jqxhr = $.ajax({
 							  url: postUrl,
@@ -435,7 +431,6 @@
 			  dataType: 'json',
 			  cache: false,
 			  beforeSend: function(xhr) {
-					console.log("base64: " + base64);
 					xhr.setRequestHeader("Authorization", "Basic " + base64);
 			  },
 			  success: function(data, textStatus, jqXHR) {

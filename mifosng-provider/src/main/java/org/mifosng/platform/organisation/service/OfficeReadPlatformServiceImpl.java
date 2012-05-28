@@ -11,7 +11,7 @@ import javax.sql.DataSource;
 import org.joda.time.LocalDate;
 import org.mifosng.data.OfficeData;
 import org.mifosng.data.OfficeLookup;
-import org.mifosng.platform.exceptions.PlatformResourceNotFoundException;
+import org.mifosng.platform.exceptions.OfficeNotFoundException;
 import org.mifosng.platform.infrastructure.JdbcSupport;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.user.domain.AppUser;
@@ -122,9 +122,7 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
 
 			return selectedOffice;
 		} catch (EmptyResultDataAccessException e) {
-			throw new PlatformResourceNotFoundException(
-					"error.msg.office.id.invalid",
-					"Office with identifier {0} does not exist.", officeId);
+			throw new OfficeNotFoundException(officeId);
 		}
 	}
 

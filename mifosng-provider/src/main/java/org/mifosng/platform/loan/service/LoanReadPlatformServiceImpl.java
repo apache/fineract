@@ -19,6 +19,10 @@ import org.mifosng.platform.client.service.ClientReadPlatformService;
 import org.mifosng.platform.currency.domain.ApplicationCurrency;
 import org.mifosng.platform.currency.domain.ApplicationCurrencyRepository;
 import org.mifosng.platform.currency.domain.Money;
+import org.mifosng.platform.exceptions.CurrencyNotFoundException;
+import org.mifosng.platform.exceptions.LoanNotFoundException;
+import org.mifosng.platform.exceptions.LoanProductNotFoundException;
+import org.mifosng.platform.exceptions.LoanTransactionNotFoundException;
 import org.mifosng.platform.loan.domain.Loan;
 import org.mifosng.platform.loan.domain.LoanRepository;
 import org.mifosng.platform.loan.domain.LoanTransaction;
@@ -61,12 +65,16 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 		// need of loan information.
 		AppUser currentUser = context.authenticatedUser();
 
-		Loan loan = this.loanRepository.findOne(loansThatMatch(
-				currentUser.getOrganisation(), loanId));
+		Loan loan = this.loanRepository.findOne(loansThatMatch(currentUser.getOrganisation(), loanId));
+		if (loan == null) {
+			throw new LoanNotFoundException(loanId);
+		}
 
-		ApplicationCurrency currency = this.applicationCurrencyRepository
-				.findOneByCode(loan.getLoanRepaymentScheduleDetail()
-						.getPrincipal().getCurrencyCode());
+		final String currencyCode = loan.getLoanRepaymentScheduleDetail().getPrincipal().getCurrencyCode();
+		ApplicationCurrency currency = this.applicationCurrencyRepository.findOneByCode(currencyCode);
+		if (currency == null) {
+			throw new CurrencyNotFoundException(currencyCode);
+		}
 
 		CurrencyData currencyData = new CurrencyData(currency.getCode(),
 				currency.getName(), currency.getDecimalPlaces(),
@@ -177,13 +185,18 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 		if (loanProducts.size() == 1) {
 			Long allowedProductId = workflowData.getAllowedProducts().get(0).getId();
 			LoanProductData selectedProduct = this.loanProductReadPlatformService.retrieveLoanProduct(allowedProductId);
+			if (selectedProduct == null) {
+				throw new LoanProductNotFoundException(allowedProductId);
+			}
 
 			workflowData.setProductId(selectedProduct.getId());
 			workflowData.setProductName(selectedProduct.getName());
 			workflowData.setSelectedProduct(selectedProduct);
 		} else {
 			LoanProductData selectedProduct = findLoanProductById(loanProducts, productId);
-
+			if (selectedProduct == null) {
+				throw new LoanProductNotFoundException(productId);
+			}
 			workflowData.setProductId(selectedProduct.getId());
 			workflowData.setProductName(selectedProduct.getName());
 			workflowData.setSelectedProduct(selectedProduct);
@@ -219,20 +232,23 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 		// TODO - OPTIMIZE - write simple sql query to fetch back date of
 		// possible next transaction date.
 		Loan loan = this.loanRepository.findOne(loansThatMatch(currentUser.getOrganisation(), loanId));
+		if (loan == null) {
+			throw new LoanNotFoundException(loanId);
+		}
 
-		ApplicationCurrency currency = this.applicationCurrencyRepository
-				.findOneByCode(loan.getLoanRepaymentScheduleDetail()
-						.getPrincipal().getCurrencyCode());
+		final String currencyCode = loan.getLoanRepaymentScheduleDetail().getPrincipal().getCurrencyCode();
+		ApplicationCurrency currency = this.applicationCurrencyRepository.findOneByCode(currencyCode);
+		if (currency == null) {
+			throw new CurrencyNotFoundException(currencyCode);
+		}
 
 		CurrencyData currencyData = new CurrencyData(currency.getCode(),
 				currency.getName(), currency.getDecimalPlaces(),
 				currency.getDisplaySymbol(), currency.getNameCode());
 
-		LocalDate earliestUnpaidInstallmentDate = loan
-				.possibleNextRepaymentDate();
+		LocalDate earliestUnpaidInstallmentDate = loan.possibleNextRepaymentDate();
 		Money possibleNextRepaymentAmount = loan.possibleNextRepaymentAmount();
-		MoneyData possibleNextRepayment = MoneyData.of(currencyData,
-				possibleNextRepaymentAmount.getAmount());
+		MoneyData possibleNextRepayment = MoneyData.of(currencyData, possibleNextRepaymentAmount.getAmount());
 
 		LoanRepaymentData newRepaymentDetails = new LoanRepaymentData();
 		newRepaymentDetails.setDate(earliestUnpaidInstallmentDate);
@@ -250,10 +266,15 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 		// possible next transaction date.
 		Loan loan = this.loanRepository.findOne(loansThatMatch(
 				currentUser.getOrganisation(), loanId));
+		if (loan == null) {
+			throw new LoanNotFoundException(loanId);
+		}
 
-		ApplicationCurrency currency = this.applicationCurrencyRepository
-				.findOneByCode(loan.getLoanRepaymentScheduleDetail()
-						.getPrincipal().getCurrencyCode());
+		final String currencyCode = loan.getLoanRepaymentScheduleDetail().getPrincipal().getCurrencyCode();
+		ApplicationCurrency currency = this.applicationCurrencyRepository.findOneByCode(currencyCode);
+		if (currency == null) {
+			throw new CurrencyNotFoundException(currencyCode);
+		}
 
 		CurrencyData currencyData = new CurrencyData(currency.getCode(),
 				currency.getName(), currency.getDecimalPlaces(),
@@ -271,21 +292,25 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 	}
 
 	@Override
-	public LoanRepaymentData retrieveLoanRepaymentDetails(Long loanId,
-			Long repaymentId) {
+	public LoanRepaymentData retrieveLoanRepaymentDetails(Long loanId, Long transactionId) {
 
 		AppUser currentUser = context.authenticatedUser();
 
-		LoanTransaction transaction = this.loanTransactionRepository
-				.findOne(loanTransactionsThatMatch(
-						currentUser.getOrganisation(), repaymentId));
+		Loan loan = this.loanRepository.findOne(loansThatMatch(currentUser.getOrganisation(), loanId));
+		if (loan == null) {
+			throw new LoanNotFoundException(loanId);
+		}
 
-		Loan loan = this.loanRepository.findOne(loansThatMatch(
-				currentUser.getOrganisation(), loanId));
+		final String currencyCode = loan.getLoanRepaymentScheduleDetail().getPrincipal().getCurrencyCode();
+		ApplicationCurrency currency = this.applicationCurrencyRepository.findOneByCode(currencyCode);
+		if (currency == null) {
+			throw new CurrencyNotFoundException(currencyCode);
+		}
 
-		ApplicationCurrency currency = this.applicationCurrencyRepository
-				.findOneByCode(loan.getLoanRepaymentScheduleDetail()
-						.getPrincipal().getCurrencyCode());
+		LoanTransaction transaction = this.loanTransactionRepository.findOne(loanTransactionsThatMatch(currentUser.getOrganisation(), transactionId));
+		if (transaction == null) {
+			throw new LoanTransactionNotFoundException(transactionId);
+		}
 
 		CurrencyData currencyData = new CurrencyData(currency.getCode(),
 				currency.getName(), currency.getDecimalPlaces(),
@@ -294,7 +319,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 		LocalDate date = transaction.getTransactionDate();
 
 		LoanRepaymentData loanRepaymentData = new LoanRepaymentData();
-		loanRepaymentData.setId(repaymentId);
+		loanRepaymentData.setId(transactionId);
 		loanRepaymentData.setTotal(total);
 		loanRepaymentData.setDate(date);
 

@@ -4,6 +4,7 @@ import static org.mifosng.platform.Specifications.officesThatMatch;
 
 import org.mifosng.data.command.OfficeCommand;
 import org.mifosng.platform.exceptions.NoAuthorizationException;
+import org.mifosng.platform.exceptions.OfficeNotFoundException;
 import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
 import org.mifosng.platform.organisation.domain.Office;
 import org.mifosng.platform.organisation.domain.OfficeRepository;
@@ -42,6 +43,9 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
 			validator.validateForCreate();
 			
 			Office parent = validateUserPriviledgeOnOfficeAndRetrieve(currentUser, command.getParentId());
+			if (parent == null) {
+				throw new OfficeNotFoundException(command.getParentId());
+			}
 	
 			Office office = Office.createNew(currentUser.getOrganisation(), parent, command.getName(), command.getOpeningDate(), command.getExternalId());
 			
@@ -70,11 +74,17 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
 			validator.validateForUpdate();
 			
 			Office office = validateUserPriviledgeOnOfficeAndRetrieve(currentUser, command.getId());
+			if (office == null) {
+				throw new OfficeNotFoundException(command.getId());
+			}
 			
 			office.update(command);
 			
 			if (!command.isRootOffice() && command.getParentId() != null) {
 				Office parent = validateUserPriviledgeOnOfficeAndRetrieve(currentUser, command.getParentId());
+				if (parent == null) {
+					throw new OfficeNotFoundException(command.getParentId());
+				}
 				office.update(parent);
 			}
 	
@@ -109,6 +119,9 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
 	private Office validateUserPriviledgeOnOfficeAndRetrieve(AppUser currentUser, Long officeId) {
 		
 		Office userOffice = this.officeRepository.findOne(officesThatMatch(currentUser.getOrganisation(), currentUser.getOffice().getId()));
+		if (userOffice == null) {
+			throw new OfficeNotFoundException(currentUser.getOffice().getId());
+		}
 		
 		if (userOffice.doesNotHaveAnOfficeInHierarchyWithId(officeId)) {
 			throw new NoAuthorizationException("User does not have sufficient priviledges to act on the provided office.");

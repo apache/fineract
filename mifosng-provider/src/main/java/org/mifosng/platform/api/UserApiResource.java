@@ -25,7 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/v1/users")
+@Path("/users")
 @Component
 @Scope("singleton")
 public class UserApiResource {

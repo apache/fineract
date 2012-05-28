@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 import org.mifosng.data.EntityIdentifier;
 import org.mifosng.data.command.LoanProductCommand;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
-import org.mifosng.platform.exceptions.PlatformResourceNotFoundException;
+import org.mifosng.platform.exceptions.LoanProductNotFoundException;
 import org.mifosng.platform.loan.domain.AmortizationMethod;
 import org.mifosng.platform.loan.domain.InterestCalculationPeriodMethod;
 import org.mifosng.platform.loan.domain.InterestMethod;
@@ -81,7 +81,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
 		
 		LoanProduct product = this.loanProductRepository.findOne(productThatMatches(currentUser.getOrganisation(), command.getId()));
 		if (product == null) {
-			throw new PlatformResourceNotFoundException("error.msg.loanproduct.id.invalid", "Loan product with identifier {0} does not exist.", command.getId());
+			throw new LoanProductNotFoundException(command.getId());
 		}
 		
 		product.update(command);

@@ -14,7 +14,7 @@ import org.mifosng.data.EnumOptionData;
 import org.mifosng.data.LoanProductData;
 import org.mifosng.data.MoneyData;
 import org.mifosng.platform.currency.service.CurrencyReadPlatformService;
-import org.mifosng.platform.exceptions.PlatformResourceNotFoundException;
+import org.mifosng.platform.exceptions.LoanProductNotFoundException;
 import org.mifosng.platform.infrastructure.JdbcSupport;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.user.domain.AppUser;
@@ -57,7 +57,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 	
 			return productData;
 		} catch (EmptyResultDataAccessException e) {
-			throw new PlatformResourceNotFoundException("error.msg.loanproduct.id.invalid", "Loan product with identifier {0} does not exist.", loanProductId);
+			throw new LoanProductNotFoundException(loanProductId);
 		}
 	}
 	
