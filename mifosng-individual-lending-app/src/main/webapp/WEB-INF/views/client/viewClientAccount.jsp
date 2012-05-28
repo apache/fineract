@@ -240,7 +240,6 @@ $(document).ready(function() {
 					  contentType: 'application/json',
 					  dataType: 'json',
 					  beforeSend: function(xhr) {
-							console.log("base64: " + base64);
 				            xhr.setRequestHeader("Authorization", "Basic " + base64);
 					  },
 					  success: function(data, textStatus, jqXHR) {
@@ -594,8 +593,21 @@ $(document).ready(function() {
 					});
 					$('button.approveloan span').text(jQuery.i18n.prop('dialog.button.approve.loan'));
 					
-					$('.deleteloan').button().click(function(e) {
+					$('.undoapproveloan').button().click(function(e) {
 						
+						var linkId = this.id;
+						var loanId = linkId.replace("undoapprovebtn", "");
+						var postUrl = baseApiUrl + 'loans/' + loanId + '?command=undoapproval';
+						var templateSelector = "#undoStateTransitionLoanFormTemplate";
+						var width = 500; 
+						var height = 350;
+						var defaultOffset = offsetToSubmittedDate;
+						popupDialogWithPostOnlyFormView(postUrl, 'dialog.title.undo.loan.approval', templateSelector, width, height, currentTabIndex, offsetToSubmittedDate, defaultOffset, maxOffset)
+					    e.preventDefault();
+					});
+					$('button.undoapproveloan span').text(jQuery.i18n.prop('dialog.button.undo.loan.approval'));
+					
+					$('.deleteloan').button().click(function(e) {
 						var linkId = this.id;
 						var loanId = linkId.replace("deletebtn", "");
 						var url = baseApiUrl + 'loans/' + loanId;
@@ -608,30 +620,6 @@ $(document).ready(function() {
 					    e.preventDefault();
 					});
 					$('button.deleteloan span').text(jQuery.i18n.prop('dialog.button.delete.loan'));
-					
-					$('.undoapproveloan').button().click(function(e) {
-						
-						var linkId = this.id;
-						var loanId = linkId.replace("undoapprovebtn", "");
-						var postUrl = baseApiUrl + 'loans/' + loanId + '/undo?command=undoapproval';
-						var width = 400; 
-						var height = 225;
-						popupConfirmationDialogAndPost(postUrl, 'POST', 'dialog.title.undo.loan.approval', width, height, currentTabIndex);
-					    e.preventDefault();
-					});
-					$('button.undoapproveloan span').text(jQuery.i18n.prop('dialog.button.undo.loan.approval'));
-					
-					$('.undodisbursalloan').button().click(function(e) {
-						
-						var linkId = this.id;
-						var loanId = linkId.replace("undodisbursalbtn", "");
-						var postUrl = baseApiUrl + 'loans/' + loanId + '/undo?command=undodisbursal';
-						var width = 400; 
-						var height = 150;
-						popupConfirmationDialogAndPost(postUrl, 'POST', 'dialog.title.undo.loan.disbursal', width, height, currentTabIndex);
-					    e.preventDefault();
-					});
-					$('button.undodisbursalloan span').text(jQuery.i18n.prop('dialog.button.undo.loan.disbursal'));
 					
 					$('.disburseloan').button().click(function(e) {
 						
@@ -646,6 +634,20 @@ $(document).ready(function() {
 					    e.preventDefault();
 					});
 					$('button.disburseloan span').text(jQuery.i18n.prop('dialog.button.disburse.loan'));
+					
+					$('.undodisbursalloan').button().click(function(e) {
+						
+						var linkId = this.id;
+						var loanId = linkId.replace("undodisbursalbtn", "");
+						var postUrl = baseApiUrl + 'loans/' + loanId + '?command=undodisbursal';
+						var templateSelector = "#undoStateTransitionLoanFormTemplate";
+						var width = 500; 
+						var height = 350;
+						var defaultOffset = offsetToApprovalDate;
+						popupDialogWithPostOnlyFormView(postUrl, 'dialog.title.undo.loan.disbursal', templateSelector, width, height, currentTabIndex, offsetToSubmittedDate, defaultOffset, maxOffset)
+					    e.preventDefault();
+					});
+					$('button.undodisbursalloan span').text(jQuery.i18n.prop('dialog.button.undo.loan.disbursal'));
 					
 					$('.repaymentloan').button().click(function(e) {
 						

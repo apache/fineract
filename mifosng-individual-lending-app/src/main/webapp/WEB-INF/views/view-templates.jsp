@@ -804,11 +804,20 @@
     <div id="formerrors"></div>
 
 	<input type="hidden" id="dateFormat" name="dateFormat" value="dd MMMM yyyy" />
-	<label for="eventDateFormatted"><spring:message code="label.loan.rejected.on"/></label>
+	<label for="eventDateFormatted"><spring:message code="label.loan.on"/></label>
 	<input id="eventDateFormatted" name="eventDateFormatted" title="" class="datepickerfield" />
 
 	<label for="comment"><spring:message code="label.loan.action.note"/></label>
 	<textarea rows="3" cols="53" id="comment" name="comment"></textarea>
+</form>
+</script>
+
+<script id="undoStateTransitionLoanFormTemplate" type="text/x-jquery-tmpl">
+<form id="entityform">
+    <div id="formerrors"></div>
+
+	<label for="comment"><spring:message code="label.loan.action.note"/></label>
+	<textarea rows="6" cols="53" id="comment" name="comment"></textarea>
 </form>
 </script>
 

@@ -29,10 +29,10 @@ import org.mifosng.data.command.CalculateLoanScheduleCommand;
 import org.mifosng.data.command.LoanStateTransitionCommand;
 import org.mifosng.data.command.LoanTransactionCommand;
 import org.mifosng.data.command.SubmitLoanApplicationCommand;
-import org.mifosng.data.command.UndoLoanApprovalCommand;
-import org.mifosng.data.command.UndoLoanDisbursalCommand;
+import org.mifosng.data.command.UndoStateTransitionCommand;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.ApiJSONFormattingService;
+import org.mifosng.platform.exceptions.UnrecognizedQueryParamException;
 import org.mifosng.platform.loan.service.CalculationPlatformService;
 import org.mifosng.platform.loan.service.LoanReadPlatformService;
 import org.mifosng.platform.loan.service.LoanWritePlatformService;
@@ -70,8 +70,8 @@ public class LoansApiResource {
 
 	@GET
 	@Path("template")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON })
+	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+	@Produces({ MediaType.APPLICATION_JSON})
 	public String retrieveDetailsForNewLoanApplicationStepOne(
 			@QueryParam("clientId") final Long clientId,
 			@QueryParam("productId") final Long productId,
@@ -88,8 +88,8 @@ public class LoansApiResource {
 
 	@GET
 	@Path("{loanId}")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON })
+	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+	@Produces({ MediaType.APPLICATION_JSON})
 	public String retrieveLoanAccountDetails(
 			@PathParam("loanId") final Long loanId, @Context UriInfo uriInfo) {
 
@@ -103,8 +103,8 @@ public class LoansApiResource {
 	}
 
 	@POST
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON })
+	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+	@Produces({ MediaType.APPLICATION_JSON})
 	public Response calculateLoanSchedule(
 			@QueryParam("command") final String commandParam,
 			final SubmitLoanApplicationCommand command) {
@@ -170,8 +170,8 @@ public class LoansApiResource {
 
 	@DELETE
 	@Path("{loanId}")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON })
+	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+	@Produces({ MediaType.APPLICATION_JSON})
 	public Response deleteLoanApplication(@PathParam("loanId") final Long loanId) {
 
 		EntityIdentifier identifier = this.loanWritePlatformService
@@ -182,10 +182,9 @@ public class LoansApiResource {
 
 	@POST
 	@Path("{loanId}")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public Response stateTransitions(@PathParam("loanId") final Long loanId,
-			@QueryParam("command") final String commandParam,
+	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+	@Produces({ MediaType.APPLICATION_JSON})
+	public Response stateTransitions(@PathParam("loanId") final Long loanId, @QueryParam("command") final String commandParam,
 			final LoanStateTransitionCommand command) {
 
 		LocalDate eventDate = this.apiDataConversionService.convertFrom(
@@ -194,63 +193,47 @@ public class LoansApiResource {
 
 		command.setLoanId(loanId);
 		command.setEventDate(eventDate);
+		
+		Response response = null;
 
-		if (StringUtils.isNotBlank(commandParam)
-				&& commandParam.trim().equalsIgnoreCase("reject")) {
-			EntityIdentifier identifier = this.loanWritePlatformService
-					.rejectLoan(command);
-			return Response.ok().entity(identifier).build();
-		} else if (StringUtils.isNotBlank(commandParam)
-				&& commandParam.trim().equalsIgnoreCase("withdrewbyclient")) {
-			EntityIdentifier identifier = this.loanWritePlatformService
-					.withdrawLoan(command);
-			return Response.ok().entity(identifier).build();
-		} else if (StringUtils.isNotBlank(commandParam)
-				&& commandParam.trim().equalsIgnoreCase("approve")) {
-			EntityIdentifier identifier = this.loanWritePlatformService
-					.approveLoanApplication(command);
-			return Response.ok().entity(identifier).build();
-		} else if (StringUtils.isNotBlank(commandParam)
-				&& commandParam.trim().equalsIgnoreCase("disburse")) {
-			EntityIdentifier identifier = this.loanWritePlatformService
-					.disburseLoan(command);
-			return Response.ok().entity(identifier).build();
+		if (is(commandParam, "reject")) {
+			EntityIdentifier identifier = this.loanWritePlatformService.rejectLoan(command);
+			response = Response.ok().entity(identifier).build();
+		} else if (is(commandParam, "withdrewbyclient")) {
+			EntityIdentifier identifier = this.loanWritePlatformService.withdrawLoan(command);
+			response = Response.ok().entity(identifier).build();
+		} else if (is(commandParam, "approve")) {
+			EntityIdentifier identifier = this.loanWritePlatformService.approveLoanApplication(command);
+			response = Response.ok().entity(identifier).build();
+		} else if (is(commandParam, "disburse")) {
+			EntityIdentifier identifier = this.loanWritePlatformService.disburseLoan(command);
+			response = Response.ok().entity(identifier).build();
+		}
+		
+		UndoStateTransitionCommand undoCommand = new UndoStateTransitionCommand(loanId, command.getComment());
+		if (is(commandParam, "undoapproval")) {
+			EntityIdentifier identifier = this.loanWritePlatformService.undoLoanApproval(undoCommand);
+			response = Response.ok().entity(identifier).build();
+		} else if (is(commandParam, "undodisbursal")) {
+			EntityIdentifier identifier = this.loanWritePlatformService.undoLoanDisbursal(undoCommand);
+			response = Response.ok().entity(identifier).build();
+		}
+		
+		if (response == null) {
+			throw new UnrecognizedQueryParamException("command", commandParam);
 		}
 
-		return Response.ok().build();
+		return response;
 	}
 
-	@POST
-	@Path("{loanId}/undo")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public Response undoStateTransitions(
-			@PathParam("loanId") final Long loanId,
-			@QueryParam("command") final String commandParam) {
-
-		if (StringUtils.isNotBlank(commandParam)
-				&& commandParam.trim().equalsIgnoreCase("undoapproval")) {
-			UndoLoanApprovalCommand undoCommand = new UndoLoanApprovalCommand(
-					loanId);
-			EntityIdentifier identifier = this.loanWritePlatformService
-					.undoLoanApproval(undoCommand);
-			return Response.ok().entity(identifier).build();
-		} else if (StringUtils.isNotBlank(commandParam)
-				&& commandParam.trim().equalsIgnoreCase("undodisbursal")) {
-			UndoLoanDisbursalCommand undoCommand = new UndoLoanDisbursalCommand(
-					loanId);
-			EntityIdentifier identifier = this.loanWritePlatformService
-					.undloLoanDisbursal(undoCommand);
-			return Response.ok().entity(identifier).build();
-		}
-
-		return Response.ok().build();
+	private boolean is(final String commandParam, final String commandValue) {
+		return StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase(commandValue);
 	}
 
 	@POST
 	@Path("{loanId}/transactions")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON })
+	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+	@Produces({ MediaType.APPLICATION_JSON})
 	public Response executeLoanTransaction(
 			@PathParam("loanId") final Long loanId,
 			@QueryParam("transactionType") final String transactionType,
@@ -282,8 +265,8 @@ public class LoansApiResource {
 
 	@GET
 	@Path("{loanId}/transactions/template")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON })
+	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+	@Produces({ MediaType.APPLICATION_JSON})
 	public String retrieveNewRepaymentDetails(
 			@PathParam("loanId") final Long loanId,
 			@QueryParam("type") final String transactionType,
@@ -308,8 +291,8 @@ public class LoansApiResource {
 
 	@GET
 	@Path("{loanId}/transactions/{repaymentId}")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON })
+	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+	@Produces({ MediaType.APPLICATION_JSON})
 	public String retrieveRepaymentDetails(
 			@PathParam("loanId") final Long loanId,
 			@PathParam("repaymentId") final Long repaymentId,
@@ -326,8 +309,8 @@ public class LoansApiResource {
 
 	@PUT
 	@Path("{loanId}/transactions/{repaymentId}")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+	@Produces({ MediaType.APPLICATION_JSON})
 	public Response adjustLoanTransaction(
 			@PathParam("loanId") final Long loanId,
 			@PathParam("repaymentId") final Long repaymentId,

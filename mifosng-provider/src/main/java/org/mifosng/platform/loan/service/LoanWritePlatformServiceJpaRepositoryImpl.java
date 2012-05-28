@@ -17,8 +17,7 @@ import org.mifosng.data.command.CalculateLoanScheduleCommand;
 import org.mifosng.data.command.LoanStateTransitionCommand;
 import org.mifosng.data.command.LoanTransactionCommand;
 import org.mifosng.data.command.SubmitLoanApplicationCommand;
-import org.mifosng.data.command.UndoLoanApprovalCommand;
-import org.mifosng.data.command.UndoLoanDisbursalCommand;
+import org.mifosng.data.command.UndoStateTransitionCommand;
 import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.client.domain.ClientRepository;
 import org.mifosng.platform.client.domain.Note;
@@ -213,7 +212,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
 	@Transactional
 	@Override
-	public EntityIdentifier undoLoanApproval(final UndoLoanApprovalCommand command) {
+	public EntityIdentifier undoLoanApproval(final UndoStateTransitionCommand command) {
 
 		AppUser currentUser = context.authenticatedUser();
 
@@ -225,8 +224,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		loan.undoApproval(defaultLoanLifecycleStateMachine());
 		this.loanRepository.save(loan);
 		
-		Note note = Note.loanNote(currentUser.getOrganisation(), loan, "Undo of approval.");
-		this.noteRepository.save(note);
+		if (StringUtils.isNotBlank(command.getComment())) {
+			Note note = Note.loanNote(currentUser.getOrganisation(), loan, command.getComment());
+			this.noteRepository.save(note);
+		}
 
 		return new EntityIdentifier(loan.getClient().getId());
 	}
@@ -381,7 +382,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
 	@Transactional
 	@Override
-	public EntityIdentifier undloLoanDisbursal(final UndoLoanDisbursalCommand command) {
+	public EntityIdentifier undoLoanDisbursal(final UndoStateTransitionCommand command) {
 
 		AppUser currentUser = context.authenticatedUser();
 
@@ -398,9 +399,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
 		this.loanRepository.save(loan);
 
-		// TODO - this may not be wanted.
-		Note note = Note.loanNote(currentUser.getOrganisation(), loan, "Undo of disbursal.");
-		this.noteRepository.save(note);
+		if (StringUtils.isNotBlank(command.getComment())) {
+			Note note = Note.loanNote(currentUser.getOrganisation(), loan, command.getComment());
+			this.noteRepository.save(note);
+		}
 		
 		return new EntityIdentifier(loan.getClient().getId());
 	}

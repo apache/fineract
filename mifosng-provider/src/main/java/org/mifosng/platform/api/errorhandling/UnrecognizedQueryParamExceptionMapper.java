@@ -11,6 +11,7 @@ import javax.ws.rs.ext.Provider;
 import org.codehaus.jackson.map.exc.UnrecognizedPropertyException;
 import org.mifosng.data.ApiGlobalErrorResponse;
 import org.mifosng.data.ApiParameterError;
+import org.mifosng.platform.exceptions.UnrecognizedQueryParamException;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -22,16 +23,17 @@ import org.springframework.stereotype.Component;
 @Provider
 @Component
 @Scope("singleton")
-public class UnrecognizedPropertyExceptionMapper implements ExceptionMapper<UnrecognizedPropertyException> {
+public class UnrecognizedQueryParamExceptionMapper implements ExceptionMapper<UnrecognizedQueryParamException> {
 
 	@Override
-	public Response toResponse(UnrecognizedPropertyException exception) {
+	public Response toResponse(UnrecognizedQueryParamException exception) {
 		
-		String parameterName = exception.getUnrecognizedPropertyName();
+		String parameterName = exception.getQueryParamKey();
+		String parameterValue = exception.getQueryParamValue();
 		
-		StringBuilder validationErrorCode = new StringBuilder("error.msg.parameter.unsupported");
-		StringBuilder defaultEnglishMessage = new StringBuilder("The parameter ").append(parameterName).append(" is not supported.");
-		ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(), defaultEnglishMessage.toString(), parameterName, parameterName);
+		StringBuilder validationErrorCode = new StringBuilder("error.msg.query.parameter.value.unsupported");
+		StringBuilder defaultEnglishMessage = new StringBuilder("The query parameter ").append(parameterName).append(" has an unsupported value of: ").append(parameterValue);
+		ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(), defaultEnglishMessage.toString(), parameterName, parameterName, parameterValue);
 		
 		List<ApiParameterError> errors = new ArrayList<ApiParameterError>();		
 		errors.add(error);
