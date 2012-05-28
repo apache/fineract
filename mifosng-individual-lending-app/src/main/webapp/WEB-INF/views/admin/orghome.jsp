@@ -202,20 +202,24 @@
 	    var o = {};
 	    var a = this.serializeArray();
 	    $.each(a, function() {
-	        if (o[this.name] !== undefined) {
-	            if (!o[this.name].push) {
-	                o[this.name] = [o[this.name]];
-	            }
-	            o[this.name].push(this.value || '');
-	        } else {
-	        	
-	        	if (this.name === 'currencies' || this.name === 'notSelectedCurrencies') {
-	        		o[this.name] = new Array();
-	        		o[this.name].push(this.value || '');
-	        	} else {
-	        		o[this.name] = this.value || '';	
-	        	}
-	        }
+	    	if (this.name === 'notSelectedCurrencies') {
+	    		// do not serialize
+	    	} else  {
+	    		if (o[this.name] !== undefined) {
+	  	            if (!o[this.name].push) {
+	  	                o[this.name] = [o[this.name]];
+	  	            }
+	  	            o[this.name].push(this.value || '');
+	  	        } else {
+	  	        	
+	  	        	if (this.name === 'currencies') {
+	  	        		o[this.name] = new Array();
+	  	        		o[this.name].push(this.value || '');
+	  	        	} else {
+	  	        		o[this.name] = this.value || '';	
+	  	        	}
+	  	        }
+	    	}
 	    });
 	    return o;
 	};
@@ -229,7 +233,6 @@
 			dataType: 'json',
 			cache: false,
 			beforeSend: function(xhr) {
-				console.log("base64: " + base64);
 				xhr.setRequestHeader("Authorization", "Basic " + base64);
 			},
 			success: function(data, textStatus, jqXHR) {
@@ -262,10 +265,9 @@
 							  dataType: 'json',
 							  data: newFormData,
 							  cache: false,
-								beforeSend: function(xhr) {
-									console.log("base64: " + base64);
-									xhr.setRequestHeader("Authorization", "Basic " + base64);
-								},
+							  beforeSend: function(xhr) {
+							      xhr.setRequestHeader("Authorization", "Basic " + base64);
+							  },
 							  success: saveSuccessFunction,
 							  error: function(jqXHR, textStatus, errorThrown) {
 							    handleXhrError(jqXHR, textStatus, errorThrown, "#formErrorsTemplate", "#formerrors");
