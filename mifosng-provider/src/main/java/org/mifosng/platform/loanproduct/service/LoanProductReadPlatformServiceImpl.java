@@ -143,15 +143,15 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 			MoneyData toleranceMoney = MoneyData.of(currencyData, tolerance);
 
 			BigDecimal interestRatePerPeriod = rs.getBigDecimal("interestRatePerPeriod");
-			Integer interestRatePeriod = JdbcSupport.getInteger(rs, "interestRatePerPeriodFreq");
+			int interestRatePeriod = JdbcSupport.getInteger(rs, "interestRatePerPeriodFreq");
 			BigDecimal annualInterestRate = rs.getBigDecimal("annualInterestRate");
-			Integer interestMethod = JdbcSupport.getInteger(rs, "interestMethod");
-			Integer interestCalculationInPeriodMethod = JdbcSupport.getInteger(rs, "interestCalculationInPeriodMethod");
+			int interestMethod = JdbcSupport.getInteger(rs, "interestMethod");
+			int interestCalculationInPeriodMethod = JdbcSupport.getInteger(rs, "interestCalculationInPeriodMethod");
 
 			Integer repaidEvery = JdbcSupport.getInteger(rs, "repaidEvery");
-			Integer repaymentFrequency = JdbcSupport.getInteger(rs, "repaymentPeriodFrequency");
+			int repaymentFrequency = JdbcSupport.getInteger(rs, "repaymentPeriodFrequency");
 			Integer numberOfRepayments = JdbcSupport.getInteger(rs, "numberOfRepayments");
-			Integer amortizationMethod = JdbcSupport.getInteger(rs, "amortizationMethod");
+			int amortizationMethod = JdbcSupport.getInteger(rs, "amortizationMethod");
 
 			DateTime createdOn = JdbcSupport.getDateTime(rs, "createdon");
 			DateTime lastModifedOn = JdbcSupport.getDateTime(rs, "modifiedon");
@@ -160,7 +160,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 					interestRatePerPeriod, interestRatePeriod,
 					annualInterestRate, interestMethod, interestCalculationInPeriodMethod,
 					repaidEvery,
-					repaymentFrequency, numberOfRepayments, amortizationMethod,
+					repaymentFrequency, numberOfRepayments,   amortizationMethod,
 					toleranceMoney, createdOn, lastModifedOn);
 		}
 
