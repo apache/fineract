@@ -3174,76 +3174,35 @@ No Request Body
     <a id="roles_list" name="roles_list" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">
 	    <div class="method-description">
-	        <h4>Retrieve list of roles</h4>
-	        <p>Returns all roles.</p>
-	        <p>Example Request: 
-	        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/roles">https://localhost:8443/mifosng-provider/api/v1/roles</a>
-	        </p>
+	        <h4>List Roles</h4>
+	        <p>Example Requests: </p>
+	        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/roles?pretty=true">https://localhost:8443/mifosng-provider/api/v1/roles?pretty=true</a>
+	        <br><br>
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/roles?pretty=true&fields=name">https://localhost:8443/mifosng-provider/api/v1/roles?pretty=true&fields=name</a>
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">GET https://thedomainname/api/v1/roles</code>
-<code class="method-request">GET https://localhost:8443/mifosng-provider/api/v1/roles</code>
-<code class="method-response">
-{
-  "roles": [
-    {
-      "id": 1,
-      "orgId": 1,
-      "name": "Super user",
-      "description": "This role provides all application permissions.",
-      "availablePermissions": [],
-      "selectedPermissions": []
-    },
-    {
-      "id": 2,
-      "orgId": 1,
-      "name": "Field officer",
-      "description": "A field officer role allows the user to add client and loans and view reports but nothing else.",
-      "availablePermissions": [],
-      "selectedPermissions": []
-    },
-    {
-      "id": 3,
-      "orgId": 1,
-      "name": "Data Entry (Portfolio only)",
-      "description": "This role allows a user full permissions around client and loan functionality but nothing else.",
-      "availablePermissions": [],
-      "selectedPermissions": []
-    },
-    {
-      "id": 4,
-      "orgId": 1,
-      "name": "Credit Committe Member",
-      "description": "This role allows a user to approve reject or withdraw loans (with reporting).",
-      "availablePermissions": [],
-      "selectedPermissions": []
-    },
-    {
-      "id": 5,
-      "orgId": 1,
-      "name": "Manager",
-      "description": "This role allows a manager to do anything related to portfolio management and also view all reports.",
-      "availablePermissions": [],
-      "selectedPermissions": []
-    },
-    {
-      "id": 6,
-      "orgId": 1,
-      "name": "new role test",
-      "description": "test new role description...",
-      "availablePermissions": [],
-      "selectedPermissions": []
-    },
-    {
-      "id": 7,
-      "orgId": 1,
-      "name": "new",
-      "description": "test",
-      "availablePermissions": [],
-      "selectedPermissions": []
-    }
-  ]
-}
+<code class="method-response">[ {
+  "id" : 1,
+  "name" : "Super user",
+  "description" : "This role provides all application permissions."
+}, {
+  "id" : 2,
+  "name" : "Field officer",
+  "description" : "A field officer role allows the user to add client and loans and view reports but nothing else."
+}, {
+  "id" : 3,
+  "name" : "Data Entry (Portfolio only)",
+  "description" : "This role allows a user full permissions around client and loan functionality but nothing else."
+}, {
+  "id" : 4,
+  "name" : "Credit Committe Member",
+  "description" : "This role allows a user to approve reject or withdraw loans (with reporting)."
+}, {
+  "id" : 5,
+  "name" : "Manager",
+  "description" : "This role allows a manager to do anything related to portfolio management and also view all reports."
+} ]
 </code>
 	    </div>
 	</div>
@@ -3251,50 +3210,38 @@ No Request Body
     <a id="roles_template" name="roles_template" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">
 	    <div class="method-description">
-	        <h4>Retrieve new role template details</h4>
-	        <p>Returns details for new role screen</p>
-	        <p>Example Request: 
-	        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/roles/template">https://localhost:8443/mifosng-provider/api/v1/roles/template</a>
-	        </p>
+	        <h4>Retrieve Role Details Template</h4>
+                <p>This is a convenience resource.  It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:
+                    <ul>
+                    <li class=normalli>Field Defaults</li>   
+                    <li class=normalli>Allowed Value Lists</li>    
+                    </ul>
+                </p>
+	        <p>Example Request: </p>
+	        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/roles/template?pretty=true">https://localhost:8443/mifosng-provider/api/v1/roles/template?pretty=true</a>
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">GET https://thedomainname/api/v1/roles/template</code>
-<code class="method-request">GET https://localhost:8443/mifosng-provider/api/v1/roles/template</code>
-<code class="method-response">
-{
-  "id": null,
-  "orgId": null,
-  "name": null,
-  "description": null,
-  "availablePermissions": [
-    {
-      "id": 1,
-      "orgId": 1,
-      "name": "User administration ALL",
-      "description": "An application user will have permission to execute all tasks related to user administration.",
-      "code": "USER_ADMINISTRATION_SUPER_USER_ROLE",
-      "groupType": 1
-    },
-    {
-      "id": 2,
-      "orgId": 1,
-      "name": "Organisation adminsitration ALL",
-      "description": "An application user will have permission to execute all tasks related to organisation administration.",
-      "code": "ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE",
-      "groupType": 2
-    },
-    ...
-    ...
-    {
-      "id": 20,
-      "orgId": 1,
-      "name": "Can add a new client.",
-      "description": "Allows an application user to add a new client.",
-      "code": "CAN_ENROLL_NEW_CLIENT_ROLE",
-      "groupType": 3
-    }
-  ],
-  "selectedPermissions": []
+<code class="method-response">{
+  "availablePermissions" : [ {
+    "id" : 1,
+    "name" : "User administration ALL",
+    "description" : "An application user will have permission to execute all tasks related to user administration.",
+    "code" : "USER_ADMINISTRATION_SUPER_USER_ROLE",
+    "groupType" : 1
+  }, {
+    "id" : 2,
+    "name" : "Organisation adminsitration ALL",
+    "description" : "An application user will have permission to execute all tasks related to organisation administration.",
+    "code" : "ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE",
+    "groupType" : 2
+  }, {
+    "id" : 3,
+    "name" : "Portfolio management ALL",
+    "description" : "An application user will have permission to execute all tasks related to portfolio management.",
+    "code" : "PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE",
+    "groupType" : 3
+  }...]
 }
 </code>
 	    </div>
@@ -3303,69 +3250,45 @@ No Request Body
     <a id="roles_retrieve" name="roles_retrieve" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">
 	    <div class="method-description">
-	        <h4>Retrieve existing role details</h4>
-	        <p>Returns details for existing application role</p>
-	        <p>Example Request: 
-	        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/roles/1">https://localhost:8443/mifosng-provider/api/v1/roles/1</a>
-	        </p>
+	        <h4>Retrieve a Role</h4>
+	        <p>Example Requests: </p>
+	        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/roles/1?pretty=true">https://localhost:8443/mifosng-provider/api/v1/roles/1?pretty=true</a>
+                <br><br>
+	        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/roles/1?pretty=true&template=true">https://localhost:8443/mifosng-provider/api/v1/roles/1?pretty=true&template=true</a>
+                <br><br>
+	        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/roles/1?pretty=true&fields=name,selectedPermissions">https://localhost:8443/mifosng-provider/api/v1/roles/1?pretty=true&fields=name,selectedPermissions</a>
 	    </div>
 	    <div class="method-example">
-	        <code class="method-declaration">GET https://thedomainname/api/v1/roles/1</code>
-<code class="method-request">GET https://localhost:8443/mifosng-provider/api/v1/roles/1</code>
-<code class="method-response">
-{
-  "id": 1,
-  "orgId": 1,
-  "name": "Super user",
-  "description": "This role provides all application permissions.",
-  "availablePermissions": [
-    {
-      "id": 5,
-      "orgId": 1,
-      "name": "Can submit new loan application",
-      "description": "Allows an application user to sumit new loan application.",
-      "code": "CAN_SUBMIT_NEW_LOAN_APPLICATION_ROLE",
-      "groupType": 3
-    },
-    ...
-    ...
-    {
-      "id": 19,
-      "orgId": 1,
-      "name": "Can enter a repayment against a loan in the past",
-      "description": "Allows an application user to enter a repayment on the loan where the repayment date is in the past.",
-      "code": "CAN_MAKE_LOAN_REPAYMENT_IN_THE_PAST_ROLE",
-      "groupType": 3
-    },
-    {
-      "id": 20,
-      "orgId": 1,
-      "name": "Can add a new client.",
-      "description": "Allows an application user to add a new client.",
-      "code": "CAN_ENROLL_NEW_CLIENT_ROLE",
-      "groupType": 3
-    }
-  ],
-  "selectedPermissions": [
-    {
-      "id": 1,
-      "orgId": 1,
-      "name": "User administration ALL",
-      "description": "An application user will have permission to execute all tasks related to user administration.",
-      "code": "USER_ADMINISTRATION_SUPER_USER_ROLE",
-      "groupType": 1
-    },
-    ...
-    ...
-    {
-      "id": 2,
-      "orgId": 1,
-      "name": "Organisation adminsitration ALL",
-      "description": "An application user will have permission to execute all tasks related to organisation administration.",
-      "code": "ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE",
-      "groupType": 2
-    }
-  ]
+	        <code class="method-declaration">GET https://thedomainname/api/v1/roles/{roleId}</code>
+<code class="method-response">{
+  "id" : 1,
+  "name" : "Super user",
+  "description" : "This role provides all application permissions.",
+  "selectedPermissions" : [ {
+    "id" : 1,
+    "name" : "User administration ALL",
+    "description" : "An application user will have permission to execute all tasks related to user administration.",
+    "code" : "USER_ADMINISTRATION_SUPER_USER_ROLE",
+    "groupType" : 1
+  }, {
+    "id" : 4,
+    "name" : "Reporting ALL",
+    "description" : "An application user will have permission to execute and view all reports.",
+    "code" : "REPORTING_SUPER_USER_ROLE",
+    "groupType" : 4
+  }, {
+    "id" : 3,
+    "name" : "Portfolio management ALL",
+    "description" : "An application user will have permission to execute all tasks related to portfolio management.",
+    "code" : "PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE",
+    "groupType" : 3
+  }, {
+    "id" : 2,
+    "name" : "Organisation adminsitration ALL",
+    "description" : "An application user will have permission to execute all tasks related to organisation administration.",
+    "code" : "ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE",
+    "groupType" : 2
+  } ]
 }
 </code>
 	    </div>
@@ -3374,18 +3297,17 @@ No Request Body
     <a id="roles_create" name="roles_create" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">
 	    <div class="method-description">
-	        <h4>Create new role</h4>
-	        <p>Adds new application role to the platform.</p>
+	        <h4>Create a New Role</h4>
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">POST https://thedomainname/api/v1/roles</code>
 <code class="method-request">POST https://localhost:8443/mifosng-provider/api/v1/roles
 Content-Type: application/json
 Request body:
-{
-  "name": "Some role name",
-  "description": "A description outlining the purpose of this role in relation to the application.",
-  "selectedItems": ["1", "2", "3"]
+{ 
+ "name": "Another Role Name", 
+ "description": "A description outlining the purpose of this role in relation to the application.", 
+ "permissions": ["1", "2", "3"] 
 }
 </code>
 <code class="method-response">{
@@ -3398,18 +3320,16 @@ Request body:
     <a id="roles_update" name="roles_update" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">
 	    <div class="method-description">
-	        <h4>Update existing role</h4>
-	        <p>Update details of an existing application role.</p>
+	        <h4>Update a Role</h4>
 	    </div>
 	    <div class="method-example">
-	        <code class="method-declaration">PUT https://thedomainname/api/v1/roles/8</code>
+	        <code class="method-declaration">PUT https://thedomainname/api/v1/roles/{roleId}</code>
 <code class="method-request">PUT https://localhost:8443/mifosng-provider/api/v1/roles/8
 Content-Type: application/json
 Request body:
-{
-  "name": "Some role name update",
-  "description": "A description outlining the purpose of this role in relation to the application. [updated]",
-  "selectedItems": ["1", "2", "3", "4", "5"]
+{ 
+ "name": "Updated Role Name", 
+ "permissions": ["1"] 
 }
 </code>
 <code class="method-response">{
@@ -3432,180 +3352,33 @@ Request body:
     <a id="permissions_list" name="permissions_list" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">
 	    <div class="method-description">
-	        <h4>Retrieve list of permissions</h4>
-	        <p>Returns all permissions.</p>
-	        <p>Example Request: 
-	        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/permissions">https://localhost:8443/mifosng-provider/api/v1/permissions</a>
-	        </p>
+	        <h4>List Application Permissions</h4>
+	        <p>Example Requests: </p>
+	        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/permissions?pretty=true">https://localhost:8443/mifosng-provider/api/v1/permissions?pretty=true</a>
+                <br><br>
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/permissions?pretty=true&fields=id,code">https://localhost:8443/mifosng-provider/api/v1/permissions?pretty=true&fields=id,code</a>
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">GET https://thedomainname/api/v1/permissions</code>
-<code class="method-request">GET https://localhost:8443/mifosng-provider/api/v1/permissions</code>
-<code class="method-response">
-{
-  "permissions": [
-    {
-      "id": 1,
-      "orgId": 1,
-      "name": "User administration ALL",
-      "description": "An application user will have permission to execute all tasks related to user administration.",
-      "code": "USER_ADMINISTRATION_SUPER_USER_ROLE",
-      "groupType": 1
-    },
-    {
-      "id": 2,
-      "orgId": 1,
-      "name": "Organisation adminsitration ALL",
-      "description": "An application user will have permission to execute all tasks related to organisation administration.",
-      "code": "ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE",
-      "groupType": 2
-    },
-    {
-      "id": 3,
-      "orgId": 1,
-      "name": "Portfolio management ALL",
-      "description": "An application user will have permission to execute all tasks related to portfolio management.",
-      "code": "PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE",
-      "groupType": 3
-    },
-    {
-      "id": 4,
-      "orgId": 1,
-      "name": "Reporting ALL",
-      "description": "An application user will have permission to execute and view all reports.",
-      "code": "REPORTING_SUPER_USER_ROLE",
-      "groupType": 4
-    },
-    {
-      "id": 5,
-      "orgId": 1,
-      "name": "Can submit new loan application",
-      "description": "Allows an application user to sumit new loan application.",
-      "code": "CAN_SUBMIT_NEW_LOAN_APPLICATION_ROLE",
-      "groupType": 3
-    },
-    {
-      "id": 6,
-      "orgId": 1,
-      "name": "Can submit historic loan application",
-      "description": "Allows an application user to sumit new loan application where the submitted on date is in the past.",
-      "code": "CAN_SUBMIT_HISTORIC_LOAN_APPLICATION_ROLE",
-      "groupType": 3
-    },
-    {
-      "id": 7,
-      "orgId": 1,
-      "name": "Can approve loan application",
-      "description": "Allows an application user to approve a loan application.",
-      "code": "CAN_APPROVE_LOAN_ROLE",
-      "groupType": 3
-    },
-    {
-      "id": 8,
-      "orgId": 1,
-      "name": "Can approve loan application in the past",
-      "description": "Allows an application user to approve a loan application where the approval date is in the past.",
-      "code": "CAN_APPROVE_LOAN_IN_THE_PAST_ROLE",
-      "groupType": 3
-    },
-    {
-      "id": 9,
-      "orgId": 1,
-      "name": "Can reject loan application",
-      "description": "Allows an application user to reject a loan application.",
-      "code": "CAN_REJECT_LOAN_ROLE",
-      "groupType": 3
-    },
-    {
-      "id": 10,
-      "orgId": 1,
-      "name": "Can reject loan application in the past",
-      "description": "Allows an application user to reject a loan application where the rejected date is in the past.",
-      "code": "CAN_REJECT_LOAN_IN_THE_PAST_ROLE",
-      "groupType": 3
-    },
-    {
-      "id": 11,
-      "orgId": 1,
-      "name": "Can withdraw loan application",
-      "description": "Allows an application user to mark loan application as withdrawn by client.",
-      "code": "CAN_WITHDRAW_LOAN_ROLE",
-      "groupType": 3
-    },
-    {
-      "id": 12,
-      "orgId": 1,
-      "name": "Can withdraw loan application in the past",
-      "description": "Allows an application user to mark loan application as withdrawn by client where the withdran on date is in the past.",
-      "code": "CAN_WITHDRAW_LOAN_IN_THE_PAST_ROLE",
-      "groupType": 3
-    },
-    {
-      "id": 13,
-      "orgId": 1,
-      "name": "Can delete submitted loan application",
-      "description": "Allows an application user to complete delete the loan application if it is submitted but not approved.",
-      "code": "CAN_DELETE_LOAN_THAT_IS_SUBMITTED_AND_NOT_APPROVED",
-      "groupType": 3
-    },
-    {
-      "id": 14,
-      "orgId": 1,
-      "name": "Can undo loan approval",
-      "description": "Allows an application user to undo a loan approval.",
-      "code": "CAN_UNDO_LOAN_APPROVAL_ROLE",
-      "groupType": 3
-    },
-    {
-      "id": 15,
-      "orgId": 1,
-      "name": "Can disburse loan",
-      "description": "Allows an application user to disburse a loan application.",
-      "code": "CAN_DISBURSE_LOAN_ROLE",
-      "groupType": 3
-    },
-    {
-      "id": 16,
-      "orgId": 1,
-      "name": "Can disburse loan in the past",
-      "description": "Allows an application user to disburse a loan where the disbursement date is in the past.",
-      "code": "CAN_DISBURSE_LOAN_IN_THE_PAST_ROLE",
-      "groupType": 3
-    },
-    {
-      "id": 17,
-      "orgId": 1,
-      "name": "Can undo loan disbursal",
-      "description": "Allows an application user to undo a loan disbursal if not payments already made.",
-      "code": "CAN_UNDO_LOAN_DISBURSAL_ROLE",
-      "groupType": 3
-    },
-    {
-      "id": 18,
-      "orgId": 1,
-      "name": "Can enter a repayment against a loan",
-      "description": "Allows an application user to enter a repayment on the loan.",
-      "code": "CAN_MAKE_LOAN_REPAYMENT_LOAN_ROLE",
-      "groupType": 3
-    },
-    {
-      "id": 19,
-      "orgId": 1,
-      "name": "Can enter a repayment against a loan in the past",
-      "description": "Allows an application user to enter a repayment on the loan where the repayment date is in the past.",
-      "code": "CAN_MAKE_LOAN_REPAYMENT_IN_THE_PAST_ROLE",
-      "groupType": 3
-    },
-    {
-      "id": 20,
-      "orgId": 1,
-      "name": "Can add a new client.",
-      "description": "Allows an application user to add a new client.",
-      "code": "CAN_ENROLL_NEW_CLIENT_ROLE",
-      "groupType": 3
-    }
-  ]
-}
+<code class="method-response">[ {
+  "id" : 1,
+  "name" : "User administration ALL",
+  "description" : "An application user will have permission to execute all tasks related to user administration.",
+  "code" : "USER_ADMINISTRATION_SUPER_USER_ROLE",
+  "groupType" : 1
+}, {
+  "id" : 2,
+  "name" : "Organisation adminsitration ALL",
+  "description" : "An application user will have permission to execute all tasks related to organisation administration.",
+  "code" : "ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE",
+  "groupType" : 2
+}, {
+  "id" : 3,
+  "name" : "Portfolio management ALL",
+  "description" : "An application user will have permission to execute all tasks related to portfolio management.",
+  "code" : "PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE",
+  "groupType" : 3
+}...]
 </code>
 	    </div>
 	</div>

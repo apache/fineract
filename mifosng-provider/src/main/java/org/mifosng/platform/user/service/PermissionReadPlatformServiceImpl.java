@@ -33,7 +33,7 @@ public class PermissionReadPlatformServiceImpl implements PermissionReadPlatform
 		AppUser currentUser = context.authenticatedUser();
 
 		PermissionMapper mapper = new PermissionMapper();
-		String sql = "select " + mapper.schema() + " where p.org_id = ?";
+		String sql = "select " + mapper.schema() + " where p.org_id = ? order by p.id";
 
 		return this.jdbcTemplate.query(sql, mapper, new Object[] { currentUser
 				.getOrganisation().getId() });
