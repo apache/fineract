@@ -16,3 +16,7 @@ Note that openingData is passed as openingDateFormatted and a dateFormat is prov
 hierarchy update results in exception (prob  solved by using unrecognized parameter exception)
 
 
+Users
+template:   allowedOffices (only id 1 came back)... does allowedOffices and available Roles depending on requested permissions?
+Retrieve a user: selectedRoles- possible json prob availablePermissions is blank... is it always?
+

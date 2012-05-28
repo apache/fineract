@@ -115,8 +115,8 @@
                         <tr class="alt"><td>/v1/loans/{loanId}/transactions/template</td><td><a href="#loans_repaymenttemplate_etc">Retrieve Loan Repayment/Loan Waiver Template</a></td></tr>
                         <tr><td>/v1/offices/template</td><td><a href="#offices_template">Retrieve Office Details Template</a></td></tr>
                         <tr class="alt"><td>/v1/loanproducts/template</td><td><a href="#loanproducts_template">Retrieve Loan Product Details Template</a></td></tr>
-                        <tr><td>/v1/users/template</td><td><a href="#users_template">Retrieve new user template</a></td></tr>
-                        <tr class="alt"><td>/v1/roles/template</td><td><a href="#roles_template">Retrieve new role template</a></td></tr>
+                        <tr><td>/v1/users/template</td><td><a href="#users_template">Retrieve User Details Template</a></td></tr>
+                        <tr class="alt"><td>/v1/roles/template</td><td><a href="#roles_template">Retrieve Role Details Template</a></td></tr>
                     </table>
                 </div>
             </div>
@@ -2944,7 +2944,7 @@ Request Body:
 	        <p>Authenticates the credentials provided and returns the set of permissions allowed.</p>
 	    </div>
 	    <div class="method-example">
-	        <code class="method-declaration">POST https://thedomainname/api/v1/authentication?username={userName}&password={password}</code>
+	        <code class="method-declaration">POST https://thedomainname/api/v1/authentication?username={username}&password={password}</code>
 <code class="method-request">POST https://localhost:8443/mifosng-provider/api/v1/authentication?username=super1&password=demo
 Content-Type: application/json
 No Request Body
@@ -2978,45 +2978,30 @@ No Request Body
 	<div class="method-section">
 	    <div class="method-description">
 	        <h4>Retrieve list of users</h4>
-	        <p>Returns all users.</p>
-	        <p>Example Request: 
-	        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/users">https://localhost:8443/mifosng-provider/api/v1/users</a>
-	        </p>
+	        <p>Example Requests: </p>
+	        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/users?pretty=true">https://localhost:8443/mifosng-provider/api/v1/users?pretty=true</a>
+                <br><br>
+	        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/users?pretty=true&fields=id,username,email,officeName">https://localhost:8443/mifosng-provider/api/v1/users?pretty=true&fields=id,username,email,officeName</a>
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">GET https://thedomainname/api/v1/users</code>
-<code class="method-request">GET https://localhost:8443/mifosng-provider/api/v1/users</code>
-<code class="method-response">
-{
-  "users": [
-    {
-      "id": 1,
-      "orgId": 1,
-      "officeId": 1,
-      "officeName": "Demo MFI Head Office",
-      "username": "mifos",
-      "firstname": "App hello",
-      "lastname": "Administrator",
-      "email": "demomfi@mifos.org",
-      "allowedOffices": [],
-      "availableRoles": [],
-      "selectedRoles": []
-    },
-    {
-      "id": 2,
-      "orgId": 1,
-      "officeId": 1,
-      "officeName": "Demo MFI Head Office",
-      "username": "super1",
-      "firstname": "super",
-      "lastname": "user",
-      "email": "fake@email.com",
-      "allowedOffices": [],
-      "availableRoles": [],
-      "selectedRoles": []
-    }
-  ]
-}
+<code class="method-response">[ {
+  "id" : 6,
+  "officeId" : 1,
+  "officeName" : "change super user",
+  "username" : "committee1",
+  "firstname" : "Committee",
+  "lastname" : "Member",
+  "email" : "fake@email.com"
+}, {
+  "id" : 5,
+  "officeId" : 1,
+  "officeName" : "change super user",
+  "username" : "dataentry1",
+  "firstname" : "Data Entry",
+  "lastname" : "User",
+  "email" : "fake@email.com"
+}...]
 </code>
 	    </div>
 	</div>
@@ -3024,66 +3009,36 @@ No Request Body
     <a id="users_template" name="users_template" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">
 	    <div class="method-description">
-	        <h4>Retrieve new user template details</h4>
-	        <p>Returns details for new user screen</p>
-	        <p>Example Request: 
-	        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/users/template">https://localhost:8443/mifosng-provider/api/v1/users/template</a>
-	        </p>
+	        <h4>Retrieve User Details Template</h4>
+                <p>This is a convenience resource.  It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:
+                    <ul>
+                    <li class=normalli>Field Defaults</li>   
+                    <li class=normalli>Allowed Value Lists</li>    
+                    </ul>
+                </p>
+	        <p>Example Request: </p>
+	        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/users/template?pretty=true">https://localhost:8443/mifosng-provider/api/v1/users/template?pretty=true</a>
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">GET https://thedomainname/api/v1/users/template</code>
-<code class="method-request">GET https://localhost:8443/mifosng-provider/api/v1/users/template</code>
-<code class="method-response">
-{
-  "id": null,
-  "orgId": null,
-  "officeId": null,
-  "officeName": null,
-  "username": null,
-  "firstname": null,
-  "lastname": null,
-  "email": null,
-  "allowedOffices": [
-    {
-      "id": 1,
-      "name": "Demo MFI Head Office",
-      "externalId": "1",
-      "openingDate": "2009-01-01",
-      "hierarchy": ".",
-      "parentName": null,
-      "parentId": 0,
-      "allowedParents": []
-    },
-    {
-      "id": 2,
-      "name": "sub branch 1",
-      "externalId": "2",
-      "openingDate": "2012-01-02",
-      "hierarchy": ".2.",
-      "parentName": "Demo MFI Head Office",
-      "parentId": 1,
-      "allowedParents": []
-    }
-  ],
-  "availableRoles": [
-    {
-      "id": 1,
-      "orgId": 1,
-      "name": "Super user",
-      "description": "This role provides all application permissions.",
-      "availablePermissions": [],
-      "selectedPermissions": []
-    },
-    {
-      "id": 2,
-      "orgId": 1,
-      "name": "Field officer",
-      "description": "A field officer role allows the user to add client and loans and view reports but nothing else.",
-      "availablePermissions": [],
-      "selectedPermissions": []
-    }
-  ],
-  "selectedRoles": []
+<code class="method-response">{
+  "allowedOffices" : [ {
+    "id" : 1,
+    "name" : "change super user"
+  } ],
+  "availableRoles" : [ {
+    "id" : 1,
+    "name" : "Super user",
+    "description" : "This role provides all application permissions.",
+    "availablePermissions" : [ ],
+    "selectedPermissions" : [ ]
+  }, {
+    "id" : 2,
+    "name" : "Field officer",
+    "description" : "A field officer role allows the user to add client and loans and view reports but nothing else.",
+    "availablePermissions" : [ ],
+    "selectedPermissions" : [ ]
+  }...]
 }
 </code>
 	    </div>
@@ -3092,100 +3047,43 @@ No Request Body
     <a id="users_retrieve" name="users_retrieve" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">
 	    <div class="method-description">
-	        <h4>Retrieve existing user details</h4>
-	        <p>Returns details for existing application user</p>
-	        <p>Example Request: 
-	        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/users/1">https://localhost:8443/mifosng-provider/api/v1/users/1</a>
-	        </p>
+	        <h4>Retrieve a User</h4>
+	        <p>Example Requests: </p>
+	        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/users/1?pretty=true">https://localhost:8443/mifosng-provider/api/v1/users/1?pretty=true</a>
+	        <br><br>
+	        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/users/1?pretty=true&template=true">https://localhost:8443/mifosng-provider/api/v1/users/1?pretty=true&template=true</a>
+	        <br><br>
+	        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/users/1?pretty=true&fields=username,officeName">https://localhost:8443/mifosng-provider/api/v1/users/1?pretty=true&fields=username,officeName</a>
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">GET https://thedomainname/api/v1/users/1</code>
-<code class="method-request">GET https://localhost:8443/mifosng-provider/api/v1/users/1</code>
-<code class="method-response">
-{
-  "id": 1,
-  "orgId": 1,
-  "officeId": 1,
-  "officeName": "Demo MFI Head Office",
-  "username": "mifos",
-  "firstname": "App hello",
-  "lastname": "Administrator",
-  "email": "demomfi@mifos.org",
-  "allowedOffices": [
-    {
-      "id": 1,
-      "name": "Demo MFI Head Office",
-      "externalId": "1",
-      "openingDate": "2009-01-01",
-      "hierarchy": ".",
-      "parentName": null,
-      "parentId": 0,
-      "allowedParents": []
-    },
-    {
-      "id": 2,
-      "name": "sub branch 1",
-      "externalId": "2",
-      "openingDate": "2012-01-02",
-      "hierarchy": ".2.",
-      "parentName": "Demo MFI Head Office",
-      "parentId": 1,
-      "allowedParents": []
-    }
-  ],
-  "availableRoles": [
-    {
-      "id": 2,
-      "orgId": 1,
-      "name": "Field officer",
-      "description": "A field officer role allows the user to add client and loans and view reports but nothing else.",
-      "availablePermissions": [],
-      "selectedPermissions": []
-    }
-  ],
-  "selectedRoles": [
-    {
-      "id": 1,
-      "orgId": 1,
-      "name": "Super user",
-      "description": "This role provides all application permissions.",
-      "availablePermissions": [],
-      "selectedPermissions": [
-        {
-          "id": 1,
-          "orgId": 1,
-          "name": "User administration ALL",
-          "description": "An application user will have permission to execute all tasks related to user administration.",
-          "code": "USER_ADMINISTRATION_SUPER_USER_ROLE",
-          "groupType": 1
-        },
-        {
-          "id": 4,
-          "orgId": 1,
-          "name": "Reporting ALL",
-          "description": "An application user will have permission to execute and view all reports.",
-          "code": "REPORTING_SUPER_USER_ROLE",
-          "groupType": 4
-        },
-        {
-          "id": 3,
-          "orgId": 1,
-          "name": "Portfolio management ALL",
-          "description": "An application user will have permission to execute all tasks related to portfolio management.",
-          "code": "PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE",
-          "groupType": 3
-        },
-        {
-          "id": 2,
-          "orgId": 1,
-          "name": "Organisation adminsitration ALL",
-          "description": "An application user will have permission to execute all tasks related to organisation administration.",
-          "code": "ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE",
-          "groupType": 2
-        }
-      ]
-    }
-  ]
+<code class="method-response">{
+  "id" : 1,
+  "officeId" : 1,
+  "officeName" : "change super user",
+  "username" : "mifos",
+  "firstname" : "App",
+  "lastname" : "Administrator",
+  "email" : "demomfi@mifos.org",
+  "selectedRoles" : [ {
+    "id" : 1,
+    "name" : "Super user",
+    "description" : "This role provides all application permissions.",
+    "availablePermissions" : [ ],
+    "selectedPermissions" : [ {
+      "id" : 1,
+      "name" : "User administration ALL",
+      "description" : "An application user will have permission to execute all tasks related to user administration.",
+      "code" : "USER_ADMINISTRATION_SUPER_USER_ROLE",
+      "groupType" : 1
+    }, {
+      "id" : 4,
+      "name" : "Reporting ALL",
+      "description" : "An application user will have permission to execute and view all reports.",
+      "code" : "REPORTING_SUPER_USER_ROLE",
+      "groupType" : 4
+    }...]
+  } ]
 }
 </code>
 	    </div>
@@ -3760,8 +3658,8 @@ Request body:
             <tr class="alt"><td>/v1/loans/{loanId}/transactions/template</td><td><a href="#loans_repaymenttemplate_etc">Retrieve Loan Repayment/Loan Waiver Template</a></td></tr>
             <tr><td>/v1/offices/template</td><td><a href="#offices_template">Retrieve Office Details Template</a></td></tr>
             <tr class="alt"><td>/v1/loanproducts/template</td><td><a href="#loanproducts_template">Retrieve Loan Product Details Template</a></td></tr>
-            <tr><td>/v1/users/template</td><td><a href="#users_template">Retrieve new user template</a></td></tr>
-            <tr class="alt"><td>/v1/roles/template</td><td><a href="#roles_template">Retrieve new role template</a></td></tr>
+            <tr><td>/v1/users/template</td><td><a href="#users_template">Retrieve User Details Template</a></td></tr>
+            <tr class="alt"><td>/v1/roles/template</td><td><a href="#roles_template">Retrieve Role Details Template</a></td></tr>
         </table>
     </div>
 </div>
