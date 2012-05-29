@@ -20,8 +20,9 @@ import org.mifosng.data.AdditionalFieldsSet;
 import org.mifosng.data.reports.GenericResultset;
 import org.mifosng.data.reports.ResultsetColumnHeader;
 import org.mifosng.data.reports.ResultsetDataRow;
+import org.mifosng.platform.exceptions.AdditionalFieldsNotFoundException;
 import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
-import org.mifosng.platform.exceptions.PlatformResourceNotFoundException;
+import org.mifosng.platform.exceptions.ReportNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -311,10 +312,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 			if (rs.next()) {
 				sql = rs.getString("the_sql");
 			} else {
-				throw new PlatformResourceNotFoundException(
-						"error.msg.report.name.not.found",
-						"Reporting Meta Data Entry Not Found", "Input Sql: "
-								+ inputSql);
+				throw new ReportNotFoundException(inputSql);
 			}
 
 			db_statement.close();
@@ -476,18 +474,12 @@ public class ReadExtraDataAndReportingServiceImpl implements
 					} while (rs.next());
 					result.setData(resultsetDataRows);
 				} else {
-					throw new PlatformResourceNotFoundException(
-							"error.msg.type.value.not.found",
-							"Additional Fields Type: " + type
-									+ " Id Not Found for " + id);
+					throw new AdditionalFieldsNotFoundException(type, id);
 				}
 				db_statement3.close();
 				db_statement3 = null;
 			} else {
-				throw new PlatformResourceNotFoundException(
-						"error.msg.set.not.found",
-						"Additional Fields Set Not Found", "Type: " + type
-								+ "   Set: " + set);
+				throw new AdditionalFieldsNotFoundException(type, set);
 			}
 			db_statement1.close();
 			db_statement1 = null;
@@ -576,10 +568,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 				db_statement = null;
 				db_connection.close();
 				db_connection = null;
-				throw new PlatformResourceNotFoundException(
-						"error.msg.set.not.found",
-						"Additional Fields Set Not Found", "Type: " + type
-								+ "   Set: " + set);
+				throw new AdditionalFieldsNotFoundException(type, set);
 			}
 			db_statement.close();
 			db_statement = null;
@@ -618,10 +607,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 				db_statement = null;
 				db_connection.close();
 				db_connection = null;
-				throw new PlatformResourceNotFoundException(
-						"error.msg.type.value.not.found",
-						"Additional Fields Type: " + type
-								+ " Id Not Found for " + id);
+				throw new AdditionalFieldsNotFoundException(type, id);
 			}
 			db_statement.close();
 			db_statement = null;

@@ -6,22 +6,22 @@ import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
 import org.mifosng.data.ApiGlobalErrorResponse;
-import org.mifosng.platform.exceptions.PlatformResourceNotFoundException;
+import org.mifosng.platform.exceptions.AbstractPlatformResourceNotFoundException;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 /**
- * An {@link ExceptionMapper} to map {@link PlatformResourceNotFoundException} thrown by platform into a HTTP API friendly format.
+ * An {@link ExceptionMapper} to map {@link AbstractPlatformResourceNotFoundException} thrown by platform into a HTTP API friendly format.
  * 
- * The {@link PlatformResourceNotFoundException} is thrown when an api call for a resource that is expected to exist does not.
+ * The {@link AbstractPlatformResourceNotFoundException} is thrown when an api call for a resource that is expected to exist does not.
  */
 @Provider
 @Component
 @Scope("singleton")
-public class PlatformResourceNotFoundExceptionMapper implements ExceptionMapper<PlatformResourceNotFoundException> {
+public class PlatformResourceNotFoundExceptionMapper implements ExceptionMapper<AbstractPlatformResourceNotFoundException> {
 
 	@Override
-	public Response toResponse(PlatformResourceNotFoundException exception) {
+	public Response toResponse(AbstractPlatformResourceNotFoundException exception) {
 		
 		ApiGlobalErrorResponse notFoundErrorResponse = ApiGlobalErrorResponse.notFound(exception.getGlobalisationMessageCode(), exception.getDefaultUserMessage(), exception.getDefaultUserMessageArgs());
 		return Response.status(Status.NOT_FOUND).entity(notFoundErrorResponse).build();

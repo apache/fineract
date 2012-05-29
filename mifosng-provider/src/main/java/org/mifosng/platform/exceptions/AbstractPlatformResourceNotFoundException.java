@@ -3,13 +3,13 @@ package org.mifosng.platform.exceptions;
 /**
  * A {@link RuntimeException} thrown when resources that are queried for are not found.
  */
-public class PlatformResourceNotFoundException extends RuntimeException {
+public abstract class AbstractPlatformResourceNotFoundException extends RuntimeException {
 
 	private final String globalisationMessageCode;
 	private final String defaultUserMessage;
 	private final Object[] defaultUserMessageArgs;
 
-	public PlatformResourceNotFoundException(String globalisationMessageCode, String defaultUserMessage, Object... defaultUserMessageArgs) {
+	public AbstractPlatformResourceNotFoundException(String globalisationMessageCode, String defaultUserMessage, Object... defaultUserMessageArgs) {
 		this.globalisationMessageCode = globalisationMessageCode;
 		this.defaultUserMessage = defaultUserMessage;
 		this.defaultUserMessageArgs = defaultUserMessageArgs;

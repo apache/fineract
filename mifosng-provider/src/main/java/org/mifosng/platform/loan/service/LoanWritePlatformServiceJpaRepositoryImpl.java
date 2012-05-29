@@ -24,9 +24,9 @@ import org.mifosng.platform.client.domain.Note;
 import org.mifosng.platform.client.domain.NoteRepository;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.currency.domain.Money;
+import org.mifosng.platform.exceptions.LoanNotFoundException;
 import org.mifosng.platform.exceptions.NoAuthorizationException;
 import org.mifosng.platform.exceptions.PlatformDomainRuleException;
-import org.mifosng.platform.exceptions.PlatformResourceNotFoundException;
 import org.mifosng.platform.loan.domain.AmortizationMethod;
 import org.mifosng.platform.loan.domain.DefaultLoanLifecycleStateMachine;
 import org.mifosng.platform.loan.domain.InterestCalculationPeriodMethod;
@@ -164,7 +164,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
 		Loan loan = this.loanRepository.findOne(loansThatMatch(currentUser.getOrganisation(), loanId));
 		if (loan == null) {
-			throw new PlatformResourceNotFoundException("error.msg.loan.id.invalid", "Loan with identifier {0} does not exist", loanId);
+			throw new LoanNotFoundException(loanId);
 		}
 		
 		if (loan.isNotSubmittedAndPendingApproval()) {
@@ -192,7 +192,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
 		Loan loan = this.loanRepository.findOne(loansThatMatch(currentUser.getOrganisation(), command.getLoanId()));
 		if (loan == null) {
-			throw new PlatformResourceNotFoundException("error.msg.loan.id.invalid", "Loan with identifier {0} does not exist", command.getLoanId());
+			throw new LoanNotFoundException(command.getLoanId());
 		}
 
 		if (this.isBeforeToday(command.getEventDate()) && currentUser.canNotApproveLoanInPast()) {
@@ -218,7 +218,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
 		Loan loan = this.loanRepository.findOne(loansThatMatch(currentUser.getOrganisation(), command.getLoanId()));
 		if (loan == null) {
-			throw new PlatformResourceNotFoundException("error.msg.loan.id.invalid", "Loan with identifier {0} does not exist", command.getLoanId());
+			throw new LoanNotFoundException(command.getLoanId());
 		}
 		
 		loan.undoApproval(defaultLoanLifecycleStateMachine());
@@ -243,7 +243,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
 		Loan loan = this.loanRepository.findOne(loansThatMatch(currentUser.getOrganisation(), command.getLoanId()));
 		if (loan == null) {
-			throw new PlatformResourceNotFoundException("error.msg.loan.id.invalid", "Loan with identifier {0} does not exist", command.getLoanId());
+			throw new LoanNotFoundException(command.getLoanId());
 		}
 
 		if (this.isBeforeToday(command.getEventDate()) && currentUser.canNotRejectLoanInPast()) {
@@ -272,7 +272,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		
 		Loan loan = this.loanRepository.findOne(loansThatMatch(currentUser.getOrganisation(), command.getLoanId()));
 		if (loan == null) {
-			throw new PlatformResourceNotFoundException("error.msg.loan.id.invalid", "Loan with identifier {0} does not exist", command.getLoanId());
+			throw new LoanNotFoundException(command.getLoanId());
 		}
 		
 		if (this.isBeforeToday(command.getEventDate()) && currentUser.canNotWithdrawByClientLoanInPast()) {
@@ -301,7 +301,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
 		Loan loan = this.loanRepository.findOne(loansThatMatch(currentUser.getOrganisation(), command.getLoanId()));
 		if (loan == null) {
-			throw new PlatformResourceNotFoundException("error.msg.loan.id.invalid", "Loan with identifier {0} does not exist", command.getLoanId());
+			throw new LoanNotFoundException(command.getLoanId());
 		}
 
 		if (this.isBeforeToday(command.getEventDate()) && currentUser.canNotDisburseLoanInPast()) {
@@ -388,7 +388,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
 		Loan loan = this.loanRepository.findOne(loansThatMatch(currentUser.getOrganisation(), command.getLoanId()));
 		if (loan == null) {
-			throw new PlatformResourceNotFoundException("error.msg.loan.id.invalid", "Loan with identifier {0} does not exist", command.getLoanId());
+			throw new LoanNotFoundException(command.getLoanId());
 		}
 
 		if (loan.isActualDisbursedOnDateEarlierOrLaterThanExpected()) {
@@ -418,7 +418,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		
 		Loan loan = this.loanRepository.findOne(loansThatMatch(currentUser.getOrganisation(), command.getLoanId()));
 		if (loan == null) {
-			throw new PlatformResourceNotFoundException("error.msg.loan.id.invalid", "Loan with identifier {0} does not exist", command.getLoanId());
+			throw new LoanNotFoundException(command.getLoanId());
 		}
 		
 		if (this.isBeforeToday(command.getTransactionDate()) && currentUser.canNotMakeRepaymentOnLoanInPast()) {
@@ -453,7 +453,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
 		Loan loan = this.loanRepository.findOne(loansThatMatch(currentUser.getOrganisation(), command.getLoanId()));
 		if (loan == null) {
-			throw new PlatformResourceNotFoundException("error.msg.loan.id.invalid", "Loan with identifier {0} does not exist", command.getLoanId());
+			throw new LoanNotFoundException(command.getLoanId());
 		}
 
 		LoanTransaction transactionToAdjust = this.loanTransactionRepository
@@ -495,7 +495,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		
 		Loan loan = this.loanRepository.findOne(loansThatMatch(currentUser.getOrganisation(), command.getLoanId()));
 		if (loan == null) {
-			throw new PlatformResourceNotFoundException("error.msg.loan.id.invalid", "Loan with identifier {0} does not exist", command.getLoanId());
+			throw new LoanNotFoundException(command.getLoanId());
 		}
 		
 		Money waived = Money.of(loan.getLoanRepaymentScheduleDetail()
