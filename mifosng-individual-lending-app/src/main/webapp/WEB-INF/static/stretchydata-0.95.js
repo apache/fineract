@@ -158,7 +158,7 @@
 	}
 	;
 	viewExtraDataErrorFunction = function(jqXHR, textStatus, errorThrown) {
-		alert(jqXHR.responseText);
+		alert("err: " + jqXHR.responseText);
 	};
 
 	function viewExtraData(url, basicAuthKey, datasetType, datasetName, datasetPKValue, dsnDivName) {
@@ -174,7 +174,6 @@
 	}
 
 	popupEditErrorFunction = function(jqXHR, textStatus, errorThrown) {
-		alert("error");
 		handleXhrError(jqXHR, textStatus, errorThrown, "#formErrorsTemplate", "#formerrors");
 	};
 	popupEditSuccessFunction = function(data, textStatus, jqXHR) {
@@ -392,7 +391,7 @@
 				},
 				success : function(data, textStatus, jqXHR) {
 					currentEditPopup.dialogDiv.dialog("close");
-					viewExtraData(currentEditPopup.baseUrl,
+					viewExtraData(currentEditPopup.baseUrl, basicAuthKey, 
 							currentEditPopup.datasetType,
 							currentEditPopup.datasetName,
 							currentEditPopup.datasetPKValue,
@@ -468,6 +467,8 @@
 
 	function handleXhrError(jqXHR, textStatus, errorThrown, templateSelector,
 			placeholderDiv) {
+		
+		alert("Status: " + jqXHR.status + "     textStatus: " + textStatus + "     errorThrown: " + errorThrown + "     templateSelector: " + templateSelector + "     placeholderDiv: " + placeholderDiv);
 		if (jqXHR.status === 0) {
 			alert('Not connect.\n Verify Network.');
 		} else if (jqXHR.status == 404) {

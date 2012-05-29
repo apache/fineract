@@ -433,9 +433,9 @@ public class ReadExtraDataAndReportingServiceImpl implements
 					rsch.setColumnLength(rsmd.getInt("data_length"));
 					rsch.setColumnDisplayType(rsmd.getString("display_type"));
 					allowedListId = rsmd.getInt("allowed_list_id");
-					if (allowedListId != null) {
+					if (allowedListId > 0) {
 
-						logger.info("allowedListId != null: Column: " + rsch.getColumnName());
+						//logger.info("allowedListId != null: Column: " + rsch.getColumnName());
 						sql = "select v.`name` from stretchydata_allowed_value v where allowed_list_id = "
 								+ allowedListId + " order by id";
 						ResultSet rsValues = db_statement2.executeQuery(sql);
