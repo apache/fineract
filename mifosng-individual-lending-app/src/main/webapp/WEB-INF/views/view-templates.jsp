@@ -804,11 +804,11 @@
     <div id="formerrors"></div>
 
 	<input type="hidden" id="dateFormat" name="dateFormat" value="dd MMMM yyyy" />
-	<label for="eventDateFormatted"><spring:message code="label.loan.on"/></label>
-	<input id="eventDateFormatted" name="eventDateFormatted" title="" class="datepickerfield" />
+	<label for="eventDate"><spring:message code="label.loan.on"/></label>
+	<input id="eventDate" name="eventDate" title="" class="datepickerfield" />
 
-	<label for="comment"><spring:message code="label.loan.action.note"/></label>
-	<textarea rows="3" cols="53" id="comment" name="comment"></textarea>
+	<label for="note"><spring:message code="label.loan.action.note"/></label>
+	<textarea rows="3" cols="53" id="note" name="note"></textarea>
 </form>
 </script>
 
@@ -816,8 +816,8 @@
 <form id="entityform">
     <div id="formerrors"></div>
 
-	<label for="comment"><spring:message code="label.loan.action.note"/></label>
-	<textarea rows="6" cols="53" id="comment" name="comment"></textarea>
+	<label for="note"><spring:message code="label.loan.action.note"/></label>
+	<textarea rows="6" cols="53" id="note" name="note"></textarea>
 </form>
 </script>
 
@@ -826,14 +826,14 @@
     <div id="formerrors"></div>
 
 	<input type="hidden" id="dateFormat" name="dateFormat" value="dd MMMM yyyy" />
-	<label for="transactionDateFormatted"><spring:message code="label.loan.transaction.on"/></label>
-	<input id="transactionDateFormatted" name="transactionDateFormatted" cssClass="text ui-widget-content ui-corner-all" title="" class="datepickerfield" value="{{=$ctx.globalDate(date)}}"/>
+	<label for="transactionDate"><spring:message code="label.loan.transaction.on"/></label>
+	<input id="transactionDate" name="transactionDate" class="text ui-widget-content ui-corner-all" title="" class="datepickerfield" value="{{=$ctx.globalDate(date)}}"/>
 
-	<label for="transactionAmountFormatted"><spring:message code="label.loan.transaction.amount"/></label>
-	<input id="transactionAmountFormatted" name="transactionAmountFormatted" cssClass="text ui-widget-content ui-corner-all" title="" value="{{=$ctx.money(total)}}" />
+	<label for="transactionAmount"><spring:message code="label.loan.transaction.amount"/></label>
+	<input id="transactionAmount" name="transactionAmount" class="text ui-widget-content ui-corner-all" title="" value="{{=$ctx.money(total)}}" />
 
-	<label for="comment"><spring:message code="label.loan.action.note"/></label>
-	<textarea rows="3" cols="53" id="comment" name="comment" cssClass="text ui-widget-content ui-corner-all"></textarea>
+	<label for="note"><spring:message code="label.loan.action.note"/></label>
+	<textarea rows="3" cols="53" id="note" name="note" class="text ui-widget-content ui-corner-all"></textarea>
 </form>
 </script>
 

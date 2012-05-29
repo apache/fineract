@@ -1,4 +1,4 @@
-package org.mifosng.data.command;
+package org.mifosng.platform.api.commands;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.mifosng.data.ApiParameterError;
-import org.mifosng.data.command.CalculateLoanScheduleCommand;
-import org.mifosng.data.command.SubmitLoanApplicationCommand;
+import org.mifosng.platform.api.commands.CalculateLoanScheduleCommand;
+import org.mifosng.platform.api.commands.SubmitLoanApplicationCommand;
 import org.mifosng.platform.exceptions.PlatformApiDataValidationException;
 
 public class SubmitLoanApplicationCommandValidator {

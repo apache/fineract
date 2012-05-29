@@ -19,15 +19,15 @@ import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.mifosng.data.LoanSchedule;
-import org.mifosng.data.command.CalculateLoanScheduleCommand;
-import org.mifosng.data.command.ImportLoanCommand;
-import org.mifosng.data.command.ImportLoanRepaymentsCommand;
-import org.mifosng.data.command.LoanStateTransitionCommand;
-import org.mifosng.data.command.LoanTransactionCommand;
-import org.mifosng.data.command.SubmitApproveDisburseLoanCommand;
-import org.mifosng.data.command.SubmitLoanApplicationCommand;
+import org.mifosng.platform.api.commands.CalculateLoanScheduleCommand;
 import org.mifosng.platform.api.commands.ClientCommand;
 import org.mifosng.platform.api.commands.ImportClientCommand;
+import org.mifosng.platform.api.commands.ImportLoanCommand;
+import org.mifosng.platform.api.commands.ImportLoanRepaymentsCommand;
+import org.mifosng.platform.api.commands.LoanStateTransitionCommand;
+import org.mifosng.platform.api.commands.LoanTransactionCommand;
+import org.mifosng.platform.api.commands.SubmitApproveDisburseLoanCommand;
+import org.mifosng.platform.api.commands.SubmitLoanApplicationCommand;
 import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.client.domain.ClientRepository;
 import org.mifosng.platform.currency.domain.Money;
@@ -140,12 +140,12 @@ public class ImportPlatformServiceImpl implements ImportPlatformService {
 			
 			LoanStateTransitionCommand approveLoanCommand = combinedCommand.getApproveLoanCommand();
 			if (approveLoanCommand != null) {
-				loan.approve(approveLoanCommand.getEventDate(), loanLifecycleStateMachine);
+				loan.approve(approveLoanCommand.getEventLocalDate(), loanLifecycleStateMachine);
 			}
 			
 			LoanStateTransitionCommand disburseLoanCommand = combinedCommand.getDisburseLoanCommand();
 			if (disburseLoanCommand != null) {
-				loan.disburse(disburseLoanCommand.getEventDate(), loanLifecycleStateMachine);
+				loan.disburse(disburseLoanCommand.getEventLocalDate(), loanLifecycleStateMachine);
 			}
 			
 			newLoanCollection.add(loan);
@@ -173,9 +173,9 @@ public class ImportPlatformServiceImpl implements ImportPlatformService {
 		for (LoanTransactionCommand repaymentDetail : command.getRepayments()) {
 			Loan loan = findLoanByIdentifier(allLoans, repaymentDetail.getLoanId().toString());
 			
-			Money repaymentAmount = Money.of(loan.getCurrency(), repaymentDetail.getTransactionAmount());
+			Money repaymentAmount = Money.of(loan.getCurrency(), repaymentDetail.getTransactionAmountValue());
 			
-			LoanTransaction loanRepayment = LoanTransaction.repayment(repaymentAmount, repaymentDetail.getTransactionDate());
+			LoanTransaction loanRepayment = LoanTransaction.repayment(repaymentAmount, repaymentDetail.getTransactionLocalDate());
 			loan.makeRepayment(loanRepayment, loanLifecycleStateMachine);
 		}
 		

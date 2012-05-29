@@ -3,7 +3,7 @@ package org.mifosng.platform.loan.service;
 import org.joda.time.LocalDate;
 import org.mifosng.data.LoanPayoffReadModel;
 import org.mifosng.data.LoanSchedule;
-import org.mifosng.data.command.CalculateLoanScheduleCommand;
+import org.mifosng.platform.api.commands.CalculateLoanScheduleCommand;
 
 public interface CalculationPlatformService {
 

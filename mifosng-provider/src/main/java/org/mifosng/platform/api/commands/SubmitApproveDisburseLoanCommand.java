@@ -1,6 +1,7 @@
-package org.mifosng.data.command;
+package org.mifosng.platform.api.commands;
 
 import javax.xml.bind.annotation.XmlRootElement;
+
 
 @XmlRootElement
 public class SubmitApproveDisburseLoanCommand {

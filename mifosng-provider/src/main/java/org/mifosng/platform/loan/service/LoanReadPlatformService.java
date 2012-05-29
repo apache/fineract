@@ -14,5 +14,5 @@ public interface LoanReadPlatformService {
 
 	LoanRepaymentData retrieveNewLoanWaiverDetails(Long loanId);
 
-	LoanRepaymentData retrieveLoanRepaymentDetails(Long loanId, Long repaymentId);
+	LoanRepaymentData retrieveLoanRepaymentDetails(Long loanId, Long transactionId);
 }

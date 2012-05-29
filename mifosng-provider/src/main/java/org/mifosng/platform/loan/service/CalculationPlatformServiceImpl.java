@@ -7,7 +7,7 @@ import org.mifosng.data.CurrencyData;
 import org.mifosng.data.LoanPayoffReadModel;
 import org.mifosng.data.LoanSchedule;
 import org.mifosng.data.MoneyData;
-import org.mifosng.data.command.CalculateLoanScheduleCommand;
+import org.mifosng.platform.api.commands.CalculateLoanScheduleCommand;
 import org.mifosng.platform.currency.domain.ApplicationCurrency;
 import org.mifosng.platform.currency.domain.ApplicationCurrencyRepository;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;

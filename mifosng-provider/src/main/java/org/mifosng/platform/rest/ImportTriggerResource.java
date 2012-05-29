@@ -7,10 +7,10 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.mifosng.data.command.ImportLoanCommand;
-import org.mifosng.data.command.ImportLoanRepaymentsCommand;
 import org.mifosng.platform.ImportPlatformService;
 import org.mifosng.platform.api.commands.ImportClientCommand;
+import org.mifosng.platform.api.commands.ImportLoanCommand;
+import org.mifosng.platform.api.commands.ImportLoanRepaymentsCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;

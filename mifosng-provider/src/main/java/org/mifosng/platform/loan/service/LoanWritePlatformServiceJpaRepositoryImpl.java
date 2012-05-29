@@ -10,17 +10,18 @@ import org.joda.time.LocalDate;
 import org.mifosng.data.EntityIdentifier;
 import org.mifosng.data.LoanSchedule;
 import org.mifosng.data.ScheduledLoanInstallment;
-import org.mifosng.data.command.AdjustLoanTransactionCommand;
-import org.mifosng.data.command.CalculateLoanScheduleCommand;
-import org.mifosng.data.command.LoanStateTransitionCommand;
-import org.mifosng.data.command.LoanTransactionCommand;
-import org.mifosng.data.command.SubmitLoanApplicationCommand;
-import org.mifosng.data.command.UndoStateTransitionCommand;
+import org.mifosng.platform.api.commands.AdjustLoanTransactionCommand;
+import org.mifosng.platform.api.commands.CalculateLoanScheduleCommand;
+import org.mifosng.platform.api.commands.LoanStateTransitionCommand;
+import org.mifosng.platform.api.commands.LoanTransactionCommand;
+import org.mifosng.platform.api.commands.SubmitLoanApplicationCommand;
+import org.mifosng.platform.api.commands.UndoStateTransitionCommand;
 import org.mifosng.platform.client.domain.Note;
 import org.mifosng.platform.client.domain.NoteRepository;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.exceptions.LoanNotFoundException;
+import org.mifosng.platform.exceptions.LoanTransactionNotFoundException;
 import org.mifosng.platform.exceptions.NoAuthorizationException;
 import org.mifosng.platform.exceptions.PlatformDomainRuleException;
 import org.mifosng.platform.loan.domain.DefaultLoanLifecycleStateMachine;
@@ -138,16 +139,18 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		if (loan == null) {
 			throw new LoanNotFoundException(command.getLoanId());
 		}
-
-		if (this.isBeforeToday(command.getEventDate()) && currentUser.canNotApproveLoanInPast()) {
+		
+		LocalDate eventDate = command.getEventLocalDate();
+		if (this.isBeforeToday(eventDate) && currentUser.canNotApproveLoanInPast()) {
 			throw new NoAuthorizationException("User has no authority to approve loan with a date in the past.");
 		}
 		
-		loan.approve(command.getEventDate(), defaultLoanLifecycleStateMachine());
+		loan.approve(eventDate, defaultLoanLifecycleStateMachine());
 		this.loanRepository.save(loan);
 		
-		if (StringUtils.isNotBlank(command.getComment())) {
-			Note note = Note.loanNote(currentUser.getOrganisation(), loan, command.getComment());
+		String noteText = command.getNote();
+		if (StringUtils.isNotBlank(noteText)) {
+			Note note = Note.loanNote(currentUser.getOrganisation(), loan, noteText);
 			this.noteRepository.save(note);
 		}
 
@@ -168,8 +171,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		loan.undoApproval(defaultLoanLifecycleStateMachine());
 		this.loanRepository.save(loan);
 		
-		if (StringUtils.isNotBlank(command.getComment())) {
-			Note note = Note.loanNote(currentUser.getOrganisation(), loan, command.getComment());
+		String noteText = command.getNote();
+		if (StringUtils.isNotBlank(noteText)) {
+			Note note = Note.loanNote(currentUser.getOrganisation(), loan, noteText);
 			this.noteRepository.save(note);
 		}
 
@@ -190,15 +194,17 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 			throw new LoanNotFoundException(command.getLoanId());
 		}
 
-		if (this.isBeforeToday(command.getEventDate()) && currentUser.canNotRejectLoanInPast()) {
+		LocalDate eventDate = command.getEventLocalDate();
+		if (this.isBeforeToday(eventDate) && currentUser.canNotRejectLoanInPast()) {
 			throw new NoAuthorizationException("User has no authority to reject loan with a date in the past.");
 		}
 		
-		loan.reject(command.getEventDate(), defaultLoanLifecycleStateMachine());
+		loan.reject(eventDate, defaultLoanLifecycleStateMachine());
 		this.loanRepository.save(loan);
 		
-		if (StringUtils.isNotBlank(command.getComment())) {
-			Note note = Note.loanNote(currentUser.getOrganisation(), loan, command.getComment());
+		String noteText = command.getNote();
+		if (StringUtils.isNotBlank(noteText)) {
+			Note note = Note.loanNote(currentUser.getOrganisation(), loan, noteText);
 			this.noteRepository.save(note);
 		}
 
@@ -219,15 +225,17 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 			throw new LoanNotFoundException(command.getLoanId());
 		}
 		
-		if (this.isBeforeToday(command.getEventDate()) && currentUser.canNotWithdrawByClientLoanInPast()) {
+		LocalDate eventDate = command.getEventLocalDate();
+		if (this.isBeforeToday(eventDate) && currentUser.canNotWithdrawByClientLoanInPast()) {
 			throw new NoAuthorizationException("User has no authority to mark loan as withdrawn by client with a date in the past.");
 		}
 		
-		loan.withdraw(command.getEventDate(), defaultLoanLifecycleStateMachine());
+		loan.withdraw(eventDate, defaultLoanLifecycleStateMachine());
 		this.loanRepository.save(loan);
 
-		if (StringUtils.isNotBlank(command.getComment())) {
-			Note note = Note.loanNote(currentUser.getOrganisation(), loan, command.getComment());
+		String noteText = command.getNote();
+		if (StringUtils.isNotBlank(noteText)) {
+			Note note = Note.loanNote(currentUser.getOrganisation(), loan, noteText);
 			this.noteRepository.save(note);
 		}
 		
@@ -248,15 +256,12 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 			throw new LoanNotFoundException(command.getLoanId());
 		}
 
-		if (this.isBeforeToday(command.getEventDate()) && currentUser.canNotDisburseLoanInPast()) {
+		String noteText = command.getNote();
+		LocalDate actualDisbursementDate = command.getEventLocalDate();
+		if (this.isBeforeToday(actualDisbursementDate) && currentUser.canNotDisburseLoanInPast()) {
 			throw new NoAuthorizationException("User has no authority to disburse loan with a date in the past.");
 		}
 
-		LocalDate disbursedOn = command.getEventDate();
-		String comment = command.getComment();
-
-		LocalDate actualDisbursementDate = new LocalDate(disbursedOn);
-		
 		if (loan.isRepaymentScheduleRegenerationRequiredForDisbursement(actualDisbursementDate)) {
 			
 			LocalDate repaymentsStartingFromDate = loan.getExpectedFirstRepaymentOnDate();
@@ -309,15 +314,15 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 						interest.getAmount());
 				modifiedLoanRepaymentSchedule.add(installment);
 			}
-			loan.disburseWithModifiedRepaymentSchedule(disbursedOn, comment, modifiedLoanRepaymentSchedule, defaultLoanLifecycleStateMachine());
+			loan.disburseWithModifiedRepaymentSchedule(actualDisbursementDate, noteText, modifiedLoanRepaymentSchedule, defaultLoanLifecycleStateMachine());
 		} else {
-			loan.disburse(disbursedOn, defaultLoanLifecycleStateMachine());
+			loan.disburse(actualDisbursementDate, defaultLoanLifecycleStateMachine());
 		}
 
 		this.loanRepository.save(loan);
 		
-		if (StringUtils.isNotBlank(command.getComment())) {
-			Note note = Note.loanNote(currentUser.getOrganisation(), loan, command.getComment());
+		if (StringUtils.isNotBlank(noteText)) {
+			Note note = Note.loanNote(currentUser.getOrganisation(), loan, noteText);
 			this.noteRepository.save(note);
 		}
 		
@@ -343,8 +348,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
 		this.loanRepository.save(loan);
 
-		if (StringUtils.isNotBlank(command.getComment())) {
-			Note note = Note.loanNote(currentUser.getOrganisation(), loan, command.getComment());
+		String noteText = command.getNote();
+		if (StringUtils.isNotBlank(noteText)) {
+			Note note = Note.loanNote(currentUser.getOrganisation(), loan, noteText);
 			this.noteRepository.save(note);
 		}
 		
@@ -365,21 +371,23 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 			throw new LoanNotFoundException(command.getLoanId());
 		}
 		
-		if (this.isBeforeToday(command.getTransactionDate()) && currentUser.canNotMakeRepaymentOnLoanInPast()) {
+		LocalDate transactionDate = command.getTransactionLocalDate();
+		if (this.isBeforeToday(transactionDate) && currentUser.canNotMakeRepaymentOnLoanInPast()) {
 			throw new NoAuthorizationException("error.msg.no.permission.to.make.repayment.on.loan.in.past");
 		}
 
 		Money repayment = Money.of(loan.getLoanRepaymentScheduleDetail()
 				.getPrincipal().getCurrency(),
-				command.getTransactionAmount());
+				command.getTransactionAmountValue());
 
-		LoanTransaction loanRepayment = LoanTransaction.repayment(repayment, command.getTransactionDate());
+		LoanTransaction loanRepayment = LoanTransaction.repayment(repayment, transactionDate);
 		loan.makeRepayment(loanRepayment, defaultLoanLifecycleStateMachine());
 		this.loanTransactionRepository.save(loanRepayment);
 		this.loanRepository.save(loan);
 		
-		if (StringUtils.isNotBlank(command.getComment())) {
-			Note note = Note.loanTransactionNote(currentUser.getOrganisation(), loan, loanRepayment, command.getComment());
+		String noteText = command.getNote();
+		if (StringUtils.isNotBlank(noteText)) {
+			Note note = Note.loanTransactionNote(currentUser.getOrganisation(), loan, loanRepayment, noteText);
 			this.noteRepository.save(note);
 		}
 
@@ -400,17 +408,20 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 			throw new LoanNotFoundException(command.getLoanId());
 		}
 
-		LoanTransaction transactionToAdjust = this.loanTransactionRepository
-				.findOne(command.getRepaymentId());
-
+		LoanTransaction transactionToAdjust = this.loanTransactionRepository.findOne(command.getTransactionId());
+		if (transactionToAdjust == null) {
+			throw new LoanTransactionNotFoundException(command.getTransactionId());
+		}
+		
 		Money transactionAmount = Money.of(loan
 				.getLoanRepaymentScheduleDetail().getPrincipal()
-				.getCurrency(), command.getTransactionAmount());
+				.getCurrency(), command.getTransactionAmountValue());
 
 		// adjustment is only supported for repayments and waivers at present
-		LoanTransaction newTransactionDetail = LoanTransaction.repayment(transactionAmount, command.getTransactionDate());
+		LocalDate transactionDate = command.getTransactionLocalDate();
+		LoanTransaction newTransactionDetail = LoanTransaction.repayment(transactionAmount, transactionDate);
 		if (transactionToAdjust.isWaiver()) {
-			newTransactionDetail = LoanTransaction.waiver(transactionAmount, command.getTransactionDate());
+			newTransactionDetail = LoanTransaction.waiver(transactionAmount, transactionDate);
 		}
 
 		loan.adjustExistingTransaction(transactionToAdjust, newTransactionDetail, defaultLoanLifecycleStateMachine());
@@ -419,9 +430,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
 		this.loanRepository.save(loan);
 
-		if (StringUtils.isNotBlank(command.getComment())) {
+		String noteText = command.getNote();
+		if (StringUtils.isNotBlank(noteText)) {
 			Note note = Note.loanTransactionNote(currentUser.getOrganisation(),
-					loan, newTransactionDetail, command.getComment());
+					loan, newTransactionDetail, noteText);
 			this.noteRepository.save(note);
 		}
 
@@ -444,9 +456,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		
 		Money waived = Money.of(loan.getLoanRepaymentScheduleDetail()
 				.getPrincipal().getCurrency(),
-				command.getTransactionAmount());
+				command.getTransactionAmountValue());
 
-		LoanTransaction waiver = LoanTransaction.waiver(waived, command.getTransactionDate());
+		LoanTransaction waiver = LoanTransaction.waiver(waived, command.getTransactionLocalDate());
 		
 		loan.waive(waiver, defaultLoanLifecycleStateMachine());
 		
@@ -454,8 +466,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		
 		this.loanRepository.save(loan);
 		
-		if (StringUtils.isNotBlank(command.getComment())) {
-			Note note = Note.loanTransactionNote(currentUser.getOrganisation(), loan, waiver, command.getComment());
+		String noteText = command.getNote();
+		if (StringUtils.isNotBlank(noteText)) {
+			Note note = Note.loanTransactionNote(currentUser.getOrganisation(), loan, waiver, noteText);
 			this.noteRepository.save(note);
 		}
 

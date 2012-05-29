@@ -24,12 +24,12 @@ import org.mifosng.data.LoanAccountData;
 import org.mifosng.data.LoanRepaymentData;
 import org.mifosng.data.LoanSchedule;
 import org.mifosng.data.NewLoanWorkflowStepOneData;
-import org.mifosng.data.command.AdjustLoanTransactionCommand;
-import org.mifosng.data.command.CalculateLoanScheduleCommand;
-import org.mifosng.data.command.LoanStateTransitionCommand;
-import org.mifosng.data.command.LoanTransactionCommand;
-import org.mifosng.data.command.SubmitLoanApplicationCommand;
-import org.mifosng.data.command.UndoStateTransitionCommand;
+import org.mifosng.platform.api.commands.AdjustLoanTransactionCommand;
+import org.mifosng.platform.api.commands.CalculateLoanScheduleCommand;
+import org.mifosng.platform.api.commands.LoanStateTransitionCommand;
+import org.mifosng.platform.api.commands.LoanTransactionCommand;
+import org.mifosng.platform.api.commands.SubmitLoanApplicationCommand;
+import org.mifosng.platform.api.commands.UndoStateTransitionCommand;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.ApiJSONFormattingService;
 import org.mifosng.platform.exceptions.UnrecognizedQueryParamException;
@@ -187,12 +187,12 @@ public class LoansApiResource {
 	public Response stateTransitions(@PathParam("loanId") final Long loanId, @QueryParam("command") final String commandParam,
 			final LoanStateTransitionCommand command) {
 
-		LocalDate eventDate = this.apiDataConversionService.convertFrom(
-				command.getEventDateFormatted(), "eventDateFormatted",
+		LocalDate eventLocalDate = this.apiDataConversionService.convertFrom(
+				command.getEventDate(), "eventDate",
 				command.getDateFormat());
 
 		command.setLoanId(loanId);
-		command.setEventDate(eventDate);
+		command.setEventLocalDate(eventLocalDate);
 		
 		Response response = null;
 
@@ -210,7 +210,7 @@ public class LoansApiResource {
 			response = Response.ok().entity(identifier).build();
 		}
 		
-		UndoStateTransitionCommand undoCommand = new UndoStateTransitionCommand(loanId, command.getComment());
+		UndoStateTransitionCommand undoCommand = new UndoStateTransitionCommand(loanId, command.getNote());
 		if (is(commandParam, "undoapproval")) {
 			EntityIdentifier identifier = this.loanWritePlatformService.undoLoanApproval(undoCommand);
 			response = Response.ok().entity(identifier).build();
@@ -236,31 +236,37 @@ public class LoansApiResource {
 	@Produces({ MediaType.APPLICATION_JSON})
 	public Response executeLoanTransaction(
 			@PathParam("loanId") final Long loanId,
-			@QueryParam("transactionType") final String transactionType,
+			@QueryParam("command") final String commandParam,
 			final LoanTransactionCommand command) {
 
+		Response response = null;
 		command.setLoanId(loanId);
+		
+		Locale clientLocale = this.apiDataConversionService.localeFromString(command.getLocale());
 
-		LocalDate transactionDate = apiDataConversionService.convertFrom(
-				command.getTransactionDateFormatted(),
-				"transactionDateFormatted", command.getDateFormat());
-		command.setTransactionDate(transactionDate);
+		LocalDate transactionLocalDate = apiDataConversionService.convertFrom(
+				command.getTransactionDate(),
+				"transactionDate", command.getDateFormat());
+		command.setTransactionLocalDate(transactionLocalDate);
 
-		BigDecimal transactionAmount = apiDataConversionService.convertFrom(
-				command.getTransactionAmountFormatted(),
-				"transactionAmountFormatted", Locale.UK);
-		command.setTransactionAmount(transactionAmount);
+		BigDecimal transactionAmountValue = apiDataConversionService.convertFrom(
+				command.getTransactionAmount(),
+				"transactionAmount", clientLocale);
+		command.setTransactionAmountValue(transactionAmountValue);
 
-		if (StringUtils.isNotBlank(transactionType)
-				&& transactionType.trim().equalsIgnoreCase("waiver")) {
-			EntityIdentifier identifier = this.loanWritePlatformService
-					.waiveLoanAmount(command);
-			return Response.ok().entity(identifier).build();
+		if (is(commandParam, "repayment")) {
+			EntityIdentifier identifier = this.loanWritePlatformService.makeLoanRepayment(command);
+			response = Response.ok().entity(identifier).build();
+		} else if (is(commandParam, "waiver")) {
+			EntityIdentifier identifier = this.loanWritePlatformService.waiveLoanAmount(command);
+			response = Response.ok().entity(identifier).build();
+		}
+		
+		if (response == null) {
+			throw new UnrecognizedQueryParamException("command", commandParam);
 		}
 
-		EntityIdentifier identifier = this.loanWritePlatformService
-				.makeLoanRepayment(command);
-		return Response.ok().entity(identifier).build();
+		return response;
 	}
 
 	@GET
@@ -269,37 +275,43 @@ public class LoansApiResource {
 	@Produces({ MediaType.APPLICATION_JSON})
 	public String retrieveNewRepaymentDetails(
 			@PathParam("loanId") final Long loanId,
-			@QueryParam("type") final String transactionType,
+			@QueryParam("command") final String commandParam,
 			@Context UriInfo uriInfo) {
 
+		String json = "";
 		String selectedFields = loanRepaymentDefaultFieldList;
-		if (StringUtils.isNotBlank(transactionType)
-				&& transactionType.trim().equalsIgnoreCase("waiver")) {
+		if (is(commandParam, "repayment")) {
+			LoanRepaymentData loanRepaymentData = this.loanReadPlatformService
+					.retrieveNewLoanRepaymentDetails(loanId);
+			json = this.jsonFormattingService.convertRequest(loanRepaymentData,
+					loanRepaymentFilterName, loanRepaymentAllowedFieldList, selectedFields,
+					uriInfo.getQueryParameters());
+		} else if (is(commandParam, "waiver")) {
 			LoanRepaymentData loanWaiverData = this.loanReadPlatformService
 					.retrieveNewLoanWaiverDetails(loanId);
-			return this.jsonFormattingService.convertRequest(loanWaiverData,
+			json = this.jsonFormattingService.convertRequest(loanWaiverData,
 					loanRepaymentFilterName, loanRepaymentAllowedFieldList, selectedFields,
 					uriInfo.getQueryParameters());
 		}
 
-		LoanRepaymentData loanRepaymentData = this.loanReadPlatformService
-				.retrieveNewLoanRepaymentDetails(loanId);
-		return this.jsonFormattingService.convertRequest(loanRepaymentData,
-				loanRepaymentFilterName, loanRepaymentAllowedFieldList, selectedFields,
-				uriInfo.getQueryParameters());
+		if (StringUtils.isBlank(json)) {
+			throw new UnrecognizedQueryParamException("command", commandParam);
+		}
+		
+		return json;
 	}
 
 	@GET
-	@Path("{loanId}/transactions/{repaymentId}")
+	@Path("{loanId}/transactions/{transactionId}")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON})
 	public String retrieveRepaymentDetails(
 			@PathParam("loanId") final Long loanId,
-			@PathParam("repaymentId") final Long repaymentId,
+			@PathParam("transactionId") final Long transactionId,
 			@Context UriInfo uriInfo) {
 
 		LoanRepaymentData loanRepaymentData = this.loanReadPlatformService
-				.retrieveLoanRepaymentDetails(loanId, repaymentId);
+				.retrieveLoanRepaymentDetails(loanId, transactionId);
 
 		String selectedFields = "";
 		return this.jsonFormattingService.convertRequest(loanRepaymentData,
@@ -308,29 +320,30 @@ public class LoansApiResource {
 	}
 
 	@PUT
-	@Path("{loanId}/transactions/{repaymentId}")
+	@Path("{loanId}/transactions/{transactionId}")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON})
 	public Response adjustLoanTransaction(
 			@PathParam("loanId") final Long loanId,
-			@PathParam("repaymentId") final Long repaymentId,
+			@PathParam("transactionId") final Long transactionId,
 			final AdjustLoanTransactionCommand command) {
 
 		command.setLoanId(loanId);
-		command.setRepaymentId(repaymentId);
+		command.setTransactionId(transactionId);
+		
+		Locale clientLocale = this.apiDataConversionService.localeFromString(command.getLocale());
 
-		LocalDate transactionDate = apiDataConversionService.convertFrom(
-				command.getTransactionDateFormatted(),
-				"transactionDateFormatted", command.getDateFormat());
-		command.setTransactionDate(transactionDate);
+		LocalDate transactionLocalDate = apiDataConversionService.convertFrom(
+				command.getTransactionDate(),
+				"transactionDate", command.getDateFormat());
+		command.setTransactionLocalDate(transactionLocalDate);
 
-		BigDecimal transactionAmount = apiDataConversionService.convertFrom(
-				command.getTransactionAmountFormatted(),
-				"transactionAmountFormatted", Locale.UK);
-		command.setTransactionAmount(transactionAmount);
+		BigDecimal transactionAmountValue = apiDataConversionService.convertFrom(
+				command.getTransactionAmount(),
+				"transactionAmount", clientLocale);
+		command.setTransactionAmountValue(transactionAmountValue);
 
-		EntityIdentifier identifier = this.loanWritePlatformService
-				.adjustLoanTransaction(command);
+		EntityIdentifier identifier = this.loanWritePlatformService.adjustLoanTransaction(command);
 
 		return Response.ok().entity(identifier).build();
 	}

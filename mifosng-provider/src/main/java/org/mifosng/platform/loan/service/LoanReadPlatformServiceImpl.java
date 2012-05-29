@@ -36,7 +36,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
-//	private final SimpleJdbcTemplate jdbcTemplate;
 	private final PlatformSecurityContext context;
 	private final LoanRepository loanRepository;
 	private final ApplicationCurrencyRepository applicationCurrencyRepository;
@@ -46,7 +45,6 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
 	@Autowired
 	public LoanReadPlatformServiceImpl(final PlatformSecurityContext context, 
-//			final DataSource dataSource, 
 			final LoanRepository loanRepository, final LoanTransactionRepository loanTransactionRepository, final ApplicationCurrencyRepository applicationCurrencyRepository, 
 			final LoanProductReadPlatformService loanProductReadPlatformService, final ClientReadPlatformService clientReadPlatformService) {
 		this.context = context;
@@ -55,7 +53,6 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 		this.applicationCurrencyRepository = applicationCurrencyRepository;
 		this.loanProductReadPlatformService = loanProductReadPlatformService;
 		this.clientReadPlatformService = clientReadPlatformService;
-//		this.jdbcTemplate = new SimpleJdbcTemplate(dataSource);
 	}
 	
 	@Override
@@ -264,8 +261,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
 		// TODO - OPTIMIZE - write simple sql query to fetch back date of
 		// possible next transaction date.
-		Loan loan = this.loanRepository.findOne(loansThatMatch(
-				currentUser.getOrganisation(), loanId));
+		Loan loan = this.loanRepository.findOne(loansThatMatch(currentUser.getOrganisation(), loanId));
 		if (loan == null) {
 			throw new LoanNotFoundException(loanId);
 		}

@@ -139,9 +139,9 @@ $(document).ready(function() {
 			removeErrors(placeholderDiv);
 			
 		  	var jsonErrors = JSON.parse(jqXHR.responseText);
-		  	console.log(jsonErrors);
+
 		  	var valErrors = jsonErrors.errors;
-		  	console.log(valErrors);
+
 		  	var errorArray = new Array();
 		  	var arrayIndex = 0;
 		  	$.each(valErrors, function() {
@@ -158,7 +158,7 @@ $(document).ready(function() {
 		  		argArray[argArrayIndex] = this.value;
 		  		argArrayIndex++;
 		  	  });
-		  	  console.log(argArray);
+
 		  	  // hardcoded support for six arguments
 		  	  errorObj.message = jQuery.i18n.prop(this.userMessageGlobalisationCode, argArray[0], argArray[1], argArray[2], argArray[3], argArray[4], argArray[5]);
 		  	  errorObj.value = this.value;
@@ -292,7 +292,6 @@ $(document).ready(function() {
 		    });
   			
 			var newFormData = JSON.stringify($('#entityform').serializeObject());
-	    	console.log(newFormData);
 	    	
 			var jqxhr = $.ajax({
 				  url: postUrl,
@@ -302,7 +301,6 @@ $(document).ready(function() {
 				  cache: false,
 				  data: newFormData,
 				  beforeSend: function(xhr) {
-						console.log("base64: " + base64);
 			            xhr.setRequestHeader("Authorization", "Basic " + base64);
 				  },
 				  success: function(data, textStatus, jqXHR) {
@@ -377,7 +375,6 @@ $(document).ready(function() {
 			    	});
 			    	
 			    	var newFormData = JSON.stringify($('#entityform').serializeObject());
-			    	console.log(newFormData);
 			    	
 					var jqxhr = $.ajax({
 						  url: postUrl,
@@ -435,8 +432,6 @@ $(document).ready(function() {
 	var $newtabs = $("#newtabs").tabs({
 		
 		"add": function( event, ui ) {
-			console.log(ui);
-			//alert("adding new tab: " + ui.panel.id + " :" + ui.tab.className);
 			$newtabs.tabs('select', '#' + ui.panel.id);
 		},
 		"ajaxOptions": {
@@ -445,7 +440,6 @@ $(document).ready(function() {
 			contentType: 'application/json',
 			cache: false,
 			beforeSend: function(xhr) {
-				console.log("base64: " + base64);
 				xhr.setRequestHeader("Authorization", "Basic " + base64);
 			},
 	        error: function(jqXHR, status, errorThrown, index, anchor) {
@@ -455,12 +449,8 @@ $(document).ready(function() {
 	        },
 	        success: function(data, status, xhr) {
 	        	
-	        	console.log(data);
-	        	
 	        	var currentTabIndex = $newtabs.tabs('option', 'selected');
 	            var currentTabAnchor = $newtabs.data('tabs').anchors[currentTabIndex];
-	            //$(currentTabAnchor).data('cache.tabs', true)
-				//alert('tab: ' + currentTabIndex + ' - id: ' + currentTabAnchor);
 	            
 	            var offsetToSubmittedDate = 0;
 	            var offsetToApprovalDate = 0;
@@ -468,7 +458,6 @@ $(document).ready(function() {
 				var maxOffset = 0; // today
 
 	            if (currentTabIndex < 1) {
-	            	console.log("success: client tab.");
 	        		var tableHtml = $("#clientDataTabTemplate").render(data);
 					$("#clienttab").html(tableHtml);
 					
@@ -653,8 +642,8 @@ $(document).ready(function() {
 						
 						var linkId = this.id;
 						var loanId = linkId.replace("repaymentbtn", "");
-						var getUrl = baseApiUrl + 'loans/' + loanId + '/transactions/template?transactionType=repayment';
-						var postUrl = baseApiUrl + 'loans/' + loanId + '/transactions?transactionType=repayment';
+						var getUrl = baseApiUrl + 'loans/' + loanId + '/transactions/template?command=repayment';
+						var postUrl = baseApiUrl + 'loans/' + loanId + '/transactions?command=repayment';
 						
 						var templateSelector = "#transactionLoanFormTemplate";
 						var width = 500; 
@@ -676,8 +665,8 @@ $(document).ready(function() {
 						var linkId = this.id;
 						var loanId = linkId.replace("waivebtn", "");
 						
-						var getUrl = baseApiUrl + 'loans/' + loanId + '/transactions/template?transactionType=waiver';
-						var postUrl = baseApiUrl + 'loans/' + loanId + '/transactions?transactionType=waiver';
+						var getUrl = baseApiUrl + 'loans/' + loanId + '/transactions/template?command=waiver';
+						var postUrl = baseApiUrl + 'loans/' + loanId + '/transactions?command=waiver';
 						
 						var templateSelector = "#transactionLoanFormTemplate";
 						var width = 500; 
@@ -690,7 +679,6 @@ $(document).ready(function() {
 						}
 						
 						popupDialogWithFormView(getUrl, postUrl, 'POST', "dialog.title.waive.loan", templateSelector, width, height, saveSuccessFunction);
-						//popupDialogWithFormView(getUrl, postUrl, 'POST', 'dialog.title.waive.loan', templateSelector, width, height, currentTabIndex, offsetToSubmittedDate, defaultOffset, maxOffset)
 					    e.preventDefault();
 					});
 					$('button.waiveloan span').text(jQuery.i18n.prop('dialog.button.loan.waive'));
@@ -715,7 +703,6 @@ $(document).ready(function() {
 						}
 						
 						popupDialogWithFormView(getAndPutUrl, getAndPutUrl, 'PUT', "dialog.title.adjust.loan.repayment", templateSelector, width, height, saveSuccessFunction);
-//						popupDialogWithFormView(getAndPutUrl, getAndPutUrl, 'PUT', 'dialog.title.adjust.loan.repayment', templateSelector, width, height, currentTabIndex, offsetToSubmittedDate, defaultOffset, maxOffset)
 					    e.preventDefault();
 					});
 					$('button.adjustloanrepayment span').text(jQuery.i18n.prop('dialog.button.adjust.loan.repayment'));
@@ -748,11 +735,9 @@ $(document).ready(function() {
 			  dataType: 'json',
 			  cache: false,
 			  beforeSend: function(xhr) {
-					console.log("base64: " + base64);
 					xhr.setRequestHeader("Authorization", "Basic " + base64);
 			  },
 			  success: function(data, textStatus, jqXHR) {
-				  console.log(data);
 				  var tableHtml = $("#clientAccountSummariesTemplate").render(data);
 				  $("#clientaccountssummary").html(tableHtml);
 				  
@@ -786,8 +771,6 @@ $(document).ready(function() {
 					xhr.setRequestHeader("Authorization", "Basic " + base64);
 			  },
 			  success: function(data, textStatus, jqXHR) {	
-				  console.log(data);
-				  
 				  var noteParent = new Object();
 				  noteParent.title = jQuery.i18n.prop('widget.notes.heading');
 				  noteParent.notes = data;
