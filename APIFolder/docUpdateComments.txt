@@ -9,6 +9,8 @@ new loan template ... is it 2 templates... one to pick product... and 2nd to ret
 Lost permissions again... restore fixed it up... must be some prob with permissions/roles maintenance
 also, maybe I should be using a user that has everything but role admin.
 
+go thru questions over mandatory fields
+also about formation numbers with locale... can i put a dodgey one in and mess up data unknowingly?
 
 Permissions
 groupType in or out?
@@ -23,5 +25,10 @@ List/Retrieve - should show textual values of enums?
 Create - currencyDigitsAfterDecimal is it needed? (maybe customising digits after decimal by loan product not just currency) 
 	is locale saved?
 	principal is later called principalMoney
+
+Clients
+displayName, externalId, maxJoinedOnOffsetFromToday
+joinedDateFormatted still there,
+update doesn't work if officeId not there.
 
 

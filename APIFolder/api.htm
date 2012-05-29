@@ -577,7 +577,19 @@ JSON examples:
   "joinedDate" : [ 2012, 5, 29 ],
   "allowedOffices" : [ {
     "id" : 1,
-    "name" : "change super user"
+    "name" : "Demo MFI Head Office"
+  }, {
+    "id" : 2,
+    "name" : "sub branch 1"
+  }, {
+    "id" : 8,
+    "name" : "moi aussi"
+  }, {
+    "id" : 3,
+    "name" : "sub branch 2"
+  }, {
+    "id" : 4,
+    "name" : "sub branch 3"
   } ]
 }
 </code>
@@ -625,19 +637,23 @@ JSON examples:
     </div>
     <div class="method-example">
         <code class="method-declaration">POST https://thedomainname/api/v1/clients</code>
-<code class="method-request">https://localhost:8443/mifosng-provider/api/v1/clients
+<code class="method-request">POST https://localhost:8443/mifosng-provider/api/v1/clients
 Content-Type: application/json
 Request Body:
 {
-  "officeId": 1,
-  "firstname": "Firstname",
-  "lastname": "Surname",
-  "externalId": null,
-  "dateFormat": "dd MMMM yyyy",
-  "joiningDateFormatted": "04 March 2009"
+ "officeId": 1, 
+ "firstname": "Petra", 
+ "lastname": "Yton", 
+ "externalId": "786YYH7",
+ "dateFormat": "dd MMMM yyyy", 
+ "joiningDateFormatted": "04 March 2009"
 }
 </code>
-<code class="method-response">{ "entityId": 2}</code>
+<code class="method-response">
+{
+ "entityId":23
+}
+</code>
     </div>
 </div>
 
@@ -647,17 +663,14 @@ Request Body:
         <h4>Update a Client</h4>
     </div>
     <div class="method-example">
-        <code class="method-declaration">PUT https://thedomainname/api/v1/clients/1</code>
-<code class="method-request">PUT https://localhost:8443/mifosng-provider/api/v1/clients/1
+        <code class="method-declaration">PUT https://thedomainname/api/v1/clients/{clientId}</code>
+<code class="method-request">PUT https://localhost:8443/mifosng-provider/api/v1/clients/23
 Content-Type: application/json
 Request Body:
-{
-  "officeId": 1,
-  "firstname": "Firstname",
-  "lastname": "Surname",
-  "externalId": null,
-  "dateFormat": "dd MMMM yyyy",
-  "joiningDateFormatted": "04 March 2009"
+{ 
+ "externalId": "786UUUYYH7",
+ "dateFormat": "dd MMMM yyyy", 
+ "joiningDateFormatted": "09 June 2006"
 }
 </code>
 <code class="method-response">{ "entityId": 2}</code>
