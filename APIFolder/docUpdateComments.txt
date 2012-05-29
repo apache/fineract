@@ -4,9 +4,7 @@ template for waiver/repayment... is it same for both? no type needed? (might hav
 new loan template ... is it 2 templates... one to pick product... and 2nd to return default properties in selected product or is it meant that if only one product then use that. 
 
 
-
-Configuration
-All Good!
+--------------------------------------------------------
 
 
 Users
@@ -37,3 +35,13 @@ template - only get office 1 in allowed offices
 
 mandatoryfields - if pass {}
 dates lose formatted - general docs, money... strings, locale, don't have to put in commas.....but do put in decs.
+
+
+
+--------------------------------------------------------
+
+Permissions
+groupType in or out?
+
+Roles
+"id" is a mandatory field (says something about updating in the msg)

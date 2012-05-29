@@ -98,6 +98,7 @@ var jqxhr = $.ajax({
                         <li><a href="#top">Mifos X API Documentation</a></li>
                         <li><a href="#interact">Try The API From Your Browser</a></li>
                         <li><a href="#genopts">Generic Options</a></li>
+                        <li><a href="#creates_and_updates">Creating and Updating</a></li>
                         <li><a href="#dates_and_numbers">Updating Dates and Numbers</a></li>
                         <li><a href="#authentication_overview">Authentication Overview</a></li>
                         <li><a href="#errors">Errors</a></li>
@@ -270,6 +271,23 @@ var jqxhr = $.ajax({
     
         </div>
         
+        <a id="creates_and_updates" name="creates_and_updates" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h3>Creating and Updating</h3>
+                <p>
+                When you want to 'Create a...' you have to at least supply the mandatory fields.
+                You can see which fields are mandatory by clicking the 'Show Mandatory Fields' button under the relevant 'Create a ...' heading.
+                </p>
+                
+                <p>
+                When you want to 'Update a...' you can update individual fields or a combination of fields (subject to data integrity rules).
+                </p>
+            </div>
+    
+        </div>
+        
+        
         <a id="dates_and_numbers" name="dates_and_numbers" class="old-syle-anchor">&nbsp;</a>
         <div class="method-section">
             <div class="method-description">
@@ -296,7 +314,7 @@ JSON examples:
 JSON examples:
 {
 "locale": "en-us",
-"principal": "240 400.88"
+"principal": "240,400.88"
 }
 {
 "locale": "fr-CH",
@@ -3342,7 +3360,7 @@ Request body:
 { 
  "name": "Another Role Name", 
  "description": "A description outlining the purpose of this role in relation to the application.", 
- "permissions": ["1", "2", "3"] 
+ "permissions": [1, 2, 3] 
 }
 </code>
 <code class="method-response">{
@@ -3364,7 +3382,7 @@ Content-Type: application/json
 Request body:
 { 
  "name": "Updated Role Name", 
- "permissions": ["1"] 
+ "permissions": [1] 
 }
 </code>
 <code class="method-response">{
