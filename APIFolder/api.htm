@@ -275,8 +275,10 @@ var jqxhr = $.ajax({
             <div class="method-description">
                 <h3>Updating Dates and Numbers</h3>
                 <h4>Dates</h4>
-                <p>When updating dates you need to provide the "dateFormat". This can be any date pattern supported by <a href="http://joda-time.sourceforge.net/api-release/org/joda/time/format/DateTimeFormat.html">Joda-Time</a>.
-                This helps when saving data in your client application as you shouldn't need to do any date format conversion.</p>
+                <p>Dates are returned in GET requests as an array e.g. [ 2007, 4, 11].  However, they are sent as strings in POST and PUT requests.
+                If there are any dates in your POST or PUT requests, you need to provide the "dateFormat".
+                This can be any date pattern supported by <a href="http://joda-time.sourceforge.net/api-release/org/joda/time/format/DateTimeFormat.html">Joda-Time</a>.
+                This capability can help you when saving data in your client application as you shouldn't need to do any date format conversion prior to issuing your POST or PUT request.</p>
                 <code>
 JSON examples:
 {
@@ -289,17 +291,19 @@ JSON examples:
 }
                 </code>
                 <h4>Numbers</h4>
-                <p>When updating dates you need to provide the "dateFormat". This can be any date pattern supported by <a href="http://joda-time.sourceforge.net/api-release/org/joda/time/format/DateTimeFormat.html">Joda-Time</a>.
-                This helps when saving data in your client application as you shouldn't need to do any date format conversion.</p>
+                <p>Similar to dates above, if you format numbers based on a "locale" in your User Interface you need to provide the "locale" when updating.</a>.
                 <code>
 JSON examples:
 {
- "dateFormat": "dd MMMM yyyy",
- "openingDate": "01 July 2007"
+"locale": "en-us",
+"principal": "240 400.88"
 }
 {
- "dateFormat": "yyyy-MM-dd",
- "openingDate": "2007-03-21"
+"locale": "fr-CH",
+"principal": "240 400.88"
+}
+{
+"principal": "240400.88"
 }
                 </code>
            </div>
