@@ -9,7 +9,6 @@ import org.mifosng.platform.loan.domain.LoanProductRelatedDetail;
 public class PmtCalculator {
 
 	public Money calculatePaymentForOnePeriodFrom(LoanProductRelatedDetail loanScheduleInfo, BigDecimal periodInterestRateForRepaymentPeriod, MonetaryCurrency monetaryCurrency) {
-		// TODO - check if going to doubles is a problem
 		double interestRateFraction = periodInterestRateForRepaymentPeriod.doubleValue();
 		
 		double futureValue = 0;
@@ -24,7 +23,6 @@ public class PmtCalculator {
 	}
 	
 	public Money calculateTotalRepaymentFrom(LoanProductRelatedDetail loanScheduleInfo, BigDecimal periodInterestRateForRepaymentPeriod, MonetaryCurrency monetaryCurrency) {
-		// TODO - check if going to doubles is a problem
 		double interestRateFraction = periodInterestRateForRepaymentPeriod.doubleValue();
 		
 		double futureValue = 0;

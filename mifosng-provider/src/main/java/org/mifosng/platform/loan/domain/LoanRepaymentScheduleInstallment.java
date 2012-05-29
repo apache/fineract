@@ -99,7 +99,7 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableCustom<Ap
 		Money interest = getInterest(totalAvailable.getCurrency());
 		Money principal = getPrincipal(totalAvailable.getCurrency());
 		
-		// TODO - configuration around order components of loan are paid off in.
+		// TODO - NEWFEATURE - configuration around order components of loan are paid off in.
 		// pay off interest
 		if (remaining.isGreaterThanOrEqualTo(interest)) {
 			this.interestCompleted = interest.getAmount();

@@ -2,7 +2,6 @@ package org.mifosng.platform.loan.service;
 
 import static org.mifosng.platform.Specifications.loansThatMatch;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,7 +9,6 @@ import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.mifosng.data.EntityIdentifier;
 import org.mifosng.data.LoanSchedule;
-import org.mifosng.data.MoneyData;
 import org.mifosng.data.ScheduledLoanInstallment;
 import org.mifosng.data.command.AdjustLoanTransactionCommand;
 import org.mifosng.data.command.CalculateLoanScheduleCommand;
@@ -18,8 +16,6 @@ import org.mifosng.data.command.LoanStateTransitionCommand;
 import org.mifosng.data.command.LoanTransactionCommand;
 import org.mifosng.data.command.SubmitLoanApplicationCommand;
 import org.mifosng.data.command.UndoStateTransitionCommand;
-import org.mifosng.platform.client.domain.Client;
-import org.mifosng.platform.client.domain.ClientRepository;
 import org.mifosng.platform.client.domain.Note;
 import org.mifosng.platform.client.domain.NoteRepository;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
@@ -27,15 +23,9 @@ import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.exceptions.LoanNotFoundException;
 import org.mifosng.platform.exceptions.NoAuthorizationException;
 import org.mifosng.platform.exceptions.PlatformDomainRuleException;
-import org.mifosng.platform.loan.domain.AmortizationMethod;
 import org.mifosng.platform.loan.domain.DefaultLoanLifecycleStateMachine;
-import org.mifosng.platform.loan.domain.InterestCalculationPeriodMethod;
-import org.mifosng.platform.loan.domain.InterestMethod;
 import org.mifosng.platform.loan.domain.Loan;
 import org.mifosng.platform.loan.domain.LoanLifecycleStateMachine;
-import org.mifosng.platform.loan.domain.LoanProduct;
-import org.mifosng.platform.loan.domain.LoanProductRelatedDetail;
-import org.mifosng.platform.loan.domain.LoanProductRepository;
 import org.mifosng.platform.loan.domain.LoanRepaymentScheduleInstallment;
 import org.mifosng.platform.loan.domain.LoanRepository;
 import org.mifosng.platform.loan.domain.LoanStatus;
@@ -43,7 +33,6 @@ import org.mifosng.platform.loan.domain.LoanStatusRepository;
 import org.mifosng.platform.loan.domain.LoanTransaction;
 import org.mifosng.platform.loan.domain.LoanTransactionRepository;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
-import org.mifosng.platform.loanschedule.domain.AprCalculator;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.user.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,24 +45,21 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
 	private final PlatformSecurityContext context;
 	private final LoanRepository loanRepository;
-	private final LoanProductRepository loanProductRepository;
 	private final LoanStatusRepository loanStatusRepository;
-	private final ClientRepository clientRepository;
 	private final NoteRepository noteRepository;
 	private final CalculationPlatformService calculationPlatformService;	
-	private final AprCalculator aprCalculator = new AprCalculator();
 	private final LoanTransactionRepository loanTransactionRepository;
+	private final LoanAssembler loanAssembler;
 	
 	@Autowired
-	public LoanWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, 
+	public LoanWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final LoanAssembler loanAssembler,
 			final LoanRepository loanRepository, final LoanTransactionRepository loanTransactionRepository,
-			final LoanStatusRepository loanStatusRepository, final LoanProductRepository loanProductRepository, 
-			final ClientRepository clientRepository, final NoteRepository noteRepository, final CalculationPlatformService calculationPlatformService) {
+			final LoanStatusRepository loanStatusRepository, 
+			final NoteRepository noteRepository, final CalculationPlatformService calculationPlatformService) {
 		this.context = context;
+		this.loanAssembler = loanAssembler;
 		this.loanRepository = loanRepository;
 		this.loanTransactionRepository = loanTransactionRepository;
-		this.loanProductRepository = loanProductRepository;
-		this.clientRepository = clientRepository;
 		this.loanStatusRepository = loanStatusRepository;
 		this.noteRepository = noteRepository;
 		this.calculationPlatformService = calculationPlatformService;
@@ -97,55 +83,13 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		SubmitLoanApplicationCommandValidator validator = new SubmitLoanApplicationCommandValidator(command);
 		validator.validate();
 
-		LocalDate submittedOn = command.getSubmittedOnDate();
+		LocalDate submittedOn = command.getSubmittedOnLocalDate();
 		if (this.isBeforeToday(submittedOn) && currentUser.hasNotPermissionForAnyOf("CAN_SUBMIT_HISTORIC_LOAN_APPLICATION_ROLE", "PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE")) {
 			throw new NoAuthorizationException("Cannot add backdated loan.");
 		}
 
-		// FIXME - looks like assembly of LoanProductRelatedDetail is common with loan product and calculate loan schedule areas. remove duplication into an assembler.
-		LoanProduct loanProduct = this.loanProductRepository.findOne(command.getProductId());
-		Client client = this.clientRepository.findOne(command.getApplicantId());
+		Loan loan = loanAssembler.assembleFrom(command, currentUser.getOrganisation());
 
-		MonetaryCurrency currency = new MonetaryCurrency(command.getCurrencyCode(), command.getDigitsAfterDecimal());
-		
-		final BigDecimal defaultNominalInterestRatePerPeriod = BigDecimal.valueOf(command.getInterestRatePerPeriod().doubleValue());
-		final PeriodFrequencyType interestPeriodFrequencyType = PeriodFrequencyType.fromInt(command.getInterestRateFrequencyMethod());
-		
-		BigDecimal defaultAnnualNominalInterestRate = aprCalculator.calculateFrom(interestPeriodFrequencyType, command.getInterestRatePerPeriod());
-		
-		final InterestMethod interestMethod = InterestMethod.fromInt(command.getInterestMethod());
-		final InterestCalculationPeriodMethod interestCalculationPeriodMethod = InterestCalculationPeriodMethod.fromInt(command.getInterestCalculationPeriodMethod());
-		
-		final Integer repayEvery = command.getRepaymentEvery();
-		final PeriodFrequencyType repaymentFrequencyType = PeriodFrequencyType.fromInt(command.getRepaymentFrequency());
-		final Integer defaultNumberOfInstallments = command.getNumberOfRepayments();
-		final AmortizationMethod amortizationMethod = AmortizationMethod.fromInt(command.getAmortizationMethod());
-		
-		LoanProductRelatedDetail loanRepaymentScheduleDetail = new LoanProductRelatedDetail(currency,
-				command.getPrincipal(), defaultNominalInterestRatePerPeriod, interestPeriodFrequencyType, defaultAnnualNominalInterestRate, 
-				interestMethod, interestCalculationPeriodMethod,
-				repayEvery, repaymentFrequencyType, defaultNumberOfInstallments, amortizationMethod, command.getInArrearsToleranceAmount());
-
-		LoanSchedule loanSchedule = command.getLoanSchedule();
-		List<ScheduledLoanInstallment> loanRepaymentSchedule = loanSchedule.getScheduledLoanInstallments();
-
-		Loan loan = Loan.createNew(currentUser.getOrganisation(), loanProduct, client, loanRepaymentScheduleDetail);
-		loan.setExternalId(command.getExternalId());
-		
-		for (ScheduledLoanInstallment scheduledLoanInstallment : loanRepaymentSchedule) {
-
-			MoneyData readPrincipalDue = scheduledLoanInstallment.getPrincipalDue();
-			MoneyData readInterestDue = scheduledLoanInstallment.getInterestDue();
-
-			LoanRepaymentScheduleInstallment installment = new LoanRepaymentScheduleInstallment(
-					loan, scheduledLoanInstallment.getInstallmentNumber(),
-					scheduledLoanInstallment.getPeriodStart(),
-					scheduledLoanInstallment.getPeriodEnd(), readPrincipalDue.getAmount(),
-					readInterestDue.getAmount());
-			loan.addRepaymentScheduleInstallment(installment);
-		}
-		
-		loan.submitApplication(submittedOn, command.getExpectedDisbursementDate(), command.getRepaymentsStartingFromDate(), command.getInterestCalculatedFromDate(), defaultLoanLifecycleStateMachine());
 		this.loanRepository.save(loan);
 		
 		if (StringUtils.isNotBlank(command.getSubmittedOnNote())) {

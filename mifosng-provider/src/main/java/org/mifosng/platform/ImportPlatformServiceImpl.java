@@ -19,8 +19,6 @@ import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.mifosng.data.LoanSchedule;
-import org.mifosng.data.MoneyData;
-import org.mifosng.data.ScheduledLoanInstallment;
 import org.mifosng.data.command.CalculateLoanScheduleCommand;
 import org.mifosng.data.command.ImportLoanCommand;
 import org.mifosng.data.command.ImportLoanRepaymentsCommand;
@@ -32,25 +30,21 @@ import org.mifosng.platform.api.commands.ClientCommand;
 import org.mifosng.platform.api.commands.ImportClientCommand;
 import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.client.domain.ClientRepository;
-import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.exceptions.UnAuthenticatedUserException;
-import org.mifosng.platform.loan.domain.AmortizationMethod;
 import org.mifosng.platform.loan.domain.DefaultLoanLifecycleStateMachine;
 import org.mifosng.platform.loan.domain.InterestCalculationPeriodMethod;
-import org.mifosng.platform.loan.domain.InterestMethod;
 import org.mifosng.platform.loan.domain.Loan;
 import org.mifosng.platform.loan.domain.LoanLifecycleStateMachine;
 import org.mifosng.platform.loan.domain.LoanProduct;
-import org.mifosng.platform.loan.domain.LoanProductRelatedDetail;
 import org.mifosng.platform.loan.domain.LoanProductRepository;
-import org.mifosng.platform.loan.domain.LoanRepaymentScheduleInstallment;
 import org.mifosng.platform.loan.domain.LoanRepository;
 import org.mifosng.platform.loan.domain.LoanStatus;
 import org.mifosng.platform.loan.domain.LoanStatusRepository;
 import org.mifosng.platform.loan.domain.LoanTransaction;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 import org.mifosng.platform.loan.service.CalculationPlatformService;
+import org.mifosng.platform.loan.service.LoanAssembler;
 import org.mifosng.platform.organisation.domain.Office;
 import org.mifosng.platform.organisation.domain.OfficeRepository;
 import org.mifosng.platform.organisation.domain.Organisation;
@@ -75,11 +69,13 @@ public class ImportPlatformServiceImpl implements ImportPlatformService {
 	private final CalculationPlatformService calculationPlatformService;
 	private final LoanRepository loanRepository;
 	private final LoanStatusRepository loanStatusRepository;
+	private final LoanAssembler loanAssembler;
 
 	@Autowired
-	public ImportPlatformServiceImpl(
+	public ImportPlatformServiceImpl(final LoanAssembler loanAssembler,
 			final OfficeRepository officeRepository, final ClientRepository clientRepository, final LoanProductRepository loanProductRepository,
 			final CalculationPlatformService calculationPlatformService, final LoanRepository loanRepository, final LoanStatusRepository loanStatusRepository) {
+		this.loanAssembler = loanAssembler;
 		this.officeRepository = officeRepository;
 		this.clientRepository = clientRepository;
 		this.loanProductRepository = loanProductRepository;
@@ -138,74 +134,9 @@ public class ImportPlatformServiceImpl implements ImportPlatformService {
 			
 			SubmitLoanApplicationCommand command = combinedCommand.getSubmitLoanApplicationCommand();
 			
-			// most of this code can be extracted out into an Assembler
-			LoanProduct loanProduct = this.loanProductRepository.findOne(command
-					.getProductId());
-			Client client = this.clientRepository.findOne(command.getApplicantId());
-			
-			MonetaryCurrency currency = new MonetaryCurrency(command.getCurrencyCode(), command.getDigitsAfterDecimal());
-			
-			final BigDecimal defaultNominalInterestRatePerPeriod = BigDecimal.valueOf(command
-					.getInterestRatePerPeriod().doubleValue());
-			final PeriodFrequencyType interestPeriodFrequencyType = PeriodFrequencyType.fromInt(command.getInterestRateFrequencyMethod());
-			
-			// apr calculator
-			BigDecimal defaultAnnualNominalInterestRate = BigDecimal.ZERO;
-			switch (interestPeriodFrequencyType) {
-			case DAYS:
-				break;
-			case WEEKS:
-				defaultAnnualNominalInterestRate = command.getInterestRatePerPeriod().multiply(BigDecimal.valueOf(52));
-				break;
-			case MONTHS:
-				defaultAnnualNominalInterestRate = command.getInterestRatePerPeriod().multiply(BigDecimal.valueOf(12));
-				break;
-			case YEARS:
-				defaultAnnualNominalInterestRate = command.getInterestRatePerPeriod();
-				break;
-			case INVALID:
-				break;
-			}
-			
-			final InterestMethod interestMethod = InterestMethod.fromInt(command.getInterestMethod());
-			final InterestCalculationPeriodMethod interestCalculationPeriodMethod = InterestCalculationPeriodMethod.fromInt(command.getInterestCalculationPeriodMethod());
-			
-			final Integer repayEvery = command.getRepaymentEvery();
-			final PeriodFrequencyType repaymentFrequencyType = PeriodFrequencyType
-					.fromInt(command.getRepaymentFrequency());
-			final Integer defaultNumberOfInstallments = command.getNumberOfRepayments();
-			final AmortizationMethod amortizationMethod = AmortizationMethod.fromInt(command.getAmortizationMethod());
-			
-			LoanProductRelatedDetail loanRepaymentScheduleDetail = new LoanProductRelatedDetail(currency, command.getPrincipal(),
-					defaultNominalInterestRatePerPeriod, interestPeriodFrequencyType, defaultAnnualNominalInterestRate, interestMethod, interestCalculationPeriodMethod,
-					repayEvery, repaymentFrequencyType, defaultNumberOfInstallments, amortizationMethod, command.getInArrearsToleranceAmount());
-
-			LoanSchedule loanSchedule = command.getLoanSchedule();
-			List<ScheduledLoanInstallment> loanRepaymentSchedule = loanSchedule
-					.getScheduledLoanInstallments();
-
-			Loan loan = Loan.createNew(currentUser.getOrganisation(), loanProduct, client, loanRepaymentScheduleDetail);
-			loan.setExternalId(command.getExternalId());
-			
-			for (ScheduledLoanInstallment scheduledLoanInstallment : loanRepaymentSchedule) {
-
-				MoneyData readPrincipalDue = scheduledLoanInstallment
-						.getPrincipalDue();
-
-				MoneyData readInterestDue = scheduledLoanInstallment
-						.getInterestDue();
-
-				LoanRepaymentScheduleInstallment installment = new LoanRepaymentScheduleInstallment(
-						loan, scheduledLoanInstallment.getInstallmentNumber(),
-						scheduledLoanInstallment.getPeriodStart(),
-						scheduledLoanInstallment.getPeriodEnd(), readPrincipalDue.getAmount(),
-						readInterestDue.getAmount());
-				loan.addRepaymentScheduleInstallment(installment);
-			}
+			Loan loan = loanAssembler.assembleFrom(command, currentUser.getOrganisation());
 			
 			LoanLifecycleStateMachine loanLifecycleStateMachine = defaultLoanLifecycleStateMachine();
-			
-			loan.submitApplication(command.getSubmittedOnDate(), command.getExpectedDisbursementDate(), command.getRepaymentsStartingFromDate(), command.getInterestCalculatedFromDate(), loanLifecycleStateMachine);
 			
 			LoanStateTransitionCommand approveLoanCommand = combinedCommand.getApproveLoanCommand();
 			if (approveLoanCommand != null) {

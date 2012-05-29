@@ -25,15 +25,15 @@ public class SubmitLoanApplicationCommandValidator {
 			dataValidationErrors.add(error);
 		}
 		
-		if (command.getSubmittedOnDate() == null) {
+		if (command.getSubmittedOnLocalDate() == null) {
 			ApiParameterError error = ApiParameterError.parameterError("validation.msg.loan.submitted.on.date.cannot.be.blank", 
-					"The parameter submittedOnDateFormatted cannot be empty.", "submittedOnDateFormatted");
+					"The parameter submittedOnDate cannot be empty.", "submittedOnDateFormatted");
 			dataValidationErrors.add(error);
 		} else {
-			if (command.getSubmittedOnDate().isAfter(command.getExpectedDisbursementDate())) {
+			if (command.getSubmittedOnLocalDate().isAfter(command.getExpectedDisbursementLocalDate())) {
 				ApiParameterError error = ApiParameterError.parameterError("validation.msg.loan.submitted.on.date.cannot.be.after.expectedDisbursementDate", 
-						"The date of parameter submittedOnDateFormatted cannot fall after the date given for expectedDisbursementDateFormatted.", "submittedOnDateFormatted", 
-						command.getSubmittedOnDateFormatted(), command.getExpectedDisbursementDateFormatted());
+						"The date of parameter submittedOnDate cannot fall after the date given for expectedDisbursementDate.", "submittedOnDate", 
+						command.getSubmittedOnDate(), command.getExpectedDisbursementDate());
 				dataValidationErrors.add(error);
 			}
 		}
@@ -41,17 +41,17 @@ public class SubmitLoanApplicationCommandValidator {
 		try {
 			// reuse calculate loan schedule validator for now
 			CalculateLoanScheduleCommand calculateLoanScheduleCommand = new CalculateLoanScheduleCommand(
-					command.getCurrencyCode(), command.getDigitsAfterDecimal(),
-					command.getPrincipal(), command.getInterestRatePerPeriod(),
-					command.getInterestRateFrequencyMethod(),
-					command.getInterestMethod(), command.getInterestCalculationPeriodMethod(),
-					command.getRepaymentEvery(),
-					command.getRepaymentFrequency(),
-					command.getNumberOfRepayments(),
-					command.getAmortizationMethod(),
-					command.getExpectedDisbursementDate(),
-					command.getRepaymentsStartingFromDate(),
-					command.getInterestCalculatedFromDate());
+					command.getCurrencyCode(), command.getDigitsAfterDecimalValue(),
+					command.getPrincipalValue(), command.getInterestRatePerPeriodValue(),
+					command.getInterestRateFrequencyType(),
+					command.getInterestType(), command.getInterestCalculationPeriodType(),
+					command.getRepaymentEveryValue(),
+					command.getRepaymentFrequencyType(),
+					command.getNumberOfRepaymentsValue(),
+					command.getAmortizationType(),
+					command.getExpectedDisbursementLocalDate(),
+					command.getRepaymentsStartingFromLocalDate(),
+					command.getInterestChargedFromLocalDate());
 
 			CalculateLoanScheduleCommandValidator validator = new CalculateLoanScheduleCommandValidator(
 					calculateLoanScheduleCommand);

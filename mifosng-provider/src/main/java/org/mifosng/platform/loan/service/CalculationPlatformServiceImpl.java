@@ -51,20 +51,19 @@ public class CalculationPlatformServiceImpl implements
 		CalculateLoanScheduleCommandValidator validator = new CalculateLoanScheduleCommandValidator(command);
 		validator.validate();
 		
-		// assemble 'loan data' into 'domain' object [LoanProductRelatedDetail]
-		final BigDecimal principalAmount = BigDecimal.valueOf(command.getPrincipal().doubleValue());
-		final BigDecimal defaultNominalInterestRatePerPeriod = BigDecimal.valueOf(command.getInterestRatePerPeriod().doubleValue());
-		final PeriodFrequencyType interestPeriodFrequencyType = PeriodFrequencyType.fromInt(command.getInterestRateFrequencyMethod());
-		final InterestMethod interestMethod = InterestMethod.fromInt(command.getInterestMethod());
-		final InterestCalculationPeriodMethod interestCalculationPeriodMethod = InterestCalculationPeriodMethod.fromInt(command.getInterestCalculationPeriodMethod());
-		final Integer repayEvery = command.getRepaymentEvery();
-		final PeriodFrequencyType repaymentFrequencyType = PeriodFrequencyType.fromInt(command.getRepaymentFrequency());
-		final Integer defaultNumberOfInstallments = command.getNumberOfRepayments();
-		final AmortizationMethod amortizationMethod = AmortizationMethod.fromInt(command.getAmortizationMethod());
+		final BigDecimal principalAmount = command.getPrincipalValue();
+		final BigDecimal defaultNominalInterestRatePerPeriod = command.getInterestRatePerPeriodValue();
+		final PeriodFrequencyType interestPeriodFrequencyType = PeriodFrequencyType.fromInt(command.getInterestRateFrequencyType());
+		final InterestMethod interestMethod = InterestMethod.fromInt(command.getInterestType());
+		final InterestCalculationPeriodMethod interestCalculationPeriodMethod = InterestCalculationPeriodMethod.fromInt(command.getInterestCalculationPeriodType());
+		final Integer repayEvery = command.getRepaymentEveryValue();
+		final PeriodFrequencyType repaymentFrequencyType = PeriodFrequencyType.fromInt(command.getRepaymentFrequencyType());
+		final Integer defaultNumberOfInstallments = command.getNumberOfRepaymentsValue();
+		final AmortizationMethod amortizationMethod = AmortizationMethod.fromInt(command.getAmortizationType());
 		
 		final BigDecimal defaultAnnualNominalInterestRate = this.aprCalculator.calculateFrom(interestPeriodFrequencyType, defaultNominalInterestRatePerPeriod);
 		
-		final MonetaryCurrency currency = new MonetaryCurrency(command.getCurrencyCode(), command.getDigitsAfterDecimal());
+		final MonetaryCurrency currency = new MonetaryCurrency(command.getCurrencyCode(), command.getDigitsAfterDecimalValue());
 		
 		// in arrerars tolerance isnt relevant when auto-calculating a loan schedule 
 		final BigDecimal inArrearsTolerance = BigDecimal.ZERO;
@@ -78,11 +77,11 @@ public class CalculationPlatformServiceImpl implements
 		LoanScheduleGenerator loanScheduleGenerator = this.loanScheduleFactory.create(interestMethod);
 
 		ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneByCode(command.getCurrencyCode());
-		CurrencyData currencyData = new CurrencyData(applicationCurrency.getCode(), applicationCurrency.getName(), command.getDigitsAfterDecimal(),
+		CurrencyData currencyData = new CurrencyData(applicationCurrency.getCode(), applicationCurrency.getName(), command.getDigitsAfterDecimalValue(),
 				applicationCurrency.getDisplaySymbol(), applicationCurrency.getNameCode());
 		
-		return loanScheduleGenerator.generate(loanScheduleInfo, command.getExpectedDisbursementDate(), command.getRepaymentsStartingFromDate(), 
-				command.getInterestCalculatedFromDate(), currencyData);
+		return loanScheduleGenerator.generate(loanScheduleInfo, command.getExpectedDisbursementLocalDate(), command.getRepaymentsStartingFromLocalDate(), 
+				command.getInterestChargedFromLocalDate(), currencyData);
 	}
 
 	@Override

@@ -109,42 +109,42 @@ public class LoansApiResource {
 			@QueryParam("command") final String commandParam,
 			final SubmitLoanApplicationCommand command) {
 
-		LocalDate expectedDisbursementDate = apiDataConversionService
-				.convertFrom(command.getExpectedDisbursementDateFormatted(),
-						"expectedDisbursementDateFormatted",
+		LocalDate expectedDisbursementLocalDate = apiDataConversionService
+				.convertFrom(command.getExpectedDisbursementDate(),
+						"expectedDisbursementDate",
 						command.getDateFormat());
-		LocalDate repaymentsStartingFromDate = apiDataConversionService
-				.convertFrom(command.getRepaymentsStartingFromDateFormatted(),
-						"repaymentsStartingFromDateFormatted",
+		LocalDate repaymentsStartingFromLocalDate = apiDataConversionService
+				.convertFrom(command.getRepaymentsStartingFromDate(),
+						"repaymentsStartingFromDate",
 						command.getDateFormat());
-		LocalDate interestCalculatedFromDate = apiDataConversionService
-				.convertFrom(command.getInterestCalculatedFromDateFormatted(),
-						"interestCalculatedFromDateFormatted",
+		LocalDate interestChargedFromLocalDate = apiDataConversionService
+				.convertFrom(command.getInterestChargedFromDate(),
+						"interestChargedFromDate",
 						command.getDateFormat());
-		LocalDate submittedOnDate = apiDataConversionService.convertFrom(
-				command.getSubmittedOnDateFormatted(),
-				"submittedOnDateFormatted", command.getDateFormat());
-		command.setExpectedDisbursementDate(expectedDisbursementDate);
-		command.setRepaymentsStartingFromDate(repaymentsStartingFromDate);
-		command.setInterestCalculatedFromDate(interestCalculatedFromDate);
-		command.setSubmittedOnDate(submittedOnDate);
+		LocalDate submittedOnLocalDate = apiDataConversionService.convertFrom(
+				command.getSubmittedOnDate(),
+				"submittedOnDate", command.getDateFormat());
+		
+		command.setExpectedDisbursementLocalDate(expectedDisbursementLocalDate);
+		command.setRepaymentsStartingFromLocalDate(repaymentsStartingFromLocalDate);
+		command.setInterestChargedFromLocalDate(interestChargedFromLocalDate);
+		command.setSubmittedOnLocalDate(submittedOnLocalDate);
 
-		// FIXME - pass in locale through query string or in 'request body'
-		Locale clientApplicationLocale = Locale.UK;
-		BigDecimal principal = this.apiDataConversionService.convertFrom(
-				command.getPrincipalFormatted(), "principalFormatted",
-				clientApplicationLocale);
-		BigDecimal interestRatePerPeriod = this.apiDataConversionService
-				.convertFrom(command.getInterestRatePerPeriodFormatted(),
-						"interestRatePerPeriodFormatted",
-						clientApplicationLocale);
-		BigDecimal inArrearsToleranceAmount = this.apiDataConversionService
-				.convertFrom(command.getInArrearsToleranceAmountFormatted(),
-						"inArrearsToleranceAmountFormatted",
-						clientApplicationLocale);
-		command.setPrincipal(principal);
-		command.setInterestRatePerPeriod(interestRatePerPeriod);
-		command.setInArrearsToleranceAmount(inArrearsToleranceAmount);
+		Locale clientApplicationLocale = this.apiDataConversionService.localeFromString(command.getLocale());
+		BigDecimal principalValue = this.apiDataConversionService.convertFrom(command.getPrincipal(), "principal", clientApplicationLocale);
+		BigDecimal inArrearsToleranceValue = this.apiDataConversionService.convertFrom(command.getInArrearsTolerance(), "inArrearsTolerance", clientApplicationLocale);
+		BigDecimal interestRatePerPeriodValue = this.apiDataConversionService.convertFrom(command.getInterestRatePerPeriod(),"interestRatePerPeriod", clientApplicationLocale);
+		
+		Integer digitsAfterDecimalValue = this.apiDataConversionService.convertToInteger(command.getDigitsAfterDecimal(), "digitsAfterDecimal", clientApplicationLocale);
+		Integer repaymentEveryValue = this.apiDataConversionService.convertToInteger(command.getRepaymentEvery(), "repaymentEvery", clientApplicationLocale);
+		Integer numberOfRepaymentsValue = this.apiDataConversionService.convertToInteger(command.getNumberOfRepayments(), "numberOfRepayments", clientApplicationLocale);
+		
+		command.setPrincipalValue(principalValue);
+		command.setInArrearsToleranceValue(inArrearsToleranceValue);
+		command.setInterestRatePerPeriodValue(interestRatePerPeriodValue);
+		command.setDigitsAfterDecimalValue(digitsAfterDecimalValue);
+		command.setRepaymentEveryValue(repaymentEveryValue);
+		command.setNumberOfRepaymentsValue(numberOfRepaymentsValue);
 
 		CalculateLoanScheduleCommand calculateLoanScheduleCommand = command
 				.toCalculateLoanScheduleCommand();

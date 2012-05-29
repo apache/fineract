@@ -44,7 +44,6 @@ public class RoleReadPlatformServiceImpl implements RoleReadPlatformService {
 		return this.jdbcTemplate.query(sql, mapper, new Object[] {currentUser.getOrganisation().getId() });
 	}
 
-	// FIXME - does it make sense to use JDBC over repository for this?
 	@Override
 	public RoleData retrieveRole(final Long id) {
 		AppUser currentUser = context.authenticatedUser();

@@ -55,9 +55,28 @@ $(document).ready(function() {
 		        return false;
 		      }
 		},
-		globalDate: function(localDateAsISOString) {
+		globalDate: function(dateParts) {
 		      try {
-		    	  if (localDateAsISOString === null) return "";
+		    	  
+		    	  if (dateParts === null || dateParts === '') return "";
+		    	
+		    	  var year = dateParts[0];
+		    	  var month = parseInt(dateParts[1]) - 1; // month is zero indexed
+		    	  var day = dateParts[2];
+		    	  
+		    	  var d = new Date();
+		    	  d.setFullYear(year,month,day);
+		    	  
+		    	  return Globalize.format(d,"dd MMMM yyyy");
+		      } catch(e) {
+		        return "??";
+		      }
+		},
+		globalDateAsISOString: function(localDateAsISOString) {
+			
+		      try {
+		    	  if (localDateAsISOString === null || localDateAsISOString === '') return "";
+		    	  
 		    	  var dateParts = localDateAsISOString.split("-")
 		    	  var year = dateParts[0];
 		    	  var month = parseInt(dateParts[1]) - 1; // month is zero indexed
@@ -177,13 +196,13 @@ $(document).ready(function() {
 	};
 	
 	function calculateAnnualPercentageRate() {
-		var periodInterestRate = parseFloat($('#interestRatePerPeriodFormatted').val());
+		var periodInterestRate = parseFloat($('#interestRatePerPeriod').val());
 		if (isNaN(periodInterestRate)) {
 			periodInterestRate = 0;
 		}
 		
 		var periodsInYear = 12;
-		var periodType = $('#interestRateFrequencyMethod').val();
+		var periodType = $('#interestRateFrequencyType').val();
 		if (periodType == 3) {
 			periodsInYear = 1;
 		} else if (periodType == 2) {
@@ -207,7 +226,6 @@ $(document).ready(function() {
 			dataType: 'json',
 			cache: false,
 			beforeSend: function(xhr) {
-				console.log("base64: " + base64);
 				xhr.setRequestHeader("Authorization", "Basic " + base64);
 			},
 			success: function(data, textStatus, jqXHR) {
@@ -228,7 +246,7 @@ $(document).ready(function() {
 				calculateLoanSchedule();
 				
 				// change detection
-				$('#principalFormatted').change(function() {
+				$('#principal').change(function() {
 					calculateLoanSchedule();
 				});
 				
@@ -236,7 +254,7 @@ $(document).ready(function() {
 					calculateLoanSchedule();
 				});
 				
-				$('#repaymentFrequency').change(function() {
+				$('#repaymentFrequencyType').change(function() {
 					calculateLoanSchedule();
 				});
 				
@@ -244,37 +262,37 @@ $(document).ready(function() {
 					calculateLoanSchedule();
 				});
 				
-				$('#expectedDisbursementDateFormatted').change(function() {
+				$('#expectedDisbursementDate').change(function() {
 					calculateLoanSchedule();
 				});
 				
-				$('#repaymentsStartingFromDateFormatted').change(function() {
+				$('#repaymentsStartingFromDate').change(function() {
 					calculateLoanSchedule();
 				});
 				
-				$('#interestRatePerPeriodFormatted').change(function() {
+				$('#interestRatePerPeriod').change(function() {
 					calculateAnnualPercentageRate();
 					calculateLoanSchedule();
 				});
 				
-				$('#interestRateFrequencyMethod').change(function() {
+				$('#interestRateFrequencyType').change(function() {
 					calculateAnnualPercentageRate();
 					calculateLoanSchedule();
 				});
 				
-				$('#amortizationMethod').change(function() {
+				$('#amortizationType').change(function() {
 					calculateLoanSchedule();
 				});
 				
-				$('#interestMethod').change(function() {
+				$('#interestType').change(function() {
 					calculateLoanSchedule();
 				});
 				
-				$('#interestCalculationPeriodMethod').change(function() {
+				$('#interestCalculationPeriodType').change(function() {
 					calculateLoanSchedule();
 				});
 				
-				$('#interestCalculatedFromDateFormatted').change(function() {
+				$('#interestChargedFromDate').change(function() {
 					calculateLoanSchedule();
 				});
 				
@@ -302,7 +320,6 @@ $(document).ready(function() {
 		var calculateLoanScheduleurl = baseApiUrl + 'loans?command=calculateLoanSchedule';
 		
 		var newFormData = JSON.stringify($('#entityform').serializeObject());
-    	console.log(newFormData);
     	
 		var jqxhr2 = $.ajax({
 			  url: calculateLoanScheduleurl,
@@ -312,7 +329,6 @@ $(document).ready(function() {
 			  data: newFormData,
 			  cache: false,
 			  beforeSend: function(xhr) {
-			  	console.log("base64: " + base64);
 			  	xhr.setRequestHeader("Authorization", "Basic " + base64);
 			  },
 			  success: function(data, textStatus, jqXHR) {
@@ -332,7 +348,6 @@ $(document).ready(function() {
 		var submitLoanApplicationUrl = baseApiUrl + 'loans';
 		
 		var newFormData = JSON.stringify($('#entityform').serializeObject());
-    	console.log(newFormData);
     	
 		var jqxhr2 = $.ajax({
 			  url: submitLoanApplicationUrl,
@@ -342,11 +357,9 @@ $(document).ready(function() {
 			  data: newFormData,
 			  cache: false,
 			  beforeSend: function(xhr) {
-				  	console.log("base64: " + base64);
 				  	xhr.setRequestHeader("Authorization", "Basic " + base64);
 			  },			  
 			  beforeSend: function(xhr) {
-				  	console.log("base64: " + base64);
 				  	xhr.setRequestHeader("Authorization", "Basic " + base64);
 			  },
 			  success: function(data, textStatus, jqXHR) {
@@ -368,7 +381,6 @@ $(document).ready(function() {
 		dataType: 'json',
 		cache: false,
 		beforeSend: function(xhr) {
-			console.log("base64: " + base64);
 			xhr.setRequestHeader("Authorization", "Basic " + base64);
 	    },
 		success: function(data, textStatus, jqXHR) {

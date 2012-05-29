@@ -29,7 +29,7 @@
 		{{#each scheduledLoanInstallments}}
 		<tr>
 			<td>{{=$ctx.number(installmentNumber)}}</td>
-			<td>{{=$ctx.globalDate(periodEnd)}}</td>
+			<td>{{=$ctx.globalDateAsISOString(periodEnd)}}</td>
 			<td>{{=$ctx.money(principalDue)}}</td>
 			<td>{{=$ctx.money(interestDue)}}</td>
 			<td>{{=$ctx.money(totalInstallmentDue)}}</td>
@@ -54,7 +54,7 @@
 <form id="entityform">
     <div id="formerrors"></div>
 
-	<input type="hidden" id="applicantId" name="applicantId" value="{{=clientId}}" />
+	<input type="hidden" id="clientId" name="clientId" value="{{=clientId}}" />
 	<input type="hidden" id="currencyCode" name="currencyCode" value="{{=selectedProduct.principalMoney.currencyCode}}" />
 	<input type="hidden" id="digitsAfterDecimal" name="digitsAfterDecimal" value="{{=$ctx.number(selectedProduct.principalMoney.currencyDigitsAfterDecimal)}}" />
 
@@ -84,8 +84,8 @@
 					<td style="text-align:right;vertical-align:bottom;width:50px;">&nbsp;</td>
 					<td valign="top">
 						<input type="hidden" id="dateFormat" name="dateFormat" value="dd MMMM yyyy" />
-						<label for="submittedOnDateFormatted"><spring:message code="form.label.loan.submitted.on"/></label>
-						<input id="submittedOnDateFormatted" name="submittedOnDateFormatted" title="" type="text" class="datepickerfield" value="{{=$ctx.globalDate(submittedOnDate)}}" />
+						<label for="submittedOnDate"><spring:message code="form.label.loan.submitted.on"/></label>
+						<input id="submittedOnDate" name="submittedOnDate" title="" type="text" class="datepickerfield" value="{{=$ctx.globalDate(submittedOnDate)}}" />
 
 						<label for="submittedOnNote"><spring:message code="form.label.loan.submitted.on.note"/></label>
 						<textarea id="submittedOnNote" name="submittedOnNote" rows="2" cols="50" draggable="false">{{=submittedOnNote}}</textarea>
@@ -103,7 +103,7 @@
 						<tr>
 							<td><spring:message code="form.label.loan.product.loan.amount"/></td>
 							<td>
-								<input id="principalFormatted" name="principalFormatted" title="" type="text" value="{{=$ctx.money(selectedProduct.principalMoney)}}" style="width: 125px;" />
+								<input id="principal" name="principal" title="" type="text" value="{{=$ctx.money(selectedProduct.principalMoney)}}" style="width: 125px;" />
 								<input id="principalCurrencyCode" name="principalCurrencyCode" title="" type="text" value="{{=selectedProduct.principalMoney.displaySymbol}}" style="width: 40px;" disabled="disabled" />
 							</td>
 						</tr>
@@ -112,7 +112,7 @@
 							<td>
 								<input id="repaymentEvery" name="repaymentEvery" title="" type="text" value="{{=$ctx.number(selectedProduct.repaidEvery)}}" style="width: 50px;" />
 								
-								<select name="repaymentFrequency" id="repaymentFrequency"  title="" style="width: 121px;">
+								<select name="repaymentFrequencyType" id="repaymentFrequencyType"  title="" style="width: 121px;">
 								{{#each selectedProduct.repaymentFrequencyOptions}}
 								{{#if $ctx.number($parent.parent.data.selectedProduct.repaymentPeriodFrequency)===$ctx.number(id)}}
 									<option value="{{=$ctx.number(id)}}" selected="selected">{{=value}}</option>
@@ -132,13 +132,13 @@
 						<tr>
 							<td><spring:message code="form.label.loan.expected.disbursement.date.on"/></td>
 							<td>
-							<input id="expectedDisbursementDateFormatted" name="expectedDisbursementDateFormatted" title="" type="text" class="datepickerfield" value="{{=$ctx.globalDate(expectedDisbursementDate)}}" style="width:172px;"/>
+							<input id="expectedDisbursementDate" name="expectedDisbursementDate" title="" type="text" class="datepickerfield" value="{{=$ctx.globalDate(expectedDisbursementDate)}}" style="width:172px;"/>
 							</td>
 						</tr>
 						<tr>
 							<td><spring:message code="form.label.loan.first.repayment.on"/></td>
 							<td>
-							<input id="repaymentsStartingFromDateFormatted" name="repaymentsStartingFromDateFormatted" title="" type="text" class="datepickerfield" value="{{=$ctx.globalDate(repaymentsStartingFromDate)}}" style="width:172px;"/>
+							<input id="repaymentsStartingFromDate" name="repaymentsStartingFromDate" title="" type="text" class="datepickerfield" value="{{=$ctx.globalDate(repaymentsStartingFromDate)}}" style="width:172px;"/>
 							</td>
 						</tr>
 					</table>
@@ -149,9 +149,9 @@
 						<tr>
 							<td><spring:message code="form.label.loan.product.nominal.interestrate"/></td>
 							<td>
-								<input id="interestRatePerPeriodFormatted" name="interestRatePerPeriodFormatted" title="" type="text" value="{{=$ctx.decimal(selectedProduct.interestRatePerPeriod, 4)}}" style="width: 60px;" />
+								<input id="interestRatePerPeriod" name="interestRatePerPeriod" title="" type="text" value="{{=$ctx.decimal(selectedProduct.interestRatePerPeriod, 4)}}" style="width: 60px;" />
 								
-								<select name="interestRateFrequencyMethod" id="interestRateFrequencyMethod"  title="" style="width: 115px;">
+								<select name="interestRateFrequencyType" id="interestRateFrequencyType"  title="" style="width: 115px;">
 								{{#each selectedProduct.interestFrequencyOptions}}
 								{{#if $ctx.number($parent.parent.data.selectedProduct.interestRatePeriod)===$ctx.number(id)}}
 									<option value="{{=$ctx.number(id)}}" selected="selected">{{=value}}</option>
@@ -171,7 +171,7 @@
 						<tr>
 							<td><spring:message code="form.label.loan.product.amortization"/></td>
 							<td>
-								<select name="amortizationMethod" id="amortizationMethod"  title="" style="width: 178px;">
+								<select name="amortizationType" id="amortizationType"  title="" style="width: 178px;">
 								{{#each selectedProduct.possibleAmortizationOptions}}
 								{{#if $ctx.number($parent.parent.data.selectedProduct.amortizationMethod)===$ctx.number(id)}}
 									<option value="{{=$ctx.number(id)}}" selected="selected">{{=value}}</option>
@@ -185,7 +185,7 @@
 						<tr>
 							<td><spring:message code="form.label.loan.product.interest.method"/></td>
 							<td>
-								<select name="interestMethod" id="interestMethod"  title="" style="width: 180px;">
+								<select name="interestType" id="interestType"  title="" style="width: 180px;">
 								{{#each selectedProduct.possibleInterestOptions}}
 								{{#if $ctx.number($parent.parent.data.selectedProduct.interestMethod)===$ctx.number(id)}}
 									<option value="{{=$ctx.number(id)}}" selected="selected">{{=value}}</option>
@@ -199,7 +199,7 @@
 						<tr>
 							<td><spring:message code="form.label.loan.product.interest.rate.calcutated.in.period"/></td>
 							<td>
-							<select id="interestCalculationPeriodMethod" name="interestCalculationPeriodMethod" title="" style="width: 220px;">
+							<select id="interestCalculationPeriodType" name="interestCalculationPeriodType" title="" style="width: 220px;">
 								{{#each selectedProduct.possibleInterestRateCalculatedInPeriodOptions}}
                                  	{{#if $ctx.number($parent.parent.data.selectedProduct.interestRateCalculatedInPeriod)===$ctx.number(id)}}
 										<option value="{{=$ctx.number(id)}}" selected="selected">{{=value}}</option>
@@ -213,13 +213,13 @@
 						<tr>
 							<td><spring:message code="form.label.loan.interest.charged.from"/></td>
 							<td>
-							<input id="interestCalculatedFromDateFormatted" name="interestCalculatedFromDateFormatted" title="" type="text" class="datepickerfield" value="{{=$ctx.globalDate(interestCalculatedFromDate)}}" style="width:172px;"/>
+							<input id="interestChargedFromDate" name="interestChargedFromDate" title="" type="text" class="datepickerfield" value="{{=$ctx.globalDate(interestCalculatedFromDate)}}" style="width:172px;"/>
 							</td>
 						</tr>
 						<tr>
 							<td><spring:message code="form.label.loan.product.arrears.tolerance"/></td>
 							<td>
-								<input id="inArrearsToleranceAmountFormatted" name="inArrearsToleranceAmountFormatted" title="" type="text" value="{{=$ctx.money(selectedProduct.inArrearsTolerance)}}" style="width: 125px;" />
+								<input id="inArrearsTolerance" name="inArrearsTolerance" title="" type="text" value="{{=$ctx.money(selectedProduct.inArrearsTolerance)}}" style="width: 125px;" />
 								<input id="inArrearsCurrencyCode" name="inArrearsCurrencyCode" title="" type="text" value="{{=selectedProduct.inArrearsTolerance.displaySymbol}}" style="width: 40px;" disabled="disabled" />
 							</td>
 						</tr>
