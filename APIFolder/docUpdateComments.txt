@@ -28,7 +28,6 @@ Create - currencyDigitsAfterDecimal is it needed? (maybe customising digits afte
 
 Clients
 displayName, externalId, maxJoinedOnOffsetFromToday
-joinedDateFormatted still there,
-update doesn't work if officeId not there.
+business name?
 
 
