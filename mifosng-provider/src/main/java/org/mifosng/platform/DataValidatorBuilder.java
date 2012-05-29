@@ -1,5 +1,6 @@
 package org.mifosng.platform;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -120,6 +121,23 @@ public class DataValidatorBuilder {
 				StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(resource).append(".").append(parameter).append(".is.not.within.expected.range");
 				StringBuilder defaultEnglishMessage = new StringBuilder("The parameter ").append(parameter).append(" must be between ").append(min).append(" and ").append(max).append(".");
 				ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(), defaultEnglishMessage.toString(), parameter, number, min, max);
+				dataValidationErrors.add(error);
+			}
+		}
+		return this;
+	}
+	
+	public DataValidatorBuilder positiveAmount() {
+		if (value == null && ignoreNullValue) {
+			return this;
+		}
+		
+		if (value != null) {
+			BigDecimal number = BigDecimal.valueOf(Double.valueOf(value.toString()));
+			if (number.compareTo(BigDecimal.ZERO) <= 0) {
+				StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(resource).append(".").append(parameter).append(".not.greater.than.zero");
+				StringBuilder defaultEnglishMessage = new StringBuilder("The parameter ").append(parameter).append(" must be greater than 0.");
+				ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(), defaultEnglishMessage.toString(), parameter, number, 0);
 				dataValidationErrors.add(error);
 			}
 		}

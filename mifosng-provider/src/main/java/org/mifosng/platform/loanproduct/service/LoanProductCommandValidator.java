@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.mifosng.data.ApiParameterError;
-import org.mifosng.data.command.LoanProductCommand;
 import org.mifosng.platform.DataValidatorBuilder;
+import org.mifosng.platform.api.commands.LoanProductCommand;
 import org.mifosng.platform.exceptions.PlatformApiDataValidationException;
 
 public class LoanProductCommandValidator {
@@ -27,25 +27,26 @@ public class LoanProductCommandValidator {
 		baseDataValidator.reset().parameter("description").value(command.getDescription()).ignoreIfNull().notExceedingLengthOf(500);
 		baseDataValidator.reset().parameter("externalId").value(command.getExternalId()).ignoreIfNull().notExceedingLengthOf(100);
 		baseDataValidator.reset().parameter("currencyCode").value(command.getCurrencyCode()).ignoreIfNull().notBlank();
-		baseDataValidator.reset().parameter("digitsAfterDecimal").value(command.getDigitsAfterDecimal()).ignoreIfNull().notNull().inMinMaxRange(0, 6);
+		baseDataValidator.reset().parameter("digitsAfterDecimal").value(command.getDigitsAfterDecimalValue()).ignoreIfNull().notNull().inMinMaxRange(0, 6);
 		
-		baseDataValidator.reset().parameter("principalFormatted").value(command.getPrincipalFormatted()).ignoreIfNull().notBlank();
-		baseDataValidator.reset().parameter("inArrearsToleranceAmountFormatted").value(command.getInArrearsToleranceAmountFormatted()).ignoreIfNull().notBlank();
+		baseDataValidator.reset().parameter("principal").value(command.getPrincipalValue()).ignoreIfNull().notNull().positiveAmount();
+		baseDataValidator.reset().parameter("inArrearsTolerance").value(command.getInArrearsToleranceValue()).ignoreIfNull().positiveAmount();
 		
-		baseDataValidator.reset().parameter("repaymentFrequency").value(command.getRepaymentFrequency()).ignoreIfNull().notNull().inMinMaxRange(0, 3);
-		baseDataValidator.reset().parameter("repaymentEvery").value(command.getRepaymentEvery()).ignoreIfNull().notNull().greaterThanZero();
-		baseDataValidator.reset().parameter("numberOfRepayments").value(command.getNumberOfRepayments()).ignoreIfNull().notNull().greaterThanZero();
+		baseDataValidator.reset().parameter("repaymentFrequencyType").value(command.getRepaymentFrequencyType()).ignoreIfNull().notNull().inMinMaxRange(0, 3);
 		
-		baseDataValidator.reset().parameter("interestRatePerPeriodFormatted").value(command.getInterestRatePerPeriodFormatted()).ignoreIfNull().notBlank();
-		baseDataValidator.reset().parameter("interestRateFrequencyMethod").value(command.getInterestRateFrequencyMethod()).ignoreIfNull().notNull().inMinMaxRange(0, 3);
+		baseDataValidator.reset().parameter("repaymentEvery").value(command.getRepaymentEveryValue()).ignoreIfNull().notNull().greaterThanZero();
+		baseDataValidator.reset().parameter("numberOfRepayments").value(command.getNumberOfRepaymentsValue()).ignoreIfNull().notNull().greaterThanZero();
 		
-		baseDataValidator.reset().parameter("amortizationMethod").value(command.getAmortizationMethod()).ignoreIfNull().notNull().inMinMaxRange(0, 1);
-		baseDataValidator.reset().parameter("interestMethod").value(command.getInterestMethod()).ignoreIfNull().notNull().inMinMaxRange(0, 1);
-		baseDataValidator.reset().parameter("interestCalculationPeriodMethod").value(command.getInterestCalculationPeriodMethod()).ignoreIfNull().notNull().inMinMaxRange(0, 1);
+		baseDataValidator.reset().parameter("interestRatePerPeriod").value(command.getInterestRatePerPeriodValue()).ignoreIfNull().notBlank();
+		baseDataValidator.reset().parameter("interestRateFrequencyType").value(command.getInterestRateFrequencyType()).ignoreIfNull().notNull().inMinMaxRange(0, 3);
+		
+		baseDataValidator.reset().parameter("amortizationType").value(command.getAmortizationType()).ignoreIfNull().notNull().inMinMaxRange(0, 1);
+		baseDataValidator.reset().parameter("interestType").value(command.getInterestType()).ignoreIfNull().notNull().inMinMaxRange(0, 1);
+		baseDataValidator.reset().parameter("interestCalculationPeriodType").value(command.getInterestCalculationPeriodType()).ignoreIfNull().notNull().inMinMaxRange(0, 1);
 		
 		baseDataValidator.reset().anyOfNotNull(command.getName(), command.getDescription(), command.getExternalId(), command.getCurrencyCode(), command.getDigitsAfterDecimal(),
-				command.getPrincipalFormatted(), command.getInArrearsToleranceAmountFormatted(), command.getRepaymentFrequency(), command.getRepaymentEvery(), command.getNumberOfRepayments(),
-				command.getInterestRatePerPeriodFormatted(), command.getInterestRateFrequencyMethod(), command.getAmortizationMethod(), command.getInterestMethod(), command.getInterestCalculationPeriodMethod());
+				command.getPrincipal(), command.getInArrearsTolerance(), command.getRepaymentFrequencyType(), command.getRepaymentEvery(), command.getNumberOfRepayments(),
+				command.getInterestRatePerPeriod(), command.getInterestRateFrequencyType(), command.getAmortizationType(), command.getInterestType(), command.getInterestCalculationPeriodType());
 		
 		if (!dataValidationErrors.isEmpty()) {
 			throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);
@@ -62,21 +63,21 @@ public class LoanProductCommandValidator {
 		baseDataValidator.reset().parameter("description").value(command.getDescription()).notExceedingLengthOf(500);
 		baseDataValidator.reset().parameter("externalId").value(command.getExternalId()).notExceedingLengthOf(100);
 		baseDataValidator.reset().parameter("currencyCode").value(command.getCurrencyCode()).notBlank();
-		baseDataValidator.reset().parameter("digitsAfterDecimal").value(command.getDigitsAfterDecimal()).notNull().inMinMaxRange(0, 6);
+		baseDataValidator.reset().parameter("digitsAfterDecimal").value(command.getDigitsAfterDecimalValue()).notNull().inMinMaxRange(0, 6);
 		
-		baseDataValidator.reset().parameter("principalFormatted").value(command.getPrincipalFormatted()).notBlank();
-		baseDataValidator.reset().parameter("inArrearsToleranceAmountFormatted").value(command.getInArrearsToleranceAmountFormatted()).notBlank();
+		baseDataValidator.reset().parameter("principal").value(command.getPrincipalValue()).notNull().positiveAmount();
+		baseDataValidator.reset().parameter("inArrearsTolerance").value(command.getInArrearsToleranceValue()).positiveAmount();
 		
-		baseDataValidator.reset().parameter("repaymentFrequency").value(command.getRepaymentFrequency()).notNull().inMinMaxRange(0, 3);
-		baseDataValidator.reset().parameter("repaymentEvery").value(command.getRepaymentEvery()).notNull().greaterThanZero();
-		baseDataValidator.reset().parameter("numberOfRepayments").value(command.getNumberOfRepayments()).notNull().greaterThanZero();
+		baseDataValidator.reset().parameter("repaymentFrequencyType").value(command.getRepaymentFrequencyType()).notNull().inMinMaxRange(0, 3);
+		baseDataValidator.reset().parameter("repaymentEvery").value(command.getRepaymentEveryValue()).notNull().greaterThanZero();
+		baseDataValidator.reset().parameter("numberOfRepayments").value(command.getNumberOfRepaymentsValue()).notNull().greaterThanZero();
 		
-		baseDataValidator.reset().parameter("interestRatePerPeriodFormatted").value(command.getInterestRatePerPeriodFormatted()).notBlank();
-		baseDataValidator.reset().parameter("interestRateFrequencyMethod").value(command.getInterestRateFrequencyMethod()).notNull().inMinMaxRange(0, 3);
+		baseDataValidator.reset().parameter("interestRatePerPeriod").value(command.getInterestRatePerPeriodValue()).notNull();
+		baseDataValidator.reset().parameter("interestRateFrequencyType").value(command.getInterestRateFrequencyType()).notNull().inMinMaxRange(0, 3);
 		
-		baseDataValidator.reset().parameter("amortizationMethod").value(command.getAmortizationMethod()).notNull().inMinMaxRange(0, 1);
-		baseDataValidator.reset().parameter("interestMethod").value(command.getInterestMethod()).notNull().inMinMaxRange(0, 1);
-		baseDataValidator.reset().parameter("interestCalculationPeriodMethod").value(command.getInterestCalculationPeriodMethod()).notNull().inMinMaxRange(0, 1);
+		baseDataValidator.reset().parameter("amortizationType").value(command.getAmortizationType()).notNull().inMinMaxRange(0, 1);
+		baseDataValidator.reset().parameter("interestType").value(command.getInterestType()).notNull().inMinMaxRange(0, 1);
+		baseDataValidator.reset().parameter("interestCalculationPeriodType").value(command.getInterestCalculationPeriodType()).notNull().inMinMaxRange(0, 1);
 		
 		if (!dataValidationErrors.isEmpty()) {
 			throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);

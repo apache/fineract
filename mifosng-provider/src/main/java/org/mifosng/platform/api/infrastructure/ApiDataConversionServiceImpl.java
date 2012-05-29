@@ -48,6 +48,36 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 
 		return eventLocalDate;
 	}
+	
+	@Override
+	public Integer convertToInteger(String numericalValueFormatted, String parameterName, Locale clientApplicationLocale) {
+		try {
+			Integer number = null;
+
+			if (StringUtils.isNotBlank(numericalValueFormatted)) {
+				String sourceWithoutSpaces = numericalValueFormatted.replaceAll(" ", "");
+				NumberFormat format = NumberFormat.getNumberInstance(clientApplicationLocale);
+				Number parsedNumber = format.parse(sourceWithoutSpaces);
+				number = parsedNumber.intValue();
+			}
+
+			return number;
+		} catch (ParseException e) {
+
+			List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+			ApiParameterError error = ApiParameterError.parameterError(
+					"validation.msg.invalid.number.format", "The parameter "
+							+ parameterName + " is invalid for provided locale"
+							+ clientApplicationLocale.toString() + ".",
+					parameterName, numericalValueFormatted,
+					clientApplicationLocale);
+			dataValidationErrors.add(error);
+
+			throw new PlatformApiDataValidationException(
+					"validation.msg.validation.errors.exist",
+					"Validation errors exist.", dataValidationErrors);
+		}
+	}
 
 	@Override
 	public BigDecimal convertFrom(String numericalValueFormatted,

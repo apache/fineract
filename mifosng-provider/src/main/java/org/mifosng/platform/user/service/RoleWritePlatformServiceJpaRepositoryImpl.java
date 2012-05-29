@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.mifosng.data.command.RoleCommand;
+import org.mifosng.platform.api.commands.RoleCommand;
 import org.mifosng.platform.exceptions.RoleNotFoundException;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.user.domain.AppUser;

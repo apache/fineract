@@ -5,7 +5,7 @@ import static org.mifosng.platform.Specifications.productThatMatches;
 import java.math.BigDecimal;
 
 import org.mifosng.data.EntityIdentifier;
-import org.mifosng.data.command.LoanProductCommand;
+import org.mifosng.platform.api.commands.LoanProductCommand;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.exceptions.LoanProductNotFoundException;
 import org.mifosng.platform.loan.domain.AmortizationMethod;
@@ -45,25 +45,26 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
 		validator.validateForCreate();
 
 		// assemble LoanProduct from data
-		InterestMethod interestMethod = InterestMethod.fromInt(command.getInterestMethod());
-		InterestCalculationPeriodMethod interestCalculationPeriodMethod = InterestCalculationPeriodMethod.fromInt(command.getInterestCalculationPeriodMethod());
+		InterestMethod interestMethod = InterestMethod.fromInt(command.getInterestType());
+		InterestCalculationPeriodMethod interestCalculationPeriodMethod = InterestCalculationPeriodMethod.fromInt(command.getInterestCalculationPeriodType());
 		
-		AmortizationMethod amortizationMethod = AmortizationMethod.fromInt(command.getAmortizationMethod());
+		AmortizationMethod amortizationMethod = AmortizationMethod.fromInt(command.getAmortizationType());
 
 		PeriodFrequencyType repaymentFrequencyType = PeriodFrequencyType
-				.fromInt(command.getRepaymentFrequency());
+				.fromInt(command.getRepaymentFrequencyType());
 		
 		PeriodFrequencyType interestFrequencyType = PeriodFrequencyType
-				.fromInt(command.getInterestRateFrequencyMethod());
+				.fromInt(command.getInterestRateFrequencyType());
 
-		MonetaryCurrency currency = new MonetaryCurrency(command.getCurrencyCode(), command.getDigitsAfterDecimal());
+		MonetaryCurrency currency = new MonetaryCurrency(command.getCurrencyCode(), command.getDigitsAfterDecimalValue());
 		
-		BigDecimal annualInterestRate = this.aprCalculator.calculateFrom(interestFrequencyType, command.getInterestRatePerPeriod());
+		BigDecimal annualInterestRate = this.aprCalculator.calculateFrom(interestFrequencyType, command.getInterestRatePerPeriodValue());
 		
 		LoanProduct loanproduct = new LoanProduct(currentUser.getOrganisation(), command.getName(), command.getDescription(), 
-				currency, command.getPrincipal(), 
-				command.getInterestRatePerPeriod(), interestFrequencyType, annualInterestRate, interestMethod, interestCalculationPeriodMethod,
-				command.getRepaymentEvery(), repaymentFrequencyType, command.getNumberOfRepayments(), amortizationMethod, command.getInArrearsToleranceAmount());
+				currency, command.getPrincipalValue(), 
+				command.getInterestRatePerPeriodValue(), interestFrequencyType, annualInterestRate, interestMethod, interestCalculationPeriodMethod,
+				command.getRepaymentEveryValue(), repaymentFrequencyType, command.getNumberOfRepaymentsValue(), 
+				amortizationMethod, command.getInArrearsToleranceValue());
 		 
 		this.loanProductRepository.save(loanproduct);
 

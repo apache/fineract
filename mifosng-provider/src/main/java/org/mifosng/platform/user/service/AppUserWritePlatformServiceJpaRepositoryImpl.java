@@ -9,7 +9,7 @@ import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosng.data.ApiParameterError;
-import org.mifosng.data.command.UserCommand;
+import org.mifosng.platform.api.commands.UserCommand;
 import org.mifosng.platform.exceptions.OfficeNotFoundException;
 import org.mifosng.platform.exceptions.PlatformApiDataValidationException;
 import org.mifosng.platform.exceptions.PlatformDataIntegrityException;

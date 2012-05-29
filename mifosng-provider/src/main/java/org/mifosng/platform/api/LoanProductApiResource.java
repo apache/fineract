@@ -18,7 +18,7 @@ import javax.ws.rs.core.UriInfo;
 
 import org.mifosng.data.EntityIdentifier;
 import org.mifosng.data.LoanProductData;
-import org.mifosng.data.command.LoanProductCommand;
+import org.mifosng.platform.api.commands.LoanProductCommand;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.ApiJSONFormattingService;
 import org.mifosng.platform.loanproduct.service.LoanProductReadPlatformService;
@@ -52,6 +52,23 @@ public class LoanProductApiResource {
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON })
 	public Response createLoanProduct(LoanProductCommand command) {
+		
+		Locale clientApplicationLocale = this.apiDataConversionService.localeFromString(command.getLocale());
+		
+		BigDecimal principalValue = this.apiDataConversionService.convertFrom(command.getPrincipal(), "principal", clientApplicationLocale);
+		BigDecimal inArrearsToleranceValue = this.apiDataConversionService.convertFrom(command.getInArrearsTolerance(), "inArrearsTolerance", clientApplicationLocale);
+		BigDecimal interestRatePerPeriodValue = this.apiDataConversionService.convertFrom(command.getInterestRatePerPeriod(),"interestRatePerPeriod", clientApplicationLocale);
+		
+		Integer digitsAfterDecimalValue = this.apiDataConversionService.convertToInteger(command.getDigitsAfterDecimal(), "digitsAfterDecimal", clientApplicationLocale);
+		Integer repaymentEveryValue = this.apiDataConversionService.convertToInteger(command.getRepaymentEvery(), "repaymentEvery", clientApplicationLocale);
+		Integer numberOfRepaymentsValue = this.apiDataConversionService.convertToInteger(command.getNumberOfRepayments(), "numberOfRepayments", clientApplicationLocale);
+		
+		command.setPrincipalValue(principalValue);
+		command.setInArrearsToleranceValue(inArrearsToleranceValue);
+		command.setInterestRatePerPeriodValue(interestRatePerPeriodValue);
+		command.setDigitsAfterDecimalValue(digitsAfterDecimalValue);
+		command.setRepaymentEveryValue(repaymentEveryValue);
+		command.setNumberOfRepaymentsValue(numberOfRepaymentsValue);
 
 		EntityIdentifier entityIdentifier = this.loanProductWritePlatformService
 				.createLoanProduct(command);
@@ -116,14 +133,21 @@ public class LoanProductApiResource {
 	public Response updateLoanProduct(@PathParam("productId") final Long productId, final LoanProductCommand command) {
 
 		Locale clientApplicationLocale = this.apiDataConversionService.localeFromString(command.getLocale());
-				
-		BigDecimal principal = this.apiDataConversionService.convertFrom(command.getPrincipalFormatted(), "principalFormatted", clientApplicationLocale);
-		BigDecimal interestRatePerPeriod = this.apiDataConversionService.convertFrom(command.getInterestRatePerPeriodFormatted(),"interestRatePerPeriodFormatted", clientApplicationLocale);
-		BigDecimal inArrearsToleranceAmount = this.apiDataConversionService.convertFrom(command.getInArrearsToleranceAmountFormatted(), "inArrearsToleranceAmountFormatted", clientApplicationLocale);
 		
-		command.setPrincipal(principal);
-		command.setInterestRatePerPeriod(interestRatePerPeriod);
-		command.setInArrearsToleranceAmount(inArrearsToleranceAmount);
+		BigDecimal principalValue = this.apiDataConversionService.convertFrom(command.getPrincipal(), "principal", clientApplicationLocale);
+		BigDecimal inArrearsToleranceValue = this.apiDataConversionService.convertFrom(command.getInArrearsTolerance(), "inArrearsTolerance", clientApplicationLocale);
+		BigDecimal interestRatePerPeriodValue = this.apiDataConversionService.convertFrom(command.getInterestRatePerPeriod(),"interestRatePerPeriod", clientApplicationLocale);
+		
+		Integer digitsAfterDecimalValue = this.apiDataConversionService.convertToInteger(command.getDigitsAfterDecimal(), "digitsAfterDecimal", clientApplicationLocale);
+		Integer repaymentEveryValue = this.apiDataConversionService.convertToInteger(command.getRepaymentEvery(), "repaymentEvery", clientApplicationLocale);
+		Integer numberOfRepaymentsValue = this.apiDataConversionService.convertToInteger(command.getNumberOfRepayments(), "numberOfRepayments", clientApplicationLocale);
+		
+		command.setPrincipalValue(principalValue);
+		command.setInArrearsToleranceValue(inArrearsToleranceValue);
+		command.setInterestRatePerPeriodValue(interestRatePerPeriodValue);
+		command.setDigitsAfterDecimalValue(digitsAfterDecimalValue);
+		command.setRepaymentEveryValue(repaymentEveryValue);
+		command.setNumberOfRepaymentsValue(numberOfRepaymentsValue);
 
 		command.setId(productId);
 		EntityIdentifier entityIdentifier = this.loanProductWritePlatformService.updateLoanProduct(command);

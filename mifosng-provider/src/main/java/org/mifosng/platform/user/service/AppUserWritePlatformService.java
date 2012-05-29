@@ -1,6 +1,6 @@
 package org.mifosng.platform.user.service;
 
-import org.mifosng.data.command.UserCommand;
+import org.mifosng.platform.api.commands.UserCommand;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface AppUserWritePlatformService {

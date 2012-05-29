@@ -10,7 +10,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.apache.commons.lang.StringUtils;
-import org.mifosng.data.command.LoanProductCommand;
+import org.mifosng.platform.api.commands.LoanProductCommand;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;

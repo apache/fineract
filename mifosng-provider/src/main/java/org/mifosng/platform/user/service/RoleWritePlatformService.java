@@ -1,6 +1,6 @@
 package org.mifosng.platform.user.service;
 
-import org.mifosng.data.command.RoleCommand;
+import org.mifosng.platform.api.commands.RoleCommand;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface RoleWritePlatformService {
