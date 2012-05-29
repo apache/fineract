@@ -22,14 +22,14 @@ import org.mifosng.data.LoanSchedule;
 import org.mifosng.data.MoneyData;
 import org.mifosng.data.ScheduledLoanInstallment;
 import org.mifosng.data.command.CalculateLoanScheduleCommand;
-import org.mifosng.data.command.ClientCommand;
-import org.mifosng.data.command.ImportClientCommand;
 import org.mifosng.data.command.ImportLoanCommand;
 import org.mifosng.data.command.ImportLoanRepaymentsCommand;
 import org.mifosng.data.command.LoanStateTransitionCommand;
 import org.mifosng.data.command.LoanTransactionCommand;
 import org.mifosng.data.command.SubmitApproveDisburseLoanCommand;
 import org.mifosng.data.command.SubmitLoanApplicationCommand;
+import org.mifosng.platform.api.commands.ClientCommand;
+import org.mifosng.platform.api.commands.ImportClientCommand;
 import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.client.domain.ClientRepository;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
@@ -118,7 +118,7 @@ public class ImportPlatformServiceImpl implements ImportPlatformService {
 		for (ClientCommand client : command.getClients()) {
 			Office clientOffice = findById(allOffices, client.getOfficeId());
 
-			Client newClient = Client.newClient(currentUser.getOrganisation(), clientOffice, client.getFirstname(), client.getLastname(), client.getJoiningDate(), client.getExternalId());
+			Client newClient = Client.newClient(currentUser.getOrganisation(), clientOffice, client.getFirstname(), client.getLastname(), client.getJoiningLocalDate(), client.getExternalId());
 			
 			newClientCollection.add(newClient);
 		}

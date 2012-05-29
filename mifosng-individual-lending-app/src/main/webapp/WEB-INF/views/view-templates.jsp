@@ -350,15 +350,15 @@
 		<tr>
 		<tr>
 			<td colspan="2">
-				<label for="fullname"><spring:message code="label.longname"/></label>
-				<input id="fullname" name="fullname" title="" type="text" value="{{=fullname}}" style="width:100%"/>
+				<label for="clientOrBusinessName"><spring:message code="label.longname"/></label>
+				<input id="clientOrBusinessName" name="clientOrBusinessName" title="" type="text" value="{{=fullname}}" style="width:100%"/>
 			</td>
 		</tr>
 	</table>
 
 	<input type="hidden" id="dateFormat" name="dateFormat" value="dd MMMM yyyy" />
-	<label for="joiningDateFormatted"><spring:message code="label.joiningdate"/></label>
-	<input id="joiningDateFormatted" name="joiningDateFormatted" title="" type="text" class="datepickerfield" value="{{=$ctx.globalDate(joinedDate)}}"/>
+	<label for="joiningDate"><spring:message code="label.joiningdate"/></label>
+	<input id="joiningDate" name="joiningDate" title="" type="text" class="datepickerfield" value="{{=$ctx.globalDate(joinedDate)}}"/>
 </form>
 </script>
 

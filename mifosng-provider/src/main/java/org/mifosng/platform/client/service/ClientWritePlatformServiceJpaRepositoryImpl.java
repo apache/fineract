@@ -6,8 +6,8 @@ import static org.mifosng.platform.Specifications.officesThatMatch;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosng.data.EntityIdentifier;
-import org.mifosng.data.command.ClientCommand;
 import org.mifosng.data.command.NoteCommand;
+import org.mifosng.platform.api.commands.ClientCommand;
 import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.client.domain.ClientRepository;
 import org.mifosng.platform.client.domain.Note;
@@ -56,12 +56,12 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 		
 		String firstname = command.getFirstname();
 		String lastname = command.getLastname();
-		if (StringUtils.isNotBlank(command.getFullname())) {
-			lastname = command.getFullname();
+		if (StringUtils.isNotBlank(command.getClientOrBusinessName())) {
+			lastname = command.getClientOrBusinessName();
 			firstname = null;
 		}
 
-		Client newClient = Client.newClient(currentUser.getOrganisation(), clientOffice, firstname, lastname, command.getJoiningDate(), command.getExternalId());
+		Client newClient = Client.newClient(currentUser.getOrganisation(), clientOffice, firstname, lastname, command.getJoiningLocalDate(), command.getExternalId());
 				
 		this.clientRepository.save(newClient);
 
@@ -76,16 +76,20 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 		
 		ClientCommandValidator validator = new ClientCommandValidator(command);
 		validator.validateForUpdate();
-
-		Office clientOffice = this.officeRepository.findOne(officesThatMatch(currentUser.getOrganisation(), command.getOfficeId()));
-		if (clientOffice == null) {
-			throw new OfficeNotFoundException(command.getOfficeId());
-		}
 		
+		Office clientOffice = null;
+		Long officeId = command.getOfficeId();
+		if (officeId != null) {
+			clientOffice = this.officeRepository.findOne(officesThatMatch(currentUser.getOrganisation(), officeId));
+			if (clientOffice == null) {
+				throw new OfficeNotFoundException(command.getOfficeId());
+			}			
+		}
+
 		String firstname = command.getFirstname();
 		String lastname = command.getLastname();
-		if (StringUtils.isNotBlank(command.getFullname())) {
-			lastname = command.getFullname();
+		if (StringUtils.isNotBlank(command.getClientOrBusinessName())) {
+			lastname = command.getClientOrBusinessName();
 			firstname = null;
 		}
 
@@ -93,7 +97,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 		if (clientForUpdate == null) {
 			throw new ClientNotFoundException(command.getId());
 		}
-		clientForUpdate.update(clientOffice, firstname, lastname, command.getExternalId(), command.getJoiningDate());
+		clientForUpdate.update(clientOffice, firstname, lastname, command.getExternalId(), command.getJoiningLocalDate());
 				
 		this.clientRepository.save(clientForUpdate);
 

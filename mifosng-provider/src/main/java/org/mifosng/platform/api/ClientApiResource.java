@@ -22,8 +22,8 @@ import org.mifosng.data.ClientLoanAccountSummaryCollectionData;
 import org.mifosng.data.EntityIdentifier;
 import org.mifosng.data.NoteData;
 import org.mifosng.data.OfficeLookup;
-import org.mifosng.data.command.ClientCommand;
 import org.mifosng.data.command.NoteCommand;
+import org.mifosng.platform.api.commands.ClientCommand;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.ApiJSONFormattingService;
 import org.mifosng.platform.client.service.ClientReadPlatformService;
@@ -112,10 +112,10 @@ public class ClientApiResource {
 	@Produces({ MediaType.APPLICATION_JSON })
 	public Response enrollClient(final ClientCommand command) {
 
-		LocalDate joiningDate = apiDataConversionService.convertFrom(
-				command.getJoiningDateFormatted(), "joiningDateFormatted",
+		LocalDate joiningLocalDate = apiDataConversionService.convertFrom(
+				command.getJoiningDate(), "joiningDate",
 				command.getDateFormat());
-		command.setJoiningDate(joiningDate);
+		command.setJoiningLocalDate(joiningLocalDate);
 
 		Long clientId = this.clientWritePlatformService.enrollClient(command);
 
@@ -129,10 +129,10 @@ public class ClientApiResource {
 	public Response updateClient(@PathParam("clientId") final Long clientId,
 			final ClientCommand command) {
 
-		LocalDate joiningDate = apiDataConversionService.convertFrom(
-				command.getJoiningDateFormatted(), "joiningDateFormatted",
+		LocalDate joiningLocalDate = apiDataConversionService.convertFrom(
+				command.getJoiningDate(), "joiningDate",
 				command.getDateFormat());
-		command.setJoiningDate(joiningDate);
+		command.setJoiningLocalDate(joiningLocalDate);
 		command.setId(clientId);
 
 		EntityIdentifier identifier = this.clientWritePlatformService

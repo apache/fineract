@@ -1,8 +1,8 @@
 package org.mifosng.platform;
 
-import org.mifosng.data.command.ImportClientCommand;
 import org.mifosng.data.command.ImportLoanCommand;
 import org.mifosng.data.command.ImportLoanRepaymentsCommand;
+import org.mifosng.platform.api.commands.ImportClientCommand;
 
 public interface ImportPlatformService {
 

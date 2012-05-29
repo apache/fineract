@@ -1,4 +1,4 @@
-package org.mifosng.data.command;
+package org.mifosng.platform.api.commands;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -10,24 +10,24 @@ public class ClientCommand {
 	private Long id;
 	private String firstname;
 	private String lastname;
-	private String fullname;
+	private String clientOrBusinessName;
 	private Long officeId;
 	private String externalId;
 	
 	private String dateFormat;
-	private String joiningDateFormatted;
-	private LocalDate joiningDate;
+	private String joiningDate;
+	private LocalDate joiningLocalDate;
 
 	protected ClientCommand() {
 		//
 	}
 
-	public ClientCommand(final String firstname, final String lastname, String fullname, final Long officeId, final LocalDate joiningDate) {
+	public ClientCommand(final String firstname, final String lastname, final String clientOrBusinessName, final Long officeId, final LocalDate joiningDate) {
 		this.firstname = firstname;
 		this.lastname = lastname;
-		this.fullname = fullname;
+		this.clientOrBusinessName = clientOrBusinessName;
 		this.officeId = officeId;
-		this.joiningDate = joiningDate;
+		this.joiningLocalDate = joiningDate;
 	}
 
 	public String getFirstname() {
@@ -54,28 +54,12 @@ public class ClientCommand {
 		this.officeId = officeId;
 	}
 
-	public LocalDate getJoiningDate() {
-		return this.joiningDate;
-	}
-
-	public void setJoiningDate(final LocalDate joiningDate) {
-		this.joiningDate = joiningDate;
-	}
-
 	public String getExternalId() {
 		return externalId;
 	}
 
 	public void setExternalId(String externalId) {
 		this.externalId = externalId;
-	}
-
-	public String getFullname() {
-		return fullname;
-	}
-
-	public void setFullname(String fullname) {
-		this.fullname = fullname;
 	}
 
 	public String getDateFormat() {
@@ -86,19 +70,35 @@ public class ClientCommand {
 		this.dateFormat = dateFormat;
 	}
 
-	public String getJoiningDateFormatted() {
-		return joiningDateFormatted;
-	}
-
-	public void setJoiningDateFormatted(String joiningDateFormatted) {
-		this.joiningDateFormatted = joiningDateFormatted;
-	}
-
 	public Long getId() {
 		return id;
 	}
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public String getJoiningDate() {
+		return joiningDate;
+	}
+
+	public void setJoiningDate(String joiningDate) {
+		this.joiningDate = joiningDate;
+	}
+
+	public LocalDate getJoiningLocalDate() {
+		return joiningLocalDate;
+	}
+
+	public void setJoiningLocalDate(LocalDate joiningLocalDate) {
+		this.joiningLocalDate = joiningLocalDate;
+	}
+
+	public String getClientOrBusinessName() {
+		return clientOrBusinessName;
+	}
+
+	public void setClientOrBusinessName(String clientOrBusinessName) {
+		this.clientOrBusinessName = clientOrBusinessName;
 	}
 }

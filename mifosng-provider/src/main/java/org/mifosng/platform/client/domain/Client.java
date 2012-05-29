@@ -13,7 +13,7 @@ import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
-import org.mifosng.data.command.ClientCommand;
+import org.mifosng.platform.api.commands.ClientCommand;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
 import org.mifosng.platform.organisation.domain.Office;
 import org.mifosng.platform.organisation.domain.Organisation;
@@ -88,13 +88,13 @@ public class Client extends AbstractAuditableCustom<AppUser, Long> {
 	}
 
 	public void update(ClientCommand command) {
-		this.joiningDate = command.getJoiningDate().toDate();
+		this.joiningDate = command.getJoiningLocalDate().toDate();
 		this.firstName = command.getFirstname();
 		this.lastName = command.getLastname();
 		
-		if (StringUtils.isNotBlank(command.getFullname())) {
+		if (StringUtils.isNotBlank(command.getClientOrBusinessName())) {
 			this.firstName = null;
-			this.lastName = command.getFullname().trim();
+			this.lastName = command.getClientOrBusinessName().trim();
 		}
 		
 		if (StringUtils.isNotBlank(command.getExternalId())) {
@@ -114,7 +114,7 @@ public class Client extends AbstractAuditableCustom<AppUser, Long> {
 		if (StringUtils.isNotBlank(firstname)) {
 			this.firstName = firstname;
 		}
-		if (StringUtils.isNotBlank(firstname)) {
+		if (StringUtils.isNotBlank(lastname)) {
 			this.lastName = lastname;
 		}
 		if (externalId != null) {
