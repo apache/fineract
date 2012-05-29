@@ -1,47 +1,27 @@
 \loan\?\transactions\id get exception if loan doesn't match id.... should loan be taken out here?
 template for waiver/repayment... is it same for both? no type needed? (might have got this wrong)
-
 new loan template ... is it 2 templates... one to pick product... and 2nd to return default properties in selected product or is it meant that if only one product then use that. 
 
 
 --------------------------------------------------------
+ 
 
+Lost permissions again... restore fixed it up... must be some prob with permissions/roles maintenance
+also, maybe I should be using a user that has everything but role admin.
 
-Users
-template:   allowedOffices (only id 1 came back)... does allowedOffices and available Roles depending on requested permissions?
-Retrieve a user: selectedRoles- possible json prob availablePermissions is blank... is it always?
-create new user... didn't check repeatPassword (see example in docs) but does in update
-  and msg shown on duplicate username isn't useful.
-  takes 4/5 seconds!
-
-update: give hardtofigureout error msg when using equivalent to create parameters...worked ok with ones in docs tho.
-delete: does delete (I delete super1), no 200 ok returned,  "org.springframework.dao.InvalidDataAccessApiUsageException: attempt to create merge event with null entity; " if delete a non-existant user
-
-Offices (creates and updates not working with last commit)
-When creating new offices.. do i have to supply  "dateFormat": & "openingDateFormatted" for openingDate?  What is list of dateFormats?
-openingDate seems mandatory... but when the 'pair' not supplied I get NullPointerException
-could just openingDate be used?
-Note that openingData is passed as openingDateFormatted and a dateFormat is provided to convert the date from the way your UI records it to a common format.
-hierarchy update results in exception (prob  solved by using unrecognized parameter exception)
-
-Loan Product
-List - interestRateCalculatedInPeriod is it usefult to show this field...also enums questionsor show only a few cos on loan template
-Create - get NullPointerException when creating using values in api doc (? about using principal or principal formatted or the right locale values)
-Update - tried to update name (using api docs data) and got a NullPointerException
-
-Clients
-List - can't get client other than from office 1
-template - only get office 1 in allowed offices
-
-mandatoryfields - if pass {}
-dates lose formatted - general docs, money... strings, locale, don't have to put in commas.....but do put in decs.
-
-
-
---------------------------------------------------------
 
 Permissions
 groupType in or out?
 
+users - delete still falls over if user doesn't exist.
 Roles
+
 "id" is a mandatory field (says something about updating in the msg)
+
+Loan Products
+List/Retrieve - should show textual values of enums?
+Create - currencyDigitsAfterDecimal is it needed? (maybe customising digits after decimal by loan product not just currency) 
+	is locale saved?
+	principal is later called principalMoney
+
+

@@ -2080,10 +2080,10 @@ Request Body:
 Content-Type: application/json 
 Request Body:
 {
- "name": "Example New Branch", 
- "dateFormat": "dd MMMM yyyy", 
- "openingDateFormatted": "01 July 2007", 
- "parentId": 2 
+ "name": "Example New Branch",
+ "dateFormat": "dd MMMM yyyy",
+ "openingDate": "01 July 2007",
+ "parentId": 2
 }
 </code>
 <code class="method-response">{
@@ -2097,15 +2097,9 @@ Request Body:
         <div class="method-section">
             <div class="method-description">
                 <h4>Update Office</h4>
-                <p>Update office details.</p>
-                <p>Example Request: 
-                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/offices/1">
-                https://localhost:8443/mifosng-provider/api/v1/offices/1
-                </a>
-                </p>
             </div>
             <div class="method-example">
-                <code class="method-declaration">PUT https://thedomainname/api/v1/offices/1</code>
+                <code class="method-declaration">PUT https://thedomainname/api/v1/offices/{officeId}</code>
 <code class="method-request">PUT https://localhost:8443/mifosng-provider/api/v1/offices/1
 Content-Type: application/json
 Request Body:
@@ -2184,43 +2178,43 @@ Request Body:
   "lastModifedOn" : 1334232874000
 }, {
   "id" : 2,
-  "name" : "curr loan",
-  "description" : "asdff",
+  "name" : "Brunei Loan",
+  "description" : null,
   "principalMoney" : {
-    "currencyCode" : "ETB",
+    "currencyCode" : "BND",
     "currencyDigitsAfterDecimal" : 2,
-    "amount" : 100000.00,
-    "defaultName" : "Ethiopian Birr",
-    "nameCode" : "currency.ETB",
-    "displaySymbol" : null,
+    "amount" : 76000.00,
+    "defaultName" : "Brunei Dollar",
+    "nameCode" : "currency.BND",
+    "displaySymbol" : "BND",
     "zero" : false,
     "greaterThanZero" : true,
-    "displaySymbolValue" : "100000.00 null"
+    "displaySymbolValue" : "76000.00 BND"
   },
-  "interestRatePerPeriod" : 0.000000,
+  "interestRatePerPeriod" : 6.000000,
   "interestRatePeriod" : 2,
-  "annualInterestRate" : 0.000000,
+  "annualInterestRate" : 72.000000,
   "interestMethod" : 0,
   "interestRateCalculatedInPeriod" : 1,
   "numberOfInterestFreePeriods" : 0,
   "repaidEvery" : 1,
-  "repaymentPeriodFrequency" : 2,
-  "numberOfRepayments" : 5,
+  "repaymentPeriodFrequency" : 1,
+  "numberOfRepayments" : 10,
   "amortizationMethod" : 1,
   "inArrearsTolerance" : {
-    "currencyCode" : "ETB",
+    "currencyCode" : "BND",
     "currencyDigitsAfterDecimal" : 2,
-    "amount" : 0.00,
-    "defaultName" : "Ethiopian Birr",
-    "nameCode" : "currency.ETB",
-    "displaySymbol" : null,
-    "zero" : true,
-    "greaterThanZero" : false,
-    "displaySymbolValue" : "0.00 null"
+    "amount" : 50.00,
+    "defaultName" : "Brunei Dollar",
+    "nameCode" : "currency.BND",
+    "displaySymbol" : "BND",
+    "zero" : false,
+    "greaterThanZero" : true,
+    "displaySymbolValue" : "50.00 BND"
   },
-  "createdOn" : 1334475938000,
-  "lastModifedOn" : 1334475938000
-} ]
+  "createdOn" : 1334513601000,
+  "lastModifedOn" : 1334513601000
+}... ]
     </code>
             </div>
         </div>
@@ -2410,28 +2404,29 @@ Request Body:
                 <br>
                 <div id=loanproducts_mandatory></div>
                 <br>
+                <p>Probably need to describe some of the fields here.</p>
             </div>
             <div class="method-example">
                 <code class="method-declaration">POST https://thedomainname/api/v1/loanproducts</code>
 <code class="method-request">https://localhost:8443/mifosng-provider/api/v1/loanproducts
 Content-Type: application/json
-Request Body:{ 
-"name": "Newish kind of Loan", 
-"description": "A description not exceeding 500 characters.", 
-"externalId": "1077",
-"locale": "en-us",
-"currencyCode": "XOF", 
-"digitsAfterDecimal": 0, 
-"principalFormatted": "100,000", 
-"inArrearsToleranceAmountFormatted": "1,000", 
- "repaymentEvery": 1,
- "repaymentFrequency": 2, 
-"numberOfRepayments": 1,
-"interestRatePerPeriodFormatted": "1.75", 
-"interestRateFrequencyMethod": 2, 
-"amortizationMethod": 1, 
-"interestMethod": 0 ,
-"interestCalculationPeriodMethod": 1
+Request Body:
+{
+ "name": "A new loan product for me",
+ "description": "A description not exceeding 500 characters.",
+ "currencyCode": "USD",
+ "digitsAfterDecimal": "2",
+ "locale": "en_GB",
+ "principal": "100,000.00",
+ "inArrearsTolerance": "1,000.00",
+ "numberOfRepayments": "12",
+ "repaymentEvery": "1",
+ "repaymentFrequencyType": 2,
+ "interestRatePerPeriod": "1.75",
+ "interestRateFrequencyType": 2,
+ "amortizationType": 1,
+ "interestCalculationPeriodType": 1,
+ "interestType": 0
 }
 </code>
 <code class="method-response">{
@@ -2451,8 +2446,10 @@ Request Body:{
 <code class="method-request">https://localhost:8443/mifosng-provider/api/v1/loanproducts/1
 Content-Type: application/json
 Request Body:
-{ 
-"name": "Loan name - updated" 
+{
+ "locale": "en_GB",
+ "principal": "100,000.00",
+ "inArrearsTolerance": "5,000.00"
 }
 </code>
 <code class="method-response">{
