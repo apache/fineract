@@ -9,10 +9,14 @@
 
 <script type="text/javascript">
 
-setBasicAuthKey();
+basicAuthKey = "";
 
 function showMandatoryFields(url, resultDiv) {
+if (basicAuthKey == "")  setBasicAuthKey(url, resultDiv)
+else showMandatoryFieldsAjax(url, resultDiv);
+}
 
+function showMandatoryFieldsAjax(url, resultDiv) {
 var jqxhr = $.ajax({
         url : url,
         type : 'POST',
@@ -57,7 +61,7 @@ var jqxhr = $.ajax({
 }
 
 
-function setBasicAuthKey() {
+function setBasicAuthKey(url, resultDiv) {
     
 var jqxhr = $.ajax({
         url : "https://localhost:8443/mifosng-provider/api/v1/authentication?username=mifos&password=password",
@@ -71,6 +75,7 @@ var jqxhr = $.ajax({
         //},
         success : function(data, textStatus, jqXHR) {     
             basicAuthKey = data.base64EncodedAuthenticationKey;
+            showMandatoryFieldsAjax(url, resultDiv);
             //alert("success");
         },
         error : function(jqXHR, textStatus, errorThrown) {  
@@ -270,9 +275,33 @@ var jqxhr = $.ajax({
             <div class="method-description">
                 <h3>Updating Dates and Numbers</h3>
                 <h4>Dates</h4>
-                <p>Put in thing about suppying date_format and 'Formatted' being added onto end of field</p>
+                <p>When updating dates you need to provide the "dateFormat". This can be any date pattern supported by <a href="http://joda-time.sourceforge.net/api-release/org/joda/time/format/DateTimeFormat.html">Joda-Time</a>.
+                This helps when saving data in your client application as you shouldn't need to do any date format conversion.</p>
+                <code>
+JSON examples:
+{
+ "dateFormat": "dd MMMM yyyy",
+ "openingDate": "01 July 2007"
+}
+{
+ "dateFormat": "yyyy-MM-dd",
+ "openingDate": "2007-03-21"
+}
+                </code>
                 <h4>Numbers</h4>
-                <p>Put in whatever happens to numbers here.</p>
+                <p>When updating dates you need to provide the "dateFormat". This can be any date pattern supported by <a href="http://joda-time.sourceforge.net/api-release/org/joda/time/format/DateTimeFormat.html">Joda-Time</a>.
+                This helps when saving data in your client application as you shouldn't need to do any date format conversion.</p>
+                <code>
+JSON examples:
+{
+ "dateFormat": "dd MMMM yyyy",
+ "openingDate": "01 July 2007"
+}
+{
+ "dateFormat": "yyyy-MM-dd",
+ "openingDate": "2007-03-21"
+}
+                </code>
            </div>
     
         </div>
