@@ -34,3 +34,6 @@ Update - tried to update name (using api docs data) and got a NullPointerExcepti
 Clients
 List - can't get client other than from office 1
 template - only get office 1 in allowed offices
+
+mandatoryfields - if pass {}
+dates lose formatted - general docs, money... strings, locale, don't have to put in commas.....but do put in decs.
