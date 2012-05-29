@@ -3,9 +3,82 @@
     <head>
         <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
         <link rel="stylesheet" href="apidocs.css" type="text/css" media="screen" title="Mifos X API Docs" charset="utf-8"/>
+        <script type="text/javascript" src="jquery-1.7.min.js"></script>
         <title>Mifos X API Documentation</title>
     </head>
 
+<script type="text/javascript">
+
+setBasicAuthKey();
+
+function showMandatoryFields(url, resultDiv) {
+
+var jqxhr = $.ajax({
+        url : url,
+        type : 'POST',
+        contentType : "application/json; charset=utf-8",
+        dataType : 'json',
+        data : "{}",
+        cache : false,
+        beforeSend : function(xhr) {
+                xhr.setRequestHeader("Authorization", "Basic " + basicAuthKey);
+        },
+        success : function(data, textStatus, jqXHR) {            
+            $('#' + resultDiv).html("Strangely, There Are No Mandatory Fields");
+        },
+        error : function(jqXHR, textStatus, errorThrown) {            
+            
+	    if (jqXHR.status === 400) {
+                errJSON = eval("(" + jqXHR.responseText + ')');
+                var mandFields = ""
+                for ( var i in errJSON.errors) {
+                    if (i == 0) mandFields = errJSON.errors[i].parameterName;
+                    else mandFields += ", " + errJSON.errors[i].parameterName;
+                }
+                $('#' + resultDiv).html(mandFields);
+                return;
+            }
+            
+	    if (jqXHR.status === 0) {
+			$('#' + resultDiv).html('No connection.\n Verify Network.');
+		} else if (jqXHR.status == 404) {
+			$('#' + resultDiv).html('Requested page not found. [404]');
+		} else if (jqXHR.status == 500) {
+			$('#' + resultDiv).html('Internal Server Error [500].');
+		} else if (errorThrown === 'parsererror') {
+			$('#' + resultDiv).html('Requested JSON parse failed.');
+		} else if (errorThrown === 'timeout') {
+			$('#' + resultDiv).html('Time out error.');
+		} else if (errorThrown === 'abort') {
+			$('#' + resultDiv).html('Ajax request aborted.');
+		} else $('#' + resultDiv).html('Unknown Ajax request problem - jqXHR.status: ' + jqXHR.status);
+        }
+});
+}
+
+
+function setBasicAuthKey() {
+    
+var jqxhr = $.ajax({
+        url : "https://localhost:8443/mifosng-provider/api/v1/authentication?username=mifos&password=password",
+        type : 'POST',
+        contentType : "application/json; charset=utf-8",
+        dataType : 'json',
+        data : "{}",
+        cache : false,
+        //beforeSend : function(xhr) {
+        //        xhr.setRequestHeader("Authorization", "Basic " + basicAuthKey);
+        //},
+        success : function(data, textStatus, jqXHR) {     
+            basicAuthKey = data.base64EncodedAuthenticationKey;
+            //alert("success");
+        },
+        error : function(jqXHR, textStatus, errorThrown) {  
+            alert("error - Might be an SSL certificate problem.\nTry to run a List Offices example (which should force your browser to Proceed Anyway).\nThen Click Back to return to this page and all should be good.");
+        }
+});
+}
+</script>
 
 <body>
 <div id="page-wrapper">
@@ -493,6 +566,11 @@
 <div class="method-section">
     <div class="method-description">
         <h4>Create a Client</h4>
+        <br>
+        <button type="button" onclick="showMandatoryFields('https://localhost:8443/mifosng-provider/api/v1/clients', 'clients_mandatory');">Show Mandatory Fields</button>
+        <br>
+        <div id=clients_mandatory></div>
+        <br>
     </div>
     <div class="method-example">
         <code class="method-declaration">POST https://thedomainname/api/v1/clients</code>
@@ -1627,6 +1705,11 @@ Request Body:
 <div class="method-section">
     <div class="method-description">
         <h4>Create a New Loan/Submit a Loan Application</h4>
+        <br>
+        <button type="button" onclick="showMandatoryFields('https://localhost:8443/mifosng-provider/api/v1/loans', 'loans_mandatory');">Show Mandatory Fields</button>
+        <br>
+        <div id=loans_mandatory></div>
+        <br>
         <h5>Arguments</h5>
         <dl class="argument-list">
             <dt>command</dt>
@@ -1934,6 +2017,11 @@ Request Body:
         <div class="method-section">
             <div class="method-description">
                 <h4>Create an Office</h4>
+                <br>
+                <button type="button" onclick="showMandatoryFields('https://localhost:8443/mifosng-provider/api/v1/offices', 'offices_mandatory');">Show Mandatory Fields</button>
+                <br>
+                <div id=offices_mandatory></div>
+                <br>
             </div>
             <div class="method-example">
                 <code class="method-declaration">POST https://thedomainname/api/v1/offices</code>
@@ -2266,6 +2354,11 @@ Request Body:
         <div class="method-section">
             <div class="method-description">
                 <h4>Create a Loan Product</h4>
+                <br>
+                <button type="button" onclick="showMandatoryFields('https://localhost:8443/mifosng-provider/api/v1/loanproducts', 'loanproducts_mandatory');">Show Mandatory Fields</button>
+                <br>
+                <div id=loanproducts_mandatory></div>
+                <br>
             </div>
             <div class="method-example">
                 <code class="method-declaration">POST https://thedomainname/api/v1/loanproducts</code>
@@ -2387,12 +2480,22 @@ Request Body:
                 <code class="method-declaration">PUT https://thedomainname/api/v1/configurations/currency</code>
                 <code class="method-request">PUT https://localhost:8443/mifosng-provider/api/v1/configurations/currency
 Content-Type: application/json
-Request Body:
-{ 
- "currencies": ["USD", "GBP","XOF","ETB"]
+Request Body:{
+"currencies": ["KES", "BND",  "LBP", "GHC", "USD", "XOF", "AED", "AMD"]
 }
                 </code>
-                <code class="method-response">Question Outstanding
+                <code class="method-response">{
+    "currencies": [
+    "KES",
+    "BND",
+    "LBP",
+    "GHC",
+    "USD",
+    "XOF",
+    "AED",
+    "AMD"
+    ]
+}
                 </code>
 	    </div>
         </div>
@@ -2982,6 +3085,12 @@ No Request Body
 	    <div class="method-description">
 	        <h4>Create a User</h4>
 	        <p>Adds new application user.</p>
+                <br>
+                <button type="button" onclick="showMandatoryFields('https://localhost:8443/mifosng-provider/api/v1/users', 'users_mandatory');">Show Mandatory Fields</button>
+                <br>
+                <div id=users_mandatory></div>
+                <br>
+
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">POST https://thedomainname/api/v1/users</code>
@@ -3185,6 +3294,12 @@ No Request Body
 	<div class="method-section">
 	    <div class="method-description">
 	        <h4>Create a New Role</h4>
+                <br>
+                <button type="button" onclick="showMandatoryFields('https://localhost:8443/mifosng-provider/api/v1/roles', 'roles_mandatory');">Show Mandatory Fields</button>
+                <br>
+                <div id=roles_mandatory></div>
+                <br>
+
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">POST https://thedomainname/api/v1/roles</code>

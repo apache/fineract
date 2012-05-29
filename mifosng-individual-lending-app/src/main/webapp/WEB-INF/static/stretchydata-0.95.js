@@ -468,7 +468,6 @@
 	function handleXhrError(jqXHR, textStatus, errorThrown, templateSelector,
 			placeholderDiv) {
 		
-		alert("Status: " + jqXHR.status + "     textStatus: " + textStatus + "     errorThrown: " + errorThrown + "     templateSelector: " + templateSelector + "     placeholderDiv: " + placeholderDiv);
 		if (jqXHR.status === 0) {
 			alert('Not connect.\n Verify Network.');
 		} else if (jqXHR.status == 404) {
