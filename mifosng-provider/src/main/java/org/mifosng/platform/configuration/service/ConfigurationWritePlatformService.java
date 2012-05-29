@@ -1,6 +1,6 @@
 package org.mifosng.platform.configuration.service;
 
-import org.mifosng.data.command.OrganisationCurrencyCommand;
+import org.mifosng.platform.api.commands.OrganisationCurrencyCommand;
 
 public interface ConfigurationWritePlatformService {
 

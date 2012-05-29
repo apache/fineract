@@ -25,8 +25,6 @@ public class RoleCommandValidator {
 		baseDataValidator.reset().parameter("description").value(command.getDescription()).notBlank().notExceedingLengthOf(500);
 		baseDataValidator.reset().parameter("permissions").value(command.getPermissions()).arrayNotEmpty();
 		
-		baseDataValidator.reset().anyOfNotNull(command.getName(), command.getDescription(), command.getPermissions());
-		
 		if (!dataValidationErrors.isEmpty()) {
 			throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);
 		}

@@ -1,4 +1,4 @@
-package org.mifosng.data.command;
+package org.mifosng.platform.api.commands;
 
 import java.io.Serializable;
 import java.util.List;

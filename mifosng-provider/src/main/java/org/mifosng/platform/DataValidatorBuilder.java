@@ -144,6 +144,23 @@ public class DataValidatorBuilder {
 		return this;
 	}
 	
+	public DataValidatorBuilder zeroOrPositiveAmount() {
+		if (value == null && ignoreNullValue) {
+			return this;
+		}
+		
+		if (value != null) {
+			BigDecimal number = BigDecimal.valueOf(Double.valueOf(value.toString()));
+			if (number.compareTo(BigDecimal.ZERO) < 0) {
+				StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(resource).append(".").append(parameter).append(".not.zero.or.greater");
+				StringBuilder defaultEnglishMessage = new StringBuilder("The parameter ").append(parameter).append(" must be greater than or equal to 0.");
+				ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(), defaultEnglishMessage.toString(), parameter, number, 0);
+				dataValidationErrors.add(error);
+			}
+		}
+		return this;
+	}
+	
 	public DataValidatorBuilder greaterThanZero() {
 		if (value == null && ignoreNullValue) {
 			return this;

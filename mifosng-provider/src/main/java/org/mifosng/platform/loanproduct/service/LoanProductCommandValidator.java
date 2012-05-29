@@ -30,7 +30,7 @@ public class LoanProductCommandValidator {
 		baseDataValidator.reset().parameter("digitsAfterDecimal").value(command.getDigitsAfterDecimalValue()).ignoreIfNull().notNull().inMinMaxRange(0, 6);
 		
 		baseDataValidator.reset().parameter("principal").value(command.getPrincipalValue()).ignoreIfNull().notNull().positiveAmount();
-		baseDataValidator.reset().parameter("inArrearsTolerance").value(command.getInArrearsToleranceValue()).ignoreIfNull().positiveAmount();
+		baseDataValidator.reset().parameter("inArrearsTolerance").value(command.getInArrearsToleranceValue()).ignoreIfNull().notNull().zeroOrPositiveAmount();
 		
 		baseDataValidator.reset().parameter("repaymentFrequencyType").value(command.getRepaymentFrequencyType()).ignoreIfNull().notNull().inMinMaxRange(0, 3);
 		
@@ -66,7 +66,7 @@ public class LoanProductCommandValidator {
 		baseDataValidator.reset().parameter("digitsAfterDecimal").value(command.getDigitsAfterDecimalValue()).notNull().inMinMaxRange(0, 6);
 		
 		baseDataValidator.reset().parameter("principal").value(command.getPrincipalValue()).notNull().positiveAmount();
-		baseDataValidator.reset().parameter("inArrearsTolerance").value(command.getInArrearsToleranceValue()).positiveAmount();
+		baseDataValidator.reset().parameter("inArrearsTolerance").value(command.getInArrearsToleranceValue()).notNull().zeroOrPositiveAmount();
 		
 		baseDataValidator.reset().parameter("repaymentFrequencyType").value(command.getRepaymentFrequencyType()).notNull().inMinMaxRange(0, 3);
 		baseDataValidator.reset().parameter("repaymentEvery").value(command.getRepaymentEveryValue()).notNull().greaterThanZero();

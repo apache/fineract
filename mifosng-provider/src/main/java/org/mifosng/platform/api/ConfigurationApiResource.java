@@ -11,7 +11,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.mifosng.data.ConfigurationData;
-import org.mifosng.data.command.OrganisationCurrencyCommand;
+import org.mifosng.platform.api.commands.OrganisationCurrencyCommand;
 import org.mifosng.platform.api.infrastructure.ApiJSONFormattingService;
 import org.mifosng.platform.configuration.service.ConfigurationReadPlatformService;
 import org.mifosng.platform.configuration.service.ConfigurationWritePlatformService;
