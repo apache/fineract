@@ -319,7 +319,7 @@ public class LoansApiResource {
 				uriInfo.getQueryParameters());
 	}
 
-	@PUT
+	@POST
 	@Path("{loanId}/transactions/{transactionId}")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON})

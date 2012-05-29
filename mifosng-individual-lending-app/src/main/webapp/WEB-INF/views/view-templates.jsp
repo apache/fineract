@@ -827,7 +827,7 @@
 
 	<input type="hidden" id="dateFormat" name="dateFormat" value="dd MMMM yyyy" />
 	<label for="transactionDate"><spring:message code="label.loan.transaction.on"/></label>
-	<input id="transactionDate" name="transactionDate" class="text ui-widget-content ui-corner-all" title="" class="datepickerfield" value="{{=$ctx.globalDate(date)}}"/>
+	<input id="transactionDate" name="transactionDate" class="text ui-widget-content ui-corner-all datepickerfield" title=""d value="{{=$ctx.globalDate(date)}}"/>
 
 	<label for="transactionAmount"><spring:message code="label.loan.transaction.amount"/></label>
 	<input id="transactionAmount" name="transactionAmount" class="text ui-widget-content ui-corner-all" title="" value="{{=$ctx.money(total)}}" />

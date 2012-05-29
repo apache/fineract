@@ -690,7 +690,7 @@ $(document).ready(function() {
 						var ids = loanAndRepaymentId.split("_");
 						var loanId = ids[0];
 						var transactionId = ids[1];
-						var getAndPutUrl = baseApiUrl + 'loans/' + loanId + '/transactions/' + transactionId;
+						var getAndPostUrl = baseApiUrl + 'loans/' + loanId + '/transactions/' + transactionId;
 						
 						var templateSelector = "#transactionLoanFormTemplate";
 						var width = 500; 
@@ -702,7 +702,7 @@ $(document).ready(function() {
 						  	$newtabs.tabs('load', currentTabIndex);
 						}
 						
-						popupDialogWithFormView(getAndPutUrl, getAndPutUrl, 'PUT', "dialog.title.adjust.loan.repayment", templateSelector, width, height, saveSuccessFunction);
+						popupDialogWithFormView(getAndPostUrl, getAndPostUrl, 'POST', "dialog.title.adjust.loan.repayment", templateSelector, width, height, saveSuccessFunction);
 					    e.preventDefault();
 					});
 					$('button.adjustloanrepayment span').text(jQuery.i18n.prop('dialog.button.adjust.loan.repayment'));
