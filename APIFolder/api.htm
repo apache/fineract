@@ -3136,6 +3136,9 @@ No Request Body
 	    <div class="method-description">
 	        <h4>Create a User</h4>
 	        <p>Adds new application user.</p>
+                <p><b>Note:</b> Password information is not required (or processed).  Password details are auto-generated and then sent to the email account given
+                (which is why it can take a few seconds to complete). 
+                </p>
                 <br>
                 <button type="button" onclick="showMandatoryFields('https://localhost:8443/mifosng-provider/api/v1/users', 'users_mandatory');">Show Mandatory Fields</button>
                 <br>
@@ -3152,11 +3155,9 @@ Request body:
  "username": "Another New User zll", 
  "firstname": "Test", 
  "lastname": "User", 
- "password": "window75",
- "repeatPassword": "window75f",
  "email": "whatever@mifos.org", 
  "officeId": 1, 
- "roles": ["2","3"] 
+ "roles": [2,3] 
 }
 </code>
 <code class="method-response">
@@ -3171,14 +3172,18 @@ Request body:
 	<div class="method-section">
 	    <div class="method-description">
 	        <h4>Update a User</h4>
+                <p><b>Note:</b> When updating a password you must provide the repeatPassword parameter also.</p>
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">PUT https://thedomainname/api/v1/users/{userId)</code>
 <code class="method-request">PUT https://localhost:8443/mifosng-provider/api/v1/users/3
 Content-Type: application/json
-Request body:{ 
- "firstname": "Test",
- "roles": ["2"] 
+Request body:
+{
+ "firstname": "Test", 
+ "roles": [2], 
+ "password": "window75", 
+ "repeatPassword": "window75"
 }
 
 </code>
@@ -3202,7 +3207,9 @@ Request body:{
 Content-Type: application/json
 No Request Body
 </code>
-<code class="method-response">Question outstanding
+<code class="method-response">{
+ "entityId": 20
+}
 </code>
 	    </div>
 	</div>
