@@ -18,6 +18,8 @@ import javax.persistence.UniqueConstraint;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.mifosng.platform.api.commands.OfficeCommand;
+import org.mifosng.platform.exceptions.CannotUpdateOfficeWithParentOfficeSameAsSelf;
+import org.mifosng.platform.exceptions.RootOfficeParentCannotBeUpdated;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
 import org.mifosng.platform.user.domain.AppUser;
 
@@ -120,6 +122,12 @@ public class Office extends AbstractAuditableCustom<AppUser, Long> {
 	}
 	
 	public void update(Office newParent) {
+		if (this.parent == null) {
+			throw new RootOfficeParentCannotBeUpdated();
+		}
+		if (this.identifiedBy(newParent.getId())) {
+			throw new CannotUpdateOfficeWithParentOfficeSameAsSelf(this.getId(), newParent.getId());
+		}
 		this.parent = newParent;
 		generateHierarchy();
 	}

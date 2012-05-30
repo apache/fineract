@@ -70,7 +70,7 @@ public class ApiParameterError {
 		}
 		this.args = messageArgs;
 		
-		this.parameterName="identifier";
+		this.parameterName="id";
 	}
 
 	public String getDeveloperMessage() {

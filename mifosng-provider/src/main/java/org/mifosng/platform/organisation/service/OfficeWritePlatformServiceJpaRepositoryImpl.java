@@ -43,9 +43,6 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
 			validator.validateForCreate();
 			
 			Office parent = validateUserPriviledgeOnOfficeAndRetrieve(currentUser, command.getParentId());
-			if (parent == null) {
-				throw new OfficeNotFoundException(command.getParentId());
-			}
 	
 			Office office = Office.createNew(currentUser.getOrganisation(), parent, command.getName(), command.getOpeningLocalDate(), command.getExternalId());
 			
@@ -74,17 +71,11 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
 			validator.validateForUpdate();
 			
 			Office office = validateUserPriviledgeOnOfficeAndRetrieve(currentUser, command.getId());
-			if (office == null) {
-				throw new OfficeNotFoundException(command.getId());
-			}
 			
 			office.update(command);
 			
-			if (!command.isRootOffice() && command.getParentId() != null) {
+			if (command.getParentId() != null) {
 				Office parent = validateUserPriviledgeOnOfficeAndRetrieve(currentUser, command.getParentId());
-				if (parent == null) {
-					throw new OfficeNotFoundException(command.getParentId());
-				}
 				office.update(parent);
 			}
 	
@@ -130,6 +121,9 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
 		Office officeToReturn = userOffice;
 		if (!userOffice.identifiedBy(officeId)) {
 			officeToReturn = this.officeRepository.findOne(officesThatMatch(currentUser.getOrganisation(), officeId));
+			if (officeToReturn == null) {
+				throw new OfficeNotFoundException(officeId);
+			}
 		}
 		
 		return officeToReturn;

@@ -21,9 +21,9 @@ import org.mifosng.platform.client.domain.NoteRepository;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.exceptions.LoanNotFoundException;
+import org.mifosng.platform.exceptions.LoanNotInSubmittedAndPendingApprovalStateCannotBeDeleted;
 import org.mifosng.platform.exceptions.LoanTransactionNotFoundException;
 import org.mifosng.platform.exceptions.NoAuthorizationException;
-import org.mifosng.platform.exceptions.PlatformDomainRuleException;
 import org.mifosng.platform.loan.domain.DefaultLoanLifecycleStateMachine;
 import org.mifosng.platform.loan.domain.Loan;
 import org.mifosng.platform.loan.domain.LoanLifecycleStateMachine;
@@ -113,7 +113,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		}
 		
 		if (loan.isNotSubmittedAndPendingApproval()) {
-			throw new PlatformDomainRuleException("error.msg.cannot.delete.loan.in.its.present.state", "Loan with identifier {0} cannot be deleted in its current state.", loanId);
+			throw new LoanNotInSubmittedAndPendingApprovalStateCannotBeDeleted(loanId);
 		}
 		
 		Long clientId = loan.getClient().getId();
