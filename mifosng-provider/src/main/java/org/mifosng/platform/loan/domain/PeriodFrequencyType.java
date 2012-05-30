@@ -1,17 +1,23 @@
 package org.mifosng.platform.loan.domain;
 
 public enum PeriodFrequencyType {
-	DAYS(0), WEEKS(1), MONTHS(2), YEARS(3), INVALID(4);
+	DAYS(0, "periodFrequencyType.days"), WEEKS(1, "periodFrequencyType.weeks"), MONTHS(2, "periodFrequencyType.months"), YEARS(3, "periodFrequencyType.years"), INVALID(4, "periodFrequencyType.invalid");
 
     private final Integer value;
+	private final String code;
 
-    private PeriodFrequencyType(final Integer value) {
+    private PeriodFrequencyType(final Integer value, final String code) {
         this.value = value;
+		this.code = code;
     }
 
     public Integer getValue() {
         return this.value;
     }
+    
+	public String getCode() {
+		return code;
+	}
 
 	public static PeriodFrequencyType fromInt(final Integer frequency) {
 

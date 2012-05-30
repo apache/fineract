@@ -8,7 +8,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import org.mifosng.data.PermissionData;
+import org.mifosng.platform.api.data.PermissionData;
 import org.mifosng.platform.organisation.domain.Organisation;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 

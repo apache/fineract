@@ -2,9 +2,9 @@ package org.mifosng.platform.client.service;
 
 import java.util.Collection;
 
-import org.mifosng.data.ClientData;
 import org.mifosng.data.ClientLoanAccountSummaryCollectionData;
 import org.mifosng.data.NoteData;
+import org.mifosng.platform.api.data.ClientData;
 
 public interface ClientReadPlatformService {
 

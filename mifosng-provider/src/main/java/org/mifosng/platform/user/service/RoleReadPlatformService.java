@@ -2,7 +2,7 @@ package org.mifosng.platform.user.service;
 
 import java.util.Collection;
 
-import org.mifosng.data.RoleData;
+import org.mifosng.platform.api.data.RoleData;
 
 public interface RoleReadPlatformService {
 

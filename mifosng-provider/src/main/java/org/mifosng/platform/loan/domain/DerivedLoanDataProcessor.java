@@ -483,7 +483,7 @@ public class DerivedLoanDataProcessor {
 	}
 	
 	private Money moneyFrom(MoneyData money) {
-		MonetaryCurrency monetaryCurrency = new MonetaryCurrency(money.getCurrencyCode(), money.getCurrencyDigitsAfterDecimal());
+		MonetaryCurrency monetaryCurrency = new MonetaryCurrency(money.getCurrencyCode(), money.getDigitsAfterDecimal());
 		return Money.of(monetaryCurrency, money.getAmount());
 	}
 	

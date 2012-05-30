@@ -7,14 +7,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import org.joda.time.LocalDate;
-import org.mifosng.data.ClientData;
 import org.mifosng.data.CurrencyData;
 import org.mifosng.data.DerivedLoanData;
 import org.mifosng.data.LoanAccountData;
-import org.mifosng.data.LoanProductData;
 import org.mifosng.data.LoanRepaymentData;
 import org.mifosng.data.MoneyData;
-import org.mifosng.data.NewLoanWorkflowStepOneData;
+import org.mifosng.platform.api.data.ClientData;
+import org.mifosng.platform.api.data.LoanProductData;
+import org.mifosng.platform.api.data.NewLoanWorkflowStepOneData;
 import org.mifosng.platform.client.service.ClientReadPlatformService;
 import org.mifosng.platform.currency.domain.ApplicationCurrency;
 import org.mifosng.platform.currency.domain.ApplicationCurrencyRepository;

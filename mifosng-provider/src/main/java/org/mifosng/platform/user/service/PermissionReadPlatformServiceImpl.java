@@ -6,7 +6,7 @@ import java.util.Collection;
 
 import javax.sql.DataSource;
 
-import org.mifosng.data.PermissionData;
+import org.mifosng.platform.api.data.PermissionData;
 import org.mifosng.platform.infrastructure.JdbcSupport;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.user.domain.AppUser;

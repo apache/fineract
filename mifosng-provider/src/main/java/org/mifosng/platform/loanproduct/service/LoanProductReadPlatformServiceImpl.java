@@ -11,11 +11,15 @@ import javax.sql.DataSource;
 import org.joda.time.DateTime;
 import org.mifosng.data.CurrencyData;
 import org.mifosng.data.EnumOptionData;
-import org.mifosng.data.LoanProductData;
 import org.mifosng.data.MoneyData;
+import org.mifosng.platform.api.data.LoanProductData;
 import org.mifosng.platform.currency.service.CurrencyReadPlatformService;
 import org.mifosng.platform.exceptions.LoanProductNotFoundException;
 import org.mifosng.platform.infrastructure.JdbcSupport;
+import org.mifosng.platform.loan.domain.AmortizationMethod;
+import org.mifosng.platform.loan.domain.InterestCalculationPeriodMethod;
+import org.mifosng.platform.loan.domain.InterestMethod;
+import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.user.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,24 +84,21 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
 		LoanProductData productData = new LoanProductData();
 
+		productData.setAmortizationType(LoanEnumerations.amortizationType(AmortizationMethod.EQUAL_INSTALLMENTS));
+		productData.setInterestType(LoanEnumerations.interestType(InterestMethod.DECLINING_BALANCE));
+		productData.setRepaymentFrequencyType(LoanEnumerations.repaymentFrequencyType(PeriodFrequencyType.MONTHS));
+		productData.setInterestRateFrequencyType(LoanEnumerations.interestRateFrequencyType(PeriodFrequencyType.MONTHS));
+		productData.setInterestCalculationPeriodType(LoanEnumerations.interestCalculationPeriodType(InterestCalculationPeriodMethod.SAME_AS_REPAYMENT_PERIOD));
+
 		populateProductDataWithDropdownOptions(productData);
 
-		if (productData.getPossibleCurrencies().size() >= 1) {
-			CurrencyData currency = productData.getPossibleCurrencies().get(0);
+		if (productData.getCurrencyOptions().size() >= 1) {
+			CurrencyData currency = productData.getCurrencyOptions().get(0);
 			MoneyData zero = MoneyData.zero(currency);
-			productData.setPrincipalMoney(zero);
+			productData.setPrincipal(zero);
 			productData.setInArrearsTolerance(zero);
 		}
-
-		productData.setAmortizationMethod(Integer.valueOf(1));
-		productData.setInterestMethod(Integer.valueOf(0));
-		productData.setRepaymentPeriodFrequency(2);
-		productData.setInterestRatePeriod(2);
-		productData.setInterestRateCalculatedInPeriod(1);
-
-		productData.setRepaidEvery(1);
-		productData.setNumberOfRepayments(0);
-
+		
 		return productData;
 	}
 
@@ -142,26 +143,32 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 			MoneyData principalMoney = MoneyData.of(currencyData, principal);
 			MoneyData toleranceMoney = MoneyData.of(currencyData, tolerance);
 
-			BigDecimal interestRatePerPeriod = rs.getBigDecimal("interestRatePerPeriod");
-			int interestRatePeriod = JdbcSupport.getInteger(rs, "interestRatePerPeriodFreq");
-			BigDecimal annualInterestRate = rs.getBigDecimal("annualInterestRate");
-			int interestMethod = JdbcSupport.getInteger(rs, "interestMethod");
-			int interestCalculationInPeriodMethod = JdbcSupport.getInteger(rs, "interestCalculationInPeriodMethod");
-
-			Integer repaidEvery = JdbcSupport.getInteger(rs, "repaidEvery");
-			int repaymentFrequency = JdbcSupport.getInteger(rs, "repaymentPeriodFrequency");
 			Integer numberOfRepayments = JdbcSupport.getInteger(rs, "numberOfRepayments");
-			int amortizationMethod = JdbcSupport.getInteger(rs, "amortizationMethod");
+			Integer repaymentEvery = JdbcSupport.getInteger(rs, "repaidEvery");
+			BigDecimal interestRatePerPeriod = rs.getBigDecimal("interestRatePerPeriod");
+			BigDecimal annualInterestRate = rs.getBigDecimal("annualInterestRate");
 
+			int repaymentFrequencyTypeId = JdbcSupport.getInteger(rs, "repaymentPeriodFrequency");
+			EnumOptionData repaymentFrequencyType = LoanEnumerations.repaymentFrequencyType(repaymentFrequencyTypeId);
+			
+			int amortizationTypeId = JdbcSupport.getInteger(rs, "amortizationMethod");
+			EnumOptionData amortizationType = LoanEnumerations.amortizationType(amortizationTypeId);
+			
+			int interestRateFrequencyTypeId = JdbcSupport.getInteger(rs, "interestRatePerPeriodFreq");
+			EnumOptionData interestRateFrequencyType = LoanEnumerations.interestRateFrequencyType(interestRateFrequencyTypeId);
+			
+			int interestTypeId = JdbcSupport.getInteger(rs, "interestMethod");
+			EnumOptionData interestType = LoanEnumerations.interestType(interestTypeId);
+			
+			int interestCalculationPeriodTypeId = JdbcSupport.getInteger(rs, "interestCalculationInPeriodMethod");
+			EnumOptionData interestCalculationPeriodType = LoanEnumerations.interestCalculationPeriodType(interestCalculationPeriodTypeId);
+			
 			DateTime createdOn = JdbcSupport.getDateTime(rs, "createdon");
 			DateTime lastModifedOn = JdbcSupport.getDateTime(rs, "modifiedon");
 
-			return new LoanProductData(id, name, description, principalMoney,
-					interestRatePerPeriod, interestRatePeriod,
-					annualInterestRate, interestMethod, interestCalculationInPeriodMethod,
-					repaidEvery,
-					repaymentFrequency, numberOfRepayments,   amortizationMethod,
-					toleranceMoney, createdOn, lastModifedOn);
+			return new LoanProductData(createdOn, lastModifedOn, id, name, description, principalMoney, toleranceMoney, 
+					numberOfRepayments, repaymentEvery, interestRatePerPeriod, annualInterestRate, 
+					repaymentFrequencyType, interestRateFrequencyType, amortizationType, interestType, interestCalculationPeriodType);
 		}
 
 		private CurrencyData findCurrencyByCode(String currencyCode, List<CurrencyData> allowedCurrencies) {
@@ -178,19 +185,19 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
 	private void populateProductDataWithDropdownOptions(LoanProductData productData) {
 
-		List<CurrencyData> possibleCurrencies = currencyReadPlatformService.retrieveAllowedCurrencies();
+		List<CurrencyData> currencyOptions = currencyReadPlatformService.retrieveAllowedCurrencies();
+		List<EnumOptionData> amortizationTypeOptions = dropdownReadPlatformService.retrieveLoanAmortizationTypeOptions();
+		List<EnumOptionData> interestTypeOptions = dropdownReadPlatformService.retrieveLoanInterestTypeOptions();
+		List<EnumOptionData> interestCalculationPeriodTypeOptions = dropdownReadPlatformService.retrieveLoanInterestRateCalculatedInPeriodOptions();
+		List<EnumOptionData> repaymentFrequencyTypeOptions = dropdownReadPlatformService.retrieveRepaymentFrequencyTypeOptions();
+		List<EnumOptionData> interestRateFrequencyTypeOptions = dropdownReadPlatformService.retrieveInterestRateFrequencyTypeOptions();
 
-		List<EnumOptionData> possibleAmortizationOptions = dropdownReadPlatformService.retrieveLoanAmortizationMethodOptions();
-		List<EnumOptionData> possibleInterestOptions = dropdownReadPlatformService.retrieveLoanInterestMethodOptions();
-		List<EnumOptionData> possibleInterestRateCalculatedInPeriodOptions = dropdownReadPlatformService.retrieveLoanInterestRateCalculatedInPeriodOptions();
-		List<EnumOptionData> repaymentFrequencyOptions = dropdownReadPlatformService.retrieveRepaymentFrequencyOptions();
-		List<EnumOptionData> interestFrequencyOptions = dropdownReadPlatformService.retrieveInterestFrequencyOptions();
-
-		productData.setPossibleCurrencies(possibleCurrencies);
-		productData.setPossibleAmortizationOptions(possibleAmortizationOptions);
-		productData.setPossibleInterestOptions(possibleInterestOptions);
-		productData.setPossibleInterestRateCalculatedInPeriodOptions(possibleInterestRateCalculatedInPeriodOptions);
-		productData.setRepaymentFrequencyOptions(repaymentFrequencyOptions);
-		productData.setInterestFrequencyOptions(interestFrequencyOptions);
+		productData.setCurrencyOptions(currencyOptions);
+		productData.setAmortizationTypeOptions(amortizationTypeOptions);
+		productData.setInterestTypeOptions(interestTypeOptions);
+		productData.setInterestCalculationPeriodTypeOptions(interestCalculationPeriodTypeOptions);
+		productData.setRepaymentFrequencyTypeOptions(repaymentFrequencyTypeOptions);
+		productData.setInterestRateFrequencyTypeOptions(interestRateFrequencyTypeOptions);
 	}
+	
 }

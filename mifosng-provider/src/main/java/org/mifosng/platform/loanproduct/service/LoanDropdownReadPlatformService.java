@@ -6,13 +6,13 @@ import org.mifosng.data.EnumOptionData;
 
 public interface LoanDropdownReadPlatformService {
 
-	List<EnumOptionData> retrieveLoanAmortizationMethodOptions();
+	List<EnumOptionData> retrieveLoanAmortizationTypeOptions();
 
-	List<EnumOptionData> retrieveLoanInterestMethodOptions();
+	List<EnumOptionData> retrieveLoanInterestTypeOptions();
 	
 	List<EnumOptionData> retrieveLoanInterestRateCalculatedInPeriodOptions();
 
-	List<EnumOptionData> retrieveRepaymentFrequencyOptions();
+	List<EnumOptionData> retrieveRepaymentFrequencyTypeOptions();
 
-	List<EnumOptionData> retrieveInterestFrequencyOptions();
+	List<EnumOptionData> retrieveInterestRateFrequencyTypeOptions();
 }

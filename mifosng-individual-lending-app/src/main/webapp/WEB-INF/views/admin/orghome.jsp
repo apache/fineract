@@ -26,14 +26,14 @@
 				
 				Globalize.culture().numberFormat.currency.symbol = monetaryObj.displaySymbol;
 				
-				var digits = monetaryObj.currencyDigitsAfterDecimal.toFixed(0);
+				var digits = monetaryObj.digitsAfterDecimal.toFixed(0);
 				return Globalize.format(monetaryObj.amount, "n" + digits); 
 			},
 			moneyWithCurrency: function(monetaryObj) {
 				
 				Globalize.culture().numberFormat.currency.symbol = monetaryObj.displaySymbol;
 				
-				var digits = monetaryObj.currencyDigitsAfterDecimal.toFixed(0);
+				var digits = monetaryObj.digitsAfterDecimal.toFixed(0);
 				return Globalize.format(monetaryObj.amount, "c" + digits); 
 			},
 			decimal: function(number, digits) {

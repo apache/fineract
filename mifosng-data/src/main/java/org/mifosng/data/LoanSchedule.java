@@ -14,7 +14,7 @@ public class LoanSchedule implements Serializable {
 	private static CurrencyData currencyData(MoneyData moneyData) {
 		String code = moneyData.getCurrencyCode();
 		String name = moneyData.getDefaultName();
-		int decimalPlaces = moneyData.getCurrencyDigitsAfterDecimal();
+		int decimalPlaces = moneyData.getDigitsAfterDecimal();
 		String displaySymbol = moneyData.getDisplaySymbol();
 		String nameCode = moneyData.getNameCode();
 		return new CurrencyData(code, name, decimalPlaces, displaySymbol, nameCode);

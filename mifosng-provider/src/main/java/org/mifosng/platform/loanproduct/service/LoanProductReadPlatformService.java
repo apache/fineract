@@ -2,7 +2,7 @@ package org.mifosng.platform.loanproduct.service;
 
 import java.util.Collection;
 
-import org.mifosng.data.LoanProductData;
+import org.mifosng.platform.api.data.LoanProductData;
 
 public interface LoanProductReadPlatformService {
 

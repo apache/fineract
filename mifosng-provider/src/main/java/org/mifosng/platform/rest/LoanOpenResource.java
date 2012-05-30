@@ -102,8 +102,7 @@ public class LoanOpenResource {
 		JSONObject object = new JSONObject();
 		object.put("amount", money.getAmount());
 		object.put("currencyCode", money.getCurrencyCode());
-		object.put("currencyDigitsAfterDecimal",
-				money.getCurrencyDigitsAfterDecimal());
+		object.put("currencyDigitsAfterDecimal", money.getDigitsAfterDecimal());
 
 		return object;
 	}

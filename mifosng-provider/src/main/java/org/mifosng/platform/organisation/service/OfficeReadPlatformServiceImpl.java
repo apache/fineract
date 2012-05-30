@@ -9,8 +9,8 @@ import java.util.List;
 import javax.sql.DataSource;
 
 import org.joda.time.LocalDate;
-import org.mifosng.data.OfficeData;
-import org.mifosng.data.OfficeLookup;
+import org.mifosng.platform.api.data.OfficeData;
+import org.mifosng.platform.api.data.OfficeLookup;
 import org.mifosng.platform.exceptions.OfficeNotFoundException;
 import org.mifosng.platform.infrastructure.JdbcSupport;
 import org.mifosng.platform.security.PlatformSecurityContext;

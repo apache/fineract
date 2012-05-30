@@ -1,4 +1,4 @@
-package org.mifosng.data;
+package org.mifosng.platform.api.data;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -9,6 +9,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.map.annotate.JsonFilter;
 import org.joda.time.LocalDate;
+import org.mifosng.data.LoanSchedule;
 
 @XmlRootElement(name = "newloanworkflow")
 @JsonIgnoreProperties({ "organisationId", "organisationName" })

@@ -2,21 +2,20 @@ package org.mifosng.data;
 
 import java.io.Serializable;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
-@XmlRootElement(name = "option")
 public class EnumOptionData implements Serializable {
 
 	private Long id;
+	private String code;
 	private String value;
 
-	public EnumOptionData() {
+	protected EnumOptionData() {
 		//
 	}
 
-	public EnumOptionData(final String value, final Long id) {
-		this.value = value;
+	public EnumOptionData(final Long id, final String code, final String value) {
 		this.id = id;
+		this.code = code;
+		this.value = value;
 	}
 
 	public Long getId() {
@@ -33,5 +32,13 @@ public class EnumOptionData implements Serializable {
 
 	public void setValue(final String value) {
 		this.value = value;
+	}
+
+	public String getCode() {
+		return code;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
 	}
 }

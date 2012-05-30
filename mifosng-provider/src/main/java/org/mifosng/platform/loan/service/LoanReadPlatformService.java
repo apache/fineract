@@ -2,7 +2,7 @@ package org.mifosng.platform.loan.service;
 
 import org.mifosng.data.LoanAccountData;
 import org.mifosng.data.LoanRepaymentData;
-import org.mifosng.data.NewLoanWorkflowStepOneData;
+import org.mifosng.platform.api.data.NewLoanWorkflowStepOneData;
 
 public interface LoanReadPlatformService {
 

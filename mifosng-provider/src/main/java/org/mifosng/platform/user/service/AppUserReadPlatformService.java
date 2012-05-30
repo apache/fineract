@@ -2,7 +2,7 @@ package org.mifosng.platform.user.service;
 
 import java.util.Collection;
 
-import org.mifosng.data.AppUserData;
+import org.mifosng.platform.api.data.AppUserData;
 
 public interface AppUserReadPlatformService {
 

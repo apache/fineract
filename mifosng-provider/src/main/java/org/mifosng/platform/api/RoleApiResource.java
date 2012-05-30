@@ -16,9 +16,9 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.mifosng.data.EntityIdentifier;
-import org.mifosng.data.PermissionData;
-import org.mifosng.data.RoleData;
 import org.mifosng.platform.api.commands.RoleCommand;
+import org.mifosng.platform.api.data.PermissionData;
+import org.mifosng.platform.api.data.RoleData;
 import org.mifosng.platform.api.infrastructure.ApiJSONFormattingService;
 import org.mifosng.platform.user.service.PermissionReadPlatformService;
 import org.mifosng.platform.user.service.RoleReadPlatformService;

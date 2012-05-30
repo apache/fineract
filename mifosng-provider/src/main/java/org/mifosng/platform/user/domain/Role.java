@@ -15,8 +15,8 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import org.mifosng.data.PermissionData;
-import org.mifosng.data.RoleData;
+import org.mifosng.platform.api.data.PermissionData;
+import org.mifosng.platform.api.data.RoleData;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
 import org.mifosng.platform.organisation.domain.Organisation;
 

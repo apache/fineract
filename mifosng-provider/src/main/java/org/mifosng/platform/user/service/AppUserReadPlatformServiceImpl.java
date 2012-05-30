@@ -11,10 +11,10 @@ import java.util.Set;
 
 import javax.sql.DataSource;
 
-import org.mifosng.data.AppUserData;
-import org.mifosng.data.OfficeData;
-import org.mifosng.data.OfficeLookup;
-import org.mifosng.data.RoleData;
+import org.mifosng.platform.api.data.AppUserData;
+import org.mifosng.platform.api.data.OfficeData;
+import org.mifosng.platform.api.data.OfficeLookup;
+import org.mifosng.platform.api.data.RoleData;
 import org.mifosng.platform.exceptions.UserNotFoundException;
 import org.mifosng.platform.infrastructure.JdbcSupport;
 import org.mifosng.platform.organisation.service.OfficeReadPlatformService;

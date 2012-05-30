@@ -2,7 +2,7 @@ package org.mifosng.platform.user.service;
 
 import java.util.Collection;
 
-import org.mifosng.data.PermissionData;
+import org.mifosng.platform.api.data.PermissionData;
 
 public interface PermissionReadPlatformService {
 

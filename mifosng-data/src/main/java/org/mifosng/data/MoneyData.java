@@ -10,7 +10,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class MoneyData implements Serializable, Comparable<MoneyData> {
 
 	private String currencyCode;
-	private Integer currencyDigitsAfterDecimal;
+	private Integer digitsAfterDecimal;
 	private BigDecimal amount;
 	private String defaultName;
 	private String nameCode;
@@ -33,12 +33,12 @@ public class MoneyData implements Serializable, Comparable<MoneyData> {
 			String defaultName, String nameCode, String displaySymbol,
 			final BigDecimal amount) {
 		this.currencyCode = currencyCode;
-		this.currencyDigitsAfterDecimal = currencyDigitsAfterDecimal;
+		this.digitsAfterDecimal = currencyDigitsAfterDecimal;
 		this.defaultName = defaultName;
 		this.nameCode = nameCode;
 		this.displaySymbol = displaySymbol;
 		BigDecimal amountStripped = amount.stripTrailingZeros();
-		this.amount = amountStripped.setScale(this.currencyDigitsAfterDecimal,
+		this.amount = amountStripped.setScale(this.digitsAfterDecimal,
 				RoundingMode.HALF_EVEN);
 	}
 	
@@ -75,7 +75,7 @@ public class MoneyData implements Serializable, Comparable<MoneyData> {
 	private static CurrencyData currencyData(MoneyData moneyData) {
 		String code = moneyData.getCurrencyCode();
 		String name = moneyData.getDefaultName();
-		int decimalPlaces = moneyData.getCurrencyDigitsAfterDecimal();
+		int decimalPlaces = moneyData.getDigitsAfterDecimal();
 		String displaySymbol = moneyData.getDisplaySymbol();
 		String nameCode = moneyData.getNameCode();
 		return new CurrencyData(code, name, decimalPlaces, displaySymbol, nameCode);
@@ -96,20 +96,12 @@ public class MoneyData implements Serializable, Comparable<MoneyData> {
 		return this.currencyCode;
 	}
 
-	public Integer getCurrencyDigitsAfterDecimal() {
-		return this.currencyDigitsAfterDecimal;
-	}
-
 	public BigDecimal getAmount() {
 		return this.amount;
 	}
 
 	public void setCurrencyCode(final String currencyCode) {
 		this.currencyCode = currencyCode;
-	}
-
-	public void setCurrencyDigitsAfterDecimal(final Integer currencyDigitsAfterDecimal) {
-		this.currencyDigitsAfterDecimal = currencyDigitsAfterDecimal;
 	}
 
 	public void setAmount(final BigDecimal amount) {
@@ -184,5 +176,13 @@ public class MoneyData implements Serializable, Comparable<MoneyData> {
 	
 	public String getDisplaySymbolValue() {
 		return new StringBuilder().append(this.amount.toPlainString()).append(' ').append(this.displaySymbol).toString().trim();
+	}
+
+	public Integer getDigitsAfterDecimal() {
+		return digitsAfterDecimal;
+	}
+
+	public void setDigitsAfterDecimal(Integer digitsAfterDecimal) {
+		this.digitsAfterDecimal = digitsAfterDecimal;
 	}
 }

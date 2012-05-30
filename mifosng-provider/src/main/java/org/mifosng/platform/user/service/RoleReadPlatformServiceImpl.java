@@ -8,7 +8,7 @@ import java.util.Collection;
 
 import javax.sql.DataSource;
 
-import org.mifosng.data.RoleData;
+import org.mifosng.platform.api.data.RoleData;
 import org.mifosng.platform.exceptions.RoleNotFoundException;
 import org.mifosng.platform.infrastructure.JdbcSupport;
 import org.mifosng.platform.security.PlatformSecurityContext;

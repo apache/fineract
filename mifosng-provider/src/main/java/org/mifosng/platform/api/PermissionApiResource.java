@@ -10,7 +10,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
-import org.mifosng.data.PermissionData;
+import org.mifosng.platform.api.data.PermissionData;
 import org.mifosng.platform.api.infrastructure.ApiJSONFormattingService;
 import org.mifosng.platform.user.service.PermissionReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;

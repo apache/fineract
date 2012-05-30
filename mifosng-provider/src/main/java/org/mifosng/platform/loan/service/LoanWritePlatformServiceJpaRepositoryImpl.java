@@ -297,7 +297,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 				
 				final MonetaryCurrency monetaryCurrency = new MonetaryCurrency(
 										scheduledLoanInstallment.getPrincipalDue().getCurrencyCode(), 
-										scheduledLoanInstallment.getPrincipalDue().getCurrencyDigitsAfterDecimal());
+										scheduledLoanInstallment.getPrincipalDue().getDigitsAfterDecimal());
 
 				Money principal = Money.of(monetaryCurrency,
 						scheduledLoanInstallment.getPrincipalDue().getAmount());

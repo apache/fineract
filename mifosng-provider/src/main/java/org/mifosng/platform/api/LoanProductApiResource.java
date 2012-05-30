@@ -17,8 +17,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.mifosng.data.EntityIdentifier;
-import org.mifosng.data.LoanProductData;
 import org.mifosng.platform.api.commands.LoanProductCommand;
+import org.mifosng.platform.api.data.LoanProductData;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.ApiJSONFormattingService;
 import org.mifosng.platform.loanproduct.service.LoanProductReadPlatformService;
@@ -32,8 +32,8 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class LoanProductApiResource {
 
-	private String defaultFieldList = "principalMoney,inArrearsTolerance,amortizationMethod,interestMethod,repaymentPeriodFrequency,interestRatePeriod,interestRateCalculatedInPeriod,repaidEvery,numberOfRepayments,interestRatePerPeriod,annualInterestRate,numberOfInterestFreePeriods,flexible,interestRebateAllowed";
-	private String allowedFieldList = "possibleCurrencies,possibleAmortizationOptions,possibleInterestOptions,possibleInterestRateCalculatedInPeriodOptions,repaymentFrequencyOptions,interestFrequencyOptions";
+	private String defaultFieldList = "principal,inArrearsTolerance,numberOfRepayments,repaymentEvery,interestRatePerPeriod,annualInterestRate,repaymentFrequencyType,interestRateFrequencyType,amortizationType,interestType,interestCalculationPeriodType";
+	private String allowedFieldList = "currencyOptions,amortizationTypeOptions,interestTypeOptions,interestCalculationPeriodTypeOptions,repaymentFrequencyTypeOptions,interestRateFrequencyTypeOptions";
 	private String filterName = "myFilter";
 
 	@Autowired
