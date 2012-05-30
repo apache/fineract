@@ -123,7 +123,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		
 		this.loanRepository.delete(loanId);
 		
-		return new EntityIdentifier(clientId);
+		return new EntityIdentifier(loanId);
 	}
 	
 	@Transactional

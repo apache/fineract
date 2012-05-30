@@ -34,9 +34,10 @@ var jqxhr = $.ajax({
             
 	    if (jqXHR.status === 400) {
                 errJSON = eval("(" + jqXHR.responseText + ')');
-                var mandFields = ""
+                var mandFields = "";
+                if (resultDiv == 'loans_mandatory') mandFields = "clientId, productId, inArrearsTolerance, submittedOnDate, ";
                 for ( var i in errJSON.errors) {
-                    if (i == 0) mandFields = errJSON.errors[i].parameterName;
+                    if (i == 0) mandFields += errJSON.errors[i].parameterName;
                     else mandFields += ", " + errJSON.errors[i].parameterName;
                 }
                 $('#' + resultDiv).html(mandFields);
@@ -1767,19 +1768,41 @@ Request Body:
         <dl class="argument-list">
             <dt>command</dt>
             <dd>String<span> Optional, case-insensitive</span></dd>
-            <dd>The default action is to Submit a New Loan Application.  If the value is 'calculateLoanSchedule' then a new loan entry is created without entering the loan life cycle.</dd>
+            <dd>The default action is to Submit a New Loan Application ("Submitted and awaiting approval" status).<br></dd>
+            <dd>If "?command=calculateLoanSchedule" is added to the URL then no update is made but the loan schedule (as would have been if the loan
+            had been submitted) is returned.  This gives the ability to try out various loan options and 'preview' the schedule before committing
+            to it.</dd>
         </dl>
     </div>
     <div class="method-example">
         <code class="method-declaration">POST https://thedomainname/api/v1/loans</code>
-        <code class="method-request">https://localhost:8443/mifosng-provider/api/v1/loans
-        
-        
-        Content-Type: application/json
-        Request Body:
-        new json here
+        <code class="method-request">POST https://localhost:8443/mifosng-provider/api/v1/loans
+Content-Type: application/json
+Request Body:
+{
+ "clientId": 1,
+ "productId": 1,
+ "currencyCode": "USD",
+ "digitsAfterDecimal": "2",
+ "locale": "en_GB",
+ "principal": "100,000.00",
+ "inArrearsTolerance": "1,000.00",
+ "repaymentFrequencyType": 2,
+ "repaymentEvery": "1",
+ "numberOfRepayments": "12",
+ "interestRatePerPeriod": "1.75",
+ "interestRateFrequencyType": 2,
+ "amortizationType": 1,
+ "interestCalculationPeriodType": 1,
+ "interestType": 0,
+ "dateFormat": "dd MMMM yyyy",
+ "expectedDisbursementDate": "01 July 2007",
+ "submittedOnDate": "25 June 2007"
+}
         </code>
-        <code class="method-response">{"entityId": 2}
+        <code class="method-response">{
+ "entityId": 42
+}
         </code>
     </div>
 </div>
@@ -1810,7 +1833,7 @@ Request Body:
                 new json here
                 </code>
                 <code class="method-response">{
-    "entityId": 2
+"entityId": 1
 }
                 </code>
             </div>
@@ -1819,18 +1842,18 @@ Request Body:
         <div class="method-section">
             <div class="method-description">
                 <h4>Delete a Loan</h4>
+                <p>
+                    <b>Note:</b> Only loans in "Submitted and awaiting approval" status can be deleted.
+                </p>
             </div>
             <div class="method-example">
                 <code class="method-declaration">DELETE https://thedomainname/api/v1/loans/{loanId}</code>
-                <code class="method-request">https://localhost:8443/mifosng-provider/api/v1/loans/1
-                
-                
-                Content-Type: application/json
-                Request Body:
-                new json here
+                <code class="method-request">DELETE https://localhost:8443/mifosng-provider/api/v1/loans/1              
+Content-Type: application/json
+No Request Body:
                 </code>
                 <code class="method-response">{
-    "entityId": 2
+"entityId": 1
 }
                 </code>
             </div>
