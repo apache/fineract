@@ -1,11 +1,11 @@
 package org.mifosng.platform.loan.service;
 
-import org.mifosng.data.EntityIdentifier;
 import org.mifosng.platform.api.commands.AdjustLoanTransactionCommand;
 import org.mifosng.platform.api.commands.LoanStateTransitionCommand;
 import org.mifosng.platform.api.commands.LoanTransactionCommand;
 import org.mifosng.platform.api.commands.SubmitLoanApplicationCommand;
 import org.mifosng.platform.api.commands.UndoStateTransitionCommand;
+import org.mifosng.platform.api.data.EntityIdentifier;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface LoanWritePlatformService {

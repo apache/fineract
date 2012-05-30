@@ -1,6 +1,6 @@
 package org.mifosng.platform.loanproduct.service;
 
-import org.mifosng.data.EnumOptionData;
+import org.mifosng.platform.api.data.EnumOptionData;
 import org.mifosng.platform.loan.domain.AmortizationMethod;
 import org.mifosng.platform.loan.domain.InterestCalculationPeriodMethod;
 import org.mifosng.platform.loan.domain.InterestMethod;

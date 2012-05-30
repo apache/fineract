@@ -1,8 +1,6 @@
-package org.mifosng.data;
+package org.mifosng.platform.api.data;
 
-import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement(name = "identifier")
 public class EntityIdentifier {
 
 	private Long entityId;

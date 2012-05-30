@@ -4,8 +4,8 @@ import static org.mifosng.platform.Specifications.productThatMatches;
 
 import java.math.BigDecimal;
 
-import org.mifosng.data.EntityIdentifier;
 import org.mifosng.platform.api.commands.LoanProductCommand;
+import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.exceptions.LoanProductNotFoundException;
 import org.mifosng.platform.loan.domain.AmortizationMethod;

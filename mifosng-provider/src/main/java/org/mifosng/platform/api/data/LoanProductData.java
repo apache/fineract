@@ -8,7 +8,6 @@ import java.util.List;
 import org.codehaus.jackson.map.annotate.JsonFilter;
 import org.joda.time.DateTime;
 import org.mifosng.data.CurrencyData;
-import org.mifosng.data.EnumOptionData;
 import org.mifosng.data.MoneyData;
 
 @JsonFilter("myFilter")

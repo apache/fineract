@@ -9,7 +9,7 @@ import static org.mifosng.platform.loanproduct.service.LoanEnumerations.repaymen
 import java.util.Arrays;
 import java.util.List;
 
-import org.mifosng.data.EnumOptionData;
+import org.mifosng.platform.api.data.EnumOptionData;
 import org.mifosng.platform.loan.domain.AmortizationMethod;
 import org.mifosng.platform.loan.domain.InterestCalculationPeriodMethod;
 import org.mifosng.platform.loan.domain.InterestMethod;

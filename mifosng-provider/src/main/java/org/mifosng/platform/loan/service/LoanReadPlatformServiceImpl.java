@@ -14,7 +14,7 @@ import org.mifosng.data.LoanRepaymentData;
 import org.mifosng.data.MoneyData;
 import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.LoanProductData;
-import org.mifosng.platform.api.data.NewLoanWorkflowStepOneData;
+import org.mifosng.platform.api.data.NewLoanData;
 import org.mifosng.platform.client.service.ClientReadPlatformService;
 import org.mifosng.platform.currency.domain.ApplicationCurrency;
 import org.mifosng.platform.currency.domain.ApplicationCurrencyRepository;
@@ -168,11 +168,11 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 	}
 	
 	@Override
-	public NewLoanWorkflowStepOneData retrieveClientAndProductDetails(final Long clientId, final Long productId) {
+	public NewLoanData retrieveClientAndProductDetails(final Long clientId, final Long productId) {
 
 		AppUser currentUser = context.authenticatedUser();
 
-		NewLoanWorkflowStepOneData workflowData = new NewLoanWorkflowStepOneData();
+		NewLoanData workflowData = new NewLoanData();
 		workflowData.setOrganisationId(currentUser.getOrganisation().getId());
 		workflowData.setOrganisationName(currentUser.getOrganisation().getName());
 

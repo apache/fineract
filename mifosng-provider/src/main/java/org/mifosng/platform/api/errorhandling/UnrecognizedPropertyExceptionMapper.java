@@ -9,8 +9,8 @@ import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
 import org.codehaus.jackson.map.exc.UnrecognizedPropertyException;
-import org.mifosng.data.ApiGlobalErrorResponse;
-import org.mifosng.data.ApiParameterError;
+import org.mifosng.platform.api.data.ApiGlobalErrorResponse;
+import org.mifosng.platform.api.data.ApiParameterError;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 

@@ -3,9 +3,9 @@ package org.mifosng.platform.user.service;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.mifosng.data.ApiParameterError;
 import org.mifosng.platform.DataValidatorBuilder;
 import org.mifosng.platform.api.commands.UserCommand;
+import org.mifosng.platform.api.data.ApiParameterError;
 import org.mifosng.platform.exceptions.PlatformApiDataValidationException;
 
 public class UserCommandValidator {

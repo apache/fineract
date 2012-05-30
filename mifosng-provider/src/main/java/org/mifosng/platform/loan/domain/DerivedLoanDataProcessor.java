@@ -9,7 +9,6 @@ import org.mifosng.data.CurrencyData;
 import org.mifosng.data.DerivedLoanData;
 import org.mifosng.data.LoanAccountSummaryData;
 import org.mifosng.data.LoanRepaymentData;
-import org.mifosng.data.LoanRepaymentDataComparator;
 import org.mifosng.data.LoanRepaymentPeriodData;
 import org.mifosng.data.LoanRepaymentScheduleData;
 import org.mifosng.data.MoneyData;

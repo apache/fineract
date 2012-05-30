@@ -1,4 +1,4 @@
-package org.mifosng.data;
+package org.mifosng.platform.loan.domain;
 
 import java.util.Comparator;
 

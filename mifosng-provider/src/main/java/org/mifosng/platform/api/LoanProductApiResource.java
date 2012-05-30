@@ -16,8 +16,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.mifosng.data.EntityIdentifier;
 import org.mifosng.platform.api.commands.LoanProductCommand;
+import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.LoanProductData;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.ApiJSONFormattingService;

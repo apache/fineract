@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
-import org.mifosng.data.ApiParameterError;
+import org.mifosng.platform.api.data.ApiParameterError;
 import org.springframework.util.ObjectUtils;
 
 public class DataValidatorBuilder {

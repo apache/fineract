@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
-import org.mifosng.data.ApiParameterError;
 import org.mifosng.platform.DataValidatorBuilder;
 import org.mifosng.platform.api.commands.ClientCommand;
+import org.mifosng.platform.api.data.ApiParameterError;
 import org.mifosng.platform.exceptions.PlatformApiDataValidationException;
 
 public class ClientCommandValidator {

@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 
 import org.joda.time.LocalDate;
 import org.mifosng.data.CurrencyData;
-import org.mifosng.data.LoanPayoffReadModel;
 import org.mifosng.data.LoanSchedule;
 import org.mifosng.data.MoneyData;
 import org.mifosng.platform.api.commands.CalculateLoanScheduleCommand;

@@ -1,11 +1,8 @@
-package org.mifosng.data;
-
-import javax.xml.bind.annotation.XmlRootElement;
+package org.mifosng.platform.api.data;
 
 import org.codehaus.jackson.map.annotate.JsonFilter;
 import org.joda.time.DateTime;
 
-@XmlRootElement(name = "note")
 @JsonFilter("myFilter")
 public class NoteData {
 

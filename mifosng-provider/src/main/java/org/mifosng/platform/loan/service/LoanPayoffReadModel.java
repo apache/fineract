@@ -1,11 +1,12 @@
-package org.mifosng.data;
-
-import javax.xml.bind.annotation.XmlRootElement;
+package org.mifosng.platform.loan.service;
 
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormatter;
+import org.mifosng.data.MoneyData;
 
-@XmlRootElement
+/**
+ *
+ */
 public class LoanPayoffReadModel {
 
 	private String reference;

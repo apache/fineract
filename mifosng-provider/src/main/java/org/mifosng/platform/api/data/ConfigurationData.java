@@ -1,10 +1,11 @@
-package org.mifosng.data;
+package org.mifosng.platform.api.data;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.codehaus.jackson.map.annotate.JsonFilter;
+import org.mifosng.data.CurrencyData;
 
 @JsonFilter("myFilter")
 public class ConfigurationData implements Serializable {

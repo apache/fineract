@@ -2,7 +2,7 @@ package org.mifosng.platform.exceptions;
 
 import java.util.List;
 
-import org.mifosng.data.ApiParameterError;
+import org.mifosng.platform.api.data.ApiParameterError;
 
 public class PlatformApiDataValidationException extends RuntimeException {
 

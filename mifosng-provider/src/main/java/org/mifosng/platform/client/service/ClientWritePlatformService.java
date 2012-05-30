@@ -1,8 +1,8 @@
 package org.mifosng.platform.client.service;
 
-import org.mifosng.data.EntityIdentifier;
 import org.mifosng.platform.api.commands.ClientCommand;
 import org.mifosng.platform.api.commands.NoteCommand;
+import org.mifosng.platform.api.data.EntityIdentifier;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface ClientWritePlatformService {

@@ -4,17 +4,14 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.map.annotate.JsonFilter;
 import org.joda.time.LocalDate;
 import org.mifosng.data.LoanSchedule;
 
-@XmlRootElement(name = "newloanworkflow")
 @JsonIgnoreProperties({ "organisationId", "organisationName" })
 @JsonFilter("myFilter")
-public class NewLoanWorkflowStepOneData implements Serializable {
+public class NewLoanData implements Serializable {
 
 	private Long organisationId;
 	private String organisationName;
@@ -44,7 +41,7 @@ public class NewLoanWorkflowStepOneData implements Serializable {
 	
 	private LoanProductData selectedProduct;
 	
-	public NewLoanWorkflowStepOneData() {
+	public NewLoanData() {
 		//
 	}
 

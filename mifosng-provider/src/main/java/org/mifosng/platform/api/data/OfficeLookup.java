@@ -2,9 +2,6 @@ package org.mifosng.platform.api.data;
 
 import java.io.Serializable;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
-@XmlRootElement(name = "officeLookup")
 public class OfficeLookup implements Serializable {
 
 	private Long id;

@@ -18,7 +18,6 @@ import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
-import org.mifosng.data.EntityIdentifier;
 import org.mifosng.data.LoanAccountData;
 import org.mifosng.data.LoanRepaymentData;
 import org.mifosng.data.LoanSchedule;
@@ -28,7 +27,8 @@ import org.mifosng.platform.api.commands.LoanStateTransitionCommand;
 import org.mifosng.platform.api.commands.LoanTransactionCommand;
 import org.mifosng.platform.api.commands.SubmitLoanApplicationCommand;
 import org.mifosng.platform.api.commands.UndoStateTransitionCommand;
-import org.mifosng.platform.api.data.NewLoanWorkflowStepOneData;
+import org.mifosng.platform.api.data.EntityIdentifier;
+import org.mifosng.platform.api.data.NewLoanData;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.ApiJSONFormattingService;
 import org.mifosng.platform.exceptions.UnrecognizedQueryParamException;
@@ -76,7 +76,7 @@ public class LoansApiResource {
 			@QueryParam("productId") final Long productId,
 			@Context UriInfo uriInfo) {
 
-		NewLoanWorkflowStepOneData workflowData = this.loanReadPlatformService
+		NewLoanData workflowData = this.loanReadPlatformService
 				.retrieveClientAndProductDetails(clientId, productId);
 
 		String selectedFields = "";

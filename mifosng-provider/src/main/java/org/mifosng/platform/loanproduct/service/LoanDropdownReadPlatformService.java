@@ -2,7 +2,7 @@ package org.mifosng.platform.loanproduct.service;
 
 import java.util.List;
 
-import org.mifosng.data.EnumOptionData;
+import org.mifosng.platform.api.data.EnumOptionData;
 
 public interface LoanDropdownReadPlatformService {
 

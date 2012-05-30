@@ -1,11 +1,8 @@
-package org.mifosng.data;
+package org.mifosng.platform.api.data;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
-@XmlRootElement(name="apiParameterError")
 public class ApiParameterError {
 	
 	/**

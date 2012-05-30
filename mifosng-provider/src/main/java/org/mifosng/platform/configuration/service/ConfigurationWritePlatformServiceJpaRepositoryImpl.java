@@ -5,9 +5,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.mifosng.data.ApiParameterError;
 import org.mifosng.platform.DataValidatorBuilder;
 import org.mifosng.platform.api.commands.OrganisationCurrencyCommand;
+import org.mifosng.platform.api.data.ApiParameterError;
 import org.mifosng.platform.currency.domain.ApplicationCurrency;
 import org.mifosng.platform.currency.domain.ApplicationCurrencyRepository;
 import org.mifosng.platform.exceptions.PlatformApiDataValidationException;

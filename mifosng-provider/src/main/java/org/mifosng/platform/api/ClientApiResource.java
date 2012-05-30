@@ -18,11 +18,11 @@ import javax.ws.rs.core.UriInfo;
 
 import org.joda.time.LocalDate;
 import org.mifosng.data.ClientLoanAccountSummaryCollectionData;
-import org.mifosng.data.EntityIdentifier;
-import org.mifosng.data.NoteData;
 import org.mifosng.platform.api.commands.ClientCommand;
 import org.mifosng.platform.api.commands.NoteCommand;
 import org.mifosng.platform.api.data.ClientData;
+import org.mifosng.platform.api.data.EntityIdentifier;
+import org.mifosng.platform.api.data.NoteData;
 import org.mifosng.platform.api.data.OfficeLookup;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.ApiJSONFormattingService;

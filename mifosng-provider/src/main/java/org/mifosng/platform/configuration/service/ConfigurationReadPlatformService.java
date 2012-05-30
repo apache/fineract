@@ -1,6 +1,6 @@
 package org.mifosng.platform.configuration.service;
 
-import org.mifosng.data.ConfigurationData;
+import org.mifosng.platform.api.data.ConfigurationData;
 
 public interface ConfigurationReadPlatformService {
 

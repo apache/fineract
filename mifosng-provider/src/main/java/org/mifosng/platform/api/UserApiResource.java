@@ -15,9 +15,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.mifosng.data.EntityIdentifier;
 import org.mifosng.platform.api.commands.UserCommand;
 import org.mifosng.platform.api.data.AppUserData;
+import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.infrastructure.ApiJSONFormattingService;
 import org.mifosng.platform.user.service.AppUserReadPlatformService;
 import org.mifosng.platform.user.service.AppUserWritePlatformService;

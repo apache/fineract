@@ -5,9 +5,9 @@ import static org.mifosng.platform.Specifications.notesThatMatch;
 import static org.mifosng.platform.Specifications.officesThatMatch;
 
 import org.apache.commons.lang.StringUtils;
-import org.mifosng.data.EntityIdentifier;
 import org.mifosng.platform.api.commands.ClientCommand;
 import org.mifosng.platform.api.commands.NoteCommand;
+import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.client.domain.ClientRepository;
 import org.mifosng.platform.client.domain.Note;
