@@ -5,7 +5,7 @@ import java.io.Serializable;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.map.annotate.JsonFilter;
 
-@JsonIgnoreProperties({ "orgId" })
+@JsonIgnoreProperties({ "orgId", "groupType" })
 @JsonFilter("permissionFilter")
 public class PermissionData implements Serializable {
 

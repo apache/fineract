@@ -2,32 +2,22 @@
 template for waiver/repayment... is it same for both? no type needed? (might have got this wrong)
 new loan template ... is it 2 templates... one to pick product... and 2nd to return default properties in selected product or is it meant that if only one product then use that. 
 
+recreate()
 
---------------------------------------------------------
- 
 
 Lost permissions again... restore fixed it up... must be some prob with permissions/roles maintenance
 also, maybe I should be using a user that has everything but role admin.
 
-go thru questions over mandatory fields
-also about formation numbers with locale... can i put a dodgey one in and mess up data unknowingly?
-
-Permissions
-groupType in or out?
-
-users - delete still falls over if user doesn't exist.
-Roles
-
-"id" is a mandatory field (says something about updating in the msg)
+users - delete still falls over if user doesn't exist. DOING
 
 Loan Products
-List/Retrieve - should show textual values of enums?
-Create - currencyDigitsAfterDecimal is it needed? (maybe customising digits after decimal by loan product not just currency) 
-	is locale saved?
-	principal is later called principalMoney
+List/Retrieve - should show textual values of enums? DOING
+Create - principal is later called principalMoney , also consistency between other loan fields and loan product fields with Type on them DOING
 
+
+
+Identify Fields that need explaining
 Clients
 displayName, externalId, maxJoinedOnOffsetFromToday
-business name?
 
 

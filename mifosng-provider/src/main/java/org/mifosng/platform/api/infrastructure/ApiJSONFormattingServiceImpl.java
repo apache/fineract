@@ -162,12 +162,6 @@ public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 		if (filterName.equals("roleFilter")) {
 
 			Set<String> permissionFields = new HashSet<String>();
-			// Ask keith which ones to show
-			permissionFields.add("id");
-			permissionFields.add("name");
-			permissionFields.add("description");
-			permissionFields.add("code");
-			permissionFields.add("groupType");
 
 			if (filterType.equals("I")) {
 				return new SimpleFilterProvider().addFilter(
@@ -176,7 +170,7 @@ public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 								.filterOutAllExcept(filterFields)).addFilter(
 						"permissionFilter",
 						SimpleBeanPropertyFilter
-								.filterOutAllExcept(permissionFields));
+								.serializeAllExcept(permissionFields));
 
 			}
 
@@ -185,25 +179,13 @@ public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 					.addFilter(
 							"permissionFilter",
 							SimpleBeanPropertyFilter
-									.filterOutAllExcept(permissionFields));
+									.serializeAllExcept(permissionFields));
 		}
 
 		if (filterName.equals("userFilter")) {
 
 			Set<String> roleFields = new HashSet<String>();
-			roleFields.add("id");
-			roleFields.add("name");
-			roleFields.add("description");
-			roleFields.add("availablePermissions");
-			roleFields.add("selectedPermissions");
-			// Ask keith which ones to show
 			Set<String> permissionFields = new HashSet<String>();
-			// Ask keith which ones to show
-			permissionFields.add("id");
-			permissionFields.add("name");
-			permissionFields.add("description");
-			permissionFields.add("code");
-			permissionFields.add("groupType");
 
 			if (filterType.equals("I")) {
 				return new SimpleFilterProvider()
@@ -214,11 +196,11 @@ public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 						.addFilter(
 								"roleFilter",
 								SimpleBeanPropertyFilter
-										.filterOutAllExcept(roleFields))
+										.serializeAllExcept(roleFields))
 						.addFilter(
 								"permissionFilter",
 								SimpleBeanPropertyFilter
-										.filterOutAllExcept(permissionFields));
+										.serializeAllExcept(permissionFields));
 
 			}
 
@@ -230,11 +212,11 @@ public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 					.addFilter(
 							"roleFilter",
 							SimpleBeanPropertyFilter
-									.filterOutAllExcept(roleFields))
+									.serializeAllExcept(roleFields))
 					.addFilter(
 							"permissionFilter",
 							SimpleBeanPropertyFilter
-									.filterOutAllExcept(permissionFields));
+									.serializeAllExcept(permissionFields));
 
 		}
 		return filters;

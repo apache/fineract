@@ -296,7 +296,8 @@ var jqxhr = $.ajax({
                 <p>Dates are returned in GET requests as an array e.g. [ 2007, 4, 11].  However, they are sent as strings in POST and PUT requests.
                 If there are any dates in your POST or PUT requests, you need to provide the "dateFormat".
                 This can be any date pattern supported by <a href="http://joda-time.sourceforge.net/api-release/org/joda/time/format/DateTimeFormat.html">Joda-Time</a>.
-                This capability can help you when saving data in your client application as you shouldn't need to do any date format conversion prior to issuing your POST or PUT request.</p>
+                This capability can help you when saving data in your client application as you shouldn't need to do any date format conversion prior to issuing your POST or PUT request.
+                </p>
                 <code>
 JSON examples:
 {
@@ -309,19 +310,20 @@ JSON examples:
 }
                 </code>
                 <h4>Numbers</h4>
-                <p>Similar to dates above, if you format numbers based on a "locale" in your User Interface you need to provide the "locale" when updating.</a>.
+                <p>                 
+                You must provide a "locale" when updating numbers.
+                Numbers are not "Ids" or "Types" but are typically money amounts or percentages that relate to loans.
+                In any case, the API will send back an error message if you forget.
+                </p>
                 <code>
 JSON examples:
 {
-"locale": "en-us",
+"locale": "en_US",
 "principal": "240,400.88"
 }
 {
-"locale": "fr-CH",
+"locale": "fr_CH",
 "principal": "240 400.88"
-}
-{
-"principal": "240400.88"
 }
                 </code>
            </div>
@@ -629,7 +631,11 @@ JSON examples:
 <div class="method-section">
     <div class="method-description">
         <h4>Create a Client</h4>
-        <br>
+        <p> <b>Note:</b> You can enter either:<br>
+        firstname/lastname - for a person<br>
+        OR<br>
+        clientOrBusinessName - for a business or organisation (or person known by one name).
+        </p>
         <button type="button" onclick="showMandatoryFields('https://localhost:8443/mifosng-provider/api/v1/clients', 'clients_mandatory');">Show Mandatory Fields</button>
         <br>
         <div id=clients_mandatory></div>
@@ -3075,8 +3081,20 @@ No Request Body
 <code class="method-response">{
   "allowedOffices" : [ {
     "id" : 1,
-    "name" : "change super user"
-  } ],
+    "name" : "Demo MFI Head Office"
+  }, {
+    "id" : 2,
+    "name" : "sub branch 1"
+  }, {
+    "id" : 8,
+    "name" : "moi aussi"
+  }, {
+    "id" : 3,
+    "name" : "sub branch 2"
+  }, {
+    "id" : 4,
+    "name" : "sub branch 3"
+  }],
   "availableRoles" : [ {
     "id" : 1,
     "name" : "Super user",
@@ -3089,7 +3107,25 @@ No Request Body
     "description" : "A field officer role allows the user to add client and loans and view reports but nothing else.",
     "availablePermissions" : [ ],
     "selectedPermissions" : [ ]
-  }...]
+  }, {
+    "id" : 3,
+    "name" : "Data Entry (Portfolio only)",
+    "description" : "This role allows a user full permissions around client and loan functionality but nothing else.",
+    "availablePermissions" : [ ],
+    "selectedPermissions" : [ ]
+  }, {
+    "id" : 4,
+    "name" : "Credit Committe Member",
+    "description" : "This role allows a user to approve reject or withdraw loans (with reporting).",
+    "availablePermissions" : [ ],
+    "selectedPermissions" : [ ]
+  }, {
+    "id" : 5,
+    "name" : "Manager",
+    "description" : "This role allows a manager to do anything related to portfolio management and also view all reports.",
+    "availablePermissions" : [ ],
+    "selectedPermissions" : [ ]
+  } ]
 }
 </code>
 	    </div>
@@ -3111,7 +3147,7 @@ No Request Body
 <code class="method-response">{
   "id" : 1,
   "officeId" : 1,
-  "officeName" : "change super user",
+  "officeName" : "Demo MFI Head Office",
   "username" : "mifos",
   "firstname" : "App",
   "lastname" : "Administrator",
@@ -3125,15 +3161,23 @@ No Request Body
       "id" : 1,
       "name" : "User administration ALL",
       "description" : "An application user will have permission to execute all tasks related to user administration.",
-      "code" : "USER_ADMINISTRATION_SUPER_USER_ROLE",
-      "groupType" : 1
+      "code" : "USER_ADMINISTRATION_SUPER_USER_ROLE"
     }, {
       "id" : 4,
       "name" : "Reporting ALL",
       "description" : "An application user will have permission to execute and view all reports.",
-      "code" : "REPORTING_SUPER_USER_ROLE",
-      "groupType" : 4
-    }...]
+      "code" : "REPORTING_SUPER_USER_ROLE"
+    }, {
+      "id" : 3,
+      "name" : "Portfolio management ALL",
+      "description" : "An application user will have permission to execute all tasks related to portfolio management.",
+      "code" : "PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE"
+    }, {
+      "id" : 2,
+      "name" : "Organisation adminsitration ALL",
+      "description" : "An application user will have permission to execute all tasks related to organisation administration.",
+      "code" : "ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE"
+    } ]
   } ]
 }
 </code>
@@ -3291,20 +3335,22 @@ No Request Body
     "id" : 1,
     "name" : "User administration ALL",
     "description" : "An application user will have permission to execute all tasks related to user administration.",
-    "code" : "USER_ADMINISTRATION_SUPER_USER_ROLE",
-    "groupType" : 1
+    "code" : "USER_ADMINISTRATION_SUPER_USER_ROLE"
   }, {
     "id" : 2,
     "name" : "Organisation adminsitration ALL",
     "description" : "An application user will have permission to execute all tasks related to organisation administration.",
-    "code" : "ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE",
-    "groupType" : 2
+    "code" : "ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE"
   }, {
     "id" : 3,
     "name" : "Portfolio management ALL",
     "description" : "An application user will have permission to execute all tasks related to portfolio management.",
-    "code" : "PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE",
-    "groupType" : 3
+    "code" : "PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE"
+  }, {
+    "id" : 4,
+    "name" : "Reporting ALL",
+    "description" : "An application user will have permission to execute and view all reports.",
+    "code" : "REPORTING_SUPER_USER_ROLE"
   }...]
 }
 </code>
@@ -3332,26 +3378,22 @@ No Request Body
     "id" : 1,
     "name" : "User administration ALL",
     "description" : "An application user will have permission to execute all tasks related to user administration.",
-    "code" : "USER_ADMINISTRATION_SUPER_USER_ROLE",
-    "groupType" : 1
+    "code" : "USER_ADMINISTRATION_SUPER_USER_ROLE"
   }, {
     "id" : 4,
     "name" : "Reporting ALL",
     "description" : "An application user will have permission to execute and view all reports.",
-    "code" : "REPORTING_SUPER_USER_ROLE",
-    "groupType" : 4
+    "code" : "REPORTING_SUPER_USER_ROLE"
   }, {
     "id" : 3,
     "name" : "Portfolio management ALL",
     "description" : "An application user will have permission to execute all tasks related to portfolio management.",
-    "code" : "PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE",
-    "groupType" : 3
+    "code" : "PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE"
   }, {
     "id" : 2,
     "name" : "Organisation adminsitration ALL",
     "description" : "An application user will have permission to execute all tasks related to organisation administration.",
-    "code" : "ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE",
-    "groupType" : 2
+    "code" : "ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE"
   } ]
 }
 </code>
@@ -3434,21 +3476,23 @@ Request body:
   "id" : 1,
   "name" : "User administration ALL",
   "description" : "An application user will have permission to execute all tasks related to user administration.",
-  "code" : "USER_ADMINISTRATION_SUPER_USER_ROLE",
-  "groupType" : 1
+  "code" : "USER_ADMINISTRATION_SUPER_USER_ROLE"
 }, {
   "id" : 2,
   "name" : "Organisation adminsitration ALL",
   "description" : "An application user will have permission to execute all tasks related to organisation administration.",
-  "code" : "ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE",
-  "groupType" : 2
+  "code" : "ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE"
 }, {
   "id" : 3,
   "name" : "Portfolio management ALL",
   "description" : "An application user will have permission to execute all tasks related to portfolio management.",
-  "code" : "PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE",
-  "groupType" : 3
-}...]
+  "code" : "PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE"
+}, {
+  "id" : 4,
+  "name" : "Reporting ALL",
+  "description" : "An application user will have permission to execute and view all reports.",
+  "code" : "REPORTING_SUPER_USER_ROLE"
+}, ... ]
 </code>
 	    </div>
 	</div>
