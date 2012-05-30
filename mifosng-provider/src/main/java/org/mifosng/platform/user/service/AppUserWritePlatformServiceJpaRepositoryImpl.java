@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
@@ -164,7 +165,12 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 	@Transactional
 	@Override
 	public void deleteUser(Long userId) {
-		this.appUserRepository.delete(userId);
+		try {
+			this.appUserRepository.delete(userId);
+		} catch (InvalidDataAccessApiUsageException exception) {
+			// spring data jpa throws this when deleting user that doesnt exist
+			throw new UserNotFoundException(userId);
+		}
 	}
 	
 	/*
