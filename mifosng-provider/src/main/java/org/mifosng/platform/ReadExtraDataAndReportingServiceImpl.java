@@ -369,22 +369,6 @@ public class ReadExtraDataAndReportingServiceImpl implements
 	@Override
 	public GenericResultset retrieveExtraData(String type, String set, Long id) {
 
-		if (type == null) {
-			throw new PlatformDataIntegrityException(
-					"error.msg.additional.fields.type.null",
-					"JPWWRONGMSG - Additional Fields Type is null.");
-		}
-		if (set == null) {
-			throw new PlatformDataIntegrityException(
-					"error.msg.additional.fields.set.null",
-					"JPWWRONGMSG - Additional Fields Set is null.");
-		}
-		if (id == null) {
-			throw new PlatformDataIntegrityException(
-					"error.msg.additional.fields.id.null",
-					"JPWWRONGMSG - Additional Fields Id is null.");
-		}
-
 		long startTime = System.currentTimeMillis();
 		GenericResultset result = fillExtraDataGenericResultSet(type, set, id);
 		long elapsed = System.currentTimeMillis() - startTime;
@@ -428,12 +412,14 @@ public class ReadExtraDataAndReportingServiceImpl implements
 							+ rsch.getColumnName() + "`";
 
 					rsch.setColumnType(rsmd.getString("data_type"));
-					rsch.setColumnLength(rsmd.getInt("data_length"));
+					if (rsmd.getInt("data_length") > 0)
+						rsch.setColumnLength(rsmd.getInt("data_length"));
 					rsch.setColumnDisplayType(rsmd.getString("display_type"));
 					allowedListId = rsmd.getInt("allowed_list_id");
 					if (allowedListId > 0) {
 
-						//logger.info("allowedListId != null: Column: " + rsch.getColumnName());
+						// logger.info("allowedListId != null: Column: " +
+						// rsch.getColumnName());
 						sql = "select v.`name` from stretchydata_allowed_value v where allowed_list_id = "
 								+ allowedListId + " order by id";
 						ResultSet rsValues = db_statement2.executeQuery(sql);

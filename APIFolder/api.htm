@@ -526,7 +526,7 @@ JSON examples:
         <div class="method-section">
             <div class="method-description">
                 <h4>List Clients</h4>
-                <p>Example Request: </p>
+                <p>Example Requests: </p>
                 <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/clients?pretty=true">https://localhost:8443/mifosng-provider/api/v1/clients?pretty=true</a>
                 <br><br>
                 <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/clients?pretty=true&fields=displayName,officeName,joinedDate">https://localhost:8443/mifosng-provider/api/v1/clients?pretty=true&fields=displayName,officeName,joinedDate</a>
@@ -602,7 +602,7 @@ JSON examples:
         <div class="method-section">
             <div class="method-description">
                 <h4>Retrieve a Client</h4>
-                <p>Example Request: </p>
+                <p>Example Requests: </p>
                 <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/clients/1?pretty=true">https://localhost:8443/mifosng-provider/api/v1/clients/1?pretty=true</a>
                 <br><br>
                 <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/clients/1?pretty=true&template=true">https://localhost:8443/mifosng-provider/api/v1/clients/1?pretty=true&template=true</a>
@@ -691,7 +691,7 @@ Request Body:
             in a specific use case of the Individual Lending User Interface.<br>
             However, it is quite reasonable to add resources like this to simplify User Interface development.
         </p>
-        <p>Example Request: </p>
+        <p>Example Requests: </p>
         <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/clients/1/loans?pretty=true">https://localhost:8443/mifosng-provider/api/v1/clients/1/loans?pretty=true</a>
         <br><br>
         <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/clients/1/loans?pretty=true&fields=openLoans,%20closedLoans,activeLoanCount">https://localhost:8443/mifosng-provider/api/v1/clients/1/loans?pretty=true&fields=openLoans,%20closedLoans,activeLoanCount</a>
@@ -745,7 +745,7 @@ Request Body:
         <p>
             <b>Note:</b> Notes are returned in descending createOn order.
         </p>
-        <p>Example Request: </p>
+        <p>Example Requests: </p>
         <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/clients/2/notes?pretty=true">https://localhost:8443/mifosng-provider/api/v1/clients/2/notes?pretty=true</a>
         <br><br>
         <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/clients/2/notes?pretty=true&fields=note,createdOn,createdByUsername">https://localhost:8443/mifosng-provider/api/v1/clients/2/notes?pretty=true&fields=note,createdOn,createdByUsername</a>
@@ -808,7 +808,7 @@ Request Body:
 <div class="method-section">
     <div class="method-description">
         <h4>Retrieve a Client Note</h4>
-        <p>Example Request: </p>
+        <p>Example Requests: </p>
         <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/clients/2/notes/20?pretty=true">https://localhost:8443/mifosng-provider/api/v1/clients/2/notes/20?pretty=true</a>
         <br><br>
         <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/clients/2/notes/20?pretty=true&fields=note,createdOn,createdByUsername">https://localhost:8443/mifosng-provider/api/v1/clients/2/notes/20?pretty=true&fields=note,createdOn,createdByUsername</a>
@@ -901,15 +901,15 @@ Request Body:
         <h5>Arguments</h5>
         <dl class="argument-list">
             <dt>clientId</dt>
-            <dd>Integer</dd>
-            <dd>The 'id' of the Client</dd>
+            <dd>Integer <span>mandatory</span></dd>
             <dt>productId</dt>
-            <dd>Integer</dd>
-            <dd>The 'id' of the Loan Product</dd>
+            <dd>Integer <span>optional</span></dd>
+            <dd>If entered, productId, productName and selectedProduct fields are returned. </dd>
         </dl>
-        <p>Example Request: 
-        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/loans/template?clientId=1&productId=1">https://localhost:8443/mifosng-provider/api/v1/loans/template?clientId=1&productId=1</a>
-        </p>
+        <p>Example Requests: </p>
+        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/loans/template?clientId=1&productId=1&pretty=true">https://localhost:8443/mifosng-provider/api/v1/loans/template?clientId=1&productId=1&pretty=true</a>
+        <br><br>
+        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/loans/template?clientId=1&pretty=true">https://localhost:8443/mifosng-provider/api/v1/loans/template?clientId=1&pretty=true</a>
     </div>
     <div class="method-example">
         <code class="method-declaration">GET https://thedomainname/api/v1/loans/template</code>
@@ -2558,13 +2558,16 @@ Request Body:{
                 In Mifos X, any number of "Sets" of "Additional Fields" can be configured for a Mifos X database table ("Type").
                 </p>
                 <p>  For example, portfolio_client is the database table that holds client data.  Typically, MFI's want more client related fields than is provided by Mifos X out-of-the-box.  
-                The MFI might add a Set called "Additional Info" containing some fields that are typically input when creating a client.  They might then add another Set called "Highly Improbable Info" containing some fields that are only input in exceptional circumstances.
+                The MFI might add a Set called "Additional Info" containing some fields that are typically input when creating a client.
+                They might then add another Set called "Highly Improbable Info" containing some fields that are only input in exceptional
+                circumstances.
                 </p>
                 <p>
                 The additional fields resource allows you to retrieve and update any Additional Fields data that has been configured in Mifos X.
                 </p>
                 <p>
-                The Mifos X Individual Lending client application uses a JQuery plugin called stretchydata which, itself, uses this additional fields resource to provide a pretty flexible additional fields User Interface (UI).  Put a link to an example here.
+                The Mifos X Individual Lending client application uses a JQuery plugin called stretchydata which, itself, uses this
+                additional fields resource to provide a pretty flexible additional fields User Interface (UI).
                 </p>
             </div>
         </div>
@@ -2584,26 +2587,26 @@ Request Body:{
                     <dd><span>optional</span></dd>
                     <dd>The Additional Fields Type (Mifos X database table) to restrict the output to</dd>
                 </dl>
-                <p>Example Request: 
-                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/additionalfields?type=portfolio_client">https://localhost:8443/mifosng-provider/api/v1/additionalfields?type=portfolio_client</a>
-                </p>
+                <p>Example Requests: </p>
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/additionalfields?type=portfolio_client&pretty=true">https://localhost:8443/mifosng-provider/api/v1/additionalfields?type=portfolio_client&pretty=true</a>
+                <br><br>
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/additionalfields?pretty=true">https://localhost:8443/mifosng-provider/api/v1/additionalfields?pretty=true</a>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://thedomainname/api/v1/additionalfields</code>
-                <code class="method-response">{
-                "additionalFieldsSets": [
-                {
-                "id": 1,
-                "name": "Additional Information",
-                "type": "portfolio_client"
-                },
-                {
-                "id": 9,
-                "name": "Highly Improbable Info",
-                "type": "portfolio_client"
-                }
-                ]
-                }
+                <code class="method-response">[ {
+  "id" : 1,
+  "name" : "Additional Information",
+  "type" : "portfolio_client"
+}, {
+  "id" : 8,
+  "name" : "Additional Information",
+  "type" : "portfolio_loan"
+}, {
+  "id" : 9,
+  "name" : "Highly Improbable Info",
+  "type" : "portfolio_client"
+} ]
                 </code>
             </div>
         </div>
@@ -2617,125 +2620,71 @@ Request Body:{
                 Returns the Set of Additional Fields data for the ID provided.  The ID is the id field of the Type table e.g. portfolio_client might have an id value of 4.  The output is a JSON formatted "Generic Resultset".  The Generic Resultset contains Column Heading as well as Data information.  The Column Heading information may include allowed values (columnValues array).
                 </p>
                 <p>Example Request: 
-                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/additionalfields/portfolio_client/Additional Information/2">https://localhost:8443/mifosng-provider/api/v1/additionalfields/portfolio_client/Additional Information/2</a>
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/additionalfields/portfolio_client/Additional Information/2?pretty=true">https://localhost:8443/mifosng-provider/api/v1/additionalfields/portfolio_client/Additional Information/2?pretty=true</a>
                 </p>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://thedomainname/api/v1/additionalfields/{type}/{set}/{id}</code>
                 <code class="method-response">{
-                "columnHeaders": [
-                {
-                "columnName": "Ethnic Group",
-                "columnType": "String",
-                "columnLength": 50,
-                "columnDisplayType": "List",
-                "columnValues": [
-                "Bedouin",
-                "Berber",
-                "Italian",
-                "Miknasa",
-                "Mrazig",
-                "Other",
-                "Unknown"
-                ]
-                },
-                {
-                "columnName": "Ethnic Group Other",
-                "columnType": "String",
-                "columnLength": 50,
-                "columnDisplayType": null,
-                "columnValues": []
-                },
-                {
-                "columnName": "Household Location",
-                "columnType": "String",
-                "columnLength": 50,
-                "columnDisplayType": "List",
-                "columnValues": [
-                "East Sikkim",
-                "North Sikkim",
-                "South Sikkim",
-                "West Sikkim",
-                "Other"
-                ]
-                },
-                {
-                "columnName": "Household Location Other",
-                "columnType": "String",
-                "columnLength": 50,
-                "columnDisplayType": null,
-                "columnValues": []
-                },
-                {
-                "columnName": "Religion",
-                "columnType": "String",
-                "columnLength": 50,
-                "columnDisplayType": "List",
-                "columnValues": [
-                "Protestant",
-                "Catholic",
-                "Muslim",
-                "Animist",
-                "Atheist",
-                "Other",
-                "Unknown"
-                ]
-                },
-                {
-                "columnName": "Religion Other",
-                "columnType": "String",
-                "columnLength": 50,
-                "columnDisplayType": null,
-                "columnValues": []
-                },
-                {
-                "columnName": "Knowledge of Person",
-                "columnType": "String",
-                "columnLength": 50,
-                "columnDisplayType": "List",
-                "columnValues": [
-                "Staff member",
-                "Spouse of staff member",
-                "Son/daughter of staff member",
-                "Friend of staff member",
-                "Not known by any staff member",
-                "Other"
-                ]
-                },
-                {
-                "columnName": "Gender",
-                "columnType": "String",
-                "columnLength": 10,
-                "columnDisplayType": "List",
-                "columnValues": [
-                "Female",
-                "Male"
-                ]
-                },
-                {
-                "columnName": "Whois",
-                "columnType": "Text",
-                "columnLength": 0,
-                "columnDisplayType": null,
-                "columnValues": []
-                }
-                ],
-                "data": [
-                {
-                "row": [
-                "Berber",
-                null,
-                "East Sikkim",
-                null,
-                "Animist",
-                "jjjjjjj",
-                "Son/daughter of staff member",
-                "Female",
-                "its\r\nme of\r\ncourse\r\nyes\r\nend and the end of it all"
-                ]
-                }
-                ]
-                }
+  "columnHeaders" : [ {
+    "columnName" : "Ethnic Group",
+    "columnType" : "String",
+    "columnLength" : 50,
+    "columnDisplayType" : "List",
+    "columnValues" : [ "Bedouin", "Berber", "Italian", "Miknasa", "Mrazig", "Other", "Unknown" ]
+  }, {
+    "columnName" : "Ethnic Group Other",
+    "columnType" : "String",
+    "columnLength" : 50,
+    "columnDisplayType" : null,
+    "columnValues" : [ ]
+  }, {
+    "columnName" : "Household Location",
+    "columnType" : "String",
+    "columnLength" : 50,
+    "columnDisplayType" : "List",
+    "columnValues" : [ "East Sikkim", "North Sikkim", "South Sikkim", "West Sikkim", "Other" ]
+  }, {
+    "columnName" : "Household Location Other",
+    "columnType" : "String",
+    "columnLength" : 50,
+    "columnDisplayType" : null,
+    "columnValues" : [ ]
+  }, {
+    "columnName" : "Religion",
+    "columnType" : "String",
+    "columnLength" : 50,
+    "columnDisplayType" : "List",
+    "columnValues" : [ "Protestant", "Catholic", "Muslim", "Animist", "Atheist", "Other", "Unknown" ]
+  }, {
+    "columnName" : "Religion Other",
+    "columnType" : "String",
+    "columnLength" : 50,
+    "columnDisplayType" : null,
+    "columnValues" : [ ]
+  }, {
+    "columnName" : "Knowledge of Person",
+    "columnType" : "String",
+    "columnLength" : 50,
+    "columnDisplayType" : "List",
+    "columnValues" : [ "Staff member", "Spouse of staff member", "Son/daughter of staff member", "Friend of staff member", "Not known by any staff member", "Other" ]
+  }, {
+    "columnName" : "Gender",
+    "columnType" : "String",
+    "columnLength" : 10,
+    "columnDisplayType" : "List",
+    "columnValues" : [ "Female", "Male" ]
+  }, {
+    "columnName" : "Whois",
+    "columnType" : "Text",
+    "columnLength" : null,
+    "columnDisplayType" : null,
+    "columnValues" : [ ]
+  } ],
+  "data" : [ {
+    "row" : [ "Bedouin", null, "East Sikkim", null, "Animist", "Agnostic", "Friend of staff member", "Female", "A person of honesty & clear thought" ]
+  } ]
+}
                 </code>
             </div>
         </div>
@@ -2749,34 +2698,27 @@ Request Body:{
             </div>
             <div class="method-example">
                 <code class="method-declaration">POST https://thedomainname/api/v1/additionalfields/{type}/{set}/{id}</code>
-                <code class="method-request">https://localhost:8443/mifosng-provider/api/v1/additionalfields/portfolio_client/Additional Information/2
-                
-                
-                Content-Type: application/json
-                Request Body:
-                {
-                "Ethnic_Group":"Berber",
-                "Ethnic_Group_Other":"",
-                "Household_Location":"East Sikkim",
-                "Household_Location_Other":"",
-                "Religion":"Animist",
-                "Religion_Other":"jjjjjjj",
-                "Knowledge_of_Person":"Son/daughter of staff member",
-                "Gender":"Female",
-                "Whois":"its\r\nme of\r\ncourse\r\nyes\r\nend and the end of it all"
-                }
-                </code>
+                <code class="method-request">POST https://localhost:8443/mifosng-provider/api/v1/additionalfields/portfolio_client/Additional Information/2
+Content-Type: application/json
+Request Body:
+{
+ "Ethnic_Group":"Berber",
+ "Ethnic_Group_Other":"",
+ "Household_Location":"East Sikkim",
+ "Household_Location_Other":"",
+ "Religion":"Animist",
+ "Religion_Other":"jjjjjjj",
+ "Knowledge_of_Person":"Son/daughter of staff member",
+ "Gender":"Female",
+ "Whois":"its\r\nme of\r\ncourse\r\nyes\r\nend and the end of it all"
+}
+</code>
                 <code class="method-response">{
-                "entityId": 2
-                }
+ "entityId": 2
+}
                 </code>
             </div>
         </div>
-    
-    
-    
-    
-    
     
     
         <a id="reports" name="reports" class="old-syle-anchor">&nbsp;</a>
@@ -2784,15 +2726,16 @@ Request Body:{
             <div class="method-description">
                 <h3>Reports</h3>
                 <p>
-                The reports resource allows you to run and receive output from pre-defined Mifos X reports.  The default output is a JSON formatted "Generic Resultset".  The Generic Resultset contains Column Heading as well as Data information.  However, you can export to CSV format by simply adding "&exportCSV=true" to the end of your URI.
+                The reports resource allows you to run and receive output from pre-defined Mifos X reports.
+                The default output is a JSON formatted "Generic Resultset".
+                The Generic Resultset contains Column Heading as well as Data information.
+                However, you can export to CSV format by simply adding "&exportCSV=true" to the end of your URL.
                 </p>
                 <p>
                 If Pentaho reports have been pre-defined, they can also be run through this resource.  Pentaho reports can return HTML, PDF or CSV formats.
                 </p>
-                
-                <p>Add examples showing links to client listing report producing json, then csv, then a pentaho report producing html, pdf, csv</p>
-                <p>
-                The Mifos X Individual Lending client application uses a JQuery plugin called stretchyreporting which, itself, uses this reports resource to provide a pretty flexible reporting User Interface (UI).  Put a link to an example here.
+               <p>
+                The Mifos X Individual Lending client application uses a JQuery plugin called stretchyreporting which, itself, uses this reports resource to provide a pretty flexible reporting User Interface (UI).
                 </p>
             </div>
         </div>
@@ -2813,81 +2756,104 @@ Request Body:{
                     <dd>optional, <span>The only valid value is 'true'.  If any other value is provided the argument will be ignored</span></dd>
                     <dd>Output will be delivered as a CSV file instead of JSON.</dd>
                 </dl>
-                <p>Example Request: 
-                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/reports">https://localhost:8443/mifosng-provider/api/v1/reports</a>
-                </p>
+                <p>Example Requests: </p>
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/reports?pretty=true">https://localhost:8443/mifosng-provider/api/v1/reports?pretty=true</a>
+                <br><br>
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/reports?pretty=true&exportCSV=true">https://localhost:8443/mifosng-provider/api/v1/reports?pretty=true&exportCSV=true</a>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://thedomainname/api/v1/reports</code>
                 <code class="method-response">{
-                "columnHeaders": [
-                {
-                "columnName": "report_id",
-                "columnType": "INT",
-                "columnLength": null,
-                "columnDisplayType": null,
-                "columnValues": []
-                },
-                {
-                "columnName": "report_name",
-                "columnType": "VARCHAR",
-                "columnLength": null,
-                "columnDisplayType": null,
-                "columnValues": []
-                },
-                {
-                "columnName": "report_type",
-                "columnType": "VARCHAR",
-                "columnLength": null,
-                "columnDisplayType": null,
-                "columnValues": []
-                },
-                ... more "columnHeaders" entries
-                ],
-                "data": [
-                {
-                "row": [
-                "29",
-                "Client Listing",
-                "Table",
-                null,
-                null,
-                "5",
-                null,
-                "selectOfficeId"
-                ]
-                },
-                {
-                "row": [
-                "42",
-                "Client Listing - Additional and Unlikely",
-                "Table",
-                null,
-                null,
-                "5",
-                null,
-                "selectOfficeId"
-                ]
-                },
-                {
-                "row": [
-                "30",
-                "Client Loans Listing",
-                "Table",
-                null,
-                null,
-                "5",
-                null,
-                "selectOfficeId"
-                ]
-                },
-                ... more "Row" entries
-                ]
-                }</code>
+  "columnHeaders" : [ {
+    "columnName" : "report_id",
+    "columnType" : "INT",
+    "columnLength" : null,
+    "columnDisplayType" : null,
+    "columnValues" : [ ]
+  }, {
+    "columnName" : "report_name",
+    "columnType" : "VARCHAR",
+    "columnLength" : null,
+    "columnDisplayType" : null,
+    "columnValues" : [ ]
+  }, {
+    "columnName" : "report_type",
+    "columnType" : "VARCHAR",
+    "columnLength" : null,
+    "columnDisplayType" : null,
+    "columnValues" : [ ]
+  }, {
+    "columnName" : "report_subtype",
+    "columnType" : "VARCHAR",
+    "columnLength" : null,
+    "columnDisplayType" : null,
+    "columnValues" : [ ]
+  }, {
+    "columnName" : "report_category",
+    "columnType" : "VARCHAR",
+    "columnLength" : null,
+    "columnDisplayType" : null,
+    "columnValues" : [ ]
+  }, {
+    "columnName" : "parameter_id",
+    "columnType" : "INT",
+    "columnLength" : null,
+    "columnDisplayType" : null,
+    "columnValues" : [ ]
+  }, {
+    "columnName" : "report_parameter_name",
+    "columnType" : "VARCHAR",
+    "columnLength" : null,
+    "columnDisplayType" : null,
+    "columnValues" : [ ]
+  }, {
+    "columnName" : "parameter_name",
+    "columnType" : "VARCHAR",
+    "columnLength" : null,
+    "columnDisplayType" : null,
+    "columnValues" : [ ]
+  } ],
+  "data" : [ {
+    "row" : [ "29", "Client Listing", "Table", null, null, "5", null, "selectOfficeId" ]
+  }, {
+    "row" : [ "42", "Client Listing - Additional and Unlikely", "Table", null, null, "5", null, "selectOfficeId" ]
+  }, {
+    "row" : [ "30", "Client Loans Listing", "Table", null, null, "5", null, "selectOfficeId" ]
+  }, {
+    "row" : [ "43", "Client Loans Listing - Additional", "Table", null, null, "5", null, "selectOfficeId" ]
+  }, {
+    "row" : [ "41", "Clients by Surname (a bit silly)", "Chart", "Pie", null, "5", null, "selectOfficeId" ]
+  }, {
+    "row" : [ "39", "Loan Disbursals in Previous Year", "Chart", "Bar", null, "5", null, "selectOfficeId" ]
+  }, {
+    "row" : [ "39", "Loan Disbursals in Previous Year", "Chart", "Bar", null, "7", null, "currencyIdSelectOne" ]
+  }, {
+    "row" : [ "40", "Loan Repayments in Previous Year", "Chart", "Bar", null, "5", null, "selectOfficeId" ]
+  }, {
+    "row" : [ "40", "Loan Repayments in Previous Year", "Chart", "Bar", null, "7", null, "currencyIdSelectOne" ]
+  }, {
+    "row" : [ "34", "Loans - Active Loans Portfolio Status", "Table", null, null, "5", null, "selectOfficeId" ]
+  }, {
+    "row" : [ "34", "Loans - Active Loans Portfolio Status", "Table", null, null, "6", null, "currencyIdSelectAll" ]
+  }, {
+    "row" : [ "31", "Loans Awaiting Disbursal", "Table", null, null, "5", null, "selectOfficeId" ]
+  }, {
+    "row" : [ "35", "Portfolio at Risk", "Table", null, null, "5", null, "selectOfficeId" ]
+  }, {
+    "row" : [ "35", "Portfolio at Risk", "Table", null, null, "6", null, "currencyIdSelectAll" ]
+  }, {
+    "row" : [ "32", "Upcoming Repayments", "Table", null, null, "5", null, "selectOfficeId" ]
+  }, {
+    "row" : [ "32", "Upcoming Repayments", "Table", null, null, "6", null, "currencyIdSelectAll" ]
+  }, {
+    "row" : [ "38", "Upcoming Repayments Summary By Month, Currency and Loan Risk", "Table", null, null, "5", null, "selectOfficeId" ]
+  }, {
+    "row" : [ "38", "Upcoming Repayments Summary By Month, Currency and Loan Risk", "Table", null, null, "6", null, "currencyIdSelectAll" ]
+  } ]
+}
+                </code>
             </div>
         </div>
-    
-    
     
         <a id="report_run" name="report_run" class="old-syle-anchor">&nbsp;</a>
         <div class="method-section">
@@ -2895,6 +2861,9 @@ Request Body:{
                 <h4>Running a Report</h4>
                 <p>
                 Runs a report and returns the report output.
+                </p>
+                <p>
+                <b>Note: </b> Pentaho details yet to be provided
                 </p>
                 <h5>Arguments</h5>
                 <dl class="argument-list">
@@ -2907,63 +2876,90 @@ Request Body:{
                     <dd>Determines whether the request looks in the list of reports or the list of parameters for its data.</dd>
                     <dt>exportCSV</dt>
                     <dd>optional, <span>The only valid value is 'true'.  If any other value is provided the argument will be ignored</span></dd>
-                    <dd>Output will be delivered as a CSV file instead of JSON.  Doesn't apply to Pentaho reports.</dd>
+                    <dd>Output will be delivered as a CSV file instead of JSON.  Doesn't apply to Pentaho reports .</dd>
                 </dl>
-                <p>Example Request: 
-                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/reports/Client%20Listing?R_officeId=1">https://localhost:8443/mifosng-provider/api/v1/reports/Client%20Listing?R_officeId=1</a>
-                </p>
+                <p>Example Requests: </p>
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/reports/Client%20Listing?R_officeId=1&pretty=true">https://localhost:8443/mifosng-provider/api/v1/reports/Client%20Listing?R_officeId=1&pretty=true</a>
+                <br><br>
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/reports/Client%20Listing?R_officeId=1&pretty=true&exportCSV=true">https://localhost:8443/mifosng-provider/api/v1/reports/Client%20Listing?R_officeId=1&pretty=true&exportCSV=true</a>
+                <br><br>
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/reports/selectOfficeId?R_officeId=1&pretty=true&parameterType=true">https://localhost:8443/mifosng-provider/api/v1/reports/selectOfficeId?R_officeId=1&pretty=true& parameterType=true</a>
+                <br><br>
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/reports/selectOfficeId?R_officeId=1&pretty=true&parameterType=true&exportCSV=true">https://localhost:8443/mifosng-provider/api/v1/reports/selectOfficeId?R_officeId=1&pretty=true& parameterType=true&exportCSV=true</a>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://thedomainname/api/v1/reports/{reportName}</code>
                 <code class="method-response">{
-                "columnHeaders": [
-                {
-                "columnName": "Office/Branch",
-                "columnType": "VARCHAR",
-                "columnLength": null,
-                "columnDisplayType": null,
-                "columnValues": []
-                },
-                {
-                "columnName": "Name",
-                "columnType": "VARCHAR",
-                "columnLength": null,
-                "columnDisplayType": null,
-                "columnValues": []
-                },
-                {
-                "columnName": "Joining Date",
-                "columnType": "DATE",
-                "columnLength": null,
-                "columnDisplayType": null,
-                "columnValues": []
-                }
-                ],
-                "data": [
-                {
-                "row": [
-                "Demo MFI Head Office",
-                "O'Meara, Patrick",
-                "2009-01-04"
-                ]
-                },
-                {
-                "row": [
-                "Demo MFI Head Office",
-                "O'Meara, Dennis",
-                "2009-01-04"
-                ]
-                },
-                {
-                "row": [
-                "Demo MFI Head Office",
-                "Smith, John",
-                "2009-01-11"
-                ]
-                },
-                ... more "row" entries
-                ]
-                }</code>
+  "columnHeaders" : [ {
+    "columnName" : "Office/Branch",
+    "columnType" : "VARCHAR",
+    "columnLength" : null,
+    "columnDisplayType" : null,
+    "columnValues" : [ ]
+  }, {
+    "columnName" : "Name",
+    "columnType" : "VARCHAR",
+    "columnLength" : null,
+    "columnDisplayType" : null,
+    "columnValues" : [ ]
+  }, {
+    "columnName" : "Joining Date",
+    "columnType" : "DATE",
+    "columnLength" : null,
+    "columnDisplayType" : null,
+    "columnValues" : [ ]
+  } ],
+  "data" : [ {
+    "row" : [ "Demo MFI Head Office", "O'Meara, Patrick", "2009-01-04" ]
+  }, {
+    "row" : [ "Demo MFI Head Office", "O'Meara, Dennis", "2009-01-04" ]
+  }, {
+    "row" : [ "Demo MFI Head Office", "Smith, John", "2009-01-11" ]
+  }, {
+    "row" : [ "Demo MFI Head Office", "O'Meara, Jimmy", "2009-01-11" ]
+  }, {
+    "row" : [ "Demo MFI Head Office", "Sunnyville vegetable growers Ltd", "2009-01-24" ]
+  }, {
+    "row" : [ "Demo MFI Head Office", "TraorÃ©, Kalilou", "2009-02-04" ]
+  }, {
+    "row" : [ "Demo MFI Head Office", "KonÃ©, Sidi", "2009-02-11" ]
+  }, {
+    "row" : [ "Demo MFI Head Office", "YattabarÃ©, Moustapha", "2009-02-18" ]
+  }, {
+    "row" : [ "Demo MFI Head Office", "Mali fruit sales ltd.", "2009-02-18" ]
+  }, {
+    "row" : [ "Demo MFI Head Office", "Djenne co-op group", "2009-02-25" ]
+  }, {
+    "row" : [ "Demo MFI Head Office", "test, test", "2012-04-19" ]
+  }, {
+    "row" : [ "Demo MFI Head Office", "Ziffle, Fred", "2012-04-21" ]
+  }, {
+    "row" : [ "Demo MFI Head Office", "omara, safik", "2012-04-24" ]
+  }, {
+    "row" : [ "Demo MFI Head Office", "HF Test", "2012-04-24" ]
+  }, {
+    "row" : [ "Demo MFI Head Office", "HF Test 2", "2012-04-24" ]
+  }, {
+    "row" : [ "Demo MFI Head Office", "Kumar, Shiva", "2011-10-01" ]
+  }, {
+    "row" : [ "Demo MFI Head Office", "Yton, Petra", "2006-06-09" ]
+  }, {
+    "row" : [ "Demo MFI Head Office", "Yton, Petra", "2006-06-09" ]
+  }, {
+    "row" : [ "sub branch 1", "Lee, Jacques", "2012-04-03" ]
+  }, {
+    "row" : [ "sub branch 1", "Asare-Frimpong, Patrick", "2012-04-18" ]
+  }, {
+    "row" : [ "sub branch 2", "t, test", "2012-04-18" ]
+  }, {
+    "row" : [ "Majmoua", "client, firstMajmoua", "2011-12-01" ]
+  }, {
+    "row" : [ "Intrasoft Technologies", "Said, Zayyad", "2012-04-02" ]
+  }, {
+    "row" : [ "Hugo technologies", "typical individual lending client", "2010-06-02" ]
+  } ]
+}
+                </code>
             </div>
         </div>
     

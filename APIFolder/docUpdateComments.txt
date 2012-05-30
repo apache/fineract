@@ -21,6 +21,17 @@ list clients notes - noteType needs a 'text'
 
 updating client note - ignores clientId anyhow! so is it really a notes resource? 
 
+loan template
+Formatted field still there
+Type fields rename and with associated text?
+allowedProduct should maybe just be id & name
+which fields have defaults as not all on NewLoanWorkflowStepOneData dto seem to be default.
+
+
+Additional Fields
+put right message for parameter not recognized etc.(plus tht 9 other jpwwrongmsg items)
+
+
 
 Identify Fields that need explaining
 Clients
