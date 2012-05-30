@@ -860,33 +860,11 @@ Request Body:
         <div class="method-section">
             <div class="method-description">
                 <h3>Loans</h3>
-                <p>Loan stuff.
+                <p>
                 </p>
             </div>
         </div>
                 
-        <div class="method-section">
-            <div class="method-description">
-                <h5>Attributes</h5>
-                <dl class="argument-list">
-                    <dt>
-                    id
-                    </dt>
-                    <dd>              
-                    string <span>jpw ipsum as an example of showing the (at least important) columns</span>
-                    </dd>
-                    <dt>
-                    amount
-                    </dt>
-                    <dd>blah <span></span>
-                    </dd>
-                    <dd>blah</dd>
-                    <dt>
-                    card
-                    </dt>
-                </dl>
-            </div>
-        </div>
         
 <a id="loans_template" name="loans_template" class="old-syle-anchor">&nbsp;</a>
 <div class="method-section">
@@ -1383,397 +1361,395 @@ Request Body:
 <div class="method-section">
     <div class="method-description">
         <h4>Retrieve a Loan</h4>
-        <p>Returns loan fields.
+        <p>
+            <b>Note:</b> template=true parameter doesn't apply to this resource.
         </p>
-        <p>Example Request: 
-        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/loans/1">https://localhost:8443/mifosng-provider/api/v1/loans/1</a>
-        </p>
+        <p>Example Requests: </p>
+        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/loans/1?pretty=true">https://localhost:8443/mifosng-provider/api/v1/loans/1?pretty=true</a>
+        <br><br>
+        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/loans/1?pretty=true&fields=id,principal,interestRatePerYear">https://localhost:8443/mifosng-provider/api/v1/loans/1?pretty=true&fields=id,principal,interestRatePerYear</a>
     </div>
     <div class="method-example">
         <code class="method-declaration">GET https://thedomainname/api/v1/loans/{loanId}</code>
         <code class="method-response">{
-  "open": false,
-  "openWithRepaymentMade": false,
-  "closed": true,
-  "interestRebateOutstanding": false,
-  "pendingApproval": false,
-  "waitingForDisbursal": false,
-  "lifeCycleStatusText": "Closed",
-  "lifeCycleStatusDate": "2009-11-13",
-  "id": 1,
-  "externalId": null,
-  "loanProductName": "Agricultural Loan",
-  "submittedOnDate": "2009-01-05",
-  "approvedOnDate": "2009-01-08",
-  "expectedDisbursementDate": "2009-01-15",
-  "actualDisbursementDate": "2009-01-15",
-  "undoDisbursalAllowed": false,
-  "expectedFirstRepaymentOnDate": null,
-  "interestCalculatedFromDate": null,
-  "closedOnDate": "2009-11-13",
-  "expectedMaturityDate": "2009-11-15",
-  "principal": {
-    "currencyCode": "XOF",
-    "currencyDigitsAfterDecimal": 0,
-    "amount": 100000,
-    "defaultName": "CFA Franc BCEAO",
-    "nameCode": "currency.XOF",
-    "displaySymbol": "CFA",
-    "zero": false,
-    "greaterThanZero": true,
-    "displaySymbolValue": "100000 CFA"
+  "open" : false,
+  "openWithRepaymentMade" : false,
+  "closed" : true,
+  "interestRebateOutstanding" : false,
+  "pendingApproval" : false,
+  "waitingForDisbursal" : false,
+  "lifeCycleStatusText" : "Closed",
+  "lifeCycleStatusDate" : [ 2009, 11, 13 ],
+  "id" : 1,
+  "externalId" : null,
+  "loanProductName" : "Agricultural Loan",
+  "submittedOnDate" : [ 2009, 1, 5 ],
+  "approvedOnDate" : [ 2009, 1, 8 ],
+  "expectedDisbursementDate" : [ 2009, 1, 15 ],
+  "actualDisbursementDate" : [ 2009, 1, 15 ],
+  "undoDisbursalAllowed" : false,
+  "expectedFirstRepaymentOnDate" : null,
+  "interestCalculatedFromDate" : null,
+  "closedOnDate" : [ 2009, 11, 13 ],
+  "expectedMaturityDate" : [ 2009, 11, 15 ],
+  "principal" : {
+    "currencyCode" : "XOF",
+    "currencyDigitsAfterDecimal" : 0,
+    "amount" : 100000,
+    "defaultName" : "CFA Franc BCEAO",
+    "nameCode" : "currency.XOF",
+    "displaySymbol" : "CFA",
+    "zero" : false,
+    "greaterThanZero" : true,
+    "displaySymbolValue" : "100000 CFA"
   },
-  "interestRatePerYear": 21,
-  "interestRatePerPeriod": 1.75,
-  "interestPeriodFrequencyType": 2,
-  "interestPeriodFrequencyText": "MONTHS",
-  "interestMethodType": 0,
-  "interestMethodText": "DECLINING_BALANCE",
-  "amortizationMethodValue": 1,
-  "amortizationMethodText": "EQUAL_INSTALLMENTS",
-  "numberOfRepayments": 1,
-  "repaymentFrequencyNumber": 10,
-  "repaymentFrequencyTypeEnumOrdinal": 2,
-  "repaymentFrequencyTypeText": "MONTHS",
-  "interestRebateOwed": {
-    "currencyCode": "XOF",
-    "currencyDigitsAfterDecimal": 0,
-    "amount": 0,
-    "defaultName": "CFA Franc BCEAO",
-    "nameCode": "currency.XOF",
-    "displaySymbol": "CFA",
-    "zero": true,
-    "greaterThanZero": false,
-    "displaySymbolValue": "0 CFA"
+  "interestRatePerYear" : 21.0,
+  "interestRatePerPeriod" : 1.75,
+  "interestPeriodFrequencyType" : 2,
+  "interestPeriodFrequencyText" : "MONTHS",
+  "interestMethodType" : 0,
+  "interestMethodText" : "DECLINING_BALANCE",
+  "amortizationMethodValue" : 1,
+  "amortizationMethodText" : "EQUAL_INSTALLMENTS",
+  "numberOfRepayments" : 1,
+  "repaymentFrequencyNumber" : 10,
+  "repaymentFrequencyTypeEnumOrdinal" : 2,
+  "repaymentFrequencyTypeText" : "MONTHS",
+  "interestRebateOwed" : {
+    "currencyCode" : "XOF",
+    "currencyDigitsAfterDecimal" : 0,
+    "amount" : 0,
+    "defaultName" : "CFA Franc BCEAO",
+    "nameCode" : "currency.XOF",
+    "displaySymbol" : "CFA",
+    "zero" : true,
+    "greaterThanZero" : false,
+    "displaySymbolValue" : "0 CFA"
   },
-  "loanData": {
-    "repaymentSchedule": {
-      "periods": [
-        {
-          "period": 1,
-          "date": "2009-11-15",
-          "disbursed": {
-            "currencyCode": "XOF",
-            "currencyDigitsAfterDecimal": 0,
-            "amount": 0,
-            "defaultName": "CFA Franc BCEAO",
-            "nameCode": "currency.XOF",
-            "displaySymbol": "CFA",
-            "zero": true,
-            "greaterThanZero": false,
-            "displaySymbolValue": "0 CFA"
-          },
-          "principal": {
-            "currencyCode": "XOF",
-            "currencyDigitsAfterDecimal": 0,
-            "amount": 100000,
-            "defaultName": "CFA Franc BCEAO",
-            "nameCode": "currency.XOF",
-            "displaySymbol": "CFA",
-            "zero": false,
-            "greaterThanZero": true,
-            "displaySymbolValue": "100000 CFA"
-          },
-          "principalPaid": {
-            "currencyCode": "XOF",
-            "currencyDigitsAfterDecimal": 0,
-            "amount": 100000,
-            "defaultName": "CFA Franc BCEAO",
-            "nameCode": "currency.XOF",
-            "displaySymbol": "CFA",
-            "zero": false,
-            "greaterThanZero": true,
-            "displaySymbolValue": "100000 CFA"
-          },
-          "principalOutstanding": {
-            "currencyCode": "XOF",
-            "currencyDigitsAfterDecimal": 0,
-            "amount": 0,
-            "defaultName": "CFA Franc BCEAO",
-            "nameCode": "currency.XOF",
-            "displaySymbol": "CFA",
-            "zero": true,
-            "greaterThanZero": false,
-            "displaySymbolValue": "0 CFA"
-          },
-          "interest": {
-            "currencyCode": "XOF",
-            "currencyDigitsAfterDecimal": 0,
-            "amount": 17500,
-            "defaultName": "CFA Franc BCEAO",
-            "nameCode": "currency.XOF",
-            "displaySymbol": "CFA",
-            "zero": false,
-            "greaterThanZero": true,
-            "displaySymbolValue": "17500 CFA"
-          },
-          "interestPaid": {
-            "currencyCode": "XOF",
-            "currencyDigitsAfterDecimal": 0,
-            "amount": 17500,
-            "defaultName": "CFA Franc BCEAO",
-            "nameCode": "currency.XOF",
-            "displaySymbol": "CFA",
-            "zero": false,
-            "greaterThanZero": true,
-            "displaySymbolValue": "17500 CFA"
-          },
-          "interestOutstanding": {
-            "currencyCode": "XOF",
-            "currencyDigitsAfterDecimal": 0,
-            "amount": 0,
-            "defaultName": "CFA Franc BCEAO",
-            "nameCode": "currency.XOF",
-            "displaySymbol": "CFA",
-            "zero": true,
-            "greaterThanZero": false,
-            "displaySymbolValue": "0 CFA"
-          },
-          "total": {
-            "currencyCode": "XOF",
-            "currencyDigitsAfterDecimal": 0,
-            "amount": 117500,
-            "defaultName": "CFA Franc BCEAO",
-            "nameCode": "currency.XOF",
-            "displaySymbol": "CFA",
-            "zero": false,
-            "greaterThanZero": true,
-            "displaySymbolValue": "117500 CFA"
-          },
-          "totalPaid": {
-            "currencyCode": "XOF",
-            "currencyDigitsAfterDecimal": 0,
-            "amount": 117500,
-            "defaultName": "CFA Franc BCEAO",
-            "nameCode": "currency.XOF",
-            "displaySymbol": "CFA",
-            "zero": false,
-            "greaterThanZero": true,
-            "displaySymbolValue": "117500 CFA"
-          },
-          "totalOutstanding": {
-            "currencyCode": "XOF",
-            "currencyDigitsAfterDecimal": 0,
-            "amount": 0,
-            "defaultName": "CFA Franc BCEAO",
-            "nameCode": "currency.XOF",
-            "displaySymbol": "CFA",
-            "zero": true,
-            "greaterThanZero": false,
-            "displaySymbolValue": "0 CFA"
-          },
-          "totalWaived": null,
-          "totalArrears": {
-            "currencyCode": "XOF",
-            "currencyDigitsAfterDecimal": 0,
-            "amount": 0,
-            "defaultName": "CFA Franc BCEAO",
-            "nameCode": "currency.XOF",
-            "displaySymbol": "CFA",
-            "zero": true,
-            "greaterThanZero": false,
-            "displaySymbolValue": "0 CFA"
-          },
-          "arrearsFrom": null,
-          "arrearsTo": null,
-          "paidInFullOn": "2009-11-13",
-          "lastAffectingPaymentOn": "2009-11-13",
-          "fullyPaid": true
-        }
-      ]
+  "loanData" : {
+    "repaymentSchedule" : {
+      "periods" : [ {
+        "period" : 1,
+        "date" : [ 2009, 11, 15 ],
+        "disbursed" : {
+          "currencyCode" : "XOF",
+          "currencyDigitsAfterDecimal" : 0,
+          "amount" : 0,
+          "defaultName" : "CFA Franc BCEAO",
+          "nameCode" : "currency.XOF",
+          "displaySymbol" : "CFA",
+          "zero" : true,
+          "greaterThanZero" : false,
+          "displaySymbolValue" : "0 CFA"
+        },
+        "principal" : {
+          "currencyCode" : "XOF",
+          "currencyDigitsAfterDecimal" : 0,
+          "amount" : 100000,
+          "defaultName" : "CFA Franc BCEAO",
+          "nameCode" : "currency.XOF",
+          "displaySymbol" : "CFA",
+          "zero" : false,
+          "greaterThanZero" : true,
+          "displaySymbolValue" : "100000 CFA"
+        },
+        "principalPaid" : {
+          "currencyCode" : "XOF",
+          "currencyDigitsAfterDecimal" : 0,
+          "amount" : 100000,
+          "defaultName" : "CFA Franc BCEAO",
+          "nameCode" : "currency.XOF",
+          "displaySymbol" : "CFA",
+          "zero" : false,
+          "greaterThanZero" : true,
+          "displaySymbolValue" : "100000 CFA"
+        },
+        "principalOutstanding" : {
+          "currencyCode" : "XOF",
+          "currencyDigitsAfterDecimal" : 0,
+          "amount" : 0,
+          "defaultName" : "CFA Franc BCEAO",
+          "nameCode" : "currency.XOF",
+          "displaySymbol" : "CFA",
+          "zero" : true,
+          "greaterThanZero" : false,
+          "displaySymbolValue" : "0 CFA"
+        },
+        "interest" : {
+          "currencyCode" : "XOF",
+          "currencyDigitsAfterDecimal" : 0,
+          "amount" : 17500,
+          "defaultName" : "CFA Franc BCEAO",
+          "nameCode" : "currency.XOF",
+          "displaySymbol" : "CFA",
+          "zero" : false,
+          "greaterThanZero" : true,
+          "displaySymbolValue" : "17500 CFA"
+        },
+        "interestPaid" : {
+          "currencyCode" : "XOF",
+          "currencyDigitsAfterDecimal" : 0,
+          "amount" : 17500,
+          "defaultName" : "CFA Franc BCEAO",
+          "nameCode" : "currency.XOF",
+          "displaySymbol" : "CFA",
+          "zero" : false,
+          "greaterThanZero" : true,
+          "displaySymbolValue" : "17500 CFA"
+        },
+        "interestOutstanding" : {
+          "currencyCode" : "XOF",
+          "currencyDigitsAfterDecimal" : 0,
+          "amount" : 0,
+          "defaultName" : "CFA Franc BCEAO",
+          "nameCode" : "currency.XOF",
+          "displaySymbol" : "CFA",
+          "zero" : true,
+          "greaterThanZero" : false,
+          "displaySymbolValue" : "0 CFA"
+        },
+        "total" : {
+          "currencyCode" : "XOF",
+          "currencyDigitsAfterDecimal" : 0,
+          "amount" : 117500,
+          "defaultName" : "CFA Franc BCEAO",
+          "nameCode" : "currency.XOF",
+          "displaySymbol" : "CFA",
+          "zero" : false,
+          "greaterThanZero" : true,
+          "displaySymbolValue" : "117500 CFA"
+        },
+        "totalPaid" : {
+          "currencyCode" : "XOF",
+          "currencyDigitsAfterDecimal" : 0,
+          "amount" : 117500,
+          "defaultName" : "CFA Franc BCEAO",
+          "nameCode" : "currency.XOF",
+          "displaySymbol" : "CFA",
+          "zero" : false,
+          "greaterThanZero" : true,
+          "displaySymbolValue" : "117500 CFA"
+        },
+        "totalOutstanding" : {
+          "currencyCode" : "XOF",
+          "currencyDigitsAfterDecimal" : 0,
+          "amount" : 0,
+          "defaultName" : "CFA Franc BCEAO",
+          "nameCode" : "currency.XOF",
+          "displaySymbol" : "CFA",
+          "zero" : true,
+          "greaterThanZero" : false,
+          "displaySymbolValue" : "0 CFA"
+        },
+        "totalWaived" : null,
+        "totalArrears" : {
+          "currencyCode" : "XOF",
+          "currencyDigitsAfterDecimal" : 0,
+          "amount" : 0,
+          "defaultName" : "CFA Franc BCEAO",
+          "nameCode" : "currency.XOF",
+          "displaySymbol" : "CFA",
+          "zero" : true,
+          "greaterThanZero" : false,
+          "displaySymbolValue" : "0 CFA"
+        },
+        "arrearsFrom" : null,
+        "arrearsTo" : null,
+        "paidInFullOn" : [ 2009, 11, 13 ],
+        "lastAffectingPaymentOn" : [ 2009, 11, 13 ],
+        "fullyPaid" : true
+      } ]
     },
-    "summary": {
-      "originalPrincipal": {
-        "currencyCode": "XOF",
-        "currencyDigitsAfterDecimal": 0,
-        "amount": 100000,
-        "defaultName": "CFA Franc BCEAO",
-        "nameCode": "currency.XOF",
-        "displaySymbol": "CFA",
-        "zero": false,
-        "greaterThanZero": true,
-        "displaySymbolValue": "100000 CFA"
+    "summary" : {
+      "originalPrincipal" : {
+        "currencyCode" : "XOF",
+        "currencyDigitsAfterDecimal" : 0,
+        "amount" : 100000,
+        "defaultName" : "CFA Franc BCEAO",
+        "nameCode" : "currency.XOF",
+        "displaySymbol" : "CFA",
+        "zero" : false,
+        "greaterThanZero" : true,
+        "displaySymbolValue" : "100000 CFA"
       },
-      "originalInterest": {
-        "currencyCode": "XOF",
-        "currencyDigitsAfterDecimal": 0,
-        "amount": 17500,
-        "defaultName": "CFA Franc BCEAO",
-        "nameCode": "currency.XOF",
-        "displaySymbol": "CFA",
-        "zero": false,
-        "greaterThanZero": true,
-        "displaySymbolValue": "17500 CFA"
+      "originalInterest" : {
+        "currencyCode" : "XOF",
+        "currencyDigitsAfterDecimal" : 0,
+        "amount" : 17500,
+        "defaultName" : "CFA Franc BCEAO",
+        "nameCode" : "currency.XOF",
+        "displaySymbol" : "CFA",
+        "zero" : false,
+        "greaterThanZero" : true,
+        "displaySymbolValue" : "17500 CFA"
       },
-      "originalTotal": {
-        "currencyCode": "XOF",
-        "currencyDigitsAfterDecimal": 0,
-        "amount": 117500,
-        "defaultName": "CFA Franc BCEAO",
-        "nameCode": "currency.XOF",
-        "displaySymbol": "CFA",
-        "zero": false,
-        "greaterThanZero": true,
-        "displaySymbolValue": "117500 CFA"
+      "originalTotal" : {
+        "currencyCode" : "XOF",
+        "currencyDigitsAfterDecimal" : 0,
+        "amount" : 117500,
+        "defaultName" : "CFA Franc BCEAO",
+        "nameCode" : "currency.XOF",
+        "displaySymbol" : "CFA",
+        "zero" : false,
+        "greaterThanZero" : true,
+        "displaySymbolValue" : "117500 CFA"
       },
-      "principalPaid": {
-        "currencyCode": "XOF",
-        "currencyDigitsAfterDecimal": 0,
-        "amount": 100000,
-        "defaultName": "CFA Franc BCEAO",
-        "nameCode": "currency.XOF",
-        "displaySymbol": "CFA",
-        "zero": false,
-        "greaterThanZero": true,
-        "displaySymbolValue": "100000 CFA"
+      "principalPaid" : {
+        "currencyCode" : "XOF",
+        "currencyDigitsAfterDecimal" : 0,
+        "amount" : 100000,
+        "defaultName" : "CFA Franc BCEAO",
+        "nameCode" : "currency.XOF",
+        "displaySymbol" : "CFA",
+        "zero" : false,
+        "greaterThanZero" : true,
+        "displaySymbolValue" : "100000 CFA"
       },
-      "principalOutstanding": {
-        "currencyCode": "XOF",
-        "currencyDigitsAfterDecimal": 0,
-        "amount": 0,
-        "defaultName": "CFA Franc BCEAO",
-        "nameCode": "currency.XOF",
-        "displaySymbol": "CFA",
-        "zero": true,
-        "greaterThanZero": false,
-        "displaySymbolValue": "0 CFA"
+      "principalOutstanding" : {
+        "currencyCode" : "XOF",
+        "currencyDigitsAfterDecimal" : 0,
+        "amount" : 0,
+        "defaultName" : "CFA Franc BCEAO",
+        "nameCode" : "currency.XOF",
+        "displaySymbol" : "CFA",
+        "zero" : true,
+        "greaterThanZero" : false,
+        "displaySymbolValue" : "0 CFA"
       },
-      "interestPaid": {
-        "currencyCode": "XOF",
-        "currencyDigitsAfterDecimal": 0,
-        "amount": 17500,
-        "defaultName": "CFA Franc BCEAO",
-        "nameCode": "currency.XOF",
-        "displaySymbol": "CFA",
-        "zero": false,
-        "greaterThanZero": true,
-        "displaySymbolValue": "17500 CFA"
+      "interestPaid" : {
+        "currencyCode" : "XOF",
+        "currencyDigitsAfterDecimal" : 0,
+        "amount" : 17500,
+        "defaultName" : "CFA Franc BCEAO",
+        "nameCode" : "currency.XOF",
+        "displaySymbol" : "CFA",
+        "zero" : false,
+        "greaterThanZero" : true,
+        "displaySymbolValue" : "17500 CFA"
       },
-      "interestOutstanding": {
-        "currencyCode": "XOF",
-        "currencyDigitsAfterDecimal": 0,
-        "amount": 0,
-        "defaultName": "CFA Franc BCEAO",
-        "nameCode": "currency.XOF",
-        "displaySymbol": "CFA",
-        "zero": true,
-        "greaterThanZero": false,
-        "displaySymbolValue": "0 CFA"
+      "interestOutstanding" : {
+        "currencyCode" : "XOF",
+        "currencyDigitsAfterDecimal" : 0,
+        "amount" : 0,
+        "defaultName" : "CFA Franc BCEAO",
+        "nameCode" : "currency.XOF",
+        "displaySymbol" : "CFA",
+        "zero" : true,
+        "greaterThanZero" : false,
+        "displaySymbolValue" : "0 CFA"
       },
-      "totalPaid": {
-        "currencyCode": "XOF",
-        "currencyDigitsAfterDecimal": 0,
-        "amount": 117500,
-        "defaultName": "CFA Franc BCEAO",
-        "nameCode": "currency.XOF",
-        "displaySymbol": "CFA",
-        "zero": false,
-        "greaterThanZero": true,
-        "displaySymbolValue": "117500 CFA"
+      "totalPaid" : {
+        "currencyCode" : "XOF",
+        "currencyDigitsAfterDecimal" : 0,
+        "amount" : 117500,
+        "defaultName" : "CFA Franc BCEAO",
+        "nameCode" : "currency.XOF",
+        "displaySymbol" : "CFA",
+        "zero" : false,
+        "greaterThanZero" : true,
+        "displaySymbolValue" : "117500 CFA"
       },
-      "totalOutstanding": {
-        "currencyCode": "XOF",
-        "currencyDigitsAfterDecimal": 0,
-        "amount": 0,
-        "defaultName": "CFA Franc BCEAO",
-        "nameCode": "currency.XOF",
-        "displaySymbol": "CFA",
-        "zero": true,
-        "greaterThanZero": false,
-        "displaySymbolValue": "0 CFA"
+      "totalOutstanding" : {
+        "currencyCode" : "XOF",
+        "currencyDigitsAfterDecimal" : 0,
+        "amount" : 0,
+        "defaultName" : "CFA Franc BCEAO",
+        "nameCode" : "currency.XOF",
+        "displaySymbol" : "CFA",
+        "zero" : true,
+        "greaterThanZero" : false,
+        "displaySymbolValue" : "0 CFA"
       },
-      "totalInArrears": {
-        "currencyCode": "XOF",
-        "currencyDigitsAfterDecimal": 0,
-        "amount": 0,
-        "defaultName": "CFA Franc BCEAO",
-        "nameCode": "currency.XOF",
-        "displaySymbol": "CFA",
-        "zero": true,
-        "greaterThanZero": false,
-        "displaySymbolValue": "0 CFA"
+      "totalInArrears" : {
+        "currencyCode" : "XOF",
+        "currencyDigitsAfterDecimal" : 0,
+        "amount" : 0,
+        "defaultName" : "CFA Franc BCEAO",
+        "nameCode" : "currency.XOF",
+        "displaySymbol" : "CFA",
+        "zero" : true,
+        "greaterThanZero" : false,
+        "displaySymbolValue" : "0 CFA"
       },
-      "totalWaived": {
-        "currencyCode": "XOF",
-        "currencyDigitsAfterDecimal": 0,
-        "amount": 0,
-        "defaultName": "CFA Franc BCEAO",
-        "nameCode": "currency.XOF",
-        "displaySymbol": "CFA",
-        "zero": true,
-        "greaterThanZero": false,
-        "displaySymbolValue": "0 CFA"
+      "totalWaived" : {
+        "currencyCode" : "XOF",
+        "currencyDigitsAfterDecimal" : 0,
+        "amount" : 0,
+        "defaultName" : "CFA Franc BCEAO",
+        "nameCode" : "currency.XOF",
+        "displaySymbol" : "CFA",
+        "zero" : true,
+        "greaterThanZero" : false,
+        "displaySymbolValue" : "0 CFA"
       }
     },
-    "loanRepayments": [
-      {
-        "id": 2,
-        "date": "2009-11-13",
-        "principal": {
-          "currencyCode": "XOF",
-          "currencyDigitsAfterDecimal": 0,
-          "amount": 100000,
-          "defaultName": "CFA Franc BCEAO",
-          "nameCode": "currency.XOF",
-          "displaySymbol": "CFA",
-          "zero": false,
-          "greaterThanZero": true,
-          "displaySymbolValue": "100000 CFA"
-        },
-        "interest": {
-          "currencyCode": "XOF",
-          "currencyDigitsAfterDecimal": 0,
-          "amount": 17500,
-          "defaultName": "CFA Franc BCEAO",
-          "nameCode": "currency.XOF",
-          "displaySymbol": "CFA",
-          "zero": false,
-          "greaterThanZero": true,
-          "displaySymbolValue": "17500 CFA"
-        },
-        "total": {
-          "currencyCode": "XOF",
-          "currencyDigitsAfterDecimal": 0,
-          "amount": 117500,
-          "defaultName": "CFA Franc BCEAO",
-          "nameCode": "currency.XOF",
-          "displaySymbol": "CFA",
-          "zero": false,
-          "greaterThanZero": true,
-          "displaySymbolValue": "117500 CFA"
-        },
-        "totalWaived": null,
-        "overpaid": null,
-        "transactionOffsetFromToday": -921
-      }
-    ]
+    "loanRepayments" : [ {
+      "id" : 2,
+      "date" : [ 2009, 11, 13 ],
+      "principal" : {
+        "currencyCode" : "XOF",
+        "currencyDigitsAfterDecimal" : 0,
+        "amount" : 100000,
+        "defaultName" : "CFA Franc BCEAO",
+        "nameCode" : "currency.XOF",
+        "displaySymbol" : "CFA",
+        "zero" : false,
+        "greaterThanZero" : true,
+        "displaySymbolValue" : "100000 CFA"
+      },
+      "interest" : {
+        "currencyCode" : "XOF",
+        "currencyDigitsAfterDecimal" : 0,
+        "amount" : 17500,
+        "defaultName" : "CFA Franc BCEAO",
+        "nameCode" : "currency.XOF",
+        "displaySymbol" : "CFA",
+        "zero" : false,
+        "greaterThanZero" : true,
+        "displaySymbolValue" : "17500 CFA"
+      },
+      "total" : {
+        "currencyCode" : "XOF",
+        "currencyDigitsAfterDecimal" : 0,
+        "amount" : 117500,
+        "defaultName" : "CFA Franc BCEAO",
+        "nameCode" : "currency.XOF",
+        "displaySymbol" : "CFA",
+        "zero" : false,
+        "greaterThanZero" : true,
+        "displaySymbolValue" : "117500 CFA"
+      },
+      "totalWaived" : null,
+      "overpaid" : null,
+      "transactionOffsetFromToday" : -929
+    } ]
   },
-  "arrearsTolerance": {
-    "currencyCode": "XOF",
-    "currencyDigitsAfterDecimal": 0,
-    "amount": 1000,
-    "defaultName": "CFA Franc BCEAO",
-    "nameCode": "currency.XOF",
-    "displaySymbol": "CFA",
-    "zero": false,
-    "greaterThanZero": true,
-    "displaySymbolValue": "1000 CFA"
+  "arrearsTolerance" : {
+    "currencyCode" : "XOF",
+    "currencyDigitsAfterDecimal" : 0,
+    "amount" : 1000,
+    "defaultName" : "CFA Franc BCEAO",
+    "nameCode" : "currency.XOF",
+    "displaySymbol" : "CFA",
+    "zero" : false,
+    "greaterThanZero" : true,
+    "displaySymbolValue" : "1000 CFA"
   },
-  "waiveAllowed": false,
-  "makeRepaymentAllowed": false,
-  "rejectAllowed": false,
-  "withdrawnByApplicantAllowed": false,
-  "undoApprovalAllowed": false,
-  "disbursalAllowed": false,
-  "anyActionOnLoanAllowed": false,
-  "maxSubmittedOnOffsetFromToday": -1233,
-  "maxApprovedOnOffsetFromToday": -1230,
-  "maxDisbursedOnOffsetFromToday": -1223,
-  "actualLoanTermInDays": 302,
-  "actualLoanTermInMonths": 9,
-  "loanTermInDays": 304,
-  "loanTermInMonths": 10
-} 
+  "waiveAllowed" : false,
+  "makeRepaymentAllowed" : false,
+  "rejectAllowed" : false,
+  "withdrawnByApplicantAllowed" : false,
+  "undoApprovalAllowed" : false,
+  "disbursalAllowed" : false,
+  "anyActionOnLoanAllowed" : false,
+  "maxSubmittedOnOffsetFromToday" : -1241,
+  "maxApprovedOnOffsetFromToday" : -1238,
+  "maxDisbursedOnOffsetFromToday" : -1231,
+  "actualLoanTermInDays" : 302,
+  "actualLoanTermInMonths" : 9,
+  "loanTermInDays" : 304,
+  "loanTermInMonths" : 10
+}
         </code>
     </div>
 </div>

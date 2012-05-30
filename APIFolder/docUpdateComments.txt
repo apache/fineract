@@ -27,12 +27,30 @@ Type fields rename and with associated text?
 allowedProduct should maybe just be id & name
 which fields have defaults as not all on NewLoanWorkflowStepOneData dto seem to be default.
 
+loan retrieve
+break up data into categories.. e.g. 
+Basic - lifeCycleStatusText thru
+Convenience - open thru waitingForDisbursal then maxSubmittedOnOffsetFromToday, maxApprovedOnOffsetFromToday , maxDisbursedOnOffsetFromToday, actualLoanTermInDays, actualLoanTermInMonths,  loanTermInDays, loanTermInMonths
+Permission - undoDisbursalAllowed, waiveAllowed, makeRepaymentAllowed, rejectAllowed, withdrawnByApplicantAllowed, undoApprovalAllowed, disbursalAllowed, anyActionOnLoanAllowed
+
+flatten loadData
+repaymentSchedule
+summary
+loanRepayments
+
+
 
 Additional Fields
 put right message for parameter not recognized etc.(plus tht 9 other jpwwrongmsg items)
 
 
 
+
+
+
+
+
+Loans - what does Keith think about a description
 Identify Fields that need explaining
 Clients
 displayName, externalId, maxJoinedOnOffsetFromToday
