@@ -116,8 +116,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 			throw new LoanNotInSubmittedAndPendingApprovalStateCannotBeDeleted(loanId);
 		}
 		
-		Long clientId = loan.getClient().getId();
-		
 		List<Note> relatedNotes = this.noteRepository.findByLoanId(loan.getId());
 		this.noteRepository.deleteInBatch(relatedNotes);
 		
