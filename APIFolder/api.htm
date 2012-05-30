@@ -120,10 +120,9 @@ var jqxhr = $.ajax({
                         <tr><td></td><td>/v1/clients/{clientId}/notes</td><td><a href="#clients_addnote">Add a Client Note</a></td><td><a href="#clients_notes">Retrieve a Client's Notes</a></td><td></td><td></td></tr>
                         <tr class="alt"><td></td><td>/v1/clients/{clientId}/notes/{noteId}</td><td></td><td><a href="#clients_retrievenote">Retrieve a Client Note</a></td><td><a href="#clients_updatenote">Update a Client Note</a></td><td></td></tr>
                         <tr><td><a href="#loans">LOAN</a></td><td>/v1/loans</td><td><a href="#loans_create">Create a New Loan/Submit a Loan Application</a></td><td></td><td></td><td></td></tr>
-                        <tr class="alt"><td></td><td>/v1/loans/{loanId}</td><td><a href="#loans_approve_etc">Approve, Disburse, Reject a Loan or Withdraw a Loan Application</a></td><td><a href="#loans_retrieve">Retrieve a Loan</a></td><td></td><td><a href="#loans_delete">Delete a Loan</a></td></tr>
-                        <tr><td></td><td>/v1/loans/{loanId}/undo</td><td><a href="#loans_undoapproval_etc">Undo Loan Approval or Disbursal</a></td><td></td><td></td><td></td></tr>
+                        <tr class="alt"><td></td><td>/v1/loans/{loanId}</td><td><a href="#loans_approve_etc">Approve, Undo Approval, Disburse, Undo Disbursal, Reject a Loan or Withdraw a Loan Application</a></td><td><a href="#loans_retrieve">Retrieve a Loan</a></td><td></td><td><a href="#loans_delete">Delete a Loan</a></td></tr>
                         <tr class="alt"><td></td><td>/v1/loans/{loanId}/transactions</td><td><a href="#loans_repayment_etc">Make a Repayment / Loan Waiver</a></td><td></td><td></td><td></td></tr>
-                        <tr><td></td><td>/v1/loans/{loanId}/transactions/{transactionId}</td><td></td><td><a href="#loans_repaymentretrieve_etc">Retrieve a Repayment or Waiver Details</a></td><td><a href="#loans_repaymentadjust_etc">Adjust a Repayment or Waiver</a></td><td></td></tr>
+                        <tr><td></td><td>/v1/loans/{loanId}/transactions/{transactionId}</td><td><a href="#loans_repaymentadjust_etc">Adjust a Repayment or Waiver</a></td><td><a href="#loans_repaymentretrieve_etc">Retrieve a Repayment or Waiver Details</a></td><td></td><td></td></tr>
                         <tr class="alt"><td><a href="#offices">OFFICE</a></td><td>/v1/offices</td><td><a href="#offices_create">Create an Office</a></td><td><a href="#offices_list">List Offices</a></td><td></td><td></td></tr>
                         <tr><td></td><td>/v1/offices/{officeId}</td><td></td><td><a href="#offices_retrieve">Retrieve an Office</a></td><td><a href="#offices_update">Update an Office</a></td><td></td></tr>
                         <tr class="alt"><td><a href="#loanproducts">LOAN PRODUCT</a></td><td>/v1/loanproducts</td><td><a href="#loanproducts_create">Create a Loan Product</a></td><td><a href="#loanproducts_list">List Loan Products</a></td><td></td><td></td></tr>
@@ -687,50 +686,52 @@ Request Body:
 <div class="method-section">
     <div class="method-description">
         <h4>Retrieve a Client's Loan Account Summary</h4>
-        <p>Example Request: 
-        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/clients/1/loans">https://localhost:8443/mifosng-provider/api/v1/clients/1/loans</a>
+        <p>
+            An example of how a loan portfolio summary can be provided.  This one contains quite a bit of redundant data (like the counts) and is requested
+            in a specific use case of the Individual Lending User Interface.<br>
+            However, it is quite reasonable to add resources like this to simplify User Interface development.
         </p>
+        <p>Example Request: </p>
+        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/clients/1/loans?pretty=true">https://localhost:8443/mifosng-provider/api/v1/clients/1/loans?pretty=true</a>
+        <br><br>
+        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/clients/1/loans?pretty=true&fields=openLoans,%20closedLoans,activeLoanCount">https://localhost:8443/mifosng-provider/api/v1/clients/1/loans?pretty=true&fields=openLoans,%20closedLoans,activeLoanCount</a>
     </div>
     <div class="method-example">
         <code class="method-declaration">GET https://thedomainname/api/v1/clients/{clientId}/loans</code>
 <code class="method-response">{
-  "pendingApprovalLoans": [],
-  "awaitingDisbursalLoans": [
-    {
-      "id": 17,
-      "externalId": null,
-      "loanProductId": 1,
-      "loanProductName": "Agricultural Loan",
-      "loanStatusId": 200,
-      "pendingApproval": false,
-      "waitingForDisbursal": true,
-      "open": false,
-      "closed": false,
-      "lifeCycleStatusText": "Approved",
-      "lifeCycleStatusDate": null
-    }
-  ],
-  "openLoans": [],
-  "closedLoans": [
-    {
-      "id": 1,
-      "externalId": null,
-      "loanProductId": 1,
-      "loanProductName": "Agricultural Loan",
-      "loanStatusId": 600,
-      "pendingApproval": false,
-      "waitingForDisbursal": false,
-      "open": false,
-      "closed": true,
-      "lifeCycleStatusText": "Closed",
-      "lifeCycleStatusDate": null
-    }
-  ],
-  "anyLoanCount": 2,
-  "pendingApprovalLoanCount": 0,
-  "awaitingDisbursalLoanCount": 1,
-  "activeLoanCount": 0,
-  "closedLoanCount": 1
+  "pendingApprovalLoans" : [ ],
+  "awaitingDisbursalLoans" : [ {
+    "id" : 17,
+    "externalId" : null,
+    "loanProductId" : 1,
+    "loanProductName" : "Agricultural Loan",
+    "loanStatusId" : 200,
+    "pendingApproval" : false,
+    "waitingForDisbursal" : true,
+    "open" : false,
+    "closed" : false,
+    "lifeCycleStatusText" : "Approved",
+    "lifeCycleStatusDate" : null
+  } ],
+  "openLoans" : [ ],
+  "closedLoans" : [ {
+    "id" : 1,
+    "externalId" : null,
+    "loanProductId" : 1,
+    "loanProductName" : "Agricultural Loan",
+    "loanStatusId" : 600,
+    "pendingApproval" : false,
+    "waitingForDisbursal" : false,
+    "open" : false,
+    "closed" : true,
+    "lifeCycleStatusText" : "Closed",
+    "lifeCycleStatusDate" : null
+  } ],
+  "anyLoanCount" : 2,
+  "pendingApprovalLoanCount" : 0,
+  "awaitingDisbursalLoanCount" : 1,
+  "activeLoanCount" : 0,
+  "closedLoanCount" : 1
 }
 </code>
     </div>
@@ -741,44 +742,43 @@ Request Body:
 <div class="method-section">
     <div class="method-description">
         <h4>Retrieve a Client's Notes</h4>
-        <p>Example Request: 
-        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/clients/2/notes">https://localhost:8443/mifosng-provider/api/v1/clients/2/notes</a>
+        <p>
+            <b>Note:</b> Notes are returned in descending createOn order.
         </p>
+        <p>Example Request: </p>
+        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/clients/2/notes?pretty=true">https://localhost:8443/mifosng-provider/api/v1/clients/2/notes?pretty=true</a>
+        <br><br>
+        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/clients/2/notes?pretty=true&fields=note,createdOn,createdByUsername">https://localhost:8443/mifosng-provider/api/v1/clients/2/notes?pretty=true&fields=note,createdOn,createdByUsername</a>
     </div>
     <div class="method-example">
         <code class="method-declaration">GET https://thedomainname/api/v1/clients/{clientId}/notes</code>
-<code class="method-response">{
-  "notes": [
-    {
-      "id": 20,
-      "clientId": 2,
-      "loanId": 0,
-      "loanTransactionId": 0,
-      "noteTypeId": 100,
-      "note": "This is an extra note!",
-      "createdById": 2,
-      "createdByUsername": "super1",
-      "createdOn": "2012-04-22T13:50:25.000+01:00",
-      "updatedById": 2,
-      "updatedByUsername": "super1",
-      "updatedOn": "2012-04-22T13:50:25.000+01:00"
-    },
-    {
-      "id": 16,
-      "clientId": 2,
-      "loanId": 0,
-      "loanTransactionId": 0,
-      "noteTypeId": 100,
-      "note": "loan only 1/2 amount expected\r\nyes",
-      "createdById": 2,
-      "createdByUsername": "super1",
-      "createdOn": "2012-04-18T15:15:04.000+01:00",
-      "updatedById": 2,
-      "updatedByUsername": "super1",
-      "updatedOn": "2012-04-23T09:38:13.000+01:00"
-    }
-  ]
-}
+<code class="method-response">[ {
+  "id" : 20,
+  "clientId" : 2,
+  "loanId" : null,
+  "loanTransactionId" : null,
+  "noteTypeId" : 100,
+  "note" : "This is an extra note!",
+  "createdById" : 2,
+  "createdByUsername" : "super1",
+  "createdOn" : 1335066625000,
+  "updatedById" : 2,
+  "updatedByUsername" : "super1",
+  "updatedOn" : 1335066625000
+}, {
+  "id" : 16,
+  "clientId" : 2,
+  "loanId" : null,
+  "loanTransactionId" : null,
+  "noteTypeId" : 100,
+  "note" : "loan only 1/2 amount expected\r\nyes",
+  "createdById" : 2,
+  "createdByUsername" : "super1",
+  "createdOn" : 1334726104000,
+  "updatedById" : 2,
+  "updatedByUsername" : "super1",
+  "updatedOn" : 1335137893000
+} ]
 </code>
     </div>
 </div>
@@ -797,7 +797,10 @@ Request Body:
 "note": "a note about the client"
 }
 </code>
-<code class="method-response">{ "entityId": 40}</code>
+<code class="method-response">{
+ "entityId": 40
+}
+</code>
     </div>
 </div>
 
@@ -805,25 +808,26 @@ Request Body:
 <div class="method-section">
     <div class="method-description">
         <h4>Retrieve a Client Note</h4>
-        <p>Example Request: 
-        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/clients/1/notes/40">https://localhost:8443/mifosng-provider/api/v1/clients/1/notes/40</a>
-        </p>
+        <p>Example Request: </p>
+        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/clients/2/notes/20?pretty=true">https://localhost:8443/mifosng-provider/api/v1/clients/2/notes/20?pretty=true</a>
+        <br><br>
+        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/clients/2/notes/20?pretty=true&fields=note,createdOn,createdByUsername">https://localhost:8443/mifosng-provider/api/v1/clients/2/notes/20?pretty=true&fields=note,createdOn,createdByUsername</a>
     </div>
     <div class="method-example">
         <code class="method-declaration">GET https://thedomainname/api/v1/clients/{clientId}/notes/{noteId}</code>
         <code class="method-response">{
-  "id": 40,
-  "clientId": 2,
-  "loanId": 0,
-  "loanTransactionId": 0,
-  "noteTypeId": 100,
-  "note": "a note about the client",
-  "createdById": 1,
-  "createdByUsername": "mifos",
-  "createdOn": "2012-05-22T21:40:05.000+01:00",
-  "updatedById": 1,
-  "updatedByUsername": "mifos",
-  "updatedOn": "2012-05-22T21:40:05.000+01:00"
+  "id" : 20,
+  "clientId" : 2,
+  "loanId" : null,
+  "loanTransactionId" : null,
+  "noteTypeId" : 100,
+  "note" : "This is an extra note!",
+  "createdById" : 2,
+  "createdByUsername" : "super1",
+  "createdOn" : 1335066625000,
+  "updatedById" : 2,
+  "updatedByUsername" : "super1",
+  "updatedOn" : 1335066625000
 }
 </code>
     </div>
@@ -836,14 +840,17 @@ Request Body:
     </div>
     <div class="method-example">
         <code class="method-declaration">PUT https://thedomainname/api/v1/clients/{clientId}/notes/{noteId}</code>
-<code class="method-request">PUT https://localhost:8443/mifosng-provider/api/v1/clients/1/notes/40
+<code class="method-request">PUT https://localhost:8443/mifosng-provider/api/v1/clients/2/notes/20
 Content-Type: application/json
 Request Body:
 {
-"note": "an updated note about the client"
+"note": "and here the note is updated nicely."
 }
 </code>
-        <code class="method-response">{"entityId": 40}</code>
+<code class="method-response">{
+ "entityId": 20
+}
+</code>
     </div>
 </div>   
 
@@ -1804,15 +1811,17 @@ Request Body:
         <a id="loans_approve_etc" name="loans_approve_etc" class="old-syle-anchor">&nbsp;</a>
         <div class="method-section">
             <div class="method-description">
-                <h4>Approve, Disburse, Reject a Loan or Withdraw a Loan Application</h4>
+                <h4>Approve, Undo Approval, Disburse, Undo Disbursal, Reject a Loan or Withdraw a Loan Application</h4>
                 <h5>Arguments</h5>
                 <dl class="argument-list">
                     <dt>command</dt>
-                    <dd>String<span> Mandatory? what happens if command wrong, , case-insensitive</span></dd>
+                    <dd>String<span> Mandatory, case-insensitive</span></dd>
                     <dd>'approve' : Approve Loan</dd>
                     <dd>'disburse' : Disburse Loan</dd>
                     <dd>'reject' : Reject Loan</dd>
                     <dd>'withdrewbyclient' : Client Withdrew Loan Application</dd>
+                    <dd>'undoapproval' : Undo Loan Approval</dd>
+                    <dd>'undodisbursal' : Undo Loan Disbursal</dd>
                 </dl>
             </div>
             <div class="method-example">
@@ -1850,33 +1859,6 @@ Request Body:
                 </code>
             </div>
         </div>
-        <a id="loans_undoapproval_etc" name="loans_undoapproval_etc" class="old-syle-anchor">&nbsp;</a>
-        <div class="method-section">
-            <div class="method-description">
-                <h4>Undo Loan Approval/ Undo Loan Disbursal</h4>
-                <dl class="argument-list">
-                    <dt>command</dt>
-                    <dd>String<span> Mandatory? what happens if command wrong, , case-insensitive</span></dd>
-                    <dd>'undoapproval' : Undo Loan Approval</dd>
-                    <dd>'undodisbursal' : Undo Loan Disbursal</dd>
-                </dl>
-            </div>
-            <div class="method-example">
-                <code class="method-declaration">POST https://thedomainname/api/v1/loans/{loanId}/undo</code>
-                <code class="method-request">https://localhost:8443/mifosng-provider/api/v1/loans/1/undo
-                
-                
-                Content-Type: application/json
-                Request Body:
-                new json here
-                </code>
-                <code class="method-response">{
-    "entityId": 2
-}
-                </code>
-            </div>
-        </div>
-
 
         <a id="loans_repaymenttemplate_etc" name="loans_repaymenttemplate_etc" class="old-syle-anchor">&nbsp;</a>
         <div class="method-section">
@@ -3512,10 +3494,9 @@ Request body:
             <tr><td></td><td>/v1/clients/{clientId}/notes</td><td><a href="#clients_addnote">Add a Client Note</a></td><td><a href="#clients_notes">Retrieve a Client's Notes</a></td><td></td><td></td></tr>
             <tr class="alt"><td></td><td>/v1/clients/{clientId}/notes/{noteId}</td><td></td><td><a href="#clients_retrievenote">Retrieve a Client Note</a></td><td><a href="#clients_updatenote">Update a Client Note</a></td><td></td></tr>
             <tr><td><a href="#loans">LOAN</a></td><td>/v1/loans</td><td><a href="#loans_create">Create a New Loan/Submit a Loan Application</a></td><td></td><td></td><td></td></tr>
-            <tr class="alt"><td></td><td>/v1/loans/{loanId}</td><td><a href="#loans_approve_etc">Approve, Disburse, Reject a Loan or Withdraw a Loan Application</a></td><td><a href="#loans_retrieve">Retrieve a Loan</a></td><td></td><td><a href="#loans_delete">Delete a Loan</a></td></tr>
-            <tr><td></td><td>/v1/loans/{loanId}/undo</td><td><a href="#loans_undoapproval_etc">Undo Loan Approval or Disbursal</a></td><td></td><td></td><td></td></tr>
+            <tr class="alt"><td></td><td>/v1/loans/{loanId}</td><td><a href="#loans_approve_etc">Approve, Undo Approval, Disburse, Undo Disbursal, Reject a Loan or Withdraw a Loan Application</a></td><td><a href="#loans_retrieve">Retrieve a Loan</a></td><td></td><td><a href="#loans_delete">Delete a Loan</a></td></tr>
             <tr class="alt"><td></td><td>/v1/loans/{loanId}/transactions</td><td><a href="#loans_repayment_etc">Make a Repayment / Loan Waiver</a></td><td></td><td></td><td></td></tr>
-            <tr><td></td><td>/v1/loans/{loanId}/transactions/{transactionId}</td><td></td><td><a href="#loans_repaymentretrieve_etc">Retrieve a Repayment or Waiver Details</a></td><td><a href="#loans_repaymentadjust_etc">Adjust a Repayment or Waiver</a></td><td></td></tr>
+            <tr><td></td><td>/v1/loans/{loanId}/transactions/{transactionId}</td><td><a href="#loans_repaymentadjust_etc">Adjust a Repayment or Waiver</a></td><td><a href="#loans_repaymentretrieve_etc">Retrieve a Repayment or Waiver Details</a></td><td></td><td></td></tr>
             <tr class="alt"><td><a href="#offices">OFFICE</a></td><td>/v1/offices</td><td><a href="#offices_create">Create an Office</a></td><td><a href="#offices_list">List Offices</a></td><td></td><td></td></tr>
             <tr><td></td><td>/v1/offices/{officeId}</td><td></td><td><a href="#offices_retrieve">Retrieve an Office</a></td><td><a href="#offices_update">Update an Office</a></td><td></td></tr>
             <tr class="alt"><td><a href="#loanproducts">LOAN PRODUCT</a></td><td>/v1/loanproducts</td><td><a href="#loanproducts_create">Create a Loan Product</a></td><td><a href="#loanproducts_list">List Loan Products</a></td><td></td><td></td></tr>

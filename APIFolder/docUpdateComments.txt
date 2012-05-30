@@ -14,6 +14,12 @@ Loan Products
 List/Retrieve - should show textual values of enums? DOING
 Create - principal is later called principalMoney , also consistency between other loan fields and loan product fields with Type on them DOING
 
+clients - parentid = id or id 1 has parentId not null DOING
+list clients notes - noteType needs a 'text'
+	createdOn & updatedOn values... do they need reformatting?
+	are they ord
+
+updating client note - ignores clientId anyhow! so is it really a notes resource? 
 
 
 Identify Fields that need explaining
