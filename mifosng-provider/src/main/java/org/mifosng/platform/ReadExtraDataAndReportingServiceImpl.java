@@ -582,7 +582,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 			ResultSet rs = db_statement.executeQuery(sql);
 
 			if (rs.next()) {
-				Long idValue = rs.getLong("id");
+				String idValue = rs.getString("id");
 				if (idValue != null) {
 					transType = "E";
 				} else {
