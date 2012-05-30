@@ -8,7 +8,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 /**
- * Responsible for returning the current authenticated user that is currently set in the {@link SecurityContext}.
+ * Wrapper around spring security's {@link SecurityContext} for extracted the current authenticated {@link AppUser}.
  */
 @Service
 public class SpringSecurityPlatformSecurityContext implements PlatformSecurityContext {

@@ -5,8 +5,12 @@ import org.mifosng.platform.user.domain.PlatformUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
+/**
+ * Used in securityContext.xml as implementation of spring security's {@link UserDetailsService}.
+ */
 public class PlatformUserDetailsServiceImpl implements PlatformUserDetailsService {
 
     @Autowired
