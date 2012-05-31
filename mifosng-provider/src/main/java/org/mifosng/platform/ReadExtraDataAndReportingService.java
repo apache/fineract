@@ -5,8 +5,8 @@ import java.util.Map;
 
 import javax.ws.rs.core.StreamingOutput;
 
-import org.mifosng.data.AdditionalFieldsSet;
-import org.mifosng.data.reports.GenericResultset;
+import org.mifosng.platform.api.data.AdditionalFieldsSet;
+import org.mifosng.platform.api.data.GenericResultset;
 
 public interface ReadExtraDataAndReportingService {
 

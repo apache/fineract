@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import org.mifosng.configuration.ApplicationConfigurationService;
-import org.mifosng.data.AuthenticatedUserData;
+import org.mifosng.platform.api.data.AuthenticatedUserData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;

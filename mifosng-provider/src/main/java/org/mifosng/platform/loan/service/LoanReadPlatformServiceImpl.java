@@ -114,45 +114,6 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 				realLoan.isWaitingForDisbursal());
 		
 		return new LoanAccountData(realLoan.getId(), basicDetails, loanData, permissions);
-
-//		return new LoanAccountData(realLoan.isClosed(), realLoan.isOpen(),
-//				realLoan.isOpenWithRepaymentMade(), interestRebateOutstanding,
-//				realLoan.isSubmittedAndPendingApproval(),
-//				realLoan.isWaitingForDisbursal(), undoDisbursalAllowed,
-//				makeRepaymentAllowed, rejectAllowed,
-//				withdrawnByApplicantAllowed, undoApprovalAllowed,
-//				disbursalAllowed, realLoan.getLoanStatusDisplayName(),
-//				loanStatusDate, realLoan.getId(), realLoan.getExternalId(),
-//				realLoan.getLoanProduct().getName(),
-//				realLoan.getClosedOnDate(), realLoan.getSubmittedOnDate(),
-//				realLoan.getApprovedOnDate(), expectedDisbursementDate,
-//				realLoan.getDisbursedOnDate(),
-//				realLoan.getExpectedMaturityDate(),
-//				realLoan.getExpectedFirstRepaymentOnDate(),
-//				realLoan.getInterestCalculatedFromDate(), principal, realLoan
-//						.getLoanRepaymentScheduleDetail()
-//						.getAnnualNominalInterestRate(), realLoan
-//						.getLoanRepaymentScheduleDetail()
-//						.getNominalInterestRatePerPeriod(), realLoan
-//						.getLoanRepaymentScheduleDetail()
-//						.getInterestPeriodFrequencyType().getValue(), realLoan
-//						.getLoanRepaymentScheduleDetail()
-//						.getInterestPeriodFrequencyType().toString(), realLoan
-//						.getLoanRepaymentScheduleDetail().getInterestMethod()
-//						.getValue(), realLoan.getLoanRepaymentScheduleDetail()
-//						.getInterestMethod().toString(), realLoan
-//						.getLoanRepaymentScheduleDetail()
-//						.getAmortizationMethod().getValue(), realLoan
-//						.getLoanRepaymentScheduleDetail()
-//						.getAmortizationMethod().toString(), realLoan
-//						.getLoanRepaymentScheduleDetail()
-//						.getNumberOfRepayments(), realLoan
-//						.getLoanRepaymentScheduleDetail().getRepayEvery(),
-//				realLoan.getLoanRepaymentScheduleDetail()
-//						.getRepaymentPeriodFrequencyType().getValue(), realLoan
-//						.getLoanRepaymentScheduleDetail()
-//						.getRepaymentPeriodFrequencyType().toString(),
-//				tolerance, loanData, waiveAllowed, interestRebateOwed);
 	}
 
 	@Override

@@ -16,10 +16,10 @@ import java.util.Set;
 import javax.sql.DataSource;
 import javax.ws.rs.core.StreamingOutput;
 
-import org.mifosng.data.AdditionalFieldsSet;
-import org.mifosng.data.reports.GenericResultset;
-import org.mifosng.data.reports.ResultsetColumnHeader;
-import org.mifosng.data.reports.ResultsetDataRow;
+import org.mifosng.platform.api.data.AdditionalFieldsSet;
+import org.mifosng.platform.api.data.GenericResultset;
+import org.mifosng.platform.api.data.ResultsetColumnHeader;
+import org.mifosng.platform.api.data.ResultsetDataRow;
 import org.mifosng.platform.exceptions.AdditionalFieldsNotFoundException;
 import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
 import org.mifosng.platform.exceptions.ReportNotFoundException;

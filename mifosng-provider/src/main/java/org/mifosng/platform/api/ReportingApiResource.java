@@ -16,8 +16,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriInfo;
 
-import org.mifosng.data.reports.GenericResultset;
 import org.mifosng.platform.ReadExtraDataAndReportingService;
+import org.mifosng.platform.api.data.GenericResultset;
 import org.mifosng.platform.api.infrastructure.ApiJSONFormattingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

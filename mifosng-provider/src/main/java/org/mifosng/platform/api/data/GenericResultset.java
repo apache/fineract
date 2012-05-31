@@ -1,4 +1,4 @@
-package org.mifosng.data.reports;
+package org.mifosng.platform.api.data;
 
 import java.util.ArrayList;
 import java.util.List;
