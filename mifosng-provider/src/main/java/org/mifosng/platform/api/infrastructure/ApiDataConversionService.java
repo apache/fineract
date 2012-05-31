@@ -16,4 +16,6 @@ public interface ApiDataConversionService {
 			Locale clientApplicationLocale);
 
 	Locale localeFromString(String locale);
+	
+	Locale localeFrom(String languageCode, String courntryCode, String variantCode);
 }

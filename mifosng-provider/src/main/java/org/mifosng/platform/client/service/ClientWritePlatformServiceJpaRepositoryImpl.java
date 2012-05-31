@@ -128,6 +128,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 		
 		AppUser currentUser = context.authenticatedUser();
 		
+		// FIXME - check client id matches.
 		Note noteForUpdate = this.noteRepository.findOne(notesThatMatch(currentUser.getOrganisation(), command.getId()));
 		if (noteForUpdate == null) {
 			throw new NoteNotFoundException(command.getClientId());
