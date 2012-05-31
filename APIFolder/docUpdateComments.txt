@@ -1,11 +1,8 @@
-\loan\?\transactions\id get exception if loan doesn't match id.... should loan be taken out here?
-template for waiver/repayment... is it same for both? no type needed? (might have got this wrong)
----------------------------
-
-
 Lost permissions again... restore fixed it up... must be some prob with permissions/roles maintenance
 also, maybe I should be using a user that has everything but role admin.
-recreate() problem ME DO
+recreate() problem ME DO - couldn't recreate by update user roles... maybe was to do with office 1 have a parentId?
+
+
 
 list clients notes - noteType needs a 'text' DOING
 	createdOn & updatedOn values... do they need reformatting? DOING
