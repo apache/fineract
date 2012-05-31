@@ -48,8 +48,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 			db_connection = null;
 		} catch (SQLException e) {
 			throw new PlatformDataIntegrityException("error.msg.sql.error",
-					"JPWWRONGMSG - " + e.getMessage(), "DataSource: "
-							+ dataSource);
+					e.getMessage(), "DataSource: " + dataSource);
 		}
 	}
 
@@ -82,8 +81,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 					// out.close();
 				} catch (Exception e) {
 					throw new PlatformDataIntegrityException(
-							"error.msg.exception.error", "JPWWRONGMSG - "
-									+ e.getMessage());
+							"error.msg.exception.error", e.getMessage());
 				}
 			}
 		};
@@ -139,12 +137,6 @@ public class ReadExtraDataAndReportingServiceImpl implements
 	@Override
 	public GenericResultset retrieveGenericResultset(final String name,
 			final String type, final Map<String, String> queryParams) {
-
-		if (name == null) {
-			throw new PlatformDataIntegrityException(
-					"error.msg.report.name.null",
-					"JPWWRONGMSG - Report Name is null.");
-		}
 
 		long startTime = System.currentTimeMillis();
 		logger.info("STARTING REPORT: " + name + "   Type: " + type);
@@ -225,7 +217,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 
 		} catch (SQLException e) {
 			throw new PlatformDataIntegrityException("error.msg.sql.error",
-					"JPWWRONGMSG - " + e.getMessage(), "Sql: " + sql);
+					e.getMessage(), "Sql: " + sql);
 		}
 		return result;
 
@@ -321,7 +313,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 			db_connection = null;
 		} catch (SQLException e) {
 			throw new PlatformDataIntegrityException("error.msg.sql.error",
-					"JPWWRONGMSG - " + e.getMessage(), "Input Sql: " + inputSql);
+					e.getMessage(), "Input Sql: " + inputSql);
 		}
 
 		return sql;
@@ -359,8 +351,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 			db_connection = null;
 		} catch (SQLException e) {
 			throw new PlatformDataIntegrityException("error.msg.sql.error",
-					"JPWWRONGMSG - " + e.getMessage(),
-					"Additional Fields Type: " + type);
+					e.getMessage(), "Additional Fields Type: " + type);
 		}
 
 		return additionalFieldsSets;
@@ -474,9 +465,8 @@ public class ReadExtraDataAndReportingServiceImpl implements
 
 		} catch (SQLException e) {
 			throw new PlatformDataIntegrityException("error.msg.sql.error",
-					"JPWWRONGMSG - " + e.getMessage(),
-					"Additional Fields Type: " + type + "   Set: " + set
-							+ "   Id: " + id);
+					e.getMessage(), "Additional Fields Type: " + type
+							+ "   Set: " + set + "   Id: " + id);
 		}
 		return result;
 
@@ -506,15 +496,6 @@ public class ReadExtraDataAndReportingServiceImpl implements
 		logger.info("updateExtraData - type: " + type + "    set: " + set
 				+ "  id: " + id);
 
-		logger.info("startjpw: ");
-		Set<String> keys = queryParams.keySet();
-		String pValue = "";
-		for (String key : keys) {
-			pValue = queryParams.get(key);
-			logger.info("jpw: " + key + " - " + pValue);
-		}
-		logger.info("endjpw: ");
-
 		checkResourceTypeThere(type, set);
 		String fullDatasetName = getFullDatasetName(type, set);
 		String transType = getTransType(type, fullDatasetName, id);
@@ -533,9 +514,8 @@ public class ReadExtraDataAndReportingServiceImpl implements
 			db_connection = null;
 		} catch (SQLException e) {
 			throw new PlatformDataIntegrityException("error.msg.sql.error",
-					"JPWWRONGMSG - " + e.getMessage(),
-					"Additional Fields Type: " + type + "   Set: " + set
-							+ "   Id: " + id);
+					e.getMessage(), "Additional Fields Type: " + type
+							+ "   Set: " + set + "   Id: " + id);
 		}
 
 	}
@@ -563,9 +543,8 @@ public class ReadExtraDataAndReportingServiceImpl implements
 
 		} catch (SQLException e) {
 			throw new PlatformDataIntegrityException("error.msg.sql.error",
-					"JPWWRONGMSG - " + e.getMessage(),
-					"Additional Fields Type: " + type + "   Set: " + set
-							+ "   Sql: " + sql);
+					e.getMessage(), "Additional Fields Type: " + type
+							+ "   Set: " + set + "   Sql: " + sql);
 		}
 
 	}
@@ -601,9 +580,9 @@ public class ReadExtraDataAndReportingServiceImpl implements
 			db_connection = null;
 		} catch (SQLException e) {
 			throw new PlatformDataIntegrityException("error.msg.sql.error",
-					"JPWWRONGMSG - " + e.getMessage(),
-					"Additional Fields Type: " + type + "   Full Set Name: "
-							+ fullDatasetName + "   Sql: " + sql);
+					e.getMessage(), "Additional Fields Type: " + type
+							+ "   Full Set Name: " + fullDatasetName
+							+ "   Sql: " + sql);
 		}
 
 		return transType;

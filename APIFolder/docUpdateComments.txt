@@ -63,9 +63,6 @@ when adjusting a disbursal - The server encountered an internal error () that pr
 list of loan transactions not available (except in summary presume repayments has repayments and waivers and adjusts)
 
 ---------------------------------------------------------
-Additional Fields
-put right message for parameter not recognized etc.(plus tht 9 other jpwwrongmsg items)
-
 should be able to get clients by branch as well (but not for now)
 also get loans of different status's by branch etc (but not for now)
 
