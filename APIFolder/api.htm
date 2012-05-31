@@ -1538,7 +1538,12 @@ Request Body:
         <div class="method-section">
             <div class="method-description">
                 <h4>Approve, Undo Approval, Disburse, Undo Disbursal, Reject a Loan or Withdraw a Loan Application</h4>
-                <h5>Arguments</h5>
+                <h5>Arguments</h5>                <br>
+                <button type="button" onclick="showMandatoryFields('https://localhost:8443/mifosng-provider/api/v1/loans/37?command=approve', 'loan_state_transition_mandatory');">Show Mandatory Fields</button>
+                <br>
+                <div id=loan_state_transition_mandatory></div>
+                <br>
+
                 <dl class="argument-list">
                     <dt>command</dt>
                     <dd>String<span> Mandatory, case-insensitive</span></dd>
@@ -1552,15 +1557,16 @@ Request Body:
             </div>
             <div class="method-example">
                 <code class="method-declaration">POST https://thedomainname/api/v1/loans/{loanId}</code>
-                <code class="method-request">https://localhost:8443/mifosng-provider/api/v1/loans/1?command=approve
-                
-                
-                Content-Type: application/json
-                Request Body:
-                new json here
-                </code>
+                <code class="method-request">POST https://localhost:8443/mifosng-provider/api/v1/loans/1?command=approve
+Content-Type: application/json
+Request Body:
+{
+ "dateFormat": "dd MMMM yyyy",
+ "eventDate": "07 May 2012",
+ "note": "and event note is added"
+}                </code>
                 <code class="method-response">{
-"entityId": 1
+"entityId": 37
 }
                 </code>
             </div>

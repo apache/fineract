@@ -1,25 +1,21 @@
 \loan\?\transactions\id get exception if loan doesn't match id.... should loan be taken out here?
 template for waiver/repayment... is it same for both? no type needed? (might have got this wrong)
-new loan template ... is it 2 templates... one to pick product... and 2nd to return default properties in selected product or is it meant that if only one product then use that. 
-
-recreate()
+---------------------------
 
 
 Lost permissions again... restore fixed it up... must be some prob with permissions/roles maintenance
 also, maybe I should be using a user that has everything but role admin.
+recreate() problem ME DO
 
+list clients notes - noteType needs a 'text' DOING
+	createdOn & updatedOn values... do they need reformatting? DOING
 
-
-
-list clients notes - noteType needs a 'text'TODO
-	createdOn & updatedOn values... do they need reformatting?TODO
-
-updating client note - ignores clientId anyhow! so is it really a notes resource? TODO
+updating client note - ignores clientId anyhow! so is it really a notes resource? DOING
 
 loan template
-Formatted field still there
+Formatted field still there DOING
 
-loan retrieve
+loan retrieve DOING
 break up data into categories.. e.g. 
 Basic - lifeCycleStatusText thru
 Convenience - open thru waitingForDisbursal then maxSubmittedOnOffsetFromToday, maxApprovedOnOffsetFromToday , maxDisbursedOnOffsetFromToday, actualLoanTermInDays, actualLoanTermInMonths,  loanTermInDays, loanTermInMonths
@@ -30,20 +26,33 @@ repaymentSchedule
 summary
 loanRepayments
 
+---------------------------------------------
+LOAN TRANSITIONS approve etc.
+if  "eventLocalDate" parameter added with string date then instead of parameter not support msg do get jackson conversion exception.
+
+approve loan (already closed) with approval date before submitted date
+The server encountered an internal error () that prevented it from fulfilling this request.</u></p><p><b>exception</b> <pre>org.mifosng.platform.loan.domain.InvalidLoanTimelineDate: The date of when loan is approved cannot be before its submittal date.
+
+approve loan (already closed) with approval date after submitted date
+Column 'loan_status_id' cannot be null; SQL [n/a]; constraint [null]; nested exception is org.hibernate.exception.ConstraintViolationException: Column 'loan_status_id' cannot be null
+
+if I do an approve when already approved also get
+Column 'loan_status_id' cannot be null; SQL [n/a]; constraint [null]; nested exception is org.hibernate.exception.ConstraintViolationException: Column 'loan_status_id' cannot be null
 
 
+
+
+somtimes client returns... always loanId OK?
+
+---------------------------------------------------------
 Additional Fields
 put right message for parameter not recognized etc.(plus tht 9 other jpwwrongmsg items)
 
 should be able to get clients by branch as well (but not for now)
-
-
-
-
-
-
+also get loans of different status's by branch etc (but not for now)
 
 Loans - what does Keith think about a description
+
 Identify Fields that need explaining
 Clients
 displayName, externalId, maxJoinedOnOffsetFromToday
