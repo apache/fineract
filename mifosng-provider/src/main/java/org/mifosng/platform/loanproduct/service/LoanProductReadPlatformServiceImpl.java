@@ -9,11 +9,11 @@ import java.util.List;
 import javax.sql.DataSource;
 
 import org.joda.time.DateTime;
-import org.mifosng.data.CurrencyData;
-import org.mifosng.data.MoneyData;
+import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.EnumOptionData;
 import org.mifosng.platform.api.data.LoanProductData;
 import org.mifosng.platform.api.data.LoanProductLookup;
+import org.mifosng.platform.api.data.MoneyData;
 import org.mifosng.platform.currency.service.CurrencyReadPlatformService;
 import org.mifosng.platform.exceptions.LoanProductNotFoundException;
 import org.mifosng.platform.infrastructure.JdbcSupport;

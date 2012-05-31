@@ -27,7 +27,7 @@ public class SubmitLoanApplicationCommandValidator {
 		
 		if (command.getSubmittedOnLocalDate() == null) {
 			ApiParameterError error = ApiParameterError.parameterError("validation.msg.loan.submitted.on.date.cannot.be.blank", 
-					"The parameter submittedOnDate cannot be empty.", "submittedOnDateFormatted");
+					"The parameter submittedOnDate cannot be empty.", "submittedOnDate");
 			dataValidationErrors.add(error);
 		} else {
 			if (command.getSubmittedOnLocalDate().isAfter(command.getExpectedDisbursementLocalDate())) {

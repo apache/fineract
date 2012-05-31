@@ -3,7 +3,7 @@ package org.mifosng.platform.loan.service;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
+import org.mifosng.platform.DataValidatorBuilder;
 import org.mifosng.platform.api.commands.LoanTransactionCommand;
 import org.mifosng.platform.api.data.ApiParameterError;
 import org.mifosng.platform.exceptions.PlatformApiDataValidationException;
@@ -17,27 +17,15 @@ public class LoanTransactionCommandValidator {
 	}
 
 	public void validate() {
+		
 		List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 		
-		if (command.getLoanId() == null || command.getLoanId().doubleValue() <= 0) {
-			ApiParameterError error = ApiParameterError.parameterError("validation.msg.loan.id.is.invalid", "The parameter loanId is invalid.", "loanId", command.getLoanId());
-			dataValidationErrors.add(error);
-		}
+		DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("role");
 		
-		if (command.getTransactionLocalDate() == null) {
-			ApiParameterError error = ApiParameterError.parameterError("validation.msg.loan.repayment.date.cannot.be.blank", "The parameter transactionDateFormatted cannot be blank.", "transactionDateFormatted");
-			dataValidationErrors.add(error);
-		}
-		
-		if (command.getTransactionAmount() == null || command.getTransactionAmountValue().doubleValue() <= 0) {
-			ApiParameterError error = ApiParameterError.parameterError("validation.msg.loan.repayment.must.be.greater.than.zero", "The parameter transactionAmountFormatted less than zero.", "transactionAmountFormatted", command.getTransactionAmountValue());
-			dataValidationErrors.add(error);
-		}
-		
-		if (StringUtils.isNotBlank(command.getNote()) && command.getNote().length() > 1000) {
-			ApiParameterError error = ApiParameterError.parameterError("validation.msg.note.exceeds.max.length", "The parameter comment exceeds max allowed size of {0}", "comment", 1000);
-			dataValidationErrors.add(error);
-		}
+		baseDataValidator.reset().parameter("loanid").value(command.getLoanId()).notNull().greaterThanZero();
+		baseDataValidator.reset().parameter("transactionDate").value(command.getTransactionLocalDate()).notNull();
+		baseDataValidator.reset().parameter("transactionAmount").value(command.getTransactionAmount()).notNull().positiveAmount();
+		baseDataValidator.reset().parameter("note").value(command.getNote()).notExceedingLengthOf(1000);
 		
 		if (!dataValidationErrors.isEmpty()) {
 			throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);

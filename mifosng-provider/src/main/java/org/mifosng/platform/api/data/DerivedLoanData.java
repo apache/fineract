@@ -1,4 +1,4 @@
-package org.mifosng.data;
+package org.mifosng.platform.api.data;
 
 import java.util.List;
 

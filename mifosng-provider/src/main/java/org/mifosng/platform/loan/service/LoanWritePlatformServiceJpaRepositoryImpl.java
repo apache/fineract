@@ -7,8 +7,6 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
-import org.mifosng.data.LoanSchedule;
-import org.mifosng.data.ScheduledLoanInstallment;
 import org.mifosng.platform.api.commands.AdjustLoanTransactionCommand;
 import org.mifosng.platform.api.commands.CalculateLoanScheduleCommand;
 import org.mifosng.platform.api.commands.LoanStateTransitionCommand;
@@ -16,6 +14,8 @@ import org.mifosng.platform.api.commands.LoanTransactionCommand;
 import org.mifosng.platform.api.commands.SubmitLoanApplicationCommand;
 import org.mifosng.platform.api.commands.UndoStateTransitionCommand;
 import org.mifosng.platform.api.data.EntityIdentifier;
+import org.mifosng.platform.api.data.LoanSchedule;
+import org.mifosng.platform.api.data.ScheduledLoanInstallment;
 import org.mifosng.platform.client.domain.Note;
 import org.mifosng.platform.client.domain.NoteRepository;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
@@ -263,7 +263,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		if (loan.isRepaymentScheduleRegenerationRequiredForDisbursement(actualDisbursementDate)) {
 			
 			LocalDate repaymentsStartingFromDate = loan.getExpectedFirstRepaymentOnDate();
-			LocalDate interestCalculatedFromDate = loan.getInterestCalculatedFromDate();
+			LocalDate interestCalculatedFromDate = loan.getInterestChargedFromDate();
 
 			Number principalAsDecimal = loan.getLoanRepaymentScheduleDetail().getPrincipal().getAmount();
 			String currencyCode = loan.getLoanRepaymentScheduleDetail().getPrincipal().getCurrencyCode();

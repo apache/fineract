@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.codehaus.jackson.map.annotate.JsonFilter;
 import org.joda.time.LocalDate;
-import org.mifosng.data.LoanSchedule;
 
 @JsonFilter("myFilter")
 public class NewLoanData implements Serializable {

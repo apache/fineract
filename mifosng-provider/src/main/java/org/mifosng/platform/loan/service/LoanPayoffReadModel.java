@@ -2,7 +2,7 @@ package org.mifosng.platform.loan.service;
 
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormatter;
-import org.mifosng.data.MoneyData;
+import org.mifosng.platform.api.data.MoneyData;
 
 /**
  *

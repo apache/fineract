@@ -2,7 +2,7 @@ package org.mifosng.platform.loan.domain;
 
 import java.util.Comparator;
 
-import org.mifosng.data.LoanRepaymentData;
+import org.mifosng.platform.api.data.LoanRepaymentData;
 
 
 public class LoanRepaymentDataComparator implements Comparator<LoanRepaymentData> {

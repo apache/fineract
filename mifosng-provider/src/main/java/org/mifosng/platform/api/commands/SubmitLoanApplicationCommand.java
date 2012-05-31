@@ -5,7 +5,7 @@ import java.math.BigDecimal;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.joda.time.LocalDate;
-import org.mifosng.data.LoanSchedule;
+import org.mifosng.platform.api.data.LoanSchedule;
 
 @XmlRootElement
 public class SubmitLoanApplicationCommand {

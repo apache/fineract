@@ -466,64 +466,66 @@
 		'CAN_REJECT_LOAN_ROLE', 'CAN_REJECT_LOAN_IN_THE_PAST_ROLE', 'CAN_WITHDRAW_LOAN_ROLE', 'CAN_WITHDRAW_LOAN_IN_THE_PAST_ROLE', 'CAN_DELETE_LOAN_THAT_IS_SUBMITTED_AND_NOT_APPROVED', 
 		'CAN_UNDO_LOAN_APPROVAL_ROLE', 'CAN_MAKE_LOAN_REPAYMENT_ROLE', 'CAN_MAKE_LOAN_REPAYMENT_IN_THE_PAST_ROLE')">
 
+{{#each permissions}}
 {{#if anyActionOnLoanAllowed}}
 <div id="loanactions">
 	<span id="toolbar" class="ui-widget-header ui-corner-all">
 
 		<sec:authorize access="hasAnyRole('CAN_REJECT_LOAN_ROLE', 'CAN_REJECT_LOAN_IN_THE_PAST_ROLE', 'PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE')" >
 		{{#if rejectAllowed}}
-		<button id="rejectbtn{{=id}}" class="rejectloan">Reject</button>
+		<button id="rejectbtn{{=$parent.parent.parent.data.id}}" class="rejectloan">Reject</button>
 		{{/if}}
 		</sec:authorize>
 
 		<sec:authorize access="hasAnyRole('CAN_WITHDRAW_LOAN_ROLE', 'CAN_WITHDRAW_LOAN_IN_THE_PAST_ROLE', 'PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE')" >
 		{{#if withdrawnByApplicantAllowed}}
-		<button id="withdrawnbyapplicantloanbtn{{=id}}" class="withdrawnbyapplicantloan">Withdrawn By Applicant</button>
+		<button id="withdrawnbyapplicantloanbtn{{=$parent.parent.parent.data.id}}" class="withdrawnbyapplicantloan">Withdrawn By Applicant</button>
 		{{/if}}
 		</sec:authorize>
 
 		<sec:authorize access="hasAnyRole('CAN_APPROVE_LOAN_ROLE', 'CAN_APPROVE_LOAN_IN_THE_PAST_ROLE', 'PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE')" >
 		{{#if pendingApproval}}
-		<button id="approvebtn{{=id}}" class="approveloan">Approve</button>
+		<button id="approvebtn{{=$parent.parent.parent.data.id}}" class="approveloan">Approve</button>
 		{{/if}}
 		</sec:authorize>
 
 		<sec:authorize access="hasAnyRole('CAN_DELETE_LOAN_THAT_IS_SUBMITTED_AND_NOT_APPROVED', 'PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE')" >
 		{{#if pendingApproval}}
-		<button id="deletebtn{{=id}}" class="deleteloan">Delete</button>
+		<button id="deletebtn{{=$parent.parent.parent.data.id}}" class="deleteloan">Delete</button>
 		{{/if}}
 		</sec:authorize>
 
 		<sec:authorize access="hasAnyRole('CAN_UNDO_LOAN_APPROVAL_ROLE', 'PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE')" >
 		{{#if undoApprovalAllowed}}
-		<button id="undoapprovebtn{{=id}}" class="undoapproveloan">Undo Approval</button>
+		<button id="undoapprovebtn{{=$parent.parent.parent.data.id}}" class="undoapproveloan">Undo Approval</button>
 		{{/if}}
 		</sec:authorize>
 		
 		<sec:authorize access="hasAnyRole('CAN_DISBURSE_LOAN_ROLE', 'CAN_DISBURSE_LOAN_IN_THE_PAST_ROLE','PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE')" >
 		{{#if disbursalAllowed}}
-		<button id="disbursebtn{{=id}}" class="disburseloan">Disburse</button>
+		<button id="disbursebtn{{=$parent.parent.parent.data.id}}" class="disburseloan">Disburse</button>
 		{{/if}}
 		</sec:authorize>
 
 		<sec:authorize access="hasAnyRole('CAN_UNDO_LOAN_DISBURSAL_ROLE', 'PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE')" >
-			{{#if undoDisbursalAllowed}}
-			<button id="undodisbursalbtn{{=id}}" class="undodisbursalloan">Undo Disbursal</button>
-			{{/if}}
+		{{#if undoDisbursalAllowed}}
+		<button id="undodisbursalbtn{{=$parent.parent.parent.data.id}}" class="undodisbursalloan">Undo Disbursal</button>
+		{{/if}}
 		</sec:authorize>
 
 		<sec:authorize access="hasAnyRole('CAN_MAKE_LOAN_REPAYMENT_ROLE', 'CAN_MAKE_LOAN_REPAYMENT_IN_THE_PAST_ROLE', 'PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE')" >
 		{{#if makeRepaymentAllowed}}
-		<button id="repaymentbtn{{=id}}" class="repaymentloan">Make Repayment</button>
+		<button id="repaymentbtn{{=$parent.parent.parent.data.id}}" class="repaymentloan">Make Repayment</button>
 		{{/if}}
 		</sec:authorize>
 		
 		{{#if waiveAllowed}}
-		<button id="waivebtn{{=id}}" class="waiveloan">Waive</button>
+		<button id="waivebtn{{=$parent.parent.parent.data.id}}" class="waiveloan">Waive</button>
 		{{/if}}
 	</span>
 </div>
 {{/if}}
+{{/each}}
 
 <div id="loantabs{{=id}}" class="loantabs">
 	<ul>
@@ -534,15 +536,17 @@
 		{{/if}}
 	</ul>
     <!-- first loan tab -->
+
+	{{#each basicDetails}}	
 	<div id="details{{=id}}" style="margin-top: 5px;">
 		<div class="row">
 			<span class="longrowlabel"><spring:message code="label.client.account.loan.status"/></span>
-			<span class="rowvalue">{{=lifeCycleStatusText}} (<spring:message code="label.client.account.loan.status.since"/> {{=$ctx.globalDate(lifeCycleStatusDate)}}) 
-			{{#if $ctx.numberGreaterThanZero(loanData.summary.totalInArrears.amount)}}
-				{{#if open}}
-			- <spring:message code="label.client.account.loan.status.arrears"/> {{=$ctx.moneyWithCurrency(loanData.summary.totalInArrears)}}
-				{{/if}}
-			{{/if}}
+			<span class="rowvalue">{{=lifeCycleStatusText}} (<spring:message code="label.client.account.loan.status.since"/> {{=$ctx.globalDate(lifeCycleStatusDate)}})
+{{#if $ctx.numberGreaterThanZero($parent.data.loanData.summary.totalInArrears.amount)}}
+	{{#if actualDisbursementDate !== null}}
+		- <spring:message code="label.client.account.loan.status.arrears"/> {{=$ctx.moneyWithCurrency($parent.parent.parent.data.loanData.summary.totalInArrears)}}
+	{{/if}}
+{{/if}}
 			</span>
 		</div>
 
@@ -581,14 +585,14 @@
 		</div>
 		{{/if}}
 
-		{{#if interestCalculatedFromDate !== null}}
+		{{#if interestChargedFromDate !== null}}
 		<div class="row">
 			<span class="longrowlabel"><spring:message code="label.client.account.loan.interest.charged.from"/></span>
-			<span class="rowvalue">{{=$ctx.globalDate(interestCalculatedFromDate)}}</span>
+			<span class="rowvalue">{{=$ctx.globalDate(interestChargedFromDate)}}</span>
 		</div>
 		{{/if}}
 
-		{{#if open}}
+		{{#if actualDisbursementDate !== null}}
 		<div class="row">
 			<span class="longrowlabel"><spring:message code="label.client.account.loan.expected.maturity.on"/></span>
 			<span class="rowvalue">{{=$ctx.globalDate(expectedMaturityDate)}}</span>
@@ -634,23 +638,24 @@
 		</div>
 		<div class="row">
 			<span class="longrowlabel"><spring:message code="label.client.account.loan.repayments"/></span>
-			<span class="rowvalue">{{=numberOfRepayments}} every {{=repaymentFrequencyNumber}}&nbsp;{{=repaymentFrequencyTypeText}}</span>
+			<span class="rowvalue">{{=numberOfRepayments}} every {{=repaymentEvery}}&nbsp;{{=repaymentFrequencyType.value}}</span>
 		</div>
 		<div class="row">
 			<span class="longrowlabel"><spring:message code="label.client.account.loan.amortization"/></span>
-			<span class="rowvalue">{{=amortizationMethodText}}</span>
+			<span class="rowvalue">{{=amortizationType.value}}</span>
 		</div>
 		<div class="row">
 			<span class="longrowlabel"><spring:message code="label.client.account.loan.interest"/></span>
-			<span class="rowvalue">{{=$ctx.decimal(interestRatePerYear, 4)}}% per annum ({{=$ctx.decimal(interestRatePerPeriod, 4)}}%&nbsp; per {{=interestPeriodFrequencyText}}) - {{=interestMethodText}}</span>
+			<span class="rowvalue">{{=$ctx.decimal(annualInterestRate, 4)}}% per annum ({{=$ctx.decimal(interestRatePerPeriod, 4)}}%&nbsp; {{=interestRateFrequencyType.value}}) - {{=interestType.value}}</span>
 		</div>
 
 		<div id="loanadditionaldata{{=id}}"></div>
 	</div>		
+	{{/each}}
 
 	<!-- second loan tab -->
-	<div id="schedule{{=id}}" style="margin-top: 5px;">
-		<table id="summarytable{{=id}}" class="pretty displayschedule">
+	<div id="schedule{{=basicDetails.id}}" style="margin-top: 5px;">
+		<table id="summarytable{{=basicDetails.id}}" class="pretty displayschedule">
 			<caption><spring:message code="tab.client.account.loan.schedule.table.summary.caption"/></caption>
 			<thead>
 				<tr>
@@ -690,7 +695,7 @@
 
 		<br/>
 
-		<table id="repaymentschedule_todate{{=id}}" class="pretty displayschedule">
+		<table id="repaymentschedule_todate{{=basicDetails.id}}" class="pretty displayschedule">
 			<caption><spring:message code="tab.client.account.loan.schedule.table.repaymentschedule.caption"/></caption>
 			<colgroup span="2"></colgroup>
 			<colgroup span="3">

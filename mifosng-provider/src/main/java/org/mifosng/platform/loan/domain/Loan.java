@@ -25,12 +25,16 @@ import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
-import org.mifosng.data.CurrencyData;
-import org.mifosng.data.DerivedLoanData;
+import org.mifosng.platform.api.data.CurrencyData;
+import org.mifosng.platform.api.data.DerivedLoanData;
+import org.mifosng.platform.api.data.EnumOptionData;
+import org.mifosng.platform.api.data.LoanBasicDetailsData;
+import org.mifosng.platform.api.data.MoneyData;
 import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
+import org.mifosng.platform.loanproduct.service.LoanEnumerations;
 import org.mifosng.platform.organisation.domain.Organisation;
 import org.mifosng.platform.user.domain.AppUser;
 
@@ -86,7 +90,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	
 	@Temporal(TemporalType.DATE)
 	@Column(name = "interest_calculated_from_date")
-	private Date interestCalculatedFromDate;
+	private Date interestChargedFromDate;
 
 	@Temporal(TemporalType.DATE)
 	@Column(name = "disbursedon_date")
@@ -173,7 +177,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	}
 
 	public void submitApplication(final LocalDate submittedOn, final LocalDate expectedDisbursementDate, 
-			LocalDate repaymentsStartingFromDate, LocalDate interestCalculatedFromDate, LoanLifecycleStateMachine lifecycleStateMachine) {
+			LocalDate repaymentsStartingFromDate, LocalDate interestChargedFromDate, LoanLifecycleStateMachine lifecycleStateMachine) {
 		
 		this.loanStatus = lifecycleStateMachine.transition(LoanEvent.LOAN_CREATED, this.loanStatus);
 		
@@ -191,8 +195,8 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 			this.expectedFirstRepaymentOnDate = repaymentsStartingFromDate.toDateMidnight().toDate();
 		}
 		
-		if (interestCalculatedFromDate != null) {
-			this.interestCalculatedFromDate = interestCalculatedFromDate.toDateMidnight().toDate();
+		if (interestChargedFromDate != null) {
+			this.interestChargedFromDate = interestChargedFromDate.toDateMidnight().toDate();
 		}
 		
 		if (new LocalDate(this.submittedOnDate).isAfter(new LocalDate())) {
@@ -724,6 +728,14 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	public Date getExpectedDisbursedOnDate() {
 		return this.expectedDisbursedOnDate;
 	}
+	
+	public LocalDate getExpectedDisbursedOnLocalDate() {
+		LocalDate expectedDisbursementDate = null;
+		if (this.expectedDisbursedOnDate != null) {
+			expectedDisbursementDate = new LocalDate(this.expectedDisbursedOnDate);
+		}
+		return expectedDisbursementDate;
+	}
 
 	public LocalDate getExpectedFirstRepaymentOnDate() {
 		LocalDate firstRepaymentDate = null;
@@ -734,7 +746,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	}
 
 	public LocalDate getDisbursementDate() {
-		LocalDate disbursementDate = new LocalDate(this.expectedDisbursedOnDate);
+		LocalDate disbursementDate = getExpectedDisbursedOnLocalDate();
 		if (this.disbursedOnDate != null) {
 			disbursementDate = new LocalDate(this.disbursedOnDate);
 		}
@@ -923,19 +935,17 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		return this.loanRepaymentScheduleDetail.getCurrency();
 	}
 
-	public LocalDate getInterestCalculatedFromDate() {
-		
-		LocalDate interestCalculatedFrom = null;
-		if (this.interestCalculatedFromDate != null) {
-			interestCalculatedFrom = new LocalDate(this.interestCalculatedFromDate);
+	public LocalDate getInterestChargedFromDate() {
+		LocalDate interestChargedFrom = null;
+		if (this.interestChargedFromDate != null) {
+			interestChargedFrom = new LocalDate(this.interestChargedFromDate);
 		}
-		
-		return interestCalculatedFrom;
+		return interestChargedFrom;
 	}
 
 	public LocalDate getLoanStatusSinceDate() {
 		
-		LocalDate statusSinceDate = new LocalDate(this.submittedOnDate);
+		LocalDate statusSinceDate = getSubmittedOnDate();
 		if (isApproved()) {
 			statusSinceDate = new LocalDate(this.approvedOnDate);
 		}
@@ -949,5 +959,31 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		}
 		
 		return statusSinceDate;
+	}
+
+	public LoanBasicDetailsData toBasicDetailsData(CurrencyData currencyData) {
+		
+		Money loanPrincipal = this.loanRepaymentScheduleDetail.getPrincipal();
+		MoneyData principal = MoneyData.of(currencyData, loanPrincipal.getAmount());
+
+		Money loanArrearsTolerance = this.loanRepaymentScheduleDetail.getInArrearsTolerance();
+		MoneyData tolerance = MoneyData.of(currencyData, loanArrearsTolerance.getAmount());
+		
+		EnumOptionData repaymentFrequencyType = LoanEnumerations.repaymentFrequencyType(this.loanRepaymentScheduleDetail.getRepaymentPeriodFrequencyType());
+		EnumOptionData interestRateFrequencyType = LoanEnumerations.interestRateFrequencyType(this.loanRepaymentScheduleDetail.getInterestPeriodFrequencyType());
+		EnumOptionData amortizationType = LoanEnumerations.amortizationType(this.loanRepaymentScheduleDetail.getAmortizationMethod());
+		EnumOptionData interestType = LoanEnumerations.interestType(this.loanRepaymentScheduleDetail.getInterestMethod());
+		EnumOptionData interestCalculationPeriodType = LoanEnumerations.interestCalculationPeriodType(this.loanRepaymentScheduleDetail.getInterestCalculationPeriodMethod());
+		
+		return new LoanBasicDetailsData(getId(), this.externalId, this.loanProduct.getName(), 
+				getClosedOnDate(), getSubmittedOnDate(), getApprovedOnDate(), getExpectedDisbursedOnLocalDate(), getDisbursedOnDate(),
+				getExpectedMaturityDate(), getExpectedFirstRepaymentOnDate(), getInterestChargedFromDate(), principal, tolerance, 
+				this.loanRepaymentScheduleDetail.getNumberOfRepayments(), this.loanRepaymentScheduleDetail.getRepayEvery(), 
+				this.loanRepaymentScheduleDetail.getNominalInterestRatePerPeriod(), this.loanRepaymentScheduleDetail.getAnnualNominalInterestRate(),
+				repaymentFrequencyType, interestRateFrequencyType, amortizationType, interestType, interestCalculationPeriodType, getLoanStatusDisplayName(), getLoanStatusSinceDate());
+	}
+
+	public String getCurrencyCode() {
+		return this.loanRepaymentScheduleDetail.getPrincipal().getCurrencyCode();
 	}
 }

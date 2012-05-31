@@ -2,7 +2,7 @@ package org.mifosng.platform.currency.service;
 
 import java.util.List;
 
-import org.mifosng.data.CurrencyData;
+import org.mifosng.platform.api.data.CurrencyData;
 
 public interface CurrencyReadPlatformService {
 	

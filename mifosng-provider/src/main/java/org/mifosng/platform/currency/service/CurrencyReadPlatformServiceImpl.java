@@ -6,7 +6,7 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
-import org.mifosng.data.CurrencyData;
+import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.infrastructure.JdbcSupport;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.user.domain.AppUser;

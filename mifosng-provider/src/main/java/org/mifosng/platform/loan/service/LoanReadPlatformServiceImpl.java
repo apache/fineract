@@ -7,14 +7,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import org.joda.time.LocalDate;
-import org.mifosng.data.CurrencyData;
-import org.mifosng.data.DerivedLoanData;
-import org.mifosng.data.LoanAccountData;
-import org.mifosng.data.LoanRepaymentData;
-import org.mifosng.data.MoneyData;
 import org.mifosng.platform.api.data.ClientData;
+import org.mifosng.platform.api.data.CurrencyData;
+import org.mifosng.platform.api.data.DerivedLoanData;
+import org.mifosng.platform.api.data.LoanAccountData;
+import org.mifosng.platform.api.data.LoanBasicDetailsData;
+import org.mifosng.platform.api.data.LoanPermissionData;
 import org.mifosng.platform.api.data.LoanProductData;
 import org.mifosng.platform.api.data.LoanProductLookup;
+import org.mifosng.platform.api.data.LoanRepaymentData;
+import org.mifosng.platform.api.data.MoneyData;
 import org.mifosng.platform.api.data.NewLoanData;
 import org.mifosng.platform.client.service.ClientReadPlatformService;
 import org.mifosng.platform.currency.domain.ApplicationCurrency;
@@ -66,16 +68,13 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 		// need of loan information.
 		AppUser currentUser = context.authenticatedUser();
 
-		Loan loan = this.loanRepository.findOne(loansThatMatch(
-				currentUser.getOrganisation(), loanId));
+		Loan loan = this.loanRepository.findOne(loansThatMatch(currentUser.getOrganisation(), loanId));
 		if (loan == null) {
 			throw new LoanNotFoundException(loanId);
 		}
 
-		final String currencyCode = loan.getLoanRepaymentScheduleDetail()
-				.getPrincipal().getCurrencyCode();
-		ApplicationCurrency currency = this.applicationCurrencyRepository
-				.findOneByCode(currencyCode);
+		final String currencyCode = loan.getCurrencyCode();
+		ApplicationCurrency currency = this.applicationCurrencyRepository.findOneByCode(currencyCode);
 		if (currency == null) {
 			throw new CurrencyNotFoundException(currencyCode);
 		}
@@ -84,46 +83,22 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 				currency.getName(), currency.getDecimalPlaces(),
 				currency.getDisplaySymbol(), currency.getNameCode());
 
-		LoanAccountData loanData = convertToData(loan, currencyData);
-
-		return loanData;
+		return convertToData(loan, currencyData);
 	}
 
-	private LoanAccountData convertToData(final Loan realLoan,
-			CurrencyData currencyData) {
+	private LoanAccountData convertToData(final Loan realLoan, CurrencyData currencyData) {
 
 		DerivedLoanData loanData = realLoan.deriveLoanData(currencyData);
 
-		LocalDate expectedDisbursementDate = null;
-		if (realLoan.getExpectedDisbursedOnDate() != null) {
-			expectedDisbursementDate = new LocalDate(
-					realLoan.getExpectedDisbursedOnDate());
-		}
-
-		Money loanPrincipal = realLoan.getLoanRepaymentScheduleDetail()
-				.getPrincipal();
-		MoneyData principal = MoneyData.of(currencyData,
-				loanPrincipal.getAmount());
-
-		Money loanArrearsTolerance = realLoan.getInArrearsTolerance();
-		MoneyData tolerance = MoneyData.of(currencyData,
-				loanArrearsTolerance.getAmount());
-
-		Money interestRebate = realLoan.getInterestRebateOwed();
-		MoneyData interestRebateOwed = MoneyData.of(currencyData,
-				interestRebate.getAmount());
-
-		boolean interestRebateOutstanding = false; // realLoan.isInterestRebateOutstanding(),
-
+		LoanBasicDetailsData basicDetails = realLoan.toBasicDetailsData(currencyData);
+		
 		// permissions
-		boolean waiveAllowed = loanData.getSummary().isWaiveAllowed(tolerance)
+		boolean waiveAllowed = loanData.getSummary().isWaiveAllowed(basicDetails.getInArrearsTolerance())
 				&& realLoan.isNotClosed();
 		boolean undoDisbursalAllowed = realLoan.isDisbursed()
 				&& realLoan.isOpenWithNoRepaymentMade();
 		boolean makeRepaymentAllowed = realLoan.isDisbursed()
 				&& realLoan.isNotClosed();
-
-		LocalDate loanStatusDate = realLoan.getLoanStatusSinceDate();
 
 		boolean rejectAllowed = realLoan.isNotApproved()
 				&& realLoan.isNotDisbursed() && realLoan.isNotClosed();
@@ -133,45 +108,51 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 				&& realLoan.isNotClosed();
 		boolean disbursalAllowed = realLoan.isApproved()
 				&& realLoan.isNotDisbursed() && realLoan.isNotClosed();
+		
+		LoanPermissionData permissions = new LoanPermissionData(waiveAllowed, makeRepaymentAllowed, rejectAllowed, withdrawnByApplicantAllowed, 
+				undoApprovalAllowed, undoDisbursalAllowed, disbursalAllowed, realLoan.isSubmittedAndPendingApproval(),
+				realLoan.isWaitingForDisbursal());
+		
+		return new LoanAccountData(realLoan.getId(), basicDetails, loanData, permissions);
 
-		return new LoanAccountData(realLoan.isClosed(), realLoan.isOpen(),
-				realLoan.isOpenWithRepaymentMade(), interestRebateOutstanding,
-				realLoan.isSubmittedAndPendingApproval(),
-				realLoan.isWaitingForDisbursal(), undoDisbursalAllowed,
-				makeRepaymentAllowed, rejectAllowed,
-				withdrawnByApplicantAllowed, undoApprovalAllowed,
-				disbursalAllowed, realLoan.getLoanStatusDisplayName(),
-				loanStatusDate, realLoan.getId(), realLoan.getExternalId(),
-				realLoan.getLoanProduct().getName(),
-				realLoan.getClosedOnDate(), realLoan.getSubmittedOnDate(),
-				realLoan.getApprovedOnDate(), expectedDisbursementDate,
-				realLoan.getDisbursedOnDate(),
-				realLoan.getExpectedMaturityDate(),
-				realLoan.getExpectedFirstRepaymentOnDate(),
-				realLoan.getInterestCalculatedFromDate(), principal, realLoan
-						.getLoanRepaymentScheduleDetail()
-						.getAnnualNominalInterestRate(), realLoan
-						.getLoanRepaymentScheduleDetail()
-						.getNominalInterestRatePerPeriod(), realLoan
-						.getLoanRepaymentScheduleDetail()
-						.getInterestPeriodFrequencyType().getValue(), realLoan
-						.getLoanRepaymentScheduleDetail()
-						.getInterestPeriodFrequencyType().toString(), realLoan
-						.getLoanRepaymentScheduleDetail().getInterestMethod()
-						.getValue(), realLoan.getLoanRepaymentScheduleDetail()
-						.getInterestMethod().toString(), realLoan
-						.getLoanRepaymentScheduleDetail()
-						.getAmortizationMethod().getValue(), realLoan
-						.getLoanRepaymentScheduleDetail()
-						.getAmortizationMethod().toString(), realLoan
-						.getLoanRepaymentScheduleDetail()
-						.getNumberOfRepayments(), realLoan
-						.getLoanRepaymentScheduleDetail().getRepayEvery(),
-				realLoan.getLoanRepaymentScheduleDetail()
-						.getRepaymentPeriodFrequencyType().getValue(), realLoan
-						.getLoanRepaymentScheduleDetail()
-						.getRepaymentPeriodFrequencyType().toString(),
-				tolerance, loanData, waiveAllowed, interestRebateOwed);
+//		return new LoanAccountData(realLoan.isClosed(), realLoan.isOpen(),
+//				realLoan.isOpenWithRepaymentMade(), interestRebateOutstanding,
+//				realLoan.isSubmittedAndPendingApproval(),
+//				realLoan.isWaitingForDisbursal(), undoDisbursalAllowed,
+//				makeRepaymentAllowed, rejectAllowed,
+//				withdrawnByApplicantAllowed, undoApprovalAllowed,
+//				disbursalAllowed, realLoan.getLoanStatusDisplayName(),
+//				loanStatusDate, realLoan.getId(), realLoan.getExternalId(),
+//				realLoan.getLoanProduct().getName(),
+//				realLoan.getClosedOnDate(), realLoan.getSubmittedOnDate(),
+//				realLoan.getApprovedOnDate(), expectedDisbursementDate,
+//				realLoan.getDisbursedOnDate(),
+//				realLoan.getExpectedMaturityDate(),
+//				realLoan.getExpectedFirstRepaymentOnDate(),
+//				realLoan.getInterestCalculatedFromDate(), principal, realLoan
+//						.getLoanRepaymentScheduleDetail()
+//						.getAnnualNominalInterestRate(), realLoan
+//						.getLoanRepaymentScheduleDetail()
+//						.getNominalInterestRatePerPeriod(), realLoan
+//						.getLoanRepaymentScheduleDetail()
+//						.getInterestPeriodFrequencyType().getValue(), realLoan
+//						.getLoanRepaymentScheduleDetail()
+//						.getInterestPeriodFrequencyType().toString(), realLoan
+//						.getLoanRepaymentScheduleDetail().getInterestMethod()
+//						.getValue(), realLoan.getLoanRepaymentScheduleDetail()
+//						.getInterestMethod().toString(), realLoan
+//						.getLoanRepaymentScheduleDetail()
+//						.getAmortizationMethod().getValue(), realLoan
+//						.getLoanRepaymentScheduleDetail()
+//						.getAmortizationMethod().toString(), realLoan
+//						.getLoanRepaymentScheduleDetail()
+//						.getNumberOfRepayments(), realLoan
+//						.getLoanRepaymentScheduleDetail().getRepayEvery(),
+//				realLoan.getLoanRepaymentScheduleDetail()
+//						.getRepaymentPeriodFrequencyType().getValue(), realLoan
+//						.getLoanRepaymentScheduleDetail()
+//						.getRepaymentPeriodFrequencyType().toString(),
+//				tolerance, loanData, waiveAllowed, interestRebateOwed);
 	}
 
 	@Override

@@ -7,10 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.joda.time.LocalDate;
-import org.mifosng.data.CurrencyData;
-import org.mifosng.data.LoanSchedule;
-import org.mifosng.data.MoneyData;
-import org.mifosng.data.ScheduledLoanInstallment;
+import org.mifosng.platform.api.data.CurrencyData;
+import org.mifosng.platform.api.data.LoanSchedule;
+import org.mifosng.platform.api.data.MoneyData;
+import org.mifosng.platform.api.data.ScheduledLoanInstallment;
 import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.loan.domain.LoanProductRelatedDetail;
 

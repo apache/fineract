@@ -532,9 +532,9 @@ $(document).ready(function() {
 
 	        		var curTabID = currentTab.prop("id")
 	        		
-	        		offsetToSubmittedDate = data.maxSubmittedOnOffsetFromToday;
-	        		offsetToApprovalDate = data.maxApprovedOnOffsetFromToday;
-	        		offsetToDisbursalDate = data.maxDisbursedOnOffsetFromToday;
+	        		offsetToSubmittedDate = data.basicDetails.maxSubmittedOnOffsetFromToday;
+	        		offsetToApprovalDate = data.basicDetails.maxApprovedOnOffsetFromToday;
+	        		offsetToDisbursalDate = data.basicDetails.maxDisbursedOnOffsetFromToday;
 	        		
 	        		var $loantabs = $(".loantabs").tabs({
 						"show": function(event, ui) {
@@ -715,7 +715,7 @@ $(document).ready(function() {
 							basicAuthKey: base64,
 							datasetType: "portfolio_loan",
 							datasetPKValue: data.id,
-							datasetTypeDiv: "loanadditionaldata" + data.id, 
+							datasetTypeDiv: "loanadditionaldata" + data.basicDetails.id, 
 							headingPrefix: "", 
 							headingClass: "", 
 							labelClass: "longrowlabel",

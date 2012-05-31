@@ -6,10 +6,10 @@ import static org.mifosng.platform.Specifications.productThatMatches;
 import java.math.BigDecimal;
 import java.util.List;
 
-import org.mifosng.data.LoanSchedule;
-import org.mifosng.data.MoneyData;
-import org.mifosng.data.ScheduledLoanInstallment;
 import org.mifosng.platform.api.commands.SubmitLoanApplicationCommand;
+import org.mifosng.platform.api.data.LoanSchedule;
+import org.mifosng.platform.api.data.MoneyData;
+import org.mifosng.platform.api.data.ScheduledLoanInstallment;
 import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.client.domain.ClientRepository;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;

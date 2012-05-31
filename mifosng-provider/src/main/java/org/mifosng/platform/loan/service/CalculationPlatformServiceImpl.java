@@ -3,10 +3,10 @@ package org.mifosng.platform.loan.service;
 import java.math.BigDecimal;
 
 import org.joda.time.LocalDate;
-import org.mifosng.data.CurrencyData;
-import org.mifosng.data.LoanSchedule;
-import org.mifosng.data.MoneyData;
 import org.mifosng.platform.api.commands.CalculateLoanScheduleCommand;
+import org.mifosng.platform.api.data.CurrencyData;
+import org.mifosng.platform.api.data.LoanSchedule;
+import org.mifosng.platform.api.data.MoneyData;
 import org.mifosng.platform.currency.domain.ApplicationCurrency;
 import org.mifosng.platform.currency.domain.ApplicationCurrencyRepository;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;

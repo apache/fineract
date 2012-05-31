@@ -5,13 +5,13 @@ import java.util.Collections;
 import java.util.List;
 
 import org.joda.time.LocalDate;
-import org.mifosng.data.CurrencyData;
-import org.mifosng.data.DerivedLoanData;
-import org.mifosng.data.LoanAccountSummaryData;
-import org.mifosng.data.LoanRepaymentData;
-import org.mifosng.data.LoanRepaymentPeriodData;
-import org.mifosng.data.LoanRepaymentScheduleData;
-import org.mifosng.data.MoneyData;
+import org.mifosng.platform.api.data.CurrencyData;
+import org.mifosng.platform.api.data.DerivedLoanData;
+import org.mifosng.platform.api.data.LoanAccountSummaryData;
+import org.mifosng.platform.api.data.LoanRepaymentData;
+import org.mifosng.platform.api.data.LoanRepaymentPeriodData;
+import org.mifosng.platform.api.data.LoanRepaymentScheduleData;
+import org.mifosng.platform.api.data.MoneyData;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.currency.domain.Money;
 
