@@ -42,7 +42,23 @@ Column 'loan_status_id' cannot be null; SQL [n/a]; constraint [null]; nested exc
 
 
 
-somtimes client returns... always loanId OK?
+sometimes clientId returned... always loanId OK?
+
+LOAN TRANSACTIONS (repay and waive - and maybe reversal - but not disbursement) general talk needed as retrieve could work for any txn?
+transaction type... UNKNOWN(0), DISBURSEMENT(1), REPAYMENT(2), REVERSAL(3), WAIVED(4);
+Create - (command has string and proper value fields... so assume its like eventDate above)
+If you undo disbursal does it undo the loantransaction? - didnt test
+Template - does waiver amount default to 'rest of loan' cos it looked like it missed out on other waivers. didn't test
+	repayment amount matches current installment outstanding amount w/o taking waivers into account.
+check descriptions - couldn't test because of invalid locale
+
+retrieve: display transaction type value?
+
+"principal" : null,   "interest" : null, total, "totalWaived" : null,   "overpaid" : null, and the offset - are nulls ever put in?
+
+
+ on create and adjust returns clientId can it be transaction id or loanId?
+list of loan transactions not available (except in summary presume repayments has repayments and waivers and adjusts)
 
 ---------------------------------------------------------
 Additional Fields
@@ -57,4 +73,5 @@ Identify Fields that need explaining
 Clients
 displayName, externalId, maxJoinedOnOffsetFromToday
 
+repayment/waiver
 

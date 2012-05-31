@@ -1604,17 +1604,34 @@ No Request Body:
                 </p>
                 <h5>Arguments</h5>
                 <dl class="argument-list">
-                    <dt>type</dt>
-                    <dd>String<span> Optional, case-insensitive</span></dd>
-                    <dd>The default action is to return details for Repayment of a loan.  If the value is 'waiver' then details relevant to Waiving a loan amount are returned.</dd>
+                    <dt>command</dt>
+                    <dd>String<span> mandatory, case-insensitive</span></dd>
+                    <dd><b>'repayment'</b><br>
+                    "date" is set to the date of the first outstanding installment.<br>
+                    "total" "amount" is set to the amount outstanding.</dd>
+                    <dd><b>'waiver'</b><br>
+                    "date" is set to the current date.<br>
+                    "total" "amount" is set to the remaining loan principal outstanding.</dd>
                 </dl>
-                <p>Example Request: 
-                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/loans/1/transactions/template?type=waiver">https://localhost:8443/mifosng-provider/api/v1/loans/1/transactions/template?type=waiver"</a>
-                </p>
+                <p>Example Request: </p>
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/loans/10/transactions/template?command=repayment&pretty=true">https://localhost:8443/mifosng-provider/api/v1/loans/10/transactions/template?command=repayment&pretty=true</a>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://thedomainname/api/v1/loans/{loanId}/transactions/template"</code>
-                <code class="method-response"> to be done
+                <code class="method-response">{
+  "date" : [ 2009, 8, 1 ],
+  "total" : {
+    "currencyCode" : "XOF",
+    "digitsAfterDecimal" : 0,
+    "amount" : 471,
+    "defaultName" : "CFA Franc BCEAO",
+    "nameCode" : "currency.XOF",
+    "displaySymbol" : "CFA",
+    "zero" : false,
+    "greaterThanZero" : true,
+    "displaySymbolValue" : "471 CFA"
+  }
+}
             </code>
             </div>
         </div>
@@ -1623,22 +1640,27 @@ No Request Body:
             <div class="method-description">
                 <h4>Make a Repayment / Loan Waiver</h4>
                 <dl class="argument-list">
-                    <dt>type</dt>
+                    <dt>command</dt>
                     <dd>String<span> Optional, case-insensitive</span></dd>
-                    <dd>The default action is to make a Loan Repayment.  If the value is 'waiver' then a Loan Waiver is made.</dd>
+                    <dd>'repayment' : Make Loan Repayment.</dd>
+                    <dd>'waiver' : Loan Waiver.</dd>
                 </dl>
             </div>
             <div class="method-example">
                 <code class="method-declaration">POST https://thedomainname/api/v1/loans/{loanId}/transactions</code>
-                <code class="method-request">https://localhost:8443/mifosng-provider/api/v1/loans/1/transactions
-                
-                
-                Content-Type: application/json
-                Request Body:
-                new json here
+                <code class="method-request">POST https://localhost:8443/mifosng-provider/api/v1/loans/37/transactions?command=repayment
+Content-Type: application/json
+Request Body:
+{
+ "locale": "en_GB",
+ "dateFormat": "dd MMMM yyyy",
+ "transactionDate": "14 May 2012",
+ "transactionAmount": "559.88",
+ "note": "Repayment at branch"
+}
                 </code>
                 <code class="method-response">{
-    "entityId": 2
+"entityId": 37
 }
                 </code>
             </div>
@@ -1648,13 +1670,31 @@ No Request Body:
         <div class="method-section">
             <div class="method-description">
                 <h4>Retrieve a Repayment or Waiver Details</h4>
-                <p>Example Request: 
-                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/loans/1/transactions/1">https://localhost:8443/mifosng-provider/api/v1/loans/1/transactions/1</a>
-                </p>
+                <p>Example Request: </p>
+                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/loans/10/transactions/20?pretty=true">https://localhost:8443/mifosng-provider/api/v1/loans/10/transactions/20?pretty=true</a>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://thedomainname/api/v1/loans/{loanId}/transactions/{transactionId}</code>
-                <code class="method-response"> 
+                <code class="method-response">{
+  "id" : 10,
+  "date" : [ 2009, 1, 29 ],
+  "principal" : null,
+  "interest" : null,
+  "total" : {
+    "currencyCode" : "XOF",
+    "digitsAfterDecimal" : 0,
+    "amount" : 300000,
+    "defaultName" : "CFA Franc BCEAO",
+    "nameCode" : "currency.XOF",
+    "displaySymbol" : "CFA",
+    "zero" : false,
+    "greaterThanZero" : true,
+    "displaySymbolValue" : "300000 CFA"
+  },
+  "totalWaived" : null,
+  "overpaid" : null,
+  "transactionOffsetFromToday" : -1218
+}
                 </code>
             </div>
         </div>
@@ -1664,16 +1704,13 @@ No Request Body:
                 <h4>Adjust a Repayment or Waiver</h4>
             </div>
             <div class="method-example">
-                <code class="method-declaration">PUT https://thedomainname/api/v1/loans/{loanId}/transactions/{transactionId}</code>
-                <code class="method-request">https://localhost:8443/mifosng-provider/api/v1/loans/1/transactions/1
-                
-                
+                <code class="method-declaration">POST https://thedomainname/api/v1/loans/{loanId}/transactions/{transactionId}</code>
+                <code class="method-request">POST https://localhost:8443/mifosng-provider/api/v1/loans/10/transactions/20
                 Content-Type: application/json
                 Request Body:
-                new json here
                 </code>
                 <code class="method-response">{
-    "entityId": 2
+    "entityId": 10
 }
                 </code>
             </div>
