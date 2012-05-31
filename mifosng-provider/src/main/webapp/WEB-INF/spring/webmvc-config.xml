@@ -31,10 +31,7 @@
 	<mvc:view-controller path="/home" view-name="home"/>
 	<mvc:view-controller path="/login" view-name="login"/>
 	<mvc:view-controller path="/logout" view-name="logout"/>
-	<!--
-	<mvc:view-controller path="/sessionTimeout" view-name="sessionTimeout"/>
-	<mvc:view-controller path="/oauth/confirm_access" view-name="/oauth/confirm_access"/>
-	 -->
+
 	<!-- Resolves view names to protected .jsp resources within the /WEB-INF/views directory -->
 	<bean id="jspViewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
 		<property name="prefix" value="/WEB-INF/views/"/>
