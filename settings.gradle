@@ -1,1 +1,1 @@
-include 'mifosng-data', 'mifosng-provider'
+include 'mifosng-provider'
