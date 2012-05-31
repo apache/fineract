@@ -67,7 +67,7 @@ public class ApiGlobalErrorResponse {
 	public static ApiGlobalErrorResponse domainRuleViolation(String globalisationMessageCode, String defaultUserMessage, Object... defaultUserMessageArgs) {
 		ApiGlobalErrorResponse globalErrorResponse = new ApiGlobalErrorResponse();
 		globalErrorResponse.setHttpStatusCode("403");
-		globalErrorResponse.setDeveloperMessage("Request was understoon but caused a domain rule violation.");
+		globalErrorResponse.setDeveloperMessage("Request was understood but caused a domain rule violation.");
 		globalErrorResponse.setDeveloperDocLink("https://github.com/keithwoodlock/mifosx/wiki/HTTP-API-Error-codes");
 		globalErrorResponse.setUserMessageGlobalisationCode("validation.msg.domain.rule.violation");
 		globalErrorResponse.setDefaultUserMessage("Errors contain reason for domain rule violation.");

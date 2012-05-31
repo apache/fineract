@@ -14,6 +14,7 @@ import org.mifosng.data.LoanRepaymentData;
 import org.mifosng.data.MoneyData;
 import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.LoanProductData;
+import org.mifosng.platform.api.data.LoanProductLookup;
 import org.mifosng.platform.api.data.NewLoanData;
 import org.mifosng.platform.client.service.ClientReadPlatformService;
 import org.mifosng.platform.currency.domain.ApplicationCurrency;
@@ -44,9 +45,13 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 	private final LoanTransactionRepository loanTransactionRepository;
 
 	@Autowired
-	public LoanReadPlatformServiceImpl(final PlatformSecurityContext context, 
-			final LoanRepository loanRepository, final LoanTransactionRepository loanTransactionRepository, final ApplicationCurrencyRepository applicationCurrencyRepository, 
-			final LoanProductReadPlatformService loanProductReadPlatformService, final ClientReadPlatformService clientReadPlatformService) {
+	public LoanReadPlatformServiceImpl(
+			final PlatformSecurityContext context,
+			final LoanRepository loanRepository,
+			final LoanTransactionRepository loanTransactionRepository,
+			final ApplicationCurrencyRepository applicationCurrencyRepository,
+			final LoanProductReadPlatformService loanProductReadPlatformService,
+			final ClientReadPlatformService clientReadPlatformService) {
 		this.context = context;
 		this.loanRepository = loanRepository;
 		this.loanTransactionRepository = loanTransactionRepository;
@@ -54,7 +59,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 		this.loanProductReadPlatformService = loanProductReadPlatformService;
 		this.clientReadPlatformService = clientReadPlatformService;
 	}
-	
+
 	@Override
 	public LoanAccountData retrieveLoanAccountDetails(Long loanId) {
 
@@ -62,13 +67,16 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 		// need of loan information.
 		AppUser currentUser = context.authenticatedUser();
 
-		Loan loan = this.loanRepository.findOne(loansThatMatch(currentUser.getOrganisation(), loanId));
+		Loan loan = this.loanRepository.findOne(loansThatMatch(
+				currentUser.getOrganisation(), loanId));
 		if (loan == null) {
 			throw new LoanNotFoundException(loanId);
 		}
 
-		final String currencyCode = loan.getLoanRepaymentScheduleDetail().getPrincipal().getCurrencyCode();
-		ApplicationCurrency currency = this.applicationCurrencyRepository.findOneByCode(currencyCode);
+		final String currencyCode = loan.getLoanRepaymentScheduleDetail()
+				.getPrincipal().getCurrencyCode();
+		ApplicationCurrency currency = this.applicationCurrencyRepository
+				.findOneByCode(currencyCode);
 		if (currency == null) {
 			throw new CurrencyNotFoundException(currencyCode);
 		}
@@ -81,7 +89,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
 		return loanData;
 	}
-	
+
 	private LoanAccountData convertToData(final Loan realLoan,
 			CurrencyData currencyData) {
 
@@ -166,22 +174,28 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 						.getRepaymentPeriodFrequencyType().toString(),
 				tolerance, loanData, waiveAllowed, interestRebateOwed);
 	}
-	
+
 	@Override
-	public NewLoanData retrieveClientAndProductDetails(final Long clientId, final Long productId) {
+	public NewLoanData retrieveClientAndProductDetails(final Long clientId,
+			final Long productId) {
 
 		AppUser currentUser = context.authenticatedUser();
 
 		NewLoanData workflowData = new NewLoanData();
 		workflowData.setOrganisationId(currentUser.getOrganisation().getId());
-		workflowData.setOrganisationName(currentUser.getOrganisation().getName());
+		workflowData.setOrganisationName(currentUser.getOrganisation()
+				.getName());
 
-		Collection<LoanProductData> loanProducts = this.loanProductReadPlatformService.retrieveAllLoanProducts();
-		workflowData.setAllowedProducts(new ArrayList<LoanProductData>(loanProducts));
+		Collection<LoanProductLookup> loanProducts = this.loanProductReadPlatformService
+				.retrieveAllLoanProductsForLookup();
+		workflowData.setAllowedProducts(new ArrayList<LoanProductLookup>(
+				loanProducts));
 
 		if (loanProducts.size() == 1) {
-			Long allowedProductId = workflowData.getAllowedProducts().get(0).getId();
-			LoanProductData selectedProduct = this.loanProductReadPlatformService.retrieveLoanProduct(allowedProductId);
+			Long allowedProductId = workflowData.getAllowedProducts().get(0)
+					.getId();
+			LoanProductData selectedProduct = this.loanProductReadPlatformService
+					.retrieveLoanProduct(allowedProductId);
 			if (selectedProduct == null) {
 				throw new LoanProductNotFoundException(allowedProductId);
 			}
@@ -190,7 +204,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 			workflowData.setProductName(selectedProduct.getName());
 			workflowData.setSelectedProduct(selectedProduct);
 		} else {
-			LoanProductData selectedProduct = findLoanProductById(loanProducts, productId);
+			LoanProductData selectedProduct = findLoanProductById(loanProducts,
+					productId);
 			if (selectedProduct == null) {
 				throw new LoanProductNotFoundException(productId);
 			}
@@ -199,7 +214,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 			workflowData.setSelectedProduct(selectedProduct);
 		}
 
-		ClientData clientAccount = this.clientReadPlatformService.retrieveIndividualClient(clientId);
+		ClientData clientAccount = this.clientReadPlatformService
+				.retrieveIndividualClient(clientId);
 		workflowData.setClientId(clientAccount.getId());
 		workflowData.setClientName(clientAccount.getDisplayName());
 
@@ -207,20 +223,19 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 	}
 
 	private LoanProductData findLoanProductById(
-			Collection<LoanProductData> loanProducts, Long productId) {
+			Collection<LoanProductLookup> loanProducts, Long productId) {
 		LoanProductData match = this.loanProductReadPlatformService
 				.retrieveNewLoanProductDetails();
-		for (LoanProductData loanProductData : loanProducts) {
-			if (loanProductData.getId().equals(productId)) {
+		for (LoanProductLookup loanProductLookup : loanProducts) {
+			if (loanProductLookup.getId().equals(productId)) {
 				match = this.loanProductReadPlatformService
-						.retrieveLoanProduct(loanProductData.getId());
+						.retrieveLoanProduct(loanProductLookup.getId());
 				break;
 			}
 		}
 		return match;
 	}
-	
-	
+
 	@Override
 	public LoanRepaymentData retrieveNewLoanRepaymentDetails(Long loanId) {
 
@@ -228,13 +243,16 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
 		// TODO - OPTIMIZE - write simple sql query to fetch back date of
 		// possible next transaction date.
-		Loan loan = this.loanRepository.findOne(loansThatMatch(currentUser.getOrganisation(), loanId));
+		Loan loan = this.loanRepository.findOne(loansThatMatch(
+				currentUser.getOrganisation(), loanId));
 		if (loan == null) {
 			throw new LoanNotFoundException(loanId);
 		}
 
-		final String currencyCode = loan.getLoanRepaymentScheduleDetail().getPrincipal().getCurrencyCode();
-		ApplicationCurrency currency = this.applicationCurrencyRepository.findOneByCode(currencyCode);
+		final String currencyCode = loan.getLoanRepaymentScheduleDetail()
+				.getPrincipal().getCurrencyCode();
+		ApplicationCurrency currency = this.applicationCurrencyRepository
+				.findOneByCode(currencyCode);
 		if (currency == null) {
 			throw new CurrencyNotFoundException(currencyCode);
 		}
@@ -243,9 +261,11 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 				currency.getName(), currency.getDecimalPlaces(),
 				currency.getDisplaySymbol(), currency.getNameCode());
 
-		LocalDate earliestUnpaidInstallmentDate = loan.possibleNextRepaymentDate();
+		LocalDate earliestUnpaidInstallmentDate = loan
+				.possibleNextRepaymentDate();
 		Money possibleNextRepaymentAmount = loan.possibleNextRepaymentAmount();
-		MoneyData possibleNextRepayment = MoneyData.of(currencyData, possibleNextRepaymentAmount.getAmount());
+		MoneyData possibleNextRepayment = MoneyData.of(currencyData,
+				possibleNextRepaymentAmount.getAmount());
 
 		LoanRepaymentData newRepaymentDetails = new LoanRepaymentData();
 		newRepaymentDetails.setDate(earliestUnpaidInstallmentDate);
@@ -261,13 +281,16 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
 		// TODO - OPTIMIZE - write simple sql query to fetch back date of
 		// possible next transaction date.
-		Loan loan = this.loanRepository.findOne(loansThatMatch(currentUser.getOrganisation(), loanId));
+		Loan loan = this.loanRepository.findOne(loansThatMatch(
+				currentUser.getOrganisation(), loanId));
 		if (loan == null) {
 			throw new LoanNotFoundException(loanId);
 		}
 
-		final String currencyCode = loan.getLoanRepaymentScheduleDetail().getPrincipal().getCurrencyCode();
-		ApplicationCurrency currency = this.applicationCurrencyRepository.findOneByCode(currencyCode);
+		final String currencyCode = loan.getLoanRepaymentScheduleDetail()
+				.getPrincipal().getCurrencyCode();
+		ApplicationCurrency currency = this.applicationCurrencyRepository
+				.findOneByCode(currencyCode);
 		if (currency == null) {
 			throw new CurrencyNotFoundException(currencyCode);
 		}
@@ -288,22 +311,28 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 	}
 
 	@Override
-	public LoanRepaymentData retrieveLoanRepaymentDetails(Long loanId, Long transactionId) {
+	public LoanRepaymentData retrieveLoanRepaymentDetails(Long loanId,
+			Long transactionId) {
 
 		AppUser currentUser = context.authenticatedUser();
 
-		Loan loan = this.loanRepository.findOne(loansThatMatch(currentUser.getOrganisation(), loanId));
+		Loan loan = this.loanRepository.findOne(loansThatMatch(
+				currentUser.getOrganisation(), loanId));
 		if (loan == null) {
 			throw new LoanNotFoundException(loanId);
 		}
 
-		final String currencyCode = loan.getLoanRepaymentScheduleDetail().getPrincipal().getCurrencyCode();
-		ApplicationCurrency currency = this.applicationCurrencyRepository.findOneByCode(currencyCode);
+		final String currencyCode = loan.getLoanRepaymentScheduleDetail()
+				.getPrincipal().getCurrencyCode();
+		ApplicationCurrency currency = this.applicationCurrencyRepository
+				.findOneByCode(currencyCode);
 		if (currency == null) {
 			throw new CurrencyNotFoundException(currencyCode);
 		}
 
-		LoanTransaction transaction = this.loanTransactionRepository.findOne(loanTransactionsThatMatch(currentUser.getOrganisation(), transactionId));
+		LoanTransaction transaction = this.loanTransactionRepository
+				.findOne(loanTransactionsThatMatch(
+						currentUser.getOrganisation(), transactionId));
 		if (transaction == null) {
 			throw new LoanTransactionNotFoundException(transactionId);
 		}

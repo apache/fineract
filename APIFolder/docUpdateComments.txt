@@ -8,24 +8,16 @@ recreate()
 Lost permissions again... restore fixed it up... must be some prob with permissions/roles maintenance
 also, maybe I should be using a user that has everything but role admin.
 
-users - delete still falls over if user doesn't exist. DOING
 
-Loan Products
-List/Retrieve - should show textual values of enums? DOING
-Create - principal is later called principalMoney , also consistency between other loan fields and loan product fields with Type on them DOING
 
-clients - parentid = id or id 1 has parentId not null DOING
-list clients notes - noteType needs a 'text'
-	createdOn & updatedOn values... do they need reformatting?
-	are they ord
 
-updating client note - ignores clientId anyhow! so is it really a notes resource? 
+list clients notes - noteType needs a 'text'TODO
+	createdOn & updatedOn values... do they need reformatting?TODO
+
+updating client note - ignores clientId anyhow! so is it really a notes resource? TODO
 
 loan template
 Formatted field still there
-Type fields rename and with associated text?
-allowedProduct should maybe just be id & name
-which fields have defaults as not all on NewLoanWorkflowStepOneData dto seem to be default.
 
 loan retrieve
 break up data into categories.. e.g. 
@@ -43,6 +35,7 @@ loanRepayments
 Additional Fields
 put right message for parameter not recognized etc.(plus tht 9 other jpwwrongmsg items)
 
+should be able to get clients by branch as well (but not for now)
 
 
 

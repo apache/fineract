@@ -19,28 +19,28 @@ public class NewLoanData implements Serializable {
 	private String clientName;
 	private Long productId;
 	private String productName;
-	
-	private List<LoanProductData> allowedProducts = new ArrayList<LoanProductData>();
-	
+
+	private List<LoanProductLookup> allowedProducts = new ArrayList<LoanProductLookup>();
+
 	// extra
 	private String dateFormat;
 	private String submittedOnDateFormatted;
 	private LocalDate submittedOnDate;
 	private String submittedOnNote = "";
-	
+
 	private String expectedDisbursementDateFormatted;
 	private LocalDate expectedDisbursementDate = new LocalDate();
-	
+
 	private String repaymentsStartingFromDateFormatted;
 	private LocalDate repaymentsStartingFromDate;
-	
+
 	private String interestCalculatedFromDateFormatted;
 	private LocalDate interestCalculatedFromDate;
-	
+
 	private LoanSchedule repaymentSchedule;
-	
+
 	private LoanProductData selectedProduct;
-	
+
 	public NewLoanData() {
 		//
 	}
@@ -93,11 +93,11 @@ public class NewLoanData implements Serializable {
 		this.productName = productName;
 	}
 
-	public List<LoanProductData> getAllowedProducts() {
+	public List<LoanProductLookup> getAllowedProducts() {
 		return allowedProducts;
 	}
 
-	public void setAllowedProducts(List<LoanProductData> allowedProducts) {
+	public void setAllowedProducts(List<LoanProductLookup> allowedProducts) {
 		this.allowedProducts = allowedProducts;
 	}
 
@@ -137,7 +137,8 @@ public class NewLoanData implements Serializable {
 		return repaymentsStartingFromDate;
 	}
 
-	public void setRepaymentsStartingFromDate(LocalDate repaymentsStartingFromDate) {
+	public void setRepaymentsStartingFromDate(
+			LocalDate repaymentsStartingFromDate) {
 		this.repaymentsStartingFromDate = repaymentsStartingFromDate;
 	}
 
@@ -145,7 +146,8 @@ public class NewLoanData implements Serializable {
 		return interestCalculatedFromDate;
 	}
 
-	public void setInterestCalculatedFromDate(LocalDate interestCalculatedFromDate) {
+	public void setInterestCalculatedFromDate(
+			LocalDate interestCalculatedFromDate) {
 		this.interestCalculatedFromDate = interestCalculatedFromDate;
 	}
 
