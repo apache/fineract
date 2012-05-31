@@ -1702,12 +1702,19 @@ Request Body:
         <div class="method-section">
             <div class="method-description">
                 <h4>Adjust a Repayment or Waiver</h4>
+                <p><b>Note:</b> there is no need to specify command={transactionType} parameter.</p>
             </div>
             <div class="method-example">
                 <code class="method-declaration">POST https://thedomainname/api/v1/loans/{loanId}/transactions/{transactionId}</code>
-                <code class="method-request">POST https://localhost:8443/mifosng-provider/api/v1/loans/10/transactions/20
-                Content-Type: application/json
-                Request Body:
+                <code class="method-request">POST https://localhost:8443/mifosng-provider/api/v1/loans/16/transactions/32
+Content-Type: application/json
+Request Body:{
+ "locale": "en_GB",
+ "dateFormat": "dd MMMM yyyy",
+ "transactionDate": "25 May 2012",
+ "transactionAmount": "50,000.00",
+ "note": "adj note"
+}
                 </code>
                 <code class="method-response">{
     "entityId": 10

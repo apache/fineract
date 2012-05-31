@@ -56,6 +56,8 @@ retrieve: display transaction type value?
 
 "principal" : null,   "interest" : null, total, "totalWaived" : null,   "overpaid" : null, and the offset - are nulls ever put in?
 
+adjust:
+when adjusting a disbursal - The server encountered an internal error () that prevented it from fulfilling this request.</u></p><p><b>exception</b> <pre>java.lang.IllegalArgumentException: Only repayment and waiver transactions can be adjusted.
 
  on create and adjust returns clientId can it be transaction id or loanId?
 list of loan transactions not available (except in summary presume repayments has repayments and waivers and adjusts)
