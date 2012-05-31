@@ -57,6 +57,8 @@
 	<input type="hidden" id="clientId" name="clientId" value="{{=clientId}}" />
 	<input type="hidden" id="currencyCode" name="currencyCode" value="{{=selectedProduct.principal.currencyCode}}" />
 	<input type="hidden" id="digitsAfterDecimal" name="digitsAfterDecimal" value="{{=$ctx.number(selectedProduct.principal.digitsAfterDecimal)}}" />
+	<input type="hidden" id="dateFormat" name="dateFormat" value="dd MMMM yyyy" />
+	<input type="hidden" id="locale" name="locale" value="${currentLocale}" />
 
 	<fieldset>
 		<legend><spring:message code="form.legend.loan.information"/></legend>
@@ -83,7 +85,6 @@
 					</td>
 					<td style="text-align:right;vertical-align:bottom;width:50px;">&nbsp;</td>
 					<td valign="top">
-						<input type="hidden" id="dateFormat" name="dateFormat" value="dd MMMM yyyy" />
 						<label for="submittedOnDate"><spring:message code="form.label.loan.submitted.on"/></label>
 						<input id="submittedOnDate" name="submittedOnDate" title="" type="text" class="datepickerfield" value="{{=$ctx.globalDate(submittedOnDate)}}" />
 
@@ -826,6 +827,8 @@
     <div id="formerrors"></div>
 
 	<input type="hidden" id="dateFormat" name="dateFormat" value="dd MMMM yyyy" />
+	<input type="hidden" id="locale" name="locale" value="{{=$ctx.currentLocale()}}" />
+
 	<label for="transactionDate"><spring:message code="label.loan.transaction.on"/></label>
 	<input id="transactionDate" name="transactionDate" class="text ui-widget-content ui-corner-all datepickerfield" title=""d value="{{=$ctx.globalDate(date)}}"/>
 

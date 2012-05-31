@@ -57,7 +57,7 @@ $(document).ready(function() {
 		},
 		globalDate: function(dateParts) {
 		      try {
-		    	  
+		    	  if (dateParts === 'undefined' || dateParts === undefined) return "";
 		    	  if (dateParts === null || dateParts === '') return "";
 		    	
 		    	  var year = dateParts[0];
@@ -69,7 +69,7 @@ $(document).ready(function() {
 		    	  
 		    	  return Globalize.format(d,"dd MMMM yyyy");
 		      } catch(e) {
-		        return "??";
+		        return dateParts + " ??";
 		      }
 		},
 		globalDateAsISOString: function(localDateAsISOString) {

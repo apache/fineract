@@ -30,6 +30,7 @@ public class ApplicationPagesRoutesController {
     	BasicAuthUserDetails userDetails = (BasicAuthUserDetails) authentication.getPrincipal();
     	model.addAttribute("basicAuthKey", userDetails.getBasicAuthenticationKey());
     	model.addAttribute("baseApiUrl", userDetails.getFullApiUrl());
+    	model.addAttribute("currentLocale", LocaleContextHolder.getLocale().toString());
     	
         return "redirect:/home";
     }
@@ -40,6 +41,7 @@ public class ApplicationPagesRoutesController {
 		BasicAuthUserDetails userDetails = (BasicAuthUserDetails) authentication.getPrincipal();
     	model.addAttribute("basicAuthKey", userDetails.getBasicAuthenticationKey());
     	model.addAttribute("baseApiUrl", userDetails.getFullApiUrl());
+    	model.addAttribute("currentLocale", LocaleContextHolder.getLocale().toString());
     	
 		return new ModelAndView("/home");
 	}
@@ -56,6 +58,7 @@ public class ApplicationPagesRoutesController {
     	model.addAttribute("basicAuthKey", userDetails.getBasicAuthenticationKey());
     	model.addAttribute("baseApiUrl", userDetails.getFullApiUrl());
 		model.addAttribute("clientId", clientId);
+		model.addAttribute("currentLocale", LocaleContextHolder.getLocale().toString());
 		return "client/viewClientAccount";
 	}
 	
@@ -75,6 +78,9 @@ public class ApplicationPagesRoutesController {
 		BasicAuthUserDetails userDetails = (BasicAuthUserDetails) authentication.getPrincipal();
     	model.addAttribute("basicAuthKey", userDetails.getBasicAuthenticationKey());
     	model.addAttribute("baseApiUrl", userDetails.getFullApiUrl());
+    	
+    	model.addAttribute("currentLocale", LocaleContextHolder.getLocale().toString());
+    	
 		return "admin/userhome";
 	}
 	
@@ -84,6 +90,9 @@ public class ApplicationPagesRoutesController {
     	model.addAttribute("basicAuthKey", userDetails.getBasicAuthenticationKey());
     	model.addAttribute("baseApiUrl", userDetails.getFullApiUrl());
     	model.addAttribute("userId", userDetails.getUserId());
+    	
+    	model.addAttribute("currentLocale", LocaleContextHolder.getLocale().toString());
+    	
 		return "admin/accountsettings";
 	}
 	
@@ -95,6 +104,8 @@ public class ApplicationPagesRoutesController {
     	model.addAttribute("baseApiUrl", userDetails.getFullApiUrl());
 		model.addAttribute("clientId", clientId);
 		
+		model.addAttribute("currentLocale", LocaleContextHolder.getLocale().toString());
+		
 		return "newloanapplication";
 	}
 	
@@ -104,6 +115,8 @@ public class ApplicationPagesRoutesController {
 		BasicAuthUserDetails userDetails = (BasicAuthUserDetails) authentication.getPrincipal();
     	model.addAttribute("basicAuthKey", userDetails.getBasicAuthenticationKey());
     	model.addAttribute("baseApiUrl", userDetails.getFullApiUrl());
+    	
+    	model.addAttribute("currentLocale", LocaleContextHolder.getLocale().toString());
     	
 		return "reports/flexireport";
 	}

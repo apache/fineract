@@ -27,7 +27,9 @@ $(document).ready(function() {
 	
 	// these helpers are registered for the jsViews and jsRender functionality to fix bug with display zero!
 	$.views.registerHelpers({
-			
+			currentLocale: function() {
+				return "${currentLocale}"; 
+			},
 			money: function(monetaryObj) {
 				
 				Globalize.culture().numberFormat.currency.symbol = monetaryObj.displaySymbol;

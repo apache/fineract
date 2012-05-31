@@ -22,7 +22,6 @@ import org.mifosng.platform.currency.domain.ApplicationCurrencyRepository;
 import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.exceptions.CurrencyNotFoundException;
 import org.mifosng.platform.exceptions.LoanNotFoundException;
-import org.mifosng.platform.exceptions.LoanProductNotFoundException;
 import org.mifosng.platform.exceptions.LoanTransactionNotFoundException;
 import org.mifosng.platform.loan.domain.Loan;
 import org.mifosng.platform.loan.domain.LoanRepository;
@@ -176,60 +175,44 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 	}
 
 	@Override
-	public NewLoanData retrieveClientAndProductDetails(final Long clientId,
-			final Long productId) {
+	public NewLoanData retrieveClientAndProductDetails(final Long clientId, final Long productId) {
 
-		AppUser currentUser = context.authenticatedUser();
+		context.authenticatedUser();
 
 		NewLoanData workflowData = new NewLoanData();
-		workflowData.setOrganisationId(currentUser.getOrganisation().getId());
-		workflowData.setOrganisationName(currentUser.getOrganisation()
-				.getName());
 
-		Collection<LoanProductLookup> loanProducts = this.loanProductReadPlatformService
-				.retrieveAllLoanProductsForLookup();
-		workflowData.setAllowedProducts(new ArrayList<LoanProductLookup>(
-				loanProducts));
+		Collection<LoanProductLookup> loanProducts = this.loanProductReadPlatformService.retrieveAllLoanProductsForLookup();
+		workflowData.setAllowedProducts(new ArrayList<LoanProductLookup>(loanProducts));
 
 		if (loanProducts.size() == 1) {
-			Long allowedProductId = workflowData.getAllowedProducts().get(0)
-					.getId();
-			LoanProductData selectedProduct = this.loanProductReadPlatformService
-					.retrieveLoanProduct(allowedProductId);
-			if (selectedProduct == null) {
-				throw new LoanProductNotFoundException(allowedProductId);
-			}
+			Long allowedProductId = workflowData.getAllowedProducts().get(0).getId();
+			LoanProductData selectedProduct = this.loanProductReadPlatformService.retrieveLoanProduct(allowedProductId);
 
 			workflowData.setProductId(selectedProduct.getId());
 			workflowData.setProductName(selectedProduct.getName());
 			workflowData.setSelectedProduct(selectedProduct);
 		} else {
-			LoanProductData selectedProduct = findLoanProductById(loanProducts,
-					productId);
-			if (selectedProduct == null) {
-				throw new LoanProductNotFoundException(productId);
-			}
+			LoanProductData selectedProduct = findLoanProductById(loanProducts, productId);
+			
 			workflowData.setProductId(selectedProduct.getId());
 			workflowData.setProductName(selectedProduct.getName());
 			workflowData.setSelectedProduct(selectedProduct);
 		}
 
-		ClientData clientAccount = this.clientReadPlatformService
-				.retrieveIndividualClient(clientId);
+		ClientData clientAccount = this.clientReadPlatformService.retrieveIndividualClient(clientId);
 		workflowData.setClientId(clientAccount.getId());
 		workflowData.setClientName(clientAccount.getDisplayName());
+		
+		workflowData.setExpectedDisbursementDate(new LocalDate());
 
 		return workflowData;
 	}
 
-	private LoanProductData findLoanProductById(
-			Collection<LoanProductLookup> loanProducts, Long productId) {
-		LoanProductData match = this.loanProductReadPlatformService
-				.retrieveNewLoanProductDetails();
+	private LoanProductData findLoanProductById(Collection<LoanProductLookup> loanProducts, Long productId) {
+		LoanProductData match = this.loanProductReadPlatformService.retrieveNewLoanProductDetails();
 		for (LoanProductLookup loanProductLookup : loanProducts) {
 			if (loanProductLookup.getId().equals(productId)) {
-				match = this.loanProductReadPlatformService
-						.retrieveLoanProduct(loanProductLookup.getId());
+				match = this.loanProductReadPlatformService.retrieveLoanProduct(loanProductLookup.getId());
 				break;
 			}
 		}
