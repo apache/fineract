@@ -21,7 +21,6 @@ public class Note extends AbstractAuditableCustom<AppUser, Long> {
     @JoinColumn(name = "org_id", nullable = false)
     private final Organisation organisation;
 
-    @SuppressWarnings("unused")
 	@ManyToOne
     @JoinColumn(name = "client_id", nullable = false)
     private final Client       client;
@@ -112,5 +111,9 @@ public class Note extends AbstractAuditableCustom<AppUser, Long> {
 
 	public void update(final String note) {
 		this.note = note;
+	}
+
+	public boolean isNotAgainstClientWithIdOf(Long clientId) {
+		return !this.client.identifiedBy(clientId);
 	}
 }

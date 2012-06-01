@@ -86,6 +86,10 @@ public class Client extends AbstractAuditableCustom<AppUser, Long> {
 	public boolean identifiedBy(final String identifier) {
 		return identifier.equalsIgnoreCase(this.externalId);
 	}
+	
+	public boolean identifiedBy(Long clientId) {
+		return getId().equals(clientId);
+	}
 
 	public void update(ClientCommand command) {
 		this.joiningDate = command.getJoiningLocalDate().toDate();
