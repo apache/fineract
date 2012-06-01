@@ -4,10 +4,6 @@ POSSIBLE CHANGES TO APP OR DOCUMENTATION
 list clients notes - noteType needs a 'text' DOING
 	createdOn & updatedOn values... do they need reformatting? DOING
 
-
-updating client note - produces valid json message although if the clientId is wrong the msg is "Note with identifier 25 does not exist" rather than something like "Note with client identifier 25 does not exist"
-
-
 loan template - repaymentSchedule is null - I can't see it set in the app
 
 
