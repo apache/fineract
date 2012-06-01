@@ -71,9 +71,6 @@ var jqxhr = $.ajax({
         dataType : 'json',
         data : "{}",
         cache : false,
-        //beforeSend : function(xhr) {
-        //        xhr.setRequestHeader("Authorization", "Basic " + basicAuthKey);
-        //},
         success : function(data, textStatus, jqXHR) {     
             basicAuthKey = data.base64EncodedAuthenticationKey;
             showMandatoryFieldsAjax(url, resultDiv);
@@ -210,12 +207,16 @@ var jqxhr = $.ajax({
                 <p>
                 The Mifos X API is organized around
                 <a href="http://en.wikipedia.org/wiki/Representational_State_Transfer">REST</a>.
-                Our API is designed to have predictable, resource-oriented
-                URLs, to use HTTP response codes to indicate API errors, and
-                to use built-in HTTP features, like HTTP authentication and
+                </p>
+                <p>
+                The API is designed to have: <br>
+                - predictable, resource-oriented URLs<br>
+                - to use HTTP response codes to indicate API errors<br>
+                - to use built-in HTTP features, like HTTP authentication and
                 HTTP verbs, which can be understood by off-the-shelf HTTP
-                clients. <a href="http://www.json.org/">JSON</a> will be
-                returned in all responses from the API, including errors.
+                clients.
+                </p>
+                <p><a href="http://www.json.org/">JSON</a> is returned in all responses from the API, including errors.
                 </p>
                 <p>
                 Much of the API presentation and design ideas are owed to the excellent <a href="http://info.apigee.com/Portals/62317/docs/web%20api.pdf">Apigee "Web API Design" eBook/PDF</a> and the very good <a href="https://stripe.com/docs/api">Stripe API reference</a>. 
@@ -228,7 +229,11 @@ var jqxhr = $.ajax({
         <div class="method-section">
             <div class="method-description">
                 <h3>Try The API From Your Browser</h3>
-                <p>GET (read) examples can be run directly from this documentation.  If you want to check out the POST, PUT and DELETE (update) examples a good approach is to
+                <p>GET (read) examples can be run directly from this documentation.  It is just a matter of clicking a link.
+                Most browsers display the output on the same page (or another tab if you right click and select that option).
+                Internet Explorer will probably treat the output as if you wanted to download a file.
+                In that case just elect to open the output in a text editor.</p>
+                <p>If you want to check out the POST, PUT and DELETE (update) examples a good approach is to take a moment to
                 install a REST plugin for your browser e.g. RESTClient for FireFox</p>
                 The REST plugins will allow you to
                 <ul>
@@ -236,7 +241,7 @@ var jqxhr = $.ajax({
                     <li class=normalli>Enter the resource name (e.g. https://localhost:8443/mifosng-provider/api/v1/offices)</li>
                     <li class=normalli>Add a header to indicate you are sending JSON data as part of the request body (e.g. Content-Type: application/json)</li>
                     <li class=normalli>Paste the example JSON into a Request Body</li>
-                    <li class=normalli>Send the Request (and recieve a Response)</li>
+                    <li class=normalli>Send the Request (and receive a Response)</li>
                 </ul>
              </div>
     
@@ -254,7 +259,7 @@ var jqxhr = $.ajax({
                     <li class=normalli>Allowed Value Lists</li>    
                     </ul>
                 </p>
-                <p>Also, many "Retrieve a" type resource (<a href="#clients_retrieve">Retrieve a Client</a> for example) allow the parameter option "template=true".
+                <p>Also, many "Retrieve a" type resources (<a href="#clients_retrieve">Retrieve a Client</a> for example) allow the parameter option "template=true".
                 This appends any "Allowed Value Lists" which can be useful when building update functionality.</p>
                 
                 <h4>Restrict Returned Fields</h4>
@@ -265,8 +270,9 @@ var jqxhr = $.ajax({
                 </a>
                 <p></p>
                 <h4>Pretty JSON Formatting</h4>
-                <p>Parameter "pretty=true" can be used to display JSON from GET requests in an easily readable format.  This parameter is used in this documentation so that GET requests are immediately viewable.</p>
-                <p>If you want easily readable JSON output for POSTs, PUTs and DELETEs it will available in the REST plugin you use e.g. RESTClient for FireFox</p>
+                <p>Parameter "pretty=true" can be used to display JSON from GET requests in an easy-to-read format.
+                This parameter is used in this documentation.</p>
+                <p>Easy-to-read JSON output for POSTs, PUTs and DELETEs will available in the REST plugin you use e.g. RESTClient for FireFox</p>
             </div>
     
         </div>
@@ -276,12 +282,12 @@ var jqxhr = $.ajax({
             <div class="method-description">
                 <h3>Creating and Updating</h3>
                 <p>
-                When you want to 'Create a...' you have to at least supply the mandatory fields.
-                You can see which fields are mandatory by clicking the 'Show Mandatory Fields' button under the relevant 'Create a ...' heading.
+                When you want to 'Create a ...' you have to at least supply the mandatory fields.
+                The mandatory fields are listed in this documentation under the relevant 'Create a ...' heading.
                 </p>
                 
                 <p>
-                When you want to 'Update a...' you can update individual fields or a combination of fields (subject to data integrity rules).
+                When you want to 'Update a ...' you can update individual fields or a combination of fields (subject to data integrity rules).
                 </p>
             </div>
     
@@ -333,48 +339,60 @@ JSON examples:
         <a id="authentication_overview" name="authentication_overview" class="old-syle-anchor">&nbsp;</a>
         <div class="method-section">
             <div class="method-description">
-                <h3>Authentication Overview</h3>
+                <h3>Authentication Overview</h3>              
                 <p>
-                JPW: Keith, this needs to change to whatever is right after authentication has been added.  Don't know if you will go with keys or passwords (I assume passwords)... but can you fix it so we have one user or one user per role that doesn't need a password or always has a password of 'password' so we can let ppl do stuff from the browser and/or REST plugins?  We can talk about this.
-                </p>
-                <p>
-                STRIPE content:  You authenticate to the Mifos X API by providing one of
-                your API keys in the request.  You can manage your API
-                keys from your
-                <a href="https://manage.stripe.com/#account">account</a>.
-                You can have multiple API keys
-                active at one time.  Your API keys carry many
-                privileges, so be sure to keep them secret!
+                Authentication to the API occurs via <a href="http://en.wikipedia.org/wiki/Basic_access_authentication">HTTP Basic Auth</a>.  
                 </p>
                 
                 <p>
-                Authentication to the API occurs via
-                <a href="http://en.wikipedia.org/wiki/Basic_access_authentication">
-                HTTP Basic Auth</a>.  Provide your API key as the basic
-                auth username.  You do not need to provide a password.
-                </p>
-                
-                <p>
-                All API requests must be made
-                over <a href="http://en.wikipedia.org/wiki/HTTP_Secure">HTTPS</a>.
-                Calls made over plain HTTP will fail.  You must
-                authenticate for all requests.
+                All API requests must be made over <a href="http://en.wikipedia.org/wiki/HTTP_Secure">HTTPS</a>.
+                Calls made over plain HTTP will fail.  You must authenticate for all requests.
                 </p>
             </div>
             <div class="method-example">
-                <code class="method-request"><span class="prompt curl"></span>curl https://api.stripe.com/api/v1/charges \
-        -u vtUQeOtUnYr7PGCLQ96Ul4zqpDUO4sOE:
+                <code>
+//   A Javascript/Jquery example of how to login to Mifos X and use its api.
+
+//   Typically, the javascript application would
+//   1) Display a login page to retrieve the username and password.
+//   2) Send the username and password to a function
+//      such as setBasicAuthKey below which sets the HTTP Basic Auth key.
+//   3) The HTTP Basic Auth key is used in all subsequent requests
+//      (see the function executeAjaxRequest below).
+
+function setBasicAuthKey(username, password) {
+var jqxhr = $.ajax({
+        url : "https://localhost:8443/mifosng-provider/api/v1/authentication?username=" + username + "&password=" + password,
+        type : 'POST',
+        contentType : "application/json; charset=utf-8",
+        dataType : 'json',
+        data : "{}",
+        cache : false,
+        success : function(data, textStatus, jqXHR) {     
+            basicAuthKey = data.base64EncodedAuthenticationKey;
+        },
+        error : function(jqXHR, textStatus, errorThrown) {
+            //error processing
+        }
+    });
+}
+
+function executeAjaxRequest(url, verbType, jsonData, basicAuthKey, successFunction, errorFunction) {
+var jqxhr = $.ajax({
+        url : url,
+        type : verbType, //POST, GET, PUT or DELETE
+        contentType : "application/json; charset=utf-8",
+        dataType : 'json',
+        data : jsonData,
+        cache : false,
+        beforeSend : function(xhr) {
+                xhr.setRequestHeader("Authorization", "Basic " + basicAuthKey);
+        },
+        success : successFunction,
+        error : errorFunction
+    });
+}
                 </code>
-                <p>
-                JPW: We'll update this after...
-                curl uses the -u flag to pass basic auth 
-                credentials (adding a colon after your API key will prevent
-                it from asking you for a password).
-                
-                A sample test API key has been provided in all 
-                the examples on the page, so you can test out any example right away.
-                
-                </p>
             </div>
         </div>
     
@@ -897,39 +915,6 @@ Request Body:
   "clientName" : "Patrick O'Meara",
   "productId" : 1,
   "productName" : "Agricultural Loan",
-  "allowedProducts" : [ {
-    "id" : 1,
-    "name" : "Agricultural Loan"
-  }, {
-    "id" : 2,
-    "name" : "Brunei Loan"
-  }, {
-    "id" : 3,
-    "name" : "IL Loan"
-  }, {
-    "id" : 4,
-    "name" : "IBL Mabeshte"
-  }, {
-    "id" : 5,
-    "name" : "Salary Loan"
-  }, {
-    "id" : 6,
-    "name" : "daily-declining-balance"
-  }, {
-    "id" : 7,
-    "name" : "really fantastic loan"
-  } ],
-  "dateFormat" : null,
-  "submittedOnDateFormatted" : null,
-  "submittedOnDate" : null,
-  "submittedOnNote" : "",
-  "expectedDisbursementDateFormatted" : null,
-  "expectedDisbursementDate" : [ 2012, 5, 31 ],
-  "repaymentsStartingFromDateFormatted" : null,
-  "repaymentsStartingFromDate" : null,
-  "interestCalculatedFromDateFormatted" : null,
-  "interestCalculatedFromDate" : null,
-  "repaymentSchedule" : null,
   "selectedProduct" : {
     "id" : 1,
     "name" : "Agricultural Loan",
@@ -1079,7 +1064,28 @@ Request Body:
       "code" : "interestRateFrequency.periodFrequencyType.years",
       "value" : "Per year"
     } ]
-  }
+  },
+  "expectedDisbursementDate" : [ 2012, 6, 1 ],
+  "repaymentSchedule" : null,
+  "allowedProducts" : [ {
+    "id" : 1,
+    "name" : "Agricultural Loan"
+  }, {
+    "id" : 2,
+    "name" : "Brunei Loan"
+  }, {
+    "id" : 3,
+    "name" : "IL Loan"
+  }, {
+    "id" : 4,
+    "name" : "IBL Mabeshte"
+  }, {
+    "id" : 5,
+    "name" : "Salary Loan"
+  }, {
+    "id" : 6,
+    "name" : "daily-declining-balance"
+  } ]
 }
 </code>
     </div>
@@ -1708,7 +1714,8 @@ Request Body:
                 <code class="method-declaration">POST https://thedomainname/api/v1/loans/{loanId}/transactions/{transactionId}</code>
                 <code class="method-request">POST https://localhost:8443/mifosng-provider/api/v1/loans/16/transactions/32
 Content-Type: application/json
-Request Body:{
+Request Body:
+{
  "locale": "en_GB",
  "dateFormat": "dd MMMM yyyy",
  "transactionDate": "25 May 2012",
@@ -2852,6 +2859,14 @@ Request Body:
 	    <div class="method-description">
 	        <h4>Verify authentication</h4>
 	        <p>Authenticates the credentials provided and returns the set of permissions allowed.</p>
+                
+                <table class=matrixHeading>
+                    <tr class="matrixHeadingBG"><td><div class="matrixHeadingVerbs">Field Descriptions</div></td></tr>
+                    <tr class=alt><td>base64EncodedAuthenticationKey</td></tr>
+                    <tr><td class=fielddesc>HTTP Basic Auth key.
+                        See <a href="#authentication_overview">Authentication Overview</a> for an example of its use.</td></tr>
+                    </tr>
+                </table>
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">POST https://thedomainname/api/v1/authentication?username={username}&password={password}</code>

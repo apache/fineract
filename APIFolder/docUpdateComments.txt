@@ -1,71 +1,72 @@
-Lost permissions again... restore fixed it up... must be some prob with permissions/roles maintenance
-also, maybe I should be using a user that has everything but role admin.
-recreate() problem ME DO - couldn't recreate by update user roles... maybe was to do with office 1 have a parentId?
-
+POSSIBLE CHANGES TO APP OR DOCUMENTATION
 
 
 list clients notes - noteType needs a 'text' DOING
 	createdOn & updatedOn values... do they need reformatting? DOING
 
-updating client note - ignores clientId anyhow! so is it really a notes resource? DOING
 
-loan template
-Formatted field still there DOING
+updating client note - produces valid json message although if the clientId is wrong the msg is "Note with identifier 25 does not exist" rather than something like "Note with client identifier 25 does not exist"
+
+
+loan template - repaymentSchedule is null - I can't see it set in the app
+
 
 loan retrieve DOING
-break up data into categories.. e.g. 
-Basic - lifeCycleStatusText thru
-Convenience - open thru waitingForDisbursal then maxSubmittedOnOffsetFromToday, maxApprovedOnOffsetFromToday , maxDisbursedOnOffsetFromToday, actualLoanTermInDays, actualLoanTermInMonths,  loanTermInDays, loanTermInMonths
-Permission - undoDisbursalAllowed, waiveAllowed, makeRepaymentAllowed, rejectAllowed, withdrawnByApplicantAllowed, undoApprovalAllowed, disbursalAllowed, anyActionOnLoanAllowed
-
-flatten loadData
-repaymentSchedule
-summary
-loanRepayments
-
----------------------------------------------
-LOAN TRANSITIONS approve etc.
-if  "eventLocalDate" parameter added with string date then instead of parameter not support msg do get jackson conversion exception.
-
-approve loan (already closed) with approval date before submitted date
-The server encountered an internal error () that prevented it from fulfilling this request.</u></p><p><b>exception</b> <pre>org.mifosng.platform.loan.domain.InvalidLoanTimelineDate: The date of when loan is approved cannot be before its submittal date.
-
-approve loan (already closed) with approval date after submitted date
-Column 'loan_status_id' cannot be null; SQL [n/a]; constraint [null]; nested exception is org.hibernate.exception.ConstraintViolationException: Column 'loan_status_id' cannot be null
-
-if I do an approve when already approved also get
-Column 'loan_status_id' cannot be null; SQL [n/a]; constraint [null]; nested exception is org.hibernate.exception.ConstraintViolationException: Column 'loan_status_id' cannot be null
+   break up data into categories.. e.g. 
+   Basic - lifeCycleStatusText thru
+   Convenience - open thru waitingForDisbursal then maxSubmittedOnOffsetFromToday, maxApprovedOnOffsetFromToday , maxDisbursedOnOffsetFromToday, actualLoanTermInDays,    actualLoanTermInMonths,  loanTermInDays, loanTermInMonths
+   Permission - undoDisbursalAllowed, waiveAllowed, makeRepaymentAllowed, rejectAllowed, withdrawnByApplicantAllowed, undoApprovalAllowed, disbursalAllowed, anyActionOnLoanAllowed
+   flatten loadData
+       repaymentSchedule
+       summary
+       loanRepayments
 
 
+Loan Transitions ... approve etc
+    if  "eventLocalDate" parameter added with string date then instead of parameter not support msg do get jackson conversion exception.
+    approve loan (already closed) with approval date before submitted date
+    The server encountered an internal error () that prevented it from fulfilling this request.</u></p><p><b>exception</b> <pre>org.mifosng.platform.loan.domain.InvalidLoanTimelineDate: The     date    of when loan is approved cannot be before its submittal date.
+
+   approve loan (already closed) with approval date after submitted date
+    Column 'loan_status_id' cannot be null; SQL [n/a]; constraint [null]; nested exception is org.hibernate.exception.ConstraintViolationException: Column 'loan_status_id' cannot be null
+
+   if I do an approve when already approved also get
+   Column 'loan_status_id' cannot be null; SQL [n/a]; constraint [null]; nested exception is org.hibernate.exception.ConstraintViolationException: Column 'loan_status_id' cannot be null
+
+   sometimes clientId returned... always loanId OK?
 
 
-sometimes clientId returned... always loanId OK?
-
-LOAN TRANSACTIONS (repay and waive - and maybe reversal - but not disbursement) general talk needed as retrieve could work for any txn?
-transaction type... UNKNOWN(0), DISBURSEMENT(1), REPAYMENT(2), REVERSAL(3), WAIVED(4);
-Create - (command has string and proper value fields... so assume its like eventDate above)
-If you undo disbursal does it undo the loantransaction? - didnt test
-Template - does waiver amount default to 'rest of loan' cos it looked like it missed out on other waivers. didn't test
+Loan Transactions (repay and waive - and maybe reversal - but not disbursement) general talk needed as retrieve could work for any txn?
+    transaction type... UNKNOWN(0), DISBURSEMENT(1), REPAYMENT(2), REVERSAL(3), WAIVED(4);
+    Create - (command has string and proper value fields... so assume its like eventDate above)
+    If you undo disbursal does it undo the loantransaction? - didnt test
+    Template - does waiver amount default to 'rest of loan' cos it looked like it missed out on other waivers. didn't test
 	repayment amount matches current installment outstanding amount w/o taking waivers into account.
-check descriptions - couldn't test because of invalid locale
+    check descriptions - couldn't test because of invalid locale
+    retrieve: display transaction type value?
+    "principal" : null,   "interest" : null, total, "totalWaived" : null,   "overpaid" : null, and the offset - are nulls ever put in?
+    adjust:
+    when adjusting a disbursal - The server encountered an internal error () that prevented it from fulfilling this request.</u></p><p><b>exception</b> <pre>java.lang.IllegalArgumentException:         Only repayment and waiver transactions can be adjusted.
+    on create and adjust, app returns clientId can it be transaction id or loanId?
 
-retrieve: display transaction type value?
 
-"principal" : null,   "interest" : null, total, "totalWaived" : null,   "overpaid" : null, and the offset - are nulls ever put in?
 
-adjust:
-when adjusting a disbursal - The server encountered an internal error () that prevented it from fulfilling this request.</u></p><p><b>exception</b> <pre>java.lang.IllegalArgumentException: Only repayment and waiver transactions can be adjusted.
+BUT NOT FOR NOWS
+should be able to get clients by branch as well
+also get loans of different status's by branch etc
+list of loan transactions not available (except in summary - presume repayments section has repayments and waivers and adjusts)
 
- on create and adjust returns clientId can it be transaction id or loanId?
-list of loan transactions not available (except in summary presume repayments has repayments and waivers and adjusts)
 
----------------------------------------------------------
-should be able to get clients by branch as well (but not for now)
-also get loans of different status's by branch etc (but not for now)
+
+
+DOCUMENTATION REMAINING
+
+Just Errors section to do in the Overview section
 
 Loans - what does Keith think about a description
 
 Identify Fields that need explaining
+=========================
 Clients
 displayName, externalId, maxJoinedOnOffsetFromToday
 

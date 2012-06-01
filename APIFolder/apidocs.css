@@ -10,7 +10,7 @@
 .matrixHeading { 
 	font-family: Helvetica, Arial, sans-serif;
 	border-collapse:collapse;
-	border:3px solid #6eb4db;
+	border 3px solid #6eb4db;
 	width:100%;
 }
 
@@ -42,6 +42,12 @@
 .matrixHeadingCommands {
     	color: rgb(240, 240, 255);
 }
+
+.fielddesc {
+	padding-bottom:20px;
+	padding-left:40px;
+}
+
 
 .normalli {list-style:disc outside none;}
 
