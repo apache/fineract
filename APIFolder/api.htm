@@ -826,8 +826,51 @@ Request Body:
         <div class="method-section">
             <div class="method-description">
                 <h3>Loans</h3>
-                <p>overview here
-                </p>
+                <table class=matrixHeading>
+                    <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Field Descriptions</div></td></tr>
+                    <tr class=alt><td>digitsAfterDecimal</td></tr>
+                    <tr><td class=fielddesc>Override the loan product default value for digitsAfterDecimal.</td></tr>
+                    </tr>
+                    <tr class=alt><td>principal</td></tr>
+                    <tr><td class=fielddesc>Loan amount.</td></tr>
+                    <tr class=alt><td>inArrearsTolerance</td></tr>
+                    <tr><td class=fielddesc></td></tr>
+                    <tr class=alt><td>numberOfRepayments</td></tr>
+                    <tr><td class=fielddesc>Number of installments to repay.<br>
+                    Used like: numberOfRepayments Every repaymentEvery repaymentFrequencyType<br>
+                    e.g. <b>10</b> (repayments) Every 12 Weeks</td></tr>
+                    <tr class=alt><td>interestRatePerPeriod</td></tr>
+                    <tr><td class=fielddesc>Interest Rate.<br>
+                    Used like: interestRatePerPeriod% interestRateFrequencyType - interestType<br>
+                    e.g. <b>12.0000</b>%  Per year - Declining Balance</td></tr>
+                    <tr class=alt><td>repaymentEvery</td></tr>
+                    <tr><td class=fielddesc>Used like: numberOfRepayments Every repaymentEvery repaymentFrequencyType<br>
+                    e.g. 10 (repayments) Every <b>12</b> Weeks</td></tr>
+                    <tr><td class=fieldtype>Each of the items below has an id, code and (english) value.<br>
+                    Only the id (integer) is used when updating.  All 3 are returned on GET (read) requests.<br>
+                    The options are fully listed in <a href="#loanproducts_template">Retrieve Loan Product Details Template</a>.
+                    </td></tr>
+                    <tr class=alt><td>repaymentFrequencyType</td></tr>
+                    <tr><td class=fielddesc>Used like: numberOfRepayments Every repaymentEvery repaymentFrequencyType<br>
+                    e.g. 10 (repayments) Every 12 <b>Weeks</b>
+                    <br><span>Example Values:</span> Days, Weeks, Months
+                    </td></tr>
+                    <tr class=alt><td>interestRateFrequencyType</td></tr>
+                    <tr><td class=fielddesc>Used like: interestRatePerPeriod% interestRateFrequencyType - interestType<br>
+                    e.g. 12.0000%  <b>Per year</b> - Declining Balance
+                    <br><span>Example Values:</span> Per month, Per year</td></tr>
+                    <tr class=alt><td>amortizationType</td></tr>
+                    <tr><td class=fielddesc>
+                        <span>Example Values:</span> Equal principle payments, Equal installments</td></tr></td></tr>
+                    <tr class=alt><td>interestType</td></tr>
+                    <tr><td class=fielddesc>Used like: interestRatePerPeriod% interestRateFrequencyType - interestType<br>
+                    e.g. 12.0000%  Per year - <b>Declining Balance</b>
+                    <br><span>Example Values:</span> Declining Balance, Flat</td></tr></td></tr>
+                    <tr class=alt><td>interestCalculationPeriodType</td></tr>
+                    <tr><td class=fielddesc>
+                        <span>Example Values:</span> Same as repayment period, Daily</td></tr></td></tr>
+                    </tr>
+                </table>
                 <table class=matrixHeading>
                     <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Field Descriptions</div></td></tr>
                     <tr class=alt><td>externalId</td></tr>
