@@ -10,7 +10,7 @@
 .matrixHeading { 
 	font-family: Helvetica, Arial, sans-serif;
 	border-collapse:collapse;
-	border 3px solid #6eb4db;
+	border: 3px solid #6eb4db;
 	width:100%;
 }
 
