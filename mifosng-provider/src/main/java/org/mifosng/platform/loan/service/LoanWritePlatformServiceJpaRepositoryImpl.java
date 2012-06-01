@@ -312,7 +312,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 						interest.getAmount());
 				modifiedLoanRepaymentSchedule.add(installment);
 			}
-			loan.disburseWithModifiedRepaymentSchedule(actualDisbursementDate, noteText, modifiedLoanRepaymentSchedule, defaultLoanLifecycleStateMachine());
+			loan.disburseWithModifiedRepaymentSchedule(actualDisbursementDate, modifiedLoanRepaymentSchedule, defaultLoanLifecycleStateMachine());
 		} else {
 			loan.disburse(actualDisbursementDate, defaultLoanLifecycleStateMachine());
 		}

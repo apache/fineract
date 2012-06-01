@@ -33,6 +33,7 @@ import org.mifosng.platform.api.data.MoneyData;
 import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.currency.domain.Money;
+import org.mifosng.platform.exceptions.InvalidLoanStateTransitionException;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
 import org.mifosng.platform.loanproduct.service.LoanEnumerations;
 import org.mifosng.platform.organisation.domain.Organisation;
@@ -72,6 +73,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	@Column(name = "rejectedon_date")
 	private Date rejectedOnDate;
 
+	@SuppressWarnings("unused")
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "withdrawnon_date")
 	private Date withdrawnOnDate;
@@ -199,16 +201,14 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 			this.interestChargedFromDate = interestChargedFromDate.toDateMidnight().toDate();
 		}
 		
-		if (new LocalDate(this.submittedOnDate).isAfter(new LocalDate())) {
-			throw new InvalidLoanTimelineDate(
-					"The loan application submit date cannot be in the future.",
-					"invalid.submit.date.as.date.is.in.future");
+		if (submittedOn.isAfter(new LocalDate())) {
+			final String errorMessage = "The date on which a loan is submitted cannot be in the future.";
+			throw new InvalidLoanStateTransitionException("submittal", "cannot.be.a.future.date", errorMessage, submittedOn);
 		}
-		if (new LocalDate(this.submittedOnDate).isAfter(new LocalDate(
-				this.expectedDisbursedOnDate))) {
-			throw new InvalidLoanTimelineDate(
-					"The loan application submit date cannot be after its expected disbursement date.",
-					"invalid.submit.date.as.date.is.after.expected.disbursement.date");
+		
+		if (submittedOn.isAfter(getExpectedDisbursedOnLocalDate())) {
+			final String errorMessage = "The date on which a loan is submitted cannot be after its expected disbursement date: " + getExpectedDisbursedOnLocalDate().toString();
+			throw new InvalidLoanStateTransitionException("submittal", "cannot.be.after.expected.disbursement.date", errorMessage, submittedOn, getExpectedDisbursedOnLocalDate());
 		}
 	}
 
@@ -218,16 +218,14 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		
 		this.rejectedOnDate = rejectedOn.toDateTimeAtCurrentTime().toDate();
 		this.closedOnDate = rejectedOn.toDateTimeAtCurrentTime().toDate();
-		if (new LocalDate(this.rejectedOnDate).isBefore(new LocalDate(
-				this.submittedOnDate))) {
-			throw new InvalidLoanTimelineDate(
-					"The loan rejection date cannot be before its submittal date.",
-					"invalid.rejection.date.as.date.is.before.submittal.date");
+		
+		if (rejectedOn.isBefore(getSubmittedOnDate())) {
+			final String errorMessage = "The date on which a loan is rejected cannot be before its submittal date: " + getSubmittedOnDate().toString();
+			throw new InvalidLoanStateTransitionException("reject", "cannot.be.before.submittal.date", errorMessage, rejectedOn, getSubmittedOnDate());
 		}
-		if (new LocalDate(this.rejectedOnDate).isAfter(new LocalDate())) {
-			throw new InvalidLoanTimelineDate(
-					"The loan application rejection date cannot be in the future.",
-					"invalid.rejection.date.as.date.is.in.future");
+		if (rejectedOn.isAfter(new LocalDate())) {
+			final String errorMessage = "The date on which a loan is rejected cannot be in the future.";
+			throw new InvalidLoanStateTransitionException("reject", "cannot.be.a.future.date", errorMessage, rejectedOn);
 		}
 	}
 
@@ -237,32 +235,29 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		
 		this.withdrawnOnDate = withdrawnOn.toDateTimeAtCurrentTime().toDate();
 		this.closedOnDate = withdrawnOn.toDateTimeAtCurrentTime().toDate();
-		if (new LocalDate(this.withdrawnOnDate).isBefore(new LocalDate(
-				this.submittedOnDate))) {
-			throw new InvalidLoanTimelineDate(
-					"The date of when loan is withdrawn cannot be before its submittal date.",
-					"invalid.withdrawal.date.as.date.is.before.submittal.date");
+		
+		if (withdrawnOn.isBefore(getSubmittedOnDate())) {
+			final String errorMessage = "The date on which a loan is withdrawn cannot be before its submittal date: " + getSubmittedOnDate().toString();
+			throw new InvalidLoanStateTransitionException("reject", "cannot.be.before.submittal.date", errorMessage, withdrawnOn, getSubmittedOnDate());
 		}
-		if (new LocalDate(this.withdrawnOnDate).isAfter(new LocalDate())) {
-			throw new InvalidLoanTimelineDate(
-					"The loan application withdraw date cannot be in the future.",
-					"invalid.withdrawal.date.as.date.is.in.future");
+		if (withdrawnOn.isAfter(new LocalDate())) {
+			final String errorMessage = "The date on which a loan is withdrawn cannot be in the future.";
+			throw new InvalidLoanStateTransitionException("reject", "cannot.be.a.future.date", errorMessage, withdrawnOn);
 		}
 	}
 
 	public void approve(final LocalDate approvedOn, LoanLifecycleStateMachine loanLifecycleStateMachine) {
 		this.loanStatus = loanLifecycleStateMachine.transition(LoanEvent.LOAN_APPROVED, this.loanStatus);
 		this.approvedOnDate = approvedOn.toDateTimeAtCurrentTime().toDate();
-		if (new LocalDate(this.approvedOnDate).isBefore(new LocalDate(
-				this.submittedOnDate))) {
-			throw new InvalidLoanTimelineDate(
-					"The date of when loan is approved cannot be before its submittal date.",
-					"invalid.approval.date.as.date.is.before.submittal.date");
+		
+		LocalDate submittalDate = new LocalDate(this.submittedOnDate);
+		if (approvedOn.isBefore(submittalDate)) {
+			final String errorMessage = "The date on which a loan is approved cannot be before its submittal date: " + submittalDate.toString();
+			throw new InvalidLoanStateTransitionException("approval", "cannot.be.before.submittal.date", errorMessage, getApprovedOnDate(), submittalDate);
 		}
-		if (new LocalDate(this.approvedOnDate).isAfter(new LocalDate())) {
-			throw new InvalidLoanTimelineDate(
-					"The date of when loan is approved cannot be in the future.",
-					"invalid.approval.date.as.date.is.in.future");
+		if (approvedOn.isAfter(new LocalDate())) {
+			final String errorMessage = "The date on which a loan is approved cannot be in the future.";
+			throw new InvalidLoanStateTransitionException("approval", "cannot.be.a.future.date", errorMessage, getApprovedOnDate());
 		}
 	}
 
@@ -273,7 +268,6 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 
 	public void disburseWithModifiedRepaymentSchedule(
 			final LocalDate disbursedOn,
-			final String comment,
 			final List<LoanRepaymentScheduleInstallment> modifiedLoanRepaymentSchedule, LoanLifecycleStateMachine loanLifecycleStateMachine) {
 		this.repaymentScheduleInstallments.clear();
 		for (LoanRepaymentScheduleInstallment modifiedInstallment : modifiedLoanRepaymentSchedule) {
@@ -296,23 +290,21 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		loanTransaction.updateLoan(this);
 		loanTransaction.updateOrganisation(organisation);
 		this.loanTransactions.add(loanTransaction);
-
-		if (disbursedOn.isBefore(new LocalDate(this.approvedOnDate))) {
-			throw new InvalidLoanTimelineDate(
-					"The date of when loan is disbursed cannot be before its approval date.",
-					"invalid.disbursal.as.disbursement.date.is.before.approved.date");
+		
+		if (disbursedOn.isBefore(getApprovedOnDate())) {
+			final String errorMessage = "The date on which a loan is disbursed cannot be before its approval date: " + getApprovedOnDate().toString();
+			throw new InvalidLoanStateTransitionException("disbursal", "cannot.be.before.approval.date", errorMessage, disbursedOn, getApprovedOnDate());
 		}
+		
 		if (disbursedOn.isAfter(new LocalDate())) {
-			throw new InvalidLoanTimelineDate(
-					"The date of when loan is disbursed cannot be in the future.",
-					"invalid.disbursal.as.disbursement.date.is.in.future");
+			final String errorMessage = "The date on which a loan is disbursed cannot be in the future.";
+			throw new InvalidLoanStateTransitionException("disbursal", "cannot.be.a.future.date", errorMessage, disbursedOn);
 		}
-		LocalDate firstRepaymentDueDate = this.repaymentScheduleInstallments
-				.get(0).getDueDate();
+
+		LocalDate firstRepaymentDueDate = this.repaymentScheduleInstallments.get(0).getDueDate();
 		if (disbursedOn.isAfter(firstRepaymentDueDate)) {
-			throw new InvalidLoanTimelineDate(
-					"The date of when loan is disbursed cannot be after the first expected repayment.",
-					"invalid.disbursal.as.disbursement.date.is.after.first.repayment.due.date");
+			final String errorMessage = "The date on which a loan is disbursed cannot be after the first expected repayment date: " + firstRepaymentDueDate.toString();
+			throw new InvalidLoanStateTransitionException("disbursal", "cannot.be.after.first.repayment.due.date", errorMessage, disbursedOn, firstRepaymentDueDate);
 		}
 	}
 
@@ -328,18 +320,17 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		loanTransaction.updateOrganisation(organisation);
 		this.loanTransactions.add(loanTransaction);
 
-		if (loanTransaction.getTransactionDate().isBefore(
-				this.getDisbursementDate())) {
-			throw new InvalidLoanTimelineDate(
-					"The repayment date cannot be before the loan disbursement date.",
-					"invalid.repayment.date.as.date.is.before.disbursement.date");
+		LocalDate loanTransactionDate = loanTransaction.getTransactionDate();
+		if (loanTransactionDate.isBefore(this.getDisbursementDate())) {
+			final String errorMessage = "The transaction date cannot be before the loan disbursement date: " + getApprovedOnDate().toString();
+			throw new InvalidLoanStateTransitionException("waive", "cannot.be.before.disbursement.date", errorMessage, loanTransactionDate, this.getDisbursementDate());
 		}
-		if (loanTransaction.getTransactionDate().isAfter(new LocalDate())) {
-			throw new InvalidLoanTimelineDate(
-					"The repayment date cannot be in the future.",
-					"invalid.repayment.date.as.date.is.in.future");
+		
+		if (loanTransactionDate.isAfter(new LocalDate())) {
+			final String errorMessage = "The transaction date cannot be in the future.";
+			throw new InvalidLoanStateTransitionException("waive", "cannot.be.a.futre.date", errorMessage, loanTransactionDate);
 		}
-
+		
 		if (this.isRepaidInFull()) {
 			this.loanStatus = loanLifecycleStateMachine.transition(LoanEvent.REPAID_IN_FULL, this.loanStatus);
 			this.closedOnDate = loanTransaction.getTransactionDate().toDate();
@@ -368,18 +359,18 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 			throw new IllegalArgumentException(
 					"Only repayment transactions can be passed to makeRepayment.");
 		}
+		
+		LocalDate loanTransactionDate = loanTransaction.getTransactionDate();
+		if (loanTransactionDate.isBefore(this.getDisbursementDate())) {
+			final String errorMessage = "The transaction date cannot be before the loan disbursement date: " + getApprovedOnDate().toString();
+			throw new InvalidLoanStateTransitionException("repayment", "cannot.be.before.disbursement.date", errorMessage, loanTransactionDate, this.getDisbursementDate());
+		}
+		
+		if (loanTransactionDate.isAfter(new LocalDate())) {
+			final String errorMessage = "The transaction date cannot be in the future.";
+			throw new InvalidLoanStateTransitionException("repayment", "cannot.be.a.futre.date", errorMessage, loanTransactionDate);
+		}
 
-		if (loanTransaction.getTransactionDate().isBefore(
-				this.getDisbursementDate())) {
-			throw new InvalidLoanTimelineDate(
-					"The repayment date cannot be before the loan disbursement date.",
-					"invalid.repayment.date.as.date.is.before.disbursement.date");
-		}
-		if (loanTransaction.getTransactionDate().isAfter(new LocalDate())) {
-			throw new InvalidLoanTimelineDate(
-					"The repayment date cannot be in the future.",
-					"invalid.repayment.date.as.date.is.in.future");
-		}
 		if (this.isRepaidInFull()) {
 			this.loanStatus = loanLifecycleStateMachine.transition(LoanEvent.REPAID_IN_FULL, this.loanStatus);
 			this.closedOnDate = loanTransaction.getTransactionDate().toDate();
@@ -529,16 +520,15 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		this.loanStatus = loanLifecycleStateMachine.transition(LoanEvent.LOAN_WRITE_OFF, this.loanStatus);
 		this.closedOnDate = writtenOffOn.toDate();
 		this.writtenOffOnDate = writtenOffOn.toDate();
-		if (new LocalDate(this.writtenOffOnDate).isBefore(this
-				.getDisbursementDate())) {
-			throw new InvalidLoanTimelineDate(
-					"The date the loan is written off cannot be before the loan disbursement date.",
-					"invalid.writeoff.date.as.date.is.before.disbursement.date");
+		
+		LocalDate writtenOffOnLocalDate = new LocalDate(writtenOffOnDate);
+		if (writtenOffOnLocalDate.isBefore(this.getDisbursementDate())) {
+			final String errorMessage = "The date on which a loan is withdrawn cannot be before the loan disbursement date: " + getDisbursementDate().toString();
+			throw new InvalidLoanStateTransitionException("writeoff", "cannot.be.before.submittal.date", errorMessage, writtenOffOnLocalDate, getDisbursementDate());
 		}
-		if (new LocalDate(this.writtenOffOnDate).isAfter(new LocalDate())) {
-			throw new InvalidLoanTimelineDate(
-					"The date the loan is written off cannot be in the future.",
-					"invalid.writeoff.date.as.date.is.in.future");
+		if (writtenOffOnLocalDate.isAfter(new LocalDate())) {
+			final String errorMessage = "The date on which a loan is written off cannot be in the future.";
+			throw new InvalidLoanStateTransitionException("writeoff", "cannot.be.a.future.date", errorMessage, writtenOffOnLocalDate);
 		}
 	}
 
@@ -546,16 +536,15 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		this.loanStatus = loanLifecycleStateMachine.transition(LoanEvent.LOAN_RESCHEDULE, this.loanStatus);
 		this.closedOnDate = rescheduledOn.toDate();
 		this.rescheduledOnDate = rescheduledOn.toDate();
-		if (new LocalDate(this.rescheduledOnDate).isBefore(this
-				.getDisbursementDate())) {
-			throw new InvalidLoanTimelineDate(
-					"The date the loan is rescheduled cannot be before the loan disbursement date.",
-					"invalid.reschedule.date.as.date.is.before.disbursement.date");
+		
+		LocalDate rescheduledOnLocalDate = new LocalDate(rescheduledOnDate);
+		if (rescheduledOnLocalDate.isBefore(this.getDisbursementDate())) {
+			final String errorMessage = "The date on which a loan is rescheduled cannot be before the loan disbursement date: " + getDisbursementDate().toString();
+			throw new InvalidLoanStateTransitionException("writeoff", "cannot.be.before.submittal.date", errorMessage, rescheduledOnLocalDate, getDisbursementDate());
 		}
-		if (new LocalDate(this.rescheduledOnDate).isAfter(new LocalDate())) {
-			throw new InvalidLoanTimelineDate(
-					"The date the loan is rescheduled cannot be in the future.",
-					"invalid.reschedule.date.as.date.is.in.future");
+		if (rescheduledOnLocalDate.isAfter(new LocalDate())) {
+			final String errorMessage = "The date on which a loan is rescheduled cannot be in the future.";
+			throw new InvalidLoanStateTransitionException("writeoff", "cannot.be.a.future.date", errorMessage, rescheduledOnLocalDate);
 		}
 	}
 
