@@ -63,12 +63,9 @@ DOCUMENTATION REMAINING
 
 Just Errors section to do in the Overview section
 
-Loans - what does Keith think about a description
-
 Identify Fields that need explaining
 =========================
-Clients
-displayName, externalId, maxJoinedOnOffsetFromToday
+bit of loan product/loan
 
 repayment/waiver
 
