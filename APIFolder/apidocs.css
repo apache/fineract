@@ -43,9 +43,14 @@
     	color: rgb(240, 240, 255);
 }
 
+.mifosXHeading2 {
+	color: white;
+	font-weight: bold;
+	//font-size: 125%
+}
 .fielddesc {
-	padding-bottom:20px;
-	padding-left:40px;
+	padding-bottom:10px;
+	padding-left:20px;
 }
 
 

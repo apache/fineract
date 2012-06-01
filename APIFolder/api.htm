@@ -7,82 +7,6 @@
         <title>Mifos X API Documentation</title>
     </head>
 
-<script type="text/javascript">
-
-basicAuthKey = "";
-
-function showMandatoryFields(url, resultDiv) {
-if (basicAuthKey == "")  setBasicAuthKey(url, resultDiv)
-else showMandatoryFieldsAjax(url, resultDiv);
-}
-
-function showMandatoryFieldsAjax(url, resultDiv) {
-var jqxhr = $.ajax({
-        url : url,
-        type : 'POST',
-        contentType : "application/json; charset=utf-8",
-        dataType : 'json',
-        data : "{}",
-        cache : false,
-        beforeSend : function(xhr) {
-                xhr.setRequestHeader("Authorization", "Basic " + basicAuthKey);
-        },
-        success : function(data, textStatus, jqXHR) {            
-            $('#' + resultDiv).html("Strangely, There Are No Mandatory Fields");
-        },
-        error : function(jqXHR, textStatus, errorThrown) {            
-            
-	    if (jqXHR.status === 400) {
-                errJSON = eval("(" + jqXHR.responseText + ')');
-                var mandFields = "";
-                if (resultDiv == 'loans_mandatory') mandFields = "clientId, productId, inArrearsTolerance, submittedOnDate, ";
-                for ( var i in errJSON.errors) {
-                    if (i == 0) mandFields += errJSON.errors[i].parameterName;
-                    else mandFields += ", " + errJSON.errors[i].parameterName;
-                }
-                $('#' + resultDiv).html(mandFields);
-                return;
-            }
-            
-	    if (jqXHR.status === 0) {
-			$('#' + resultDiv).html('No connection.\n Verify Network.');
-		} else if (jqXHR.status == 404) {
-			$('#' + resultDiv).html('Requested page not found. [404]');
-		} else if (jqXHR.status == 500) {
-			$('#' + resultDiv).html('Internal Server Error [500].');
-		} else if (errorThrown === 'parsererror') {
-			$('#' + resultDiv).html('Requested JSON parse failed.');
-		} else if (errorThrown === 'timeout') {
-			$('#' + resultDiv).html('Time out error.');
-		} else if (errorThrown === 'abort') {
-			$('#' + resultDiv).html('Ajax request aborted.');
-		} else $('#' + resultDiv).html('Unknown Ajax request problem - jqXHR.status: ' + jqXHR.status);
-        }
-});
-}
-
-
-function setBasicAuthKey(url, resultDiv) {
-    
-var jqxhr = $.ajax({
-        url : "https://localhost:8443/mifosng-provider/api/v1/authentication?username=mifos&password=password",
-        type : 'POST',
-        contentType : "application/json; charset=utf-8",
-        dataType : 'json',
-        data : "{}",
-        cache : false,
-        success : function(data, textStatus, jqXHR) {     
-            basicAuthKey = data.base64EncodedAuthenticationKey;
-            showMandatoryFieldsAjax(url, resultDiv);
-            //alert("success");
-        },
-        error : function(jqXHR, textStatus, errorThrown) {  
-            alert("error - Might be an SSL certificate problem.\nTry to run a List Offices example (which should force your browser to Proceed Anyway).\nThen Click Back to return to this page and all should be good.");
-        }
-});
-}
-</script>
-
 <body>
 <div id="page-wrapper">
     <div id="flybar">
@@ -98,6 +22,7 @@ var jqxhr = $.ajax({
                         <li><a href="#genopts">Generic Options</a></li>
                         <li><a href="#creates_and_updates">Creating and Updating</a></li>
                         <li><a href="#dates_and_numbers">Updating Dates and Numbers</a></li>
+                        <li><a href="#field_descriptions">Field Descriptions</a></li>
                         <li><a href="#authentication_overview">Authentication Overview</a></li>
                         <li><a href="#errors">Errors</a></li>
                         <li><a href="#fullapi_matrix">Full API Matrix</a></li>
@@ -336,6 +261,18 @@ JSON examples:
     
         </div>
     
+        <a id="field_descriptions" name="field_descriptions" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h3>Field Descriptions</h3>
+                <p>
+                    Most fields are self-explanatory.  Fields that aren't are described under the relevant resource heading e.g. <a href="#authentication">AUTHENTICATION</a>
+                </p>
+                
+            </div>
+    
+        </div>
+        
         <a id="authentication_overview" name="authentication_overview" class="old-syle-anchor">&nbsp;</a>
         <div class="method-section">
             <div class="method-description">
@@ -531,13 +468,21 @@ var jqxhr = $.ajax({
             </div>
         </div>
     
+    
+    
+    
 <!-- start of clients api docs -->
-
         <a id="clients" name="clients" class="old-syle-anchor">&nbsp;</a>
         <div class="method-section">
             <div class="method-description">
                 <h3>Clients</h3>
                 <p>Clients are people and businesses that have applied (or may apply) to an MFI for loans.</p>
+                <table class=matrixHeading>
+                    <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Field Descriptions</div></td></tr>
+                    <tr class=alt><td>externalId</td></tr>
+                    <tr><td class=fielddesc>A place to put an external reference for this client e.g. The ID another system uses.</td></tr>
+                    </tr>
+                </table>
             </div>
         </div>
     
@@ -650,14 +595,13 @@ var jqxhr = $.ajax({
     <div class="method-description">
         <h4>Create a Client</h4>
         <p> <b>Note:</b> You can enter either:<br>
-        firstname/lastname - for a person<br>
-        OR<br>
+        firstname/lastname - for a person OR<br>
         clientOrBusinessName - for a business or organisation (or person known by one name).
         </p>
-        <button type="button" onclick="showMandatoryFields('https://localhost:8443/mifosng-provider/api/v1/clients', 'clients_mandatory');">Show Mandatory Fields</button>
-        <br>
-        <div id=clients_mandatory></div>
-        <br>
+        <table class=matrixHeading>
+            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields</div></td></tr>
+            <tr class=alt><td>firstname, lastname, joiningDate, officeId</td></tr>
+        </table>
     </div>
     <div class="method-example">
         <code class="method-declaration">POST https://thedomainname/api/v1/clients</code>
@@ -879,8 +823,14 @@ Request Body:
         <div class="method-section">
             <div class="method-description">
                 <h3>Loans</h3>
-                <p>
+                <p>overview here
                 </p>
+                <table class=matrixHeading>
+                    <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Field Descriptions</div></td></tr>
+                    <tr class=alt><td>externalId</td></tr>
+                    <tr><td class=fielddesc>A place to put an external reference for this client e.g. The ID another system uses.</td></tr>
+                    </tr>
+                </table>
             </div>
         </div>
                 
@@ -1492,11 +1442,6 @@ Request Body:
 <div class="method-section">
     <div class="method-description">
         <h4>Create a New Loan/Submit a Loan Application</h4>
-        <br>
-        <button type="button" onclick="showMandatoryFields('https://localhost:8443/mifosng-provider/api/v1/loans', 'loans_mandatory');">Show Mandatory Fields</button>
-        <br>
-        <div id=loans_mandatory></div>
-        <br>
         <h5>Arguments</h5>
         <dl class="argument-list">
             <dt>command</dt>
@@ -1506,6 +1451,13 @@ Request Body:
             had been submitted) is returned.  This gives the ability to try out various loan options and 'preview' the schedule before committing
             to it.</dd>
         </dl>
+        <br>
+        <table class=matrixHeading>
+            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields</div></td></tr>
+            <tr class=alt><td>clientId, productId, inArrearsTolerance, submittedOnDate, currencyCode, digitsAfterDecimal, principal,
+            repaymentFrequencyType, repaymentEvery, numberOfRepayments, interestRatePerPeriod, interestRateFrequencyType, amortizationType,
+            interestType, interestCalculationPeriodType, expectedDisbursementDate</td></tr>
+        </table>
     </div>
     <div class="method-example">
         <code class="method-declaration">POST https://thedomainname/api/v1/loans</code>
@@ -1544,12 +1496,7 @@ Request Body:
         <div class="method-section">
             <div class="method-description">
                 <h4>Approve, Undo Approval, Disburse, Undo Disbursal, Reject a Loan or Withdraw a Loan Application</h4>
-                <h5>Arguments</h5>                <br>
-                <button type="button" onclick="showMandatoryFields('https://localhost:8443/mifosng-provider/api/v1/loans/37?command=approve', 'loan_state_transition_mandatory');">Show Mandatory Fields</button>
-                <br>
-                <div id=loan_state_transition_mandatory></div>
-                <br>
-
+                <h5>Arguments</h5> 
                 <dl class="argument-list">
                     <dt>command</dt>
                     <dd>String<span> Mandatory, case-insensitive</span></dd>
@@ -1560,6 +1507,11 @@ Request Body:
                     <dd>'undoapproval' : Undo Loan Approval</dd>
                     <dd>'undodisbursal' : Undo Loan Disbursal</dd>
                 </dl>
+                <br>
+                <table class=matrixHeading>
+                    <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields</div></td></tr>
+                    <tr class=alt><td>eventDate</td></tr>
+                </table>
             </div>
             <div class="method-example">
                 <code class="method-declaration">POST https://thedomainname/api/v1/loans/{loanId}</code>
@@ -1709,6 +1661,10 @@ Request Body:
             <div class="method-description">
                 <h4>Adjust a Repayment or Waiver</h4>
                 <p><b>Note:</b> there is no need to specify command={transactionType} parameter.</p>
+                <table class=matrixHeading>
+                    <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields</div></td></tr>
+                    <tr class=alt><td>transactionDate, transactionAmount</td></tr>
+                </table>
             </div>
             <div class="method-example">
                 <code class="method-declaration">POST https://thedomainname/api/v1/loans/{loanId}/transactions/{transactionId}</code>
@@ -1739,6 +1695,21 @@ Request Body:
                 <p>Offices are used to model an MFIs structure. A hierarchial representation of offices is supported. 
                 There will always be at least one office (which represents the MFI or an MFIs head office). 
                 All subsequent offices added must have a parent office.</p>
+                <table class=matrixHeading>
+                    <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Field Descriptions</div></td></tr>
+                    <tr class=alt><td>externalId</td></tr>
+                    <tr><td class=fielddesc>A place to put an external reference for this office e.g. The ID another system uses for it.</td></tr>
+                    </tr>
+                    <tr class=alt><td>hierarchy</td></tr>
+                    <tr><td class=fielddesc>This field is a system generated convenience field.  It can't be set.<br>
+                    It uses "dot notation" to define where an office stands in the office hierarchy.<br>
+                    For example, the system default office (id = 1) has a hierarchy value of '.'<br>
+                    An office (id = 12) placed directly underneath this default office has a hierarchy value of '.12.'<br>
+                    And if a further office (id = 78) is placed directly under office (id = 12) its hierarchy value is '.12.78.'<br><br>
+                    The hierarchy value is useful when you need to display offices in 'hierarchy' order (perhaps indented in a drop down list box).
+                    </td></tr>
+                    </tr>
+                </table>
             </div>
         </div>
         
@@ -1852,11 +1823,10 @@ Request Body:
         <div class="method-section">
             <div class="method-description">
                 <h4>Create an Office</h4>
-                <br>
-                <button type="button" onclick="showMandatoryFields('https://localhost:8443/mifosng-provider/api/v1/offices', 'offices_mandatory');">Show Mandatory Fields</button>
-                <br>
-                <div id=offices_mandatory></div>
-                <br>
+                <table class=matrixHeading>
+                    <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields</div></td></tr>
+                    <tr class=alt><td>name, openingDate, parentId</td></tr>
+                </table>
             </div>
             <div class="method-example">
                 <code class="method-declaration">POST https://thedomainname/api/v1/offices</code>
@@ -1867,7 +1837,8 @@ Request Body:
  "name": "Example New Branch",
  "dateFormat": "dd MMMM yyyy",
  "openingDate": "01 July 2007",
- "parentId": 2
+ "parentId": 2,
+ "externalId": "SYS54-88"
 }
 </code>
 <code class="method-response">{
@@ -1908,6 +1879,33 @@ Request Body:
                 <h3>Loan Products</h3>
                 <p>A Loan product is a template that is used when creating a loan.  Much of the template definition can be overridden during loan creation.
                 </p>
+                <table class=matrixHeading>
+                    <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Field Descriptions</div></td></tr>
+                    <tr class=alt><td>digitsAfterDecimal</td></tr>
+                    <tr><td class=fielddesc>Override the default value for digitsAfterDecimal associated with the currencyCode selected.</td></tr>
+                    </tr>
+                    <tr class=alt><td>principal</td></tr>
+                    <tr><td class=fielddesc>Default loan principal.</td></tr>
+                    <tr class=alt><td>inArrearsTolerance</td></tr>
+                    <tr><td class=fielddesc></td></tr>
+                    <tr class=alt><td>repaymentFrequencyType</td></tr>
+                    <tr><td class=fielddesc></td></tr>
+                    <tr class=alt><td>repaymentEvery</td></tr>
+                    <tr><td class=fielddesc></td></tr>
+                    <tr class=alt><td>numberOfRepayments</td></tr>
+                    <tr><td class=fielddesc></td></tr>
+                    <tr class=alt><td>interestRatePerPeriod</td></tr>
+                    <tr><td class=fielddesc></td></tr>
+                    <tr class=alt><td>interestRateFrequencyType</td></tr>
+                    <tr><td class=fielddesc></td></tr>
+                    <tr class=alt><td>amortizationType</td></tr>
+                    <tr><td class=fielddesc></td></tr>
+                    <tr class=alt><td>interestType</td></tr>
+                    <tr><td class=fielddesc></td></tr>
+                    <tr class=alt><td>interestCalculationPeriodType</td></tr>
+                    <tr><td class=fielddesc></td></tr>
+                    </tr>
+                </table>
             </div>
         </div>
     
@@ -2282,16 +2280,16 @@ Request Body:
         <div class="method-section">
             <div class="method-description">
                 <h4>Create a Loan Product</h4>
-                <br>
-                <button type="button" onclick="showMandatoryFields('https://localhost:8443/mifosng-provider/api/v1/loanproducts', 'loanproducts_mandatory');">Show Mandatory Fields</button>
-                <br>
-                <div id=loanproducts_mandatory></div>
-                <br>
-                <p>Probably need to describe some of the fields here.</p>
+                <table class=matrixHeading>
+                    <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields</div></td></tr>
+                    <tr class=alt><td>name, currencyCode, digitsAfterDecimal, principal, inArrearsTolerance, repaymentFrequencyType, repaymentEvery,
+                    numberOfRepayments, interestRatePerPeriod, interestRateFrequencyType, amortizationType,
+                    interestType, interestCalculationPeriodType</td></tr>
+                </table>
             </div>
             <div class="method-example">
                 <code class="method-declaration">POST https://thedomainname/api/v1/loanproducts</code>
-<code class="method-request">https://localhost:8443/mifosng-provider/api/v1/loanproducts
+<code class="method-request">POST https://localhost:8443/mifosng-provider/api/v1/loanproducts
 Content-Type: application/json
 Request Body:
 {
@@ -2302,14 +2300,14 @@ Request Body:
  "locale": "en_GB",
  "principal": "100,000.00",
  "inArrearsTolerance": "1,000.00",
- "numberOfRepayments": "12",
- "repaymentEvery": "1",
  "repaymentFrequencyType": 2,
+ "repaymentEvery": "1",
+ "numberOfRepayments": "12",
  "interestRatePerPeriod": "1.75",
  "interestRateFrequencyType": 2,
  "amortizationType": 1,
- "interestCalculationPeriodType": 1,
- "interestType": 0
+ "interestType": 0,
+ "interestCalculationPeriodType": 1
 }
 </code>
 <code class="method-response">{
@@ -2326,7 +2324,7 @@ Request Body:
             </div>
             <div class="method-example">
                 <code class="method-declaration">POST https://thedomainname/api/v1/loanproducts/{loanId}</code>
-<code class="method-request">https://localhost:8443/mifosng-provider/api/v1/loanproducts/1
+<code class="method-request">POST https://localhost:8443/mifosng-provider/api/v1/loanproducts/1
 Content-Type: application/json
 Request Body:
 {
@@ -2348,7 +2346,7 @@ Request Body:
 	<div class="method-section">
 		<div class="method-description">
 		    <h3>Configuration</h3>
-		    <p>Application related configuration like being able to select the currencies permitted for use within the MFI.</p>
+		    <p>Application related configuration.  For example, selecting the currencies permitted for use within the MFI.</p>
 		</div>
 	</div>
 	
@@ -2850,7 +2848,14 @@ Request Body:
 	<div class="method-section">
 		<div class="method-description">
 		    <h3>Authentication</h3>
-		    <p>An API capability to allowed client applications verify authentication details.</p>
+		    <p>An API capability that allows client applications to verify authentication details.</p>
+                    <table class=matrixHeading>
+                        <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Field Descriptions</div></td></tr>
+                        <tr class=alt><td>base64EncodedAuthenticationKey</td></tr>
+                        <tr><td class=fielddesc>HTTP Basic Auth key.
+                            See <a href="#authentication_overview">Authentication Overview</a> for an example of its use.</td></tr>
+                        </tr>
+                    </table>
 		</div>
 	</div>
     
@@ -2859,14 +2864,6 @@ Request Body:
 	    <div class="method-description">
 	        <h4>Verify authentication</h4>
 	        <p>Authenticates the credentials provided and returns the set of permissions allowed.</p>
-                
-                <table class=matrixHeading>
-                    <tr class="matrixHeadingBG"><td><div class="matrixHeadingVerbs">Field Descriptions</div></td></tr>
-                    <tr class=alt><td>base64EncodedAuthenticationKey</td></tr>
-                    <tr><td class=fielddesc>HTTP Basic Auth key.
-                        See <a href="#authentication_overview">Authentication Overview</a> for an example of its use.</td></tr>
-                    </tr>
-                </table>
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">POST https://thedomainname/api/v1/authentication?username={username}&password={password}</code>
@@ -3061,12 +3058,10 @@ No Request Body
                 <p><b>Note:</b> Password information is not required (or processed).  Password details are auto-generated and then sent to the email account given
                 (which is why it can take a few seconds to complete). 
                 </p>
-                <br>
-                <button type="button" onclick="showMandatoryFields('https://localhost:8443/mifosng-provider/api/v1/users', 'users_mandatory');">Show Mandatory Fields</button>
-                <br>
-                <div id=users_mandatory></div>
-                <br>
-
+                <table class=matrixHeading>
+                    <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields</div></td></tr>
+                    <tr class=alt><td>username, firstname, lastname, email, officeId, roles</td></tr>
+                </table>
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">POST https://thedomainname/api/v1/users</code>
@@ -3272,12 +3267,10 @@ No Request Body
 	<div class="method-section">
 	    <div class="method-description">
 	        <h4>Create a New Role</h4>
-                <br>
-                <button type="button" onclick="showMandatoryFields('https://localhost:8443/mifosng-provider/api/v1/roles', 'roles_mandatory');">Show Mandatory Fields</button>
-                <br>
-                <div id=roles_mandatory></div>
-                <br>
-
+                <table class=matrixHeading>
+                    <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields</div></td></tr>
+                    <tr class=alt><td>name, description, permissions</td></tr>
+                </table>
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">POST https://thedomainname/api/v1/roles</code>
