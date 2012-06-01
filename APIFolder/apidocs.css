@@ -48,11 +48,28 @@
 	font-weight: bold;
 	//font-size: 125%
 }
+
+.fieldtype  {
+	padding-right: 40px;
+	padding-left:40px;
+	padding-top:20px;
+	font-size: 85%;
+}
+
+.fielddesc span, .fieldtype {
+    font-style: italic;
+    font-weight: normal;
+}
+
 .fielddesc {
 	padding-bottom:10px;
 	padding-left:20px;
 }
 
+.fielddesc span {
+    font-style: italic;
+    font-weight: normal;
+}
 
 .normalli {list-style:disc outside none;}
 

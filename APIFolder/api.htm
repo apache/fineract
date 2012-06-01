@@ -1885,25 +1885,35 @@ Request Body:
                     <tr><td class=fielddesc>Override the default value for digitsAfterDecimal associated with the currencyCode selected.</td></tr>
                     </tr>
                     <tr class=alt><td>principal</td></tr>
-                    <tr><td class=fielddesc>Default loan principal.</td></tr>
+                    <tr><td class=fielddesc>Loan amount.</td></tr>
                     <tr class=alt><td>inArrearsTolerance</td></tr>
                     <tr><td class=fielddesc></td></tr>
-                    <tr class=alt><td>repaymentFrequencyType</td></tr>
+                    <tr class=alt><td>numberOfRepayments</td></tr>
+                    <tr><td class=fielddesc>Number of installments to repay.</td></tr>
+                    <tr class=alt><td>interestRatePerPeriod</td></tr>
                     <tr><td class=fielddesc></td></tr>
                     <tr class=alt><td>repaymentEvery</td></tr>
                     <tr><td class=fielddesc></td></tr>
-                    <tr class=alt><td>numberOfRepayments</td></tr>
-                    <tr><td class=fielddesc></td></tr>
-                    <tr class=alt><td>interestRatePerPeriod</td></tr>
-                    <tr><td class=fielddesc></td></tr>
-                    <tr class=alt><td>interestRateFrequencyType</td></tr>
-                    <tr><td class=fielddesc></td></tr>
+                    <tr><td class=fieldtype>Each of the items below has an id, code and (english) value.<br>
+                    Only the id (integer) is used when updating.  All 3 are returned on GET (read) requests.<br>
+                    The options are fully listed in <a href="#loanproducts_template">Retrieve Loan Product Details Template</a>.
+                    </td></tr>
+                    <tr class=alt><td>repaymentFrequencyType</td></tr>
+                    <tr><td class=fielddesc>
+                        <span>Example Values:</span> Days, Weeks, Months
+                    </td></tr>
+                    <tr class=alt><td>interestRateFrequencyType</td></tr>Per month
+                    <tr><td class=fielddesc>
+                        <span>Example Values:</span> Per month, Per year</td></tr>
                     <tr class=alt><td>amortizationType</td></tr>
-                    <tr><td class=fielddesc></td></tr>
+                    <tr><td class=fielddesc>
+                        <span>Example Values:</span> Equal principle payments, Equal installments</td></tr></td></tr>
                     <tr class=alt><td>interestType</td></tr>
-                    <tr><td class=fielddesc></td></tr>
+                    <tr><td class=fielddesc>
+                        <span>Example Values:</span> Declining Balance, Flat</td></tr></td></tr>
                     <tr class=alt><td>interestCalculationPeriodType</td></tr>
-                    <tr><td class=fielddesc></td></tr>
+                    <tr><td class=fielddesc>
+                        <span>Example Values:</span> Same as repayment period, Daily</td></tr></td></tr>
                     </tr>
                 </table>
             </div>
