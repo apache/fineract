@@ -4,7 +4,7 @@ POSSIBLE CHANGES TO APP OR DOCUMENTATION
 list clients notes - noteType needs a 'text' DOING
 	createdOn & updatedOn values... do they need reformatting? DOING
 
-loan template - repaymentSchedule is null - I can't see it set in the app
+loan template - repaymentSchedule is null - I can't see it set in the app - used in preview schedule functionality maybe?
 
 
 loan retrieve DOING
@@ -29,13 +29,14 @@ Loan Transitions ... approve etc
    if I do an approve when already approved also get
    Column 'loan_status_id' cannot be null; SQL [n/a]; constraint [null]; nested exception is org.hibernate.exception.ConstraintViolationException: Column 'loan_status_id' cannot be null
 
+
    sometimes clientId returned... always loanId OK?
 
 
 Loan Transactions (repay and waive - and maybe reversal - but not disbursement) general talk needed as retrieve could work for any txn?
     transaction type... UNKNOWN(0), DISBURSEMENT(1), REPAYMENT(2), REVERSAL(3), WAIVED(4);
     Create - (command has string and proper value fields... so assume its like eventDate above)
-    If you undo disbursal does it undo the loantransaction? - didnt test
+
     Template - does waiver amount default to 'rest of loan' cos it looked like it missed out on other waivers. didn't test
 	repayment amount matches current installment outstanding amount w/o taking waivers into account.
     check descriptions - couldn't test because of invalid locale
@@ -63,5 +64,6 @@ Identify Fields that need explaining
 =========================
 bit of loan product/loan
 
-repayment/waiver
+repayment/waiver - describe waiver
+why fields "totalWaived", "overpaid"
 
