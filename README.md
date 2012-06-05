@@ -8,15 +8,16 @@ Video Demonstration
 
 http://www.youtube.com/watch?v=zN5Dn1Lc_js
 
-Online Demo
-=============
+Online Client Applicaton Demos
+=============================
 
-https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-individual-lending-app
+Individual Lending Application: https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-individual-lending-app
 
-Roadmap
-==============
 
-see https://github.com/keithwoodlock/mifosx/wiki/Developer-deep-dive-into-Http-API for info around resource-oriented API work
+Mifos Platform API
+=====================
+
+API on demo server: https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/api-docs/apiLive.htm
 
 Developers
 ==========
@@ -34,11 +35,11 @@ Amazon Public AMI
 
 Launch instance <a target="_blank" href="https://console.aws.amazon.com/ec2/home?region=eu-west-1#launchAmi=ami-05030671" title="mifos platform api beta 1">ami-05030671</a>
 
-AMI ID: ami-05030671
-
-mifos-platform-api-beta-1
-
-Ubuntu11.10, tomcat7.0.21 (with SSL),MySql 5.1.62, Java 1.6_30, Mifos IL
+ - mifos-platform-api-beta-1
+ - Ubuntu11.10, tomcat7.0.21 (with SSL),MySql 5.1.62, Java 1.6_30, Mifos IL
 
 
+Roadmap
+==============
 
+see https://github.com/keithwoodlock/mifosx/wiki/Developer-deep-dive-into-Http-API for info around resource-oriented API work
