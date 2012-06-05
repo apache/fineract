@@ -7,7 +7,7 @@
    http://www.springframework.org/schema/beans 
    http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
 
-	<http create-session="stateless" use-expressions="true" pattern="/api/**">
+	<http create-session="stateless" use-expressions="true" pattern="/api/**" realm="Mifos Platform API">
 	   <intercept-url pattern="/api/*/authentication" access="permitAll" method="POST" requires-channel="https" />
 	   <intercept-url pattern="/api/**" access="isFullyAuthenticated()" method="GET" requires-channel="https" />
 	   <intercept-url pattern="/api/**" access="isFullyAuthenticated()" method="POST" requires-channel="https"/>
