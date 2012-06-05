@@ -11,7 +11,8 @@ http://www.youtube.com/watch?v=zN5Dn1Lc_js
 Online Demo
 =============
 
-http://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8080/mifosng-individual-lending-app
+old - http://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8080/mifosng-individual-lending-app
+new - https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-individual-lending-app
 
 Roadmap
 ==============
