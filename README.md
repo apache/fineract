@@ -32,7 +32,7 @@ see https://www.ohloh.net/p/mifosx for activity overview and basic code analysis
 Amazon Public AMI
 =================
 
-Launch instance https://console.aws.amazon.com/ec2/home?region=eu-west-1#launchAmi=ami-05030671
+Launch instance <a target="_blank" href="https://console.aws.amazon.com/ec2/home?region=eu-west-1#launchAmi=ami-05030671" title="mifos platform api beta 1">ami-05030671</a>
 
 AMI ID: ami-05030671
 
