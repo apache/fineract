@@ -32,7 +32,13 @@ see https://www.ohloh.net/p/mifosx for activity overview and basic code analysis
 Amazon Public AMI
 =================
 
-AMI id: ami-d9a59ead
+Launch instance https://console.aws.amazon.com/ec2/home?region=eu-west-1#launchAmi=ami-05030671
+
+AMI ID: ami-05030671
+
+mifos-platform-api-beta-1
+
+Ubuntu11.10, tomcat7.0.21 (with SSL),MySql 5.1.62, Java 1.6_30, Mifos IL
 
 
 
