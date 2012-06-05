@@ -1,0 +1,3470 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+        <link rel="stylesheet" href="apidocs.css" type="text/css" media="screen" title="Mifos X API Docs" charset="utf-8"/>
+        <script type="text/javascript" src="jquery-1.7.min.js"></script>
+        <title>Mifos X API Documentation</title>
+    </head>
+
+<body>
+<div id="page-wrapper">
+    <div id="flybar">
+        <div id=nav-logo>API MENU</div>
+        <div class="flybar-nav">
+            <h2 class="flybar-button">Overview</h2>
+            <div class="flybar-menu-overview">
+                <div class="toc-column1">
+                    <div class="toc-section">
+                        <ul>
+                        <li><a href="#top">Mifos X API Documentation</a></li>
+                        <li><a href="#interact">Try The API From Your Browser</a></li>
+                        <li><a href="#genopts">Generic Options</a></li>
+                        <li><a href="#creates_and_updates">Creating and Updating</a></li>
+                        <li><a href="#dates_and_numbers">Updating Dates and Numbers</a></li>
+                        <li><a href="#field_descriptions">Field Descriptions</a></li>
+                        <li><a href="#authentication_overview">Authentication Overview</a></li>
+                        <li><a href="#errors">Errors</a></li>
+                        <li><a href="#fullapi_matrix">Full API Matrix</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="flybar-nav">
+            <h2 class="flybar-button">Core</h2>
+            <div class="flybar-menu">
+                <div class="tocMatrix">
+                    <table class=matrixHeading>
+                        <tr class="matrixHeadingBG"><td colspan=2 valign="top"><div class="matrixHeadingVerbs"><table><tr><td>RESOURCES</td></tr></table></div></td><td><table><tr><td><div class="matrixHeadingVerbs">POST</div></td></tr><tr><td><div class=matrixHeadingCommands>create/complex update</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">GET</div></td></tr><tr><td><div class=matrixHeadingCommands>read</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">PUT</div></td></tr><tr><td><div class=matrixHeadingCommands>update</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">DELETE</div></td></tr><tr><td><div class=matrixHeadingCommands>delete</div></td></tr></table></td></tr>
+                        <tr class="alt"><td><a href="#clients">CLIENT</a></td><td>/v1/clients</td><td><a href="api.htm#clients_create">Create a Client</a></td><td><a href="#clients_list">List Clients</a></td><td></td><td></td></tr>
+                        <tr><td></td><td>/v1/clients/{clientId}</td><td></td><td><a href="#clients_retrieve">Retrieve a Client</a></td><td><a href="#clients_update">Update a Client</a></td><td></td></tr>
+                        <tr class="alt"><td></td><td>/v1/clients/{clientId}/loans</td><td></td><td><a href="#clients_loansummary">Retrieve a Client's Loan Account Summary</a></td><td></td><td></td></tr>
+                        <tr><td></td><td>/v1/clients/{clientId}/notes</td><td><a href="#clients_addnote">Add a Client Note</a></td><td><a href="#clients_notes">Retrieve a Client's Notes</a></td><td></td><td></td></tr>
+                        <tr class="alt"><td></td><td>/v1/clients/{clientId}/notes/{noteId}</td><td></td><td><a href="#clients_retrievenote">Retrieve a Client Note</a></td><td><a href="#clients_updatenote">Update a Client Note</a></td><td></td></tr>
+                        <tr><td><a href="#loans">LOAN</a></td><td>/v1/loans</td><td><a href="#loans_create">Create a New Loan/Submit a Loan Application</a></td><td></td><td></td><td></td></tr>
+                        <tr class="alt"><td></td><td>/v1/loans/{loanId}</td><td><a href="#loans_approve_etc">Approve, Undo Approval, Disburse, Undo Disbursal, Reject a Loan or Withdraw a Loan Application</a></td><td><a href="#loans_retrieve">Retrieve a Loan</a></td><td></td><td><a href="#loans_delete">Delete a Loan</a></td></tr>
+                        <tr class="alt"><td></td><td>/v1/loans/{loanId}/transactions</td><td><a href="#loans_repayment_etc">Make a Repayment / Loan Waiver</a></td><td></td><td></td><td></td></tr>
+                        <tr><td></td><td>/v1/loans/{loanId}/transactions/{transactionId}</td><td><a href="#loans_repaymentadjust_etc">Adjust a Repayment or Waiver</a></td><td><a href="#loans_repaymentretrieve_etc">Retrieve a Repayment or Waiver Details</a></td><td></td><td></td></tr>
+                        <tr class="alt"><td><a href="#offices">OFFICE</a></td><td>/v1/offices</td><td><a href="#offices_create">Create an Office</a></td><td><a href="#offices_list">List Offices</a></td><td></td><td></td></tr>
+                        <tr><td></td><td>/v1/offices/{officeId}</td><td></td><td><a href="#offices_retrieve">Retrieve an Office</a></td><td><a href="#offices_update">Update an Office</a></td><td></td></tr>
+                        <tr class="alt"><td><a href="#loanproducts">LOAN PRODUCT</a></td><td>/v1/loanproducts</td><td><a href="#loanproducts_create">Create a Loan Product</a></td><td><a href="#loanproducts_list">List Loan Products</a></td><td></td><td></td></tr>
+                        <tr><td></td><td>/v1/loanproducts/{productId}</td><td></td><td><a href="#loanproducts_retrieve">Retrieve a Loan Product</a></td><td><a href="#loanproducts_update">Update a Loan Product</a></td><td></td></tr>
+                    </table>
+                </div>                
+            </div>
+        </div>
+        <div class="flybar-nav">
+            <h2 class="flybar-button">Configuration</h2>
+            <div id="toc-menu1" class="flybar-menu">
+                <div class="tocMatrix">
+                    <table class=matrixHeading>
+                        <tr class="matrixHeadingBG"><td colspan=2 valign="top"><div class="matrixHeadingVerbs"><table><tr><td>RESOURCES</td></tr></table></div></td><td><table><tr><td><div class="matrixHeadingVerbs">POST</div></td></tr><tr><td><div class=matrixHeadingCommands>create/complex update</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">GET</div></td></tr><tr><td><div class=matrixHeadingCommands>read</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">PUT</div></td></tr><tr><td><div class=matrixHeadingCommands>update</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">DELETE</div></td></tr><tr><td><div class=matrixHeadingCommands>delete</div></td></tr></table></td></tr>
+                        <tr class="alt"><td><a href="#configs">CONFIGURATION</a></td><td>/v1/configurations/currency</td><td></td><td><a href="#configs_currencyretrieve">Retrieve Currency Configuration</a></td><td><a href="#configs_currencyupdate">Update Currency Configuration</a></td><td></td></tr>
+                    </table>
+                </div>                
+            </div>
+        </div>
+        <div class="flybar-nav">
+            <h2 class="flybar-button">Additional Fields</h2>
+            <div  id="toc-menu2" class="flybar-menu">
+                <div class="tocMatrix">
+                    <table class=matrixHeading>
+                        <tr class="matrixHeadingBG"><td colspan=2 valign="top"><div class="matrixHeadingVerbs"><table><tr><td>RESOURCES</td></tr></table></div></td><td><table><tr><td><div class="matrixHeadingVerbs">POST</div></td></tr><tr><td><div class=matrixHeadingCommands>create/complex update</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">GET</div></td></tr><tr><td><div class=matrixHeadingCommands>read</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">PUT</div></td></tr><tr><td><div class=matrixHeadingCommands>update</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">DELETE</div></td></tr><tr><td><div class=matrixHeadingCommands>delete</div></td></tr></table></td></tr>
+                        <tr><td><a href="#additionalfields">ADDITIONAL FIELDS</a></td><td>/v1/additionalfields</td><td></td><td><a href="#additionalfields_list">List Additional Fields Sets</a></td><td></td><td></td></tr>
+                        <tr class="alt"><td></td><td>/v1/additionalfields/{Type}/{Set}/{id}</td><td><a href="#additionalfields_update">Update Additional Fields</a></td><td><a href="#additionalfields_retrieve">Retrieve Additional Fields</a></td><td></td><td></td></tr>
+                    </table>
+                </div>                
+            </div>
+        </div>
+        <div class="flybar-nav">
+            <h2 class="flybar-button">Report</h2>
+            <div  id="toc-menu3" class="flybar-menu">
+                <div class="tocMatrix">
+                    <table class=matrixHeading>
+                        <tr class="matrixHeadingBG"><td colspan=2 valign="top"><div class="matrixHeadingVerbs"><table><tr><td>RESOURCES</td></tr></table></div></td><td><table><tr><td><div class="matrixHeadingVerbs">POST</div></td></tr><tr><td><div class=matrixHeadingCommands>create/complex update</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">GET</div></td></tr><tr><td><div class=matrixHeadingCommands>read</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">PUT</div></td></tr><tr><td><div class=matrixHeadingCommands>update</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">DELETE</div></td></tr><tr><td><div class=matrixHeadingCommands>delete</div></td></tr></table></td></tr>
+                        <tr><td><a href="#reports">REPORT</a></td><td>/v1/reports</td><td></td><td><a href="#reports_list">List Reports</a></td><td></td><td></td></tr>
+                        <tr class="alt"><td></td><td>/v1/reports/{reportName}</td><td></td><td><a href="#report_run">Run a Report</a></td><td></td><td></td></tr>
+                    </table>
+                </div>                
+            </div>
+        </div>
+        <div class="flybar-nav">
+            <h2 class="flybar-button">User Related</h2>
+            <div id="toc-menu4" class="flybar-menu">
+                <div class="tocMatrix">
+                    <table class=matrixHeading>
+                        <tr class="matrixHeadingBG"><td colspan=2 valign="top"><div class="matrixHeadingVerbs"><table><tr><td>RESOURCES</td></tr></table></div></td><td><table><tr><td><div class="matrixHeadingVerbs">POST</div></td></tr><tr><td><div class=matrixHeadingCommands>create/complex update</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">GET</div></td></tr><tr><td><div class=matrixHeadingCommands>read</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">PUT</div></td></tr><tr><td><div class=matrixHeadingCommands>update</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">DELETE</div></td></tr><tr><td><div class=matrixHeadingCommands>delete</div></td></tr></table></td></tr>
+                        <tr><td><a href="#authentication">AUTHENTICATION</a></td><td>/v1/authentication</td><td><a href="#authentication_permissions">Verify Authentication</a></td><td></td><td></td><td></td></tr>
+                        <tr class="alt"><td><a href="#users">USER</a></td><td>/v1/users</td><td><a href="#users_create">Create a User</a></td><td><a href="#users_list">List Users</a></td><td></td><td></td></tr>
+                        <tr><td></td><td>/v1/users/{userId}</td><td></td><td><a href="#users_retrieve">Retrieve a User</a></td><td><a href="#users_update">Update a User</a></td><td><a href="#users_delete">Delete a User</a></td></tr>
+                        <tr class="alt"><td><a href="#roles">ROLE</a></td><td>/v1/roles</td><td><a href="#roles_create">Create a New Role</a></td><td><a href="#roles_list">List Roles</a></td><td></td><td></td></tr>
+                        <tr><td></td><td>/v1/roles/{roleId}</td><td></td><td><a href="#roles_retrieve">Retrieve a Role</a></td><td><a href="#roles_update">Update a Role</a></td><td></td></tr>
+                        <tr class="alt"><td><a href="#permissions">PERMISSION</a></td><td>/v1/permissions</td><td></td><td><a href="#permissions_list">List Application Permissions</a></td><td></td><td></td></tr>
+                    </table>
+                </div>                
+            </div>
+        </div>
+        <div class="flybar-nav">
+            <h2 class="flybar-button">Convenience</h2>
+            <div id="toc-menu5" class="flybar-menu-convenience"> 
+                <div class="tocMatrix">
+                    <table class=matrixHeading>
+                        <tr class="matrixHeadingBG"><td valign="top"><div class="matrixHeadingVerbs"><table><tr><td>RESOURCES</td></tr></table></div></td><td><table><tr><td><div class="matrixHeadingVerbs">GET</div></td></tr><tr><td><div class=matrixHeadingCommands>read</div></td></tr></table></td></tr>
+                        <tr class="alt"><td>/v1/clients/template</td><td><a href="#clients_template">Retrieve Client Details Template</a></td></tr>
+                        <tr><td>/v1/loans/template</td><td><a href="#loans_template">Retrieve Loan Details Template</a></td></tr>
+                        <tr class="alt"><td>/v1/loans/{loanId}/transactions/template</td><td><a href="#loans_repaymenttemplate_etc">Retrieve Loan Repayment/Loan Waiver Template</a></td></tr>
+                        <tr><td>/v1/offices/template</td><td><a href="#offices_template">Retrieve Office Details Template</a></td></tr>
+                        <tr class="alt"><td>/v1/loanproducts/template</td><td><a href="#loanproducts_template">Retrieve Loan Product Details Template</a></td></tr>
+                        <tr><td>/v1/users/template</td><td><a href="#users_template">Retrieve User Details Template</a></td></tr>
+                        <tr class="alt"><td>/v1/roles/template</td><td><a href="#roles_template">Retrieve Role Details Template</a></td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="main-content-wrapper">
+        <a id="top" name="top" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h3>Mifos X API Documentation</h3>
+                <p>
+                The Mifos X API is organized around
+                <a href="http://en.wikipedia.org/wiki/Representational_State_Transfer">REST</a>.
+                </p>
+                <p>
+                The API is designed to have: <br>
+                - predictable, resource-oriented URLs<br>
+                - to use HTTP response codes to indicate API errors<br>
+                - to use built-in HTTP features, like HTTP authentication and
+                HTTP verbs, which can be understood by off-the-shelf HTTP
+                clients.
+                </p>
+                <p><a href="http://www.json.org/">JSON</a> is returned in all responses from the API, including errors.
+                </p>
+                <p>
+                Much of the API presentation and design ideas are owed to the excellent <a href="http://info.apigee.com/Portals/62317/docs/web%20api.pdf">Apigee "Web API Design" eBook/PDF</a> and the very good <a href="https://stripe.com/docs/api">Stripe API reference</a>. 
+                </p>
+            </div>
+    
+        </div>
+    
+            <a id="interact" name="interact" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h3>Try The API From Your Browser</h3>
+                <p>GET (read) examples can be run directly from this documentation.  It is just a matter of clicking a link.
+                Most browsers display the output on the same page (or another tab if you right click and select that option).
+                Internet Explorer will probably treat the output as if you wanted to download a file.
+                In that case just elect to open the output in a text editor.</p>
+                <p>If you want to check out the POST, PUT and DELETE (update) examples a good approach is to take a moment to
+                install a REST plugin for your browser e.g. RESTClient for FireFox</p>
+                The REST plugins will allow you to
+                <ul>
+                    <li class=normalli>Select the "Verb" (e.g. POST)</li>
+                    <li class=normalli>Enter the resource name (e.g. https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices)</li>
+                    <li class=normalli>Add a header to indicate you are sending JSON data as part of the request body (e.g. Content-Type: application/json)</li>
+                    <li class=normalli>Paste the example JSON into a Request Body</li>
+                    <li class=normalli>Send the Request (and receive a Response)</li>
+                </ul>
+             </div>
+    
+        </div>
+
+    
+        <a id="genopts" name="genopts" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h3>Generic Options</h3>
+                <h4>Convenience Templates</h4>
+                <p>There are a list of convenience resources (see Convenience menu option).  These resources end with "/template" and can be useful when building maintenance user interface screens for client applications. The template data returned may consist of any or all of:
+                    <ul>
+                    <li class=normalli>Field Defaults</li>   
+                    <li class=normalli>Allowed Value Lists</li>    
+                    </ul>
+                </p>
+                <p>Also, many "Retrieve a" type resources (<a href="#clients_retrieve">Retrieve a Client</a> for example) allow the parameter option "template=true".
+                This appends any "Allowed Value Lists" which can be useful when building update functionality.</p>
+                
+                <h4>Restrict Returned Fields</h4>
+                <p>Parameter "fields={fieldlist}" can be used on GET requests to restrict the fields returned.</p>
+                <p>Example Request: </p>
+                <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices/1?pretty=true&fields=id,name,parentName">
+                https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices/1?pretty=true&fields=id,name,parentName
+                </a>
+                <p></p>
+                <h4>Pretty JSON Formatting</h4>
+                <p>Parameter "pretty=true" can be used to display JSON from GET requests in an easy-to-read format.
+                This parameter is used in this documentation.</p>
+                <p>Easy-to-read JSON output for POSTs, PUTs and DELETEs will available in the REST plugin you use e.g. RESTClient for FireFox</p>
+            </div>
+    
+        </div>
+        
+        <a id="creates_and_updates" name="creates_and_updates" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h3>Creating and Updating</h3>
+                <p>
+                When you want to 'Create a ...' you have to at least supply the mandatory fields.
+                The mandatory fields are listed in this documentation under the relevant 'Create a ...' heading.
+                </p>
+                
+                <p>
+                When you want to 'Update a ...' you can update individual fields or a combination of fields (subject to data integrity rules).
+                </p>
+            </div>
+    
+        </div>
+        
+        
+        <a id="dates_and_numbers" name="dates_and_numbers" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h3>Updating Dates and Numbers</h3>
+                <h4>Dates</h4>
+                <p>Dates are returned in GET requests as an array e.g. [ 2007, 4, 11].  However, they are sent as strings in POST and PUT requests.
+                If there are any dates in your POST or PUT requests, you need to provide the "dateFormat".
+                This can be any date pattern supported by <a href="http://joda-time.sourceforge.net/api-release/org/joda/time/format/DateTimeFormat.html">Joda-Time</a>.
+                This capability can help you when saving data in your client application as you shouldn't need to do any date format conversion prior to issuing your POST or PUT request.
+                </p>
+                <code>
+JSON examples:
+{
+ "dateFormat": "dd MMMM yyyy",
+ "openingDate": "01 July 2007"
+}
+{
+ "dateFormat": "yyyy-MM-dd",
+ "openingDate": "2007-03-21"
+}
+                </code>
+                <h4>Numbers</h4>
+                <p>                 
+                You must provide a "locale" when updating numbers.
+                Numbers are not "Ids" or "Types" but are typically money amounts or percentages that relate to loans.
+                In any case, the API will send back an error message if you forget.
+                </p>
+                <code>
+JSON examples:
+{
+"locale": "en_US",
+"principal": "240,400.88"
+}
+{
+"locale": "fr_CH",
+"principal": "240 400.88"
+}
+                </code>
+           </div>
+    
+        </div>
+    
+        <a id="field_descriptions" name="field_descriptions" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h3>Field Descriptions</h3>
+                <p>
+                    Most fields are self-explanatory.  Fields that aren't are described under the relevant resource heading e.g. <a href="#authentication">AUTHENTICATION</a>
+                </p>
+                
+            </div>
+    
+        </div>
+        
+        <a id="authentication_overview" name="authentication_overview" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h3>Authentication Overview</h3>              
+                <p>
+                Authentication to the API occurs via <a href="http://en.wikipedia.org/wiki/Basic_access_authentication">HTTP Basic Auth</a>.  
+                </p>
+                
+                <p>
+                All API requests must be made over <a href="http://en.wikipedia.org/wiki/HTTP_Secure">HTTPS</a>.
+                Calls made over plain HTTP will fail.  You must authenticate for all requests.
+                </p>
+            </div>
+            <div class="method-example">
+                <code>
+//   A Javascript/Jquery example of how to login to Mifos X and use its api.
+
+//   Typically, the javascript application would
+//   1) Display a login page to retrieve the username and password.
+//   2) Send the username and password to a function
+//      such as setBasicAuthKey below which sets the HTTP Basic Auth key.
+//   3) The HTTP Basic Auth key is used in all subsequent requests
+//      (see the function executeAjaxRequest below).
+
+function setBasicAuthKey(username, password) {
+var jqxhr = $.ajax({
+        url : "https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/authentication?username=" + username + "&password=" + password,
+        type : 'POST',
+        contentType : "application/json; charset=utf-8",
+        dataType : 'json',
+        data : "{}",
+        cache : false,
+        success : function(data, textStatus, jqXHR) {     
+            basicAuthKey = data.base64EncodedAuthenticationKey;
+        },
+        error : function(jqXHR, textStatus, errorThrown) {
+            //error processing
+        }
+    });
+}
+
+function executeAjaxRequest(url, verbType, jsonData, basicAuthKey, successFunction, errorFunction) {
+var jqxhr = $.ajax({
+        url : url,
+        type : verbType, //POST, GET, PUT or DELETE
+        contentType : "application/json; charset=utf-8",
+        dataType : 'json',
+        data : jsonData,
+        cache : false,
+        beforeSend : function(xhr) {
+                xhr.setRequestHeader("Authorization", "Basic " + basicAuthKey);
+        },
+        success : successFunction,
+        error : errorFunction
+    });
+}
+                </code>
+            </div>
+        </div>
+    
+        <a id="errors" name="errors" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h3>Errors</h3>
+                <p>JPW:Need to update this
+                Stripe uses conventional HTTP response codes to indicate
+                success or failure of an API request.  In general,
+                codes in the 2xx range indicate success, codes in the
+                4xx range indicate an error that resulted from the
+                provided information (e.g. a required parameter was
+                missing, a charge failed, etc.), and codes in the 5xx
+                range indicate an error with Stripe's servers.
+                </p>
+                
+                <p>
+                Not all errors map cleanly onto HTTP response codes,
+                however.  When a request is valid but does not complete
+                successfully (e.g. a card is declined), we return a 402
+                error code.
+                </p>
+                
+                
+                <p>
+                All errors return JSON with a type (one of card_error, invalid_request_error,
+                or api_error) and message describing the particular problem.
+                </p>
+                
+                <h5>Attributes</h5>
+                <dl class="argument-list">
+                    <dt>type</dt>
+                    <dd></dd>
+                    <dd>The type of error returned (card_error, invalid_request_error, api_error)
+                    Card errors are the most common type of error you should expect to handle.
+                    They result when the user enters a card that can't be charged for some reason.
+                    Invalid request errors arise when your request has invalid parameters.  API
+                    errors cover any other type of problem (e.g. a temporary problem with Stripe's servers)
+                    and should turn up only very infrequently.</dd>
+                    
+                    <dt>message</dt>
+                    <dd></dd>
+                    <dd>A user-friendly message describing the error</dd>
+                    
+                    <dt>code</dt>
+                    <dd>optional</dd>
+                    <dd>For card errors, additional information 
+                    about the user-friendly message to display for this error (e.g. "Your 
+                    card was declined.")</dd>
+                    
+                    <dt>param</dt>
+                    <dd>optional</dd>
+                    <dd>The parameter the error relates to if the 
+                    error is parameter-specific.  You can use this to display a message near
+                    the correct form field, for example.</dd>
+                </dl>
+            </div>
+            <div class="method-example">
+                <h6>HTTP Status Code Summary</h6>
+                <ul>
+                <li><strong>200</strong> OK - Everything worked as expected.</li>
+                <li><strong>400</strong> Bad Request - Often missing a required parameter.</li>
+                <li><strong>401</strong> Unauthorized - No valid API key provided.</li>
+                <li><strong>402</strong> Request Failed - Parameters were valid but request failed.</li>
+                <li><strong>404</strong> Not Found - The requested item doesn't exist.</li>
+                <li><strong>500, 502, 503, 504</strong> Server errors - something went wrong on Stripe's end.</li>
+                </ul>
+            </div>
+    
+            <div class="method-example">
+                <h6>Errors</h6>
+                <h7>Invalid Request Errors</h7>
+                <code><strong>Type:</strong> invalid_request_error</code>
+                
+                <h7>API Errors</h7>
+                <code><strong>Type:</strong> api_error</code>
+                
+                <h7>Card Errors</h7>
+                <code><strong>Type:</strong> card_error</code>
+                <table>
+                <tbody><tr>
+                <th>Code</th>
+                <th>Details</th>
+                </tr>
+                <tr>
+                <td>invalid_number</td>
+                <td>The card number is invalid</td>
+                </tr>
+                <tr>
+                <td>incorrect_number</td>
+                <td>The card number is incorrect</td>
+                </tr>
+                <tr>
+                <td>invalid_expiry_month</td>
+                <td>The card's expiration month is invalid</td>
+                </tr>
+                <tr>
+                <td>invalid_expiry_year</td>
+                <td>The card's expiration year is invalid</td>
+                </tr>
+                <tr>
+                <td>invalid_cvc</td>
+                <td>The card's security code is invalid</td>
+                </tr>
+                <tr>
+                <td>expired_card</td>
+                <td>The card has expired</td>
+                </tr>
+                <tr>
+                <td>invalid_amount</td>
+                <td>An invalid amount was entered</td>
+                </tr>
+                <tr>
+                <td>incorrect_cvc</td>
+                <td>The card's security code is incorrect</td>
+                </tr>
+                <tr>
+                <td>card_declined</td>
+                <td>The card was declined.</td>
+                </tr>
+                <tr>
+                <td>missing</td>
+                <td>There is no card on a customer that is being charged.</td>
+                </tr>
+                
+                <tr>
+                <td>duplicate_transaction</td>
+                <td>A transaction with identical amount and credit card information was submitted very recently.</td>
+                </tr>
+                <tr>
+                <td>processing_error</td>
+                <td>An error occurred while processing the card.</td>
+                </tr>
+                </tbody></table>
+            </div>
+        </div>
+    
+    
+    
+    
+<!-- start of clients api docs -->
+        <a id="clients" name="clients" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h3>Clients</h3>
+                <p>Clients are people and businesses that have applied (or may apply) to an MFI for loans.</p>
+                <table class=matrixHeading>
+                    <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Field Descriptions</div></td></tr>
+                    <tr class=alt><td>externalId</td></tr>
+                    <tr><td class=fielddesc>A place to put an external reference for this client e.g. The ID another system uses.</td></tr>
+                    </tr>
+                    <tr class=alt><td>maxJoinedOnOffsetFromToday</td></tr>
+                    <tr><td class=fielddesc>Convenience field. Number of days since the Client joined.</td></tr>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    
+        <a id="client_list" name="clients_list" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>List Clients</h4>
+                <p>Example Requests: </p>
+                <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients?pretty=true">https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients?pretty=true</a>
+                <br><br>
+                <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients?pretty=true&fields=displayName,officeName,joinedDate">https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients?pretty=true&fields=displayName,officeName,joinedDate</a>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">GET https://thedomainname/api/v1/clients</code>
+<code class="method-response">[ {
+  "officeId" : 1,
+  "officeName" : "change super user",
+  "id" : 2,
+  "firstname" : "Dennis",
+  "lastname" : "O'Meara",
+  "displayName" : "Dennis O'Meara",
+  "externalId" : null,
+  "joinedDate" : [ 2009, 1, 4 ],
+  "maxJoinedOnOffsetFromToday" : -1241
+}, {
+  "officeId" : 1,
+  "officeName" : "change super user",
+  "id" : 4,
+  "firstname" : "Jimmy",
+  "lastname" : "O'Meara",
+  "displayName" : "Jimmy O'Meara",
+  "externalId" : null,
+  "joinedDate" : [ 2009, 1, 11 ],
+  "maxJoinedOnOffsetFromToday" : -1234
+}...]
+</code>
+            </div>
+        </div>
+    
+    
+        <a id="clients_template" name="clients_template" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>Retrieve Client Details Template</h4>
+                <p>This is a convenience resource.  It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:
+                    <ul>
+                    <li class=normalli>Field Defaults</li>   
+                    <li class=normalli>Allowed Value Lists</li>    
+                    </ul>
+                </p>
+                <p>Example Request: </p>
+                <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/template?pretty=true">https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/template?pretty=true</a>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">GET https://thedomainname/api/v1/clients/template</code>
+<code class="method-response">{
+  "joinedDate" : [ 2012, 5, 29 ],
+  "allowedOffices" : [ {
+    "id" : 1,
+    "name" : "Demo MFI Head Office"
+  }, {
+    "id" : 2,
+    "name" : "sub branch 1"
+  }, {
+    "id" : 8,
+    "name" : "moi aussi"
+  }, {
+    "id" : 3,
+    "name" : "sub branch 2"
+  }, {
+    "id" : 4,
+    "name" : "sub branch 3"
+  } ]
+}
+</code>
+            </div>
+        </div>
+    
+    
+        <a id="clients_retrieve" name="clients_retrieve" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>Retrieve a Client</h4>
+                <p>Example Requests: </p>
+                <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/1?pretty=true">https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/1?pretty=true</a>
+                <br><br>
+                <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/1?pretty=true&template=true">https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/1?pretty=true&template=true</a>
+                <br><br>
+                <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/1?pretty=true&fields=id,displayName,officeName">https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/1?pretty=true&fields=id,displayName,officeName</a>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">GET https://thedomainname/api/v1/clients/{clientId}</code>
+<code class="method-response">{
+  "officeId" : 1,
+  "officeName" : "change super user",
+  "id" : 1,
+  "firstname" : "Patrick",
+  "lastname" : "O'Meara",
+  "displayName" : "Patrick O'Meara",
+  "externalId" : null,
+  "joinedDate" : [ 2009, 1, 4 ],
+  "maxJoinedOnOffsetFromToday" : -1241
+}
+</code>
+            </div>
+        </div>
+    
+<a id="clients_create" name="clients_create" class="old-syle-anchor">&nbsp;</a>
+<div class="method-section">
+    <div class="method-description">
+        <h4>Create a Client</h4>
+        <p> <b>Note:</b> You can enter either:<br>
+        firstname/lastname - for a person OR<br>
+        clientOrBusinessName - for a business or organisation (or person known by one name).
+        </p>
+        <table class=matrixHeading>
+            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields</div></td></tr>
+            <tr class=alt><td>firstname, lastname, joiningDate, officeId</td></tr>
+        </table>
+    </div>
+    <div class="method-example">
+        <code class="method-declaration">POST https://thedomainname/api/v1/clients</code>
+<code class="method-request">POST https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients
+Content-Type: application/json
+Request Body:
+{
+ "officeId": 1, 
+ "firstname": "Petra", 
+ "lastname": "Yton", 
+ "externalId": "786YYH7",
+ "dateFormat": "dd MMMM yyyy", 
+ "joiningDate": "04 March 2009"
+}
+</code>
+<code class="method-response">
+{
+ "entityId":23
+}
+</code>
+    </div>
+</div>
+
+<a id="clients_update" name="clients_update" class="old-syle-anchor">&nbsp;</a>
+<div class="method-section">
+    <div class="method-description">
+        <h4>Update a Client</h4>
+    </div>
+    <div class="method-example">
+        <code class="method-declaration">PUT https://thedomainname/api/v1/clients/{clientId}</code>
+<code class="method-request">PUT https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/23
+Content-Type: application/json
+Request Body:
+{ 
+ "externalId": "786444UUUYYH7",
+ "dateFormat": "dd MMMM yyyy", 
+ "joiningDate": "09 June 2006"
+}
+</code>
+<code class="method-response">{ "entityId": 23}</code>
+    </div>
+</div>
+        
+<a id="clients_loansummary" name="clients_loansummary" class="old-syle-anchor">&nbsp;</a>
+<div class="method-section">
+    <div class="method-description">
+        <h4>Retrieve a Client's Loan Account Summary</h4>
+        <p>
+            An example of how a loan portfolio summary can be provided.  This one contains quite a bit of redundant data (like the counts) and is requested
+            in a specific use case of the Individual Lending User Interface.<br>
+            However, it is quite reasonable to add resources like this to simplify User Interface development.
+        </p>
+        <p>Example Requests: </p>
+        <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/1/loans?pretty=true">https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/1/loans?pretty=true</a>
+        <br><br>
+        <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/1/loans?pretty=true&fields=openLoans,%20closedLoans,activeLoanCount">https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/1/loans?pretty=true&fields=openLoans,%20closedLoans,activeLoanCount</a>
+    </div>
+    <div class="method-example">
+        <code class="method-declaration">GET https://thedomainname/api/v1/clients/{clientId}/loans</code>
+<code class="method-response">{
+  "pendingApprovalLoans" : [ ],
+  "awaitingDisbursalLoans" : [ {
+    "id" : 17,
+    "externalId" : null,
+    "loanProductId" : 1,
+    "loanProductName" : "Agricultural Loan",
+    "loanStatusId" : 200,
+    "pendingApproval" : false,
+    "waitingForDisbursal" : true,
+    "open" : false,
+    "closed" : false,
+    "lifeCycleStatusText" : "Approved",
+    "lifeCycleStatusDate" : null
+  } ],
+  "openLoans" : [ ],
+  "closedLoans" : [ {
+    "id" : 1,
+    "externalId" : null,
+    "loanProductId" : 1,
+    "loanProductName" : "Agricultural Loan",
+    "loanStatusId" : 600,
+    "pendingApproval" : false,
+    "waitingForDisbursal" : false,
+    "open" : false,
+    "closed" : true,
+    "lifeCycleStatusText" : "Closed",
+    "lifeCycleStatusDate" : null
+  } ],
+  "anyLoanCount" : 2,
+  "pendingApprovalLoanCount" : 0,
+  "awaitingDisbursalLoanCount" : 1,
+  "activeLoanCount" : 0,
+  "closedLoanCount" : 1
+}
+</code>
+    </div>
+</div>
+
+
+<a id="clients_notes" name="clients_notes" class="old-syle-anchor">&nbsp;</a>
+<div class="method-section">
+    <div class="method-description">
+        <h4>Retrieve a Client's Notes</h4>
+        <p>
+            <b>Note:</b> Notes are returned in descending createOn order.
+        </p>
+        <p>Example Requests: </p>
+        <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/2/notes?pretty=true">https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/2/notes?pretty=true</a>
+        <br><br>
+        <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/2/notes?pretty=true&fields=note,createdOn,createdByUsername">https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/2/notes?pretty=true&fields=note,createdOn,createdByUsername</a>
+    </div>
+    <div class="method-example">
+        <code class="method-declaration">GET https://thedomainname/api/v1/clients/{clientId}/notes</code>
+<code class="method-response">[ {
+  "id" : 20,
+  "clientId" : 2,
+  "loanId" : null,
+  "loanTransactionId" : null,
+  "noteTypeId" : 100,
+  "note" : "This is an extra note!",
+  "createdById" : 2,
+  "createdByUsername" : "super1",
+  "createdOn" : 1335066625000,
+  "updatedById" : 2,
+  "updatedByUsername" : "super1",
+  "updatedOn" : 1335066625000
+}, {
+  "id" : 16,
+  "clientId" : 2,
+  "loanId" : null,
+  "loanTransactionId" : null,
+  "noteTypeId" : 100,
+  "note" : "loan only 1/2 amount expected\r\nyes",
+  "createdById" : 2,
+  "createdByUsername" : "super1",
+  "createdOn" : 1334726104000,
+  "updatedById" : 2,
+  "updatedByUsername" : "super1",
+  "updatedOn" : 1335137893000
+} ]
+</code>
+    </div>
+</div>
+        
+<a id="clients_addnote" name="clients_addnote" class="old-syle-anchor">&nbsp;</a>
+<div class="method-section">
+    <div class="method-description">
+        <h4>Add a Client Note</h4>
+    </div>
+    <div class="method-example">
+        <code class="method-declaration">POST https://thedomainname/api/v1/clients/{clientId}/notes</code>
+        <code class="method-request">POST https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/1/notes
+Content-Type: application/json
+Request Body:
+{
+"note": "a note about the client"
+}
+</code>
+<code class="method-response">{
+ "entityId": 40
+}
+</code>
+    </div>
+</div>
+
+<a id="clients_retrievenote" name="clients_retrievenote" class="old-syle-anchor">&nbsp;</a>
+<div class="method-section">
+    <div class="method-description">
+        <h4>Retrieve a Client Note</h4>
+        <p>Example Requests: </p>
+        <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/2/notes/20?pretty=true">https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/2/notes/20?pretty=true</a>
+        <br><br>
+        <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/2/notes/20?pretty=true&fields=note,createdOn,createdByUsername">https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/2/notes/20?pretty=true&fields=note,createdOn,createdByUsername</a>
+    </div>
+    <div class="method-example">
+        <code class="method-declaration">GET https://thedomainname/api/v1/clients/{clientId}/notes/{noteId}</code>
+        <code class="method-response">{
+  "id" : 20,
+  "clientId" : 2,
+  "loanId" : null,
+  "loanTransactionId" : null,
+  "noteTypeId" : 100,
+  "note" : "This is an extra note!",
+  "createdById" : 2,
+  "createdByUsername" : "super1",
+  "createdOn" : 1335066625000,
+  "updatedById" : 2,
+  "updatedByUsername" : "super1",
+  "updatedOn" : 1335066625000
+}
+</code>
+    </div>
+</div>
+        
+<a id="clients_updatenote" name="clients_updatenote" class="old-syle-anchor">&nbsp;</a>
+<div class="method-section">
+    <div class="method-description">
+        <h4>Update a Client Note</h4>
+    </div>
+    <div class="method-example">
+        <code class="method-declaration">PUT https://thedomainname/api/v1/clients/{clientId}/notes/{noteId}</code>
+<code class="method-request">PUT https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/2/notes/20
+Content-Type: application/json
+Request Body:
+{
+"note": "and here the note is updated nicely."
+}
+</code>
+<code class="method-response">{
+ "entityId": 20
+}
+</code>
+    </div>
+</div>   
+
+<!-- start of loans api docs -->
+
+        <a id="loans" name="loans" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h3>Loans</h3>
+                <table class=matrixHeading>
+                    <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Field Descriptions</div></td></tr>
+                    <tr class=alt><td>digitsAfterDecimal</td></tr>
+                    <tr><td class=fielddesc>Override the loan product default value for digitsAfterDecimal.</td></tr>
+                    </tr>
+                    <tr class=alt><td>principal</td></tr>
+                    <tr><td class=fielddesc>Loan amount.</td></tr>
+                    <tr class=alt><td>externalId</td></tr>
+                    <tr><td class=fielddesc>A place to put an external reference for this loan e.g. The ID another system uses.</td></tr>
+                    <tr class=alt><td>inArrearsTolerance</td></tr>
+                    <tr><td class=fielddesc></td></tr>
+                    <tr class=alt><td>numberOfRepayments</td></tr>
+                    <tr><td class=fielddesc>Number of installments to repay.<br>
+                    Used like: numberOfRepayments Every repaymentEvery repaymentFrequencyType<br>
+                    e.g. <b>10</b> (repayments) Every 12 Weeks</td></tr>
+                    <tr class=alt><td>interestRatePerPeriod</td></tr>
+                    <tr><td class=fielddesc>Interest Rate.<br>
+                    Used like: interestRatePerPeriod% interestRateFrequencyType - interestType<br>
+                    e.g. <b>12.0000</b>%  Per year - Declining Balance</td></tr>
+                    <tr class=alt><td>repaymentEvery</td></tr>
+                    <tr><td class=fielddesc>Used like: numberOfRepayments Every repaymentEvery repaymentFrequencyType<br>
+                    e.g. 10 (repayments) Every <b>12</b> Weeks</td></tr>
+                    <tr><td class=fieldtype>Each of the items below has an id, code and (english) value.<br>
+                    Only the id (integer) is used when updating.  All 3 are returned on GET (read) requests.<br>
+                    The options are fully listed in <a href="#loanproducts_template">Retrieve Loan Product Details Template</a>.
+                    </td></tr>
+                    <tr class=alt><td>repaymentFrequencyType</td></tr>
+                    <tr><td class=fielddesc>Used like: numberOfRepayments Every repaymentEvery repaymentFrequencyType<br>
+                    e.g. 10 (repayments) Every 12 <b>Weeks</b>
+                    <br><span>Example Values:</span> Days, Weeks, Months
+                    </td></tr>
+                    <tr class=alt><td>interestRateFrequencyType</td></tr>
+                    <tr><td class=fielddesc>Used like: interestRatePerPeriod% interestRateFrequencyType - interestType<br>
+                    e.g. 12.0000%  <b>Per year</b> - Declining Balance
+                    <br><span>Example Values:</span> Per month, Per year</td></tr>
+                    <tr class=alt><td>amortizationType</td></tr>
+                    <tr><td class=fielddesc>
+                        <span>Example Values:</span> Equal principle payments, Equal installments</td></tr></td></tr>
+                    <tr class=alt><td>interestType</td></tr>
+                    <tr><td class=fielddesc>Used like: interestRatePerPeriod% interestRateFrequencyType - interestType<br>
+                    e.g. 12.0000%  Per year - <b>Declining Balance</b>
+                    <br><span>Example Values:</span> Declining Balance, Flat</td></tr></td></tr>
+                    <tr class=alt><td>interestCalculationPeriodType</td></tr>
+                    <tr><td class=fielddesc>
+                        <span>Example Values:</span> Same as repayment period, Daily</td></tr></td></tr>
+                    </tr>
+                </table>
+            </div>
+        </div>
+                
+        
+<a id="loans_template" name="loans_template" class="old-syle-anchor">&nbsp;</a>
+<div class="method-section">
+    <div class="method-description">
+        <h4>Retrieve Loan Details Template</h4>
+                <p>This is a convenience resource.  It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:
+                    <ul>
+                    <li class=normalli>Field Defaults</li>   
+                    <li class=normalli>Allowed Value Lists</li>    
+                    </ul>
+                </p>
+        <h5>Arguments</h5>
+        <dl class="argument-list">
+            <dt>clientId</dt>
+            <dd>Integer <span>mandatory</span></dd>
+            <dt>productId</dt>
+            <dd>Integer <span>optional</span></dd>
+            <dd>If entered, productId, productName and selectedProduct fields are returned. </dd>
+        </dl>
+        <p>Example Requests: </p>
+        <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/template?clientId=1&productId=1&pretty=true">https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/template?clientId=1&productId=1&pretty=true</a>
+        <br><br>
+        <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/template?clientId=1&pretty=true">https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/template?clientId=1&pretty=true</a>
+    </div>
+    <div class="method-example">
+        <code class="method-declaration">GET https://thedomainname/api/v1/loans/template</code>
+<code class="method-response">{
+  "clientId" : 1,
+  "clientName" : "Patrick O'Meara",
+  "productId" : 1,
+  "productName" : "Agricultural Loan",
+  "selectedProduct" : {
+    "id" : 1,
+    "name" : "Agricultural Loan",
+    "description" : "An agricultural loan given to farmers to help buy crop, stock and machinery. With an arrears tolerance setting of 1,000 CFA, loans are not marked as 'in arrears' or 'in bad standing' if the amount outstanding is less than this. Interest rate is described using monthly percentage rate (MPR) even though the loan typically lasts a year and requires one repayment (typically at time when farmer sells crop)",
+    "principal" : {
+      "currencyCode" : "XOF",
+      "digitsAfterDecimal" : 0,
+      "amount" : 100000,
+      "defaultName" : "CFA Franc BCEAO",
+      "nameCode" : "currency.XOF",
+      "displaySymbol" : "CFA",
+      "zero" : false,
+      "greaterThanZero" : true,
+      "displaySymbolValue" : "100000 CFA"
+    },
+    "inArrearsTolerance" : {
+      "currencyCode" : "XOF",
+      "digitsAfterDecimal" : 0,
+      "amount" : 1000,
+      "defaultName" : "CFA Franc BCEAO",
+      "nameCode" : "currency.XOF",
+      "displaySymbol" : "CFA",
+      "zero" : false,
+      "greaterThanZero" : true,
+      "displaySymbolValue" : "1000 CFA"
+    },
+    "numberOfRepayments" : 1,
+    "repaymentEvery" : 12,
+    "interestRatePerPeriod" : 1.750000,
+    "annualInterestRate" : 21.000000,
+    "repaymentFrequencyType" : {
+      "id" : 2,
+      "code" : "repaymentFrequency.periodFrequencyType.months",
+      "value" : "Months"
+    },
+    "interestRateFrequencyType" : {
+      "id" : 2,
+      "code" : "interestRateFrequency.periodFrequencyType.months",
+      "value" : "Per month"
+    },
+    "amortizationType" : {
+      "id" : 1,
+      "code" : "amortizationType.equal.installments",
+      "value" : "Equal installments"
+    },
+    "interestType" : {
+      "id" : 0,
+      "code" : "interestType.declining.balance",
+      "value" : "Declining Balance"
+    },
+    "interestCalculationPeriodType" : {
+      "id" : 1,
+      "code" : "interestCalculationPeriodType.same.as.repayment.period",
+      "value" : "Same as repayment period"
+    },
+    "createdOn" : 1334232874000,
+    "lastModifedOn" : 1334232874000,
+    "currencyOptions" : [ {
+      "code" : "KES",
+      "name" : "Kenyan Shilling",
+      "decimalPlaces" : 2,
+      "displaySymbol" : "KSh",
+      "nameCode" : "currency.KES",
+      "displayLabel" : "Kenyan Shilling (KSh)"
+    }, {
+      "code" : "BND",
+      "name" : "Brunei Dollar",
+      "decimalPlaces" : 2,
+      "displaySymbol" : "BND",
+      "nameCode" : "currency.BND",
+      "displayLabel" : "Brunei Dollar (BND)"
+    }, {
+      "code" : "LBP",
+      "name" : "Lebanese Pound",
+      "decimalPlaces" : 2,
+      "displaySymbol" : "LÂ£",
+      "nameCode" : "currency.LBP",
+      "displayLabel" : "Lebanese Pound (LÂ£)"
+    }, {
+      "code" : "GHC",
+      "name" : "Ghana Cedi",
+      "decimalPlaces" : 2,
+      "displaySymbol" : "GHC",
+      "nameCode" : "currency.GHC",
+      "displayLabel" : "Ghana Cedi (GHC)"
+    }, {
+      "code" : "USD",
+      "name" : "US Dollar",
+      "decimalPlaces" : 2,
+      "displaySymbol" : "$",
+      "nameCode" : "currency.USD",
+      "displayLabel" : "US Dollar ($)"
+    }, {
+      "code" : "XOF",
+      "name" : "CFA Franc BCEAO",
+      "decimalPlaces" : 0,
+      "displaySymbol" : "CFA",
+      "nameCode" : "currency.XOF",
+      "displayLabel" : "CFA Franc BCEAO (CFA)"
+    } ],
+    "amortizationTypeOptions" : [ {
+      "id" : 1,
+      "code" : "amortizationType.equal.installments",
+      "value" : "Equal installments"
+    }, {
+      "id" : 0,
+      "code" : "amortizationType.equal.principal",
+      "value" : "Equal principle payments"
+    } ],
+    "interestTypeOptions" : [ {
+      "id" : 1,
+      "code" : "interestType.flat",
+      "value" : "Flat"
+    }, {
+      "id" : 0,
+      "code" : "interestType.declining.balance",
+      "value" : "Declining Balance"
+    } ],
+    "interestCalculationPeriodTypeOptions" : [ {
+      "id" : 0,
+      "code" : "interestCalculationPeriodType.daily",
+      "value" : "Daily"
+    }, {
+      "id" : 1,
+      "code" : "interestCalculationPeriodType.same.as.repayment.period",
+      "value" : "Same as repayment period"
+    } ],
+    "repaymentFrequencyTypeOptions" : [ {
+      "id" : 0,
+      "code" : "repaymentFrequency.periodFrequencyType.days",
+      "value" : "Days"
+    }, {
+      "id" : 1,
+      "code" : "repaymentFrequency.periodFrequencyType.weeks",
+      "value" : "Weeks"
+    }, {
+      "id" : 2,
+      "code" : "repaymentFrequency.periodFrequencyType.months",
+      "value" : "Months"
+    } ],
+    "interestRateFrequencyTypeOptions" : [ {
+      "id" : 2,
+      "code" : "interestRateFrequency.periodFrequencyType.months",
+      "value" : "Per month"
+    }, {
+      "id" : 3,
+      "code" : "interestRateFrequency.periodFrequencyType.years",
+      "value" : "Per year"
+    } ]
+  },
+  "expectedDisbursementDate" : [ 2012, 6, 1 ],
+  "repaymentSchedule" : null,
+  "allowedProducts" : [ {
+    "id" : 1,
+    "name" : "Agricultural Loan"
+  }, {
+    "id" : 2,
+    "name" : "Brunei Loan"
+  }, {
+    "id" : 3,
+    "name" : "IL Loan"
+  }, {
+    "id" : 4,
+    "name" : "IBL Mabeshte"
+  }, {
+    "id" : 5,
+    "name" : "Salary Loan"
+  }, {
+    "id" : 6,
+    "name" : "daily-declining-balance"
+  } ]
+}
+</code>
+    </div>
+</div>
+        
+<a id="loans_retrieve" name="loans_retrieve" class="old-syle-anchor">&nbsp;</a>
+<div class="method-section">
+    <div class="method-description">
+        <h4>Retrieve a Loan</h4>
+        <p>
+            <b>Note:</b> template=true parameter doesn't apply to this resource.
+        </p>
+        <p>Example Requests: </p>
+        <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/1?pretty=true">https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/1?pretty=true</a>
+        <br><br>
+        <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/1?pretty=true&fields=id,principal,interestRatePerYear">https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/1?pretty=true&fields=id,principal,interestRatePerYear</a>
+    </div>
+    <div class="method-example">
+        <code class="method-declaration">GET https://thedomainname/api/v1/loans/{loanId}</code>
+        <code class="method-response">{
+  "open" : false,
+  "openWithRepaymentMade" : false,
+  "closed" : true,
+  "interestRebateOutstanding" : false,
+  "pendingApproval" : false,
+  "waitingForDisbursal" : false,
+  "lifeCycleStatusText" : "Closed",
+  "lifeCycleStatusDate" : [ 2009, 11, 13 ],
+  "id" : 1,
+  "externalId" : null,
+  "loanProductName" : "Agricultural Loan",
+  "submittedOnDate" : [ 2009, 1, 5 ],
+  "approvedOnDate" : [ 2009, 1, 8 ],
+  "expectedDisbursementDate" : [ 2009, 1, 15 ],
+  "actualDisbursementDate" : [ 2009, 1, 15 ],
+  "undoDisbursalAllowed" : false,
+  "expectedFirstRepaymentOnDate" : null,
+  "interestCalculatedFromDate" : null,
+  "closedOnDate" : [ 2009, 11, 13 ],
+  "expectedMaturityDate" : [ 2009, 11, 15 ],
+  "principal" : {
+    "currencyCode" : "XOF",
+    "currencyDigitsAfterDecimal" : 0,
+    "amount" : 100000,
+    "defaultName" : "CFA Franc BCEAO",
+    "nameCode" : "currency.XOF",
+    "displaySymbol" : "CFA",
+    "zero" : false,
+    "greaterThanZero" : true,
+    "displaySymbolValue" : "100000 CFA"
+  },
+  "interestRatePerYear" : 21.0,
+  "interestRatePerPeriod" : 1.75,
+  "interestPeriodFrequencyType" : 2,
+  "interestPeriodFrequencyText" : "MONTHS",
+  "interestMethodType" : 0,
+  "interestMethodText" : "DECLINING_BALANCE",
+  "amortizationMethodValue" : 1,
+  "amortizationMethodText" : "EQUAL_INSTALLMENTS",
+  "numberOfRepayments" : 1,
+  "repaymentFrequencyNumber" : 10,
+  "repaymentFrequencyTypeEnumOrdinal" : 2,
+  "repaymentFrequencyTypeText" : "MONTHS",
+  "interestRebateOwed" : {
+    "currencyCode" : "XOF",
+    "currencyDigitsAfterDecimal" : 0,
+    "amount" : 0,
+    "defaultName" : "CFA Franc BCEAO",
+    "nameCode" : "currency.XOF",
+    "displaySymbol" : "CFA",
+    "zero" : true,
+    "greaterThanZero" : false,
+    "displaySymbolValue" : "0 CFA"
+  },
+  "loanData" : {
+    "repaymentSchedule" : {
+      "periods" : [ {
+        "period" : 1,
+        "date" : [ 2009, 11, 15 ],
+        "disbursed" : {
+          "currencyCode" : "XOF",
+          "currencyDigitsAfterDecimal" : 0,
+          "amount" : 0,
+          "defaultName" : "CFA Franc BCEAO",
+          "nameCode" : "currency.XOF",
+          "displaySymbol" : "CFA",
+          "zero" : true,
+          "greaterThanZero" : false,
+          "displaySymbolValue" : "0 CFA"
+        },
+        "principal" : {
+          "currencyCode" : "XOF",
+          "currencyDigitsAfterDecimal" : 0,
+          "amount" : 100000,
+          "defaultName" : "CFA Franc BCEAO",
+          "nameCode" : "currency.XOF",
+          "displaySymbol" : "CFA",
+          "zero" : false,
+          "greaterThanZero" : true,
+          "displaySymbolValue" : "100000 CFA"
+        },
+        "principalPaid" : {
+          "currencyCode" : "XOF",
+          "currencyDigitsAfterDecimal" : 0,
+          "amount" : 100000,
+          "defaultName" : "CFA Franc BCEAO",
+          "nameCode" : "currency.XOF",
+          "displaySymbol" : "CFA",
+          "zero" : false,
+          "greaterThanZero" : true,
+          "displaySymbolValue" : "100000 CFA"
+        },
+        "principalOutstanding" : {
+          "currencyCode" : "XOF",
+          "currencyDigitsAfterDecimal" : 0,
+          "amount" : 0,
+          "defaultName" : "CFA Franc BCEAO",
+          "nameCode" : "currency.XOF",
+          "displaySymbol" : "CFA",
+          "zero" : true,
+          "greaterThanZero" : false,
+          "displaySymbolValue" : "0 CFA"
+        },
+        "interest" : {
+          "currencyCode" : "XOF",
+          "currencyDigitsAfterDecimal" : 0,
+          "amount" : 17500,
+          "defaultName" : "CFA Franc BCEAO",
+          "nameCode" : "currency.XOF",
+          "displaySymbol" : "CFA",
+          "zero" : false,
+          "greaterThanZero" : true,
+          "displaySymbolValue" : "17500 CFA"
+        },
+        "interestPaid" : {
+          "currencyCode" : "XOF",
+          "currencyDigitsAfterDecimal" : 0,
+          "amount" : 17500,
+          "defaultName" : "CFA Franc BCEAO",
+          "nameCode" : "currency.XOF",
+          "displaySymbol" : "CFA",
+          "zero" : false,
+          "greaterThanZero" : true,
+          "displaySymbolValue" : "17500 CFA"
+        },
+        "interestOutstanding" : {
+          "currencyCode" : "XOF",
+          "currencyDigitsAfterDecimal" : 0,
+          "amount" : 0,
+          "defaultName" : "CFA Franc BCEAO",
+          "nameCode" : "currency.XOF",
+          "displaySymbol" : "CFA",
+          "zero" : true,
+          "greaterThanZero" : false,
+          "displaySymbolValue" : "0 CFA"
+        },
+        "total" : {
+          "currencyCode" : "XOF",
+          "currencyDigitsAfterDecimal" : 0,
+          "amount" : 117500,
+          "defaultName" : "CFA Franc BCEAO",
+          "nameCode" : "currency.XOF",
+          "displaySymbol" : "CFA",
+          "zero" : false,
+          "greaterThanZero" : true,
+          "displaySymbolValue" : "117500 CFA"
+        },
+        "totalPaid" : {
+          "currencyCode" : "XOF",
+          "currencyDigitsAfterDecimal" : 0,
+          "amount" : 117500,
+          "defaultName" : "CFA Franc BCEAO",
+          "nameCode" : "currency.XOF",
+          "displaySymbol" : "CFA",
+          "zero" : false,
+          "greaterThanZero" : true,
+          "displaySymbolValue" : "117500 CFA"
+        },
+        "totalOutstanding" : {
+          "currencyCode" : "XOF",
+          "currencyDigitsAfterDecimal" : 0,
+          "amount" : 0,
+          "defaultName" : "CFA Franc BCEAO",
+          "nameCode" : "currency.XOF",
+          "displaySymbol" : "CFA",
+          "zero" : true,
+          "greaterThanZero" : false,
+          "displaySymbolValue" : "0 CFA"
+        },
+        "totalWaived" : null,
+        "totalArrears" : {
+          "currencyCode" : "XOF",
+          "currencyDigitsAfterDecimal" : 0,
+          "amount" : 0,
+          "defaultName" : "CFA Franc BCEAO",
+          "nameCode" : "currency.XOF",
+          "displaySymbol" : "CFA",
+          "zero" : true,
+          "greaterThanZero" : false,
+          "displaySymbolValue" : "0 CFA"
+        },
+        "arrearsFrom" : null,
+        "arrearsTo" : null,
+        "paidInFullOn" : [ 2009, 11, 13 ],
+        "lastAffectingPaymentOn" : [ 2009, 11, 13 ],
+        "fullyPaid" : true
+      } ]
+    },
+    "summary" : {
+      "originalPrincipal" : {
+        "currencyCode" : "XOF",
+        "currencyDigitsAfterDecimal" : 0,
+        "amount" : 100000,
+        "defaultName" : "CFA Franc BCEAO",
+        "nameCode" : "currency.XOF",
+        "displaySymbol" : "CFA",
+        "zero" : false,
+        "greaterThanZero" : true,
+        "displaySymbolValue" : "100000 CFA"
+      },
+      "originalInterest" : {
+        "currencyCode" : "XOF",
+        "currencyDigitsAfterDecimal" : 0,
+        "amount" : 17500,
+        "defaultName" : "CFA Franc BCEAO",
+        "nameCode" : "currency.XOF",
+        "displaySymbol" : "CFA",
+        "zero" : false,
+        "greaterThanZero" : true,
+        "displaySymbolValue" : "17500 CFA"
+      },
+      "originalTotal" : {
+        "currencyCode" : "XOF",
+        "currencyDigitsAfterDecimal" : 0,
+        "amount" : 117500,
+        "defaultName" : "CFA Franc BCEAO",
+        "nameCode" : "currency.XOF",
+        "displaySymbol" : "CFA",
+        "zero" : false,
+        "greaterThanZero" : true,
+        "displaySymbolValue" : "117500 CFA"
+      },
+      "principalPaid" : {
+        "currencyCode" : "XOF",
+        "currencyDigitsAfterDecimal" : 0,
+        "amount" : 100000,
+        "defaultName" : "CFA Franc BCEAO",
+        "nameCode" : "currency.XOF",
+        "displaySymbol" : "CFA",
+        "zero" : false,
+        "greaterThanZero" : true,
+        "displaySymbolValue" : "100000 CFA"
+      },
+      "principalOutstanding" : {
+        "currencyCode" : "XOF",
+        "currencyDigitsAfterDecimal" : 0,
+        "amount" : 0,
+        "defaultName" : "CFA Franc BCEAO",
+        "nameCode" : "currency.XOF",
+        "displaySymbol" : "CFA",
+        "zero" : true,
+        "greaterThanZero" : false,
+        "displaySymbolValue" : "0 CFA"
+      },
+      "interestPaid" : {
+        "currencyCode" : "XOF",
+        "currencyDigitsAfterDecimal" : 0,
+        "amount" : 17500,
+        "defaultName" : "CFA Franc BCEAO",
+        "nameCode" : "currency.XOF",
+        "displaySymbol" : "CFA",
+        "zero" : false,
+        "greaterThanZero" : true,
+        "displaySymbolValue" : "17500 CFA"
+      },
+      "interestOutstanding" : {
+        "currencyCode" : "XOF",
+        "currencyDigitsAfterDecimal" : 0,
+        "amount" : 0,
+        "defaultName" : "CFA Franc BCEAO",
+        "nameCode" : "currency.XOF",
+        "displaySymbol" : "CFA",
+        "zero" : true,
+        "greaterThanZero" : false,
+        "displaySymbolValue" : "0 CFA"
+      },
+      "totalPaid" : {
+        "currencyCode" : "XOF",
+        "currencyDigitsAfterDecimal" : 0,
+        "amount" : 117500,
+        "defaultName" : "CFA Franc BCEAO",
+        "nameCode" : "currency.XOF",
+        "displaySymbol" : "CFA",
+        "zero" : false,
+        "greaterThanZero" : true,
+        "displaySymbolValue" : "117500 CFA"
+      },
+      "totalOutstanding" : {
+        "currencyCode" : "XOF",
+        "currencyDigitsAfterDecimal" : 0,
+        "amount" : 0,
+        "defaultName" : "CFA Franc BCEAO",
+        "nameCode" : "currency.XOF",
+        "displaySymbol" : "CFA",
+        "zero" : true,
+        "greaterThanZero" : false,
+        "displaySymbolValue" : "0 CFA"
+      },
+      "totalInArrears" : {
+        "currencyCode" : "XOF",
+        "currencyDigitsAfterDecimal" : 0,
+        "amount" : 0,
+        "defaultName" : "CFA Franc BCEAO",
+        "nameCode" : "currency.XOF",
+        "displaySymbol" : "CFA",
+        "zero" : true,
+        "greaterThanZero" : false,
+        "displaySymbolValue" : "0 CFA"
+      },
+      "totalWaived" : {
+        "currencyCode" : "XOF",
+        "currencyDigitsAfterDecimal" : 0,
+        "amount" : 0,
+        "defaultName" : "CFA Franc BCEAO",
+        "nameCode" : "currency.XOF",
+        "displaySymbol" : "CFA",
+        "zero" : true,
+        "greaterThanZero" : false,
+        "displaySymbolValue" : "0 CFA"
+      }
+    },
+    "loanRepayments" : [ {
+      "id" : 2,
+      "date" : [ 2009, 11, 13 ],
+      "principal" : {
+        "currencyCode" : "XOF",
+        "currencyDigitsAfterDecimal" : 0,
+        "amount" : 100000,
+        "defaultName" : "CFA Franc BCEAO",
+        "nameCode" : "currency.XOF",
+        "displaySymbol" : "CFA",
+        "zero" : false,
+        "greaterThanZero" : true,
+        "displaySymbolValue" : "100000 CFA"
+      },
+      "interest" : {
+        "currencyCode" : "XOF",
+        "currencyDigitsAfterDecimal" : 0,
+        "amount" : 17500,
+        "defaultName" : "CFA Franc BCEAO",
+        "nameCode" : "currency.XOF",
+        "displaySymbol" : "CFA",
+        "zero" : false,
+        "greaterThanZero" : true,
+        "displaySymbolValue" : "17500 CFA"
+      },
+      "total" : {
+        "currencyCode" : "XOF",
+        "currencyDigitsAfterDecimal" : 0,
+        "amount" : 117500,
+        "defaultName" : "CFA Franc BCEAO",
+        "nameCode" : "currency.XOF",
+        "displaySymbol" : "CFA",
+        "zero" : false,
+        "greaterThanZero" : true,
+        "displaySymbolValue" : "117500 CFA"
+      },
+      "totalWaived" : null,
+      "overpaid" : null,
+      "transactionOffsetFromToday" : -929
+    } ]
+  },
+  "arrearsTolerance" : {
+    "currencyCode" : "XOF",
+    "currencyDigitsAfterDecimal" : 0,
+    "amount" : 1000,
+    "defaultName" : "CFA Franc BCEAO",
+    "nameCode" : "currency.XOF",
+    "displaySymbol" : "CFA",
+    "zero" : false,
+    "greaterThanZero" : true,
+    "displaySymbolValue" : "1000 CFA"
+  },
+  "waiveAllowed" : false,
+  "makeRepaymentAllowed" : false,
+  "rejectAllowed" : false,
+  "withdrawnByApplicantAllowed" : false,
+  "undoApprovalAllowed" : false,
+  "disbursalAllowed" : false,
+  "anyActionOnLoanAllowed" : false,
+  "maxSubmittedOnOffsetFromToday" : -1241,
+  "maxApprovedOnOffsetFromToday" : -1238,
+  "maxDisbursedOnOffsetFromToday" : -1231,
+  "actualLoanTermInDays" : 302,
+  "actualLoanTermInMonths" : 9,
+  "loanTermInDays" : 304,
+  "loanTermInMonths" : 10
+}
+        </code>
+    </div>
+</div>
+
+<a id="loans_create" name="loans_create" class="old-syle-anchor">&nbsp;</a>
+<div class="method-section">
+    <div class="method-description">
+        <h4>Create a New Loan/Submit a Loan Application</h4>
+        <h5>Arguments</h5>
+        <dl class="argument-list">
+            <dt>command</dt>
+            <dd>String<span> Optional, case-insensitive</span></dd>
+            <dd>The default action is to Submit a New Loan Application ("Submitted and awaiting approval" status).<br></dd>
+            <dd>If "?command=calculateLoanSchedule" is added to the URL then no update is made but the loan schedule (as would have been if the loan
+            had been submitted) is returned.  This gives the ability to try out various loan options and 'preview' the schedule before committing
+            to it.</dd>
+        </dl>
+        <br>
+        <table class=matrixHeading>
+            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields</div></td></tr>
+            <tr class=alt><td>clientId, productId, inArrearsTolerance, submittedOnDate, currencyCode, digitsAfterDecimal, principal,
+            repaymentFrequencyType, repaymentEvery, numberOfRepayments, interestRatePerPeriod, interestRateFrequencyType, amortizationType,
+            interestType, interestCalculationPeriodType, expectedDisbursementDate</td></tr>
+        </table>
+    </div>
+    <div class="method-example">
+        <code class="method-declaration">POST https://thedomainname/api/v1/loans</code>
+        <code class="method-request">POST https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans
+Content-Type: application/json
+Request Body:
+{
+ "clientId": 1,
+ "productId": 1,
+ "currencyCode": "USD",
+ "digitsAfterDecimal": "2",
+ "locale": "en_GB",
+ "principal": "100,000.00",
+ "inArrearsTolerance": "1,000.00",
+ "repaymentFrequencyType": 2,
+ "repaymentEvery": "1",
+ "numberOfRepayments": "12",
+ "interestRatePerPeriod": "1.75",
+ "interestRateFrequencyType": 2,
+ "amortizationType": 1,
+ "interestCalculationPeriodType": 1,
+ "interestType": 0,
+ "dateFormat": "dd MMMM yyyy",
+ "expectedDisbursementDate": "01 July 2007",
+ "submittedOnDate": "25 June 2007"
+}
+        </code>
+        <code class="method-response">{
+ "entityId": 42
+}
+        </code>
+    </div>
+</div>
+        
+        <a id="loans_approve_etc" name="loans_approve_etc" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>Approve, Undo Approval, Disburse, Undo Disbursal, Reject a Loan or Withdraw a Loan Application</h4>
+                <h5>Arguments</h5> 
+                <dl class="argument-list">
+                    <dt>command</dt>
+                    <dd>String<span> Mandatory, case-insensitive</span></dd>
+                    <dd>'approve' : Approve Loan</dd>
+                    <dd>'disburse' : Disburse Loan</dd>
+                    <dd>'reject' : Reject Loan</dd>
+                    <dd>'withdrewbyclient' : Client Withdrew Loan Application</dd>
+                    <dd>'undoapproval' : Undo Loan Approval</dd>
+                    <dd>'undodisbursal' : Undo Loan Disbursal</dd>
+                </dl>
+                <br>
+                <table class=matrixHeading>
+                    <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields</div></td></tr>
+                    <tr class=alt><td>eventDate</td></tr>
+                </table>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">POST https://thedomainname/api/v1/loans/{loanId}</code>
+                <code class="method-request">POST https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/1?command=approve
+Content-Type: application/json
+Request Body:
+{
+ "dateFormat": "dd MMMM yyyy",
+ "eventDate": "07 May 2012",
+ "note": "and event note is added"
+}                </code>
+                <code class="method-response">{
+"entityId": 37
+}
+                </code>
+            </div>
+        </div>
+        <a id="loans_delete" name="loans_delete" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>Delete a Loan</h4>
+                <p>
+                    <b>Note:</b> Only loans in "Submitted and awaiting approval" status can be deleted.
+                </p>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">DELETE https://thedomainname/api/v1/loans/{loanId}</code>
+                <code class="method-request">DELETE https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/1              
+Content-Type: application/json
+No Request Body:
+                </code>
+                <code class="method-response">{
+"entityId": 1
+}
+                </code>
+            </div>
+        </div>
+
+        <a id="loans_repaymenttemplate_etc" name="loans_repaymenttemplate_etc" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>Retrieve Loan Repayment/Loan Waiver Template</h4>
+                <p>This is a convenience resource.  It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:
+                    <ul>
+                    <li class=normalli>Field Defaults</li>   
+                    <li class=normalli>Allowed Value Lists</li>    
+                    </ul>
+                </p>
+                <h5>Arguments</h5>
+                <dl class="argument-list">
+                    <dt>command</dt>
+                    <dd>String<span> mandatory, case-insensitive</span></dd>
+                    <dd><b>'repayment'</b><br>
+                    "date" is set to the date of the first outstanding installment.<br>
+                    "total" "amount" is set to the amount outstanding.</dd>
+                    <dd><b>'waiver'</b><br>
+                    "date" is set to the current date.<br>
+                    "total" "amount" is set to the remaining loan principal outstanding.</dd>
+                </dl>
+                <p>Example Request: </p>
+                <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/10/transactions/template?command=repayment&pretty=true">https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/10/transactions/template?command=repayment&pretty=true</a>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">GET https://thedomainname/api/v1/loans/{loanId}/transactions/template"</code>
+                <code class="method-response">{
+  "date" : [ 2009, 8, 1 ],
+  "total" : {
+    "currencyCode" : "XOF",
+    "digitsAfterDecimal" : 0,
+    "amount" : 471,
+    "defaultName" : "CFA Franc BCEAO",
+    "nameCode" : "currency.XOF",
+    "displaySymbol" : "CFA",
+    "zero" : false,
+    "greaterThanZero" : true,
+    "displaySymbolValue" : "471 CFA"
+  }
+}
+            </code>
+            </div>
+        </div>
+        <a id="loans_repayment_etc" name="loans_repayment_etc" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>Make a Repayment / Loan Waiver</h4>
+                <dl class="argument-list">
+                    <dt>command</dt>
+                    <dd>String<span> Optional, case-insensitive</span></dd>
+                    <dd>'repayment' : Make Loan Repayment.</dd>
+                    <dd>'waiver' : Loan Waiver.</dd>
+                </dl>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">POST https://thedomainname/api/v1/loans/{loanId}/transactions</code>
+                <code class="method-request">POST https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/37/transactions?command=repayment
+Content-Type: application/json
+Request Body:
+{
+ "locale": "en_GB",
+ "dateFormat": "dd MMMM yyyy",
+ "transactionDate": "14 May 2012",
+ "transactionAmount": "559.88",
+ "note": "Repayment at branch"
+}
+                </code>
+                <code class="method-response">{
+"entityId": 37
+}
+                </code>
+            </div>
+        </div>
+
+        <a id="loans_repaymentretrieve_etc" name="loans_repaymentretrieve_etc" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>Retrieve a Repayment or Waiver Details</h4>
+                <p>Example Request: </p>
+                <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/10/transactions/20?pretty=true">https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/10/transactions/20?pretty=true</a>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">GET https://thedomainname/api/v1/loans/{loanId}/transactions/{transactionId}</code>
+                <code class="method-response">{
+  "id" : 10,
+  "date" : [ 2009, 1, 29 ],
+  "principal" : null,
+  "interest" : null,
+  "total" : {
+    "currencyCode" : "XOF",
+    "digitsAfterDecimal" : 0,
+    "amount" : 300000,
+    "defaultName" : "CFA Franc BCEAO",
+    "nameCode" : "currency.XOF",
+    "displaySymbol" : "CFA",
+    "zero" : false,
+    "greaterThanZero" : true,
+    "displaySymbolValue" : "300000 CFA"
+  },
+  "totalWaived" : null,
+  "overpaid" : null,
+  "transactionOffsetFromToday" : -1218
+}
+                </code>
+            </div>
+        </div>
+        <a id="loans_repaymentadjust_etc" name="loans_repaymentadjust_etc" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>Adjust a Repayment or Waiver</h4>
+                <p><b>Note:</b> there is no need to specify command={transactionType} parameter.</p>
+                <table class=matrixHeading>
+                    <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields</div></td></tr>
+                    <tr class=alt><td>transactionDate, transactionAmount</td></tr>
+                </table>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">POST https://thedomainname/api/v1/loans/{loanId}/transactions/{transactionId}</code>
+                <code class="method-request">POST https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/16/transactions/32
+Content-Type: application/json
+Request Body:
+{
+ "locale": "en_GB",
+ "dateFormat": "dd MMMM yyyy",
+ "transactionDate": "25 May 2012",
+ "transactionAmount": "50,000.00",
+ "note": "adj note"
+}
+                </code>
+                <code class="method-response">{
+    "entityId": 16
+}
+                </code>
+            </div>
+        </div>
+        
+        
+        <!-- start of offices content -->    
+        <a id="offices" name="offices" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h3>Offices</h3>
+                <p>Offices are used to model an MFIs structure. A hierarchial representation of offices is supported. 
+                There will always be at least one office (which represents the MFI or an MFIs head office). 
+                All subsequent offices added must have a parent office.</p>
+                <table class=matrixHeading>
+                    <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Field Descriptions</div></td></tr>
+                    <tr class=alt><td>externalId</td></tr>
+                    <tr><td class=fielddesc>A place to put an external reference for this office e.g. The ID another system uses for it.</td></tr>
+                    </tr>
+                    <tr class=alt><td>hierarchy</td></tr>
+                    <tr><td class=fielddesc>This field is a system generated convenience field.  It can't be set.<br>
+                    It uses "dot notation" to define where an office stands in the office hierarchy.<br>
+                    For example, the system default office (id = 1) has a hierarchy value of '.'<br>
+                    An office (id = 12) placed directly underneath this default office has a hierarchy value of '.12.'<br>
+                    And if a further office (id = 78) is placed directly under office (id = 12) its hierarchy value is '.12.78.'<br><br>
+                    The hierarchy value is useful when you need to display offices in 'hierarchy' order (perhaps indented in a drop down list box).
+                    </td></tr>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        
+        <a id="offices_list" name="offices_list" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>List Offices</h4>
+                <p>Example Requests: </p>
+                <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices?pretty=true">https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices?pretty=true</a>
+                <br><br>
+                <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices?fields=id,name,openingDate&pretty=true">https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices?fields=id,name,openingDate&pretty=true</a>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">GET https://thedomainname/api/v1/offices</code>
+<code class="method-response">[ {
+  "id" : 1,
+  "name" : "Demo MFI Head Office",
+  "externalId" : "1",
+  "openingDate" : [ 2009, 1, 1 ],
+  "hierarchy" : ".",
+  "parentName" : null,
+  "parentId" : null
+}, {
+  "id" : 2,
+  "name" : "B1",
+  "externalId" : null,
+  "openingDate" : [ 2012, 4, 1 ],
+  "hierarchy" : ".2.",
+  "parentName" : "Demo MFI Head Office",
+  "parentId" : 1
+}, {
+  "id" : 3,
+  "name" : "B2",
+  "externalId" : null,
+  "openingDate" : [ 2012, 4, 4 ],
+  "hierarchy" : ".3.",
+  "parentName" : "Demo MFI Head Office",
+  "parentId" : 1
+} ]
+</code>
+            </div>
+        </div>
+
+        <a id="offices_template" name="offices_template" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>Retrieve Office Details Template</h4>
+                <p>This is a convenience resource.  It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:
+                    <ul>
+                    <li class=normalli>Field Defaults</li>   
+                    <li class=normalli>Allowed Value Lists</li>    
+                    </ul>
+                </p>
+                <p>Example Request: </p>
+                <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices/template?pretty=true">
+                https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices/template?pretty=true
+                </a>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">GET https://thedomainname/api/v1/offices/template</code>
+<code class="method-response">{
+  "openingDate" : [ 2012, 5, 28 ],
+  "allowedParents" : [ {
+    "id" : 1,
+    "name" : "Demo MFI Head Office"
+  }, {
+    "id" : 2,
+    "name" : "B1"
+  }, {
+    "id" : 3,
+    "name" : "B2"
+  } ]
+}
+</code>
+            </div>
+        </div>
+
+        <a id="offices_retrieve" name="offices_retrieve" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>Retrieve an Office</h4>
+                <p>Example Requests: </p>
+                <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices/1?pretty=true">
+                https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices/1?pretty=true
+                </a>
+                <br><br>
+                <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices/1?pretty=true&template=true">
+                https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices/1?pretty=true&template=true
+                </a>
+                <br><br>
+                <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices/1?pretty=true&fields=id,name,parentName">
+                https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices/1?pretty=true&fields=id,name,parentName
+                </a>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">GET https://thedomainname/api/v1/offices/1</code>
+<code class="method-response">{
+  "id" : 1,
+  "name" : "Demo MFI Head Office",
+  "externalId" : "1",
+  "openingDate" : [ 2009, 1, 1 ],
+  "hierarchy" : ".",
+  "parentName" : null,
+  "parentId" : null
+}
+</code>
+            </div>
+        </div>
+
+        <a id="offices_create" name="offices_create" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>Create an Office</h4>
+                <table class=matrixHeading>
+                    <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields</div></td></tr>
+                    <tr class=alt><td>name, openingDate, parentId</td></tr>
+                </table>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">POST https://thedomainname/api/v1/offices</code>
+<code class="method-request">POST https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices
+Content-Type: application/json 
+Request Body:
+{
+ "name": "Example New Branch",
+ "dateFormat": "dd MMMM yyyy",
+ "openingDate": "01 July 2007",
+ "parentId": 2,
+ "externalId": "SYS54-88"
+}
+</code>
+<code class="method-response">{
+  "entityId": 9
+}
+</code>
+            </div>
+        </div>
+
+        <a id="offices_update" name="offices_update" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>Update Office</h4>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">PUT https://thedomainname/api/v1/offices/{officeId}</code>
+<code class="method-request">PUT https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices/1
+Content-Type: application/json
+Request Body:
+{
+  "name": "Name is updated"
+}
+</code>
+<code class="method-response">{
+  "entityId": 1
+}
+</code>
+            </div>
+        </div>
+<!-- end of office api docs -->
+
+    
+  <!-- start of loan products api docs -->    
+   
+        <a id="loanproducts" name="loanproducts" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h3>Loan Products</h3>
+                <p>A Loan product is a template that is used when creating a loan.  Much of the template definition can be overridden during loan creation.
+                </p>
+                <table class=matrixHeading>
+                    <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Field Descriptions</div></td></tr>
+                    <tr class=alt><td>digitsAfterDecimal</td></tr>
+                    <tr><td class=fielddesc>Override the default value for digitsAfterDecimal associated with the currencyCode selected.</td></tr>
+                    </tr>
+                    <tr class=alt><td>principal</td></tr>
+                    <tr><td class=fielddesc>Loan amount.</td></tr>
+                    <tr class=alt><td>inArrearsTolerance</td></tr>
+                    <tr><td class=fielddesc></td></tr>
+                    <tr class=alt><td>numberOfRepayments</td></tr>
+                    <tr><td class=fielddesc>Number of installments to repay.<br>
+                    Used like: numberOfRepayments Every repaymentEvery repaymentFrequencyType<br>
+                    e.g. <b>10</b> (repayments) Every 12 Weeks</td></tr>
+                    <tr class=alt><td>interestRatePerPeriod</td></tr>
+                    <tr><td class=fielddesc>Interest Rate.<br>
+                    Used like: interestRatePerPeriod% interestRateFrequencyType - interestType<br>
+                    e.g. <b>12.0000</b>%  Per year - Declining Balance</td></tr>
+                    <tr class=alt><td>repaymentEvery</td></tr>
+                    <tr><td class=fielddesc>Used like: numberOfRepayments Every repaymentEvery repaymentFrequencyType<br>
+                    e.g. 10 (repayments) Every <b>12</b> Weeks</td></tr>
+                    <tr><td class=fieldtype>Each of the items below has an id, code and (english) value.<br>
+                    Only the id (integer) is used when updating.  All 3 are returned on GET (read) requests.<br>
+                    The options are fully listed in <a href="#loanproducts_template">Retrieve Loan Product Details Template</a>.
+                    </td></tr>
+                    <tr class=alt><td>repaymentFrequencyType</td></tr>
+                    <tr><td class=fielddesc>Used like: numberOfRepayments Every repaymentEvery repaymentFrequencyType<br>
+                    e.g. 10 (repayments) Every 12 <b>Weeks</b>
+                    <br><span>Example Values:</span> Days, Weeks, Months
+                    </td></tr>
+                    <tr class=alt><td>interestRateFrequencyType</td></tr>
+                    <tr><td class=fielddesc>Used like: interestRatePerPeriod% interestRateFrequencyType - interestType<br>
+                    e.g. 12.0000%  <b>Per year</b> - Declining Balance
+                    <br><span>Example Values:</span> Per month, Per year</td></tr>
+                    <tr class=alt><td>amortizationType</td></tr>
+                    <tr><td class=fielddesc>
+                        <span>Example Values:</span> Equal principle payments, Equal installments</td></tr></td></tr>
+                    <tr class=alt><td>interestType</td></tr>
+                    <tr><td class=fielddesc>Used like: interestRatePerPeriod% interestRateFrequencyType - interestType<br>
+                    e.g. 12.0000%  Per year - <b>Declining Balance</b>
+                    <br><span>Example Values:</span> Declining Balance, Flat</td></tr></td></tr>
+                    <tr class=alt><td>interestCalculationPeriodType</td></tr>
+                    <tr><td class=fielddesc>
+                        <span>Example Values:</span> Same as repayment period, Daily</td></tr></td></tr>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    
+        <a id="loanproducts_list" name="loanproducts_list" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>List Loan Products</h4>
+                <p>Example Requests:</p> 
+                <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts?pretty=true">https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts?pretty=true</a>
+                <br><br>
+                <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts?pretty=true&fields=name,description,interestRateFrequencyType,amortizationType">https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts?pretty=true&fields=name,description,interestRateFrequencyType,amortizationType</a>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">GET https://thedomainname/api/v1/loanproducts</code>
+                <code class="method-response">[ {
+  "id" : 1,
+  "name" : "Agricultural Loan",
+  "description" : "An agricultural loan given to farmers to help buy crop, stock and machinery. With an arrears tolerance setting of 1,000 CFA, loans are not marked as 'in arrears' or 'in bad standing' if the amount outstanding is less than this. Interest rate is described using monthly percentage rate (MPR) even though the loan typically lasts a year and requires one repayment (typically at time when farmer sells crop)",
+  "principal" : {
+    "currencyCode" : "XOF",
+    "digitsAfterDecimal" : 0,
+    "amount" : 100000,
+    "defaultName" : "CFA Franc BCEAO",
+    "nameCode" : "currency.XOF",
+    "displaySymbol" : "CFA",
+    "zero" : false,
+    "greaterThanZero" : true,
+    "displaySymbolValue" : "100000 CFA"
+  },
+  "inArrearsTolerance" : {
+    "currencyCode" : "XOF",
+    "digitsAfterDecimal" : 0,
+    "amount" : 1000,
+    "defaultName" : "CFA Franc BCEAO",
+    "nameCode" : "currency.XOF",
+    "displaySymbol" : "CFA",
+    "zero" : false,
+    "greaterThanZero" : true,
+    "displaySymbolValue" : "1000 CFA"
+  },
+  "numberOfRepayments" : 1,
+  "repaymentEvery" : 12,
+  "interestRatePerPeriod" : 1.750000,
+  "annualInterestRate" : 21.000000,
+  "repaymentFrequencyType" : {
+    "id" : 2,
+    "code" : "repaymentFrequency.periodFrequencyType.months",
+    "value" : "Months"
+  },
+  "interestRateFrequencyType" : {
+    "id" : 2,
+    "code" : "interestRateFrequency.periodFrequencyType.months",
+    "value" : "Per month"
+  },
+  "amortizationType" : {
+    "id" : 1,
+    "code" : "amortizationType.equal.installments",
+    "value" : "Equal installments"
+  },
+  "interestType" : {
+    "id" : 0,
+    "code" : "interestType.declining.balance",
+    "value" : "Declining Balance"
+  },
+  "interestCalculationPeriodType" : {
+    "id" : 1,
+    "code" : "interestCalculationPeriodType.same.as.repayment.period",
+    "value" : "Same as repayment period"
+  },
+  "createdOn" : 1334232874000,
+  "lastModifedOn" : 1334232874000
+}, {
+  "id" : 2,
+  "name" : "Brunei Loan",
+  "description" : null,
+  "principal" : {
+    "currencyCode" : "BND",
+    "digitsAfterDecimal" : 2,
+    "amount" : 76000.00,
+    "defaultName" : "Brunei Dollar",
+    "nameCode" : "currency.BND",
+    "displaySymbol" : "BND",
+    "zero" : false,
+    "greaterThanZero" : true,
+    "displaySymbolValue" : "76000.00 BND"
+  },
+  "inArrearsTolerance" : {
+    "currencyCode" : "BND",
+    "digitsAfterDecimal" : 2,
+    "amount" : 50.00,
+    "defaultName" : "Brunei Dollar",
+    "nameCode" : "currency.BND",
+    "displaySymbol" : "BND",
+    "zero" : false,
+    "greaterThanZero" : true,
+    "displaySymbolValue" : "50.00 BND"
+  },
+  "numberOfRepayments" : 10,
+  "repaymentEvery" : 1,
+  "interestRatePerPeriod" : 6.000000,
+  "annualInterestRate" : 72.000000,
+  "repaymentFrequencyType" : {
+    "id" : 1,
+    "code" : "repaymentFrequency.periodFrequencyType.weeks",
+    "value" : "Weeks"
+  },
+  "interestRateFrequencyType" : {
+    "id" : 2,
+    "code" : "interestRateFrequency.periodFrequencyType.months",
+    "value" : "Per month"
+  },
+  "amortizationType" : {
+    "id" : 1,
+    "code" : "amortizationType.equal.installments",
+    "value" : "Equal installments"
+  },
+  "interestType" : {
+    "id" : 0,
+    "code" : "interestType.declining.balance",
+    "value" : "Declining Balance"
+  },
+  "interestCalculationPeriodType" : {
+    "id" : 1,
+    "code" : "interestCalculationPeriodType.same.as.repayment.period",
+    "value" : "Same as repayment period"
+  },
+  "createdOn" : 1334513601000,
+  "lastModifedOn" : 1334513601000
+}...]
+    </code>
+            </div>
+        </div>
+    
+        <a id="loanproducts_template" name="loanproducts_template" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>Retrieve Loan Product Details Template</h4>
+                <p>This is a convenience resource.  It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:
+                    <ul>
+                    <li class=normalli>Field Defaults</li>   
+                    <li class=normalli>Allowed Value Lists</li>    
+                    </ul>
+                </p>
+                <p>Example Request: </p>
+                <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts/template?pretty=true">https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts/template?pretty=true</a>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">GET https://thedomainname/api/v1/loanproducts/template</code>
+<code class="method-response">{
+  "principal" : {
+    "currencyCode" : "KES",
+    "digitsAfterDecimal" : 2,
+    "amount" : 0.00,
+    "defaultName" : "Kenyan Shilling",
+    "nameCode" : "currency.KES",
+    "displaySymbol" : "KSh",
+    "zero" : true,
+    "greaterThanZero" : false,
+    "displaySymbolValue" : "0.00 KSh"
+  },
+  "inArrearsTolerance" : {
+    "currencyCode" : "KES",
+    "digitsAfterDecimal" : 2,
+    "amount" : 0.00,
+    "defaultName" : "Kenyan Shilling",
+    "nameCode" : "currency.KES",
+    "displaySymbol" : "KSh",
+    "zero" : true,
+    "greaterThanZero" : false,
+    "displaySymbolValue" : "0.00 KSh"
+  },
+  "interestRatePerPeriod" : 0,
+  "annualInterestRate" : 0,
+  "repaymentFrequencyType" : {
+    "id" : 2,
+    "code" : "repaymentFrequency.periodFrequencyType.months",
+    "value" : "Months"
+  },
+  "interestRateFrequencyType" : {
+    "id" : 2,
+    "code" : "interestRateFrequency.periodFrequencyType.months",
+    "value" : "Per month"
+  },
+  "amortizationType" : {
+    "id" : 1,
+    "code" : "amortizationType.equal.installments",
+    "value" : "Equal installments"
+  },
+  "interestType" : {
+    "id" : 0,
+    "code" : "interestType.declining.balance",
+    "value" : "Declining Balance"
+  },
+  "interestCalculationPeriodType" : {
+    "id" : 1,
+    "code" : "interestCalculationPeriodType.same.as.repayment.period",
+    "value" : "Same as repayment period"
+  },
+  "currencyOptions" : [ {
+    "code" : "KES",
+    "name" : "Kenyan Shilling",
+    "decimalPlaces" : 2,
+    "displaySymbol" : "KSh",
+    "nameCode" : "currency.KES",
+    "displayLabel" : "Kenyan Shilling (KSh)"
+  }, {
+    "code" : "BND",
+    "name" : "Brunei Dollar",
+    "decimalPlaces" : 2,
+    "displaySymbol" : "BND",
+    "nameCode" : "currency.BND",
+    "displayLabel" : "Brunei Dollar (BND)"
+  }, {
+    "code" : "LBP",
+    "name" : "Lebanese Pound",
+    "decimalPlaces" : 2,
+    "displaySymbol" : "LÂ£",
+    "nameCode" : "currency.LBP",
+    "displayLabel" : "Lebanese Pound (LÂ£)"
+  }, {
+    "code" : "GHC",
+    "name" : "Ghana Cedi",
+    "decimalPlaces" : 2,
+    "displaySymbol" : "GHC",
+    "nameCode" : "currency.GHC",
+    "displayLabel" : "Ghana Cedi (GHC)"
+  }, {
+    "code" : "USD",
+    "name" : "US Dollar",
+    "decimalPlaces" : 2,
+    "displaySymbol" : "$",
+    "nameCode" : "currency.USD",
+    "displayLabel" : "US Dollar ($)"
+  }, {
+    "code" : "XOF",
+    "name" : "CFA Franc BCEAO",
+    "decimalPlaces" : 0,
+    "displaySymbol" : "CFA",
+    "nameCode" : "currency.XOF",
+    "displayLabel" : "CFA Franc BCEAO (CFA)"
+  } ],
+  "amortizationTypeOptions" : [ {
+    "id" : 1,
+    "code" : "amortizationType.equal.installments",
+    "value" : "Equal installments"
+  }, {
+    "id" : 0,
+    "code" : "amortizationType.equal.principal",
+    "value" : "Equal principle payments"
+  } ],
+  "interestTypeOptions" : [ {
+    "id" : 1,
+    "code" : "interestType.flat",
+    "value" : "Flat"
+  }, {
+    "id" : 0,
+    "code" : "interestType.declining.balance",
+    "value" : "Declining Balance"
+  } ],
+  "interestCalculationPeriodTypeOptions" : [ {
+    "id" : 0,
+    "code" : "interestCalculationPeriodType.daily",
+    "value" : "Daily"
+  }, {
+    "id" : 1,
+    "code" : "interestCalculationPeriodType.same.as.repayment.period",
+    "value" : "Same as repayment period"
+  } ],
+  "repaymentFrequencyTypeOptions" : [ {
+    "id" : 0,
+    "code" : "repaymentFrequency.periodFrequencyType.days",
+    "value" : "Days"
+  }, {
+    "id" : 1,
+    "code" : "repaymentFrequency.periodFrequencyType.weeks",
+    "value" : "Weeks"
+  }, {
+    "id" : 2,
+    "code" : "repaymentFrequency.periodFrequencyType.months",
+    "value" : "Months"
+  } ],
+  "interestRateFrequencyTypeOptions" : [ {
+    "id" : 2,
+    "code" : "interestRateFrequency.periodFrequencyType.months",
+    "value" : "Per month"
+  }, {
+    "id" : 3,
+    "code" : "interestRateFrequency.periodFrequencyType.years",
+    "value" : "Per year"
+  } ]
+}
+</code>
+            </div>
+        </div>
+    
+        <a id="loanproducts_retrieve" name="loanproducts_retrieve" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>Retrieve a Loan Product</h4>
+                <p>Example Requests: </p>
+                <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts/1?pretty=true">https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts/1?pretty=true</a>
+                <br><br>
+                <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts/1?pretty=true&template=true">https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts/1?pretty=true&template=true</a>
+                 <br><br>
+                <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts/1?pretty=true&fields=name,description,numberOfRepayments">https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts/1?pretty=true&fields=name,description,numberOfRepayments</a>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">GET https://thedomainname/api/v1/loanproducts/{productId}</code>
+<code class="method-response">{
+  "id" : 1,
+  "name" : "Agricultural Loan",
+  "description" : "An agricultural loan given to farmers to help buy crop, stock and machinery. With an arrears tolerance setting of 1,000 CFA, loans are not marked as 'in arrears' or 'in bad standing' if the amount outstanding is less than this. Interest rate is described using monthly percentage rate (MPR) even though the loan typically lasts a year and requires one repayment (typically at time when farmer sells crop)",
+  "principal" : {
+    "currencyCode" : "XOF",
+    "digitsAfterDecimal" : 0,
+    "amount" : 100000,
+    "defaultName" : "CFA Franc BCEAO",
+    "nameCode" : "currency.XOF",
+    "displaySymbol" : "CFA",
+    "zero" : false,
+    "greaterThanZero" : true,
+    "displaySymbolValue" : "100000 CFA"
+  },
+  "inArrearsTolerance" : {
+    "currencyCode" : "XOF",
+    "digitsAfterDecimal" : 0,
+    "amount" : 1000,
+    "defaultName" : "CFA Franc BCEAO",
+    "nameCode" : "currency.XOF",
+    "displaySymbol" : "CFA",
+    "zero" : false,
+    "greaterThanZero" : true,
+    "displaySymbolValue" : "1000 CFA"
+  },
+  "numberOfRepayments" : 1,
+  "repaymentEvery" : 12,
+  "interestRatePerPeriod" : 1.750000,
+  "annualInterestRate" : 21.000000,
+  "repaymentFrequencyType" : {
+    "id" : 2,
+    "code" : "repaymentFrequency.periodFrequencyType.months",
+    "value" : "Months"
+  },
+  "interestRateFrequencyType" : {
+    "id" : 2,
+    "code" : "interestRateFrequency.periodFrequencyType.months",
+    "value" : "Per month"
+  },
+  "amortizationType" : {
+    "id" : 1,
+    "code" : "amortizationType.equal.installments",
+    "value" : "Equal installments"
+  },
+  "interestType" : {
+    "id" : 0,
+    "code" : "interestType.declining.balance",
+    "value" : "Declining Balance"
+  },
+  "interestCalculationPeriodType" : {
+    "id" : 1,
+    "code" : "interestCalculationPeriodType.same.as.repayment.period",
+    "value" : "Same as repayment period"
+  },
+  "createdOn" : 1334232874000,
+  "lastModifedOn" : 1334232874000
+}
+</code>
+            </div>
+        </div>
+     
+        <a id="loanproducts_create" name="loanproducts_create" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>Create a Loan Product</h4>
+                <table class=matrixHeading>
+                    <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields</div></td></tr>
+                    <tr class=alt><td>name, currencyCode, digitsAfterDecimal, principal, inArrearsTolerance, repaymentFrequencyType, repaymentEvery,
+                    numberOfRepayments, interestRatePerPeriod, interestRateFrequencyType, amortizationType,
+                    interestType, interestCalculationPeriodType</td></tr>
+                </table>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">POST https://thedomainname/api/v1/loanproducts</code>
+<code class="method-request">POST https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts
+Content-Type: application/json
+Request Body:
+{
+ "name": "A new loan product for me",
+ "description": "A description not exceeding 500 characters.",
+ "currencyCode": "USD",
+ "digitsAfterDecimal": "2",
+ "locale": "en_GB",
+ "principal": "100,000.00",
+ "inArrearsTolerance": "1,000.00",
+ "repaymentFrequencyType": 2,
+ "repaymentEvery": "1",
+ "numberOfRepayments": "12",
+ "interestRatePerPeriod": "1.75",
+ "interestRateFrequencyType": 2,
+ "amortizationType": 1,
+ "interestType": 0,
+ "interestCalculationPeriodType": 1
+}
+</code>
+<code class="method-response">{
+  "entityId": 9
+}
+</code>
+            </div>
+        </div>
+    
+        <a id="loanproducts_update" name="loanproducts_update" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>Update a Loan Product</h4>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">POST https://thedomainname/api/v1/loanproducts/{loanId}</code>
+<code class="method-request">POST https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts/1
+Content-Type: application/json
+Request Body:
+{
+ "locale": "en_GB",
+ "principal": "100,000.00",
+ "inArrearsTolerance": "5,000.00"
+}
+</code>
+<code class="method-response">{
+  "entityId": 1
+}
+</code>
+            </div>
+        </div>
+<!-- end of loan products api docs -->    
+    
+<!-- start of configurations api docs -->
+	<a id="configs" name="configs" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+		<div class="method-description">
+		    <h3>Configuration</h3>
+		    <p>Application related configuration.  For example, selecting the currencies permitted for use within the MFI.</p>
+		</div>
+	</div>
+	
+	<a id="configs_currencyretrieve" name="configs_currencyretrieve" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>Retrieve Currency Configuration</h4>
+	        <p>Returns the list of currencies permitted for use AND the list of currencies not selected (but available for selection).</p>
+	        <p>Example Requests: </p>
+	        <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/configurations/currency?pretty=true">https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/configurations/currency?pretty=true</a>
+                <br><br>
+	        <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/configurations/currency?pretty=true&fields=selectedCurrencyOptions">https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/configurations/currency?pretty=true&fields=selectedCurrencyOptions</a>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://thedomainname/api/v1/configurations/currency</code>
+<code class="method-response">{
+  "selectedCurrencyOptions" : [ {
+    "code" : "XOF",
+    "name" : "CFA Franc BCEAO",
+    "decimalPlaces" : 0,
+    "displaySymbol" : "CFA",
+    "nameCode" : "currency.XOF",
+    "displayLabel" : "CFA Franc BCEAO (CFA)"
+  }, {
+    "code" : "ETB",
+    "name" : "Ethiopian Birr",
+    "decimalPlaces" : 2,
+    "displaySymbol" : null,
+    "nameCode" : "currency.ETB",
+    "displayLabel" : "Ethiopian Birr [ETB]"
+  } ],
+  "currencyOptions" : [ {
+    "code" : "AED",
+    "name" : "UAE Dirham",
+    "decimalPlaces" : 2,
+    "displaySymbol" : null,
+    "nameCode" : "currency.AED",
+    "displayLabel" : "UAE Dirham [AED]"
+  }, {
+    "code" : "AFN",
+    "name" : "Afghanistan Afghani",
+    "decimalPlaces" : 2,
+    "displaySymbol" : null,
+    "nameCode" : "currency.AFN",
+    "displayLabel" : "Afghanistan Afghani [AFN]"
+  }, ...
+ ]
+}
+</code>
+	    </div>
+	</div>
+        
+        <a id="configs_currencyupdate" name="configs_currencyupdate" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>Update Currency Configuration</h4>
+	        <p>Updates the list of currencies permitted for use.</p>
+	    </div>
+            <div class="method-example">
+                <code class="method-declaration">PUT https://thedomainname/api/v1/configurations/currency</code>
+                <code class="method-request">PUT https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/configurations/currency
+Content-Type: application/json
+Request Body:{
+"currencies": ["KES", "BND",  "LBP", "GHC", "USD", "XOF", "AED", "AMD"]
+}
+                </code>
+                <code class="method-response">{
+    "currencies": [
+    "KES",
+    "BND",
+    "LBP",
+    "GHC",
+    "USD",
+    "XOF",
+    "AED",
+    "AMD"
+    ]
+}
+                </code>
+	    </div>
+        </div>
+    
+    <!-- start of additionalfields api docs -->
+        <a id="additionalfields" name="additionalfields" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h3>Additional Fields</h3>
+                <p>
+                In Mifos X, any number of "Sets" of "Additional Fields" can be configured for a Mifos X database table ("Type").
+                </p>
+                <p>  For example, portfolio_client is the database table that holds client data.  Typically, MFI's want more client related fields than is provided by Mifos X out-of-the-box.  
+                The MFI might add a Set called "Additional Info" containing some fields that are typically input when creating a client.
+                They might then add another Set called "Highly Improbable Info" containing some fields that are only input in exceptional
+                circumstances.
+                </p>
+                <p>
+                The additional fields resource allows you to retrieve and update any Additional Fields data that has been configured in Mifos X.
+                </p>
+                <p>
+                The Mifos X Individual Lending client application uses a JQuery plugin called stretchydata which, itself, uses this
+                additional fields resource to provide a pretty flexible additional fields User Interface (UI).
+                </p>
+            </div>
+        </div>
+    
+    
+        <a id="additionalfields_list" name="additionalfields_list" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>List Additional Fields Sets</h4>
+                <p>
+                Lists the Sets of additional fields have been defined in Mifos X. 
+                </p>
+                
+                <h5>Arguments</h5>
+                <dl class="argument-list">
+                    <dt>type</dt>
+                    <dd><span>optional</span></dd>
+                    <dd>The Additional Fields Type (Mifos X database table) to restrict the output to</dd>
+                </dl>
+                <p>Example Requests: </p>
+                <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/additionalfields?type=portfolio_client&pretty=true">https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/additionalfields?type=portfolio_client&pretty=true</a>
+                <br><br>
+                <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/additionalfields?pretty=true">https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/additionalfields?pretty=true</a>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">GET https://thedomainname/api/v1/additionalfields</code>
+                <code class="method-response">[ {
+  "id" : 1,
+  "name" : "Additional Information",
+  "type" : "portfolio_client"
+}, {
+  "id" : 8,
+  "name" : "Additional Information",
+  "type" : "portfolio_loan"
+}, {
+  "id" : 9,
+  "name" : "Highly Improbable Info",
+  "type" : "portfolio_client"
+} ]
+                </code>
+            </div>
+        </div>
+    
+    
+        <a id="additionalfields_retrieve" name="additionalfields_retrieve" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>Retrieve Additional Fields</h4>
+                <p>
+                Returns the Set of Additional Fields data for the ID provided.  The ID is the id field of the Type table e.g. portfolio_client might have an id value of 4.  The output is a JSON formatted "Generic Resultset".  The Generic Resultset contains Column Heading as well as Data information.  The Column Heading information may include allowed values (columnValues array).
+                </p>
+                <p>Example Request: 
+                <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/additionalfields/portfolio_client/Additional Information/2?pretty=true">https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/additionalfields/portfolio_client/Additional Information/2?pretty=true</a>
+                </p>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">GET https://thedomainname/api/v1/additionalfields/{type}/{set}/{id}</code>
+                <code class="method-response">{
+  "columnHeaders" : [ {
+    "columnName" : "Ethnic Group",
+    "columnType" : "String",
+    "columnLength" : 50,
+    "columnDisplayType" : "List",
+    "columnValues" : [ "Bedouin", "Berber", "Italian", "Miknasa", "Mrazig", "Other", "Unknown" ]
+  }, {
+    "columnName" : "Ethnic Group Other",
+    "columnType" : "String",
+    "columnLength" : 50,
+    "columnDisplayType" : null,
+    "columnValues" : [ ]
+  }, {
+    "columnName" : "Household Location",
+    "columnType" : "String",
+    "columnLength" : 50,
+    "columnDisplayType" : "List",
+    "columnValues" : [ "East Sikkim", "North Sikkim", "South Sikkim", "West Sikkim", "Other" ]
+  }, {
+    "columnName" : "Household Location Other",
+    "columnType" : "String",
+    "columnLength" : 50,
+    "columnDisplayType" : null,
+    "columnValues" : [ ]
+  }, {
+    "columnName" : "Religion",
+    "columnType" : "String",
+    "columnLength" : 50,
+    "columnDisplayType" : "List",
+    "columnValues" : [ "Protestant", "Catholic", "Muslim", "Animist", "Atheist", "Other", "Unknown" ]
+  }, {
+    "columnName" : "Religion Other",
+    "columnType" : "String",
+    "columnLength" : 50,
+    "columnDisplayType" : null,
+    "columnValues" : [ ]
+  }, {
+    "columnName" : "Knowledge of Person",
+    "columnType" : "String",
+    "columnLength" : 50,
+    "columnDisplayType" : "List",
+    "columnValues" : [ "Staff member", "Spouse of staff member", "Son/daughter of staff member", "Friend of staff member", "Not known by any staff member", "Other" ]
+  }, {
+    "columnName" : "Gender",
+    "columnType" : "String",
+    "columnLength" : 10,
+    "columnDisplayType" : "List",
+    "columnValues" : [ "Female", "Male" ]
+  }, {
+    "columnName" : "Whois",
+    "columnType" : "Text",
+    "columnLength" : null,
+    "columnDisplayType" : null,
+    "columnValues" : [ ]
+  } ],
+  "data" : [ {
+    "row" : [ "Bedouin", null, "East Sikkim", null, "Animist", "Agnostic", "Friend of staff member", "Female", "A person of honesty & clear thought" ]
+  } ]
+}
+                </code>
+            </div>
+        </div>
+        <a id="additionalfields_update" name="additionalfields_update" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+            <h4>Update Additional Fields</h4>
+            <p>
+            Updates (or creates) the Set of Additional Fields data for the ID provided.  The ID is the id field of the Type table e.g. portfolio_client might have an id value of 4.
+            </p>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">POST https://thedomainname/api/v1/additionalfields/{type}/{set}/{id}</code>
+                <code class="method-request">POST https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/additionalfields/portfolio_client/Additional Information/2
+Content-Type: application/json
+Request Body:
+{
+ "Ethnic_Group":"Berber",
+ "Ethnic_Group_Other":"",
+ "Household_Location":"East Sikkim",
+ "Household_Location_Other":"",
+ "Religion":"Animist",
+ "Religion_Other":"jjjjjjj",
+ "Knowledge_of_Person":"Son/daughter of staff member",
+ "Gender":"Female",
+ "Whois":"its\r\nme of\r\ncourse\r\nyes\r\nend and the end of it all"
+}
+</code>
+                <code class="method-response">{
+ "entityId": 2
+}
+                </code>
+            </div>
+        </div>
+    
+    
+        <a id="reports" name="reports" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h3>Reports</h3>
+                <p>
+                The reports resource allows you to run and receive output from pre-defined Mifos X reports.
+                The default output is a JSON formatted "Generic Resultset".
+                The Generic Resultset contains Column Heading as well as Data information.
+                However, you can export to CSV format by simply adding "&exportCSV=true" to the end of your URL.
+                </p>
+                <p>
+                If Pentaho reports have been pre-defined, they can also be run through this resource.  Pentaho reports can return HTML, PDF or CSV formats.
+                </p>
+               <p>
+                The Mifos X Individual Lending client application uses a JQuery plugin called stretchyreporting which, itself, uses this reports resource to provide a pretty flexible reporting User Interface (UI).
+                </p>
+            </div>
+        </div>
+    
+    
+    
+        <a id="reports_list" name="reports_list" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>List Reports</h4>
+                <p>
+                Lists all reports and their parameters.  If a report has more than one parameter it will be listed the same number of times as it has parameters.
+                </p>
+                
+                <h5>Arguments</h5>
+                <dl class="argument-list">
+                    <dt>exportCSV</dt>
+                    <dd>optional, <span>The only valid value is 'true'.  If any other value is provided the argument will be ignored</span></dd>
+                    <dd>Output will be delivered as a CSV file instead of JSON.</dd>
+                </dl>
+                <p>Example Requests: </p>
+                <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/reports?pretty=true">https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/reports?pretty=true</a>
+                <br><br>
+                <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/reports?pretty=true&exportCSV=true">https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/reports?pretty=true&exportCSV=true</a>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">GET https://thedomainname/api/v1/reports</code>
+                <code class="method-response">{
+  "columnHeaders" : [ {
+    "columnName" : "report_id",
+    "columnType" : "INT",
+    "columnLength" : null,
+    "columnDisplayType" : null,
+    "columnValues" : [ ]
+  }, {
+    "columnName" : "report_name",
+    "columnType" : "VARCHAR",
+    "columnLength" : null,
+    "columnDisplayType" : null,
+    "columnValues" : [ ]
+  }, {
+    "columnName" : "report_type",
+    "columnType" : "VARCHAR",
+    "columnLength" : null,
+    "columnDisplayType" : null,
+    "columnValues" : [ ]
+  }, {
+    "columnName" : "report_subtype",
+    "columnType" : "VARCHAR",
+    "columnLength" : null,
+    "columnDisplayType" : null,
+    "columnValues" : [ ]
+  }, {
+    "columnName" : "report_category",
+    "columnType" : "VARCHAR",
+    "columnLength" : null,
+    "columnDisplayType" : null,
+    "columnValues" : [ ]
+  }, {
+    "columnName" : "parameter_id",
+    "columnType" : "INT",
+    "columnLength" : null,
+    "columnDisplayType" : null,
+    "columnValues" : [ ]
+  }, {
+    "columnName" : "report_parameter_name",
+    "columnType" : "VARCHAR",
+    "columnLength" : null,
+    "columnDisplayType" : null,
+    "columnValues" : [ ]
+  }, {
+    "columnName" : "parameter_name",
+    "columnType" : "VARCHAR",
+    "columnLength" : null,
+    "columnDisplayType" : null,
+    "columnValues" : [ ]
+  } ],
+  "data" : [ {
+    "row" : [ "29", "Client Listing", "Table", null, null, "5", null, "selectOfficeId" ]
+  }, {
+    "row" : [ "42", "Client Listing - Additional and Unlikely", "Table", null, null, "5", null, "selectOfficeId" ]
+  }, {
+    "row" : [ "30", "Client Loans Listing", "Table", null, null, "5", null, "selectOfficeId" ]
+  }, {
+    "row" : [ "43", "Client Loans Listing - Additional", "Table", null, null, "5", null, "selectOfficeId" ]
+  }, {
+    "row" : [ "41", "Clients by Surname (a bit silly)", "Chart", "Pie", null, "5", null, "selectOfficeId" ]
+  }, {
+    "row" : [ "39", "Loan Disbursals in Previous Year", "Chart", "Bar", null, "5", null, "selectOfficeId" ]
+  }, {
+    "row" : [ "39", "Loan Disbursals in Previous Year", "Chart", "Bar", null, "7", null, "currencyIdSelectOne" ]
+  }, {
+    "row" : [ "40", "Loan Repayments in Previous Year", "Chart", "Bar", null, "5", null, "selectOfficeId" ]
+  }, {
+    "row" : [ "40", "Loan Repayments in Previous Year", "Chart", "Bar", null, "7", null, "currencyIdSelectOne" ]
+  }, {
+    "row" : [ "34", "Loans - Active Loans Portfolio Status", "Table", null, null, "5", null, "selectOfficeId" ]
+  }, {
+    "row" : [ "34", "Loans - Active Loans Portfolio Status", "Table", null, null, "6", null, "currencyIdSelectAll" ]
+  }, {
+    "row" : [ "31", "Loans Awaiting Disbursal", "Table", null, null, "5", null, "selectOfficeId" ]
+  }, {
+    "row" : [ "35", "Portfolio at Risk", "Table", null, null, "5", null, "selectOfficeId" ]
+  }, {
+    "row" : [ "35", "Portfolio at Risk", "Table", null, null, "6", null, "currencyIdSelectAll" ]
+  }, {
+    "row" : [ "32", "Upcoming Repayments", "Table", null, null, "5", null, "selectOfficeId" ]
+  }, {
+    "row" : [ "32", "Upcoming Repayments", "Table", null, null, "6", null, "currencyIdSelectAll" ]
+  }, {
+    "row" : [ "38", "Upcoming Repayments Summary By Month, Currency and Loan Risk", "Table", null, null, "5", null, "selectOfficeId" ]
+  }, {
+    "row" : [ "38", "Upcoming Repayments Summary By Month, Currency and Loan Risk", "Table", null, null, "6", null, "currencyIdSelectAll" ]
+  } ]
+}
+                </code>
+            </div>
+        </div>
+    
+        <a id="report_run" name="report_run" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>Running a Report</h4>
+                <p>
+                Runs a report and returns the report output.
+                </p>
+                <p>
+                <b>Note: </b> Pentaho details yet to be provided
+                </p>
+                <h5>Arguments</h5>
+                <dl class="argument-list">
+                    <dt>R_'parameter names' ...</dt>
+                    <dd>optional, <span>No defaults</span></dd>
+                    <dd>The number and names of the parameters depend on the specific report and how it has been configured.  R_officeId is an example parameter name.</dd>
+                    <dd>Note: the prefix R_ stands for Reporting</dd>
+                    <dt>parameterType</dt>        
+                    <dd>optional, <span>The only valid value is 'true'.  If any other value is provided the argument will be ignored</span></dd>
+                    <dd>Determines whether the request looks in the list of reports or the list of parameters for its data.</dd>
+                    <dt>exportCSV</dt>
+                    <dd>optional, <span>The only valid value is 'true'.  If any other value is provided the argument will be ignored</span></dd>
+                    <dd>Output will be delivered as a CSV file instead of JSON.  Doesn't apply to Pentaho reports .</dd>
+                </dl>
+                <p>Example Requests: </p>
+                <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/reports/Client%20Listing?R_officeId=1&pretty=true">https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/reports/Client%20Listing?R_officeId=1&pretty=true</a>
+                <br><br>
+                <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/reports/Client%20Listing?R_officeId=1&pretty=true&exportCSV=true">https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/reports/Client%20Listing?R_officeId=1&pretty=true&exportCSV=true</a>
+                <br><br>
+                <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/reports/selectOfficeId?R_officeId=1&pretty=true&parameterType=true">https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/reports/selectOfficeId?R_officeId=1&pretty=true& parameterType=true</a>
+                <br><br>
+                <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/reports/selectOfficeId?R_officeId=1&pretty=true&parameterType=true&exportCSV=true">https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/reports/selectOfficeId?R_officeId=1&pretty=true& parameterType=true&exportCSV=true</a>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">GET https://thedomainname/api/v1/reports/{reportName}</code>
+                <code class="method-response">{
+  "columnHeaders" : [ {
+    "columnName" : "Office/Branch",
+    "columnType" : "VARCHAR",
+    "columnLength" : null,
+    "columnDisplayType" : null,
+    "columnValues" : [ ]
+  }, {
+    "columnName" : "Name",
+    "columnType" : "VARCHAR",
+    "columnLength" : null,
+    "columnDisplayType" : null,
+    "columnValues" : [ ]
+  }, {
+    "columnName" : "Joining Date",
+    "columnType" : "DATE",
+    "columnLength" : null,
+    "columnDisplayType" : null,
+    "columnValues" : [ ]
+  } ],
+  "data" : [ {
+    "row" : [ "Demo MFI Head Office", "O'Meara, Patrick", "2009-01-04" ]
+  }, {
+    "row" : [ "Demo MFI Head Office", "O'Meara, Dennis", "2009-01-04" ]
+  }, {
+    "row" : [ "Demo MFI Head Office", "Smith, John", "2009-01-11" ]
+  }, {
+    "row" : [ "Demo MFI Head Office", "O'Meara, Jimmy", "2009-01-11" ]
+  }, {
+    "row" : [ "Demo MFI Head Office", "Sunnyville vegetable growers Ltd", "2009-01-24" ]
+  }, {
+    "row" : [ "Demo MFI Head Office", "TraorÃ©, Kalilou", "2009-02-04" ]
+  }, {
+    "row" : [ "Demo MFI Head Office", "KonÃ©, Sidi", "2009-02-11" ]
+  }, {
+    "row" : [ "Demo MFI Head Office", "YattabarÃ©, Moustapha", "2009-02-18" ]
+  }, {
+    "row" : [ "Demo MFI Head Office", "Mali fruit sales ltd.", "2009-02-18" ]
+  }, {
+    "row" : [ "Demo MFI Head Office", "Djenne co-op group", "2009-02-25" ]
+  }, {
+    "row" : [ "Demo MFI Head Office", "test, test", "2012-04-19" ]
+  }, {
+    "row" : [ "Demo MFI Head Office", "Ziffle, Fred", "2012-04-21" ]
+  }, {
+    "row" : [ "Demo MFI Head Office", "omara, safik", "2012-04-24" ]
+  }, {
+    "row" : [ "Demo MFI Head Office", "HF Test", "2012-04-24" ]
+  }, {
+    "row" : [ "Demo MFI Head Office", "HF Test 2", "2012-04-24" ]
+  }, {
+    "row" : [ "Demo MFI Head Office", "Kumar, Shiva", "2011-10-01" ]
+  }, {
+    "row" : [ "Demo MFI Head Office", "Yton, Petra", "2006-06-09" ]
+  }, {
+    "row" : [ "Demo MFI Head Office", "Yton, Petra", "2006-06-09" ]
+  }, {
+    "row" : [ "sub branch 1", "Lee, Jacques", "2012-04-03" ]
+  }, {
+    "row" : [ "sub branch 1", "Asare-Frimpong, Patrick", "2012-04-18" ]
+  }, {
+    "row" : [ "sub branch 2", "t, test", "2012-04-18" ]
+  }, {
+    "row" : [ "Majmoua", "client, firstMajmoua", "2011-12-01" ]
+  }, {
+    "row" : [ "Intrasoft Technologies", "Said, Zayyad", "2012-04-02" ]
+  }, {
+    "row" : [ "Hugo technologies", "typical individual lending client", "2010-06-02" ]
+  } ]
+}
+                </code>
+            </div>
+        </div>
+    
+     <!-- start of authentication api docs -->
+	<a id="authentication" name="authentication" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+		<div class="method-description">
+		    <h3>Authentication</h3>
+		    <p>An API capability that allows client applications to verify authentication details.</p>
+                    <table class=matrixHeading>
+                        <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Field Descriptions</div></td></tr>
+                        <tr class=alt><td>base64EncodedAuthenticationKey</td></tr>
+                        <tr><td class=fielddesc>HTTP Basic Auth key.
+                            See <a href="#authentication_overview">Authentication Overview</a> for an example of its use.</td></tr>
+                        </tr>
+                    </table>
+		</div>
+	</div>
+    
+    <a id="authentication_permissions" name="authentication_permissions" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>Verify authentication</h4>
+	        <p>Authenticates the credentials provided and returns the set of permissions allowed.</p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://thedomainname/api/v1/authentication?username={username}&password={password}</code>
+<code class="method-request">POST https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/authentication?username=super1&password=demo
+Content-Type: application/json
+No Request Body
+</code>
+<code class="method-response">{
+    "username": "super1",
+    "userId": 2,
+    "base64EncodedAuthenticationKey": "c3VwZXIxOmRlbW8=",
+    "authenticated": true,
+    "permissions": [
+    "USER_ADMINISTRATION_SUPER_USER_ROLE",
+    "REPORTING_SUPER_USER_ROLE",
+    "PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE",
+    "ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE"
+    ]
+}
+</code>
+	    </div>
+	</div>    
+    
+    <!-- start of users api docs -->
+	<a id="users" name="users" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+		<div class="method-description">
+		    <h3>Users</h3>
+		    <p>An API capability to support user administration.</p>
+		</div>
+	</div>
+   
+    <a id="users_list" name="users_list" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>Retrieve list of users</h4>
+	        <p>Example Requests: </p>
+	        <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users?pretty=true">https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users?pretty=true</a>
+                <br><br>
+	        <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users?pretty=true&fields=id,username,email,officeName">https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users?pretty=true&fields=id,username,email,officeName</a>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://thedomainname/api/v1/users</code>
+<code class="method-response">[ {
+  "id" : 6,
+  "officeId" : 1,
+  "officeName" : "change super user",
+  "username" : "committee1",
+  "firstname" : "Committee",
+  "lastname" : "Member",
+  "email" : "fake@email.com"
+}, {
+  "id" : 5,
+  "officeId" : 1,
+  "officeName" : "change super user",
+  "username" : "dataentry1",
+  "firstname" : "Data Entry",
+  "lastname" : "User",
+  "email" : "fake@email.com"
+}...]
+</code>
+	    </div>
+	</div>
+   
+    <a id="users_template" name="users_template" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>Retrieve User Details Template</h4>
+                <p>This is a convenience resource.  It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:
+                    <ul>
+                    <li class=normalli>Field Defaults</li>   
+                    <li class=normalli>Allowed Value Lists</li>    
+                    </ul>
+                </p>
+	        <p>Example Request: </p>
+	        <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users/template?pretty=true">https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users/template?pretty=true</a>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://thedomainname/api/v1/users/template</code>
+<code class="method-response">{
+  "allowedOffices" : [ {
+    "id" : 1,
+    "name" : "Demo MFI Head Office"
+  }, {
+    "id" : 2,
+    "name" : "sub branch 1"
+  }, {
+    "id" : 8,
+    "name" : "moi aussi"
+  }, {
+    "id" : 3,
+    "name" : "sub branch 2"
+  }, {
+    "id" : 4,
+    "name" : "sub branch 3"
+  }],
+  "availableRoles" : [ {
+    "id" : 1,
+    "name" : "Super user",
+    "description" : "This role provides all application permissions.",
+    "availablePermissions" : [ ],
+    "selectedPermissions" : [ ]
+  }, {
+    "id" : 2,
+    "name" : "Field officer",
+    "description" : "A field officer role allows the user to add client and loans and view reports but nothing else.",
+    "availablePermissions" : [ ],
+    "selectedPermissions" : [ ]
+  }, {
+    "id" : 3,
+    "name" : "Data Entry (Portfolio only)",
+    "description" : "This role allows a user full permissions around client and loan functionality but nothing else.",
+    "availablePermissions" : [ ],
+    "selectedPermissions" : [ ]
+  }, {
+    "id" : 4,
+    "name" : "Credit Committe Member",
+    "description" : "This role allows a user to approve reject or withdraw loans (with reporting).",
+    "availablePermissions" : [ ],
+    "selectedPermissions" : [ ]
+  }, {
+    "id" : 5,
+    "name" : "Manager",
+    "description" : "This role allows a manager to do anything related to portfolio management and also view all reports.",
+    "availablePermissions" : [ ],
+    "selectedPermissions" : [ ]
+  } ]
+}
+</code>
+	    </div>
+	</div>
+   
+    <a id="users_retrieve" name="users_retrieve" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>Retrieve a User</h4>
+	        <p>Example Requests: </p>
+	        <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users/1?pretty=true">https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users/1?pretty=true</a>
+	        <br><br>
+	        <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users/1?pretty=true&template=true">https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users/1?pretty=true&template=true</a>
+	        <br><br>
+	        <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users/1?pretty=true&fields=username,officeName">https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users/1?pretty=true&fields=username,officeName</a>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://thedomainname/api/v1/users/1</code>
+<code class="method-response">{
+  "id" : 1,
+  "officeId" : 1,
+  "officeName" : "Demo MFI Head Office",
+  "username" : "mifos",
+  "firstname" : "App",
+  "lastname" : "Administrator",
+  "email" : "demomfi@mifos.org",
+  "selectedRoles" : [ {
+    "id" : 1,
+    "name" : "Super user",
+    "description" : "This role provides all application permissions.",
+    "availablePermissions" : [ ],
+    "selectedPermissions" : [ {
+      "id" : 1,
+      "name" : "User administration ALL",
+      "description" : "An application user will have permission to execute all tasks related to user administration.",
+      "code" : "USER_ADMINISTRATION_SUPER_USER_ROLE"
+    }, {
+      "id" : 4,
+      "name" : "Reporting ALL",
+      "description" : "An application user will have permission to execute and view all reports.",
+      "code" : "REPORTING_SUPER_USER_ROLE"
+    }, {
+      "id" : 3,
+      "name" : "Portfolio management ALL",
+      "description" : "An application user will have permission to execute all tasks related to portfolio management.",
+      "code" : "PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE"
+    }, {
+      "id" : 2,
+      "name" : "Organisation adminsitration ALL",
+      "description" : "An application user will have permission to execute all tasks related to organisation administration.",
+      "code" : "ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE"
+    } ]
+  } ]
+}
+</code>
+	    </div>
+	</div>
+    
+    
+    <a id="users_create" name="users_create" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>Create a User</h4>
+	        <p>Adds new application user.</p>
+                <p><b>Note:</b> Password information is not required (or processed).  Password details are auto-generated and then sent to the email account given
+                (which is why it can take a few seconds to complete). 
+                </p>
+                <table class=matrixHeading>
+                    <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields</div></td></tr>
+                    <tr class=alt><td>username, firstname, lastname, email, officeId, roles</td></tr>
+                </table>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://thedomainname/api/v1/users</code>
+<code class="method-request">POST https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users
+Content-Type: application/json
+Request body:
+{ 
+ "username": "Another New User zll", 
+ "firstname": "Test", 
+ "lastname": "User", 
+ "email": "whatever@mifos.org", 
+ "officeId": 1, 
+ "roles": [2,3] 
+}
+</code>
+<code class="method-response">
+{
+  "entityId": 11
+}
+</code>
+	    </div>
+	</div>
+    
+     <a id="users_update" name="users_update" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>Update a User</h4>
+                <p><b>Note:</b> When updating a password you must provide the repeatPassword parameter also.</p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">PUT https://thedomainname/api/v1/users/{userId)</code>
+<code class="method-request">PUT https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users/3
+Content-Type: application/json
+Request body:
+{
+ "firstname": "Test", 
+ "roles": [2], 
+ "password": "window75", 
+ "repeatPassword": "window75"
+}
+
+</code>
+<code class="method-response">
+{
+  "entityId": 3
+}
+</code>
+	    </div>
+	</div>
+    
+    <a id="users_delete" name="users_delete" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>Delete a User</h4>
+	        <p>Removes the user and the associated roles and permissions.</p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">DELETE https://thedomainname/api/v1/users/{userId}</code>
+<code class="method-request">DELETE https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users/20
+Content-Type: application/json
+No Request Body
+</code>
+<code class="method-response">{
+ "entityId": 20
+}
+</code>
+	    </div>
+	</div>
+    <!--  end of users api docs -->
+    
+    
+    <!-- start of roles api docs -->
+	<a id="roles" name="users" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+		<div class="method-description">
+		    <h3>Roles</h3>
+		    <p>An API capability to support management of application roles for user administration.</p>
+		</div>
+	</div>
+   
+    <a id="roles_list" name="roles_list" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>List Roles</h4>
+	        <p>Example Requests: </p>
+	        <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles?pretty=true">https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles?pretty=true</a>
+	        <br><br>
+                <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles?pretty=true&fields=name">https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles?pretty=true&fields=name</a>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://thedomainname/api/v1/roles</code>
+<code class="method-response">[ {
+  "id" : 1,
+  "name" : "Super user",
+  "description" : "This role provides all application permissions."
+}, {
+  "id" : 2,
+  "name" : "Field officer",
+  "description" : "A field officer role allows the user to add client and loans and view reports but nothing else."
+}, {
+  "id" : 3,
+  "name" : "Data Entry (Portfolio only)",
+  "description" : "This role allows a user full permissions around client and loan functionality but nothing else."
+}, {
+  "id" : 4,
+  "name" : "Credit Committe Member",
+  "description" : "This role allows a user to approve reject or withdraw loans (with reporting)."
+}, {
+  "id" : 5,
+  "name" : "Manager",
+  "description" : "This role allows a manager to do anything related to portfolio management and also view all reports."
+} ]
+</code>
+	    </div>
+	</div>
+   
+    <a id="roles_template" name="roles_template" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>Retrieve Role Details Template</h4>
+                <p>This is a convenience resource.  It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:
+                    <ul>
+                    <li class=normalli>Field Defaults</li>   
+                    <li class=normalli>Allowed Value Lists</li>    
+                    </ul>
+                </p>
+	        <p>Example Request: </p>
+	        <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles/template?pretty=true">https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles/template?pretty=true</a>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://thedomainname/api/v1/roles/template</code>
+<code class="method-response">{
+  "availablePermissions" : [ {
+    "id" : 1,
+    "name" : "User administration ALL",
+    "description" : "An application user will have permission to execute all tasks related to user administration.",
+    "code" : "USER_ADMINISTRATION_SUPER_USER_ROLE"
+  }, {
+    "id" : 2,
+    "name" : "Organisation adminsitration ALL",
+    "description" : "An application user will have permission to execute all tasks related to organisation administration.",
+    "code" : "ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE"
+  }, {
+    "id" : 3,
+    "name" : "Portfolio management ALL",
+    "description" : "An application user will have permission to execute all tasks related to portfolio management.",
+    "code" : "PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE"
+  }, {
+    "id" : 4,
+    "name" : "Reporting ALL",
+    "description" : "An application user will have permission to execute and view all reports.",
+    "code" : "REPORTING_SUPER_USER_ROLE"
+  }...]
+}
+</code>
+	    </div>
+	</div>
+   
+    <a id="roles_retrieve" name="roles_retrieve" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>Retrieve a Role</h4>
+	        <p>Example Requests: </p>
+	        <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles/1?pretty=true">https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles/1?pretty=true</a>
+                <br><br>
+	        <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles/1?pretty=true&template=true">https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles/1?pretty=true&template=true</a>
+                <br><br>
+	        <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles/1?pretty=true&fields=name,selectedPermissions">https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles/1?pretty=true&fields=name,selectedPermissions</a>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://thedomainname/api/v1/roles/{roleId}</code>
+<code class="method-response">{
+  "id" : 1,
+  "name" : "Super user",
+  "description" : "This role provides all application permissions.",
+  "selectedPermissions" : [ {
+    "id" : 1,
+    "name" : "User administration ALL",
+    "description" : "An application user will have permission to execute all tasks related to user administration.",
+    "code" : "USER_ADMINISTRATION_SUPER_USER_ROLE"
+  }, {
+    "id" : 4,
+    "name" : "Reporting ALL",
+    "description" : "An application user will have permission to execute and view all reports.",
+    "code" : "REPORTING_SUPER_USER_ROLE"
+  }, {
+    "id" : 3,
+    "name" : "Portfolio management ALL",
+    "description" : "An application user will have permission to execute all tasks related to portfolio management.",
+    "code" : "PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE"
+  }, {
+    "id" : 2,
+    "name" : "Organisation adminsitration ALL",
+    "description" : "An application user will have permission to execute all tasks related to organisation administration.",
+    "code" : "ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE"
+  } ]
+}
+</code>
+	    </div>
+	</div>
+    
+    <a id="roles_create" name="roles_create" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>Create a New Role</h4>
+                <table class=matrixHeading>
+                    <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields</div></td></tr>
+                    <tr class=alt><td>name, description, permissions</td></tr>
+                </table>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://thedomainname/api/v1/roles</code>
+<code class="method-request">POST https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles
+Content-Type: application/json
+Request body:
+{ 
+ "name": "Another Role Name", 
+ "description": "A description outlining the purpose of this role in relation to the application.", 
+ "permissions": [1, 2, 3] 
+}
+</code>
+<code class="method-response">{
+  "entityId": 8
+}
+</code>
+	    </div>
+	</div>
+
+    <a id="roles_update" name="roles_update" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>Update a Role</h4>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">PUT https://thedomainname/api/v1/roles/{roleId}</code>
+<code class="method-request">PUT https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles/8
+Content-Type: application/json
+Request body:
+{ 
+ "name": "Updated Role Name", 
+ "permissions": [1] 
+}
+</code>
+<code class="method-response">{
+  "entityId": 8
+}
+</code>
+	    </div>
+	</div>
+    
+    
+    <!-- start of roles api docs -->
+	<a id="permissions" name="permissions" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+		<div class="method-description">
+		    <h3>Permissions</h3>
+		    <p>An API capability to support management of application permissions for user administration.</p>
+		</div>
+	</div>
+   
+    <a id="permissions_list" name="permissions_list" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>List Application Permissions</h4>
+	        <p>Example Requests: </p>
+	        <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/permissions?pretty=true">https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/permissions?pretty=true</a>
+                <br><br>
+                <a style="word-wrap: break-word;" href="https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/permissions?pretty=true&fields=id,code">https://ec2-176-34-174-133.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/permissions?pretty=true&fields=id,code</a>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://thedomainname/api/v1/permissions</code>
+<code class="method-response">[ {
+  "id" : 1,
+  "name" : "User administration ALL",
+  "description" : "An application user will have permission to execute all tasks related to user administration.",
+  "code" : "USER_ADMINISTRATION_SUPER_USER_ROLE"
+}, {
+  "id" : 2,
+  "name" : "Organisation adminsitration ALL",
+  "description" : "An application user will have permission to execute all tasks related to organisation administration.",
+  "code" : "ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE"
+}, {
+  "id" : 3,
+  "name" : "Portfolio management ALL",
+  "description" : "An application user will have permission to execute all tasks related to portfolio management.",
+  "code" : "PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE"
+}, {
+  "id" : 4,
+  "name" : "Reporting ALL",
+  "description" : "An application user will have permission to execute and view all reports.",
+  "code" : "REPORTING_SUPER_USER_ROLE"
+}, ... ]
+</code>
+	    </div>
+	</div>
+    
+    </div> <!-- main-content-wrapper -->
+    
+    
+    <a id="fullapi_matrix" name="fullapi_matrix" class="old-syle-anchor">&nbsp;</a>
+    <br><br><br>
+    <div class=fullMatrixOuter>
+        <table width="80%"><tr><td><h3>Full API Matrix</h4></td><td><h4>API Endpoint:</h5></td><td><h5>https://thedomainname/api</h5></td></tr></table>
+        <table class=matrixHeading>
+            <tr class="matrixHeadingBG"><td colspan=2 valign="top"><div class="matrixHeadingVerbs"><table><tr><td>RESOURCES</td></tr></table></div></td><td><table><tr><td><div class="matrixHeadingVerbs">POST</div></td></tr><tr><td><div class=matrixHeadingCommands>create/complex update</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">GET</div></td></tr><tr><td><div class=matrixHeadingCommands>read</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">PUT</div></td></tr><tr><td><div class=matrixHeadingCommands>update</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">DELETE</div></td></tr><tr><td><div class=matrixHeadingCommands>delete</div></td></tr></table></td></tr>
+            <tr class="alt"><td><a href="#clients">CLIENT</a></td><td>/v1/clients</td><td><a href="api.htm#clients_create">Create a Client</a></td><td><a href="#clients_list">List Clients</a></td><td></td><td></td></tr>
+            <tr><td></td><td>/v1/clients/{clientId}</td><td></td><td><a href="#clients_retrieve">Retrieve a Client</a></td><td><a href="#clients_update">Update a Client</a></td><td></td></tr>
+            <tr class="alt"><td></td><td>/v1/clients/{clientId}/loans</td><td></td><td><a href="#clients_loansummary">Retrieve a Client's Loan Account Summary</a></td><td></td><td></td></tr>
+            <tr><td></td><td>/v1/clients/{clientId}/notes</td><td><a href="#clients_addnote">Add a Client Note</a></td><td><a href="#clients_notes">Retrieve a Client's Notes</a></td><td></td><td></td></tr>
+            <tr class="alt"><td></td><td>/v1/clients/{clientId}/notes/{noteId}</td><td></td><td><a href="#clients_retrievenote">Retrieve a Client Note</a></td><td><a href="#clients_updatenote">Update a Client Note</a></td><td></td></tr>
+            <tr><td><a href="#loans">LOAN</a></td><td>/v1/loans</td><td><a href="#loans_create">Create a New Loan/Submit a Loan Application</a></td><td></td><td></td><td></td></tr>
+            <tr class="alt"><td></td><td>/v1/loans/{loanId}</td><td><a href="#loans_approve_etc">Approve, Undo Approval, Disburse, Undo Disbursal, Reject a Loan or Withdraw a Loan Application</a></td><td><a href="#loans_retrieve">Retrieve a Loan</a></td><td></td><td><a href="#loans_delete">Delete a Loan</a></td></tr>
+            <tr class="alt"><td></td><td>/v1/loans/{loanId}/transactions</td><td><a href="#loans_repayment_etc">Make a Repayment / Loan Waiver</a></td><td></td><td></td><td></td></tr>
+            <tr><td></td><td>/v1/loans/{loanId}/transactions/{transactionId}</td><td><a href="#loans_repaymentadjust_etc">Adjust a Repayment or Waiver</a></td><td><a href="#loans_repaymentretrieve_etc">Retrieve a Repayment or Waiver Details</a></td><td></td><td></td></tr>
+            <tr class="alt"><td><a href="#offices">OFFICE</a></td><td>/v1/offices</td><td><a href="#offices_create">Create an Office</a></td><td><a href="#offices_list">List Offices</a></td><td></td><td></td></tr>
+            <tr><td></td><td>/v1/offices/{officeId}</td><td></td><td><a href="#offices_retrieve">Retrieve an Office</a></td><td><a href="#offices_update">Update an Office</a></td><td></td></tr>
+            <tr class="alt"><td><a href="#loanproducts">LOAN PRODUCT</a></td><td>/v1/loanproducts</td><td><a href="#loanproducts_create">Create a Loan Product</a></td><td><a href="#loanproducts_list">List Loan Products</a></td><td></td><td></td></tr>
+            <tr><td></td><td>/v1/loanproducts/{productId}</td><td></td><td><a href="#loanproducts_retrieve">Retrieve a Loan Product</a></td><td><a href="#loanproducts_update">Update a Loan Product</a></td><td></td></tr>
+            <tr class="alt"><td><a href="#configs">CONFIGURATION</a></td><td>/v1/configurations/currency</td><td></td><td><a href="#configs_currencyretrieve">Retrieve Currency Configuration</a></td><td><a href="#configs_currencyupdate">Update Currency Configuration</a></td><td></td></tr>
+            <tr><td><a href="#additionalfields">ADDITIONAL FIELDS</a></td><td>/v1/additionalfields</td><td></td><td><a href="#additionalfields_list">List Additional Fields Sets</a></td><td></td><td></td></tr>
+            <tr class="alt"><td></td><td>/v1/additionalfields/{Type}/{Set}/{id}</td><td><a href="#additionalfields_update">Update Additional Fields</a></td><td><a href="#additionalfields_retrieve">Retrieve Additional Fields</a></td><td></td><td></td></tr>
+            <tr><td><a href="#reports">REPORT</a></td><td>/v1/reports</td><td></td><td><a href="#reports_list">List Reports</a></td><td></td><td></td></tr>
+            <tr class="alt"><td></td><td>/v1/reports/{reportName}</td><td></td><td><a href="#report_run">Run a Report</a></td><td></td><td></td></tr>
+            <tr><td><a href="#authentication">AUTHENTICATION</a></td><td>/v1/authentication</td><td><a href="#authentication_permissions">Verify Authentication</a></td><td></td><td></td><td></td></tr>
+            <tr class="alt"><td><a href="#users">USER</a></td><td>/v1/users</td><td><a href="#users_create">Create a User</a></td><td><a href="#users_list">List Users</a></td><td></td><td></td></tr>
+            <tr><td></td><td>/v1/users/{userId}</td><td></td><td><a href="#users_retrieve">Retrieve a User</a></td><td><a href="#users_update">Update a User</a></td><td><a href="#users_delete">Delete a User</a></td></tr>
+            <tr class="alt"><td><a href="#roles">ROLE</a></td><td>/v1/roles</td><td><a href="#roles_create">Create a New Role</a></td><td><a href="#roles_list">List Roles</a></td><td></td><td></td></tr>
+            <tr><td></td><td>/v1/roles/{roleId}</td><td></td><td><a href="#roles_retrieve">Retrieve a Role</a></td><td><a href="#roles_update">Update a Role</a></td><td></td></tr>
+            <tr class="alt"><td><a href="#permissions">PERMISSION</a></td><td>/v1/permissions</td><td></td><td><a href="#permissions_list">List Application Permissions</a></td><td></td><td></td></tr>
+        </table>
+        <br>
+        <table class=matrixHeading>
+            <tr class="matrixHeadingBG"><td valign="top"><div class="matrixHeadingVerbs"><table><tr><td>CONVENIENCE RESOURCES</td></tr></table></div></td><td><table><tr><td><div class="matrixHeadingVerbs">GET</div></td></tr><tr><td><div class=matrixHeadingCommands>read</div></td></tr></table></td></tr>
+            <tr class="alt"><td>/v1/clients/template</td><td><a href="#clients_template">Retrieve Client Details Template</a></td></tr>
+            <tr><td>/v1/loans/template</td><td><a href="#loans_template">Retrieve Loan Details Template</a></td></tr>
+            <tr class="alt"><td>/v1/loans/{loanId}/transactions/template</td><td><a href="#loans_repaymenttemplate_etc">Retrieve Loan Repayment/Loan Waiver Template</a></td></tr>
+            <tr><td>/v1/offices/template</td><td><a href="#offices_template">Retrieve Office Details Template</a></td></tr>
+            <tr class="alt"><td>/v1/loanproducts/template</td><td><a href="#loanproducts_template">Retrieve Loan Product Details Template</a></td></tr>
+            <tr><td>/v1/users/template</td><td><a href="#users_template">Retrieve User Details Template</a></td></tr>
+            <tr class="alt"><td>/v1/roles/template</td><td><a href="#roles_template">Retrieve Role Details Template</a></td></tr>
+        </table>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+        <script type="text/javascript" src="jquery-1.7.min.js"></script>
+        <title>Demo use of Mifos X platform</title>
+    </head>
+
+<body>
+
+<script type = "text/javascript">
+
+
+function setBasicAuthKey(username, password) 
+{ 
+	basicAuthKey = "";
+	var jqxhr = $.ajax({ 
+		url : "https://localhost:8443/mifosng-provider/api/v1/authentication?username=" + username + "&password=" + password, 
+		type : 'POST', 
+		contentType : "application/json; charset=utf-8", 
+		dataType : 'json', 
+		data : "{}", 
+		cache : false, 
+		success : function(data, textStatus, jqXHR) { 
+				basicAuthKey = data.base64EncodedAuthenticationKey; 
+				window.location = "http://www.google.com";
+				return false;
+			},
+		error : function(jqXHR, textStatus, errorThrown) {
+				alert("Invalid Username/Password"); 
+				return true;
+		} 
+	});
+ }
+</script>
+
+<form name = "logonform">
+<table>
+<tr><td>User Name:</td><td><input type="text" name="username"></td></tr>
+<tr><td>Password: </td><td><input type="password" name="password"></td></tr>
+<tr><td><input type="button" value="Logon to Rough Approval" name="Submit" onclick= "setBasicAuthKey(document.logonform.username.value, document.logonform.password.value )"></td><td></td></tr>
+</table>
+
+</form>
+
+
+
+</body>
