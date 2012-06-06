@@ -9,8 +9,7 @@ import org.joda.time.LocalDate;
 @XmlRootElement
 public class CalculateLoanScheduleCommand {
 
-	private String currencyCode;
-	private Integer digitsAfterDecimalValue;
+	private Long productId;
 	private BigDecimal principalValue;
 	private BigDecimal inArrearsToleranceValue;
 	
@@ -32,15 +31,15 @@ public class CalculateLoanScheduleCommand {
 		//
 	}
 
-	public CalculateLoanScheduleCommand(final String currencyCode,
-			final Integer digitsAfterDecimal, final Number principal,
+	public CalculateLoanScheduleCommand(
+			final Long productId,
+			final Number principal,
 			final Number interestRatePerPeriod, Integer interestRateFrequencyMethod, final Integer interestMethod, final Integer interestCalculationPeriodMethod,
 			final Integer repaymentEvery, final Integer repaymentFrequency, final Integer numberOfRepayments, Integer amortizationMethod,
 			final LocalDate expectedDisbursementDate,
 			final LocalDate repaymentsStartingFromDate, final LocalDate interestCalculatedFromDate) {
 		
-		this.currencyCode = currencyCode;
-		this.digitsAfterDecimalValue = digitsAfterDecimal;
+		this.productId = productId;
 		if (principal != null) {
 			this.principalValue = BigDecimal.valueOf(principal.doubleValue());
 		}
@@ -60,21 +59,21 @@ public class CalculateLoanScheduleCommand {
 		this.interestChargedFromLocalDate= interestCalculatedFromDate;
 	}
 
-	public String getCurrencyCode() {
-		return currencyCode;
-	}
-
-	public void setCurrencyCode(String currencyCode) {
-		this.currencyCode = currencyCode;
-	}
-
-	public Integer getDigitsAfterDecimalValue() {
-		return digitsAfterDecimalValue;
-	}
-
-	public void setDigitsAfterDecimalValue(Integer digitsAfterDecimalValue) {
-		this.digitsAfterDecimalValue = digitsAfterDecimalValue;
-	}
+//	public String getCurrencyCode() {
+//		return currencyCode;
+//	}
+//
+//	public void setCurrencyCode(String currencyCode) {
+//		this.currencyCode = currencyCode;
+//	}
+//
+//	public Integer getDigitsAfterDecimalValue() {
+//		return digitsAfterDecimalValue;
+//	}
+//
+//	public void setDigitsAfterDecimalValue(Integer digitsAfterDecimalValue) {
+//		this.digitsAfterDecimalValue = digitsAfterDecimalValue;
+//	}
 
 	public BigDecimal getPrincipalValue() {
 		return principalValue;
@@ -182,5 +181,13 @@ public class CalculateLoanScheduleCommand {
 	public void setInterestChargedFromLocalDate(
 			LocalDate interestChargedFromLocalDate) {
 		this.interestChargedFromLocalDate = interestChargedFromLocalDate;
+	}
+
+	public Long getProductId() {
+		return productId;
+	}
+
+	public void setProductId(Long productId) {
+		this.productId = productId;
 	}
 }

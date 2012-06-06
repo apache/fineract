@@ -134,14 +134,12 @@ public class LoansApiResource {
 		BigDecimal inArrearsToleranceValue = this.apiDataConversionService.convertFrom(command.getInArrearsTolerance(), "inArrearsTolerance", clientApplicationLocale);
 		BigDecimal interestRatePerPeriodValue = this.apiDataConversionService.convertFrom(command.getInterestRatePerPeriod(),"interestRatePerPeriod", clientApplicationLocale);
 		
-		Integer digitsAfterDecimalValue = this.apiDataConversionService.convertToInteger(command.getDigitsAfterDecimal(), "digitsAfterDecimal", clientApplicationLocale);
 		Integer repaymentEveryValue = this.apiDataConversionService.convertToInteger(command.getRepaymentEvery(), "repaymentEvery", clientApplicationLocale);
 		Integer numberOfRepaymentsValue = this.apiDataConversionService.convertToInteger(command.getNumberOfRepayments(), "numberOfRepayments", clientApplicationLocale);
 		
 		command.setPrincipalValue(principalValue);
 		command.setInArrearsToleranceValue(inArrearsToleranceValue);
 		command.setInterestRatePerPeriodValue(interestRatePerPeriodValue);
-		command.setDigitsAfterDecimalValue(digitsAfterDecimalValue);
 		command.setRepaymentEveryValue(repaymentEveryValue);
 		command.setNumberOfRepaymentsValue(numberOfRepaymentsValue);
 

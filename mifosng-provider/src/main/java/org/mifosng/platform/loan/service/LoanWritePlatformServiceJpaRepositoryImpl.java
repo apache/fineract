@@ -266,8 +266,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 			LocalDate interestCalculatedFromDate = loan.getInterestChargedFromDate();
 
 			Number principalAsDecimal = loan.getLoanRepaymentScheduleDetail().getPrincipal().getAmount();
-			String currencyCode = loan.getLoanRepaymentScheduleDetail().getPrincipal().getCurrencyCode();
-			int currencyDigits = loan.getLoanRepaymentScheduleDetail().getPrincipal().getCurrencyDigitsAfterDecimal();
+//			String currencyCode = loan.getLoanRepaymentScheduleDetail().getPrincipal().getCurrencyCode();
+//			int currencyDigits = loan.getLoanRepaymentScheduleDetail().getPrincipal().getCurrencyDigitsAfterDecimal();
 			
 			Number interestRatePerYear = loan.getLoanRepaymentScheduleDetail().getAnnualNominalInterestRate();
 			Integer numberOfInstallments = loan.getLoanRepaymentScheduleDetail().getNumberOfRepayments();
@@ -283,7 +283,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 			Integer interestMethod = loan.getLoanRepaymentScheduleDetail().getInterestMethod().getValue();
 			Integer interestCalculationInPeriod = loan.getLoanRepaymentScheduleDetail().getInterestCalculationPeriodMethod().getValue();
 			
-			CalculateLoanScheduleCommand calculateCommand = new CalculateLoanScheduleCommand(currencyCode, currencyDigits, principalAsDecimal, 
+			CalculateLoanScheduleCommand calculateCommand = new CalculateLoanScheduleCommand(
+					loan.getLoanProduct().getId(),
+					principalAsDecimal, 
 					interestRatePerPeriod, interestRateFrequencyMethod, interestMethod, interestCalculationInPeriod,
 					repaidEvery, selectedRepaymentFrequency, numberOfInstallments, 
 					selectedRepaymentSchedule, actualDisbursementDate, repaymentsStartingFromDate, interestCalculatedFromDate);

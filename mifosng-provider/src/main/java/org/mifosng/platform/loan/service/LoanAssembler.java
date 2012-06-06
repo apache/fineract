@@ -60,9 +60,7 @@ public class LoanAssembler {
 			throw new ClientNotFoundException(command.getClientId());
 		}
 		
-		// FIXME - should probably fetch applicationCurrency with currencycode to check its validity.
-		MonetaryCurrency currency = new MonetaryCurrency(command.getCurrencyCode(), command.getDigitsAfterDecimalValue());
-		
+		MonetaryCurrency currency = loanProduct.getCurrency();
 		final BigDecimal defaultNominalInterestRatePerPeriod = command.getInterestRatePerPeriodValue();
 		final PeriodFrequencyType interestPeriodFrequencyType = PeriodFrequencyType.fromInt(command.getInterestRateFrequencyType());
 		

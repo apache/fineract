@@ -22,8 +22,8 @@ public class CalculateLoanScheduleCommandValidator {
 		
 		DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");
 		
-		baseDataValidator.reset().parameter("currencyCode").value(command.getCurrencyCode()).notBlank();
-		baseDataValidator.reset().parameter("digitsAfterDecimal").value(command.getDigitsAfterDecimalValue()).notNull().inMinMaxRange(0, 6);
+//		baseDataValidator.reset().parameter("currencyCode").value(command.getCurrencyCode()).notBlank();
+//		baseDataValidator.reset().parameter("digitsAfterDecimal").value(command.getDigitsAfterDecimalValue()).notNull().inMinMaxRange(0, 6);
 		baseDataValidator.reset().parameter("principal").value(command.getPrincipalValue()).notNull().positiveAmount();
 		baseDataValidator.reset().parameter("repaymentFrequencyType").value(command.getRepaymentFrequencyType()).notNull().inMinMaxRange(0, 3);
 		baseDataValidator.reset().parameter("repaymentEvery").value(command.getRepaymentEveryValue()).notNull().greaterThanZero();

@@ -15,9 +15,6 @@ public class SubmitLoanApplicationCommand {
 	
 	// product 
 	private String locale;
-	private String currencyCode;
-	private String digitsAfterDecimal;
-	private Integer digitsAfterDecimalValue;
 	private BigDecimal principalValue;
 	private String principal;
 	private BigDecimal inArrearsToleranceValue;
@@ -63,8 +60,8 @@ public class SubmitLoanApplicationCommand {
 			final LocalDate expectedDisbursementDate,
 			final LocalDate repaymentsStartingFromDate,
 			final LocalDate interestChargedFromLocalDate,
-			final LoanSchedule loanSchedule, final String currencyCode,
-			final Integer digitsAfterDecimal, final Number principal,
+			final LoanSchedule loanSchedule, 
+			final Number principal,
 			final Number interestRatePerPeriod, Integer interestRateFrequencyMethod, final Integer interestMethod, final Integer interestCalculationPeriodMethod,
 			final Integer repaymentEvery, final Integer repaymentFrequency, final Integer numberOfRepayments, Integer amortizationMethod, final Number toleranceAmount) {
 		this.clientId = clientId;
@@ -77,8 +74,6 @@ public class SubmitLoanApplicationCommand {
 		this.loanSchedule = loanSchedule;
 		this.inArrearsToleranceValue = BigDecimal.valueOf(toleranceAmount.doubleValue());
 		
-		this.currencyCode = currencyCode;
-		this.digitsAfterDecimalValue = digitsAfterDecimal;
 		this.principalValue = BigDecimal.valueOf(principal.doubleValue());
 		this.interestRatePerPeriodValue = BigDecimal.valueOf(interestRatePerPeriod.doubleValue());
 		this.interestRateFrequencyType = interestRateFrequencyMethod;
@@ -91,7 +86,8 @@ public class SubmitLoanApplicationCommand {
 	}
 	
 	public CalculateLoanScheduleCommand toCalculateLoanScheduleCommand() {
-		return new CalculateLoanScheduleCommand(currencyCode, digitsAfterDecimalValue, principalValue, interestRatePerPeriodValue, interestRateFrequencyType, interestType, interestCalculationPeriodType, repaymentEveryValue, repaymentFrequencyType, numberOfRepaymentsValue, amortizationType, 
+		return new CalculateLoanScheduleCommand(productId,
+				principalValue, interestRatePerPeriodValue, interestRateFrequencyType, interestType, interestCalculationPeriodType, repaymentEveryValue, repaymentFrequencyType, numberOfRepaymentsValue, amortizationType, 
 				expectedDisbursementLocalDate, repaymentsStartingFromLocalDate, interestChargedFromLocalDate);
 	}
 
@@ -127,14 +123,6 @@ public class SubmitLoanApplicationCommand {
 		this.externalId = externalId;
 	}
 
-	public String getCurrencyCode() {
-		return currencyCode;
-	}
-
-	public void setCurrencyCode(String currencyCode) {
-		this.currencyCode = currencyCode;
-	}
-
 	public String getDateFormat() {
 		return dateFormat;
 	}
@@ -157,22 +145,6 @@ public class SubmitLoanApplicationCommand {
 
 	public void setLocale(String locale) {
 		this.locale = locale;
-	}
-
-	public String getDigitsAfterDecimal() {
-		return digitsAfterDecimal;
-	}
-
-	public void setDigitsAfterDecimal(String digitsAfterDecimal) {
-		this.digitsAfterDecimal = digitsAfterDecimal;
-	}
-
-	public Integer getDigitsAfterDecimalValue() {
-		return digitsAfterDecimalValue;
-	}
-
-	public void setDigitsAfterDecimalValue(Integer digitsAfterDecimalValue) {
-		this.digitsAfterDecimalValue = digitsAfterDecimalValue;
 	}
 
 	public BigDecimal getPrincipalValue() {

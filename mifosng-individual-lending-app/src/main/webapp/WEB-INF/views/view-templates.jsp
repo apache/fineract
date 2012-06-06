@@ -29,7 +29,7 @@
 		{{#each scheduledLoanInstallments}}
 		<tr>
 			<td>{{=$ctx.number(installmentNumber)}}</td>
-			<td>{{=$ctx.globalDateAsISOString(periodEnd)}}</td>
+			<td>{{=$ctx.globalDate(periodEnd)}}</td>
 			<td>{{=$ctx.money(principalDue)}}</td>
 			<td>{{=$ctx.money(interestDue)}}</td>
 			<td>{{=$ctx.money(totalInstallmentDue)}}</td>
@@ -55,8 +55,6 @@
     <div id="formerrors"></div>
 
 	<input type="hidden" id="clientId" name="clientId" value="{{=clientId}}" />
-	<input type="hidden" id="currencyCode" name="currencyCode" value="{{=selectedProduct.principal.currencyCode}}" />
-	<input type="hidden" id="digitsAfterDecimal" name="digitsAfterDecimal" value="{{=$ctx.number(selectedProduct.principal.digitsAfterDecimal)}}" />
 	<input type="hidden" id="dateFormat" name="dateFormat" value="dd MMMM yyyy" />
 	<input type="hidden" id="locale" name="locale" value="${currentLocale}" />
 
@@ -607,13 +605,13 @@
 
 		<div class="row">
 			<span class="longrowlabel"><spring:message code="label.client.account.loan.term"/></span>
-			<span class="rowvalue">{{=expectedLoanTermInMonths}} <spring:message code="label.months"/> / ({{=expectedLoanTermInDays}} <spring:message code="label.days"/>)</span>
+			<span class="rowvalue">{{=convenienceData.expectedLoanTermInMonths}} <spring:message code="label.months"/> / ({{=convenienceData.expectedLoanTermInDays}} <spring:message code="label.days"/>)</span>
 		</div>
 
 		{{#if closedOnDate !== null}}
 		<div class="row">
 			<span class="longrowlabel"><spring:message code="label.client.account.loan.actual.term"/></span>
-			<span class="rowvalue">{{=actualLoanTermInMonths}} <spring:message code="label.months"/> / ({{=actualLoanTermInDays}} <spring:message code="label.days"/>)</span>
+			<span class="rowvalue">{{=convenienceData.actualLoanTermInMonths}} <spring:message code="label.months"/> / ({{=convenienceData.actualLoanTermInDays}} <spring:message code="label.days"/>)</span>
 		</div>
 		{{/if}}
 

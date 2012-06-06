@@ -1,5 +1,7 @@
 package org.mifosng.platform.loan.service;
 
+import static org.mifosng.platform.Specifications.productThatMatches;
+
 import java.math.BigDecimal;
 
 import org.joda.time.LocalDate;
@@ -12,18 +14,23 @@ import org.mifosng.platform.currency.domain.ApplicationCurrencyRepository;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.exceptions.CurrencyNotFoundException;
 import org.mifosng.platform.exceptions.LoanNotFoundException;
+import org.mifosng.platform.exceptions.LoanProductNotFoundException;
 import org.mifosng.platform.loan.domain.AmortizationMethod;
 import org.mifosng.platform.loan.domain.InterestCalculationPeriodMethod;
 import org.mifosng.platform.loan.domain.InterestMethod;
 import org.mifosng.platform.loan.domain.Loan;
 import org.mifosng.platform.loan.domain.LoanPayoffSummary;
+import org.mifosng.platform.loan.domain.LoanProduct;
 import org.mifosng.platform.loan.domain.LoanProductRelatedDetail;
+import org.mifosng.platform.loan.domain.LoanProductRepository;
 import org.mifosng.platform.loan.domain.LoanRepository;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 import org.mifosng.platform.loanschedule.domain.AprCalculator;
 import org.mifosng.platform.loanschedule.domain.DefaultLoanScheduleGeneratorFactory;
 import org.mifosng.platform.loanschedule.domain.LoanScheduleGenerator;
 import org.mifosng.platform.loanschedule.domain.LoanScheduleGeneratorFactory;
+import org.mifosng.platform.security.PlatformSecurityContext;
+import org.mifosng.platform.user.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,12 +40,18 @@ public class CalculationPlatformServiceImpl implements
 
 	private final LoanScheduleGeneratorFactory loanScheduleFactory;
 	private final LoanRepository loanRepository;
+	private final LoanProductRepository loanProductRepository;
 	private final ApplicationCurrencyRepository applicationCurrencyRepository;
 	private final AprCalculator aprCalculator;
+	private final PlatformSecurityContext context;
 	
 	@Autowired
-	public CalculationPlatformServiceImpl(final LoanRepository loanRepository, final ApplicationCurrencyRepository applicationCurrencyRepository, final AprCalculator aprCalculator) {
+	public CalculationPlatformServiceImpl(final PlatformSecurityContext context,
+			final LoanRepository loanRepository, final LoanProductRepository loanProductRepository,
+			final ApplicationCurrencyRepository applicationCurrencyRepository, final AprCalculator aprCalculator) {
+		this.context = context;
 		this.loanRepository = loanRepository;
+		this.loanProductRepository = loanProductRepository;
 		this.applicationCurrencyRepository = applicationCurrencyRepository;
 		this.aprCalculator = aprCalculator;
 		this.loanScheduleFactory = new DefaultLoanScheduleGeneratorFactory();
@@ -46,6 +59,8 @@ public class CalculationPlatformServiceImpl implements
 
 	@Override
 	public LoanSchedule calculateLoanSchedule(final CalculateLoanScheduleCommand command) {
+		
+		AppUser currentUser = context.authenticatedUser();
 		
 		CalculateLoanScheduleCommandValidator validator = new CalculateLoanScheduleCommandValidator(command);
 		validator.validate();
@@ -62,7 +77,12 @@ public class CalculationPlatformServiceImpl implements
 		
 		final BigDecimal defaultAnnualNominalInterestRate = this.aprCalculator.calculateFrom(interestPeriodFrequencyType, defaultNominalInterestRatePerPeriod);
 		
-		final MonetaryCurrency currency = new MonetaryCurrency(command.getCurrencyCode(), command.getDigitsAfterDecimalValue());
+		LoanProduct loanProduct = this.loanProductRepository.findOne(productThatMatches(currentUser.getOrganisation(), command.getProductId()));
+		if (loanProduct == null) {
+			throw new LoanProductNotFoundException(command.getProductId());
+		}
+		
+		final MonetaryCurrency currency = loanProduct.getCurrency();
 		
 		// in arrerars tolerance isnt relevant when auto-calculating a loan schedule 
 		final BigDecimal inArrearsTolerance = BigDecimal.ZERO;
@@ -75,8 +95,8 @@ public class CalculationPlatformServiceImpl implements
 		
 		LoanScheduleGenerator loanScheduleGenerator = this.loanScheduleFactory.create(interestMethod);
 
-		ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneByCode(command.getCurrencyCode());
-		CurrencyData currencyData = new CurrencyData(applicationCurrency.getCode(), applicationCurrency.getName(), command.getDigitsAfterDecimalValue(),
+		ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneByCode(currency.getCode());
+		CurrencyData currencyData = new CurrencyData(applicationCurrency.getCode(), applicationCurrency.getName(), currency.getDigitsAfterDecimal(),
 				applicationCurrency.getDisplaySymbol(), applicationCurrency.getNameCode());
 		
 		return loanScheduleGenerator.generate(loanScheduleInfo, command.getExpectedDisbursementLocalDate(), command.getRepaymentsStartingFromLocalDate(), 

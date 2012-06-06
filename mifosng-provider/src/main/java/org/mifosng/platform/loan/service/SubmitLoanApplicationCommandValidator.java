@@ -41,7 +41,7 @@ public class SubmitLoanApplicationCommandValidator {
 		try {
 			// reuse calculate loan schedule validator for now
 			CalculateLoanScheduleCommand calculateLoanScheduleCommand = new CalculateLoanScheduleCommand(
-					command.getCurrencyCode(), command.getDigitsAfterDecimalValue(),
+					command.getProductId(),
 					command.getPrincipalValue(), command.getInterestRatePerPeriodValue(),
 					command.getInterestRateFrequencyType(),
 					command.getInterestType(), command.getInterestCalculationPeriodType(),
