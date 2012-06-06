@@ -159,7 +159,7 @@
                 Internet Explorer will probably treat the output as if you wanted to download a file.
                 In that case just elect to open the output in a text editor.</p>
                 <p>If you want to check out the POST, PUT and DELETE (update) examples a good approach is to take a moment to
-                install a REST plugin for your browser e.g. RESTClient for FireFox</p>
+                install a REST plugin for your browser e.g. <a href="https://addons.mozilla.org/en-US/firefox/addon/restclient/">RESTClient</a> for FireFox</p>
                 The REST plugins will allow you to
                 <ul>
                     <li class=normalli>Select the "Verb" (e.g. POST)</li>
@@ -282,8 +282,8 @@ JSON examples:
                 </p>
                 
                 <p>
-                All API requests must be made over <a href="http://en.wikipedia.org/wiki/HTTP_Secure">HTTPS</a>.
-                Calls made over plain HTTP will fail.  You must authenticate for all requests.
+                The platform has been configured to reject plain HTTP requests and to expect all API requests to be made over <a href="http://en.wikipedia.org/wiki/HTTP_Secure">HTTPS</a>.
+                All requests must be authenticated.
                 </p>
             </div>
             <div class="method-example">
@@ -336,135 +336,61 @@ var jqxhr = $.ajax({
         <a id="errors" name="errors" class="old-syle-anchor">&nbsp;</a>
         <div class="method-section">
             <div class="method-description">
-                <h3>Errors</h3>
-                <p>JPW:Need to update this
-                Stripe uses conventional HTTP response codes to indicate
-                success or failure of an API request.  In general,
-                codes in the 2xx range indicate success, codes in the
-                4xx range indicate an error that resulted from the
-                provided information (e.g. a required parameter was
-                missing, a charge failed, etc.), and codes in the 5xx
-                range indicate an error with Stripe's servers.
-                </p>
+                <h3>Errors</h3>               
                 
                 <p>
-                Not all errors map cleanly onto HTTP response codes,
-                however.  When a request is valid but does not complete
-                successfully (e.g. a card is declined), we return a 402
-                error code.
+                All errors are return in JSON.
                 </p>
                 
-                
-                <p>
-                All errors return JSON with a type (one of card_error, invalid_request_error,
-                or api_error) and message describing the particular problem.
-                </p>
-                
-                <h5>Attributes</h5>
-                <dl class="argument-list">
-                    <dt>type</dt>
-                    <dd></dd>
-                    <dd>The type of error returned (card_error, invalid_request_error, api_error)
-                    Card errors are the most common type of error you should expect to handle.
-                    They result when the user enters a card that can't be charged for some reason.
-                    Invalid request errors arise when your request has invalid parameters.  API
-                    errors cover any other type of problem (e.g. a temporary problem with Stripe's servers)
-                    and should turn up only very infrequently.</dd>
-                    
-                    <dt>message</dt>
-                    <dd></dd>
-                    <dd>A user-friendly message describing the error</dd>
-                    
-                    <dt>code</dt>
-                    <dd>optional</dd>
-                    <dd>For card errors, additional information 
-                    about the user-friendly message to display for this error (e.g. "Your 
-                    card was declined.")</dd>
-                    
-                    <dt>param</dt>
-                    <dd>optional</dd>
-                    <dd>The parameter the error relates to if the 
-                    error is parameter-specific.  You can use this to display a message near
-                    the correct form field, for example.</dd>
-                </dl>
             </div>
             <div class="method-example">
                 <h6>HTTP Status Code Summary</h6>
                 <ul>
-                <li><strong>200</strong> OK - Everything worked as expected.</li>
-                <li><strong>400</strong> Bad Request - Often missing a required parameter.</li>
-                <li><strong>401</strong> Unauthorized - No valid API key provided.</li>
-                <li><strong>402</strong> Request Failed - Parameters were valid but request failed.</li>
-                <li><strong>404</strong> Not Found - The requested item doesn't exist.</li>
-                <li><strong>500, 502, 503, 504</strong> Server errors - something went wrong on Stripe's end.</li>
+                <li><strong>200</strong> OK - Everything Worked.</li>
+                <li><strong>400</strong> Bad Request - Invalid Parameter or Data Integrity Issue.</li>
+                <li><strong>401</strong> Authentication Error.</li>
+                <li><strong>403</strong> Unauthorized Request.</li>
+                <li><strong>404</strong> Resource Not Found</li>
+                <li><strong>500</strong> Platform Internal Server Error.</li>
                 </ul>
-            </div>
-    
+            </div>    
             <div class="method-example">
-                <h6>Errors</h6>
-                <h7>Invalid Request Errors</h7>
-                <code><strong>Type:</strong> invalid_request_error</code>
-                
-                <h7>API Errors</h7>
-                <code><strong>Type:</strong> api_error</code>
-                
-                <h7>Card Errors</h7>
-                <code><strong>Type:</strong> card_error</code>
-                <table>
-                <tbody><tr>
-                <th>Code</th>
-                <th>Details</th>
-                </tr>
-                <tr>
-                <td>invalid_number</td>
-                <td>The card number is invalid</td>
-                </tr>
-                <tr>
-                <td>incorrect_number</td>
-                <td>The card number is incorrect</td>
-                </tr>
-                <tr>
-                <td>invalid_expiry_month</td>
-                <td>The card's expiration month is invalid</td>
-                </tr>
-                <tr>
-                <td>invalid_expiry_year</td>
-                <td>The card's expiration year is invalid</td>
-                </tr>
-                <tr>
-                <td>invalid_cvc</td>
-                <td>The card's security code is invalid</td>
-                </tr>
-                <tr>
-                <td>expired_card</td>
-                <td>The card has expired</td>
-                </tr>
-                <tr>
-                <td>invalid_amount</td>
-                <td>An invalid amount was entered</td>
-                </tr>
-                <tr>
-                <td>incorrect_cvc</td>
-                <td>The card's security code is incorrect</td>
-                </tr>
-                <tr>
-                <td>card_declined</td>
-                <td>The card was declined.</td>
-                </tr>
-                <tr>
-                <td>missing</td>
-                <td>There is no card on a customer that is being charged.</td>
-                </tr>
-                
-                <tr>
-                <td>duplicate_transaction</td>
-                <td>A transaction with identical amount and credit card information was submitted very recently.</td>
-                </tr>
-                <tr>
-                <td>processing_error</td>
-                <td>An error occurred while processing the card.</td>
-                </tr>
-                </tbody></table>
+                <code class="method-response">
+<b>Error Message returned when attempting to create an Office without passing any parameters</b>
+{
+    "developerMessage": "The request was invalid. This typically will happen due to validation errors which are provided.",
+    "developerDocLink": "https://github.com/keithwoodlock/mifosx/wiki/HTTP-API-Error-codes",
+    "httpStatusCode": "400",
+    "defaultUserMessage": "Validation errors exist.",
+    "userMessageGlobalisationCode": "validation.msg.validation.errors.exist",
+    "errors": [
+        {
+        "developerMessage": "The parameter name cannot be blank.",
+        "defaultUserMessage": "The parameter name cannot be blank.",
+        "userMessageGlobalisationCode": "validation.msg.office.name.cannot.be.blank",
+        "parameterName": "name",
+        "value": null,
+        "args": []
+        },
+        {
+        "developerMessage": "The parameter openingDate cannot be blank.",
+        "defaultUserMessage": "The parameter openingDate cannot be blank.",
+        "userMessageGlobalisationCode": "validation.msg.office.openingDate.cannot.be.blank",
+        "parameterName": "openingDate",
+        "value": null,
+        "args": []
+        },
+        {
+        "developerMessage": "The parameter parentId cannot be blank.",
+        "defaultUserMessage": "The parameter parentId cannot be blank.",
+        "userMessageGlobalisationCode": "validation.msg.office.parentId.cannot.be.blank",
+        "parameterName": "parentId",
+        "value": null,
+        "args": []
+        }
+            ]
+}
+                </code>
             </div>
         </div>
     

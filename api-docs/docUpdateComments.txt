@@ -4,7 +4,7 @@ POSSIBLE CHANGES TO APP OR DOCUMENTATION
 list clients notes - noteType needs a 'text' DOING
 	createdOn & updatedOn values... do they need reformatting? DOING
 
-loan template - repaymentSchedule is null - I can't see it set in the app - used in preview schedule functionality maybe? - probably not used and will be deleted
+loan template - repaymentSchedule is null - I can't see it set in the app - used in preview schedule functionality maybe? - KW probably not used and will be deleted
 
 
 loan retrieve DOING
@@ -18,8 +18,8 @@ loan retrieve DOING
        loanRepayments
 
 
-Loan Transitions ... approve etc - possible done
-    if  "eventLocalDate" parameter added with string date then instead of parameter not support msg do get jackson conversion exception.
+Loan Transitions ... approve etc - possible done CHECK AFTER
+    if  "eventLocalDate" parameter added with string date then instead of parameter not support msg do get jackson conversion exception. - KW might to jackson conversion exception to json.
     approve loan (already closed) with approval date before submitted date
     The server encountered an internal error () that prevented it from fulfilling this request.</u></p><p><b>exception</b> <pre>org.mifosng.platform.loan.domain.InvalidLoanTimelineDate: The     date    of when loan is approved cannot be before its submittal date.
 
@@ -41,7 +41,7 @@ Loan Transactions (repay and waive - and maybe reversal - but not disbursement) 
     "principal" : null,   "interest" : null, total, "totalWaived" : null,   "overpaid" : null, and the offset - are nulls ever put in? DOING
     adjust:
 
-    when adjusting a disbursal - The server encountered an internal error () that prevented it from fulfilling this request.</u></p><p><b>exception</b> <pre>java.lang.IllegalArgumentException:         Only repayment and waiver transactions can be adjusted. DONE
+    when adjusting a disbursal - The server encountered an internal error () that prevented it from fulfilling this request.</u></p><p><b>exception</b> <pre>java.lang.IllegalArgumentException:         Only repayment and waiver transactions can be adjusted. DOING
     on create and adjust, app returns clientId can it be transaction id or loanId?
 
 
@@ -55,8 +55,7 @@ list of loan transactions not available (except in summary - presume repayments 
 
 
 DOCUMENTATION REMAINING
-
-Just Errors section to do in the Overview section
+maybe PlatformDomainRule should be in 400 rather than 403
 
 
 describe waiver CHECK RULES AFTER
@@ -80,4 +79,6 @@ details if defaults from loan product are acceptable, they can be
 inherited from loan product. KW DOING - CHECK AFTER
 
 ?DOMAIN NAME 
+
+
 
