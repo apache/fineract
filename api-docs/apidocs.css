@@ -124,8 +124,8 @@ body {
     left: 0; right: 0; top: 0;
     padding-left: 200px;
     background: #eee;
-    background: -webkit-gradient(linear, left top, left bottom, from(#f8f8f8), to(#dadada));
-    background: -moz-linear-gradient(top, #f8f8f8, #dadada);
+    background: -webkit-gradient(linear, left top, left bottom, from(#6eb4db), to(#dadada));
+    background: -moz-linear-gradient(top, #6eb4db, #dadada);
     border-top: 3px solid black;
     border-bottom: 1px solid #888;
     -webkit-box-shadow: 0 3px 5px rgba(0,0,0,0.1);
@@ -292,8 +292,8 @@ body {
 .flybar-nav:hover .flybar-button,
 .flybar-nav.active .flybar-button {
   background: #eee;
-  background: -webkit-gradient(linear, left top, left bottom, from(#eee), to(#f8f8f8));
-  background: -moz-linear-gradient(top, #eee, #f8f8f8);
+  background: -webkit-gradient(linear, left top, left bottom, from(#eee), to(#6eb4db));
+  background: -moz-linear-gradient(top, #eee, #6eb4db);
   border-left: 1px solid rgb(187, 187, 187);
   border-right: 1px solid rgb(187, 187, 187);
 }
@@ -604,8 +604,8 @@ strong { font-weight: bold; }
 
     border-top: 1px solid #ccc;
     background: #eee;
-    background: -webkit-gradient(linear, left top, left bottom, from(#f8f8f8), to(#dadada));
-    background: -moz-linear-gradient(top, #f8f8f8, #dadada);
+    background: -webkit-gradient(linear, left top, left bottom, from(#6eb4db), to(#dadada));
+    background: -moz-linear-gradient(top, #6eb4db, #dadada);
 
     width: 100%;
     opacity: 0.95;
