@@ -4,7 +4,7 @@ POSSIBLE CHANGES TO APP OR DOCUMENTATION
 list clients notes - noteType needs a 'text' DOING
 	createdOn & updatedOn values... do they need reformatting? DOING
 
-loan template - repaymentSchedule is null - I can't see it set in the app - used in preview schedule functionality maybe?
+loan template - repaymentSchedule is null - I can't see it set in the app - used in preview schedule functionality maybe? - probably not used and will be deleted
 
 
 loan retrieve DOING
@@ -18,7 +18,7 @@ loan retrieve DOING
        loanRepayments
 
 
-Loan Transitions ... approve etc
+Loan Transitions ... approve etc - possible done
     if  "eventLocalDate" parameter added with string date then instead of parameter not support msg do get jackson conversion exception.
     approve loan (already closed) with approval date before submitted date
     The server encountered an internal error () that prevented it from fulfilling this request.</u></p><p><b>exception</b> <pre>org.mifosng.platform.loan.domain.InvalidLoanTimelineDate: The     date    of when loan is approved cannot be before its submittal date.
@@ -30,20 +30,18 @@ Loan Transitions ... approve etc
    Column 'loan_status_id' cannot be null; SQL [n/a]; constraint [null]; nested exception is org.hibernate.exception.ConstraintViolationException: Column 'loan_status_id' cannot be null
 
 
-   sometimes clientId returned... always loanId OK?
+   sometimes clientId returned... always loanId OK? DOING
 
 
 Loan Transactions (repay and waive - and maybe reversal - but not disbursement) general talk needed as retrieve could work for any txn?
     transaction type... UNKNOWN(0), DISBURSEMENT(1), REPAYMENT(2), REVERSAL(3), WAIVED(4);
     Create - (command has string and proper value fields... so assume its like eventDate above)
 
-    Template - does waiver amount default to 'rest of loan' cos it looked like it missed out on other waivers. didn't test
-	repayment amount matches current installment outstanding amount w/o taking waivers into account.
-    check descriptions - couldn't test because of invalid locale
-    retrieve: display transaction type value?
-    "principal" : null,   "interest" : null, total, "totalWaived" : null,   "overpaid" : null, and the offset - are nulls ever put in?
+    retrieve: display transaction type value?  DOING
+    "principal" : null,   "interest" : null, total, "totalWaived" : null,   "overpaid" : null, and the offset - are nulls ever put in? DOING
     adjust:
-    when adjusting a disbursal - The server encountered an internal error () that prevented it from fulfilling this request.</u></p><p><b>exception</b> <pre>java.lang.IllegalArgumentException:         Only repayment and waiver transactions can be adjusted.
+
+    when adjusting a disbursal - The server encountered an internal error () that prevented it from fulfilling this request.</u></p><p><b>exception</b> <pre>java.lang.IllegalArgumentException:         Only repayment and waiver transactions can be adjusted. DONE
     on create and adjust, app returns clientId can it be transaction id or loanId?
 
 
@@ -66,4 +64,24 @@ bit of loan product/loan
 
 repayment/waiver - describe waiver
 why fields "totalWaived", "overpaid"
+
+
+take aout /v1 from resource name.
+
+maxJoinedOnOffsetFromToday
+
+    - create a client example could show second example with the
+field clientOrBusinessName being used instead of firstname, lastname,
+no mention of it.
+    - mention if optional externalId is provided, it must be unqiue?
+    - TODO - check update of client with 'clientOrBusinessName' with
+a first name/last name results in error
+
+ - Loans
+     - digitsAfterDecimal and currencyCode should NOT be sent during
+creation - they should be inherited from the product. Likewise for
+update.
+     - Would be better if it was possible to not pass any of these
+details if defaults from loan product are acceptable, they can be
+inherited from loan product.
 
