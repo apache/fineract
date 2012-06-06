@@ -10,7 +10,7 @@ public class NoteData {
 	private Long clientId;
 	private Long loanId;
 	private Long loanTransactionId;
-	private Integer noteTypeId;
+	private EnumOptionData noteType;
 	
 	private String note;
 	
@@ -26,14 +26,14 @@ public class NoteData {
 	}
 
 	public NoteData(Long id, Long clientId, Long loanId,
-			Long transactionId, Integer noteTypeId, String note, 
+			Long transactionId, EnumOptionData noteType, String note, 
 			DateTime createdDate, Long createdById, String createdByUsername, 
 			DateTime lastModifiedDate, Long lastModifiedById, String updatedByUsername) {
 		this.id = id;
 		this.clientId = clientId;
 		this.loanId = loanId;
 		this.loanTransactionId = transactionId;
-		this.noteTypeId = noteTypeId;
+		this.noteType = noteType;
 		this.note = note;
 		this.createdOn = createdDate;
 		this.createdById = createdById;
@@ -131,11 +131,11 @@ public class NoteData {
 		this.updatedOn = updatedOn;
 	}
 
-	public Integer getNoteTypeId() {
-		return noteTypeId;
+	public EnumOptionData getNoteType() {
+		return noteType;
 	}
 
-	public void setNoteTypeId(Integer noteTypeId) {
-		this.noteTypeId = noteTypeId;
+	public void setNoteType(EnumOptionData noteType) {
+		this.noteType = noteType;
 	}
 }

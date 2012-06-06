@@ -278,13 +278,13 @@
 			<div>
 				<div class="notespacer">
 					<span class="ui-icon ui-icon-note" style="float: left; margin-right: 5px;"></span>
-					{{#if noteTypeId === 100}}
+					{{#if noteType.id === 100}}
 					<span><spring:message code="widget.notes.label.client.note"/></span>
 					{{/if}}
-					{{#if noteTypeId === 200}}
+					{{#if noteType.id === 200}}
 					<span><spring:message code="widget.notes.label.loan.note"/></span>
 					{{/if}}
-					{{#if noteTypeId === 300}}
+					{{#if noteType.id === 300}}
 					<span><spring:message code="widget.notes.label.loan.transaction.note"/></span>
 					{{/if}}
 					<span><a href="#" class="editclientnote" id="editclientnotelink{{=id}}"><spring:message code="link.edit"/></a></span>
@@ -607,7 +607,7 @@
 
 		<div class="row">
 			<span class="longrowlabel"><spring:message code="label.client.account.loan.term"/></span>
-			<span class="rowvalue">{{=loanTermInMonths}} <spring:message code="label.months"/> / ({{=loanTermInDays}} <spring:message code="label.days"/>)</span>
+			<span class="rowvalue">{{=expectedLoanTermInMonths}} <spring:message code="label.months"/> / ({{=expectedLoanTermInDays}} <spring:message code="label.days"/>)</span>
 		</div>
 
 		{{#if closedOnDate !== null}}

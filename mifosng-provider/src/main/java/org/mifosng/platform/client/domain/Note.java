@@ -44,18 +44,23 @@ public class Note extends AbstractAuditableCustom<AppUser, Long> {
     private Integer       noteTypeId;
     
     public enum NoteType {
-        CLIENT(100), LOAN(200), LOAN_TRANSACTION(300);
+        CLIENT(100, "noteType.client"), LOAN(200, "noteType.loan"), LOAN_TRANSACTION(300, "noteType.loan.transaction");
 
-        private int value;
+        private Integer value;
+        private String code;
 
-        NoteType(int value) { this.value = value; }    
+        NoteType(final Integer value, final String code) { this.value = value; this.code = code; }    
 
-        public int getValue() { return value; }
+        public Integer getValue() { return value; }
 
-        public static NoteType parse(int id) {
+        public String getCode() {
+			return code;
+		}
+
+		public static NoteType parse(Integer id) {
         	NoteType right = null; // Default
             for (NoteType item : NoteType.values()) {
-                if (item.getValue()==id) {
+                if (item.getValue().intValue() == id.intValue()) {
                     right = item;
                     break;
                 }

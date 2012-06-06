@@ -15,9 +15,11 @@ import org.mifosng.platform.api.data.AppUserData;
 import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.ClientLoanAccountSummaryCollectionData;
 import org.mifosng.platform.api.data.ClientLoanAccountSummaryData;
+import org.mifosng.platform.api.data.EnumOptionData;
 import org.mifosng.platform.api.data.NoteData;
 import org.mifosng.platform.api.data.OfficeData;
 import org.mifosng.platform.api.data.OfficeLookup;
+import org.mifosng.platform.client.domain.NoteEnumerations;
 import org.mifosng.platform.exceptions.ClientNotFoundException;
 import org.mifosng.platform.exceptions.NoteNotFoundException;
 import org.mifosng.platform.infrastructure.JdbcSupport;
@@ -306,6 +308,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 			Long loanId = JdbcSupport.getLong(rs, "loanId");
 			Long transactionId = JdbcSupport.getLong(rs, "transactionId");
 			Integer noteTypeId = JdbcSupport.getInteger(rs, "noteTypeEnum");
+			EnumOptionData noteType = NoteEnumerations.noteType(noteTypeId);
 			String note = rs.getString("note");
 
 			DateTime createdDate = JdbcSupport.getDateTime(rs, "createdDate");
@@ -317,7 +320,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 			String updatedByUsername = findUserById(createdById, allUsers);
 
 			return new NoteData(id, clientId, loanId, transactionId,
-					noteTypeId, note, createdDate, createdById,
+					noteType, note, createdDate, createdById,
 					createdByUsername, lastModifiedDate, lastModifiedById,
 					updatedByUsername);
 		}

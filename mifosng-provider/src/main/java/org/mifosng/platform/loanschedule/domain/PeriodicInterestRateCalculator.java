@@ -60,6 +60,8 @@ public class PeriodicInterestRateCalculator {
 		case EQUAL_INSTALLMENTS:
 			principalDue = totalDuePerInstallment.minus(interestForInstallment);
 			break;
+		case INVALID:
+			break;
 		}
 		
 		return principalDue;
