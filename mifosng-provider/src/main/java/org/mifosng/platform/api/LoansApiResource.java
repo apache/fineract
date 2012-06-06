@@ -96,9 +96,10 @@ public class LoansApiResource {
 				.retrieveLoanAccountDetails(loanId);
 
 		String selectedFields = "";
+		String associatedFields = "summary,repaymentSchedule,loanRepayments,permissions,convenienceData";
 		return this.jsonFormattingService.convertRequest(loanAccount,
 				loanFilterName, loanAllowedFieldList, selectedFields,
-				uriInfo.getQueryParameters());
+				associatedFields, uriInfo.getQueryParameters());
 	}
 
 	@POST
