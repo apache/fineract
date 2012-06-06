@@ -26,6 +26,6 @@ public class PlatformDataIntegrityExceptionMapper implements ExceptionMapper<Pla
 		ApiGlobalErrorResponse dataIntegrityError = ApiGlobalErrorResponse.dataIntegrityError(exception.getGlobalisationMessageCode(), exception.getDefaultUserMessage(), 
 																									exception.getParameterName(), exception.getDefaultUserMessageArgs());
 		
-		return Response.status(Status.BAD_REQUEST).entity(dataIntegrityError).build();
+		return Response.status(Status.FORBIDDEN).entity(dataIntegrityError).build();
 	}
 }

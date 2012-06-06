@@ -6,13 +6,13 @@ public class DerivedLoanData {
 
 	private LoanRepaymentScheduleData repaymentSchedule;
 	private LoanAccountSummaryData summary;
-	private List<LoanRepaymentData> loanRepayments;
+	private List<LoanTransactionData> loanRepayments;
 
 	public DerivedLoanData() {
 		//
 	}
 
-	public DerivedLoanData(LoanRepaymentScheduleData repaymentScheduleData, LoanAccountSummaryData summaryData, List<LoanRepaymentData> loanRepayments) {
+	public DerivedLoanData(LoanRepaymentScheduleData repaymentScheduleData, LoanAccountSummaryData summaryData, List<LoanTransactionData> loanRepayments) {
 		this.repaymentSchedule = repaymentScheduleData;
 		this.summary = summaryData;
 		this.loanRepayments = loanRepayments;
@@ -34,11 +34,11 @@ public class DerivedLoanData {
 		this.summary = summary;
 	}
 
-	public List<LoanRepaymentData> getLoanRepayments() {
+	public List<LoanTransactionData> getLoanRepayments() {
 		return loanRepayments;
 	}
 
-	public void setLoanRepayments(List<LoanRepaymentData> loanRepayments) {
+	public void setLoanRepayments(List<LoanTransactionData> loanRepayments) {
 		this.loanRepayments = loanRepayments;
 	}
 }

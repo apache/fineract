@@ -7,13 +7,15 @@ import java.util.List;
 import org.joda.time.LocalDate;
 import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.DerivedLoanData;
+import org.mifosng.platform.api.data.EnumOptionData;
 import org.mifosng.platform.api.data.LoanAccountSummaryData;
-import org.mifosng.platform.api.data.LoanRepaymentData;
+import org.mifosng.platform.api.data.LoanTransactionData;
 import org.mifosng.platform.api.data.LoanRepaymentPeriodData;
 import org.mifosng.platform.api.data.LoanRepaymentScheduleData;
 import org.mifosng.platform.api.data.MoneyData;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.currency.domain.Money;
+import org.mifosng.platform.loanproduct.service.LoanEnumerations;
 
 // FIXME - The derived details of the loan schedule are now updated on the fly when someone does a transaction against a loan. So this is not fully needed.
 //       - we still use this to figure out how much of a given transactions amount was principal versus interest but might not need this and we should probably
@@ -28,7 +30,7 @@ public class DerivedLoanDataProcessor {
 		List<LoanRepaymentPeriodData> loanRepaymentPeriods = repaymentScheduleDetails.getPeriods();
 		 
 		// break up payments based on principal and interest
-		List<LoanRepaymentData> loanRepayments = new ArrayList<LoanRepaymentData>();
+		List<LoanTransactionData> loanRepayments = new ArrayList<LoanTransactionData>();
 		int repaymentScheduleIndex = 0;
 		for (LoanTransaction transaction : loanTransactions) {
 			if (transaction.isRepayment() || transaction.isWaiver()) {
@@ -40,7 +42,7 @@ public class DerivedLoanDataProcessor {
 							.get(repaymentScheduleIndex);
 
 					if (transaction.isRepayment()) {
-						LoanRepaymentData repaymentData = processLoanRepayment(
+						LoanTransactionData repaymentData = processLoanRepayment(
 								transaction, scheduledRepaymentPeriod,
 								repaymentScheduleIndex, loanRepaymentPeriods,
 								arrearsTolerance, currencyDetail);
@@ -48,7 +50,7 @@ public class DerivedLoanDataProcessor {
 					}
 
 					if (transaction.isWaiver()) {
-						LoanRepaymentData repaymentData = processWaiver(transaction, scheduledRepaymentPeriod, currencyDetail);
+						LoanTransactionData repaymentData = processWaiver(transaction, scheduledRepaymentPeriod, currencyDetail);
 						loanRepayments.add(repaymentData);
 					}
 
@@ -73,7 +75,7 @@ public class DerivedLoanDataProcessor {
 		return new DerivedLoanData(processRepaymentScheduleData, summaryData, loanRepayments);
 	}
 	
-	private LoanRepaymentData processWaiver(LoanTransaction transaction,
+	private LoanTransactionData processWaiver(LoanTransaction transaction,
 			LoanRepaymentPeriodData scheduledRepaymentPeriod, CurrencyData currencyData) {
 		
 		MonetaryCurrency currency = new MonetaryCurrency(currencyData.getCode(), currencyData.getDecimalPlaces());
@@ -125,7 +127,8 @@ public class DerivedLoanDataProcessor {
 		Money remainingOutstanding = totalOutstanding.minus(moneyFrom(totalWaived));
 		scheduledRepaymentPeriod.setTotalOutstanding(moneyDataFrom(currencyData, remainingOutstanding));
 		
-		LoanRepaymentData loanRepaymentData = new LoanRepaymentData(transaction.getId(), transaction.getTransactionDate(), moneyDataFrom(currencyData, principalWaived),
+		EnumOptionData transactionType = LoanEnumerations.transactionType(LoanTransactionType.WAIVED);
+		LoanTransactionData loanRepaymentData = new LoanTransactionData(transaction.getId(), transactionType, transaction.getTransactionDate(), moneyDataFrom(currencyData, principalWaived),
 				moneyDataFrom(currencyData, interestWaived), totalWaived, zero);
 		loanRepaymentData.setTotalWaived(totalWaived);
 		return loanRepaymentData;
@@ -270,7 +273,7 @@ public class DerivedLoanDataProcessor {
 	/**
 	 * TODO - pays off interest first then principal so should make this configurable when generating 'derived view of loan account'
 	 */
-	private LoanRepaymentData processLoanRepayment(LoanTransaction repayment,
+	private LoanTransactionData processLoanRepayment(LoanTransaction repayment,
 			LoanRepaymentPeriodData scheduledRepayment, 
 			int repaymentScheduleIndex, 
 			List<LoanRepaymentPeriodData> repaymentSchedulePeriods, 
@@ -443,7 +446,8 @@ public class DerivedLoanDataProcessor {
 		
 		MoneyData totalPaid = moneyDataFrom(currencyDetail, totalPrincipalComponent.plus(totalInterestComponent));
 		
-		LoanRepaymentData loanRepaymentData = new LoanRepaymentData(repayment.getId(), repayment.getTransactionDate(), cumulativePrincipalPaid, cumulativeInterestPaid, totalPaid, overpaid);
+		EnumOptionData transactionType = LoanEnumerations.transactionType(LoanTransactionType.REPAYMENT);
+		LoanTransactionData loanRepaymentData = new LoanTransactionData(repayment.getId(), transactionType, repayment.getTransactionDate(), cumulativePrincipalPaid, cumulativeInterestPaid, totalPaid, overpaid);
 		return loanRepaymentData;
 	}
 	

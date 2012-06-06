@@ -12,7 +12,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.DerivedLoanData;
-import org.mifosng.platform.api.data.LoanRepaymentData;
+import org.mifosng.platform.api.data.LoanTransactionData;
 import org.mifosng.platform.api.data.LoanRepaymentPeriodData;
 import org.mifosng.platform.api.data.LoanRepaymentScheduleData;
 import org.mifosng.platform.api.data.MoneyData;
@@ -81,11 +81,11 @@ public class DerivedLoanDataProcessorTest {
 		assertThat(periodData.getInterestOutstanding(), is(expectedInterestOutstanding));
 		
 		// assert repayments are ok
-		List<LoanRepaymentData> loanRepayments = derivedData.getLoanRepayments();
+		List<LoanTransactionData> loanRepayments = derivedData.getLoanRepayments();
 		assertThat(loanRepayments, is(notNullValue()));
 		assertThat(loanRepayments.size(), is(1));
 		
-		LoanRepaymentData firstRepayment = loanRepayments.get(0);
+		LoanTransactionData firstRepayment = loanRepayments.get(0);
 		assertThat(firstRepayment.getPrincipal(), is(expectedPrincipalPaid));
 		assertThat(firstRepayment.getInterest(), is(expectedInterestPaid));
 		assertThat(firstRepayment.getTotal(), is(expectedTotal));
@@ -147,11 +147,11 @@ public class DerivedLoanDataProcessorTest {
 		assertThat(periodData.getInterestOutstanding(), is(expectedInterestOutstanding));
 		
 		// assert repayments are ok
-		List<LoanRepaymentData> loanRepayments = derivedData.getLoanRepayments();
+		List<LoanTransactionData> loanRepayments = derivedData.getLoanRepayments();
 		assertThat(loanRepayments, is(notNullValue()));
 		assertThat(loanRepayments.size(), is(1));
 		
-		LoanRepaymentData firstRepayment = loanRepayments.get(0);
+		LoanTransactionData firstRepayment = loanRepayments.get(0);
 		assertThat(firstRepayment.getPrincipal(), is(expectedPrincipalPaid));
 		assertThat(firstRepayment.getInterest(), is(expectedInterestPaid));
 		assertThat(firstRepayment.getTotal(), is(expectedTotal));
@@ -210,11 +210,11 @@ public class DerivedLoanDataProcessorTest {
 		assertThat(periodData.getInterestOutstanding(), is(expectedInterestOutstanding));
 		
 		// assert repayments are ok
-		List<LoanRepaymentData> loanRepayments = derivedData.getLoanRepayments();
+		List<LoanTransactionData> loanRepayments = derivedData.getLoanRepayments();
 		assertThat(loanRepayments, is(notNullValue()));
 		assertThat(loanRepayments.size(), is(1));
 		
-		LoanRepaymentData firstRepayment = loanRepayments.get(0);
+		LoanTransactionData firstRepayment = loanRepayments.get(0);
 		assertThat(firstRepayment.getPrincipal(), is(expectedPrincipalPaid));
 		assertThat(firstRepayment.getInterest(), is(expectedInterestPaid));
 		assertThat(firstRepayment.getTotal(), is(expectedTotal));
@@ -273,11 +273,11 @@ public class DerivedLoanDataProcessorTest {
 		assertThat(periodData.getInterestOutstanding(), is(expectedInterestOutstanding));
 		
 		// assert repayments are ok
-		List<LoanRepaymentData> loanRepayments = derivedData.getLoanRepayments();
+		List<LoanTransactionData> loanRepayments = derivedData.getLoanRepayments();
 		assertThat(loanRepayments, is(notNullValue()));
 		assertThat(loanRepayments.size(), is(1));
 		
-		LoanRepaymentData firstRepayment = loanRepayments.get(0);
+		LoanTransactionData firstRepayment = loanRepayments.get(0);
 		assertThat(firstRepayment.getPrincipal(), is(expectedPrincipalPaid));
 		assertThat(firstRepayment.getInterest(), is(expectedInterestPaid));
 		assertThat(firstRepayment.getTotal(), is(expectedTotal));
@@ -359,11 +359,11 @@ public class DerivedLoanDataProcessorTest {
 		assertThat(secondPeriod.getInterestOutstanding(), is(expectedInterestOutstanding));
 		
 		// assert repayments are ok
-		List<LoanRepaymentData> loanRepayments = derivedData.getLoanRepayments();
+		List<LoanTransactionData> loanRepayments = derivedData.getLoanRepayments();
 		assertThat(loanRepayments, is(notNullValue()));
 		assertThat(loanRepayments.size(), is(1));
 		
-		LoanRepaymentData firstRepayment = loanRepayments.get(0);
+		LoanTransactionData firstRepayment = loanRepayments.get(0);
 		assertThat(firstRepayment.getPrincipal(), is(moneyDataFrom(new MoneyBuilder().with(cfaCurrency).with("1180").build())));
 		assertThat(firstRepayment.getInterest(), is(moneyDataFrom(new MoneyBuilder().with(cfaCurrency).with("20").build())));
 		assertThat(firstRepayment.getTotal(), is(moneyDataFrom(new MoneyBuilder().with(cfaCurrency).with("1200").build())));

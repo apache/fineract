@@ -140,6 +140,14 @@ public class LoanTransaction extends AbstractAuditableCustom<AppUser, Long> {
 	public boolean isIdentifiedBy(Long identifier) {
 		return this.getId().equals(identifier);
 	}
+	
+	public boolean isBelongingToLoanOf(Loan check) {
+		return this.loan.getId().equals(check.getId());
+	}
+	
+	public boolean isNotBelongingToLoanOf(Loan check) {
+		return !isBelongingToLoanOf(check);
+	}
 
 	public void contra() {
 		this.contra = LoanTransaction.contra(this);

@@ -152,7 +152,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 			this.noteRepository.save(note);
 		}
 
-		return new EntityIdentifier(loan.getClient().getId());
+		return new EntityIdentifier(loan.getId());
 	}
 
 	@Transactional
@@ -175,7 +175,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 			this.noteRepository.save(note);
 		}
 
-		return new EntityIdentifier(loan.getClient().getId());
+		return new EntityIdentifier(loan.getId());
 	}
 
 	@Transactional
@@ -206,7 +206,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 			this.noteRepository.save(note);
 		}
 
-		return new EntityIdentifier(loan.getClient().getId());
+		return new EntityIdentifier(loan.getId());
 	}
 
 	@Transactional
@@ -237,7 +237,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 			this.noteRepository.save(note);
 		}
 		
-		return new EntityIdentifier(loan.getClient().getId());
+		return new EntityIdentifier(loan.getId());
 	}
 	
 	@Transactional
@@ -324,7 +324,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 			this.noteRepository.save(note);
 		}
 		
-		return new EntityIdentifier(loan.getClient().getId());
+		return new EntityIdentifier(loan.getId());
 	}
 
 	@Transactional
@@ -352,7 +352,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 			this.noteRepository.save(note);
 		}
 		
-		return new EntityIdentifier(loan.getClient().getId());
+		return new EntityIdentifier(loan.getId());
 	}
 	
 	@Transactional
@@ -389,7 +389,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 			this.noteRepository.save(note);
 		}
 
-		return new EntityIdentifier(loan.getClient().getId());
+		return new EntityIdentifier(loan.getId());
 	}
 
 	@Transactional
@@ -435,7 +435,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 			this.noteRepository.save(note);
 		}
 
-		return new EntityIdentifier(loan.getClient().getId());
+		return new EntityIdentifier(loan.getId());
 	}
 	
 	@Transactional
@@ -470,6 +470,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 			this.noteRepository.save(note);
 		}
 
-		return new EntityIdentifier(loan.getClient().getId());
+		return new EntityIdentifier(loan.getId());
 	}
 }

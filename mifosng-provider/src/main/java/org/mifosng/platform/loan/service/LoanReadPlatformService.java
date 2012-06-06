@@ -1,7 +1,7 @@
 package org.mifosng.platform.loan.service;
 
 import org.mifosng.platform.api.data.LoanAccountData;
-import org.mifosng.platform.api.data.LoanRepaymentData;
+import org.mifosng.platform.api.data.LoanTransactionData;
 import org.mifosng.platform.api.data.NewLoanData;
 
 public interface LoanReadPlatformService {
@@ -10,9 +10,9 @@ public interface LoanReadPlatformService {
 	
 	NewLoanData retrieveClientAndProductDetails(Long clientId, Long productId);
 	
-	LoanRepaymentData retrieveNewLoanRepaymentDetails(Long loanId);
+	LoanTransactionData retrieveNewLoanRepaymentDetails(Long loanId);
 
-	LoanRepaymentData retrieveNewLoanWaiverDetails(Long loanId);
+	LoanTransactionData retrieveNewLoanWaiverDetails(Long loanId);
 
-	LoanRepaymentData retrieveLoanRepaymentDetails(Long loanId, Long transactionId);
+	LoanTransactionData retrieveLoanTransactionDetails(Long loanId, Long transactionId);
 }

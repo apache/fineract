@@ -99,7 +99,7 @@ public class ApiGlobalErrorResponse {
 	public static ApiGlobalErrorResponse dataIntegrityError(final String globalisationMessageCode, final String defaultUserMessage, final String parameterName, final Object... defaultUserMessageArgs) {
 		
 		ApiGlobalErrorResponse globalErrorResponse = new ApiGlobalErrorResponse();
-		globalErrorResponse.setHttpStatusCode("400");
+		globalErrorResponse.setHttpStatusCode("403");
 		globalErrorResponse.setDeveloperMessage("The request caused a data integrity issue to be fired by the database.");
 		globalErrorResponse.setDeveloperDocLink("https://github.com/keithwoodlock/mifosx/wiki/HTTP-API-Error-codes");
 		globalErrorResponse.setUserMessageGlobalisationCode(globalisationMessageCode);

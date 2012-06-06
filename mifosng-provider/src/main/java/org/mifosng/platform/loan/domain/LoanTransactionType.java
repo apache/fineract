@@ -1,22 +1,28 @@
 package org.mifosng.platform.loan.domain;
 
 public enum LoanTransactionType {
-	UNKNOWN(0), DISBURSEMENT(1), REPAYMENT(2), REVERSAL(3), WAIVED(4);
+	INVALID(0, "loanTransactionType.invalid"), DISBURSEMENT(1, "loanTransactionType.disbursement"), REPAYMENT(2, "loanTransactionType.repayment"), REVERSAL(3, "loanTransactionType.reversal"), WAIVED(4, "loanTransactionType.waiver");
 
     private final Integer value;
+    private final String code;
 
-    private LoanTransactionType(final Integer value) {
+    private LoanTransactionType(final Integer value, final String code) {
         this.value = value;
+		this.code = code;
     }
 
     public Integer getValue() {
         return this.value;
     }
+    
+	public String getCode() {
+		return code;
+	}
 
 	public static LoanTransactionType fromInt(final Integer transactionType) {
 
 		if (transactionType == null) {
-			return LoanTransactionType.UNKNOWN;
+			return LoanTransactionType.INVALID;
 		}
 
 		LoanTransactionType loanTransactionType = null;
@@ -34,7 +40,7 @@ public enum LoanTransactionType {
 			loanTransactionType = LoanTransactionType.WAIVED;
 			break;
 		default:
-			loanTransactionType = LoanTransactionType.UNKNOWN;
+			loanTransactionType = LoanTransactionType.INVALID;
 			break;
 		}
 		return loanTransactionType;

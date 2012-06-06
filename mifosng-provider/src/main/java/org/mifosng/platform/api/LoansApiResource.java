@@ -26,7 +26,7 @@ import org.mifosng.platform.api.commands.SubmitLoanApplicationCommand;
 import org.mifosng.platform.api.commands.UndoStateTransitionCommand;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.LoanAccountData;
-import org.mifosng.platform.api.data.LoanRepaymentData;
+import org.mifosng.platform.api.data.LoanTransactionData;
 import org.mifosng.platform.api.data.LoanSchedule;
 import org.mifosng.platform.api.data.NewLoanData;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
@@ -49,7 +49,7 @@ public class LoansApiResource {
 	private String loanFilterName = "loanFilter";
 	private String loanAllowedFieldList = "";
 	private String loanRepaymentFilterName = "loanRepaymentFilter";
-	private String loanRepaymentDefaultFieldList = "date,total";
+	private String loanRepaymentDefaultFieldList = "transactionType,date,total";
 	private String loanRepaymentAllowedFieldList = "";
 
 	@Autowired
@@ -280,13 +280,13 @@ public class LoansApiResource {
 		String json = "";
 		String selectedFields = loanRepaymentDefaultFieldList;
 		if (is(commandParam, "repayment")) {
-			LoanRepaymentData loanRepaymentData = this.loanReadPlatformService
+			LoanTransactionData loanRepaymentData = this.loanReadPlatformService
 					.retrieveNewLoanRepaymentDetails(loanId);
 			json = this.jsonFormattingService.convertRequest(loanRepaymentData,
 					loanRepaymentFilterName, loanRepaymentAllowedFieldList, selectedFields,
 					uriInfo.getQueryParameters());
 		} else if (is(commandParam, "waiver")) {
-			LoanRepaymentData loanWaiverData = this.loanReadPlatformService
+			LoanTransactionData loanWaiverData = this.loanReadPlatformService
 					.retrieveNewLoanWaiverDetails(loanId);
 			json = this.jsonFormattingService.convertRequest(loanWaiverData,
 					loanRepaymentFilterName, loanRepaymentAllowedFieldList, selectedFields,
@@ -304,15 +304,15 @@ public class LoansApiResource {
 	@Path("{loanId}/transactions/{transactionId}")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON})
-	public String retrieveRepaymentDetails(
+	public String retrieveTransaction(
 			@PathParam("loanId") final Long loanId,
 			@PathParam("transactionId") final Long transactionId,
 			@Context UriInfo uriInfo) {
 
-		LoanRepaymentData loanRepaymentData = this.loanReadPlatformService
-				.retrieveLoanRepaymentDetails(loanId, transactionId);
+		LoanTransactionData loanRepaymentData = this.loanReadPlatformService
+				.retrieveLoanTransactionDetails(loanId, transactionId);
 
-		String selectedFields = "";
+		String selectedFields = loanRepaymentDefaultFieldList;
 		return this.jsonFormattingService.convertRequest(loanRepaymentData,
 				loanRepaymentFilterName, loanRepaymentAllowedFieldList, selectedFields,
 				uriInfo.getQueryParameters());

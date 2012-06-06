@@ -41,7 +41,7 @@ public class LoanAccountData {
 	
 	private LoanAccountSummaryData summary;
 	private LoanRepaymentScheduleData repaymentSchedule;
-	private List<LoanRepaymentData> loanRepayments;
+	private List<LoanTransactionData> loanRepayments;
 	
 	private LoanPermissionData permissions;
 	
@@ -55,7 +55,7 @@ public class LoanAccountData {
 	public LoanAccountData(LoanBasicDetailsData basicDetails,
 			LoanAccountSummaryData summary,
 			LoanRepaymentScheduleData repaymentSchedule,
-			List<LoanRepaymentData> loanRepayments, LoanPermissionData permissions) {
+			List<LoanTransactionData> loanRepayments, LoanPermissionData permissions) {
 		this.summary = summary;
 		this.repaymentSchedule = repaymentSchedule;
 		this.loanRepayments = loanRepayments;
@@ -130,11 +130,11 @@ public class LoanAccountData {
 		this.repaymentSchedule = repaymentSchedule;
 	}
 
-	public List<LoanRepaymentData> getLoanRepayments() {
+	public List<LoanTransactionData> getLoanRepayments() {
 		return loanRepayments;
 	}
 
-	public void setLoanRepayments(List<LoanRepaymentData> loanRepayments) {
+	public void setLoanRepayments(List<LoanTransactionData> loanRepayments) {
 		this.loanRepayments = loanRepayments;
 	}
 

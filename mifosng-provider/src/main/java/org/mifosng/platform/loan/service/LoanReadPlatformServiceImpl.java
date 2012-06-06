@@ -13,7 +13,7 @@ import org.mifosng.platform.api.data.DerivedLoanData;
 import org.mifosng.platform.api.data.LoanAccountData;
 import org.mifosng.platform.api.data.LoanProductData;
 import org.mifosng.platform.api.data.LoanProductLookup;
-import org.mifosng.platform.api.data.LoanRepaymentData;
+import org.mifosng.platform.api.data.LoanTransactionData;
 import org.mifosng.platform.api.data.MoneyData;
 import org.mifosng.platform.api.data.NewLoanData;
 import org.mifosng.platform.client.service.ClientReadPlatformService;
@@ -27,6 +27,8 @@ import org.mifosng.platform.loan.domain.Loan;
 import org.mifosng.platform.loan.domain.LoanRepository;
 import org.mifosng.platform.loan.domain.LoanTransaction;
 import org.mifosng.platform.loan.domain.LoanTransactionRepository;
+import org.mifosng.platform.loan.domain.LoanTransactionType;
+import org.mifosng.platform.loanproduct.service.LoanEnumerations;
 import org.mifosng.platform.loanproduct.service.LoanProductReadPlatformService;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.user.domain.AppUser;
@@ -137,7 +139,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 	}
 
 	@Override
-	public LoanRepaymentData retrieveNewLoanRepaymentDetails(Long loanId) {
+	public LoanTransactionData retrieveNewLoanRepaymentDetails(Long loanId) {
 
 		AppUser currentUser = context.authenticatedUser();
 
@@ -167,7 +169,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 		MoneyData possibleNextRepayment = MoneyData.of(currencyData,
 				possibleNextRepaymentAmount.getAmount());
 
-		LoanRepaymentData newRepaymentDetails = new LoanRepaymentData();
+		LoanTransactionData newRepaymentDetails = new LoanTransactionData();
+		newRepaymentDetails.setTransactionType(LoanEnumerations.transactionType(LoanTransactionType.REPAYMENT));
 		newRepaymentDetails.setDate(earliestUnpaidInstallmentDate);
 		newRepaymentDetails.setTotal(possibleNextRepayment);
 
@@ -175,7 +178,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 	}
 
 	@Override
-	public LoanRepaymentData retrieveNewLoanWaiverDetails(Long loanId) {
+	public LoanTransactionData retrieveNewLoanWaiverDetails(Long loanId) {
 
 		AppUser currentUser = context.authenticatedUser();
 
@@ -203,7 +206,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 		MoneyData totalOutstandingData = MoneyData.of(currencyData,
 				totalOutstanding.getAmount());
 
-		LoanRepaymentData newWaiverDetails = new LoanRepaymentData();
+		LoanTransactionData newWaiverDetails = new LoanTransactionData();
+		newWaiverDetails.setTransactionType(LoanEnumerations.transactionType(LoanTransactionType.WAIVED));
 		newWaiverDetails.setDate(new LocalDate());
 		newWaiverDetails.setTotal(totalOutstandingData);
 
@@ -211,7 +215,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 	}
 
 	@Override
-	public LoanRepaymentData retrieveLoanRepaymentDetails(Long loanId,
+	public LoanTransactionData retrieveLoanTransactionDetails(Long loanId,
 			Long transactionId) {
 
 		AppUser currentUser = context.authenticatedUser();
@@ -236,6 +240,10 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 		if (transaction == null) {
 			throw new LoanTransactionNotFoundException(transactionId);
 		}
+		
+		if (transaction.isNotBelongingToLoanOf(loan)) {
+			throw new LoanTransactionNotFoundException(transactionId, loanId);
+		}
 
 		CurrencyData currencyData = new CurrencyData(currency.getCode(),
 				currency.getName(), currency.getDecimalPlaces(),
@@ -243,7 +251,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 		MoneyData total = MoneyData.of(currencyData, transaction.getAmount());
 		LocalDate date = transaction.getTransactionDate();
 
-		LoanRepaymentData loanRepaymentData = new LoanRepaymentData();
+		LoanTransactionData loanRepaymentData = new LoanTransactionData();
+		loanRepaymentData.setTransactionType(LoanEnumerations.transactionType(transaction.getTypeOf()));
 		loanRepaymentData.setId(transactionId);
 		loanRepaymentData.setTotal(total);
 		loanRepaymentData.setDate(date);

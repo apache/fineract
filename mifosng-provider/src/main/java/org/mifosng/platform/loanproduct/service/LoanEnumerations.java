@@ -4,6 +4,7 @@ import org.mifosng.platform.api.data.EnumOptionData;
 import org.mifosng.platform.loan.domain.AmortizationMethod;
 import org.mifosng.platform.loan.domain.InterestCalculationPeriodMethod;
 import org.mifosng.platform.loan.domain.InterestMethod;
+import org.mifosng.platform.loan.domain.LoanTransactionType;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 
 public class LoanEnumerations {
@@ -87,7 +88,7 @@ public class LoanEnumerations {
 			optionData = new EnumOptionData(InterestMethod.DECLINING_BALANCE.getValue().longValue(), InterestMethod.DECLINING_BALANCE.getCode(), "Declining Balance");
 			break;
 		default:
-			optionData = new EnumOptionData(AmortizationMethod.INVALID.getValue().longValue(), AmortizationMethod.INVALID.getCode(), "Invalid");
+			optionData = new EnumOptionData(InterestMethod.INVALID.getValue().longValue(), InterestMethod.INVALID.getCode(), "Invalid");
 			break;
 		}
 		return optionData;
@@ -107,7 +108,33 @@ public class LoanEnumerations {
 			optionData = new EnumOptionData(InterestCalculationPeriodMethod.SAME_AS_REPAYMENT_PERIOD.getValue().longValue(), InterestCalculationPeriodMethod.SAME_AS_REPAYMENT_PERIOD.getCode(), "Same as repayment period");
 			break;
 		default:
-			optionData = new EnumOptionData(AmortizationMethod.INVALID.getValue().longValue(), AmortizationMethod.INVALID.getCode(), "Invalid");
+			optionData = new EnumOptionData(InterestCalculationPeriodMethod.INVALID.getValue().longValue(), InterestCalculationPeriodMethod.INVALID.getCode(), "Invalid");
+			break;
+		}
+		return optionData;
+	}
+	
+	public static EnumOptionData transactionType(Integer id) {
+		return transactionType(LoanTransactionType.fromInt(id));
+	}
+	
+	public static EnumOptionData transactionType(LoanTransactionType type) {
+		EnumOptionData optionData = null;
+		switch (type) {
+		case DISBURSEMENT:
+			optionData= new EnumOptionData(LoanTransactionType.DISBURSEMENT.getValue().longValue(), LoanTransactionType.DISBURSEMENT.getCode(), "Dibursement");
+			break;
+		case REPAYMENT:
+			optionData = new EnumOptionData(LoanTransactionType.REPAYMENT.getValue().longValue(), LoanTransactionType.REPAYMENT.getCode(), "Repayment");
+			break;
+		case REVERSAL:
+			optionData = new EnumOptionData(LoanTransactionType.REVERSAL.getValue().longValue(), LoanTransactionType.REVERSAL.getCode(), "Reversal");
+			break;
+		case WAIVED:
+			optionData = new EnumOptionData(LoanTransactionType.WAIVED.getValue().longValue(), LoanTransactionType.WAIVED.getCode(), "Waiver");
+			break;
+		default:
+			optionData = new EnumOptionData(LoanTransactionType.INVALID.getValue().longValue(), LoanTransactionType.INVALID.getCode(), "Invalid");
 			break;
 		}
 		return optionData;

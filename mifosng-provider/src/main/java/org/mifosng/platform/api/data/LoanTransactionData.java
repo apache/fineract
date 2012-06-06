@@ -4,9 +4,10 @@ import org.codehaus.jackson.map.annotate.JsonFilter;
 import org.joda.time.LocalDate;
 
 @JsonFilter("loanRepaymentFilter")
-public class LoanRepaymentData {
+public class LoanTransactionData {
 
 	private Long id;
+	private EnumOptionData transactionType;
 	private LocalDate date;
 	private MoneyData principal;
 	private MoneyData interest;
@@ -14,16 +15,17 @@ public class LoanRepaymentData {
 	private MoneyData totalWaived;
 	private MoneyData overpaid;
 
-	public LoanRepaymentData() {
+	public LoanTransactionData() {
 		//
 	}
 
-	public LoanRepaymentData(
-			Long id, final LocalDate date,
+	public LoanTransactionData(
+			Long id, EnumOptionData transactionType, final LocalDate date,
 			final MoneyData principal,
 			final MoneyData interest,
 			final MoneyData total, final MoneyData overpaid) {
         this.id = id;
+		this.transactionType = transactionType;
 		this.date = date;
 		this.principal = principal;
         this.interest = interest;
@@ -38,15 +40,19 @@ public class LoanRepaymentData {
 	public void setId(Long id) {
 		this.id = id;
 	}
+	
+	public EnumOptionData getTransactionType() {
+		return transactionType;
+	}
+
+	public void setTransactionType(EnumOptionData transactionType) {
+		this.transactionType = transactionType;
+	}
 
 	public LocalDate getDate() {
 		return date;
 	}
 	
-//	public int getTransactionOffsetFromToday() {
-//		return Days.daysBetween(new DateMidnight().toDateTime(), this.date.toDateMidnight().toDateTime()).getDays();
-//	}
-
 	public void setDate(LocalDate date) {
 		this.date = date;
 	}

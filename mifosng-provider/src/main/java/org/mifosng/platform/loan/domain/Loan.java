@@ -32,13 +32,14 @@ import org.mifosng.platform.api.data.LoanAccountData;
 import org.mifosng.platform.api.data.LoanAccountSummaryData;
 import org.mifosng.platform.api.data.LoanBasicDetailsData;
 import org.mifosng.platform.api.data.LoanPermissionData;
-import org.mifosng.platform.api.data.LoanRepaymentData;
 import org.mifosng.platform.api.data.LoanRepaymentScheduleData;
+import org.mifosng.platform.api.data.LoanTransactionData;
 import org.mifosng.platform.api.data.MoneyData;
 import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.exceptions.InvalidLoanStateTransitionException;
+import org.mifosng.platform.exceptions.InvalidLoanTransactionTypeException;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
 import org.mifosng.platform.loanproduct.service.LoanEnumerations;
 import org.mifosng.platform.organisation.domain.Organisation;
@@ -336,6 +337,17 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 			throw new InvalidLoanStateTransitionException("waive", "cannot.be.a.futre.date", errorMessage, loanTransactionDate);
 		}
 		
+		if (getTotalOutstanding().isGreaterThan(this.getInArrearsTolerance())) {
+			final String errorMessage = "Waiver is only allowed when the total outstanding amount left on loan (" + getTotalOutstanding() +") is less than thethe in arrears tolerance setting of " + getInArrearsTolerance().getAmount();
+			throw new InvalidLoanStateTransitionException("waive", "cannot.exceed.in.arrears.tolerance.setting", errorMessage, getTotalOutstanding(), getInArrearsTolerance());
+		}
+		
+		Money waived = Money.of(getCurrency(), loanTransaction.getAmount());		
+		if (waived.isGreaterThan(this.getInArrearsTolerance())) {
+			final String errorMessage = "The amount being waived cannot exceed the in arrears tolerance setting of " + getInArrearsTolerance().getAmount();
+			throw new InvalidLoanStateTransitionException("waive", "cannot.exceed.in.arrears.tolerance.setting", errorMessage, waived, getInArrearsTolerance());
+		}
+		
 		if (this.isRepaidInFull()) {
 			this.loanStatus = loanLifecycleStateMachine.transition(LoanEvent.REPAID_IN_FULL, this.loanStatus);
 			this.closedOnDate = loanTransaction.getTransactionDate().toDate();
@@ -361,8 +373,8 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		deriveLoanRepaymentScheduleCompletedData();
 
 		if (loanTransaction.isNotRepayment()) {
-			throw new IllegalArgumentException(
-					"Only repayment transactions can be passed to makeRepayment.");
+			final String errorMessage = "A transaction of type repayment was expected but not received.";
+			throw new InvalidLoanTransactionTypeException("transaction", "is.not.a.repayment.transaction", errorMessage);
 		}
 		
 		LocalDate loanTransactionDate = loanTransaction.getTransactionDate();
@@ -469,7 +481,8 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 			LoanTransaction newTransactionDetail, LoanLifecycleStateMachine loanLifecycleStateMachine) {
 
 		if (transactionForAdjustment.isNotRepayment() && transactionForAdjustment.isNotWaiver()) {
-			throw new IllegalArgumentException("Only repayment and waiver transactions can be adjusted.");
+			final String errorMessage = "A transaction of type repayment or waiver was expected but not received.";
+			throw new InvalidLoanTransactionTypeException("transaction", "is.not.a.repayment.or.waiver.transaction", errorMessage);
 		}
 
 		transactionForAdjustment.contra();
@@ -982,7 +995,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	}
 
 	public LoanAccountData toLoanAccountData(LoanAccountSummaryData summary, LoanRepaymentScheduleData repaymentSchedule, 
-			List<LoanRepaymentData> loanRepayments, 
+			List<LoanTransactionData> loanRepayments, 
 			CurrencyData currencyData) {
 		
 		LoanBasicDetailsData basicDetails = toBasicDetailsData(currencyData);
