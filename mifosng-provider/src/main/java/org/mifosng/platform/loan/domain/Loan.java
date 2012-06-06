@@ -28,7 +28,12 @@ import org.joda.time.LocalDate;
 import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.DerivedLoanData;
 import org.mifosng.platform.api.data.EnumOptionData;
+import org.mifosng.platform.api.data.LoanAccountData;
+import org.mifosng.platform.api.data.LoanAccountSummaryData;
 import org.mifosng.platform.api.data.LoanBasicDetailsData;
+import org.mifosng.platform.api.data.LoanPermissionData;
+import org.mifosng.platform.api.data.LoanRepaymentData;
+import org.mifosng.platform.api.data.LoanRepaymentScheduleData;
 import org.mifosng.platform.api.data.MoneyData;
 import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
@@ -974,5 +979,35 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 
 	public String getCurrencyCode() {
 		return this.loanRepaymentScheduleDetail.getPrincipal().getCurrencyCode();
+	}
+
+	public LoanAccountData toLoanAccountData(LoanAccountSummaryData summary, LoanRepaymentScheduleData repaymentSchedule, 
+			List<LoanRepaymentData> loanRepayments, 
+			CurrencyData currencyData) {
+		
+		LoanBasicDetailsData basicDetails = toBasicDetailsData(currencyData);
+		
+		// permissions
+		boolean waiveAllowed = summary.isWaiveAllowed(basicDetails.getInArrearsTolerance())
+				&& isNotClosed();
+		boolean undoDisbursalAllowed = isDisbursed()
+				&& isOpenWithNoRepaymentMade();
+		boolean makeRepaymentAllowed = isDisbursed()
+				&& isNotClosed();
+
+		boolean rejectAllowed = isNotApproved()
+				&& isNotDisbursed() && isNotClosed();
+		boolean withdrawnByApplicantAllowed = isNotDisbursed()
+				&& isNotClosed();
+		boolean undoApprovalAllowed = isApproved()
+				&& isNotClosed();
+		boolean disbursalAllowed = isApproved()
+				&& isNotDisbursed() && isNotClosed();
+		
+		LoanPermissionData permissions = new LoanPermissionData(waiveAllowed, makeRepaymentAllowed, rejectAllowed, withdrawnByApplicantAllowed, 
+				undoApprovalAllowed, undoDisbursalAllowed, disbursalAllowed, isSubmittedAndPendingApproval(),
+				isWaitingForDisbursal());
+		
+		return new LoanAccountData(basicDetails, summary, repaymentSchedule, loanRepayments, permissions);
 	}
 }

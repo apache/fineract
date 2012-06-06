@@ -2,9 +2,6 @@ package org.mifosng.platform.api.data;
 
 import java.io.Serializable;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
-@XmlRootElement(name = "currency")
 public class CurrencyData implements Serializable {
 
 	private String code;

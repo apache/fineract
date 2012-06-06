@@ -65,7 +65,7 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableCustom<Ap
         this.completed = false;
     }
 
-    public LoanRepaymentScheduleInstallment(final Loan loan, final Integer installmentNumber, final LocalDate from,
+    public LoanRepaymentScheduleInstallment(final Loan loan, final Integer installmentNumber,
             final LocalDate dueDate, final BigDecimal principal, final BigDecimal interest) {
         this.loan = loan;
         this.installmentNumber = installmentNumber;

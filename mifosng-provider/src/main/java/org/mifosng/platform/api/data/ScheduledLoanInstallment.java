@@ -3,11 +3,8 @@ package org.mifosng.platform.api.data;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
 import org.joda.time.LocalDate;
 
-@XmlRootElement(name = "installment")
 public class ScheduledLoanInstallment implements Serializable {
 
 	private Integer installmentNumber;

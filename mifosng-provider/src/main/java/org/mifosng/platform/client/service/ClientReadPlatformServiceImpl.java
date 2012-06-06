@@ -185,11 +185,14 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 			List<ClientLoanAccountSummaryData> results = this.jdbcTemplate.query(sql, rm, new Object[] {clientId, currentUser.getOrganisation().getId()});
 			if (results != null) {
 				for (ClientLoanAccountSummaryData row : results) {
-					if (row.isOpen()) {
+					
+					LoanStatusMapper statusMapper = new LoanStatusMapper(row.getLoanStatusId());
+					
+					if (statusMapper.isOpen()) {
 						openLoans.add(row);
-					} else if (row.isWaitingForDisbursal()) {
+					} else if (statusMapper.isAwaitingDisbursal()) {
 						awaitingDisbursalLoans.add(row);
-					} else if (row.isPendingApproval()) {
+					} else if (statusMapper.isPendingApproval()) {
 						pendingApprovalLoans.add(row);
 					} else {
 						closedLoans.add(row);
@@ -226,16 +229,16 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 			Long productId = JdbcSupport.getLong(rs, "productId");
 			String loanProductName = rs.getString("productName");
 			Integer loanStatusId = JdbcSupport.getInteger(rs, "statusId");
-			String lifeCycleStatusText = rs.getString("statusName");
+//			String lifeCycleStatusText = rs.getString("statusName");
+//			
+//			LoanStatusMapper statusMapper = new LoanStatusMapper(loanStatusId);
+//			
+//			boolean pendingApproval = statusMapper.isPendingApproval();
+//			boolean waitingForDisbursal = statusMapper.isAwaitingDisbursal();
+//			boolean open = statusMapper.isOpen();
+//			boolean closed = statusMapper.isClosed();
 			
-			LoanStatusMapper statusMapper = new LoanStatusMapper(loanStatusId);
-			
-			boolean pendingApproval = statusMapper.isPendingApproval();
-			boolean waitingForDisbursal = statusMapper.isAwaitingDisbursal();
-			boolean open = statusMapper.isOpen();
-			boolean closed = statusMapper.isClosed();
-			
-			return new ClientLoanAccountSummaryData(id, externalId, productId, loanProductName, loanStatusId, lifeCycleStatusText, pendingApproval, waitingForDisbursal, open, closed);
+			return new ClientLoanAccountSummaryData(id, externalId, productId, loanProductName, loanStatusId);
 		}
 	}
 	

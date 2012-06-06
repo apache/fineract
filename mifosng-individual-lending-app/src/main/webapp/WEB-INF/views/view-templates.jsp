@@ -371,7 +371,7 @@
 	<span class="longrowlabel"><spring:message code="label.client.account.pending.approval.loans"/> ({{=$ctx.number(pendingApprovalLoanCount)}}):</span>
 	<span class="rowvalue">
 	{{#each pendingApprovalLoans}}
-		<span class="loanaccount"><a href="${baseApiUrl}loans/{{=id}}" id="loan{{=id}}" class="openloanaccount" title="{{=loanProductName}}: &#35;{{=id}}">{{=loanProductName}}: &#35;{{=id}}</a></span>
+		<span class="loanaccount"><a href="${baseApiUrl}loans/{{=id}}?association=ALL" id="loan{{=id}}" class="openloanaccount" title="{{=loanProductName}}: &#35;{{=id}}">{{=loanProductName}}: &#35;{{=id}}</a></span>
 	{{/each}}
 	</span>
 </div>
@@ -382,7 +382,7 @@
 	<span class="longrowlabel"><spring:message code="label.client.account.pending.disbursal.loans"/> ({{=$ctx.number(awaitingDisbursalLoanCount)}}):</span>
 	<span class="rowvalue">
 	{{#each awaitingDisbursalLoans}}
-		<span class="loanaccount"><a href="${baseApiUrl}loans/{{=id}}" id="loan{{=id}}" class="openloanaccount" title="{{=loanProductName}}: &#35;{{=id}}">{{=loanProductName}}: &#35;{{=id}}</a></span>
+		<span class="loanaccount"><a href="${baseApiUrl}loans/{{=id}}?association=ALL" id="loan{{=id}}" class="openloanaccount" title="{{=loanProductName}}: &#35;{{=id}}">{{=loanProductName}}: &#35;{{=id}}</a></span>
 	{{/each}}
 	</span>
 </div>
@@ -393,7 +393,7 @@
 	<span class="longrowlabel"><spring:message code="label.client.account.active.loans"/> ({{=$ctx.number(activeLoanCount)}}):</span>
 	<span class="rowvalue">
 	{{#each openLoans}}
-		<span class="loanaccount"><a href="${baseApiUrl}loans/{{=id}}" id="loan{{=id}}" class="openloanaccount" title="{{=loanProductName}}: &#35;{{=id}}">{{=loanProductName}}: &#35;{{=id}}</a></span>
+		<span class="loanaccount"><a href="${baseApiUrl}loans/{{=id}}?association=ALL" id="loan{{=id}}" class="openloanaccount" title="{{=loanProductName}}: &#35;{{=id}}">{{=loanProductName}}: &#35;{{=id}}</a></span>
 	{{/each}}
 	</span>
 </div>
@@ -404,7 +404,7 @@
 	<div class="longrowlabel"><spring:message code="label.client.account.closed.loans"/> ({{=$ctx.number(closedLoanCount)}}):</div>
 	<div class="rowvalue">
 	{{#each closedLoans}}
-		<span class="loanaccount"><a href="${baseApiUrl}loans/{{=id}}" id="loan{{=id}}" class="openloanaccount" title="{{=loanProductName}}: &#35;{{=id}}">{{=loanProductName}}: &#35;{{=id}}</a></span>
+		<span class="loanaccount"><a href="${baseApiUrl}loans/{{=id}}?association=ALL" id="loan{{=id}}" class="openloanaccount" title="{{=loanProductName}}: &#35;{{=id}}">{{=loanProductName}}: &#35;{{=id}}</a></span>
 	{{/each}}
 	</div>
 </div>
@@ -531,20 +531,19 @@
 	<ul>
 		<li><a href="#details{{=id}}" title="details"><spring:message code="tab.client.account.loan.details"/></a></li>
 		<li><a href="#schedule{{=id}}" title="schedule"><spring:message code="tab.client.account.loan.schedule"/></a></li>
-		{{#if loanData.loanRepayments}}
+		{{#if loanRepayments}}
 		<li><a href="#repayments{{=id}}" title="repayments"><spring:message code="tab.client.account.loan.repayments"/></a></li>
 		{{/if}}
 	</ul>
     <!-- first loan tab -->
 
-	{{#each basicDetails}}	
 	<div id="details{{=id}}" style="margin-top: 5px;">
 		<div class="row">
 			<span class="longrowlabel"><spring:message code="label.client.account.loan.status"/></span>
 			<span class="rowvalue">{{=lifeCycleStatusText}} (<spring:message code="label.client.account.loan.status.since"/> {{=$ctx.globalDate(lifeCycleStatusDate)}})
-{{#if $ctx.numberGreaterThanZero($parent.data.loanData.summary.totalInArrears.amount)}}
+{{#if $ctx.numberGreaterThanZero(summary.totalInArrears.amount)}}
 	{{#if actualDisbursementDate !== null}}
-		- <spring:message code="label.client.account.loan.status.arrears"/> {{=$ctx.moneyWithCurrency($parent.parent.parent.data.loanData.summary.totalInArrears)}}
+		- <spring:message code="label.client.account.loan.status.arrears"/> {{=$ctx.moneyWithCurrency($parent.parent.data.summary.totalInArrears)}}
 	{{/if}}
 {{/if}}
 			</span>
@@ -651,11 +650,10 @@
 
 		<div id="loanadditionaldata{{=id}}"></div>
 	</div>		
-	{{/each}}
 
 	<!-- second loan tab -->
-	<div id="schedule{{=basicDetails.id}}" style="margin-top: 5px;">
-		<table id="summarytable{{=basicDetails.id}}" class="pretty displayschedule">
+	<div id="schedule{{=id}}" style="margin-top: 5px;">
+		<table id="summarytable{{=id}}" class="pretty displayschedule">
 			<caption><spring:message code="tab.client.account.loan.schedule.table.summary.caption"/></caption>
 			<thead>
 				<tr>
@@ -669,33 +667,33 @@
 			<tbody>
 				<tr>
 					<th><spring:message code="tab.client.account.loan.schedule.table.column.heading.principal"/></th>
-					<td>{{=$ctx.money(loanData.summary.originalPrincipal)}}</td>
-					<td>{{=$ctx.money(loanData.summary.principalPaid)}}</td>
+					<td>{{=$ctx.money(summary.originalPrincipal)}}</td>
+					<td>{{=$ctx.money(summary.principalPaid)}}</td>
 					<td>&nbsp;</td>
-					<td>{{=$ctx.money(loanData.summary.principalOutstanding)}}</td>
+					<td>{{=$ctx.money(summary.principalOutstanding)}}</td>
 				</tr>
 				<tr>
 					<th><spring:message code="tab.client.account.loan.schedule.table.column.heading.interest"/></th>
-					<td>{{=$ctx.money(loanData.summary.originalInterest)}}</td>
-					<td>{{=$ctx.money(loanData.summary.interestPaid)}}</td>
+					<td>{{=$ctx.money(summary.originalInterest)}}</td>
+					<td>{{=$ctx.money(summary.interestPaid)}}</td>
 					<td>&nbsp;</td>
-					<td>{{=$ctx.money(loanData.summary.interestOutstanding)}}</td>
+					<td>{{=$ctx.money(summary.interestOutstanding)}}</td>
 				</tr>
 			</tbody>
 			<tfoot>
 				<tr>
 					<th><spring:message code="tab.client.account.loan.schedule.table.column.heading.total"/></th>
-					<th>{{=$ctx.money(loanData.summary.originalTotal)}}</th>
-					<th>{{=$ctx.money(loanData.summary.totalPaid)}}</th>
-					<th>{{=$ctx.money(loanData.summary.totalWaived)}}</th>
-					<th>{{=$ctx.money(loanData.summary.totalOutstanding)}}</th>
+					<th>{{=$ctx.money(summary.originalTotal)}}</th>
+					<th>{{=$ctx.money(summary.totalPaid)}}</th>
+					<th>{{=$ctx.money(summary.totalWaived)}}</th>
+					<th>{{=$ctx.money(summary.totalOutstanding)}}</th>
 				</tr>
 			</tfoot>
 		</table>
 
 		<br/>
 
-		<table id="repaymentschedule_todate{{=basicDetails.id}}" class="pretty displayschedule">
+		<table id="repaymentschedule_todate{{=id}}" class="pretty displayschedule">
 			<caption><spring:message code="tab.client.account.loan.schedule.table.repaymentschedule.caption"/></caption>
 			<colgroup span="2"></colgroup>
 			<colgroup span="3">
@@ -735,7 +733,7 @@
 				</tr>
 			</thead>
 			<tbody>
-			{{#each loanData.repaymentSchedule.periods}}
+			{{#each repaymentSchedule.periods}}
 			<tr>
 				<td scope="row">{{=$ctx.number(period)}}</td>
 				<td>{{=$ctx.globalDate(date)}}</td>
@@ -754,20 +752,20 @@
 			<tfoot>
 				<tr>
 					<th colspan="2"><spring:message code="tab.client.account.loan.schedule.table.column.heading.total"/></th>
-					<th class="lefthighlightcolheader">{{=$ctx.money(loanData.summary.originalPrincipal)}}</th>
-					<th>{{=$ctx.money(loanData.summary.principalPaid)}}</th>
-					<th class="righthighlightcolheader">{{=$ctx.money(loanData.summary.principalOutstanding)}}</th>
-					<th class="lefthighlightcolheader">{{=$ctx.money(loanData.summary.originalInterest)}}</th>
-					<th>{{=$ctx.money(loanData.summary.interestPaid)}}</th>
-					<th class="righthighlightcolheader">{{=$ctx.money(loanData.summary.interestOutstanding)}}</th>
-					<th class="lefthighlightcolheader">{{=$ctx.money(loanData.summary.originalTotal)}}</th>
-					<th>{{=$ctx.money(loanData.summary.totalPaid)}}</th>
-					<th class="righthighlightcolheader">{{=$ctx.money(loanData.summary.totalOutstanding)}}</th>
+					<th class="lefthighlightcolheader">{{=$ctx.money(summary.originalPrincipal)}}</th>
+					<th>{{=$ctx.money(summary.principalPaid)}}</th>
+					<th class="righthighlightcolheader">{{=$ctx.money(summary.principalOutstanding)}}</th>
+					<th class="lefthighlightcolheader">{{=$ctx.money(summary.originalInterest)}}</th>
+					<th>{{=$ctx.money(summary.interestPaid)}}</th>
+					<th class="righthighlightcolheader">{{=$ctx.money(summary.interestOutstanding)}}</th>
+					<th class="lefthighlightcolheader">{{=$ctx.money(summary.originalTotal)}}</th>
+					<th>{{=$ctx.money(summary.totalPaid)}}</th>
+					<th class="righthighlightcolheader">{{=$ctx.money(summary.totalOutstanding)}}</th>
 				</tr>
 			</tfoot>
 		</table>
 	</div>
-    {{#if loanData.loanRepayments}}
+    {{#if loanRepayments}}
 	<!-- Third loan tab -->
 	<div id="repayments{{=id}}" style="margin-top: 5px;">
 		<table id="newrepaymentsactivity{{=id}}" class="pretty displaypayments">
@@ -778,19 +776,19 @@
 				<th><spring:message code="tab.client.account.loan.schedule.table.column.heading.amountpaid"/></th>
 				<th><spring:message code="tab.client.account.loan.schedule.table.column.heading.principal.portion"/></th>
 				<th><spring:message code="tab.client.account.loan.schedule.table.column.heading.interest.portion"/></th>
-				{{#if open}}
+				{{#if actualDisbursementDate !== null}}
 				<th><spring:message code="tab.client.account.loan.schedule.table.column.heading.action"/></th>
 				{{/if}}
 				</tr>
 			</thead>
 			<tbody>
-				{{#each loanData.loanRepayments}}
+				{{#each loanRepayments}}
 				<tr>
 				<td>{{=$ctx.globalDate(date)}}</td>
 				<td>{{=$ctx.money(total)}}</td>
 				<td>{{=$ctx.money(principal)}}</td>
 				<td>{{=$ctx.money(interest)}}</td>
-				{{#if $parent.parent.data.open}}
+				{{#if $parent.parent.data.actualDisbursementDate !== null}}
 				<td><button id="adjustrepaymentbtn{{=$parent.parent.parent.data.id}}_{{=id}}" class="adjustloanrepayment">Adjust</button></td>
 				{{/if}}
 				</tr>

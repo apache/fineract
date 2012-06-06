@@ -2,9 +2,6 @@ package org.mifosng.platform.api.data;
 
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
-@XmlRootElement
 public class DerivedLoanData {
 
 	private LoanRepaymentScheduleData repaymentSchedule;

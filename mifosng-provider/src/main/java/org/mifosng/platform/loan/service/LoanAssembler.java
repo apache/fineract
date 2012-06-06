@@ -94,7 +94,7 @@ public class LoanAssembler {
 
 			LoanRepaymentScheduleInstallment installment = new LoanRepaymentScheduleInstallment(
 					loan, scheduledLoanInstallment.getInstallmentNumber(),
-					scheduledLoanInstallment.getPeriodStart(),
+//					scheduledLoanInstallment.getPeriodStart(),
 					scheduledLoanInstallment.getPeriodEnd(), readPrincipalDue.getAmount(),
 					readInterestDue.getAmount());
 			loan.addRepaymentScheduleInstallment(installment);

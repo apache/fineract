@@ -8,7 +8,7 @@ public class LoanRepaymentScheduleInstallmentBuilder {
 
 	private Loan loan = null;
 	private Integer installmentNumber = Integer.valueOf(1);
-	private LocalDate from = LocalDate.now();
+//	private LocalDate from = LocalDate.now();
 	private LocalDate dueDate = LocalDate.now();
 	private MonetaryCurrency currencyDetail = new MonetaryCurrencyBuilder().build();
 	private Money principal = new MoneyBuilder().build();
@@ -21,7 +21,7 @@ public class LoanRepaymentScheduleInstallmentBuilder {
 	}
 
 	public LoanRepaymentScheduleInstallment build() {
-		return new LoanRepaymentScheduleInstallment(loan, installmentNumber, from, dueDate, principal.getAmount(), interest.getAmount());
+		return new LoanRepaymentScheduleInstallment(loan, installmentNumber, dueDate, principal.getAmount(), interest.getAmount());
 	}
 
 	public LoanRepaymentScheduleInstallmentBuilder withPrincipal(String withPrincipal) {

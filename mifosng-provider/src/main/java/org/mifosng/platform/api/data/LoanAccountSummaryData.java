@@ -1,8 +1,6 @@
 package org.mifosng.platform.api.data;
 
-import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement
 public class LoanAccountSummaryData {
 
 	private MoneyData originalPrincipal;

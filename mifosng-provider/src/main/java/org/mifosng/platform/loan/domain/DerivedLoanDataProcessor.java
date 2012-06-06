@@ -48,10 +48,7 @@ public class DerivedLoanDataProcessor {
 					}
 
 					if (transaction.isWaiver()) {
-						LoanRepaymentData repaymentData = processWaiver(
-								transaction, scheduledRepaymentPeriod,
-								repaymentScheduleIndex, loanRepaymentPeriods,
-								arrearsTolerance, currencyDetail);
+						LoanRepaymentData repaymentData = processWaiver(transaction, scheduledRepaymentPeriod, currencyDetail);
 						loanRepayments.add(repaymentData);
 					}
 
@@ -77,10 +74,7 @@ public class DerivedLoanDataProcessor {
 	}
 	
 	private LoanRepaymentData processWaiver(LoanTransaction transaction,
-			LoanRepaymentPeriodData scheduledRepaymentPeriod,
-			int repaymentScheduleIndex,
-			List<LoanRepaymentPeriodData> loanRepaymentPeriods,
-			Money arrearsTolerance, CurrencyData currencyData) {
+			LoanRepaymentPeriodData scheduledRepaymentPeriod, CurrencyData currencyData) {
 		
 		MonetaryCurrency currency = new MonetaryCurrency(currencyData.getCode(), currencyData.getDecimalPlaces());
 		Money totalToWaive = transaction.getAmount(currency);
@@ -152,7 +146,7 @@ public class DerivedLoanDataProcessor {
 				
 				LocalDate arrearsFrom = determineInArrearsFrom(currentRepaymentSchedule, loanRepaymentPeriods, repaymentIndex);
 				
-				LocalDate arrearsTo = determineInArrearsTo(currentRepaymentSchedule, loanRepaymentPeriods, repaymentIndex);
+				LocalDate arrearsTo = determineInArrearsTo(loanRepaymentPeriods, repaymentIndex);
 				
 				currentRepaymentSchedule.setArrearsFrom(arrearsFrom);
 				currentRepaymentSchedule.setArrearsTo(arrearsTo);
@@ -165,7 +159,6 @@ public class DerivedLoanDataProcessor {
 	}
 
 	private LocalDate determineInArrearsTo(
-			LoanRepaymentPeriodData currentRepaymentSchedule,
 			List<LoanRepaymentPeriodData> loanRepaymentPeriods,
 			int repaymentIndex) {
 		

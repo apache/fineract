@@ -1,10 +1,7 @@
 package org.mifosng.platform.api.data;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
 import org.joda.time.LocalDate;
 
-@XmlRootElement
 public class LoanRepaymentPeriodData {
 
 	private Integer period;

@@ -307,7 +307,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
 				LoanRepaymentScheduleInstallment installment = new LoanRepaymentScheduleInstallment(
 						loan, scheduledLoanInstallment.getInstallmentNumber(),
-						scheduledLoanInstallment.getPeriodStart(),
+//						scheduledLoanInstallment.getPeriodStart(),
 						scheduledLoanInstallment.getPeriodEnd(), principal.getAmount(),
 						interest.getAmount());
 				modifiedLoanRepaymentSchedule.add(installment);

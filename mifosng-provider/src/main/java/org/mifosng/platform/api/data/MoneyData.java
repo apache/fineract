@@ -4,9 +4,6 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
-@XmlRootElement
 public class MoneyData implements Serializable, Comparable<MoneyData> {
 
 	private String currencyCode;

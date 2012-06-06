@@ -11,8 +11,6 @@ import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.DerivedLoanData;
 import org.mifosng.platform.api.data.LoanAccountData;
-import org.mifosng.platform.api.data.LoanBasicDetailsData;
-import org.mifosng.platform.api.data.LoanPermissionData;
 import org.mifosng.platform.api.data.LoanProductData;
 import org.mifosng.platform.api.data.LoanProductLookup;
 import org.mifosng.platform.api.data.LoanRepaymentData;
@@ -89,31 +87,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 	private LoanAccountData convertToData(final Loan realLoan, CurrencyData currencyData) {
 
 		DerivedLoanData loanData = realLoan.deriveLoanData(currencyData);
-
-		LoanBasicDetailsData basicDetails = realLoan.toBasicDetailsData(currencyData);
 		
-		// permissions
-		boolean waiveAllowed = loanData.getSummary().isWaiveAllowed(basicDetails.getInArrearsTolerance())
-				&& realLoan.isNotClosed();
-		boolean undoDisbursalAllowed = realLoan.isDisbursed()
-				&& realLoan.isOpenWithNoRepaymentMade();
-		boolean makeRepaymentAllowed = realLoan.isDisbursed()
-				&& realLoan.isNotClosed();
-
-		boolean rejectAllowed = realLoan.isNotApproved()
-				&& realLoan.isNotDisbursed() && realLoan.isNotClosed();
-		boolean withdrawnByApplicantAllowed = realLoan.isNotDisbursed()
-				&& realLoan.isNotClosed();
-		boolean undoApprovalAllowed = realLoan.isApproved()
-				&& realLoan.isNotClosed();
-		boolean disbursalAllowed = realLoan.isApproved()
-				&& realLoan.isNotDisbursed() && realLoan.isNotClosed();
-		
-		LoanPermissionData permissions = new LoanPermissionData(waiveAllowed, makeRepaymentAllowed, rejectAllowed, withdrawnByApplicantAllowed, 
-				undoApprovalAllowed, undoDisbursalAllowed, disbursalAllowed, realLoan.isSubmittedAndPendingApproval(),
-				realLoan.isWaitingForDisbursal());
-		
-		return new LoanAccountData(realLoan.getId(), basicDetails, loanData, permissions);
+		return realLoan.toLoanAccountData(loanData.getSummary(), loanData.getRepaymentSchedule(), loanData.getLoanRepayments(), currencyData);
 	}
 
 	@Override

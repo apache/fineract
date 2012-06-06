@@ -1,13 +1,8 @@
 package org.mifosng.platform.api.data;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
 import org.codehaus.jackson.map.annotate.JsonFilter;
-import org.joda.time.DateMidnight;
-import org.joda.time.Days;
 import org.joda.time.LocalDate;
 
-@XmlRootElement
 @JsonFilter("loanRepaymentFilter")
 public class LoanRepaymentData {
 
@@ -48,9 +43,9 @@ public class LoanRepaymentData {
 		return date;
 	}
 	
-	public int getTransactionOffsetFromToday() {
-		return Days.daysBetween(new DateMidnight().toDateTime(), this.date.toDateMidnight().toDateTime()).getDays();
-	}
+//	public int getTransactionOffsetFromToday() {
+//		return Days.daysBetween(new DateMidnight().toDateTime(), this.date.toDateMidnight().toDateTime()).getDays();
+//	}
 
 	public void setDate(LocalDate date) {
 		this.date = date;
