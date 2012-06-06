@@ -55,8 +55,6 @@ list of loan transactions not available (except in summary - presume repayments 
 
 
 DOCUMENTATION REMAINING
-maybe PlatformDomainRule should be in 400 rather than 403
-
 
 describe waiver CHECK RULES AFTER
 why fields "totalWaived", "overpaid" - KW DOING - CHECK AFTER
@@ -65,9 +63,6 @@ maxJoinedOnOffsetFromToday - KW DOING - CHECK AFTER
     - create a client example could show second example with the
 field clientOrBusinessName being used instead of firstname, lastname,
 no mention of it - done BUT NOTE displayName starts with space!
-
-    - TODO - check update of client with 'clientOrBusinessName' with
-a first name/last name results in error - it just updates! NEED KEITH TO FIX
 
  - Loans
      - digitsAfterDecimal and currencyCode should NOT be sent during
@@ -78,7 +73,6 @@ update. KW DOING - CHECK AFTER
 details if defaults from loan product are acceptable, they can be
 inherited from loan product. KW DOING - CHECK AFTER
 
-?DOMAIN NAME 
 
 
 
