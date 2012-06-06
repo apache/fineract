@@ -4,10 +4,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.map.annotate.JsonFilter;
-import org.joda.time.DateTime;
-import org.joda.time.Days;
 import org.joda.time.LocalDate;
 
 @JsonIgnoreProperties({ "organisationId","organisationName"})
@@ -42,15 +41,16 @@ public class ClientData implements Serializable {
 		this.id = id;
 		this.firstname = firstname;
 		this.lastname = lastname;
-		this.displayName = new StringBuilder(this.firstname).append(' ')
-				.append(this.lastname).toString();
+		
+		StringBuilder nameBuilder = new StringBuilder(this.firstname);
+		if (StringUtils.isNotBlank(nameBuilder.toString())) {
+			nameBuilder.append(' ');
+		}
+		nameBuilder.append(this.lastname);
+		
+		this.displayName = nameBuilder.toString();
 		this.externalId = externalId;
 		this.joinedDate = joinedDate;
-	}
-
-	public int getMaxJoinedOnOffsetFromToday() {
-		return Days.daysBetween(new DateTime(),
-				this.getJoinedDate().toDateMidnight().toDateTime()).getDays();
 	}
 
 	public Long getId() {

@@ -19,8 +19,6 @@ public class NewLoanData implements Serializable {
 	
 	private LocalDate expectedDisbursementDate;
 
-	private LoanSchedule repaymentSchedule;
-	
 	private List<LoanProductLookup> allowedProducts = new ArrayList<LoanProductLookup>();
 	
 	public NewLoanData() {
@@ -73,14 +71,6 @@ public class NewLoanData implements Serializable {
 
 	public void setSelectedProduct(LoanProductData selectedProduct) {
 		this.selectedProduct = selectedProduct;
-	}
-
-	public LoanSchedule getRepaymentSchedule() {
-		return repaymentSchedule;
-	}
-
-	public void setRepaymentSchedule(LoanSchedule repaymentSchedule) {
-		this.repaymentSchedule = repaymentSchedule;
 	}
 
 	public LocalDate getExpectedDisbursementDate() {
