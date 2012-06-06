@@ -37,19 +37,19 @@
                 <div class="tocMatrix">
                     <table class=matrixHeading>
                         <tr class="matrixHeadingBG"><td colspan=2 valign="top"><div class="matrixHeadingVerbs"><table><tr><td>RESOURCES</td></tr></table></div></td><td><table><tr><td><div class="matrixHeadingVerbs">POST</div></td></tr><tr><td><div class=matrixHeadingCommands>create/complex update</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">GET</div></td></tr><tr><td><div class=matrixHeadingCommands>read</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">PUT</div></td></tr><tr><td><div class=matrixHeadingCommands>update</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">DELETE</div></td></tr><tr><td><div class=matrixHeadingCommands>delete</div></td></tr></table></td></tr>
-                        <tr class="alt"><td><a href="#clients">CLIENT</a></td><td>/v1/clients</td><td><a href="api.htm#clients_create">Create a Client</a></td><td><a href="#clients_list">List Clients</a></td><td></td><td></td></tr>
-                        <tr><td></td><td>/v1/clients/{clientId}</td><td></td><td><a href="#clients_retrieve">Retrieve a Client</a></td><td><a href="#clients_update">Update a Client</a></td><td></td></tr>
-                        <tr class="alt"><td></td><td>/v1/clients/{clientId}/loans</td><td></td><td><a href="#clients_loansummary">Retrieve a Client's Loan Account Summary</a></td><td></td><td></td></tr>
-                        <tr><td></td><td>/v1/clients/{clientId}/notes</td><td><a href="#clients_addnote">Add a Client Note</a></td><td><a href="#clients_notes">Retrieve a Client's Notes</a></td><td></td><td></td></tr>
-                        <tr class="alt"><td></td><td>/v1/clients/{clientId}/notes/{noteId}</td><td></td><td><a href="#clients_retrievenote">Retrieve a Client Note</a></td><td><a href="#clients_updatenote">Update a Client Note</a></td><td></td></tr>
-                        <tr><td><a href="#loans">LOAN</a></td><td>/v1/loans</td><td><a href="#loans_create">Create a New Loan/Submit a Loan Application</a></td><td></td><td></td><td></td></tr>
-                        <tr class="alt"><td></td><td>/v1/loans/{loanId}</td><td><a href="#loans_approve_etc">Approve, Undo Approval, Disburse, Undo Disbursal, Reject a Loan or Withdraw a Loan Application</a></td><td><a href="#loans_retrieve">Retrieve a Loan</a></td><td></td><td><a href="#loans_delete">Delete a Loan</a></td></tr>
-                        <tr class="alt"><td></td><td>/v1/loans/{loanId}/transactions</td><td><a href="#loans_repayment_etc">Make a Repayment / Loan Waiver</a></td><td></td><td></td><td></td></tr>
-                        <tr><td></td><td>/v1/loans/{loanId}/transactions/{transactionId}</td><td><a href="#loans_repaymentadjust_etc">Adjust a Repayment or Waiver</a></td><td><a href="#loans_repaymentretrieve_etc">Retrieve a Repayment or Waiver Details</a></td><td></td><td></td></tr>
-                        <tr class="alt"><td><a href="#offices">OFFICE</a></td><td>/v1/offices</td><td><a href="#offices_create">Create an Office</a></td><td><a href="#offices_list">List Offices</a></td><td></td><td></td></tr>
-                        <tr><td></td><td>/v1/offices/{officeId}</td><td></td><td><a href="#offices_retrieve">Retrieve an Office</a></td><td><a href="#offices_update">Update an Office</a></td><td></td></tr>
-                        <tr class="alt"><td><a href="#loanproducts">LOAN PRODUCT</a></td><td>/v1/loanproducts</td><td><a href="#loanproducts_create">Create a Loan Product</a></td><td><a href="#loanproducts_list">List Loan Products</a></td><td></td><td></td></tr>
-                        <tr><td></td><td>/v1/loanproducts/{productId}</td><td></td><td><a href="#loanproducts_retrieve">Retrieve a Loan Product</a></td><td><a href="#loanproducts_update">Update a Loan Product</a></td><td></td></tr>
+                        <tr class="alt"><td><a href="#clients">CLIENT</a></td><td>clients</td><td><a href="api.htm#clients_create">Create a Client</a></td><td><a href="#clients_list">List Clients</a></td><td></td><td></td></tr>
+                        <tr><td></td><td>clients/{clientId}</td><td></td><td><a href="#clients_retrieve">Retrieve a Client</a></td><td><a href="#clients_update">Update a Client</a></td><td></td></tr>
+                        <tr class="alt"><td></td><td>clients/{clientId}/loans</td><td></td><td><a href="#clients_loansummary">Retrieve a Client's Loan Account Summary</a></td><td></td><td></td></tr>
+                        <tr><td></td><td>clients/{clientId}/notes</td><td><a href="#clients_addnote">Add a Client Note</a></td><td><a href="#clients_notes">Retrieve a Client's Notes</a></td><td></td><td></td></tr>
+                        <tr class="alt"><td></td><td>clients/{clientId}/notes/{noteId}</td><td></td><td><a href="#clients_retrievenote">Retrieve a Client Note</a></td><td><a href="#clients_updatenote">Update a Client Note</a></td><td></td></tr>
+                        <tr><td><a href="#loans">LOAN</a></td><td>loans</td><td><a href="#loans_create">Create a New Loan / Submit a Loan Application</a></td><td></td><td></td><td></td></tr>
+                        <tr class="alt"><td></td><td>loans/{loanId}</td><td><a href="#loans_approve_etc">Approve, Undo Approval, Disburse, Undo Disbursal, Reject a Loan or Withdraw a Loan Application</a></td><td><a href="#loans_retrieve">Retrieve a Loan</a></td><td></td><td><a href="#loans_delete">Delete a Loan</a></td></tr>
+                        <tr class="alt"><td></td><td>loans/{loanId}/transactions</td><td><a href="#loans_repayment_etc">Make a Repayment / Loan Waiver</a></td><td></td><td></td><td></td></tr>
+                        <tr><td></td><td>loans/{loanId}/transactions/{transactionId}</td><td><a href="#loans_repaymentadjust_etc">Adjust a Repayment or Waiver</a></td><td><a href="#loans_repaymentretrieve_etc">Retrieve a Repayment or Waiver Details</a></td><td></td><td></td></tr>
+                        <tr class="alt"><td><a href="#offices">OFFICE</a></td><td>offices</td><td><a href="#offices_create">Create an Office</a></td><td><a href="#offices_list">List Offices</a></td><td></td><td></td></tr>
+                        <tr><td></td><td>offices/{officeId}</td><td></td><td><a href="#offices_retrieve">Retrieve an Office</a></td><td><a href="#offices_update">Update an Office</a></td><td></td></tr>
+                        <tr class="alt"><td><a href="#loanproducts">LOAN PRODUCT</a></td><td>loanproducts</td><td><a href="#loanproducts_create">Create a Loan Product</a></td><td><a href="#loanproducts_list">List Loan Products</a></td><td></td><td></td></tr>
+                        <tr><td></td><td>loanproducts/{productId}</td><td></td><td><a href="#loanproducts_retrieve">Retrieve a Loan Product</a></td><td><a href="#loanproducts_update">Update a Loan Product</a></td><td></td></tr>
                     </table>
                 </div>                
             </div>
@@ -60,7 +60,7 @@
                 <div class="tocMatrix">
                     <table class=matrixHeading>
                         <tr class="matrixHeadingBG"><td colspan=2 valign="top"><div class="matrixHeadingVerbs"><table><tr><td>RESOURCES</td></tr></table></div></td><td><table><tr><td><div class="matrixHeadingVerbs">POST</div></td></tr><tr><td><div class=matrixHeadingCommands>create/complex update</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">GET</div></td></tr><tr><td><div class=matrixHeadingCommands>read</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">PUT</div></td></tr><tr><td><div class=matrixHeadingCommands>update</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">DELETE</div></td></tr><tr><td><div class=matrixHeadingCommands>delete</div></td></tr></table></td></tr>
-                        <tr class="alt"><td><a href="#configs">CONFIGURATION</a></td><td>/v1/configurations/currency</td><td></td><td><a href="#configs_currencyretrieve">Retrieve Currency Configuration</a></td><td><a href="#configs_currencyupdate">Update Currency Configuration</a></td><td></td></tr>
+                        <tr class="alt"><td><a href="#configs">CONFIGURATION</a></td><td>configurations/currency</td><td></td><td><a href="#configs_currencyretrieve">Retrieve Currency Configuration</a></td><td><a href="#configs_currencyupdate">Update Currency Configuration</a></td><td></td></tr>
                     </table>
                 </div>                
             </div>
@@ -71,8 +71,8 @@
                 <div class="tocMatrix">
                     <table class=matrixHeading>
                         <tr class="matrixHeadingBG"><td colspan=2 valign="top"><div class="matrixHeadingVerbs"><table><tr><td>RESOURCES</td></tr></table></div></td><td><table><tr><td><div class="matrixHeadingVerbs">POST</div></td></tr><tr><td><div class=matrixHeadingCommands>create/complex update</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">GET</div></td></tr><tr><td><div class=matrixHeadingCommands>read</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">PUT</div></td></tr><tr><td><div class=matrixHeadingCommands>update</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">DELETE</div></td></tr><tr><td><div class=matrixHeadingCommands>delete</div></td></tr></table></td></tr>
-                        <tr><td><a href="#additionalfields">ADDITIONAL FIELDS</a></td><td>/v1/additionalfields</td><td></td><td><a href="#additionalfields_list">List Additional Fields Sets</a></td><td></td><td></td></tr>
-                        <tr class="alt"><td></td><td>/v1/additionalfields/{Type}/{Set}/{id}</td><td><a href="#additionalfields_update">Update Additional Fields</a></td><td><a href="#additionalfields_retrieve">Retrieve Additional Fields</a></td><td></td><td></td></tr>
+                        <tr><td><a href="#additionalfields">ADDITIONAL FIELDS</a></td><td>additionalfields</td><td></td><td><a href="#additionalfields_list">List Additional Fields Sets</a></td><td></td><td></td></tr>
+                        <tr class="alt"><td></td><td>additionalfields/{Type}/{Set}/{id}</td><td><a href="#additionalfields_update">Update Additional Fields</a></td><td><a href="#additionalfields_retrieve">Retrieve Additional Fields</a></td><td></td><td></td></tr>
                     </table>
                 </div>                
             </div>
@@ -83,8 +83,8 @@
                 <div class="tocMatrix">
                     <table class=matrixHeading>
                         <tr class="matrixHeadingBG"><td colspan=2 valign="top"><div class="matrixHeadingVerbs"><table><tr><td>RESOURCES</td></tr></table></div></td><td><table><tr><td><div class="matrixHeadingVerbs">POST</div></td></tr><tr><td><div class=matrixHeadingCommands>create/complex update</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">GET</div></td></tr><tr><td><div class=matrixHeadingCommands>read</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">PUT</div></td></tr><tr><td><div class=matrixHeadingCommands>update</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">DELETE</div></td></tr><tr><td><div class=matrixHeadingCommands>delete</div></td></tr></table></td></tr>
-                        <tr><td><a href="#reports">REPORT</a></td><td>/v1/reports</td><td></td><td><a href="#reports_list">List Reports</a></td><td></td><td></td></tr>
-                        <tr class="alt"><td></td><td>/v1/reports/{reportName}</td><td></td><td><a href="#report_run">Run a Report</a></td><td></td><td></td></tr>
+                        <tr><td><a href="#reports">REPORT</a></td><td>reports</td><td></td><td><a href="#reports_list">List Reports</a></td><td></td><td></td></tr>
+                        <tr class="alt"><td></td><td>reports/{reportName}</td><td></td><td><a href="#report_run">Run a Report</a></td><td></td><td></td></tr>
                     </table>
                 </div>                
             </div>
@@ -95,12 +95,12 @@
                 <div class="tocMatrix">
                     <table class=matrixHeading>
                         <tr class="matrixHeadingBG"><td colspan=2 valign="top"><div class="matrixHeadingVerbs"><table><tr><td>RESOURCES</td></tr></table></div></td><td><table><tr><td><div class="matrixHeadingVerbs">POST</div></td></tr><tr><td><div class=matrixHeadingCommands>create/complex update</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">GET</div></td></tr><tr><td><div class=matrixHeadingCommands>read</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">PUT</div></td></tr><tr><td><div class=matrixHeadingCommands>update</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">DELETE</div></td></tr><tr><td><div class=matrixHeadingCommands>delete</div></td></tr></table></td></tr>
-                        <tr><td><a href="#authentication">AUTHENTICATION</a></td><td>/v1/authentication</td><td><a href="#authentication_permissions">Verify Authentication</a></td><td></td><td></td><td></td></tr>
-                        <tr class="alt"><td><a href="#users">USER</a></td><td>/v1/users</td><td><a href="#users_create">Create a User</a></td><td><a href="#users_list">List Users</a></td><td></td><td></td></tr>
-                        <tr><td></td><td>/v1/users/{userId}</td><td></td><td><a href="#users_retrieve">Retrieve a User</a></td><td><a href="#users_update">Update a User</a></td><td><a href="#users_delete">Delete a User</a></td></tr>
-                        <tr class="alt"><td><a href="#roles">ROLE</a></td><td>/v1/roles</td><td><a href="#roles_create">Create a New Role</a></td><td><a href="#roles_list">List Roles</a></td><td></td><td></td></tr>
-                        <tr><td></td><td>/v1/roles/{roleId}</td><td></td><td><a href="#roles_retrieve">Retrieve a Role</a></td><td><a href="#roles_update">Update a Role</a></td><td></td></tr>
-                        <tr class="alt"><td><a href="#permissions">PERMISSION</a></td><td>/v1/permissions</td><td></td><td><a href="#permissions_list">List Application Permissions</a></td><td></td><td></td></tr>
+                        <tr><td><a href="#authentication">AUTHENTICATION</a></td><td>authentication</td><td><a href="#authentication_permissions">Verify Authentication</a></td><td></td><td></td><td></td></tr>
+                        <tr class="alt"><td><a href="#users">USER</a></td><td>users</td><td><a href="#users_create">Create a User</a></td><td><a href="#users_list">List Users</a></td><td></td><td></td></tr>
+                        <tr><td></td><td>users/{userId}</td><td></td><td><a href="#users_retrieve">Retrieve a User</a></td><td><a href="#users_update">Update a User</a></td><td><a href="#users_delete">Delete a User</a></td></tr>
+                        <tr class="alt"><td><a href="#roles">ROLE</a></td><td>roles</td><td><a href="#roles_create">Create a New Role</a></td><td><a href="#roles_list">List Roles</a></td><td></td><td></td></tr>
+                        <tr><td></td><td>roles/{roleId}</td><td></td><td><a href="#roles_retrieve">Retrieve a Role</a></td><td><a href="#roles_update">Update a Role</a></td><td></td></tr>
+                        <tr class="alt"><td><a href="#permissions">PERMISSION</a></td><td>permissions</td><td></td><td><a href="#permissions_list">List Application Permissions</a></td><td></td><td></td></tr>
                     </table>
                 </div>                
             </div>
@@ -111,13 +111,13 @@
                 <div class="tocMatrix">
                     <table class=matrixHeading>
                         <tr class="matrixHeadingBG"><td valign="top"><div class="matrixHeadingVerbs"><table><tr><td>RESOURCES</td></tr></table></div></td><td><table><tr><td><div class="matrixHeadingVerbs">GET</div></td></tr><tr><td><div class=matrixHeadingCommands>read</div></td></tr></table></td></tr>
-                        <tr class="alt"><td>/v1/clients/template</td><td><a href="#clients_template">Retrieve Client Details Template</a></td></tr>
-                        <tr><td>/v1/loans/template</td><td><a href="#loans_template">Retrieve Loan Details Template</a></td></tr>
-                        <tr class="alt"><td>/v1/loans/{loanId}/transactions/template</td><td><a href="#loans_repaymenttemplate_etc">Retrieve Loan Repayment/Loan Waiver Template</a></td></tr>
-                        <tr><td>/v1/offices/template</td><td><a href="#offices_template">Retrieve Office Details Template</a></td></tr>
-                        <tr class="alt"><td>/v1/loanproducts/template</td><td><a href="#loanproducts_template">Retrieve Loan Product Details Template</a></td></tr>
-                        <tr><td>/v1/users/template</td><td><a href="#users_template">Retrieve User Details Template</a></td></tr>
-                        <tr class="alt"><td>/v1/roles/template</td><td><a href="#roles_template">Retrieve Role Details Template</a></td></tr>
+                        <tr class="alt"><td>clients/template</td><td><a href="#clients_template">Retrieve Client Details Template</a></td></tr>
+                        <tr><td>loans/template</td><td><a href="#loans_template">Retrieve Loan Details Template</a></td></tr>
+                        <tr class="alt"><td>loans/{loanId}/transactions/template</td><td><a href="#loans_repaymenttemplate_etc">Retrieve Loan Repayment/Loan Waiver Template</a></td></tr>
+                        <tr><td>offices/template</td><td><a href="#offices_template">Retrieve Office Details Template</a></td></tr>
+                        <tr class="alt"><td>loanproducts/template</td><td><a href="#loanproducts_template">Retrieve Loan Product Details Template</a></td></tr>
+                        <tr><td>users/template</td><td><a href="#users_template">Retrieve User Details Template</a></td></tr>
+                        <tr class="alt"><td>roles/template</td><td><a href="#roles_template">Retrieve Role Details Template</a></td></tr>
                     </table>
                 </div>
             </div>
@@ -163,7 +163,7 @@
                 The REST plugins will allow you to
                 <ul>
                     <li class=normalli>Select the "Verb" (e.g. POST)</li>
-                    <li class=normalli>Enter the resource name (e.g. https://localhost:8443/mifosng-provider/api/v1/offices)</li>
+                    <li class=normalli>Enter the resource name (e.g. https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices)</li>
                     <li class=normalli>Add a header to indicate you are sending JSON data as part of the request body (e.g. Content-Type: application/json)</li>
                     <li class=normalli>Paste the example JSON into a Request Body</li>
                     <li class=normalli>Send the Request (and receive a Response)</li>
@@ -190,8 +190,8 @@
                 <h4>Restrict Returned Fields</h4>
                 <p>Parameter "fields={fieldlist}" can be used on GET requests to restrict the fields returned.</p>
                 <p>Example Request: </p>
-                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/offices/1?pretty=true&fields=id,name,parentName">
-                https://localhost:8443/mifosng-provider/api/v1/offices/1?pretty=true&fields=id,name,parentName
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices/1?pretty=true&fields=id,name,parentName">
+                https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices/1?pretty=true&fields=id,name,parentName
                 </a>
                 <p></p>
                 <h4>Pretty JSON Formatting</h4>
@@ -299,7 +299,7 @@ JSON examples:
 
 function setBasicAuthKey(username, password) {
 var jqxhr = $.ajax({
-        url : "https://localhost:8443/mifosng-provider/api/v1/authentication?username=" + username + "&password=" + password,
+        url : "https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/authentication?username=" + username + "&password=" + password,
         type : 'POST',
         contentType : "application/json; charset=utf-8",
         dataType : 'json',
@@ -480,11 +480,8 @@ var jqxhr = $.ajax({
                 <table class=matrixHeading>
                     <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Field Descriptions</div></td></tr>
                     <tr class=alt><td>externalId</td></tr>
-                    <tr><td class=fielddesc>A place to put an external reference for this client e.g. The ID another system uses.</td></tr>
-                    </tr>
-                    <tr class=alt><td>maxJoinedOnOffsetFromToday</td></tr>
-                    <tr><td class=fielddesc>Convenience field. Number of days since the Client joined.</td></tr>
-                    </tr>
+                    <tr><td class=fielddesc>A place to put an external reference for this client e.g. The ID another system uses.<br>
+                    If provided, it must be unique.</td></tr>
                 </table>
             </div>
         </div>
@@ -494,9 +491,9 @@ var jqxhr = $.ajax({
             <div class="method-description">
                 <h4>List Clients</h4>
                 <p>Example Requests: </p>
-                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/clients?pretty=true">https://localhost:8443/mifosng-provider/api/v1/clients?pretty=true</a>
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients?pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients?pretty=true</a>
                 <br><br>
-                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/clients?pretty=true&fields=displayName,officeName,joinedDate">https://localhost:8443/mifosng-provider/api/v1/clients?pretty=true&fields=displayName,officeName,joinedDate</a>
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients?pretty=true&fields=displayName,officeName,joinedDate">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients?pretty=true&fields=displayName,officeName,joinedDate</a>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://thedomainname/api/v1/clients</code>
@@ -537,7 +534,7 @@ var jqxhr = $.ajax({
                     </ul>
                 </p>
                 <p>Example Request: </p>
-                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/clients/template?pretty=true">https://localhost:8443/mifosng-provider/api/v1/clients/template?pretty=true</a>
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/template?pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/template?pretty=true</a>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://thedomainname/api/v1/clients/template</code>
@@ -570,11 +567,11 @@ var jqxhr = $.ajax({
             <div class="method-description">
                 <h4>Retrieve a Client</h4>
                 <p>Example Requests: </p>
-                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/clients/1?pretty=true">https://localhost:8443/mifosng-provider/api/v1/clients/1?pretty=true</a>
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/1?pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/1?pretty=true</a>
                 <br><br>
-                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/clients/1?pretty=true&template=true">https://localhost:8443/mifosng-provider/api/v1/clients/1?pretty=true&template=true</a>
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/1?pretty=true&template=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/1?pretty=true&template=true</a>
                 <br><br>
-                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/clients/1?pretty=true&fields=id,displayName,officeName">https://localhost:8443/mifosng-provider/api/v1/clients/1?pretty=true&fields=id,displayName,officeName</a>
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/1?pretty=true&fields=id,displayName,officeName">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/1?pretty=true&fields=id,displayName,officeName</a>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://thedomainname/api/v1/clients/{clientId}</code>
@@ -608,7 +605,7 @@ var jqxhr = $.ajax({
     </div>
     <div class="method-example">
         <code class="method-declaration">POST https://thedomainname/api/v1/clients</code>
-<code class="method-request">POST https://localhost:8443/mifosng-provider/api/v1/clients
+<code class="method-request">POST https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients
 Content-Type: application/json
 Request Body:
 {
@@ -635,7 +632,7 @@ Request Body:
     </div>
     <div class="method-example">
         <code class="method-declaration">PUT https://thedomainname/api/v1/clients/{clientId}</code>
-<code class="method-request">PUT https://localhost:8443/mifosng-provider/api/v1/clients/23
+<code class="method-request">PUT https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/23
 Content-Type: application/json
 Request Body:
 { 
@@ -658,9 +655,9 @@ Request Body:
             However, it is quite reasonable to add resources like this to simplify User Interface development.
         </p>
         <p>Example Requests: </p>
-        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/clients/1/loans?pretty=true">https://localhost:8443/mifosng-provider/api/v1/clients/1/loans?pretty=true</a>
+        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/1/loans?pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/1/loans?pretty=true</a>
         <br><br>
-        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/clients/1/loans?pretty=true&fields=openLoans,%20closedLoans,activeLoanCount">https://localhost:8443/mifosng-provider/api/v1/clients/1/loans?pretty=true&fields=openLoans,%20closedLoans,activeLoanCount</a>
+        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/1/loans?pretty=true&fields=openLoans,%20closedLoans,activeLoanCount">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/1/loans?pretty=true&fields=openLoans,%20closedLoans,activeLoanCount</a>
     </div>
     <div class="method-example">
         <code class="method-declaration">GET https://thedomainname/api/v1/clients/{clientId}/loans</code>
@@ -712,9 +709,9 @@ Request Body:
             <b>Note:</b> Notes are returned in descending createOn order.
         </p>
         <p>Example Requests: </p>
-        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/clients/2/notes?pretty=true">https://localhost:8443/mifosng-provider/api/v1/clients/2/notes?pretty=true</a>
+        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/2/notes?pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/2/notes?pretty=true</a>
         <br><br>
-        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/clients/2/notes?pretty=true&fields=note,createdOn,createdByUsername">https://localhost:8443/mifosng-provider/api/v1/clients/2/notes?pretty=true&fields=note,createdOn,createdByUsername</a>
+        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/2/notes?pretty=true&fields=note,createdOn,createdByUsername">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/2/notes?pretty=true&fields=note,createdOn,createdByUsername</a>
     </div>
     <div class="method-example">
         <code class="method-declaration">GET https://thedomainname/api/v1/clients/{clientId}/notes</code>
@@ -756,7 +753,7 @@ Request Body:
     </div>
     <div class="method-example">
         <code class="method-declaration">POST https://thedomainname/api/v1/clients/{clientId}/notes</code>
-        <code class="method-request">POST https://localhost:8443/mifosng-provider/api/v1/clients/1/notes
+        <code class="method-request">POST https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/1/notes
 Content-Type: application/json
 Request Body:
 {
@@ -775,9 +772,9 @@ Request Body:
     <div class="method-description">
         <h4>Retrieve a Client Note</h4>
         <p>Example Requests: </p>
-        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/clients/2/notes/20?pretty=true">https://localhost:8443/mifosng-provider/api/v1/clients/2/notes/20?pretty=true</a>
+        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/2/notes/20?pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/2/notes/20?pretty=true</a>
         <br><br>
-        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/clients/2/notes/20?pretty=true&fields=note,createdOn,createdByUsername">https://localhost:8443/mifosng-provider/api/v1/clients/2/notes/20?pretty=true&fields=note,createdOn,createdByUsername</a>
+        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/2/notes/20?pretty=true&fields=note,createdOn,createdByUsername">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/2/notes/20?pretty=true&fields=note,createdOn,createdByUsername</a>
     </div>
     <div class="method-example">
         <code class="method-declaration">GET https://thedomainname/api/v1/clients/{clientId}/notes/{noteId}</code>
@@ -806,7 +803,7 @@ Request Body:
     </div>
     <div class="method-example">
         <code class="method-declaration">PUT https://thedomainname/api/v1/clients/{clientId}/notes/{noteId}</code>
-<code class="method-request">PUT https://localhost:8443/mifosng-provider/api/v1/clients/2/notes/20
+<code class="method-request">PUT https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/2/notes/20
 Content-Type: application/json
 Request Body:
 {
@@ -828,15 +825,14 @@ Request Body:
                 <h3>Loans</h3>
                 <table class=matrixHeading>
                     <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Field Descriptions</div></td></tr>
-                    <tr class=alt><td>digitsAfterDecimal</td></tr>
-                    <tr><td class=fielddesc>Override the loan product default value for digitsAfterDecimal.</td></tr>
-                    </tr>
                     <tr class=alt><td>principal</td></tr>
                     <tr><td class=fielddesc>Loan amount.</td></tr>
                     <tr class=alt><td>externalId</td></tr>
-                    <tr><td class=fielddesc>A place to put an external reference for this loan e.g. The ID another system uses.</td></tr>
+                    <tr><td class=fielddesc>A place to put an external reference for this loan e.g. The ID another system uses.<br>
+                    If provided, it must be unique.</td></tr>
                     <tr class=alt><td>inArrearsTolerance</td></tr>
-                    <tr><td class=fielddesc></td></tr>
+                    <tr><td class=fielddesc>The amount that can be 'waived' at end of all loan payments because it is too small to worry about.<br>
+                    This is also the tolerance amount assessed when determining if a loan is in arrears.</td></tr>
                     <tr class=alt><td>numberOfRepayments</td></tr>
                     <tr><td class=fielddesc>Number of installments to repay.<br>
                     Used like: numberOfRepayments Every repaymentEvery repaymentFrequencyType<br>
@@ -896,9 +892,9 @@ Request Body:
             <dd>If entered, productId, productName and selectedProduct fields are returned. </dd>
         </dl>
         <p>Example Requests: </p>
-        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/loans/template?clientId=1&productId=1&pretty=true">https://localhost:8443/mifosng-provider/api/v1/loans/template?clientId=1&productId=1&pretty=true</a>
+        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/template?clientId=1&productId=1&pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/template?clientId=1&productId=1&pretty=true</a>
         <br><br>
-        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/loans/template?clientId=1&pretty=true">https://localhost:8443/mifosng-provider/api/v1/loans/template?clientId=1&pretty=true</a>
+        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/template?clientId=1&pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/template?clientId=1&pretty=true</a>
     </div>
     <div class="method-example">
         <code class="method-declaration">GET https://thedomainname/api/v1/loans/template</code>
@@ -1091,9 +1087,9 @@ Request Body:
             <b>Note:</b> template=true parameter doesn't apply to this resource.
         </p>
         <p>Example Requests: </p>
-        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/loans/1?pretty=true">https://localhost:8443/mifosng-provider/api/v1/loans/1?pretty=true</a>
+        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/1?pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/1?pretty=true</a>
         <br><br>
-        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/loans/1?pretty=true&fields=id,principal,interestRatePerYear">https://localhost:8443/mifosng-provider/api/v1/loans/1?pretty=true&fields=id,principal,interestRatePerYear</a>
+        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/1?pretty=true&fields=id,principal,interestRatePerYear">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/1?pretty=true&fields=id,principal,interestRatePerYear</a>
     </div>
     <div class="method-example">
         <code class="method-declaration">GET https://thedomainname/api/v1/loans/{loanId}</code>
@@ -1483,7 +1479,7 @@ Request Body:
 <a id="loans_create" name="loans_create" class="old-syle-anchor">&nbsp;</a>
 <div class="method-section">
     <div class="method-description">
-        <h4>Create a New Loan/Submit a Loan Application</h4>
+        <h4>Create a New Loan / Submit a Loan Application</h4>
         <h5>Arguments</h5>
         <dl class="argument-list">
             <dt>command</dt>
@@ -1503,7 +1499,7 @@ Request Body:
     </div>
     <div class="method-example">
         <code class="method-declaration">POST https://thedomainname/api/v1/loans</code>
-        <code class="method-request">POST https://localhost:8443/mifosng-provider/api/v1/loans
+        <code class="method-request">POST https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans
 Content-Type: application/json
 Request Body:
 {
@@ -1557,7 +1553,7 @@ Request Body:
             </div>
             <div class="method-example">
                 <code class="method-declaration">POST https://thedomainname/api/v1/loans/{loanId}</code>
-                <code class="method-request">POST https://localhost:8443/mifosng-provider/api/v1/loans/1?command=approve
+                <code class="method-request">POST https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/1?command=approve
 Content-Type: application/json
 Request Body:
 {
@@ -1581,7 +1577,7 @@ Request Body:
             </div>
             <div class="method-example">
                 <code class="method-declaration">DELETE https://thedomainname/api/v1/loans/{loanId}</code>
-                <code class="method-request">DELETE https://localhost:8443/mifosng-provider/api/v1/loans/1              
+                <code class="method-request">DELETE https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/1              
 Content-Type: application/json
 No Request Body:
                 </code>
@@ -1611,10 +1607,11 @@ No Request Body:
                     "total" "amount" is set to the amount outstanding.</dd>
                     <dd><b>'waiver'</b><br>
                     "date" is set to the current date.<br>
-                    "total" "amount" is set to the remaining loan principal outstanding.</dd>
+                    "total" "amount" is set to the remaining loan principal outstanding.
+                    The amount that can be waived is limited to the loan's inArrearsTolerance</dd>
                 </dl>
                 <p>Example Request: </p>
-                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/loans/10/transactions/template?command=repayment&pretty=true">https://localhost:8443/mifosng-provider/api/v1/loans/10/transactions/template?command=repayment&pretty=true</a>
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/10/transactions/template?command=repayment&pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/10/transactions/template?command=repayment&pretty=true</a>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://thedomainname/api/v1/loans/{loanId}/transactions/template"</code>
@@ -1648,7 +1645,7 @@ No Request Body:
             </div>
             <div class="method-example">
                 <code class="method-declaration">POST https://thedomainname/api/v1/loans/{loanId}/transactions</code>
-                <code class="method-request">POST https://localhost:8443/mifosng-provider/api/v1/loans/37/transactions?command=repayment
+                <code class="method-request">POST https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/37/transactions?command=repayment
 Content-Type: application/json
 Request Body:
 {
@@ -1671,7 +1668,7 @@ Request Body:
             <div class="method-description">
                 <h4>Retrieve a Repayment or Waiver Details</h4>
                 <p>Example Request: </p>
-                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/loans/10/transactions/20?pretty=true">https://localhost:8443/mifosng-provider/api/v1/loans/10/transactions/20?pretty=true</a>
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/10/transactions/20?pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/10/transactions/20?pretty=true</a>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://thedomainname/api/v1/loans/{loanId}/transactions/{transactionId}</code>
@@ -1710,7 +1707,7 @@ Request Body:
             </div>
             <div class="method-example">
                 <code class="method-declaration">POST https://thedomainname/api/v1/loans/{loanId}/transactions/{transactionId}</code>
-                <code class="method-request">POST https://localhost:8443/mifosng-provider/api/v1/loans/16/transactions/32
+                <code class="method-request">POST https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/16/transactions/32
 Content-Type: application/json
 Request Body:
 {
@@ -1740,8 +1737,8 @@ Request Body:
                 <table class=matrixHeading>
                     <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Field Descriptions</div></td></tr>
                     <tr class=alt><td>externalId</td></tr>
-                    <tr><td class=fielddesc>A place to put an external reference for this office e.g. The ID another system uses for it.</td></tr>
-                    </tr>
+                    <tr><td class=fielddesc>A place to put an external reference for this office e.g. The ID another system uses for it.<br>
+                    If provided, it must be unique.</td></tr>
                     <tr class=alt><td>hierarchy</td></tr>
                     <tr><td class=fielddesc>This field is a system generated convenience field.  It can't be set.<br>
                     It uses "dot notation" to define where an office stands in the office hierarchy.<br>
@@ -1750,7 +1747,6 @@ Request Body:
                     And if a further office (id = 78) is placed directly under office (id = 12) its hierarchy value is '.12.78.'<br><br>
                     The hierarchy value is useful when you need to display offices in 'hierarchy' order (perhaps indented in a drop down list box).
                     </td></tr>
-                    </tr>
                 </table>
             </div>
         </div>
@@ -1760,9 +1756,9 @@ Request Body:
             <div class="method-description">
                 <h4>List Offices</h4>
                 <p>Example Requests: </p>
-                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/offices?pretty=true">https://localhost:8443/mifosng-provider/api/v1/offices?pretty=true</a>
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices?pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices?pretty=true</a>
                 <br><br>
-                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/offices?fields=id,name,openingDate&pretty=true">https://localhost:8443/mifosng-provider/api/v1/offices?fields=id,name,openingDate&pretty=true</a>
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices?fields=id,name,openingDate&pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices?fields=id,name,openingDate&pretty=true</a>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://thedomainname/api/v1/offices</code>
@@ -1806,8 +1802,8 @@ Request Body:
                     </ul>
                 </p>
                 <p>Example Request: </p>
-                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/offices/template?pretty=true">
-                https://localhost:8443/mifosng-provider/api/v1/offices/template?pretty=true
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices/template?pretty=true">
+                https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices/template?pretty=true
                 </a>
             </div>
             <div class="method-example">
@@ -1834,16 +1830,16 @@ Request Body:
             <div class="method-description">
                 <h4>Retrieve an Office</h4>
                 <p>Example Requests: </p>
-                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/offices/1?pretty=true">
-                https://localhost:8443/mifosng-provider/api/v1/offices/1?pretty=true
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices/1?pretty=true">
+                https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices/1?pretty=true
                 </a>
                 <br><br>
-                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/offices/1?pretty=true&template=true">
-                https://localhost:8443/mifosng-provider/api/v1/offices/1?pretty=true&template=true
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices/1?pretty=true&template=true">
+                https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices/1?pretty=true&template=true
                 </a>
                 <br><br>
-                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/offices/1?pretty=true&fields=id,name,parentName">
-                https://localhost:8443/mifosng-provider/api/v1/offices/1?pretty=true&fields=id,name,parentName
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices/1?pretty=true&fields=id,name,parentName">
+                https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices/1?pretty=true&fields=id,name,parentName
                 </a>
             </div>
             <div class="method-example">
@@ -1872,7 +1868,7 @@ Request Body:
             </div>
             <div class="method-example">
                 <code class="method-declaration">POST https://thedomainname/api/v1/offices</code>
-<code class="method-request">POST https://localhost:8443/mifosng-provider/api/v1/offices
+<code class="method-request">POST https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices
 Content-Type: application/json 
 Request Body:
 {
@@ -1897,7 +1893,7 @@ Request Body:
             </div>
             <div class="method-example">
                 <code class="method-declaration">PUT https://thedomainname/api/v1/offices/{officeId}</code>
-<code class="method-request">PUT https://localhost:8443/mifosng-provider/api/v1/offices/1
+<code class="method-request">PUT https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices/1
 Content-Type: application/json
 Request Body:
 {
@@ -1924,12 +1920,12 @@ Request Body:
                 <table class=matrixHeading>
                     <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Field Descriptions</div></td></tr>
                     <tr class=alt><td>digitsAfterDecimal</td></tr>
-                    <tr><td class=fielddesc>Override the default value for digitsAfterDecimal associated with the currencyCode selected.</td></tr>
-                    </tr>
+                    <tr><td class=fielddesc>Override the currency default value for digitsAfterDecimal.</td></tr>
                     <tr class=alt><td>principal</td></tr>
                     <tr><td class=fielddesc>Loan amount.</td></tr>
                     <tr class=alt><td>inArrearsTolerance</td></tr>
-                    <tr><td class=fielddesc></td></tr>
+                    <tr><td class=fielddesc>The amount that can be 'waived' at end of all loan payments because it is too small to worry about.<br>
+                    This is also the tolerance amount assessed when determining if a loan is in arrears.</td></tr>
                     <tr class=alt><td>numberOfRepayments</td></tr>
                     <tr><td class=fielddesc>Number of installments to repay.<br>
                     Used like: numberOfRepayments Every repaymentEvery repaymentFrequencyType<br>
@@ -1974,9 +1970,9 @@ Request Body:
             <div class="method-description">
                 <h4>List Loan Products</h4>
                 <p>Example Requests:</p> 
-                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/loanproducts?pretty=true">https://localhost:8443/mifosng-provider/api/v1/loanproducts?pretty=true</a>
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts?pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts?pretty=true</a>
                 <br><br>
-                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/loanproducts?pretty=true&fields=name,description,interestRateFrequencyType,amortizationType">https://localhost:8443/mifosng-provider/api/v1/loanproducts?pretty=true&fields=name,description,interestRateFrequencyType,amortizationType</a>
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts?pretty=true&fields=name,description,interestRateFrequencyType,amortizationType">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts?pretty=true&fields=name,description,interestRateFrequencyType,amortizationType</a>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://thedomainname/api/v1/loanproducts</code>
@@ -2110,7 +2106,7 @@ Request Body:
                     </ul>
                 </p>
                 <p>Example Request: </p>
-                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/loanproducts/template?pretty=true">https://localhost:8443/mifosng-provider/api/v1/loanproducts/template?pretty=true</a>
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts/template?pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts/template?pretty=true</a>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://thedomainname/api/v1/loanproducts/template</code>
@@ -2266,11 +2262,11 @@ Request Body:
             <div class="method-description">
                 <h4>Retrieve a Loan Product</h4>
                 <p>Example Requests: </p>
-                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/loanproducts/1?pretty=true">https://localhost:8443/mifosng-provider/api/v1/loanproducts/1?pretty=true</a>
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts/1?pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts/1?pretty=true</a>
                 <br><br>
-                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/loanproducts/1?pretty=true&template=true">https://localhost:8443/mifosng-provider/api/v1/loanproducts/1?pretty=true&template=true</a>
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts/1?pretty=true&template=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts/1?pretty=true&template=true</a>
                  <br><br>
-                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/loanproducts/1?pretty=true&fields=name,description,numberOfRepayments">https://localhost:8443/mifosng-provider/api/v1/loanproducts/1?pretty=true&fields=name,description,numberOfRepayments</a>
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts/1?pretty=true&fields=name,description,numberOfRepayments">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts/1?pretty=true&fields=name,description,numberOfRepayments</a>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://thedomainname/api/v1/loanproducts/{productId}</code>
@@ -2349,7 +2345,7 @@ Request Body:
             </div>
             <div class="method-example">
                 <code class="method-declaration">POST https://thedomainname/api/v1/loanproducts</code>
-<code class="method-request">POST https://localhost:8443/mifosng-provider/api/v1/loanproducts
+<code class="method-request">POST https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts
 Content-Type: application/json
 Request Body:
 {
@@ -2384,7 +2380,7 @@ Request Body:
             </div>
             <div class="method-example">
                 <code class="method-declaration">POST https://thedomainname/api/v1/loanproducts/{loanId}</code>
-<code class="method-request">POST https://localhost:8443/mifosng-provider/api/v1/loanproducts/1
+<code class="method-request">POST https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts/1
 Content-Type: application/json
 Request Body:
 {
@@ -2416,9 +2412,9 @@ Request Body:
 	        <h4>Retrieve Currency Configuration</h4>
 	        <p>Returns the list of currencies permitted for use AND the list of currencies not selected (but available for selection).</p>
 	        <p>Example Requests: </p>
-	        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/configurations/currency?pretty=true">https://localhost:8443/mifosng-provider/api/v1/configurations/currency?pretty=true</a>
+	        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/configurations/currency?pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/configurations/currency?pretty=true</a>
                 <br><br>
-	        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/configurations/currency?pretty=true&fields=selectedCurrencyOptions">https://localhost:8443/mifosng-provider/api/v1/configurations/currency?pretty=true&fields=selectedCurrencyOptions</a>
+	        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/configurations/currency?pretty=true&fields=selectedCurrencyOptions">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/configurations/currency?pretty=true&fields=selectedCurrencyOptions</a>
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">GET https://thedomainname/api/v1/configurations/currency</code>
@@ -2467,7 +2463,7 @@ Request Body:
 	    </div>
             <div class="method-example">
                 <code class="method-declaration">PUT https://thedomainname/api/v1/configurations/currency</code>
-                <code class="method-request">PUT https://localhost:8443/mifosng-provider/api/v1/configurations/currency
+                <code class="method-request">PUT https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/configurations/currency
 Content-Type: application/json
 Request Body:{
 "currencies": ["KES", "BND",  "LBP", "GHC", "USD", "XOF", "AED", "AMD"]
@@ -2528,9 +2524,9 @@ Request Body:{
                     <dd>The Additional Fields Type (Mifos X database table) to restrict the output to</dd>
                 </dl>
                 <p>Example Requests: </p>
-                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/additionalfields?type=portfolio_client&pretty=true">https://localhost:8443/mifosng-provider/api/v1/additionalfields?type=portfolio_client&pretty=true</a>
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/additionalfields?type=portfolio_client&pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/additionalfields?type=portfolio_client&pretty=true</a>
                 <br><br>
-                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/additionalfields?pretty=true">https://localhost:8443/mifosng-provider/api/v1/additionalfields?pretty=true</a>
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/additionalfields?pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/additionalfields?pretty=true</a>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://thedomainname/api/v1/additionalfields</code>
@@ -2560,7 +2556,7 @@ Request Body:{
                 Returns the Set of Additional Fields data for the ID provided.  The ID is the id field of the Type table e.g. portfolio_client might have an id value of 4.  The output is a JSON formatted "Generic Resultset".  The Generic Resultset contains Column Heading as well as Data information.  The Column Heading information may include allowed values (columnValues array).
                 </p>
                 <p>Example Request: 
-                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/additionalfields/portfolio_client/Additional Information/2?pretty=true">https://localhost:8443/mifosng-provider/api/v1/additionalfields/portfolio_client/Additional Information/2?pretty=true</a>
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/additionalfields/portfolio_client/Additional Information/2?pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/additionalfields/portfolio_client/Additional Information/2?pretty=true</a>
                 </p>
             </div>
             <div class="method-example">
@@ -2638,7 +2634,7 @@ Request Body:{
             </div>
             <div class="method-example">
                 <code class="method-declaration">POST https://thedomainname/api/v1/additionalfields/{type}/{set}/{id}</code>
-                <code class="method-request">POST https://localhost:8443/mifosng-provider/api/v1/additionalfields/portfolio_client/Additional Information/2
+                <code class="method-request">POST https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/additionalfields/portfolio_client/Additional Information/2
 Content-Type: application/json
 Request Body:
 {
@@ -2697,9 +2693,9 @@ Request Body:
                     <dd>Output will be delivered as a CSV file instead of JSON.</dd>
                 </dl>
                 <p>Example Requests: </p>
-                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/reports?pretty=true">https://localhost:8443/mifosng-provider/api/v1/reports?pretty=true</a>
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/reports?pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/reports?pretty=true</a>
                 <br><br>
-                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/reports?pretty=true&exportCSV=true">https://localhost:8443/mifosng-provider/api/v1/reports?pretty=true&exportCSV=true</a>
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/reports?pretty=true&exportCSV=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/reports?pretty=true&exportCSV=true</a>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://thedomainname/api/v1/reports</code>
@@ -2819,13 +2815,13 @@ Request Body:
                     <dd>Output will be delivered as a CSV file instead of JSON.  Doesn't apply to Pentaho reports .</dd>
                 </dl>
                 <p>Example Requests: </p>
-                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/reports/Client%20Listing?R_officeId=1&pretty=true">https://localhost:8443/mifosng-provider/api/v1/reports/Client%20Listing?R_officeId=1&pretty=true</a>
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/reports/Client%20Listing?R_officeId=1&pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/reports/Client%20Listing?R_officeId=1&pretty=true</a>
                 <br><br>
-                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/reports/Client%20Listing?R_officeId=1&pretty=true&exportCSV=true">https://localhost:8443/mifosng-provider/api/v1/reports/Client%20Listing?R_officeId=1&pretty=true&exportCSV=true</a>
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/reports/Client%20Listing?R_officeId=1&pretty=true&exportCSV=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/reports/Client%20Listing?R_officeId=1&pretty=true&exportCSV=true</a>
                 <br><br>
-                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/reports/selectOfficeId?R_officeId=1&pretty=true&parameterType=true">https://localhost:8443/mifosng-provider/api/v1/reports/selectOfficeId?R_officeId=1&pretty=true& parameterType=true</a>
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/reports/selectOfficeId?R_officeId=1&pretty=true&parameterType=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/reports/selectOfficeId?R_officeId=1&pretty=true& parameterType=true</a>
                 <br><br>
-                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/reports/selectOfficeId?R_officeId=1&pretty=true&parameterType=true&exportCSV=true">https://localhost:8443/mifosng-provider/api/v1/reports/selectOfficeId?R_officeId=1&pretty=true& parameterType=true&exportCSV=true</a>
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/reports/selectOfficeId?R_officeId=1&pretty=true&parameterType=true&exportCSV=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/reports/selectOfficeId?R_officeId=1&pretty=true& parameterType=true&exportCSV=true</a>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://thedomainname/api/v1/reports/{reportName}</code>
@@ -2927,7 +2923,7 @@ Request Body:
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">POST https://thedomainname/api/v1/authentication?username={username}&password={password}</code>
-<code class="method-request">POST https://localhost:8443/mifosng-provider/api/v1/authentication?username=super1&password=demo
+<code class="method-request">POST https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/authentication?username=super1&password=demo
 Content-Type: application/json
 No Request Body
 </code>
@@ -2961,9 +2957,9 @@ No Request Body
 	    <div class="method-description">
 	        <h4>Retrieve list of users</h4>
 	        <p>Example Requests: </p>
-	        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/users?pretty=true">https://localhost:8443/mifosng-provider/api/v1/users?pretty=true</a>
+	        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users?pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users?pretty=true</a>
                 <br><br>
-	        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/users?pretty=true&fields=id,username,email,officeName">https://localhost:8443/mifosng-provider/api/v1/users?pretty=true&fields=id,username,email,officeName</a>
+	        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users?pretty=true&fields=id,username,email,officeName">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users?pretty=true&fields=id,username,email,officeName</a>
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">GET https://thedomainname/api/v1/users</code>
@@ -2999,7 +2995,7 @@ No Request Body
                     </ul>
                 </p>
 	        <p>Example Request: </p>
-	        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/users/template?pretty=true">https://localhost:8443/mifosng-provider/api/v1/users/template?pretty=true</a>
+	        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users/template?pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users/template?pretty=true</a>
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">GET https://thedomainname/api/v1/users/template</code>
@@ -3061,11 +3057,11 @@ No Request Body
 	    <div class="method-description">
 	        <h4>Retrieve a User</h4>
 	        <p>Example Requests: </p>
-	        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/users/1?pretty=true">https://localhost:8443/mifosng-provider/api/v1/users/1?pretty=true</a>
+	        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users/1?pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users/1?pretty=true</a>
 	        <br><br>
-	        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/users/1?pretty=true&template=true">https://localhost:8443/mifosng-provider/api/v1/users/1?pretty=true&template=true</a>
+	        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users/1?pretty=true&template=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users/1?pretty=true&template=true</a>
 	        <br><br>
-	        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/users/1?pretty=true&fields=username,officeName">https://localhost:8443/mifosng-provider/api/v1/users/1?pretty=true&fields=username,officeName</a>
+	        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users/1?pretty=true&fields=username,officeName">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users/1?pretty=true&fields=username,officeName</a>
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">GET https://thedomainname/api/v1/users/1</code>
@@ -3125,7 +3121,7 @@ No Request Body
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">POST https://thedomainname/api/v1/users</code>
-<code class="method-request">POST https://localhost:8443/mifosng-provider/api/v1/users
+<code class="method-request">POST https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users
 Content-Type: application/json
 Request body:
 { 
@@ -3153,7 +3149,7 @@ Request body:
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">PUT https://thedomainname/api/v1/users/{userId)</code>
-<code class="method-request">PUT https://localhost:8443/mifosng-provider/api/v1/users/3
+<code class="method-request">PUT https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users/3
 Content-Type: application/json
 Request body:
 {
@@ -3180,7 +3176,7 @@ Request body:
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">DELETE https://thedomainname/api/v1/users/{userId}</code>
-<code class="method-request">DELETE https://localhost:8443/mifosng-provider/api/v1/users/20
+<code class="method-request">DELETE https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users/20
 Content-Type: application/json
 No Request Body
 </code>
@@ -3207,9 +3203,9 @@ No Request Body
 	    <div class="method-description">
 	        <h4>List Roles</h4>
 	        <p>Example Requests: </p>
-	        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/roles?pretty=true">https://localhost:8443/mifosng-provider/api/v1/roles?pretty=true</a>
+	        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles?pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles?pretty=true</a>
 	        <br><br>
-                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/roles?pretty=true&fields=name">https://localhost:8443/mifosng-provider/api/v1/roles?pretty=true&fields=name</a>
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles?pretty=true&fields=name">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles?pretty=true&fields=name</a>
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">GET https://thedomainname/api/v1/roles</code>
@@ -3249,7 +3245,7 @@ No Request Body
                     </ul>
                 </p>
 	        <p>Example Request: </p>
-	        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/roles/template?pretty=true">https://localhost:8443/mifosng-provider/api/v1/roles/template?pretty=true</a>
+	        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles/template?pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles/template?pretty=true</a>
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">GET https://thedomainname/api/v1/roles/template</code>
@@ -3285,11 +3281,11 @@ No Request Body
 	    <div class="method-description">
 	        <h4>Retrieve a Role</h4>
 	        <p>Example Requests: </p>
-	        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/roles/1?pretty=true">https://localhost:8443/mifosng-provider/api/v1/roles/1?pretty=true</a>
+	        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles/1?pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles/1?pretty=true</a>
                 <br><br>
-	        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/roles/1?pretty=true&template=true">https://localhost:8443/mifosng-provider/api/v1/roles/1?pretty=true&template=true</a>
+	        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles/1?pretty=true&template=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles/1?pretty=true&template=true</a>
                 <br><br>
-	        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/roles/1?pretty=true&fields=name,selectedPermissions">https://localhost:8443/mifosng-provider/api/v1/roles/1?pretty=true&fields=name,selectedPermissions</a>
+	        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles/1?pretty=true&fields=name,selectedPermissions">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles/1?pretty=true&fields=name,selectedPermissions</a>
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">GET https://thedomainname/api/v1/roles/{roleId}</code>
@@ -3334,7 +3330,7 @@ No Request Body
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">POST https://thedomainname/api/v1/roles</code>
-<code class="method-request">POST https://localhost:8443/mifosng-provider/api/v1/roles
+<code class="method-request">POST https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles
 Content-Type: application/json
 Request body:
 { 
@@ -3357,7 +3353,7 @@ Request body:
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">PUT https://thedomainname/api/v1/roles/{roleId}</code>
-<code class="method-request">PUT https://localhost:8443/mifosng-provider/api/v1/roles/8
+<code class="method-request">PUT https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles/8
 Content-Type: application/json
 Request body:
 { 
@@ -3387,9 +3383,9 @@ Request body:
 	    <div class="method-description">
 	        <h4>List Application Permissions</h4>
 	        <p>Example Requests: </p>
-	        <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/permissions?pretty=true">https://localhost:8443/mifosng-provider/api/v1/permissions?pretty=true</a>
+	        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/permissions?pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/permissions?pretty=true</a>
                 <br><br>
-                <a style="word-wrap: break-word;" href="https://localhost:8443/mifosng-provider/api/v1/permissions?pretty=true&fields=id,code">https://localhost:8443/mifosng-provider/api/v1/permissions?pretty=true&fields=id,code</a>
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/permissions?pretty=true&fields=id,code">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/permissions?pretty=true&fields=id,code</a>
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">GET https://thedomainname/api/v1/permissions</code>
@@ -3427,41 +3423,41 @@ Request body:
         <table width="80%"><tr><td><h3>Full API Matrix</h4></td><td><h4>API Endpoint:</h5></td><td><h5>https://thedomainname/api</h5></td></tr></table>
         <table class=matrixHeading>
             <tr class="matrixHeadingBG"><td colspan=2 valign="top"><div class="matrixHeadingVerbs"><table><tr><td>RESOURCES</td></tr></table></div></td><td><table><tr><td><div class="matrixHeadingVerbs">POST</div></td></tr><tr><td><div class=matrixHeadingCommands>create/complex update</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">GET</div></td></tr><tr><td><div class=matrixHeadingCommands>read</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">PUT</div></td></tr><tr><td><div class=matrixHeadingCommands>update</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">DELETE</div></td></tr><tr><td><div class=matrixHeadingCommands>delete</div></td></tr></table></td></tr>
-            <tr class="alt"><td><a href="#clients">CLIENT</a></td><td>/v1/clients</td><td><a href="api.htm#clients_create">Create a Client</a></td><td><a href="#clients_list">List Clients</a></td><td></td><td></td></tr>
-            <tr><td></td><td>/v1/clients/{clientId}</td><td></td><td><a href="#clients_retrieve">Retrieve a Client</a></td><td><a href="#clients_update">Update a Client</a></td><td></td></tr>
-            <tr class="alt"><td></td><td>/v1/clients/{clientId}/loans</td><td></td><td><a href="#clients_loansummary">Retrieve a Client's Loan Account Summary</a></td><td></td><td></td></tr>
-            <tr><td></td><td>/v1/clients/{clientId}/notes</td><td><a href="#clients_addnote">Add a Client Note</a></td><td><a href="#clients_notes">Retrieve a Client's Notes</a></td><td></td><td></td></tr>
-            <tr class="alt"><td></td><td>/v1/clients/{clientId}/notes/{noteId}</td><td></td><td><a href="#clients_retrievenote">Retrieve a Client Note</a></td><td><a href="#clients_updatenote">Update a Client Note</a></td><td></td></tr>
-            <tr><td><a href="#loans">LOAN</a></td><td>/v1/loans</td><td><a href="#loans_create">Create a New Loan/Submit a Loan Application</a></td><td></td><td></td><td></td></tr>
-            <tr class="alt"><td></td><td>/v1/loans/{loanId}</td><td><a href="#loans_approve_etc">Approve, Undo Approval, Disburse, Undo Disbursal, Reject a Loan or Withdraw a Loan Application</a></td><td><a href="#loans_retrieve">Retrieve a Loan</a></td><td></td><td><a href="#loans_delete">Delete a Loan</a></td></tr>
-            <tr class="alt"><td></td><td>/v1/loans/{loanId}/transactions</td><td><a href="#loans_repayment_etc">Make a Repayment / Loan Waiver</a></td><td></td><td></td><td></td></tr>
-            <tr><td></td><td>/v1/loans/{loanId}/transactions/{transactionId}</td><td><a href="#loans_repaymentadjust_etc">Adjust a Repayment or Waiver</a></td><td><a href="#loans_repaymentretrieve_etc">Retrieve a Repayment or Waiver Details</a></td><td></td><td></td></tr>
-            <tr class="alt"><td><a href="#offices">OFFICE</a></td><td>/v1/offices</td><td><a href="#offices_create">Create an Office</a></td><td><a href="#offices_list">List Offices</a></td><td></td><td></td></tr>
-            <tr><td></td><td>/v1/offices/{officeId}</td><td></td><td><a href="#offices_retrieve">Retrieve an Office</a></td><td><a href="#offices_update">Update an Office</a></td><td></td></tr>
-            <tr class="alt"><td><a href="#loanproducts">LOAN PRODUCT</a></td><td>/v1/loanproducts</td><td><a href="#loanproducts_create">Create a Loan Product</a></td><td><a href="#loanproducts_list">List Loan Products</a></td><td></td><td></td></tr>
-            <tr><td></td><td>/v1/loanproducts/{productId}</td><td></td><td><a href="#loanproducts_retrieve">Retrieve a Loan Product</a></td><td><a href="#loanproducts_update">Update a Loan Product</a></td><td></td></tr>
-            <tr class="alt"><td><a href="#configs">CONFIGURATION</a></td><td>/v1/configurations/currency</td><td></td><td><a href="#configs_currencyretrieve">Retrieve Currency Configuration</a></td><td><a href="#configs_currencyupdate">Update Currency Configuration</a></td><td></td></tr>
-            <tr><td><a href="#additionalfields">ADDITIONAL FIELDS</a></td><td>/v1/additionalfields</td><td></td><td><a href="#additionalfields_list">List Additional Fields Sets</a></td><td></td><td></td></tr>
-            <tr class="alt"><td></td><td>/v1/additionalfields/{Type}/{Set}/{id}</td><td><a href="#additionalfields_update">Update Additional Fields</a></td><td><a href="#additionalfields_retrieve">Retrieve Additional Fields</a></td><td></td><td></td></tr>
-            <tr><td><a href="#reports">REPORT</a></td><td>/v1/reports</td><td></td><td><a href="#reports_list">List Reports</a></td><td></td><td></td></tr>
-            <tr class="alt"><td></td><td>/v1/reports/{reportName}</td><td></td><td><a href="#report_run">Run a Report</a></td><td></td><td></td></tr>
-            <tr><td><a href="#authentication">AUTHENTICATION</a></td><td>/v1/authentication</td><td><a href="#authentication_permissions">Verify Authentication</a></td><td></td><td></td><td></td></tr>
-            <tr class="alt"><td><a href="#users">USER</a></td><td>/v1/users</td><td><a href="#users_create">Create a User</a></td><td><a href="#users_list">List Users</a></td><td></td><td></td></tr>
-            <tr><td></td><td>/v1/users/{userId}</td><td></td><td><a href="#users_retrieve">Retrieve a User</a></td><td><a href="#users_update">Update a User</a></td><td><a href="#users_delete">Delete a User</a></td></tr>
-            <tr class="alt"><td><a href="#roles">ROLE</a></td><td>/v1/roles</td><td><a href="#roles_create">Create a New Role</a></td><td><a href="#roles_list">List Roles</a></td><td></td><td></td></tr>
-            <tr><td></td><td>/v1/roles/{roleId}</td><td></td><td><a href="#roles_retrieve">Retrieve a Role</a></td><td><a href="#roles_update">Update a Role</a></td><td></td></tr>
-            <tr class="alt"><td><a href="#permissions">PERMISSION</a></td><td>/v1/permissions</td><td></td><td><a href="#permissions_list">List Application Permissions</a></td><td></td><td></td></tr>
+            <tr class="alt"><td><a href="#clients">CLIENT</a></td><td>clients</td><td><a href="api.htm#clients_create">Create a Client</a></td><td><a href="#clients_list">List Clients</a></td><td></td><td></td></tr>
+            <tr><td></td><td>clients/{clientId}</td><td></td><td><a href="#clients_retrieve">Retrieve a Client</a></td><td><a href="#clients_update">Update a Client</a></td><td></td></tr>
+            <tr class="alt"><td></td><td>clients/{clientId}/loans</td><td></td><td><a href="#clients_loansummary">Retrieve a Client's Loan Account Summary</a></td><td></td><td></td></tr>
+            <tr><td></td><td>clients/{clientId}/notes</td><td><a href="#clients_addnote">Add a Client Note</a></td><td><a href="#clients_notes">Retrieve a Client's Notes</a></td><td></td><td></td></tr>
+            <tr class="alt"><td></td><td>clients/{clientId}/notes/{noteId}</td><td></td><td><a href="#clients_retrievenote">Retrieve a Client Note</a></td><td><a href="#clients_updatenote">Update a Client Note</a></td><td></td></tr>
+            <tr><td><a href="#loans">LOAN</a></td><td>loans</td><td><a href="#loans_create">Create a New Loan / Submit a Loan Application</a></td><td></td><td></td><td></td></tr>
+            <tr class="alt"><td></td><td>loans/{loanId}</td><td><a href="#loans_approve_etc">Approve, Undo Approval, Disburse, Undo Disbursal, Reject a Loan or Withdraw a Loan Application</a></td><td><a href="#loans_retrieve">Retrieve a Loan</a></td><td></td><td><a href="#loans_delete">Delete a Loan</a></td></tr>
+            <tr class="alt"><td></td><td>loans/{loanId}/transactions</td><td><a href="#loans_repayment_etc">Make a Repayment / Loan Waiver</a></td><td></td><td></td><td></td></tr>
+            <tr><td></td><td>loans/{loanId}/transactions/{transactionId}</td><td><a href="#loans_repaymentadjust_etc">Adjust a Repayment or Waiver</a></td><td><a href="#loans_repaymentretrieve_etc">Retrieve a Repayment or Waiver Details</a></td><td></td><td></td></tr>
+            <tr class="alt"><td><a href="#offices">OFFICE</a></td><td>offices</td><td><a href="#offices_create">Create an Office</a></td><td><a href="#offices_list">List Offices</a></td><td></td><td></td></tr>
+            <tr><td></td><td>offices/{officeId}</td><td></td><td><a href="#offices_retrieve">Retrieve an Office</a></td><td><a href="#offices_update">Update an Office</a></td><td></td></tr>
+            <tr class="alt"><td><a href="#loanproducts">LOAN PRODUCT</a></td><td>loanproducts</td><td><a href="#loanproducts_create">Create a Loan Product</a></td><td><a href="#loanproducts_list">List Loan Products</a></td><td></td><td></td></tr>
+            <tr><td></td><td>loanproducts/{productId}</td><td></td><td><a href="#loanproducts_retrieve">Retrieve a Loan Product</a></td><td><a href="#loanproducts_update">Update a Loan Product</a></td><td></td></tr>
+            <tr class="alt"><td><a href="#configs">CONFIGURATION</a></td><td>configurations/currency</td><td></td><td><a href="#configs_currencyretrieve">Retrieve Currency Configuration</a></td><td><a href="#configs_currencyupdate">Update Currency Configuration</a></td><td></td></tr>
+            <tr><td><a href="#additionalfields">ADDITIONAL FIELDS</a></td><td>additionalfields</td><td></td><td><a href="#additionalfields_list">List Additional Fields Sets</a></td><td></td><td></td></tr>
+            <tr class="alt"><td></td><td>additionalfields/{Type}/{Set}/{id}</td><td><a href="#additionalfields_update">Update Additional Fields</a></td><td><a href="#additionalfields_retrieve">Retrieve Additional Fields</a></td><td></td><td></td></tr>
+            <tr><td><a href="#reports">REPORT</a></td><td>reports</td><td></td><td><a href="#reports_list">List Reports</a></td><td></td><td></td></tr>
+            <tr class="alt"><td></td><td>reports/{reportName}</td><td></td><td><a href="#report_run">Run a Report</a></td><td></td><td></td></tr>
+            <tr><td><a href="#authentication">AUTHENTICATION</a></td><td>authentication</td><td><a href="#authentication_permissions">Verify Authentication</a></td><td></td><td></td><td></td></tr>
+            <tr class="alt"><td><a href="#users">USER</a></td><td>users</td><td><a href="#users_create">Create a User</a></td><td><a href="#users_list">List Users</a></td><td></td><td></td></tr>
+            <tr><td></td><td>users/{userId}</td><td></td><td><a href="#users_retrieve">Retrieve a User</a></td><td><a href="#users_update">Update a User</a></td><td><a href="#users_delete">Delete a User</a></td></tr>
+            <tr class="alt"><td><a href="#roles">ROLE</a></td><td>roles</td><td><a href="#roles_create">Create a New Role</a></td><td><a href="#roles_list">List Roles</a></td><td></td><td></td></tr>
+            <tr><td></td><td>roles/{roleId}</td><td></td><td><a href="#roles_retrieve">Retrieve a Role</a></td><td><a href="#roles_update">Update a Role</a></td><td></td></tr>
+            <tr class="alt"><td><a href="#permissions">PERMISSION</a></td><td>permissions</td><td></td><td><a href="#permissions_list">List Application Permissions</a></td><td></td><td></td></tr>
         </table>
         <br>
         <table class=matrixHeading>
             <tr class="matrixHeadingBG"><td valign="top"><div class="matrixHeadingVerbs"><table><tr><td>CONVENIENCE RESOURCES</td></tr></table></div></td><td><table><tr><td><div class="matrixHeadingVerbs">GET</div></td></tr><tr><td><div class=matrixHeadingCommands>read</div></td></tr></table></td></tr>
-            <tr class="alt"><td>/v1/clients/template</td><td><a href="#clients_template">Retrieve Client Details Template</a></td></tr>
-            <tr><td>/v1/loans/template</td><td><a href="#loans_template">Retrieve Loan Details Template</a></td></tr>
-            <tr class="alt"><td>/v1/loans/{loanId}/transactions/template</td><td><a href="#loans_repaymenttemplate_etc">Retrieve Loan Repayment/Loan Waiver Template</a></td></tr>
-            <tr><td>/v1/offices/template</td><td><a href="#offices_template">Retrieve Office Details Template</a></td></tr>
-            <tr class="alt"><td>/v1/loanproducts/template</td><td><a href="#loanproducts_template">Retrieve Loan Product Details Template</a></td></tr>
-            <tr><td>/v1/users/template</td><td><a href="#users_template">Retrieve User Details Template</a></td></tr>
-            <tr class="alt"><td>/v1/roles/template</td><td><a href="#roles_template">Retrieve Role Details Template</a></td></tr>
+            <tr class="alt"><td>clients/template</td><td><a href="#clients_template">Retrieve Client Details Template</a></td></tr>
+            <tr><td>loans/template</td><td><a href="#loans_template">Retrieve Loan Details Template</a></td></tr>
+            <tr class="alt"><td>loans/{loanId}/transactions/template</td><td><a href="#loans_repaymenttemplate_etc">Retrieve Loan Repayment/Loan Waiver Template</a></td></tr>
+            <tr><td>offices/template</td><td><a href="#offices_template">Retrieve Office Details Template</a></td></tr>
+            <tr class="alt"><td>loanproducts/template</td><td><a href="#loanproducts_template">Retrieve Loan Product Details Template</a></td></tr>
+            <tr><td>users/template</td><td><a href="#users_template">Retrieve User Details Template</a></td></tr>
+            <tr class="alt"><td>roles/template</td><td><a href="#roles_template">Retrieve Role Details Template</a></td></tr>
         </table>
     </div>
 </div>

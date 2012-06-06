@@ -58,30 +58,26 @@ DOCUMENTATION REMAINING
 
 Just Errors section to do in the Overview section
 
-Identify Fields that need explaining
-=========================
-bit of loan product/loan
 
-repayment/waiver - describe waiver
-why fields "totalWaived", "overpaid"
-
-
-take aout /v1 from resource name.
-
-maxJoinedOnOffsetFromToday
+describe waiver CHECK RULES AFTER
+why fields "totalWaived", "overpaid" - KW DOING - CHECK AFTER
+maxJoinedOnOffsetFromToday - KW DOING - CHECK AFTER
 
     - create a client example could show second example with the
 field clientOrBusinessName being used instead of firstname, lastname,
-no mention of it.
-    - mention if optional externalId is provided, it must be unqiue?
+no mention of it - done BUT NOTE displayName starts with space!
+
     - TODO - check update of client with 'clientOrBusinessName' with
-a first name/last name results in error
+a first name/last name results in error - it just updates! NEED KEITH TO FIX
 
  - Loans
      - digitsAfterDecimal and currencyCode should NOT be sent during
 creation - they should be inherited from the product. Likewise for
-update.
+update. KW DOING - CHECK AFTER
+
      - Would be better if it was possible to not pass any of these
 details if defaults from loan product are acceptable, they can be
-inherited from loan product.
+inherited from loan product. KW DOING - CHECK AFTER
+
+?DOMAIN NAME 
 

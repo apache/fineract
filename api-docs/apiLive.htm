@@ -37,7 +37,7 @@
                 <div class="tocMatrix">
                     <table class=matrixHeading>
                         <tr class="matrixHeadingBG"><td colspan=2 valign="top"><div class="matrixHeadingVerbs"><table><tr><td>RESOURCES</td></tr></table></div></td><td><table><tr><td><div class="matrixHeadingVerbs">POST</div></td></tr><tr><td><div class=matrixHeadingCommands>create/complex update</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">GET</div></td></tr><tr><td><div class=matrixHeadingCommands>read</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">PUT</div></td></tr><tr><td><div class=matrixHeadingCommands>update</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">DELETE</div></td></tr><tr><td><div class=matrixHeadingCommands>delete</div></td></tr></table></td></tr>
-                        <tr class="alt"><td><a href="#clients">CLIENT</a></td><td>clients</td><td><a href="api.htm#clients_create">Create a Client</a></td><td><a href="#clients_list">List Clients</a></td><td></td><td></td></tr>
+                        <tr class="alt"><td><a href="#clients">CLIENT</a></td><td>clients</td><td><a href="#clients_create">Create a Client</a></td><td><a href="#clients_list">List Clients</a></td><td></td><td></td></tr>
                         <tr><td></td><td>clients/{clientId}</td><td></td><td><a href="#clients_retrieve">Retrieve a Client</a></td><td><a href="#clients_update">Update a Client</a></td><td></td></tr>
                         <tr class="alt"><td></td><td>clients/{clientId}/loans</td><td></td><td><a href="#clients_loansummary">Retrieve a Client's Loan Account Summary</a></td><td></td><td></td></tr>
                         <tr><td></td><td>clients/{clientId}/notes</td><td><a href="#clients_addnote">Add a Client Note</a></td><td><a href="#clients_notes">Retrieve a Client's Notes</a></td><td></td><td></td></tr>
@@ -480,11 +480,8 @@ var jqxhr = $.ajax({
                 <table class=matrixHeading>
                     <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Field Descriptions</div></td></tr>
                     <tr class=alt><td>externalId</td></tr>
-                    <tr><td class=fielddesc>A place to put an external reference for this client e.g. The ID another system uses.</td></tr>
-                    </tr>
-                    <tr class=alt><td>maxJoinedOnOffsetFromToday</td></tr>
-                    <tr><td class=fielddesc>Convenience field. Number of days since the Client joined.</td></tr>
-                    </tr>
+                    <tr><td class=fielddesc>A place to put an external reference for this client e.g. The ID another system uses.<br>
+                    If provided, it must be unique.</td></tr>
                 </table>
             </div>
         </div>
@@ -499,7 +496,7 @@ var jqxhr = $.ajax({
                 <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients?pretty=true&fields=displayName,officeName,joinedDate">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients?pretty=true&fields=displayName,officeName,joinedDate</a>
             </div>
             <div class="method-example">
-                <code class="method-declaration">GET https://thedomainname/api/v1/clients</code>
+                <code class="method-declaration">GET https://Domain Name/api/v1/clients</code>
 <code class="method-response">[ {
   "officeId" : 1,
   "officeName" : "change super user",
@@ -540,7 +537,7 @@ var jqxhr = $.ajax({
                 <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/template?pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/template?pretty=true</a>
             </div>
             <div class="method-example">
-                <code class="method-declaration">GET https://thedomainname/api/v1/clients/template</code>
+                <code class="method-declaration">GET https://Domain Name/api/v1/clients/template</code>
 <code class="method-response">{
   "joinedDate" : [ 2012, 5, 29 ],
   "allowedOffices" : [ {
@@ -577,7 +574,7 @@ var jqxhr = $.ajax({
                 <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/1?pretty=true&fields=id,displayName,officeName">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/1?pretty=true&fields=id,displayName,officeName</a>
             </div>
             <div class="method-example">
-                <code class="method-declaration">GET https://thedomainname/api/v1/clients/{clientId}</code>
+                <code class="method-declaration">GET https://Domain Name/api/v1/clients/{clientId}</code>
 <code class="method-response">{
   "officeId" : 1,
   "officeName" : "change super user",
@@ -599,7 +596,8 @@ var jqxhr = $.ajax({
         <h4>Create a Client</h4>
         <p> <b>Note:</b> You can enter either:<br>
         firstname/lastname - for a person OR<br>
-        clientOrBusinessName - for a business or organisation (or person known by one name).
+        clientOrBusinessName - for a business or organisation (or person known by one name).<br><br>
+        If you use clientOrBusinessName, the value is placed in the lastname field when you retrieve clients.
         </p>
         <table class=matrixHeading>
             <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields</div></td></tr>
@@ -607,7 +605,7 @@ var jqxhr = $.ajax({
         </table>
     </div>
     <div class="method-example">
-        <code class="method-declaration">POST https://thedomainname/api/v1/clients</code>
+        <code class="method-declaration">POST https://Domain Name/api/v1/clients</code>
 <code class="method-request">POST https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients
 Content-Type: application/json
 Request Body:
@@ -626,6 +624,24 @@ Request Body:
 }
 </code>
     </div>
+    <div class="method-example">
+<code class="method-request">POST https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients
+Content-Type: application/json
+Request Body:
+{
+ "officeId": 1,
+ "clientOrBusinessName": "New Business to Create",
+ "externalId": "one/78",
+ "dateFormat": "dd MMMM yyyy", 
+ "joiningDate": "13 June 2006"
+}
+</code>
+<code class="method-response">
+{
+ "entityId":26
+}
+</code>
+    </div>
 </div>
 
 <a id="clients_update" name="clients_update" class="old-syle-anchor">&nbsp;</a>
@@ -634,7 +650,7 @@ Request Body:
         <h4>Update a Client</h4>
     </div>
     <div class="method-example">
-        <code class="method-declaration">PUT https://thedomainname/api/v1/clients/{clientId}</code>
+        <code class="method-declaration">PUT https://Domain Name/api/v1/clients/{clientId}</code>
 <code class="method-request">PUT https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/23
 Content-Type: application/json
 Request Body:
@@ -663,7 +679,7 @@ Request Body:
         <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/1/loans?pretty=true&fields=openLoans,%20closedLoans,activeLoanCount">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/1/loans?pretty=true&fields=openLoans,%20closedLoans,activeLoanCount</a>
     </div>
     <div class="method-example">
-        <code class="method-declaration">GET https://thedomainname/api/v1/clients/{clientId}/loans</code>
+        <code class="method-declaration">GET https://Domain Name/api/v1/clients/{clientId}/loans</code>
 <code class="method-response">{
   "pendingApprovalLoans" : [ ],
   "awaitingDisbursalLoans" : [ {
@@ -717,7 +733,7 @@ Request Body:
         <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/2/notes?pretty=true&fields=note,createdOn,createdByUsername">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/2/notes?pretty=true&fields=note,createdOn,createdByUsername</a>
     </div>
     <div class="method-example">
-        <code class="method-declaration">GET https://thedomainname/api/v1/clients/{clientId}/notes</code>
+        <code class="method-declaration">GET https://Domain Name/api/v1/clients/{clientId}/notes</code>
 <code class="method-response">[ {
   "id" : 20,
   "clientId" : 2,
@@ -755,7 +771,7 @@ Request Body:
         <h4>Add a Client Note</h4>
     </div>
     <div class="method-example">
-        <code class="method-declaration">POST https://thedomainname/api/v1/clients/{clientId}/notes</code>
+        <code class="method-declaration">POST https://Domain Name/api/v1/clients/{clientId}/notes</code>
         <code class="method-request">POST https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/1/notes
 Content-Type: application/json
 Request Body:
@@ -780,7 +796,7 @@ Request Body:
         <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/2/notes/20?pretty=true&fields=note,createdOn,createdByUsername">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/2/notes/20?pretty=true&fields=note,createdOn,createdByUsername</a>
     </div>
     <div class="method-example">
-        <code class="method-declaration">GET https://thedomainname/api/v1/clients/{clientId}/notes/{noteId}</code>
+        <code class="method-declaration">GET https://Domain Name/api/v1/clients/{clientId}/notes/{noteId}</code>
         <code class="method-response">{
   "id" : 20,
   "clientId" : 2,
@@ -805,7 +821,7 @@ Request Body:
         <h4>Update a Client Note</h4>
     </div>
     <div class="method-example">
-        <code class="method-declaration">PUT https://thedomainname/api/v1/clients/{clientId}/notes/{noteId}</code>
+        <code class="method-declaration">PUT https://Domain Name/api/v1/clients/{clientId}/notes/{noteId}</code>
 <code class="method-request">PUT https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/2/notes/20
 Content-Type: application/json
 Request Body:
@@ -828,15 +844,14 @@ Request Body:
                 <h3>Loans</h3>
                 <table class=matrixHeading>
                     <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Field Descriptions</div></td></tr>
-                    <tr class=alt><td>digitsAfterDecimal</td></tr>
-                    <tr><td class=fielddesc>Override the loan product default value for digitsAfterDecimal.</td></tr>
-                    </tr>
                     <tr class=alt><td>principal</td></tr>
                     <tr><td class=fielddesc>Loan amount.</td></tr>
                     <tr class=alt><td>externalId</td></tr>
-                    <tr><td class=fielddesc>A place to put an external reference for this loan e.g. The ID another system uses.</td></tr>
+                    <tr><td class=fielddesc>A place to put an external reference for this loan e.g. The ID another system uses.<br>
+                    If provided, it must be unique.</td></tr>
                     <tr class=alt><td>inArrearsTolerance</td></tr>
-                    <tr><td class=fielddesc></td></tr>
+                    <tr><td class=fielddesc>The amount that can be 'waived' at end of all loan payments because it is too small to worry about.<br>
+                    This is also the tolerance amount assessed when determining if a loan is in arrears.</td></tr>
                     <tr class=alt><td>numberOfRepayments</td></tr>
                     <tr><td class=fielddesc>Number of installments to repay.<br>
                     Used like: numberOfRepayments Every repaymentEvery repaymentFrequencyType<br>
@@ -901,7 +916,7 @@ Request Body:
         <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/template?clientId=1&pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/template?clientId=1&pretty=true</a>
     </div>
     <div class="method-example">
-        <code class="method-declaration">GET https://thedomainname/api/v1/loans/template</code>
+        <code class="method-declaration">GET https://Domain Name/api/v1/loans/template</code>
 <code class="method-response">{
   "clientId" : 1,
   "clientName" : "Patrick O'Meara",
@@ -1096,7 +1111,7 @@ Request Body:
         <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/1?pretty=true&fields=id,principal,interestRatePerYear">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/1?pretty=true&fields=id,principal,interestRatePerYear</a>
     </div>
     <div class="method-example">
-        <code class="method-declaration">GET https://thedomainname/api/v1/loans/{loanId}</code>
+        <code class="method-declaration">GET https://Domain Name/api/v1/loans/{loanId}</code>
         <code class="method-response">{
   "open" : false,
   "openWithRepaymentMade" : false,
@@ -1502,7 +1517,7 @@ Request Body:
         </table>
     </div>
     <div class="method-example">
-        <code class="method-declaration">POST https://thedomainname/api/v1/loans</code>
+        <code class="method-declaration">POST https://Domain Name/api/v1/loans</code>
         <code class="method-request">POST https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans
 Content-Type: application/json
 Request Body:
@@ -1556,7 +1571,7 @@ Request Body:
                 </table>
             </div>
             <div class="method-example">
-                <code class="method-declaration">POST https://thedomainname/api/v1/loans/{loanId}</code>
+                <code class="method-declaration">POST https://Domain Name/api/v1/loans/{loanId}</code>
                 <code class="method-request">POST https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/1?command=approve
 Content-Type: application/json
 Request Body:
@@ -1580,7 +1595,7 @@ Request Body:
                 </p>
             </div>
             <div class="method-example">
-                <code class="method-declaration">DELETE https://thedomainname/api/v1/loans/{loanId}</code>
+                <code class="method-declaration">DELETE https://Domain Name/api/v1/loans/{loanId}</code>
                 <code class="method-request">DELETE https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/1              
 Content-Type: application/json
 No Request Body:
@@ -1611,13 +1626,14 @@ No Request Body:
                     "total" "amount" is set to the amount outstanding.</dd>
                     <dd><b>'waiver'</b><br>
                     "date" is set to the current date.<br>
-                    "total" "amount" is set to the remaining loan principal outstanding.</dd>
+                    "total" "amount" is set to the remaining loan principal outstanding.
+                    The amount that can be waived is limited to the loan's inArrearsTolerance</dd>
                 </dl>
                 <p>Example Request: </p>
                 <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/10/transactions/template?command=repayment&pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/10/transactions/template?command=repayment&pretty=true</a>
             </div>
             <div class="method-example">
-                <code class="method-declaration">GET https://thedomainname/api/v1/loans/{loanId}/transactions/template"</code>
+                <code class="method-declaration">GET https://Domain Name/api/v1/loans/{loanId}/transactions/template"</code>
                 <code class="method-response">{
   "date" : [ 2009, 8, 1 ],
   "total" : {
@@ -1647,7 +1663,7 @@ No Request Body:
                 </dl>
             </div>
             <div class="method-example">
-                <code class="method-declaration">POST https://thedomainname/api/v1/loans/{loanId}/transactions</code>
+                <code class="method-declaration">POST https://Domain Name/api/v1/loans/{loanId}/transactions</code>
                 <code class="method-request">POST https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/37/transactions?command=repayment
 Content-Type: application/json
 Request Body:
@@ -1674,7 +1690,7 @@ Request Body:
                 <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/10/transactions/20?pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/10/transactions/20?pretty=true</a>
             </div>
             <div class="method-example">
-                <code class="method-declaration">GET https://thedomainname/api/v1/loans/{loanId}/transactions/{transactionId}</code>
+                <code class="method-declaration">GET https://Domain Name/api/v1/loans/{loanId}/transactions/{transactionId}</code>
                 <code class="method-response">{
   "id" : 10,
   "date" : [ 2009, 1, 29 ],
@@ -1709,7 +1725,7 @@ Request Body:
                 </table>
             </div>
             <div class="method-example">
-                <code class="method-declaration">POST https://thedomainname/api/v1/loans/{loanId}/transactions/{transactionId}</code>
+                <code class="method-declaration">POST https://Domain Name/api/v1/loans/{loanId}/transactions/{transactionId}</code>
                 <code class="method-request">POST https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/16/transactions/32
 Content-Type: application/json
 Request Body:
@@ -1740,8 +1756,8 @@ Request Body:
                 <table class=matrixHeading>
                     <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Field Descriptions</div></td></tr>
                     <tr class=alt><td>externalId</td></tr>
-                    <tr><td class=fielddesc>A place to put an external reference for this office e.g. The ID another system uses for it.</td></tr>
-                    </tr>
+                    <tr><td class=fielddesc>A place to put an external reference for this office e.g. The ID another system uses for it.<br>
+                    If provided, it must be unique.</td></tr>
                     <tr class=alt><td>hierarchy</td></tr>
                     <tr><td class=fielddesc>This field is a system generated convenience field.  It can't be set.<br>
                     It uses "dot notation" to define where an office stands in the office hierarchy.<br>
@@ -1750,7 +1766,6 @@ Request Body:
                     And if a further office (id = 78) is placed directly under office (id = 12) its hierarchy value is '.12.78.'<br><br>
                     The hierarchy value is useful when you need to display offices in 'hierarchy' order (perhaps indented in a drop down list box).
                     </td></tr>
-                    </tr>
                 </table>
             </div>
         </div>
@@ -1765,7 +1780,7 @@ Request Body:
                 <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices?fields=id,name,openingDate&pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices?fields=id,name,openingDate&pretty=true</a>
             </div>
             <div class="method-example">
-                <code class="method-declaration">GET https://thedomainname/api/v1/offices</code>
+                <code class="method-declaration">GET https://Domain Name/api/v1/offices</code>
 <code class="method-response">[ {
   "id" : 1,
   "name" : "Demo MFI Head Office",
@@ -1811,7 +1826,7 @@ Request Body:
                 </a>
             </div>
             <div class="method-example">
-                <code class="method-declaration">GET https://thedomainname/api/v1/offices/template</code>
+                <code class="method-declaration">GET https://Domain Name/api/v1/offices/template</code>
 <code class="method-response">{
   "openingDate" : [ 2012, 5, 28 ],
   "allowedParents" : [ {
@@ -1847,7 +1862,7 @@ Request Body:
                 </a>
             </div>
             <div class="method-example">
-                <code class="method-declaration">GET https://thedomainname/api/v1/offices/1</code>
+                <code class="method-declaration">GET https://Domain Name/api/v1/offices/1</code>
 <code class="method-response">{
   "id" : 1,
   "name" : "Demo MFI Head Office",
@@ -1871,7 +1886,7 @@ Request Body:
                 </table>
             </div>
             <div class="method-example">
-                <code class="method-declaration">POST https://thedomainname/api/v1/offices</code>
+                <code class="method-declaration">POST https://Domain Name/api/v1/offices</code>
 <code class="method-request">POST https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices
 Content-Type: application/json 
 Request Body:
@@ -1896,7 +1911,7 @@ Request Body:
                 <h4>Update Office</h4>
             </div>
             <div class="method-example">
-                <code class="method-declaration">PUT https://thedomainname/api/v1/offices/{officeId}</code>
+                <code class="method-declaration">PUT https://Domain Name/api/v1/offices/{officeId}</code>
 <code class="method-request">PUT https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices/1
 Content-Type: application/json
 Request Body:
@@ -1924,12 +1939,12 @@ Request Body:
                 <table class=matrixHeading>
                     <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Field Descriptions</div></td></tr>
                     <tr class=alt><td>digitsAfterDecimal</td></tr>
-                    <tr><td class=fielddesc>Override the default value for digitsAfterDecimal associated with the currencyCode selected.</td></tr>
-                    </tr>
+                    <tr><td class=fielddesc>Override the currency default value for digitsAfterDecimal.</td></tr>
                     <tr class=alt><td>principal</td></tr>
                     <tr><td class=fielddesc>Loan amount.</td></tr>
                     <tr class=alt><td>inArrearsTolerance</td></tr>
-                    <tr><td class=fielddesc></td></tr>
+                    <tr><td class=fielddesc>The amount that can be 'waived' at end of all loan payments because it is too small to worry about.<br>
+                    This is also the tolerance amount assessed when determining if a loan is in arrears.</td></tr>
                     <tr class=alt><td>numberOfRepayments</td></tr>
                     <tr><td class=fielddesc>Number of installments to repay.<br>
                     Used like: numberOfRepayments Every repaymentEvery repaymentFrequencyType<br>
@@ -1979,7 +1994,7 @@ Request Body:
                 <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts?pretty=true&fields=name,description,interestRateFrequencyType,amortizationType">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts?pretty=true&fields=name,description,interestRateFrequencyType,amortizationType</a>
             </div>
             <div class="method-example">
-                <code class="method-declaration">GET https://thedomainname/api/v1/loanproducts</code>
+                <code class="method-declaration">GET https://Domain Name/api/v1/loanproducts</code>
                 <code class="method-response">[ {
   "id" : 1,
   "name" : "Agricultural Loan",
@@ -2113,7 +2128,7 @@ Request Body:
                 <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts/template?pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts/template?pretty=true</a>
             </div>
             <div class="method-example">
-                <code class="method-declaration">GET https://thedomainname/api/v1/loanproducts/template</code>
+                <code class="method-declaration">GET https://Domain Name/api/v1/loanproducts/template</code>
 <code class="method-response">{
   "principal" : {
     "currencyCode" : "KES",
@@ -2273,7 +2288,7 @@ Request Body:
                 <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts/1?pretty=true&fields=name,description,numberOfRepayments">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts/1?pretty=true&fields=name,description,numberOfRepayments</a>
             </div>
             <div class="method-example">
-                <code class="method-declaration">GET https://thedomainname/api/v1/loanproducts/{productId}</code>
+                <code class="method-declaration">GET https://Domain Name/api/v1/loanproducts/{productId}</code>
 <code class="method-response">{
   "id" : 1,
   "name" : "Agricultural Loan",
@@ -2348,7 +2363,7 @@ Request Body:
                 </table>
             </div>
             <div class="method-example">
-                <code class="method-declaration">POST https://thedomainname/api/v1/loanproducts</code>
+                <code class="method-declaration">POST https://Domain Name/api/v1/loanproducts</code>
 <code class="method-request">POST https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts
 Content-Type: application/json
 Request Body:
@@ -2383,7 +2398,7 @@ Request Body:
                 <h4>Update a Loan Product</h4>
             </div>
             <div class="method-example">
-                <code class="method-declaration">POST https://thedomainname/api/v1/loanproducts/{loanId}</code>
+                <code class="method-declaration">POST https://Domain Name/api/v1/loanproducts/{loanId}</code>
 <code class="method-request">POST https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts/1
 Content-Type: application/json
 Request Body:
@@ -2421,7 +2436,7 @@ Request Body:
 	        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/configurations/currency?pretty=true&fields=selectedCurrencyOptions">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/configurations/currency?pretty=true&fields=selectedCurrencyOptions</a>
 	    </div>
 	    <div class="method-example">
-	        <code class="method-declaration">GET https://thedomainname/api/v1/configurations/currency</code>
+	        <code class="method-declaration">GET https://Domain Name/api/v1/configurations/currency</code>
 <code class="method-response">{
   "selectedCurrencyOptions" : [ {
     "code" : "XOF",
@@ -2466,7 +2481,7 @@ Request Body:
 	        <p>Updates the list of currencies permitted for use.</p>
 	    </div>
             <div class="method-example">
-                <code class="method-declaration">PUT https://thedomainname/api/v1/configurations/currency</code>
+                <code class="method-declaration">PUT https://Domain Name/api/v1/configurations/currency</code>
                 <code class="method-request">PUT https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/configurations/currency
 Content-Type: application/json
 Request Body:{
@@ -2533,7 +2548,7 @@ Request Body:{
                 <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/additionalfields?pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/additionalfields?pretty=true</a>
             </div>
             <div class="method-example">
-                <code class="method-declaration">GET https://thedomainname/api/v1/additionalfields</code>
+                <code class="method-declaration">GET https://Domain Name/api/v1/additionalfields</code>
                 <code class="method-response">[ {
   "id" : 1,
   "name" : "Additional Information",
@@ -2564,7 +2579,7 @@ Request Body:{
                 </p>
             </div>
             <div class="method-example">
-                <code class="method-declaration">GET https://thedomainname/api/v1/additionalfields/{type}/{set}/{id}</code>
+                <code class="method-declaration">GET https://Domain Name/api/v1/additionalfields/{type}/{set}/{id}</code>
                 <code class="method-response">{
   "columnHeaders" : [ {
     "columnName" : "Ethnic Group",
@@ -2637,7 +2652,7 @@ Request Body:{
             </p>
             </div>
             <div class="method-example">
-                <code class="method-declaration">POST https://thedomainname/api/v1/additionalfields/{type}/{set}/{id}</code>
+                <code class="method-declaration">POST https://Domain Name/api/v1/additionalfields/{type}/{set}/{id}</code>
                 <code class="method-request">POST https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/additionalfields/portfolio_client/Additional Information/2
 Content-Type: application/json
 Request Body:
@@ -2702,7 +2717,7 @@ Request Body:
                 <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/reports?pretty=true&exportCSV=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/reports?pretty=true&exportCSV=true</a>
             </div>
             <div class="method-example">
-                <code class="method-declaration">GET https://thedomainname/api/v1/reports</code>
+                <code class="method-declaration">GET https://Domain Name/api/v1/reports</code>
                 <code class="method-response">{
   "columnHeaders" : [ {
     "columnName" : "report_id",
@@ -2828,7 +2843,7 @@ Request Body:
                 <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/reports/selectOfficeId?R_officeId=1&pretty=true&parameterType=true&exportCSV=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/reports/selectOfficeId?R_officeId=1&pretty=true& parameterType=true&exportCSV=true</a>
             </div>
             <div class="method-example">
-                <code class="method-declaration">GET https://thedomainname/api/v1/reports/{reportName}</code>
+                <code class="method-declaration">GET https://Domain Name/api/v1/reports/{reportName}</code>
                 <code class="method-response">{
   "columnHeaders" : [ {
     "columnName" : "Office/Branch",
@@ -2926,7 +2941,7 @@ Request Body:
 	        <p>Authenticates the credentials provided and returns the set of permissions allowed.</p>
 	    </div>
 	    <div class="method-example">
-	        <code class="method-declaration">POST https://thedomainname/api/v1/authentication?username={username}&password={password}</code>
+	        <code class="method-declaration">POST https://Domain Name/api/v1/authentication?username={username}&password={password}</code>
 <code class="method-request">POST https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/authentication?username=super1&password=demo
 Content-Type: application/json
 No Request Body
@@ -2966,7 +2981,7 @@ No Request Body
 	        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users?pretty=true&fields=id,username,email,officeName">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users?pretty=true&fields=id,username,email,officeName</a>
 	    </div>
 	    <div class="method-example">
-	        <code class="method-declaration">GET https://thedomainname/api/v1/users</code>
+	        <code class="method-declaration">GET https://Domain Name/api/v1/users</code>
 <code class="method-response">[ {
   "id" : 6,
   "officeId" : 1,
@@ -3002,7 +3017,7 @@ No Request Body
 	        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users/template?pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users/template?pretty=true</a>
 	    </div>
 	    <div class="method-example">
-	        <code class="method-declaration">GET https://thedomainname/api/v1/users/template</code>
+	        <code class="method-declaration">GET https://Domain Name/api/v1/users/template</code>
 <code class="method-response">{
   "allowedOffices" : [ {
     "id" : 1,
@@ -3068,7 +3083,7 @@ No Request Body
 	        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users/1?pretty=true&fields=username,officeName">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users/1?pretty=true&fields=username,officeName</a>
 	    </div>
 	    <div class="method-example">
-	        <code class="method-declaration">GET https://thedomainname/api/v1/users/1</code>
+	        <code class="method-declaration">GET https://Domain Name/api/v1/users/1</code>
 <code class="method-response">{
   "id" : 1,
   "officeId" : 1,
@@ -3124,7 +3139,7 @@ No Request Body
                 </table>
 	    </div>
 	    <div class="method-example">
-	        <code class="method-declaration">POST https://thedomainname/api/v1/users</code>
+	        <code class="method-declaration">POST https://Domain Name/api/v1/users</code>
 <code class="method-request">POST https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users
 Content-Type: application/json
 Request body:
@@ -3152,7 +3167,7 @@ Request body:
                 <p><b>Note:</b> When updating a password you must provide the repeatPassword parameter also.</p>
 	    </div>
 	    <div class="method-example">
-	        <code class="method-declaration">PUT https://thedomainname/api/v1/users/{userId)</code>
+	        <code class="method-declaration">PUT https://Domain Name/api/v1/users/{userId)</code>
 <code class="method-request">PUT https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users/3
 Content-Type: application/json
 Request body:
@@ -3179,7 +3194,7 @@ Request body:
 	        <p>Removes the user and the associated roles and permissions.</p>
 	    </div>
 	    <div class="method-example">
-	        <code class="method-declaration">DELETE https://thedomainname/api/v1/users/{userId}</code>
+	        <code class="method-declaration">DELETE https://Domain Name/api/v1/users/{userId}</code>
 <code class="method-request">DELETE https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users/20
 Content-Type: application/json
 No Request Body
@@ -3212,7 +3227,7 @@ No Request Body
                 <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles?pretty=true&fields=name">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles?pretty=true&fields=name</a>
 	    </div>
 	    <div class="method-example">
-	        <code class="method-declaration">GET https://thedomainname/api/v1/roles</code>
+	        <code class="method-declaration">GET https://Domain Name/api/v1/roles</code>
 <code class="method-response">[ {
   "id" : 1,
   "name" : "Super user",
@@ -3252,7 +3267,7 @@ No Request Body
 	        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles/template?pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles/template?pretty=true</a>
 	    </div>
 	    <div class="method-example">
-	        <code class="method-declaration">GET https://thedomainname/api/v1/roles/template</code>
+	        <code class="method-declaration">GET https://Domain Name/api/v1/roles/template</code>
 <code class="method-response">{
   "availablePermissions" : [ {
     "id" : 1,
@@ -3292,7 +3307,7 @@ No Request Body
 	        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles/1?pretty=true&fields=name,selectedPermissions">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles/1?pretty=true&fields=name,selectedPermissions</a>
 	    </div>
 	    <div class="method-example">
-	        <code class="method-declaration">GET https://thedomainname/api/v1/roles/{roleId}</code>
+	        <code class="method-declaration">GET https://Domain Name/api/v1/roles/{roleId}</code>
 <code class="method-response">{
   "id" : 1,
   "name" : "Super user",
@@ -3333,7 +3348,7 @@ No Request Body
                 </table>
 	    </div>
 	    <div class="method-example">
-	        <code class="method-declaration">POST https://thedomainname/api/v1/roles</code>
+	        <code class="method-declaration">POST https://Domain Name/api/v1/roles</code>
 <code class="method-request">POST https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles
 Content-Type: application/json
 Request body:
@@ -3356,7 +3371,7 @@ Request body:
 	        <h4>Update a Role</h4>
 	    </div>
 	    <div class="method-example">
-	        <code class="method-declaration">PUT https://thedomainname/api/v1/roles/{roleId}</code>
+	        <code class="method-declaration">PUT https://Domain Name/api/v1/roles/{roleId}</code>
 <code class="method-request">PUT https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles/8
 Content-Type: application/json
 Request body:
@@ -3392,7 +3407,7 @@ Request body:
                 <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/permissions?pretty=true&fields=id,code">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/permissions?pretty=true&fields=id,code</a>
 	    </div>
 	    <div class="method-example">
-	        <code class="method-declaration">GET https://thedomainname/api/v1/permissions</code>
+	        <code class="method-declaration">GET https://Domain Name/api/v1/permissions</code>
 <code class="method-response">[ {
   "id" : 1,
   "name" : "User administration ALL",
@@ -3424,10 +3439,10 @@ Request body:
     <a id="fullapi_matrix" name="fullapi_matrix" class="old-syle-anchor">&nbsp;</a>
     <br><br><br>
     <div class=fullMatrixOuter>
-        <table width="80%"><tr><td><h3>Full API Matrix</h4></td><td><h4>API Endpoint:</h5></td><td><h5>https://thedomainname/api</h5></td></tr></table>
+        <table width="80%"><tr><td><h3>Full API Matrix</h4></td><td><h4>API Endpoint:</h5></td><td><h5>https://Domain Name/api</h5></td></tr></table>
         <table class=matrixHeading>
             <tr class="matrixHeadingBG"><td colspan=2 valign="top"><div class="matrixHeadingVerbs"><table><tr><td>RESOURCES</td></tr></table></div></td><td><table><tr><td><div class="matrixHeadingVerbs">POST</div></td></tr><tr><td><div class=matrixHeadingCommands>create/complex update</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">GET</div></td></tr><tr><td><div class=matrixHeadingCommands>read</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">PUT</div></td></tr><tr><td><div class=matrixHeadingCommands>update</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">DELETE</div></td></tr><tr><td><div class=matrixHeadingCommands>delete</div></td></tr></table></td></tr>
-            <tr class="alt"><td><a href="#clients">CLIENT</a></td><td>clients</td><td><a href="api.htm#clients_create">Create a Client</a></td><td><a href="#clients_list">List Clients</a></td><td></td><td></td></tr>
+            <tr class="alt"><td><a href="#clients">CLIENT</a></td><td>clients</td><td><a href="#clients_create">Create a Client</a></td><td><a href="#clients_list">List Clients</a></td><td></td><td></td></tr>
             <tr><td></td><td>clients/{clientId}</td><td></td><td><a href="#clients_retrieve">Retrieve a Client</a></td><td><a href="#clients_update">Update a Client</a></td><td></td></tr>
             <tr class="alt"><td></td><td>clients/{clientId}/loans</td><td></td><td><a href="#clients_loansummary">Retrieve a Client's Loan Account Summary</a></td><td></td><td></td></tr>
             <tr><td></td><td>clients/{clientId}/notes</td><td><a href="#clients_addnote">Add a Client Note</a></td><td><a href="#clients_notes">Retrieve a Client's Notes</a></td><td></td><td></td></tr>
