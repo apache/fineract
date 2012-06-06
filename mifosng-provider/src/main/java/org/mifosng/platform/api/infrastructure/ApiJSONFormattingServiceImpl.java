@@ -25,6 +25,32 @@ public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 			String allowedFieldList, String selectedFields,
 			MultivaluedMap<String, String> queryParams) {
 
+		String associationFields = "";
+		return convertRequestCommon(dataObject, filterName, allowedFieldList,
+				selectedFields, associationFields, queryParams);
+
+	}
+
+	@Override
+	public String convertRequest(Object dataObject, String filterName,
+			String allowedFieldList, String selectedFields,
+			String associationFields, MultivaluedMap<String, String> queryParams) {
+
+		return convertRequestCommon(dataObject, filterName, allowedFieldList,
+				selectedFields, associationFields, queryParams);
+
+	}
+
+	private String convertRequestCommon(Object dataObject, String filterName,
+			String allowedFieldList, String selectedFields,
+			String associationFields, MultivaluedMap<String, String> queryParams) {
+
+		// filterType E means Exclude : used where no restriction on the basic
+		// fields in the java object and has the effect of returning all fields
+		// in the object
+		// filterType I mean Include : used when a specific list of fields is to
+		// be returned.
+
 		String filterType = "E";
 		String fieldList = "";
 		String fields = queryParams.getFirst("fields");
@@ -71,6 +97,19 @@ public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 		} else {
 			if (filterType.equals("E"))
 				fieldList = allowedFieldList;
+		}
+
+		if (isTrue(queryParams.getFirst("associations"))) {
+			// assume ALL for moment
+			if (filterType.equals("I"))
+				fieldList += "," + associationFields;
+		} else {
+			if (filterType.equals("E")) {
+				if (fieldList.equals(""))
+					fieldList = associationFields;
+				else
+					fieldList += "," + associationFields;
+			}
 		}
 
 		return convertDataObjectJSON(dataObject, filterName, filterType,
