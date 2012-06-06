@@ -14,12 +14,18 @@ import org.codehaus.jackson.map.ObjectWriter;
 import org.codehaus.jackson.map.ser.FilterProvider;
 import org.codehaus.jackson.map.ser.impl.SimpleBeanPropertyFilter;
 import org.codehaus.jackson.map.ser.impl.SimpleFilterProvider;
+import org.mifosng.platform.api.LoansApiResource;
 import org.mifosng.platform.exceptions.PlatformInternalServerException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 
+	private final static Logger logger = LoggerFactory
+			.getLogger(ApiJSONFormattingServiceImpl.class);
+	
 	@Override
 	public String convertRequest(Object dataObject, String filterName,
 			String allowedFieldList, String selectedFields,
@@ -36,6 +42,7 @@ public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 			String allowedFieldList, String selectedFields,
 			String associationFields, MultivaluedMap<String, String> queryParams) {
 
+		logger.info("in Loan Date Convert Request: " + associationFields);
 		return convertRequestCommon(dataObject, filterName, allowedFieldList,
 				selectedFields, associationFields, queryParams);
 
@@ -99,11 +106,16 @@ public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 				fieldList = allowedFieldList;
 		}
 
-		if (isTrue(queryParams.getFirst("associations"))) {
+		if (isPassed(queryParams.getFirst("associations"))) {
+			logger.info("is associations");
 			// assume ALL for moment
 			if (filterType.equals("I"))
 				fieldList += "," + associationFields;
+			
+			
 		} else {
+
+			logger.info("no associations");
 			if (filterType.equals("E")) {
 				if (fieldList.equals(""))
 					fieldList = associationFields;
@@ -111,6 +123,9 @@ public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 					fieldList += "," + associationFields;
 			}
 		}
+		
+
+		logger.info("fieldList to be process is: " + fieldList + "   filter type is: " + filterType);
 
 		return convertDataObjectJSON(dataObject, filterName, filterType,
 				fieldList, isTrue(queryParams.getFirst("pretty")));
