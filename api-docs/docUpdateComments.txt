@@ -1,21 +1,10 @@
 POSSIBLE CHANGES TO APP OR DOCUMENTATION
 
 
-list clients notes - noteType needs a 'text' DOING
-	createdOn & updatedOn values... do they need reformatting? DOING
+list clients notes and a note - createdOn & updatedOn values... still need reformatting? DOING
 
-loan template - repaymentSchedule is null - I can't see it set in the app - used in preview schedule functionality maybe? - KW probably not used and will be deleted
-
-
-loan retrieve DOING
-   break up data into categories.. e.g. 
-   Basic - lifeCycleStatusText thru
-   Convenience - open thru waitingForDisbursal then maxSubmittedOnOffsetFromToday, maxApprovedOnOffsetFromToday , maxDisbursedOnOffsetFromToday, actualLoanTermInDays,    actualLoanTermInMonths,  loanTermInDays, loanTermInMonths
-   Permission - undoDisbursalAllowed, waiveAllowed, makeRepaymentAllowed, rejectAllowed, withdrawnByApplicantAllowed, undoApprovalAllowed, disbursalAllowed, anyActionOnLoanAllowed
-   flatten loadData
-       repaymentSchedule
-       summary
-       loanRepayments
+permissions? or what can happen?
+-------------------------------------------
 
 
 Loan Transitions ... approve etc - possible done CHECK AFTER
