@@ -425,26 +425,24 @@ var jqxhr = $.ajax({
             <div class="method-example">
                 <code class="method-declaration">GET https://Domain Name/api/v1/clients</code>
 <code class="method-response">[ {
-  "officeId" : 1,
-  "officeName" : "change super user",
-  "id" : 2,
-  "firstname" : "Dennis",
-  "lastname" : "O'Meara",
-  "displayName" : "Dennis O'Meara",
+  "officeId" : 2,
+  "officeName" : "sub branch 1",
+  "id" : 14,
+  "firstname" : "Patrick",
+  "lastname" : "Asare-Frimpong",
+  "displayName" : "Patrick Asare-Frimpong",
   "externalId" : null,
-  "joinedDate" : [ 2009, 1, 4 ],
-  "maxJoinedOnOffsetFromToday" : -1241
+  "joinedDate" : [ 2012, 4, 18 ]
 }, {
-  "officeId" : 1,
-  "officeName" : "change super user",
-  "id" : 4,
-  "firstname" : "Jimmy",
-  "lastname" : "O'Meara",
-  "displayName" : "Jimmy O'Meara",
+  "officeId" : 5,
+  "officeName" : "Majmoua",
+  "id" : 13,
+  "firstname" : "firstMajmoua",
+  "lastname" : "client",
+  "displayName" : "firstMajmoua client",
   "externalId" : null,
-  "joinedDate" : [ 2009, 1, 11 ],
-  "maxJoinedOnOffsetFromToday" : -1234
-}...]
+  "joinedDate" : [ 2011, 12, 1 ]
+}... ]
 </code>
             </div>
         </div>
@@ -504,14 +502,13 @@ var jqxhr = $.ajax({
                 <code class="method-declaration">GET https://Domain Name/api/v1/clients/{clientId}</code>
 <code class="method-response">{
   "officeId" : 1,
-  "officeName" : "change super user",
+  "officeName" : "Demo MFI Head Office",
   "id" : 1,
   "firstname" : "Patrick",
   "lastname" : "O'Meara",
   "displayName" : "Patrick O'Meara",
   "externalId" : null,
-  "joinedDate" : [ 2009, 1, 4 ],
-  "maxJoinedOnOffsetFromToday" : -1241
+  "joinedDate" : [ 2009, 1, 4 ]
 }
 </code>
             </div>
@@ -528,7 +525,7 @@ var jqxhr = $.ajax({
         </p>
         <table class=matrixHeading>
             <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields</div></td></tr>
-            <tr class=alt><td>firstname, lastname, joiningDate, officeId</td></tr>
+            <tr class=alt><td>firstname and lastname OR clientOrBusinessName<br>, joiningDate, officeId</td></tr>
         </table>
     </div>
     <div class="method-example">
@@ -1156,7 +1153,7 @@ Request Body:
         <br>
         <table class=matrixHeading>
             <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields</div></td></tr>
-            <tr class=alt><td>clientId, productId, inArrearsTolerance, submittedOnDate, currencyCode, digitsAfterDecimal, principal,
+            <tr class=alt><td>clientId, productId, inArrearsTolerance, submittedOnDate, principal,
             repaymentFrequencyType, repaymentEvery, numberOfRepayments, interestRatePerPeriod, interestRateFrequencyType, amortizationType,
             interestType, interestCalculationPeriodType, expectedDisbursementDate</td></tr>
         </table>
@@ -1169,8 +1166,6 @@ Request Body:
 {
  "clientId": 1,
  "productId": 1,
- "currencyCode": "USD",
- "digitsAfterDecimal": "2",
  "locale": "en_GB",
  "principal": "100,000.00",
  "inArrearsTolerance": "1,000.00",
@@ -1280,6 +1275,11 @@ No Request Body:
             <div class="method-example">
                 <code class="method-declaration">GET https://Domain Name/api/v1/loans/{loanId}/transactions/template"</code>
                 <code class="method-response">{
+  "transactionType" : {
+    "id" : 2,
+    "code" : "loanTransactionType.repayment",
+    "value" : "Repayment"
+  },
   "date" : [ 2009, 8, 1 ],
   "total" : {
     "currencyCode" : "XOF",

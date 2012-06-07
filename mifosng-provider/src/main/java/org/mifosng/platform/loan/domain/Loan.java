@@ -338,7 +338,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		}
 		
 		if (getTotalOutstanding().isGreaterThan(this.getInArrearsTolerance())) {
-			final String errorMessage = "Waiver is only allowed when the total outstanding amount left on loan (" + getTotalOutstanding() +") is less than thethe in arrears tolerance setting of " + getInArrearsTolerance().getAmount();
+			final String errorMessage = "Waiver is only allowed when the total outstanding amount left on loan (" + getTotalOutstanding() +") is less than the in arrears tolerance setting of " + getInArrearsTolerance().getAmount();
 			throw new InvalidLoanStateTransitionException("waive", "cannot.exceed.in.arrears.tolerance.setting", errorMessage, getTotalOutstanding(), getInArrearsTolerance());
 		}
 		

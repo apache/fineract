@@ -1,34 +1,30 @@
-POSSIBLE CHANGES TO APP OR DOCUMENTATION
-
-
 list clients notes and a note - createdOn & updatedOn values... still need reformatting? DOING
 
 permissions? or what can happen?
--------------------------------------------
-
 
 Loan Transitions ... approve etc - possible done CHECK AFTER
     if  "eventLocalDate" parameter added with string date then instead of parameter not supported msg do get jackson conversion exception. -
 "JsonMappingException: Invalid format: &quot;07 June 2012&quot; " KW might do jackson conversion exception to json.
 
-
     approve loan (already closed) with approval date before submitted date - now fine and shows json msg but
     if approve loan (already closed) with approval date after submitted date - DataIntegrityViolationException: Column 'loan_status_id' cannot be null;
 
+   sometimes clientId returned... always loanId OK? DOING - SEEMS DONE!
 
-   sometimes clientId returned... always loanId OK? DOING
+Loan Transactions 
+    retrieve: display transaction type value?  DONE for template - no id for retrieve... but does it matter
+
+    when adjusting a disbursal - The server encountered an internal error () that prevented it from fulfilling this request.</u></p><p><b>exception</b> <pre>java.lang.IllegalArgumentException:         Only repayment and waiver transactions can be adjusted. DONE
+    on create and adjust, app returns clientId can it be transaction id or loanId? - SEEMS TO BE LOANID :) DONE
+
+describe waiver CHECK RULES AFTER - good but maybe there should be an amount pass in ? it let me waive 12 when there was only 10 left... also more waives after that (on closed loan) caused exection - ConstraintViolationException: Column 'loan_status_id' cannot be null
+
+Loans.... "likewise for update"  there is no update.
+
+when creating loan: if arrearsTolerance left there is an exception - for the other mandatory fields... just a json msg saying it is mandatory (OK).
 
 
-Loan Transactions (repay and waive - and maybe reversal - but not disbursement) general talk needed as retrieve could work for any txn?
-    transaction type... UNKNOWN(0), DISBURSEMENT(1), REPAYMENT(2), REVERSAL(3), WAIVED(4);
-    Create - (command has string and proper value fields... so assume its like eventDate above)
 
-    retrieve: display transaction type value?  DOING
-    "principal" : null,   "interest" : null, total, "totalWaived" : null,   "overpaid" : null, and the offset - are nulls ever put in? DOING
-    adjust:
-
-    when adjusting a disbursal - The server encountered an internal error () that prevented it from fulfilling this request.</u></p><p><b>exception</b> <pre>java.lang.IllegalArgumentException:         Only repayment and waiver transactions can be adjusted. DOING
-    on create and adjust, app returns clientId can it be transaction id or loanId?
 
 
 
@@ -37,27 +33,6 @@ should be able to get clients by branch as well
 also get loans of different status's by branch etc
 list of loan transactions not available (except in summary - presume repayments section has repayments and waivers and adjusts)
 
-
-
-
-DOCUMENTATION REMAINING
-
-describe waiver CHECK RULES AFTER
-why fields "totalWaived", "overpaid" - KW DOING - CHECK AFTER
-maxJoinedOnOffsetFromToday - KW DOING - CHECK AFTER
-
-    - create a client example could show second example with the
-field clientOrBusinessName being used instead of firstname, lastname,
-no mention of it - done BUT NOTE displayName starts with space!
-
- - Loans
-     - digitsAfterDecimal and currencyCode should NOT be sent during
-creation - they should be inherited from the product. Likewise for
-update. KW DOING - CHECK AFTER
-
-     - Would be better if it was possible to not pass any of these
-details if defaults from loan product are acceptable, they can be
-inherited from loan product. KW DOING - CHECK AFTER
 
 
 
