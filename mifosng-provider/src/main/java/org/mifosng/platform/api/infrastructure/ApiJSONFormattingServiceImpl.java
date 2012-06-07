@@ -107,9 +107,9 @@ public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 			return fieldList;
 		}
 
-		//No template query param provided
+		// No template query param provided
 		if (filterType.equals("E")) {
-			fieldList = allowedFieldList; //exclude
+			fieldList = allowedFieldList; // exclude
 		}
 
 		return fieldList;
@@ -122,12 +122,16 @@ public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 		if (isPassed(param)) {
 			logger.info("is associations");
 			if (param.equalsIgnoreCase("ALL")) {
+				logger.info("is ALL");
 				if (filterType.equals("I")) {
+					logger.info("is Include");
 					return fieldList + "," + associationFields;
 				}
+				logger.info("is Exclude");
 				return fieldList;
 			}
 
+			logger.info("Not ALL");
 			Set<String> fullAssociationsSet = createSetFromString(associationFields);
 			Set<String> paramAssociationsSet = createSetFromString(param);
 
@@ -135,11 +139,15 @@ public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 
 				String selectedAssociationFields = createIncludedInStringList(
 						paramAssociationsSet, fullAssociationsSet);
+				logger.info("is Include - selected fields are :"
+						+ selectedAssociationFields);
 				return fieldList + "," + selectedAssociationFields;
 			}
 
 			String unSelectedAssociationFields = createNotIncludedInStringList(
-					paramAssociationsSet, fullAssociationsSet);
+					fullAssociationsSet, paramAssociationsSet);
+			logger.info("is Exclude - unselected fields are :"
+					+ unSelectedAssociationFields);
 
 			if (fieldList.equals("")) {
 				return unSelectedAssociationFields;
