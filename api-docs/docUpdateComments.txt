@@ -1,6 +1,3 @@
-list clients notes and a note - createdOn & updatedOn values... still need reformatting? DOING
-
-permissions? or what can happen?
 
 Loan Transitions ... approve etc - possible done CHECK AFTER
     if  "eventLocalDate" parameter added with string date then instead of parameter not supported msg do get jackson conversion exception. -
@@ -9,17 +6,8 @@ Loan Transitions ... approve etc - possible done CHECK AFTER
     approve loan (already closed) with approval date before submitted date - now fine and shows json msg but
     if approve loan (already closed) with approval date after submitted date - DataIntegrityViolationException: Column 'loan_status_id' cannot be null;
 
-   sometimes clientId returned... always loanId OK? DOING - SEEMS DONE!
 
-Loan Transactions 
-    retrieve: display transaction type value?  DONE for template - no id for retrieve... but does it matter
-
-    when adjusting a disbursal - The server encountered an internal error () that prevented it from fulfilling this request.</u></p><p><b>exception</b> <pre>java.lang.IllegalArgumentException:         Only repayment and waiver transactions can be adjusted. DONE
-    on create and adjust, app returns clientId can it be transaction id or loanId? - SEEMS TO BE LOANID :) DONE
-
-describe waiver CHECK RULES AFTER - good but maybe there should be an amount pass in ? it let me waive 12 when there was only 10 left... also more waives after that (on closed loan) caused exection - ConstraintViolationException: Column 'loan_status_id' cannot be null
-
-Loans.... "likewise for update"  there is no update.
+describe waiver CHECK RULES AFTER - good but maybe there should be an amount pass in ? it let me waive 12 when there was only 10 left...
 
 when creating loan: if arrearsTolerance left there is an exception - for the other mandatory fields... just a json msg saying it is mandatory (OK).
 
