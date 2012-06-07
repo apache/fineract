@@ -14,7 +14,6 @@ import org.codehaus.jackson.map.ObjectWriter;
 import org.codehaus.jackson.map.ser.FilterProvider;
 import org.codehaus.jackson.map.ser.impl.SimpleBeanPropertyFilter;
 import org.codehaus.jackson.map.ser.impl.SimpleFilterProvider;
-import org.mifosng.platform.api.LoansApiResource;
 import org.mifosng.platform.exceptions.PlatformInternalServerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +24,7 @@ public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 
 	private final static Logger logger = LoggerFactory
 			.getLogger(ApiJSONFormattingServiceImpl.class);
-	
+
 	@Override
 	public String convertRequest(Object dataObject, String filterName,
 			String allowedFieldList, String selectedFields,
@@ -42,7 +41,6 @@ public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 			String allowedFieldList, String selectedFields,
 			String associationFields, MultivaluedMap<String, String> queryParams) {
 
-		logger.info("in Loan Date Convert Request: " + associationFields);
 		return convertRequestCommon(dataObject, filterName, allowedFieldList,
 				selectedFields, associationFields, queryParams);
 
@@ -52,11 +50,11 @@ public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 			String allowedFieldList, String selectedFields,
 			String associationFields, MultivaluedMap<String, String> queryParams) {
 
-		// filterType E means Exclude : used where no restriction on the basic
-		// fields in the java object and has the effect of returning all fields
-		// in the object
-		// filterType I mean Include : used when a specific list of fields is to
-		// be returned.
+		// filterType E means Exclude : has the effect of returning all fields
+		// in the dataObject but can only be used if selectedFields is "" and
+		// there is no fields query parameter
+		// filterType I means Include : used when a specific list of fields is
+		// to be returned.
 
 		String filterType = "E";
 		String fieldList = "";
@@ -69,28 +67,10 @@ public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 				if (selectedFields.equals(""))
 					fieldList = fields;
 				else {
-					Set<String> paramFieldsSet = new HashSet<String>();
-					StringTokenizer st = new StringTokenizer(fields, ",");
-					while (st.hasMoreTokens()) {
-						paramFieldsSet.add(st.nextToken().trim());
-					}
-					Set<String> selectedFieldsSet = new HashSet<String>();
-					st = new StringTokenizer(selectedFields, ",");
-					while (st.hasMoreTokens()) {
-						selectedFieldsSet.add(st.nextToken().trim());
-					}
-
-					Boolean first = true;
-					for (String paramField : paramFieldsSet) {
-						if (selectedFieldsSet.contains(paramField)) {
-							if (first) {
-								fieldList = paramField;
-								first = false;
-							} else {
-								fieldList += "," + paramField;
-							}
-						}
-					}
+					Set<String> paramFieldsSet = createSetFromString(fields);
+					Set<String> selectedFieldsSet = createSetFromString(selectedFields);
+					fieldList = createIncludedInStringList(paramFieldsSet,
+							selectedFieldsSet);
 				}
 			} else {
 				fieldList = selectedFields;
@@ -98,37 +78,88 @@ public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 
 		}
 
-		if (isTrue(queryParams.getFirst("template"))) {
-			if (filterType.equals("I"))
-				fieldList += "," + allowedFieldList;
-		} else {
-			if (filterType.equals("E"))
-				fieldList = allowedFieldList;
-		}
+		logger.info("fieldList before template is: " + fieldList
+				+ "   filter type is: " + filterType);
 
-		if (isPassed(queryParams.getFirst("associations"))) {
-			logger.info("is associations");
-			// assume ALL for moment
-			if (filterType.equals("I"))
-				fieldList += "," + associationFields;
-			
-			
-		} else {
+		fieldList = updateListForTemplate(fieldList, allowedFieldList,
+				queryParams.getFirst("template"), filterType);
 
-			logger.info("no associations");
-			if (filterType.equals("E")) {
-				if (fieldList.equals(""))
-					fieldList = associationFields;
-				else
-					fieldList += "," + associationFields;
-			}
-		}
-		
+		logger.info("fieldList before assocs is: " + fieldList
+				+ "   filter type is: " + filterType);
 
-		logger.info("fieldList to be process is: " + fieldList + "   filter type is: " + filterType);
+		fieldList = updateListForAssociations(fieldList, associationFields,
+				queryParams.getFirst("associations"), filterType);
+
+		logger.info("fieldList to be processed is: " + fieldList
+				+ "   filter type is: " + filterType);
 
 		return convertDataObjectJSON(dataObject, filterName, filterType,
 				fieldList, isTrue(queryParams.getFirst("pretty")));
+	}
+
+	private String updateListForTemplate(String fieldList,
+			String allowedFieldList, String param, String filterType) {
+
+		if (isTrue(param)) {
+			if (filterType.equals("I")) {
+				return fieldList + "," + allowedFieldList;
+			}
+			return fieldList;
+		}
+
+		//No template query param provided
+		if (filterType.equals("E")) {
+			fieldList = allowedFieldList; //exclude
+		}
+
+		return fieldList;
+
+	}
+
+	private String updateListForAssociations(String fieldList,
+			String associationFields, String param, String filterType) {
+
+		if (isPassed(param)) {
+			logger.info("is associations");
+			if (param.equalsIgnoreCase("ALL")) {
+				if (filterType.equals("I")) {
+					return fieldList + "," + associationFields;
+				}
+				return fieldList;
+			}
+
+			Set<String> fullAssociationsSet = createSetFromString(associationFields);
+			Set<String> paramAssociationsSet = createSetFromString(param);
+
+			if (filterType.equals("I")) {
+
+				String selectedAssociationFields = createIncludedInStringList(
+						paramAssociationsSet, fullAssociationsSet);
+				return fieldList + "," + selectedAssociationFields;
+			}
+
+			String unSelectedAssociationFields = createNotIncludedInStringList(
+					paramAssociationsSet, fullAssociationsSet);
+
+			if (fieldList.equals("")) {
+				return unSelectedAssociationFields;
+			}
+			return fieldList + "," + unSelectedAssociationFields;
+		}
+
+		// No association parameter provided
+		// If Exclude - then add the list of associationFields to the original
+		// fieldList
+		// If filter is Include just return the original fieldList value
+		if (filterType.equals("E")) {
+			if (fieldList.equals("")) {
+				return associationFields;
+			}
+			return fieldList + "," + associationFields;
+		}
+
+		return fieldList;
+
 	}
 
 	private String convertDataObjectJSON(Object dataObject, String filterName,
@@ -274,6 +305,49 @@ public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 
 		}
 		return filters;
+	}
+
+	private Set<String> createSetFromString(String string) {
+		Set<String> set = new HashSet<String>();
+		StringTokenizer st = new StringTokenizer(string, ",");
+		while (st.hasMoreTokens()) {
+			set.add(st.nextToken().trim());
+		}
+		return set;
+	}
+
+	private String createIncludedInStringList(Set<String> candidates,
+			Set<String> matchAgainst) {
+		String stringList = "";
+		Boolean first = true;
+		for (String candidate : candidates) {
+			if (matchAgainst.contains(candidate)) {
+				if (first) {
+					stringList = candidate;
+					first = false;
+				} else {
+					stringList += "," + candidate;
+				}
+			}
+		}
+		return stringList;
+	}
+
+	private String createNotIncludedInStringList(Set<String> candidates,
+			Set<String> matchAgainst) {
+		String stringList = "";
+		Boolean first = true;
+		for (String candidate : candidates) {
+			if (!(matchAgainst.contains(candidate))) {
+				if (first) {
+					stringList = candidate;
+					first = false;
+				} else {
+					stringList += "," + candidate;
+				}
+			}
+		}
+		return stringList;
 	}
 
 	private Boolean isTrue(String param) {
