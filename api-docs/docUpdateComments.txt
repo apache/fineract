@@ -8,15 +8,12 @@ permissions? or what can happen?
 
 
 Loan Transitions ... approve etc - possible done CHECK AFTER
-    if  "eventLocalDate" parameter added with string date then instead of parameter not support msg do get jackson conversion exception. - KW might to jackson conversion exception to json.
-    approve loan (already closed) with approval date before submitted date
-    The server encountered an internal error () that prevented it from fulfilling this request.</u></p><p><b>exception</b> <pre>org.mifosng.platform.loan.domain.InvalidLoanTimelineDate: The     date    of when loan is approved cannot be before its submittal date.
+    if  "eventLocalDate" parameter added with string date then instead of parameter not supported msg do get jackson conversion exception. -
+"JsonMappingException: Invalid format: &quot;07 June 2012&quot; " KW might do jackson conversion exception to json.
 
-   approve loan (already closed) with approval date after submitted date
-    Column 'loan_status_id' cannot be null; SQL [n/a]; constraint [null]; nested exception is org.hibernate.exception.ConstraintViolationException: Column 'loan_status_id' cannot be null
 
-   if I do an approve when already approved also get
-   Column 'loan_status_id' cannot be null; SQL [n/a]; constraint [null]; nested exception is org.hibernate.exception.ConstraintViolationException: Column 'loan_status_id' cannot be null
+    approve loan (already closed) with approval date before submitted date - now fine and shows json msg but
+    if approve loan (already closed) with approval date after submitted date - DataIntegrityViolationException: Column 'loan_status_id' cannot be null;
 
 
    sometimes clientId returned... always loanId OK? DOING
