@@ -8,7 +8,7 @@ Video Demonstration
 
 http://www.youtube.com/watch?v=zN5Dn1Lc_js
 
-Online Client Applicaton Demos
+Online Client Application Demos
 =============================
 
 <a target="_blank" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-individual-lending-app" title="Client apps: Individual Lending">Individual Lending App</a>
