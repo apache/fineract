@@ -23,4 +23,6 @@ public interface ReadExtraDataAndReportingService {
 
 	void updateExtraData(String type, String set, Long id,
 			Map<String, String> queryParams);
+
+	String getReportType(String reportName);
 }

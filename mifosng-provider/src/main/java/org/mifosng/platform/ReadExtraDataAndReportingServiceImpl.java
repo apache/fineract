@@ -23,6 +23,7 @@ import org.mifosng.platform.api.data.ResultsetDataRow;
 import org.mifosng.platform.exceptions.AdditionalFieldsNotFoundException;
 import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
 import org.mifosng.platform.exceptions.ReportNotFoundException;
+import org.pentaho.reporting.engine.classic.core.ClassicEngineBoot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +41,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 
 	@Autowired
 	public ReadExtraDataAndReportingServiceImpl(final DataSource dataSource) {
+		ClassicEngineBoot.getInstance().start();
 		try {
 			this.dataSource = dataSource;
 			Connection db_connection = dataSource.getConnection();
@@ -652,5 +654,49 @@ public class ReadExtraDataAndReportingServiceImpl implements
 					+ ")" + " select " + id + " as id" + selectColumns;
 		}
 		return saveSql;
+	}
+
+	@Override
+	public String getReportType(String reportName) {
+		String sql = "SELECT ifnull(report_type,'') as report_type FROM `stretchy_report` where report_name = '"
+				+ reportName + "'";
+		String reportType = "";
+		logger.info("get reportType: " + sql);
+
+		try {
+			Connection db_connection = dataSource.getConnection();
+			Statement db_statement = db_connection.createStatement();
+			ResultSet rs = db_statement.executeQuery(sql);
+
+			if (rs.next()) {
+				reportType = rs.getString("report_type");
+			} else {
+				dbClose(db_statement, db_connection);
+				throw new ReportNotFoundException(sql);
+			}
+			dbClose(db_statement, db_connection);
+		} catch (SQLException e) {
+			throw new PlatformDataIntegrityException("error.msg.sql.error",
+					e.getMessage(), "Report Name: " + reportName + "   Sql: "
+							+ sql);
+		}
+
+		return reportType;
+	}
+
+	private void dbClose(Statement db_statement, Connection db_connection) {
+		try {
+			if (db_statement != null) {
+				db_statement.close();
+				db_statement = null;
+			}
+			if (db_connection != null) {
+				db_connection.close();
+				db_connection = null;
+			}
+		} catch (SQLException e) {
+			throw new PlatformDataIntegrityException("error.msg.sql.error",
+					e.getMessage(), "Error closing database connection");
+		}
 	}
 }

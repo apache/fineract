@@ -1,5 +1,7 @@
 package org.mifosng.platform.api;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -19,6 +21,15 @@ import javax.ws.rs.core.UriInfo;
 import org.mifosng.platform.ReadExtraDataAndReportingService;
 import org.mifosng.platform.api.data.GenericResultset;
 import org.mifosng.platform.api.infrastructure.ApiJSONFormattingService;
+import org.pentaho.reporting.engine.classic.core.MasterReport;
+import org.pentaho.reporting.engine.classic.core.ReportProcessingException;
+import org.pentaho.reporting.engine.classic.core.modules.output.pageable.pdf.PdfReportUtil;
+import org.pentaho.reporting.engine.classic.core.modules.output.table.csv.CSVReportUtil;
+import org.pentaho.reporting.engine.classic.core.modules.output.table.html.HtmlReportUtil;
+import org.pentaho.reporting.engine.classic.core.modules.output.table.xls.ExcelReportUtil;
+import org.pentaho.reporting.libraries.resourceloader.Resource;
+import org.pentaho.reporting.libraries.resourceloader.ResourceException;
+import org.pentaho.reporting.libraries.resourceloader.ResourceManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +48,7 @@ public class ReportingApiResource {
 	private String filterName = "myFilter";
 
 	@Autowired
-	private ReadExtraDataAndReportingService ReadExtraDataAndReportingService;
+	private ReadExtraDataAndReportingService readExtraDataAndReportingService;
 
 	@Autowired
 	private ApiJSONFormattingService jsonFormattingService;
@@ -54,7 +65,7 @@ public class ReportingApiResource {
 		String exportCSV = queryParams.getFirst("exportCSV");
 
 		if ((exportCSV == null) || (!(exportCSV.equalsIgnoreCase("true")))) {
-			GenericResultset result = this.ReadExtraDataAndReportingService
+			GenericResultset result = this.readExtraDataAndReportingService
 					.retrieveGenericResultset(".", ".", extractedQueryParams);
 			String selectedFields = "";
 			String json = this.jsonFormattingService.convertRequest(result,
@@ -63,7 +74,7 @@ public class ReportingApiResource {
 			return Response.ok().entity(json).build();
 		}
 
-		StreamingOutput result = this.ReadExtraDataAndReportingService
+		StreamingOutput result = this.readExtraDataAndReportingService
 				.retrieveReportCSV(".", ".", extractedQueryParams);
 
 		return Response
@@ -76,7 +87,8 @@ public class ReportingApiResource {
 	@GET
 	@Path("{reportName}")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON, "application/x-msdownload" })
+	@Produces({ MediaType.APPLICATION_JSON, "application/x-msdownload",
+			"application/vnd.ms-excel", "application/pdf", "text/html" })
 	public Response retrieveReport(
 			@PathParam("reportName") final String reportName,
 			@Context UriInfo uriInfo) {
@@ -90,7 +102,6 @@ public class ReportingApiResource {
 		} else {
 			parameterType = "parameter";
 		}
-		String exportCSV = queryParams.getFirst("exportCSV");
 
 		Map<String, String> extractedQueryParams = new HashMap<String, String>();
 
@@ -107,8 +118,89 @@ public class ReportingApiResource {
 		}
 		logger.info("BEGINNING REQUEST FOR: " + reportName);
 
+		if (this.readExtraDataAndReportingService.getReportType(reportName)
+				.equalsIgnoreCase("Pentaho")) {
+
+			String reportPath = "C:\\dev\\apache-tomcat-7.0.25\\webapps\\ROOT\\PentahoReports\\"
+					+ reportName + ".prpt";
+			// String reportPath =
+			// "/var/lib/tomcat6/webapps/ROOT/PentahoReports/"
+			// + reportName + ".prpt";
+			logger.info("Report path: " + reportPath);
+
+			// load report definition
+			ResourceManager manager = new ResourceManager();
+			manager.registerDefaults();
+			Resource res;
+
+			String outputType = queryParams.getFirst("output-type");
+			logger.info("outputType: " + outputType);
+			try {
+				res = manager.createDirectly(reportPath, MasterReport.class);
+				MasterReport masterReport = (MasterReport) res.getResource();
+
+				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+				if ("PDF".equalsIgnoreCase(outputType)) {
+					logger.info("PDF: " + outputType);
+					PdfReportUtil.createPDF(masterReport, baos);
+					return Response.ok().entity(baos.toByteArray())
+							.type("application/pdf").build();
+					/*
+					 * .header("Content-Disposition", "attachment;filename=" +
+					 * reportName.replaceAll(" ", "") + ".pdf").build();
+					 */
+				}
+
+				if ("XLS".equalsIgnoreCase(outputType)) {
+					logger.info("XLS: " + outputType);
+					ExcelReportUtil.createXLS(masterReport, baos);
+					return Response
+							.ok()
+							.entity(baos.toByteArray())
+							.type("application/vnd.ms-excel")
+							.header("Content-Disposition",
+									"attachment;filename="
+											+ reportName.replaceAll(" ", "")
+											+ ".xls").build();
+				}
+
+				if ("CSV".equalsIgnoreCase(outputType)) {
+					logger.info("CSV: " + outputType);
+
+					CSVReportUtil.createCSV(masterReport, baos, "UTF-8");
+					return Response
+							.ok()
+							.entity(baos.toByteArray())
+							.type("application/x-msdownload")
+							.header("Content-Disposition",
+									"attachment;filename="
+											+ reportName.replaceAll(" ", "")
+											+ ".csv").build();
+				}
+
+				if ("HTML".equalsIgnoreCase(outputType)) {
+					logger.info("HTML: " + outputType);
+
+					HtmlReportUtil.createStreamHTML(masterReport, baos);
+					return Response.ok().entity(baos.toByteArray()).build();
+				}
+			} catch (ResourceException e) {
+				e.printStackTrace();
+			} catch (ReportProcessingException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
+			logger.info("No matching Output Type: " + outputType);
+			return Response.ok().build();
+		}
+
+		String exportCSV = queryParams.getFirst("exportCSV");
+
 		if ((exportCSV == null) || (!(exportCSV.equalsIgnoreCase("true")))) {
-			GenericResultset result = this.ReadExtraDataAndReportingService
+			GenericResultset result = this.readExtraDataAndReportingService
 					.retrieveGenericResultset(reportName, parameterType,
 							extractedQueryParams);
 
@@ -116,16 +208,18 @@ public class ReportingApiResource {
 			String json = this.jsonFormattingService.convertRequest(result,
 					filterName, allowedFieldList, selectedFields,
 					uriInfo.getQueryParameters());
-			return Response.ok().entity(json).build();
+			return Response.ok().entity(json).type(MediaType.APPLICATION_JSON)
+					.build();
 		}
 
-		StreamingOutput result = this.ReadExtraDataAndReportingService
+		StreamingOutput result = this.readExtraDataAndReportingService
 				.retrieveReportCSV(reportName, parameterType,
 						extractedQueryParams);
 
 		return Response
 				.ok()
 				.entity(result)
+				.type("application/x-msdownload")
 				.header("Content-Disposition",
 						"attachment;filename=" + reportName.replaceAll(" ", "")
 								+ ".csv").build();
