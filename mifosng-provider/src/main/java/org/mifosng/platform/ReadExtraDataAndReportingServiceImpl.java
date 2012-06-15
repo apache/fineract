@@ -1,6 +1,8 @@
 package org.mifosng.platform;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.Connection;
@@ -14,6 +16,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.sql.DataSource;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
 import org.mifosng.platform.api.data.AdditionalFieldsSet;
@@ -24,6 +27,15 @@ import org.mifosng.platform.exceptions.AdditionalFieldsNotFoundException;
 import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
 import org.mifosng.platform.exceptions.ReportNotFoundException;
 import org.pentaho.reporting.engine.classic.core.ClassicEngineBoot;
+import org.pentaho.reporting.engine.classic.core.MasterReport;
+import org.pentaho.reporting.engine.classic.core.ReportProcessingException;
+import org.pentaho.reporting.engine.classic.core.modules.output.pageable.pdf.PdfReportUtil;
+import org.pentaho.reporting.engine.classic.core.modules.output.table.csv.CSVReportUtil;
+import org.pentaho.reporting.engine.classic.core.modules.output.table.html.HtmlReportUtil;
+import org.pentaho.reporting.engine.classic.core.modules.output.table.xls.ExcelReportUtil;
+import org.pentaho.reporting.libraries.resourceloader.Resource;
+import org.pentaho.reporting.libraries.resourceloader.ResourceException;
+import org.pentaho.reporting.libraries.resourceloader.ResourceManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +53,10 @@ public class ReadExtraDataAndReportingServiceImpl implements
 
 	@Autowired
 	public ReadExtraDataAndReportingServiceImpl(final DataSource dataSource) {
+		//kick off pentaho reports server
 		ClassicEngineBoot.getInstance().start();
+		
+		
 		try {
 			this.dataSource = dataSource;
 			Connection db_connection = dataSource.getConnection();
@@ -699,4 +714,79 @@ public class ReadExtraDataAndReportingServiceImpl implements
 					e.getMessage(), "Error closing database connection");
 		}
 	}
+	
+
+	@Override
+	public Response processPentahoRequest(String reportName,
+			String outputType, Map<String, String> queryParams) {
+		String reportPath = "C:\\dev\\apache-tomcat-7.0.25\\webapps\\ROOT\\PentahoReports\\"
+				+ reportName + ".prpt";
+		// String reportPath =
+		// "/var/lib/tomcat6/webapps/ROOT/PentahoReports/"
+		// + reportName + ".prpt";
+		logger.info("Report path: " + reportPath);
+
+		// load report definition
+		ResourceManager manager = new ResourceManager();
+		manager.registerDefaults();
+		Resource res;
+
+		logger.info("outputType: " + outputType);
+		try {
+			res = manager.createDirectly(reportPath, MasterReport.class);
+			MasterReport masterReport = (MasterReport) res.getResource();
+
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+			if ("PDF".equalsIgnoreCase(outputType)) {
+				PdfReportUtil.createPDF(masterReport, baos);
+				return Response.ok().entity(baos.toByteArray())
+						.type("application/pdf").build();
+			}
+
+			if ("XLS".equalsIgnoreCase(outputType)) {
+				ExcelReportUtil.createXLS(masterReport, baos);
+				return Response
+						.ok()
+						.entity(baos.toByteArray())
+						.type("application/vnd.ms-excel")
+						.header("Content-Disposition",
+								"attachment;filename="
+										+ reportName.replaceAll(" ", "")
+										+ ".xls").build();
+			}
+
+			if ("CSV".equalsIgnoreCase(outputType)) {
+				CSVReportUtil.createCSV(masterReport, baos, "UTF-8");
+				return Response
+						.ok()
+						.entity(baos.toByteArray())
+						.type("application/x-msdownload")
+						.header("Content-Disposition",
+								"attachment;filename="
+										+ reportName.replaceAll(" ", "")
+										+ ".csv").build();
+			}
+
+			if ("HTML".equalsIgnoreCase(outputType)) {
+				HtmlReportUtil.createStreamHTML(masterReport, baos);
+				return Response.ok().entity(baos.toByteArray()).build();
+			}
+		} catch (ResourceException e) {
+			throw new PlatformDataIntegrityException(
+					"error.msg.reporting.error", e.getMessage());
+		} catch (ReportProcessingException e) {
+			throw new PlatformDataIntegrityException(
+					"error.msg.reporting.error", e.getMessage());
+		} catch (IOException e) {
+			throw new PlatformDataIntegrityException(
+					"error.msg.reporting.error", e.getMessage());
+		}
+
+		throw new PlatformDataIntegrityException(
+				"error.msg.invalid.outputType", "No matching Output Type: "
+						+ outputType);
+
+	}
+	
 }

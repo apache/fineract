@@ -3,6 +3,7 @@ package org.mifosng.platform;
 import java.util.List;
 import java.util.Map;
 
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
 import org.mifosng.platform.api.data.AdditionalFieldsSet;
@@ -24,5 +25,8 @@ public interface ReadExtraDataAndReportingService {
 	void updateExtraData(String type, String set, Long id,
 			Map<String, String> queryParams);
 
+	public Response processPentahoRequest(String reportName,
+			String outputType, Map<String, String> queryParams);
+	
 	String getReportType(String reportName);
 }
