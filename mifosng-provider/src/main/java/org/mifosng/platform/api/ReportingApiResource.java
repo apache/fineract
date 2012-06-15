@@ -21,6 +21,7 @@ import javax.ws.rs.core.UriInfo;
 import org.mifosng.platform.ReadExtraDataAndReportingService;
 import org.mifosng.platform.api.data.GenericResultset;
 import org.mifosng.platform.api.infrastructure.ApiJSONFormattingService;
+import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
 import org.pentaho.reporting.engine.classic.core.MasterReport;
 import org.pentaho.reporting.engine.classic.core.ReportProcessingException;
 import org.pentaho.reporting.engine.classic.core.modules.output.pageable.pdf.PdfReportUtil;
@@ -121,80 +122,8 @@ public class ReportingApiResource {
 		if (this.readExtraDataAndReportingService.getReportType(reportName)
 				.equalsIgnoreCase("Pentaho")) {
 
-			String reportPath = "C:\\dev\\apache-tomcat-7.0.25\\webapps\\ROOT\\PentahoReports\\"
-					+ reportName + ".prpt";
-			// String reportPath =
-			// "/var/lib/tomcat6/webapps/ROOT/PentahoReports/"
-			// + reportName + ".prpt";
-			logger.info("Report path: " + reportPath);
-
-			// load report definition
-			ResourceManager manager = new ResourceManager();
-			manager.registerDefaults();
-			Resource res;
-
-			String outputType = queryParams.getFirst("output-type");
-			logger.info("outputType: " + outputType);
-			try {
-				res = manager.createDirectly(reportPath, MasterReport.class);
-				MasterReport masterReport = (MasterReport) res.getResource();
-
-				ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-				if ("PDF".equalsIgnoreCase(outputType)) {
-					logger.info("PDF: " + outputType);
-					PdfReportUtil.createPDF(masterReport, baos);
-					return Response.ok().entity(baos.toByteArray())
-							.type("application/pdf").build();
-					/*
-					 * .header("Content-Disposition", "attachment;filename=" +
-					 * reportName.replaceAll(" ", "") + ".pdf").build();
-					 */
-				}
-
-				if ("XLS".equalsIgnoreCase(outputType)) {
-					logger.info("XLS: " + outputType);
-					ExcelReportUtil.createXLS(masterReport, baos);
-					return Response
-							.ok()
-							.entity(baos.toByteArray())
-							.type("application/vnd.ms-excel")
-							.header("Content-Disposition",
-									"attachment;filename="
-											+ reportName.replaceAll(" ", "")
-											+ ".xls").build();
-				}
-
-				if ("CSV".equalsIgnoreCase(outputType)) {
-					logger.info("CSV: " + outputType);
-
-					CSVReportUtil.createCSV(masterReport, baos, "UTF-8");
-					return Response
-							.ok()
-							.entity(baos.toByteArray())
-							.type("application/x-msdownload")
-							.header("Content-Disposition",
-									"attachment;filename="
-											+ reportName.replaceAll(" ", "")
-											+ ".csv").build();
-				}
-
-				if ("HTML".equalsIgnoreCase(outputType)) {
-					logger.info("HTML: " + outputType);
-
-					HtmlReportUtil.createStreamHTML(masterReport, baos);
-					return Response.ok().entity(baos.toByteArray()).build();
-				}
-			} catch (ResourceException e) {
-				e.printStackTrace();
-			} catch (ReportProcessingException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-
-			logger.info("No matching Output Type: " + outputType);
-			return Response.ok().build();
+			return processPentahoRequest(reportName,
+					queryParams.getFirst("output-type"), extractedQueryParams);
 		}
 
 		String exportCSV = queryParams.getFirst("exportCSV");
@@ -223,5 +152,77 @@ public class ReportingApiResource {
 				.header("Content-Disposition",
 						"attachment;filename=" + reportName.replaceAll(" ", "")
 								+ ".csv").build();
+	}
+
+	private Response processPentahoRequest(String reportName,
+			String outputType, Map<String, String> queryParams) {
+		String reportPath = "C:\\dev\\apache-tomcat-7.0.25\\webapps\\ROOT\\PentahoReports\\"
+				+ reportName + ".prpt";
+		// String reportPath =
+		// "/var/lib/tomcat6/webapps/ROOT/PentahoReports/"
+		// + reportName + ".prpt";
+		logger.info("Report path: " + reportPath);
+
+		// load report definition
+		ResourceManager manager = new ResourceManager();
+		manager.registerDefaults();
+		Resource res;
+
+		logger.info("outputType: " + outputType);
+		try {
+			res = manager.createDirectly(reportPath, MasterReport.class);
+			MasterReport masterReport = (MasterReport) res.getResource();
+
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+			if ("PDF".equalsIgnoreCase(outputType)) {
+				PdfReportUtil.createPDF(masterReport, baos);
+				return Response.ok().entity(baos.toByteArray())
+						.type("application/pdf").build();
+			}
+
+			if ("XLS".equalsIgnoreCase(outputType)) {
+				ExcelReportUtil.createXLS(masterReport, baos);
+				return Response
+						.ok()
+						.entity(baos.toByteArray())
+						.type("application/vnd.ms-excel")
+						.header("Content-Disposition",
+								"attachment;filename="
+										+ reportName.replaceAll(" ", "")
+										+ ".xls").build();
+			}
+
+			if ("CSV".equalsIgnoreCase(outputType)) {
+				CSVReportUtil.createCSV(masterReport, baos, "UTF-8");
+				return Response
+						.ok()
+						.entity(baos.toByteArray())
+						.type("application/x-msdownload")
+						.header("Content-Disposition",
+								"attachment;filename="
+										+ reportName.replaceAll(" ", "")
+										+ ".csv").build();
+			}
+
+			if ("HTML".equalsIgnoreCase(outputType)) {
+				HtmlReportUtil.createStreamHTML(masterReport, baos);
+				return Response.ok().entity(baos.toByteArray()).build();
+			}
+		} catch (ResourceException e) {
+			throw new PlatformDataIntegrityException(
+					"error.msg.reporting.error", e.getMessage());
+		} catch (ReportProcessingException e) {
+			throw new PlatformDataIntegrityException(
+					"error.msg.reporting.error", e.getMessage());
+		} catch (IOException e) {
+			throw new PlatformDataIntegrityException(
+					"error.msg.reporting.error", e.getMessage());
+		}
+
+		throw new PlatformDataIntegrityException(
+				"error.msg.invalid.outputType", "No matching Output Type: "
+						+ outputType);
+
 	}
 }

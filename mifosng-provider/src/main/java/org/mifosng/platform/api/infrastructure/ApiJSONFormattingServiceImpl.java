@@ -84,9 +84,6 @@ public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 		fieldList = updateListForAssociations(fieldList, associationFields,
 				queryParams.getFirst("associations"), filterType);
 
-		// logger.info("fieldList to be processed is: " + fieldList
-		// + "   filter type is: " + filterType);
-		logger.info("query params: " + queryParams.toString());
 		return convertDataObjectJSON(dataObject, filterName, filterType,
 				fieldList, isTrue(queryParams.getFirst("pretty")));
 	}
