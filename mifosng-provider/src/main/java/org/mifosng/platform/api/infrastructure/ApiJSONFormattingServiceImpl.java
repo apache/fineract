@@ -15,15 +15,10 @@ import org.codehaus.jackson.map.ser.FilterProvider;
 import org.codehaus.jackson.map.ser.impl.SimpleBeanPropertyFilter;
 import org.codehaus.jackson.map.ser.impl.SimpleFilterProvider;
 import org.mifosng.platform.exceptions.PlatformInternalServerException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
-
-	private final static Logger logger = LoggerFactory
-			.getLogger(ApiJSONFormattingServiceImpl.class);
 
 	@Override
 	public String convertRequest(Object dataObject, String filterName,
@@ -111,18 +106,18 @@ public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 			String associationFields, String param, String filterType) {
 
 		if (isPassed(param)) {
-			//logger.info("is associations");
+			// logger.info("is associations");
 			if (param.equalsIgnoreCase("ALL")) {
-				//logger.info("is ALL");
+				// logger.info("is ALL");
 				if (filterType.equals("I")) {
-					//logger.info("is Include");
+					// logger.info("is Include");
 					return fieldList + "," + associationFields;
 				}
-				//logger.info("is Exclude");
+				// logger.info("is Exclude");
 				return fieldList;
 			}
 
-			//logger.info("Not ALL");
+			// logger.info("Not ALL");
 			Set<String> fullAssociationsSet = createSetFromString(associationFields);
 			Set<String> paramAssociationsSet = createSetFromString(param);
 
@@ -130,15 +125,15 @@ public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 
 				String selectedAssociationFields = createIncludedInStringList(
 						paramAssociationsSet, fullAssociationsSet);
-				//logger.info("is Include - selected fields are :"
-				//		+ selectedAssociationFields);
+				// logger.info("is Include - selected fields are :"
+				// + selectedAssociationFields);
 				return fieldList + "," + selectedAssociationFields;
 			}
 
 			String unSelectedAssociationFields = createNotIncludedInStringList(
 					fullAssociationsSet, paramAssociationsSet);
-			//logger.info("is Exclude - unselected fields are :"
-			//		+ unSelectedAssociationFields);
+			// logger.info("is Exclude - unselected fields are :"
+			// + unSelectedAssociationFields);
 
 			if (fieldList.equals("")) {
 				return unSelectedAssociationFields;

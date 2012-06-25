@@ -19,6 +19,7 @@ import javax.sql.DataSource;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
+import org.apache.commons.lang.StringUtils;
 import org.mifosng.platform.api.data.AdditionalFieldsSet;
 import org.mifosng.platform.api.data.GenericResultset;
 import org.mifosng.platform.api.data.ResultsetColumnHeader;
@@ -50,13 +51,14 @@ public class ReadExtraDataAndReportingServiceImpl implements
 
 	private final DataSource dataSource;
 	private final String reportingMetaDataDB;
+	private Boolean noPentaho = false;
 
 	@Autowired
 	public ReadExtraDataAndReportingServiceImpl(final DataSource dataSource) {
-		//kick off pentaho reports server
-		ClassicEngineBoot.getInstance().start();
-		
-		
+		// kick off pentaho reports server
+		// ClassicEngineBoot.getInstance().start();
+		noPentaho = true;
+
 		try {
 			this.dataSource = dataSource;
 			Connection db_connection = dataSource.getConnection();
@@ -714,15 +716,28 @@ public class ReadExtraDataAndReportingServiceImpl implements
 					e.getMessage(), "Error closing database connection");
 		}
 	}
-	
 
 	@Override
-	public Response processPentahoRequest(String reportName,
-			String outputType, Map<String, String> queryParams) {
+	public Response processPentahoRequest(String reportName, String outputTypeParam,
+			Map<String, String> queryParams) {
+
+		String outputType = "HTML";
+		if (StringUtils.isNotBlank(outputTypeParam)) outputType = outputTypeParam;
+		
+		if (!(outputType.equalsIgnoreCase("HTML") || outputType.equalsIgnoreCase("PDF") || outputType.equalsIgnoreCase("XLS") || outputType.equalsIgnoreCase("CSV")))
+			throw new PlatformDataIntegrityException(
+					"error.msg.invalid.outputType", "No matching Output Type: "
+							+ outputType);
+		
+		if (noPentaho)
+			throw new PlatformDataIntegrityException("error.msg.no.pentaho",
+					"Pentaho is not enabled", "Pentaho is not enabled");
+
+		//TODO - use pentaho location finder like Pawel does in Mifos
 		String reportPath = "C:\\dev\\apache-tomcat-7.0.25\\webapps\\ROOT\\PentahoReports\\"
 				+ reportName + ".prpt";
 		// String reportPath =
-		// "/var/lib/tomcat6/webapps/ROOT/PentahoReports/"
+		// "/var/lib/tomcat7/webapps/ROOT/PentahoReports/"
 		// + reportName + ".prpt";
 		logger.info("Report path: " + reportPath);
 
@@ -770,7 +785,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 
 			if ("HTML".equalsIgnoreCase(outputType)) {
 				HtmlReportUtil.createStreamHTML(masterReport, baos);
-				return Response.ok().entity(baos.toByteArray()).build();
+				return Response.ok().entity(baos.toByteArray()).type("text/html").build();
 			}
 		} catch (ResourceException e) {
 			throw new PlatformDataIntegrityException(
@@ -788,5 +803,5 @@ public class ReadExtraDataAndReportingServiceImpl implements
 						+ outputType);
 
 	}
-	
+
 }

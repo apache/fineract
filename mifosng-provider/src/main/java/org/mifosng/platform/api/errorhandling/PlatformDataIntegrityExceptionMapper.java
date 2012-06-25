@@ -1,5 +1,6 @@
 package org.mifosng.platform.api.errorhandling;
 
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
@@ -26,6 +27,6 @@ public class PlatformDataIntegrityExceptionMapper implements ExceptionMapper<Pla
 		ApiGlobalErrorResponse dataIntegrityError = ApiGlobalErrorResponse.dataIntegrityError(exception.getGlobalisationMessageCode(), exception.getDefaultUserMessage(), 
 																									exception.getParameterName(), exception.getDefaultUserMessageArgs());
 		
-		return Response.status(Status.FORBIDDEN).entity(dataIntegrityError).build();
+		return Response.status(Status.FORBIDDEN).entity(dataIntegrityError).type(MediaType.APPLICATION_JSON).build();
 	}
 }
