@@ -27,7 +27,7 @@ import org.mifosng.platform.api.data.ResultsetDataRow;
 import org.mifosng.platform.exceptions.AdditionalFieldsNotFoundException;
 import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
 import org.mifosng.platform.exceptions.ReportNotFoundException;
-import org.pentaho.reporting.engine.classic.core.ClassicEngineBoot;
+//import org.pentaho.reporting.engine.classic.core.ClassicEngineBoot;
 import org.pentaho.reporting.engine.classic.core.MasterReport;
 import org.pentaho.reporting.engine.classic.core.ReportProcessingException;
 import org.pentaho.reporting.engine.classic.core.modules.output.pageable.pdf.PdfReportUtil;
