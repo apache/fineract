@@ -340,7 +340,7 @@
 <script id="clientSearchTabTemplate" type="text/x-jquery-tmpl">
 <form method="post" id="viewClient" name="viewClient" action="switchToClient">
 	<label for="client">Choose client:</label>
-	<select name="client" id="client">
+	<select name="client" id="client" onChange="showILClient(baseApiUrl, options[selectedIndex].value);">
 		<option value="0">--Select Client--</option>
 		{{#each clients}}
 			<option value="{{=id}}">{{=displayName}}&nbsp;-&nbsp;({{=officeName}})</option>
@@ -867,6 +867,15 @@
 
 <!-- differences in layout and javascript below here -->
 
+<style type="text/css">
+
+#container {
+	display: none;
+}
+
+</style>
+
+<div id="logonDiv"></div>
 <div id="container">
 	<div id="logowrapper">
 		<span style="float: left">
@@ -875,7 +884,7 @@
 	</div>
 	<div id="navwrapper">
 	<ul id="nav" class="floatleft">
-		<li><a href="home">Clients</a></li>
+		<li><a href="#" onclick="showILClientListing(baseApiUrl) ;">Clients</a></li>
 		<li><a href="org/admin/user">User Administration</a></li>
 		<li><a href="org/admin">Organisation Administration</a></li>
 		<li><a href="reporting/flexireport">Reports</a></li>
@@ -908,8 +917,7 @@
 	<br class="clear">
 	</div><div style="float:none; clear:both;">
 		<div id="spacer" style="line-height: 15px;">&nbsp;</div>
-		<div id="content">
-		</div>
+		<div id="content"></div>
 	</div>
 </div>
 
@@ -922,11 +930,8 @@
 $(document).ready(function() {
 
 
-	// basic auth details
-	base64 = "bWlmb3M6cGFzc3dvcmQ=";
 	baseApiUrl = "https://localhost:8443/mifosng-provider/api/v1/";
 
-	$("#content").html(getClientListingContent());
 
     	// default to 'en' culture - no need to import extra javascript files for globalize.js or datapicker
     	Globalize.culture('en');
@@ -945,8 +950,7 @@ $(document).ready(function() {
 	
 	jsViewsRegisterHelpers();
 	
-	showILClientListing(baseApiUrl);
-
+	showILLogon(baseApiUrl, "logonDiv");
 });
 </script>
 

@@ -1,30 +1,66 @@
 
-	queryParam = (function(){
-    				var query = {}, pair, search = location.search.substring(1).split("&"), i = search.length;
-    				while (i--) {
-        				pair = search[i].split("=");
-        				query[pair[0]] = decodeURIComponent(pair[1]);
-    				}
-    				return query;
-				})();
+queryParam = (function(){
+    			var query = {}, pair, search = location.search.substring(1).split("&"), i = search.length;
+    			while (i--) {
+        			pair = search[i].split("=");
+        			query[pair[0]] = decodeURIComponent(pair[1]);
+    			}
+    			return query;
+			})();
 
 
+function showILLogon(apiUrl, logonDivName) {
 
+	var htmlVar = '<form name = "logonform"><table><tr><td>User Name:</td><td><input type="text" name="username"></td></tr>';
+	htmlVar += '<tr><td>Password: </td><td><input type="password" name="password"></td></tr>';
+	htmlVar += '<tr><td><input type="button" value="Logon" name="Submit" ';
+	htmlVar += 'onclick= "setBasicAuthKey(' + "'" + apiUrl + "', '" + logonDivName + "'" + ', document.logonform.username.value, document.logonform.password.value )"></td><td></td></tr></table></form>';
 
-
-
-function getClientContent(baseApiUrl, clientId) {
-	var content = '<div id="newtabs">	<ul><li><a href="' + baseApiUrl + 'clients/' + clientId + '"'; 
-	content += ' title="clienttab" class="topleveltab"><span id="clienttabname">Loading...</span></a></li></ul><div id="clienttab"></div></div>';
-	return content;
+	$("#" + logonDivName).html(htmlVar);
 }
 
 
-function getClientListingContent() {
-	var content = '<button id="addclient" style="clear: both;">Add a new client</button>';
-	content += '<div id="tabs"><ul><li><a href="#searchtab" title="searchtab">Search</a></li></ul><div id="searchtab"></div></div>';
-	return content;
+function setBasicAuthKey(apiUrl, logonDivName, username, password) 
+{ 
+	base64 = "";
+	var jqxhr = $.ajax({ 
+		url : apiUrl +  "authentication?username=" + username + "&password=" + password, 
+		type : 'POST', 
+		contentType : "application/json; charset=utf-8", 
+		dataType : 'json', 
+		data : "{}", 
+		cache : false, 
+		success : function(data, textStatus, jqXHR) { 
+				base64 = data.base64EncodedAuthenticationKey; 
+				$("#" + logonDivName).hide();
+				$("#container").show();
+				showILClientListing(apiUrl);
+				return false;
+			},
+		error : function(jqXHR, textStatus, errorThrown) {
+				alert("Invalid Username/Password"); 
+				return true;
+		} 
+	});
 }
+
+
+
+
+function setClientListingContent(divName) {
+	var htmlVar = '<button id="addclient" style="clear: both;">Add a new client</button>';
+	htmlVar += '<div id="tabs"><ul><li><a href="#searchtab" title="searchtab">Search</a></li></ul><div id="searchtab"></div></div>';
+
+	$("#" + divName).html(htmlVar);
+}
+
+function setClientContent(baseApiUrl, clientId, divName) {
+	var htmlVar = '<div id="newtabs">	<ul><li><a href="' + baseApiUrl + 'clients/' + clientId + '"'; 
+	htmlVar += ' title="clienttab" class="topleveltab"><span id="clienttabname">Loading...</span></a></li></ul><div id="clienttab"></div></div>';
+
+	$("#" + divName).html(htmlVar);
+}
+
 
 
 
@@ -331,6 +367,9 @@ function jsViewsRegisterHelpers() {
 //all the code for the various functions
 
 function showILClientListing(baseApiUrl) {
+
+setClientListingContent("content");
+
 //HOME list clients functionality
 	$("#tabs").tabs({
 		"ajaxOptions": {
@@ -372,10 +411,8 @@ function showILClientListing(baseApiUrl) {
 			        	console.log(clientObject);
 			        	
 				    	var tableHtml = $("#clientSearchTabTemplate").render(clientObject);
-						$("#searchtab").html(tableHtml);
+					$("#searchtab").html(tableHtml);
 						
-						$('#client').change(function() {
-				        	$('#viewClient').submit();
 				    	});
 				  },
 				  error: function(jqXHR, textStatus, errorThrown) {
@@ -387,7 +424,7 @@ function showILClientListing(baseApiUrl) {
 	
 	var addClientSuccessFunction = function(data, textStatus, jqXHR) {
 		  $('#dialog-form').dialog("close");
-		  window.location.href = 'IndivLendClient.html?clientId=' + data.entityId;
+		  showILClient(baseApiUrl, data.entityId);
 	}
 	
 	$("#addclient").button().click(function(e) {
@@ -409,6 +446,8 @@ function showILClientListing(baseApiUrl) {
 
 
 function showILClient(baseApiUrl, clientId) {
+
+	setClientContent(baseApiUrl, clientId, "content");
 
 	var tab_counter = 1;
 	var $newtabs = $("#newtabs").tabs({
