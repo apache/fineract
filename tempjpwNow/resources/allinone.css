@@ -1,0 +1,74 @@
+/*reset*/
+html{color:#000;background:#FFF;}body{margin:0 auto;font-family:Arial, Helvetica, Sans-Serif; font-size:12px;},div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input,textarea,p,blockquote,th,td{margin:0;padding:0;}table{border-collapse:collapse;border-spacing:0;}fieldset,img{border:0;}address,caption,cite,code,dfn,em,strong,th,var{font-style:normal;font-weight:normal;}li{list-style:none;}caption,th{text-align:left;}h1,h2,h3,h4,h5,h6{font-size:100%;font-weight:normal;}q:before,q:after{content:'';}abbr,acronym{border:0;font-variant:normal;}sup{vertical-align:text-top;}sub{vertical-align:text-bottom;}input,textarea,select{font-family:inherit;font-size:inherit;font-weight:inherit;}input,textarea,select{*font-size:100%;}legend{color:#000;}
+strong{font-weight: bolder;}
+/*General*/
+div#container {margin-top:0px;}
+div#content {margin-left:5px; margin-right:5px;}
+/*top navigation*/
+#nav, #nav ul {padding:0;margin:0;list-style:none;}  
+#nav a {display:block;padding:7px 7px 7px 7px;color:#ccc;text-decoration:none;}  
+#nav a.dmenu {}  
+#nav a.dmenu:hover {color:#3366CC !important;background-color: #fff !important;}
+#navwrapper {background-color: #2D2D2D;height:30px;}  
+#nav {padding-top:0px;}
+#nav li {float: left;  }  
+#nav li {position: relative;}   
+#nav li {position: static; width: auto;}/* hide from IE, mac */ 
+#nav li ul {position: absolute;display: none;margin-left:-1px;padding-bottom:10px;background-color: #FFFFFF;border: 1px solid #bbb;border-top:none;-moz-box-shadow: 0 0 5px #ddd;-webkit-box-shadow: 0 0 5px #ddd;box-shadow: 0 0 5px #ddd;z-index:5000;}  
+#nav li:hover a, #nav a:focus,  
+#nav a:active {padding:7px 7px 7px 7px;color:#fff;background:#444;text-decoration:none;}
+#nav li ul, #nav ul li  {width: 10em;}  
+#nav ul li a  {color: #3366CC !important;border-right: 0;}  
+#nav ul li a:hover {color:#3366CC !important;background-color: #eef3fb !important;border-right: 0;}  
+#nav a.current {color:#fff;font-weight:bold;background:#2D2D2D;text-decoration:none;border-top:2px solid #C33;padding-bottom:5px;}  
+#nav a.current:hover{padding-bottom:5px;}  
+#nav li:hover ul {display: block;}  
+#nav li:hover ul a{color: #000000;background-color: transparent;}  
+#nav ul a:hover {background-color: #606060!important;color: #FFFFFF !important;}
+.menuseprator{border-bottom:1px solid #ddd; margin:10px 0 10px 0;}  
+.arrowdown{color#eee; font-size:0.5em;}    
+.floatleft{float:left;}   
+.floatright{float:right;}  
+.clear{clear:both;}
+/*end of top navigation css*/
+/*simple vertical form*/
+label {display: block; font-size: 14px; padding-top: 3px;}
+#formcontainer input {font-size:12px; padding:4px 2px; border:solid 1px #aacfe4; width: 402px;}
+#formcontainer select {font-size:12px; padding:3px 2px; border:solid 1px #aacfe4; width: 402px;}
+fieldset {border-top: 1px solid;}
+legend {margin-left: 10px; font-size: 14px; font-weight: bold;}
+#ignorefornow button {clear:both; margin-left:225px; width:125px; height:31px; 
+        background:#666666 no-repeat; text-align:center; 
+        line-height:31px; color:#FFFFFF; font-size:11px; font-weight:bold;}
+#formcontainer {margin:0 auto; width: auto; border:solid 2px #b7ddf2; background:#ebf4fb; padding: 14px;}
+a.multiselectwidget {display: block; border: 1px solid #aaa; text-decoration: none; 
+    	background-color: #fafafa; color: #123456; clear:both;}
+div.multiselectwidget {float:left; text-align: center; margin-right: 10px;}  
+select.multiselectwidget {width: 450px; height: 80px;}
+
+/*display of information in label, attribute fashion*/
+.row .shortrowlabel {float: left; width: 6em; text-align: left; margin-right: 0.5em;}
+.row .rowlabel {float: left; width: 8em; text-align: left; margin-right: 0.5em;}
+.row .longrowlabel {float: left; width: 18em; text-align: left; margin-right: 0.5em;}
+.row .rowvalue {text-align: left; display: inline-block;}
+/**/
+#toolbar {padding: 9px 5px;}
+/*datatables*/
+table.pretty {width:100%;}
+table.pretty th, table.pretty td {border: 1px gainsboro solid;padding: 0.2em;}
+table.pretty caption {margin-left: inherit;margin-right: inherit;font-style: italic;font-weight: bold;}
+table.pretty thead tr th {text-align: center;font-weight: bold;border-bottom: 2px solid;}
+table.pretty thead tr th.empty {border: 0px;}
+table.pretty tfoot tr th {text-align: center;font-weight: bold;border-bottom: 2px solid;border-top: 2px solid;}
+table.pretty tbody tr th {text-align: center;}
+table.pretty tbody tr td {text-align: center; border-top: solid 1px;}
+table.pretty tbody tr.odd td {background: #EBF4FB;}
+table.pretty tbody tr.even td {background: #BCEEEE;}
+table.pretty thead tr th.highlightcol {border-top: solid 2px #2E6E9E;border-left: solid 2px #2E6E9E;border-right: solid 2px #2E6E9E; border-bottom: 1px gainsboro solid;}
+table.pretty tfoot tr th.highlightcol {border-left: solid 2px #2E6E9E;border-right: solid 2px #2E6E9E;}
+table.pretty thead tr th.lefthighlightcol, table.pretty tbody tr td.lefthighlightcol, table.pretty tfoot tr th.lefthighlightcol{border-left: solid 2px #2E6E9E;}
+table.pretty thead tr th.righthighlightcol, table.pretty tbody tr td.righthighlightcol, table.pretty tfoot tr th.righthighlightcol {border-right: solid 2px #2E6E9E;}
+table.pretty thead tr th.lefthighlightcolheader, table.pretty tbody tr td.lefthighlightcolheader, table.pretty tfoot tr th.lefthighlightcolheader {border-left: solid 2px #2E6E9E;}
+table.pretty thead tr th.righthighlightcolheader, table.pretty tbody tr td.righthighlightcolheader, table.pretty tfoot tr th.righthighlightcolheader {border-right: solid 2px #2E6E9E;}
+
+div.loantabs {margin-top: 5px;}

@@ -80,6 +80,8 @@ public class ReportingApiResource {
 		MultivaluedMap<String, String> queryParams = uriInfo
 				.getQueryParameters();
 
+		Map<String, String> reportParams = getReportParams(queryParams);
+
 		String parameterType = queryParams.getFirst("parameterType");
 		if ((parameterType == null)
 				|| (!(parameterType.equalsIgnoreCase("true")))) {
@@ -88,13 +90,15 @@ public class ReportingApiResource {
 			parameterType = "parameter";
 		}
 
-		Map<String, String> reportParams = getReportParams(queryParams);
-		if (this.readExtraDataAndReportingService.getReportType(reportName)
-				.equalsIgnoreCase("Pentaho")) {
+		if (parameterType.equals("report")) {
+			if (this.readExtraDataAndReportingService.getReportType(reportName)
+					.equalsIgnoreCase("Pentaho")) {
 
-			return this.readExtraDataAndReportingService.processPentahoRequest(
-					reportName, queryParams.getFirst("output-type"),
-					reportParams);
+				return this.readExtraDataAndReportingService
+						.processPentahoRequest(reportName,
+								queryParams.getFirst("output-type"),
+								reportParams);
+			}
 		}
 
 		String exportCSV = queryParams.getFirst("exportCSV");
@@ -126,7 +130,7 @@ public class ReportingApiResource {
 
 	private Map<String, String> getReportParams(
 			MultivaluedMap<String, String> queryParams) {
-		
+
 		Map<String, String> reportParams = new HashMap<String, String>();
 		Set<String> keys = queryParams.keySet();
 		String pKey;

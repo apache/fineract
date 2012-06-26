@@ -1,0 +1,52 @@
+
+.ui-button-text {
+   font-size: 12px;
+} 
+
+.reportLabel {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-weight: bold;
+	font-size: 13px;
+}
+
+#MifosReportOutput {
+  	width: 100%; 
+  	//height: 600px;
+	border-top-style: solid;
+	border-top-width: 1px;
+	border-top-color: black;
+}
+
+#reportLoadingImage {
+   display:block;
+   margin:0 auto;
+   text-align:center;
+}
+
+.rptAlignRight {
+	text-align: right;
+} 
+
+
+.dataTables_filter {
+	width: 30%;
+	float: left;
+	text-align: left;
+}
+
+
+.dataTables_length {
+	width: 40%;
+	float: left;
+}
+ 
+
+.dataTables_info {
+	width: 40%;
+	float: left;
+}
+
+.dataTables_paginate {
+	float: left;
+	text-align: left;
+}
