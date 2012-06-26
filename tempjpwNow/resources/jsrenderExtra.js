@@ -1,4 +1,4 @@
-
+/*
 queryParam = (function(){
     			var query = {}, pair, search = location.search.substring(1).split("&"), i = search.length;
     			while (i--) {
@@ -7,6 +7,24 @@ queryParam = (function(){
     			}
     			return query;
 			})();
+*/
+
+
+function executeAjaxRequest(url, verbType, jsonData, basicAuthKey, successFunction, errorFunction) { 
+	var jqxhr = $.ajax({ 
+				url : url, 
+				type : verbType, //POST, GET, PUT or DELETE 
+				contentType : "application/json; charset=utf-8", 
+				dataType : 'json', 
+				data : jsonData, 
+				cache : false, 
+				beforeSend : function(xhr) { 
+						xhr.setRequestHeader("Authorization", "Basic " + basicAuthKey); 
+					}, 
+				success : successFunction, 
+				error : errorFunction 
+			}); 
+}
 
 
 function showILLogon(apiUrl, logonDivName) {
@@ -372,7 +390,7 @@ setClientListingContent("content");
 
 //HOME list clients functionality
 	$("#tabs").tabs({
-		"ajaxOptions": {
+		/* "ajaxOptions": {
 			type: 'GET',
 			dataType: 'json',
 			contentType: 'application/json; charset=utf-8',
@@ -386,7 +404,7 @@ setClientListingContent("content");
 	        error: function(xhr, status, index, anchor) {
 	            $(anchor.hash).html("error occured while ajax loading.");
 	        }
-	    },
+	    },*/
 	    select: function(event, ui) {
 	    	console.log("selected..");
 	    },
@@ -396,6 +414,22 @@ setClientListingContent("content");
 	    show: function(event, ui) {
 	    	console.log("show..");
 	    	
+
+		var successFunction =  function(data) {
+				  			var clientObject = new Object();
+			        			clientObject.clients = data;
+			        			console.log(clientObject);
+			        	
+				    			var tableHtml = $("#clientSearchTabTemplate").render(clientObject);
+							$("#searchtab").html(tableHtml);	
+				  		};
+
+		var errorFunction = function(jqXHR, textStatus, errorThrown) {
+				    			handleXhrError(jqXHR, textStatus, errorThrown, "#formErrorsTemplate", "#formerrors");
+				  		};
+
+  		executeAjaxRequest(baseApiUrl + 'clients', 'GET', "", base64, successFunction, errorFunction);
+/*
 	    	var jqxhr = $.ajax({
 				  url: baseApiUrl + 'clients',
 				  type: 'GET',
@@ -411,14 +445,13 @@ setClientListingContent("content");
 			        	console.log(clientObject);
 			        	
 				    	var tableHtml = $("#clientSearchTabTemplate").render(clientObject);
-					$("#searchtab").html(tableHtml);
-						
-				    	});
+					$("#searchtab").html(tableHtml);	
 				  },
 				  error: function(jqXHR, textStatus, errorThrown) {
 				    handleXhrError(jqXHR, textStatus, errorThrown, "#formErrorsTemplate", "#formerrors");
 				  }
 			});
+*/
 	    }
 	});
 	
