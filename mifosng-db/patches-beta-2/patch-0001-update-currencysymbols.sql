@@ -1,5 +1,5 @@
 /*
-Note: its possible that this script wont apply on windowns through the command line client. The UTF-8 value £ isnt inserted.
+Note: its possible that this script wont apply on windows through the command line client. The UTF-8 value £ isnt inserted.
 In this case you can open up an sql tool like MySql workbench and apply this script in total.
 */
 UPDATE `ref_currency` SET `display_symbol` = 'BND' where `id`=18;
