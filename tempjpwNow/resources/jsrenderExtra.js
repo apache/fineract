@@ -297,10 +297,19 @@ function jsViewsRegisterHelpers() {
 	};
 	
 	function popupDialogWithFormView(getUrl, postUrl, submitType, titleCode, templateSelector, width, height, saveSuccessFunction) {
-		var dialogDiv = $("<div id='dialog-form'></div>");
 
 		var successFunction = function(data, textStatus, jqXHR) {
 				console.log(data);
+				popupDialogWithFormViewData(data, postUrl, submitType, titleCode, templateSelector, width, height, saveSuccessFunction);
+		  	};
+		
+		if (getUrl == "") popupDialogWithFormViewData("", postUrl, submitType, titleCode, templateSelector, width, height, saveSuccessFunction)
+		else executeAjaxRequest(getUrl, "GET", "", base64, successFunction, formErrorFunction);
+
+	}
+	function popupDialogWithFormViewData(data, postUrl, submitType, titleCode, templateSelector, width, height, saveSuccessFunction)  {
+				var dialogDiv = $("<div id='dialog-form'></div>");
+
 				var formHtml = $(templateSelector).render(data);
 				
 				dialogDiv.append(formHtml);
@@ -354,12 +363,12 @@ function jsViewsRegisterHelpers() {
 				  			$('#entityform input').first().focus();
 				  		}
 				  	}).dialog('open');
-		  	};
-		 
-		executeAjaxRequest(getUrl, "GET", "", base64, successFunction, formErrorFunction);
 
 	}
-	
+
+
+
+
 
 
 
@@ -476,18 +485,17 @@ alert("here");
 					$('.addnotebtn').button().click(function(e) {
 						var linkId = this.id;
 						var clientId = linkId.replace("addnotebtn", "");
-						var getAndPostUrl = baseApiUrl + 'clients/' + clientId + '/notes';
-						
+						var postUrl = baseApiUrl + 'clients/' + clientId + '/notes';
 						var templateSelector = "#noteFormTemplate";
 						var width = 600; 
 						var height = 400;
 						
 						var saveSuccessFunction = function(data, textStatus, jqXHR) {
 						  	$("#dialog-form").dialog("close");
-						  	refreshNoteWidget();
+						  	refreshNoteWidget(baseApiUrl + 'clients/' + clientId);
 						}
 						
-						popupDialogWithFormView(getAndPostUrl, getAndPostUrl, 'POST', "dialog.title.add.note", templateSelector, width, height,  saveSuccessFunction);
+						popupDialogWithFormView("", postUrl, 'POST', "dialog.title.add.note", templateSelector, width, height,  saveSuccessFunction);
 					    e.preventDefault();
 					});
 					$('button.addnotebtn span').text(jQuery.i18n.prop('dialog.button.add.note'));
@@ -715,6 +723,8 @@ alert("here");
 
 }
 	
+
+
 	// function to retrieve and display loan summary information in it placeholder
 	function refreshLoanSummaryInfo(clientUrl) {
 
@@ -743,7 +753,7 @@ alert("here");
 	}
 	function genRefreshNoteWidgetSuccessVar(clientUrl) {
 
-		var retVar = 'var successFunction = function(data, textStatus, jqXHR) {	' +
+		return 'var successFunction = function(data, textStatus, jqXHR) {	' +
 				  ' var noteParent = new Object();' + 
 				  ' noteParent.title = jQuery.i18n.prop("widget.notes.heading");' +
 				  ' noteParent.notes = data;' +
@@ -764,8 +774,6 @@ alert("here");
 					    ' e.preventDefault();' +
 			      ' });' +
 			  ' };'
-		alert(retVar);
-		return retVar;
 	}
 
 	
