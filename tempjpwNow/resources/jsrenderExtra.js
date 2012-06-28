@@ -141,15 +141,18 @@ function jsViewsRegisterHelpers() {
 			},
 			globalDate: function(dateParts) {
 			      try {
-			    	
-			    	  var year = dateParts[0];
-			    	  var month = parseInt(dateParts[1]) - 1; // month is zero indexed
-			    	  var day = dateParts[2];
+			    	  if (undefined != dateParts)
+				  {
+			    	  	var year = dateParts[0];
+			    	  	var month = parseInt(dateParts[1]) - 1; // month is zero indexed
+			    	  	var day = dateParts[2];
 			    	  
-			    	  var d = new Date();
-			    	  d.setFullYear(year,month,day);
+			    	  	var d = new Date();
+			    	  	d.setFullYear(year,month,day);
 			    	  
-			    	  return Globalize.format(d,"dd MMMM yyyy");
+			    	  	return Globalize.format(d,"dd MMMM yyyy");
+				  }
+				  else return "";
 			      } catch(e) {
 			        return "??";
 			      }
@@ -786,70 +789,32 @@ alert("currentTabIndex: " + currentTabIndex );
 	function addILLoan(baseApiUrl, clientId) {
 		setAddLoanContent("content");
 
-		successFunction = function(data, textStatus, jqXHR) {
-		
-			var formHtml = $("#newLoanFormTemplateMin").render(data);
-		
-			$("#inputarea").html(formHtml);
-
-			$('#productId').change(function() {
-				alert("incoming clientId: " + clientId);
-				var clientId = "x";
-				var productId = $('#productId').val();
-				repopulateFullForm(clientId, productId);
-			});
-		}
+		eval(genAddLoanSuccessVar(clientId));
 
   		executeAjaxRequest(baseApiUrl + 'loans/template?clientId=' + clientId, 'GET', "", base64, successFunction, formErrorFunction);	  
 	}
+	function genAddLoanSuccessVar(clientId) {
 
+		return 'var successFunction = function(data, textStatus, jqXHR) { ' +
+				' var formHtml = $("#newLoanFormTemplateMin").render(data);' +
+				' $("#inputarea").html(formHtml);' +
+				' $("#productId").change(function() {' +
+					' var productId = $("#productId").val();' +
+					' repopulateFullForm(' + clientId + ', productId);' +
+				' });' +
+			' };'
 
-	function calculateAnnualPercentageRate() {
-	//	alert('calculating interest');
-		var periodInterestRate = parseFloat($('#nominalInterestRate').val());
-		if (isNaN(periodInterestRate)) {
-			periodInterestRate = 0;
-		}
-		
-		var periodsInYear = 12;
-		var periodType = $('#selectedInterestFrequencyOption').val();
-		if (periodType == 3) {
-			periodsInYear = 1;
-		} else if (periodType == 2) {
-			periodsInYear = 12;
-		} else if (periodType == 1) {
-			periodsInYear = 52;
-		}
-		
-		var apr = parseFloat(periodsInYear * periodInterestRate);
-        $('#interestRatePerYear').val(Globalize.format(apr, "n4"));
 	}
 
-
-
-
-
-
-
 	function repopulateFullForm(clientId, productId) {
-		
-		var url = baseApiUrl + 'loans/template?clientId=' + clientId + '&productId=' + productId;
-		
-		var jqxhr = $.ajax({
-			url: url,
-			type: 'GET',
-			contentType: 'application/json',
-			dataType: 'json',
-			cache: false,
-			beforeSend: function(xhr) {
-				xhr.setRequestHeader("Authorization", "Basic " + base64);
-			},
-			success: function(data, textStatus, jqXHR) {
+				
+		successFunction =  function(data, textStatus, jqXHR) {
 			
 				var formHtml = $("#newLoanFormTemplate").render(data);
 			
 				$("#inputarea").html(formHtml);
 
+				alert("repop: " + clientId);
 				$('#productId').change(function() {
 					var productId = $('#productId').val();
 					repopulateFullForm(clientId, productId);
@@ -924,11 +889,48 @@ alert("currentTabIndex: " + currentTabIndex );
 				    e.preventDefault();
 				});
 				$('button#cancelloanapp span').text(jQuery.i18n.prop('dialog.button.cancel'));
-			}
-		});
-			
-		jqxhr.error(function(jqXHR, textStatus, errorThrown) {
-			handleXhrError(jqXHR, textStatus, errorThrown, "#formErrorsTemplate", "#formerrors");
-		});
+			};
+			  		
+		executeAjaxRequest(baseApiUrl + 'loans/template?clientId=' + clientId + '&productId=' + productId, 'GET', "", base64, successFunction, formErrorFunction);	  
+
 	}
 	
+
+	function calculateAnnualPercentageRate() {
+	//	alert('calculating interest');
+		var periodInterestRate = parseFloat($('#nominalInterestRate').val());
+		if (isNaN(periodInterestRate)) {
+			periodInterestRate = 0;
+		}
+		
+		var periodsInYear = 12;
+		var periodType = $('#selectedInterestFrequencyOption').val();
+		if (periodType == 3) {
+			periodsInYear = 1;
+		} else if (periodType == 2) {
+			periodsInYear = 12;
+		} else if (periodType == 1) {
+			periodsInYear = 52;
+		}
+		
+		var apr = parseFloat(periodsInYear * periodInterestRate);
+        $('#interestRatePerYear').val(Globalize.format(apr, "n4"));
+	}
+
+	function calculateLoanSchedule() {
+		
+		var newFormData = JSON.stringify($('#entityform').serializeObject());
+    	
+		var successFunction = function(data, textStatus, jqXHR) {
+				  		removeErrors("#formerrors");
+				  		var loanScheduleHtml = $("#newLoanScheduleTemplate").render(data);
+				  		$("#schedulearea").html(loanScheduleHtml);
+			  		}
+		
+		var errorFunction = (function(jqXHR, textStatus, errorThrown) {
+						 $("#schedulearea").html("");
+						handleXhrError(jqXHR, textStatus, errorThrown, "#formErrorsTemplate", "#formerrors");
+					});
+		executeAjaxRequest(baseApiUrl + 'loans?command=calculateLoanSchedule', "POST", newFormData, base64, successFunction, errorFunction);	  
+
+	}
