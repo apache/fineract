@@ -15,7 +15,7 @@ formErrorFunction = function(jqXHR, textStatus, errorThrown) {
 				};
 
 function executeAjaxRequest(url, verbType, jsonData, basicAuthKey, successFunction, errorFunction) { 
-alert("in exAjax");
+
 	var jqxhr = $.ajax({ 
 				url : url, 
 				type : verbType, //POST, GET, PUT or DELETE 
@@ -438,7 +438,7 @@ function showILClient(baseApiUrl, clientId) {
 	var clientUrl = baseApiUrl + 'clients/' + clientId
 	setClientContent("content");
 	var tab_counter = 1;
-	var $newtabs = $("#newtabs").tabs({
+	$newtabs = $("#newtabs").tabs({
 		
 		"add": function( event, ui ) {
 			$newtabs.tabs('select', '#' + ui.panel.id);
@@ -814,7 +814,6 @@ alert("currentTabIndex: " + currentTabIndex );
 			
 				$("#inputarea").html(formHtml);
 
-				alert("repop: " + clientId);
 				$('#productId').change(function() {
 					var productId = $('#productId').val();
 					repopulateFullForm(clientId, productId);
@@ -878,14 +877,13 @@ alert("currentTabIndex: " + currentTabIndex );
 				});
 				
 				$('#submitloanapp').button().click(function(e) {
-					submitLoanApplication();
+					submitLoanApplication(clientId);
 				    e.preventDefault();
 				});
 				$('button#submitloanapp span').text(jQuery.i18n.prop('dialog.button.submit'));
 				
 				$('#cancelloanapp').button().click(function(e) {
-					var url = '${rootContext}portfolio/client/' + clientId;
-					window.location.href = url;
+		  			showILClient(baseApiUrl, clientId);
 				    e.preventDefault();
 				});
 				$('button#cancelloanapp span').text(jQuery.i18n.prop('dialog.button.cancel'));
@@ -925,12 +923,26 @@ alert("currentTabIndex: " + currentTabIndex );
 				  		removeErrors("#formerrors");
 				  		var loanScheduleHtml = $("#newLoanScheduleTemplate").render(data);
 				  		$("#schedulearea").html(loanScheduleHtml);
-			  		}
+			  		};
 		
-		var errorFunction = (function(jqXHR, textStatus, errorThrown) {
+		var errorFunction = function(jqXHR, textStatus, errorThrown) {
 						 $("#schedulearea").html("");
 						handleXhrError(jqXHR, textStatus, errorThrown, "#formErrorsTemplate", "#formerrors");
-					});
+					};
 		executeAjaxRequest(baseApiUrl + 'loans?command=calculateLoanSchedule', "POST", newFormData, base64, successFunction, errorFunction);	  
 
 	}
+
+
+	function submitLoanApplication(clientId) {
+		
+		var newFormData = JSON.stringify($('#entityform').serializeObject());
+    	
+		var successFunction =  function(data, textStatus, jqXHR) {
+		  				showILClient(baseApiUrl, clientId);
+			  };
+		
+		executeAjaxRequest(baseApiUrl + 'loans', "POST", newFormData, base64, successFunction, formErrorFunction);	  
+
+	}
+
