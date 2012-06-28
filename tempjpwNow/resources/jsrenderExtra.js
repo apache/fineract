@@ -77,13 +77,19 @@ function setClientListingContent(divName) {
 	$("#" + divName).html(htmlVar);
 }
 
-function setClientContent(clientUrl, divName) {
+function setClientContent(divName) {
 
 	var htmlVar = '<div id="newtabs">	<ul><li><a href="nothing"'; 
 	htmlVar += ' title="clienttab" class="topleveltab"><span id="clienttabname">Loading...</span></a></li></ul><div id="clienttab"></div></div>';
 	$("#" + divName).html(htmlVar);
 }
 
+
+function setAddLoanContent(divName) {
+
+	var htmlVar = '<div id="inputarea"></div><div id="schedulearea"></div>'
+	$("#" + divName).html(htmlVar);
+}
 
 
 
@@ -427,7 +433,7 @@ setClientListingContent("content");
 
 function showILClient(baseApiUrl, clientId) {
 	var clientUrl = baseApiUrl + 'clients/' + clientId
-	setClientContent(clientUrl, "content");
+	setClientContent("content");
 	var tab_counter = 1;
 	var $newtabs = $("#newtabs").tabs({
 		
@@ -472,12 +478,12 @@ alert("currentTabIndex: " + currentTabIndex );
 					$('button.casflowbtn span').text(jQuery.i18n.prop('dialog.button.new.cashflow.analysis'));
 					
 					$('.newloanbtn').button().click(function(e) {
-alert("here");
 						var linkId = this.id;
 						var clientId = linkId.replace("newloanbtn", "");
 						// switch to jsp page focussed on new loan application flow.
-						var url = '${rootContext}portfolio/client/' + clientId + '/loan/new';
-						window.location.href = url;
+						addILLoan(baseApiUrl, clientId);
+						//var url = '${rootContext}portfolio/client/' + clientId + '/loan/new';
+						//window.location.href = url;
 					    e.preventDefault();
 					});
 					$('button.newloanbtn span').text(jQuery.i18n.prop('dialog.button.new.loan.application'));
@@ -777,6 +783,27 @@ alert("here");
 	}
 
 	
+	function addILLoan(baseApiUrl, clientId) {
+		setAddLoanContent("content");
+
+		successFunction = function(data, textStatus, jqXHR) {
+		
+			var formHtml = $("#newLoanFormTemplateMin").render(data);
+		
+			$("#inputarea").html(formHtml);
+
+			$('#productId').change(function() {
+				alert("incoming clientId: " + clientId);
+				var clientId = "x";
+				var productId = $('#productId').val();
+				repopulateFullForm(clientId, productId);
+			});
+		}
+
+  		executeAjaxRequest(baseApiUrl + 'loans/template?clientId=' + clientId, 'GET', "", base64, successFunction, formErrorFunction);	  
+	}
+
+
 	function calculateAnnualPercentageRate() {
 	//	alert('calculating interest');
 		var periodInterestRate = parseFloat($('#nominalInterestRate').val());
@@ -800,3 +827,108 @@ alert("here");
 
 
 
+
+
+
+
+	function repopulateFullForm(clientId, productId) {
+		
+		var url = baseApiUrl + 'loans/template?clientId=' + clientId + '&productId=' + productId;
+		
+		var jqxhr = $.ajax({
+			url: url,
+			type: 'GET',
+			contentType: 'application/json',
+			dataType: 'json',
+			cache: false,
+			beforeSend: function(xhr) {
+				xhr.setRequestHeader("Authorization", "Basic " + base64);
+			},
+			success: function(data, textStatus, jqXHR) {
+			
+				var formHtml = $("#newLoanFormTemplate").render(data);
+			
+				$("#inputarea").html(formHtml);
+
+				$('#productId').change(function() {
+					var productId = $('#productId').val();
+					repopulateFullForm(clientId, productId);
+				});
+				
+				$('.datepickerfield').datepicker({constrainInput: true, defaultDate: 0, maxDate: 0, dateFormat: 'dd MM yy'});
+				
+				calculateAnnualPercentageRate();
+				
+				calculateLoanSchedule();
+				
+				// change detection
+				$('#principal').change(function() {
+					calculateLoanSchedule();
+				});
+				
+				$('#repaymentEvery').change(function() {
+					calculateLoanSchedule();
+				});
+				
+				$('#repaymentFrequencyType').change(function() {
+					calculateLoanSchedule();
+				});
+				
+				$('#numberOfRepayments').change(function() {
+					calculateLoanSchedule();
+				});
+				
+				$('#expectedDisbursementDate').change(function() {
+					calculateLoanSchedule();
+				});
+				
+				$('#repaymentsStartingFromDate').change(function() {
+					calculateLoanSchedule();
+				});
+				
+				$('#interestRatePerPeriod').change(function() {
+					calculateAnnualPercentageRate();
+					calculateLoanSchedule();
+				});
+				
+				$('#interestRateFrequencyType').change(function() {
+					calculateAnnualPercentageRate();
+					calculateLoanSchedule();
+				});
+				
+				$('#amortizationType').change(function() {
+					calculateLoanSchedule();
+				});
+				
+				$('#interestType').change(function() {
+					calculateLoanSchedule();
+				});
+				
+				$('#interestCalculationPeriodType').change(function() {
+					calculateLoanSchedule();
+				});
+				
+				$('#interestChargedFromDate').change(function() {
+					calculateLoanSchedule();
+				});
+				
+				$('#submitloanapp').button().click(function(e) {
+					submitLoanApplication();
+				    e.preventDefault();
+				});
+				$('button#submitloanapp span').text(jQuery.i18n.prop('dialog.button.submit'));
+				
+				$('#cancelloanapp').button().click(function(e) {
+					var url = '${rootContext}portfolio/client/' + clientId;
+					window.location.href = url;
+				    e.preventDefault();
+				});
+				$('button#cancelloanapp span').text(jQuery.i18n.prop('dialog.button.cancel'));
+			}
+		});
+			
+		jqxhr.error(function(jqXHR, textStatus, errorThrown) {
+			handleXhrError(jqXHR, textStatus, errorThrown, "#formErrorsTemplate", "#formerrors");
+		});
+	}
+	
