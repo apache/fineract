@@ -297,17 +297,9 @@ function jsViewsRegisterHelpers() {
 	};
 	
 	function popupDialogWithFormView(getUrl, postUrl, submitType, titleCode, templateSelector, width, height, saveSuccessFunction) {
-		 var dialogDiv = $("<div id='dialog-form'></div>");
-		 var jqxhr = $.ajax({
-			url: getUrl,
-			type: 'GET',
-			contentType: 'application/json',
-			dataType: 'json',
-			cache: false,
-			beforeSend: function(xhr) {
-	            xhr.setRequestHeader("Authorization", "Basic " + base64);
-			},
-			success: function(data, textStatus, jqXHR) {
+		var dialogDiv = $("<div id='dialog-form'></div>");
+
+		var successFunction = function(data, textStatus, jqXHR) {
 				console.log(data);
 				var formHtml = $(templateSelector).render(data);
 				
@@ -321,30 +313,17 @@ function jsViewsRegisterHelpers() {
 					
 					$('#notSelectedItems option').each(function(i) {  
 				    	   $(this).attr("selected", "selected");  
-				    });
+				    	});
 			    	
-			    	$('#selectedItems option').each(function(i) {  
-			    	   $(this).attr("selected", "selected");  
-			    	});
+			    		$('#selectedItems option').each(function(i) {  
+			    	   		$(this).attr("selected", "selected");  
+			    		});
 			    	
-			    	var newFormData = JSON.stringify($('#entityform').serializeObject());
-			    	console.log(newFormData);
+			    		var newFormData = JSON.stringify($('#entityform').serializeObject());
+			    		console.log(newFormData);
 			    	
-					var jqxhr = $.ajax({
-						  url: postUrl,
-						  type: submitType,
-						  contentType: 'application/json',
-						  dataType: 'json',
-						  data: newFormData,
-						  success: saveSuccessFunction,
-						  cache: false,
-						  beforeSend: function(xhr) {
-					            xhr.setRequestHeader("Authorization", "Basic " + base64);
-						  },
-						  error: function(jqXHR, textStatus, errorThrown) {
-						    handleXhrError(jqXHR, textStatus, errorThrown, "#formErrorsTemplate", "#formerrors");
-						  }
-					});
+					executeAjaxRequest(postUrl, submitType, newFormData, base64, saveSuccessFunction, formErrorFunction);
+
 				};
 				
 				buttonsOpts[cancelButton] = function() {$(this).dialog( "close" );};
@@ -375,12 +354,10 @@ function jsViewsRegisterHelpers() {
 				  			$('#entityform input').first().focus();
 				  		}
 				  	}).dialog('open');
-		  	}
-		 });
+		  	};
 		 
-		jqxhr.error(function(jqXHR, textStatus, errorThrown) {
-			handleXhrError(jqXHR, textStatus, errorThrown, "#formErrorsTemplate", "#formerrors");
-		});
+		executeAjaxRequest(getUrl, "GET", "", base64, successFunction, formErrorFunction);
+
 	}
 	
 
@@ -764,7 +741,6 @@ alert("here");
 		eval(genRefreshNoteWidgetSuccessVar(clientUrl));
   		executeAjaxRequest(clientUrl + '/notes', 'GET', "", base64, successFunction, formErrorFunction);	  
 	}
-
 	function genRefreshNoteWidgetSuccessVar(clientUrl) {
 
 		var retVar = 'var successFunction = function(data, textStatus, jqXHR) {	' +
@@ -782,7 +758,7 @@ alert("here");
 						' var height = 400;' +
 						' var saveSuccessFunction = function(data, textStatus, jqXHR) {' +
 						  	' $("#dialog-form").dialog("close");' +
-						  	' refreshNoteWidget();' +
+						  	' refreshNoteWidget("' + clientUrl + '");' +
 						' };' +
 						' popupDialogWithFormView(getAndPutUrl, getAndPutUrl, "PUT", "dialog.title.edit.note", templateSelector, width, height,  saveSuccessFunction);' +
 					    ' e.preventDefault();' +
