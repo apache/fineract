@@ -761,34 +761,37 @@ alert("here");
 
 	function refreshNoteWidget(clientUrl) {
 			  	
-		var successFunction = function(data, textStatus, jqXHR) {	
-				  var noteParent = new Object();
-				  noteParent.title = jQuery.i18n.prop('widget.notes.heading');
-				  noteParent.notes = data;
-				  
-				  var tableHtml = $("#noteListViewTemplate").render(noteParent);
-				  $("#clienttabrightpane").html(tableHtml);
-				  
-				  $('.editclientnote').click(function(e) {
-						var linkId = this.id;
-						var noteId = linkId.replace("editclientnotelink", "");
-						var getAndPutUrl = clientURL + '/notes/' + noteId;
-						var templateSelector = "#noteFormTemplate";
-						var width = 600;
-						var height = 400;
-						
-						var saveSuccessFunction = function(data, textStatus, jqXHR) {
-						  	$("#dialog-form").dialog("close");
-						  	refreshNoteWidget();
-						}
-						
-						popupDialogWithFormView(getAndPutUrl, getAndPutUrl, 'PUT', "dialog.title.edit.note", templateSelector, width, height,  saveSuccessFunction);
-					    e.preventDefault();
-			      });
-			  };
-		 
+		eval(genRefreshNoteWidgetSuccessVar(clientUrl));
   		executeAjaxRequest(clientUrl + '/notes', 'GET', "", base64, successFunction, formErrorFunction);	  
 	}
+
+	function genRefreshNoteWidgetSuccessVar(clientUrl) {
+
+		var retVar = 'var successFunction = function(data, textStatus, jqXHR) {	' +
+				  ' var noteParent = new Object();' + 
+				  ' noteParent.title = jQuery.i18n.prop("widget.notes.heading");' +
+				  ' noteParent.notes = data;' +
+				  ' var tableHtml = $("#noteListViewTemplate").render(noteParent);' +
+				  ' $("#clienttabrightpane").html(tableHtml);' + 
+				  ' $(".editclientnote").click(function(e) { ' +
+						' var linkId = this.id;' +
+						' var noteId = linkId.replace("editclientnotelink", "");' +
+						' var getAndPutUrl = "' + clientUrl + '/notes/" + noteId;' +
+						' var templateSelector = "#noteFormTemplate";' +
+						' var width = 600;' +
+						' var height = 400;' +
+						' var saveSuccessFunction = function(data, textStatus, jqXHR) {' +
+						  	' $("#dialog-form").dialog("close");' +
+						  	' refreshNoteWidget();' +
+						' };' +
+						' popupDialogWithFormView(getAndPutUrl, getAndPutUrl, "PUT", "dialog.title.edit.note", templateSelector, width, height,  saveSuccessFunction);' +
+					    ' e.preventDefault();' +
+			      ' });' +
+			  ' };'
+		alert(retVar);
+		return retVar;
+	}
+
 	
 	function calculateAnnualPercentageRate() {
 	//	alert('calculating interest');
