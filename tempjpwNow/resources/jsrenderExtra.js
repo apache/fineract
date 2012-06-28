@@ -1,4 +1,4 @@
-/*
+/* not used
 queryParam = (function(){
     			var query = {}, pair, search = location.search.substring(1).split("&"), i = search.length;
     			while (i--) {
@@ -10,7 +10,12 @@ queryParam = (function(){
 */
 
 
+formErrorFunction = function(jqXHR, textStatus, errorThrown) {
+				    	handleXhrError(jqXHR, textStatus, errorThrown, "#formErrorsTemplate", "#formerrors");
+				};
+
 function executeAjaxRequest(url, verbType, jsonData, basicAuthKey, successFunction, errorFunction) { 
+alert("in exAjax");
 	var jqxhr = $.ajax({ 
 				url : url, 
 				type : verbType, //POST, GET, PUT or DELETE 
@@ -72,13 +77,12 @@ function setClientListingContent(divName) {
 	$("#" + divName).html(htmlVar);
 }
 
-function setClientContent(baseApiUrl, clientId, divName) {
-	var htmlVar = '<div id="newtabs">	<ul><li><a href="' + baseApiUrl + 'clients/' + clientId + '"'; 
-	htmlVar += ' title="clienttab" class="topleveltab"><span id="clienttabname">Loading...</span></a></li></ul><div id="clienttab"></div></div>';
+function setClientContent(clientUrl, divName) {
 
+	var htmlVar = '<div id="newtabs">	<ul><li><a href="nothing"'; 
+	htmlVar += ' title="clienttab" class="topleveltab"><span id="clienttabname">Loading...</span></a></li></ul><div id="clienttab"></div></div>';
 	$("#" + divName).html(htmlVar);
 }
-
 
 
 
@@ -407,19 +411,16 @@ setClientListingContent("content");
 							$("#searchtab").html(tableHtml);	
 				  		};
 
-		var errorFunction = function(jqXHR, textStatus, errorThrown) {
-				    			handleXhrError(jqXHR, textStatus, errorThrown, "#formErrorsTemplate", "#formerrors");
-				  		};
-
-  		executeAjaxRequest(baseApiUrl + 'clients', 'GET', "", base64, successFunction, errorFunction);
+  		executeAjaxRequest(baseApiUrl + 'clients', 'GET', "", base64, successFunction, formErrorFunction);
 	    }
 	});
 	
+
+
 	var addClientSuccessFunction = function(data, textStatus, jqXHR) {
 		  $('#dialog-form').dialog("close");
 		  showILClient(baseApiUrl, data.entityId);
 	}
-	
 	$("#addclient").button().click(function(e) {
 		var getUrl = baseApiUrl + 'clients/template';
 		var postUrl = baseApiUrl + 'clients';
@@ -439,29 +440,23 @@ setClientListingContent("content");
 
 
 function showILClient(baseApiUrl, clientId) {
-
-	setClientContent(baseApiUrl, clientId, "content");
-
+	var clientUrl = baseApiUrl + 'clients/' + clientId
+	setClientContent(clientUrl, "content");
 	var tab_counter = 1;
 	var $newtabs = $("#newtabs").tabs({
 		
 		"add": function( event, ui ) {
 			$newtabs.tabs('select', '#' + ui.panel.id);
-		},
-		"ajaxOptions": {
-			type: 'GET',
-			dataType: 'json',
-			contentType: 'application/json',
-			cache: false,
-			beforeSend: function(xhr) {
-				xhr.setRequestHeader("Authorization", "Basic " + base64);
-			},
-	        error: function(jqXHR, status, errorThrown, index, anchor) {
+		}
+
+	});
+
+
+	var errorFunction = function(jqXHR, status, errorThrown, index, anchor) {
 	        	handleXhrError(jqXHR, textStatus, errorThrown, "#formErrorsTemplate", "#formerrors");
-	        	
 	            $(anchor.hash).html("error occured while ajax loading.");
-	        },
-	        success: function(data, status, xhr) {
+	        };
+	var successFunction = function(data, status, xhr) {
 	        	
 	        	var currentTabIndex = $newtabs.tabs('option', 'selected');
 	            var currentTabAnchor = $newtabs.data('tabs').anchors[currentTabIndex];
@@ -470,7 +465,7 @@ function showILClient(baseApiUrl, clientId) {
 	            var offsetToApprovalDate = 0;
 	            var offsetToDisbursalDate = 0;
 				var maxOffset = 0; // today
-
+alert("currentTabIndex: " + currentTabIndex );
 	            if (currentTabIndex < 1) {
 	        		var tableHtml = $("#clientDataTabTemplate").render(data);
 					$("#clienttab").html(tableHtml);
@@ -478,7 +473,7 @@ function showILClient(baseApiUrl, clientId) {
 					$("#clienttabname").html(data.displayName);
 					
 					// retrieve accounts summary info
-					refreshLoanSummaryInfo();
+					refreshLoanSummaryInfo(clientUrl);
 					
 					// bind click listeners to buttons.
 					$('.casflowbtn').button().click(function(e) {
@@ -491,6 +486,7 @@ function showILClient(baseApiUrl, clientId) {
 					$('button.casflowbtn span').text(jQuery.i18n.prop('dialog.button.new.cashflow.analysis'));
 					
 					$('.newloanbtn').button().click(function(e) {
+alert("here");
 						var linkId = this.id;
 						var clientId = linkId.replace("newloanbtn", "");
 						// switch to jsp page focussed on new loan application flow.
@@ -519,7 +515,7 @@ function showILClient(baseApiUrl, clientId) {
 					});
 					$('button.addnotebtn span').text(jQuery.i18n.prop('dialog.button.add.note'));
 
-					refreshNoteWidget();
+					refreshNoteWidget(clientUrl);
 					
 					// retrieve additional info
 					var additionalFieldsParams = {
@@ -735,57 +731,37 @@ function showILClient(baseApiUrl, clientId) {
 					};
 					jQuery.stretchyData.displayAllExtraData(additionalFieldsParams);
 	        	}
-	        }
-	    }
-	});
+	        };
+	    
+
+		executeAjaxRequest(clientUrl, 'GET', "", base64, successFunction, errorFunction);	  
+
 }
 	
 	// function to retrieve and display loan summary information in it placeholder
-	function refreshLoanSummaryInfo() {
-		
-	  	var jqxhr = $.ajax({
-			  url: baseApiUrl + 'clients/' + clientId + '/loans',
-			  type: 'GET',
-			  contentType: 'application/json',
-			  dataType: 'json',
-			  cache: false,
-			  beforeSend: function(xhr) {
-					xhr.setRequestHeader("Authorization", "Basic " + base64);
-			  },
-			  success: function(data, textStatus, jqXHR) {
-				  var tableHtml = $("#clientAccountSummariesTemplate").render(data);
-				  $("#clientaccountssummary").html(tableHtml);
+	function refreshLoanSummaryInfo(clientUrl) {
+
+		var successFunction =  function(data, textStatus, jqXHR) {
+				  			var tableHtml = $("#clientAccountSummariesTemplate").render(data);
+				  			$("#clientaccountssummary").html(tableHtml);
 				  
-				  $("a.openloanaccount").click( function(e) {
-						var tab_title = $(this).attr('title');
-					    var tab_href = this.href;
+				  			$("a.openloanaccount").click( function(e) {
+								var tab_title = $(this).attr('title');
+					    			var tab_href = this.href;
 					    
-						$newtabs.tabs( "add", tab_href, tab_title );
-						e.preventDefault();
-					});
-			  }
-		 });
-	  	
-	  	jqxhr.error(function(jqXHR, textStatus, errorThrown) {
-			handleXhrError(jqXHR, textStatus, errorThrown, "#formErrorsTemplate", "#formerrors");
-		});
+								$newtabs.tabs( "add", tab_href, tab_title );
+								e.preventDefault();
+							});
+			  			}
+
+  		executeAjaxRequest(clientUrl + '/loans', 'GET', "", base64, successFunction, formErrorFunction);	  	
 	}
 	
-	function refreshNoteWidget() {
-		
-		var noteArray = new Array();
-	  	var arrayIndex = 0;
-	  	
-	  	var jqxhr = $.ajax({
-			  url: baseApiUrl + 'clients/' + clientId + '/notes',
-			  type: 'GET',
-			  contentType: 'application/json',
-			  dataType: 'json',
-			  cache: false,
-			  beforeSend: function(xhr) {
-					xhr.setRequestHeader("Authorization", "Basic " + base64);
-			  },
-			  success: function(data, textStatus, jqXHR) {	
+
+
+	function refreshNoteWidget(clientUrl) {
+			  	
+		var successFunction = function(data, textStatus, jqXHR) {	
 				  var noteParent = new Object();
 				  noteParent.title = jQuery.i18n.prop('widget.notes.heading');
 				  noteParent.notes = data;
@@ -796,7 +772,7 @@ function showILClient(baseApiUrl, clientId) {
 				  $('.editclientnote').click(function(e) {
 						var linkId = this.id;
 						var noteId = linkId.replace("editclientnotelink", "");
-						var getAndPutUrl = baseApiUrl + 'clients/' + clientId + '/notes/' + noteId;
+						var getAndPutUrl = clientURL + '/notes/' + noteId;
 						var templateSelector = "#noteFormTemplate";
 						var width = 600;
 						var height = 400;
@@ -809,12 +785,9 @@ function showILClient(baseApiUrl, clientId) {
 						popupDialogWithFormView(getAndPutUrl, getAndPutUrl, 'PUT', "dialog.title.edit.note", templateSelector, width, height,  saveSuccessFunction);
 					    e.preventDefault();
 			      });
-			  }
-		 });
-	  	
-	  	jqxhr.error(function(jqXHR, textStatus, errorThrown) {
-			handleXhrError(jqXHR, textStatus, errorThrown, "#formErrorsTemplate", "#formerrors");
-		});
+			  };
+		 
+  		executeAjaxRequest(clientUrl + '/notes', 'GET', "", base64, successFunction, formErrorFunction);	  
 	}
 	
 	function calculateAnnualPercentageRate() {
