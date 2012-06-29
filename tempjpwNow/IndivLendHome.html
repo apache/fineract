@@ -391,13 +391,12 @@
 
 <script id="clientAccountSummariesTemplate" type="text/x-jquery-tmpl">
 {{#if $ctx.numberGreaterThanZero(anyLoanCount)}}
-
 {{#if $ctx.numberGreaterThanZero(pendingApprovalLoanCount)}}
 <div class="row">
 	<span class="longrowlabel">Pending approval loans ({{=$ctx.number(pendingApprovalLoanCount)}}):</span>
 	<span class="rowvalue">
 	{{#each pendingApprovalLoans}}
-		<span class="loanaccount"><a href="https://localhost:8443/mifosng-provider/api/v1/loans/{{=id}}?associations=ALL" id="loan{{=id}}" class="openloanaccount" title="{{=loanProductName}}: &#35;{{=id}}">{{=loanProductName}}: &#35;{{=id}}</a></span>
+		<span class="loanaccount"><a href="unknown.html" onclick="showILLoan(baseApiUrl, {{=id}}, '{{=loanProductName}}');return false ;" >{{=loanProductName}}: &#35;{{=id}}</a></span>
 	{{/each}}
 	</span>
 </div>
@@ -861,11 +860,11 @@
 </div>
 </script>
 
+<!-- end of template section -->
 
 
 
-
-<!-- differences in layout and javascript below here -->
+<!-- real action start here -->
 
 <style type="text/css">
 
