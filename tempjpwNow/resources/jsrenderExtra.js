@@ -708,60 +708,47 @@ function showILClient(baseApiUrl, clientId) {
 				$('.datepickerfield').datepicker({constrainInput: true, defaultDate: 0, maxDate: 0, dateFormat: 'dd MM yy'});
 				
 				calculateAnnualPercentageRate();
-				
 				calculateLoanSchedule();
 				
 				// change detection
 				$('#principal').change(function() {
 					calculateLoanSchedule();
 				});
-				
 				$('#repaymentEvery').change(function() {
 					calculateLoanSchedule();
 				});
-				
 				$('#repaymentFrequencyType').change(function() {
 					calculateLoanSchedule();
 				});
-				
 				$('#numberOfRepayments').change(function() {
 					calculateLoanSchedule();
 				});
-				
 				$('#expectedDisbursementDate').change(function() {
 					calculateLoanSchedule();
 				});
-				
 				$('#repaymentsStartingFromDate').change(function() {
 					calculateLoanSchedule();
 				});
-				
 				$('#interestRatePerPeriod').change(function() {
 					calculateAnnualPercentageRate();
 					calculateLoanSchedule();
 				});
-				
 				$('#interestRateFrequencyType').change(function() {
 					calculateAnnualPercentageRate();
 					calculateLoanSchedule();
 				});
-				
 				$('#amortizationType').change(function() {
 					calculateLoanSchedule();
 				});
-				
 				$('#interestType').change(function() {
 					calculateLoanSchedule();
 				});
-				
 				$('#interestCalculationPeriodType').change(function() {
 					calculateLoanSchedule();
 				});
-				
 				$('#interestChargedFromDate').change(function() {
 					calculateLoanSchedule();
 				});
-				
 				$('#submitloanapp').button().click(function(e) {
 					submitLoanApplication(clientId);
 				    e.preventDefault();
@@ -816,7 +803,6 @@ function showILClient(baseApiUrl, clientId) {
 						handleXhrError(jqXHR, textStatus, errorThrown, "#formErrorsTemplate", "#formerrors");
 					};
 		executeAjaxRequest(baseApiUrl + 'loans?command=calculateLoanSchedule', "POST", newFormData, base64, successFunction, errorFunction);	  
-
 	}
 
 
@@ -836,6 +822,12 @@ function showILClient(baseApiUrl, clientId) {
 function showILLoan(baseApiUrl, loanId, product) {
 	var title = product + ": #" + loanId ;			    
 	$newtabs.tabs( "add", "no url", title);
+	loadILLoan(baseApiUrl, loanId);
+}
+
+
+function loadILLoan(baseApiUrl, loanId) {
+
 	var loanUrl = baseApiUrl + 'loans/' + loanId + "?associations=ALL";
 
 	var errorFunction = function(jqXHR, status, errorThrown, index, anchor) {
@@ -983,8 +975,7 @@ function showILLoan(baseApiUrl, loanId, product) {
 						
 						var saveSuccessFunction = function(data, textStatus, jqXHR) {
 						  	$("#dialog-form").dialog("close");
-						  	//$newtabs.tabs('load', currentTabIndex);
-							alert('repaymment - reload current tab');
+							loadILLoan(baseApiUrl, loanId);
 						}
 						
 						popupDialogWithFormView(getUrl, postUrl, 'POST', "dialog.title.loan.repayment", templateSelector, width, height,  saveSuccessFunction);
@@ -1031,7 +1022,7 @@ function showILLoan(baseApiUrl, loanId, product) {
 						
 						var saveSuccessFunction = function(data, textStatus, jqXHR) {
 						  	$("#dialog-form").dialog("close");
-						  	$newtabs.tabs('load', currentTabIndex);
+							loadILLoan(baseApiUrl, loanId);
 						}
 						
 						popupDialogWithFormView(getAndPostUrl, getAndPostUrl, 'POST', "dialog.title.adjust.loan.repayment", templateSelector, width,  height, saveSuccessFunction);
