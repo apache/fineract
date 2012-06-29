@@ -407,7 +407,7 @@
 	<span class="longrowlabel">Awaiting disbursal loans ({{=$ctx.number(awaitingDisbursalLoanCount)}}):</span>
 	<span class="rowvalue">
 	{{#each awaitingDisbursalLoans}}
-		<span class="loanaccount"><a href="https://localhost:8443/mifosng-provider/api/v1/loans/{{=id}}?associations=ALL" id="loan{{=id}}" class="openloanaccount" title="{{=loanProductName}}: &#35;{{=id}}">{{=loanProductName}}: &#35;{{=id}}</a></span>
+		<span class="loanaccount"><a href="unknown.html" onclick="showILLoan(baseApiUrl, {{=id}}, '{{=loanProductName}}');return false ;" >{{=loanProductName}}: &#35;{{=id}}</a></span>
 	{{/each}}
 	</span>
 </div>
@@ -418,7 +418,7 @@
 	<span class="longrowlabel">Active loans ({{=$ctx.number(activeLoanCount)}}):</span>
 	<span class="rowvalue">
 	{{#each openLoans}}
-		<span class="loanaccount"><a href="https://localhost:8443/mifosng-provider/api/v1/loans/{{=id}}?associations=ALL" id="loan{{=id}}" class="openloanaccount" title="{{=loanProductName}}: &#35;{{=id}}">{{=loanProductName}}: &#35;{{=id}}</a></span>
+		<span class="loanaccount"><a href="unknown.html" onclick="showILLoan(baseApiUrl, {{=id}}, '{{=loanProductName}}');return false ;" >{{=loanProductName}}: &#35;{{=id}}</a></span>
 	{{/each}}
 	</span>
 </div>
@@ -429,7 +429,7 @@
 	<div class="longrowlabel">Closed loans ({{=$ctx.number(closedLoanCount)}}):</div>
 	<div class="rowvalue">
 	{{#each closedLoans}}
-		<span class="loanaccount"><a href="https://localhost:8443/mifosng-provider/api/v1/loans/{{=id}}?associations=ALL" id="loan{{=id}}" class="openloanaccount" title="{{=loanProductName}}: &#35;{{=id}}">{{=loanProductName}}: &#35;{{=id}}</a></span>
+		<span class="loanaccount"><a href="unknown.html" onclick="showILLoan(baseApiUrl, {{=id}}, '{{=loanProductName}}');return false ;" >{{=loanProductName}}: &#35;{{=id}}</a></span>
 	{{/each}}
 	</div>
 </div>

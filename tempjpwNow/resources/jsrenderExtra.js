@@ -318,11 +318,8 @@ function jsViewsRegisterHelpers() {
 	}
 	function popupDialogWithFormViewData(data, postUrl, submitType, titleCode, templateSelector, width, height, saveSuccessFunction)  {
 				var dialogDiv = $("<div id='dialog-form'></div>");
-
 				var formHtml = $(templateSelector).render(data);
-				
 				dialogDiv.append(formHtml);
-				
 				var saveButton = jQuery.i18n.prop('dialog.button.save');
 				var cancelButton = jQuery.i18n.prop('dialog.button.cancel');
 				
@@ -372,9 +369,96 @@ function jsViewsRegisterHelpers() {
 				  			$('#entityform input').first().focus();
 				  		}
 				  	}).dialog('open');
-
 	}
 
+	function popupDialogWithPostOnlyFormView(postUrl, titleCode, templateSelector, width, height, tabIndex, minOffset, defaultOffset, maxOffset) {
+		var dialogDiv = $("<div id='dialog-form'></div>");
+		var data = new Object();
+		var formHtml = $(templateSelector).render(data);
+		dialogDiv.append(formHtml);
+		
+		var saveButton = jQuery.i18n.prop('dialog.button.save');
+		var cancelButton = jQuery.i18n.prop('dialog.button.cancel');
+		var buttonsOpts = {};		
+		buttonsOpts[saveButton] = function() {
+			$('.multiSelectedItems option').each(function(i) {  
+		    	   		$(this).attr("selected", "selected");  
+		    		});
+
+			var newFormData = JSON.stringify($('#entityform').serializeObject());
+			console.log(newFormData);
+
+			var saveSuccessFunction =  function(data, textStatus, jqXHR) {
+					  			dialogDiv.dialog("close");
+					  			//$newtabs.tabs('load', tabIndex);
+								alert("should be reloaded this loan tab");
+				  			};
+
+			executeAjaxRequest(postUrl, "POST", newFormData, base64, saveSuccessFunction, formErrorFunction);
+		};
+		buttonsOpts[cancelButton] = function() {$(this).dialog( "close" );};
+		
+		dialogDiv.dialog({
+		  		title: jQuery.i18n.prop(titleCode), 
+		  		width: width, 
+		  		height: height, 
+		  		modal: true,
+		  		buttons: buttonsOpts,
+		  		close: function() {
+		  			// if i dont do this, theres a problem with errors being appended to dialog view second time round
+		  			$(this).remove();
+				},
+		  		open: function (event, ui) {
+		  			$('.multiadd').click(function() {  
+		  			     return !$('.multiNotSelectedItems option:selected').remove().appendTo('#selectedItems');  
+		  			});
+		  			
+		  			$('.multiremove').click(function() {  
+		  				return !$('.multiSelectedItems option:selected').remove().appendTo('#notSelectedItems');  
+		  			});
+		  			
+		  			$('.datepickerfield').datepicker({constrainInput: true, minDate: minOffset, defaultDate: defaultOffset, maxDate: maxOffset, dateFormat: 'dd MM yy'});
+		  			
+		  			$("#entityform textarea").first().focus();
+		  			$('#entityform input').first().focus();
+		  		}
+		  }).dialog('open');
+	}
+	function popupConfirmationDialogAndPost(url, submitType, titleCode, width, height, tabIndex, redirectUrl) {
+		    var dialogDiv = $("<div id='dialog-form'><div id='formerrors'></div>" + jQuery.i18n.prop('text.confirmation.required') + "</div>");
+		  
+		  	var confirmButton = jQuery.i18n.prop('dialog.button.confirm');
+			var cancelButton = jQuery.i18n.prop('dialog.button.cancel');
+			
+			var buttonsOpts = {};
+			buttonsOpts[confirmButton] = function() {
+				var saveSuccessFunction = function(data, textStatus, jqXHR) {
+						  			dialogDiv.dialog("close");
+					  				//$newtabs.tabs('load', tabIndex);
+									alert("should be reloaded this loan tab");
+					  			}
+				 
+				executeAjaxRequest(url, submitType, "", base64, saveSuccessFunction, formErrorFunction);
+
+			};
+			
+			buttonsOpts[cancelButton] = function() {$(this).dialog( "close" );};
+		  
+		  
+		  dialogDiv.dialog({
+		  		title: jQuery.i18n.prop(titleCode), 
+		  		width: width, 
+		  		height: height, 
+		  		modal: true,
+		  		buttons: buttonsOpts,
+		  		close: function() {
+		  			// if i dont do this, theres a problem with errors being appended to dialog view second time round
+		  			$(this).remove();
+				},
+		  		open: function (event, ui) {}
+		  	}).dialog('open');
+	 }
+	
 
 
 
@@ -775,7 +859,7 @@ function showILLoan(baseApiUrl, loanId, product) {
 						"show": function(event, ui) {
 							
 							var curTab = $('#newtabs .ui-tabs-panel:not(.ui-tabs-hide)');
-			        		var curTabID = curTab.prop("id")
+			      			var curTabID = curTab.prop("id")
 						}
 					});
 	        		
@@ -787,12 +871,12 @@ function showILLoan(baseApiUrl, loanId, product) {
 						var width = 500; 
 						var height = 350;
 						var defaultOffset = offsetToSubmittedDate;
-						popupDialogWithPostOnlyFormView(postUrl, 'dialog.title.reject.loan', templateSelector, width, height, currentTabIndex,  offsetToSubmittedDate, defaultOffset, maxOffset);
+						popupDialogWithPostOnlyFormView(postUrl, 'dialog.title.reject.loan', templateSelector, width, height, currentTabIndex, offsetToSubmittedDate, defaultOffset, maxOffset);
 					    e.preventDefault();
 					});
 	        		$('button.rejectloan span').text(jQuery.i18n.prop('dialog.button.reject.loan'));
 					
-					$('.withdrawnbyapplicantloan').button().click(function(e) {
+				$('.withdrawnbyapplicantloan').button().click(function(e) {
 						var linkId = this.id;
 						var loanId = linkId.replace("withdrawnbyapplicantloanbtn", "");
 						var postUrl = baseApiUrl + 'loans/' + loanId + '?command=withdrewbyclient';
@@ -802,10 +886,10 @@ function showILLoan(baseApiUrl, loanId, product) {
 						var defaultOffset = offsetToSubmittedDate;
 						popupDialogWithPostOnlyFormView(postUrl, 'dialog.title.loan.withdrawn.by.client', templateSelector, width, height, currentTabIndex,  offsetToSubmittedDate, defaultOffset, maxOffset)
 					    e.preventDefault();
-					});
-					$('button.withdrawnbyapplicantloan span').text(jQuery.i18n.prop('dialog.button.withdrawn.by.client.loan'));
+				});
+				$('button.withdrawnbyapplicantloan span').text(jQuery.i18n.prop('dialog.button.withdrawn.by.client.loan'));
 					
-					$('.approveloan').button().click(function(e) {
+				$('.approveloan').button().click(function(e) {
 						
 						var linkId = this.id;
 						var loanId = linkId.replace("approvebtn", "");
@@ -816,10 +900,10 @@ function showILLoan(baseApiUrl, loanId, product) {
 						var defaultOffset = offsetToSubmittedDate;
 						popupDialogWithPostOnlyFormView(postUrl, 'dialog.title.approve.loan', templateSelector, width, height, currentTabIndex,  offsetToSubmittedDate, defaultOffset, maxOffset)
 					    e.preventDefault();
-					});
-					$('button.approveloan span').text(jQuery.i18n.prop('dialog.button.approve.loan'));
+				});
+				$('button.approveloan span').text(jQuery.i18n.prop('dialog.button.approve.loan'));
 					
-					$('.undoapproveloan').button().click(function(e) {
+				$('.undoapproveloan').button().click(function(e) {
 						
 						var linkId = this.id;
 						var loanId = linkId.replace("undoapprovebtn", "");
@@ -830,10 +914,10 @@ function showILLoan(baseApiUrl, loanId, product) {
 						var defaultOffset = offsetToSubmittedDate;
 						popupDialogWithPostOnlyFormView(postUrl, 'dialog.title.undo.loan.approval', templateSelector, width, height, currentTabIndex,  offsetToSubmittedDate, defaultOffset, maxOffset)
 					    e.preventDefault();
-					});
-					$('button.undoapproveloan span').text(jQuery.i18n.prop('dialog.button.undo.loan.approval'));
+				});
+				$('button.undoapproveloan span').text(jQuery.i18n.prop('dialog.button.undo.loan.approval'));
 					
-					$('.deleteloan').button().click(function(e) {
+				$('.deleteloan').button().click(function(e) {
 						var linkId = this.id;
 						var loanId = linkId.replace("deletebtn", "");
 						var url = baseApiUrl + 'loans/' + loanId;
@@ -844,10 +928,10 @@ function showILLoan(baseApiUrl, loanId, product) {
 						
 						popupConfirmationDialogAndPost(url, 'DELETE', 'dialog.title.confirmation.required', width, height, 0, redirectUrl);
 					    e.preventDefault();
-					});
-					$('button.deleteloan span').text(jQuery.i18n.prop('dialog.button.delete.loan'));
+				});
+				$('button.deleteloan span').text(jQuery.i18n.prop('dialog.button.delete.loan'));
 					
-					$('.disburseloan').button().click(function(e) {
+				$('.disburseloan').button().click(function(e) {
 						
 						var linkId = this.id;
 						var loanId = linkId.replace("disbursebtn", "");
@@ -858,10 +942,10 @@ function showILLoan(baseApiUrl, loanId, product) {
 						var defaultOffset = offsetToApprovalDate;
 						popupDialogWithPostOnlyFormView(postUrl, 'dialog.title.disburse.loan', templateSelector, width, height, currentTabIndex,  offsetToSubmittedDate, defaultOffset, maxOffset)
 					    e.preventDefault();
-					});
-					$('button.disburseloan span').text(jQuery.i18n.prop('dialog.button.disburse.loan'));
+				});
+				$('button.disburseloan span').text(jQuery.i18n.prop('dialog.button.disburse.loan'));
 					
-					$('.undodisbursalloan').button().click(function(e) {
+				$('.undodisbursalloan').button().click(function(e) {
 						
 						var linkId = this.id;
 						var loanId = linkId.replace("undodisbursalbtn", "");
@@ -872,8 +956,8 @@ function showILLoan(baseApiUrl, loanId, product) {
 						var defaultOffset = offsetToApprovalDate;
 						popupDialogWithPostOnlyFormView(postUrl, 'dialog.title.undo.loan.disbursal', templateSelector, width, height, currentTabIndex,  offsetToSubmittedDate, defaultOffset, maxOffset)
 					    e.preventDefault();
-					});
-					$('button.undodisbursalloan span').text(jQuery.i18n.prop('dialog.button.undo.loan.disbursal'));
+				});
+				$('button.undodisbursalloan span').text(jQuery.i18n.prop('dialog.button.undo.loan.disbursal'));
 					
 					$('.repaymentloan').button().click(function(e) {
 						
@@ -889,7 +973,8 @@ function showILLoan(baseApiUrl, loanId, product) {
 						
 						var saveSuccessFunction = function(data, textStatus, jqXHR) {
 						  	$("#dialog-form").dialog("close");
-						  	$newtabs.tabs('load', currentTabIndex);
+						  	//$newtabs.tabs('load', currentTabIndex);
+							alert('repaymment - reload current tab');
 						}
 						
 						popupDialogWithFormView(getUrl, postUrl, 'POST', "dialog.title.loan.repayment", templateSelector, width, height,  saveSuccessFunction);
@@ -962,3 +1047,21 @@ function showILLoan(baseApiUrl, loanId, product) {
 		executeAjaxRequest(loanUrl, 'GET', "", base64, successFunction, errorFunction);	  
 
 }
+
+
+/* dont use
+function showLoanChangeForm(loanAction, loanId){ 
+
+	alert("Action: " + loanAction + "   loanId: " + loanId);
+
+	var currentTabIndex = $newtabs.tabs('option', 'selected');
+	var postUrl = baseApiUrl + 'loans/' + loanId + '?command=reject';
+	var templateSelector = "#stateTransitionLoanFormTemplate";
+	var width = 500; 
+	var height = 350;
+	var defaultOffset = offsetToSubmittedDate;
+
+	popupDialogWithPostOnlyFormView(postUrl, 'dialog.title.reject.loan', templateSelector, width, height, currentTabIndex,  offsetToSubmittedDate, defaultOffset, maxOffset);
+	//e.preventDefault();
+}
+*/
