@@ -969,7 +969,7 @@ function showILLoan(baseApiUrl, loanId, product) {
 				});
 				$('button.undodisbursalloan span').text(jQuery.i18n.prop('dialog.button.undo.loan.disbursal'));
 					
-					$('.repaymentloan').button().click(function(e) {
+				$('.repaymentloan').button().click(function(e) {
 						
 						var linkId = this.id;
 						var loanId = linkId.replace("repaymentbtn", "");
@@ -990,10 +990,10 @@ function showILLoan(baseApiUrl, loanId, product) {
 						popupDialogWithFormView(getUrl, postUrl, 'POST', "dialog.title.loan.repayment", templateSelector, width, height,  saveSuccessFunction);
 						//popupDialogWithFormView(getUrl, postUrl, 'POST', 'dialog.title.loan.repayment', templateSelector, width, height, currentTabIndex,  offsetToSubmittedDate, defaultOffset, maxOffset)
 					    e.preventDefault();
-					});
-					$('button.repaymentloan span').text(jQuery.i18n.prop('dialog.button.loan.repayment'));
+				});
+				$('button.repaymentloan span').text(jQuery.i18n.prop('dialog.button.loan.repayment'));
 					
-					$('.waiveloan').button().click(function(e) {
+				$('.waiveloan').button().click(function(e) {
 						var linkId = this.id;
 						var loanId = linkId.replace("waivebtn", "");
 						
@@ -1012,10 +1012,10 @@ function showILLoan(baseApiUrl, loanId, product) {
 						
 						popupDialogWithFormView(getUrl, postUrl, 'POST', "dialog.title.waive.loan", templateSelector, width, height, saveSuccessFunction);
 					    e.preventDefault();
-					});
-					$('button.waiveloan span').text(jQuery.i18n.prop('dialog.button.loan.waive'));
+				});
+				$('button.waiveloan span').text(jQuery.i18n.prop('dialog.button.loan.waive'));
 					
-					$('.adjustloanrepayment').button().click(function(e) {
+				$('.adjustloanrepayment').button().click(function(e) {
 						
 						var linkId = this.id;
 						var loanAndRepaymentId = linkId.replace("adjustrepaymentbtn", "");
@@ -1036,11 +1036,11 @@ function showILLoan(baseApiUrl, loanId, product) {
 						
 						popupDialogWithFormView(getAndPostUrl, getAndPostUrl, 'POST', "dialog.title.adjust.loan.repayment", templateSelector, width,  height, saveSuccessFunction);
 					    e.preventDefault();
-					});
-					$('button.adjustloanrepayment span').text(jQuery.i18n.prop('dialog.button.adjust.loan.repayment'));
+				});
+				$('button.adjustloanrepayment span').text(jQuery.i18n.prop('dialog.button.adjust.loan.repayment'));
 					
-					// additional data
-					var additionalFieldsParams = {
+				// additional data
+				var additionalFieldsParams = {
 							url: baseApiUrl,
 							basicAuthKey: base64,
 							datasetType: "portfolio_loan",
@@ -1050,8 +1050,8 @@ function showILLoan(baseApiUrl, loanId, product) {
 							headingClass: "", 
 							labelClass: "longrowlabel",
 							valueClass:	"rowvalue"					
-					};
-					jQuery.stretchyData.displayAllExtraData(additionalFieldsParams)
+				};
+				jQuery.stretchyData.displayAllExtraData(additionalFieldsParams)
 	        };
 	    
 		executeAjaxRequest(loanUrl, 'GET', "", base64, successFunction, errorFunction);	  
