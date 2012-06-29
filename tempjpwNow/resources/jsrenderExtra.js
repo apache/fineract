@@ -181,7 +181,17 @@ function jsViewsRegisterHelpers() {
 			      } catch(e) {
 			        return "??";
 			      }
+			},
+			currentLocale: function() {
+			      try {
+			    	  return Globalize.culture().name;
+			      } catch(e) {
+			        return "??";
+			      }
 			}
+
+
+
 	});
 }
 
