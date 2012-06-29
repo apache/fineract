@@ -10,6 +10,11 @@ queryParam = (function(){
 */
 
 
+saveSuccessFunctionReloadClient =  function(data, textStatus, jqXHR) {
+						  	$("#dialog-form").dialog("close");
+		  					showILClient(baseApiUrl, currentClientId );
+				  		};
+
 formErrorFunction = function(jqXHR, textStatus, errorThrown) {
 				    	handleXhrError(jqXHR, textStatus, errorThrown, "#formErrorsTemplate", "#formerrors");
 				};
@@ -381,7 +386,7 @@ function jsViewsRegisterHelpers() {
 				  	}).dialog('open');
 	}
 
-	function popupDialogWithPostOnlyFormView(postUrl, titleCode, templateSelector, width, height, tabIndex, minOffset, defaultOffset, maxOffset) {
+	function popupDialogWithPostOnlyFormView(postUrl, titleCode, templateSelector, width, height, saveSuccessFunction, minOffset, defaultOffset, maxOffset) {
 		var dialogDiv = $("<div id='dialog-form'></div>");
 		var data = new Object();
 		var formHtml = $(templateSelector).render(data);
@@ -397,12 +402,6 @@ function jsViewsRegisterHelpers() {
 
 			var newFormData = JSON.stringify($('#entityform').serializeObject());
 			console.log(newFormData);
-
-			var saveSuccessFunction =  function(data, textStatus, jqXHR) {
-					  			dialogDiv.dialog("close");
-					  			//$newtabs.tabs('load', tabIndex);
-								alert("should be reloaded this loan tab");
-				  			};
 
 			executeAjaxRequest(postUrl, "POST", newFormData, base64, saveSuccessFunction, formErrorFunction);
 		};
@@ -545,7 +544,8 @@ function showILClient(baseApiUrl, clientId) {
 	        };
 
 	var successFunction = function(data, status, xhr) {
-	        	
+	        		currentClientId = clientId;
+				clientDirty = false;
 	        		var currentTabIndex = $newtabs.tabs('option', 'selected');
 	            	var currentTabAnchor = $newtabs.data('tabs').anchors[currentTabIndex];
 	            
@@ -626,16 +626,7 @@ function showILClient(baseApiUrl, clientId) {
 		var successFunction =  function(data, textStatus, jqXHR) {
 				  			var tableHtml = $("#clientAccountSummariesTemplate").render(data);
 				  			$("#clientaccountssummary").html(tableHtml);
-				  
-				  			//$("a.openloanaccount").click( function(e) {
-							//	var tab_title = $(this).attr('title');
-					    		//	var tab_href = this.href;
-							//	$newtabs.tabs( "add", "", tab_title );
-							//	showILLoan(baseApiUrl, $(this).attr('id'), tab_title );
-							//	e.preventDefault();
-							//});
 			  			}
-
   		executeAjaxRequest(clientUrl + '/loans', 'GET', "", base64, successFunction, formErrorFunction);	  	
 	}
 	
@@ -859,7 +850,6 @@ function loadILLoan(baseApiUrl, loanId) {
 	        		
 	        		var $loantabs = $(".loantabs").tabs({
 						"show": function(event, ui) {
-							
 							var curTab = $('#newtabs .ui-tabs-panel:not(.ui-tabs-hide)');
 			      			var curTabID = curTab.prop("id")
 						}
@@ -873,7 +863,8 @@ function loadILLoan(baseApiUrl, loanId) {
 						var width = 500; 
 						var height = 350;
 						var defaultOffset = offsetToSubmittedDate;
-						popupDialogWithPostOnlyFormView(postUrl, 'dialog.title.reject.loan', templateSelector, width, height, currentTabIndex, offsetToSubmittedDate, defaultOffset, maxOffset);
+
+						popupDialogWithPostOnlyFormView(postUrl, 'dialog.title.reject.loan', templateSelector, width, height, saveSuccessFunctionReloadClient, offsetToSubmittedDate, defaultOffset, maxOffset);
 					    e.preventDefault();
 					});
 	        		$('button.rejectloan span').text(jQuery.i18n.prop('dialog.button.reject.loan'));
@@ -886,7 +877,7 @@ function loadILLoan(baseApiUrl, loanId) {
 						var width = 500; 
 						var height = 350;
 						var defaultOffset = offsetToSubmittedDate;
-						popupDialogWithPostOnlyFormView(postUrl, 'dialog.title.loan.withdrawn.by.client', templateSelector, width, height, currentTabIndex,  offsetToSubmittedDate, defaultOffset, maxOffset)
+						popupDialogWithPostOnlyFormView(postUrl, 'dialog.title.loan.withdrawn.by.client', templateSelector, width, height, saveSuccessFunctionReloadClient,  offsetToSubmittedDate, defaultOffset, maxOffset)
 					    e.preventDefault();
 				});
 				$('button.withdrawnbyapplicantloan span').text(jQuery.i18n.prop('dialog.button.withdrawn.by.client.loan'));
@@ -976,6 +967,7 @@ function loadILLoan(baseApiUrl, loanId) {
 						var saveSuccessFunction = function(data, textStatus, jqXHR) {
 						  	$("#dialog-form").dialog("close");
 							loadILLoan(baseApiUrl, loanId);
+							clientDirty = true;
 						}
 						
 						popupDialogWithFormView(getUrl, postUrl, 'POST', "dialog.title.loan.repayment", templateSelector, width, height,  saveSuccessFunction);
@@ -1049,20 +1041,3 @@ function loadILLoan(baseApiUrl, loanId) {
 
 }
 
-
-/* dont use
-function showLoanChangeForm(loanAction, loanId){ 
-
-	alert("Action: " + loanAction + "   loanId: " + loanId);
-
-	var currentTabIndex = $newtabs.tabs('option', 'selected');
-	var postUrl = baseApiUrl + 'loans/' + loanId + '?command=reject';
-	var templateSelector = "#stateTransitionLoanFormTemplate";
-	var width = 500; 
-	var height = 350;
-	var defaultOffset = offsetToSubmittedDate;
-
-	popupDialogWithPostOnlyFormView(postUrl, 'dialog.title.reject.loan', templateSelector, width, height, currentTabIndex,  offsetToSubmittedDate, defaultOffset, maxOffset);
-	//e.preventDefault();
-}
-*/
