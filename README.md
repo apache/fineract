@@ -34,14 +34,15 @@ see https://github.com/keithwoodlock/mifosx/wiki/Developer-deep-dive-into-Http-A
 Amazon Public AMI
 =================
 
-Launch instance <a target="_blank" href="https://console.aws.amazon.com/ec2/home?region=eu-west-1#launchAmi=ami-05030671" title="mifos platform api beta 1">ami-05030671</a>
+Launch instance <a target="_blank" href="https://console.aws.amazon.com/ec2/home?region=eu-west-1#launchAmi=ami-7b0e0a0f" title="mifos platform api beta 2">ami-7b0e0a0f</a>
 
- - mifos-platform-api-beta-1
- - Ubuntu11.10, tomcat7.0.21 (with SSL),MySql 5.1.62, Java 1.6_30, Mifos IL
-
+ - mifos-platform-api-beta-2
+ - Ubuntu11.10, tomcat7.0.21 (with SSL),MySql 5.1.62, Java 1.6_30, Mifos X Platform
 
 Roadmap
 ==============
- - Finalise API pattern
  - Support Multi-tenancy (maybe)
  - Round out **Individual Lending** platform and application cababilities through working with (ENDA, Al Majmoua, GK-maarg http://www.gfspl.in/maarg)
+ - API improvements from feedback
+    - paging support
+    - Ability to refine retrieval of single/list resources
