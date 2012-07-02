@@ -491,7 +491,8 @@ $(document).ready(function() {
 					$('.addnotebtn').button().click(function(e) {
 						var linkId = this.id;
 						var clientId = linkId.replace("addnotebtn", "");
-						var getAndPostUrl = baseApiUrl + 'clients/' + clientId + '/notes';
+						var getUrl = baseApiUrl + 'clients/' + clientId;
+						var postUrl = baseApiUrl + 'clients/' + clientId + '/notes';
 						
 						var templateSelector = "#noteFormTemplate";
 						var width = 600; 
@@ -502,7 +503,7 @@ $(document).ready(function() {
 						  	refreshNoteWidget();
 						}
 						
-						popupDialogWithFormView(getAndPostUrl, getAndPostUrl, 'POST', "dialog.title.add.note", templateSelector, width, height, saveSuccessFunction);
+						popupDialogWithFormView(getUrl, postUrl, 'POST', "dialog.title.add.note", templateSelector, width, height, saveSuccessFunction);
 					    e.preventDefault();
 					});
 					$('button.addnotebtn span').text(jQuery.i18n.prop('dialog.button.add.note'));
