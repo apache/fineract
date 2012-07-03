@@ -873,7 +873,7 @@
 <form id="entityform">
     <div id="formerrors"></div>
 	<fieldset>
-		<input type="hidden" id="locale" name="locale" value="${currentLocale}" />
+		<input type="hidden" id="locale" name="locale" value="{{=$ctx.currentLocale()}}" />
 		<legend>{{=$ctx.doI18N("form.legend.loan.product.information")}}</legend>
 		
 		<label for="name">{{=$ctx.doI18N("form.label.loan.product.name")}}</label>

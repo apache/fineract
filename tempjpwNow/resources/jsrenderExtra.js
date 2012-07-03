@@ -1,14 +1,3 @@
-/* not used
-queryParam = (function(){
-    			var query = {}, pair, search = location.search.substring(1).split("&"), i = search.length;
-    			while (i--) {
-        			pair = search[i].split("=");
-        			query[pair[0]] = decodeURIComponent(pair[1]);
-    			}
-    			return query;
-			})();
-*/
-
 
 saveSuccessFunctionReloadClient =  function(data, textStatus, jqXHR) {
 						  	$("#dialog-form").dialog("close");
@@ -117,13 +106,14 @@ function setAddLoanContent(divName) {
 
 function setOrgAdminContent(divName) {
 
+	var addLoanProductUrl = "maintainLoanProduct('loanproducts/template', 'loanproducts', 'POST', 'dialog.title.add.loan.product');return false;";
 	var htmlVar = '<div id="inputarea"></div><div id="schedulearea"></div>'
 
 	var htmlVar = '<div>';
 	htmlVar += '<span style="float: left">';
 	htmlVar += '	<a href="unknown.html" onclick="refreshLoanProductsView();return false;" id="viewloanproducts">' + doI18N("administration.link.view.products") + '</a>';
 	htmlVar += ' | ';
-	htmlVar += '	<a href="#" id="addloanproduct">' + doI18N("administration.link.add.product") + '</a>';
+	htmlVar += '	<a href="unknown.html" onclick="' + addLoanProductUrl + '" id="addloanproduct">' + doI18N("administration.link.add.product") + '</a>';
 	htmlVar += ' | ';
 	htmlVar += '	<a href="#" id="viewoffices">' + doI18N("administration.link.view.offices") + '</a>';
 	htmlVar += ' | ';
@@ -1128,9 +1118,9 @@ function loadILLoan(baseApiUrl, loanId) {
 
 /* user admin code */
 
-function showILOrgAdmin() {
-	setOrgAdminContent("content");
-}
+	function showILOrgAdmin() {
+		setOrgAdminContent("content");
+	}
 
 
 	function refreshLoanProductsView() {
@@ -1148,18 +1138,9 @@ function showILOrgAdmin() {
 				$("a.editproduct").click( function(e) {
 					var linkId = this.id;
 					var productId = linkId.replace("editproduct", "");
-					var getUrl = baseApiUrl + 'loanproducts/' + productId + '?template=true';
-					var putUrl = baseApiUrl + 'loanproducts/' + productId;
-					
-					var templateSelector = "#productFormTemplate";
-					var width = 800; 
-					var height = 550;
-					
-					var saveSuccessFunction = function(data, textStatus, jqXHR) {
-						  $("#dialog-form").dialog("close");
-						  refreshLoanProductsView();
-					}
-					popupDialogWithFormView(getUrl, putUrl, 'PUT', "dialog.title.product.details", templateSelector, width, height, saveSuccessFunction);
+					var getUrl = 'loanproducts/' + productId + '?template=true';
+					var putUrl = 'loanproducts/' + productId;
+					maintainLoanProduct(getUrl, putUrl, 'PUT', "dialog.title.product.details");
 					e.preventDefault();
 				});
 				
@@ -1193,7 +1174,20 @@ function showILOrgAdmin() {
   		executeAjaxRequest(url, 'GET', "", base64, successFunction, formErrorFunction);
 	}
 
+ 
 
+	function maintainLoanProduct(getUrl, putOrPostUrl, submitType, dialogTitle) {
+		var templateSelector = "#productFormTemplate";
+		var width = 800; 
+		var height = 550;
+		
+		var saveSuccessFunction = function(data, textStatus, jqXHR) {
+			  $("#dialog-form").dialog("close");
+			  refreshLoanProductsView();
+		}
+		
+		popupDialogWithFormView(baseApiUrl + getUrl, baseApiUrl + putOrPostUrl, submitType, dialogTitle, templateSelector, width, height, saveSuccessFunction);
+	}
 
 
 
