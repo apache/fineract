@@ -1027,9 +1027,9 @@
 	<td>{{=$ctx.globalDateTime(lastModifedOn)}}</td>
 	<td>Yes</td>
 	<td>
-		<a id='deactivateproduct{{=id}}' class='deactivateproduct' href='#' style='margin-right: 5px;'>Deactivate</a>
-		<a id='editproduct{{=id}}' class='editproduct' href='#' style='margin-right: 5px;'>View/Edit</a>
-		<a id='deleteproduct{{=id}}' class='deleteproduct' href='#' style='margin-right: 5px;'>Delete</a>
+		<a id='deactivateproduct{{=id}}' class='deactivateproduct' href='#' style='margin-right: 5px;'>{{=$ctx.doI18N("link.action.product.deactivate")}}</a>
+		<a id='editproduct{{=id}}' class='editproduct' href='#' style='margin-right: 5px;'>{{=$ctx.doI18N("link.action.product.viewedit")}}</a>
+		<a id='deleteproduct{{=id}}' class='deleteproduct' href='#' style='margin-right: 5px;'>{{=$ctx.doI18N("link.action.product.delete")}}</a>
 	</td>
 </tr>
 {{/each}}
@@ -1041,10 +1041,10 @@
 <table id='officestable' width='100%'>
 	<thead>
 		<tr>
-			<th><spring:message code="table.heading.office.name"/></th>
-			<th><spring:message code="table.heading.office.externalid"/></th>
-			<th><spring:message code="table.heading.office.openedon"/></th>
-			<th><spring:message code="table.heading.office.parent"/></th>
+			<th>{{=$ctx.doI18N("table.heading.office.name")}}</th>
+			<th>{{=$ctx.doI18N("table.heading.office.externalid")}}</th>
+			<th>{{=$ctx.doI18N("table.heading.office.openedon")}}</th>
+			<th>{{=$ctx.doI18N("table.heading.office.parent")}}</th>
 			<th>&nbsp;</th>
 		</tr>
 	</thead>
@@ -1056,10 +1056,8 @@
 	<td>{{=$ctx.globalDate(openingDate)}}</td>
 	<td>{{=parentName}}</td>
 	<td>
-		<a id='edit{{=id}}' class='edit' href='#' style='margin-right: 5px;'><spring:message code="link.action.product.viewedit"/></a>
-		<!--
-		<a id='delete{{=id}}' class='delete' href='#' style='margin-right: 5px;'><spring:message code="link.action.product.delete"/></a>
-		-->
+		<a id='edit{{=id}}' class='edit' href='#' style='margin-right: 5px;'>{{=$ctx.doI18N("link.action.product.viewedit")}}</a>
+		<a id='delete{{=id}}' class='delete' href='#' style='margin-right: 5px;'>{{=$ctx.doI18N("link.action.product.delete")}}</a>
 	</td>
 </tr>
 {{/each}}
