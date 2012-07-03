@@ -43,6 +43,18 @@ function executeAjaxRequest(url, verbType, jsonData, basicAuthKey, successFuncti
 }
 
 
+highlightMissingXlations = "Y";
+function doI18N(xlateStr, params) { 
+	if (highlightMissingXlations == "Y") return jQuery.i18n.prop(xlateStr, params)
+	else
+	{
+		var xlated = jQuery.i18n.prop(xlateStr, params);
+		if (xlated.substr(0,1) == "[" && xlated.substr(xlated.length - 1, 1) == "]") return xlated.substr(1, xlated.length - 2)
+		else return xlated;
+	}
+}
+
+
 function showILLogon(apiUrl, logonDivName) {
 
 	var htmlVar = '<form name = "logonform"><table><tr><td>User Name:</td><td><input type="text" name="username"></td></tr>';
@@ -109,15 +121,15 @@ function setOrgAdminContent(divName) {
 
 	var htmlVar = '<div>';
 	htmlVar += '<span style="float: left">';
-	htmlVar += '	<a href="unknown.html" onclick="refreshLoanProductsView();return false;" id="viewloanproducts">View Products</a>';
-	htmlVar += '|';
-	htmlVar += '	<a href="#" id="addloanproduct">Add Product</a>';
-	htmlVar += '|';
-	htmlVar += '	<a href="#" id="viewoffices">View Offices</a>';
-	htmlVar += '|';
-	htmlVar += '	<a href="#" id="addoffice">Add Office</a>';
-	htmlVar += '|';
-	htmlVar += '	<a href="#" id="editconfiguration">Currency Configuration</a>';
+	htmlVar += '	<a href="unknown.html" onclick="refreshLoanProductsView();return false;" id="viewloanproducts">' + doI18N("administration.link.view.products") + '</a>';
+	htmlVar += ' | ';
+	htmlVar += '	<a href="#" id="addloanproduct">' + doI18N("administration.link.add.product") + '</a>';
+	htmlVar += ' | ';
+	htmlVar += '	<a href="#" id="viewoffices">' + doI18N("administration.link.view.offices") + '</a>';
+	htmlVar += ' | ';
+	htmlVar += '	<a href="#" id="addoffice">' + doI18N("administration.link.add.office") + '</a>';
+	htmlVar += ' | ';
+	htmlVar += '	<a href="#" id="editconfiguration">' + doI18N("administration.link.currency.configuration") + '</a>';
 	htmlVar += '</span>';
 	htmlVar += '</div>';
 	htmlVar += '<br><br>';
@@ -264,10 +276,14 @@ function jsViewsRegisterHelpers() {
 			      } catch(e) {
 			        return "??";
 			      }
+			},
+			doI18N: function(xlateStr, params) {
+			      try {
+			    	  return doI18N(xlateStr, params);
+			      } catch(e) {
+			        return xlateStr;
+			      }
 			}
-
-
-
 	});
 }
 
@@ -325,7 +341,7 @@ function jsViewsRegisterHelpers() {
 		  		argArrayIndex++;
 		  	  });
 		  	  // hardcoded support for six arguments
-		  	  errorObj.message = jQuery.i18n.prop(this.userMessageGlobalisationCode, argArray[0], argArray[1], argArray[2], argArray[3], argArray[4], argArray[5]);
+		  	  errorObj.message = doI18N(this.userMessageGlobalisationCode, argArray[0], argArray[1], argArray[2], argArray[3], argArray[4], argArray[5]);
 		  	  errorObj.value = this.value;
 		  	  
 		  	  errorArray[arrayIndex] = errorObj;
@@ -334,7 +350,7 @@ function jsViewsRegisterHelpers() {
 		  	
 		  	var templateArray = new Array();
 		  	var templateErrorObj = new Object();
-		  	templateErrorObj.title = jQuery.i18n.prop('error.msg.header');
+		  	templateErrorObj.title = doI18N('error.msg.header');
 		  	templateErrorObj.errors = errorArray;
 		  	
 		  	templateArray[0] = templateErrorObj;
@@ -348,15 +364,15 @@ function jsViewsRegisterHelpers() {
 	function showNotAvailableDialog(titleCode) {
 		var dialogDiv = $("<div id='notavailable-dialog-form'></div>");
 		
-		dialogDiv.append("<p>" + jQuery.i18n.prop('dialog.messages.functionality.not.available') + "</p>");
+		dialogDiv.append("<p>" + doI18N('dialog.messages.functionality.not.available') + "</p>");
 		
-		var okButton = jQuery.i18n.prop('dialog.button.ok');
+		var okButton = doI18N('dialog.button.ok');
 		
 		var buttonsOpts = {};
 		buttonsOpts[okButton] = function() {$(this).dialog("close");};
 		
 		dialogDiv.dialog({
-	  		title: jQuery.i18n.prop(titleCode), 
+	  		title: doI18N(titleCode), 
 	  		width: 300, 
 	  		height: 200, 
 	  		modal: true,
@@ -406,8 +422,8 @@ function jsViewsRegisterHelpers() {
 				var dialogDiv = $("<div id='dialog-form'></div>");
 				var formHtml = $(templateSelector).render(data);
 				dialogDiv.append(formHtml);
-				var saveButton = jQuery.i18n.prop('dialog.button.save');
-				var cancelButton = jQuery.i18n.prop('dialog.button.cancel');
+				var saveButton = doI18N('dialog.button.save');
+				var cancelButton = doI18N('dialog.button.cancel');
 				
 				var buttonsOpts = {};
 				buttonsOpts[saveButton] = function() {
@@ -430,7 +446,7 @@ function jsViewsRegisterHelpers() {
 				buttonsOpts[cancelButton] = function() {$(this).dialog( "close" );};
 				
 				dialogDiv.dialog({
-				  		title: jQuery.i18n.prop(titleCode), 
+				  		title: doI18N(titleCode), 
 				  		width: width, 
 				  		height: height, 
 				  		modal: true,
@@ -463,8 +479,8 @@ function jsViewsRegisterHelpers() {
 		var formHtml = $(templateSelector).render(data);
 		dialogDiv.append(formHtml);
 		
-		var saveButton = jQuery.i18n.prop('dialog.button.save');
-		var cancelButton = jQuery.i18n.prop('dialog.button.cancel');
+		var saveButton = doI18N('dialog.button.save');
+		var cancelButton = doI18N('dialog.button.cancel');
 		var buttonsOpts = {};		
 		buttonsOpts[saveButton] = function() {
 			$('.multiSelectedItems option').each(function(i) {  
@@ -479,7 +495,7 @@ function jsViewsRegisterHelpers() {
 		buttonsOpts[cancelButton] = function() {$(this).dialog( "close" );};
 		
 		dialogDiv.dialog({
-		  		title: jQuery.i18n.prop(titleCode), 
+		  		title: doI18N(titleCode), 
 		  		width: width, 
 		  		height: height, 
 		  		modal: true,
@@ -505,10 +521,10 @@ function jsViewsRegisterHelpers() {
 		  }).dialog('open');
 	}
 	function popupConfirmationDialogAndPost(url, submitType, titleCode, width, height, tabIndex, redirectUrl) {
-		    var dialogDiv = $("<div id='dialog-form'><div id='formerrors'></div>" + jQuery.i18n.prop('text.confirmation.required') + "</div>");
+		    var dialogDiv = $("<div id='dialog-form'><div id='formerrors'></div>" + doI18N('text.confirmation.required') + "</div>");
 		  
-		  	var confirmButton = jQuery.i18n.prop('dialog.button.confirm');
-			var cancelButton = jQuery.i18n.prop('dialog.button.cancel');
+		  	var confirmButton = doI18N('dialog.button.confirm');
+			var cancelButton = doI18N('dialog.button.cancel');
 			
 			var buttonsOpts = {};
 			buttonsOpts[confirmButton] = function() {
@@ -526,7 +542,7 @@ function jsViewsRegisterHelpers() {
 		  
 		  
 		  dialogDiv.dialog({
-		  		title: jQuery.i18n.prop(titleCode), 
+		  		title: doI18N(titleCode), 
 		  		width: width, 
 		  		height: height, 
 		  		modal: true,
@@ -639,7 +655,7 @@ function showILClient(baseApiUrl, clientId) {
 					    e.preventDefault();
 					});
 					
-					$('button.casflowbtn span').text(jQuery.i18n.prop('dialog.button.new.cashflow.analysis'));
+					$('button.casflowbtn span').text(doI18N('dialog.button.new.cashflow.analysis'));
 					*/
 
 					$('.newloanbtn').button().click(function(e) {
@@ -648,7 +664,7 @@ function showILClient(baseApiUrl, clientId) {
 						addILLoan(baseApiUrl, clientId);
 					    e.preventDefault();
 					});
-					$('button.newloanbtn span').text(jQuery.i18n.prop('dialog.button.new.loan.application'));
+					$('button.newloanbtn span').text(doI18N('dialog.button.new.loan.application'));
 					
 					$('.addnotebtn').button().click(function(e) {
 						var linkId = this.id;
@@ -666,7 +682,7 @@ function showILClient(baseApiUrl, clientId) {
 						popupDialogWithFormView("", postUrl, 'POST', "dialog.title.add.note", templateSelector, width, height,  saveSuccessFunction);
 					    e.preventDefault();
 					});
-					$('button.addnotebtn span').text(jQuery.i18n.prop('dialog.button.add.note'));
+					$('button.addnotebtn span').text(doI18N('dialog.button.add.note'));
 
 					refreshNoteWidget(clientUrl);
 					
@@ -712,7 +728,7 @@ function showILClient(baseApiUrl, clientId) {
 
 		return 'var successFunction = function(data, textStatus, jqXHR) {	' +
 				  ' var noteParent = new Object();' + 
-				  ' noteParent.title = jQuery.i18n.prop("widget.notes.heading");' +
+				  ' noteParent.title = doI18N("widget.notes.heading");' +
 				  ' noteParent.notes = data;' +
 				  ' var tableHtml = $("#noteListViewTemplate").render(noteParent);' +
 				  ' $("#clienttabrightpane").html(tableHtml);' + 
@@ -815,13 +831,13 @@ function showILClient(baseApiUrl, clientId) {
 					submitLoanApplication(clientId);
 				    e.preventDefault();
 				});
-				$('button#submitloanapp span').text(jQuery.i18n.prop('dialog.button.submit'));
+				$('button#submitloanapp span').text(doI18N('dialog.button.submit'));
 				
 				$('#cancelloanapp').button().click(function(e) {
 		  			showILClient(baseApiUrl, clientId);
 				    e.preventDefault();
 				});
-				$('button#cancelloanapp span').text(jQuery.i18n.prop('dialog.button.cancel'));
+				$('button#cancelloanapp span').text(doI18N('dialog.button.cancel'));
 			};
 			  		
 		executeAjaxRequest(baseApiUrl + 'loans/template?clientId=' + clientId + '&productId=' + productId, 'GET', "", base64, successFunction, formErrorFunction);	  
@@ -938,7 +954,7 @@ function loadILLoan(baseApiUrl, loanId) {
 						popupDialogWithPostOnlyFormView(postUrl, 'dialog.title.reject.loan', templateSelector, width, height, saveSuccessFunctionReloadClient, offsetToSubmittedDate, defaultOffset, maxOffset);
 					    e.preventDefault();
 					});
-	        		$('button.rejectloan span').text(jQuery.i18n.prop('dialog.button.reject.loan'));
+	        		$('button.rejectloan span').text(doI18N('dialog.button.reject.loan'));
 					
 				$('.withdrawnbyapplicantloan').button().click(function(e) {
 						var linkId = this.id;
@@ -951,7 +967,7 @@ function loadILLoan(baseApiUrl, loanId) {
 						popupDialogWithPostOnlyFormView(postUrl, 'dialog.title.loan.withdrawn.by.client', templateSelector, width, height, saveSuccessFunctionReloadClient,  offsetToSubmittedDate, defaultOffset, maxOffset)
 					    e.preventDefault();
 				});
-				$('button.withdrawnbyapplicantloan span').text(jQuery.i18n.prop('dialog.button.withdrawn.by.client.loan'));
+				$('button.withdrawnbyapplicantloan span').text(doI18N('dialog.button.withdrawn.by.client.loan'));
 					
 				$('.approveloan').button().click(function(e) {
 						
@@ -965,7 +981,7 @@ function loadILLoan(baseApiUrl, loanId) {
 						popupDialogWithPostOnlyFormView(postUrl, 'dialog.title.approve.loan', templateSelector, width, height, saveSuccessFunctionReloadLoan ,  offsetToSubmittedDate, defaultOffset, maxOffset)
 					    e.preventDefault();
 				});
-				$('button.approveloan span').text(jQuery.i18n.prop('dialog.button.approve.loan'));
+				$('button.approveloan span').text(doI18N('dialog.button.approve.loan'));
 					
 				$('.undoapproveloan').button().click(function(e) {
 						
@@ -979,7 +995,7 @@ function loadILLoan(baseApiUrl, loanId) {
 						popupDialogWithPostOnlyFormView(postUrl, 'dialog.title.undo.loan.approval', templateSelector, width, height, saveSuccessFunctionReloadLoan ,  offsetToSubmittedDate, defaultOffset, maxOffset)
 					    e.preventDefault();
 				});
-				$('button.undoapproveloan span').text(jQuery.i18n.prop('dialog.button.undo.loan.approval'));
+				$('button.undoapproveloan span').text(doI18N('dialog.button.undo.loan.approval'));
 					
 				$('.deleteloan').button().click(function(e) {
 						var linkId = this.id;
@@ -993,7 +1009,7 @@ function loadILLoan(baseApiUrl, loanId) {
 						popupConfirmationDialogAndPost(url, 'DELETE', 'dialog.title.confirmation.required', width, height, 0, redirectUrl);
 					    e.preventDefault();
 				});
-				$('button.deleteloan span').text(jQuery.i18n.prop('dialog.button.delete.loan'));
+				$('button.deleteloan span').text(doI18N('dialog.button.delete.loan'));
 					
 				$('.disburseloan').button().click(function(e) {
 						
@@ -1007,7 +1023,7 @@ function loadILLoan(baseApiUrl, loanId) {
 						popupDialogWithPostOnlyFormView(postUrl, 'dialog.title.disburse.loan', templateSelector, width, height, saveSuccessFunctionReloadLoan ,  offsetToSubmittedDate, defaultOffset, maxOffset)
 					    e.preventDefault();
 				});
-				$('button.disburseloan span').text(jQuery.i18n.prop('dialog.button.disburse.loan'));
+				$('button.disburseloan span').text(doI18N('dialog.button.disburse.loan'));
 					
 				$('.undodisbursalloan').button().click(function(e) {
 						
@@ -1021,7 +1037,7 @@ function loadILLoan(baseApiUrl, loanId) {
 						popupDialogWithPostOnlyFormView(postUrl, 'dialog.title.undo.loan.disbursal', templateSelector, width, height, saveSuccessFunctionReloadLoan ,  offsetToSubmittedDate, defaultOffset, maxOffset)
 					    e.preventDefault();
 				});
-				$('button.undodisbursalloan span').text(jQuery.i18n.prop('dialog.button.undo.loan.disbursal'));
+				$('button.undodisbursalloan span').text(doI18N('dialog.button.undo.loan.disbursal'));
 					
 				$('.repaymentloan').button().click(function(e) {
 						
@@ -1039,7 +1055,7 @@ function loadILLoan(baseApiUrl, loanId) {
 						//popupDialogWithFormView(getUrl, postUrl, 'POST', 'dialog.title.loan.repayment', templateSelector, width, height, currentTabIndex,  offsetToSubmittedDate, defaultOffset, maxOffset)
 					    e.preventDefault();
 				});
-				$('button.repaymentloan span').text(jQuery.i18n.prop('dialog.button.loan.repayment'));
+				$('button.repaymentloan span').text(doI18N('dialog.button.loan.repayment'));
 					
 				$('.waiveloan').button().click(function(e) {
 						var linkId = this.id;
@@ -1061,7 +1077,7 @@ function loadILLoan(baseApiUrl, loanId) {
 						popupDialogWithFormView(getUrl, postUrl, 'POST', "dialog.title.waive.loan", templateSelector, width, height, saveSuccessFunction);
 					    e.preventDefault();
 				});
-				$('button.waiveloan span').text(jQuery.i18n.prop('dialog.button.loan.waive'));
+				$('button.waiveloan span').text(doI18N('dialog.button.loan.waive'));
 					
 				$('.adjustloanrepayment').button().click(function(e) {
 						
@@ -1085,7 +1101,7 @@ function loadILLoan(baseApiUrl, loanId) {
 						popupDialogWithFormView(getAndPostUrl, getAndPostUrl, 'POST', "dialog.title.adjust.loan.repayment", templateSelector, width,  height, saveSuccessFunction);
 					    e.preventDefault();
 				});
-				$('button.adjustloanrepayment span').text(jQuery.i18n.prop('dialog.button.adjust.loan.repayment'));
+				$('button.adjustloanrepayment span').text(doI18N('dialog.button.adjust.loan.repayment'));
 					
 				// additional data
 				var additionalFieldsParams = {

@@ -874,17 +874,17 @@
     <div id="formerrors"></div>
 	<fieldset>
 		<input type="hidden" id="locale" name="locale" value="${currentLocale}" />
-		<legend><spring:message code="form.legend.loan.product.information"/></legend>
+		<legend>{{=$ctx.doI18N("form.legend.loan.product.information")}}</legend>
 		
-		<label for="name"><spring:message code="form.label.loan.product.name"/></label>
+		<label for="name">{{=$ctx.doI18N("form.label.loan.product.name")}}</label>
 		<input id="name" name="name" type="text" title="" value="{{=name}}"/>
 		
-		<label for="description"><spring:message code="form.label.loan.product.description"/></label>
+		<label for="description">{{=$ctx.doI18N("form.label.loan.product.description")}}</label>
 		<textarea cols="73" rows="3" id="description" name="description" title="">{{=description}}</textarea>
 	</fieldset>
 	<fieldset>
-		<legend><spring:message code="form.legend.loan.product.currency"/></legend>
-		<label for="currencyCode"><spring:message code="form.label.loan.product.currency"/></label>
+		<legend>{{=$ctx.doI18N("form.legend.loan.product.currency")}}</legend>
+		<label for="currencyCode">{{=$ctx.doI18N("form.label.loan.product.currency")}}</label>
 		<select id="currencyCode" name="currencyCode" title="" style="width: 300px;">
 				{{#each currencyOptions}}
                 	{{#if $parent.parent.data.principal.currencyCode===code}}
@@ -894,24 +894,24 @@
 					{{/if}}
           		{{/each}}
 		</select>
-		<label for="digitsAfterDecimal"><spring:message code="form.label.loan.product.decimalplaces"/></label>
+		<label for="digitsAfterDecimal">{{=$ctx.doI18N("form.label.loan.product.decimalplaces")}}</label>
 		<input id="digitsAfterDecimal" name="digitsAfterDecimal" title="" style="width: 300px;" value="{{=$ctx.number(principal.digitsAfterDecimal)}}" />
 	</fieldset>
 	<fieldset>
-		<legend><spring:message code="form.legend.loan.product.loan.terms"/></legend>
+		<legend>{{=$ctx.doI18N("form.legend.loan.product.loan.terms")}}</legend>
 		
 		<table>
 		<tr>
 			<td valign="top" style="padding-right: 5px; border-right: 1px solid;">
 				<table>
 					<tr>
-						<td><spring:message code="form.label.loan.product.loan.amount"/></td>
+						<td>{{=$ctx.doI18N("form.label.loan.product.loan.amount")}}</td>
 						<td>
 							<input id="principal" name="principal" title="" style="width: 125px;" value="{{=$ctx.money(principal)}}" />
 						</td>
 					</tr>
 					<tr>
-						<td><spring:message code="form.label.loan.product.repaidevery"/></td>
+						<td>{{=$ctx.doI18N("form.label.loan.product.repaidevery")}}</td>
 						<td>
 							<input id="repaymentEvery" name="repaymentEvery" title="" style="width: 50px;" value="{{=$ctx.number(repaymentEvery)}}"/>
 							
@@ -927,7 +927,7 @@
 						</td>
 					</tr>
 					<tr>
-						<td><spring:message code="form.label.loan.product.numberof.repayments"/></td>
+						<td>{{=$ctx.doI18N("form.label.loan.product.numberof.repayments")}}</td>
 						<td>
 							<input id="numberOfRepayments" name="numberOfRepayments" title="" style="width: 50px;" value="{{=$ctx.number(numberOfRepayments)}}"/>
 						</td>
@@ -937,7 +937,7 @@
 			<td valign="top" style="padding-left: 5px; padding-right: 5px; border-right: 1px solid;">
 				<table>
 					<tr>
-						<td><spring:message code="form.label.loan.product.nominal.interestrate"/></td>
+						<td>{{=$ctx.doI18N("form.label.loan.product.nominal.interestrate")}}</td>
 						<td>
 							<input id="interestRatePerPeriod" name="interestRatePerPeriod" title="" style="width: 70px;" value="{{=$ctx.decimal(interestRatePerPeriod, 4)}}" />
 
@@ -953,7 +953,7 @@
 						</td>
 					</tr>
 					<tr>
-						<td><spring:message code="form.label.loan.product.amortization"/></td>
+						<td>{{=$ctx.doI18N("form.label.loan.product.amortization")}}</td>
 						<td>
 							<select id="amortizationType" name="amortizationType" title="" style="width: 220px;">
                                 {{#each amortizationTypeOptions}}
@@ -967,7 +967,7 @@
 						</td>
 					</tr>
 					<tr>
-						<td><spring:message code="form.label.loan.product.interest.method"/></td>
+						<td>{{=$ctx.doI18N("form.label.loan.product.interest.method")}}</td>
 						<td>
 							<select id="interestType" name="interestType" title="" style="width: 220px;">
 								{{#each interestTypeOptions}}
@@ -981,7 +981,7 @@
 						</td>
 					</tr>
 					<tr>
-						<td><spring:message code="form.label.loan.product.interest.rate.calcutated.in.period"/></td>
+						<td>{{=$ctx.doI18N("form.label.loan.product.interest.rate.calcutated.in.period")}}</td>
 						<td>
 							<select id="interestCalculationPeriodType" name="interestCalculationPeriodType" title="" style="width: 220px;">
 								{{#each interestCalculationPeriodTypeOptions}}
@@ -995,7 +995,7 @@
 						</td>
 					</tr>
 					<tr>
-						<td><spring:message code="form.label.loan.product.arrears.tolerance"/></td>
+						<td>{{=$ctx.doI18N("form.label.loan.product.arrears.tolerance")}}</td>
 						<td>
 							<input id="inArrearsTolerance" name="inArrearsTolerance" title="" style="width: 215px;" value="{{=$ctx.money(inArrearsTolerance)}}" />
 						</td>
