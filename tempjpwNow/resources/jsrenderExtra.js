@@ -103,6 +103,28 @@ function setAddLoanContent(divName) {
 	$("#" + divName).html(htmlVar);
 }
 
+function setOrgAdminContent(divName) {
+
+	var htmlVar = '<div id="inputarea"></div><div id="schedulearea"></div>'
+
+	var htmlVar = '<div>';
+	htmlVar += '<span style="float: left">';
+	htmlVar += '	<a href="unknown.html" onclick="refreshLoanProductsView();return false;" id="viewloanproducts">View Products</a>';
+	htmlVar += '|';
+	htmlVar += '	<a href="#" id="addloanproduct">Add Product</a>';
+	htmlVar += '|';
+	htmlVar += '	<a href="#" id="viewoffices">View Offices</a>';
+	htmlVar += '|';
+	htmlVar += '	<a href="#" id="addoffice">Add Office</a>';
+	htmlVar += '|';
+	htmlVar += '	<a href="#" id="editconfiguration">Currency Configuration</a>';
+	htmlVar += '</span>';
+	htmlVar += '</div>';
+	htmlVar += '<br><br>';
+	htmlVar += '<div id="listplaceholder" ></div>';
+	$("#" + divName).html(htmlVar);
+}
+
 
 function setReportingContent(divName) {
 
@@ -1083,6 +1105,77 @@ function loadILLoan(baseApiUrl, loanId) {
 		executeAjaxRequest(loanUrl, 'GET', "", base64, successFunction, errorFunction);	  
 
 }
+
+
+
+
+
+/* user admin code */
+
+function showILOrgAdmin() {
+	setOrgAdminContent("content");
+}
+
+
+	function refreshLoanProductsView() {
+
+		var url = baseApiUrl + 'loanproducts';
+ 
+		var successFunction = function(data, textStatus, jqXHR) {
+				
+				var productlistParent = new Object();
+				productlistParent.products = data;
+				
+				var productListHtml = $("#productListTemplate").render(productlistParent);
+				$("#listplaceholder").html(productListHtml);
+				
+				$("a.editproduct").click( function(e) {
+					var linkId = this.id;
+					var productId = linkId.replace("editproduct", "");
+					var getUrl = baseApiUrl + 'loanproducts/' + productId + '?template=true';
+					var putUrl = baseApiUrl + 'loanproducts/' + productId;
+					
+					var templateSelector = "#productFormTemplate";
+					var width = 800; 
+					var height = 550;
+					
+					var saveSuccessFunction = function(data, textStatus, jqXHR) {
+						  $("#dialog-form").dialog("close");
+						  refreshLoanProductsView();
+					}
+					popupDialogWithFormView(getUrl, putUrl, 'PUT', "dialog.title.product.details", templateSelector, width, height, saveSuccessFunction);
+					e.preventDefault();
+				});
+				
+				$("a.deactivateproduct").click( function(e) {
+					//var linkId = this.id;
+					//var productId = linkId.replace("deactivateproduct", "");
+					showNotAvailableDialog('dialog.title.functionality.not.available');
+					e.preventDefault();
+				});
+				
+				$("a.deleteproduct").click( function(e) {
+					//var linkId = this.id;
+					//var productId = linkId.replace("deleteproduct", "");
+					showNotAvailableDialog('dialog.title.functionality.not.available');					
+					e.preventDefault();
+				});
+				
+				var oTable = $("#productstable").dataTable( {
+					"bSort": true,
+					"bInfo": true,
+					"bJQueryUI": true,
+					"bRetrieve": false,
+					"bScrollCollapse": false,
+					"bPaginate": false,
+					"bLengthChange": false,
+					"bFilter": false,
+					"bAutoWidth": false,
+				});
+			  };
+
+  		executeAjaxRequest(url, 'GET', "", base64, successFunction, formErrorFunction);
+	}
 
 
 
