@@ -1070,14 +1070,14 @@
     <div id="formerrors"></div>
 	</div>
 	<fieldset>
-		<legend><spring:message code="form.legend.office.details"/></legend>
-		<label for="name"><spring:message code="form.label.office.name"/></label>
+		<legend>{{=$ctx.doI18N("form.legend.office.details")}}</legend>
+		<label for="name">{{=$ctx.doI18N("form.label.office.name")}}</label>
 		<input id="name" name="name" title="" type="text" value="{{=name}}" size="75"/>
 
         {{#if allowedParents.length > 0}}
-		<label for="parentId"><spring:message code="form.label.office.parent"/></label>
+		<label for="parentId">{{=$ctx.doI18N("form.label.office.parent")}}</label>
 		<select id="parentId" name="parentId" title="">
-            <option value="-1"><spring:message code="option.office.first.choice"/></option>
+            <option value="-1">{{=$ctx.doI18N("option.office.first.choice")}}</option>
 			{{#each allowedParents}}
 				{{#if $ctx.number($parent.parent.data.parentId)===$ctx.number(id)}}
 					<option value="{{=$ctx.number(id)}}" selected="selected">{{=name}}</option>
@@ -1091,10 +1091,10 @@
 		{{/if}}
 
 		<input type="hidden" id="dateFormat" name="dateFormat" value="dd MMMM yyyy" />
-		<label for="openingDate"><spring:message code="form.label.office.openedon"/></label>
+		<label for="openingDate">{{=$ctx.doI18N("form.label.office.openedon")}}</label>
 		<input id="openingDate" name="openingDate" title="" type="text" value="{{=$ctx.globalDate(openingDate)}}" size="75" class="datepickerfield" />
 
-		<label for="externalId"><spring:message code="form.label.office.externalid"/></label>
+		<label for="externalId">{{=$ctx.doI18N("form.label.office.externalid")}}</label>
 		<input id="externalId" name="externalId" title="" type="text" value="{{=externalId}}" size="75"/>
 	</fieldset>
 </form>
@@ -1104,10 +1104,10 @@
 <form id="entityform">
     <div id="formerrors"></div>
 	<fieldset>
-		<legend><spring:message code="form.legend.loan.product.currency"/></legend>
+		<legend>{{=$ctx.doI18N("form.legend.loan.product.currency")}}</legend>
 
 		<div class="multiselectwidget" style="width:400px;height:125px;">
-			<label for="notSelectedCurrencies"><spring:message code="form.label.configuration.available.currencies"/></label>
+			<label for="notSelectedCurrencies">{{=$ctx.doI18N("form.label.configuration.available.currencies")}}</label>
 			<select id="notSelectedCurrencies" name="notSelectedCurrencies" title="" class="multiselectwidget" multiple="multiple" style="width:400px;height:125px;">
 			{{#each currencyOptions}}
 				{{#if $ctx.number($parent.parent.data.code)===code}}
@@ -1117,11 +1117,11 @@
 				{{/if}}
             {{/each}}
 			</select>
-			<a href="#" id="add" class="multiselectwidget"><spring:message code="widget.multiselect.button.add"/> &gt;&gt;</a>
+			<a href="unknown.html" id="addcurrencies" class="multiselectwidget">{{=$ctx.doI18N("widget.multiselect.button.add")}} &gt;&gt;</a>
 		</div>
 				  
 		<div class="multiselectwidget">
-			<label for="currencies"><spring:message code="form.label.configuration.allowed.currencies"/></label>
+			<label for="currencies">{{=$ctx.doI18N("form.label.configuration.allowed.currencies")}}</label>
 			<select id="currencies" name="currencies" title="" class="multiselectwidget" multiple="multiple" style="width:400px;height:125px;">
 			{{#each selectedCurrencyOptions}}
 				{{#if $ctx.number($parent.parent.data.code)===code}}
@@ -1131,7 +1131,7 @@
 				{{/if}}
             {{/each}}
 			</select>
-			<a href="#" id="remove" class="multiselectwidget">&lt;&lt; <spring:message code="widget.multiselect.button.remove"/></a>  
+			<a href="unknown.html" id="removecurrencies" class="multiselectwidget">&lt;&lt; {{=$ctx.doI18N("widget.multiselect.button.remove")}}</a>  
 		</div>
 	</fieldset>
 </form>
@@ -1166,40 +1166,40 @@
 </script>
 
 <script id="userSettingsTemplate" type="text/x-jquery-tmpl">
-<h2><spring:message code="form.label.heading.office"/></h2>
+<h2>{{=$ctx.doI18N("form.label.heading.office")}}</h2>
 <div class="row">
-	<span class="rowlabel"><spring:message code="form.label.office"/></span>
+	<span class="rowlabel">{{=$ctx.doI18N("form.label.office")}}</span>
 	<span class="rowvalue">{{=officeName}}</span>
 </div>
 <br/>
 
-<h2><spring:message code="form.label.heading.details"/></h2>
+<h2>{{=$ctx.doI18N("form.label.heading.details")}}</h2>
 <div class="row">
-	<span class="rowlabel"><spring:message code="form.label.name"/></span>
+	<span class="rowlabel">{{=$ctx.doI18N("form.label.name")}}</span>
 	<span class="rowvalue">{{=firstname}}&nbsp;{{=lastname}}</span>
 </div>
 <div class="row">
-	<span class="rowlabel"><spring:message code="form.label.username"/></span>
+	<span class="rowlabel">{{=$ctx.doI18N("form.label.username")}}</span>
 	<span class="rowvalue">{{=username}}</span>
 </div>
 <div class="row">
-	<span class="rowlabel"><spring:message code="form.label.email"/></span>
+	<span class="rowlabel">{{=$ctx.doI18N("form.label.email")}}</span>
 	<span class="rowvalue">{{=email}}</span>
 </div>
 <div class="row">
 	<span class="rowlabel">&nbsp;</span>
-	<span class="rowvalue"><a href="#" id="changedetails"><spring:message code="form.link.changedetails"/></a></span>
+	<span class="rowvalue"><a href="#" id="changedetails">{{=$ctx.doI18N("form.link.changedetails")}}</a></span>
 </div>
 <br/>
 
-<h2><spring:message code="form.label.heading.security"/></h2>
+<h2>{{=$ctx.doI18N("form.label.heading.security")}}</h2>
 <div class="row">
-	<span class="rowlabel"><spring:message code="form.label.password"/></span>
-	<span class="rowvalue"><a href="#" id="changepassword"><spring:message code="form.link.changepassword"/></a></span>
+	<span class="rowlabel">{{=$ctx.doI18N("form.label.password")}}</span>
+	<span class="rowvalue"><a href="#" id="changepassword">{{=$ctx.doI18N("form.link.changepassword")}}</a></span>
 </div>
 <br/>
 
-<h2><spring:message code="form.label.heading.roles"/></h2>
+<h2>{{=$ctx.doI18N("form.label.heading.roles")}}</h2>
 {{#each selectedRoles}}
 <div class="row">
 	<span class="rowlabel">&nbsp;</span>

@@ -107,6 +107,8 @@ function setAddLoanContent(divName) {
 function setOrgAdminContent(divName) {
 
 	var addLoanProductUrl = "maintainLoanProduct('loanproducts/template', 'loanproducts', 'POST', 'dialog.title.add.loan.product');return false;";
+	var addOfficeUrl = "maintainOffice('offices/template', 'offices', 'POST', 'dialog.title.add.office');return false;";
+	var orgCurrenciesUrl = "maintainOrgCurrencies('configurations/currency', 'configurations/currency', 'PUT', 'dialog.title.configuration.currencies');return false;";
 	var htmlVar = '<div id="inputarea"></div><div id="schedulearea"></div>'
 
 	var htmlVar = '<div>';
@@ -117,9 +119,9 @@ function setOrgAdminContent(divName) {
 	htmlVar += ' | ';
 	htmlVar += '	<a href="unknown.html" onclick="refreshOfficesView();return false;" id="viewoffices">' + doI18N("administration.link.view.offices") + '</a>';
 	htmlVar += ' | ';
-	htmlVar += '	<a href="#" id="addoffice">' + doI18N("administration.link.add.office") + '</a>';
+	htmlVar += '	<a href="unknown.html" onclick="' + addOfficeUrl + '" id="addoffice">' + doI18N("administration.link.add.office") + '</a>';
 	htmlVar += ' | ';
-	htmlVar += '	<a href="#" id="editconfiguration">' + doI18N("administration.link.currency.configuration") + '</a>';
+	htmlVar += '	<a href="unknown.html" onclick="' + orgCurrenciesUrl + '" id="editconfiguration">' + doI18N("administration.link.currency.configuration") + '</a>';
 	htmlVar += '</span>';
 	htmlVar += '</div>';
 	htmlVar += '<br><br>';
@@ -379,6 +381,10 @@ function jsViewsRegisterHelpers() {
 	    var o = {};
 	    var a = this.serializeArray();
 	    $.each(a, function() {
+	    	if (this.name === 'notSelectedCurrencies') {
+	    		// do not serialize
+	    	} else  {
+
 	        if (o[this.name] !== undefined) {
 	            if (!o[this.name].push) {
 	                o[this.name] = [o[this.name]];
@@ -386,13 +392,14 @@ function jsViewsRegisterHelpers() {
 	            o[this.name].push(this.value || '');
 	        } else {
 	        	
-	        	if (this.name === 'selectedItems' || this.name === 'notSelectedItems') {
+	        	if (this.name === 'selectedItems' || this.name === 'notSelectedItems' || this.name === 'currencies') {
 	        		o[this.name] = new Array();
 	        		o[this.name].push(this.value || '');
 	        	} else {
 	        		o[this.name] = this.value || '';	
 	        	}
 	        }
+		}
 	    });
 	    return o;
 	};
@@ -421,11 +428,18 @@ function jsViewsRegisterHelpers() {
 					$('#notSelectedItems option').each(function(i) {  
 				    	   $(this).attr("selected", "selected");  
 				    	});
-			    	
 			    		$('#selectedItems option').each(function(i) {  
 			    	   		$(this).attr("selected", "selected");  
 			    		});
 			    	
+
+					$('#notSelectedCurrencies option').each(function(i) {  
+					    	   	$(this).attr("selected", "selected");  
+					});
+				    	$('#currencies option').each(function(i) {  
+				    	   		$(this).attr("selected", "selected");  
+				    	});
+
 			    		var newFormData = JSON.stringify($('#entityform').serializeObject());
 			    		console.log(newFormData);
 			    	
@@ -446,15 +460,23 @@ function jsViewsRegisterHelpers() {
 				  			$(this).remove();
 						},
 				  		open: function (event, ui) {
-				  			
+
 				  			$('#add').click(function() {  
 				  			     return !$('#notSelectedItems option:selected').remove().appendTo('#selectedItems');  
 				  			});
-				  			
 				  			$('#remove').click(function() {  
 				  				return !$('#selectedItems option:selected').remove().appendTo('#notSelectedItems');  
 				  			});
 				  			
+
+					  		$('#addcurrencies').click(function() {  
+					  			return !$('#notSelectedCurrencies option:selected').remove().appendTo('#currencies');  
+					  		});
+					  		$('#removecurrencies').click(function() {  
+					  			return !$('#currencies option:selected').remove().appendTo('#notSelectedCurrencies');  
+					  		});
+
+
 				  			$('.datepickerfield').datepicker({constrainInput: true, maxDate: 0, dateFormat: 'dd MM yy'});
 				  			
 				  			$("#entityform textarea").first().focus();
@@ -1174,8 +1196,6 @@ function loadILLoan(baseApiUrl, loanId) {
   		executeAjaxRequest(url, 'GET', "", base64, successFunction, formErrorFunction);
 	}
 
- 
-
 	function maintainLoanProduct(getUrl, putOrPostUrl, submitType, dialogTitle) {
 		var templateSelector = "#productFormTemplate";
 		var width = 800; 
@@ -1204,19 +1224,9 @@ function loadILLoan(baseApiUrl, loanId) {
 				$("a.edit").click( function(e) {
 					var linkId = this.id;
 					var entityId = linkId.replace("edit", "");
-					var getUrl = baseApiUrl + 'offices/' + entityId + '?template=true';
-					var putUrl = baseApiUrl + 'offices/' + entityId;
-					
-					var templateSelector = "#officeFormTemplate";
-					var width = 600; 
-					var height = 400;
-					
-					var saveSuccessFunction = function(data, textStatus, jqXHR) {
-						  $("#dialog-form").dialog("close");
-						  refreshOfficesView();
-					}
-					
-					popupDialogWithFormView(getUrl, putUrl, 'PUT', "dialog.title.office.details", templateSelector, width, height, saveSuccessFunction);
+					var getUrl = 'offices/' + entityId + '?template=true';
+					var putUrl = 'offices/' + entityId;
+					maintainOffice(getUrl, putUrl, 'PUT', "dialog.title.office.details");
 					e.preventDefault();
 				});
 				
@@ -1245,7 +1255,30 @@ function loadILLoan(baseApiUrl, loanId) {
 
 	}
 	
+	function maintainOffice(getUrl, putOrPostUrl, submitType, dialogTitle) {
+		var templateSelector = "#officeFormTemplate";
+		var width = 600; 
+		var height = 400;
 
+		var saveSuccessFunction = function(data, textStatus, jqXHR) {
+			  $("#dialog-form").dialog("close");
+			  refreshOfficesView();
+		}
+		
+		popupDialogWithFormView(baseApiUrl + getUrl, baseApiUrl + putOrPostUrl, submitType, dialogTitle, templateSelector, width, height, saveSuccessFunction);
+	}
+
+	function maintainOrgCurrencies(getUrl, putOrPostUrl, submitType, dialogTitle) {
+		var templateSelector = "#configurationFormTemplate";
+		var width = 900; 
+		var height = 400;
+
+		var saveSuccessFunction = function(data, textStatus, jqXHR) {
+			  $("#dialog-form").dialog("close");
+		}
+		
+		popupDialogWithFormView(baseApiUrl + getUrl, baseApiUrl + putOrPostUrl, submitType, dialogTitle, templateSelector, width, height, saveSuccessFunction);
+	}
 
 
 
