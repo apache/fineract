@@ -115,7 +115,7 @@ function setOrgAdminContent(divName) {
 	htmlVar += ' | ';
 	htmlVar += '	<a href="unknown.html" onclick="' + addLoanProductUrl + '" id="addloanproduct">' + doI18N("administration.link.add.product") + '</a>';
 	htmlVar += ' | ';
-	htmlVar += '	<a href="#" id="viewoffices">' + doI18N("administration.link.view.offices") + '</a>';
+	htmlVar += '	<a href="unknown.html" onclick="refreshOfficesView();return false;" id="viewoffices">' + doI18N("administration.link.view.offices") + '</a>';
 	htmlVar += ' | ';
 	htmlVar += '	<a href="#" id="addoffice">' + doI18N("administration.link.add.office") + '</a>';
 	htmlVar += ' | ';
@@ -1190,6 +1190,61 @@ function loadILLoan(baseApiUrl, loanId) {
 	}
 
 
+	function refreshOfficesView() {
+
+		var url = baseApiUrl + 'offices';
+		var successFunction = function(data, textStatus, jqXHR) {
+				
+				var officelistParent = new Object();
+				officelistParent.offices = data;
+				
+				var officeListHtml = $("#officeListTemplate").render(officelistParent);
+				$("#listplaceholder").html(officeListHtml);  
+				
+				$("a.edit").click( function(e) {
+					var linkId = this.id;
+					var entityId = linkId.replace("edit", "");
+					var getUrl = baseApiUrl + 'offices/' + entityId + '?template=true';
+					var putUrl = baseApiUrl + 'offices/' + entityId;
+					
+					var templateSelector = "#officeFormTemplate";
+					var width = 600; 
+					var height = 400;
+					
+					var saveSuccessFunction = function(data, textStatus, jqXHR) {
+						  $("#dialog-form").dialog("close");
+						  refreshOfficesView();
+					}
+					
+					popupDialogWithFormView(getUrl, putUrl, 'PUT', "dialog.title.office.details", templateSelector, width, height, saveSuccessFunction);
+					e.preventDefault();
+				});
+				
+				$("a.delete").click( function(e) {
+					//var linkId = this.id;
+					//var entityId = linkId.replace("delete", "");
+					showNotAvailableDialog('dialog.title.functionality.not.available');
+					e.preventDefault();
+				});
+				
+				var oTable = $("#officestable").dataTable( {
+					"bSort": true,
+					"bInfo": true,
+					"bJQueryUI": true,
+					"bRetrieve": false,
+					"bScrollCollapse": false,
+					"bPaginate": false,
+					"bLengthChange": false,
+					"bFilter": false,
+					"bAutoWidth": false,
+					
+				} );
+			  };
+		
+  		executeAjaxRequest(url, 'GET', "", base64, successFunction, formErrorFunction);
+
+	}
+	
 
 
 
