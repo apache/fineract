@@ -13,6 +13,9 @@
 <link rel="stylesheet" type="text/css" href="resources/libs/jquery-ui-1.8.16.custom/css/smoothness/jquery-ui-1.8.16.custom.css" />
 <link rel="stylesheet" type="text/css" href="resources/excel/excel-2007.css" />
 
+<link rel="stylesheet" type="text/css" href="resources/stretchyreporting/stretchyreporting.css">
+
+
 <script type="text/javascript" src="resources/libs/jquery-1.7.min.js"></script>
 <script type="text/javascript" src="resources/libs/jquery-ui-1.8.16.custom/js/jquery-ui-1.8.16.custom.min.js"></script>
 <script type="text/javascript" src="resources/libs/DataTables-1.8.2/media/js/jquery.dataTables.min.js"></script>
@@ -25,6 +28,9 @@
 <script type="text/javascript" src="resources/libs/jquery.observable.min.js"></script>
 <script type="text/javascript" src="resources/libs/globalize/globalize.js"></script>
 <script type="text/javascript" src="resources/stretchydata-0.95.js"></script>
+
+<script type="text/javascript" src="resources/stretchyreporting/stretchyreporting-0.987.js"></script>
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
 
 
 </head>
@@ -871,6 +877,9 @@
 	display: none;
 }
 
+#toptable {
+	display: none;
+}
 </style>
 
 <div id="logonDiv"></div>
@@ -882,10 +891,10 @@
 	</div>
 	<div id="navwrapper">
 	<ul id="nav" class="floatleft">
-		<li><a href="unknown.html" onclick="showILClientListing(baseApiUrl);return false ;">Clients</a></li>
+		<li><a href="unknown.html" onclick="showILClientListing(baseApiUrl);return false;">Clients</a></li>
 		<li><a href="org/admin/user">User Administration</a></li>
 		<li><a href="org/admin">Organisation Administration</a></li>
-		<li><a href="reporting/flexireport">Reports</a></li>
+		<li><a href="unknown.html" onclick="showILReporting();return false;">Reports</a></li>
 	</ul>
 	<ul id="nav" class="floatright">
 		<li class="dmenu"><a href="#">Theme</a>

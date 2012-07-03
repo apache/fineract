@@ -3,6 +3,7 @@
 $.stretchyReporting = {};
     
 $.stretchyReporting.initialise  = function(params) {
+
 					initialiseReporting(params)
 				};
 
@@ -59,7 +60,6 @@ function initialiseReporting(params) {
 
 	bundleDir = 'bundle/';
 	if (params.bundleDir) bundleDir = params.bundleDir;
-
 
 	highlightMissingXlations = "Y";
  	if (params.highlightMissingXlations) highlightMissingXlations = params.highlightMissingXlations;
@@ -139,10 +139,7 @@ function initialiseReporting(params) {
 		showMsg("OAuth params were not passed");
 	}
  	
-
-// google charts
-      google.load("visualization", "1", {packages:["corechart"]});
-      // google.load('visualization', '1', {packages:['table']});
+	googleLoaded = false;
 
 	reportListing = [];
 	listOfParameters = [];
@@ -764,6 +761,13 @@ return 'var selectSuccess = function(data, textStatus,jqXHR){' +
 
 
 function createChart(theData) {
+
+	if (googleLoaded == false) 
+	{
+		google.load("visualization", "1", {packages:["corechart"]});
+		googleLoaded = true;
+	}
+
 
 	RData = new google.visualization.DataTable();
       RData.addColumn('string', dataTableDef.aoColumns[0].sTitle);

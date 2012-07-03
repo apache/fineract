@@ -81,6 +81,7 @@ function setBasicAuthKey(apiUrl, logonDivName, username, password)
 
 
 
+
 function setClientListingContent(divName) {
 	var htmlVar = '<button id="addclient" style="clear: both;">Add a new client</button>';
 	htmlVar += '<div id="tabs"><ul><li><a href="#searchtab" title="searchtab">Search</a></li></ul><div id="searchtab"></div></div>';
@@ -99,6 +100,48 @@ function setClientContent(divName) {
 function setAddLoanContent(divName) {
 
 	var htmlVar = '<div id="inputarea"></div><div id="schedulearea"></div>'
+	$("#" + divName).html(htmlVar);
+}
+
+
+function setReportingContent(divName) {
+
+	var htmlVar = '<table id=toptable>';
+ 	htmlVar += '<tr>';
+ 	htmlVar += '  <td valign="top"><div id=myListOfReports></div></td>';
+ 	htmlVar += '  <td valign="bottom"><div id=myInputParameters></div></td>';
+ 	htmlVar += '  <td valign="top"><div id=myRunReportButton></div></td>';
+ 	htmlVar += '  <td valign="top"><div id=myClearReportButton></div></td>';
+ 	htmlVar += '  <td valign="bottom">';
+ 	htmlVar += '		<select id=decimalsChoice onChange="selectNewDecimals(options[selectedIndex].value)" >';
+ 	htmlVar += '		<option value="" selected="selected">Decimals</option>';
+ 	htmlVar += '		<option value="4">4</option>';
+ 	htmlVar += '		<option value="3">3</option>';
+ 	htmlVar += '		<option value="2">2</option>';
+ 	htmlVar += '		<option value="1">1</option>';
+ 	htmlVar += '		<option value="0">0</option>';
+ 	htmlVar += '		<option value="-1">-1</option>';
+ 	htmlVar += '		<option value="-2">-2</option>';
+ 	htmlVar += '		<option value="-3">-3</option>';
+ 	htmlVar += '		</select>';
+ 	htmlVar += '   </td>';
+ 	htmlVar += '  <td valign="bottom">';
+ 	htmlVar += '		<select id=decimalsThousandsSep onChange="selectNewThousandsSep(options[selectedIndex].value)" >';
+ 	htmlVar += '		<option value="" selected="selected">Format</option>';
+ 	htmlVar += '		<option value=",.">1,234,567.89</option>';
+ 	htmlVar += '		<option value=".,">1.234.567,89</option>';
+ 	htmlVar += '		<option value=" ,">1 234 567,89</option>';
+ 	htmlVar += '		<option value=" .">1 234 567.89</option>';
+ 	htmlVar += '		<option value=".' + "'" + '">1.234.567' + "'" + '89</option>';
+ 	htmlVar += '		<option value="' + "'" + ',">1'+ "'" + '234' + "'" + '567,89</option>';
+ 	htmlVar += '		<option value="INDIAN">Indian 12,34,567.89</option>';
+ 	htmlVar += '		<option value="NONE">None 1234567.89</option>';
+ 	htmlVar += '		</select>';
+ 	htmlVar += '   </td>';
+ 	htmlVar += ' </tr>';
+ 	htmlVar += '</table>';
+ 	htmlVar += '<div id=myOutput></div>'; 
+
 	$("#" + divName).html(htmlVar);
 }
 
@@ -1041,3 +1084,59 @@ function loadILLoan(baseApiUrl, loanId) {
 
 }
 
+
+
+
+
+
+
+
+/* reports code */
+
+function showILReporting() {
+	setReportingContent("content");
+
+var reportingParams = {
+	RESTUrl: baseApiUrl + "reports",
+	basicAuthKey: base64,
+	pentahoUrl: baseApiUrl + "pentahoreport",
+	bundleDir: "resources/stretchyreporting/mifosngbundle/",
+	reportsListDiv: "myListOfReports",
+	runReportDiv: "myRunReportButton",
+	clearReportDiv: "myClearReportButton",
+	inputParametersDiv: "myInputParameters",
+	reportOutputDiv: "myOutput",
+	indianFormat: false,
+	highlightMissingXlations: "N",
+	loadingImg: "resources/stretchyreporting/dots64.gif",
+	resValue: "resources/libs/"
+};
+
+	jQuery.stretchyReporting.initialise(reportingParams);
+
+	$("#toptable").slideToggle("slow");
+
+}
+
+function selectNewDecimals(selectedVal) {
+	if (!(selectedVal == "")) jQuery.stretchyReporting.changeDecimals(selectedVal);
+}
+
+function selectNewThousandsSep(selectedVal) {
+
+	if (!(selectedVal == "")) 
+	{
+
+		switch(selectedVal )
+		{
+			case "INDIAN":
+				jQuery.stretchyReporting.changeSeparator(",", ".", true);
+  				break;
+			case "NONE":
+				jQuery.stretchyReporting.changeSeparator("", ".", false);
+  				break;
+			default:
+				jQuery.stretchyReporting.changeSeparator(selectedVal.substr(0,1), selectedVal.substr(1,1), false);
+		}
+	}
+}
