@@ -345,7 +345,7 @@
 <script id="clientSearchTabTemplate" type="text/x-jquery-tmpl">
 <form method="post" id="viewClient" name="viewClient" action="switchToClient">
 	<label for="client">Choose client:</label>
-	<select name="client" id="client" onChange="showILClient(baseApiUrl, options[selectedIndex].value);">
+	<select name="client" id="client" onChange="showILClient(options[selectedIndex].value);">
 		<option value="0">--Select Client--</option>
 		{{#each clients}}
 			<option value="{{=id}}">{{=displayName}}&nbsp;-&nbsp;({{=officeName}})</option>
@@ -401,7 +401,7 @@
 	<span class="longrowlabel">Pending approval loans ({{=$ctx.number(pendingApprovalLoanCount)}}):</span>
 	<span class="rowvalue">
 	{{#each pendingApprovalLoans}}
-		<span class="loanaccount"><a href="unknown.html" onclick="showILLoan(baseApiUrl, {{=id}}, '{{=loanProductName}}');return false ;" >{{=loanProductName}}: &#35;{{=id}}</a></span>
+		<span class="loanaccount"><a href="unknown.html" onclick="showILLoan({{=id}}, '{{=loanProductName}}');return false ;" >{{=loanProductName}}: &#35;{{=id}}</a></span>
 	{{/each}}
 	</span>
 </div>
@@ -412,7 +412,7 @@
 	<span class="longrowlabel">Awaiting disbursal loans ({{=$ctx.number(awaitingDisbursalLoanCount)}}):</span>
 	<span class="rowvalue">
 	{{#each awaitingDisbursalLoans}}
-		<span class="loanaccount"><a href="unknown.html" onclick="showILLoan(baseApiUrl, {{=id}}, '{{=loanProductName}}');return false ;" >{{=loanProductName}}: &#35;{{=id}}</a></span>
+		<span class="loanaccount"><a href="unknown.html" onclick="showILLoan({{=id}}, '{{=loanProductName}}');return false ;" >{{=loanProductName}}: &#35;{{=id}}</a></span>
 	{{/each}}
 	</span>
 </div>
@@ -423,7 +423,7 @@
 	<span class="longrowlabel">Active loans ({{=$ctx.number(activeLoanCount)}}):</span>
 	<span class="rowvalue">
 	{{#each openLoans}}
-		<span class="loanaccount"><a href="unknown.html" onclick="showILLoan(baseApiUrl, {{=id}}, '{{=loanProductName}}');return false ;" >{{=loanProductName}}: &#35;{{=id}}</a></span>
+		<span class="loanaccount"><a href="unknown.html" onclick="showILLoan({{=id}}, '{{=loanProductName}}');return false ;" >{{=loanProductName}}: &#35;{{=id}}</a></span>
 	{{/each}}
 	</span>
 </div>
@@ -434,7 +434,7 @@
 	<div class="longrowlabel">Closed loans ({{=$ctx.number(closedLoanCount)}}):</div>
 	<div class="rowvalue">
 	{{#each closedLoans}}
-		<span class="loanaccount"><a href="unknown.html" onclick="showILLoan(baseApiUrl, {{=id}}, '{{=loanProductName}}');return false ;" >{{=loanProductName}}: &#35;{{=id}}</a></span>
+		<span class="loanaccount"><a href="unknown.html" onclick="showILLoan({{=id}}, '{{=loanProductName}}');return false ;" >{{=loanProductName}}: &#35;{{=id}}</a></span>
 	{{/each}}
 	</div>
 </div>
@@ -1420,7 +1420,7 @@
 	</div>
 	<div id="navwrapper">
 	<ul id="nav" class="floatleft">
-		<li><a href="unknown.html" onclick="showILClientListing(baseApiUrl);return false;">Clients</a></li>
+		<li><a href="unknown.html" onclick="showILClientListing();return false;">Clients</a></li>
 		<li><a href="unknown.html" onclick="showILUserAdmin();return false;">User Administration</a></li>
 		<li><a href="unknown.html" onclick="showILOrgAdmin();return false;">Organisation Administration</a></li>
 		<li><a href="unknown.html" onclick="showILReporting();return false;">Reports</a></li>
@@ -1486,7 +1486,7 @@ $(document).ready(function() {
 	
 	jsViewsRegisterHelpers();
 	
-	showILLogon(baseApiUrl, "logonDiv");
+	showILLogon("logonDiv");
 });
 </script>
 

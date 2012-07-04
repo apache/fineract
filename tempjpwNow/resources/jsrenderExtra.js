@@ -1,12 +1,12 @@
 
 saveSuccessFunctionReloadClient =  function(data, textStatus, jqXHR) {
 						  	$("#dialog-form").dialog("close");
-		  					showILClient(baseApiUrl, currentClientId );
+		  					showILClient(currentClientId );
 				  		};
 
 saveSuccessFunctionReloadLoan = function(data, textStatus, jqXHR) {
 						  	$("#dialog-form").dialog("close");
-							loadILLoan(baseApiUrl, loanId);
+							loadILLoan(loanId);
 							clientDirty = true;
 						};
 
@@ -17,7 +17,7 @@ formErrorFunction = function(jqXHR, textStatus, errorThrown) {
 function executeAjaxRequest(url, verbType, jsonData, successFunction, errorFunction) { 
 
 	var jqxhr = $.ajax({ 
-				url : url, 
+				url : baseApiUrl + url, 
 				type : verbType, //POST, GET, PUT or DELETE 
 				contentType : "application/json; charset=utf-8", 
 				dataType : 'json', 
@@ -44,22 +44,22 @@ function doI18N(xlateStr, params) {
 }
 
 
-function showILLogon(apiUrl, logonDivName) {
+function showILLogon(logonDivName) {
 
 	var htmlVar = '<form name = "logonform"><table><tr><td>User Name:</td><td><input type="text" name="username"></td></tr>';
 	htmlVar += '<tr><td>Password: </td><td><input type="password" name="password"></td></tr>';
 	htmlVar += '<tr><td><input type="button" value="Logon" name="Submit" ';
-	htmlVar += 'onclick= "setBasicAuthKey(' + "'" + apiUrl + "', '" + logonDivName + "'" + ', document.logonform.username.value, document.logonform.password.value )"></td><td></td></tr></table></form>';
+	htmlVar += 'onclick= "setBasicAuthKey(' + "'" + logonDivName + "'" + ', document.logonform.username.value, document.logonform.password.value )"></td><td></td></tr></table></form>';
 
 	$("#" + logonDivName).html(htmlVar);
 }
 
 
-function setBasicAuthKey(apiUrl, logonDivName, username, password) 
+function setBasicAuthKey(logonDivName, username, password) 
 { 
 	base64 = "";
 	var jqxhr = $.ajax({ 
-		url : apiUrl +  "authentication?username=" + username + "&password=" + password, 
+		url : baseApiUrl + "authentication?username=" + username + "&password=" + password, 
 		type : 'POST', 
 		contentType : "application/json; charset=utf-8", 
 		dataType : 'json', 
@@ -69,7 +69,7 @@ function setBasicAuthKey(apiUrl, logonDivName, username, password)
 				base64 = data.base64EncodedAuthenticationKey; 
 				$("#" + logonDivName).hide();
 				$("#container").show();
-				showILClientListing(apiUrl);
+				showILClientListing();
 				return false;
 			},
 		error : function(jqXHR, textStatus, errorThrown) {
@@ -575,7 +575,7 @@ function jsViewsRegisterHelpers() {
 
 //all the code for the various functions
 
-function showILClientListing(baseApiUrl) {
+function showILClientListing() {
 
 setClientListingContent("content");
 
@@ -598,7 +598,7 @@ setClientListingContent("content");
 							$("#searchtab").html(tableHtml);	
 				  		};
 
-  		executeAjaxRequest(baseApiUrl + 'clients', 'GET', "", successFunction, formErrorFunction);
+  		executeAjaxRequest('clients', 'GET', "", successFunction, formErrorFunction);
 	    }
 	});
 	
@@ -606,11 +606,11 @@ setClientListingContent("content");
 
 	var addClientSuccessFunction = function(data, textStatus, jqXHR) {
 		  $('#dialog-form').dialog("close");
-		  showILClient(baseApiUrl, data.entityId);
+		  showILClient(data.entityId);
 	}
 	$("#addclient").button().click(function(e) {
-		var getUrl = baseApiUrl + 'clients/template';
-		var postUrl = baseApiUrl + 'clients';
+		var getUrl = 'clients/template';
+		var postUrl = 'clients';
 		var templateSelector = "#clientFormTemplate";
 		var width = 600; 
 		var height = 350;
@@ -626,8 +626,8 @@ setClientListingContent("content");
 
 
 
-function showILClient(baseApiUrl, clientId) {
-	var clientUrl = baseApiUrl + 'clients/' + clientId
+function showILClient(clientId) {
+	var clientUrl = 'clients/' + clientId
 	setClientContent("content");
 	$newtabs = $("#newtabs").tabs({
 		
@@ -673,7 +673,7 @@ function showILClient(baseApiUrl, clientId) {
 					$('.newloanbtn').button().click(function(e) {
 						var linkId = this.id;
 						var clientId = linkId.replace("newloanbtn", "");
-						addILLoan(baseApiUrl, clientId);
+						addILLoan(clientId);
 					    e.preventDefault();
 					});
 					$('button.newloanbtn span').text(doI18N('dialog.button.new.loan.application'));
@@ -681,14 +681,14 @@ function showILClient(baseApiUrl, clientId) {
 					$('.addnotebtn').button().click(function(e) {
 						var linkId = this.id;
 						var clientId = linkId.replace("addnotebtn", "");
-						var postUrl = baseApiUrl + 'clients/' + clientId + '/notes';
+						var postUrl = 'clients/' + clientId + '/notes';
 						var templateSelector = "#noteFormTemplate";
 						var width = 600; 
 						var height = 400;
 						
 						var saveSuccessFunction = function(data, textStatus, jqXHR) {
 						  	$("#dialog-form").dialog("close");
-						  	refreshNoteWidget(baseApiUrl + 'clients/' + clientId);
+						  	refreshNoteWidget('clients/' + clientId);
 						}
 						
 						popupDialogWithFormView("", postUrl, 'POST', "dialog.title.add.note", templateSelector, width, height,  saveSuccessFunction);
@@ -762,12 +762,12 @@ function showILClient(baseApiUrl, clientId) {
 	}
 
 	
-	function addILLoan(baseApiUrl, clientId) {
+	function addILLoan(clientId) {
 		setAddLoanContent("content");
 
 		eval(genAddLoanSuccessVar(clientId));
 
-  		executeAjaxRequest(baseApiUrl + 'loans/template?clientId=' + clientId, 'GET', "", successFunction, formErrorFunction);	  
+  		executeAjaxRequest('loans/template?clientId=' + clientId, 'GET', "", successFunction, formErrorFunction);	  
 	}
 	function genAddLoanSuccessVar(clientId) {
 
@@ -846,13 +846,13 @@ function showILClient(baseApiUrl, clientId) {
 				$('button#submitloanapp span').text(doI18N('dialog.button.submit'));
 				
 				$('#cancelloanapp').button().click(function(e) {
-		  			showILClient(baseApiUrl, clientId);
+		  			showILClient(clientId);
 				    e.preventDefault();
 				});
 				$('button#cancelloanapp span').text(doI18N('dialog.button.cancel'));
 			};
 			  		
-		executeAjaxRequest(baseApiUrl + 'loans/template?clientId=' + clientId + '&productId=' + productId, 'GET', "", successFunction, formErrorFunction);	  
+		executeAjaxRequest('loans/template?clientId=' + clientId + '&productId=' + productId, 'GET', "", successFunction, formErrorFunction);	  
 
 	}
 	
@@ -892,7 +892,7 @@ function showILClient(baseApiUrl, clientId) {
 						 $("#schedulearea").html("");
 						handleXhrError(jqXHR, textStatus, errorThrown, "#formErrorsTemplate", "#formerrors");
 					};
-		executeAjaxRequest(baseApiUrl + 'loans?command=calculateLoanSchedule', "POST", newFormData, successFunction, errorFunction);	  
+		executeAjaxRequest('loans?command=calculateLoanSchedule', "POST", newFormData, successFunction, errorFunction);	  
 	}
 
 
@@ -901,24 +901,24 @@ function showILClient(baseApiUrl, clientId) {
 		var newFormData = JSON.stringify($('#entityform').serializeObject());
     	
 		var successFunction =  function(data, textStatus, jqXHR) {
-		  				showILClient(baseApiUrl, clientId);
+		  				showILClient(clientId);
 			  };
 		
-		executeAjaxRequest(baseApiUrl + 'loans', "POST", newFormData, successFunction, formErrorFunction);	  
+		executeAjaxRequest('loans', "POST", newFormData, successFunction, formErrorFunction);	  
 
 	}
 
 
-function showILLoan(baseApiUrl, loanId, product) {
+function showILLoan(loanId, product) {
 	var title = product + ": #" + loanId ;			    
 	$newtabs.tabs( "add", "no url", title);
-	loadILLoan(baseApiUrl, loanId);
+	loadILLoan(loanId);
 }
 
 
-function loadILLoan(baseApiUrl, loanId) {
+function loadILLoan(loanId) {
 
-	var loanUrl = baseApiUrl + 'loans/' + loanId + "?associations=ALL";
+	var loanUrl = 'loans/' + loanId + "?associations=ALL";
 
 	var errorFunction = function(jqXHR, status, errorThrown, index, anchor) {
 	        	handleXhrError(jqXHR, textStatus, errorThrown, "#formErrorsTemplate", "#formerrors");
@@ -957,7 +957,7 @@ function loadILLoan(baseApiUrl, loanId) {
 	        		$('.rejectloan').button().click(function(e) {
 						var linkId = this.id;
 						var loanId = linkId.replace("rejectbtn", "");
-						var postUrl = baseApiUrl + 'loans/' + loanId + '?command=reject';
+						var postUrl = 'loans/' + loanId + '?command=reject';
 						var templateSelector = "#stateTransitionLoanFormTemplate";
 						var width = 500; 
 						var height = 350;
@@ -971,7 +971,7 @@ function loadILLoan(baseApiUrl, loanId) {
 				$('.withdrawnbyapplicantloan').button().click(function(e) {
 						var linkId = this.id;
 						var loanId = linkId.replace("withdrawnbyapplicantloanbtn", "");
-						var postUrl = baseApiUrl + 'loans/' + loanId + '?command=withdrewbyclient';
+						var postUrl = 'loans/' + loanId + '?command=withdrewbyclient';
 						var templateSelector = "#stateTransitionLoanFormTemplate";
 						var width = 500; 
 						var height = 350;
@@ -985,7 +985,7 @@ function loadILLoan(baseApiUrl, loanId) {
 						
 						var linkId = this.id;
 						var loanId = linkId.replace("approvebtn", "");
-						var postUrl = baseApiUrl + 'loans/' + loanId + '?command=approve';
+						var postUrl = 'loans/' + loanId + '?command=approve';
 						var templateSelector = "#stateTransitionLoanFormTemplate";
 						var width = 500; 
 						var height = 350;
@@ -999,7 +999,7 @@ function loadILLoan(baseApiUrl, loanId) {
 						
 						var linkId = this.id;
 						var loanId = linkId.replace("undoapprovebtn", "");
-						var postUrl = baseApiUrl + 'loans/' + loanId + '?command=undoapproval';
+						var postUrl = 'loans/' + loanId + '?command=undoapproval';
 						var templateSelector = "#undoStateTransitionLoanFormTemplate";
 						var width = 500; 
 						var height = 350;
@@ -1012,7 +1012,7 @@ function loadILLoan(baseApiUrl, loanId) {
 				$('.deleteloan').button().click(function(e) {
 						var linkId = this.id;
 						var loanId = linkId.replace("deletebtn", "");
-						var url = baseApiUrl + 'loans/' + loanId;
+						var url = 'loans/' + loanId;
 						var width = 400; 
 						var height = 225;
 						
@@ -1027,7 +1027,7 @@ function loadILLoan(baseApiUrl, loanId) {
 						
 						var linkId = this.id;
 						var loanId = linkId.replace("disbursebtn", "");
-						var postUrl = baseApiUrl + 'loans/' + loanId + '?command=disburse';
+						var postUrl = 'loans/' + loanId + '?command=disburse';
 						var templateSelector = "#stateTransitionLoanFormTemplate";
 						var width = 500; 
 						var height = 350;
@@ -1041,7 +1041,7 @@ function loadILLoan(baseApiUrl, loanId) {
 						
 						var linkId = this.id;
 						var loanId = linkId.replace("undodisbursalbtn", "");
-						var postUrl = baseApiUrl + 'loans/' + loanId + '?command=undodisbursal';
+						var postUrl = 'loans/' + loanId + '?command=undodisbursal';
 						var templateSelector = "#undoStateTransitionLoanFormTemplate";
 						var width = 500; 
 						var height = 350;
@@ -1055,8 +1055,8 @@ function loadILLoan(baseApiUrl, loanId) {
 						
 						var linkId = this.id;
 						var loanId = linkId.replace("repaymentbtn", "");
-						var getUrl = baseApiUrl + 'loans/' + loanId + '/transactions/template?command=repayment';
-						var postUrl = baseApiUrl + 'loans/' + loanId + '/transactions?command=repayment';
+						var getUrl = 'loans/' + loanId + '/transactions/template?command=repayment';
+						var postUrl = 'loans/' + loanId + '/transactions?command=repayment';
 						
 						var templateSelector = "#transactionLoanFormTemplate";
 						var width = 500; 
@@ -1073,8 +1073,8 @@ function loadILLoan(baseApiUrl, loanId) {
 						var linkId = this.id;
 						var loanId = linkId.replace("waivebtn", "");
 						
-						var getUrl = baseApiUrl + 'loans/' + loanId + '/transactions/template?command=waiver';
-						var postUrl = baseApiUrl + 'loans/' + loanId + '/transactions?command=waiver';
+						var getUrl = 'loans/' + loanId + '/transactions/template?command=waiver';
+						var postUrl = 'loans/' + loanId + '/transactions?command=waiver';
 						
 						var templateSelector = "#transactionLoanFormTemplate";
 						var width = 500; 
@@ -1098,7 +1098,7 @@ function loadILLoan(baseApiUrl, loanId) {
 						var ids = loanAndRepaymentId.split("_");
 						var loanId = ids[0];
 						var transactionId = ids[1];
-						var getAndPostUrl = baseApiUrl + 'loans/' + loanId + '/transactions/' + transactionId;
+						var getAndPostUrl = 'loans/' + loanId + '/transactions/' + transactionId;
 						
 						var templateSelector = "#transactionLoanFormTemplate";
 						var width = 500; 
@@ -1107,7 +1107,7 @@ function loadILLoan(baseApiUrl, loanId) {
 						
 						var saveSuccessFunction = function(data, textStatus, jqXHR) {
 						  	$("#dialog-form").dialog("close");
-							loadILLoan(baseApiUrl, loanId);
+							loadILLoan(loanId);
 						}
 						
 						popupDialogWithFormView(getAndPostUrl, getAndPostUrl, 'POST', "dialog.title.adjust.loan.repayment", templateSelector, width,  height, saveSuccessFunction);
@@ -1147,7 +1147,7 @@ function loadILLoan(baseApiUrl, loanId) {
 
 	function refreshLoanProductsView() {
 
-		var url = baseApiUrl + 'loanproducts';
+		var url = 'loanproducts';
  
 		var successFunction = function(data, textStatus, jqXHR) {
 				
@@ -1206,13 +1206,13 @@ function loadILLoan(baseApiUrl, loanId) {
 			  refreshLoanProductsView();
 		}
 		
-		popupDialogWithFormView(baseApiUrl + getUrl, baseApiUrl + putOrPostUrl, submitType, dialogTitle, templateSelector, width, height, saveSuccessFunction);
+		popupDialogWithFormView(getUrl, putOrPostUrl, submitType, dialogTitle, templateSelector, width, height, saveSuccessFunction);
 	}
 
 
 	function refreshOfficesView() {
 
-		var url = baseApiUrl + 'offices';
+		var url = 'offices';
 		var successFunction = function(data, textStatus, jqXHR) {
 				
 				var officelistParent = new Object();
@@ -1265,7 +1265,7 @@ function loadILLoan(baseApiUrl, loanId) {
 			  refreshOfficesView();
 		}
 		
-		popupDialogWithFormView(baseApiUrl + getUrl, baseApiUrl + putOrPostUrl, submitType, dialogTitle, templateSelector, width, height, saveSuccessFunction);
+		popupDialogWithFormView(getUrl, putOrPostUrl, submitType, dialogTitle, templateSelector, width, height, saveSuccessFunction);
 	}
 
 	function maintainOrgCurrencies(getUrl, putOrPostUrl, submitType, dialogTitle) {
@@ -1277,7 +1277,7 @@ function loadILLoan(baseApiUrl, loanId) {
 			  $("#dialog-form").dialog("close");
 		}
 		
-		popupDialogWithFormView(baseApiUrl + getUrl, baseApiUrl + putOrPostUrl, submitType, dialogTitle, templateSelector, width, height, saveSuccessFunction);
+		popupDialogWithFormView(getUrl, putOrPostUrl, submitType, dialogTitle, templateSelector, width, height, saveSuccessFunction);
 	}
 
 
