@@ -129,6 +129,31 @@ function setOrgAdminContent(divName) {
 	$("#" + divName).html(htmlVar);
 }
 
+function setUserAdminContent(divName) {
+
+	var addLoanProductUrl = "maintainLoanProduct('loanproducts/template', 'loanproducts', 'POST', 'dialog.title.add.loan.product');return false;";
+	var addOfficeUrl = "maintainOffice('offices/template', 'offices', 'POST', 'dialog.title.add.office');return false;";
+	var orgCurrenciesUrl = "maintainOrgCurrencies('configurations/currency', 'configurations/currency', 'PUT', 'dialog.title.configuration.currencies');return false;";
+	var htmlVar = '<div id="inputarea"></div><div id="schedulearea"></div>'
+
+	var htmlVar = '<div>';
+	htmlVar += '<span style="float: left">';
+	htmlVar += '	<a href="unknown.html" onclick="refreshUsersView();return false;" id="listusers">' + doI18N("administration.link.view.users") + '</a>';
+	htmlVar += ' | ';
+	htmlVar += '	<a href="unknown.html" onclick="' + addLoanProductUrl + '" id="adduser">' + doI18N("administration.link.add.user") + '</a>';
+	htmlVar += ' | ';
+	htmlVar += '	<a href="unknown.html" onclick="refreshOfficesView();return false;" id="listroles">' + doI18N("administration.link.view.roles") + '</a>';
+	htmlVar += ' | ';
+	htmlVar += '	<a href="unknown.html" onclick="' + addOfficeUrl + '" id="addrole">' + doI18N("administration.link.add.role") + '</a>';
+	htmlVar += ' | ';
+	htmlVar += '	<a href="unknown.html" onclick="' + orgCurrenciesUrl + '" id="listpermissions">' + doI18N("administration.link.view.permissions") + '</a>';
+	htmlVar += '</span>';
+	htmlVar += '</div>';
+	htmlVar += '<br><br>';
+	htmlVar += '<div id="contentplaceholder" ></div>';
+	$("#" + divName).html(htmlVar);
+}
+
 
 function setReportingContent(divName) {
 
@@ -381,7 +406,7 @@ function jsViewsRegisterHelpers() {
 	    var o = {};
 	    var a = this.serializeArray();
 	    $.each(a, function() {
-	    	if (this.name === 'notSelectedCurrencies') {
+	    	if (this.name === 'notSelectedCurrencies' || this.name === 'notSelectedPermissions' || this.name === 'notSelectedRoles') {
 	    		// do not serialize
 	    	} else  {
 
@@ -392,7 +417,7 @@ function jsViewsRegisterHelpers() {
 	            o[this.name].push(this.value || '');
 	        } else {
 	        	
-	        	if (this.name === 'selectedItems' || this.name === 'notSelectedItems' || this.name === 'currencies') {
+	        	if (this.name === 'selectedItems' || this.name === 'notSelectedItems' || this.name === 'currencies' || this.name === 'permissions' || this.name === 'roles') {
 	        		o[this.name] = new Array();
 	        		o[this.name].push(this.value || '');
 	        	} else {
@@ -425,6 +450,23 @@ function jsViewsRegisterHelpers() {
 				var buttonsOpts = {};
 				buttonsOpts[saveButton] = function() {
 					
+					$('#notSelectedPermissions option').each(function(i) {  
+						$(this).attr("selected", "selected");  
+					});
+				    	
+				    	$('#permissions option').each(function(i) {  
+				    	   	$(this).attr("selected", "selected");  
+				    	});
+
+
+				    	$('#notSelectedRoles option').each(function(i) {  
+						$(this).attr("selected", "selected");  
+					});
+				    	$('#roles option').each(function(i) {  
+				    	   	$(this).attr("selected", "selected");  
+				    	});
+					
+
 					$('#notSelectedItems option').each(function(i) {  
 				    	   $(this).attr("selected", "selected");  
 				    	});
@@ -460,7 +502,26 @@ function jsViewsRegisterHelpers() {
 				  			$(this).remove();
 						},
 				  		open: function (event, ui) {
+/*
 
+				  		    if (roles) {
+					  			$('#add').click(function() {  
+					  			     return !$('#notSelectedPermissions option:selected').remove().appendTo('#permissions');  
+					  			});
+					  			
+					  			$('#remove').click(function() {  
+					  				return !$('#permissions option:selected').remove().appendTo('#notSelectedPermissions');  
+					  			});
+				  			} else {
+				  				$('#add').click(function() {  
+					  			     return !$('#notSelectedRoles option:selected').remove().appendTo('#roles');  
+					  			});
+					  			
+					  			$('#remove').click(function() {  
+					  				return !$('#roles option:selected').remove().appendTo('#notSelectedRoles');  
+					  			});
+				  			}
+*/
 				  			$('#add').click(function() {  
 				  			     return !$('#notSelectedItems option:selected').remove().appendTo('#selectedItems');  
 				  			});
@@ -1140,14 +1201,76 @@ function loadILLoan(loanId) {
 
 /* user admin code */
 
+	function showILUserAdmin() {
+		setUserAdminContent("content");
+	}
+
+	function refreshUsersView() {
+				
+		var successFunction = function(data, textStatus, jqXHR) {
+				var usersObject = new Object();
+				usersObject.users = data;
+				var usersListHtml = $("#usersListTemplate").render(usersObject);
+				$("#contentplaceholder").html(usersListHtml);  
+				
+				$("a.edit").click( function(e) {
+					var linkId = this.id;
+					var entityId = linkId.replace("edit", "");
+					var getUrl = 'users/' + entityId + '?template=true';
+					var putUrl = 'users/' + entityId;
+					maintainUser(getUrl, putUrl, 'PUT', "dialog.title.edit.details");
+					e.preventDefault();
+				});
+				
+				$("a.delete").click( function(e) {
+					//var linkId = this.id;
+					//var entityId = linkId.replace("delete", "");
+					showNotAvailableDialog('dialog.title.functionality.not.available');
+					e.preventDefault();
+				});
+				
+				var oTable = $("#entitytable").dataTable( {
+					"bSort": true,
+					"bInfo": true,
+					"bJQueryUI": true,
+					"bRetrieve": false,
+					"bScrollCollapse": false,
+					"bPaginate": false,
+					"bLengthChange": false,
+					"bFilter": false,
+					"bAutoWidth": false,
+				} );
+			  };
+
+  		executeAjaxRequest('users', 'GET', "", successFunction, formErrorFunction);
+	}
+	
+
+	function maintainUser(getUrl, putOrPostUrl, submitType, dialogTitle) {
+
+		var templateSelector = "#userFormTemplate";
+		var width = 1000; 
+		var height = 550;
+					
+		var saveSuccessFunction = function(data, textStatus, jqXHR) {
+			$("#dialog-form").dialog("close");
+			refreshUsersView();
+		}		
+		popupDialogWithFormView(getUrl, putOrPostUrl, submitType, dialogTitle, templateSelector, width, height, saveSuccessFunction);
+	}
+
+
+
+
+
+/* org admin code */
+
 	function showILOrgAdmin() {
 		setOrgAdminContent("content");
 	}
 
 
 	function refreshLoanProductsView() {
-
-		var url = 'loanproducts';
  
 		var successFunction = function(data, textStatus, jqXHR) {
 				
@@ -1193,7 +1316,7 @@ function loadILLoan(loanId) {
 				});
 			  };
 
-  		executeAjaxRequest(url, 'GET', "", successFunction, formErrorFunction);
+  		executeAjaxRequest('loanproducts', 'GET', "", successFunction, formErrorFunction);
 	}
 
 	function maintainLoanProduct(getUrl, putOrPostUrl, submitType, dialogTitle) {
@@ -1212,7 +1335,6 @@ function loadILLoan(loanId) {
 
 	function refreshOfficesView() {
 
-		var url = 'offices';
 		var successFunction = function(data, textStatus, jqXHR) {
 				
 				var officelistParent = new Object();
@@ -1251,8 +1373,7 @@ function loadILLoan(loanId) {
 				} );
 			  };
 		
-  		executeAjaxRequest(url, 'GET', "", successFunction, formErrorFunction);
-
+  		executeAjaxRequest('offices', 'GET', "", successFunction, formErrorFunction);
 	}
 	
 	function maintainOffice(getUrl, putOrPostUrl, submitType, dialogTitle) {

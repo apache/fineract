@@ -1278,10 +1278,10 @@
 <table id='entitytable' width='100%'>
 <thead>
 	<tr>
-		<th><spring:message code="table.heading.officename"/></th>
-		<th><spring:message code="table.heading.username"/></th>
-        <th><spring:message code="table.heading.name"/></th>
-		<th><spring:message code="table.heading.email"/></th>
+		<th>{{=$ctx.doI18N("table.heading.officename")}}</th>
+		<th>{{=$ctx.doI18N("table.heading.username")}}</th>
+        	<th>{{=$ctx.doI18N("table.heading.name")}}</th>
+		<th>{{=$ctx.doI18N("table.heading.email")}}</th>
 		<th>&nbsp;</th>
 	</tr>
 </thead>
@@ -1293,10 +1293,8 @@
     <td>{{=lastname}}, {{=firstname}}</td>
 	<td>{{=email}}</td>
 	<td>
-		<a id='edit{{=id}}' class='edit' href='#' style='margin-right: 5px;'><spring:message code="link.action.product.viewedit"/></a>
-        <!--
-		<a id='delete{{=id}}' class='delete' href='#' style='margin-right: 5px;'><spring:message code="link.action.product.delete"/></a>
-        -->
+		<a id='edit{{=id}}' class='edit' href='#' style='margin-right: 5px;'>{{=$ctx.doI18N("link.action.product.viewedit")}}</a>
+		<a id='delete{{=id}}' class='delete' href='#' style='margin-right: 5px;'>{{=$ctx.doI18N("link.action.product.delete")}}</a>
 	</td>
 </tr>
 {{/each}}
@@ -1308,7 +1306,7 @@
 <form id="entityform">
     <div id="formerrors"></div>
 	<fieldset>
-		<legend><spring:message code="form.legend.user.details"/></legend>
+		<legend>{{=$ctx.doI18N("form.legend.user.details")}}</legend>
 
 		<label for="username"><spring:message code="form.label.user.username"/></label>
 		<input id="username" name="username" title="" type="text" value="{{=username}}" size="75"/>
@@ -1465,9 +1463,7 @@
 <script>
 $(document).ready(function() {
 
-
 	baseApiUrl = "https://localhost:8443/mifosng-provider/api/v1/";
-
 
     	// default to 'en' culture - no need to import extra javascript files for globalize.js or datapicker
     	Globalize.culture('en');
