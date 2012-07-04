@@ -14,7 +14,7 @@ formErrorFunction = function(jqXHR, textStatus, errorThrown) {
 				    	handleXhrError(jqXHR, textStatus, errorThrown, "#formErrorsTemplate", "#formerrors");
 				};
 
-function executeAjaxRequest(url, verbType, jsonData, basicAuthKey, successFunction, errorFunction) { 
+function executeAjaxRequest(url, verbType, jsonData, successFunction, errorFunction) { 
 
 	var jqxhr = $.ajax({ 
 				url : url, 
@@ -24,7 +24,7 @@ function executeAjaxRequest(url, verbType, jsonData, basicAuthKey, successFuncti
 				data : jsonData, 
 				cache : false, 
 				beforeSend : function(xhr) { 
-						xhr.setRequestHeader("Authorization", "Basic " + basicAuthKey); 
+						xhr.setRequestHeader("Authorization", "Basic " + base64); 
 					}, 
 				success : successFunction, 
 				error : errorFunction 
@@ -412,7 +412,7 @@ function jsViewsRegisterHelpers() {
 		  	};
 		
 		if (getUrl == "") popupDialogWithFormViewData("", postUrl, submitType, titleCode, templateSelector, width, height, saveSuccessFunction)
-		else executeAjaxRequest(getUrl, "GET", "", base64, successFunction, formErrorFunction);
+		else executeAjaxRequest(getUrl, "GET", "", successFunction, formErrorFunction);
 
 	}
 	function popupDialogWithFormViewData(data, postUrl, submitType, titleCode, templateSelector, width, height, saveSuccessFunction)  {
@@ -443,7 +443,7 @@ function jsViewsRegisterHelpers() {
 			    		var newFormData = JSON.stringify($('#entityform').serializeObject());
 			    		console.log(newFormData);
 			    	
-					executeAjaxRequest(postUrl, submitType, newFormData, base64, saveSuccessFunction, formErrorFunction);
+					executeAjaxRequest(postUrl, submitType, newFormData, saveSuccessFunction, formErrorFunction);
 
 				};
 				
@@ -502,7 +502,7 @@ function jsViewsRegisterHelpers() {
 			var newFormData = JSON.stringify($('#entityform').serializeObject());
 			console.log(newFormData);
 
-			executeAjaxRequest(postUrl, "POST", newFormData, base64, saveSuccessFunction, formErrorFunction);
+			executeAjaxRequest(postUrl, "POST", newFormData, saveSuccessFunction, formErrorFunction);
 		};
 		buttonsOpts[cancelButton] = function() {$(this).dialog( "close" );};
 		
@@ -546,7 +546,7 @@ function jsViewsRegisterHelpers() {
 									alert("should be reloaded this loan tab");
 					  			}
 				 
-				executeAjaxRequest(url, submitType, "", base64, saveSuccessFunction, formErrorFunction);
+				executeAjaxRequest(url, submitType, "", saveSuccessFunction, formErrorFunction);
 
 			};
 			
@@ -598,7 +598,7 @@ setClientListingContent("content");
 							$("#searchtab").html(tableHtml);	
 				  		};
 
-  		executeAjaxRequest(baseApiUrl + 'clients', 'GET', "", base64, successFunction, formErrorFunction);
+  		executeAjaxRequest(baseApiUrl + 'clients', 'GET', "", successFunction, formErrorFunction);
 	    }
 	});
 	
@@ -713,7 +713,7 @@ function showILClient(baseApiUrl, clientId) {
 					jQuery.stretchyData.displayAllExtraData(additionalFieldsParams);
 	        };
 	    
-		executeAjaxRequest(clientUrl, 'GET', "", base64, successFunction, errorFunction);	  
+		executeAjaxRequest(clientUrl, 'GET', "", successFunction, errorFunction);	  
 
 }
 	
@@ -726,7 +726,7 @@ function showILClient(baseApiUrl, clientId) {
 				  			var tableHtml = $("#clientAccountSummariesTemplate").render(data);
 				  			$("#clientaccountssummary").html(tableHtml);
 			  			}
-  		executeAjaxRequest(clientUrl + '/loans', 'GET', "", base64, successFunction, formErrorFunction);	  	
+  		executeAjaxRequest(clientUrl + '/loans', 'GET', "", successFunction, formErrorFunction);	  	
 	}
 	
 
@@ -734,7 +734,7 @@ function showILClient(baseApiUrl, clientId) {
 	function refreshNoteWidget(clientUrl) {
 			  	
 		eval(genRefreshNoteWidgetSuccessVar(clientUrl));
-  		executeAjaxRequest(clientUrl + '/notes', 'GET', "", base64, successFunction, formErrorFunction);	  
+  		executeAjaxRequest(clientUrl + '/notes', 'GET', "", successFunction, formErrorFunction);	  
 	}
 	function genRefreshNoteWidgetSuccessVar(clientUrl) {
 
@@ -767,7 +767,7 @@ function showILClient(baseApiUrl, clientId) {
 
 		eval(genAddLoanSuccessVar(clientId));
 
-  		executeAjaxRequest(baseApiUrl + 'loans/template?clientId=' + clientId, 'GET', "", base64, successFunction, formErrorFunction);	  
+  		executeAjaxRequest(baseApiUrl + 'loans/template?clientId=' + clientId, 'GET', "", successFunction, formErrorFunction);	  
 	}
 	function genAddLoanSuccessVar(clientId) {
 
@@ -852,7 +852,7 @@ function showILClient(baseApiUrl, clientId) {
 				$('button#cancelloanapp span').text(doI18N('dialog.button.cancel'));
 			};
 			  		
-		executeAjaxRequest(baseApiUrl + 'loans/template?clientId=' + clientId + '&productId=' + productId, 'GET', "", base64, successFunction, formErrorFunction);	  
+		executeAjaxRequest(baseApiUrl + 'loans/template?clientId=' + clientId + '&productId=' + productId, 'GET', "", successFunction, formErrorFunction);	  
 
 	}
 	
@@ -892,7 +892,7 @@ function showILClient(baseApiUrl, clientId) {
 						 $("#schedulearea").html("");
 						handleXhrError(jqXHR, textStatus, errorThrown, "#formErrorsTemplate", "#formerrors");
 					};
-		executeAjaxRequest(baseApiUrl + 'loans?command=calculateLoanSchedule', "POST", newFormData, base64, successFunction, errorFunction);	  
+		executeAjaxRequest(baseApiUrl + 'loans?command=calculateLoanSchedule', "POST", newFormData, successFunction, errorFunction);	  
 	}
 
 
@@ -904,7 +904,7 @@ function showILClient(baseApiUrl, clientId) {
 		  				showILClient(baseApiUrl, clientId);
 			  };
 		
-		executeAjaxRequest(baseApiUrl + 'loans', "POST", newFormData, base64, successFunction, formErrorFunction);	  
+		executeAjaxRequest(baseApiUrl + 'loans', "POST", newFormData, successFunction, formErrorFunction);	  
 
 	}
 
@@ -1130,7 +1130,7 @@ function loadILLoan(baseApiUrl, loanId) {
 				jQuery.stretchyData.displayAllExtraData(additionalFieldsParams)
 	        };
 	    
-		executeAjaxRequest(loanUrl, 'GET', "", base64, successFunction, errorFunction);	  
+		executeAjaxRequest(loanUrl, 'GET', "", successFunction, errorFunction);	  
 
 }
 
@@ -1193,7 +1193,7 @@ function loadILLoan(baseApiUrl, loanId) {
 				});
 			  };
 
-  		executeAjaxRequest(url, 'GET', "", base64, successFunction, formErrorFunction);
+  		executeAjaxRequest(url, 'GET', "", successFunction, formErrorFunction);
 	}
 
 	function maintainLoanProduct(getUrl, putOrPostUrl, submitType, dialogTitle) {
@@ -1251,7 +1251,7 @@ function loadILLoan(baseApiUrl, loanId) {
 				} );
 			  };
 		
-  		executeAjaxRequest(url, 'GET', "", base64, successFunction, formErrorFunction);
+  		executeAjaxRequest(url, 'GET', "", successFunction, formErrorFunction);
 
 	}
 	
