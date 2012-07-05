@@ -77,13 +77,6 @@ function showMainContainer(containerDivName, username) {
 	htmlVar += '	<li><a href="unknown.html" onclick="showILReporting();return false;">' + doI18N("link.reports") + '</a></li>';
 	htmlVar += '</ul>';
 	htmlVar += '<ul id="nav" class="floatright">';
-	htmlVar += '	<li class="dmenu"><a href="#">' + doI18N("link.topnav.theme") + '</a>';
-	htmlVar += '		<ul>';
-	htmlVar += '			<li><a href="?theme=default">smoothness</a></li>';
-	htmlVar += '			<li><a href="?theme=ui-lightness">lightness</a></li>';
-	htmlVar += '			<li><a href="?theme=redmond">redmond</a></li>';
-	htmlVar += '		</ul>';
-	htmlVar += '	</li>';
 	htmlVar += '	<li class="dmenu"><a href="#">' + doI18N("link.topnav.culture") + '</a>';
 	htmlVar += '		<ul>';
 	htmlVar += '			<li><a href="?lang=en">en</a></li>';
