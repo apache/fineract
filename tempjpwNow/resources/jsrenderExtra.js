@@ -131,22 +131,21 @@ function setOrgAdminContent(divName) {
 
 function setUserAdminContent(divName) {
 
-	var addLoanProductUrl = "maintainLoanProduct('loanproducts/template', 'loanproducts', 'POST', 'dialog.title.add.loan.product');return false;";
-	var addOfficeUrl = "maintainOffice('offices/template', 'offices', 'POST', 'dialog.title.add.office');return false;";
-	var orgCurrenciesUrl = "maintainOrgCurrencies('configurations/currency', 'configurations/currency', 'PUT', 'dialog.title.configuration.currencies');return false;";
+	var addUserUrl = "maintainUser('users/template', 'users', 'POST', 'dialog.title.add.user');return false;";
+	var addRoleUrl = "maintainRole('roles/template', 'roles', 'POST', 'dialog.title.add.role');return false;";
 	var htmlVar = '<div id="inputarea"></div><div id="schedulearea"></div>'
 
 	var htmlVar = '<div>';
 	htmlVar += '<span style="float: left">';
 	htmlVar += '	<a href="unknown.html" onclick="refreshUsersView();return false;" id="listusers">' + doI18N("administration.link.view.users") + '</a>';
 	htmlVar += ' | ';
-	htmlVar += '	<a href="unknown.html" onclick="' + addLoanProductUrl + '" id="adduser">' + doI18N("administration.link.add.user") + '</a>';
+	htmlVar += '	<a href="unknown.html" onclick="' + addUserUrl + '" id="adduser">' + doI18N("administration.link.add.user") + '</a>';
 	htmlVar += ' | ';
-	htmlVar += '	<a href="unknown.html" onclick="refreshOfficesView();return false;" id="listroles">' + doI18N("administration.link.view.roles") + '</a>';
+	htmlVar += '	<a href="unknown.html" onclick="refreshRolesView();return false;" id="listroles">' + doI18N("administration.link.view.roles") + '</a>';
 	htmlVar += ' | ';
-	htmlVar += '	<a href="unknown.html" onclick="' + addOfficeUrl + '" id="addrole">' + doI18N("administration.link.add.role") + '</a>';
+	htmlVar += '	<a href="unknown.html" onclick="' + addRoleUrl + '" id="addrole">' + doI18N("administration.link.add.role") + '</a>';
 	htmlVar += ' | ';
-	htmlVar += '	<a href="unknown.html" onclick="' + orgCurrenciesUrl + '" id="listpermissions">' + doI18N("administration.link.view.permissions") + '</a>';
+	htmlVar += '	<a href="unknown.html" onclick="refreshPermissionsView();return false;" id="listpermissions">' + doI18N("administration.link.view.permissions") + '</a>';
 	htmlVar += '</span>';
 	htmlVar += '</div>';
 	htmlVar += '<br><br>';
@@ -502,26 +501,21 @@ function jsViewsRegisterHelpers() {
 				  			$(this).remove();
 						},
 				  		open: function (event, ui) {
-/*
 
-				  		    if (roles) {
-					  			$('#add').click(function() {  
-					  			     return !$('#notSelectedPermissions option:selected').remove().appendTo('#permissions');  
-					  			});
-					  			
-					  			$('#remove').click(function() {  
-					  				return !$('#permissions option:selected').remove().appendTo('#notSelectedPermissions');  
-					  			});
-				  			} else {
-				  				$('#add').click(function() {  
-					  			     return !$('#notSelectedRoles option:selected').remove().appendTo('#roles');  
-					  			});
-					  			
-					  			$('#remove').click(function() {  
-					  				return !$('#roles option:selected').remove().appendTo('#notSelectedRoles');  
-					  			});
-				  			}
-*/
+					  		$('#addpermissions').click(function() {  
+					  			return !$('#notSelectedPermissions option:selected').remove().appendTo('#permissions');  
+					  		});
+					  		$('#removepermissions').click(function() {  
+					  			return !$('#permissions option:selected').remove().appendTo('#notSelectedPermissions');  
+					  		}); 
+
+				  			$('#addroles').click(function() {  
+					  			return !$('#notSelectedRoles option:selected').remove().appendTo('#roles');  
+					  		});	
+					  		$('#removeroles').click(function() {  
+					  			return !$('#roles option:selected').remove().appendTo('#notSelectedRoles');  
+					  		}); 
+
 				  			$('#add').click(function() {  
 				  			     return !$('#notSelectedItems option:selected').remove().appendTo('#selectedItems');  
 				  			});
@@ -1245,7 +1239,6 @@ function loadILLoan(loanId) {
   		executeAjaxRequest('users', 'GET', "", successFunction, formErrorFunction);
 	}
 	
-
 	function maintainUser(getUrl, putOrPostUrl, submitType, dialogTitle) {
 
 		var templateSelector = "#userFormTemplate";
@@ -1259,7 +1252,87 @@ function loadILLoan(loanId) {
 		popupDialogWithFormView(getUrl, putOrPostUrl, submitType, dialogTitle, templateSelector, width, height, saveSuccessFunction);
 	}
 
+	function refreshRolesView() {
+		
+		var successFunction = function(data, textStatus, jqXHR) {
+				  
+				var rolesObject = new Object();
+				rolesObject.roles = data;
+				var listHtml = $("#roleListTemplate").render(rolesObject);
+				$("#contentplaceholder").html(listHtml);
+				
+				$("a.edit").click( function(e) {
+					var linkId = this.id;
+					var entityId = linkId.replace("edit", "");
+					var getUrl = 'roles/' + entityId + '?template=true';
+					var putUrl = 'roles/' + entityId;
+					maintainRole(getUrl, putUrl, 'PUT', "dialog.title.edit.details");					
+					e.preventDefault();
+				});
+				
+				$("a.delete").click( function(e) {
+					//var linkId = this.id;
+					//var entityId = linkId.replace("delete", "");
+					showNotAvailableDialog('dialog.title.functionality.not.available');
+					e.preventDefault();
+				});
+				
+				var oTable = $("#entitytable").dataTable( {
+					"bSort": true,
+					"bInfo": true,
+					"bJQueryUI": true,
+					"bRetrieve": false,
+					"bScrollCollapse": false,
+					"bPaginate": false,
+					"bLengthChange": false,
+					"bFilter": false,
+					"bAutoWidth": false,
+				} );
+			  };
+		
+  		executeAjaxRequest('roles', 'GET', "", successFunction, formErrorFunction);
+	}
+	
+	function maintainRole(getUrl, putOrPostUrl, submitType, dialogTitle) {
 
+		var templateSelector = "#roleFormTemplate";
+		var width = 1000; 
+		var height = 550;
+					
+		var saveSuccessFunction = function(data, textStatus, jqXHR) {
+						  $("#dialog-form").dialog("close");
+						  refreshRolesView();
+						}
+
+		popupDialogWithFormView(getUrl, putOrPostUrl, submitType, dialogTitle, templateSelector, width, height, saveSuccessFunction);
+	}
+
+
+	function refreshPermissionsView() {
+		var templateSelector = "#permissionListTemplate";
+		var displayAreaDivSelector = "#contentplaceholder";
+		
+		var successFunction = function(data, textStatus, jqXHR) {
+				var permissionsObject = new Object();
+				permissionsObject.permissions = data;
+				var listHtml = $(templateSelector).render(permissionsObject);
+				$(displayAreaDivSelector).html(listHtml);
+				
+				var oTable = $("#entitytable").dataTable( {
+					"bSort": true,
+					"bInfo": true,
+					"bJQueryUI": true,
+					"bRetrieve": false,
+					"bScrollCollapse": false,
+					"bPaginate": false,
+					"bLengthChange": false,
+					"bFilter": false,
+					"bAutoWidth": false,
+				} );
+			  };
+
+  		executeAjaxRequest('permissions', 'GET', "", successFunction, formErrorFunction);
+	}
 
 
 

@@ -1212,9 +1212,9 @@
 <table id='entitytable' width='100%'>
 <thead>
 	<tr>
-        <th><spring:message code="table.heading.permission.type"/></th>
-		<th><spring:message code="table.heading.permission.permission"/></th>
-		<th><spring:message code="table.heading.permission.description"/></th>
+        <th>{{=$ctx.doI18N("table.heading.permission.type")}}</th>
+		<th>{{=$ctx.doI18N("table.heading.permission.permission")}}</th>
+		<th>{{=$ctx.doI18N("table.heading.permission.description")}}</th>
 	</tr>
 </thead>
 <tbody>
@@ -1252,8 +1252,8 @@
 <table id='entitytable' width='100%'>
 <thead>
 	<tr>
-		<th><spring:message code="table.heading.rolename"/></th>
-		<th><spring:message code="table.heading.description"/></th>
+		<th>{{=$ctx.doI18N("table.heading.rolename")}}</th>
+		<th>{{=$ctx.doI18N("table.heading.description")}}</th>
 		<th>&nbsp;</th>
 	</tr>
 </thead>
@@ -1263,10 +1263,8 @@
 	<td>{{=name}}</td>
 	<td>{{=description}}</td>
 	<td>
-		<a id='edit{{=id}}' class='edit' href='#' style='margin-right: 5px;'><spring:message code="link.action.product.viewedit"/></a>
-        <!--
-		<a id='delete{{=id}}' class='delete' href='#' style='margin-right: 5px;'><spring:message code="link.action.product.delete"/></a>
-        -->
+		<a id='edit{{=id}}' class='edit' href='#' style='margin-right: 5px;'>{{=$ctx.doI18N("link.action.product.viewedit")}}</a>
+		<a id='delete{{=id}}' class='delete' href='#' style='margin-right: 5px;'>{{=$ctx.doI18N("link.action.product.delete")}}</a>
 	</td>
 </tr>
 {{/each}}
@@ -1308,21 +1306,21 @@
 	<fieldset>
 		<legend>{{=$ctx.doI18N("form.legend.user.details")}}</legend>
 
-		<label for="username"><spring:message code="form.label.user.username"/></label>
+		<label for="username">{{=$ctx.doI18N("form.label.user.username")}}</label>
 		<input id="username" name="username" title="" type="text" value="{{=username}}" size="75"/>
 
-        <label for="firstname"><spring:message code="form.label.user.firstname"/></label>
+        <label for="firstname">{{=$ctx.doI18N("form.label.user.firstname")}}</label>
 		<input id="firstname" name="firstname" title="" type="text" value="{{=firstname}}" size="75"/>
 
-        <label for="lastname"><spring:message code="form.label.user.lastname"/></label>
+        <label for="lastname">{{=$ctx.doI18N("form.label.user.lastname")}}</label>
 		<input id="lastname" name="lastname" title="" type="text" value="{{=lastname}}" size="75"/>
 
-		<label for="email"><spring:message code="form.label.user.email"/></label>
+		<label for="email">{{=$ctx.doI18N("form.label.user.email")}}</label>
 		<input id="email" name="email" title="" type="text" value="{{=email}}" size="75"/>
 
-		<label for="officeId"><spring:message code="form.label.user.office"/></label>
+		<label for="officeId">{{=$ctx.doI18N("form.label.user.office")}}</label>
 		<select id="officeId" name="officeId" title="">
-			<option value="-1"><spring:message code="option.office.first.choice"/></option>
+			<option value="-1">{{=$ctx.doI18N("option.office.first.choice")}}</option>
 			{{#each allowedOffices}}
 				{{#if $ctx.number($parent.parent.data.officeId)===$ctx.number(id)}}
 					<option value="{{=$ctx.number(id)}}" selected="selected">{{=name}}</option>
@@ -1334,23 +1332,23 @@
 		<br/>
 
 		<div class="multiselectwidget">
-			<label for="notSelectedRoles"><spring:message code="form.label.user.available.roles"/></label>
+			<label for="notSelectedRoles">{{=$ctx.doI18N("form.label.user.available.roles")}}</label>
 			<select id="notSelectedRoles" name="notSelectedRoles" title="Available application roles." class="multiselectwidget multiNotSelectedItems" multiple="multiple" style="width:450px;height:125px;">
 			{{#each availableRoles}}
 				<option value="{{=id}}">{{=name}}</option>
             {{/each}}
 			</select>
-			<a href="#" id="add" class="multiselectwidget multiadd"><spring:message code="widget.multiselect.button.add"/> &gt;&gt;</a>
+			<a href="#" id="addroles" class="multiselectwidget multiadd">{{=$ctx.doI18N("widget.multiselect.button.add")}} &gt;&gt;</a>
 		</div>
 		
 		<div class="multiselectwidget">
-			<label for="roles"><spring:message code="form.label.user.selected.roles"/></label>
+			<label for="roles">{{=$ctx.doI18N("form.label.user.selected.roles")}}</label>
 			<select id="roles" name="roles" title="User selected roles." class="multiselectwidget multiSelectedItems" multiple="multiple" style="width:450px;height:125px;">
 			{{#each selectedRoles}}
 				<option value="{{=id}}" selected="selected">{{=name}}</option>
             {{/each}}
 			</select>
-			<a href="#" id="remove" class="multiselectwidget multiremove">&lt;&lt; <spring:message code="widget.multiselect.button.remove"/></a>  
+			<a href="#" id="removeroles" class="multiselectwidget multiremove">&lt;&lt; {{=$ctx.doI18N("widget.multiselect.button.remove")}}</a>  
 		</div>
 	</fieldset>
 </form>
@@ -1360,23 +1358,23 @@
 <form id="entityform">
     <div id="formerrors"></div>
 	<fieldset>
-		<legend><spring:message code="form.legend.role.details"/></legend>
+		<legend>{{=$ctx.doI18N("form.legend.role.details")}}</legend>
 
-		<label for="name"><spring:message code="form.label.role.name"/></label>
+		<label for="name">{{=$ctx.doI18N("form.label.role.name")}}</label>
 		<input id="name" name="name" title="" type="text" value="{{=name}}" size="75"/>
 
-		<label for="description"><spring:message code="form.label.role.description"/></label>
+		<label for="description">{{=$ctx.doI18N("form.label.role.description")}}</label>
 		<textarea cols="73" rows="3" id="description" name="description" title="">{{=description}}</textarea>
 		<br/>
 
 		<div class="multiselectwidget">
-			<label for="notSelectedPermissions"><spring:message code="form.label.role.available.permissions"/></label>
+			<label for="notSelectedPermissions">{{=$ctx.doI18N("form.label.role.available.permissions")}}</label>
 			<select id="notSelectedPermissions" name="notSelectedPermissions" title="" class="multiselectwidget multiNotSelectedItems" multiple="multiple" style="width:450px;height:125px;">
 			{{#each availablePermissions}}
 				<option value="{{=id}}" title="{{=description}}">{{=name}}</option>
             {{/each}}
 			</select>
-			<a href="#" id="add" class="multiselectwidget multiadd"><spring:message code="widget.multiselect.button.add"/> &gt;&gt;</a>
+			<a href="#" id="addpermissions" class="multiselectwidget multiadd">{{=$ctx.doI18N("widget.multiselect.button.add")}} &gt;&gt;</a>
 		</div>
 		
 		<div class="multiselectwidget">
@@ -1386,7 +1384,7 @@
 				<option value="{{=id}}" title="{{=description}}">{{=name}}</option>
             {{/each}}
 			</select>
-			<a href="#" id="remove" class="multiselectwidget multiremove">&lt;&lt; <spring:message code="widget.multiselect.button.remove"/></a>  
+			<a href="#" id="removepermissions" class="multiselectwidget multiremove">&lt;&lt; {{=$ctx.doI18N("widget.multiselect.button.remove")}}</a>  
 		</div>
 	</fieldset>
 </form>
