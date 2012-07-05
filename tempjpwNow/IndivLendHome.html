@@ -1411,63 +1411,13 @@
 </style>
 
 <div id="logonDiv"></div>
-<div id="container">
-	<div id="logowrapper">
-		<span style="float: left">
-			<img style="float:left; border: 0;" alt="" src="resources/mifos.jpg"/>
-		</span>
-	</div>
-	<div id="navwrapper">
-	<ul id="nav" class="floatleft">
-		<li><a href="unknown.html" onclick="showILClientListing();return false;">Clients</a></li>
-		<li><a href="unknown.html" onclick="showILUserAdmin();return false;">User Administration</a></li>
-		<li><a href="unknown.html" onclick="showILOrgAdmin();return false;">Organisation Administration</a></li>
-		<li><a href="unknown.html" onclick="showILReporting();return false;">Reports</a></li>
-	</ul>
-	<ul id="nav" class="floatright">
-		<li class="dmenu"><a href="#">Theme</a>
-			<ul>
-				<li><a href="?theme=default">smoothness</a></li>
-				<li><a href="?theme=ui-lightness">lightness</a></li>
-				<li><a href="?theme=redmond">redmond</a></li>
-			</ul>
-		</li>
-		<li class="dmenu"><a href="#">Culture</a>
-			<ul>
-				<li><a href="?lang=en">en</a></li>
-				<li><a href="?lang=fr">fr</a></li>
-				<li><a href="?lang=es">es</a></li>
-				<li><a href="?lang=pt">pt</a></li>
-				<li><a href="?lang=zh">zh</a></li>
-			</ul>
-		</li>
-		<li><a href="org/admin/settings" class="dmenu">mifos</a>
-			<ul>
-				<li><a href="org/admin/settings">Account Settings</a></li>
-			</ul>
-		</li>
-		<li><a href="signout">Sign out</a></li>
-	</ul>
-
-	<br class="clear">
-	</div><div style="float:none; clear:both;">
-		<div id="spacer" style="line-height: 15px;">&nbsp;</div>
-		<div id="content"></div>
-	</div>
-</div>
-
-
+<div id="container"></div>
 
 
 <script type="text/javascript" src="resources/jsrenderExtra.js"></script>
 
 <script>
 $(document).ready(function() {
-
-	//baseApiUrl = "https://localhost:8443/mifosng-provider/api/v1/";
-	baseApiUrl = "https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/";
-	if (QueryParameters["baseApiUrl"]) baseApiUrl = QueryParameters["baseApiUrl"];
-
 
     	// default to 'en' culture - no need to import extra javascript files for globalize.js or datapicker
     	Globalize.culture('en');
@@ -1485,6 +1435,13 @@ $(document).ready(function() {
 		});
 	
 	jsViewsRegisterHelpers();
+
+
+	showMainContainer("container");
+
+	//baseApiUrl = "https://localhost:8443/mifosng-provider/api/v1/";
+	baseApiUrl = "https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/";
+	if (QueryParameters["baseApiUrl"]) baseApiUrl = QueryParameters["baseApiUrl"];
 	
 	showILLogon("logonDiv");
 });

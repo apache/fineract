@@ -1,7 +1,6 @@
 QueryParameters = (function()
 {
     var result = {};
-
     if (window.location.search)
     {
         // split up the query string and store in an associative array
@@ -12,7 +11,6 @@ QueryParameters = (function()
             result[tmp[0]] = unescape(tmp[1]);
         }
     }
-
     return result;
 }());
 
@@ -60,6 +58,57 @@ function doI18N(xlateStr, params) {
 		else return xlated;
 	}
 }
+
+
+
+// load html functions
+function showMainContainer(containerDivName) {
+
+	var htmlVar = '<div id="logowrapper">';
+	htmlVar += '	<span style="float: left">';
+	htmlVar += '		<img style="float:left; border: 0;" alt="" src="resources/mifos.jpg"/>';
+	htmlVar += '	</span>';
+	htmlVar += '</div>';
+	htmlVar += '<div id="navwrapper">';
+	htmlVar += '<ul id="nav" class="floatleft">';
+	htmlVar += '	<li><a href="unknown.html" onclick="showILClientListing();return false;">' + doI18N("link.topnav.clients") + '</a></li>';
+	htmlVar += '	<li><a href="unknown.html" onclick="showILUserAdmin();return false;">' + doI18N("link.topnav.users") + '</a></li>';
+	htmlVar += '	<li><a href="unknown.html" onclick="showILOrgAdmin();return false;">' + doI18N("link.topnav.organisation") + '</a></li>';
+	htmlVar += '	<li><a href="unknown.html" onclick="showILReporting();return false;">' + doI18N("link.reports") + '</a></li>';
+	htmlVar += '</ul>';
+	htmlVar += '<ul id="nav" class="floatright">';
+	htmlVar += '	<li class="dmenu"><a href="#">' + doI18N("link.topnav.theme") + '</a>';
+	htmlVar += '		<ul>';
+	htmlVar += '			<li><a href="?theme=default">smoothness</a></li>';
+	htmlVar += '			<li><a href="?theme=ui-lightness">lightness</a></li>';
+	htmlVar += '			<li><a href="?theme=redmond">redmond</a></li>';
+	htmlVar += '		</ul>';
+	htmlVar += '	</li>';
+	htmlVar += '	<li class="dmenu"><a href="#">' + doI18N("link.topnav.culture") + '</a>';
+	htmlVar += '		<ul>';
+	htmlVar += '			<li><a href="?lang=en">en</a></li>';
+	htmlVar += '			<li><a href="?lang=fr">fr</a></li>';
+	htmlVar += '			<li><a href="?lang=es">es</a></li>';
+	htmlVar += '			<li><a href="?lang=pt">pt</a></li>';
+	htmlVar += '			<li><a href="?lang=zh">zh</a></li>';
+	htmlVar += '		</ul>';
+	htmlVar += '	</li>';
+	htmlVar += '	<li><a href="org/admin/settings" class="dmenu">xxxxxxxxmifos</a>';
+	htmlVar += '		<ul>';
+	htmlVar += '			<li><a href="org/admin/settings">' + doI18N("link.topnav.account.settings") + '</a></li>';
+	htmlVar += '		</ul>';
+	htmlVar += '	</li>';
+	htmlVar += '	<li><a href="signout">' + doI18N("link.signout") + '</a></li>';
+	htmlVar += '</ul>';
+	htmlVar += '<br class="clear">';
+	htmlVar += '</div><div style="float:none; clear:both;">';
+	htmlVar += '	<div id="spacer" style="line-height: 15px;">&nbsp;</div>';
+	htmlVar += '	<div id="content"></div>';
+	htmlVar += '</div>';
+
+	$("#" + containerDivName).html(htmlVar);
+}
+
 
 
 function showILLogon(logonDivName) {
