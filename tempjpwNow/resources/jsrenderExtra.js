@@ -62,7 +62,7 @@ function doI18N(xlateStr, params) {
 
 
 // load html functions
-function showMainContainer(containerDivName) {
+function showMainContainer(containerDivName, username) {
 
 	var htmlVar = '<div id="logowrapper">';
 	htmlVar += '	<span style="float: left">';
@@ -93,12 +93,12 @@ function showMainContainer(containerDivName) {
 	htmlVar += '			<li><a href="?lang=zh">zh</a></li>';
 	htmlVar += '		</ul>';
 	htmlVar += '	</li>';
-	htmlVar += '	<li><a href="org/admin/settings" class="dmenu">xxxxxxxxmifos</a>';
+	htmlVar += '	<li><a href="org/admin/settings" class="dmenu">' + username + '</a>';
 	htmlVar += '		<ul>';
 	htmlVar += '			<li><a href="org/admin/settings">' + doI18N("link.topnav.account.settings") + '</a></li>';
 	htmlVar += '		</ul>';
 	htmlVar += '	</li>';
-	htmlVar += '	<li><a href="signout">' + doI18N("link.signout") + '</a></li>';
+	htmlVar += '	<li><a href="unknown.html" onclick="signOut(' + "'" + containerDivName + "'" + ');return false;">' + doI18N("link.signout") + '</a></li>';
 	htmlVar += '</ul>';
 	htmlVar += '<br class="clear">';
 	htmlVar += '</div><div style="float:none; clear:both;">';
@@ -134,12 +134,12 @@ function setBasicAuthKey(logonDivName, username, password)
 		cache : false, 
 		success : function(data, textStatus, jqXHR) { 
 				base64 = data.base64EncodedAuthenticationKey; 
-				$("#" + logonDivName).hide();
-				$("#container").show();
+				showMainContainer(logonDivName, username);
 				showILClientListing();
 				return false;
 			},
 		error : function(jqXHR, textStatus, errorThrown) {
+				//actually should have more checking here, its not just invalid user/pwd that may get here
 				alert("Invalid Username/Password"); 
 				return true;
 		} 
@@ -1591,4 +1591,15 @@ function selectNewThousandsSep(selectedVal) {
 				jQuery.stretchyReporting.changeSeparator(selectedVal.substr(0,1), selectedVal.substr(1,1), false);
 		}
 	}
+}
+
+
+
+
+
+//sign-out
+function signOut(containerDivName) {
+	base64 = "";
+	$("#" + containerDivName).html("");
+	alert("Close the Browser for a Complete Sign Out");
 }

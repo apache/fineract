@@ -1401,16 +1401,11 @@
 
 <style type="text/css">
 
-#container {
-	display: none;
-}
-
 #toptable {
 	display: none;
 }
 </style>
 
-<div id="logonDiv"></div>
 <div id="container"></div>
 
 
@@ -1436,14 +1431,11 @@ $(document).ready(function() {
 	
 	jsViewsRegisterHelpers();
 
-
-	showMainContainer("container");
-
 	//baseApiUrl = "https://localhost:8443/mifosng-provider/api/v1/";
 	baseApiUrl = "https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/";
 	if (QueryParameters["baseApiUrl"]) baseApiUrl = QueryParameters["baseApiUrl"];
 	
-	showILLogon("logonDiv");
+	showILLogon("container");
 });
 </script>
 
