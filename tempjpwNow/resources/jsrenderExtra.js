@@ -93,9 +93,9 @@ function showMainContainer(containerDivName, username) {
 	htmlVar += '			<li><a href="?lang=zh">zh</a></li>';
 	htmlVar += '		</ul>';
 	htmlVar += '	</li>';
-	htmlVar += '	<li><a href="org/admin/settings" class="dmenu">' + username + '</a>';
+	htmlVar += '	<li><a href="unknown.html" onclick="showILAccountSettings(1);return false;" class="dmenu">' + username + '</a>';
 	htmlVar += '		<ul>';
-	htmlVar += '			<li><a href="org/admin/settings">' + doI18N("link.topnav.account.settings") + '</a></li>';
+	htmlVar += '			<li><a href="unknown.html" onclick="showILAccountSettings(1);return false;">' + doI18N("link.topnav.account.settings") + '</a></li>';
 	htmlVar += '		</ul>';
 	htmlVar += '	</li>';
 	htmlVar += '	<li><a href="unknown.html" onclick="signOut(' + "'" + containerDivName + "'" + ');return false;">' + doI18N("link.signout") + '</a></li>';
@@ -262,8 +262,17 @@ function setReportingContent(divName) {
 	$("#" + divName).html(htmlVar);
 }
 
+function setAccountSettingsContent(divName) {
 
+	var htmlVar = '<div id="tabs">';
+	htmlVar += '	<ul>';
+	htmlVar += '		<li><a href="unknown.html" onclick="refreshUsersView();return false;" title="settings"' + doI18N("tab.settings") + '</a></li>';
+	htmlVar += '	</ul>';
+	htmlVar += '	<div id="settings"></div>';
+	htmlVar += '</div>';
 
+	$("#" + divName).html(htmlVar);
+}
 
 
 
@@ -271,7 +280,8 @@ function setReportingContent(divName) {
 
 function jsViewsRegisterHelpers() {
 
-	// these helpers are registered for the jsViews and jsRender functionality to fix bug with display zero!
+	// these helpers are registered for the jsViews and jsRender functionality to fix bug with display zero! 
+	// plus some utility functions are added also
 	$.views.registerHelpers({
 			
 			money: function(monetaryObj) {
@@ -1593,6 +1603,62 @@ function selectNewThousandsSep(selectedVal) {
 	}
 }
 
+//account settings
+
+function showILAccountSettings(userId) {
+
+	setAccountSettingsContent("content"); 
+	$tabs = $("#tabs").tabs({
+		"add": function( event, ui ) {
+			$tabs.tabs('select', '#' + ui.panel.id);
+		}
+
+	});
+
+	var errorFunction = function(jqXHR, status, errorThrown, index, anchor) {
+	            $(anchor.hash).html("error occured while ajax loading.");
+	        };
+
+	var successFunction = function(data, status, xhr) {
+				var tableHtml = $("#userSettingsTemplate").render(data);
+				$("#settings").html(tableHtml);
+				
+				$('#changepassword').click(function(e) {
+					var putUrl = 'users/' + userId;
+					var templateSelector = "#changePasswordFormTemplate";
+					var width = 600; 
+					var height = 350;
+					
+					var saveSuccessFunction = function(data, textStatus, jqXHR) {
+						  $("#dialog-form").dialog("close");
+						  $("#tabs").tabs('load', 0);
+					}
+					
+					popupDialogWithPostOnlyFormView(putUrl, 'PUT', 'dialog.title.update.password', templateSelector, width, height, saveSuccessFunction);
+					
+				    e.preventDefault();
+				});
+				
+				$('#changedetails').click(function(e) {
+					var getAndPutUrl = 'users/' + userId;
+					var templateSelector = "#userSettingsFormTemplate";
+					var width = 600; 
+					var height = 350;
+					
+					var saveSuccessFunction = function(data, textStatus, jqXHR) {
+						  $("#dialog-form").dialog("close");
+						  $("#tabs").tabs('load', 0);
+					}
+					
+					popupDialogWithFormView(getAndPutUrl, getAndPutUrl, 'PUT', 'dialog.title.update.details', templateSelector, width, height, saveSuccessFunction);
+					
+				    e.preventDefault();
+				});
+	        };
+    
+	executeAjaxRequest("users/" + userId, 'GET', "", successFunction, errorFunction);	  
+}
+	
 
 
 
