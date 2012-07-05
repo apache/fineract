@@ -29,8 +29,11 @@
 <script type="text/javascript" src="resources/libs/globalize/globalize.js"></script>
 <script type="text/javascript" src="resources/stretchydata-0.95.js"></script>
 
-<script type="text/javascript" src="resources/stretchyreporting/stretchyreporting-0.987.js"></script>
+<script type="text/javascript" src="resources/stretchyreporting/stretchyreporting-0.99.js"></script>
 <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script type="text/javascript">
+	google.load("visualization", "1", {packages:["corechart"]});
+</script>
 
 
 </head>
@@ -1378,7 +1381,7 @@
 		</div>
 		
 		<div class="multiselectwidget">
-			<label for="permissions"><spring:message code="form.label.role.selected.permissions"/></label>
+			<label for="permissions">{{=$ctx.doI18N("form.label.role.selected.permissions")}}</label>
 			<select id="permissions" name="permissions" title="" class="multiselectwidget multiSelectedItems" multiple="multiple" style="width:450px;height:125px;">
 			{{#each selectedPermissions}}
 				<option value="{{=id}}" title="{{=description}}">{{=name}}</option>
@@ -1461,7 +1464,10 @@
 <script>
 $(document).ready(function() {
 
-	baseApiUrl = "https://localhost:8443/mifosng-provider/api/v1/";
+	//baseApiUrl = "https://localhost:8443/mifosng-provider/api/v1/";
+	baseApiUrl = "https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/";
+	if (QueryParameters["baseApiUrl"]) baseApiUrl = QueryParameters["baseApiUrl"];
+
 
     	// default to 'en' culture - no need to import extra javascript files for globalize.js or datapicker
     	Globalize.culture('en');

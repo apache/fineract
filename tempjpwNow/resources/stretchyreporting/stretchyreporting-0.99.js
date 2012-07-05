@@ -139,8 +139,6 @@ function initialiseReporting(params) {
 		showMsg("OAuth params were not passed");
 	}
  	
-	googleLoaded = false;
-
 	reportListing = [];
 	listOfParameters = [];
 
@@ -761,13 +759,6 @@ return 'var selectSuccess = function(data, textStatus,jqXHR){' +
 
 
 function createChart(theData) {
-
-	if (googleLoaded == false) 
-	{
-		google.load("visualization", "1", {packages:["corechart"]});
-		googleLoaded = true;
-	}
-
 
 	RData = new google.visualization.DataTable();
       RData.addColumn('string', dataTableDef.aoColumns[0].sTitle);
