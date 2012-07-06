@@ -1,19 +1,3 @@
-QueryParameters = (function()
-{
-    var result = {};
-    if (window.location.search)
-    {
-        // split up the query string and store in an associative array
-        var params = window.location.search.slice(1).split("&");
-        for (var i = 0; i < params.length; i++)
-        {
-            var tmp = params[i].split("=");
-            result[tmp[0]] = unescape(tmp[1]);
-        }
-    }
-    return result;
-}());
-
 
 saveSuccessFunctionReloadClient =  function(data, textStatus, jqXHR) {
 						  	$("#dialog-form").dialog("close");
@@ -73,14 +57,14 @@ function showMainContainer(containerDivName, username) {
 	htmlVar += '<ul id="nav" class="floatright">';
 	htmlVar += '	<li class="dmenu"><a href="#">' + doI18N("link.topnav.culture") + '</a>';
 	htmlVar += '		<ul>';
-	htmlVar += '			<li><a href="?lang=en">en</a></li>';
-	htmlVar += '			<li><a href="?lang=fr">fr</a></li>';
-	htmlVar += '			<li><a href="?lang=es">es</a></li>';
-	htmlVar += '			<li><a href="?lang=pt">pt</a></li>';
-	htmlVar += '			<li><a href="?lang=zh">zh</a></li>';
+	htmlVar += '			<li><a href="unknown.html" onclick="setCultureReshowListing(' + "'" + 'en' + "'" + ');return false;">en</a></li>';
+	htmlVar += '			<li><a href="unknown.html" onclick="setCultureReshowListing(' + "'" + 'fr' + "'" + ');return false;">fr</a></li>';
+	htmlVar += '			<li><a href="unknown.html" onclick="setCultureReshowListing(' + "'" + 'es' + "'" + ');return false;">es</a></li>';
+	htmlVar += '			<li><a href="unknown.html" onclick="setCultureReshowListing(' + "'" + 'pt' + "'" + ');return false;">pt</a></li>';
+	htmlVar += '			<li><a href="unknown.html" onclick="setCultureReshowListing(' + "'" + 'zh' + "'" + ');return false;">zh</a></li>';
 	htmlVar += '		</ul>';
 	htmlVar += '	</li>';
-	htmlVar += '	<li><a href="unknown.html" onclick="showILAccountSettings();return false;" class="dmenu">' + username + '</a>';
+	htmlVar += '	<li><a href="unknown.html" onclick="showILAccountSettings();return false;" class="dmenu">' + currentUserName + '</a>';
 	htmlVar += '		<ul>';
 	htmlVar += '			<li><a href="unknown.html" onclick="showILAccountSettings();return false;">' + doI18N("link.topnav.account.settings") + '</a></li>';
 	htmlVar += '		</ul>';
@@ -113,6 +97,7 @@ function setBasicAuthKey(logonDivName, username, password)
 { 
 	base64 = "";
 	currentUser = -1;
+	currentUserName = "";
 	var jqxhr = $.ajax({ 
 		url : baseApiUrl + "authentication?username=" + username + "&password=" + password, 
 		type : 'POST', 
@@ -123,6 +108,7 @@ function setBasicAuthKey(logonDivName, username, password)
 		success : function(data, textStatus, jqXHR) { 
 				base64 = data.base64EncodedAuthenticationKey; 
 				currentUser = data.userId;
+				currentUserName = data.username;
 				showMainContainer(logonDivName, username);
 				showILClientListing();
 				return false;
@@ -1665,3 +1651,47 @@ function signOut(containerDivName) {
 	$("#" + containerDivName).html("");
 	alert("Close the Browser for a Complete Sign Out");
 }
+
+
+
+//utility functions
+function setCultureReshowListing(cultureVal) {
+	setCulture(cultureVal);
+	showMainContainer("container");
+	showILClientListing();
+}
+
+function setCulture(cultureVal) {
+
+    	Globalize.culture(cultureVal);
+    	
+    	$.datepicker.setDefaults( $.datepicker.regional[cultureVal]);
+    	
+    	jQuery.i18n.properties({
+			name:'messages', 
+			path: 'resources/global-translations/',
+			mode:'map',
+			cache: true,
+			language: cultureVal,
+			callback: function() {
+			}
+		});
+}
+
+
+QueryParameters = (function()
+{
+    var result = {};
+    if (window.location.search)
+    {
+        // split up the query string and store in an associative array
+        var params = window.location.search.slice(1).split("&");
+        for (var i = 0; i < params.length; i++)
+        {
+            var tmp = params[i].split("=");
+            result[tmp[0]] = unescape(tmp[1]);
+        }
+    }
+    return result;
+}());
+

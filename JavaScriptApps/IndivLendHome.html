@@ -46,21 +46,8 @@
 <script>
 $(document).ready(function() {
 
-    	// default to 'en' culture - no need to import extra javascript files for globalize.js or datapicker
-    	Globalize.culture('en');
-    	
-    	$.datepicker.setDefaults( $.datepicker.regional['en']);
-    	
-    	jQuery.i18n.properties({
-			name:'messages', 
-			path: 'resources/global-translations/',
-			mode:'map',
-			cache: true,
-			language: '', // leave blank so defaults to 'en' 
-			callback: function() {
-			}
-		});
-	
+	setCulture('en');	
+
 	jsViewsRegisterHelpers();
 
 	//baseApiUrl = "https://localhost:8443/mifosng-provider/api/v1/";
