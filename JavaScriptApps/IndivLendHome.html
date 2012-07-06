@@ -39,7 +39,60 @@
 </head>
 <body>
 
-<!-- portfolio templates below here -->
+<style type="text/css">
+
+#settings {
+    	margin-top: 20px;
+    	margin-left: 20px;
+}
+
+h2 {
+    	font-size: 16px;
+    	margin-bottom: 10px;
+}
+
+#toptable {
+	display: none;
+}
+</style>
+
+<div id="container"></div>
+<script type="text/javascript" src="resources/IndividualLendingCode.js"></script>
+
+<script>
+$(document).ready(function() {
+
+    	// default to 'en' culture - no need to import extra javascript files for globalize.js or datapicker
+    	Globalize.culture('en');
+    	
+    	$.datepicker.setDefaults( $.datepicker.regional['en']);
+    	
+    	jQuery.i18n.properties({
+			name:'messages', 
+			path: 'resources/global-translations/',
+			mode:'map',
+			cache: true,
+			language: '', // leave blank so defaults to 'en' 
+			callback: function() {
+			}
+		});
+	
+	jsViewsRegisterHelpers();
+
+	//baseApiUrl = "https://localhost:8443/mifosng-provider/api/v1/";
+	baseApiUrl = "https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/";
+	if (QueryParameters["baseApiUrl"]) baseApiUrl = QueryParameters["baseApiUrl"];
+	
+	showILLogon("container");
+});
+</script>
+
+
+
+<!-- Everything below here is just templates for jsrender to process in order to display the various pages -->
+
+
+<!-- portfolio templates -->
 <script id="newLoanScheduleTemplate" type="text/x-jquery-tmpl">
 <table id="repaymentschedule" class="pretty displayschedule">
 	<caption>Repayment Schedule</caption>
@@ -1396,58 +1449,6 @@
 
 
 <!-- end of admin templates -->
-
-<!-- real action start here -->
-
-<style type="text/css">
-
-#settings {
-    	margin-top: 20px;
-    	margin-left: 20px;
-}
-
-h2 {
-    	font-size: 16px;
-    	margin-bottom: 10px;
-}
-
-#toptable {
-	display: none;
-}
-</style>
-
-<div id="container"></div>
-
-
-<script type="text/javascript" src="resources/IndividualLendingCode.js"></script>
-
-<script>
-$(document).ready(function() {
-
-    	// default to 'en' culture - no need to import extra javascript files for globalize.js or datapicker
-    	Globalize.culture('en');
-    	
-    	$.datepicker.setDefaults( $.datepicker.regional['en']);
-    	
-    	jQuery.i18n.properties({
-			name:'messages', 
-			path: 'resources/global-translations/',
-			mode:'map',
-			cache: true,
-			language: '', // leave blank so defaults to 'en' 
-			callback: function() {
-			}
-		});
-	
-	jsViewsRegisterHelpers();
-
-	//baseApiUrl = "https://localhost:8443/mifosng-provider/api/v1/";
-	baseApiUrl = "https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/";
-	if (QueryParameters["baseApiUrl"]) baseApiUrl = QueryParameters["baseApiUrl"];
-	
-	showILLogon("container");
-});
-</script>
 
 
 </body>

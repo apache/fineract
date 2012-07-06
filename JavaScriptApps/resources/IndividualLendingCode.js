@@ -20,12 +20,6 @@ saveSuccessFunctionReloadClient =  function(data, textStatus, jqXHR) {
 		  					showILClient(currentClientId );
 				  		};
 
-saveSuccessFunctionReloadLoan = function(data, textStatus, jqXHR) {
-						  	$("#dialog-form").dialog("close");
-							loadILLoan(loanId);
-							clientDirty = true;
-						};
-
 formErrorFunction = function(jqXHR, textStatus, errorThrown) {
 				    	handleXhrError(jqXHR, textStatus, errorThrown, "#formErrorsTemplate", "#formerrors");
 				};
@@ -907,6 +901,18 @@ function showILClient(clientId) {
 
 	}
 
+	function genSaveSuccessFunctionReloadLoan(loanId) {
+
+		return 'var saveSuccessFunctionReloadLoan = function(data, textStatus, jqXHR) { ' + 
+						  	' $("#dialog-form").dialog("close");' +
+							' loadILLoan(' + loanId + ');' +
+							' clientDirty = true;' +
+						'};';
+	}
+
+
+
+
 	function repopulateFullForm(clientId, productId) {
 				
 		successFunction =  function(data, textStatus, jqXHR) {
@@ -1115,7 +1121,8 @@ function loadILLoan(loanId) {
 						var width = 500; 
 						var height = 350;
 						var defaultOffset = offsetToSubmittedDate;
-						popupDialogWithPostOnlyFormView(postUrl, 'POST', 'dialog.title.approve.loan', templateSelector, width, height, saveSuccessFunctionReloadLoan ,  offsetToSubmittedDate, defaultOffset, maxOffset)
+						eval(genSaveSuccessFunctionReloadLoan(loanId));
+						popupDialogWithPostOnlyFormView(postUrl, 'POST', 'dialog.title.approve.loan', templateSelector, width, height, saveSuccessFunctionReloadLoan,  offsetToSubmittedDate, defaultOffset, maxOffset)
 					    e.preventDefault();
 				});
 				$('button.approveloan span').text(doI18N('dialog.button.approve.loan'));
@@ -1129,7 +1136,8 @@ function loadILLoan(loanId) {
 						var width = 500; 
 						var height = 350;
 						var defaultOffset = offsetToSubmittedDate;
-						popupDialogWithPostOnlyFormView(postUrl, 'POST', 'dialog.title.undo.loan.approval', templateSelector, width, height, saveSuccessFunctionReloadLoan ,  offsetToSubmittedDate, defaultOffset, maxOffset)
+						eval(genSaveSuccessFunctionReloadLoan(loanId));
+						popupDialogWithPostOnlyFormView(postUrl, 'POST', 'dialog.title.undo.loan.approval', templateSelector, width, height, saveSuccessFunctionReloadLoan, offsetToSubmittedDate, defaultOffset, maxOffset)
 					    e.preventDefault();
 				});
 				$('button.undoapproveloan span').text(doI18N('dialog.button.undo.loan.approval'));
@@ -1157,7 +1165,8 @@ function loadILLoan(loanId) {
 						var width = 500; 
 						var height = 350;
 						var defaultOffset = offsetToApprovalDate;
-						popupDialogWithPostOnlyFormView(postUrl, 'POST', 'dialog.title.disburse.loan', templateSelector, width, height, saveSuccessFunctionReloadLoan ,  offsetToSubmittedDate, defaultOffset, maxOffset)
+						eval(genSaveSuccessFunctionReloadLoan(loanId));
+						popupDialogWithPostOnlyFormView(postUrl, 'POST', 'dialog.title.disburse.loan', templateSelector, width, height, saveSuccessFunctionReloadLoan,  offsetToSubmittedDate, defaultOffset, maxOffset)
 					    e.preventDefault();
 				});
 				$('button.disburseloan span').text(doI18N('dialog.button.disburse.loan'));
@@ -1171,7 +1180,8 @@ function loadILLoan(loanId) {
 						var width = 500; 
 						var height = 350;
 						var defaultOffset = offsetToApprovalDate;
-						popupDialogWithPostOnlyFormView(postUrl, 'POST', 'dialog.title.undo.loan.disbursal', templateSelector, width, height, saveSuccessFunctionReloadLoan ,  offsetToSubmittedDate, defaultOffset, maxOffset)
+						eval(genSaveSuccessFunctionReloadLoan(loanId));
+						popupDialogWithPostOnlyFormView(postUrl, 'POST', 'dialog.title.undo.loan.disbursal', templateSelector, width, height, saveSuccessFunctionReloadLoan,  offsetToSubmittedDate, defaultOffset, maxOffset)
 					    e.preventDefault();
 				});
 				$('button.undodisbursalloan span').text(doI18N('dialog.button.undo.loan.disbursal'));
