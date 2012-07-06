@@ -1197,8 +1197,9 @@ function loadILLoan(loanId) {
 						var width = 500; 
 						var height = 350;
 						var defaultOffset = offsetToApprovalDate;
-						
-						popupDialogWithFormView(getUrl, postUrl, 'POST', "dialog.title.loan.repayment", templateSelector, width, height,  saveSuccessFunction);
+						eval(genSaveSuccessFunctionReloadLoan(loanId));
+			
+						popupDialogWithFormView(getUrl, postUrl, 'POST', "dialog.title.loan.repayment", templateSelector, width, height,  saveSuccessFunctionReloadLoan);
 						//popupDialogWithFormView(getUrl, postUrl, 'POST', 'dialog.title.loan.repayment', templateSelector, width, height, currentTabIndex,  offsetToSubmittedDate, defaultOffset, maxOffset)
 					    e.preventDefault();
 				});
@@ -1216,12 +1217,9 @@ function loadILLoan(loanId) {
 						var height = 350;
 						var defaultOffset = offsetToApprovalDate;
 						
-						var saveSuccessFunction = function(data, textStatus, jqXHR) {
-						  	$("#dialog-form").dialog("close");
-						  	$newtabs.tabs('load', currentTabIndex);
-						}
+						eval(genSaveSuccessFunctionReloadLoan(loanId));
 						
-						popupDialogWithFormView(getUrl, postUrl, 'POST', "dialog.title.waive.loan", templateSelector, width, height, saveSuccessFunction);
+						popupDialogWithFormView(getUrl, postUrl, 'POST', "dialog.title.waive.loan", templateSelector, width, height, saveSuccessFunctionReloadLoan);
 					    e.preventDefault();
 				});
 				$('button.waiveloan span').text(doI18N('dialog.button.loan.waive'));
@@ -1239,13 +1237,9 @@ function loadILLoan(loanId) {
 						var width = 500; 
 						var height = 350;
 						var defaultOffset = offsetToApprovalDate;
-						
-						var saveSuccessFunction = function(data, textStatus, jqXHR) {
-						  	$("#dialog-form").dialog("close");
-							loadILLoan(loanId);
-						}
-						
-						popupDialogWithFormView(getAndPostUrl, getAndPostUrl, 'POST', "dialog.title.adjust.loan.repayment", templateSelector, width,  height, saveSuccessFunction);
+
+						eval(genSaveSuccessFunctionReloadLoan(loanId));						
+						popupDialogWithFormView(getAndPostUrl, getAndPostUrl, 'POST', "dialog.title.adjust.loan.repayment", templateSelector, width,  height, saveSuccessFunctionReloadLoan);
 					    e.preventDefault();
 				});
 				$('button.adjustloanrepayment span').text(doI18N('dialog.button.adjust.loan.repayment'));
