@@ -1143,10 +1143,10 @@
 <script id="changePasswordFormTemplate" type="text/x-jquery-tmpl">
 <form id="entityform">
     <div id="formerrors"></div>
-        <label for="password"><spring:message code="form.label.new.password"/></label>
+        <label for="password">{{=$ctx.doI18N("form.label.new.password")}}</label>
 		<input id="password" name="password" title="" type="password" value="{{=password}}" size="75"/>
 
-        <label for="repeatPassword"><spring:message code="form.label.repeat.new.password"/></label>
+        <label for="repeatPassword">{{=$ctx.doI18N("form.label.repeat.new.password")}}</label>
 		<input id="repeatPassword" name="repeatPassword" title="" type="password" value="{{=passwordrepeat}}" size="75"/>
 </form>
 </script>
@@ -1154,16 +1154,16 @@
 <script id="userSettingsFormTemplate" type="text/x-jquery-tmpl">
 <form id="entityform">
     <div id="formerrors"></div>
-		<label for="username"><spring:message code="form.label.username"/></label>
+		<label for="username">{{=$ctx.doI18N("form.label.username")}}</label>
 		<input id="username" name="username" title="" type="text" value="{{=username}}" size="75"/>
 
-        <label for="firstname"><spring:message code="form.label.firstname"/></label>
+        <label for="firstname">{{=$ctx.doI18N("form.label.firstname")}}</label>
 		<input id="firstname" name="firstname" title="The first name of user." type="text" value="{{=firstname}}" size="75"/>
 
-        <label for="lastname"><spring:message code="form.label.lastname"/></label>
+        <label for="lastname">{{=$ctx.doI18N("form.label.lastname")}}</label>
 		<input id="lastname" name="lastname" title="The last name of user." type="text" value="{{=lastname}}" size="75"/>
 
-		<label for="email"><spring:message code="form.label.email"/></label>
+		<label for="email">{{=$ctx.doI18N("form.label.email")}}</label>
 		<input id="email" name="email" title="" type="text" value="{{=email}}" size="75"/>
 </form>
 </script>
@@ -1401,6 +1401,16 @@
 
 <style type="text/css">
 
+#settings {
+    	margin-top: 20px;
+    	margin-left: 20px;
+}
+
+h2 {
+    	font-size: 16px;
+    	margin-bottom: 10px;
+}
+
 #toptable {
 	display: none;
 }
@@ -1409,7 +1419,7 @@
 <div id="container"></div>
 
 
-<script type="text/javascript" src="resources/jsrenderExtra.js"></script>
+<script type="text/javascript" src="resources/IndividualLendingCode.js"></script>
 
 <script>
 $(document).ready(function() {

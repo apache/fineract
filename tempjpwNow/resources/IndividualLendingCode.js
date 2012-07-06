@@ -86,9 +86,9 @@ function showMainContainer(containerDivName, username) {
 	htmlVar += '			<li><a href="?lang=zh">zh</a></li>';
 	htmlVar += '		</ul>';
 	htmlVar += '	</li>';
-	htmlVar += '	<li><a href="unknown.html" onclick="showILAccountSettings(1);return false;" class="dmenu">' + username + '</a>';
+	htmlVar += '	<li><a href="unknown.html" onclick="showILAccountSettings();return false;" class="dmenu">' + username + '</a>';
 	htmlVar += '		<ul>';
-	htmlVar += '			<li><a href="unknown.html" onclick="showILAccountSettings(1);return false;">' + doI18N("link.topnav.account.settings") + '</a></li>';
+	htmlVar += '			<li><a href="unknown.html" onclick="showILAccountSettings();return false;">' + doI18N("link.topnav.account.settings") + '</a></li>';
 	htmlVar += '		</ul>';
 	htmlVar += '	</li>';
 	htmlVar += '	<li><a href="unknown.html" onclick="signOut(' + "'" + containerDivName + "'" + ');return false;">' + doI18N("link.signout") + '</a></li>';
@@ -107,9 +107,9 @@ function showMainContainer(containerDivName, username) {
 function showILLogon(logonDivName) {
 
 	var htmlVar = '<form name = "logonform"><table><tr><td>User Name:</td><td><input type="text" name="username"></td></tr>';
-	htmlVar += '<tr><td>Password: </td><td><input type="password" name="password"></td></tr>';
+	htmlVar += '<tr><td>Password: </td><td><input type="password" name="pwd"></td></tr>';
 	htmlVar += '<tr><td><input type="button" value="Logon" name="Submit" ';
-	htmlVar += 'onclick= "setBasicAuthKey(' + "'" + logonDivName + "'" + ', document.logonform.username.value, document.logonform.password.value )"></td><td></td></tr></table></form>';
+	htmlVar += 'onclick= "setBasicAuthKey(' + "'" + logonDivName + "'" + ', document.logonform.username.value, document.logonform.pwd.value )"></td><td></td></tr></table></form>';
 
 	$("#" + logonDivName).html(htmlVar);
 }
@@ -118,6 +118,7 @@ function showILLogon(logonDivName) {
 function setBasicAuthKey(logonDivName, username, password) 
 { 
 	base64 = "";
+	currentUser = -1;
 	var jqxhr = $.ajax({ 
 		url : baseApiUrl + "authentication?username=" + username + "&password=" + password, 
 		type : 'POST', 
@@ -127,6 +128,7 @@ function setBasicAuthKey(logonDivName, username, password)
 		cache : false, 
 		success : function(data, textStatus, jqXHR) { 
 				base64 = data.base64EncodedAuthenticationKey; 
+				currentUser = data.userId;
 				showMainContainer(logonDivName, username);
 				showILClientListing();
 				return false;
@@ -259,7 +261,7 @@ function setAccountSettingsContent(divName) {
 
 	var htmlVar = '<div id="tabs">';
 	htmlVar += '	<ul>';
-	htmlVar += '		<li><a href="unknown.html" onclick="refreshUsersView();return false;" title="settings"' + doI18N("tab.settings") + '</a></li>';
+	htmlVar += '		<li><a href="#settingstab" title="settings">' + doI18N("tab.settings") + '</a></li>';
 	htmlVar += '	</ul>';
 	htmlVar += '	<div id="settings"></div>';
 	htmlVar += '</div>';
@@ -610,7 +612,7 @@ function jsViewsRegisterHelpers() {
 				  	}).dialog('open');
 	}
 
-	function popupDialogWithPostOnlyFormView(postUrl, titleCode, templateSelector, width, height, saveSuccessFunction, minOffset, defaultOffset, maxOffset) {
+	function popupDialogWithPostOnlyFormView(postUrl, submitType, titleCode, templateSelector, width, height, saveSuccessFunction, minOffset, defaultOffset, maxOffset) {
 		var dialogDiv = $("<div id='dialog-form'></div>");
 		var data = new Object();
 		var formHtml = $(templateSelector).render(data);
@@ -627,7 +629,7 @@ function jsViewsRegisterHelpers() {
 			var newFormData = JSON.stringify($('#entityform').serializeObject());
 			console.log(newFormData);
 
-			executeAjaxRequest(postUrl, "POST", newFormData, saveSuccessFunction, formErrorFunction);
+			executeAjaxRequest(postUrl, submitType, newFormData, saveSuccessFunction, formErrorFunction);
 		};
 		buttonsOpts[cancelButton] = function() {$(this).dialog( "close" );};
 		
@@ -755,7 +757,6 @@ function showILClient(clientId) {
 	var clientUrl = 'clients/' + clientId
 	setClientContent("content");
 	$newtabs = $("#newtabs").tabs({
-		
 		"add": function( event, ui ) {
 			$newtabs.tabs('select', '#' + ui.panel.id);
 		}
@@ -775,7 +776,6 @@ function showILClient(clientId) {
 	            
 	        		var tableHtml = $("#clientDataTabTemplate").render(data);
 					$("#clienttab").html(tableHtml);
-					
 					$("#clienttabname").html(data.displayName);
 					
 					// retrieve accounts summary info
@@ -1088,7 +1088,7 @@ function loadILLoan(loanId) {
 						var height = 350;
 						var defaultOffset = offsetToSubmittedDate;
 
-						popupDialogWithPostOnlyFormView(postUrl, 'dialog.title.reject.loan', templateSelector, width, height, saveSuccessFunctionReloadClient, offsetToSubmittedDate, defaultOffset, maxOffset);
+						popupDialogWithPostOnlyFormView(postUrl, 'POST', 'dialog.title.reject.loan', templateSelector, width, height, saveSuccessFunctionReloadClient, offsetToSubmittedDate, defaultOffset, maxOffset);
 					    e.preventDefault();
 					});
 	        		$('button.rejectloan span').text(doI18N('dialog.button.reject.loan'));
@@ -1101,7 +1101,7 @@ function loadILLoan(loanId) {
 						var width = 500; 
 						var height = 350;
 						var defaultOffset = offsetToSubmittedDate;
-						popupDialogWithPostOnlyFormView(postUrl, 'dialog.title.loan.withdrawn.by.client', templateSelector, width, height, saveSuccessFunctionReloadClient,  offsetToSubmittedDate, defaultOffset, maxOffset)
+						popupDialogWithPostOnlyFormView(postUrl, 'POST', 'dialog.title.loan.withdrawn.by.client', templateSelector, width, height, saveSuccessFunctionReloadClient,  offsetToSubmittedDate, defaultOffset, maxOffset)
 					    e.preventDefault();
 				});
 				$('button.withdrawnbyapplicantloan span').text(doI18N('dialog.button.withdrawn.by.client.loan'));
@@ -1115,7 +1115,7 @@ function loadILLoan(loanId) {
 						var width = 500; 
 						var height = 350;
 						var defaultOffset = offsetToSubmittedDate;
-						popupDialogWithPostOnlyFormView(postUrl, 'dialog.title.approve.loan', templateSelector, width, height, saveSuccessFunctionReloadLoan ,  offsetToSubmittedDate, defaultOffset, maxOffset)
+						popupDialogWithPostOnlyFormView(postUrl, 'POST', 'dialog.title.approve.loan', templateSelector, width, height, saveSuccessFunctionReloadLoan ,  offsetToSubmittedDate, defaultOffset, maxOffset)
 					    e.preventDefault();
 				});
 				$('button.approveloan span').text(doI18N('dialog.button.approve.loan'));
@@ -1129,7 +1129,7 @@ function loadILLoan(loanId) {
 						var width = 500; 
 						var height = 350;
 						var defaultOffset = offsetToSubmittedDate;
-						popupDialogWithPostOnlyFormView(postUrl, 'dialog.title.undo.loan.approval', templateSelector, width, height, saveSuccessFunctionReloadLoan ,  offsetToSubmittedDate, defaultOffset, maxOffset)
+						popupDialogWithPostOnlyFormView(postUrl, 'POST', 'dialog.title.undo.loan.approval', templateSelector, width, height, saveSuccessFunctionReloadLoan ,  offsetToSubmittedDate, defaultOffset, maxOffset)
 					    e.preventDefault();
 				});
 				$('button.undoapproveloan span').text(doI18N('dialog.button.undo.loan.approval'));
@@ -1157,7 +1157,7 @@ function loadILLoan(loanId) {
 						var width = 500; 
 						var height = 350;
 						var defaultOffset = offsetToApprovalDate;
-						popupDialogWithPostOnlyFormView(postUrl, 'dialog.title.disburse.loan', templateSelector, width, height, saveSuccessFunctionReloadLoan ,  offsetToSubmittedDate, defaultOffset, maxOffset)
+						popupDialogWithPostOnlyFormView(postUrl, 'POST', 'dialog.title.disburse.loan', templateSelector, width, height, saveSuccessFunctionReloadLoan ,  offsetToSubmittedDate, defaultOffset, maxOffset)
 					    e.preventDefault();
 				});
 				$('button.disburseloan span').text(doI18N('dialog.button.disburse.loan'));
@@ -1171,7 +1171,7 @@ function loadILLoan(loanId) {
 						var width = 500; 
 						var height = 350;
 						var defaultOffset = offsetToApprovalDate;
-						popupDialogWithPostOnlyFormView(postUrl, 'dialog.title.undo.loan.disbursal', templateSelector, width, height, saveSuccessFunctionReloadLoan ,  offsetToSubmittedDate, defaultOffset, maxOffset)
+						popupDialogWithPostOnlyFormView(postUrl, 'POST', 'dialog.title.undo.loan.disbursal', templateSelector, width, height, saveSuccessFunctionReloadLoan ,  offsetToSubmittedDate, defaultOffset, maxOffset)
 					    e.preventDefault();
 				});
 				$('button.undodisbursalloan span').text(doI18N('dialog.button.undo.loan.disbursal'));
@@ -1598,7 +1598,7 @@ function selectNewThousandsSep(selectedVal) {
 
 //account settings
 
-function showILAccountSettings(userId) {
+function showILAccountSettings() {
 
 	setAccountSettingsContent("content"); 
 	$tabs = $("#tabs").tabs({
@@ -1617,7 +1617,7 @@ function showILAccountSettings(userId) {
 				$("#settings").html(tableHtml);
 				
 				$('#changepassword').click(function(e) {
-					var putUrl = 'users/' + userId;
+					var putUrl = 'users/' + currentUser;
 					var templateSelector = "#changePasswordFormTemplate";
 					var width = 600; 
 					var height = 350;
@@ -1627,13 +1627,12 @@ function showILAccountSettings(userId) {
 						  $("#tabs").tabs('load', 0);
 					}
 					
-					popupDialogWithPostOnlyFormView(putUrl, 'PUT', 'dialog.title.update.password', templateSelector, width, height, saveSuccessFunction);
-					
+					popupDialogWithPostOnlyFormView(putUrl, 'PUT', 'dialog.title.update.password', templateSelector, width, height, saveSuccessFunction, 0, 0, 0);
 				    e.preventDefault();
 				});
 				
 				$('#changedetails').click(function(e) {
-					var getAndPutUrl = 'users/' + userId;
+					var getAndPutUrl = 'users/' + currentUser;
 					var templateSelector = "#userSettingsFormTemplate";
 					var width = 600; 
 					var height = 350;
@@ -1649,7 +1648,7 @@ function showILAccountSettings(userId) {
 				});
 	        };
     
-	executeAjaxRequest("users/" + userId, 'GET', "", successFunction, errorFunction);	  
+	executeAjaxRequest("users/" + currentUser, 'GET', "", successFunction, errorFunction);	  
 }
 	
 
