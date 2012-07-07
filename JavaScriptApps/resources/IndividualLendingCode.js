@@ -124,8 +124,8 @@ function setBasicAuthKey(logonDivName, username, password)
 
 
 function setClientListingContent(divName) {
-	var htmlVar = '<button id="addclient" style="clear: both;">Add a new client</button>';
-	htmlVar += '<div id="tabs"><ul><li><a href="#searchtab" title="searchtab">Search</a></li></ul><div id="searchtab"></div></div>';
+	var htmlVar = '<button id="addclient" style="clear: both;">' + doI18N("link.add.new.client") + '</button>';
+	htmlVar += '<div id="tabs"><ul><li><a href="#searchtab" title="searchtab">' + doI18N("tab.search") + '</a></li></ul><div id="searchtab"></div></div>';
 
 	$("#" + divName).html(htmlVar);
 }
