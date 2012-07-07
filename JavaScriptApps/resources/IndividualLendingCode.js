@@ -88,6 +88,7 @@ function showILLogon(logonDivName) {
 	htmlVar += '<tr><td>' + doI18N("login.password") + ': </td><td><input type="password" name="pwd"></td></tr>';
 	htmlVar += '<tr><td><input type="button" value="Logon" name="Submit" ';
 	htmlVar += 'onclick= "setBasicAuthKey(' + "'" + logonDivName + "'" + ', document.logonform.username.value, document.logonform.pwd.value )"></td><td></td></tr></table></form>';
+	htmlVar += '<div id=formerrors></div>';
 
 	$("#" + logonDivName).html(htmlVar);
 }
@@ -114,8 +115,7 @@ function setBasicAuthKey(logonDivName, username, password)
 				return false;
 			},
 		error : function(jqXHR, textStatus, errorThrown) {
-				//actually should have more checking here, its not just invalid user/pwd that may get here
-				alert("Invalid Username/Password"); 
+	        		handleXhrError(jqXHR, textStatus, errorThrown, "#formErrorsTemplate", "#formerrors");
 				return true;
 		} 
 	});
