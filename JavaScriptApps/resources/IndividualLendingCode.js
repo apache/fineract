@@ -99,26 +99,24 @@ function setBasicAuthKey(logonDivName, username, password)
 	base64 = "";
 	currentUser = -1;
 	currentUserName = "";
-	var jqxhr = $.ajax({ 
-		url : baseApiUrl + "authentication?username=" + username + "&password=" + password, 
-		type : 'POST', 
-		contentType : "application/json; charset=utf-8", 
-		dataType : 'json', 
-		data : "{}", 
-		cache : false, 
-		success : function(data, textStatus, jqXHR) { 
-				base64 = data.base64EncodedAuthenticationKey; 
-				currentUser = data.userId;
-				currentUserName = data.username;
-				showMainContainer(logonDivName, username);
-				showILClientListing();
-				return false;
-			},
-		error : function(jqXHR, textStatus, errorThrown) {
-	        		handleXhrError(jqXHR, textStatus, errorThrown, "#formErrorsTemplate", "#formerrors");
-				return true;
-		} 
-	});
+
+	var url = "authentication?username=" + username + "&password=" + password;
+	var successFunction = function(data, textStatus, jqXHR) { 
+					base64 = data.base64EncodedAuthenticationKey; 
+					currentUser = data.userId;
+					currentUserName = data.username;
+
+					showMainContainer(logonDivName, username);
+					showILClientListing();
+					return false;
+			};
+
+	var errorFunction = function(jqXHR, textStatus, errorThrown) {
+	        			handleXhrError(jqXHR, textStatus, errorThrown, "#formErrorsTemplate", "#formerrors");
+					return true;
+				};
+
+	executeAjaxRequest(url, 'POST', "", successFunction, errorFunction);
 }
 
 
