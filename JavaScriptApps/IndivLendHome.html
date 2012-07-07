@@ -51,20 +51,21 @@ $(document).ready(function() {
 
 
 <!-- Everything below here is just templates for jsrender to process in order to display the various pages -->
-
+<!-- Normally this would be put in a server side include... but you need to run the html through a web server for that to work -->
+<!-- If anyone knows how to include this text without the need for a web server that would help a lot. -->
+<!-- I guess I could just read the file and write it into the DOM -->
 
 <!-- portfolio templates -->
-<script id="newLoanScheduleTemplate" type="text/x-jquery-tmpl">
-<table id="repaymentschedule" class="pretty displayschedule">
+<script id="newLoanScheduleTemplate" type="text/x-jquery-tmpl"><table id="repaymentschedule" class="pretty displayschedule">
 	<caption>Repayment Schedule</caption>
 	<thead>
 		<tr>
 			<th>#</th>
-			<th>Date</th>
-			<th>Principal</th>
-			<th>Interest</th>
-			<th>Total</th>
-			<th>Outstanding</th>
+			<th>{{=$ctx.doI18N("tab.client.account.loan.schedule.table.column.heading.date")}}</th>
+			<th>{{=$ctx.doI18N("tab.client.account.loan.schedule.table.column.heading.principal")}}</th>
+			<th>{{=$ctx.doI18N("tab.client.account.loan.schedule.table.column.heading.interest")}}</th>
+			<th>{{=$ctx.doI18N("tab.client.account.loan.schedule.table.column.heading.total")}}</th>
+			<th>{{=$ctx.doI18N("tab.client.account.loan.schedule.table.heading.outstanding")}}</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -89,7 +90,7 @@ $(document).ready(function() {
 	</tbody>
 	<tfoot class="ui-widget-header">
 		<tr class="ui-widget-header">
-			<th>Total</th>
+			<th>{{=$ctx.doI18N("tab.client.account.loan.schedule.table.column.heading.total")}}</th>
 			<th>&nbsp;</th>
 			<th>{{=$ctx.money(cumulativePrincipal)}}</th>
 			<th>{{=$ctx.money(cumulativeInterest)}}</th>
