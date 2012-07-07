@@ -1655,11 +1655,48 @@ function signOut(containerDivName) {
 
 
 //utility functions
+function initialiseAndShowILLogon() {
+
+	setInitialCulture();
+
+	jsViewsRegisterHelpers();
+
+	//baseApiUrl = "https://localhost:8443/mifosng-provider/api/v1/";
+	baseApiUrl = "https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/";
+	if (QueryParameters["baseApiUrl"]) baseApiUrl = QueryParameters["baseApiUrl"];
+	
+	showILLogon("container");
+}
+
+function setInitialCulture() {
+
+	baseCulture = 'en';
+	if (QueryParameters["baseCulture"]) baseCulture = QueryParameters["baseCulture"];
+	switch(baseCulture)
+	{
+			case "en":
+  				break;
+			case "fr":
+  				break;
+			case "es":
+  				break;
+			case "pt":
+  				break;
+			case "zh":
+  				break;
+			default:
+  				alert("The culture/language you specified (" + baseCulture + ") isn't available so will default to 'en' (English).");
+				baseCulture = 'en';
+	}
+	setCulture(baseCulture);	
+}
+
 function setCultureReshowListing(cultureVal) {
 	setCulture(cultureVal);
 	showMainContainer("container");
 	showILClientListing();
 }
+
 
 function setCulture(cultureVal) {
 
