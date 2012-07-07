@@ -297,12 +297,12 @@ $(document).ready(function() {
 
 	<input type="hidden" id="clientId" name="clientId" value="{{=clientId}}" />
 	
-	<label for="clientname">Applicant:</label>
+	<label for="clientname">{{=$ctx.doI18N("form.label.loan.applicant")}}</label>
 	<input id="clientname" name="clientName" title="" type="text" value="{{=clientName}}" disabled="disabled" />
 
-	<label for="productId">Product:</label>
+	<label for="productId">{{=$ctx.doI18N("form.label.product.dropdown")}}</label>
 	<select name="productId" id="productId">
-		<option value="-1">--Select Product--</option>
+		<option value="-1">{{=$ctx.doI18N("form.option.product.dropdown.first.choice")}}</option>
 {{#each allowedProducts}}
 	{{#if $ctx.number($parent.parent.data.productId)===$ctx.number(id)}}
 		<option value="{{=$ctx.number(id)}}" selected="selected">{{=name}}</option>
@@ -328,15 +328,15 @@ $(document).ready(function() {
 				<div class="notespacer">
 					<span class="ui-icon ui-icon-note" style="float: left; margin-right: 5px;"></span>
 					{{#if noteType.id === 100}}
-					<span>Client note:</span>
+					<span>{{=$ctx.doI18N("widget.notes.label.client.note")}}</span>
 					{{/if}}
 					{{#if noteType.id === 200}}
-					<span>Loan note:</span>
+					<span>{{=$ctx.doI18N("widget.notes.label.loan.note")}}</span>
 					{{/if}}
 					{{#if noteType.id === 300}}
-					<span>Loan transaction note:</span>
+					<span>{{=$ctx.doI18N("widget.notes.label.loan.transaction.note")}}</span>
 					{{/if}}
-					<span><a href="#" class="editclientnote" id="editclientnotelink{{=id}}">Edit</a></span>
+					<span><a href="#" class="editclientnote" id="editclientnotelink{{=id}}">{{=$ctx.doI18N("link.edit")}}</a></span>
 				</div>
 				<div class="notecontent">{{=note}}</div>
 				<div class="notespacer">
@@ -355,7 +355,7 @@ $(document).ready(function() {
 <form id="entityform">
     <div id="formerrors"></div>
 
-	<label for="note">Note:</label>
+	<label for="note">{{=$ctx.doI18N("dialog.notes.form.label.note")}}</label>
 	<textarea rows="10" cols="75" id="note" name="note" cssClass="text ui-widget-content ui-corner-all">{{=note}}</textarea>
 </form>
 </script>
