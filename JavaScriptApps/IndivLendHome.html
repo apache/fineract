@@ -46,7 +46,25 @@
 <script>
 $(document).ready(function() {
 
-	setCulture('en');	
+	baseCulture = 'en';
+	if (QueryParameters["baseCulture"]) baseCulture = QueryParameters["baseCulture"];
+	switch(baseCulture)
+	{
+			case "en":
+  				break;
+			case "fr":
+  				break;
+			case "es":
+  				break;
+			case "pt":
+  				break;
+			case "zh":
+  				break;
+			default:
+  				alert("The culture/language you specified (" + baseCulture + ") isn't available so will default to 'en' (English).");
+				baseCulture = 'en';
+	}
+	setCulture(baseCulture);	
 
 	jsViewsRegisterHelpers();
 
