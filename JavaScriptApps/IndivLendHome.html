@@ -14,28 +14,41 @@
 <link rel="stylesheet" type="text/css" href="resources/excel/excel-2007.css" />
 
 <link rel="stylesheet" type="text/css" href="resources/stretchyreporting/stretchyreporting.css">
-<link rel="stylesheet" type="text/css" href="resources/IndividualLendingCode.css" />
+<link rel="stylesheet" type="text/css" href="resources/IndividualLendingCode-1.0.css" />
 
+<!-- JQuery/JQuery UI is used. JQuery data tables are used to display rows of data - especially in reporting (stretchyreporting) -->
 <script type="text/javascript" src="resources/libs/jquery-1.7.min.js"></script>
 <script type="text/javascript" src="resources/libs/jquery-ui-1.8.16.custom/js/jquery-ui-1.8.16.custom.min.js"></script>
 <script type="text/javascript" src="resources/libs/DataTables-1.8.2/media/js/jquery.dataTables.min.js"></script>
 <script type="text/javascript" src="resources/libs/jquery.dataTables.TitleNumeric.js"></script>
 <script type="text/javascript" src="resources/libs/DataTables-1.8.2/extras/TableTools/media/js/ZeroClipboard.js"></script>
 <script type="text/javascript" src="resources/libs/DataTables-1.8.2/extras/TableTools/media/js/TableTools.min.js"></script>
+
+<!-- JQuery I18N plug-in -->
 <script type="text/javascript" src="resources/libs/jquery.i18n.properties-min-1.0.9.js"></script>
+
+<!-- JQuery Template plug-in and code (for rendering UI functionality) -->
 <script type="text/javascript" src="resources/libs/jsrender.js"></script>
 <script type="text/javascript" src="resources/libs/jquery.views.js"></script>
 <script type="text/javascript" src="resources/libs/jquery.observable.min.js"></script>
+
+<!-- JQuery globalize plug-in -->
 <script type="text/javascript" src="resources/libs/globalize/globalize.js"></script>
+
+<!-- JQuery plug-in to show Mifos X Platform additional data -->
 <script type="text/javascript" src="resources/stretchydata-0.952.js"></script>
 
+<!-- JQuery plug-in to show Mifos X Platform reporting -->
 <script type="text/javascript" src="resources/stretchyreporting/stretchyreporting-0.991.js"></script>
+
+<!-- Google charts api (used in stretchyreporting) -->
 <script type="text/javascript" src="https://www.google.com/jsapi"></script>
 <script type="text/javascript">
 	google.load("visualization", "1", {packages:["corechart"]});
 </script>
 
-<script type="text/javascript" src="resources/IndividualLendingCode.js"></script>
+<!-- This is a single Page javascript app - IndividualLendingCode.js has functions which switch functionality by replacing the html in the #container div -->
+<script type="text/javascript" src="resources/IndividualLendingCode-1.0.js"></script>
 
 </head>
 
@@ -44,6 +57,8 @@
 <div id="container"></div>
 <script>
 $(document).ready(function() {
+
+//IndividualLendingCode.js is the file to look at
 	initialiseAndShowILLogon();
 });
 </script>
@@ -51,9 +66,9 @@ $(document).ready(function() {
 
 
 <!-- Everything below here is just templates for jsrender to process in order to display the various pages -->
-<!-- Normally this would be put in a server side include... but you need to run the html through a web server for that to work -->
+<!-- Normally this would be put in a server side include... but you need to run the html through a web server for those to work -->
 <!-- If anyone knows how to include this text without the need for a web server that would help a lot. -->
-<!-- I guess I could just read the file and write it into the DOM -->
+<!-- I guess I could just read the file and write it into the DOM but probably not worth it -->
 
 <!-- portfolio templates -->
 <script id="newLoanScheduleTemplate" type="text/x-jquery-tmpl"><table id="repaymentschedule" class="pretty displayschedule">
