@@ -83,12 +83,12 @@ function showMainContainer(containerDivName, username) {
 
 
 function showILLogon(logonDivName) {
-
-	var htmlVar = '<form name = "logonform"><table><tr><td>' + doI18N("login.username") + ':</td><td><input type="text" name="username"></td></tr>';
+	var htmlVar = '<div id=theLogonForm><img style="float:left; border: 0;" alt="" src="resources/mifos.jpg"/><div id=appTitle>' + doI18N("app.name") + '</div>';
+	htmlVar += '<form name = "logonform"><table id=logonTable><tr><td>' + doI18N("login.username") + ':</td><td><input type="text" name="username"></td></tr>';
 	htmlVar += '<tr><td>' + doI18N("login.password") + ': </td><td><input type="password" name="pwd"></td></tr>';
 	htmlVar += '<tr><td><input type="button" value="Logon" name="Submit" ';
 	htmlVar += 'onclick= "setBasicAuthKey(' + "'" + logonDivName + "'" + ', document.logonform.username.value, document.logonform.pwd.value )"></td><td></td></tr></table></form>';
-	htmlVar += '<div id=formerrors></div>';
+	htmlVar += '<div id=formerrors></div></div>';
 
 	$("#" + logonDivName).html(htmlVar);
 }
