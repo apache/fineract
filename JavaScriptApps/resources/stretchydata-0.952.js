@@ -25,6 +25,17 @@
 			return;
 		}
 
+
+		editLabel = "Edit";	
+		if (params.editLabel) editLabel = params.editLabel;
+
+		saveLabel = "Save";
+		if (params.saveLabel) saveLabel = params.saveLabel;
+
+		cancelLabel = "Cancel";		
+		if (params.cancelLabel) cancelLabel = params.cancelLabel;
+
+
 		var headingPrefix = "";
 		if (params.headingPrefix)
 			headingPrefix = params.headingPrefix;
@@ -108,11 +119,10 @@
 
 		var popupVar = "jQuery.stretchyData.popupEditDialog('" + url + "', '" + basicAuthKey + "', '"
 				+ datasetType + "', '" + datasetName + "', " + datasetPKValue
-				+ ", '" + dsnDivName + "', '" + doI18N("Edit") + " "
-				+ doI18N(datasetName) + "', 900, 500)";
-		var editLink = '<A HREF="#" onClick="' + popupVar + '">'
-				+ doI18N("Edit") + '</A><br>';
-		// alert(editLink);
+				+ ", '" + dsnDivName + "', '" + editLabel + " "
+				+ doI18N(datasetName) + "', 900, 500);return false;";
+		var editLink = '<A HREF="unknown.html" onClick="' + popupVar + '">'
+				+ editLabel + '</A><br>';
 		return editLink;
 	}
 
@@ -365,10 +375,8 @@
 
 	function extraDataOpenDialog(url, basicAuthKey) {
 
-		// var saveButton = jQuery.i18n.prop('dialog.button.save');
-		// var cancelButton = jQuery.i18n.prop('dialog.button.cancel');
-		var saveButton = "save";
-		var cancelButton = "cancel"
+		var saveButton = saveLabel;
+		var cancelButton = cancelLabel;
 
 		var buttonsOpts = {};
 		buttonsOpts[saveButton] = function() {

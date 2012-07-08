@@ -133,7 +133,7 @@ function setClientListingContent(divName) {
 function setClientContent(divName) {
 
 	var htmlVar = '<div id="newtabs">	<ul><li><a href="nothing"'; 
-	htmlVar += ' title="clienttab" class="topleveltab"><span id="clienttabname">Loading...</span></a></li></ul><div id="clienttab"></div></div>';
+	htmlVar += ' title="clienttab" class="topleveltab"><span id="clienttabname">' + doI18N("app.loading") + '</span></a></li></ul><div id="clienttab"></div></div>';
 	$("#" + divName).html(htmlVar);
 }
 
@@ -204,7 +204,7 @@ function setReportingContent(divName) {
  	htmlVar += '  <td valign="top"><div id=myClearReportButton></div></td>';
  	htmlVar += '  <td valign="bottom">';
  	htmlVar += '		<select id=decimalsChoice onChange="selectNewDecimals(options[selectedIndex].value)" >';
- 	htmlVar += '		<option value="" selected="selected">Decimals</option>';
+ 	htmlVar += '		<option value="" selected="selected">' + doI18N("reporting.decimals") + '</option>';
  	htmlVar += '		<option value="4">4</option>';
  	htmlVar += '		<option value="3">3</option>';
  	htmlVar += '		<option value="2">2</option>';
@@ -217,7 +217,7 @@ function setReportingContent(divName) {
  	htmlVar += '   </td>';
  	htmlVar += '  <td valign="bottom">';
  	htmlVar += '		<select id=decimalsThousandsSep onChange="selectNewThousandsSep(options[selectedIndex].value)" >';
- 	htmlVar += '		<option value="" selected="selected">Format</option>';
+ 	htmlVar += '		<option value="" selected="selected">' + doI18N("reporting.format") + '</option>';
  	htmlVar += '		<option value=",.">1,234,567.89</option>';
  	htmlVar += '		<option value=".,">1.234.567,89</option>';
  	htmlVar += '		<option value=" ,">1 234 567,89</option>';
@@ -811,7 +811,10 @@ function showILClient(clientId) {
 							headingPrefix: "", 
 							headingClass: "", 
 							labelClass: "longrowlabel",
-							valueClass:	"rowvalue"					
+							valueClass:	"rowvalue",
+							editLabel: doI18N("link.edit"),	
+							saveLabel: doI18N("dialog.button.save"),	
+							cancelLabel: doI18N("dialog.button.cancel")				
 					};
 					jQuery.stretchyData.displayAllExtraData(additionalFieldsParams);
 	        };
@@ -1238,7 +1241,10 @@ function loadILLoan(loanId) {
 							headingPrefix: "", 
 							headingClass: "", 
 							labelClass: "longrowlabel",
-							valueClass:	"rowvalue"					
+							valueClass:	"rowvalue",
+							editLabel: doI18N("link.edit"),	
+							saveLabel: doI18N("dialog.button.save"),	
+							cancelLabel: doI18N("dialog.button.cancel")						
 				};
 				jQuery.stretchyData.displayAllExtraData(additionalFieldsParams)
 	        };
@@ -1543,6 +1549,7 @@ var reportingParams = {
 	RESTUrl: baseApiUrl + "reports",
 	basicAuthKey: base64,
 	pentahoUrl: baseApiUrl + "pentahoreport",
+	initialLanguage: currentCulture,
 	bundleDir: "resources/stretchyreporting/mifosngbundle/",
 	reportsListDiv: "myListOfReports",
 	runReportDiv: "myRunReportButton",
@@ -1698,17 +1705,17 @@ function setCultureReshowListing(cultureVal) {
 
 
 function setCulture(cultureVal) {
-
-    	Globalize.culture(cultureVal);
+	currentCulture = cultureVal;
+    	Globalize.culture(currentCulture);
     	
-    	$.datepicker.setDefaults( $.datepicker.regional[cultureVal]);
+    	$.datepicker.setDefaults( $.datepicker.regional[currentCulture]);
     	
     	jQuery.i18n.properties({
 			name:'messages', 
 			path: 'resources/global-translations/',
 			mode:'map',
 			cache: true,
-			language: cultureVal,
+			language: currentCulture,
 			callback: function() {
 			}
 		});
