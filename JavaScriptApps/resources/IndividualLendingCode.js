@@ -1654,6 +1654,7 @@ function signOut(containerDivName) {
 
 //utility functions
 function initialiseAndShowILLogon() {
+	jQuery.support.cors = true;
 
 	setInitialCulture();
 
