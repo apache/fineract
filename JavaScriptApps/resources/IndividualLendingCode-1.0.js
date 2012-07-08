@@ -8,6 +8,10 @@ formErrorFunction = function(jqXHR, textStatus, errorThrown) {
 				    	handleXhrError(jqXHR, textStatus, errorThrown, "#formErrorsTemplate", "#formerrors");
 				};
 
+
+
+
+
 function executeAjaxRequest(url, verbType, jsonData, successFunction, errorFunction) { 
 
 	var jqxhr = $.ajax({ 
@@ -24,19 +28,6 @@ function executeAjaxRequest(url, verbType, jsonData, successFunction, errorFunct
 				error : errorFunction 
 			}); 
 }
-
-
-highlightMissingXlations = "Y";
-function doI18N(xlateStr, params) { 
-	if (highlightMissingXlations == "Y") return jQuery.i18n.prop(xlateStr, params)
-	else
-	{
-		var xlated = jQuery.i18n.prop(xlateStr, params);
-		if (xlated.substr(0,1) == "[" && xlated.substr(xlated.length - 1, 1) == "]") return xlated.substr(1, xlated.length - 2)
-		else return xlated;
-	}
-}
-
 
 
 // load html functions
@@ -81,7 +72,6 @@ function showMainContainer(containerDivName, username) {
 }
 
 
-
 function showILLogon(logonDivName) {
 	var htmlVar = '<div id=theLogonForm><img style="float:left; border: 0;" alt="" src="resources/mifos.jpg"/><div id=appTitle>' + doI18N("app.name") + '</div>';
 	htmlVar += '<form name = "logonform"><table id=logonTable><tr><td>' + doI18N("login.username") + ':</td><td><input type="text" name="username"></td></tr>';
@@ -92,35 +82,6 @@ function showILLogon(logonDivName) {
 
 	$("#" + logonDivName).html(htmlVar);
 }
-
-
-function setBasicAuthKey(logonDivName, username, password) 
-{ 
-	base64 = "";
-	currentUser = -1;
-	currentUserName = "";
-
-	var url = "authentication?username=" + username + "&password=" + password;
-	var successFunction = function(data, textStatus, jqXHR) { 
-					base64 = data.base64EncodedAuthenticationKey; 
-					currentUser = data.userId;
-					currentUserName = data.username;
-
-					showMainContainer(logonDivName, username);
-					showILClientListing();
-					return false;
-			};
-
-	var errorFunction = function(jqXHR, textStatus, errorThrown) {
-	        			handleXhrError(jqXHR, textStatus, errorThrown, "#formErrorsTemplate", "#formerrors");
-					return true;
-				};
-
-	executeAjaxRequest(url, 'POST', "", successFunction, errorFunction);
-}
-
-
-
 
 
 function setClientListingContent(divName) {
@@ -143,6 +104,7 @@ function setAddLoanContent(divName) {
 	var htmlVar = '<div id="inputarea"></div><div id="schedulearea"></div>'
 	$("#" + divName).html(htmlVar);
 }
+
 
 function setOrgAdminContent(divName) {
 
@@ -168,6 +130,7 @@ function setOrgAdminContent(divName) {
 	htmlVar += '<div id="listplaceholder" ></div>';
 	$("#" + divName).html(htmlVar);
 }
+
 
 function setUserAdminContent(divName) {
 
@@ -250,434 +213,6 @@ function setAccountSettingsContent(divName) {
 
 
 
-
-function jsViewsRegisterHelpers() {
-
-	// these helpers are registered for the jsViews and jsRender functionality to fix bug with display zero! 
-	// plus some utility functions are added also
-	$.views.registerHelpers({
-			
-			money: function(monetaryObj) {
-				
-				Globalize.culture().numberFormat.currency.symbol = monetaryObj.displaySymbol;
-				
-				var digits = monetaryObj.digitsAfterDecimal.toFixed(0);
-				return Globalize.format(monetaryObj.amount, "n" + digits); 
-			},
-			moneyWithCurrency: function(monetaryObj) {
-				
-				Globalize.culture().numberFormat.currency.symbol = monetaryObj.displaySymbol;
-				
-				var digits = monetaryObj.digitsAfterDecimal.toFixed(0);
-				return Globalize.format(monetaryObj.amount, "c" + digits); 
-			},
-			decimal: function(number, digits) {
-		      try {
-		    	return Globalize.format(number, "n" + digits); 
-		      } catch(e) {
-		        return number +"(NaN)";
-		      }
-		    },
-			number: function(number) {
-		      try {
-		    	  return Globalize.format(number, "n0"); 
-		      } catch(e) {
-		        return number +"(NaN)";
-		      }
-		    },
-		    numberGreaterThanZero: function(number) {
-			      try {
-			    	var num = number.toFixed(0);
-			        return num > 0;
-			      } catch(e) {
-			        return false;
-			      }
-			},
-			globalDate: function(dateParts) {
-			      try {
-			    	  if (undefined != dateParts)
-				  {
-			    	  	var year = dateParts[0];
-			    	  	var month = parseInt(dateParts[1]) - 1; // month is zero indexed
-			    	  	var day = dateParts[2];
-			    	  
-			    	  	var d = new Date();
-			    	  	d.setFullYear(year,month,day);
-			    	  
-			    	  	return Globalize.format(d,"dd MMMM yyyy");
-				  }
-				  else return "";
-			      } catch(e) {
-			        return "??";
-			      }
-			},
-			globalDateAsISOString: function(localDateAsISOString) {
-				
-			      try {
-			    	  var dateParts = localDateAsISOString.split("-")
-			    	  var year = dateParts[0];
-			    	  var month = parseInt(dateParts[1]) - 1; // month is zero indexed
-			    	  var day = dateParts[2];
-			    	  
-			    	  var d = new Date();
-			    	  d.setFullYear(year,month,day);
-			    	  
-			    	  return Globalize.format(d,"dd MMMM yyyy");
-			      } catch(e) {
-			        return "??";
-			      }
-			},
-			globalDateTime: function(dateInMillis) {
-			      try {
-			    	  var d = new Date(dateInMillis);
-			    	  
-			    	  return Globalize.format(d,"F");
-			      } catch(e) {
-			        return "??";
-			      }
-			},
-			currentLocale: function() {
-			      try {
-			    	  return Globalize.culture().name;
-			      } catch(e) {
-			        return "??";
-			      }
-			},
-			doI18N: function(xlateStr, params) {
-			      try {
-			    	  return doI18N(xlateStr, params);
-			      } catch(e) {
-			        return xlateStr;
-			      }
-			}
-	});
-}
-
-		
-	function removeErrors(placeholderDiv) {
-		// remove error class from all input fields
-		var $inputs = $('#entityform :input');
-		
-	    $inputs.each(function() {
-	        $(this).removeClass("ui-state-error");
-	    });
-		
-	  	$(placeholderDiv).html("");
-	}
-	
-	function handleXhrError(jqXHR, textStatus, errorThrown, templateSelector, placeholderDiv) {
-	  	if (jqXHR.status === 0) {
-		    alert('No connection. Verify application is running.');
-	  	} else if (jqXHR.status == 401) {
-			alert('Unauthorized. [401]');
-		} else if (jqXHR.status == 404) {
-		    alert('Requested page not found. [404]');
-		} else if (jqXHR.status == 405) {
-			alert('HTTP verb not supported [405]: ' + errorThrown);
-		} else if (jqXHR.status == 500) {
-		    alert('Internal Server Error [500].');
-		} else if (errorThrown === 'parsererror') {
-		    alert('Requested JSON parse failed.');
-		} else if (errorThrown === 'timeout') {
-		    alert('Time out error.');
-		} else if (errorThrown === 'abort') {
-		    alert('Ajax request aborted.');
-		} else {
-			
-			removeErrors(placeholderDiv);
-			
-		  	var jsonErrors = JSON.parse(jqXHR.responseText);
-		  	console.log(jsonErrors);
-		  	var valErrors = jsonErrors.errors;
-		  	console.log(valErrors);
-		  	var errorArray = new Array();
-		  	var arrayIndex = 0;
-		  	$.each(valErrors, function() {
-		  	  var fieldId = '#' + this.parameterName;
-		  	  $(fieldId).addClass("ui-state-error");
-		  	  
-		  	  var errorObj = new Object();
-		  	  errorObj.field = this.parameterName;
-		  	  errorObj.code = this.userMessageGlobalisationCode;
-		  	  
-		  	  var argArray = new Array();
-		  	  var argArrayIndex = 0;
-		  	  $.each(this.args, function() {
-		  		argArray[argArrayIndex] = this.value;
-		  		argArrayIndex++;
-		  	  });
-		  	  // hardcoded support for six arguments
-		  	  errorObj.message = doI18N(this.userMessageGlobalisationCode, argArray[0], argArray[1], argArray[2], argArray[3], argArray[4], argArray[5]);
-		  	  errorObj.value = this.value;
-		  	  
-		  	  errorArray[arrayIndex] = errorObj;
-		  	  arrayIndex++
-		  	});
-		  	
-		  	var templateArray = new Array();
-		  	var templateErrorObj = new Object();
-		  	templateErrorObj.title = doI18N('error.msg.header');
-		  	templateErrorObj.errors = errorArray;
-		  	
-		  	templateArray[0] = templateErrorObj;
-		  	
-		  	var formErrorsHtml = $(templateSelector).render(templateArray);
-		  	
-		  	$(placeholderDiv).append(formErrorsHtml);
-		}
-	}
-	
-	function showNotAvailableDialog(titleCode) {
-		var dialogDiv = $("<div id='notavailable-dialog-form'></div>");
-		
-		dialogDiv.append("<p>" + doI18N('dialog.messages.functionality.not.available') + "</p>");
-		
-		var okButton = doI18N('dialog.button.ok');
-		
-		var buttonsOpts = {};
-		buttonsOpts[okButton] = function() {$(this).dialog("close");};
-		
-		dialogDiv.dialog({
-	  		title: doI18N(titleCode), 
-	  		width: 300, 
-	  		height: 200, 
-	  		modal: true,
-	  		buttons: buttonsOpts,
-	  		close: function() {
-	  			// if i dont do this, theres a problem with errors being appended to dialog view second time round
-	  			$(this).remove();
-			}
-		 }).dialog('open');
-	}
-	
-	$.fn.serializeObject = function()
-	{
-	    var o = {};
-	    var a = this.serializeArray();
-	    $.each(a, function() {
-	    	if (this.name === 'notSelectedCurrencies' || this.name === 'notSelectedPermissions' || this.name === 'notSelectedRoles') {
-	    		// do not serialize
-	    	} else  {
-
-	        if (o[this.name] !== undefined) {
-	            if (!o[this.name].push) {
-	                o[this.name] = [o[this.name]];
-	            }
-	            o[this.name].push(this.value || '');
-	        } else {
-	        	
-	        	if (this.name === 'selectedItems' || this.name === 'notSelectedItems' || this.name === 'currencies' || this.name === 'permissions' || this.name === 'roles') {
-	        		o[this.name] = new Array();
-	        		o[this.name].push(this.value || '');
-	        	} else {
-	        		o[this.name] = this.value || '';	
-	        	}
-	        }
-		}
-	    });
-	    return o;
-	};
-	
-	function popupDialogWithFormView(getUrl, postUrl, submitType, titleCode, templateSelector, width, height, saveSuccessFunction) {
-
-		var successFunction = function(data, textStatus, jqXHR) {
-				console.log(data);
-				popupDialogWithFormViewData(data, postUrl, submitType, titleCode, templateSelector, width, height, saveSuccessFunction);
-		  	};
-		
-		if (getUrl == "") popupDialogWithFormViewData("", postUrl, submitType, titleCode, templateSelector, width, height, saveSuccessFunction)
-		else executeAjaxRequest(getUrl, "GET", "", successFunction, formErrorFunction);
-
-	}
-	function popupDialogWithFormViewData(data, postUrl, submitType, titleCode, templateSelector, width, height, saveSuccessFunction)  {
-				var dialogDiv = $("<div id='dialog-form'></div>");
-				var formHtml = $(templateSelector).render(data);
-				dialogDiv.append(formHtml);
-				var saveButton = doI18N('dialog.button.save');
-				var cancelButton = doI18N('dialog.button.cancel');
-				
-				var buttonsOpts = {};
-				buttonsOpts[saveButton] = function() {
-					
-					$('#notSelectedPermissions option').each(function(i) {  
-						$(this).attr("selected", "selected");  
-					});
-				    	
-				    	$('#permissions option').each(function(i) {  
-				    	   	$(this).attr("selected", "selected");  
-				    	});
-
-
-				    	$('#notSelectedRoles option').each(function(i) {  
-						$(this).attr("selected", "selected");  
-					});
-				    	$('#roles option').each(function(i) {  
-				    	   	$(this).attr("selected", "selected");  
-				    	});
-					
-
-					$('#notSelectedItems option').each(function(i) {  
-				    	   $(this).attr("selected", "selected");  
-				    	});
-			    		$('#selectedItems option').each(function(i) {  
-			    	   		$(this).attr("selected", "selected");  
-			    		});
-			    	
-
-					$('#notSelectedCurrencies option').each(function(i) {  
-					    	   	$(this).attr("selected", "selected");  
-					});
-				    	$('#currencies option').each(function(i) {  
-				    	   		$(this).attr("selected", "selected");  
-				    	});
-
-			    		var newFormData = JSON.stringify($('#entityform').serializeObject());
-			    		console.log(newFormData);
-			    	
-					executeAjaxRequest(postUrl, submitType, newFormData, saveSuccessFunction, formErrorFunction);
-
-				};
-				
-				buttonsOpts[cancelButton] = function() {$(this).dialog( "close" );};
-				
-				dialogDiv.dialog({
-				  		title: doI18N(titleCode), 
-				  		width: width, 
-				  		height: height, 
-				  		modal: true,
-				  		buttons: buttonsOpts,
-				  		close: function() {
-				  			// if i dont do this, theres a problem with errors being appended to dialog view second time round
-				  			$(this).remove();
-						},
-				  		open: function (event, ui) {
-
-					  		$('#addpermissions').click(function() {  
-					  			return !$('#notSelectedPermissions option:selected').remove().appendTo('#permissions');  
-					  		});
-					  		$('#removepermissions').click(function() {  
-					  			return !$('#permissions option:selected').remove().appendTo('#notSelectedPermissions');  
-					  		}); 
-
-				  			$('#addroles').click(function() {  
-					  			return !$('#notSelectedRoles option:selected').remove().appendTo('#roles');  
-					  		});	
-					  		$('#removeroles').click(function() {  
-					  			return !$('#roles option:selected').remove().appendTo('#notSelectedRoles');  
-					  		}); 
-
-				  			$('#add').click(function() {  
-				  			     return !$('#notSelectedItems option:selected').remove().appendTo('#selectedItems');  
-				  			});
-				  			$('#remove').click(function() {  
-				  				return !$('#selectedItems option:selected').remove().appendTo('#notSelectedItems');  
-				  			});
-				  			
-
-					  		$('#addcurrencies').click(function() {  
-					  			return !$('#notSelectedCurrencies option:selected').remove().appendTo('#currencies');  
-					  		});
-					  		$('#removecurrencies').click(function() {  
-					  			return !$('#currencies option:selected').remove().appendTo('#notSelectedCurrencies');  
-					  		});
-
-
-				  			$('.datepickerfield').datepicker({constrainInput: true, maxDate: 0, dateFormat: 'dd MM yy'});
-				  			
-				  			$("#entityform textarea").first().focus();
-				  			$('#entityform input').first().focus();
-				  		}
-				  	}).dialog('open');
-	}
-
-	function popupDialogWithPostOnlyFormView(postUrl, submitType, titleCode, templateSelector, width, height, saveSuccessFunction, minOffset, defaultOffset, maxOffset) {
-		var dialogDiv = $("<div id='dialog-form'></div>");
-		var data = new Object();
-		var formHtml = $(templateSelector).render(data);
-		dialogDiv.append(formHtml);
-		
-		var saveButton = doI18N('dialog.button.save');
-		var cancelButton = doI18N('dialog.button.cancel');
-		var buttonsOpts = {};		
-		buttonsOpts[saveButton] = function() {
-			$('.multiSelectedItems option').each(function(i) {  
-		    	   		$(this).attr("selected", "selected");  
-		    		});
-
-			var newFormData = JSON.stringify($('#entityform').serializeObject());
-			console.log(newFormData);
-
-			executeAjaxRequest(postUrl, submitType, newFormData, saveSuccessFunction, formErrorFunction);
-		};
-		buttonsOpts[cancelButton] = function() {$(this).dialog( "close" );};
-		
-		dialogDiv.dialog({
-		  		title: doI18N(titleCode), 
-		  		width: width, 
-		  		height: height, 
-		  		modal: true,
-		  		buttons: buttonsOpts,
-		  		close: function() {
-		  			// if i dont do this, theres a problem with errors being appended to dialog view second time round
-		  			$(this).remove();
-				},
-		  		open: function (event, ui) {
-		  			$('.multiadd').click(function() {  
-		  			     return !$('.multiNotSelectedItems option:selected').remove().appendTo('#selectedItems');  
-		  			});
-		  			
-		  			$('.multiremove').click(function() {  
-		  				return !$('.multiSelectedItems option:selected').remove().appendTo('#notSelectedItems');  
-		  			});
-		  			
-		  			$('.datepickerfield').datepicker({constrainInput: true, minDate: minOffset, defaultDate: defaultOffset, maxDate: maxOffset, dateFormat: 'dd MM yy'});
-		  			
-		  			$("#entityform textarea").first().focus();
-		  			$('#entityform input').first().focus();
-		  		}
-		  }).dialog('open');
-	}
-	function popupConfirmationDialogAndPost(url, submitType, titleCode, width, height, tabIndex, redirectUrl) {
-		    var dialogDiv = $("<div id='dialog-form'><div id='formerrors'></div>" + doI18N('text.confirmation.required') + "</div>");
-		  
-		  	var confirmButton = doI18N('dialog.button.confirm');
-			var cancelButton = doI18N('dialog.button.cancel');
-			
-			var buttonsOpts = {};
-			buttonsOpts[confirmButton] = function() {
-				var saveSuccessFunction = function(data, textStatus, jqXHR) {
-						  			dialogDiv.dialog("close");
-					  				//$newtabs.tabs('load', tabIndex);
-									alert("should be reloaded this loan tab");
-					  			}
-				 
-				executeAjaxRequest(url, submitType, "", saveSuccessFunction, formErrorFunction);
-
-			};
-			
-			buttonsOpts[cancelButton] = function() {$(this).dialog( "close" );};
-		  
-		  
-		  dialogDiv.dialog({
-		  		title: doI18N(titleCode), 
-		  		width: width, 
-		  		height: height, 
-		  		modal: true,
-		  		buttons: buttonsOpts,
-		  		close: function() {
-		  			// if i dont do this, theres a problem with errors being appended to dialog view second time round
-		  			$(this).remove();
-				},
-		  		open: function (event, ui) {}
-		  	}).dialog('open');
-	 }
-	
-
-
-
-
-
-
 //all the code for the various functions
 
 function showILClientListing() {
@@ -748,7 +283,7 @@ function showILClient(clientId) {
 
 	var successFunction = function(data, status, xhr) {
 	        		currentClientId = clientId;
-				clientDirty = false;
+				clientDirty = false; //not coded but intended to refresh client if some date on its display has changed e.g. loan status
 	        		var currentTabIndex = $newtabs.tabs('option', 'selected');
 	            	var currentTabAnchor = $newtabs.data('tabs').anchors[currentTabIndex];
 	            
@@ -1591,8 +1126,8 @@ function selectNewThousandsSep(selectedVal) {
 	}
 }
 
-//account settings
 
+//account settings
 function showILAccountSettings() {
 
 	setAccountSettingsContent("content"); 
@@ -1648,6 +1183,232 @@ function showILAccountSettings() {
 	
 
 
+//authenticate user and set global details
+function setBasicAuthKey(logonDivName, username, password) 
+{ 
+	base64 = "";
+	currentUser = -1;
+	currentUserName = "";
+
+	var url = "authentication?username=" + username + "&password=" + password;
+	var successFunction = function(data, textStatus, jqXHR) { 
+					base64 = data.base64EncodedAuthenticationKey; 
+					currentUser = data.userId;
+					currentUserName = data.username;
+
+					showMainContainer(logonDivName, username);
+					showILClientListing();
+					return false;
+			};
+
+	var errorFunction = function(jqXHR, textStatus, errorThrown) {
+	        			handleXhrError(jqXHR, textStatus, errorThrown, "#formErrorsTemplate", "#formerrors");
+					return true;
+				};
+
+	executeAjaxRequest(url, 'POST', "", successFunction, errorFunction);
+}
+
+
+
+
+//Popups used for saving data and confirmation	
+function popupDialogWithFormView(getUrl, postUrl, submitType, titleCode, templateSelector, width, height, saveSuccessFunction) {
+
+		var successFunction = function(data, textStatus, jqXHR) {
+				//console.log(data);
+				popupDialogWithFormViewData(data, postUrl, submitType, titleCode, templateSelector, width, height, saveSuccessFunction);
+		  	};
+		
+		if (getUrl == "") popupDialogWithFormViewData("", postUrl, submitType, titleCode, templateSelector, width, height, saveSuccessFunction)
+		else executeAjaxRequest(getUrl, "GET", "", successFunction, formErrorFunction);
+
+}
+function popupDialogWithFormViewData(data, postUrl, submitType, titleCode, templateSelector, width, height, saveSuccessFunction)  {
+				var dialogDiv = $("<div id='dialog-form'></div>");
+				var formHtml = $(templateSelector).render(data);
+				dialogDiv.append(formHtml);
+				var saveButton = doI18N('dialog.button.save');
+				var cancelButton = doI18N('dialog.button.cancel');
+				
+				var buttonsOpts = {};
+				buttonsOpts[saveButton] = function() {
+					
+					$('#notSelectedPermissions option').each(function(i) {  
+						$(this).attr("selected", "selected");  
+					});
+				    	
+				    	$('#permissions option').each(function(i) {  
+				    	   	$(this).attr("selected", "selected");  
+				    	});
+
+
+				    	$('#notSelectedRoles option').each(function(i) {  
+						$(this).attr("selected", "selected");  
+					});
+				    	$('#roles option').each(function(i) {  
+				    	   	$(this).attr("selected", "selected");  
+				    	});
+					
+
+					$('#notSelectedItems option').each(function(i) {  
+				    	   $(this).attr("selected", "selected");  
+				    	});
+			    		$('#selectedItems option').each(function(i) {  
+			    	   		$(this).attr("selected", "selected");  
+			    		});
+			    	
+
+					$('#notSelectedCurrencies option').each(function(i) {  
+					    	   	$(this).attr("selected", "selected");  
+					});
+				    	$('#currencies option').each(function(i) {  
+				    	   		$(this).attr("selected", "selected");  
+				    	});
+
+			    		var newFormData = JSON.stringify($('#entityform').serializeObject());
+			    		console.log(newFormData);
+			    	
+					executeAjaxRequest(postUrl, submitType, newFormData, saveSuccessFunction, formErrorFunction);
+
+				};
+				
+				buttonsOpts[cancelButton] = function() {$(this).dialog( "close" );};
+				
+				dialogDiv.dialog({
+				  		title: doI18N(titleCode), 
+				  		width: width, 
+				  		height: height, 
+				  		modal: true,
+				  		buttons: buttonsOpts,
+				  		close: function() {
+				  			// if i dont do this, theres a problem with errors being appended to dialog view second time round
+				  			$(this).remove();
+						},
+				  		open: function (event, ui) {
+
+					  		$('#addpermissions').click(function() {  
+					  			return !$('#notSelectedPermissions option:selected').remove().appendTo('#permissions');  
+					  		});
+					  		$('#removepermissions').click(function() {  
+					  			return !$('#permissions option:selected').remove().appendTo('#notSelectedPermissions');  
+					  		}); 
+
+				  			$('#addroles').click(function() {  
+					  			return !$('#notSelectedRoles option:selected').remove().appendTo('#roles');  
+					  		});	
+					  		$('#removeroles').click(function() {  
+					  			return !$('#roles option:selected').remove().appendTo('#notSelectedRoles');  
+					  		}); 
+
+				  			$('#add').click(function() {  
+				  			     return !$('#notSelectedItems option:selected').remove().appendTo('#selectedItems');  
+				  			});
+				  			$('#remove').click(function() {  
+				  				return !$('#selectedItems option:selected').remove().appendTo('#notSelectedItems');  
+				  			});
+				  			
+
+					  		$('#addcurrencies').click(function() {  
+					  			return !$('#notSelectedCurrencies option:selected').remove().appendTo('#currencies');  
+					  		});
+					  		$('#removecurrencies').click(function() {  
+					  			return !$('#currencies option:selected').remove().appendTo('#notSelectedCurrencies');  
+					  		});
+
+
+				  			$('.datepickerfield').datepicker({constrainInput: true, maxDate: 0, dateFormat: 'dd MM yy'});
+				  			
+				  			$("#entityform textarea").first().focus();
+				  			$('#entityform input').first().focus();
+				  		}
+				  	}).dialog('open');
+}
+
+
+function popupDialogWithPostOnlyFormView(postUrl, submitType, titleCode, templateSelector, width, height, saveSuccessFunction, minOffset, defaultOffset, maxOffset) {
+		var dialogDiv = $("<div id='dialog-form'></div>");
+		var data = new Object();
+		var formHtml = $(templateSelector).render(data);
+		dialogDiv.append(formHtml);
+		
+		var saveButton = doI18N('dialog.button.save');
+		var cancelButton = doI18N('dialog.button.cancel');
+		var buttonsOpts = {};		
+		buttonsOpts[saveButton] = function() {
+			$('.multiSelectedItems option').each(function(i) {  
+		    	   		$(this).attr("selected", "selected");  
+		    		});
+
+			var newFormData = JSON.stringify($('#entityform').serializeObject());
+			console.log(newFormData);
+
+			executeAjaxRequest(postUrl, submitType, newFormData, saveSuccessFunction, formErrorFunction);
+		};
+		buttonsOpts[cancelButton] = function() {$(this).dialog( "close" );};
+		
+		dialogDiv.dialog({
+		  		title: doI18N(titleCode), 
+		  		width: width, 
+		  		height: height, 
+		  		modal: true,
+		  		buttons: buttonsOpts,
+		  		close: function() {
+		  			// if i dont do this, theres a problem with errors being appended to dialog view second time round
+		  			$(this).remove();
+				},
+		  		open: function (event, ui) {
+		  			$('.multiadd').click(function() {  
+		  			     return !$('.multiNotSelectedItems option:selected').remove().appendTo('#selectedItems');  
+		  			});
+		  			
+		  			$('.multiremove').click(function() {  
+		  				return !$('.multiSelectedItems option:selected').remove().appendTo('#notSelectedItems');  
+		  			});
+		  			
+		  			$('.datepickerfield').datepicker({constrainInput: true, minDate: minOffset, defaultDate: defaultOffset, maxDate: maxOffset, dateFormat: 'dd MM yy'});
+		  			
+		  			$("#entityform textarea").first().focus();
+		  			$('#entityform input').first().focus();
+		  		}
+		  }).dialog('open');
+}
+
+function popupConfirmationDialogAndPost(url, submitType, titleCode, width, height, tabIndex, redirectUrl) {
+		    var dialogDiv = $("<div id='dialog-form'><div id='formerrors'></div>" + doI18N('text.confirmation.required') + "</div>");
+		  
+		  	var confirmButton = doI18N('dialog.button.confirm');
+			var cancelButton = doI18N('dialog.button.cancel');
+			
+			var buttonsOpts = {};
+			buttonsOpts[confirmButton] = function() {
+				var saveSuccessFunction = function(data, textStatus, jqXHR) {
+						  			dialogDiv.dialog("close");
+					  				//$newtabs.tabs('load', tabIndex);
+									alert("should be reloaded this loan tab");
+					  			}
+				 
+				executeAjaxRequest(url, submitType, "", saveSuccessFunction, formErrorFunction);
+
+			};
+			
+			buttonsOpts[cancelButton] = function() {$(this).dialog( "close" );};
+		  
+		  
+		  dialogDiv.dialog({
+		  		title: doI18N(titleCode), 
+		  		width: width, 
+		  		height: height, 
+		  		modal: true,
+		  		buttons: buttonsOpts,
+		  		close: function() {
+		  			// if i dont do this, theres a problem with errors being appended to dialog view second time round
+		  			$(this).remove();
+				},
+		  		open: function (event, ui) {}
+		  	}).dialog('open');
+}
+
 
 
 //sign-out
@@ -1660,6 +1421,19 @@ function signOut(containerDivName) {
 
 
 //utility functions
+
+highlightMissingXlations = "Y";
+function doI18N(xlateStr, params) { 
+	if (highlightMissingXlations == "Y") return jQuery.i18n.prop(xlateStr, params)
+	else
+	{
+		var xlated = jQuery.i18n.prop(xlateStr, params);
+		if (xlated.substr(0,1) == "[" && xlated.substr(xlated.length - 1, 1) == "]") return xlated.substr(1, xlated.length - 2)
+		else return xlated;
+	}
+}
+
+
 function initialiseAndShowILLogon() {
 	jQuery.support.cors = true;
 
@@ -1737,4 +1511,238 @@ QueryParameters = (function()
     }
     return result;
 }());
+
+
+function showNotAvailableDialog(titleCode) {
+		var dialogDiv = $("<div id='notavailable-dialog-form'></div>");
+		
+		dialogDiv.append("<p>" + doI18N('dialog.messages.functionality.not.available') + "</p>");
+		
+		var okButton = doI18N('dialog.button.ok');
+		
+		var buttonsOpts = {};
+		buttonsOpts[okButton] = function() {$(this).dialog("close");};
+		
+		dialogDiv.dialog({
+	  		title: doI18N(titleCode), 
+	  		width: 300, 
+	  		height: 200, 
+	  		modal: true,
+	  		buttons: buttonsOpts,
+	  		close: function() {
+	  			// if i dont do this, theres a problem with errors being appended to dialog view second time round
+	  			$(this).remove();
+			}
+		 }).dialog('open');
+}
+	
+$.fn.serializeObject = function()
+	{
+	    var o = {};
+	    var a = this.serializeArray();
+	    $.each(a, function() {
+	    	if (this.name === 'notSelectedCurrencies' || this.name === 'notSelectedPermissions' || this.name === 'notSelectedRoles') {
+	    		// do not serialize
+	    	} else  {
+
+	        if (o[this.name] !== undefined) {
+	            if (!o[this.name].push) {
+	                o[this.name] = [o[this.name]];
+	            }
+	            o[this.name].push(this.value || '');
+	        } else {
+	        	
+	        	if (this.name === 'selectedItems' || this.name === 'notSelectedItems' || this.name === 'currencies' || this.name === 'permissions' || this.name === 'roles') {
+	        		o[this.name] = new Array();
+	        		o[this.name].push(this.value || '');
+	        	} else {
+	        		o[this.name] = this.value || '';	
+	        	}
+	        }
+		}
+	    });
+	    return o;
+	};
+	
+
+
+
+
+//Error functions		
+function removeErrors(placeholderDiv) {
+		// remove error class from all input fields
+		var $inputs = $('#entityform :input');
+		
+	    $inputs.each(function() {
+	        $(this).removeClass("ui-state-error");
+	    });
+		
+	  	$(placeholderDiv).html("");
+}
+	
+function handleXhrError(jqXHR, textStatus, errorThrown, templateSelector, placeholderDiv) {
+	  	if (jqXHR.status === 0) {
+		    alert('No connection. Verify application is running.');
+	  	} else if (jqXHR.status == 401) {
+			alert('Unauthorized. [401]');
+		} else if (jqXHR.status == 404) {
+		    alert('Requested page not found. [404]');
+		} else if (jqXHR.status == 405) {
+			alert('HTTP verb not supported [405]: ' + errorThrown);
+		} else if (jqXHR.status == 500) {
+		    alert('Internal Server Error [500].');
+		} else if (errorThrown === 'parsererror') {
+		    alert('Requested JSON parse failed.');
+		} else if (errorThrown === 'timeout') {
+		    alert('Time out error.');
+		} else if (errorThrown === 'abort') {
+		    alert('Ajax request aborted.');
+		} else {
+			
+			removeErrors(placeholderDiv);
+			
+		  	var jsonErrors = JSON.parse(jqXHR.responseText);
+		  	console.log(jsonErrors);
+		  	var valErrors = jsonErrors.errors;
+		  	console.log(valErrors);
+		  	var errorArray = new Array();
+		  	var arrayIndex = 0;
+		  	$.each(valErrors, function() {
+		  	  var fieldId = '#' + this.parameterName;
+		  	  $(fieldId).addClass("ui-state-error");
+		  	  
+		  	  var errorObj = new Object();
+		  	  errorObj.field = this.parameterName;
+		  	  errorObj.code = this.userMessageGlobalisationCode;
+		  	  
+		  	  var argArray = new Array();
+		  	  var argArrayIndex = 0;
+		  	  $.each(this.args, function() {
+		  		argArray[argArrayIndex] = this.value;
+		  		argArrayIndex++;
+		  	  });
+		  	  // hardcoded support for six arguments
+		  	  errorObj.message = doI18N(this.userMessageGlobalisationCode, argArray[0], argArray[1], argArray[2], argArray[3], argArray[4], argArray[5]);
+		  	  errorObj.value = this.value;
+		  	  
+		  	  errorArray[arrayIndex] = errorObj;
+		  	  arrayIndex++
+		  	});
+		  	
+		  	var templateArray = new Array();
+		  	var templateErrorObj = new Object();
+		  	templateErrorObj.title = doI18N('error.msg.header');
+		  	templateErrorObj.errors = errorArray;
+		  	
+		  	templateArray[0] = templateErrorObj;
+		  	
+		  	var formErrorsHtml = $(templateSelector).render(templateArray);
+		  	
+		  	$(placeholderDiv).append(formErrorsHtml);
+		}
+}
+
+
+
+
+// these helpers are registered for the jsViews and jsRender functionality to fix bug with display zero! 
+// plus some utility functions are added also for doI18N and currentLocale
+function jsViewsRegisterHelpers() {
+	$.views.registerHelpers({
+			
+			money: function(monetaryObj) {
+				
+				Globalize.culture().numberFormat.currency.symbol = monetaryObj.displaySymbol;
+				
+				var digits = monetaryObj.digitsAfterDecimal.toFixed(0);
+				return Globalize.format(monetaryObj.amount, "n" + digits); 
+			},
+			moneyWithCurrency: function(monetaryObj) {
+				
+				Globalize.culture().numberFormat.currency.symbol = monetaryObj.displaySymbol;
+				
+				var digits = monetaryObj.digitsAfterDecimal.toFixed(0);
+				return Globalize.format(monetaryObj.amount, "c" + digits); 
+			},
+			decimal: function(number, digits) {
+		      try {
+		    	return Globalize.format(number, "n" + digits); 
+		      } catch(e) {
+		        return number +"(NaN)";
+		      }
+		    },
+			number: function(number) {
+		      try {
+		    	  return Globalize.format(number, "n0"); 
+		      } catch(e) {
+		        return number +"(NaN)";
+		      }
+		    },
+		    numberGreaterThanZero: function(number) {
+			      try {
+			    	var num = number.toFixed(0);
+			        return num > 0;
+			      } catch(e) {
+			        return false;
+			      }
+			},
+			globalDate: function(dateParts) {
+			      try {
+			    	  if (undefined != dateParts)
+				  {
+			    	  	var year = dateParts[0];
+			    	  	var month = parseInt(dateParts[1]) - 1; // month is zero indexed
+			    	  	var day = dateParts[2];
+			    	  
+			    	  	var d = new Date();
+			    	  	d.setFullYear(year,month,day);
+			    	  
+			    	  	return Globalize.format(d,"dd MMMM yyyy");
+				  }
+				  else return "";
+			      } catch(e) {
+			        return "??";
+			      }
+			},
+			globalDateAsISOString: function(localDateAsISOString) {
+				
+			      try {
+			    	  var dateParts = localDateAsISOString.split("-")
+			    	  var year = dateParts[0];
+			    	  var month = parseInt(dateParts[1]) - 1; // month is zero indexed
+			    	  var day = dateParts[2];
+			    	  
+			    	  var d = new Date();
+			    	  d.setFullYear(year,month,day);
+			    	  
+			    	  return Globalize.format(d,"dd MMMM yyyy");
+			      } catch(e) {
+			        return "??";
+			      }
+			},
+			globalDateTime: function(dateInMillis) {
+			      try {
+			    	  var d = new Date(dateInMillis);
+			    	  
+			    	  return Globalize.format(d,"F");
+			      } catch(e) {
+			        return "??";
+			      }
+			},
+			currentLocale: function() {
+			      try {
+			    	  return Globalize.culture().name;
+			      } catch(e) {
+			        return "??";
+			      }
+			},
+			doI18N: function(xlateStr, params) {
+			      try {
+			    	  return doI18N(xlateStr, params);
+			      } catch(e) {
+			        return xlateStr;
+			      }
+			}
+	});
+}
 
