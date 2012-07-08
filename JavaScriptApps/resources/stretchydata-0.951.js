@@ -386,7 +386,6 @@
 				data : form_data,
 				cache : false,
 				beforeSend : function(xhr) {
-					console.log("base64: " + basicAuthKey);
 					xhr.setRequestHeader("Authorization", "Basic " + basicAuthKey);
 				},
 				success : function(data, textStatus, jqXHR) {
@@ -457,7 +456,6 @@
 			dataType : 'json',
 			cache : false,
 			beforeSend : function(xhr) {
-				console.log("base64: " + basicAuthKey);
 				xhr.setRequestHeader("Authorization", "Basic " + basicAuthKey);
 			},
 			success : successFunction,

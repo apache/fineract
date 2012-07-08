@@ -1001,8 +1001,6 @@ return
 		crossDomain: false,
 		cache: false,
 		beforeSend: function( xhr ) {
-			xhr.setRequestHeader("Accept", "application/json");
-			console.log("base64: " + basicAuthKey);
 			xhr.setRequestHeader("Authorization", "Basic " + basicAuthKey);
 		},
 		success: successFunction,
@@ -1055,8 +1053,6 @@ function getReportDataNoAuth(rptName, inParams, successFunction, isParameterType
 			crossDomain: false,
 			cache: false,
 			beforeSend : function(xhr) {
-				xhr.setRequestHeader("Accept", "application/json");
-				console.log("base64: " + basicAuthKey);
 				xhr.setRequestHeader("Authorization", "Basic " + basicAuthKey);
 			},
 			success: successFunction,

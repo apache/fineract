@@ -1290,7 +1290,7 @@ function loadILLoan(loanId) {
 					"bPaginate": false,
 					"bLengthChange": false,
 					"bFilter": false,
-					"bAutoWidth": false,
+					"bAutoWidth": false
 				} );
 			  };
 
@@ -1344,7 +1344,7 @@ function loadILLoan(loanId) {
 					"bPaginate": false,
 					"bLengthChange": false,
 					"bFilter": false,
-					"bAutoWidth": false,
+					"bAutoWidth": false
 				} );
 			  };
 		
@@ -1385,7 +1385,7 @@ function loadILLoan(loanId) {
 					"bPaginate": false,
 					"bLengthChange": false,
 					"bFilter": false,
-					"bAutoWidth": false,
+					"bAutoWidth": false
 				} );
 			  };
 
@@ -1443,7 +1443,7 @@ function loadILLoan(loanId) {
 					"bPaginate": false,
 					"bLengthChange": false,
 					"bFilter": false,
-					"bAutoWidth": false,
+					"bAutoWidth": false
 				});
 			  };
 
@@ -1499,7 +1499,7 @@ function loadILLoan(loanId) {
 					"bPaginate": false,
 					"bLengthChange": false,
 					"bFilter": false,
-					"bAutoWidth": false,
+					"bAutoWidth": false
 					
 				} );
 			  };
