@@ -13,6 +13,7 @@ import org.apache.commons.lang.StringUtils;
 import org.mifosng.platform.api.commands.LoanProductCommand;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.currency.domain.Money;
+import org.mifosng.platform.fund.domain.Fund;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
 import org.mifosng.platform.organisation.domain.Organisation;
 import org.mifosng.platform.user.domain.AppUser;
@@ -29,32 +30,38 @@ import org.mifosng.platform.user.domain.AppUser;
 @Table(name = "portfolio_product_loan")
 public class LoanProduct extends AbstractAuditableCustom<AppUser, Long> {
 
-    @ManyToOne
-    @JoinColumn(name = "org_id", nullable = false)
-    private final Organisation                organisation;
+	@ManyToOne
+	@JoinColumn(name = "org_id", nullable = false)
+	private final Organisation organisation;
 
-    @Column(name = "name", nullable = false)
-    private String                      name;
+	@ManyToOne
+	@JoinColumn(name = "fund_id", nullable = true)
+	private Fund fund;
 
-    @Column(name = "description")
-    private String                      description;
+	@Column(name = "name", nullable = false)
+	private String name;
 
-    @Embedded
-    private final LoanProductRelatedDetail            loanProductRelatedDetail;
+	@Column(name = "description")
+	private String description;
+
+	@Embedded
+	private final LoanProductRelatedDetail loanProductRelatedDetail;
 
     public LoanProduct() {
         this.organisation = null;
+        this.fund = null;
         this.name = null;
         this.description = null;
         this.loanProductRelatedDetail = null;
     }
 
-    public LoanProduct(final Organisation organisation, final String name, final String description, final MonetaryCurrency currency, final BigDecimal defaultPrincipal,
+    public LoanProduct(final Organisation organisation, Fund fund, final String name, final String description, final MonetaryCurrency currency, final BigDecimal defaultPrincipal,
             final BigDecimal defaultNominalInterestRatePerPeriod, final PeriodFrequencyType interestPeriodFrequencyType, final BigDecimal defaultAnnualNominalInterestRate, 
             final InterestMethod interestMethod, final InterestCalculationPeriodMethod interestCalculationPeriodMethod, 
             final Integer repayEvery, final PeriodFrequencyType repaymentFrequencyType, final Integer defaultNumberOfInstallments, final AmortizationMethod amortizationMethod,
             final BigDecimal inArrearsTolerance) {
         this.organisation = organisation;
+		this.fund = fund;
         this.name = name.trim();
         if (StringUtils.isNotBlank(description)) {
             this.description = description.trim();
@@ -132,13 +139,17 @@ public class LoanProduct extends AbstractAuditableCustom<AppUser, Long> {
 		return this.loanProductRelatedDetail.getAmortizationMethod();
 	}
 	
-	public void update(LoanProductCommand command) {
+	public void update(final LoanProductCommand command, final Fund fund) {
 		if (command.getName() != null) {
 			this.name = command.getName();
 		}
 		if (command.getDescription() != null) {
 			this.description = command.getDescription();
 		}
+		if (fund != null) {
+			this.fund = fund;
+		}
+		
 		this.loanProductRelatedDetail.update(command);
 	}
 }

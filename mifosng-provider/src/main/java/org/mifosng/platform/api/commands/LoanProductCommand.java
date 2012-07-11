@@ -12,6 +12,8 @@ public class LoanProductCommand {
 	private String description;
 	private String externalId;
 	
+	private Long fundId;
+	
 	private String locale;
 	private String currencyCode;
 	private String digitsAfterDecimal;
@@ -222,5 +224,13 @@ public class LoanProductCommand {
 	public void setInterestCalculationPeriodType(
 			Integer interestCalculationPeriodType) {
 		this.interestCalculationPeriodType = interestCalculationPeriodType;
+	}
+
+	public Long getFundId() {
+		return fundId;
+	}
+
+	public void setFundId(Long fundId) {
+		this.fundId = fundId;
 	}
 }

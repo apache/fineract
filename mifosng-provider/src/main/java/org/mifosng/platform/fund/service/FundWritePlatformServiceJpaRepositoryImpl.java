@@ -83,13 +83,13 @@ public class FundWritePlatformServiceJpaRepositoryImpl implements FundWritePlatf
 	private void handleFundDataIntegrityIssues(final FundCommand command, DataIntegrityViolationException dve)  {
 		
 		Throwable realCause = dve.getMostSpecificCause();
-		if (realCause.getMessage().contains("externalid_org")) {
-			throw new PlatformDataIntegrityException("error.msg.office.duplicate.externalId", "Office with externalId {0} already exists", "externalId", command.getExternalId());
-		} else if (realCause.getMessage().contains("name_org")) {
-			throw new PlatformDataIntegrityException("error.msg.office.duplicate.name", "Office with name {0} already exists", "name", command.getName());
+		if (realCause.getMessage().contains("fund_externalid_org")) {
+			throw new PlatformDataIntegrityException("error.msg.fund.duplicate.externalId", "Fund with externalId {0} already exists", "externalId", command.getExternalId());
+		} else if (realCause.getMessage().contains("fund_name_org")) {
+			throw new PlatformDataIntegrityException("error.msg.fund.duplicate.name", "Fund with name {0} already exists", "name", command.getName());
 		} 
 		
 		logger.error(dve.getMessage(), dve);
-		throw new PlatformDataIntegrityException("error.msg.office.unknown.data.integrity.issue", "Unknown data integrity issue with resource.");
+		throw new PlatformDataIntegrityException("error.msg.fund.unknown.data.integrity.issue", "Unknown data integrity issue with resource: " + realCause.getMessage());
 	}
 }

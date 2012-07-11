@@ -9,7 +9,6 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -18,7 +17,6 @@ import javax.ws.rs.core.UriInfo;
 import org.mifosng.platform.api.commands.FundCommand;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.FundData;
-import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.ApiJSONFormattingService;
 import org.mifosng.platform.fund.service.FundReadPlatformService;
 import org.mifosng.platform.fund.service.FundWritePlatformService;
@@ -31,7 +29,6 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class FundsApiResource {
 
-	private String defaultFieldList = "openingDate";
 	private String allowedFieldList = "allowedParents";
 	private String filterName = "myFilter";
 
@@ -40,9 +37,6 @@ public class FundsApiResource {
 
 	@Autowired
 	private FundWritePlatformService writePlatformService;
-
-	@Autowired
-	private ApiDataConversionService apiDataConversionService;
 
 	@Autowired
 	private ApiJSONFormattingService jsonFormattingService;
@@ -63,11 +57,6 @@ public class FundsApiResource {
 	@Produces({ MediaType.APPLICATION_JSON })
 	public Response createFund(final FundCommand command) {
 
-//		LocalDate openingLocalDate = apiDataConversionService.convertFrom(
-//				command.getOpeningDate(), "openingDate",
-//				command.getDateFormat());
-//		command.setOpeningLocalDate(openingLocalDate);
-
 		Long fundId = this.writePlatformService.createFund(command);
 
 		return Response.ok().entity(new EntityIdentifier(fundId)).build();
@@ -77,14 +66,9 @@ public class FundsApiResource {
 	@Path("{fundId}")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public String retreiveOffice(@PathParam("fundId") final Long fundId,
-			@QueryParam("template") String template, @Context UriInfo uriInfo) {
+	public String retreiveOffice(@PathParam("fundId") final Long fundId, @Context UriInfo uriInfo) {
 
 		FundData fund = this.readPlatformService.retrieveFund(fundId);
-//		if (template != null && template.equalsIgnoreCase("true")) {
-//			office.setAllowedParents(this.readPlatformService
-//					.retrieveAllowedParents(officeId));
-//		}
 
 		String selectedFields = "";
 		return this.jsonFormattingService.convertRequest(fund, filterName,
@@ -95,13 +79,8 @@ public class FundsApiResource {
 	@Path("{fundId}")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public Response updateOffice(@PathParam("fundId") final Long fundId,
-			final FundCommand command) {
+	public Response updateFund(@PathParam("fundId") final Long fundId, final FundCommand command) {
 
-//		LocalDate openingLocalDate = apiDataConversionService.convertFrom(
-//				command.getOpeningDate(), "openingDate",
-//				command.getDateFormat());
-//		command.setOpeningLocalDate(openingLocalDate);
 		command.setId(fundId);
 
 		Long entityId = this.writePlatformService.updateFund(command);

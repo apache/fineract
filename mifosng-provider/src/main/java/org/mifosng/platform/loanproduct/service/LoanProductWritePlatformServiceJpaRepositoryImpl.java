@@ -1,13 +1,16 @@
 package org.mifosng.platform.loanproduct.service;
 
-import static org.mifosng.platform.Specifications.productThatMatches;
+import static org.mifosng.platform.Specifications.*;
 
 import java.math.BigDecimal;
 
 import org.mifosng.platform.api.commands.LoanProductCommand;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
+import org.mifosng.platform.exceptions.FundNotFoundException;
 import org.mifosng.platform.exceptions.LoanProductNotFoundException;
+import org.mifosng.platform.fund.domain.Fund;
+import org.mifosng.platform.fund.domain.FundRepository;
 import org.mifosng.platform.loan.domain.AmortizationMethod;
 import org.mifosng.platform.loan.domain.InterestCalculationPeriodMethod;
 import org.mifosng.platform.loan.domain.InterestMethod;
@@ -15,6 +18,7 @@ import org.mifosng.platform.loan.domain.LoanProduct;
 import org.mifosng.platform.loan.domain.LoanProductRepository;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 import org.mifosng.platform.loanschedule.domain.AprCalculator;
+import org.mifosng.platform.organisation.domain.Organisation;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.user.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,12 +31,15 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
 	private final PlatformSecurityContext context;
 	private final LoanProductRepository loanProductRepository;
 	private final AprCalculator aprCalculator;
+	private final FundRepository fundRepository;
 
 	@Autowired
-	public LoanProductWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final LoanProductRepository loanProductRepository,  final AprCalculator aprCalculator) {
+	public LoanProductWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final LoanProductRepository loanProductRepository,  
+			final AprCalculator aprCalculator, final FundRepository fundRepository) {
 		this.context = context;
 		this.loanProductRepository = loanProductRepository;
 		this.aprCalculator = aprCalculator;
+		this.fundRepository = fundRepository;
 	}
 	
 	@Transactional
@@ -60,7 +67,10 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
 		
 		BigDecimal annualInterestRate = this.aprCalculator.calculateFrom(interestFrequencyType, command.getInterestRatePerPeriodValue());
 		
-		LoanProduct loanproduct = new LoanProduct(currentUser.getOrganisation(), command.getName(), command.getDescription(), 
+		// associating fund with loan product at creation is optional for now.
+		Fund fund = findFundByIdIfProvided(currentUser.getOrganisation(), command.getFundId());
+		
+		LoanProduct loanproduct = new LoanProduct(currentUser.getOrganisation(), fund, command.getName(), command.getDescription(), 
 				currency, command.getPrincipalValue(), 
 				command.getInterestRatePerPeriodValue(), interestFrequencyType, annualInterestRate, interestMethod, interestCalculationPeriodMethod,
 				command.getRepaymentEveryValue(), repaymentFrequencyType, command.getNumberOfRepaymentsValue(), 
@@ -71,6 +81,17 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
 		return new EntityIdentifier(loanproduct.getId());
 	}
 	
+	private Fund findFundByIdIfProvided(final Organisation organisation, final Long fundId) {
+		Fund fund = null;
+		if (fundId != null) {
+			fund = this.fundRepository.findOne(fundsThatMatch(organisation, fundId));
+			if (fund == null) {
+				throw new FundNotFoundException(fundId);
+			}
+		}
+		return fund;
+	}
+
 	@Transactional
 	@Override
 	public EntityIdentifier updateLoanProduct(LoanProductCommand command) {
@@ -85,7 +106,10 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
 			throw new LoanProductNotFoundException(command.getId());
 		}
 		
-		product.update(command);
+		// associating fund with loan product at creation is optional for now.
+		Fund fund = findFundByIdIfProvided(currentUser.getOrganisation(), command.getFundId());
+		
+		product.update(command, fund);
 		
 		this.loanProductRepository.save(product);
 		

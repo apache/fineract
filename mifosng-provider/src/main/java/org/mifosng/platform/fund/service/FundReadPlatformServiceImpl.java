@@ -42,7 +42,6 @@ public class FundReadPlatformServiceImpl implements FundReadPlatformService {
 			Long id = rs.getLong("id");
 			String name = rs.getString("name");
 			String externalId = rs.getString("externalId");
-//			LocalDate openingDate = JdbcSupport.getLocalDate(rs, "openingDate");
 
 			return new FundData(id, name, externalId);
 		}
