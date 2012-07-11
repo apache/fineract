@@ -4,12 +4,17 @@ import static org.mifosng.platform.Specifications.officesThatMatch;
 
 import org.mifosng.platform.api.commands.BranchMoneyTransferCommand;
 import org.mifosng.platform.api.commands.OfficeCommand;
+import org.mifosng.platform.currency.domain.ApplicationCurrency;
+import org.mifosng.platform.currency.domain.ApplicationCurrencyRepository;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.currency.domain.Money;
+import org.mifosng.platform.exceptions.CurrencyNotFoundException;
 import org.mifosng.platform.exceptions.NoAuthorizationException;
 import org.mifosng.platform.exceptions.OfficeNotFoundException;
 import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
 import org.mifosng.platform.organisation.domain.Office;
+import org.mifosng.platform.organisation.domain.OfficeMonetaryTransfer;
+import org.mifosng.platform.organisation.domain.OfficeMonetaryTransferRepository;
 import org.mifosng.platform.organisation.domain.OfficeRepository;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.user.domain.AppUser;
@@ -27,11 +32,18 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
 	
 	private final PlatformSecurityContext context;
 	private final OfficeRepository officeRepository;
+	private final OfficeMonetaryTransferRepository officeMonetaryTransferRepository;
+	private final ApplicationCurrencyRepository applicationCurrencyRepository;
 
 	@Autowired
-	public OfficeWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final OfficeRepository officeRepository) {
+	public OfficeWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, 
+			final OfficeRepository officeRepository, 
+			final OfficeMonetaryTransferRepository officeMonetaryTransferRepository,
+			final ApplicationCurrencyRepository applicationCurrencyRepository) {
 		this.context = context;
 		this.officeRepository = officeRepository;
+		this.officeMonetaryTransferRepository = officeMonetaryTransferRepository;
+		this.applicationCurrencyRepository = applicationCurrencyRepository;
 	}
 
 	@Transactional
@@ -92,31 +104,42 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
 	
 	@Transactional
 	@Override
-	public Long transferMoney(BranchMoneyTransferCommand command) {
+	public Long transferMoney(final BranchMoneyTransferCommand command) {
 		
 		AppUser currentUser = context.authenticatedUser();
 		
-		Office fromOffice = this.officeRepository.findOne(command.getFromOfficeId());
-		if (fromOffice == null) {
-			throw new OfficeNotFoundException(command.getFromOfficeId());
+		BranchMoneyTransferCommandValidator validator = new BranchMoneyTransferCommandValidator(command);
+		validator.validate();
+		
+		Office fromOffice = validateUserPriviledgeOnOfficeAndRetrieve(currentUser, command.getFromOfficeId());
+		Office toOffice = null;
+		if (fromOffice.isHeadOffice()) {
+			toOffice = validateUserPriviledgeOnOfficeAndRetrieve(currentUser, command.getToOfficeId());
+		} else {
+			toOffice = this.officeRepository.findOne(command.getToOfficeId());
+			if (toOffice == null) {
+				throw new OfficeNotFoundException(command.getToOfficeId());
+			}
+			
+			if (!fromOffice.hasParentOf(toOffice)) {
+				throw new NoAuthorizationException("User does not have sufficient priviledges to act on the provided office.");
+			}
+		}
+
+		final String currencyCode = command.getCurrencyCode();
+		ApplicationCurrency appCurrency = this.applicationCurrencyRepository.findOneByCode(currencyCode);
+		if (appCurrency == null) {
+			throw new CurrencyNotFoundException(currencyCode);
 		}
 		
-		Office toOffice = this.officeRepository.findOne(command.getToOfficeId());
-		if (toOffice == null) {
-			throw new OfficeNotFoundException(command.getToOfficeId());
-		}
-		
-		MonetaryCurrency currency = new MonetaryCurrency("USD", 2);
+		MonetaryCurrency currency = new MonetaryCurrency(appCurrency.getCode(), appCurrency.getDecimalPlaces());
 		Money amount = Money.of(currency, command.getTransactionAmountValue());
 		
-		OfficeFundsTransfer entity = OfficeFundsTransfer.create(currentUser.getOrganisation(), fromOffice, toOffice, 
-
-		command.getTransactionDate(), amount);
+		OfficeMonetaryTransfer entity = OfficeMonetaryTransfer.create(fromOffice, toOffice, command.getTransactionLocalDate(), amount);
 		
-		this.officeFundsTransferRepository.save(entity);
+		this.officeMonetaryTransferRepository.save(entity);
 		
 		return entity.getId();
-		return null;
 	}
 
 	/*

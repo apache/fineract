@@ -1,6 +1,8 @@
 package org.mifosng.platform.api;
 
+import java.math.BigDecimal;
 import java.util.Collection;
+import java.util.Locale;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -15,6 +17,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.mifosng.platform.api.commands.BranchMoneyTransferCommand;
 import org.mifosng.platform.api.commands.OfficeCommand;
@@ -22,6 +25,7 @@ import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.OfficeData;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.ApiJSONFormattingService;
+import org.mifosng.platform.exceptions.UnrecognizedQueryParamException;
 import org.mifosng.platform.organisation.service.OfficeReadPlatformService;
 import org.mifosng.platform.organisation.service.OfficeWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -129,14 +133,38 @@ public class OfficeApiResource {
 	
 	@POST
 	@Path("{officeId}")
-	@Consumes({ MediaType.APPLICATION_JSON})
-	@Produces({ MediaType.APPLICATION_JSON})
-	public Response transferMoney(@PathParam("officeId") final Long loanId,
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public Response transferMoneyFrom(@PathParam("officeId") final Long officeId,
 			@QueryParam("command") final String commandParam,
 			final BranchMoneyTransferCommand command) {
 
-			Long officeId = this.writePlatformService.transferMoney(command);
+		command.setFromOfficeId(officeId);
+		
+		LocalDate transactionLocalDate = apiDataConversionService.convertFrom(command.getTransactionDate(), "transactionDate", command.getDateFormat());
+		command.setTransactionLocalDate(transactionLocalDate);
+		
+		Locale clientLocale = this.apiDataConversionService.localeFromString(command.getLocale());
 
-			return Response.ok().entity(new EntityIdentifier(officeId)).build();
+		BigDecimal transactionAmountValue = apiDataConversionService.convertFrom(command.getTransactionAmount(), "transactionAmount", clientLocale);
+		command.setTransactionAmountValue(transactionAmountValue);
+		
+		Response response = null;
+		
+		if (is(commandParam, "transfer")) {
+			Long id = this.writePlatformService.transferMoney(command);
+			response = Response.ok().entity(new EntityIdentifier(id)).build();
+		}
+		
+		if (response == null) {
+			throw new UnrecognizedQueryParamException("command", commandParam);
+		}
+		
+		return response;
+	}
+	
+	private boolean is(final String commandParam, final String commandValue) {
+		return StringUtils.isNotBlank(commandParam)
+				&& commandParam.trim().equalsIgnoreCase(commandValue);
 	}
 }

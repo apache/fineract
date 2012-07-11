@@ -21,6 +21,7 @@ public class BranchMoneyTransferCommand {
 	private LocalDate transactionLocalDate;
 	
 	private String locale;
+	private String currencyCode;
 	private String transactionAmount;
 	private BigDecimal transactionAmountValue;
 	
@@ -98,5 +99,13 @@ public class BranchMoneyTransferCommand {
 
 	public void setTransactionAmountValue(BigDecimal transactionAmountValue) {
 		this.transactionAmountValue = transactionAmountValue;
+	}
+
+	public String getCurrencyCode() {
+		return currencyCode;
+	}
+
+	public void setCurrencyCode(String currencyCode) {
+		this.currencyCode = currencyCode;
 	}
 }

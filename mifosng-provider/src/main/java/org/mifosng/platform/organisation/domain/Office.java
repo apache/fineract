@@ -182,4 +182,12 @@ public class Office extends AbstractAuditableCustom<AppUser, Long> {
 	public String getHierarchy() {
 		return hierarchy;
 	}
+
+	public boolean hasParentOf(final Office office) {
+		boolean isParent = false;
+		if (this.parent != null) {
+			isParent = this.parent.equals(office);
+		}
+		return isParent;
+	}
 }
