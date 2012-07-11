@@ -100,10 +100,10 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 			ClientMapper rm = new ClientMapper(offices);
 
 			String sql = "select " + rm.clientSchema()
-					+ " where c.id = ? and c.org_id = ?";
+					+ " where c.id = ? ";
 
 			return this.jdbcTemplate.queryForObject(sql, rm, new Object[] {
-					clientId, currentUser.getOrganisation().getId() });
+					clientId });
 		} catch (EmptyResultDataAccessException e) {
 			throw new ClientNotFoundException(clientId);
 		}

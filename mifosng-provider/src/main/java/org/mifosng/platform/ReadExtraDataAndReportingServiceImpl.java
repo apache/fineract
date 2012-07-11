@@ -59,15 +59,16 @@ public class ReadExtraDataAndReportingServiceImpl implements
 		ClassicEngineBoot.getInstance().start();
 		noPentaho = false;
 
+		Connection db_connection = null;
 		try {
 			this.dataSource = dataSource;
-			Connection db_connection = dataSource.getConnection();
+			db_connection = dataSource.getConnection();
 			this.reportingMetaDataDB = db_connection.getCatalog();
-			db_connection.close();
-			db_connection = null;
 		} catch (SQLException e) {
 			throw new PlatformDataIntegrityException("error.msg.sql.error",
 					e.getMessage(), "DataSource: " + dataSource);
+		} finally {
+			dbClose(null, db_connection);
 		}
 	}
 
@@ -197,9 +198,11 @@ public class ReadExtraDataAndReportingServiceImpl implements
 
 		GenericResultset result = new GenericResultset();
 
+		Connection db_connection = null;
+		Statement db_statement = null;
 		try {
-			Connection db_connection = dataSource.getConnection();
-			Statement db_statement = db_connection.createStatement();
+			db_connection = dataSource.getConnection();
+			db_statement = db_connection.createStatement();
 			ResultSet rs = db_statement.executeQuery(sql);
 
 			ResultSetMetaData rsmd = rs.getMetaData();
@@ -229,14 +232,11 @@ public class ReadExtraDataAndReportingServiceImpl implements
 			}
 			result.setData(resultsetDataRows);
 
-			db_statement.close();
-			db_statement = null;
-			db_connection.close();
-			db_connection = null;
-
 		} catch (SQLException e) {
 			throw new PlatformDataIntegrityException("error.msg.sql.error",
 					e.getMessage(), "Sql: " + sql);
+		} finally {
+			dbClose(db_statement, db_connection);
 		}
 		return result;
 
@@ -315,9 +315,11 @@ public class ReadExtraDataAndReportingServiceImpl implements
 	private String getSql(String inputSql) {
 
 		String sql = null;
+		Connection db_connection = null;
+		Statement db_statement = null;
 		try {
-			Connection db_connection = dataSource.getConnection();
-			Statement db_statement = db_connection.createStatement();
+			db_connection = dataSource.getConnection();
+			db_statement = db_connection.createStatement();
 			ResultSet rs = db_statement.executeQuery(inputSql);
 
 			if (rs.next()) {
@@ -326,13 +328,11 @@ public class ReadExtraDataAndReportingServiceImpl implements
 				throw new ReportNotFoundException(inputSql);
 			}
 
-			db_statement.close();
-			db_statement = null;
-			db_connection.close();
-			db_connection = null;
 		} catch (SQLException e) {
 			throw new PlatformDataIntegrityException("error.msg.sql.error",
 					e.getMessage(), "Input Sql: " + inputSql);
+		} finally {
+			dbClose(db_statement, db_connection);
 		}
 
 		return sql;
@@ -343,9 +343,11 @@ public class ReadExtraDataAndReportingServiceImpl implements
 
 		List<AdditionalFieldsSet> additionalFieldsSets = new ArrayList<AdditionalFieldsSet>();
 
+		Connection db_connection = null;
+		Statement db_statement = null;
 		try {
-			Connection db_connection = dataSource.getConnection();
-			Statement db_statement = db_connection.createStatement();
+			db_connection = dataSource.getConnection();
+			db_statement = db_connection.createStatement();
 
 			String whereClause;
 			if (type == null) {
@@ -364,13 +366,11 @@ public class ReadExtraDataAndReportingServiceImpl implements
 						.getString("type")));
 			}
 
-			db_statement.close();
-			db_statement = null;
-			db_connection.close();
-			db_connection = null;
 		} catch (SQLException e) {
 			throw new PlatformDataIntegrityException("error.msg.sql.error",
 					e.getMessage(), "Additional Fields Type: " + type);
+		} finally {
+			dbClose(db_statement, db_connection);
 		}
 
 		return additionalFieldsSets;
@@ -391,9 +391,13 @@ public class ReadExtraDataAndReportingServiceImpl implements
 
 		GenericResultset result = new GenericResultset();
 
+		Connection db_connection = null;
+		Statement db_statement1 = null;
+		Statement db_statement2 = null;
+		Statement db_statement3 = null;
 		try {
-			Connection db_connection = dataSource.getConnection();
-			Statement db_statement1 = db_connection.createStatement();
+			db_connection = dataSource.getConnection();
+			db_statement1 = db_connection.createStatement();
 			String sql = "select f.`name`, f.data_type, f.data_length, f.display_type, f.allowed_list_id from stretchydata_datasettype t join stretchydata_dataset d on d.datasettype_id = t.id join stretchydata_dataset_fields f on f.dataset_id = d.id where d.`name` = '"
 					+ set + "' and t.`name` = '" + type + "' order by f.id";
 
@@ -402,7 +406,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 			if (rsmd.next()) {
 
 				String fullDatasetName = getFullDatasetName(type, set);
-				Statement db_statement2 = db_connection.createStatement();
+				db_statement2 = db_connection.createStatement();
 				List<ResultsetColumnHeader> columnHeaders = new ArrayList<ResultsetColumnHeader>();
 				Boolean firstColumn = true;
 				Integer allowedListId;
@@ -441,14 +445,12 @@ public class ReadExtraDataAndReportingServiceImpl implements
 					columnHeaders.add(rsch);
 				} while (rsmd.next());
 				result.setColumnHeaders(columnHeaders);
-				db_statement2.close();
-				db_statement2 = null;
 
 				sql = "select " + selectFieldList + " from `" + type
 						+ "` t left join `" + fullDatasetName
 						+ "` s on s.id = t.id " + " where t.id = " + id;
 
-				Statement db_statement3 = db_connection.createStatement();
+				db_statement3 = db_connection.createStatement();
 				ResultSet rs = db_statement3.executeQuery(sql);
 
 				if (rs.next()) {
@@ -472,20 +474,17 @@ public class ReadExtraDataAndReportingServiceImpl implements
 				} else {
 					throw new AdditionalFieldsNotFoundException(type, id);
 				}
-				db_statement3.close();
-				db_statement3 = null;
 			} else {
 				throw new AdditionalFieldsNotFoundException(type, set);
 			}
-			db_statement1.close();
-			db_statement1 = null;
-			db_connection.close();
-			db_connection = null;
-
 		} catch (SQLException e) {
 			throw new PlatformDataIntegrityException("error.msg.sql.error",
 					e.getMessage(), "Additional Fields Type: " + type
 							+ "   Set: " + set + "   Id: " + id);
+		} finally {
+			dbClose(db_statement2, null);
+			dbClose(db_statement3, null);
+			dbClose(db_statement1, db_connection);
 		}
 		return result;
 
@@ -522,19 +521,19 @@ public class ReadExtraDataAndReportingServiceImpl implements
 		String saveSql = getSaveSql(fullDatasetName, id, transType, queryParams);
 
 		logger.info("saveSQL: " + saveSql);
+		Connection db_connection = null;
+		Statement db_statement = null;
 		try {
-			Connection db_connection = dataSource.getConnection();
-			Statement db_statement = db_connection.createStatement();
+			db_connection = dataSource.getConnection();
+			db_statement = db_connection.createStatement();
 			db_statement.executeUpdate(saveSql);
 
-			db_statement.close();
-			db_statement = null;
-			db_connection.close();
-			db_connection = null;
 		} catch (SQLException e) {
 			throw new PlatformDataIntegrityException("error.msg.sql.error",
 					e.getMessage(), "Additional Fields Type: " + type
 							+ "   Set: " + set + "   Id: " + id);
+		} finally {
+			dbClose(db_statement, db_connection);
 		}
 
 	}
@@ -542,28 +541,24 @@ public class ReadExtraDataAndReportingServiceImpl implements
 	private void checkResourceTypeThere(String type, String set) {
 		String sql = "select 'f' from stretchydata_datasettype t join stretchydata_dataset d on d.datasettype_id = t.id where d.`name` = '"
 				+ set + "' and t.`name` = '" + type + "'";
-		try {
-			Connection db_connection = dataSource.getConnection();
-			Statement db_statement = db_connection.createStatement();
 
+		Connection db_connection = null;
+		Statement db_statement = null;
+		try {
+			db_connection = dataSource.getConnection();
+			db_statement = db_connection.createStatement();
 			ResultSet rs = db_statement.executeQuery(sql);
 
 			if (!(rs.next())) {
-				db_statement.close();
-				db_statement = null;
-				db_connection.close();
-				db_connection = null;
 				throw new AdditionalFieldsNotFoundException(type, set);
 			}
-			db_statement.close();
-			db_statement = null;
-			db_connection.close();
-			db_connection = null;
 
 		} catch (SQLException e) {
 			throw new PlatformDataIntegrityException("error.msg.sql.error",
 					e.getMessage(), "Additional Fields Type: " + type
 							+ "   Set: " + set + "   Sql: " + sql);
+		} finally {
+			dbClose(db_statement, db_connection);
 		}
 
 	}
@@ -574,9 +569,11 @@ public class ReadExtraDataAndReportingServiceImpl implements
 		String sql = "select s.id from `" + type + "` t left join `"
 				+ fullDatasetName + "` s on s.id = t.id where t.id = " + id;
 
+		Connection db_connection = null;
+		Statement db_statement = null;
 		try {
-			Connection db_connection = dataSource.getConnection();
-			Statement db_statement = db_connection.createStatement();
+			db_connection = dataSource.getConnection();
+			db_statement = db_connection.createStatement();
 			ResultSet rs = db_statement.executeQuery(sql);
 
 			if (rs.next()) {
@@ -587,21 +584,15 @@ public class ReadExtraDataAndReportingServiceImpl implements
 					transType = "A";
 				}
 			} else {
-				db_statement.close();
-				db_statement = null;
-				db_connection.close();
-				db_connection = null;
 				throw new AdditionalFieldsNotFoundException(type, id);
 			}
-			db_statement.close();
-			db_statement = null;
-			db_connection.close();
-			db_connection = null;
 		} catch (SQLException e) {
 			throw new PlatformDataIntegrityException("error.msg.sql.error",
 					e.getMessage(), "Additional Fields Type: " + type
 							+ "   Full Set Name: " + fullDatasetName
 							+ "   Sql: " + sql);
+		} finally {
+			dbClose(db_statement, db_connection);
 		}
 
 		return transType;
@@ -680,28 +671,32 @@ public class ReadExtraDataAndReportingServiceImpl implements
 		String reportType = "";
 		logger.info("get reportType: " + sql);
 
+		Connection db_connection = null;
+		Statement db_statement = null;
+		ResultSet rs = null;
 		try {
-			Connection db_connection = dataSource.getConnection();
-			Statement db_statement = db_connection.createStatement();
-			ResultSet rs = db_statement.executeQuery(sql);
+			db_connection = dataSource.getConnection();
+			db_statement = db_connection.createStatement();
+			rs = db_statement.executeQuery(sql);
 
 			if (rs.next()) {
 				reportType = rs.getString("report_type");
 			} else {
-				dbClose(db_statement, db_connection);
 				throw new ReportNotFoundException(sql);
 			}
-			dbClose(db_statement, db_connection);
 		} catch (SQLException e) {
 			throw new PlatformDataIntegrityException("error.msg.sql.error",
 					e.getMessage(), "Report Name: " + reportName + "   Sql: "
 							+ sql);
+		} finally {
+			dbClose(db_statement, db_connection);
 		}
 
 		return reportType;
 	}
 
 	private void dbClose(Statement db_statement, Connection db_connection) {
+		logger.info("dbClose");
 		try {
 			if (db_statement != null) {
 				db_statement.close();
