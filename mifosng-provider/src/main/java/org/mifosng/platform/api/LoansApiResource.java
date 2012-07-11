@@ -105,7 +105,7 @@ public class LoansApiResource {
 	@POST
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public Response calculateLoanSchedule(
+	public Response calculateLoanScheduleOrSubmitLoanApplication(
 			@QueryParam("command") final String commandParam,
 			final SubmitLoanApplicationCommand command) {
 

@@ -14,6 +14,8 @@ public class SubmitLoanApplicationCommand {
 	private Long productId;
 	
 	// product 
+	private Long fundId;
+	
 	private String locale;
 	private BigDecimal principalValue;
 	private String principal;
@@ -333,5 +335,13 @@ public class SubmitLoanApplicationCommand {
 
 	public void setInterestChargedFromDate(String interestChargedFromDate) {
 		this.interestChargedFromDate = interestChargedFromDate;
+	}
+
+	public Long getFundId() {
+		return fundId;
+	}
+
+	public void setFundId(Long fundId) {
+		this.fundId = fundId;
 	}
 }

@@ -104,6 +104,7 @@ public final class Specifications {
 		};
 	}
 	
+	@Deprecated
 	public static Specification<Client> clientsThatMatch(final Organisation organisation, final Long id) {
 		return new Specification<Client>() {
 

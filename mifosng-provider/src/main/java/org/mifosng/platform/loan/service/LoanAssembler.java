@@ -1,6 +1,6 @@
 package org.mifosng.platform.loan.service;
 
-import static org.mifosng.platform.Specifications.clientsThatMatch;
+import static org.mifosng.platform.Specifications.fundsThatMatch;
 import static org.mifosng.platform.Specifications.productThatMatches;
 
 import java.math.BigDecimal;
@@ -14,7 +14,10 @@ import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.client.domain.ClientRepository;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.exceptions.ClientNotFoundException;
+import org.mifosng.platform.exceptions.FundNotFoundException;
 import org.mifosng.platform.exceptions.LoanProductNotFoundException;
+import org.mifosng.platform.fund.domain.Fund;
+import org.mifosng.platform.fund.domain.FundRepository;
 import org.mifosng.platform.loan.domain.AmortizationMethod;
 import org.mifosng.platform.loan.domain.DefaultLoanLifecycleStateMachine;
 import org.mifosng.platform.loan.domain.InterestCalculationPeriodMethod;
@@ -40,14 +43,16 @@ public class LoanAssembler {
 	private final LoanProductRepository loanProductRepository;
 	private final ClientRepository clientRepository;
 	private final AprCalculator aprCalculator = new AprCalculator();
+	private final FundRepository fundRepository;
 	
 	@Autowired
 	public LoanAssembler(final LoanStatusRepository loanStatusRepository,
 			final LoanProductRepository loanProductRepository,
-			final ClientRepository clientRepository) {
+			final ClientRepository clientRepository, final FundRepository fundRepository) {
 		this.loanStatusRepository = loanStatusRepository;
 		this.loanProductRepository = loanProductRepository;
 		this.clientRepository = clientRepository;
+		this.fundRepository = fundRepository;
 	}
 	
 	public Loan assembleFrom(SubmitLoanApplicationCommand command, Organisation organisation) {
@@ -55,7 +60,8 @@ public class LoanAssembler {
 		if (loanProduct == null) {
 			throw new LoanProductNotFoundException(command.getProductId());
 		}
-		Client client = this.clientRepository.findOne(clientsThatMatch(organisation, command.getClientId()));
+//		Client client = this.clientRepository.findOne(clientsThatMatch(organisation, command.getClientId()));
+		Client client = this.clientRepository.findOne(command.getClientId());
 		if (client == null) {
 			throw new ClientNotFoundException(command.getClientId());
 		}
@@ -81,8 +87,11 @@ public class LoanAssembler {
 
 		LoanSchedule loanSchedule = command.getLoanSchedule();
 		List<ScheduledLoanInstallment> loanRepaymentSchedule = loanSchedule.getScheduledLoanInstallments();
+		
+		// associating fund with loan product at creation is optional for now.
+		Fund fund = findFundByIdIfProvided(organisation, command.getFundId());
 
-		Loan loan = Loan.createNew(organisation, loanProduct, client, loanRepaymentScheduleDetail);
+		Loan loan = Loan.createNew(organisation, fund, loanProduct, client, loanRepaymentScheduleDetail);
 		loan.setExternalId(command.getExternalId());
 		
 		for (ScheduledLoanInstallment scheduledLoanInstallment : loanRepaymentSchedule) {
@@ -106,5 +115,16 @@ public class LoanAssembler {
 	private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
 		List<LoanStatus> allowedLoanStatuses = this.loanStatusRepository.findAll();
 		return new DefaultLoanLifecycleStateMachine(allowedLoanStatuses);
+	}
+	
+	private Fund findFundByIdIfProvided(final Organisation organisation, final Long fundId) {
+		Fund fund = null;
+		if (fundId != null) {
+			fund = this.fundRepository.findOne(fundsThatMatch(organisation, fundId));
+			if (fund == null) {
+				throw new FundNotFoundException(fundId);
+			}
+		}
+		return fund;
 	}
 }

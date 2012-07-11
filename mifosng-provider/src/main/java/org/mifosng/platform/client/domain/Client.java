@@ -9,24 +9,17 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.mifosng.platform.api.commands.ClientCommand;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
 import org.mifosng.platform.organisation.domain.Office;
-import org.mifosng.platform.organisation.domain.Organisation;
 import org.mifosng.platform.user.domain.AppUser;
 
 @Entity
-@Table(name = "portfolio_client", uniqueConstraints = @UniqueConstraint(columnNames = {"org_id", "external_id" }))
+@Table(name = "portfolio_client")
 public class Client extends AbstractAuditableCustom<AppUser, Long> {
-
-    @SuppressWarnings("unused")
-	@ManyToOne
-    @JoinColumn(name = "org_id", nullable = false)
-    private final Organisation organisation;
 
     @SuppressWarnings("unused")
 	@ManyToOne
@@ -46,18 +39,14 @@ public class Client extends AbstractAuditableCustom<AppUser, Long> {
     @Temporal(TemporalType.DATE)
     private Date         joiningDate;
 
-    @Column(name = "external_id", length=100)
+    @Column(name = "external_id", length=100, unique=true)
     private String externalId;
 
-	public static Client newClient(Organisation organisation,
-			Office clientOffice, String firstname, String lastname,
-			LocalDate joiningDate, String externalId) {
-		return new Client(organisation, clientOffice, firstname, lastname,
-				joiningDate, externalId);
+	public static Client newClient(Office clientOffice, String firstname, String lastname, LocalDate joiningDate, String externalId) {
+		return new Client(clientOffice, firstname, lastname, joiningDate, externalId);
 	}
 
     public Client() {
-        this.organisation = null;
         this.office = null;
         this.joiningDate = null;
         this.firstName = null;
@@ -65,9 +54,7 @@ public class Client extends AbstractAuditableCustom<AppUser, Long> {
         this.externalId = null;
     }
 
-    public Client(final Organisation organisation, final Office office, final String firstName,
-            final String lastName, final LocalDate openingDate, final String externalId) {
-        this.organisation = organisation;
+    private Client(final Office office, final String firstName, final String lastName, final LocalDate openingDate, final String externalId) {
         this.office = office;
         if (StringUtils.isNotBlank(externalId)) {
             this.externalId = externalId.trim();

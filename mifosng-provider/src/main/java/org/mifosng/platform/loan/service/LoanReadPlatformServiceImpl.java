@@ -10,6 +10,7 @@ import org.joda.time.LocalDate;
 import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.DerivedLoanData;
+import org.mifosng.platform.api.data.FundData;
 import org.mifosng.platform.api.data.LoanAccountData;
 import org.mifosng.platform.api.data.LoanProductData;
 import org.mifosng.platform.api.data.LoanProductLookup;
@@ -23,6 +24,7 @@ import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.exceptions.CurrencyNotFoundException;
 import org.mifosng.platform.exceptions.LoanNotFoundException;
 import org.mifosng.platform.exceptions.LoanTransactionNotFoundException;
+import org.mifosng.platform.fund.service.FundReadPlatformService;
 import org.mifosng.platform.loan.domain.Loan;
 import org.mifosng.platform.loan.domain.LoanRepository;
 import org.mifosng.platform.loan.domain.LoanTransaction;
@@ -44,6 +46,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 	private final LoanProductReadPlatformService loanProductReadPlatformService;
 	private final ClientReadPlatformService clientReadPlatformService;
 	private final LoanTransactionRepository loanTransactionRepository;
+	private final FundReadPlatformService fundReadPlatformService;
 
 	@Autowired
 	public LoanReadPlatformServiceImpl(
@@ -52,12 +55,14 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 			final LoanTransactionRepository loanTransactionRepository,
 			final ApplicationCurrencyRepository applicationCurrencyRepository,
 			final LoanProductReadPlatformService loanProductReadPlatformService,
+			final FundReadPlatformService fundReadPlatformService,
 			final ClientReadPlatformService clientReadPlatformService) {
 		this.context = context;
 		this.loanRepository = loanRepository;
 		this.loanTransactionRepository = loanTransactionRepository;
 		this.applicationCurrencyRepository = applicationCurrencyRepository;
 		this.loanProductReadPlatformService = loanProductReadPlatformService;
+		this.fundReadPlatformService = fundReadPlatformService;
 		this.clientReadPlatformService = clientReadPlatformService;
 	}
 
@@ -72,7 +77,12 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 		if (loan == null) {
 			throw new LoanNotFoundException(loanId);
 		}
-
+		
+		FundData fundData = null;
+		if (loan.getFund() != null) { 
+			fundData = this.fundReadPlatformService.retrieveFund(loan.getFund().getId());
+		}
+		
 		final String currencyCode = loan.getCurrencyCode();
 		ApplicationCurrency currency = this.applicationCurrencyRepository.findOneByCode(currencyCode);
 		if (currency == null) {
@@ -83,14 +93,14 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 				currency.getName(), currency.getDecimalPlaces(),
 				currency.getDisplaySymbol(), currency.getNameCode());
 
-		return convertToData(loan, currencyData);
+		return convertToData(loan, currencyData, fundData);
 	}
 
-	private LoanAccountData convertToData(final Loan realLoan, CurrencyData currencyData) {
+	private LoanAccountData convertToData(final Loan realLoan, CurrencyData currencyData, FundData fundData) {
 
 		DerivedLoanData loanData = realLoan.deriveLoanData(currencyData);
 		
-		return realLoan.toLoanAccountData(loanData.getSummary(), loanData.getRepaymentSchedule(), loanData.getLoanRepayments(), currencyData);
+		return realLoan.toLoanAccountData(loanData.getSummary(), loanData.getRepaymentSchedule(), loanData.getLoanRepayments(), currencyData, fundData);
 	}
 
 	@Override

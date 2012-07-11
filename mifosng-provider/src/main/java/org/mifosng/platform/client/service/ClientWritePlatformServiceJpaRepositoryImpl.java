@@ -1,6 +1,5 @@
 package org.mifosng.platform.client.service;
 
-import static org.mifosng.platform.Specifications.clientsThatMatch;
 import static org.mifosng.platform.Specifications.notesThatMatch;
 import static org.mifosng.platform.Specifications.officesThatMatch;
 
@@ -61,7 +60,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 			firstname = null;
 		}
 
-		Client newClient = Client.newClient(currentUser.getOrganisation(), clientOffice, firstname, lastname, command.getJoiningLocalDate(), command.getExternalId());
+		Client newClient = Client.newClient(clientOffice, firstname, lastname, command.getJoiningLocalDate(), command.getExternalId());
 				
 		this.clientRepository.save(newClient);
 
@@ -93,7 +92,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 			firstname = null;
 		}
 
-		Client clientForUpdate = this.clientRepository.findOne(clientsThatMatch(currentUser.getOrganisation(), command.getId()));
+//		Client clientForUpdate = this.clientRepository.findOne(clientsThatMatch(currentUser.getOrganisation(), command.getId()));
+		Client clientForUpdate = this.clientRepository.findOne(command.getId());
 		if (clientForUpdate == null) {
 			throw new ClientNotFoundException(command.getId());
 		}
@@ -110,7 +110,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 		
 		AppUser currentUser = context.authenticatedUser();
 		
-		Client clientForUpdate = this.clientRepository.findOne(clientsThatMatch(currentUser.getOrganisation(), command.getClientId()));
+//		Client clientForUpdate = this.clientRepository.findOne(clientsThatMatch(currentUser.getOrganisation(), command.getClientId()));
+		Client clientForUpdate = this.clientRepository.findOne(command.getClientId());
 		if (clientForUpdate == null) {
 			throw new ClientNotFoundException(command.getClientId());
 		}

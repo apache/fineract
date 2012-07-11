@@ -139,6 +139,10 @@ public class LoanProduct extends AbstractAuditableCustom<AppUser, Long> {
 		return this.loanProductRelatedDetail.getAmortizationMethod();
 	}
 	
+	public Fund getFund() {
+		return fund;
+	}
+
 	public void update(final LoanProductCommand command, final Fund fund) {
 		if (command.getName() != null) {
 			this.name = command.getName();

@@ -11,6 +11,7 @@ public class LoanAccountData {
 
 	private Long id;
 	private String externalId;
+	private FundData fund;
 	private String loanProductName;
 
 	private LocalDate submittedOnDate;
@@ -47,7 +48,6 @@ public class LoanAccountData {
 	
 	private LoanConvenienceData convenienceData;
 	
-	
 	protected LoanAccountData() {
 		//
 	}
@@ -74,6 +74,7 @@ public class LoanAccountData {
 		
 		this.id = basicDetails.getId();
 		this.externalId = basicDetails.getExternalId();
+		this.fund = basicDetails.getFund();
 		this.loanProductName = basicDetails.getLoanProductName();
 		this.submittedOnDate = basicDetails.getSubmittedOnDate();
 		this.approvedOnDate = basicDetails.getApprovedOnDate();
@@ -152,6 +153,14 @@ public class LoanAccountData {
 
 	public void setExternalId(String externalId) {
 		this.externalId = externalId;
+	}
+	
+	public FundData getFund() {
+		return fund;
+	}
+
+	public void setFund(FundData fund) {
+		this.fund = fund;
 	}
 
 	public String getLoanProductName() {

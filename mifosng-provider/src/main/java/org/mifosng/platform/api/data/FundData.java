@@ -2,9 +2,6 @@ package org.mifosng.platform.api.data;
 
 import java.io.Serializable;
 
-import org.codehaus.jackson.map.annotate.JsonFilter;
-
-@JsonFilter("myFilter")
 public class FundData implements Serializable {
 
 	private Long id;

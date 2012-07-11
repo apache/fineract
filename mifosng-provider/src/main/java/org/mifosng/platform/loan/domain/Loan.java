@@ -28,6 +28,7 @@ import org.joda.time.LocalDate;
 import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.DerivedLoanData;
 import org.mifosng.platform.api.data.EnumOptionData;
+import org.mifosng.platform.api.data.FundData;
 import org.mifosng.platform.api.data.LoanAccountData;
 import org.mifosng.platform.api.data.LoanAccountSummaryData;
 import org.mifosng.platform.api.data.LoanBasicDetailsData;
@@ -40,6 +41,7 @@ import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.exceptions.InvalidLoanStateTransitionException;
 import org.mifosng.platform.exceptions.InvalidLoanTransactionTypeException;
+import org.mifosng.platform.fund.domain.Fund;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
 import org.mifosng.platform.loanproduct.service.LoanEnumerations;
 import org.mifosng.platform.organisation.domain.Organisation;
@@ -60,6 +62,10 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	@ManyToOne
 	@JoinColumn(name = "product_id")
 	private final LoanProduct loanProduct;
+	
+	@ManyToOne
+	@JoinColumn(name = "fund_id", nullable = true)
+	private Fund fund;
 
 	@Column(name = "external_id")
 	private String externalId;
@@ -144,9 +150,9 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	private final InterestRebateCalculatorFactory interestRebateCalculatorFactory = new DailyEquivalentInterestRebateCalculatorFactory();
 
 	public static Loan createNew(Organisation organisation,
-			LoanProduct loanProduct, Client client,
+			Fund fund, LoanProduct loanProduct, Client client,
 			LoanProductRelatedDetail loanRepaymentScheduleDetail) {
-		return new Loan(organisation, client, loanProduct, loanRepaymentScheduleDetail, null);
+		return new Loan(organisation, client, fund, loanProduct, loanRepaymentScheduleDetail, null);
 	}
 	
 	public Loan() {
@@ -157,11 +163,16 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	}
 
 	public Loan(final Organisation organisation, final Client client,
-			final LoanProduct loanProduct,
+			Fund fund, final LoanProduct loanProduct,
 			final LoanProductRelatedDetail loanRepaymentScheduleDetail,
 			final LoanStatus loanStatus) {
 		this.organisation = organisation;
 		this.client = client;
+		if (fund != null) {
+			this.fund = fund;
+		} else {
+			this.fund = loanProduct.getFund();
+		}
 		this.loanProduct = loanProduct;
 		this.loanRepaymentScheduleDetail = loanRepaymentScheduleDetail;
 		this.loanStatus = loanStatus;
@@ -174,6 +185,10 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 
 	public Client getClient() {
 		return this.client;
+	}
+
+	public Fund getFund() {
+		return this.fund;
 	}
 
 	public LoanProduct getLoanProduct() {
@@ -968,7 +983,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		return statusSinceDate;
 	}
 
-	public LoanBasicDetailsData toBasicDetailsData(CurrencyData currencyData) {
+	public LoanBasicDetailsData toBasicDetailsData(final CurrencyData currencyData, final FundData fundData) {
 		
 		Money loanPrincipal = this.loanRepaymentScheduleDetail.getPrincipal();
 		MoneyData principal = MoneyData.of(currencyData, loanPrincipal.getAmount());
@@ -982,7 +997,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		EnumOptionData interestType = LoanEnumerations.interestType(this.loanRepaymentScheduleDetail.getInterestMethod());
 		EnumOptionData interestCalculationPeriodType = LoanEnumerations.interestCalculationPeriodType(this.loanRepaymentScheduleDetail.getInterestCalculationPeriodMethod());
 		
-		return new LoanBasicDetailsData(getId(), this.externalId, this.loanProduct.getName(), 
+		return new LoanBasicDetailsData(getId(), this.externalId, this.loanProduct.getName(), fundData,
 				getClosedOnDate(), getSubmittedOnDate(), getApprovedOnDate(), getExpectedDisbursedOnLocalDate(), getDisbursedOnDate(),
 				getExpectedMaturityDate(), getExpectedFirstRepaymentOnDate(), getInterestChargedFromDate(), principal, tolerance, 
 				this.loanRepaymentScheduleDetail.getNumberOfRepayments(), this.loanRepaymentScheduleDetail.getRepayEvery(), 
@@ -996,9 +1011,9 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 
 	public LoanAccountData toLoanAccountData(LoanAccountSummaryData summary, LoanRepaymentScheduleData repaymentSchedule, 
 			List<LoanTransactionData> loanRepayments, 
-			CurrencyData currencyData) {
+			CurrencyData currencyData, FundData fundData) {
 		
-		LoanBasicDetailsData basicDetails = toBasicDetailsData(currencyData);
+		LoanBasicDetailsData basicDetails = toBasicDetailsData(currencyData, fundData);
 		
 		// permissions
 		boolean waiveAllowed = summary.isWaiveAllowed(basicDetails.getInArrearsTolerance())
