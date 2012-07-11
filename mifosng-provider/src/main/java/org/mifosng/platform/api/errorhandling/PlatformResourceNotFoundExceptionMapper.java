@@ -1,5 +1,6 @@
 package org.mifosng.platform.api.errorhandling;
 
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
@@ -24,6 +25,6 @@ public class PlatformResourceNotFoundExceptionMapper implements ExceptionMapper<
 	public Response toResponse(AbstractPlatformResourceNotFoundException exception) {
 		
 		ApiGlobalErrorResponse notFoundErrorResponse = ApiGlobalErrorResponse.notFound(exception.getGlobalisationMessageCode(), exception.getDefaultUserMessage(), exception.getDefaultUserMessageArgs());
-		return Response.status(Status.NOT_FOUND).entity(notFoundErrorResponse).build();
+		return Response.status(Status.NOT_FOUND).entity(notFoundErrorResponse).type(MediaType.APPLICATION_JSON).build();
 	}
 }

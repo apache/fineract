@@ -3,6 +3,7 @@ package org.mifosng.platform.api.errorhandling;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
@@ -42,6 +43,6 @@ public class UnrecognizedQueryParamExceptionMapper implements ExceptionMapper<Un
 				"validation.msg.validation.errors.exist",
 				"Validation errors exist.", errors);
 		
-		return Response.status(Status.BAD_REQUEST).entity(invalidParameterError).build();
+		return Response.status(Status.BAD_REQUEST).entity(invalidParameterError).type(MediaType.APPLICATION_JSON).build();
 	}
 }

@@ -1,5 +1,6 @@
 package org.mifosng.platform.api.errorhandling;
 
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
@@ -22,6 +23,6 @@ public class BadCredentialsExceptionMapper implements ExceptionMapper<BadCredent
 
 	@Override
 	public Response toResponse(BadCredentialsException exception) {
-		return Response.status(Status.UNAUTHORIZED).entity(ApiGlobalErrorResponse.unAuthenticated()).build();
+		return Response.status(Status.UNAUTHORIZED).entity(ApiGlobalErrorResponse.unAuthenticated()).type(MediaType.APPLICATION_JSON).build();
 	}
 }

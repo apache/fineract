@@ -1,5 +1,6 @@
 package org.mifosng.platform.api.errorhandling;
 
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
@@ -24,6 +25,6 @@ public class AccessDeniedExceptionMapper implements ExceptionMapper<AccessDenied
 	@Override
 	public Response toResponse(AccessDeniedException exception) {
 		// Status code 403 really reads as: "Authenticated - but not authorized":
-		return Response.status(Status.FORBIDDEN).entity(ApiGlobalErrorResponse.unAuthorized()).build();
+		return Response.status(Status.FORBIDDEN).entity(ApiGlobalErrorResponse.unAuthorized()).type(MediaType.APPLICATION_JSON).build();
 	}
 }

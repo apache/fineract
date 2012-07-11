@@ -1,5 +1,6 @@
 package org.mifosng.platform.api.errorhandling;
 
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
@@ -21,6 +22,6 @@ public class UnAuthenticatedUserExceptionMapper implements ExceptionMapper<UnAut
 	@Override
 	public Response toResponse(UnAuthenticatedUserException exception) {
 		// Status code 401 really reads as: "Unauthenticated":
-		return Response.status(Status.UNAUTHORIZED).entity(ApiGlobalErrorResponse.unAuthenticated()).build();
+		return Response.status(Status.UNAUTHORIZED).entity(ApiGlobalErrorResponse.unAuthenticated()).type(MediaType.APPLICATION_JSON).build();
 	}
 }

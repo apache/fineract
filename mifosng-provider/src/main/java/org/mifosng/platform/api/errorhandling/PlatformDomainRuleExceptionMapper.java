@@ -1,5 +1,6 @@
 package org.mifosng.platform.api.errorhandling;
 
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
@@ -25,6 +26,6 @@ public class PlatformDomainRuleExceptionMapper implements ExceptionMapper<Abstra
 		
 		ApiGlobalErrorResponse notFoundErrorResponse = ApiGlobalErrorResponse.domainRuleViolation(exception.getGlobalisationMessageCode(), exception.getDefaultUserMessage(), exception.getDefaultUserMessageArgs());
 		// request understood but not carried out due to it violating some domain/business logic
-		return Response.status(Status.FORBIDDEN).entity(notFoundErrorResponse).build();
+		return Response.status(Status.FORBIDDEN).entity(notFoundErrorResponse).type(MediaType.APPLICATION_JSON).build();
 	}
 }
