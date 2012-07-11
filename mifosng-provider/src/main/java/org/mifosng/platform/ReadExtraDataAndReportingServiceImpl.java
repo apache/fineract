@@ -27,7 +27,7 @@ import org.mifosng.platform.api.data.ResultsetDataRow;
 import org.mifosng.platform.exceptions.AdditionalFieldsNotFoundException;
 import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
 import org.mifosng.platform.exceptions.ReportNotFoundException;
-//import org.pentaho.reporting.engine.classic.core.ClassicEngineBoot;
+import org.pentaho.reporting.engine.classic.core.ClassicEngineBoot;
 import org.pentaho.reporting.engine.classic.core.MasterReport;
 import org.pentaho.reporting.engine.classic.core.ReportProcessingException;
 import org.pentaho.reporting.engine.classic.core.modules.output.pageable.pdf.PdfReportUtil;
@@ -56,8 +56,8 @@ public class ReadExtraDataAndReportingServiceImpl implements
 	@Autowired
 	public ReadExtraDataAndReportingServiceImpl(final DataSource dataSource) {
 		// kick off pentaho reports server
-		// ClassicEngineBoot.getInstance().start();
-		noPentaho = true;
+		ClassicEngineBoot.getInstance().start();
+		noPentaho = false;
 
 		try {
 			this.dataSource = dataSource;
@@ -718,22 +718,26 @@ public class ReadExtraDataAndReportingServiceImpl implements
 	}
 
 	@Override
-	public Response processPentahoRequest(String reportName, String outputTypeParam,
-			Map<String, String> queryParams) {
+	public Response processPentahoRequest(String reportName,
+			String outputTypeParam, Map<String, String> queryParams) {
 
 		String outputType = "HTML";
-		if (StringUtils.isNotBlank(outputTypeParam)) outputType = outputTypeParam;
-		
-		if (!(outputType.equalsIgnoreCase("HTML") || outputType.equalsIgnoreCase("PDF") || outputType.equalsIgnoreCase("XLS") || outputType.equalsIgnoreCase("CSV")))
+		if (StringUtils.isNotBlank(outputTypeParam))
+			outputType = outputTypeParam;
+
+		if (!(outputType.equalsIgnoreCase("HTML")
+				|| outputType.equalsIgnoreCase("PDF")
+				|| outputType.equalsIgnoreCase("XLS") || outputType
+					.equalsIgnoreCase("CSV")))
 			throw new PlatformDataIntegrityException(
 					"error.msg.invalid.outputType", "No matching Output Type: "
 							+ outputType);
-		
+
 		if (noPentaho)
 			throw new PlatformDataIntegrityException("error.msg.no.pentaho",
 					"Pentaho is not enabled", "Pentaho is not enabled");
 
-		//TODO - use pentaho location finder like Pawel does in Mifos
+		// TODO - use pentaho location finder like Pawel does in Mifos
 		String reportPath = "C:\\dev\\apache-tomcat-7.0.25\\webapps\\ROOT\\PentahoReports\\"
 				+ reportName + ".prpt";
 		// String reportPath =
@@ -785,7 +789,8 @@ public class ReadExtraDataAndReportingServiceImpl implements
 
 			if ("HTML".equalsIgnoreCase(outputType)) {
 				HtmlReportUtil.createStreamHTML(masterReport, baos);
-				return Response.ok().entity(baos.toByteArray()).type("text/html").build();
+				return Response.ok().entity(baos.toByteArray())
+						.type("text/html").build();
 			}
 		} catch (ResourceException e) {
 			throw new PlatformDataIntegrityException(

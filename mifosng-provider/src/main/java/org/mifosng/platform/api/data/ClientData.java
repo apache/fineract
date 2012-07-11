@@ -5,16 +5,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.map.annotate.JsonFilter;
 import org.joda.time.LocalDate;
 
-@JsonIgnoreProperties({ "organisationId","organisationName"})
 @JsonFilter("myFilter")
 public class ClientData implements Serializable {
 
-	private Long organisationId;
-	private String organisationName;
 	private Long officeId;
 	private String officeName;
 	private Long id;
@@ -30,24 +26,21 @@ public class ClientData implements Serializable {
 		//
 	}
 
-	public ClientData(final Long organisationId, final String organisationName,
-			final Long officeId, final String officeName, final Long id,
-			final String firstname, final String lastname,
+	public ClientData(final Long officeId, final String officeName,
+			final Long id, final String firstname, final String lastname,
 			final String externalId, final LocalDate joinedDate) {
-		this.organisationId = organisationId;
-		this.organisationName = organisationName;
 		this.officeId = officeId;
 		this.officeName = officeName;
 		this.id = id;
 		this.firstname = firstname;
 		this.lastname = lastname;
-		
+
 		StringBuilder nameBuilder = new StringBuilder(this.firstname);
 		if (StringUtils.isNotBlank(nameBuilder.toString())) {
 			nameBuilder.append(' ');
 		}
 		nameBuilder.append(this.lastname);
-		
+
 		this.displayName = nameBuilder.toString();
 		this.externalId = externalId;
 		this.joinedDate = joinedDate;
@@ -69,14 +62,6 @@ public class ClientData implements Serializable {
 		return this.externalId;
 	}
 
-	public Long getOrganisationId() {
-		return this.organisationId;
-	}
-
-	public String getOrganisationName() {
-		return this.organisationName;
-	}
-
 	public Long getOfficeId() {
 		return this.officeId;
 	}
@@ -87,14 +72,6 @@ public class ClientData implements Serializable {
 
 	public LocalDate getJoinedDate() {
 		return this.joinedDate;
-	}
-
-	public void setOrganisationId(final Long organisationId) {
-		this.organisationId = organisationId;
-	}
-
-	public void setOrganisationName(final String organisationName) {
-		this.organisationName = organisationName;
 	}
 
 	public void setOfficeId(final Long officeId) {

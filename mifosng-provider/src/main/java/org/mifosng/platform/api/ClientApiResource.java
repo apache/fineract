@@ -16,6 +16,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.mifosng.platform.api.commands.ClientCommand;
 import org.mifosng.platform.api.commands.NoteCommand;
@@ -29,6 +30,8 @@ import org.mifosng.platform.api.infrastructure.ApiJSONFormattingService;
 import org.mifosng.platform.client.service.ClientReadPlatformService;
 import org.mifosng.platform.client.service.ClientWritePlatformService;
 import org.mifosng.platform.organisation.service.OfficeReadPlatformService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -37,6 +40,9 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope("singleton")
 public class ClientApiResource {
+
+	private final static Logger logger = LoggerFactory
+			.getLogger(ClientApiResource.class);
 
 	private String defaultFieldList = "joinedDate";
 	private String allowedFieldList = "allowedOffices";
@@ -60,14 +66,62 @@ public class ClientApiResource {
 	@GET
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrieveAllIndividualClients(@Context UriInfo uriInfo) {
+	public String retrieveAllIndividualClients(@Context UriInfo uriInfo,
+			@QueryParam("sqlSearch") final String sqlSearch,
+			@QueryParam("officeId") final Integer officeId,
+			@QueryParam("externalId") final String externalId,
+			@QueryParam("displayName") final String displayName,
+			@QueryParam("firstName") final String firstName,
+			@QueryParam("lastName") final String lastName) {
+
+		String extraCriteria = getClientCriteria(sqlSearch, officeId,
+				externalId, displayName, firstName, lastName);
 
 		Collection<ClientData> clients = this.clientReadPlatformService
-				.retrieveAllIndividualClients();
+				.retrieveAllIndividualClients(extraCriteria);
 
 		String selectedFields = "";
 		return this.jsonFormattingService.convertRequest(clients, filterName,
 				allowedFieldList, selectedFields, uriInfo.getQueryParameters());
+	}
+
+	private String getClientCriteria(String sqlSearch, Integer officeId,
+			String externalId, String displayName, String firstName,
+			String lastName) {
+
+		String extraCriteria = "";
+
+		if (sqlSearch != null)
+			extraCriteria = " and (" + sqlSearch + ")";
+
+		if (officeId != null)
+			extraCriteria += " and office_id = " + officeId;
+		if (externalId != null)
+			extraCriteria += " and external_id like "
+					+ sqlEncodeString(externalId);
+		if (displayName != null)
+			extraCriteria += " and concat(ifnull(firstname, ''), if(firstname > '',' ', '') , ifnull(lastname, '')) like "
+					+ sqlEncodeString(displayName);
+		if (firstName != null)
+			extraCriteria += " and firstname like "
+					+ sqlEncodeString(firstName);
+		if (lastName != null)
+			extraCriteria += " and lastname like " + sqlEncodeString(lastName);
+
+		if (StringUtils.isNotBlank(extraCriteria))
+			extraCriteria = extraCriteria.substring(4);
+
+		logger.info("extraCriteria; " + extraCriteria);
+
+		return extraCriteria;
+	}
+
+	private String sqlEncodeString(String str) {
+		String singleQuote = "'";
+		String twoSingleQuotes = "''";
+		return singleQuote
+				+ StringUtils.replace(str, singleQuote, twoSingleQuotes, -1)
+				+ singleQuote;
 	}
 
 	@GET

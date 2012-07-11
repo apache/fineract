@@ -8,14 +8,15 @@ import org.mifosng.platform.api.data.NoteData;
 
 public interface ClientReadPlatformService {
 
-	Collection<ClientData> retrieveAllIndividualClients();
+	Collection<ClientData> retrieveAllIndividualClients(String extraCriteria);
 
 	ClientData retrieveIndividualClient(Long clientId);
-	
+
 	ClientData retrieveNewClientDetails();
-	
-	ClientLoanAccountSummaryCollectionData retrieveClientAccountDetails(Long clientId);
-	
+
+	ClientLoanAccountSummaryCollectionData retrieveClientAccountDetails(
+			Long clientId);
+
 	Collection<NoteData> retrieveAllClientNotes(Long clientId);
 
 	NoteData retrieveClientNote(Long clientId, Long noteId);
