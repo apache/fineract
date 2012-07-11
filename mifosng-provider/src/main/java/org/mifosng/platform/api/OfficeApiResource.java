@@ -16,6 +16,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.joda.time.LocalDate;
+import org.mifosng.platform.api.commands.BranchMoneyTransferCommand;
 import org.mifosng.platform.api.commands.OfficeCommand;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.OfficeData;
@@ -124,5 +125,18 @@ public class OfficeApiResource {
 		Long entityId = this.writePlatformService.updateOffice(command);
 
 		return Response.ok().entity(new EntityIdentifier(entityId)).build();
+	}
+	
+	@POST
+	@Path("{officeId}")
+	@Consumes({ MediaType.APPLICATION_JSON})
+	@Produces({ MediaType.APPLICATION_JSON})
+	public Response transferMoney(@PathParam("officeId") final Long loanId,
+			@QueryParam("command") final String commandParam,
+			final BranchMoneyTransferCommand command) {
+
+			Long officeId = this.writePlatformService.transferMoney(command);
+
+			return Response.ok().entity(new EntityIdentifier(officeId)).build();
 	}
 }

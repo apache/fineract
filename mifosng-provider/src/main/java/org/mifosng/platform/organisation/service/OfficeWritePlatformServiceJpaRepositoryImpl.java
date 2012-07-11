@@ -2,13 +2,15 @@ package org.mifosng.platform.organisation.service;
 
 import static org.mifosng.platform.Specifications.officesThatMatch;
 
+import org.mifosng.platform.api.commands.BranchMoneyTransferCommand;
 import org.mifosng.platform.api.commands.OfficeCommand;
+import org.mifosng.platform.currency.domain.MonetaryCurrency;
+import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.exceptions.NoAuthorizationException;
 import org.mifosng.platform.exceptions.OfficeNotFoundException;
 import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
 import org.mifosng.platform.organisation.domain.Office;
 import org.mifosng.platform.organisation.domain.OfficeRepository;
-import org.mifosng.platform.organisation.service.OfficeCommandValidator;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.user.domain.AppUser;
 import org.slf4j.Logger;
@@ -86,6 +88,35 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
 			handleOfficeDataIntegrityIssues(command, dve);
 			return Long.valueOf(-1);
 		}
+	}
+	
+	@Transactional
+	@Override
+	public Long transferMoney(BranchMoneyTransferCommand command) {
+		
+		AppUser currentUser = context.authenticatedUser();
+		
+		Office fromOffice = this.officeRepository.findOne(command.getFromOfficeId());
+		if (fromOffice == null) {
+			throw new OfficeNotFoundException(command.getFromOfficeId());
+		}
+		
+		Office toOffice = this.officeRepository.findOne(command.getToOfficeId());
+		if (toOffice == null) {
+			throw new OfficeNotFoundException(command.getToOfficeId());
+		}
+		
+		MonetaryCurrency currency = new MonetaryCurrency("USD", 2);
+		Money amount = Money.of(currency, command.getTransactionAmountValue());
+		
+		OfficeFundsTransfer entity = OfficeFundsTransfer.create(currentUser.getOrganisation(), fromOffice, toOffice, 
+
+		command.getTransactionDate(), amount);
+		
+		this.officeFundsTransferRepository.save(entity);
+		
+		return entity.getId();
+		return null;
 	}
 
 	/*
