@@ -12,6 +12,7 @@ public class OfficeData implements Serializable {
 
 	private Long id;
 	private String name;
+	private String nameDecorated;
 	private String externalId;
 	private LocalDate openingDate;
 	private String hierarchy;
@@ -24,10 +25,12 @@ public class OfficeData implements Serializable {
 	}
 
 	public OfficeData(final Long id, final String name,
-			final String externalId, final LocalDate openingDate,
-			String hierarchy, final Long parentId, final String parentName) {
+			final String nameDecorated, final String externalId,
+			final LocalDate openingDate, String hierarchy, final Long parentId,
+			final String parentName) {
 		this.id = id;
 		this.name = name;
+		this.nameDecorated = nameDecorated;
 		this.externalId = externalId;
 		this.openingDate = openingDate;
 		this.hierarchy = hierarchy;
@@ -41,6 +44,10 @@ public class OfficeData implements Serializable {
 
 	public String getName() {
 		return this.name;
+	}
+
+	public String getNameDecorated() {
+		return nameDecorated;
 	}
 
 	public String getExternalId() {
@@ -65,6 +72,10 @@ public class OfficeData implements Serializable {
 
 	public void setName(final String name) {
 		this.name = name;
+	}
+
+	public void setNameDecorated(String nameDecorated) {
+		this.nameDecorated = nameDecorated;
 	}
 
 	public void setExternalId(final String externalId) {

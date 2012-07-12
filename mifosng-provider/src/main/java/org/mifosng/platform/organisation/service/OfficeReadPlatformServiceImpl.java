@@ -33,11 +33,13 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
 		this.context = context;
 		this.jdbcTemplate = new SimpleJdbcTemplate(dataSource);
 	}
-	
+
 	private static final class OfficeMapper implements RowMapper<OfficeData> {
 
 		public String officeSchema() {
-			return " o.id as id, o.name as name, o.external_id as externalId, o.opening_date as openingDate, o.hierarchy as hierarchy, parent.id as parentId, parent.name as parentName "
+			return " o.id as id, o.name as name, "
+					+ "concat(substring('........................................', 1, ((LENGTH(o.hierarchy) - LENGTH(REPLACE(o.hierarchy, '.', '')) - 1) * 4)), o.name)"
+					+ " as nameDecorated, o.external_id as externalId, o.opening_date as openingDate, o.hierarchy as hierarchy, parent.id as parentId, parent.name as parentName "
 					+ "from org_office o LEFT JOIN org_office AS parent ON parent.id = o.parent_id ";
 		}
 
@@ -47,17 +49,20 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
 
 			Long id = rs.getLong("id");
 			String name = rs.getString("name");
+			String nameDecorated = rs.getString("nameDecorated");
 			String externalId = rs.getString("externalId");
 			LocalDate openingDate = JdbcSupport.getLocalDate(rs, "openingDate");
 			String hierarchy = rs.getString("hierarchy");
 			Long parentId = JdbcSupport.getLong(rs, "parentId");
 			String parentName = rs.getString("parentName");
 
-			return new OfficeData(id, name, externalId, openingDate, hierarchy, parentId, parentName);
+			return new OfficeData(id, name, nameDecorated, externalId, openingDate, hierarchy,
+					parentId, parentName);
 		}
 	}
-	
-	private static final class OfficeLookupMapper implements RowMapper<OfficeLookup> {
+
+	private static final class OfficeLookupMapper implements
+			RowMapper<OfficeLookup> {
 
 		public String officeLookupSchema() {
 			return " o.id as id, o.name as name from org_office o ";
@@ -103,7 +108,8 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
 				+ rm.officeLookupSchema()
 				+ "where o.org_id = ? and o.hierarchy like ? order by o.hierarchy";
 
-		return this.jdbcTemplate.query(sql, rm, new Object[] {currentUser.getOrganisation().getId(), hierarchySearchString });
+		return this.jdbcTemplate.query(sql, rm, new Object[] {
+				currentUser.getOrganisation().getId(), hierarchySearchString });
 	}
 
 	@Override
