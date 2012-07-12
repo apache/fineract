@@ -25,6 +25,8 @@ public class BranchMoneyTransferCommand {
 	private String transactionAmount;
 	private BigDecimal transactionAmountValue;
 	
+	private String description;
+	
 	protected BranchMoneyTransferCommand() {
 		//
 	}
@@ -107,5 +109,13 @@ public class BranchMoneyTransferCommand {
 
 	public void setCurrencyCode(String currencyCode) {
 		this.currencyCode = currencyCode;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 }

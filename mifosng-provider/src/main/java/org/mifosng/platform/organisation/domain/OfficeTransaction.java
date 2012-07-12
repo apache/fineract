@@ -20,8 +20,8 @@ import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
 import org.mifosng.platform.user.domain.AppUser;
 
 @Entity
-@Table(name = "portfolio_office_monetary_transfers")
-public class OfficeMonetaryTransfer extends AbstractAuditableCustom<AppUser, Long> {
+@Table(name = "portfolio_office_transaction")
+public class OfficeTransaction extends AbstractAuditableCustom<AppUser, Long> {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "from_office_id")
@@ -40,22 +40,25 @@ public class OfficeMonetaryTransfer extends AbstractAuditableCustom<AppUser, Lon
 
 	@Column(name = "transaction_amount", scale = 6, precision = 19, nullable = false)
 	private BigDecimal transactionAmount;
+	
+	@Column(name = "description", nullable=true, length=100)
+	private String description;
 
-	protected OfficeMonetaryTransfer() {
+	protected OfficeTransaction() {
 		this.transactionDate = null;
 	}
 
-	public static OfficeMonetaryTransfer create(Office fromOffice, Office toOffice, LocalDate transactionLocalDate, Money amount) {
+	public static OfficeTransaction create(Office fromOffice, Office toOffice, LocalDate transactionLocalDate, Money amount) {
 
 		Date transactionDate = null;
 		if (transactionLocalDate != null) {
 			transactionDate = transactionLocalDate.toDate();
 		}
 
-		return new OfficeMonetaryTransfer(fromOffice, toOffice, transactionDate, amount);
+		return new OfficeTransaction(fromOffice, toOffice, transactionDate, amount);
 	}
 
-	private OfficeMonetaryTransfer(final Office fromOffice,final Office toOffice, final Date transactionDate, final Money amount) {
+	private OfficeTransaction(final Office fromOffice,final Office toOffice, final Date transactionDate, final Money amount) {
 		this.from = fromOffice;
 		this.to = toOffice;
 		this.transactionDate = transactionDate;

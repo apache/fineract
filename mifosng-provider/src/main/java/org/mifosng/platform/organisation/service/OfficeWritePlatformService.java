@@ -13,5 +13,8 @@ public interface OfficeWritePlatformService {
 	Long updateOffice(final OfficeCommand command);
 
 	@PreAuthorize(value = "hasRole('ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE')")
-	Long transferMoney(BranchMoneyTransferCommand command);
+	Long interBranchMoneyTransfer(BranchMoneyTransferCommand command);
+
+	@PreAuthorize(value = "hasRole('ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE')")
+	Long externalBranchMoneyTransfer(BranchMoneyTransferCommand command);
 }
