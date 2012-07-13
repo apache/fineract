@@ -59,12 +59,7 @@ public class LoanProductReadPlatformServiceImpl implements
 	public LoanProductData retrieveLoanProduct(final Long loanProductId) {
 
 		try {
-			List<CurrencyData> allowedCurrencies = currencyReadPlatformService
-					.retrieveAllPlatformCurrencies();
-			
-			Collection<FundData> allFunds = this.fundReadPlatformService.retrieveAllFunds();
-
-			LoanProductMapper rm = new LoanProductMapper(allowedCurrencies, allFunds);
+			LoanProductMapper rm = new LoanProductMapper();
 			String sql = "select " + rm.loanProductSchema()
 					+ " where lp.id = ?";
 
@@ -83,12 +78,8 @@ public class LoanProductReadPlatformServiceImpl implements
 	public Collection<LoanProductData> retrieveAllLoanProducts() {
 
 		AppUser currentUser = this.context.authenticatedUser();
-		
-		// TODO - include currency read in the sql
-		List<CurrencyData> allowedCurrencies = currencyReadPlatformService.retrieveAllPlatformCurrencies();
-		Collection<FundData> allFunds = this.fundReadPlatformService.retrieveAllFunds();
 
-		LoanProductMapper rm = new LoanProductMapper(allowedCurrencies, allFunds);
+		LoanProductMapper rm = new LoanProductMapper();
 
 		String sql = "select " + rm.loanProductSchema()
 				+ " where lp.org_id = ?";
@@ -140,14 +131,13 @@ public class LoanProductReadPlatformServiceImpl implements
 		return productData;
 	}
 
-	private static final class LoanProductMapper implements RowMapper<LoanProductData> {
+	private static final class LoanProductMapper implements
+			RowMapper<LoanProductData> {
 
-		private final List<CurrencyData> allowedCurrencies;
-		private final Collection<FundData> allFunds;
+		// private final List<CurrencyData> allowedCurrencies;
+		// private final Collection<FundData> allFunds;
 
-		public LoanProductMapper(List<CurrencyData> allowedCurrencies, Collection<FundData> allFunds) {
-			this.allowedCurrencies = allowedCurrencies;
-			this.allFunds = allFunds;
+		public LoanProductMapper() {
 		}
 
 		public String loanProductSchema() {
@@ -157,8 +147,11 @@ public class LoanProductReadPlatformServiceImpl implements
 					+ "lp.annual_nominal_interest_rate as annualInterestRate, lp.interest_method_enum as interestMethod, lp.interest_calculated_in_period_enum as interestCalculationInPeriodMethod,"
 					+ "lp.repay_every as repaidEvery, lp.repayment_period_frequency_enum as repaymentPeriodFrequency, lp.number_of_repayments as numberOfRepayments, "
 					+ "lp.amortization_method_enum as amortizationMethod, lp.arrearstolerance_amount as tolerance, "
-					+ "lp.created_date as createdon, lp.lastmodified_date as modifiedon "
-					+ " from portfolio_product_loan lp left join org_fund f on f.id = lp.fund_id";
+					+ "lp.created_date as createdon, lp.lastmodified_date as modifiedon, "
+					+ "curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, curr.display_symbol as currencyDisplaySymbol "
+					+ " from portfolio_product_loan lp "
+					+ " left join org_fund f on f.id = lp.fund_id"
+					+ " join ref_currency curr on curr.code = lp.currency_code";
 		}
 
 		@Override
@@ -171,16 +164,18 @@ public class LoanProductReadPlatformServiceImpl implements
 
 			Long fundId = JdbcSupport.getLong(rs, "fundId");
 			String fundName = rs.getString("fundName");
-			
+
 			String currencyCode = rs.getString("currencyCode");
+			String currencyName = rs.getString("currencyName");
+			String currencyNameCode = rs.getString("currencyNameCode");
+			String currencyDisplaySymbol = rs
+					.getString("currencyDisplaySymbol");
 			Integer currencyDigits = JdbcSupport.getInteger(rs,
 					"currencyDigits");
 
-			CurrencyData currencyData = findCurrencyByCode(currencyCode,
-					allowedCurrencies);
-			if (currencyData != null) {
-				currencyData.setDecimalPlaces(currencyDigits);
-			}
+			CurrencyData currencyData = new CurrencyData(currencyCode,
+					currencyName, currencyDigits, currencyDisplaySymbol,
+					currencyNameCode);
 
 			BigDecimal principal = rs.getBigDecimal("principal");
 			BigDecimal tolerance = rs.getBigDecimal("tolerance");
@@ -231,16 +226,6 @@ public class LoanProductReadPlatformServiceImpl implements
 					interestCalculationPeriodType, fundId, fundName);
 		}
 
-		private CurrencyData findCurrencyByCode(String currencyCode, List<CurrencyData> allowedCurrencies) {
-			CurrencyData match = null;
-			for (CurrencyData currencyData : allowedCurrencies) {
-				if (currencyData.getCode().equalsIgnoreCase(currencyCode)) {
-					match = currencyData;
-					break;
-				}
-			}
-			return match;
-		}
 	}
 
 	private static final class LoanProductLookupMapper implements
@@ -262,7 +247,8 @@ public class LoanProductReadPlatformServiceImpl implements
 
 	}
 
-	private void populateProductDataWithDropdownOptions(LoanProductData productData) {
+	private void populateProductDataWithDropdownOptions(
+			LoanProductData productData) {
 
 		List<CurrencyData> currencyOptions = currencyReadPlatformService
 				.retrieveAllowedCurrencies();
@@ -276,8 +262,9 @@ public class LoanProductReadPlatformServiceImpl implements
 				.retrieveRepaymentFrequencyTypeOptions();
 		List<EnumOptionData> interestRateFrequencyTypeOptions = dropdownReadPlatformService
 				.retrieveInterestRateFrequencyTypeOptions();
-		
-		Collection<FundData> fundOptions = this.fundReadPlatformService.retrieveAllFunds();
+
+		Collection<FundData> fundOptions = this.fundReadPlatformService
+				.retrieveAllFunds();
 
 		productData.setCurrencyOptions(currencyOptions);
 		productData.setAmortizationTypeOptions(amortizationTypeOptions);
