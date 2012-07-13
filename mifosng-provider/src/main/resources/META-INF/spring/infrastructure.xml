@@ -7,7 +7,7 @@
     	http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.0.xsd">
 
     <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
-        <property name="dataSource" ref="dataSource" />
+        <property name="dataSource" ref="tenantAwareDataSource" />
         <property name="persistenceUnitName" value="jpa-pu" />
         <property name="jpaVendorAdapter">
             <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
@@ -23,14 +23,5 @@
         <property name="entityManagerFactory" ref="entityManagerFactory" />
     </bean>
                                
-    <jee:jndi-lookup jndi-name="java:comp/env/jdbc/mifosng" id="dataSource" />
-	
-	<!-- 
-	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-        <property name="driverClassName" value="com.mysql.jdbc.Driver" />
-        <property name="url" value="jdbc:mysql://localhost:3306/mifosngprovider" />
-        <property name="username" value="root" />
-        <property name="password" value="mysql" />
-    </bean>
-    -->
+    <jee:jndi-lookup jndi-name="java:comp/env/jdbc/mifosplatform-tenants" id="tenantDataSourceJndi" />
 </beans>

@@ -9,42 +9,41 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import javax.sql.DataSource;
-
 import org.mifosng.platform.api.data.AppUserData;
 import org.mifosng.platform.api.data.OfficeData;
 import org.mifosng.platform.api.data.OfficeLookup;
 import org.mifosng.platform.api.data.RoleData;
 import org.mifosng.platform.exceptions.UserNotFoundException;
 import org.mifosng.platform.infrastructure.JdbcSupport;
+import org.mifosng.platform.infrastructure.TenantAwareRoutingDataSource;
 import org.mifosng.platform.organisation.service.OfficeReadPlatformService;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.user.domain.AppUser;
 import org.mifosng.platform.user.domain.AppUserRepository;
 import org.mifosng.platform.user.domain.Role;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformService {
 
-	private final SimpleJdbcTemplate jdbcTemplate;
+	private final JdbcTemplate jdbcTemplate;
 	private final PlatformSecurityContext context;
 	private final OfficeReadPlatformService officeReadPlatformService;
 	private final RoleReadPlatformService roleReadPlatformService;
 	private final AppUserRepository appUserRepository;
 
 	@Autowired
-	public AppUserReadPlatformServiceImpl(final PlatformSecurityContext context, final DataSource dataSource, 
+	public AppUserReadPlatformServiceImpl(final PlatformSecurityContext context, final TenantAwareRoutingDataSource dataSource, 
 			final OfficeReadPlatformService officeReadPlatformService, final RoleReadPlatformService roleReadPlatformService,
 			final AppUserRepository appUserRepository) {
 		this.context = context;
 		this.officeReadPlatformService = officeReadPlatformService;
 		this.roleReadPlatformService = roleReadPlatformService;
 		this.appUserRepository = appUserRepository;
-		this.jdbcTemplate = new SimpleJdbcTemplate(dataSource);
+		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
 
 	@Override

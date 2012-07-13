@@ -5,12 +5,12 @@
   xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" 
   id="mifosng-platform-provider" version="2.5">
 
-	<display-name>MifosNg - Platform</display-name>
+	<display-name>Mifos Platform</display-name>
 	<description>A provider of microfinance services which applications can consume once authenticated and authorized.</description>
 
 	<context-param>
 	    <param-name>webAppRootKey</param-name>
-	    <param-value>mifosngserver.root</param-value>
+	    <param-value>mifosplatform.root</param-value>
     </context-param>
 
 	<context-param>
@@ -28,24 +28,8 @@
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
 
-<!--
-	<filter>
-		<filter-name>filterChainProxy</filter-name>
-		<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
-	</filter>
-
-	<filter-mapping>
-		<filter-name>filterChainProxy</filter-name>
-		<url-pattern>/*</url-pattern>
-	</filter-mapping>
--->
-
 	<listener>
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
-    </listener>
-
-	<listener>
-		<listener-class>org.springframework.security.web.session.HttpSessionEventPublisher</listener-class>
     </listener>
 
 	<servlet>
@@ -77,30 +61,4 @@
 		<servlet-name>jersey-serlvet</servlet-name>
 		<url-pattern>/api/v1/*</url-pattern>
 	</servlet-mapping>
-
-	<servlet>
-		<servlet-name>dispatcher</servlet-name>
-		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-		<init-param>
-			<param-name>contextConfigLocation</param-name>
-			<param-value>/WEB-INF/spring/webmvc-config.xml</param-value>
-		</init-param>
-		<load-on-startup>1</load-on-startup>
-	</servlet>
-
-	<servlet-mapping>
-		<servlet-name>dispatcher</servlet-name>
-		<url-pattern>/</url-pattern>
-	</servlet-mapping>
-	
-	<jsp-config>
-	  <jsp-property-group>
-	    <url-pattern>*.jsp</url-pattern>
-	    <trim-directive-whitespaces>true</trim-directive-whitespaces>
-	  </jsp-property-group>
-	</jsp-config>
-
-	<session-config>
-	    <session-timeout>20</session-timeout>
-    </session-config>
 </web-app>

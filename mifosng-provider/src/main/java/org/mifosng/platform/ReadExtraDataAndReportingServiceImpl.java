@@ -27,6 +27,7 @@ import org.mifosng.platform.api.data.ResultsetDataRow;
 import org.mifosng.platform.exceptions.AdditionalFieldsNotFoundException;
 import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
 import org.mifosng.platform.exceptions.ReportNotFoundException;
+import org.mifosng.platform.infrastructure.TenantAwareRoutingDataSource;
 import org.pentaho.reporting.engine.classic.core.ClassicEngineBoot;
 import org.pentaho.reporting.engine.classic.core.MasterReport;
 import org.pentaho.reporting.engine.classic.core.ReportProcessingException;
@@ -46,15 +47,14 @@ import org.springframework.stereotype.Service;
 public class ReadExtraDataAndReportingServiceImpl implements
 		ReadExtraDataAndReportingService {
 
-	private final static Logger logger = LoggerFactory
-			.getLogger(ReadExtraDataAndReportingServiceImpl.class);
+	private final static Logger logger = LoggerFactory.getLogger(ReadExtraDataAndReportingServiceImpl.class);
 
 	private final DataSource dataSource;
 	private final String reportingMetaDataDB;
 	private Boolean noPentaho = false;
 
 	@Autowired
-	public ReadExtraDataAndReportingServiceImpl(final DataSource dataSource) {
+	public ReadExtraDataAndReportingServiceImpl(final TenantAwareRoutingDataSource dataSource) {
 		// kick off pentaho reports server
 		ClassicEngineBoot.getInstance().start();
 		noPentaho = false;

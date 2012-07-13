@@ -1,6 +1,6 @@
 -- create office transaction table
-DROP TABLE IF EXISTS `mifosngprovider`.`portfolio_office_monetary_transfers`;
-DROP TABLE IF EXISTS `mifosngprovider`.`portfolio_office_transaction`;
+DROP TABLE IF EXISTS `portfolio_office_monetary_transfers`;
+DROP TABLE IF EXISTS `portfolio_office_transaction`;
 CREATE TABLE `portfolio_office_transaction` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `from_office_id` bigint(20) DEFAULT NULL,

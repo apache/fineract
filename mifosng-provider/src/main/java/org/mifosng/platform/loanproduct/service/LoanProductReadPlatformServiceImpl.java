@@ -6,8 +6,6 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 
-import javax.sql.DataSource;
-
 import org.joda.time.DateTime;
 import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.EnumOptionData;
@@ -19,6 +17,7 @@ import org.mifosng.platform.currency.service.CurrencyReadPlatformService;
 import org.mifosng.platform.exceptions.LoanProductNotFoundException;
 import org.mifosng.platform.fund.service.FundReadPlatformService;
 import org.mifosng.platform.infrastructure.JdbcSupport;
+import org.mifosng.platform.infrastructure.TenantAwareRoutingDataSource;
 import org.mifosng.platform.loan.domain.AmortizationMethod;
 import org.mifosng.platform.loan.domain.InterestCalculationPeriodMethod;
 import org.mifosng.platform.loan.domain.InterestMethod;
@@ -27,8 +26,8 @@ import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.user.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -37,7 +36,7 @@ public class LoanProductReadPlatformServiceImpl implements
 
 	private final PlatformSecurityContext context;
 	private final CurrencyReadPlatformService currencyReadPlatformService;
-	private final SimpleJdbcTemplate jdbcTemplate;
+	private final JdbcTemplate jdbcTemplate;
 	private final LoanDropdownReadPlatformService dropdownReadPlatformService;
 	private final FundReadPlatformService fundReadPlatformService;
 
@@ -47,12 +46,12 @@ public class LoanProductReadPlatformServiceImpl implements
 			final CurrencyReadPlatformService currencyReadPlatformService,
 			final FundReadPlatformService fundReadPlatformService,
 			final LoanDropdownReadPlatformService dropdownReadPlatformService,
-			final DataSource dataSource) {
+			final TenantAwareRoutingDataSource dataSource) {
 		this.context = context;
 		this.currencyReadPlatformService = currencyReadPlatformService;
 		this.fundReadPlatformService = fundReadPlatformService;
 		this.dropdownReadPlatformService = dropdownReadPlatformService;
-		this.jdbcTemplate = new SimpleJdbcTemplate(dataSource);
+		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
 
 	@Override

@@ -4,27 +4,26 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
-import javax.sql.DataSource;
-
 import org.mifosng.platform.api.data.PermissionData;
 import org.mifosng.platform.infrastructure.JdbcSupport;
+import org.mifosng.platform.infrastructure.TenantAwareRoutingDataSource;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.user.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
 public class PermissionReadPlatformServiceImpl implements PermissionReadPlatformService {
 
-	private final SimpleJdbcTemplate jdbcTemplate;
+	private final JdbcTemplate jdbcTemplate;
 	private final PlatformSecurityContext context;
 
 	@Autowired
-	public PermissionReadPlatformServiceImpl(final PlatformSecurityContext context, final DataSource dataSource) {
+	public PermissionReadPlatformServiceImpl(final PlatformSecurityContext context, final TenantAwareRoutingDataSource dataSource) {
 		this.context = context;
-		this.jdbcTemplate = new SimpleJdbcTemplate(dataSource);
+		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
 
 	@Override

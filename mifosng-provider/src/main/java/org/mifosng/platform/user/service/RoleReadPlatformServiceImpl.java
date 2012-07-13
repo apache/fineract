@@ -6,32 +6,31 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
-import javax.sql.DataSource;
-
 import org.mifosng.platform.api.data.RoleData;
 import org.mifosng.platform.exceptions.RoleNotFoundException;
 import org.mifosng.platform.infrastructure.JdbcSupport;
+import org.mifosng.platform.infrastructure.TenantAwareRoutingDataSource;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.user.domain.AppUser;
 import org.mifosng.platform.user.domain.Role;
 import org.mifosng.platform.user.domain.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
 public class RoleReadPlatformServiceImpl implements RoleReadPlatformService {
 
-	private final SimpleJdbcTemplate jdbcTemplate;
+	private final JdbcTemplate jdbcTemplate;
 	private final PlatformSecurityContext context;
 	private final RoleRepository roleRepository;
 
 	@Autowired
-	public RoleReadPlatformServiceImpl(final PlatformSecurityContext context, final DataSource dataSource, final RoleRepository roleRepository) {
+	public RoleReadPlatformServiceImpl(final PlatformSecurityContext context, final TenantAwareRoutingDataSource dataSource, final RoleRepository roleRepository) {
 		this.context = context;
 		this.roleRepository = roleRepository;
-		this.jdbcTemplate = new SimpleJdbcTemplate(dataSource);
+		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
 
 	@Override

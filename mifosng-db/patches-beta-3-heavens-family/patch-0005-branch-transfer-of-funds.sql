@@ -1,5 +1,5 @@
 -- create fund table
-DROP TABLE IF EXISTS `mifosngprovider`.`portfolio_office_monetary_transfers`;
+DROP TABLE IF EXISTS `portfolio_office_monetary_transfers`;
 CREATE TABLE `portfolio_office_monetary_transfers` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `from_office_id` bigint(20) DEFAULT NULL,

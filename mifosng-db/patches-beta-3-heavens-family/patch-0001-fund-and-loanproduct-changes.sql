@@ -1,5 +1,5 @@
 -- create fund table
-DROP TABLE IF EXISTS `mifosngprovider`.`org_fund`;
+DROP TABLE IF EXISTS `org_fund`;
 CREATE TABLE `org_fund` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `org_id` bigint(20) NOT NULL,
@@ -21,13 +21,13 @@ CREATE TABLE `org_fund` (
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 -- example of dropping fund column/index/foreign key 
--- alter table `mifosngprovider`.`portfolio_product_loan` 
+-- alter table `portfolio_product_loan` 
 -- DROP FOREIGN KEY `FKA6A8A7D77240145`,
 -- DROP INDEX `FKA6A8A7D77240145`,
 -- drop column `fund_id`;
 
 -- associate fund table with loan products making it fund optional at database level
-alter table `mifosngprovider`.`portfolio_product_loan`
+alter table `portfolio_product_loan`
 add column `fund_id` bigint(20) DEFAULT NULL,
 add KEY `FKA6A8A7D77240145` (`fund_id`),
 add CONSTRAINT `FKA6A8A7D77240145` FOREIGN KEY (`fund_id`) REFERENCES `org_fund` (`id`);

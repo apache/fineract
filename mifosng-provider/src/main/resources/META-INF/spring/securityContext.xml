@@ -7,15 +7,25 @@
    http://www.springframework.org/schema/beans 
    http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
 
-	<http create-session="stateless" use-expressions="true" pattern="/api/**" realm="Mifos Platform API">
-	   <intercept-url pattern="/api/*/authentication" access="permitAll" method="POST" requires-channel="https" />
-	   <intercept-url pattern="/api/**" access="isFullyAuthenticated()" method="GET" requires-channel="https" />
-	   <intercept-url pattern="/api/**" access="isFullyAuthenticated()" method="POST" requires-channel="https"/>
-	   <intercept-url pattern="/api/**" access="isFullyAuthenticated()" method="PUT" requires-channel="https"/>
-	   <intercept-url pattern="/api/**" access="isFullyAuthenticated()" method="DELETE" requires-channel="https"/>
-	   <intercept-url pattern="/api/**" access="isFullyAuthenticated()" method="HEAD" requires-channel="https"/>
-	   <http-basic />
+	<http create-session="stateless" use-expressions="true" pattern="/api/**" entry-point-ref="basicAuthenticationEntryPoint">
+	   <intercept-url pattern="/api/*/authentication" access="permitAll" method="POST" requires-channel="http" />
+	   <intercept-url pattern="/api/**" access="isFullyAuthenticated()" method="GET" requires-channel="http" />
+	   <intercept-url pattern="/api/**" access="isFullyAuthenticated()" method="POST" requires-channel="http"/>
+	   <intercept-url pattern="/api/**" access="isFullyAuthenticated()" method="PUT" requires-channel="http"/>
+	   <intercept-url pattern="/api/**" access="isFullyAuthenticated()" method="DELETE" requires-channel="http"/>
+	   <intercept-url pattern="/api/**" access="isFullyAuthenticated()" method="HEAD" requires-channel="http"/>
+
+		<custom-filter after="SECURITY_CONTEXT_FILTER" ref="basicAuthenticationProcessingFilter" />	   
 	</http>
+	
+	<beans:bean id="basicAuthenticationEntryPoint" class="org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint">
+		<beans:property name="realmName" value="Mifos Platform API" />
+	</beans:bean>
+
+	<beans:bean id="basicAuthenticationProcessingFilter" class="org.mifosng.platform.infrastructure.TenantAwareBasicAuthenticationFilter">
+		<beans:constructor-arg ref="authenticationManager" />
+		<beans:constructor-arg ref="basicAuthenticationEntryPoint" />
+	</beans:bean>
 
 	<beans:bean id="passwordEncoder" class="org.springframework.security.authentication.encoding.ShaPasswordEncoder">
     	<beans:constructor-arg value="256"/>
@@ -25,8 +35,6 @@
     	<beans:property name="userPropertyToUse" value="id"/>
  	</beans:bean>
  		
-	<beans:bean id="userDetailsService" class="org.mifosng.platform.security.PlatformUserDetailsServiceImpl" />
-		
 	<beans:bean id="customAuthenticationProvider" class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
 		<beans:property name="userDetailsService" ref="userDetailsService" />
 		<beans:property name="passwordEncoder" ref="passwordEncoder" />

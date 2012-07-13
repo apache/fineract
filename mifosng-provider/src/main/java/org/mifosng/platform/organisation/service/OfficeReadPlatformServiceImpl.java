@@ -6,33 +6,31 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import javax.sql.DataSource;
-
 import org.joda.time.LocalDate;
 import org.mifosng.platform.api.data.OfficeData;
 import org.mifosng.platform.api.data.OfficeLookup;
 import org.mifosng.platform.exceptions.OfficeNotFoundException;
 import org.mifosng.platform.infrastructure.JdbcSupport;
+import org.mifosng.platform.infrastructure.TenantAwareRoutingDataSource;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.user.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
 public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService {
 
-	private final SimpleJdbcTemplate jdbcTemplate;
+	private final JdbcTemplate jdbcTemplate;
 	private final PlatformSecurityContext context;
 	private final static String nameDecoratedBaseOnHierarchy = "concat(substring('........................................', 1, ((LENGTH(o.hierarchy) - LENGTH(REPLACE(o.hierarchy, '.', '')) - 1) * 4)), o.name)";
 
 	@Autowired
-	public OfficeReadPlatformServiceImpl(final PlatformSecurityContext context,
-			final DataSource dataSource) {
+	public OfficeReadPlatformServiceImpl(final PlatformSecurityContext context, final TenantAwareRoutingDataSource dataSource) {
 		this.context = context;
-		this.jdbcTemplate = new SimpleJdbcTemplate(dataSource);
+		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
 
 	private static final class OfficeMapper implements RowMapper<OfficeData> {
