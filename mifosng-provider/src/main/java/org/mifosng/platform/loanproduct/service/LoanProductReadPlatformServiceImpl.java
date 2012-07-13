@@ -151,14 +151,14 @@ public class LoanProductReadPlatformServiceImpl implements
 		}
 
 		public String loanProductSchema() {
-			return "lp.id as id, lp.fund_id as fundId, lp.name as name, lp.description as description, lp.flexible_repayment_schedule as isFlexible, lp.interest_rebate as isInterestRebateAllowed, "
+			return "lp.id as id, lp.fund_id as fundId, f.name as fundName, lp.name as name, lp.description as description, lp.flexible_repayment_schedule as isFlexible, lp.interest_rebate as isInterestRebateAllowed, "
 					+ "lp.principal_amount as principal, lp.currency_code as currencyCode, lp.currency_digits as currencyDigits, "
 					+ "lp.nominal_interest_rate_per_period as interestRatePerPeriod, lp.interest_period_frequency_enum as interestRatePerPeriodFreq, "
 					+ "lp.annual_nominal_interest_rate as annualInterestRate, lp.interest_method_enum as interestMethod, lp.interest_calculated_in_period_enum as interestCalculationInPeriodMethod,"
 					+ "lp.repay_every as repaidEvery, lp.repayment_period_frequency_enum as repaymentPeriodFrequency, lp.number_of_repayments as numberOfRepayments, "
 					+ "lp.amortization_method_enum as amortizationMethod, lp.arrearstolerance_amount as tolerance, "
 					+ "lp.created_date as createdon, lp.lastmodified_date as modifiedon "
-					+ " from portfolio_product_loan lp";
+					+ " from portfolio_product_loan lp left join org_fund f on f.id = lp.fund_id";
 		}
 
 		@Override
@@ -169,8 +169,8 @@ public class LoanProductReadPlatformServiceImpl implements
 			String name = rs.getString("name");
 			String description = rs.getString("description");
 
-			Long fundId = rs.getLong("fundId");
-			FundData fund = findFundDataById(fundId, allFunds);
+			Long fundId = JdbcSupport.getLong(rs, "fundId");
+			String fundName = rs.getString("fundName");
 			
 			String currencyCode = rs.getString("currencyCode");
 			Integer currencyDigits = JdbcSupport.getInteger(rs,
@@ -228,17 +228,7 @@ public class LoanProductReadPlatformServiceImpl implements
 					numberOfRepayments, repaymentEvery, interestRatePerPeriod,
 					annualInterestRate, repaymentFrequencyType,
 					interestRateFrequencyType, amortizationType, interestType,
-					interestCalculationPeriodType, fund);
-		}
-
-		private FundData findFundDataById(Long fundId, Collection<FundData> allFunds) {
-			FundData match = null;
-			for (FundData fundData : allFunds) {
-				if (fundData.getId().equals(fundId)) {
-					match = fundData;
-				}
-			}
-			return match;
+					interestCalculationPeriodType, fundId, fundName);
 		}
 
 		private CurrencyData findCurrencyByCode(String currencyCode, List<CurrencyData> allowedCurrencies) {

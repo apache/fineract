@@ -15,13 +15,14 @@ public class LoanProductData implements Serializable {
 	private Long id;
 	private String name;
 	private String description;
-	
-	private FundData fund;
-	
+
+	private Long fundId;
+	private String fundName;
+
 	private MoneyData principal;
 	private MoneyData inArrearsTolerance;
-	
-	private Integer numberOfRepayments;	
+
+	private Integer numberOfRepayments;
 	private Integer repaymentEvery;
 	private BigDecimal interestRatePerPeriod = BigDecimal.ZERO;
 	private BigDecimal annualInterestRate = BigDecimal.ZERO;
@@ -31,10 +32,10 @@ public class LoanProductData implements Serializable {
 	private EnumOptionData amortizationType;
 	private EnumOptionData interestType;
 	private EnumOptionData interestCalculationPeriodType;
-	
+
 	private DateTime createdOn;
 	private DateTime lastModifedOn;
-	
+
 	private List<CurrencyData> currencyOptions = new ArrayList<CurrencyData>();
 	private Collection<FundData> fundOptions = new ArrayList<FundData>();
 	private List<EnumOptionData> amortizationTypeOptions = new ArrayList<EnumOptionData>();
@@ -42,8 +43,7 @@ public class LoanProductData implements Serializable {
 	private List<EnumOptionData> interestCalculationPeriodTypeOptions = new ArrayList<EnumOptionData>();
 	private List<EnumOptionData> repaymentFrequencyTypeOptions = new ArrayList<EnumOptionData>();
 	private List<EnumOptionData> interestRateFrequencyTypeOptions = new ArrayList<EnumOptionData>();
-	
-	
+
 	public LoanProductData() {
 		//
 	}
@@ -55,9 +55,9 @@ public class LoanProductData implements Serializable {
 			BigDecimal annualInterestRate,
 			EnumOptionData repaymentFrequencyType,
 			EnumOptionData interestRateFrequencyType,
-			EnumOptionData amortizationType, 
-			EnumOptionData interestType,
-			EnumOptionData interestCalculationPeriodType, FundData fund) {
+			EnumOptionData amortizationType, EnumOptionData interestType,
+			EnumOptionData interestCalculationPeriodType, Long fundId,
+			String fundName) {
 		this.createdOn = createdOn;
 		this.lastModifedOn = lastModifedOn;
 		this.id = id;
@@ -74,7 +74,8 @@ public class LoanProductData implements Serializable {
 		this.amortizationType = amortizationType;
 		this.interestType = interestType;
 		this.interestCalculationPeriodType = interestCalculationPeriodType;
-		this.fund = fund;
+		this.fundId = fundId;
+		this.fundName = fundName;
 	}
 
 	public Long getId() {
@@ -100,13 +101,21 @@ public class LoanProductData implements Serializable {
 	public void setDescription(String description) {
 		this.description = description;
 	}
-	
-	public FundData getFund() {
-		return fund;
+
+	public Long getFundId() {
+		return fundId;
 	}
 
-	public void setFund(FundData fund) {
-		this.fund = fund;
+	public void setFundId(Long fundId) {
+		this.fundId = fundId;
+	}
+
+	public String getFundName() {
+		return fundName;
+	}
+
+	public void setFundName(String fundName) {
+		this.fundName = fundName;
 	}
 
 	public MoneyData getPrincipal() {
@@ -240,7 +249,7 @@ public class LoanProductData implements Serializable {
 	public void setCurrencyOptions(List<CurrencyData> currencyOptions) {
 		this.currencyOptions = currencyOptions;
 	}
-	
+
 	public Collection<FundData> getFundOptions() {
 		return fundOptions;
 	}

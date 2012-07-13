@@ -32,8 +32,8 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class LoanProductApiResource {
 
-	private String defaultFieldList = "principal,inArrearsTolerance,interestRatePerPeriod,annualInterestRate,repaymentFrequencyType,interestRateFrequencyType,amortizationType,interestType,interestCalculationPeriodType";
-	private String allowedFieldList = "currencyOptions,amortizationTypeOptions,interestTypeOptions,interestCalculationPeriodTypeOptions,repaymentFrequencyTypeOptions,interestRateFrequencyTypeOptions";
+	private String defaultFieldList = "principal,inArrearsTolerance,interestRatePerPeriod,annualInterestRate,repaymentFrequencyType,interestRateFrequencyType,amortizationType,interestType,interestCalculationPeriodType,fundId";
+	private String allowedFieldList = "currencyOptions,amortizationTypeOptions,interestTypeOptions,interestCalculationPeriodTypeOptions,repaymentFrequencyTypeOptions,interestRateFrequencyTypeOptions,fundOptions";
 	private String filterName = "myFilter";
 
 	@Autowired
