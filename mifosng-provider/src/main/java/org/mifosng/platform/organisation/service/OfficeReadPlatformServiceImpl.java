@@ -26,6 +26,7 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
 
 	private final SimpleJdbcTemplate jdbcTemplate;
 	private final PlatformSecurityContext context;
+	private final static String nameDecoratedBaseOnHierarchy = "concat(substring('........................................', 1, ((LENGTH(o.hierarchy) - LENGTH(REPLACE(o.hierarchy, '.', '')) - 1) * 4)), o.name)";
 
 	@Autowired
 	public OfficeReadPlatformServiceImpl(final PlatformSecurityContext context,
@@ -38,7 +39,7 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
 
 		public String officeSchema() {
 			return " o.id as id, o.name as name, "
-					+ "concat(substring('........................................', 1, ((LENGTH(o.hierarchy) - LENGTH(REPLACE(o.hierarchy, '.', '')) - 1) * 4)), o.name)"
+					+ nameDecoratedBaseOnHierarchy
 					+ " as nameDecorated, o.external_id as externalId, o.opening_date as openingDate, o.hierarchy as hierarchy, parent.id as parentId, parent.name as parentName "
 					+ "from org_office o LEFT JOIN org_office AS parent ON parent.id = o.parent_id ";
 		}
@@ -56,8 +57,8 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
 			Long parentId = JdbcSupport.getLong(rs, "parentId");
 			String parentName = rs.getString("parentName");
 
-			return new OfficeData(id, name, nameDecorated, externalId, openingDate, hierarchy,
-					parentId, parentName);
+			return new OfficeData(id, name, nameDecorated, externalId,
+					openingDate, hierarchy, parentId, parentName);
 		}
 	}
 
@@ -65,7 +66,8 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
 			RowMapper<OfficeLookup> {
 
 		public String officeLookupSchema() {
-			return " o.id as id, o.name as name from org_office o ";
+			return " o.id as id, " + nameDecoratedBaseOnHierarchy
+					+ " as nameDecorated, o.name as name from org_office o ";
 		}
 
 		@Override
@@ -74,8 +76,9 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
 
 			Long id = rs.getLong("id");
 			String name = rs.getString("name");
+			String nameDecorated = rs.getString("nameDecorated");
 
-			return new OfficeLookup(id, name);
+			return new OfficeLookup(id, name, nameDecorated);
 		}
 	}
 

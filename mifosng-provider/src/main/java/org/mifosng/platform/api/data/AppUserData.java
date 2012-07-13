@@ -18,9 +18,9 @@ public class AppUserData {
 	private String firstname;
 	private String lastname;
 	private String email;
-	
+
 	private List<OfficeLookup> allowedOffices = new ArrayList<OfficeLookup>();
-	
+
 	private List<RoleData> availableRoles = new ArrayList<RoleData>();
 	private List<RoleData> selectedRoles = new ArrayList<RoleData>();
 

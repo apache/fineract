@@ -6,14 +6,17 @@ public class OfficeLookup implements Serializable {
 
 	private Long id;
 	private String name;
+	private String nameDecorated;
 
 	public OfficeLookup() {
 		//
 	}
 
-	public OfficeLookup(final Long id, final String name) {
+	public OfficeLookup(final Long id, final String name,
+			final String nameDecorated) {
 		this.id = id;
 		this.name = name;
+		this.nameDecorated = nameDecorated;
 	}
 
 	public Long getId() {
@@ -22,6 +25,10 @@ public class OfficeLookup implements Serializable {
 
 	public String getName() {
 		return this.name;
+	}
+
+	public String getNameDecorated() {
+		return nameDecorated;
 	}
 
 }
