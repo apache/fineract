@@ -77,8 +77,6 @@ dependencies {
 	   			[group: 'org.springframework.security', name: 'spring-security-config', version: springSecurityVersion],
 	            [group: 'org.aspectj', name: 'aspectjrt', version: '1.6.12.RELEASE'],
 	            
-	            [group: 'javax.validation', name: 'validation-api', version: '1.0.0.GA'],
-	            [group: 'org.hibernate', name: 'hibernate-validator', version: hibernateValidatorVersion],
 	            [group: 'org.hibernate', name: 'hibernate-core', version: hibernateCoreVersion],
 	            [group: 'org.hibernate', name: 'hibernate-entitymanager', version: hibernateCoreVersion],
 	            [group: 'org.hibernate.javax.persistence', name: 'hibernate-jpa-2.0-api', version: '1.0.1.Final'],
