@@ -17,7 +17,7 @@ public class ResponseCorsFilter implements ContainerResponseFilter {
 
 		ResponseBuilder resp = Response.fromResponse(response.getResponse());
 		
-		resp.header("Access-Control-Allow-Origin", "*").header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+		resp.header("Access-Control-Allow-Origin", "*").header("Access-Control-Expose-Headers", "X-Mifos-Platform-TenantId").header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
 
 		String reqHead = request.getHeaderValue("Access-Control-Request-Headers");
 

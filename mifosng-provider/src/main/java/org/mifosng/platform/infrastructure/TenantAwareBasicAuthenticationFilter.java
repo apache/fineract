@@ -33,16 +33,22 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
 	public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
 		
 		HttpServletRequest request = (HttpServletRequest) req;
-		final String tenantId = request.getHeader(tenantRequestHeader);
-
-		if (tenantId == null && exceptionIfHeaderMissing) {
-			throw new PreAuthenticatedCredentialsNotFoundException(tenantRequestHeader + " header not found in request.");
+		
+		if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+			// ignore to allow 'preflight' requests from AJAX applications in different domain
+		} else {
+		
+			final String tenantId = request.getHeader(tenantRequestHeader);
+	
+			if (tenantId == null && exceptionIfHeaderMissing) {
+				throw new PreAuthenticatedCredentialsNotFoundException(tenantRequestHeader + " header not found in request.");
+			}
+			
+			// check tenants database for tenantId
+			MifosPlatformTenant tenant = this.tenantDetailsService.loadTenantById(tenantId);
+			
+			ThreadLocalContextUtil.setTenant(tenant);
 		}
-		
-		// check tenants database for tenantId
-		MifosPlatformTenant tenant = this.tenantDetailsService.loadTenantById(tenantId);
-		
-		ThreadLocalContextUtil.setTenant(tenant);
 		
 		super.doFilter(req, res, chain);
 	}
