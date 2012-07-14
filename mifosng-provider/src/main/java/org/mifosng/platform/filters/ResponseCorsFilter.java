@@ -8,7 +8,7 @@ import com.sun.jersey.spi.container.ContainerResponse;
 import com.sun.jersey.spi.container.ContainerResponseFilter;
 
 /**
- * General approach to turn back-end capabilities exposed through resource-oriented API as Cross-Origin-Request complaint.
+ * Filter that returns a response with headers that allows for Cross-Origin Requests (CORs) to be performed against the platform API.
  */
 public class ResponseCorsFilter implements ContainerResponseFilter {
 
@@ -17,7 +17,9 @@ public class ResponseCorsFilter implements ContainerResponseFilter {
 
 		ResponseBuilder resp = Response.fromResponse(response.getResponse());
 		
-		resp.header("Access-Control-Allow-Origin", "*").header("Access-Control-Expose-Headers", "X-Mifos-Platform-TenantId").header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+		resp.header("Access-Control-Allow-Origin", "*")
+//		.header("Access-Control-Expose-Headers", "X-Mifos-Platform-TenantId")
+		.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
 
 		String reqHead = request.getHeaderValue("Access-Control-Request-Headers");
 
