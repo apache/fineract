@@ -1,7 +1,5 @@
 package org.mifosng.platform.user.service;
 
-import static org.mifosng.platform.Specifications.rolesThatMatch;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -9,7 +7,6 @@ import java.util.List;
 import org.mifosng.platform.api.commands.RoleCommand;
 import org.mifosng.platform.exceptions.RoleNotFoundException;
 import org.mifosng.platform.security.PlatformSecurityContext;
-import org.mifosng.platform.user.domain.AppUser;
 import org.mifosng.platform.user.domain.Permission;
 import org.mifosng.platform.user.domain.PermissionRepository;
 import org.mifosng.platform.user.domain.Role;
@@ -38,14 +35,14 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
 	@Override
 	public Long createRole(final RoleCommand command) {
 		
-		AppUser currentUser = context.authenticatedUser();
+		context.authenticatedUser();
 		
 		RoleCommandValidator validator = new RoleCommandValidator(command);
 		validator.validateForCreate();
 
 		List<Permission> selectedPermissions = assembleListOfSelectedPermissions(command.getPermissions());
 
-		Role entity = new Role(currentUser.getOrganisation(), command.getName(), command.getDescription(), selectedPermissions);
+		Role entity = new Role(command.getName(), command.getDescription(), selectedPermissions);
 				
 		this.roleRepository.save(entity);
 
@@ -56,14 +53,14 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
 	@Override
 	public Long updateRole(RoleCommand command) {
 		
-		AppUser currentUser = context.authenticatedUser();
+		context.authenticatedUser();
 		
 		RoleCommandValidator validator = new RoleCommandValidator(command);
 		validator.validateForUpdate();
 
 		List<Permission> selectedPermissions = assembleListOfSelectedPermissions(command.getPermissions());
 		
-		Role role = this.roleRepository.findOne(rolesThatMatch(currentUser.getOrganisation(), command.getId()));
+		Role role = this.roleRepository.findOne(command.getId());
 		if (role == null) {
 			throw new RoleNotFoundException(command.getId());
 		}

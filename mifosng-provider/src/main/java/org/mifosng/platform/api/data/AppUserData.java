@@ -11,7 +11,6 @@ import org.codehaus.jackson.map.annotate.JsonFilter;
 public class AppUserData {
 
 	private Long id;
-	private Long orgId;
 	private Long officeId;
 	private String officeName;
 	private String username;
@@ -29,12 +28,11 @@ public class AppUserData {
 	}
 
 	public AppUserData(final Long id, final String username,
-			final String email, final Long orgId, final Long officeId,
+			final String email, final Long officeId,
 			final String officeName) {
 		this.id = id;
 		this.username = username;
 		this.email = email;
-		this.orgId = orgId;
 		this.officeId = officeId;
 		this.officeName = officeName;
 	}
@@ -49,10 +47,6 @@ public class AppUserData {
 
 	public String getEmail() {
 		return this.email;
-	}
-
-	public Long getOrgId() {
-		return this.orgId;
 	}
 
 	public Long getOfficeId() {
@@ -73,10 +67,6 @@ public class AppUserData {
 
 	public void setEmail(final String email) {
 		this.email = email;
-	}
-
-	public void setOrgId(final Long orgId) {
-		this.orgId = orgId;
 	}
 
 	public void setOfficeId(final Long officeId) {

@@ -8,7 +8,6 @@ import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.infrastructure.JdbcSupport;
 import org.mifosng.platform.infrastructure.TenantAwareRoutingDataSource;
 import org.mifosng.platform.security.PlatformSecurityContext;
-import org.mifosng.platform.user.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -29,14 +28,13 @@ public class CurrencyReadPlatformServiceImpl implements CurrencyReadPlatformServ
 	@Override
 	public List<CurrencyData> retrieveAllowedCurrencies() {
 
-		AppUser currentUser = context.authenticatedUser();
+		context.authenticatedUser();
 
-		String sql = "select c.code as code, c.name as name, c.decimal_places as decimalPlaces, c.display_symbol as displaySymbol, c.internationalized_name_code as nameCode from org_organisation_currency c where c.org_id = ?";
+		String sql = "select c.code as code, c.name as name, c.decimal_places as decimalPlaces, c.display_symbol as displaySymbol, c.internationalized_name_code as nameCode from org_organisation_currency c";
 
 		RowMapper<CurrencyData> rm = new CurrencyMapper();
 
-		return this.jdbcTemplate.query(sql, rm, new Object[] { currentUser
-				.getOrganisation().getId() });
+		return this.jdbcTemplate.query(sql, rm, new Object[] {});
 	}
 
 	@Override

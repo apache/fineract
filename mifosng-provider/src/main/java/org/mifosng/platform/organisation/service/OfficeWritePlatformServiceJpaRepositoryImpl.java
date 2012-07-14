@@ -1,7 +1,5 @@
 package org.mifosng.platform.organisation.service;
 
-import static org.mifosng.platform.Specifications.officesThatMatch;
-
 import org.mifosng.platform.api.commands.BranchMoneyTransferCommand;
 import org.mifosng.platform.api.commands.OfficeCommand;
 import org.mifosng.platform.currency.domain.ApplicationCurrency;
@@ -13,9 +11,9 @@ import org.mifosng.platform.exceptions.NoAuthorizationException;
 import org.mifosng.platform.exceptions.OfficeNotFoundException;
 import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
 import org.mifosng.platform.organisation.domain.Office;
+import org.mifosng.platform.organisation.domain.OfficeRepository;
 import org.mifosng.platform.organisation.domain.OfficeTransaction;
 import org.mifosng.platform.organisation.domain.OfficeTransactionRepository;
-import org.mifosng.platform.organisation.domain.OfficeRepository;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.user.domain.AppUser;
 import org.slf4j.Logger;
@@ -58,7 +56,7 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
 			
 			Office parent = validateUserPriviledgeOnOfficeAndRetrieve(currentUser, command.getParentId());
 	
-			Office office = Office.createNew(currentUser.getOrganisation(), parent, command.getName(), command.getOpeningLocalDate(), command.getExternalId());
+			Office office = Office.createNew(parent, command.getName(), command.getOpeningLocalDate(), command.getExternalId());
 			
 			// pre save to generate id for use in office hierarchy
 			this.officeRepository.save(office);
@@ -106,17 +104,17 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
 	@Override
 	public Long interBranchMoneyTransfer(final BranchMoneyTransferCommand command) {
 		
-		AppUser currentUser = context.authenticatedUser();
+		context.authenticatedUser();
 		
 		BranchMoneyTransferCommandValidator validator = new BranchMoneyTransferCommandValidator(command);
 		validator.validateInterBranchTransfer();
 		
-		Office fromOffice = this.officeRepository.findOne(officesThatMatch(currentUser.getOrganisation(), command.getFromOfficeId()));
+		Office fromOffice = this.officeRepository.findOne(command.getFromOfficeId());
 		if (fromOffice == null) {
 			throw new OfficeNotFoundException(command.getFromOfficeId());
 		}
 		
-		Office toOffice = this.officeRepository.findOne(officesThatMatch(currentUser.getOrganisation(), command.getToOfficeId()));
+		Office toOffice = this.officeRepository.findOne(command.getToOfficeId());
 		if (toOffice == null) {
 			throw new OfficeNotFoundException(command.getToOfficeId());
 		}
@@ -141,13 +139,13 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
 	@Override
 	public Long externalBranchMoneyTransfer(BranchMoneyTransferCommand command) {
 		
-		AppUser currentUser = context.authenticatedUser();
+		context.authenticatedUser();
 		
 		BranchMoneyTransferCommandValidator validator = new BranchMoneyTransferCommandValidator(command);
 		validator.validateExternalBranchTransfer();
 		
-		Office fromOffice = this.officeRepository.findOne(officesThatMatch(currentUser.getOrganisation(), command.getFromOfficeId()));
-		Office toOffice = this.officeRepository.findOne(officesThatMatch(currentUser.getOrganisation(), command.getToOfficeId()));
+		Office fromOffice = this.officeRepository.findOne(command.getFromOfficeId());
+		Office toOffice = this.officeRepository.findOne(command.getToOfficeId());
 		if (fromOffice == null && toOffice == null) {
 			throw new OfficeNotFoundException(command.getToOfficeId());
 		}
@@ -189,7 +187,7 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
 	 */
 	private Office validateUserPriviledgeOnOfficeAndRetrieve(AppUser currentUser, Long officeId) {
 		
-		Office userOffice = this.officeRepository.findOne(officesThatMatch(currentUser.getOrganisation(), currentUser.getOffice().getId()));
+		Office userOffice = this.officeRepository.findOne(currentUser.getOffice().getId());
 		if (userOffice == null) {
 			throw new OfficeNotFoundException(currentUser.getOffice().getId());
 		}
@@ -200,7 +198,7 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
 		
 		Office officeToReturn = userOffice;
 		if (!userOffice.identifiedBy(officeId)) {
-			officeToReturn = this.officeRepository.findOne(officesThatMatch(currentUser.getOrganisation(), officeId));
+			officeToReturn = this.officeRepository.findOne(officeId);
 			if (officeToReturn == null) {
 				throw new OfficeNotFoundException(officeId);
 			}

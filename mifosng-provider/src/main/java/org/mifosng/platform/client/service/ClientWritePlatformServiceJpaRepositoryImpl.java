@@ -1,8 +1,5 @@
 package org.mifosng.platform.client.service;
 
-import static org.mifosng.platform.Specifications.notesThatMatch;
-import static org.mifosng.platform.Specifications.officesThatMatch;
-
 import org.apache.commons.lang.StringUtils;
 import org.mifosng.platform.api.commands.ClientCommand;
 import org.mifosng.platform.api.commands.NoteCommand;
@@ -17,7 +14,6 @@ import org.mifosng.platform.exceptions.OfficeNotFoundException;
 import org.mifosng.platform.organisation.domain.Office;
 import org.mifosng.platform.organisation.domain.OfficeRepository;
 import org.mifosng.platform.security.PlatformSecurityContext;
-import org.mifosng.platform.user.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,12 +39,12 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 	@Override
 	public Long enrollClient(final ClientCommand command) {
 
-		AppUser currentUser = context.authenticatedUser();
+		context.authenticatedUser();
 		
 		ClientCommandValidator validator = new ClientCommandValidator(command);
 		validator.validateForCreate();
 
-		Office clientOffice = this.officeRepository.findOne(officesThatMatch(currentUser.getOrganisation(), command.getOfficeId()));
+		Office clientOffice = this.officeRepository.findOne(command.getOfficeId());
 		if (clientOffice == null) {
 			throw new OfficeNotFoundException(command.getOfficeId());
 		}
@@ -69,9 +65,9 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 	
 	@Transactional
 	@Override
-	public EntityIdentifier updateClientDetails(ClientCommand command) {
+	public EntityIdentifier updateClientDetails(final ClientCommand command) {
 		
-		AppUser currentUser = context.authenticatedUser();
+		context.authenticatedUser();
 		
 		ClientCommandValidator validator = new ClientCommandValidator(command);
 		validator.validateForUpdate();
@@ -79,7 +75,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 		Office clientOffice = null;
 		Long officeId = command.getOfficeId();
 		if (officeId != null) {
-			clientOffice = this.officeRepository.findOne(officesThatMatch(currentUser.getOrganisation(), officeId));
+			clientOffice = this.officeRepository.findOne(officeId);
 			if (clientOffice == null) {
 				throw new OfficeNotFoundException(command.getOfficeId());
 			}			
@@ -106,17 +102,16 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 	
 	@Transactional
 	@Override
-	public EntityIdentifier addClientNote(NoteCommand command) {
+	public EntityIdentifier addClientNote(final NoteCommand command) {
 		
-		AppUser currentUser = context.authenticatedUser();
+		context.authenticatedUser();
 		
-//		Client clientForUpdate = this.clientRepository.findOne(clientsThatMatch(currentUser.getOrganisation(), command.getClientId()));
 		Client clientForUpdate = this.clientRepository.findOne(command.getClientId());
 		if (clientForUpdate == null) {
 			throw new ClientNotFoundException(command.getClientId());
 		}
 		
-		Note note = Note.clientNote(currentUser.getOrganisation(), clientForUpdate, command.getNote());
+		Note note = Note.clientNote(clientForUpdate, command.getNote());
 		
 		this.noteRepository.save(note);
 		
@@ -125,11 +120,11 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
 	@Transactional
 	@Override
-	public EntityIdentifier updateNote(NoteCommand command) {
+	public EntityIdentifier updateNote(final NoteCommand command) {
 		
-		AppUser currentUser = context.authenticatedUser();
+		context.authenticatedUser();
 		
-		Note noteForUpdate = this.noteRepository.findOne(notesThatMatch(currentUser.getOrganisation(), command.getId()));
+		Note noteForUpdate = this.noteRepository.findOne(command.getId());
 		if (noteForUpdate == null || noteForUpdate.isNotAgainstClientWithIdOf(command.getClientId())) {
 			throw new NoteNotFoundException(command.getId(), command.getClientId(), "client");
 		}

@@ -23,24 +23,30 @@ import org.mifosng.platform.user.domain.AppUser;
 @Table(name = "portfolio_office_transaction")
 public class OfficeTransaction extends AbstractAuditableCustom<AppUser, Long> {
 
+	@SuppressWarnings("unused")
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "from_office_id")
 	private Office from;
 
+	@SuppressWarnings("unused")
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "to_office_id")
 	private Office to;
 
+	@SuppressWarnings("unused")
 	@Column(name = "transaction_date", nullable = false)
 	@Temporal(TemporalType.DATE)
 	private Date transactionDate;
 
+	@SuppressWarnings("unused")
 	@Embedded
 	private MonetaryCurrency currency;
 
+	@SuppressWarnings("unused")
 	@Column(name = "transaction_amount", scale = 6, precision = 19, nullable = false)
 	private BigDecimal transactionAmount;
 	
+	@SuppressWarnings("unused")
 	@Column(name = "description", nullable=true, length=100)
 	private String description;
 

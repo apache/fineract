@@ -1,8 +1,5 @@
 package org.mifosng.platform.loan.service;
 
-import static org.mifosng.platform.Specifications.fundsThatMatch;
-import static org.mifosng.platform.Specifications.productThatMatches;
-
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -32,7 +29,6 @@ import org.mifosng.platform.loan.domain.LoanStatus;
 import org.mifosng.platform.loan.domain.LoanStatusRepository;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 import org.mifosng.platform.loanschedule.domain.AprCalculator;
-import org.mifosng.platform.organisation.domain.Organisation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -55,12 +51,13 @@ public class LoanAssembler {
 		this.fundRepository = fundRepository;
 	}
 	
-	public Loan assembleFrom(SubmitLoanApplicationCommand command, Organisation organisation) {
-		LoanProduct loanProduct = this.loanProductRepository.findOne(productThatMatches(organisation, command.getProductId()));
+	public Loan assembleFrom(SubmitLoanApplicationCommand command) {
+		
+		LoanProduct loanProduct = this.loanProductRepository.findOne(command.getProductId());
 		if (loanProduct == null) {
 			throw new LoanProductNotFoundException(command.getProductId());
 		}
-//		Client client = this.clientRepository.findOne(clientsThatMatch(organisation, command.getClientId()));
+
 		Client client = this.clientRepository.findOne(command.getClientId());
 		if (client == null) {
 			throw new ClientNotFoundException(command.getClientId());
@@ -89,9 +86,9 @@ public class LoanAssembler {
 		List<ScheduledLoanInstallment> loanRepaymentSchedule = loanSchedule.getScheduledLoanInstallments();
 		
 		// associating fund with loan product at creation is optional for now.
-		Fund fund = findFundByIdIfProvided(organisation, command.getFundId());
+		Fund fund = findFundByIdIfProvided(command.getFundId());
 
-		Loan loan = Loan.createNew(organisation, fund, loanProduct, client, loanRepaymentScheduleDetail);
+		Loan loan = Loan.createNew(fund, loanProduct, client, loanRepaymentScheduleDetail);
 		loan.setExternalId(command.getExternalId());
 		
 		for (ScheduledLoanInstallment scheduledLoanInstallment : loanRepaymentSchedule) {
@@ -117,10 +114,10 @@ public class LoanAssembler {
 		return new DefaultLoanLifecycleStateMachine(allowedLoanStatuses);
 	}
 	
-	private Fund findFundByIdIfProvided(final Organisation organisation, final Long fundId) {
+	private Fund findFundByIdIfProvided(final Long fundId) {
 		Fund fund = null;
 		if (fundId != null) {
-			fund = this.fundRepository.findOne(fundsThatMatch(organisation, fundId));
+			fund = this.fundRepository.findOne(fundId);
 			if (fund == null) {
 				throw new FundNotFoundException(fundId);
 			}

@@ -11,7 +11,6 @@ import org.codehaus.jackson.map.annotate.JsonFilter;
 public class RoleData {
 
 	private Long id;
-	private Long orgId;
 	private String name;
 	private String description;
 	
@@ -22,10 +21,8 @@ public class RoleData {
 		//
 	}
 
-	public RoleData(final Long id, final Long orgId, final String name,
-			final String description) {
+	public RoleData(final Long id, final String name, final String description) {
 		this.id = id;
-		this.orgId = orgId;
 		this.name = name;
 		this.description = description;
 	}
@@ -45,10 +42,6 @@ public class RoleData {
 		return this.id;
 	}
 
-	public Long getOrgId() {
-		return this.orgId;
-	}
-
 	public String getName() {
 		return this.name;
 	}
@@ -59,10 +52,6 @@ public class RoleData {
 
 	public void setId(final Long id) {
 		this.id = id;
-	}
-
-	public void setOrgId(final Long orgId) {
-		this.orgId = orgId;
 	}
 
 	public void setName(final String name) {

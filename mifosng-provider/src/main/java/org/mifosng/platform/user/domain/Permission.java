@@ -4,12 +4,9 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.mifosng.platform.api.data.PermissionData;
-import org.mifosng.platform.organisation.domain.Organisation;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
@@ -29,21 +26,14 @@ public class Permission extends AbstractPersistable<Long> {
 	@Enumerated(EnumType.ORDINAL)
     private final PermissionGroup permissionGroup;
 
-	@ManyToOne
-    @JoinColumn(name = "org_id", nullable = false)
-    private final Organisation    organisation;
-
     public Permission() {
         this.code = null;
         this.defaultDescription = null;
-        this.organisation = null;
         this.defaultName = null;
         this.permissionGroup = null;
     }
 
-    public Permission(final Organisation organisation, final String code, final String defaultDescription, final String defaultName,
-            final PermissionGroup permissionGroup) {
-        this.organisation = organisation;
+    public Permission(final String code, final String defaultDescription, final String defaultName, final PermissionGroup permissionGroup) {
         this.code = code;
         this.defaultDescription = defaultDescription;
         this.permissionGroup = permissionGroup;
@@ -59,6 +49,6 @@ public class Permission extends AbstractPersistable<Long> {
 	}
 
 	public PermissionData toData() {
-		return new PermissionData(this.getId(), this.organisation.getId(), this.defaultName, this.defaultDescription, this.code, this.permissionGroup.ordinal());
+		return new PermissionData(this.getId(), this.defaultName, this.defaultDescription, this.code, this.permissionGroup.ordinal());
 	}
 }

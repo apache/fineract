@@ -25,15 +25,10 @@ import org.mifosng.platform.user.domain.AppUser;
 
 @Entity
 @Table(name = "org_office", uniqueConstraints={
-												@UniqueConstraint(columnNames = {"org_id", "name"}, name="name_org"), 
-												@UniqueConstraint(columnNames = {"org_id", "external_id"}, name="externalid_org")
+												@UniqueConstraint(columnNames = {"name"}, name="name_org"), 
+												@UniqueConstraint(columnNames = {"external_id"}, name="externalid_org")
 })
 public class Office extends AbstractAuditableCustom<AppUser, Long> {
-
-    @SuppressWarnings("unused")
-	@ManyToOne
-    @JoinColumn(name = "org_id", nullable = false)
-    private final Organisation organisation;
 
     @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "parent_id")
@@ -57,24 +52,22 @@ public class Office extends AbstractAuditableCustom<AppUser, Long> {
     @Column(name = "external_id", length=100)
 	private String externalId;
 
-    public static Office headOffice(final Organisation org, final String name, final LocalDate openingDate, final String externalId) {
-        return new Office(org, null, name, openingDate, externalId);
+    public static Office headOffice(final String name, final LocalDate openingDate, final String externalId) {
+        return new Office(null, name, openingDate, externalId);
     }
     
-    public static Office createNew(Organisation organisation, Office parent, String name, LocalDate openingDate, String externalId) {
-		return new Office(organisation, parent, name, openingDate, externalId);
+    public static Office createNew(final Office parent, final String name, final LocalDate openingDate, final String externalId) {
+		return new Office(parent, name, openingDate, externalId);
 	}
 
     protected Office() {
-        this.organisation = null;
         this.openingDate = null;
         this.parent = null;
         this.name = null;
         this.externalId = null;
     }
 
-    public Office(final Organisation organisation, final Office parent, final String name, final LocalDate openingDate, final String externalId) {
-        this.organisation = organisation;
+    public Office(final Office parent, final String name, final LocalDate openingDate, final String externalId) {
         this.parent = parent;
         this.openingDate = openingDate.toDateMidnight().toDate();
         if (parent != null) {

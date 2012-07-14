@@ -1,7 +1,5 @@
 package org.mifosng.platform.user.service;
 
-import static org.mifosng.platform.Specifications.usersThatMatch;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -64,7 +62,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 	public Long createUser(final UserCommand command) {
 		
 		try {
-			AppUser currentUser = context.authenticatedUser();
+			context.authenticatedUser();
 			
 			UserCommandValidator validator = new UserCommandValidator(command);
 			validator.validateForCreate();
@@ -81,7 +79,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 				password = "autogenerate";
 			}
 			
-	        AppUser appUser = AppUser.createNew(currentUser.getOrganisation(), office, 
+	        AppUser appUser = AppUser.createNew(office, 
 	        		allRoles, command.getUsername(), command.getEmail(), 
 	        		command.getFirstname(), command.getLastname(), 
 	        		password);
@@ -106,7 +104,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 	public Long updateUser(UserCommand command) {
 		
 		try {
-			AppUser currentUser = context.authenticatedUser();
+			context.authenticatedUser();
 			
 			UserCommandValidator validator = new UserCommandValidator(command);
 			validator.validateForUpdate();
@@ -121,7 +119,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 				}
 			}
 
-			AppUser userToUpdate = this.appUserRepository.findOne(usersThatMatch(currentUser.getOrganisation(), command.getId()));
+			AppUser userToUpdate = this.appUserRepository.findOne(command.getId());
 			if (userToUpdate == null) {
 				throw new UserNotFoundException(command.getId());
 			}

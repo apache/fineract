@@ -44,16 +44,11 @@ import org.mifosng.platform.exceptions.InvalidLoanTransactionTypeException;
 import org.mifosng.platform.fund.domain.Fund;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
 import org.mifosng.platform.loanproduct.service.LoanEnumerations;
-import org.mifosng.platform.organisation.domain.Organisation;
 import org.mifosng.platform.user.domain.AppUser;
 
 @Entity
-@Table(name = "portfolio_loan", uniqueConstraints = @UniqueConstraint(columnNames = {"org_id", "external_id" }))
+@Table(name = "portfolio_loan", uniqueConstraints = @UniqueConstraint(columnNames = {"external_id" }))
 public class Loan extends AbstractAuditableCustom<AppUser, Long> {
-
-	@ManyToOne
-	@JoinColumn(name = "org_id", nullable = false)
-	private final Organisation organisation;
 
 	@ManyToOne
 	@JoinColumn(name = "client_id", nullable = false)
@@ -149,24 +144,20 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	@Transient
 	private final InterestRebateCalculatorFactory interestRebateCalculatorFactory = new DailyEquivalentInterestRebateCalculatorFactory();
 
-	public static Loan createNew(Organisation organisation,
-			Fund fund, LoanProduct loanProduct, Client client,
-			LoanProductRelatedDetail loanRepaymentScheduleDetail) {
-		return new Loan(organisation, client, fund, loanProduct, loanRepaymentScheduleDetail, null);
+	public static Loan createNew(final Fund fund, final LoanProduct loanProduct, final Client client, final LoanProductRelatedDetail loanRepaymentScheduleDetail) {
+		return new Loan(client, fund, loanProduct, loanRepaymentScheduleDetail, null);
 	}
 	
 	public Loan() {
-		this.organisation = null;
 		this.client = null;
 		this.loanProduct = null;
 		this.loanRepaymentScheduleDetail = null;
 	}
 
-	public Loan(final Organisation organisation, final Client client,
+	public Loan(final Client client,
 			Fund fund, final LoanProduct loanProduct,
 			final LoanProductRelatedDetail loanRepaymentScheduleDetail,
 			final LoanStatus loanStatus) {
-		this.organisation = organisation;
 		this.client = client;
 		if (fund != null) {
 			this.fund = fund;
@@ -177,10 +168,6 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		this.loanRepaymentScheduleDetail = loanRepaymentScheduleDetail;
 		this.loanStatus = loanStatus;
 		this.interestRebateOwed = BigDecimal.ZERO;
-	}
-
-	public Organisation getOrganisation() {
-		return this.organisation;
 	}
 
 	public Client getClient() {
@@ -292,7 +279,6 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 			final List<LoanRepaymentScheduleInstallment> modifiedLoanRepaymentSchedule, LoanLifecycleStateMachine loanLifecycleStateMachine) {
 		this.repaymentScheduleInstallments.clear();
 		for (LoanRepaymentScheduleInstallment modifiedInstallment : modifiedLoanRepaymentSchedule) {
-			modifiedInstallment.updateOrgnaisation(this.organisation);
 			modifiedInstallment.updateLoan(this);
 			this.repaymentScheduleInstallments.add(modifiedInstallment);
 		}
@@ -309,7 +295,6 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		LoanTransaction loanTransaction = LoanTransaction.disbursement(
 				this.loanRepaymentScheduleDetail.getPrincipal(), disbursedOn);
 		loanTransaction.updateLoan(this);
-		loanTransaction.updateOrganisation(organisation);
 		this.loanTransactions.add(loanTransaction);
 		
 		if (disbursedOn.isBefore(getApprovedOnDate())) {
@@ -338,7 +323,6 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	public void waive(LoanTransaction loanTransaction, LoanLifecycleStateMachine loanLifecycleStateMachine) {
 		this.loanStatus = loanLifecycleStateMachine.transition(LoanEvent.LOAN_REPAYMENT, this.loanStatus);
 		loanTransaction.updateLoan(this);
-		loanTransaction.updateOrganisation(organisation);
 		this.loanTransactions.add(loanTransaction);
 
 		LocalDate loanTransactionDate = loanTransaction.getTransactionDate();
@@ -382,7 +366,6 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	public void makeRepayment(final LoanTransaction loanTransaction, LoanLifecycleStateMachine loanLifecycleStateMachine) {
 		this.loanStatus = loanLifecycleStateMachine.transition(LoanEvent.LOAN_REPAYMENT, this.loanStatus);
 		loanTransaction.updateLoan(this);
-		loanTransaction.updateOrganisation(organisation);
 		this.loanTransactions.add(loanTransaction);
 		
 		deriveLoanRepaymentScheduleCompletedData();
@@ -804,7 +787,6 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	}
 
 	public void addRepaymentScheduleInstallment(final LoanRepaymentScheduleInstallment installment) {
-		installment.updateOrgnaisation(this.organisation);
 		installment.updateLoan(this);
 		this.repaymentScheduleInstallments.add(installment);
 	}

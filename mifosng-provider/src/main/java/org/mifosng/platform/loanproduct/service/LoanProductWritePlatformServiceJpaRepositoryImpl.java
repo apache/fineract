@@ -1,7 +1,5 @@
 package org.mifosng.platform.loanproduct.service;
 
-import static org.mifosng.platform.Specifications.*;
-
 import java.math.BigDecimal;
 
 import org.mifosng.platform.api.commands.LoanProductCommand;
@@ -18,9 +16,7 @@ import org.mifosng.platform.loan.domain.LoanProduct;
 import org.mifosng.platform.loan.domain.LoanProductRepository;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 import org.mifosng.platform.loanschedule.domain.AprCalculator;
-import org.mifosng.platform.organisation.domain.Organisation;
 import org.mifosng.platform.security.PlatformSecurityContext;
-import org.mifosng.platform.user.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,7 +42,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
 	@Override
 	public EntityIdentifier createLoanProduct(final LoanProductCommand command) {
 
-		AppUser currentUser = this.context.authenticatedUser();
+		this.context.authenticatedUser();
 		
 		LoanProductCommandValidator validator = new LoanProductCommandValidator(command);
 		validator.validateForCreate();
@@ -68,9 +64,9 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
 		BigDecimal annualInterestRate = this.aprCalculator.calculateFrom(interestFrequencyType, command.getInterestRatePerPeriodValue());
 		
 		// associating fund with loan product at creation is optional for now.
-		Fund fund = findFundByIdIfProvided(currentUser.getOrganisation(), command.getFundId());
+		Fund fund = findFundByIdIfProvided(command.getFundId());
 		
-		LoanProduct loanproduct = new LoanProduct(currentUser.getOrganisation(), fund, command.getName(), command.getDescription(), 
+		LoanProduct loanproduct = new LoanProduct(fund, command.getName(), command.getDescription(), 
 				currency, command.getPrincipalValue(), 
 				command.getInterestRatePerPeriodValue(), interestFrequencyType, annualInterestRate, interestMethod, interestCalculationPeriodMethod,
 				command.getRepaymentEveryValue(), repaymentFrequencyType, command.getNumberOfRepaymentsValue(), 
@@ -81,10 +77,10 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
 		return new EntityIdentifier(loanproduct.getId());
 	}
 	
-	private Fund findFundByIdIfProvided(final Organisation organisation, final Long fundId) {
+	private Fund findFundByIdIfProvided(final Long fundId) {
 		Fund fund = null;
 		if (fundId != null) {
-			fund = this.fundRepository.findOne(fundsThatMatch(organisation, fundId));
+			fund = this.fundRepository.findOne(fundId);
 			if (fund == null) {
 				throw new FundNotFoundException(fundId);
 			}
@@ -96,18 +92,18 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
 	@Override
 	public EntityIdentifier updateLoanProduct(LoanProductCommand command) {
 		
-		AppUser currentUser = this.context.authenticatedUser();
+		this.context.authenticatedUser();
 		
 		LoanProductCommandValidator validator = new LoanProductCommandValidator(command);
 		validator.validateForUpdate();
 		
-		LoanProduct product = this.loanProductRepository.findOne(productThatMatches(currentUser.getOrganisation(), command.getId()));
+		LoanProduct product = this.loanProductRepository.findOne(command.getId());
 		if (product == null) {
 			throw new LoanProductNotFoundException(command.getId());
 		}
 		
 		// associating fund with loan product at creation is optional for now.
-		Fund fund = findFundByIdIfProvided(currentUser.getOrganisation(), command.getFundId());
+		Fund fund = findFundByIdIfProvided(command.getFundId());
 		
 		product.update(command, fund);
 		

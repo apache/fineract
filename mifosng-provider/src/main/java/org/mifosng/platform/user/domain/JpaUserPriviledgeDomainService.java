@@ -2,7 +2,6 @@ package org.mifosng.platform.user.domain;
 
 import java.util.Arrays;
 
-import org.mifosng.platform.organisation.domain.Organisation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,48 +17,48 @@ public class JpaUserPriviledgeDomainService implements UserPriviledgeDomainServi
 
     @Transactional
     @Override
-    public void createAllOrganisationRolesAndPermissions(final Organisation organisation) {
+    public void createAllOrganisationRolesAndPermissions() {
 
         // 2. create out of the box application permissions and roles
-        Permission viewUsersAndRolesPermission = new PermissionBuilder().viewUsersAndRoles().with(organisation).build();
-        Permission createUserPermission = new PermissionBuilder().userCreation().with(organisation).build();
-        Permission createRolePermission = new PermissionBuilder().roleCreation().with(organisation).build();
-        Permission updateApplicationPermissionsPermission = new PermissionBuilder().updateApplicationPermissions().with(organisation).build();
+        Permission viewUsersAndRolesPermission = new PermissionBuilder().viewUsersAndRoles().build();
+        Permission createUserPermission = new PermissionBuilder().userCreation().build();
+        Permission createRolePermission = new PermissionBuilder().roleCreation().build();
+        Permission updateApplicationPermissionsPermission = new PermissionBuilder().updateApplicationPermissions().build();
 
         Permission[] userAdminPermissions = new Permission[] {viewUsersAndRolesPermission, createUserPermission,
                 createRolePermission, updateApplicationPermissionsPermission};
 
-        Permission viewOrganisationOfficesStaffAndProductsPermission = new PermissionBuilder().viewOrganisationsOfficesStaffAndProducts().with(organisation).build();
-        Permission addOfficePermission = new PermissionBuilder().addOffice().with(organisation).build();
-        Permission addStaffPermission = new PermissionBuilder().addStaff().with(organisation).build();
-        Permission addLoanProductPermission = new PermissionBuilder().addLoanProduct().with(organisation).build();
+        Permission viewOrganisationOfficesStaffAndProductsPermission = new PermissionBuilder().viewOrganisationsOfficesStaffAndProducts().build();
+        Permission addOfficePermission = new PermissionBuilder().addOffice().build();
+        Permission addStaffPermission = new PermissionBuilder().addStaff().build();
+        Permission addLoanProductPermission = new PermissionBuilder().addLoanProduct().build();
 
         Permission[] organisationAdminPermissions = new Permission[] {viewOrganisationOfficesStaffAndProductsPermission, addOfficePermission
                 ,addStaffPermission, addLoanProductPermission};
 
-        Permission viewLoanPortfolioPermission = new PermissionBuilder().viewLoanPortfolio().with(organisation).build();
-        Permission addLoanPermission = new PermissionBuilder().addLoan().with(organisation).build();
-        Permission addBackdatedLoanPermission = new PermissionBuilder().addBackdatedLoan().with(organisation).build();
-        Permission approveLoanPermission = new PermissionBuilder().approveLoan().with(organisation).build();
-        Permission approveLoanWithPastDatePermission = new PermissionBuilder().approveLoanInThePast().with(organisation).build();
-        Permission rejectLoanPermission = new PermissionBuilder().rejectLoan().with(organisation).build();
-        Permission rejectLoanWithPastDatePermission = new PermissionBuilder().rejectLoanInThePast().with(organisation).build();
-        Permission withdrawLoanPermission = new PermissionBuilder().withdrawLoan().with(organisation).build();
-        Permission withdrawLoanWithPastDatePermission = new PermissionBuilder().withdrawLoanInThePast().with(organisation).build();
-        Permission undoLoanApprovalPermission = new PermissionBuilder().undoLoanApproval().with(organisation).build();
+        Permission viewLoanPortfolioPermission = new PermissionBuilder().viewLoanPortfolio().build();
+        Permission addLoanPermission = new PermissionBuilder().addLoan().build();
+        Permission addBackdatedLoanPermission = new PermissionBuilder().addBackdatedLoan().build();
+        Permission approveLoanPermission = new PermissionBuilder().approveLoan().build();
+        Permission approveLoanWithPastDatePermission = new PermissionBuilder().approveLoanInThePast().build();
+        Permission rejectLoanPermission = new PermissionBuilder().rejectLoan().build();
+        Permission rejectLoanWithPastDatePermission = new PermissionBuilder().rejectLoanInThePast().build();
+        Permission withdrawLoanPermission = new PermissionBuilder().withdrawLoan().build();
+        Permission withdrawLoanWithPastDatePermission = new PermissionBuilder().withdrawLoanInThePast().build();
+        Permission undoLoanApprovalPermission = new PermissionBuilder().undoLoanApproval().build();
 
-        Permission disburseLoanPermission = new PermissionBuilder().disburseLoan().with(organisation).build();
-        Permission disburseLoanWithPastDatePermission = new PermissionBuilder().disburseLoanInThePast().with(organisation).build();
-        Permission undoLoanDisbursalPermission = new PermissionBuilder().undoLoanDisbursal().with(organisation).build();
+        Permission disburseLoanPermission = new PermissionBuilder().disburseLoan().build();
+        Permission disburseLoanWithPastDatePermission = new PermissionBuilder().disburseLoanInThePast().build();
+        Permission undoLoanDisbursalPermission = new PermissionBuilder().undoLoanDisbursal().build();
 
-        Permission makeLoanRepaymentPermission = new PermissionBuilder().makeLoanRepayment().with(organisation).build();
-        Permission makeLoanRepaymentWithPastDatePermission = new PermissionBuilder().makeLoanRepaymentInThePast().with(organisation).build();
+        Permission makeLoanRepaymentPermission = new PermissionBuilder().makeLoanRepayment().build();
+        Permission makeLoanRepaymentWithPastDatePermission = new PermissionBuilder().makeLoanRepaymentInThePast().build();
 
-        //        Permission writeoffLoanPermission = new PermissionBuilder().writeoffLoan().with(organisation).build();
-        //        Permission writeoffLoanWithPastDatePermission = new PermissionBuilder().writeoffLoanInThePast().with(organisation).build();
+        //        Permission writeoffLoanPermission = new PermissionBuilder().writeoffLoan().build();
+        //        Permission writeoffLoanWithPastDatePermission = new PermissionBuilder().writeoffLoanInThePast().build();
 
-        //        Permission rescheduleLoanPermission = new PermissionBuilder().rescheduleLoan().with(organisation).build();
-        //        Permission rescheduleLoanWithPastDatePermission = new PermissionBuilder().rescheduleInThePast().with(organisation).build();
+        //        Permission rescheduleLoanPermission = new PermissionBuilder().rescheduleLoan().build();
+        //        Permission rescheduleLoanWithPastDatePermission = new PermissionBuilder().rescheduleInThePast().build();
 
         // MIFOS-2878 - support recovery of payments for written off loans.
 
@@ -89,7 +88,7 @@ public class JpaUserPriviledgeDomainService implements UserPriviledgeDomainServi
         };
 
 		Permission dataMigrationPermission = new PermissionBuilder()
-				.dataMigration().with(organisation).build();
+				.dataMigration().build();
 
 		Permission[] migrationPermissions = new Permission[] { dataMigrationPermission };
 
@@ -101,13 +100,13 @@ public class JpaUserPriviledgeDomainService implements UserPriviledgeDomainServi
         // 2. roles
         String userAdminRoleDescription = "A user administrator can create new roles, assign and update roles assigned to users and create and deactivate users.";
         
-        Role userAdminRole = new Role(organisation, "User Administrator", userAdminRoleDescription, Arrays.asList(userAdminPermissions));
+        Role userAdminRole = new Role("User Administrator", userAdminRoleDescription, Arrays.asList(userAdminPermissions));
         
         String organisationAdminRoleDescription = "A organisation administrator can view, create and update organisation office hierarchy, staff and products.";
-        Role organisatonAdminRole = new Role(organisation, "Organisation Administrator", organisationAdminRoleDescription, Arrays.asList(organisationAdminPermissions));
+        Role organisatonAdminRole = new Role("Organisation Administrator", organisationAdminRoleDescription, Arrays.asList(organisationAdminPermissions));
         
         String fullLoanPortfolioRoleDescription = "A loan portfolio user can view, create and update client, group and loan information.";
-        Role loanPortfolioFullRole = new Role(organisation, "Full Loan Portfolio", fullLoanPortfolioRoleDescription, Arrays.asList(fullLoanPortfolioPermissions));
+        Role loanPortfolioFullRole = new Role("Full Loan Portfolio", fullLoanPortfolioRoleDescription, Arrays.asList(fullLoanPortfolioPermissions));
 
 		this.roleRepository.save(Arrays.asList(userAdminRole, organisatonAdminRole, loanPortfolioFullRole));
     }

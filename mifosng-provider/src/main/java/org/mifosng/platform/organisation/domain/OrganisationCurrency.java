@@ -2,8 +2,6 @@ package org.mifosng.platform.organisation.domain;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
@@ -13,11 +11,6 @@ import org.mifosng.platform.user.domain.AppUser;
 @Table(name = "org_organisation_currency")
 public class OrganisationCurrency extends AbstractAuditableCustom<AppUser, Long> {
 
-    @SuppressWarnings("unused")
-	@ManyToOne
-    @JoinColumn(name = "org_id", nullable = false)
-    private Organisation  organisation;
-    
     @SuppressWarnings("unused")
     @Column(name = "code", nullable = false, length=3)
     private final String  code;
@@ -52,9 +45,5 @@ public class OrganisationCurrency extends AbstractAuditableCustom<AppUser, Long>
         this.decimalPlaces = decimalPlaces;
 		this.nameCode = nameCode;
 		this.displaySymbol = displaySymbol;
-    }
-
-    public void updateOrganisation(final Organisation organisation) {
-        this.organisation = organisation;
     }
 }

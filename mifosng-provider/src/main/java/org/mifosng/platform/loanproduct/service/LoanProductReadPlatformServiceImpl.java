@@ -23,7 +23,6 @@ import org.mifosng.platform.loan.domain.InterestCalculationPeriodMethod;
 import org.mifosng.platform.loan.domain.InterestMethod;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 import org.mifosng.platform.security.PlatformSecurityContext;
-import org.mifosng.platform.user.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -76,29 +75,25 @@ public class LoanProductReadPlatformServiceImpl implements
 	@Override
 	public Collection<LoanProductData> retrieveAllLoanProducts() {
 
-		AppUser currentUser = this.context.authenticatedUser();
+		this.context.authenticatedUser();
 
 		LoanProductMapper rm = new LoanProductMapper();
 
-		String sql = "select " + rm.loanProductSchema()
-				+ " where lp.org_id = ?";
+		String sql = "select " + rm.loanProductSchema();
 
-		return this.jdbcTemplate.query(sql, rm, new Object[] { currentUser
-				.getOrganisation().getId() });
+		return this.jdbcTemplate.query(sql, rm, new Object[] {});
 	}
 
 	@Override
 	public Collection<LoanProductLookup> retrieveAllLoanProductsForLookup() {
 
-		AppUser currentUser = this.context.authenticatedUser();
+		this.context.authenticatedUser();
 
 		LoanProductLookupMapper rm = new LoanProductLookupMapper();
 
-		String sql = "select " + rm.loanProductLookupSchema()
-				+ " where lp.org_id = ?";
+		String sql = "select " + rm.loanProductLookupSchema();
 
-		return this.jdbcTemplate.query(sql, rm, new Object[] { currentUser
-				.getOrganisation().getId() });
+		return this.jdbcTemplate.query(sql, rm, new Object[] {});
 	}
 
 	@Override

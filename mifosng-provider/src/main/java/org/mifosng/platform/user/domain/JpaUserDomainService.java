@@ -4,19 +4,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-
 import org.mifosng.platform.infrastructure.EmailDetail;
 import org.mifosng.platform.infrastructure.PlatformEmailService;
 import org.mifosng.platform.infrastructure.PlatformPasswordEncoder;
 import org.mifosng.platform.infrastructure.RandomPasswordGenerator;
 import org.mifosng.platform.organisation.domain.Office;
-import org.mifosng.platform.organisation.domain.Organisation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,29 +31,19 @@ public class JpaUserDomainService implements UserDomainService {
     @Autowired
     private PlatformEmailService emailService;
 
-    public static Specification<Role> thatMatch(final Organisation organisation) {
-        return new Specification<Role>() {
-
-            @Override
-            public Predicate toPredicate(final Root<Role> root, final CriteriaQuery<?> query, final CriteriaBuilder cb) {
-                return cb.equal(root.get("organisation"), organisation);
-            }
-        };
-    }
-
 	@Transactional
     @Override
-    public void createDefaultAdminUser(final Organisation organisation, final Office office) {
+    public void createDefaultAdminUser(final Office office) {
 
-        this.userPriviledgeDomainService.createAllOrganisationRolesAndPermissions(organisation);
+        this.userPriviledgeDomainService.createAllOrganisationRolesAndPermissions();
 
-        List<Role> organisationalRoles = this.roleRepository.findAll(thatMatch(organisation));
+        List<Role> organisationalRoles = this.roleRepository.findAll();
         Set<Role> allRoles = new HashSet<Role>(organisationalRoles);
 
-        String username = "admin" + organisation.getId();
+        String username = "admin";
         String password = "";
 
-		AppUser defaultAdministrator = AppUser.createNew(organisation, office, allRoles, username, organisation.getContactEmail(), "Organisation", "Administrator", password);
+		AppUser defaultAdministrator = AppUser.createNew(office, allRoles, username, "email?", "Organisation", "Administrator", password);
 
         this.create(defaultAdministrator);
     }
@@ -81,7 +64,7 @@ public class JpaUserDomainService implements UserDomainService {
 
 		this.userRepository.save(appUser);
         
-        EmailDetail emailDetail = new EmailDetail(appUser.getOrganisation().getName(), appUser.getOrganisation().getContactName(), appUser.getEmail(), appUser.getUsername());
+        EmailDetail emailDetail = new EmailDetail(appUser.getFirstname(), appUser.getFirstname(), appUser.getEmail(), appUser.getUsername());
 
         this.emailService.sendToUserAccount(emailDetail, unencodedPassword);
     }

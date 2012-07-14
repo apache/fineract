@@ -8,7 +8,6 @@ import org.mifosng.platform.api.data.PermissionData;
 import org.mifosng.platform.infrastructure.JdbcSupport;
 import org.mifosng.platform.infrastructure.TenantAwareRoutingDataSource;
 import org.mifosng.platform.security.PlatformSecurityContext;
-import org.mifosng.platform.user.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -29,13 +28,12 @@ public class PermissionReadPlatformServiceImpl implements PermissionReadPlatform
 	@Override
 	public Collection<PermissionData> retrieveAllPermissions() {
 
-		AppUser currentUser = context.authenticatedUser();
+		context.authenticatedUser();
 
 		PermissionMapper mapper = new PermissionMapper();
-		String sql = "select " + mapper.schema() + " where p.org_id = ? order by p.id";
+		String sql = "select " + mapper.schema() + " order by p.id";
 
-		return this.jdbcTemplate.query(sql, mapper, new Object[] { currentUser
-				.getOrganisation().getId() });
+		return this.jdbcTemplate.query(sql, mapper, new Object[] {});
 	}
 
 	private static final class PermissionMapper implements RowMapper<PermissionData> {
@@ -44,17 +42,16 @@ public class PermissionReadPlatformServiceImpl implements PermissionReadPlatform
 		public PermissionData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
 
 			Long id = JdbcSupport.getLong(rs, "id");
-			Long orgId = JdbcSupport.getLong(rs, "orgId");
 			String name = rs.getString("name");
 			String description = rs.getString("description");
 			String code = rs.getString("code");
 			Integer groupType = JdbcSupport.getInteger(rs, "groupType");
 
-			return new PermissionData(id, orgId, name, description, code, groupType);
+			return new PermissionData(id, name, description, code, groupType);
 		}
 
 		public String schema() {
-			return " p.id as id, p.org_id as orgId, p.default_name as name, p.default_description as description, p.code as code, p.group_enum as groupType from admin_permission p ";
+			return " p.id as id, p.default_name as name, p.default_description as description, p.code as code, p.group_enum as groupType from admin_permission p ";
 		}
 	}
 }

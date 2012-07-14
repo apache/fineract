@@ -1,7 +1,5 @@
 package org.mifosng.platform.loan.service;
 
-import static org.mifosng.platform.Specifications.loansThatMatch;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -89,12 +87,12 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 			throw new NoAuthorizationException("Cannot add backdated loan.");
 		}
 
-		Loan loan = loanAssembler.assembleFrom(command, currentUser.getOrganisation());
+		Loan loan = loanAssembler.assembleFrom(command);
 
 		this.loanRepository.save(loan);
 		
 		if (StringUtils.isNotBlank(command.getSubmittedOnNote())) {
-			Note note = Note.loanNote(currentUser.getOrganisation(), loan, command.getSubmittedOnNote());
+			Note note = Note.loanNote(loan, command.getSubmittedOnNote());
 			this.noteRepository.save(note);
 		}
 		
@@ -103,11 +101,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 	
 	@Transactional
 	@Override
-	public EntityIdentifier deleteLoan(Long loanId) {
+	public EntityIdentifier deleteLoan(final Long loanId) {
 		
-		AppUser currentUser = context.authenticatedUser();
+		context.authenticatedUser();
 
-		Loan loan = this.loanRepository.findOne(loansThatMatch(currentUser.getOrganisation(), loanId));
+		Loan loan = this.loanRepository.findOne(loanId);
 		if (loan == null) {
 			throw new LoanNotFoundException(loanId);
 		}
@@ -133,7 +131,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		LoanStateTransitionCommandValidator validator = new LoanStateTransitionCommandValidator(command);
 		validator.validate();
 
-		Loan loan = this.loanRepository.findOne(loansThatMatch(currentUser.getOrganisation(), command.getLoanId()));
+		Loan loan = this.loanRepository.findOne(command.getLoanId());
 		if (loan == null) {
 			throw new LoanNotFoundException(command.getLoanId());
 		}
@@ -148,7 +146,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		
 		String noteText = command.getNote();
 		if (StringUtils.isNotBlank(noteText)) {
-			Note note = Note.loanNote(currentUser.getOrganisation(), loan, noteText);
+			Note note = Note.loanNote(loan, noteText);
 			this.noteRepository.save(note);
 		}
 
@@ -159,9 +157,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 	@Override
 	public EntityIdentifier undoLoanApproval(final UndoStateTransitionCommand command) {
 
-		AppUser currentUser = context.authenticatedUser();
+		context.authenticatedUser();
 
-		Loan loan = this.loanRepository.findOne(loansThatMatch(currentUser.getOrganisation(), command.getLoanId()));
+		Loan loan = this.loanRepository.findOne(command.getLoanId());
 		if (loan == null) {
 			throw new LoanNotFoundException(command.getLoanId());
 		}
@@ -171,7 +169,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		
 		String noteText = command.getNote();
 		if (StringUtils.isNotBlank(noteText)) {
-			Note note = Note.loanNote(currentUser.getOrganisation(), loan, noteText);
+			Note note = Note.loanNote(loan, noteText);
 			this.noteRepository.save(note);
 		}
 
@@ -187,7 +185,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		LoanStateTransitionCommandValidator validator = new LoanStateTransitionCommandValidator(command);
 		validator.validate();
 
-		Loan loan = this.loanRepository.findOne(loansThatMatch(currentUser.getOrganisation(), command.getLoanId()));
+		Loan loan = this.loanRepository.findOne(command.getLoanId());
 		if (loan == null) {
 			throw new LoanNotFoundException(command.getLoanId());
 		}
@@ -202,7 +200,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		
 		String noteText = command.getNote();
 		if (StringUtils.isNotBlank(noteText)) {
-			Note note = Note.loanNote(currentUser.getOrganisation(), loan, noteText);
+			Note note = Note.loanNote(loan, noteText);
 			this.noteRepository.save(note);
 		}
 
@@ -218,7 +216,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		LoanStateTransitionCommandValidator validator = new LoanStateTransitionCommandValidator(command);
 		validator.validate();
 		
-		Loan loan = this.loanRepository.findOne(loansThatMatch(currentUser.getOrganisation(), command.getLoanId()));
+		Loan loan = this.loanRepository.findOne(command.getLoanId());
 		if (loan == null) {
 			throw new LoanNotFoundException(command.getLoanId());
 		}
@@ -233,7 +231,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
 		String noteText = command.getNote();
 		if (StringUtils.isNotBlank(noteText)) {
-			Note note = Note.loanNote(currentUser.getOrganisation(), loan, noteText);
+			Note note = Note.loanNote(loan, noteText);
 			this.noteRepository.save(note);
 		}
 		
@@ -249,7 +247,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		LoanStateTransitionCommandValidator validator = new LoanStateTransitionCommandValidator(command);
 		validator.validate();
 
-		Loan loan = this.loanRepository.findOne(loansThatMatch(currentUser.getOrganisation(), command.getLoanId()));
+		Loan loan = this.loanRepository.findOne(command.getLoanId());
 		if (loan == null) {
 			throw new LoanNotFoundException(command.getLoanId());
 		}
@@ -322,7 +320,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		this.loanRepository.save(loan);
 		
 		if (StringUtils.isNotBlank(noteText)) {
-			Note note = Note.loanNote(currentUser.getOrganisation(), loan, noteText);
+			Note note = Note.loanNote(loan, noteText);
 			this.noteRepository.save(note);
 		}
 		
@@ -333,9 +331,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 	@Override
 	public EntityIdentifier undoLoanDisbursal(final UndoStateTransitionCommand command) {
 
-		AppUser currentUser = context.authenticatedUser();
+		context.authenticatedUser();
 
-		Loan loan = this.loanRepository.findOne(loansThatMatch(currentUser.getOrganisation(), command.getLoanId()));
+		Loan loan = this.loanRepository.findOne(command.getLoanId());
 		if (loan == null) {
 			throw new LoanNotFoundException(command.getLoanId());
 		}
@@ -350,7 +348,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
 		String noteText = command.getNote();
 		if (StringUtils.isNotBlank(noteText)) {
-			Note note = Note.loanNote(currentUser.getOrganisation(), loan, noteText);
+			Note note = Note.loanNote(loan, noteText);
 			this.noteRepository.save(note);
 		}
 		
@@ -366,7 +364,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		LoanTransactionCommandValidator validator = new LoanTransactionCommandValidator(command);
 		validator.validate();
 		
-		Loan loan = this.loanRepository.findOne(loansThatMatch(currentUser.getOrganisation(), command.getLoanId()));
+		Loan loan = this.loanRepository.findOne(command.getLoanId());
 		if (loan == null) {
 			throw new LoanNotFoundException(command.getLoanId());
 		}
@@ -387,7 +385,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		
 		String noteText = command.getNote();
 		if (StringUtils.isNotBlank(noteText)) {
-			Note note = Note.loanTransactionNote(currentUser.getOrganisation(), loan, loanRepayment, noteText);
+			Note note = Note.loanTransactionNote(loan, loanRepayment, noteText);
 			this.noteRepository.save(note);
 		}
 
@@ -396,14 +394,14 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
 	@Transactional
 	@Override
-	public EntityIdentifier adjustLoanTransaction(AdjustLoanTransactionCommand command) {
+	public EntityIdentifier adjustLoanTransaction(final AdjustLoanTransactionCommand command) {
 
-		AppUser currentUser = context.authenticatedUser();
+		context.authenticatedUser();
 
 		AdjustLoanTransactionCommandValidator validator = new AdjustLoanTransactionCommandValidator(command);
 		validator.validate();
 
-		Loan loan = this.loanRepository.findOne(loansThatMatch(currentUser.getOrganisation(), command.getLoanId()));
+		Loan loan = this.loanRepository.findOne(command.getLoanId());
 		if (loan == null) {
 			throw new LoanNotFoundException(command.getLoanId());
 		}
@@ -432,8 +430,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
 		String noteText = command.getNote();
 		if (StringUtils.isNotBlank(noteText)) {
-			Note note = Note.loanTransactionNote(currentUser.getOrganisation(),
-					loan, newTransactionDetail, noteText);
+			Note note = Note.loanTransactionNote(loan, newTransactionDetail, noteText);
 			this.noteRepository.save(note);
 		}
 
@@ -444,12 +441,12 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 	@Override
 	public EntityIdentifier waiveLoanAmount(LoanTransactionCommand command) {
 		
-		AppUser currentUser = context.authenticatedUser();
+		context.authenticatedUser();
 
 		LoanTransactionCommandValidator validator = new LoanTransactionCommandValidator(command);
 		validator.validate();
 		
-		Loan loan = this.loanRepository.findOne(loansThatMatch(currentUser.getOrganisation(), command.getLoanId()));
+		Loan loan = this.loanRepository.findOne(command.getLoanId());
 		if (loan == null) {
 			throw new LoanNotFoundException(command.getLoanId());
 		}
@@ -468,7 +465,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		
 		String noteText = command.getNote();
 		if (StringUtils.isNotBlank(noteText)) {
-			Note note = Note.loanTransactionNote(currentUser.getOrganisation(), loan, waiver, noteText);
+			Note note = Note.loanTransactionNote(loan, waiver, noteText);
 			this.noteRepository.save(note);
 		}
 

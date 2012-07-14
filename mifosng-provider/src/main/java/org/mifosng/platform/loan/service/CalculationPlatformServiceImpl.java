@@ -1,7 +1,5 @@
 package org.mifosng.platform.loan.service;
 
-import static org.mifosng.platform.Specifications.productThatMatches;
-
 import java.math.BigDecimal;
 
 import org.joda.time.LocalDate;
@@ -30,7 +28,6 @@ import org.mifosng.platform.loanschedule.domain.DefaultLoanScheduleGeneratorFact
 import org.mifosng.platform.loanschedule.domain.LoanScheduleGenerator;
 import org.mifosng.platform.loanschedule.domain.LoanScheduleGeneratorFactory;
 import org.mifosng.platform.security.PlatformSecurityContext;
-import org.mifosng.platform.user.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -60,7 +57,7 @@ public class CalculationPlatformServiceImpl implements
 	@Override
 	public LoanSchedule calculateLoanSchedule(final CalculateLoanScheduleCommand command) {
 		
-		AppUser currentUser = context.authenticatedUser();
+		context.authenticatedUser();
 		
 		CalculateLoanScheduleCommandValidator validator = new CalculateLoanScheduleCommandValidator(command);
 		validator.validate();
@@ -77,7 +74,7 @@ public class CalculationPlatformServiceImpl implements
 		
 		final BigDecimal defaultAnnualNominalInterestRate = this.aprCalculator.calculateFrom(interestPeriodFrequencyType, defaultNominalInterestRatePerPeriod);
 		
-		LoanProduct loanProduct = this.loanProductRepository.findOne(productThatMatches(currentUser.getOrganisation(), command.getProductId()));
+		LoanProduct loanProduct = this.loanProductRepository.findOne(command.getProductId());
 		if (loanProduct == null) {
 			throw new LoanProductNotFoundException(command.getProductId());
 		}

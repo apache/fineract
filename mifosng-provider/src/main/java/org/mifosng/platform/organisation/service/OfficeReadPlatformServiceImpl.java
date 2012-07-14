@@ -91,10 +91,9 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
 		OfficeMapper rm = new OfficeMapper();
 		String sql = "select "
 				+ rm.officeSchema()
-				+ "where o.org_id = ? and o.hierarchy like ? order by o.hierarchy";
+				+ "where o.hierarchy like ? order by o.hierarchy";
 
-		return this.jdbcTemplate.query(sql, rm, new Object[] {
-				currentUser.getOrganisation().getId(), hierarchySearchString });
+		return this.jdbcTemplate.query(sql, rm, new Object[] {hierarchySearchString});
 	}
 
 	@Override
@@ -107,25 +106,21 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
 		OfficeLookupMapper rm = new OfficeLookupMapper();
 		String sql = "select "
 				+ rm.officeLookupSchema()
-				+ "where o.org_id = ? and o.hierarchy like ? order by o.hierarchy";
+				+ "where o.hierarchy like ? order by o.hierarchy";
 
-		return this.jdbcTemplate.query(sql, rm, new Object[] {
-				currentUser.getOrganisation().getId(), hierarchySearchString });
+		return this.jdbcTemplate.query(sql, rm, new Object[] {hierarchySearchString});
 	}
 
 	@Override
 	public OfficeData retrieveOffice(final Long officeId) {
 
 		try {
-			AppUser currentUser = context.authenticatedUser();
+			context.authenticatedUser();
 
 			OfficeMapper rm = new OfficeMapper();
-			String sql = "select " + rm.officeSchema()
-					+ " where o.org_id = ? and o.id = ?";
+			String sql = "select " + rm.officeSchema() + " where o.id = ?";
 
-			OfficeData selectedOffice = this.jdbcTemplate.queryForObject(sql,
-					rm, new Object[] { currentUser.getOrganisation().getId(),
-							officeId });
+			OfficeData selectedOffice = this.jdbcTemplate.queryForObject(sql, rm, new Object[] {officeId});
 
 			return selectedOffice;
 		} catch (EmptyResultDataAccessException e) {

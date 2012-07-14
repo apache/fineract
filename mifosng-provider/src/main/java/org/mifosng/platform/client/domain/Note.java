@@ -9,17 +9,11 @@ import javax.persistence.Table;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
 import org.mifosng.platform.loan.domain.Loan;
 import org.mifosng.platform.loan.domain.LoanTransaction;
-import org.mifosng.platform.organisation.domain.Organisation;
 import org.mifosng.platform.user.domain.AppUser;
 
 @Entity
 @Table(name = "portfolio_note")
 public class Note extends AbstractAuditableCustom<AppUser, Long> {
-
-    @SuppressWarnings("unused")
-	@ManyToOne
-    @JoinColumn(name = "org_id", nullable = false)
-    private final Organisation organisation;
 
 	@ManyToOne
     @JoinColumn(name = "client_id", nullable = false)
@@ -69,35 +63,32 @@ public class Note extends AbstractAuditableCustom<AppUser, Long> {
         }
     }
 
-    public static Note clientNote(Organisation organisation, Client client, String note) {
-		return new Note(organisation, client, note);
+    public static Note clientNote(Client client, String note) {
+		return new Note(client, note);
 	}
 
-	public static Note loanNote(Organisation organisation, Loan loan,  String note) {
-		return new Note(organisation, loan, note);
+	public static Note loanNote(Loan loan,  String note) {
+		return new Note(loan, note);
 	}
 	
-	public static Note loanTransactionNote(Organisation organisation, Loan loan, LoanTransaction loanTransaction, String note) {
-		return new Note(organisation, loan, loanTransaction, note);
+	public static Note loanTransactionNote(Loan loan, LoanTransaction loanTransaction, String note) {
+		return new Note(loan, loanTransaction, note);
 	}
     
-    private Note(Organisation organisation, Client client, String note) {
-    	this.organisation = organisation;
+    private Note(Client client, String note) {
 		this.client = client;
 		this.note = note;
 		this.noteTypeId = NoteType.CLIENT.getValue();
 	}
     
-    private Note(Organisation organisation, Loan loan, String note) {
-    	this.organisation = organisation;
+    private Note(Loan loan, String note) {
     	this.loan = loan;
 		this.client = loan.getClient();
 		this.note = note;
 		this.noteTypeId = NoteType.LOAN.getValue();
 	}
     
-    private Note(Organisation organisation, Loan loan, LoanTransaction loanTransaction, String note) {
-    	this.organisation = organisation;
+    private Note(Loan loan, LoanTransaction loanTransaction, String note) {
     	this.loan = loan;
     	this.loanTransaction = loanTransaction;
 		this.client = loan.getClient();
@@ -106,7 +97,6 @@ public class Note extends AbstractAuditableCustom<AppUser, Long> {
 	}
     
     protected Note() {
-        this.organisation = null;
         this.client = null;
         this.loan = null;
         this.loanTransaction = null;

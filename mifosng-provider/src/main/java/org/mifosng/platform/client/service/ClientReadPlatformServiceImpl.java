@@ -68,16 +68,14 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 	public Collection<ClientData> retrieveAllIndividualClients(
 			String extraCriteria) {
 
-		AppUser currentUser = this.context.authenticatedUser();
+		this.context.authenticatedUser();
 
-		List<OfficeData> offices = new ArrayList<OfficeData>(
-				officeReadPlatformService.retrieveAllOffices());
+		List<OfficeData> offices = new ArrayList<OfficeData>(officeReadPlatformService.retrieveAllOffices());
 		String officeIdsList = generateOfficeIdInClause(offices);
 
 		ClientMapper rm = new ClientMapper(offices);
 
-		String sql = "select " + rm.clientSchema() + " where c.office_id in ("
-				+ officeIdsList + ") ";
+		String sql = "select " + rm.clientSchema() + " where c.office_id in (" + officeIdsList + ") ";
 
 		if (StringUtils.isNotBlank(extraCriteria))			
 			sql += " and " + extraCriteria;
@@ -91,18 +89,16 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 	public ClientData retrieveIndividualClient(final Long clientId) {
 
 		try {
-			AppUser currentUser = this.context.authenticatedUser();
+			this.context.authenticatedUser();
 			// TODO - JW include office name in query rather than get the lot
 			// for office name
 			List<OfficeData> offices = new ArrayList<OfficeData>(
 					officeReadPlatformService.retrieveAllOffices());
 			ClientMapper rm = new ClientMapper(offices);
 
-			String sql = "select " + rm.clientSchema()
-					+ " where c.id = ? ";
+			String sql = "select " + rm.clientSchema() + " where c.id = ? ";
 
-			return this.jdbcTemplate.queryForObject(sql, rm, new Object[] {
-					clientId });
+			return this.jdbcTemplate.queryForObject(sql, rm, new Object[] {clientId});
 		} catch (EmptyResultDataAccessException e) {
 			throw new ClientNotFoundException(clientId);
 		}
@@ -134,7 +130,8 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 		}
 
 		public String clientSchema() {
-			return "c.office_id as officeId, c.id as id, c.firstname as firstname, c.lastname as lastname, c.external_id as externalId, c.joining_date as joinedDate from portfolio_client c";
+			return "c.office_id as officeId, c.id as id, c.firstname as firstname, c.lastname as lastname, c.external_id as externalId, " +
+					"c.joining_date as joinedDate from portfolio_client c";
 		}
 
 		@Override
@@ -171,11 +168,10 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 	}
 
 	@Override
-	public ClientLoanAccountSummaryCollectionData retrieveClientAccountDetails(
-			final Long clientId) {
+	public ClientLoanAccountSummaryCollectionData retrieveClientAccountDetails(final Long clientId) {
 
 		try {
-			AppUser currentUser = this.context.authenticatedUser();
+			this.context.authenticatedUser();
 
 			List<ClientLoanAccountSummaryData> pendingApprovalLoans = new ArrayList<ClientLoanAccountSummaryData>();
 			List<ClientLoanAccountSummaryData> awaitingDisbursalLoans = new ArrayList<ClientLoanAccountSummaryData>();
@@ -185,11 +181,9 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 			ClientLoanAccountSummaryDataMapper rm = new ClientLoanAccountSummaryDataMapper();
 
 			String sql = "select " + rm.loanAccountSummarySchema()
-					+ " where l.client_id = ? and l.org_id = ?";
+					+ " where l.client_id = ?";
 
-			List<ClientLoanAccountSummaryData> results = this.jdbcTemplate
-					.query(sql, rm, new Object[] { clientId,
-							currentUser.getOrganisation().getId() });
+			List<ClientLoanAccountSummaryData> results = this.jdbcTemplate.query(sql, rm, new Object[] {clientId});
 			if (results != null) {
 				for (ClientLoanAccountSummaryData row : results) {
 
@@ -243,18 +237,8 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 			Long productId = JdbcSupport.getLong(rs, "productId");
 			String loanProductName = rs.getString("productName");
 			Integer loanStatusId = JdbcSupport.getInteger(rs, "statusId");
-			// String lifeCycleStatusText = rs.getString("statusName");
-			//
-			// LoanStatusMapper statusMapper = new
-			// LoanStatusMapper(loanStatusId);
-			//
-			// boolean pendingApproval = statusMapper.isPendingApproval();
-			// boolean waitingForDisbursal = statusMapper.isAwaitingDisbursal();
-			// boolean open = statusMapper.isOpen();
-			// boolean closed = statusMapper.isClosed();
 
-			return new ClientLoanAccountSummaryData(id, externalId, productId,
-					loanProductName, loanStatusId);
+			return new ClientLoanAccountSummaryData(id, externalId, productId, loanProductName, loanStatusId);
 		}
 	}
 
@@ -262,7 +246,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 	public NoteData retrieveClientNote(Long clientId, Long noteId) {
 
 		try {
-			AppUser currentUser = context.authenticatedUser();
+			context.authenticatedUser();
 
 			// FIXME - use join on sql query to fetch user information for note
 			// rather than fetching users?
@@ -272,11 +256,9 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 			NoteMapper noteMapper = new NoteMapper(allUsers);
 
 			String sql = "select " + noteMapper.schema()
-					+ " where n.org_id = ? and n.client_id = ? and n.id = ?";
+					+ " where n.client_id = ? and n.id = ?";
 
-			return this.jdbcTemplate.queryForObject(sql, noteMapper,
-					new Object[] { currentUser.getOrganisation().getId(),
-							clientId, noteId });
+			return this.jdbcTemplate.queryForObject(sql, noteMapper, new Object[] {clientId, noteId});
 		} catch (EmptyResultDataAccessException e) {
 			throw new NoteNotFoundException(clientId);
 		}
@@ -285,7 +267,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 	@Override
 	public Collection<NoteData> retrieveAllClientNotes(Long clientId) {
 
-		AppUser currentUser = context.authenticatedUser();
+		context.authenticatedUser();
 
 		// FIXME - use join on sql query to fetch user information for note
 		// rather than fetching users?
@@ -296,10 +278,9 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
 		String sql = "select "
 				+ noteMapper.schema()
-				+ " where n.org_id = ? and n.client_id = ? order by n.created_date DESC";
+				+ " where n.client_id = ? order by n.created_date DESC";
 
-		return this.jdbcTemplate.query(sql, noteMapper, new Object[] {
-				currentUser.getOrganisation().getId(), clientId });
+		return this.jdbcTemplate.query(sql, noteMapper, new Object[] {clientId});
 	}
 
 	private static final class NoteMapper implements RowMapper<NoteData> {
@@ -342,8 +323,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 					lastModifiedDate, lastModifiedById, updatedByUsername);
 		}
 
-		private String findUserById(Long createdById,
-				Collection<AppUserData> allUsers) {
+		private String findUserById(Long createdById, Collection<AppUserData> allUsers) {
 			String username = "";
 			for (AppUserData appUserData : allUsers) {
 				if (appUserData.getId().equals(createdById)) {

@@ -12,13 +12,11 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.mifosng.platform.api.data.PermissionData;
 import org.mifosng.platform.api.data.RoleData;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
-import org.mifosng.platform.organisation.domain.Organisation;
 
 @Entity
 @Table(name = "admin_role")
@@ -30,10 +28,6 @@ public class Role extends AbstractAuditableCustom<AppUser, Long> {
     @Column(name="description", nullable=false, length=500)
     private String          description;
 
-    @ManyToOne
-    @JoinColumn(name="org_id", nullable=false)
-    private Organisation organisation;
-
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "admin_role_permission", joinColumns = @JoinColumn(name = "role_id"), inverseJoinColumns = @JoinColumn(name = "permission_id"))
     private Set<Permission> permissions;
@@ -42,11 +36,9 @@ public class Role extends AbstractAuditableCustom<AppUser, Long> {
         this.name = null;
         this.description = null;
         this.permissions = new HashSet<Permission>();
-        this.organisation = null;
     }
 
-    public Role(final Organisation organisation, final String name, final String description, final List<Permission> rolePermissions) {
-        this.organisation = organisation;
+    public Role(final String name, final String description, final List<Permission> rolePermissions) {
         this.name = name.trim();
         this.description = description.trim();
         this.permissions = new HashSet<Permission>(rolePermissions);
@@ -69,7 +61,7 @@ public class Role extends AbstractAuditableCustom<AppUser, Long> {
 
 	public RoleData toData() {
 		
-		RoleData data = new RoleData(this.getId(), this.organisation.getId(), this.name, this.description);
+		RoleData data = new RoleData(this.getId(), this.name, this.description);
 		
 		Collection<PermissionData> rolePermissions = new ArrayList<PermissionData>();
 		for (Permission permission : this.permissions) {

@@ -8,7 +8,6 @@ import org.mifosng.platform.api.data.FundData;
 import org.mifosng.platform.exceptions.FundNotFoundException;
 import org.mifosng.platform.infrastructure.TenantAwareRoutingDataSource;
 import org.mifosng.platform.security.PlatformSecurityContext;
-import org.mifosng.platform.user.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -30,7 +29,7 @@ public class FundReadPlatformServiceImpl implements FundReadPlatformService {
 	
 	private static final class FundMapper implements RowMapper<FundData> {
 
-		public String officeSchema() {
+		public String schema() {
 			return " f.id as id, f.name as name, f.external_id as externalId from org_fund f ";
 		}
 
@@ -49,28 +48,26 @@ public class FundReadPlatformServiceImpl implements FundReadPlatformService {
 	@Override
 	public Collection<FundData> retrieveAllFunds() {
 
-		AppUser currentUser = context.authenticatedUser();
+		context.authenticatedUser();
 
 		FundMapper rm = new FundMapper();
 		String sql = "select "
-				+ rm.officeSchema()
-				+ " where f.org_id = ? order by f.name";
+				+ rm.schema()
+				+ " order by f.name";
 
-		return this.jdbcTemplate.query(sql, rm, new Object[] {currentUser.getOrganisation().getId()});
+		return this.jdbcTemplate.query(sql, rm, new Object[] {});
 	}
 	
 	@Override
 	public FundData retrieveFund(final Long fundId) {
 
 		try {
-			AppUser currentUser = context.authenticatedUser();
+			context.authenticatedUser();
 
 			FundMapper rm = new FundMapper();
-			String sql = "select " + rm.officeSchema()
-					+ " where f.org_id = ? and f.id = ?";
+			String sql = "select " + rm.schema() + " where f.id = ?";
 
-			FundData selectedFund = this.jdbcTemplate.queryForObject(sql,
-					rm, new Object[] { currentUser.getOrganisation().getId(), fundId});
+			FundData selectedFund = this.jdbcTemplate.queryForObject(sql, rm, new Object[] {fundId});
 
 			return selectedFund;
 		} catch (EmptyResultDataAccessException e) {

@@ -19,13 +19,12 @@ import javax.persistence.UniqueConstraint;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
 import org.mifosng.platform.infrastructure.PlatformUser;
 import org.mifosng.platform.organisation.domain.Office;
-import org.mifosng.platform.organisation.domain.Organisation;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 
 @Entity
-@Table(name = "admin_appuser", uniqueConstraints=@UniqueConstraint(columnNames = {"org_id", "username"}, name="username_org"))
+@Table(name = "admin_appuser", uniqueConstraints=@UniqueConstraint(columnNames = {"username"}, name="username_org"))
 public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements PlatformUser {
 
     @Column(name = "email", nullable=false, length=100)
@@ -59,10 +58,6 @@ public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements P
     private boolean      firstTimeLoginRemaining;
 
     @ManyToOne
-    @JoinColumn(name = "org_id", nullable = false)
-    private final Organisation organisation;
-
-    @ManyToOne
     @JoinColumn(name = "office_id")
     private Office office;
 
@@ -71,9 +66,9 @@ public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements P
     private Set<Role>    roles;
     
 
-	public static AppUser createNew(Organisation organisation, Office office,
-			Set<Role> allRoles, String username, String email,
-			String firstname, String lastname, String password) {
+	public static AppUser createNew(final Office office,
+			final Set<Role> allRoles, final String username, final String email,
+			final String firstname, final String lastname, final String password) {
 		
 		boolean userEnabled = true;
 		boolean userAccountNonExpired = true;
@@ -84,11 +79,10 @@ public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements P
 		authorities.add(new SimpleGrantedAuthority("DUMMY_ROLE_NOT_USED_OR_PERSISTED_TO_AVOID_EXCEPTION"));
 		
 		User user = new User(username, password, userEnabled, userAccountNonExpired, userCredentialsNonExpired, userAccountNonLocked, authorities);
-		return new AppUser(organisation, office, user, allRoles, email, firstname, lastname);
+		return new AppUser(office, user, allRoles, email, firstname, lastname);
 	}
 
     protected AppUser() {
-        this.organisation = null;
         this.office = null;
         this.email = null;
         this.username = null;
@@ -101,8 +95,7 @@ public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements P
         this.firstTimeLoginRemaining = true;
     }
 
-    public AppUser(final Organisation organisation, final Office office, final User user, final Set<Role> roles, final String email, final String firstname, final String lastname) {
-        this.organisation = organisation;
+    public AppUser(final Office office, final User user, final Set<Role> roles, final String email, final String firstname, final String lastname) {
         this.office = office;
         this.email = email.trim();
         this.username = user.getUsername().trim();
@@ -212,10 +205,6 @@ public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements P
 
     public void setUserIdAs(final Long id) {
         this.setId(id);
-    }
-
-    public Organisation getOrganisation() {
-        return this.organisation;
     }
 
     public Office getOffice() {

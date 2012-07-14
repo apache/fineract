@@ -10,7 +10,6 @@ import org.codehaus.jackson.map.annotate.JsonFilter;
 public class PermissionData implements Serializable {
 
 	private Long id;
-	private Long orgId;
 	private String name;
 	private String description;
 	private String code;
@@ -20,10 +19,8 @@ public class PermissionData implements Serializable {
 		//
 	}
 
-	public PermissionData(final Long id, final Long orgId, final String name,
-			final String description, final String code, int groupType) {
+	public PermissionData(final Long id, final String name, final String description, final String code, int groupType) {
 		this.id = id;
-		this.orgId = orgId;
 		this.name = name;
 		this.description = description;
 		this.code = code;
@@ -45,10 +42,6 @@ public class PermissionData implements Serializable {
 		return this.id;
 	}
 
-	public Long getOrgId() {
-		return this.orgId;
-	}
-
 	public String getName() {
 		return this.name;
 	}
@@ -63,10 +56,6 @@ public class PermissionData implements Serializable {
 
 	public void setId(final Long id) {
 		this.id = id;
-	}
-
-	public void setOrgId(final Long orgId) {
-		this.orgId = orgId;
 	}
 
 	public void setName(final String name) {

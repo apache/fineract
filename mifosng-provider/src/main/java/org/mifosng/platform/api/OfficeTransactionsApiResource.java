@@ -16,9 +16,7 @@ import org.joda.time.LocalDate;
 import org.mifosng.platform.api.commands.BranchMoneyTransferCommand;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
-import org.mifosng.platform.api.infrastructure.ApiJSONFormattingService;
 import org.mifosng.platform.exceptions.UnrecognizedQueryParamException;
-import org.mifosng.platform.organisation.service.OfficeReadPlatformService;
 import org.mifosng.platform.organisation.service.OfficeWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -29,22 +27,12 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class OfficeTransactionsApiResource {
 
-	private String defaultFieldList = "openingDate";
-	private String allowedFieldList = "allowedParents";
-	private String filterName = "myFilter";
-
-	@Autowired
-	private OfficeReadPlatformService readPlatformService;
-
 	@Autowired
 	private OfficeWritePlatformService writePlatformService;
 
 	@Autowired
 	private ApiDataConversionService apiDataConversionService;
 
-	@Autowired
-	private ApiJSONFormattingService jsonFormattingService;
-	
 	@POST
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})

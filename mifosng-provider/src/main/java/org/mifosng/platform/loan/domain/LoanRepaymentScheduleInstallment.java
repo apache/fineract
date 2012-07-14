@@ -15,18 +15,12 @@ import org.joda.time.LocalDate;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
-import org.mifosng.platform.organisation.domain.Organisation;
 import org.mifosng.platform.user.domain.AppUser;
 
 @Entity
 @Table(name = "portfolio_loan_repayment_schedule")
 public class LoanRepaymentScheduleInstallment extends AbstractAuditableCustom<AppUser, Long> {
 
-	@SuppressWarnings("unused")
-	@ManyToOne
-    @JoinColumn(name = "org_id", nullable = false)
-	private Organisation                organisation;
-	 
     @ManyToOne(optional = false)
     @JoinColumn(name = "loan_id")
     private Loan    loan;
@@ -54,7 +48,6 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableCustom<Ap
     private final Date    dueDate;
 
     protected LoanRepaymentScheduleInstallment() {
-    	this.organisation = null;
         this.loan = null;
         this.installmentNumber = null;
         this.dueDate = null;
@@ -109,7 +102,6 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableCustom<Ap
 		}
 		remaining = remaining.minus(this.interestCompleted);
 		
-		
 		// pay off principal
 		if (remaining.isGreaterThanOrEqualTo(principal)) {
 			this.principalCompleted = principal.getAmount();
@@ -142,10 +134,6 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableCustom<Ap
 	
 	public Money getTotal(MonetaryCurrency currency) {
 		return getPrincipal(currency).plus(getInterest(currency));
-	}
-	
-	public void updateOrgnaisation(Organisation organisation) {
-		this.organisation = organisation;
 	}
 	
 	public void updateLoan(final Loan loan) {

@@ -15,7 +15,6 @@ import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.fund.domain.Fund;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
-import org.mifosng.platform.organisation.domain.Organisation;
 import org.mifosng.platform.user.domain.AppUser;
 
 /**
@@ -31,10 +30,6 @@ import org.mifosng.platform.user.domain.AppUser;
 public class LoanProduct extends AbstractAuditableCustom<AppUser, Long> {
 
 	@ManyToOne
-	@JoinColumn(name = "org_id", nullable = false)
-	private final Organisation organisation;
-
-	@ManyToOne
 	@JoinColumn(name = "fund_id", nullable = true)
 	private Fund fund;
 
@@ -48,19 +43,17 @@ public class LoanProduct extends AbstractAuditableCustom<AppUser, Long> {
 	private final LoanProductRelatedDetail loanProductRelatedDetail;
 
     public LoanProduct() {
-        this.organisation = null;
         this.fund = null;
         this.name = null;
         this.description = null;
         this.loanProductRelatedDetail = null;
     }
 
-    public LoanProduct(final Organisation organisation, Fund fund, final String name, final String description, final MonetaryCurrency currency, final BigDecimal defaultPrincipal,
+    public LoanProduct(final Fund fund, final String name, final String description, final MonetaryCurrency currency, final BigDecimal defaultPrincipal,
             final BigDecimal defaultNominalInterestRatePerPeriod, final PeriodFrequencyType interestPeriodFrequencyType, final BigDecimal defaultAnnualNominalInterestRate, 
             final InterestMethod interestMethod, final InterestCalculationPeriodMethod interestCalculationPeriodMethod, 
             final Integer repayEvery, final PeriodFrequencyType repaymentFrequencyType, final Integer defaultNumberOfInstallments, final AmortizationMethod amortizationMethod,
             final BigDecimal inArrearsTolerance) {
-        this.organisation = organisation;
 		this.fund = fund;
         this.name = name.trim();
         if (StringUtils.isNotBlank(description)) {
@@ -75,10 +68,6 @@ public class LoanProduct extends AbstractAuditableCustom<AppUser, Long> {
 				repayEvery, repaymentFrequencyType, defaultNumberOfInstallments, amortizationMethod, inArrearsTolerance);
     }
 
-    public Organisation getOrganisation() {
-        return this.organisation;
-    }
-    
     public MonetaryCurrency getCurrency() {
     	return this.loanProductRelatedDetail.getCurrency();
     }

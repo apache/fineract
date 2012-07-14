@@ -1,14 +1,11 @@
 package org.mifosng.platform.fund.service;
 
-import static org.mifosng.platform.Specifications.fundsThatMatch;
-
 import org.mifosng.platform.api.commands.FundCommand;
 import org.mifosng.platform.exceptions.FundNotFoundException;
 import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
 import org.mifosng.platform.fund.domain.Fund;
 import org.mifosng.platform.fund.domain.FundRepository;
 import org.mifosng.platform.security.PlatformSecurityContext;
-import org.mifosng.platform.user.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,12 +32,12 @@ public class FundWritePlatformServiceJpaRepositoryImpl implements FundWritePlatf
 	public Long createFund(final FundCommand command) {
 		
 		try {
-			AppUser currentUser = context.authenticatedUser();
+			context.authenticatedUser();
 			
 			FundCommandValidator validator = new FundCommandValidator(command);
 			validator.validateForCreate();
 
-			Fund fund = Fund.createNew(currentUser.getOrganisation(), command.getName());
+			Fund fund = Fund.createNew(command.getName());
 			
 			this.fundRepository.saveAndFlush(fund);
 			
@@ -56,13 +53,13 @@ public class FundWritePlatformServiceJpaRepositoryImpl implements FundWritePlatf
 	public Long updateFund(final FundCommand command) {
 
 		try {
-			AppUser currentUser = context.authenticatedUser();
+			context.authenticatedUser();
 			
 			FundCommandValidator validator = new FundCommandValidator(command);
 			validator.validateForCreate();
 			
 			final Long fundId = command.getId();
-			Fund fund = this.fundRepository.findOne(fundsThatMatch(currentUser.getOrganisation(), fundId));
+			Fund fund = this.fundRepository.findOne(fundId);
 			if (fund == null) {
 				throw new FundNotFoundException(fundId);
 			}

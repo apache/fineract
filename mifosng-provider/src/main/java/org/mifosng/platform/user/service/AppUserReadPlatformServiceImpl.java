@@ -1,7 +1,5 @@
 package org.mifosng.platform.user.service;
 
-import static org.mifosng.platform.Specifications.usersThatMatch;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -49,18 +47,16 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
 	@Override
 	public Collection<AppUserData> retrieveAllUsers() {
 
-		AppUser currentUser = context.authenticatedUser();
+		context.authenticatedUser();
 
 		List<OfficeData> offices = new ArrayList<OfficeData>(officeReadPlatformService.retrieveAllOffices());
 		String officeIdsList = generateOfficeIdInClause(offices);
 
 		AppUserMapper mapper = new AppUserMapper(offices);
 		String sql = "select " + mapper.schema()
-				+ " where u.org_id = ? and u.office_id in (" + officeIdsList
-				+ ") order by u.id";
+				+ " where u.office_id in (" + officeIdsList + ") order by u.id";
 
-		return this.jdbcTemplate.query(sql, mapper, new Object[] { currentUser
-				.getOrganisation().getId() });
+		return this.jdbcTemplate.query(sql, mapper, new Object[] {});
 	}
 	
 	private String generateOfficeIdInClause(List<OfficeData> offices) {
@@ -91,15 +87,15 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
 	}
 
 	@Override
-	public AppUserData retrieveUser(Long userId) {
+	public AppUserData retrieveUser(final Long userId) {
 
-		AppUser currentUser = context.authenticatedUser();
+		context.authenticatedUser();
 
 		List<OfficeLookup> offices = new ArrayList<OfficeLookup>(officeReadPlatformService.retrieveAllOfficesForLookup());
 
 		List<RoleData> availableRoles = new ArrayList<RoleData>(this.roleReadPlatformService.retrieveAllRoles());
 
-		AppUser user = this.appUserRepository.findOne(usersThatMatch(currentUser.getOrganisation(), userId));
+		AppUser user = this.appUserRepository.findOne(userId);
 		if (user == null) {
 			throw new UserNotFoundException(userId);
 		}
@@ -111,8 +107,7 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
 		}
 
 		AppUserData userData = new AppUserData(user.getId(),
-				user.getUsername(), user.getEmail(), user.getOrganisation()
-						.getId(), user.getOffice().getId(), user.getOffice()
+				user.getUsername(), user.getEmail(), user.getOffice().getId(), user.getOffice()
 						.getName());
 		userData.setFirstname(user.getFirstname());
 		userData.setLastname(user.getLastname());
@@ -143,13 +138,12 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
 			String firstname = rs.getString("firstname");
 			String lastname = rs.getString("lastname");
 			String email = rs.getString("email");
-			Long orgId = JdbcSupport.getLong(rs, "orgId");
 			Long officeId = JdbcSupport.getLong(rs, "officeId");
 			
 			// FIXME - change sql query to join to get office id and name information.
 			String officeName = fromOfficeList(this.offices, officeId);
 
-			AppUserData user = new AppUserData(id, username, email, orgId, officeId, officeName);
+			AppUserData user = new AppUserData(id, username, email, officeId, officeName);
 			user.setLastname(lastname);
 			user.setFirstname(firstname);
 
@@ -157,7 +151,7 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
 		}
 
 		public String schema() {
-			return " u.id as id, u.username as username, u.firstname as firstname, u.lastname as lastname, u.email as email, u.org_id as orgId, u.office_id as officeId from admin_appuser u ";
+			return " u.id as id, u.username as username, u.firstname as firstname, u.lastname as lastname, u.email as email, u.office_id as officeId from admin_appuser u ";
 		}
 
 		private String fromOfficeList(final List<OfficeData> officeList, final Long officeId) {

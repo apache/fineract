@@ -1,7 +1,5 @@
 package org.mifosng.platform.user.service;
 
-import static org.mifosng.platform.Specifications.rolesThatMatch;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -11,7 +9,6 @@ import org.mifosng.platform.exceptions.RoleNotFoundException;
 import org.mifosng.platform.infrastructure.JdbcSupport;
 import org.mifosng.platform.infrastructure.TenantAwareRoutingDataSource;
 import org.mifosng.platform.security.PlatformSecurityContext;
-import org.mifosng.platform.user.domain.AppUser;
 import org.mifosng.platform.user.domain.Role;
 import org.mifosng.platform.user.domain.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,19 +32,19 @@ public class RoleReadPlatformServiceImpl implements RoleReadPlatformService {
 
 	@Override
 	public Collection<RoleData> retrieveAllRoles() {
-		AppUser currentUser = context.authenticatedUser();
+		context.authenticatedUser();
 
 		RoleMapper mapper = new RoleMapper();
-		String sql = "select " + mapper.schema() + " where r.org_id = ? order by r.id";
+		String sql = "select " + mapper.schema() + " order by r.id";
 
-		return this.jdbcTemplate.query(sql, mapper, new Object[] {currentUser.getOrganisation().getId() });
+		return this.jdbcTemplate.query(sql, mapper, new Object[] {});
 	}
 
 	@Override
 	public RoleData retrieveRole(final Long id) {
-		AppUser currentUser = context.authenticatedUser();
+		context.authenticatedUser();
 		
-		Role role = this.roleRepository.findOne(rolesThatMatch(currentUser.getOrganisation(), id));
+		Role role = this.roleRepository.findOne(id);
 		if (role == null) {
 			throw new RoleNotFoundException(id);
 		}
@@ -61,15 +58,14 @@ public class RoleReadPlatformServiceImpl implements RoleReadPlatformService {
 				throws SQLException {
 
 			Long id = JdbcSupport.getLong(rs, "id");
-			Long orgId = JdbcSupport.getLong(rs, "orgId");
 			String name = rs.getString("name");
 			String description = rs.getString("description");
 
-			return new RoleData(id, orgId, name, description);
+			return new RoleData(id, name, description);
 		}
 
 		public String schema() {
-			return " r.id as id, r.org_id as orgId, r.name as name, r.description as description from admin_role r";
+			return " r.id as id, r.name as name, r.description as description from admin_role r";
 		}
 	}
 }

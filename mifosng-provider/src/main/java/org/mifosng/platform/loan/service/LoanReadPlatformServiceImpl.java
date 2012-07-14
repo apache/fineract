@@ -1,8 +1,5 @@
 package org.mifosng.platform.loan.service;
 
-import static org.mifosng.platform.Specifications.loanTransactionsThatMatch;
-import static org.mifosng.platform.Specifications.loansThatMatch;
-
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -33,7 +30,6 @@ import org.mifosng.platform.loan.domain.LoanTransactionType;
 import org.mifosng.platform.loanproduct.service.LoanEnumerations;
 import org.mifosng.platform.loanproduct.service.LoanProductReadPlatformService;
 import org.mifosng.platform.security.PlatformSecurityContext;
-import org.mifosng.platform.user.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -67,13 +63,13 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 	}
 
 	@Override
-	public LoanAccountData retrieveLoanAccountDetails(Long loanId) {
+	public LoanAccountData retrieveLoanAccountDetails(final Long loanId) {
 
 		// TODO - OPTIMISE - prefer jdbc sql approach to return only what we
 		// need of loan information.
-		AppUser currentUser = context.authenticatedUser();
+		context.authenticatedUser();
 
-		Loan loan = this.loanRepository.findOne(loansThatMatch(currentUser.getOrganisation(), loanId));
+		Loan loan = this.loanRepository.findOne(loanId);
 		if (loan == null) {
 			throw new LoanNotFoundException(loanId);
 		}
@@ -149,14 +145,13 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 	}
 
 	@Override
-	public LoanTransactionData retrieveNewLoanRepaymentDetails(Long loanId) {
+	public LoanTransactionData retrieveNewLoanRepaymentDetails(final Long loanId) {
 
-		AppUser currentUser = context.authenticatedUser();
+		context.authenticatedUser();
 
 		// TODO - OPTIMIZE - write simple sql query to fetch back date of
 		// possible next transaction date.
-		Loan loan = this.loanRepository.findOne(loansThatMatch(
-				currentUser.getOrganisation(), loanId));
+		Loan loan = this.loanRepository.findOne(loanId);
 		if (loan == null) {
 			throw new LoanNotFoundException(loanId);
 		}
@@ -188,14 +183,13 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 	}
 
 	@Override
-	public LoanTransactionData retrieveNewLoanWaiverDetails(Long loanId) {
+	public LoanTransactionData retrieveNewLoanWaiverDetails(final Long loanId) {
 
-		AppUser currentUser = context.authenticatedUser();
+		context.authenticatedUser();
 
 		// TODO - OPTIMIZE - write simple sql query to fetch back date of
 		// possible next transaction date.
-		Loan loan = this.loanRepository.findOne(loansThatMatch(
-				currentUser.getOrganisation(), loanId));
+		Loan loan = this.loanRepository.findOne(loanId);
 		if (loan == null) {
 			throw new LoanNotFoundException(loanId);
 		}
@@ -225,13 +219,11 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 	}
 
 	@Override
-	public LoanTransactionData retrieveLoanTransactionDetails(Long loanId,
-			Long transactionId) {
+	public LoanTransactionData retrieveLoanTransactionDetails(final Long loanId, final Long transactionId) {
 
-		AppUser currentUser = context.authenticatedUser();
+		context.authenticatedUser();
 
-		Loan loan = this.loanRepository.findOne(loansThatMatch(
-				currentUser.getOrganisation(), loanId));
+		Loan loan = this.loanRepository.findOne(loanId);
 		if (loan == null) {
 			throw new LoanNotFoundException(loanId);
 		}
@@ -244,9 +236,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 			throw new CurrencyNotFoundException(currencyCode);
 		}
 
-		LoanTransaction transaction = this.loanTransactionRepository
-				.findOne(loanTransactionsThatMatch(
-						currentUser.getOrganisation(), transactionId));
+		LoanTransaction transaction = this.loanTransactionRepository.findOne(transactionId);
 		if (transaction == null) {
 			throw new LoanTransactionNotFoundException(transactionId);
 		}

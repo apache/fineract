@@ -19,7 +19,6 @@ import org.joda.time.LocalDate;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
-import org.mifosng.platform.organisation.domain.Organisation;
 import org.mifosng.platform.user.domain.AppUser;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -31,10 +30,6 @@ import org.springframework.format.annotation.DateTimeFormat;
 @Table(name = "portfolio_loan_transaction")
 public class LoanTransaction extends AbstractAuditableCustom<AppUser, Long> {
 
-	@ManyToOne
-    @JoinColumn(name = "org_id", nullable = false)
-	private Organisation                organisation;
-	
     @ManyToOne(optional = false)
     @JoinColumn(name = "loan_id", nullable=false)
     private Loan        loan;
@@ -55,7 +50,6 @@ public class LoanTransaction extends AbstractAuditableCustom<AppUser, Long> {
     private LoanTransaction contra;
     
     protected LoanTransaction() {
-    	this.organisation = null;
         this.loan = null;
         this.amount = null;
         this.dateOf = null;
@@ -152,13 +146,8 @@ public class LoanTransaction extends AbstractAuditableCustom<AppUser, Long> {
 	public void contra() {
 		this.contra = LoanTransaction.contra(this);
 		contra.updateLoan(this.loan);
-		contra.updateOrganisation(this.organisation);
 	}
 
-	public void updateOrganisation(Organisation organisation) {
-		this.organisation = organisation;
-	}
-	
     public void updateLoan(final Loan loan) {
         this.loan = loan;
     }
