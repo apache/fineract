@@ -7,8 +7,11 @@ import java.util.Collection;
 import java.util.List;
 
 import org.joda.time.LocalDate;
+import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.OfficeData;
 import org.mifosng.platform.api.data.OfficeLookup;
+import org.mifosng.platform.api.data.OfficeTransactionData;
+import org.mifosng.platform.currency.service.CurrencyReadPlatformService;
 import org.mifosng.platform.exceptions.OfficeNotFoundException;
 import org.mifosng.platform.infrastructure.JdbcSupport;
 import org.mifosng.platform.infrastructure.TenantAwareRoutingDataSource;
@@ -25,11 +28,15 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
 
 	private final JdbcTemplate jdbcTemplate;
 	private final PlatformSecurityContext context;
+	private final CurrencyReadPlatformService currencyReadPlatformService;
 	private final static String nameDecoratedBaseOnHierarchy = "concat(substring('........................................', 1, ((LENGTH(o.hierarchy) - LENGTH(REPLACE(o.hierarchy, '.', '')) - 1) * 4)), o.name)";
 
 	@Autowired
-	public OfficeReadPlatformServiceImpl(final PlatformSecurityContext context, final TenantAwareRoutingDataSource dataSource) {
+	public OfficeReadPlatformServiceImpl(final PlatformSecurityContext context,
+			final CurrencyReadPlatformService currencyReadPlatformService,
+			final TenantAwareRoutingDataSource dataSource) {
 		this.context = context;
+		this.currencyReadPlatformService = currencyReadPlatformService;
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
 
@@ -89,11 +96,11 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
 		String hierarchySearchString = hierarchy + "%";
 
 		OfficeMapper rm = new OfficeMapper();
-		String sql = "select "
-				+ rm.officeSchema()
+		String sql = "select " + rm.officeSchema()
 				+ "where o.hierarchy like ? order by o.hierarchy";
 
-		return this.jdbcTemplate.query(sql, rm, new Object[] {hierarchySearchString});
+		return this.jdbcTemplate.query(sql, rm,
+				new Object[] { hierarchySearchString });
 	}
 
 	@Override
@@ -104,11 +111,11 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
 		String hierarchySearchString = hierarchy + "%";
 
 		OfficeLookupMapper rm = new OfficeLookupMapper();
-		String sql = "select "
-				+ rm.officeLookupSchema()
+		String sql = "select " + rm.officeLookupSchema()
 				+ "where o.hierarchy like ? order by o.hierarchy";
 
-		return this.jdbcTemplate.query(sql, rm, new Object[] {hierarchySearchString});
+		return this.jdbcTemplate.query(sql, rm,
+				new Object[] { hierarchySearchString });
 	}
 
 	@Override
@@ -120,7 +127,8 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
 			OfficeMapper rm = new OfficeMapper();
 			String sql = "select " + rm.officeSchema() + " where o.id = ?";
 
-			OfficeData selectedOffice = this.jdbcTemplate.queryForObject(sql, rm, new Object[] {officeId});
+			OfficeData selectedOffice = this.jdbcTemplate.queryForObject(sql,
+					rm, new Object[] { officeId });
 
 			return selectedOffice;
 		} catch (EmptyResultDataAccessException e) {
@@ -161,5 +169,22 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
 
 		return filterParentLookups;
 
+	}
+
+	@Override
+	public OfficeTransactionData retrieveNewOfficeTransactionDetails() {
+		context.authenticatedUser();
+
+		List<OfficeLookup> parentLookups = new ArrayList<OfficeLookup>(
+				retrieveAllOfficesForLookup());
+		List<CurrencyData> currencyOptions = currencyReadPlatformService
+				.retrieveAllowedCurrencies();
+
+		OfficeTransactionData officeTransactionData = new OfficeTransactionData(
+				new LocalDate());
+		officeTransactionData.setAllowedOffices(parentLookups);
+		officeTransactionData.setCurrencyOptions(currencyOptions);
+
+		return officeTransactionData;
 	}
 }

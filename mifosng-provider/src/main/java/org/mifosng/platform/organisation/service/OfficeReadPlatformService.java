@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.mifosng.platform.api.data.OfficeData;
 import org.mifosng.platform.api.data.OfficeLookup;
+import org.mifosng.platform.api.data.OfficeTransactionData;
 
 public interface OfficeReadPlatformService {
 
@@ -17,4 +18,6 @@ public interface OfficeReadPlatformService {
 	OfficeData retrieveNewOfficeTemplate();
 
 	List<OfficeLookup> retrieveAllowedParents(Long officeId);
+	
+	OfficeTransactionData retrieveNewOfficeTransactionDetails();
 }
