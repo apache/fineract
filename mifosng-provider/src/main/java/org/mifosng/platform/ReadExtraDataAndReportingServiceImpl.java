@@ -47,29 +47,20 @@ import org.springframework.stereotype.Service;
 public class ReadExtraDataAndReportingServiceImpl implements
 		ReadExtraDataAndReportingService {
 
-	private final static Logger logger = LoggerFactory.getLogger(ReadExtraDataAndReportingServiceImpl.class);
+	private final static Logger logger = LoggerFactory
+			.getLogger(ReadExtraDataAndReportingServiceImpl.class);
 
 	private final DataSource dataSource;
-	private final String reportingMetaDataDB;
 	private Boolean noPentaho = false;
 
 	@Autowired
-	public ReadExtraDataAndReportingServiceImpl(final TenantAwareRoutingDataSource dataSource) {
+	public ReadExtraDataAndReportingServiceImpl(
+			final TenantAwareRoutingDataSource dataSource) {
 		// kick off pentaho reports server
 		ClassicEngineBoot.getInstance().start();
 		noPentaho = false;
 
-		Connection db_connection = null;
-		try {
-			this.dataSource = dataSource;
-			db_connection = dataSource.getConnection();
-			this.reportingMetaDataDB = db_connection.getCatalog();
-		} catch (SQLException e) {
-			throw new PlatformDataIntegrityException("error.msg.sql.error",
-					e.getMessage(), "DataSource: " + dataSource);
-		} finally {
-			dbClose(null, db_connection);
-		}
+		this.dataSource = dataSource;
 	}
 
 	@Override
@@ -245,15 +236,11 @@ public class ReadExtraDataAndReportingServiceImpl implements
 	private String getSQLtoRun(final String name, final String type,
 			final Map<String, String> queryParams) {
 		String sql = null;
-		String rptDB = queryParams.get("${rptDB}");
-		if ((rptDB == null) || rptDB.equals("")) {
-			rptDB = reportingMetaDataDB;
-		}
 
 		if (type.equals("report")) {
-			sql = getReportSql(rptDB, name);
+			sql = getReportSql(name);
 		} else {
-			sql = getParameterSql(rptDB, name);
+			sql = getParameterSql(name);
 		}
 
 		Set<String> keys = queryParams.keySet();
@@ -299,15 +286,14 @@ public class ReadExtraDataAndReportingServiceImpl implements
 	// return true;
 	// }
 
-	private String getReportSql(String rptDB, String reportName) {
-		String sql = "select report_sql as the_sql from " + rptDB
-				+ ".stretchy_report where report_name = '" + reportName + "'";
+	private String getReportSql(String reportName) {
+		String sql = "select report_sql as the_sql from stretchy_report where report_name = '"
+				+ reportName + "'";
 		return getSql(sql);
 	}
 
-	private String getParameterSql(String rptDB, String parameterName) {
-		String sql = "select parameter_sql as the_sql from " + rptDB
-				+ ".stretchy_parameter where parameter_name = '"
+	private String getParameterSql(String parameterName) {
+		String sql = "select parameter_sql as the_sql from stretchy_parameter where parameter_name = '"
 				+ parameterName + "'";
 		return getSql(sql);
 	}
