@@ -52,6 +52,18 @@ public class ApiGlobalErrorResponse {
 		
 		return globalErrorResponse;
 	}
+	
+	public static ApiGlobalErrorResponse invalidTenantIdentifier() {
+		
+		ApiGlobalErrorResponse globalErrorResponse = new ApiGlobalErrorResponse();
+		globalErrorResponse.setHttpStatusCode("401");
+		globalErrorResponse.setDeveloperMessage("Invalid tenant details were passed in api request.");
+		globalErrorResponse.setDeveloperDocLink("https://github.com/keithwoodlock/mifosx/wiki/HTTP-API-Error-codes");
+		globalErrorResponse.setUserMessageGlobalisationCode("error.msg.invalid.tenant.identifier");
+		globalErrorResponse.setDefaultUserMessage("Invalide tenant identifier provided with request.");
+		
+		return globalErrorResponse;
+	}
 
 	public static ApiGlobalErrorResponse unAuthorized() {
 		ApiGlobalErrorResponse globalErrorResponse = new ApiGlobalErrorResponse();
