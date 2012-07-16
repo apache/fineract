@@ -102,41 +102,6 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
 	
 	@Transactional
 	@Override
-	public Long interBranchMoneyTransfer(final BranchMoneyTransferCommand command) {
-		
-		context.authenticatedUser();
-		
-		BranchMoneyTransferCommandValidator validator = new BranchMoneyTransferCommandValidator(command);
-		validator.validateInterBranchTransfer();
-		
-		Office fromOffice = this.officeRepository.findOne(command.getFromOfficeId());
-		if (fromOffice == null) {
-			throw new OfficeNotFoundException(command.getFromOfficeId());
-		}
-		
-		Office toOffice = this.officeRepository.findOne(command.getToOfficeId());
-		if (toOffice == null) {
-			throw new OfficeNotFoundException(command.getToOfficeId());
-		}
-
-		final String currencyCode = command.getCurrencyCode();
-		ApplicationCurrency appCurrency = this.applicationCurrencyRepository.findOneByCode(currencyCode);
-		if (appCurrency == null) {
-			throw new CurrencyNotFoundException(currencyCode);
-		}
-		
-		MonetaryCurrency currency = new MonetaryCurrency(appCurrency.getCode(), appCurrency.getDecimalPlaces());
-		Money amount = Money.of(currency, command.getTransactionAmountValue());
-		
-		OfficeTransaction entity = OfficeTransaction.create(fromOffice, toOffice, command.getTransactionLocalDate(), amount);
-		
-		this.officeMonetaryTransferRepository.save(entity);
-		
-		return entity.getId();
-	}
-	
-	@Transactional
-	@Override
 	public Long externalBranchMoneyTransfer(BranchMoneyTransferCommand command) {
 		
 		context.authenticatedUser();
@@ -144,8 +109,15 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
 		BranchMoneyTransferCommandValidator validator = new BranchMoneyTransferCommandValidator(command);
 		validator.validateExternalBranchTransfer();
 		
-		Office fromOffice = this.officeRepository.findOne(command.getFromOfficeId());
-		Office toOffice = this.officeRepository.findOne(command.getToOfficeId());
+		Office fromOffice = null;
+		if (command.getFromOfficeId() != null) {
+			fromOffice = this.officeRepository.findOne(command.getFromOfficeId());
+		}
+		Office toOffice = null;
+		if (command.getToOfficeId() != null) {
+			toOffice = this.officeRepository.findOne(command.getToOfficeId());
+		}
+		
 		if (fromOffice == null && toOffice == null) {
 			throw new OfficeNotFoundException(command.getToOfficeId());
 		}

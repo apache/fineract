@@ -8,6 +8,18 @@ DROP INDEX `externalid_org`,
 ADD UNIQUE INDEX `externalid_org` (`external_id` ASC), 
 DROP INDEX `FK2291C47754DF2770`;
 
+ALTER TABLE `portfolio_client` DROP FOREIGN KEY `FKCE00CAB354DF2770`;
+ALTER TABLE `portfolio_client` 
+	DROP COLUMN `org_id` , 
+	DROP INDEX `org_id` , 
+	ADD UNIQUE INDEX `external_id` (`external_id` ASC) , 
+	DROP INDEX `FKCE00CAB354DF2770`;
+
+ALTER TABLE `portfolio_client` 
+  DROP INDEX `external_id`,
+	ADD UNIQUE INDEX `external_id` (`external_id` ASC);
+
+
 ALTER TABLE `org_fund` DROP FOREIGN KEY `FK4E56DB4054DF2770` ;
 ALTER TABLE `org_fund` DROP COLUMN `org_id` , DROP INDEX `fund_name_org` , ADD UNIQUE INDEX `fund_name_org` (`name` ASC) , DROP INDEX `fund_externalid_org` , ADD UNIQUE INDEX `fund_externalid_org` (`external_id` ASC) , DROP INDEX `FK4E56DB4054DF2770` ;
 

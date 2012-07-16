@@ -16,29 +16,14 @@ public class BranchMoneyTransferCommandValidator {
 		this.command = command;
 	}
 	
-	public void validateInterBranchTransfer() {
-		
-		List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-		
-		DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("office.money.transfer");
-		
-		baseDataValidator.reset().parameter("fromOfficeId").value(command.getFromOfficeId()).notNull();
-		baseDataValidator.reset().parameter("toOfficeId").value(command.getToOfficeId()).notNull();
-		baseDataValidator.reset().parameter("transactionDate").value(command.getTransactionLocalDate()).notNull();
-		baseDataValidator.reset().parameter("currencyCode").value(command.getCurrencyCode()).notBlank();
-		baseDataValidator.reset().parameter("transactionAmount").value(command.getTransactionAmountValue()).notNull();
-		baseDataValidator.reset().parameter("description").value(command.getDescription()).notExceedingLengthOf(100);
-		
-		if (!dataValidationErrors.isEmpty()) {
-			throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);
-		}
-	}
-	
 	public void validateExternalBranchTransfer() {
 		
 		List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 		
 		DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("office.money.transfer");
+		
+		baseDataValidator.reset().parameter("fromOfficeId").value(command.getFromOfficeId()).greaterThanZero();
+		baseDataValidator.reset().parameter("toOfficeId").value(command.getToOfficeId()).greaterThanZero();
 		
 		if (command.getFromOfficeId() == null) {
 			baseDataValidator.reset().parameter("toOfficeId").value(command.getToOfficeId()).notNull();
