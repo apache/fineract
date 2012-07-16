@@ -33,6 +33,10 @@ public class BranchMoneyTransferCommandValidator {
 			baseDataValidator.reset().parameter("fromOfficeId").value(command.getFromOfficeId()).notNull();
 		}
 		
+		if (command.getFromOfficeId() != null && command.getToOfficeId() != null) {
+			baseDataValidator.reset().parameter("fromOfficeId").value(command.getFromOfficeId()).notSameAsParameter("toOfficeId", command.getToOfficeId());
+		}
+		
 		baseDataValidator.reset().parameter("transactionDate").value(command.getTransactionLocalDate()).notNull();
 		baseDataValidator.reset().parameter("currencyCode").value(command.getCurrencyCode()).notBlank();
 		baseDataValidator.reset().parameter("transactionAmount").value(command.getTransactionAmountValue()).notNull();
