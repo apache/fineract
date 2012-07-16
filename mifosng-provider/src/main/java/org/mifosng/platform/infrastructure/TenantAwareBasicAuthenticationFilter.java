@@ -42,10 +42,14 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
 				// ignore to allow 'preflight' requests from AJAX applications in different domain
 			} else {
 			
-				final String tenantId = request.getHeader(tenantRequestHeader);
+				String tenantId = request.getHeader(tenantRequestHeader);
+				if (org.apache.commons.lang.StringUtils.isBlank(tenantId)) {
+					tenantId = request.getParameter("tenantIdentifier");
+				}
 		
 				if (tenantId == null && exceptionIfHeaderMissing) {
-					throw new InvalidTenantIdentiferException(tenantRequestHeader + " header not found in request.");
+					throw new InvalidTenantIdentiferException("No tenant identifier found: Add request header of '" + tenantRequestHeader +
+							"' or add the parameter 'tenantIdentifier' to query string of request URL.");
 				}
 				
 				// check tenants database for tenantId
@@ -60,7 +64,7 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
 			SecurityContextHolder.getContext().setAuthentication(null);
 
 			response.addHeader("WWW-Authenticate", "Basic realm=\"" + "Mifos Platform API" + "\"");
-	        response.sendError(HttpServletResponse.SC_BAD_REQUEST, tenantRequestHeader + " header not found in request.");
+	        response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
 		} finally {
 			
 		}
