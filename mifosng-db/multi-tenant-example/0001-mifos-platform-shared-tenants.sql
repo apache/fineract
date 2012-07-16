@@ -16,5 +16,5 @@ CREATE TABLE `mifosplatform-tenants`.`tenants` (
 INSERT INTO `mifosplatform-tenants`.`tenants`
 (`id`,`name`, `identifier`,`schema_name`)
 VALUES
-(1, 'Demo IL MFI', 'demo-il-mfi' ,'mifostenant-creocore'),
-(2, 'Demo micro-bank MFI', 'demo-micro-bank-mfi', 'mifostenant-heavansfamilydotorg');
+(1, 'Default Demo Tenant', 'default' ,'mifostenant-default'),
+(2, 'IL Demo Tenant', 'il-demo', 'mifostenant-il-demo');

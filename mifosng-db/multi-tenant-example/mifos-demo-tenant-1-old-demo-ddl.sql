@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 5.1.60, for Win32 (ia32)
 --
--- Host: localhost    Database: mifostenant-heavansfamilydotorg
+-- Host: localhost    Database: mifostenant-creocore
 -- ------------------------------------------------------
 -- Server version	5.1.60-community
 
@@ -52,7 +52,7 @@ CREATE TABLE `admin_appuser` (
 
 LOCK TABLES `admin_appuser` WRITE;
 /*!40000 ALTER TABLE `admin_appuser` DISABLE KEYS */;
-INSERT INTO `admin_appuser` VALUES (1,1,'admin','Dick','Samuels','5787039480429368bf94732aacc771cd0a3ea02bcf504ffe1185ab94213bc63a','demomfi@mifos.org','\0','','','','',NULL,NULL,NULL,NULL),(2,1,'super1','super','user','13bac23bfc7fe5257536dea35b9ed361c15eb2b440a140983db2eb6b1539c9cf','fake@email.com','\0','','','','',1,'2012-04-12 17:49:44','2012-04-12 17:51:00',2),(3,1,'manager1','manager','user','e85323fd00ff4129313ee45562c6c21215c03abce1dc17a7e843df7c182e98f2','fake@email.com','\0','','','','',1,'2012-04-12 17:56:03','2012-04-12 17:57:35',3),(4,1,'fieldofficer1','Field','Officer','ac51896ceae9573ffe3b49d426dbf063ddfa3a6e95437b14af4ce2d18b266c6f','fake@email.com','\0','','','','',1,'2012-04-12 17:59:48','2012-04-12 18:03:09',4),(5,1,'dataentry1','Data Entry','User','7e86696ecd68e3168401feecbca2d23913eaf313362840ec40268b826fc95781','fake@email.com','\0','','','','',1,'2012-04-12 18:04:13','2012-04-12 18:05:36',5),(6,1,'committee1','Committee','Member','8087b7099cb145e5907c49359270db915a5c896f514ab4a82d83d46aeacc0d30','fake@email.com','\0','','','','',1,'2012-04-12 18:14:29','2012-04-12 18:16:17',6),(7,2,'branch1super','superuser','forsubbranch1','3373728b1c3edaa6bf7339715b6607537dd50fc9b6c5b54d26a6bc4130088a59','fake@email.com','\0','','','','',1,'2012-04-16 11:47:58','2012-04-16 11:51:44',7),(8,3,'branch2super','superuser','forsubbranch2','7b52775f8b905d495a915adc228cf56d775180eccd042eaaa4892ae615ff615b','fake@email.com','\0','','','','',1,'2012-04-16 11:49:52','2012-04-16 11:51:10',8);
+INSERT INTO `admin_appuser` VALUES (1,1,'mifos','App','Administrator','5787039480429368bf94732aacc771cd0a3ea02bcf504ffe1185ab94213bc63a','demomfi@mifos.org','\0','','','','',NULL,NULL,NULL,NULL),(2,1,'super1','super','user','13bac23bfc7fe5257536dea35b9ed361c15eb2b440a140983db2eb6b1539c9cf','fake@email.com','\0','','','','',1,'2012-04-12 17:49:44','2012-04-12 17:51:00',2),(3,1,'manager1','manager','user','e85323fd00ff4129313ee45562c6c21215c03abce1dc17a7e843df7c182e98f2','fake@email.com','\0','','','','',1,'2012-04-12 17:56:03','2012-04-12 17:57:35',3),(4,1,'fieldofficer1','Field','Officer','ac51896ceae9573ffe3b49d426dbf063ddfa3a6e95437b14af4ce2d18b266c6f','fake@email.com','\0','','','','',1,'2012-04-12 17:59:48','2012-04-12 18:03:09',4),(5,1,'dataentry1','Data Entry','User','7e86696ecd68e3168401feecbca2d23913eaf313362840ec40268b826fc95781','fake@email.com','\0','','','','',1,'2012-04-12 18:04:13','2012-04-12 18:05:36',5),(6,1,'committee1','Committee','Member','8087b7099cb145e5907c49359270db915a5c896f514ab4a82d83d46aeacc0d30','fake@email.com','\0','','','','',1,'2012-04-12 18:14:29','2012-04-12 18:16:17',6),(7,2,'branch1super','superuser','forsubbranch1','3373728b1c3edaa6bf7339715b6607537dd50fc9b6c5b54d26a6bc4130088a59','fake@email.com','\0','','','','',1,'2012-04-16 11:47:58','2012-04-16 11:51:44',7),(8,3,'branch2super','superuser','forsubbranch2','7b52775f8b905d495a915adc228cf56d775180eccd042eaaa4892ae615ff615b','fake@email.com','\0','','','','',1,'2012-04-16 11:49:52','2012-04-16 11:51:10',8);
 /*!40000 ALTER TABLE `admin_appuser` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -234,7 +234,7 @@ CREATE TABLE `org_office` (
 
 LOCK TABLES `org_office` WRITE;
 /*!40000 ALTER TABLE `org_office` DISABLE KEYS */;
-INSERT INTO `org_office` VALUES (1,NULL,'.','1','Heavensfamily.org','2009-01-01',NULL,NULL,'2012-07-13 16:49:26',1),(2,1,'.2.','2','sub branch 1','2012-01-02',1,'2012-04-14 05:42:40','2012-04-16 11:47:05',1),(3,1,'.3.','3','sub branch 2','2012-03-01',1,'2012-04-16 04:12:02','2012-04-16 11:47:14',1),(4,1,'.4.',NULL,'sub branch 3','2012-04-17',1,'2012-04-17 06:01:10','2012-04-17 06:01:10',1),(5,1,'.5.',NULL,'Majmoua','2012-04-18',2,'2012-04-18 18:29:01','2012-04-18 18:29:01',2),(6,1,'.6.',NULL,'Intrasoft Technologies','2012-04-01',2,'2012-04-21 07:05:41','2012-04-21 07:05:41',2),(7,1,'.7.',NULL,'Hugo technologies','2010-05-01',1,'2012-05-01 22:44:53','2012-05-01 22:44:53',1);
+INSERT INTO `org_office` VALUES (1,NULL,'.','1','CreoCore USA','2009-01-01',NULL,NULL,'2012-07-13 17:04:20',1),(2,1,'.2.','2','sub branch 1','2012-01-02',1,'2012-04-14 05:42:40','2012-04-16 11:47:05',1),(3,1,'.3.','3','sub branch 2','2012-03-01',1,'2012-04-16 04:12:02','2012-04-16 11:47:14',1),(4,1,'.4.',NULL,'sub branch 3','2012-04-17',1,'2012-04-17 06:01:10','2012-04-17 06:01:10',1),(5,1,'.5.',NULL,'Majmoua','2012-04-18',2,'2012-04-18 18:29:01','2012-04-18 18:29:01',2),(6,1,'.6.',NULL,'Intrasoft Technologies','2012-04-01',2,'2012-04-21 07:05:41','2012-04-21 07:05:41',2),(7,1,'.7.',NULL,'Hugo technologies','2010-05-01',1,'2012-05-01 22:44:53','2012-05-01 22:44:53',1);
 /*!40000 ALTER TABLE `org_office` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -989,4 +989,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2012-07-14 23:43:17
+-- Dump completed on 2012-07-14 23:42:12
