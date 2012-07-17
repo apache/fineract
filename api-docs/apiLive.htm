@@ -129,7 +129,10 @@
         <div class="method-section">
             <div class="method-description">
                 <h3>Mifos X API Documentation</h3>
-                <p>The goal of the Mifos X API is to empower developers to build apps on top of the Mifos X Platform.</p>
+                <p>Mifos X is a secure, multi-tenanted microfinance platform.</p>
+                <p>The goal of the Mifos X API is to empower developers to build apps on top of the Mifos X Platform.
+                The <a href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/IndividualLendingGeneralJavaScript/IndivLendHome.html?tenantIdentifier=default">
+                reference Individual Lending app</a> (user: mifos password: password) works on the same demo 'tenant' as the interactive links in this documentation.</p>
                 <p>
                 The API is organized around
                 <a href="http://en.wikipedia.org/wiki/Representational_State_Transfer">REST</a>.
@@ -165,7 +168,8 @@
                 <ul>
                     <li class=normalli>Select the "Verb" (e.g. POST)</li>
                     <li class=normalli>Enter the resource name (e.g. https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices)</li>
-                    <li class=normalli>Add a header to indicate you are sending JSON data as part of the request body (e.g. Content-Type: application/json)</li>
+                    <li class=normalli>Add a header to indicate you are sending JSON data as part of the request body (Content-Type: application/json)</li>
+                    <li class=normalli>Add a header to indicate your 'tenant' (X-Mifos-Platform-TenantId: default)</li>
                     <li class=normalli>Paste the example JSON into a Request Body</li>
                     <li class=normalli>Send the Request (and receive a Response)</li>
                 </ul>
