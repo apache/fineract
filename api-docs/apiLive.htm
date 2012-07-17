@@ -191,8 +191,8 @@
                 <h4>Restrict Returned Fields</h4>
                 <p>Parameter "fields={fieldlist}" can be used on GET requests to restrict the fields returned.</p>
                 <p>Example Request: </p>
-                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices/1?pretty=true&fields=id,name,parentName">
-                https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices/1?pretty=true&fields=id,name,parentName
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices/1?tenantIdentifier=default&pretty=true&fields=id,name,parentName">
+                https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices/1?tenantIdentifier=default&pretty=true&fields=id,name,parentName
                 </a>
                 <p></p>
                 <h4>Pretty JSON Formatting</h4>
@@ -418,9 +418,9 @@ var jqxhr = $.ajax({
             <div class="method-description">
                 <h4>List Clients</h4>
                 <p>Example Requests: </p>
-                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients?pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients?pretty=true</a>
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients?tenantIdentifier=default&pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients?tenantIdentifier=default&pretty=true</a>
                 <br><br>
-                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients?pretty=true&fields=displayName,officeName,joinedDate">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients?pretty=true&fields=displayName,officeName,joinedDate</a>
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients?tenantIdentifier=default&pretty=true&fields=displayName,officeName,joinedDate">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients?tenantIdentifier=default&pretty=true&fields=displayName,officeName,joinedDate</a>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://Domain Name/api/v1/clients</code>
@@ -459,7 +459,7 @@ var jqxhr = $.ajax({
                     </ul>
                 </p>
                 <p>Example Request: </p>
-                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/template?pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/template?pretty=true</a>
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/template?tenantIdentifier=default&pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/template?tenantIdentifier=default&pretty=true</a>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://Domain Name/api/v1/clients/template</code>
@@ -492,11 +492,11 @@ var jqxhr = $.ajax({
             <div class="method-description">
                 <h4>Retrieve a Client</h4>
                 <p>Example Requests: </p>
-                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/1?pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/1?pretty=true</a>
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/1?tenantIdentifier=default&pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/1?tenantIdentifier=default&pretty=true</a>
                 <br><br>
-                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/1?pretty=true&template=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/1?pretty=true&template=true</a>
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/1?tenantIdentifier=default&pretty=true&template=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/1?tenantIdentifier=default&pretty=true&template=true</a>
                 <br><br>
-                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/1?pretty=true&fields=id,displayName,officeName">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/1?pretty=true&fields=id,displayName,officeName</a>
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/1?tenantIdentifier=default&pretty=true&fields=id,displayName,officeName">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/1?tenantIdentifier=default&pretty=true&fields=id,displayName,officeName</a>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://Domain Name/api/v1/clients/{clientId}</code>
@@ -598,9 +598,9 @@ Request Body:
             However, it is quite reasonable to add resources like this to simplify User Interface development.
         </p>
         <p>Example Requests: </p>
-        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/1/loans?pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/1/loans?pretty=true</a>
+        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/1/loans?tenantIdentifier=default&pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/1/loans?tenantIdentifier=default&pretty=true</a>
         <br><br>
-        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/1/loans?pretty=true&fields=openLoans,%20closedLoans,activeLoanCount">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/1/loans?pretty=true&fields=openLoans,%20closedLoans,activeLoanCount</a>
+        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/1/loans?tenantIdentifier=default&pretty=true&fields=openLoans,%20closedLoans,activeLoanCount">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/1/loans?tenantIdentifier=default&pretty=true&fields=openLoans,%20closedLoans,activeLoanCount</a>
     </div>
     <div class="method-example">
         <code class="method-declaration">GET https://Domain Name/api/v1/clients/{clientId}/loans</code>
@@ -652,9 +652,9 @@ Request Body:
             <b>Note:</b> Notes are returned in descending createOn order.
         </p>
         <p>Example Requests: </p>
-        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/2/notes?pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/2/notes?pretty=true</a>
+        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/2/notes?tenantIdentifier=default&pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/2/notes?tenantIdentifier=default&pretty=true</a>
         <br><br>
-        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/2/notes?pretty=true&fields=note,createdOn,createdByUsername">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/2/notes?pretty=true&fields=note,createdOn,createdByUsername</a>
+        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/2/notes?tenantIdentifier=default&pretty=true&fields=note,createdOn,createdByUsername">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/2/notes?tenantIdentifier=default&pretty=true&fields=note,createdOn,createdByUsername</a>
     </div>
     <div class="method-example">
         <code class="method-declaration">GET https://Domain Name/api/v1/clients/{clientId}/notes</code>
@@ -723,9 +723,9 @@ Request Body:
     <div class="method-description">
         <h4>Retrieve a Client Note</h4>
         <p>Example Requests: </p>
-        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/2/notes/20?pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/2/notes/20?pretty=true</a>
+        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/2/notes/20?tenantIdentifier=default&pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/2/notes/20?tenantIdentifier=default&pretty=true</a>
         <br><br>
-        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/2/notes/20?pretty=true&fields=note,createdOn,createdByUsername">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/2/notes/20?pretty=true&fields=note,createdOn,createdByUsername</a>
+        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/2/notes/20?tenantIdentifier=default&pretty=true&fields=note,createdOn,createdByUsername">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/clients/2/notes/20?tenantIdentifier=default&pretty=true&fields=note,createdOn,createdByUsername</a>
     </div>
     <div class="method-example">
         <code class="method-declaration">GET https://Domain Name/api/v1/clients/{clientId}/notes/{noteId}</code>
@@ -1057,13 +1057,13 @@ Request Body:
             <dd><b>'convenienceData':</b> Some derived data that is specific to the needs of the current Individual Lending client application.</dd>
         </dl>
         <p>Example Requests: </p>
-        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/1?pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/1?pretty=true</a>
+        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/1?tenantIdentifier=default&pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/1?tenantIdentifier=default&pretty=true</a>
         <br><br>
-        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/1?pretty=true&fields=id,principal,annualInterestRate">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/1?pretty=true&fields=id,principal,annualInterestRate</a>
+        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/1?tenantIdentifier=default&pretty=true&fields=id,principal,annualInterestRate">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/1?tenantIdentifier=default&pretty=true&fields=id,principal,annualInterestRate</a>
         <br><br>
-        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/1?pretty=true&associations=all">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/1?pretty=true&associations=all</a>
+        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/1?tenantIdentifier=default&pretty=true&associations=all">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/1?tenantIdentifier=default&pretty=true&associations=all</a>
         <br><br>
-        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/1?pretty=true&fields=id,principal,annualInterestRate&associations=summary,repaymentSchedule">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/1?pretty=true&fields=id,principal,annualInterestRate&associations=summary,repaymentSchedule</a>
+        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/1?tenantIdentifier=default&pretty=true&fields=id,principal,annualInterestRate&associations=summary,repaymentSchedule">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/1?tenantIdentifier=default&pretty=true&fields=id,principal,annualInterestRate&associations=summary,repaymentSchedule</a>
     </div>
     <div class="method-example">
         <code class="method-declaration">GET https://Domain Name/api/v1/loans/{loanId}</code>
@@ -1332,7 +1332,7 @@ Request Body:
             <div class="method-description">
                 <h4>Retrieve a Repayment or Waiver Details</h4>
                 <p>Example Request: </p>
-                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/10/transactions/20?pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/10/transactions/20?pretty=true</a>
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/10/transactions/20?tenantIdentifier=default&pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loans/10/transactions/20?tenantIdentifier=default&pretty=true</a>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://Domain Name/api/v1/loans/{loanId}/transactions/{transactionId}</code>
@@ -1420,7 +1420,7 @@ Request Body:
             <div class="method-description">
                 <h4>List Offices</h4>
                 <p>Example Requests: </p>
-                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices?pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices?pretty=true</a>
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices?tenantIdentifier=default&pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices?tenantIdentifier=default&pretty=true</a>
                 <br><br>
                 <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices?fields=id,name,openingDate&pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices?fields=id,name,openingDate&pretty=true</a>
             </div>
@@ -1466,8 +1466,8 @@ Request Body:
                     </ul>
                 </p>
                 <p>Example Request: </p>
-                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices/template?pretty=true">
-                https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices/template?pretty=true
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices/template?tenantIdentifier=default&pretty=true">
+                https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices/template?tenantIdentifier=default&pretty=true
                 </a>
             </div>
             <div class="method-example">
@@ -1494,16 +1494,16 @@ Request Body:
             <div class="method-description">
                 <h4>Retrieve an Office</h4>
                 <p>Example Requests: </p>
-                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices/1?pretty=true">
-                https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices/1?pretty=true
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices/1?tenantIdentifier=default&pretty=true">
+                https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices/1?tenantIdentifier=default&pretty=true
                 </a>
                 <br><br>
-                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices/1?pretty=true&template=true">
-                https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices/1?pretty=true&template=true
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices/1?tenantIdentifier=default&pretty=true&template=true">
+                https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices/1?tenantIdentifier=default&pretty=true&template=true
                 </a>
                 <br><br>
-                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices/1?pretty=true&fields=id,name,parentName">
-                https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices/1?pretty=true&fields=id,name,parentName
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices/1?tenantIdentifier=default&pretty=true&fields=id,name,parentName">
+                https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/offices/1?tenantIdentifier=default&pretty=true&fields=id,name,parentName
                 </a>
             </div>
             <div class="method-example">
@@ -1634,9 +1634,9 @@ Request Body:
             <div class="method-description">
                 <h4>List Loan Products</h4>
                 <p>Example Requests:</p> 
-                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts?pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts?pretty=true</a>
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts?tenantIdentifier=default&pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts?tenantIdentifier=default&pretty=true</a>
                 <br><br>
-                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts?pretty=true&fields=name,description,interestRateFrequencyType,amortizationType">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts?pretty=true&fields=name,description,interestRateFrequencyType,amortizationType</a>
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts?tenantIdentifier=default&pretty=true&fields=name,description,interestRateFrequencyType,amortizationType">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts?tenantIdentifier=default&pretty=true&fields=name,description,interestRateFrequencyType,amortizationType</a>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://Domain Name/api/v1/loanproducts</code>
@@ -1770,7 +1770,7 @@ Request Body:
                     </ul>
                 </p>
                 <p>Example Request: </p>
-                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts/template?pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts/template?pretty=true</a>
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts/template?tenantIdentifier=default&pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts/template?tenantIdentifier=default&pretty=true</a>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://Domain Name/api/v1/loanproducts/template</code>
@@ -1926,11 +1926,11 @@ Request Body:
             <div class="method-description">
                 <h4>Retrieve a Loan Product</h4>
                 <p>Example Requests: </p>
-                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts/1?pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts/1?pretty=true</a>
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts/1?tenantIdentifier=default&pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts/1?tenantIdentifier=default&pretty=true</a>
                 <br><br>
-                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts/1?pretty=true&template=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts/1?pretty=true&template=true</a>
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts/1?tenantIdentifier=default&pretty=true&template=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts/1?tenantIdentifier=default&pretty=true&template=true</a>
                  <br><br>
-                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts/1?pretty=true&fields=name,description,numberOfRepayments">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts/1?pretty=true&fields=name,description,numberOfRepayments</a>
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts/1?tenantIdentifier=default&pretty=true&fields=name,description,numberOfRepayments">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/loanproducts/1?tenantIdentifier=default&pretty=true&fields=name,description,numberOfRepayments</a>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://Domain Name/api/v1/loanproducts/{productId}</code>
@@ -2076,9 +2076,9 @@ Request Body:
 	        <h4>Retrieve Currency Configuration</h4>
 	        <p>Returns the list of currencies permitted for use AND the list of currencies not selected (but available for selection).</p>
 	        <p>Example Requests: </p>
-	        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/configurations/currency?pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/configurations/currency?pretty=true</a>
+	        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/configurations/currency?tenantIdentifier=default&pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/configurations/currency?tenantIdentifier=default&pretty=true</a>
                 <br><br>
-	        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/configurations/currency?pretty=true&fields=selectedCurrencyOptions">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/configurations/currency?pretty=true&fields=selectedCurrencyOptions</a>
+	        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/configurations/currency?tenantIdentifier=default&pretty=true&fields=selectedCurrencyOptions">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/configurations/currency?tenantIdentifier=default&pretty=true&fields=selectedCurrencyOptions</a>
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">GET https://Domain Name/api/v1/configurations/currency</code>
@@ -2190,7 +2190,7 @@ Request Body:{
                 <p>Example Requests: </p>
                 <a  href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/additionalfields?type=portfolio_client&pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/additionalfields?type=portfolio_client&pretty=true</a>
                 <br><br>
-                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/additionalfields?pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/additionalfields?pretty=true</a>
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/additionalfields?tenantIdentifier=default&pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/additionalfields?tenantIdentifier=default&pretty=true</a>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://Domain Name/api/v1/additionalfields</code>
@@ -2220,7 +2220,7 @@ Request Body:{
                 Returns the Set of Additional Fields data for the ID provided.  The ID is the id field of the Type table e.g. portfolio_client might have an id value of 4.  The output is a JSON formatted "Generic Resultset".  The Generic Resultset contains Column Heading as well as Data information.  The Column Heading information may include allowed values (columnValues array).
                 </p>
                 <p>Example Request: 
-                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/additionalfields/portfolio_client/Additional Information/2?pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/additionalfields/portfolio_client/Additional Information/2?pretty=true</a>
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/additionalfields/portfolio_client/Additional Information/2?tenantIdentifier=default&pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/additionalfields/portfolio_client/Additional Information/2?tenantIdentifier=default&pretty=true</a>
                 </p>
             </div>
             <div class="method-example">
@@ -2357,9 +2357,9 @@ Request Body:
                     <dd>Output will be delivered as a CSV file instead of JSON.</dd>
                 </dl>
                 <p>Example Requests: </p>
-                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/reports?pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/reports?pretty=true</a>
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/reports?tenantIdentifier=default&pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/reports?tenantIdentifier=default&pretty=true</a>
                 <br><br>
-                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/reports?pretty=true&exportCSV=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/reports?pretty=true&exportCSV=true</a>
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/reports?tenantIdentifier=default&pretty=true&exportCSV=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/reports?tenantIdentifier=default&pretty=true&exportCSV=true</a>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://Domain Name/api/v1/reports</code>
@@ -2621,9 +2621,9 @@ No Request Body
 	    <div class="method-description">
 	        <h4>Retrieve list of users</h4>
 	        <p>Example Requests: </p>
-	        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users?pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users?pretty=true</a>
+	        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users?tenantIdentifier=default&pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users?tenantIdentifier=default&pretty=true</a>
                 <br><br>
-	        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users?pretty=true&fields=id,username,email,officeName">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users?pretty=true&fields=id,username,email,officeName</a>
+	        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users?tenantIdentifier=default&pretty=true&fields=id,username,email,officeName">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users?tenantIdentifier=default&pretty=true&fields=id,username,email,officeName</a>
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">GET https://Domain Name/api/v1/users</code>
@@ -2659,7 +2659,7 @@ No Request Body
                     </ul>
                 </p>
 	        <p>Example Request: </p>
-	        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users/template?pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users/template?pretty=true</a>
+	        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users/template?tenantIdentifier=default&pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users/template?tenantIdentifier=default&pretty=true</a>
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">GET https://Domain Name/api/v1/users/template</code>
@@ -2721,11 +2721,11 @@ No Request Body
 	    <div class="method-description">
 	        <h4>Retrieve a User</h4>
 	        <p>Example Requests: </p>
-	        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users/1?pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users/1?pretty=true</a>
+	        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users/1?tenantIdentifier=default&pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users/1?tenantIdentifier=default&pretty=true</a>
 	        <br><br>
-	        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users/1?pretty=true&template=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users/1?pretty=true&template=true</a>
+	        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users/1?tenantIdentifier=default&pretty=true&template=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users/1?tenantIdentifier=default&pretty=true&template=true</a>
 	        <br><br>
-	        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users/1?pretty=true&fields=username,officeName">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users/1?pretty=true&fields=username,officeName</a>
+	        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users/1?tenantIdentifier=default&pretty=true&fields=username,officeName">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/users/1?tenantIdentifier=default&pretty=true&fields=username,officeName</a>
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">GET https://Domain Name/api/v1/users/1</code>
@@ -2867,9 +2867,9 @@ No Request Body
 	    <div class="method-description">
 	        <h4>List Roles</h4>
 	        <p>Example Requests: </p>
-	        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles?pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles?pretty=true</a>
+	        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles?tenantIdentifier=default&pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles?tenantIdentifier=default&pretty=true</a>
 	        <br><br>
-                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles?pretty=true&fields=name">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles?pretty=true&fields=name</a>
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles?tenantIdentifier=default&pretty=true&fields=name">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles?tenantIdentifier=default&pretty=true&fields=name</a>
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">GET https://Domain Name/api/v1/roles</code>
@@ -2909,7 +2909,7 @@ No Request Body
                     </ul>
                 </p>
 	        <p>Example Request: </p>
-	        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles/template?pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles/template?pretty=true</a>
+	        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles/template?tenantIdentifier=default&pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles/template?tenantIdentifier=default&pretty=true</a>
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">GET https://Domain Name/api/v1/roles/template</code>
@@ -2945,11 +2945,11 @@ No Request Body
 	    <div class="method-description">
 	        <h4>Retrieve a Role</h4>
 	        <p>Example Requests: </p>
-	        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles/1?pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles/1?pretty=true</a>
+	        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles/1?tenantIdentifier=default&pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles/1?tenantIdentifier=default&pretty=true</a>
                 <br><br>
-	        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles/1?pretty=true&template=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles/1?pretty=true&template=true</a>
+	        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles/1?tenantIdentifier=default&pretty=true&template=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles/1?tenantIdentifier=default&pretty=true&template=true</a>
                 <br><br>
-	        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles/1?pretty=true&fields=name,selectedPermissions">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles/1?pretty=true&fields=name,selectedPermissions</a>
+	        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles/1?tenantIdentifier=default&pretty=true&fields=name,selectedPermissions">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/roles/1?tenantIdentifier=default&pretty=true&fields=name,selectedPermissions</a>
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">GET https://Domain Name/api/v1/roles/{roleId}</code>
@@ -3047,9 +3047,9 @@ Request body:
 	    <div class="method-description">
 	        <h4>List Application Permissions</h4>
 	        <p>Example Requests: </p>
-	        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/permissions?pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/permissions?pretty=true</a>
+	        <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/permissions?tenantIdentifier=default&pretty=true">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/permissions?tenantIdentifier=default&pretty=true</a>
                 <br><br>
-                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/permissions?pretty=true&fields=id,code">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/permissions?pretty=true&fields=id,code</a>
+                <a style="word-wrap: break-word;" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/permissions?tenantIdentifier=default&pretty=true&fields=id,code">https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/permissions?tenantIdentifier=default&pretty=true&fields=id,code</a>
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">GET https://Domain Name/api/v1/permissions</code>
