@@ -37,11 +37,12 @@ public class Fund extends AbstractAuditableCustom<AppUser, Long> {
 	}
 
 	public void update(final FundCommand command) {
-		if (StringUtils.isNotBlank(command.getName())) {
-			this.name = command.getName();
+		
+		if (command.isNameChanged()) {
+			this.name = StringUtils.defaultIfEmpty(command.getName(), null);
 		}
 		
-		if (command.getExternalId() != null) {
+		if (command.isExternalIdChanged()) {
 			this.externalId = StringUtils.defaultIfEmpty(command.getExternalId(), null);
 		}
 	}

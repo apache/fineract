@@ -1,22 +1,21 @@
 package org.mifosng.platform.api.commands;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import java.util.Set;
 
 /**
- * Command used for create and update fund operations.
+ * Immutable command for creating or updating details of a fund.
  */
-@XmlRootElement
 public class FundCommand {
 
-	private Long id;
-	private String name;
-	private String externalId;
-
-	protected FundCommand() {
-		//
-	}
+	private final Long id;
+	private final String name;
+	private final String externalId;
 	
-	public FundCommand(final String fundName, final String externalId) {
+	private final Set<String> modifiedParameters;
+
+	public FundCommand(final Set<String> modifiedParameters, final Long id, final String fundName, final String externalId) {
+		this.modifiedParameters = modifiedParameters;
+		this.id = id;
 		this.name = fundName;
 		this.externalId = externalId;
 	}
@@ -25,23 +24,19 @@ public class FundCommand {
 		return id;
 	}
 
-	public void setId(Long id) {
-		this.id = id;
-	}
-
 	public String getName() {
 		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
 	}
 
 	public String getExternalId() {
 		return externalId;
 	}
+	
+	public boolean isNameChanged() {
+		return this.modifiedParameters.contains("name");
+	}
 
-	public void setExternalId(String externalId) {
-		this.externalId = externalId;
+	public boolean isExternalIdChanged() {
+		return this.modifiedParameters.contains("externalId");
 	}
 }

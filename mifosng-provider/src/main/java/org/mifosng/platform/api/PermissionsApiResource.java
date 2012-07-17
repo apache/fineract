@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 @Path("/permissions")
 @Component
 @Scope("singleton")
-public class PermissionApiResource {
+public class PermissionsApiResource {
 	private String allowedFieldList = "";
 	private String filterName = "permissionFilter";
 
@@ -31,12 +31,11 @@ public class PermissionApiResource {
 	private ApiJSONFormattingService jsonFormattingService;
 
 	@GET
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrieveAllPermissions(@Context UriInfo uriInfo) {
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
+	public String retrieveAllPermissions(@Context final UriInfo uriInfo) {
 
-		Collection<PermissionData> permissions = this.permissionReadPlatformService
-				.retrieveAllPermissions();
+		Collection<PermissionData> permissions = this.permissionReadPlatformService.retrieveAllPermissions();
 
 		String selectedFields = "";
 		return this.jsonFormattingService.convertRequest(permissions,

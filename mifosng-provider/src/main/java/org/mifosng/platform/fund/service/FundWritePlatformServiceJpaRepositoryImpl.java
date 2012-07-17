@@ -56,7 +56,7 @@ public class FundWritePlatformServiceJpaRepositoryImpl implements FundWritePlatf
 			context.authenticatedUser();
 			
 			FundCommandValidator validator = new FundCommandValidator(command);
-			validator.validateForCreate();
+			validator.validateForUpdate();
 			
 			final Long fundId = command.getId();
 			Fund fund = this.fundRepository.findOne(fundId);

@@ -19,6 +19,7 @@ import org.mifosng.platform.api.commands.RoleCommand;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.PermissionData;
 import org.mifosng.platform.api.data.RoleData;
+import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.ApiJSONFormattingService;
 import org.mifosng.platform.user.service.PermissionReadPlatformService;
 import org.mifosng.platform.user.service.RoleReadPlatformService;
@@ -30,7 +31,7 @@ import org.springframework.stereotype.Component;
 @Path("/roles")
 @Component
 @Scope("singleton")
-public class RoleApiResource {
+public class RolesApiResource {
 
 	private String allowedFieldList = "availablePermissions";
 	private String filterName = "roleFilter";
@@ -46,14 +47,16 @@ public class RoleApiResource {
 
 	@Autowired
 	private ApiJSONFormattingService jsonFormattingService;
+	
+	@Autowired
+	private ApiDataConversionService apiDataConversionService;
 
 	@GET
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrieveAllRoles(@Context UriInfo uriInfo) {
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
+	public String retrieveAllRoles(@Context final UriInfo uriInfo) {
 
-		Collection<RoleData> roles = this.roleReadPlatformService
-				.retrieveAllRoles();
+		Collection<RoleData> roles = this.roleReadPlatformService.retrieveAllRoles();
 
 		String selectedFields = "id,name,description";
 		return this.jsonFormattingService.convertRequest(roles, filterName,
@@ -62,12 +65,11 @@ public class RoleApiResource {
 
 	@GET
 	@Path("template")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrieveNewRoleDetails(@Context UriInfo uriInfo) {
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
+	public String retrieveNewRoleDetails(@Context final UriInfo uriInfo) {
 
-		Collection<PermissionData> allPermissions = this.permissionReadPlatformService
-				.retrieveAllPermissions();
+		Collection<PermissionData> allPermissions = this.permissionReadPlatformService.retrieveAllPermissions();
 
 		RoleData role = new RoleData();
 		role.setAvailablePermissions(allPermissions);
@@ -78,20 +80,23 @@ public class RoleApiResource {
 	}
 
 	@POST
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public Response createRole(final RoleCommand command) {
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
+	public Response createRole(final String jsonRequestBody) {
 
+		RoleCommand command = this.apiDataConversionService.convertJsonToRoleCommand(null, jsonRequestBody);
+		
 		Long roleId = this.roleWritePlatformService.createRole(command);
+		
 		return Response.ok().entity(new EntityIdentifier(roleId)).build();
 	}
 
 	@GET
 	@Path("{roleId}")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON })
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveRole(@PathParam("roleId") final Long roleId,
-			@QueryParam("template") String template, @Context UriInfo uriInfo) {
+			@QueryParam("template") final String template, @Context final UriInfo uriInfo) {
 
 		RoleData role = this.roleReadPlatformService.retrieveRole(roleId);
 
@@ -109,13 +114,14 @@ public class RoleApiResource {
 
 	@PUT
 	@Path("{roleId}")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public Response updateRole(@PathParam("roleId") final Long roleId,
-			final RoleCommand command) {
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
+	public Response updateRole(@PathParam("roleId") final Long roleId, final String jsonRequestBody) {
 
-		command.setId(roleId);
+		RoleCommand command = this.apiDataConversionService.convertJsonToRoleCommand(roleId, jsonRequestBody);
+			
 		this.roleWritePlatformService.updateRole(command);
+		
 		return Response.ok().entity(new EntityIdentifier(roleId)).build();
 	}
 }

@@ -28,7 +28,7 @@ import org.springframework.stereotype.Component;
 @Path("/loanproducts")
 @Component
 @Scope("singleton")
-public class LoanProductApiResource {
+public class LoanProductsApiResource {
 
 	private String defaultFieldList = "principal,inArrearsTolerance,interestRatePerPeriod,annualInterestRate,repaymentFrequencyType,interestRateFrequencyType,amortizationType,interestType,interestCalculationPeriodType,fundId";
 	private String allowedFieldList = "currencyOptions,amortizationTypeOptions,interestTypeOptions,interestCalculationPeriodTypeOptions,repaymentFrequencyTypeOptions,interestRateFrequencyTypeOptions,fundOptions";
@@ -51,7 +51,7 @@ public class LoanProductApiResource {
 	@Produces({MediaType.APPLICATION_JSON})
 	public Response createLoanProduct(final String jsonRequestBody) {
 		
-		final LoanProductCommand command = this.apiDataConversionService.convertJsonToCommand(null, jsonRequestBody);
+		final LoanProductCommand command = this.apiDataConversionService.convertJsonToLoanProductCommand(null, jsonRequestBody);
 		
 		EntityIdentifier entityIdentifier = this.loanProductWritePlatformService.createLoanProduct(command);
 
@@ -93,7 +93,7 @@ public class LoanProductApiResource {
 	@Path("{productId}")
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
-	public String retrieveLoanProductDetails(@PathParam("productId") final Long productId, final UriInfo uriInfo) {
+	public String retrieveLoanProductDetails(@PathParam("productId") final Long productId, @Context final UriInfo uriInfo) {
 
 		LoanProductData loanProduct = this.loanProductReadPlatformService.retrieveLoanProduct(productId);
 
@@ -109,7 +109,7 @@ public class LoanProductApiResource {
 	@Produces({MediaType.APPLICATION_JSON})
 	public Response updateLoanProduct(@PathParam("productId") final Long productId, final String jsonRequestBody) {
 		
-		LoanProductCommand command = this.apiDataConversionService.convertJsonToCommand(productId, jsonRequestBody);
+		LoanProductCommand command = this.apiDataConversionService.convertJsonToLoanProductCommand(productId, jsonRequestBody);
 		
 		EntityIdentifier entityIdentifier = this.loanProductWritePlatformService.updateLoanProduct(command);
 

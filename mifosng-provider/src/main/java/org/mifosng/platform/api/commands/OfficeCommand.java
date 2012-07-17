@@ -1,109 +1,66 @@
 package org.mifosng.platform.api.commands;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import java.util.Set;
 
 import org.joda.time.LocalDate;
 
 /**
- * Command used for create and update office operations.
+ * Immutable command for creating or updating details of a office.
  */
-@XmlRootElement
 public class OfficeCommand {
 
-	private Long id;
-	private String name;
-	private String externalId;
+	private final Long id;
+	private final String name;
+	private final String externalId;
+	private final LocalDate openingDate;
+	private final Long parentId;
 
-	private String dateFormat;
-	private String openingDate;
-	private LocalDate openingLocalDate;
-
-	private Long parentId;
-	private Boolean rootOffice = false;
-
-	protected OfficeCommand() {
-		//
-	}
+	private final Set<String> modifiedParameters;
 	
-	public OfficeCommand(final String officeName, final String externalId,
-			final Long parentId, final LocalDate openingDate) {
-		this.name = officeName;
-		this.externalId = externalId;
-		this.parentId = parentId;
-		this.openingLocalDate = openingDate;
-	}
-
-	public OfficeCommand(final Long id, final String officeName,
+	public OfficeCommand(Set<String> modifiedParameters, final Long id, final String officeName,
 			final String externalId, final Long parentId,
 			final LocalDate openingDate) {
+		this.modifiedParameters = modifiedParameters;
 		this.id = id;
 		this.name = officeName;
 		this.externalId = externalId;
 		this.parentId = parentId;
-		this.openingLocalDate = openingDate;
-	}
-
-	public String getName() {
-		return this.name;
-	}
-
-	public void setName(final String name) {
-		this.name = name;
-	}
-
-	public String getExternalId() {
-		return this.externalId;
-	}
-
-	public void setExternalId(final String externalId) {
-		this.externalId = externalId;
-	}
-
-	public Long getParentId() {
-		return this.parentId;
-	}
-
-	public void setParentId(final Long parentId) {
-		this.parentId = parentId;
-	}
-
-	public Long getId() {
-		return this.id;
-	}
-
-	public void setId(final Long id) {
-		this.id = id;
-	}
-
-	public String getDateFormat() {
-		return dateFormat;
-	}
-
-	public void setDateFormat(String dateFormat) {
-		this.dateFormat = dateFormat;
-	}
-
-	public boolean isRootOffice() {
-		return rootOffice;
-	}
-
-	public void setRootOffice(boolean rootOffice) {
-		this.rootOffice = rootOffice;
-	}
-
-	public String getOpeningDate() {
-		return openingDate;
-	}
-
-	public void setOpeningDate(String openingDate) {
 		this.openingDate = openingDate;
 	}
 
-	public LocalDate getOpeningLocalDate() {
-		return openingLocalDate;
+	public Long getId() {
+		return id;
 	}
 
-	public void setOpeningLocalDate(LocalDate openingLocalDate) {
-		this.openingLocalDate = openingLocalDate;
+	public String getName() {
+		return name;
+	}
+
+	public String getExternalId() {
+		return externalId;
+	}
+
+	public LocalDate getOpeningDate() {
+		return openingDate;
+	}
+
+	public Long getParentId() {
+		return parentId;
+	}
+	
+	public boolean isNameChanged() {
+		return this.modifiedParameters.contains("name");
+	}
+
+	public boolean isExternalIdChanged() {
+		return this.modifiedParameters.contains("externalId");
+	}
+
+	public boolean isOpeningDateChanged() {
+		return this.modifiedParameters.contains("openingDate");
+	}
+
+	public boolean isParentChanged() {
+		return this.modifiedParameters.contains("parentId");
 	}
 }

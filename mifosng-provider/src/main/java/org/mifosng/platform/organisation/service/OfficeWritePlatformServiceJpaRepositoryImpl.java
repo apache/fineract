@@ -56,7 +56,7 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
 			
 			Office parent = validateUserPriviledgeOnOfficeAndRetrieve(currentUser, command.getParentId());
 	
-			Office office = Office.createNew(parent, command.getName(), command.getOpeningLocalDate(), command.getExternalId());
+			Office office = Office.createNew(parent, command.getName(), command.getOpeningDate(), command.getExternalId());
 			
 			// pre save to generate id for use in office hierarchy
 			this.officeRepository.save(office);
@@ -86,7 +86,7 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
 			
 			office.update(command);
 			
-			if (command.getParentId() != null) {
+			if (command.isParentChanged()) {
 				Office parent = validateUserPriviledgeOnOfficeAndRetrieve(currentUser, command.getParentId());
 				office.update(parent);
 			}

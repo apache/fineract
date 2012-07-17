@@ -11,7 +11,6 @@ public class LoanProductCommand {
 	private final Long id;
 	private final String name;
 	private final String description;
-	private final String externalId;
 	
 	private final Long fundId;
 	
@@ -33,7 +32,8 @@ public class LoanProductCommand {
 	
 	private final Set<String> modifiedParameters;
 	
-	public LoanProductCommand(Set<String> modifiedParameters, final Long id, final String name, final String description, final String externalId, final Long fundId, 
+	public LoanProductCommand(final Set<String> modifiedParameters, final Long id, final String name, final String description, 
+			final Long fundId, 
 			final String currencyCode, final Integer digitsAfterDecimal, 
 			final BigDecimal principal, final BigDecimal inArrearsTolerance, final Integer numberOfRepayments, 
 			final Integer repaymentEvery, final BigDecimal interestRatePerPeriod,
@@ -43,7 +43,6 @@ public class LoanProductCommand {
 		this.id = id;
 		this.name = name;
 		this.description = description;
-		this.externalId = externalId;
 		this.fundId = fundId;
 		this.currencyCode = currencyCode;
 		this.digitsAfterDecimal = digitsAfterDecimal;
@@ -69,10 +68,6 @@ public class LoanProductCommand {
 
 	public String getDescription() {
 		return description;
-	}
-
-	public String getExternalId() {
-		return externalId;
 	}
 
 	public Long getFundId() {

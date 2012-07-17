@@ -1,58 +1,44 @@
 package org.mifosng.platform.api.commands;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import java.util.Set;
 
 /**
- * For creating and updating roles. When updating the id is expected to be populated.
+ * Immutable command for creating or updating details of a role.
  */
-@XmlRootElement
 public class RoleCommand {
 
-	private Long id;
-	private String name;
-	private String description;
+	private final Long id;
+	private final String name;
+	private final String description;
+	private final String[] permissions;
 	
-	private String[] permissions;
+	private final Set<String> modifiedParameters;
 
-	public RoleCommand() {
-		//
-	}
-
-	public RoleCommand(final String name, final String description, final String[] permissionIds) {
+	public RoleCommand(Set<String> modifiedParameters, final Long id, final String name, final String description, final String[] permissionIds) {
+		this.modifiedParameters = modifiedParameters;
+		this.id = id;
 		this.name = name;
 		this.description = description;
 		this.permissions = permissionIds;
-	}
-
-	public String getName() {
-		return this.name;
-	}
-
-	public void setName(final String name) {
-		this.name = name;
-	}
-
-	public String getDescription() {
-		return this.description;
-	}
-
-	public void setDescription(final String description) {
-		this.description = description;
 	}
 
 	public Long getId() {
 		return id;
 	}
 
-	public void setId(Long id) {
-		this.id = id;
+	public String getName() {
+		return name;
+	}
+
+	public String getDescription() {
+		return description;
 	}
 
 	public String[] getPermissions() {
 		return permissions;
 	}
 
-	public void setPermissions(String[] permissions) {
-		this.permissions = permissions;
+	public Set<String> getModifiedParameters() {
+		return modifiedParameters;
 	}
 }

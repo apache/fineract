@@ -25,7 +25,6 @@ public class LoanProductCommandValidator {
 		baseDataValidator.reset().parameter("id").value(command.getId()).notNull();
 		baseDataValidator.reset().parameter("name").value(command.getName()).ignoreIfNull().notBlank();
 		baseDataValidator.reset().parameter("description").value(command.getDescription()).ignoreIfNull().notExceedingLengthOf(500);
-		baseDataValidator.reset().parameter("externalId").value(command.getExternalId()).ignoreIfNull().notExceedingLengthOf(100);
 		baseDataValidator.reset().parameter("currencyCode").value(command.getCurrencyCode()).ignoreIfNull().notBlank();
 		baseDataValidator.reset().parameter("digitsAfterDecimal").value(command.getDigitsAfterDecimal()).ignoreIfNull().notNull().inMinMaxRange(0, 6);
 		
@@ -44,7 +43,7 @@ public class LoanProductCommandValidator {
 		baseDataValidator.reset().parameter("interestType").value(command.getInterestType()).ignoreIfNull().notNull().inMinMaxRange(0, 1);
 		baseDataValidator.reset().parameter("interestCalculationPeriodType").value(command.getInterestCalculationPeriodType()).ignoreIfNull().notNull().inMinMaxRange(0, 1);
 		
-		baseDataValidator.reset().anyOfNotNull(command.getFundId(), command.getName(), command.getDescription(), command.getExternalId(), command.getCurrencyCode(), command.getDigitsAfterDecimal(),
+		baseDataValidator.reset().anyOfNotNull(command.getFundId(), command.getName(), command.getDescription(), command.getCurrencyCode(), command.getDigitsAfterDecimal(),
 				command.getPrincipal(), command.getInArrearsTolerance(), command.getRepaymentFrequencyType(), command.getRepaymentEvery(), command.getNumberOfRepayments(),
 				command.getInterestRatePerPeriod(), command.getInterestRateFrequencyType(), command.getAmortizationType(), command.getInterestType(), command.getInterestCalculationPeriodType());
 		
@@ -61,7 +60,6 @@ public class LoanProductCommandValidator {
 		
 		baseDataValidator.reset().parameter("name").value(command.getName()).notBlank();
 		baseDataValidator.reset().parameter("description").value(command.getDescription()).notExceedingLengthOf(500);
-		baseDataValidator.reset().parameter("externalId").value(command.getExternalId()).notExceedingLengthOf(100);
 		baseDataValidator.reset().parameter("currencyCode").value(command.getCurrencyCode()).notBlank();
 		baseDataValidator.reset().parameter("digitsAfterDecimal").value(command.getDigitsAfterDecimal()).notNull().inMinMaxRange(0, 6);
 		

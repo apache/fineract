@@ -98,28 +98,35 @@ public class Office extends AbstractAuditableCustom<AppUser, Long> {
         return this.parent == null;
     }
 
-
 	public void update(final OfficeCommand command) {
-		if (StringUtils.isNotBlank(command.getName())) {
-			this.name = command.getName().trim();
+		
+		if (command.isNameChanged()) {
+			this.name = StringUtils.defaultIfEmpty(command.getName(), null);
 		}
 		
-		if (command.getExternalId() != null) {
-			this.externalId = StringUtils.defaultIfEmpty(command.getExternalId().trim(), null);
+		if (command.isExternalIdChanged()) {
+			this.externalId = StringUtils.defaultIfEmpty(command.getExternalId(), null);
 		}
 		
-		if (command.getOpeningDate() != null) {
-			this.openingDate = command.getOpeningLocalDate().toDate();
+		if (command.isOpeningDateChanged()) {
+			if (command.getOpeningDate() != null) {
+				this.openingDate = command.getOpeningDate().toDate();
+			} else {
+				this.openingDate = null;
+			}
 		}
 	}
 	
-	public void update(Office newParent) {
+	public void update(final Office newParent) {
+		
 		if (this.parent == null) {
 			throw new RootOfficeParentCannotBeUpdated();
 		}
+		
 		if (this.identifiedBy(newParent.getId())) {
 			throw new CannotUpdateOfficeWithParentOfficeSameAsSelf(this.getId(), newParent.getId());
 		}
+		
 		this.parent = newParent;
 		generateHierarchy();
 	}
