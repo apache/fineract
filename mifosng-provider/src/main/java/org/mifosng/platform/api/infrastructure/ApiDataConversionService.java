@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.Locale;
 
 import org.joda.time.LocalDate;
+import org.mifosng.platform.api.commands.LoanProductCommand;
 
 public interface ApiDataConversionService {
 
@@ -18,4 +19,6 @@ public interface ApiDataConversionService {
 	Locale localeFromString(String locale);
 	
 	Locale localeFrom(String languageCode, String courntryCode, String variantCode);
+
+	LoanProductCommand convertJsonToCommand(Long productId, String jsonRequestBody);
 }

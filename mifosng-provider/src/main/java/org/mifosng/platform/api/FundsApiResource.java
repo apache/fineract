@@ -1,6 +1,8 @@
 package org.mifosng.platform.api;
 
+import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.Map;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -23,6 +25,9 @@ import org.mifosng.platform.fund.service.FundWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 @Path("/funds")
 @Component
@@ -53,9 +58,25 @@ public class FundsApiResource {
 	}
 
 	@POST
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public Response createFund(final FundCommand command) {
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
+	public Response createFund(final String jsonRequestBody) {
+		
+		Gson gson = new Gson();
+		Type typeOfMap = new TypeToken<Map<String, String>>(){}.getType();
+	    Map<String, String> requestMap = gson.fromJson(jsonRequestBody, typeOfMap);
+	    
+	    String name = null;
+	    if (requestMap.containsKey("name")) {
+	    	name = requestMap.get("name");
+	    }
+		
+	    String externalId = null;
+	    if (requestMap.containsKey("externalId")) {
+	    	externalId = requestMap.get("externalId");
+	    }
+	    
+		FundCommand command = new FundCommand(name, externalId);
 
 		Long fundId = this.writePlatformService.createFund(command);
 
@@ -77,10 +98,25 @@ public class FundsApiResource {
 
 	@PUT
 	@Path("{fundId}")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public Response updateFund(@PathParam("fundId") final Long fundId, final FundCommand command) {
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
+	public Response updateFund(@PathParam("fundId") final Long fundId, final String jsonRequestBody) {
 
+		Gson gson = new Gson();
+		Type typeOfMap = new TypeToken<Map<String, String>>(){}.getType();
+	    Map<String, String> requestMap = gson.fromJson(jsonRequestBody, typeOfMap);
+	    
+	    String name = null;
+	    if (requestMap.containsKey("name")) {
+	    	name = requestMap.get("name");
+	    }
+		
+	    String externalId = null;
+	    if (requestMap.containsKey("externalId")) {
+	    	externalId = requestMap.get("externalId");
+	    }
+	    
+		FundCommand command = new FundCommand(name, externalId);
 		command.setId(fundId);
 
 		Long entityId = this.writePlatformService.updateFund(command);

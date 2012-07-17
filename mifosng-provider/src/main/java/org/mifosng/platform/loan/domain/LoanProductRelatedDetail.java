@@ -171,39 +171,50 @@ public class LoanProductRelatedDetail implements
 		return interestRebateAllowed;
 	}
 
-	public void update(LoanProductCommand command) {
+	public void update(final LoanProductCommand command) {
 		
-		if (command.getCurrencyCode() != null && command.getDigitsAfterDecimal() != null) {
-			this.currency = new MonetaryCurrency(command.getCurrencyCode(), command.getDigitsAfterDecimalValue());
+		Integer digitsAfterDecimalChanged = this.currency.getDigitsAfterDecimal();
+		if (command.isDigitsAfterDecimalChanged()) {
+			digitsAfterDecimalChanged = command.getDigitsAfterDecimal();
 		}
-		if (command.getPrincipal() != null) {
-			this.principal = command.getPrincipalValue();
+		
+		String currencyCodeChanged = this.currency.getCode();
+		if (command.isCurrencyCodeChanged()) {
+			currencyCodeChanged = command.getCurrencyCode();
 		}
-		if (command.getRepaymentEvery() != null) {
-			this.repayEvery = command.getRepaymentEveryValue();
+		
+		if (command.isDigitsAfterDecimalChanged() || command.isCurrencyCodeChanged()) {
+			this.currency = new MonetaryCurrency(currencyCodeChanged, digitsAfterDecimalChanged);
 		}
-		if (command.getRepaymentFrequencyType() != null) {
+		
+		if (command.isPrincipalChanged()) {
+			this.principal = command.getPrincipal();
+		}
+		if (command.isRepaymentEveryChanged()) {
+			this.repayEvery = command.getRepaymentEvery();
+		}
+		if (command.isRepaymentFrequencyTypeChanged()) {
 			this.repaymentPeriodFrequencyType = PeriodFrequencyType.fromInt(command.getRepaymentFrequencyType());
 		}
-		if (command.getNumberOfRepayments() != null) {
-			this.numberOfRepayments = command.getNumberOfRepaymentsValue();
+		if (command.isNumberOfRepaymentsChanged()) {
+			this.numberOfRepayments = command.getNumberOfRepayments();
 		}
-		if (command.getAmortizationType() != null) {
+		if (command.isAmortizationTypeChanged()) {
 			this.amortizationMethod = AmortizationMethod.fromInt(command.getAmortizationType());
 		}
-		if (command.getInArrearsToleranceValue() != null) {
-			this.inArrearsTolerance = command.getInArrearsToleranceValue();
+		if (command.isInArrearsToleranceChanged()) {
+			this.inArrearsTolerance = command.getInArrearsTolerance();
 		}
-		if (command.getInterestRatePerPeriod() != null) {
-			this.nominalInterestRatePerPeriod = command.getInterestRatePerPeriodValue();
+		if (command.isInterestRatePerPeriodChanged()) {
+			this.nominalInterestRatePerPeriod = command.getInterestRatePerPeriod();
 		}
-		if (command.getInterestRateFrequencyType() != null) {
+		if (command.isInterestRateFrequencyTypeChanged()) {
 			this.interestPeriodFrequencyType = PeriodFrequencyType.fromInt(command.getInterestRateFrequencyType());
 		}
-		if (command.getInterestType() != null) {
+		if (command.isInterestTypeChanged()) {
 			this.interestMethod = InterestMethod.fromInt(command.getInterestType());
 		}
-		if (command.getInterestCalculationPeriodType() != null) {
+		if (command.isInterestCalculationPeriodTypeChanged()) {
 			this.interestCalculationPeriodMethod = InterestCalculationPeriodMethod.fromInt(command.getInterestCalculationPeriodType());
 		}
 	}

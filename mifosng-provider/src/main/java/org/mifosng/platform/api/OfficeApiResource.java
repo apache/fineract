@@ -1,6 +1,8 @@
 package org.mifosng.platform.api;
 
+import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.Map;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -26,6 +28,9 @@ import org.mifosng.platform.organisation.service.OfficeWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 @Path("/offices")
 @Component
@@ -76,14 +81,42 @@ public class OfficeApiResource {
 	}
 
 	@POST
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public Response createOffice(final OfficeCommand command) {
-
-		LocalDate openingLocalDate = apiDataConversionService.convertFrom(
-				command.getOpeningDate(), "openingDate",
-				command.getDateFormat());
-		command.setOpeningLocalDate(openingLocalDate);
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
+	public Response createOffice(final String jsonRequestBody) {
+		
+		Gson gson = new Gson();
+		Type typeOfMap = new TypeToken<Map<String, String>>(){}.getType();
+	    Map<String, String> requestMap = gson.fromJson(jsonRequestBody, typeOfMap);
+	    
+	    String name = null;
+	    if (requestMap.containsKey("name")) {
+	    	name = requestMap.get("name");
+	    }
+		
+	    String externalId = null;
+	    if (requestMap.containsKey("externalId")) {
+	    	externalId = requestMap.get("externalId");
+	    }
+	    
+	    Long parentId = null;
+	    if (requestMap.containsKey("parentId")) {
+	    	parentId = Long.valueOf(requestMap.get("parentId"));
+	    }
+	    
+	    String openingDate = null;
+	    if (requestMap.containsKey("openingDate")) {
+	    	openingDate = requestMap.get("openingDate");
+	    }
+	    
+	    String dateFormat = null;
+	    if (requestMap.containsKey("dateFormat")) {
+	    	dateFormat = requestMap.get("dateFormat");
+	    }
+	    
+	    LocalDate openingLocalDate = apiDataConversionService.convertFrom(openingDate, "openingDate", dateFormat);
+	    
+		OfficeCommand command = new OfficeCommand(name, externalId, parentId, openingLocalDate);
 
 		Long officeId = this.writePlatformService.createOffice(command);
 
@@ -112,15 +145,41 @@ public class OfficeApiResource {
 	@Path("{officeId}")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public Response updateOffice(@PathParam("officeId") final Long officeId,
-			final OfficeCommand command) {
-
-		LocalDate openingLocalDate = apiDataConversionService.convertFrom(
-				command.getOpeningDate(), "openingDate",
-				command.getDateFormat());
-		command.setOpeningLocalDate(openingLocalDate);
-		command.setId(officeId);
-
+	public Response updateOffice(@PathParam("officeId") final Long officeId, final String jsonRequestBody) {
+		
+		Gson gson = new Gson();
+		Type typeOfMap = new TypeToken<Map<String, String>>(){}.getType();
+	    Map<String, String> requestMap = gson.fromJson(jsonRequestBody, typeOfMap);
+	    
+	    String name = null;
+	    if (requestMap.containsKey("name")) {
+	    	name = requestMap.get("name");
+	    }
+		
+	    String externalId = null;
+	    if (requestMap.containsKey("externalId")) {
+	    	externalId = requestMap.get("externalId");
+	    }
+	    
+	    Long parentId = null;
+	    if (requestMap.containsKey("parentId")) {
+	    	parentId = Long.valueOf(requestMap.get("parentId"));
+	    }
+	    
+	    String openingDate = null;
+	    if (requestMap.containsKey("openingDate")) {
+	    	openingDate = requestMap.get("openingDate");
+	    }
+	    
+	    String dateFormat = null;
+	    if (requestMap.containsKey("dateFormat")) {
+	    	dateFormat = requestMap.get("dateFormat");
+	    }
+	    
+	    LocalDate openingLocalDate = apiDataConversionService.convertFrom(openingDate, "openingDate", dateFormat);
+	    
+		OfficeCommand command = new OfficeCommand(officeId, name, externalId, parentId, openingLocalDate);
+		
 		Long entityId = this.writePlatformService.updateOffice(command);
 
 		return Response.ok().entity(new EntityIdentifier(entityId)).build();

@@ -59,18 +59,18 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
 		PeriodFrequencyType interestFrequencyType = PeriodFrequencyType
 				.fromInt(command.getInterestRateFrequencyType());
 
-		MonetaryCurrency currency = new MonetaryCurrency(command.getCurrencyCode(), command.getDigitsAfterDecimalValue());
+		MonetaryCurrency currency = new MonetaryCurrency(command.getCurrencyCode(), command.getDigitsAfterDecimal());
 		
-		BigDecimal annualInterestRate = this.aprCalculator.calculateFrom(interestFrequencyType, command.getInterestRatePerPeriodValue());
+		BigDecimal annualInterestRate = this.aprCalculator.calculateFrom(interestFrequencyType, command.getInterestRatePerPeriod());
 		
 		// associating fund with loan product at creation is optional for now.
 		Fund fund = findFundByIdIfProvided(command.getFundId());
 		
 		LoanProduct loanproduct = new LoanProduct(fund, command.getName(), command.getDescription(), 
-				currency, command.getPrincipalValue(), 
-				command.getInterestRatePerPeriodValue(), interestFrequencyType, annualInterestRate, interestMethod, interestCalculationPeriodMethod,
-				command.getRepaymentEveryValue(), repaymentFrequencyType, command.getNumberOfRepaymentsValue(), 
-				amortizationMethod, command.getInArrearsToleranceValue());
+				currency, command.getPrincipal(), 
+				command.getInterestRatePerPeriod(), interestFrequencyType, annualInterestRate, interestMethod, interestCalculationPeriodMethod,
+				command.getRepaymentEvery(), repaymentFrequencyType, command.getNumberOfRepayments(), 
+				amortizationMethod, command.getInArrearsTolerance());
 		 
 		this.loanProductRepository.save(loanproduct);
 
@@ -90,7 +90,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
 
 	@Transactional
 	@Override
-	public EntityIdentifier updateLoanProduct(LoanProductCommand command) {
+	public EntityIdentifier updateLoanProduct(final LoanProductCommand command) {
 		
 		this.context.authenticatedUser();
 		

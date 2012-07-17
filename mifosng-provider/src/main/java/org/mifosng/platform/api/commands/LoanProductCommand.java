@@ -1,236 +1,189 @@
 package org.mifosng.platform.api.commands;
 
 import java.math.BigDecimal;
+import java.util.Set;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
-@XmlRootElement
+/**
+ * Immutable command for creating or updating details of a loan product.
+ */
 public class LoanProductCommand {
 
-	private Long id;
-	private String name;
-	private String description;
-	private String externalId;
+	private final Long id;
+	private final String name;
+	private final String description;
+	private final String externalId;
 	
-	private Long fundId;
+	private final Long fundId;
 	
-	private String locale;
-	private String currencyCode;
-	private String digitsAfterDecimal;
-	private Integer digitsAfterDecimalValue;
-	private BigDecimal principalValue;
-	private String principal;
-	private BigDecimal inArrearsToleranceValue;
-	private String inArrearsTolerance;
+	private final String currencyCode;
+	private final Integer digitsAfterDecimal;
+	private final BigDecimal principal;
+	private final BigDecimal inArrearsTolerance;
 	
-	private String numberOfRepayments;
-	private Integer numberOfRepaymentsValue;
-	private String repaymentEvery;
-	private Integer repaymentEveryValue;
+	private final Integer numberOfRepayments;
+	private final Integer repaymentEvery;
 	
-	private String interestRatePerPeriod;
-	private BigDecimal interestRatePerPeriodValue;
+	private final BigDecimal interestRatePerPeriod;
 
-	private Integer repaymentFrequencyType;
-	private Integer interestRateFrequencyType;
-	private Integer amortizationType;
-	private Integer interestType;
-	private Integer interestCalculationPeriodType;
+	private final Integer repaymentFrequencyType;
+	private final Integer interestRateFrequencyType;
+	private final Integer amortizationType;
+	private final Integer interestType;
+	private final Integer interestCalculationPeriodType;
 	
-	protected LoanProductCommand() {
-		//
+	private final Set<String> modifiedParameters;
+	
+	public LoanProductCommand(Set<String> modifiedParameters, final Long id, final String name, final String description, final String externalId, final Long fundId, 
+			final String currencyCode, final Integer digitsAfterDecimal, 
+			final BigDecimal principal, final BigDecimal inArrearsTolerance, final Integer numberOfRepayments, 
+			final Integer repaymentEvery, final BigDecimal interestRatePerPeriod,
+			final Integer repaymentFrequencyType, final Integer interestRateFrequencyType, final Integer amortizationType, final Integer interestType, 
+			final Integer interestCalculationPeriodType) {
+		this.modifiedParameters = modifiedParameters;
+		this.id = id;
+		this.name = name;
+		this.description = description;
+		this.externalId = externalId;
+		this.fundId = fundId;
+		this.currencyCode = currencyCode;
+		this.digitsAfterDecimal = digitsAfterDecimal;
+		this.principal = principal;
+		this.inArrearsTolerance = inArrearsTolerance;
+		this.numberOfRepayments = numberOfRepayments;
+		this.repaymentEvery = repaymentEvery;
+		this.interestRatePerPeriod = interestRatePerPeriod;
+		this.repaymentFrequencyType = repaymentFrequencyType;
+		this.interestRateFrequencyType = interestRateFrequencyType;
+		this.amortizationType = amortizationType;
+		this.interestType = interestType;
+		this.interestCalculationPeriodType = interestCalculationPeriodType;
 	}
 
 	public Long getId() {
 		return id;
 	}
 
-	public void setId(Long id) {
-		this.id = id;
-	}
-
 	public String getName() {
 		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
 	}
 
 	public String getDescription() {
 		return description;
 	}
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
 	public String getExternalId() {
 		return externalId;
-	}
-
-	public void setExternalId(String externalId) {
-		this.externalId = externalId;
-	}
-
-	public String getCurrencyCode() {
-		return currencyCode;
-	}
-
-	public void setCurrencyCode(String currencyCode) {
-		this.currencyCode = currencyCode;
-	}
-
-	public String getLocale() {
-		return locale;
-	}
-
-	public void setLocale(String locale) {
-		this.locale = locale;
-	}
-
-	public String getDigitsAfterDecimal() {
-		return digitsAfterDecimal;
-	}
-
-	public void setDigitsAfterDecimal(String digitsAfterDecimal) {
-		this.digitsAfterDecimal = digitsAfterDecimal;
-	}
-
-	public Integer getDigitsAfterDecimalValue() {
-		return digitsAfterDecimalValue;
-	}
-
-	public void setDigitsAfterDecimalValue(Integer digitsAfterDecimalValue) {
-		this.digitsAfterDecimalValue = digitsAfterDecimalValue;
-	}
-
-	public BigDecimal getPrincipalValue() {
-		return principalValue;
-	}
-
-	public void setPrincipalValue(BigDecimal principalValue) {
-		this.principalValue = principalValue;
-	}
-
-	public String getPrincipal() {
-		return principal;
-	}
-
-	public void setPrincipal(String principal) {
-		this.principal = principal;
-	}
-
-	public BigDecimal getInArrearsToleranceValue() {
-		return inArrearsToleranceValue;
-	}
-
-	public void setInArrearsToleranceValue(BigDecimal inArrearsToleranceValue) {
-		this.inArrearsToleranceValue = inArrearsToleranceValue;
-	}
-
-	public String getInArrearsTolerance() {
-		return inArrearsTolerance;
-	}
-
-	public void setInArrearsTolerance(String inArrearsTolerance) {
-		this.inArrearsTolerance = inArrearsTolerance;
-	}
-
-	public String getNumberOfRepayments() {
-		return numberOfRepayments;
-	}
-
-	public void setNumberOfRepayments(String numberOfRepayments) {
-		this.numberOfRepayments = numberOfRepayments;
-	}
-
-	public Integer getNumberOfRepaymentsValue() {
-		return numberOfRepaymentsValue;
-	}
-
-	public void setNumberOfRepaymentsValue(Integer numberOfRepaymentsValue) {
-		this.numberOfRepaymentsValue = numberOfRepaymentsValue;
-	}
-
-	public String getRepaymentEvery() {
-		return repaymentEvery;
-	}
-
-	public void setRepaymentEvery(String repaymentEvery) {
-		this.repaymentEvery = repaymentEvery;
-	}
-
-	public Integer getRepaymentEveryValue() {
-		return repaymentEveryValue;
-	}
-
-	public void setRepaymentEveryValue(Integer repaymentEveryValue) {
-		this.repaymentEveryValue = repaymentEveryValue;
-	}
-
-	public String getInterestRatePerPeriod() {
-		return interestRatePerPeriod;
-	}
-
-	public void setInterestRatePerPeriod(String interestRatePerPeriod) {
-		this.interestRatePerPeriod = interestRatePerPeriod;
-	}
-
-	public BigDecimal getInterestRatePerPeriodValue() {
-		return interestRatePerPeriodValue;
-	}
-
-	public void setInterestRatePerPeriodValue(BigDecimal interestRatePerPeriodValue) {
-		this.interestRatePerPeriodValue = interestRatePerPeriodValue;
-	}
-
-	public Integer getRepaymentFrequencyType() {
-		return repaymentFrequencyType;
-	}
-
-	public void setRepaymentFrequencyType(Integer repaymentFrequencyType) {
-		this.repaymentFrequencyType = repaymentFrequencyType;
-	}
-
-	public Integer getInterestRateFrequencyType() {
-		return interestRateFrequencyType;
-	}
-
-	public void setInterestRateFrequencyType(Integer interestRateFrequencyType) {
-		this.interestRateFrequencyType = interestRateFrequencyType;
-	}
-
-	public Integer getAmortizationType() {
-		return amortizationType;
-	}
-
-	public void setAmortizationType(Integer amortizationType) {
-		this.amortizationType = amortizationType;
-	}
-
-	public Integer getInterestType() {
-		return interestType;
-	}
-
-	public void setInterestType(Integer interestType) {
-		this.interestType = interestType;
-	}
-
-	public Integer getInterestCalculationPeriodType() {
-		return interestCalculationPeriodType;
-	}
-
-	public void setInterestCalculationPeriodType(
-			Integer interestCalculationPeriodType) {
-		this.interestCalculationPeriodType = interestCalculationPeriodType;
 	}
 
 	public Long getFundId() {
 		return fundId;
 	}
 
-	public void setFundId(Long fundId) {
-		this.fundId = fundId;
+	public String getCurrencyCode() {
+		return currencyCode;
+	}
+
+	public Integer getDigitsAfterDecimal() {
+		return digitsAfterDecimal;
+	}
+
+	public BigDecimal getPrincipal() {
+		return principal;
+	}
+
+	public BigDecimal getInArrearsTolerance() {
+		return inArrearsTolerance;
+	}
+
+	public Integer getNumberOfRepayments() {
+		return numberOfRepayments;
+	}
+
+	public Integer getRepaymentEvery() {
+		return repaymentEvery;
+	}
+
+	public BigDecimal getInterestRatePerPeriod() {
+		return interestRatePerPeriod;
+	}
+
+	public Integer getRepaymentFrequencyType() {
+		return repaymentFrequencyType;
+	}
+
+	public Integer getInterestRateFrequencyType() {
+		return interestRateFrequencyType;
+	}
+
+	public Integer getAmortizationType() {
+		return amortizationType;
+	}
+
+	public Integer getInterestType() {
+		return interestType;
+	}
+
+	public Integer getInterestCalculationPeriodType() {
+		return interestCalculationPeriodType;
+	}
+
+	public boolean isNameChanged() {
+		return this.modifiedParameters.contains("name");
+	}
+
+	public boolean isDescriptionChanged() {
+		return this.modifiedParameters.contains("description");
+	}
+
+	public boolean isFundChanged() {
+		return this.modifiedParameters.contains("fundId");
+	}
+
+	public boolean isCurrencyCodeChanged() {
+		return this.modifiedParameters.contains("currencyCode");
+	}
+
+	public boolean isDigitsAfterDecimalChanged() {
+		return this.modifiedParameters.contains("digitsAfterDecimal");
+	}
+
+	public boolean isPrincipalChanged() {
+		return this.modifiedParameters.contains("principal");
+	}
+
+	public boolean isInArrearsToleranceChanged() {
+		return this.modifiedParameters.contains("inArrearsTolerance");
+	}
+	
+	public boolean isNumberOfRepaymentsChanged() {
+		return this.modifiedParameters.contains("numberOfRepayments");
+	}
+	
+	public boolean isRepaymentEveryChanged() {
+		return this.modifiedParameters.contains("repaymentEvery");
+	}
+
+	public boolean isRepaymentFrequencyTypeChanged() {
+		return this.modifiedParameters.contains("repaymentFrequencyType");
+	}
+
+	public boolean isAmortizationTypeChanged() {
+		return this.modifiedParameters.contains("amortizationType");
+	}
+
+	public boolean isInterestTypeChanged() {
+		return this.modifiedParameters.contains("interestType");
+	}
+	
+	public boolean isInterestRatePerPeriodChanged() {
+		return this.modifiedParameters.contains("interestRatePerPeriod");
+	}
+
+	public boolean isInterestRateFrequencyTypeChanged() {
+		return this.modifiedParameters.contains("interestRateFrequencyType");
+	}
+
+	public boolean isInterestCalculationPeriodTypeChanged() {
+		return this.modifiedParameters.contains("interestCalculationPeriodType");
 	}
 }

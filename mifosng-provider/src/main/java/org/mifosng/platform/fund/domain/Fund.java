@@ -5,6 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.apache.commons.lang.StringUtils;
 import org.mifosng.platform.api.commands.FundCommand;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
 import org.mifosng.platform.user.domain.AppUser;
@@ -35,9 +36,13 @@ public class Fund extends AbstractAuditableCustom<AppUser, Long> {
 		this.name = fundName;
 	}
 
-	public void update(FundCommand command) {
-		if (command.getName() != null) {
+	public void update(final FundCommand command) {
+		if (StringUtils.isNotBlank(command.getName())) {
 			this.name = command.getName();
+		}
+		
+		if (command.getExternalId() != null) {
+			this.externalId = StringUtils.defaultIfEmpty(command.getExternalId(), null);
 		}
 	}
 }

@@ -99,14 +99,13 @@ public class Office extends AbstractAuditableCustom<AppUser, Long> {
     }
 
 
-	public void update(OfficeCommand command) {
-		// ignore nulls when updating
-		if (command.getName() != null) {
+	public void update(final OfficeCommand command) {
+		if (StringUtils.isNotBlank(command.getName())) {
 			this.name = command.getName().trim();
 		}
 		
 		if (command.getExternalId() != null) {
-			this.externalId = command.getExternalId().trim();
+			this.externalId = StringUtils.defaultIfEmpty(command.getExternalId().trim(), null);
 		}
 		
 		if (command.getOpeningDate() != null) {

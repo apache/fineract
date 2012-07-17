@@ -27,17 +27,17 @@ public class LoanProductCommandValidator {
 		baseDataValidator.reset().parameter("description").value(command.getDescription()).ignoreIfNull().notExceedingLengthOf(500);
 		baseDataValidator.reset().parameter("externalId").value(command.getExternalId()).ignoreIfNull().notExceedingLengthOf(100);
 		baseDataValidator.reset().parameter("currencyCode").value(command.getCurrencyCode()).ignoreIfNull().notBlank();
-		baseDataValidator.reset().parameter("digitsAfterDecimal").value(command.getDigitsAfterDecimalValue()).ignoreIfNull().notNull().inMinMaxRange(0, 6);
+		baseDataValidator.reset().parameter("digitsAfterDecimal").value(command.getDigitsAfterDecimal()).ignoreIfNull().notNull().inMinMaxRange(0, 6);
 		
-		baseDataValidator.reset().parameter("principal").value(command.getPrincipalValue()).ignoreIfNull().notNull().positiveAmount();
-		baseDataValidator.reset().parameter("inArrearsTolerance").value(command.getInArrearsToleranceValue()).ignoreIfNull().notNull().zeroOrPositiveAmount();
+		baseDataValidator.reset().parameter("principal").value(command.getPrincipal()).ignoreIfNull().notNull().positiveAmount();
+		baseDataValidator.reset().parameter("inArrearsTolerance").value(command.getInArrearsTolerance()).ignoreIfNull().notNull().zeroOrPositiveAmount();
 		
 		baseDataValidator.reset().parameter("repaymentFrequencyType").value(command.getRepaymentFrequencyType()).ignoreIfNull().notNull().inMinMaxRange(0, 3);
 		
-		baseDataValidator.reset().parameter("repaymentEvery").value(command.getRepaymentEveryValue()).ignoreIfNull().notNull().greaterThanZero();
-		baseDataValidator.reset().parameter("numberOfRepayments").value(command.getNumberOfRepaymentsValue()).ignoreIfNull().notNull().greaterThanZero();
+		baseDataValidator.reset().parameter("repaymentEvery").value(command.getRepaymentEvery()).ignoreIfNull().notNull().greaterThanZero();
+		baseDataValidator.reset().parameter("numberOfRepayments").value(command.getNumberOfRepayments()).ignoreIfNull().notNull().greaterThanZero();
 		
-		baseDataValidator.reset().parameter("interestRatePerPeriod").value(command.getInterestRatePerPeriodValue()).ignoreIfNull().notBlank();
+		baseDataValidator.reset().parameter("interestRatePerPeriod").value(command.getInterestRatePerPeriod()).ignoreIfNull().notBlank();
 		baseDataValidator.reset().parameter("interestRateFrequencyType").value(command.getInterestRateFrequencyType()).ignoreIfNull().notNull().inMinMaxRange(0, 3);
 		
 		baseDataValidator.reset().parameter("amortizationType").value(command.getAmortizationType()).ignoreIfNull().notNull().inMinMaxRange(0, 1);
@@ -63,16 +63,16 @@ public class LoanProductCommandValidator {
 		baseDataValidator.reset().parameter("description").value(command.getDescription()).notExceedingLengthOf(500);
 		baseDataValidator.reset().parameter("externalId").value(command.getExternalId()).notExceedingLengthOf(100);
 		baseDataValidator.reset().parameter("currencyCode").value(command.getCurrencyCode()).notBlank();
-		baseDataValidator.reset().parameter("digitsAfterDecimal").value(command.getDigitsAfterDecimalValue()).notNull().inMinMaxRange(0, 6);
+		baseDataValidator.reset().parameter("digitsAfterDecimal").value(command.getDigitsAfterDecimal()).notNull().inMinMaxRange(0, 6);
 		
-		baseDataValidator.reset().parameter("principal").value(command.getPrincipalValue()).notNull().positiveAmount();
-		baseDataValidator.reset().parameter("inArrearsTolerance").value(command.getInArrearsToleranceValue()).notNull().zeroOrPositiveAmount();
+		baseDataValidator.reset().parameter("principal").value(command.getPrincipal()).notNull().positiveAmount();
+		baseDataValidator.reset().parameter("inArrearsTolerance").value(command.getInArrearsTolerance()).notNull().zeroOrPositiveAmount();
 		
 		baseDataValidator.reset().parameter("repaymentFrequencyType").value(command.getRepaymentFrequencyType()).notNull().inMinMaxRange(0, 3);
-		baseDataValidator.reset().parameter("repaymentEvery").value(command.getRepaymentEveryValue()).notNull().greaterThanZero();
-		baseDataValidator.reset().parameter("numberOfRepayments").value(command.getNumberOfRepaymentsValue()).notNull().greaterThanZero();
+		baseDataValidator.reset().parameter("repaymentEvery").value(command.getRepaymentEvery()).notNull().greaterThanZero();
+		baseDataValidator.reset().parameter("numberOfRepayments").value(command.getNumberOfRepayments()).notNull().greaterThanZero();
 		
-		baseDataValidator.reset().parameter("interestRatePerPeriod").value(command.getInterestRatePerPeriodValue()).notNull();
+		baseDataValidator.reset().parameter("interestRatePerPeriod").value(command.getInterestRatePerPeriod()).notNull();
 		baseDataValidator.reset().parameter("interestRateFrequencyType").value(command.getInterestRateFrequencyType()).notNull().inMinMaxRange(0, 3);
 		
 		baseDataValidator.reset().parameter("amortizationType").value(command.getAmortizationType()).notNull().inMinMaxRange(0, 1);

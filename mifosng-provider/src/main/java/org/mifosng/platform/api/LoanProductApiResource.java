@@ -1,8 +1,6 @@
 package org.mifosng.platform.api;
 
-import java.math.BigDecimal;
 import java.util.Collection;
-import java.util.Locale;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -49,40 +47,23 @@ public class LoanProductApiResource {
 	private ApiJSONFormattingService jsonFormattingService;
 
 	@POST
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-	@Produces({ MediaType.APPLICATION_JSON })
-	public Response createLoanProduct(LoanProductCommand command) {
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
+	public Response createLoanProduct(final String jsonRequestBody) {
 		
-		Locale clientApplicationLocale = this.apiDataConversionService.localeFromString(command.getLocale());
+		final LoanProductCommand command = this.apiDataConversionService.convertJsonToCommand(null, jsonRequestBody);
 		
-		BigDecimal principalValue = this.apiDataConversionService.convertFrom(command.getPrincipal(), "principal", clientApplicationLocale);
-		BigDecimal inArrearsToleranceValue = this.apiDataConversionService.convertFrom(command.getInArrearsTolerance(), "inArrearsTolerance", clientApplicationLocale);
-		BigDecimal interestRatePerPeriodValue = this.apiDataConversionService.convertFrom(command.getInterestRatePerPeriod(),"interestRatePerPeriod", clientApplicationLocale);
-		
-		Integer digitsAfterDecimalValue = this.apiDataConversionService.convertToInteger(command.getDigitsAfterDecimal(), "digitsAfterDecimal", clientApplicationLocale);
-		Integer repaymentEveryValue = this.apiDataConversionService.convertToInteger(command.getRepaymentEvery(), "repaymentEvery", clientApplicationLocale);
-		Integer numberOfRepaymentsValue = this.apiDataConversionService.convertToInteger(command.getNumberOfRepayments(), "numberOfRepayments", clientApplicationLocale);
-		
-		command.setPrincipalValue(principalValue);
-		command.setInArrearsToleranceValue(inArrearsToleranceValue);
-		command.setInterestRatePerPeriodValue(interestRatePerPeriodValue);
-		command.setDigitsAfterDecimalValue(digitsAfterDecimalValue);
-		command.setRepaymentEveryValue(repaymentEveryValue);
-		command.setNumberOfRepaymentsValue(numberOfRepaymentsValue);
-
-		EntityIdentifier entityIdentifier = this.loanProductWritePlatformService
-				.createLoanProduct(command);
+		EntityIdentifier entityIdentifier = this.loanProductWritePlatformService.createLoanProduct(command);
 
 		return Response.ok().entity(entityIdentifier).build();
 	}
 
 	@GET
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrieveAllLoanProducts(@Context UriInfo uriInfo) {
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
+	public String retrieveAllLoanProducts(@Context final UriInfo uriInfo) {
 
-		Collection<LoanProductData> products = this.loanProductReadPlatformService
-				.retrieveAllLoanProducts();
+		Collection<LoanProductData> products = this.loanProductReadPlatformService.retrieveAllLoanProducts();
 
 		String selectedFields = "";
 		return this.jsonFormattingService.convertRequest(products, filterName,
@@ -96,12 +77,11 @@ public class LoanProductApiResource {
 	 */
 	@GET
 	@Path("template")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrieveNewLoanProductDetails(@Context UriInfo uriInfo) {
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
+	public String retrieveNewLoanProductDetails(@Context final UriInfo uriInfo) {
 
-		LoanProductData loanProduct = this.loanProductReadPlatformService
-				.retrieveNewLoanProductDetails();
+		LoanProductData loanProduct = this.loanProductReadPlatformService.retrieveNewLoanProductDetails();
 
 		String selectedFields = defaultFieldList + "," + allowedFieldList;
 		return this.jsonFormattingService.convertRequest(loanProduct,
@@ -111,14 +91,11 @@ public class LoanProductApiResource {
 
 	@GET
 	@Path("{productId}")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrieveLoanProductDetails(
-			@PathParam("productId") final Long productId,
-			@Context UriInfo uriInfo) {
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
+	public String retrieveLoanProductDetails(@PathParam("productId") final Long productId, final UriInfo uriInfo) {
 
-		LoanProductData loanProduct = this.loanProductReadPlatformService
-				.retrieveLoanProduct(productId);
+		LoanProductData loanProduct = this.loanProductReadPlatformService.retrieveLoanProduct(productId);
 
 		String selectedFields = "";
 		return this.jsonFormattingService.convertRequest(loanProduct,
@@ -128,28 +105,12 @@ public class LoanProductApiResource {
 
 	@PUT
 	@Path("{productId}")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-	@Produces({ MediaType.APPLICATION_JSON })
-	public Response updateLoanProduct(@PathParam("productId") final Long productId, final LoanProductCommand command) {
-
-		Locale clientApplicationLocale = this.apiDataConversionService.localeFromString(command.getLocale());
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
+	public Response updateLoanProduct(@PathParam("productId") final Long productId, final String jsonRequestBody) {
 		
-		BigDecimal principalValue = this.apiDataConversionService.convertFrom(command.getPrincipal(), "principal", clientApplicationLocale);
-		BigDecimal inArrearsToleranceValue = this.apiDataConversionService.convertFrom(command.getInArrearsTolerance(), "inArrearsTolerance", clientApplicationLocale);
-		BigDecimal interestRatePerPeriodValue = this.apiDataConversionService.convertFrom(command.getInterestRatePerPeriod(),"interestRatePerPeriod", clientApplicationLocale);
+		LoanProductCommand command = this.apiDataConversionService.convertJsonToCommand(productId, jsonRequestBody);
 		
-		Integer digitsAfterDecimalValue = this.apiDataConversionService.convertToInteger(command.getDigitsAfterDecimal(), "digitsAfterDecimal", clientApplicationLocale);
-		Integer repaymentEveryValue = this.apiDataConversionService.convertToInteger(command.getRepaymentEvery(), "repaymentEvery", clientApplicationLocale);
-		Integer numberOfRepaymentsValue = this.apiDataConversionService.convertToInteger(command.getNumberOfRepayments(), "numberOfRepayments", clientApplicationLocale);
-		
-		command.setPrincipalValue(principalValue);
-		command.setInArrearsToleranceValue(inArrearsToleranceValue);
-		command.setInterestRatePerPeriodValue(interestRatePerPeriodValue);
-		command.setDigitsAfterDecimalValue(digitsAfterDecimalValue);
-		command.setRepaymentEveryValue(repaymentEveryValue);
-		command.setNumberOfRepaymentsValue(numberOfRepaymentsValue);
-
-		command.setId(productId);
 		EntityIdentifier entityIdentifier = this.loanProductWritePlatformService.updateLoanProduct(command);
 
 		return Response.ok().entity(entityIdentifier).build();
