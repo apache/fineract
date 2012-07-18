@@ -11,7 +11,9 @@ public class LoanBasicDetailsData {
 
 	private Long id;
 	private String externalId;
-	private FundData fund;
+	private Long fundId;
+	private String fundName;
+	private Long loanProductId;
 	private String loanProductName;
 
 	private LocalDate submittedOnDate;
@@ -22,11 +24,11 @@ public class LoanBasicDetailsData {
 	private LocalDate interestChargedFromDate;
 	private LocalDate closedOnDate;
 	private LocalDate expectedMaturityDate;
-	
+
 	private MoneyData principal;
 	private MoneyData inArrearsTolerance;
-	
-	private Integer numberOfRepayments;	
+
+	private Integer numberOfRepayments;
 	private Integer repaymentEvery;
 	private BigDecimal interestRatePerPeriod;
 	private BigDecimal annualInterestRate;
@@ -36,36 +38,42 @@ public class LoanBasicDetailsData {
 	private EnumOptionData amortizationType;
 	private EnumOptionData interestType;
 	private EnumOptionData interestCalculationPeriodType;
-	
+
+	private Integer lifeCycleStatusId;
 	private String lifeCycleStatusText;
 	private LocalDate lifeCycleStatusDate;
-	
+
 	protected LoanBasicDetailsData() {
 		//
 	}
-	
-	public LoanBasicDetailsData(Long id, String externalId,
-			String loanProductName, FundData fund, LocalDate closedOnDate,
-			LocalDate submittedOnDate, LocalDate approvedOnDate,
-			LocalDate expectedDisbursedOnLocalDate,
-			LocalDate acutalDisbursedOnLocalDate,
-			LocalDate expectedMaturityDate,
+
+	public LoanBasicDetailsData(Long id, String externalId, Long loanProductId,
+			String loanProductName, Long fundId, String fundName,
+			LocalDate closedOnDate, LocalDate submittedOnDate,
+			LocalDate approvedOnDate, LocalDate expectedDisbursementDate,
+			LocalDate actualDisbursementDate, LocalDate expectedMaturityDate,
 			LocalDate expectedFirstRepaymentOnDate,
-			LocalDate interestChargedFromDate, 
-			MoneyData principal, MoneyData inArrearsTolerance, Integer numberOfRepayments, Integer repaymentEvery, 
-			BigDecimal interestRatePerPeriod, BigDecimal annualInterestRate, 
-			EnumOptionData repaymentFrequencyType, EnumOptionData interestRateFrequencyType, EnumOptionData amortizationType, 
-			EnumOptionData interestType, EnumOptionData interestCalculationPeriodType, 
-			String lifeCycleStatusText, LocalDate lifeCycleStatusDate) {
+			LocalDate interestChargedFromDate, MoneyData principal,
+			MoneyData inArrearsTolerance, Integer numberOfRepayments,
+			Integer repaymentEvery, BigDecimal interestRatePerPeriod,
+			BigDecimal annualInterestRate,
+			EnumOptionData repaymentFrequencyType,
+			EnumOptionData interestRateFrequencyType,
+			EnumOptionData amortizationType, EnumOptionData interestType,
+			EnumOptionData interestCalculationPeriodType,
+			Integer lifeCycleStatusId, String lifeCycleStatusText,
+			LocalDate lifeCycleStatusDate) {
 		this.id = id;
 		this.externalId = externalId;
+		this.loanProductId = loanProductId;
 		this.loanProductName = loanProductName;
-		this.fund = fund;
+		this.fundId = fundId;
+		this.fundName = fundName;
 		this.closedOnDate = closedOnDate;
 		this.submittedOnDate = submittedOnDate;
 		this.approvedOnDate = approvedOnDate;
-		this.expectedDisbursementDate = expectedDisbursedOnLocalDate;
-		actualDisbursementDate = acutalDisbursedOnLocalDate;
+		this.expectedDisbursementDate = expectedDisbursementDate;
+		this.actualDisbursementDate = actualDisbursementDate;
 		this.expectedMaturityDate = expectedMaturityDate;
 		this.expectedFirstRepaymentOnDate = expectedFirstRepaymentOnDate;
 		this.interestChargedFromDate = interestChargedFromDate;
@@ -80,6 +88,7 @@ public class LoanBasicDetailsData {
 		this.amortizationType = amortizationType;
 		this.interestType = interestType;
 		this.interestCalculationPeriodType = interestCalculationPeriodType;
+		this.lifeCycleStatusId = lifeCycleStatusId;
 		this.lifeCycleStatusText = lifeCycleStatusText;
 		this.lifeCycleStatusDate = lifeCycleStatusDate;
 	}
@@ -91,81 +100,86 @@ public class LoanBasicDetailsData {
 	}
 
 	public int getMaxApprovedOnOffsetFromToday() {
-		
+
 		int offset = 0;
 		if (this.getApprovedOnDate() != null) {
-			offset =  Days.daysBetween(new DateTime(),
+			offset = Days.daysBetween(new DateTime(),
 					this.getApprovedOnDate().toDateMidnight().toDateTime())
 					.getDays();
 		}
-		
+
 		return offset;
 	}
 
 	public int getMaxDisbursedOnOffsetFromToday() {
-		
+
 		int offset = 0;
 		if (this.getActualDisbursementDate() != null) {
-			offset = Days.daysBetween(new DateTime(),
-					this.getActualDisbursementDate().toDateMidnight().toDateTime())
-					.getDays();
+			offset = Days.daysBetween(
+					new DateTime(),
+					this.getActualDisbursementDate().toDateMidnight()
+							.toDateTime()).getDays();
 		}
-		
+
 		return offset;
 	}
-	
+
 	public int getActualLoanTermInDays() {
-		
+
 		LocalDate dateToUse = getExpectedDisbursementDate();
 		if (getActualDisbursementDate() != null) {
 			dateToUse = getActualDisbursementDate();
 		}
-		
+
 		LocalDate closingDateToUse = getExpectedMaturityDate();
 		if (getClosedOnDate() != null) {
 			closingDateToUse = getClosedOnDate();
 		}
-		
-		return  Days.daysBetween(dateToUse.toDateMidnight().toDateTime(), closingDateToUse.toDateMidnight().toDateTime()).getDays();
+
+		return Days.daysBetween(dateToUse.toDateMidnight().toDateTime(),
+				closingDateToUse.toDateMidnight().toDateTime()).getDays();
 	}
-	
+
 	public int getActualLoanTermInMonths() {
-		
+
 		LocalDate dateToUse = getExpectedDisbursementDate();
 		if (getActualDisbursementDate() != null) {
 			dateToUse = getActualDisbursementDate();
 		}
-		
+
 		LocalDate closingDateToUse = getExpectedMaturityDate();
 		if (getClosedOnDate() != null) {
 			closingDateToUse = getClosedOnDate();
 		}
-		
-		return Months.monthsBetween(dateToUse.toDateMidnight().toDateTime(), closingDateToUse.toDateMidnight().toDateTime()).getMonths();
+
+		return Months.monthsBetween(dateToUse.toDateMidnight().toDateTime(),
+				closingDateToUse.toDateMidnight().toDateTime()).getMonths();
 	}
-	
+
 	public int getLoanTermInDays() {
-		
+
 		LocalDate dateToUse = getExpectedDisbursementDate();
 		if (getActualDisbursementDate() != null) {
 			dateToUse = getActualDisbursementDate();
 		}
-		
+
 		LocalDate closingDateToUse = getExpectedMaturityDate();
-		
-		return  Days.daysBetween(dateToUse.toDateMidnight().toDateTime(), closingDateToUse.toDateMidnight().toDateTime()).getDays();
+
+		return Days.daysBetween(dateToUse.toDateMidnight().toDateTime(),
+				closingDateToUse.toDateMidnight().toDateTime()).getDays();
 	}
-	
+
 	public int getLoanTermInMonths() {
-		
+
 		LocalDate dateToUse = getExpectedDisbursementDate();
 		if (getActualDisbursementDate() != null) {
 			dateToUse = getActualDisbursementDate();
 		}
-		
+
 		LocalDate closingDateToUse = getExpectedMaturityDate();
-		
-		return Months.monthsBetween(dateToUse.toDateMidnight().toDateTime(), closingDateToUse.toDateMidnight().toDateTime()).getMonths();
+
+		return Months.monthsBetween(dateToUse.toDateMidnight().toDateTime(),
+				closingDateToUse.toDateMidnight().toDateTime()).getMonths();
 	}
 
 	public Long getId() {
@@ -182,14 +196,6 @@ public class LoanBasicDetailsData {
 
 	public void setExternalId(String externalId) {
 		this.externalId = externalId;
-	}
-	
-	public FundData getFund() {
-		return fund;
-	}
-
-	public void setFund(FundData fund) {
-		this.fund = fund;
 	}
 
 	public String getLoanProductName() {
@@ -370,4 +376,37 @@ public class LoanBasicDetailsData {
 	public void setLifeCycleStatusDate(LocalDate lifeCycleStatusDate) {
 		this.lifeCycleStatusDate = lifeCycleStatusDate;
 	}
+
+	public Long getFundId() {
+		return fundId;
+	}
+
+	public void setFundId(Long fundId) {
+		this.fundId = fundId;
+	}
+
+	public String getFundName() {
+		return fundName;
+	}
+
+	public void setFundName(String fundName) {
+		this.fundName = fundName;
+	}
+
+	public Long getLoanProductId() {
+		return loanProductId;
+	}
+
+	public void setLoanProductId(Long loanProductId) {
+		this.loanProductId = loanProductId;
+	}
+
+	public Integer getLifeCycleStatusId() {
+		return lifeCycleStatusId;
+	}
+
+	public void setLifeCycleStatusId(Integer lifeCycleStatusId) {
+		this.lifeCycleStatusId = lifeCycleStatusId;
+	}
+
 }

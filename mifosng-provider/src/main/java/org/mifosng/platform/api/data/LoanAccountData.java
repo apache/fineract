@@ -11,7 +11,9 @@ public class LoanAccountData {
 
 	private Long id;
 	private String externalId;
-	private FundData fund;
+	private Long fundId;
+	private String fundName;
+	private Long loanProductId;
 	private String loanProductName;
 
 	private LocalDate submittedOnDate;
@@ -22,11 +24,11 @@ public class LoanAccountData {
 	private LocalDate interestChargedFromDate;
 	private LocalDate closedOnDate;
 	private LocalDate expectedMaturityDate;
-	
+
 	private MoneyData principal;
 	private MoneyData inArrearsTolerance;
-	
-	private Integer numberOfRepayments;	
+
+	private Integer numberOfRepayments;
 	private Integer repaymentEvery;
 	private BigDecimal interestRatePerPeriod;
 	private BigDecimal annualInterestRate;
@@ -36,18 +38,19 @@ public class LoanAccountData {
 	private EnumOptionData amortizationType;
 	private EnumOptionData interestType;
 	private EnumOptionData interestCalculationPeriodType;
-	
+
+	private Integer lifeCycleStatusId;
 	private String lifeCycleStatusText;
 	private LocalDate lifeCycleStatusDate;
-	
+
 	private LoanAccountSummaryData summary;
 	private LoanRepaymentScheduleData repaymentSchedule;
 	private List<LoanTransactionData> loanRepayments;
-	
+
 	private LoanPermissionData permissions;
-	
+
 	private LoanConvenienceData convenienceData;
-	
+
 	protected LoanAccountData() {
 		//
 	}
@@ -55,35 +58,47 @@ public class LoanAccountData {
 	public LoanAccountData(LoanBasicDetailsData basicDetails,
 			LoanAccountSummaryData summary,
 			LoanRepaymentScheduleData repaymentSchedule,
-			List<LoanTransactionData> loanRepayments, LoanPermissionData permissions) {
+			List<LoanTransactionData> loanRepayments,
+			LoanPermissionData permissions) {
 		this.summary = summary;
 		this.repaymentSchedule = repaymentSchedule;
 		this.loanRepayments = loanRepayments;
 		this.permissions = permissions;
-		
-		int maxSubmittedOnOffsetFromToday = basicDetails.getMaxSubmittedOnOffsetFromToday();
-		int maxApprovedOnOffsetFromToday = basicDetails.getMaxApprovedOnOffsetFromToday();
-		int maxDisbursedOnOffsetFromToday = basicDetails.getMaxDisbursedOnOffsetFromToday();
+
+		int maxSubmittedOnOffsetFromToday = basicDetails
+				.getMaxSubmittedOnOffsetFromToday();
+		int maxApprovedOnOffsetFromToday = basicDetails
+				.getMaxApprovedOnOffsetFromToday();
+		int maxDisbursedOnOffsetFromToday = basicDetails
+				.getMaxDisbursedOnOffsetFromToday();
 		int expectedLoanTermInDays = basicDetails.getLoanTermInDays();
 		int expectedLoanTermInMonths = basicDetails.getLoanTermInMonths();
 		int actualLoanTermInDays = basicDetails.getActualLoanTermInDays();
 		int actualLoanTermInMonths = basicDetails.getActualLoanTermInMonths();
-		
-		this.convenienceData = new LoanConvenienceData(maxSubmittedOnOffsetFromToday, maxApprovedOnOffsetFromToday, maxDisbursedOnOffsetFromToday, 
-				expectedLoanTermInDays, actualLoanTermInDays, expectedLoanTermInMonths, actualLoanTermInMonths);
-		
+
+		this.convenienceData = new LoanConvenienceData(
+				maxSubmittedOnOffsetFromToday, maxApprovedOnOffsetFromToday,
+				maxDisbursedOnOffsetFromToday, expectedLoanTermInDays,
+				actualLoanTermInDays, expectedLoanTermInMonths,
+				actualLoanTermInMonths);
+
 		this.id = basicDetails.getId();
 		this.externalId = basicDetails.getExternalId();
-		this.fund = basicDetails.getFund();
+		this.fundId = basicDetails.getFundId();
+		this.fundName = basicDetails.getFundName();
+		this.loanProductId = basicDetails.getLoanProductId();
 		this.loanProductName = basicDetails.getLoanProductName();
 		this.submittedOnDate = basicDetails.getSubmittedOnDate();
 		this.approvedOnDate = basicDetails.getApprovedOnDate();
-		this.expectedDisbursementDate = basicDetails.getExpectedDisbursementDate();
+		this.expectedDisbursementDate = basicDetails
+				.getExpectedDisbursementDate();
 		this.actualDisbursementDate = basicDetails.getActualDisbursementDate();
 		this.closedOnDate = basicDetails.getClosedOnDate();
 		this.expectedMaturityDate = basicDetails.getExpectedMaturityDate();
-		this.expectedFirstRepaymentOnDate = basicDetails.getExpectedFirstRepaymentOnDate();
-		this.interestChargedFromDate = basicDetails.getInterestChargedFromDate();
+		this.expectedFirstRepaymentOnDate = basicDetails
+				.getExpectedFirstRepaymentOnDate();
+		this.interestChargedFromDate = basicDetails
+				.getInterestChargedFromDate();
 		this.principal = basicDetails.getPrincipal();
 		this.inArrearsTolerance = basicDetails.getInArrearsTolerance();
 		this.numberOfRepayments = basicDetails.getNumberOfRepayments();
@@ -91,14 +106,17 @@ public class LoanAccountData {
 		this.interestRatePerPeriod = basicDetails.getInterestRatePerPeriod();
 		this.annualInterestRate = basicDetails.getAnnualInterestRate();
 		this.repaymentFrequencyType = basicDetails.getRepaymentFrequencyType();
-		this.interestRateFrequencyType = basicDetails.getInterestRateFrequencyType();
+		this.interestRateFrequencyType = basicDetails
+				.getInterestRateFrequencyType();
 		this.amortizationType = basicDetails.getAmortizationType();
 		this.interestType = basicDetails.getInterestType();
-		this.interestCalculationPeriodType = basicDetails.getInterestCalculationPeriodType();
+		this.interestCalculationPeriodType = basicDetails
+				.getInterestCalculationPeriodType();
 		this.lifeCycleStatusText = basicDetails.getLifeCycleStatusText();
+		this.lifeCycleStatusId = basicDetails.getLifeCycleStatusId();
 		this.lifeCycleStatusDate = basicDetails.getLifeCycleStatusDate();
 	}
-	
+
 	public LoanConvenienceData getConvenienceData() {
 		return convenienceData;
 	}
@@ -114,7 +132,7 @@ public class LoanAccountData {
 	public void setPermissions(LoanPermissionData permissions) {
 		this.permissions = permissions;
 	}
-	
+
 	public LoanAccountSummaryData getSummary() {
 		return summary;
 	}
@@ -153,14 +171,6 @@ public class LoanAccountData {
 
 	public void setExternalId(String externalId) {
 		this.externalId = externalId;
-	}
-	
-	public FundData getFund() {
-		return fund;
-	}
-
-	public void setFund(FundData fund) {
-		this.fund = fund;
 	}
 
 	public String getLoanProductName() {
@@ -341,4 +351,37 @@ public class LoanAccountData {
 	public void setLifeCycleStatusDate(LocalDate lifeCycleStatusDate) {
 		this.lifeCycleStatusDate = lifeCycleStatusDate;
 	}
+
+	public Long getFundId() {
+		return fundId;
+	}
+
+	public void setFundId(Long fundId) {
+		this.fundId = fundId;
+	}
+
+	public String getFundName() {
+		return fundName;
+	}
+
+	public void setFundName(String fundName) {
+		this.fundName = fundName;
+	}
+
+	public Long getLoanProductId() {
+		return loanProductId;
+	}
+
+	public void setLoanProductId(Long loanProductId) {
+		this.loanProductId = loanProductId;
+	}
+
+	public Integer getLifeCycleStatusId() {
+		return lifeCycleStatusId;
+	}
+
+	public void setLifeCycleStatusId(Integer lifeCycleStatusId) {
+		this.lifeCycleStatusId = lifeCycleStatusId;
+	}
+
 }

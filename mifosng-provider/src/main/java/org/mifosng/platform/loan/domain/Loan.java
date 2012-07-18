@@ -27,15 +27,6 @@ import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.DerivedLoanData;
-import org.mifosng.platform.api.data.EnumOptionData;
-import org.mifosng.platform.api.data.FundData;
-import org.mifosng.platform.api.data.LoanAccountData;
-import org.mifosng.platform.api.data.LoanAccountSummaryData;
-import org.mifosng.platform.api.data.LoanBasicDetailsData;
-import org.mifosng.platform.api.data.LoanPermissionData;
-import org.mifosng.platform.api.data.LoanRepaymentScheduleData;
-import org.mifosng.platform.api.data.LoanTransactionData;
-import org.mifosng.platform.api.data.MoneyData;
 import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.currency.domain.Money;
@@ -43,7 +34,6 @@ import org.mifosng.platform.exceptions.InvalidLoanStateTransitionException;
 import org.mifosng.platform.exceptions.InvalidLoanTransactionTypeException;
 import org.mifosng.platform.fund.domain.Fund;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
-import org.mifosng.platform.loanproduct.service.LoanEnumerations;
 import org.mifosng.platform.user.domain.AppUser;
 
 @Entity
@@ -964,7 +954,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		
 		return statusSinceDate;
 	}
-
+/* jpw will be deleting this shortly
 	public LoanBasicDetailsData toBasicDetailsData(final CurrencyData currencyData, final FundData fundData) {
 		
 		Money loanPrincipal = this.loanRepaymentScheduleDetail.getPrincipal();
@@ -986,11 +976,12 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 				this.loanRepaymentScheduleDetail.getNominalInterestRatePerPeriod(), this.loanRepaymentScheduleDetail.getAnnualNominalInterestRate(),
 				repaymentFrequencyType, interestRateFrequencyType, amortizationType, interestType, interestCalculationPeriodType, getLoanStatusDisplayName(), getLoanStatusSinceDate());
 	}
-
+*/
 	public String getCurrencyCode() {
 		return this.loanRepaymentScheduleDetail.getPrincipal().getCurrencyCode();
 	}
 
+/* jpw will be deleting this shortly
 	public LoanAccountData toLoanAccountData(LoanAccountSummaryData summary, LoanRepaymentScheduleData repaymentSchedule, 
 			List<LoanTransactionData> loanRepayments, 
 			CurrencyData currencyData, FundData fundData) {
@@ -1020,4 +1011,5 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		
 		return new LoanAccountData(basicDetails, summary, repaymentSchedule, loanRepayments, permissions);
 	}
+	*/
 }

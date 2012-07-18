@@ -22,6 +22,7 @@ import org.mifosng.platform.api.commands.SubmitLoanApplicationCommand;
 import org.mifosng.platform.api.commands.UndoStateTransitionCommand;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.LoanAccountData;
+import org.mifosng.platform.api.data.LoanBasicDetailsData;
 import org.mifosng.platform.api.data.LoanSchedule;
 import org.mifosng.platform.api.data.LoanTransactionData;
 import org.mifosng.platform.api.data.NewLoanData;
@@ -87,7 +88,10 @@ public class LoansApiResource {
 	public String retrieveLoanAccountDetails(
 			@PathParam("loanId") final Long loanId, @Context final UriInfo uriInfo) {
 
-		LoanAccountData loanAccount = this.loanReadPlatformService.retrieveLoanAccountDetails(loanId);
+		LoanBasicDetailsData loanBasicDetails = this.loanReadPlatformService
+				.retrieveLoanAccountDetails(loanId);
+		
+		LoanAccountData loanAccount = new LoanAccountData(loanBasicDetails, null, null, null, null );
 
 		String selectedFields = "";
 		String associatedFields = "summary,repaymentSchedule,loanRepayments,permissions,convenienceData";
