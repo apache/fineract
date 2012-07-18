@@ -9,7 +9,10 @@ import java.util.Collection;
 import org.joda.time.LocalDate;
 import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.CurrencyData;
+import org.mifosng.platform.api.data.DerivedLoanData;
 import org.mifosng.platform.api.data.EnumOptionData;
+import org.mifosng.platform.api.data.FundData;
+import org.mifosng.platform.api.data.LoanAccountData;
 import org.mifosng.platform.api.data.LoanBasicDetailsData;
 import org.mifosng.platform.api.data.LoanProductData;
 import org.mifosng.platform.api.data.LoanProductLookup;
@@ -86,20 +89,26 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 		}
 
 		return selectedLoan;
-		// return convertToData(loan, currencyData, fundData);
+	}
+//jpw delete after
+	public LoanAccountData convertToData(LoanBasicDetailsData loanBasic) {
+
+		MoneyData princ = loanBasic.getPrincipal();
+		
+		CurrencyData currencyData = new CurrencyData(princ.getCurrencyCode(),
+				princ.getDefaultName(), princ.getDigitsAfterDecimal(), princ.getDisplaySymbol(),
+				princ.getNameCode());
+		
+		final Loan realLoan = this.loanRepository.findOne(loanBasic.getId());
+		if (realLoan == null) {
+			throw new LoanNotFoundException(loanBasic.getId());
+		}
+		DerivedLoanData loanData = realLoan.deriveLoanData(currencyData);
+
+		return realLoan.toLoanAccountData(loanBasic, loanData.getSummary(),
+				loanData.getRepaymentSchedule(), loanData.getLoanRepayments());
 	}
 
-	/*
-	 * check if this is used after jpw private LoanAccountData
-	 * convertToData(final Loan realLoan, CurrencyData currencyData, FundData
-	 * fundData) {
-	 * 
-	 * DerivedLoanData loanData = realLoan.deriveLoanData(currencyData);
-	 * 
-	 * return realLoan.toLoanAccountData(loanData.getSummary(),
-	 * loanData.getRepaymentSchedule(), loanData.getLoanRepayments(),
-	 * currencyData, fundData); }
-	 */
 	@Override
 	public NewLoanData retrieveClientAndProductDetails(final Long clientId,
 			final Long productId) {

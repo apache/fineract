@@ -27,6 +27,13 @@ import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.DerivedLoanData;
+import org.mifosng.platform.api.data.FundData;
+import org.mifosng.platform.api.data.LoanAccountData;
+import org.mifosng.platform.api.data.LoanAccountSummaryData;
+import org.mifosng.platform.api.data.LoanBasicDetailsData;
+import org.mifosng.platform.api.data.LoanPermissionData;
+import org.mifosng.platform.api.data.LoanRepaymentScheduleData;
+import org.mifosng.platform.api.data.LoanTransactionData;
 import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.currency.domain.Money;
@@ -954,39 +961,16 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		
 		return statusSinceDate;
 	}
-/* jpw will be deleting this shortly
-	public LoanBasicDetailsData toBasicDetailsData(final CurrencyData currencyData, final FundData fundData) {
-		
-		Money loanPrincipal = this.loanRepaymentScheduleDetail.getPrincipal();
-		MoneyData principal = MoneyData.of(currencyData, loanPrincipal.getAmount());
-
-		Money loanArrearsTolerance = this.loanRepaymentScheduleDetail.getInArrearsTolerance();
-		MoneyData tolerance = MoneyData.of(currencyData, loanArrearsTolerance.getAmount());
-		
-		EnumOptionData repaymentFrequencyType = LoanEnumerations.repaymentFrequencyType(this.loanRepaymentScheduleDetail.getRepaymentPeriodFrequencyType());
-		EnumOptionData interestRateFrequencyType = LoanEnumerations.interestRateFrequencyType(this.loanRepaymentScheduleDetail.getInterestPeriodFrequencyType());
-		EnumOptionData amortizationType = LoanEnumerations.amortizationType(this.loanRepaymentScheduleDetail.getAmortizationMethod());
-		EnumOptionData interestType = LoanEnumerations.interestType(this.loanRepaymentScheduleDetail.getInterestMethod());
-		EnumOptionData interestCalculationPeriodType = LoanEnumerations.interestCalculationPeriodType(this.loanRepaymentScheduleDetail.getInterestCalculationPeriodMethod());
-		
-		return new LoanBasicDetailsData(getId(), this.externalId, this.loanProduct.getName(), fundData,
-				getClosedOnDate(), getSubmittedOnDate(), getApprovedOnDate(), getExpectedDisbursedOnLocalDate(), getDisbursedOnDate(),
-				getExpectedMaturityDate(), getExpectedFirstRepaymentOnDate(), getInterestChargedFromDate(), principal, tolerance, 
-				this.loanRepaymentScheduleDetail.getNumberOfRepayments(), this.loanRepaymentScheduleDetail.getRepayEvery(), 
-				this.loanRepaymentScheduleDetail.getNominalInterestRatePerPeriod(), this.loanRepaymentScheduleDetail.getAnnualNominalInterestRate(),
-				repaymentFrequencyType, interestRateFrequencyType, amortizationType, interestType, interestCalculationPeriodType, getLoanStatusDisplayName(), getLoanStatusSinceDate());
-	}
-*/
+	
 	public String getCurrencyCode() {
 		return this.loanRepaymentScheduleDetail.getPrincipal().getCurrencyCode();
 	}
 
-/* jpw will be deleting this shortly
-	public LoanAccountData toLoanAccountData(LoanAccountSummaryData summary, LoanRepaymentScheduleData repaymentSchedule, 
-			List<LoanTransactionData> loanRepayments, 
-			CurrencyData currencyData, FundData fundData) {
+// jpw will be deleting this shortly
+	public LoanAccountData toLoanAccountData(LoanBasicDetailsData basicDetails, LoanAccountSummaryData summary, LoanRepaymentScheduleData repaymentSchedule, 
+			List<LoanTransactionData> loanRepayments) {
 		
-		LoanBasicDetailsData basicDetails = toBasicDetailsData(currencyData, fundData);
+		//LoanBasicDetailsData basicDetails = toBasicDetailsData(currencyData, fundData);
 		
 		// permissions
 		boolean waiveAllowed = summary.isWaiveAllowed(basicDetails.getInArrearsTolerance())
@@ -1011,5 +995,5 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		
 		return new LoanAccountData(basicDetails, summary, repaymentSchedule, loanRepayments, permissions);
 	}
-	*/
+	
 }

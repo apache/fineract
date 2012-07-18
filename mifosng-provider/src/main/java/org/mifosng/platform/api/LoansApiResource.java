@@ -90,8 +90,9 @@ public class LoansApiResource {
 
 		LoanBasicDetailsData loanBasicDetails = this.loanReadPlatformService
 				.retrieveLoanAccountDetails(loanId);
+		LoanAccountData loanAccount = this.loanReadPlatformService.convertToData(loanBasicDetails);
 		
-		LoanAccountData loanAccount = new LoanAccountData(loanBasicDetails, null, null, null, null );
+		//LoanAccountData loanAccount = new LoanAccountData(loanBasicDetails, null, null, null, null );
 
 		String selectedFields = "";
 		String associatedFields = "summary,repaymentSchedule,loanRepayments,permissions,convenienceData";

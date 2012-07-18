@@ -1,5 +1,6 @@
 package org.mifosng.platform.loan.service;
 
+import org.mifosng.platform.api.data.LoanAccountData;
 import org.mifosng.platform.api.data.LoanBasicDetailsData;
 import org.mifosng.platform.api.data.LoanTransactionData;
 import org.mifosng.platform.api.data.NewLoanData;
@@ -16,4 +17,6 @@ public interface LoanReadPlatformService {
 
 	LoanTransactionData retrieveLoanTransactionDetails(Long loanId,
 			Long transactionId);
+	
+	LoanAccountData convertToData(LoanBasicDetailsData loanBasic);//del jpw after
 }
