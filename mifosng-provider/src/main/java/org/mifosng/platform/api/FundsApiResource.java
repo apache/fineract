@@ -48,7 +48,7 @@ public class FundsApiResource {
 	@GET
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
-	public String retrieveFunds(@Context UriInfo uriInfo) {
+	public String retrieveFunds(@Context final UriInfo uriInfo) {
 
 		Collection<FundData> funds = this.readPlatformService.retrieveAllFunds();
 		String selectedFields = "";

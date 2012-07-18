@@ -17,10 +17,17 @@ import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
+import org.mifosng.platform.api.commands.AdjustLoanTransactionCommand;
+import org.mifosng.platform.api.commands.BranchMoneyTransferCommand;
+import org.mifosng.platform.api.commands.ClientCommand;
 import org.mifosng.platform.api.commands.FundCommand;
 import org.mifosng.platform.api.commands.LoanProductCommand;
+import org.mifosng.platform.api.commands.LoanStateTransitionCommand;
+import org.mifosng.platform.api.commands.LoanTransactionCommand;
 import org.mifosng.platform.api.commands.OfficeCommand;
 import org.mifosng.platform.api.commands.RoleCommand;
+import org.mifosng.platform.api.commands.SubmitLoanApplicationCommand;
+import org.mifosng.platform.api.commands.UserCommand;
 import org.mifosng.platform.api.data.ApiParameterError;
 import org.mifosng.platform.api.errorhandling.InvalidJsonException;
 import org.mifosng.platform.api.errorhandling.UnsupportedParameterException;
@@ -45,8 +52,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		gsonConverter = new Gson();
 	}
 	
-	@Override
-	public LocalDate convertFrom(final String dateAsString, final String parameterName, final String dateFormat) {
+	private LocalDate convertFrom(final String dateAsString, final String parameterName, final String dateFormat) {
 		
 		if (StringUtils.isBlank(dateFormat)) {
 			
@@ -88,8 +94,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		return eventLocalDate;
 	}
 	
-	@Override
-	public Integer convertToInteger(String numericalValueFormatted, String parameterName, Locale clientApplicationLocale) {
+	private Integer convertToInteger(String numericalValueFormatted, String parameterName, Locale clientApplicationLocale) {
 		try {
 			Integer number = null;
 
@@ -142,8 +147,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		}
 	}
 
-	@Override
-	public BigDecimal convertFrom(final String numericalValueFormatted, final String parameterName, final Locale clientApplicationLocale) {
+	private BigDecimal convertFrom(final String numericalValueFormatted, final String parameterName, final Locale clientApplicationLocale) {
 
 		if (clientApplicationLocale == null) {
 			
@@ -196,8 +200,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		}
 	}
 
-	@Override
-	public Locale localeFromString(final String localeAsString) {
+	private Locale localeFromString(final String localeAsString) {
 		
 		if (StringUtils.isBlank(localeAsString)) {
 			List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
@@ -233,8 +236,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		return localeFrom(languageCode, courntryCode, variantCode);
 	}
 
-	@Override
-	public Locale localeFrom(final String languageCode, final String courntryCode, final String variantCode) {
+	private Locale localeFrom(final String languageCode, final String courntryCode, final String variantCode) {
 		
 		List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 		
@@ -271,11 +273,10 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		Type typeOfMap = new TypeToken<Map<String, String>>(){}.getType();
 	    Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
 	    
-	    
 	    Set<String> supportedParams = new HashSet<String>(
 	    		Arrays.asList("name", "description", "fundId", "currencyCode", "digitsAfterDecimalValue", 
 	    				"principal", "inArrearsTolerance", "interestRatePerPeriod", "repaymentEvery", "numberOfRepayments", 
-	    				"repaymentFrequencyType", "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType")
+	    				"repaymentFrequencyType", "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType", "locale")
 	    );
 	    
 	    checkForUnsupportedParameters(requestMap, supportedParams);
@@ -394,6 +395,244 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	    String description = extractStringParameter("description", requestMap, modifiedParameters);
 	    
 	    return new RoleCommand(modifiedParameters, resourceIdentifier, name, description, permissionIds);
+	}
+	
+	@Override
+	public UserCommand convertJsonToUserCommand(final Long resourceIdentifier, final String json) {
+		
+		if (StringUtils.isBlank(json)) {
+			throw new InvalidJsonException();
+		}
+		
+		Type typeOfMap = new TypeToken<Map<String, Object>>(){}.getType();
+	    Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
+	    
+	    Set<String> supportedParams = new HashSet<String>(
+	    		Arrays.asList("username", "firstname", "lastname", "password", "repeatPassword", "email", "officeId", "notSelectedRoles", "roles")
+	    );
+	    
+	    checkForUnsupportedParameters(requestMap, supportedParams);
+	    
+	    Set<String> modifiedParameters = new HashSet<String>();
+	    
+	    String username = extractStringParameter("username", requestMap, modifiedParameters);
+	    String firstname = extractStringParameter("firstname", requestMap, modifiedParameters);
+	    String lastname = extractStringParameter("lastname", requestMap, modifiedParameters);
+	    String password = extractStringParameter("password", requestMap, modifiedParameters);
+	    String repeatPassword = extractStringParameter("repeatPassword", requestMap, modifiedParameters);
+	    String email = extractStringParameter("email", requestMap, modifiedParameters);
+	    Long officeId = extractLongParameter("officeId", requestMap, modifiedParameters);
+	    
+	    // check array
+	    JsonParser parser = new JsonParser();
+		
+		String[] notSelectedRoles = null;
+		String[] roles = null;
+		JsonElement element = parser.parse(json);
+		if (element.isJsonObject()) {
+			JsonObject object = element.getAsJsonObject();
+			if (object.has("notSelectedRoles")) {
+				modifiedParameters.add("notSelectedRoles");
+				JsonArray array = object.get("notSelectedRoles").getAsJsonArray();
+				notSelectedRoles = new String[array.size()];
+				for (int i=0; i<array.size(); i++) {
+					notSelectedRoles[i] = array.get(i).getAsString();
+				}
+			}
+			
+			if (object.has("roles")) {
+				modifiedParameters.add("roles");
+				JsonArray array = object.get("roles").getAsJsonArray();
+				roles = new String[array.size()];
+				for (int i=0; i<array.size(); i++) {
+					roles[i] = array.get(i).getAsString();
+				}
+			}
+		}
+	    //
+	    
+		return new UserCommand(modifiedParameters, resourceIdentifier, username, firstname, lastname, password, repeatPassword, email, officeId, notSelectedRoles, roles);
+	}
+	
+	@Override
+	public BranchMoneyTransferCommand convertJsonToBranchMoneyTransferCommand(final String json) {
+		
+		if (StringUtils.isBlank(json)) {
+			throw new InvalidJsonException();
+		}
+		
+		Type typeOfMap = new TypeToken<Map<String, Object>>(){}.getType();
+	    Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
+	    
+	    Set<String> supportedParams = new HashSet<String>(
+	    		Arrays.asList("fromOfficeId", "toOfficeId", "transactionDate", "currencyCode", "transactionAmount", "description", "locale", "dateFormat")
+	    );
+	    
+	    checkForUnsupportedParameters(requestMap, supportedParams);
+	    
+	    Set<String> modifiedParameters = new HashSet<String>();
+	   
+	    Long fromOfficeId = extractLongParameter("fromOfficeId", requestMap, modifiedParameters);
+	    Long toOfficeId = extractLongParameter("toOfficeId", requestMap, modifiedParameters);
+	    LocalDate transactionLocalDate = extractLocalDateParameter("transactionDate", requestMap, modifiedParameters);
+	    String currencyCode = extractStringParameter("currencyCode", requestMap, modifiedParameters);
+	    BigDecimal transactionAmountValue = extractBigDecimalParameter("transactionAmount", requestMap, modifiedParameters);
+	    String description = extractStringParameter("description", requestMap, modifiedParameters);
+	    
+	    return new BranchMoneyTransferCommand(modifiedParameters, fromOfficeId, toOfficeId, transactionLocalDate, currencyCode, transactionAmountValue, description);
+	}
+	
+	@Override
+	public ClientCommand convertJsonToClientCommand(final Long resourceIdentifier, final String json) {
+		if (StringUtils.isBlank(json)) {
+			throw new InvalidJsonException();
+		}
+		
+		Type typeOfMap = new TypeToken<Map<String, Object>>(){}.getType();
+	    Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
+	    
+	    Set<String> supportedParams = new HashSet<String>(
+	    		Arrays.asList("externalId", "firstname", "lastname", "clientOrBusinessName", "officeId", "joiningDate", "dateFormat")
+	    );
+	    
+	    checkForUnsupportedParameters(requestMap, supportedParams);
+	    
+	    Set<String> modifiedParameters = new HashSet<String>();
+	   
+	    String externalId = extractStringParameter("externalId", requestMap, modifiedParameters);
+	    Long officeId = extractLongParameter("officeId", requestMap, modifiedParameters);
+	    LocalDate joiningDate = extractLocalDateParameter("joiningDate", requestMap, modifiedParameters);
+	    String firstname = extractStringParameter("firstname", requestMap, modifiedParameters);
+	    String lastname = extractStringParameter("lastname", requestMap, modifiedParameters);
+	    String clientOrBusinessName = extractStringParameter("clientOrBusinessName", requestMap, modifiedParameters);
+	    
+	    return new ClientCommand(resourceIdentifier, externalId, firstname, lastname, clientOrBusinessName, officeId, joiningDate);
+	}
+	
+	@Override
+	public SubmitLoanApplicationCommand convertJsonToSubmitLoanApplicationCommand(final String json) {
+		
+		if (StringUtils.isBlank(json)) {
+			throw new InvalidJsonException();
+		}
+		
+		Type typeOfMap = new TypeToken<Map<String, Object>>(){}.getType();
+	    Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
+	    
+	    Set<String> supportedParams = new HashSet<String>(
+	    		Arrays.asList("clientId", "productId", "externalId", "fundId", 
+	    				"principal", "inArrearsTolerance", "interestRatePerPeriod", "repaymentEvery", "numberOfRepayments", 
+	    				"repaymentFrequencyType", "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType",
+	    				"expectedDisbursementDate", "repaymentsStartingFromDate", "interestChargedFromDate", "submittedOnDate", "submittedOnNote",
+	    				"locale", "dateFormat")
+	    );
+	    
+	    checkForUnsupportedParameters(requestMap, supportedParams);
+	    
+	    Set<String> modifiedParameters = new HashSet<String>();
+
+	    Long clientId = extractLongParameter("clientId", requestMap, modifiedParameters);
+	    Long productId = extractLongParameter("productId", requestMap, modifiedParameters);
+	    Long fundId = extractLongParameter("fundId", requestMap, modifiedParameters);
+	    String externalId = extractStringParameter("externalId", requestMap, modifiedParameters);
+	    
+	    BigDecimal principal = extractBigDecimalParameter("principal", requestMap, modifiedParameters);
+	    BigDecimal inArrearsToleranceValue = extractBigDecimalParameter("inArrearsTolerance", requestMap, modifiedParameters);
+	    BigDecimal interestRatePerPeriod = extractBigDecimalParameter("interestRatePerPeriod", requestMap, modifiedParameters);
+	    
+	    Integer repaymentEvery = extractIntegerParameter("repaymentEvery", requestMap, modifiedParameters);
+	    Integer numberOfRepayments = extractIntegerParameter("numberOfRepayments", requestMap, modifiedParameters);
+	    Integer repaymentFrequencyType = extractIntegerParameter("repaymentFrequencyType", requestMap, modifiedParameters);
+	    
+	    Integer interestRateFrequencyTypeValue = extractIntegerParameter("interestRateFrequencyType", requestMap, modifiedParameters);
+	    Integer amortizationTypeValue = extractIntegerParameter("amortizationType", requestMap, modifiedParameters);
+	    Integer interestTypeValue = extractIntegerParameter("interestType", requestMap, modifiedParameters);
+	    Integer interestCalculationPeriodTypeValue = extractIntegerParameter("interestCalculationPeriodType", requestMap, modifiedParameters);
+	    
+	    LocalDate expectedDisbursementDate = extractLocalDateParameter("expectedDisbursementDate", requestMap, modifiedParameters);
+	    LocalDate repaymentsStartingFromDate = extractLocalDateParameter("repaymentsStartingFromDate", requestMap, modifiedParameters);
+	    LocalDate interestChargedFromDate = extractLocalDateParameter("interestChargedFromDate", requestMap, modifiedParameters);
+	    LocalDate submittedOnDate = extractLocalDateParameter("submittedOnDate", requestMap, modifiedParameters);
+	    
+	    String submittedOnNote = extractStringParameter("submittedOnNote", requestMap, modifiedParameters);
+	    
+		return new SubmitLoanApplicationCommand(clientId, productId, externalId, fundId, submittedOnDate, submittedOnNote, 
+	    		expectedDisbursementDate, repaymentsStartingFromDate, interestChargedFromDate, 
+	    		principal, interestRatePerPeriod, interestRateFrequencyTypeValue, interestTypeValue, interestCalculationPeriodTypeValue, 
+	    		repaymentEvery, repaymentFrequencyType, numberOfRepayments, amortizationTypeValue, inArrearsToleranceValue);
+	}
+	
+	@Override
+	public LoanStateTransitionCommand convertJsonToLoanStateTransitionCommand(final Long resourceIdentifier, final String json) {
+		if (StringUtils.isBlank(json)) {
+			throw new InvalidJsonException();
+		}
+		
+		Type typeOfMap = new TypeToken<Map<String, Object>>(){}.getType();
+	    Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
+	    
+	    Set<String> supportedParams = new HashSet<String>(
+	    		Arrays.asList("eventDate", "note", "dateFormat")
+	    );
+	    
+	    checkForUnsupportedParameters(requestMap, supportedParams);
+	    
+	    Set<String> modifiedParameters = new HashSet<String>();
+
+	    LocalDate eventDate = extractLocalDateParameter("eventDate", requestMap, modifiedParameters);
+	    String note = extractStringParameter("note", requestMap, modifiedParameters);
+	    
+	    return new LoanStateTransitionCommand(resourceIdentifier, eventDate, note);
+	}
+	
+	@Override
+	public LoanTransactionCommand convertJsonToLoanTransactionCommand(final Long resourceIdentifier, final String json) {
+		if (StringUtils.isBlank(json)) {
+			throw new InvalidJsonException();
+		}
+		
+		Type typeOfMap = new TypeToken<Map<String, Object>>(){}.getType();
+	    Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
+	    
+	    Set<String> supportedParams = new HashSet<String>(
+	    		Arrays.asList("transactionDate", "transactionAmount", "note", "dateFormat", "locale")
+	    );
+	    
+	    checkForUnsupportedParameters(requestMap, supportedParams);
+	    
+	    Set<String> modifiedParameters = new HashSet<String>();
+
+	    LocalDate paymentDate = extractLocalDateParameter("paymentDate", requestMap, modifiedParameters);
+	    BigDecimal paymentAmount = extractBigDecimalParameter("paymentAmount", requestMap, modifiedParameters);
+	    String note = extractStringParameter("note", requestMap, modifiedParameters);
+	    
+	    return new LoanTransactionCommand(resourceIdentifier, paymentDate, paymentAmount, note);
+	}
+	
+	@Override
+	public AdjustLoanTransactionCommand convertJsonToAdjustLoanTransactionCommand(
+			final Long loanId, final Long transactionId, final String json) {
+		
+		if (StringUtils.isBlank(json)) {
+			throw new InvalidJsonException();
+		}
+		
+		Type typeOfMap = new TypeToken<Map<String, Object>>(){}.getType();
+	    Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
+	    
+	    Set<String> supportedParams = new HashSet<String>(
+	    		Arrays.asList("transactionDate", "transactionAmount", "note", "dateFormat", "locale")
+	    );
+	    
+	    checkForUnsupportedParameters(requestMap, supportedParams);
+	    
+	    Set<String> modifiedParameters = new HashSet<String>();
+
+	    LocalDate transactionDate = extractLocalDateParameter("paymentDate", requestMap, modifiedParameters);
+	    BigDecimal transactionAmount = extractBigDecimalParameter("paymentAmount", requestMap, modifiedParameters);
+	    String note = extractStringParameter("note", requestMap, modifiedParameters);
+	    
+	    return new AdjustLoanTransactionCommand(loanId, transactionId, transactionDate, note, transactionAmount);
 	}
 
 	private void checkForUnsupportedParameters(Map<String, ?> requestMap, Set<String> supportedParams) {

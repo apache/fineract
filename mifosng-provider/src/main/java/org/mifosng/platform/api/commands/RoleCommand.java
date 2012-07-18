@@ -38,7 +38,15 @@ public class RoleCommand {
 		return permissions;
 	}
 
-	public Set<String> getModifiedParameters() {
-		return modifiedParameters;
+	public boolean isNameChanged() {
+		return this.modifiedParameters.contains("name");
+	}
+	
+	public boolean isDescriptionChanged() {
+		return this.modifiedParameters.contains("description");
+	}
+	
+	public boolean isPermissionsChanged() {
+		return this.modifiedParameters.contains("permissions");
 	}
 }

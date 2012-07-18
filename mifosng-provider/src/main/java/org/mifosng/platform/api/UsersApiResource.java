@@ -18,6 +18,7 @@ import javax.ws.rs.core.UriInfo;
 import org.mifosng.platform.api.commands.UserCommand;
 import org.mifosng.platform.api.data.AppUserData;
 import org.mifosng.platform.api.data.EntityIdentifier;
+import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.ApiJSONFormattingService;
 import org.mifosng.platform.user.service.AppUserReadPlatformService;
 import org.mifosng.platform.user.service.AppUserWritePlatformService;
@@ -28,7 +29,7 @@ import org.springframework.stereotype.Component;
 @Path("/users")
 @Component
 @Scope("singleton")
-public class UserApiResource {
+public class UsersApiResource {
 
 	private String allowedFieldList = "allowedOffices,availableRoles";
 	private String filterName = "userFilter";
@@ -40,15 +41,17 @@ public class UserApiResource {
 	private AppUserWritePlatformService appUserWritePlatformService;
 
 	@Autowired
+	private ApiDataConversionService apiDataConversionService;
+	
+	@Autowired
 	private ApiJSONFormattingService jsonFormattingService;
 
 	@GET
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrieveUsers(@Context UriInfo uriInfo) {
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
+	public String retrieveUsers(@Context final UriInfo uriInfo) {
 
-		Collection<AppUserData> users = this.appUserReadPlatformService
-				.retrieveAllUsers();
+		Collection<AppUserData> users = this.appUserReadPlatformService.retrieveAllUsers();
 
 		String selectedFields = "id,officeId,officeName,username,firstname,lastname,email";
 		return this.jsonFormattingService.convertRequest(users, filterName,
@@ -57,10 +60,9 @@ public class UserApiResource {
 
 	@GET
 	@Path("{userId}")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrieveUser(@PathParam("userId") final Long userId,
-			@Context UriInfo uriInfo) {
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
+	public String retrieveUser(@PathParam("userId") final Long userId, @Context final UriInfo uriInfo) {
 
 		AppUserData user = this.appUserReadPlatformService.retrieveUser(userId);
 
@@ -71,9 +73,9 @@ public class UserApiResource {
 
 	@GET
 	@Path("template")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public String newUserDetails(@Context UriInfo uriInfo) {
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
+	public String newUserDetails(@Context final UriInfo uriInfo) {
 
 		AppUserData newUser = this.appUserReadPlatformService
 				.retrieveNewUserDetails();
@@ -84,18 +86,20 @@ public class UserApiResource {
 	}
 
 	@POST
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public Response createUser(UserCommand command) {
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
+	public Response createUser(final String jsonRequestBody) {
 
+		UserCommand command = this.apiDataConversionService.convertJsonToUserCommand(null, jsonRequestBody);
+		
 		Long userId = this.appUserWritePlatformService.createUser(command);
 		return Response.ok().entity(new EntityIdentifier(userId)).build();
 	}
 
 	@DELETE
 	@Path("{userId}")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON })
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
 	public Response deleteUser(@PathParam("userId") final Long userId) {
 
 		this.appUserWritePlatformService.deleteUser(userId);
@@ -105,12 +109,11 @@ public class UserApiResource {
 
 	@PUT
 	@Path("{userId}")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public Response updateUser(@PathParam("userId") final Long userId,
-			UserCommand command) {
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
+	public Response updateUser(@PathParam("userId") final Long userId, final String jsonRequestBody) {
 
-		command.setId(userId);
+		UserCommand command = this.apiDataConversionService.convertJsonToUserCommand(userId, jsonRequestBody);
 
 		this.appUserWritePlatformService.updateUser(command);
 

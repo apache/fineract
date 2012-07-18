@@ -129,9 +129,9 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
 		}
 		
 		MonetaryCurrency currency = new MonetaryCurrency(appCurrency.getCode(), appCurrency.getDecimalPlaces());
-		Money amount = Money.of(currency, command.getTransactionAmountValue());
+		Money amount = Money.of(currency, command.getTransactionAmount());
 		
-		OfficeTransaction entity = OfficeTransaction.create(fromOffice, toOffice, command.getTransactionLocalDate(), amount);
+		OfficeTransaction entity = OfficeTransaction.create(fromOffice, toOffice, command.getTransactionDate(), amount);
 		
 		this.officeMonetaryTransferRepository.save(entity);
 		

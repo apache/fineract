@@ -1,112 +1,89 @@
 package org.mifosng.platform.api.commands;
 
 import java.io.Serializable;
-
-import javax.xml.bind.annotation.XmlRootElement;
+import java.util.Set;
 
 /**
- * create or update user details command.
+ * Immutable command for creating or updating details of a User.
  */
-@XmlRootElement
 public class UserCommand implements Serializable {
 
-	private Long id;
-	private String username;
-	private String firstname;
-	private String lastname;
-	private String password;
-	private String repeatPassword;
-	private String email;
-	private Long officeId;
+	private final Long id;
+	private final String username;
+	private final String firstname;
+	private final String lastname;
+	private final String password;
+	private final String repeatPassword;
+	private final String email;
+	private final Long officeId;
 	
-	private String[] notSelectedRoles;
-	private String[] roles;
+	private final String[] notSelectedRoles;
+	private final String[] roles;
+	
+	private final Set<String> modifiedParameters;
 
-	public UserCommand() {
-		//
+	public UserCommand(final Set<String> modifiedParameters, final Long id, 
+			final String username, final String firstname, final String lastname, 
+			final String password, final String repeatPassword, final String email, 
+			final Long officeId, final String[] notSelectedRoles, final String[] roles) {
+		this.modifiedParameters = modifiedParameters;
+		this.id = id;
+		this.username = username;
+		this.firstname = firstname;
+		this.lastname = lastname;
+		this.password = password;
+		this.repeatPassword = repeatPassword;
+		this.email = email;
+		this.officeId = officeId;
+		this.notSelectedRoles = notSelectedRoles;
+		this.roles = roles;
 	}
 	
 	public String getDisplayName() {
 		return new StringBuilder(this.lastname).append(", ").append(this.firstname).toString();
 	}
 
+	public Long getId() {
+		return id;
+	}
+
 	public String getUsername() {
-		return this.username;
-	}
-
-	public void setUsername(final String username) {
-		this.username = username;
-	}
-
-	public String getPassword() {
-		return this.password;
-	}
-
-	public void setPassword(final String password) {
-		this.password = password;
-	}
-
-	public String getEmail() {
-		return this.email;
-	}
-
-	public void setEmail(final String email) {
-		this.email = email;
-	}
-
-	public Long getOfficeId() {
-		return this.officeId;
-	}
-
-	public void setOfficeId(final Long officeId) {
-		this.officeId = officeId;
+		return username;
 	}
 
 	public String getFirstname() {
 		return firstname;
 	}
 
-	public void setFirstname(String firstname) {
-		this.firstname = firstname;
-	}
-
 	public String getLastname() {
 		return lastname;
 	}
 
-	public void setLastname(String lastname) {
-		this.lastname = lastname;
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public String[] getNotSelectedRoles() {
-		return notSelectedRoles;
-	}
-
-	public void setNotSelectedRoles(String... notSelectedRoles) {
-		this.notSelectedRoles = notSelectedRoles;
-	}
-
-	public String[] getRoles() {
-		return roles;
-	}
-
-	public void setRoles(String... roles) {
-		this.roles = roles;
+	public String getPassword() {
+		return password;
 	}
 
 	public String getRepeatPassword() {
 		return repeatPassword;
 	}
 
-	public void setRepeatPassword(String repeatPassword) {
-		this.repeatPassword = repeatPassword;
+	public String getEmail() {
+		return email;
+	}
+
+	public Long getOfficeId() {
+		return officeId;
+	}
+
+	public String[] getNotSelectedRoles() {
+		return notSelectedRoles;
+	}
+
+	public String[] getRoles() {
+		return roles;
+	}
+
+	public boolean isUsernameChanged() {
+		return this.modifiedParameters.contains("username");
 	}
 }

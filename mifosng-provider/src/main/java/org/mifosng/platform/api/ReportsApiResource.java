@@ -26,7 +26,7 @@ import org.springframework.stereotype.Component;
 @Path("/reports")
 @Component
 @Scope("singleton")
-public class ReportingApiResource {
+public class ReportsApiResource {
 
 	private String allowedFieldList = "";
 	private String filterName = "myFilter";
@@ -38,9 +38,9 @@ public class ReportingApiResource {
 	private ApiJSONFormattingService jsonFormattingService;
 
 	@GET
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON, "application/x-msdownload" })
-	public Response retrieveReportList(@Context UriInfo uriInfo) {
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON, "application/x-msdownload" })
+	public Response retrieveReportList(@Context final UriInfo uriInfo) {
 
 		MultivaluedMap<String, String> queryParams = uriInfo
 				.getQueryParameters();
@@ -70,12 +70,12 @@ public class ReportingApiResource {
 
 	@GET
 	@Path("{reportName}")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON, "application/x-msdownload",
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON, "application/x-msdownload",
 			"application/vnd.ms-excel", "application/pdf", "text/html" })
 	public Response retrieveReport(
 			@PathParam("reportName") final String reportName,
-			@Context UriInfo uriInfo) {
+			@Context final UriInfo uriInfo) {
 
 		MultivaluedMap<String, String> queryParams = uriInfo
 				.getQueryParameters();

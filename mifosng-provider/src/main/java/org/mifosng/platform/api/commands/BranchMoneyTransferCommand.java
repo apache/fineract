@@ -1,121 +1,60 @@
 package org.mifosng.platform.api.commands;
 
 import java.math.BigDecimal;
-
-import javax.xml.bind.annotation.XmlRootElement;
+import java.util.Set;
 
 import org.joda.time.LocalDate;
 
 /**
- * Command used for transfering money between two branches.
+ * Immutable command for transfering money between two branches.
  */
-@XmlRootElement
 public class BranchMoneyTransferCommand {
 
-	private Long id;
-	private Long fromOfficeId;
-	private Long toOfficeId;
+	private final Long fromOfficeId;
+	private final Long toOfficeId;
+	private final LocalDate transactionDate;
+	private final String currencyCode;
+	private final BigDecimal transactionAmount;
+	private final String description;
 	
-	private String dateFormat;
-	private String transactionDate;
-	private LocalDate transactionLocalDate;
+	private final Set<String> modifiedParameters;
 	
-	private String locale;
-	private String currencyCode;
-	private String transactionAmount;
-	private BigDecimal transactionAmountValue;
-	
-	private String description;
-	
-	protected BranchMoneyTransferCommand() {
-		//
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
+	public BranchMoneyTransferCommand(final Set<String> modifiedParameters, final Long fromOfficeId, final Long toOfficeId, 
+			final LocalDate transactionDate, final String currencyCode, final BigDecimal transactionAmount, final String description) {
+		this.modifiedParameters = modifiedParameters;
+		this.fromOfficeId = fromOfficeId;
+		this.toOfficeId = toOfficeId;
+		this.transactionDate = transactionDate;
+		this.currencyCode = currencyCode;
+		this.transactionAmount = transactionAmount;
+		this.description = description;
 	}
 
 	public Long getFromOfficeId() {
 		return fromOfficeId;
 	}
 
-	public void setFromOfficeId(Long fromOfficeId) {
-		this.fromOfficeId = fromOfficeId;
-	}
-
 	public Long getToOfficeId() {
 		return toOfficeId;
 	}
 
-	public void setToOfficeId(Long toOfficeId) {
-		this.toOfficeId = toOfficeId;
-	}
-
-	public String getDateFormat() {
-		return dateFormat;
-	}
-
-	public void setDateFormat(String dateFormat) {
-		this.dateFormat = dateFormat;
-	}
-
-	public String getTransactionDate() {
+	public LocalDate getTransactionDate() {
 		return transactionDate;
-	}
-
-	public void setTransactionDate(String transactionDate) {
-		this.transactionDate = transactionDate;
-	}
-
-	public LocalDate getTransactionLocalDate() {
-		return transactionLocalDate;
-	}
-
-	public void setTransactionLocalDate(LocalDate transactionLocalDate) {
-		this.transactionLocalDate = transactionLocalDate;
-	}
-
-	public String getLocale() {
-		return locale;
-	}
-
-	public void setLocale(String locale) {
-		this.locale = locale;
-	}
-
-	public String getTransactionAmount() {
-		return transactionAmount;
-	}
-
-	public void setTransactionAmount(String transactionAmount) {
-		this.transactionAmount = transactionAmount;
-	}
-
-	public BigDecimal getTransactionAmountValue() {
-		return transactionAmountValue;
-	}
-
-	public void setTransactionAmountValue(BigDecimal transactionAmountValue) {
-		this.transactionAmountValue = transactionAmountValue;
 	}
 
 	public String getCurrencyCode() {
 		return currencyCode;
 	}
 
-	public void setCurrencyCode(String currencyCode) {
-		this.currencyCode = currencyCode;
+	public BigDecimal getTransactionAmount() {
+		return transactionAmount;
 	}
 
 	public String getDescription() {
 		return description;
 	}
-
-	public void setDescription(String description) {
-		this.description = description;
+	
+	public boolean isFromOfficeIdChanged() {
+		return this.modifiedParameters.contains("fromOfficeId");
 	}
 }

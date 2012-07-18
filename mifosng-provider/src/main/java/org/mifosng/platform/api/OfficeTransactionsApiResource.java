@@ -1,8 +1,5 @@
 package org.mifosng.platform.api;
 
-import java.math.BigDecimal;
-import java.util.Locale;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -13,7 +10,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.joda.time.LocalDate;
 import org.mifosng.platform.api.commands.BranchMoneyTransferCommand;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.OfficeTransactionData;
@@ -44,9 +40,9 @@ public class OfficeTransactionsApiResource {
 	
 	@GET
 	@Path("template")
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public String newOfficeTransactionDetails(@Context UriInfo uriInfo) {
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
+	public String newOfficeTransactionDetails(@Context final UriInfo uriInfo) {
 
 		OfficeTransactionData officeTransactionData = this.readPlatformService
 				.retrieveNewOfficeTransactionDetails();
@@ -63,15 +59,9 @@ public class OfficeTransactionsApiResource {
 	@POST
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
-	public Response transferMoneyFrom(final BranchMoneyTransferCommand command) {
+	public Response transferMoneyFrom(final String jsonRequestBody) {
 
-		LocalDate transactionLocalDate = apiDataConversionService.convertFrom(command.getTransactionDate(), "transactionDate", command.getDateFormat());
-		command.setTransactionLocalDate(transactionLocalDate);
-		
-		Locale clientLocale = this.apiDataConversionService.localeFromString(command.getLocale());
-
-		BigDecimal transactionAmountValue = apiDataConversionService.convertFrom(command.getTransactionAmount(), "transactionAmount", clientLocale);
-		command.setTransactionAmountValue(transactionAmountValue);
+		BranchMoneyTransferCommand command = this.apiDataConversionService.convertJsonToBranchMoneyTransferCommand(jsonRequestBody);
 		
 		Long id = this.writePlatformService.externalBranchMoneyTransfer(command);
 		return Response.ok().entity(new EntityIdentifier(id)).build();

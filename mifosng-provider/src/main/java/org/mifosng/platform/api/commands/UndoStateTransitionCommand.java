@@ -1,13 +1,12 @@
 package org.mifosng.platform.api.commands;
 
+/**
+ * Immutable command for undo'ing a state transition.
+ */
 public class UndoStateTransitionCommand {
 
-	private Long loanId;
-	private String note;
-
-	protected UndoStateTransitionCommand() {
-		//
-	}
+	private final Long loanId;
+	private final String note;
 
 	public UndoStateTransitionCommand(final Long loanId, final String note) {
 		this.loanId = loanId;
@@ -18,15 +17,7 @@ public class UndoStateTransitionCommand {
 		return this.loanId;
 	}
 
-	public void setLoanId(final Long loanId) {
-		this.loanId = loanId;
-	}
-
 	public String getNote() {
 		return note;
-	}
-
-	public void setNote(String note) {
-		this.note = note;
 	}
 }

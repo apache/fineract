@@ -17,7 +17,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.StringUtils;
-import org.joda.time.LocalDate;
 import org.mifosng.platform.api.commands.ClientCommand;
 import org.mifosng.platform.api.commands.NoteCommand;
 import org.mifosng.platform.api.data.ClientData;
@@ -64,9 +63,9 @@ public class ClientApiResource {
 	private ApiJSONFormattingService jsonFormattingService;
 
 	@GET
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrieveAllIndividualClients(@Context UriInfo uriInfo,
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
+	public String retrieveAllIndividualClients(@Context final UriInfo uriInfo,
 			@QueryParam("sqlSearch") final String sqlSearch,
 			@QueryParam("officeId") final Integer officeId,
 			@QueryParam("externalId") final String externalId,
@@ -126,11 +125,11 @@ public class ClientApiResource {
 
 	@GET
 	@Path("{clientId}")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON })
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveClientData(
 			@PathParam("clientId") final Long clientId,
-			@QueryParam("template") String template, @Context UriInfo uriInfo) {
+			@QueryParam("template") final String template, @Context final UriInfo uriInfo) {
 
 		ClientData clientData = this.clientReadPlatformService
 				.retrieveIndividualClient(clientId);
@@ -148,8 +147,8 @@ public class ClientApiResource {
 
 	@GET
 	@Path("template")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON })
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
 	public String newClientDetails(@Context UriInfo uriInfo) {
 
 		ClientData clientData = this.clientReadPlatformService
@@ -162,15 +161,12 @@ public class ClientApiResource {
 	}
 
 	@POST
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public Response enrollClient(final ClientCommand command) {
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
+	public Response enrollClient(final String jsonRequestBody) {
 
-		LocalDate joiningLocalDate = apiDataConversionService.convertFrom(
-				command.getJoiningDate(), "joiningDate",
-				command.getDateFormat());
-		command.setJoiningLocalDate(joiningLocalDate);
-
+		ClientCommand command = this.apiDataConversionService.convertJsonToClientCommand(null, jsonRequestBody);
+		
 		Long clientId = this.clientWritePlatformService.enrollClient(command);
 
 		return Response.ok().entity(new EntityIdentifier(clientId)).build();
@@ -178,29 +174,23 @@ public class ClientApiResource {
 
 	@PUT
 	@Path("{clientId}")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public Response updateClient(@PathParam("clientId") final Long clientId,
-			final ClientCommand command) {
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
+	public Response updateClient(@PathParam("clientId") final Long clientId, final String jsonRequestBody) {
 
-		LocalDate joiningLocalDate = apiDataConversionService.convertFrom(
-				command.getJoiningDate(), "joiningDate",
-				command.getDateFormat());
-		command.setJoiningLocalDate(joiningLocalDate);
-		command.setId(clientId);
+		ClientCommand command = this.apiDataConversionService.convertJsonToClientCommand(clientId, jsonRequestBody);
 
-		EntityIdentifier identifier = this.clientWritePlatformService
-				.updateClientDetails(command);
+		EntityIdentifier identifier = this.clientWritePlatformService.updateClientDetails(command);
 
 		return Response.ok().entity(identifier).build();
 	}
 
 	@GET
 	@Path("{clientId}/loans")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON })
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveClientAccount(
-			@PathParam("clientId") final Long clientId, @Context UriInfo uriInfo) {
+			@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
 
 		ClientLoanAccountSummaryCollectionData clientAccount = this.clientReadPlatformService
 				.retrieveClientAccountDetails(clientId);
@@ -213,10 +203,9 @@ public class ClientApiResource {
 
 	@GET
 	@Path("{clientId}/notes")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrieveAllClientNotes(
-			@PathParam("clientId") final Long clientId, @Context UriInfo uriInfo) {
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
+	public String retrieveAllClientNotes(@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
 
 		Collection<NoteData> notes = this.clientReadPlatformService
 				.retrieveAllClientNotes(clientId);
@@ -228,11 +217,9 @@ public class ClientApiResource {
 
 	@POST
 	@Path("{clientId}/notes")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public Response addNewClientNote(
-			@PathParam("clientId") final Long clientId,
-			final NoteCommand command) {
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
+	public Response addNewClientNote(@PathParam("clientId") final Long clientId, final NoteCommand command) {
 
 		command.setClientId(clientId);
 
@@ -244,11 +231,11 @@ public class ClientApiResource {
 
 	@GET
 	@Path("{clientId}/notes/{noteId}")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON })
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveClientNote(
 			@PathParam("clientId") final Long clientId,
-			@PathParam("noteId") final Long noteId, @Context UriInfo uriInfo) {
+			@PathParam("noteId") final Long noteId, @Context final UriInfo uriInfo) {
 
 		NoteData note = this.clientReadPlatformService.retrieveClientNote(
 				clientId, noteId);
@@ -260,8 +247,8 @@ public class ClientApiResource {
 
 	@PUT
 	@Path("{clientId}/notes/{noteId}")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON })
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
 	public Response updateClientNote(
 			@PathParam("clientId") final Long clientId,
 			@PathParam("noteId") final Long noteId, final NoteCommand command) {

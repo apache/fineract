@@ -79,7 +79,7 @@ public class Client extends AbstractAuditableCustom<AppUser, Long> {
 	}
 
 	public void update(ClientCommand command) {
-		this.joiningDate = command.getJoiningLocalDate().toDate();
+		this.joiningDate = command.getJoiningDate().toDate();
 		this.firstName = command.getFirstname();
 		this.lastName = command.getLastname();
 		

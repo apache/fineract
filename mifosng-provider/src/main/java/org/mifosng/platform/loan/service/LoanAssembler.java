@@ -64,23 +64,23 @@ public class LoanAssembler {
 		}
 		
 		MonetaryCurrency currency = loanProduct.getCurrency();
-		final BigDecimal defaultNominalInterestRatePerPeriod = command.getInterestRatePerPeriodValue();
+		final BigDecimal defaultNominalInterestRatePerPeriod = command.getInterestRatePerPeriod();
 		final PeriodFrequencyType interestPeriodFrequencyType = PeriodFrequencyType.fromInt(command.getInterestRateFrequencyType());
 		
-		BigDecimal defaultAnnualNominalInterestRate = aprCalculator.calculateFrom(interestPeriodFrequencyType, command.getInterestRatePerPeriodValue());
+		BigDecimal defaultAnnualNominalInterestRate = aprCalculator.calculateFrom(interestPeriodFrequencyType, command.getInterestRatePerPeriod());
 		
 		final InterestMethod interestMethod = InterestMethod.fromInt(command.getInterestType());
 		final InterestCalculationPeriodMethod interestCalculationPeriodMethod = InterestCalculationPeriodMethod.fromInt(command.getInterestCalculationPeriodType());
 		
-		final Integer repayEvery = command.getRepaymentEveryValue();
+		final Integer repayEvery = command.getRepaymentEvery();
 		final PeriodFrequencyType repaymentFrequencyType = PeriodFrequencyType.fromInt(command.getRepaymentFrequencyType());
-		final Integer defaultNumberOfInstallments = command.getNumberOfRepaymentsValue();
+		final Integer defaultNumberOfInstallments = command.getNumberOfRepayments();
 		final AmortizationMethod amortizationMethod = AmortizationMethod.fromInt(command.getAmortizationType());
 		
 		LoanProductRelatedDetail loanRepaymentScheduleDetail = new LoanProductRelatedDetail(currency,
-				command.getPrincipalValue(), defaultNominalInterestRatePerPeriod, interestPeriodFrequencyType, defaultAnnualNominalInterestRate, 
+				command.getPrincipal(), defaultNominalInterestRatePerPeriod, interestPeriodFrequencyType, defaultAnnualNominalInterestRate, 
 				interestMethod, interestCalculationPeriodMethod,
-				repayEvery, repaymentFrequencyType, defaultNumberOfInstallments, amortizationMethod, command.getInArrearsToleranceValue());
+				repayEvery, repaymentFrequencyType, defaultNumberOfInstallments, amortizationMethod, command.getInArrearsTolerance());
 
 		LoanSchedule loanSchedule = command.getLoanSchedule();
 		List<ScheduledLoanInstallment> loanRepaymentSchedule = loanSchedule.getScheduledLoanInstallments();
@@ -98,13 +98,14 @@ public class LoanAssembler {
 
 			LoanRepaymentScheduleInstallment installment = new LoanRepaymentScheduleInstallment(
 					loan, scheduledLoanInstallment.getInstallmentNumber(),
-//					scheduledLoanInstallment.getPeriodStart(),
 					scheduledLoanInstallment.getPeriodEnd(), readPrincipalDue.getAmount(),
 					readInterestDue.getAmount());
 			loan.addRepaymentScheduleInstallment(installment);
 		}
 		
-		loan.submitApplication(command.getSubmittedOnLocalDate(), command.getExpectedDisbursementLocalDate(), command.getRepaymentsStartingFromLocalDate(), command.getInterestChargedFromLocalDate(), defaultLoanLifecycleStateMachine());
+		loan.submitApplication(command.getSubmittedOnDate(), command.getExpectedDisbursementDate(), 
+				command.getRepaymentsStartingFromDate(), command.getInterestChargedFromDate(), 
+				defaultLoanLifecycleStateMachine());
 		
 		return loan;
 	}

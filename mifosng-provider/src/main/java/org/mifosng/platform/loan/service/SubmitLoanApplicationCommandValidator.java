@@ -25,12 +25,12 @@ public class SubmitLoanApplicationCommandValidator {
 			dataValidationErrors.add(error);
 		}
 		
-		if (command.getSubmittedOnLocalDate() == null) {
+		if (command.getSubmittedOnDate() == null) {
 			ApiParameterError error = ApiParameterError.parameterError("validation.msg.loan.submitted.on.date.cannot.be.blank", 
 					"The parameter submittedOnDate cannot be empty.", "submittedOnDate");
 			dataValidationErrors.add(error);
 		} else {
-			if (command.getSubmittedOnLocalDate().isAfter(command.getExpectedDisbursementLocalDate())) {
+			if (command.getSubmittedOnDate().isAfter(command.getExpectedDisbursementDate())) {
 				ApiParameterError error = ApiParameterError.parameterError("validation.msg.loan.submitted.on.date.cannot.be.after.expectedDisbursementDate", 
 						"The date of parameter submittedOnDate cannot fall after the date given for expectedDisbursementDate.", "submittedOnDate", 
 						command.getSubmittedOnDate(), command.getExpectedDisbursementDate());
@@ -40,21 +40,8 @@ public class SubmitLoanApplicationCommandValidator {
 		
 		try {
 			// reuse calculate loan schedule validator for now
-			CalculateLoanScheduleCommand calculateLoanScheduleCommand = new CalculateLoanScheduleCommand(
-					command.getProductId(),
-					command.getPrincipalValue(), command.getInterestRatePerPeriodValue(),
-					command.getInterestRateFrequencyType(),
-					command.getInterestType(), command.getInterestCalculationPeriodType(),
-					command.getRepaymentEveryValue(),
-					command.getRepaymentFrequencyType(),
-					command.getNumberOfRepaymentsValue(),
-					command.getAmortizationType(),
-					command.getExpectedDisbursementLocalDate(),
-					command.getRepaymentsStartingFromLocalDate(),
-					command.getInterestChargedFromLocalDate());
-
-			CalculateLoanScheduleCommandValidator validator = new CalculateLoanScheduleCommandValidator(
-					calculateLoanScheduleCommand);
+			CalculateLoanScheduleCommand calculateLoanScheduleCommand = this.command.toCalculateLoanScheduleCommand();
+			CalculateLoanScheduleCommandValidator validator = new CalculateLoanScheduleCommandValidator(calculateLoanScheduleCommand);
 			validator.validate();
 		} catch (PlatformApiDataValidationException e) {
 			dataValidationErrors.addAll(e.getErrors());

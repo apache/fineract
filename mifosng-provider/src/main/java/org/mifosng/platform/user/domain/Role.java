@@ -14,6 +14,7 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
+import org.mifosng.platform.api.commands.RoleCommand;
 import org.mifosng.platform.api.data.PermissionData;
 import org.mifosng.platform.api.data.RoleData;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
@@ -73,17 +74,16 @@ public class Role extends AbstractAuditableCustom<AppUser, Long> {
 		return data;
 	}
 
-	/**
-	 * When updating details, any parameters with null values are ignored.
-	 */
-	public void update(String name, String description, List<Permission> selectedPermissions) {
-		if (name != null) {
-			this.name = name;
+	public void update(final RoleCommand command, List<Permission> selectedPermissions) {
+		if (command.isNameChanged()) {
+			this.name = command.getName();
 		}
-		if (description != null) {
-			this.description = description;
+		
+		if (command.isDescriptionChanged()) {
+			this.description = command.getDescription();
 		}
-		if (!selectedPermissions.isEmpty()) {
+		
+		if (command.isPermissionsChanged()) {
 			this.permissions.clear();
 			this.permissions = new HashSet<Permission>(selectedPermissions);
 		}

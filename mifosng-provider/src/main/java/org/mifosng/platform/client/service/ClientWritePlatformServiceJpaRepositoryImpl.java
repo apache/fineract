@@ -56,7 +56,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 			firstname = null;
 		}
 
-		Client newClient = Client.newClient(clientOffice, firstname, lastname, command.getJoiningLocalDate(), command.getExternalId());
+		Client newClient = Client.newClient(clientOffice, firstname, lastname, command.getJoiningDate(), command.getExternalId());
 				
 		this.clientRepository.save(newClient);
 
@@ -88,12 +88,11 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 			firstname = null;
 		}
 
-//		Client clientForUpdate = this.clientRepository.findOne(clientsThatMatch(currentUser.getOrganisation(), command.getId()));
 		Client clientForUpdate = this.clientRepository.findOne(command.getId());
 		if (clientForUpdate == null) {
 			throw new ClientNotFoundException(command.getId());
 		}
-		clientForUpdate.update(clientOffice, firstname, lastname, command.getExternalId(), command.getJoiningLocalDate());
+		clientForUpdate.update(clientOffice, firstname, lastname, command.getExternalId(), command.getJoiningDate());
 				
 		this.clientRepository.save(clientForUpdate);
 

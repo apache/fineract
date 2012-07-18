@@ -82,7 +82,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		SubmitLoanApplicationCommandValidator validator = new SubmitLoanApplicationCommandValidator(command);
 		validator.validate();
 
-		LocalDate submittedOn = command.getSubmittedOnLocalDate();
+		LocalDate submittedOn = command.getSubmittedOnDate();
 		if (this.isBeforeToday(submittedOn) && currentUser.hasNotPermissionForAnyOf("CAN_SUBMIT_HISTORIC_LOAN_APPLICATION_ROLE", "PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE")) {
 			throw new NoAuthorizationException("Cannot add backdated loan.");
 		}
@@ -136,7 +136,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 			throw new LoanNotFoundException(command.getLoanId());
 		}
 		
-		LocalDate eventDate = command.getEventLocalDate();
+		LocalDate eventDate = command.getEventDate();
 		if (this.isBeforeToday(eventDate) && currentUser.canNotApproveLoanInPast()) {
 			throw new NoAuthorizationException("User has no authority to approve loan with a date in the past.");
 		}
@@ -190,7 +190,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 			throw new LoanNotFoundException(command.getLoanId());
 		}
 
-		LocalDate eventDate = command.getEventLocalDate();
+		LocalDate eventDate = command.getEventDate();
 		if (this.isBeforeToday(eventDate) && currentUser.canNotRejectLoanInPast()) {
 			throw new NoAuthorizationException("User has no authority to reject loan with a date in the past.");
 		}
@@ -221,7 +221,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 			throw new LoanNotFoundException(command.getLoanId());
 		}
 		
-		LocalDate eventDate = command.getEventLocalDate();
+		LocalDate eventDate = command.getEventDate();
 		if (this.isBeforeToday(eventDate) && currentUser.canNotWithdrawByClientLoanInPast()) {
 			throw new NoAuthorizationException("User has no authority to mark loan as withdrawn by client with a date in the past.");
 		}
@@ -253,7 +253,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		}
 
 		String noteText = command.getNote();
-		LocalDate actualDisbursementDate = command.getEventLocalDate();
+		LocalDate actualDisbursementDate = command.getEventDate();
 		if (this.isBeforeToday(actualDisbursementDate) && currentUser.canNotDisburseLoanInPast()) {
 			throw new NoAuthorizationException("User has no authority to disburse loan with a date in the past.");
 		}
@@ -264,9 +264,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 			LocalDate interestCalculatedFromDate = loan.getInterestChargedFromDate();
 
 			Number principalAsDecimal = loan.getLoanRepaymentScheduleDetail().getPrincipal().getAmount();
-//			String currencyCode = loan.getLoanRepaymentScheduleDetail().getPrincipal().getCurrencyCode();
-//			int currencyDigits = loan.getLoanRepaymentScheduleDetail().getPrincipal().getCurrencyDigitsAfterDecimal();
-			
 			Number interestRatePerYear = loan.getLoanRepaymentScheduleDetail().getAnnualNominalInterestRate();
 			Integer numberOfInstallments = loan.getLoanRepaymentScheduleDetail().getNumberOfRepayments();
 			
@@ -369,14 +366,14 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 			throw new LoanNotFoundException(command.getLoanId());
 		}
 		
-		LocalDate transactionDate = command.getTransactionLocalDate();
+		LocalDate transactionDate = command.getTransactionDate();
 		if (this.isBeforeToday(transactionDate) && currentUser.canNotMakeRepaymentOnLoanInPast()) {
 			throw new NoAuthorizationException("error.msg.no.permission.to.make.repayment.on.loan.in.past");
 		}
 
 		Money repayment = Money.of(loan.getLoanRepaymentScheduleDetail()
 				.getPrincipal().getCurrency(),
-				command.getTransactionAmountValue());
+				command.getTransactionAmount());
 
 		LoanTransaction loanRepayment = LoanTransaction.repayment(repayment, transactionDate);
 		loan.makeRepayment(loanRepayment, defaultLoanLifecycleStateMachine());
@@ -413,10 +410,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		
 		Money transactionAmount = Money.of(loan
 				.getLoanRepaymentScheduleDetail().getPrincipal()
-				.getCurrency(), command.getTransactionAmountValue());
+				.getCurrency(), command.getTransactionAmount());
 
 		// adjustment is only supported for repayments and waivers at present
-		LocalDate transactionDate = command.getTransactionLocalDate();
+		LocalDate transactionDate = command.getTransactionDate();
 		LoanTransaction newTransactionDetail = LoanTransaction.repayment(transactionAmount, transactionDate);
 		if (transactionToAdjust.isWaiver()) {
 			newTransactionDetail = LoanTransaction.waiver(transactionAmount, transactionDate);
@@ -453,9 +450,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		
 		Money waived = Money.of(loan.getLoanRepaymentScheduleDetail()
 				.getPrincipal().getCurrency(),
-				command.getTransactionAmountValue());
+				command.getTransactionAmount());
 
-		LoanTransaction waiver = LoanTransaction.waiver(waived, command.getTransactionLocalDate());
+		LoanTransaction waiver = LoanTransaction.waiver(waived, command.getTransactionDate());
 		
 		loan.waive(waiver, defaultLoanLifecycleStateMachine());
 		

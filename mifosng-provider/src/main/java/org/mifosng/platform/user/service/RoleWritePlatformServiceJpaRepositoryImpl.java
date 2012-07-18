@@ -64,7 +64,7 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
 		if (role == null) {
 			throw new RoleNotFoundException(command.getId());
 		}
-		role.update(command.getName(), command.getDescription(), selectedPermissions);
+		role.update(command, selectedPermissions);
 		
 		this.roleRepository.save(role);
 		

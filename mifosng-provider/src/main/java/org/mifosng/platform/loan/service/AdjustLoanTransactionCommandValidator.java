@@ -29,13 +29,13 @@ public class AdjustLoanTransactionCommandValidator {
 			dataValidationErrors.add(error);
 		}
 		
-		if (command.getTransactionLocalDate() == null) {
+		if (command.getTransactionDate() == null) {
 			ApiParameterError error = ApiParameterError.parameterError("validation.msg.loan.repayment.date.cannot.be.blank", "The parameter transactionDate cannot be blank.", "transactionDate");
 			dataValidationErrors.add(error);
 		}
 		
-		if (command.getTransactionAmountValue() == null || command.getTransactionAmountValue().doubleValue() <= 0) {
-			ApiParameterError error = ApiParameterError.parameterError("validation.msg.loan.repayment.must.be.greater.than.zero", "The parameter transactionAmount less than zero.", "transactionAmount", command.getTransactionAmountValue());
+		if (command.getTransactionAmount() == null || command.getTransactionAmount().doubleValue() <= 0) {
+			ApiParameterError error = ApiParameterError.parameterError("validation.msg.loan.repayment.must.be.greater.than.zero", "The parameter transactionAmount less than zero.", "transactionAmount", command.getTransactionAmount());
 			dataValidationErrors.add(error);
 		}
 		

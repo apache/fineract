@@ -35,7 +35,7 @@ public class ClientCommandValidator {
 		baseDataValidator.reset().parameter("officeId").value(command.getOfficeId()).ignoreIfNull().notNull().greaterThanZero();
 		
 		baseDataValidator.reset().anyOfNotNull(command.getFirstname(), command.getLastname(), command.getClientOrBusinessName(), 
-				command.getJoiningLocalDate(), command.getExternalId(), command.getOfficeId());
+				command.getJoiningDate(), command.getExternalId(), command.getOfficeId());
 		
 		if (!dataValidationErrors.isEmpty()) {
 			throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);

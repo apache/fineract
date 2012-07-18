@@ -7,98 +7,50 @@ import org.joda.time.LocalDate;
 @XmlRootElement
 public class ClientCommand {
 
-	private Long id;
-	private String firstname;
-	private String lastname;
-	private String clientOrBusinessName;
-	private Long officeId;
-	private String externalId;
-	
-	private String dateFormat;
-	private String joiningDate;
-	private LocalDate joiningLocalDate;
+	private final Long id;
+	private final String externalId;
+	private final String firstname;
+	private final String lastname;
+	private final String clientOrBusinessName;
+	private final Long officeId;
+	private final LocalDate joiningDate;
 
-	protected ClientCommand() {
-		//
-	}
-
-	public ClientCommand(final String firstname, final String lastname, final String clientOrBusinessName, final Long officeId, final LocalDate joiningDate) {
+	public ClientCommand(final Long id, final String externalId, final String firstname, final String lastname, final String clientOrBusinessName, 
+			final Long officeId, final LocalDate joiningDate) {
+		this.id = id;
+		this.externalId = externalId;
 		this.firstname = firstname;
 		this.lastname = lastname;
 		this.clientOrBusinessName = clientOrBusinessName;
 		this.officeId = officeId;
-		this.joiningLocalDate = joiningDate;
-	}
-
-	public String getFirstname() {
-		return this.firstname;
-	}
-
-	public void setFirstname(final String firstname) {
-		this.firstname = firstname;
-	}
-
-	public String getLastname() {
-		return this.lastname;
-	}
-
-	public void setLastname(final String lastname) {
-		this.lastname = lastname;
-	}
-
-	public Long getOfficeId() {
-		return this.officeId;
-	}
-
-	public void setOfficeId(final Long officeId) {
-		this.officeId = officeId;
-	}
-
-	public String getExternalId() {
-		return externalId;
-	}
-
-	public void setExternalId(String externalId) {
-		this.externalId = externalId;
-	}
-
-	public String getDateFormat() {
-		return dateFormat;
-	}
-
-	public void setDateFormat(String dateFormat) {
-		this.dateFormat = dateFormat;
+		this.joiningDate = joiningDate;
 	}
 
 	public Long getId() {
 		return id;
 	}
 
-	public void setId(Long id) {
-		this.id = id;
+	public String getExternalId() {
+		return externalId;
 	}
 
-	public String getJoiningDate() {
-		return joiningDate;
+	public String getFirstname() {
+		return firstname;
 	}
 
-	public void setJoiningDate(String joiningDate) {
-		this.joiningDate = joiningDate;
-	}
-
-	public LocalDate getJoiningLocalDate() {
-		return joiningLocalDate;
-	}
-
-	public void setJoiningLocalDate(LocalDate joiningLocalDate) {
-		this.joiningLocalDate = joiningLocalDate;
+	public String getLastname() {
+		return lastname;
 	}
 
 	public String getClientOrBusinessName() {
 		return clientOrBusinessName;
 	}
 
-	public void setClientOrBusinessName(String clientOrBusinessName) {
-		this.clientOrBusinessName = clientOrBusinessName;
+	public Long getOfficeId() {
+		return officeId;
+	}
+
+	public LocalDate getJoiningDate() {
+		return joiningDate;
 	}
 }
