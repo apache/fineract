@@ -12,6 +12,7 @@ import org.mifosng.platform.currency.domain.ApplicationCurrency;
 import org.mifosng.platform.currency.domain.ApplicationCurrencyRepository;
 import org.mifosng.platform.exceptions.PlatformApiDataValidationException;
 import org.mifosng.platform.organisation.domain.OrganisationCurrency;
+import org.mifosng.platform.organisation.domain.OrganisationCurrencyRepository;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,12 +23,14 @@ public class ConfigurationWritePlatformServiceJpaRepositoryImpl implements Confi
 
 	private final PlatformSecurityContext context;
 	private final ApplicationCurrencyRepository applicationCurrencyRepository;
+	private final OrganisationCurrencyRepository organisationCurrencyRepository;
 
 	@Autowired
 	public ConfigurationWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, 
-			final ApplicationCurrencyRepository applicationCurrencyRepository) {
+			final ApplicationCurrencyRepository applicationCurrencyRepository, final OrganisationCurrencyRepository organisationCurrencyRepository) {
 		this.context = context;
 		this.applicationCurrencyRepository = applicationCurrencyRepository;
+		this.organisationCurrencyRepository = organisationCurrencyRepository;
 	}
 	
 	@Transactional
@@ -60,6 +63,9 @@ public class ConfigurationWritePlatformServiceJpaRepositoryImpl implements Confi
 				allowedCurrencies.add(allowedCurrency);				
 			}
 		}
+		
+		this.organisationCurrencyRepository.deleteAll();
+		this.organisationCurrencyRepository.save(allowedCurrencies);
 		
 		if (!dataValidationErrors.isEmpty()) {
 			throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);

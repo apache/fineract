@@ -1,28 +1,17 @@
 package org.mifosng.platform.api.commands;
 
-import java.io.Serializable;
-import java.util.List;
-
-import javax.xml.bind.annotation.XmlRootElement;
-
-@XmlRootElement
-public class OrganisationCurrencyCommand implements Serializable {
+/**
+ * Immutable command for updating allowed currencies.
+ */
+public class OrganisationCurrencyCommand {
 
 	private String[] currencies;
 
-	public OrganisationCurrencyCommand() {
-		//
-	}
-
-	public OrganisationCurrencyCommand(final List<String> selectedCurrencyCodes) {
-		this.currencies = selectedCurrencyCodes.toArray(new String[selectedCurrencyCodes.size()]);
+	public OrganisationCurrencyCommand(final String[] currencies) {
+		this.currencies = currencies;
 	}
 
 	public String[] getCurrencies() {
 		return currencies;
-	}
-
-	public void setCurrencies(String... currencies) {
-		this.currencies = currencies;
 	}
 }

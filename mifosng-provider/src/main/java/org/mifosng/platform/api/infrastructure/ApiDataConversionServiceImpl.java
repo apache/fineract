@@ -24,7 +24,9 @@ import org.mifosng.platform.api.commands.FundCommand;
 import org.mifosng.platform.api.commands.LoanProductCommand;
 import org.mifosng.platform.api.commands.LoanStateTransitionCommand;
 import org.mifosng.platform.api.commands.LoanTransactionCommand;
+import org.mifosng.platform.api.commands.NoteCommand;
 import org.mifosng.platform.api.commands.OfficeCommand;
+import org.mifosng.platform.api.commands.OrganisationCurrencyCommand;
 import org.mifosng.platform.api.commands.RoleCommand;
 import org.mifosng.platform.api.commands.SubmitLoanApplicationCommand;
 import org.mifosng.platform.api.commands.UserCommand;
@@ -633,6 +635,66 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	    String note = extractStringParameter("note", requestMap, modifiedParameters);
 	    
 	    return new AdjustLoanTransactionCommand(loanId, transactionId, transactionDate, note, transactionAmount);
+	}
+	
+	@Override
+	public NoteCommand convertJsonToNoteCommand(final Long noteId, final Long clientId, final String json) {
+		if (StringUtils.isBlank(json)) {
+			throw new InvalidJsonException();
+		}
+		
+		Type typeOfMap = new TypeToken<Map<String, Object>>(){}.getType();
+	    Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
+	    
+	    Set<String> supportedParams = new HashSet<String>(
+	    		Arrays.asList("note")
+	    );
+	    
+	    checkForUnsupportedParameters(requestMap, supportedParams);
+	    
+	    Set<String> modifiedParameters = new HashSet<String>();
+
+	    String note = extractStringParameter("note", requestMap, modifiedParameters);
+	    
+	    return new NoteCommand(noteId, clientId, note);
+	}
+	
+	@Override
+	public OrganisationCurrencyCommand convertJsonToOrganisationCurrencyCommand(final String json) {
+		if (StringUtils.isBlank(json)) {
+			throw new InvalidJsonException();
+		}
+		
+		Type typeOfMap = new TypeToken<Map<String, Object>>(){}.getType();
+	    Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
+	    
+	    Set<String> supportedParams = new HashSet<String>(
+	    		Arrays.asList("currencies")
+	    );
+	    
+	    checkForUnsupportedParameters(requestMap, supportedParams);
+	    
+	    Set<String> modifiedParameters = new HashSet<String>();
+
+	    // check array
+	    JsonParser parser = new JsonParser();
+		
+		String[] currencies = null;
+		JsonElement element = parser.parse(json);
+		if (element.isJsonObject()) {
+			JsonObject object = element.getAsJsonObject();
+			if (object.has("currencies")) {
+				modifiedParameters.add("currencies");
+				JsonArray array = object.get("currencies").getAsJsonArray();
+				currencies = new String[array.size()];
+				for (int i=0; i<array.size(); i++) {
+					currencies[i] = array.get(i).getAsString();
+				}
+			}
+		}
+	    //
+	    
+	    return new OrganisationCurrencyCommand(currencies);
 	}
 
 	private void checkForUnsupportedParameters(Map<String, ?> requestMap, Set<String> supportedParams) {

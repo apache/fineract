@@ -3,9 +3,6 @@ package org.mifosng.platform.api.data;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
-@XmlRootElement
 public class AuthenticatedUserData {
 
 	private String username;

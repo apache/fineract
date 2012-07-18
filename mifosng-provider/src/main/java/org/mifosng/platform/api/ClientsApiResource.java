@@ -38,10 +38,10 @@ import org.springframework.stereotype.Component;
 @Path("/clients")
 @Component
 @Scope("singleton")
-public class ClientApiResource {
+public class ClientsApiResource {
 
 	private final static Logger logger = LoggerFactory
-			.getLogger(ClientApiResource.class);
+			.getLogger(ClientsApiResource.class);
 
 	private String defaultFieldList = "joinedDate";
 	private String allowedFieldList = "allowedOffices";
@@ -219,12 +219,11 @@ public class ClientApiResource {
 	@Path("{clientId}/notes")
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
-	public Response addNewClientNote(@PathParam("clientId") final Long clientId, final NoteCommand command) {
+	public Response addNewClientNote(@PathParam("clientId") final Long clientId, final String jsonRequestBody) {
 
-		command.setClientId(clientId);
-
-		EntityIdentifier identifier = this.clientWritePlatformService
-				.addClientNote(command);
+		NoteCommand command = this.apiDataConversionService.convertJsonToNoteCommand(null, clientId, jsonRequestBody);
+		
+		EntityIdentifier identifier = this.clientWritePlatformService.addClientNote(command);
 
 		return Response.ok().entity(identifier).build();
 	}
@@ -237,8 +236,7 @@ public class ClientApiResource {
 			@PathParam("clientId") final Long clientId,
 			@PathParam("noteId") final Long noteId, @Context final UriInfo uriInfo) {
 
-		NoteData note = this.clientReadPlatformService.retrieveClientNote(
-				clientId, noteId);
+		NoteData note = this.clientReadPlatformService.retrieveClientNote(clientId, noteId);
 
 		String selectedFields = "";
 		return this.jsonFormattingService.convertRequest(note, filterName,
@@ -251,11 +249,10 @@ public class ClientApiResource {
 	@Produces({MediaType.APPLICATION_JSON})
 	public Response updateClientNote(
 			@PathParam("clientId") final Long clientId,
-			@PathParam("noteId") final Long noteId, final NoteCommand command) {
+			@PathParam("noteId") final Long noteId, final String jsonRequestBody) {
 
-		command.setClientId(clientId);
-		command.setId(noteId);
-
+		NoteCommand command = this.apiDataConversionService.convertJsonToNoteCommand(noteId, clientId, jsonRequestBody);
+		
 		EntityIdentifier identifier = this.clientWritePlatformService
 				.updateNote(command);
 

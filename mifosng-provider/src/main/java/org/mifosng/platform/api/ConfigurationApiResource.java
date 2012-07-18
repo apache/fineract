@@ -12,6 +12,7 @@ import javax.ws.rs.core.UriInfo;
 
 import org.mifosng.platform.api.commands.OrganisationCurrencyCommand;
 import org.mifosng.platform.api.data.ConfigurationData;
+import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.ApiJSONFormattingService;
 import org.mifosng.platform.configuration.service.ConfigurationReadPlatformService;
 import org.mifosng.platform.configuration.service.ConfigurationWritePlatformService;
@@ -34,13 +35,16 @@ public class ConfigurationApiResource {
 	private ConfigurationWritePlatformService configurationWritePlatformService;
 
 	@Autowired
+	private ApiDataConversionService apiDataConversionService;
+	
+	@Autowired
 	private ApiJSONFormattingService jsonFormattingService;
 
 	@GET
 	@Path("currency")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrieveCurrencyDataForConfiguration(@Context UriInfo uriInfo) {
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
+	public String retrieveCurrencyDataForConfiguration(@Context final UriInfo uriInfo) {
 
 		ConfigurationData configurationData = this.configurationReadPlatformService
 				.retrieveCurrencyConfiguration();
@@ -53,13 +57,13 @@ public class ConfigurationApiResource {
 
 	@PUT
 	@Path("currency")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public Response updateAllowedCurrenciesForOrganisation(
-			OrganisationCurrencyCommand command) {
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
+	public Response updateAllowedCurrenciesForOrganisation(final String jsonRequestBody) {
 
-		this.configurationWritePlatformService
-				.updateOrganisationCurrencies(command);
+		OrganisationCurrencyCommand command = this.apiDataConversionService.convertJsonToOrganisationCurrencyCommand(jsonRequestBody);
+		
+		this.configurationWritePlatformService.updateOrganisationCurrencies(command);
 
 		return Response.ok().entity(command).build();
 	}

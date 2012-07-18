@@ -1,60 +1,41 @@
 package org.mifosng.platform.api.commands;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
 /**
- * Command used for add or edit notes.
+ * Immutable command used for create or update of notes.
  */
-@XmlRootElement
 public class NoteCommand {
 
-	private Long id;
-	private Long clientId;
-	private Long loanId;
-	private Long loanTransactionId;
-	private String note;
+	private final Long id;
+	private final Long clientId;
+	private final Long loanId;
+	private final Long loanTransactionId;
+	private final String note;
 
-	public NoteCommand() {
-		//
+	public NoteCommand(final Long id, Long clientId, final String note) {
+		this.id = id;
+		this.clientId = clientId;
+		this.loanId = null;
+		this.loanTransactionId = null;
+		this.note = note;
 	}
 
 	public Long getId() {
 		return id;
 	}
 
-	public void setId(Long id) {
-		this.id = id;
-	}
-
 	public Long getClientId() {
 		return clientId;
-	}
-
-	public void setClientId(Long clientId) {
-		this.clientId = clientId;
 	}
 
 	public Long getLoanId() {
 		return loanId;
 	}
 
-	public void setLoanId(Long loanId) {
-		this.loanId = loanId;
-	}
-
 	public Long getLoanTransactionId() {
 		return loanTransactionId;
 	}
 
-	public void setLoanTransactionId(Long loanTransactionId) {
-		this.loanTransactionId = loanTransactionId;
-	}
-
 	public String getNote() {
 		return note;
-	}
-
-	public void setNote(String note) {
-		this.note = note;
 	}
 }

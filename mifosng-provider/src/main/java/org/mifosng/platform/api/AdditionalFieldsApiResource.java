@@ -54,8 +54,8 @@ public class AdditionalFieldsApiResource {
 	private ApiJSONFormattingService jsonFormattingService;
 
 	@GET
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON })
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
 	public String datasets(@QueryParam("type") String type,
 			@Context UriInfo uriInfo) {
 
@@ -69,8 +69,8 @@ public class AdditionalFieldsApiResource {
 
 	@GET
 	@Path("{type}/{set}/{id}")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON })
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
 	public String extraData(@PathParam("type") final String type,
 			@PathParam("set") final String set, @PathParam("id") final Long id,
 			@Context UriInfo uriInfo) {
@@ -98,8 +98,8 @@ public class AdditionalFieldsApiResource {
 
 	@POST
 	@Path("{type}/{set}/{id}")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON })
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
 	public Response saveExtraData(@PathParam("type") final String type,
 			@PathParam("set") final String set, @PathParam("id") final Long id,
 			String reqbody) {

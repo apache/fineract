@@ -3,11 +3,8 @@ package org.mifosng.platform.api.data;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
 import org.codehaus.jackson.map.annotate.JsonFilter;
 
-@XmlRootElement
 @JsonFilter("myFilter")
 public class ClientLoanAccountSummaryCollectionData {
 

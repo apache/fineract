@@ -1,10 +1,7 @@
 package org.mifosng.platform.api.commands;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
 import org.joda.time.LocalDate;
 
-@XmlRootElement
 public class ClientCommand {
 
 	private final Long id;
