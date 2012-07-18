@@ -274,7 +274,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	    Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
 	    
 	    Set<String> supportedParams = new HashSet<String>(
-	    		Arrays.asList("name", "description", "fundId", "currencyCode", "digitsAfterDecimalValue", 
+	    		Arrays.asList("name", "description", "fundId", "currencyCode", "digitsAfterDecimal", 
 	    				"principal", "inArrearsTolerance", "interestRatePerPeriod", "repaymentEvery", "numberOfRepayments", 
 	    				"repaymentFrequencyType", "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType", "locale")
 	    );
@@ -341,7 +341,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	    Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
 	    
 	    Set<String> supportedParams = new HashSet<String>(
-	    		Arrays.asList("name", "externalId", "parentId", "openingDate")
+	    		Arrays.asList("name", "externalId", "parentId", "openingDate", "dateFormat")
 	    );
 	    
 	    checkForUnsupportedParameters(requestMap, supportedParams);
@@ -654,6 +654,11 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 			paramValue = (String) requestMap.get(paramName);
 			modifiedParameters.add(paramName);
 		}
+		
+		if (paramValue != null) {
+			paramValue = paramValue.trim();
+		}
+		
 		return paramValue;
 	}
 	

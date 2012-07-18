@@ -1,5 +1,6 @@
 package org.mifosng.platform.loan.service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -263,8 +264,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 			LocalDate repaymentsStartingFromDate = loan.getExpectedFirstRepaymentOnDate();
 			LocalDate interestCalculatedFromDate = loan.getInterestChargedFromDate();
 
-			Number principalAsDecimal = loan.getLoanRepaymentScheduleDetail().getPrincipal().getAmount();
-			Number interestRatePerYear = loan.getLoanRepaymentScheduleDetail().getAnnualNominalInterestRate();
+			BigDecimal principalAsDecimal = loan.getLoanRepaymentScheduleDetail().getPrincipal().getAmount();
+			BigDecimal interestRatePerYear = loan.getLoanRepaymentScheduleDetail().getAnnualNominalInterestRate();
 			Integer numberOfInstallments = loan.getLoanRepaymentScheduleDetail().getNumberOfRepayments();
 			
 			Integer repaidEvery = loan.getLoanRepaymentScheduleDetail().getRepayEvery();
@@ -272,7 +273,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 			Integer selectedRepaymentSchedule = loan.getLoanRepaymentScheduleDetail().getAmortizationMethod().getValue();
 			
 			// use annual percentage rate to re-calculate loan schedule for late disbursement
-			Number interestRatePerPeriod = interestRatePerYear;
+			BigDecimal interestRatePerPeriod = interestRatePerYear;
 			Integer interestRateFrequencyMethod = PeriodFrequencyType.YEARS.getValue();
 			
 			Integer interestMethod = loan.getLoanRepaymentScheduleDetail().getInterestMethod().getValue();

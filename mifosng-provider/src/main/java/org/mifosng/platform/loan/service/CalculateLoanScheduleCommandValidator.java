@@ -22,41 +22,39 @@ public class CalculateLoanScheduleCommandValidator {
 		
 		DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");
 		
-//		baseDataValidator.reset().parameter("currencyCode").value(command.getCurrencyCode()).notBlank();
-//		baseDataValidator.reset().parameter("digitsAfterDecimal").value(command.getDigitsAfterDecimalValue()).notNull().inMinMaxRange(0, 6);
-		baseDataValidator.reset().parameter("principal").value(command.getPrincipalValue()).notNull().positiveAmount();
+		baseDataValidator.reset().parameter("principal").value(command.getPrincipal()).notNull().positiveAmount();
 		baseDataValidator.reset().parameter("repaymentFrequencyType").value(command.getRepaymentFrequencyType()).notNull().inMinMaxRange(0, 3);
-		baseDataValidator.reset().parameter("repaymentEvery").value(command.getRepaymentEveryValue()).notNull().greaterThanZero();
-		baseDataValidator.reset().parameter("numberOfRepayments").value(command.getNumberOfRepaymentsValue()).notNull().greaterThanZero();
-		baseDataValidator.reset().parameter("interestRatePerPeriod").value(command.getInterestRatePerPeriodValue()).notNull();
+		baseDataValidator.reset().parameter("repaymentEvery").value(command.getRepaymentEvery()).notNull().greaterThanZero();
+		baseDataValidator.reset().parameter("numberOfRepayments").value(command.getNumberOfRepayments()).notNull().greaterThanZero();
+		baseDataValidator.reset().parameter("interestRatePerPeriod").value(command.getInterestRatePerPeriod()).notNull();
 		baseDataValidator.reset().parameter("interestRateFrequencyType").value(command.getInterestRateFrequencyType()).notNull().inMinMaxRange(0, 3);
 		baseDataValidator.reset().parameter("amortizationType").value(command.getAmortizationType()).notNull().inMinMaxRange(0, 1);
 		baseDataValidator.reset().parameter("interestType").value(command.getInterestType()).notNull().inMinMaxRange(0, 1);
 		baseDataValidator.reset().parameter("interestCalculationPeriodType").value(command.getInterestCalculationPeriodType()).notNull().inMinMaxRange(0, 1);
 		
-		baseDataValidator.reset().parameter("expectedDisbursementDate").value(command.getExpectedDisbursementLocalDate()).notNull();
+		baseDataValidator.reset().parameter("expectedDisbursementDate").value(command.getExpectedDisbursementDate()).notNull();
 		
-		if (command.getExpectedDisbursementLocalDate() != null) {
-			if (command.getRepaymentsStartingFromLocalDate() != null
-					&& command.getExpectedDisbursementLocalDate().isAfter(command.getRepaymentsStartingFromLocalDate())) {
+		if (command.getExpectedDisbursementDate() != null) {
+			if (command.getRepaymentsStartingFromDate() != null
+					&& command.getExpectedDisbursementDate().isAfter(command.getRepaymentsStartingFromDate())) {
 				ApiParameterError error = ApiParameterError.parameterError("validation.msg.loan.expectedDisbursementDate.cannot.be.after.first.repayment.date", 
 						"The parameter expectedDisbursementDate has a date which falls after the given first repayment date.", "expectedDisbursementDate", 
-						command.getExpectedDisbursementLocalDate(), command.getRepaymentsStartingFromLocalDate());
+						command.getExpectedDisbursementDate(), command.getRepaymentsStartingFromDate());
 				dataValidationErrors.add(error);
 			}
 		}
 		
-		if (command.getRepaymentsStartingFromLocalDate() != null && command.getInterestChargedFromLocalDate() == null) {
+		if (command.getRepaymentsStartingFromDate() != null && command.getInterestChargedFromDate() == null) {
 			
 			ApiParameterError error = ApiParameterError.parameterError("validation.msg.loan.interestCalculatedFromDate.must.be.entered.when.using.repayments.startfrom.field", 
-					"The parameter interestCalculatedFromDate cannot be empty when first repayment date is provided.", "interestCalculatedFromDate", command.getRepaymentsStartingFromLocalDate());
+					"The parameter interestCalculatedFromDate cannot be empty when first repayment date is provided.", "interestCalculatedFromDate", command.getRepaymentsStartingFromDate());
 			dataValidationErrors.add(error);
-		} else if (command.getRepaymentsStartingFromLocalDate() == null && command.getInterestChargedFromLocalDate() != null) {
+		} else if (command.getRepaymentsStartingFromDate() == null && command.getInterestChargedFromDate() != null) {
 			
 			// validate interestCalculatedFromDate is after or on repaymentsStartingFromDate
-			if (command.getExpectedDisbursementLocalDate().isAfter(command.getInterestChargedFromLocalDate())) {
+			if (command.getExpectedDisbursementDate().isAfter(command.getInterestChargedFromDate())) {
 				ApiParameterError error = ApiParameterError.parameterError("validation.msg.loan.interestChargedFromDate.cannot.be.before.disbursement.date", 
-						"The parameter interestCalculatedFromDate cannot be before the date given for expected disbursement.", "interestChargedFromDate", command.getInterestChargedFromLocalDate(), command.getExpectedDisbursementLocalDate());
+						"The parameter interestCalculatedFromDate cannot be before the date given for expected disbursement.", "interestChargedFromDate", command.getInterestChargedFromDate(), command.getExpectedDisbursementDate());
 				dataValidationErrors.add(error);
 			}
 		}

@@ -91,7 +91,7 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
 				office.update(parent);
 			}
 	
-			this.officeRepository.save(office);
+			this.officeRepository.saveAndFlush(office);
 	
 			return office.getId();
 		} catch (DataIntegrityViolationException dve) {

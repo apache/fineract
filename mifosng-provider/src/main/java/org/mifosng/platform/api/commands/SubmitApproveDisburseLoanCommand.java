@@ -1,9 +1,5 @@
 package org.mifosng.platform.api.commands;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
-
-@XmlRootElement
 public class SubmitApproveDisburseLoanCommand {
 
 	private SubmitLoanApplicationCommand submitLoanApplicationCommand;
@@ -27,7 +23,8 @@ public class SubmitApproveDisburseLoanCommand {
 		return approveLoanCommand;
 	}
 
-	public void setApproveLoanCommand(LoanStateTransitionCommand approveLoanCommand) {
+	public void setApproveLoanCommand(
+			LoanStateTransitionCommand approveLoanCommand) {
 		this.approveLoanCommand = approveLoanCommand;
 	}
 
@@ -35,7 +32,8 @@ public class SubmitApproveDisburseLoanCommand {
 		return disburseLoanCommand;
 	}
 
-	public void setDisburseLoanCommand(LoanStateTransitionCommand disburseLoanCommand) {
+	public void setDisburseLoanCommand(
+			LoanStateTransitionCommand disburseLoanCommand) {
 		this.disburseLoanCommand = disburseLoanCommand;
 	}
 }

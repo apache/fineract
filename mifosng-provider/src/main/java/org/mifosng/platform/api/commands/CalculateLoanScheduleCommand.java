@@ -2,192 +2,103 @@ package org.mifosng.platform.api.commands;
 
 import java.math.BigDecimal;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
 import org.joda.time.LocalDate;
 
-@XmlRootElement
+/**
+ * Immutable command used when auto-calculating loan schedules based on loan terms.
+ */
 public class CalculateLoanScheduleCommand {
 
-	private Long productId;
-	private BigDecimal principalValue;
-	private BigDecimal inArrearsToleranceValue;
+	private final Long productId;
+	private final BigDecimal principal;
 	
-	private Integer repaymentEveryValue;
-	private Integer repaymentFrequencyType;
-	private Integer numberOfRepaymentsValue;
+	private final Integer repaymentEvery;
+	private final Integer repaymentFrequencyType;
+	private final Integer numberOfRepayments;
 	
-	private BigDecimal interestRatePerPeriodValue;
-	private Integer interestRateFrequencyType;
-	private Integer amortizationType;
-	private Integer interestType;
-	private Integer interestCalculationPeriodType;
+	private final BigDecimal interestRatePerPeriod;
+	private final Integer interestRateFrequencyType;
+	private final Integer amortizationType;
+	private final Integer interestType;
+	private final Integer interestCalculationPeriodType;
 	
-	private LocalDate expectedDisbursementLocalDate;
-	private LocalDate repaymentsStartingFromLocalDate;
-	private LocalDate interestChargedFromLocalDate;
-
-	protected CalculateLoanScheduleCommand() {
-		//
-	}
+	private final LocalDate expectedDisbursementDate;
+	private final LocalDate repaymentsStartingFromDate;
+	private final LocalDate interestChargedFromDate;
 
 	public CalculateLoanScheduleCommand(
 			final Long productId,
-			final Number principal,
-			final Number interestRatePerPeriod, Integer interestRateFrequencyMethod, final Integer interestMethod, final Integer interestCalculationPeriodMethod,
+			final BigDecimal principal,
+			final BigDecimal interestRatePerPeriod, Integer interestRateFrequencyMethod, final Integer interestMethod, final Integer interestCalculationPeriodMethod,
 			final Integer repaymentEvery, final Integer repaymentFrequency, final Integer numberOfRepayments, Integer amortizationMethod,
 			final LocalDate expectedDisbursementDate,
 			final LocalDate repaymentsStartingFromDate, final LocalDate interestCalculatedFromDate) {
 		
 		this.productId = productId;
-		if (principal != null) {
-			this.principalValue = BigDecimal.valueOf(principal.doubleValue());
-		}
-		if (interestRatePerPeriod != null) {
-			this.interestRatePerPeriodValue = BigDecimal.valueOf(interestRatePerPeriod.doubleValue());
-		}
+		this.principal = principal;
+		this.interestRatePerPeriod = interestRatePerPeriod;
 		this.interestRateFrequencyType = interestRateFrequencyMethod;
 		this.interestType = interestMethod;
 		this.interestCalculationPeriodType = interestCalculationPeriodMethod;
-		this.repaymentEveryValue = repaymentEvery;
+		this.repaymentEvery = repaymentEvery;
 		this.repaymentFrequencyType = repaymentFrequency;
-		this.numberOfRepaymentsValue = numberOfRepayments;
+		this.numberOfRepayments = numberOfRepayments;
 		this.amortizationType = amortizationMethod;
 		
-		this.expectedDisbursementLocalDate = expectedDisbursementDate;
-		this.repaymentsStartingFromLocalDate = repaymentsStartingFromDate;
-		this.interestChargedFromLocalDate= interestCalculatedFromDate;
-	}
-
-//	public String getCurrencyCode() {
-//		return currencyCode;
-//	}
-//
-//	public void setCurrencyCode(String currencyCode) {
-//		this.currencyCode = currencyCode;
-//	}
-//
-//	public Integer getDigitsAfterDecimalValue() {
-//		return digitsAfterDecimalValue;
-//	}
-//
-//	public void setDigitsAfterDecimalValue(Integer digitsAfterDecimalValue) {
-//		this.digitsAfterDecimalValue = digitsAfterDecimalValue;
-//	}
-
-	public BigDecimal getPrincipalValue() {
-		return principalValue;
-	}
-
-	public void setPrincipalValue(BigDecimal principalValue) {
-		this.principalValue = principalValue;
-	}
-
-	public BigDecimal getInArrearsToleranceValue() {
-		return inArrearsToleranceValue;
-	}
-
-	public void setInArrearsToleranceValue(BigDecimal inArrearsToleranceValue) {
-		this.inArrearsToleranceValue = inArrearsToleranceValue;
-	}
-
-	public Integer getRepaymentEveryValue() {
-		return repaymentEveryValue;
-	}
-
-	public void setRepaymentEveryValue(Integer repaymentEveryValue) {
-		this.repaymentEveryValue = repaymentEveryValue;
-	}
-
-	public Integer getRepaymentFrequencyType() {
-		return repaymentFrequencyType;
-	}
-
-	public void setRepaymentFrequencyType(Integer repaymentFrequencyType) {
-		this.repaymentFrequencyType = repaymentFrequencyType;
-	}
-
-	public Integer getNumberOfRepaymentsValue() {
-		return numberOfRepaymentsValue;
-	}
-
-	public void setNumberOfRepaymentsValue(Integer numberOfRepaymentsValue) {
-		this.numberOfRepaymentsValue = numberOfRepaymentsValue;
-	}
-
-	public BigDecimal getInterestRatePerPeriodValue() {
-		return interestRatePerPeriodValue;
-	}
-
-	public void setInterestRatePerPeriodValue(BigDecimal interestRatePerPeriodValue) {
-		this.interestRatePerPeriodValue = interestRatePerPeriodValue;
-	}
-
-	public Integer getInterestRateFrequencyType() {
-		return interestRateFrequencyType;
-	}
-
-	public void setInterestRateFrequencyType(Integer interestRateFrequencyType) {
-		this.interestRateFrequencyType = interestRateFrequencyType;
-	}
-
-	public Integer getAmortizationType() {
-		return amortizationType;
-	}
-
-	public void setAmortizationType(Integer amortizationType) {
-		this.amortizationType = amortizationType;
-	}
-
-	public Integer getInterestType() {
-		return interestType;
-	}
-
-	public void setInterestType(Integer interestType) {
-		this.interestType = interestType;
-	}
-
-	public Integer getInterestCalculationPeriodType() {
-		return interestCalculationPeriodType;
-	}
-
-	public void setInterestCalculationPeriodType(
-			Integer interestCalculationPeriodType) {
-		this.interestCalculationPeriodType = interestCalculationPeriodType;
-	}
-
-	public LocalDate getExpectedDisbursementLocalDate() {
-		return expectedDisbursementLocalDate;
-	}
-
-	public void setExpectedDisbursementLocalDate(
-			LocalDate expectedDisbursementLocalDate) {
-		this.expectedDisbursementLocalDate = expectedDisbursementLocalDate;
-	}
-
-	public LocalDate getRepaymentsStartingFromLocalDate() {
-		return repaymentsStartingFromLocalDate;
-	}
-
-	public void setRepaymentsStartingFromLocalDate(
-			LocalDate repaymentsStartingFromLocalDate) {
-		this.repaymentsStartingFromLocalDate = repaymentsStartingFromLocalDate;
-	}
-
-	public LocalDate getInterestChargedFromLocalDate() {
-		return interestChargedFromLocalDate;
-	}
-
-	public void setInterestChargedFromLocalDate(
-			LocalDate interestChargedFromLocalDate) {
-		this.interestChargedFromLocalDate = interestChargedFromLocalDate;
+		this.expectedDisbursementDate = expectedDisbursementDate;
+		this.repaymentsStartingFromDate = repaymentsStartingFromDate;
+		this.interestChargedFromDate= interestCalculatedFromDate;
 	}
 
 	public Long getProductId() {
 		return productId;
 	}
 
-	public void setProductId(Long productId) {
-		this.productId = productId;
+	public BigDecimal getPrincipal() {
+		return principal;
+	}
+
+	public Integer getRepaymentEvery() {
+		return repaymentEvery;
+	}
+
+	public Integer getRepaymentFrequencyType() {
+		return repaymentFrequencyType;
+	}
+
+	public Integer getNumberOfRepayments() {
+		return numberOfRepayments;
+	}
+
+	public BigDecimal getInterestRatePerPeriod() {
+		return interestRatePerPeriod;
+	}
+
+	public Integer getInterestRateFrequencyType() {
+		return interestRateFrequencyType;
+	}
+
+	public Integer getAmortizationType() {
+		return amortizationType;
+	}
+
+	public Integer getInterestType() {
+		return interestType;
+	}
+
+	public Integer getInterestCalculationPeriodType() {
+		return interestCalculationPeriodType;
+	}
+
+	public LocalDate getExpectedDisbursementDate() {
+		return expectedDisbursementDate;
+	}
+
+	public LocalDate getRepaymentsStartingFromDate() {
+		return repaymentsStartingFromDate;
+	}
+
+	public LocalDate getInterestChargedFromDate() {
+		return interestChargedFromDate;
 	}
 }

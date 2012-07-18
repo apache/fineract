@@ -25,15 +25,16 @@ public class Fund extends AbstractAuditableCustom<AppUser, Long> {
 	@Column(name = "external_id", length=100)
 	private String externalId;
 
-	public static Fund createNew(final String fundName) {
-		return new Fund(fundName);
+	public static Fund createNew(final String fundName, final String externalId) {
+		return new Fund(fundName, externalId);
 	}
 	
 	protected Fund() {
 	}
 
-	private Fund(final String fundName) {
-		this.name = fundName;
+	private Fund(final String fundName, final String externalId) {
+		this.name = StringUtils.defaultIfEmpty(fundName, null);
+		this.externalId = StringUtils.defaultIfEmpty(externalId, null);
 	}
 
 	public void update(final FundCommand command) {

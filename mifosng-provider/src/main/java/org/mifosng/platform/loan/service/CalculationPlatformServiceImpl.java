@@ -62,14 +62,14 @@ public class CalculationPlatformServiceImpl implements
 		CalculateLoanScheduleCommandValidator validator = new CalculateLoanScheduleCommandValidator(command);
 		validator.validate();
 		
-		final BigDecimal principalAmount = command.getPrincipalValue();
-		final BigDecimal defaultNominalInterestRatePerPeriod = command.getInterestRatePerPeriodValue();
+		final BigDecimal principalAmount = command.getPrincipal();
+		final BigDecimal defaultNominalInterestRatePerPeriod = command.getInterestRatePerPeriod();
 		final PeriodFrequencyType interestPeriodFrequencyType = PeriodFrequencyType.fromInt(command.getInterestRateFrequencyType());
 		final InterestMethod interestMethod = InterestMethod.fromInt(command.getInterestType());
 		final InterestCalculationPeriodMethod interestCalculationPeriodMethod = InterestCalculationPeriodMethod.fromInt(command.getInterestCalculationPeriodType());
-		final Integer repayEvery = command.getRepaymentEveryValue();
+		final Integer repayEvery = command.getRepaymentEvery();
 		final PeriodFrequencyType repaymentFrequencyType = PeriodFrequencyType.fromInt(command.getRepaymentFrequencyType());
-		final Integer defaultNumberOfInstallments = command.getNumberOfRepaymentsValue();
+		final Integer defaultNumberOfInstallments = command.getNumberOfRepayments();
 		final AmortizationMethod amortizationMethod = AmortizationMethod.fromInt(command.getAmortizationType());
 		
 		final BigDecimal defaultAnnualNominalInterestRate = this.aprCalculator.calculateFrom(interestPeriodFrequencyType, defaultNominalInterestRatePerPeriod);
@@ -96,8 +96,8 @@ public class CalculationPlatformServiceImpl implements
 		CurrencyData currencyData = new CurrencyData(applicationCurrency.getCode(), applicationCurrency.getName(), currency.getDigitsAfterDecimal(),
 				applicationCurrency.getDisplaySymbol(), applicationCurrency.getNameCode());
 		
-		return loanScheduleGenerator.generate(loanScheduleInfo, command.getExpectedDisbursementLocalDate(), command.getRepaymentsStartingFromLocalDate(), 
-				command.getInterestChargedFromLocalDate(), currencyData);
+		return loanScheduleGenerator.generate(loanScheduleInfo, command.getExpectedDisbursementDate(), command.getRepaymentsStartingFromDate(), 
+				command.getInterestChargedFromDate(), currencyData);
 	}
 
 	@Override

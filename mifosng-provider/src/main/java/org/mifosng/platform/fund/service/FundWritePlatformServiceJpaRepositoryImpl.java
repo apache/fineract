@@ -37,7 +37,7 @@ public class FundWritePlatformServiceJpaRepositoryImpl implements FundWritePlatf
 			FundCommandValidator validator = new FundCommandValidator(command);
 			validator.validateForCreate();
 
-			Fund fund = Fund.createNew(command.getName());
+			Fund fund = Fund.createNew(command.getName(), command.getExternalId());
 			
 			this.fundRepository.saveAndFlush(fund);
 			
@@ -65,7 +65,7 @@ public class FundWritePlatformServiceJpaRepositoryImpl implements FundWritePlatf
 			}
 			fund.update(command);
 			
-			this.fundRepository.save(fund);
+			this.fundRepository.saveAndFlush(fund);
 	
 			return fund.getId();
 		} catch (DataIntegrityViolationException dve) {
