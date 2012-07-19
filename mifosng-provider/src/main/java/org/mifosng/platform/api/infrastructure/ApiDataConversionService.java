@@ -16,14 +16,22 @@ import org.mifosng.platform.api.commands.RoleCommand;
 import org.mifosng.platform.api.commands.SubmitLoanApplicationCommand;
 import org.mifosng.platform.api.commands.UserCommand;
 import org.mifosng.platform.api.data.FundData;
+import org.mifosng.platform.api.data.OfficeData;
+import org.mifosng.platform.api.data.PermissionData;
 
 public interface ApiDataConversionService {
+	
+	//
+	String convertPermissionDataToJson(boolean prettyPrint, Set<String> responseParameters, PermissionData... permissions);
+	//
 
 	FundCommand convertJsonToFundCommand(Long resourceIdentifier, String json);
 	
-	String covertFundDataToJson(boolean prettyPrint, Set<String> responseParameters, FundData... funds);
+	String convertFundDataToJson(boolean prettyPrint, Set<String> responseParameters, FundData... funds);
 
 	OfficeCommand convertJsonToOfficeCommand(Long resourceIdentifier, String json);
+	
+	String convertOfficeDataToJson(boolean prettyPrint, Set<String> responseParameters, OfficeData... offices);
 
 	RoleCommand convertJsonToRoleCommand(Long resourceIdentifier, String json);
 
@@ -47,6 +55,4 @@ public interface ApiDataConversionService {
 	OrganisationCurrencyCommand convertJsonToOrganisationCurrencyCommand(String jsonRequestBody);
 
 	NoteCommand convertJsonToNoteCommand(Long resourceIdentifier, Long clientId, String jsonRequestBody);
-
-	
 }

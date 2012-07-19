@@ -2,29 +2,22 @@ package org.mifosng.platform.api.data;
 
 import java.io.Serializable;
 
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-import org.codehaus.jackson.map.annotate.JsonFilter;
-
-@JsonIgnoreProperties({ "orgId", "groupType" })
-@JsonFilter("permissionFilter")
 public class PermissionData implements Serializable {
 
 	private Long id;
 	private String name;
 	private String description;
 	private String code;
-	private int groupType;
 
 	public PermissionData() {
 		//
 	}
 
-	public PermissionData(final Long id, final String name, final String description, final String code, int groupType) {
+	public PermissionData(final Long id, final String name, final String description, final String code) {
 		this.id = id;
 		this.name = name;
 		this.description = description;
 		this.code = code;
-		this.groupType = groupType;
 	}
 
 	@Override
@@ -68,13 +61,5 @@ public class PermissionData implements Serializable {
 
 	public void setCode(final String code) {
 		this.code = code;
-	}
-
-	public int getGroupType() {
-		return groupType;
-	}
-
-	public void setGroupType(int groupType) {
-		this.groupType = groupType;
 	}
 }

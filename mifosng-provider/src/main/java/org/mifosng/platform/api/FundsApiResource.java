@@ -1,8 +1,6 @@
 package org.mifosng.platform.api;
 
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
@@ -14,7 +12,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
@@ -22,6 +19,7 @@ import org.mifosng.platform.api.commands.FundCommand;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.FundData;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
+import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
 import org.mifosng.platform.fund.service.FundReadPlatformService;
 import org.mifosng.platform.fund.service.FundWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,23 +45,12 @@ public class FundsApiResource {
 	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveFunds(@Context final UriInfo uriInfo) {
 
-		MultivaluedMap<String, String> queryParams = uriInfo.getQueryParameters();
-		String commaSerperatedParameters = "";
-		if (queryParams.getFirst("fields") != null) {
-			commaSerperatedParameters = queryParams.getFirst("fields");
-		}
-		
-		boolean prettyPrint = false;
-		if (queryParams.getFirst("pretty") != null) {
-			String prettyPrintValue = queryParams.getFirst("pretty");
-			prettyPrint = "true".equalsIgnoreCase(prettyPrintValue);
-		} 
-		
-		Set<String> responseParameters = new HashSet<String>(Arrays.asList(commaSerperatedParameters.split("\\s*,\\s*")));
+		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 		
 		Collection<FundData> funds = this.readPlatformService.retrieveAllFunds();
 		
-		return this.apiDataConversionService.covertFundDataToJson(prettyPrint, responseParameters, funds.toArray(new FundData[funds.size()]));
+		return this.apiDataConversionService.convertFundDataToJson(prettyPrint, responseParameters, funds.toArray(new FundData[funds.size()]));
 	}
 
 	@POST
@@ -83,10 +70,13 @@ public class FundsApiResource {
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
 	public String retreiveOffice(@PathParam("fundId") final Long fundId, @Context UriInfo uriInfo) {
-
+		
+		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+		
 		FundData fund = this.readPlatformService.retrieveFund(fundId);
 
-		return this.apiDataConversionService.covertFundDataToJson(fund);
+		return this.apiDataConversionService.convertFundDataToJson(prettyPrint, responseParameters, fund);
 	}
 
 	@PUT

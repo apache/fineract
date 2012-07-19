@@ -32,6 +32,8 @@ import org.mifosng.platform.api.commands.SubmitLoanApplicationCommand;
 import org.mifosng.platform.api.commands.UserCommand;
 import org.mifosng.platform.api.data.ApiParameterError;
 import org.mifosng.platform.api.data.FundData;
+import org.mifosng.platform.api.data.OfficeData;
+import org.mifosng.platform.api.data.PermissionData;
 import org.mifosng.platform.api.errorhandling.InvalidJsonException;
 import org.mifosng.platform.api.errorhandling.UnsupportedParameterException;
 import org.mifosng.platform.exceptions.PlatformApiDataValidationException;
@@ -58,20 +60,85 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	}
 	
 	@Override
-	public String covertFundDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final FundData... funds) {
+	public String convertPermissionDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final PermissionData... permissions) {
+		Set<String> supportedParameters = new HashSet<String>(Arrays.asList("id", "name", "nameDecorated", "externalId", "openingDate", 
+				"hierarchy", "parentId", "parentName", "allowedParents"));
 		
-		Set<String> supportedParameters = new HashSet<String>(Arrays.asList("id", "name", "externalId"));
+		final Set<String> parameterNamesToSkip = new HashSet<String>();
 		
-		if (!supportedParameters.containsAll(responseParameters)) {
-			throw new UnsupportedParameterException(new ArrayList<String>(responseParameters));
+		if (!responseParameters.isEmpty()) {
+			if (!supportedParameters.containsAll(responseParameters)) {
+				throw new UnsupportedParameterException(new ArrayList<String>(responseParameters));
+			}
+			
+			parameterNamesToSkip.addAll(supportedParameters);
+			parameterNamesToSkip.removeAll(responseParameters);
 		}
-		
-		final Set<String> parameterNamesToSkip = new HashSet<String>(supportedParameters);
-		parameterNamesToSkip.removeAll(responseParameters);
 		
 		ExclusionStrategy strategy = new ParameterListExclusionStrategy(parameterNamesToSkip);
 		
-		Gson gsonDeserializer = new GsonBuilder().addSerializationExclusionStrategy(strategy).create();
+		GsonBuilder builder = new GsonBuilder().addSerializationExclusionStrategy(strategy);
+		builder.registerTypeAdapter(LocalDate.class, new JodaLocalDateAdapter());
+		if (prettyPrint) {
+			builder.setPrettyPrinting();
+		}
+		Gson gsonDeserializer = builder.create();
+		
+		return gsonDeserializer.toJson(permissions);
+	}
+	
+	@Override
+	public String convertOfficeDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final OfficeData... offices) {
+		
+		Set<String> supportedParameters = new HashSet<String>(Arrays.asList("id", "name", "nameDecorated", "externalId", "openingDate", 
+				"hierarchy", "parentId", "parentName", "allowedParents"));
+		
+		final Set<String> parameterNamesToSkip = new HashSet<String>();
+		
+		if (!responseParameters.isEmpty()) {
+			if (!supportedParameters.containsAll(responseParameters)) {
+				throw new UnsupportedParameterException(new ArrayList<String>(responseParameters));
+			}
+			
+			parameterNamesToSkip.addAll(supportedParameters);
+			parameterNamesToSkip.removeAll(responseParameters);
+		}
+		
+		ExclusionStrategy strategy = new ParameterListExclusionStrategy(parameterNamesToSkip);
+		
+		GsonBuilder builder = new GsonBuilder().addSerializationExclusionStrategy(strategy);
+		builder.registerTypeAdapter(LocalDate.class, new JodaLocalDateAdapter());
+		if (prettyPrint) {
+			builder.setPrettyPrinting();
+		}
+		Gson gsonDeserializer = builder.create();
+		
+		return gsonDeserializer.toJson(offices);
+	}
+	
+	@Override
+	public String convertFundDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final FundData... funds) {
+		
+		Set<String> supportedParameters = new HashSet<String>(Arrays.asList("id", "name", "externalId"));
+		
+		final Set<String> parameterNamesToSkip = new HashSet<String>();
+		
+		if (!responseParameters.isEmpty()) {
+			if (!supportedParameters.containsAll(responseParameters)) {
+				throw new UnsupportedParameterException(new ArrayList<String>(responseParameters));
+			}
+			
+			parameterNamesToSkip.addAll(supportedParameters);
+			parameterNamesToSkip.removeAll(responseParameters);
+		}
+		
+		ExclusionStrategy strategy = new ParameterListExclusionStrategy(parameterNamesToSkip);
+		
+		GsonBuilder builder = new GsonBuilder().addSerializationExclusionStrategy(strategy);
+		if (prettyPrint) {
+			builder.setPrettyPrinting();
+		}
+		Gson gsonDeserializer = builder.create();
 		
 		return gsonDeserializer.toJson(funds);
 	}

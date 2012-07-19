@@ -45,9 +45,9 @@ public class PermissionReadPlatformServiceImpl implements PermissionReadPlatform
 			String name = rs.getString("name");
 			String description = rs.getString("description");
 			String code = rs.getString("code");
-			Integer groupType = JdbcSupport.getInteger(rs, "groupType");
+//			Integer groupType = JdbcSupport.getInteger(rs, "groupType");
 
-			return new PermissionData(id, name, description, code, groupType);
+			return new PermissionData(id, name, description, code);
 		}
 
 		public String schema() {

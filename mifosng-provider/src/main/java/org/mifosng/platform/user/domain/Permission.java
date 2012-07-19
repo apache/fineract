@@ -49,6 +49,6 @@ public class Permission extends AbstractPersistable<Long> {
 	}
 
 	public PermissionData toData() {
-		return new PermissionData(this.getId(), this.defaultName, this.defaultDescription, this.code, this.permissionGroup.ordinal());
+		return new PermissionData(this.getId(), this.defaultName, this.defaultDescription, this.code);
 	}
 }
