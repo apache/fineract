@@ -27,7 +27,6 @@ import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.DerivedLoanData;
-import org.mifosng.platform.api.data.FundData;
 import org.mifosng.platform.api.data.LoanAccountData;
 import org.mifosng.platform.api.data.LoanAccountSummaryData;
 import org.mifosng.platform.api.data.LoanBasicDetailsData;

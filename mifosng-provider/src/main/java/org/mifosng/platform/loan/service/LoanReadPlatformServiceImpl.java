@@ -11,7 +11,6 @@ import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.DerivedLoanData;
 import org.mifosng.platform.api.data.EnumOptionData;
-import org.mifosng.platform.api.data.FundData;
 import org.mifosng.platform.api.data.LoanAccountData;
 import org.mifosng.platform.api.data.LoanBasicDetailsData;
 import org.mifosng.platform.api.data.LoanProductData;
