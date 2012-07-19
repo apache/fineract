@@ -35,6 +35,9 @@ import org.pentaho.reporting.engine.classic.core.modules.output.pageable.pdf.Pdf
 import org.pentaho.reporting.engine.classic.core.modules.output.table.csv.CSVReportUtil;
 import org.pentaho.reporting.engine.classic.core.modules.output.table.html.HtmlReportUtil;
 import org.pentaho.reporting.engine.classic.core.modules.output.table.xls.ExcelReportUtil;
+import org.pentaho.reporting.engine.classic.core.parameters.ParameterDefinitionEntry;
+import org.pentaho.reporting.engine.classic.core.parameters.ReportParameterDefinition;
+import org.pentaho.reporting.engine.classic.core.util.ReportParameterValues;
 import org.pentaho.reporting.libraries.resourceloader.Resource;
 import org.pentaho.reporting.libraries.resourceloader.ResourceException;
 import org.pentaho.reporting.libraries.resourceloader.ResourceManager;
@@ -734,7 +737,9 @@ public class ReadExtraDataAndReportingServiceImpl implements
 		logger.info("outputType: " + outputType);
 		try {
 			res = manager.createDirectly(reportPath, MasterReport.class);
-			MasterReport masterReport = (MasterReport) res.getResource();
+			MasterReport masterReport = (MasterReport) res.getResource();			
+			
+			addParametersToReport(masterReport, queryParams);
 
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
@@ -788,6 +793,46 @@ public class ReadExtraDataAndReportingServiceImpl implements
 				"error.msg.invalid.outputType", "No matching Output Type: "
 						+ outputType);
 
+	}
+
+	private void addParametersToReport(MasterReport report,
+			Map<String, String> queryParams) {
+		
+		try {
+			ReportParameterValues rptParamValues = report.getParameterValues();
+			ReportParameterDefinition paramsDefinition = report
+					.getParameterDefinition();
+
+			/*
+			 * only allow integer and string parameter types and assume all
+			 * mandatory - could go more detailed like Pawel did in Mifos later
+			 * and could match incoming and pentaho parameters better...
+			 * currently assuming they come in ok... and if not an error
+			 */
+			for (ParameterDefinitionEntry paramDefEntry : paramsDefinition
+					.getParameterDefinitions()) {
+				String paramName = paramDefEntry.getName();
+				String pValue = queryParams.get(paramName);
+				if (StringUtils.isBlank(pValue))
+					throw new PlatformDataIntegrityException(
+							"error.msg.reporting.error", "Pentaho Parameter: "
+									+ paramName + " - not Provided");
+
+				Class<?> clazz = paramDefEntry.getValueType();
+				logger.info("addParametersToReport(" + paramName + " : "
+						+ pValue + " : " + clazz.getCanonicalName() + ")");
+
+				if (clazz.getCanonicalName().equalsIgnoreCase(
+						"java.lang.Integer"))
+					rptParamValues.put(paramName, Integer.parseInt(pValue));
+				else
+					rptParamValues.put(paramName, pValue);
+			}
+
+		} catch (Exception e) {
+			throw new PlatformDataIntegrityException(
+					"error.msg.reporting.error", e.getMessage());
+		}
 	}
 
 }

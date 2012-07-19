@@ -80,8 +80,6 @@ public class ReportsApiResource {
 		MultivaluedMap<String, String> queryParams = uriInfo
 				.getQueryParameters();
 
-		Map<String, String> reportParams = getReportParams(queryParams);
-
 		String parameterType = queryParams.getFirst("parameterType");
 		if ((parameterType == null)
 				|| (!(parameterType.equalsIgnoreCase("true")))) {
@@ -97,7 +95,7 @@ public class ReportsApiResource {
 				return this.readExtraDataAndReportingService
 						.processPentahoRequest(reportName,
 								queryParams.getFirst("output-type"),
-								reportParams);
+								getReportParams(queryParams, true));
 			}
 		}
 
@@ -106,7 +104,7 @@ public class ReportsApiResource {
 			// JSON
 			GenericResultset result = this.readExtraDataAndReportingService
 					.retrieveGenericResultset(reportName, parameterType,
-							reportParams);
+							getReportParams(queryParams, false));
 
 			String selectedFields = "";
 			String json = this.jsonFormattingService.convertRequest(result,
@@ -118,7 +116,7 @@ public class ReportsApiResource {
 
 		// CSV Export
 		StreamingOutput result = this.readExtraDataAndReportingService
-				.retrieveReportCSV(reportName, parameterType, reportParams);
+				.retrieveReportCSV(reportName, parameterType, getReportParams(queryParams, false));
 		return Response
 				.ok()
 				.entity(result)
@@ -129,7 +127,7 @@ public class ReportsApiResource {
 	}
 
 	private Map<String, String> getReportParams(
-			MultivaluedMap<String, String> queryParams) {
+			MultivaluedMap<String, String> queryParams, Boolean isPentaho) {
 
 		Map<String, String> reportParams = new HashMap<String, String>();
 		Set<String> keys = queryParams.keySet();
@@ -138,7 +136,9 @@ public class ReportsApiResource {
 		for (String k : keys) {
 
 			if (k.startsWith("R_")) {
-				pKey = "${" + k.substring(2) + "}";
+				if (isPentaho) pKey = k.substring(2);
+				else pKey = "${" + k.substring(2) + "}";
+				
 				pValue = queryParams.get(k).get(0);
 				reportParams.put(pKey, pValue);
 			}
