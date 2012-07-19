@@ -1,5 +1,7 @@
 package org.mifosng.platform.api.infrastructure;
 
+import java.util.Set;
+
 import org.mifosng.platform.api.commands.AdjustLoanTransactionCommand;
 import org.mifosng.platform.api.commands.BranchMoneyTransferCommand;
 import org.mifosng.platform.api.commands.ClientCommand;
@@ -13,12 +15,13 @@ import org.mifosng.platform.api.commands.OrganisationCurrencyCommand;
 import org.mifosng.platform.api.commands.RoleCommand;
 import org.mifosng.platform.api.commands.SubmitLoanApplicationCommand;
 import org.mifosng.platform.api.commands.UserCommand;
+import org.mifosng.platform.api.data.FundData;
 
 public interface ApiDataConversionService {
 
-	LoanProductCommand convertJsonToLoanProductCommand(Long resourceIdentifier, String json);
-	
 	FundCommand convertJsonToFundCommand(Long resourceIdentifier, String json);
+	
+	String covertFundDataToJson(boolean prettyPrint, Set<String> responseParameters, FundData... funds);
 
 	OfficeCommand convertJsonToOfficeCommand(Long resourceIdentifier, String json);
 
@@ -27,6 +30,8 @@ public interface ApiDataConversionService {
 	UserCommand convertJsonToUserCommand(Long resourceIdentifier, String json);
 
 	BranchMoneyTransferCommand convertJsonToBranchMoneyTransferCommand(String jsonRequestBody);
+	
+	LoanProductCommand convertJsonToLoanProductCommand(Long resourceIdentifier, String json);
 
 	ClientCommand convertJsonToClientCommand(Long resourceIdentifier, String jsonRequestBody);
 
@@ -42,4 +47,6 @@ public interface ApiDataConversionService {
 	OrganisationCurrencyCommand convertJsonToOrganisationCurrencyCommand(String jsonRequestBody);
 
 	NoteCommand convertJsonToNoteCommand(Long resourceIdentifier, Long clientId, String jsonRequestBody);
+
+	
 }
