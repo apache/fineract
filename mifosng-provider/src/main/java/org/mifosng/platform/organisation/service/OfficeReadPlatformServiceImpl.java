@@ -175,16 +175,9 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
 	public OfficeTransactionData retrieveNewOfficeTransactionDetails() {
 		context.authenticatedUser();
 
-		List<OfficeLookup> parentLookups = new ArrayList<OfficeLookup>(
-				retrieveAllOfficesForLookup());
-		List<CurrencyData> currencyOptions = currencyReadPlatformService
-				.retrieveAllowedCurrencies();
+		List<OfficeLookup> parentLookups = new ArrayList<OfficeLookup>(retrieveAllOfficesForLookup());
+		List<CurrencyData> currencyOptions = currencyReadPlatformService.retrieveAllowedCurrencies();
 
-		OfficeTransactionData officeTransactionData = new OfficeTransactionData(
-				new LocalDate());
-		officeTransactionData.setAllowedOffices(parentLookups);
-		officeTransactionData.setCurrencyOptions(currencyOptions);
-
-		return officeTransactionData;
+		return new OfficeTransactionData(new LocalDate(), parentLookups, currencyOptions);
 	}
 }

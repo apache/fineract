@@ -64,7 +64,29 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	
 	@Override
 	public String convertOfficeTransactionDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final OfficeTransactionData... officeTransactions) {
-		return null;
+		Set<String> supportedParameters = new HashSet<String>(Arrays.asList("transactionDate", "currencyOptions", "allowedOffices"));
+		
+		final Set<String> parameterNamesToSkip = new HashSet<String>();
+		
+		if (!responseParameters.isEmpty()) {
+			if (!supportedParameters.containsAll(responseParameters)) {
+				throw new UnsupportedParameterException(new ArrayList<String>(responseParameters));
+			}
+			
+			parameterNamesToSkip.addAll(supportedParameters);
+			parameterNamesToSkip.removeAll(responseParameters);
+		}
+		
+		ExclusionStrategy strategy = new ParameterListExclusionStrategy(parameterNamesToSkip);
+		
+		GsonBuilder builder = new GsonBuilder().addSerializationExclusionStrategy(strategy);
+		builder.registerTypeAdapter(LocalDate.class, new JodaLocalDateAdapter());
+		if (prettyPrint) {
+			builder.setPrettyPrinting();
+		}
+		Gson gsonDeserializer = builder.create();
+		
+		return gsonDeserializer.toJson(officeTransactions);
 	}
 
 	@Override
@@ -94,7 +116,6 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		Gson gsonDeserializer = builder.create();
 		
 		return gsonDeserializer.toJson(users);
-		
 	}
 	
 	@Override
@@ -573,8 +594,8 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	    
 	    Set<String> modifiedParameters = new HashSet<String>();
 
-	    LocalDate transactionDate = extractLocalDateParameter("paymentDate", requestMap, modifiedParameters);
-	    BigDecimal transactionAmount = extractBigDecimalParameter("paymentAmount", requestMap, modifiedParameters);
+	    LocalDate transactionDate = extractLocalDateParameter("transactionDate", requestMap, modifiedParameters);
+	    BigDecimal transactionAmount = extractBigDecimalParameter("transactionAmount", requestMap, modifiedParameters);
 	    String note = extractStringParameter("note", requestMap, modifiedParameters);
 	    
 	    return new AdjustLoanTransactionCommand(loanId, transactionId, transactionDate, note, transactionAmount);

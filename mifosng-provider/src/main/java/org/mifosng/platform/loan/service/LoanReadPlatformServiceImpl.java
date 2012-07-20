@@ -79,9 +79,10 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 			context.authenticatedUser();
 
 			LoanMapper rm = new LoanMapper();
+			
 			String sql = "select " + rm.loanSchema() + " where l.id = ?";
-			return this.jdbcTemplate.queryForObject(sql, rm,
-					new Object[] { loanId });
+			
+			return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanId });
 
 		} catch (EmptyResultDataAccessException e) {
 			throw new LoanNotFoundException(loanId);
@@ -240,18 +241,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 		workflowData.setAllowedProducts(new ArrayList<LoanProductLookup>(
 				loanProducts));
 
-		if (loanProducts.size() == 1) {
-			Long allowedProductId = workflowData.getAllowedProducts().get(0)
-					.getId();
-			LoanProductData selectedProduct = this.loanProductReadPlatformService
-					.retrieveLoanProduct(allowedProductId);
-
-			workflowData.setProductId(selectedProduct.getId());
-			workflowData.setProductName(selectedProduct.getName());
-			workflowData.setSelectedProduct(selectedProduct);
-		} else {
-			LoanProductData selectedProduct = findLoanProductById(loanProducts,
-					productId);
+		if (productId != null) {
+			LoanProductData selectedProduct = findLoanProductById(loanProducts, productId);
 
 			workflowData.setProductId(selectedProduct.getId());
 			workflowData.setProductName(selectedProduct.getName());

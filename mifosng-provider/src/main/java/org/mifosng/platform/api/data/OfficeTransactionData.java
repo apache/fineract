@@ -4,10 +4,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.codehaus.jackson.map.annotate.JsonFilter;
 import org.joda.time.LocalDate;
 
-@JsonFilter("myFilter")
 public class OfficeTransactionData implements Serializable {
 
 	private LocalDate transactionDate;
@@ -18,8 +16,10 @@ public class OfficeTransactionData implements Serializable {
 		//
 	}
 
-	public OfficeTransactionData(final LocalDate transactionDate) {
+	public OfficeTransactionData(final LocalDate transactionDate, final List<OfficeLookup> allowedOffices, final List<CurrencyData> currencyOptions) {
 		this.transactionDate = transactionDate;
+		this.allowedOffices = allowedOffices;
+		this.currencyOptions = currencyOptions;
 	}
 
 	public LocalDate getTransactionDate() {
