@@ -15,11 +15,9 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.mifosng.platform.api.commands.BranchMoneyTransferCommand;
-import org.mifosng.platform.api.data.AppUserData;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.OfficeTransactionData;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
-import org.mifosng.platform.api.infrastructure.ApiJSONFormattingService;
 import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
 import org.mifosng.platform.organisation.service.OfficeReadPlatformService;
 import org.mifosng.platform.organisation.service.OfficeWritePlatformService;
@@ -41,9 +39,6 @@ public class OfficeTransactionsApiResource {
 	@Autowired
 	private ApiDataConversionService apiDataConversionService;
 
-	@Autowired
-	private ApiJSONFormattingService jsonFormattingService;
-	
 	@GET
 	@Path("template")
 	@Consumes({MediaType.APPLICATION_JSON})

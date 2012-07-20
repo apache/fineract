@@ -22,6 +22,8 @@ public class Permission extends AbstractPersistable<Long> {
 	@Column(name = "default_description", nullable = false, length=500)
     private final String          defaultDescription;
 
+	// TODO - KW - do we need to retain this concept?
+	@SuppressWarnings("unused")
 	@Column(name = "group_enum", nullable = false)
 	@Enumerated(EnumType.ORDINAL)
     private final PermissionGroup permissionGroup;
