@@ -1,7 +1,6 @@
 -- create roles and associate with permissions
 INSERT INTO `admin_role` (`id`, `name`, `description`, `createdby_id`, `created_date`, `lastmodified_date`, `lastmodifiedby_id`) 
-VALUES 
-(1,'Super user','This role provides all application permissions.',NULL,NULL,NULL,NULL),
+VALUES
 (2,'Field officer','A field officer role allows the user to add client and loans and view reports but nothing else.',1,'2012-04-12 15:59:48','2012-04-12 15:59:48',1),
 (3,'Data Entry (Portfolio only)','This role allows a user full permissions around client and loan functionality but nothing else.',1,'2012-04-12 16:01:25','2012-04-12 16:01:25',1),
 (4,'Credit Committe Member','This role allows a user to approve reject or withdraw loans (with reporting).',1,'2012-04-12 16:11:25','2012-04-12 16:11:25',1),
@@ -9,27 +8,15 @@ VALUES
 
 INSERT INTO `admin_role_permission` (`role_id`, `permission_id`) 
 VALUES 
-(1,1),(1,2),(1,3),(1,4),(2,4),(2,5),(2,6),(2,13),(2,20),(3,3),(4,4),(4,7),(4,8),(4,9),(4,10),(4,11),(4,12),(5,3),(5,4);
+(2,4),(2,5),(2,6),(2,13),(2,20),(3,3),(4,4),(4,7),(4,8),(4,9),(4,10),(4,11),(4,12),(5,3),(5,4);
 
 
 -- insert office data required by appuser table/data
 INSERT INTO `org_office` (`id`, `parent_id`, `hierarchy`, `external_id`, `name`, `opening_date`, `createdby_id`, `created_date`, `lastmodified_date`, `lastmodifiedby_id`) 
 VALUES 
-(1,NULL,'.','1','Head Office','2009-01-01',NULL,NULL,'2012-07-13 17:04:20',1),
 (2,1,'.2.','2','sub branch 1','2012-01-02',1,'2012-04-14 05:42:40','2012-04-16 11:47:05',1),
 (3,1,'.3.','3','sub branch 2','2012-03-01',1,'2012-04-16 04:12:02','2012-04-16 11:47:14',1),
 (4,1,'.4.',NULL,'sub branch 3','2012-04-17',1,'2012-04-17 06:01:10','2012-04-17 06:01:10',1);
-
--- insert user admin related data
-INSERT INTO `admin_appuser` (`id`, `office_id`, `username`, `firstname`, `lastname`, `password`, `email`, 
-`firsttime_login_remaining`, `nonexpired`, `nonlocked`, `nonexpired_credentials`, `enabled`, 
-`createdby_id`, `created_date`, `lastmodified_date`, `lastmodifiedby_id`) 
-VALUES 
-(1,1,'defaultadmin','App','Administrator','5787039480429368bf94732aacc771cd0a3ea02bcf504ffe1185ab94213bc63a',
-'demomfi@mifos.org','\0','','','','',NULL,NULL,NULL,NULL);
-
-
-INSERT INTO `admin_appuser_role` (`appuser_id`, `role_id`) VALUES (1,1);
 
 
 -- insert remaining fund/currencies/product data
@@ -40,7 +27,6 @@ VALUES
 (18,'BND',2,'Brunei Dollar','BND','currency.BND',1,'2012-05-01 22:43:02','2012-05-01 22:43:02',1),
 (19,'LBP',2,'Lebanese Pound','L','currency.LBP',1,'2012-05-01 22:43:02','2012-05-01 22:43:02',1),
 (20,'GHC',2,'Ghana Cedi','GHC','currency.GHC',1,'2012-05-01 22:43:02','2012-05-01 22:43:02',1),
-(21,'USD',2,'US Dollar','$','currency.USD',1,'2012-05-01 22:43:02','2012-05-01 22:43:02',1),
 (22,'XOF',0,'CFA Franc BCEAO','CFA','currency.XOF',1,'2012-05-01 22:43:02','2012-05-01 22:43:02',1);
 
 
