@@ -16,5 +16,4 @@ CREATE TABLE `mifosplatform-tenants`.`tenants` (
 INSERT INTO `mifosplatform-tenants`.`tenants`
 (`id`,`name`, `identifier`,`schema_name`)
 VALUES
-(1, 'Default Demo Tenant', 'default' ,'mifostenant-default'),
-(2, 'IL Demo Tenant', 'il-demo', 'mifostenant-il-demo');
+(1, 'Default Demo Tenant', 'default' ,'mifostenant-default');
