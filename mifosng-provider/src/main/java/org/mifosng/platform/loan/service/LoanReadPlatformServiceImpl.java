@@ -14,6 +14,7 @@ import org.mifosng.platform.api.data.EnumOptionData;
 import org.mifosng.platform.api.data.LoanAccountData;
 import org.mifosng.platform.api.data.LoanAccountSummaryData;
 import org.mifosng.platform.api.data.LoanBasicDetailsData;
+import org.mifosng.platform.api.data.LoanPermissionData;
 import org.mifosng.platform.api.data.LoanProductData;
 import org.mifosng.platform.api.data.LoanProductLookup;
 import org.mifosng.platform.api.data.LoanRepaymentPeriodDatajpw;
@@ -115,7 +116,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
 	@Override
 	public LoanAccountSummaryData retrieveSummary(MoneyData principal,
-			Collection<LoanRepaymentPeriodDatajpw> repaymentSchedule, Collection<LoanTransactionDatajpw> loanRepayments) {
+			Collection<LoanRepaymentPeriodDatajpw> repaymentSchedule,
+			Collection<LoanTransactionDatajpw> loanRepayments) {
 
 		CurrencyData currencyData = new CurrencyData(
 				principal.getCurrencyCode(), principal.getDefaultName(),
@@ -158,13 +160,13 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 		}
 
 		totalInArrears = BigDecimal.TEN;
-		
-		
+
 		Long waiverType = (long) 4;
 		for (LoanTransactionDatajpw loanRepayment : loanRepayments) {
 			Long transactionType = loanRepayment.getTransactionType().getId();
 			if (transactionType.equals(waiverType)) {
-				totalWaived = totalWaived.add(loanRepayment.getTotal().getAmount());
+				totalWaived = totalWaived.add(loanRepayment.getTotal()
+						.getAmount());
 			}
 
 		}
@@ -200,84 +202,41 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 		}
 	}
 
-	public LoanAccountData convertToData(LoanBasicDetailsData loanBasic) {
-
-		MoneyData princ = loanBasic.getPrincipal();
-
-		CurrencyData currencyData = new CurrencyData(princ.getCurrencyCode(),
-				princ.getDefaultName(), princ.getDigitsAfterDecimal(),
-				princ.getDisplaySymbol(), princ.getNameCode());
-
-		// DerivedLoanData loanData = deriveLoanData(loanBasic.getId(),
-		// currencyData, loanBasic.getInArrearsTolerance().getAmount());
-
+	@Override
+	public LoanPermissionData retrieveLoanPermissions(
+			LoanBasicDetailsData loanBasicDetails, boolean isWaiverAllowed) {
 		/*
-		 * return toLoanAccountData(loanBasic, loanData.getSummary(),
-		 * loanData.getRepaymentSchedule(), loanData.getLoanRepayments());
-		 */
+		boolean waiveAllowed = isWaiverAllowed && (loanBasicDetails.getClosedOnDate() == null);
+		
+		
+		
+		
+		boolean undoDisbursalAllowed = isDisbursed()
+				&& isOpenWithNoRepaymentMade();
+		boolean makeRepaymentAllowed = isDisbursed() && isNotClosed();
 
-		// return new LoanAccountData(loanBasic, null, repaymentSchedule, null,
-		// null);
-		return null;
+		boolean rejectAllowed = isNotApproved() && isNotDisbursed()
+				&& isNotClosed();
+		boolean withdrawnByApplicantAllowed = isNotDisbursed() && isNotClosed();
+		boolean undoApprovalAllowed = isApproved() && isNotClosed();
+		boolean disbursalAllowed = isApproved() && isNotDisbursed()
+				&& isNotClosed();
+
+		return new LoanPermissionData(waiveAllowed,
+				makeRepaymentAllowed, rejectAllowed,
+				withdrawnByApplicantAllowed, undoApprovalAllowed,
+				undoDisbursalAllowed, disbursalAllowed,
+				isSubmittedAndPendingApproval(), isWaitingForDisbursal());
+				*/
+		
+
+		return new LoanPermissionData(true,
+				true, true,
+				true, true,
+				true, true,
+				true, true);
 	}
-
-	/*
-	 * private DerivedLoanData deriveLoanData(Long loanId, CurrencyData
-	 * currencyData, BigDecimal arrearsTolerance) {
-	 * 
-	 * List<LoanTransaction> repaymentTransactions = new
-	 * ArrayList<LoanTransaction>(); //for (LoanTransaction loanTransaction :
-	 * this.loanTransactions) { // if (loanTransaction.isRepayment() ||
-	 * loanTransaction.isWaiver()) { //
-	 * repaymentTransactions.add(loanTransaction); // } //}
-	 * 
-	 * 
-	 * LoanRepaymentPeriodDatajpw selectedLoan = null;
-	 * 
-	 * Collection<LoanRepaymentPeriodDatajpw> periods; try {
-	 * context.authenticatedUser();
-	 * 
-	 * LoanScheduleMapper rm = new LoanScheduleMapper(); String sql = "select "
-	 * + rm.loanScheduleSchema() + " where l.id = ?"; periods =
-	 * this.jdbcTemplate.query(sql, rm, new Object[] { loanId });
-	 * 
-	 * } catch (EmptyResultDataAccessException e) { throw new
-	 * LoanNotFoundException(loanId); }
-	 * 
-	 * return new DerivedLoanDataProcessor().process( new
-	 * ArrayList<LoanRepaymentScheduleInstallment>( periods),
-	 * repaymentTransactions, currencyData, arrearsTolerance); }
-	 */
-
-	private LoanAccountData toLoanAccountData(
-			LoanBasicDetailsData basicDetails, LoanAccountSummaryData summary,
-			LoanRepaymentScheduleData repaymentSchedule,
-			List<LoanTransactionData> loanRepayments) {
-
-		// permissions
-		/*
-		 * boolean waiveAllowed =
-		 * summary.isWaiveAllowed(basicDetails.getInArrearsTolerance()) &&
-		 * isNotClosed(); boolean undoDisbursalAllowed = isDisbursed() &&
-		 * isOpenWithNoRepaymentMade(); boolean makeRepaymentAllowed =
-		 * isDisbursed() && isNotClosed();
-		 * 
-		 * boolean rejectAllowed = isNotApproved() && isNotDisbursed() &&
-		 * isNotClosed(); boolean withdrawnByApplicantAllowed = isNotDisbursed()
-		 * && isNotClosed(); boolean undoApprovalAllowed = isApproved() &&
-		 * isNotClosed(); boolean disbursalAllowed = isApproved() &&
-		 * isNotDisbursed() && isNotClosed();
-		 * 
-		 * LoanPermissionData permissions = new LoanPermissionData(waiveAllowed,
-		 * makeRepaymentAllowed, rejectAllowed, withdrawnByApplicantAllowed,
-		 * undoApprovalAllowed, undoDisbursalAllowed, disbursalAllowed,
-		 * isSubmittedAndPendingApproval(), isWaitingForDisbursal());
-		 * 
-		 * return new LoanAccountData(basicDetails, summary, repaymentSchedule,
-		 * loanRepayments, permissions);
-		 */
-		return null;
-	}
+	
 
 	@Override
 	public NewLoanData retrieveClientAndProductDetails(final Long clientId,

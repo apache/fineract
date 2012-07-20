@@ -21,6 +21,7 @@ import org.mifosng.platform.loanproduct.service.LoanEnumerations;
 // FIXME - The derived details of the loan schedule are now updated on the fly when someone does a transaction against a loan. So this is not fully needed.
 //       - we still use this to figure out how much of a given transactions amount was principal versus interest but might not need this and we should probably
 //       - derive and update that on the database on the fly
+// FIXME - JPW - the above fixme was done and I can't see anything else using this method or whole class
 public class DerivedLoanDataProcessor {
 
 	public DerivedLoanData process(List<LoanRepaymentScheduleInstallment> repaymentSchedulePeriods, List<LoanTransaction> loanTransactions, 

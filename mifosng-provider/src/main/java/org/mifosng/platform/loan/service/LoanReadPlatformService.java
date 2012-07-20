@@ -2,9 +2,9 @@ package org.mifosng.platform.loan.service;
 
 import java.util.Collection;
 
-import org.mifosng.platform.api.data.LoanAccountData;
 import org.mifosng.platform.api.data.LoanAccountSummaryData;
 import org.mifosng.platform.api.data.LoanBasicDetailsData;
+import org.mifosng.platform.api.data.LoanPermissionData;
 import org.mifosng.platform.api.data.LoanRepaymentPeriodDatajpw;
 import org.mifosng.platform.api.data.LoanTransactionData;
 import org.mifosng.platform.api.data.LoanTransactionDatajpw;
@@ -23,6 +23,9 @@ public interface LoanReadPlatformService {
 			Collection<LoanRepaymentPeriodDatajpw> repaymentSchedule,
 			Collection<LoanTransactionDatajpw> loanRepayments);
 
+	LoanPermissionData retrieveLoanPermissions(
+			LoanBasicDetailsData loanBasicDetails, boolean isWaiverAllowed);
+
 	NewLoanData retrieveClientAndProductDetails(Long clientId, Long productId);
 
 	LoanTransactionData retrieveNewLoanRepaymentDetails(Long loanId);
@@ -32,6 +35,4 @@ public interface LoanReadPlatformService {
 	LoanTransactionData retrieveLoanTransactionDetails(Long loanId,
 			Long transactionId);
 
-	LoanAccountData convertToData(LoanBasicDetailsData loanBasic);// del jpw
-																	// after
 }

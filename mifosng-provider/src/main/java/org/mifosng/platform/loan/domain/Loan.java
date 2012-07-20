@@ -25,14 +25,6 @@ import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
-import org.mifosng.platform.api.data.CurrencyData;
-import org.mifosng.platform.api.data.DerivedLoanData;
-import org.mifosng.platform.api.data.LoanAccountData;
-import org.mifosng.platform.api.data.LoanAccountSummaryData;
-import org.mifosng.platform.api.data.LoanBasicDetailsData;
-import org.mifosng.platform.api.data.LoanPermissionData;
-import org.mifosng.platform.api.data.LoanRepaymentScheduleData;
-import org.mifosng.platform.api.data.LoanTransactionData;
 import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.currency.domain.Money;
@@ -43,7 +35,7 @@ import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
 import org.mifosng.platform.user.domain.AppUser;
 
 @Entity
-@Table(name = "portfolio_loan", uniqueConstraints = @UniqueConstraint(columnNames = {"external_id" }))
+@Table(name = "portfolio_loan", uniqueConstraints = @UniqueConstraint(columnNames = { "external_id" }))
 public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 
 	@ManyToOne
@@ -53,7 +45,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	@ManyToOne
 	@JoinColumn(name = "product_id")
 	private final LoanProduct loanProduct;
-	
+
 	@ManyToOne
 	@JoinColumn(name = "fund_id", nullable = true)
 	private Fund fund;
@@ -92,7 +84,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	@Temporal(TemporalType.DATE)
 	@Column(name = "expected_firstrepaymenton_date")
 	private Date expectedFirstRepaymentOnDate;
-	
+
 	@Temporal(TemporalType.DATE)
 	@Column(name = "interest_calculated_from_date")
 	private Date interestChargedFromDate;
@@ -140,18 +132,20 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	@Transient
 	private final InterestRebateCalculatorFactory interestRebateCalculatorFactory = new DailyEquivalentInterestRebateCalculatorFactory();
 
-	public static Loan createNew(final Fund fund, final LoanProduct loanProduct, final Client client, final LoanProductRelatedDetail loanRepaymentScheduleDetail) {
-		return new Loan(client, fund, loanProduct, loanRepaymentScheduleDetail, null);
+	public static Loan createNew(final Fund fund,
+			final LoanProduct loanProduct, final Client client,
+			final LoanProductRelatedDetail loanRepaymentScheduleDetail) {
+		return new Loan(client, fund, loanProduct, loanRepaymentScheduleDetail,
+				null);
 	}
-	
+
 	public Loan() {
 		this.client = null;
 		this.loanProduct = null;
 		this.loanRepaymentScheduleDetail = null;
 	}
 
-	public Loan(final Client client,
-			Fund fund, final LoanProduct loanProduct,
+	public Loan(final Client client, Fund fund, final LoanProduct loanProduct,
 			final LoanProductRelatedDetail loanRepaymentScheduleDetail,
 			final LoanStatus loanStatus) {
 		this.client = client;
@@ -182,11 +176,15 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		return this.loanRepaymentScheduleDetail;
 	}
 
-	public void submitApplication(final LocalDate submittedOn, final LocalDate expectedDisbursementDate, 
-			LocalDate repaymentsStartingFromDate, LocalDate interestChargedFromDate, LoanLifecycleStateMachine lifecycleStateMachine) {
-		
-		this.loanStatus = lifecycleStateMachine.transition(LoanEvent.LOAN_CREATED, this.loanStatus);
-		
+	public void submitApplication(final LocalDate submittedOn,
+			final LocalDate expectedDisbursementDate,
+			LocalDate repaymentsStartingFromDate,
+			LocalDate interestChargedFromDate,
+			LoanLifecycleStateMachine lifecycleStateMachine) {
+
+		this.loanStatus = lifecycleStateMachine.transition(
+				LoanEvent.LOAN_CREATED, this.loanStatus);
+
 		this.submittedOnDate = submittedOn.toDateTimeAtCurrentTime().toDate();
 
 		this.expectedMaturityDate = this.repaymentScheduleInstallments
@@ -194,85 +192,113 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 				.getDueDate().toDateMidnight().toDate();
 		if (expectedDisbursementDate != null) {
 			// can be null during bulk upload of loans
-			this.expectedDisbursedOnDate = expectedDisbursementDate.toDateMidnight().toDate();
+			this.expectedDisbursedOnDate = expectedDisbursementDate
+					.toDateMidnight().toDate();
 		}
-		
+
 		if (repaymentsStartingFromDate != null) {
-			this.expectedFirstRepaymentOnDate = repaymentsStartingFromDate.toDateMidnight().toDate();
+			this.expectedFirstRepaymentOnDate = repaymentsStartingFromDate
+					.toDateMidnight().toDate();
 		}
-		
+
 		if (interestChargedFromDate != null) {
-			this.interestChargedFromDate = interestChargedFromDate.toDateMidnight().toDate();
+			this.interestChargedFromDate = interestChargedFromDate
+					.toDateMidnight().toDate();
 		}
-		
+
 		if (submittedOn.isAfter(new LocalDate())) {
 			final String errorMessage = "The date on which a loan is submitted cannot be in the future.";
-			throw new InvalidLoanStateTransitionException("submittal", "cannot.be.a.future.date", errorMessage, submittedOn);
+			throw new InvalidLoanStateTransitionException("submittal",
+					"cannot.be.a.future.date", errorMessage, submittedOn);
 		}
-		
+
 		if (submittedOn.isAfter(getExpectedDisbursedOnLocalDate())) {
-			final String errorMessage = "The date on which a loan is submitted cannot be after its expected disbursement date: " + getExpectedDisbursedOnLocalDate().toString();
-			throw new InvalidLoanStateTransitionException("submittal", "cannot.be.after.expected.disbursement.date", errorMessage, submittedOn, getExpectedDisbursedOnLocalDate());
+			final String errorMessage = "The date on which a loan is submitted cannot be after its expected disbursement date: "
+					+ getExpectedDisbursedOnLocalDate().toString();
+			throw new InvalidLoanStateTransitionException("submittal",
+					"cannot.be.after.expected.disbursement.date", errorMessage,
+					submittedOn, getExpectedDisbursedOnLocalDate());
 		}
 	}
 
-	public void reject(final LocalDate rejectedOn, LoanLifecycleStateMachine loanLifecycleStateMachine) {
-		
-		this.loanStatus = loanLifecycleStateMachine.transition(LoanEvent.LOAN_REJECTED, this.loanStatus);
-		
+	public void reject(final LocalDate rejectedOn,
+			LoanLifecycleStateMachine loanLifecycleStateMachine) {
+
+		this.loanStatus = loanLifecycleStateMachine.transition(
+				LoanEvent.LOAN_REJECTED, this.loanStatus);
+
 		this.rejectedOnDate = rejectedOn.toDateTimeAtCurrentTime().toDate();
 		this.closedOnDate = rejectedOn.toDateTimeAtCurrentTime().toDate();
-		
+
 		if (rejectedOn.isBefore(getSubmittedOnDate())) {
-			final String errorMessage = "The date on which a loan is rejected cannot be before its submittal date: " + getSubmittedOnDate().toString();
-			throw new InvalidLoanStateTransitionException("reject", "cannot.be.before.submittal.date", errorMessage, rejectedOn, getSubmittedOnDate());
+			final String errorMessage = "The date on which a loan is rejected cannot be before its submittal date: "
+					+ getSubmittedOnDate().toString();
+			throw new InvalidLoanStateTransitionException("reject",
+					"cannot.be.before.submittal.date", errorMessage,
+					rejectedOn, getSubmittedOnDate());
 		}
 		if (rejectedOn.isAfter(new LocalDate())) {
 			final String errorMessage = "The date on which a loan is rejected cannot be in the future.";
-			throw new InvalidLoanStateTransitionException("reject", "cannot.be.a.future.date", errorMessage, rejectedOn);
+			throw new InvalidLoanStateTransitionException("reject",
+					"cannot.be.a.future.date", errorMessage, rejectedOn);
 		}
 	}
 
-	public void withdraw(final LocalDate withdrawnOn, LoanLifecycleStateMachine loanLifecycleStateMachine) {
-		
-		this.loanStatus = loanLifecycleStateMachine.transition(LoanEvent.LOAN_WITHDRAWN, this.loanStatus);
-		
+	public void withdraw(final LocalDate withdrawnOn,
+			LoanLifecycleStateMachine loanLifecycleStateMachine) {
+
+		this.loanStatus = loanLifecycleStateMachine.transition(
+				LoanEvent.LOAN_WITHDRAWN, this.loanStatus);
+
 		this.withdrawnOnDate = withdrawnOn.toDateTimeAtCurrentTime().toDate();
 		this.closedOnDate = withdrawnOn.toDateTimeAtCurrentTime().toDate();
-		
+
 		if (withdrawnOn.isBefore(getSubmittedOnDate())) {
-			final String errorMessage = "The date on which a loan is withdrawn cannot be before its submittal date: " + getSubmittedOnDate().toString();
-			throw new InvalidLoanStateTransitionException("reject", "cannot.be.before.submittal.date", errorMessage, withdrawnOn, getSubmittedOnDate());
+			final String errorMessage = "The date on which a loan is withdrawn cannot be before its submittal date: "
+					+ getSubmittedOnDate().toString();
+			throw new InvalidLoanStateTransitionException("reject",
+					"cannot.be.before.submittal.date", errorMessage,
+					withdrawnOn, getSubmittedOnDate());
 		}
 		if (withdrawnOn.isAfter(new LocalDate())) {
 			final String errorMessage = "The date on which a loan is withdrawn cannot be in the future.";
-			throw new InvalidLoanStateTransitionException("reject", "cannot.be.a.future.date", errorMessage, withdrawnOn);
+			throw new InvalidLoanStateTransitionException("reject",
+					"cannot.be.a.future.date", errorMessage, withdrawnOn);
 		}
 	}
 
-	public void approve(final LocalDate approvedOn, LoanLifecycleStateMachine loanLifecycleStateMachine) {
-		this.loanStatus = loanLifecycleStateMachine.transition(LoanEvent.LOAN_APPROVED, this.loanStatus);
+	public void approve(final LocalDate approvedOn,
+			LoanLifecycleStateMachine loanLifecycleStateMachine) {
+		this.loanStatus = loanLifecycleStateMachine.transition(
+				LoanEvent.LOAN_APPROVED, this.loanStatus);
 		this.approvedOnDate = approvedOn.toDateTimeAtCurrentTime().toDate();
-		
+
 		LocalDate submittalDate = new LocalDate(this.submittedOnDate);
 		if (approvedOn.isBefore(submittalDate)) {
-			final String errorMessage = "The date on which a loan is approved cannot be before its submittal date: " + submittalDate.toString();
-			throw new InvalidLoanStateTransitionException("approval", "cannot.be.before.submittal.date", errorMessage, getApprovedOnDate(), submittalDate);
+			final String errorMessage = "The date on which a loan is approved cannot be before its submittal date: "
+					+ submittalDate.toString();
+			throw new InvalidLoanStateTransitionException("approval",
+					"cannot.be.before.submittal.date", errorMessage,
+					getApprovedOnDate(), submittalDate);
 		}
 		if (approvedOn.isAfter(new LocalDate())) {
 			final String errorMessage = "The date on which a loan is approved cannot be in the future.";
-			throw new InvalidLoanStateTransitionException("approval", "cannot.be.a.future.date", errorMessage, getApprovedOnDate());
+			throw new InvalidLoanStateTransitionException("approval",
+					"cannot.be.a.future.date", errorMessage,
+					getApprovedOnDate());
 		}
 	}
 
 	public void undoApproval(LoanLifecycleStateMachine loanLifecycleStateMachine) {
-		this.loanStatus = loanLifecycleStateMachine.transition(LoanEvent.LOAN_APPROVAL_UNDO, this.loanStatus);
+		this.loanStatus = loanLifecycleStateMachine.transition(
+				LoanEvent.LOAN_APPROVAL_UNDO, this.loanStatus);
 		this.approvedOnDate = null;
 	}
 
 	public void disburseWithModifiedRepaymentSchedule(
 			final LocalDate disbursedOn,
-			final List<LoanRepaymentScheduleInstallment> modifiedLoanRepaymentSchedule, LoanLifecycleStateMachine loanLifecycleStateMachine) {
+			final List<LoanRepaymentScheduleInstallment> modifiedLoanRepaymentSchedule,
+			LoanLifecycleStateMachine loanLifecycleStateMachine) {
 		this.repaymentScheduleInstallments.clear();
 		for (LoanRepaymentScheduleInstallment modifiedInstallment : modifiedLoanRepaymentSchedule) {
 			modifiedInstallment.updateLoan(this);
@@ -281,8 +307,10 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		disburse(disbursedOn, loanLifecycleStateMachine);
 	}
 
-	public void disburse(final LocalDate disbursedOn, LoanLifecycleStateMachine loanLifecycleStateMachine) {
-		this.loanStatus = loanLifecycleStateMachine.transition(LoanEvent.LOAN_DISBURSED, this.loanStatus);
+	public void disburse(final LocalDate disbursedOn,
+			LoanLifecycleStateMachine loanLifecycleStateMachine) {
+		this.loanStatus = loanLifecycleStateMachine.transition(
+				LoanEvent.LOAN_DISBURSED, this.loanStatus);
 		this.disbursedOnDate = disbursedOn.toDateTimeAtCurrentTime().toDate();
 		this.expectedMaturityDate = this.repaymentScheduleInstallments
 				.get(this.repaymentScheduleInstallments.size() - 1)
@@ -292,106 +320,141 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 				this.loanRepaymentScheduleDetail.getPrincipal(), disbursedOn);
 		loanTransaction.updateLoan(this);
 		this.loanTransactions.add(loanTransaction);
-		
+
 		if (disbursedOn.isBefore(getApprovedOnDate())) {
-			final String errorMessage = "The date on which a loan is disbursed cannot be before its approval date: " + getApprovedOnDate().toString();
-			throw new InvalidLoanStateTransitionException("disbursal", "cannot.be.before.approval.date", errorMessage, disbursedOn, getApprovedOnDate());
-		}
-		
-		if (disbursedOn.isAfter(new LocalDate())) {
-			final String errorMessage = "The date on which a loan is disbursed cannot be in the future.";
-			throw new InvalidLoanStateTransitionException("disbursal", "cannot.be.a.future.date", errorMessage, disbursedOn);
+			final String errorMessage = "The date on which a loan is disbursed cannot be before its approval date: "
+					+ getApprovedOnDate().toString();
+			throw new InvalidLoanStateTransitionException("disbursal",
+					"cannot.be.before.approval.date", errorMessage,
+					disbursedOn, getApprovedOnDate());
 		}
 
-		LocalDate firstRepaymentDueDate = this.repaymentScheduleInstallments.get(0).getDueDate();
+		if (disbursedOn.isAfter(new LocalDate())) {
+			final String errorMessage = "The date on which a loan is disbursed cannot be in the future.";
+			throw new InvalidLoanStateTransitionException("disbursal",
+					"cannot.be.a.future.date", errorMessage, disbursedOn);
+		}
+
+		LocalDate firstRepaymentDueDate = this.repaymentScheduleInstallments
+				.get(0).getDueDate();
 		if (disbursedOn.isAfter(firstRepaymentDueDate)) {
-			final String errorMessage = "The date on which a loan is disbursed cannot be after the first expected repayment date: " + firstRepaymentDueDate.toString();
-			throw new InvalidLoanStateTransitionException("disbursal", "cannot.be.after.first.repayment.due.date", errorMessage, disbursedOn, firstRepaymentDueDate);
+			final String errorMessage = "The date on which a loan is disbursed cannot be after the first expected repayment date: "
+					+ firstRepaymentDueDate.toString();
+			throw new InvalidLoanStateTransitionException("disbursal",
+					"cannot.be.after.first.repayment.due.date", errorMessage,
+					disbursedOn, firstRepaymentDueDate);
 		}
 	}
 
-	public void undoDisbursal(LoanLifecycleStateMachine loanLifecycleStateMachine) {
-		this.loanStatus = loanLifecycleStateMachine.transition(LoanEvent.LOAN_DISBURSAL_UNDO, this.loanStatus);
+	public void undoDisbursal(
+			LoanLifecycleStateMachine loanLifecycleStateMachine) {
+		this.loanStatus = loanLifecycleStateMachine.transition(
+				LoanEvent.LOAN_DISBURSAL_UNDO, this.loanStatus);
 		this.loanTransactions.clear();
 		this.disbursedOnDate = null;
 	}
 
-	public void waive(LoanTransaction loanTransaction, LoanLifecycleStateMachine loanLifecycleStateMachine) {
-		this.loanStatus = loanLifecycleStateMachine.transition(LoanEvent.LOAN_REPAYMENT, this.loanStatus);
+	public void waive(LoanTransaction loanTransaction,
+			LoanLifecycleStateMachine loanLifecycleStateMachine) {
+		this.loanStatus = loanLifecycleStateMachine.transition(
+				LoanEvent.LOAN_REPAYMENT, this.loanStatus);
 		loanTransaction.updateLoan(this);
 		this.loanTransactions.add(loanTransaction);
 
 		LocalDate loanTransactionDate = loanTransaction.getTransactionDate();
 		if (loanTransactionDate.isBefore(this.getDisbursementDate())) {
-			final String errorMessage = "The transaction date cannot be before the loan disbursement date: " + getApprovedOnDate().toString();
-			throw new InvalidLoanStateTransitionException("waive", "cannot.be.before.disbursement.date", errorMessage, loanTransactionDate, this.getDisbursementDate());
+			final String errorMessage = "The transaction date cannot be before the loan disbursement date: "
+					+ getApprovedOnDate().toString();
+			throw new InvalidLoanStateTransitionException("waive",
+					"cannot.be.before.disbursement.date", errorMessage,
+					loanTransactionDate, this.getDisbursementDate());
 		}
-		
+
 		if (loanTransactionDate.isAfter(new LocalDate())) {
 			final String errorMessage = "The transaction date cannot be in the future.";
-			throw new InvalidLoanStateTransitionException("waive", "cannot.be.a.futre.date", errorMessage, loanTransactionDate);
+			throw new InvalidLoanStateTransitionException("waive",
+					"cannot.be.a.futre.date", errorMessage, loanTransactionDate);
 		}
-		
+
 		if (getTotalOutstanding().isGreaterThan(this.getInArrearsTolerance())) {
-			final String errorMessage = "Waiver is only allowed when the total outstanding amount left on loan (" + getTotalOutstanding() +") is less than the in arrears tolerance setting of " + getInArrearsTolerance().getAmount();
-			throw new InvalidLoanStateTransitionException("waive", "cannot.exceed.in.arrears.tolerance.setting", errorMessage, getTotalOutstanding(), getInArrearsTolerance());
+			final String errorMessage = "Waiver is only allowed when the total outstanding amount left on loan ("
+					+ getTotalOutstanding()
+					+ ") is less than the in arrears tolerance setting of "
+					+ getInArrearsTolerance().getAmount();
+			throw new InvalidLoanStateTransitionException("waive",
+					"cannot.exceed.in.arrears.tolerance.setting", errorMessage,
+					getTotalOutstanding(), getInArrearsTolerance());
 		}
-		
-		Money waived = Money.of(getCurrency(), loanTransaction.getAmount());		
+
+		Money waived = Money.of(getCurrency(), loanTransaction.getAmount());
 		if (waived.isGreaterThan(this.getInArrearsTolerance())) {
-			final String errorMessage = "The amount being waived cannot exceed the in arrears tolerance setting of " + getInArrearsTolerance().getAmount();
-			throw new InvalidLoanStateTransitionException("waive", "cannot.exceed.in.arrears.tolerance.setting", errorMessage, waived, getInArrearsTolerance());
+			final String errorMessage = "The amount being waived cannot exceed the in arrears tolerance setting of "
+					+ getInArrearsTolerance().getAmount();
+			throw new InvalidLoanStateTransitionException("waive",
+					"cannot.exceed.in.arrears.tolerance.setting", errorMessage,
+					waived, getInArrearsTolerance());
 		}
-		
+
 		if (this.isRepaidInFull()) {
-			this.loanStatus = loanLifecycleStateMachine.transition(LoanEvent.REPAID_IN_FULL, this.loanStatus);
+			this.loanStatus = loanLifecycleStateMachine.transition(
+					LoanEvent.REPAID_IN_FULL, this.loanStatus);
 			this.closedOnDate = loanTransaction.getTransactionDate().toDate();
 			this.maturedOnDate = loanTransaction.getTransactionDate().toDate();
-			
+
 			if (isInterestRebateAllowed()) {
 				Money rebateDue = calculateRebateWhenPaidInFullOn(loanTransaction
 						.getTransactionDate());
 				if (rebateDue.isGreaterThanZero()) {
-					this.loanStatus = loanLifecycleStateMachine.transition(LoanEvent.INTERST_REBATE_OWED, this.loanStatus);
+					this.loanStatus = loanLifecycleStateMachine.transition(
+							LoanEvent.INTERST_REBATE_OWED, this.loanStatus);
 					this.interestRebateOwed = rebateDue.getAmount();
 				}
 			}
 		}
 	}
 
-	public void makeRepayment(final LoanTransaction loanTransaction, LoanLifecycleStateMachine loanLifecycleStateMachine) {
-		this.loanStatus = loanLifecycleStateMachine.transition(LoanEvent.LOAN_REPAYMENT, this.loanStatus);
+	public void makeRepayment(final LoanTransaction loanTransaction,
+			LoanLifecycleStateMachine loanLifecycleStateMachine) {
+		this.loanStatus = loanLifecycleStateMachine.transition(
+				LoanEvent.LOAN_REPAYMENT, this.loanStatus);
 		loanTransaction.updateLoan(this);
 		this.loanTransactions.add(loanTransaction);
-		
+
 		deriveLoanRepaymentScheduleCompletedData();
 
 		if (loanTransaction.isNotRepayment()) {
 			final String errorMessage = "A transaction of type repayment was expected but not received.";
-			throw new InvalidLoanTransactionTypeException("transaction", "is.not.a.repayment.transaction", errorMessage);
+			throw new InvalidLoanTransactionTypeException("transaction",
+					"is.not.a.repayment.transaction", errorMessage);
 		}
-		
+
 		LocalDate loanTransactionDate = loanTransaction.getTransactionDate();
 		if (loanTransactionDate.isBefore(this.getDisbursementDate())) {
-			final String errorMessage = "The transaction date cannot be before the loan disbursement date: " + getApprovedOnDate().toString();
-			throw new InvalidLoanStateTransitionException("repayment", "cannot.be.before.disbursement.date", errorMessage, loanTransactionDate, this.getDisbursementDate());
+			final String errorMessage = "The transaction date cannot be before the loan disbursement date: "
+					+ getApprovedOnDate().toString();
+			throw new InvalidLoanStateTransitionException("repayment",
+					"cannot.be.before.disbursement.date", errorMessage,
+					loanTransactionDate, this.getDisbursementDate());
 		}
-		
+
 		if (loanTransactionDate.isAfter(new LocalDate())) {
 			final String errorMessage = "The transaction date cannot be in the future.";
-			throw new InvalidLoanStateTransitionException("repayment", "cannot.be.a.futre.date", errorMessage, loanTransactionDate);
+			throw new InvalidLoanStateTransitionException("repayment",
+					"cannot.be.a.futre.date", errorMessage, loanTransactionDate);
 		}
 
 		if (this.isRepaidInFull()) {
-			this.loanStatus = loanLifecycleStateMachine.transition(LoanEvent.REPAID_IN_FULL, this.loanStatus);
+			this.loanStatus = loanLifecycleStateMachine.transition(
+					LoanEvent.REPAID_IN_FULL, this.loanStatus);
 			this.closedOnDate = loanTransaction.getTransactionDate().toDate();
 			this.maturedOnDate = loanTransaction.getTransactionDate().toDate();
-			
+
 			if (isInterestRebateAllowed()) {
 				Money rebateDue = calculateRebateWhenPaidInFullOn(loanTransaction
 						.getTransactionDate());
 				if (rebateDue.isGreaterThanZero()) {
-					this.loanStatus = loanLifecycleStateMachine.transition(LoanEvent.INTERST_REBATE_OWED, this.loanStatus);
+					this.loanStatus = loanLifecycleStateMachine.transition(
+							LoanEvent.INTERST_REBATE_OWED, this.loanStatus);
 					this.interestRebateOwed = rebateDue.getAmount();
 				}
 			}
@@ -399,40 +462,47 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	}
 
 	private void deriveLoanRepaymentScheduleCompletedData() {
-		
+
 		Money totalRepaidOrWaivedAgainstLoan = calculateTotalPaidOrWaived();
-		
+
 		Money remainingToPayoffAgainstLoanSchedule = totalRepaidOrWaivedAgainstLoan;
-		Money totalOverpaid = Money.zero(totalRepaidOrWaivedAgainstLoan.getCurrency());
+		Money totalOverpaid = Money.zero(totalRepaidOrWaivedAgainstLoan
+				.getCurrency());
 		int repaymentInstallmentIndex = 0;
 		while (remainingToPayoffAgainstLoanSchedule.isGreaterThanZero()) {
-			
-			if (repaymentInstallmentIndex == this.repaymentScheduleInstallments.size()) {
+
+			if (repaymentInstallmentIndex == this.repaymentScheduleInstallments
+					.size()) {
 				totalOverpaid = remainingToPayoffAgainstLoanSchedule;
-				
+
 				// to exit while loop
-				remainingToPayoffAgainstLoanSchedule = remainingToPayoffAgainstLoanSchedule.minus(totalOverpaid);
+				remainingToPayoffAgainstLoanSchedule = remainingToPayoffAgainstLoanSchedule
+						.minus(totalOverpaid);
 			} else {
-				LoanRepaymentScheduleInstallment scheduledRepaymentInstallment = this.repaymentScheduleInstallments.get(repaymentInstallmentIndex);
-				remainingToPayoffAgainstLoanSchedule = scheduledRepaymentInstallment.updateDerivedComponents(remainingToPayoffAgainstLoanSchedule);
+				LoanRepaymentScheduleInstallment scheduledRepaymentInstallment = this.repaymentScheduleInstallments
+						.get(repaymentInstallmentIndex);
+				remainingToPayoffAgainstLoanSchedule = scheduledRepaymentInstallment
+						.updateDerivedComponents(remainingToPayoffAgainstLoanSchedule);
 				repaymentInstallmentIndex++;
 			}
 		}
 	}
 
 	private Money calculateTotalPaidOrWaived() {
-		
-		Money totalRepaidOrWaived = Money.zero(this.loanRepaymentScheduleDetail.getPrincipal().getCurrency());
-		
+
+		Money totalRepaidOrWaived = Money.zero(this.loanRepaymentScheduleDetail
+				.getPrincipal().getCurrency());
+
 		for (LoanTransaction transaction : this.loanTransactions) {
 			if (transaction.isRepayment() || transaction.isWaiver()) {
-				totalRepaidOrWaived = totalRepaidOrWaived.plus(transaction.getAmount());
+				totalRepaidOrWaived = totalRepaidOrWaived.plus(transaction
+						.getAmount());
 			}
 		}
-		
+
 		return totalRepaidOrWaived;
 	}
-	
+
 	public LocalDate possibleNextRepaymentDate() {
 		LocalDate earliestUnpaidInstallmentDate = new LocalDate();
 		for (LoanRepaymentScheduleInstallment installment : this.repaymentScheduleInstallments) {
@@ -441,49 +511,55 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 				break;
 			}
 		}
-		
-		LocalDate lastTransactionDate = null; 
+
+		LocalDate lastTransactionDate = null;
 		for (LoanTransaction transaction : this.loanTransactions) {
 			if (transaction.isRepayment() && transaction.isNonZero()) {
 				lastTransactionDate = transaction.getTransactionDate();
 			}
 		}
-		
+
 		LocalDate possibleNextRepaymentDate = earliestUnpaidInstallmentDate;
-		if (lastTransactionDate != null && lastTransactionDate.isAfter(earliestUnpaidInstallmentDate)) {
+		if (lastTransactionDate != null
+				&& lastTransactionDate.isAfter(earliestUnpaidInstallmentDate)) {
 			possibleNextRepaymentDate = lastTransactionDate;
 		}
-		
+
 		return possibleNextRepaymentDate;
 	}
-	
+
 	public Money possibleNextRepaymentAmount() {
-		MonetaryCurrency currency = this.loanRepaymentScheduleDetail.getPrincipal().getCurrency();
+		MonetaryCurrency currency = this.loanRepaymentScheduleDetail
+				.getPrincipal().getCurrency();
 		Money possibleNextRepaymentAmount = Money.zero(currency);
-		
+
 		for (LoanRepaymentScheduleInstallment installment : this.repaymentScheduleInstallments) {
 			if (installment.unpaid()) {
 				possibleNextRepaymentAmount = installment.getTotalDue(currency);
 				break;
 			}
 		}
-		
+
 		return possibleNextRepaymentAmount;
 	}
 
-	public void adjustExistingTransaction(LoanTransaction transactionForAdjustment,
-			LoanTransaction newTransactionDetail, LoanLifecycleStateMachine loanLifecycleStateMachine) {
+	public void adjustExistingTransaction(
+			LoanTransaction transactionForAdjustment,
+			LoanTransaction newTransactionDetail,
+			LoanLifecycleStateMachine loanLifecycleStateMachine) {
 
-		if (transactionForAdjustment.isNotRepayment() && transactionForAdjustment.isNotWaiver()) {
+		if (transactionForAdjustment.isNotRepayment()
+				&& transactionForAdjustment.isNotWaiver()) {
 			final String errorMessage = "A transaction of type repayment or waiver was expected but not received.";
-			throw new InvalidLoanTransactionTypeException("transaction", "is.not.a.repayment.or.waiver.transaction", errorMessage);
+			throw new InvalidLoanTransactionTypeException("transaction",
+					"is.not.a.repayment.or.waiver.transaction", errorMessage);
 		}
 
 		transactionForAdjustment.contra();
 		if (newTransactionDetail.isRepayment()) {
 			makeRepayment(newTransactionDetail, loanLifecycleStateMachine);
 		}
-		
+
 		if (newTransactionDetail.isWaiver()) {
 			waive(newTransactionDetail, loanLifecycleStateMachine);
 		}
@@ -503,7 +579,8 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 				.getPrincipal().getCurrency());
 
 		for (LoanRepaymentScheduleInstallment scheduledRepayment : this.repaymentScheduleInstallments) {
-			cumulativePrincipal = cumulativePrincipal.plus(scheduledRepayment.getPrincipal(loanCurrency()));
+			cumulativePrincipal = cumulativePrincipal.plus(scheduledRepayment
+					.getPrincipal(loanCurrency()));
 			cumulativeInterest = cumulativeInterest.plus(scheduledRepayment
 					.getInterest(loanCurrency()));
 			cumulativeTotal = cumulativeTotal.plus(scheduledRepayment
@@ -528,42 +605,56 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		return this.loanRepaymentScheduleDetail.getCurrency();
 	}
 
-	public void writeOff(final DateTime writtenOffOn, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
-		this.loanStatus = loanLifecycleStateMachine.transition(LoanEvent.LOAN_WRITE_OFF, this.loanStatus);
+	public void writeOff(final DateTime writtenOffOn,
+			final LoanLifecycleStateMachine loanLifecycleStateMachine) {
+		this.loanStatus = loanLifecycleStateMachine.transition(
+				LoanEvent.LOAN_WRITE_OFF, this.loanStatus);
 		this.closedOnDate = writtenOffOn.toDate();
 		this.writtenOffOnDate = writtenOffOn.toDate();
-		
+
 		LocalDate writtenOffOnLocalDate = new LocalDate(writtenOffOnDate);
 		if (writtenOffOnLocalDate.isBefore(this.getDisbursementDate())) {
-			final String errorMessage = "The date on which a loan is withdrawn cannot be before the loan disbursement date: " + getDisbursementDate().toString();
-			throw new InvalidLoanStateTransitionException("writeoff", "cannot.be.before.submittal.date", errorMessage, writtenOffOnLocalDate, getDisbursementDate());
+			final String errorMessage = "The date on which a loan is withdrawn cannot be before the loan disbursement date: "
+					+ getDisbursementDate().toString();
+			throw new InvalidLoanStateTransitionException("writeoff",
+					"cannot.be.before.submittal.date", errorMessage,
+					writtenOffOnLocalDate, getDisbursementDate());
 		}
 		if (writtenOffOnLocalDate.isAfter(new LocalDate())) {
 			final String errorMessage = "The date on which a loan is written off cannot be in the future.";
-			throw new InvalidLoanStateTransitionException("writeoff", "cannot.be.a.future.date", errorMessage, writtenOffOnLocalDate);
+			throw new InvalidLoanStateTransitionException("writeoff",
+					"cannot.be.a.future.date", errorMessage,
+					writtenOffOnLocalDate);
 		}
 	}
 
-	public void reschedule(final DateTime rescheduledOn, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
-		this.loanStatus = loanLifecycleStateMachine.transition(LoanEvent.LOAN_RESCHEDULE, this.loanStatus);
+	public void reschedule(final DateTime rescheduledOn,
+			final LoanLifecycleStateMachine loanLifecycleStateMachine) {
+		this.loanStatus = loanLifecycleStateMachine.transition(
+				LoanEvent.LOAN_RESCHEDULE, this.loanStatus);
 		this.closedOnDate = rescheduledOn.toDate();
 		this.rescheduledOnDate = rescheduledOn.toDate();
-		
+
 		LocalDate rescheduledOnLocalDate = new LocalDate(rescheduledOnDate);
 		if (rescheduledOnLocalDate.isBefore(this.getDisbursementDate())) {
-			final String errorMessage = "The date on which a loan is rescheduled cannot be before the loan disbursement date: " + getDisbursementDate().toString();
-			throw new InvalidLoanStateTransitionException("writeoff", "cannot.be.before.submittal.date", errorMessage, rescheduledOnLocalDate, getDisbursementDate());
+			final String errorMessage = "The date on which a loan is rescheduled cannot be before the loan disbursement date: "
+					+ getDisbursementDate().toString();
+			throw new InvalidLoanStateTransitionException("writeoff",
+					"cannot.be.before.submittal.date", errorMessage,
+					rescheduledOnLocalDate, getDisbursementDate());
 		}
 		if (rescheduledOnLocalDate.isAfter(new LocalDate())) {
 			final String errorMessage = "The date on which a loan is rescheduled cannot be in the future.";
-			throw new InvalidLoanStateTransitionException("writeoff", "cannot.be.a.future.date", errorMessage, rescheduledOnLocalDate);
+			throw new InvalidLoanStateTransitionException("writeoff",
+					"cannot.be.a.future.date", errorMessage,
+					rescheduledOnLocalDate);
 		}
 	}
 
 	public boolean isNotSubmittedAndPendingApproval() {
 		return !isSubmittedAndPendingApproval();
 	}
-	
+
 	public boolean isSubmittedAndPendingApproval() {
 		return this.loanStatus.isSubmittedAndPendingApproval();
 	}
@@ -653,26 +744,6 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	public List<LoanRepaymentScheduleInstallment> getRepaymentScheduleInstallments() {
 		return this.repaymentScheduleInstallments;
 	}
-//delete after jpw
-	/*
-	public DerivedLoanData deriveLoanDataxxx(CurrencyData currencyData) {
-
-		List<LoanTransaction> repaymentTransactions = new ArrayList<LoanTransaction>();
-		for (LoanTransaction loanTransaction : this.loanTransactions) {
-			if (loanTransaction.isRepayment() || loanTransaction.isWaiver()) {
-				repaymentTransactions.add(loanTransaction);
-			}
-		}
-
-		Money arrearsTolerance = this.loanRepaymentScheduleDetail
-				.getInArrearsTolerance();
-
-		return new DerivedLoanDataProcessor().process(
-				new ArrayList<LoanRepaymentScheduleInstallment>(
-						this.repaymentScheduleInstallments),
-				repaymentTransactions, currencyData, arrearsTolerance);
-	}
-	*/
 
 	public String getExternalId() {
 		return this.externalId;
@@ -731,11 +802,12 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	public Date getExpectedDisbursedOnDate() {
 		return this.expectedDisbursedOnDate;
 	}
-	
+
 	public LocalDate getExpectedDisbursedOnLocalDate() {
 		LocalDate expectedDisbursementDate = null;
 		if (this.expectedDisbursedOnDate != null) {
-			expectedDisbursementDate = new LocalDate(this.expectedDisbursedOnDate);
+			expectedDisbursementDate = new LocalDate(
+					this.expectedDisbursedOnDate);
 		}
 		return expectedDisbursementDate;
 	}
@@ -743,7 +815,8 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	public LocalDate getExpectedFirstRepaymentOnDate() {
 		LocalDate firstRepaymentDate = null;
 		if (this.expectedFirstRepaymentOnDate != null) {
-			firstRepaymentDate = new LocalDate(this.expectedFirstRepaymentOnDate);
+			firstRepaymentDate = new LocalDate(
+					this.expectedFirstRepaymentOnDate);
 		}
 		return firstRepaymentDate;
 	}
@@ -755,7 +828,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		}
 		return disbursementDate;
 	}
-	
+
 	public LocalDate getExpectedMaturityDate() {
 		LocalDate possibleMaturityDate = null;
 		if (this.expectedMaturityDate != null) {
@@ -763,7 +836,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		}
 		return possibleMaturityDate;
 	}
-	
+
 	public LocalDate getActualMaturityDate() {
 		LocalDate possibleMaturityDate = null;
 		if (this.maturedOnDate != null) {
@@ -784,7 +857,8 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		return possibleMaturityDate;
 	}
 
-	public void addRepaymentScheduleInstallment(final LoanRepaymentScheduleInstallment installment) {
+	public void addRepaymentScheduleInstallment(
+			final LoanRepaymentScheduleInstallment installment) {
 		installment.updateLoan(this);
 		this.repaymentScheduleInstallments.add(installment);
 	}
@@ -898,7 +972,8 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 				.getPrincipal().getCurrency());
 
 		for (LoanRepaymentScheduleInstallment scheduledRepayment : this.repaymentScheduleInstallments) {
-			cumulativeInterest = cumulativeInterest.plus(scheduledRepayment.getInterest(loanCurrency()));
+			cumulativeInterest = cumulativeInterest.plus(scheduledRepayment
+					.getInterest(loanCurrency()));
 		}
 
 		return cumulativeInterest;
@@ -917,7 +992,8 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	}
 
 	public Money getInterestRebateOwed() {
-		return Money.of(this.loanRepaymentScheduleDetail.getCurrency(), this.interestRebateOwed);
+		return Money.of(this.loanRepaymentScheduleDetail.getCurrency(),
+				this.interestRebateOwed);
 	}
 
 	public Money getInArrearsTolerance() {
@@ -946,25 +1022,26 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	}
 
 	public LocalDate getLoanStatusSinceDate() {
-		
+
 		LocalDate statusSinceDate = getSubmittedOnDate();
 		if (isApproved()) {
 			statusSinceDate = new LocalDate(this.approvedOnDate);
 		}
-		
+
 		if (isDisbursed()) {
 			statusSinceDate = new LocalDate(this.disbursedOnDate);
 		}
-		
+
 		if (isClosed()) {
 			statusSinceDate = new LocalDate(this.closedOnDate);
 		}
-		
+
 		return statusSinceDate;
 	}
-	
+
 	public String getCurrencyCode() {
-		return this.loanRepaymentScheduleDetail.getPrincipal().getCurrencyCode();
+		return this.loanRepaymentScheduleDetail.getPrincipal()
+				.getCurrencyCode();
 	}
-	
+
 }

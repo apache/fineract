@@ -26,6 +26,7 @@ import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.LoanAccountData;
 import org.mifosng.platform.api.data.LoanAccountSummaryData;
 import org.mifosng.platform.api.data.LoanBasicDetailsData;
+import org.mifosng.platform.api.data.LoanPermissionData;
 import org.mifosng.platform.api.data.LoanRepaymentPeriodDatajpw;
 import org.mifosng.platform.api.data.LoanSchedule;
 import org.mifosng.platform.api.data.LoanTransactionData;
@@ -95,17 +96,14 @@ public class LoansApiResource {
 
 		LoanBasicDetailsData loanBasicDetails = this.loanReadPlatformService
 				.retrieveLoanAccountDetails(loanId);
-		//LoanAccountData loanAccount = this.loanReadPlatformService.convertToData(loanBasicDetails);
 		
-		
-
 		Collection<LoanTransactionDatajpw> loanRepayments = this.loanReadPlatformService.retrieveLoanPayments(loanId);
 		Collection<LoanRepaymentPeriodDatajpw> repaymentSchedule = this.loanReadPlatformService.retrieveRepaymentSchedule(loanId);
 		
 		LoanAccountSummaryData summary = this.loanReadPlatformService.retrieveSummary(loanBasicDetails.getPrincipal(), repaymentSchedule, loanRepayments);
+		LoanPermissionData permissions = this.loanReadPlatformService.retrieveLoanPermissions(loanBasicDetails, summary.isWaiveAllowed(loanBasicDetails.getInArrearsTolerance()));
 		
-		
-		LoanAccountData loanAccount = new LoanAccountData(loanBasicDetails, summary, repaymentSchedule, loanRepayments, null );
+		LoanAccountData loanAccount = new LoanAccountData(loanBasicDetails, summary, repaymentSchedule, loanRepayments, permissions);
 
 		String selectedFields = "";
 		String associatedFields = "summary,repaymentSchedule,loanRepayments,permissions,convenienceData";
