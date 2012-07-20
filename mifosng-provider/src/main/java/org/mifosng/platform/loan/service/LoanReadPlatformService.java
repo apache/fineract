@@ -17,10 +17,11 @@ public interface LoanReadPlatformService {
 
 	Collection<LoanRepaymentPeriodDatajpw> retrieveRepaymentSchedule(Long loanId);
 
-	LoanAccountSummaryData retrieveSummary(MoneyData principal,
-			Collection<LoanRepaymentPeriodDatajpw> repaymentSchedule);
-
 	Collection<LoanTransactionDatajpw> retrieveLoanPayments(Long loanId);
+
+	LoanAccountSummaryData retrieveSummary(MoneyData principal,
+			Collection<LoanRepaymentPeriodDatajpw> repaymentSchedule,
+			Collection<LoanTransactionDatajpw> loanRepayments);
 
 	NewLoanData retrieveClientAndProductDetails(Long clientId, Long productId);
 

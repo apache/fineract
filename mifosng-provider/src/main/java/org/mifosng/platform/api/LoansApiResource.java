@@ -97,11 +97,13 @@ public class LoansApiResource {
 				.retrieveLoanAccountDetails(loanId);
 		//LoanAccountData loanAccount = this.loanReadPlatformService.convertToData(loanBasicDetails);
 		
+		
+
+		Collection<LoanTransactionDatajpw> loanRepayments = this.loanReadPlatformService.retrieveLoanPayments(loanId);
 		Collection<LoanRepaymentPeriodDatajpw> repaymentSchedule = this.loanReadPlatformService.retrieveRepaymentSchedule(loanId);
 		
-		LoanAccountSummaryData summary = this.loanReadPlatformService.retrieveSummary(loanBasicDetails.getPrincipal(), repaymentSchedule);
+		LoanAccountSummaryData summary = this.loanReadPlatformService.retrieveSummary(loanBasicDetails.getPrincipal(), repaymentSchedule, loanRepayments);
 		
-		Collection<LoanTransactionDatajpw> loanRepayments = this.loanReadPlatformService.retrieveLoanPayments(loanId);
 		
 		LoanAccountData loanAccount = new LoanAccountData(loanBasicDetails, summary, repaymentSchedule, loanRepayments, null );
 

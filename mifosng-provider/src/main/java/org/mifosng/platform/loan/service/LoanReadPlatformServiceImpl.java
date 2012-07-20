@@ -115,7 +115,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
 	@Override
 	public LoanAccountSummaryData retrieveSummary(MoneyData principal,
-			Collection<LoanRepaymentPeriodDatajpw> repaymentSchedule) {
+			Collection<LoanRepaymentPeriodDatajpw> repaymentSchedule, Collection<LoanTransactionDatajpw> loanRepayments) {
 
 		CurrencyData currencyData = new CurrencyData(
 				principal.getCurrencyCode(), principal.getDefaultName(),
@@ -158,7 +158,16 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 		}
 
 		totalInArrears = BigDecimal.TEN;
-		totalWaived = BigDecimal.ONE;
+		
+		
+		Long waiverType = (long) 4;
+		for (LoanTransactionDatajpw loanRepayment : loanRepayments) {
+			Long transactionType = loanRepayment.getTransactionType().getId();
+			if (transactionType.equals(waiverType)) {
+				totalWaived = totalWaived.add(loanRepayment.getTotal().getAmount());
+			}
+
+		}
 
 		return new LoanAccountSummaryData(MoneyData.of(currencyData,
 				originalPrincipal), MoneyData.of(currencyData, principalPaid),
