@@ -413,15 +413,31 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		}
 	}
 
-	public void makeRepayment(final LoanTransaction loanTransaction,
-			LoanLifecycleStateMachine loanLifecycleStateMachine) {
-		this.loanStatus = loanLifecycleStateMachine.transition(
-				LoanEvent.LOAN_REPAYMENT, this.loanStatus);
+	public void makeRepayment(final LoanTransaction loanTransaction, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
+		this.loanStatus = loanLifecycleStateMachine.transition(LoanEvent.LOAN_REPAYMENT, this.loanStatus);
 		loanTransaction.updateLoan(this);
 		this.loanTransactions.add(loanTransaction);
 
 		deriveLoanRepaymentScheduleCompletedData();
-
+		
+//		Money totalRepaidOrWaived = Money.zero(this.loanRepaymentScheduleDetail.getPrincipal().getCurrency());
+//		MonetaryCurrency currency = totalRepaidOrWaived.getCurrency();
+//		
+//		int repaymentIndex = 0;
+//		
+//		for (LoanTransaction transaction : this.loanTransactions) {
+//			if (transaction.isRepayment() || transaction.isWaiver()) {
+//				totalRepaidOrWaived = totalRepaidOrWaived.plus(transaction.getAmount());
+//				
+//				LoanRepaymentScheduleInstallment currentInstallment = this.repaymentScheduleInstallments.get(repaymentIndex);
+//				if (currentInstallment.unpaid()) {
+//					currentInstallment.payOffWith(transaction, currency);
+//				} else {
+//					repaymentIndex++;
+//				}
+//			}
+//		}
+		
 		if (loanTransaction.isNotRepayment()) {
 			final String errorMessage = "A transaction of type repayment was expected but not received.";
 			throw new InvalidLoanTransactionTypeException("transaction",
@@ -466,23 +482,18 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		Money totalRepaidOrWaivedAgainstLoan = calculateTotalPaidOrWaived();
 
 		Money remainingToPayoffAgainstLoanSchedule = totalRepaidOrWaivedAgainstLoan;
-		Money totalOverpaid = Money.zero(totalRepaidOrWaivedAgainstLoan
-				.getCurrency());
+		Money totalOverpaid = Money.zero(totalRepaidOrWaivedAgainstLoan.getCurrency());
 		int repaymentInstallmentIndex = 0;
 		while (remainingToPayoffAgainstLoanSchedule.isGreaterThanZero()) {
 
-			if (repaymentInstallmentIndex == this.repaymentScheduleInstallments
-					.size()) {
+			if (repaymentInstallmentIndex == this.repaymentScheduleInstallments.size()) {
 				totalOverpaid = remainingToPayoffAgainstLoanSchedule;
 
 				// to exit while loop
-				remainingToPayoffAgainstLoanSchedule = remainingToPayoffAgainstLoanSchedule
-						.minus(totalOverpaid);
+				remainingToPayoffAgainstLoanSchedule = remainingToPayoffAgainstLoanSchedule.minus(totalOverpaid);
 			} else {
-				LoanRepaymentScheduleInstallment scheduledRepaymentInstallment = this.repaymentScheduleInstallments
-						.get(repaymentInstallmentIndex);
-				remainingToPayoffAgainstLoanSchedule = scheduledRepaymentInstallment
-						.updateDerivedComponents(remainingToPayoffAgainstLoanSchedule);
+				LoanRepaymentScheduleInstallment scheduledRepaymentInstallment = this.repaymentScheduleInstallments.get(repaymentInstallmentIndex);
+				remainingToPayoffAgainstLoanSchedule = scheduledRepaymentInstallment.updateDerivedComponents(remainingToPayoffAgainstLoanSchedule);
 				repaymentInstallmentIndex++;
 			}
 		}

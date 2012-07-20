@@ -2,18 +2,21 @@ package org.mifosng.platform.api.data;
 
 import org.joda.time.LocalDate;
 
-public class LoanTransactionDataDTO {
+/**
+ * This data object replaces {@link LoanTransactionData}.
+ */
+public class LoanRepaymentTransactionData {
 
 	private Long id;
 	private EnumOptionData transactionType;
 	private LocalDate date;
 	private MoneyData total;
 
-	public LoanTransactionDataDTO() {
+	public LoanRepaymentTransactionData() {
 		//
 	}
 
-	public LoanTransactionDataDTO(Long id, EnumOptionData transactionType,
+	public LoanRepaymentTransactionData(Long id, EnumOptionData transactionType,
 			final LocalDate date, final MoneyData total) {
 		this.id = id;
 		this.transactionType = transactionType;

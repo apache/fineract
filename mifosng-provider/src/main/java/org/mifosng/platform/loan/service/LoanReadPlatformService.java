@@ -7,7 +7,7 @@ import org.mifosng.platform.api.data.LoanBasicDetailsData;
 import org.mifosng.platform.api.data.LoanPermissionData;
 import org.mifosng.platform.api.data.LoanRepaymentPeriodData;
 import org.mifosng.platform.api.data.LoanTransactionData;
-import org.mifosng.platform.api.data.LoanTransactionDataDTO;
+import org.mifosng.platform.api.data.LoanRepaymentTransactionData;
 import org.mifosng.platform.api.data.MoneyData;
 import org.mifosng.platform.api.data.NewLoanData;
 
@@ -17,11 +17,11 @@ public interface LoanReadPlatformService {
 
 	Collection<LoanRepaymentPeriodData> retrieveRepaymentSchedule(Long loanId);
 
-	Collection<LoanTransactionDataDTO> retrieveLoanPayments(Long loanId);
+	Collection<LoanRepaymentTransactionData> retrieveLoanPayments(Long loanId);
 
 	LoanAccountSummaryData retrieveSummary(MoneyData principal,
 			Collection<LoanRepaymentPeriodData> repaymentSchedule,
-			Collection<LoanTransactionDataDTO> loanRepayments);
+			Collection<LoanRepaymentTransactionData> loanRepayments);
 
 	LoanPermissionData retrieveLoanPermissions(
 			LoanBasicDetailsData loanBasicDetails, boolean isWaiverAllowed,

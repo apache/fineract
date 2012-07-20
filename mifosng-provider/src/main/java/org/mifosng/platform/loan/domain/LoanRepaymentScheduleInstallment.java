@@ -151,4 +151,18 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableCustom<Ap
 	private Money getTotalCompleted(MonetaryCurrency currency) {
 		return getPrincipalCompleted(currency).plus(getInterestCompleted(currency));
 	}
+
+//	public void payOffWith(final LoanTransaction transaction, final MonetaryCurrency currency) {
+//		Money transactionAmountRemaining = Money.of(currency, transaction.getAmount());
+//		
+//		Money interestDue = getInterest(currency);
+//		if (transactionAmountRemaining.isGreaterThanOrEqualTo(interestDue)) {
+//			this.interestCompleted = interestDue.getAmount();
+//			transactionAmountRemaining = transactionAmountRemaining.minus(interestDue);
+//		} else {
+//			this.interestCompleted = transactionAmountRemaining.getAmount();
+//		}
+//		
+//		Money principalDue = getPrincipal(currency);
+//	}
 }

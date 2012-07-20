@@ -17,7 +17,7 @@ import org.mifosng.platform.api.data.LoanProductData;
 import org.mifosng.platform.api.data.LoanProductLookup;
 import org.mifosng.platform.api.data.LoanRepaymentPeriodData;
 import org.mifosng.platform.api.data.LoanTransactionData;
-import org.mifosng.platform.api.data.LoanTransactionDataDTO;
+import org.mifosng.platform.api.data.LoanRepaymentTransactionData;
 import org.mifosng.platform.api.data.MoneyData;
 import org.mifosng.platform.api.data.NewLoanData;
 import org.mifosng.platform.client.service.ClientReadPlatformService;
@@ -110,7 +110,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 	@Override
 	public LoanAccountSummaryData retrieveSummary(MoneyData principal,
 			Collection<LoanRepaymentPeriodData> repaymentSchedule,
-			Collection<LoanTransactionDataDTO> loanRepayments) {
+			Collection<LoanRepaymentTransactionData> loanRepayments) {
 
 		CurrencyData currencyData = new CurrencyData(
 				principal.getCurrencyCode(), principal.getDefaultName(),
@@ -157,7 +157,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 		}
 
 		Long waiverType = (long) 4;
-		for (LoanTransactionDataDTO loanRepayment : loanRepayments) {
+		for (LoanRepaymentTransactionData loanRepayment : loanRepayments) {
 			Long transactionType = loanRepayment.getTransactionType().getId();
 			if (transactionType.equals(waiverType)) {
 				totalWaived = totalWaived.add(loanRepayment.getTotal()
@@ -179,17 +179,17 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 	}
 
 	@Override
-	public Collection<LoanTransactionDataDTO> retrieveLoanPayments(Long loanId) {
+	public Collection<LoanRepaymentTransactionData> retrieveLoanPayments(Long loanId) {
 		try {
 			context.authenticatedUser();
 
 			LoanPaymentsMapper rm = new LoanPaymentsMapper();
 
 			// retrieve all loan transactions that are not invalid (0) and not
-			// disbursements (1)
+			// disbursements (1) and have not been 'contra'ed by another transaction
 			String sql = "select "
 					+ rm.LoanPaymentsSchema()
-					+ " where tr.loan_id = ? and tr.transaction_type_enum not in (0, 1) order by tr.transaction_date";
+					+ " where tr.loan_id = ? and tr.transaction_type_enum not in (0, 1) and tr.contra_id is null order by tr.transaction_date ASC";
 			return this.jdbcTemplate.query(sql, rm, new Object[] { loanId });
 
 		} catch (EmptyResultDataAccessException e) {
@@ -581,7 +581,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 	}
 
 	private static final class LoanPaymentsMapper implements
-			RowMapper<LoanTransactionDataDTO> {
+			RowMapper<LoanRepaymentTransactionData> {
 
 		public String LoanPaymentsSchema() {
 
@@ -593,7 +593,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 		}
 
 		@Override
-		public LoanTransactionDataDTO mapRow(final ResultSet rs,
+		public LoanRepaymentTransactionData mapRow(final ResultSet rs,
 				final int rowNum) throws SQLException {
 
 			String currencyCode = rs.getString("currencyCode");
@@ -616,7 +616,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 			BigDecimal totalBD = rs.getBigDecimal("total");
 			MoneyData total = MoneyData.of(currencyData, totalBD);
 
-			return new LoanTransactionDataDTO(id, transactionType, date, total);
+			return new LoanRepaymentTransactionData(id, transactionType, date, total);
 		}
 	}
 

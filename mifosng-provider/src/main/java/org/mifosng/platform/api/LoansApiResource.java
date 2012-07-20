@@ -30,7 +30,7 @@ import org.mifosng.platform.api.data.LoanPermissionData;
 import org.mifosng.platform.api.data.LoanRepaymentPeriodData;
 import org.mifosng.platform.api.data.LoanSchedule;
 import org.mifosng.platform.api.data.LoanTransactionData;
-import org.mifosng.platform.api.data.LoanTransactionDataDTO;
+import org.mifosng.platform.api.data.LoanRepaymentTransactionData;
 import org.mifosng.platform.api.data.NewLoanData;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.ApiJSONFormattingService;
@@ -99,7 +99,7 @@ public class LoansApiResource {
 		LoanBasicDetailsData loanBasicDetails = this.loanReadPlatformService
 				.retrieveLoanAccountDetails(loanId);
 
-		Collection<LoanTransactionDataDTO> loanRepayments = this.loanReadPlatformService
+		Collection<LoanRepaymentTransactionData> loanRepayments = this.loanReadPlatformService
 				.retrieveLoanPayments(loanId);
 		Collection<LoanRepaymentPeriodData> repaymentSchedule = this.loanReadPlatformService
 				.retrieveRepaymentSchedule(loanId);
