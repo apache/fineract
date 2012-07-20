@@ -547,11 +547,11 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	    
 	    Set<String> modifiedParameters = new HashSet<String>();
 
-	    LocalDate paymentDate = extractLocalDateParameter("paymentDate", requestMap, modifiedParameters);
-	    BigDecimal paymentAmount = extractBigDecimalParameter("paymentAmount", requestMap, modifiedParameters);
+	    LocalDate transactionDate = extractLocalDateParameter("transactionDate", requestMap, modifiedParameters);
+	    BigDecimal transactionAmount = extractBigDecimalParameter("transactionAmount", requestMap, modifiedParameters);
 	    String note = extractStringParameter("note", requestMap, modifiedParameters);
 	    
-	    return new LoanTransactionCommand(resourceIdentifier, paymentDate, paymentAmount, note);
+	    return new LoanTransactionCommand(resourceIdentifier, transactionDate, transactionAmount, note);
 	}
 	
 	@Override
