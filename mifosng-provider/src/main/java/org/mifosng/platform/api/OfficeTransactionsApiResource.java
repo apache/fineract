@@ -1,5 +1,9 @@
 package org.mifosng.platform.api;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -11,10 +15,12 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.mifosng.platform.api.commands.BranchMoneyTransferCommand;
+import org.mifosng.platform.api.data.AppUserData;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.OfficeTransactionData;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.ApiJSONFormattingService;
+import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
 import org.mifosng.platform.organisation.service.OfficeReadPlatformService;
 import org.mifosng.platform.organisation.service.OfficeWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,16 +50,17 @@ public class OfficeTransactionsApiResource {
 	@Produces({MediaType.APPLICATION_JSON})
 	public String newOfficeTransactionDetails(@Context final UriInfo uriInfo) {
 
-		OfficeTransactionData officeTransactionData = this.readPlatformService
-				.retrieveNewOfficeTransactionDetails();
+		Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "transactionDate", "allowedOffices", "currencyOptions"));
+		
+		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+		if (responseParameters.isEmpty()) {
+			responseParameters.addAll(typicalResponseParameters);
+		}
+		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+		
+		OfficeTransactionData officeTransactionData = this.readPlatformService.retrieveNewOfficeTransactionDetails();
 
-		String filterName = "myFilter";
-		String defaultFieldList = "transactionDate";
-		String allowedFieldList = "currencyOptions,allowedOffices";
-		String selectedFields = defaultFieldList + "," + allowedFieldList;
-		return this.jsonFormattingService.convertRequest(officeTransactionData,
-				filterName, allowedFieldList, selectedFields,
-				uriInfo.getQueryParameters());
+		return this.apiDataConversionService.convertOfficeTransactionDataToJson(prettyPrint, responseParameters, officeTransactionData);
 	}
 	
 	@POST

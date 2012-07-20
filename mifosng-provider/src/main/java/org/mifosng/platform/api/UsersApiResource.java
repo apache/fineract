@@ -1,6 +1,11 @@
 package org.mifosng.platform.api;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -18,8 +23,10 @@ import javax.ws.rs.core.UriInfo;
 import org.mifosng.platform.api.commands.UserCommand;
 import org.mifosng.platform.api.data.AppUserData;
 import org.mifosng.platform.api.data.EntityIdentifier;
+import org.mifosng.platform.api.data.OfficeLookup;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
-import org.mifosng.platform.api.infrastructure.ApiJSONFormattingService;
+import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
+import org.mifosng.platform.organisation.service.OfficeReadPlatformService;
 import org.mifosng.platform.user.service.AppUserReadPlatformService;
 import org.mifosng.platform.user.service.AppUserWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,31 +38,34 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class UsersApiResource {
 
-	private String allowedFieldList = "allowedOffices,availableRoles";
-	private String filterName = "userFilter";
-
 	@Autowired
 	private AppUserReadPlatformService appUserReadPlatformService;
-
+	
+	@Autowired
+	private OfficeReadPlatformService officeReadPlatformService;
+	
 	@Autowired
 	private AppUserWritePlatformService appUserWritePlatformService;
 
 	@Autowired
 	private ApiDataConversionService apiDataConversionService;
 	
-	@Autowired
-	private ApiJSONFormattingService jsonFormattingService;
-
 	@GET
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveUsers(@Context final UriInfo uriInfo) {
+		
+		Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "officeId", "officeName", "username", "firstname", "lastname", "email"));
+		
+		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+		if (responseParameters.isEmpty()) {
+			responseParameters.addAll(typicalResponseParameters);
+		}
+		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 
 		Collection<AppUserData> users = this.appUserReadPlatformService.retrieveAllUsers();
-
-		String selectedFields = "id,officeId,officeName,username,firstname,lastname,email";
-		return this.jsonFormattingService.convertRequest(users, filterName,
-				allowedFieldList, selectedFields, uriInfo.getQueryParameters());
+		
+		return this.apiDataConversionService.convertAppUserDataToJson(prettyPrint, responseParameters, users.toArray(new AppUserData[users.size()]));
 	}
 
 	@GET
@@ -63,12 +73,26 @@ public class UsersApiResource {
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveUser(@PathParam("userId") final Long userId, @Context final UriInfo uriInfo) {
-
+		
+		Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "officeId", "officeName", "username", "firstname", "lastname", "email"));
+		
+		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+		if (responseParameters.isEmpty()) {
+			responseParameters.addAll(typicalResponseParameters);
+		}
+		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+		boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
+		
 		AppUserData user = this.appUserReadPlatformService.retrieveUser(userId);
-
-		String selectedFields = "";
-		return this.jsonFormattingService.convertRequest(user, filterName,
-				allowedFieldList, selectedFields, uriInfo.getQueryParameters());
+		if (template) {
+			List<OfficeLookup> offices = new ArrayList<OfficeLookup>(this.officeReadPlatformService.retrieveAllOfficesForLookup());
+			user.setAllowedOffices(offices);
+			responseParameters.add("allowedOffices");
+			responseParameters.add("availableRoles");
+			responseParameters.add("selectedRoles");
+		}
+		
+		return this.apiDataConversionService.convertAppUserDataToJson(prettyPrint, responseParameters, user);
 	}
 
 	@GET
@@ -76,13 +100,19 @@ public class UsersApiResource {
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
 	public String newUserDetails(@Context final UriInfo uriInfo) {
+		
+		Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "officeId", "officeName", "username", "firstname", "lastname", "email",
+				"allowedOffices", "availableRoles", "selectedRoles"));
+		
+		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+		if (responseParameters.isEmpty()) {
+			responseParameters.addAll(typicalResponseParameters);
+		}
+		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+		
+		AppUserData user = this.appUserReadPlatformService.retrieveNewUserDetails();
 
-		AppUserData newUser = this.appUserReadPlatformService
-				.retrieveNewUserDetails();
-
-		String selectedFields = allowedFieldList;
-		return this.jsonFormattingService.convertRequest(newUser, filterName,
-				allowedFieldList, selectedFields, uriInfo.getQueryParameters());
+		return this.apiDataConversionService.convertAppUserDataToJson(prettyPrint, responseParameters, user);
 	}
 
 	@POST

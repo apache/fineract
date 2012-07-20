@@ -3,11 +3,6 @@ package org.mifosng.platform.api.data;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-import org.codehaus.jackson.map.annotate.JsonFilter;
-
-@JsonIgnoreProperties({ "orgId" })
-@JsonFilter("roleFilter")
 public class RoleData {
 
 	private Long id;

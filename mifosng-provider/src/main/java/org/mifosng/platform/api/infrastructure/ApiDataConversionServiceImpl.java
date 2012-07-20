@@ -31,9 +31,12 @@ import org.mifosng.platform.api.commands.RoleCommand;
 import org.mifosng.platform.api.commands.SubmitLoanApplicationCommand;
 import org.mifosng.platform.api.commands.UserCommand;
 import org.mifosng.platform.api.data.ApiParameterError;
+import org.mifosng.platform.api.data.AppUserData;
 import org.mifosng.platform.api.data.FundData;
 import org.mifosng.platform.api.data.OfficeData;
+import org.mifosng.platform.api.data.OfficeTransactionData;
 import org.mifosng.platform.api.data.PermissionData;
+import org.mifosng.platform.api.data.RoleData;
 import org.mifosng.platform.api.errorhandling.InvalidJsonException;
 import org.mifosng.platform.api.errorhandling.UnsupportedParameterException;
 import org.mifosng.platform.exceptions.PlatformApiDataValidationException;
@@ -57,6 +60,68 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	
 	public ApiDataConversionServiceImpl() {
 		gsonConverter = new Gson();
+	}
+	
+	@Override
+	public String convertOfficeTransactionDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final OfficeTransactionData... officeTransactions) {
+		return null;
+	}
+
+	@Override
+	public String convertAppUserDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final AppUserData... users) {
+		
+		Set<String> supportedParameters = new HashSet<String>(Arrays.asList("id", "officeId", "officeName", "username", "firstname", "lastname", "email",
+				"allowedOffices", "availableRoles", "selectedRoles"));
+		
+		final Set<String> parameterNamesToSkip = new HashSet<String>();
+		
+		if (!responseParameters.isEmpty()) {
+			if (!supportedParameters.containsAll(responseParameters)) {
+				throw new UnsupportedParameterException(new ArrayList<String>(responseParameters));
+			}
+			
+			parameterNamesToSkip.addAll(supportedParameters);
+			parameterNamesToSkip.removeAll(responseParameters);
+		}
+		
+		ExclusionStrategy strategy = new ParameterListExclusionStrategy(parameterNamesToSkip);
+		
+		GsonBuilder builder = new GsonBuilder().addSerializationExclusionStrategy(strategy);
+		builder.registerTypeAdapter(LocalDate.class, new JodaLocalDateAdapter());
+		if (prettyPrint) {
+			builder.setPrettyPrinting();
+		}
+		Gson gsonDeserializer = builder.create();
+		
+		return gsonDeserializer.toJson(users);
+		
+	}
+	
+	@Override
+	public String convertRoleDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final RoleData... roles) {
+		Set<String> supportedParameters = new HashSet<String>(Arrays.asList("id", "name", "description", "availablePermissions", "selectedPermissions"));
+		
+		final Set<String> parameterNamesToSkip = new HashSet<String>();
+		
+		if (!responseParameters.isEmpty()) {
+			if (!supportedParameters.containsAll(responseParameters)) {
+				throw new UnsupportedParameterException(new ArrayList<String>(responseParameters));
+			}
+			
+			parameterNamesToSkip.addAll(supportedParameters);
+			parameterNamesToSkip.removeAll(responseParameters);
+		}
+		
+		ExclusionStrategy strategy = new ParameterListExclusionStrategy(parameterNamesToSkip);
+		
+		GsonBuilder builder = new GsonBuilder().addSerializationExclusionStrategy(strategy);
+		builder.registerTypeAdapter(LocalDate.class, new JodaLocalDateAdapter());
+		if (prettyPrint) {
+			builder.setPrettyPrinting();
+		}
+		Gson gsonDeserializer = builder.create();
+		
+		return gsonDeserializer.toJson(roles);
 	}
 	
 	@Override

@@ -1,6 +1,9 @@
 package org.mifosng.platform.api;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -9,7 +12,6 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -20,7 +22,7 @@ import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.PermissionData;
 import org.mifosng.platform.api.data.RoleData;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
-import org.mifosng.platform.api.infrastructure.ApiJSONFormattingService;
+import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
 import org.mifosng.platform.user.service.PermissionReadPlatformService;
 import org.mifosng.platform.user.service.RoleReadPlatformService;
 import org.mifosng.platform.user.service.RoleWritePlatformService;
@@ -33,9 +35,6 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class RolesApiResource {
 
-	private String allowedFieldList = "availablePermissions";
-	private String filterName = "roleFilter";
-
 	@Autowired
 	private RoleReadPlatformService roleReadPlatformService;
 
@@ -46,21 +45,24 @@ public class RolesApiResource {
 	private RoleWritePlatformService roleWritePlatformService;
 
 	@Autowired
-	private ApiJSONFormattingService jsonFormattingService;
-	
-	@Autowired
 	private ApiDataConversionService apiDataConversionService;
 
 	@GET
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveAllRoles(@Context final UriInfo uriInfo) {
+		
+		Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "name", "description"));
+		
+		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+		if (responseParameters.isEmpty()) {
+			responseParameters.addAll(typicalResponseParameters);
+		}
+		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 
 		Collection<RoleData> roles = this.roleReadPlatformService.retrieveAllRoles();
-
-		String selectedFields = "id,name,description";
-		return this.jsonFormattingService.convertRequest(roles, filterName,
-				allowedFieldList, selectedFields, uriInfo.getQueryParameters());
+		
+		return this.apiDataConversionService.convertRoleDataToJson(prettyPrint, responseParameters, roles.toArray(new RoleData[roles.size()]));
 	}
 
 	@GET
@@ -69,14 +71,20 @@ public class RolesApiResource {
 	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveNewRoleDetails(@Context final UriInfo uriInfo) {
 
+		Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "name", "description", "availablePermissions", "selectedPermissions"));
+		
+		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+		if (responseParameters.isEmpty()) {
+			responseParameters.addAll(typicalResponseParameters);
+		}
+		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+		
 		Collection<PermissionData> allPermissions = this.permissionReadPlatformService.retrieveAllPermissions();
 
 		RoleData role = new RoleData();
 		role.setAvailablePermissions(allPermissions);
-
-		String selectedFields = allowedFieldList;
-		return this.jsonFormattingService.convertRequest(role, filterName,
-				allowedFieldList, selectedFields, uriInfo.getQueryParameters());
+		
+		return this.apiDataConversionService.convertRoleDataToJson(prettyPrint, responseParameters, role);
 	}
 
 	@POST
@@ -95,21 +103,29 @@ public class RolesApiResource {
 	@Path("{roleId}")
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
-	public String retrieveRole(@PathParam("roleId") final Long roleId,
-			@QueryParam("template") final String template, @Context final UriInfo uriInfo) {
+	public String retrieveRole(@PathParam("roleId") final Long roleId, @Context final UriInfo uriInfo) {
+		
+		Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "name", "description"));
+		
+		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+		if (responseParameters.isEmpty()) {
+			responseParameters.addAll(typicalResponseParameters);
+		}
+		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+		boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
 
 		RoleData role = this.roleReadPlatformService.retrieveRole(roleId);
 
-		if (template != null && template.equalsIgnoreCase("true")) {
-			Collection<PermissionData> availablePermissions = this.permissionReadPlatformService
-					.retrieveAllPermissions();
+		if (template) {
+			Collection<PermissionData> availablePermissions = this.permissionReadPlatformService.retrieveAllPermissions();
 			availablePermissions.removeAll(role.getSelectedPermissions());
 			role.setAvailablePermissions(availablePermissions);
+			
+			responseParameters.add("availablePermissions");
+			responseParameters.add("selectedPermissions");
 		}
 
-		String selectedFields = "";
-		return this.jsonFormattingService.convertRequest(role, filterName,
-				allowedFieldList, selectedFields, uriInfo.getQueryParameters());
+		return this.apiDataConversionService.convertRoleDataToJson(prettyPrint, responseParameters, role);
 	}
 
 	@PUT

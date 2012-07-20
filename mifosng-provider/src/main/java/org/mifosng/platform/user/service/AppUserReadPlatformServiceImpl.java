@@ -91,15 +91,13 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
 
 		context.authenticatedUser();
 
-		List<OfficeLookup> offices = new ArrayList<OfficeLookup>(officeReadPlatformService.retrieveAllOfficesForLookup());
-
-		List<RoleData> availableRoles = new ArrayList<RoleData>(this.roleReadPlatformService.retrieveAllRoles());
-
 		AppUser user = this.appUserRepository.findOne(userId);
 		if (user == null) {
 			throw new UserNotFoundException(userId);
 		}
 
+		List<RoleData> availableRoles = new ArrayList<RoleData>(this.roleReadPlatformService.retrieveAllRoles());
+		
 		List<RoleData> userRoleData = new ArrayList<RoleData>();
 		Set<Role> userRoles = user.getRoles();
 		for (Role role : userRoles) {
@@ -111,8 +109,6 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
 						.getName());
 		userData.setFirstname(user.getFirstname());
 		userData.setLastname(user.getLastname());
-
-		userData.setAllowedOffices(offices);
 
 		availableRoles.removeAll(userRoleData);
 		userData.setAvailableRoles(availableRoles);

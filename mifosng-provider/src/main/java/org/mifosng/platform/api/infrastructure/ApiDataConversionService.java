@@ -15,14 +15,23 @@ import org.mifosng.platform.api.commands.OrganisationCurrencyCommand;
 import org.mifosng.platform.api.commands.RoleCommand;
 import org.mifosng.platform.api.commands.SubmitLoanApplicationCommand;
 import org.mifosng.platform.api.commands.UserCommand;
+import org.mifosng.platform.api.data.AppUserData;
 import org.mifosng.platform.api.data.FundData;
 import org.mifosng.platform.api.data.OfficeData;
+import org.mifosng.platform.api.data.OfficeTransactionData;
 import org.mifosng.platform.api.data.PermissionData;
+import org.mifosng.platform.api.data.RoleData;
 
 public interface ApiDataConversionService {
 	
 	//
 	String convertPermissionDataToJson(boolean prettyPrint, Set<String> responseParameters, PermissionData... permissions);
+	
+	String convertRoleDataToJson(boolean prettyPrint, Set<String> responseParameters, RoleData... roles);
+	
+	String convertAppUserDataToJson(boolean prettyPrint, Set<String> responseParameters, AppUserData... users);
+	
+	String convertOfficeTransactionDataToJson(boolean prettyPrint, Set<String> responseParameters, OfficeTransactionData... officeTransactions);
 	//
 
 	FundCommand convertJsonToFundCommand(Long resourceIdentifier, String json);
