@@ -1,6 +1,7 @@
 package org.mifosng.platform.api.data;
 
 import java.math.BigDecimal;
+import java.util.Collection;
 import java.util.List;
 
 import org.codehaus.jackson.map.annotate.JsonFilter;
@@ -44,7 +45,7 @@ public class LoanAccountData {
 	private LocalDate lifeCycleStatusDate;
 
 	private LoanAccountSummaryData summary;
-	private LoanRepaymentScheduleData repaymentSchedule;
+	private Collection<LoanRepaymentPeriodDatajpw> repaymentSchedule;
 	private List<LoanTransactionData> loanRepayments;
 
 	private LoanPermissionData permissions;
@@ -57,7 +58,7 @@ public class LoanAccountData {
 
 	public LoanAccountData(LoanBasicDetailsData basicDetails,
 			LoanAccountSummaryData summary,
-			LoanRepaymentScheduleData repaymentSchedule,
+			Collection<LoanRepaymentPeriodDatajpw> repaymentSchedule,
 			List<LoanTransactionData> loanRepayments,
 			LoanPermissionData permissions) {
 		this.summary = summary;
@@ -141,11 +142,11 @@ public class LoanAccountData {
 		this.summary = summary;
 	}
 
-	public LoanRepaymentScheduleData getRepaymentSchedule() {
+	public Collection<LoanRepaymentPeriodDatajpw> getRepaymentSchedule() {
 		return repaymentSchedule;
 	}
 
-	public void setRepaymentSchedule(LoanRepaymentScheduleData repaymentSchedule) {
+	public void setRepaymentSchedule(Collection<LoanRepaymentPeriodDatajpw> repaymentSchedule) {
 		this.repaymentSchedule = repaymentSchedule;
 	}
 

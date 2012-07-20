@@ -1,5 +1,7 @@
 package org.mifosng.platform.api;
 
+import java.util.Collection;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -22,7 +24,9 @@ import org.mifosng.platform.api.commands.SubmitLoanApplicationCommand;
 import org.mifosng.platform.api.commands.UndoStateTransitionCommand;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.LoanAccountData;
+import org.mifosng.platform.api.data.LoanAccountSummaryData;
 import org.mifosng.platform.api.data.LoanBasicDetailsData;
+import org.mifosng.platform.api.data.LoanRepaymentPeriodDatajpw;
 import org.mifosng.platform.api.data.LoanSchedule;
 import org.mifosng.platform.api.data.LoanTransactionData;
 import org.mifosng.platform.api.data.NewLoanData;
@@ -90,9 +94,14 @@ public class LoansApiResource {
 
 		LoanBasicDetailsData loanBasicDetails = this.loanReadPlatformService
 				.retrieveLoanAccountDetails(loanId);
-		LoanAccountData loanAccount = this.loanReadPlatformService.convertToData(loanBasicDetails);
+		//LoanAccountData loanAccount = this.loanReadPlatformService.convertToData(loanBasicDetails);
 		
-		//LoanAccountData loanAccount = new LoanAccountData(loanBasicDetails, null, null, null, null );
+		Collection<LoanRepaymentPeriodDatajpw> repaymentSchedule = this.loanReadPlatformService.retrieveRepaymentSchedule(loanId);
+		
+		LoanAccountSummaryData summary = this.loanReadPlatformService.retrieveSummary(loanBasicDetails.getPrincipal(), repaymentSchedule);
+		
+		 
+		LoanAccountData loanAccount = new LoanAccountData(loanBasicDetails, summary, repaymentSchedule, null, null );
 
 		String selectedFields = "";
 		String associatedFields = "summary,repaymentSchedule,loanRepayments,permissions,convenienceData";

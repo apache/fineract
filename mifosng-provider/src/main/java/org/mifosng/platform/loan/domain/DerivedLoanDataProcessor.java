@@ -1,5 +1,6 @@
 package org.mifosng.platform.loan.domain;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -23,7 +24,7 @@ import org.mifosng.platform.loanproduct.service.LoanEnumerations;
 public class DerivedLoanDataProcessor {
 
 	public DerivedLoanData process(List<LoanRepaymentScheduleInstallment> repaymentSchedulePeriods, List<LoanTransaction> loanTransactions, 
-			CurrencyData currencyDetail, Money arrearsTolerance) {
+			CurrencyData currencyDetail, BigDecimal arrearsTolerance) {
 		
 		// 1. derive repayment schedule
 		LoanRepaymentScheduleData repaymentScheduleDetails = generateRepaymentScheduleData(repaymentSchedulePeriods, currencyDetail);
@@ -136,13 +137,13 @@ public class DerivedLoanDataProcessor {
 
 	private List<LoanRepaymentPeriodData> calculateArrears(
 			List<LoanRepaymentPeriodData> loanRepaymentPeriods,
-			Money arrearsTolerance, CurrencyData currencyData) {
+			BigDecimal arrearsTolerance, CurrencyData currencyData) {
 
 		LocalDate today = new LocalDate();
 		int repaymentIndex = 0;
 		for (LoanRepaymentPeriodData currentRepaymentSchedule : loanRepaymentPeriods) {
 			if (currentRepaymentSchedule.isInArrearsWithToleranceOf(
-					moneyDataFrom(currencyData, arrearsTolerance), today)) {
+					MoneyData.of(currencyData, arrearsTolerance), today)) {
 				currentRepaymentSchedule
 						.setTotalArrears(currentRepaymentSchedule
 								.getTotalOutstanding());
@@ -277,7 +278,7 @@ public class DerivedLoanDataProcessor {
 			LoanRepaymentPeriodData scheduledRepayment, 
 			int repaymentScheduleIndex, 
 			List<LoanRepaymentPeriodData> repaymentSchedulePeriods, 
-			Money arrearsTolerance, CurrencyData currencyDetail) {
+			BigDecimal arrearsTolerance, CurrencyData currencyDetail) {
 		
 		MoneyData zero = MoneyData.zero(currencyDetail);
 		MoneyData cumulativeInterestPaid = MoneyData.zero(currencyDetail);
@@ -422,7 +423,7 @@ public class DerivedLoanDataProcessor {
 			}
 			
 			// check if this installment has
-			if (currentRepaymentSchedule.isInArrearsWithToleranceOf(moneyDataFrom(currencyDetail, arrearsTolerance), repayment.getTransactionDate())) {
+			if (currentRepaymentSchedule.isInArrearsWithToleranceOf(MoneyData.of(currencyDetail, arrearsTolerance), repayment.getTransactionDate())) {
 				currentRepaymentSchedule.setTotalArrears(currentRepaymentSchedule.getTotalOutstanding());
 			} else {
 				currentRepaymentSchedule.setTotalArrears(MoneyData.zero(currencyDetail));

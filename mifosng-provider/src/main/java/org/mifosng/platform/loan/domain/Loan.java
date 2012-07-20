@@ -653,8 +653,9 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	public List<LoanRepaymentScheduleInstallment> getRepaymentScheduleInstallments() {
 		return this.repaymentScheduleInstallments;
 	}
-
-	public DerivedLoanData deriveLoanData(CurrencyData currencyData) {
+//delete after jpw
+	/*
+	public DerivedLoanData deriveLoanDataxxx(CurrencyData currencyData) {
 
 		List<LoanTransaction> repaymentTransactions = new ArrayList<LoanTransaction>();
 		for (LoanTransaction loanTransaction : this.loanTransactions) {
@@ -671,6 +672,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 						this.repaymentScheduleInstallments),
 				repaymentTransactions, currencyData, arrearsTolerance);
 	}
+	*/
 
 	public String getExternalId() {
 		return this.externalId;
@@ -963,36 +965,6 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	
 	public String getCurrencyCode() {
 		return this.loanRepaymentScheduleDetail.getPrincipal().getCurrencyCode();
-	}
-
-// jpw will be deleting this shortly
-	public LoanAccountData toLoanAccountData(LoanBasicDetailsData basicDetails, LoanAccountSummaryData summary, LoanRepaymentScheduleData repaymentSchedule, 
-			List<LoanTransactionData> loanRepayments) {
-		
-		//LoanBasicDetailsData basicDetails = toBasicDetailsData(currencyData, fundData);
-		
-		// permissions
-		boolean waiveAllowed = summary.isWaiveAllowed(basicDetails.getInArrearsTolerance())
-				&& isNotClosed();
-		boolean undoDisbursalAllowed = isDisbursed()
-				&& isOpenWithNoRepaymentMade();
-		boolean makeRepaymentAllowed = isDisbursed()
-				&& isNotClosed();
-
-		boolean rejectAllowed = isNotApproved()
-				&& isNotDisbursed() && isNotClosed();
-		boolean withdrawnByApplicantAllowed = isNotDisbursed()
-				&& isNotClosed();
-		boolean undoApprovalAllowed = isApproved()
-				&& isNotClosed();
-		boolean disbursalAllowed = isApproved()
-				&& isNotDisbursed() && isNotClosed();
-		
-		LoanPermissionData permissions = new LoanPermissionData(waiveAllowed, makeRepaymentAllowed, rejectAllowed, withdrawnByApplicantAllowed, 
-				undoApprovalAllowed, undoDisbursalAllowed, disbursalAllowed, isSubmittedAndPendingApproval(),
-				isWaitingForDisbursal());
-		
-		return new LoanAccountData(basicDetails, summary, repaymentSchedule, loanRepayments, permissions);
 	}
 	
 }

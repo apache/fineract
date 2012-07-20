@@ -5,16 +5,20 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.joda.time.LocalDate;
+import org.mifosng.platform.ReadExtraDataAndReportingServiceImpl;
 import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.CurrencyData;
-import org.mifosng.platform.api.data.DerivedLoanData;
 import org.mifosng.platform.api.data.EnumOptionData;
 import org.mifosng.platform.api.data.LoanAccountData;
+import org.mifosng.platform.api.data.LoanAccountSummaryData;
 import org.mifosng.platform.api.data.LoanBasicDetailsData;
 import org.mifosng.platform.api.data.LoanProductData;
 import org.mifosng.platform.api.data.LoanProductLookup;
+import org.mifosng.platform.api.data.LoanRepaymentPeriodDatajpw;
+import org.mifosng.platform.api.data.LoanRepaymentScheduleData;
 import org.mifosng.platform.api.data.LoanTransactionData;
 import org.mifosng.platform.api.data.MoneyData;
 import org.mifosng.platform.api.data.NewLoanData;
@@ -28,6 +32,7 @@ import org.mifosng.platform.exceptions.LoanTransactionNotFoundException;
 import org.mifosng.platform.infrastructure.JdbcSupport;
 import org.mifosng.platform.infrastructure.TenantAwareRoutingDataSource;
 import org.mifosng.platform.loan.domain.Loan;
+import org.mifosng.platform.loan.domain.LoanRepaymentScheduleInstallment;
 import org.mifosng.platform.loan.domain.LoanRepository;
 import org.mifosng.platform.loan.domain.LoanTransaction;
 import org.mifosng.platform.loan.domain.LoanTransactionRepository;
@@ -35,6 +40,8 @@ import org.mifosng.platform.loan.domain.LoanTransactionType;
 import org.mifosng.platform.loanproduct.service.LoanEnumerations;
 import org.mifosng.platform.loanproduct.service.LoanProductReadPlatformService;
 import org.mifosng.platform.security.PlatformSecurityContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -44,6 +51,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
+	private final static Logger logger = LoggerFactory
+			.getLogger(LoanReadPlatformServiceImpl.class);
+	
 	private final JdbcTemplate jdbcTemplate;
 	private final PlatformSecurityContext context;
 	private final LoanRepository loanRepository;
@@ -73,39 +83,167 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 	@Override
 	public LoanBasicDetailsData retrieveLoanAccountDetails(final Long loanId) {
 
-		LoanBasicDetailsData selectedLoan = null;
 		try {
 			context.authenticatedUser();
 
 			LoanMapper rm = new LoanMapper();
 			String sql = "select " + rm.loanSchema() + " where l.id = ?";
-
-			selectedLoan = this.jdbcTemplate.queryForObject(sql, rm,
+			return this.jdbcTemplate.queryForObject(sql, rm,
 					new Object[] { loanId });
 
 		} catch (EmptyResultDataAccessException e) {
 			throw new LoanNotFoundException(loanId);
 		}
 
-		return selectedLoan;
 	}
-//jpw delete after
+
+	@Override
+	public Collection<LoanRepaymentPeriodDatajpw> retrieveRepaymentSchedule(
+			Long loanId) {
+
+		try {
+			context.authenticatedUser();
+
+			LoanScheduleMapper rm = new LoanScheduleMapper();
+			String sql = "select " + rm.loanScheduleSchema()
+					+ " where l.id = ? order by ls.loan_id, ls.installment";
+			return this.jdbcTemplate.query(sql, rm, new Object[] { loanId });
+
+		} catch (EmptyResultDataAccessException e) {
+			throw new LoanNotFoundException(loanId);
+		}
+	}
+
+	@Override
+	public LoanAccountSummaryData retrieveSummary(MoneyData principal,
+			Collection<LoanRepaymentPeriodDatajpw> repaymentSchedule) {
+
+		CurrencyData currencyData = new CurrencyData(
+				principal.getCurrencyCode(), principal.getDefaultName(),
+				principal.getDigitsAfterDecimal(),
+				principal.getDisplaySymbol(), principal.getNameCode());
+
+		BigDecimal originalPrincipal = BigDecimal.ZERO;
+		BigDecimal principalPaid = BigDecimal.ZERO;
+		BigDecimal principalOutstanding = BigDecimal.ZERO;
+		BigDecimal originalInterest = BigDecimal.ZERO;
+		BigDecimal interestPaid = BigDecimal.ZERO;
+		BigDecimal interestOutstanding = BigDecimal.ZERO;
+		BigDecimal originalTotal = BigDecimal.ZERO;
+		BigDecimal totalPaid = BigDecimal.ZERO;
+		BigDecimal totalOutstanding = BigDecimal.ZERO;
+		BigDecimal totalInArrears = BigDecimal.ZERO;
+		BigDecimal totalWaived = BigDecimal.ZERO;
+
+		logger.info("reading");
+		for (LoanRepaymentPeriodDatajpw installment : repaymentSchedule) {
+			logger.info("reading: " + installment.getPrincipal().getAmount());
+			originalPrincipal.add(installment.getPrincipal().getAmount());
+			principalPaid.add(installment.getPrincipalPaid().getAmount());
+			principalOutstanding.add(installment.getPrincipalOutstanding().getAmount());
+
+			originalInterest.add(installment.getInterest().getAmount());
+			interestPaid.add(installment.getInterestPaid().getAmount());
+			interestOutstanding.add(installment.getInterestOutstanding().getAmount());
+			
+			originalTotal.add(installment.getTotal().getAmount());
+			totalPaid.add(installment.getTotalPaid().getAmount());
+			totalOutstanding.add(installment.getTotalOutstanding().getAmount());
+			
+		}
+
+		totalInArrears = BigDecimal.TEN;
+		totalWaived = BigDecimal.ONE;
+
+		return new LoanAccountSummaryData(MoneyData.of(currencyData,
+				originalPrincipal), MoneyData.of(currencyData, principalPaid),
+				MoneyData.of(currencyData, principalOutstanding), MoneyData.of(
+						currencyData, originalInterest), MoneyData.of(
+						currencyData, interestPaid), MoneyData.of(currencyData,
+						interestOutstanding), MoneyData.of(currencyData,
+						originalTotal), MoneyData.of(currencyData, totalPaid),
+				MoneyData.of(currencyData, totalOutstanding), MoneyData.of(
+						currencyData, totalInArrears), MoneyData.of(
+						currencyData, totalWaived));
+	}
+
 	public LoanAccountData convertToData(LoanBasicDetailsData loanBasic) {
 
 		MoneyData princ = loanBasic.getPrincipal();
-		
-		CurrencyData currencyData = new CurrencyData(princ.getCurrencyCode(),
-				princ.getDefaultName(), princ.getDigitsAfterDecimal(), princ.getDisplaySymbol(),
-				princ.getNameCode());
-		
-		final Loan realLoan = this.loanRepository.findOne(loanBasic.getId());
-		if (realLoan == null) {
-			throw new LoanNotFoundException(loanBasic.getId());
-		}
-		DerivedLoanData loanData = realLoan.deriveLoanData(currencyData);
 
-		return realLoan.toLoanAccountData(loanBasic, loanData.getSummary(),
-				loanData.getRepaymentSchedule(), loanData.getLoanRepayments());
+		CurrencyData currencyData = new CurrencyData(princ.getCurrencyCode(),
+				princ.getDefaultName(), princ.getDigitsAfterDecimal(),
+				princ.getDisplaySymbol(), princ.getNameCode());
+
+		// DerivedLoanData loanData = deriveLoanData(loanBasic.getId(),
+		// currencyData, loanBasic.getInArrearsTolerance().getAmount());
+
+		/*
+		 * return toLoanAccountData(loanBasic, loanData.getSummary(),
+		 * loanData.getRepaymentSchedule(), loanData.getLoanRepayments());
+		 */
+
+		// return new LoanAccountData(loanBasic, null, repaymentSchedule, null,
+		// null);
+		return null;
+	}
+
+	/*
+	 * private DerivedLoanData deriveLoanData(Long loanId, CurrencyData
+	 * currencyData, BigDecimal arrearsTolerance) {
+	 * 
+	 * List<LoanTransaction> repaymentTransactions = new
+	 * ArrayList<LoanTransaction>(); //for (LoanTransaction loanTransaction :
+	 * this.loanTransactions) { // if (loanTransaction.isRepayment() ||
+	 * loanTransaction.isWaiver()) { //
+	 * repaymentTransactions.add(loanTransaction); // } //}
+	 * 
+	 * 
+	 * LoanRepaymentPeriodDatajpw selectedLoan = null;
+	 * 
+	 * Collection<LoanRepaymentPeriodDatajpw> periods; try {
+	 * context.authenticatedUser();
+	 * 
+	 * LoanScheduleMapper rm = new LoanScheduleMapper(); String sql = "select "
+	 * + rm.loanScheduleSchema() + " where l.id = ?"; periods =
+	 * this.jdbcTemplate.query(sql, rm, new Object[] { loanId });
+	 * 
+	 * } catch (EmptyResultDataAccessException e) { throw new
+	 * LoanNotFoundException(loanId); }
+	 * 
+	 * return new DerivedLoanDataProcessor().process( new
+	 * ArrayList<LoanRepaymentScheduleInstallment>( periods),
+	 * repaymentTransactions, currencyData, arrearsTolerance); }
+	 */
+
+	private LoanAccountData toLoanAccountData(
+			LoanBasicDetailsData basicDetails, LoanAccountSummaryData summary,
+			LoanRepaymentScheduleData repaymentSchedule,
+			List<LoanTransactionData> loanRepayments) {
+
+		// permissions
+		/*
+		 * boolean waiveAllowed =
+		 * summary.isWaiveAllowed(basicDetails.getInArrearsTolerance()) &&
+		 * isNotClosed(); boolean undoDisbursalAllowed = isDisbursed() &&
+		 * isOpenWithNoRepaymentMade(); boolean makeRepaymentAllowed =
+		 * isDisbursed() && isNotClosed();
+		 * 
+		 * boolean rejectAllowed = isNotApproved() && isNotDisbursed() &&
+		 * isNotClosed(); boolean withdrawnByApplicantAllowed = isNotDisbursed()
+		 * && isNotClosed(); boolean undoApprovalAllowed = isApproved() &&
+		 * isNotClosed(); boolean disbursalAllowed = isApproved() &&
+		 * isNotDisbursed() && isNotClosed();
+		 * 
+		 * LoanPermissionData permissions = new LoanPermissionData(waiveAllowed,
+		 * makeRepaymentAllowed, rejectAllowed, withdrawnByApplicantAllowed,
+		 * undoApprovalAllowed, undoDisbursalAllowed, disbursalAllowed,
+		 * isSubmittedAndPendingApproval(), isWaitingForDisbursal());
+		 * 
+		 * return new LoanAccountData(basicDetails, summary, repaymentSchedule,
+		 * loanRepayments, permissions);
+		 */
+		return null;
 	}
 
 	@Override
@@ -404,6 +542,69 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 					amortizationType, interestType,
 					interestCalculationPeriodType, lifeCycleStatusId,
 					lifeCycleStatusText, lifeCycleStatusDate);
+		}
+	}
+
+	private static final class LoanScheduleMapper implements
+			RowMapper<LoanRepaymentPeriodDatajpw> {
+
+		public String loanScheduleSchema() {
+
+			return " ls.loan_id as loanId, ls.installment as period, ls.duedate as `date`, "
+					+ " ls.principal_amount as principal, ls.principal_completed_derived as principalPaid, "
+					+ " ls.interest_amount as interest, ls.interest_completed_derived as interestPaid, "
+					+ " l.currency_code as currencyCode, l.currency_digits as currencyDigits, rc.`name` as currencyName, rc.display_symbol as currencyDisplaySymbol, rc.internationalized_name_code as currencyNameCode "
+					+ " from portfolio_loan l "
+					+ " join portfolio_loan_repayment_schedule ls on ls.loan_id = l.id "
+					+ " join ref_currency rc on rc.`code` = l.currency_code ";
+		}
+
+		@Override
+		public LoanRepaymentPeriodDatajpw mapRow(final ResultSet rs,
+				final int rowNum) throws SQLException {
+
+			String currencyCode = rs.getString("currencyCode");
+			String currencyName = rs.getString("currencyName");
+			String currencyNameCode = rs.getString("currencyNameCode");
+			String currencyDisplaySymbol = rs
+					.getString("currencyDisplaySymbol");
+			Integer currencyDigits = JdbcSupport.getInteger(rs,
+					"currencyDigits");
+			CurrencyData currencyData = new CurrencyData(currencyCode,
+					currencyName, currencyDigits, currencyDisplaySymbol,
+					currencyNameCode);
+
+			Long loanId = rs.getLong("loanId");
+			Integer period = JdbcSupport.getInteger(rs, "period");
+			LocalDate date = JdbcSupport.getLocalDate(rs, "date");
+
+			BigDecimal principalBD = rs.getBigDecimal("principal");
+			MoneyData principal = MoneyData.of(currencyData, principalBD);
+			BigDecimal principalPaidBD = rs.getBigDecimal("principalPaid");
+			MoneyData principalPaid = MoneyData.of(currencyData,
+					principalPaidBD);
+			MoneyData principalOutstanding = MoneyData.of(currencyData,
+					principalBD.subtract(principalPaidBD));
+
+			BigDecimal interestBD = rs.getBigDecimal("interest");
+			MoneyData interest = MoneyData.of(currencyData, interestBD);
+			BigDecimal interestPaidBD = rs.getBigDecimal("interestPaid");
+			MoneyData interestPaid = MoneyData.of(currencyData, interestPaidBD);
+			MoneyData interestOutstanding = MoneyData.of(currencyData,
+					interestBD.subtract(interestPaidBD));
+
+			MoneyData total = MoneyData.of(currencyData,
+					principalBD.add(interestBD));
+			MoneyData totalPaid = MoneyData.of(currencyData,
+					principalPaidBD.add(interestPaidBD));
+			MoneyData totalOutstanding = MoneyData.of(currencyData,
+					principalBD.add(interestBD).subtract(principalPaidBD)
+							.subtract(interestPaidBD));
+
+			return new LoanRepaymentPeriodDatajpw(loanId, period, date,
+					principal, principalPaid, principalOutstanding, interest,
+					interestPaid, interestOutstanding, total, totalPaid,
+					totalOutstanding);
 		}
 	}
 
