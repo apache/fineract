@@ -24,7 +24,8 @@ public interface LoanReadPlatformService {
 			Collection<LoanTransactionDatajpw> loanRepayments);
 
 	LoanPermissionData retrieveLoanPermissions(
-			LoanBasicDetailsData loanBasicDetails, boolean isWaiverAllowed);
+			LoanBasicDetailsData loanBasicDetails, boolean isWaiverAllowed,
+			int repaymentAndWaiveCount);
 
 	NewLoanData retrieveClientAndProductDetails(Long clientId, Long productId);
 

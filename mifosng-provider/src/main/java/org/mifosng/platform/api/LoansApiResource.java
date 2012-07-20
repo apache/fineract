@@ -72,14 +72,15 @@ public class LoansApiResource {
 
 	@GET
 	@Path("template")
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
 	public String retrieveDetailsForNewLoanApplicationStepOne(
 			@QueryParam("clientId") final Long clientId,
 			@QueryParam("productId") final Long productId,
 			@Context final UriInfo uriInfo) {
 
-		NewLoanData workflowData = this.loanReadPlatformService.retrieveClientAndProductDetails(clientId, productId);
+		NewLoanData workflowData = this.loanReadPlatformService
+				.retrieveClientAndProductDetails(clientId, productId);
 
 		String selectedFields = "";
 		return this.jsonFormattingService.convertRequest(workflowData,
@@ -89,21 +90,32 @@ public class LoansApiResource {
 
 	@GET
 	@Path("{loanId}")
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
 	public String retrieveLoanAccountDetails(
-			@PathParam("loanId") final Long loanId, @Context final UriInfo uriInfo) {
+			@PathParam("loanId") final Long loanId,
+			@Context final UriInfo uriInfo) {
 
 		LoanBasicDetailsData loanBasicDetails = this.loanReadPlatformService
 				.retrieveLoanAccountDetails(loanId);
-		
-		Collection<LoanTransactionDatajpw> loanRepayments = this.loanReadPlatformService.retrieveLoanPayments(loanId);
-		Collection<LoanRepaymentPeriodDatajpw> repaymentSchedule = this.loanReadPlatformService.retrieveRepaymentSchedule(loanId);
-		
-		LoanAccountSummaryData summary = this.loanReadPlatformService.retrieveSummary(loanBasicDetails.getPrincipal(), repaymentSchedule, loanRepayments);
-		LoanPermissionData permissions = this.loanReadPlatformService.retrieveLoanPermissions(loanBasicDetails, summary.isWaiveAllowed(loanBasicDetails.getInArrearsTolerance()));
-		
-		LoanAccountData loanAccount = new LoanAccountData(loanBasicDetails, summary, repaymentSchedule, loanRepayments, permissions);
+
+		Collection<LoanTransactionDatajpw> loanRepayments = this.loanReadPlatformService
+				.retrieveLoanPayments(loanId);
+		Collection<LoanRepaymentPeriodDatajpw> repaymentSchedule = this.loanReadPlatformService
+				.retrieveRepaymentSchedule(loanId);
+
+		LoanAccountSummaryData summary = this.loanReadPlatformService
+				.retrieveSummary(loanBasicDetails.getPrincipal(),
+						repaymentSchedule, loanRepayments);
+
+		LoanPermissionData permissions = this.loanReadPlatformService
+				.retrieveLoanPermissions(loanBasicDetails, summary
+						.isWaiveAllowed(loanBasicDetails
+								.getInArrearsTolerance()), loanRepayments
+						.size());
+
+		LoanAccountData loanAccount = new LoanAccountData(loanBasicDetails,
+				summary, repaymentSchedule, loanRepayments, permissions);
 
 		String selectedFields = "";
 		String associatedFields = "summary,repaymentSchedule,loanRepayments,permissions,convenienceData";
@@ -113,16 +125,19 @@ public class LoansApiResource {
 	}
 
 	@POST
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
 	public Response calculateLoanScheduleOrSubmitLoanApplication(
 			@QueryParam("command") final String commandParam,
 			final String jsonRequestBody) {
 
-		SubmitLoanApplicationCommand command = this.apiDataConversionService.convertJsonToSubmitLoanApplicationCommand(jsonRequestBody);
-		
-		CalculateLoanScheduleCommand calculateLoanScheduleCommand = command.toCalculateLoanScheduleCommand();
-		LoanSchedule loanSchedule = this.calculationPlatformService.calculateLoanSchedule(calculateLoanScheduleCommand);
+		SubmitLoanApplicationCommand command = this.apiDataConversionService
+				.convertJsonToSubmitLoanApplicationCommand(jsonRequestBody);
+
+		CalculateLoanScheduleCommand calculateLoanScheduleCommand = command
+				.toCalculateLoanScheduleCommand();
+		LoanSchedule loanSchedule = this.calculationPlatformService
+				.calculateLoanSchedule(calculateLoanScheduleCommand);
 
 		// for now just auto generating the loan schedule and setting support
 		// for 'manual' loan schedule creation later.
@@ -132,31 +147,36 @@ public class LoansApiResource {
 			return Response.ok().entity(loanSchedule).build();
 		}
 
-		EntityIdentifier identifier = this.loanWritePlatformService.submitLoanApplication(command);
+		EntityIdentifier identifier = this.loanWritePlatformService
+				.submitLoanApplication(command);
 
 		return Response.ok().entity(identifier).build();
 	}
 
 	@DELETE
 	@Path("{loanId}")
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
 	public Response deleteLoanApplication(@PathParam("loanId") final Long loanId) {
 
-		EntityIdentifier identifier = this.loanWritePlatformService.deleteLoan(loanId);
+		EntityIdentifier identifier = this.loanWritePlatformService
+				.deleteLoan(loanId);
 
 		return Response.ok().entity(identifier).build();
 	}
 
 	@POST
 	@Path("{loanId}")
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
 	public Response stateTransitions(@PathParam("loanId") final Long loanId,
-			@QueryParam("command") final String commandParam, final String jsonRequestBody) {
+			@QueryParam("command") final String commandParam,
+			final String jsonRequestBody) {
 
-		LoanStateTransitionCommand command = this.apiDataConversionService.convertJsonToLoanStateTransitionCommand(loanId, jsonRequestBody);
-		
+		LoanStateTransitionCommand command = this.apiDataConversionService
+				.convertJsonToLoanStateTransitionCommand(loanId,
+						jsonRequestBody);
+
 		Response response = null;
 
 		if (is(commandParam, "reject")) {
@@ -177,8 +197,9 @@ public class LoansApiResource {
 			response = Response.ok().entity(identifier).build();
 		}
 
-		UndoStateTransitionCommand undoCommand = new UndoStateTransitionCommand(loanId, command.getNote());
-		
+		UndoStateTransitionCommand undoCommand = new UndoStateTransitionCommand(
+				loanId, command.getNote());
+
 		if (is(commandParam, "undoapproval")) {
 			EntityIdentifier identifier = this.loanWritePlatformService
 					.undoLoanApproval(undoCommand);
@@ -203,21 +224,25 @@ public class LoansApiResource {
 
 	@POST
 	@Path("{loanId}/transactions")
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
 	public Response executeLoanTransaction(
 			@PathParam("loanId") final Long loanId,
-			@QueryParam("command") final String commandParam, final String jsonRequestBody) {
+			@QueryParam("command") final String commandParam,
+			final String jsonRequestBody) {
 
-		final LoanTransactionCommand command = this.apiDataConversionService.convertJsonToLoanTransactionCommand(loanId, jsonRequestBody);
-		
+		final LoanTransactionCommand command = this.apiDataConversionService
+				.convertJsonToLoanTransactionCommand(loanId, jsonRequestBody);
+
 		Response response = null;
 
 		if (is(commandParam, "repayment")) {
-			EntityIdentifier identifier = this.loanWritePlatformService.makeLoanRepayment(command);
+			EntityIdentifier identifier = this.loanWritePlatformService
+					.makeLoanRepayment(command);
 			response = Response.ok().entity(identifier).build();
 		} else if (is(commandParam, "waiver")) {
-			EntityIdentifier identifier = this.loanWritePlatformService.waiveLoanAmount(command);
+			EntityIdentifier identifier = this.loanWritePlatformService
+					.waiveLoanAmount(command);
 			response = Response.ok().entity(identifier).build();
 		}
 
@@ -230,8 +255,8 @@ public class LoansApiResource {
 
 	@GET
 	@Path("{loanId}/transactions/template")
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
 	public String retrieveNewRepaymentDetails(
 			@PathParam("loanId") final Long loanId,
 			@QueryParam("command") final String commandParam,
@@ -262,8 +287,8 @@ public class LoansApiResource {
 
 	@GET
 	@Path("{loanId}/transactions/{transactionId}")
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
 	public String retrieveTransaction(@PathParam("loanId") final Long loanId,
 			@PathParam("transactionId") final Long transactionId,
 			@Context final UriInfo uriInfo) {
@@ -279,15 +304,19 @@ public class LoansApiResource {
 
 	@POST
 	@Path("{loanId}/transactions/{transactionId}")
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
 	public Response adjustLoanTransaction(
 			@PathParam("loanId") final Long loanId,
-			@PathParam("transactionId") final Long transactionId, final String jsonRequestBody) {
+			@PathParam("transactionId") final Long transactionId,
+			final String jsonRequestBody) {
 
-		final AdjustLoanTransactionCommand command = this.apiDataConversionService.convertJsonToAdjustLoanTransactionCommand(loanId, transactionId, jsonRequestBody);
-			
-		EntityIdentifier identifier = this.loanWritePlatformService.adjustLoanTransaction(command);
+		final AdjustLoanTransactionCommand command = this.apiDataConversionService
+				.convertJsonToAdjustLoanTransactionCommand(loanId,
+						transactionId, jsonRequestBody);
+
+		EntityIdentifier identifier = this.loanWritePlatformService
+				.adjustLoanTransaction(command);
 
 		return Response.ok().entity(identifier).build();
 	}

@@ -5,20 +5,17 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import org.joda.time.LocalDate;
 import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.EnumOptionData;
-import org.mifosng.platform.api.data.LoanAccountData;
 import org.mifosng.platform.api.data.LoanAccountSummaryData;
 import org.mifosng.platform.api.data.LoanBasicDetailsData;
 import org.mifosng.platform.api.data.LoanPermissionData;
 import org.mifosng.platform.api.data.LoanProductData;
 import org.mifosng.platform.api.data.LoanProductLookup;
 import org.mifosng.platform.api.data.LoanRepaymentPeriodDatajpw;
-import org.mifosng.platform.api.data.LoanRepaymentScheduleData;
 import org.mifosng.platform.api.data.LoanTransactionData;
 import org.mifosng.platform.api.data.LoanTransactionDatajpw;
 import org.mifosng.platform.api.data.MoneyData;
@@ -40,8 +37,6 @@ import org.mifosng.platform.loan.domain.LoanTransactionType;
 import org.mifosng.platform.loanproduct.service.LoanEnumerations;
 import org.mifosng.platform.loanproduct.service.LoanProductReadPlatformService;
 import org.mifosng.platform.security.PlatformSecurityContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -50,9 +45,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
-
-	private final static Logger logger = LoggerFactory
-			.getLogger(LoanReadPlatformServiceImpl.class);
 
 	private final JdbcTemplate jdbcTemplate;
 	private final PlatformSecurityContext context;
@@ -204,39 +196,33 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
 	@Override
 	public LoanPermissionData retrieveLoanPermissions(
-			LoanBasicDetailsData loanBasicDetails, boolean isWaiverAllowed) {
-		/*
-		boolean waiveAllowed = isWaiverAllowed && (loanBasicDetails.getClosedOnDate() == null);
-		
-		
-		
-		
-		boolean undoDisbursalAllowed = isDisbursed()
-				&& isOpenWithNoRepaymentMade();
-		boolean makeRepaymentAllowed = isDisbursed() && isNotClosed();
+			LoanBasicDetailsData loanBasicDetails, boolean isWaiverAllowed,
+			int repaymentAndWaiveCount) {
 
-		boolean rejectAllowed = isNotApproved() && isNotDisbursed()
-				&& isNotClosed();
-		boolean withdrawnByApplicantAllowed = isNotDisbursed() && isNotClosed();
-		boolean undoApprovalAllowed = isApproved() && isNotClosed();
-		boolean disbursalAllowed = isApproved() && isNotDisbursed()
-				&& isNotClosed();
+		boolean pendingApproval = (loanBasicDetails.getLifeCycleStatusId()
+				.equals(100));
+		boolean waitingForDisbursal = (loanBasicDetails.getLifeCycleStatusId()
+				.equals(200));
+		boolean isActive = (loanBasicDetails.getLifeCycleStatusId().equals(300));
 
-		return new LoanPermissionData(waiveAllowed,
-				makeRepaymentAllowed, rejectAllowed,
-				withdrawnByApplicantAllowed, undoApprovalAllowed,
-				undoDisbursalAllowed, disbursalAllowed,
-				isSubmittedAndPendingApproval(), isWaitingForDisbursal());
-				*/
-		
+		boolean waiveAllowed = isWaiverAllowed && isActive;
+		boolean makeRepaymentAllowed = isActive;
 
-		return new LoanPermissionData(true,
-				true, true,
-				true, true,
-				true, true,
-				true, true);
+		boolean rejectAllowed = pendingApproval;
+		boolean withdrawnByApplicantAllowed = waitingForDisbursal
+				|| pendingApproval;
+
+		boolean undoApprovalAllowed = waitingForDisbursal;
+
+		boolean undoDisbursalAllowed = isActive && (repaymentAndWaiveCount == 0);
+
+		boolean disbursalAllowed = waitingForDisbursal;
+
+		return new LoanPermissionData(waiveAllowed, makeRepaymentAllowed,
+				rejectAllowed, withdrawnByApplicantAllowed,
+				undoApprovalAllowed, undoDisbursalAllowed, disbursalAllowed,
+				pendingApproval, waitingForDisbursal);
 	}
-	
 
 	@Override
 	public NewLoanData retrieveClientAndProductDetails(final Long clientId,
