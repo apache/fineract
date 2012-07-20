@@ -7,6 +7,7 @@ import org.mifosng.platform.api.data.LoanAccountSummaryData;
 import org.mifosng.platform.api.data.LoanBasicDetailsData;
 import org.mifosng.platform.api.data.LoanRepaymentPeriodDatajpw;
 import org.mifosng.platform.api.data.LoanTransactionData;
+import org.mifosng.platform.api.data.LoanTransactionDatajpw;
 import org.mifosng.platform.api.data.MoneyData;
 import org.mifosng.platform.api.data.NewLoanData;
 
@@ -18,6 +19,8 @@ public interface LoanReadPlatformService {
 
 	LoanAccountSummaryData retrieveSummary(MoneyData principal,
 			Collection<LoanRepaymentPeriodDatajpw> repaymentSchedule);
+
+	Collection<LoanTransactionDatajpw> retrieveLoanPayments(Long loanId);
 
 	NewLoanData retrieveClientAndProductDetails(Long clientId, Long productId);
 

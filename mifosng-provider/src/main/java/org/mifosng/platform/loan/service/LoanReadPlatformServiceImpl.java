@@ -8,7 +8,6 @@ import java.util.Collection;
 import java.util.List;
 
 import org.joda.time.LocalDate;
-import org.mifosng.platform.ReadExtraDataAndReportingServiceImpl;
 import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.EnumOptionData;
@@ -20,6 +19,7 @@ import org.mifosng.platform.api.data.LoanProductLookup;
 import org.mifosng.platform.api.data.LoanRepaymentPeriodDatajpw;
 import org.mifosng.platform.api.data.LoanRepaymentScheduleData;
 import org.mifosng.platform.api.data.LoanTransactionData;
+import org.mifosng.platform.api.data.LoanTransactionDatajpw;
 import org.mifosng.platform.api.data.MoneyData;
 import org.mifosng.platform.api.data.NewLoanData;
 import org.mifosng.platform.client.service.ClientReadPlatformService;
@@ -32,7 +32,6 @@ import org.mifosng.platform.exceptions.LoanTransactionNotFoundException;
 import org.mifosng.platform.infrastructure.JdbcSupport;
 import org.mifosng.platform.infrastructure.TenantAwareRoutingDataSource;
 import org.mifosng.platform.loan.domain.Loan;
-import org.mifosng.platform.loan.domain.LoanRepaymentScheduleInstallment;
 import org.mifosng.platform.loan.domain.LoanRepository;
 import org.mifosng.platform.loan.domain.LoanTransaction;
 import org.mifosng.platform.loan.domain.LoanTransactionRepository;
@@ -53,7 +52,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
 	private final static Logger logger = LoggerFactory
 			.getLogger(LoanReadPlatformServiceImpl.class);
-	
+
 	private final JdbcTemplate jdbcTemplate;
 	private final PlatformSecurityContext context;
 	private final LoanRepository loanRepository;
@@ -135,21 +134,27 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 		BigDecimal totalInArrears = BigDecimal.ZERO;
 		BigDecimal totalWaived = BigDecimal.ZERO;
 
-		logger.info("reading");
 		for (LoanRepaymentPeriodDatajpw installment : repaymentSchedule) {
-			logger.info("reading: " + installment.getPrincipal().getAmount());
-			originalPrincipal.add(installment.getPrincipal().getAmount());
-			principalPaid.add(installment.getPrincipalPaid().getAmount());
-			principalOutstanding.add(installment.getPrincipalOutstanding().getAmount());
+			originalPrincipal = originalPrincipal.add(installment
+					.getPrincipal().getAmount());
+			principalPaid = principalPaid.add(installment.getPrincipalPaid()
+					.getAmount());
+			principalOutstanding = principalOutstanding.add(installment
+					.getPrincipalOutstanding().getAmount());
 
-			originalInterest.add(installment.getInterest().getAmount());
-			interestPaid.add(installment.getInterestPaid().getAmount());
-			interestOutstanding.add(installment.getInterestOutstanding().getAmount());
-			
-			originalTotal.add(installment.getTotal().getAmount());
-			totalPaid.add(installment.getTotalPaid().getAmount());
-			totalOutstanding.add(installment.getTotalOutstanding().getAmount());
-			
+			originalInterest = originalInterest.add(installment.getInterest()
+					.getAmount());
+			interestPaid = interestPaid.add(installment.getInterestPaid()
+					.getAmount());
+			interestOutstanding = interestOutstanding.add(installment
+					.getInterestOutstanding().getAmount());
+
+			originalTotal = originalTotal.add(installment.getTotal()
+					.getAmount());
+			totalPaid = totalPaid.add(installment.getTotalPaid().getAmount());
+			totalOutstanding = totalOutstanding.add(installment
+					.getTotalOutstanding().getAmount());
+
 		}
 
 		totalInArrears = BigDecimal.TEN;
@@ -165,6 +170,25 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 				MoneyData.of(currencyData, totalOutstanding), MoneyData.of(
 						currencyData, totalInArrears), MoneyData.of(
 						currencyData, totalWaived));
+	}
+
+	@Override
+	public Collection<LoanTransactionDatajpw> retrieveLoanPayments(Long loanId) {
+		try {
+			context.authenticatedUser();
+
+			LoanPaymentsMapper rm = new LoanPaymentsMapper();
+
+			// retrieve all loan transactions that are not invalid (0) and not
+			// disbursements (1)
+			String sql = "select "
+					+ rm.LoanPaymentsSchema()
+					+ " where tr.loan_id = ? and tr.transaction_type_enum not in (0, 1) order by tr.transaction_date";
+			return this.jdbcTemplate.query(sql, rm, new Object[] { loanId });
+
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}
 	}
 
 	public LoanAccountData convertToData(LoanBasicDetailsData loanBasic) {
@@ -605,6 +629,46 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 					principal, principalPaid, principalOutstanding, interest,
 					interestPaid, interestOutstanding, total, totalPaid,
 					totalOutstanding);
+		}
+	}
+
+	private static final class LoanPaymentsMapper implements
+			RowMapper<LoanTransactionDatajpw> {
+
+		public String LoanPaymentsSchema() {
+
+			return " tr.id as id, tr.transaction_type_enum as transactionType, tr.transaction_date as `date`, tr.amount as total, "
+					+ " l.currency_code as currencyCode, l.currency_digits as currencyDigits, rc.`name` as currencyName, rc.display_symbol as currencyDisplaySymbol, rc.internationalized_name_code as currencyNameCode "
+					+ " from portfolio_loan l "
+					+ " join portfolio_loan_transaction tr on tr.loan_id = l.id"
+					+ " join ref_currency rc on rc.`code` = l.currency_code ";
+		}
+
+		@Override
+		public LoanTransactionDatajpw mapRow(final ResultSet rs,
+				final int rowNum) throws SQLException {
+
+			String currencyCode = rs.getString("currencyCode");
+			String currencyName = rs.getString("currencyName");
+			String currencyNameCode = rs.getString("currencyNameCode");
+			String currencyDisplaySymbol = rs
+					.getString("currencyDisplaySymbol");
+			Integer currencyDigits = JdbcSupport.getInteger(rs,
+					"currencyDigits");
+			CurrencyData currencyData = new CurrencyData(currencyCode,
+					currencyName, currencyDigits, currencyDisplaySymbol,
+					currencyNameCode);
+
+			Long id = rs.getLong("id");
+			int transactionTypeInt = JdbcSupport.getInteger(rs,
+					"transactionType");
+			EnumOptionData transactionType = LoanEnumerations
+					.transactionType(transactionTypeInt);
+			LocalDate date = JdbcSupport.getLocalDate(rs, "date");
+			BigDecimal totalBD = rs.getBigDecimal("total");
+			MoneyData total = MoneyData.of(currencyData, totalBD);
+
+			return new LoanTransactionDatajpw(id, transactionType, date, total);
 		}
 	}
 
