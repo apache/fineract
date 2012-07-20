@@ -44,8 +44,8 @@ public class LoanAccountData {
 	private LocalDate lifeCycleStatusDate;
 
 	private LoanAccountSummaryData summary;
-	private Collection<LoanRepaymentPeriodDatajpw> repaymentSchedule;
-	private Collection<LoanTransactionDatajpw> loanRepayments;
+	private Collection<LoanRepaymentPeriodData> repaymentSchedule;
+	private Collection<LoanTransactionDataDTO> loanRepayments;
 
 	private LoanPermissionData permissions;
 
@@ -57,8 +57,8 @@ public class LoanAccountData {
 
 	public LoanAccountData(LoanBasicDetailsData basicDetails,
 			LoanAccountSummaryData summary,
-			Collection<LoanRepaymentPeriodDatajpw> repaymentSchedule,
-			Collection<LoanTransactionDatajpw> loanRepayments,
+			Collection<LoanRepaymentPeriodData> repaymentSchedule,
+			Collection<LoanTransactionDataDTO> loanRepayments,
 			LoanPermissionData permissions) {
 		this.summary = summary;
 		this.repaymentSchedule = repaymentSchedule;
@@ -141,21 +141,21 @@ public class LoanAccountData {
 		this.summary = summary;
 	}
 
-	public Collection<LoanRepaymentPeriodDatajpw> getRepaymentSchedule() {
+	public Collection<LoanRepaymentPeriodData> getRepaymentSchedule() {
 		return repaymentSchedule;
 	}
 
 	public void setRepaymentSchedule(
-			Collection<LoanRepaymentPeriodDatajpw> repaymentSchedule) {
+			Collection<LoanRepaymentPeriodData> repaymentSchedule) {
 		this.repaymentSchedule = repaymentSchedule;
 	}
 
-	public Collection<LoanTransactionDatajpw> getLoanRepayments() {
+	public Collection<LoanTransactionDataDTO> getLoanRepayments() {
 		return loanRepayments;
 	}
 
 	public void setLoanRepayments(
-			Collection<LoanTransactionDatajpw> loanRepayments) {
+			Collection<LoanTransactionDataDTO> loanRepayments) {
 		this.loanRepayments = loanRepayments;
 	}
 

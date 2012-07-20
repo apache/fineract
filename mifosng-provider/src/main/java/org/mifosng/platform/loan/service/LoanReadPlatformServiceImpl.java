@@ -15,9 +15,9 @@ import org.mifosng.platform.api.data.LoanBasicDetailsData;
 import org.mifosng.platform.api.data.LoanPermissionData;
 import org.mifosng.platform.api.data.LoanProductData;
 import org.mifosng.platform.api.data.LoanProductLookup;
-import org.mifosng.platform.api.data.LoanRepaymentPeriodDatajpw;
+import org.mifosng.platform.api.data.LoanRepaymentPeriodData;
 import org.mifosng.platform.api.data.LoanTransactionData;
-import org.mifosng.platform.api.data.LoanTransactionDatajpw;
+import org.mifosng.platform.api.data.LoanTransactionDataDTO;
 import org.mifosng.platform.api.data.MoneyData;
 import org.mifosng.platform.api.data.NewLoanData;
 import org.mifosng.platform.client.service.ClientReadPlatformService;
@@ -90,7 +90,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 	}
 
 	@Override
-	public Collection<LoanRepaymentPeriodDatajpw> retrieveRepaymentSchedule(
+	public Collection<LoanRepaymentPeriodData> retrieveRepaymentSchedule(
 			Long loanId) {
 
 		try {
@@ -108,8 +108,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
 	@Override
 	public LoanAccountSummaryData retrieveSummary(MoneyData principal,
-			Collection<LoanRepaymentPeriodDatajpw> repaymentSchedule,
-			Collection<LoanTransactionDatajpw> loanRepayments) {
+			Collection<LoanRepaymentPeriodData> repaymentSchedule,
+			Collection<LoanTransactionDataDTO> loanRepayments) {
 
 		CurrencyData currencyData = new CurrencyData(
 				principal.getCurrencyCode(), principal.getDefaultName(),
@@ -128,7 +128,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 		BigDecimal totalInArrears = BigDecimal.ZERO;
 		BigDecimal totalWaived = BigDecimal.ZERO;
 
-		for (LoanRepaymentPeriodDatajpw installment : repaymentSchedule) {
+		for (LoanRepaymentPeriodData installment : repaymentSchedule) {
 			originalPrincipal = originalPrincipal.add(installment
 					.getPrincipal().getAmount());
 			principalPaid = principalPaid.add(installment.getPrincipalPaid()
@@ -149,12 +149,14 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 			totalOutstanding = totalOutstanding.add(installment
 					.getTotalOutstanding().getAmount());
 
+			if (installment.getDate().isBefore(new LocalDate())) {
+				totalInArrears = totalInArrears.add(installment
+						.getTotalOutstanding().getAmount());
+			}
 		}
 
-		totalInArrears = BigDecimal.TEN;
-
 		Long waiverType = (long) 4;
-		for (LoanTransactionDatajpw loanRepayment : loanRepayments) {
+		for (LoanTransactionDataDTO loanRepayment : loanRepayments) {
 			Long transactionType = loanRepayment.getTransactionType().getId();
 			if (transactionType.equals(waiverType)) {
 				totalWaived = totalWaived.add(loanRepayment.getTotal()
@@ -176,7 +178,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 	}
 
 	@Override
-	public Collection<LoanTransactionDatajpw> retrieveLoanPayments(Long loanId) {
+	public Collection<LoanTransactionDataDTO> retrieveLoanPayments(Long loanId) {
 		try {
 			context.authenticatedUser();
 
@@ -214,7 +216,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
 		boolean undoApprovalAllowed = waitingForDisbursal;
 
-		boolean undoDisbursalAllowed = isActive && (repaymentAndWaiveCount == 0);
+		boolean undoDisbursalAllowed = isActive
+				&& (repaymentAndWaiveCount == 0);
 
 		boolean disbursalAllowed = waitingForDisbursal;
 
@@ -524,7 +527,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 	}
 
 	private static final class LoanScheduleMapper implements
-			RowMapper<LoanRepaymentPeriodDatajpw> {
+			RowMapper<LoanRepaymentPeriodData> {
 
 		public String loanScheduleSchema() {
 
@@ -538,7 +541,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 		}
 
 		@Override
-		public LoanRepaymentPeriodDatajpw mapRow(final ResultSet rs,
+		public LoanRepaymentPeriodData mapRow(final ResultSet rs,
 				final int rowNum) throws SQLException {
 
 			String currencyCode = rs.getString("currencyCode");
@@ -579,7 +582,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 					principalBD.add(interestBD).subtract(principalPaidBD)
 							.subtract(interestPaidBD));
 
-			return new LoanRepaymentPeriodDatajpw(loanId, period, date,
+			return new LoanRepaymentPeriodData(loanId, period, date,
 					principal, principalPaid, principalOutstanding, interest,
 					interestPaid, interestOutstanding, total, totalPaid,
 					totalOutstanding);
@@ -587,7 +590,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 	}
 
 	private static final class LoanPaymentsMapper implements
-			RowMapper<LoanTransactionDatajpw> {
+			RowMapper<LoanTransactionDataDTO> {
 
 		public String LoanPaymentsSchema() {
 
@@ -599,7 +602,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 		}
 
 		@Override
-		public LoanTransactionDatajpw mapRow(final ResultSet rs,
+		public LoanTransactionDataDTO mapRow(final ResultSet rs,
 				final int rowNum) throws SQLException {
 
 			String currencyCode = rs.getString("currencyCode");
@@ -622,7 +625,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 			BigDecimal totalBD = rs.getBigDecimal("total");
 			MoneyData total = MoneyData.of(currencyData, totalBD);
 
-			return new LoanTransactionDatajpw(id, transactionType, date, total);
+			return new LoanTransactionDataDTO(id, transactionType, date, total);
 		}
 	}
 
