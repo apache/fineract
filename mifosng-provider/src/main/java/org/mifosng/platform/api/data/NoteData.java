@@ -1,9 +1,7 @@
 package org.mifosng.platform.api.data;
 
-import org.codehaus.jackson.map.annotate.JsonFilter;
 import org.joda.time.DateTime;
 
-@JsonFilter("myFilter")
 public class NoteData {
 
 	private Long id;

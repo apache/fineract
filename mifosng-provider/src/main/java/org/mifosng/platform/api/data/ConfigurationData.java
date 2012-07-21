@@ -1,35 +1,22 @@
 package org.mifosng.platform.api.data;
 
-import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 
-import org.codehaus.jackson.map.annotate.JsonFilter;
+public class ConfigurationData {
 
-@JsonFilter("myFilter")
-public class ConfigurationData implements Serializable {
+	private final List<CurrencyData> selectedCurrencyOptions;
+	private final List<CurrencyData> currencyOptions;
 
-	private List<CurrencyData> selectedCurrencyOptions = new ArrayList<CurrencyData>();
-	private List<CurrencyData> currencyOptions = new ArrayList<CurrencyData>();
-
-	public ConfigurationData() {
-		//
+	public ConfigurationData(final List<CurrencyData> currencyOptions, final List<CurrencyData> selectedCurrencyOptions) {
+		this.currencyOptions = currencyOptions;
+		this.selectedCurrencyOptions = selectedCurrencyOptions;
 	}
 
 	public List<CurrencyData> getSelectedCurrencyOptions() {
 		return selectedCurrencyOptions;
 	}
 
-	public void setSelectedCurrencyOptions(
-			List<CurrencyData> selectedCurrencyOptions) {
-		this.selectedCurrencyOptions = selectedCurrencyOptions;
-	}
-
 	public List<CurrencyData> getCurrencyOptions() {
 		return currencyOptions;
-	}
-
-	public void setCurrencyOptions(List<CurrencyData> currencyOptions) {
-		this.currencyOptions = currencyOptions;
 	}
 }

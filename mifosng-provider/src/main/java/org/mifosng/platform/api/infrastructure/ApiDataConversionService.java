@@ -16,7 +16,11 @@ import org.mifosng.platform.api.commands.RoleCommand;
 import org.mifosng.platform.api.commands.SubmitLoanApplicationCommand;
 import org.mifosng.platform.api.commands.UserCommand;
 import org.mifosng.platform.api.data.AppUserData;
+import org.mifosng.platform.api.data.ClientData;
+import org.mifosng.platform.api.data.ClientLoanAccountSummaryCollectionData;
+import org.mifosng.platform.api.data.ConfigurationData;
 import org.mifosng.platform.api.data.FundData;
+import org.mifosng.platform.api.data.NoteData;
 import org.mifosng.platform.api.data.OfficeData;
 import org.mifosng.platform.api.data.OfficeTransactionData;
 import org.mifosng.platform.api.data.PermissionData;
@@ -32,6 +36,15 @@ public interface ApiDataConversionService {
 	String convertAppUserDataToJson(boolean prettyPrint, Set<String> responseParameters, AppUserData... users);
 	
 	String convertOfficeTransactionDataToJson(boolean prettyPrint, Set<String> responseParameters, OfficeTransactionData... officeTransactions);
+	
+	String convertConfigurationDataToJson(boolean prettyPrint, Set<String> responseParameters, ConfigurationData... configuration);
+	
+	String convertClientDataToJson(boolean prettyPrint, Set<String> responseParameters, ClientData... clients);
+	
+	String convertClientLoanAccountSummaryCollectionDataToJson(boolean prettyPrint, Set<String> responseParameters, 
+			ClientLoanAccountSummaryCollectionData clientAccountsData);
+	
+	String convertNoteDataToJson(boolean prettyPrint, Set<String> responseParameters, NoteData... notes);
 	//
 
 	FundCommand convertJsonToFundCommand(Long resourceIdentifier, String json);

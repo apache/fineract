@@ -1,5 +1,9 @@
 package org.mifosng.platform.api;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
@@ -13,7 +17,7 @@ import javax.ws.rs.core.UriInfo;
 import org.mifosng.platform.api.commands.OrganisationCurrencyCommand;
 import org.mifosng.platform.api.data.ConfigurationData;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
-import org.mifosng.platform.api.infrastructure.ApiJSONFormattingService;
+import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
 import org.mifosng.platform.configuration.service.ConfigurationReadPlatformService;
 import org.mifosng.platform.configuration.service.ConfigurationWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,9 +29,6 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class ConfigurationApiResource {
 
-	private String allowedFieldList = "";
-	private String filterName = "myFilter";
-
 	@Autowired
 	private ConfigurationReadPlatformService configurationReadPlatformService;
 
@@ -37,22 +38,24 @@ public class ConfigurationApiResource {
 	@Autowired
 	private ApiDataConversionService apiDataConversionService;
 	
-	@Autowired
-	private ApiJSONFormattingService jsonFormattingService;
-
 	@GET
 	@Path("currency")
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveCurrencyDataForConfiguration(@Context final UriInfo uriInfo) {
+		
+		Set<String> typicalResponseParameters = new HashSet<String>(
+				Arrays.asList("selectedCurrencyOptions", "currencyOptions"));
+		
+		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+		if (responseParameters.isEmpty()) {
+			responseParameters.addAll(typicalResponseParameters);
+		}
+		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 
-		ConfigurationData configurationData = this.configurationReadPlatformService
-				.retrieveCurrencyConfiguration();
-
-		String selectedFields = "";
-		return this.jsonFormattingService.convertRequest(configurationData,
-				filterName, allowedFieldList, selectedFields,
-				uriInfo.getQueryParameters());
+		ConfigurationData configurationData = this.configurationReadPlatformService.retrieveCurrencyConfiguration();
+		
+		return this.apiDataConversionService.convertConfigurationDataToJson(prettyPrint, responseParameters, configurationData);
 	}
 
 	@PUT

@@ -1,7 +1,10 @@
 package org.mifosng.platform.api;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -25,7 +28,7 @@ import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.NoteData;
 import org.mifosng.platform.api.data.OfficeLookup;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
-import org.mifosng.platform.api.infrastructure.ApiJSONFormattingService;
+import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
 import org.mifosng.platform.client.service.ClientReadPlatformService;
 import org.mifosng.platform.client.service.ClientWritePlatformService;
 import org.mifosng.platform.organisation.service.OfficeReadPlatformService;
@@ -40,12 +43,7 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class ClientsApiResource {
 
-	private final static Logger logger = LoggerFactory
-			.getLogger(ClientsApiResource.class);
-
-	private String defaultFieldList = "joinedDate";
-	private String allowedFieldList = "allowedOffices";
-	private String filterName = "myFilter";
+	private final static Logger logger = LoggerFactory.getLogger(ClientsApiResource.class);
 
 	@Autowired
 	private ClientReadPlatformService clientReadPlatformService;
@@ -59,9 +57,6 @@ public class ClientsApiResource {
 	@Autowired
 	private OfficeReadPlatformService officeReadPlatformService;
 
-	@Autowired
-	private ApiJSONFormattingService jsonFormattingService;
-
 	@GET
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
@@ -73,15 +68,21 @@ public class ClientsApiResource {
 			@QueryParam("firstName") final String firstName,
 			@QueryParam("lastName") final String lastName) {
 
-		String extraCriteria = getClientCriteria(sqlSearch, officeId,
-				externalId, displayName, firstName, lastName);
+		final String extraCriteria = getClientCriteria(sqlSearch, officeId, externalId, displayName, firstName, lastName);
+		
+		Set<String> typicalResponseParameters = new HashSet<String>(
+				Arrays.asList("id", "officeId", "officeName", "externalId", "firstname", "lastname", "joinedDate", "displayName")
+		);
+		
+		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+		if (responseParameters.isEmpty()) {
+			responseParameters.addAll(typicalResponseParameters);
+		}
+		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 
-		Collection<ClientData> clients = this.clientReadPlatformService
-				.retrieveAllIndividualClients(extraCriteria);
-
-		String selectedFields = "";
-		return this.jsonFormattingService.convertRequest(clients, filterName,
-				allowedFieldList, selectedFields, uriInfo.getQueryParameters());
+		Collection<ClientData> clients = this.clientReadPlatformService.retrieveAllIndividualClients(extraCriteria);
+		
+		return this.apiDataConversionService.convertClientDataToJson(prettyPrint, responseParameters, clients.toArray(new ClientData[clients.size()]));
 	}
 
 	private String getClientCriteria(String sqlSearch, Integer officeId,
@@ -129,20 +130,26 @@ public class ClientsApiResource {
 	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveClientData(
 			@PathParam("clientId") final Long clientId,
-			@QueryParam("template") final String template, @Context final UriInfo uriInfo) {
-
-		ClientData clientData = this.clientReadPlatformService
-				.retrieveIndividualClient(clientId);
-
-		if (template != null && template.equalsIgnoreCase("true")) {
-			clientData.setAllowedOffices(new ArrayList<OfficeLookup>(
-					officeReadPlatformService.retrieveAllOfficesForLookup()));
+			@Context final UriInfo uriInfo) {
+		
+		Set<String> typicalResponseParameters = new HashSet<String>(
+				Arrays.asList("id", "officeId", "officeName", "externalId", "firstname", "lastname", "joinedDate", "displayName")
+		);
+		
+		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+		if (responseParameters.isEmpty()) {
+			responseParameters.addAll(typicalResponseParameters);
+		}
+		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+		boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
+		
+		ClientData clientData = this.clientReadPlatformService.retrieveIndividualClient(clientId);
+		if (template) {
+			clientData.setAllowedOffices(new ArrayList<OfficeLookup>(officeReadPlatformService.retrieveAllOfficesForLookup()));
+			responseParameters.add("allowedOffices");
 		}
 
-		String selectedFields = "";
-		return this.jsonFormattingService.convertRequest(clientData,
-				filterName, allowedFieldList, selectedFields,
-				uriInfo.getQueryParameters());
+		return this.apiDataConversionService.convertClientDataToJson(prettyPrint, responseParameters, clientData);
 	}
 
 	@GET
@@ -150,14 +157,20 @@ public class ClientsApiResource {
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
 	public String newClientDetails(@Context UriInfo uriInfo) {
-
-		ClientData clientData = this.clientReadPlatformService
-				.retrieveNewClientDetails();
-
-		String selectedFields = defaultFieldList + "," + allowedFieldList;
-		return this.jsonFormattingService.convertRequest(clientData,
-				filterName, allowedFieldList, selectedFields,
-				uriInfo.getQueryParameters());
+		
+		Set<String> typicalResponseParameters = new HashSet<String>(
+				Arrays.asList("id", "officeId", "officeName", "externalId", "firstname", "lastname", "joinedDate", "displayName", "allowedOffices")
+		);
+		
+		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+		if (responseParameters.isEmpty()) {
+			responseParameters.addAll(typicalResponseParameters);
+		}
+		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+		
+		ClientData clientData = this.clientReadPlatformService.retrieveNewClientDetails();
+		
+		return this.apiDataConversionService.convertClientDataToJson(prettyPrint, responseParameters, clientData);
 	}
 
 	@POST
@@ -189,16 +202,22 @@ public class ClientsApiResource {
 	@Path("{clientId}/loans")
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
-	public String retrieveClientAccount(
-			@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
+	public String retrieveClientAccount(@PathParam("clientId") final Long clientId, 
+										@Context final UriInfo uriInfo) {
 
-		ClientLoanAccountSummaryCollectionData clientAccount = this.clientReadPlatformService
-				.retrieveClientAccountDetails(clientId);
-
-		String selectedFields = "";
-		return this.jsonFormattingService.convertRequest(clientAccount,
-				filterName, allowedFieldList, selectedFields,
-				uriInfo.getQueryParameters());
+		Set<String> typicalResponseParameters = new HashSet<String>(
+				Arrays.asList("pendingApprovalLoans", "awaitingDisbursalLoans", "openLoans", "closedLoans")
+		);
+		
+		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+		if (responseParameters.isEmpty()) {
+			responseParameters.addAll(typicalResponseParameters);
+		}
+		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+		
+		ClientLoanAccountSummaryCollectionData clientAccount = this.clientReadPlatformService.retrieveClientAccountDetails(clientId);
+		
+		return this.apiDataConversionService.convertClientLoanAccountSummaryCollectionDataToJson(prettyPrint, responseParameters, clientAccount);
 	}
 
 	@GET
@@ -207,12 +226,20 @@ public class ClientsApiResource {
 	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveAllClientNotes(@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
 
-		Collection<NoteData> notes = this.clientReadPlatformService
-				.retrieveAllClientNotes(clientId);
-
-		String selectedFields = "";
-		return this.jsonFormattingService.convertRequest(notes, filterName,
-				allowedFieldList, selectedFields, uriInfo.getQueryParameters());
+		Set<String> typicalResponseParameters = new HashSet<String>(
+				Arrays.asList("id", "clientId", "loanId", "loanTransactionId", "noteType", "note", "createdById", "createdByUsername", 
+						"createdOn", "updatedById", "updatedByUsername", "updatedOn")
+		);
+		
+		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+		if (responseParameters.isEmpty()) {
+			responseParameters.addAll(typicalResponseParameters);
+		}
+		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+		
+		Collection<NoteData> notes = this.clientReadPlatformService.retrieveAllClientNotes(clientId);
+		
+		return this.apiDataConversionService.convertNoteDataToJson(prettyPrint, responseParameters, notes.toArray(new NoteData[notes.size()]));
 	}
 
 	@POST
@@ -234,13 +261,23 @@ public class ClientsApiResource {
 	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveClientNote(
 			@PathParam("clientId") final Long clientId,
-			@PathParam("noteId") final Long noteId, @Context final UriInfo uriInfo) {
-
+			@PathParam("noteId") final Long noteId, 
+			@Context final UriInfo uriInfo) {
+		
+		Set<String> typicalResponseParameters = new HashSet<String>(
+				Arrays.asList("id", "clientId", "loanId", "loanTransactionId", "noteType", "note", "createdById", "createdByUsername", 
+						"createdOn", "updatedById", "updatedByUsername", "updatedOn")
+		);
+		
+		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+		if (responseParameters.isEmpty()) {
+			responseParameters.addAll(typicalResponseParameters);
+		}
+		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+		
 		NoteData note = this.clientReadPlatformService.retrieveClientNote(clientId, noteId);
-
-		String selectedFields = "";
-		return this.jsonFormattingService.convertRequest(note, filterName,
-				allowedFieldList, selectedFields, uriInfo.getQueryParameters());
+		
+		return this.apiDataConversionService.convertNoteDataToJson(prettyPrint, responseParameters, note);
 	}
 
 	@PUT
@@ -253,8 +290,7 @@ public class ClientsApiResource {
 
 		NoteCommand command = this.apiDataConversionService.convertJsonToNoteCommand(noteId, clientId, jsonRequestBody);
 		
-		EntityIdentifier identifier = this.clientWritePlatformService
-				.updateNote(command);
+		EntityIdentifier identifier = this.clientWritePlatformService.updateNote(command);
 
 		return Response.ok().entity(identifier).build();
 	}

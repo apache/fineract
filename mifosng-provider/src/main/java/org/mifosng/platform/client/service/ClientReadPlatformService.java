@@ -14,8 +14,7 @@ public interface ClientReadPlatformService {
 
 	ClientData retrieveNewClientDetails();
 
-	ClientLoanAccountSummaryCollectionData retrieveClientAccountDetails(
-			Long clientId);
+	ClientLoanAccountSummaryCollectionData retrieveClientAccountDetails(Long clientId);
 
 	Collection<NoteData> retrieveAllClientNotes(Long clientId);
 

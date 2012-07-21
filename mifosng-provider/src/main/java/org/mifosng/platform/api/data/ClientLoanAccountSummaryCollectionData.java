@@ -3,20 +3,18 @@ package org.mifosng.platform.api.data;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.codehaus.jackson.map.annotate.JsonFilter;
-
-@JsonFilter("myFilter")
 public class ClientLoanAccountSummaryCollectionData {
 
 	private List<ClientLoanAccountSummaryData> pendingApprovalLoans = new ArrayList<ClientLoanAccountSummaryData>();
 	private List<ClientLoanAccountSummaryData> awaitingDisbursalLoans = new ArrayList<ClientLoanAccountSummaryData>();
 	private List<ClientLoanAccountSummaryData> openLoans = new ArrayList<ClientLoanAccountSummaryData>();
 	private List<ClientLoanAccountSummaryData> closedLoans = new ArrayList<ClientLoanAccountSummaryData>();
-
-	public ClientLoanAccountSummaryCollectionData() {
-		//
-	}
-
+	private int anyLoanCount;
+	private int pendingApprovalLoanCount;
+	private int awaitingDisbursalLoanCount;
+	private int activeLoanCount;
+	private int closedLoanCount;
+	
 	public ClientLoanAccountSummaryCollectionData(
 			final List<ClientLoanAccountSummaryData> pendingApprovalLoans,
 			final List<ClientLoanAccountSummaryData> awaitingDisbursalLoans,
@@ -26,60 +24,46 @@ public class ClientLoanAccountSummaryCollectionData {
 		this.awaitingDisbursalLoans = awaitingDisbursalLoans;
 		this.openLoans = openLoans;
 		this.closedLoans = closedLoans;
-	}
-
-	public Integer getAnyLoanCount() {
-		return getPendingApprovalLoanCount() + getAwaitingDisbursalLoanCount()
-				+ getActiveLoanCount() + getClosedLoanCount();
-	}
-
-	public Integer getPendingApprovalLoanCount() {
-		return this.pendingApprovalLoans.size();
-	}
-
-	public Integer getAwaitingDisbursalLoanCount() {
-		return this.awaitingDisbursalLoans.size();
-	}
-
-	public Integer getActiveLoanCount() {
-		return this.openLoans.size();
-	}
-
-	public Integer getClosedLoanCount() {
-		return this.closedLoans.size();
+		this.pendingApprovalLoanCount = this.pendingApprovalLoans.size();
+		this.awaitingDisbursalLoanCount = this.awaitingDisbursalLoans.size();
+		this.activeLoanCount = this.openLoans.size();
+		this.closedLoanCount = this.closedLoans.size();
+		this.anyLoanCount = this.pendingApprovalLoanCount + this.awaitingDisbursalLoanCount + this.activeLoanCount + this.closedLoanCount;
 	}
 
 	public List<ClientLoanAccountSummaryData> getPendingApprovalLoans() {
 		return pendingApprovalLoans;
 	}
 
-	public void setPendingApprovalLoans(
-			List<ClientLoanAccountSummaryData> pendingApprovalLoans) {
-		this.pendingApprovalLoans = pendingApprovalLoans;
-	}
-
 	public List<ClientLoanAccountSummaryData> getAwaitingDisbursalLoans() {
 		return awaitingDisbursalLoans;
-	}
-
-	public void setAwaitingDisbursalLoans(
-			List<ClientLoanAccountSummaryData> awaitingDisbursalLoans) {
-		this.awaitingDisbursalLoans = awaitingDisbursalLoans;
 	}
 
 	public List<ClientLoanAccountSummaryData> getOpenLoans() {
 		return openLoans;
 	}
 
-	public void setOpenLoans(List<ClientLoanAccountSummaryData> openLoans) {
-		this.openLoans = openLoans;
-	}
-
 	public List<ClientLoanAccountSummaryData> getClosedLoans() {
 		return closedLoans;
 	}
 
-	public void setClosedLoans(List<ClientLoanAccountSummaryData> closedLoans) {
-		this.closedLoans = closedLoans;
+	public int getAnyLoanCount() {
+		return anyLoanCount;
+	}
+
+	public int getPendingApprovalLoanCount() {
+		return pendingApprovalLoanCount;
+	}
+
+	public int getAwaitingDisbursalLoanCount() {
+		return awaitingDisbursalLoanCount;
+	}
+
+	public int getActiveLoanCount() {
+		return activeLoanCount;
+	}
+
+	public int getClosedLoanCount() {
+		return closedLoanCount;
 	}
 }

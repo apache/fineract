@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.mifosng.platform.api.commands.AdjustLoanTransactionCommand;
@@ -32,7 +33,11 @@ import org.mifosng.platform.api.commands.SubmitLoanApplicationCommand;
 import org.mifosng.platform.api.commands.UserCommand;
 import org.mifosng.platform.api.data.ApiParameterError;
 import org.mifosng.platform.api.data.AppUserData;
+import org.mifosng.platform.api.data.ClientData;
+import org.mifosng.platform.api.data.ClientLoanAccountSummaryCollectionData;
+import org.mifosng.platform.api.data.ConfigurationData;
 import org.mifosng.platform.api.data.FundData;
+import org.mifosng.platform.api.data.NoteData;
 import org.mifosng.platform.api.data.OfficeData;
 import org.mifosng.platform.api.data.OfficeTransactionData;
 import org.mifosng.platform.api.data.PermissionData;
@@ -63,6 +68,144 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	}
 	
 	@Override
+	public String convertNoteDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final NoteData... notes) {
+		Set<String> supportedParameters = new HashSet<String>(
+				Arrays.asList("id", "clientId", "loanId", "loanTransactionId", "noteType", "note", "createdById", "createdByUsername", 
+						"createdOn", "updatedById", "updatedByUsername", "updatedOn")
+		);
+		
+		final Set<String> parameterNamesToSkip = new HashSet<String>();
+		
+		if (!responseParameters.isEmpty()) {
+			if (!supportedParameters.containsAll(responseParameters)) {
+				throw new UnsupportedParameterException(new ArrayList<String>(responseParameters));
+			}
+			
+			parameterNamesToSkip.addAll(supportedParameters);
+			parameterNamesToSkip.removeAll(responseParameters);
+		}
+		
+		ExclusionStrategy strategy = new ParameterListExclusionStrategy(parameterNamesToSkip);
+		
+		GsonBuilder builder = new GsonBuilder().addSerializationExclusionStrategy(strategy);
+		builder.registerTypeAdapter(LocalDate.class, new JodaLocalDateAdapter());
+		builder.registerTypeAdapter(DateTime.class, new JodaDateTimeAdapter());
+		if (prettyPrint) {
+			builder.setPrettyPrinting();
+		}
+		Gson gsonDeserializer = builder.create();
+		
+		String json = "";
+		if (notes != null && notes.length == 1) {
+			json = gsonDeserializer.toJson(notes[0]);
+		} else {
+			json = gsonDeserializer.toJson(notes);
+		}
+		
+		return json;
+	}
+	
+	@Override
+	public String convertClientLoanAccountSummaryCollectionDataToJson(final boolean prettyPrint, final Set<String> responseParameters,
+			final ClientLoanAccountSummaryCollectionData clientAccountsData) {
+		Set<String> supportedParameters = new HashSet<String>(
+				Arrays.asList("pendingApprovalLoans", "awaitingDisbursalLoans", "openLoans", "closedLoans")
+		);
+		
+		final Set<String> parameterNamesToSkip = new HashSet<String>();
+		
+		if (!responseParameters.isEmpty()) {
+			if (!supportedParameters.containsAll(responseParameters)) {
+				throw new UnsupportedParameterException(new ArrayList<String>(responseParameters));
+			}
+			
+			parameterNamesToSkip.addAll(supportedParameters);
+			parameterNamesToSkip.removeAll(responseParameters);
+		}
+		
+		ExclusionStrategy strategy = new ParameterListExclusionStrategy(parameterNamesToSkip);
+		
+		GsonBuilder builder = new GsonBuilder().addSerializationExclusionStrategy(strategy);
+		builder.registerTypeAdapter(LocalDate.class, new JodaLocalDateAdapter());
+		if (prettyPrint) {
+			builder.setPrettyPrinting();
+		}
+		Gson gsonDeserializer = builder.create();
+		
+		return gsonDeserializer.toJson(clientAccountsData);
+	}
+	
+	@Override
+	public String convertClientDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final ClientData... clients) {
+		Set<String> supportedParameters = new HashSet<String>(
+				Arrays.asList("id", "officeId", "officeName", "externalId", "firstname", "lastname", "joinedDate", "displayName", "allowedOffices")
+		);
+		
+		final Set<String> parameterNamesToSkip = new HashSet<String>();
+		
+		if (!responseParameters.isEmpty()) {
+			if (!supportedParameters.containsAll(responseParameters)) {
+				throw new UnsupportedParameterException(new ArrayList<String>(responseParameters));
+			}
+			
+			parameterNamesToSkip.addAll(supportedParameters);
+			parameterNamesToSkip.removeAll(responseParameters);
+		}
+		
+		ExclusionStrategy strategy = new ParameterListExclusionStrategy(parameterNamesToSkip);
+		
+		GsonBuilder builder = new GsonBuilder().addSerializationExclusionStrategy(strategy);
+		builder.registerTypeAdapter(LocalDate.class, new JodaLocalDateAdapter());
+		if (prettyPrint) {
+			builder.setPrettyPrinting();
+		}
+		Gson gsonDeserializer = builder.create();
+		
+		String json = "";
+		if (clients != null && clients.length == 1) {
+			json = gsonDeserializer.toJson(clients[0]);
+		} else {
+			json = gsonDeserializer.toJson(clients);
+		}
+		
+		return json;
+	}
+	
+	@Override
+	public String convertConfigurationDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final ConfigurationData... configuration) {
+		Set<String> supportedParameters = new HashSet<String>(Arrays.asList("selectedCurrencyOptions", "currencyOptions"));
+		
+		final Set<String> parameterNamesToSkip = new HashSet<String>();
+		
+		if (!responseParameters.isEmpty()) {
+			if (!supportedParameters.containsAll(responseParameters)) {
+				throw new UnsupportedParameterException(new ArrayList<String>(responseParameters));
+			}
+			
+			parameterNamesToSkip.addAll(supportedParameters);
+			parameterNamesToSkip.removeAll(responseParameters);
+		}
+		
+		ExclusionStrategy strategy = new ParameterListExclusionStrategy(parameterNamesToSkip);
+		
+		GsonBuilder builder = new GsonBuilder().addSerializationExclusionStrategy(strategy);
+		builder.registerTypeAdapter(LocalDate.class, new JodaLocalDateAdapter());
+		if (prettyPrint) {
+			builder.setPrettyPrinting();
+		}
+		Gson gsonDeserializer = builder.create();
+		
+		String json = "";
+		if (configuration != null && configuration.length == 1) {
+			json = gsonDeserializer.toJson(configuration[0]);
+		} else {
+			json = gsonDeserializer.toJson(configuration);
+		}
+		
+		return json;
+	}
+	
+	@Override
 	public String convertOfficeTransactionDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final OfficeTransactionData... officeTransactions) {
 		Set<String> supportedParameters = new HashSet<String>(Arrays.asList("transactionDate", "currencyOptions", "allowedOffices"));
 		
@@ -86,7 +229,14 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		}
 		Gson gsonDeserializer = builder.create();
 		
-		return gsonDeserializer.toJson(officeTransactions);
+		String json = "";
+		if (officeTransactions != null && officeTransactions.length == 1) {
+			json = gsonDeserializer.toJson(officeTransactions[0]);
+		} else {
+			json = gsonDeserializer.toJson(officeTransactions);
+		}
+		
+		return json;
 	}
 
 	@Override
@@ -115,7 +265,14 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		}
 		Gson gsonDeserializer = builder.create();
 		
-		return gsonDeserializer.toJson(users);
+		String json = "";
+		if (users != null && users.length == 1) {
+			json = gsonDeserializer.toJson(users[0]);
+		} else {
+			json = gsonDeserializer.toJson(users);
+		}
+		
+		return json;
 	}
 	
 	@Override
@@ -142,7 +299,14 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		}
 		Gson gsonDeserializer = builder.create();
 		
-		return gsonDeserializer.toJson(roles);
+		String json = "";
+		if (roles != null && roles.length == 1) {
+			json = gsonDeserializer.toJson(roles[0]);
+		} else {
+			json = gsonDeserializer.toJson(roles);
+		}
+		
+		return json;
 	}
 	
 	@Override
@@ -170,7 +334,14 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		}
 		Gson gsonDeserializer = builder.create();
 		
-		return gsonDeserializer.toJson(permissions);
+		String json = "";
+		if (permissions != null && permissions.length == 1) {
+			json = gsonDeserializer.toJson(permissions[0]);
+		} else {
+			json = gsonDeserializer.toJson(permissions);
+		}
+		
+		return json;
 	}
 	
 	@Override
@@ -199,7 +370,14 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		}
 		Gson gsonDeserializer = builder.create();
 		
-		return gsonDeserializer.toJson(offices);
+		String json = "";
+		if (offices != null && offices.length == 1) {
+			json = gsonDeserializer.toJson(offices[0]);
+		} else {
+			json = gsonDeserializer.toJson(offices);
+		}
+		
+		return json;
 	}
 	
 	@Override
@@ -226,7 +404,14 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		}
 		Gson gsonDeserializer = builder.create();
 		
-		return gsonDeserializer.toJson(funds);
+		String json = "";
+		if (funds != null && funds.length == 1) {
+			json = gsonDeserializer.toJson(funds[0]);
+		} else {
+			json = gsonDeserializer.toJson(funds);
+		}
+		
+		return json;
 	}
 	
 	@Override

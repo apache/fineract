@@ -21,15 +21,14 @@ public class ConfigurationReadPlatformServiceImpl implements ConfigurationReadPl
 
 	@Override
 	public ConfigurationData retrieveCurrencyConfiguration() {
+		
 		List<CurrencyData> selectedCurrencyOptions = new ArrayList<CurrencyData>(this.currencyReadPlatformService.retrieveAllowedCurrencies());
 		List<CurrencyData> currencyOptions = new ArrayList<CurrencyData>(this.currencyReadPlatformService.retrieveAllPlatformCurrencies());
 
 		// remove selected currency options
 		currencyOptions.removeAll(selectedCurrencyOptions);
 		
-		ConfigurationData configurationData = new ConfigurationData();
-		configurationData.setCurrencyOptions(currencyOptions);
-		configurationData.setSelectedCurrencyOptions(selectedCurrencyOptions);
+		ConfigurationData configurationData = new ConfigurationData(currencyOptions, selectedCurrencyOptions);
 		
 		return configurationData;
 	}

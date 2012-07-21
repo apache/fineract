@@ -1,30 +1,23 @@
 package org.mifosng.platform.api.data;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.jackson.map.annotate.JsonFilter;
 import org.joda.time.LocalDate;
 
-@JsonFilter("myFilter")
-public class ClientData implements Serializable {
+public class ClientData {
 
-	private Long officeId;
-	private String officeName;
-	private Long id;
-	private String firstname;
-	private String lastname;
-	private String displayName;
-	private String externalId;
-	private LocalDate joinedDate;
+	private final Long officeId;
+	private final String officeName;
+	private final Long id;
+	private final String firstname;
+	private final String lastname;
+	private final String displayName;
+	private final String externalId;
+	private final LocalDate joinedDate;
 
 	private List<OfficeLookup> allowedOffices = new ArrayList<OfficeLookup>();
-
-	public ClientData() {
-		//
-	}
 
 	public ClientData(final Long officeId, final String officeName,
 			final Long id, final String firstname, final String lastname,
@@ -46,68 +39,48 @@ public class ClientData implements Serializable {
 		this.joinedDate = joinedDate;
 	}
 
-	public Long getId() {
-		return this.id;
-	}
-
-	public String getFirstname() {
-		return this.firstname;
-	}
-
-	public String getLastname() {
-		return this.lastname;
-	}
-
-	public String getExternalId() {
-		return this.externalId;
+	public ClientData(final Long officeId, final LocalDate joinedDate, final List<OfficeLookup> offices) {
+		this.id = null;
+		this.officeId = officeId;
+		this.officeName = null;
+		this.firstname = null;
+		this.lastname = null;
+		this.displayName = null;
+		this.externalId = null;
+		this.joinedDate = joinedDate;
+		this.allowedOffices = offices;
 	}
 
 	public Long getOfficeId() {
-		return this.officeId;
+		return officeId;
 	}
 
 	public String getOfficeName() {
-		return this.officeName;
+		return officeName;
 	}
 
-	public LocalDate getJoinedDate() {
-		return this.joinedDate;
+	public Long getId() {
+		return id;
 	}
 
-	public void setOfficeId(final Long officeId) {
-		this.officeId = officeId;
+	public String getFirstname() {
+		return firstname;
 	}
 
-	public void setOfficeName(final String officeName) {
-		this.officeName = officeName;
-	}
-
-	public void setId(final Long id) {
-		this.id = id;
-	}
-
-	public void setFirstname(final String firstname) {
-		this.firstname = firstname;
-	}
-
-	public void setLastname(final String lastname) {
-		this.lastname = lastname;
-	}
-
-	public void setExternalId(final String externalId) {
-		this.externalId = externalId;
-	}
-
-	public void setJoinedDate(final LocalDate joinedDate) {
-		this.joinedDate = joinedDate;
+	public String getLastname() {
+		return lastname;
 	}
 
 	public String getDisplayName() {
-		return this.displayName;
+		return displayName;
 	}
 
-	public void setDisplayName(final String displayName) {
-		this.displayName = displayName;
+	public String getExternalId() {
+		return externalId;
+	}
+
+	public LocalDate getJoinedDate() {
+		return joinedDate;
 	}
 
 	public List<OfficeLookup> getAllowedOffices() {

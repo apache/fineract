@@ -65,8 +65,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 	}
 
 	@Override
-	public Collection<ClientData> retrieveAllIndividualClients(
-			String extraCriteria) {
+	public Collection<ClientData> retrieveAllIndividualClients(final String extraCriteria) {
 
 		this.context.authenticatedUser();
 
@@ -112,13 +111,8 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 		List<OfficeLookup> offices = new ArrayList<OfficeLookup>(
 				officeReadPlatformService.retrieveAllOfficesForLookup());
 
-		ClientData clientData = new ClientData();
-		clientData.setOfficeId(currentUser.getOffice().getId());
-		clientData.setAllowedOffices(offices);
-
-		clientData.setJoinedDate(new LocalDate());
-
-		return clientData;
+		final Long officeId = currentUser.getOffice().getId();
+		return new ClientData(officeId, new LocalDate(), offices);
 	}
 
 	private static final class ClientMapper implements RowMapper<ClientData> {
