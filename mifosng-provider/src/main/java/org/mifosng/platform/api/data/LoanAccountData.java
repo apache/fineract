@@ -3,10 +3,8 @@ package org.mifosng.platform.api.data;
 import java.math.BigDecimal;
 import java.util.Collection;
 
-import org.codehaus.jackson.map.annotate.JsonFilter;
 import org.joda.time.LocalDate;
 
-@JsonFilter("loanFilter")
 public class LoanAccountData {
 
 	private Long id;

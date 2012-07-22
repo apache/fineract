@@ -20,7 +20,10 @@ import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.ClientLoanAccountSummaryCollectionData;
 import org.mifosng.platform.api.data.ConfigurationData;
 import org.mifosng.platform.api.data.FundData;
+import org.mifosng.platform.api.data.LoanAccountData;
 import org.mifosng.platform.api.data.LoanProductData;
+import org.mifosng.platform.api.data.LoanTransactionData;
+import org.mifosng.platform.api.data.NewLoanData;
 import org.mifosng.platform.api.data.NoteData;
 import org.mifosng.platform.api.data.OfficeData;
 import org.mifosng.platform.api.data.OfficeTransactionData;
@@ -48,6 +51,12 @@ public interface ApiDataConversionService {
 	String convertNoteDataToJson(boolean prettyPrint, Set<String> responseParameters, NoteData... notes);
 	
 	String convertLoanProductDataToJson(boolean prettyPrint, Set<String> responseParameters, LoanProductData... products);
+	
+	String convertNewLoanDataToJson(boolean prettyPrint, Set<String> responseParameters, NewLoanData newLoanData);
+	
+	String convertLoanAccountDataToJson(boolean prettyPrint, Set<String> responseParameters, LoanAccountData loanAccount);
+	
+	String convertLoanTransactionDataToJson(boolean prettyPrint, Set<String> responseParameters, LoanTransactionData... transactions);
 	//
 
 	FundCommand convertJsonToFundCommand(Long resourceIdentifier, String json);

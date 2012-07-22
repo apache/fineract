@@ -1,14 +1,11 @@
 package org.mifosng.platform.api.data;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.codehaus.jackson.map.annotate.JsonFilter;
 import org.joda.time.LocalDate;
 
-@JsonFilter("myFilter")
-public class NewLoanData implements Serializable {
+public class NewLoanData {
 
 	private Long clientId;
 	private String clientName;

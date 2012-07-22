@@ -1,13 +1,7 @@
 package org.mifosng.platform.api.data;
 
-import org.codehaus.jackson.map.annotate.JsonFilter;
 import org.joda.time.LocalDate;
 
-/**
- * TODO - KW - Think this is deprecated now.
- */
-@Deprecated
-@JsonFilter("loanRepaymentFilter")
 public class LoanTransactionData {
 
 	private Long id;

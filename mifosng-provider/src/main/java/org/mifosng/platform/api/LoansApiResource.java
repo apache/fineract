@@ -1,6 +1,9 @@
 package org.mifosng.platform.api;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -28,12 +31,12 @@ import org.mifosng.platform.api.data.LoanAccountSummaryData;
 import org.mifosng.platform.api.data.LoanBasicDetailsData;
 import org.mifosng.platform.api.data.LoanPermissionData;
 import org.mifosng.platform.api.data.LoanRepaymentPeriodData;
+import org.mifosng.platform.api.data.LoanRepaymentTransactionData;
 import org.mifosng.platform.api.data.LoanSchedule;
 import org.mifosng.platform.api.data.LoanTransactionData;
-import org.mifosng.platform.api.data.LoanRepaymentTransactionData;
 import org.mifosng.platform.api.data.NewLoanData;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
-import org.mifosng.platform.api.infrastructure.ApiJSONFormattingService;
+import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
 import org.mifosng.platform.exceptions.UnrecognizedQueryParamException;
 import org.mifosng.platform.loan.service.CalculationPlatformService;
 import org.mifosng.platform.loan.service.LoanReadPlatformService;
@@ -47,14 +50,6 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class LoansApiResource {
 
-	private String filterName = "myFilter";
-	private String allowedFieldList = "";
-	private String loanFilterName = "loanFilter";
-	private String loanAllowedFieldList = "";
-	private String loanRepaymentFilterName = "loanRepaymentFilter";
-	private String loanRepaymentDefaultFieldList = "transactionType,date,total";
-	private String loanRepaymentAllowedFieldList = "";
-
 	@Autowired
 	private LoanReadPlatformService loanReadPlatformService;
 
@@ -67,9 +62,6 @@ public class LoansApiResource {
 	@Autowired
 	private ApiDataConversionService apiDataConversionService;
 
-	@Autowired
-	private ApiJSONFormattingService jsonFormattingService;
-
 	@GET
 	@Path("template")
 	@Consumes({ MediaType.APPLICATION_JSON })
@@ -78,14 +70,19 @@ public class LoansApiResource {
 			@QueryParam("clientId") final Long clientId,
 			@QueryParam("productId") final Long productId,
 			@Context final UriInfo uriInfo) {
+		
+		Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("clientId", "clientName", "productId", "productName",
+				"selectedProduct", "expectedDisbursementDate", "allowedProducts"));
+		
+		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+		if (responseParameters.isEmpty()) {
+			responseParameters.addAll(typicalResponseParameters);
+		}
+		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+		
+		NewLoanData workflowData = this.loanReadPlatformService.retrieveClientAndProductDetails(clientId, productId);
 
-		NewLoanData workflowData = this.loanReadPlatformService
-				.retrieveClientAndProductDetails(clientId, productId);
-
-		String selectedFields = "";
-		return this.jsonFormattingService.convertRequest(workflowData,
-				filterName, allowedFieldList, selectedFields,
-				uriInfo.getQueryParameters());
+		return this.apiDataConversionService.convertNewLoanDataToJson(prettyPrint, responseParameters, workflowData);
 	}
 
 	@GET
@@ -96,32 +93,36 @@ public class LoansApiResource {
 			@PathParam("loanId") final Long loanId,
 			@Context final UriInfo uriInfo) {
 
-		LoanBasicDetailsData loanBasicDetails = this.loanReadPlatformService
-				.retrieveLoanAccountDetails(loanId);
+		Set<String> typicalResponseParameters = new HashSet<String>(
+				Arrays.asList("id", "externalId", "fundId", "fundName", "loanProductId", "loanProductName", "principal", "inArrearsTolerance", "numberOfRepayments",
+						"repaymentEvery", "interestRatePerPeriod", "annualInterestRate", 
+						"repaymentFrequencyType", "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType",
+						"submittedOnDate", "approvedOnDate", "expectedDisbursementDate", "actualDisbursementDate", 
+						"expectedFirstRepaymentOnDate", "interestChargedFromDate", "closedOnDate", "expectedMaturityDate", 
+						"lifeCycleStatusId", "lifeCycleStatusText", "lifeCycleStatusDate",
+						"summary", "repaymentSchedule", "loanRepayments", "permissions", "convenienceData")
+				);
+		
+		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+		if (responseParameters.isEmpty()) {
+			responseParameters.addAll(typicalResponseParameters);
+		}
+		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+		
+		LoanBasicDetailsData loanBasicDetails = this.loanReadPlatformService.retrieveLoanAccountDetails(loanId);
 
-		Collection<LoanRepaymentTransactionData> loanRepayments = this.loanReadPlatformService
-				.retrieveLoanPayments(loanId);
-		Collection<LoanRepaymentPeriodData> repaymentSchedule = this.loanReadPlatformService
-				.retrieveRepaymentSchedule(loanId);
+		Collection<LoanRepaymentTransactionData> loanRepayments = this.loanReadPlatformService.retrieveLoanPayments(loanId);
+		Collection<LoanRepaymentPeriodData> repaymentSchedule = this.loanReadPlatformService.retrieveRepaymentSchedule(loanId);
 
-		LoanAccountSummaryData summary = this.loanReadPlatformService
-				.retrieveSummary(loanBasicDetails.getPrincipal(),
-						repaymentSchedule, loanRepayments);
+		LoanAccountSummaryData summary = this.loanReadPlatformService.retrieveSummary(loanBasicDetails.getPrincipal(), repaymentSchedule, loanRepayments);
 
-		LoanPermissionData permissions = this.loanReadPlatformService
-				.retrieveLoanPermissions(loanBasicDetails, summary
-						.isWaiveAllowed(loanBasicDetails
-								.getInArrearsTolerance()), loanRepayments
-						.size());
+		LoanPermissionData permissions = this.loanReadPlatformService.retrieveLoanPermissions(loanBasicDetails, 
+							summary.isWaiveAllowed(loanBasicDetails.getInArrearsTolerance()), 
+							loanRepayments.size());
 
-		LoanAccountData loanAccount = new LoanAccountData(loanBasicDetails,
-				summary, repaymentSchedule, loanRepayments, permissions);
-
-		String selectedFields = "";
-		String associatedFields = "summary,repaymentSchedule,loanRepayments,permissions,convenienceData";
-		return this.jsonFormattingService.convertRequest(loanAccount,
-				loanFilterName, loanAllowedFieldList, selectedFields,
-				associatedFields, uriInfo.getQueryParameters());
+		LoanAccountData loanAccount = new LoanAccountData(loanBasicDetails, summary, repaymentSchedule, loanRepayments, permissions);
+		
+		return this.apiDataConversionService.convertLoanAccountDataToJson(prettyPrint, responseParameters, loanAccount);
 	}
 
 	@POST
@@ -261,28 +262,27 @@ public class LoansApiResource {
 			@PathParam("loanId") final Long loanId,
 			@QueryParam("command") final String commandParam,
 			@Context final UriInfo uriInfo) {
-
-		String json = "";
-		String selectedFields = loanRepaymentDefaultFieldList;
-		if (is(commandParam, "repayment")) {
-			LoanTransactionData loanRepaymentData = this.loanReadPlatformService
-					.retrieveNewLoanRepaymentDetails(loanId);
-			json = this.jsonFormattingService.convertRequest(loanRepaymentData,
-					loanRepaymentFilterName, loanRepaymentAllowedFieldList,
-					selectedFields, uriInfo.getQueryParameters());
-		} else if (is(commandParam, "waiver")) {
-			LoanTransactionData loanWaiverData = this.loanReadPlatformService
-					.retrieveNewLoanWaiverDetails(loanId);
-			json = this.jsonFormattingService.convertRequest(loanWaiverData,
-					loanRepaymentFilterName, loanRepaymentAllowedFieldList,
-					selectedFields, uriInfo.getQueryParameters());
+		
+		Set<String> typicalResponseParameters = new HashSet<String>(
+				Arrays.asList("id", "transactionType", "date", "principal", "interest", "total", "totalWaived", "overpaid")
+				);
+		
+		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+		if (responseParameters.isEmpty()) {
+			responseParameters.addAll(typicalResponseParameters);
 		}
-
-		if (StringUtils.isBlank(json)) {
+		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+		
+		LoanTransactionData transactionData = null;
+		if (is(commandParam, "repayment")) {
+			transactionData = this.loanReadPlatformService.retrieveNewLoanRepaymentDetails(loanId);
+		} else if (is(commandParam, "waiver")) {
+			transactionData = this.loanReadPlatformService.retrieveNewLoanWaiverDetails(loanId);
+		} else {
 			throw new UnrecognizedQueryParamException("command", commandParam);
 		}
 
-		return json;
+		return this.apiDataConversionService.convertLoanTransactionDataToJson(prettyPrint, responseParameters, transactionData);
 	}
 
 	@GET
@@ -292,14 +292,20 @@ public class LoansApiResource {
 	public String retrieveTransaction(@PathParam("loanId") final Long loanId,
 			@PathParam("transactionId") final Long transactionId,
 			@Context final UriInfo uriInfo) {
+		
+		Set<String> typicalResponseParameters = new HashSet<String>(
+				Arrays.asList("id", "transactionType", "date", "principal", "interest", "total", "totalWaived", "overpaid")
+				);
+		
+		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+		if (responseParameters.isEmpty()) {
+			responseParameters.addAll(typicalResponseParameters);
+		}
+		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+		
+		LoanTransactionData transactionData = this.loanReadPlatformService.retrieveLoanTransactionDetails(loanId, transactionId);
 
-		LoanTransactionData loanRepaymentData = this.loanReadPlatformService
-				.retrieveLoanTransactionDetails(loanId, transactionId);
-
-		String selectedFields = loanRepaymentDefaultFieldList;
-		return this.jsonFormattingService.convertRequest(loanRepaymentData,
-				loanRepaymentFilterName, loanRepaymentAllowedFieldList,
-				selectedFields, uriInfo.getQueryParameters());
+		return this.apiDataConversionService.convertLoanTransactionDataToJson(prettyPrint, responseParameters, transactionData);
 	}
 
 	@POST

@@ -2,25 +2,22 @@ package org.mifosng.platform.api.data;
 
 public class LoanPermissionData {
 
-	private boolean waiveAllowed;
-	private boolean makeRepaymentAllowed;
-	private boolean rejectAllowed;
-	private boolean withdrawnByApplicantAllowed;
-	private boolean undoApprovalAllowed;
-	private boolean disbursalAllowed;
-	private boolean undoDisbursalAllowed;
+	private final boolean waiveAllowed;
+	private final boolean makeRepaymentAllowed;
+	private final boolean rejectAllowed;
+	private final boolean withdrawnByApplicantAllowed;
+	private final boolean undoApprovalAllowed;
+	private final boolean disbursalAllowed;
+	private final boolean undoDisbursalAllowed;
 		
-	private boolean pendingApproval;
-	private boolean waitingForDisbursal;
+	private final boolean pendingApproval;
+	private final boolean waitingForDisbursal;
+	private final boolean anyActionOnLoanAllowed;
 	
-	protected LoanPermissionData() {
-		//
-	}
-	
-	public LoanPermissionData(boolean waiveAllowed,
-			boolean makeRepaymentAllowed, boolean rejectAllowed,
-			boolean withdrawnByApplicantAllowed, boolean undoApprovalAllowed,
-			boolean undoDisbursalAllowed, boolean disbursalAllowed, boolean pendingApproval, boolean waitingForDisbursal) {
+	public LoanPermissionData(final boolean waiveAllowed,
+			final boolean makeRepaymentAllowed, final boolean rejectAllowed,
+			final boolean withdrawnByApplicantAllowed, final boolean undoApprovalAllowed,
+			final boolean undoDisbursalAllowed, final boolean disbursalAllowed, final boolean pendingApproval, final boolean waitingForDisbursal) {
 		this.waiveAllowed = waiveAllowed;
 		this.makeRepaymentAllowed = makeRepaymentAllowed;
 		this.rejectAllowed = rejectAllowed;
@@ -30,81 +27,46 @@ public class LoanPermissionData {
 		this.disbursalAllowed = disbursalAllowed;
 		this.pendingApproval = pendingApproval;
 		this.waitingForDisbursal = waitingForDisbursal;
-	}
-
-	public boolean isAnyActionOnLoanAllowed() {
-		return isRejectAllowed() || isWithdrawnByApplicantAllowed() || isPendingApproval() || isUndoDisbursalAllowed() || isMakeRepaymentAllowed();
+		this.anyActionOnLoanAllowed = isRejectAllowed() || isWithdrawnByApplicantAllowed() || isPendingApproval() || isUndoDisbursalAllowed() || isMakeRepaymentAllowed();
 	}
 
 	public boolean isWaiveAllowed() {
 		return waiveAllowed;
 	}
 
-	public void setWaiveAllowed(boolean waiveAllowed) {
-		this.waiveAllowed = waiveAllowed;
-	}
-
 	public boolean isMakeRepaymentAllowed() {
 		return makeRepaymentAllowed;
-	}
-
-	public void setMakeRepaymentAllowed(boolean makeRepaymentAllowed) {
-		this.makeRepaymentAllowed = makeRepaymentAllowed;
 	}
 
 	public boolean isRejectAllowed() {
 		return rejectAllowed;
 	}
 
-	public void setRejectAllowed(boolean rejectAllowed) {
-		this.rejectAllowed = rejectAllowed;
-	}
-
 	public boolean isWithdrawnByApplicantAllowed() {
 		return withdrawnByApplicantAllowed;
-	}
-
-	public void setWithdrawnByApplicantAllowed(boolean withdrawnByApplicantAllowed) {
-		this.withdrawnByApplicantAllowed = withdrawnByApplicantAllowed;
 	}
 
 	public boolean isUndoApprovalAllowed() {
 		return undoApprovalAllowed;
 	}
 
-	public void setUndoApprovalAllowed(boolean undoApprovalAllowed) {
-		this.undoApprovalAllowed = undoApprovalAllowed;
-	}
-
 	public boolean isDisbursalAllowed() {
 		return disbursalAllowed;
-	}
-
-	public void setDisbursalAllowed(boolean disbursalAllowed) {
-		this.disbursalAllowed = disbursalAllowed;
-	}
-
-	public boolean isPendingApproval() {
-		return pendingApproval;
-	}
-
-	public void setPendingApproval(boolean pendingApproval) {
-		this.pendingApproval = pendingApproval;
-	}
-
-	public boolean isWaitingForDisbursal() {
-		return waitingForDisbursal;
-	}
-
-	public void setWaitingForDisbursal(boolean waitingForDisbursal) {
-		this.waitingForDisbursal = waitingForDisbursal;
 	}
 
 	public boolean isUndoDisbursalAllowed() {
 		return undoDisbursalAllowed;
 	}
 
-	public void setUndoDisbursalAllowed(boolean undoDisbursalAllowed) {
-		this.undoDisbursalAllowed = undoDisbursalAllowed;
+	public boolean isPendingApproval() {
+		return pendingApproval;
+	}
+
+	public boolean isWaitingForDisbursal() {
+		return waitingForDisbursal;
+	}
+
+	public boolean isAnyActionOnLoanAllowed() {
+		return anyActionOnLoanAllowed;
 	}
 }
