@@ -31,12 +31,14 @@ import org.mifosng.platform.api.commands.OrganisationCurrencyCommand;
 import org.mifosng.platform.api.commands.RoleCommand;
 import org.mifosng.platform.api.commands.SubmitLoanApplicationCommand;
 import org.mifosng.platform.api.commands.UserCommand;
+import org.mifosng.platform.api.data.AdditionalFieldsSetData;
 import org.mifosng.platform.api.data.ApiParameterError;
 import org.mifosng.platform.api.data.AppUserData;
 import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.ClientLoanAccountSummaryCollectionData;
 import org.mifosng.platform.api.data.ConfigurationData;
 import org.mifosng.platform.api.data.FundData;
+import org.mifosng.platform.api.data.GenericResultsetData;
 import org.mifosng.platform.api.data.LoanAccountData;
 import org.mifosng.platform.api.data.LoanProductData;
 import org.mifosng.platform.api.data.LoanTransactionData;
@@ -69,6 +71,40 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	
 	public ApiDataConversionServiceImpl() {
 		gsonConverter = new Gson();
+	}
+	
+	@Override
+	public String convertGenericResultsetDataToJson(final boolean prettyPrint, final GenericResultsetData result) {
+		GsonBuilder builder = new GsonBuilder();
+		builder.registerTypeAdapter(LocalDate.class, new JodaLocalDateAdapter());
+		builder.registerTypeAdapter(DateTime.class, new JodaDateTimeAdapter());
+		
+		if (prettyPrint) {
+			builder.setPrettyPrinting();
+		}
+		Gson gsonDeserializer = builder.create();
+		
+		return gsonDeserializer.toJson(result);
+	}
+	
+	@Override
+	public String convertAdditionalFieldsSetDataToJson(final boolean prettyPrint, final AdditionalFieldsSetData... additionalFields) {
+		GsonBuilder builder = new GsonBuilder();
+		builder.registerTypeAdapter(LocalDate.class, new JodaLocalDateAdapter());
+		builder.registerTypeAdapter(DateTime.class, new JodaDateTimeAdapter());
+		if (prettyPrint) {
+			builder.setPrettyPrinting();
+		}
+		Gson gsonDeserializer = builder.create();
+		
+		String json = "";
+		if (additionalFields != null && additionalFields.length == 1) {
+			json = gsonDeserializer.toJson(additionalFields[0]);
+		} else {
+			json = gsonDeserializer.toJson(additionalFields);
+		}
+		
+		return json;
 	}
 	
 	@Override

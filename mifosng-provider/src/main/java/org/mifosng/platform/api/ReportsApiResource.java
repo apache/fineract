@@ -17,8 +17,9 @@ import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriInfo;
 
 import org.mifosng.platform.ReadExtraDataAndReportingService;
-import org.mifosng.platform.api.data.GenericResultset;
-import org.mifosng.platform.api.infrastructure.ApiJSONFormattingService;
+import org.mifosng.platform.api.data.GenericResultsetData;
+import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
+import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -28,38 +29,31 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class ReportsApiResource {
 
-	private String allowedFieldList = "";
-	private String filterName = "myFilter";
-
 	@Autowired
 	private ReadExtraDataAndReportingService readExtraDataAndReportingService;
 
 	@Autowired
-	private ApiJSONFormattingService jsonFormattingService;
-
+	private ApiDataConversionService apiDataConversionService;
+	
 	@GET
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON, "application/x-msdownload" })
 	public Response retrieveReportList(@Context final UriInfo uriInfo) {
 
-		MultivaluedMap<String, String> queryParams = uriInfo
-				.getQueryParameters();
 		Map<String, String> extractedQueryParams = new HashMap<String, String>();
+		
+		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+		boolean exportCsv = ApiParameterHelper.exportCsv(uriInfo.getQueryParameters());
 
-		String exportCSV = queryParams.getFirst("exportCSV");
-
-		if ((exportCSV == null) || (!(exportCSV.equalsIgnoreCase("true")))) {
-			GenericResultset result = this.readExtraDataAndReportingService
-					.retrieveGenericResultset(".", ".", extractedQueryParams);
-			String selectedFields = "";
-			String json = this.jsonFormattingService.convertRequest(result,
-					filterName, allowedFieldList, selectedFields,
-					uriInfo.getQueryParameters());
+		if (!exportCsv) {
+			GenericResultsetData result = this.readExtraDataAndReportingService.retrieveGenericResultset(".", ".", extractedQueryParams);
+			
+			final String json = this.apiDataConversionService.convertGenericResultsetDataToJson(prettyPrint, result);
+			
 			return Response.ok().entity(json).build();
 		}
 
-		StreamingOutput result = this.readExtraDataAndReportingService
-				.retrieveReportCSV(".", ".", extractedQueryParams);
+		StreamingOutput result = this.readExtraDataAndReportingService.retrieveReportCSV(".", ".", extractedQueryParams);
 
 		return Response
 				.ok()
@@ -71,52 +65,43 @@ public class ReportsApiResource {
 	@GET
 	@Path("{reportName}")
 	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON, "application/x-msdownload",
-			"application/vnd.ms-excel", "application/pdf", "text/html" })
+	@Produces({MediaType.APPLICATION_JSON, "application/x-msdownload","application/vnd.ms-excel", "application/pdf", "text/html" })
 	public Response retrieveReport(
 			@PathParam("reportName") final String reportName,
 			@Context final UriInfo uriInfo) {
 
-		MultivaluedMap<String, String> queryParams = uriInfo
-				.getQueryParameters();
+		MultivaluedMap<String, String> queryParams = uriInfo.getQueryParameters();
+		
+		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+		boolean exportCsv = ApiParameterHelper.exportCsv(uriInfo.getQueryParameters());
+		boolean parameterType = ApiParameterHelper.parameterType(uriInfo.getQueryParameters());
 
-		String parameterType = queryParams.getFirst("parameterType");
-		if ((parameterType == null)
-				|| (!(parameterType.equalsIgnoreCase("true")))) {
-			parameterType = "report";
-		} else {
-			parameterType = "parameter";
-		}
-
-		if (parameterType.equals("report")) {
-			if (this.readExtraDataAndReportingService.getReportType(reportName)
-					.equalsIgnoreCase("Pentaho")) {
-
-				return this.readExtraDataAndReportingService
-						.processPentahoRequest(reportName,
-								queryParams.getFirst("output-type"),
-								getReportParams(queryParams, true));
+		String parameterTypeValue = null;
+		if (!parameterType) {
+			parameterTypeValue = "report";
+			if (this.readExtraDataAndReportingService.getReportType(reportName).equalsIgnoreCase("Pentaho")) {
+				Map<String, String> reportParams = getReportParams(queryParams, true);
+				return this.readExtraDataAndReportingService.processPentahoRequest(reportName, queryParams.getFirst("output-type"), reportParams);
 			}
+		} else {
+			parameterTypeValue = "parameter";
 		}
 
-		String exportCSV = queryParams.getFirst("exportCSV");
-		if ((exportCSV == null) || (!(exportCSV.equalsIgnoreCase("true")))) {
-			// JSON
-			GenericResultset result = this.readExtraDataAndReportingService
-					.retrieveGenericResultset(reportName, parameterType,
-							getReportParams(queryParams, false));
+		if (!exportCsv) {
+			
+			Map<String, String> reportParams = getReportParams(queryParams, false);
+			
+			GenericResultsetData result = this.readExtraDataAndReportingService.retrieveGenericResultset(reportName, parameterTypeValue, reportParams);
 
-			String selectedFields = "";
-			String json = this.jsonFormattingService.convertRequest(result,
-					filterName, allowedFieldList, selectedFields,
-					uriInfo.getQueryParameters());
-			return Response.ok().entity(json).type(MediaType.APPLICATION_JSON)
-					.build();
+			final String json = this.apiDataConversionService.convertGenericResultsetDataToJson(prettyPrint, result);
+			
+			return Response.ok().entity(json).type(MediaType.APPLICATION_JSON).build();
 		}
 
 		// CSV Export
-		StreamingOutput result = this.readExtraDataAndReportingService
-				.retrieveReportCSV(reportName, parameterType, getReportParams(queryParams, false));
+		Map<String, String> reportParams = getReportParams(queryParams, false);
+		StreamingOutput result = this.readExtraDataAndReportingService.retrieveReportCSV(reportName, parameterTypeValue, reportParams);
+		
 		return Response
 				.ok()
 				.entity(result)
@@ -126,8 +111,7 @@ public class ReportsApiResource {
 								+ ".csv").build();
 	}
 
-	private Map<String, String> getReportParams(
-			MultivaluedMap<String, String> queryParams, Boolean isPentaho) {
+	private Map<String, String> getReportParams(final MultivaluedMap<String, String> queryParams, final Boolean isPentaho) {
 
 		Map<String, String> reportParams = new HashMap<String, String>();
 		Set<String> keys = queryParams.keySet();

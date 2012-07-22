@@ -43,6 +43,24 @@ public class ApiParameterHelper {
 		return prettyPrint;
 	}
 	
+	public static boolean exportCsv(final MultivaluedMap<String, String> queryParams) {
+		boolean exportCsv = false;
+		if (queryParams.getFirst("exportCSV") != null) {
+			String exportCsvValue = queryParams.getFirst("exportCSV");
+			exportCsv = "true".equalsIgnoreCase(exportCsvValue);
+		}
+		return exportCsv;
+	}
+	
+	public static boolean parameterType(final MultivaluedMap<String, String> queryParams) {
+		boolean parameterType = false;
+		if (queryParams.getFirst("parameterType") != null) {
+			String parameterTypeValue = queryParams.getFirst("parameterType");
+			parameterType = "true".equalsIgnoreCase(parameterTypeValue);
+		}
+		return parameterType;
+	}
+	
 	public static boolean template(final MultivaluedMap<String, String> queryParams) {
 		boolean template = false;
 		if (queryParams.getFirst("template") != null) {

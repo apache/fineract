@@ -3,12 +3,12 @@ package org.mifosng.platform.api.data;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GenericResultset {
+public class GenericResultsetData {
 
 	private List<ResultsetColumnHeader> columnHeaders = new ArrayList<ResultsetColumnHeader>();
 	private List<ResultsetDataRow> data = new ArrayList<ResultsetDataRow>();
 	
-	public GenericResultset() {
+	public GenericResultsetData() {
 		
 	}
 

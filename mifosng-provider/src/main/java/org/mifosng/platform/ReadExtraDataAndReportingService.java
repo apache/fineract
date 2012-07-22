@@ -6,8 +6,8 @@ import java.util.Map;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
-import org.mifosng.platform.api.data.AdditionalFieldsSet;
-import org.mifosng.platform.api.data.GenericResultset;
+import org.mifosng.platform.api.data.AdditionalFieldsSetData;
+import org.mifosng.platform.api.data.GenericResultsetData;
 
 public interface ReadExtraDataAndReportingService {
 
@@ -15,18 +15,18 @@ public interface ReadExtraDataAndReportingService {
 			Map<String, String> extractedQueryParams);
 
 	// @PreAuthorize(value = "hasAnyRole('REPORTING_SUPER_USER_ROLE')")
-	GenericResultset retrieveGenericResultset(String name, String type,
+	GenericResultsetData retrieveGenericResultset(String name, String type,
 			Map<String, String> extractedQueryParams);
 
-	List<AdditionalFieldsSet> retrieveExtraDatasetNames(String type);
+	List<AdditionalFieldsSetData> retrieveExtraDatasetNames(String type);
 
-	GenericResultset retrieveExtraData(String type, String set, Long id);
+	GenericResultsetData retrieveExtraData(String type, String set, Long id);
 
 	void updateExtraData(String type, String set, Long id,
 			Map<String, String> queryParams);
 
-	public Response processPentahoRequest(String reportName,
-			String outputType, Map<String, String> queryParams);
-	
+	Response processPentahoRequest(String reportName, String outputType,
+			Map<String, String> queryParams);
+
 	String getReportType(String reportName);
 }

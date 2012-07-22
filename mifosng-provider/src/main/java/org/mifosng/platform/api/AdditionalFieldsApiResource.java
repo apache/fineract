@@ -24,11 +24,12 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.mifosng.platform.InvalidSqlException;
 import org.mifosng.platform.ReadExtraDataAndReportingService;
-import org.mifosng.platform.api.data.AdditionalFieldsSet;
+import org.mifosng.platform.api.data.AdditionalFieldsSetData;
 import org.mifosng.platform.api.data.ApiParameterError;
 import org.mifosng.platform.api.data.EntityIdentifier;
-import org.mifosng.platform.api.data.GenericResultset;
-import org.mifosng.platform.api.infrastructure.ApiJSONFormattingService;
+import org.mifosng.platform.api.data.GenericResultsetData;
+import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
+import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
 import org.mifosng.platform.exceptions.PlatformApiDataValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,30 +42,23 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class AdditionalFieldsApiResource {
 
-	private final static Logger logger = LoggerFactory
-			.getLogger(AdditionalFieldsApiResource.class);
-
-	private String allowedFieldList = "";
-	private String filterName = "myFilter";
+	private final static Logger logger = LoggerFactory.getLogger(AdditionalFieldsApiResource.class);
 
 	@Autowired
 	private ReadExtraDataAndReportingService readExtraDataAndReportingService;
-
+	
 	@Autowired
-	private ApiJSONFormattingService jsonFormattingService;
+	private ApiDataConversionService apiDataConversionService;
 
 	@GET
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
-	public String datasets(@QueryParam("type") String type,
-			@Context UriInfo uriInfo) {
+	public String datasets(@QueryParam("type") final String type, @Context final UriInfo uriInfo) {
 
-		List<AdditionalFieldsSet> result = this.readExtraDataAndReportingService
-				.retrieveExtraDatasetNames(type);
+		List<AdditionalFieldsSetData> result = this.readExtraDataAndReportingService.retrieveExtraDatasetNames(type);
 
-		String selectedFields = "";
-		return this.jsonFormattingService.convertRequest(result, filterName,
-				allowedFieldList, selectedFields, uriInfo.getQueryParameters());
+		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+		return this.apiDataConversionService.convertAdditionalFieldsSetDataToJson(prettyPrint, result.toArray(new AdditionalFieldsSetData[result.size()]));
 	}
 
 	@GET
@@ -73,17 +67,13 @@ public class AdditionalFieldsApiResource {
 	@Produces({MediaType.APPLICATION_JSON})
 	public String extraData(@PathParam("type") final String type,
 			@PathParam("set") final String set, @PathParam("id") final Long id,
-			@Context UriInfo uriInfo) {
+			@Context final UriInfo uriInfo) {
 
 		try {
-			GenericResultset result = this.readExtraDataAndReportingService
-					.retrieveExtraData(type, set, id);
+			GenericResultsetData result = this.readExtraDataAndReportingService.retrieveExtraData(type, set, id);
 
-			String selectedFields = "";
-			//Note that GenericResultSet doesn't have a filter so all fields are returned (this is correct)
-			return this.jsonFormattingService.convertRequest(result, filterName,
-					allowedFieldList, selectedFields,
-					uriInfo.getQueryParameters());
+			boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+			return this.apiDataConversionService.convertGenericResultsetDataToJson(prettyPrint, result);
 		} catch (InvalidSqlException e) {
 			List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 			ApiParameterError error = ApiParameterError.parameterError(
@@ -102,7 +92,7 @@ public class AdditionalFieldsApiResource {
 	@Produces({MediaType.APPLICATION_JSON})
 	public Response saveExtraData(@PathParam("type") final String type,
 			@PathParam("set") final String set, @PathParam("id") final Long id,
-			String reqbody) {
+			final String jsonRequestBody) {
 
 		try {
 
@@ -110,7 +100,7 @@ public class AdditionalFieldsApiResource {
 			String pValue = "";
 			String pName;
 			try {
-				JSONObject jsonObj = new JSONObject(reqbody);
+				JSONObject jsonObj = new JSONObject(jsonRequestBody);
 				JSONArray jsonArr = jsonObj.names();
 				if (jsonArr != null) {
 					for (int i = 0; i < jsonArr.length(); i++) {

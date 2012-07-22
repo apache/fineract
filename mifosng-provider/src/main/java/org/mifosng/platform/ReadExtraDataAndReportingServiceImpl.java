@@ -20,8 +20,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.commons.lang.StringUtils;
-import org.mifosng.platform.api.data.AdditionalFieldsSet;
-import org.mifosng.platform.api.data.GenericResultset;
+import org.mifosng.platform.api.data.AdditionalFieldsSetData;
+import org.mifosng.platform.api.data.GenericResultsetData;
 import org.mifosng.platform.api.data.ResultsetColumnHeader;
 import org.mifosng.platform.api.data.ResultsetDataRow;
 import org.mifosng.platform.exceptions.AdditionalFieldsNotFoundException;
@@ -76,7 +76,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 			public void write(OutputStream out) {
 				try {
 
-					GenericResultset result = retrieveGenericResultset(name,
+					GenericResultsetData result = retrieveGenericResultset(name,
 							type, queryParams);
 					StringBuffer sb = generateCsvFileBuffer(result);
 
@@ -102,7 +102,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 
 	}
 
-	private static StringBuffer generateCsvFileBuffer(GenericResultset result) {
+	private static StringBuffer generateCsvFileBuffer(GenericResultsetData result) {
 		StringBuffer writer = new StringBuffer();
 
 		List<ResultsetColumnHeader> columnHeaders = result.getColumnHeaders();
@@ -149,7 +149,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 	}
 
 	@Override
-	public GenericResultset retrieveGenericResultset(final String name,
+	public GenericResultsetData retrieveGenericResultset(final String name,
 			final String type, final Map<String, String> queryParams) {
 
 		long startTime = System.currentTimeMillis();
@@ -180,7 +180,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 			sql = getSQLtoRun(name, type, queryParams);
 		}
 
-		GenericResultset result = fillReportingGenericResultSet(sql);
+		GenericResultsetData result = fillReportingGenericResultSet(sql);
 
 		long elapsed = System.currentTimeMillis() - startTime;
 		logger.info("FINISHING Report/Request Name: " + name + " - " + type
@@ -188,9 +188,9 @@ public class ReadExtraDataAndReportingServiceImpl implements
 		return result;
 	}
 
-	private GenericResultset fillReportingGenericResultSet(final String sql) {
+	private GenericResultsetData fillReportingGenericResultSet(final String sql) {
 
-		GenericResultset result = new GenericResultset();
+		GenericResultsetData result = new GenericResultsetData();
 
 		Connection db_connection = null;
 		Statement db_statement = null;
@@ -328,9 +328,9 @@ public class ReadExtraDataAndReportingServiceImpl implements
 	}
 
 	@Override
-	public List<AdditionalFieldsSet> retrieveExtraDatasetNames(String type) {
+	public List<AdditionalFieldsSetData> retrieveExtraDatasetNames(String type) {
 
-		List<AdditionalFieldsSet> additionalFieldsSets = new ArrayList<AdditionalFieldsSet>();
+		List<AdditionalFieldsSetData> additionalFieldsSets = new ArrayList<AdditionalFieldsSetData>();
 
 		Connection db_connection = null;
 		Statement db_statement = null;
@@ -350,7 +350,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 			ResultSet rs = db_statement.executeQuery(sql);
 
 			while (rs.next()) {
-				additionalFieldsSets.add(new AdditionalFieldsSet(rs
+				additionalFieldsSets.add(new AdditionalFieldsSetData(rs
 						.getInt("id"), rs.getString("set"), rs
 						.getString("type")));
 			}
@@ -366,19 +366,19 @@ public class ReadExtraDataAndReportingServiceImpl implements
 	}
 
 	@Override
-	public GenericResultset retrieveExtraData(String type, String set, Long id) {
+	public GenericResultsetData retrieveExtraData(String type, String set, Long id) {
 
 		long startTime = System.currentTimeMillis();
-		GenericResultset result = fillExtraDataGenericResultSet(type, set, id);
+		GenericResultsetData result = fillExtraDataGenericResultSet(type, set, id);
 		long elapsed = System.currentTimeMillis() - startTime;
 		logger.info("FINISHING SET: " + set + "     Elapsed Time: " + elapsed);
 		return result;
 	}
 
-	private GenericResultset fillExtraDataGenericResultSet(String type,
+	private GenericResultsetData fillExtraDataGenericResultSet(String type,
 			String set, Long id) {
 
-		GenericResultset result = new GenericResultset();
+		GenericResultsetData result = new GenericResultsetData();
 
 		Connection db_connection = null;
 		Statement db_statement1 = null;

@@ -15,9 +15,11 @@ import org.codehaus.jackson.map.ser.FilterProvider;
 import org.codehaus.jackson.map.ser.impl.SimpleBeanPropertyFilter;
 import org.codehaus.jackson.map.ser.impl.SimpleFilterProvider;
 import org.mifosng.platform.exceptions.PlatformInternalServerException;
-import org.springframework.stereotype.Service;
 
-@Service
+/**
+ * 
+ */
+@Deprecated
 public class ApiJSONFormattingServiceImpl implements ApiJSONFormattingService {
 
 	@Override
