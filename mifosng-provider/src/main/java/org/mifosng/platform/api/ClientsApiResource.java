@@ -156,7 +156,7 @@ public class ClientsApiResource {
 	@Path("template")
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
-	public String newClientDetails(@Context UriInfo uriInfo) {
+	public String newClientDetails(@Context final UriInfo uriInfo) {
 		
 		Set<String> typicalResponseParameters = new HashSet<String>(
 				Arrays.asList("id", "officeId", "officeName", "externalId", "firstname", "lastname", "joinedDate", "displayName", "allowedOffices")

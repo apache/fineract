@@ -37,6 +37,7 @@ import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.ClientLoanAccountSummaryCollectionData;
 import org.mifosng.platform.api.data.ConfigurationData;
 import org.mifosng.platform.api.data.FundData;
+import org.mifosng.platform.api.data.LoanProductData;
 import org.mifosng.platform.api.data.NoteData;
 import org.mifosng.platform.api.data.OfficeData;
 import org.mifosng.platform.api.data.OfficeTransactionData;
@@ -65,6 +66,48 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	
 	public ApiDataConversionServiceImpl() {
 		gsonConverter = new Gson();
+	}
+	
+	@Override
+	public String convertLoanProductDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final LoanProductData... products) {
+		Set<String> supportedParameters = new HashSet<String>(
+				Arrays.asList("id", "name", "description", "fundId", "fundName", "principal", "inArrearsTolerance", "numberOfRepayments",
+						"repaymentEvery", "interestRatePerPeriod", "annualInterestRate", 
+						"repaymentFrequencyType", "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType",
+						"createdOn", "lastModifedOn",
+						"currencyOptions", "amortizationTypeOptions", "interestTypeOptions", "interestCalculationPeriodTypeOptions", 
+						"repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "fundOptions")
+		);
+		
+		final Set<String> parameterNamesToSkip = new HashSet<String>();
+		
+		if (!responseParameters.isEmpty()) {
+			if (!supportedParameters.containsAll(responseParameters)) {
+				throw new UnsupportedParameterException(new ArrayList<String>(responseParameters));
+			}
+			
+			parameterNamesToSkip.addAll(supportedParameters);
+			parameterNamesToSkip.removeAll(responseParameters);
+		}
+		
+		ExclusionStrategy strategy = new ParameterListExclusionStrategy(parameterNamesToSkip);
+		
+		GsonBuilder builder = new GsonBuilder().addSerializationExclusionStrategy(strategy);
+		builder.registerTypeAdapter(LocalDate.class, new JodaLocalDateAdapter());
+		builder.registerTypeAdapter(DateTime.class, new JodaDateTimeAdapter());
+		if (prettyPrint) {
+			builder.setPrettyPrinting();
+		}
+		Gson gsonDeserializer = builder.create();
+		
+		String json = "";
+		if (products != null && products.length == 1) {
+			json = gsonDeserializer.toJson(products[0]);
+		} else {
+			json = gsonDeserializer.toJson(products);
+		}
+		
+		return json;
 	}
 	
 	@Override
@@ -207,7 +250,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	
 	@Override
 	public String convertOfficeTransactionDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final OfficeTransactionData... officeTransactions) {
-		Set<String> supportedParameters = new HashSet<String>(Arrays.asList("transactionDate", "currencyOptions", "allowedOffices"));
+		Set<String> supportedParameters = new HashSet<String>(Arrays.asList("id", "transactionDate", "allowedOffices", "currencyOptions"));
 		
 		final Set<String> parameterNamesToSkip = new HashSet<String>();
 		

@@ -1,14 +1,11 @@
 package org.mifosng.platform.api.data;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.codehaus.jackson.map.annotate.JsonFilter;
 import org.joda.time.LocalDate;
 
-@JsonFilter("myFilter")
-public class OfficeData implements Serializable {
+public class OfficeData {
 
 	private Long id;
 	private String name;

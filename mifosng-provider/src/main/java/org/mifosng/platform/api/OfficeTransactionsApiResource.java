@@ -45,7 +45,7 @@ public class OfficeTransactionsApiResource {
 	@Produces({MediaType.APPLICATION_JSON})
 	public String newOfficeTransactionDetails(@Context final UriInfo uriInfo) {
 
-		Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "transactionDate", "allowedOffices", "currencyOptions"));
+		Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("transactionDate", "allowedOffices", "currencyOptions"));
 		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (responseParameters.isEmpty()) {

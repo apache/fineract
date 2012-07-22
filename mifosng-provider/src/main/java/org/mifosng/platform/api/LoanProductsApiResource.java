@@ -1,6 +1,9 @@
 package org.mifosng.platform.api;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -18,7 +21,7 @@ import org.mifosng.platform.api.commands.LoanProductCommand;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.LoanProductData;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
-import org.mifosng.platform.api.infrastructure.ApiJSONFormattingService;
+import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
 import org.mifosng.platform.loanproduct.service.LoanProductReadPlatformService;
 import org.mifosng.platform.loanproduct.service.LoanProductWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,10 +33,6 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class LoanProductsApiResource {
 
-	private String defaultFieldList = "principal,inArrearsTolerance,interestRatePerPeriod,annualInterestRate,repaymentFrequencyType,interestRateFrequencyType,amortizationType,interestType,interestCalculationPeriodType,fundId";
-	private String allowedFieldList = "currencyOptions,amortizationTypeOptions,interestTypeOptions,interestCalculationPeriodTypeOptions,repaymentFrequencyTypeOptions,interestRateFrequencyTypeOptions,fundOptions";
-	private String filterName = "myFilter";
-
 	@Autowired
 	private LoanProductReadPlatformService loanProductReadPlatformService;
 
@@ -42,9 +41,6 @@ public class LoanProductsApiResource {
 
 	@Autowired
 	private ApiDataConversionService apiDataConversionService;
-
-	@Autowired
-	private ApiJSONFormattingService jsonFormattingService;
 
 	@POST
 	@Consumes({MediaType.APPLICATION_JSON})
@@ -63,11 +59,22 @@ public class LoanProductsApiResource {
 	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveAllLoanProducts(@Context final UriInfo uriInfo) {
 
-		Collection<LoanProductData> products = this.loanProductReadPlatformService.retrieveAllLoanProducts();
+		Set<String> typicalResponseParameters = new HashSet<String>(
+				Arrays.asList("id", "name", "description", "fundId", "fundName", "principal", "inArrearsTolerance", "numberOfRepayments",
+						"repaymentEvery", "interestRatePerPeriod", "annualInterestRate", 
+						"repaymentFrequencyType", "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType",
+						"createdOn", "lastModifedOn")
+		);
+		
+		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+		if (responseParameters.isEmpty()) {
+			responseParameters.addAll(typicalResponseParameters);
+		}
+		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 
-		String selectedFields = "";
-		return this.jsonFormattingService.convertRequest(products, filterName,
-				allowedFieldList, selectedFields, uriInfo.getQueryParameters());
+		Collection<LoanProductData> products = this.loanProductReadPlatformService.retrieveAllLoanProducts();
+		
+		return this.apiDataConversionService.convertLoanProductDataToJson(prettyPrint, responseParameters, products.toArray(new LoanProductData[products.size()]));
 	}
 
 	/*
@@ -80,13 +87,24 @@ public class LoanProductsApiResource {
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveNewLoanProductDetails(@Context final UriInfo uriInfo) {
+		
+		Set<String> typicalResponseParameters = new HashSet<String>(
+				Arrays.asList("id", "name", "description", "fundId", "fundName", "principal", "inArrearsTolerance", "numberOfRepayments",
+						"repaymentEvery", "interestRatePerPeriod", "annualInterestRate", 
+						"repaymentFrequencyType", "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType",
+						"createdOn", "lastModifedOn","currencyOptions", "amortizationTypeOptions", "interestTypeOptions", "interestCalculationPeriodTypeOptions", 
+						"repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "fundOptions")
+		);
+		
+		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+		if (responseParameters.isEmpty()) {
+			responseParameters.addAll(typicalResponseParameters);
+		}
+		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 
 		LoanProductData loanProduct = this.loanProductReadPlatformService.retrieveNewLoanProductDetails();
-
-		String selectedFields = defaultFieldList + "," + allowedFieldList;
-		return this.jsonFormattingService.convertRequest(loanProduct,
-				filterName, allowedFieldList, selectedFields,
-				uriInfo.getQueryParameters());
+		
+		return this.apiDataConversionService.convertLoanProductDataToJson(prettyPrint, responseParameters, loanProduct);
 	}
 
 	@GET
@@ -95,12 +113,27 @@ public class LoanProductsApiResource {
 	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveLoanProductDetails(@PathParam("productId") final Long productId, @Context final UriInfo uriInfo) {
 
-		LoanProductData loanProduct = this.loanProductReadPlatformService.retrieveLoanProduct(productId);
+		Set<String> typicalResponseParameters = new HashSet<String>(
+				Arrays.asList("id", "name", "description", "fundId", "fundName", "principal", "inArrearsTolerance", "numberOfRepayments",
+						"repaymentEvery", "interestRatePerPeriod", "annualInterestRate", 
+						"repaymentFrequencyType", "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType",
+						"createdOn", "lastModifedOn")
+		);
+		
+		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+		if (responseParameters.isEmpty()) {
+			responseParameters.addAll(typicalResponseParameters);
+		}
+		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+		boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
 
-		String selectedFields = "";
-		return this.jsonFormattingService.convertRequest(loanProduct,
-				filterName, allowedFieldList, selectedFields,
-				uriInfo.getQueryParameters());
+		LoanProductData loanProduct = this.loanProductReadPlatformService.retrieveLoanProduct(productId);
+		if (template) {
+			responseParameters.addAll(Arrays.asList("currencyOptions", "amortizationTypeOptions", "interestTypeOptions", "interestCalculationPeriodTypeOptions", 
+					"repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "fundOptions"));
+		}
+		
+		return this.apiDataConversionService.convertLoanProductDataToJson(prettyPrint, responseParameters, loanProduct);
 	}
 
 	@PUT

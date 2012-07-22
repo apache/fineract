@@ -6,10 +6,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.codehaus.jackson.map.annotate.JsonFilter;
 import org.joda.time.DateTime;
 
-@JsonFilter("myFilter")
 public class LoanProductData implements Serializable {
 
 	private Long id;
