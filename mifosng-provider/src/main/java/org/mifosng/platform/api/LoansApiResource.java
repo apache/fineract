@@ -99,8 +99,7 @@ public class LoansApiResource {
 						"repaymentFrequencyType", "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType",
 						"submittedOnDate", "approvedOnDate", "expectedDisbursementDate", "actualDisbursementDate", 
 						"expectedFirstRepaymentOnDate", "interestChargedFromDate", "closedOnDate", "expectedMaturityDate", 
-						"lifeCycleStatusId", "lifeCycleStatusText", "lifeCycleStatusDate",
-						"summary", "repaymentSchedule", "loanRepayments", "permissions", "convenienceData")
+						"lifeCycleStatusId", "lifeCycleStatusText", "lifeCycleStatusDate")
 				);
 		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
@@ -110,15 +109,28 @@ public class LoansApiResource {
 		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 		
 		LoanBasicDetailsData loanBasicDetails = this.loanReadPlatformService.retrieveLoanAccountDetails(loanId);
+		
+		Collection<LoanRepaymentTransactionData> loanRepayments = null;
+		Collection<LoanRepaymentPeriodData> repaymentSchedule = null;
+		LoanAccountSummaryData summary = null;
+		LoanPermissionData permissions = null;
+		
+		Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
+		if (!associationParameters.isEmpty()) {
+			if (associationParameters.contains("all")) {
+				responseParameters.addAll(Arrays.asList("summary", "repaymentSchedule", "loanRepayments", "permissions", "convenienceData"));
+			} else {
+				responseParameters.addAll(associationParameters);
+			}
+			
+			loanRepayments = this.loanReadPlatformService.retrieveLoanPayments(loanId);
+			repaymentSchedule = this.loanReadPlatformService.retrieveRepaymentSchedule(loanId);
 
-		Collection<LoanRepaymentTransactionData> loanRepayments = this.loanReadPlatformService.retrieveLoanPayments(loanId);
-		Collection<LoanRepaymentPeriodData> repaymentSchedule = this.loanReadPlatformService.retrieveRepaymentSchedule(loanId);
+			summary = this.loanReadPlatformService.retrieveSummary(loanBasicDetails.getPrincipal(), repaymentSchedule, loanRepayments);
 
-		LoanAccountSummaryData summary = this.loanReadPlatformService.retrieveSummary(loanBasicDetails.getPrincipal(), repaymentSchedule, loanRepayments);
-
-		LoanPermissionData permissions = this.loanReadPlatformService.retrieveLoanPermissions(loanBasicDetails, 
-							summary.isWaiveAllowed(loanBasicDetails.getInArrearsTolerance()), 
-							loanRepayments.size());
+			boolean isWaiveAllowed = summary.isWaiveAllowed(loanBasicDetails.getInArrearsTolerance());
+			permissions = this.loanReadPlatformService.retrieveLoanPermissions(loanBasicDetails, isWaiveAllowed, loanRepayments.size());
+		}
 
 		LoanAccountData loanAccount = new LoanAccountData(loanBasicDetails, summary, repaymentSchedule, loanRepayments, permissions);
 		

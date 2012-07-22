@@ -22,6 +22,18 @@ public class ApiParameterHelper {
 		return fields;
 	}
 	
+	public static Set<String> extractAssociationsForResponseIfProvided(final MultivaluedMap<String, String> queryParams) {
+		Set<String> fields = new HashSet<String>();
+		String commaSerperatedParameters = "";
+		if (queryParams.getFirst("associations") != null) {
+			commaSerperatedParameters = queryParams.getFirst("associations");
+			if (StringUtils.isNotBlank(commaSerperatedParameters)) {
+				fields = new HashSet<String>(Arrays.asList(commaSerperatedParameters.split("\\s*,\\s*")));
+			}
+		}
+		return fields;
+	}
+	
 	public static boolean prettyPrint(final MultivaluedMap<String, String> queryParams) {
 		boolean prettyPrint = false;
 		if (queryParams.getFirst("pretty") != null) {
