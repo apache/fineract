@@ -34,6 +34,7 @@ import org.mifosng.platform.api.commands.UserCommand;
 import org.mifosng.platform.api.data.AdditionalFieldsSetData;
 import org.mifosng.platform.api.data.ApiParameterError;
 import org.mifosng.platform.api.data.AppUserData;
+import org.mifosng.platform.api.data.AuthenticatedUserData;
 import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.ClientLoanAccountSummaryCollectionData;
 import org.mifosng.platform.api.data.ConfigurationData;
@@ -72,6 +73,20 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	public ApiDataConversionServiceImpl() {
 		gsonConverter = new Gson();
 	}
+
+	@Override
+	public String convertAuthenticatedUserDataToJson(final boolean prettyPrint, final AuthenticatedUserData authenticatedUserData) {
+		GsonBuilder builder = new GsonBuilder();
+		builder.registerTypeAdapter(LocalDate.class, new JodaLocalDateAdapter());
+		builder.registerTypeAdapter(DateTime.class, new JodaDateTimeAdapter());
+		
+		if (prettyPrint) {
+			builder.setPrettyPrinting();
+		}
+		Gson gsonDeserializer = builder.create();
+		
+		return gsonDeserializer.toJson(authenticatedUserData);
+	}
 	
 	@Override
 	public String convertGenericResultsetDataToJson(final boolean prettyPrint, final GenericResultsetData result) {
@@ -97,14 +112,8 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		}
 		Gson gsonDeserializer = builder.create();
 		
-		String json = "";
-		if (additionalFields != null && additionalFields.length == 1) {
-			json = gsonDeserializer.toJson(additionalFields[0]);
-		} else {
-			json = gsonDeserializer.toJson(additionalFields);
-		}
-		
-		return json;
+		// even if only a single result, its passed back as an array.
+		return gsonDeserializer.toJson(additionalFields);
 	}
 	
 	@Override

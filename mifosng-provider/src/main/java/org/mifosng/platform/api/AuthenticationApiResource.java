@@ -9,9 +9,9 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 import org.mifosng.platform.api.data.AuthenticatedUserData;
+import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
 import org.mifosng.platform.user.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -32,11 +32,14 @@ public class AuthenticationApiResource {
 	@Qualifier("customAuthenticationProvider")
     @Autowired
 	private DaoAuthenticationProvider customAuthenticationProvider;
+	
+	@Autowired
+	private ApiDataConversionService apiDataConversionService;
     
     @POST
 	@Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
-	public Response authenticate(@QueryParam("username") final String username, @QueryParam("password") final String password) {
+	public String authenticate(@QueryParam("username") final String username, @QueryParam("password") final String password) {
 
     	Authentication authentication = new UsernamePasswordAuthenticationToken(username, password);
     	Authentication authenticationCheck = customAuthenticationProvider.authenticate(authentication);
@@ -56,9 +59,8 @@ public class AuthenticationApiResource {
 			authenticatedUserData.setUserId(principal.getId());
 			byte[] base64EncodedAuthenticationKey = Base64.encode(username + ":" + password);
 			authenticatedUserData.setBase64EncodedAuthenticationKey(new String(base64EncodedAuthenticationKey));
-			
 		}
-    	
-		return Response.ok().entity(authenticatedUserData).build();
+		
+		return this.apiDataConversionService.convertAuthenticatedUserDataToJson(false, authenticatedUserData);
 	}
 }

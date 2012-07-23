@@ -49,7 +49,8 @@ configurations {
     providedCompile
 	compile
 	runtime
-	all*.exclude group: 'commons-logging' // this is where we exclude
+	all*.exclude group: 'commons-logging'
+	all*.exclude group: 'org.codehaus.jackson'
 }
 
 dependencies {
