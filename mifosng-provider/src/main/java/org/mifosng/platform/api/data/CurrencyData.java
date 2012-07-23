@@ -4,15 +4,12 @@ import java.io.Serializable;
 
 public class CurrencyData implements Serializable {
 
-	private String code;
-	private String name;
-	private int decimalPlaces;
-	private String displaySymbol;
-	private String nameCode;
-
-	public CurrencyData() {
-		//
-	}
+	private final String code;
+	private final String name;
+	private final int decimalPlaces;
+	private final String displaySymbol;
+	private final String nameCode;
+	private final String displayLabel;
 
 	public CurrencyData(final String code, final String name, final int decimalPlaces, String displaySymbol, String nameCode) {
 		this.code = code;
@@ -20,6 +17,7 @@ public class CurrencyData implements Serializable {
 		this.decimalPlaces = decimalPlaces;
 		this.displaySymbol = displaySymbol;
 		this.nameCode = nameCode;
+		this.displayLabel = generateDisplayLabel();
 	}
 	
 	@Override
@@ -33,7 +31,7 @@ public class CurrencyData implements Serializable {
 		return this.code.hashCode();
 	}
 	
-	public String getDisplayLabel() {
+	private String generateDisplayLabel() {
 		
 		StringBuilder builder = new StringBuilder(this.name).append(' ');
 		
@@ -46,43 +44,27 @@ public class CurrencyData implements Serializable {
 		return builder.toString();
 	}
 
-	public String getName() {
-		return this.name;
+	public String getCode() {
+		return code;
 	}
 
-	public String getCode() {
-		return this.code;
+	public String getName() {
+		return name;
 	}
 
 	public int getDecimalPlaces() {
-		return this.decimalPlaces;
-	}
-
-	public void setCode(final String code) {
-		this.code = code;
-	}
-
-	public void setName(final String name) {
-		this.name = name;
-	}
-
-	public void setDecimalPlaces(final int decimalPlaces) {
-		this.decimalPlaces = decimalPlaces;
+		return decimalPlaces;
 	}
 
 	public String getDisplaySymbol() {
 		return displaySymbol;
 	}
 
-	public void setDisplaySymbol(String displaySymbol) {
-		this.displaySymbol = displaySymbol;
-	}
-
 	public String getNameCode() {
 		return nameCode;
 	}
 
-	public void setNameCode(String nameCode) {
-		this.nameCode = nameCode;
+	public String getDisplayLabel() {
+		return displayLabel;
 	}
 }
