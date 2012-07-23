@@ -51,8 +51,6 @@ configurations {
 	compile
 	runtime
 	all*.exclude group: 'commons-logging'
-	all*.exclude group: 'org.codehaus.jackson'
-	all*.exclude group: 'org.codehaus.jackson'
 }
 
 dependencies {
