@@ -27,7 +27,9 @@ public class JdbcTenantDetailsService implements TenantDetailsService {
 		
 		try {
 			TenantMapper rm = new TenantMapper();
-			String sql = "select id, name, schema_name as schemaName from tenants t where t.identifier like ?";
+			String sql = "select id, name, schema_name as schemaName, schema_server as schemaServer, schema_server_port as schemaServerPort, " +
+					" schema_username as schemaUsername, schema_password as schemaPassword " +
+					" from tenants t where t.identifier like ?";
 	
 			return this.jdbcTemplate.queryForObject(sql, rm, new Object[] {tenantIdentifier});
 		} catch (EmptyResultDataAccessException e) {
@@ -43,8 +45,12 @@ public class JdbcTenantDetailsService implements TenantDetailsService {
 			Long id = rs.getLong("id");
 			String name = rs.getString("name");
 			String schemaName = rs.getString("schemaName");
+			String schemaServer = rs.getString("schemaServer");
+			String schemaServerPort = rs.getString("schemaServerPort");
+			String schemaUsername = rs.getString("schemaUsername");
+			String schemaPassword = rs.getString("schemaPassword");
 			
-			return new MifosPlatformTenant(id, name, schemaName);
+			return new MifosPlatformTenant(id, name, schemaName, schemaServer, schemaServerPort, schemaUsername, schemaPassword);
 		}
 	}
 }

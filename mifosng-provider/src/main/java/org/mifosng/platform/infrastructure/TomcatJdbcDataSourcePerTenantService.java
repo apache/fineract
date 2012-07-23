@@ -47,12 +47,20 @@ public class TomcatJdbcDataSourcePerTenantService implements DataSourcePerTenant
 
 	private DataSource createNewDataSourceFor(final MifosPlatformTenant tenant) {
     	// see http://www.tomcatexpert.com/blog/2010/04/01/configuring-jdbc-pool-high-concurrency
+		
+		StringBuilder jdbcUrlBuilder = new StringBuilder("jdbc:mysql://")
+														.append(tenant.getSchemaServer())
+														.append(':')
+														.append(tenant.getSchemaServerPort())
+														.append('/')
+														.append(tenant.getSchemaName());
+		
     	PoolConfiguration poolConfiguration = new PoolProperties();
     	poolConfiguration.setDriverClassName("com.mysql.jdbc.Driver");
     	poolConfiguration.setName(tenant.getSchemaName() + "_pool");
-    	poolConfiguration.setUrl("jdbc:mysql://localhost:3306/" + tenant.getSchemaName());
-    	poolConfiguration.setUsername("root");
-    	poolConfiguration.setPassword("mysql");
+    	poolConfiguration.setUrl(jdbcUrlBuilder.toString());
+    	poolConfiguration.setUsername(tenant.getSchemaUsername());
+    	poolConfiguration.setPassword(tenant.getSchemaPassword());
     	
     	poolConfiguration.setInitialSize(5);
     	poolConfiguration.setMaxActive(5);
