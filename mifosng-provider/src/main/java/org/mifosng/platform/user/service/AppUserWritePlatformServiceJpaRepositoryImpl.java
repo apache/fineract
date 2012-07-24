@@ -162,7 +162,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 	
 	@Transactional
 	@Override
-	public void deleteUser(Long userId) {
+	public void deleteUser(final Long userId) {
 		try {
 			this.appUserRepository.delete(userId);
 		} catch (InvalidDataAccessApiUsageException exception) {

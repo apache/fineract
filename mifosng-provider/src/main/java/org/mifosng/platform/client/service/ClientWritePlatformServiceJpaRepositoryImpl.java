@@ -1,5 +1,7 @@
 package org.mifosng.platform.client.service;
 
+import java.util.List;
+
 import org.apache.commons.lang.StringUtils;
 import org.mifosng.platform.api.commands.ClientCommand;
 import org.mifosng.platform.api.commands.NoteCommand;
@@ -33,6 +35,16 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 		this.clientRepository = clientRepository;
 		this.officeRepository = officeRepository;
 		this.noteRepository = noteRepository;
+	}
+	
+	@Transactional
+	@Override
+	public void deleteClient(final Long clientId) {
+		
+		List<Note> relatedNotes = this.noteRepository.findByClientId(clientId);
+		this.noteRepository.deleteInBatch(relatedNotes);
+		
+		this.clientRepository.delete(clientId);
 	}
 	
 	@Transactional

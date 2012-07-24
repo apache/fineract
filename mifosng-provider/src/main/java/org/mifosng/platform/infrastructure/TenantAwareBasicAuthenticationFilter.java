@@ -16,7 +16,19 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 /**
- *
+ * A customised version of spring security's {@link BasicAuthenticationFilter}.
+ * 
+ * This filter is responsible for extracting multi-tenant and basic auth
+ * credentials from the request and checking that the details provided are
+ * valid.
+ * 
+ * If multi-tenant and basic auth credentials are valid, the details of the
+ * tenant are stored in {@link MifosPlatformTenant} and stored in a
+ * {@link ThreadLocal} variable for this request using
+ * {@link ThreadLocalContextUtil}.
+ * 
+ * If multi-tenant and basic auth credentials are invalid, a http error response
+ * is returned.
  */
 public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFilter {
 
@@ -39,7 +51,7 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
 		try {
 		
 			if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
-				// ignore to allow 'preflight' requests from AJAX applications in different domain
+				// ignore to allow 'preflight' requests from AJAX applications in different origin (domain name)
 			} else {
 			
 				String tenantId = request.getHeader(tenantRequestHeader);

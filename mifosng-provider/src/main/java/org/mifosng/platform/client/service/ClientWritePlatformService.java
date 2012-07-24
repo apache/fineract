@@ -18,4 +18,7 @@ public interface ClientWritePlatformService {
 
 	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE')")
 	EntityIdentifier updateNote(NoteCommand command);
+
+	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE', 'CAN_DELETE_CLIENT_ROLE')")
+	void deleteClient(Long clientId);
 }

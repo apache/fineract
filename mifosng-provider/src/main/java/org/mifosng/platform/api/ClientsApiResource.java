@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -196,6 +197,17 @@ public class ClientsApiResource {
 		EntityIdentifier identifier = this.clientWritePlatformService.updateClientDetails(command);
 
 		return Response.ok().entity(identifier).build();
+	}
+	
+	@DELETE
+	@Path("{clientId}")
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
+	public Response deleteClient(@PathParam("clientId") final Long clientId) {
+
+		this.clientWritePlatformService.deleteClient(clientId);
+
+		return Response.ok(new EntityIdentifier(clientId)).build();
 	}
 
 	@GET
