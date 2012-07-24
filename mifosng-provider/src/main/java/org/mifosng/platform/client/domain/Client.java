@@ -42,6 +42,9 @@ public class Client extends AbstractAuditableCustom<AppUser, Long> {
     @Column(name = "external_id", length=100, unique=true)
     private String externalId;
 
+    @Column(name = "is_deleted", nullable=false)
+	private boolean deleted = false;
+
 	public static Client newClient(Office clientOffice, String firstname, String lastname, LocalDate joiningDate, String externalId) {
 		return new Client(clientOffice, firstname, lastname, joiningDate, externalId);
 	}
@@ -111,5 +114,19 @@ public class Client extends AbstractAuditableCustom<AppUser, Long> {
 		if (externalId != null) {
 			 this.externalId = externalId.trim();
 		}
+	}
+
+	/**
+	 * Delete is a <i>soft delete</i>. Updates flag on client so it wont appear in query/report results.
+	 * 
+	 * Any fields with unique constraints and prepended with id of record.
+	 */
+	public void delete() {
+		this.deleted = true;
+		this.externalId = this.getId() + "_" + this.externalId;
+	}
+
+	public boolean isDeleted() {
+		return deleted;
 	}
 }

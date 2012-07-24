@@ -1,7 +1,5 @@
 package org.mifosng.platform.client.service;
 
-import java.util.List;
-
 import org.apache.commons.lang.StringUtils;
 import org.mifosng.platform.api.commands.ClientCommand;
 import org.mifosng.platform.api.commands.NoteCommand;
@@ -39,12 +37,17 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 	
 	@Transactional
 	@Override
-	public void deleteClient(final Long clientId) {
+	public EntityIdentifier deleteClient(final Long clientId) {
 		
-		List<Note> relatedNotes = this.noteRepository.findByClientId(clientId);
-		this.noteRepository.deleteInBatch(relatedNotes);
+		Client client = this.clientRepository.findOne(clientId);
+		if (client == null || client.isDeleted()) {
+			throw new ClientNotFoundException(clientId);
+		}
 		
-		this.clientRepository.delete(clientId);
+		client.delete();
+		this.clientRepository.save(client);
+
+		return new EntityIdentifier(client.getId());
 	}
 	
 	@Transactional
@@ -101,7 +104,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 		}
 
 		Client clientForUpdate = this.clientRepository.findOne(command.getId());
-		if (clientForUpdate == null) {
+		if (clientForUpdate == null || clientForUpdate.isDeleted()) {
 			throw new ClientNotFoundException(command.getId());
 		}
 		clientForUpdate.update(clientOffice, firstname, lastname, command.getExternalId(), command.getJoiningDate());

@@ -74,7 +74,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
 		ClientMapper rm = new ClientMapper(offices);
 
-		String sql = "select " + rm.clientSchema() + " where c.office_id in (" + officeIdsList + ") ";
+		String sql = "select " + rm.clientSchema() + " where c.office_id in (" + officeIdsList + ") and c.is_deleted=0";
 
 		if (StringUtils.isNotBlank(extraCriteria))			
 			sql += " and " + extraCriteria;
@@ -95,7 +95,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 					officeReadPlatformService.retrieveAllOffices());
 			ClientMapper rm = new ClientMapper(offices);
 
-			String sql = "select " + rm.clientSchema() + " where c.id = ? ";
+			String sql = "select " + rm.clientSchema() + " where c.id = ? and c.is_deleted=0";
 
 			return this.jdbcTemplate.queryForObject(sql, rm, new Object[] {clientId});
 		} catch (EmptyResultDataAccessException e) {
@@ -166,6 +166,9 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
 		try {
 			this.context.authenticatedUser();
+			
+			// Check if client exists
+			retrieveIndividualClient(clientId);
 
 			List<ClientLoanAccountSummaryData> pendingApprovalLoans = new ArrayList<ClientLoanAccountSummaryData>();
 			List<ClientLoanAccountSummaryData> awaitingDisbursalLoans = new ArrayList<ClientLoanAccountSummaryData>();
@@ -241,6 +244,9 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
 		try {
 			context.authenticatedUser();
+			
+			// Check if client exists
+			retrieveIndividualClient(clientId);
 
 			// FIXME - use join on sql query to fetch user information for note
 			// rather than fetching users?
@@ -262,6 +268,9 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 	public Collection<NoteData> retrieveAllClientNotes(Long clientId) {
 
 		context.authenticatedUser();
+		
+		// Check if client exists
+		retrieveIndividualClient(clientId);
 
 		// FIXME - use join on sql query to fetch user information for note
 		// rather than fetching users?

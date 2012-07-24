@@ -196,6 +196,7 @@ CREATE TABLE `admin_appuser_role` (
 -- DDL for portfolio tables
 CREATE TABLE `portfolio_client` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `is_deleted` tinyint(1) NOT NULL DEFAULT 0,
   `office_id` bigint(20) NOT NULL,
   `external_id` varchar(100) DEFAULT NULL,
   `firstname` varchar(50) DEFAULT NULL,
