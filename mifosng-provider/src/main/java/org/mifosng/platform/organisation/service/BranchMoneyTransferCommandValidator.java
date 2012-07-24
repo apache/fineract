@@ -22,15 +22,11 @@ public class BranchMoneyTransferCommandValidator {
 		
 		DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("office.money.transfer");
 		
-		baseDataValidator.reset().parameter("fromOfficeId").value(command.getFromOfficeId()).greaterThanZero();
-		baseDataValidator.reset().parameter("toOfficeId").value(command.getToOfficeId()).greaterThanZero();
+		baseDataValidator.reset().parameter("fromOfficeId").value(command.getFromOfficeId()).ignoreIfNull().greaterThanZero();
+		baseDataValidator.reset().parameter("toOfficeId").value(command.getToOfficeId()).ignoreIfNull().greaterThanZero();
 		
-		if (command.getFromOfficeId() == null) {
+		if (command.getFromOfficeId() == null && command.getToOfficeId() == null) {
 			baseDataValidator.reset().parameter("toOfficeId").value(command.getToOfficeId()).notNull();
-		}
-		
-		if (command.getToOfficeId() == null) {
-			baseDataValidator.reset().parameter("fromOfficeId").value(command.getFromOfficeId()).notNull();
 		}
 		
 		if (command.getFromOfficeId() != null && command.getToOfficeId() != null) {

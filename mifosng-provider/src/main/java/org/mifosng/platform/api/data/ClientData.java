@@ -13,6 +13,7 @@ public class ClientData {
 	private final Long id;
 	private final String firstname;
 	private final String lastname;
+	private final String clientOrBusinessName;
 	private final String displayName;
 	private final String externalId;
 	private final LocalDate joinedDate;
@@ -26,15 +27,22 @@ public class ClientData {
 		this.officeName = officeName;
 		this.id = id;
 		this.firstname = firstname;
-		this.lastname = lastname;
 
 		StringBuilder nameBuilder = new StringBuilder(this.firstname);
 		if (StringUtils.isNotBlank(nameBuilder.toString())) {
 			nameBuilder.append(' ');
 		}
-		nameBuilder.append(this.lastname);
+		nameBuilder.append(lastname);
 
 		this.displayName = nameBuilder.toString();
+		if (StringUtils.isBlank(this.firstname)) {
+			this.lastname = null;
+			this.clientOrBusinessName = nameBuilder.toString();
+		} else {
+			this.lastname = lastname;
+			this.clientOrBusinessName = null;
+		}
+		
 		this.externalId = externalId;
 		this.joinedDate = joinedDate;
 	}
@@ -45,6 +53,7 @@ public class ClientData {
 		this.officeName = null;
 		this.firstname = null;
 		this.lastname = null;
+		this.clientOrBusinessName = null;
 		this.displayName = null;
 		this.externalId = null;
 		this.joinedDate = joinedDate;
@@ -69,6 +78,10 @@ public class ClientData {
 
 	public String getLastname() {
 		return lastname;
+	}
+	
+	public String getClientOrBusinessName() {
+		return clientOrBusinessName;
 	}
 
 	public String getDisplayName() {

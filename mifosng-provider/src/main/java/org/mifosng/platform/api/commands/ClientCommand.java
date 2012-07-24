@@ -1,5 +1,7 @@
 package org.mifosng.platform.api.commands;
 
+import java.util.Set;
+
 import org.joda.time.LocalDate;
 
 public class ClientCommand {
@@ -11,9 +13,12 @@ public class ClientCommand {
 	private final String clientOrBusinessName;
 	private final Long officeId;
 	private final LocalDate joiningDate;
+	
+	private final Set<String> modifiedParameters;
 
-	public ClientCommand(final Long id, final String externalId, final String firstname, final String lastname, final String clientOrBusinessName, 
+	public ClientCommand(final Set<String> modifiedParameters, final Long id, final String externalId, final String firstname, final String lastname, final String clientOrBusinessName, 
 			final Long officeId, final LocalDate joiningDate) {
+		this.modifiedParameters = modifiedParameters;
 		this.id = id;
 		this.externalId = externalId;
 		this.firstname = firstname;
@@ -49,5 +54,9 @@ public class ClientCommand {
 
 	public LocalDate getJoiningDate() {
 		return joiningDate;
+	}
+	
+	public boolean isOfficeIdChanged() {
+		return this.modifiedParameters.contains("officeId");
 	}
 }

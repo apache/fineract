@@ -32,7 +32,10 @@ public class ClientCommandValidator {
 		
 		baseDataValidator.reset().parameter("joiningDate").value(command.getJoiningDate()).ignoreIfNull().notBlank();
 		baseDataValidator.reset().parameter("externalId").value(command.getExternalId()).ignoreIfNull().notExceedingLengthOf(100);
-		baseDataValidator.reset().parameter("officeId").value(command.getOfficeId()).ignoreIfNull().notNull().greaterThanZero();
+		
+		if (command.isOfficeIdChanged()) {
+			baseDataValidator.reset().parameter("officeId").value(command.getOfficeId()).notNull().greaterThanZero();
+		}
 		
 		baseDataValidator.reset().anyOfNotNull(command.getFirstname(), command.getLastname(), command.getClientOrBusinessName(), 
 				command.getJoiningDate(), command.getExternalId(), command.getOfficeId());

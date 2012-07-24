@@ -1,20 +1,15 @@
 package org.mifosng.platform.api.data;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.joda.time.LocalDate;
 
-public class OfficeTransactionData implements Serializable {
+public class OfficeTransactionData {
 
 	private LocalDate transactionDate;
 	private List<CurrencyData> currencyOptions = new ArrayList<CurrencyData>();
 	private List<OfficeLookup> allowedOffices = new ArrayList<OfficeLookup>();
-
-	public OfficeTransactionData() {
-		//
-	}
 
 	public OfficeTransactionData(final LocalDate transactionDate, final List<OfficeLookup> allowedOffices, final List<CurrencyData> currencyOptions) {
 		this.transactionDate = transactionDate;

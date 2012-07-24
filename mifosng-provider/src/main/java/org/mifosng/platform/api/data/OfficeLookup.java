@@ -1,19 +1,12 @@
 package org.mifosng.platform.api.data;
 
-import java.io.Serializable;
-
-public class OfficeLookup implements Serializable {
+public class OfficeLookup {
 
 	private Long id;
 	private String name;
 	private String nameDecorated;
 
-	public OfficeLookup() {
-		//
-	}
-
-	public OfficeLookup(final Long id, final String name,
-			final String nameDecorated) {
+	public OfficeLookup(final Long id, final String name, final String nameDecorated) {
 		this.id = id;
 		this.name = name;
 		this.nameDecorated = nameDecorated;

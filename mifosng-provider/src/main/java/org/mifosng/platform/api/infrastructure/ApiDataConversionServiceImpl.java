@@ -403,7 +403,8 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	
 	@Override
 	public String convertOfficeTransactionDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final OfficeTransactionData... officeTransactions) {
-		Set<String> supportedParameters = new HashSet<String>(Arrays.asList("id", "transactionDate", "allowedOffices", "currencyOptions"));
+		
+		Set<String> supportedParameters = new HashSet<String>(Arrays.asList("transactionDate", "allowedOffices", "currencyOptions"));
 		
 		final Set<String> parameterNamesToSkip = new HashSet<String>();
 		
@@ -810,7 +811,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	    String lastname = extractStringParameter("lastname", requestMap, modifiedParameters);
 	    String clientOrBusinessName = extractStringParameter("clientOrBusinessName", requestMap, modifiedParameters);
 	    
-	    return new ClientCommand(resourceIdentifier, externalId, firstname, lastname, clientOrBusinessName, officeId, joiningDate);
+	    return new ClientCommand(modifiedParameters, resourceIdentifier, externalId, firstname, lastname, clientOrBusinessName, officeId, joiningDate);
 	}
 	
 	@Override
