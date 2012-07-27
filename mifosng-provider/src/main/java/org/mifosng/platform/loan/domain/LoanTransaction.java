@@ -37,6 +37,15 @@ public class LoanTransaction extends AbstractAuditableCustom<AppUser, Long> {
 	@Column(name = "amount", scale = 6, precision = 19, nullable = false)
 	private final BigDecimal amount;
 	
+	@Column(name = "principal_portion_derived", scale = 6, precision = 19, nullable = false)
+	private BigDecimal principalPortion = BigDecimal.ZERO;
+	
+	@Column(name = "interest_portion_derived", scale = 6, precision = 19, nullable = false)
+	private BigDecimal interestPortion = BigDecimal.ZERO;
+	
+	@Column(name = "interest_waived_derived", scale = 6, precision = 19)
+	private BigDecimal interestWaivedPortion = BigDecimal.ZERO;
+	
     @Temporal(TemporalType.DATE)
     @Column(name = "transaction_date", nullable=false)
     private final Date  dateOf;
@@ -154,5 +163,37 @@ public class LoanTransaction extends AbstractAuditableCustom<AppUser, Long> {
 
 	public boolean isNonZero() {
 		return this.amount.subtract(BigDecimal.ZERO).doubleValue() > 0;
+	}
+	
+	/**
+	 * This updates the derived fields of a loan transaction for the principal, interest and interest waived portions.
+	 * 
+	 * This accumulates the values passed to the already existent values for each of the portions.
+	 */
+	public void updateComponents(final Money principal, final Money interest, final Money interestWaivedPortion) {
+		MonetaryCurrency currency = principal.getCurrency();
+		this.principalPortion = getPrincipalPortion(currency).plus(principal).getAmount();
+		this.interestPortion = getInterestPortion(currency).plus(interest).getAmount();
+		this.interestWaivedPortion = getInterestWaivedPortion(currency).plus(interestWaivedPortion).getAmount();
+	}
+
+	public Money getPrincipalPortion(MonetaryCurrency currency) {
+		return Money.of(currency, principalPortion);
+	}
+
+	public Money getInterestPortion(MonetaryCurrency currency) {
+		return  Money.of(currency, interestPortion);
+	}
+	
+	public Money getInterestWaivedPortion(MonetaryCurrency currency) {
+		if (this.interestWaivedPortion == null) {
+			this.interestWaivedPortion = BigDecimal.ZERO;
+		}
+		return  Money.of(currency, interestWaivedPortion);
+	}
+
+	public void resetDerivedComponents() {
+		this.principalPortion = BigDecimal.ZERO;
+		this.interestPortion = BigDecimal.ZERO;
 	}
 }

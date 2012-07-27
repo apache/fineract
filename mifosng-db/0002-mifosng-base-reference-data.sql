@@ -8,7 +8,8 @@ VALUES
 (300, 'Active'),
 (400, 'Withdrawn by client'),
 (500, 'Rejected'),
-(600, 'Closed');
+(600, 'Closed'),
+(700, 'Overpaid');
 
 
 INSERT INTO `ref_currency`

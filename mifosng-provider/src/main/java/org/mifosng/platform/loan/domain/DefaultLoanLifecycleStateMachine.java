@@ -54,7 +54,7 @@ public class DefaultLoanLifecycleStateMachine implements
 			}
 			break;
 		case LOAN_REPAYMENT:
-			if (this.anyOfAllowedWhenComingFrom(from, LoanStatus.ACTIVE)) {
+			if (this.anyOfAllowedWhenComingFrom(from, LoanStatus.ACTIVE, LoanStatus.OVERPAID)) {
 				newState = stateOf(LoanStatus.ACTIVE, allowedLoanStatuses);
 			} else {
 				newState = from;
@@ -78,6 +78,11 @@ public class DefaultLoanLifecycleStateMachine implements
 		case INTERST_REBATE_OWED:
 			if (this.anyOfAllowedWhenComingFrom(from, LoanStatus.CLOSED)) {
 				newState = stateOf(LoanStatus.CLOSED, allowedLoanStatuses);
+			}
+			break;
+		case LOAN_OVERPAYMENT:
+			if (this.anyOfAllowedWhenComingFrom(from, LoanStatus.CLOSED, LoanStatus.ACTIVE)) {
+				newState = stateOf(LoanStatus.OVERPAID, allowedLoanStatuses);
 			}
 			break;
 		}

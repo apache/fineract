@@ -17,6 +17,7 @@ public class LoanStatus implements Persistable<Integer> {
 	public static final Integer WITHDRAWN_BY_CLIENT = 400;
 	public static final Integer REJECTED = 500;
 	public static final Integer CLOSED = 600;
+	public static final Integer OVERPAID = 700;
 	
 	@Id
 	@Column(name = "id")

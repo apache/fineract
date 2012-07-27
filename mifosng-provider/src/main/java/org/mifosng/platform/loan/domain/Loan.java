@@ -2,6 +2,7 @@ package org.mifosng.platform.loan.domain;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -354,10 +355,8 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		this.disbursedOnDate = null;
 	}
 
-	public void waive(LoanTransaction loanTransaction,
-			LoanLifecycleStateMachine loanLifecycleStateMachine) {
-		this.loanStatus = loanLifecycleStateMachine.transition(
-				LoanEvent.LOAN_REPAYMENT, this.loanStatus);
+	public void waive(final LoanTransaction loanTransaction, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
+		this.loanStatus = loanLifecycleStateMachine.transition(LoanEvent.LOAN_REPAYMENT, this.loanStatus);
 		loanTransaction.updateLoan(this);
 		this.loanTransactions.add(loanTransaction);
 
@@ -395,49 +394,23 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 					waived, getInArrearsTolerance());
 		}
 
-		if (this.isRepaidInFull()) {
-			this.loanStatus = loanLifecycleStateMachine.transition(
-					LoanEvent.REPAID_IN_FULL, this.loanStatus);
-			this.closedOnDate = loanTransaction.getTransactionDate().toDate();
-			this.maturedOnDate = loanTransaction.getTransactionDate().toDate();
-
-			if (isInterestRebateAllowed()) {
-				Money rebateDue = calculateRebateWhenPaidInFullOn(loanTransaction
-						.getTransactionDate());
-				if (rebateDue.isGreaterThanZero()) {
-					this.loanStatus = loanLifecycleStateMachine.transition(
-							LoanEvent.INTERST_REBATE_OWED, this.loanStatus);
-					this.interestRebateOwed = rebateDue.getAmount();
-				}
-			}
-		}
+		doPostLoanTransactionChecks(loanTransaction, loanLifecycleStateMachine);
 	}
 
 	public void makeRepayment(final LoanTransaction loanTransaction, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
+		handleRepaymentTransaction(loanTransaction, loanLifecycleStateMachine, false);
+	}
+
+	private void handleRepaymentTransaction(
+			final LoanTransaction loanTransaction,
+			final LoanLifecycleStateMachine loanLifecycleStateMachine, final boolean adjusted) {
 		this.loanStatus = loanLifecycleStateMachine.transition(LoanEvent.LOAN_REPAYMENT, this.loanStatus);
 		loanTransaction.updateLoan(this);
+		
+		boolean isTransactionChronologicallyLatest = isChronologicallyLatestRepaymentOrWaiver(loanTransaction, this.loanTransactions);
+		
 		this.loanTransactions.add(loanTransaction);
 
-		deriveLoanRepaymentScheduleCompletedData();
-		
-//		Money totalRepaidOrWaived = Money.zero(this.loanRepaymentScheduleDetail.getPrincipal().getCurrency());
-//		MonetaryCurrency currency = totalRepaidOrWaived.getCurrency();
-//		
-//		int repaymentIndex = 0;
-//		
-//		for (LoanTransaction transaction : this.loanTransactions) {
-//			if (transaction.isRepayment() || transaction.isWaiver()) {
-//				totalRepaidOrWaived = totalRepaidOrWaived.plus(transaction.getAmount());
-//				
-//				LoanRepaymentScheduleInstallment currentInstallment = this.repaymentScheduleInstallments.get(repaymentIndex);
-//				if (currentInstallment.unpaid()) {
-//					currentInstallment.payOffWith(transaction, currency);
-//				} else {
-//					repaymentIndex++;
-//				}
-//			}
-//		}
-		
 		if (loanTransaction.isNotRepayment()) {
 			final String errorMessage = "A transaction of type repayment was expected but not received.";
 			throw new InvalidLoanTransactionTypeException("transaction",
@@ -458,66 +431,81 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 			throw new InvalidLoanStateTransitionException("repayment",
 					"cannot.be.a.futre.date", errorMessage, loanTransactionDate);
 		}
+		
+		List<LoanTransaction> repaymentsOrWaivers = new ArrayList<LoanTransaction>();
+		for (LoanTransaction transaction : this.loanTransactions) {
+			if (!transaction.isDisbursement() && transaction.isNotContra()) {
+				repaymentsOrWaivers.add(transaction);
+			}
+		}
+		LoanTransactionComparator transactionComparator = new LoanTransactionComparator();
+		Collections.sort(repaymentsOrWaivers, transactionComparator);
+		
+		LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = new DefaultLoanRepaymentScheduleTransactionProcessor();
+		if (isTransactionChronologicallyLatest && !adjusted) {
+			loanRepaymentScheduleTransactionProcessor.handleTransaction(loanTransaction, getCurrency(), this.repaymentScheduleInstallments);
+		} else {
+			loanRepaymentScheduleTransactionProcessor.handleTransaction(repaymentsOrWaivers, getCurrency(), this.repaymentScheduleInstallments);
+		}
+		
+		doPostLoanTransactionChecks(loanTransaction, loanLifecycleStateMachine);
+	}
 
+	private void doPostLoanTransactionChecks(final LoanTransaction loanTransaction, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
+		
+		if (this.isOverPaid()) {
+			handleLoanOverpayment(loanTransaction, loanLifecycleStateMachine);
+		}
+		
 		if (this.isRepaidInFull()) {
-			this.loanStatus = loanLifecycleStateMachine.transition(
-					LoanEvent.REPAID_IN_FULL, this.loanStatus);
-			this.closedOnDate = loanTransaction.getTransactionDate().toDate();
-			this.maturedOnDate = loanTransaction.getTransactionDate().toDate();
+			handleLoanRepaymentInFull(loanTransaction, loanLifecycleStateMachine);
+		}
+	}
 
-			if (isInterestRebateAllowed()) {
-				Money rebateDue = calculateRebateWhenPaidInFullOn(loanTransaction
-						.getTransactionDate());
-				if (rebateDue.isGreaterThanZero()) {
-					this.loanStatus = loanLifecycleStateMachine.transition(
-							LoanEvent.INTERST_REBATE_OWED, this.loanStatus);
-					this.interestRebateOwed = rebateDue.getAmount();
+	private void handleLoanRepaymentInFull(final LoanTransaction loanTransaction, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
+		this.loanStatus = loanLifecycleStateMachine.transition(LoanEvent.REPAID_IN_FULL, this.loanStatus);
+		this.closedOnDate = loanTransaction.getTransactionDate().toDate();
+		this.maturedOnDate = loanTransaction.getTransactionDate().toDate();
+
+		if (isInterestRebateAllowed()) {
+			Money rebateDue = calculateRebateWhenPaidInFullOn(loanTransaction.getTransactionDate());
+			if (rebateDue.isGreaterThanZero()) {
+				this.loanStatus = loanLifecycleStateMachine.transition(LoanEvent.INTERST_REBATE_OWED, this.loanStatus);
+				this.interestRebateOwed = rebateDue.getAmount();
+			}
+		}
+	}
+
+	private void handleLoanOverpayment(@SuppressWarnings("unused") final LoanTransaction loanTransaction, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
+		this.loanStatus = loanLifecycleStateMachine.transition(LoanEvent.LOAN_OVERPAYMENT, this.loanStatus);
+		this.closedOnDate = null;
+		this.maturedOnDate = null;
+	}
+
+	private boolean isChronologicallyLatestRepaymentOrWaiver(
+			final LoanTransaction loanTransaction,
+			final List<LoanTransaction> loanTransactions) {
+		
+		boolean isChronologicallyLatestRepaymentOrWaiver = true;
+		
+		LocalDate currentTransactionDate = loanTransaction.getTransactionDate();
+		for (LoanTransaction previousTransaction : loanTransactions) {
+			if (!previousTransaction.isDisbursement() && previousTransaction.isNotContra()) {
+				if (currentTransactionDate.isBefore(previousTransaction.getTransactionDate()) ||
+						currentTransactionDate.isEqual(previousTransaction.getTransactionDate())) {
+					isChronologicallyLatestRepaymentOrWaiver = false;
+					break;
 				}
 			}
 		}
-	}
-
-	private void deriveLoanRepaymentScheduleCompletedData() {
-
-		Money totalRepaidOrWaivedAgainstLoan = calculateTotalPaidOrWaived();
-
-		Money remainingToPayoffAgainstLoanSchedule = totalRepaidOrWaivedAgainstLoan;
-		Money totalOverpaid = Money.zero(totalRepaidOrWaivedAgainstLoan.getCurrency());
-		int repaymentInstallmentIndex = 0;
-		while (remainingToPayoffAgainstLoanSchedule.isGreaterThanZero()) {
-
-			if (repaymentInstallmentIndex == this.repaymentScheduleInstallments.size()) {
-				totalOverpaid = remainingToPayoffAgainstLoanSchedule;
-
-				// to exit while loop
-				remainingToPayoffAgainstLoanSchedule = remainingToPayoffAgainstLoanSchedule.minus(totalOverpaid);
-			} else {
-				LoanRepaymentScheduleInstallment scheduledRepaymentInstallment = this.repaymentScheduleInstallments.get(repaymentInstallmentIndex);
-				remainingToPayoffAgainstLoanSchedule = scheduledRepaymentInstallment.updateDerivedComponents(remainingToPayoffAgainstLoanSchedule);
-				repaymentInstallmentIndex++;
-			}
-		}
-	}
-
-	private Money calculateTotalPaidOrWaived() {
-
-		Money totalRepaidOrWaived = Money.zero(this.loanRepaymentScheduleDetail
-				.getPrincipal().getCurrency());
-
-		for (LoanTransaction transaction : this.loanTransactions) {
-			if (transaction.isRepayment() || transaction.isWaiver()) {
-				totalRepaidOrWaived = totalRepaidOrWaived.plus(transaction
-						.getAmount());
-			}
-		}
-
-		return totalRepaidOrWaived;
+		
+		return isChronologicallyLatestRepaymentOrWaiver;
 	}
 
 	public LocalDate possibleNextRepaymentDate() {
 		LocalDate earliestUnpaidInstallmentDate = new LocalDate();
 		for (LoanRepaymentScheduleInstallment installment : this.repaymentScheduleInstallments) {
-			if (installment.unpaid()) {
+			if (installment.isNotFullyCompleted()) {
 				earliestUnpaidInstallmentDate = installment.getDueDate();
 				break;
 			}
@@ -545,7 +533,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		Money possibleNextRepaymentAmount = Money.zero(currency);
 
 		for (LoanRepaymentScheduleInstallment installment : this.repaymentScheduleInstallments) {
-			if (installment.unpaid()) {
+			if (installment.isNotFullyCompleted()) {
 				possibleNextRepaymentAmount = installment.getTotalDue(currency);
 				break;
 			}
@@ -568,7 +556,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 
 		transactionForAdjustment.contra();
 		if (newTransactionDetail.isRepayment()) {
-			makeRepayment(newTransactionDetail, loanLifecycleStateMachine);
+			handleRepaymentTransaction(newTransactionDetail, loanLifecycleStateMachine, true);
 		}
 
 		if (newTransactionDetail.isWaiver()) {
@@ -577,39 +565,42 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	}
 
 	private boolean isRepaidInFull() {
+		
+		MonetaryCurrency currency = loanCurrency();
 
-		Money cumulativePrincipal = Money.zero(this.loanRepaymentScheduleDetail
-				.getPrincipal().getCurrency());
-		Money cumulativeInterest = Money.zero(this.loanRepaymentScheduleDetail
-				.getPrincipal().getCurrency());
-		Money cumulativeTotal = Money.zero(this.loanRepaymentScheduleDetail
-				.getPrincipal().getCurrency());
-		Money cumulativePaid = Money.zero(this.loanRepaymentScheduleDetail
-				.getPrincipal().getCurrency());
-		Money cumulativeWaived = Money.zero(this.loanRepaymentScheduleDetail
-				.getPrincipal().getCurrency());
-
+		Money cumulativeOriginalExpectedTotal = Money.zero(currency);
+		Money cumulativeTotalPaid = Money.zero(currency);
+		Money cumulativeTotalWaived = Money.zero(currency);
+		
 		for (LoanRepaymentScheduleInstallment scheduledRepayment : this.repaymentScheduleInstallments) {
-			cumulativePrincipal = cumulativePrincipal.plus(scheduledRepayment
-					.getPrincipal(loanCurrency()));
-			cumulativeInterest = cumulativeInterest.plus(scheduledRepayment
-					.getInterest(loanCurrency()));
-			cumulativeTotal = cumulativeTotal.plus(scheduledRepayment
-					.getTotal(loanCurrency()));
+			cumulativeOriginalExpectedTotal = cumulativeOriginalExpectedTotal.plus(scheduledRepayment.getPrincipal(currency));
+			cumulativeTotalPaid = cumulativeTotalPaid.plus(scheduledRepayment.getPrincipalCompleted(currency).plus(scheduledRepayment.getInterestCompleted(currency)));
+			cumulativeTotalWaived = cumulativeTotalWaived.plus(scheduledRepayment.getInterestWaived(currency));
 		}
+		
+		Money totalOutstanding = cumulativeOriginalExpectedTotal.minus(cumulativeTotalPaid.plus(cumulativeTotalWaived));
+		boolean isRepaidInFull = totalOutstanding.isZero();
+		
+		return isRepaidInFull;
+	}
+	
+	private boolean isOverPaid() {
+		
+		Money totalPaidInRepayments = getTotalPaidInRepayments();
+		
+		MonetaryCurrency currency = loanCurrency();
 
-		for (LoanTransaction transaction : this.loanTransactions) {
-			if (transaction.isRepayment()) {
-				cumulativePaid = cumulativePaid.plus(transaction.getAmount());
-			}
-			if (transaction.isWaiver()) {
-				cumulativeWaived = cumulativeWaived.plus(transaction
-						.getAmount());
-			}
+		Money cumulativeOriginalExpectedTotal = Money.zero(currency);
+		Money cumulativeTotalPaidOnInstallments = Money.zero(currency);
+		Money cumulativeTotalWaivedOnInstallments = Money.zero(currency);
+		
+		for (LoanRepaymentScheduleInstallment scheduledRepayment : this.repaymentScheduleInstallments) {
+			cumulativeOriginalExpectedTotal = cumulativeOriginalExpectedTotal.plus(scheduledRepayment.getPrincipal(currency));
+			cumulativeTotalPaidOnInstallments = cumulativeTotalPaidOnInstallments.plus(scheduledRepayment.getPrincipalCompleted(currency).plus(scheduledRepayment.getInterestCompleted(currency)));
+			cumulativeTotalWaivedOnInstallments = cumulativeTotalWaivedOnInstallments.plus(scheduledRepayment.getInterestWaived(currency));
 		}
-
-		return cumulativePaid.plus(cumulativeWaived).isGreaterThanOrEqualTo(
-				cumulativeTotal);
+		
+		return totalPaidInRepayments.isGreaterThan(cumulativeTotalPaidOnInstallments);
 	}
 
 	private MonetaryCurrency loanCurrency() {
@@ -914,7 +905,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 
 		LocalDate acutalDisbursementDate = new LocalDate(this.disbursedOnDate);
 
-		Money totalPaidToDate = this.getTotalPaid();
+		Money totalPaidToDate = this.getTotalPaidInRepayments();
 
 		Money totalOutstandingBasedOnExpectedMaturityDate = this
 				.getTotalOutstanding();
@@ -937,13 +928,11 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	}
 
 	public Money getTotalOutstanding() {
-		return getTotalPrincipalOnLoan().plus(getTotalInterestOnLoan()).minus(
-				getTotalPaid());
+		return getTotalPrincipalOnLoan().plus(getTotalInterestOnLoan()).minus(getTotalPaidInRepayments());
 	}
 
-	private Money getTotalPaid() {
-		Money cumulativePaid = Money.zero(this.loanRepaymentScheduleDetail
-				.getPrincipal().getCurrency());
+	private Money getTotalPaidInRepayments() {
+		Money cumulativePaid = Money.zero(this.loanRepaymentScheduleDetail.getPrincipal().getCurrency());
 
 		for (LoanTransaction repayment : this.loanTransactions) {
 			if (repayment.isRepayment()) {

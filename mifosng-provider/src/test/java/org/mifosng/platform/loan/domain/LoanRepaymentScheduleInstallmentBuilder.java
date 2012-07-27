@@ -8,11 +8,11 @@ public class LoanRepaymentScheduleInstallmentBuilder {
 
 	private Loan loan = null;
 	private Integer installmentNumber = Integer.valueOf(1);
-//	private LocalDate from = LocalDate.now();
 	private LocalDate dueDate = LocalDate.now();
 	private MonetaryCurrency currencyDetail = new MonetaryCurrencyBuilder().build();
 	private Money principal = new MoneyBuilder().build();
 	private Money interest = new MoneyBuilder().build();
+	private boolean completed = false;
 	
 	public LoanRepaymentScheduleInstallmentBuilder(MonetaryCurrency currencyDetail) {
 		this.currencyDetail = currencyDetail;
@@ -21,7 +21,12 @@ public class LoanRepaymentScheduleInstallmentBuilder {
 	}
 
 	public LoanRepaymentScheduleInstallment build() {
-		return new LoanRepaymentScheduleInstallment(loan, installmentNumber, dueDate, principal.getAmount(), interest.getAmount());
+		LoanRepaymentScheduleInstallment installment = new LoanRepaymentScheduleInstallment(loan, installmentNumber, dueDate, principal.getAmount(), interest.getAmount());
+		if (completed) {
+			installment.payPrincipalComponent(principal);
+			installment.payInterestComponent(interest);
+		}
+		return installment;
 	}
 
 	public LoanRepaymentScheduleInstallmentBuilder withPrincipal(String withPrincipal) {
@@ -36,6 +41,11 @@ public class LoanRepaymentScheduleInstallmentBuilder {
 
 	public LoanRepaymentScheduleInstallmentBuilder withDueDate(LocalDate withDueDate) {
 		this.dueDate = withDueDate;
+		return this;
+	}
+
+	public LoanRepaymentScheduleInstallmentBuilder completed() {
+		this.completed = true;
 		return this;
 	}
 }

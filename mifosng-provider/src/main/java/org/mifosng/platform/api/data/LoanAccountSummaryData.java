@@ -1,6 +1,5 @@
 package org.mifosng.platform.api.data;
 
-
 public class LoanAccountSummaryData {
 
 	private MoneyData originalPrincipal;
@@ -9,32 +8,42 @@ public class LoanAccountSummaryData {
 	private MoneyData principalPaid;
 	private MoneyData principalOutstanding;
 	private MoneyData interestPaid;
+	private MoneyData interestWaived;
 	private MoneyData interestOutstanding;
 	private MoneyData totalPaid;
+	private MoneyData totalWaived;
 	private MoneyData totalOutstanding;
 	private MoneyData totalInArrears;
-	private MoneyData totalWaived;
 
 	protected LoanAccountSummaryData() {
 		//
 	}
 
-	public LoanAccountSummaryData(MoneyData originalPrincipal,
-			MoneyData principalPaid, MoneyData principalOutstanding,
-			MoneyData originalInterest, MoneyData interestPaid,
-			MoneyData interestOutstanding, MoneyData originalTotal,
-			MoneyData totalPaid, MoneyData totalOutstanding, MoneyData totalInArrears, MoneyData totalWaived) {
+	public LoanAccountSummaryData(
+			MoneyData originalPrincipal,
+			MoneyData principalPaid, 
+			MoneyData principalOutstanding,
+			MoneyData originalInterest, 
+			MoneyData interestPaid,
+			MoneyData interestWaived,
+			MoneyData interestOutstanding, 
+			MoneyData originalTotal,
+			MoneyData totalPaid, 
+			MoneyData totalWaived,
+			MoneyData totalOutstanding, 
+			MoneyData totalInArrears) {
 		this.originalPrincipal = originalPrincipal;
 		this.principalPaid = principalPaid;
 		this.principalOutstanding = principalOutstanding;
 		this.originalInterest = originalInterest;
 		this.interestPaid = interestPaid;
+		this.interestWaived = interestWaived;
 		this.interestOutstanding = interestOutstanding;
 		this.originalTotal = originalTotal;
 		this.totalPaid = totalPaid;
+		this.totalWaived = totalWaived;
 		this.totalOutstanding = totalOutstanding;
 		this.totalInArrears = totalInArrears;
-		this.totalWaived = totalWaived;
 	}
 
 	public boolean isWaiveAllowed(MoneyData tolerance) {
@@ -88,6 +97,14 @@ public class LoanAccountSummaryData {
 	public void setInterestPaid(MoneyData interestPaid) {
 		this.interestPaid = interestPaid;
 	}
+	
+	public MoneyData getInterestWaived() {
+		return interestWaived;
+	}
+
+	public void setInterestWaived(MoneyData interestWaived) {
+		this.interestWaived = interestWaived;
+	}
 
 	public MoneyData getInterestOutstanding() {
 		return interestOutstanding;
@@ -104,6 +121,14 @@ public class LoanAccountSummaryData {
 	public void setTotalPaid(MoneyData totalPaid) {
 		this.totalPaid = totalPaid;
 	}
+	
+	public MoneyData getTotalWaived() {
+		return totalWaived;
+	}
+
+	public void setTotalWaived(MoneyData totalWaived) {
+		this.totalWaived = totalWaived;
+	}
 
 	public MoneyData getTotalOutstanding() {
 		return totalOutstanding;
@@ -119,13 +144,5 @@ public class LoanAccountSummaryData {
 
 	public void setTotalInArrears(MoneyData totalInArrears) {
 		this.totalInArrears = totalInArrears;
-	}
-
-	public MoneyData getTotalWaived() {
-		return totalWaived;
-	}
-
-	public void setTotalWaived(MoneyData totalWaived) {
-		this.totalWaived = totalWaived;
 	}
 }

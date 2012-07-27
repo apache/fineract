@@ -29,16 +29,19 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableCustom<Ap
     private final Integer installmentNumber;
     
     @Column(name = "principal_amount", scale=6, precision=19)
-    private BigDecimal   principal;
+    private BigDecimal  principal = BigDecimal.ZERO;
     
     @Column(name = "interest_amount", scale=6, precision=19)
-    private BigDecimal   interest;
+    private BigDecimal   interest = BigDecimal.ZERO;
     
     @Column(name = "principal_completed_derived", scale=6, precision=19)
-    private BigDecimal   principalCompleted;
+    private BigDecimal   principalCompleted = BigDecimal.ZERO;
     
 	@Column(name = "interest_completed_derived", scale = 6, precision = 19)
-	private BigDecimal interestCompleted;
+	private BigDecimal interestCompleted = BigDecimal.ZERO;
+	
+	@Column(name = "interest_waived_derived", scale = 6, precision = 19)
+	private BigDecimal interestWaived = BigDecimal.ZERO;
     
     @Column(name="completed_derived")
     private boolean completed;
@@ -82,40 +85,6 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableCustom<Ap
         return new LocalDate(this.dueDate);
     }
 
-	public Money updateDerivedComponents(Money totalAvailable) {
-		
-		Money remaining = totalAvailable.copy();
-		
-		boolean principalCompletedInFull = false;
-		boolean interestCompletedInFull = false;
-		
-		Money interest = getInterest(totalAvailable.getCurrency());
-		Money principal = getPrincipal(totalAvailable.getCurrency());
-		
-		// TODO - NEWFEATURE - configuration around order components of loan are paid off in.
-		// pay off interest
-		if (remaining.isGreaterThanOrEqualTo(interest)) {
-			this.interestCompleted = interest.getAmount();
-			interestCompletedInFull = true;
-		} else {
-			this.interestCompleted = remaining.getAmount();
-		}
-		remaining = remaining.minus(this.interestCompleted);
-		
-		// pay off principal
-		if (remaining.isGreaterThanOrEqualTo(principal)) {
-			this.principalCompleted = principal.getAmount();
-			principalCompletedInFull = true;
-		} else {
-			this.principalCompleted = remaining.getAmount();
-		}
-		remaining = remaining.minus(this.principalCompleted);
-		
-		this.completed = (principalCompletedInFull && interestCompletedInFull);
-		
-		return remaining;
-	}
-
 	public Money getPrincipal(MonetaryCurrency currency) {
 		return Money.of(currency, this.principal);
 	}
@@ -132,6 +101,10 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableCustom<Ap
 		return Money.of(currency, this.interestCompleted);
 	}
 	
+	public Money getInterestWaived(MonetaryCurrency currency) {
+		return Money.of(currency, this.interestWaived);
+	}
+	
 	public Money getTotal(MonetaryCurrency currency) {
 		return getPrincipal(currency).plus(getInterest(currency));
 	}
@@ -139,30 +112,96 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableCustom<Ap
 	public void updateLoan(final Loan loan) {
 		this.loan = loan;
 	}
+	
+	public boolean isFullyCompleted() {
+		return this.completed;
+	}
 
-	public boolean unpaid() {
+	public boolean isNotFullyCompleted() {
 		return !this.completed;
+	}
+	
+	public boolean isPrincipalNotCompleted(final MonetaryCurrency currency) {
+		return !isPrincipalCompleted(currency);
+	}
+	
+	public boolean isPrincipalCompleted(final MonetaryCurrency currency) {
+		return getPrincipal(currency).minus(getPrincipalCompleted(currency)).isZero();
 	}
 
 	public Money getTotalDue(MonetaryCurrency currency) {
-		return getTotal(currency).minus(getTotalCompleted(currency));
+		final Money totalPaidOrWaived = getInterestWaived(currency).plus(getTotalCompleted(currency));
+		return getTotal(currency).minus(totalPaidOrWaived);
 	}
 
 	private Money getTotalCompleted(MonetaryCurrency currency) {
 		return getPrincipalCompleted(currency).plus(getInterestCompleted(currency));
 	}
 
-//	public void payOffWith(final LoanTransaction transaction, final MonetaryCurrency currency) {
-//		Money transactionAmountRemaining = Money.of(currency, transaction.getAmount());
-//		
-//		Money interestDue = getInterest(currency);
-//		if (transactionAmountRemaining.isGreaterThanOrEqualTo(interestDue)) {
-//			this.interestCompleted = interestDue.getAmount();
-//			transactionAmountRemaining = transactionAmountRemaining.minus(interestDue);
-//		} else {
-//			this.interestCompleted = transactionAmountRemaining.getAmount();
-//		}
-//		
-//		Money principalDue = getPrincipal(currency);
-//	}
+	public void resetDerivedComponents() {
+		this.principalCompleted = BigDecimal.ZERO;
+		this.interestCompleted = BigDecimal.ZERO;
+		this.interestWaived = BigDecimal.ZERO;
+		this.completed = false;
+	}
+
+	public Money payInterestComponent(final Money transactionAmountRemaining) {
+		
+		MonetaryCurrency currency = transactionAmountRemaining.getCurrency();
+		
+		Money interestPortionOfTransaction = Money.zero(currency);
+		
+		Money interestExpected = getInterest(currency);
+		Money interestDue = interestExpected.minus(getInterestCompleted(currency));
+		if (transactionAmountRemaining.isGreaterThanOrEqualTo(interestDue)) {
+			this.interestCompleted = getInterestCompleted(currency).plus(interestDue).getAmount();
+			interestPortionOfTransaction = interestPortionOfTransaction.plus(interestDue);
+		} else {
+			this.interestCompleted = getInterestCompleted(currency).plus(transactionAmountRemaining).getAmount();
+			interestPortionOfTransaction = interestPortionOfTransaction.plus(transactionAmountRemaining);
+		}
+		
+		this.completed = getTotalDue(currency).isZero();
+		
+		return interestPortionOfTransaction;
+	}
+
+	public Money payPrincipalComponent(final Money transactionAmountRemaining) {
+		
+		MonetaryCurrency currency = transactionAmountRemaining.getCurrency();
+		Money principalPortionOfTransaction = Money.zero(currency);
+		
+		Money principalExpected = getPrincipal(currency);
+		Money principalDue = principalExpected.minus(getPrincipalCompleted(currency));
+		if (transactionAmountRemaining.isGreaterThanOrEqualTo(principalDue)) {
+			this.principalCompleted = getPrincipalCompleted(currency).plus(principalDue).getAmount();
+			principalPortionOfTransaction = principalPortionOfTransaction.plus(principalDue);
+		} else {
+			this.principalCompleted = getPrincipalCompleted(currency).plus(transactionAmountRemaining).getAmount();
+			principalPortionOfTransaction = principalPortionOfTransaction.plus(transactionAmountRemaining);
+		}
+		
+		this.completed = getTotalDue(currency).isZero();
+		
+		return principalPortionOfTransaction;
+	}
+
+	public Money waiveInterestComponent(final Money transactionAmountRemaining) {
+		MonetaryCurrency currency = transactionAmountRemaining.getCurrency();
+		Money waivedInterestPortionOfTransaction = Money.zero(currency);
+		
+		Money interestExpected = getInterest(currency);
+		Money interestDue = interestExpected.minus(getInterestCompleted(currency));
+		if (transactionAmountRemaining.isGreaterThanOrEqualTo(interestDue)) {
+			this.interestWaived = getInterestWaived(currency).plus(interestDue).getAmount();
+			waivedInterestPortionOfTransaction = waivedInterestPortionOfTransaction.plus(interestDue);
+		} else {
+			this.interestWaived = getInterestWaived(currency).plus(transactionAmountRemaining).getAmount();
+			waivedInterestPortionOfTransaction = waivedInterestPortionOfTransaction.plus(transactionAmountRemaining);
+		}
+		
+		this.completed = getTotalDue(currency).isZero();
+		
+		return waivedInterestPortionOfTransaction;
+	}
 }

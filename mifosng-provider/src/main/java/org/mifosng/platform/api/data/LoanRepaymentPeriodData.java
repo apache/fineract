@@ -12,9 +12,11 @@ public class LoanRepaymentPeriodData {
 	private MoneyData principalOutstanding;
 	private MoneyData interest;
 	private MoneyData interestPaid;
+	private MoneyData interestWaived;
 	private MoneyData interestOutstanding;
 	private MoneyData total;
 	private MoneyData totalPaid;
+	private MoneyData totalWaived;
 	private MoneyData totalOutstanding;
 
 	public LoanRepaymentPeriodData() {
@@ -24,8 +26,8 @@ public class LoanRepaymentPeriodData {
 	public LoanRepaymentPeriodData(Long loanId, Integer period,
 			LocalDate date, MoneyData principal, MoneyData principalPaid,
 			MoneyData principalOutstanding, MoneyData interest,
-			MoneyData interestPaid, MoneyData interestOutstanding,
-			MoneyData total, MoneyData totalPaid, MoneyData totalOutstanding) {
+			MoneyData interestPaid, MoneyData interestWaived, MoneyData interestOutstanding,
+			MoneyData total, MoneyData totalPaid, MoneyData totalWaived, MoneyData totalOutstanding) {
 		this.loanId = loanId;
 		this.period = period;
 		this.date = date;
@@ -34,9 +36,11 @@ public class LoanRepaymentPeriodData {
 		this.principalOutstanding = principalOutstanding;
 		this.interest = interest;
 		this.interestPaid = interestPaid;
+		this.interestWaived = interestWaived;
 		this.interestOutstanding = interestOutstanding;
 		this.total = total;
 		this.totalPaid = totalPaid;
+		this.totalWaived = totalWaived;
 		this.totalOutstanding = totalOutstanding;
 	}
 
@@ -103,6 +107,14 @@ public class LoanRepaymentPeriodData {
 	public void setInterestPaid(MoneyData interestPaid) {
 		this.interestPaid = interestPaid;
 	}
+	
+	public MoneyData getInterestWaived() {
+		return interestWaived;
+	}
+
+	public void setInterestWaived(MoneyData interestWaived) {
+		this.interestWaived = interestWaived;
+	}
 
 	public MoneyData getInterestOutstanding() {
 		return interestOutstanding;
@@ -126,6 +138,14 @@ public class LoanRepaymentPeriodData {
 
 	public void setTotalPaid(MoneyData totalPaid) {
 		this.totalPaid = totalPaid;
+	}
+	
+	public MoneyData getTotalWaived() {
+		return totalWaived;
+	}
+
+	public void setTotalWaived(MoneyData totalWaived) {
+		this.totalWaived = totalWaived;
 	}
 
 	public MoneyData getTotalOutstanding() {

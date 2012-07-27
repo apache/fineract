@@ -122,60 +122,66 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 		BigDecimal principalOutstanding = BigDecimal.ZERO;
 		BigDecimal originalInterest = BigDecimal.ZERO;
 		BigDecimal interestPaid = BigDecimal.ZERO;
+		BigDecimal interestWaived = BigDecimal.ZERO;
 		BigDecimal interestOutstanding = BigDecimal.ZERO;
 		BigDecimal originalTotal = BigDecimal.ZERO;
 		BigDecimal totalPaid = BigDecimal.ZERO;
-		BigDecimal totalOutstanding = BigDecimal.ZERO;
-		BigDecimal totalInArrears = BigDecimal.ZERO;
 		BigDecimal totalWaived = BigDecimal.ZERO;
+		BigDecimal totalOutstanding = BigDecimal.ZERO;
+		
+		BigDecimal totalInArrears = BigDecimal.ZERO;
 
 		for (LoanRepaymentPeriodData installment : repaymentSchedule) {
-			originalPrincipal = originalPrincipal.add(installment
-					.getPrincipal().getAmount());
-			principalPaid = principalPaid.add(installment.getPrincipalPaid()
-					.getAmount());
-			principalOutstanding = principalOutstanding.add(installment
-					.getPrincipalOutstanding().getAmount());
+			originalPrincipal = originalPrincipal.add(installment.getPrincipal().getAmount());
+			principalPaid = principalPaid.add(installment.getPrincipalPaid().getAmount());
+			principalOutstanding = principalOutstanding.add(installment.getPrincipalOutstanding().getAmount());
 
-			originalInterest = originalInterest.add(installment.getInterest()
-					.getAmount());
-			interestPaid = interestPaid.add(installment.getInterestPaid()
-					.getAmount());
-			interestOutstanding = interestOutstanding.add(installment
-					.getInterestOutstanding().getAmount());
+			originalInterest = originalInterest.add(installment.getInterest().getAmount());
+			interestPaid = interestPaid.add(installment.getInterestPaid().getAmount());
+			interestWaived = interestWaived.add(installment.getInterestWaived().getAmount());
+			interestOutstanding = interestOutstanding.add(installment.getInterestOutstanding().getAmount());
 
-			originalTotal = originalTotal.add(installment.getTotal()
-					.getAmount());
+			originalTotal = originalTotal.add(installment.getTotal().getAmount());
 			totalPaid = totalPaid.add(installment.getTotalPaid().getAmount());
-			totalOutstanding = totalOutstanding.add(installment
-					.getTotalOutstanding().getAmount());
+			totalWaived = totalWaived.add(installment.getTotalWaived().getAmount());
+			totalOutstanding = totalOutstanding.add(installment.getTotalOutstanding().getAmount());
 
 			if (installment.getDate().isBefore(new LocalDate())) {
-				totalInArrears = totalInArrears.add(installment
-						.getTotalOutstanding().getAmount());
+				totalInArrears = totalInArrears.add(installment.getTotalOutstanding().getAmount());
 			}
 		}
 
+		// sum up all repayment transactions
 		Long waiverType = (long) 4;
+		MoneyData totalRepaymentAmount = MoneyData.of(currencyData, BigDecimal.ZERO);
 		for (LoanRepaymentTransactionData loanRepayment : loanRepayments) {
 			Long transactionType = loanRepayment.getTransactionType().getId();
 			if (transactionType.equals(waiverType)) {
-				totalWaived = totalWaived.add(loanRepayment.getTotal()
-						.getAmount());
+				// skip
+			} else {
+				totalRepaymentAmount = totalRepaymentAmount.plus(loanRepayment.getTotal());
 			}
-
+		}
+		
+		// detect if loan is in overpaid state
+		if (totalRepaymentAmount.isGreaterThan(MoneyData.of(currencyData, totalPaid))) {
+			BigDecimal difference = totalRepaymentAmount.getAmount().subtract(totalPaid);
+			totalOutstanding = totalOutstanding.subtract(difference);
 		}
 
-		return new LoanAccountSummaryData(MoneyData.of(currencyData,
-				originalPrincipal), MoneyData.of(currencyData, principalPaid),
-				MoneyData.of(currencyData, principalOutstanding), MoneyData.of(
-						currencyData, originalInterest), MoneyData.of(
-						currencyData, interestPaid), MoneyData.of(currencyData,
-						interestOutstanding), MoneyData.of(currencyData,
-						originalTotal), MoneyData.of(currencyData, totalPaid),
-				MoneyData.of(currencyData, totalOutstanding), MoneyData.of(
-						currencyData, totalInArrears), MoneyData.of(
-						currencyData, totalWaived));
+		return new LoanAccountSummaryData(
+				MoneyData.of(currencyData,originalPrincipal), 
+				MoneyData.of(currencyData, principalPaid),
+				MoneyData.of(currencyData, principalOutstanding), 
+				MoneyData.of(currencyData, originalInterest), 
+				MoneyData.of(currencyData, interestPaid),
+				MoneyData.of(currencyData, interestWaived),
+				MoneyData.of(currencyData, interestOutstanding), 
+				MoneyData.of(currencyData, originalTotal), 
+				MoneyData.of(currencyData, totalPaid),
+				MoneyData.of(currencyData, totalWaived),
+				MoneyData.of(currencyData, totalOutstanding), 
+				MoneyData.of(currencyData, totalInArrears));
 	}
 
 	@Override
@@ -524,7 +530,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
 			return " ls.loan_id as loanId, ls.installment as period, ls.duedate as `date`, "
 					+ " ls.principal_amount as principal, ls.principal_completed_derived as principalPaid, "
-					+ " ls.interest_amount as interest, ls.interest_completed_derived as interestPaid, "
+					+ " ls.interest_amount as interest, ls.interest_completed_derived as interestPaid, ls.interest_waived_derived as interestWaived, "
 					+ " l.currency_code as currencyCode, l.currency_digits as currencyDigits, rc.`name` as currencyName, rc.display_symbol as currencyDisplaySymbol, rc.internationalized_name_code as currencyNameCode "
 					+ " from portfolio_loan l "
 					+ " join portfolio_loan_repayment_schedule ls on ls.loan_id = l.id "
@@ -553,29 +559,29 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 			BigDecimal principalBD = rs.getBigDecimal("principal");
 			MoneyData principal = MoneyData.of(currencyData, principalBD);
 			BigDecimal principalPaidBD = rs.getBigDecimal("principalPaid");
-			MoneyData principalPaid = MoneyData.of(currencyData,
-					principalPaidBD);
-			MoneyData principalOutstanding = MoneyData.of(currencyData,
-					principalBD.subtract(principalPaidBD));
+			MoneyData principalPaid = MoneyData.of(currencyData, principalPaidBD);
+			MoneyData principalOutstanding = MoneyData.of(currencyData,principalBD.subtract(principalPaidBD));
 
 			BigDecimal interestBD = rs.getBigDecimal("interest");
 			MoneyData interest = MoneyData.of(currencyData, interestBD);
 			BigDecimal interestPaidBD = rs.getBigDecimal("interestPaid");
 			MoneyData interestPaid = MoneyData.of(currencyData, interestPaidBD);
-			MoneyData interestOutstanding = MoneyData.of(currencyData,
-					interestBD.subtract(interestPaidBD));
+			
+			BigDecimal interestWaivedBD = rs.getBigDecimal("interestWaived");
+			if (interestWaivedBD == null) {
+				interestWaivedBD = BigDecimal.ZERO;
+			}
+			MoneyData interestWaived = MoneyData.of(currencyData, interestWaivedBD);
+			MoneyData interestOutstanding = MoneyData.of(currencyData, interestBD.subtract(interestPaidBD).subtract(interestWaivedBD));
 
-			MoneyData total = MoneyData.of(currencyData,
-					principalBD.add(interestBD));
-			MoneyData totalPaid = MoneyData.of(currencyData,
-					principalPaidBD.add(interestPaidBD));
-			MoneyData totalOutstanding = MoneyData.of(currencyData,
-					principalBD.add(interestBD).subtract(principalPaidBD)
-							.subtract(interestPaidBD));
+			MoneyData total = MoneyData.of(currencyData,principalBD.add(interestBD));
+			MoneyData totalPaid = principalPaid.plus(interestPaid);
+			MoneyData totalWaived = interestWaived;
+			MoneyData totalOutstanding = principalOutstanding.plus(interestOutstanding);
 
 			return new LoanRepaymentPeriodData(loanId, period, date,
 					principal, principalPaid, principalOutstanding, interest,
-					interestPaid, interestOutstanding, total, totalPaid,
+					interestPaid, interestWaived, interestOutstanding, total, totalPaid, totalWaived,
 					totalOutstanding);
 		}
 	}
