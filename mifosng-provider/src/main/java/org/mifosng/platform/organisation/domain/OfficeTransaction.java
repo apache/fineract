@@ -54,21 +54,22 @@ public class OfficeTransaction extends AbstractAuditableCustom<AppUser, Long> {
 		this.transactionDate = null;
 	}
 
-	public static OfficeTransaction create(Office fromOffice, Office toOffice, LocalDate transactionLocalDate, Money amount) {
+	public static OfficeTransaction create(Office fromOffice, Office toOffice, LocalDate transactionLocalDate, Money amount, String description) {
 
 		Date transactionDate = null;
 		if (transactionLocalDate != null) {
 			transactionDate = transactionLocalDate.toDate();
 		}
 
-		return new OfficeTransaction(fromOffice, toOffice, transactionDate, amount);
+		return new OfficeTransaction(fromOffice, toOffice, transactionDate, amount, description);
 	}
 
-	private OfficeTransaction(final Office fromOffice,final Office toOffice, final Date transactionDate, final Money amount) {
+	private OfficeTransaction(final Office fromOffice,final Office toOffice, final Date transactionDate, final Money amount, String description) {
 		this.from = fromOffice;
 		this.to = toOffice;
 		this.transactionDate = transactionDate;
 		this.currency = amount.getCurrency();
 		this.transactionAmount = amount.getAmount();
+		this.description = description;
 	}
 }
