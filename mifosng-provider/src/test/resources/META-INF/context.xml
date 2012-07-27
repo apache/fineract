@@ -5,7 +5,7 @@
             driverClassName="com.mysql.jdbc.Driver"
             url="jdbc:mysql://localhost:3306/mifosplatform-tenants"
             username="root"
-            password="mysql"
+            password="mifos"
             validationQuery="select 1"
             maxActive="10"
             maxIdle="4"
