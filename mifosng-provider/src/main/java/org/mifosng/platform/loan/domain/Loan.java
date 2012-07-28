@@ -455,9 +455,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		
 		if (this.isOverPaid()) {
 			handleLoanOverpayment(loanTransaction, loanLifecycleStateMachine);
-		}
-		
-		if (this.isRepaidInFull()) {
+		} else if (this.isRepaidInFull()) {
 			handleLoanRepaymentInFull(loanTransaction, loanLifecycleStateMachine);
 		}
 	}
@@ -567,18 +565,25 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	private boolean isRepaidInFull() {
 		
 		MonetaryCurrency currency = loanCurrency();
-
-		Money cumulativeOriginalExpectedTotal = Money.zero(currency);
+		
+		Money cumulativeOriginalPrincipalExpected = Money.zero(currency);
+		Money cumulativeOriginalInterestExpected = Money.zero(currency);
+		Money cumulativeOriginalTotalExpected = Money.zero(currency);
+		
 		Money cumulativeTotalPaid = Money.zero(currency);
 		Money cumulativeTotalWaived = Money.zero(currency);
 		
 		for (LoanRepaymentScheduleInstallment scheduledRepayment : this.repaymentScheduleInstallments) {
-			cumulativeOriginalExpectedTotal = cumulativeOriginalExpectedTotal.plus(scheduledRepayment.getPrincipal(currency));
+			cumulativeOriginalPrincipalExpected = cumulativeOriginalPrincipalExpected.plus(scheduledRepayment.getPrincipal(currency));
+			cumulativeOriginalInterestExpected = cumulativeOriginalInterestExpected.plus(scheduledRepayment.getInterest(currency));
+			
 			cumulativeTotalPaid = cumulativeTotalPaid.plus(scheduledRepayment.getPrincipalCompleted(currency).plus(scheduledRepayment.getInterestCompleted(currency)));
 			cumulativeTotalWaived = cumulativeTotalWaived.plus(scheduledRepayment.getInterestWaived(currency));
 		}
 		
-		Money totalOutstanding = cumulativeOriginalExpectedTotal.minus(cumulativeTotalPaid.plus(cumulativeTotalWaived));
+		cumulativeOriginalTotalExpected = cumulativeOriginalPrincipalExpected.plus(cumulativeOriginalInterestExpected);
+		
+		Money totalOutstanding = cumulativeOriginalTotalExpected.minus(cumulativeTotalPaid.plus(cumulativeTotalWaived));
 		boolean isRepaidInFull = totalOutstanding.isZero();
 		
 		return isRepaidInFull;

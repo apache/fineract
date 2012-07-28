@@ -47,7 +47,7 @@ public class LoanAccountSummaryData {
 	}
 
 	public boolean isWaiveAllowed(MoneyData tolerance) {
-		return tolerance.isGreaterThan(this.totalOutstanding) || tolerance.isEqualTo(this.totalOutstanding);
+		return this.totalOutstanding.isGreaterThanZero() && (tolerance.isGreaterThan(this.totalOutstanding) || tolerance.isEqualTo(this.totalOutstanding));
 	}
 	
 	public MoneyData getOriginalPrincipal() {

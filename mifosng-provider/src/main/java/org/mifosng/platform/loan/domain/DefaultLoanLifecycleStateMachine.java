@@ -54,7 +54,7 @@ public class DefaultLoanLifecycleStateMachine implements
 			}
 			break;
 		case LOAN_REPAYMENT:
-			if (this.anyOfAllowedWhenComingFrom(from, LoanStatus.ACTIVE, LoanStatus.OVERPAID)) {
+			if (this.anyOfAllowedWhenComingFrom(from, LoanStatus.ACTIVE, LoanStatus.CLOSED, LoanStatus.OVERPAID)) {
 				newState = stateOf(LoanStatus.ACTIVE, allowedLoanStatuses);
 			} else {
 				newState = from;

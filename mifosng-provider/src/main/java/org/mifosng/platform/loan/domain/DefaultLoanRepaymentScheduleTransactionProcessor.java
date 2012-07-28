@@ -46,7 +46,7 @@ public class DefaultLoanRepaymentScheduleTransactionProcessor implements LoanRep
 					transactionProcessed = true;
 				} else if (isTransactionLate(installmentIndex, installments, loanTransaction.getTransactionDate())) {
 					// does this result in a late payment of existing installment?
-					handleLateTransaction(installments, loanTransaction, currency);
+					handleLateTransaction(currentInstallment, installments, loanTransaction, currency);
 					transactionProcessed = true;
 				} else {
 					// standard transaction
@@ -65,14 +65,16 @@ public class DefaultLoanRepaymentScheduleTransactionProcessor implements LoanRep
 
 	/**
 	 * Dont do anything special for late payments e.g. no fees, charges or penalties are applied
+	 * @param currentInstallment2 
 	 */
 	protected void handleLateTransaction(
+			final LoanRepaymentScheduleInstallment currentInstallment, 
 			final List<LoanRepaymentScheduleInstallment> installments,
 			final LoanTransaction loanTransaction, 
 			final MonetaryCurrency currency) {
 		
-		final Money lateRepayment = loanTransaction.getAmount(currency); 
-		Money loanOverPaymentAmount = handleOverpaymentTransaction(installments, loanTransaction, currency, lateRepayment);
+		Money installmentOverPaymentAmount = handleOnTimeTransaction(currentInstallment, loanTransaction, currency);
+		Money loanOverPaymentAmount = handleOverpaymentTransaction(installments, loanTransaction, currency, installmentOverPaymentAmount);
 		if (loanOverPaymentAmount.isGreaterThanZero()) {
 			onLoanOverpayment(loanTransaction, currency, loanOverPaymentAmount);
 		}
