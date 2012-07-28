@@ -132,6 +132,9 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 
 	@Transient
 	private final InterestRebateCalculatorFactory interestRebateCalculatorFactory = new DailyEquivalentInterestRebateCalculatorFactory();
+	
+	@Transient
+	private final LoanRepaymentScheduleTransactionProcessorFactory transactionProcessor = new LoanRepaymentScheduleTransactionProcessorFactory();
 
 	public static Loan createNew(final Fund fund,
 			final LoanProduct loanProduct, final Client client,
@@ -441,7 +444,8 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		LoanTransactionComparator transactionComparator = new LoanTransactionComparator();
 		Collections.sort(repaymentsOrWaivers, transactionComparator);
 		
-		LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = new DefaultLoanRepaymentScheduleTransactionProcessor();
+		
+		final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessor.determineProcessor();
 		if (isTransactionChronologicallyLatest && !adjusted) {
 			loanRepaymentScheduleTransactionProcessor.handleTransaction(loanTransaction, getCurrency(), this.repaymentScheduleInstallments);
 		} else {

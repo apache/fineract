@@ -14,10 +14,10 @@ import org.mifosng.platform.currency.domain.Money;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class DefaultLoanRepaymentScheduleTransactionProcessorTest {
+public class HeavensFamilyLoanRepaymentScheduleTransactionProcessorTest {
 	
 	// class under test
-	private DefaultLoanRepaymentScheduleTransactionProcessor processor;
+	private HeavensFamilyLoanRepaymentScheduleTransactionProcessor processor;
 	
 	//
 	private LocalDate july2nd = new LocalDate(2012, 7, 2);
@@ -29,7 +29,7 @@ public class DefaultLoanRepaymentScheduleTransactionProcessorTest {
 		
 		installments = LoanScheduleTestDataHelper.createSimpleLoanSchedule(july2nd, usDollars);
 		
-		processor = new DefaultLoanRepaymentScheduleTransactionProcessor();
+		processor = new HeavensFamilyLoanRepaymentScheduleTransactionProcessor();
 	}
 
 	/**
@@ -326,6 +326,36 @@ public class DefaultLoanRepaymentScheduleTransactionProcessorTest {
 		
 		assertThatLoanTransactionHasDerivedFieldsForPrincipalInterestOf("700.00", "200.00", paymentBeforeDueDateButNotInAdvance);
 	}
+	
+	
+	/**
+	 * Scenario 12: Single transaction which is a repayment many days early but still does not qualify for 'in advance'.
+	 */
+	@Test
+	public void givenLateRepaymentOfInstallmentShouldPayoffInterestAndPrincipalComponentsOfOverdueInstallmentsWithNoWaiveOfInterest() {
+		// setup
+		installments = LoanScheduleTestDataHelper.createSimpleLoanSchedule(july2nd, usDollars);
+		LoanRepaymentScheduleInstallment firstInstallment = this.installments.get(0);
+		LocalDate latePaymentDate = firstInstallment.getDueDate().plusMonths(5);
+		
+		Money amount = new MoneyBuilder().with(usDollars).with("3600.00").build();
+		LoanTransaction lateRepaymentTransaction = new LoanTransactionBuilder().repayment().with(latePaymentDate).with(amount).build();
+		
+		// execute test
+		processor.handleTransaction(lateRepaymentTransaction, usDollars, installments);
+		
+		// verification of derived fields on installments
+		assertThatLoanInstallmentHasDerivedFieldsOf(principalOf("1000.00"), interestOf("200.00"), interestWaivedOf("0.00"), firstInstallment, usDollars);
+		
+		LoanRepaymentScheduleInstallment secondInstallment = this.installments.get(1);
+		assertThatLoanInstallmentHasDerivedFieldsOf(principalOf("1000.00"), interestOf("200.00"), interestWaivedOf("0.00"), secondInstallment, usDollars);
+		
+		LoanRepaymentScheduleInstallment thirdInstallment = this.installments.get(2);
+		assertThatLoanInstallmentHasDerivedFieldsOf(principalOf("1000.00"), interestOf("200.00"), interestWaivedOf("0.00"), thirdInstallment, usDollars);
+		
+		assertThatLoanTransactionHasDerivedFieldsOf(principalOf("3000.00"), interestOf("600.00"), interestWaivedOf("0.00"), lateRepaymentTransaction, usDollars);
+	}
+	
 
 	private void assertThatLoanTransactionHasDerivedFieldsForPrincipalInterestOf(
 			final String principal, final String interest, final LoanTransaction transaction) {
