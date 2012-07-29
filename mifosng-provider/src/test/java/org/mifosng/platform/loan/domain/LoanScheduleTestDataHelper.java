@@ -11,20 +11,35 @@ import org.mifosng.platform.currency.domain.MonetaryCurrency;
  */
 public class LoanScheduleTestDataHelper {
 
+	/**
+	 * Creates brand new three installment loan:
+	 * 
+	 * For example:
+	 * with firstDueDate = 02 July 2011
+	 * 
+	 * Date					Principal				Interest				Interest Waived
+	 * ==================================================================================
+	 * 02 July 2011			1,000					200						0
+	 * 02 August 2011		1,000					200						0  
+	 * 02 September 2011	1,000					200						0
+	 */
 	public static List<LoanRepaymentScheduleInstallment> createSimpleLoanSchedule(final LocalDate firstDueDate, final MonetaryCurrency currency) {
 		LoanRepaymentScheduleInstallment firstInstallment = new LoanRepaymentScheduleInstallmentBuilder(currency)
+		.withInstallmentNumber(1)
 		.withDueDate(firstDueDate)
 		.withPrincipal("1000.00")
 		.withInterest("200.00")
 		.build();
 
 		LoanRepaymentScheduleInstallment secondInstallment = new LoanRepaymentScheduleInstallmentBuilder(currency)
-				.withDueDate(firstDueDate.plusMonths(1))
-				.withPrincipal("1000.00")
-				.withInterest("200.00")
-				.build();
+			.withInstallmentNumber(2)
+			.withDueDate(firstDueDate.plusMonths(1))
+			.withPrincipal("1000.00")
+			.withInterest("200.00")
+			.build();
 		
 		LoanRepaymentScheduleInstallment thirdInstallment = new LoanRepaymentScheduleInstallmentBuilder(currency)
+		.withInstallmentNumber(3)
 		.withDueDate(firstDueDate.plusMonths(2))
 		.withPrincipal("1000.00")
 		.withInterest("200.00")
@@ -33,9 +48,23 @@ public class LoanScheduleTestDataHelper {
 		return Arrays.asList(firstInstallment, secondInstallment, thirdInstallment);
 	}
 
+	
+	/**
+	 * Creates three installment loan with first installment fully completed:
+	 * 
+	 * For example:
+	 * with firstDueDate = 02 July 2011
+	 * 
+	 * Date					Principal				Interest				Interest Waived				Completed
+	 * ================================================================================================================
+	 * 02 July 2011			1,000					200						0							true (principal paid, interest paid)
+	 * 02 August 2011		1,000					200						0  							false
+	 * 02 September 2011	1,000					200						0							false
+	 */
 	public static List<LoanRepaymentScheduleInstallment> createSimpleLoanScheduleWithFirstInstallmentFullyPaid(final LocalDate firstDueDate, final MonetaryCurrency currency) {
 		
 		LoanRepaymentScheduleInstallment firstInstallment = new LoanRepaymentScheduleInstallmentBuilder(currency)
+															.withInstallmentNumber(1)
 															.withDueDate(firstDueDate)
 															.withPrincipal("1000.00")
 															.withInterest("200.00")
@@ -43,12 +72,14 @@ public class LoanScheduleTestDataHelper {
 															.build();
 
 		LoanRepaymentScheduleInstallment secondInstallment = new LoanRepaymentScheduleInstallmentBuilder(currency)
+															.withInstallmentNumber(2)
 															.withDueDate(firstDueDate.plusMonths(1))
 															.withPrincipal("1000.00")
 															.withInterest("200.00")
 															.build();
 		
 		LoanRepaymentScheduleInstallment thirdInstallment = new LoanRepaymentScheduleInstallmentBuilder(currency)
+															.withInstallmentNumber(3)
 															.withDueDate(firstDueDate.plusMonths(2))
 															.withPrincipal("1000.00")
 															.withInterest("200.00")

@@ -85,24 +85,28 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableCustom<Ap
         return new LocalDate(this.dueDate);
     }
 
-	public Money getPrincipal(MonetaryCurrency currency) {
+	public Money getPrincipal(final MonetaryCurrency currency) {
 		return Money.of(currency, this.principal);
 	}
 	
-	public Money getPrincipalCompleted(MonetaryCurrency currency) {
+	public Money getPrincipalCompleted(final MonetaryCurrency currency) {
 		return Money.of(currency, this.principalCompleted);
 	}
 	
-	public Money getInterest(MonetaryCurrency currency) {
+	public Money getInterest(final MonetaryCurrency currency) {
 		return Money.of(currency, this.interest);
 	}
 	
-	public Money getInterestCompleted(MonetaryCurrency currency) {
+	public Money getInterestCompleted(final MonetaryCurrency currency) {
 		return Money.of(currency, this.interestCompleted);
 	}
 	
-	public Money getInterestWaived(MonetaryCurrency currency) {
+	public Money getInterestWaived(final MonetaryCurrency currency) {
 		return Money.of(currency, this.interestWaived);
+	}
+
+	public boolean isInterestDue(final MonetaryCurrency currency) {
+		return getInterest(currency).minus(getInterestCompleted(currency).plus(getInterestWaived(currency))).isGreaterThanZero();
 	}
 	
 	public Money getTotal(MonetaryCurrency currency) {
@@ -203,5 +207,9 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableCustom<Ap
 		this.completed = getTotalDue(currency).isZero();
 		
 		return waivedInterestPortionOfTransaction;
+	}
+
+	public boolean isOverdueOn(final LocalDate transactionDate) {
+		return this.getDueDate().isBefore(transactionDate);
 	}
 }

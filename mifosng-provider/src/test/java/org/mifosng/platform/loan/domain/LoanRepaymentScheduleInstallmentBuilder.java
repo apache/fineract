@@ -48,4 +48,9 @@ public class LoanRepaymentScheduleInstallmentBuilder {
 		this.completed = true;
 		return this;
 	}
+
+	public LoanRepaymentScheduleInstallmentBuilder withInstallmentNumber(final int withInstallmentNumber) {
+		this.installmentNumber = withInstallmentNumber;
+		return this;
+	}
 }
