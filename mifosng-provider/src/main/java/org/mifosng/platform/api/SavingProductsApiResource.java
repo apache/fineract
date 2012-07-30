@@ -80,7 +80,7 @@ public class SavingProductsApiResource {
 
 		Collection<SavingProductData> products = this.savingProductReadPlatformService.retrieveAllSavingProducts();
 		
-	return this.apiDataConversionService.convertSavingProductDataToJson(prettyPrint, responseParameters, products.toArray(new SavingProductData[products.size()]));
+		return this.apiDataConversionService.convertSavingProductDataToJson(prettyPrint, responseParameters, products.toArray(new SavingProductData[products.size()]));
 	}
 	
 	@GET
@@ -122,6 +122,4 @@ public class SavingProductsApiResource {
 		
 		return this.apiDataConversionService.convertSavingProductDataToJson(prettyPrint, responseParameters, savingProduct);
 	}
-
-
 }

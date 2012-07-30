@@ -12,14 +12,15 @@ public class SavingProductCommandValidator {
 	
 	private final SavingProductCommand command;
 	
-	public SavingProductCommandValidator(SavingProductCommand command) {
+	public SavingProductCommandValidator(final SavingProductCommand command) {
 		this.command=command;
 	}
+	
 	public void validateForUpdate() {
 		
 		List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 
-		DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("product");
+		DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("savingsproduct");
 		baseDataValidator.reset().parameter("id").value(command.getId()).notNull();
 		baseDataValidator.reset().parameter("name").value(command.getName()).ignoreIfNull().notBlank();
 		baseDataValidator.reset().parameter("description").value(command.getDescription()).ignoreIfNull().notExceedingLengthOf(500);
@@ -29,6 +30,7 @@ public class SavingProductCommandValidator {
 			throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);
 		}
 	}
+	
 	public void validateForCreate() {
 		
 		List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();

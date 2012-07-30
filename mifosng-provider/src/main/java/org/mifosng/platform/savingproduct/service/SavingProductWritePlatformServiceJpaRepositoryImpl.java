@@ -24,20 +24,20 @@ public class SavingProductWritePlatformServiceJpaRepositoryImpl implements Savin
 	
 	@Transactional
 	@Override
-	public EntityIdentifier createSavingProduct(SavingProductCommand command) {
+	public EntityIdentifier createSavingProduct(final SavingProductCommand command) {
 		
 		this.context.authenticatedUser();
 		SavingProductCommandValidator validator=new SavingProductCommandValidator(command);
 		validator.validateForCreate();
 		
-		SavingProduct product= new SavingProduct(command.getName(),command.getDescription());  
+		SavingProduct product = new SavingProduct(command.getName(),command.getDescription());  
 		this.savingProductRepository.save(product);
 		return new EntityIdentifier(product.getId());
 	}
 
 	@Transactional
 	@Override
-	public EntityIdentifier updateSavingProduct(SavingProductCommand command) {
+	public EntityIdentifier updateSavingProduct(final SavingProductCommand command) {
 		
 		this.context.authenticatedUser();
 		SavingProductCommandValidator validator=new SavingProductCommandValidator(command);
@@ -51,5 +51,4 @@ public class SavingProductWritePlatformServiceJpaRepositoryImpl implements Savin
 		this.savingProductRepository.save(product);
 		return new EntityIdentifier(Long.valueOf(product.getId()));
 	}
-
 }

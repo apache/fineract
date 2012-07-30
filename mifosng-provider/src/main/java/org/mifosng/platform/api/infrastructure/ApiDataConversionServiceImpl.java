@@ -1341,8 +1341,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	}
 
 	@Override
-	public SavingProductCommand convertJsonToSavingProductCommand(
-			final Long resourceIdentifier, final String json) {
+	public SavingProductCommand convertJsonToSavingProductCommand(final Long resourceIdentifier, final String json) {
 
 		if (StringUtils.isBlank(json)) {
 			throw new InvalidJsonException();

@@ -13,15 +13,16 @@ import org.mifosng.platform.user.domain.AppUser;
 @Table(name = "portfolio_product_savings")
 public class SavingProduct extends AbstractAuditableCustom<AppUser, Long> {
 
+	@SuppressWarnings("unused")
 	@Column(name = "name", nullable = false)
 	private String name;
 
+	@SuppressWarnings("unused")
 	@Column(name = "description")
 	private String description;
 
-	public SavingProduct() {
-		this.name = null;
-		this.description = null;
+	protected SavingProduct() {
+		//
 	}
 
 	public SavingProduct(final String name, final String description) {
@@ -33,18 +34,6 @@ public class SavingProduct extends AbstractAuditableCustom<AppUser, Long> {
 		}
 	}
 
-	public String getName() {
-		return this.name;
-	}
-
-	public String getDescription() {
-		return this.description;
-	}
-
-	public boolean identifiedBy(final String identifier) {
-		return identifier.equalsIgnoreCase(this.name);
-	}
-
 	public void update(final SavingProductCommand command) {
 
 		if (command.isNameChanged()) {
@@ -54,7 +43,5 @@ public class SavingProduct extends AbstractAuditableCustom<AppUser, Long> {
 		if (command.isDescriptionChanged()) {
 			this.description = command.getDescription();
 		}
-
 	}
-
 }
