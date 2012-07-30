@@ -19,3 +19,11 @@ ADD KEY `FK_ltp_strategy` (`loan_transaction_strategy_id`),
 ADD CONSTRAINT `FK_ltp_strategy` FOREIGN KEY (`loan_transaction_strategy_id`) REFERENCES `ref_loan_transaction_processing_strategy` (`id`);
 
 -- update ref table with out-of-the-box strategies
+
+INSERT INTO `ref_loan_transaction_processing_strategy`
+(`id`,`code`,`name`)
+VALUES
+(1, 'mifos-standard-strategy', 'Mifos style'),
+(2, 'heavensfamily-strategy', 'Heavensfamily'),
+(3, 'creocore-strategy', 'Creocore'),
+(4, 'rbi-india-strategy', 'RBI (India)');
