@@ -33,6 +33,7 @@ DROP TABLE IF EXISTS `admin_role`;
 -- drop reference/lookup tables
 DROP TABLE IF EXISTS `ref_currency`;
 DROP TABLE IF EXISTS `ref_loan_status`;
+DROP TABLE IF EXISTS `ref_loan_transaction_processing_strategy`;
 
 -- additional data and report tables
 DROP TABLE IF EXISTS `stretchydata_dataset_fields`;
@@ -286,6 +287,7 @@ CREATE TABLE `portfolio_loan` (
   `client_id` bigint(20) NOT NULL,
   `product_id` bigint(20) DEFAULT NULL,
   `fund_id` bigint(20) DEFAULT NULL,
+  `loan_transaction_strategy_id` bigint(20) DEFAULT NULL,
   `loan_status_id` smallint(5) NOT NULL,
   `currency_code` varchar(3) NOT NULL,
   `currency_digits` smallint(5) NOT NULL,
@@ -326,6 +328,8 @@ CREATE TABLE `portfolio_loan` (
   KEY `FKB6F935D8C8D4B434` (`product_id`),
   KEY `FK7C885878B1147D1` (`loan_status_id`),
   KEY `FK7C885877240145` (`fund_id`),
+  KEY `FK_loan_ltp_strategy` (`loan_transaction_strategy_id`),
+  CONSTRAINT `FK_loan_ltp_strategy` FOREIGN KEY (`loan_transaction_strategy_id`) REFERENCES `ref_loan_transaction_processing_strategy` (`id`),
   CONSTRAINT `FK7C885877240145` FOREIGN KEY (`fund_id`) REFERENCES `org_fund` (`id`),
   CONSTRAINT `FK7C885878B1147D1` FOREIGN KEY (`loan_status_id`) REFERENCES `ref_loan_status` (`id`),
   CONSTRAINT `FKB6F935D87179A0CB` FOREIGN KEY (`client_id`) REFERENCES `portfolio_client` (`id`),

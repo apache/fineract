@@ -1,5 +1,13 @@
 -- currency symbols may not apply through command line on windows so use a different client like mysql workbench
 
+INSERT INTO `ref_loan_transaction_processing_strategy`
+(`id`,`code`,`name`)
+VALUES
+(1, 'mifos-standard-strategy', 'Mifos style'),
+(2, 'heavensfamily-strategy', 'Heavensfamily'),
+(3, 'creocore-strategy', 'Creocore'),
+(4, 'rbi-india-strategy', 'RBI (India)');
+
 INSERT INTO `ref_loan_status`
 (`id`,`display_name`)
 VALUES
