@@ -1,7 +1,7 @@
 bin
 build
 repos
-mifosng-provider\src\test\resources\META-INF\context.xml
+mifosng-provider/src/test/**/**/context.xml
 .classpath
 .project
 .settings
