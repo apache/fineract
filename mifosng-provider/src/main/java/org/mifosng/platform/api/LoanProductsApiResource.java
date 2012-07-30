@@ -88,12 +88,14 @@ public class LoanProductsApiResource {
 	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveNewLoanProductDetails(@Context final UriInfo uriInfo) {
 		
+		// TODO - KW - every addition of a parameter here requires same additon in supported params used in 'apiDataConversionService' method.
 		Set<String> typicalResponseParameters = new HashSet<String>(
-				Arrays.asList("id", "name", "description", "fundId", "fundName", "principal", "inArrearsTolerance", "numberOfRepayments",
+				Arrays.asList("id", "name", "description", "fundId", "fundName", "transactionProcessingStrategyId", "transactionProcessingStrategyName",  
+						"principal", "inArrearsTolerance", "numberOfRepayments",
 						"repaymentEvery", "interestRatePerPeriod", "annualInterestRate", 
 						"repaymentFrequencyType", "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType",
 						"createdOn", "lastModifedOn","currencyOptions", "amortizationTypeOptions", "interestTypeOptions", "interestCalculationPeriodTypeOptions", 
-						"repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "fundOptions")
+						"repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "fundOptions", "transactionProcessingStrategyOptions")
 		);
 		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
@@ -114,7 +116,9 @@ public class LoanProductsApiResource {
 	public String retrieveLoanProductDetails(@PathParam("productId") final Long productId, @Context final UriInfo uriInfo) {
 
 		Set<String> typicalResponseParameters = new HashSet<String>(
-				Arrays.asList("id", "name", "description", "fundId", "fundName", "principal", "inArrearsTolerance", "numberOfRepayments",
+				Arrays.asList("id", "name", "description", "fundId", "fundName", 
+						"transactionProcessingStrategyId", "transactionProcessingStrategyName",
+						"principal", "inArrearsTolerance", "numberOfRepayments",
 						"repaymentEvery", "interestRatePerPeriod", "annualInterestRate", 
 						"repaymentFrequencyType", "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType",
 						"createdOn", "lastModifedOn")
@@ -130,7 +134,7 @@ public class LoanProductsApiResource {
 		LoanProductData loanProduct = this.loanProductReadPlatformService.retrieveLoanProduct(productId);
 		if (template) {
 			responseParameters.addAll(Arrays.asList("currencyOptions", "amortizationTypeOptions", "interestTypeOptions", "interestCalculationPeriodTypeOptions", 
-					"repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "fundOptions"));
+					"repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "fundOptions", "transactionProcessingStrategyOptions"));
 		}
 		
 		return this.apiDataConversionService.convertLoanProductDataToJson(prettyPrint, responseParameters, loanProduct);

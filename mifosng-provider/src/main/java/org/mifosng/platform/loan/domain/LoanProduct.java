@@ -32,6 +32,10 @@ public class LoanProduct extends AbstractAuditableCustom<AppUser, Long> {
 	@ManyToOne
 	@JoinColumn(name = "fund_id", nullable = true)
 	private Fund fund;
+	
+	@ManyToOne
+	@JoinColumn(name = "loan_transaction_strategy_id", nullable = true)
+	private LoanTransactionProcessingStrategy transactionProcessingStrategy;
 
 	@Column(name = "name", nullable = false)
 	private String name;
@@ -49,12 +53,14 @@ public class LoanProduct extends AbstractAuditableCustom<AppUser, Long> {
         this.loanProductRelatedDetail = null;
     }
 
-    public LoanProduct(final Fund fund, final String name, final String description, final MonetaryCurrency currency, final BigDecimal defaultPrincipal,
+    public LoanProduct(final Fund fund, final LoanTransactionProcessingStrategy transactionProcessingStrategy, 
+    		final String name, final String description, final MonetaryCurrency currency, final BigDecimal defaultPrincipal,
             final BigDecimal defaultNominalInterestRatePerPeriod, final PeriodFrequencyType interestPeriodFrequencyType, final BigDecimal defaultAnnualNominalInterestRate, 
             final InterestMethod interestMethod, final InterestCalculationPeriodMethod interestCalculationPeriodMethod, 
             final Integer repayEvery, final PeriodFrequencyType repaymentFrequencyType, final Integer defaultNumberOfInstallments, final AmortizationMethod amortizationMethod,
             final BigDecimal inArrearsTolerance) {
 		this.fund = fund;
+		this.transactionProcessingStrategy = transactionProcessingStrategy;
         this.name = name.trim();
         if (StringUtils.isNotBlank(description)) {
             this.description = description.trim();
@@ -96,10 +102,6 @@ public class LoanProduct extends AbstractAuditableCustom<AppUser, Long> {
 		return this.loanProductRelatedDetail.isInterestRebateAllowed();
 	}
 
-	public boolean identifiedBy(final String identifier) {
-		return identifier.equalsIgnoreCase(this.name);
-	}
-
 	public BigDecimal getDefaultNominalInterestRatePerPeriod() {
 		return this.loanProductRelatedDetail.getNominalInterestRatePerPeriod();
 	}
@@ -131,8 +133,12 @@ public class LoanProduct extends AbstractAuditableCustom<AppUser, Long> {
 	public Fund getFund() {
 		return fund;
 	}
+	
+	public LoanTransactionProcessingStrategy getTransactionProcessingStrategy() {
+		return transactionProcessingStrategy;
+	}
 
-	public void update(final LoanProductCommand command, final Fund fund) {
+	public void update(final LoanProductCommand command, final Fund fund, final LoanTransactionProcessingStrategy strategy) {
 		
 		if (command.isNameChanged()) {
 			this.name = command.getName();
@@ -144,6 +150,10 @@ public class LoanProduct extends AbstractAuditableCustom<AppUser, Long> {
 		
 		if (command.isFundChanged()) {
 			this.fund = fund;
+		}
+		
+		if (command.isTransactionProcessingStrategyChanged()) {
+			this.transactionProcessingStrategy = strategy;
 		}
 		
 		this.loanProductRelatedDetail.update(command);

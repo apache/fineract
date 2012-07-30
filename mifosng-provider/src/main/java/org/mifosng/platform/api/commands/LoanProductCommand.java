@@ -13,6 +13,7 @@ public class LoanProductCommand {
 	private final String description;
 	
 	private final Long fundId;
+	private final Long transactionProcessingStrategyId;
 	
 	private final String currencyCode;
 	private final Integer digitsAfterDecimal;
@@ -33,7 +34,7 @@ public class LoanProductCommand {
 	private final Set<String> modifiedParameters;
 	
 	public LoanProductCommand(final Set<String> modifiedParameters, final Long id, final String name, final String description, 
-			final Long fundId, 
+			final Long fundId, final Long transactionProcessingStrategyId,
 			final String currencyCode, final Integer digitsAfterDecimal, 
 			final BigDecimal principal, final BigDecimal inArrearsTolerance, final Integer numberOfRepayments, 
 			final Integer repaymentEvery, final BigDecimal interestRatePerPeriod,
@@ -44,6 +45,7 @@ public class LoanProductCommand {
 		this.name = name;
 		this.description = description;
 		this.fundId = fundId;
+		this.transactionProcessingStrategyId = transactionProcessingStrategyId;
 		this.currencyCode = currencyCode;
 		this.digitsAfterDecimal = digitsAfterDecimal;
 		this.principal = principal;
@@ -72,6 +74,10 @@ public class LoanProductCommand {
 
 	public Long getFundId() {
 		return fundId;
+	}
+	
+	public Long getTransactionProcessingStrategyId() {
+		return transactionProcessingStrategyId;
 	}
 
 	public String getCurrencyCode() {
@@ -132,6 +138,10 @@ public class LoanProductCommand {
 
 	public boolean isFundChanged() {
 		return this.modifiedParameters.contains("fundId");
+	}
+	
+	public boolean isTransactionProcessingStrategyChanged() {
+		return this.modifiedParameters.contains("transactionProcessingStrategyId");
 	}
 
 	public boolean isCurrencyCodeChanged() {

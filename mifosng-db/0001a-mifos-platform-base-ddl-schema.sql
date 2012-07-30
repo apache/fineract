@@ -63,6 +63,18 @@ CREATE TABLE `ref_loan_status` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+CREATE TABLE `ref_loan_transaction_processing_strategy` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `code` varchar(100) DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `createdby_id` bigint(20) DEFAULT NULL,
+  `created_date` datetime DEFAULT NULL,
+  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
+  `lastmodified_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `ltp_strategy_code` (`code`)
+) ENGINE=InnoDB AUTO_INCREMENT=1000 DEFAULT CHARSET=utf8;
+
 -- DDL for organisation wide related concepts
 CREATE TABLE `org_fund` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -216,6 +228,7 @@ CREATE TABLE `portfolio_client` (
   CONSTRAINT `FKCE00CAB3E0DD567A` FOREIGN KEY (`office_id`) REFERENCES `org_office` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
+
 CREATE TABLE `portfolio_product_loan` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `currency_code` varchar(3) NOT NULL,
@@ -225,6 +238,7 @@ CREATE TABLE `portfolio_product_loan` (
   `name` varchar(100) NOT NULL,
   `description` varchar(500) DEFAULT NULL,
   `fund_id` bigint(20) DEFAULT NULL,
+  `loan_transaction_strategy_id` bigint(20) DEFAULT NULL,
   `nominal_interest_rate_per_period` decimal(19,6) NOT NULL,
   `interest_period_frequency_enum` smallint(5) NOT NULL,
   `annual_nominal_interest_rate` decimal(19,6) NOT NULL,
@@ -244,6 +258,8 @@ CREATE TABLE `portfolio_product_loan` (
   KEY `FKAUD0000000000003` (`createdby_id`),
   KEY `FKAUD0000000000004` (`lastmodifiedby_id`),
   KEY `FKA6A8A7D77240145` (`fund_id`),
+  KEY `FK_ltp_strategy` (`loan_transaction_strategy_id`),
+  CONSTRAINT `FK_ltp_strategy` FOREIGN KEY (`loan_transaction_strategy_id`) REFERENCES `ref_loan_transaction_processing_strategy` (`id`),
   CONSTRAINT `FKA6A8A7D77240145` FOREIGN KEY (`fund_id`) REFERENCES `org_fund` (`id`),
   CONSTRAINT `FKAUD0000000000003` FOREIGN KEY (`createdby_id`) REFERENCES `admin_appuser` (`id`),
   CONSTRAINT `FKAUD0000000000004` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `admin_appuser` (`id`)

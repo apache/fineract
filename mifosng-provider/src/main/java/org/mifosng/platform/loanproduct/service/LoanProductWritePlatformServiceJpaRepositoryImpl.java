@@ -7,6 +7,7 @@ import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.exceptions.FundNotFoundException;
 import org.mifosng.platform.exceptions.LoanProductNotFoundException;
+import org.mifosng.platform.exceptions.LoanTransactionProcessingStrategyNotFoundException;
 import org.mifosng.platform.fund.domain.Fund;
 import org.mifosng.platform.fund.domain.FundRepository;
 import org.mifosng.platform.loan.domain.AmortizationMethod;
@@ -14,6 +15,8 @@ import org.mifosng.platform.loan.domain.InterestCalculationPeriodMethod;
 import org.mifosng.platform.loan.domain.InterestMethod;
 import org.mifosng.platform.loan.domain.LoanProduct;
 import org.mifosng.platform.loan.domain.LoanProductRepository;
+import org.mifosng.platform.loan.domain.LoanTransactionProcessingStrategy;
+import org.mifosng.platform.loan.domain.LoanTransactionProcessingStrategyRepository;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 import org.mifosng.platform.loanschedule.domain.AprCalculator;
 import org.mifosng.platform.security.PlatformSecurityContext;
@@ -28,14 +31,16 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
 	private final LoanProductRepository loanProductRepository;
 	private final AprCalculator aprCalculator;
 	private final FundRepository fundRepository;
+	private final LoanTransactionProcessingStrategyRepository loanTransactionProcessingStrategyRepository;
 
 	@Autowired
 	public LoanProductWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final LoanProductRepository loanProductRepository,  
-			final AprCalculator aprCalculator, final FundRepository fundRepository) {
+			final AprCalculator aprCalculator, final FundRepository fundRepository, final LoanTransactionProcessingStrategyRepository loanTransactionProcessingStrategyRepository) {
 		this.context = context;
 		this.loanProductRepository = loanProductRepository;
 		this.aprCalculator = aprCalculator;
 		this.fundRepository = fundRepository;
+		this.loanTransactionProcessingStrategyRepository = loanTransactionProcessingStrategyRepository;
 	}
 	
 	@Transactional
@@ -65,8 +70,10 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
 		
 		// associating fund with loan product at creation is optional for now.
 		Fund fund = findFundByIdIfProvided(command.getFundId());
+		LoanTransactionProcessingStrategy loanTransactionProcessingStrategy = findStrategyByIdIfProvided(command.getTransactionProcessingStrategyId());
 		
-		LoanProduct loanproduct = new LoanProduct(fund, command.getName(), command.getDescription(), 
+		LoanProduct loanproduct = new LoanProduct(fund, loanTransactionProcessingStrategy, 
+				command.getName(), command.getDescription(), 
 				currency, command.getPrincipal(), 
 				command.getInterestRatePerPeriod(), interestFrequencyType, annualInterestRate, interestMethod, interestCalculationPeriodMethod,
 				command.getRepaymentEvery(), repaymentFrequencyType, command.getNumberOfRepayments(), 
@@ -77,6 +84,17 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
 		return new EntityIdentifier(loanproduct.getId());
 	}
 	
+	private LoanTransactionProcessingStrategy findStrategyByIdIfProvided(final Long transactionProcessingStrategyId) {
+		LoanTransactionProcessingStrategy fund = null;
+		if (transactionProcessingStrategyId != null) {
+			fund = this.loanTransactionProcessingStrategyRepository.findOne(transactionProcessingStrategyId);
+			if (fund == null) {
+				throw new LoanTransactionProcessingStrategyNotFoundException(transactionProcessingStrategyId);
+			}
+		}
+		return fund;
+	}
+
 	private Fund findFundByIdIfProvided(final Long fundId) {
 		Fund fund = null;
 		if (fundId != null) {
@@ -104,8 +122,9 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
 		
 		// associating fund with loan product at creation is optional for now.
 		Fund fund = findFundByIdIfProvided(command.getFundId());
+		LoanTransactionProcessingStrategy loanTransactionProcessingStrategy = findStrategyByIdIfProvided(command.getTransactionProcessingStrategyId());
 		
-		product.update(command, fund);
+		product.update(command, fund, loanTransactionProcessingStrategy);
 		
 		this.loanProductRepository.save(product);
 		

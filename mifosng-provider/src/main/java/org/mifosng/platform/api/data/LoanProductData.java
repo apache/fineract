@@ -1,6 +1,5 @@
 package org.mifosng.platform.api.data;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -8,7 +7,7 @@ import java.util.List;
 
 import org.joda.time.DateTime;
 
-public class LoanProductData implements Serializable {
+public class LoanProductData {
 
 	private Long id;
 	private String name;
@@ -16,6 +15,9 @@ public class LoanProductData implements Serializable {
 
 	private Long fundId;
 	private String fundName;
+	
+	private Long transactionProcessingStrategyId;
+	private String transactionProcessingStrategyName;
 
 	private MoneyData principal;
 	private MoneyData inArrearsTolerance;
@@ -36,6 +38,7 @@ public class LoanProductData implements Serializable {
 
 	private List<CurrencyData> currencyOptions = new ArrayList<CurrencyData>();
 	private Collection<FundData> fundOptions = new ArrayList<FundData>();
+	private Collection<TransactionProcessingStrategyData> transactionProcessingStrategyOptions = new ArrayList<TransactionProcessingStrategyData>();
 	private List<EnumOptionData> amortizationTypeOptions = new ArrayList<EnumOptionData>();
 	private List<EnumOptionData> interestTypeOptions = new ArrayList<EnumOptionData>();
 	private List<EnumOptionData> interestCalculationPeriodTypeOptions = new ArrayList<EnumOptionData>();
@@ -55,7 +58,7 @@ public class LoanProductData implements Serializable {
 			EnumOptionData interestRateFrequencyType,
 			EnumOptionData amortizationType, EnumOptionData interestType,
 			EnumOptionData interestCalculationPeriodType, Long fundId,
-			String fundName) {
+			String fundName, Long transactionProcessingStrategyId, String transactionProcessingStrategyName) {
 		this.createdOn = createdOn;
 		this.lastModifedOn = lastModifedOn;
 		this.id = id;
@@ -74,6 +77,8 @@ public class LoanProductData implements Serializable {
 		this.interestCalculationPeriodType = interestCalculationPeriodType;
 		this.fundId = fundId;
 		this.fundName = fundName;
+		this.transactionProcessingStrategyId = transactionProcessingStrategyId;
+		this.transactionProcessingStrategyName = transactionProcessingStrategyName;
 	}
 
 	public Long getId() {
@@ -114,6 +119,23 @@ public class LoanProductData implements Serializable {
 
 	public void setFundName(String fundName) {
 		this.fundName = fundName;
+	}
+	
+	public Long getTransactionProcessingStrategyId() {
+		return transactionProcessingStrategyId;
+	}
+
+	public void setTransactionProcessingStrategyId(Long transactionProcessingStrategyId) {
+		this.transactionProcessingStrategyId = transactionProcessingStrategyId;
+	}
+
+	public String getTransactionProcessingStrategyName() {
+		return transactionProcessingStrategyName;
+	}
+
+	public void setTransactionProcessingStrategyName(
+			String transactionProcessingStrategyName) {
+		this.transactionProcessingStrategyName = transactionProcessingStrategyName;
 	}
 
 	public MoneyData getPrincipal() {
@@ -254,6 +276,15 @@ public class LoanProductData implements Serializable {
 
 	public void setFundOptions(Collection<FundData> fundOptions) {
 		this.fundOptions = fundOptions;
+	}
+	
+	public Collection<TransactionProcessingStrategyData> getTransactionProcessingStrategyOptions() {
+		return transactionProcessingStrategyOptions;
+	}
+
+	public void setTransactionProcessingStrategyOptions(
+			Collection<TransactionProcessingStrategyData> transactionProcessingStrategyOptions) {
+		this.transactionProcessingStrategyOptions = transactionProcessingStrategyOptions;
 	}
 
 	public List<EnumOptionData> getAmortizationTypeOptions() {

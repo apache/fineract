@@ -6,20 +6,32 @@ import static org.mifosng.platform.loanproduct.service.LoanEnumerations.interest
 import static org.mifosng.platform.loanproduct.service.LoanEnumerations.interestType;
 import static org.mifosng.platform.loanproduct.service.LoanEnumerations.repaymentFrequencyType;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import org.mifosng.platform.api.data.EnumOptionData;
+import org.mifosng.platform.api.data.TransactionProcessingStrategyData;
 import org.mifosng.platform.loan.domain.AmortizationMethod;
 import org.mifosng.platform.loan.domain.InterestCalculationPeriodMethod;
 import org.mifosng.platform.loan.domain.InterestMethod;
+import org.mifosng.platform.loan.domain.LoanTransactionProcessingStrategy;
+import org.mifosng.platform.loan.domain.LoanTransactionProcessingStrategyRepository;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class LoanDropdownReadPlatformServiceImpl implements
-		LoanDropdownReadPlatformService {
+public class LoanDropdownReadPlatformServiceImpl implements LoanDropdownReadPlatformService {
 
+	private final LoanTransactionProcessingStrategyRepository loanTransactionProcessingStrategyRepository;
+
+	@Autowired
+	public LoanDropdownReadPlatformServiceImpl(final LoanTransactionProcessingStrategyRepository loanTransactionProcessingStrategyRepository) {
+		this.loanTransactionProcessingStrategyRepository = loanTransactionProcessingStrategyRepository;
+	}
+	
 	@Override
 	public List<EnumOptionData> retrieveLoanAmortizationTypeOptions() {
 
@@ -66,5 +78,18 @@ public class LoanDropdownReadPlatformServiceImpl implements
 				interestRateFrequencyType(PeriodFrequencyType.MONTHS),
 				interestRateFrequencyType(PeriodFrequencyType.YEARS));
 		return interestRateFrequencyTypeOptions;
+	}
+
+	@Override
+	public Collection<TransactionProcessingStrategyData> retreiveTransactionProcessingStrategies() {
+		
+		Collection<TransactionProcessingStrategyData> strategyOptions = new ArrayList<TransactionProcessingStrategyData>();
+		
+		List<LoanTransactionProcessingStrategy> strategies = this.loanTransactionProcessingStrategyRepository.findAll();
+		for (LoanTransactionProcessingStrategy strategy : strategies) {
+			strategyOptions.add(strategy.toData());
+		}
+		
+		return strategyOptions;
 	}
 }

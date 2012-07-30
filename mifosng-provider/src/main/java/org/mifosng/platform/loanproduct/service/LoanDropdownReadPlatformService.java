@@ -1,8 +1,10 @@
 package org.mifosng.platform.loanproduct.service;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.mifosng.platform.api.data.EnumOptionData;
+import org.mifosng.platform.api.data.TransactionProcessingStrategyData;
 
 public interface LoanDropdownReadPlatformService {
 
@@ -15,4 +17,6 @@ public interface LoanDropdownReadPlatformService {
 	List<EnumOptionData> retrieveRepaymentFrequencyTypeOptions();
 
 	List<EnumOptionData> retrieveInterestRateFrequencyTypeOptions();
+
+	Collection<TransactionProcessingStrategyData> retreiveTransactionProcessingStrategies();
 }

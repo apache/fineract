@@ -226,12 +226,13 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	@Override
 	public String convertLoanProductDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final LoanProductData... products) {
 		Set<String> supportedParameters = new HashSet<String>(
-				Arrays.asList("id", "name", "description", "fundId", "fundName", "principal", "inArrearsTolerance", "numberOfRepayments",
+				Arrays.asList("id", "name", "description", "fundId", "fundName", "transactionProcessingStrategyId", "transactionProcessingStrategyName",
+						"principal", "inArrearsTolerance", "numberOfRepayments",
 						"repaymentEvery", "interestRatePerPeriod", "annualInterestRate", 
 						"repaymentFrequencyType", "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType",
 						"createdOn", "lastModifedOn",
 						"currencyOptions", "amortizationTypeOptions", "interestTypeOptions", "interestCalculationPeriodTypeOptions", 
-						"repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "fundOptions")
+						"repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "fundOptions", "transactionProcessingStrategyOptions")
 		);
 		
 		final Set<String> parameterNamesToSkip = new HashSet<String>();
@@ -827,7 +828,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	    Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
 	    
 	    Set<String> supportedParams = new HashSet<String>(
-	    		Arrays.asList("name", "description", "fundId", "currencyCode", "digitsAfterDecimal", 
+	    		Arrays.asList("name", "description", "fundId", "transactionProcessingStrategyId", "currencyCode", "digitsAfterDecimal", 
 	    				"principal", "inArrearsTolerance", "interestRatePerPeriod", "repaymentEvery", "numberOfRepayments", 
 	    				"repaymentFrequencyType", "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType", "locale")
 	    );
@@ -839,6 +840,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	    String name = extractStringParameter("name", requestMap, modifiedParameters);
 	    String description = extractStringParameter("description", requestMap, modifiedParameters);
 	    Long fundId = extractLongParameter("fundId", requestMap, modifiedParameters);
+	    Long transactionProcessingStrategyId = extractLongParameter("transactionProcessingStrategyId", requestMap, modifiedParameters);
 	    String currencyCode = extractStringParameter("currencyCode", requestMap, modifiedParameters);
 	    Integer digitsAfterDecimalValue = extractIntegerParameter("digitsAfterDecimal", requestMap, modifiedParameters);
 	    BigDecimal principalValue = extractBigDecimalParameter("principal", requestMap, modifiedParameters);
@@ -854,7 +856,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	    Integer interestTypeValue = extractIntegerParameter("interestType", requestMap, modifiedParameters);
 	    Integer interestCalculationPeriodTypeValue = extractIntegerParameter("interestCalculationPeriodType", requestMap, modifiedParameters);
 	    
-		return new LoanProductCommand(modifiedParameters, resourceIdentifier, name, description, fundId, 
+		return new LoanProductCommand(modifiedParameters, resourceIdentifier, name, description, fundId, transactionProcessingStrategyId, 
 				currencyCode, digitsAfterDecimalValue, principalValue, inArrearsToleranceValue, numberOfRepaymentsValue, repaymentEveryValue, interestRatePerPeriodValue,
 				repaymentFrequencyTypeValue, interestRateFrequencyTypeValue, amortizationTypeValue, interestTypeValue, interestCalculationPeriodTypeValue);
 	}
