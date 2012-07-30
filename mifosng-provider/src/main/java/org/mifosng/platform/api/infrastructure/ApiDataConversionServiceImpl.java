@@ -29,6 +29,7 @@ import org.mifosng.platform.api.commands.NoteCommand;
 import org.mifosng.platform.api.commands.OfficeCommand;
 import org.mifosng.platform.api.commands.OrganisationCurrencyCommand;
 import org.mifosng.platform.api.commands.RoleCommand;
+import org.mifosng.platform.api.commands.SavingProductCommand;
 import org.mifosng.platform.api.commands.SubmitLoanApplicationCommand;
 import org.mifosng.platform.api.commands.UserCommand;
 import org.mifosng.platform.api.data.AdditionalFieldsSetData;
@@ -49,6 +50,7 @@ import org.mifosng.platform.api.data.OfficeData;
 import org.mifosng.platform.api.data.OfficeTransactionData;
 import org.mifosng.platform.api.data.PermissionData;
 import org.mifosng.platform.api.data.RoleData;
+import org.mifosng.platform.api.data.SavingProductData;
 import org.mifosng.platform.api.errorhandling.InvalidJsonException;
 import org.mifosng.platform.api.errorhandling.UnsupportedParameterException;
 import org.mifosng.platform.exceptions.PlatformApiDataValidationException;
@@ -1334,5 +1336,62 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		}
 		
 		return new Locale(languageCode.toLowerCase(), courntryCode.toUpperCase(), variantCode);
+	}
+
+	@Override
+	public SavingProductCommand convertJsonToSavingProductCommand(
+			final Long resourceIdentifier, final String json) {
+
+		if (StringUtils.isBlank(json)) {
+			throw new InvalidJsonException();
+		}
+		Type typeOfMap = new TypeToken<Map<String, String>>() {}.getType();
+		Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
+
+		Set<String> supportedParams = new HashSet<String>(Arrays.asList("name","description"));
+		checkForUnsupportedParameters(requestMap, supportedParams);
+		Set<String> modifiedParameters = new HashSet<String>();
+		String name = extractStringParameter("name", requestMap,modifiedParameters);
+		String description = extractStringParameter("description", requestMap,modifiedParameters);
+
+		return new SavingProductCommand(modifiedParameters, resourceIdentifier,name, description);
+	}
+
+	@Override
+	public String convertSavingProductDataToJson(boolean prettyPrint,
+			Set<String> responseParameters, SavingProductData... products) {
+		
+		Set<String> supportedParameters = new HashSet<String>(
+				Arrays.asList("id", "name", "description","createdOn", "lastModifedOn"));
+		
+		final Set<String> parameterNamesToSkip = new HashSet<String>();
+		
+		if (!responseParameters.isEmpty()) {
+			if (!supportedParameters.containsAll(responseParameters)) {
+				throw new UnsupportedParameterException(new ArrayList<String>(responseParameters));
+			}
+			
+			parameterNamesToSkip.addAll(supportedParameters);
+			parameterNamesToSkip.removeAll(responseParameters);
+		}
+		
+		ExclusionStrategy strategy = new ParameterListExclusionStrategy(parameterNamesToSkip);
+		
+		GsonBuilder builder = new GsonBuilder().addSerializationExclusionStrategy(strategy);
+		builder.registerTypeAdapter(LocalDate.class, new JodaLocalDateAdapter());
+		builder.registerTypeAdapter(DateTime.class, new JodaDateTimeAdapter());
+		if (prettyPrint) {
+			builder.setPrettyPrinting();
+		}
+		Gson gsonDeserializer = builder.create();
+		
+		String json = "";
+		if (products != null && products.length == 1) {
+			json = gsonDeserializer.toJson(products[0]);
+		} else {
+			json = gsonDeserializer.toJson(products);
+		}
+		
+		return json;
 	}
 }
