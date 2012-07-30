@@ -1,7 +1,6 @@
 bin
 build
 repos
-mifosng-provider/src/test/**/**/context.xml
 .classpath
 .project
 .settings
