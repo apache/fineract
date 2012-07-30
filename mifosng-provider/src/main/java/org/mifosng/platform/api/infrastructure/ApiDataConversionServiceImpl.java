@@ -872,7 +872,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	    Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
 	    
 	    Set<String> supportedParams = new HashSet<String>(
-	    		Arrays.asList("clientId", "productId", "externalId", "fundId", 
+	    		Arrays.asList("clientId", "productId", "externalId", "fundId", "transactionProcessingStrategyId",
 	    				"principal", "inArrearsTolerance", "interestRatePerPeriod", "repaymentEvery", "numberOfRepayments", 
 	    				"repaymentFrequencyType", "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType",
 	    				"expectedDisbursementDate", "repaymentsStartingFromDate", "interestChargedFromDate", "submittedOnDate", "submittedOnNote",
@@ -886,6 +886,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	    Long clientId = extractLongParameter("clientId", requestMap, modifiedParameters);
 	    Long productId = extractLongParameter("productId", requestMap, modifiedParameters);
 	    Long fundId = extractLongParameter("fundId", requestMap, modifiedParameters);
+	    Long transactionProcessingStrategyId = extractLongParameter("transactionProcessingStrategyId", requestMap, modifiedParameters);
 	    String externalId = extractStringParameter("externalId", requestMap, modifiedParameters);
 	    
 	    BigDecimal principal = extractBigDecimalParameter("principal", requestMap, modifiedParameters);
@@ -908,7 +909,8 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	    
 	    String submittedOnNote = extractStringParameter("submittedOnNote", requestMap, modifiedParameters);
 	    
-		return new SubmitLoanApplicationCommand(clientId, productId, externalId, fundId, submittedOnDate, submittedOnNote, 
+		return new SubmitLoanApplicationCommand(clientId, productId, externalId, fundId, transactionProcessingStrategyId,
+				submittedOnDate, submittedOnNote, 
 	    		expectedDisbursementDate, repaymentsStartingFromDate, interestChargedFromDate, 
 	    		principal, interestRatePerPeriod, interestRateFrequencyTypeValue, interestTypeValue, interestCalculationPeriodTypeValue, 
 	    		repaymentEvery, repaymentFrequencyType, numberOfRepayments, amortizationTypeValue, inArrearsToleranceValue);

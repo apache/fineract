@@ -18,6 +18,11 @@ ADD COLUMN `loan_transaction_strategy_id` bigint(20) DEFAULT NULL,
 ADD KEY `FK_ltp_strategy` (`loan_transaction_strategy_id`),
 ADD CONSTRAINT `FK_ltp_strategy` FOREIGN KEY (`loan_transaction_strategy_id`) REFERENCES `ref_loan_transaction_processing_strategy` (`id`);
 
+ALTER TABLE `portfolio_loan` 
+ADD COLUMN `loan_transaction_strategy_id` bigint(20) DEFAULT NULL,
+ADD KEY `FK_loan_ltp_strategy` (`loan_transaction_strategy_id`),
+ADD CONSTRAINT `FK_loan_ltp_strategy` FOREIGN KEY (`loan_transaction_strategy_id`) REFERENCES `ref_loan_transaction_processing_strategy` (`id`);
+
 -- update ref table with out-of-the-box strategies
 
 INSERT INTO `ref_loan_transaction_processing_strategy`

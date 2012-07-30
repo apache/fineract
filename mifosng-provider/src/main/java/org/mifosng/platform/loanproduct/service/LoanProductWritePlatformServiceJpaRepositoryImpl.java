@@ -85,14 +85,14 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
 	}
 	
 	private LoanTransactionProcessingStrategy findStrategyByIdIfProvided(final Long transactionProcessingStrategyId) {
-		LoanTransactionProcessingStrategy fund = null;
+		LoanTransactionProcessingStrategy strategy = null;
 		if (transactionProcessingStrategyId != null) {
-			fund = this.loanTransactionProcessingStrategyRepository.findOne(transactionProcessingStrategyId);
-			if (fund == null) {
+			strategy = this.loanTransactionProcessingStrategyRepository.findOne(transactionProcessingStrategyId);
+			if (strategy == null) {
 				throw new LoanTransactionProcessingStrategyNotFoundException(transactionProcessingStrategyId);
 			}
 		}
-		return fund;
+		return strategy;
 	}
 
 	private Fund findFundByIdIfProvided(final Long fundId) {

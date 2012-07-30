@@ -25,11 +25,23 @@ public class LoanTransactionProcessingStrategy extends AbstractAuditableCustom<A
 		//
 	}
 
-	public String code() {
-		return this.code;
-	}
-
 	public TransactionProcessingStrategyData toData() {
 		return new TransactionProcessingStrategyData(this.getId(), this.code, this.name);
+	}
+
+	public boolean isStandardMifosStrategy() {
+		return "mifos-standard-strategy".equalsIgnoreCase(this.code);
+	}
+
+	public boolean isHeavensfamilyStrategy() {
+		return "heavensfamily-strategy".equalsIgnoreCase(this.code);
+	}
+
+	public boolean isCreocoreStrategy() {
+		return "creocore-strategy".equalsIgnoreCase(this.code);
+	}
+
+	public boolean isIndianRBIStrategy() {
+		return "rbi-india-strategy".equalsIgnoreCase(this.code);
 	}
 }

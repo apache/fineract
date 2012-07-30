@@ -13,6 +13,7 @@ import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.exceptions.ClientNotFoundException;
 import org.mifosng.platform.exceptions.FundNotFoundException;
 import org.mifosng.platform.exceptions.LoanProductNotFoundException;
+import org.mifosng.platform.exceptions.LoanTransactionProcessingStrategyNotFoundException;
 import org.mifosng.platform.fund.domain.Fund;
 import org.mifosng.platform.fund.domain.FundRepository;
 import org.mifosng.platform.loan.domain.AmortizationMethod;
@@ -27,6 +28,8 @@ import org.mifosng.platform.loan.domain.LoanProductRepository;
 import org.mifosng.platform.loan.domain.LoanRepaymentScheduleInstallment;
 import org.mifosng.platform.loan.domain.LoanStatus;
 import org.mifosng.platform.loan.domain.LoanStatusRepository;
+import org.mifosng.platform.loan.domain.LoanTransactionProcessingStrategy;
+import org.mifosng.platform.loan.domain.LoanTransactionProcessingStrategyRepository;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 import org.mifosng.platform.loanschedule.domain.AprCalculator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,18 +43,22 @@ public class LoanAssembler {
 	private final ClientRepository clientRepository;
 	private final AprCalculator aprCalculator = new AprCalculator();
 	private final FundRepository fundRepository;
+	private final LoanTransactionProcessingStrategyRepository loanTransactionProcessingStrategyRepository;
 	
 	@Autowired
 	public LoanAssembler(final LoanStatusRepository loanStatusRepository,
 			final LoanProductRepository loanProductRepository,
-			final ClientRepository clientRepository, final FundRepository fundRepository) {
+			final ClientRepository clientRepository, 
+			final FundRepository fundRepository,
+			final LoanTransactionProcessingStrategyRepository loanTransactionProcessingStrategyRepository) {
 		this.loanStatusRepository = loanStatusRepository;
 		this.loanProductRepository = loanProductRepository;
 		this.clientRepository = clientRepository;
 		this.fundRepository = fundRepository;
+		this.loanTransactionProcessingStrategyRepository = loanTransactionProcessingStrategyRepository;
 	}
 	
-	public Loan assembleFrom(SubmitLoanApplicationCommand command) {
+	public Loan assembleFrom(final SubmitLoanApplicationCommand command) {
 		
 		LoanProduct loanProduct = this.loanProductRepository.findOne(command.getProductId());
 		if (loanProduct == null) {
@@ -87,8 +94,9 @@ public class LoanAssembler {
 		
 		// associating fund with loan product at creation is optional for now.
 		Fund fund = findFundByIdIfProvided(command.getFundId());
-
-		Loan loan = Loan.createNew(fund, loanProduct, client, loanRepaymentScheduleDetail);
+		LoanTransactionProcessingStrategy loanTransactionProcessingStrategy = findStrategyByIdIfProvided(command.getTransactionProcessingStrategyId());
+		
+		Loan loan = Loan.createNew(fund, loanTransactionProcessingStrategy, loanProduct, client, loanRepaymentScheduleDetail);
 		loan.setExternalId(command.getExternalId());
 		
 		for (ScheduledLoanInstallment scheduledLoanInstallment : loanRepaymentSchedule) {
@@ -124,5 +132,16 @@ public class LoanAssembler {
 			}
 		}
 		return fund;
+	}
+	
+	private LoanTransactionProcessingStrategy findStrategyByIdIfProvided(final Long transactionProcessingStrategyId) {
+		LoanTransactionProcessingStrategy strategy = null;
+		if (transactionProcessingStrategyId != null) {
+			strategy = this.loanTransactionProcessingStrategyRepository.findOne(transactionProcessingStrategyId);
+			if (strategy == null) {
+				throw new LoanTransactionProcessingStrategyNotFoundException(transactionProcessingStrategyId);
+			}
+		}
+		return strategy;
 	}
 }

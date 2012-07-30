@@ -15,6 +15,7 @@ public class SubmitLoanApplicationCommand {
 	private final String externalId;
 	
 	private final Long fundId;
+	private final Long transactionProcessingStrategyId;
 	
 	private final BigDecimal principal;
 	private final BigDecimal inArrearsTolerance;
@@ -39,7 +40,8 @@ public class SubmitLoanApplicationCommand {
 	private LoanSchedule loanSchedule;
 
 	public SubmitLoanApplicationCommand(
-			final Long clientId, final Long productId, final String externalId, final Long fundId, 
+			final Long clientId, final Long productId, final String externalId, 
+			final Long fundId, final Long transactionProcessingStrategyId,
 			final LocalDate submittedOnDate, final String submittedOnNote,
 			final LocalDate expectedDisbursementDate,
 			final LocalDate repaymentsStartingFromDate,
@@ -55,6 +57,7 @@ public class SubmitLoanApplicationCommand {
 		this.productId = productId;
 		this.externalId = externalId;
 		this.fundId = fundId;
+		this.transactionProcessingStrategyId = transactionProcessingStrategyId;
 		
 		this.submittedOnDate = submittedOnDate;
 		this.submittedOnNote = submittedOnNote;
@@ -103,6 +106,10 @@ public class SubmitLoanApplicationCommand {
 
 	public Long getFundId() {
 		return fundId;
+	}
+	
+	public Long getTransactionProcessingStrategyId() {
+		return transactionProcessingStrategyId;
 	}
 
 	public BigDecimal getPrincipal() {

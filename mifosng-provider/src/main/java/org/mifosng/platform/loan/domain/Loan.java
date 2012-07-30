@@ -50,6 +50,10 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	@ManyToOne
 	@JoinColumn(name = "fund_id", nullable = true)
 	private Fund fund;
+	
+	@ManyToOne
+	@JoinColumn(name = "loan_transaction_strategy_id", nullable = true)
+	private LoanTransactionProcessingStrategy transactionProcessingStrategy;
 
 	@Column(name = "external_id")
 	private String externalId;
@@ -136,11 +140,10 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	@Transient
 	private final LoanRepaymentScheduleTransactionProcessorFactory transactionProcessor = new LoanRepaymentScheduleTransactionProcessorFactory();
 
-	public static Loan createNew(final Fund fund,
+	public static Loan createNew(final Fund fund, final LoanTransactionProcessingStrategy transactionProcessingStrategy,
 			final LoanProduct loanProduct, final Client client,
 			final LoanProductRelatedDetail loanRepaymentScheduleDetail) {
-		return new Loan(client, fund, loanProduct, loanRepaymentScheduleDetail,
-				null);
+		return new Loan(client, fund, transactionProcessingStrategy, loanProduct, loanRepaymentScheduleDetail, null);
 	}
 
 	public Loan() {
@@ -149,15 +152,12 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		this.loanRepaymentScheduleDetail = null;
 	}
 
-	public Loan(final Client client, Fund fund, final LoanProduct loanProduct,
+	public Loan(final Client client, Fund fund, LoanTransactionProcessingStrategy transactionProcessingStrategy, final LoanProduct loanProduct,
 			final LoanProductRelatedDetail loanRepaymentScheduleDetail,
 			final LoanStatus loanStatus) {
 		this.client = client;
-		if (fund != null) {
-			this.fund = fund;
-		} else {
-			this.fund = loanProduct.getFund();
-		}
+		this.fund = fund;
+		this.transactionProcessingStrategy = transactionProcessingStrategy;
 		this.loanProduct = loanProduct;
 		this.loanRepaymentScheduleDetail = loanRepaymentScheduleDetail;
 		this.loanStatus = loanStatus;
@@ -445,7 +445,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		Collections.sort(repaymentsOrWaivers, transactionComparator);
 		
 		
-		final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessor.determineProcessor();
+		final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessor.determineProcessor(this.transactionProcessingStrategy);
 		if (isTransactionChronologicallyLatest && !adjusted) {
 			loanRepaymentScheduleTransactionProcessor.handleTransaction(loanTransaction, getCurrency(), this.repaymentScheduleInstallments);
 		} else {
