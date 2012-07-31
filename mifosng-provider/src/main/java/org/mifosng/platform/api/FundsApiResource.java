@@ -69,7 +69,7 @@ public class FundsApiResource {
 	@Path("{fundId}")
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
-	public String retreiveOffice(@PathParam("fundId") final Long fundId, @Context UriInfo uriInfo) {
+	public String retreiveOffice(@PathParam("fundId") final Long fundId, @Context final UriInfo uriInfo) {
 		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());

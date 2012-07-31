@@ -89,25 +89,18 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 		
 		Office clientOffice = null;
 		Long officeId = command.getOfficeId();
-		if (officeId != null) {
+		if (command.isOfficeChanged() && officeId != null) {
 			clientOffice = this.officeRepository.findOne(officeId);
 			if (clientOffice == null) {
 				throw new OfficeNotFoundException(command.getOfficeId());
 			}			
 		}
 
-		String firstname = command.getFirstname();
-		String lastname = command.getLastname();
-		if (StringUtils.isNotBlank(command.getClientOrBusinessName())) {
-			lastname = command.getClientOrBusinessName();
-			firstname = null;
-		}
-
 		Client clientForUpdate = this.clientRepository.findOne(command.getId());
 		if (clientForUpdate == null || clientForUpdate.isDeleted()) {
 			throw new ClientNotFoundException(command.getId());
 		}
-		clientForUpdate.update(clientOffice, firstname, lastname, command.getExternalId(), command.getJoiningDate());
+		clientForUpdate.update(clientOffice, command);
 				
 		this.clientRepository.save(clientForUpdate);
 

@@ -98,21 +98,27 @@ public class Client extends AbstractAuditableCustom<AppUser, Long> {
         }
 	}
 
-	public void update(Office clientOffice, String firstname, String lastname, String externalId, LocalDate joiningDate) {
-		if (clientOffice != null) {
+	public void update(final Office clientOffice, final ClientCommand command) {
+		if (command.isOfficeChanged()) {
 			this.office = clientOffice;
 		}
-		if (joiningDate != null) {
-			this.joiningDate = joiningDate.toDate();
+		if (command.isJoiningDateChanged()) {
+			this.joiningDate = command.getJoiningDate().toDate();
 		}
-		if (StringUtils.isNotBlank(firstname)) {
-			this.firstName = firstname;
+		if (command.isFirstnameChanged()) {
+			this.firstName = command.getFirstname();
 		}
-		if (StringUtils.isNotBlank(lastname)) {
-			this.lastName = lastname;
+		if (command.isLastnameChanged()) {
+			this.lastName = command.getLastname();
 		}
-		if (externalId != null) {
-			 this.externalId = externalId.trim();
+		
+		if (command.isClientOrBusinessNameChanged()) {
+			this.lastName = command.getClientOrBusinessName();
+			this.firstName = null;
+		}
+		
+		if (command.isExternalIdChanged()) {
+			 this.externalId = StringUtils.defaultIfEmpty(externalId.trim(), null);
 		}
 	}
 

@@ -121,8 +121,15 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
 		}
 		
 		// associating fund with loan product at creation is optional for now.
-		Fund fund = findFundByIdIfProvided(command.getFundId());
-		LoanTransactionProcessingStrategy loanTransactionProcessingStrategy = findStrategyByIdIfProvided(command.getTransactionProcessingStrategyId());
+		Fund fund = null;
+		if (command.isFundChanged()) { 
+			fund = findFundByIdIfProvided(command.getFundId());
+		}
+		
+		LoanTransactionProcessingStrategy loanTransactionProcessingStrategy = null;
+		if (command.isTransactionProcessingStrategyChanged()) {
+			findStrategyByIdIfProvided(command.getTransactionProcessingStrategyId());
+		}
 		
 		product.update(command, fund, loanTransactionProcessingStrategy);
 		

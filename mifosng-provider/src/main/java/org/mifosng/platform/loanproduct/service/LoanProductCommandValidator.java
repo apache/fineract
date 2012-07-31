@@ -43,7 +43,7 @@ public class LoanProductCommandValidator {
 		baseDataValidator.reset().parameter("interestType").value(command.getInterestType()).ignoreIfNull().notNull().inMinMaxRange(0, 1);
 		baseDataValidator.reset().parameter("interestCalculationPeriodType").value(command.getInterestCalculationPeriodType()).ignoreIfNull().notNull().inMinMaxRange(0, 1);
 		
-		baseDataValidator.reset().anyOfNotNull(command.getFundId(), command.getName(), command.getDescription(), command.getCurrencyCode(), command.getDigitsAfterDecimal(),
+		baseDataValidator.reset().anyOfNotNull(command.getFundId(), command.getTransactionProcessingStrategyId(), command.getName(), command.getDescription(), command.getCurrencyCode(), command.getDigitsAfterDecimal(),
 				command.getPrincipal(), command.getInArrearsTolerance(), command.getRepaymentFrequencyType(), command.getRepaymentEvery(), command.getNumberOfRepayments(),
 				command.getInterestRatePerPeriod(), command.getInterestRateFrequencyType(), command.getAmortizationType(), command.getInterestType(), command.getInterestCalculationPeriodType());
 		

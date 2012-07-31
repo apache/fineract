@@ -33,7 +33,7 @@ public class ClientCommandValidator {
 		baseDataValidator.reset().parameter("joiningDate").value(command.getJoiningDate()).ignoreIfNull().notBlank();
 		baseDataValidator.reset().parameter("externalId").value(command.getExternalId()).ignoreIfNull().notExceedingLengthOf(100);
 		
-		if (command.isOfficeIdChanged()) {
+		if (command.isOfficeChanged()) {
 			baseDataValidator.reset().parameter("officeId").value(command.getOfficeId()).notNull().greaterThanZero();
 		}
 		

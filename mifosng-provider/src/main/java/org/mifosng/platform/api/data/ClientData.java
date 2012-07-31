@@ -9,12 +9,12 @@ import org.joda.time.LocalDate;
 public class ClientData {
 
 	private final Long id;
-	private final Long officeId;
-	private final String officeName;
 	private final String firstname;
 	private final String lastname;
 	private final String clientOrBusinessName;
 	private final String displayName;
+	private final Long officeId;
+	private final String officeName;
 	private final String externalId;
 	private final LocalDate joinedDate;
 

@@ -56,7 +56,27 @@ public class ClientCommand {
 		return joiningDate;
 	}
 	
-	public boolean isOfficeIdChanged() {
+	public boolean isFirstnameChanged() {
+		return this.modifiedParameters.contains("firstname");
+	}
+	
+	public boolean isLastnameChanged() {
+		return this.modifiedParameters.contains("lastname");
+	}
+	
+	public boolean isClientOrBusinessNameChanged() {
+		return this.modifiedParameters.contains("clientOrBusinessName");
+	}
+	
+	public boolean isExternalIdChanged() {
+		return this.modifiedParameters.contains("externalId");
+	}
+	
+	public boolean isJoiningDateChanged() {
+		return this.modifiedParameters.contains("joiningDate");
+	}
+	
+	public boolean isOfficeChanged() {
 		return this.modifiedParameters.contains("officeId");
 	}
 }

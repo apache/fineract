@@ -13,8 +13,9 @@ public class OfficeData {
 	private String externalId;
 	private LocalDate openingDate;
 	private String hierarchy;
-	private String parentName;
 	private Long parentId;
+	private String parentName;
+	
 	private List<OfficeLookup> allowedParents = new ArrayList<OfficeLookup>();
 
 	public OfficeData() {
@@ -106,5 +107,4 @@ public class OfficeData {
 	public void setAllowedParents(List<OfficeLookup> allowedParents) {
 		this.allowedParents = allowedParents;
 	}
-
 }
