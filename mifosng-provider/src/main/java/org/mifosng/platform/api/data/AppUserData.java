@@ -6,9 +6,9 @@ import java.util.List;
 public class AppUserData {
 
 	private Long id;
+	private String username;
 	private Long officeId;
 	private String officeName;
-	private String username;
 	private String firstname;
 	private String lastname;
 	private String email;

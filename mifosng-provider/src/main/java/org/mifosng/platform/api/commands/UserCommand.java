@@ -100,7 +100,7 @@ public class UserCommand implements Serializable {
 	}
 	
 	public boolean isPasswordChanged() {
-		return this.modifiedParameters.contains("password");
+		return this.modifiedParameters.contains("password") && this.modifiedParameters.contains("repeatPassword");
 	}
 	
 	public boolean isOfficeChanged() {

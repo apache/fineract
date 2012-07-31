@@ -88,7 +88,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 			
 			return appUser.getId();
 		} catch (DataIntegrityViolationException dve) {
-			handleOfficeDataIntegrityIssues(command, dve);
+			handleAppUserDataIntegrityIssues(command, dve);
 			return Long.valueOf(-1);
 		} catch (PlatformEmailSendException e) {
 			List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
@@ -127,7 +127,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 			userToUpdate.update(allRoles, office, command);
 			this.appUserRepository.saveAndFlush(userToUpdate);
 			
-			if (command.getPassword() != null || command.getRepeatPassword() != null) {
+			if (command.isPasswordChanged()) {
 				PlatformUser dummyPlatformUser = new BasicPasswordEncodablePlatformUser(
 						userToUpdate.getId(),
 						userToUpdate.getUsername(), command.getPassword());
@@ -140,7 +140,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 			
 			return userToUpdate.getId();
 		} catch (DataIntegrityViolationException dve) {
-			handleOfficeDataIntegrityIssues(command, dve);
+			handleAppUserDataIntegrityIssues(command, dve);
 			return Long.valueOf(-1);
 		}
 	}
@@ -164,6 +164,8 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 		return allRoles;
 	}
 	
+	// FIXME - KW - move this to a soft delete of user marking a is_deleted field as true so doesnt appear in results
+	// more than making a user disabled, locked?
 	@Transactional
 	@Override
 	public void deleteUser(final Long userId) {
@@ -178,11 +180,12 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 	/*
 	 * Guaranteed to throw an exception no matter what the data integrity issue is.
 	 */
-	private void handleOfficeDataIntegrityIssues(final UserCommand command, DataIntegrityViolationException dve)  {
+	private void handleAppUserDataIntegrityIssues(final UserCommand command, final DataIntegrityViolationException dve)  {
 		
 		Throwable realCause = dve.getMostSpecificCause();
 		if (realCause.getMessage().contains("username_org")) {
-			throw new PlatformDataIntegrityException("error.msg.user.duplicate.username", "User with username {0} already exists", "username", command.getUsername());
+			StringBuilder defaultMessageBuilder = new StringBuilder("User with username ").append(command.getUsername()).append(" already exists.");
+			throw new PlatformDataIntegrityException("error.msg.user.duplicate.username", defaultMessageBuilder.toString(), "username", command.getUsername());
 		}
 		
 		logger.error(dve.getMessage(), dve);
