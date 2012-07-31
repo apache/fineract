@@ -8,9 +8,9 @@ import org.joda.time.LocalDate;
 
 public class ClientData {
 
+	private final Long id;
 	private final Long officeId;
 	private final String officeName;
-	private final Long id;
 	private final String firstname;
 	private final String lastname;
 	private final String clientOrBusinessName;
@@ -60,16 +60,16 @@ public class ClientData {
 		this.allowedOffices = offices;
 	}
 
+	public Long getId() {
+		return id;
+	}
+	
 	public Long getOfficeId() {
 		return officeId;
 	}
 
 	public String getOfficeName() {
 		return officeName;
-	}
-
-	public Long getId() {
-		return id;
 	}
 
 	public String getFirstname() {

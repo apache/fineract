@@ -120,7 +120,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	
 	@Override
 	public String convertLoanTransactionDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final LoanTransactionData... transactions) {
-		Set<String> supportedParameters = new HashSet<String>(
+		final Set<String> supportedParameters = new HashSet<String>(
 				Arrays.asList("id", "transactionType", "date", "principal", "interest", "total", "totalWaived", "overpaid")
 		);
 		
@@ -157,7 +157,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	
 	@Override
 	public String convertLoanAccountDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final LoanAccountData loanAccount) {
-		Set<String> supportedParameters = new HashSet<String>(
+		final Set<String> supportedParameters = new HashSet<String>(
 				Arrays.asList("id", "externalId", "fundId", "fundName", "loanProductId", "loanProductName", "principal", "inArrearsTolerance", "numberOfRepayments",
 						"repaymentEvery", "interestRatePerPeriod", "annualInterestRate", 
 						"repaymentFrequencyType", "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType",
@@ -194,7 +194,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	@Override
 	public String convertNewLoanDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final NewLoanData newLoanData) {
 		
-		Set<String> supportedParameters = new HashSet<String>(
+		final Set<String> supportedParameters = new HashSet<String>(
 				Arrays.asList("clientId", "clientName", "productId", "productName",
 						"selectedProduct", "expectedDisbursementDate", "allowedProducts")
 		);
@@ -225,7 +225,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	
 	@Override
 	public String convertLoanProductDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final LoanProductData... products) {
-		Set<String> supportedParameters = new HashSet<String>(
+		final Set<String> supportedParameters = new HashSet<String>(
 				Arrays.asList("id", "name", "description", "fundId", "fundName", "transactionProcessingStrategyId", "transactionProcessingStrategyName",
 						"principal", "inArrearsTolerance", "numberOfRepayments",
 						"repaymentEvery", "interestRatePerPeriod", "annualInterestRate", 
@@ -268,7 +268,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	
 	@Override
 	public String convertNoteDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final NoteData... notes) {
-		Set<String> supportedParameters = new HashSet<String>(
+		final Set<String> supportedParameters = new HashSet<String>(
 				Arrays.asList("id", "clientId", "loanId", "loanTransactionId", "noteType", "note", "createdById", "createdByUsername", 
 						"createdOn", "updatedById", "updatedByUsername", "updatedOn")
 		);
@@ -307,8 +307,9 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	@Override
 	public String convertClientLoanAccountSummaryCollectionDataToJson(final boolean prettyPrint, final Set<String> responseParameters,
 			final ClientLoanAccountSummaryCollectionData clientAccountsData) {
-		Set<String> supportedParameters = new HashSet<String>(
-				Arrays.asList("pendingApprovalLoans", "awaitingDisbursalLoans", "openLoans", "closedLoans")
+		final Set<String> supportedParameters = new HashSet<String>(
+				Arrays.asList("pendingApprovalLoans", "awaitingDisbursalLoans", "openLoans", "closedLoans", 
+						"anyLoanCount", "pendingApprovalLoanCount", "awaitingDisbursalLoanCount", "activeLoanCount", "closedLoanCount")
 		);
 		
 		final Set<String> parameterNamesToSkip = new HashSet<String>();
@@ -336,7 +337,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	
 	@Override
 	public String convertClientDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final ClientData... clients) {
-		Set<String> supportedParameters = new HashSet<String>(
+		final Set<String> supportedParameters = new HashSet<String>(
 				Arrays.asList("id", "officeId", "officeName", "externalId", "firstname", "lastname", "joinedDate", "displayName", "allowedOffices")
 		);
 		
@@ -372,7 +373,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	
 	@Override
 	public String convertConfigurationDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final ConfigurationData... configuration) {
-		Set<String> supportedParameters = new HashSet<String>(Arrays.asList("selectedCurrencyOptions", "currencyOptions"));
+		final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("selectedCurrencyOptions", "currencyOptions"));
 		
 		final Set<String> parameterNamesToSkip = new HashSet<String>();
 		
@@ -407,7 +408,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	@Override
 	public String convertOfficeTransactionDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final OfficeTransactionData... officeTransactions) {
 		
-		Set<String> supportedParameters = new HashSet<String>(Arrays.asList("transactionDate", "allowedOffices", "currencyOptions"));
+		final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("transactionDate", "allowedOffices", "currencyOptions"));
 		
 		final Set<String> parameterNamesToSkip = new HashSet<String>();
 		
@@ -442,7 +443,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	@Override
 	public String convertAppUserDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final AppUserData... users) {
 		
-		Set<String> supportedParameters = new HashSet<String>(Arrays.asList("id", "officeId", "officeName", "username", "firstname", "lastname", "email",
+		final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("id", "officeId", "officeName", "username", "firstname", "lastname", "email",
 				"allowedOffices", "availableRoles", "selectedRoles"));
 		
 		final Set<String> parameterNamesToSkip = new HashSet<String>();
@@ -477,7 +478,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	
 	@Override
 	public String convertRoleDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final RoleData... roles) {
-		Set<String> supportedParameters = new HashSet<String>(Arrays.asList("id", "name", "description", "availablePermissions", "selectedPermissions"));
+		final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("id", "name", "description", "availablePermissions", "selectedPermissions"));
 		
 		final Set<String> parameterNamesToSkip = new HashSet<String>();
 		
@@ -511,8 +512,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	
 	@Override
 	public String convertPermissionDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final PermissionData... permissions) {
-		Set<String> supportedParameters = new HashSet<String>(Arrays.asList("id", "name", "nameDecorated", "externalId", "openingDate", 
-				"hierarchy", "parentId", "parentName", "allowedParents"));
+		final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("id", "name", "description", "code"));
 		
 		final Set<String> parameterNamesToSkip = new HashSet<String>();
 		
