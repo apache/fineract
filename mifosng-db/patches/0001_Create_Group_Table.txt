@@ -10,5 +10,6 @@ CREATE TABLE `portfolio_group` (
   KEY `FKJPWG000000000003` (`createdby_id`),
   KEY `FKJPWG000000000004` (`lastmodifiedby_id`),
   CONSTRAINT `FKJPWG000000000003` FOREIGN KEY (`createdby_id`) REFERENCES `admin_appuser` (`id`),
+  KEY `external_id` (`external_id`),
   CONSTRAINT `FKJPWG000000000004` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `admin_appuser` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
