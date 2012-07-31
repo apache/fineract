@@ -74,7 +74,7 @@ public class Role extends AbstractAuditableCustom<AppUser, Long> {
 		return data;
 	}
 
-	public void update(final RoleCommand command, List<Permission> selectedPermissions) {
+	public void update(final RoleCommand command, final List<Permission> selectedPermissions) {
 		if (command.isNameChanged()) {
 			this.name = command.getName();
 		}

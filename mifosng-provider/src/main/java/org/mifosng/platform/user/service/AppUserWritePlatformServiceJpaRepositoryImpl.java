@@ -67,7 +67,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 			UserCommandValidator validator = new UserCommandValidator(command);
 			validator.validateForCreate();
 			
-			Set<Role> allRoles = assembleSetOfRoles(command.getRoles());
+			final Set<Role> allRoles = assembleSetOfRoles(command);
 
 			Office office = this.officeRepository.findOne(command.getOfficeId());
 			if (office == null) {
@@ -101,7 +101,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 
 	@Transactional
 	@Override
-	public Long updateUser(UserCommand command) {
+	public Long updateUser(final UserCommand command) {
 		
 		try {
 			context.authenticatedUser();
@@ -109,10 +109,10 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 			UserCommandValidator validator = new UserCommandValidator(command);
 			validator.validateForUpdate();
 			
-			Set<Role> allRoles = assembleSetOfRoles(command.getRoles());
+			final Set<Role> allRoles = assembleSetOfRoles(command);
 
 			Office office = null;
-			if (command.getOfficeId() != null) {
+			if (command.isOfficeChanged()) {
 				office = this.officeRepository.findOne(command.getOfficeId());
 				if (office == null) {
 					throw new OfficeNotFoundException(command.getOfficeId());
@@ -124,7 +124,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 				throw new UserNotFoundException(command.getId());
 			}
 			
-			userToUpdate.update(allRoles, office, command.getUsername(), command.getFirstname(), command.getLastname(), command.getEmail());
+			userToUpdate.update(allRoles, office, command);
 			this.appUserRepository.saveAndFlush(userToUpdate);
 			
 			if (command.getPassword() != null || command.getRepeatPassword() != null) {
@@ -145,9 +145,12 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 		}
 	}
 	
-	private Set<Role> assembleSetOfRoles(final String[] rolesArray) {
-		Set<Role> allRoles = new HashSet<Role>();
-		if (!ObjectUtils.isEmpty(rolesArray)) {
+	private Set<Role> assembleSetOfRoles(final UserCommand command) {
+		
+		final Set<Role> allRoles = new HashSet<Role>();
+		
+		String[] rolesArray = command.getRoles();
+		if (command.isRolesChanged() && !ObjectUtils.isEmpty(rolesArray)) {
 			for (String roleId : rolesArray) {
 				Long id = Long.valueOf(roleId);
 				Role role = this.roleRepository.findOne(id);
@@ -157,6 +160,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 				allRoles.add(role);
 			}
 		}
+		
 		return allRoles;
 	}
 	

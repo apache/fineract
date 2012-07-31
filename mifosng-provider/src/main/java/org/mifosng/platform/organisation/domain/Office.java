@@ -49,7 +49,8 @@ public class Office extends AbstractAuditableCustom<AppUser, Long> {
     @Temporal(TemporalType.DATE)
 	private Date openingDate;
 
-    @Column(name = "external_id", length=100)
+    @SuppressWarnings("unused")
+	@Column(name = "external_id", length=100)
 	private String externalId;
 
     public static Office headOffice(final String name, final LocalDate openingDate, final String externalId) {
@@ -67,7 +68,7 @@ public class Office extends AbstractAuditableCustom<AppUser, Long> {
         this.externalId = null;
     }
 
-    public Office(final Office parent, final String name, final LocalDate openingDate, final String externalId) {
+    private Office(final Office parent, final String name, final LocalDate openingDate, final String externalId) {
         this.parent = parent;
         this.openingDate = openingDate.toDateMidnight().toDate();
         if (parent != null) {
@@ -90,14 +91,6 @@ public class Office extends AbstractAuditableCustom<AppUser, Long> {
         this.children.add(office);
     }
     
-    public String getName() {
-    	return this.name;
-    }
-
-    public boolean isHeadOffice() {
-        return this.parent == null;
-    }
-
 	public void update(final OfficeCommand command) {
 		
 		if (command.isNameChanged()) {
@@ -131,15 +124,44 @@ public class Office extends AbstractAuditableCustom<AppUser, Long> {
 		generateHierarchy();
 	}
 
-	public boolean identifiedBy(String identifier) {
-		return identifier.equalsIgnoreCase(this.name) || identifier.equalsIgnoreCase(this.externalId);
-	}
-
 	public boolean identifiedBy(final Long id) {
 		return getId().equals(id);
 	}
 
-	public boolean hasAnOfficeInHierarchyWithId(Long officeId) {
+	public void generateHierarchy() {
+		
+		if (parent != null) {
+			this.hierarchy = this.parent.hierarchyOf(this.getId());
+		} else {
+			this.hierarchy = ".";
+		}
+	}
+
+	private String hierarchyOf(Long id) {
+		return this.hierarchy + id.toString() + ".";
+	}
+	
+    public String getName() {
+    	return this.name;
+    }
+
+	public String getHierarchy() {
+		return hierarchy;
+	}
+
+	public boolean hasParentOf(final Office office) {
+		boolean isParent = false;
+		if (this.parent != null) {
+			isParent = this.parent.equals(office);
+		}
+		return isParent;
+	}
+	
+	public boolean doesNotHaveAnOfficeInHierarchyWithId(Long officeId) {
+		return !this.hasAnOfficeInHierarchyWithId(officeId);
+	}
+	
+	private boolean hasAnOfficeInHierarchyWithId(Long officeId) {
 		
 		boolean match = false;
 		
@@ -159,34 +181,5 @@ public class Office extends AbstractAuditableCustom<AppUser, Long> {
 		}
 		
 		return match;
-	}
-
-	public boolean doesNotHaveAnOfficeInHierarchyWithId(Long officeId) {
-		return !this.hasAnOfficeInHierarchyWithId(officeId);
-	}
-
-	public void generateHierarchy() {
-		
-		if (parent != null) {
-			this.hierarchy = this.parent.hierarchyOf(this.getId());
-		} else {
-			this.hierarchy = ".";
-		}
-	}
-
-	private String hierarchyOf(Long id) {
-		return this.hierarchy + id.toString() + ".";
-	}
-
-	public String getHierarchy() {
-		return hierarchy;
-	}
-
-	public boolean hasParentOf(final Office office) {
-		boolean isParent = false;
-		if (this.parent != null) {
-			isParent = this.parent.equals(office);
-		}
-		return isParent;
 	}
 }

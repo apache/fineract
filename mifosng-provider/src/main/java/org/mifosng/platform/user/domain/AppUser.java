@@ -16,6 +16,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.mifosng.platform.api.commands.UserCommand;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
 import org.mifosng.platform.infrastructure.PlatformUser;
 import org.mifosng.platform.organisation.domain.Office;
@@ -138,6 +139,29 @@ public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements P
 	public void updatePassword(final String encodePassword) {
 		this.password = encodePassword;
 	}
+	
+	public void update(final Set<Role> allRoles, final Office office, final UserCommand userCommand) {
+		
+		if (userCommand.isRolesChanged() && !allRoles.isEmpty()) {
+			this.roles.clear();
+			this.roles = allRoles;
+		}
+		if (userCommand.isOfficeChanged()) {
+			this.office = office;
+		}
+		if (userCommand.isUsernameChanged()) {
+			this.username = userCommand.getUsername();
+		}
+		if (userCommand.isFirstnameChanged()) {
+			this.firstname = userCommand.getFirstname();
+		}
+		if (userCommand.isLastnameChanged()) {
+			this.lastname = userCommand.getLastname();
+		}
+		if (userCommand.isEmailChanged()) {
+			this.email = userCommand.getEmail();
+		}
+	}
 
     @Override
     public Collection<GrantedAuthority> getAuthorities() {
@@ -184,6 +208,14 @@ public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements P
     public boolean isEnabled() {
         return this.enabled;
     }
+    
+    public String getFirstname() {
+		return firstname;
+	}
+
+	public String getLastname() {
+		return lastname;
+	}
 
     public String getEmail() {
         return this.email;
@@ -193,96 +225,9 @@ public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements P
         return this.roles;
     }
 
-    public String getRoleNames() {
-        StringBuilder roleNames = new StringBuilder();
-
-        for (Role role : this.roles) {
-            roleNames.append(role.toData().getName()).append(' ');
-        }
-
-        return roleNames.toString();
-    }
-
-    public void setUserIdAs(final Long id) {
-        this.setId(id);
-    }
-
     public Office getOffice() {
         return this.office;
     }
-
-    public boolean isHeadOfficeUser() {
-        boolean headOfficeUser = false;
-        if (this.office != null) {
-            headOfficeUser = this.office.isHeadOffice();
-        }
-        return headOfficeUser;
-    }
-
-    public boolean hasPermissionTo(final String permissionCode) {
-        boolean match = false;
-        for (Role role : this.roles) {
-            if (role.hasPermissionTo(permissionCode)) {
-                match = true;
-                break;
-            }
-        }
-
-        return match;
-    }
-    
-    public boolean hasNotPermissionForAnyOf(final String... permissionCodes) {
-    	boolean hasNotPermission = true;
-    	for (String permissionCode : permissionCodes) {
-			boolean checkPermission = this.hasPermissionTo(permissionCode);
-			if (checkPermission) {
-				hasNotPermission = false;
-				break;
-			}
-		}
-    	return hasNotPermission;
-    }
-
-    public boolean hasNotPermissionTo(final String permissionCode) {
-        return !this.hasPermissionTo(permissionCode);
-    }
-
-	public boolean canAccess(Long officeId) {
-		return this.office.hasAnOfficeInHierarchyWithId(officeId);
-	}
-
-	public String getFirstname() {
-		return firstname;
-	}
-
-	public String getLastname() {
-		return lastname;
-	}
-
-	/**
-	 * When updating details, any parameters with null values are ignored.
-	 */
-	public void update(Set<Role> allRoles, Office office, String username, String firstname, String lastname, String email) {
-		if (!allRoles.isEmpty()) {
-			this.roles.clear();
-			this.roles = allRoles;
-		}
-		if (office != null) {
-			this.office = office;
-		}
-		if (username != null) {
-			this.username = username;
-		}
-		if (firstname != null) {
-			this.firstname = firstname;
-		}
-		if (lastname != null) {
-			this.lastname = lastname;
-		}
-		if (email != null) {
-			this.email = email;
-		}
-	}
 
 	public boolean canNotApproveLoanInPast() {
 		return hasNotPermissionForAnyOf("CAN_APPROVE_LOAN_IN_THE_PAST_ROLE", "PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE");
@@ -302,5 +247,29 @@ public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements P
 
 	public boolean canNotMakeRepaymentOnLoanInPast() {
 		return hasNotPermissionForAnyOf("CAN_MAKE_LOAN_REPAYMENT_IN_THE_PAST_ROLE", "PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE");
+	}
+	
+	public boolean hasNotPermissionForAnyOf(final String... permissionCodes) {
+		boolean hasNotPermission = true;
+		for (String permissionCode : permissionCodes) {
+			boolean checkPermission = this.hasPermissionTo(permissionCode);
+			if (checkPermission) {
+				hasNotPermission = false;
+				break;
+			}
+		}
+		return hasNotPermission;
+	}
+
+	private boolean hasPermissionTo(final String permissionCode) {
+		boolean match = false;
+		for (Role role : this.roles) {
+			if (role.hasPermissionTo(permissionCode)) {
+				match = true;
+				break;
+			}
+		}
+
+		return match;
 	}
 }

@@ -86,4 +86,28 @@ public class UserCommand implements Serializable {
 	public boolean isUsernameChanged() {
 		return this.modifiedParameters.contains("username");
 	}
+	
+	public boolean isFirstnameChanged() {
+		return this.modifiedParameters.contains("firstname");
+	}
+	
+	public boolean isLastnameChanged() {
+		return this.modifiedParameters.contains("lastname");
+	}
+	
+	public boolean isEmailChanged() {
+		return this.modifiedParameters.contains("email");
+	}
+	
+	public boolean isPasswordChanged() {
+		return this.modifiedParameters.contains("password");
+	}
+	
+	public boolean isOfficeChanged() {
+		return this.modifiedParameters.contains("officeId");
+	}
+	
+	public boolean isRolesChanged() {
+		return this.modifiedParameters.contains("roles");
+	}
 }
