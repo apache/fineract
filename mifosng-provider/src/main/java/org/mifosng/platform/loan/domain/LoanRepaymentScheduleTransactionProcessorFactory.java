@@ -8,12 +8,12 @@ public class LoanRepaymentScheduleTransactionProcessorFactory {
 
 	public LoanRepaymentScheduleTransactionProcessor determineProcessor(final LoanTransactionProcessingStrategy transactionProcessingStrategy) {
 
-		LoanRepaymentScheduleTransactionProcessor processor = new HeavensFamilyLoanRepaymentScheduleTransactionProcessor();
+		LoanRepaymentScheduleTransactionProcessor processor = new MifosStyleLoanRepaymentScheduleTransactionProcessor();
 		
 		if (transactionProcessingStrategy != null) {
 			
 			if (transactionProcessingStrategy.isStandardMifosStrategy()) {
-				processor = new HeavensFamilyLoanRepaymentScheduleTransactionProcessor();
+				processor = new MifosStyleLoanRepaymentScheduleTransactionProcessor();
 			}
 			
 			if (transactionProcessingStrategy.isHeavensfamilyStrategy()) {
@@ -31,5 +31,4 @@ public class LoanRepaymentScheduleTransactionProcessorFactory {
 		
 		return processor;
 	}
-
 }

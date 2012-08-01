@@ -6,25 +6,18 @@ import org.joda.time.LocalDate;
 import org.mifosng.platform.currency.domain.Money;
 
 /**
- * Creocore style {@link LoanRepaymentScheduleTransactionProcessor}.
+ * Old Mifos style {@link LoanRepaymentScheduleTransactionProcessor}.
  * 
- * For standard transactions, pays off components in order of interest, then
+ * For ALL types of transactions, pays off components in order of interest, then
  * principal.
  * 
- * If a transaction results in an advance payment or over-payment for a given
- * installment, the over paid amount is pay off on the principal component of
- * subsequent installments.
- * 
- * If the entire principal of an installment is paid in advance then the
- * interest component is waived.
+ * Other formulas exist on mifos where you can choose 'Declining-Balance Interest Recalculation' which simply
+ * means, recalculate the interest component based on the how much principal is outstanding at a point in time;
+ * but this isnt trying to model that option only the basic one for now.
  */
-public class CreocoreLoanRepaymentScheduleTransactionProcessor extends
+public class MifosStyleLoanRepaymentScheduleTransactionProcessor extends
 		AbstractLoanRepaymentScheduleTransactionProcessor {
 
-	/**
-	 * For creocore, early is defined as any date before the installment due
-	 * date
-	 */
 	@Override
 	protected boolean isTransactionInAdvanceOfInstallment(
 			final int currentInstallmentIndex,
