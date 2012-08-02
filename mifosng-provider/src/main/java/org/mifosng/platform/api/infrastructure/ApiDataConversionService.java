@@ -6,6 +6,7 @@ import org.mifosng.platform.api.commands.AdjustLoanTransactionCommand;
 import org.mifosng.platform.api.commands.BranchMoneyTransferCommand;
 import org.mifosng.platform.api.commands.ClientCommand;
 import org.mifosng.platform.api.commands.FundCommand;
+import org.mifosng.platform.api.commands.GroupCommand;
 import org.mifosng.platform.api.commands.LoanProductCommand;
 import org.mifosng.platform.api.commands.LoanStateTransitionCommand;
 import org.mifosng.platform.api.commands.LoanTransactionCommand;
@@ -92,6 +93,8 @@ public interface ApiDataConversionService {
 
 	ClientCommand convertJsonToClientCommand(Long resourceIdentifier, String jsonRequestBody);
 
+	GroupCommand convertJsonToGroupCommand(Long resourceIdentifier, String jsonRequestBody);
+	
 	SubmitLoanApplicationCommand convertJsonToSubmitLoanApplicationCommand(String jsonRequestBody);
 
 	LoanStateTransitionCommand convertJsonToLoanStateTransitionCommand(Long resourceIdentifier, String jsonRequestBody);

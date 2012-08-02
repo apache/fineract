@@ -22,6 +22,7 @@ import org.mifosng.platform.api.commands.AdjustLoanTransactionCommand;
 import org.mifosng.platform.api.commands.BranchMoneyTransferCommand;
 import org.mifosng.platform.api.commands.ClientCommand;
 import org.mifosng.platform.api.commands.FundCommand;
+import org.mifosng.platform.api.commands.GroupCommand;
 import org.mifosng.platform.api.commands.LoanProductCommand;
 import org.mifosng.platform.api.commands.LoanStateTransitionCommand;
 import org.mifosng.platform.api.commands.LoanTransactionCommand;
@@ -818,6 +819,29 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	}
 	
 	@Override
+    public GroupCommand convertJsonToGroupCommand(final Long resourceIdentifier, final String json) {
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
+        
+        Type typeOfMap = new TypeToken<Map<String, String>>(){}.getType();
+        Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
+
+        Set<String> supportedParams = new HashSet<String>(
+                Arrays.asList("name", "externalId")
+        );
+        
+        checkForUnsupportedParameters(requestMap, supportedParams);
+
+        Set<String> modifiedParameters = new HashSet<String>();
+        
+        String externalId = extractStringParameter("externalId", requestMap, modifiedParameters);
+        String name = extractStringParameter("name", requestMap, modifiedParameters);
+
+        return new GroupCommand(modifiedParameters, externalId, name);
+    }
+
+    @Override
 	public LoanProductCommand convertJsonToLoanProductCommand(final Long resourceIdentifier, final String json) {
 		
 		if (StringUtils.isBlank(json)) {
