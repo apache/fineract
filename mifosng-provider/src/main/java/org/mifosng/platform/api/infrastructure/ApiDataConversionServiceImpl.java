@@ -1441,7 +1441,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 			Set<String> responseParameters, SavingProductData... products) {
 		
 		Set<String> supportedParameters = new HashSet<String>(
-				Arrays.asList("id", "name", "description","createdOn", "lastModifedOn","interestRate","currencyCode","digitsAfterDecimal"));
+				Arrays.asList("id", "name", "description","createdOn", "lastModifedOn","interestRate","currencyCode","digitsAfterDecimal", "currencyOptions"));
 		
 		final Set<String> parameterNamesToSkip = new HashSet<String>();
 		
