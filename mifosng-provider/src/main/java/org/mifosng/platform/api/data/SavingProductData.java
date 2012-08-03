@@ -10,14 +10,13 @@ public class SavingProductData implements Serializable {
 	private Long id;
 	private String name;
 	private String description;
-	
-	private DateTime createdOn;
-	private DateTime lastModifedOn;
-	
 	private String currencyCode;
 	private Integer digitsAfterDecimal;
 	
 	private BigDecimal interestRate = BigDecimal.ZERO;
+	
+	private DateTime createdOn;
+	private DateTime lastModifedOn;
 	
 	public SavingProductData(){
 		//

@@ -1232,7 +1232,20 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		return eventLocalDate;
 	}
 	
-	private Integer convertToInteger(String numericalValueFormatted, String parameterName, Locale clientApplicationLocale) {
+	private Integer convertToInteger(final String numericalValueFormatted, final String parameterName, final Locale clientApplicationLocale) {
+		
+		if (clientApplicationLocale == null) {
+			
+			List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+			String defaultMessage = new StringBuilder("The parameter '" + parameterName + "' requires a 'locale' parameter to be passed with it.").toString();
+			ApiParameterError error = ApiParameterError.parameterError("validation.msg.missing.locale.parameter", defaultMessage, parameterName);
+			dataValidationErrors.add(error);
+			
+			throw new PlatformApiDataValidationException(
+					"validation.msg.validation.errors.exist",
+					"Validation errors exist.", dataValidationErrors);
+		}
+		
 		try {
 			Integer number = null;
 
