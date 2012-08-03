@@ -2,6 +2,7 @@ package org.mifosng.platform.group.service;
 
 import org.mifosng.platform.api.commands.GroupCommand;
 import org.mifosng.platform.api.data.EntityIdentifier;
+import org.mifosng.platform.exceptions.GroupNotFoundException;
 import org.mifosng.platform.group.domain.Group;
 import org.mifosng.platform.group.domain.GroupRepository;
 import org.mifosng.platform.security.PlatformSecurityContext;
@@ -36,6 +37,26 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
         this.groupRepository.save(newGroup);
         
         return new EntityIdentifier(newGroup.getId());
+    }
+
+    @Transactional
+    @Override
+    public EntityIdentifier updateGroup(GroupCommand command) {
+        
+        context.authenticatedUser();
+        
+        GroupCommandValidator validator = new GroupCommandValidator(command);
+        validator.validateForUpdate();
+        
+        Group groupForUpdate = this.groupRepository.findOne(command.getId());
+        if (groupForUpdate == null){
+            throw new GroupNotFoundException(command.getId());
+        }
+        groupForUpdate.update(command);
+        
+        groupRepository.save(groupForUpdate);
+        
+        return new EntityIdentifier(groupForUpdate.getId());
     }
 
 }

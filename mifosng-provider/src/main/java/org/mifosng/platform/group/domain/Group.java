@@ -5,6 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 import org.apache.commons.lang.StringUtils;
+import org.mifosng.platform.api.commands.GroupCommand;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
 import org.mifosng.platform.user.domain.AppUser;
 
@@ -38,6 +39,16 @@ public class Group extends AbstractAuditableCustom<AppUser, Long> {
             this.externalId = externalId.trim();
         } else {
             this.externalId = null;
+        }
+    }
+    
+    public void update(GroupCommand command) {
+        if (command.isExternalIdChanged()) {
+            this.externalId = command.getExternalId();
+        }
+
+        if (command.isNameChanged()) {
+            this.name = command.getName();
         }
     }
 }

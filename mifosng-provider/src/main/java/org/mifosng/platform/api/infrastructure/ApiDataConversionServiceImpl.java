@@ -42,6 +42,7 @@ import org.mifosng.platform.api.data.ClientLoanAccountSummaryCollectionData;
 import org.mifosng.platform.api.data.ConfigurationData;
 import org.mifosng.platform.api.data.FundData;
 import org.mifosng.platform.api.data.GenericResultsetData;
+import org.mifosng.platform.api.data.GroupData;
 import org.mifosng.platform.api.data.LoanAccountData;
 import org.mifosng.platform.api.data.LoanProductData;
 import org.mifosng.platform.api.data.LoanTransactionData;
@@ -373,6 +374,40 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	}
 	
 	@Override
+    public String convertGroupDataToJson(boolean prettyPrint, Set<String> responseParameters, GroupData... groups) {
+        final Set<String> supportedParameters = new HashSet<String>(
+                Arrays.asList("id", "name", "externalId")
+        );
+        
+        final Set<String> parameterNamesToSkip = new HashSet<String>();
+        
+        if (!responseParameters.isEmpty()) {
+            if (!supportedParameters.containsAll(responseParameters)) {
+                throw new UnsupportedParameterException(new ArrayList<String>(responseParameters));
+            }
+            
+            parameterNamesToSkip.addAll(supportedParameters);
+            parameterNamesToSkip.removeAll(responseParameters);
+        }
+        
+        ExclusionStrategy strategy = new ParameterListExclusionStrategy(parameterNamesToSkip);
+        GsonBuilder builder = new GsonBuilder().addSerializationExclusionStrategy(strategy);
+        if (prettyPrint) {
+            builder.setPrettyPrinting();
+        }
+        Gson gsonDeserializer = builder.create();
+        String json = "";
+        
+        if (groups != null && groups.length == 1) {
+            json = gsonDeserializer.toJson(groups[0]);
+        } else {
+            json = gsonDeserializer.toJson(groups);
+        }
+        
+        return json;
+    }
+
+    @Override
 	public String convertConfigurationDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final ConfigurationData... configuration) {
 		final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("selectedCurrencyOptions", "currencyOptions"));
 		
@@ -838,7 +873,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
         String externalId = extractStringParameter("externalId", requestMap, modifiedParameters);
         String name = extractStringParameter("name", requestMap, modifiedParameters);
 
-        return new GroupCommand(modifiedParameters, externalId, name);
+        return new GroupCommand(modifiedParameters, resourceIdentifier, externalId, name);
     }
 
     @Override

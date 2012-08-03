@@ -25,6 +25,7 @@ import org.mifosng.platform.api.data.ClientLoanAccountSummaryCollectionData;
 import org.mifosng.platform.api.data.ConfigurationData;
 import org.mifosng.platform.api.data.FundData;
 import org.mifosng.platform.api.data.GenericResultsetData;
+import org.mifosng.platform.api.data.GroupData;
 import org.mifosng.platform.api.data.LoanAccountData;
 import org.mifosng.platform.api.data.LoanProductData;
 import org.mifosng.platform.api.data.LoanTransactionData;
@@ -53,6 +54,8 @@ public interface ApiDataConversionService {
 	
 	String convertClientLoanAccountSummaryCollectionDataToJson(boolean prettyPrint, Set<String> responseParameters, 
 			ClientLoanAccountSummaryCollectionData clientAccountsData);
+	
+	String convertGroupDataToJson(boolean prettyPrint, Set<String> responseParameters, GroupData... groups);
 	
 	String convertNoteDataToJson(boolean prettyPrint, Set<String> responseParameters, NoteData... notes);
 	
