@@ -1,7 +1,11 @@
 package org.mifosng.platform.loan.domain;
 
 public enum PeriodFrequencyType {
-	DAYS(0, "periodFrequencyType.days"), WEEKS(1, "periodFrequencyType.weeks"), MONTHS(2, "periodFrequencyType.months"), YEARS(3, "periodFrequencyType.years"), INVALID(4, "periodFrequencyType.invalid");
+	DAYS(0, "periodFrequencyType.days"), //
+	WEEKS(1, "periodFrequencyType.weeks"), //
+	MONTHS(2, "periodFrequencyType.months"), //
+	YEARS(3, "periodFrequencyType.years"), //
+	INVALID(4, "periodFrequencyType.invalid");
 
     private final Integer value;
 	private final String code;

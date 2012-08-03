@@ -27,6 +27,7 @@ public class LoanProductData {
 	private BigDecimal interestRatePerPeriod = BigDecimal.ZERO;
 	private BigDecimal annualInterestRate = BigDecimal.ZERO;
 
+	private EnumOptionData loanTermFrequencyType;
 	private EnumOptionData repaymentFrequencyType;
 	private EnumOptionData interestRateFrequencyType;
 	private EnumOptionData amortizationType;
@@ -44,6 +45,7 @@ public class LoanProductData {
 	private List<EnumOptionData> interestCalculationPeriodTypeOptions = new ArrayList<EnumOptionData>();
 	private List<EnumOptionData> repaymentFrequencyTypeOptions = new ArrayList<EnumOptionData>();
 	private List<EnumOptionData> interestRateFrequencyTypeOptions = new ArrayList<EnumOptionData>();
+	private List<EnumOptionData> loanTermFrequencyTypeOptions = new ArrayList<EnumOptionData>();
 
 	public LoanProductData() {
 		//
@@ -54,6 +56,7 @@ public class LoanProductData {
 			MoneyData tolerance, Integer numberOfRepayments,
 			Integer repaymentEvery, BigDecimal interestRatePerPeriod,
 			BigDecimal annualInterestRate,
+			EnumOptionData loanTermFrequencyType,
 			EnumOptionData repaymentFrequencyType,
 			EnumOptionData interestRateFrequencyType,
 			EnumOptionData amortizationType, EnumOptionData interestType,
@@ -70,6 +73,7 @@ public class LoanProductData {
 		this.repaymentEvery = repaymentEvery;
 		this.interestRatePerPeriod = interestRatePerPeriod;
 		this.annualInterestRate = annualInterestRate;
+		this.loanTermFrequencyType = loanTermFrequencyType;
 		this.repaymentFrequencyType = repaymentFrequencyType;
 		this.interestRateFrequencyType = interestRateFrequencyType;
 		this.amortizationType = amortizationType;
@@ -260,6 +264,23 @@ public class LoanProductData {
 	public void setInterestRateFrequencyTypeOptions(
 			List<EnumOptionData> interestRateFrequencyTypeOptions) {
 		this.interestRateFrequencyTypeOptions = interestRateFrequencyTypeOptions;
+	}
+	
+	public EnumOptionData getLoanTermFrequencyType() {
+		return loanTermFrequencyType;
+	}
+
+	public void setLoanTermFrequencyType(EnumOptionData loanTermFrequencyType) {
+		this.loanTermFrequencyType = loanTermFrequencyType;
+	}
+
+	public List<EnumOptionData> getLoanTermFrequencyTypeOptions() {
+		return loanTermFrequencyTypeOptions;
+	}
+
+	public void setLoanTermFrequencyTypeOptions(
+			List<EnumOptionData> loanTermFrequencyTypeOptions) {
+		this.loanTermFrequencyTypeOptions = loanTermFrequencyTypeOptions;
 	}
 
 	public List<CurrencyData> getCurrencyOptions() {

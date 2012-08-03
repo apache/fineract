@@ -31,8 +31,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
-public class LoanProductReadPlatformServiceImpl implements
-		LoanProductReadPlatformService {
+public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatformService {
 
 	private final PlatformSecurityContext context;
 	private final CurrencyReadPlatformService currencyReadPlatformService;
@@ -188,24 +187,21 @@ public class LoanProductReadPlatformServiceImpl implements
 			BigDecimal annualInterestRate = rs
 					.getBigDecimal("annualInterestRate");
 
-			int repaymentFrequencyTypeId = JdbcSupport.getInteger(rs,
-					"repaymentPeriodFrequency");
-			EnumOptionData repaymentFrequencyType = LoanEnumerations
-					.repaymentFrequencyType(repaymentFrequencyTypeId);
+			int repaymentFrequencyTypeId = JdbcSupport.getInteger(rs, "repaymentPeriodFrequency");
+			EnumOptionData repaymentFrequencyType = LoanEnumerations.repaymentFrequencyType(repaymentFrequencyTypeId);
+			
+			EnumOptionData loanTermFrequencyType = LoanEnumerations.loanTermFrequencyType(repaymentFrequencyTypeId);
 
 			int amortizationTypeId = JdbcSupport.getInteger(rs,
 					"amortizationMethod");
 			EnumOptionData amortizationType = LoanEnumerations
 					.amortizationType(amortizationTypeId);
 
-			int interestRateFrequencyTypeId = JdbcSupport.getInteger(rs,
-					"interestRatePerPeriodFreq");
-			EnumOptionData interestRateFrequencyType = LoanEnumerations
-					.interestRateFrequencyType(interestRateFrequencyTypeId);
+			int interestRateFrequencyTypeId = JdbcSupport.getInteger(rs,"interestRatePerPeriodFreq");
+			EnumOptionData interestRateFrequencyType = LoanEnumerations.interestRateFrequencyType(interestRateFrequencyTypeId);
 
 			int interestTypeId = JdbcSupport.getInteger(rs, "interestMethod");
-			EnumOptionData interestType = LoanEnumerations
-					.interestType(interestTypeId);
+			EnumOptionData interestType = LoanEnumerations.interestType(interestTypeId);
 
 			int interestCalculationPeriodTypeId = JdbcSupport.getInteger(rs,
 					"interestCalculationInPeriodMethod");
@@ -218,7 +214,7 @@ public class LoanProductReadPlatformServiceImpl implements
 			return new LoanProductData(createdOn, lastModifedOn, id, name,
 					description, principalMoney, toleranceMoney,
 					numberOfRepayments, repaymentEvery, interestRatePerPeriod,
-					annualInterestRate, repaymentFrequencyType,
+					annualInterestRate, loanTermFrequencyType, repaymentFrequencyType,
 					interestRateFrequencyType, amortizationType, interestType,
 					interestCalculationPeriodType, fundId, fundName, transactionStrategyId, transactionStrategyName);
 		}
