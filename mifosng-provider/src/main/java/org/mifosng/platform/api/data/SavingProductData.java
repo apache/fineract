@@ -2,6 +2,8 @@ package org.mifosng.platform.api.data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.joda.time.DateTime;
 
@@ -17,6 +19,8 @@ public class SavingProductData implements Serializable {
 	
 	private DateTime createdOn;
 	private DateTime lastModifedOn;
+	
+	private List<CurrencyData> currencyOptions = new ArrayList<CurrencyData>();
 	
 	public SavingProductData(){
 		//
@@ -96,7 +100,12 @@ public class SavingProductData implements Serializable {
 	public void setDigitsAfterDecimal(Integer digitsAfterDecimal) {
 		this.digitsAfterDecimal = digitsAfterDecimal;
 	}
-	
-	
-	
+
+	public List<CurrencyData> getCurrencyOptions() {
+		return currencyOptions;
+	}
+
+	public void setCurrencyOptions(List<CurrencyData> currencyOptions) {
+		this.currencyOptions = currencyOptions;
+	}
 }

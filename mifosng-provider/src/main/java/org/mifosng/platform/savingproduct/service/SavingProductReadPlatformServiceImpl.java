@@ -4,8 +4,10 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.List;
 
 import org.joda.time.DateTime;
+import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.SavingProductData;
 import org.mifosng.platform.api.data.SavingProductLookup;
 import org.mifosng.platform.currency.service.CurrencyReadPlatformService;
@@ -68,6 +70,8 @@ public class SavingProductReadPlatformServiceImpl implements
 					+ " where sp.id = ?";
 			SavingProductData productData = this.jdbcTemplate.queryForObject(sql,
 					savingProductMapper, new Object[] { savingProductId });
+			
+			populateProductDataWithDropdownOptions(productData);
 
 			return productData;
 		} catch (EmptyResultDataAccessException e) {
@@ -79,6 +83,8 @@ public class SavingProductReadPlatformServiceImpl implements
 	public SavingProductData retrieveNewSavingProductDetails() {
 		
 		SavingProductData productData=new SavingProductData();
+		
+		populateProductDataWithDropdownOptions(productData);
 		
 		return productData;
 	}
@@ -135,6 +141,11 @@ public class SavingProductReadPlatformServiceImpl implements
 			return new SavingProductLookup(id, name);
 		}
 
+	}
+	private void populateProductDataWithDropdownOptions(final SavingProductData productData) {
+
+		List<CurrencyData> currencyOptions = currencyReadPlatformService.retrieveAllowedCurrencies();
+		productData.setCurrencyOptions(currencyOptions);
 	}
 
 }
