@@ -2,6 +2,7 @@ package org.mifosng.platform.savingproduct.service;
 
 import org.mifosng.platform.api.commands.SavingProductCommand;
 import org.mifosng.platform.api.data.EntityIdentifier;
+import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.exceptions.SavingProductNotFoundException;
 import org.mifosng.platform.saving.domain.SavingProduct;
 import org.mifosng.platform.saving.domain.SavingProductRepository;
@@ -30,7 +31,9 @@ public class SavingProductWritePlatformServiceJpaRepositoryImpl implements Savin
 		SavingProductCommandValidator validator=new SavingProductCommandValidator(command);
 		validator.validateForCreate();
 		
-		SavingProduct product = new SavingProduct(command.getName(),command.getDescription());  
+		MonetaryCurrency currency = new MonetaryCurrency(command.getCurrencyCode(), command.getDigitsAfterDecimal());
+		
+		SavingProduct product = new SavingProduct(command.getName(),command.getDescription(),currency,command.getInterestRate());  
 		this.savingProductRepository.save(product);
 		return new EntityIdentifier(product.getId());
 	}

@@ -24,7 +24,10 @@ public class SavingProductCommandValidator {
 		baseDataValidator.reset().parameter("id").value(command.getId()).notNull();
 		baseDataValidator.reset().parameter("name").value(command.getName()).ignoreIfNull().notBlank();
 		baseDataValidator.reset().parameter("description").value(command.getDescription()).ignoreIfNull().notExceedingLengthOf(500);
-		baseDataValidator.reset().anyOfNotNull(command.getName(), command.getDescription());
+		baseDataValidator.reset().parameter("currencyCode").value(command.getCurrencyCode()).ignoreIfNull().notBlank();
+		baseDataValidator.reset().parameter("digitsAfterDecimal").value(command.getDigitsAfterDecimal()).ignoreIfNull().notNull().inMinMaxRange(0, 6);
+		baseDataValidator.reset().parameter("interestRate").value(command.getInterestRate()).ignoreIfNull().notBlank();
+		baseDataValidator.reset().anyOfNotNull(command.getName(), command.getDescription(),command.getCurrencyCode(),command.getDigitsAfterDecimal(),command.getInterestRate());
 		
 		if (!dataValidationErrors.isEmpty()) {
 			throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);
@@ -38,6 +41,9 @@ public class SavingProductCommandValidator {
 		DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("product");
 		baseDataValidator.reset().parameter("name").value(command.getName()).notBlank();
 		baseDataValidator.reset().parameter("description").value(command.getDescription()).notExceedingLengthOf(500);
+		baseDataValidator.reset().parameter("currencyCode").value(command.getCurrencyCode()).notBlank();
+		baseDataValidator.reset().parameter("digitsAfterDecimal").value(command.getDigitsAfterDecimal()).notNull().inMinMaxRange(0, 6);
+		baseDataValidator.reset().parameter("interestRate").value(command.getInterestRate()).notNull();
 		
 		if (!dataValidationErrors.isEmpty()) {
 			throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);

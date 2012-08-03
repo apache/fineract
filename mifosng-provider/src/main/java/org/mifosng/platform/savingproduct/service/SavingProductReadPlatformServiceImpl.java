@@ -1,5 +1,6 @@
 package org.mifosng.platform.savingproduct.service;
 
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -7,6 +8,7 @@ import java.util.Collection;
 import org.joda.time.DateTime;
 import org.mifosng.platform.api.data.SavingProductData;
 import org.mifosng.platform.api.data.SavingProductLookup;
+import org.mifosng.platform.currency.service.CurrencyReadPlatformService;
 import org.mifosng.platform.exceptions.LoanProductNotFoundException;
 import org.mifosng.platform.infrastructure.JdbcSupport;
 import org.mifosng.platform.infrastructure.TenantAwareRoutingDataSource;
@@ -23,12 +25,14 @@ public class SavingProductReadPlatformServiceImpl implements
 	
 	private final PlatformSecurityContext context;
 	private final JdbcTemplate jdbcTemplate;
+	private final CurrencyReadPlatformService currencyReadPlatformService;
 	
 	@Autowired
-	public SavingProductReadPlatformServiceImpl(final PlatformSecurityContext context,final TenantAwareRoutingDataSource dataSource) {
+	public SavingProductReadPlatformServiceImpl(final PlatformSecurityContext context,final TenantAwareRoutingDataSource dataSource,final CurrencyReadPlatformService currencyReadPlatformService) {
 		
 		this.context=context;
 		jdbcTemplate=new JdbcTemplate(dataSource);
+		this.currencyReadPlatformService=currencyReadPlatformService;
 	}
 
 	@Override
@@ -85,7 +89,9 @@ public class SavingProductReadPlatformServiceImpl implements
 		}
 		
 		public String savingProductSchema(){
-			return "sp.id as id,sp.name as name, sp.description as description, sp.created_date as createdon, sp.lastmodified_date as modifiedon from portfolio_product_savings sp ";
+			return "sp.id as id,sp.name as name, sp.description as description,sp.currency_code as currencyCode, sp.currency_digits as currencyDigits,sp.interest_rate as interestRate,sp.created_date as createdon, sp.lastmodified_date as modifiedon,"
+				+  "curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, curr.display_symbol as currencyDisplaySymbol" 
+				+  "  from portfolio_product_savings sp join ref_currency curr on curr.code = sp.currency_code";
 		}
 
 		@Override
@@ -96,10 +102,19 @@ public class SavingProductReadPlatformServiceImpl implements
 			String name = rs.getString("name");
 			String description = rs.getString("description");
 			
+			String currencyCode = rs.getString("currencyCode");
+			//String currencyName = rs.getString("currencyName");
+			//String currencyNameCode = rs.getString("currencyNameCode");
+			//String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
+			Integer currencyDigits = JdbcSupport.getInteger(rs,"currencyDigits");
+			
+			//CurrencyData currencyData = new CurrencyData(currencyCode,currencyName, currencyDigits, currencyDisplaySymbol,currencyNameCode);*/
+			BigDecimal interestRate = rs.getBigDecimal("interestRate");
+			
 			DateTime createdOn = JdbcSupport.getDateTime(rs, "createdon");
 			DateTime lastModifedOn = JdbcSupport.getDateTime(rs, "modifiedon");
 			
-			return new SavingProductData(createdOn, lastModifedOn, id, name,description);
+			return new SavingProductData(createdOn, lastModifedOn, id, name,description,interestRate,currencyCode,currencyDigits);
 		}
 	}
 	

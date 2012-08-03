@@ -1,5 +1,6 @@
 package org.mifosng.platform.api.commands;
 
+import java.math.BigDecimal;
 import java.util.Set;
 
 public class SavingProductCommand {
@@ -7,12 +8,24 @@ public class SavingProductCommand {
 	private final String name;
 	private final String description;
 
+	private final String currencyCode;
+	private final Integer digitsAfterDecimal;
+	private final BigDecimal interestRate;
+
 	private final Set<String> modifiedParameters;
 
-	public SavingProductCommand(final Set<String> modifiedParameters, final Long id, final String name, final String description) {
+	public SavingProductCommand(final Set<String> modifiedParameters,
+			final Long id, final String name, final String description,
+			final String currencyCode, final Integer digitsAfterDecimal,
+			final BigDecimal interestRate) {
 		this.id = id;
 		this.name = name;
 		this.description = description;
+
+		this.currencyCode = currencyCode;
+		this.digitsAfterDecimal = digitsAfterDecimal;
+		this.interestRate = interestRate;
+
 		this.modifiedParameters = modifiedParameters;
 	}
 
@@ -27,6 +40,18 @@ public class SavingProductCommand {
 	public String getDescription() {
 		return description;
 	}
+
+	public String getCurrencyCode() {
+		return currencyCode;
+	}
+
+	public Integer getDigitsAfterDecimal() {
+		return digitsAfterDecimal;
+	}
+
+	public BigDecimal getInterestRate() {
+		return interestRate;
+	}
 	
 	public boolean isNameChanged() {
 		return this.modifiedParameters.contains("name");
@@ -35,5 +60,16 @@ public class SavingProductCommand {
 	public boolean isDescriptionChanged() {
 		return this.modifiedParameters.contains("description");
 	}
+	
+	public boolean isCurrencyCodeChanged() {
+		return this.modifiedParameters.contains("currencyCode");
+	}
 
+	public boolean isDigitsAfterDecimalChanged() {
+		return this.modifiedParameters.contains("digitsAfterDecimal");
+	}
+	
+	public boolean isInterestRateChanged() {
+		return this.modifiedParameters.contains("interestRate");
+	}
 }
