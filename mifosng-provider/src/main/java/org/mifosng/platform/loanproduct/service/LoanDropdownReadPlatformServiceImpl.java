@@ -4,6 +4,7 @@ import static org.mifosng.platform.loanproduct.service.LoanEnumerations.amortiza
 import static org.mifosng.platform.loanproduct.service.LoanEnumerations.interestCalculationPeriodType;
 import static org.mifosng.platform.loanproduct.service.LoanEnumerations.interestRateFrequencyType;
 import static org.mifosng.platform.loanproduct.service.LoanEnumerations.interestType;
+import static org.mifosng.platform.loanproduct.service.LoanEnumerations.loanTermFrequencyType;
 import static org.mifosng.platform.loanproduct.service.LoanEnumerations.repaymentFrequencyType;
 
 import java.util.ArrayList;
@@ -59,6 +60,16 @@ public class LoanDropdownReadPlatformServiceImpl implements LoanDropdownReadPlat
 						interestCalculationPeriodType(InterestCalculationPeriodMethod.SAME_AS_REPAYMENT_PERIOD));
 
 		return allowedOptions;
+	}
+	
+	@Override
+	public List<EnumOptionData> retrieveLoanTermFrequencyTypeOptions() {
+		List<EnumOptionData> loanTermFrequencyOptions = Arrays.asList(
+				loanTermFrequencyType(PeriodFrequencyType.DAYS),
+				loanTermFrequencyType(PeriodFrequencyType.WEEKS),
+				loanTermFrequencyType(PeriodFrequencyType.MONTHS),
+				loanTermFrequencyType(PeriodFrequencyType.YEARS));
+		return loanTermFrequencyOptions;
 	}
 
 	@Override

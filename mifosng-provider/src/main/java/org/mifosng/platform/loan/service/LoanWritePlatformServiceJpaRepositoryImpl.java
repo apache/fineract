@@ -270,7 +270,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 			
 			Integer repaidEvery = loan.getLoanRepaymentScheduleDetail().getRepayEvery();
 			Integer selectedRepaymentFrequency = loan.getLoanRepaymentScheduleDetail().getRepaymentPeriodFrequencyType().getValue();
-			Integer selectedRepaymentSchedule = loan.getLoanRepaymentScheduleDetail().getAmortizationMethod().getValue();
+			Integer selectedAmortizationMethod = loan.getLoanRepaymentScheduleDetail().getAmortizationMethod().getValue();
+			
+			// FIXME - use values from loan table here instead of inferring.
+			Integer loanTermFrequency = repaidEvery * numberOfInstallments;
+			Integer loanTermFrequencyType = selectedRepaymentFrequency;
 			
 			// use annual percentage rate to re-calculate loan schedule for late disbursement
 			BigDecimal interestRatePerPeriod = interestRatePerYear;
@@ -283,8 +287,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 					loan.getLoanProduct().getId(),
 					principalAsDecimal, 
 					interestRatePerPeriod, interestRateFrequencyMethod, interestMethod, interestCalculationInPeriod,
-					repaidEvery, selectedRepaymentFrequency, numberOfInstallments, 
-					selectedRepaymentSchedule, actualDisbursementDate, repaymentsStartingFromDate, interestCalculatedFromDate);
+					repaidEvery, selectedRepaymentFrequency, numberOfInstallments, selectedAmortizationMethod, 
+					loanTermFrequency, loanTermFrequencyType,
+					actualDisbursementDate, repaymentsStartingFromDate, interestCalculatedFromDate);
 
 			LoanSchedule loanSchedule = this.calculationPlatformService.calculateLoanSchedule(calculateCommand);
 

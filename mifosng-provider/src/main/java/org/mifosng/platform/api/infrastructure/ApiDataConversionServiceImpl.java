@@ -933,6 +933,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	    Set<String> supportedParams = new HashSet<String>(
 	    		Arrays.asList("clientId", "productId", "externalId", "fundId", "transactionProcessingStrategyId",
 	    				"principal", "inArrearsTolerance", "interestRatePerPeriod", "repaymentEvery", "numberOfRepayments", 
+	    				"loanTermFrequency", "loanTermFrequencyType",
 	    				"repaymentFrequencyType", "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType",
 	    				"expectedDisbursementDate", "repaymentsStartingFromDate", "interestChargedFromDate", "submittedOnDate", "submittedOnNote",
 	    				"locale", "dateFormat")
@@ -956,6 +957,9 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	    Integer numberOfRepayments = extractIntegerParameter("numberOfRepayments", requestMap, modifiedParameters);
 	    Integer repaymentFrequencyType = extractIntegerParameter("repaymentFrequencyType", requestMap, modifiedParameters);
 	    
+	    Integer loanTermFrequency = extractIntegerParameter("loanTermFrequency", requestMap, modifiedParameters);
+	    Integer loanTermFrequencyType = extractIntegerParameter("loanTermFrequencyType", requestMap, modifiedParameters);
+	    
 	    Integer interestRateFrequencyTypeValue = extractIntegerParameter("interestRateFrequencyType", requestMap, modifiedParameters);
 	    Integer amortizationTypeValue = extractIntegerParameter("amortizationType", requestMap, modifiedParameters);
 	    Integer interestTypeValue = extractIntegerParameter("interestType", requestMap, modifiedParameters);
@@ -972,7 +976,9 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 				submittedOnDate, submittedOnNote, 
 	    		expectedDisbursementDate, repaymentsStartingFromDate, interestChargedFromDate, 
 	    		principal, interestRatePerPeriod, interestRateFrequencyTypeValue, interestTypeValue, interestCalculationPeriodTypeValue, 
-	    		repaymentEvery, repaymentFrequencyType, numberOfRepayments, amortizationTypeValue, inArrearsToleranceValue);
+	    		repaymentEvery, repaymentFrequencyType, numberOfRepayments, amortizationTypeValue, 
+	    		loanTermFrequency, loanTermFrequencyType,
+	    		inArrearsToleranceValue);
 	}
 	
 	@Override

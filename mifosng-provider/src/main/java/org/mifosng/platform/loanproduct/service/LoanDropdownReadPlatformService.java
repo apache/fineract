@@ -14,6 +14,8 @@ public interface LoanDropdownReadPlatformService {
 	
 	List<EnumOptionData> retrieveLoanInterestRateCalculatedInPeriodOptions();
 
+	List<EnumOptionData> retrieveLoanTermFrequencyTypeOptions();
+	
 	List<EnumOptionData> retrieveRepaymentFrequencyTypeOptions();
 
 	List<EnumOptionData> retrieveInterestRateFrequencyTypeOptions();

@@ -20,11 +20,13 @@ public class SubmitLoanApplicationCommand {
 	private final BigDecimal principal;
 	private final BigDecimal inArrearsTolerance;
 	
+	private final Integer loanTermFrequency;
+	private final Integer loanTermFrequencyType;
+	
 	private final Integer numberOfRepayments;
 	private final Integer repaymentEvery;
 	
 	private final BigDecimal interestRatePerPeriod;
-
 	private final Integer repaymentFrequencyType;
 	private final Integer interestRateFrequencyType;
 	private final Integer amortizationType;
@@ -52,6 +54,7 @@ public class SubmitLoanApplicationCommand {
 			final Integer interestMethod, 
 			final Integer interestCalculationPeriodMethod,
 			final Integer repaymentEvery, final Integer repaymentFrequency, final Integer numberOfRepayments, Integer amortizationMethod, 
+			final Integer loanTermFrequency, final Integer loanTermFrequencyType,
 			final BigDecimal toleranceAmount) {
 		this.clientId = clientId;
 		this.productId = productId;
@@ -66,6 +69,8 @@ public class SubmitLoanApplicationCommand {
 		this.interestChargedFromDate = interestChargedFromLocalDate;
 		
 		this.principal = principal;
+		this.loanTermFrequency = loanTermFrequency;
+		this.loanTermFrequencyType = loanTermFrequencyType;
 		this.inArrearsTolerance = toleranceAmount;
 		
 		this.interestRatePerPeriod = interestRatePerPeriod;
@@ -80,7 +85,8 @@ public class SubmitLoanApplicationCommand {
 	
 	public CalculateLoanScheduleCommand toCalculateLoanScheduleCommand() {
 		return new CalculateLoanScheduleCommand(productId,
-				principal, interestRatePerPeriod, interestRateFrequencyType, interestType, interestCalculationPeriodType, repaymentEvery, repaymentFrequencyType, numberOfRepayments, amortizationType, 
+				principal, interestRatePerPeriod, interestRateFrequencyType, interestType, interestCalculationPeriodType, repaymentEvery, repaymentFrequencyType, numberOfRepayments, amortizationType,
+				this.loanTermFrequency, this.loanTermFrequencyType,
 				expectedDisbursementDate, repaymentsStartingFromDate, interestChargedFromDate);
 	}
 
@@ -126,6 +132,14 @@ public class SubmitLoanApplicationCommand {
 
 	public Integer getRepaymentEvery() {
 		return repaymentEvery;
+	}
+	
+	public Integer getLoanTermFrequency() {
+		return loanTermFrequency;
+	}
+
+	public Integer getLoanTermFrequencyType() {
+		return loanTermFrequencyType;
 	}
 
 	public BigDecimal getInterestRatePerPeriod() {

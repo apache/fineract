@@ -12,6 +12,9 @@ public class CalculateLoanScheduleCommand {
 	private final Long productId;
 	private final BigDecimal principal;
 	
+	private final Integer loanTermFrequency;
+	private final Integer loanTermFrequencyType;
+	
 	private final Integer repaymentEvery;
 	private final Integer repaymentFrequencyType;
 	private final Integer numberOfRepayments;
@@ -31,6 +34,7 @@ public class CalculateLoanScheduleCommand {
 			final BigDecimal principal,
 			final BigDecimal interestRatePerPeriod, Integer interestRateFrequencyMethod, final Integer interestMethod, final Integer interestCalculationPeriodMethod,
 			final Integer repaymentEvery, final Integer repaymentFrequency, final Integer numberOfRepayments, Integer amortizationMethod,
+			final Integer loanTermFrequency, final Integer loanTermFrequencyType,
 			final LocalDate expectedDisbursementDate,
 			final LocalDate repaymentsStartingFromDate, final LocalDate interestCalculatedFromDate) {
 		
@@ -44,6 +48,8 @@ public class CalculateLoanScheduleCommand {
 		this.repaymentFrequencyType = repaymentFrequency;
 		this.numberOfRepayments = numberOfRepayments;
 		this.amortizationType = amortizationMethod;
+		this.loanTermFrequency = loanTermFrequency;
+		this.loanTermFrequencyType = loanTermFrequencyType;
 		
 		this.expectedDisbursementDate = expectedDisbursementDate;
 		this.repaymentsStartingFromDate = repaymentsStartingFromDate;
@@ -56,6 +62,14 @@ public class CalculateLoanScheduleCommand {
 
 	public BigDecimal getPrincipal() {
 		return principal;
+	}
+	
+	public Integer getLoanTermFrequency() {
+		return loanTermFrequency;
+	}
+
+	public Integer getLoanTermFrequencyType() {
+		return loanTermFrequencyType;
 	}
 
 	public Integer getRepaymentEvery() {

@@ -27,10 +27,12 @@ public class FlatLoanScheduleGenerator implements LoanScheduleGenerator {
 
 		List<ScheduledLoanInstallment> scheduledLoanInstallments = new ArrayList<ScheduledLoanInstallment>();
 
-		List<LocalDate> scheduledDates = this.scheduledDateGenerator.generate(
-				loanScheduleInfo, disbursementDate, firstRepaymentDate);
+		List<LocalDate> scheduledDates = this.scheduledDateGenerator.generate(loanScheduleInfo, disbursementDate, firstRepaymentDate);
 
 		MathContext mc = new MathContext(8, RoundingMode.HALF_EVEN);
+		
+		// FIXME - use the expected loan term to work out interest due
+		// loan term = 9 months
 
 		Money principalPerInstallment = loanScheduleInfo.getPrincipal()
 				.dividedBy(loanScheduleInfo.getNumberOfRepayments(),
@@ -46,9 +48,7 @@ public class FlatLoanScheduleGenerator implements LoanScheduleGenerator {
 				.divide(BigDecimal.valueOf(Double.valueOf("100.0")), mc)
 				.multiply(BigDecimal.valueOf(loanScheduleInfo.getRepayEvery()));
 
-		Money interestPerInstallment = loanScheduleInfo.getPrincipal()
-				.multiplyRetainScale(periodicInterestRate,
-						RoundingMode.HALF_EVEN);
+		Money interestPerInstallment = loanScheduleInfo.getPrincipal().multiplyRetainScale(periodicInterestRate, RoundingMode.HALF_EVEN);
 
 		Money outstandingBalance = loanScheduleInfo.getPrincipal();
 		Money totalPrincipal = Money.zero(outstandingBalance.getCurrency());
@@ -59,14 +59,11 @@ public class FlatLoanScheduleGenerator implements LoanScheduleGenerator {
 			totalPrincipal = totalPrincipal.plus(principalPerInstallment);
 
 			if (installmentNumber == loanScheduleInfo.getNumberOfRepayments()) {
-				Money difference = totalPrincipal.minus(loanScheduleInfo
-						.getPrincipal());
+				Money difference = totalPrincipal.minus(loanScheduleInfo.getPrincipal());
 				if (difference.isLessThanZero()) {
-					principalPerInstallment = principalPerInstallment
-							.plus(difference.abs());
+					principalPerInstallment = principalPerInstallment.plus(difference.abs());
 				} else if (difference.isGreaterThanZero()) {
-					principalPerInstallment = principalPerInstallment
-							.minus(difference.abs());
+					principalPerInstallment = principalPerInstallment.minus(difference.abs());
 				}
 			}
 

@@ -23,6 +23,7 @@ public class LoanProductData {
 	private MoneyData inArrearsTolerance;
 
 	private Integer numberOfRepayments;
+	private Integer loanTermFrequency;
 	private Integer repaymentEvery;
 	private BigDecimal interestRatePerPeriod = BigDecimal.ZERO;
 	private BigDecimal annualInterestRate = BigDecimal.ZERO;
@@ -54,6 +55,7 @@ public class LoanProductData {
 	public LoanProductData(DateTime createdOn, DateTime lastModifedOn, Long id,
 			String name, String description, MoneyData principal,
 			MoneyData tolerance, Integer numberOfRepayments,
+			Integer loanTermFrequency,
 			Integer repaymentEvery, BigDecimal interestRatePerPeriod,
 			BigDecimal annualInterestRate,
 			EnumOptionData loanTermFrequencyType,
@@ -70,6 +72,7 @@ public class LoanProductData {
 		this.principal = principal;
 		this.inArrearsTolerance = tolerance;
 		this.numberOfRepayments = numberOfRepayments;
+		this.loanTermFrequency = loanTermFrequency;
 		this.repaymentEvery = repaymentEvery;
 		this.interestRatePerPeriod = interestRatePerPeriod;
 		this.annualInterestRate = annualInterestRate;
@@ -164,6 +167,14 @@ public class LoanProductData {
 
 	public void setNumberOfRepayments(Integer numberOfRepayments) {
 		this.numberOfRepayments = numberOfRepayments;
+	}
+	
+	public Integer getLoanTermFrequency() {
+		return loanTermFrequency;
+	}
+
+	public void setLoanTermFrequency(Integer loanTermFrequency) {
+		this.loanTermFrequency = loanTermFrequency;
 	}
 
 	public Integer getRepaymentEvery() {
