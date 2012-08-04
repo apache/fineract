@@ -115,7 +115,7 @@ public class SavingProductsApiResource {
 	public String retrieveNewSavingProductDetails(@Context final UriInfo uriInfo) {
 		
 		Set<String> typicalResponseParameters = new HashSet<String>(
-				Arrays.asList("id", "name", "description", "createdOn", "lastModifedOn","interestRate","currencyCode","digitsAfterDecimal"));
+				Arrays.asList("id", "name", "description", "createdOn", "lastModifedOn","interestRate","currencyCode","digitsAfterDecimal", "currencyOptions"));
 		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (responseParameters.isEmpty()) {
