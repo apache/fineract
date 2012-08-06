@@ -12,4 +12,7 @@ public interface GroupWritePlatformService {
     @PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE')")
     EntityIdentifier updateGroup(GroupCommand command);
 
+    @PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE')")
+    EntityIdentifier deleteGroup(Long groupId);
+    
 }

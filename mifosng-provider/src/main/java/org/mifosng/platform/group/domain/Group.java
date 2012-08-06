@@ -20,6 +20,9 @@ public class Group extends AbstractAuditableCustom<AppUser, Long> {
     @Column(name = "external_id", length = 100, unique = true)
     private String externalId;
 
+    @Column(name = "is_deleted", nullable=false)
+    private boolean deleted = false;
+    
     public Group() {
         this.name = null;
         this.externalId = null;
@@ -50,5 +53,19 @@ public class Group extends AbstractAuditableCustom<AppUser, Long> {
         if (command.isNameChanged()) {
             this.name = command.getName();
         }
+    }
+    
+    /**
+     * Delete is a <i>soft delete</i>. Updates flag on group so it wont appear in query/report results.
+     * 
+     * Any fields with unique constraints and prepended with id of record.
+     */
+    public void delete() {
+        this.deleted = true;
+        this.externalId = this.getId() + "_" + this.externalId;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
     }
 }

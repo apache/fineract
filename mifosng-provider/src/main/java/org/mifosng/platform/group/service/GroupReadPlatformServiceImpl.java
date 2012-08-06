@@ -34,7 +34,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
 
         GroupMapper rm = new GroupMapper();
 
-        String sql = "select " + rm.groupSchema();
+        String sql = "select " + rm.groupSchema() + " where g.is_deleted=0";
 
         return this.jdbcTemplate.query(sql, rm, new Object[] {});
     }
@@ -47,7 +47,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
             
             GroupMapper rm = new GroupMapper();
             
-            String sql = "select " + rm.groupSchema() + " where g.id = ?";
+            String sql = "select " + rm.groupSchema() + " where g.id = ? and g.is_deleted=0";
             
             return this.jdbcTemplate.queryForObject(sql, rm, new Object[] {groupId});
         } catch (EmptyResultDataAccessException e){

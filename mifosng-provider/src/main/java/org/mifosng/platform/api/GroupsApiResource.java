@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -105,6 +106,17 @@ public class GroupsApiResource {
         final GroupCommand command = this.apiDataConversionService.convertJsonToGroupCommand(groupId, jsonRequestBody);
 
         EntityIdentifier entityIdentifier = this.groupWritePlatformService.updateGroup(command);
+
+        return Response.ok().entity(entityIdentifier).build();
+    }
+    
+    @DELETE
+    @Path("{groupId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public Response deleteGroup(@PathParam("groupId") final Long groupId, @Context final UriInfo uriInfo){
+
+        EntityIdentifier entityIdentifier = this.groupWritePlatformService.deleteGroup(groupId);
 
         return Response.ok().entity(entityIdentifier).build();
     }
