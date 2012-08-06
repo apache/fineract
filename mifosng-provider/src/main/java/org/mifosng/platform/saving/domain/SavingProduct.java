@@ -23,6 +23,9 @@ public class SavingProduct extends AbstractAuditableCustom<AppUser, Long> {
 	@Column(name = "description")
 	private String description;
 	
+    @Column(name = "is_deleted", nullable=false)
+	private boolean deleted = false;
+	
 	@Embedded
 	SavingProductRelatedDetail savingProductRelatedDetail;
 
@@ -57,6 +60,14 @@ public class SavingProduct extends AbstractAuditableCustom<AppUser, Long> {
 	public BigDecimal getInterestRate(){
 		return this.savingProductRelatedDetail.getInterestRate();
 	}
+	
+	public boolean isDeleted() {
+		return deleted;
+	}
+	
+	public void delete() {
+		this.deleted = true;
+	}	
 
 	public void update(final SavingProductCommand command) {
 

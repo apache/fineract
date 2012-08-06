@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -126,5 +127,16 @@ public class SavingProductsApiResource {
 		SavingProductData savingProduct = this.savingProductReadPlatformService.retrieveNewSavingProductDetails();
 		
 		return this.apiDataConversionService.convertSavingProductDataToJson(prettyPrint, responseParameters, savingProduct);
+	}
+	
+	@DELETE
+	@Path("{productId}")
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
+	public Response deleteProduct(@PathParam("productId") final Long productId) {
+
+		this.savingProductWritePlatformService.deleteSavingProduct(productId);
+
+		return Response.ok(new EntityIdentifier(productId)).build();
 	}
 }
