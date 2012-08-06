@@ -478,7 +478,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		}
 	}
 
-	private void handleLoanOverpayment(final LoanTransaction loanTransaction, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
+	private void handleLoanOverpayment(@SuppressWarnings("unused") final LoanTransaction loanTransaction, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
 		this.loanStatus = loanLifecycleStateMachine.transition(LoanEvent.LOAN_OVERPAYMENT, this.loanStatus);
 		this.closedOnDate = null;
 		this.maturedOnDate = null;

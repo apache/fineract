@@ -7,7 +7,6 @@ import org.mifosng.platform.group.domain.Group;
 import org.mifosng.platform.group.domain.GroupRepository;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

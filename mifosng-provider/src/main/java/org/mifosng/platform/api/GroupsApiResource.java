@@ -114,7 +114,7 @@ public class GroupsApiResource {
     @Path("{groupId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response deleteGroup(@PathParam("groupId") final Long groupId, @Context final UriInfo uriInfo){
+    public Response deleteGroup(@PathParam("groupId") final Long groupId){
 
         EntityIdentifier entityIdentifier = this.groupWritePlatformService.deleteGroup(groupId);
 
