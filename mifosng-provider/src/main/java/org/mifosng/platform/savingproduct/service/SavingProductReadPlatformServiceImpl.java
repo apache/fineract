@@ -95,7 +95,7 @@ public class SavingProductReadPlatformServiceImpl implements
 		}
 		
 		public String savingProductSchema(){
-			return "sp.id as id,sp.name as name, sp.description as description,sp.currency_code as currencyCode, sp.currency_digits as currencyDigits,sp.interest_rate as interestRate,sp.created_date as createdon, sp.lastmodified_date as modifiedon,"
+			return "sp.id as id,sp.name as name, sp.description as description,sp.currency_code as currencyCode, sp.currency_digits as currencyDigits,sp.interest_rate as interestRate,sp.created_date as createdon, sp.lastmodified_date as modifiedon, sp.is_deleted as isdeleted, "
 				+  "curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, curr.display_symbol as currencyDisplaySymbol" 
 				+  "  from portfolio_product_savings sp join ref_currency curr on curr.code = sp.currency_code";
 		}

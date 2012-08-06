@@ -3,6 +3,7 @@ package org.mifosng.platform.savingproduct.service;
 import org.mifosng.platform.api.commands.SavingProductCommand;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
+import org.mifosng.platform.exceptions.ProductNotFoundException;
 import org.mifosng.platform.exceptions.SavingProductNotFoundException;
 import org.mifosng.platform.saving.domain.SavingProduct;
 import org.mifosng.platform.saving.domain.SavingProductRepository;
@@ -54,4 +55,18 @@ public class SavingProductWritePlatformServiceJpaRepositoryImpl implements Savin
 		this.savingProductRepository.save(product);
 		return new EntityIdentifier(Long.valueOf(product.getId()));
 	}
+
+	@Transactional
+	@Override
+	public EntityIdentifier deleteSavingProduct(Long productId) {
+		SavingProduct product=this.savingProductRepository.findOne(productId);
+		if (product==null || product.isDeleted()) {
+			throw new ProductNotFoundException(productId);
+		}
+		product.delete();
+		this.savingProductRepository.save(product);
+		return new EntityIdentifier(Long.valueOf(product.getId()));
+	}
+	
+	
 }

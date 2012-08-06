@@ -10,4 +10,7 @@ public interface SavingProductWritePlatformService {
 	
 	@PreAuthorize(value = "hasRole('ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE')")
 	EntityIdentifier updateSavingProduct(SavingProductCommand command);
+	
+	@PreAuthorize(value = "hasRole('ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE')")
+	EntityIdentifier deleteSavingProduct(Long productId);
 }
