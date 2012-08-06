@@ -290,6 +290,7 @@ CREATE TABLE `portfolio_product_savings` (
   `currency_code` varchar(3) NOT NULL,
   `currency_digits` smallint(5) NOT NULL,
   `interest_rate` decimal(19,6) NOT NULL,
+  `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
   `createdby_id` bigint(20) DEFAULT NULL,
   `created_date` datetime DEFAULT NULL,
   `lastmodified_date` datetime DEFAULT NULL,
