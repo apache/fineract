@@ -6,12 +6,23 @@ import java.math.RoundingMode;
 
 import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.loan.domain.LoanProductRelatedDetail;
+import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 
 public class PeriodicInterestRateCalculator {
 
 	private final PaymentPeriodsInOneYearCalculator paymentPeriodsInOneYearCalculator = new DefaultPaymentPeriodsInOneYearCalculator();
 	
-	public BigDecimal calculateFrom(LoanProductRelatedDetail loanScheduleInfo) {
+	public BigDecimal calculateFrom(final PeriodFrequencyType loanTermFrequencyType, final BigDecimal annualNominalInterestRate) {
+		
+		MathContext mc = new MathContext(8, RoundingMode.HALF_EVEN);
+		
+		Integer paymentPeriodsInOneYear = this.paymentPeriodsInOneYearCalculator.calculate(loanTermFrequencyType);
+		
+		BigDecimal divisor = BigDecimal.valueOf(paymentPeriodsInOneYear * 100);
+		return annualNominalInterestRate.divide(divisor, mc);
+	}
+	
+	public BigDecimal calculateFrom(final LoanProductRelatedDetail loanScheduleInfo) {
 		
 		MathContext mc = new MathContext(8, RoundingMode.HALF_EVEN);
 		

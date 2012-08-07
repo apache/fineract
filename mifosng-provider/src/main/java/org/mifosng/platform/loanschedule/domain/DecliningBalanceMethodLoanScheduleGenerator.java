@@ -14,6 +14,7 @@ import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.loan.domain.AmortizationMethod;
 import org.mifosng.platform.loan.domain.LoanProductRelatedDetail;
+import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 
 public class DecliningBalanceMethodLoanScheduleGenerator implements
 		LoanScheduleGenerator {
@@ -26,6 +27,8 @@ public class DecliningBalanceMethodLoanScheduleGenerator implements
 	@Override
 	public LoanSchedule generate(
 			final LoanProductRelatedDetail loanScheduleInfo,
+			final Integer loanTermFrequency, 
+			final PeriodFrequencyType loanTermFrequencyType, 
 			final LocalDate disbursementDate, 
 			final LocalDate firstRepaymentDate, 
 			final LocalDate interestCalculatedFrom, CurrencyData currencyData) {
@@ -42,6 +45,10 @@ public class DecliningBalanceMethodLoanScheduleGenerator implements
 		final MonetaryCurrency monetaryCurrency = loanScheduleInfo.getPrincipal().getCurrency();
 		final Money totalDuePerInstallment = this.pmtCalculator.calculatePaymentForOnePeriodFrom(loanScheduleInfo, periodInterestRateForRepaymentPeriod, monetaryCurrency);
 		final Money totalDue = this.pmtCalculator.calculateTotalRepaymentFrom(loanScheduleInfo, periodInterestRateForRepaymentPeriod, monetaryCurrency);
+		
+		// REVIEW. calculate total interest due based on loan term settings
+		final BigDecimal periodInterestRateForLoanTermPeriod = this.periodicInterestRateCalculator.calculateFrom(loanTermFrequencyType, loanScheduleInfo.getAnnualNominalInterestRate());
+		final Money totalRepaymentDueForLoanTerm = this.pmtCalculator.calculateTotalRepaymentFrom(loanScheduleInfo.getPrincipal(), loanTermFrequency, periodInterestRateForLoanTermPeriod, monetaryCurrency);
 		
 		Money totalInterestDue = totalDue.minus(loanScheduleInfo.getPrincipal());
 		Money outstandingBalance = loanScheduleInfo.getPrincipal();

@@ -8,7 +8,9 @@ import org.mifosng.platform.loan.domain.LoanProductRelatedDetail;
 
 public class PmtCalculator {
 
-	public Money calculatePaymentForOnePeriodFrom(LoanProductRelatedDetail loanScheduleInfo, BigDecimal periodInterestRateForRepaymentPeriod, MonetaryCurrency monetaryCurrency) {
+	public Money calculatePaymentForOnePeriodFrom(final LoanProductRelatedDetail loanScheduleInfo, 
+			final BigDecimal periodInterestRateForRepaymentPeriod, 
+			final MonetaryCurrency monetaryCurrency) {
 		double interestRateFraction = periodInterestRateForRepaymentPeriod.doubleValue();
 		
 		double futureValue = 0;
@@ -22,7 +24,9 @@ public class PmtCalculator {
 		return Money.of(monetaryCurrency, BigDecimal.valueOf(paymentPerInstallment));
 	}
 	
-	public Money calculateTotalRepaymentFrom(LoanProductRelatedDetail loanScheduleInfo, BigDecimal periodInterestRateForRepaymentPeriod, MonetaryCurrency monetaryCurrency) {
+	public Money calculateTotalRepaymentFrom(final LoanProductRelatedDetail loanScheduleInfo, 
+			final BigDecimal periodInterestRateForRepaymentPeriod, 
+			final MonetaryCurrency monetaryCurrency) {
 		double interestRateFraction = periodInterestRateForRepaymentPeriod.doubleValue();
 		
 		double futureValue = 0;
@@ -34,6 +38,27 @@ public class PmtCalculator {
 		double paymentPerInstallment = pmt(interestRateFraction, numberOfPeriods, principal, futureValue, false);
 		
 		double totalRepayment = paymentPerInstallment * loanScheduleInfo.getNumberOfRepayments();
+		
+		return Money.of(monetaryCurrency, BigDecimal.valueOf(totalRepayment));
+	}
+	
+	public Money calculateTotalRepaymentFrom(
+			final Money principal, 
+			final Integer loanTermFrequency,
+			final BigDecimal periodInterestRateForLoanTermPeriod,
+			final MonetaryCurrency monetaryCurrency) {
+		
+		double interestRateFraction = periodInterestRateForLoanTermPeriod.doubleValue();
+		
+		double futureValue = 0;
+		double numberOfPeriods = loanTermFrequency;
+		double principalAmount = principal.getAmount().multiply(BigDecimal.valueOf(-1)).doubleValue();
+		
+		// work out the total payment (principal + interest components) for each installment due.
+		// use the period type and interest as expressed e.g. 2% per month or 24% per year even is 'daily' interest calculation is selected
+		double paymentPerInstallment = pmt(interestRateFraction, numberOfPeriods, principalAmount, futureValue, false);
+		
+		double totalRepayment = paymentPerInstallment * loanTermFrequency;
 		
 		return Money.of(monetaryCurrency, BigDecimal.valueOf(totalRepayment));
 	}

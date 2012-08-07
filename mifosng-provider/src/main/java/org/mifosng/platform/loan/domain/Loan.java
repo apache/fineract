@@ -186,8 +186,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 			LocalDate interestChargedFromDate,
 			LoanLifecycleStateMachine lifecycleStateMachine) {
 
-		this.loanStatus = lifecycleStateMachine.transition(
-				LoanEvent.LOAN_CREATED, this.loanStatus);
+		this.loanStatus = lifecycleStateMachine.transition(LoanEvent.LOAN_CREATED, this.loanStatus);
 
 		this.submittedOnDate = submittedOn.toDateTimeAtCurrentTime().toDate();
 

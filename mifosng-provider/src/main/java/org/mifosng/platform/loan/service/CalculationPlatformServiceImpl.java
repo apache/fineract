@@ -67,9 +67,14 @@ public class CalculationPlatformServiceImpl implements
 		final PeriodFrequencyType interestPeriodFrequencyType = PeriodFrequencyType.fromInt(command.getInterestRateFrequencyType());
 		final InterestMethod interestMethod = InterestMethod.fromInt(command.getInterestType());
 		final InterestCalculationPeriodMethod interestCalculationPeriodMethod = InterestCalculationPeriodMethod.fromInt(command.getInterestCalculationPeriodType());
+		
+		final Integer loanTermFrequency = command.getLoanTermFrequency();
+		final PeriodFrequencyType loanTermFrequencyType = PeriodFrequencyType.fromInt(command.getLoanTermFrequencyType());
+		
+		final Integer defaultNumberOfInstallments = command.getNumberOfRepayments();
 		final Integer repayEvery = command.getRepaymentEvery();
 		final PeriodFrequencyType repaymentFrequencyType = PeriodFrequencyType.fromInt(command.getRepaymentFrequencyType());
-		final Integer defaultNumberOfInstallments = command.getNumberOfRepayments();
+		
 		final AmortizationMethod amortizationMethod = AmortizationMethod.fromInt(command.getAmortizationType());
 		
 		final BigDecimal defaultAnnualNominalInterestRate = this.aprCalculator.calculateFrom(interestPeriodFrequencyType, defaultNominalInterestRatePerPeriod);
@@ -96,7 +101,7 @@ public class CalculationPlatformServiceImpl implements
 		CurrencyData currencyData = new CurrencyData(applicationCurrency.getCode(), applicationCurrency.getName(), currency.getDigitsAfterDecimal(),
 				applicationCurrency.getDisplaySymbol(), applicationCurrency.getNameCode());
 		
-		return loanScheduleGenerator.generate(loanScheduleInfo, command.getExpectedDisbursementDate(), command.getRepaymentsStartingFromDate(), 
+		return loanScheduleGenerator.generate(loanScheduleInfo, loanTermFrequency, loanTermFrequencyType, command.getExpectedDisbursementDate(), command.getRepaymentsStartingFromDate(), 
 				command.getInterestChargedFromDate(), currencyData);
 	}
 

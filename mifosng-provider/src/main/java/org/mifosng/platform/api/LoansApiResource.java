@@ -147,10 +147,8 @@ public class LoansApiResource {
 		SubmitLoanApplicationCommand command = this.apiDataConversionService
 				.convertJsonToSubmitLoanApplicationCommand(jsonRequestBody);
 
-		CalculateLoanScheduleCommand calculateLoanScheduleCommand = command
-				.toCalculateLoanScheduleCommand();
-		LoanSchedule loanSchedule = this.calculationPlatformService
-				.calculateLoanSchedule(calculateLoanScheduleCommand);
+		CalculateLoanScheduleCommand calculateLoanScheduleCommand = command.toCalculateLoanScheduleCommand();
+		LoanSchedule loanSchedule = this.calculationPlatformService.calculateLoanSchedule(calculateLoanScheduleCommand);
 
 		// for now just auto generating the loan schedule and setting support
 		// for 'manual' loan schedule creation later.
@@ -160,8 +158,7 @@ public class LoansApiResource {
 			return Response.ok().entity(loanSchedule).build();
 		}
 
-		EntityIdentifier identifier = this.loanWritePlatformService
-				.submitLoanApplication(command);
+		EntityIdentifier identifier = this.loanWritePlatformService.submitLoanApplication(command);
 
 		return Response.ok().entity(identifier).build();
 	}

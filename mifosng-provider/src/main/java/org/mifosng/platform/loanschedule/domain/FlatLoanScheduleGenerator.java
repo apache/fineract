@@ -13,6 +13,7 @@ import org.mifosng.platform.api.data.MoneyData;
 import org.mifosng.platform.api.data.ScheduledLoanInstallment;
 import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.loan.domain.LoanProductRelatedDetail;
+import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 
 public class FlatLoanScheduleGenerator implements LoanScheduleGenerator {
 
@@ -22,6 +23,8 @@ public class FlatLoanScheduleGenerator implements LoanScheduleGenerator {
 	@Override
 	public LoanSchedule generate(
 			final LoanProductRelatedDetail loanScheduleInfo,
+			final Integer loanTermFrequency, 
+			final PeriodFrequencyType loanTermFrequencyType, 
 			final LocalDate disbursementDate, final LocalDate firstRepaymentDate, 
 			final LocalDate interestCalculatedFrom, final CurrencyData currencyData) {
 
@@ -31,39 +34,56 @@ public class FlatLoanScheduleGenerator implements LoanScheduleGenerator {
 
 		MathContext mc = new MathContext(8, RoundingMode.HALF_EVEN);
 		
-		// FIXME - use the expected loan term to work out interest due
-		// loan term = 9 months
+		BigDecimal loanTermPeriodsInYear = BigDecimal.valueOf(this.paymentPeriodsInOneYearCalculator.calculate(loanTermFrequencyType));
+		BigDecimal interestRateForLoanTerm = loanScheduleInfo
+				.getAnnualNominalInterestRate()
+				.divide(loanTermPeriodsInYear, mc)
+				.divide(BigDecimal.valueOf(Double.valueOf("100.0")), mc)
+				.multiply(BigDecimal.valueOf(loanTermFrequency));
+		
+		Money totalInterestForLoanTerm = loanScheduleInfo.getPrincipal().multiplyRetainScale(interestRateForLoanTerm, RoundingMode.HALF_EVEN);
 
+		Money interestPerInstallment = totalInterestForLoanTerm.dividedBy(Long.valueOf(loanScheduleInfo.getNumberOfRepayments()), RoundingMode.HALF_EVEN);
+		
 		Money principalPerInstallment = loanScheduleInfo.getPrincipal()
 				.dividedBy(loanScheduleInfo.getNumberOfRepayments(),
 						RoundingMode.HALF_EVEN);
 
-		BigDecimal paymentPeriodsInYear = BigDecimal
-				.valueOf(this.paymentPeriodsInOneYearCalculator
-						.calculate(loanScheduleInfo.getRepaymentPeriodFrequencyType()));
+//		BigDecimal paymentPeriodsInYear = BigDecimal
+//				.valueOf(this.paymentPeriodsInOneYearCalculator
+//						.calculate(loanScheduleInfo.getRepaymentPeriodFrequencyType()));
 
-		BigDecimal periodicInterestRate = loanScheduleInfo
-				.getAnnualNominalInterestRate()
-				.divide(paymentPeriodsInYear, mc)
-				.divide(BigDecimal.valueOf(Double.valueOf("100.0")), mc)
-				.multiply(BigDecimal.valueOf(loanScheduleInfo.getRepayEvery()));
+//		BigDecimal periodicInterestRate = loanScheduleInfo
+//				.getAnnualNominalInterestRate()
+//				.divide(paymentPeriodsInYear, mc)
+//				.divide(BigDecimal.valueOf(Double.valueOf("100.0")), mc)
+//				.multiply(BigDecimal.valueOf(loanScheduleInfo.getRepayEvery()));
 
-		Money interestPerInstallment = loanScheduleInfo.getPrincipal().multiplyRetainScale(periodicInterestRate, RoundingMode.HALF_EVEN);
+//		Money interestPerInstallment = loanScheduleInfo.getPrincipal().multiplyRetainScale(periodicInterestRate, RoundingMode.HALF_EVEN);
 
 		Money outstandingBalance = loanScheduleInfo.getPrincipal();
 		Money totalPrincipal = Money.zero(outstandingBalance.getCurrency());
+		Money totalInterest = Money.zero(outstandingBalance.getCurrency());
 
 		LocalDate startDate = disbursementDate;
 		int installmentNumber = 1;
 		for (LocalDate scheduledDueDate : scheduledDates) {
 			totalPrincipal = totalPrincipal.plus(principalPerInstallment);
+			totalInterest = totalInterest.plus(interestPerInstallment);
 
 			if (installmentNumber == loanScheduleInfo.getNumberOfRepayments()) {
-				Money difference = totalPrincipal.minus(loanScheduleInfo.getPrincipal());
+				final Money difference = totalPrincipal.minus(loanScheduleInfo.getPrincipal());
 				if (difference.isLessThanZero()) {
 					principalPerInstallment = principalPerInstallment.plus(difference.abs());
 				} else if (difference.isGreaterThanZero()) {
 					principalPerInstallment = principalPerInstallment.minus(difference.abs());
+				}
+				
+				final Money interestDifference = totalInterest.minus(totalInterestForLoanTerm);
+				if (interestDifference.isLessThanZero()) {
+					interestPerInstallment = interestPerInstallment.plus(interestDifference.abs());
+				} else if (interestDifference.isGreaterThanZero()) {
+					interestPerInstallment = interestPerInstallment.minus(interestDifference.abs());
 				}
 			}
 
