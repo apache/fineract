@@ -112,7 +112,7 @@ public class Client extends AbstractAuditableCustom<AppUser, Long> {
 			this.lastName = command.getLastname();
 		}
 		
-		if (command.isClientOrBusinessNameChanged()) {
+		if (command.isClientOrBusinessNameChanged() && StringUtils.isNotBlank(command.getClientOrBusinessName())) {
 			this.lastName = command.getClientOrBusinessName();
 			this.firstName = null;
 		}
