@@ -44,7 +44,7 @@ public class SavingProductReadPlatformServiceImpl implements
 		
 		SavingProductMapper savingProductMapper=new SavingProductMapper();
 		
-		String sql = "select " +savingProductMapper.savingProductSchema();
+		String sql = "select " + savingProductMapper.savingProductSchema() + " where sp.is_deleted=0";
 		
 		return this.jdbcTemplate.query(sql,savingProductMapper, new Object[]{});
 	
@@ -67,7 +67,7 @@ public class SavingProductReadPlatformServiceImpl implements
 		try{
 			SavingProductMapper savingProductMapper=new SavingProductMapper();
 			String sql = "select " + savingProductMapper.savingProductSchema()
-					+ " where sp.id = ?";
+					+ " where sp.id = ? and sp.is_deleted=0";
 			SavingProductData productData = this.jdbcTemplate.queryForObject(sql,
 					savingProductMapper, new Object[] { savingProductId });
 			
@@ -90,12 +90,9 @@ public class SavingProductReadPlatformServiceImpl implements
 	}
 	
 	private static final class SavingProductMapper implements RowMapper<SavingProductData> {
-		public SavingProductMapper() {
-			
-		}
 		
 		public String savingProductSchema(){
-			return "sp.id as id,sp.name as name, sp.description as description,sp.currency_code as currencyCode, sp.currency_digits as currencyDigits,sp.interest_rate as interestRate,sp.created_date as createdon, sp.lastmodified_date as modifiedon, sp.is_deleted as isdeleted, "
+			return "sp.id as id,sp.name as name, sp.description as description,sp.currency_code as currencyCode, sp.currency_digits as currencyDigits,sp.interest_rate as interestRate,sp.created_date as createdon, sp.lastmodified_date as modifiedon, "
 				+  "curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, curr.display_symbol as currencyDisplaySymbol" 
 				+  "  from portfolio_product_savings sp join ref_currency curr on curr.code = sp.currency_code";
 		}
