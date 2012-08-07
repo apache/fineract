@@ -287,9 +287,19 @@ CREATE TABLE `portfolio_product_savings` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(100) NOT NULL,
   `description` varchar(500) DEFAULT NULL,
-  `currency_code` varchar(3) NOT NULL,
-  `currency_digits` smallint(5) NOT NULL,
-  `interest_rate` decimal(19,6) NOT NULL,
+  `savings_type_enum` smallint(5) NOT NULL,
+  `currency_code` varchar(3) DEFAULT NULL,
+  `currency_digits` smallint(5) DEFAULT NULL,
+  `interest_rate` decimal(19,6) DEFAULT NULL,
+  `minimum_balance` decimal(19,6) DEFAULT NULL,
+  `maximum_balance` decimal(19,6) DEFAULT NULL,
+  `ft_tenure_months` int(11) DEFAULT NULL,
+  `ft_maturity_default_interest_rate` decimal(19,6) DEFAULT NULL,
+  `ft_maturity_min_interest_rate` decimal(19,6) DEFAULT NULL,
+  `ft_maturity_max_interest_rate` decimal(19,6) DEFAULT NULL,
+  `ft_can_renew` tinyint(1) DEFAULT NULL,
+  `ft_can_pre_close` tinyint(1) DEFAULT NULL,
+  `ft_pre_closure_interest_rate` decimal(19,6) DEFAULT NULL,
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
   `createdby_id` bigint(20) DEFAULT NULL,
   `created_date` datetime DEFAULT NULL,
@@ -300,7 +310,7 @@ CREATE TABLE `portfolio_product_savings` (
   KEY `FKJPW0000000000004` (`lastmodifiedby_id`),
   CONSTRAINT `FKJPW0000000000003` FOREIGN KEY (`createdby_id`) REFERENCES `admin_appuser` (`id`),
   CONSTRAINT `FKJPW0000000000004` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `admin_appuser` (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `portfolio_loan` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
