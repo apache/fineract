@@ -329,6 +329,8 @@ CREATE TABLE `portfolio_loan` (
   `annual_nominal_interest_rate` decimal(19,6) NOT NULL,
   `interest_method_enum` smallint(5) NOT NULL,
   `interest_calculated_in_period_enum` smallint(5) NOT NULL DEFAULT '1',
+  `term_frequency` smallint(5) NOT NULL,
+  `term_period_frequency_enum` smallint(5) NOT NULL,
   `repay_every` smallint(5) NOT NULL,
   `repayment_period_frequency_enum` smallint(5) NOT NULL,
   `number_of_repayments` smallint(5) NOT NULL,
