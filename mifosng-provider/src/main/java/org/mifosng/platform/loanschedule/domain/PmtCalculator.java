@@ -51,7 +51,7 @@ public class PmtCalculator {
 		double interestRateFraction = periodInterestRateForLoanTermPeriod.doubleValue();
 		
 		double futureValue = 0;
-		double numberOfPeriods = loanTermFrequency;
+		double numberOfPeriods = loanTermFrequency.doubleValue();
 		double principalAmount = principal.getAmount().multiply(BigDecimal.valueOf(-1)).doubleValue();
 		
 		// work out the total payment (principal + interest components) for each installment due.

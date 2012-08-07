@@ -10,6 +10,8 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -60,6 +62,15 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 
 	@Embedded
 	private final LoanProductRelatedDetail loanRepaymentScheduleDetail;
+	
+	@SuppressWarnings("unused")
+	@Column(name = "term_frequency", nullable = false)
+	private Integer termFrequency;
+
+	@SuppressWarnings("unused")
+	@Enumerated(EnumType.ORDINAL)
+	@Column(name = "term_period_frequency_enum", nullable = false)
+	private PeriodFrequencyType termPeriodFrequencyType;
 
 	@ManyToOne
 	@JoinColumn(name = "loan_status_id", nullable = false)
@@ -180,16 +191,23 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		return this.loanRepaymentScheduleDetail;
 	}
 
-	public void submitApplication(final LocalDate submittedOn,
+	public void submitApplication(
+			final Integer loanTermFrequency, 
+			final PeriodFrequencyType loanTermFrequencyType, 
+			final LocalDate submittedOn,
 			final LocalDate expectedDisbursementDate,
-			LocalDate repaymentsStartingFromDate,
-			LocalDate interestChargedFromDate,
-			LoanLifecycleStateMachine lifecycleStateMachine) {
+			final LocalDate repaymentsStartingFromDate,
+			final LocalDate interestChargedFromDate,
+			final LoanLifecycleStateMachine lifecycleStateMachine) {
 
 		this.loanStatus = lifecycleStateMachine.transition(LoanEvent.LOAN_CREATED, this.loanStatus);
 
+		this.termFrequency = loanTermFrequency;
+		this.termPeriodFrequencyType = loanTermFrequencyType;
+		
 		this.submittedOnDate = submittedOn.toDateTimeAtCurrentTime().toDate();
 
+		// TODO - this should also match expectedDisbursmentDate + loan term
 		this.expectedMaturityDate = this.repaymentScheduleInstallments
 				.get(this.repaymentScheduleInstallments.size() - 1)
 				.getDueDate().toDateMidnight().toDate();

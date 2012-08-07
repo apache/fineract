@@ -23,9 +23,33 @@ public class CalculateLoanScheduleCommandValidator {
 		DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");
 		
 		baseDataValidator.reset().parameter("principal").value(command.getPrincipal()).notNull().positiveAmount();
-		baseDataValidator.reset().parameter("repaymentFrequencyType").value(command.getRepaymentFrequencyType()).notNull().inMinMaxRange(0, 3);
-		baseDataValidator.reset().parameter("repaymentEvery").value(command.getRepaymentEvery()).notNull().greaterThanZero();
+		
+		baseDataValidator.reset().parameter("loanTermFrequency").value(command.getLoanTermFrequency()).notNull().greaterThanZero();
+		baseDataValidator.reset().parameter("loanTermFrequencyType").value(command.getLoanTermFrequencyType()).notNull().inMinMaxRange(0, 4);
+		
 		baseDataValidator.reset().parameter("numberOfRepayments").value(command.getNumberOfRepayments()).notNull().greaterThanZero();
+		baseDataValidator.reset().parameter("repaymentEvery").value(command.getRepaymentEvery()).notNull().greaterThanZero();
+		baseDataValidator.reset().parameter("repaymentFrequencyType").value(command.getRepaymentFrequencyType()).notNull().inMinMaxRange(0, 3);
+		
+		// FIXME - this constraint doesnt really need to be here. should be possible to express loan term as say 12 months whilst also saying
+		//       - that the repayment structure is 6 repayments every bi-monthly.
+		if (!command.getLoanTermFrequencyType().equals(command.getRepaymentFrequencyType())) {
+			ApiParameterError error = ApiParameterError.parameterError("validation.msg.loan.loanTermFrequencyType.not.the.same.as.repaymentFrequencyType", 
+					"The parameters loanTermFrequencyType and repaymentFrequencyType must be the same.", "loanTermFrequencyType", 
+					command.getLoanTermFrequencyType(), command.getRepaymentFrequencyType());
+			dataValidationErrors.add(error);
+		} else {
+			if (command.getLoanTermFrequency() != null && command.getRepaymentEvery() != null && command.getNumberOfRepayments() != null) { 
+				int suggestsedLoanTerm = command.getRepaymentEvery() * command.getNumberOfRepayments();
+				if (command.getLoanTermFrequency().intValue() < suggestsedLoanTerm) {
+					ApiParameterError error = ApiParameterError.parameterError("validation.msg.loan.loanTermFrequency.less.than.repayment.structure.suggests", 
+							"The parameter loanTermFrequency is less than the suggest loan term as indicated by numberOfRepayments and repaymentEvery.", "loanTermFrequency", 
+							command.getLoanTermFrequency(), command.getNumberOfRepayments(), command.getRepaymentEvery());
+					dataValidationErrors.add(error);
+				}
+			}
+		}
+		
 		baseDataValidator.reset().parameter("interestRatePerPeriod").value(command.getInterestRatePerPeriod()).notNull();
 		baseDataValidator.reset().parameter("interestRateFrequencyType").value(command.getInterestRateFrequencyType()).notNull().inMinMaxRange(0, 3);
 		baseDataValidator.reset().parameter("amortizationType").value(command.getAmortizationType()).notNull().inMinMaxRange(0, 1);
@@ -47,7 +71,7 @@ public class CalculateLoanScheduleCommandValidator {
 		if (command.getRepaymentsStartingFromDate() != null && command.getInterestChargedFromDate() == null) {
 			
 			ApiParameterError error = ApiParameterError.parameterError("validation.msg.loan.interestCalculatedFromDate.must.be.entered.when.using.repayments.startfrom.field", 
-					"The parameter interestCalculatedFromDate cannot be empty when first repayment date is provided.", "interestCalculatedFromDate", command.getRepaymentsStartingFromDate());
+					"The parameter interestCalculatedFromDate cannot be empty when first repayment date is provided.", "interestChargedFromDate", command.getRepaymentsStartingFromDate());
 			dataValidationErrors.add(error);
 		} else if (command.getRepaymentsStartingFromDate() == null && command.getInterestChargedFromDate() != null) {
 			
