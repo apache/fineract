@@ -16,6 +16,8 @@ public class SavingProductData implements Serializable {
 	private Integer digitsAfterDecimal;
 	
 	private BigDecimal interestRate = BigDecimal.ZERO;
+	private BigDecimal minimumBalance = BigDecimal.ZERO;
+	private BigDecimal maximumBalance = BigDecimal.ZERO;
 	
 	private DateTime createdOn;
 	private DateTime lastModifedOn;
@@ -26,7 +28,7 @@ public class SavingProductData implements Serializable {
 		//
 	}
 
-	public SavingProductData(DateTime createdOn, DateTime lastModifedOn, Long id,String name, String description,BigDecimal interestRate,String currencyCode, Integer digitsAfterDecimal) {
+	public SavingProductData(DateTime createdOn, DateTime lastModifedOn, Long id,String name, String description,BigDecimal interestRate,String currencyCode, Integer digitsAfterDecimal,BigDecimal minimumBalance,BigDecimal maximumBalance) {
 		this.createdOn=createdOn;
 		this.lastModifedOn=lastModifedOn;
 		this.id=id;
@@ -35,6 +37,8 @@ public class SavingProductData implements Serializable {
 		this.interestRate=interestRate;
 		this.currencyCode=currencyCode;
 		this.digitsAfterDecimal=digitsAfterDecimal;
+		this.minimumBalance=minimumBalance;
+		this.maximumBalance=maximumBalance;
 	}
 
 	public Long getId() {
@@ -108,4 +112,21 @@ public class SavingProductData implements Serializable {
 	public void setCurrencyOptions(List<CurrencyData> currencyOptions) {
 		this.currencyOptions = currencyOptions;
 	}
+
+	public BigDecimal getMinimumBalance() {
+		return minimumBalance;
+	}
+
+	public void setMinimumBalance(BigDecimal minimumBalance) {
+		this.minimumBalance = minimumBalance;
+	}
+
+	public BigDecimal getMaximumBalance() {
+		return maximumBalance;
+	}
+
+	public void setMaximumBalance(BigDecimal maximumBalance) {
+		this.maximumBalance = maximumBalance;
+	}
+	
 }

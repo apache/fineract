@@ -11,13 +11,16 @@ public class SavingProductCommand {
 	private final String currencyCode;
 	private final Integer digitsAfterDecimal;
 	private final BigDecimal interestRate;
+	
+	private final BigDecimal minimumBalance;
+	private final BigDecimal maximumBalance;
 
 	private final Set<String> modifiedParameters;
 
 	public SavingProductCommand(final Set<String> modifiedParameters,
 			final Long id, final String name, final String description,
 			final String currencyCode, final Integer digitsAfterDecimal,
-			final BigDecimal interestRate) {
+			final BigDecimal interestRate, final BigDecimal minimumBalance, final BigDecimal maximumBalance) {
 		this.id = id;
 		this.name = name;
 		this.description = description;
@@ -25,6 +28,9 @@ public class SavingProductCommand {
 		this.currencyCode = currencyCode;
 		this.digitsAfterDecimal = digitsAfterDecimal;
 		this.interestRate = interestRate;
+		
+		this.minimumBalance=minimumBalance;
+		this.maximumBalance=maximumBalance;
 
 		this.modifiedParameters = modifiedParameters;
 	}
@@ -53,6 +59,15 @@ public class SavingProductCommand {
 		return interestRate;
 	}
 	
+	
+	public BigDecimal getMinimumBalance() {
+		return minimumBalance;
+	}
+
+	public BigDecimal getMaximumBalance() {
+		return maximumBalance;
+	}
+
 	public boolean isNameChanged() {
 		return this.modifiedParameters.contains("name");
 	}
@@ -71,5 +86,13 @@ public class SavingProductCommand {
 	
 	public boolean isInterestRateChanged() {
 		return this.modifiedParameters.contains("interestRate");
+	}
+	
+	public boolean isMinimumBalanceChanged(){
+		return this.modifiedParameters.contains("minimumBalance");
+	}
+	
+	public boolean isMaximumBalanceChanged(){
+		return this.modifiedParameters.contains("maximumBalance");
 	}
 }

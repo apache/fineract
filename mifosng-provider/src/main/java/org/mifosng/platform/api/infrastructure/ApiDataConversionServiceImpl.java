@@ -1447,7 +1447,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		Type typeOfMap = new TypeToken<Map<String, String>>() {}.getType();
 		Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
 
-		Set<String> supportedParams = new HashSet<String>(Arrays.asList("name","description","currencyCode", "digitsAfterDecimal","interestRate","locale"));
+		Set<String> supportedParams = new HashSet<String>(Arrays.asList("name","description","currencyCode", "digitsAfterDecimal","interestRate","locale","minimumBalance","maximumBalance"));
 		checkForUnsupportedParameters(requestMap, supportedParams);
 		Set<String> modifiedParameters = new HashSet<String>();
 		String name = extractStringParameter("name", requestMap,modifiedParameters);
@@ -1455,9 +1455,11 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		String currencyCode=extractStringParameter("currencyCode", requestMap,modifiedParameters);
 		Integer digitsAfterDecimalValue = extractIntegerParameter("digitsAfterDecimal", requestMap, modifiedParameters);
 		BigDecimal interestRate = extractBigDecimalParameter("interestRate", requestMap, modifiedParameters);
+		BigDecimal minimumBalance=extractBigDecimalParameter("minimumBalance", requestMap, modifiedParameters);
+		BigDecimal maximumBalance=extractBigDecimalParameter("maximumBalance", requestMap, modifiedParameters);
 		
 
-		return new SavingProductCommand(modifiedParameters, resourceIdentifier,name, description,currencyCode,digitsAfterDecimalValue,interestRate);
+		return new SavingProductCommand(modifiedParameters, resourceIdentifier,name, description,currencyCode,digitsAfterDecimalValue,interestRate,minimumBalance,maximumBalance);
 	}
 
 	@Override
@@ -1465,7 +1467,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 			Set<String> responseParameters, SavingProductData... products) {
 		
 		Set<String> supportedParameters = new HashSet<String>(
-				Arrays.asList("id", "name", "description","createdOn", "lastModifedOn","interestRate","currencyCode","digitsAfterDecimal", "currencyOptions"));
+				Arrays.asList("id", "name", "description","createdOn", "lastModifedOn","interestRate","currencyCode","digitsAfterDecimal", "currencyOptions", "minimumBalance","maximumBalance"));
 		
 		final Set<String> parameterNamesToSkip = new HashSet<String>();
 		

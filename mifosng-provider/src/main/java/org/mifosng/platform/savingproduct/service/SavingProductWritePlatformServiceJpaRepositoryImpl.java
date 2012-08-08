@@ -34,7 +34,7 @@ public class SavingProductWritePlatformServiceJpaRepositoryImpl implements Savin
 		
 		MonetaryCurrency currency = new MonetaryCurrency(command.getCurrencyCode(), command.getDigitsAfterDecimal());
 		
-		SavingProduct product = new SavingProduct(command.getName(),command.getDescription(),currency,command.getInterestRate());  
+		SavingProduct product = new SavingProduct(command.getName(),command.getDescription(),currency,command.getInterestRate(),command.getMinimumBalance(),command.getMaximumBalance());  
 		this.savingProductRepository.save(product);
 		return new EntityIdentifier(product.getId());
 	}
@@ -59,6 +59,8 @@ public class SavingProductWritePlatformServiceJpaRepositoryImpl implements Savin
 	@Transactional
 	@Override
 	public EntityIdentifier deleteSavingProduct(Long productId) {
+		
+		this.context.authenticatedUser();
 		SavingProduct product=this.savingProductRepository.findOne(productId);
 		if (product==null || product.isDeleted()) {
 			throw new ProductNotFoundException(productId);

@@ -35,14 +35,14 @@ public class SavingProduct extends AbstractAuditableCustom<AppUser, Long> {
         this.savingProductRelatedDetail = null;
 	}
 
-	public SavingProduct(final String name, final String description, final MonetaryCurrency currency,final BigDecimal interestRate) {
+	public SavingProduct(final String name, final String description, final MonetaryCurrency currency,final BigDecimal interestRate, final BigDecimal minimumBalance,final BigDecimal maximumBalance) {
 		this.name = name.trim();
 		if (StringUtils.isNotBlank(description)) {
 			this.description = description.trim();
 		} else {
 			this.description = null;
 		}
-		this.savingProductRelatedDetail=new SavingProductRelatedDetail(currency, interestRate);
+		this.savingProductRelatedDetail=new SavingProductRelatedDetail(currency, interestRate,minimumBalance,maximumBalance);
 	}
 	
     public String getName() {
@@ -59,6 +59,14 @@ public class SavingProduct extends AbstractAuditableCustom<AppUser, Long> {
 	
 	public BigDecimal getInterestRate(){
 		return this.savingProductRelatedDetail.getInterestRate();
+	}
+	
+	public BigDecimal getMinimumBalance(){
+		return this.savingProductRelatedDetail.getMinimumBalance();
+	}
+	
+	public BigDecimal getMaximumBalance(){
+		return this.savingProductRelatedDetail.getMaximumBalance();
 	}
 	
 	public boolean isDeleted() {

@@ -72,7 +72,7 @@ public class SavingProductsApiResource {
 	public String retrieveAllSavingProducts(@Context final UriInfo uriInfo) {
 
 		Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "name", "description", "createdOn", "lastModifedOn",
-				"interestRate","currencyCode","digitsAfterDecimal"));
+				"interestRate","currencyCode","digitsAfterDecimal","minimumBalance","maximumBalance"));
 		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (responseParameters.isEmpty()) {
@@ -92,7 +92,7 @@ public class SavingProductsApiResource {
 	public String retrieveSavingProductDetails(@PathParam("productId") final Long productId, @Context final UriInfo uriInfo) {
 
 		Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "name", "description", "createdOn", "lastModifedOn",
-				"interestRate","currencyCode","digitsAfterDecimal"));
+				"interestRate","currencyCode","digitsAfterDecimal","minimumBalance","maximumBalance"));
 		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (responseParameters.isEmpty()) {
@@ -116,7 +116,7 @@ public class SavingProductsApiResource {
 	public String retrieveNewSavingProductDetails(@Context final UriInfo uriInfo) {
 		
 		Set<String> typicalResponseParameters = new HashSet<String>(
-				Arrays.asList("id", "name", "description", "createdOn", "lastModifedOn","interestRate","currencyCode","digitsAfterDecimal", "currencyOptions"));
+				Arrays.asList("id", "name", "description", "createdOn", "lastModifedOn","interestRate","currencyCode","digitsAfterDecimal", "currencyOptions","minimumBalance","maximumBalance"));
 		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (responseParameters.isEmpty()) {

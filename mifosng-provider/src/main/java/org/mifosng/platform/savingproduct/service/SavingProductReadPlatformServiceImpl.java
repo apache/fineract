@@ -92,7 +92,7 @@ public class SavingProductReadPlatformServiceImpl implements
 	private static final class SavingProductMapper implements RowMapper<SavingProductData> {
 		
 		public String savingProductSchema(){
-			return "sp.id as id,sp.name as name, sp.description as description,sp.currency_code as currencyCode, sp.currency_digits as currencyDigits,sp.interest_rate as interestRate,sp.created_date as createdon, sp.lastmodified_date as modifiedon, "
+			return "sp.id as id,sp.name as name, sp.description as description,sp.currency_code as currencyCode, sp.currency_digits as currencyDigits,sp.interest_rate as interestRate,sp.minimum_balance as minimumBalance,sp.maximum_balance as maximumBalance,sp.created_date as createdon, sp.lastmodified_date as modifiedon, "
 				+  "curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, curr.display_symbol as currencyDisplaySymbol" 
 				+  "  from portfolio_product_savings sp join ref_currency curr on curr.code = sp.currency_code";
 		}
@@ -117,7 +117,10 @@ public class SavingProductReadPlatformServiceImpl implements
 			DateTime createdOn = JdbcSupport.getDateTime(rs, "createdon");
 			DateTime lastModifedOn = JdbcSupport.getDateTime(rs, "modifiedon");
 			
-			return new SavingProductData(createdOn, lastModifedOn, id, name,description,interestRate,currencyCode,currencyDigits);
+			BigDecimal minimumBalance=rs.getBigDecimal("minimumBalance");
+			BigDecimal maximumBalance=rs.getBigDecimal("maximumBalance");
+			
+			return new SavingProductData(createdOn, lastModifedOn, id, name,description,interestRate,currencyCode,currencyDigits,minimumBalance,maximumBalance);
 		}
 	}
 	

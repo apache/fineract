@@ -27,7 +27,12 @@ public class SavingProductCommandValidator {
 		baseDataValidator.reset().parameter("currencyCode").value(command.getCurrencyCode()).ignoreIfNull().notBlank();
 		baseDataValidator.reset().parameter("digitsAfterDecimal").value(command.getDigitsAfterDecimal()).ignoreIfNull().notNull().inMinMaxRange(0, 6);
 		baseDataValidator.reset().parameter("interestRate").value(command.getInterestRate()).ignoreIfNull().notBlank();
-		baseDataValidator.reset().anyOfNotNull(command.getName(), command.getDescription(),command.getCurrencyCode(),command.getDigitsAfterDecimal(),command.getInterestRate());
+		baseDataValidator.reset().parameter("maximumBalance").value(command.getMaximumBalance()).notNull();
+		baseDataValidator.reset().parameter("minimumBalance").value(command.getMinimumBalance()).notNull();
+		baseDataValidator.reset().parameter("maximumBalance").value(command.getMaximumBalance()).zeroOrPositiveAmount();
+		baseDataValidator.reset().parameter("minimumBalance").value(command.getMinimumBalance()).zeroOrPositiveAmount();
+		baseDataValidator.reset().comapareMinimumAndMaximumAmounts(command.getMinimumBalance(), command.getMaximumBalance());
+		baseDataValidator.reset().anyOfNotNull(command.getName(), command.getDescription(),command.getCurrencyCode(),command.getDigitsAfterDecimal(),command.getInterestRate(),command.getMinimumBalance(),command.getMaximumBalance());
 		
 		if (!dataValidationErrors.isEmpty()) {
 			throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);
@@ -44,7 +49,11 @@ public class SavingProductCommandValidator {
 		baseDataValidator.reset().parameter("currencyCode").value(command.getCurrencyCode()).notBlank();
 		baseDataValidator.reset().parameter("digitsAfterDecimal").value(command.getDigitsAfterDecimal()).notNull().inMinMaxRange(0, 6);
 		baseDataValidator.reset().parameter("interestRate").value(command.getInterestRate()).notNull();
-		
+		baseDataValidator.reset().parameter("maximumBalance").value(command.getMaximumBalance()).notNull();
+		baseDataValidator.reset().parameter("minimumBalance").value(command.getMinimumBalance()).notNull();
+		baseDataValidator.reset().parameter("maximumBalance").value(command.getMaximumBalance()).zeroOrPositiveAmount();
+		baseDataValidator.reset().parameter("minimumBalance").value(command.getMinimumBalance()).zeroOrPositiveAmount();
+		baseDataValidator.reset().comapareMinimumAndMaximumAmounts(command.getMinimumBalance(), command.getMaximumBalance());
 		if (!dataValidationErrors.isEmpty()) {
 			throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);
 		}

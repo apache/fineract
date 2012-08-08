@@ -252,4 +252,16 @@ public class DataValidatorBuilder {
 		dataValidationErrors.add(error);
 		return this;
 	}
+	
+	public DataValidatorBuilder comapareMinimumAndMaximumAmounts(BigDecimal minimumBalance,BigDecimal maximumBalance){
+		if(minimumBalance!=null&&maximumBalance!=null)
+		if(maximumBalance.compareTo(minimumBalance)==-1){
+			StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(resource).append(".minimum.amount.should.lessthan.maximun.amount");
+			StringBuilder defaultEnglishMessage = new StringBuilder("The parameter ").append(" minimum amount ").append(minimumBalance).append(" should less than maximum amount ").append(maximumBalance).append(".");
+			ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(), defaultEnglishMessage.toString(), parameter, minimumBalance, maximumBalance);
+			dataValidationErrors.add(error);
+			return this;
+		}
+		return this;
+	}
 }

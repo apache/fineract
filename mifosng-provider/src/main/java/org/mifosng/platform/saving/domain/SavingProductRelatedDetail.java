@@ -18,13 +18,23 @@ public class SavingProductRelatedDetail {
 	@Column(name = "interest_rate", scale = 6, precision = 19, nullable = false)
 	private BigDecimal interestRate;
 	
+	@Column(name = "minimum_balance", scale = 6, precision = 19, nullable = false)
+	private BigDecimal minimumBalance;
+	
+	@Column(name = "maximum_balance", scale = 6, precision = 19, nullable = false)
+	private BigDecimal maximumBalance;
+	
 	public SavingProductRelatedDetail() {
 		this.interestRate=null;
+		this.maximumBalance=null;
+		this.minimumBalance=null;
 	}
 	
-	public SavingProductRelatedDetail(final MonetaryCurrency currency,final BigDecimal interestRate) {
+	public SavingProductRelatedDetail(final MonetaryCurrency currency,final BigDecimal interestRate, final BigDecimal minimumBalance,final BigDecimal maximumBalance) {
 		this.currency=currency;
 		this.interestRate=interestRate;
+		this.minimumBalance=minimumBalance;
+		this.maximumBalance=maximumBalance;
 	}
 	
 	public MonetaryCurrency getCurrency() {
@@ -33,6 +43,14 @@ public class SavingProductRelatedDetail {
 
 	public BigDecimal getInterestRate() {
 		return BigDecimal.valueOf(Double.valueOf(this.interestRate.stripTrailingZeros().toString()));
+	}
+	
+	public BigDecimal getMinimumBalance(){
+		return BigDecimal.valueOf(Double.valueOf(this.minimumBalance.stripTrailingZeros().toString()));
+	}
+	
+	public BigDecimal getMaximumBalance(){
+		return BigDecimal.valueOf(Double.valueOf(this.maximumBalance.stripTrailingZeros().toString()));
 	}
 	
 	public void update(SavingProductCommand command){
@@ -52,6 +70,14 @@ public class SavingProductRelatedDetail {
 		
 		if (command.isInterestRateChanged()) {
 			this.interestRate = command.getInterestRate();
+		}
+		
+		if(command.isMaximumBalanceChanged()){
+			this.minimumBalance=command.getMinimumBalance();
+		}
+		
+		if(command.isMaximumBalanceChanged()){
+			this.maximumBalance=command.getMaximumBalance();
 		}
 	}
 }
