@@ -859,11 +859,11 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
             throw new InvalidJsonException();
         }
         
-        Type typeOfMap = new TypeToken<Map<String, String>>(){}.getType();
+        Type typeOfMap = new TypeToken<Map<String, Object>>(){}.getType();
         Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
 
         Set<String> supportedParams = new HashSet<String>(
-                Arrays.asList("name", "externalId")
+                Arrays.asList("name", "externalId", "clientMembers")
         );
         
         checkForUnsupportedParameters(requestMap, supportedParams);
@@ -873,7 +873,25 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
         String externalId = extractStringParameter("externalId", requestMap, modifiedParameters);
         String name = extractStringParameter("name", requestMap, modifiedParameters);
 
-        return new GroupCommand(modifiedParameters, resourceIdentifier, externalId, name);
+        // check array
+        JsonParser parser = new JsonParser();
+        
+        String[] clientMembers = null;
+        JsonElement element = parser.parse(json);
+        if (element.isJsonObject()) {
+            JsonObject object = element.getAsJsonObject();
+            if (object.has("clientMembers")) {
+                modifiedParameters.add("clientMembers");
+                JsonArray array = object.get("clientMembers").getAsJsonArray();
+                clientMembers = new String[array.size()];
+                for (int i=0; i<array.size(); i++) {
+                    clientMembers[i] = array.get(i).getAsString();
+                }
+            }
+        }
+        //
+        
+        return new GroupCommand(modifiedParameters, resourceIdentifier, externalId, name, clientMembers);
     }
 
     @Override

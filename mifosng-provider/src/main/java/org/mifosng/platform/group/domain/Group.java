@@ -1,11 +1,18 @@
 package org.mifosng.platform.group.domain;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosng.platform.api.commands.GroupCommand;
+import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
 import org.mifosng.platform.user.domain.AppUser;
 
@@ -13,7 +20,6 @@ import org.mifosng.platform.user.domain.AppUser;
 @Table(name = "portfolio_group")
 public class Group extends AbstractAuditableCustom<AppUser, Long> {
 
-    @SuppressWarnings("unused")
     @Column(name = "name", length = 100)
     private String name;
 
@@ -23,16 +29,23 @@ public class Group extends AbstractAuditableCustom<AppUser, Long> {
     @Column(name = "is_deleted", nullable=false)
     private boolean deleted = false;
     
+    @ManyToMany
+    @JoinTable(name = "portfolio_group_client",
+               joinColumns = @JoinColumn(name = "group_id"),
+               inverseJoinColumns = @JoinColumn(name = "client_id"))
+    private Set<Client> clientMembers;
+    
     public Group() {
         this.name = null;
         this.externalId = null;
+        this.clientMembers = new HashSet<Client>();
     }
 
-    public static Group newGroup(String name, String externalId){
-        return new Group(name, externalId);
+    public static Group newGroup(String name, String externalId, Set<Client> clientMembers){
+        return new Group(name, externalId, clientMembers);
     }
     
-    public Group(String name, String externalId) {
+    public Group(String name, String externalId, Set<Client> clientMembers) {
         if (StringUtils.isNotBlank(name)) {
             this.name = name.trim();
         } else {
@@ -42,6 +55,9 @@ public class Group extends AbstractAuditableCustom<AppUser, Long> {
             this.externalId = externalId.trim();
         } else {
             this.externalId = null;
+        }
+        if (clientMembers != null){
+            this.clientMembers = clientMembers;
         }
     }
     
@@ -53,6 +69,10 @@ public class Group extends AbstractAuditableCustom<AppUser, Long> {
         if (command.isNameChanged()) {
             this.name = command.getName();
         }
+    }
+    
+    public void addClientMember(final Client member){
+        this.clientMembers.add(member);
     }
     
     /**
