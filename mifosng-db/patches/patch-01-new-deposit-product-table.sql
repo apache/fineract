@@ -1,6 +1,6 @@
 ALTER TABLE `portfolio_product_savings` 
 DROP COLUMN `ft_pre_closure_interest_rate` , 
-DROP COLUMN `ft_can_preclose` , 
+DROP COLUMN `ft_can_pre_close` , 
 DROP COLUMN `ft_can_renew` , 
 DROP COLUMN `ft_maturity_max_interest_rate` , 
 DROP COLUMN `ft_maturity_min_interest_rate` , 
