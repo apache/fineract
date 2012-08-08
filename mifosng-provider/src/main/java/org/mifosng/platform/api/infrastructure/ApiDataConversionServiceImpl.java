@@ -748,8 +748,8 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 			throw new InvalidJsonException();
 		}
 		
-		Type typeOfMap = new TypeToken<Map<String, String>>(){}.getType();
-	    Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
+		Type typeOfMap = new TypeToken<Map<String, Object>>(){}.getType();
+	    Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
 	    
 	    Set<String> supportedParams = new HashSet<String>(
 	    		Arrays.asList("username", "firstname", "lastname", "password", "repeatPassword", "email", "officeId", "notSelectedRoles", "roles")
@@ -1161,10 +1161,10 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		return paramValue;
 	}
 	
-	private Long extractLongParameter(final String paramName, final Map<String, String> requestMap, final Set<String> modifiedParameters) {
+	private Long extractLongParameter(final String paramName, final Map<String, ?> requestMap, final Set<String> modifiedParameters) {
 		Long paramValue = null;
 		if (requestMap.containsKey(paramName)) {
-			String valueAsString = requestMap.get(paramName);
+			String valueAsString = (String) requestMap.get(paramName);
 			if (StringUtils.isNotBlank(valueAsString)) {
 				paramValue = Long.valueOf(Double.valueOf(valueAsString).longValue());
 			}
