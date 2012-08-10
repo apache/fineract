@@ -19,6 +19,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.mifosng.platform.api.commands.GroupCommand;
+import org.mifosng.platform.api.data.ClientMemberData;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.GroupData;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
@@ -49,7 +50,7 @@ public class GroupsApiResource {
     public String retrieveAllGroups(@Context final UriInfo uriInfo){
         
         Set<String> typicalResponseParameters = new HashSet<String>(
-                Arrays.asList("id", "name", "externalId")
+                Arrays.asList("id", "name", "externalId", "clientMembers")
         );
         
         Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
@@ -60,6 +61,10 @@ public class GroupsApiResource {
         boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
         
         Collection<GroupData> groups = this.groupReadPlatformService.retrieveAllGroups();
+        
+        for (GroupData group : groups){
+            group.setClientMembers(this.groupReadPlatformService.retrieveClientMembers(group.getId()));
+        }
         
         return this.apiDataConversionService.convertGroupDataToJson(prettyPrint, responseParameters, groups.toArray(new GroupData[groups.size()]));
     }
@@ -82,6 +87,9 @@ public class GroupsApiResource {
 
         GroupData group = this.groupReadPlatformService.retrieveGroup(groupId);
 
+        Collection<ClientMemberData> clientMembers = this.groupReadPlatformService.retrieveClientMembers(groupId);
+        group.setClientMembers(clientMembers);
+        
         return this.apiDataConversionService.convertGroupDataToJson(prettyPrint, responseParameters, group);
     }
 

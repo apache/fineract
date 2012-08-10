@@ -4,6 +4,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
+import org.apache.commons.lang.StringUtils;
+import org.mifosng.platform.api.data.ClientMemberData;
 import org.mifosng.platform.api.data.GroupData;
 import org.mifosng.platform.exceptions.GroupNotFoundException;
 import org.mifosng.platform.infrastructure.TenantAwareRoutingDataSource;
@@ -73,4 +75,35 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
 
     }
 
+    @Override
+    public Collection<ClientMemberData> retrieveClientMembers(Long groupId){
+        
+        this.context.authenticatedUser();
+        
+        ClientMemberSummaryDataMapper rm = new ClientMemberSummaryDataMapper();
+        
+        String sql = "select " + rm.clientMemberSummarySchema() + " where cm.is_deleted = 0 and pgc.group_id = ?";
+        
+        return this.jdbcTemplate.query(sql, rm, new Object[] {groupId});
+    }
+    
+    private static final class ClientMemberSummaryDataMapper implements RowMapper<ClientMemberData> {
+
+        public String clientMemberSummarySchema() {
+            return "cm.id, cm.firstname, cm.lastname from portfolio_client cm INNER JOIN portfolio_group_client pgc ON pgc.client_id = cm.id";
+        }
+
+        @Override
+        public ClientMemberData mapRow(ResultSet rs, int rowNum) throws SQLException {
+            Long id = rs.getLong("id");
+            String firstname = rs.getString("firstname");
+            String lastname = rs.getString("lastname");
+            if (StringUtils.isBlank(firstname)) {
+                firstname = "";
+            }
+            return new ClientMemberData(id, firstname, lastname);
+        }
+
+    }
+    
 }

@@ -380,7 +380,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	@Override
     public String convertGroupDataToJson(boolean prettyPrint, Set<String> responseParameters, GroupData... groups) {
         final Set<String> supportedParameters = new HashSet<String>(
-                Arrays.asList("id", "name", "externalId")
+                Arrays.asList("id", "name", "externalId", "clientMembers")
         );
         
         final Set<String> parameterNamesToSkip = new HashSet<String>();

@@ -65,7 +65,10 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
         if (groupForUpdate == null || groupForUpdate.isDeleted()) {
             throw new GroupNotFoundException(command.getId());
         }
-        groupForUpdate.update(command);
+
+        final Set<Client> clientMembers = assembleSetOfClients(command);
+
+        groupForUpdate.update(command, clientMembers);
 
         groupRepository.save(groupForUpdate);
 

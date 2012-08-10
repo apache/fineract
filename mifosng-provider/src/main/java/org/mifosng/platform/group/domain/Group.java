@@ -20,7 +20,7 @@ import org.mifosng.platform.user.domain.AppUser;
 @Table(name = "portfolio_group")
 public class Group extends AbstractAuditableCustom<AppUser, Long> {
 
-    @Column(name = "name", length = 100)
+    @Column(name = "name", length = 100, unique = true)
     private String name;
 
     @Column(name = "external_id", length = 100, unique = true)
@@ -34,7 +34,7 @@ public class Group extends AbstractAuditableCustom<AppUser, Long> {
                joinColumns = @JoinColumn(name = "group_id"),
                inverseJoinColumns = @JoinColumn(name = "client_id"))
     private Set<Client> clientMembers;
-    
+
     public Group() {
         this.name = null;
         this.externalId = null;
@@ -61,13 +61,17 @@ public class Group extends AbstractAuditableCustom<AppUser, Long> {
         }
     }
     
-    public void update(GroupCommand command) {
+    public void update(final GroupCommand command, final Set<Client> clientMembers) {
         if (command.isExternalIdChanged()) {
             this.externalId = command.getExternalId();
         }
 
         if (command.isNameChanged()) {
             this.name = command.getName();
+        }
+        
+        if (clientMembers != null && command.isClientMembersChanged()){
+            this.clientMembers = clientMembers;
         }
     }
     
@@ -83,6 +87,7 @@ public class Group extends AbstractAuditableCustom<AppUser, Long> {
     public void delete() {
         this.deleted = true;
         this.externalId = this.getId() + "_" + this.externalId;
+        this.name = this.getId() + "_" + this.name;
     }
 
     public boolean isDeleted() {
