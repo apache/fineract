@@ -83,7 +83,8 @@ public class DepositProductsApiResource {
 	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveAllDepositProducts(@Context final UriInfo uriInfo){
 		Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "name", "description", "createdOn", "lastModifedOn",
-				"currencyCode","digitsAfterDecimal","minimumBalance","maximumBalance"));
+				"currencyCode","digitsAfterDecimal","minimumBalance","maximumBalance","tenureMonths","maturityDefaultInterestRate","maturityMinInterestRate",
+				"maturityMaxInterestRate","canRenew","canPreClose","preClosureInterestRate"));
 		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (responseParameters.isEmpty()) {
@@ -101,7 +102,8 @@ public class DepositProductsApiResource {
 	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveDepositProductDetails(@PathParam("productId") final Long productId, @Context final UriInfo uriInfo){
 		Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "name", "description", "createdOn", "lastModifedOn",
-				"currencyCode","digitsAfterDecimal","minimumBalance","maximumBalance"));
+				"currencyCode","digitsAfterDecimal","minimumBalance","maximumBalance","tenureMonths","maturityDefaultInterestRate","maturityMinInterestRate",
+				"maturityMaxInterestRate","canRenew","canPreClose","preClosureInterestRate"));
 		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (responseParameters.isEmpty()) {
@@ -123,7 +125,8 @@ public class DepositProductsApiResource {
 	public String retrieveNewDepositProductDetails(@Context final UriInfo uriInfo) {
 		
 		Set<String> typicalResponseParameters = new HashSet<String>(
-				Arrays.asList("id", "name", "description", "createdOn", "lastModifedOn","currencyCode","digitsAfterDecimal", "currencyOptions","minimumBalance","maximumBalance"));
+				Arrays.asList("id", "name", "description", "createdOn", "lastModifedOn","currencyCode","digitsAfterDecimal", "currencyOptions","minimumBalance","maximumBalance","tenureMonths","maturityDefaultInterestRate","maturityMinInterestRate",
+						"maturityMaxInterestRate","canRenew","canPreClose","preClosureInterestRate"));
 		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (responseParameters.isEmpty()) {
