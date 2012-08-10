@@ -457,7 +457,7 @@ CREATE TABLE `portfolio_note` (
 CREATE TABLE `rpt_sequence` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=483 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 CREATE TABLE `stretchydata_datasettype` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -529,9 +529,12 @@ CREATE TABLE `stretchy_report` (
   `report_subtype` varchar(20) DEFAULT NULL,
   `report_category` varchar(45) DEFAULT NULL,
   `report_sql` text,
+  `description` text,
+  `core_report` tinyint(1) DEFAULT '0',
+  `use_report` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`report_id`),
   UNIQUE KEY `report_name_UNIQUE` (`report_name`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `stretchy_report_parameter` (
   `report_id` int(11) NOT NULL,
