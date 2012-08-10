@@ -75,9 +75,12 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 				+  " da.deposit_amount as depositAmount, "	
 				+  " da.maturity_interest_rate as interestRate, " 
 				+  " da.created_date as createdon, da.lastmodified_date as modifiedon, "
-				+  " c.firstname as firstname, c.lastname as lastname, "
+				+  " c.firstname as firstname, c.lastname as lastname, da.name as productName,"
 				+  " curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, curr.display_symbol as currencyDisplaySymbol" 
-				+  " from portfolio_deposit_account da join ref_currency curr on curr.code = da.currency_code join portfolio_client c on c.id = da.client_id";
+				+  " from portfolio_deposit_account da " 
+				+  " join ref_currency curr on curr.code = da.currency_code " 
+				+  " join portfolio_client c on c.id = da.client_id " 
+				+  " join portfolio_product_deposit pd on pd.id = da.product_id";
 		}
 
 		@Override
@@ -88,7 +91,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 			Long clientId = rs.getLong("clientId");
 			String clientName = rs.getString("firstname") + " " + rs.getString("lastname");
 			Long productId = rs.getLong("productId");
-			String productName = "";
+			String productName = rs.getString("productName");
 			
 			String currencyCode = rs.getString("currencyCode");
 			String currencyName = rs.getString("currencyName");
