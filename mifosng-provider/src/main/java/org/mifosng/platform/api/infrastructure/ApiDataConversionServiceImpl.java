@@ -1493,7 +1493,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
 
 		Set<String> supportedParams = new HashSet<String>(
-				Arrays.asList("clientId", "productId", "externalId", "currencyCode", "digitsAfterDecimal", "depositAmount", "interestRate", "termInMonths", "locale")
+				Arrays.asList("clientId", "productId", "externalId", "currencyCode", "digitsAfterDecimal", "depositAmount", "maturityInterestRate", "termInMonths", "locale")
 		);
 		checkForUnsupportedParameters(requestMap, supportedParams);
 		Set<String> modifiedParameters = new HashSet<String>();
@@ -1504,7 +1504,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		String currencyCode=extractStringParameter("currencyCode", requestMap,modifiedParameters);
 		Integer digitsAfterDecimalValue = extractIntegerParameter("digitsAfterDecimal", requestMap, modifiedParameters);
 		BigDecimal depositAmount=extractBigDecimalParameter("depositAmount", requestMap, modifiedParameters);
-		BigDecimal interestRate = extractBigDecimalParameter("interestRate", requestMap, modifiedParameters);
+		BigDecimal interestRate = extractBigDecimalParameter("maturityInterestRate", requestMap, modifiedParameters);
 		Integer termInMonths = extractIntegerParameter("termInMonths", requestMap, modifiedParameters);
 		
 		// isRenewable, isPreClosureAllowed, expectedDepositDate, pojectMaturityDate, projectedInterestAccrued
@@ -1636,7 +1636,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		Set<String> supportedParameters = new HashSet<String>(
 				Arrays.asList("createdOn", "lastModifedOn", 
 						"id", "clientId", "clientName", "productId", "productName", 
-						"currency", "deposit", "interestRate", "currencyOptions")
+						"currency", "deposit", "maturityInterestRate", "currencyOptions")
 		);
 		
 		final Set<String> parameterNamesToSkip = new HashSet<String>();

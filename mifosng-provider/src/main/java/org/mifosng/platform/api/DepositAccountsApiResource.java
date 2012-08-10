@@ -82,7 +82,7 @@ public class DepositAccountsApiResource {
 		Set<String> typicalResponseParameters = new HashSet<String>(
 				Arrays.asList("createdOn", "lastModifedOn", 
 						"id", "clientId", "clientName", "productId", "productName", 
-						"currency", "deposit", "interestRate")
+						"currency", "deposit", "maturityInterestRate")
 		);
 		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
@@ -105,7 +105,7 @@ public class DepositAccountsApiResource {
 		Set<String> typicalResponseParameters = new HashSet<String>(
 				Arrays.asList("createdOn", "lastModifedOn", 
 						"id", "clientId", "clientName", "productId", "productName", 
-						"currency", "deposit", "interestRate")
+						"currency", "deposit", "maturityInterestRate")
 		);
 		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
@@ -135,7 +135,7 @@ public class DepositAccountsApiResource {
 		Set<String> typicalResponseParameters = new HashSet<String>(
 				Arrays.asList("createdOn", "lastModifedOn", 
 						"id", "clientId", "clientName", "productId", "productName", 
-						"currency", "deposit", "interestRate", "currencyOptions")
+						"currency", "deposit", "maturityInterestRate", "currencyOptions")
 		);
 		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());

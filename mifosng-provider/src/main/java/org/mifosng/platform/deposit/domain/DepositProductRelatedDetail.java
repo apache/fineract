@@ -8,6 +8,7 @@ import javax.persistence.Embedded;
 
 import org.mifosng.platform.api.commands.DepositProductCommand;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
+import org.mifosng.platform.exceptions.InterestRateOutsideRangeException;
 
 	@Embeddable
 	public class DepositProductRelatedDetail {
@@ -165,4 +166,18 @@ import org.mifosng.platform.currency.domain.MonetaryCurrency;
 		
 	}
 
+	public void validateInterestRateInRange(final BigDecimal interestRate) {
+		boolean inRange = true;
+		if (interestRate.compareTo(this.maturityMinInterestRate) < 0) {
+			inRange = false;
+		}
+		
+		if (this.maturityMaxInterestRate.compareTo(interestRate) < 0) {
+			inRange = false;
+		}
+		
+		if (!inRange) {
+			throw new InterestRateOutsideRangeException(interestRate, this.maturityMinInterestRate, this.maturityMaxInterestRate);
+		}
+	}
 }

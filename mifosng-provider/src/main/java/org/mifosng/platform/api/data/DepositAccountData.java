@@ -21,7 +21,7 @@ public class DepositAccountData {
 	
 	private final CurrencyData currency;
 	private final BigDecimal deposit;
-	private final BigDecimal interestRate;
+	private final BigDecimal maturityInterestRate;
 	
 	private final DateTime createdOn;
 	private final DateTime lastModifedOn;
@@ -38,7 +38,7 @@ public class DepositAccountData {
 		this.productName = null;
 		this.currency = null;
 		this.deposit = null;
-		this.interestRate = null;
+		this.maturityInterestRate = null;
 		this.currencyOptions = new ArrayList<CurrencyData>();
 	}
 	
@@ -52,7 +52,7 @@ public class DepositAccountData {
 		this.productName = account.getProductName();
 		this.currency = account.getCurrency();
 		this.deposit = account.getDeposit();
-		this.interestRate = account.getInterestRate();
+		this.maturityInterestRate = account.getMaturityInterestRate();
 		this.currencyOptions = currencies;
 	}
 	
@@ -75,7 +75,7 @@ public class DepositAccountData {
 		this.productName = productName;
 		this.currency = currency;
 		this.deposit = deposit;
-		this.interestRate=interestRate;
+		this.maturityInterestRate=interestRate;
 		this.currencyOptions = new ArrayList<CurrencyData>();
 	}
 
@@ -107,8 +107,8 @@ public class DepositAccountData {
 		return deposit;
 	}
 	
-	public BigDecimal getInterestRate() {
-		return interestRate;
+	public BigDecimal getMaturityInterestRate() {
+		return maturityInterestRate;
 	}
 
 	public DateTime getCreatedOn() {

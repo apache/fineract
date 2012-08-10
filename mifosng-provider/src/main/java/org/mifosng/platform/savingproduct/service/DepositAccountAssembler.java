@@ -5,7 +5,10 @@ import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.client.domain.ClientRepository;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.currency.domain.Money;
+import org.mifosng.platform.deposit.domain.DepositProduct;
+import org.mifosng.platform.deposit.domain.DepositProductRepository;
 import org.mifosng.platform.exceptions.ClientNotFoundException;
+import org.mifosng.platform.exceptions.DepositProductNotFoundException;
 import org.mifosng.platform.saving.domain.DepositAccount;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,10 +20,12 @@ import org.springframework.stereotype.Service;
 public class DepositAccountAssembler {
 
 	private final ClientRepository clientRepository;
+	private final DepositProductRepository depositProductRepository;
 
 	@Autowired
-	public DepositAccountAssembler(final ClientRepository clientRepository) {
+	public DepositAccountAssembler(final ClientRepository clientRepository, final DepositProductRepository depositProductRepository) {
 		this.clientRepository = clientRepository;
+		this.depositProductRepository = depositProductRepository;
 	}
 
 	public DepositAccount assembleFrom(final DepositAccountCommand command) {
@@ -28,11 +33,16 @@ public class DepositAccountAssembler {
 		Client client = this.clientRepository.findOne(command.getClientId());
 		if (client == null || client.isDeleted()) {
 			throw new ClientNotFoundException(command.getClientId());
+		}
+		
+		DepositProduct product = this.depositProductRepository.findOne(command.getProductId());
+		if (product == null || product.isDeleted()) {
+			throw new DepositProductNotFoundException(command.getProductId());
 		} 
 		
 		MonetaryCurrency currency = new MonetaryCurrency(command.getCurrencyCode(), command.getDigitsAfterDecimal());
 		Money deposit = Money.of(currency, command.getDepositAmount());
 		
-		return new DepositAccount(client, command.getExternalId(), deposit, command.getInterestRate(), command.getTermInMonths());
+		return new DepositAccount(client, product, command.getExternalId(), deposit, command.getMaturityInterestRate(), command.getTermInMonths());
 	}
 }

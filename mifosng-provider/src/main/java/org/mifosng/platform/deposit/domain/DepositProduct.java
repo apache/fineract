@@ -27,7 +27,7 @@ public class DepositProduct extends AbstractAuditableCustom<AppUser, Long> {
 	private boolean deleted = false;
     
     @Embedded
-    DepositProductRelatedDetail depositProductRelatedDetail;
+    private DepositProductRelatedDetail depositProductRelatedDetail;
     
     protected DepositProduct(){
     	this.name = null;
@@ -114,5 +114,9 @@ public class DepositProduct extends AbstractAuditableCustom<AppUser, Long> {
 		}
 		
 		this.depositProductRelatedDetail.update(command);
+	}
+
+	public void validateInterestRateInRange(final BigDecimal interestRate) {
+		this.depositProductRelatedDetail.validateInterestRateInRange(interestRate);
 	}
 }

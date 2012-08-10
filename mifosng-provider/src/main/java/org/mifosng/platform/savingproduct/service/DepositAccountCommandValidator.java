@@ -30,13 +30,13 @@ public class DepositAccountCommandValidator {
 		baseDataValidator.reset().parameter("currencyCode").value(command.getCurrencyCode()).ignoreIfNull().notBlank();
 		baseDataValidator.reset().parameter("digitsAfterDecimal").value(command.getDigitsAfterDecimal()).ignoreIfNull().notNull().inMinMaxRange(0, 6);
 		baseDataValidator.reset().parameter("depositAmount").value(command.getDepositAmount()).ignoreIfNull().notNull().integerGreaterThanZero();
-		baseDataValidator.reset().parameter("interestRate").value(command.getInterestRate()).ignoreIfNull().notNull().zeroOrPositiveAmount();
+		baseDataValidator.reset().parameter("maturityInterestRate").value(command.getMaturityInterestRate()).ignoreIfNull().notNull().zeroOrPositiveAmount();
 		baseDataValidator.reset().parameter("termInMonths").value(command.getTermInMonths()).ignoreIfNull().notNull().integerGreaterThanZero();
 		
 		baseDataValidator.reset().anyOfNotNull(
 				command.getClientId(), command.getProductId(), command.getExternalId(),
-				command.getCurrencyCode(),command.getDigitsAfterDecimal(),
-				command.getDepositAmount(), command.getInterestRate(),command.getTermInMonths());
+				command.getCurrencyCode(), command.getDigitsAfterDecimal(),
+				command.getDepositAmount(), command.getMaturityInterestRate(), command.getTermInMonths());
 		
 		if (!dataValidationErrors.isEmpty()) {
 			throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);
@@ -56,7 +56,7 @@ public class DepositAccountCommandValidator {
 		baseDataValidator.reset().parameter("currencyCode").value(command.getCurrencyCode()).notBlank();
 		baseDataValidator.reset().parameter("digitsAfterDecimal").value(command.getDigitsAfterDecimal()).notNull().inMinMaxRange(0, 6);
 		baseDataValidator.reset().parameter("depositAmount").value(command.getDepositAmount()).notNull().zeroOrPositiveAmount();
-		baseDataValidator.reset().parameter("interestRate").value(command.getInterestRate()).notNull().zeroOrPositiveAmount();
+		baseDataValidator.reset().parameter("maturityInterestRate").value(command.getMaturityInterestRate()).notNull().zeroOrPositiveAmount();
 		baseDataValidator.reset().parameter("termInMonths").value(command.getTermInMonths()).notNull().integerGreaterThanZero();
 		
 		if (!dataValidationErrors.isEmpty()) {

@@ -16,7 +16,7 @@ public class DepositAccountCommand {
 	private final String currencyCode;
 	private final Integer digitsAfterDecimal;
 	private final BigDecimal depositAmount;
-	private final BigDecimal interestRate;
+	private final BigDecimal maturityInterestRate;
 	private final Integer termInMonths;
 	
 	private final Set<String> modifiedParameters;
@@ -39,7 +39,7 @@ public class DepositAccountCommand {
 		this.currencyCode = currencyCode;
 		this.digitsAfterDecimal = digitsAfterDecimal;
 		this.depositAmount = depositAmount;
-		this.interestRate = interestRate;
+		this.maturityInterestRate = interestRate;
 		this.termInMonths = termInMonths;
 		
 		this.modifiedParameters = modifiedParameters;
@@ -72,9 +72,9 @@ public class DepositAccountCommand {
 	public BigDecimal getDepositAmount() {
 		return depositAmount;
 	}
-
-	public BigDecimal getInterestRate() {
-		return interestRate;
+	
+	public BigDecimal getMaturityInterestRate() {
+		return maturityInterestRate;
 	}
 
 	public Integer getTermInMonths() {
