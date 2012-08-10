@@ -14,13 +14,8 @@ public class DepositProductData implements Serializable {
 	private String description;
 	private String currencyCode;
 	private Integer digitsAfterDecimal;
-	
 	private BigDecimal minimumBalance = BigDecimal.ZERO;
 	private BigDecimal maximumBalance = BigDecimal.ZERO;
-	
-	private DateTime createdOn;
-	private DateTime lastModifedOn;
-	
 	private Integer tenureMonths;
 	private BigDecimal maturityDefaultInterestRate = BigDecimal.ZERO;
 	private BigDecimal maturityMinInterestRate = BigDecimal.ZERO;
@@ -28,11 +23,13 @@ public class DepositProductData implements Serializable {
 	private Boolean canRenew;
 	private Boolean canPreClose;
 	private BigDecimal preClosureInterestRate = BigDecimal.ZERO;
+	private DateTime createdOn;
+	private DateTime lastModifedOn;
 	
 	private List<CurrencyData> currencyOptions = new ArrayList<CurrencyData>();
 	
 	public DepositProductData() {
-		// TODO Auto-generated constructor stub
+		//
 	}
 	
 	public DepositProductData(DateTime createdOn, DateTime lastModifedOn, Long id,String name, String description, String currencyCode, Integer digitsAfterDecimal,BigDecimal minimumBalance,BigDecimal maximumBalance,
