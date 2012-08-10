@@ -145,6 +145,12 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 		}
 	}
 	
+	@Transactional
+	@Override
+	public void updateUsersOwnAccountDetails(final UserCommand command) {
+		updateUser(command);
+	}
+	
 	private Set<Role> assembleSetOfRoles(final UserCommand command) {
 		
 		final Set<Role> allRoles = new HashSet<Role>();

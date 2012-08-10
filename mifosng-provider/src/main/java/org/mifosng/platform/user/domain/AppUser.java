@@ -272,4 +272,8 @@ public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements P
 
 		return match;
 	}
+
+	public boolean hasIdOf(final Long userId) {
+		return getId().equals(userId);
+	}
 }

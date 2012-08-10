@@ -13,4 +13,7 @@ public interface AppUserWritePlatformService {
 	
 	@PreAuthorize(value = "hasRole('USER_ADMINISTRATION_SUPER_USER_ROLE')")
 	void deleteUser(final Long userId);
+
+	// we dont put any permissions on this e.g. a user with no admin rights can change their own details (email, username, password etc).
+	void updateUsersOwnAccountDetails(UserCommand command);
 }

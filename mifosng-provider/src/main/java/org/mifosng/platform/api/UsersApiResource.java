@@ -27,6 +27,8 @@ import org.mifosng.platform.api.data.OfficeLookup;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
 import org.mifosng.platform.organisation.service.OfficeReadPlatformService;
+import org.mifosng.platform.security.PlatformSecurityContext;
+import org.mifosng.platform.user.domain.AppUser;
 import org.mifosng.platform.user.service.AppUserReadPlatformService;
 import org.mifosng.platform.user.service.AppUserWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +51,9 @@ public class UsersApiResource {
 
 	@Autowired
 	private ApiDataConversionService apiDataConversionService;
+	
+	@Autowired
+	private PlatformSecurityContext context;
 	
 	@GET
 	@Consumes({MediaType.APPLICATION_JSON})
@@ -145,7 +150,13 @@ public class UsersApiResource {
 
 		UserCommand command = this.apiDataConversionService.convertJsonToUserCommand(userId, jsonRequestBody);
 
-		this.appUserWritePlatformService.updateUser(command);
+		AppUser loggedInUser = context.authenticatedUser();
+		
+		if (loggedInUser.hasIdOf(userId)) {
+			this.appUserWritePlatformService.updateUsersOwnAccountDetails(command);
+		} else {
+			this.appUserWritePlatformService.updateUser(command);
+		}
 
 		return Response.ok().entity(new EntityIdentifier(userId)).build();
 	}
