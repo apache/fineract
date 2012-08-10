@@ -1589,10 +1589,9 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	public String convertDepositProductDataToJson(boolean prettyPrint,
 			Set<String> responseParameters, DepositProductData... products) {
 		
-		Set<String> supportedParameters = new HashSet<String>(
-				Arrays.asList("id", "name", "description","createdOn", "lastModifedOn","currencyCode","digitsAfterDecimal", "currencyOptions", 
-						"minimumBalance","maximumBalance"));
-		
+		Set<String> supportedParameters = new HashSet<String>(Arrays.asList("id", "name", "description","createdOn", "lastModifedOn","currencyCode","digitsAfterDecimal", "currencyOptions", "minimumBalance","maximumBalance","tenureMonths","maturityDefaultInterestRate","maturityMinInterestRate",
+						"maturityMaxInterestRate","canRenew","canPreClose","preClosureInterestRate"));
+
 		final Set<String> parameterNamesToSkip = new HashSet<String>();
 		
 		if (!responseParameters.isEmpty()) {

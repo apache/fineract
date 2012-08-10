@@ -43,6 +43,12 @@ public class DepositProductCommandValidator {
 		baseDataValidator.reset().parameter("preClosureInterestRate").value(command.getPreClosureInterestRate()).zeroOrPositiveAmount();
 		
 		baseDataValidator.reset().comapareMinimumAndMaximumAmounts(command.getMinimumBalance(), command.getMaximumBalance());
+		baseDataValidator.reset().comapareMinAndMaxOfTwoBigDecmimalNos(command.getMaturityMinInterestRate(), command.getMaturityMaxInterestRate());
+		baseDataValidator.reset().comapareMinAndMaxOfTwoBigDecmimalNos(command.getMaturityDefaultInterestRate(), command.getMaturityMaxInterestRate());
+		baseDataValidator.reset().comapareMinAndMaxOfTwoBigDecmimalNos(command.getMaturityMinInterestRate(), command.getMaturityDefaultInterestRate());
+		baseDataValidator.reset().comapareMinAndMaxOfTwoBigDecmimalNos(command.getPreClosureInterestRate(), command.getMaturityMinInterestRate());
+		
+		
 		
 		if (!dataValidationErrors.isEmpty()) {
 			throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);
@@ -78,6 +84,10 @@ public class DepositProductCommandValidator {
 		baseDataValidator.reset().parameter("preClosureInterestRate").value(command.getPreClosureInterestRate()).zeroOrPositiveAmount();
 		
 		baseDataValidator.reset().comapareMinimumAndMaximumAmounts(command.getMinimumBalance(), command.getMaximumBalance());
+		baseDataValidator.reset().comapareMinAndMaxOfTwoBigDecmimalNos(command.getMaturityMinInterestRate(), command.getMaturityMaxInterestRate());
+		baseDataValidator.reset().comapareMinAndMaxOfTwoBigDecmimalNos(command.getMaturityDefaultInterestRate(), command.getMaturityMaxInterestRate());
+		baseDataValidator.reset().comapareMinAndMaxOfTwoBigDecmimalNos(command.getMaturityMinInterestRate(), command.getMaturityDefaultInterestRate());
+		baseDataValidator.reset().comapareMinAndMaxOfTwoBigDecmimalNos(command.getPreClosureInterestRate(), command.getMaturityMinInterestRate());
 		
 		baseDataValidator.reset().anyOfNotNull(command.getName(), command.getDescription(),command.getCurrencyCode(),command.getDigitsAfterDecimal(),command.getMinimumBalance(),command.getMaximumBalance(),command.getTenureMonths(),command.getMaturityDefaultInterestRate(),command.getMaturityMaxInterestRate(),command.getMaturityMinInterestRate(),command.getCanRenew(),command.getCanPreClose(),command.getPreClosureInterestRate());
 		

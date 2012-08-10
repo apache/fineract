@@ -38,7 +38,7 @@ public class DepositProductReadPlatformServiceImpl implements
 	public Collection<DepositProductData> retrieveAllDepositProducts() {
 		this.context.authenticatedUser();
 		DepositProductMapper depositProductMapper= new DepositProductMapper();
-		String sql= "select " + depositProductMapper.depositProductSchema() + " where dp.is_deleted=0";
+		String sql="select "+depositProductMapper.depositProductSchema() + " where dp.is_deleted=0";
 		return this.jdbcTemplate.query(sql,depositProductMapper, new Object[]{});
 	}
 
@@ -70,7 +70,9 @@ public class DepositProductReadPlatformServiceImpl implements
 	private static final class DepositProductMapper implements RowMapper<DepositProductData>{
 		
 		public String depositProductSchema(){
-			return "dp.id as id,dp.name as name, dp.description as description,dp.currency_code as currencyCode, dp.currency_digits as currencyDigits,dp.minimum_balance as minimumBalance,dp.maximum_balance as maximumBalance,dp.created_date as createdon, dp.lastmodified_date as modifiedon, " +
+			return "dp.id as id,dp.name as name, dp.description as description,dp.currency_code as currencyCode, dp.currency_digits as currencyDigits,dp.minimum_balance as minimumBalance,dp.maximum_balance as maximumBalance," +
+					"dp.created_date as createdon, dp.lastmodified_date as modifiedon,dp.tenure_months as tenureMonths, dp.maturity_default_interest_rate as maturityDefaultInterestRate, " +
+					"dp.maturity_min_interest_rate as maturityMinInterestRate, dp.maturity_max_interest_rate as maturityMaxInterestRate, dp.can_renew as canRenew, dp.can_pre_close as canPreClose, dp.pre_closure_interest_rate as preClosureInterestRate, " +
 					"curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, curr.display_symbol as currencyDisplaySymbol " +
 					"from portfolio_product_deposit dp join ref_currency curr on curr.code = dp.currency_code ";
 		}
@@ -91,7 +93,19 @@ public class DepositProductReadPlatformServiceImpl implements
 			
 			BigDecimal minimumBalance=rs.getBigDecimal("minimumBalance");
 			BigDecimal maximumBalance=rs.getBigDecimal("maximumBalance");
-			return new DepositProductData(createdOn, lastModifedOn, id, name, description, currencyCode, currencyDigits, minimumBalance, maximumBalance);
+			
+			Integer tenureMonths = JdbcSupport.getInteger(rs, "tenureMonths");
+			BigDecimal maturityDefaultInterestRate=rs.getBigDecimal("maturityDefaultInterestRate");
+			BigDecimal maturityMinInterestRate= rs.getBigDecimal("maturityMinInterestRate");
+			BigDecimal maturityMaxInterestRate = rs.getBigDecimal("maturityMaxInterestRate");
+			
+			Boolean canRenew = rs.getBoolean("canRenew");
+			Boolean canPreClose=rs.getBoolean("canPreClose");
+			
+			BigDecimal preClosureInterestRate=rs.getBigDecimal("preClosureInterestRate");
+			
+			return new DepositProductData(createdOn, lastModifedOn, id, name, description, currencyCode, currencyDigits, minimumBalance, maximumBalance,
+					tenureMonths, maturityDefaultInterestRate,maturityMinInterestRate,maturityMaxInterestRate,canRenew,canPreClose,preClosureInterestRate);
 		}
 		
 	}

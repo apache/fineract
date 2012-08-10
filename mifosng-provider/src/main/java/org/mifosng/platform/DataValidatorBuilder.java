@@ -264,4 +264,16 @@ public class DataValidatorBuilder {
 		}
 		return this;
 	}
+	public DataValidatorBuilder comapareMinAndMaxOfTwoBigDecmimalNos(BigDecimal min,BigDecimal max){
+		if(min!=null&&max!=null)
+		if(max.compareTo(min)==-1){
+			StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(resource).append(".min.number.should.lessthan.max.number");
+			StringBuilder defaultEnglishMessage = new StringBuilder("The ").append(" min number ").append(min).append(" should less than max number ").append(max).append(".");
+			ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(), defaultEnglishMessage.toString(), parameter, min, max);
+			dataValidationErrors.add(error);
+			return this;
+		}
+		return this;
+	}
+	
 }
