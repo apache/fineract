@@ -3,6 +3,7 @@ package org.mifosng.platform.api;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
@@ -18,13 +19,15 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.mifosng.platform.api.commands.SavingProductCommand;
+import org.mifosng.platform.api.commands.DepositAccountCommand;
+import org.mifosng.platform.api.data.CurrencyData;
+import org.mifosng.platform.api.data.DepositAccountData;
 import org.mifosng.platform.api.data.EntityIdentifier;
-import org.mifosng.platform.api.data.SavingProductData;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
-import org.mifosng.platform.savingproduct.service.SavingProductReadPlatformService;
-import org.mifosng.platform.savingproduct.service.SavingProductWritePlatformService;
+import org.mifosng.platform.currency.service.CurrencyReadPlatformService;
+import org.mifosng.platform.savingproduct.service.DepositAccountReadPlatformService;
+import org.mifosng.platform.savingproduct.service.DepositAccountWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -35,10 +38,13 @@ import org.springframework.stereotype.Component;
 public class DepositAccountsApiResource {
 	
 	@Autowired
-	private SavingProductReadPlatformService savingProductReadPlatformService;
+	private DepositAccountReadPlatformService depositAccountReadPlatformService;
 	
 	@Autowired
-	private SavingProductWritePlatformService savingProductWritePlatformService;
+	private CurrencyReadPlatformService currencyReadPlatformService;
+	
+	@Autowired
+	private DepositAccountWritePlatformService depositAccountWritePlatformService;
 
 	@Autowired
 	private ApiDataConversionService apiDataConversionService;
@@ -48,31 +54,36 @@ public class DepositAccountsApiResource {
 	@Produces({MediaType.APPLICATION_JSON})
 	public Response createDepositAccount(final String jsonRequestBody){
 		
-		final SavingProductCommand command=this.apiDataConversionService.convertJsonToSavingProductCommand(null, jsonRequestBody);
+		final DepositAccountCommand command = this.apiDataConversionService.convertJsonToDepositAccountCommand(null, jsonRequestBody);
 		
-		EntityIdentifier entityIdentifier=this.savingProductWritePlatformService.createSavingProduct(command);
+		EntityIdentifier entityIdentifier = this.depositAccountWritePlatformService.createDepositAccount(command);
 		
 		return Response.ok().entity(entityIdentifier).build();
 	}
 	
 	@PUT
-	@Path("{productId}")
+	@Path("{accountId}")
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
-	public Response updateSavingProduct(@PathParam("productId") final Long productId, final String jsonRequestBody){
+	public Response updateSavingProduct(@PathParam("accountId") final Long accountId, final String jsonRequestBody){
 		
-		SavingProductCommand command=this.apiDataConversionService.convertJsonToSavingProductCommand(productId, jsonRequestBody);
-		EntityIdentifier entityIdentifier=this.savingProductWritePlatformService.updateSavingProduct(command);
+		final DepositAccountCommand command = this.apiDataConversionService.convertJsonToDepositAccountCommand(accountId, jsonRequestBody);
+		
+		EntityIdentifier entityIdentifier = this.depositAccountWritePlatformService.updateDepositAccount(command);
+		
 		return Response.ok().entity(entityIdentifier).build();
 	}
 	
 	@GET
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
-	public String retrieveAllSavingProducts(@Context final UriInfo uriInfo) {
+	public String retrieveAllDepositAccounts(@Context final UriInfo uriInfo) {
 
-		Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "name", "description", "createdOn", "lastModifedOn",
-				"interestRate","currencyCode","digitsAfterDecimal"));
+		Set<String> typicalResponseParameters = new HashSet<String>(
+				Arrays.asList("createdOn", "lastModifedOn", 
+						"id", "clientId", "clientName", "productId", "productName", 
+						"currency", "deposit", "interestRate")
+		);
 		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (responseParameters.isEmpty()) {
@@ -80,63 +91,74 @@ public class DepositAccountsApiResource {
 		}
 		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 
-		Collection<SavingProductData> products = this.savingProductReadPlatformService.retrieveAllSavingProducts();
+		Collection<DepositAccountData> accounts = this.depositAccountReadPlatformService.retrieveAllDepositAccounts();
 		
-		return this.apiDataConversionService.convertSavingProductDataToJson(prettyPrint, responseParameters, products.toArray(new SavingProductData[products.size()]));
+		return this.apiDataConversionService.convertDepositAccountDataToJson(prettyPrint, responseParameters, accounts.toArray(new DepositAccountData[accounts.size()]));
 	}
 	
 	@GET
-	@Path("{productId}")
+	@Path("{accountId}")
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
-	public String retrieveSavingProductDetails(@PathParam("productId") final Long productId, @Context final UriInfo uriInfo) {
-
-		Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "name", "description", "createdOn", "lastModifedOn",
-				"interestRate","currencyCode","digitsAfterDecimal"));
+	public String retrieveDepositAccount(@PathParam("accountId") final Long accountId, @Context final UriInfo uriInfo) {
+		
+		Set<String> typicalResponseParameters = new HashSet<String>(
+				Arrays.asList("createdOn", "lastModifedOn", 
+						"id", "clientId", "clientName", "productId", "productName", 
+						"currency", "deposit", "interestRate")
+		);
 		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (responseParameters.isEmpty()) {
 			responseParameters.addAll(typicalResponseParameters);
 		}
 		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+		
+		DepositAccountData account = this.depositAccountReadPlatformService.retrieveDepositAccount(accountId);
+		
 		boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
 		if (template) {
 			responseParameters.addAll(Arrays.asList("currencyOptions"));
+			List<CurrencyData> allowedCurrencies = this.currencyReadPlatformService.retrieveAllowedCurrencies();
+			account = new DepositAccountData(account, allowedCurrencies);
 		}
 		
-		SavingProductData savingProduct = this.savingProductReadPlatformService.retrieveSavingProduct(productId);
-		
-		return this.apiDataConversionService.convertSavingProductDataToJson(prettyPrint, responseParameters, savingProduct);
+		return this.apiDataConversionService.convertDepositAccountDataToJson(prettyPrint, responseParameters, account);
 	}
 	
 	@GET
 	@Path("template")
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
-	public String retrieveNewSavingProductDetails(@Context final UriInfo uriInfo) {
+	public String retrieveNewDepositAccountDetails(@Context final UriInfo uriInfo) {
 		
 		Set<String> typicalResponseParameters = new HashSet<String>(
-				Arrays.asList("id", "name", "description", "createdOn", "lastModifedOn","interestRate","currencyCode","digitsAfterDecimal", "currencyOptions"));
+				Arrays.asList("createdOn", "lastModifedOn", 
+						"id", "clientId", "clientName", "productId", "productName", 
+						"currency", "deposit", "interestRate", "currencyOptions")
+		);
 		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (responseParameters.isEmpty()) {
 			responseParameters.addAll(typicalResponseParameters);
 		}
 		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-
-		SavingProductData savingProduct = this.savingProductReadPlatformService.retrieveNewSavingProductDetails();
 		
-		return this.apiDataConversionService.convertSavingProductDataToJson(prettyPrint, responseParameters, savingProduct);
+		DepositAccountData account = this.depositAccountReadPlatformService.retrieveNewDepositAccountDetails();
+		List<CurrencyData> allowedCurrencies = this.currencyReadPlatformService.retrieveAllowedCurrencies();
+		account = new DepositAccountData(account, allowedCurrencies);
+		
+		return this.apiDataConversionService.convertDepositAccountDataToJson(prettyPrint, responseParameters, account);
 	}
 	
 	@DELETE
-	@Path("{productId}")
+	@Path("{accountId}")
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
-	public Response deleteProduct(@PathParam("productId") final Long productId) {
+	public Response deleteProduct(@PathParam("accountId") final Long accountId) {
 
-		this.savingProductWritePlatformService.deleteSavingProduct(productId);
+		this.depositAccountWritePlatformService.deleteDepositAccount(accountId);
 
-		return Response.ok(new EntityIdentifier(productId)).build();
+		return Response.ok(new EntityIdentifier(accountId)).build();
 	}
 }

@@ -21,7 +21,7 @@ public class LoanStateTransitionCommandValidator {
 		
 		DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan.transition");
 		
-		baseDataValidator.reset().parameter("loanId").value(command.getLoanId()).notNull().greaterThanZero();
+		baseDataValidator.reset().parameter("loanId").value(command.getLoanId()).notNull().integerGreaterThanZero();
 		baseDataValidator.reset().parameter("eventDate").value(command.getEventDate()).notNull();
 		baseDataValidator.reset().parameter("note").value(command.getNote()).notExceedingLengthOf(1000);
 		

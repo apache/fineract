@@ -66,7 +66,7 @@ public class LoanAssembler {
 		}
 
 		Client client = this.clientRepository.findOne(command.getClientId());
-		if (client == null) {
+		if (client == null || client.isDeleted()) {
 			throw new ClientNotFoundException(command.getClientId());
 		}
 		

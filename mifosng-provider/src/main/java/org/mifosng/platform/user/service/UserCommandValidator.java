@@ -26,7 +26,7 @@ public class UserCommandValidator {
 		baseDataValidator.reset().parameter("firstname").value(command.getFirstname()).ignoreIfNull().notBlank();
 		baseDataValidator.reset().parameter("lastname").value(command.getLastname()).ignoreIfNull().notBlank();
 		baseDataValidator.reset().parameter("email").value(command.getEmail()).ignoreIfNull().notBlank();
-		baseDataValidator.reset().parameter("officeId").value(command.getOfficeId()).ignoreIfNull().notNull().greaterThanZero();
+		baseDataValidator.reset().parameter("officeId").value(command.getOfficeId()).ignoreIfNull().notNull().integerGreaterThanZero();
 		baseDataValidator.reset().parameter("roles").value(command.getRoles()).ignoreIfNull().arrayNotEmpty();
 
 		baseDataValidator.reset().parameter("password").value(command.getPassword()).ignoreIfNull().notBlank();
@@ -51,7 +51,7 @@ public class UserCommandValidator {
 		baseDataValidator.reset().parameter("firstname").value(command.getFirstname()).notBlank();
 		baseDataValidator.reset().parameter("lastname").value(command.getLastname()).notBlank();
 		baseDataValidator.reset().parameter("email").value(command.getEmail()).notBlank();
-		baseDataValidator.reset().parameter("officeId").value(command.getOfficeId()).notNull().greaterThanZero();
+		baseDataValidator.reset().parameter("officeId").value(command.getOfficeId()).notNull().integerGreaterThanZero();
 		baseDataValidator.reset().parameter("roles").value(command.getRoles()).arrayNotEmpty();
 
 		if (!dataValidationErrors.isEmpty()) {

@@ -175,7 +175,7 @@ public class DataValidatorBuilder {
 		return this;
 	}
 	
-	public DataValidatorBuilder greaterThanZero() {
+	public DataValidatorBuilder integerGreaterThanZero() {
 		if (value == null && ignoreNullValue) {
 			return this;
 		}

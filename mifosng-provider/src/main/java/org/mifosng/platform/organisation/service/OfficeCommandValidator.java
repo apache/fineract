@@ -25,7 +25,7 @@ public class OfficeCommandValidator {
 		baseDataValidator.reset().parameter("name").value(command.getName()).notBlank();
 		baseDataValidator.reset().parameter("openingDate").value(command.getOpeningDate()).notBlank();
 		baseDataValidator.reset().parameter("externalId").value(command.getExternalId()).notExceedingLengthOf(100);
-		baseDataValidator.reset().parameter("parentId").value(command.getParentId()).notNull().greaterThanZero();
+		baseDataValidator.reset().parameter("parentId").value(command.getParentId()).notNull().integerGreaterThanZero();
 		
 		if (!dataValidationErrors.isEmpty()) {
 			throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);
@@ -41,7 +41,7 @@ public class OfficeCommandValidator {
 		baseDataValidator.reset().parameter("name").value(command.getName()).ignoreIfNull().notBlank();
 		baseDataValidator.reset().parameter("openingDate").value(command.getOpeningDate()).ignoreIfNull().notBlank();
 		baseDataValidator.reset().parameter("externalId").value(command.getExternalId()).ignoreIfNull().notExceedingLengthOf(100);
-		baseDataValidator.reset().parameter("parentId").value(command.getParentId()).ignoreIfNull().notNull().greaterThanZero();
+		baseDataValidator.reset().parameter("parentId").value(command.getParentId()).ignoreIfNull().notNull().integerGreaterThanZero();
 		
 		baseDataValidator.reset().anyOfNotNull(command.getName(), command.getOpeningDate(), command.getExternalId(), command.getParentId());
 		

@@ -22,8 +22,8 @@ public class BranchMoneyTransferCommandValidator {
 		
 		DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("office.money.transfer");
 		
-		baseDataValidator.reset().parameter("fromOfficeId").value(command.getFromOfficeId()).ignoreIfNull().greaterThanZero();
-		baseDataValidator.reset().parameter("toOfficeId").value(command.getToOfficeId()).ignoreIfNull().greaterThanZero();
+		baseDataValidator.reset().parameter("fromOfficeId").value(command.getFromOfficeId()).ignoreIfNull().integerGreaterThanZero();
+		baseDataValidator.reset().parameter("toOfficeId").value(command.getToOfficeId()).ignoreIfNull().integerGreaterThanZero();
 		
 		if (command.getFromOfficeId() == null && command.getToOfficeId() == null) {
 			baseDataValidator.reset().parameter("toOfficeId").value(command.getToOfficeId()).notNull();

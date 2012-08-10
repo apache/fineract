@@ -22,6 +22,7 @@ import org.mifosng.platform.api.commands.AdjustLoanTransactionCommand;
 import org.mifosng.platform.api.commands.BranchMoneyTransferCommand;
 import org.mifosng.platform.api.commands.ClientCommand;
 import org.mifosng.platform.api.commands.DepositProductCommand;
+import org.mifosng.platform.api.commands.DepositAccountCommand;
 import org.mifosng.platform.api.commands.FundCommand;
 import org.mifosng.platform.api.commands.GroupCommand;
 import org.mifosng.platform.api.commands.LoanProductCommand;
@@ -42,6 +43,7 @@ import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.ClientLoanAccountSummaryCollectionData;
 import org.mifosng.platform.api.data.ConfigurationData;
 import org.mifosng.platform.api.data.DepositProductData;
+import org.mifosng.platform.api.data.DepositAccountData;
 import org.mifosng.platform.api.data.FundData;
 import org.mifosng.platform.api.data.GenericResultsetData;
 import org.mifosng.platform.api.data.GroupData;
@@ -1479,10 +1481,42 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 
 		return new SavingProductCommand(modifiedParameters, resourceIdentifier,name, description,currencyCode,digitsAfterDecimalValue,interestRate,minimumBalance,maximumBalance);
 	}
+	
+	@Override
+	public DepositAccountCommand convertJsonToDepositAccountCommand(final Long resourceIdentifier, final String json) {
+		
+		if (StringUtils.isBlank(json)) {
+			throw new InvalidJsonException();
+		}
+		
+		Type typeOfMap = new TypeToken<Map<String, String>>() {}.getType();
+		Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
+
+		Set<String> supportedParams = new HashSet<String>(
+				Arrays.asList("clientId", "productId", "externalId", "currencyCode", "digitsAfterDecimal", "depositAmount", "interestRate", "termInMonths", "locale")
+		);
+		checkForUnsupportedParameters(requestMap, supportedParams);
+		Set<String> modifiedParameters = new HashSet<String>();
+		
+		Long clientId = extractLongParameter("clientId", requestMap, modifiedParameters);
+		Long productId = extractLongParameter("productId", requestMap, modifiedParameters);
+		String externalId = extractStringParameter("externalId", requestMap,modifiedParameters);
+		String currencyCode=extractStringParameter("currencyCode", requestMap,modifiedParameters);
+		Integer digitsAfterDecimalValue = extractIntegerParameter("digitsAfterDecimal", requestMap, modifiedParameters);
+		BigDecimal depositAmount=extractBigDecimalParameter("depositAmount", requestMap, modifiedParameters);
+		BigDecimal interestRate = extractBigDecimalParameter("interestRate", requestMap, modifiedParameters);
+		Integer termInMonths = extractIntegerParameter("termInMonths", requestMap, modifiedParameters);
+		
+		// isRenewable, isPreClosureAllowed, expectedDepositDate, pojectMaturityDate, projectedInterestAccrued
+		
+		return new DepositAccountCommand(modifiedParameters, resourceIdentifier, clientId, productId, externalId, currencyCode, digitsAfterDecimalValue, depositAmount, interestRate, termInMonths);
+	}
 
 	@Override
-	public String convertSavingProductDataToJson(boolean prettyPrint,
-			Set<String> responseParameters, SavingProductData... products) {
+	public String convertSavingProductDataToJson(
+			final boolean prettyPrint,
+			final Set<String> responseParameters, 
+			final SavingProductData... products) {
 		
 		Set<String> supportedParameters = new HashSet<String>(
 				Arrays.asList("id", "name", "description","createdOn", "lastModifedOn","interestRate","currencyCode","digitsAfterDecimal", "currencyOptions", "minimumBalance","maximumBalance"));
@@ -1519,7 +1553,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	}
 
 	@Override
-	public DepositProductCommand convertJsonToDepositProductCommand(Long resourceIdentifier, String json) {
+	public DepositProductCommand convertJsonToDepositProductCommand(final Long resourceIdentifier, final String json) {
 		
 		if (StringUtils.isBlank(json)) {
 			throw new InvalidJsonException();
@@ -1556,17 +1590,27 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 			Set<String> responseParameters, DepositProductData... products) {
 		
 		Set<String> supportedParameters = new HashSet<String>(
-				Arrays.asList("id", "name", "description","createdOn", "lastModifedOn","currencyCode","digitsAfterDecimal", "currencyOptions", "minimumBalance","maximumBalance"));
+				Arrays.asList("id", "name", "description","createdOn", "lastModifedOn","currencyCode","digitsAfterDecimal", "currencyOptions", 
+						"minimumBalance","maximumBalance"));
+		
 		final Set<String> parameterNamesToSkip = new HashSet<String>();
+		
 		if (!responseParameters.isEmpty()) {
-			if (!supportedParameters.containsAll(responseParameters)) {
-				throw new UnsupportedParameterException(new ArrayList<String>(responseParameters));
+			
+			// strip out all know support params from expected response to see if unsupported parameters requested for response.
+			Set<String> differentParametersSet = new HashSet<String>(responseParameters);
+			differentParametersSet.removeAll(supportedParameters);
+			
+			if (!differentParametersSet.isEmpty()) {
+				throw new UnsupportedParameterException(new ArrayList<String>(differentParametersSet));
 			}
 			
 			parameterNamesToSkip.addAll(supportedParameters);
 			parameterNamesToSkip.removeAll(responseParameters);
 		}
+		
 		ExclusionStrategy strategy = new ParameterListExclusionStrategy(parameterNamesToSkip);
+		
 		GsonBuilder builder = new GsonBuilder().addSerializationExclusionStrategy(strategy);
 		builder.registerTypeAdapter(LocalDate.class, new JodaLocalDateAdapter());
 		builder.registerTypeAdapter(DateTime.class, new JodaDateTimeAdapter());
@@ -1580,6 +1624,53 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 			json = gsonDeserializer.toJson(products[0]);
 		} else {
 			json = gsonDeserializer.toJson(products);
+		}
+		return json;
+	}
+	
+	@Override
+	public String convertDepositAccountDataToJson(
+			final boolean prettyPrint,
+			final Set<String> responseParameters, 
+			final DepositAccountData... accounts) {
+
+		Set<String> supportedParameters = new HashSet<String>(
+				Arrays.asList("createdOn", "lastModifedOn", 
+						"id", "clientId", "clientName", "productId", "productName", 
+						"currency", "deposit", "interestRate", "currencyOptions")
+		);
+		
+		final Set<String> parameterNamesToSkip = new HashSet<String>();
+		
+		if (!responseParameters.isEmpty()) {
+			
+			// strip out all know support params from expected response to see if unsupported parameters requested for response.
+			Set<String> differentParametersSet = new HashSet<String>(responseParameters);
+			differentParametersSet.removeAll(supportedParameters);
+			
+			if (!differentParametersSet.isEmpty()) {
+				throw new UnsupportedParameterException(new ArrayList<String>(differentParametersSet));
+			}
+			
+			parameterNamesToSkip.addAll(supportedParameters);
+			parameterNamesToSkip.removeAll(responseParameters);
+		}
+		
+		ExclusionStrategy strategy = new ParameterListExclusionStrategy(parameterNamesToSkip);
+		
+		GsonBuilder builder = new GsonBuilder().addSerializationExclusionStrategy(strategy);
+		builder.registerTypeAdapter(LocalDate.class, new JodaLocalDateAdapter());
+		builder.registerTypeAdapter(DateTime.class, new JodaDateTimeAdapter());
+		if (prettyPrint) {
+			builder.setPrettyPrinting();
+		}
+		Gson gsonDeserializer = builder.create();
+		
+		String json = "";
+		if (accounts != null && accounts.length == 1) {
+			json = gsonDeserializer.toJson(accounts[0]);
+		} else {
+			json = gsonDeserializer.toJson(accounts);
 		}
 		
 		return json;

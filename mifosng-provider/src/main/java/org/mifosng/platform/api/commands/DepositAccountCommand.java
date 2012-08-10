@@ -9,26 +9,39 @@ import java.util.Set;
 public class DepositAccountCommand {
 	
 	private final Long id;
+	private final Long clientId;
+	private final Long productId;
 	private final String externalId;
 
 	private final String currencyCode;
 	private final Integer digitsAfterDecimal;
-	private final BigDecimal maturityActualInterestRate;
-
+	private final BigDecimal depositAmount;
+	private final BigDecimal interestRate;
+	private final Integer termInMonths;
+	
 	private final Set<String> modifiedParameters;
 
 	public DepositAccountCommand(final Set<String> modifiedParameters,
 			final Long id,
+			final Long clientId, 
+			final Long productId, 
 			final String externalId,
 			final String currencyCode, 
 			final Integer digitsAfterDecimal,
-			final BigDecimal maturityActualInterestRate) {
+			final BigDecimal depositAmount, 
+			final BigDecimal interestRate, 
+			final Integer termInMonths) {
 		this.id = id;
+		this.clientId = clientId;
+		this.productId = productId;
 		this.externalId = externalId;
+		
 		this.currencyCode = currencyCode;
 		this.digitsAfterDecimal = digitsAfterDecimal;
-		this.maturityActualInterestRate = maturityActualInterestRate;
-
+		this.depositAmount = depositAmount;
+		this.interestRate = interestRate;
+		this.termInMonths = termInMonths;
+		
 		this.modifiedParameters = modifiedParameters;
 	}
 
@@ -36,6 +49,14 @@ public class DepositAccountCommand {
 		return id;
 	}
 	
+	public Long getClientId() {
+		return clientId;
+	}
+
+	public Long getProductId() {
+		return productId;
+	}
+
 	public String getExternalId() {
 		return externalId;
 	}
@@ -48,8 +69,16 @@ public class DepositAccountCommand {
 		return digitsAfterDecimal;
 	}
 
-	public BigDecimal getMaturityActualInterestRate() {
-		return maturityActualInterestRate;
+	public BigDecimal getDepositAmount() {
+		return depositAmount;
+	}
+
+	public BigDecimal getInterestRate() {
+		return interestRate;
+	}
+
+	public Integer getTermInMonths() {
+		return termInMonths;
 	}
 
 	public boolean isCurrencyCodeChanged() {

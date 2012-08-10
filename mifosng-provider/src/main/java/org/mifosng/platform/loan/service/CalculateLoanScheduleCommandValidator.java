@@ -24,11 +24,11 @@ public class CalculateLoanScheduleCommandValidator {
 		
 		baseDataValidator.reset().parameter("principal").value(command.getPrincipal()).notNull().positiveAmount();
 		
-		baseDataValidator.reset().parameter("loanTermFrequency").value(command.getLoanTermFrequency()).notNull().greaterThanZero();
+		baseDataValidator.reset().parameter("loanTermFrequency").value(command.getLoanTermFrequency()).notNull().integerGreaterThanZero();
 		baseDataValidator.reset().parameter("loanTermFrequencyType").value(command.getLoanTermFrequencyType()).notNull().inMinMaxRange(0, 4);
 		
-		baseDataValidator.reset().parameter("numberOfRepayments").value(command.getNumberOfRepayments()).notNull().greaterThanZero();
-		baseDataValidator.reset().parameter("repaymentEvery").value(command.getRepaymentEvery()).notNull().greaterThanZero();
+		baseDataValidator.reset().parameter("numberOfRepayments").value(command.getNumberOfRepayments()).notNull().integerGreaterThanZero();
+		baseDataValidator.reset().parameter("repaymentEvery").value(command.getRepaymentEvery()).notNull().integerGreaterThanZero();
 		baseDataValidator.reset().parameter("repaymentFrequencyType").value(command.getRepaymentFrequencyType()).notNull().inMinMaxRange(0, 3);
 		
 		// FIXME - this constraint doesnt really need to be here. should be possible to express loan term as say 12 months whilst also saying

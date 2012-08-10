@@ -22,7 +22,7 @@ public class LoanTransactionCommandValidator {
 		
 		DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan.transaction");
 		
-		baseDataValidator.reset().parameter("loanId").value(command.getLoanId()).notNull().greaterThanZero();
+		baseDataValidator.reset().parameter("loanId").value(command.getLoanId()).notNull().integerGreaterThanZero();
 		baseDataValidator.reset().parameter("transactionDate").value(command.getTransactionDate()).notNull();
 		baseDataValidator.reset().parameter("transactionAmount").value(command.getTransactionAmount()).notNull().positiveAmount();
 		baseDataValidator.reset().parameter("note").value(command.getNote()).notExceedingLengthOf(1000);

@@ -33,8 +33,8 @@ public class LoanProductCommandValidator {
 		
 		baseDataValidator.reset().parameter("repaymentFrequencyType").value(command.getRepaymentFrequencyType()).ignoreIfNull().notNull().inMinMaxRange(0, 3);
 		
-		baseDataValidator.reset().parameter("repaymentEvery").value(command.getRepaymentEvery()).ignoreIfNull().notNull().greaterThanZero();
-		baseDataValidator.reset().parameter("numberOfRepayments").value(command.getNumberOfRepayments()).ignoreIfNull().notNull().greaterThanZero();
+		baseDataValidator.reset().parameter("repaymentEvery").value(command.getRepaymentEvery()).ignoreIfNull().notNull().integerGreaterThanZero();
+		baseDataValidator.reset().parameter("numberOfRepayments").value(command.getNumberOfRepayments()).ignoreIfNull().notNull().integerGreaterThanZero();
 		
 		baseDataValidator.reset().parameter("interestRatePerPeriod").value(command.getInterestRatePerPeriod()).ignoreIfNull().notBlank();
 		baseDataValidator.reset().parameter("interestRateFrequencyType").value(command.getInterestRateFrequencyType()).ignoreIfNull().notNull().inMinMaxRange(0, 3);
@@ -67,8 +67,8 @@ public class LoanProductCommandValidator {
 		baseDataValidator.reset().parameter("inArrearsTolerance").value(command.getInArrearsTolerance()).notNull().zeroOrPositiveAmount();
 		
 		baseDataValidator.reset().parameter("repaymentFrequencyType").value(command.getRepaymentFrequencyType()).notNull().inMinMaxRange(0, 3);
-		baseDataValidator.reset().parameter("repaymentEvery").value(command.getRepaymentEvery()).notNull().greaterThanZero();
-		baseDataValidator.reset().parameter("numberOfRepayments").value(command.getNumberOfRepayments()).notNull().greaterThanZero();
+		baseDataValidator.reset().parameter("repaymentEvery").value(command.getRepaymentEvery()).notNull().integerGreaterThanZero();
+		baseDataValidator.reset().parameter("numberOfRepayments").value(command.getNumberOfRepayments()).notNull().integerGreaterThanZero();
 		
 		baseDataValidator.reset().parameter("interestRatePerPeriod").value(command.getInterestRatePerPeriod()).notNull();
 		baseDataValidator.reset().parameter("interestRateFrequencyType").value(command.getInterestRateFrequencyType()).notNull().inMinMaxRange(0, 3);
