@@ -75,7 +75,7 @@ public class GroupsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveGroupData(@PathParam("groupId") final Long groupId, @Context final UriInfo uriInfo) {
 
-        Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "name", "externalId"));
+        Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "name", "externalId", "clientMembers"));
 
         Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo
                 .getQueryParameters());

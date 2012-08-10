@@ -9,16 +9,22 @@ import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.client.domain.ClientRepository;
 import org.mifosng.platform.exceptions.ClientNotFoundException;
 import org.mifosng.platform.exceptions.GroupNotFoundException;
+import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
 import org.mifosng.platform.group.domain.Group;
 import org.mifosng.platform.group.domain.GroupRepository;
 import org.mifosng.platform.security.PlatformSecurityContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
 @Service
 public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePlatformService {
+
+    private final static Logger logger = LoggerFactory.getLogger(GroupWritePlatformServiceJpaRepositoryImpl.class);
 
     private final PlatformSecurityContext context;
 
@@ -37,42 +43,51 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
     @Transactional
     @Override
     public EntityIdentifier createGroup(GroupCommand command) {
+        try {
+            this.context.authenticatedUser();
 
-        this.context.authenticatedUser();
+            GroupCommandValidator validator = new GroupCommandValidator(command);
+            validator.validateForCreate();
 
-        GroupCommandValidator validator = new GroupCommandValidator(command);
-        validator.validateForCreate();
+            final Set<Client> clientMembers = assembleSetOfClients(command);
 
-        final Set<Client> clientMembers = assembleSetOfClients(command);
+            Group newGroup = Group.newGroup(command.getName(), command.getExternalId(), clientMembers);
 
-        Group newGroup = Group.newGroup(command.getName(), command.getExternalId(), clientMembers);
+            this.groupRepository.saveAndFlush(newGroup);
 
-        this.groupRepository.save(newGroup);
-
-        return new EntityIdentifier(newGroup.getId());
+            return new EntityIdentifier(newGroup.getId());
+        } catch (DataIntegrityViolationException dve) {
+            handleGroupDataIntegrityIssues(command, dve);
+            return new EntityIdentifier(Long.valueOf(-1));
+        }
     }
 
     @Transactional
     @Override
     public EntityIdentifier updateGroup(GroupCommand command) {
 
-        context.authenticatedUser();
+        try {
+            context.authenticatedUser();
 
-        GroupCommandValidator validator = new GroupCommandValidator(command);
-        validator.validateForUpdate();
+            GroupCommandValidator validator = new GroupCommandValidator(command);
+            validator.validateForUpdate();
 
-        Group groupForUpdate = this.groupRepository.findOne(command.getId());
-        if (groupForUpdate == null || groupForUpdate.isDeleted()) {
-            throw new GroupNotFoundException(command.getId());
+            Group groupForUpdate = this.groupRepository.findOne(command.getId());
+            if (groupForUpdate == null || groupForUpdate.isDeleted()) {
+                throw new GroupNotFoundException(command.getId());
+            }
+
+            final Set<Client> clientMembers = assembleSetOfClients(command);
+
+            groupForUpdate.update(command, clientMembers);
+
+            groupRepository.saveAndFlush(groupForUpdate);
+
+            return new EntityIdentifier(groupForUpdate.getId());
+        } catch (DataIntegrityViolationException dve) {
+            handleGroupDataIntegrityIssues(command, dve);
+            return new EntityIdentifier(Long.valueOf(-1));
         }
-
-        final Set<Client> clientMembers = assembleSetOfClients(command);
-
-        groupForUpdate.update(command, clientMembers);
-
-        groupRepository.save(groupForUpdate);
-
-        return new EntityIdentifier(groupForUpdate.getId());
     }
 
     @Transactional
@@ -100,7 +115,7 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
             for (String clientId : clientMembersArray) {
                 Long id = Long.valueOf(clientId);
                 Client client = this.clientRepository.findOne(id);
-                if (client == null) {
+                if (client == null || client.isDeleted()) {
                     throw new ClientNotFoundException(id);
                 }
                 clientMembers.add(client);
@@ -110,4 +125,19 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
         return clientMembers;
     }
 
+    /*
+      * Guaranteed to throw an exception no matter what the data integrity issue is.
+      */
+    private void handleGroupDataIntegrityIssues(final GroupCommand command, DataIntegrityViolationException dve)  {
+
+        Throwable realCause = dve.getMostSpecificCause();
+        if (realCause.getMessage().contains("external_id")) {
+            throw new PlatformDataIntegrityException("error.msg.group.duplicate.externalId", "Group with externalId {0} already exists", "externalId", command.getExternalId());
+        } else if (realCause.getMessage().contains("name")) {
+            throw new PlatformDataIntegrityException("error.msg.group.duplicate.name", "Group with name {0} already exists", "name", command.getName());
+        }
+
+        logger.error(dve.getMessage(), dve);
+        throw new PlatformDataIntegrityException("error.msg.group.unknown.data.integrity.issue", "Unknown data integrity issue with resource.");
+    }
 }
