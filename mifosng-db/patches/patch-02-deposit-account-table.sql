@@ -1,3 +1,4 @@
+DROP TABLE `portfolio_deposit_account`;
 CREATE TABLE `portfolio_deposit_account` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `external_id` varchar(100) DEFAULT NULL,
@@ -5,12 +6,9 @@ CREATE TABLE `portfolio_deposit_account` (
   `product_id` bigint(20) NOT NULL,
   `currency_code` varchar(3) NOT NULL,
   `currency_digits` smallint(5) NOT NULL,
-  `minimum_balance` decimal(19,6) DEFAULT NULL,
-  `maximum_balance` decimal(19,6) DEFAULT NULL,
+  `deposit_amount` decimal(19,6) DEFAULT NULL,
+  `maturity_interest_rate` decimal(19,6) NOT NULL,
   `tenure_months` int(11) NOT NULL,
-  `maturity_default_interest_rate` decimal(19,6) NOT NULL,
-  `maturity_min_interest_rate` decimal(19,6) NOT NULL,
-  `maturity_max_interest_rate` decimal(19,6) NOT NULL,
   `can_renew` tinyint(1) NOT NULL DEFAULT '0',
   `can_pre_close` tinyint(1) NOT NULL DEFAULT '0',
   `pre_closure_interest_rate` decimal(19,6) NOT NULL,
@@ -25,4 +23,5 @@ CREATE TABLE `portfolio_deposit_account` (
   KEY `FKKW0000000000002` (`product_id`),
   CONSTRAINT `FKKW0000000000001` FOREIGN KEY (`client_id`) REFERENCES `portfolio_client` (`id`),
   CONSTRAINT `FKKW0000000000002` FOREIGN KEY (`product_id`) REFERENCES `portfolio_product_deposit` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
