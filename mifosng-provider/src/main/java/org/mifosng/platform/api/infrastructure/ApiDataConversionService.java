@@ -5,6 +5,7 @@ import java.util.Set;
 import org.mifosng.platform.api.commands.AdjustLoanTransactionCommand;
 import org.mifosng.platform.api.commands.BranchMoneyTransferCommand;
 import org.mifosng.platform.api.commands.ClientCommand;
+import org.mifosng.platform.api.commands.DepositProductCommand;
 import org.mifosng.platform.api.commands.FundCommand;
 import org.mifosng.platform.api.commands.GroupCommand;
 import org.mifosng.platform.api.commands.LoanProductCommand;
@@ -23,6 +24,7 @@ import org.mifosng.platform.api.data.AuthenticatedUserData;
 import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.ClientLoanAccountSummaryCollectionData;
 import org.mifosng.platform.api.data.ConfigurationData;
+import org.mifosng.platform.api.data.DepositProductData;
 import org.mifosng.platform.api.data.FundData;
 import org.mifosng.platform.api.data.GenericResultsetData;
 import org.mifosng.platform.api.data.GroupData;
@@ -61,7 +63,9 @@ public interface ApiDataConversionService {
 	
 	String convertLoanProductDataToJson(boolean prettyPrint, Set<String> responseParameters, LoanProductData... products);
 
-	String convertSavingProductDataToJson(boolean prettyPrint, Set<String> responseParameters, SavingProductData... products);	
+	String convertSavingProductDataToJson(boolean prettyPrint, Set<String> responseParameters, SavingProductData... products);
+	
+	String convertDepositProductDataToJson(boolean prettyPrint, Set<String> responseParameters, DepositProductData... products);
 	
 	String convertNewLoanDataToJson(boolean prettyPrint, Set<String> responseParameters, NewLoanData newLoanData);
 	
@@ -93,6 +97,8 @@ public interface ApiDataConversionService {
 	LoanProductCommand convertJsonToLoanProductCommand(Long resourceIdentifier, String json);
 	
 	SavingProductCommand convertJsonToSavingProductCommand(Long resourceIdentifier, String json);
+	
+	DepositProductCommand convertJsonToDepositProductCommand(Long resourceIdentifier, String json);
 
 	ClientCommand convertJsonToClientCommand(Long resourceIdentifier, String jsonRequestBody);
 
