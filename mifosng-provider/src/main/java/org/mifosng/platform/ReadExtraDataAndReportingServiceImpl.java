@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -76,8 +77,8 @@ public class ReadExtraDataAndReportingServiceImpl implements
 			public void write(OutputStream out) {
 				try {
 
-					GenericResultsetData result = retrieveGenericResultset(name,
-							type, queryParams);
+					GenericResultsetData result = retrieveGenericResultset(
+							name, type, queryParams);
 					StringBuffer sb = generateCsvFileBuffer(result);
 
 					InputStream in = new ByteArrayInputStream(sb.toString()
@@ -102,7 +103,8 @@ public class ReadExtraDataAndReportingServiceImpl implements
 
 	}
 
-	private static StringBuffer generateCsvFileBuffer(GenericResultsetData result) {
+	private static StringBuffer generateCsvFileBuffer(
+			GenericResultsetData result) {
 		StringBuffer writer = new StringBuffer();
 
 		List<ResultsetColumnHeader> columnHeaders = result.getColumnHeaders();
@@ -366,10 +368,12 @@ public class ReadExtraDataAndReportingServiceImpl implements
 	}
 
 	@Override
-	public GenericResultsetData retrieveExtraData(String type, String set, Long id) {
+	public GenericResultsetData retrieveExtraData(String type, String set,
+			Long id) {
 
 		long startTime = System.currentTimeMillis();
-		GenericResultsetData result = fillExtraDataGenericResultSet(type, set, id);
+		GenericResultsetData result = fillExtraDataGenericResultSet(type, set,
+				id);
 		long elapsed = System.currentTimeMillis() - startTime;
 		logger.info("FINISHING SET: " + set + "     Elapsed Time: " + elapsed);
 		return result;
@@ -722,11 +726,11 @@ public class ReadExtraDataAndReportingServiceImpl implements
 					"Pentaho is not enabled", "Pentaho is not enabled");
 
 		// TODO - use pentaho location finder like Pawel does in Mifos
-		String reportPath = "C:\\dev\\apache-tomcat-7.0.25\\webapps\\ROOT\\PentahoReports\\"
-				+ reportName + ".prpt";
 		// String reportPath =
-		// "/var/lib/tomcat7/webapps/ROOT/PentahoReports/"
+		// "C:\\dev\\apache-tomcat-7.0.25\\webapps\\ROOT\\PentahoReports\\"
 		// + reportName + ".prpt";
+		String reportPath = "/var/lib/tomcat7/webapps/ROOT/PentahoReports/"
+				+ reportName + ".prpt";
 		logger.info("Report path: " + reportPath);
 
 		// load report definition
@@ -737,8 +741,8 @@ public class ReadExtraDataAndReportingServiceImpl implements
 		logger.info("outputType: " + outputType);
 		try {
 			res = manager.createDirectly(reportPath, MasterReport.class);
-			MasterReport masterReport = (MasterReport) res.getResource();			
-			
+			MasterReport masterReport = (MasterReport) res.getResource();
+
 			addParametersToReport(masterReport, queryParams);
 
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -797,7 +801,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 
 	private void addParametersToReport(MasterReport report,
 			Map<String, String> queryParams) {
-		
+
 		try {
 			ReportParameterValues rptParamValues = report.getParameterValues();
 			ReportParameterDefinition paramsDefinition = report
@@ -825,6 +829,9 @@ public class ReadExtraDataAndReportingServiceImpl implements
 				if (clazz.getCanonicalName().equalsIgnoreCase(
 						"java.lang.Integer"))
 					rptParamValues.put(paramName, Integer.parseInt(pValue));
+				else if (clazz.getCanonicalName().equalsIgnoreCase(
+						"java.sql.Date"))
+					rptParamValues.put(paramName, Date.valueOf(pValue));
 				else
 					rptParamValues.put(paramName, pValue);
 			}
