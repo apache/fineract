@@ -38,7 +38,7 @@ public class DepositProductReadPlatformServiceImpl implements
 	public Collection<DepositProductData> retrieveAllDepositProducts() {
 		this.context.authenticatedUser();
 		DepositProductMapper depositProductMapper= new DepositProductMapper();
-		String sql="select "+depositProductMapper.depositProductSchema() + " where sp.is_deleted=0";
+		String sql= "select " + depositProductMapper.depositProductSchema() + " where dp.is_deleted=0";
 		return this.jdbcTemplate.query(sql,depositProductMapper, new Object[]{});
 	}
 
@@ -118,6 +118,4 @@ public class DepositProductReadPlatformServiceImpl implements
 		List<CurrencyData> currencyOptions = currencyReadPlatformService.retrieveAllowedCurrencies();
 		productData.setCurrencyOptions(currencyOptions);
 	}
-
-
 }
