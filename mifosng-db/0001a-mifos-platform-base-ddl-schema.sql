@@ -213,16 +213,27 @@ CREATE TABLE `portfolio_group` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(100) DEFAULT NULL,
   `external_id` varchar(100) DEFAULT NULL,
+  `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
   `createdby_id` bigint(20) DEFAULT NULL,
   `created_date` datetime DEFAULT NULL,
   `lastmodified_date` datetime DEFAULT NULL,
   `lastmodifiedby_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`),
+  UNIQUE KEY `external_id` (`external_id`),
   KEY `FKJPWG000000000003` (`createdby_id`),
   KEY `FKJPWG000000000004` (`lastmodifiedby_id`),
   CONSTRAINT `FKJPWG000000000003` FOREIGN KEY (`createdby_id`) REFERENCES `admin_appuser` (`id`),
-  KEY `external_id` (`external_id`),
   CONSTRAINT `FKJPWG000000000004` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `admin_appuser` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+CREATE TABLE `portfolio_group_client` (
+  `group_id` bigint(20) NOT NULL,
+  `client_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`group_id`,`client_id`),
+  KEY `client_id` (`client_id`),
+  CONSTRAINT `portfolio_group_client_ibfk_1` FOREIGN KEY (`group_id`) REFERENCES `portfolio_group` (`id`),
+  CONSTRAINT `portfolio_group_client_ibfk_2` FOREIGN KEY (`client_id`) REFERENCES `portfolio_client` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `portfolio_client` (
@@ -246,7 +257,6 @@ CREATE TABLE `portfolio_client` (
   CONSTRAINT `FKAUD0000000000002` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `admin_appuser` (`id`),
   CONSTRAINT `FKCE00CAB3E0DD567A` FOREIGN KEY (`office_id`) REFERENCES `org_office` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
-
 
 CREATE TABLE `portfolio_product_loan` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
