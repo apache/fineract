@@ -75,7 +75,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 				+  " da.deposit_amount as depositAmount, "	
 				+  " da.maturity_interest_rate as interestRate, " 
 				+  " da.created_date as createdon, da.lastmodified_date as modifiedon, "
-				+  " c.firstname as firstname, c.lastname as lastname, da.name as productName,"
+				+  " c.firstname as firstname, c.lastname as lastname, pd.name as productName,"
 				+  " curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, curr.display_symbol as currencyDisplaySymbol" 
 				+  " from portfolio_deposit_account da " 
 				+  " join ref_currency curr on curr.code = da.currency_code " 
