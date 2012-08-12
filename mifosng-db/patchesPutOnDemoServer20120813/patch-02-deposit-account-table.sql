@@ -1,4 +1,4 @@
-DROP TABLE `portfolio_deposit_account`;
+DROP TABLE if exists `portfolio_deposit_account`;
 CREATE TABLE `portfolio_deposit_account` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `external_id` varchar(100) DEFAULT NULL,
