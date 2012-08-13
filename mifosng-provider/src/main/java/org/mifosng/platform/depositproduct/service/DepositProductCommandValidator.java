@@ -32,8 +32,8 @@ public class DepositProductCommandValidator {
 		baseDataValidator.reset().parameter("maturityDefaultInterestRate").value(command.getMaturityDefaultInterestRate()).notNull().zeroOrPositiveAmount();
 		baseDataValidator.reset().parameter("maturityMinInterestRate").value(command.getMaturityMinInterestRate()).notNull().zeroOrPositiveAmount();
 		baseDataValidator.reset().parameter("maturityMaxInterestRate").value(command.getMaturityMaxInterestRate()).notNull().zeroOrPositiveAmount();
-		baseDataValidator.reset().parameter("canRenew").value(command.getCanRenew()).ignoreIfNull();
-		baseDataValidator.reset().parameter("canPreClose").value(command.getCanPreClose()).ignoreIfNull();
+//		baseDataValidator.reset().parameter("canRenew").value(command.getCanRenew()).ignoreIfNull();
+//		baseDataValidator.reset().parameter("canPreClose").value(command.getCanPreClose()).ignoreIfNull();
 		baseDataValidator.reset().parameter("preClosureInterestRate").value(command.getPreClosureInterestRate()).notNull().zeroOrPositiveAmount();
 		
 		baseDataValidator.reset().parameter("minimumBalance").comapareMinimumAndMaximumAmounts(command.getMinimumBalance(), command.getMaximumBalance());
@@ -65,8 +65,6 @@ public class DepositProductCommandValidator {
 		baseDataValidator.reset().parameter("maturityDefaultInterestRate").value(command.getMaturityDefaultInterestRate()).ignoreIfNull().zeroOrPositiveAmount();
 		baseDataValidator.reset().parameter("maturityMinInterestRate").value(command.getMaturityMinInterestRate()).ignoreIfNull().zeroOrPositiveAmount();
 		baseDataValidator.reset().parameter("maturityMaxInterestRate").value(command.getMaturityMaxInterestRate()).ignoreIfNull().zeroOrPositiveAmount();
-		baseDataValidator.reset().parameter("canRenew").value(command.getCanRenew()).ignoreIfNull();
-		baseDataValidator.reset().parameter("canPreClose").value(command.getCanPreClose()).ignoreIfNull();
 		baseDataValidator.reset().parameter("preClosureInterestRate").value(command.getPreClosureInterestRate()).ignoreIfNull().zeroOrPositiveAmount();
 		
 		baseDataValidator.reset().comapareMinimumAndMaximumAmounts(command.getMinimumBalance(), command.getMaximumBalance());
@@ -75,7 +73,12 @@ public class DepositProductCommandValidator {
 		baseDataValidator.reset().comapareMinAndMaxOfTwoBigDecmimalNos(command.getMaturityMinInterestRate(), command.getMaturityDefaultInterestRate());
 		baseDataValidator.reset().comapareMinAndMaxOfTwoBigDecmimalNos(command.getPreClosureInterestRate(), command.getMaturityMinInterestRate());
 		
-		baseDataValidator.reset().anyOfNotNull(command.getName(), command.getDescription(),command.getCurrencyCode(),command.getDigitsAfterDecimal(),command.getMinimumBalance(),command.getMaximumBalance(),command.getTenureMonths(),command.getMaturityDefaultInterestRate(),command.getMaturityMaxInterestRate(),command.getMaturityMinInterestRate(),command.getPreClosureInterestRate());
+		if (command.isNoFieldChanged()) {
+			StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append("deposit.product").append(".no.parameters.for.update");
+			StringBuilder defaultEnglishMessage = new StringBuilder("No parameters passed for update.");
+			ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(), defaultEnglishMessage.toString(), "id");
+			dataValidationErrors.add(error);
+		}
 		
 		if (!dataValidationErrors.isEmpty()) {
 			throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);

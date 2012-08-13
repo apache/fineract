@@ -1183,8 +1183,8 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		return paramValue;
 	}
 	
-	private Boolean extractBooleanParameter(final String paramName, final Map<String, ?> requestMap, final Set<String> modifiedParameters) {
-		Boolean paramValue = null;
+	private boolean extractBooleanParameter(final String paramName, final Map<String, ?> requestMap, final Set<String> modifiedParameters) {
+		boolean paramValue = false;
 		String paramValueAsString = null;
 		if (requestMap.containsKey(paramName)) {
 			paramValueAsString = (String) requestMap.get(paramName);
@@ -1562,7 +1562,10 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		Type typeOfMap = new TypeToken<Map<String, String>>() {}.getType();
 		Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
 
-		Set<String> supportedParams = new HashSet<String>(Arrays.asList("name","description","currencyCode", "digitsAfterDecimal","locale","minimumBalance","maximumBalance","tenureMonths","maturityDefaultInterestRate","maturityMinInterestRate","maturityMaxInterestRate","canRenew","canPreClose","preClosureInterestRate"));
+		Set<String> supportedParams = new HashSet<String>(
+				Arrays.asList("name","description","currencyCode", "digitsAfterDecimal","locale","minimumBalance","maximumBalance","tenureMonths",
+						"maturityDefaultInterestRate","maturityMinInterestRate","maturityMaxInterestRate","canRenew","canPreClose","preClosureInterestRate")
+				);
 		checkForUnsupportedParameters(requestMap, supportedParams);
 		Set<String> modifiedParameters = new HashSet<String>();
 		String name = extractStringParameter("name", requestMap,modifiedParameters);
@@ -1576,10 +1579,9 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		BigDecimal maturityDefaultInterestRate = extractBigDecimalParameter("maturityDefaultInterestRate", requestMap, modifiedParameters);
 		BigDecimal maturityMinInterestRate = extractBigDecimalParameter("maturityMinInterestRate", requestMap, modifiedParameters);
 		BigDecimal maturityMaxInterestRate = extractBigDecimalParameter("maturityMaxInterestRate", requestMap, modifiedParameters);
-	    Boolean canRenew = extractBooleanParameter("canRenew", requestMap, modifiedParameters);
-	    Boolean canPreClose = extractBooleanParameter("canPreClose", requestMap, modifiedParameters);
+	    boolean canRenew = extractBooleanParameter("canRenew", requestMap, modifiedParameters);
+	    boolean canPreClose = extractBooleanParameter("canPreClose", requestMap, modifiedParameters);
 	    BigDecimal preClosureInterestRate = extractBigDecimalParameter("preClosureInterestRate", requestMap, modifiedParameters);
-	    
 		
 		return new DepositProductCommand(modifiedParameters, resourceIdentifier, name, description, currencyCode, digitsAfterDecimalValue, minimumBalance,maximumBalance, 
 				tenureMonths, maturityDefaultInterestRate, maturityMinInterestRate, maturityMaxInterestRate, canRenew, canPreClose, preClosureInterestRate);

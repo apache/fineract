@@ -32,19 +32,21 @@ public class DepositProduct extends AbstractAuditableCustom<AppUser, Long> {
     protected DepositProduct(){
     	this.name = null;
         this.description = null;
-        depositProductRelatedDetail=null;
+        this.depositProductRelatedDetail=null;
     }
     
     public DepositProduct(final String name, final String description, final MonetaryCurrency currency, final BigDecimal minimumBalance,final BigDecimal maximumBalance,
-    		final Integer tenureMonths,final BigDecimal maturityDefaultInterestRate, final BigDecimal maturityMinInterestRate, BigDecimal maturityMaxInterestRate, Boolean canRenew, 
-    		Boolean canPreClose, BigDecimal preClosureInterestRate ){
+    		final Integer tenureMonths,final BigDecimal maturityDefaultInterestRate, final BigDecimal maturityMinInterestRate, BigDecimal maturityMaxInterestRate, 
+    		boolean canRenew, 
+    		boolean canPreClose, BigDecimal preClosureInterestRate ){
     	this.name = name.trim();
 		if (StringUtils.isNotBlank(description)) {
 			this.description = description.trim();
 		} else {
 			this.description = null;
 		}
-		this.depositProductRelatedDetail= new DepositProductRelatedDetail(currency, minimumBalance, maximumBalance, tenureMonths, maturityDefaultInterestRate, maturityMinInterestRate, maturityMaxInterestRate, canRenew, canPreClose, preClosureInterestRate);
+		this.depositProductRelatedDetail= new DepositProductRelatedDetail(currency, minimumBalance, maximumBalance, tenureMonths, 
+				maturityDefaultInterestRate, maturityMinInterestRate, maturityMaxInterestRate, canRenew, canPreClose, preClosureInterestRate);
     }
     
     public String getName() {
@@ -81,14 +83,6 @@ public class DepositProduct extends AbstractAuditableCustom<AppUser, Long> {
 	
 	public BigDecimal getMaturityMaxInterestRate() {
 		return this.depositProductRelatedDetail.getMaturityMaxInterestRate();
-	}
-	
-	public Boolean getCanRenew() {
-		return this.depositProductRelatedDetail.getCanRenew();
-	}
-	
-	public Boolean getCanPreClose() {
-		return this.depositProductRelatedDetail.getCanPreClose();
 	}
 	
 	public BigDecimal getPreClosureInterestRate() {

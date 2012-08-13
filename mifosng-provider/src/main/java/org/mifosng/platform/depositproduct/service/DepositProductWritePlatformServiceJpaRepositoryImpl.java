@@ -36,7 +36,8 @@ public class DepositProductWritePlatformServiceJpaRepositoryImpl implements
 		MonetaryCurrency currency = new MonetaryCurrency(command.getCurrencyCode(), command.getDigitsAfterDecimal());
 		DepositProduct product = new DepositProduct(command.getName(),command.getDescription(),currency,command.getMinimumBalance(),command.getMaximumBalance(),
 				command.getTenureMonths(),command.getMaturityDefaultInterestRate(),command.getMaturityMinInterestRate(),command.getMaturityMaxInterestRate(),
-				command.getCanRenew(),command.getCanPreClose(),command.getPreClosureInterestRate());
+				command.isRenewalAllowed(), command.isPreClosureAllowed(),
+				command.getPreClosureInterestRate());
 		this.depositProductRepository.save(product);
 		
 		return new EntityIdentifier(product.getId());
@@ -74,5 +75,4 @@ public class DepositProductWritePlatformServiceJpaRepositoryImpl implements
 		this.depositProductRepository.save(product);
 		return new EntityIdentifier(Long.valueOf(product.getId()));
 	}
-
 }

@@ -10,8 +10,8 @@ import org.mifosng.platform.api.commands.DepositProductCommand;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.exceptions.InterestRateOutsideRangeException;
 
-	@Embeddable
-	public class DepositProductRelatedDetail {
+@Embeddable
+public class DepositProductRelatedDetail {
 	
 	@Embedded
 	private MonetaryCurrency currency;
@@ -35,10 +35,10 @@ import org.mifosng.platform.exceptions.InterestRateOutsideRangeException;
 	private BigDecimal maturityMaxInterestRate;
 	
 	@Column(name = "can_renew", nullable=false)
-	private Boolean canRenew;
+	private boolean renewalAllowed = false;
 	
 	@Column(name = "can_pre_close", nullable=false)
-	private Boolean canPreClose;
+	private boolean preClosureAllowed = false;
 	
 	@Column(name = "pre_closure_interest_rate", scale = 6, precision = 19, nullable = false)
 	private BigDecimal preClosureInterestRate;
@@ -50,13 +50,14 @@ import org.mifosng.platform.exceptions.InterestRateOutsideRangeException;
 		this.maturityDefaultInterestRate = null;
 		this.maturityMinInterestRate = null;
 		this.maturityMaxInterestRate = null;
-		this.canRenew = null;
-		this.canPreClose = null;
 		this.preClosureInterestRate = null;
 	}
 	
-	public DepositProductRelatedDetail(final MonetaryCurrency currency, final BigDecimal minimumBalance,final BigDecimal maximumBalance, final Integer tenureMonths,
-			final BigDecimal maturityDefaultInterestRate, final BigDecimal maturityMinInterestRate, BigDecimal maturityMaxInterestRate, Boolean canRenew, Boolean canPreClose, BigDecimal preClosureInterestRate){
+	public DepositProductRelatedDetail(
+			final MonetaryCurrency currency, final BigDecimal minimumBalance, final BigDecimal maximumBalance, 
+			final Integer tenureMonths,
+			final BigDecimal maturityDefaultInterestRate, final BigDecimal maturityMinInterestRate, final BigDecimal maturityMaxInterestRate, 
+			final boolean renewalAllowed, final boolean preClosureAllowed, final BigDecimal preClosureInterestRate) {
 		
 		this.currency=currency;
 		this.minimumBalance=minimumBalance;
@@ -66,11 +67,10 @@ import org.mifosng.platform.exceptions.InterestRateOutsideRangeException;
 		this.maturityDefaultInterestRate = maturityDefaultInterestRate;
 		this.maturityMinInterestRate = maturityMinInterestRate;
 		this.maturityMaxInterestRate = maturityMaxInterestRate;
-		this.canRenew = canRenew;
-		this.canPreClose = canPreClose;
+		this.renewalAllowed = renewalAllowed;
+		this.preClosureAllowed = preClosureAllowed;
 		this.preClosureInterestRate = preClosureInterestRate;
 	}
-	
 	
 	public MonetaryCurrency getCurrency() {
 		return this.currency.copy();
@@ -98,14 +98,6 @@ import org.mifosng.platform.exceptions.InterestRateOutsideRangeException;
 
 	public BigDecimal getMaturityMaxInterestRate() {
 		return BigDecimal.valueOf(Double.valueOf(this.maturityMaxInterestRate.stripTrailingZeros().toString()));
-	}
-
-	public Boolean getCanRenew() {
-		return this.canRenew;
-	}
-
-	public Boolean getCanPreClose() {
-		return this.canPreClose;
 	}
 
 	public BigDecimal getPreClosureInterestRate() {
@@ -153,11 +145,11 @@ import org.mifosng.platform.exceptions.InterestRateOutsideRangeException;
 		}
 		
 		if (command.isCanRenewChanged()) {
-			this.canRenew=command.getCanRenew();
+			this.renewalAllowed=command.isRenewalAllowed();
 		}
 		
 		if (command.isCanPreCloseChanged()) {
-			this.canPreClose=command.getCanPreClose();
+			this.preClosureAllowed=command.isPreClosureAllowed();
 		}
 		
 		if (command.isPreClosureInterestRateChanged()) {

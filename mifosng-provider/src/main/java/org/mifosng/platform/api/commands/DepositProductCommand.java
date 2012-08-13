@@ -19,8 +19,8 @@ public class DepositProductCommand {
 	private final BigDecimal maturityDefaultInterestRate;
 	private final BigDecimal maturityMinInterestRate;
 	private final BigDecimal maturityMaxInterestRate;
-	private final Boolean canRenew;
-	private final Boolean canPreClose;
+	private final boolean renewalAllowed;
+	private final boolean preClosureAllowed;
 	private final BigDecimal preClosureInterestRate;
 
 	private final Set<String> modifiedParameters;
@@ -31,7 +31,7 @@ public class DepositProductCommand {
 			final BigDecimal minimumBalance, final BigDecimal maximumBalance,
 			final Integer tenureMonths, final BigDecimal maturityDefaultInterestRate,
 			final BigDecimal maturityMinInterestRate, final BigDecimal maturityMaxInterestRate,
-			final Boolean canRenew, final Boolean canPreClose, final BigDecimal preClosureInterestRate ) {
+			final boolean canRenew, final boolean canPreClose, final BigDecimal preClosureInterestRate ) {
 		this.id = id;
 		this.name = name;
 		this.description = description;
@@ -48,8 +48,8 @@ public class DepositProductCommand {
 		this.maturityMaxInterestRate = maturityMaxInterestRate;
 		this.preClosureInterestRate = preClosureInterestRate;
 		
-		this.canRenew =(canRenew != null) ? canRenew : false;
-		this.canPreClose = (canPreClose != null) ? canPreClose : false;
+		this.renewalAllowed = canRenew;
+		this.preClosureAllowed = canPreClose;
 
 		this.modifiedParameters = modifiedParameters;		
 		
@@ -98,13 +98,13 @@ public class DepositProductCommand {
 	public BigDecimal getMaturityMaxInterestRate() {
 		return maturityMaxInterestRate;
 	}
-
-	public Boolean getCanRenew() {
-		return canRenew;
+	
+	public boolean isRenewalAllowed() {
+		return renewalAllowed;
 	}
 
-	public Boolean getCanPreClose() {
-		return canPreClose;
+	public boolean isPreClosureAllowed() {
+		return preClosureAllowed;
 	}
 
 	public BigDecimal getPreClosureInterestRate() {
@@ -167,4 +167,7 @@ public class DepositProductCommand {
 		return this.modifiedParameters.contains("preClosureInterestRate");
 	}
 
+	public boolean isNoFieldChanged() {
+		return this.modifiedParameters.isEmpty();
+	}
 }
