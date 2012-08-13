@@ -73,7 +73,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 			return "da.id as id, da.client_id as clientId, da.product_id as productId," 
 				+  " da.currency_code as currencyCode, da.currency_digits as currencyDigits, " 
 				+  " da.deposit_amount as depositAmount, "	
-				+  " da.maturity_interest_rate as interestRate, " 
+				+  " da.maturity_nominal_interest_rate as interestRate, " 
 				+  " da.created_date as createdon, da.lastmodified_date as modifiedon, "
 				+  " c.firstname as firstname, c.lastname as lastname, pd.name as productName,"
 				+  " curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, curr.display_symbol as currencyDisplaySymbol" 

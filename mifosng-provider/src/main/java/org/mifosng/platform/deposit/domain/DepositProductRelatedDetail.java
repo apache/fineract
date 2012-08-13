@@ -8,7 +8,7 @@ import javax.persistence.Embedded;
 
 import org.mifosng.platform.api.commands.DepositProductCommand;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
-import org.mifosng.platform.exceptions.InterestRateOutsideRangeException;
+import org.mifosng.platform.exceptions.ValueOutsideRangeException;
 
 @Embeddable
 public class DepositProductRelatedDetail {
@@ -169,7 +169,28 @@ public class DepositProductRelatedDetail {
 		}
 		
 		if (!inRange) {
-			throw new InterestRateOutsideRangeException(interestRate, this.maturityMinInterestRate, this.maturityMaxInterestRate);
+			final String actualValue = interestRate.toPlainString();
+			final String minValue = (this.maturityMinInterestRate == null) ? "" : this.maturityMinInterestRate.toPlainString();
+			final String maxValue = (this.maturityMaxInterestRate == null) ? "" : this.maturityMaxInterestRate.toPlainString();
+			throw new ValueOutsideRangeException(actualValue, minValue, maxValue, "deposit.account.maturityInterestRate");
+		}
+	}
+
+	public void validateDepositInRange(final BigDecimal depositAmount) {
+		boolean inRange = true;
+		if (depositAmount.compareTo(this.minimumBalance) < 0) {
+			inRange = false;
+		}
+		
+		if (this.maximumBalance != null && this.maximumBalance.compareTo(depositAmount) < 0) {
+			inRange = false;
+		}
+		
+		if (!inRange) {
+			final String actualValue = depositAmount.toPlainString();
+			final String minValue = (this.minimumBalance == null) ? "" : this.minimumBalance.toPlainString();
+			final String maxValue = (this.minimumBalance == null) ? "" : this.minimumBalance.toPlainString();
+			throw new ValueOutsideRangeException(actualValue, minValue, maxValue, "deposit.account.deposit.amount");
 		}
 	}
 }

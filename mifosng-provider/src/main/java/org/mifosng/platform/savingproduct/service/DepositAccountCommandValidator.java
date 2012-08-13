@@ -27,16 +27,20 @@ public class DepositAccountCommandValidator {
 		baseDataValidator.reset().parameter("productId").value(command.getProductId()).ignoreIfNull().notNull();
 		baseDataValidator.reset().parameter("externalId").value(command.getExternalId()).ignoreIfNull().notExceedingLengthOf(100);
 		
-		baseDataValidator.reset().parameter("currencyCode").value(command.getCurrencyCode()).ignoreIfNull().notBlank();
-		baseDataValidator.reset().parameter("digitsAfterDecimal").value(command.getDigitsAfterDecimal()).ignoreIfNull().notNull().inMinMaxRange(0, 6);
 		baseDataValidator.reset().parameter("depositAmount").value(command.getDepositAmount()).ignoreIfNull().notNull().integerGreaterThanZero();
 		baseDataValidator.reset().parameter("maturityInterestRate").value(command.getMaturityInterestRate()).ignoreIfNull().notNull().zeroOrPositiveAmount();
 		baseDataValidator.reset().parameter("termInMonths").value(command.getTermInMonths()).ignoreIfNull().notNull().integerGreaterThanZero();
 		
-		baseDataValidator.reset().anyOfNotNull(
-				command.getClientId(), command.getProductId(), command.getExternalId(),
-				command.getCurrencyCode(), command.getDigitsAfterDecimal(),
-				command.getDepositAmount(), command.getMaturityInterestRate(), command.getTermInMonths());
+		baseDataValidator.reset().parameter("interestCompoundedEvery").value(command.getInterestCompoundedEvery()).ignoreIfNull().integerGreaterThanZero();
+		baseDataValidator.reset().parameter("interestCompoundedEveryPeriodType").value(command.getInterestCompoundedEveryPeriodType()).ignoreIfNull().inMinMaxRange(2, 2);
+		baseDataValidator.reset().parameter("commencementDate").value(command.getCommencementDate()).ignoreIfNull();
+		
+		if (command.isNoFieldChanged()) {
+			StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append("deposit.account").append(".no.parameters.for.update");
+			StringBuilder defaultEnglishMessage = new StringBuilder("No parameters passed for update.");
+			ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(), defaultEnglishMessage.toString(), "id");
+			dataValidationErrors.add(error);
+		}
 		
 		if (!dataValidationErrors.isEmpty()) {
 			throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);
@@ -53,11 +57,13 @@ public class DepositAccountCommandValidator {
 		baseDataValidator.reset().parameter("productId").value(command.getProductId()).notNull();
 		baseDataValidator.reset().parameter("externalId").value(command.getExternalId()).ignoreIfNull().notExceedingLengthOf(100);
 
-		baseDataValidator.reset().parameter("currencyCode").value(command.getCurrencyCode()).notBlank();
-		baseDataValidator.reset().parameter("digitsAfterDecimal").value(command.getDigitsAfterDecimal()).notNull().inMinMaxRange(0, 6);
 		baseDataValidator.reset().parameter("depositAmount").value(command.getDepositAmount()).notNull().zeroOrPositiveAmount();
 		baseDataValidator.reset().parameter("maturityInterestRate").value(command.getMaturityInterestRate()).notNull().zeroOrPositiveAmount();
 		baseDataValidator.reset().parameter("termInMonths").value(command.getTermInMonths()).notNull().integerGreaterThanZero();
+		
+		baseDataValidator.reset().parameter("interestCompoundedEvery").value(command.getInterestCompoundedEvery()).notNull().integerGreaterThanZero();
+		baseDataValidator.reset().parameter("interestCompoundedEveryPeriodType").value(command.getInterestCompoundedEveryPeriodType()).notNull().inMinMaxRange(2, 2);
+		baseDataValidator.reset().parameter("commencementDate").value(command.getCommencementDate()).notNull();
 		
 		if (!dataValidationErrors.isEmpty()) {
 			throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);

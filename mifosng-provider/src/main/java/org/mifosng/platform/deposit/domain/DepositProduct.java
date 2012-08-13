@@ -113,4 +113,8 @@ public class DepositProduct extends AbstractAuditableCustom<AppUser, Long> {
 	public void validateInterestRateInRange(final BigDecimal interestRate) {
 		this.depositProductRelatedDetail.validateInterestRateInRange(interestRate);
 	}
+
+	public void validateDepositInRange(final BigDecimal depositAmount) {
+		this.depositProductRelatedDetail.validateDepositInRange(depositAmount);
+	}
 }

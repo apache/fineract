@@ -1493,7 +1493,9 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
 
 		Set<String> supportedParams = new HashSet<String>(
-				Arrays.asList("clientId", "productId", "externalId", "currencyCode", "digitsAfterDecimal", "depositAmount", "maturityInterestRate", "termInMonths", "locale")
+				Arrays.asList("clientId", "productId", "externalId", "depositAmount", "maturityInterestRate", 
+						"termInMonths", "interestCompoundedEvery", "interestCompoundedEveryPeriodType", "commencementDate",
+						"locale", "dateFormat")
 		);
 		checkForUnsupportedParameters(requestMap, supportedParams);
 		Set<String> modifiedParameters = new HashSet<String>();
@@ -1501,15 +1503,19 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		Long clientId = extractLongParameter("clientId", requestMap, modifiedParameters);
 		Long productId = extractLongParameter("productId", requestMap, modifiedParameters);
 		String externalId = extractStringParameter("externalId", requestMap,modifiedParameters);
-		String currencyCode=extractStringParameter("currencyCode", requestMap,modifiedParameters);
-		Integer digitsAfterDecimalValue = extractIntegerParameter("digitsAfterDecimal", requestMap, modifiedParameters);
 		BigDecimal depositAmount=extractBigDecimalParameter("depositAmount", requestMap, modifiedParameters);
 		BigDecimal interestRate = extractBigDecimalParameter("maturityInterestRate", requestMap, modifiedParameters);
 		Integer termInMonths = extractIntegerParameter("termInMonths", requestMap, modifiedParameters);
 		
-		// isRenewable, isPreClosureAllowed, expectedDepositDate, pojectMaturityDate, projectedInterestAccrued
+		Integer interestCompoundedEvery = extractIntegerParameter("interestCompoundedEvery", requestMap, modifiedParameters);
+		Integer interestCompoundedEveryPeriodType = extractIntegerParameter("interestCompoundedEveryPeriodType", requestMap, modifiedParameters);
+		LocalDate commencementDate = extractLocalDateParameter("commencementDate", requestMap, modifiedParameters);
 		
-		return new DepositAccountCommand(modifiedParameters, resourceIdentifier, clientId, productId, externalId, currencyCode, digitsAfterDecimalValue, depositAmount, interestRate, termInMonths);
+		// TODO - isRenewable, isPreClosureAllowed
+		
+		return new DepositAccountCommand(modifiedParameters, resourceIdentifier, clientId, productId, 
+				externalId, depositAmount, interestRate, termInMonths, 
+				interestCompoundedEvery, interestCompoundedEveryPeriodType, commencementDate);
 	}
 
 	@Override
