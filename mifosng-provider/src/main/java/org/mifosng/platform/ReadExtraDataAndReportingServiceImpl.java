@@ -17,14 +17,23 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.sql.DataSource;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
+import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.lang.StringUtils;
+import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
+import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 import org.mifosng.platform.api.data.AdditionalFieldsSetData;
 import org.mifosng.platform.api.data.GenericResultsetData;
 import org.mifosng.platform.api.data.ResultsetColumnHeader;
 import org.mifosng.platform.api.data.ResultsetDataRow;
+import org.mifosng.platform.api.infrastructure.JodaDateTimeAdapter;
+import org.mifosng.platform.api.infrastructure.JodaLocalDateAdapter;
 import org.mifosng.platform.exceptions.AdditionalFieldsNotFoundException;
 import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
 import org.mifosng.platform.exceptions.ReportNotFoundException;
@@ -46,6 +55,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 @Service
 public class ReadExtraDataAndReportingServiceImpl implements
@@ -365,6 +377,87 @@ public class ReadExtraDataAndReportingServiceImpl implements
 		}
 
 		return additionalFieldsSets;
+	}
+
+	@Override
+	public String retrieveDataTable(String datatable) {
+		long startTime = System.currentTimeMillis();
+
+		String sql = "select * from " + datatable;
+
+		GenericResultsetData result = fillReportingGenericResultSet(sql);
+
+		String jsonString = generateJsonFromGenericResultsetData(result);
+
+		logger.info("JSON is: " + jsonString);
+		long elapsed = System.currentTimeMillis() - startTime;
+		logger.info("FINISHING DATATABLE: " + datatable + "     Elapsed Time: "
+				+ elapsed);
+		return jsonString;
+	}
+
+	private static String generateJsonFromGenericResultsetData(
+			GenericResultsetData result) {
+
+		StringBuffer writer = new StringBuffer();
+				
+		writer.append("[");
+
+		List<ResultsetColumnHeader> columnHeaders = result.getColumnHeaders();
+		logger.info("NO. of Columns: " + columnHeaders.size());
+
+		List<ResultsetDataRow> data = result.getData();
+		List<String> row;
+		Integer rSize;
+		String currColType;
+		String currVal;
+		logger.info("NO. of Rows: " + data.size());
+		for (int i = 0; i < data.size(); i++) {
+			writer.append("\n{");
+
+			row = data.get(i).getRow();
+			rSize = row.size();
+			for (int j = 0; j < rSize; j++) {
+
+				writer.append('\"' + columnHeaders.get(j).getColumnName() + '\"'
+						+ ": ");
+				currColType = columnHeaders.get(j).getColumnType();
+				currVal = row.get(j);
+				if (currVal != null) {
+					if (currColType.equals("DECIMAL")
+							|| currColType.equals("DOUBLE")
+							|| currColType.equals("BIGINT")
+							|| currColType.equals("SMALLINT")
+							|| currColType.equals("INT"))
+						writer.append(currVal);
+					else
+						writer.append('\"' + currVal + '\"');
+				} else
+					writer.append("null");
+
+				if (j < (rSize - 1))
+					writer.append(",\n");
+			}
+
+			if (i < (data.size() - 1)) writer.append("},");
+			else writer.append("}");
+		}
+
+		writer.append("\n]");
+		return writer.toString();
+		
+		/*
+		JSONObject js = null;
+		try {
+			js = new JSONObject(writer.toString());
+		} catch (JSONException e) {
+			throw new WebApplicationException(Response
+					.status(Status.BAD_REQUEST).entity("JSON body is wrong")
+					.build());
+		}
+
+		return js.toString();*/
+
 	}
 
 	@Override
