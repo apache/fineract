@@ -62,7 +62,7 @@ VALUES
 (158,'XOF',0, 'CFA','CFA Franc BCEAO','currency.XOF'),
 (159,'XPF',0,NULL,'CFP Franc','currency.XPF'),
 (160,'YER',2,NULL,'Yemeni Rial','currency.YER'),
-(161,'ZAR',2,NULL,'South African Rand','currency.ZAR'),
+(161,'ZAR',2, 'R','South African Rand','currency.ZAR'),
 (162,'ZMK',2,NULL,'Zambian Kwacha','currency.ZMK'),
 (163,'ZWD',2,NULL,'Zimbabwe Dollar','currency.ZWD');
 
