@@ -31,7 +31,7 @@ see https://www.ohloh.net/p/mifosx for activity overview and basic code analysis
 
 see https://github.com/keithwoodlock/mifosx/wiki/Developer-deep-dive-into-Http-API for info around resource-oriented API work
 
-Amazon Public AMI
+Amazon Public AMI (currently out-of-date and will be updated - so don't use
 =================
 
 Launch instance <a target="_blank" href="https://console.aws.amazon.com/ec2/home?region=eu-west-1#launchAmi=ami-7b0e0a0f" title="mifos platform api beta 2">ami-7b0e0a0f</a>
