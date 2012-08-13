@@ -32,15 +32,15 @@ public class DepositProductCommandValidator {
 		baseDataValidator.reset().parameter("maturityDefaultInterestRate").value(command.getMaturityDefaultInterestRate()).notNull().zeroOrPositiveAmount();
 		baseDataValidator.reset().parameter("maturityMinInterestRate").value(command.getMaturityMinInterestRate()).notNull().zeroOrPositiveAmount();
 		baseDataValidator.reset().parameter("maturityMaxInterestRate").value(command.getMaturityMaxInterestRate()).notNull().zeroOrPositiveAmount();
-		baseDataValidator.reset().parameter("canRenew").value(command.getCanRenew()).notNull();
-		baseDataValidator.reset().parameter("canPreClose").value(command.getCanPreClose()).notNull();
+		baseDataValidator.reset().parameter("canRenew").value(command.getCanRenew()).ignoreIfNull();
+		baseDataValidator.reset().parameter("canPreClose").value(command.getCanPreClose()).ignoreIfNull();
 		baseDataValidator.reset().parameter("preClosureInterestRate").value(command.getPreClosureInterestRate()).notNull().zeroOrPositiveAmount();
 		
-		baseDataValidator.reset().comapareMinimumAndMaximumAmounts(command.getMinimumBalance(), command.getMaximumBalance());
-		baseDataValidator.reset().comapareMinAndMaxOfTwoBigDecmimalNos(command.getMaturityMinInterestRate(), command.getMaturityMaxInterestRate());
-		baseDataValidator.reset().comapareMinAndMaxOfTwoBigDecmimalNos(command.getMaturityDefaultInterestRate(), command.getMaturityMaxInterestRate());
-		baseDataValidator.reset().comapareMinAndMaxOfTwoBigDecmimalNos(command.getMaturityMinInterestRate(), command.getMaturityDefaultInterestRate());
-		baseDataValidator.reset().comapareMinAndMaxOfTwoBigDecmimalNos(command.getPreClosureInterestRate(), command.getMaturityMinInterestRate());
+		baseDataValidator.reset().parameter("minimumBalance").comapareMinimumAndMaximumAmounts(command.getMinimumBalance(), command.getMaximumBalance());
+		baseDataValidator.reset().parameter("maturityMinInterestRate").comapareMinAndMaxOfTwoBigDecmimalNos(command.getMaturityMinInterestRate(), command.getMaturityMaxInterestRate());
+		baseDataValidator.reset().parameter("maturityDefaultInterestRate").comapareMinAndMaxOfTwoBigDecmimalNos(command.getMaturityDefaultInterestRate(), command.getMaturityMaxInterestRate());
+		baseDataValidator.reset().parameter("maturityMinInterestRate").comapareMinAndMaxOfTwoBigDecmimalNos(command.getMaturityMinInterestRate(), command.getMaturityDefaultInterestRate());
+		baseDataValidator.reset().parameter("preClosureInterestRate").comapareMinAndMaxOfTwoBigDecmimalNos(command.getPreClosureInterestRate(), command.getMaturityMinInterestRate());
 		
 		if (!dataValidationErrors.isEmpty()) {
 			throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);
@@ -75,7 +75,7 @@ public class DepositProductCommandValidator {
 		baseDataValidator.reset().comapareMinAndMaxOfTwoBigDecmimalNos(command.getMaturityMinInterestRate(), command.getMaturityDefaultInterestRate());
 		baseDataValidator.reset().comapareMinAndMaxOfTwoBigDecmimalNos(command.getPreClosureInterestRate(), command.getMaturityMinInterestRate());
 		
-		baseDataValidator.reset().anyOfNotNull(command.getName(), command.getDescription(),command.getCurrencyCode(),command.getDigitsAfterDecimal(),command.getMinimumBalance(),command.getMaximumBalance(),command.getTenureMonths(),command.getMaturityDefaultInterestRate(),command.getMaturityMaxInterestRate(),command.getMaturityMinInterestRate(),command.getCanRenew(),command.getCanPreClose(),command.getPreClosureInterestRate());
+		baseDataValidator.reset().anyOfNotNull(command.getName(), command.getDescription(),command.getCurrencyCode(),command.getDigitsAfterDecimal(),command.getMinimumBalance(),command.getMaximumBalance(),command.getTenureMonths(),command.getMaturityDefaultInterestRate(),command.getMaturityMaxInterestRate(),command.getMaturityMinInterestRate(),command.getPreClosureInterestRate());
 		
 		if (!dataValidationErrors.isEmpty()) {
 			throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);

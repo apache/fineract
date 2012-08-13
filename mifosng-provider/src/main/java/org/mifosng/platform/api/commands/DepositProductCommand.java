@@ -48,8 +48,8 @@ public class DepositProductCommand {
 		this.maturityMaxInterestRate = maturityMaxInterestRate;
 		this.preClosureInterestRate = preClosureInterestRate;
 		
-		this.canRenew = canRenew;
-		this.canPreClose = canPreClose;
+		this.canRenew =(canRenew != null) ? canRenew : false;
+		this.canPreClose = (canPreClose != null) ? canPreClose : false;
 
 		this.modifiedParameters = modifiedParameters;		
 		
