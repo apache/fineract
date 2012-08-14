@@ -1517,7 +1517,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		boolean preClosureAllowed = extractBooleanParameter("preClosureAllowed", requestMap, modifiedParameters);
 		
 		return new DepositAccountCommand(modifiedParameters, resourceIdentifier, clientId, productId, 
-				externalId, depositAmount, interestRate, termInMonths, 
+				externalId, depositAmount, interestRate, tenureInMonths, 
 				interestCompoundedEvery, interestCompoundedEveryPeriodType, commencementDate, renewalAllowed, preClosureAllowed);
 	}
 
