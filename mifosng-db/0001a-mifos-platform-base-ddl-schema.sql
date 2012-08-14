@@ -380,6 +380,7 @@ CREATE TABLE `portfolio_loan_transaction` (
   `amount` decimal(19,6) NOT NULL,
   `principal_portion_derived` decimal(19,6) NOT NULL,
   `interest_portion_derived` decimal(19,6) NOT NULL,
+  `interest_waived_derived` decimal(19,6) NOT NULL,
   `createdby_id` bigint(20) DEFAULT NULL,
   `created_date` datetime DEFAULT NULL,
   `lastmodified_date` datetime DEFAULT NULL,
