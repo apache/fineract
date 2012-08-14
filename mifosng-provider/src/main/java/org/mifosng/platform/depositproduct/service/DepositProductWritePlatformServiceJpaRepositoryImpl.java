@@ -6,65 +6,103 @@ import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.deposit.domain.DepositProduct;
 import org.mifosng.platform.deposit.domain.DepositProductRepository;
 import org.mifosng.platform.exceptions.DepositProductNotFoundException;
+import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
+import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 import org.mifosng.platform.security.PlatformSecurityContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class DepositProductWritePlatformServiceJpaRepositoryImpl implements
-		DepositProductWritePlatformService {
+public class DepositProductWritePlatformServiceJpaRepositoryImpl implements DepositProductWritePlatformService {
+	
+	private final static Logger logger = LoggerFactory.getLogger(DepositProductWritePlatformServiceJpaRepositoryImpl.class);
 	
 	private final PlatformSecurityContext context;
 	private final DepositProductRepository depositProductRepository;
-	
 	
 	@Autowired
 	public DepositProductWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final DepositProductRepository depositProductRepository){
 		this.context=context;
 		this.depositProductRepository=depositProductRepository;
 	}
-
-	@Transactional
-	@Override
-	public EntityIdentifier createDepositProduct(DepositProductCommand command) {
+	
+	/*
+	 * Guaranteed to throw an exception no matter what the data integrity issue is.
+	 */
+	private void handleDataIntegrityIssues(final DepositProductCommand command, final DataIntegrityViolationException dve)  {
 		
-		this.context.authenticatedUser();
-		DepositProductCommandValidator validator=new DepositProductCommandValidator(command);
-		validator.validateForCreate();
-		
-		MonetaryCurrency currency = new MonetaryCurrency(command.getCurrencyCode(), command.getDigitsAfterDecimal());
-		DepositProduct product = new DepositProduct(command.getName(),command.getDescription(),currency,command.getMinimumBalance(),command.getMaximumBalance(),
-				command.getTenureInMonths(),command.getMaturityDefaultInterestRate(),command.getMaturityMinInterestRate(),command.getMaturityMaxInterestRate(),
-				command.isRenewalAllowed(), command.isPreClosureAllowed(),
-				command.getPreClosureInterestRate());
-		this.depositProductRepository.save(product);
-		
-		return new EntityIdentifier(product.getId());
-		
-	}
-
-	@Transactional
-	@Override
-	public EntityIdentifier updateDepositProduct(DepositProductCommand command) {
-		
-		this.context.authenticatedUser();
-		DepositProductCommandValidator validator=new DepositProductCommandValidator(command);
-		validator.validateForUpdate();
-		
-		DepositProduct product=this.depositProductRepository.findOne(command.getId());
-		if(product==null){
-			throw new DepositProductNotFoundException(command.getId());
+		Throwable realCause = dve.getMostSpecificCause();
+		if (realCause.getMessage().contains("name_deposit_product")) {
+			throw new PlatformDataIntegrityException("error.msg.desposit.product.duplicate.name", "Deposit product with name: " + command.getName() + " already exists", "name", command.getName());
+		}
+		if (realCause.getMessage().contains("externalid_deposit_product")) {
+			throw new PlatformDataIntegrityException("error.msg.desposit.product.duplicate.externalId", "Deposit product with externalId " + command.getExternalId() + " already exists", "externalId", command.getExternalId());
 		}
 		
-		product.update(command);
-		this.depositProductRepository.save(product);
-		return new EntityIdentifier(Long.valueOf(product.getId()));
+		logger.error(dve.getMessage(), dve);
+		throw new PlatformDataIntegrityException("error.msg.deposit.product.unknown.data.integrity.issue", "Unknown data integrity issue with resource.");
 	}
 
 	@Transactional
 	@Override
-	public EntityIdentifier deleteDepositProduct(Long productId) {
+	public EntityIdentifier createDepositProduct(final DepositProductCommand command) {
+		
+		try {
+			this.context.authenticatedUser();
+			DepositProductCommandValidator validator=new DepositProductCommandValidator(command);
+			validator.validateForCreate();
+			
+			PeriodFrequencyType interestCompoundingPeriodType = PeriodFrequencyType.fromInt(command.getInterestCompoundedEveryPeriodType());
+			MonetaryCurrency currency = new MonetaryCurrency(command.getCurrencyCode(), command.getDigitsAfterDecimal());
+			DepositProduct product = new DepositProduct(command.getName(), command.getExternalId(), command.getDescription(),currency,command.getMinimumBalance(),command.getMaximumBalance(),
+					command.getTenureInMonths(),command.getMaturityDefaultInterestRate(),command.getMaturityMinInterestRate(),command.getMaturityMaxInterestRate(),
+					command.getInterestCompoundedEvery(), interestCompoundingPeriodType,
+					command.isRenewalAllowed(), command.isPreClosureAllowed(),
+					command.getPreClosureInterestRate());
+			this.depositProductRepository.save(product);
+			
+			return new EntityIdentifier(product.getId());
+		} catch (DataIntegrityViolationException dve) {
+			 handleDataIntegrityIssues(command, dve);
+			 return new EntityIdentifier(Long.valueOf(-1));
+		}
+	}
+
+	@Transactional
+	@Override
+	public EntityIdentifier updateDepositProduct(final DepositProductCommand command) {
+		
+		try {
+			this.context.authenticatedUser();
+			DepositProductCommandValidator validator=new DepositProductCommandValidator(command);
+			validator.validateForUpdate();
+			
+			DepositProduct product=this.depositProductRepository.findOne(command.getId());
+			if(product==null){
+				throw new DepositProductNotFoundException(command.getId());
+			}
+			
+			PeriodFrequencyType interestCompoundingFrequency = null;
+			if (command.isInterestCompoundedEveryPeriodTypeChanged()) {
+				interestCompoundingFrequency = PeriodFrequencyType.fromInt(command.getInterestCompoundedEveryPeriodType());
+			}
+			
+			product.update(command, interestCompoundingFrequency);
+			this.depositProductRepository.save(product);
+			return new EntityIdentifier(Long.valueOf(product.getId()));
+		} catch (DataIntegrityViolationException dve) {
+			 handleDataIntegrityIssues(command, dve);
+			 return new EntityIdentifier(Long.valueOf(-1));
+		}
+	}
+
+	@Transactional
+	@Override
+	public EntityIdentifier deleteDepositProduct(final Long productId) {
 		
 		this.context.authenticatedUser();
 		DepositProduct product=this.depositProductRepository.findOne(productId);

@@ -3,6 +3,7 @@ package org.mifosng.platform.depositproduct.service;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -10,9 +11,12 @@ import org.joda.time.DateTime;
 import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.DepositProductData;
 import org.mifosng.platform.api.data.DepositProductLookup;
+import org.mifosng.platform.api.data.EnumOptionData;
 import org.mifosng.platform.currency.service.CurrencyReadPlatformService;
+import org.mifosng.platform.deposit.domain.SavingsDepositEnumerations;
 import org.mifosng.platform.infrastructure.JdbcSupport;
 import org.mifosng.platform.infrastructure.TenantAwareRoutingDataSource;
+import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -58,22 +62,30 @@ public class DepositProductReadPlatformServiceImpl implements
 		DepositProductData productData = this.jdbcTemplate.queryForObject(sql, depositProductMapper, new Object[]{productId});
 		
 		List<CurrencyData> currencyOptions = currencyReadPlatformService.retrieveAllowedCurrencies();
-		return new DepositProductData(productData, currencyOptions);
+		EnumOptionData monthly = SavingsDepositEnumerations.interestCompoundingPeriodType(PeriodFrequencyType.MONTHS);
+		List<EnumOptionData> interestCompoundedEveryPeriodTypeOptions = Arrays.asList(monthly);
+		
+		return new DepositProductData(productData, currencyOptions, interestCompoundedEveryPeriodTypeOptions);
 	}
 
 	@Override
 	public DepositProductData retrieveNewDepositProductDetails() {
 		
 		List<CurrencyData> currencyOptions = currencyReadPlatformService.retrieveAllowedCurrencies();
-		return new DepositProductData(currencyOptions);
+		EnumOptionData monthly = SavingsDepositEnumerations.interestCompoundingPeriodType(PeriodFrequencyType.MONTHS);
+		List<EnumOptionData> interestCompoundedEveryPeriodTypeOptions = Arrays.asList(monthly);
+		
+		return new DepositProductData(currencyOptions, monthly, interestCompoundedEveryPeriodTypeOptions);
 	}
 	
 	private static final class DepositProductMapper implements RowMapper<DepositProductData>{
 		
 		public String depositProductSchema(){
-			return "dp.id as id,dp.name as name, dp.description as description,dp.currency_code as currencyCode, dp.currency_digits as currencyDigits,dp.minimum_balance as minimumBalance,dp.maximum_balance as maximumBalance," +
-					"dp.created_date as createdon, dp.lastmodified_date as modifiedon,dp.tenure_months as tenureMonths, dp.maturity_default_interest_rate as maturityDefaultInterestRate, " +
-					"dp.maturity_min_interest_rate as maturityMinInterestRate, dp.maturity_max_interest_rate as maturityMaxInterestRate, dp.can_renew as canRenew, dp.can_pre_close as canPreClose, dp.pre_closure_interest_rate as preClosureInterestRate, " +
+			return " dp.id as id, dp.external_id as exernalId, dp.name as name, dp.description as description,dp.currency_code as currencyCode, dp.currency_digits as currencyDigits,dp.minimum_balance as minimumBalance,dp.maximum_balance as maximumBalance," +
+					"dp.created_date as createdon, dp.lastmodified_date as modifiedon,dp.tenure_months as tenureMonths, " +
+					"dp.interest_compounded_every as interestCompoundedEvery, dp.interest_compounded_every_period_enum as interestCompoundedEveryPeriodType, " +
+					"dp.maturity_default_interest_rate as maturityDefaultInterestRate, " +
+					"dp.maturity_min_interest_rate as maturityMinInterestRate, dp.maturity_max_interest_rate as maturityMaxInterestRate, dp.is_renewal_allowed as canRenew, dp.is_preclosure_allowed as canPreClose, dp.pre_closure_interest_rate as preClosureInterestRate, " +
 					"curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, curr.display_symbol as currencyDisplaySymbol " +
 					"from portfolio_product_deposit dp join ref_currency curr on curr.code = dp.currency_code ";
 		}
@@ -83,6 +95,7 @@ public class DepositProductReadPlatformServiceImpl implements
 				throws SQLException {
 			
 			Long id = rs.getLong("id");
+			String exernalId = rs.getString("exernalId");
 			String name = rs.getString("name");
 			String description = rs.getString("description");
 			
@@ -96,6 +109,10 @@ public class DepositProductReadPlatformServiceImpl implements
 			BigDecimal maximumBalance=rs.getBigDecimal("maximumBalance");
 			
 			Integer tenureMonths = JdbcSupport.getInteger(rs, "tenureMonths");
+			Integer interestCompoundedEvery = JdbcSupport.getInteger(rs, "interestCompoundedEvery");
+			Integer interestCompoundedEveryPeriodTypeValue = JdbcSupport.getInteger(rs, "interestCompoundedEveryPeriodType");
+			EnumOptionData interestCompoundedEveryPeriodType = SavingsDepositEnumerations.interestCompoundingPeriodType(interestCompoundedEveryPeriodTypeValue);
+			
 			BigDecimal maturityDefaultInterestRate=rs.getBigDecimal("maturityDefaultInterestRate");
 			BigDecimal maturityMinInterestRate= rs.getBigDecimal("maturityMinInterestRate");
 			BigDecimal maturityMaxInterestRate = rs.getBigDecimal("maturityMaxInterestRate");
@@ -105,8 +122,10 @@ public class DepositProductReadPlatformServiceImpl implements
 			
 			BigDecimal preClosureInterestRate=rs.getBigDecimal("preClosureInterestRate");
 			
-			return new DepositProductData(createdOn, lastModifedOn, id, name, description, currencyCode, currencyDigits, minimumBalance, maximumBalance,
-					tenureMonths, maturityDefaultInterestRate,maturityMinInterestRate,maturityMaxInterestRate,canRenew,canPreClose,preClosureInterestRate);
+			return new DepositProductData(createdOn, lastModifedOn, id, exernalId, name, description, currencyCode, currencyDigits, minimumBalance, maximumBalance,
+					tenureMonths, maturityDefaultInterestRate,maturityMinInterestRate,maturityMaxInterestRate, 
+					interestCompoundedEvery, interestCompoundedEveryPeriodType,
+					canRenew,canPreClose,preClosureInterestRate);
 		}
 		
 	}

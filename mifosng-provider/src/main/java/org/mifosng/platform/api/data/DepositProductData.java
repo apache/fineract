@@ -12,6 +12,7 @@ import org.joda.time.DateTime;
 public class DepositProductData {
 	
 	private final Long id;
+	private final String externalId;
 	private final String name;
 	private final String description;
 	private final String currencyCode;
@@ -22,6 +23,9 @@ public class DepositProductData {
 	private final BigDecimal maturityDefaultInterestRate;
 	private final BigDecimal maturityMinInterestRate;
 	private final BigDecimal maturityMaxInterestRate;
+	private final Integer interestCompoundedEvery;
+	private final EnumOptionData interestCompoundedEveryPeriodType;
+	
 	private final boolean renewalAllowed;
 	private final boolean preClosureAllowed;
 	private final BigDecimal preClosureInterestRate;
@@ -30,11 +34,13 @@ public class DepositProductData {
 	private final DateTime lastModifedOn;
 	
 	private final List<CurrencyData> currencyOptions;
+	private final List<EnumOptionData> interestCompoundedEveryPeriodTypeOptions;
 	
 	public DepositProductData(
 			final DateTime createdOn, 
 			final DateTime lastModifedOn, 
 			final Long id,
+			final String externalId,
 			final String name, 
 			final String description, 
 			final String currencyCode, 
@@ -45,6 +51,8 @@ public class DepositProductData {
 			final BigDecimal maturityDefaultInterestRate, 
 			final BigDecimal maturityMinInterestRate, 
 			final BigDecimal maturityMaxInterestRate,
+			final Integer interestCompoundedEvery, 
+			final EnumOptionData interestCompoundedEveryPeriodType, 
 			final boolean renewalAllowed, 
 			final boolean preClosureAllowed, 
 			final BigDecimal preClosureInterestRate) {
@@ -52,6 +60,7 @@ public class DepositProductData {
 		this.createdOn=createdOn;
 		this.lastModifedOn=lastModifedOn;
 		this.id=id;
+		this.externalId = externalId;
 		this.name=name;
 		this.description=description;
 		this.currencyCode=currencyCode;
@@ -63,17 +72,24 @@ public class DepositProductData {
 		this.maturityDefaultInterestRate = maturityDefaultInterestRate;
 		this.maturityMinInterestRate=maturityMinInterestRate;
 		this.maturityMaxInterestRate=maturityMaxInterestRate;
+		this.interestCompoundedEvery = interestCompoundedEvery;
+		this.interestCompoundedEveryPeriodType = interestCompoundedEveryPeriodType;
 		this.renewalAllowed=renewalAllowed;
 		this.preClosureAllowed=preClosureAllowed;
 		this.preClosureInterestRate=preClosureInterestRate;
 		
 		this.currencyOptions = new ArrayList<CurrencyData>();
+		this.interestCompoundedEveryPeriodTypeOptions = new ArrayList<EnumOptionData>();
 	}
 	
-	public DepositProductData(final List<CurrencyData> currencyOptions) {
+	public DepositProductData(
+			final List<CurrencyData> currencyOptions, 
+			final EnumOptionData defaultInterestCompoundedEveryPeriodType,
+			final List<EnumOptionData> interestCompoundedEveryPeriodTypeOptions) {
 		this.createdOn=null;
 		this.lastModifedOn=null;
 		this.id=null;
+		this.externalId = null;
 		this.name=null;
 		this.description=null;
 		this.currencyCode=null;
@@ -85,17 +101,25 @@ public class DepositProductData {
 		this.maturityDefaultInterestRate = null;
 		this.maturityMinInterestRate=BigDecimal.ZERO;
 		this.maturityMaxInterestRate=BigDecimal.ZERO;
+		this.interestCompoundedEvery = Integer.valueOf(1);
+		this.interestCompoundedEveryPeriodType = defaultInterestCompoundedEveryPeriodType;
+		
 		this.renewalAllowed=true;
 		this.preClosureAllowed=true;
 		this.preClosureInterestRate=BigDecimal.ZERO;
 		
 		this.currencyOptions = currencyOptions;
+		this.interestCompoundedEveryPeriodTypeOptions = interestCompoundedEveryPeriodTypeOptions;
 	}
 	
-	public DepositProductData(final DepositProductData product, final List<CurrencyData> currencyOptions) {
+	public DepositProductData(
+			final DepositProductData product, 
+			final List<CurrencyData> currencyOptions,
+			final List<EnumOptionData> interestCompoundedEveryPeriodTypeOptions) {
 		this.createdOn=product.getCreatedOn();
 		this.lastModifedOn=product.getLastModifedOn();
 		this.id=product.getId();
+		this.externalId = product.getExternalId();
 		this.name=product.getName();
 		this.description=product.getDescription();
 		this.currencyCode=product.getCurrencyCode();
@@ -107,15 +131,23 @@ public class DepositProductData {
 		this.maturityDefaultInterestRate = product.getMaturityDefaultInterestRate();
 		this.maturityMinInterestRate=product.getMaturityMinInterestRate();
 		this.maturityMaxInterestRate=product.getMaturityMaxInterestRate();
+		this.interestCompoundedEvery = product.getInterestCompoundedEvery();
+		this.interestCompoundedEveryPeriodType = product.getInterestCompoundedEveryPeriodType();
+		
 		this.renewalAllowed=product.isRenewalAllowed();
 		this.preClosureAllowed=product.isPreClosureAllowed();
 		this.preClosureInterestRate=product.getPreClosureInterestRate();
 		
 		this.currencyOptions = currencyOptions;
+		this.interestCompoundedEveryPeriodTypeOptions = interestCompoundedEveryPeriodTypeOptions;
 	}
 
 	public Long getId() {
 		return id;
+	}
+	
+	public String getExternalId() {
+		return externalId;
 	}
 
 	public String getName() {
@@ -157,6 +189,14 @@ public class DepositProductData {
 	public BigDecimal getMaturityMaxInterestRate() {
 		return maturityMaxInterestRate;
 	}
+	
+	public Integer getInterestCompoundedEvery() {
+		return interestCompoundedEvery;
+	}
+
+	public EnumOptionData getInterestCompoundedEveryPeriodType() {
+		return interestCompoundedEveryPeriodType;
+	}
 
 	public boolean isRenewalAllowed() {
 		return renewalAllowed;
@@ -180,5 +220,9 @@ public class DepositProductData {
 
 	public List<CurrencyData> getCurrencyOptions() {
 		return currencyOptions;
+	}
+
+	public List<EnumOptionData> getInterestCompoundedEveryPeriodTypeOptions() {
+		return interestCompoundedEveryPeriodTypeOptions;
 	}
 }

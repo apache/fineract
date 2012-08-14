@@ -6,6 +6,7 @@ import java.util.Set;
 public class DepositProductCommand {
 	
 	private final Long id;
+	private final String externalId;
 	private final String name;
 	private final String description;
 
@@ -19,6 +20,9 @@ public class DepositProductCommand {
 	private final BigDecimal maturityDefaultInterestRate;
 	private final BigDecimal maturityMinInterestRate;
 	private final BigDecimal maturityMaxInterestRate;
+	private final Integer interestCompoundedEvery;
+	private final Integer interestCompoundedEveryPeriodType;
+	
 	private final boolean renewalAllowed;
 	private final boolean preClosureAllowed;
 	private final BigDecimal preClosureInterestRate;
@@ -26,13 +30,16 @@ public class DepositProductCommand {
 	private final Set<String> modifiedParameters;
 	
 	public DepositProductCommand(final Set<String> modifiedParameters,
-			final Long id, final String name, final String description,
+			final Long id, final String externalId, final String name, final String description,
 			final String currencyCode, final Integer digitsAfterDecimal,
 			final BigDecimal minimumBalance, final BigDecimal maximumBalance,
 			final Integer tenureInMonths, final BigDecimal maturityDefaultInterestRate,
 			final BigDecimal maturityMinInterestRate, final BigDecimal maturityMaxInterestRate,
+			final Integer interestCompoundedEvery,
+			final Integer interestCompoundedEveryPeriodType,
 			final boolean renewalAllowed, final boolean preClosureAllowed, final BigDecimal preClosureInterestRate ) {
 		this.id = id;
+		this.externalId = externalId;
 		this.name = name;
 		this.description = description;
 
@@ -46,6 +53,8 @@ public class DepositProductCommand {
 		this.maturityDefaultInterestRate = maturityDefaultInterestRate;
 		this.maturityMinInterestRate = maturityMinInterestRate;
 		this.maturityMaxInterestRate = maturityMaxInterestRate;
+		this.interestCompoundedEvery = interestCompoundedEvery;
+		this.interestCompoundedEveryPeriodType = interestCompoundedEveryPeriodType;
 		this.preClosureInterestRate = preClosureInterestRate;
 		
 		this.renewalAllowed = renewalAllowed;
@@ -57,6 +66,10 @@ public class DepositProductCommand {
 	
 	public Long getId() {
 		return id;
+	}
+	
+	public String getExternalId() {
+		return externalId;
 	}
 
 	public String getName() {
@@ -99,6 +112,14 @@ public class DepositProductCommand {
 		return maturityMaxInterestRate;
 	}
 	
+	public Integer getInterestCompoundedEvery() {
+		return interestCompoundedEvery;
+	}
+
+	public Integer getInterestCompoundedEveryPeriodType() {
+		return interestCompoundedEveryPeriodType;
+	}
+
 	public boolean isRenewalAllowed() {
 		return renewalAllowed;
 	}
@@ -109,6 +130,10 @@ public class DepositProductCommand {
 
 	public BigDecimal getPreClosureInterestRate() {
 		return preClosureInterestRate;
+	}
+	
+	public boolean isExternalIdChanged() {
+		return this.modifiedParameters.contains("externalId");
 	}
 
 	public boolean isNameChanged() {
@@ -153,6 +178,14 @@ public class DepositProductCommand {
 	
 	public boolean isMaturityMaxInterestRateChanged() {
 		return this.modifiedParameters.contains("maturityMaxInterestRate");
+	}
+	
+	public boolean isInterestCompoundedEveryChanged() {
+		return this.modifiedParameters.contains("interestCompoundedEvery");
+	}
+	
+	public boolean isInterestCompoundedEveryPeriodTypeChanged() {
+		return this.modifiedParameters.contains("interestCompoundedEveryPeriodType");
 	}
 	
 	public boolean isRenewalAllowedChanged() {

@@ -1572,12 +1572,16 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
 
 		Set<String> supportedParams = new HashSet<String>(
-				Arrays.asList("name","description","currencyCode", "digitsAfterDecimal","locale","minimumBalance","maximumBalance","tenureInMonths",
-						"maturityDefaultInterestRate","maturityMinInterestRate","maturityMaxInterestRate","renewalAllowed","preClosureAllowed","preClosureInterestRate")
+				Arrays.asList("locale", "name", "externalId", "description","currencyCode", "digitsAfterDecimal","minimumBalance","maximumBalance","tenureInMonths",
+						"maturityDefaultInterestRate","maturityMinInterestRate","maturityMaxInterestRate", 
+						"interestCompoundedEvery", "interestCompoundedEveryPeriodType",
+						"renewalAllowed","preClosureAllowed","preClosureInterestRate")
 				);
 		checkForUnsupportedParameters(requestMap, supportedParams);
 		Set<String> modifiedParameters = new HashSet<String>();
 		String name = extractStringParameter("name", requestMap,modifiedParameters);
+		String externalId = extractStringParameter("externalId", requestMap,modifiedParameters);
+		
 		String description = extractStringParameter("description", requestMap,modifiedParameters);
 		String currencyCode=extractStringParameter("currencyCode", requestMap,modifiedParameters);
 		Integer digitsAfterDecimalValue = extractIntegerParameter("digitsAfterDecimal", requestMap, modifiedParameters);
@@ -1588,12 +1592,19 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		BigDecimal maturityDefaultInterestRate = extractBigDecimalParameter("maturityDefaultInterestRate", requestMap, modifiedParameters);
 		BigDecimal maturityMinInterestRate = extractBigDecimalParameter("maturityMinInterestRate", requestMap, modifiedParameters);
 		BigDecimal maturityMaxInterestRate = extractBigDecimalParameter("maturityMaxInterestRate", requestMap, modifiedParameters);
+		
+		Integer interestCompoundedEvery = extractIntegerParameter("interestCompoundedEvery", requestMap, modifiedParameters);
+		Integer interestCompoundedEveryPeriodType = extractIntegerParameter("interestCompoundedEveryPeriodType", requestMap, modifiedParameters);
+		
 	    boolean canRenew = extractBooleanParameter("renewalAllowed", requestMap, modifiedParameters);
 	    boolean canPreClose = extractBooleanParameter("preClosureAllowed", requestMap, modifiedParameters);
 	    BigDecimal preClosureInterestRate = extractBigDecimalParameter("preClosureInterestRate", requestMap, modifiedParameters);
 		
-		return new DepositProductCommand(modifiedParameters, resourceIdentifier, name, description, currencyCode, digitsAfterDecimalValue, minimumBalance,maximumBalance, 
-				tenureMonths, maturityDefaultInterestRate, maturityMinInterestRate, maturityMaxInterestRate, canRenew, canPreClose, preClosureInterestRate);
+		return new DepositProductCommand(modifiedParameters, resourceIdentifier, externalId, 
+				name, description, currencyCode, digitsAfterDecimalValue, minimumBalance,maximumBalance, 
+				tenureMonths, maturityDefaultInterestRate, maturityMinInterestRate, maturityMaxInterestRate, 
+				interestCompoundedEvery, interestCompoundedEveryPeriodType,
+				canRenew, canPreClose, preClosureInterestRate);
 	}
 
 	@Override
@@ -1601,9 +1612,11 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 			Set<String> responseParameters, DepositProductData... products) {
 		
 		Set<String> supportedParameters = new HashSet<String>(
-				Arrays.asList("id", "name", "description","createdOn", "lastModifedOn","currencyCode","digitsAfterDecimal", 
-						"currencyOptions", "minimumBalance","maximumBalance","tenureInMonths","maturityDefaultInterestRate","maturityMinInterestRate",
-						"maturityMaxInterestRate","renewalAllowed","preClosureAllowed","preClosureInterestRate"));
+				Arrays.asList("currencyOptions", "interestCompoundedEveryPeriodTypeOptions", 
+						"id", "externalId", "name", "description","createdOn", "lastModifedOn","currencyCode","digitsAfterDecimal", 
+						"minimumBalance","maximumBalance","tenureInMonths","maturityDefaultInterestRate","maturityMinInterestRate",
+						"maturityMaxInterestRate", "interestCompoundedEvery", "interestCompoundedEveryPeriodType",
+						"renewalAllowed","preClosureAllowed","preClosureInterestRate"));
 
 		final Set<String> parameterNamesToSkip = new HashSet<String>();
 		

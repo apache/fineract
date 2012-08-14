@@ -53,7 +53,6 @@ public class DepositProductsApiResource {
 		EntityIdentifier entityIdentifier=this.depositProductWritePlatformService.createDepositProduct(command);
 		
 		return Response.ok().entity(entityIdentifier).build();
-		
 	}
 	
 	@PUT
@@ -84,9 +83,11 @@ public class DepositProductsApiResource {
 	public String retrieveAllDepositProducts(@Context final UriInfo uriInfo) {
 		
 		Set<String> typicalResponseParameters = new HashSet<String>(
-				Arrays.asList("id", "name", "description", "createdOn", "lastModifedOn",
-				"currencyCode","digitsAfterDecimal","minimumBalance","maximumBalance","tenureInMonths","maturityDefaultInterestRate","maturityMinInterestRate",
-				"maturityMaxInterestRate","renewalAllowed","preClosureAllowed","preClosureInterestRate"));
+				Arrays.asList("id", "externalId", "name", "description", "createdOn", "lastModifedOn",
+				"currencyCode","digitsAfterDecimal","minimumBalance","maximumBalance","tenureInMonths",
+				"maturityDefaultInterestRate","maturityMinInterestRate","maturityMaxInterestRate",
+				"interestCompoundedEvery", "interestCompoundedEveryPeriodType",
+				"renewalAllowed","preClosureAllowed","preClosureInterestRate"));
 		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (responseParameters.isEmpty()) {
@@ -105,9 +106,11 @@ public class DepositProductsApiResource {
 	public String retrieveDepositProductDetails(@PathParam("productId") final Long productId, @Context final UriInfo uriInfo) {
 		
 		Set<String> typicalResponseParameters = new HashSet<String>(
-				Arrays.asList("id", "name", "description", "createdOn", "lastModifedOn",
-				"currencyCode","digitsAfterDecimal","minimumBalance","maximumBalance","tenureInMonths","maturityDefaultInterestRate","maturityMinInterestRate",
-				"maturityMaxInterestRate","renewalAllowed","preClosureAllowed","preClosureInterestRate"));
+				Arrays.asList("id", "externalId", "name", "description", "createdOn", "lastModifedOn",
+				"currencyCode","digitsAfterDecimal","minimumBalance","maximumBalance","tenureInMonths",
+				"maturityDefaultInterestRate","maturityMinInterestRate","maturityMaxInterestRate",
+				"interestCompoundedEvery", "interestCompoundedEveryPeriodType",
+				"renewalAllowed","preClosureAllowed","preClosureInterestRate"));
 		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (responseParameters.isEmpty()) {
@@ -116,9 +119,11 @@ public class DepositProductsApiResource {
 		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 		boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
 		if (template) {
-			responseParameters.addAll(Arrays.asList("currencyOptions"));
+			responseParameters.addAll(Arrays.asList("currencyOptions", "interestCompoundedEveryPeriodTypeOptions"));
 		}
+		
 		DepositProductData productData = this.depositProductReadPlatformService.retrieveDepositProductData(productId);
+		
 		return this.apiDataConversionService.convertDepositProductDataToJson(prettyPrint, responseParameters, productData);
 	}
 
@@ -129,9 +134,12 @@ public class DepositProductsApiResource {
 	public String retrieveNewDepositProductDetails(@Context final UriInfo uriInfo) {
 		
 		Set<String> typicalResponseParameters = new HashSet<String>(
-				Arrays.asList("currencyOptions", "id", "name", "description", "createdOn", "lastModifedOn",
-				"currencyCode","digitsAfterDecimal","minimumBalance","maximumBalance","tenureInMonths","maturityDefaultInterestRate","maturityMinInterestRate",
-				"maturityMaxInterestRate","renewalAllowed","preClosureAllowed","preClosureInterestRate"));
+				Arrays.asList("currencyOptions", "interestCompoundedEveryPeriodTypeOptions", 
+				"id", "externalId", "name", "description", "createdOn", "lastModifedOn",
+				"currencyCode","digitsAfterDecimal","minimumBalance","maximumBalance","tenureInMonths",
+				"maturityDefaultInterestRate","maturityMinInterestRate","maturityMaxInterestRate",
+				"interestCompoundedEvery", "interestCompoundedEveryPeriodType",
+				"renewalAllowed","preClosureAllowed","preClosureInterestRate"));
 		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (responseParameters.isEmpty()) {
@@ -143,5 +151,4 @@ public class DepositProductsApiResource {
 		
 		return this.apiDataConversionService.convertDepositProductDataToJson(prettyPrint, responseParameters, depositProduct);
 	}	
-	
 }

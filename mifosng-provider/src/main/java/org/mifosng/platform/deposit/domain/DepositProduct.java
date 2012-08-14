@@ -6,21 +6,28 @@ import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosng.platform.api.commands.DepositProductCommand;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.exceptions.ValueOutsideRangeException;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
+import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 import org.mifosng.platform.user.domain.AppUser;
 
 @Entity
-@Table(name = "portfolio_product_deposit")
+@Table(name = "portfolio_product_deposit", uniqueConstraints={
+												@UniqueConstraint(columnNames = {"name"}, name="name_deposit_product"), 
+												@UniqueConstraint(columnNames = {"external_id"}, name="externalid_deposit_product")
+})
 public class DepositProduct extends AbstractAuditableCustom<AppUser, Long> {
 	
-	@SuppressWarnings("unused")
 	@Column(name = "name", nullable = false)
 	private String name;
+	
+	@Column(name = "external_id", length=100)
+	private String externalId;
 
 	@SuppressWarnings("unused")
 	@Column(name = "description")
@@ -39,8 +46,12 @@ public class DepositProduct extends AbstractAuditableCustom<AppUser, Long> {
 	private BigDecimal maximumBalance;
 	
 	@SuppressWarnings("unused")
-	@Column(name = "tenure_months", nullable=false)
-	private Integer tenureInMonths;
+	@Column(name = "interest_compounded_every", nullable=false)
+	private Integer interestCompoundedEvery;
+	
+	@SuppressWarnings("unused")
+	@Column(name = "interest_compounded_every_period_enum", nullable=false)
+	private PeriodFrequencyType interestCompoundedEveryPeriodType;
 	
 	@SuppressWarnings("unused")
 	@Column(name = "maturity_default_interest_rate", scale = 6, precision = 19, nullable = false)
@@ -52,10 +63,14 @@ public class DepositProduct extends AbstractAuditableCustom<AppUser, Long> {
 	@Column(name = "maturity_max_interest_rate", scale = 6, precision = 19, nullable = false)
 	private BigDecimal maturityMaxInterestRate;
 	
-	@Column(name = "can_renew", nullable=false)
+	@SuppressWarnings("unused")
+	@Column(name = "tenure_months", nullable=false)
+	private Integer tenureInMonths;
+	
+	@Column(name = "is_renewal_allowed", nullable=false)
 	private boolean renewalAllowed = false;
 	
-	@Column(name = "can_pre_close", nullable=false)
+	@Column(name = "is_preclosure_allowed", nullable=false)
 	private boolean preClosureAllowed = false;
 	
 	@SuppressWarnings("unused")
@@ -66,18 +81,28 @@ public class DepositProduct extends AbstractAuditableCustom<AppUser, Long> {
 		//
 	}
     
-	public DepositProduct(final String name, final String description,
+	public DepositProduct(final String name, final String externalId, 
+			final String description,
 			final MonetaryCurrency currency, final BigDecimal minimumBalance,
 			final BigDecimal maximumBalance, final Integer tenureMonths,
 			final BigDecimal maturityDefaultInterestRate,
 			final BigDecimal maturityMinInterestRate,
-			BigDecimal maturityMaxInterestRate, boolean canRenew,
-			boolean canPreClose, BigDecimal preClosureInterestRate) {
+			final BigDecimal maturityMaxInterestRate, 
+			final Integer interestCompoundedEvery, 
+			final PeriodFrequencyType interestCompoundedEveryPeriodType, 
+			final boolean canRenew,
+			final boolean canPreClose, 
+			final BigDecimal preClosureInterestRate) {
 		this.name = name.trim();
 		if (StringUtils.isNotBlank(description)) {
 			this.description = description.trim();
 		} else {
 			this.description = null;
+		}
+		if (StringUtils.isNotBlank(externalId)) {
+			this.externalId = externalId.trim();
+		} else {
+			this.externalId = null;
 		}
 		
 		this.currency = currency;
@@ -87,6 +112,8 @@ public class DepositProduct extends AbstractAuditableCustom<AppUser, Long> {
 		this.maturityDefaultInterestRate = maturityDefaultInterestRate;
 		this.maturityMinInterestRate = maturityMinInterestRate;
 		this.maturityMaxInterestRate = maturityMaxInterestRate;
+		this.interestCompoundedEvery = interestCompoundedEvery;
+		this.interestCompoundedEveryPeriodType = interestCompoundedEveryPeriodType;
 		this.renewalAllowed = canRenew;
 		this.preClosureAllowed = canPreClose;
 		this.preClosureInterestRate = preClosureInterestRate;
@@ -108,11 +135,22 @@ public class DepositProduct extends AbstractAuditableCustom<AppUser, Long> {
 		return deleted;
 	}
 	
+	/**
+	 * Delete is a <i>soft delete</i>. Updates flag on product so it wont appear in query/report results.
+	 * 
+	 * Any fields with unique constraints and prepended with id of record.
+	 */
 	public void delete() {
 		this.deleted = true;
+		this.name = this.getId() + "_DELETED_" + this.name;
+		this.externalId = this.getId() + "_DELETED_" + this.externalId;
 	}
 	
-	public void update(final DepositProductCommand command){
+	public void update(final DepositProductCommand command, final PeriodFrequencyType interestCompoundingFrequency){
+		
+		if (command.isExternalIdChanged()) {
+			this.externalId = command.getExternalId();
+		}
 		
 		if (command.isNameChanged()) {
 			this.name = command.getName();
@@ -158,6 +196,14 @@ public class DepositProduct extends AbstractAuditableCustom<AppUser, Long> {
 		
 		if (command.isMaturityMinInterestRateChanged()) {
 			this.maturityMinInterestRate=command.getMaturityMinInterestRate();
+		}
+		
+		if (command.isInterestCompoundedEveryChanged()) {
+			this.interestCompoundedEvery = command.getInterestCompoundedEvery();
+		}
+		
+		if (command.isInterestCompoundedEveryPeriodTypeChanged()) {
+			this.interestCompoundedEveryPeriodType = interestCompoundingFrequency;
 		}
 		
 		if (command.isRenewalAllowedChanged()) {
