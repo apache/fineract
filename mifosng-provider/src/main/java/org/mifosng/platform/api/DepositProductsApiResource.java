@@ -81,10 +81,12 @@ public class DepositProductsApiResource {
 	@GET
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
-	public String retrieveAllDepositProducts(@Context final UriInfo uriInfo){
-		Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "name", "description", "createdOn", "lastModifedOn",
-				"currencyCode","digitsAfterDecimal","minimumBalance","maximumBalance","tenureMonths","maturityDefaultInterestRate","maturityMinInterestRate",
-				"maturityMaxInterestRate","canRenew","canPreClose","preClosureInterestRate"));
+	public String retrieveAllDepositProducts(@Context final UriInfo uriInfo) {
+		
+		Set<String> typicalResponseParameters = new HashSet<String>(
+				Arrays.asList("id", "name", "description", "createdOn", "lastModifedOn",
+				"currencyCode","digitsAfterDecimal","minimumBalance","maximumBalance","tenureInMonths","maturityDefaultInterestRate","maturityMinInterestRate",
+				"maturityMaxInterestRate","renewalAllowed","preClosureAllowed","preClosureInterestRate"));
 		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (responseParameters.isEmpty()) {
@@ -100,10 +102,12 @@ public class DepositProductsApiResource {
 	@Path("{productId}")
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
-	public String retrieveDepositProductDetails(@PathParam("productId") final Long productId, @Context final UriInfo uriInfo){
-		Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "name", "description", "createdOn", "lastModifedOn",
-				"currencyCode","digitsAfterDecimal","minimumBalance","maximumBalance","tenureMonths","maturityDefaultInterestRate","maturityMinInterestRate",
-				"maturityMaxInterestRate","canRenew","canPreClose","preClosureInterestRate"));
+	public String retrieveDepositProductDetails(@PathParam("productId") final Long productId, @Context final UriInfo uriInfo) {
+		
+		Set<String> typicalResponseParameters = new HashSet<String>(
+				Arrays.asList("id", "name", "description", "createdOn", "lastModifedOn",
+				"currencyCode","digitsAfterDecimal","minimumBalance","maximumBalance","tenureInMonths","maturityDefaultInterestRate","maturityMinInterestRate",
+				"maturityMaxInterestRate","renewalAllowed","preClosureAllowed","preClosureInterestRate"));
 		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (responseParameters.isEmpty()) {
@@ -125,8 +129,9 @@ public class DepositProductsApiResource {
 	public String retrieveNewDepositProductDetails(@Context final UriInfo uriInfo) {
 		
 		Set<String> typicalResponseParameters = new HashSet<String>(
-				Arrays.asList("id", "name", "description", "createdOn", "lastModifedOn","currencyCode","digitsAfterDecimal", "currencyOptions","minimumBalance","maximumBalance","tenureMonths","maturityDefaultInterestRate","maturityMinInterestRate",
-						"maturityMaxInterestRate","canRenew","canPreClose","preClosureInterestRate"));
+				Arrays.asList("currencyOptions", "id", "name", "description", "createdOn", "lastModifedOn",
+				"currencyCode","digitsAfterDecimal","minimumBalance","maximumBalance","tenureInMonths","maturityDefaultInterestRate","maturityMinInterestRate",
+				"maturityMaxInterestRate","renewalAllowed","preClosureAllowed","preClosureInterestRate"));
 		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (responseParameters.isEmpty()) {

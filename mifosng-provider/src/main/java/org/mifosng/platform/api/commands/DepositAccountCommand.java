@@ -23,6 +23,9 @@ public class DepositAccountCommand {
 	private final Integer interestCompoundedEveryPeriodType;
 	private final LocalDate commencementDate;
 	
+	private final boolean renewalAllowed;
+	private final boolean preClosureAllowed;
+	
 	private final Set<String> modifiedParameters;
 
 	public DepositAccountCommand(final Set<String> modifiedParameters,
@@ -32,7 +35,8 @@ public class DepositAccountCommand {
 			final String externalId,
 			final BigDecimal depositAmount, 
 			final BigDecimal interestRate, 
-			final Integer termInMonths, final Integer compoundingInterestFrequency, final Integer compoundingInterestFrequencyType, final LocalDate commencementDate) {
+			final Integer termInMonths, final Integer compoundingInterestFrequency, final Integer compoundingInterestFrequencyType, final LocalDate commencementDate,
+			final boolean renewalAllowed, final boolean preClosureAllowed) {
 		this.id = id;
 		this.clientId = clientId;
 		this.productId = productId;
@@ -46,6 +50,8 @@ public class DepositAccountCommand {
 		this.interestCompoundedEvery = compoundingInterestFrequency;
 		this.interestCompoundedEveryPeriodType = compoundingInterestFrequencyType;
 		this.commencementDate = commencementDate;
+		this.renewalAllowed = renewalAllowed;
+		this.preClosureAllowed = preClosureAllowed;
 	}
 
 	public Long getId() {
@@ -88,6 +94,14 @@ public class DepositAccountCommand {
 		return commencementDate;
 	}
 	
+	public boolean isRenewalAllowed() {
+		return renewalAllowed;
+	}
+
+	public boolean isPreClosureAllowed() {
+		return preClosureAllowed;
+	}
+
 	public boolean isNoFieldChanged() {
 		return this.modifiedParameters.isEmpty();
 	}
@@ -102,5 +116,13 @@ public class DepositAccountCommand {
 	
 	public boolean isMaturityActualInterestRateChanged() {
 		return this.modifiedParameters.contains("interestRate");
+	}
+	
+	public boolean isRenewalAllowedChanged() {
+		return this.modifiedParameters.contains("renewalAllowed");
+	}
+	
+	public boolean isPreClosureAllowedChanged() {
+		return this.modifiedParameters.contains("preClosureAllowed");
 	}
 }

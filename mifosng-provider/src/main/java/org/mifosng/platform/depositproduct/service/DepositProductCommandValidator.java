@@ -27,19 +27,20 @@ public class DepositProductCommandValidator {
 		baseDataValidator.reset().parameter("digitsAfterDecimal").value(command.getDigitsAfterDecimal()).notNull().inMinMaxRange(0, 6);
 		baseDataValidator.reset().parameter("minimumBalance").value(command.getMinimumBalance()).notNull().zeroOrPositiveAmount();
 		baseDataValidator.reset().parameter("maximumBalance").value(command.getMaximumBalance()).zeroOrPositiveAmount();
+		baseDataValidator.reset().parameter("minimumBalance").comapareMinimumAndMaximumAmounts(command.getMinimumBalance(), command.getMaximumBalance());
 		
-		baseDataValidator.reset().parameter("tenureMonths").value(command.getTenureMonths()).notNull().zeroOrPositiveAmount();
+		baseDataValidator.reset().parameter("tenureInMonths").value(command.getTenureInMonths()).notNull().zeroOrPositiveAmount();
 		baseDataValidator.reset().parameter("maturityDefaultInterestRate").value(command.getMaturityDefaultInterestRate()).notNull().zeroOrPositiveAmount();
 		baseDataValidator.reset().parameter("maturityMinInterestRate").value(command.getMaturityMinInterestRate()).notNull().zeroOrPositiveAmount();
 		baseDataValidator.reset().parameter("maturityMaxInterestRate").value(command.getMaturityMaxInterestRate()).notNull().zeroOrPositiveAmount();
-//		baseDataValidator.reset().parameter("canRenew").value(command.getCanRenew()).ignoreIfNull();
-//		baseDataValidator.reset().parameter("canPreClose").value(command.getCanPreClose()).ignoreIfNull();
-		baseDataValidator.reset().parameter("preClosureInterestRate").value(command.getPreClosureInterestRate()).notNull().zeroOrPositiveAmount();
-		
-		baseDataValidator.reset().parameter("minimumBalance").comapareMinimumAndMaximumAmounts(command.getMinimumBalance(), command.getMaximumBalance());
 		baseDataValidator.reset().parameter("maturityMinInterestRate").comapareMinAndMaxOfTwoBigDecmimalNos(command.getMaturityMinInterestRate(), command.getMaturityMaxInterestRate());
 		baseDataValidator.reset().parameter("maturityDefaultInterestRate").comapareMinAndMaxOfTwoBigDecmimalNos(command.getMaturityDefaultInterestRate(), command.getMaturityMaxInterestRate());
 		baseDataValidator.reset().parameter("maturityMinInterestRate").comapareMinAndMaxOfTwoBigDecmimalNos(command.getMaturityMinInterestRate(), command.getMaturityDefaultInterestRate());
+		
+		baseDataValidator.reset().parameter("renewalAllowed").trueOrFalseRequired(command.isRenewalAllowedChanged());
+		baseDataValidator.reset().parameter("preClosureAllowed").trueOrFalseRequired(command.isPreClosureAllowedChanged());
+
+		baseDataValidator.reset().parameter("preClosureInterestRate").value(command.getPreClosureInterestRate()).notNull().zeroOrPositiveAmount();
 		baseDataValidator.reset().parameter("preClosureInterestRate").comapareMinAndMaxOfTwoBigDecmimalNos(command.getPreClosureInterestRate(), command.getMaturityMinInterestRate());
 		
 		if (!dataValidationErrors.isEmpty()) {
@@ -60,17 +61,17 @@ public class DepositProductCommandValidator {
 		baseDataValidator.reset().parameter("digitsAfterDecimal").value(command.getDigitsAfterDecimal()).ignoreIfNull().notNull().inMinMaxRange(0, 6);
 		baseDataValidator.reset().parameter("minimumBalance").value(command.getMinimumBalance()).ignoreIfNull().zeroOrPositiveAmount();
 		baseDataValidator.reset().parameter("maximumBalance").value(command.getMaximumBalance()).ignoreIfNull().zeroOrPositiveAmount();
+		baseDataValidator.reset().comapareMinimumAndMaximumAmounts(command.getMinimumBalance(), command.getMaximumBalance());
 		
-		baseDataValidator.reset().parameter("tenureMonths").value(command.getTenureMonths()).ignoreIfNull().zeroOrPositiveAmount();
+		baseDataValidator.reset().parameter("tenureMonths").value(command.getTenureInMonths()).ignoreIfNull().zeroOrPositiveAmount();
 		baseDataValidator.reset().parameter("maturityDefaultInterestRate").value(command.getMaturityDefaultInterestRate()).ignoreIfNull().zeroOrPositiveAmount();
 		baseDataValidator.reset().parameter("maturityMinInterestRate").value(command.getMaturityMinInterestRate()).ignoreIfNull().zeroOrPositiveAmount();
 		baseDataValidator.reset().parameter("maturityMaxInterestRate").value(command.getMaturityMaxInterestRate()).ignoreIfNull().zeroOrPositiveAmount();
-		baseDataValidator.reset().parameter("preClosureInterestRate").value(command.getPreClosureInterestRate()).ignoreIfNull().zeroOrPositiveAmount();
-		
-		baseDataValidator.reset().comapareMinimumAndMaximumAmounts(command.getMinimumBalance(), command.getMaximumBalance());
 		baseDataValidator.reset().comapareMinAndMaxOfTwoBigDecmimalNos(command.getMaturityMinInterestRate(), command.getMaturityMaxInterestRate());
 		baseDataValidator.reset().comapareMinAndMaxOfTwoBigDecmimalNos(command.getMaturityDefaultInterestRate(), command.getMaturityMaxInterestRate());
 		baseDataValidator.reset().comapareMinAndMaxOfTwoBigDecmimalNos(command.getMaturityMinInterestRate(), command.getMaturityDefaultInterestRate());
+		
+		baseDataValidator.reset().parameter("preClosureInterestRate").value(command.getPreClosureInterestRate()).ignoreIfNull().zeroOrPositiveAmount();
 		baseDataValidator.reset().comapareMinAndMaxOfTwoBigDecmimalNos(command.getPreClosureInterestRate(), command.getMaturityMinInterestRate());
 		
 		if (command.isNoFieldChanged()) {

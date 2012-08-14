@@ -54,17 +54,18 @@ public class DepositProductReadPlatformServiceImpl implements
 	public DepositProductData retrieveDepositProductData(Long productId) {
 		DepositProductMapper depositProductMapper=new DepositProductMapper();
 		String sql = "select "+ depositProductMapper.depositProductSchema() +" where dp.id = ? and dp.is_deleted=0";
-		DepositProductData productData=this.jdbcTemplate.queryForObject(sql, depositProductMapper, new Object[]{productId});
-		populateProductDataWithDropdownOptions(productData);
-		return productData;
+		
+		DepositProductData productData = this.jdbcTemplate.queryForObject(sql, depositProductMapper, new Object[]{productId});
+		
+		List<CurrencyData> currencyOptions = currencyReadPlatformService.retrieveAllowedCurrencies();
+		return new DepositProductData(productData, currencyOptions);
 	}
 
 	@Override
 	public DepositProductData retrieveNewDepositProductDetails() {
 		
-		DepositProductData productData=new DepositProductData();
-		populateProductDataWithDropdownOptions(productData);
-		return productData;
+		List<CurrencyData> currencyOptions = currencyReadPlatformService.retrieveAllowedCurrencies();
+		return new DepositProductData(currencyOptions);
 	}
 	
 	private static final class DepositProductMapper implements RowMapper<DepositProductData>{
@@ -126,10 +127,5 @@ public class DepositProductReadPlatformServiceImpl implements
 			return new DepositProductLookup(id, name);
 		}
 
-	}
-	
-	private void populateProductDataWithDropdownOptions(final DepositProductData productData) {
-		List<CurrencyData> currencyOptions = currencyReadPlatformService.retrieveAllowedCurrencies();
-		productData.setCurrencyOptions(currencyOptions);
 	}
 }

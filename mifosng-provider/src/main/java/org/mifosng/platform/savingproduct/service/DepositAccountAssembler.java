@@ -51,10 +51,18 @@ public class DepositAccountAssembler {
 		PeriodFrequencyType compoundingInterestFrequency = PeriodFrequencyType.fromInt(interestCompoundingPeriodType);
 		
 		boolean renewalAllowed = product.isRenewalAllowed();
-//		if (command.get)
+		if (command.isRenewalAllowedChanged()) {
+			renewalAllowed = command.isRenewalAllowed();
+		}
+		
+		boolean preClosureAllowed = product.isPreClosureAllowed();
+		if (command.isPreClosureAllowedChanged()) {
+			preClosureAllowed = command.isPreClosureAllowed();
+		}
 		
 		DepositAccount account = DepositAccount.openNew(client, product, command.getExternalId(), deposit, command.getMaturityInterestRate(), 
-				command.getTermInMonths(), command.getInterestCompoundedEvery(), compoundingInterestFrequency, command.getCommencementDate());
+				command.getTermInMonths(), command.getInterestCompoundedEvery(), compoundingInterestFrequency, command.getCommencementDate(), 
+				renewalAllowed, preClosureAllowed);
 		
 		return account;
 	}

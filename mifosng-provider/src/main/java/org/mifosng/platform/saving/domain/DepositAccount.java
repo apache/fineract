@@ -53,7 +53,7 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long> {
 	@Column(name = "maturity_nominal_interest_rate", scale = 6, precision = 19, nullable = false)
 	private BigDecimal interestRate;
 	
-	@Column(name = "tenure_months", nullable = false)
+	@Column(name = "tenure_months", nullable=false)
 	private Integer tenureInMonths;
 	
 	@SuppressWarnings("unused")
@@ -121,9 +121,11 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long> {
 			final String externalId, final Money deposit, final BigDecimal interestRate, final Integer termInMonths, 
 			final Integer interestCompoundedEvery, 
 			final PeriodFrequencyType interestCompoundedFrequencyPeriodType, 
-			final LocalDate commencementDate) {
+			final LocalDate commencementDate, 
+			final boolean renewalAllowed, 
+			final boolean preClosureAllowed) {
 		return new DepositAccount(client, product, externalId, deposit, interestRate, termInMonths, 
-				interestCompoundedEvery, interestCompoundedFrequencyPeriodType, commencementDate);
+				interestCompoundedEvery, interestCompoundedFrequencyPeriodType, commencementDate, renewalAllowed, preClosureAllowed);
 	}
 	
 	protected DepositAccount() {
@@ -135,7 +137,9 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long> {
 			final String externalId, final Money deposit, final BigDecimal interestRate, final Integer termInMonths, 
 			final Integer interestCompoundedEvery, 
 			final PeriodFrequencyType interestCompoundedFrequencyPeriodType, 
-			final LocalDate commencementDate) {
+			final LocalDate commencementDate,
+			final boolean renewalAllowed, 
+			final boolean preClosureAllowed) {
 		this.client = client;
 		this.product = product;
 		this.externalId = externalId;
@@ -152,6 +156,9 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long> {
 			this.projectedCommencementDate = commencementDate.toDate();
 			this.projectedMaturityDate = commencementDate.plusMonths(this.tenureInMonths).toDate();
 		}
+		
+		this.renewalAllowed = renewalAllowed;
+		this.preClosureAllowed = preClosureAllowed;
 		
 		this.preClosureInterestRate = BigDecimal.ZERO;
 		

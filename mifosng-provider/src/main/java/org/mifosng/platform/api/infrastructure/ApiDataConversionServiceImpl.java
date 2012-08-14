@@ -1492,9 +1492,11 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		Type typeOfMap = new TypeToken<Map<String, String>>() {}.getType();
 		Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
 
+		// preClosureInterestRate
 		Set<String> supportedParams = new HashSet<String>(
 				Arrays.asList("clientId", "productId", "externalId", "depositAmount", "maturityInterestRate", 
-						"termInMonths", "interestCompoundedEvery", "interestCompoundedEveryPeriodType", "commencementDate",
+						"tenureInMonths", "interestCompoundedEvery", "interestCompoundedEveryPeriodType", "commencementDate",
+						"renewalAllowed", "preClosureAllowed",
 						"locale", "dateFormat")
 		);
 		checkForUnsupportedParameters(requestMap, supportedParams);
@@ -1505,17 +1507,18 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		String externalId = extractStringParameter("externalId", requestMap,modifiedParameters);
 		BigDecimal depositAmount=extractBigDecimalParameter("depositAmount", requestMap, modifiedParameters);
 		BigDecimal interestRate = extractBigDecimalParameter("maturityInterestRate", requestMap, modifiedParameters);
-		Integer termInMonths = extractIntegerParameter("termInMonths", requestMap, modifiedParameters);
+		Integer tenureInMonths = extractIntegerParameter("tenureInMonths", requestMap, modifiedParameters);
 		
 		Integer interestCompoundedEvery = extractIntegerParameter("interestCompoundedEvery", requestMap, modifiedParameters);
 		Integer interestCompoundedEveryPeriodType = extractIntegerParameter("interestCompoundedEveryPeriodType", requestMap, modifiedParameters);
 		LocalDate commencementDate = extractLocalDateParameter("commencementDate", requestMap, modifiedParameters);
-		
-		// TODO - isRenewable, isPreClosureAllowed
+
+		boolean renewalAllowed = extractBooleanParameter("renewalAllowed", requestMap, modifiedParameters);
+		boolean preClosureAllowed = extractBooleanParameter("preClosureAllowed", requestMap, modifiedParameters);
 		
 		return new DepositAccountCommand(modifiedParameters, resourceIdentifier, clientId, productId, 
 				externalId, depositAmount, interestRate, termInMonths, 
-				interestCompoundedEvery, interestCompoundedEveryPeriodType, commencementDate);
+				interestCompoundedEvery, interestCompoundedEveryPeriodType, commencementDate, renewalAllowed, preClosureAllowed);
 	}
 
 	@Override
@@ -1569,8 +1572,8 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
 
 		Set<String> supportedParams = new HashSet<String>(
-				Arrays.asList("name","description","currencyCode", "digitsAfterDecimal","locale","minimumBalance","maximumBalance","tenureMonths",
-						"maturityDefaultInterestRate","maturityMinInterestRate","maturityMaxInterestRate","canRenew","canPreClose","preClosureInterestRate")
+				Arrays.asList("name","description","currencyCode", "digitsAfterDecimal","locale","minimumBalance","maximumBalance","tenureInMonths",
+						"maturityDefaultInterestRate","maturityMinInterestRate","maturityMaxInterestRate","renewalAllowed","preClosureAllowed","preClosureInterestRate")
 				);
 		checkForUnsupportedParameters(requestMap, supportedParams);
 		Set<String> modifiedParameters = new HashSet<String>();
@@ -1581,12 +1584,12 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		BigDecimal minimumBalance=extractBigDecimalParameter("minimumBalance", requestMap, modifiedParameters);
 		BigDecimal maximumBalance=extractBigDecimalParameter("maximumBalance", requestMap, modifiedParameters);
 		
-		Integer tenureMonths = extractIntegerParameter("tenureMonths", requestMap, modifiedParameters);
+		Integer tenureMonths = extractIntegerParameter("tenureInMonths", requestMap, modifiedParameters);
 		BigDecimal maturityDefaultInterestRate = extractBigDecimalParameter("maturityDefaultInterestRate", requestMap, modifiedParameters);
 		BigDecimal maturityMinInterestRate = extractBigDecimalParameter("maturityMinInterestRate", requestMap, modifiedParameters);
 		BigDecimal maturityMaxInterestRate = extractBigDecimalParameter("maturityMaxInterestRate", requestMap, modifiedParameters);
-	    boolean canRenew = extractBooleanParameter("canRenew", requestMap, modifiedParameters);
-	    boolean canPreClose = extractBooleanParameter("canPreClose", requestMap, modifiedParameters);
+	    boolean canRenew = extractBooleanParameter("renewalAllowed", requestMap, modifiedParameters);
+	    boolean canPreClose = extractBooleanParameter("preClosureAllowed", requestMap, modifiedParameters);
 	    BigDecimal preClosureInterestRate = extractBigDecimalParameter("preClosureInterestRate", requestMap, modifiedParameters);
 		
 		return new DepositProductCommand(modifiedParameters, resourceIdentifier, name, description, currencyCode, digitsAfterDecimalValue, minimumBalance,maximumBalance, 
@@ -1597,8 +1600,10 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	public String convertDepositProductDataToJson(boolean prettyPrint,
 			Set<String> responseParameters, DepositProductData... products) {
 		
-		Set<String> supportedParameters = new HashSet<String>(Arrays.asList("id", "name", "description","createdOn", "lastModifedOn","currencyCode","digitsAfterDecimal", "currencyOptions", "minimumBalance","maximumBalance","tenureMonths","maturityDefaultInterestRate","maturityMinInterestRate",
-						"maturityMaxInterestRate","canRenew","canPreClose","preClosureInterestRate"));
+		Set<String> supportedParameters = new HashSet<String>(
+				Arrays.asList("id", "name", "description","createdOn", "lastModifedOn","currencyCode","digitsAfterDecimal", 
+						"currencyOptions", "minimumBalance","maximumBalance","tenureInMonths","maturityDefaultInterestRate","maturityMinInterestRate",
+						"maturityMaxInterestRate","renewalAllowed","preClosureAllowed","preClosureInterestRate"));
 
 		final Set<String> parameterNamesToSkip = new HashSet<String>();
 		

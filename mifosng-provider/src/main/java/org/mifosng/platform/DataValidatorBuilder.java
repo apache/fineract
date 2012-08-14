@@ -86,6 +86,16 @@ public class DataValidatorBuilder {
 		return this;
 	}
 	
+	public DataValidatorBuilder trueOrFalseRequired(boolean trueOfFalseFieldProvided) {
+		if (!trueOfFalseFieldProvided && !ignoreNullValue) {
+			StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(resource).append(".").append(parameter).append(".must.be.true.or.false");
+			StringBuilder defaultEnglishMessage = new StringBuilder("The parameter ").append(parameter).append(" must be set as true or false.");
+			ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(), defaultEnglishMessage.toString(), parameter);
+			dataValidationErrors.add(error);
+		}
+		return this;
+	}
+	
 	public DataValidatorBuilder notNull() {
 		if (value == null && !ignoreNullValue) {
 			StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(resource).append(".").append(parameter).append(".cannot.be.blank");
@@ -275,5 +285,4 @@ public class DataValidatorBuilder {
 		}
 		return this;
 	}
-	
 }

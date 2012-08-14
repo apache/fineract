@@ -24,7 +24,7 @@ public class DepositAccountData {
 	private final BigDecimal deposit;
 	private final BigDecimal maturityInterestRate;
 	
-	private final Integer termInMonths;
+	private final Integer tenureInMonths;
 	private final LocalDate projectedCommencementDate;
 	private final LocalDate actualCommencementDate;
 	private final LocalDate projectedMaturityDate;
@@ -53,7 +53,7 @@ public class DepositAccountData {
 		this.currency = null;
 		this.deposit = null;
 		this.maturityInterestRate = null;
-		this.termInMonths = null;
+		this.tenureInMonths = null;
 		this.projectedCommencementDate = null;
 		this.actualCommencementDate = null;
 		this.projectedMaturityDate = null;
@@ -80,7 +80,7 @@ public class DepositAccountData {
 		this.currency = account.getCurrency();
 		this.deposit = account.getDeposit();
 		this.maturityInterestRate = account.getMaturityInterestRate();
-		this.termInMonths = account.getTermInMonths();
+		this.tenureInMonths = account.getTenureInMonths();
 		this.projectedCommencementDate = account.getProjectedCommencementDate();
 		this.actualCommencementDate = account.getActualCommencementDate();
 		this.projectedMaturityDate = account.getProjectedMaturityDate();
@@ -106,7 +106,7 @@ public class DepositAccountData {
 			final String productName, 
 			final CurrencyData currency,
 			final BigDecimal deposit, final BigDecimal interestRate, 
-			final Integer termInMonths, 
+			final Integer tenureInMonths, 
 			final LocalDate projectedCommencementDate, 
 			final LocalDate actualCommencementDate, 
 			final LocalDate projectedMaturityDate, 
@@ -128,7 +128,7 @@ public class DepositAccountData {
 		this.currency = currency;
 		this.deposit = deposit;
 		this.maturityInterestRate=interestRate;
-		this.termInMonths = termInMonths;
+		this.tenureInMonths = tenureInMonths;
 		this.projectedCommencementDate = projectedCommencementDate;
 		this.actualCommencementDate = actualCommencementDate;
 		this.projectedMaturityDate = projectedMaturityDate;
@@ -175,11 +175,11 @@ public class DepositAccountData {
 	public BigDecimal getMaturityInterestRate() {
 		return maturityInterestRate;
 	}
-	
-	public Integer getTermInMonths() {
-		return termInMonths;
+
+	public Integer getTenureInMonths() {
+		return tenureInMonths;
 	}
-	
+
 	public LocalDate getProjectedCommencementDate() {
 		return projectedCommencementDate;
 	}

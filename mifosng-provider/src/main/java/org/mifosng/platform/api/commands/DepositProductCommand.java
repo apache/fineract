@@ -15,7 +15,7 @@ public class DepositProductCommand {
 	private final BigDecimal minimumBalance;
 	private final BigDecimal maximumBalance;
 	
-	private final Integer tenureMonths;
+	private final Integer tenureInMonths;
 	private final BigDecimal maturityDefaultInterestRate;
 	private final BigDecimal maturityMinInterestRate;
 	private final BigDecimal maturityMaxInterestRate;
@@ -29,9 +29,9 @@ public class DepositProductCommand {
 			final Long id, final String name, final String description,
 			final String currencyCode, final Integer digitsAfterDecimal,
 			final BigDecimal minimumBalance, final BigDecimal maximumBalance,
-			final Integer tenureMonths, final BigDecimal maturityDefaultInterestRate,
+			final Integer tenureInMonths, final BigDecimal maturityDefaultInterestRate,
 			final BigDecimal maturityMinInterestRate, final BigDecimal maturityMaxInterestRate,
-			final boolean canRenew, final boolean canPreClose, final BigDecimal preClosureInterestRate ) {
+			final boolean renewalAllowed, final boolean preClosureAllowed, final BigDecimal preClosureInterestRate ) {
 		this.id = id;
 		this.name = name;
 		this.description = description;
@@ -42,14 +42,14 @@ public class DepositProductCommand {
 		this.minimumBalance=minimumBalance;
 		this.maximumBalance=maximumBalance;
 		
-		this.tenureMonths=tenureMonths;
+		this.tenureInMonths=tenureInMonths;
 		this.maturityDefaultInterestRate = maturityDefaultInterestRate;
 		this.maturityMinInterestRate = maturityMinInterestRate;
 		this.maturityMaxInterestRate = maturityMaxInterestRate;
 		this.preClosureInterestRate = preClosureInterestRate;
 		
-		this.renewalAllowed = canRenew;
-		this.preClosureAllowed = canPreClose;
+		this.renewalAllowed = renewalAllowed;
+		this.preClosureAllowed = preClosureAllowed;
 
 		this.modifiedParameters = modifiedParameters;		
 		
@@ -83,8 +83,8 @@ public class DepositProductCommand {
 		return maximumBalance;
 	}
 
-	public Integer getTenureMonths() {
-		return tenureMonths;
+	public Integer getTenureInMonths() {
+		return tenureInMonths;
 	}
 
 	public BigDecimal getMaturityDefaultInterestRate() {
@@ -155,12 +155,12 @@ public class DepositProductCommand {
 		return this.modifiedParameters.contains("maturityMaxInterestRate");
 	}
 	
-	public boolean isCanRenewChanged() {
-		return this.modifiedParameters.contains("canRenew");
+	public boolean isRenewalAllowedChanged() {
+		return this.modifiedParameters.contains("renewalAllowed");
 	}
 	
-	public boolean isCanPreCloseChanged() {
-		return this.modifiedParameters.contains("canPreClose");
+	public boolean isPreClosureAllowedChanged() {
+		return this.modifiedParameters.contains("preClosureAllowed");
 	}
 	
 	public boolean isPreClosureInterestRateChanged() {
