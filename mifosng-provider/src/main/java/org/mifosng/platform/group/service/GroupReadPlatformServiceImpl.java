@@ -2,11 +2,14 @@ package org.mifosng.platform.group.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
-import org.mifosng.platform.api.data.ClientMemberData;
+import org.mifosng.platform.api.data.ClientLookup;
 import org.mifosng.platform.api.data.GroupData;
+import org.mifosng.platform.client.service.ClientReadPlatformService;
 import org.mifosng.platform.exceptions.GroupNotFoundException;
 import org.mifosng.platform.infrastructure.TenantAwareRoutingDataSource;
 import org.mifosng.platform.security.PlatformSecurityContext;
@@ -21,12 +24,14 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
+    private final ClientReadPlatformService clientReadPlatformService;
 
     @Autowired
     public GroupReadPlatformServiceImpl(final PlatformSecurityContext context,
-            final TenantAwareRoutingDataSource dataSource) {
+            final TenantAwareRoutingDataSource dataSource, ClientReadPlatformService clientReadPlatformService) {
         this.context = context;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.clientReadPlatformService = clientReadPlatformService;
     }
 
     @Override
@@ -57,6 +62,17 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         }
     }
 
+    @Override
+    public GroupData retrieveNewGroupDetails() {
+
+        this.context.authenticatedUser();
+
+        List<ClientLookup> allowedClients = new ArrayList<ClientLookup>(
+                this.clientReadPlatformService.retrieveAllIndividualClientsForLookup());
+
+        return new GroupData(allowedClients);
+    }
+
     private static final class GroupMapper implements RowMapper<GroupData> {
 
         public String groupSchema() {
@@ -76,7 +92,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
     }
 
     @Override
-    public Collection<ClientMemberData> retrieveClientMembers(Long groupId){
+    public Collection<ClientLookup> retrieveClientMembers(Long groupId){
         
         this.context.authenticatedUser();
         
@@ -87,21 +103,21 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         return this.jdbcTemplate.query(sql, rm, new Object[] {groupId});
     }
     
-    private static final class ClientMemberSummaryDataMapper implements RowMapper<ClientMemberData> {
+    private static final class ClientMemberSummaryDataMapper implements RowMapper<ClientLookup> {
 
         public String clientMemberSummarySchema() {
             return "cm.id, cm.firstname, cm.lastname from portfolio_client cm INNER JOIN portfolio_group_client pgc ON pgc.client_id = cm.id";
         }
 
         @Override
-        public ClientMemberData mapRow(ResultSet rs, int rowNum) throws SQLException {
+        public ClientLookup mapRow(ResultSet rs, int rowNum) throws SQLException {
             Long id = rs.getLong("id");
             String firstname = rs.getString("firstname");
             String lastname = rs.getString("lastname");
             if (StringUtils.isBlank(firstname)) {
                 firstname = "";
             }
-            return new ClientMemberData(id, firstname, lastname);
+            return new ClientLookup(id, firstname, lastname);
         }
 
     }

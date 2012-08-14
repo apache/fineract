@@ -9,14 +9,7 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
-import org.mifosng.platform.api.data.AppUserData;
-import org.mifosng.platform.api.data.ClientData;
-import org.mifosng.platform.api.data.ClientLoanAccountSummaryCollectionData;
-import org.mifosng.platform.api.data.ClientLoanAccountSummaryData;
-import org.mifosng.platform.api.data.EnumOptionData;
-import org.mifosng.platform.api.data.NoteData;
-import org.mifosng.platform.api.data.OfficeData;
-import org.mifosng.platform.api.data.OfficeLookup;
+import org.mifosng.platform.api.data.*;
 import org.mifosng.platform.client.domain.NoteEnumerations;
 import org.mifosng.platform.exceptions.ClientNotFoundException;
 import org.mifosng.platform.exceptions.NoteNotFoundException;
@@ -103,7 +96,19 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 		}
 	}
 
-	@Override
+    @Override
+    public Collection<ClientLookup> retrieveAllIndividualClientsForLookup() {
+
+        this.context.authenticatedUser();
+
+        ClientLookupMapper rm = new ClientLookupMapper();
+
+        String sql = "select " + rm.clientLookupSchema() + " where c.is_deleted = 0";
+
+        return this.jdbcTemplate.query(sql, rm, new Object[] {});
+    }
+
+    @Override
 	public ClientData retrieveNewClientDetails() {
 
 		AppUser currentUser = context.authenticatedUser();
@@ -114,6 +119,8 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 		final Long officeId = currentUser.getOffice().getId();
 		return new ClientData(officeId, new LocalDate(), offices);
 	}
+
+
 
 	private static final class ClientMapper implements RowMapper<ClientData> {
 
@@ -160,6 +167,24 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 			return match;
 		}
 	}
+
+    private static final class ClientLookupMapper implements RowMapper<ClientLookup>{
+
+        public String clientLookupSchema() {
+            return "c.id as id, c.firstname as firstname, c.lastname as lastname from portfolio_client c";
+        }
+
+        @Override
+        public ClientLookup mapRow(ResultSet rs, int rowNum) throws SQLException {
+            Long id = rs.getLong("id");
+            String firstname = rs.getString("firstname");
+            String lastname = rs.getString("lastname");
+            if (StringUtils.isBlank(firstname)) {
+                firstname = "";
+            }
+            return new ClientLookup(id, firstname, lastname);
+        }
+    }
 
 	@Override
 	public ClientLoanAccountSummaryCollectionData retrieveClientAccountDetails(final Long clientId) {

@@ -19,11 +19,12 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.mifosng.platform.api.commands.GroupCommand;
-import org.mifosng.platform.api.data.ClientMemberData;
+import org.mifosng.platform.api.data.ClientLookup;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.GroupData;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
+import org.mifosng.platform.client.service.ClientReadPlatformService;
 import org.mifosng.platform.group.service.GroupReadPlatformService;
 import org.mifosng.platform.group.service.GroupWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +41,10 @@ public class GroupsApiResource {
     
     @Autowired
     private GroupWritePlatformService groupWritePlatformService;
-    
+
+    @Autowired
+    private ClientReadPlatformService clientReadPlatformService;
+
     @Autowired
     private ApiDataConversionService apiDataConversionService;
     
@@ -84,13 +88,41 @@ public class GroupsApiResource {
         }
 
         boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+        boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
 
         GroupData group = this.groupReadPlatformService.retrieveGroup(groupId);
 
-        Collection<ClientMemberData> clientMembers = this.groupReadPlatformService.retrieveClientMembers(groupId);
+        Collection<ClientLookup> clientMembers = this.groupReadPlatformService.retrieveClientMembers(groupId);
         group.setClientMembers(clientMembers);
+
+        if (template) {
+            Collection<ClientLookup>  availableClients = this.clientReadPlatformService.retrieveAllIndividualClientsForLookup();
+            availableClients.removeAll(group.getClientMembers());
+            group.setAllowedClients(availableClients);
+
+            responseParameters.add("allowedClients");
+        }
         
         return this.apiDataConversionService.convertGroupDataToJson(prettyPrint, responseParameters, group);
+    }
+
+    @GET
+    @Path("template")
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
+    public String newGroupDetails(@Context final UriInfo uriInfo) {
+
+        Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "name", "externalId", "clientMembers", "allowedClients"));
+
+        Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+        if (responseParameters.isEmpty()) {
+            responseParameters.addAll(typicalResponseParameters);
+        }
+        boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+
+        GroupData groupData = this.groupReadPlatformService.retrieveNewGroupDetails();
+
+        return this.apiDataConversionService.convertGroupDataToJson(prettyPrint, responseParameters, groupData);
     }
 
     @POST
