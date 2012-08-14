@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 
 import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.DepositAccountData;
 import org.mifosng.platform.exceptions.LoanProductNotFoundException;
@@ -73,7 +74,11 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 			return "da.id as id, da.client_id as clientId, da.product_id as productId," 
 				+  " da.currency_code as currencyCode, da.currency_digits as currencyDigits, " 
 				+  " da.deposit_amount as depositAmount, "	
-				+  " da.maturity_nominal_interest_rate as interestRate, " 
+				+  " da.maturity_nominal_interest_rate as interestRate, da.tenure_months as termInMonths, da.projected_commencement_date as projectedCommencementDate," 
+				+  " da.actual_commencement_date as actualCommencementDate, da.projected_maturity_date as projectedMaturityDate, da.actual_maturity_date as actualMaturityDate,"
+				+  " da.projected_interest_accrued_on_maturity as projectedInterestAccrued, da.actual_interest_accrued as actualInterestAccrued, "
+				+  " da.projected_total_maturity_amount as projectedMaturityAmount, da.actual_total_amount as actualMaturityAmount, "
+				+  " da.can_renew as renewalAllowed, da.can_pre_close as preClosureAllowed, da.pre_closure_interest_rate as preClosureInterestRate, "
 				+  " da.created_date as createdon, da.lastmodified_date as modifiedon, "
 				+  " c.firstname as firstname, c.lastname as lastname, pd.name as productName,"
 				+  " curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, curr.display_symbol as currencyDisplaySymbol" 
@@ -103,10 +108,29 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 			BigDecimal depositAmount = rs.getBigDecimal("depositAmount");
 			BigDecimal interestRate = rs.getBigDecimal("interestRate");
 			
+			Integer termInMonths = JdbcSupport.getInteger(rs,"termInMonths");
+			
+			LocalDate projectedCommencementDate = JdbcSupport.getLocalDate(rs, "projectedCommencementDate");
+			LocalDate actualCommencementDate = JdbcSupport.getLocalDate(rs, "actualCommencementDate");
+			LocalDate projectedMaturityDate = JdbcSupport.getLocalDate(rs, "projectedMaturityDate");
+			LocalDate actualMaturityDate = JdbcSupport.getLocalDate(rs, "actualMaturityDate");
+			BigDecimal projectedInterestAccrued = rs.getBigDecimal("projectedInterestAccrued");
+			BigDecimal actualInterestAccrued = rs.getBigDecimal("actualInterestAccrued");
+			
+			BigDecimal projectedMaturityAmount = rs.getBigDecimal("projectedMaturityAmount");
+			BigDecimal actualMaturityAmount = rs.getBigDecimal("actualMaturityAmount");
+			
+			boolean renewalAllowed = rs.getBoolean("renewalAllowed");
+			boolean preClosureAllowed = rs.getBoolean("preClosureAllowed");
+			
+			BigDecimal preClosureInterestRate = rs.getBigDecimal("preClosureInterestRate");
+			
 			DateTime createdOn = JdbcSupport.getDateTime(rs, "createdon");
 			DateTime lastModifedOn = JdbcSupport.getDateTime(rs, "modifiedon");
 			
-			return new DepositAccountData(createdOn, lastModifedOn, id, clientId, clientName, productId, productName, currencyData, depositAmount, interestRate);
+			return new DepositAccountData(createdOn, lastModifedOn, id, clientId, clientName, productId, productName, currencyData, depositAmount, 
+					interestRate, termInMonths, projectedCommencementDate, actualCommencementDate, projectedMaturityDate, actualMaturityDate, 
+					projectedInterestAccrued, actualInterestAccrued, projectedMaturityAmount, actualMaturityAmount, renewalAllowed, preClosureAllowed, preClosureInterestRate);
 		}
 	}
 }

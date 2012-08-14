@@ -50,7 +50,8 @@ public class DepositAccountAssembler {
 		}
 		PeriodFrequencyType compoundingInterestFrequency = PeriodFrequencyType.fromInt(interestCompoundingPeriodType);
 		
-//		boolean renewalAllowed = product.isr
+		boolean renewalAllowed = product.isRenewalAllowed();
+//		if (command.get)
 		
 		DepositAccount account = DepositAccount.openNew(client, product, command.getExternalId(), deposit, command.getMaturityInterestRate(), 
 				command.getTermInMonths(), command.getInterestCompoundedEvery(), compoundingInterestFrequency, command.getCommencementDate());

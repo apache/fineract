@@ -39,7 +39,6 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long> {
 	@JoinColumn(name = "product_id")
 	private final DepositProduct product;
 	
-	@SuppressWarnings("unused")
 	@Column(name = "external_id")
 	private String externalId;
 	
@@ -165,9 +164,15 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long> {
 		return deleted;
 	}
 	
+	/**
+	 * Delete is a <i>soft delete</i>. Updates flag on account so it wont appear in query/report results.
+	 * 
+	 * Any fields with unique constraints and prepended with id of record.
+	 */
 	public void delete() {
 		this.deleted = true;
-	}	
+		this.externalId = this.getId() + "_" + this.externalId;
+	}
 
 	public void update(final DepositAccountCommand command) {
 

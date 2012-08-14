@@ -27,66 +27,76 @@ public class DepositProduct extends AbstractAuditableCustom<AppUser, Long> {
 	private boolean deleted = false;
     
     @Embedded
-    private DepositProductRelatedDetail depositProductRelatedDetail;
-    
+	private MonetaryCurrency currency;
+	
+	@Column(name = "minimum_balance", scale = 6, precision = 19, nullable = false)
+	private BigDecimal minimumBalance;
+	
+	@Column(name = "maximum_balance", scale = 6, precision = 19, nullable = false)
+	private BigDecimal maximumBalance;
+	
+	@Column(name = "tenure_months", nullable=false)
+	private Integer tenureMonths;
+	
+	@Column(name = "maturity_default_interest_rate", scale = 6, precision = 19, nullable = false)
+	private BigDecimal maturityDefaultInterestRate;
+	
+	@Column(name = "maturity_min_interest_rate", scale = 6, precision = 19, nullable = false)
+	private BigDecimal maturityMinInterestRate;
+	
+	@Column(name = "maturity_max_interest_rate", scale = 6, precision = 19, nullable = false)
+	private BigDecimal maturityMaxInterestRate;
+	
+	@Column(name = "can_renew", nullable=false)
+	private boolean renewalAllowed = false;
+	
+	@Column(name = "can_pre_close", nullable=false)
+	private boolean preClosureAllowed = false;
+	
+	@Column(name = "pre_closure_interest_rate", scale = 6, precision = 19, nullable = false)
+	private BigDecimal preClosureInterestRate;
+	
     protected DepositProduct(){
     	this.name = null;
         this.description = null;
-        this.depositProductRelatedDetail=null;
     }
     
-    public DepositProduct(final String name, final String description, final MonetaryCurrency currency, final BigDecimal minimumBalance,final BigDecimal maximumBalance,
-    		final Integer tenureMonths,final BigDecimal maturityDefaultInterestRate, final BigDecimal maturityMinInterestRate, BigDecimal maturityMaxInterestRate, 
-    		boolean canRenew, 
-    		boolean canPreClose, BigDecimal preClosureInterestRate ){
-    	this.name = name.trim();
+	public DepositProduct(final String name, final String description,
+			final MonetaryCurrency currency, final BigDecimal minimumBalance,
+			final BigDecimal maximumBalance, final Integer tenureMonths,
+			final BigDecimal maturityDefaultInterestRate,
+			final BigDecimal maturityMinInterestRate,
+			BigDecimal maturityMaxInterestRate, boolean canRenew,
+			boolean canPreClose, BigDecimal preClosureInterestRate) {
+		this.name = name.trim();
 		if (StringUtils.isNotBlank(description)) {
 			this.description = description.trim();
 		} else {
 			this.description = null;
 		}
-		this.depositProductRelatedDetail= new DepositProductRelatedDetail(currency, minimumBalance, maximumBalance, tenureMonths, 
-				maturityDefaultInterestRate, maturityMinInterestRate, maturityMaxInterestRate, canRenew, canPreClose, preClosureInterestRate);
-    }
-    
-    public String getName() {
-        return this.name;
-    }
-
-    public String getDescription() {
-        return this.description;
-    }	
+		
+		this.currency = currency;
+		this.minimumBalance = minimumBalance;
+		this.maximumBalance = maximumBalance;
+		this.tenureMonths = tenureMonths;
+		this.maturityDefaultInterestRate = maturityDefaultInterestRate;
+		this.maturityMinInterestRate = maturityMinInterestRate;
+		this.maturityMaxInterestRate = maturityMaxInterestRate;
+		this.renewalAllowed = canRenew;
+		this.preClosureAllowed = canPreClose;
+		this.preClosureInterestRate = preClosureInterestRate;
+	}
 	
 	public MonetaryCurrency getCurrency() {
-    	return this.depositProductRelatedDetail.getCurrency();
-    }
-	
-	public BigDecimal getMinimumBalance(){
-		return this.depositProductRelatedDetail.getMinimumBalance();
+		return currency;
 	}
-	
-	public BigDecimal getMaximumBalance(){
-		return this.depositProductRelatedDetail.getMaximumBalance();
+
+	public boolean isRenewalAllowed() {
+		return this.renewalAllowed;
 	}
-	
-	public Integer getTenureMonths(){
-		return this.depositProductRelatedDetail.getTenureMonths();
-	}
-	
-	public BigDecimal getMaturityDefaultInterestRate() {
-		return this.depositProductRelatedDetail.getMaturityDefaultInterestRate();
-	}
-	
-	public BigDecimal getMaturityMinInterestRate() {
-		return this.depositProductRelatedDetail.getMaturityMinInterestRate();
-	}
-	
-	public BigDecimal getMaturityMaxInterestRate() {
-		return this.depositProductRelatedDetail.getMaturityMaxInterestRate();
-	}
-	
-	public BigDecimal getPreClosureInterestRate() {
-		return this.depositProductRelatedDetail.getPreClosureInterestRate();
+
+	public boolean isPreClosureAllowed() {
+		return this.preClosureAllowed;
 	}
 	
 	public boolean isDeleted() {
@@ -106,15 +116,13 @@ public class DepositProduct extends AbstractAuditableCustom<AppUser, Long> {
 		if (command.isDescriptionChanged()) {
 			this.description = command.getDescription();
 		}
-		
-		this.depositProductRelatedDetail.update(command);
 	}
 
 	public void validateInterestRateInRange(final BigDecimal interestRate) {
-		this.depositProductRelatedDetail.validateInterestRateInRange(interestRate);
+//		this.depositProductRelatedDetail.validateInterestRateInRange(interestRate);
 	}
 
 	public void validateDepositInRange(final BigDecimal depositAmount) {
-		this.depositProductRelatedDetail.validateDepositInRange(depositAmount);
+//		this.depositProductRelatedDetail.validateDepositInRange(depositAmount);
 	}
 }
