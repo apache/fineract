@@ -3,7 +3,6 @@ package org.mifosng.platform.depositproduct.service;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -12,7 +11,6 @@ import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.DepositProductData;
 import org.mifosng.platform.api.data.DepositProductLookup;
 import org.mifosng.platform.api.data.EnumOptionData;
-import org.mifosng.platform.currency.service.CurrencyReadPlatformService;
 import org.mifosng.platform.deposit.domain.SavingsDepositEnumerations;
 import org.mifosng.platform.infrastructure.JdbcSupport;
 import org.mifosng.platform.infrastructure.TenantAwareRoutingDataSource;
@@ -24,18 +22,15 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
-public class DepositProductReadPlatformServiceImpl implements
-		DepositProductReadPlatformService {
+public class DepositProductReadPlatformServiceImpl implements DepositProductReadPlatformService {
 	
 	private final PlatformSecurityContext context;
 	private final JdbcTemplate jdbcTemplate;
-	private final CurrencyReadPlatformService currencyReadPlatformService;
 	
 	@Autowired
-	public DepositProductReadPlatformServiceImpl(final PlatformSecurityContext context,final TenantAwareRoutingDataSource dataSource,final CurrencyReadPlatformService currencyReadPlatformService) {
+	public DepositProductReadPlatformServiceImpl(final PlatformSecurityContext context,final TenantAwareRoutingDataSource dataSource) {
 		this.context=context;
 		jdbcTemplate=new JdbcTemplate(dataSource);
-		this.currencyReadPlatformService=currencyReadPlatformService;
 	}
 
 	@Override
@@ -59,21 +54,15 @@ public class DepositProductReadPlatformServiceImpl implements
 		DepositProductMapper depositProductMapper=new DepositProductMapper();
 		String sql = "select "+ depositProductMapper.depositProductSchema() +" where dp.id = ? and dp.is_deleted=0";
 		
-		DepositProductData productData = this.jdbcTemplate.queryForObject(sql, depositProductMapper, new Object[]{productId});
-		
-		List<CurrencyData> currencyOptions = currencyReadPlatformService.retrieveAllowedCurrencies();
-		EnumOptionData monthly = SavingsDepositEnumerations.interestCompoundingPeriodType(PeriodFrequencyType.MONTHS);
-		List<EnumOptionData> interestCompoundedEveryPeriodTypeOptions = Arrays.asList(monthly);
-		
-		return new DepositProductData(productData, currencyOptions, interestCompoundedEveryPeriodTypeOptions);
+		return this.jdbcTemplate.queryForObject(sql, depositProductMapper, new Object[]{productId});
 	}
 
 	@Override
 	public DepositProductData retrieveNewDepositProductDetails() {
 		
-		List<CurrencyData> currencyOptions = currencyReadPlatformService.retrieveAllowedCurrencies();
+		List<CurrencyData> currencyOptions = null;
+		List<EnumOptionData> interestCompoundedEveryPeriodTypeOptions = null;
 		EnumOptionData monthly = SavingsDepositEnumerations.interestCompoundingPeriodType(PeriodFrequencyType.MONTHS);
-		List<EnumOptionData> interestCompoundedEveryPeriodTypeOptions = Arrays.asList(monthly);
 		
 		return new DepositProductData(currencyOptions, monthly, interestCompoundedEveryPeriodTypeOptions);
 	}

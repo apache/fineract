@@ -45,15 +45,12 @@ public class DepositProduct extends AbstractAuditableCustom<AppUser, Long> {
 	@Column(name = "maximum_balance", scale = 6, precision = 19, nullable = false)
 	private BigDecimal maximumBalance;
 	
-	@SuppressWarnings("unused")
 	@Column(name = "interest_compounded_every", nullable=false)
 	private Integer interestCompoundedEvery;
 	
-	@SuppressWarnings("unused")
 	@Column(name = "interest_compounded_every_period_enum", nullable=false)
 	private PeriodFrequencyType interestCompoundedEveryPeriodType;
 	
-	@SuppressWarnings("unused")
 	@Column(name = "maturity_default_interest_rate", scale = 6, precision = 19, nullable = false)
 	private BigDecimal maturityDefaultInterestRate;
 	
@@ -63,7 +60,6 @@ public class DepositProduct extends AbstractAuditableCustom<AppUser, Long> {
 	@Column(name = "maturity_max_interest_rate", scale = 6, precision = 19, nullable = false)
 	private BigDecimal maturityMaxInterestRate;
 	
-	@SuppressWarnings("unused")
 	@Column(name = "tenure_months", nullable=false)
 	private Integer tenureInMonths;
 	
@@ -121,6 +117,22 @@ public class DepositProduct extends AbstractAuditableCustom<AppUser, Long> {
 	
 	public MonetaryCurrency getCurrency() {
 		return currency;
+	}
+	
+	public Integer getInterestCompoundedEvery() {
+		return interestCompoundedEvery;
+	}
+
+	public PeriodFrequencyType getInterestCompoundedEveryPeriodType() {
+		return interestCompoundedEveryPeriodType;
+	}
+
+	public Integer getTenureInMonths() {
+		return tenureInMonths;
+	}
+	
+	public BigDecimal getMaturityDefaultInterestRate() {
+		return maturityDefaultInterestRate;
 	}
 
 	public boolean isRenewalAllowed() {

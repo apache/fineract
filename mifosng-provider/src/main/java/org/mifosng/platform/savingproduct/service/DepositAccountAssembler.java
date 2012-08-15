@@ -1,5 +1,7 @@
 package org.mifosng.platform.savingproduct.service;
 
+import java.math.BigDecimal;
+
 import org.mifosng.platform.api.commands.DepositAccountCommand;
 import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.client.domain.ClientRepository;
@@ -40,15 +42,28 @@ public class DepositAccountAssembler {
 			throw new DepositProductNotFoundException(command.getProductId());
 		} 
 		
-		// currency details inherited from product setting
+		// details inherited from product setting (unless allowed to be overridden through account creation api
 		Money deposit = Money.of(product.getCurrency(), command.getDepositAmount());
 		
-		// default to months for now.
-		Integer interestCompoundingPeriodType = PeriodFrequencyType.MONTHS.getValue();
-		if (command.getInterestCompoundedEveryPeriodType() != null) {
-			interestCompoundingPeriodType = command.getInterestCompoundedEveryPeriodType();
+		Integer tenureInMonths = product.getTenureInMonths();
+		if (command.getTenureInMonths() != null) {
+			tenureInMonths = command.getTenureInMonths();
 		}
-		PeriodFrequencyType compoundingInterestFrequency = PeriodFrequencyType.fromInt(interestCompoundingPeriodType);
+		
+		BigDecimal maturityInterestRate = product.getMaturityDefaultInterestRate();
+		if (command.getMaturityInterestRate() != null) {
+			maturityInterestRate = command.getMaturityInterestRate();
+		}
+			
+		Integer compoundingInterestEvery = product.getInterestCompoundedEvery();
+		if (command.getInterestCompoundedEvery() != null) {
+			compoundingInterestEvery = command.getInterestCompoundedEvery();
+		}
+		
+		PeriodFrequencyType compoundingInterestFrequency = product.getInterestCompoundedEveryPeriodType();
+		if (command.getInterestCompoundedEveryPeriodType() != null) {
+			compoundingInterestFrequency = PeriodFrequencyType.fromInt(command.getInterestCompoundedEveryPeriodType());
+		}
 		
 		boolean renewalAllowed = product.isRenewalAllowed();
 		if (command.isRenewalAllowedChanged()) {
@@ -59,9 +74,13 @@ public class DepositAccountAssembler {
 		if (command.isPreClosureAllowedChanged()) {
 			preClosureAllowed = command.isPreClosureAllowed();
 		}
+		// end of details allowed to be overriden from product
 		
-		DepositAccount account = DepositAccount.openNew(client, product, command.getExternalId(), deposit, command.getMaturityInterestRate(), 
-				command.getTermInMonths(), command.getInterestCompoundedEvery(), compoundingInterestFrequency, command.getCommencementDate(), 
+		DepositAccount account = DepositAccount.openNew(client, product, command.getExternalId(), 
+				deposit, 
+				maturityInterestRate, 
+				tenureInMonths, compoundingInterestEvery, compoundingInterestFrequency, 
+				command.getCommencementDate(), 
 				renewalAllowed, preClosureAllowed);
 		
 		return account;

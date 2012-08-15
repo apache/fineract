@@ -23,9 +23,12 @@ import org.mifosng.platform.api.commands.DepositAccountCommand;
 import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.DepositAccountData;
 import org.mifosng.platform.api.data.EntityIdentifier;
+import org.mifosng.platform.api.data.EnumOptionData;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
 import org.mifosng.platform.currency.service.CurrencyReadPlatformService;
+import org.mifosng.platform.deposit.domain.SavingsDepositEnumerations;
+import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 import org.mifosng.platform.savingproduct.service.DepositAccountReadPlatformService;
 import org.mifosng.platform.savingproduct.service.DepositAccountWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -106,8 +109,10 @@ public class DepositAccountsApiResource {
 		
 		Set<String> typicalResponseParameters = new HashSet<String>(
 				Arrays.asList("createdOn", "lastModifedOn", 
-						"id", "clientId", "clientName", "productId", "productName", 
-						"currency", "deposit", "maturityInterestRate")
+						"id", "externalId", "clientId", "clientName", "productId", "productName", 
+						"currency", "deposit", "maturityInterestRate", "tenureInMonths", "interestCompoundedEvery", "interestCompoundedEveryPeriodType",
+						"renewalAllowed","preClosureAllowed","preClosureInterestRate"
+						)
 		);
 		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
@@ -120,14 +125,12 @@ public class DepositAccountsApiResource {
 		
 		boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
 		if (template) {
-			responseParameters.addAll(Arrays.asList("currencyOptions"));
-			List<CurrencyData> allowedCurrencies = this.currencyReadPlatformService.retrieveAllowedCurrencies();
-			account = new DepositAccountData(account, allowedCurrencies);
+			account = handleTemplateRelatedData(responseParameters, account);
 		}
 		
 		return this.apiDataConversionService.convertDepositAccountDataToJson(prettyPrint, responseParameters, account);
 	}
-	
+
 	@GET
 	@Path("template")
 	@Consumes({MediaType.APPLICATION_JSON})
@@ -135,9 +138,12 @@ public class DepositAccountsApiResource {
 	public String retrieveNewDepositAccountDetails(@Context final UriInfo uriInfo) {
 		
 		Set<String> typicalResponseParameters = new HashSet<String>(
-				Arrays.asList("createdOn", "lastModifedOn", 
-						"id", "clientId", "clientName", "productId", "productName", 
-						"currency", "deposit", "maturityInterestRate", "currencyOptions")
+				Arrays.asList("currencyOptions", "interestCompoundedEveryPeriodTypeOptions",
+						"createdOn", "lastModifedOn", 
+						"id", "externalId", "clientId", "clientName", "productId", "productName", 
+						"currency", "deposit", "maturityInterestRate", "tenureInMonths", "interestCompoundedEvery", "interestCompoundedEveryPeriodType",
+						"renewalAllowed","preClosureAllowed","preClosureInterestRate"
+						)
 		);
 		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
@@ -147,8 +153,8 @@ public class DepositAccountsApiResource {
 		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 		
 		DepositAccountData account = this.depositAccountReadPlatformService.retrieveNewDepositAccountDetails();
-		List<CurrencyData> allowedCurrencies = this.currencyReadPlatformService.retrieveAllowedCurrencies();
-		account = new DepositAccountData(account, allowedCurrencies);
+		
+		account = handleTemplateRelatedData(responseParameters, account);
 		
 		return this.apiDataConversionService.convertDepositAccountDataToJson(prettyPrint, responseParameters, account);
 	}
@@ -162,5 +168,18 @@ public class DepositAccountsApiResource {
 		this.depositAccountWritePlatformService.deleteDepositAccount(accountId);
 
 		return Response.ok(new EntityIdentifier(accountId)).build();
+	}
+	
+	private DepositAccountData handleTemplateRelatedData(
+			final Set<String> responseParameters, 
+			final DepositAccountData account) {
+		
+		responseParameters.addAll(Arrays.asList("currencyOptions", "interestCompoundedEveryPeriodTypeOptions"));
+		List<CurrencyData> allowedCurrencies = this.currencyReadPlatformService.retrieveAllowedCurrencies();
+		
+		EnumOptionData monthly = SavingsDepositEnumerations.interestCompoundingPeriodType(PeriodFrequencyType.MONTHS);
+		List<EnumOptionData> interestCompoundedEveryPeriodTypeOptions = Arrays.asList(monthly);
+		
+		return new DepositAccountData(account, allowedCurrencies, interestCompoundedEveryPeriodTypeOptions);
 	}
 }

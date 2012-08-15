@@ -3,6 +3,7 @@ package org.mifosng.platform.api;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
@@ -19,12 +20,17 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.mifosng.platform.api.commands.DepositProductCommand;
+import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.DepositProductData;
 import org.mifosng.platform.api.data.EntityIdentifier;
+import org.mifosng.platform.api.data.EnumOptionData;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
+import org.mifosng.platform.currency.service.CurrencyReadPlatformService;
+import org.mifosng.platform.deposit.domain.SavingsDepositEnumerations;
 import org.mifosng.platform.depositproduct.service.DepositProductReadPlatformService;
 import org.mifosng.platform.depositproduct.service.DepositProductWritePlatformService;
+import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -36,6 +42,9 @@ public class DepositProductsApiResource {
 	
 	@Autowired
 	private DepositProductReadPlatformService depositProductReadPlatformService;
+	
+	@Autowired
+	private CurrencyReadPlatformService currencyReadPlatformService;
 	
 	@Autowired 
 	private DepositProductWritePlatformService depositProductWritePlatformService;
@@ -117,12 +126,13 @@ public class DepositProductsApiResource {
 			responseParameters.addAll(typicalResponseParameters);
 		}
 		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-		boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
-		if (template) {
-			responseParameters.addAll(Arrays.asList("currencyOptions", "interestCompoundedEveryPeriodTypeOptions"));
-		}
 		
 		DepositProductData productData = this.depositProductReadPlatformService.retrieveDepositProductData(productId);
+		
+		boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
+		if (template) {
+			productData = handleTemplateRelatedData(responseParameters, productData);
+		}
 		
 		return this.apiDataConversionService.convertDepositProductDataToJson(prettyPrint, responseParameters, productData);
 	}
@@ -149,6 +159,21 @@ public class DepositProductsApiResource {
 
 		DepositProductData depositProduct = this.depositProductReadPlatformService.retrieveNewDepositProductDetails();
 		
+		depositProduct = handleTemplateRelatedData(responseParameters, depositProduct);
+		
 		return this.apiDataConversionService.convertDepositProductDataToJson(prettyPrint, responseParameters, depositProduct);
-	}	
+	}
+	
+	private DepositProductData handleTemplateRelatedData(
+			final Set<String> responseParameters, 
+			final DepositProductData productData) {
+		
+		responseParameters.addAll(Arrays.asList("currencyOptions", "interestCompoundedEveryPeriodTypeOptions"));
+		List<CurrencyData> allowedCurrencies = this.currencyReadPlatformService.retrieveAllowedCurrencies();
+		
+		EnumOptionData monthly = SavingsDepositEnumerations.interestCompoundingPeriodType(PeriodFrequencyType.MONTHS);
+		List<EnumOptionData> interestCompoundedEveryPeriodTypeOptions = Arrays.asList(monthly);
+		
+		return new DepositProductData(productData, allowedCurrencies, interestCompoundedEveryPeriodTypeOptions);
+	}
 }

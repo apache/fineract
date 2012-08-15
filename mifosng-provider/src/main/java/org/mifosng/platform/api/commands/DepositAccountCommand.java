@@ -17,7 +17,7 @@ public class DepositAccountCommand {
 
 	private final BigDecimal depositAmount;
 	private final BigDecimal maturityInterestRate;
-	private final Integer termInMonths;
+	private final Integer tenureInMonths;
 	
 	private final Integer interestCompoundedEvery;
 	private final Integer interestCompoundedEveryPeriodType;
@@ -35,7 +35,7 @@ public class DepositAccountCommand {
 			final String externalId,
 			final BigDecimal depositAmount, 
 			final BigDecimal interestRate, 
-			final Integer termInMonths, final Integer compoundingInterestFrequency, final Integer compoundingInterestFrequencyType, final LocalDate commencementDate,
+			final Integer tenureInMonths, final Integer compoundingInterestFrequency, final Integer compoundingInterestFrequencyType, final LocalDate commencementDate,
 			final boolean renewalAllowed, final boolean preClosureAllowed) {
 		this.id = id;
 		this.clientId = clientId;
@@ -44,7 +44,7 @@ public class DepositAccountCommand {
 		
 		this.depositAmount = depositAmount;
 		this.maturityInterestRate = interestRate;
-		this.termInMonths = termInMonths;
+		this.tenureInMonths = tenureInMonths;
 		
 		this.modifiedParameters = modifiedParameters;
 		this.interestCompoundedEvery = compoundingInterestFrequency;
@@ -77,11 +77,11 @@ public class DepositAccountCommand {
 	public BigDecimal getMaturityInterestRate() {
 		return maturityInterestRate;
 	}
-
-	public Integer getTermInMonths() {
-		return termInMonths;
-	}
 	
+	public Integer getTenureInMonths() {
+		return tenureInMonths;
+	}
+
 	public Integer getInterestCompoundedEvery() {
 		return interestCompoundedEvery;
 	}
@@ -106,12 +106,8 @@ public class DepositAccountCommand {
 		return this.modifiedParameters.isEmpty();
 	}
 
-	public boolean isCurrencyCodeChanged() {
-		return this.modifiedParameters.contains("currencyCode");
-	}
-
-	public boolean isDigitsAfterDecimalChanged() {
-		return this.modifiedParameters.contains("digitsAfterDecimal");
+	public boolean isTenureInMonthsChanged() {
+		return this.modifiedParameters.contains("tenureInMonths");
 	}
 	
 	public boolean isMaturityActualInterestRateChanged() {

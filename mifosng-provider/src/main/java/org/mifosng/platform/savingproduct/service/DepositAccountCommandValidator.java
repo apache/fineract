@@ -29,7 +29,7 @@ public class DepositAccountCommandValidator {
 		
 		baseDataValidator.reset().parameter("depositAmount").value(command.getDepositAmount()).ignoreIfNull().notNull().integerGreaterThanZero();
 		baseDataValidator.reset().parameter("maturityInterestRate").value(command.getMaturityInterestRate()).ignoreIfNull().notNull().zeroOrPositiveAmount();
-		baseDataValidator.reset().parameter("termInMonths").value(command.getTermInMonths()).ignoreIfNull().notNull().integerGreaterThanZero();
+		baseDataValidator.reset().parameter("tenureInMonths").value(command.getTenureInMonths()).ignoreIfNull().notNull().integerGreaterThanZero();
 		
 		baseDataValidator.reset().parameter("interestCompoundedEvery").value(command.getInterestCompoundedEvery()).ignoreIfNull().integerGreaterThanZero();
 		baseDataValidator.reset().parameter("interestCompoundedEveryPeriodType").value(command.getInterestCompoundedEveryPeriodType()).ignoreIfNull().inMinMaxRange(2, 2);
@@ -58,11 +58,11 @@ public class DepositAccountCommandValidator {
 		baseDataValidator.reset().parameter("externalId").value(command.getExternalId()).ignoreIfNull().notExceedingLengthOf(100);
 
 		baseDataValidator.reset().parameter("depositAmount").value(command.getDepositAmount()).notNull().zeroOrPositiveAmount();
-		baseDataValidator.reset().parameter("maturityInterestRate").value(command.getMaturityInterestRate()).notNull().zeroOrPositiveAmount();
-		baseDataValidator.reset().parameter("termInMonths").value(command.getTermInMonths()).notNull().integerGreaterThanZero();
+		baseDataValidator.reset().parameter("maturityInterestRate").value(command.getMaturityInterestRate()).ignoreIfNull().zeroOrPositiveAmount();
+		baseDataValidator.reset().parameter("tenureInMonths").value(command.getTenureInMonths()).ignoreIfNull().integerGreaterThanZero();
 		
-		baseDataValidator.reset().parameter("interestCompoundedEvery").value(command.getInterestCompoundedEvery()).notNull().integerGreaterThanZero();
-		baseDataValidator.reset().parameter("interestCompoundedEveryPeriodType").value(command.getInterestCompoundedEveryPeriodType()).notNull().inMinMaxRange(2, 2);
+		baseDataValidator.reset().parameter("interestCompoundedEvery").value(command.getInterestCompoundedEvery()).ignoreIfNull().integerGreaterThanZero();
+		baseDataValidator.reset().parameter("interestCompoundedEveryPeriodType").value(command.getInterestCompoundedEveryPeriodType()).ignoreIfNull().inMinMaxRange(2, 2);
 		baseDataValidator.reset().parameter("commencementDate").value(command.getCommencementDate()).notNull();
 		
 		if (!dataValidationErrors.isEmpty()) {

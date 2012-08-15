@@ -77,7 +77,7 @@ public class DepositAccountData {
 		this.interestCompoundedEveryPeriodTypeOptions = new ArrayList<EnumOptionData>();
 	}
 	
-	public DepositAccountData(final DepositAccountData account, final List<CurrencyData> currencies) {
+	public DepositAccountData(final DepositAccountData account, final List<CurrencyData> currencies, final List<EnumOptionData> interestCompoundedEveryPeriodTypeOptions) {
 		this.createdOn = account.getCreatedOn();
 		this.lastModifedOn = account.getLastModifedOn();
 		this.id = account.getId();
@@ -105,7 +105,7 @@ public class DepositAccountData {
 		this.preClosureInterestRate = account.getPreClosureInterestRate();
 		
 		this.currencyOptions = currencies;
-		this.interestCompoundedEveryPeriodTypeOptions = new ArrayList<EnumOptionData>();
+		this.interestCompoundedEveryPeriodTypeOptions = interestCompoundedEveryPeriodTypeOptions;
 	}
 	
 	public DepositAccountData(
