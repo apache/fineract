@@ -9,6 +9,8 @@ import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.DepositAccountData;
+import org.mifosng.platform.api.data.EnumOptionData;
+import org.mifosng.platform.deposit.domain.SavingsDepositEnumerations;
 import org.mifosng.platform.exceptions.LoanProductNotFoundException;
 import org.mifosng.platform.infrastructure.JdbcSupport;
 import org.mifosng.platform.infrastructure.TenantAwareRoutingDataSource;
@@ -71,14 +73,15 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 	private static final class DepositAccountMapper implements RowMapper<DepositAccountData> {
 		
 		public String schema() {
-			return "da.id as id, da.client_id as clientId, da.product_id as productId," 
+			return "da.id as id, da.external_id as externalId, da.client_id as clientId, da.product_id as productId," 
 				+  " da.currency_code as currencyCode, da.currency_digits as currencyDigits, " 
 				+  " da.deposit_amount as depositAmount, "	
 				+  " da.maturity_nominal_interest_rate as interestRate, da.tenure_months as termInMonths, da.projected_commencement_date as projectedCommencementDate," 
 				+  " da.actual_commencement_date as actualCommencementDate, da.projected_maturity_date as projectedMaturityDate, da.actual_maturity_date as actualMaturityDate,"
 				+  " da.projected_interest_accrued_on_maturity as projectedInterestAccrued, da.actual_interest_accrued as actualInterestAccrued, "
 				+  " da.projected_total_maturity_amount as projectedMaturityAmount, da.actual_total_amount as actualMaturityAmount, "
-				+  " da.can_renew as renewalAllowed, da.can_pre_close as preClosureAllowed, da.pre_closure_interest_rate as preClosureInterestRate, "
+				+  " da.interest_compounded_every as interestCompoundedEvery, da.interest_compounded_every_period_enum as interestCompoundedEveryPeriodType, "
+				+  " da.is_renewal_allowed as renewalAllowed, da.is_preclosure_allowed as preClosureAllowed, da.pre_closure_interest_rate as preClosureInterestRate, "
 				+  " da.created_date as createdon, da.lastmodified_date as modifiedon, "
 				+  " c.firstname as firstname, c.lastname as lastname, pd.name as productName,"
 				+  " curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, curr.display_symbol as currencyDisplaySymbol" 
@@ -93,6 +96,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 				throws SQLException {
 			
 			Long id = rs.getLong("id");
+			String externalId = rs.getString("externalId");
 			Long clientId = rs.getLong("clientId");
 			String clientName = rs.getString("firstname") + " " + rs.getString("lastname");
 			Long productId = rs.getLong("productId");
@@ -120,6 +124,10 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 			BigDecimal projectedMaturityAmount = rs.getBigDecimal("projectedMaturityAmount");
 			BigDecimal actualMaturityAmount = rs.getBigDecimal("actualMaturityAmount");
 			
+			Integer interestCompoundedEvery = JdbcSupport.getInteger(rs, "interestCompoundedEvery");
+			Integer interestCompoundedEveryPeriodTypeValue = JdbcSupport.getInteger(rs, "interestCompoundedEveryPeriodType");
+			EnumOptionData interestCompoundedEveryPeriodType = SavingsDepositEnumerations.interestCompoundingPeriodType(interestCompoundedEveryPeriodTypeValue);
+			
 			boolean renewalAllowed = rs.getBoolean("renewalAllowed");
 			boolean preClosureAllowed = rs.getBoolean("preClosureAllowed");
 			
@@ -128,9 +136,11 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 			DateTime createdOn = JdbcSupport.getDateTime(rs, "createdon");
 			DateTime lastModifedOn = JdbcSupport.getDateTime(rs, "modifiedon");
 			
-			return new DepositAccountData(createdOn, lastModifedOn, id, clientId, clientName, productId, productName, currencyData, depositAmount, 
+			return new DepositAccountData(createdOn, lastModifedOn, id, externalId, clientId, clientName, productId, productName, currencyData, depositAmount, 
 					interestRate, termInMonths, projectedCommencementDate, actualCommencementDate, projectedMaturityDate, actualMaturityDate, 
-					projectedInterestAccrued, actualInterestAccrued, projectedMaturityAmount, actualMaturityAmount, renewalAllowed, preClosureAllowed, preClosureInterestRate);
+					projectedInterestAccrued, actualInterestAccrued, projectedMaturityAmount, actualMaturityAmount, 
+					interestCompoundedEvery, interestCompoundedEveryPeriodType,
+					renewalAllowed, preClosureAllowed, preClosureInterestRate);
 		}
 	}
 }

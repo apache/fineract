@@ -57,12 +57,12 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long> {
 	private Integer tenureInMonths;
 	
 	@SuppressWarnings("unused")
-	@Column(name = "interest_compounding_frequency", nullable = false)
+	@Column(name = "interest_compounded_every", nullable = false)
 	private Integer interestCompoundedEvery;
 
 	@SuppressWarnings("unused")
 	@Enumerated(EnumType.ORDINAL)
-	@Column(name = "interest_compounding_frequency_enum", nullable = false)
+	@Column(name = "interest_compounded_every_period_enum", nullable = false)
 	private PeriodFrequencyType interestCompoundedFrequencyType;
 	
 	@SuppressWarnings("unused")
@@ -106,11 +106,11 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long> {
 	private BigDecimal preClosureInterestRate;
 	
 	@SuppressWarnings("unused")
-	@Column(name = "can_renew", nullable = false)
+	@Column(name = "is_renewal_allowed", nullable = false)
 	private boolean renewalAllowed = false;
 	
 	@SuppressWarnings("unused")
-	@Column(name = "can_pre_close", nullable = false)
+	@Column(name = "is_preclosure_allowed", nullable = false)
 	private boolean preClosureAllowed = false;
 	
     @Column(name = "is_deleted", nullable=false)

@@ -13,7 +13,7 @@ import org.joda.time.LocalDate;
 public class DepositAccountData {
 
 	private final Long id;
-	
+	private final String externalId;
 	private final Long clientId;
 	private final String clientName;
 	
@@ -33,6 +33,9 @@ public class DepositAccountData {
 	private final BigDecimal actualInterestAccrued;
 	private final BigDecimal projectedMaturityAmount;
 	private final BigDecimal actualMaturityAmount;
+	
+	private final Integer interestCompoundedEvery;
+	private final EnumOptionData interestCompoundedEveryPeriodType;
 	private final boolean renewalAllowed;
 	private final boolean preClosureAllowed;
 	private final BigDecimal preClosureInterestRate;
@@ -41,11 +44,13 @@ public class DepositAccountData {
 	private final DateTime lastModifedOn;
 	
 	private final List<CurrencyData> currencyOptions;
+	private final List<EnumOptionData> interestCompoundedEveryPeriodTypeOptions;
 
 	public DepositAccountData() {
 		this.createdOn = null;
 		this.lastModifedOn = null;
 		this.id = null;
+		this.externalId = null;
 		this.clientId = null;
 		this.clientName = null;
 		this.productId = null;
@@ -62,17 +67,21 @@ public class DepositAccountData {
 		this.actualInterestAccrued = null;
 		this.projectedMaturityAmount = null;
 		this.actualMaturityAmount = null;
+		this.interestCompoundedEvery = null;
+		this.interestCompoundedEveryPeriodType = null;
 		this.renewalAllowed = false;
 		this.preClosureAllowed = false;
 		this.preClosureInterestRate = null;
 		
 		this.currencyOptions = new ArrayList<CurrencyData>();
+		this.interestCompoundedEveryPeriodTypeOptions = new ArrayList<EnumOptionData>();
 	}
 	
 	public DepositAccountData(final DepositAccountData account, final List<CurrencyData> currencies) {
 		this.createdOn = account.getCreatedOn();
 		this.lastModifedOn = account.getLastModifedOn();
 		this.id = account.getId();
+		this.externalId = account.getExternalId();
 		this.clientId = account.getClientId();
 		this.clientName = account.getClientName();
 		this.productId = account.getProductId();
@@ -89,17 +98,21 @@ public class DepositAccountData {
 		this.actualInterestAccrued = account.getActualInterestAccrued();
 		this.projectedMaturityAmount = account.getProjectedMaturityAmount();
 		this.actualMaturityAmount = account.getActualMaturityAmount();
+		this.interestCompoundedEvery = account.getInterestCompoundedEvery();
+		this.interestCompoundedEveryPeriodType = account.getInterestCompoundedEveryPeriodType();
 		this.renewalAllowed = account.isRenewalAllowed();
 		this.preClosureAllowed = account.isPreClosureAllowed();
 		this.preClosureInterestRate = account.getPreClosureInterestRate();
 		
 		this.currencyOptions = currencies;
+		this.interestCompoundedEveryPeriodTypeOptions = new ArrayList<EnumOptionData>();
 	}
 	
 	public DepositAccountData(
 			final DateTime createdOn, 
 			final DateTime lastModifedOn, 
 			final Long id,
+			final String externalId,
 			final Long clientId, 
 			final String clientName, 
 			final Long productId, 
@@ -114,13 +127,16 @@ public class DepositAccountData {
 			final BigDecimal projectedInterestAccrued, 
 			final BigDecimal actualInterestAccrued, 
 			final BigDecimal projectedMaturityAmount, 
-			final BigDecimal actualMaturityAmount, 
+			final BigDecimal actualMaturityAmount,
+			final Integer interestCompoundedEvery, 
+			final EnumOptionData interestCompoundedEveryPeriodType, 
 			final boolean renewalAllowed, 
 			final boolean preClosureAllowed, 
 			final BigDecimal preClosureInterestRate) {
 		this.createdOn=createdOn;
 		this.lastModifedOn=lastModifedOn;
 		this.id=id;
+		this.externalId = externalId;
 		this.clientId = clientId;
 		this.clientName = clientName;
 		this.productId = productId;
@@ -137,17 +153,24 @@ public class DepositAccountData {
 		this.actualInterestAccrued = actualInterestAccrued;
 		this.projectedMaturityAmount = projectedMaturityAmount;
 		this.actualMaturityAmount = actualMaturityAmount;
+		this.interestCompoundedEvery = interestCompoundedEvery;
+		this.interestCompoundedEveryPeriodType = interestCompoundedEveryPeriodType;
 		this.renewalAllowed = renewalAllowed;
 		this.preClosureAllowed = preClosureAllowed;
 		this.preClosureInterestRate = preClosureInterestRate;
 		
 		this.currencyOptions = new ArrayList<CurrencyData>();
+		this.interestCompoundedEveryPeriodTypeOptions = new ArrayList<EnumOptionData>();
 	}
 
 	public Long getId() {
 		return id;
 	}
 	
+	public String getExternalId() {
+		return externalId;
+	}
+
 	public Long getClientId() {
 		return clientId;
 	}
@@ -211,6 +234,14 @@ public class DepositAccountData {
 	public BigDecimal getActualMaturityAmount() {
 		return actualMaturityAmount;
 	}
+	
+	public Integer getInterestCompoundedEvery() {
+		return interestCompoundedEvery;
+	}
+
+	public EnumOptionData getInterestCompoundedEveryPeriodType() {
+		return interestCompoundedEveryPeriodType;
+	}
 
 	public boolean isRenewalAllowed() {
 		return renewalAllowed;
@@ -234,5 +265,9 @@ public class DepositAccountData {
 
 	public List<CurrencyData> getCurrencyOptions() {
 		return currencyOptions;
+	}
+	
+	public List<EnumOptionData> getInterestCompoundedEveryPeriodTypeOptions() {
+		return interestCompoundedEveryPeriodTypeOptions;
 	}
 }

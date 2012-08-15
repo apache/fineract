@@ -1658,13 +1658,17 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 			final boolean prettyPrint,
 			final Set<String> responseParameters, 
 			final DepositAccountData... accounts) {
-
-		Set<String> supportedParameters = new HashSet<String>(
-				Arrays.asList("createdOn", "lastModifedOn", 
-						"id", "clientId", "clientName", "productId", "productName", 
-						"currency", "deposit", "maturityInterestRate", "currencyOptions")
-		);
 		
+		Set<String> supportedParameters = new HashSet<String>(
+				Arrays.asList("currencyOptions", "interestCompoundedEveryPeriodTypeOptions",
+						"createdOn", "lastModifedOn", 
+						"id", "externalId", "clientId", "clientName", "productId", "productName", 
+						"currency", "deposit", "maturityInterestRate", "tenureInMonths", 
+						"interestCompoundedEvery", "interestCompoundedEveryPeriodType",
+						"renewalAllowed","preClosureAllowed","preClosureInterestRate"
+						)
+		);
+
 		final Set<String> parameterNamesToSkip = new HashSet<String>();
 		
 		if (!responseParameters.isEmpty()) {

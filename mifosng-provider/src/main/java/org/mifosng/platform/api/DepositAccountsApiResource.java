@@ -81,8 +81,10 @@ public class DepositAccountsApiResource {
 
 		Set<String> typicalResponseParameters = new HashSet<String>(
 				Arrays.asList("createdOn", "lastModifedOn", 
-						"id", "clientId", "clientName", "productId", "productName", 
-						"currency", "deposit", "maturityInterestRate")
+						"id", "externalId", "clientId", "clientName", "productId", "productName", 
+						"currency", "deposit", "maturityInterestRate", "tenureInMonths", "interestCompoundedEvery", "interestCompoundedEveryPeriodType",
+						"renewalAllowed","preClosureAllowed","preClosureInterestRate"
+						)
 		);
 		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
