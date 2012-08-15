@@ -1,4 +1,4 @@
-package org.mifosng.platform.savingproduct.service;
+package org.mifosng.platform.saving.service;
 
 import java.util.ArrayList;
 import java.util.List;

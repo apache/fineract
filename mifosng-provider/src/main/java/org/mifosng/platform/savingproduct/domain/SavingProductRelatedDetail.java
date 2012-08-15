@@ -1,4 +1,4 @@
-package org.mifosng.platform.saving.domain;
+package org.mifosng.platform.savingproduct.domain;
 
 import java.math.BigDecimal;
 

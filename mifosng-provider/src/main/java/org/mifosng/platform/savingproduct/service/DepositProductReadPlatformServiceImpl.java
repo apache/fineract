@@ -1,4 +1,4 @@
-package org.mifosng.platform.depositproduct.service;
+package org.mifosng.platform.savingproduct.service;
 
 import java.math.BigDecimal;
 import java.sql.ResultSet;
@@ -11,7 +11,6 @@ import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.DepositProductData;
 import org.mifosng.platform.api.data.DepositProductLookup;
 import org.mifosng.platform.api.data.EnumOptionData;
-import org.mifosng.platform.deposit.domain.SavingsDepositEnumerations;
 import org.mifosng.platform.infrastructure.JdbcSupport;
 import org.mifosng.platform.infrastructure.TenantAwareRoutingDataSource;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;

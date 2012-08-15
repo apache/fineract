@@ -1,4 +1,4 @@
-package org.mifosng.platform.savingproduct.service;
+package org.mifosng.platform.saving.service;
 
 import java.math.BigDecimal;
 import java.sql.ResultSet;
@@ -10,10 +10,10 @@ import org.joda.time.LocalDate;
 import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.DepositAccountData;
 import org.mifosng.platform.api.data.EnumOptionData;
-import org.mifosng.platform.deposit.domain.SavingsDepositEnumerations;
 import org.mifosng.platform.exceptions.LoanProductNotFoundException;
 import org.mifosng.platform.infrastructure.JdbcSupport;
 import org.mifosng.platform.infrastructure.TenantAwareRoutingDataSource;
+import org.mifosng.platform.savingproduct.service.SavingsDepositEnumerations;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;

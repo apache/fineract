@@ -1,4 +1,4 @@
-package org.mifosng.platform.depositproduct.service;
+package org.mifosng.platform.savingproduct.service;
 
 import org.mifosng.platform.api.commands.DepositProductCommand;
 import org.mifosng.platform.api.data.EntityIdentifier;

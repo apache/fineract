@@ -1,4 +1,4 @@
-package org.mifosng.platform.savingproduct.service;
+package org.mifosng.platform.saving.service;
 
 import java.math.BigDecimal;
 
@@ -6,12 +6,12 @@ import org.mifosng.platform.api.commands.DepositAccountCommand;
 import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.client.domain.ClientRepository;
 import org.mifosng.platform.currency.domain.Money;
-import org.mifosng.platform.deposit.domain.DepositProduct;
-import org.mifosng.platform.deposit.domain.DepositProductRepository;
 import org.mifosng.platform.exceptions.ClientNotFoundException;
 import org.mifosng.platform.exceptions.DepositProductNotFoundException;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 import org.mifosng.platform.saving.domain.DepositAccount;
+import org.mifosng.platform.savingproduct.domain.DepositProduct;
+import org.mifosng.platform.savingproduct.domain.DepositProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -75,6 +75,8 @@ public class DepositAccountAssembler {
 			preClosureAllowed = command.isPreClosureAllowed();
 		}
 		// end of details allowed to be overriden from product
+		
+		// fixed-term interest calculator
 		
 		DepositAccount account = DepositAccount.openNew(client, product, command.getExternalId(), 
 				deposit, 

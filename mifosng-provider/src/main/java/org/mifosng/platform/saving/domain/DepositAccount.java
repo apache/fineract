@@ -20,9 +20,9 @@ import org.mifosng.platform.api.commands.DepositAccountCommand;
 import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.currency.domain.Money;
-import org.mifosng.platform.deposit.domain.DepositProduct;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
+import org.mifosng.platform.savingproduct.domain.DepositProduct;
 import org.mifosng.platform.user.domain.AppUser;
 
 @Entity

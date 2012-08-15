@@ -1,4 +1,4 @@
-package org.mifosng.platform.deposit.domain;
+package org.mifosng.platform.savingproduct.service;
 
 import org.mifosng.platform.api.data.EnumOptionData;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
