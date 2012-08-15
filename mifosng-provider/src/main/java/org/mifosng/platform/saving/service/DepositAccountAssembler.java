@@ -10,6 +10,7 @@ import org.mifosng.platform.exceptions.ClientNotFoundException;
 import org.mifosng.platform.exceptions.DepositProductNotFoundException;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 import org.mifosng.platform.saving.domain.DepositAccount;
+import org.mifosng.platform.saving.domain.FixedTermDepositInterestCalculator;
 import org.mifosng.platform.savingproduct.domain.DepositProduct;
 import org.mifosng.platform.savingproduct.domain.DepositProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,11 +24,14 @@ public class DepositAccountAssembler {
 
 	private final ClientRepository clientRepository;
 	private final DepositProductRepository depositProductRepository;
+	private final FixedTermDepositInterestCalculator fixedTermDepositInterestCalculator;
 
 	@Autowired
-	public DepositAccountAssembler(final ClientRepository clientRepository, final DepositProductRepository depositProductRepository) {
+	public DepositAccountAssembler(final ClientRepository clientRepository, final DepositProductRepository depositProductRepository,
+			final FixedTermDepositInterestCalculator fixedTermDepositInterestCalculator) {
 		this.clientRepository = clientRepository;
 		this.depositProductRepository = depositProductRepository;
+		this.fixedTermDepositInterestCalculator = fixedTermDepositInterestCalculator;
 	}
 
 	public DepositAccount assembleFrom(final DepositAccountCommand command) {
@@ -76,14 +80,12 @@ public class DepositAccountAssembler {
 		}
 		// end of details allowed to be overriden from product
 		
-		// fixed-term interest calculator
-		
 		DepositAccount account = DepositAccount.openNew(client, product, command.getExternalId(), 
 				deposit, 
 				maturityInterestRate, 
 				tenureInMonths, compoundingInterestEvery, compoundingInterestFrequency, 
 				command.getCommencementDate(), 
-				renewalAllowed, preClosureAllowed);
+				renewalAllowed, preClosureAllowed, this.fixedTermDepositInterestCalculator);
 		
 		return account;
 	}

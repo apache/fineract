@@ -118,14 +118,19 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long> {
     
 	public static DepositAccount openNew(
 			final Client client, final DepositProduct product,
-			final String externalId, final Money deposit, final BigDecimal interestRate, final Integer termInMonths, 
+			final String externalId, final Money deposit, final BigDecimal maturityInterestRate, final Integer tenureInMonths, 
 			final Integer interestCompoundedEvery, 
 			final PeriodFrequencyType interestCompoundedFrequencyPeriodType, 
 			final LocalDate commencementDate, 
 			final boolean renewalAllowed, 
-			final boolean preClosureAllowed) {
-		return new DepositAccount(client, product, externalId, deposit, interestRate, termInMonths, 
-				interestCompoundedEvery, interestCompoundedFrequencyPeriodType, commencementDate, renewalAllowed, preClosureAllowed);
+			final boolean preClosureAllowed, 
+			final FixedTermDepositInterestCalculator fixedTermDepositInterestCalculator) {
+		
+		Money futureValueOnMaturity = fixedTermDepositInterestCalculator.calculateInterestOnMaturityFor(deposit, tenureInMonths, 
+				maturityInterestRate, interestCompoundedEvery, interestCompoundedFrequencyPeriodType);
+		
+		return new DepositAccount(client, product, externalId, deposit, maturityInterestRate, tenureInMonths, 
+				interestCompoundedEvery, interestCompoundedFrequencyPeriodType, commencementDate, renewalAllowed, preClosureAllowed, futureValueOnMaturity);
 	}
 	
 	protected DepositAccount() {
@@ -139,7 +144,8 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long> {
 			final PeriodFrequencyType interestCompoundedFrequencyPeriodType, 
 			final LocalDate commencementDate,
 			final boolean renewalAllowed, 
-			final boolean preClosureAllowed) {
+			final boolean preClosureAllowed, 
+			final Money futureValueOnMaturity) {
 		this.client = client;
 		this.product = product;
 		this.externalId = externalId;
@@ -163,8 +169,8 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long> {
 		this.preClosureInterestRate = BigDecimal.ZERO;
 		
 		// derived fields
-		this.projectedInterestAccruedOnMaturity = BigDecimal.ZERO;
-		this.projectedTotalOnMaturity = BigDecimal.ZERO;
+		this.projectedInterestAccruedOnMaturity = futureValueOnMaturity.minus(deposit).getAmount();
+		this.projectedTotalOnMaturity = futureValueOnMaturity.getAmount();
 	}
 	
 	public boolean isDeleted() {
