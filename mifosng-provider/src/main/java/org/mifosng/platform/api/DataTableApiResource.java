@@ -8,6 +8,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
@@ -42,11 +43,13 @@ public class DataTableApiResource {
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
 	public String extraData(@PathParam("datatable") final String datatable,
+			@QueryParam("sqlSearch") final String sqlSearch,
+			@QueryParam("sqlOrder") final String sqlOrder,
 			@Context final UriInfo uriInfo) {
 
 		try {
 			//GenericResultsetData result = this.readExtraDataAndReportingService.retrieveDataTable(datatable);
-			return this.readExtraDataAndReportingService.retrieveDataTable(datatable);
+			return this.readExtraDataAndReportingService.retrieveDataTable(datatable, sqlSearch, sqlOrder);
 
 			//boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 			//return this.apiDataConversionService.convertGenericResultsetDataToJson(prettyPrint, result);

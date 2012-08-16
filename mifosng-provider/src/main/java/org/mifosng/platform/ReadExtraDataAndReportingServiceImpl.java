@@ -368,11 +368,15 @@ public class ReadExtraDataAndReportingServiceImpl implements
 	}
 
 	@Override
-	public String retrieveDataTable(String datatable) {
+	public String retrieveDataTable(String datatable, String sqlSearch, String sqlOrder) {
 		long startTime = System.currentTimeMillis();
 
 		String sql = "select * from " + datatable;
-
+		if (sqlSearch != null)
+			sql = sql + " where " + sqlSearch;
+		if (sqlOrder != null)
+			sql = sql + " order by " + sqlOrder;
+		
 		GenericResultsetData result = fillReportingGenericResultSet(sql);
 
 		String jsonString = generateJsonFromGenericResultsetData(result);
