@@ -19,6 +19,19 @@ VALUES
 (600, 'Closed'),
 (700, 'Overpaid');
 
+INSERT INTO `r_enum_value` 
+VALUES 
+('loan_status_id',100,'Submitted and awaiting approval','Submitted and awaiting approval'),
+('loan_status_id',200,'Approved','Approved'),('loan_status_id',300,'Active','Active'),
+('loan_status_id',400,'Withdrawn by client','Withdrawn by client'),
+('loan_status_id',500,'Rejected','Rejected'),
+('loan_status_id',600,'Closed','Closed'),
+('loan_status_id',700,'Overpaid','Overpaid'),
+('loan_transaction_strategy_id',1,'mifos-standard-strategy','Mifos style'),
+('loan_transaction_strategy_id',2,'heavensfamily-strategy','Heavensfamily'),
+('loan_transaction_strategy_id',3,'creocore-strategy','Creocore'),
+('loan_transaction_strategy_id',4,'rbi-india-strategy','RBI (India)');
+
 
 INSERT INTO `ref_currency`
 (`id`,`code`,`decimal_places`,`display_symbol`,`name`, `internationalized_name_code`)
