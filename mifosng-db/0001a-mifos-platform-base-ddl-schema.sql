@@ -8,6 +8,8 @@
 
 -- drop tables in base-schema
 
+SET foreign_key_checks = 0;
+
 -- portfolio related tables
 DROP TABLE IF EXISTS `portfolio_note`;
 DROP TABLE IF EXISTS `portfolio_loan_transaction`;
@@ -21,10 +23,9 @@ DROP TABLE IF EXISTS `portfolio_product_deposit`;
 -- organisation related tables
 DROP TABLE IF EXISTS `org_organisation_currency`;
 DROP TABLE IF EXISTS `org_fund`;
+DROP TABLE IF EXISTS `o_charge`;
 DROP TABLE IF EXISTS `portfolio_office_transaction`;
-SET foreign_key_checks = 0;
 DROP TABLE IF EXISTS `org_office`;
-SET foreign_key_checks = 1;
 -- admin tables
 DROP TABLE IF EXISTS `admin_role_permission`;
 DROP TABLE IF EXISTS `admin_appuser_role`;
@@ -47,6 +48,9 @@ DROP TABLE IF EXISTS `stretchy_parameter`;
 DROP TABLE IF EXISTS `stretchy_report_parameter`;
 DROP TABLE IF EXISTS `stretchy_report`;
 DROP TABLE IF EXISTS `rpt_sequence`;
+
+
+SET foreign_key_checks = 1;
 
 -- DDL for reference/lookup tables
 CREATE TABLE `ref_currency` (
@@ -90,6 +94,18 @@ CREATE TABLE `org_fund` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `fund_name_org` (`name`),
   UNIQUE KEY `fund_externalid_org` (`external_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `o_charge` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) DEFAULT NULL,
+  `amount` decimal(19,6) NOT NULL,
+  `createdby_id` bigint(20) DEFAULT NULL,
+  `created_date` datetime DEFAULT NULL,
+  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
+  `lastmodified_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `org_office` (
@@ -227,15 +243,6 @@ CREATE TABLE `portfolio_group` (
   CONSTRAINT `FKJPWG000000000004` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `admin_appuser` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
-CREATE TABLE `portfolio_group_client` (
-  `group_id` bigint(20) NOT NULL,
-  `client_id` bigint(20) NOT NULL,
-  PRIMARY KEY (`group_id`,`client_id`),
-  KEY `client_id` (`client_id`),
-  CONSTRAINT `portfolio_group_client_ibfk_1` FOREIGN KEY (`group_id`) REFERENCES `portfolio_group` (`id`),
-  CONSTRAINT `portfolio_group_client_ibfk_2` FOREIGN KEY (`client_id`) REFERENCES `portfolio_client` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
 CREATE TABLE `portfolio_client` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `is_deleted` tinyint(1) NOT NULL DEFAULT 0,
@@ -258,6 +265,15 @@ CREATE TABLE `portfolio_client` (
   CONSTRAINT `FKCE00CAB3E0DD567A` FOREIGN KEY (`office_id`) REFERENCES `org_office` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
+CREATE TABLE `portfolio_group_client` (
+  `group_id` bigint(20) NOT NULL,
+  `client_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`group_id`,`client_id`),
+  KEY `client_id` (`client_id`),
+  CONSTRAINT `portfolio_group_client_ibfk_1` FOREIGN KEY (`group_id`) REFERENCES `portfolio_group` (`id`),
+  CONSTRAINT `portfolio_group_client_ibfk_2` FOREIGN KEY (`client_id`) REFERENCES `portfolio_client` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 CREATE TABLE `portfolio_product_loan` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `currency_code` varchar(3) NOT NULL,
@@ -267,6 +283,7 @@ CREATE TABLE `portfolio_product_loan` (
   `name` varchar(100) NOT NULL,
   `description` varchar(500) DEFAULT NULL,
   `fund_id` bigint(20) DEFAULT NULL,
+  `charge_id` bigint(20) DEFAULT NULL,
   `loan_transaction_strategy_id` bigint(20) DEFAULT NULL,
   `nominal_interest_rate_per_period` decimal(19,6) NOT NULL,
   `interest_period_frequency_enum` smallint(5) NOT NULL,
@@ -288,11 +305,13 @@ CREATE TABLE `portfolio_product_loan` (
   KEY `FKAUD0000000000004` (`lastmodifiedby_id`),
   KEY `FKA6A8A7D77240145` (`fund_id`),
   KEY `FK_ltp_strategy` (`loan_transaction_strategy_id`),
-  CONSTRAINT `FK_ltp_strategy` FOREIGN KEY (`loan_transaction_strategy_id`) REFERENCES `ref_loan_transaction_processing_strategy` (`id`),
+  KEY `FK_o_charge_idx` (`charge_id`),
+  CONSTRAINT `FK_o_charge` FOREIGN KEY (`charge_id`) REFERENCES `o_charge` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `FKA6A8A7D77240145` FOREIGN KEY (`fund_id`) REFERENCES `org_fund` (`id`),
   CONSTRAINT `FKAUD0000000000003` FOREIGN KEY (`createdby_id`) REFERENCES `admin_appuser` (`id`),
-  CONSTRAINT `FKAUD0000000000004` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `admin_appuser` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+  CONSTRAINT `FKAUD0000000000004` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `admin_appuser` (`id`),
+  CONSTRAINT `FK_ltp_strategy` FOREIGN KEY (`loan_transaction_strategy_id`) REFERENCES `ref_loan_transaction_processing_strategy` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `portfolio_loan` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
