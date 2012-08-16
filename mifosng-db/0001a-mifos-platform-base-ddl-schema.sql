@@ -15,6 +15,8 @@ DROP TABLE IF EXISTS `portfolio_note`;
 DROP TABLE IF EXISTS `portfolio_loan_transaction`;
 DROP TABLE IF EXISTS `portfolio_loan_repayment_schedule`;
 DROP TABLE IF EXISTS `portfolio_loan`;
+DROP TABLE IF EXISTS `portfolio_deposit_account`;
+DROP TABLE IF EXISTS `portfolio_group_client`;
 DROP TABLE IF EXISTS `portfolio_client`;
 DROP TABLE IF EXISTS `portfolio_group`;
 DROP TABLE IF EXISTS `portfolio_product_loan`;
@@ -100,6 +102,7 @@ CREATE TABLE `o_charge` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(100) DEFAULT NULL,
   `amount` decimal(19,6) NOT NULL,
+  `is_deleted` tinyint(1) NOT NULL DEFAULT 0,
   `createdby_id` bigint(20) DEFAULT NULL,
   `created_date` datetime DEFAULT NULL,
   `lastmodifiedby_id` bigint(20) DEFAULT NULL,
