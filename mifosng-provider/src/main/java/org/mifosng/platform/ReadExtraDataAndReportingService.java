@@ -25,7 +25,7 @@ public interface ReadExtraDataAndReportingService {
 	void updateExtraData(String type, String set, Long id,
 			Map<String, String> queryParams);
 
-	String retrieveDataTable(String datatable, String sqlSearch, String sqlOrder);	
+	String retrieveDataTable(String datatable, String sqlFields, String sqlSearch, String sqlOrder);	
 
 	Response processPentahoRequest(String reportName, String outputType,
 			Map<String, String> queryParams);

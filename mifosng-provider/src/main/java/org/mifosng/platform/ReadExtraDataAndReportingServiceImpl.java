@@ -368,15 +368,23 @@ public class ReadExtraDataAndReportingServiceImpl implements
 	}
 
 	@Override
-	public String retrieveDataTable(String datatable, String sqlSearch, String sqlOrder) {
+	public String retrieveDataTable(String datatable, String sqlFields,
+			String sqlSearch, String sqlOrder) {
 		long startTime = System.currentTimeMillis();
 
-		String sql = "select * from " + datatable;
+		String sql = "select ";
+		if (sqlFields != null)
+			sql = sql + sqlFields;
+		else
+			sql = sql + " * ";
+
+		sql = sql + " from " + datatable;
+
 		if (sqlSearch != null)
 			sql = sql + " where " + sqlSearch;
 		if (sqlOrder != null)
 			sql = sql + " order by " + sqlOrder;
-		
+
 		GenericResultsetData result = fillReportingGenericResultSet(sql);
 
 		String jsonString = generateJsonFromGenericResultsetData(result);
@@ -392,7 +400,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 			GenericResultsetData result) {
 
 		StringBuffer writer = new StringBuffer();
-				
+
 		writer.append("[");
 
 		List<ResultsetColumnHeader> columnHeaders = result.getColumnHeaders();
@@ -411,8 +419,8 @@ public class ReadExtraDataAndReportingServiceImpl implements
 			rSize = row.size();
 			for (int j = 0; j < rSize; j++) {
 
-				writer.append('\"' + columnHeaders.get(j).getColumnName() + '\"'
-						+ ": ");
+				writer.append('\"' + columnHeaders.get(j).getColumnName()
+						+ '\"' + ": ");
 				currColType = columnHeaders.get(j).getColumnType();
 				currVal = row.get(j);
 				if (currVal != null) {
@@ -431,24 +439,22 @@ public class ReadExtraDataAndReportingServiceImpl implements
 					writer.append(",\n");
 			}
 
-			if (i < (data.size() - 1)) writer.append("},");
-			else writer.append("}");
+			if (i < (data.size() - 1))
+				writer.append("},");
+			else
+				writer.append("}");
 		}
 
 		writer.append("\n]");
 		return writer.toString();
-		
-		/*
-		JSONObject js = null;
-		try {
-			js = new JSONObject(writer.toString());
-		} catch (JSONException e) {
-			throw new WebApplicationException(Response
-					.status(Status.BAD_REQUEST).entity("JSON body is wrong")
-					.build());
-		}
 
-		return js.toString();*/
+		/*
+		 * JSONObject js = null; try { js = new JSONObject(writer.toString()); }
+		 * catch (JSONException e) { throw new WebApplicationException(Response
+		 * .status(Status.BAD_REQUEST).entity("JSON body is wrong") .build()); }
+		 * 
+		 * return js.toString();
+		 */
 
 	}
 

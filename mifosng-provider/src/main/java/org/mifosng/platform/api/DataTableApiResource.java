@@ -43,13 +43,14 @@ public class DataTableApiResource {
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
 	public String extraData(@PathParam("datatable") final String datatable,
+			@QueryParam("sqlFields") final String sqlFields,
 			@QueryParam("sqlSearch") final String sqlSearch,
 			@QueryParam("sqlOrder") final String sqlOrder,
 			@Context final UriInfo uriInfo) {
 
 		try {
 			//GenericResultsetData result = this.readExtraDataAndReportingService.retrieveDataTable(datatable);
-			return this.readExtraDataAndReportingService.retrieveDataTable(datatable, sqlSearch, sqlOrder);
+			return this.readExtraDataAndReportingService.retrieveDataTable(datatable, sqlFields, sqlSearch, sqlOrder);
 
 			//boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 			//return this.apiDataConversionService.convertGenericResultsetDataToJson(prettyPrint, result);
