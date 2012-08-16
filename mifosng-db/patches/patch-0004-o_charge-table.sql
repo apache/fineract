@@ -11,9 +11,3 @@ CREATE TABLE `o_charge` (
   UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-ALTER TABLE `portfolio_product_loan` 
-ADD COLUMN `charge_id` BIGINT(20) NULL DEFAULT NULL  AFTER `fund_id` ,    
-ADD CONSTRAINT `FK_o_charge`   FOREIGN KEY (`charge_id` )   
-REFERENCES `mifostenant_testddl`.`o_charge` (`id` )   ON DELETE NO ACTION   ON UPDATE NO ACTION , 
-ADD INDEX `FK_o_charge_idx` (`charge_id` ASC) ;
-
