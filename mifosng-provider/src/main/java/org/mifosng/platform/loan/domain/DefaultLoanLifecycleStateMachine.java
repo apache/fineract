@@ -4,84 +4,84 @@ import java.util.List;
 
 public class DefaultLoanLifecycleStateMachine implements LoanLifecycleStateMachine {
 
-	private final List<LoanStatusEnum> allowedLoanStatuses;
+	private final List<LoanStatus> allowedLoanStatuses;
 
-	public DefaultLoanLifecycleStateMachine(List<LoanStatusEnum> allowedLoanStatuses) {
+	public DefaultLoanLifecycleStateMachine(List<LoanStatus> allowedLoanStatuses) {
 		this.allowedLoanStatuses = allowedLoanStatuses;
 	}
 
 	@Override
-	public LoanStatusEnum transition(LoanEvent loanEvent, LoanStatusEnum from) {
+	public LoanStatus transition(LoanEvent loanEvent, LoanStatus from) {
 
-		LoanStatusEnum newState = null;
+		LoanStatus newState = null;
 
 		switch (loanEvent) {
 		case LOAN_CREATED:
 			if (from == null) {
-				newState = stateOf(LoanStatusEnum.SUBMITED_AND_PENDING_APPROVAL,
+				newState = stateOf(LoanStatus.SUBMITED_AND_PENDING_APPROVAL,
 						allowedLoanStatuses);
 			}
 			break;
 		case LOAN_REJECTED:
-			if (from.hasStateOf(LoanStatusEnum.SUBMITED_AND_PENDING_APPROVAL)) {
-				newState = stateOf(LoanStatusEnum.REJECTED, allowedLoanStatuses);
+			if (from.hasStateOf(LoanStatus.SUBMITED_AND_PENDING_APPROVAL)) {
+				newState = stateOf(LoanStatus.REJECTED, allowedLoanStatuses);
 			}
 			break;
 		case LOAN_APPROVED:
-			if (from.hasStateOf(LoanStatusEnum.SUBMITED_AND_PENDING_APPROVAL)) {
-				newState = stateOf(LoanStatusEnum.APPROVED, allowedLoanStatuses);
+			if (from.hasStateOf(LoanStatus.SUBMITED_AND_PENDING_APPROVAL)) {
+				newState = stateOf(LoanStatus.APPROVED, allowedLoanStatuses);
 			}
 			break;
 		case LOAN_WITHDRAWN:
-			if (this.anyOfAllowedWhenComingFrom(from, LoanStatusEnum.SUBMITED_AND_PENDING_APPROVAL, LoanStatusEnum.APPROVED)) {
-				newState = stateOf(LoanStatusEnum.WITHDRAWN_BY_CLIENT, allowedLoanStatuses);
+			if (this.anyOfAllowedWhenComingFrom(from, LoanStatus.SUBMITED_AND_PENDING_APPROVAL, LoanStatus.APPROVED)) {
+				newState = stateOf(LoanStatus.WITHDRAWN_BY_CLIENT, allowedLoanStatuses);
 			}
 			break;
 		case LOAN_DISBURSED:
-			if (from.hasStateOf(LoanStatusEnum.APPROVED)) {
-				newState = stateOf(LoanStatusEnum.ACTIVE, allowedLoanStatuses);
+			if (from.hasStateOf(LoanStatus.APPROVED)) {
+				newState = stateOf(LoanStatus.ACTIVE, allowedLoanStatuses);
 			}
 			break;
 		case LOAN_APPROVAL_UNDO:
-			if (from.hasStateOf(LoanStatusEnum.APPROVED)) {
-				newState = stateOf(LoanStatusEnum.SUBMITED_AND_PENDING_APPROVAL, allowedLoanStatuses);
+			if (from.hasStateOf(LoanStatus.APPROVED)) {
+				newState = stateOf(LoanStatus.SUBMITED_AND_PENDING_APPROVAL, allowedLoanStatuses);
 			}
 			break;
 		case LOAN_DISBURSAL_UNDO:
-			if (this.anyOfAllowedWhenComingFrom(from, LoanStatusEnum.ACTIVE)) {
-				newState = stateOf(LoanStatusEnum.APPROVED, allowedLoanStatuses);
+			if (this.anyOfAllowedWhenComingFrom(from, LoanStatus.ACTIVE)) {
+				newState = stateOf(LoanStatus.APPROVED, allowedLoanStatuses);
 			}
 			break;
 		case LOAN_REPAYMENT:
-			if (this.anyOfAllowedWhenComingFrom(from, LoanStatusEnum.ACTIVE, LoanStatusEnum.CLOSED, LoanStatusEnum.OVERPAID)) {
-				newState = stateOf(LoanStatusEnum.ACTIVE, allowedLoanStatuses);
+			if (this.anyOfAllowedWhenComingFrom(from, LoanStatus.ACTIVE, LoanStatus.CLOSED, LoanStatus.OVERPAID)) {
+				newState = stateOf(LoanStatus.ACTIVE, allowedLoanStatuses);
 			} else {
 				newState = from;
 			}
 			break;
 		case REPAID_IN_FULL:
-			if (this.anyOfAllowedWhenComingFrom(from, LoanStatusEnum.ACTIVE)) {
-				newState = stateOf(LoanStatusEnum.CLOSED, allowedLoanStatuses);
+			if (this.anyOfAllowedWhenComingFrom(from, LoanStatus.ACTIVE)) {
+				newState = stateOf(LoanStatus.CLOSED, allowedLoanStatuses);
 			}
 			break;
 		case LOAN_WRITE_OFF:
-			if (this.anyOfAllowedWhenComingFrom(from,LoanStatusEnum.ACTIVE)) {
-				newState = stateOf(LoanStatusEnum.CLOSED, allowedLoanStatuses);
+			if (this.anyOfAllowedWhenComingFrom(from,LoanStatus.ACTIVE)) {
+				newState = stateOf(LoanStatus.CLOSED, allowedLoanStatuses);
 			}
 			break;
 		case LOAN_RESCHEDULE:
-			if (this.anyOfAllowedWhenComingFrom(from, LoanStatusEnum.ACTIVE)) {
-				newState = stateOf(LoanStatusEnum.CLOSED, allowedLoanStatuses);
+			if (this.anyOfAllowedWhenComingFrom(from, LoanStatus.ACTIVE)) {
+				newState = stateOf(LoanStatus.CLOSED, allowedLoanStatuses);
 			}
 			break;
 		case INTERST_REBATE_OWED:
-			if (this.anyOfAllowedWhenComingFrom(from, LoanStatusEnum.CLOSED)) {
-				newState = stateOf(LoanStatusEnum.CLOSED, allowedLoanStatuses);
+			if (this.anyOfAllowedWhenComingFrom(from, LoanStatus.CLOSED)) {
+				newState = stateOf(LoanStatus.CLOSED, allowedLoanStatuses);
 			}
 			break;
 		case LOAN_OVERPAYMENT:
-			if (this.anyOfAllowedWhenComingFrom(from, LoanStatusEnum.CLOSED, LoanStatusEnum.ACTIVE)) {
-				newState = stateOf(LoanStatusEnum.OVERPAID, allowedLoanStatuses);
+			if (this.anyOfAllowedWhenComingFrom(from, LoanStatus.CLOSED, LoanStatus.ACTIVE)) {
+				newState = stateOf(LoanStatus.OVERPAID, allowedLoanStatuses);
 			}
 			break;
 		}
@@ -89,9 +89,9 @@ public class DefaultLoanLifecycleStateMachine implements LoanLifecycleStateMachi
 		return newState;
 	}
 
-	private LoanStatusEnum stateOf(LoanStatusEnum state, List<LoanStatusEnum> allowedLoanStatuses) {
-		LoanStatusEnum match = null;
-		for (LoanStatusEnum loanStatus : allowedLoanStatuses) {
+	private LoanStatus stateOf(LoanStatus state, List<LoanStatus> allowedLoanStatuses) {
+		LoanStatus match = null;
+		for (LoanStatus loanStatus : allowedLoanStatuses) {
 			if (loanStatus.hasStateOf(state)) {
 				match = loanStatus;
 				break;
@@ -100,11 +100,11 @@ public class DefaultLoanLifecycleStateMachine implements LoanLifecycleStateMachi
 		return match;
 	}
 
-	private boolean anyOfAllowedWhenComingFrom(final LoanStatusEnum state,
-			final LoanStatusEnum... allowedStates) {
+	private boolean anyOfAllowedWhenComingFrom(final LoanStatus state,
+			final LoanStatus... allowedStates) {
 		boolean allowed = false;
 
-		for (LoanStatusEnum allowedState : allowedStates) {
+		for (LoanStatus allowedState : allowedStates) {
 			if (state.hasStateOf(allowedState)) {
 				allowed = true;
 				break;

@@ -27,7 +27,7 @@ import org.mifosng.platform.loan.domain.LoanProduct;
 import org.mifosng.platform.loan.domain.LoanProductRelatedDetail;
 import org.mifosng.platform.loan.domain.LoanProductRepository;
 import org.mifosng.platform.loan.domain.LoanRepaymentScheduleInstallment;
-import org.mifosng.platform.loan.domain.LoanStatusEnum;
+import org.mifosng.platform.loan.domain.LoanStatus;
 import org.mifosng.platform.loan.domain.LoanTransactionProcessingStrategy;
 import org.mifosng.platform.loan.domain.LoanTransactionProcessingStrategyRepository;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
@@ -121,7 +121,7 @@ public class LoanAssembler {
 	}
 
 	private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
-		List<LoanStatusEnum> allowedLoanStatuses = Arrays.asList(LoanStatusEnum.values());
+		List<LoanStatus> allowedLoanStatuses = Arrays.asList(LoanStatus.values());
 		return new DefaultLoanLifecycleStateMachine(allowedLoanStatuses);
 	}
 	

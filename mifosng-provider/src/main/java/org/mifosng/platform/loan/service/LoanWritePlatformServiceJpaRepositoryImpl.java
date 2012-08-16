@@ -29,7 +29,7 @@ import org.mifosng.platform.loan.domain.Loan;
 import org.mifosng.platform.loan.domain.LoanLifecycleStateMachine;
 import org.mifosng.platform.loan.domain.LoanRepaymentScheduleInstallment;
 import org.mifosng.platform.loan.domain.LoanRepository;
-import org.mifosng.platform.loan.domain.LoanStatusEnum;
+import org.mifosng.platform.loan.domain.LoanStatus;
 import org.mifosng.platform.loan.domain.LoanTransaction;
 import org.mifosng.platform.loan.domain.LoanTransactionRepository;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
@@ -67,7 +67,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 	}
 	
 	private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
-		List<LoanStatusEnum> allowedLoanStatuses = Arrays.asList(LoanStatusEnum.values());
+		List<LoanStatus> allowedLoanStatuses = Arrays.asList(LoanStatus.values());
 		return new DefaultLoanLifecycleStateMachine(allowedLoanStatuses);
 	}
 	

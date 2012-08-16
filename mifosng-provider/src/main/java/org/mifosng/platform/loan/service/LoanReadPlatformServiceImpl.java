@@ -31,7 +31,7 @@ import org.mifosng.platform.infrastructure.JdbcSupport;
 import org.mifosng.platform.infrastructure.TenantAwareRoutingDataSource;
 import org.mifosng.platform.loan.domain.Loan;
 import org.mifosng.platform.loan.domain.LoanRepository;
-import org.mifosng.platform.loan.domain.LoanStatusEnum;
+import org.mifosng.platform.loan.domain.LoanStatus;
 import org.mifosng.platform.loan.domain.LoanTransaction;
 import org.mifosng.platform.loan.domain.LoanTransactionRepository;
 import org.mifosng.platform.loan.domain.LoanTransactionType;
@@ -495,7 +495,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 					.interestCalculationPeriodType(interestCalculationPeriodTypeInt);
 
 			Integer lifeCycleStatusId = JdbcSupport.getInteger(rs, "lifeCycleStatusId");
-			String lifeCycleStatusText = LoanStatusEnum.fromInt(lifeCycleStatusId).getCode();
+			String lifeCycleStatusText = LoanStatus.fromInt(lifeCycleStatusId).getCode();
 
 			LocalDate lifeCycleStatusDate = submittedOnDate;
 			if (approvedOnDate != null) {

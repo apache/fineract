@@ -164,7 +164,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 
 	public Loan(final Client client, Fund fund, LoanTransactionProcessingStrategy transactionProcessingStrategy, final LoanProduct loanProduct,
 			final LoanProductRelatedDetail loanRepaymentScheduleDetail,
-			final LoanStatusEnum loanStatus) {
+			final LoanStatus loanStatus) {
 		this.client = client;
 		this.fund = fund;
 		this.transactionProcessingStrategy = transactionProcessingStrategy;
@@ -203,7 +203,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 			final LocalDate interestChargedFromDate,
 			final LoanLifecycleStateMachine lifecycleStateMachine) {
 
-		LoanStatusEnum statusEnum = lifecycleStateMachine.transition(LoanEvent.LOAN_CREATED, LoanStatusEnum.fromInt(this.loanStatus));
+		LoanStatus statusEnum = lifecycleStateMachine.transition(LoanEvent.LOAN_CREATED, LoanStatus.fromInt(this.loanStatus));
 		this.loanStatus = statusEnum.getValue();
 
 		this.termFrequency = loanTermFrequency;
@@ -249,7 +249,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	public void reject(final LocalDate rejectedOn,
 			LoanLifecycleStateMachine loanLifecycleStateMachine) {
 
-		LoanStatusEnum statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_REJECTED, LoanStatusEnum.fromInt(this.loanStatus));
+		LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_REJECTED, LoanStatus.fromInt(this.loanStatus));
 		this.loanStatus = statusEnum.getValue();
 		
 		this.rejectedOnDate = rejectedOn.toDateTimeAtCurrentTime().toDate();
@@ -272,7 +272,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	public void withdraw(final LocalDate withdrawnOn,
 			LoanLifecycleStateMachine loanLifecycleStateMachine) {
 
-		LoanStatusEnum statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_WITHDRAWN, LoanStatusEnum.fromInt(this.loanStatus));
+		LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_WITHDRAWN, LoanStatus.fromInt(this.loanStatus));
 		this.loanStatus = statusEnum.getValue();
 		
 		this.withdrawnOnDate = withdrawnOn.toDateTimeAtCurrentTime().toDate();
@@ -295,7 +295,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	public void approve(final LocalDate approvedOn,
 			LoanLifecycleStateMachine loanLifecycleStateMachine) {
 		
-		LoanStatusEnum statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_APPROVED, LoanStatusEnum.fromInt(this.loanStatus));
+		LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_APPROVED, LoanStatus.fromInt(this.loanStatus));
 		this.loanStatus = statusEnum.getValue();
 		
 		this.approvedOnDate = approvedOn.toDateTimeAtCurrentTime().toDate();
@@ -318,7 +318,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 
 	public void undoApproval(LoanLifecycleStateMachine loanLifecycleStateMachine) {
 		
-		LoanStatusEnum statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_APPROVAL_UNDO, LoanStatusEnum.fromInt(this.loanStatus));
+		LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_APPROVAL_UNDO, LoanStatus.fromInt(this.loanStatus));
 		this.loanStatus = statusEnum.getValue();
 		
 		this.approvedOnDate = null;
@@ -339,7 +339,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	public void disburse(final LocalDate disbursedOn,
 			LoanLifecycleStateMachine loanLifecycleStateMachine) {
 		
-		LoanStatusEnum statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_DISBURSED, LoanStatusEnum.fromInt(this.loanStatus));
+		LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_DISBURSED, LoanStatus.fromInt(this.loanStatus));
 		this.loanStatus = statusEnum.getValue();
 		
 		this.disbursedOnDate = disbursedOn.toDateTimeAtCurrentTime().toDate();
@@ -380,7 +380,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	public void undoDisbursal(
 			LoanLifecycleStateMachine loanLifecycleStateMachine) {
 		
-		LoanStatusEnum statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_DISBURSAL_UNDO, LoanStatusEnum.fromInt(this.loanStatus));
+		LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_DISBURSAL_UNDO, LoanStatus.fromInt(this.loanStatus));
 		this.loanStatus = statusEnum.getValue();
 		
 		this.loanTransactions.clear();
@@ -389,7 +389,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 
 	public void waive(final LoanTransaction loanTransaction, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
 		
-		LoanStatusEnum statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_REPAYMENT, LoanStatusEnum.fromInt(this.loanStatus));
+		LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_REPAYMENT, LoanStatus.fromInt(this.loanStatus));
 		this.loanStatus = statusEnum.getValue();
 		
 		loanTransaction.updateLoan(this);
@@ -440,7 +440,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 			final LoanTransaction loanTransaction,
 			final LoanLifecycleStateMachine loanLifecycleStateMachine, final boolean adjusted) {
 		
-		LoanStatusEnum statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_REPAYMENT, LoanStatusEnum.fromInt(this.loanStatus));
+		LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_REPAYMENT, LoanStatus.fromInt(this.loanStatus));
 		this.loanStatus = statusEnum.getValue();
 		
 		loanTransaction.updateLoan(this);
@@ -501,7 +501,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 
 	private void handleLoanRepaymentInFull(final LoanTransaction loanTransaction, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
 		
-		LoanStatusEnum statusEnum = loanLifecycleStateMachine.transition(LoanEvent.REPAID_IN_FULL, LoanStatusEnum.fromInt(this.loanStatus));
+		LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.REPAID_IN_FULL, LoanStatus.fromInt(this.loanStatus));
 		this.loanStatus = statusEnum.getValue();
 		
 		this.closedOnDate = loanTransaction.getTransactionDate().toDate();
@@ -510,7 +510,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		if (isInterestRebateAllowed()) {
 			Money rebateDue = calculateRebateWhenPaidInFullOn(loanTransaction.getTransactionDate());
 			if (rebateDue.isGreaterThanZero()) {
-				statusEnum = loanLifecycleStateMachine.transition(LoanEvent.INTERST_REBATE_OWED, LoanStatusEnum.fromInt(this.loanStatus));
+				statusEnum = loanLifecycleStateMachine.transition(LoanEvent.INTERST_REBATE_OWED, LoanStatus.fromInt(this.loanStatus));
 				this.loanStatus = statusEnum.getValue();
 				
 				this.interestRebateOwed = rebateDue.getAmount();
@@ -520,7 +520,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 
 	private void handleLoanOverpayment(@SuppressWarnings("unused") final LoanTransaction loanTransaction, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
 		
-		LoanStatusEnum statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_OVERPAYMENT, LoanStatusEnum.fromInt(this.loanStatus));
+		LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_OVERPAYMENT, LoanStatus.fromInt(this.loanStatus));
 		this.loanStatus = statusEnum.getValue();
 		
 		this.closedOnDate = null;
@@ -662,7 +662,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	public void writeOff(final DateTime writtenOffOn,
 			final LoanLifecycleStateMachine loanLifecycleStateMachine) {
 		
-		LoanStatusEnum statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_WRITE_OFF, LoanStatusEnum.fromInt(this.loanStatus));
+		LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_WRITE_OFF, LoanStatus.fromInt(this.loanStatus));
 		this.loanStatus = statusEnum.getValue();
 		
 		this.closedOnDate = writtenOffOn.toDate();
@@ -687,7 +687,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	public void reschedule(final DateTime rescheduledOn,
 			final LoanLifecycleStateMachine loanLifecycleStateMachine) {
 		
-		LoanStatusEnum statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_RESCHEDULE, LoanStatusEnum.fromInt(this.loanStatus));
+		LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_RESCHEDULE, LoanStatus.fromInt(this.loanStatus));
 		this.loanStatus = statusEnum.getValue();
 		
 		this.closedOnDate = rescheduledOn.toDate();
@@ -713,8 +713,8 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		return !isSubmittedAndPendingApproval();
 	}
 	
-	private LoanStatusEnum status() {
-		return LoanStatusEnum.fromInt(this.loanStatus);
+	private LoanStatus status() {
+		return LoanStatus.fromInt(this.loanStatus);
 	}
 
 	public boolean isSubmittedAndPendingApproval() {

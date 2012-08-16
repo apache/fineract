@@ -1,6 +1,9 @@
 package org.mifosng.platform.loan.domain;
 
-public enum LoanStatusEnum {
+/**
+ * Enum representation of loan status states.
+ */
+public enum LoanStatus {
 	
 	INVALID(0, "loanStatusType.invalid"), // 
 	SUBMITED_AND_PENDING_APPROVAL(100, "loanStatusType.submitted.and.pending.approval"), //
@@ -14,41 +17,41 @@ public enum LoanStatusEnum {
     private final Integer value;
 	private final String code;
 	
-	public static LoanStatusEnum fromInt(final Integer selectedMethod) {
+	public static LoanStatus fromInt(final Integer statusValue) {
 
-		LoanStatusEnum enumeration = LoanStatusEnum.INVALID;
-		switch (selectedMethod) {
+		LoanStatus enumeration = LoanStatus.INVALID;
+		switch (statusValue) {
 		case 100:
-			enumeration = LoanStatusEnum.SUBMITED_AND_PENDING_APPROVAL;
+			enumeration = LoanStatus.SUBMITED_AND_PENDING_APPROVAL;
 			break;
 		case 200:
-			enumeration = LoanStatusEnum.APPROVED;
+			enumeration = LoanStatus.APPROVED;
 			break;
 		case 300:
-			enumeration = LoanStatusEnum.ACTIVE;
+			enumeration = LoanStatus.ACTIVE;
 			break;
 		case 400:
-			enumeration = LoanStatusEnum.WITHDRAWN_BY_CLIENT;
+			enumeration = LoanStatus.WITHDRAWN_BY_CLIENT;
 			break;
 		case 500:
-			enumeration = LoanStatusEnum.REJECTED;
+			enumeration = LoanStatus.REJECTED;
 			break;
 		case 600:
-			enumeration = LoanStatusEnum.CLOSED;
+			enumeration = LoanStatus.CLOSED;
 			break;
 		case 700:
-			enumeration = LoanStatusEnum.OVERPAID;
+			enumeration = LoanStatus.OVERPAID;
 			break;
 		}
 		return enumeration;
     }
 
-    private LoanStatusEnum(final Integer value, final String code) {
+    private LoanStatus(final Integer value, final String code) {
         this.value = value;
 		this.code = code;
     }
     
-    public boolean hasStateOf(final LoanStatusEnum state) {
+    public boolean hasStateOf(final LoanStatus state) {
 		return this.value.equals(state.getValue());
 	}
 
@@ -61,26 +64,26 @@ public enum LoanStatusEnum {
 	}
 
 	public boolean isSubmittedAndPendingApproval() {
-		return this.value.equals(LoanStatusEnum.SUBMITED_AND_PENDING_APPROVAL.getValue());
+		return this.value.equals(LoanStatus.SUBMITED_AND_PENDING_APPROVAL.getValue());
 	}
 	
 	public boolean isApproved() {
-		return this.value.equals(LoanStatusEnum.APPROVED.getValue());
+		return this.value.equals(LoanStatus.APPROVED.getValue());
 	}
 	
 	public boolean isActive() {
-		return this.value.equals(LoanStatusEnum.ACTIVE.getValue());
+		return this.value.equals(LoanStatus.ACTIVE.getValue());
 	}
 
 	public boolean isClosed() {
-		return this.value.equals(LoanStatusEnum.CLOSED.getValue());
+		return this.value.equals(LoanStatus.CLOSED.getValue());
 	}
 
 	public boolean isWithdrawnByClient() {
-		return this.value.equals(LoanStatusEnum.WITHDRAWN_BY_CLIENT.getValue());
+		return this.value.equals(LoanStatus.WITHDRAWN_BY_CLIENT.getValue());
 	}
 
 	public boolean isRejected() {
-		return this.value.equals(LoanStatusEnum.REJECTED.getValue());
+		return this.value.equals(LoanStatus.REJECTED.getValue());
 	}
 }
