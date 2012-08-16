@@ -2,6 +2,7 @@ package org.mifosng.platform.loan.service;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -28,8 +29,7 @@ import org.mifosng.platform.loan.domain.Loan;
 import org.mifosng.platform.loan.domain.LoanLifecycleStateMachine;
 import org.mifosng.platform.loan.domain.LoanRepaymentScheduleInstallment;
 import org.mifosng.platform.loan.domain.LoanRepository;
-import org.mifosng.platform.loan.domain.LoanStatus;
-import org.mifosng.platform.loan.domain.LoanStatusRepository;
+import org.mifosng.platform.loan.domain.LoanStatusEnum;
 import org.mifosng.platform.loan.domain.LoanTransaction;
 import org.mifosng.platform.loan.domain.LoanTransactionRepository;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
@@ -45,7 +45,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
 	private final PlatformSecurityContext context;
 	private final LoanRepository loanRepository;
-	private final LoanStatusRepository loanStatusRepository;
 	private final NoteRepository noteRepository;
 	private final CalculationPlatformService calculationPlatformService;	
 	private final LoanTransactionRepository loanTransactionRepository;
@@ -54,13 +53,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 	@Autowired
 	public LoanWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final LoanAssembler loanAssembler,
 			final LoanRepository loanRepository, final LoanTransactionRepository loanTransactionRepository,
-			final LoanStatusRepository loanStatusRepository, 
 			final NoteRepository noteRepository, final CalculationPlatformService calculationPlatformService) {
 		this.context = context;
 		this.loanAssembler = loanAssembler;
 		this.loanRepository = loanRepository;
 		this.loanTransactionRepository = loanTransactionRepository;
-		this.loanStatusRepository = loanStatusRepository;
 		this.noteRepository = noteRepository;
 		this.calculationPlatformService = calculationPlatformService;
 	}
@@ -70,7 +67,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 	}
 	
 	private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
-		List<LoanStatus> allowedLoanStatuses = this.loanStatusRepository.findAll();
+		List<LoanStatusEnum> allowedLoanStatuses = Arrays.asList(LoanStatusEnum.values());
 		return new DefaultLoanLifecycleStateMachine(allowedLoanStatuses);
 	}
 	

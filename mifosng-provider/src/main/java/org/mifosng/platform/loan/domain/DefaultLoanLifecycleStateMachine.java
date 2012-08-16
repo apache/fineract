@@ -2,87 +2,86 @@ package org.mifosng.platform.loan.domain;
 
 import java.util.List;
 
-public class DefaultLoanLifecycleStateMachine implements
-		LoanLifecycleStateMachine {
+public class DefaultLoanLifecycleStateMachine implements LoanLifecycleStateMachine {
 
-	private final List<LoanStatus> allowedLoanStatuses;
+	private final List<LoanStatusEnum> allowedLoanStatuses;
 
-	public DefaultLoanLifecycleStateMachine(List<LoanStatus> allowedLoanStatuses) {
+	public DefaultLoanLifecycleStateMachine(List<LoanStatusEnum> allowedLoanStatuses) {
 		this.allowedLoanStatuses = allowedLoanStatuses;
 	}
 
 	@Override
-	public LoanStatus transition(LoanEvent loanEvent, LoanStatus from) {
+	public LoanStatusEnum transition(LoanEvent loanEvent, LoanStatusEnum from) {
 
-		LoanStatus newState = null;
+		LoanStatusEnum newState = null;
 
 		switch (loanEvent) {
 		case LOAN_CREATED:
 			if (from == null) {
-				newState = stateOf(LoanStatus.SUBMITED_AND_PENDING_APPROVAL,
+				newState = stateOf(LoanStatusEnum.SUBMITED_AND_PENDING_APPROVAL,
 						allowedLoanStatuses);
 			}
 			break;
 		case LOAN_REJECTED:
-			if (from.hasStateOf(LoanStatus.SUBMITED_AND_PENDING_APPROVAL)) {
-				newState = stateOf(LoanStatus.REJECTED, allowedLoanStatuses);
+			if (from.hasStateOf(LoanStatusEnum.SUBMITED_AND_PENDING_APPROVAL)) {
+				newState = stateOf(LoanStatusEnum.REJECTED, allowedLoanStatuses);
 			}
 			break;
 		case LOAN_APPROVED:
-			if (from.hasStateOf(LoanStatus.SUBMITED_AND_PENDING_APPROVAL)) {
-				newState = stateOf(LoanStatus.APPROVED, allowedLoanStatuses);
+			if (from.hasStateOf(LoanStatusEnum.SUBMITED_AND_PENDING_APPROVAL)) {
+				newState = stateOf(LoanStatusEnum.APPROVED, allowedLoanStatuses);
 			}
 			break;
 		case LOAN_WITHDRAWN:
-			if (this.anyOfAllowedWhenComingFrom(from, LoanStatus.SUBMITED_AND_PENDING_APPROVAL, LoanStatus.APPROVED)) {
-				newState = stateOf(LoanStatus.WITHDRAWN_BY_CLIENT, allowedLoanStatuses);
+			if (this.anyOfAllowedWhenComingFrom(from, LoanStatusEnum.SUBMITED_AND_PENDING_APPROVAL, LoanStatusEnum.APPROVED)) {
+				newState = stateOf(LoanStatusEnum.WITHDRAWN_BY_CLIENT, allowedLoanStatuses);
 			}
 			break;
 		case LOAN_DISBURSED:
-			if (from.hasStateOf(LoanStatus.APPROVED)) {
-				newState = stateOf(LoanStatus.ACTIVE, allowedLoanStatuses);
+			if (from.hasStateOf(LoanStatusEnum.APPROVED)) {
+				newState = stateOf(LoanStatusEnum.ACTIVE, allowedLoanStatuses);
 			}
 			break;
 		case LOAN_APPROVAL_UNDO:
-			if (from.hasStateOf(LoanStatus.APPROVED)) {
-				newState = stateOf(LoanStatus.SUBMITED_AND_PENDING_APPROVAL, allowedLoanStatuses);
+			if (from.hasStateOf(LoanStatusEnum.APPROVED)) {
+				newState = stateOf(LoanStatusEnum.SUBMITED_AND_PENDING_APPROVAL, allowedLoanStatuses);
 			}
 			break;
 		case LOAN_DISBURSAL_UNDO:
-			if (this.anyOfAllowedWhenComingFrom(from, LoanStatus.ACTIVE)) {
-				newState = stateOf(LoanStatus.APPROVED, allowedLoanStatuses);
+			if (this.anyOfAllowedWhenComingFrom(from, LoanStatusEnum.ACTIVE)) {
+				newState = stateOf(LoanStatusEnum.APPROVED, allowedLoanStatuses);
 			}
 			break;
 		case LOAN_REPAYMENT:
-			if (this.anyOfAllowedWhenComingFrom(from, LoanStatus.ACTIVE, LoanStatus.CLOSED, LoanStatus.OVERPAID)) {
-				newState = stateOf(LoanStatus.ACTIVE, allowedLoanStatuses);
+			if (this.anyOfAllowedWhenComingFrom(from, LoanStatusEnum.ACTIVE, LoanStatusEnum.CLOSED, LoanStatusEnum.OVERPAID)) {
+				newState = stateOf(LoanStatusEnum.ACTIVE, allowedLoanStatuses);
 			} else {
 				newState = from;
 			}
 			break;
 		case REPAID_IN_FULL:
-			if (this.anyOfAllowedWhenComingFrom(from, LoanStatus.ACTIVE)) {
-				newState = stateOf(LoanStatus.CLOSED, allowedLoanStatuses);
+			if (this.anyOfAllowedWhenComingFrom(from, LoanStatusEnum.ACTIVE)) {
+				newState = stateOf(LoanStatusEnum.CLOSED, allowedLoanStatuses);
 			}
 			break;
 		case LOAN_WRITE_OFF:
-			if (this.anyOfAllowedWhenComingFrom(from,LoanStatus.ACTIVE)) {
-				newState = stateOf(LoanStatus.CLOSED, allowedLoanStatuses);
+			if (this.anyOfAllowedWhenComingFrom(from,LoanStatusEnum.ACTIVE)) {
+				newState = stateOf(LoanStatusEnum.CLOSED, allowedLoanStatuses);
 			}
 			break;
 		case LOAN_RESCHEDULE:
-			if (this.anyOfAllowedWhenComingFrom(from, LoanStatus.ACTIVE)) {
-				newState = stateOf(LoanStatus.CLOSED, allowedLoanStatuses);
+			if (this.anyOfAllowedWhenComingFrom(from, LoanStatusEnum.ACTIVE)) {
+				newState = stateOf(LoanStatusEnum.CLOSED, allowedLoanStatuses);
 			}
 			break;
 		case INTERST_REBATE_OWED:
-			if (this.anyOfAllowedWhenComingFrom(from, LoanStatus.CLOSED)) {
-				newState = stateOf(LoanStatus.CLOSED, allowedLoanStatuses);
+			if (this.anyOfAllowedWhenComingFrom(from, LoanStatusEnum.CLOSED)) {
+				newState = stateOf(LoanStatusEnum.CLOSED, allowedLoanStatuses);
 			}
 			break;
 		case LOAN_OVERPAYMENT:
-			if (this.anyOfAllowedWhenComingFrom(from, LoanStatus.CLOSED, LoanStatus.ACTIVE)) {
-				newState = stateOf(LoanStatus.OVERPAID, allowedLoanStatuses);
+			if (this.anyOfAllowedWhenComingFrom(from, LoanStatusEnum.CLOSED, LoanStatusEnum.ACTIVE)) {
+				newState = stateOf(LoanStatusEnum.OVERPAID, allowedLoanStatuses);
 			}
 			break;
 		}
@@ -90,9 +89,9 @@ public class DefaultLoanLifecycleStateMachine implements
 		return newState;
 	}
 
-	private LoanStatus stateOf(Integer state, List<LoanStatus> allowedLoanStatuses) {
-		LoanStatus match = null;
-		for (LoanStatus loanStatus : allowedLoanStatuses) {
+	private LoanStatusEnum stateOf(LoanStatusEnum state, List<LoanStatusEnum> allowedLoanStatuses) {
+		LoanStatusEnum match = null;
+		for (LoanStatusEnum loanStatus : allowedLoanStatuses) {
 			if (loanStatus.hasStateOf(state)) {
 				match = loanStatus;
 				break;
@@ -101,11 +100,11 @@ public class DefaultLoanLifecycleStateMachine implements
 		return match;
 	}
 
-	private boolean anyOfAllowedWhenComingFrom(final LoanStatus state,
-			final Integer... allowedStates) {
+	private boolean anyOfAllowedWhenComingFrom(final LoanStatusEnum state,
+			final LoanStatusEnum... allowedStates) {
 		boolean allowed = false;
 
-		for (Integer allowedState : allowedStates) {
+		for (LoanStatusEnum allowedState : allowedStates) {
 			if (state.hasStateOf(allowedState)) {
 				allowed = true;
 				break;
@@ -114,5 +113,4 @@ public class DefaultLoanLifecycleStateMachine implements
 
 		return allowed;
 	}
-
 }

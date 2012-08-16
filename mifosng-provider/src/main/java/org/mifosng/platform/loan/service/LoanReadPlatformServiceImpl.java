@@ -31,6 +31,7 @@ import org.mifosng.platform.infrastructure.JdbcSupport;
 import org.mifosng.platform.infrastructure.TenantAwareRoutingDataSource;
 import org.mifosng.platform.loan.domain.Loan;
 import org.mifosng.platform.loan.domain.LoanRepository;
+import org.mifosng.platform.loan.domain.LoanStatusEnum;
 import org.mifosng.platform.loan.domain.LoanTransaction;
 import org.mifosng.platform.loan.domain.LoanTransactionRepository;
 import org.mifosng.platform.loan.domain.LoanTransactionType;
@@ -411,12 +412,11 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 					+ " l.nominal_interest_rate_per_period as interestRatePerPeriod, l.annual_nominal_interest_rate as annualInterestRate, "
 					+ " l.repayment_period_frequency_enum as repaymentFrequencyType, l.interest_period_frequency_enum as interestRateFrequencyType, "
 					+ " l.amortization_method_enum as amortizationType, l.interest_method_enum as interestType, l.interest_calculated_in_period_enum as interestCalculationPeriodType,"
-					+ " l.loan_status_id as lifeCycleStatusId, st.display_name as lifeCycleStatusText, "
+					+ " l.loan_status_id as lifeCycleStatusId, "
 					+ " l.currency_code as currencyCode, l.currency_digits as currencyDigits, rc.`name` as currencyName, rc.display_symbol as currencyDisplaySymbol, rc.internationalized_name_code as currencyNameCode"
 					+ " from portfolio_loan l"
 					+ " join portfolio_product_loan lp on lp.id = l.product_id"
 					+ " join ref_currency rc on rc.`code` = l.currency_code"
-					+ " join ref_loan_status st on st.id = l.loan_status_id"
 					+ " left join org_fund f on f.id = l.fund_id";
 		}
 
@@ -494,9 +494,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 			EnumOptionData interestCalculationPeriodType = LoanEnumerations
 					.interestCalculationPeriodType(interestCalculationPeriodTypeInt);
 
-			Integer lifeCycleStatusId = JdbcSupport.getInteger(rs,
-					"lifeCycleStatusId");
-			String lifeCycleStatusText = rs.getString("lifeCycleStatusText");
+			Integer lifeCycleStatusId = JdbcSupport.getInteger(rs, "lifeCycleStatusId");
+			String lifeCycleStatusText = LoanStatusEnum.fromInt(lifeCycleStatusId).getCode();
 
 			LocalDate lifeCycleStatusDate = submittedOnDate;
 			if (approvedOnDate != null) {

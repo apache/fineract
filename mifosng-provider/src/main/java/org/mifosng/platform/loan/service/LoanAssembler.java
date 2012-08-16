@@ -1,6 +1,7 @@
 package org.mifosng.platform.loan.service;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.List;
 
 import org.mifosng.platform.api.commands.SubmitLoanApplicationCommand;
@@ -26,8 +27,7 @@ import org.mifosng.platform.loan.domain.LoanProduct;
 import org.mifosng.platform.loan.domain.LoanProductRelatedDetail;
 import org.mifosng.platform.loan.domain.LoanProductRepository;
 import org.mifosng.platform.loan.domain.LoanRepaymentScheduleInstallment;
-import org.mifosng.platform.loan.domain.LoanStatus;
-import org.mifosng.platform.loan.domain.LoanStatusRepository;
+import org.mifosng.platform.loan.domain.LoanStatusEnum;
 import org.mifosng.platform.loan.domain.LoanTransactionProcessingStrategy;
 import org.mifosng.platform.loan.domain.LoanTransactionProcessingStrategyRepository;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
@@ -38,7 +38,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class LoanAssembler {
 
-	private final LoanStatusRepository loanStatusRepository;
 	private final LoanProductRepository loanProductRepository;
 	private final ClientRepository clientRepository;
 	private final AprCalculator aprCalculator = new AprCalculator();
@@ -46,12 +45,11 @@ public class LoanAssembler {
 	private final LoanTransactionProcessingStrategyRepository loanTransactionProcessingStrategyRepository;
 	
 	@Autowired
-	public LoanAssembler(final LoanStatusRepository loanStatusRepository,
+	public LoanAssembler(
 			final LoanProductRepository loanProductRepository,
-			final ClientRepository clientRepository, 
+			final ClientRepository clientRepository,
 			final FundRepository fundRepository,
 			final LoanTransactionProcessingStrategyRepository loanTransactionProcessingStrategyRepository) {
-		this.loanStatusRepository = loanStatusRepository;
 		this.loanProductRepository = loanProductRepository;
 		this.clientRepository = clientRepository;
 		this.fundRepository = fundRepository;
@@ -123,7 +121,7 @@ public class LoanAssembler {
 	}
 
 	private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
-		List<LoanStatus> allowedLoanStatuses = this.loanStatusRepository.findAll();
+		List<LoanStatusEnum> allowedLoanStatuses = Arrays.asList(LoanStatusEnum.values());
 		return new DefaultLoanLifecycleStateMachine(allowedLoanStatuses);
 	}
 	

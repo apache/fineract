@@ -242,10 +242,9 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 					"l.id as id, l.external_id as externalId,");
 			loanAccountSummary
 					.append("l.product_id as productId, lp.name as productName,")
-					.append("l.loan_status_id as statusId, ls.display_name as statusName ")
+					.append("l.loan_status_id as statusId ")
 					.append("from portfolio_loan l ")
-					.append("LEFT JOIN portfolio_product_loan AS lp ON lp.id = l.product_id ")
-					.append("LEFT JOIN ref_loan_status AS ls ON ls.id = l.loan_status_id ");
+					.append("LEFT JOIN portfolio_product_loan AS lp ON lp.id = l.product_id ");
 
 			return loanAccountSummary.toString();
 		}
