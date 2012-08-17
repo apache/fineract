@@ -14,6 +14,9 @@ import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.loan.domain.LoanProductRelatedDetail;
 
+/**
+ * Irregular payments for declining balance not supported
+ */
 public class EqualInstallmentsAmortizationLoanScheduleGenerator implements AmortizationLoanScheduleGenerator {
 
 	private final PeriodicInterestRateCalculator periodicInterestRateCalculator = new PeriodicInterestRateCalculator();
@@ -32,9 +35,9 @@ public class EqualInstallmentsAmortizationLoanScheduleGenerator implements Amort
 		
 		List<ScheduledLoanInstallment> scheduledLoanInstallments = new ArrayList<ScheduledLoanInstallment>();
 		
-		// 3. determine 'total payment' for each repayment based on pmt function (and hence the total due overall)
+		// determine 'total payment' for each repayment based on pmt function (and hence the total due overall)
 		final MonetaryCurrency monetaryCurrency = loanScheduleInfo.getPrincipal().getCurrency();
-		Money totalDuePerInstallment = this.pmtCalculator.calculatePaymentForOnePeriodFrom(loanScheduleInfo, periodInterestRateForRepaymentPeriod, monetaryCurrency);
+		final Money totalDuePerInstallment = this.pmtCalculator.calculatePaymentForOnePeriodFrom(loanScheduleInfo, periodInterestRateForRepaymentPeriod, monetaryCurrency);
 		final Money totalRepaymentDueForLoanTerm = this.pmtCalculator.calculateTotalRepaymentFrom(loanScheduleInfo, periodInterestRateForRepaymentPeriod, monetaryCurrency);
 		
 		Money totalInterestDue = totalRepaymentDueForLoanTerm.minus(loanScheduleInfo.getPrincipal());
