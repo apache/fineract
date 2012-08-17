@@ -4,6 +4,7 @@ import java.util.Set;
 
 import org.mifosng.platform.api.commands.AdjustLoanTransactionCommand;
 import org.mifosng.platform.api.commands.BranchMoneyTransferCommand;
+import org.mifosng.platform.api.commands.ChargeCommand;
 import org.mifosng.platform.api.commands.ClientCommand;
 import org.mifosng.platform.api.commands.DepositProductCommand;
 import org.mifosng.platform.api.commands.DepositAccountCommand;
@@ -22,6 +23,7 @@ import org.mifosng.platform.api.commands.UserCommand;
 import org.mifosng.platform.api.data.AdditionalFieldsSetData;
 import org.mifosng.platform.api.data.AppUserData;
 import org.mifosng.platform.api.data.AuthenticatedUserData;
+import org.mifosng.platform.api.data.ChargeData;
 import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.ClientLoanAccountSummaryCollectionData;
 import org.mifosng.platform.api.data.ConfigurationData;
@@ -83,6 +85,10 @@ public interface ApiDataConversionService {
 	
 	String convertAuthenticatedUserDataToJson(boolean prettyPrint, AuthenticatedUserData authenticatedUserData);
 	//
+
+    ChargeCommand convertJsonToChargeCommand(Long resourceIdentifier, String json);
+
+    String convertChargeDataToJson(boolean prettyPrint, Set<String> responseParameters, ChargeData... charges);
 
 	FundCommand convertJsonToFundCommand(Long resourceIdentifier, String json);
 	

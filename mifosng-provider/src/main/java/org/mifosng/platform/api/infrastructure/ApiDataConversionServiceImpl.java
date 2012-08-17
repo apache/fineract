@@ -20,6 +20,7 @@ import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.mifosng.platform.api.commands.AdjustLoanTransactionCommand;
 import org.mifosng.platform.api.commands.BranchMoneyTransferCommand;
+import org.mifosng.platform.api.commands.ChargeCommand;
 import org.mifosng.platform.api.commands.ClientCommand;
 import org.mifosng.platform.api.commands.DepositProductCommand;
 import org.mifosng.platform.api.commands.DepositAccountCommand;
@@ -39,6 +40,7 @@ import org.mifosng.platform.api.data.AdditionalFieldsSetData;
 import org.mifosng.platform.api.data.ApiParameterError;
 import org.mifosng.platform.api.data.AppUserData;
 import org.mifosng.platform.api.data.AuthenticatedUserData;
+import org.mifosng.platform.api.data.ChargeData;
 import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.ClientLoanAccountSummaryCollectionData;
 import org.mifosng.platform.api.data.ConfigurationData;
@@ -653,8 +655,65 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		
 		return json;
 	}
-	
-	@Override
+
+    @Override
+    public ChargeCommand convertJsonToChargeCommand(Long resourceIdentifier, String json) {
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
+
+        Type typeOfMap = new TypeToken<Map<String, String>>(){}.getType();
+        Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
+
+
+        Set<String> supportedParams = new HashSet<String>(
+                Arrays.asList("name", "amount", "locale")
+        );
+
+        checkForUnsupportedParameters(requestMap, supportedParams);
+
+        Set<String> modifiedParameters = new HashSet<String>();
+
+        String name = extractStringParameter("name", requestMap, modifiedParameters);
+        BigDecimal amount = extractBigDecimalParameter("amount", requestMap, modifiedParameters);
+
+        return new ChargeCommand(modifiedParameters, resourceIdentifier, name, amount);
+    }
+
+    @Override
+    public String convertChargeDataToJson(boolean prettyPrint, Set<String> responseParameters, ChargeData... charges) {
+        Set<String> supportedParameters = new HashSet<String>(Arrays.asList("id", "name", "amount"));
+
+        final Set<String> parameterNamesToSkip = new HashSet<String>();
+
+        if (!responseParameters.isEmpty()) {
+            if (!supportedParameters.containsAll(responseParameters)) {
+                throw new UnsupportedParameterException(new ArrayList<String>(responseParameters));
+            }
+
+            parameterNamesToSkip.addAll(supportedParameters);
+            parameterNamesToSkip.removeAll(responseParameters);
+        }
+
+        ExclusionStrategy strategy = new ParameterListExclusionStrategy(parameterNamesToSkip);
+
+        GsonBuilder builder = new GsonBuilder().addSerializationExclusionStrategy(strategy);
+        if (prettyPrint) {
+            builder.setPrettyPrinting();
+        }
+        Gson gsonDeserializer = builder.create();
+
+        String json = "";
+        if (charges != null && charges.length == 1) {
+            json = gsonDeserializer.toJson(charges[0]);
+        } else {
+            json = gsonDeserializer.toJson(charges);
+        }
+
+        return json;
+    }
+
+    @Override
 	public FundCommand convertJsonToFundCommand(final Long resourceIdentifier, final String json) {
 
 		if (StringUtils.isBlank(json)) {
