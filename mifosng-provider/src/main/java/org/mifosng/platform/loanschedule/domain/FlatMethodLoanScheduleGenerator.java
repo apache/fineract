@@ -15,7 +15,7 @@ import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.loan.domain.LoanProductRelatedDetail;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 
-public class FlatLoanScheduleGenerator implements LoanScheduleGenerator {
+public class FlatMethodLoanScheduleGenerator implements LoanScheduleGenerator {
 
 	private final ScheduledDateGenerator scheduledDateGenerator = new DefaultScheduledDateGenerator();
 	private final PaymentPeriodsInOneYearCalculator paymentPeriodsInOneYearCalculator = new DefaultPaymentPeriodsInOneYearCalculator();
@@ -48,18 +48,6 @@ public class FlatLoanScheduleGenerator implements LoanScheduleGenerator {
 		Money principalPerInstallment = loanScheduleInfo.getPrincipal()
 				.dividedBy(loanScheduleInfo.getNumberOfRepayments(),
 						RoundingMode.HALF_EVEN);
-
-//		BigDecimal paymentPeriodsInYear = BigDecimal
-//				.valueOf(this.paymentPeriodsInOneYearCalculator
-//						.calculate(loanScheduleInfo.getRepaymentPeriodFrequencyType()));
-
-//		BigDecimal periodicInterestRate = loanScheduleInfo
-//				.getAnnualNominalInterestRate()
-//				.divide(paymentPeriodsInYear, mc)
-//				.divide(BigDecimal.valueOf(Double.valueOf("100.0")), mc)
-//				.multiply(BigDecimal.valueOf(loanScheduleInfo.getRepayEvery()));
-
-//		Money interestPerInstallment = loanScheduleInfo.getPrincipal().multiplyRetainScale(periodicInterestRate, RoundingMode.HALF_EVEN);
 
 		Money outstandingBalance = loanScheduleInfo.getPrincipal();
 		Money totalPrincipal = Money.zero(outstandingBalance.getCurrency());

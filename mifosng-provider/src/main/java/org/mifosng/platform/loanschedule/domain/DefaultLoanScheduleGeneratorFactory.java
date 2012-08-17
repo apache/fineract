@@ -12,7 +12,7 @@ public class DefaultLoanScheduleGeneratorFactory implements
 
 		switch (interestMethod) {
 		case FLAT:
-			loanScheduleGenerator = new FlatLoanScheduleGenerator();
+			loanScheduleGenerator = new FlatMethodLoanScheduleGenerator();
 			break;
 		case DECLINING_BALANCE:
 			loanScheduleGenerator = new DecliningBalanceMethodLoanScheduleGenerator();

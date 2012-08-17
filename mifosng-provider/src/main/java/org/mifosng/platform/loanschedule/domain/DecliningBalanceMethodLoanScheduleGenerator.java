@@ -1,17 +1,11 @@
 package org.mifosng.platform.loanschedule.domain;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 
-import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.LoanSchedule;
-import org.mifosng.platform.api.data.MoneyData;
-import org.mifosng.platform.api.data.ScheduledLoanInstallment;
-import org.mifosng.platform.currency.domain.MonetaryCurrency;
-import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.loan.domain.AmortizationMethod;
 import org.mifosng.platform.loan.domain.LoanProductRelatedDetail;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
@@ -37,6 +31,7 @@ public class DecliningBalanceMethodLoanScheduleGenerator implements LoanSchedule
 
 	private final ScheduledDateGenerator scheduledDateGenerator = new DefaultScheduledDateGenerator();
 	private final PeriodicInterestRateCalculator periodicInterestRateCalculator = new PeriodicInterestRateCalculator();
+	private final AmortizationLoanScheduleGeneratorFactory amortizationLoanScheduleGeneratorFactory = new AmortizationLoanScheduleGeneratorFactory();
 	
 	@Override
 	public LoanSchedule generate(
@@ -57,7 +52,8 @@ public class DecliningBalanceMethodLoanScheduleGenerator implements LoanSchedule
 		final BigDecimal periodInterestRateForRepaymentPeriod = this.periodicInterestRateCalculator.calculateFrom(loanScheduleInfo);
 		
 		// Determine with 'amortisation' approach to use
-		AmortizationLoanScheduleGenerator generator = new EqualInstallmentsAmortizationLoanScheduleGenerator();
+		AmortizationLoanScheduleGenerator generator = this.amortizationLoanScheduleGeneratorFactory.createGenerator(loanScheduleInfo.getAmortizationMethod());
+		
 		return generator.generate(loanScheduleInfo, disbursementDate, firstRepaymentDate, interestCalculatedFrom, currencyData,
 				periodInterestRateForRepaymentPeriod, idealDisbursementDateBasedOnFirstRepaymentDate, scheduledDates);
 	}
