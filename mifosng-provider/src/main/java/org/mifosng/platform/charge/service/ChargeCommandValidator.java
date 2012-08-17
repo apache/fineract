@@ -35,8 +35,8 @@ public class ChargeCommandValidator {
         DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("charge");
 
         baseDataValidator.reset().parameter("id").value(command.getId()).notNull();
-        baseDataValidator.reset().parameter("name").value(command.getName()).notBlank().notExceedingLengthOf(100);
-        baseDataValidator.reset().parameter("amount").value(command.getAmount()).notNull().positiveAmount();
+        baseDataValidator.reset().parameter("name").value(command.getName()).ignoreIfNull().notBlank().notExceedingLengthOf(100);
+        baseDataValidator.reset().parameter("amount").value(command.getAmount()).ignoreIfNull().positiveAmount();
 
         if (!dataValidationErrors.isEmpty()) {
             throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);
