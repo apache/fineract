@@ -34,9 +34,11 @@ public class PeriodicInterestRateCalculator {
 		return loanScheduleInfo.getAnnualNominalInterestRate().divide(divisor, mc).multiply(numberOfPeriods);
 	}
 
-	public Money calculateInterestOn(Money outstandingBalance, BigDecimal periodInterestRateForRepaymentPeriod, 
-			int daysInPeriod, 
-			LoanProductRelatedDetail loanScheduleInfo) {
+	public Money calculateInterestOn(
+			final Money outstandingBalance, 
+			final BigDecimal periodInterestRateForRepaymentPeriod, 
+			final int daysInPeriod, 
+			final LoanProductRelatedDetail loanScheduleInfo) {
 
 		MathContext mc = new MathContext(8, RoundingMode.HALF_EVEN);
 		Money interestDue = Money.zero(outstandingBalance.getCurrency());

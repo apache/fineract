@@ -11,7 +11,7 @@ public class CurrencyData implements Serializable {
 	private final String nameCode;
 	private final String displayLabel;
 
-	public CurrencyData(final String code, final String name, final int decimalPlaces, String displaySymbol, String nameCode) {
+	public CurrencyData(final String code, final String name, final int decimalPlaces, final String displaySymbol, final String nameCode) {
 		this.code = code;
 		this.name = name;
 		this.decimalPlaces = decimalPlaces;
