@@ -14,6 +14,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -135,14 +136,17 @@ public class DepositAccountsApiResource {
 	@Path("template")
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
-	public String retrieveNewDepositAccountDetails(@Context final UriInfo uriInfo) {
+	public String retrieveNewDepositAccountDetails(
+			@QueryParam("clientId") final Long clientId,
+			@QueryParam("productId") final Long productId,
+			@Context final UriInfo uriInfo) {
 		
 		Set<String> typicalResponseParameters = new HashSet<String>(
 				Arrays.asList("currencyOptions", "interestCompoundedEveryPeriodTypeOptions",
 						"createdOn", "lastModifedOn", 
 						"id", "externalId", "clientId", "clientName", "productId", "productName", 
 						"currency", "deposit", "maturityInterestRate", "tenureInMonths", "interestCompoundedEvery", "interestCompoundedEveryPeriodType",
-						"renewalAllowed","preClosureAllowed","preClosureInterestRate"
+						"renewalAllowed","preClosureAllowed","preClosureInterestRate","allowedProducts"
 						)
 		);
 		
@@ -152,7 +156,7 @@ public class DepositAccountsApiResource {
 		}
 		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 		
-		DepositAccountData account = this.depositAccountReadPlatformService.retrieveNewDepositAccountDetails();
+		DepositAccountData account = this.depositAccountReadPlatformService.retrieveNewDepositAccountDetails(clientId,productId);
 		
 		account = handleTemplateRelatedData(responseParameters, account);
 		

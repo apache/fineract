@@ -3,16 +3,23 @@ package org.mifosng.platform.saving.service;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
+import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.DepositAccountData;
+import org.mifosng.platform.api.data.DepositProductData;
+import org.mifosng.platform.api.data.DepositProductLookup;
 import org.mifosng.platform.api.data.EnumOptionData;
+import org.mifosng.platform.client.service.ClientReadPlatformService;
 import org.mifosng.platform.exceptions.LoanProductNotFoundException;
 import org.mifosng.platform.infrastructure.JdbcSupport;
 import org.mifosng.platform.infrastructure.TenantAwareRoutingDataSource;
+import org.mifosng.platform.savingproduct.service.DepositProductReadPlatformService;
 import org.mifosng.platform.savingproduct.service.SavingsDepositEnumerations;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,11 +33,15 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 	
 	private final PlatformSecurityContext context;
 	private final JdbcTemplate jdbcTemplate;
+	private final DepositProductReadPlatformService depositProductReadPlatformService;
+	private final ClientReadPlatformService clientReadPlatformService;
 	
 	@Autowired
-	public DepositAccountReadPlatformServiceImpl(final PlatformSecurityContext context,final TenantAwareRoutingDataSource dataSource) {
+	public DepositAccountReadPlatformServiceImpl(final PlatformSecurityContext context,final TenantAwareRoutingDataSource dataSource, final DepositProductReadPlatformService depositProductReadPlatformService,final ClientReadPlatformService clientReadPlatformService) {
 		this.context=context;
 		jdbcTemplate=new JdbcTemplate(dataSource);
+		this.depositProductReadPlatformService=depositProductReadPlatformService;
+		this.clientReadPlatformService=clientReadPlatformService;
 	}
 
 	@Override
@@ -63,13 +74,41 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 	}
 
 	@Override
-	public DepositAccountData retrieveNewDepositAccountDetails() {
-		
+	public DepositAccountData retrieveNewDepositAccountDetails(final Long clientId, final Long productId) {
+		context.authenticatedUser();
 		DepositAccountData productData = new DepositAccountData();
+		
+		Collection<DepositProductLookup> depositProducts = this.depositProductReadPlatformService.retrieveAllDepositProductsForLookup();
+		productData.setAllowedProducts(new ArrayList<DepositProductLookup>(depositProducts));
+		
+		if (productId != null) {
+			DepositProductData selectedProduct = findDepositProductById(depositProducts,productId);
+			
+			productData.setProductId(selectedProduct.getId());
+			productData.setProductName(selectedProduct.getName());
+			productData.setSelectedProduct(selectedProduct);
+			
+		}
+		
+		ClientData clientAccount = this.clientReadPlatformService.retrieveIndividualClient(clientId);
+		productData.setClientId(clientAccount.getId());
+		productData.setClientName(clientAccount.getDisplayName());
 		
 		return productData;
 	}
-	
+
+	private DepositProductData findDepositProductById(
+			Collection<DepositProductLookup> depositProducts, Long productId) {
+		DepositProductData match= this.depositProductReadPlatformService.retrieveNewDepositProductDetails();
+		for(DepositProductLookup depositProductLookup : depositProducts){
+			if (depositProductLookup.getId().equals(productId)) {
+				match=this.depositProductReadPlatformService.retrieveDepositProductData(depositProductLookup.getId());
+				break;
+			}
+		}
+		return match;
+	}
+
 	private static final class DepositAccountMapper implements RowMapper<DepositAccountData> {
 		
 		public String schema() {

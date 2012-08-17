@@ -1724,7 +1724,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 						"id", "externalId", "clientId", "clientName", "productId", "productName", 
 						"currency", "deposit", "maturityInterestRate", "tenureInMonths", 
 						"interestCompoundedEvery", "interestCompoundedEveryPeriodType",
-						"renewalAllowed","preClosureAllowed","preClosureInterestRate"
+						"renewalAllowed","preClosureAllowed","preClosureInterestRate","allowedProducts"
 						)
 		);
 

@@ -10,5 +10,5 @@ public interface DepositAccountReadPlatformService {
 
 	DepositAccountData retrieveDepositAccount(Long accountId);
 
-	DepositAccountData retrieveNewDepositAccountDetails();	
+	DepositAccountData retrieveNewDepositAccountDetails(Long clientId, Long productId);	
 }

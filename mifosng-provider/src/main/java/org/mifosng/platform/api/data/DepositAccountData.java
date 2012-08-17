@@ -14,11 +14,11 @@ public class DepositAccountData {
 
 	private final Long id;
 	private final String externalId;
-	private final Long clientId;
-	private final String clientName;
+	private Long clientId;
+	private String clientName;
 	
-	private final Long productId;
-	private final String productName;
+	private Long productId;
+	private String productName;
 	
 	private final CurrencyData currency;
 	private final BigDecimal deposit;
@@ -45,6 +45,9 @@ public class DepositAccountData {
 	
 	private final List<CurrencyData> currencyOptions;
 	private final List<EnumOptionData> interestCompoundedEveryPeriodTypeOptions;
+	
+	private List<DepositProductLookup> allowedProducts = new ArrayList<DepositProductLookup>();
+	private DepositProductData selectedProduct;
 
 	public DepositAccountData() {
 		this.createdOn = null;
@@ -270,4 +273,37 @@ public class DepositAccountData {
 	public List<EnumOptionData> getInterestCompoundedEveryPeriodTypeOptions() {
 		return interestCompoundedEveryPeriodTypeOptions;
 	}
+
+	public List<DepositProductLookup> getAllowedProducts() {
+		return allowedProducts;
+	}
+
+	public void setAllowedProducts(List<DepositProductLookup> allowedProducts) {
+		this.allowedProducts = allowedProducts;
+	}
+
+	public DepositProductData getSelectedProduct() {
+		return selectedProduct;
+	}
+
+	public void setSelectedProduct(DepositProductData selectedProduct) {
+		this.selectedProduct = selectedProduct;
+	}
+
+	public void setClientId(Long clientId) {
+		this.clientId = clientId;
+	}
+
+	public void setClientName(String clientName) {
+		this.clientName = clientName;
+	}
+
+	public void setProductId(Long productId) {
+		this.productId = productId;
+	}
+
+	public void setProductName(String productName) {
+		this.productName = productName;
+	}
+	
 }
