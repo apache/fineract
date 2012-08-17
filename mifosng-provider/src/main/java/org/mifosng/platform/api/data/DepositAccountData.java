@@ -2,6 +2,7 @@ package org.mifosng.platform.api.data;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.joda.time.DateTime;
@@ -14,11 +15,11 @@ public class DepositAccountData {
 
 	private final Long id;
 	private final String externalId;
-	private Long clientId;
-	private String clientName;
 	
-	private Long productId;
-	private String productName;
+	private final Long clientId;
+	private final String clientName;
+	private final Long productId;
+	private final String productName;
 	
 	private final CurrencyData currency;
 	private final BigDecimal deposit;
@@ -43,24 +44,31 @@ public class DepositAccountData {
 	private final DateTime createdOn;
 	private final DateTime lastModifedOn;
 	
-	private final List<CurrencyData> currencyOptions;
 	private final List<EnumOptionData> interestCompoundedEveryPeriodTypeOptions;
 	
-	private List<DepositProductLookup> allowedProducts = new ArrayList<DepositProductLookup>();
-	private DepositProductData selectedProduct;
-
-	public DepositAccountData() {
-		this.createdOn = null;
-		this.lastModifedOn = null;
-		this.id = null;
+	private final List<DepositProductLookup> productOptions;
+	
+	/*
+	 * used when returning account template data but only a clientId is passed, no selected product.
+	 */
+	public static DepositAccountData createFrom(final Long clientId, final String clientDisplayName) {
+		return new DepositAccountData(clientId, clientDisplayName);
+	}
+	
+	private DepositAccountData(
+			final Long clientId, 
+			final String clientName) {
+		this.createdOn=null;
+		this.lastModifedOn=null;
+		this.id=null;
 		this.externalId = null;
-		this.clientId = null;
-		this.clientName = null;
+		this.clientId = clientId;
+		this.clientName = clientName;
 		this.productId = null;
 		this.productName = null;
 		this.currency = null;
 		this.deposit = null;
-		this.maturityInterestRate = null;
+		this.maturityInterestRate=null;
 		this.tenureInMonths = null;
 		this.projectedCommencementDate = null;
 		this.actualCommencementDate = null;
@@ -76,11 +84,14 @@ public class DepositAccountData {
 		this.preClosureAllowed = false;
 		this.preClosureInterestRate = null;
 		
-		this.currencyOptions = new ArrayList<CurrencyData>();
 		this.interestCompoundedEveryPeriodTypeOptions = new ArrayList<EnumOptionData>();
+		this.productOptions = new ArrayList<DepositProductLookup>();
 	}
-	
-	public DepositAccountData(final DepositAccountData account, final List<CurrencyData> currencies, final List<EnumOptionData> interestCompoundedEveryPeriodTypeOptions) {
+
+	public DepositAccountData(
+			final DepositAccountData account, 
+			final List<EnumOptionData> interestCompoundedEveryPeriodTypeOptions,
+			final Collection<DepositProductLookup> productOptions) {
 		this.createdOn = account.getCreatedOn();
 		this.lastModifedOn = account.getLastModifedOn();
 		this.id = account.getId();
@@ -107,8 +118,8 @@ public class DepositAccountData {
 		this.preClosureAllowed = account.isPreClosureAllowed();
 		this.preClosureInterestRate = account.getPreClosureInterestRate();
 		
-		this.currencyOptions = currencies;
 		this.interestCompoundedEveryPeriodTypeOptions = interestCompoundedEveryPeriodTypeOptions;
+		this.productOptions = new ArrayList<DepositProductLookup>(productOptions);
 	}
 	
 	public DepositAccountData(
@@ -162,8 +173,51 @@ public class DepositAccountData {
 		this.preClosureAllowed = preClosureAllowed;
 		this.preClosureInterestRate = preClosureInterestRate;
 		
-		this.currencyOptions = new ArrayList<CurrencyData>();
 		this.interestCompoundedEveryPeriodTypeOptions = new ArrayList<EnumOptionData>();
+		this.productOptions = new ArrayList<DepositProductLookup>();
+	}
+	
+	public DepositAccountData(
+			final Long clientId, 
+			final String clientName, 
+			final Long productId, 
+			final String productName, 
+			final CurrencyData currency,
+			final BigDecimal deposit, final BigDecimal interestRate, 
+			final Integer tenureInMonths, 
+			final Integer interestCompoundedEvery, 
+			final EnumOptionData interestCompoundedEveryPeriodType, 
+			final boolean renewalAllowed, 
+			final boolean preClosureAllowed, 
+			final BigDecimal preClosureInterestRate) {
+		this.createdOn=null;
+		this.lastModifedOn=null;
+		this.id=null;
+		this.externalId = null;
+		this.clientId = clientId;
+		this.clientName = clientName;
+		this.productId = productId;
+		this.productName = productName;
+		this.currency = currency;
+		this.deposit = deposit;
+		this.maturityInterestRate=interestRate;
+		this.tenureInMonths = tenureInMonths;
+		this.projectedCommencementDate = null;
+		this.actualCommencementDate = null;
+		this.projectedMaturityDate = null;
+		this.actualMaturityDate = null;
+		this.projectedInterestAccrued = null;
+		this.actualInterestAccrued = null;
+		this.projectedMaturityAmount = null;
+		this.actualMaturityAmount = null;
+		this.interestCompoundedEvery = interestCompoundedEvery;
+		this.interestCompoundedEveryPeriodType = interestCompoundedEveryPeriodType;
+		this.renewalAllowed = renewalAllowed;
+		this.preClosureAllowed = preClosureAllowed;
+		this.preClosureInterestRate = preClosureInterestRate;
+		
+		this.interestCompoundedEveryPeriodTypeOptions = new ArrayList<EnumOptionData>();
+		this.productOptions = new ArrayList<DepositProductLookup>();
 	}
 
 	public Long getId() {
@@ -266,44 +320,11 @@ public class DepositAccountData {
 		return lastModifedOn;
 	}
 
-	public List<CurrencyData> getCurrencyOptions() {
-		return currencyOptions;
-	}
-	
 	public List<EnumOptionData> getInterestCompoundedEveryPeriodTypeOptions() {
 		return interestCompoundedEveryPeriodTypeOptions;
 	}
 
-	public List<DepositProductLookup> getAllowedProducts() {
-		return allowedProducts;
+	public List<DepositProductLookup> getProductOptions() {
+		return productOptions;
 	}
-
-	public void setAllowedProducts(List<DepositProductLookup> allowedProducts) {
-		this.allowedProducts = allowedProducts;
-	}
-
-	public DepositProductData getSelectedProduct() {
-		return selectedProduct;
-	}
-
-	public void setSelectedProduct(DepositProductData selectedProduct) {
-		this.selectedProduct = selectedProduct;
-	}
-
-	public void setClientId(Long clientId) {
-		this.clientId = clientId;
-	}
-
-	public void setClientName(String clientName) {
-		this.clientName = clientName;
-	}
-
-	public void setProductId(Long productId) {
-		this.productId = productId;
-	}
-
-	public void setProductName(String productName) {
-		this.productName = productName;
-	}
-	
 }

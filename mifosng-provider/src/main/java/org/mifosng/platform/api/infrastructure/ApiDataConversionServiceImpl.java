@@ -1719,12 +1719,12 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 			final DepositAccountData... accounts) {
 		
 		Set<String> supportedParameters = new HashSet<String>(
-				Arrays.asList("currencyOptions", "interestCompoundedEveryPeriodTypeOptions",
+				Arrays.asList("productOptions", "interestCompoundedEveryPeriodTypeOptions",
 						"createdOn", "lastModifedOn", 
 						"id", "externalId", "clientId", "clientName", "productId", "productName", 
 						"currency", "deposit", "maturityInterestRate", "tenureInMonths", 
 						"interestCompoundedEvery", "interestCompoundedEveryPeriodType",
-						"renewalAllowed","preClosureAllowed","preClosureInterestRate","allowedProducts"
+						"renewalAllowed","preClosureAllowed","preClosureInterestRate"
 						)
 		);
 

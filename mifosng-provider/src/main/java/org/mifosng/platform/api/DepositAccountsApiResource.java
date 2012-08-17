@@ -21,16 +21,16 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.mifosng.platform.api.commands.DepositAccountCommand;
-import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.DepositAccountData;
+import org.mifosng.platform.api.data.DepositProductLookup;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.EnumOptionData;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
-import org.mifosng.platform.currency.service.CurrencyReadPlatformService;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 import org.mifosng.platform.saving.service.DepositAccountReadPlatformService;
 import org.mifosng.platform.saving.service.DepositAccountWritePlatformService;
+import org.mifosng.platform.savingproduct.service.DepositProductReadPlatformService;
 import org.mifosng.platform.savingproduct.service.SavingsDepositEnumerations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -45,7 +45,7 @@ public class DepositAccountsApiResource {
 	private DepositAccountReadPlatformService depositAccountReadPlatformService;
 	
 	@Autowired
-	private CurrencyReadPlatformService currencyReadPlatformService;
+	private DepositProductReadPlatformService depositProductReadPlatformService;
 	
 	@Autowired
 	private DepositAccountWritePlatformService depositAccountWritePlatformService;
@@ -142,11 +142,11 @@ public class DepositAccountsApiResource {
 			@Context final UriInfo uriInfo) {
 		
 		Set<String> typicalResponseParameters = new HashSet<String>(
-				Arrays.asList("currencyOptions", "interestCompoundedEveryPeriodTypeOptions",
+				Arrays.asList(
 						"createdOn", "lastModifedOn", 
 						"id", "externalId", "clientId", "clientName", "productId", "productName", 
 						"currency", "deposit", "maturityInterestRate", "tenureInMonths", "interestCompoundedEvery", "interestCompoundedEveryPeriodType",
-						"renewalAllowed","preClosureAllowed","preClosureInterestRate","allowedProducts"
+						"renewalAllowed","preClosureAllowed","preClosureInterestRate"
 						)
 		);
 		
@@ -178,12 +178,13 @@ public class DepositAccountsApiResource {
 			final Set<String> responseParameters, 
 			final DepositAccountData account) {
 		
-		responseParameters.addAll(Arrays.asList("currencyOptions", "interestCompoundedEveryPeriodTypeOptions"));
-		List<CurrencyData> allowedCurrencies = this.currencyReadPlatformService.retrieveAllowedCurrencies();
+		responseParameters.addAll(Arrays.asList("interestCompoundedEveryPeriodTypeOptions", "productOptions"));
+		
+		Collection<DepositProductLookup> productOptions = depositProductReadPlatformService.retrieveAllDepositProductsForLookup();
 		
 		EnumOptionData monthly = SavingsDepositEnumerations.interestCompoundingPeriodType(PeriodFrequencyType.MONTHS);
 		List<EnumOptionData> interestCompoundedEveryPeriodTypeOptions = Arrays.asList(monthly);
 		
-		return new DepositAccountData(account, allowedCurrencies, interestCompoundedEveryPeriodTypeOptions);
+		return new DepositAccountData(account, interestCompoundedEveryPeriodTypeOptions, productOptions);
 	}
 }

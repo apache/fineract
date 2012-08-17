@@ -3,9 +3,7 @@ package org.mifosng.platform.saving.service;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
@@ -75,30 +73,36 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 
 	@Override
 	public DepositAccountData retrieveNewDepositAccountDetails(final Long clientId, final Long productId) {
+		
 		context.authenticatedUser();
-		DepositAccountData productData = new DepositAccountData();
+		
+		ClientData clientAccount = this.clientReadPlatformService.retrieveIndividualClient(clientId);
+		
+		DepositAccountData accountData = null;
 		
 		Collection<DepositProductLookup> depositProducts = this.depositProductReadPlatformService.retrieveAllDepositProductsForLookup();
-		productData.setAllowedProducts(new ArrayList<DepositProductLookup>(depositProducts));
 		
 		if (productId != null) {
 			DepositProductData selectedProduct = findDepositProductById(depositProducts,productId);
 			
-			productData.setProductId(selectedProduct.getId());
-			productData.setProductName(selectedProduct.getName());
-			productData.setSelectedProduct(selectedProduct);
+			CurrencyData currency = new CurrencyData(selectedProduct.getCurrencyCode(), "", selectedProduct.getDigitsAfterDecimal(), "", "");
 			
+			accountData = new DepositAccountData(
+					clientAccount.getId(), clientAccount.getDisplayName(), selectedProduct.getId(), selectedProduct.getName(), 
+					currency, selectedProduct.getMinimumBalance(), selectedProduct.getMaturityDefaultInterestRate(), 
+					selectedProduct.getTenureInMonths(), selectedProduct.getInterestCompoundedEvery(), selectedProduct.getInterestCompoundedEveryPeriodType(), 
+					selectedProduct.isRenewalAllowed(), selectedProduct.isPreClosureAllowed(), 
+					selectedProduct.getPreClosureInterestRate());
+		} else {
+			accountData = DepositAccountData.createFrom(clientAccount.getId(), clientAccount.getDisplayName());
 		}
 		
-		ClientData clientAccount = this.clientReadPlatformService.retrieveIndividualClient(clientId);
-		productData.setClientId(clientAccount.getId());
-		productData.setClientName(clientAccount.getDisplayName());
-		
-		return productData;
+		return accountData;
 	}
 
 	private DepositProductData findDepositProductById(
-			Collection<DepositProductLookup> depositProducts, Long productId) {
+			final Collection<DepositProductLookup> depositProducts, 
+			final Long productId) {
 		DepositProductData match= this.depositProductReadPlatformService.retrieveNewDepositProductDetails();
 		for(DepositProductLookup depositProductLookup : depositProducts){
 			if (depositProductLookup.getId().equals(productId)) {
