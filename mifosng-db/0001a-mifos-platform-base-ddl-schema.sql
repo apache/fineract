@@ -37,7 +37,6 @@ DROP TABLE IF EXISTS `admin_role`;
 
 -- drop reference/lookup tables
 DROP TABLE IF EXISTS `ref_currency`;
-DROP TABLE IF EXISTS `ref_loan_status`;
 DROP TABLE IF EXISTS `ref_loan_transaction_processing_strategy`;
 DROP TABLE IF EXISTS `r_code_value`;
 DROP TABLE IF EXISTS `r_code`;
@@ -68,12 +67,6 @@ CREATE TABLE `ref_currency` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `code` (`code`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
-
-CREATE TABLE `ref_loan_status` (
-  `id` smallint(5) NOT NULL,
-  `display_name` varchar(50) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `ref_loan_transaction_processing_strategy` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -397,7 +390,6 @@ CREATE TABLE `portfolio_loan` (
   KEY `FK_loan_ltp_strategy` (`loan_transaction_strategy_id`),
   CONSTRAINT `FK_loan_ltp_strategy` FOREIGN KEY (`loan_transaction_strategy_id`) REFERENCES `ref_loan_transaction_processing_strategy` (`id`),
   CONSTRAINT `FK7C885877240145` FOREIGN KEY (`fund_id`) REFERENCES `org_fund` (`id`),
-  CONSTRAINT `FK7C885878B1147D1` FOREIGN KEY (`loan_status_id`) REFERENCES `ref_loan_status` (`id`),
   CONSTRAINT `FKB6F935D87179A0CB` FOREIGN KEY (`client_id`) REFERENCES `portfolio_client` (`id`),
   CONSTRAINT `FKB6F935D8C8D4B434` FOREIGN KEY (`product_id`) REFERENCES `portfolio_product_loan` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
