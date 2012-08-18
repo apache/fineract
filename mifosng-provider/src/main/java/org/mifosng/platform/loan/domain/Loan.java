@@ -202,8 +202,13 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 			final LocalDate repaymentsStartingFromDate,
 			final LocalDate interestChargedFromDate,
 			final LoanLifecycleStateMachine lifecycleStateMachine) {
+		
+		LoanStatus from = null;
+		if (this.loanStatus != null) {
+			from = LoanStatus.fromInt(this.loanStatus);
+		}
 
-		LoanStatus statusEnum = lifecycleStateMachine.transition(LoanEvent.LOAN_CREATED, LoanStatus.fromInt(this.loanStatus));
+		LoanStatus statusEnum = lifecycleStateMachine.transition(LoanEvent.LOAN_CREATED, from);
 		this.loanStatus = statusEnum.getValue();
 
 		this.termFrequency = loanTermFrequency;

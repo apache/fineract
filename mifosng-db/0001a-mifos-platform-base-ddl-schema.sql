@@ -385,7 +385,6 @@ CREATE TABLE `m_loan` (
   UNIQUE KEY `m_id` (`external_id`),
   KEY `FKB6F935D87179A0CB` (`client_id`),
   KEY `FKB6F935D8C8D4B434` (`product_id`),
-  KEY `FK7C885878B1147D1` (`loan_status_id`),
   KEY `FK7C885877240145` (`fund_id`),
   KEY `FK_loan_ltp_strategy` (`loan_transaction_strategy_id`),
   CONSTRAINT `FK_loan_ltp_strategy` FOREIGN KEY (`loan_transaction_strategy_id`) REFERENCES `ref_loan_transaction_processing_strategy` (`id`),

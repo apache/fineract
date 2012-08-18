@@ -593,7 +593,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 			return " tr.id as id, tr.transaction_type_enum as transactionType, tr.transaction_date as `date`, tr.amount as total, "
 					+ " l.currency_code as currencyCode, l.currency_digits as currencyDigits, rc.`name` as currencyName, rc.display_symbol as currencyDisplaySymbol, rc.internationalized_name_code as currencyNameCode "
 					+ " from m_loan l "
-					+ " join m_transaction tr on tr.loan_id = l.id"
+					+ " join m_loan_transaction tr on tr.loan_id = l.id"
 					+ " join m_currency rc on rc.`code` = l.currency_code ";
 		}
 
