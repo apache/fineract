@@ -26,7 +26,7 @@ import org.mifosng.platform.savingproduct.domain.DepositProduct;
 import org.mifosng.platform.user.domain.AppUser;
 
 @Entity
-@Table(name = "portfolio_deposit_account", uniqueConstraints = @UniqueConstraint(name="deposit_acc_external_id", columnNames = { "external_id" }))
+@Table(name = "m_deposit_account", uniqueConstraints = @UniqueConstraint(name="deposit_acc_external_id", columnNames = { "external_id" }))
 public class DepositAccount extends AbstractAuditableCustom<AppUser, Long> {
 	
 	@SuppressWarnings("unused")

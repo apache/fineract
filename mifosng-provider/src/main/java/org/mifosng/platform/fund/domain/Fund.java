@@ -11,7 +11,7 @@ import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
 import org.mifosng.platform.user.domain.AppUser;
 
 @Entity
-@Table(name = "org_fund", uniqueConstraints={
+@Table(name = "m_fund", uniqueConstraints={
 		@UniqueConstraint(columnNames = {"name"}, name="fund_name_org"), 
 		@UniqueConstraint(columnNames = {"external_id"}, name="fund_externalid_org")
 })

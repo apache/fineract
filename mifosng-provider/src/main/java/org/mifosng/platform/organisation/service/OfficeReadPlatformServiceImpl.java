@@ -46,7 +46,7 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
 			return " o.id as id, o.name as name, "
 					+ nameDecoratedBaseOnHierarchy
 					+ " as nameDecorated, o.external_id as externalId, o.opening_date as openingDate, o.hierarchy as hierarchy, parent.id as parentId, parent.name as parentName "
-					+ "from org_office o LEFT JOIN org_office AS parent ON parent.id = o.parent_id ";
+					+ "from m_office o LEFT JOIN m_office AS parent ON parent.id = o.parent_id ";
 		}
 
 		@Override
@@ -72,7 +72,7 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
 
 		public String officeLookupSchema() {
 			return " o.id as id, " + nameDecoratedBaseOnHierarchy
-					+ " as nameDecorated, o.name as name from org_office o ";
+					+ " as nameDecorated, o.name as name from m_office o ";
 		}
 
 		@Override

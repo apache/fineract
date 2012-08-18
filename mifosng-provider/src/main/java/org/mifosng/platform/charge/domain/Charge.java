@@ -11,7 +11,7 @@ import javax.persistence.UniqueConstraint;
 import java.math.BigDecimal;
 
 @Entity
-@Table(name = "o_charge", uniqueConstraints = {
+@Table(name = "m_charge", uniqueConstraints = {
     @UniqueConstraint(columnNames = {"name"}, name = "name")
 })
 public class Charge extends AbstractAuditableCustom<AppUser, Long> {

@@ -8,7 +8,7 @@ import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
 import org.mifosng.platform.user.domain.AppUser;
 
 @Entity
-@Table(name = "org_organisation_currency")
+@Table(name = "m_organisation_currency")
 public class OrganisationCurrency extends AbstractAuditableCustom<AppUser, Long> {
 
     @SuppressWarnings("unused")

@@ -18,7 +18,7 @@ import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
 import org.mifosng.platform.user.domain.AppUser;
 
 @Entity
-@Table(name = "portfolio_loan_repayment_schedule")
+@Table(name = "m_loan_repayment_schedule")
 public class LoanRepaymentScheduleInstallment extends AbstractAuditableCustom<AppUser, Long> {
 
     @ManyToOne(optional = false)

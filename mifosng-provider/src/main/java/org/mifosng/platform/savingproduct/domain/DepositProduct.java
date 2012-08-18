@@ -17,7 +17,7 @@ import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 import org.mifosng.platform.user.domain.AppUser;
 
 @Entity
-@Table(name = "portfolio_product_deposit", uniqueConstraints={
+@Table(name = "m_product_deposit", uniqueConstraints={
 												@UniqueConstraint(columnNames = {"name"}, name="name_deposit_product"), 
 												@UniqueConstraint(columnNames = {"external_id"}, name="externalid_deposit_product")
 })

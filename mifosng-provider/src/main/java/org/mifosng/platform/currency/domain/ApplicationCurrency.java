@@ -7,7 +7,7 @@ import javax.persistence.Table;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
-@Table(name = "ref_currency")
+@Table(name = "m_currency")
 public class ApplicationCurrency extends AbstractPersistable<Long> {
 
     @Column(name = "code", nullable = false, length=3)

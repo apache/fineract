@@ -76,7 +76,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
     private static final class GroupMapper implements RowMapper<GroupData> {
 
         public String groupSchema() {
-            return "g.id as id, g.external_id as externalId, g.name as name from portfolio_group g";
+            return "g.id as id, g.external_id as externalId, g.name as name from m_group g";
         }
 
         @Override
@@ -106,7 +106,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
     private static final class ClientMemberSummaryDataMapper implements RowMapper<ClientLookup> {
 
         public String clientMemberSummarySchema() {
-            return "cm.id, cm.firstname, cm.lastname from portfolio_client cm INNER JOIN portfolio_group_client pgc ON pgc.client_id = cm.id";
+            return "cm.id, cm.firstname, cm.lastname from m_client cm INNER JOIN m_group_client pgc ON pgc.client_id = cm.id";
         }
 
         @Override

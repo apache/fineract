@@ -12,7 +12,7 @@ import org.mifosng.platform.loan.domain.LoanTransaction;
 import org.mifosng.platform.user.domain.AppUser;
 
 @Entity
-@Table(name = "portfolio_note")
+@Table(name = "m_note")
 public class Note extends AbstractAuditableCustom<AppUser, Long> {
 
 	@ManyToOne

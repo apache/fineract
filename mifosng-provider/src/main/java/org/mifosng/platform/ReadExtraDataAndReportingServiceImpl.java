@@ -575,7 +575,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 	}
 
 	private String getFullDatasetName(final String type, final String set) {
-		return type + "_extra_" + set;
+		return type + "_x_" + set;
 	}
 
 	private static String replace(String str, String pattern, String replace) {

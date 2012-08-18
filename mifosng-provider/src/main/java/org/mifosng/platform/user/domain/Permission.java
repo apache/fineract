@@ -10,7 +10,7 @@ import org.mifosng.platform.api.data.PermissionData;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
-@Table(name = "admin_permission")
+@Table(name = "m_permission")
 public class Permission extends AbstractPersistable<Long> {
 
     @Column(name = "code", nullable = false, length=100)

@@ -65,7 +65,7 @@ public class RoleReadPlatformServiceImpl implements RoleReadPlatformService {
 		}
 
 		public String schema() {
-			return " r.id as id, r.name as name, r.description as description from admin_role r";
+			return " r.id as id, r.name as name, r.description as description from m_role r";
 		}
 	}
 }

@@ -30,7 +30,7 @@ public class CurrencyReadPlatformServiceImpl implements CurrencyReadPlatformServ
 
 		context.authenticatedUser();
 
-		String sql = "select c.code as code, c.name as name, c.decimal_places as decimalPlaces, c.display_symbol as displaySymbol, c.internationalized_name_code as nameCode from org_organisation_currency c";
+		String sql = "select c.code as code, c.name as name, c.decimal_places as decimalPlaces, c.display_symbol as displaySymbol, c.internationalized_name_code as nameCode from m_organisation_currency c";
 
 		RowMapper<CurrencyData> rm = new CurrencyMapper();
 
@@ -40,7 +40,7 @@ public class CurrencyReadPlatformServiceImpl implements CurrencyReadPlatformServ
 	@Override
 	public List<CurrencyData> retrieveAllPlatformCurrencies() {
 
-		String sql = "select c.code as code, c.name as name, c.decimal_places as decimalPlaces, c.display_symbol as displaySymbol, c.internationalized_name_code as nameCode from ref_currency c";
+		String sql = "select c.code as code, c.name as name, c.decimal_places as decimalPlaces, c.display_symbol as displaySymbol, c.internationalized_name_code as nameCode from m_currency c";
 
 		RowMapper<CurrencyData> rm = new CurrencyMapper();
 

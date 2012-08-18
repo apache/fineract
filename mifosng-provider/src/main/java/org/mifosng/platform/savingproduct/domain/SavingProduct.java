@@ -14,7 +14,7 @@ import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
 import org.mifosng.platform.user.domain.AppUser;
 
 @Entity
-@Table(name = "portfolio_product_savings")
+@Table(name = "m_product_savings")
 public class SavingProduct extends AbstractAuditableCustom<AppUser, Long> {
 	
 	@Column(name = "name", nullable = false)

@@ -30,7 +30,7 @@ public class FundReadPlatformServiceImpl implements FundReadPlatformService {
 	private static final class FundMapper implements RowMapper<FundData> {
 
 		public String schema() {
-			return " f.id as id, f.name as name, f.external_id as externalId from org_fund f ";
+			return " f.id as id, f.name as name, f.external_id as externalId from m_fund f ";
 		}
 
 		@Override

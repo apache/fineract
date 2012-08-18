@@ -25,7 +25,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 
 @Entity
-@Table(name = "admin_appuser", uniqueConstraints=@UniqueConstraint(columnNames = {"username"}, name="username_org"))
+@Table(name = "m_appuser", uniqueConstraints=@UniqueConstraint(columnNames = {"username"}, name="username_org"))
 public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements PlatformUser {
 
     @Column(name = "email", nullable=false, length=100)
@@ -63,7 +63,7 @@ public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements P
     private Office office;
 
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "admin_appuser_role", joinColumns = @JoinColumn(name = "appuser_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
+    @JoinTable(name = "m_appuser_role", joinColumns = @JoinColumn(name = "appuser_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role>    roles;
     
 

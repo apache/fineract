@@ -58,7 +58,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
     private static final class ChargeMapper implements RowMapper<ChargeData> {
 
         public String chargeSchema(){
-            return "c.id as id, c.name as name, c.amount as amount from o_charge c ";
+            return "c.id as id, c.name as name, c.amount as amount from m_charge c ";
         }
 
         @Override

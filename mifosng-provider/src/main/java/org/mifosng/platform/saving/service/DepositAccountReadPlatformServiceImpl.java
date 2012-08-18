@@ -128,10 +128,10 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 				+  " da.created_date as createdon, da.lastmodified_date as modifiedon, "
 				+  " c.firstname as firstname, c.lastname as lastname, pd.name as productName,"
 				+  " curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, curr.display_symbol as currencyDisplaySymbol" 
-				+  " from portfolio_deposit_account da " 
-				+  " join ref_currency curr on curr.code = da.currency_code " 
-				+  " join portfolio_client c on c.id = da.client_id " 
-				+  " join portfolio_product_deposit pd on pd.id = da.product_id";
+				+  " from m_deposit_account da " 
+				+  " join m_currency curr on curr.code = da.currency_code " 
+				+  " join m_client c on c.id = da.client_id " 
+				+  " join m_product_deposit pd on pd.id = da.product_id";
 		}
 
 		@Override

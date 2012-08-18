@@ -20,7 +20,7 @@ import org.mifosng.platform.api.data.RoleData;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
 
 @Entity
-@Table(name = "admin_role")
+@Table(name = "m_role")
 public class Role extends AbstractAuditableCustom<AppUser, Long> {
 
     @Column(name="name", nullable=false, length=100)
@@ -30,7 +30,7 @@ public class Role extends AbstractAuditableCustom<AppUser, Long> {
     private String          description;
 
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "admin_role_permission", joinColumns = @JoinColumn(name = "role_id"), inverseJoinColumns = @JoinColumn(name = "permission_id"))
+    @JoinTable(name = "m_role_permission", joinColumns = @JoinColumn(name = "role_id"), inverseJoinColumns = @JoinColumn(name = "permission_id"))
     private Set<Permission> permissions;
 
     protected Role() {

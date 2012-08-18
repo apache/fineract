@@ -38,7 +38,7 @@ import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
 import org.mifosng.platform.user.domain.AppUser;
 
 @Entity
-@Table(name = "portfolio_loan", uniqueConstraints = @UniqueConstraint(columnNames = { "external_id" }))
+@Table(name = "m_loan", uniqueConstraints = @UniqueConstraint(columnNames = { "external_id" }))
 public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 
 	@ManyToOne

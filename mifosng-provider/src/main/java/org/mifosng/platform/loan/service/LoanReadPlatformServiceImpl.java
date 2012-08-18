@@ -414,10 +414,10 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 					+ " l.amortization_method_enum as amortizationType, l.interest_method_enum as interestType, l.interest_calculated_in_period_enum as interestCalculationPeriodType,"
 					+ " l.loan_status_id as lifeCycleStatusId, "
 					+ " l.currency_code as currencyCode, l.currency_digits as currencyDigits, rc.`name` as currencyName, rc.display_symbol as currencyDisplaySymbol, rc.internationalized_name_code as currencyNameCode"
-					+ " from portfolio_loan l"
-					+ " join portfolio_product_loan lp on lp.id = l.product_id"
-					+ " join ref_currency rc on rc.`code` = l.currency_code"
-					+ " left join org_fund f on f.id = l.fund_id";
+					+ " from m_loan l"
+					+ " join m_product_loan lp on lp.id = l.product_id"
+					+ " join m_currency rc on rc.`code` = l.currency_code"
+					+ " left join m_fund f on f.id = l.fund_id";
 		}
 
 		@Override
@@ -531,9 +531,9 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 					+ " ls.principal_amount as principal, ls.principal_completed_derived as principalPaid, "
 					+ " ls.interest_amount as interest, ls.interest_completed_derived as interestPaid, ls.interest_waived_derived as interestWaived, "
 					+ " l.currency_code as currencyCode, l.currency_digits as currencyDigits, rc.`name` as currencyName, rc.display_symbol as currencyDisplaySymbol, rc.internationalized_name_code as currencyNameCode "
-					+ " from portfolio_loan l "
-					+ " join portfolio_loan_repayment_schedule ls on ls.loan_id = l.id "
-					+ " join ref_currency rc on rc.`code` = l.currency_code ";
+					+ " from m_loan l "
+					+ " join m_loan_repayment_schedule ls on ls.loan_id = l.id "
+					+ " join m_currency rc on rc.`code` = l.currency_code ";
 		}
 
 		@Override
@@ -592,9 +592,9 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
 			return " tr.id as id, tr.transaction_type_enum as transactionType, tr.transaction_date as `date`, tr.amount as total, "
 					+ " l.currency_code as currencyCode, l.currency_digits as currencyDigits, rc.`name` as currencyName, rc.display_symbol as currencyDisplaySymbol, rc.internationalized_name_code as currencyNameCode "
-					+ " from portfolio_loan l "
-					+ " join portfolio_loan_transaction tr on tr.loan_id = l.id"
-					+ " join ref_currency rc on rc.`code` = l.currency_code ";
+					+ " from m_loan l "
+					+ " join m_transaction tr on tr.loan_id = l.id"
+					+ " join m_currency rc on rc.`code` = l.currency_code ";
 		}
 
 		@Override

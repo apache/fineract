@@ -27,7 +27,7 @@ import org.springframework.format.annotation.DateTimeFormat;
  * Disbursements, Repayments, Waivers, Write-off etc
  */
 @Entity
-@Table(name = "portfolio_loan_transaction")
+@Table(name = "m_loan_transaction")
 public class LoanTransaction extends AbstractAuditableCustom<AppUser, Long> {
 
     @ManyToOne(optional = false)

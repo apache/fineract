@@ -132,7 +132,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
 		public String clientSchema() {
 			return "c.office_id as officeId, c.id as id, c.firstname as firstname, c.lastname as lastname, c.external_id as externalId, " +
-					"c.joining_date as joinedDate from portfolio_client c";
+					"c.joining_date as joinedDate from m_client c";
 		}
 
 		@Override
@@ -171,7 +171,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     private static final class ClientLookupMapper implements RowMapper<ClientLookup>{
 
         public String clientLookupSchema() {
-            return "c.id as id, c.firstname as firstname, c.lastname as lastname from portfolio_client c";
+            return "c.id as id, c.firstname as firstname, c.lastname as lastname from m_client c";
         }
 
         @Override
@@ -243,8 +243,8 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 			loanAccountSummary
 					.append("l.product_id as productId, lp.name as productName,")
 					.append("l.loan_status_id as statusId ")
-					.append("from portfolio_loan l ")
-					.append("LEFT JOIN portfolio_product_loan AS lp ON lp.id = l.product_id ");
+					.append("from m_loan l ")
+					.append("LEFT JOIN m_product_loan AS lp ON lp.id = l.product_id ");
 
 			return loanAccountSummary.toString();
 		}
@@ -321,7 +321,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 		public String schema() {
 			return "n.id as id, n.client_id as clientId, n.loan_id as loanId, n.loan_transaction_id as transactionId, n.note_type_enum as noteTypeEnum, n.note as note, "
 					+ "n.created_date as createdDate, n.createdby_id as createdById, n.lastmodified_date as lastModifiedDate, n.lastmodifiedby_id as lastModifiedById"
-					+ " from portfolio_note n";
+					+ " from m_note n";
 		}
 
 		@Override

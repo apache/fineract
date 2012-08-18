@@ -20,7 +20,7 @@ import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
 import org.mifosng.platform.user.domain.AppUser;
 
 @Entity
-@Table(name = "portfolio_office_transaction")
+@Table(name = "m_office_transaction")
 public class OfficeTransaction extends AbstractAuditableCustom<AppUser, Long> {
 
 	@SuppressWarnings("unused")

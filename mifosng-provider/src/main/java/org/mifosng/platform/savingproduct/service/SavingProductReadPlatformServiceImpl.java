@@ -94,7 +94,7 @@ public class SavingProductReadPlatformServiceImpl implements
 		public String savingProductSchema(){
 			return "sp.id as id,sp.name as name, sp.description as description,sp.currency_code as currencyCode, sp.currency_digits as currencyDigits,sp.interest_rate as interestRate,sp.minimum_balance as minimumBalance,sp.maximum_balance as maximumBalance,sp.created_date as createdon, sp.lastmodified_date as modifiedon, "
 				+  "curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, curr.display_symbol as currencyDisplaySymbol" 
-				+  "  from portfolio_product_savings sp join ref_currency curr on curr.code = sp.currency_code";
+				+  "  from m_product_savings sp join m_currency curr on curr.code = sp.currency_code";
 		}
 
 		@Override
@@ -128,7 +128,7 @@ public class SavingProductReadPlatformServiceImpl implements
 			RowMapper<SavingProductLookup> {
 
 		public String savingProductLookupSchema() {
-			return "sp.id as id, sp.name as name from portfolio_product_savings sp";
+			return "sp.id as id, sp.name as name from m_product_savings sp";
 		}
 
 		@Override

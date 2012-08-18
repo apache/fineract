@@ -18,7 +18,7 @@ import org.mifosng.platform.organisation.domain.Office;
 import org.mifosng.platform.user.domain.AppUser;
 
 @Entity
-@Table(name = "portfolio_client")
+@Table(name = "m_client")
 public class Client extends AbstractAuditableCustom<AppUser, Long> {
 
     @SuppressWarnings("unused")

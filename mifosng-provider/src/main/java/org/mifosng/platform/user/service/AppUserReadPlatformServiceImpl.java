@@ -147,7 +147,7 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
 		}
 
 		public String schema() {
-			return " u.id as id, u.username as username, u.firstname as firstname, u.lastname as lastname, u.email as email, u.office_id as officeId from admin_appuser u ";
+			return " u.id as id, u.username as username, u.firstname as firstname, u.lastname as lastname, u.email as email, u.office_id as officeId from m_appuser u ";
 		}
 
 		private String fromOfficeList(final List<OfficeData> officeList, final Long officeId) {

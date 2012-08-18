@@ -142,10 +142,10 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 					+ "lp.amortization_method_enum as amortizationMethod, lp.arrearstolerance_amount as tolerance, "
 					+ "lp.created_date as createdon, lp.lastmodified_date as modifiedon, "
 					+ "curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, curr.display_symbol as currencyDisplaySymbol "
-					+ " from portfolio_product_loan lp "
-					+ " left join org_fund f on f.id = lp.fund_id"
+					+ " from m_product_loan lp "
+					+ " left join m_fund f on f.id = lp.fund_id"
 					+ " left join ref_loan_transaction_processing_strategy ltps on ltps.id = lp.loan_transaction_strategy_id"
-					+ " join ref_currency curr on curr.code = lp.currency_code";
+					+ " join m_currency curr on curr.code = lp.currency_code";
 		}
 
 		@Override
@@ -224,7 +224,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 			RowMapper<LoanProductLookup> {
 
 		public String loanProductLookupSchema() {
-			return "lp.id as id, lp.name as name from portfolio_product_loan lp";
+			return "lp.id as id, lp.name as name from m_product_loan lp";
 		}
 
 		@Override

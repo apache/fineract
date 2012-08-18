@@ -26,7 +26,7 @@ import org.mifosng.platform.user.domain.AppUser;
  * They allow for constraints to be added at product level.
  */
 @Entity
-@Table(name = "portfolio_product_loan")
+@Table(name = "m_product_loan")
 public class LoanProduct extends AbstractAuditableCustom<AppUser, Long> {
 
 	@ManyToOne

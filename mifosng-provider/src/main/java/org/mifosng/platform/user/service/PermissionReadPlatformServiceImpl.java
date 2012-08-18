@@ -51,7 +51,7 @@ public class PermissionReadPlatformServiceImpl implements PermissionReadPlatform
 		}
 
 		public String schema() {
-			return " p.id as id, p.default_name as name, p.default_description as description, p.code as code, p.group_enum as groupType from admin_permission p ";
+			return " p.id as id, p.default_name as name, p.default_description as description, p.code as code, p.group_enum as groupType from m_permission p ";
 		}
 	}
 }

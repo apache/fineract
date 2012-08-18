@@ -75,7 +75,7 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
 					"dp.maturity_default_interest_rate as maturityDefaultInterestRate, " +
 					"dp.maturity_min_interest_rate as maturityMinInterestRate, dp.maturity_max_interest_rate as maturityMaxInterestRate, dp.is_renewal_allowed as canRenew, dp.is_preclosure_allowed as canPreClose, dp.pre_closure_interest_rate as preClosureInterestRate, " +
 					"curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, curr.display_symbol as currencyDisplaySymbol " +
-					"from portfolio_product_deposit dp join ref_currency curr on curr.code = dp.currency_code ";
+					"from m_product_deposit dp join m_currency curr on curr.code = dp.currency_code ";
 		}
 
 		@Override
@@ -121,7 +121,7 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
 	private static final class DepositProductLookupMapper implements RowMapper<DepositProductLookup> {
 
 		public String depositProductLookupSchema() {
-			return "dp.id as id, dp.name as name from portfolio_product_deposit dp";
+			return "dp.id as id, dp.name as name from m_product_deposit dp";
 		}
 
 		@Override

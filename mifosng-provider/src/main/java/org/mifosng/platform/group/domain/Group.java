@@ -17,7 +17,7 @@ import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
 import org.mifosng.platform.user.domain.AppUser;
 
 @Entity
-@Table(name = "portfolio_group")
+@Table(name = "m_group")
 public class Group extends AbstractAuditableCustom<AppUser, Long> {
 
     @Column(name = "name", length = 100, unique = true)
@@ -30,7 +30,7 @@ public class Group extends AbstractAuditableCustom<AppUser, Long> {
     private boolean deleted = false;
     
     @ManyToMany
-    @JoinTable(name = "portfolio_group_client",
+    @JoinTable(name = "m_group_client",
                joinColumns = @JoinColumn(name = "group_id"),
                inverseJoinColumns = @JoinColumn(name = "client_id"))
     private Set<Client> clientMembers;
