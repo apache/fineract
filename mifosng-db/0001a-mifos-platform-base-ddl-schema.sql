@@ -1,5 +1,5 @@
 -- This script is the core DDL for mifos platform
--- Its includes tables related to lookup/reference data, user adminsitration, organisation modeling, client and loans
+-- Its includes tables related to lookup/reference data, user administration, organisation modeling, client and loans
 -- and infrastructure tables needed for 'additional data' and 'screen based reporting' functionality.
 
 -- It does not include DDL customisations needed for specific 'tenants' for 'additional data' functionality around clients/loans.
@@ -11,35 +11,35 @@
 SET foreign_key_checks = 0;
 
 -- portfolio related tables
-DROP TABLE IF EXISTS `portfolio_note`;
-DROP TABLE IF EXISTS `portfolio_loan_transaction`;
-DROP TABLE IF EXISTS `portfolio_loan_repayment_schedule`;
-DROP TABLE IF EXISTS `portfolio_loan`;
-DROP TABLE IF EXISTS `portfolio_deposit_account`;
-DROP TABLE IF EXISTS `portfolio_group_client`;
-DROP TABLE IF EXISTS `portfolio_client`;
-DROP TABLE IF EXISTS `portfolio_group`;
-DROP TABLE IF EXISTS `portfolio_product_loan`;
-DROP TABLE IF EXISTS `portfolio_product_savings`;
-DROP TABLE IF EXISTS `portfolio_product_deposit`;
+DROP TABLE IF EXISTS `m_note`;
+DROP TABLE IF EXISTS `m_loan_transaction`;
+DROP TABLE IF EXISTS `m_loan_repayment_schedule`;
+DROP TABLE IF EXISTS `m_loan`;
+DROP TABLE IF EXISTS `m_deposit_account`;
+DROP TABLE IF EXISTS `m_group_client`;
+DROP TABLE IF EXISTS `m_client`;
+DROP TABLE IF EXISTS `m_group`;
+DROP TABLE IF EXISTS `m_product_loan`;
+DROP TABLE IF EXISTS `m_product_savings`;
+DROP TABLE IF EXISTS `m_product_deposit`;
 -- organisation related tables
-DROP TABLE IF EXISTS `org_organisation_currency`;
-DROP TABLE IF EXISTS `org_fund`;
-DROP TABLE IF EXISTS `o_charge`;
-DROP TABLE IF EXISTS `portfolio_office_transaction`;
-DROP TABLE IF EXISTS `org_office`;
+DROP TABLE IF EXISTS `m_organisation_currency`;
+DROP TABLE IF EXISTS `m_fund`;
+DROP TABLE IF EXISTS `m_charge`;
+DROP TABLE IF EXISTS `m_office_transaction`;
+DROP TABLE IF EXISTS `m_office`;
 -- admin tables
-DROP TABLE IF EXISTS `admin_role_permission`;
-DROP TABLE IF EXISTS `admin_appuser_role`;
-DROP TABLE IF EXISTS `admin_appuser`;
-DROP TABLE IF EXISTS `admin_permission`;
-DROP TABLE IF EXISTS `admin_role`;
+DROP TABLE IF EXISTS `m_role_permission`;
+DROP TABLE IF EXISTS `m_appuser_role`;
+DROP TABLE IF EXISTS `m_appuser`;
+DROP TABLE IF EXISTS `m_permission`;
+DROP TABLE IF EXISTS `m_role`;
 
 -- drop reference/lookup tables
-DROP TABLE IF EXISTS `ref_currency`;
+DROP TABLE IF EXISTS `m_currency`;
 DROP TABLE IF EXISTS `ref_loan_transaction_processing_strategy`;
-DROP TABLE IF EXISTS `r_code_value`;
-DROP TABLE IF EXISTS `r_code`;
+DROP TABLE IF EXISTS `m_code_value`;
+DROP TABLE IF EXISTS `m_code`;
 DROP TABLE IF EXISTS `r_enum_value`;
 
 -- additional data and report tables
@@ -57,7 +57,7 @@ DROP TABLE IF EXISTS `rpt_sequence`;
 SET foreign_key_checks = 1;
 
 -- DDL for reference/lookup tables
-CREATE TABLE `ref_currency` (
+CREATE TABLE `m_currency` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `code` varchar(3) NOT NULL,
   `decimal_places` smallint(5) NOT NULL,
@@ -80,14 +80,14 @@ CREATE TABLE `ref_loan_transaction_processing_strategy` (
   UNIQUE KEY `ltp_strategy_code` (`code`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1000 DEFAULT CHARSET=utf8;
 
-CREATE TABLE `r_code` (
+CREATE TABLE `m_code` (
   `id` int NOT NULL AUTO_INCREMENT,
   `code_name` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `code_name` (`code_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE `r_code_value` (
+CREATE TABLE `m_code_value` (
   `id` int NOT NULL AUTO_INCREMENT,
   `code_id` int NOT NULL,
   `code_value` varchar(100) DEFAULT NULL,
@@ -95,7 +95,7 @@ CREATE TABLE `r_code_value` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `code_value` (`code_id`, `code_value`),
   KEY `FKCFCEA42640BE071Z` (`code_id`),
-  CONSTRAINT `FKCFCEA42640BE071Z` FOREIGN KEY (`code_id`) REFERENCES `r_code` (`id`)
+  CONSTRAINT `FKCFCEA42640BE071Z` FOREIGN KEY (`code_id`) REFERENCES `m_code` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*not a major table - just intended for database reporting use for enums and values that would be hidden in java*/
@@ -110,7 +110,7 @@ CREATE TABLE `r_enum_value` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- DDL for organisation wide related concepts
-CREATE TABLE `org_fund` (
+CREATE TABLE `m_fund` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) DEFAULT NULL,
   `external_id` varchar(100) DEFAULT NULL,
@@ -123,7 +123,7 @@ CREATE TABLE `org_fund` (
   UNIQUE KEY `fund_externalid_org` (`external_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE `o_charge` (
+CREATE TABLE `m_charge` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(100) DEFAULT NULL,
   `amount` decimal(19,6) NOT NULL,
@@ -136,7 +136,7 @@ CREATE TABLE `o_charge` (
   UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE `org_office` (
+CREATE TABLE `m_office` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `parent_id` bigint(20) DEFAULT NULL,
   `hierarchy` varchar(100) DEFAULT NULL,
@@ -151,10 +151,10 @@ CREATE TABLE `org_office` (
   UNIQUE KEY `name_org` (`name`),
   UNIQUE KEY `externalid_org` (`external_id`),
   KEY `FK2291C477E2551DCC` (`parent_id`),
-  CONSTRAINT `FK2291C477E2551DCC` FOREIGN KEY (`parent_id`) REFERENCES `org_office` (`id`)
+  CONSTRAINT `FK2291C477E2551DCC` FOREIGN KEY (`parent_id`) REFERENCES `m_office` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
-CREATE TABLE `portfolio_office_transaction` (
+CREATE TABLE `m_office_transaction` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `from_office_id` bigint(20) DEFAULT NULL,
   `to_office_id` bigint(20) DEFAULT NULL,
@@ -170,11 +170,11 @@ CREATE TABLE `portfolio_office_transaction` (
   PRIMARY KEY (`id`),
   KEY `FK1E37728B93C6C1B6` (`to_office_id`),
   KEY `FK1E37728B783C5C25` (`from_office_id`),
-  CONSTRAINT `FK1E37728B783C5C25` FOREIGN KEY (`from_office_id`) REFERENCES `org_office` (`id`),
-  CONSTRAINT `FK1E37728B93C6C1B6` FOREIGN KEY (`to_office_id`) REFERENCES `org_office` (`id`)
+  CONSTRAINT `FK1E37728B783C5C25` FOREIGN KEY (`from_office_id`) REFERENCES `m_office` (`id`),
+  CONSTRAINT `FK1E37728B93C6C1B6` FOREIGN KEY (`to_office_id`) REFERENCES `m_office` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
-CREATE TABLE `org_organisation_currency` (
+CREATE TABLE `m_organisation_currency` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `code` varchar(3) NOT NULL,
   `decimal_places` smallint(5) NOT NULL,
@@ -189,7 +189,7 @@ CREATE TABLE `org_organisation_currency` (
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 -- DDL for admin tables
-CREATE TABLE `admin_permission` (
+CREATE TABLE `m_permission` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `group_enum` smallint(5) NOT NULL,
   `code` varchar(100) NOT NULL,
@@ -198,7 +198,7 @@ CREATE TABLE `admin_permission` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
-CREATE TABLE `admin_role` (
+CREATE TABLE `m_role` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(100) NOT NULL,
   `description` varchar(500) NOT NULL,
@@ -209,7 +209,7 @@ CREATE TABLE `admin_role` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
-CREATE TABLE `admin_appuser` (
+CREATE TABLE `m_appuser` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `office_id` bigint(20) DEFAULT NULL,
   `username` varchar(100) NOT NULL,
@@ -229,31 +229,31 @@ CREATE TABLE `admin_appuser` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `username_org` (`username`),
   KEY `FKB3D587CE0DD567A` (`office_id`),
-  CONSTRAINT `FKB3D587CE0DD567A` FOREIGN KEY (`office_id`) REFERENCES `org_office` (`id`)
+  CONSTRAINT `FKB3D587CE0DD567A` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
-CREATE TABLE `admin_role_permission` (
+CREATE TABLE `m_role_permission` (
   `role_id` bigint(20) NOT NULL,
   `permission_id` bigint(20) NOT NULL,
   PRIMARY KEY (`role_id`,`permission_id`),
   KEY `FK8DEDB04815CEC7AB` (`role_id`),
   KEY `FK8DEDB048103B544B` (`permission_id`),
-  CONSTRAINT `FK8DEDB048103B544B` FOREIGN KEY (`permission_id`) REFERENCES `admin_permission` (`id`),
-  CONSTRAINT `FK8DEDB04815CEC7AB` FOREIGN KEY (`role_id`) REFERENCES `admin_role` (`id`)
+  CONSTRAINT `FK8DEDB048103B544B` FOREIGN KEY (`permission_id`) REFERENCES `m_permission` (`id`),
+  CONSTRAINT `FK8DEDB04815CEC7AB` FOREIGN KEY (`role_id`) REFERENCES `m_role` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE `admin_appuser_role` (
+CREATE TABLE `m_appuser_role` (
   `appuser_id` bigint(20) NOT NULL,
   `role_id` bigint(20) NOT NULL,
   PRIMARY KEY (`appuser_id`,`role_id`),
   KEY `FK7662CE59B4100309` (`appuser_id`),
   KEY `FK7662CE5915CEC7AB` (`role_id`),
-  CONSTRAINT `FK7662CE5915CEC7AB` FOREIGN KEY (`role_id`) REFERENCES `admin_role` (`id`),
-  CONSTRAINT `FK7662CE59B4100309` FOREIGN KEY (`appuser_id`) REFERENCES `admin_appuser` (`id`)
+  CONSTRAINT `FK7662CE5915CEC7AB` FOREIGN KEY (`role_id`) REFERENCES `m_role` (`id`),
+  CONSTRAINT `FK7662CE59B4100309` FOREIGN KEY (`appuser_id`) REFERENCES `m_appuser` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- DDL for portfolio tables
-CREATE TABLE `portfolio_group` (
+CREATE TABLE `m_group` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(100) DEFAULT NULL,
   `external_id` varchar(100) DEFAULT NULL,
@@ -267,11 +267,11 @@ CREATE TABLE `portfolio_group` (
   UNIQUE KEY `external_id` (`external_id`),
   KEY `FKJPWG000000000003` (`createdby_id`),
   KEY `FKJPWG000000000004` (`lastmodifiedby_id`),
-  CONSTRAINT `FKJPWG000000000003` FOREIGN KEY (`createdby_id`) REFERENCES `admin_appuser` (`id`),
-  CONSTRAINT `FKJPWG000000000004` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `admin_appuser` (`id`)
+  CONSTRAINT `FKJPWG000000000003` FOREIGN KEY (`createdby_id`) REFERENCES `m_appuser` (`id`),
+  CONSTRAINT `FKJPWG000000000004` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
-CREATE TABLE `portfolio_client` (
+CREATE TABLE `m_client` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `is_deleted` tinyint(1) NOT NULL DEFAULT 0,
   `office_id` bigint(20) NOT NULL,
@@ -288,21 +288,21 @@ CREATE TABLE `portfolio_client` (
   KEY `FKCE00CAB3E0DD567A` (`office_id`),
   KEY `FKAUD0000000000001` (`createdby_id`),
   KEY `FKAUD0000000000002` (`lastmodifiedby_id`),
-  CONSTRAINT `FKAUD0000000000001` FOREIGN KEY (`createdby_id`) REFERENCES `admin_appuser` (`id`),
-  CONSTRAINT `FKAUD0000000000002` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `admin_appuser` (`id`),
-  CONSTRAINT `FKCE00CAB3E0DD567A` FOREIGN KEY (`office_id`) REFERENCES `org_office` (`id`)
+  CONSTRAINT `FKAUD0000000000001` FOREIGN KEY (`createdby_id`) REFERENCES `m_appuser` (`id`),
+  CONSTRAINT `FKAUD0000000000002` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`),
+  CONSTRAINT `FKCE00CAB3E0DD567A` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
-CREATE TABLE `portfolio_group_client` (
+CREATE TABLE `m_group_client` (
   `group_id` bigint(20) NOT NULL,
   `client_id` bigint(20) NOT NULL,
   PRIMARY KEY (`group_id`,`client_id`),
   KEY `client_id` (`client_id`),
-  CONSTRAINT `portfolio_group_client_ibfk_1` FOREIGN KEY (`group_id`) REFERENCES `portfolio_group` (`id`),
-  CONSTRAINT `portfolio_group_client_ibfk_2` FOREIGN KEY (`client_id`) REFERENCES `portfolio_client` (`id`)
+  CONSTRAINT `m_group_client_ibfk_1` FOREIGN KEY (`group_id`) REFERENCES `m_group` (`id`),
+  CONSTRAINT `m_group_client_ibfk_2` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE `portfolio_product_loan` (
+CREATE TABLE `m_product_loan` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `currency_code` varchar(3) NOT NULL,
   `currency_digits` smallint(5) NOT NULL,
@@ -332,13 +332,13 @@ CREATE TABLE `portfolio_product_loan` (
   KEY `FKAUD0000000000004` (`lastmodifiedby_id`),
   KEY `FKA6A8A7D77240145` (`fund_id`),
   KEY `FK_ltp_strategy` (`loan_transaction_strategy_id`),
-  CONSTRAINT `FKA6A8A7D77240145` FOREIGN KEY (`fund_id`) REFERENCES `org_fund` (`id`),
-  CONSTRAINT `FKAUD0000000000003` FOREIGN KEY (`createdby_id`) REFERENCES `admin_appuser` (`id`),
-  CONSTRAINT `FKAUD0000000000004` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `admin_appuser` (`id`),
+  CONSTRAINT `FKA6A8A7D77240145` FOREIGN KEY (`fund_id`) REFERENCES `m_fund` (`id`),
+  CONSTRAINT `FKAUD0000000000003` FOREIGN KEY (`createdby_id`) REFERENCES `m_appuser` (`id`),
+  CONSTRAINT `FKAUD0000000000004` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `FK_ltp_strategy` FOREIGN KEY (`loan_transaction_strategy_id`) REFERENCES `ref_loan_transaction_processing_strategy` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE `portfolio_loan` (
+CREATE TABLE `m_loan` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `external_id` varchar(100) DEFAULT NULL,
   `client_id` bigint(20) NOT NULL,
@@ -382,19 +382,19 @@ CREATE TABLE `portfolio_loan` (
   `lastmodified_date` datetime DEFAULT NULL,
   `lastmodifiedby_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `org_id` (`external_id`),
+  UNIQUE KEY `m_id` (`external_id`),
   KEY `FKB6F935D87179A0CB` (`client_id`),
   KEY `FKB6F935D8C8D4B434` (`product_id`),
   KEY `FK7C885878B1147D1` (`loan_status_id`),
   KEY `FK7C885877240145` (`fund_id`),
   KEY `FK_loan_ltp_strategy` (`loan_transaction_strategy_id`),
   CONSTRAINT `FK_loan_ltp_strategy` FOREIGN KEY (`loan_transaction_strategy_id`) REFERENCES `ref_loan_transaction_processing_strategy` (`id`),
-  CONSTRAINT `FK7C885877240145` FOREIGN KEY (`fund_id`) REFERENCES `org_fund` (`id`),
-  CONSTRAINT `FKB6F935D87179A0CB` FOREIGN KEY (`client_id`) REFERENCES `portfolio_client` (`id`),
-  CONSTRAINT `FKB6F935D8C8D4B434` FOREIGN KEY (`product_id`) REFERENCES `portfolio_product_loan` (`id`)
+  CONSTRAINT `FK7C885877240145` FOREIGN KEY (`fund_id`) REFERENCES `m_fund` (`id`),
+  CONSTRAINT `FKB6F935D87179A0CB` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`),
+  CONSTRAINT `FKB6F935D8C8D4B434` FOREIGN KEY (`product_id`) REFERENCES `m_product_loan` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
-CREATE TABLE `portfolio_loan_repayment_schedule` (
+CREATE TABLE `m_loan_repayment_schedule` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `loan_id` bigint(20) NOT NULL,
   `duedate` date DEFAULT NULL,
@@ -411,10 +411,10 @@ CREATE TABLE `portfolio_loan_repayment_schedule` (
   `lastmodifiedby_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FK488B92AA40BE0710` (`loan_id`),
-  CONSTRAINT `FK488B92AA40BE0710` FOREIGN KEY (`loan_id`) REFERENCES `portfolio_loan` (`id`)
+  CONSTRAINT `FK488B92AA40BE0710` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
-CREATE TABLE `portfolio_loan_transaction` (
+CREATE TABLE `m_loan_transaction` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `loan_id` bigint(20) NOT NULL,
   `transaction_type_enum` smallint(5) NOT NULL,
@@ -431,12 +431,12 @@ CREATE TABLE `portfolio_loan_transaction` (
   PRIMARY KEY (`id`),
   KEY `FKCFCEA42640BE0710` (`loan_id`),
   KEY `FKCFCEA426FC69F3F1` (`contra_id`),
-  CONSTRAINT `FKCFCEA42640BE0710` FOREIGN KEY (`loan_id`) REFERENCES `portfolio_loan` (`id`),
-  CONSTRAINT `FKCFCEA426FC69F3F1` FOREIGN KEY (`contra_id`) REFERENCES `portfolio_loan_transaction` (`id`)
+  CONSTRAINT `FKCFCEA42640BE0710` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`),
+  CONSTRAINT `FKCFCEA426FC69F3F1` FOREIGN KEY (`contra_id`) REFERENCES `m_loan_transaction` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 
-CREATE TABLE `portfolio_product_savings` (
+CREATE TABLE `m_product_savings` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(100) NOT NULL,
   `description` varchar(500) DEFAULT NULL,
@@ -453,12 +453,12 @@ CREATE TABLE `portfolio_product_savings` (
   PRIMARY KEY (`id`),
   KEY `FKJPW0000000000003` (`createdby_id`),
   KEY `FKJPW0000000000004` (`lastmodifiedby_id`),
-  CONSTRAINT `FKJPW0000000000003` FOREIGN KEY (`createdby_id`) REFERENCES `admin_appuser` (`id`),
-  CONSTRAINT `FKJPW0000000000004` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `admin_appuser` (`id`)
+  CONSTRAINT `FKJPW0000000000003` FOREIGN KEY (`createdby_id`) REFERENCES `m_appuser` (`id`),
+  CONSTRAINT `FKJPW0000000000004` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
-CREATE TABLE `portfolio_product_deposit` (
+CREATE TABLE `m_product_deposit` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(100) NOT NULL,
   `description` varchar(500) DEFAULT NULL,
@@ -481,11 +481,11 @@ CREATE TABLE `portfolio_product_deposit` (
   PRIMARY KEY (`id`),
   KEY `FKJPW0000000000003` (`createdby_id`),
   KEY `FKJPW0000000000004` (`lastmodifiedby_id`),
-  CONSTRAINT `FKJPX0000000000003` FOREIGN KEY (`createdby_id`) REFERENCES `admin_appuser` (`id`),
-  CONSTRAINT `FKJPX0000000000004` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `admin_appuser` (`id`)
+  CONSTRAINT `FKJPX0000000000003` FOREIGN KEY (`createdby_id`) REFERENCES `m_appuser` (`id`),
+  CONSTRAINT `FKJPX0000000000004` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE `portfolio_deposit_account` (
+CREATE TABLE `m_deposit_account` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `external_id` varchar(100) DEFAULT NULL,
   `client_id` bigint(20) NOT NULL,
@@ -507,11 +507,11 @@ CREATE TABLE `portfolio_deposit_account` (
   UNIQUE KEY `deposit_acc_external_id` (`external_id`),
   KEY `FKKW0000000000001` (`client_id`),
   KEY `FKKW0000000000002` (`product_id`),
-  CONSTRAINT `FKKW0000000000001` FOREIGN KEY (`client_id`) REFERENCES `portfolio_client` (`id`),
-  CONSTRAINT `FKKW0000000000002` FOREIGN KEY (`product_id`) REFERENCES `portfolio_product_deposit` (`id`)
+  CONSTRAINT `FKKW0000000000001` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`),
+  CONSTRAINT `FKKW0000000000002` FOREIGN KEY (`product_id`) REFERENCES `m_product_deposit` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE `portfolio_note` (
+CREATE TABLE `m_note` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `client_id` bigint(20) NOT NULL,
   `loan_id` bigint(20) DEFAULT NULL,
@@ -528,11 +528,11 @@ CREATE TABLE `portfolio_note` (
   KEY `FK7C970897179A0CB` (`client_id`),
   KEY `FK7C970898F889C3F` (`lastmodifiedby_id`),
   KEY `FK7C9708940BE0710` (`loan_id`),
-  CONSTRAINT `FK7C9708924D26803` FOREIGN KEY (`loan_transaction_id`) REFERENCES `portfolio_loan_transaction` (`id`),
-  CONSTRAINT `FK7C9708940BE0710` FOREIGN KEY (`loan_id`) REFERENCES `portfolio_loan` (`id`),
-  CONSTRAINT `FK7C97089541F0A56` FOREIGN KEY (`createdby_id`) REFERENCES `admin_appuser` (`id`),
-  CONSTRAINT `FK7C970897179A0CB` FOREIGN KEY (`client_id`) REFERENCES `portfolio_client` (`id`),
-  CONSTRAINT `FK7C970898F889C3F` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `admin_appuser` (`id`)
+  CONSTRAINT `FK7C9708924D26803` FOREIGN KEY (`loan_transaction_id`) REFERENCES `m_loan_transaction` (`id`),
+  CONSTRAINT `FK7C9708940BE0710` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`),
+  CONSTRAINT `FK7C97089541F0A56` FOREIGN KEY (`createdby_id`) REFERENCES `m_appuser` (`id`),
+  CONSTRAINT `FK7C970897179A0CB` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`),
+  CONSTRAINT `FK7C970898F889C3F` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 -- DDL for additional data (aka stretchy data) tables

@@ -1,10 +1,10 @@
 -- example of a DDL script to support customised 'additional data' for clients and loans.
 
-DROP TABLE IF EXISTS `portfolio_client_extra_additional information`;
-DROP TABLE IF EXISTS `portfolio_client_extra_highly improbable info`;
-DROP TABLE IF EXISTS `portfolio_loan_extra_additional information`;
+DROP TABLE IF EXISTS `m_client_xAdditional Information`;
+DROP TABLE IF EXISTS `m_client_xHighly Improbable Info`;
+DROP TABLE IF EXISTS `m_loan_xAdditional Information`;
 
-CREATE TABLE `portfolio_client_extra_Additional Information` (
+CREATE TABLE `m_client_xAdditional Information` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `Ethnic Group` varchar(50) DEFAULT NULL,
   `Ethnic Group Other` varchar(50) DEFAULT NULL,
@@ -16,10 +16,10 @@ CREATE TABLE `portfolio_client_extra_Additional Information` (
   `Gender` varchar(10) DEFAULT NULL,
   `Whois` mediumtext,
   PRIMARY KEY (`id`),
-  CONSTRAINT `portfolio_client_extra_Additional Information_fk1` FOREIGN KEY (`id`) REFERENCES `portfolio_client` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+  CONSTRAINT `m_client_xAdditional Information_fk1` FOREIGN KEY (`id`) REFERENCES `m_client` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
-CREATE TABLE `portfolio_client_extra_Highly Improbable Info` (
+CREATE TABLE `m_client_xHighly Improbable Info` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `Fathers Favourite Team` varchar(50) DEFAULT NULL,
   `Mothers Favourite Team` varchar(50) DEFAULT NULL,
@@ -32,10 +32,10 @@ CREATE TABLE `portfolio_client_extra_Highly Improbable Info` (
   `Closing Comments` mediumtext,
   `Annual Family Income` decimal(19,6) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  CONSTRAINT `portfolio_client_extra_Highly Improbable Info_fk1` FOREIGN KEY (`id`) REFERENCES `portfolio_client` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+  CONSTRAINT `m_client_xHighly Improbable Info_fk1` FOREIGN KEY (`id`) REFERENCES `m_client` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
-CREATE TABLE `portfolio_loan_extra_Additional Information` (
+CREATE TABLE `m_loan_xAdditional Information` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `Business Location` varchar(50) DEFAULT NULL,
   `Business Location Other` varchar(50) DEFAULT NULL,
@@ -43,5 +43,5 @@ CREATE TABLE `portfolio_loan_extra_Additional Information` (
   `Business Description` mediumtext,
   `Business Title` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  CONSTRAINT `portfolio_loan_extra_Additional Information_fk1` FOREIGN KEY (`id`) REFERENCES `portfolio_loan` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+  CONSTRAINT `m_loan_xAdditional Information_fk1` FOREIGN KEY (`id`) REFERENCES `m_loan` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
