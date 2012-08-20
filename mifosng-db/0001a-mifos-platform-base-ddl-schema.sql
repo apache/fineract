@@ -26,6 +26,7 @@ DROP TABLE IF EXISTS `m_product_deposit`;
 DROP TABLE IF EXISTS `m_organisation_currency`;
 DROP TABLE IF EXISTS `m_fund`;
 DROP TABLE IF EXISTS `m_charge`;
+DROP TABLE IF EXISTS `m_product_loan_charge`;
 DROP TABLE IF EXISTS `m_office_transaction`;
 DROP TABLE IF EXISTS `m_office`;
 -- admin tables
@@ -53,8 +54,8 @@ DROP TABLE IF EXISTS `stretchy_report_parameter`;
 DROP TABLE IF EXISTS `stretchy_report`;
 DROP TABLE IF EXISTS `rpt_sequence`;
 
-
 SET foreign_key_checks = 1;
+
 
 -- DDL for reference/lookup tables
 CREATE TABLE `m_currency` (
@@ -126,8 +127,13 @@ CREATE TABLE `m_fund` (
 CREATE TABLE `m_charge` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(100) DEFAULT NULL,
+  `currency_code` varchar(3) NOT NULL,
+  `charge_applies_to_enum` smallint(5) NOT NULL,
+  `charge_time_enum` smallint(5) NOT NULL,
+  `charge_calculation_enum` smallint(5) NOT NULL,
   `amount` decimal(19,6) NOT NULL,
-  `is_deleted` tinyint(1) NOT NULL DEFAULT 0,
+  `is_active` tinyint(1) NOT NULL,
+  `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
   `createdby_id` bigint(20) DEFAULT NULL,
   `created_date` datetime DEFAULT NULL,
   `lastmodifiedby_id` bigint(20) DEFAULT NULL,
@@ -336,6 +342,15 @@ CREATE TABLE `m_product_loan` (
   CONSTRAINT `FKAUD0000000000003` FOREIGN KEY (`createdby_id`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `FKAUD0000000000004` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `FK_ltp_strategy` FOREIGN KEY (`loan_transaction_strategy_id`) REFERENCES `ref_loan_transaction_processing_strategy` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `m_product_loan_charge` (
+  `product_loan_id` bigint(20) NOT NULL,
+  `charge_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`product_loan_id`,`charge_id`),
+  KEY `charge_id` (`charge_id`),
+  CONSTRAINT `m_product_loan_charge_ibfk_1` FOREIGN KEY (`charge_id`) REFERENCES `m_charge` (`id`),
+  CONSTRAINT `m_product_loan_charge_ibfk_2` FOREIGN KEY (`product_loan_id`) REFERENCES `m_product_loan` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `m_loan` (
@@ -642,3 +657,4 @@ CREATE TABLE `stretchy_report_parameter` (
   PRIMARY KEY (`report_id`,`parameter_id`),
   UNIQUE KEY `report_id_name_UNIQUE` (`report_id`,`report_parameter_name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
