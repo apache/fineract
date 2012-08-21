@@ -6,11 +6,14 @@ import java.util.Set;
 import org.mifosng.platform.api.data.AdditionalFieldsSetData;
 import org.mifosng.platform.api.data.AppUserData;
 import org.mifosng.platform.api.data.AuthenticatedUserData;
+import org.mifosng.platform.api.data.ClientData;
+import org.mifosng.platform.api.data.ClientLoanAccountSummaryCollectionData;
 import org.mifosng.platform.api.data.ConfigurationData;
 import org.mifosng.platform.api.data.DepositAccountData;
 import org.mifosng.platform.api.data.DepositProductData;
 import org.mifosng.platform.api.data.FundData;
 import org.mifosng.platform.api.data.GenericResultsetData;
+import org.mifosng.platform.api.data.GroupData;
 import org.mifosng.platform.api.data.LoanProductData;
 import org.mifosng.platform.api.data.OfficeData;
 import org.mifosng.platform.api.data.OfficeTransactionData;
@@ -63,4 +66,14 @@ public interface ApiJsonSerializerService {
 	String serializeDepositAccountDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<DepositAccountData> accounts);
 
 	String serializeDepositAccountDataToJson(boolean prettyPrint, Set<String> responseParameters, DepositAccountData account);
+
+	String serializeClientDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<ClientData> clients);
+
+	String serializeClientDataToJson(boolean prettyPrint, Set<String> responseParameters, ClientData clientData);
+
+	String serializeClientLoanAccountSummaryCollectionDataToJson(boolean prettyPrint, Set<String> responseParameters, ClientLoanAccountSummaryCollectionData clientAccount);
+
+	String serializeGroupDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<GroupData> groups);
+
+	String serializeGroupDataToJson(boolean prettyPrint, Set<String> responseParameters, GroupData group);
 }

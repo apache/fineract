@@ -8,11 +8,14 @@ import java.util.Set;
 import org.mifosng.platform.api.data.AdditionalFieldsSetData;
 import org.mifosng.platform.api.data.AppUserData;
 import org.mifosng.platform.api.data.AuthenticatedUserData;
+import org.mifosng.platform.api.data.ClientData;
+import org.mifosng.platform.api.data.ClientLoanAccountSummaryCollectionData;
 import org.mifosng.platform.api.data.ConfigurationData;
 import org.mifosng.platform.api.data.DepositAccountData;
 import org.mifosng.platform.api.data.DepositProductData;
 import org.mifosng.platform.api.data.FundData;
 import org.mifosng.platform.api.data.GenericResultsetData;
+import org.mifosng.platform.api.data.GroupData;
 import org.mifosng.platform.api.data.LoanProductData;
 import org.mifosng.platform.api.data.OfficeData;
 import org.mifosng.platform.api.data.OfficeTransactionData;
@@ -75,6 +78,20 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 					"renewalAllowed","preClosureAllowed","preClosureInterestRate"
 					)
 			);
+	
+	private static final Set<String> CLIENT_DATA_PARAMETERS = new HashSet<String>(
+			Arrays.asList("id", "officeId", "officeName", "externalId", "firstname", "lastname", "joinedDate", "displayName", "allowedOffices")
+	);
+
+	private static final Set<String> CLIENT_ACCOUNTS_DATA_PARAMETERS = new HashSet<String>(
+			Arrays.asList("pendingApprovalLoans", "awaitingDisbursalLoans", "openLoans", "closedLoans", 
+					"anyLoanCount", "pendingApprovalLoanCount", "awaitingDisbursalLoanCount", "activeLoanCount", "closedLoanCount")
+	);
+
+	private static final Set<String> GROUP_DATA_PARAMETERS = new HashSet<String>(
+			Arrays.asList("id", "name", "externalId", "clientMembers", "allowedClients")
+	);
+	 
 	
 	private final GoogleGsonSerializerHelper helper;
 	
@@ -213,5 +230,36 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 	public String serializeDepositAccountDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final DepositAccountData account) {
 		final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(SAVINGS_DEPOSIT_ACCOUNT_DATA_PARAMETERS, prettyPrint, responseParameters);
 		return helper.serializedJsonFrom(gsonDeserializer, account);
+	}
+
+	@Override
+	public String serializeClientDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final Collection<ClientData> clients) {
+		final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(CLIENT_DATA_PARAMETERS, prettyPrint, responseParameters);
+		return helper.serializedJsonFrom(gsonDeserializer, clients.toArray(new ClientData[clients.size()]));
+	}
+
+	@Override
+	public String serializeClientDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final ClientData client) {
+		final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(CLIENT_DATA_PARAMETERS, prettyPrint, responseParameters);
+		return helper.serializedJsonFrom(gsonDeserializer, client);
+	}
+
+	@Override
+	public String serializeClientLoanAccountSummaryCollectionDataToJson(final boolean prettyPrint, final Set<String> responseParameters,
+			final ClientLoanAccountSummaryCollectionData clientAccount) {
+		final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(CLIENT_ACCOUNTS_DATA_PARAMETERS, prettyPrint, responseParameters);
+		return helper.serializedJsonFrom(gsonDeserializer, clientAccount);
+	}
+
+	@Override
+	public String serializeGroupDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final Collection<GroupData> groups) {
+		final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(GROUP_DATA_PARAMETERS, prettyPrint, responseParameters);
+		return helper.serializedJsonFrom(gsonDeserializer, groups.toArray(new GroupData[groups.size()]));
+	}
+
+	@Override
+	public String serializeGroupDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final GroupData group) {
+		final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(GROUP_DATA_PARAMETERS, prettyPrint, responseParameters);
+		return helper.serializedJsonFrom(gsonDeserializer, group);
 	}
 }

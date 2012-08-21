@@ -23,6 +23,7 @@ import org.mifosng.platform.api.data.ClientLookup;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.GroupData;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
+import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
 import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
 import org.mifosng.platform.client.service.ClientReadPlatformService;
 import org.mifosng.platform.group.service.GroupReadPlatformService;
@@ -48,13 +49,16 @@ public class GroupsApiResource {
     @Autowired
     private ApiDataConversionService apiDataConversionService;
     
+	@Autowired
+	private ApiJsonSerializerService apiJsonSerializerService;
+    
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveAllGroups(@Context final UriInfo uriInfo){
         
         Set<String> typicalResponseParameters = new HashSet<String>(
-                Arrays.asList("id", "name", "externalId", "clientMembers")
+                Arrays.asList("id", "name", "externalId")
         );
         
         Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
@@ -66,11 +70,7 @@ public class GroupsApiResource {
         
         Collection<GroupData> groups = this.groupReadPlatformService.retrieveAllGroups();
         
-        for (GroupData group : groups){
-            group.setClientMembers(this.groupReadPlatformService.retrieveClientMembers(group.getId()));
-        }
-        
-        return this.apiDataConversionService.convertGroupDataToJson(prettyPrint, responseParameters, groups.toArray(new GroupData[groups.size()]));
+        return this.apiJsonSerializerService.serializeGroupDataToJson(prettyPrint, responseParameters, groups);
     }
     
     @GET
@@ -103,7 +103,7 @@ public class GroupsApiResource {
             responseParameters.add("allowedClients");
         }
         
-        return this.apiDataConversionService.convertGroupDataToJson(prettyPrint, responseParameters, group);
+        return this.apiJsonSerializerService.serializeGroupDataToJson(prettyPrint, responseParameters, group);
     }
 
     @GET
@@ -112,7 +112,7 @@ public class GroupsApiResource {
     @Produces({MediaType.APPLICATION_JSON})
     public String newGroupDetails(@Context final UriInfo uriInfo) {
 
-        Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "name", "externalId", "clientMembers", "allowedClients"));
+        Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "name", "externalId", "allowedClients"));
 
         Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
         if (responseParameters.isEmpty()) {
@@ -122,7 +122,7 @@ public class GroupsApiResource {
 
         GroupData groupData = this.groupReadPlatformService.retrieveNewGroupDetails();
 
-        return this.apiDataConversionService.convertGroupDataToJson(prettyPrint, responseParameters, groupData);
+        return this.apiJsonSerializerService.serializeGroupDataToJson(prettyPrint, responseParameters, groupData);
     }
 
     @POST
@@ -160,5 +160,4 @@ public class GroupsApiResource {
 
         return Response.ok().entity(entityIdentifier).build();
     }
-
 }

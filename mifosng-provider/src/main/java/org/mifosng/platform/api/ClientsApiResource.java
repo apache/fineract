@@ -29,6 +29,7 @@ import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.NoteData;
 import org.mifosng.platform.api.data.OfficeLookup;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
+import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
 import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
 import org.mifosng.platform.client.service.ClientReadPlatformService;
 import org.mifosng.platform.client.service.ClientWritePlatformService;
@@ -57,6 +58,9 @@ public class ClientsApiResource {
 
 	@Autowired
 	private OfficeReadPlatformService officeReadPlatformService;
+	
+	@Autowired
+	private ApiJsonSerializerService apiJsonSerializerService;
 
 	@GET
 	@Consumes({MediaType.APPLICATION_JSON})
@@ -83,7 +87,7 @@ public class ClientsApiResource {
 
 		Collection<ClientData> clients = this.clientReadPlatformService.retrieveAllIndividualClients(extraCriteria);
 		
-		return this.apiDataConversionService.convertClientDataToJson(prettyPrint, responseParameters, clients.toArray(new ClientData[clients.size()]));
+		return this.apiJsonSerializerService.serializeClientDataToJson(prettyPrint, responseParameters, clients);
 	}
 
 	private String getClientCriteria(String sqlSearch, Integer officeId,
@@ -150,7 +154,7 @@ public class ClientsApiResource {
 			responseParameters.add("allowedOffices");
 		}
 
-		return this.apiDataConversionService.convertClientDataToJson(prettyPrint, responseParameters, clientData);
+		return this.apiJsonSerializerService.serializeClientDataToJson(prettyPrint, responseParameters, clientData);
 	}
 
 	@GET
@@ -171,7 +175,7 @@ public class ClientsApiResource {
 		
 		ClientData clientData = this.clientReadPlatformService.retrieveNewClientDetails();
 		
-		return this.apiDataConversionService.convertClientDataToJson(prettyPrint, responseParameters, clientData);
+		return this.apiJsonSerializerService.serializeClientDataToJson(prettyPrint, responseParameters, clientData);
 	}
 
 	@POST
@@ -230,7 +234,7 @@ public class ClientsApiResource {
 		
 		ClientLoanAccountSummaryCollectionData clientAccount = this.clientReadPlatformService.retrieveClientAccountDetails(clientId);
 		
-		return this.apiDataConversionService.convertClientLoanAccountSummaryCollectionDataToJson(prettyPrint, responseParameters, clientAccount);
+		return this.apiJsonSerializerService.serializeClientLoanAccountSummaryCollectionDataToJson(prettyPrint, responseParameters, clientAccount);
 	}
 
 	@GET
