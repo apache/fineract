@@ -26,6 +26,7 @@ import org.mifosng.platform.api.data.DepositProductLookup;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.EnumOptionData;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
+import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
 import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 import org.mifosng.platform.saving.service.DepositAccountReadPlatformService;
@@ -52,6 +53,9 @@ public class DepositAccountsApiResource {
 
 	@Autowired
 	private ApiDataConversionService apiDataConversionService;
+	
+	@Autowired
+	private ApiJsonSerializerService apiJsonSerializerService;
 	
 	@POST
 	@Consumes({MediaType.APPLICATION_JSON})
@@ -99,7 +103,7 @@ public class DepositAccountsApiResource {
 
 		Collection<DepositAccountData> accounts = this.depositAccountReadPlatformService.retrieveAllDepositAccounts();
 		
-		return this.apiDataConversionService.convertDepositAccountDataToJson(prettyPrint, responseParameters, accounts.toArray(new DepositAccountData[accounts.size()]));
+		return this.apiJsonSerializerService.serializeDepositAccountDataToJson(prettyPrint, responseParameters, accounts);
 	}
 	
 	@GET
@@ -129,7 +133,7 @@ public class DepositAccountsApiResource {
 			account = handleTemplateRelatedData(responseParameters, account);
 		}
 		
-		return this.apiDataConversionService.convertDepositAccountDataToJson(prettyPrint, responseParameters, account);
+		return this.apiJsonSerializerService.serializeDepositAccountDataToJson(prettyPrint, responseParameters, account);
 	}
 
 	@GET
@@ -160,7 +164,7 @@ public class DepositAccountsApiResource {
 		
 		account = handleTemplateRelatedData(responseParameters, account);
 		
-		return this.apiDataConversionService.convertDepositAccountDataToJson(prettyPrint, responseParameters, account);
+		return this.apiJsonSerializerService.serializeDepositAccountDataToJson(prettyPrint, responseParameters, account);
 	}
 	
 	@DELETE

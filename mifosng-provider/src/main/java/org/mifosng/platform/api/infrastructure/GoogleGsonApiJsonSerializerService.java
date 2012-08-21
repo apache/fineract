@@ -9,6 +9,7 @@ import org.mifosng.platform.api.data.AdditionalFieldsSetData;
 import org.mifosng.platform.api.data.AppUserData;
 import org.mifosng.platform.api.data.AuthenticatedUserData;
 import org.mifosng.platform.api.data.ConfigurationData;
+import org.mifosng.platform.api.data.DepositAccountData;
 import org.mifosng.platform.api.data.DepositProductData;
 import org.mifosng.platform.api.data.FundData;
 import org.mifosng.platform.api.data.GenericResultsetData;
@@ -63,6 +64,16 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 					"minimumBalance","maximumBalance","tenureInMonths","maturityDefaultInterestRate","maturityMinInterestRate",
 					"maturityMaxInterestRate", "interestCompoundedEvery", "interestCompoundedEveryPeriodType",
 					"renewalAllowed","preClosureAllowed","preClosureInterestRate")
+			);
+
+	private static final Set<String> SAVINGS_DEPOSIT_ACCOUNT_DATA_PARAMETERS = new HashSet<String>(
+			Arrays.asList("productOptions", "interestCompoundedEveryPeriodTypeOptions",
+					"createdOn", "lastModifedOn", 
+					"id", "externalId", "clientId", "clientName", "productId", "productName", 
+					"currency", "deposit", "maturityInterestRate", "tenureInMonths", 
+					"interestCompoundedEvery", "interestCompoundedEveryPeriodType",
+					"renewalAllowed","preClosureAllowed","preClosureInterestRate"
+					)
 			);
 	
 	private final GoogleGsonSerializerHelper helper;
@@ -190,5 +201,17 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 	public String serializeDepositProductDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final DepositProductData depositProduct) {
 		final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(SAVINGS_DEPOSIT_PRODUCT_DATA_PARAMETERS, prettyPrint, responseParameters);
 		return helper.serializedJsonFrom(gsonDeserializer, depositProduct);
+	}
+
+	@Override
+	public String serializeDepositAccountDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final Collection<DepositAccountData> accounts) {
+		final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(SAVINGS_DEPOSIT_ACCOUNT_DATA_PARAMETERS, prettyPrint, responseParameters);
+		return helper.serializedJsonFrom(gsonDeserializer, accounts.toArray(new DepositAccountData[accounts.size()]));
+	}
+
+	@Override
+	public String serializeDepositAccountDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final DepositAccountData account) {
+		final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(SAVINGS_DEPOSIT_ACCOUNT_DATA_PARAMETERS, prettyPrint, responseParameters);
+		return helper.serializedJsonFrom(gsonDeserializer, account);
 	}
 }

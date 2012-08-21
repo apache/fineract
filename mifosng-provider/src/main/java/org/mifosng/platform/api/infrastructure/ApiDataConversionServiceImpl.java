@@ -41,7 +41,6 @@ import org.mifosng.platform.api.data.ApiParameterError;
 import org.mifosng.platform.api.data.ChargeData;
 import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.ClientLoanAccountSummaryCollectionData;
-import org.mifosng.platform.api.data.DepositAccountData;
 import org.mifosng.platform.api.data.GroupData;
 import org.mifosng.platform.api.data.LoanAccountData;
 import org.mifosng.platform.api.data.LoanTransactionData;
@@ -1295,57 +1294,5 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 				tenureMonths, maturityDefaultInterestRate, maturityMinInterestRate, maturityMaxInterestRate, 
 				interestCompoundedEvery, interestCompoundedEveryPeriodType,
 				canRenew, canPreClose, preClosureInterestRate);
-	}
-
-	@Override
-	public String convertDepositAccountDataToJson(
-			final boolean prettyPrint,
-			final Set<String> responseParameters, 
-			final DepositAccountData... accounts) {
-		
-		Set<String> supportedParameters = new HashSet<String>(
-				Arrays.asList("productOptions", "interestCompoundedEveryPeriodTypeOptions",
-						"createdOn", "lastModifedOn", 
-						"id", "externalId", "clientId", "clientName", "productId", "productName", 
-						"currency", "deposit", "maturityInterestRate", "tenureInMonths", 
-						"interestCompoundedEvery", "interestCompoundedEveryPeriodType",
-						"renewalAllowed","preClosureAllowed","preClosureInterestRate"
-						)
-		);
-
-		final Set<String> parameterNamesToSkip = new HashSet<String>();
-		
-		if (!responseParameters.isEmpty()) {
-			
-			// strip out all know support params from expected response to see if unsupported parameters requested for response.
-			Set<String> differentParametersSet = new HashSet<String>(responseParameters);
-			differentParametersSet.removeAll(supportedParameters);
-			
-			if (!differentParametersSet.isEmpty()) {
-				throw new UnsupportedParameterException(new ArrayList<String>(differentParametersSet));
-			}
-			
-			parameterNamesToSkip.addAll(supportedParameters);
-			parameterNamesToSkip.removeAll(responseParameters);
-		}
-		
-		ExclusionStrategy strategy = new ParameterListExclusionStrategy(parameterNamesToSkip);
-		
-		GsonBuilder builder = new GsonBuilder().addSerializationExclusionStrategy(strategy);
-		builder.registerTypeAdapter(LocalDate.class, new JodaLocalDateAdapter());
-		builder.registerTypeAdapter(DateTime.class, new JodaDateTimeAdapter());
-		if (prettyPrint) {
-			builder.setPrettyPrinting();
-		}
-		Gson gsonDeserializer = builder.create();
-		
-		String json = "";
-		if (accounts != null && accounts.length == 1) {
-			json = gsonDeserializer.toJson(accounts[0]);
-		} else {
-			json = gsonDeserializer.toJson(accounts);
-		}
-		
-		return json;
 	}
 }
