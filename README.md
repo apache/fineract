@@ -23,13 +23,13 @@ Developers
 
 see https://github.com/keithwoodlock/mifosx/wiki for getting started.
 
+see https://mifosforge.jira.com/wiki/display/MIFOSX/MifosX+Technical
+
 see https://github.com/keithwoodlock/mifosx/wiki/Screen-Based-Reporting for info around reporting
 
 see https://github.com/keithwoodlock/mifosx/wiki/Git-Usuage for info around using git
 
 see https://www.ohloh.net/p/mifosx for activity overview and basic code analysis.
-
-see https://github.com/keithwoodlock/mifosx/wiki/Developer-deep-dive-into-Http-API for info around resource-oriented API work
 
 Amazon Public AMI (currently out-of-date and will be updated - so don't use
 =================
