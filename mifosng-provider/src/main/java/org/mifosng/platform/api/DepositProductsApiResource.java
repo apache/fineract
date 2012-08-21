@@ -25,6 +25,7 @@ import org.mifosng.platform.api.data.DepositProductData;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.EnumOptionData;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
+import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
 import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
 import org.mifosng.platform.currency.service.CurrencyReadPlatformService;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
@@ -51,6 +52,9 @@ public class DepositProductsApiResource {
 	
 	@Autowired
 	private ApiDataConversionService apiDataConversionService;
+	
+	@Autowired
+	private ApiJsonSerializerService apiJsonSerializerService;
 	
 	@POST
 	@Consumes({MediaType.APPLICATION_JSON})
@@ -105,7 +109,7 @@ public class DepositProductsApiResource {
 		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 		
 		Collection<DepositProductData> products=this.depositProductReadPlatformService.retrieveAllDepositProducts();
-		return this.apiDataConversionService.convertDepositProductDataToJson(prettyPrint, responseParameters, products.toArray(new DepositProductData[products.size()]));
+		return this.apiJsonSerializerService.serializeDepositProductDataToJson(prettyPrint, responseParameters, products);
 	}
 	
 	@GET
@@ -134,7 +138,7 @@ public class DepositProductsApiResource {
 			productData = handleTemplateRelatedData(responseParameters, productData);
 		}
 		
-		return this.apiDataConversionService.convertDepositProductDataToJson(prettyPrint, responseParameters, productData);
+		return this.apiJsonSerializerService.serializeDepositProductDataToJson(prettyPrint, responseParameters, productData);
 	}
 
 	@GET
@@ -161,7 +165,7 @@ public class DepositProductsApiResource {
 		
 		depositProduct = handleTemplateRelatedData(responseParameters, depositProduct);
 		
-		return this.apiDataConversionService.convertDepositProductDataToJson(prettyPrint, responseParameters, depositProduct);
+		return this.apiJsonSerializerService.serializeDepositProductDataToJson(prettyPrint, responseParameters, depositProduct);
 	}
 	
 	private DepositProductData handleTemplateRelatedData(

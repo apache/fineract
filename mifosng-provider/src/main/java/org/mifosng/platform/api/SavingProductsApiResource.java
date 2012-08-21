@@ -22,6 +22,7 @@ import org.mifosng.platform.api.commands.SavingProductCommand;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.SavingProductData;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
+import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
 import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
 import org.mifosng.platform.savingproduct.service.SavingProductReadPlatformService;
 import org.mifosng.platform.savingproduct.service.SavingProductWritePlatformService;
@@ -42,6 +43,9 @@ public class SavingProductsApiResource {
 
 	@Autowired
 	private ApiDataConversionService apiDataConversionService;
+	
+    @Autowired
+    private ApiJsonSerializerService apiJsonSerializerService;
 	
 	@POST
 	@Consumes({MediaType.APPLICATION_JSON})
@@ -82,7 +86,7 @@ public class SavingProductsApiResource {
 
 		Collection<SavingProductData> products = this.savingProductReadPlatformService.retrieveAllSavingProducts();
 		
-		return this.apiDataConversionService.convertSavingProductDataToJson(prettyPrint, responseParameters, products.toArray(new SavingProductData[products.size()]));
+		return this.apiJsonSerializerService.serializeSavingProductDataToJson(prettyPrint, responseParameters, products);
 	}
 	
 	@GET
@@ -106,7 +110,7 @@ public class SavingProductsApiResource {
 		
 		SavingProductData savingProduct = this.savingProductReadPlatformService.retrieveSavingProduct(productId);
 		
-		return this.apiDataConversionService.convertSavingProductDataToJson(prettyPrint, responseParameters, savingProduct);
+		return this.apiJsonSerializerService.serializeSavingProductDataToJson(prettyPrint, responseParameters, savingProduct);
 	}
 	
 	@GET
@@ -126,7 +130,7 @@ public class SavingProductsApiResource {
 
 		SavingProductData savingProduct = this.savingProductReadPlatformService.retrieveNewSavingProductDetails();
 		
-		return this.apiDataConversionService.convertSavingProductDataToJson(prettyPrint, responseParameters, savingProduct);
+		return this.apiJsonSerializerService.serializeSavingProductDataToJson(prettyPrint, responseParameters, savingProduct);
 	}
 	
 	@DELETE

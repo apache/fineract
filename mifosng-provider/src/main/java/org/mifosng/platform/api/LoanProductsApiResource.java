@@ -21,6 +21,7 @@ import org.mifosng.platform.api.commands.LoanProductCommand;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.LoanProductData;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
+import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
 import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
 import org.mifosng.platform.loanproduct.service.LoanProductReadPlatformService;
 import org.mifosng.platform.loanproduct.service.LoanProductWritePlatformService;
@@ -41,6 +42,9 @@ public class LoanProductsApiResource {
 
 	@Autowired
 	private ApiDataConversionService apiDataConversionService;
+	
+    @Autowired
+    private ApiJsonSerializerService apiJsonSerializerService;
 
 	@POST
 	@Consumes({MediaType.APPLICATION_JSON})
@@ -74,7 +78,7 @@ public class LoanProductsApiResource {
 
 		Collection<LoanProductData> products = this.loanProductReadPlatformService.retrieveAllLoanProducts();
 		
-		return this.apiDataConversionService.convertLoanProductDataToJson(prettyPrint, responseParameters, products.toArray(new LoanProductData[products.size()]));
+		return this.apiJsonSerializerService.serializeLoanProductDataToJson(prettyPrint, responseParameters, products);
 	}
 
 	/*
@@ -106,7 +110,7 @@ public class LoanProductsApiResource {
 
 		LoanProductData loanProduct = this.loanProductReadPlatformService.retrieveNewLoanProductDetails();
 		
-		return this.apiDataConversionService.convertLoanProductDataToJson(prettyPrint, responseParameters, loanProduct);
+		return this.apiJsonSerializerService.serializeLoanProductDataToJson(prettyPrint, responseParameters, loanProduct);
 	}
 
 	@GET
@@ -137,7 +141,7 @@ public class LoanProductsApiResource {
 					"repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "fundOptions", "transactionProcessingStrategyOptions"));
 		}
 		
-		return this.apiDataConversionService.convertLoanProductDataToJson(prettyPrint, responseParameters, loanProduct);
+		return this.apiJsonSerializerService.serializeLoanProductDataToJson(prettyPrint, responseParameters, loanProduct);
 	}
 
 	@PUT

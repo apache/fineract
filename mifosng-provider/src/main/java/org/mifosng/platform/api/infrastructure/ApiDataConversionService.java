@@ -25,14 +25,11 @@ import org.mifosng.platform.api.data.ChargeData;
 import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.ClientLoanAccountSummaryCollectionData;
 import org.mifosng.platform.api.data.DepositAccountData;
-import org.mifosng.platform.api.data.DepositProductData;
 import org.mifosng.platform.api.data.GroupData;
 import org.mifosng.platform.api.data.LoanAccountData;
-import org.mifosng.platform.api.data.LoanProductData;
 import org.mifosng.platform.api.data.LoanTransactionData;
 import org.mifosng.platform.api.data.NewLoanData;
 import org.mifosng.platform.api.data.NoteData;
-import org.mifosng.platform.api.data.SavingProductData;
 
 public interface ApiDataConversionService {
 	
@@ -47,12 +44,6 @@ public interface ApiDataConversionService {
 	String convertNoteDataToJson(boolean prettyPrint, Set<String> responseParameters, NoteData note);
 	
 	String convertNoteDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<NoteData> notes);
-	
-	String convertLoanProductDataToJson(boolean prettyPrint, Set<String> responseParameters, LoanProductData... products);
-
-	String convertSavingProductDataToJson(boolean prettyPrint, Set<String> responseParameters, SavingProductData... products);
-	
-	String convertDepositProductDataToJson(boolean prettyPrint, Set<String> responseParameters, DepositProductData... products);
 	
 	String convertDepositAccountDataToJson(boolean prettyPrint, Set<String> responseParameters, DepositAccountData... accounts);
 	

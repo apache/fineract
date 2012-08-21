@@ -9,12 +9,15 @@ import org.mifosng.platform.api.data.AdditionalFieldsSetData;
 import org.mifosng.platform.api.data.AppUserData;
 import org.mifosng.platform.api.data.AuthenticatedUserData;
 import org.mifosng.platform.api.data.ConfigurationData;
+import org.mifosng.platform.api.data.DepositProductData;
 import org.mifosng.platform.api.data.FundData;
 import org.mifosng.platform.api.data.GenericResultsetData;
+import org.mifosng.platform.api.data.LoanProductData;
 import org.mifosng.platform.api.data.OfficeData;
 import org.mifosng.platform.api.data.OfficeTransactionData;
 import org.mifosng.platform.api.data.PermissionData;
 import org.mifosng.platform.api.data.RoleData;
+import org.mifosng.platform.api.data.SavingProductData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -38,6 +41,29 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 	private static final Set<String> OFFICE_TRANSACTIONS_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("transactionDate", "allowedOffices", "currencyOptions"));
 	private static final Set<String> CONFIGURATION_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("selectedCurrencyOptions", "currencyOptions"));
 	private static final Set<String> FUND_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "name", "externalId"));
+	
+	private static final Set<String> LOAN_PRODUCT_DATA_PARAMETERS = new HashSet<String>(
+			Arrays.asList("id", "name", "description", "fundId", "fundName", "transactionProcessingStrategyId", "transactionProcessingStrategyName",
+					"principal", "inArrearsTolerance", "numberOfRepayments",
+					"repaymentEvery", "interestRatePerPeriod", "annualInterestRate", 
+					"repaymentFrequencyType", "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType",
+					"createdOn", "lastModifedOn",
+					"currencyOptions", "amortizationTypeOptions", "interestTypeOptions", "interestCalculationPeriodTypeOptions", 
+					"repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "fundOptions", "transactionProcessingStrategyOptions")
+			);
+	
+	private static final Set<String> SAVINGS_PRODUCT_DATA_PARAMETERS = new HashSet<String>(
+			Arrays.asList("id", "name", "description","createdOn", "lastModifedOn","interestRate","currencyCode","digitsAfterDecimal", 
+					"currencyOptions", "minimumBalance","maximumBalance")
+			);
+
+	private static final Set<String> SAVINGS_DEPOSIT_PRODUCT_DATA_PARAMETERS = new HashSet<String>(
+			Arrays.asList("currencyOptions", "interestCompoundedEveryPeriodTypeOptions", 
+					"id", "externalId", "name", "description","createdOn", "lastModifedOn","currencyCode","digitsAfterDecimal", 
+					"minimumBalance","maximumBalance","tenureInMonths","maturityDefaultInterestRate","maturityMinInterestRate",
+					"maturityMaxInterestRate", "interestCompoundedEvery", "interestCompoundedEveryPeriodType",
+					"renewalAllowed","preClosureAllowed","preClosureInterestRate")
+			);
 	
 	private final GoogleGsonSerializerHelper helper;
 	
@@ -128,5 +154,41 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 	public String serializeFundDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final FundData fund) {
 		final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(FUND_DATA_PARAMETERS, prettyPrint, responseParameters);
 		return helper.serializedJsonFrom(gsonDeserializer, fund);
+	}
+
+	@Override
+	public String serializeLoanProductDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final Collection<LoanProductData> products) {
+		final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(LOAN_PRODUCT_DATA_PARAMETERS, prettyPrint, responseParameters);
+		return helper.serializedJsonFrom(gsonDeserializer, products.toArray(new LoanProductData[products.size()]));
+	}
+	
+	@Override
+	public String serializeLoanProductDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final LoanProductData product) {
+		final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(LOAN_PRODUCT_DATA_PARAMETERS, prettyPrint, responseParameters);
+		return helper.serializedJsonFrom(gsonDeserializer, product);
+	}
+
+	@Override
+	public String serializeSavingProductDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final Collection<SavingProductData> products) {
+		final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(SAVINGS_PRODUCT_DATA_PARAMETERS, prettyPrint, responseParameters);
+		return helper.serializedJsonFrom(gsonDeserializer, products.toArray(new SavingProductData[products.size()]));
+	}
+
+	@Override
+	public String serializeSavingProductDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final SavingProductData savingProduct) {
+		final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(SAVINGS_PRODUCT_DATA_PARAMETERS, prettyPrint, responseParameters);
+		return helper.serializedJsonFrom(gsonDeserializer, savingProduct);
+	}
+
+	@Override
+	public String serializeDepositProductDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final Collection<DepositProductData> products) {
+		final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(SAVINGS_DEPOSIT_PRODUCT_DATA_PARAMETERS, prettyPrint, responseParameters);
+		return helper.serializedJsonFrom(gsonDeserializer, products.toArray(new DepositProductData[products.size()]));
+	}
+
+	@Override
+	public String serializeDepositProductDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final DepositProductData depositProduct) {
+		final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(SAVINGS_DEPOSIT_PRODUCT_DATA_PARAMETERS, prettyPrint, responseParameters);
+		return helper.serializedJsonFrom(gsonDeserializer, depositProduct);
 	}
 }

@@ -42,14 +42,11 @@ import org.mifosng.platform.api.data.ChargeData;
 import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.ClientLoanAccountSummaryCollectionData;
 import org.mifosng.platform.api.data.DepositAccountData;
-import org.mifosng.platform.api.data.DepositProductData;
 import org.mifosng.platform.api.data.GroupData;
 import org.mifosng.platform.api.data.LoanAccountData;
-import org.mifosng.platform.api.data.LoanProductData;
 import org.mifosng.platform.api.data.LoanTransactionData;
 import org.mifosng.platform.api.data.NewLoanData;
 import org.mifosng.platform.api.data.NoteData;
-import org.mifosng.platform.api.data.SavingProductData;
 import org.mifosng.platform.api.errorhandling.InvalidJsonException;
 import org.mifosng.platform.api.errorhandling.UnsupportedParameterException;
 import org.mifosng.platform.exceptions.PlatformApiDataValidationException;
@@ -178,49 +175,6 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		Gson gsonDeserializer = builder.create();
 		
 		return gsonDeserializer.toJson(newLoanData);
-	}
-	
-	@Override
-	public String convertLoanProductDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final LoanProductData... products) {
-		final Set<String> supportedParameters = new HashSet<String>(
-				Arrays.asList("id", "name", "description", "fundId", "fundName", "transactionProcessingStrategyId", "transactionProcessingStrategyName",
-						"principal", "inArrearsTolerance", "numberOfRepayments",
-						"repaymentEvery", "interestRatePerPeriod", "annualInterestRate", 
-						"repaymentFrequencyType", "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType",
-						"createdOn", "lastModifedOn",
-						"currencyOptions", "amortizationTypeOptions", "interestTypeOptions", "interestCalculationPeriodTypeOptions", 
-						"repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "fundOptions", "transactionProcessingStrategyOptions")
-		);
-		
-		final Set<String> parameterNamesToSkip = new HashSet<String>();
-		
-		if (!responseParameters.isEmpty()) {
-			if (!supportedParameters.containsAll(responseParameters)) {
-				throw new UnsupportedParameterException(new ArrayList<String>(responseParameters));
-			}
-			
-			parameterNamesToSkip.addAll(supportedParameters);
-			parameterNamesToSkip.removeAll(responseParameters);
-		}
-		
-		ExclusionStrategy strategy = new ParameterListExclusionStrategy(parameterNamesToSkip);
-		
-		GsonBuilder builder = new GsonBuilder().addSerializationExclusionStrategy(strategy);
-		builder.registerTypeAdapter(LocalDate.class, new JodaLocalDateAdapter());
-		builder.registerTypeAdapter(DateTime.class, new JodaDateTimeAdapter());
-		if (prettyPrint) {
-			builder.setPrettyPrinting();
-		}
-		Gson gsonDeserializer = builder.create();
-		
-		String json = "";
-		if (products != null && products.length == 1) {
-			json = gsonDeserializer.toJson(products[0]);
-		} else {
-			json = gsonDeserializer.toJson(products);
-		}
-		
-		return json;
 	}
 	
 	@Override
@@ -1298,46 +1252,6 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	}
 
 	@Override
-	public String convertSavingProductDataToJson(
-			final boolean prettyPrint,
-			final Set<String> responseParameters, 
-			final SavingProductData... products) {
-		
-		Set<String> supportedParameters = new HashSet<String>(
-				Arrays.asList("id", "name", "description","createdOn", "lastModifedOn","interestRate","currencyCode","digitsAfterDecimal", "currencyOptions", "minimumBalance","maximumBalance"));
-		
-		final Set<String> parameterNamesToSkip = new HashSet<String>();
-		
-		if (!responseParameters.isEmpty()) {
-			if (!supportedParameters.containsAll(responseParameters)) {
-				throw new UnsupportedParameterException(new ArrayList<String>(responseParameters));
-			}
-			
-			parameterNamesToSkip.addAll(supportedParameters);
-			parameterNamesToSkip.removeAll(responseParameters);
-		}
-		
-		ExclusionStrategy strategy = new ParameterListExclusionStrategy(parameterNamesToSkip);
-		
-		GsonBuilder builder = new GsonBuilder().addSerializationExclusionStrategy(strategy);
-		builder.registerTypeAdapter(LocalDate.class, new JodaLocalDateAdapter());
-		builder.registerTypeAdapter(DateTime.class, new JodaDateTimeAdapter());
-		if (prettyPrint) {
-			builder.setPrettyPrinting();
-		}
-		Gson gsonDeserializer = builder.create();
-		
-		String json = "";
-		if (products != null && products.length == 1) {
-			json = gsonDeserializer.toJson(products[0]);
-		} else {
-			json = gsonDeserializer.toJson(products);
-		}
-		
-		return json;
-	}
-
-	@Override
 	public DepositProductCommand convertJsonToDepositProductCommand(final Long resourceIdentifier, final String json) {
 		
 		if (StringUtils.isBlank(json)) {
@@ -1383,52 +1297,6 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 				canRenew, canPreClose, preClosureInterestRate);
 	}
 
-	@Override
-	public String convertDepositProductDataToJson(boolean prettyPrint,
-			Set<String> responseParameters, DepositProductData... products) {
-		
-		Set<String> supportedParameters = new HashSet<String>(
-				Arrays.asList("currencyOptions", "interestCompoundedEveryPeriodTypeOptions", 
-						"id", "externalId", "name", "description","createdOn", "lastModifedOn","currencyCode","digitsAfterDecimal", 
-						"minimumBalance","maximumBalance","tenureInMonths","maturityDefaultInterestRate","maturityMinInterestRate",
-						"maturityMaxInterestRate", "interestCompoundedEvery", "interestCompoundedEveryPeriodType",
-						"renewalAllowed","preClosureAllowed","preClosureInterestRate"));
-
-		final Set<String> parameterNamesToSkip = new HashSet<String>();
-		
-		if (!responseParameters.isEmpty()) {
-			
-			// strip out all know support params from expected response to see if unsupported parameters requested for response.
-			Set<String> differentParametersSet = new HashSet<String>(responseParameters);
-			differentParametersSet.removeAll(supportedParameters);
-			
-			if (!differentParametersSet.isEmpty()) {
-				throw new UnsupportedParameterException(new ArrayList<String>(differentParametersSet));
-			}
-			
-			parameterNamesToSkip.addAll(supportedParameters);
-			parameterNamesToSkip.removeAll(responseParameters);
-		}
-		
-		ExclusionStrategy strategy = new ParameterListExclusionStrategy(parameterNamesToSkip);
-		
-		GsonBuilder builder = new GsonBuilder().addSerializationExclusionStrategy(strategy);
-		builder.registerTypeAdapter(LocalDate.class, new JodaLocalDateAdapter());
-		builder.registerTypeAdapter(DateTime.class, new JodaDateTimeAdapter());
-		if (prettyPrint) {
-			builder.setPrettyPrinting();
-		}
-		Gson gsonDeserializer = builder.create();
-		
-		String json = "";
-		if (products != null && products.length == 1) {
-			json = gsonDeserializer.toJson(products[0]);
-		} else {
-			json = gsonDeserializer.toJson(products);
-		}
-		return json;
-	}
-	
 	@Override
 	public String convertDepositAccountDataToJson(
 			final boolean prettyPrint,
