@@ -5,6 +5,8 @@ import java.util.Set;
 
 import org.mifosng.platform.api.data.AppUserData;
 import org.mifosng.platform.api.data.AuthenticatedUserData;
+import org.mifosng.platform.api.data.ConfigurationData;
+import org.mifosng.platform.api.data.FundData;
 import org.mifosng.platform.api.data.OfficeData;
 import org.mifosng.platform.api.data.OfficeTransactionData;
 import org.mifosng.platform.api.data.PermissionData;
@@ -28,6 +30,11 @@ public interface ApiJsonSerializerService {
 
 	String serializeOfficeDataToJson(boolean prettyPrint, Set<String> responseParameters, OfficeData office);
 
-	String serializeOfficeTransactionDataToJson(boolean prettyPrint, Set<String> responseParameters, OfficeTransactionData officeTransactionData);
-	
+	String serializeOfficeTransactionDataToJson(boolean prettyPrint, Set<String> responseParameters, OfficeTransactionData officeTransaction);
+
+	String serializeConfigurationDataToJson(boolean prettyPrint, Set<String> responseParameters, ConfigurationData configuration);
+
+	String serializeFundDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<FundData> funds);
+
+	String serializeFundDataToJson(boolean prettyPrint, Set<String> responseParameters, FundData fund);
 }

@@ -7,6 +7,8 @@ import java.util.Set;
 
 import org.mifosng.platform.api.data.AppUserData;
 import org.mifosng.platform.api.data.AuthenticatedUserData;
+import org.mifosng.platform.api.data.ConfigurationData;
+import org.mifosng.platform.api.data.FundData;
 import org.mifosng.platform.api.data.OfficeData;
 import org.mifosng.platform.api.data.OfficeTransactionData;
 import org.mifosng.platform.api.data.PermissionData;
@@ -32,6 +34,10 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 					"hierarchy", "parentId", "parentName", "allowedParents")
 			);
 	private static final Set<String> OFFICE_TRANSACTIONS_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("transactionDate", "allowedOffices", "currencyOptions"));
+	
+	private static final Set<String> CONFIGURATION_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("selectedCurrencyOptions", "currencyOptions"));
+	
+	private static final Set<String> FUND_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "name", "externalId"));
 	
 	private final GoogleGsonSerializerHelper helper;
 	
@@ -92,5 +98,23 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 	public String serializeOfficeTransactionDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final OfficeTransactionData officeTransaction) {
 		final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(OFFICE_TRANSACTIONS_DATA_PARAMETERS, prettyPrint, responseParameters);
 		return helper.serializedJsonFrom(gsonDeserializer, officeTransaction);
+	}
+
+	@Override
+	public String serializeConfigurationDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final ConfigurationData configuration) {
+		final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(CONFIGURATION_DATA_PARAMETERS, prettyPrint, responseParameters);
+		return helper.serializedJsonFrom(gsonDeserializer, configuration);
+	}
+
+	@Override
+	public String serializeFundDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final Collection<FundData> funds) {
+		final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(FUND_DATA_PARAMETERS, prettyPrint, responseParameters);
+		return helper.serializedJsonFrom(gsonDeserializer, funds.toArray(new FundData[funds.size()]));
+	}
+
+	@Override
+	public String serializeFundDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final FundData fund) {
+		final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(FUND_DATA_PARAMETERS, prettyPrint, responseParameters);
+		return helper.serializedJsonFrom(gsonDeserializer, fund);
 	}
 }

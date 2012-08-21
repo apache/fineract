@@ -25,10 +25,8 @@ import org.mifosng.platform.api.data.AdditionalFieldsSetData;
 import org.mifosng.platform.api.data.ChargeData;
 import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.ClientLoanAccountSummaryCollectionData;
-import org.mifosng.platform.api.data.ConfigurationData;
 import org.mifosng.platform.api.data.DepositAccountData;
 import org.mifosng.platform.api.data.DepositProductData;
-import org.mifosng.platform.api.data.FundData;
 import org.mifosng.platform.api.data.GenericResultsetData;
 import org.mifosng.platform.api.data.GroupData;
 import org.mifosng.platform.api.data.LoanAccountData;
@@ -41,8 +39,6 @@ import org.mifosng.platform.api.data.SavingProductData;
 public interface ApiDataConversionService {
 	
 	//
-	String convertConfigurationDataToJson(boolean prettyPrint, Set<String> responseParameters, ConfigurationData... configuration);
-	
 	String convertClientDataToJson(boolean prettyPrint, Set<String> responseParameters, ClientData... clients);
 	
 	String convertClientLoanAccountSummaryCollectionDataToJson(boolean prettyPrint, Set<String> responseParameters, 
@@ -79,8 +75,6 @@ public interface ApiDataConversionService {
 
 	FundCommand convertJsonToFundCommand(Long resourceIdentifier, String json);
 	
-	String convertFundDataToJson(boolean prettyPrint, Set<String> responseParameters, FundData... funds);
-
 	OfficeCommand convertJsonToOfficeCommand(Long resourceIdentifier, String json);
 	
 	RoleCommand convertJsonToRoleCommand(Long resourceIdentifier, String json);

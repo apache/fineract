@@ -2,6 +2,9 @@ package org.mifosng.platform.api.data;
 
 import java.util.List;
 
+/**
+ * Immutable data object for configuration.
+ */
 public class ConfigurationData {
 
 	private final List<CurrencyData> selectedCurrencyOptions;

@@ -17,6 +17,7 @@ import javax.ws.rs.core.UriInfo;
 import org.mifosng.platform.api.commands.OrganisationCurrencyCommand;
 import org.mifosng.platform.api.data.ConfigurationData;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
+import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
 import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
 import org.mifosng.platform.configuration.service.ConfigurationReadPlatformService;
 import org.mifosng.platform.configuration.service.ConfigurationWritePlatformService;
@@ -38,6 +39,9 @@ public class ConfigurationApiResource {
 	@Autowired
 	private ApiDataConversionService apiDataConversionService;
 	
+	@Autowired
+	private ApiJsonSerializerService apiJsonSerializerService;
+	
 	@GET
 	@Path("currency")
 	@Consumes({MediaType.APPLICATION_JSON})
@@ -55,7 +59,7 @@ public class ConfigurationApiResource {
 
 		ConfigurationData configurationData = this.configurationReadPlatformService.retrieveCurrencyConfiguration();
 		
-		return this.apiDataConversionService.convertConfigurationDataToJson(prettyPrint, responseParameters, configurationData);
+		return this.apiJsonSerializerService.serializeConfigurationDataToJson(prettyPrint, responseParameters, configurationData);
 	}
 
 	@PUT

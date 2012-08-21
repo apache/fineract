@@ -19,6 +19,7 @@ import org.mifosng.platform.api.commands.FundCommand;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.FundData;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
+import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
 import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
 import org.mifosng.platform.fund.service.FundReadPlatformService;
 import org.mifosng.platform.fund.service.FundWritePlatformService;
@@ -40,6 +41,9 @@ public class FundsApiResource {
 	@Autowired
 	private ApiDataConversionService apiDataConversionService;
 	
+	@Autowired
+	private ApiJsonSerializerService apiJsonSerializerService;
+	
 	@GET
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
@@ -48,9 +52,9 @@ public class FundsApiResource {
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 		
-		Collection<FundData> funds = this.readPlatformService.retrieveAllFunds();
+		final Collection<FundData> funds = this.readPlatformService.retrieveAllFunds();
 		
-		return this.apiDataConversionService.convertFundDataToJson(prettyPrint, responseParameters, funds.toArray(new FundData[funds.size()]));
+		return this.apiJsonSerializerService.serializeFundDataToJson(prettyPrint, responseParameters, funds);
 	}
 
 	@POST
@@ -58,9 +62,9 @@ public class FundsApiResource {
 	@Produces({MediaType.APPLICATION_JSON})
 	public Response createFund(final String jsonRequestBody) {
 		
-		FundCommand command = this.apiDataConversionService.convertJsonToFundCommand(null, jsonRequestBody);
+		final FundCommand command = this.apiDataConversionService.convertJsonToFundCommand(null, jsonRequestBody);
 		
-		Long fundId = this.writePlatformService.createFund(command);
+		final Long fundId = this.writePlatformService.createFund(command);
 
 		return Response.ok().entity(new EntityIdentifier(fundId)).build();
 	}
@@ -71,12 +75,12 @@ public class FundsApiResource {
 	@Produces({MediaType.APPLICATION_JSON})
 	public String retreiveOffice(@PathParam("fundId") final Long fundId, @Context final UriInfo uriInfo) {
 		
-		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+		final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+		final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 		
-		FundData fund = this.readPlatformService.retrieveFund(fundId);
+		final FundData fund = this.readPlatformService.retrieveFund(fundId);
 
-		return this.apiDataConversionService.convertFundDataToJson(prettyPrint, responseParameters, fund);
+		return this.apiJsonSerializerService.serializeFundDataToJson(prettyPrint, responseParameters, fund);
 	}
 
 	@PUT
@@ -85,9 +89,9 @@ public class FundsApiResource {
 	@Produces({MediaType.APPLICATION_JSON})
 	public Response updateFund(@PathParam("fundId") final Long fundId, final String jsonRequestBody) {
 
-		FundCommand command = this.apiDataConversionService.convertJsonToFundCommand(fundId, jsonRequestBody);
+		final FundCommand command = this.apiDataConversionService.convertJsonToFundCommand(fundId, jsonRequestBody);
 		
-		Long entityId = this.writePlatformService.updateFund(command);
+		final Long entityId = this.writePlatformService.updateFund(command);
 
 		return Response.ok().entity(new EntityIdentifier(entityId)).build();
 	}
