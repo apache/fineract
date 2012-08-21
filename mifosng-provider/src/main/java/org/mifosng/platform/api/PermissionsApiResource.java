@@ -12,7 +12,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
 import org.mifosng.platform.api.data.PermissionData;
-import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
+import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
 import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
 import org.mifosng.platform.user.service.PermissionReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +28,7 @@ public class PermissionsApiResource {
 	private PermissionReadPlatformService permissionReadPlatformService;
 
 	@Autowired
-	private ApiDataConversionService apiDataConversionService;
+	private ApiJsonSerializerService apiJsonSerializerService;
 
 	@GET
 	@Consumes({MediaType.APPLICATION_JSON})
@@ -40,6 +40,6 @@ public class PermissionsApiResource {
 		
 		Collection<PermissionData> permissions = this.permissionReadPlatformService.retrieveAllPermissions();
 		
-		return this.apiDataConversionService.convertPermissionDataToJson(prettyPrint, responseParameters, permissions.toArray(new PermissionData[permissions.size()]));
+		return this.apiJsonSerializerService.serializePermissionDataToJson(prettyPrint, responseParameters, permissions);
 	}
 }

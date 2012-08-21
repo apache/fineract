@@ -3,112 +3,104 @@ package org.mifosng.platform.api.data;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Immutable data object for application user data.
+ */
 public class AppUserData {
 
-	private Long id;
-	private String username;
-	private Long officeId;
-	private String officeName;
-	private String firstname;
-	private String lastname;
-	private String email;
+	private final Long id;
+	private final String username;
+	private final Long officeId;
+	private final String officeName;
+	private final String firstname;
+	private final String lastname;
+	private final String email;
 
-	private List<OfficeLookup> allowedOffices = new ArrayList<OfficeLookup>();
-
-	private List<RoleData> availableRoles = new ArrayList<RoleData>();
-	private List<RoleData> selectedRoles = new ArrayList<RoleData>();
-
-	public AppUserData() {
-		//
-	}
+	private final List<OfficeLookup> allowedOffices;
+	private final List<RoleData> availableRoles;
+	private final List<RoleData> selectedRoles;
 
 	public AppUserData(final Long id, final String username,
 			final String email, final Long officeId,
-			final String officeName) {
+			final String officeName, final String firstname, final String lastname, final List<RoleData> availableRoles, final List<RoleData> selectedRoles) {
 		this.id = id;
 		this.username = username;
-		this.email = email;
 		this.officeId = officeId;
 		this.officeName = officeName;
+		this.firstname = firstname;
+		this.lastname = lastname;
+		this.email = email;
+		
+		this.allowedOffices = new ArrayList<OfficeLookup>();
+		this.availableRoles = availableRoles;
+		this.selectedRoles = selectedRoles;
+	}
+	
+	public AppUserData(AppUserData user, List<OfficeLookup> allowedOffices) {
+		this.id = user.getId();
+		this.username = user.getUsername();
+		this.officeId = user.getOfficeId();
+		this.officeName = user.getOfficeName();
+		this.firstname = user.getFirstname();
+		this.lastname = user.getLastname();
+		this.email = user.getEmail();
+		
+		this.allowedOffices = allowedOffices;
+		this.availableRoles = user.getAvailableRoles();
+		this.selectedRoles = user.getSelectedRoles();
+	}
+
+	public AppUserData(final List<OfficeLookup> allowedOffices, final List<RoleData> availableRoles) {
+		this.id = null;
+		this.username = null;
+		this.officeId = null;
+		this.officeName = null;
+		this.firstname = null;
+		this.lastname = null;
+		this.email = null;
+		
+		this.allowedOffices = allowedOffices;
+		this.availableRoles = availableRoles;
+		this.selectedRoles = new ArrayList<RoleData>();
 	}
 
 	public Long getId() {
-		return this.id;
+		return id;
 	}
 
 	public String getUsername() {
-		return this.username;
-	}
-
-	public String getEmail() {
-		return this.email;
+		return username;
 	}
 
 	public Long getOfficeId() {
-		return this.officeId;
+		return officeId;
 	}
 
 	public String getOfficeName() {
-		return this.officeName;
-	}
-
-	public void setId(final Long id) {
-		this.id = id;
-	}
-
-	public void setUsername(final String username) {
-		this.username = username;
-	}
-
-	public void setEmail(final String email) {
-		this.email = email;
-	}
-
-	public void setOfficeId(final Long officeId) {
-		this.officeId = officeId;
-	}
-
-	public void setOfficeName(final String officeName) {
-		this.officeName = officeName;
-	}
-
-	public List<OfficeLookup> getAllowedOffices() {
-		return allowedOffices;
-	}
-
-	public void setAllowedOffices(List<OfficeLookup> allowedOffices) {
-		this.allowedOffices = allowedOffices;
-	}
-
-	public List<RoleData> getAvailableRoles() {
-		return availableRoles;
-	}
-
-	public void setAvailableRoles(List<RoleData> availableRoles) {
-		this.availableRoles = availableRoles;
-	}
-
-	public List<RoleData> getSelectedRoles() {
-		return selectedRoles;
-	}
-
-	public void setSelectedRoles(List<RoleData> selectedRoles) {
-		this.selectedRoles = selectedRoles;
+		return officeName;
 	}
 
 	public String getFirstname() {
 		return firstname;
 	}
 
-	public void setFirstname(String firstname) {
-		this.firstname = firstname;
-	}
-
 	public String getLastname() {
 		return lastname;
 	}
 
-	public void setLastname(String lastname) {
-		this.lastname = lastname;
+	public String getEmail() {
+		return email;
+	}
+
+	public List<OfficeLookup> getAllowedOffices() {
+		return allowedOffices;
+	}
+
+	public List<RoleData> getAvailableRoles() {
+		return availableRoles;
+	}
+
+	public List<RoleData> getSelectedRoles() {
+		return selectedRoles;
 	}
 }

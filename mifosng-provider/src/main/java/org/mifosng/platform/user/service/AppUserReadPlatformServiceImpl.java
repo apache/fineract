@@ -79,9 +79,7 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
 
 		List<RoleData> availableRoles = new ArrayList<RoleData>(this.roleReadPlatformService.retrieveAllRoles());
 
-		AppUserData userData = new AppUserData();
-		userData.setAllowedOffices(offices);
-		userData.setAvailableRoles(availableRoles);
+		AppUserData userData = new AppUserData(offices, availableRoles);
 
 		return userData;
 	}
@@ -98,21 +96,17 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
 
 		List<RoleData> availableRoles = new ArrayList<RoleData>(this.roleReadPlatformService.retrieveAllRoles());
 		
-		List<RoleData> userRoleData = new ArrayList<RoleData>();
+		List<RoleData> selectedUserRoles = new ArrayList<RoleData>();
 		Set<Role> userRoles = user.getRoles();
 		for (Role role : userRoles) {
-			userRoleData.add(role.toData());
+			selectedUserRoles.add(role.toData());
 		}
 
+		availableRoles.removeAll(selectedUserRoles);
+		
 		AppUserData userData = new AppUserData(user.getId(),
 				user.getUsername(), user.getEmail(), user.getOffice().getId(), user.getOffice()
-						.getName());
-		userData.setFirstname(user.getFirstname());
-		userData.setLastname(user.getLastname());
-
-		availableRoles.removeAll(userRoleData);
-		userData.setAvailableRoles(availableRoles);
-		userData.setSelectedRoles(userRoleData);
+						.getName(), user.getFirstname(), user.getLastname(), availableRoles, selectedUserRoles);
 
 		return userData;
 	}
@@ -139,9 +133,7 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
 			// FIXME - change sql query to join to get office id and name information.
 			String officeName = fromOfficeList(this.offices, officeId);
 
-			AppUserData user = new AppUserData(id, username, email, officeId, officeName);
-			user.setLastname(lastname);
-			user.setFirstname(firstname);
+			AppUserData user = new AppUserData(id, username, email, officeId, officeName, firstname, lastname, new ArrayList<RoleData>(),  new ArrayList<RoleData>());
 
 			return user;
 		}

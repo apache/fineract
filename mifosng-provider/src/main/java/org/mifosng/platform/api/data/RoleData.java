@@ -3,27 +3,44 @@ package org.mifosng.platform.api.data;
 import java.util.ArrayList;
 import java.util.Collection;
 
+/**
+ * Immutable data object for role data.
+ */
 public class RoleData {
 
-	private Long id;
-	private String name;
-	private String description;
+	private final Long id;
+	private final String name;
+	private final String description;
 	
-	private Collection<PermissionData> availablePermissions = new ArrayList<PermissionData>();
-	private Collection<PermissionData> selectedPermissions = new ArrayList<PermissionData>();
+	private final Collection<PermissionData> availablePermissions;
+	private final Collection<PermissionData> selectedPermissions;
 
-	public RoleData() {
-		//
-	}
-
-	public RoleData(final Long id, final String name, final String description) {
+	public RoleData(final Long id, final String name, final String description, final Collection<PermissionData> selectedPermissions) {
 		this.id = id;
 		this.name = name;
 		this.description = description;
+		this.availablePermissions = new ArrayList<PermissionData>();
+		this.selectedPermissions = new ArrayList<PermissionData>(selectedPermissions);
 	}
 	
+	public RoleData(final Collection<PermissionData> availablePermissions, final Collection<PermissionData> selectedPermissions) {
+		this.id = null;
+		this.name = null;
+		this.description = null;
+		this.availablePermissions = new ArrayList<PermissionData>(availablePermissions);
+		this.selectedPermissions = new ArrayList<PermissionData>(selectedPermissions);
+	}
+
+	public RoleData(RoleData role, final Collection<PermissionData> availablePermissions) {
+		this.id = role.getId();
+		this.name = role.getName();
+		this.description = role.getDescription();
+		this.availablePermissions = new ArrayList<PermissionData>(availablePermissions);
+		this.selectedPermissions = role.getSelectedPermissions();
+	}
+
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(final Object obj) {
 		RoleData role = (RoleData) obj;
 		return this.id.equals(role.getId());
 	}
@@ -34,44 +51,22 @@ public class RoleData {
 	}
 
 	public Long getId() {
-		return this.id;
+		return id;
 	}
 
 	public String getName() {
-		return this.name;
+		return name;
 	}
 
 	public String getDescription() {
-		return this.description;
-	}
-
-	public void setId(final Long id) {
-		this.id = id;
-	}
-
-	public void setName(final String name) {
-		this.name = name;
-	}
-
-	public void setDescription(final String description) {
-		this.description = description;
+		return description;
 	}
 
 	public Collection<PermissionData> getAvailablePermissions() {
 		return availablePermissions;
 	}
 
-	public void setAvailablePermissions(
-			Collection<PermissionData> availablePermissions) {
-		this.availablePermissions = availablePermissions;
-	}
-
 	public Collection<PermissionData> getSelectedPermissions() {
 		return selectedPermissions;
-	}
-
-	public void setSelectedPermissions(
-			Collection<PermissionData> selectedPermissions) {
-		this.selectedPermissions = selectedPermissions;
 	}
 }

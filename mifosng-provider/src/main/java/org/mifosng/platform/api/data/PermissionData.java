@@ -1,17 +1,14 @@
 package org.mifosng.platform.api.data;
 
-import java.io.Serializable;
+/**
+ * Immutable data object for permission data.
+ */
+public class PermissionData {
 
-public class PermissionData implements Serializable {
-
-	private Long id;
-	private String name;
-	private String description;
-	private String code;
-
-	public PermissionData() {
-		//
-	}
+	private final Long id;
+	private final String name;
+	private final String description;
+	private final String code;
 
 	public PermissionData(final Long id, final String name, final String description, final String code) {
 		this.id = id;
@@ -32,34 +29,18 @@ public class PermissionData implements Serializable {
 	}
 
 	public Long getId() {
-		return this.id;
+		return id;
 	}
 
 	public String getName() {
-		return this.name;
+		return name;
 	}
 
 	public String getDescription() {
-		return this.description;
+		return description;
 	}
 
 	public String getCode() {
-		return this.code;
-	}
-
-	public void setId(final Long id) {
-		this.id = id;
-	}
-
-	public void setName(final String name) {
-		this.name = name;
-	}
-
-	public void setDescription(final String description) {
-		this.description = description;
-	}
-
-	public void setCode(final String code) {
-		this.code = code;
+		return code;
 	}
 }

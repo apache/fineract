@@ -62,16 +62,13 @@ public class Role extends AbstractAuditableCustom<AppUser, Long> {
 
 	public RoleData toData() {
 		
-		RoleData data = new RoleData(this.getId(), this.name, this.description);
-		
 		Collection<PermissionData> rolePermissions = new ArrayList<PermissionData>();
 		for (Permission permission : this.permissions) {
 			PermissionData permissionData = permission.toData();
 			rolePermissions.add(permissionData);
 		}
-		data.setSelectedPermissions(rolePermissions);
 		
-		return data;
+		return new RoleData(this.getId(), this.name, this.description, rolePermissions);
 	}
 
 	public void update(final RoleCommand command, final List<Permission> selectedPermissions) {

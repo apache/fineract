@@ -25,6 +25,7 @@ import org.mifosng.platform.api.data.AppUserData;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.OfficeLookup;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
+import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
 import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
 import org.mifosng.platform.organisation.service.OfficeReadPlatformService;
 import org.mifosng.platform.security.PlatformSecurityContext;
@@ -53,6 +54,9 @@ public class UsersApiResource {
 	private ApiDataConversionService apiDataConversionService;
 	
 	@Autowired
+	private ApiJsonSerializerService apiJsonSerializerService;
+	
+	@Autowired
 	private PlatformSecurityContext context;
 	
 	@GET
@@ -70,7 +74,7 @@ public class UsersApiResource {
 
 		Collection<AppUserData> users = this.appUserReadPlatformService.retrieveAllUsers();
 		
-		return this.apiDataConversionService.convertAppUserDataToJson(prettyPrint, responseParameters, users.toArray(new AppUserData[users.size()]));
+		return this.apiJsonSerializerService.serializeAppUserDataToJson(prettyPrint, responseParameters, users);
 	}
 
 	@GET
@@ -91,13 +95,13 @@ public class UsersApiResource {
 		AppUserData user = this.appUserReadPlatformService.retrieveUser(userId);
 		if (template) {
 			List<OfficeLookup> offices = new ArrayList<OfficeLookup>(this.officeReadPlatformService.retrieveAllOfficesForLookup());
-			user.setAllowedOffices(offices);
+			user = new AppUserData(user, offices);
 			responseParameters.add("allowedOffices");
 			responseParameters.add("availableRoles");
 			responseParameters.add("selectedRoles");
 		}
 		
-		return this.apiDataConversionService.convertAppUserDataToJson(prettyPrint, responseParameters, user);
+		return this.apiJsonSerializerService.serializeAppUserDataToJson(prettyPrint, responseParameters, user);
 	}
 
 	@GET
@@ -117,7 +121,7 @@ public class UsersApiResource {
 		
 		AppUserData user = this.appUserReadPlatformService.retrieveNewUserDetails();
 
-		return this.apiDataConversionService.convertAppUserDataToJson(prettyPrint, responseParameters, user);
+		return this.apiJsonSerializerService.serializeAppUserDataToJson(prettyPrint, responseParameters, user);
 	}
 
 	@POST

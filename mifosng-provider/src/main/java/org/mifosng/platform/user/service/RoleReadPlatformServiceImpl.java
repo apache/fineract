@@ -2,8 +2,10 @@ package org.mifosng.platform.user.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
 
+import org.mifosng.platform.api.data.PermissionData;
 import org.mifosng.platform.api.data.RoleData;
 import org.mifosng.platform.exceptions.RoleNotFoundException;
 import org.mifosng.platform.infrastructure.JdbcSupport;
@@ -61,7 +63,8 @@ public class RoleReadPlatformServiceImpl implements RoleReadPlatformService {
 			String name = rs.getString("name");
 			String description = rs.getString("description");
 
-			return new RoleData(id, name, description);
+			Collection<PermissionData> selectedPermissions = new ArrayList<PermissionData>(0);
+			return new RoleData(id, name, description, selectedPermissions);
 		}
 
 		public String schema() {

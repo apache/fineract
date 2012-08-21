@@ -1,5 +1,6 @@
 package org.mifosng.platform.api;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -22,6 +23,7 @@ import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.PermissionData;
 import org.mifosng.platform.api.data.RoleData;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
+import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
 import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
 import org.mifosng.platform.user.service.PermissionReadPlatformService;
 import org.mifosng.platform.user.service.RoleReadPlatformService;
@@ -46,6 +48,9 @@ public class RolesApiResource {
 
 	@Autowired
 	private ApiDataConversionService apiDataConversionService;
+	
+	@Autowired
+	private ApiJsonSerializerService apiJsonSerializerService;
 
 	@GET
 	@Consumes({MediaType.APPLICATION_JSON})
@@ -62,7 +67,7 @@ public class RolesApiResource {
 
 		Collection<RoleData> roles = this.roleReadPlatformService.retrieveAllRoles();
 		
-		return this.apiDataConversionService.convertRoleDataToJson(prettyPrint, responseParameters, roles.toArray(new RoleData[roles.size()]));
+		return this.apiJsonSerializerService.serializeRoleDataToJson(prettyPrint, responseParameters, roles);
 	}
 
 	@GET
@@ -81,10 +86,9 @@ public class RolesApiResource {
 		
 		Collection<PermissionData> allPermissions = this.permissionReadPlatformService.retrieveAllPermissions();
 
-		RoleData role = new RoleData();
-		role.setAvailablePermissions(allPermissions);
+		RoleData role = new RoleData(allPermissions, new ArrayList<PermissionData>());
 		
-		return this.apiDataConversionService.convertRoleDataToJson(prettyPrint, responseParameters, role);
+		return this.apiJsonSerializerService.serializeRoleDataToJson(prettyPrint, responseParameters, role);
 	}
 
 	@POST
@@ -119,13 +123,13 @@ public class RolesApiResource {
 		if (template) {
 			Collection<PermissionData> availablePermissions = this.permissionReadPlatformService.retrieveAllPermissions();
 			availablePermissions.removeAll(role.getSelectedPermissions());
-			role.setAvailablePermissions(availablePermissions);
+			
+			role = new RoleData(role, availablePermissions);
 			
 			responseParameters.add("availablePermissions");
 			responseParameters.add("selectedPermissions");
 		}
-
-		return this.apiDataConversionService.convertRoleDataToJson(prettyPrint, responseParameters, role);
+		return this.apiJsonSerializerService.serializeRoleDataToJson(prettyPrint, responseParameters, role);
 	}
 
 	@PUT

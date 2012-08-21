@@ -7,8 +7,8 @@ import org.mifosng.platform.api.commands.AdjustLoanTransactionCommand;
 import org.mifosng.platform.api.commands.BranchMoneyTransferCommand;
 import org.mifosng.platform.api.commands.ChargeCommand;
 import org.mifosng.platform.api.commands.ClientCommand;
-import org.mifosng.platform.api.commands.DepositProductCommand;
 import org.mifosng.platform.api.commands.DepositAccountCommand;
+import org.mifosng.platform.api.commands.DepositProductCommand;
 import org.mifosng.platform.api.commands.FundCommand;
 import org.mifosng.platform.api.commands.GroupCommand;
 import org.mifosng.platform.api.commands.LoanProductCommand;
@@ -22,14 +22,13 @@ import org.mifosng.platform.api.commands.SavingProductCommand;
 import org.mifosng.platform.api.commands.SubmitLoanApplicationCommand;
 import org.mifosng.platform.api.commands.UserCommand;
 import org.mifosng.platform.api.data.AdditionalFieldsSetData;
-import org.mifosng.platform.api.data.AppUserData;
 import org.mifosng.platform.api.data.AuthenticatedUserData;
 import org.mifosng.platform.api.data.ChargeData;
 import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.ClientLoanAccountSummaryCollectionData;
 import org.mifosng.platform.api.data.ConfigurationData;
-import org.mifosng.platform.api.data.DepositProductData;
 import org.mifosng.platform.api.data.DepositAccountData;
+import org.mifosng.platform.api.data.DepositProductData;
 import org.mifosng.platform.api.data.FundData;
 import org.mifosng.platform.api.data.GenericResultsetData;
 import org.mifosng.platform.api.data.GroupData;
@@ -40,19 +39,11 @@ import org.mifosng.platform.api.data.NewLoanData;
 import org.mifosng.platform.api.data.NoteData;
 import org.mifosng.platform.api.data.OfficeData;
 import org.mifosng.platform.api.data.OfficeTransactionData;
-import org.mifosng.platform.api.data.PermissionData;
-import org.mifosng.platform.api.data.RoleData;
 import org.mifosng.platform.api.data.SavingProductData;
 
 public interface ApiDataConversionService {
 	
 	//
-	String convertPermissionDataToJson(boolean prettyPrint, Set<String> responseParameters, PermissionData... permissions);
-	
-	String convertRoleDataToJson(boolean prettyPrint, Set<String> responseParameters, RoleData... roles);
-	
-	String convertAppUserDataToJson(boolean prettyPrint, Set<String> responseParameters, AppUserData... users);
-	
 	String convertOfficeTransactionDataToJson(boolean prettyPrint, Set<String> responseParameters, OfficeTransactionData... officeTransactions);
 	
 	String convertConfigurationDataToJson(boolean prettyPrint, Set<String> responseParameters, ConfigurationData... configuration);
