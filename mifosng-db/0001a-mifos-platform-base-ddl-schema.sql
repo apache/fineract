@@ -29,6 +29,8 @@ DROP TABLE IF EXISTS `m_charge`;
 DROP TABLE IF EXISTS `m_product_loan_charge`;
 DROP TABLE IF EXISTS `m_office_transaction`;
 DROP TABLE IF EXISTS `m_office`;
+DROP TABLE IF EXISTS `m_staff`;
+
 -- admin tables
 DROP TABLE IF EXISTS `m_role_permission`;
 DROP TABLE IF EXISTS `m_appuser_role`;
@@ -140,6 +142,15 @@ CREATE TABLE `m_charge` (
   `lastmodified_date` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `m_staff` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `firstname` varchar(50) DEFAULT NULL,
+  `lastname` varchar(50) DEFAULT NULL,
+  `display_name` varchar(100) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `display_name` (`display_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `m_office` (
