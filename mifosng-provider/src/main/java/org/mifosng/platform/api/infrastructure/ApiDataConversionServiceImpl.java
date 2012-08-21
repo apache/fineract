@@ -39,7 +39,6 @@ import org.mifosng.platform.api.commands.SubmitLoanApplicationCommand;
 import org.mifosng.platform.api.commands.UserCommand;
 import org.mifosng.platform.api.data.AdditionalFieldsSetData;
 import org.mifosng.platform.api.data.ApiParameterError;
-import org.mifosng.platform.api.data.AuthenticatedUserData;
 import org.mifosng.platform.api.data.ChargeData;
 import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.ClientLoanAccountSummaryCollectionData;
@@ -54,8 +53,6 @@ import org.mifosng.platform.api.data.LoanProductData;
 import org.mifosng.platform.api.data.LoanTransactionData;
 import org.mifosng.platform.api.data.NewLoanData;
 import org.mifosng.platform.api.data.NoteData;
-import org.mifosng.platform.api.data.OfficeData;
-import org.mifosng.platform.api.data.OfficeTransactionData;
 import org.mifosng.platform.api.data.SavingProductData;
 import org.mifosng.platform.api.errorhandling.InvalidJsonException;
 import org.mifosng.platform.api.errorhandling.UnsupportedParameterException;
@@ -82,20 +79,6 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		gsonConverter = new Gson();
 	}
 
-	@Override
-	public String convertAuthenticatedUserDataToJson(final boolean prettyPrint, final AuthenticatedUserData authenticatedUserData) {
-		GsonBuilder builder = new GsonBuilder();
-		builder.registerTypeAdapter(LocalDate.class, new JodaLocalDateAdapter());
-		builder.registerTypeAdapter(DateTime.class, new JodaDateTimeAdapter());
-		
-		if (prettyPrint) {
-			builder.setPrettyPrinting();
-		}
-		Gson gsonDeserializer = builder.create();
-		
-		return gsonDeserializer.toJson(authenticatedUserData);
-	}
-	
 	@Override
 	public String convertGenericResultsetDataToJson(final boolean prettyPrint, final GenericResultsetData result) {
 		GsonBuilder builder = new GsonBuilder();
@@ -451,77 +434,6 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 			json = gsonDeserializer.toJson(configuration[0]);
 		} else {
 			json = gsonDeserializer.toJson(configuration);
-		}
-		
-		return json;
-	}
-	
-	@Override
-	public String convertOfficeTransactionDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final OfficeTransactionData... officeTransactions) {
-		
-		final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("transactionDate", "allowedOffices", "currencyOptions"));
-		
-		final Set<String> parameterNamesToSkip = new HashSet<String>();
-		
-		if (!responseParameters.isEmpty()) {
-			if (!supportedParameters.containsAll(responseParameters)) {
-				throw new UnsupportedParameterException(new ArrayList<String>(responseParameters));
-			}
-			
-			parameterNamesToSkip.addAll(supportedParameters);
-			parameterNamesToSkip.removeAll(responseParameters);
-		}
-		
-		ExclusionStrategy strategy = new ParameterListExclusionStrategy(parameterNamesToSkip);
-		
-		GsonBuilder builder = new GsonBuilder().addSerializationExclusionStrategy(strategy);
-		builder.registerTypeAdapter(LocalDate.class, new JodaLocalDateAdapter());
-		if (prettyPrint) {
-			builder.setPrettyPrinting();
-		}
-		Gson gsonDeserializer = builder.create();
-		
-		String json = "";
-		if (officeTransactions != null && officeTransactions.length == 1) {
-			json = gsonDeserializer.toJson(officeTransactions[0]);
-		} else {
-			json = gsonDeserializer.toJson(officeTransactions);
-		}
-		
-		return json;
-	}
-	
-	@Override
-	public String convertOfficeDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final OfficeData... offices) {
-		
-		Set<String> supportedParameters = new HashSet<String>(Arrays.asList("id", "name", "nameDecorated", "externalId", "openingDate", 
-				"hierarchy", "parentId", "parentName", "allowedParents"));
-		
-		final Set<String> parameterNamesToSkip = new HashSet<String>();
-		
-		if (!responseParameters.isEmpty()) {
-			if (!supportedParameters.containsAll(responseParameters)) {
-				throw new UnsupportedParameterException(new ArrayList<String>(responseParameters));
-			}
-			
-			parameterNamesToSkip.addAll(supportedParameters);
-			parameterNamesToSkip.removeAll(responseParameters);
-		}
-		
-		ExclusionStrategy strategy = new ParameterListExclusionStrategy(parameterNamesToSkip);
-		
-		GsonBuilder builder = new GsonBuilder().addSerializationExclusionStrategy(strategy);
-		builder.registerTypeAdapter(LocalDate.class, new JodaLocalDateAdapter());
-		if (prettyPrint) {
-			builder.setPrettyPrinting();
-		}
-		Gson gsonDeserializer = builder.create();
-		
-		String json = "";
-		if (offices != null && offices.length == 1) {
-			json = gsonDeserializer.toJson(offices[0]);
-		} else {
-			json = gsonDeserializer.toJson(offices);
 		}
 		
 		return json;

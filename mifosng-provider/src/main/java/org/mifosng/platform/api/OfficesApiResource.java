@@ -3,6 +3,7 @@ package org.mifosng.platform.api;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
@@ -20,7 +21,9 @@ import javax.ws.rs.core.UriInfo;
 import org.mifosng.platform.api.commands.OfficeCommand;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.OfficeData;
+import org.mifosng.platform.api.data.OfficeLookup;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
+import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
 import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
 import org.mifosng.platform.organisation.service.OfficeReadPlatformService;
 import org.mifosng.platform.organisation.service.OfficeWritePlatformService;
@@ -41,6 +44,9 @@ public class OfficesApiResource {
 
 	@Autowired
 	private ApiDataConversionService apiDataConversionService;
+	
+	@Autowired
+	private ApiJsonSerializerService apiJsonSerializerService;
 
 	@GET
 	@Consumes({MediaType.APPLICATION_JSON})
@@ -59,7 +65,7 @@ public class OfficesApiResource {
 
 		Collection<OfficeData> offices = this.readPlatformService.retrieveAllOffices();
 		
-		return this.apiDataConversionService.convertOfficeDataToJson(prettyPrint, responseParameters, offices.toArray(new OfficeData[offices.size()]));
+		return this.apiJsonSerializerService.serializeOfficeDataToJson(prettyPrint, responseParameters, offices);
 	}
 
 	@GET
@@ -74,9 +80,9 @@ public class OfficesApiResource {
 		
 		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 
-		OfficeData officeData = this.readPlatformService.retrieveNewOfficeTemplate();
+		OfficeData office = this.readPlatformService.retrieveNewOfficeTemplate();
 		
-		return this.apiDataConversionService.convertOfficeDataToJson(prettyPrint, typicalResponseParameters, officeData);
+		return this.apiJsonSerializerService.serializeOfficeDataToJson(prettyPrint, typicalResponseParameters, office);
 	}
 
 	@POST
@@ -110,11 +116,12 @@ public class OfficesApiResource {
 
 		OfficeData office = this.readPlatformService.retrieveOffice(officeId);
 		if (template) {
-			office.setAllowedParents(this.readPlatformService.retrieveAllowedParents(officeId));
+			List<OfficeLookup> allowedParents = this.readPlatformService.retrieveAllowedParents(officeId);
+			office = OfficeData.appendedTemplate(office, allowedParents);
 			responseParameters.add("allowedParents");
 		}
 
-		return this.apiDataConversionService.convertOfficeDataToJson(prettyPrint, responseParameters, office);
+		return this.apiJsonSerializerService.serializeOfficeDataToJson(prettyPrint, responseParameters, office);
 	}
 
 	@PUT

@@ -62,8 +62,8 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
 			Long parentId = JdbcSupport.getLong(rs, "parentId");
 			String parentName = rs.getString("parentName");
 
-			return new OfficeData(id, name, nameDecorated, externalId,
-					openingDate, hierarchy, parentId, parentName);
+			List<OfficeLookup> allowedParents = new ArrayList<OfficeLookup>();
+			return new OfficeData(id, name, nameDecorated, externalId, openingDate, hierarchy, parentId, parentName, allowedParents);
 		}
 	}
 
@@ -144,11 +144,7 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
 		List<OfficeLookup> parentLookups = new ArrayList<OfficeLookup>(
 				retrieveAllOfficesForLookup());
 
-		OfficeData officeData = new OfficeData();
-		officeData.setAllowedParents(parentLookups);
-		officeData.setOpeningDate(new LocalDate());
-
-		return officeData;
+		return OfficeData.template(parentLookups, new LocalDate());
 	}
 
 	@Override
@@ -156,8 +152,7 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
 
 		context.authenticatedUser();
 
-		List<OfficeLookup> parentLookups = new ArrayList<OfficeLookup>(
-				retrieveAllOfficesForLookup());
+		List<OfficeLookup> parentLookups = new ArrayList<OfficeLookup>(retrieveAllOfficesForLookup());
 		List<OfficeLookup> filterParentLookups = new ArrayList<OfficeLookup>();
 
 		for (OfficeLookup office : parentLookups) {

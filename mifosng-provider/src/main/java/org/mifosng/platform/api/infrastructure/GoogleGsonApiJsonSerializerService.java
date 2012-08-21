@@ -6,6 +6,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.mifosng.platform.api.data.AppUserData;
+import org.mifosng.platform.api.data.AuthenticatedUserData;
+import org.mifosng.platform.api.data.OfficeData;
+import org.mifosng.platform.api.data.OfficeTransactionData;
 import org.mifosng.platform.api.data.PermissionData;
 import org.mifosng.platform.api.data.RoleData;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +27,12 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 	private static final Set<String> APP_USER_DATA_PARAMETERS = new HashSet<String>(
 			Arrays.asList("id", "officeId", "officeName", "username", "firstname", "lastname", "email",
 			"allowedOffices", "availableRoles", "selectedRoles"));
-
+	private static final Set<String> OFFICE_DATA_PARAMETERS = new HashSet<String>(
+			Arrays.asList("id", "name", "nameDecorated", "externalId", "openingDate", 
+					"hierarchy", "parentId", "parentName", "allowedParents")
+			);
+	private static final Set<String> OFFICE_TRANSACTIONS_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("transactionDate", "allowedOffices", "currencyOptions"));
+	
 	private final GoogleGsonSerializerHelper helper;
 	
 	@Autowired
@@ -60,5 +68,29 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 	public String serializeAppUserDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final AppUserData user) {
 		final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(APP_USER_DATA_PARAMETERS, prettyPrint, responseParameters);
 		return helper.serializedJsonFrom(gsonDeserializer, user);
+	}
+
+	@Override
+	public String serializeAuthenticatedUserDataToJson(final boolean prettyPrint, final AuthenticatedUserData authenticatedUserData) {
+		final Gson gsonDeserializer = helper.createGsonBuilder(prettyPrint);
+		return helper.serializedJsonFrom(gsonDeserializer, authenticatedUserData);
+	}
+
+	@Override
+	public String serializeOfficeDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final Collection<OfficeData> offices) {
+		final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(OFFICE_DATA_PARAMETERS, prettyPrint, responseParameters);
+		return helper.serializedJsonFrom(gsonDeserializer, offices.toArray(new OfficeData[offices.size()]));
+	}
+
+	@Override
+	public String serializeOfficeDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final OfficeData office) {
+		final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(OFFICE_DATA_PARAMETERS, prettyPrint, responseParameters);
+		return helper.serializedJsonFrom(gsonDeserializer, office);
+	}
+
+	@Override
+	public String serializeOfficeTransactionDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final OfficeTransactionData officeTransaction) {
+		final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(OFFICE_TRANSACTIONS_DATA_PARAMETERS, prettyPrint, responseParameters);
+		return helper.serializedJsonFrom(gsonDeserializer, officeTransaction);
 	}
 }

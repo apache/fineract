@@ -1,4 +1,4 @@
-ALTER TABLE `m_deposit_account` ADD COLUMN `status_enum` smallint(5) NOT NULL AFTER `is_deleted`;
+ALTER TABLE `m_deposit_account` ADD COLUMN `status_enum` smallint(5) NOT NULL DEFAULT 0 AFTER `is_deleted`;
 
 DROP TABLE IF EXISTS `m_deposit_account_transaction`;
 CREATE TABLE `m_deposit_account_transaction` (

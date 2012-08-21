@@ -22,7 +22,6 @@ import org.mifosng.platform.api.commands.SavingProductCommand;
 import org.mifosng.platform.api.commands.SubmitLoanApplicationCommand;
 import org.mifosng.platform.api.commands.UserCommand;
 import org.mifosng.platform.api.data.AdditionalFieldsSetData;
-import org.mifosng.platform.api.data.AuthenticatedUserData;
 import org.mifosng.platform.api.data.ChargeData;
 import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.ClientLoanAccountSummaryCollectionData;
@@ -37,15 +36,11 @@ import org.mifosng.platform.api.data.LoanProductData;
 import org.mifosng.platform.api.data.LoanTransactionData;
 import org.mifosng.platform.api.data.NewLoanData;
 import org.mifosng.platform.api.data.NoteData;
-import org.mifosng.platform.api.data.OfficeData;
-import org.mifosng.platform.api.data.OfficeTransactionData;
 import org.mifosng.platform.api.data.SavingProductData;
 
 public interface ApiDataConversionService {
 	
 	//
-	String convertOfficeTransactionDataToJson(boolean prettyPrint, Set<String> responseParameters, OfficeTransactionData... officeTransactions);
-	
 	String convertConfigurationDataToJson(boolean prettyPrint, Set<String> responseParameters, ConfigurationData... configuration);
 	
 	String convertClientDataToJson(boolean prettyPrint, Set<String> responseParameters, ClientData... clients);
@@ -76,8 +71,6 @@ public interface ApiDataConversionService {
 	String convertAdditionalFieldsSetDataToJson(boolean prettyPrint, AdditionalFieldsSetData... additionalFields);
 	
 	String convertGenericResultsetDataToJson(boolean prettyPrint, GenericResultsetData result);
-	
-	String convertAuthenticatedUserDataToJson(boolean prettyPrint, AuthenticatedUserData authenticatedUserData);
 	//
 
     ChargeCommand convertJsonToChargeCommand(Long resourceIdentifier, String json);
@@ -90,8 +83,6 @@ public interface ApiDataConversionService {
 
 	OfficeCommand convertJsonToOfficeCommand(Long resourceIdentifier, String json);
 	
-	String convertOfficeDataToJson(boolean prettyPrint, Set<String> responseParameters, OfficeData... offices);
-
 	RoleCommand convertJsonToRoleCommand(Long resourceIdentifier, String json);
 
 	UserCommand convertJsonToUserCommand(Long resourceIdentifier, String json);

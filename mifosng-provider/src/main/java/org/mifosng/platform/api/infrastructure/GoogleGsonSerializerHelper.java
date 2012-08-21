@@ -19,6 +19,16 @@ import com.google.gson.GsonBuilder;
 @Service
 public class GoogleGsonSerializerHelper {
 
+	public Gson createGsonBuilder(final boolean prettyPrint) {
+		final GsonBuilder builder = new GsonBuilder();
+		builder.registerTypeAdapter(LocalDate.class, new JodaLocalDateAdapter());
+		builder.registerTypeAdapter(DateTime.class, new JodaDateTimeAdapter());
+		if (prettyPrint) {
+			builder.setPrettyPrinting();
+		}
+		return builder.create();
+	}
+	
 	public Gson createGsonBuilderWithParameterExclusionSerializationStrategy(
 			final Set<String> supportedParameters, 
 			final boolean prettyPrint,

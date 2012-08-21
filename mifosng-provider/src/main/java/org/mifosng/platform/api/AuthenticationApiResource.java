@@ -11,7 +11,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import org.mifosng.platform.api.data.AuthenticatedUserData;
-import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
+import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
 import org.mifosng.platform.user.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -34,8 +34,8 @@ public class AuthenticationApiResource {
 	private DaoAuthenticationProvider customAuthenticationProvider;
 	
 	@Autowired
-	private ApiDataConversionService apiDataConversionService;
-    
+	private ApiJsonSerializerService apiJsonSerializerService;
+	
     @POST
 	@Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
@@ -45,22 +45,19 @@ public class AuthenticationApiResource {
     	Authentication authenticationCheck = customAuthenticationProvider.authenticate(authentication);
     	
     	Collection<String> permissions = new ArrayList<String>();
-		AuthenticatedUserData authenticatedUserData = new AuthenticatedUserData(permissions);
-		authenticatedUserData.setUsername(username);
+		AuthenticatedUserData authenticatedUserData = new AuthenticatedUserData(username, permissions);
 		
 		if (authenticationCheck.isAuthenticated()) {
 			Collection<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>(authenticationCheck.getAuthorities());
 			for (GrantedAuthority grantedAuthority : authorities) {
 				permissions.add(grantedAuthority.getAuthority());
 			}
-			authenticatedUserData.setPermissions(permissions);
-			authenticatedUserData.setAuthenticated(true);
 			AppUser principal = (AppUser) authenticationCheck.getPrincipal();
-			authenticatedUserData.setUserId(principal.getId());
 			byte[] base64EncodedAuthenticationKey = Base64.encode(username + ":" + password);
-			authenticatedUserData.setBase64EncodedAuthenticationKey(new String(base64EncodedAuthenticationKey));
+			
+			authenticatedUserData = new AuthenticatedUserData(username, permissions, principal.getId(), new String(base64EncodedAuthenticationKey));
 		}
 		
-		return this.apiDataConversionService.convertAuthenticatedUserDataToJson(false, authenticatedUserData);
+		return this.apiJsonSerializerService.serializeAuthenticatedUserDataToJson(false, authenticatedUserData);
 	}
 }

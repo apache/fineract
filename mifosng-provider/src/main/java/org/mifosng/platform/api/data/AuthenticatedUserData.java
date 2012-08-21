@@ -1,29 +1,31 @@
 package org.mifosng.platform.api.data;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
+/**
+ * Immutable data object for authentication.
+ */
 public class AuthenticatedUserData {
 
-	private String username;
-	private Long userId;
-	private String base64EncodedAuthenticationKey;
-	private boolean authenticated = false;
-	private Collection<String> permissions = new ArrayList<String>();
+	private final String username;
+	private final Long userId;
+	private final String base64EncodedAuthenticationKey;
+	private final boolean authenticated;
+	private final Collection<String> permissions;
 
-	protected AuthenticatedUserData() {
-		//
-	}
-
-	public AuthenticatedUserData(final Collection<String> permissions) {
+	public AuthenticatedUserData(final String username, final Collection<String> permissions) {
+		this.username = username;
+		this.userId = null;
+		this.base64EncodedAuthenticationKey = null;
+		this.authenticated = false;
 		this.permissions = permissions;
 	}
 
-	public Collection<String> getPermissions() {
-		return this.permissions;
-	}
-
-	public void setPermissions(final Collection<String> permissions) {
+	public AuthenticatedUserData(final String username, final Collection<String> permissions, final Long userId, final String base64EncodedAuthenticationKey) {
+		this.username = username;
+		this.userId = userId;
+		this.base64EncodedAuthenticationKey = base64EncodedAuthenticationKey;
+		this.authenticated = true;
 		this.permissions = permissions;
 	}
 
@@ -31,32 +33,19 @@ public class AuthenticatedUserData {
 		return username;
 	}
 
-	public void setUsername(String username) {
-		this.username = username;
-	}
-
-	public boolean isAuthenticated() {
-		return authenticated;
-	}
-
-	public void setAuthenticated(boolean authenticated) {
-		this.authenticated = authenticated;
+	public Long getUserId() {
+		return userId;
 	}
 
 	public String getBase64EncodedAuthenticationKey() {
 		return base64EncodedAuthenticationKey;
 	}
 
-	public void setBase64EncodedAuthenticationKey(
-			String base64EncodedAuthenticationKey) {
-		this.base64EncodedAuthenticationKey = base64EncodedAuthenticationKey;
+	public boolean isAuthenticated() {
+		return authenticated;
 	}
 
-	public Long getUserId() {
-		return userId;
-	}
-
-	public void setUserId(Long userId) {
-		this.userId = userId;
+	public Collection<String> getPermissions() {
+		return permissions;
 	}
 }
