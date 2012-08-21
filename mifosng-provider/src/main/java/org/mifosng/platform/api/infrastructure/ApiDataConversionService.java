@@ -1,5 +1,6 @@
 package org.mifosng.platform.api.infrastructure;
 
+import java.util.Collection;
 import java.util.Set;
 
 import org.mifosng.platform.api.commands.AdjustLoanTransactionCommand;
@@ -63,7 +64,9 @@ public interface ApiDataConversionService {
 	
 	String convertGroupDataToJson(boolean prettyPrint, Set<String> responseParameters, GroupData... groups);
 	
-	String convertNoteDataToJson(boolean prettyPrint, Set<String> responseParameters, NoteData... notes);
+	String convertNoteDataToJson(boolean prettyPrint, Set<String> responseParameters, NoteData note);
+	
+	String convertNoteDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<NoteData> notes);
 	
 	String convertLoanProductDataToJson(boolean prettyPrint, Set<String> responseParameters, LoanProductData... products);
 

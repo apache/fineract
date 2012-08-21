@@ -252,7 +252,7 @@ public class ClientsApiResource {
 		
 		Collection<NoteData> notes = this.clientReadPlatformService.retrieveAllClientNotes(clientId);
 		
-		return this.apiDataConversionService.convertNoteDataToJson(prettyPrint, responseParameters, notes.toArray(new NoteData[notes.size()]));
+		return this.apiDataConversionService.convertNoteDataToJson(prettyPrint, responseParameters, notes);
 	}
 
 	@POST

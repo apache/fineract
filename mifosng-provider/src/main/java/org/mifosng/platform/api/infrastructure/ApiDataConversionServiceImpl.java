@@ -8,6 +8,7 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -275,7 +276,18 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	}
 	
 	@Override
-	public String convertNoteDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final NoteData... notes) {
+	public String convertNoteDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<NoteData> notes) {
+		final boolean returnAsArray = true;
+		return doConvertNoteDataToJson(prettyPrint, returnAsArray, responseParameters, notes.toArray(new NoteData[notes.size()]));
+	}
+	
+	@Override
+	public String convertNoteDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final NoteData note) {
+		final boolean returnAsArray = false;
+		return doConvertNoteDataToJson(prettyPrint, returnAsArray, responseParameters, note);
+	}
+	
+	private String doConvertNoteDataToJson(final boolean prettyPrint, final boolean returnAsArray, final Set<String> responseParameters, final NoteData... notes) {
 		final Set<String> supportedParameters = new HashSet<String>(
 				Arrays.asList("id", "clientId", "loanId", "loanTransactionId", "noteType", "note", "createdById", "createdByUsername", 
 						"createdOn", "updatedById", "updatedByUsername", "updatedOn")
@@ -303,7 +315,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		Gson gsonDeserializer = builder.create();
 		
 		String json = "";
-		if (notes != null && notes.length == 1) {
+		if (notes != null && notes.length == 1 && !returnAsArray) {
 			json = gsonDeserializer.toJson(notes[0]);
 		} else {
 			json = gsonDeserializer.toJson(notes);
