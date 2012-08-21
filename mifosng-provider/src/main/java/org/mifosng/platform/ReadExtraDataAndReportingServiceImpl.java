@@ -192,28 +192,26 @@ public class ReadExtraDataAndReportingServiceImpl implements
 
 	private GenericResultsetData fillReportingGenericResultSet(final String sql) {
 
-		GenericResultsetData result = new GenericResultsetData();
-
 		Connection db_connection = null;
 		Statement db_statement = null;
 		try {
 			db_connection = dataSource.getConnection();
 			db_statement = db_connection.createStatement();
 			ResultSet rs = db_statement.executeQuery(sql);
-
+			
+			List<ResultsetColumnHeader> columnHeaders = new ArrayList<ResultsetColumnHeader>();
+			List<ResultsetDataRow> resultsetDataRows = new ArrayList<ResultsetDataRow>();
+			
 			ResultSetMetaData rsmd = rs.getMetaData();
 			String columnName = null;
 			String columnValue = null;
-			List<ResultsetColumnHeader> columnHeaders = new ArrayList<ResultsetColumnHeader>();
 			for (int i = 0; i < rsmd.getColumnCount(); i++) {
 				ResultsetColumnHeader rsch = new ResultsetColumnHeader();
 				rsch.setColumnName(rsmd.getColumnName(i + 1));
 				rsch.setColumnType(rsmd.getColumnTypeName(i + 1));
 				columnHeaders.add(rsch);
 			}
-			result.setColumnHeaders(columnHeaders);
-
-			List<ResultsetDataRow> resultsetDataRows = new ArrayList<ResultsetDataRow>();
+			
 			ResultsetDataRow resultsetDataRow;
 			while (rs.next()) {
 				resultsetDataRow = new ResultsetDataRow();
@@ -226,16 +224,13 @@ public class ReadExtraDataAndReportingServiceImpl implements
 				resultsetDataRow.setRow(columnValues);
 				resultsetDataRows.add(resultsetDataRow);
 			}
-			result.setData(resultsetDataRows);
-
+			
+			return new GenericResultsetData(columnHeaders, resultsetDataRows);
 		} catch (SQLException e) {
-			throw new PlatformDataIntegrityException("error.msg.sql.error",
-					e.getMessage(), "Sql: " + sql);
+			throw new PlatformDataIntegrityException("error.msg.sql.error", e.getMessage(), "Sql: " + sql);
 		} finally {
 			dbClose(db_statement, db_connection);
 		}
-		return result;
-
 	}
 
 	private String getSQLtoRun(final String name, final String type,
@@ -470,10 +465,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 		return result;
 	}
 
-	private GenericResultsetData fillExtraDataGenericResultSet(String type,
-			String set, Long id) {
-
-		GenericResultsetData result = new GenericResultsetData();
+	private GenericResultsetData fillExtraDataGenericResultSet(final String type, final String set, final Long id) {
 
 		Connection db_connection = null;
 		Statement db_statement1 = null;
@@ -487,11 +479,14 @@ public class ReadExtraDataAndReportingServiceImpl implements
 
 			ResultSet rsmd = db_statement1.executeQuery(sql);
 
+			List<ResultsetColumnHeader> columnHeaders = null;
+			List<ResultsetDataRow> resultsetDataRows = null;
+			
 			if (rsmd.next()) {
 
 				String fullDatasetName = getFullDatasetName(type, set);
 				db_statement2 = db_connection.createStatement();
-				List<ResultsetColumnHeader> columnHeaders = new ArrayList<ResultsetColumnHeader>();
+				columnHeaders = new ArrayList<ResultsetColumnHeader>();
 				Boolean firstColumn = true;
 				Integer allowedListId;
 				String selectFieldList = "";
@@ -528,8 +523,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 					}
 					columnHeaders.add(rsch);
 				} while (rsmd.next());
-				result.setColumnHeaders(columnHeaders);
-
+				
 				sql = "select " + selectFieldList + " from `" + type
 						+ "` t left join `" + fullDatasetName
 						+ "` s on s.id = t.id " + " where t.id = " + id;
@@ -540,7 +534,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 				if (rs.next()) {
 					String columnName = null;
 					String columnValue = null;
-					List<ResultsetDataRow> resultsetDataRows = new ArrayList<ResultsetDataRow>();
+					resultsetDataRows = new ArrayList<ResultsetDataRow>();
 					ResultsetDataRow resultsetDataRow;
 					do {
 						resultsetDataRow = new ResultsetDataRow();
@@ -554,13 +548,15 @@ public class ReadExtraDataAndReportingServiceImpl implements
 						resultsetDataRow.setRow(columnValues);
 						resultsetDataRows.add(resultsetDataRow);
 					} while (rs.next());
-					result.setData(resultsetDataRows);
 				} else {
 					throw new AdditionalFieldsNotFoundException(type, id);
 				}
 			} else {
 				throw new AdditionalFieldsNotFoundException(type, set);
 			}
+
+			return new GenericResultsetData(columnHeaders, resultsetDataRows);
+			
 		} catch (SQLException e) {
 			throw new PlatformDataIntegrityException("error.msg.sql.error",
 					e.getMessage(), "Additional Fields Type: " + type
@@ -570,8 +566,6 @@ public class ReadExtraDataAndReportingServiceImpl implements
 			dbClose(db_statement3, null);
 			dbClose(db_statement1, db_connection);
 		}
-		return result;
-
 	}
 
 	private String getFullDatasetName(final String type, final String set) {
@@ -780,7 +774,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 	}
 
 	private void dbClose(Statement db_statement, Connection db_connection) {
-		logger.info("dbClose");
+		logger.debug("dbClose");
 		try {
 			if (db_statement != null) {
 				db_statement.close();
@@ -791,8 +785,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 				db_connection = null;
 			}
 		} catch (SQLException e) {
-			throw new PlatformDataIntegrityException("error.msg.sql.error",
-					e.getMessage(), "Error closing database connection");
+			throw new PlatformDataIntegrityException("error.msg.sql.error", e.getMessage(), "Error closing database connection");
 		}
 	}
 

@@ -1,5 +1,8 @@
 package org.mifosng.platform.api.data;
 
+/**
+ * Immutable data object for 'additional data'.
+ */
 public class AdditionalFieldsSetData {
 
 	private final Integer id;

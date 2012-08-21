@@ -5,10 +5,12 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.mifosng.platform.api.data.AdditionalFieldsSetData;
 import org.mifosng.platform.api.data.AppUserData;
 import org.mifosng.platform.api.data.AuthenticatedUserData;
 import org.mifosng.platform.api.data.ConfigurationData;
 import org.mifosng.platform.api.data.FundData;
+import org.mifosng.platform.api.data.GenericResultsetData;
 import org.mifosng.platform.api.data.OfficeData;
 import org.mifosng.platform.api.data.OfficeTransactionData;
 import org.mifosng.platform.api.data.PermissionData;
@@ -34,9 +36,7 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 					"hierarchy", "parentId", "parentName", "allowedParents")
 			);
 	private static final Set<String> OFFICE_TRANSACTIONS_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("transactionDate", "allowedOffices", "currencyOptions"));
-	
 	private static final Set<String> CONFIGURATION_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("selectedCurrencyOptions", "currencyOptions"));
-	
 	private static final Set<String> FUND_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "name", "externalId"));
 	
 	private final GoogleGsonSerializerHelper helper;
@@ -44,6 +44,24 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 	@Autowired
 	public GoogleGsonApiJsonSerializerService(final GoogleGsonSerializerHelper helper) {
 		this.helper = helper;
+	}
+	
+	@Override
+	public String serializeAuthenticatedUserDataToJson(final boolean prettyPrint, final AuthenticatedUserData authenticatedUserData) {
+		final Gson gsonDeserializer = helper.createGsonBuilder(prettyPrint);
+		return helper.serializedJsonFrom(gsonDeserializer, authenticatedUserData);
+	}
+
+	@Override
+	public String serializeGenericResultsetDataToJson(final boolean prettyPrint, final GenericResultsetData resultsetData) {
+		final Gson gsonDeserializer = helper.createGsonBuilder(prettyPrint);
+		return helper.serializedJsonFrom(gsonDeserializer, resultsetData);
+	}
+
+	@Override
+	public String serializeAdditionalFieldsSetDataToJson(final boolean prettyPrint, final Collection<AdditionalFieldsSetData> datasets) {
+		final Gson gsonDeserializer = helper.createGsonBuilder(prettyPrint);
+		return helper.serializedJsonFrom(gsonDeserializer, datasets.toArray(new AdditionalFieldsSetData[datasets.size()]));
 	}
 	
 	@Override
@@ -74,12 +92,6 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 	public String serializeAppUserDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final AppUserData user) {
 		final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(APP_USER_DATA_PARAMETERS, prettyPrint, responseParameters);
 		return helper.serializedJsonFrom(gsonDeserializer, user);
-	}
-
-	@Override
-	public String serializeAuthenticatedUserDataToJson(final boolean prettyPrint, final AuthenticatedUserData authenticatedUserData) {
-		final Gson gsonDeserializer = helper.createGsonBuilder(prettyPrint);
-		return helper.serializedJsonFrom(gsonDeserializer, authenticatedUserData);
 	}
 
 	@Override

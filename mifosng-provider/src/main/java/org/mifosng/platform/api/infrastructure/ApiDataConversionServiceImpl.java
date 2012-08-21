@@ -37,14 +37,12 @@ import org.mifosng.platform.api.commands.RoleCommand;
 import org.mifosng.platform.api.commands.SavingProductCommand;
 import org.mifosng.platform.api.commands.SubmitLoanApplicationCommand;
 import org.mifosng.platform.api.commands.UserCommand;
-import org.mifosng.platform.api.data.AdditionalFieldsSetData;
 import org.mifosng.platform.api.data.ApiParameterError;
 import org.mifosng.platform.api.data.ChargeData;
 import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.ClientLoanAccountSummaryCollectionData;
 import org.mifosng.platform.api.data.DepositAccountData;
 import org.mifosng.platform.api.data.DepositProductData;
-import org.mifosng.platform.api.data.GenericResultsetData;
 import org.mifosng.platform.api.data.GroupData;
 import org.mifosng.platform.api.data.LoanAccountData;
 import org.mifosng.platform.api.data.LoanProductData;
@@ -77,34 +75,6 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		gsonConverter = new Gson();
 	}
 
-	@Override
-	public String convertGenericResultsetDataToJson(final boolean prettyPrint, final GenericResultsetData result) {
-		GsonBuilder builder = new GsonBuilder();
-		builder.registerTypeAdapter(LocalDate.class, new JodaLocalDateAdapter());
-		builder.registerTypeAdapter(DateTime.class, new JodaDateTimeAdapter());
-		
-		if (prettyPrint) {
-			builder.setPrettyPrinting();
-		}
-		Gson gsonDeserializer = builder.create();
-		
-		return gsonDeserializer.toJson(result);
-	}
-	
-	@Override
-	public String convertAdditionalFieldsSetDataToJson(final boolean prettyPrint, final AdditionalFieldsSetData... additionalFields) {
-		GsonBuilder builder = new GsonBuilder();
-		builder.registerTypeAdapter(LocalDate.class, new JodaLocalDateAdapter());
-		builder.registerTypeAdapter(DateTime.class, new JodaDateTimeAdapter());
-		if (prettyPrint) {
-			builder.setPrettyPrinting();
-		}
-		Gson gsonDeserializer = builder.create();
-		
-		// even if only a single result, its passed back as an array.
-		return gsonDeserializer.toJson(additionalFields);
-	}
-	
 	@Override
 	public String convertLoanTransactionDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final LoanTransactionData... transactions) {
 		final Set<String> supportedParameters = new HashSet<String>(

@@ -18,7 +18,7 @@ import javax.ws.rs.core.UriInfo;
 
 import org.mifosng.platform.ReadExtraDataAndReportingService;
 import org.mifosng.platform.api.data.GenericResultsetData;
-import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
+import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
 import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -33,7 +33,7 @@ public class ReportsApiResource {
 	private ReadExtraDataAndReportingService readExtraDataAndReportingService;
 
 	@Autowired
-	private ApiDataConversionService apiDataConversionService;
+	private ApiJsonSerializerService apiJsonSerializerService;
 	
 	@GET
 	@Consumes({MediaType.APPLICATION_JSON})
@@ -48,7 +48,7 @@ public class ReportsApiResource {
 		if (!exportCsv) {
 			GenericResultsetData result = this.readExtraDataAndReportingService.retrieveGenericResultset(".", ".", extractedQueryParams);
 			
-			final String json = this.apiDataConversionService.convertGenericResultsetDataToJson(prettyPrint, result);
+			final String json = this.apiJsonSerializerService.serializeGenericResultsetDataToJson(prettyPrint, result);
 			
 			return Response.ok().entity(json).build();
 		}
@@ -93,7 +93,7 @@ public class ReportsApiResource {
 			
 			GenericResultsetData result = this.readExtraDataAndReportingService.retrieveGenericResultset(reportName, parameterTypeValue, reportParams);
 
-			final String json = this.apiDataConversionService.convertGenericResultsetDataToJson(prettyPrint, result);
+			final String json = this.apiJsonSerializerService.serializeGenericResultsetDataToJson(prettyPrint, result);
 			
 			return Response.ok().entity(json).type(MediaType.APPLICATION_JSON).build();
 		}

@@ -28,7 +28,7 @@ import org.mifosng.platform.api.data.AdditionalFieldsSetData;
 import org.mifosng.platform.api.data.ApiParameterError;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.GenericResultsetData;
-import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
+import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
 import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
 import org.mifosng.platform.exceptions.PlatformApiDataValidationException;
 import org.slf4j.Logger;
@@ -48,7 +48,7 @@ public class AdditionalFieldsApiResource {
 	private ReadExtraDataAndReportingService readExtraDataAndReportingService;
 	
 	@Autowired
-	private ApiDataConversionService apiDataConversionService;
+	private ApiJsonSerializerService apiJsonSerializerService;
 
 	@GET
 	@Consumes({MediaType.APPLICATION_JSON})
@@ -58,7 +58,7 @@ public class AdditionalFieldsApiResource {
 		List<AdditionalFieldsSetData> result = this.readExtraDataAndReportingService.retrieveExtraDatasetNames(type);
 
 		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-		return this.apiDataConversionService.convertAdditionalFieldsSetDataToJson(prettyPrint, result.toArray(new AdditionalFieldsSetData[result.size()]));
+		return this.apiJsonSerializerService.serializeAdditionalFieldsSetDataToJson(prettyPrint, result);
 	}
 
 	@GET
@@ -73,7 +73,7 @@ public class AdditionalFieldsApiResource {
 			GenericResultsetData result = this.readExtraDataAndReportingService.retrieveExtraData(type, set, id);
 
 			boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-			return this.apiDataConversionService.convertGenericResultsetDataToJson(prettyPrint, result);
+			return this.apiJsonSerializerService.serializeGenericResultsetDataToJson(prettyPrint, result);
 		} catch (InvalidSqlException e) {
 			List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 			ApiParameterError error = ApiParameterError.parameterError(

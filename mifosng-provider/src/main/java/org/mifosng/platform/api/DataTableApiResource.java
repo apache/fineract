@@ -9,17 +9,12 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.UriInfo;
 
 import org.mifosng.platform.InvalidSqlException;
 import org.mifosng.platform.ReadExtraDataAndReportingService;
 import org.mifosng.platform.api.data.ApiParameterError;
-import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
 import org.mifosng.platform.exceptions.PlatformApiDataValidationException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -29,15 +24,11 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class DataTableApiResource {
 
-	private final static Logger logger = LoggerFactory.getLogger(DataTableApiResource.class);
+//	private final static Logger logger = LoggerFactory.getLogger(DataTableApiResource.class);
 
 	@Autowired
 	private ReadExtraDataAndReportingService readExtraDataAndReportingService;
 	
-	@Autowired
-	private ApiDataConversionService apiDataConversionService;
-
-
 	@GET
 	@Path("{datatable}")
 	@Consumes({MediaType.APPLICATION_JSON})
@@ -45,8 +36,9 @@ public class DataTableApiResource {
 	public String extraData(@PathParam("datatable") final String datatable,
 			@QueryParam("sqlFields") final String sqlFields,
 			@QueryParam("sqlSearch") final String sqlSearch,
-			@QueryParam("sqlOrder") final String sqlOrder,
-			@Context final UriInfo uriInfo) {
+			@QueryParam("sqlOrder") final String sqlOrder
+//			,@Context final UriInfo uriInfo
+			) {
 
 		try {
 			//GenericResultsetData result = this.readExtraDataAndReportingService.retrieveDataTable(datatable);
