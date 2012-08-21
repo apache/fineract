@@ -20,14 +20,13 @@ import org.mifosng.platform.api.commands.DepositAccountCommand;
 import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.currency.domain.Money;
-import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 import org.mifosng.platform.savingproduct.domain.DepositProduct;
-import org.mifosng.platform.user.domain.AppUser;
+import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
 @Table(name = "m_deposit_account", uniqueConstraints = @UniqueConstraint(name="deposit_acc_external_id", columnNames = { "external_id" }))
-public class DepositAccount extends AbstractAuditableCustom<AppUser, Long> {
+public class DepositAccount extends AbstractPersistable<Long> {
 	
 	@SuppressWarnings("unused")
 	@ManyToOne
