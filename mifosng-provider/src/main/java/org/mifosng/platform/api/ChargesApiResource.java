@@ -4,6 +4,7 @@ import org.mifosng.platform.api.commands.ChargeCommand;
 import org.mifosng.platform.api.data.ChargeData;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
+import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
 import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
 import org.mifosng.platform.charge.service.ChargeReadPlatformService;
 import org.mifosng.platform.charge.service.ChargeWritePlatformService;
@@ -32,6 +33,9 @@ public class ChargesApiResource {
 
     @Autowired
     private ApiDataConversionService apiDataConversionService;
+    
+    @Autowired
+    private ApiJsonSerializerService apiJsonSerializerService;
 
     @GET
     @Consumes({MediaType.APPLICATION_JSON})
@@ -43,8 +47,7 @@ public class ChargesApiResource {
 
         Collection<ChargeData> charges = this.chargeReadPlatformService.retrieveAllCharges();
 
-        return this.apiDataConversionService.convertChargeDataToJson(prettyPrint,
-                responseParameters, charges.toArray(new ChargeData[charges.size()]));
+        return this.apiJsonSerializerService.serializeChargeDataToJson(prettyPrint, responseParameters, charges);
     }
 
     @GET
@@ -58,8 +61,7 @@ public class ChargesApiResource {
 
         ChargeData charge = this.chargeReadPlatformService.retrieveCharge(chargeId);
 
-        return this.apiDataConversionService.convertChargeDataToJson(prettyPrint,
-                responseParameters, charge);
+        return this.apiJsonSerializerService.serializeChargeDataToJson(prettyPrint, responseParameters, charge);
     }
 
     @POST

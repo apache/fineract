@@ -8,6 +8,7 @@ import java.util.Set;
 import org.mifosng.platform.api.data.AdditionalFieldsSetData;
 import org.mifosng.platform.api.data.AppUserData;
 import org.mifosng.platform.api.data.AuthenticatedUserData;
+import org.mifosng.platform.api.data.ChargeData;
 import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.ClientLoanAccountSummaryCollectionData;
 import org.mifosng.platform.api.data.ConfigurationData;
@@ -119,6 +120,8 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 	private static final Set<String> LOAN_TRANSACTION_DATA_PARAMETERS = new HashSet<String>(
 			Arrays.asList("id", "transactionType", "date", "principal", "interest", "total", "totalWaived", "overpaid")
 		);
+
+	private static final Set<String> CHARGES_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "name", "amount"));
 	
 	private final GoogleGsonSerializerHelper helper;
 	
@@ -318,5 +321,17 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 	public String serializeLoanTransactionDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final LoanTransactionData transaction) {
 		final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(LOAN_TRANSACTION_DATA_PARAMETERS, prettyPrint, responseParameters);
 		return helper.serializedJsonFrom(gsonDeserializer, transaction);
+	}
+
+	@Override
+	public String serializeChargeDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final Collection<ChargeData> charges) {
+		final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(CHARGES_DATA_PARAMETERS, prettyPrint, responseParameters);
+		return helper.serializedJsonFrom(gsonDeserializer, charges.toArray(new ChargeData[charges.size()]));
+	}
+
+	@Override
+	public String serializeChargeDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final ChargeData charge) {
+		final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(CHARGES_DATA_PARAMETERS, prettyPrint, responseParameters);
+		return helper.serializedJsonFrom(gsonDeserializer, charge);
 	}
 }

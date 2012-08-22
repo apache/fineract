@@ -36,7 +36,6 @@ import org.mifosng.platform.api.commands.SavingProductCommand;
 import org.mifosng.platform.api.commands.SubmitLoanApplicationCommand;
 import org.mifosng.platform.api.commands.UserCommand;
 import org.mifosng.platform.api.data.ApiParameterError;
-import org.mifosng.platform.api.data.ChargeData;
 import org.mifosng.platform.api.errorhandling.InvalidJsonException;
 import org.mifosng.platform.api.errorhandling.UnsupportedParameterException;
 import org.mifosng.platform.exceptions.PlatformApiDataValidationException;
@@ -44,9 +43,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.format.number.NumberFormatter;
 import org.springframework.stereotype.Service;
 
-import com.google.gson.ExclusionStrategy;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -84,39 +81,6 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
         BigDecimal amount = extractBigDecimalParameter("amount", requestMap, modifiedParameters);
 
         return new ChargeCommand(modifiedParameters, resourceIdentifier, name, amount);
-    }
-
-    @Override
-    public String convertChargeDataToJson(boolean prettyPrint, Set<String> responseParameters, ChargeData... charges) {
-        Set<String> supportedParameters = new HashSet<String>(Arrays.asList("id", "name", "amount"));
-
-        final Set<String> parameterNamesToSkip = new HashSet<String>();
-
-        if (!responseParameters.isEmpty()) {
-            if (!supportedParameters.containsAll(responseParameters)) {
-                throw new UnsupportedParameterException(new ArrayList<String>(responseParameters));
-            }
-
-            parameterNamesToSkip.addAll(supportedParameters);
-            parameterNamesToSkip.removeAll(responseParameters);
-        }
-
-        ExclusionStrategy strategy = new ParameterListExclusionStrategy(parameterNamesToSkip);
-
-        GsonBuilder builder = new GsonBuilder().addSerializationExclusionStrategy(strategy);
-        if (prettyPrint) {
-            builder.setPrettyPrinting();
-        }
-        Gson gsonDeserializer = builder.create();
-
-        String json = "";
-        if (charges != null && charges.length == 1) {
-            json = gsonDeserializer.toJson(charges[0]);
-        } else {
-            json = gsonDeserializer.toJson(charges);
-        }
-
-        return json;
     }
 
     @Override

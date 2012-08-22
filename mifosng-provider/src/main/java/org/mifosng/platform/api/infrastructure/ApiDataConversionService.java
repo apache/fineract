@@ -1,7 +1,5 @@
 package org.mifosng.platform.api.infrastructure;
 
-import java.util.Set;
-
 import org.mifosng.platform.api.commands.AdjustLoanTransactionCommand;
 import org.mifosng.platform.api.commands.BranchMoneyTransferCommand;
 import org.mifosng.platform.api.commands.ChargeCommand;
@@ -20,13 +18,10 @@ import org.mifosng.platform.api.commands.RoleCommand;
 import org.mifosng.platform.api.commands.SavingProductCommand;
 import org.mifosng.platform.api.commands.SubmitLoanApplicationCommand;
 import org.mifosng.platform.api.commands.UserCommand;
-import org.mifosng.platform.api.data.ChargeData;
 
 public interface ApiDataConversionService {
 	
     ChargeCommand convertJsonToChargeCommand(Long resourceIdentifier, String json);
-
-    String convertChargeDataToJson(boolean prettyPrint, Set<String> responseParameters, ChargeData... charges);
 
 	FundCommand convertJsonToFundCommand(Long resourceIdentifier, String json);
 	
