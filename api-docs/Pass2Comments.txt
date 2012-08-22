@@ -1,0 +1,6 @@
+my api notes
+
+- loan products api should return currencyCode and digitsAfterDecimal
+ 
+
+2) "officeId": 1, comes back for clients/template ... seems to suggest a new client defaults to head office rather than select one? 
