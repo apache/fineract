@@ -1,6 +1,12 @@
 package org.mifosng.platform.charge.service;
 
 import org.mifosng.platform.api.data.ChargeData;
+import org.mifosng.platform.api.data.CurrencyData;
+import org.mifosng.platform.api.data.EnumOptionData;
+import org.mifosng.platform.charge.domain.ChargeAppliesTo;
+import org.mifosng.platform.charge.domain.ChargeCalculationMethod;
+import org.mifosng.platform.charge.domain.ChargeTimeType;
+import org.mifosng.platform.currency.service.CurrencyReadPlatformService;
 import org.mifosng.platform.exceptions.ChargeNotFoundException;
 import org.mifosng.platform.infrastructure.TenantAwareRoutingDataSource;
 import org.mifosng.platform.security.PlatformSecurityContext;
@@ -13,19 +19,28 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
+
+import static org.mifosng.platform.charge.service.ChargeEnumerations.chargeAppliesTo;
+import static org.mifosng.platform.charge.service.ChargeEnumerations.chargeCalculationType;
+import static org.mifosng.platform.charge.service.ChargeEnumerations.chargeTimeType;
 
 @Service
 public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
+    private final CurrencyReadPlatformService currencyReadPlatformService;
 
     @Autowired
     public ChargeReadPlatformServiceImpl(PlatformSecurityContext context,
+                                         final CurrencyReadPlatformService currencyReadPlatformService,
                                          final TenantAwareRoutingDataSource dataSource) {
         this.context = context;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.currencyReadPlatformService = currencyReadPlatformService;
     }
 
     @Override
@@ -55,10 +70,29 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
         }
     }
 
+    @Override
+    public ChargeData retrieveNewChargeDetails() {
+        this.context.authenticatedUser();
+
+        List<CurrencyData> currencyOptions = currencyReadPlatformService.retrieveAllowedCurrencies();
+        List<EnumOptionData> allowedChargeCalculationMethods = Arrays.asList(
+                chargeCalculationType(ChargeCalculationMethod.FLAT),
+                chargeCalculationType(ChargeCalculationMethod.PERCENT_OF_AMOUNT),
+                chargeCalculationType(ChargeCalculationMethod.PERCENT_OF_AMOUNT_AND_INTEREST),
+                chargeCalculationType(ChargeCalculationMethod.PERCENT_OF_INTEREST)
+        );
+        EnumOptionData allowedChargeAppliesTo = chargeAppliesTo(ChargeAppliesTo.LOAN);
+        EnumOptionData allowedChargeTime = chargeTimeType(ChargeTimeType.DISBURSEMENT);
+
+        return new ChargeData(allowedChargeTime, allowedChargeAppliesTo, currencyOptions, allowedChargeCalculationMethods);
+    }
+
     private static final class ChargeMapper implements RowMapper<ChargeData> {
 
         public String chargeSchema(){
-            return "c.id as id, c.name as name, c.amount as amount from m_charge c ";
+            return "c.id as id, c.name as name, c.amount as amount, c.currency_code as currencyCode, " +
+                   "charge_applies_to_enum as chargeAppliesTo, charge_time_enum as chargeTime, " +
+                   "charge_calculation_enum as chargeCalculation, is_active as active from m_charge c ";
         }
 
         @Override
@@ -66,8 +100,20 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
             Long id = rs.getLong("id");
             String name = rs.getString("name");
             BigDecimal amount = rs.getBigDecimal("amount");
+            String currencyCode = rs.getString("currencyCode");
 
-            return new ChargeData(id, name, amount);
+            int chargeAppliesTo = rs.getInt("chargeAppliesTo");
+            EnumOptionData chargeAppliesToType = ChargeEnumerations.chargeAppliesTo(chargeAppliesTo);
+
+            int chargeTime = rs.getInt("chargeTime");
+            EnumOptionData chargeTimeType = ChargeEnumerations.chargeTimeType(chargeTime);
+
+            int chargeCalculation = rs.getInt("chargeCalculation");
+            EnumOptionData chargeCalculationType = ChargeEnumerations.chargeCalculationType(chargeCalculation);
+
+            boolean active = rs.getBoolean("active");
+
+            return new ChargeData(id, name, amount, currencyCode, chargeTimeType, chargeAppliesToType, chargeCalculationType, active);
         }
     }
 }

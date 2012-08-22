@@ -121,7 +121,10 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 			Arrays.asList("id", "transactionType", "date", "principal", "interest", "total", "totalWaived", "overpaid")
 		);
 
-	private static final Set<String> CHARGES_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "name", "amount"));
+	private static final Set<String> CHARGES_DATA_PARAMETERS = new HashSet<String>(
+            Arrays.asList("id", "name", "amount", "currencyCode", "currencyOptions", "chargeAppliesTo", "chargeTimeType",
+                    "chargeCalculationType", "active")
+    );
 	
 	private final GoogleGsonSerializerHelper helper;
 	

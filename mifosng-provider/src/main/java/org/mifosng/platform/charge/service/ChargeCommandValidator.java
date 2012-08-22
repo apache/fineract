@@ -23,6 +23,10 @@ public class ChargeCommandValidator {
 
         baseDataValidator.reset().parameter("name").value(command.getName()).notBlank().notExceedingLengthOf(100);
         baseDataValidator.reset().parameter("amount").value(command.getAmount()).notNull().positiveAmount();
+        baseDataValidator.reset().parameter("currencyCode").value(command.getCurrencyCode()).notBlank();
+        baseDataValidator.reset().parameter("chargeAppliesTo").value(command.getChargeAppliesTo()).notNull().inMinMaxRange(0, 0);
+        baseDataValidator.reset().parameter("chargeTimeType").value(command.getChargeTimeType()).notNull().inMinMaxRange(0, 0);
+        baseDataValidator.reset().parameter("chargeCalculationMethod").value(command.getChargeCalculationType()).notNull().inMinMaxRange(0, 3);
 
         if (!dataValidationErrors.isEmpty()) {
             throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);
@@ -37,6 +41,10 @@ public class ChargeCommandValidator {
         baseDataValidator.reset().parameter("id").value(command.getId()).notNull();
         baseDataValidator.reset().parameter("name").value(command.getName()).ignoreIfNull().notBlank().notExceedingLengthOf(100);
         baseDataValidator.reset().parameter("amount").value(command.getAmount()).ignoreIfNull().positiveAmount();
+        baseDataValidator.reset().parameter("currencyCode").value(command.getCurrencyCode()).ignoreIfNull().notBlank();
+        baseDataValidator.reset().parameter("chargeAppliesTo").value(command.getChargeAppliesTo()).ignoreIfNull().notNull().inMinMaxRange(0, 0);
+        baseDataValidator.reset().parameter("chargeTimeType").value(command.getChargeTimeType()).ignoreIfNull().notNull().inMinMaxRange(0, 0);
+        baseDataValidator.reset().parameter("chargeCalculationMethod").value(command.getChargeCalculationType()).ignoreIfNull().notNull().inMinMaxRange(0, 3);
 
         if (!dataValidationErrors.isEmpty()) {
             throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);

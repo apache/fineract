@@ -17,7 +17,9 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Response;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 
 @Path("/charges")
@@ -62,6 +64,28 @@ public class ChargesApiResource {
         ChargeData charge = this.chargeReadPlatformService.retrieveCharge(chargeId);
 
         return this.apiJsonSerializerService.serializeChargeDataToJson(prettyPrint, responseParameters, charge);
+    }
+
+    @GET
+    @Path("template")
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
+    public String retrieveNewChargeDetails(@Context final UriInfo uriInfo) {
+
+        Set<String> typicalResponseParameters = new HashSet<String>(
+            Arrays.asList("name", "amount", "currency",  "currencyOptions", "chargeAppliesTo", "chargeTimeType",
+                "chargeCalculationType", "chargeCalculationTypeOptions", "active")
+        );
+
+        Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+        if (responseParameters.isEmpty()) {
+            responseParameters.addAll(typicalResponseParameters);
+        }
+        boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+
+        ChargeData chargeData = this.chargeReadPlatformService.retrieveNewChargeDetails();
+
+        return this.apiJsonSerializerService.serializeChargeDataToJson(prettyPrint, responseParameters, chargeData);
     }
 
     @POST

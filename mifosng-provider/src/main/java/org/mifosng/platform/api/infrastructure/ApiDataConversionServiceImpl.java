@@ -69,9 +69,10 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
         Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
 
 
-        Set<String> supportedParams = new HashSet<String>(
-                Arrays.asList("name", "amount", "locale")
-        );
+        Set<String> supportedParams = new HashSet<String>(Arrays.asList("name", "amount", "locale", "currencyCode",
+            "currencyOptions", "chargeAppliesTo", "chargeTimeType",
+            "chargeCalculationType", "chargeCalculationTypeOptions", "active"
+        ));
 
         checkForUnsupportedParameters(requestMap, supportedParams);
 
@@ -79,8 +80,16 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 
         String name = extractStringParameter("name", requestMap, modifiedParameters);
         BigDecimal amount = extractBigDecimalParameter("amount", requestMap, modifiedParameters);
+        String currencyCode = extractStringParameter("currencyCode", requestMap, modifiedParameters);
 
-        return new ChargeCommand(modifiedParameters, resourceIdentifier, name, amount);
+        Integer chargeTimeType = extractIntegerParameter("chargeTimeType", requestMap, modifiedParameters);
+        Integer chargeAppliesTo = extractIntegerParameter("chargeAppliesTo", requestMap, modifiedParameters);
+        Integer chargeCalculationType = extractIntegerParameter("chargeCalculationType", requestMap, modifiedParameters);
+
+        boolean active = extractBooleanParameter("active", requestMap, modifiedParameters);
+
+        return new ChargeCommand(modifiedParameters, resourceIdentifier, name, amount,
+                currencyCode, chargeTimeType, chargeAppliesTo, chargeCalculationType, active);
     }
 
     @Override

@@ -1,8 +1,7 @@
 package org.mifosng.platform.charge.service;
 
 import org.mifosng.platform.api.commands.ChargeCommand;
-import org.mifosng.platform.charge.domain.Charge;
-import org.mifosng.platform.charge.domain.ChargeRepository;
+import org.mifosng.platform.charge.domain.*;
 import org.mifosng.platform.exceptions.ChargeNotFoundException;
 import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
 import org.mifosng.platform.security.PlatformSecurityContext;
@@ -35,7 +34,12 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
             ChargeCommandValidator validator = new ChargeCommandValidator(command);
             validator.validateForCreate();
 
-            Charge charge = Charge.createNew(command.getName(), command.getAmount());
+            ChargeAppliesTo chargeAppliesTo = ChargeAppliesTo.fromInt(command.getChargeAppliesTo());
+            ChargeTimeType chargeTimeType = ChargeTimeType.fromInt(command.getChargeTimeType());
+            ChargeCalculationMethod chargeCalculationMethod = ChargeCalculationMethod.fromInt(command.getChargeCalculationType());
+
+            Charge charge = Charge.createNew(command.getName(), command.getAmount(), command.getCurrencyCode(),
+                    chargeAppliesTo, chargeTimeType, chargeCalculationMethod, command.isActive());
 
             this.chargeRepository.saveAndFlush(charge);
 

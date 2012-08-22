@@ -9,4 +9,6 @@ public interface ChargeReadPlatformService {
     Collection<ChargeData> retrieveAllCharges();
 
     ChargeData retrieveCharge(Long chargeId);
+
+    ChargeData retrieveNewChargeDetails();
 }
