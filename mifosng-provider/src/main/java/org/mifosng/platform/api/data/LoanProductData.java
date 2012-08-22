@@ -19,8 +19,9 @@ public class LoanProductData {
 	private Long transactionProcessingStrategyId;
 	private String transactionProcessingStrategyName;
 
-	private MoneyData principal;
-	private MoneyData inArrearsTolerance;
+	private CurrencyData currency;
+	private BigDecimal principal;
+	private BigDecimal inArrearsTolerance;
 
 	private Integer numberOfRepayments;
 	private Integer loanTermFrequency;
@@ -69,8 +70,9 @@ public class LoanProductData {
 		this.id = id;
 		this.name = name;
 		this.description = description;
-		this.principal = principal;
-		this.inArrearsTolerance = tolerance;
+		this.currency = new CurrencyData(principal.getCurrencyCode(), principal.getDefaultName(), principal.getDigitsAfterDecimal(), principal.getDisplaySymbol(), principal.getNameCode());
+		this.principal = principal.getAmount();
+		this.inArrearsTolerance = tolerance.getAmount();
 		this.numberOfRepayments = numberOfRepayments;
 		this.loanTermFrequency = loanTermFrequency;
 		this.repaymentEvery = repaymentEvery;
@@ -144,20 +146,28 @@ public class LoanProductData {
 			String transactionProcessingStrategyName) {
 		this.transactionProcessingStrategyName = transactionProcessingStrategyName;
 	}
+	
+	public CurrencyData getCurrency() {
+		return currency;
+	}
 
-	public MoneyData getPrincipal() {
+	public void setCurrency(CurrencyData currency) {
+		this.currency = currency;
+	}
+
+	public BigDecimal getPrincipal() {
 		return principal;
 	}
 
-	public void setPrincipal(MoneyData principal) {
+	public void setPrincipal(BigDecimal principal) {
 		this.principal = principal;
 	}
 
-	public MoneyData getInArrearsTolerance() {
+	public BigDecimal getInArrearsTolerance() {
 		return inArrearsTolerance;
 	}
 
-	public void setInArrearsTolerance(MoneyData inArrearsTolerance) {
+	public void setInArrearsTolerance(BigDecimal inArrearsTolerance) {
 		this.inArrearsTolerance = inArrearsTolerance;
 	}
 

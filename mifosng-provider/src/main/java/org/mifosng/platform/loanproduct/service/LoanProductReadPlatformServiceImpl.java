@@ -101,10 +101,8 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
 		LoanProductData productData = new LoanProductData();
 
-		productData.setAmortizationType(LoanEnumerations
-				.amortizationType(AmortizationMethod.EQUAL_INSTALLMENTS));
-		productData.setInterestType(LoanEnumerations
-				.interestType(InterestMethod.DECLINING_BALANCE));
+		productData.setAmortizationType(LoanEnumerations.amortizationType(AmortizationMethod.EQUAL_INSTALLMENTS));
+		productData.setInterestType(LoanEnumerations.interestType(InterestMethod.DECLINING_BALANCE));
 		
 		productData.setLoanTermFrequencyType(LoanEnumerations.loanTermFrequencyType(PeriodFrequencyType.MONTHS));
 		
@@ -115,12 +113,16 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 		productData.setInterestCalculationPeriodType(LoanEnumerations.interestCalculationPeriodType(InterestCalculationPeriodMethod.SAME_AS_REPAYMENT_PERIOD));
 
 		populateProductDataWithDropdownOptions(productData);
+		
+		productData.setPrincipal(BigDecimal.ZERO);
+		productData.setInArrearsTolerance(BigDecimal.ZERO);
+		
+		CurrencyData currency = new CurrencyData("", "", 0, "", "");
+		productData.setCurrency(currency);
 
-		if (productData.getCurrencyOptions().size() >= 1) {
-			CurrencyData currency = productData.getCurrencyOptions().get(0);
-			MoneyData zero = MoneyData.zero(currency);
-			productData.setPrincipal(zero);
-			productData.setInArrearsTolerance(zero);
+		if (productData.getCurrencyOptions().size() == 1) {
+			currency = productData.getCurrencyOptions().get(0);
+			productData.setCurrency(currency);
 		}
 
 		return productData;
