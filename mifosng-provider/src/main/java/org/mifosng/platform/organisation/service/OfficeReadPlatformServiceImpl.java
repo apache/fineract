@@ -141,29 +141,35 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
 
 		context.authenticatedUser();
 
-		List<OfficeLookup> parentLookups = new ArrayList<OfficeLookup>(
-				retrieveAllOfficesForLookup());
+		List<OfficeLookup> parentLookups = new ArrayList<OfficeLookup>();
 
 		return OfficeData.template(parentLookups, new LocalDate());
 	}
 
 	@Override
-	public List<OfficeLookup> retrieveAllowedParents(Long officeId) {
+	public List<OfficeLookup> retrieveAllowedParents(final Long officeId) {
 
 		context.authenticatedUser();
-
-		List<OfficeLookup> parentLookups = new ArrayList<OfficeLookup>(retrieveAllOfficesForLookup());
 		List<OfficeLookup> filterParentLookups = new ArrayList<OfficeLookup>();
-
-		for (OfficeLookup office : parentLookups) {
-
-			if (!office.getId().equals(officeId)) {
-				filterParentLookups.add(office);
+		
+		if (isNotHeadOffice(officeId)) {
+			List<OfficeLookup> parentLookups = new ArrayList<OfficeLookup>(retrieveAllOfficesForLookup());
+			
+	
+			for (OfficeLookup office : parentLookups) {
+	
+				if (!office.getId().equals(officeId)) {
+					filterParentLookups.add(office);
+				}
 			}
 		}
 
 		return filterParentLookups;
 
+	}
+
+	private boolean isNotHeadOffice(final Long officeId) {
+		return !Long.valueOf(1).equals(officeId);
 	}
 
 	@Override

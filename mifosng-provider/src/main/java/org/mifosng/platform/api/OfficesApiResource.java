@@ -1,5 +1,6 @@
 package org.mifosng.platform.api;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -81,6 +82,9 @@ public class OfficesApiResource {
 		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 
 		OfficeData office = this.readPlatformService.retrieveNewOfficeTemplate();
+		List<OfficeLookup> allowedParents = new ArrayList<OfficeLookup>(this.readPlatformService.retrieveAllOfficesForLookup());
+		office = OfficeData.appendedTemplate(office, allowedParents);
+		typicalResponseParameters.add("allowedParents");
 		
 		return this.apiJsonSerializerService.serializeOfficeDataToJson(prettyPrint, typicalResponseParameters, office);
 	}
