@@ -36,6 +36,7 @@ import org.mifosng.platform.api.data.LoanSchedule;
 import org.mifosng.platform.api.data.LoanTransactionData;
 import org.mifosng.platform.api.data.NewLoanData;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
+import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
 import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
 import org.mifosng.platform.exceptions.UnrecognizedQueryParamException;
 import org.mifosng.platform.loan.service.CalculationPlatformService;
@@ -61,6 +62,9 @@ public class LoansApiResource {
 
 	@Autowired
 	private ApiDataConversionService apiDataConversionService;
+	
+	@Autowired
+	private ApiJsonSerializerService apiJsonSerializerService;
 
 	@GET
 	@Path("template")
@@ -82,7 +86,7 @@ public class LoansApiResource {
 		
 		NewLoanData workflowData = this.loanReadPlatformService.retrieveClientAndProductDetails(clientId, productId);
 
-		return this.apiDataConversionService.convertNewLoanDataToJson(prettyPrint, responseParameters, workflowData);
+		return this.apiJsonSerializerService.serializeNewLoanDataToJson(prettyPrint, responseParameters, workflowData);
 	}
 
 	@GET
@@ -134,7 +138,7 @@ public class LoansApiResource {
 
 		LoanAccountData loanAccount = new LoanAccountData(loanBasicDetails, summary, repaymentSchedule, loanRepayments, permissions);
 		
-		return this.apiDataConversionService.convertLoanAccountDataToJson(prettyPrint, responseParameters, loanAccount);
+		return this.apiJsonSerializerService.serialzieLoanAccountDataToJson(prettyPrint, responseParameters, loanAccount);
 	}
 
 	@POST
@@ -291,7 +295,7 @@ public class LoansApiResource {
 			throw new UnrecognizedQueryParamException("command", commandParam);
 		}
 
-		return this.apiDataConversionService.convertLoanTransactionDataToJson(prettyPrint, responseParameters, transactionData);
+		return this.apiJsonSerializerService.serializeLoanTransactionDataToJson(prettyPrint, responseParameters, transactionData);
 	}
 
 	@GET
@@ -314,7 +318,7 @@ public class LoansApiResource {
 		
 		LoanTransactionData transactionData = this.loanReadPlatformService.retrieveLoanTransactionDetails(loanId, transactionId);
 
-		return this.apiDataConversionService.convertLoanTransactionDataToJson(prettyPrint, responseParameters, transactionData);
+		return this.apiJsonSerializerService.serializeLoanTransactionDataToJson(prettyPrint, responseParameters, transactionData);
 	}
 
 	@POST

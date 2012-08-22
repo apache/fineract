@@ -14,7 +14,10 @@ import org.mifosng.platform.api.data.DepositProductData;
 import org.mifosng.platform.api.data.FundData;
 import org.mifosng.platform.api.data.GenericResultsetData;
 import org.mifosng.platform.api.data.GroupData;
+import org.mifosng.platform.api.data.LoanAccountData;
 import org.mifosng.platform.api.data.LoanProductData;
+import org.mifosng.platform.api.data.LoanTransactionData;
+import org.mifosng.platform.api.data.NewLoanData;
 import org.mifosng.platform.api.data.NoteData;
 import org.mifosng.platform.api.data.OfficeData;
 import org.mifosng.platform.api.data.OfficeTransactionData;
@@ -81,4 +84,10 @@ public interface ApiJsonSerializerService {
 	String serializeNoteDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<NoteData> notes);
 
 	String serializeNoteDataToJson(boolean prettyPrint, Set<String> responseParameters, NoteData note);
+
+	String serializeNewLoanDataToJson(boolean prettyPrint, Set<String> responseParameters, NewLoanData newLoan);
+
+	String serialzieLoanAccountDataToJson(boolean prettyPrint, Set<String> responseParameters, LoanAccountData loanAccount);
+
+	String serializeLoanTransactionDataToJson(boolean prettyPrint, Set<String> responseParameters, LoanTransactionData transaction);
 }

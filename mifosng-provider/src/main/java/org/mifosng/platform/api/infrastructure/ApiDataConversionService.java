@@ -21,20 +21,9 @@ import org.mifosng.platform.api.commands.SavingProductCommand;
 import org.mifosng.platform.api.commands.SubmitLoanApplicationCommand;
 import org.mifosng.platform.api.commands.UserCommand;
 import org.mifosng.platform.api.data.ChargeData;
-import org.mifosng.platform.api.data.LoanAccountData;
-import org.mifosng.platform.api.data.LoanTransactionData;
-import org.mifosng.platform.api.data.NewLoanData;
 
 public interface ApiDataConversionService {
 	
-	//
-	String convertNewLoanDataToJson(boolean prettyPrint, Set<String> responseParameters, NewLoanData newLoanData);
-	
-	String convertLoanAccountDataToJson(boolean prettyPrint, Set<String> responseParameters, LoanAccountData loanAccount);
-	
-	String convertLoanTransactionDataToJson(boolean prettyPrint, Set<String> responseParameters, LoanTransactionData... transactions);
-	//
-
     ChargeCommand convertJsonToChargeCommand(Long resourceIdentifier, String json);
 
     String convertChargeDataToJson(boolean prettyPrint, Set<String> responseParameters, ChargeData... charges);

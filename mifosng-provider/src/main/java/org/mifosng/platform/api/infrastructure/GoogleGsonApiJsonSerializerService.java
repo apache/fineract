@@ -16,7 +16,10 @@ import org.mifosng.platform.api.data.DepositProductData;
 import org.mifosng.platform.api.data.FundData;
 import org.mifosng.platform.api.data.GenericResultsetData;
 import org.mifosng.platform.api.data.GroupData;
+import org.mifosng.platform.api.data.LoanAccountData;
 import org.mifosng.platform.api.data.LoanProductData;
+import org.mifosng.platform.api.data.LoanTransactionData;
+import org.mifosng.platform.api.data.NewLoanData;
 import org.mifosng.platform.api.data.NoteData;
 import org.mifosng.platform.api.data.OfficeData;
 import org.mifosng.platform.api.data.OfficeTransactionData;
@@ -97,6 +100,25 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 		Arrays.asList("id", "clientId", "loanId", "loanTransactionId", "noteType", "note", "createdById", "createdByUsername", 
 					"createdOn", "updatedById", "updatedByUsername", "updatedOn")
 	);
+
+	private static final Set<String> NEW_LOAN_DATA_PARAMETERS = new HashSet<String>(
+			Arrays.asList("clientId", "clientName", "productId", "productName",
+					"selectedProduct", "expectedDisbursementDate", "allowedProducts")
+		);
+
+	private static final Set<String> LOAN_DATA_PARAMETERS = new HashSet<String>(
+			Arrays.asList("id", "externalId", "fundId", "fundName", "loanProductId", "loanProductName", "principal", "inArrearsTolerance", "numberOfRepayments",
+					"repaymentEvery", "interestRatePerPeriod", "annualInterestRate", 
+					"repaymentFrequencyType", "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType",
+					"submittedOnDate", "approvedOnDate", "expectedDisbursementDate", "actualDisbursementDate", 
+					"expectedFirstRepaymentOnDate", "interestChargedFromDate", "closedOnDate", "expectedMaturityDate", 
+					"lifeCycleStatusId", "lifeCycleStatusText", "lifeCycleStatusDate", 
+					"summary", "repaymentSchedule", "loanRepayments", "permissions", "convenienceData")
+		);
+
+	private static final Set<String> LOAN_TRANSACTION_DATA_PARAMETERS = new HashSet<String>(
+			Arrays.asList("id", "transactionType", "date", "principal", "interest", "total", "totalWaived", "overpaid")
+		);
 	
 	private final GoogleGsonSerializerHelper helper;
 	
@@ -278,5 +300,23 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 	public String serializeNoteDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final NoteData note) {
 		final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(NOTE_DATA_PARAMETERS, prettyPrint, responseParameters);
 		return helper.serializedJsonFrom(gsonDeserializer, note);
+	}
+
+	@Override
+	public String serializeNewLoanDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final NewLoanData newLoan) {
+		final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(NEW_LOAN_DATA_PARAMETERS, prettyPrint, responseParameters);
+		return helper.serializedJsonFrom(gsonDeserializer, newLoan);
+	}
+
+	@Override
+	public String serialzieLoanAccountDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final LoanAccountData loanAccount) {
+		final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(LOAN_DATA_PARAMETERS, prettyPrint, responseParameters);
+		return helper.serializedJsonFrom(gsonDeserializer, loanAccount);
+	}
+
+	@Override
+	public String serializeLoanTransactionDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final LoanTransactionData transaction) {
+		final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(LOAN_TRANSACTION_DATA_PARAMETERS, prettyPrint, responseParameters);
+		return helper.serializedJsonFrom(gsonDeserializer, transaction);
 	}
 }

@@ -15,7 +15,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
-import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.mifosng.platform.api.commands.AdjustLoanTransactionCommand;
@@ -38,9 +37,6 @@ import org.mifosng.platform.api.commands.SubmitLoanApplicationCommand;
 import org.mifosng.platform.api.commands.UserCommand;
 import org.mifosng.platform.api.data.ApiParameterError;
 import org.mifosng.platform.api.data.ChargeData;
-import org.mifosng.platform.api.data.LoanAccountData;
-import org.mifosng.platform.api.data.LoanTransactionData;
-import org.mifosng.platform.api.data.NewLoanData;
 import org.mifosng.platform.api.errorhandling.InvalidJsonException;
 import org.mifosng.platform.api.errorhandling.UnsupportedParameterException;
 import org.mifosng.platform.exceptions.PlatformApiDataValidationException;
@@ -64,111 +60,6 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	
 	public ApiDataConversionServiceImpl() {
 		gsonConverter = new Gson();
-	}
-
-	@Override
-	public String convertLoanTransactionDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final LoanTransactionData... transactions) {
-		final Set<String> supportedParameters = new HashSet<String>(
-				Arrays.asList("id", "transactionType", "date", "principal", "interest", "total", "totalWaived", "overpaid")
-		);
-		
-		final Set<String> parameterNamesToSkip = new HashSet<String>();
-		
-		if (!responseParameters.isEmpty()) {
-			if (!supportedParameters.containsAll(responseParameters)) {
-				throw new UnsupportedParameterException(new ArrayList<String>(responseParameters));
-			}
-			
-			parameterNamesToSkip.addAll(supportedParameters);
-			parameterNamesToSkip.removeAll(responseParameters);
-		}
-		
-		ExclusionStrategy strategy = new ParameterListExclusionStrategy(parameterNamesToSkip);
-		
-		GsonBuilder builder = new GsonBuilder().addSerializationExclusionStrategy(strategy);
-		builder.registerTypeAdapter(LocalDate.class, new JodaLocalDateAdapter());
-		builder.registerTypeAdapter(DateTime.class, new JodaDateTimeAdapter());
-		if (prettyPrint) {
-			builder.setPrettyPrinting();
-		}
-		Gson gsonDeserializer = builder.create();
-		
-		String json = "";
-		if (transactions != null && transactions.length == 1) {
-			json = gsonDeserializer.toJson(transactions[0]);
-		} else {
-			json = gsonDeserializer.toJson(transactions);
-		}
-		
-		return json;
-	}
-	
-	@Override
-	public String convertLoanAccountDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final LoanAccountData loanAccount) {
-		final Set<String> supportedParameters = new HashSet<String>(
-				Arrays.asList("id", "externalId", "fundId", "fundName", "loanProductId", "loanProductName", "principal", "inArrearsTolerance", "numberOfRepayments",
-						"repaymentEvery", "interestRatePerPeriod", "annualInterestRate", 
-						"repaymentFrequencyType", "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType",
-						"submittedOnDate", "approvedOnDate", "expectedDisbursementDate", "actualDisbursementDate", 
-						"expectedFirstRepaymentOnDate", "interestChargedFromDate", "closedOnDate", "expectedMaturityDate", 
-						"lifeCycleStatusId", "lifeCycleStatusText", "lifeCycleStatusDate", 
-						"summary", "repaymentSchedule", "loanRepayments", "permissions", "convenienceData")
-		);
-		
-		final Set<String> parameterNamesToSkip = new HashSet<String>();
-		
-		if (!responseParameters.isEmpty()) {
-			if (!supportedParameters.containsAll(responseParameters)) {
-				throw new UnsupportedParameterException(new ArrayList<String>(responseParameters));
-			}
-			
-			parameterNamesToSkip.addAll(supportedParameters);
-			parameterNamesToSkip.removeAll(responseParameters);
-		}
-		
-		ExclusionStrategy strategy = new ParameterListExclusionStrategy(parameterNamesToSkip);
-		
-		GsonBuilder builder = new GsonBuilder().addSerializationExclusionStrategy(strategy);
-		builder.registerTypeAdapter(LocalDate.class, new JodaLocalDateAdapter());
-		builder.registerTypeAdapter(DateTime.class, new JodaDateTimeAdapter());
-		if (prettyPrint) {
-			builder.setPrettyPrinting();
-		}
-		Gson gsonDeserializer = builder.create();
-		
-		return gsonDeserializer.toJson(loanAccount);
-	}
-	
-	@Override
-	public String convertNewLoanDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final NewLoanData newLoanData) {
-		
-		final Set<String> supportedParameters = new HashSet<String>(
-				Arrays.asList("clientId", "clientName", "productId", "productName",
-						"selectedProduct", "expectedDisbursementDate", "allowedProducts")
-		);
-		
-		final Set<String> parameterNamesToSkip = new HashSet<String>();
-		
-		if (!responseParameters.isEmpty()) {
-			if (!supportedParameters.containsAll(responseParameters)) {
-				throw new UnsupportedParameterException(new ArrayList<String>(responseParameters));
-			}
-			
-			parameterNamesToSkip.addAll(supportedParameters);
-			parameterNamesToSkip.removeAll(responseParameters);
-		}
-		
-		ExclusionStrategy strategy = new ParameterListExclusionStrategy(parameterNamesToSkip);
-		
-		GsonBuilder builder = new GsonBuilder().addSerializationExclusionStrategy(strategy);
-		builder.registerTypeAdapter(LocalDate.class, new JodaLocalDateAdapter());
-		builder.registerTypeAdapter(DateTime.class, new JodaDateTimeAdapter());
-		if (prettyPrint) {
-			builder.setPrettyPrinting();
-		}
-		Gson gsonDeserializer = builder.create();
-		
-		return gsonDeserializer.toJson(newLoanData);
 	}
 	
     @Override
