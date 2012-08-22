@@ -19,51 +19,47 @@ public class Charge extends AbstractAuditableCustom<AppUser, Long> {
     @Column(name = "amount", scale = 6, precision = 19, nullable = false)
     private BigDecimal amount;
 
-    @Column(name = "currency_code", length=3)
+    @SuppressWarnings("unused")
+	@Column(name = "currency_code", length=3)
     private String currencyCode;
 
-    @Enumerated(EnumType.ORDINAL)
-    @Column(name = "charge_applies_to_enum", nullable = false)
-    private ChargeAppliesTo chargeAppliesTo;
+    @SuppressWarnings("unused")
+	@Column(name = "charge_applies_to_enum", nullable = false)
+    private Integer chargeAppliesTo;
 
-    @Enumerated(EnumType.ORDINAL)
-    @Column(name = "charge_time_enum", nullable = false)
-    private ChargeTimeType chargeTime;
+    @SuppressWarnings("unused")
+	@Column(name = "charge_time_enum", nullable = false)
+    private Integer chargeTime;
 
-    @Enumerated(EnumType.ORDINAL)
-    @Column(name = "charge_calculation_enum")
-    private ChargeCalculationMethod chargeCalculationMethod;
+    @SuppressWarnings("unused")
+	@Column(name = "charge_calculation_enum")
+    private Integer chargeCalculationMethod;
 
-    @Column(name = "is_active", nullable = false)
+    @SuppressWarnings("unused")
+	@Column(name = "is_active", nullable = false)
     private boolean active;
 
     @Column(name = "is_deleted", nullable=false)
     private boolean deleted = false;
 
-    public static Charge createNew(String name, BigDecimal amount, String currencyCode, ChargeAppliesTo chargeAppliesTo,
-                                   ChargeTimeType chargeTime, ChargeCalculationMethod chargeCalculationMethod, boolean active){
+    public static Charge createNew(final String name, final BigDecimal amount, final String currencyCode, 
+    		final ChargeAppliesTo chargeAppliesTo, final ChargeTimeType chargeTime, final ChargeCalculationMethod chargeCalculationMethod, final boolean active) {
         return new Charge(name, amount, currencyCode, chargeAppliesTo, chargeTime, chargeCalculationMethod, active);
     }
 
-    public Charge() {
-        this.name = null;
-        this.amount = null;
-        this.currencyCode = null;
-        this.chargeAppliesTo = null;
-        this.chargeTime = null;
-        this.chargeCalculationMethod = null;
-
-        this.active = false;
+    protected Charge() {
+    	//
     }
 
-    public Charge(String name, BigDecimal amount, String currencyCode, ChargeAppliesTo chargeAppliesTo,
-                  ChargeTimeType chargeTime, ChargeCalculationMethod chargeCalculationMethod, boolean active) {
+    public Charge(final String name, final BigDecimal amount, final String currencyCode, 
+    		final ChargeAppliesTo chargeAppliesTo, final ChargeTimeType chargeTime, 
+    		final ChargeCalculationMethod chargeCalculationMethod, final boolean active) {
         this.name = name;
         this.amount = amount;
         this.currencyCode = currencyCode;
-        this.chargeAppliesTo = chargeAppliesTo;
-        this.chargeTime = chargeTime;
-        this.chargeCalculationMethod = chargeCalculationMethod;
+        this.chargeAppliesTo = chargeAppliesTo.getValue();
+        this.chargeTime = chargeTime.getValue();
+        this.chargeCalculationMethod = chargeCalculationMethod.getValue();
         this.active = active;
     }
 
@@ -93,15 +89,15 @@ public class Charge extends AbstractAuditableCustom<AppUser, Long> {
         }
 
         if (command.isChargeTimeTypeChanged()){
-            this.chargeTime = ChargeTimeType.fromInt(command.getChargeTimeType());
+            this.chargeTime = ChargeTimeType.fromInt(command.getChargeTimeType()).getValue();
         }
 
         if (command.isChargeAppliesToChanged()){
-            this.chargeAppliesTo = ChargeAppliesTo.fromInt(command.getChargeAppliesTo());
+            this.chargeAppliesTo = ChargeAppliesTo.fromInt(command.getChargeAppliesTo()).getValue();
         }
 
         if (command.isChargeCalculationTypeChanged()){
-            this.chargeCalculationMethod = ChargeCalculationMethod.fromInt(command.getChargeCalculationType());
+            this.chargeCalculationMethod = ChargeCalculationMethod.fromInt(command.getChargeCalculationType()).getValue();
         }
 
         if (command.isActiveChanged()){

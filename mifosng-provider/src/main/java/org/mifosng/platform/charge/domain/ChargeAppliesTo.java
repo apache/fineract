@@ -1,8 +1,9 @@
 package org.mifosng.platform.charge.domain;
 
 public enum ChargeAppliesTo {
-    LOAN(0, "chargeAppliesTo.loan"),
-    INVALID(1, "chargeAppliesTo.invalid");
+	
+    INVALID(0, "chargeAppliesTo.invalid"),
+    LOAN(1, "chargeAppliesTo.loan");
 
     private final Integer value;
     private final String code;
@@ -21,9 +22,9 @@ public enum ChargeAppliesTo {
     }
 
     public static ChargeAppliesTo fromInt(final Integer chargeAppliesTo){
-        ChargeAppliesTo chargeAppliesToType = null;
+        ChargeAppliesTo chargeAppliesToType = ChargeAppliesTo.INVALID;
         switch(chargeAppliesTo){
-            case 0:
+            case 1:
                 chargeAppliesToType = LOAN;
                 break;
             default:

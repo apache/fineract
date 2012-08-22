@@ -1,12 +1,13 @@
 package org.mifosng.platform.charge.domain;
 
 public enum ChargeCalculationMethod {
-    FLAT(0, "chargeCalculationType.flat"),
-    PERCENT_OF_AMOUNT(1, "chargeCalculationType.percent.of.amount"),
-    PERCENT_OF_AMOUNT_AND_INTEREST(2, "chargeCalculationType.percent.of.amount.and.interest"),
-    PERCENT_OF_INTEREST(3, "chargeCalculationType.percent.of.interest"),
-    INVALID(4, "chargeCalculationType.invalid");
-
+	
+	INVALID(0, "chargeCalculationType.invalid"),
+    FLAT(1, "chargeCalculationType.flat"),
+    PERCENT_OF_AMOUNT(2, "chargeCalculationType.percent.of.amount"),
+    PERCENT_OF_AMOUNT_AND_INTEREST(3, "chargeCalculationType.percent.of.amount.and.interest"),
+    PERCENT_OF_INTEREST(4, "chargeCalculationType.percent.of.interest");
+    
     private final Integer value;
     private final String code;
 
@@ -24,18 +25,18 @@ public enum ChargeCalculationMethod {
     }
 
     public static ChargeCalculationMethod fromInt(final Integer chargeCalculation){
-        ChargeCalculationMethod chargeCalculationMethod = null;
+        ChargeCalculationMethod chargeCalculationMethod = ChargeCalculationMethod.INVALID;
         switch(chargeCalculation){
-            case 0:
+            case 1:
                 chargeCalculationMethod = FLAT;
                 break;
-            case 1:
+            case 2:
                 chargeCalculationMethod = PERCENT_OF_AMOUNT;
                 break;
-            case 2:
+            case 3:
                 chargeCalculationMethod = PERCENT_OF_AMOUNT_AND_INTEREST;
                 break;
-            case 3:
+            case 4:
                 chargeCalculationMethod = PERCENT_OF_INTEREST;
                 break;
             default:

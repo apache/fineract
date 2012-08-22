@@ -73,8 +73,8 @@ public class ChargesApiResource {
     public String retrieveNewChargeDetails(@Context final UriInfo uriInfo) {
 
         Set<String> typicalResponseParameters = new HashSet<String>(
-            Arrays.asList("name", "amount", "currency",  "currencyOptions", "chargeAppliesTo", "chargeTimeType",
-                "chargeCalculationType", "chargeCalculationTypeOptions", "active")
+            Arrays.asList("id", "name", "amount", "currency", "active", "chargeAppliesTo", "chargeTimeType",
+                "chargeCalculationType", "chargeCalculationTypeOptions", "currencyOptions")
         );
 
         Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());

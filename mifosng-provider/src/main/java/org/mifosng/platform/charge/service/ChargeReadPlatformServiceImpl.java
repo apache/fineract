@@ -83,8 +83,9 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
         );
         EnumOptionData allowedChargeAppliesTo = chargeAppliesTo(ChargeAppliesTo.LOAN);
         EnumOptionData allowedChargeTime = chargeTimeType(ChargeTimeType.DISBURSEMENT);
+        EnumOptionData allowedChargeCalculationType = chargeCalculationType(ChargeCalculationMethod.FLAT);
 
-        return new ChargeData(allowedChargeTime, allowedChargeAppliesTo, currencyOptions, allowedChargeCalculationMethods);
+        return ChargeData.template(allowedChargeTime, allowedChargeAppliesTo, allowedChargeCalculationType, currencyOptions, allowedChargeCalculationMethods);
     }
 
     private static final class ChargeMapper implements RowMapper<ChargeData> {
@@ -101,6 +102,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
             String name = rs.getString("name");
             BigDecimal amount = rs.getBigDecimal("amount");
             String currencyCode = rs.getString("currencyCode");
+            CurrencyData currency = new CurrencyData(currencyCode, "", 0, "", "");
 
             int chargeAppliesTo = rs.getInt("chargeAppliesTo");
             EnumOptionData chargeAppliesToType = ChargeEnumerations.chargeAppliesTo(chargeAppliesTo);
@@ -113,7 +115,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
 
             boolean active = rs.getBoolean("active");
 
-            return new ChargeData(id, name, amount, currencyCode, chargeTimeType, chargeAppliesToType, chargeCalculationType, active);
+            return new ChargeData(id, name, amount, currency, chargeTimeType, chargeAppliesToType, chargeCalculationType, active);
         }
     }
 }

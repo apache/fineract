@@ -1,8 +1,9 @@
 package org.mifosng.platform.charge.domain;
 
 public enum ChargeTimeType {
-    DISBURSEMENT(0, "chargeTimeType.disbursement"),
-    INVALID(1, "chargeTimeType.invalid");
+	
+    INVALID(0, "chargeTimeType.invalid"),
+    DISBURSEMENT(1, "chargeTimeType.disbursement");
 
     private final Integer value;
     private final String code;
@@ -21,9 +22,9 @@ public enum ChargeTimeType {
     }
 
     public static ChargeTimeType fromInt(final Integer chargeTime) {
-        ChargeTimeType chargeTimeType = null;
+        ChargeTimeType chargeTimeType = ChargeTimeType.INVALID;
         switch(chargeTime){
-            case 0:
+            case 1:
                 chargeTimeType = DISBURSEMENT;
                 break;
             default:
