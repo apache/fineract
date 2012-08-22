@@ -1,6 +1,5 @@
 package org.mifosng.platform.api.infrastructure;
 
-import java.util.Collection;
 import java.util.Set;
 
 import org.mifosng.platform.api.commands.AdjustLoanTransactionCommand;
@@ -25,15 +24,10 @@ import org.mifosng.platform.api.data.ChargeData;
 import org.mifosng.platform.api.data.LoanAccountData;
 import org.mifosng.platform.api.data.LoanTransactionData;
 import org.mifosng.platform.api.data.NewLoanData;
-import org.mifosng.platform.api.data.NoteData;
 
 public interface ApiDataConversionService {
 	
 	//
-	String convertNoteDataToJson(boolean prettyPrint, Set<String> responseParameters, NoteData note);
-	
-	String convertNoteDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<NoteData> notes);
-	
 	String convertNewLoanDataToJson(boolean prettyPrint, Set<String> responseParameters, NewLoanData newLoanData);
 	
 	String convertLoanAccountDataToJson(boolean prettyPrint, Set<String> responseParameters, LoanAccountData loanAccount);

@@ -17,6 +17,7 @@ import org.mifosng.platform.api.data.FundData;
 import org.mifosng.platform.api.data.GenericResultsetData;
 import org.mifosng.platform.api.data.GroupData;
 import org.mifosng.platform.api.data.LoanProductData;
+import org.mifosng.platform.api.data.NoteData;
 import org.mifosng.platform.api.data.OfficeData;
 import org.mifosng.platform.api.data.OfficeTransactionData;
 import org.mifosng.platform.api.data.PermissionData;
@@ -91,7 +92,11 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 	private static final Set<String> GROUP_DATA_PARAMETERS = new HashSet<String>(
 			Arrays.asList("id", "name", "externalId", "clientMembers", "allowedClients")
 	);
-	 
+	
+	private static final Set<String> NOTE_DATA_PARAMETERS = new HashSet<String>(
+		Arrays.asList("id", "clientId", "loanId", "loanTransactionId", "noteType", "note", "createdById", "createdByUsername", 
+					"createdOn", "updatedById", "updatedByUsername", "updatedOn")
+	);
 	
 	private final GoogleGsonSerializerHelper helper;
 	
@@ -261,5 +266,17 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 	public String serializeGroupDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final GroupData group) {
 		final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(GROUP_DATA_PARAMETERS, prettyPrint, responseParameters);
 		return helper.serializedJsonFrom(gsonDeserializer, group);
+	}
+
+	@Override
+	public String serializeNoteDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<NoteData> notes) {
+		final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(NOTE_DATA_PARAMETERS, prettyPrint, responseParameters);
+		return helper.serializedJsonFrom(gsonDeserializer, notes.toArray(new NoteData[notes.size()]));
+	}
+
+	@Override
+	public String serializeNoteDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final NoteData note) {
+		final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(NOTE_DATA_PARAMETERS, prettyPrint, responseParameters);
+		return helper.serializedJsonFrom(gsonDeserializer, note);
 	}
 }

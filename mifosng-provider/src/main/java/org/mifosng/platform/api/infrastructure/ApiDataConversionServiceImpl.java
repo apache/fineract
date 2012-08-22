@@ -8,7 +8,6 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -42,7 +41,6 @@ import org.mifosng.platform.api.data.ChargeData;
 import org.mifosng.platform.api.data.LoanAccountData;
 import org.mifosng.platform.api.data.LoanTransactionData;
 import org.mifosng.platform.api.data.NewLoanData;
-import org.mifosng.platform.api.data.NoteData;
 import org.mifosng.platform.api.errorhandling.InvalidJsonException;
 import org.mifosng.platform.api.errorhandling.UnsupportedParameterException;
 import org.mifosng.platform.exceptions.PlatformApiDataValidationException;
@@ -171,55 +169,6 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		Gson gsonDeserializer = builder.create();
 		
 		return gsonDeserializer.toJson(newLoanData);
-	}
-	
-	@Override
-	public String convertNoteDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<NoteData> notes) {
-		final boolean returnAsArray = true;
-		return doConvertNoteDataToJson(prettyPrint, returnAsArray, responseParameters, notes.toArray(new NoteData[notes.size()]));
-	}
-	
-	@Override
-	public String convertNoteDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final NoteData note) {
-		final boolean returnAsArray = false;
-		return doConvertNoteDataToJson(prettyPrint, returnAsArray, responseParameters, note);
-	}
-	
-	private String doConvertNoteDataToJson(final boolean prettyPrint, final boolean returnAsArray, final Set<String> responseParameters, final NoteData... notes) {
-		final Set<String> supportedParameters = new HashSet<String>(
-				Arrays.asList("id", "clientId", "loanId", "loanTransactionId", "noteType", "note", "createdById", "createdByUsername", 
-						"createdOn", "updatedById", "updatedByUsername", "updatedOn")
-		);
-		
-		final Set<String> parameterNamesToSkip = new HashSet<String>();
-		
-		if (!responseParameters.isEmpty()) {
-			if (!supportedParameters.containsAll(responseParameters)) {
-				throw new UnsupportedParameterException(new ArrayList<String>(responseParameters));
-			}
-			
-			parameterNamesToSkip.addAll(supportedParameters);
-			parameterNamesToSkip.removeAll(responseParameters);
-		}
-		
-		ExclusionStrategy strategy = new ParameterListExclusionStrategy(parameterNamesToSkip);
-		
-		GsonBuilder builder = new GsonBuilder().addSerializationExclusionStrategy(strategy);
-		builder.registerTypeAdapter(LocalDate.class, new JodaLocalDateAdapter());
-		builder.registerTypeAdapter(DateTime.class, new JodaDateTimeAdapter());
-		if (prettyPrint) {
-			builder.setPrettyPrinting();
-		}
-		Gson gsonDeserializer = builder.create();
-		
-		String json = "";
-		if (notes != null && notes.length == 1 && !returnAsArray) {
-			json = gsonDeserializer.toJson(notes[0]);
-		} else {
-			json = gsonDeserializer.toJson(notes);
-		}
-		
-		return json;
 	}
 	
     @Override

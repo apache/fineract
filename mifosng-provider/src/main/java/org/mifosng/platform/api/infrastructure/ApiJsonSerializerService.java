@@ -15,6 +15,7 @@ import org.mifosng.platform.api.data.FundData;
 import org.mifosng.platform.api.data.GenericResultsetData;
 import org.mifosng.platform.api.data.GroupData;
 import org.mifosng.platform.api.data.LoanProductData;
+import org.mifosng.platform.api.data.NoteData;
 import org.mifosng.platform.api.data.OfficeData;
 import org.mifosng.platform.api.data.OfficeTransactionData;
 import org.mifosng.platform.api.data.PermissionData;
@@ -76,4 +77,8 @@ public interface ApiJsonSerializerService {
 	String serializeGroupDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<GroupData> groups);
 
 	String serializeGroupDataToJson(boolean prettyPrint, Set<String> responseParameters, GroupData group);
+
+	String serializeNoteDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<NoteData> notes);
+
+	String serializeNoteDataToJson(boolean prettyPrint, Set<String> responseParameters, NoteData note);
 }

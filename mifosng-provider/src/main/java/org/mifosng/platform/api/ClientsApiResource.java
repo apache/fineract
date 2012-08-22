@@ -256,7 +256,7 @@ public class ClientsApiResource {
 		
 		Collection<NoteData> notes = this.clientReadPlatformService.retrieveAllClientNotes(clientId);
 		
-		return this.apiDataConversionService.convertNoteDataToJson(prettyPrint, responseParameters, notes);
+		return this.apiJsonSerializerService.serializeNoteDataToJson(prettyPrint, responseParameters, notes);
 	}
 
 	@POST
@@ -294,7 +294,7 @@ public class ClientsApiResource {
 		
 		NoteData note = this.clientReadPlatformService.retrieveClientNote(clientId, noteId);
 		
-		return this.apiDataConversionService.convertNoteDataToJson(prettyPrint, responseParameters, note);
+		return this.apiJsonSerializerService.serializeNoteDataToJson(prettyPrint, responseParameters, note);
 	}
 
 	@PUT
