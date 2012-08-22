@@ -62,6 +62,10 @@ public class ClientsApiResource {
 	@Autowired
 	private ApiJsonSerializerService apiJsonSerializerService;
 
+	private static final Set<String> typicalResponseParameters = new HashSet<String>(
+			Arrays.asList("id", "officeId", "officeName", "externalId", "firstname", "lastname", "joinedDate", "displayName", "clientOrBusinessName")
+	);
+	
 	@GET
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
@@ -74,10 +78,6 @@ public class ClientsApiResource {
 			@QueryParam("lastName") final String lastName) {
 
 		final String extraCriteria = getClientCriteria(sqlSearch, officeId, externalId, displayName, firstName, lastName);
-		
-		Set<String> typicalResponseParameters = new HashSet<String>(
-				Arrays.asList("id", "officeId", "officeName", "externalId", "firstname", "lastname", "joinedDate", "displayName")
-		);
 		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (responseParameters.isEmpty()) {
@@ -137,10 +137,6 @@ public class ClientsApiResource {
 			@PathParam("clientId") final Long clientId,
 			@Context final UriInfo uriInfo) {
 		
-		Set<String> typicalResponseParameters = new HashSet<String>(
-				Arrays.asList("id", "officeId", "officeName", "externalId", "firstname", "lastname", "joinedDate", "displayName")
-		);
-		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (responseParameters.isEmpty()) {
 			responseParameters.addAll(typicalResponseParameters);
@@ -163,13 +159,10 @@ public class ClientsApiResource {
 	@Produces({MediaType.APPLICATION_JSON})
 	public String newClientDetails(@Context final UriInfo uriInfo) {
 		
-		Set<String> typicalResponseParameters = new HashSet<String>(
-				Arrays.asList("id", "officeId", "officeName", "externalId", "firstname", "lastname", "joinedDate", "displayName", "allowedOffices")
-		);
-		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (responseParameters.isEmpty()) {
 			responseParameters.addAll(typicalResponseParameters);
+			responseParameters.add("allowedOffices");
 		}
 		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 		

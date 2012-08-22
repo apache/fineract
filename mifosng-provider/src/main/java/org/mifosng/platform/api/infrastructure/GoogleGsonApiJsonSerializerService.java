@@ -85,7 +85,7 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 			);
 	
 	private static final Set<String> CLIENT_DATA_PARAMETERS = new HashSet<String>(
-			Arrays.asList("id", "officeId", "officeName", "externalId", "firstname", "lastname", "joinedDate", "displayName", "allowedOffices")
+			Arrays.asList("id", "officeId", "officeName", "externalId", "firstname", "lastname", "joinedDate", "displayName", "clientOrBusinessName", "allowedOffices")
 	);
 
 	private static final Set<String> CLIENT_ACCOUNTS_DATA_PARAMETERS = new HashSet<String>(
