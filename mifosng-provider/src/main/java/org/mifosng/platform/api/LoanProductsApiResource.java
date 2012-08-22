@@ -92,7 +92,7 @@ public class LoanProductsApiResource {
 	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveNewLoanProductDetails(@Context final UriInfo uriInfo) {
 		
-		// TODO - KW - every addition of a parameter here requires same additon in supported params used in 'apiDataConversionService' method.
+		// TODO - KW - every addition of a parameter here requires same addition in supported params used in 'apiDataConversionService' method.
 		Set<String> typicalResponseParameters = new HashSet<String>(
 				Arrays.asList("id", "name", "description", "fundId", "fundName", "transactionProcessingStrategyId", "transactionProcessingStrategyName",  
 						"principal", "inArrearsTolerance", "numberOfRepayments",
