@@ -1,7 +1,5 @@
 package org.mifosng.platform.saving.domain;
 
-
-
 public enum DepositStatus {
 	
 	INVALID(0, "depositStatusType.invalid"), // 
@@ -84,6 +82,5 @@ public enum DepositStatus {
 			break;
 		}
 		return enumeration;
-    }
-    
+    }   
 }
