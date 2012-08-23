@@ -30,6 +30,7 @@ public class Fund extends AbstractAuditableCustom<AppUser, Long> {
 	}
 	
 	protected Fund() {
+		//
 	}
 
 	private Fund(final String fundName, final String externalId) {

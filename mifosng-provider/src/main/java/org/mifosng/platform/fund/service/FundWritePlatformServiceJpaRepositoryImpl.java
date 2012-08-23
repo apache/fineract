@@ -81,9 +81,9 @@ public class FundWritePlatformServiceJpaRepositoryImpl implements FundWritePlatf
 		
 		Throwable realCause = dve.getMostSpecificCause();
 		if (realCause.getMessage().contains("fund_externalid_org")) {
-			throw new PlatformDataIntegrityException("error.msg.fund.duplicate.externalId", "Fund with externalId {0} already exists", "externalId", command.getExternalId());
+			throw new PlatformDataIntegrityException("error.msg.fund.duplicate.externalId", "A fund with external id '" + command.getExternalId() + "' already exists", "externalId", command.getExternalId());
 		} else if (realCause.getMessage().contains("fund_name_org")) {
-			throw new PlatformDataIntegrityException("error.msg.fund.duplicate.name", "Fund with name {0} already exists", "name", command.getName());
+			throw new PlatformDataIntegrityException("error.msg.fund.duplicate.name", "A fund with name '" + command.getExternalId() + "' already exists", "name", command.getName());
 		} 
 		
 		logger.error(dve.getMessage(), dve);
