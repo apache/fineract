@@ -187,9 +187,7 @@ public class LoansApiResource {
 			@QueryParam("command") final String commandParam,
 			final String jsonRequestBody) {
 
-		LoanStateTransitionCommand command = this.apiDataConversionService
-				.convertJsonToLoanStateTransitionCommand(loanId,
-						jsonRequestBody);
+		LoanStateTransitionCommand command = this.apiDataConversionService.convertJsonToLoanStateTransitionCommand(loanId, jsonRequestBody);
 
 		Response response = null;
 

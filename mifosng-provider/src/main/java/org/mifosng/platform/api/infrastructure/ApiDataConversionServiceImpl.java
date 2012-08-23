@@ -23,6 +23,7 @@ import org.mifosng.platform.api.commands.ChargeCommand;
 import org.mifosng.platform.api.commands.ClientCommand;
 import org.mifosng.platform.api.commands.DepositAccountCommand;
 import org.mifosng.platform.api.commands.DepositProductCommand;
+import org.mifosng.platform.api.commands.DepositStateTransitionCommand;
 import org.mifosng.platform.api.commands.FundCommand;
 import org.mifosng.platform.api.commands.GroupCommand;
 import org.mifosng.platform.api.commands.LoanProductCommand;
@@ -1003,5 +1004,27 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 				tenureMonths, maturityDefaultInterestRate, maturityMinInterestRate, maturityMaxInterestRate, 
 				interestCompoundedEvery, interestCompoundedEveryPeriodType,
 				canRenew, canPreClose, preClosureInterestRate);
+	}
+
+	@Override
+	public DepositStateTransitionCommand convertJsonToDepositStateTransitionCommand(
+			Long resourceIdentifier, String json) {
+		
+		if (StringUtils.isBlank(json)) {
+			throw new InvalidJsonException();
+		}
+		
+		Type typeOfMap = new TypeToken<Map<String, Object>>(){}.getType();
+	    Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
+	    
+	    Set<String> supportedParams = new HashSet<String>( Arrays.asList("eventDate", "dateFormat"));
+	    
+	    checkForUnsupportedParameters(requestMap, supportedParams);
+	    
+	    Set<String> modifiedParameters = new HashSet<String>();
+	    
+	    LocalDate eventDate = extractLocalDateParameter("eventDate", requestMap, modifiedParameters);
+	    
+		return new DepositStateTransitionCommand(resourceIdentifier, eventDate);
 	}
 }

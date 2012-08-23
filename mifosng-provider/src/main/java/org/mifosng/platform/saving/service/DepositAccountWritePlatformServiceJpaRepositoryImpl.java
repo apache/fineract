@@ -1,13 +1,24 @@
 package org.mifosng.platform.saving.service;
 
+import java.util.Arrays;
+import java.util.List;
+
+import org.joda.time.LocalDate;
 import org.mifosng.platform.api.commands.DepositAccountCommand;
+import org.mifosng.platform.api.commands.DepositStateTransitionCommand;
+import org.mifosng.platform.api.commands.UndoStateTransitionCommand;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.exceptions.DepositAccountNotFoundException;
+import org.mifosng.platform.exceptions.NoAuthorizationException;
 import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
 import org.mifosng.platform.exceptions.ProductNotFoundException;
 import org.mifosng.platform.saving.domain.DepositAccount;
 import org.mifosng.platform.saving.domain.DepositAccountRepository;
+import org.mifosng.platform.saving.domain.DepositLifecycleStateMachine;
+import org.mifosng.platform.saving.domain.DepositLifecycleStateMachineImpl;
+import org.mifosng.platform.saving.domain.DepositStatus;
 import org.mifosng.platform.security.PlatformSecurityContext;
+import org.mifosng.platform.user.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,5 +122,105 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 		this.depositAccountRepository.save(account);
 		
 		return new EntityIdentifier(accountId);
+	}
+
+	@Transactional
+	@Override
+	public EntityIdentifier approveDepositApplication(DepositStateTransitionCommand command) {
+		
+		AppUser currentUser = context.authenticatedUser();
+		
+		DepositStateTransitionCommandValidator validator = new DepositStateTransitionCommandValidator(command);
+		validator.validate();
+		
+		
+		DepositAccount account = this.depositAccountRepository.findOne(command.getAccountId());
+		if (account == null || account.isDeleted()) {
+			throw new DepositAccountNotFoundException(command.getAccountId());
+		}
+		
+		LocalDate eventDate = command.getEventDate();
+		if (this.isBeforeToday(eventDate) && currentUser.canNotApproveLoanInPast()) {
+			throw new NoAuthorizationException("User has no authority to approve deposit with a date in the past.");
+		}
+		
+		account.approve(eventDate, defaultDepositLifecycleStateMachine());
+		this.depositAccountRepository.save(account);
+
+		return new EntityIdentifier(account.getId());
+	
+	}
+	
+	private boolean isBeforeToday(final LocalDate date) {
+		return date.isBefore(new LocalDate());
+	}
+	private DepositLifecycleStateMachine defaultDepositLifecycleStateMachine() {
+		List<DepositStatus> allowedDepositStatuses = Arrays.asList(DepositStatus.values());
+		return new DepositLifecycleStateMachineImpl(allowedDepositStatuses);
+	}
+
+	@Transactional
+	@Override
+	public EntityIdentifier rejectDepositApplication(DepositStateTransitionCommand command) {
+		
+		AppUser currentUser = context.authenticatedUser();
+		
+		DepositStateTransitionCommandValidator validator = new DepositStateTransitionCommandValidator(command);
+		validator.validate();
+		
+		DepositAccount account = this.depositAccountRepository.findOne(command.getAccountId());
+		if (account == null || account.isDeleted()) {
+			throw new DepositAccountNotFoundException(command.getAccountId());
+		}
+		
+		LocalDate eventDate = command.getEventDate();
+		if (this.isBeforeToday(eventDate) && currentUser.canNotApproveLoanInPast()) {
+			throw new NoAuthorizationException("User has no authority to approve deposit with a date in the past.");
+		}
+		
+		account.reject(eventDate, defaultDepositLifecycleStateMachine());
+		this.depositAccountRepository.save(account);
+
+		return new EntityIdentifier(account.getId());
+	}
+
+	@Transactional
+	@Override
+	public EntityIdentifier withdrawDepositApplication(DepositStateTransitionCommand command) {
+		
+		AppUser currentUser = context.authenticatedUser();
+		
+		DepositStateTransitionCommandValidator validator = new DepositStateTransitionCommandValidator(command);
+		validator.validate();
+		
+		DepositAccount account = this.depositAccountRepository.findOne(command.getAccountId());
+		if (account == null || account.isDeleted()) {
+			throw new DepositAccountNotFoundException(command.getAccountId());
+		}
+		
+		LocalDate eventDate = command.getEventDate();
+		if (this.isBeforeToday(eventDate) && currentUser.canNotApproveLoanInPast()) {
+			throw new NoAuthorizationException("User has no authority to approve deposit with a date in the past.");
+		}
+		
+		account.withdraw(eventDate, defaultDepositLifecycleStateMachine());
+		return null;
+	}
+
+	@Transactional
+	@Override
+	public EntityIdentifier undoDepositApproval(UndoStateTransitionCommand command) {
+		
+		context.authenticatedUser();
+		
+		DepositAccount account = this.depositAccountRepository.findOne(command.getLoanId());
+		if (account == null || account.isDeleted()) {
+			throw new DepositAccountNotFoundException(command.getLoanId());
+		}
+		
+		account.undoDepositApproval(defaultDepositLifecycleStateMachine());
+		this.depositAccountRepository.save(account);
+		
+		return null;
 	}
 }

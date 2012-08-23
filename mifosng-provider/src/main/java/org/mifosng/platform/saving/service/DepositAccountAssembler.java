@@ -1,6 +1,8 @@
 package org.mifosng.platform.saving.service;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.List;
 
 import org.mifosng.platform.api.commands.DepositAccountCommand;
 import org.mifosng.platform.client.domain.Client;
@@ -10,6 +12,9 @@ import org.mifosng.platform.exceptions.ClientNotFoundException;
 import org.mifosng.platform.exceptions.DepositProductNotFoundException;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 import org.mifosng.platform.saving.domain.DepositAccount;
+import org.mifosng.platform.saving.domain.DepositLifecycleStateMachine;
+import org.mifosng.platform.saving.domain.DepositLifecycleStateMachineImpl;
+import org.mifosng.platform.saving.domain.DepositStatus;
 import org.mifosng.platform.saving.domain.FixedTermDepositInterestCalculator;
 import org.mifosng.platform.savingproduct.domain.DepositProduct;
 import org.mifosng.platform.savingproduct.domain.DepositProductRepository;
@@ -80,13 +85,18 @@ public class DepositAccountAssembler {
 		}
 		// end of details allowed to be overriden from product
 		
-		DepositAccount account = DepositAccount.openNew(client, product, command.getExternalId(), 
+		DepositAccount account =new DepositAccount().openNew(client, product, command.getExternalId(), 
 				deposit, 
 				maturityInterestRate, 
 				tenureInMonths, compoundingInterestEvery, compoundingInterestFrequency, 
 				command.getCommencementDate(), 
-				renewalAllowed, preClosureAllowed, this.fixedTermDepositInterestCalculator);
+				renewalAllowed, preClosureAllowed, this.fixedTermDepositInterestCalculator, defaultDepositLifecycleStateMachine());
 		
 		return account;
+	}
+	
+	private DepositLifecycleStateMachine defaultDepositLifecycleStateMachine() {
+		List<DepositStatus> allowedDepositStatuses = Arrays.asList(DepositStatus.values());
+		return new DepositLifecycleStateMachineImpl(allowedDepositStatuses);
 	}
 }

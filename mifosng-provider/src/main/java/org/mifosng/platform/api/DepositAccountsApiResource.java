@@ -20,7 +20,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.commons.lang.StringUtils;
 import org.mifosng.platform.api.commands.DepositAccountCommand;
+import org.mifosng.platform.api.commands.DepositStateTransitionCommand;
+import org.mifosng.platform.api.commands.UndoStateTransitionCommand;
 import org.mifosng.platform.api.data.DepositAccountData;
 import org.mifosng.platform.api.data.DepositProductLookup;
 import org.mifosng.platform.api.data.EntityIdentifier;
@@ -28,6 +31,7 @@ import org.mifosng.platform.api.data.EnumOptionData;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
 import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
+import org.mifosng.platform.exceptions.UnrecognizedQueryParamException;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 import org.mifosng.platform.saving.service.DepositAccountReadPlatformService;
 import org.mifosng.platform.saving.service.DepositAccountWritePlatformService;
@@ -190,5 +194,53 @@ public class DepositAccountsApiResource {
 		List<EnumOptionData> interestCompoundedEveryPeriodTypeOptions = Arrays.asList(monthly);
 		
 		return new DepositAccountData(account, interestCompoundedEveryPeriodTypeOptions, productOptions);
+	}
+	
+	@POST
+	@Path("{accountId}")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public Response SubmitDepositApplication(@PathParam("accountId") final Long accountId,
+			@QueryParam("command") final String commandParam, final String jsonRequestBody) {
+		
+		DepositStateTransitionCommand command=apiDataConversionService.convertJsonToDepositStateTransitionCommand(accountId, jsonRequestBody);
+		
+		Response response=null;
+		
+		if (is(commandParam, "approve")) {
+
+			EntityIdentifier identifier = this.depositAccountWritePlatformService.approveDepositApplication(command);
+			response = Response.ok().entity(identifier).build();
+		} 
+		
+		else if (is(commandParam, "reject")) {
+			
+			EntityIdentifier identifier = this.depositAccountWritePlatformService.rejectDepositApplication(command);
+			response = Response.ok().entity(identifier).build();
+		
+		}  else if (is(commandParam, "withdrewbyclient")) {
+
+			EntityIdentifier identifier = this.depositAccountWritePlatformService.withdrawDepositApplication(command);
+			response = Response.ok().entity(identifier).build();
+			
+		}
+		
+		UndoStateTransitionCommand undoCommand = new UndoStateTransitionCommand(accountId);
+		
+		if (is(commandParam, "undoapproval")) {
+			EntityIdentifier identifier = this.depositAccountWritePlatformService.undoDepositApproval(undoCommand);
+			response = Response.ok().entity(identifier).build();
+		}
+		
+		if (response == null) {
+			throw new UnrecognizedQueryParamException("command", commandParam);
+		}
+		
+		return response;
+	}
+	
+	private boolean is(final String commandParam, final String commandValue) {
+		return StringUtils.isNotBlank(commandParam)
+				&& commandParam.trim().equalsIgnoreCase(commandValue);
 	}
 }
