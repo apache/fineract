@@ -71,7 +71,11 @@ public class ApiGlobalErrorResponse {
 		globalErrorResponse.setDeveloperMessage("The user associated with credentials passed on this request does not have sufficient privileges to perform this action.");
 		globalErrorResponse.setDeveloperDocLink("https://github.com/keithwoodlock/mifosx/wiki/HTTP-API-Error-codes");
 		globalErrorResponse.setUserMessageGlobalisationCode("error.msg.not.authorized");
-		globalErrorResponse.setDefaultUserMessage("Insufficient priviledges to perform this action.");
+		globalErrorResponse.setDefaultUserMessage("Insufficient privileges to perform this action.");
+		
+		List<ApiParameterError> errors = new ArrayList<ApiParameterError>();
+		errors.add(ApiParameterError.generalError("error.msg.not.authorized", "Insufficient privileges to perform this action."));
+		globalErrorResponse.setErrors(errors);
 		
 		return globalErrorResponse;
 	}
