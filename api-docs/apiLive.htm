@@ -8,12 +8,19 @@
         
 <script>
     
-baseURL = "https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/mifosng-provider/api/v1/";
-//baseURL = "https://localhost:8443/mifosng-provider/api/v1/";
+var getLocation = function(href) {
+    var l = document.createElement("a");
+    l.href = href;
+    return l;
+};
+
+baseURL = "";
 defQueryParams = "tenantIdentifier=default&pretty=true";
 
 function clickAPILink(apiLink)
 {
+    if (baseURL == "") baseURL = getBaseURL(window.location.href);
+    
     var currentLink = baseURL + apiLink;
     if (apiLink.indexOf("?") < 0) currentLink += "?" + defQueryParams;
     else currentLink += "&" + defQueryParams;
@@ -21,6 +28,25 @@ function clickAPILink(apiLink)
     //alert(currentLink);
     location.href = currentLink;
 }
+
+
+function getBaseURL(docURL)
+{
+    var hostName = ""
+    if (docURL.substring(0,4).toLowerCase() == "http")
+    {
+	var l = getLocation(docURL);
+	hostName = l.hostname;
+    }
+    else
+    {
+        //assume running locally
+        hostName = "localhost";
+    }
+    
+    return "https://" + hostName + ":8443/mifosng-provider/api/v1/"; 
+}
+
 </script>
         
         
