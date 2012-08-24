@@ -1,3 +1,18 @@
+.apiClick {
+	text-decoration: underline;
+	cursor: hand; 
+	cursor: pointer;
+	color: blue;
+}
+
+#jpw {
+	text-decoration: underline;
+	cursor: hand; 
+	cursor: pointer;
+	color: blue;
+}
+
+
 .tocMatrix {
 	font-size: 85%;
 }

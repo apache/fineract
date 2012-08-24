@@ -6,7 +6,7 @@
         <script type="text/javascript" src="jquery-1.7.min.js"></script>
         <title>Mifos X API Documentation</title>
         
-<script>
+<script> 
 
 QueryParameters = (function()
 {
@@ -34,9 +34,7 @@ baseURL = "";
 defQueryParams = "tenantIdentifier=default&pretty=true";
 
 function clickAPILink(apiLink)
-{
-    if (baseURL == "") baseURL = getBaseURL(window.location.href);
-    
+{    
     var currentLink = baseURL + apiLink;
     if (apiLink.indexOf("?") < 0) currentLink += "?" + defQueryParams;
     else currentLink += "&" + defQueryParams;
@@ -260,8 +258,7 @@ function getBaseURL(docURL)
                 <h4>Restrict Returned Fields</h4>
                 <p>Parameter "fields={fieldlist}" can be used on GET requests to restrict the fields returned.</p>
                 <p>Example Request: </p>
-                <a  href="unknown.html" onclick="clickAPILink('offices/1?fields=id,name,parentName');return false">offices/1?fields=id,name,parentName
-                </a>
+                <div class=apiClick>offices/1?fields=id,name,parentName</div>
                 <p></p>
                 <h4>Pretty JSON Formatting</h4>
                 <p>Parameter "pretty=true" can be used to display JSON from GET requests in an easy-to-read format.
@@ -486,9 +483,9 @@ var jqxhr = $.ajax({
             <div class="method-description">
                 <h4>List Clients</h4>
                 <p>Example Requests: </p>
-                <a  href="unknown.html" onclick="clickAPILink('clients');return false;">clients</a>
+                <div class=apiClick>clients</div>
                 <br><br>
-                <a  href="unknown.html" onclick="clickAPILink('clients?fields=displayName,officeName,joinedDate');return false;">clients?fields=displayName,officeName,joinedDate</a>
+                <div class=apiClick>clients?fields=displayName,officeName,joinedDate</div>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://Domain Name/api/v1/clients</code>
@@ -527,7 +524,7 @@ var jqxhr = $.ajax({
                     </ul>
                 </p>
                 <p>Example Request: </p>
-                <a  href="unknown.html" onclick="clickAPILink('clients/template');return false;">clients/template</a>
+                <div class=apiClick>clients/template</div>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://Domain Name/api/v1/clients/template</code>
@@ -560,11 +557,11 @@ var jqxhr = $.ajax({
             <div class="method-description">
                 <h4>Retrieve a Client</h4>
                 <p>Example Requests: </p>
-                <a  href="unknown.html" onclick="clickAPILink('clients/1');return false;">clients/1</a>
+                <div class=apiClick>clients/1</div>
                 <br><br>
-                <a  href="unknown.html" onclick="clickAPILink('clients/1?template=true');return false;">clients/1?template=true</a>
+                <div class=apiClick>clients/1?template=true</div>
                 <br><br>
-                <a  href="unknown.html" onclick="clickAPILink('clients/1?fields=id,displayName,officeName');return false;">clients/1?fields=id,displayName,officeName</a>
+                <div class=apiClick>clients/1?fields=id,displayName,officeName</div>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://Domain Name/api/v1/clients/{clientId}</code>
@@ -666,9 +663,9 @@ Request Body:
             However, it is quite reasonable to add resources like this to simplify User Interface development.
         </p>
         <p>Example Requests: </p>
-        <a  href="unknown.html" onclick="clickAPILink('clients/1/loans');return false;">clients/1/loans</a>
+        <div class=apiClick>clients/1/loans</div>
         <br><br>
-        <a  href="unknown.html" onclick="clickAPILink('clients/1/loans?fields=openLoans,%20closedLoans,activeLoanCount');return false;">clients/1/loans?fields=openLoans,%20closedLoans,activeLoanCount</a>
+        <div class=apiClick>clients/1/loans?fields=openLoans,%20closedLoans,activeLoanCount</div>
     </div>
     <div class="method-example">
         <code class="method-declaration">GET https://Domain Name/api/v1/clients/{clientId}/loans</code>
@@ -720,9 +717,9 @@ Request Body:
             <b>Note:</b> Notes are returned in descending createOn order.
         </p>
         <p>Example Requests: </p>
-        <a  href="unknown.html" onclick="clickAPILink('clients/2/notes');return false;">clients/2/notes</a>
+        <div class=apiClick>clients/2/notes</div>
         <br><br>
-        <a  href="unknown.html" onclick="clickAPILink('clients/2/notes?fields=note,createdOn,createdByUsername');return false;">clients/2/notes?fields=note,createdOn,createdByUsername</a>
+        <div class=apiClick>clients/2/notes?fields=note,createdOn,createdByUsername</div>
     </div>
     <div class="method-example">
         <code class="method-declaration">GET https://Domain Name/api/v1/clients/{clientId}/notes</code>
@@ -791,9 +788,9 @@ Request Body:
     <div class="method-description">
         <h4>Retrieve a Client Note</h4>
         <p>Example Requests: </p>
-        <a  href="unknown.html" onclick="clickAPILink('clients/2/notes/20');return false;">clients/2/notes/20</a>
+        <div class=apiClick>clients/2/notes/20</div>
         <br><br>
-        <a  href="unknown.html" onclick="clickAPILink('clients/2/notes/20?fields=note,createdOn,createdByUsername');return false;">clients/2/notes/20?fields=note,createdOn,createdByUsername</a>
+        <div class=apiClick>clients/2/notes/20?fields=note,createdOn,createdByUsername</div>
     </div>
     <div class="method-example">
         <code class="method-declaration">GET https://Domain Name/api/v1/clients/{clientId}/notes/{noteId}</code>
@@ -915,9 +912,9 @@ Request Body:
             <dd>If entered, productId, productName and selectedProduct fields are returned. </dd>
         </dl>
         <p>Example Requests: </p>
-        <a  href="unknown.html" onclick="clickAPILink('loans/template?clientId=1&productId=1');return false;">loans/template?clientId=1&productId=1</a>
+        <div class=apiClick>loans/template?clientId=1&productId=1</div>
         <br><br>
-        <a  href="unknown.html" onclick="clickAPILink('loans/template?clientId=1');return false;">loans/template?clientId=1</a>
+        <div class=apiClick>loans/template?clientId=1</div>
     </div>
     <div class="method-example">
         <code class="method-declaration">GET https://Domain Name/api/v1/loans/template</code>
@@ -1125,13 +1122,13 @@ Request Body:
             <dd><b>'convenienceData':</b> Some derived data that is specific to the needs of the current Individual Lending client application.</dd>
         </dl>
         <p>Example Requests: </p>
-        <a  href="unknown.html" onclick="clickAPILink('loans/1');return false;">loans/1</a>
+        <div class=apiClick>loans/1</div>
         <br><br>
-        <a  href="unknown.html" onclick="clickAPILink('loans/1?fields=id,principal,annualInterestRate');return false;">loans/1?fields=id,principal,annualInterestRate</a>
+        <div class=apiClick>loans/1?fields=id,principal,annualInterestRate</div>
         <br><br>
-        <a  href="unknown.html" onclick="clickAPILink('loans/1?associations=all');return false;">loans/1?associations=all</a>
+        <div class=apiClick>loans/1?associations=all</div>
         <br><br>
-        <a  href="unknown.html" onclick="clickAPILink('loans/1?fields=id,principal,annualInterestRate&associations=summary,repaymentSchedule');return false;">loans/1?fields=id,principal,annualInterestRate&associations=summary,repaymentSchedule</a>
+        <div class=apiClick>loans/1?fields=id,principal,annualInterestRate&associations=summary,repaymentSchedule</div>
     </div>
     <div class="method-example">
         <code class="method-declaration">GET https://Domain Name/api/v1/loans/{loanId}</code>
@@ -1338,7 +1335,7 @@ No Request Body:
                     The amount that can be waived is limited to the loan's inArrearsTolerance</dd>
                 </dl>
                 <p>Example Request: </p>
-                <a  href="unknown.html" onclick="clickAPILink('loans/10/transactions/template?command=repayment');return false;">loans/10/transactions/template?command=repayment</a>
+                <div class=apiClick>loans/10/transactions/template?command=repayment</div>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://Domain Name/api/v1/loans/{loanId}/transactions/template"</code>
@@ -1400,7 +1397,7 @@ Request Body:
             <div class="method-description">
                 <h4>Retrieve a Repayment or Waiver Details</h4>
                 <p>Example Request: </p>
-                <a  href="unknown.html" onclick="clickAPILink('loans/10/transactions/20');return false;">loans/10/transactions/20</a>
+                <div class=apiClick>loans/10/transactions/20</div>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://Domain Name/api/v1/loans/{loanId}/transactions/{transactionId}</code>
@@ -1488,9 +1485,9 @@ Request Body:
             <div class="method-description">
                 <h4>List Offices</h4>
                 <p>Example Requests: </p>
-                <a href="unknown.html" onclick="clickAPILink('offices');return false;">offices</a>
+                <div class=apiClick>offices</div>
                 <br><br>
-                <a  href="unknown.html" onclick="clickAPILink('offices?fields=id,name,openingDate');return false;">offices?fields=id,name,openingDate</a>
+                <div class=apiClick>offices?fields=id,name,openingDate</div>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://Domain Name/api/v1/offices</code>
@@ -1534,9 +1531,7 @@ Request Body:
                     </ul>
                 </p>
                 <p>Example Request: </p>
-                <a  href="unknown.html" onclick="clickAPILink('offices/template');return false;">
-                offices/template
-                </a>
+                <div class=apiClick>offices/template</div>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://Domain Name/api/v1/offices/template</code>
@@ -1562,17 +1557,11 @@ Request Body:
             <div class="method-description">
                 <h4>Retrieve an Office</h4>
                 <p>Example Requests: </p>
-                <a  href="unknown.html" onclick="clickAPILink('offices/1');return false;">
-                offices/1
-                </a>
+                <div class=apiClick>offices/1</div>
                 <br><br>
-                <a  href="unknown.html" onclick="clickAPILink('offices/1?template=true');return false;">
-                offices/1?template=true
-                </a>
+                <div class=apiClick>offices/1?template=true</div>
                 <br><br>
-                <a  href="unknown.html" onclick="clickAPILink('offices/1?fields=id,name,parentName');return false;">
-                offices/1?fields=id,name,parentName
-                </a>
+                <div class=apiClick>offices/1?fields=id,name,parentName</div>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://Domain Name/api/v1/offices/1</code>
@@ -1702,9 +1691,9 @@ Request Body:
             <div class="method-description">
                 <h4>List Loan Products</h4>
                 <p>Example Requests:</p> 
-                <a  href="unknown.html" onclick="clickAPILink('loanproducts');return false;">loanproducts</a>
+                <div class=apiClick>loanproducts</div>
                 <br><br>
-                <a  href="unknown.html" onclick="clickAPILink('loanproducts?fields=name,description,interestRateFrequencyType,amortizationType');return false;">loanproducts?fields=name,description,interestRateFrequencyType,amortizationType</a>
+                <div class=apiClick>loanproducts?fields=name,description,interestRateFrequencyType,amortizationType</div>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://Domain Name/api/v1/loanproducts</code>
@@ -1838,7 +1827,7 @@ Request Body:
                     </ul>
                 </p>
                 <p>Example Request: </p>
-                <a  href="unknown.html" onclick="clickAPILink('loanproducts/template');return false;">loanproducts/template</a>
+                <div class=apiClick>loanproducts/template</div>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://Domain Name/api/v1/loanproducts/template</code>
@@ -1994,11 +1983,11 @@ Request Body:
             <div class="method-description">
                 <h4>Retrieve a Loan Product</h4>
                 <p>Example Requests: </p>
-                <a  href="unknown.html" onclick="clickAPILink('loanproducts/1');return false;">loanproducts/1</a>
+                <div class=apiClick>loanproducts/1</div>
                 <br><br>
-                <a  href="unknown.html" onclick="clickAPILink('loanproducts/1?template=true');return false;">loanproducts/1?template=true</a>
+                <div class=apiClick>loanproducts/1?template=true</div>
                  <br><br>
-                <a  href="unknown.html" onclick="clickAPILink('loanproducts/1?fields=name,description,numberOfRepayments');return false;">loanproducts/1?fields=name,description,numberOfRepayments</a>
+                <div class=apiClick>loanproducts/1?fields=name,description,numberOfRepayments</div>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://Domain Name/api/v1/loanproducts/{productId}</code>
@@ -2144,9 +2133,9 @@ Request Body:
 	        <h4>Retrieve Currency Configuration</h4>
 	        <p>Returns the list of currencies permitted for use AND the list of currencies not selected (but available for selection).</p>
 	        <p>Example Requests: </p>
-	        <a  href="unknown.html" onclick="clickAPILink('configurations/currency');return false;">configurations/currency</a>
+	        <div class=apiClick>configurations/currency</div>
                 <br><br>
-	        <a  href="unknown.html" onclick="clickAPILink('configurations/currency?fields=selectedCurrencyOptions');return false;">configurations/currency?fields=selectedCurrencyOptions</a>
+	        <div class=apiClick>configurations/currency?fields=selectedCurrencyOptions</div>
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">GET https://Domain Name/api/v1/configurations/currency</code>
@@ -2256,9 +2245,9 @@ Request Body:{
                     <dd>The Additional Fields Type (Mifos X database table) to restrict the output to</dd>
                 </dl>
                 <p>Example Requests: </p>
-                <a  href="unknown.html" onclick="clickAPILink('additionalfields?type=m_client');return false;">additionalfields?type=m_client</a>
+                <div class=apiClick>additionalfields?type=m_client</div>
                 <br><br>
-                <a  href="unknown.html" onclick="clickAPILink('additionalfields');return false;">additionalfields</a>
+                <div class=apiClick>additionalfields</div>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://Domain Name/api/v1/additionalfields</code>
@@ -2288,7 +2277,7 @@ Request Body:{
                 Returns the Set of Additional Fields data for the ID provided.  The ID is the id field of the Type table e.g. portfolio_client might have an id value of 4.  The output is a JSON formatted "Generic Resultset".  The Generic Resultset contains Column Heading as well as Data information.  The Column Heading information may include allowed values (columnValues array).
                 </p>
                 <p>Example Request: 
-                <a  href="unknown.html" onclick="clickAPILink('additionalfields/m_client/Additional Information/2');return false;">additionalfields/m_client/Additional Information/2</a>
+                <div class=apiClick>additionalfields/m_client/Additional Information/2</div>
                 </p>
             </div>
             <div class="method-example">
@@ -2425,9 +2414,9 @@ Request Body:
                     <dd>Output will be delivered as a CSV file instead of JSON.</dd>
                 </dl>
                 <p>Example Requests: </p>
-                <a  href="unknown.html" onclick="clickAPILink('reports');return false;">reports</a>
+                <div class=apiClick>reports</div>
                 <br><br>
-                <a  href="unknown.html" onclick="clickAPILink('reports?exportCSV=true');return false;">reports?exportCSV=true</a>
+                <div class=apiClick>reports?exportCSV=true</div>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://Domain Name/api/v1/reports</code>
@@ -2548,21 +2537,21 @@ Request Body:
                     <dd>Only applies to Pentaho reports.</dd>
                 </dl>
                 <p>Example Requests: </p>
-                <a  href="unknown.html" onclick="clickAPILink('reports/Client%20Listing?R_officeId=1');return false;">reports/Client%20Listing?R_officeId=1</a>
+                <div class=apiClick>reports/Client%20Listing?R_officeId=1</div>
                 <br><br>
-                <a  href="unknown.html" onclick="clickAPILink('reports/Client%20Listing?R_officeId=1&exportCSV=true');return false;">reports/Client%20Listing?R_officeId=1&exportCSV=true</a>
+                <div class=apiClick>reports/Client%20Listing?R_officeId=1&exportCSV=true</div>
                 <br><br>
-                <a  href="unknown.html" onclick="clickAPILink('reports/selectOfficeId?R_officeId=1&parameterType=true');return false;">reports/selectOfficeId?R_officeId=1& parameterType=true</a>
+                <div class=apiClick>reports/selectOfficeId?R_officeId=1&parameterType=true</div>
                 <br><br>
-                <a  href="unknown.html" onclick="clickAPILink('reports/selectOfficeId?R_officeId=1&parameterType=true&exportCSV=true');return false;">reports/selectOfficeId?R_officeId=1& parameterType=true&exportCSV=true</a>
+                <div class=apiClick>reports/selectOfficeId?R_officeId=1&parameterType=true&exportCSV=true</div>
                 <br><br>
-                <a  href="unknown.html" onclick="clickAPILink('reports/Client Listing (Pentaho)?output-type=HTML&R_officeId=1');return false;">reports/Client Listing (Pentaho)?output-type=HTML&R_officeId=1</a>
+                <div class=apiClick>reports/Client Listing (Pentaho)?output-type=HTML&R_officeId=1</div>
                 <br><br>
-                <a  href="unknown.html" onclick="clickAPILink('reports/Client Listing (Pentaho)?output-type=XLS&R_officeId=1');return false;">reports/Client Listing (Pentaho)?output-type=XLS&R_officeId=1</a>
+                <div class=apiClick>reports/Client Listing (Pentaho)?output-type=XLS&R_officeId=1</div>
                 <br><br>
-                <a  href="unknown.html" onclick="clickAPILink('reports/Client Listing (Pentaho)?output-type=CSV&R_officeId=1');return false;">reports/Client Listing (Pentaho)?output-type=CSV&R_officeId=1</a>
+                <div class=apiClick>reports/Client Listing (Pentaho)?output-type=CSV&R_officeId=1</div>
                 <br><br>
-                <a  href="unknown.html" onclick="clickAPILink('reports/Client Listing (Pentaho)?output-type=PDF&R_officeId=1');return false;">reports/Client Listing (Pentaho)?output-type=PDF&R_officeId=1</a>
+                <div class=apiClick>reports/Client Listing (Pentaho)?output-type=PDF&R_officeId=1</div>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://Domain Name/api/v1/reports/{reportName}</code>
@@ -2698,9 +2687,9 @@ No Request Body
 	    <div class="method-description">
 	        <h4>Retrieve list of users</h4>
 	        <p>Example Requests: </p>
-	        <a  href="unknown.html" onclick="clickAPILink('users');return false;">users</a>
+	        <div class=apiClick>users</div>
                 <br><br>
-	        <a  href="unknown.html" onclick="clickAPILink('users?fields=id,username,email,officeName');return false;">users?fields=id,username,email,officeName</a>
+	        <div class=apiClick>users?fields=id,username,email,officeName</div>
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">GET https://Domain Name/api/v1/users</code>
@@ -2736,7 +2725,7 @@ No Request Body
                     </ul>
                 </p>
 	        <p>Example Request: </p>
-	        <a  href="unknown.html" onclick="clickAPILink('users/template');return false;">users/template</a>
+	        <div class=apiClick>users/template</div>
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">GET https://Domain Name/api/v1/users/template</code>
@@ -2798,11 +2787,11 @@ No Request Body
 	    <div class="method-description">
 	        <h4>Retrieve a User</h4>
 	        <p>Example Requests: </p>
-	        <a  href="unknown.html" onclick="clickAPILink('users/1');return false;">users/1</a>
+	        <div class=apiClick>users/1</div>
 	        <br><br>
-	        <a  href="unknown.html" onclick="clickAPILink('users/1?template=true');return false;">users/1?template=true</a>
+	        <div class=apiClick>users/1?template=true</div>
 	        <br><br>
-	        <a  href="unknown.html" onclick="clickAPILink('users/1?fields=username,officeName');return false;">users/1?fields=username,officeName</a>
+	        <div class=apiClick>users/1?fields=username,officeName</div>
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">GET https://Domain Name/api/v1/users/1</code>
@@ -2944,9 +2933,9 @@ No Request Body
 	    <div class="method-description">
 	        <h4>List Roles</h4>
 	        <p>Example Requests: </p>
-	        <a  href="unknown.html" onclick="clickAPILink('roles');return false;">roles</a>
+	        <div class=apiClick>roles</div>
 	        <br><br>
-                <a  href="unknown.html" onclick="clickAPILink('roles?fields=name');return false;">roles?fields=name</a>
+                <div class=apiClick>roles?fields=name</div>
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">GET https://Domain Name/api/v1/roles</code>
@@ -2986,7 +2975,7 @@ No Request Body
                     </ul>
                 </p>
 	        <p>Example Request: </p>
-	        <a  href="unknown.html" onclick="clickAPILink('roles/template');return false;">roles/template</a>
+	        <div class=apiClick>roles/template</div>
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">GET https://Domain Name/api/v1/roles/template</code>
@@ -3022,11 +3011,11 @@ No Request Body
 	    <div class="method-description">
 	        <h4>Retrieve a Role</h4>
 	        <p>Example Requests: </p>
-	        <a  href="unknown.html" onclick="clickAPILink('roles/1');return false;">roles/1</a>
+	        <div class=apiClick>roles/1</div>
                 <br><br>
-	        <a  href="unknown.html" onclick="clickAPILink('roles/1?template=true');return false;">roles/1?template=true</a>
+	        <div class=apiClick>roles/1?template=true</div>
                 <br><br>
-	        <a  href="unknown.html" onclick="clickAPILink('roles/1?fields=name,selectedPermissions');return false;">roles/1?fields=name,selectedPermissions</a>
+	        <div class=apiClick>roles/1?fields=name,selectedPermissions</div>
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">GET https://Domain Name/api/v1/roles/{roleId}</code>
@@ -3124,9 +3113,9 @@ Request body:
 	    <div class="method-description">
 	        <h4>List Application Permissions</h4>
 	        <p>Example Requests: </p>
-	        <a  href="unknown.html" onclick="clickAPILink('permissions');return false;">permissions</a>
+	        <div class=apiClick>permissions</div>
                 <br><br>
-                <a  href="unknown.html" onclick="clickAPILink('permissions?fields=id,code');return false;">permissions?fields=id,code</a>
+                <div class=apiClick>permissions?fields=id,code</div>
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">GET https://Domain Name/api/v1/permissions</code>
@@ -3202,6 +3191,16 @@ Request body:
         </table>
     </div>
 </div>
+<script>
+$(document).ready(function() {
 
+    $('.apiClick').bind('click', function() {    
+        clickAPILink($(this).html());
+    });
+
+    baseURL = getBaseURL(window.location.href);
+	
+});
+</script>
 </body>
 </html>
