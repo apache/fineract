@@ -97,15 +97,14 @@ public class GoogleGsonApiJsonSerializerService implements
 					"preClosureAllowed", "preClosureInterestRate"));
 
 	private static final Set<String> SAVINGS_DEPOSIT_ACCOUNT_DATA_PARAMETERS = new HashSet<String>(
-			Arrays.asList("productOptions",
-					"interestCompoundedEveryPeriodTypeOptions", "createdOn",
-					"lastModifedOn", "id", "externalId", "clientId",
-					"clientName", "productId", "productName", "currency",
-					"deposit", "maturityInterestRate", "tenureInMonths",
-					"interestCompoundedEvery",
-					"interestCompoundedEveryPeriodType", "renewalAllowed",
-					"preClosureAllowed", "preClosureInterestRate"));
-
+			Arrays.asList("productOptions", "interestCompoundedEveryPeriodTypeOptions",
+					"id", "externalId", "clientId", "clientName", "productId", "productName", "status",
+					"currency", "deposit", "maturityInterestRate", "tenureInMonths", 
+					"interestCompoundedEvery", "interestCompoundedEveryPeriodType",
+					"renewalAllowed","preClosureAllowed","preClosureInterestRate"
+					)
+			);
+	
 	private static final Set<String> CLIENT_DATA_PARAMETERS = new HashSet<String>(
 			Arrays.asList("id", "officeId", "officeName", "externalId",
 					"firstname", "lastname", "joinedDate", "displayName",

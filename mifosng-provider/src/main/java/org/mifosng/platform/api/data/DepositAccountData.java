@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 
 /**
@@ -15,7 +14,7 @@ public class DepositAccountData {
 
 	private final Long id;
 	private final String externalId;
-	
+	private final EnumOptionData status;	
 	private final Long clientId;
 	private final String clientName;
 	private final Long productId;
@@ -41,9 +40,6 @@ public class DepositAccountData {
 	private final boolean preClosureAllowed;
 	private final BigDecimal preClosureInterestRate;
 	
-	private final DateTime createdOn;
-	private final DateTime lastModifedOn;
-	
 	private final List<EnumOptionData> interestCompoundedEveryPeriodTypeOptions;
 	
 	private final List<DepositProductLookup> productOptions;
@@ -58,10 +54,9 @@ public class DepositAccountData {
 	private DepositAccountData(
 			final Long clientId, 
 			final String clientName) {
-		this.createdOn=null;
-		this.lastModifedOn=null;
 		this.id=null;
 		this.externalId = null;
+		this.status = null;
 		this.clientId = clientId;
 		this.clientName = clientName;
 		this.productId = null;
@@ -92,10 +87,9 @@ public class DepositAccountData {
 			final DepositAccountData account, 
 			final List<EnumOptionData> interestCompoundedEveryPeriodTypeOptions,
 			final Collection<DepositProductLookup> productOptions) {
-		this.createdOn = account.getCreatedOn();
-		this.lastModifedOn = account.getLastModifedOn();
 		this.id = account.getId();
 		this.externalId = account.getExternalId();
+		this.status = account.getStatus();
 		this.clientId = account.getClientId();
 		this.clientName = account.getClientName();
 		this.productId = account.getProductId();
@@ -123,10 +117,9 @@ public class DepositAccountData {
 	}
 	
 	public DepositAccountData(
-			final DateTime createdOn, 
-			final DateTime lastModifedOn, 
 			final Long id,
 			final String externalId,
+			final EnumOptionData status,
 			final Long clientId, 
 			final String clientName, 
 			final Long productId, 
@@ -147,10 +140,9 @@ public class DepositAccountData {
 			final boolean renewalAllowed, 
 			final boolean preClosureAllowed, 
 			final BigDecimal preClosureInterestRate) {
-		this.createdOn=createdOn;
-		this.lastModifedOn=lastModifedOn;
 		this.id=id;
 		this.externalId = externalId;
+		this.status = status;
 		this.clientId = clientId;
 		this.clientName = clientName;
 		this.productId = productId;
@@ -190,10 +182,9 @@ public class DepositAccountData {
 			final boolean renewalAllowed, 
 			final boolean preClosureAllowed, 
 			final BigDecimal preClosureInterestRate) {
-		this.createdOn=null;
-		this.lastModifedOn=null;
 		this.id=null;
 		this.externalId = null;
+		this.status = null;
 		this.clientId = clientId;
 		this.clientName = clientName;
 		this.productId = productId;
@@ -226,6 +217,10 @@ public class DepositAccountData {
 	
 	public String getExternalId() {
 		return externalId;
+	}
+	
+	public EnumOptionData getStatus() {
+		return status;
 	}
 
 	public Long getClientId() {
@@ -310,14 +305,6 @@ public class DepositAccountData {
 
 	public BigDecimal getPreClosureInterestRate() {
 		return preClosureInterestRate;
-	}
-
-	public DateTime getCreatedOn() {
-		return createdOn;
-	}
-
-	public DateTime getLastModifedOn() {
-		return lastModifedOn;
 	}
 
 	public List<EnumOptionData> getInterestCompoundedEveryPeriodTypeOptions() {

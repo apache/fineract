@@ -60,6 +60,15 @@ public class DepositAccountsApiResource {
 	
 	@Autowired
 	private ApiJsonSerializerService apiJsonSerializerService;
+
+	private static final Set<String> typicalResponseParameters = new HashSet<String>(
+			Arrays.asList("id", "externalId", "clientId", "clientName",
+					"productId", "productName", "status", "currency",
+					"deposit", "maturityInterestRate", "tenureInMonths",
+					"interestCompoundedEvery",
+					"interestCompoundedEveryPeriodType", "renewalAllowed",
+					"preClosureAllowed", "preClosureInterestRate"));
+	
 	
 	@POST
 	@Consumes({MediaType.APPLICATION_JSON})
@@ -91,14 +100,6 @@ public class DepositAccountsApiResource {
 	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveAllDepositAccounts(@Context final UriInfo uriInfo) {
 
-		Set<String> typicalResponseParameters = new HashSet<String>(
-				Arrays.asList("createdOn", "lastModifedOn", 
-						"id", "externalId", "clientId", "clientName", "productId", "productName", 
-						"currency", "deposit", "maturityInterestRate", "tenureInMonths", "interestCompoundedEvery", "interestCompoundedEveryPeriodType",
-						"renewalAllowed","preClosureAllowed","preClosureInterestRate"
-						)
-		);
-		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (responseParameters.isEmpty()) {
 			responseParameters.addAll(typicalResponseParameters);
@@ -115,14 +116,6 @@ public class DepositAccountsApiResource {
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveDepositAccount(@PathParam("accountId") final Long accountId, @Context final UriInfo uriInfo) {
-		
-		Set<String> typicalResponseParameters = new HashSet<String>(
-				Arrays.asList("createdOn", "lastModifedOn", 
-						"id", "externalId", "clientId", "clientName", "productId", "productName", 
-						"currency", "deposit", "maturityInterestRate", "tenureInMonths", "interestCompoundedEvery", "interestCompoundedEveryPeriodType",
-						"renewalAllowed","preClosureAllowed","preClosureInterestRate"
-						)
-		);
 		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (responseParameters.isEmpty()) {
@@ -148,15 +141,6 @@ public class DepositAccountsApiResource {
 			@QueryParam("clientId") final Long clientId,
 			@QueryParam("productId") final Long productId,
 			@Context final UriInfo uriInfo) {
-		
-		Set<String> typicalResponseParameters = new HashSet<String>(
-				Arrays.asList(
-						"createdOn", "lastModifedOn", 
-						"id", "externalId", "clientId", "clientName", "productId", "productName", 
-						"currency", "deposit", "maturityInterestRate", "tenureInMonths", "interestCompoundedEvery", "interestCompoundedEveryPeriodType",
-						"renewalAllowed","preClosureAllowed","preClosureInterestRate"
-						)
-		);
 		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (responseParameters.isEmpty()) {

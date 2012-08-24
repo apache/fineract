@@ -8,9 +8,9 @@ public enum DepositStatus {
 	ACTIVE(300, "depositStatusType.active"), //
 	WITHDRAWN_BY_CLIENT(400, "depositStatusType.withdrawn.by.client"), //
 	REJECTED(500, "depositStatusType.rejected"), //
-	MATURED(700,"depositStatusType.matured"),
-	CLOSED(600, "depositStatusType.closed"); 
-
+	CLOSED(600, "depositStatusType.closed"), //
+	MATURED(700,"depositStatusType.matured");
+	
     private final Integer value;
 	private final String code;
 	

@@ -5,7 +5,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
-import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.CurrencyData;
@@ -88,7 +87,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 			CurrencyData currency = new CurrencyData(selectedProduct.getCurrencyCode(), "", selectedProduct.getDigitsAfterDecimal(), "", "");
 			
 			accountData = new DepositAccountData(
-					clientAccount.getId(), clientAccount.getDisplayName(), selectedProduct.getId(), selectedProduct.getName(), 
+					clientAccount.getId(), clientAccount.getDisplayName(), selectedProduct.getId(), selectedProduct.getName(),
 					currency, selectedProduct.getMinimumBalance(), selectedProduct.getMaturityDefaultInterestRate(), 
 					selectedProduct.getTenureInMonths(), selectedProduct.getInterestCompoundedEvery(), selectedProduct.getInterestCompoundedEveryPeriodType(), 
 					selectedProduct.isRenewalAllowed(), selectedProduct.isPreClosureAllowed(), 
@@ -118,14 +117,13 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 		public String schema() {
 			return "da.id as id, da.external_id as externalId, da.client_id as clientId, da.product_id as productId," 
 				+  " da.currency_code as currencyCode, da.currency_digits as currencyDigits, " 
-				+  " da.deposit_amount as depositAmount, "	
+				+  " da.deposit_amount as depositAmount, da.status_enum as statusId, "	
 				+  " da.maturity_nominal_interest_rate as interestRate, da.tenure_months as termInMonths, da.projected_commencement_date as projectedCommencementDate," 
 				+  " da.actual_commencement_date as actualCommencementDate, da.projected_maturity_date as projectedMaturityDate, da.actual_maturity_date as actualMaturityDate,"
 				+  " da.projected_interest_accrued_on_maturity as projectedInterestAccrued, da.actual_interest_accrued as actualInterestAccrued, "
 				+  " da.projected_total_maturity_amount as projectedMaturityAmount, da.actual_total_amount as actualMaturityAmount, "
 				+  " da.interest_compounded_every as interestCompoundedEvery, da.interest_compounded_every_period_enum as interestCompoundedEveryPeriodType, "
 				+  " da.is_renewal_allowed as renewalAllowed, da.is_preclosure_allowed as preClosureAllowed, da.pre_closure_interest_rate as preClosureInterestRate, "
-				+  " da.created_date as createdon, da.lastmodified_date as modifiedon, "
 				+  " c.firstname as firstname, c.lastname as lastname, pd.name as productName,"
 				+  " curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, curr.display_symbol as currencyDisplaySymbol" 
 				+  " from m_deposit_account da " 
@@ -144,6 +142,9 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 			String clientName = rs.getString("firstname") + " " + rs.getString("lastname");
 			Long productId = rs.getLong("productId");
 			String productName = rs.getString("productName");
+			
+			Integer statusId = JdbcSupport.getInteger(rs, "statusId");
+			EnumOptionData status = DepositAccountEnumerations.status(statusId);
 			
 			String currencyCode = rs.getString("currencyCode");
 			String currencyName = rs.getString("currencyName");
@@ -176,10 +177,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 			
 			BigDecimal preClosureInterestRate = rs.getBigDecimal("preClosureInterestRate");
 			
-			DateTime createdOn = JdbcSupport.getDateTime(rs, "createdon");
-			DateTime lastModifedOn = JdbcSupport.getDateTime(rs, "modifiedon");
-			
-			return new DepositAccountData(createdOn, lastModifedOn, id, externalId, clientId, clientName, productId, productName, currencyData, depositAmount, 
+			return new DepositAccountData(id, externalId, status, clientId, clientName, productId, productName, currencyData, depositAmount, 
 					interestRate, termInMonths, projectedCommencementDate, actualCommencementDate, projectedMaturityDate, actualMaturityDate, 
 					projectedInterestAccrued, actualInterestAccrued, projectedMaturityAmount, actualMaturityAmount, 
 					interestCompoundedEvery, interestCompoundedEveryPeriodType,
