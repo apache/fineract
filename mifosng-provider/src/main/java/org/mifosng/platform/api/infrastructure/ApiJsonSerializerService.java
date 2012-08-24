@@ -8,7 +8,7 @@ import org.mifosng.platform.api.data.AppUserData;
 import org.mifosng.platform.api.data.AuthenticatedUserData;
 import org.mifosng.platform.api.data.ChargeData;
 import org.mifosng.platform.api.data.ClientData;
-import org.mifosng.platform.api.data.ClientLoanAccountSummaryCollectionData;
+import org.mifosng.platform.api.data.ClientAccountSummaryCollectionData;
 import org.mifosng.platform.api.data.ConfigurationData;
 import org.mifosng.platform.api.data.DepositAccountData;
 import org.mifosng.platform.api.data.DepositProductData;
@@ -76,7 +76,7 @@ public interface ApiJsonSerializerService {
 
 	String serializeClientDataToJson(boolean prettyPrint, Set<String> responseParameters, ClientData clientData);
 
-	String serializeClientLoanAccountSummaryCollectionDataToJson(boolean prettyPrint, Set<String> responseParameters, ClientLoanAccountSummaryCollectionData clientAccount);
+	String serializeClientAccountSummaryCollectionDataToJson(boolean prettyPrint, Set<String> responseParameters, ClientAccountSummaryCollectionData clientAccount);
 
 	String serializeGroupDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<GroupData> groups);
 

@@ -187,7 +187,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     }
 
 	@Override
-	public ClientLoanAccountSummaryCollectionData retrieveClientAccountDetails(final Long clientId) {
+	public ClientAccountSummaryCollectionData retrieveClientAccountDetails(final Long clientId) {
 
 		try {
 			this.context.authenticatedUser();
@@ -195,22 +195,20 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 			// Check if client exists
 			retrieveIndividualClient(clientId);
 
-			List<ClientLoanAccountSummaryData> pendingApprovalLoans = new ArrayList<ClientLoanAccountSummaryData>();
-			List<ClientLoanAccountSummaryData> awaitingDisbursalLoans = new ArrayList<ClientLoanAccountSummaryData>();
-			List<ClientLoanAccountSummaryData> openLoans = new ArrayList<ClientLoanAccountSummaryData>();
-			List<ClientLoanAccountSummaryData> closedLoans = new ArrayList<ClientLoanAccountSummaryData>();
+			List<ClientAccountSummaryData> pendingApprovalLoans = new ArrayList<ClientAccountSummaryData>();
+			List<ClientAccountSummaryData> awaitingDisbursalLoans = new ArrayList<ClientAccountSummaryData>();
+			List<ClientAccountSummaryData> openLoans = new ArrayList<ClientAccountSummaryData>();
+			List<ClientAccountSummaryData> closedLoans = new ArrayList<ClientAccountSummaryData>();
 
 			ClientLoanAccountSummaryDataMapper rm = new ClientLoanAccountSummaryDataMapper();
 
-			String sql = "select " + rm.loanAccountSummarySchema()
-					+ " where l.client_id = ?";
+			String sql = "select " + rm.loanAccountSummarySchema() + " where l.client_id = ?";
 
-			List<ClientLoanAccountSummaryData> results = this.jdbcTemplate.query(sql, rm, new Object[] {clientId});
+			List<ClientAccountSummaryData> results = this.jdbcTemplate.query(sql, rm, new Object[] {clientId});
 			if (results != null) {
-				for (ClientLoanAccountSummaryData row : results) {
+				for (ClientAccountSummaryData row : results) {
 
-					LoanStatusMapper statusMapper = new LoanStatusMapper(
-							row.getLoanStatusId());
+					LoanStatusMapper statusMapper = new LoanStatusMapper(row.getAccountStatusId());
 
 					if (statusMapper.isOpen()) {
 						openLoans.add(row);
@@ -223,34 +221,51 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 					}
 				}
 			}
+			
+			List<ClientAccountSummaryData> pendingApprovalDepositAccounts = new ArrayList<ClientAccountSummaryData>();
+			List<ClientAccountSummaryData> approvedDepositAccounts = new ArrayList<ClientAccountSummaryData>();
+//			List<ClientLoanAccountSummaryData> openDepositAccounts = new ArrayList<ClientLoanAccountSummaryData>();
+//			List<ClientLoanAccountSummaryData> closedDepositAccounts = new ArrayList<ClientLoanAccountSummaryData>();
+			
+			ClientDespoitAccountSummaryDataMapper depositAccountMapper = new ClientDespoitAccountSummaryDataMapper();
 
-			return new ClientLoanAccountSummaryCollectionData(
-					pendingApprovalLoans, awaitingDisbursalLoans, openLoans,
-					closedLoans);
+			String depositAccountsSql = "select " + depositAccountMapper.schema() + " where da.client_id = ? and da.is_deleted=0";
+			List<ClientAccountSummaryData> depositAccountResults = this.jdbcTemplate.query(depositAccountsSql, depositAccountMapper, new Object[] {clientId});
+			if (depositAccountResults != null) {
+				for (ClientAccountSummaryData row : depositAccountResults) {
 
+					if (row.getAccountStatusId() == 100) {
+						pendingApprovalDepositAccounts.add(row);
+					} else if (row.getAccountStatusId() == 200) {
+						approvedDepositAccounts.add(row);
+					} 
+				}
+			}
+
+			return new ClientAccountSummaryCollectionData(pendingApprovalLoans, awaitingDisbursalLoans, openLoans, closedLoans, 
+					pendingApprovalDepositAccounts, approvedDepositAccounts);
 		} catch (EmptyResultDataAccessException e) {
 			throw new ClientNotFoundException(clientId);
 		}
 	}
 
 	private static final class ClientLoanAccountSummaryDataMapper implements
-			RowMapper<ClientLoanAccountSummaryData> {
+			RowMapper<ClientAccountSummaryData> {
 
 		public String loanAccountSummarySchema() {
 
-			StringBuilder loanAccountSummary = new StringBuilder(
-					"l.id as id, l.external_id as externalId,");
-			loanAccountSummary
+			StringBuilder accountsSummary = new StringBuilder("l.id as id, l.external_id as externalId,");
+			accountsSummary
 					.append("l.product_id as productId, lp.name as productName,")
 					.append("l.loan_status_id as statusId ")
 					.append("from m_loan l ")
 					.append("LEFT JOIN m_product_loan AS lp ON lp.id = l.product_id ");
 
-			return loanAccountSummary.toString();
+			return accountsSummary.toString();
 		}
 
 		@Override
-		public ClientLoanAccountSummaryData mapRow(final ResultSet rs,
+		public ClientAccountSummaryData mapRow(final ResultSet rs,
 				final int rowNum) throws SQLException {
 
 			Long id = JdbcSupport.getLong(rs, "id");
@@ -259,9 +274,38 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 			String loanProductName = rs.getString("productName");
 			Integer loanStatusId = JdbcSupport.getInteger(rs, "statusId");
 
-			return new ClientLoanAccountSummaryData(id, externalId, productId, loanProductName, loanStatusId);
+			return new ClientAccountSummaryData(id, externalId, productId, loanProductName, loanStatusId);
 		}
 	}
+	
+	private static final class ClientDespoitAccountSummaryDataMapper implements RowMapper<ClientAccountSummaryData> {
+
+		public String schema() {
+		
+			StringBuilder accountsSummary = new StringBuilder("da.id as id, da.external_id as externalId,");
+			accountsSummary.append("da.product_id as productId, dp.name as productName,")
+						   .append("da.status_enum as statusId ")
+						   .append("from m_deposit_account da ")
+						   .append("LEFT JOIN m_product_deposit AS dp ON dp.id = da.product_id ");
+		
+			return accountsSummary.toString();
+		}
+		
+		@Override
+		public ClientAccountSummaryData mapRow(final ResultSet rs,
+				final int rowNum) throws SQLException {
+		
+			Long id = JdbcSupport.getLong(rs, "id");
+			String externalId = rs.getString("externalId");
+			Long productId = JdbcSupport.getLong(rs, "productId");
+			String productName = rs.getString("productName");
+			Integer accountStatusId = JdbcSupport.getInteger(rs, "statusId");
+		
+			return new ClientAccountSummaryData(id, externalId, productId, productName, accountStatusId);
+		}
+	}
+	
+	
 
 	@Override
 	public NoteData retrieveClientNote(Long clientId, Long noteId) {

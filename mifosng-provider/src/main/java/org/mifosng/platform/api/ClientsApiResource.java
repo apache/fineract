@@ -24,7 +24,7 @@ import org.apache.commons.lang.StringUtils;
 import org.mifosng.platform.api.commands.ClientCommand;
 import org.mifosng.platform.api.commands.NoteCommand;
 import org.mifosng.platform.api.data.ClientData;
-import org.mifosng.platform.api.data.ClientLoanAccountSummaryCollectionData;
+import org.mifosng.platform.api.data.ClientAccountSummaryCollectionData;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.NoteData;
 import org.mifosng.platform.api.data.OfficeLookup;
@@ -216,7 +216,8 @@ public class ClientsApiResource {
 
 		Set<String> typicalResponseParameters = new HashSet<String>(
 				Arrays.asList("pendingApprovalLoans", "awaitingDisbursalLoans", "openLoans", "closedLoans", 
-						"anyLoanCount", "pendingApprovalLoanCount", "awaitingDisbursalLoanCount", "activeLoanCount", "closedLoanCount")
+						"anyLoanCount", "pendingApprovalLoanCount", "awaitingDisbursalLoanCount", "activeLoanCount", "closedLoanCount",
+						"pendingApprovalDespositAccountsCount", "pendingApprovalDespositAccounts", "approvedDespositAccountsCount", "approvedDespositAccounts")
 		);
 		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
@@ -225,9 +226,9 @@ public class ClientsApiResource {
 		}
 		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 		
-		ClientLoanAccountSummaryCollectionData clientAccount = this.clientReadPlatformService.retrieveClientAccountDetails(clientId);
+		ClientAccountSummaryCollectionData clientAccount = this.clientReadPlatformService.retrieveClientAccountDetails(clientId);
 		
-		return this.apiJsonSerializerService.serializeClientLoanAccountSummaryCollectionDataToJson(prettyPrint, responseParameters, clientAccount);
+		return this.apiJsonSerializerService.serializeClientAccountSummaryCollectionDataToJson(prettyPrint, responseParameters, clientAccount);
 	}
 
 	@GET

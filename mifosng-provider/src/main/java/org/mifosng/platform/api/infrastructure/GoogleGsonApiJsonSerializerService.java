@@ -10,7 +10,7 @@ import org.mifosng.platform.api.data.AppUserData;
 import org.mifosng.platform.api.data.AuthenticatedUserData;
 import org.mifosng.platform.api.data.ChargeData;
 import org.mifosng.platform.api.data.ClientData;
-import org.mifosng.platform.api.data.ClientLoanAccountSummaryCollectionData;
+import org.mifosng.platform.api.data.ClientAccountSummaryCollectionData;
 import org.mifosng.platform.api.data.ConfigurationData;
 import org.mifosng.platform.api.data.DepositAccountData;
 import org.mifosng.platform.api.data.DepositProductData;
@@ -87,10 +87,11 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 	private static final Set<String> CLIENT_DATA_PARAMETERS = new HashSet<String>(
 			Arrays.asList("id", "officeId", "officeName", "externalId", "firstname", "lastname", "joinedDate", "displayName", "clientOrBusinessName", "allowedOffices")
 	);
-
+	
 	private static final Set<String> CLIENT_ACCOUNTS_DATA_PARAMETERS = new HashSet<String>(
 			Arrays.asList("pendingApprovalLoans", "awaitingDisbursalLoans", "openLoans", "closedLoans", 
-					"anyLoanCount", "pendingApprovalLoanCount", "awaitingDisbursalLoanCount", "activeLoanCount", "closedLoanCount")
+					"anyLoanCount", "pendingApprovalLoanCount", "awaitingDisbursalLoanCount", "activeLoanCount", "closedLoanCount",
+					"pendingApprovalDespositAccountsCount", "pendingApprovalDespositAccounts", "approvedDespositAccountsCount", "approvedDespositAccounts")
 	);
 
 	private static final Set<String> GROUP_DATA_PARAMETERS = new HashSet<String>(
@@ -278,8 +279,8 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 	}
 
 	@Override
-	public String serializeClientLoanAccountSummaryCollectionDataToJson(final boolean prettyPrint, final Set<String> responseParameters,
-			final ClientLoanAccountSummaryCollectionData clientAccount) {
+	public String serializeClientAccountSummaryCollectionDataToJson(final boolean prettyPrint, final Set<String> responseParameters,
+			final ClientAccountSummaryCollectionData clientAccount) {
 		final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(CLIENT_ACCOUNTS_DATA_PARAMETERS, prettyPrint, responseParameters);
 		return helper.serializedJsonFrom(gsonDeserializer, clientAccount);
 	}
