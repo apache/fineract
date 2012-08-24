@@ -58,13 +58,13 @@ public class UsersApiResource {
 	
 	@Autowired
 	private PlatformSecurityContext context;
+
+	private static final Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "officeId", "officeName", "username", "firstname", "lastname", "email", "selectedRoles"));
 	
 	@GET
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveUsers(@Context final UriInfo uriInfo) {
-		
-		Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "officeId", "officeName", "username", "firstname", "lastname", "email"));
 		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (responseParameters.isEmpty()) {
@@ -83,8 +83,6 @@ public class UsersApiResource {
 	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveUser(@PathParam("userId") final Long userId, @Context final UriInfo uriInfo) {
 		
-		Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "officeId", "officeName", "username", "firstname", "lastname", "email"));
-		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (responseParameters.isEmpty()) {
 			responseParameters.addAll(typicalResponseParameters);
@@ -96,12 +94,15 @@ public class UsersApiResource {
 		if (template) {
 			List<OfficeLookup> offices = new ArrayList<OfficeLookup>(this.officeReadPlatformService.retrieveAllOfficesForLookup());
 			user = new AppUserData(user, offices);
-			responseParameters.add("allowedOffices");
-			responseParameters.add("availableRoles");
-			responseParameters.add("selectedRoles");
+			addTemplateRelatedParameters(responseParameters);
 		}
 		
 		return this.apiJsonSerializerService.serializeAppUserDataToJson(prettyPrint, responseParameters, user);
+	}
+
+	private void addTemplateRelatedParameters(final Set<String> responseParameters) {
+		responseParameters.add("allowedOffices");
+		responseParameters.add("availableRoles");
 	}
 
 	@GET
@@ -110,13 +111,12 @@ public class UsersApiResource {
 	@Produces({MediaType.APPLICATION_JSON})
 	public String newUserDetails(@Context final UriInfo uriInfo) {
 		
-		Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "officeId", "officeName", "username", "firstname", "lastname", "email",
-				"allowedOffices", "availableRoles", "selectedRoles"));
-		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (responseParameters.isEmpty()) {
 			responseParameters.addAll(typicalResponseParameters);
 		}
+		addTemplateRelatedParameters(responseParameters);
+		
 		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 		
 		AppUserData user = this.appUserReadPlatformService.retrieveNewUserDetails();

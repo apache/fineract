@@ -63,9 +63,11 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	@Embedded
 	private final LoanProductRelatedDetail loanRepaymentScheduleDetail;
 	
+	@SuppressWarnings("unused")
 	@Column(name = "term_frequency", nullable = false)
 	private Integer termFrequency;
 
+	@SuppressWarnings("unused")
 	@Enumerated(EnumType.ORDINAL)
 	@Column(name = "term_period_frequency_enum", nullable = false)
 	private PeriodFrequencyType termPeriodFrequencyType;
@@ -81,6 +83,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	@Column(name = "rejectedon_date")
 	private Date rejectedOnDate;
 
+	@SuppressWarnings("unused")
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "withdrawnon_date")
 	private Date withdrawnOnDate;
@@ -520,7 +523,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		}
 	}
 
-	private void handleLoanOverpayment(final LoanTransaction loanTransaction, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
+	private void handleLoanOverpayment(@SuppressWarnings("unused") final LoanTransaction loanTransaction, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
 		
 		LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_OVERPAYMENT, LoanStatus.fromInt(this.loanStatus));
 		this.loanStatus = statusEnum.getValue();

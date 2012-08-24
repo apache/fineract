@@ -29,7 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
@@ -88,7 +87,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 			
 			return appUser.getId();
 		} catch (DataIntegrityViolationException dve) {
-			handleAppUserDataIntegrityIssues(command, dve);
+			handleDataIntegrityIssues(command, dve);
 			return Long.valueOf(-1);
 		} catch (PlatformEmailSendException e) {
 			List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
@@ -134,13 +133,13 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 
 				String newPasswordEncoded = this.platformPasswordEncoder.encode(dummyPlatformUser);
 				
-				userToUpdate.updatePasswordOnFirstTimeLogin(newPasswordEncoded);
+				userToUpdate.updatePassword(newPasswordEncoded);
 				this.appUserRepository.saveAndFlush(userToUpdate);
 			}
 			
 			return userToUpdate.getId();
 		} catch (DataIntegrityViolationException dve) {
-			handleAppUserDataIntegrityIssues(command, dve);
+			handleDataIntegrityIssues(command, dve);
 			return Long.valueOf(-1);
 		}
 	}
@@ -170,23 +169,23 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 		return allRoles;
 	}
 	
-	// FIXME - KW - move this to a soft delete of user marking a is_deleted field as true so doesnt appear in results
-	// more than making a user disabled, locked?
 	@Transactional
 	@Override
 	public void deleteUser(final Long userId) {
-		try {
-			this.appUserRepository.delete(userId);
-		} catch (InvalidDataAccessApiUsageException exception) {
-			// spring data jpa throws this when deleting user that doesnt exist
+		
+		AppUser user = this.appUserRepository.findOne(userId);
+		if (user == null || user.isDeleted()) {
 			throw new UserNotFoundException(userId);
 		}
+		
+		user.delete();
+		this.appUserRepository.save(user);
 	}
 	
 	/*
 	 * Guaranteed to throw an exception no matter what the data integrity issue is.
 	 */
-	private void handleAppUserDataIntegrityIssues(final UserCommand command, final DataIntegrityViolationException dve)  {
+	private void handleDataIntegrityIssues(final UserCommand command, final DataIntegrityViolationException dve)  {
 		
 		Throwable realCause = dve.getMostSpecificCause();
 		if (realCause.getMessage().contains("username_org")) {

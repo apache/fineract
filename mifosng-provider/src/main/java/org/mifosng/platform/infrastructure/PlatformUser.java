@@ -7,9 +7,5 @@ import org.springframework.security.core.userdetails.UserDetails;
  */
 public interface PlatformUser extends UserDetails {
 
-	boolean isFirstTimeLoginRemaining();
-
-	void updateUsernamePasswordOnFirstTimeLogin(String newUsername, String newPasswordEncoded);
-
-	void updatePasswordOnFirstTimeLogin(String newPasswordEncoded);
+//	void updatePasswordOnFirstTimeLogin(String newPasswordEncoded);
 }

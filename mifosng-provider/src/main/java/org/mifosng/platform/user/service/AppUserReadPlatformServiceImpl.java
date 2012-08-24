@@ -54,7 +54,7 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
 
 		AppUserMapper mapper = new AppUserMapper(offices);
 		String sql = "select " + mapper.schema()
-				+ " where u.office_id in (" + officeIdsList + ") order by u.id";
+				+ " where u.office_id in (" + officeIdsList + ") and u.is_deleted = 0 order by u.id";
 
 		return this.jdbcTemplate.query(sql, mapper, new Object[] {});
 	}
@@ -90,7 +90,7 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
 		context.authenticatedUser();
 
 		AppUser user = this.appUserRepository.findOne(userId);
-		if (user == null) {
+		if (user == null || user.isDeleted()) {
 			throw new UserNotFoundException(userId);
 		}
 

@@ -55,19 +55,4 @@ public class BasicPasswordEncodablePlatformUser implements PlatformUser {
 	public boolean isEnabled() {
 		return false;
 	}
-
-	@Override
-	public boolean isFirstTimeLoginRemaining() {
-		return false;
-	}
-
-	@Override
-	public void updateUsernamePasswordOnFirstTimeLogin(final String newUsername, final String newPasswordEncoded) {
-		// dummy method
-	}
-
-	@Override
-	public void updatePasswordOnFirstTimeLogin(final String newPasswordEncoded) {
-		// dummy method
-	}
 }

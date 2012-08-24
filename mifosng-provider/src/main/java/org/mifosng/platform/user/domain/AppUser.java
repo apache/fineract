@@ -44,7 +44,7 @@ public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements P
     private String             password;
 
     @Column(name = "nonexpired", nullable=false)
-    private final boolean      accountNonExpired;
+    private boolean      accountNonExpired;
 
     @Column(name = "nonlocked", nullable=false)
     private final boolean      accountNonLocked;
@@ -53,10 +53,14 @@ public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements P
     private final boolean      credentialsNonExpired;
 
     @Column(name = "enabled", nullable=false)
-    private final boolean      enabled;
+    private boolean      enabled;
 
-    @Column(name = "firsttime_login_remaining", nullable=false)
+    @SuppressWarnings("unused")
+	@Column(name = "firsttime_login_remaining", nullable=false)
     private boolean      firstTimeLoginRemaining;
+    
+    @Column(name = "is_deleted", nullable=false)
+    private boolean deleted;
 
     @ManyToOne
     @JoinColumn(name = "office_id")
@@ -65,7 +69,6 @@ public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements P
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "m_appuser_role", joinColumns = @JoinColumn(name = "appuser_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role>    roles;
-    
 
 	public static AppUser createNew(final Office office,
 			final Set<Role> allRoles, final String username, final String email,
@@ -111,33 +114,9 @@ public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements P
 		this.firstTimeLoginRemaining = true;
     }
 
-	@Override
-	public boolean isFirstTimeLoginRemaining() {
-		return this.firstTimeLoginRemaining;
-	}
-
-	@Override
-	public void updateUsernamePasswordOnFirstTimeLogin(final String newUsername,
-			final String newPasswordEncoded) {
-		if (this.username.equals(newUsername)) {
-			throw new UsernameMustBeDifferentException();
-		}
-		this.username = newUsername;
-		updatePasswordOnFirstTimeLogin(newPasswordEncoded);
-		this.firstTimeLoginRemaining = false;
-	}
-
-	@Override
-	public void updatePasswordOnFirstTimeLogin(final String newPasswordEncoded) {
-		if (this.password.equals(newPasswordEncoded)) {
-			throw new PasswordMustBeDifferentException();
-		}
-		this.password = newPasswordEncoded;
-		this.firstTimeLoginRemaining = false;
-	}
-
 	public void updatePassword(final String encodePassword) {
 		this.password = encodePassword;
+		this.firstTimeLoginRemaining = false;
 	}
 	
 	public void update(final Set<Role> allRoles, final Office office, final UserCommand userCommand) {
@@ -161,6 +140,23 @@ public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements P
 		if (userCommand.isEmailChanged()) {
 			this.email = userCommand.getEmail();
 		}
+	}
+	
+	/**
+	 * Delete is a <i>soft delete</i>. Updates flag so it wont appear in query/report results.
+	 * 
+	 * Any fields with unique constraints and prepended with id of record.
+	 */
+	public void delete() {
+		this.deleted = true;
+		this.enabled = false;
+		this.accountNonExpired = false;
+		this.firstTimeLoginRemaining = true;
+		this.username = this.getId() + "_DELETED_" + this.username;
+	}
+
+	public boolean isDeleted() {
+		return deleted;
 	}
 
     @Override
