@@ -2541,9 +2541,9 @@ Request Body:
                 <br><br>
                 <div class=apiClick>reports/Client%20Listing?R_officeId=1&exportCSV=true</div>
                 <br><br>
-                <div class=apiClick>reports/selectOfficeId?R_officeId=1&parameterType=true</div>
+                <div class=apiClick>reports/selectOfficeId?R_officeId=1&ampparameterType=true</div>
                 <br><br>
-                <div class=apiClick>reports/selectOfficeId?R_officeId=1&parameterType=true&exportCSV=true</div>
+                <div class=apiClick>reports/selectOfficeId?R_officeId=1&ampparameterType=true&exportCSV=true</div>
                 <br><br>
                 <div class=apiClick>reports/Client Listing (Pentaho)?output-type=HTML&R_officeId=1</div>
                 <br><br>
@@ -3194,8 +3194,8 @@ Request body:
 <script>
 $(document).ready(function() {
 
-    $('.apiClick').bind('click', function() {    
-        clickAPILink($(this).html());
+    $('.apiClick').bind('click', function() {
+        clickAPILink($(this).text());
     });
 
     baseURL = getBaseURL(window.location.href);
