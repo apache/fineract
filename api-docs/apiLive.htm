@@ -39,8 +39,12 @@ function clickAPILink(apiLink)
     if (apiLink.indexOf("?") < 0) currentLink += "?" + defQueryParams;
     else currentLink += "&" + defQueryParams;
     
-    //alert(currentLink);
-    location.href = currentLink;
+    
+    if ((/MSIE (\d+\.\d+);/.test(navigator.userAgent)) || (apiLink.indexOf("exportCSV") > -1) || (apiLink.indexOf("type=CSV") > -1) || (apiLink.indexOf("type=XLS") > -1) )
+    { // test for MSIE (not a great browser for the api docs anyhow)  or a file download
+        location.href = currentLink;
+    }
+    else window.open(currentLink);
 }
 
 
