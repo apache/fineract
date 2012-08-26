@@ -85,4 +85,9 @@ public class Role extends AbstractAuditableCustom<AppUser, Long> {
 			this.permissions = new HashSet<Permission>(selectedPermissions);
 		}
 	}
+
+	public String getName() {
+		return name;
+	}
+	
 }

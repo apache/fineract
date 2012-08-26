@@ -244,6 +244,18 @@ public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements P
 	public boolean canNotMakeRepaymentOnLoanInPast() {
 		return hasNotPermissionForAnyOf("CAN_MAKE_LOAN_REPAYMENT_IN_THE_PAST_ROLE", "PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE");
 	}
+	public boolean hasNotPermissionForReport(String reportName) {
+		
+		for (Role role : this.roles) {
+			if ((role.getName().equalsIgnoreCase("Super User")) || (role.getName().equalsIgnoreCase("Read Only"))) {
+				return false;
+			}
+		}
+		
+		if (hasPermissionTo("CAN_RUN_" + reportName)) return false;
+		
+		return true;
+	}
 	
 	public boolean hasNotPermissionForAnyOf(final String... permissionCodes) {
 		boolean hasNotPermission = true;
@@ -268,6 +280,7 @@ public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements P
 
 		return match;
 	}
+	
 
 	public boolean hasIdOf(final Long userId) {
 		return getId().equals(userId);
