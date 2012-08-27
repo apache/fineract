@@ -115,7 +115,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 	private static final class DepositAccountMapper implements RowMapper<DepositAccountData> {
 		
 		public String schema() {
-			return "da.id as id, da.external_id as externalId, da.client_id as clientId, da.product_id as productId," 
+			return "da.id as id, da.external_id as externalId, da.client_id as clientId, da.product_id as productId, " 
 				+  " da.currency_code as currencyCode, da.currency_digits as currencyDigits, " 
 				+  " da.deposit_amount as depositAmount, da.status_enum as statusId, "	
 				+  " da.maturity_nominal_interest_rate as interestRate, da.tenure_months as termInMonths, da.projected_commencement_date as projectedCommencementDate," 
@@ -124,6 +124,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 				+  " da.projected_total_maturity_amount as projectedMaturityAmount, da.actual_total_amount as actualMaturityAmount, "
 				+  " da.interest_compounded_every as interestCompoundedEvery, da.interest_compounded_every_period_enum as interestCompoundedEveryPeriodType, "
 				+  " da.is_renewal_allowed as renewalAllowed, da.is_preclosure_allowed as preClosureAllowed, da.pre_closure_interest_rate as preClosureInterestRate, "
+				+  " da.withdrawnon_date as withdrawnonDate, da.rejectedon_date as rejectedonDate, da.closedon_date as closedonDate, "
 				+  " c.firstname as firstname, c.lastname as lastname, pd.name as productName,"
 				+  " curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, curr.display_symbol as currencyDisplaySymbol" 
 				+  " from m_deposit_account da " 
@@ -177,11 +178,16 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 			
 			BigDecimal preClosureInterestRate = rs.getBigDecimal("preClosureInterestRate");
 			
+			LocalDate withdrawnonDate = JdbcSupport.getLocalDate(rs, "withdrawnonDate");
+			LocalDate rejectedonDate = JdbcSupport.getLocalDate(rs, "rejectedonDate");
+			LocalDate closedonDate = JdbcSupport.getLocalDate(rs, "closedonDate");
+			
 			return new DepositAccountData(id, externalId, status, clientId, clientName, productId, productName, currencyData, depositAmount, 
 					interestRate, termInMonths, projectedCommencementDate, actualCommencementDate, projectedMaturityDate, actualMaturityDate, 
 					projectedInterestAccrued, actualInterestAccrued, projectedMaturityAmount, actualMaturityAmount, 
 					interestCompoundedEvery, interestCompoundedEveryPeriodType,
-					renewalAllowed, preClosureAllowed, preClosureInterestRate);
+					renewalAllowed, preClosureAllowed, preClosureInterestRate, 
+					withdrawnonDate,rejectedonDate,closedonDate);
 		}
 	}
 }

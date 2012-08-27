@@ -1,10 +1,12 @@
 package org.mifosng.platform.saving.service;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 
 import org.joda.time.LocalDate;
 import org.mifosng.platform.api.commands.DepositAccountCommand;
+import org.mifosng.platform.api.commands.DepositStateTransitionApprovalCommand;
 import org.mifosng.platform.api.commands.DepositStateTransitionCommand;
 import org.mifosng.platform.api.commands.UndoStateTransitionCommand;
 import org.mifosng.platform.api.data.EntityIdentifier;
@@ -14,6 +16,7 @@ import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
 import org.mifosng.platform.exceptions.ProductNotFoundException;
 import org.mifosng.platform.saving.domain.DepositAccount;
 import org.mifosng.platform.saving.domain.DepositAccountRepository;
+import org.mifosng.platform.saving.domain.DepositApprovalData;
 import org.mifosng.platform.saving.domain.DepositLifecycleStateMachine;
 import org.mifosng.platform.saving.domain.DepositLifecycleStateMachineImpl;
 import org.mifosng.platform.saving.domain.DepositStatus;
@@ -126,11 +129,11 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 
 	@Transactional
 	@Override
-	public EntityIdentifier approveDepositApplication(DepositStateTransitionCommand command) {
+	public EntityIdentifier approveDepositApplication(DepositStateTransitionApprovalCommand command) {
 		
 		AppUser currentUser = context.authenticatedUser();
 		
-		DepositStateTransitionCommandValidator validator = new DepositStateTransitionCommandValidator(command);
+		DepositStateTransitionApprovalCommandValidator validator = new DepositStateTransitionApprovalCommandValidator(command);
 		validator.validate();
 		
 		
@@ -139,12 +142,16 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 			throw new DepositAccountNotFoundException(command.getAccountId());
 		}
 		
+		DepositApprovalData depositApprovalData=this.depositAccountAssembler.assembleFrom(command);
+		
 		LocalDate eventDate = command.getEventDate();
 		if (this.isBeforeToday(eventDate) && currentUser.canNotApproveLoanInPast()) {
 			throw new NoAuthorizationException("User has no authority to approve deposit with a date in the past.");
 		}
 		
-		account.approve(eventDate, defaultDepositLifecycleStateMachine());
+		BigDecimal depositAmount = command.getDepositAmount();
+		
+		account.approve(eventDate, defaultDepositLifecycleStateMachine(), depositApprovalData,depositAmount);
 		this.depositAccountRepository.save(account);
 
 		return new EntityIdentifier(account.getId());
@@ -204,7 +211,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 		}
 		
 		account.withdraw(eventDate, defaultDepositLifecycleStateMachine());
-		return null;
+		return new EntityIdentifier(account.getId());
 	}
 
 	@Transactional
@@ -221,6 +228,6 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 		account.undoDepositApproval(defaultDepositLifecycleStateMachine());
 		this.depositAccountRepository.save(account);
 		
-		return null;
+		return new EntityIdentifier(account.getId());
 	}
 }

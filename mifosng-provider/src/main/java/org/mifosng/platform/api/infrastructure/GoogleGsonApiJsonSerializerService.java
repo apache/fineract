@@ -101,7 +101,8 @@ public class GoogleGsonApiJsonSerializerService implements
 					"id", "externalId", "clientId", "clientName", "productId", "productName", "status",
 					"currency", "deposit", "maturityInterestRate", "tenureInMonths", 
 					"interestCompoundedEvery", "interestCompoundedEveryPeriodType",
-					"renewalAllowed","preClosureAllowed","preClosureInterestRate"
+					"renewalAllowed","preClosureAllowed","preClosureInterestRate", 
+					"withdrawnonDate","rejectedonDate","closedonDate"
 					)
 			);
 	

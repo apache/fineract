@@ -4,14 +4,18 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 
+import org.joda.time.LocalDate;
 import org.mifosng.platform.api.commands.DepositAccountCommand;
+import org.mifosng.platform.api.commands.DepositStateTransitionApprovalCommand;
 import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.client.domain.ClientRepository;
 import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.exceptions.ClientNotFoundException;
 import org.mifosng.platform.exceptions.DepositProductNotFoundException;
+import org.mifosng.platform.exceptions.NoAuthorizationException;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 import org.mifosng.platform.saving.domain.DepositAccount;
+import org.mifosng.platform.saving.domain.DepositApprovalData;
 import org.mifosng.platform.saving.domain.DepositLifecycleStateMachine;
 import org.mifosng.platform.saving.domain.DepositLifecycleStateMachineImpl;
 import org.mifosng.platform.saving.domain.DepositStatus;
@@ -94,6 +98,28 @@ public class DepositAccountAssembler {
 		
 		return account;
 	}
+	
+	public DepositApprovalData assembleFrom(DepositStateTransitionApprovalCommand command){
+		
+		DepositProduct product = this.depositProductRepository.findOne(command.getProductId());
+		if (product == null || product.isDeleted()) {
+			throw new DepositProductNotFoundException(command.getProductId());
+		} 
+		
+		PeriodFrequencyType interestCompoundedEveryPeriodType= product.getInterestCompoundedEveryPeriodType();
+		if (command.getInterestCompoundedEveryPeriodType() != null) {
+			interestCompoundedEveryPeriodType = PeriodFrequencyType.fromInt(command.getInterestCompoundedEveryPeriodType());
+		}
+		
+		Integer tenureInMonths = command.getTenureInMonths();
+		Money deposit = Money.of(product.getCurrency(), command.getDepositAmount());
+		BigDecimal maturityInterestRate = product.getMaturityDefaultInterestRate();
+		Integer interestCompoundedEvery = product.getInterestCompoundedEvery();
+		
+  		return new DepositApprovalData(tenureInMonths, deposit, maturityInterestRate, interestCompoundedEvery, interestCompoundedEveryPeriodType, this.fixedTermDepositInterestCalculator);
+		
+	}
+	
 	
 	private DepositLifecycleStateMachine defaultDepositLifecycleStateMachine() {
 		List<DepositStatus> allowedDepositStatuses = Arrays.asList(DepositStatus.values());

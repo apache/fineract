@@ -22,6 +22,7 @@ import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosng.platform.api.commands.DepositAccountCommand;
+import org.mifosng.platform.api.commands.DepositStateTransitionApprovalCommand;
 import org.mifosng.platform.api.commands.DepositStateTransitionCommand;
 import org.mifosng.platform.api.commands.UndoStateTransitionCommand;
 import org.mifosng.platform.api.data.DepositAccountData;
@@ -67,7 +68,7 @@ public class DepositAccountsApiResource {
 					"deposit", "maturityInterestRate", "tenureInMonths",
 					"interestCompoundedEvery",
 					"interestCompoundedEveryPeriodType", "renewalAllowed",
-					"preClosureAllowed", "preClosureInterestRate"));
+					"preClosureAllowed", "preClosureInterestRate", "statusEnum","withdrawnonDate","rejectedonDate","closedonDate"));
 	
 	
 	@POST
@@ -187,23 +188,26 @@ public class DepositAccountsApiResource {
 	public Response SubmitDepositApplication(@PathParam("accountId") final Long accountId,
 			@QueryParam("command") final String commandParam, final String jsonRequestBody) {
 		
-		DepositStateTransitionCommand command=apiDataConversionService.convertJsonToDepositStateTransitionCommand(accountId, jsonRequestBody);
+		
 		
 		Response response=null;
 		
 		if (is(commandParam, "approve")) {
-
+			
+			DepositStateTransitionApprovalCommand command=apiDataConversionService.convertJsonToDepositStateTransitionApprovalCommand(accountId, jsonRequestBody);
 			EntityIdentifier identifier = this.depositAccountWritePlatformService.approveDepositApplication(command);
 			response = Response.ok().entity(identifier).build();
 		} 
 		
 		else if (is(commandParam, "reject")) {
 			
+			DepositStateTransitionCommand command=apiDataConversionService.convertJsonToDepositStateTransitionCommand(accountId, jsonRequestBody);
 			EntityIdentifier identifier = this.depositAccountWritePlatformService.rejectDepositApplication(command);
 			response = Response.ok().entity(identifier).build();
 		
 		}  else if (is(commandParam, "withdrewbyclient")) {
-
+			
+			DepositStateTransitionCommand command=apiDataConversionService.convertJsonToDepositStateTransitionCommand(accountId, jsonRequestBody);
 			EntityIdentifier identifier = this.depositAccountWritePlatformService.withdrawDepositApplication(command);
 			response = Response.ok().entity(identifier).build();
 			

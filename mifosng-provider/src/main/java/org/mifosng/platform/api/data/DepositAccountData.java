@@ -29,6 +29,9 @@ public class DepositAccountData {
 	private final LocalDate actualCommencementDate;
 	private final LocalDate projectedMaturityDate;
 	private final LocalDate actualMaturityDate;
+	private final LocalDate withdrawnonDate;
+	private final LocalDate rejectedonDate;
+	private final LocalDate closedonDate;
 	private final BigDecimal projectedInterestAccrued;
 	private final BigDecimal actualInterestAccrued;
 	private final BigDecimal projectedMaturityAmount;
@@ -41,7 +44,6 @@ public class DepositAccountData {
 	private final BigDecimal preClosureInterestRate;
 	
 	private final List<EnumOptionData> interestCompoundedEveryPeriodTypeOptions;
-	
 	private final List<DepositProductLookup> productOptions;
 	
 	/*
@@ -81,6 +83,10 @@ public class DepositAccountData {
 		
 		this.interestCompoundedEveryPeriodTypeOptions = new ArrayList<EnumOptionData>();
 		this.productOptions = new ArrayList<DepositProductLookup>();
+		
+		this.withdrawnonDate=null;
+		this.closedonDate=null;
+		this.rejectedonDate=null;
 	}
 
 	public DepositAccountData(
@@ -114,6 +120,10 @@ public class DepositAccountData {
 		
 		this.interestCompoundedEveryPeriodTypeOptions = interestCompoundedEveryPeriodTypeOptions;
 		this.productOptions = new ArrayList<DepositProductLookup>(productOptions);
+		
+		this.withdrawnonDate=account.getWithdrawnonDate();
+		this.rejectedonDate=account.getRejectedonDate();
+		this.closedonDate=account.getClosedonDate();
 	}
 	
 	public DepositAccountData(
@@ -139,7 +149,10 @@ public class DepositAccountData {
 			final EnumOptionData interestCompoundedEveryPeriodType, 
 			final boolean renewalAllowed, 
 			final boolean preClosureAllowed, 
-			final BigDecimal preClosureInterestRate) {
+			final BigDecimal preClosureInterestRate,
+			final LocalDate withdrawnonDate,
+			final LocalDate rejectedonDate,
+			final LocalDate closedonDate) {
 		this.id=id;
 		this.externalId = externalId;
 		this.status = status;
@@ -167,6 +180,10 @@ public class DepositAccountData {
 		
 		this.interestCompoundedEveryPeriodTypeOptions = new ArrayList<EnumOptionData>();
 		this.productOptions = new ArrayList<DepositProductLookup>();
+		
+		this.withdrawnonDate = withdrawnonDate;
+		this.rejectedonDate = rejectedonDate;
+		this.closedonDate = closedonDate;
 	}
 	
 	public DepositAccountData(
@@ -209,6 +226,10 @@ public class DepositAccountData {
 		
 		this.interestCompoundedEveryPeriodTypeOptions = new ArrayList<EnumOptionData>();
 		this.productOptions = new ArrayList<DepositProductLookup>();
+		
+		this.withdrawnonDate=null;
+		this.closedonDate=null;
+		this.rejectedonDate=null;
 	}
 
 	public Long getId() {
@@ -313,5 +334,17 @@ public class DepositAccountData {
 
 	public List<DepositProductLookup> getProductOptions() {
 		return productOptions;
+	}
+
+	public LocalDate getWithdrawnonDate() {
+		return withdrawnonDate;
+	}
+
+	public LocalDate getRejectedonDate() {
+		return rejectedonDate;
+	}
+
+	public LocalDate getClosedonDate() {
+		return closedonDate;
 	}
 }
