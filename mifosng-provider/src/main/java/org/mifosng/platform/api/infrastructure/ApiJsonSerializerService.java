@@ -48,6 +48,8 @@ public interface ApiJsonSerializerService {
 
 	String serializeOfficeDataToJson(boolean prettyPrint, Set<String> responseParameters, OfficeData office);
 
+	String serializeOfficeTransactionDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<OfficeTransactionData> officeTransactions);
+	
 	String serializeOfficeTransactionDataToJson(boolean prettyPrint, Set<String> responseParameters, OfficeTransactionData officeTransaction);
 
 	String serializeConfigurationDataToJson(boolean prettyPrint, Set<String> responseParameters, ConfigurationData configuration);

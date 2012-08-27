@@ -1,6 +1,7 @@
 package org.mifosng.platform.api;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -33,43 +34,81 @@ public class OfficeTransactionsApiResource {
 
 	@Autowired
 	private OfficeWritePlatformService writePlatformService;
-	
+
 	@Autowired
 	private OfficeReadPlatformService readPlatformService;
 
 	@Autowired
 	private ApiDataConversionService apiDataConversionService;
-	
+
 	@Autowired
 	private ApiJsonSerializerService apiJsonSerializerService;
 
 	@GET
-	@Path("template")
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
-	public String newOfficeTransactionDetails(@Context final UriInfo uriInfo) {
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String retrieveOfficeTransactions(@Context final UriInfo uriInfo) {
 
-		Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("transactionDate", "allowedOffices", "currencyOptions"));
-		
-		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+		Set<String> typicalResponseParameters = new HashSet<String>(
+				Arrays.asList("id", "transactionDate", "fromOfficeId",
+						"fromOfficeName", "toOfficeId", "toOfficeIdName",
+						"currencyCode", "digitsAfterDecimal",
+						"transactionAmount", "description"));
+
+		Set<String> responseParameters = ApiParameterHelper
+				.extractFieldsForResponseIfProvided(uriInfo
+						.getQueryParameters());
 		if (responseParameters.isEmpty()) {
 			responseParameters.addAll(typicalResponseParameters);
 		}
-		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-		
-		OfficeTransactionData officeTransactionData = this.readPlatformService.retrieveNewOfficeTransactionDetails();
+		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo
+				.getQueryParameters());
 
-		return this.apiJsonSerializerService.serializeOfficeTransactionDataToJson(prettyPrint, responseParameters, officeTransactionData);
+		Collection<OfficeTransactionData> officeTransactions = this.readPlatformService
+				.retrieveAllOfficeTransactions();
+
+		return this.apiJsonSerializerService
+				.serializeOfficeTransactionDataToJson(prettyPrint,
+						responseParameters, officeTransactions);
 	}
-	
+
+	@GET
+	@Path("template")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String newOfficeTransactionDetails(@Context final UriInfo uriInfo) {
+
+		Set<String> typicalResponseParameters = new HashSet<String>(
+				Arrays.asList("transactionDate", "allowedOffices",
+						"currencyOptions"));
+
+		Set<String> responseParameters = ApiParameterHelper
+				.extractFieldsForResponseIfProvided(uriInfo
+						.getQueryParameters());
+		if (responseParameters.isEmpty()) {
+			responseParameters.addAll(typicalResponseParameters);
+		}
+		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo
+				.getQueryParameters());
+
+		OfficeTransactionData officeTransactionData = this.readPlatformService
+				.retrieveNewOfficeTransactionDetails();
+
+		return this.apiJsonSerializerService
+				.serializeOfficeTransactionDataToJson(prettyPrint,
+						responseParameters, officeTransactionData);
+	}
+
 	@POST
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
 	public Response transferMoneyFrom(final String jsonRequestBody) {
 
-		BranchMoneyTransferCommand command = this.apiDataConversionService.convertJsonToBranchMoneyTransferCommand(jsonRequestBody);
-		
-		Long id = this.writePlatformService.externalBranchMoneyTransfer(command);
+		BranchMoneyTransferCommand command = this.apiDataConversionService
+				.convertJsonToBranchMoneyTransferCommand(jsonRequestBody);
+
+		Long id = this.writePlatformService
+				.externalBranchMoneyTransfer(command);
 		return Response.ok().entity(new EntityIdentifier(id)).build();
 	}
 }

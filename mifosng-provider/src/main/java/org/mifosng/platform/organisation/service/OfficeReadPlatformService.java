@@ -18,6 +18,8 @@ public interface OfficeReadPlatformService {
 	OfficeData retrieveNewOfficeTemplate();
 
 	List<OfficeLookup> retrieveAllowedParents(Long officeId);
-	
+
+	Collection<OfficeTransactionData> retrieveAllOfficeTransactions();
+
 	OfficeTransactionData retrieveNewOfficeTransactionDetails();
 }

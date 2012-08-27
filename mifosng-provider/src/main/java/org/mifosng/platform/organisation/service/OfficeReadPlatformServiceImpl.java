@@ -1,5 +1,6 @@
 package org.mifosng.platform.organisation.service;
 
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -63,7 +64,9 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
 			String parentName = rs.getString("parentName");
 
 			List<OfficeLookup> allowedParents = new ArrayList<OfficeLookup>();
-			return new OfficeData(id, name, nameDecorated, externalId, openingDate, hierarchy, parentId, parentName, allowedParents);
+			return new OfficeData(id, name, nameDecorated, externalId,
+					openingDate, hierarchy, parentId, parentName,
+					allowedParents);
 		}
 	}
 
@@ -84,6 +87,43 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
 			String nameDecorated = rs.getString("nameDecorated");
 
 			return new OfficeLookup(id, name, nameDecorated);
+		}
+	}
+
+	private static final class OfficeTransactionMapper implements
+			RowMapper<OfficeTransactionData> {
+
+		public String officeTransactionSchema() {
+			return " ot.id as id, ot.transaction_date as transactionDate, ot.from_office_id as fromOfficeId, fromoff.name as fromOfficeName, "
+					+ " ot.to_office_id as toOfficeId, tooff.name as toOfficeName, ot.transaction_amount as transactionAmount, ot.description as description, "
+					+ " ot.currency_code as currencyCode, rc.decimal_places as digitsAfterDecimal"
+					+ " from m_office_transaction ot "
+					+ " left join m_office fromoff on fromoff.id = ot.from_office_id "
+					+ " left join m_office tooff on tooff.id = ot.to_office_id "
+					+ " join m_currency rc on rc.`code` = ot.currency_code";
+		}
+
+		@Override
+		public OfficeTransactionData mapRow(final ResultSet rs, final int rowNum)
+				throws SQLException {
+
+			Long id = rs.getLong("id");
+			LocalDate transactionDate = JdbcSupport.getLocalDate(rs,
+					"transactionDate");
+			Long fromOfficeId = JdbcSupport.getLong(rs, "fromOfficeId");
+			String fromOfficeName = rs.getString("fromOfficeName");
+			Long toOfficeId = JdbcSupport.getLong(rs, "toOfficeId");
+			String toOfficeName = rs.getString("toOfficeName");
+			String currencyCode = rs.getString("currencyCode");
+			Integer digitsAfterDecimal = JdbcSupport.getInteger(rs,
+					"digitsAfterDecimal");
+			BigDecimal transactionAmount = rs
+					.getBigDecimal("transactionAmount");
+			String description = rs.getString("description");
+
+			return new OfficeTransactionData(id, transactionDate, fromOfficeId,
+					fromOfficeName, toOfficeId, toOfficeName, currencyCode,
+					digitsAfterDecimal, transactionAmount, description);
 		}
 	}
 
@@ -151,13 +191,13 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
 
 		context.authenticatedUser();
 		List<OfficeLookup> filterParentLookups = new ArrayList<OfficeLookup>();
-		
+
 		if (isNotHeadOffice(officeId)) {
-			List<OfficeLookup> parentLookups = new ArrayList<OfficeLookup>(retrieveAllOfficesForLookup());
-			
-	
+			List<OfficeLookup> parentLookups = new ArrayList<OfficeLookup>(
+					retrieveAllOfficesForLookup());
+
 			for (OfficeLookup office : parentLookups) {
-	
+
 				if (!office.getId().equals(officeId)) {
 					filterParentLookups.add(office);
 				}
@@ -173,12 +213,31 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
 	}
 
 	@Override
+	public Collection<OfficeTransactionData> retrieveAllOfficeTransactions() {
+
+		AppUser currentUser = context.authenticatedUser();
+
+		String hierarchy = currentUser.getOffice().getHierarchy();
+		String hierarchySearchString = hierarchy + "%";
+
+		OfficeTransactionMapper rm = new OfficeTransactionMapper();
+		String sql = "select " + rm.officeTransactionSchema()
+				+ " where (fromoff.hierarchy like ? or tooff.hierarchy like ?) order by ot.transaction_date, ot.id";
+
+		return this.jdbcTemplate.query(sql, rm,
+				new Object[] { hierarchySearchString, hierarchySearchString });	}
+
+	@Override
 	public OfficeTransactionData retrieveNewOfficeTransactionDetails() {
 		context.authenticatedUser();
 
-		List<OfficeLookup> parentLookups = new ArrayList<OfficeLookup>(retrieveAllOfficesForLookup());
-		List<CurrencyData> currencyOptions = currencyReadPlatformService.retrieveAllowedCurrencies();
+		List<OfficeLookup> parentLookups = new ArrayList<OfficeLookup>(
+				retrieveAllOfficesForLookup());
+		List<CurrencyData> currencyOptions = currencyReadPlatformService
+				.retrieveAllowedCurrencies();
 
-		return new OfficeTransactionData(new LocalDate(), parentLookups, currencyOptions);
+		return new OfficeTransactionData(new LocalDate(), parentLookups,
+				currencyOptions);
 	}
+
 }
