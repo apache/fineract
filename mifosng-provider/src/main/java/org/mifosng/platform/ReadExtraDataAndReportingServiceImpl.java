@@ -30,6 +30,7 @@ import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
 import org.mifosng.platform.exceptions.ReportNotFoundException;
 import org.mifosng.platform.infrastructure.TenantAwareRoutingDataSource;
 import org.mifosng.platform.security.PlatformSecurityContext;
+import org.mifosng.platform.user.domain.AppUser;
 import org.pentaho.reporting.engine.classic.core.ClassicEngineBoot;
 import org.pentaho.reporting.engine.classic.core.MasterReport;
 import org.pentaho.reporting.engine.classic.core.ReportProcessingException;
@@ -53,7 +54,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 		ReadExtraDataAndReportingService {
 
 	private final PlatformSecurityContext context;
-	
+
 	private final static Logger logger = LoggerFactory
 			.getLogger(ReadExtraDataAndReportingServiceImpl.class);
 
@@ -61,7 +62,8 @@ public class ReadExtraDataAndReportingServiceImpl implements
 	private Boolean noPentaho = false;
 
 	@Autowired
-	public ReadExtraDataAndReportingServiceImpl(final PlatformSecurityContext context,
+	public ReadExtraDataAndReportingServiceImpl(
+			final PlatformSecurityContext context,
 			final TenantAwareRoutingDataSource dataSource) {
 		// kick off pentaho reports server
 		ClassicEngineBoot.getInstance().start();
@@ -163,13 +165,23 @@ public class ReadExtraDataAndReportingServiceImpl implements
 
 		String sql;
 		if (name.equals(".")) {
-			// this is to support api /reports - which isn't that important a
-			// call and isn't used in the default reporting UI
+			// this is to support api /reports - which isn't an important
+			// call. It isn't used in the default reporting UI. But there is a
+			// need to bring back 'permitted' reports via this api call.
 			sql = "select r.report_id, r.report_name, r.report_type, r.report_subtype, r.report_category,"
 					+ " rp.parameter_id, rp.report_parameter_name, p.parameter_name"
 					+ " from stretchy_report r"
 					+ " left join stretchy_report_parameter rp on rp.report_id = r.report_id"
 					+ " left join stretchy_parameter p on p.parameter_id = rp.parameter_id"
+					+ " where exists"
+					+ " (select 'f'"
+					+ " from m_appuser_role ur "
+					+ " join m_role r on r.id = ur.role_id"
+					+ " left join m_role_permission rp on rp.role_id = r.id"
+					+ " left join m_permission p on p.id = rp.permission_id"
+					+ " where ur.appuser_id = "
+					+ context.authenticatedUser().getId()
+					+ " and (r.name = 'Super User' or r.name = 'Read Only') or p.code = concat('CAN_RUN_', r.report_name))"
 					+ " order by r.report_name, rp.parameter_id";
 		} else {
 			sql = getSQLtoRun(name, type, queryParams);
@@ -243,9 +255,15 @@ public class ReadExtraDataAndReportingServiceImpl implements
 			// logger.info("(" + key + " : " + pValue + ")");
 			sql = replace(sql, key, pValue);
 		}
-		
-		//Allowing the sql query to restrict data by office hierarchy if it is required 
-		sql = replace(sql, "${currentHierarchy}", context.authenticatedUser().getOffice().getHierarchy());
+
+		AppUser currentUser = context.authenticatedUser();
+		// Allows sql query to restrict data by office hierarchy if required
+		sql = replace(sql, "${currentUserHierarchy}", currentUser.getOffice()
+				.getHierarchy());
+		// Allows sql query to restrict data by current user Id if required
+		// (typically used to return report lists containing only reports
+		// permitted to be run by the user
+		sql = replace(sql, "${currentUserId}", currentUser.getId().toString());
 
 		// wrap sql to prevent JDBC sql errors and also prevent malicious sql
 		sql = "select x.* from (" + sql + ") x";
