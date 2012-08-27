@@ -521,10 +521,14 @@ public class ReadExtraDataAndReportingServiceImpl implements
 					columnHeaders.add(rsch);
 				} while (rsmd.next());
 
-				sql = "select " + selectFieldList + " from `" + type
-						+ "` t left join `" + fullDatasetName
-						+ "` s on s.id = t.id " + " where t.id = " + id;
+				String unScopedSQL = "select " + selectFieldList + " from `"
+						+ type + "` t ${dataScopeCriteria} left join `"
+						+ fullDatasetName + "` s on s.id = t.id "
+						+ " where t.id = " + id;
 
+				sql = dataScopedSQL(unScopedSQL, type);
+
+				logger.info("addition fields sql: " + sql);
 				db_statement3 = db_connection.createStatement();
 				ResultSet rs = db_statement3.executeQuery(sql);
 
@@ -546,6 +550,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 						resultsetDataRows.add(resultsetDataRow);
 					} while (rs.next());
 				} else {
+					// could also be not found because of data scope
 					throw new AdditionalFieldsNotFoundException(type, id);
 				}
 			} else {
@@ -563,6 +568,37 @@ public class ReadExtraDataAndReportingServiceImpl implements
 			dbClose(db_statement3, null);
 			dbClose(db_statement1, db_connection);
 		}
+	}
+
+	private String dataScopedSQL(String unScopedSQL, String type) {
+		String dataScopeCriteria = null;
+		/*
+		 * unfortunately have to, one way or another, be able to restrict data
+		 * to the users office hierarchy. Here it's hardcoded for client and
+		 * loan. They are the main application tables. But if additional fields
+		 * are needed on other tables like group, loan_transaction or others the
+		 * same applies (hardcoding of some sort)
+		 */
+
+		AppUser currentUser = context.authenticatedUser();
+		if (type.equalsIgnoreCase("m_client")) {
+			dataScopeCriteria = " join m_office o on o.id = t.office_id and o.hierarchy like '"
+					+ currentUser.getOffice().getHierarchy() + "%'";
+		}
+		if (type.equalsIgnoreCase("m_loan")) {
+			dataScopeCriteria = " join m_client c on c.id = t.client_id "
+					+ " join m_office o on o.id = c.office_id and o.hierarchy like '"
+					+ currentUser.getOffice().getHierarchy() + "%'";
+		}
+
+		if (dataScopeCriteria == null) {
+			throw new PlatformDataIntegrityException(
+					"error.msg.invalid.dataScopeCriteria", "Type: " + type
+							+ " not catered for in data Scoping");
+		}
+
+		return replace(unScopedSQL, "${dataScopeCriteria}", dataScopeCriteria);
+
 	}
 
 	private String getFullDatasetName(final String type, final String set) {
@@ -586,6 +622,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 	@Override
 	public void updateExtraData(String type, String set, Long id,
 			Map<String, String> queryParams) {
+		// TODO should be in a Write class
 		logger.info("updateExtraData - type: " + type + "    set: " + set
 				+ "  id: " + id);
 
@@ -614,6 +651,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 	}
 
 	private void checkResourceTypeThere(String type, String set) {
+				
 		String sql = "select 'f' from stretchydata_datasettype t join stretchydata_dataset d on d.datasettype_id = t.id where d.`name` = '"
 				+ set + "' and t.`name` = '" + type + "'";
 
