@@ -79,7 +79,7 @@ public class OfficeTransactionsApiResource {
 	public String newOfficeTransactionDetails(@Context final UriInfo uriInfo) {
 
 		Set<String> typicalResponseParameters = new HashSet<String>(
-				Arrays.asList("transactionDate", "allowedOffices",
+				Arrays.asList("id", "transactionDate", "allowedOffices",
 						"currencyOptions"));
 
 		Set<String> responseParameters = ApiParameterHelper
