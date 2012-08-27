@@ -30,7 +30,10 @@ import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.GenericResultsetData;
 import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
 import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
+import org.mifosng.platform.exceptions.NoAuthorizationException;
 import org.mifosng.platform.exceptions.PlatformApiDataValidationException;
+import org.mifosng.platform.security.PlatformSecurityContext;
+import org.mifosng.platform.user.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,38 +45,55 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class AdditionalFieldsApiResource {
 
-	private final static Logger logger = LoggerFactory.getLogger(AdditionalFieldsApiResource.class);
+	private final static Logger logger = LoggerFactory
+			.getLogger(AdditionalFieldsApiResource.class);
+
+	private final PlatformSecurityContext context;
+
+	@Autowired
+	public AdditionalFieldsApiResource(final PlatformSecurityContext context) {
+		this.context = context;
+	}
 
 	@Autowired
 	private ReadExtraDataAndReportingService readExtraDataAndReportingService;
-	
+
 	@Autowired
 	private ApiJsonSerializerService apiJsonSerializerService;
 
 	@GET
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
-	public String datasets(@QueryParam("type") final String type, @Context final UriInfo uriInfo) {
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String datasets(@QueryParam("type") final String type,
+			@Context final UriInfo uriInfo) {
 
-		List<AdditionalFieldsSetData> result = this.readExtraDataAndReportingService.retrieveExtraDatasetNames(type);
+		List<AdditionalFieldsSetData> result = this.readExtraDataAndReportingService
+				.retrieveExtraDatasetNames(type);
 
-		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-		return this.apiJsonSerializerService.serializeAdditionalFieldsSetDataToJson(prettyPrint, result);
+		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo
+				.getQueryParameters());
+		return this.apiJsonSerializerService
+				.serializeAdditionalFieldsSetDataToJson(prettyPrint, result);
 	}
 
 	@GET
 	@Path("{type}/{set}/{id}")
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
 	public String extraData(@PathParam("type") final String type,
 			@PathParam("set") final String set, @PathParam("id") final Long id,
 			@Context final UriInfo uriInfo) {
 
-		try {
-			GenericResultsetData result = this.readExtraDataAndReportingService.retrieveExtraData(type, set, id);
+		checkUserPermissionForSet(type, set, "READ");
 
-			boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-			return this.apiJsonSerializerService.serializeGenericResultsetDataToJson(prettyPrint, result);
+		try {
+			GenericResultsetData result = this.readExtraDataAndReportingService
+					.retrieveExtraData(type, set, id);
+
+			boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo
+					.getQueryParameters());
+			return this.apiJsonSerializerService
+					.serializeGenericResultsetDataToJson(prettyPrint, result);
 		} catch (InvalidSqlException e) {
 			List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 			ApiParameterError error = ApiParameterError.parameterError(
@@ -88,11 +108,13 @@ public class AdditionalFieldsApiResource {
 
 	@POST
 	@Path("{type}/{set}/{id}")
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
 	public Response saveExtraData(@PathParam("type") final String type,
 			@PathParam("set") final String set, @PathParam("id") final Long id,
 			final String jsonRequestBody) {
+
+		checkUserPermissionForSet(type, set, "UPDATE");
 
 		try {
 
@@ -139,4 +161,14 @@ public class AdditionalFieldsApiResource {
 					"Validation errors exist.", dataValidationErrors);
 		}
 	}
+
+	private void checkUserPermissionForSet(String type, String set,
+			String accessType) {
+		AppUser currentUser = context.authenticatedUser();
+		if (currentUser.hasNotPermissionForSet(type, set, accessType)) {
+			throw new NoAuthorizationException("Not Authorised to Use Set: "
+					+ set + " of Type: " + type);
+		}
+	}
+
 }
