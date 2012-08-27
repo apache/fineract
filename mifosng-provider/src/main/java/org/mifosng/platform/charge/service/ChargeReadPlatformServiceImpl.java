@@ -75,17 +75,25 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
         this.context.authenticatedUser();
 
         List<CurrencyData> currencyOptions = currencyReadPlatformService.retrieveAllowedCurrencies();
-        List<EnumOptionData> allowedChargeCalculationMethods = Arrays.asList(
+        CurrencyData currency = new CurrencyData("", "", 0, "", "");
+
+        EnumOptionData allowedChargeCalculationType = chargeCalculationType(ChargeCalculationMethod.FLAT);
+        List<EnumOptionData> allowedChargeCalculationMethodsOptions = Arrays.asList(
                 chargeCalculationType(ChargeCalculationMethod.FLAT),
                 chargeCalculationType(ChargeCalculationMethod.PERCENT_OF_AMOUNT),
                 chargeCalculationType(ChargeCalculationMethod.PERCENT_OF_AMOUNT_AND_INTEREST),
                 chargeCalculationType(ChargeCalculationMethod.PERCENT_OF_INTEREST)
         );
-        EnumOptionData allowedChargeAppliesTo = chargeAppliesTo(ChargeAppliesTo.LOAN);
-        EnumOptionData allowedChargeTime = chargeTimeType(ChargeTimeType.DISBURSEMENT);
-        EnumOptionData allowedChargeCalculationType = chargeCalculationType(ChargeCalculationMethod.FLAT);
 
-        return ChargeData.template(allowedChargeTime, allowedChargeAppliesTo, allowedChargeCalculationType, currencyOptions, allowedChargeCalculationMethods);
+        EnumOptionData allowedChargeAppliesTo = chargeAppliesTo(ChargeAppliesTo.LOAN);
+        List<EnumOptionData> allowedChargeAppliesToOptions = Arrays.asList(allowedChargeAppliesTo);
+
+        EnumOptionData allowedChargeTime = chargeTimeType(ChargeTimeType.DISBURSEMENT);
+        List<EnumOptionData> allowedChargeTimeOptions = Arrays.asList(allowedChargeTime);
+
+        return ChargeData.template(currency, allowedChargeTime, allowedChargeAppliesTo, allowedChargeCalculationType,
+                currencyOptions, allowedChargeCalculationMethodsOptions,
+                allowedChargeAppliesToOptions, allowedChargeTimeOptions);
     }
 
     private static final class ChargeMapper implements RowMapper<ChargeData> {

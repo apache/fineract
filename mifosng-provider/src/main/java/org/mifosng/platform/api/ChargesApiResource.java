@@ -57,11 +57,18 @@ public class ChargesApiResource {
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     public String retrieveCharge(@PathParam("chargeId") final Long chargeId, @Context final UriInfo uriInfo){
-
         Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+
         boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+        boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
 
         ChargeData charge = this.chargeReadPlatformService.retrieveCharge(chargeId);
+
+        if (template){
+            ChargeData templateData = this.chargeReadPlatformService.retrieveNewChargeDetails();
+
+            charge = new ChargeData(charge, templateData);
+        }
 
         return this.apiJsonSerializerService.serializeChargeDataToJson(prettyPrint, responseParameters, charge);
     }
@@ -71,16 +78,8 @@ public class ChargesApiResource {
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     public String retrieveNewChargeDetails(@Context final UriInfo uriInfo) {
-
-        Set<String> typicalResponseParameters = new HashSet<String>(
-            Arrays.asList("id", "name", "amount", "currency", "active", "chargeAppliesTo", "chargeTimeType",
-                "chargeCalculationType", "chargeCalculationTypeOptions", "currencyOptions")
-        );
-
         Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-        if (responseParameters.isEmpty()) {
-            responseParameters.addAll(typicalResponseParameters);
-        }
+
         boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 
         ChargeData chargeData = this.chargeReadPlatformService.retrieveNewChargeDetails();
