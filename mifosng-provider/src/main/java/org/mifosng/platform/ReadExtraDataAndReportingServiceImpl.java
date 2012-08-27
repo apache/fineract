@@ -321,14 +321,24 @@ public class ReadExtraDataAndReportingServiceImpl implements
 			db_connection = dataSource.getConnection();
 			db_statement = db_connection.createStatement();
 
-			String whereClause;
+			String andClause;
 			if (type == null) {
-				whereClause = "";
+				andClause = "";
 			} else {
-				whereClause = "where t.`name` = '" + type + "'";
+				andClause = " and t.`name` = '" + type + "'";
 			}
-			String sql = "select d.id, d.`name` as 'set', t.`name` as 'type' from stretchydata_dataset d join stretchydata_datasettype t on t.id = d.datasettype_id "
-					+ whereClause + " order by d.`name`";
+			String sql = "select d.id, d.`name` as 'set', t.`name` as 'type' "
+					+ " from stretchydata_dataset d join stretchydata_datasettype t on t.id = d.datasettype_id "
+					+ " where exists"
+					+ " (select 'f'"
+					+ " from m_appuser_role ur "
+					+ " join m_role r on r.id = ur.role_id"
+					+ " left join m_role_permission rp on rp.role_id = r.id"
+					+ " left join m_permission p on p.id = rp.permission_id"
+					+ " where ur.appuser_id = "
+					+ context.authenticatedUser().getId()
+					+ " and (r.name = 'Super User' or r.name = 'Read Only') or p.code = concat('CAN_READ_', t.`name`, '_x', d.`name`)) "
+					+ andClause + " order by d.`name`";
 
 			ResultSet rs = db_statement.executeQuery(sql);
 
