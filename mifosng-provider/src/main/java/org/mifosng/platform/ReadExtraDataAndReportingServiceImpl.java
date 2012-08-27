@@ -29,6 +29,7 @@ import org.mifosng.platform.exceptions.AdditionalFieldsNotFoundException;
 import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
 import org.mifosng.platform.exceptions.ReportNotFoundException;
 import org.mifosng.platform.infrastructure.TenantAwareRoutingDataSource;
+import org.mifosng.platform.security.PlatformSecurityContext;
 import org.pentaho.reporting.engine.classic.core.ClassicEngineBoot;
 import org.pentaho.reporting.engine.classic.core.MasterReport;
 import org.pentaho.reporting.engine.classic.core.ReportProcessingException;
@@ -51,6 +52,8 @@ import org.springframework.stereotype.Service;
 public class ReadExtraDataAndReportingServiceImpl implements
 		ReadExtraDataAndReportingService {
 
+	private final PlatformSecurityContext context;
+	
 	private final static Logger logger = LoggerFactory
 			.getLogger(ReadExtraDataAndReportingServiceImpl.class);
 
@@ -58,12 +61,13 @@ public class ReadExtraDataAndReportingServiceImpl implements
 	private Boolean noPentaho = false;
 
 	@Autowired
-	public ReadExtraDataAndReportingServiceImpl(
+	public ReadExtraDataAndReportingServiceImpl(final PlatformSecurityContext context,
 			final TenantAwareRoutingDataSource dataSource) {
 		// kick off pentaho reports server
 		ClassicEngineBoot.getInstance().start();
 		noPentaho = false;
 
+		this.context = context;
 		this.dataSource = dataSource;
 	}
 
@@ -157,21 +161,10 @@ public class ReadExtraDataAndReportingServiceImpl implements
 		long startTime = System.currentTimeMillis();
 		logger.info("STARTING REPORT: " + name + "   Type: " + type);
 
-		// AppUser currentUser = extractAuthenticatedUser();
-		// Collection<GrantedAuthority> permissions =
-		// currentUser.getAuthorities();
-		/*
-		 * AppUser currentUser = extractAuthenticatedUser(); Boolean validUser =
-		 * verifyUserDetails(currentUser);
-		 * 
-		 * if (!validUser) { return null; }
-		 * 
-		 * String orgId = currentUser.getOrganisation().getId().toString(); put
-		 * back in later
-		 */
-
 		String sql;
 		if (name.equals(".")) {
+			// this is to support api /reports - which isn't that important a
+			// call and isn't used in the default reporting UI
 			sql = "select r.report_id, r.report_name, r.report_type, r.report_subtype, r.report_category,"
 					+ " rp.parameter_id, rp.report_parameter_name, p.parameter_name"
 					+ " from stretchy_report r"
@@ -198,10 +191,10 @@ public class ReadExtraDataAndReportingServiceImpl implements
 			db_connection = dataSource.getConnection();
 			db_statement = db_connection.createStatement();
 			ResultSet rs = db_statement.executeQuery(sql);
-			
+
 			List<ResultsetColumnHeader> columnHeaders = new ArrayList<ResultsetColumnHeader>();
 			List<ResultsetDataRow> resultsetDataRows = new ArrayList<ResultsetDataRow>();
-			
+
 			ResultSetMetaData rsmd = rs.getMetaData();
 			String columnName = null;
 			String columnValue = null;
@@ -211,7 +204,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 				rsch.setColumnType(rsmd.getColumnTypeName(i + 1));
 				columnHeaders.add(rsch);
 			}
-			
+
 			ResultsetDataRow resultsetDataRow;
 			while (rs.next()) {
 				resultsetDataRow = new ResultsetDataRow();
@@ -224,10 +217,11 @@ public class ReadExtraDataAndReportingServiceImpl implements
 				resultsetDataRow.setRow(columnValues);
 				resultsetDataRows.add(resultsetDataRow);
 			}
-			
+
 			return new GenericResultsetData(columnHeaders, resultsetDataRows);
 		} catch (SQLException e) {
-			throw new PlatformDataIntegrityException("error.msg.sql.error", e.getMessage(), "Sql: " + sql);
+			throw new PlatformDataIntegrityException("error.msg.sql.error",
+					e.getMessage(), "Sql: " + sql);
 		} finally {
 			dbClose(db_statement, db_connection);
 		}
@@ -249,6 +243,9 @@ public class ReadExtraDataAndReportingServiceImpl implements
 			// logger.info("(" + key + " : " + pValue + ")");
 			sql = replace(sql, key, pValue);
 		}
+		
+		//Allowing the sql query to restrict data by office hierarchy if it is required 
+		sql = replace(sql, "${currentHierarchy}", context.authenticatedUser().getOffice().getHierarchy());
 
 		// wrap sql to prevent JDBC sql errors and also prevent malicious sql
 		sql = "select x.* from (" + sql + ") x";
@@ -256,35 +253,6 @@ public class ReadExtraDataAndReportingServiceImpl implements
 		return sql;
 
 	}
-
-	// private Boolean verifyUserDetails(AppUser usr) {
-	//
-	// // some logs to be taken out after testing
-	// String idDetails = usr.getId() + ", " + usr.getLastname() + ", "
-	// + usr.getFirstname();
-	// logger.info("Id: " + idDetails + "   Organisation: "
-	// + usr.getOrganisation().getId() + "   Office: "
-	// + usr.getOffice().getId() + "   Role Names: "
-	// + usr.getRoleNames());
-	// String otherDetails = "Head Officer User? " + usr.isHeadOfficeUser()
-	// + "  Enabled: " + usr.isEnabled();
-	// logger.info(otherDetails);
-	// if (usr.getAuthorities() != null) {
-	// // for (GrantedAuthority grantedAuthority : usr.getAuthorities()) {
-	// // logger.info("Granted Authority: " +
-	// // grantedAuthority.getAuthority());
-	// // }
-	// }
-	// logger.info("");
-	//
-	// // some checks
-	// if (usr.getOrganisation().getId() == null) {
-	// logger.info("Organisation ID not Found");
-	// return false;
-	// }
-	//
-	// return true;
-	// }
 
 	private String getReportSql(String reportName) {
 		String sql = "select report_sql as the_sql from stretchy_report where report_name = '"
@@ -465,7 +433,8 @@ public class ReadExtraDataAndReportingServiceImpl implements
 		return result;
 	}
 
-	private GenericResultsetData fillExtraDataGenericResultSet(final String type, final String set, final Long id) {
+	private GenericResultsetData fillExtraDataGenericResultSet(
+			final String type, final String set, final Long id) {
 
 		Connection db_connection = null;
 		Statement db_statement1 = null;
@@ -481,7 +450,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 
 			List<ResultsetColumnHeader> columnHeaders = null;
 			List<ResultsetDataRow> resultsetDataRows = null;
-			
+
 			if (rsmd.next()) {
 
 				String fullDatasetName = getFullDatasetName(type, set);
@@ -523,7 +492,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 					}
 					columnHeaders.add(rsch);
 				} while (rsmd.next());
-				
+
 				sql = "select " + selectFieldList + " from `" + type
 						+ "` t left join `" + fullDatasetName
 						+ "` s on s.id = t.id " + " where t.id = " + id;
@@ -556,7 +525,7 @@ public class ReadExtraDataAndReportingServiceImpl implements
 			}
 
 			return new GenericResultsetData(columnHeaders, resultsetDataRows);
-			
+
 		} catch (SQLException e) {
 			throw new PlatformDataIntegrityException("error.msg.sql.error",
 					e.getMessage(), "Additional Fields Type: " + type
@@ -785,7 +754,8 @@ public class ReadExtraDataAndReportingServiceImpl implements
 				db_connection = null;
 			}
 		} catch (SQLException e) {
-			throw new PlatformDataIntegrityException("error.msg.sql.error", e.getMessage(), "Error closing database connection");
+			throw new PlatformDataIntegrityException("error.msg.sql.error",
+					e.getMessage(), "Error closing database connection");
 		}
 	}
 

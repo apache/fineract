@@ -14,7 +14,6 @@ public interface ReadExtraDataAndReportingService {
 	StreamingOutput retrieveReportCSV(String name, String type,
 			Map<String, String> extractedQueryParams);
 
-	// @PreAuthorize(value = "hasAnyRole('REPORTING_SUPER_USER_ROLE')")
 	GenericResultsetData retrieveGenericResultset(String name, String type,
 			Map<String, String> extractedQueryParams);
 
