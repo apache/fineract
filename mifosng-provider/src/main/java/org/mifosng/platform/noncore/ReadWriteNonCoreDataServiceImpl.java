@@ -123,36 +123,52 @@ public class ReadWriteNonCoreDataServiceImpl implements
 		CachedRowSetImpl rsmd = genericDataService.getCachedResultSet(sql,
 				sqlErrorMsg);
 
-		Connection db_connection = null;
-		Statement db_statement2 = null;
-		// Statement db_statement3 = null;
+		List<ResultsetColumnHeader> columnHeaders = getResultsetColumnHeaders(
+				rsmd, sqlErrorMsg, type, set);
+
+		Boolean firstColumn = true;
+		String selectFieldList = "";
+		String selectFieldSeparator = "";
+
+		for (ResultsetColumnHeader columnHeader : columnHeaders) {
+			if (firstColumn) {
+				selectFieldSeparator = " ";
+				firstColumn = false;
+			} else {
+				selectFieldSeparator = ", ";
+			}
+			selectFieldList += selectFieldSeparator + "s.`"
+					+ columnHeader.getColumnName() + "`";
+		}
+
+		String unScopedSQL = "select " + selectFieldList + " from `" + type
+				+ "` t ${dataScopeCriteria} left join `"
+				+ getFullDatasetName(type, set) + "` s on s.id = t.id "
+				+ " where t.id = " + id;
+		sql = dataScopedSQL(unScopedSQL, type);
+		logger.info("addition fields sql: " + sql);
+		// maybe can reduce parameters a bit (type and id only needed
+		// because of exception)
+		List<ResultsetDataRow> resultsetDataRows = getResultsetDataRows(
+				columnHeaders, sql, sqlErrorMsg, type, id);
+
+		return new GenericResultsetData(columnHeaders, resultsetDataRows);
+
+	}
+
+	private List<ResultsetColumnHeader> getResultsetColumnHeaders(
+			CachedRowSetImpl rsmd, String sqlErrorMsg, String type, String set) {
+
+		List<ResultsetColumnHeader> columnHeaders = null;
+
 		try {
-			db_connection = dataSource.getConnection();
-
-			List<ResultsetColumnHeader> columnHeaders = null;
-			List<ResultsetDataRow> resultsetDataRows = null;
-
 			if (rsmd.next()) {
 
-				String fullDatasetName = getFullDatasetName(type, set);
-				db_statement2 = db_connection.createStatement();
 				columnHeaders = new ArrayList<ResultsetColumnHeader>();
-				Boolean firstColumn = true;
 				Integer allowedListId;
-				String selectFieldList = "";
-				String selectFieldSeparator = "";
 				do {
 					ResultsetColumnHeader rsch = new ResultsetColumnHeader();
 					rsch.setColumnName(rsmd.getString("name"));
-
-					if (firstColumn) {
-						selectFieldSeparator = " ";
-						firstColumn = false;
-					} else {
-						selectFieldSeparator = ", ";
-					}
-					selectFieldList += selectFieldSeparator + "s.`"
-							+ rsch.getColumnName() + "`";
 
 					rsch.setColumnType(rsmd.getString("data_type"));
 					if (rsmd.getInt("data_length") > 0)
@@ -165,9 +181,10 @@ public class ReadWriteNonCoreDataServiceImpl implements
 
 						// logger.info("allowedListId != null: Column: " +
 						// rsch.getColumnName());
-						sql = "select v.`name` from stretchydata_allowed_value v where allowed_list_id = "
+						String sql = "select v.`name` from stretchydata_allowed_value v where allowed_list_id = "
 								+ allowedListId + " order by id";
-						ResultSet rsValues = db_statement2.executeQuery(sql);
+						CachedRowSetImpl rsValues = genericDataService
+								.getCachedResultSet(sql, sqlErrorMsg);
 						while (rsValues.next()) {
 							rsch.getColumnValues().add(
 									rsValues.getString("name"));
@@ -175,31 +192,16 @@ public class ReadWriteNonCoreDataServiceImpl implements
 					}
 					columnHeaders.add(rsch);
 				} while (rsmd.next());
+				return columnHeaders;
 
-				String unScopedSQL = "select " + selectFieldList + " from `"
-						+ type + "` t ${dataScopeCriteria} left join `"
-						+ fullDatasetName + "` s on s.id = t.id "
-						+ " where t.id = " + id;
-				sql = dataScopedSQL(unScopedSQL, type);
-				logger.info("addition fields sql: " + sql);
-				//maybe can reduce parameters a bit (type and id only needed because of exception)
-				resultsetDataRows = getResultsetDataRows(columnHeaders, sql,
-						sqlErrorMsg, type, id);
-
-			} else {
-				throw new AdditionalFieldsNotFoundException(type, set);
 			}
-
-			return new GenericResultsetData(columnHeaders, resultsetDataRows);
 
 		} catch (SQLException e) {
 			throw new PlatformDataIntegrityException("error.msg.sql.error",
-					e.getMessage(), "Additional Fields Type: " + type
-							+ "   Set: " + set + "   Id: " + id);
-		} finally {
-
-			genericDataService.dbClose(db_statement2, db_connection);
+					e.getMessage(), sqlErrorMsg);
 		}
+
+		throw new AdditionalFieldsNotFoundException(type, set);
 	}
 
 	private List<ResultsetDataRow> getResultsetDataRows(
