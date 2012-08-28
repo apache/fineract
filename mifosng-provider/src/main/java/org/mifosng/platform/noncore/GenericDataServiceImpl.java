@@ -37,7 +37,7 @@ public class GenericDataServiceImpl implements GenericDataService {
 	}
 
 	@Override
-	public CachedRowSetImpl getCachedResultSet(String sql, String errorMsg) {
+	public CachedRowSetImpl getCachedResultSet(String sql, String sqlErrorMsg) {
 
 		Connection db_connection = null;
 		Statement db_statement = null;
@@ -51,7 +51,7 @@ public class GenericDataServiceImpl implements GenericDataService {
 			return crs;
 		} catch (SQLException e) {
 			throw new PlatformDataIntegrityException("error.msg.sql.error",
-					e.getMessage(), errorMsg);
+					e.getMessage(), sqlErrorMsg);
 		} finally {
 			dbClose(db_statement, db_connection);
 

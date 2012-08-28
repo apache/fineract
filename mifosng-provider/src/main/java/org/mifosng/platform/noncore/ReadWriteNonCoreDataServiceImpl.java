@@ -114,21 +114,18 @@ public class ReadWriteNonCoreDataServiceImpl implements
 	private GenericResultsetData fillExtraDataGenericResultSet(
 			final String type, final String set, final Long id) {
 
-
 		String sql = "select f.`name`, f.data_type, f.data_length, f.display_type, f.allowed_list_id from stretchydata_datasettype t join stretchydata_dataset d on d.datasettype_id = t.id join stretchydata_dataset_fields f on f.dataset_id = d.id where d.`name` = '"
 				+ set + "' and t.`name` = '" + type + "' order by f.id";
 
 		String sqlErrorMsg = "Additional Fields Type: " + type + "   Set: "
 				+ set + "   Id: " + id;
-		
-		CachedRowSetImpl rsmd = genericDataService.getCachedResultSet(sql, sqlErrorMsg);
-		
-		
-		
-		
+
+		CachedRowSetImpl rsmd = genericDataService.getCachedResultSet(sql,
+				sqlErrorMsg);
+
 		Connection db_connection = null;
 		Statement db_statement2 = null;
-		//Statement db_statement3 = null;
+		// Statement db_statement3 = null;
 		try {
 			db_connection = dataSource.getConnection();
 
@@ -160,10 +157,10 @@ public class ReadWriteNonCoreDataServiceImpl implements
 					rsch.setColumnType(rsmd.getString("data_type"));
 					if (rsmd.getInt("data_length") > 0)
 						rsch.setColumnLength(rsmd.getInt("data_length"));
-					
+
 					rsch.setColumnDisplayType(rsmd.getString("display_type"));
 					allowedListId = rsmd.getInt("allowed_list_id");
-					
+
 					if (allowedListId > 0) {
 
 						// logger.info("allowedListId != null: Column: " +
@@ -179,39 +176,16 @@ public class ReadWriteNonCoreDataServiceImpl implements
 					columnHeaders.add(rsch);
 				} while (rsmd.next());
 
-				
 				String unScopedSQL = "select " + selectFieldList + " from `"
 						+ type + "` t ${dataScopeCriteria} left join `"
 						+ fullDatasetName + "` s on s.id = t.id "
 						+ " where t.id = " + id;
 				sql = dataScopedSQL(unScopedSQL, type);
 				logger.info("addition fields sql: " + sql);
+				//maybe can reduce parameters a bit (type and id only needed because of exception)
+				resultsetDataRows = getResultsetDataRows(columnHeaders, sql,
+						sqlErrorMsg, type, id);
 
-				CachedRowSetImpl rs = genericDataService.getCachedResultSet(sql, sqlErrorMsg);
-				//db_statement3 = db_connection.createStatement();
-				//ResultSet rs = db_statement3.executeQuery(sql);
-
-				if (rs.next()) {
-					String columnName = null;
-					String columnValue = null;
-					resultsetDataRows = new ArrayList<ResultsetDataRow>();
-					ResultsetDataRow resultsetDataRow;
-					do {
-						resultsetDataRow = new ResultsetDataRow();
-						List<String> columnValues = new ArrayList<String>();
-
-						for (int i = 0; i < columnHeaders.size(); i++) {
-							columnName = columnHeaders.get(i).getColumnName();
-							columnValue = rs.getString(columnName);
-							columnValues.add(columnValue);
-						}
-						resultsetDataRow.setRow(columnValues);
-						resultsetDataRows.add(resultsetDataRow);
-					} while (rs.next());
-				} else {
-					// could also be not found because of data scope
-					throw new AdditionalFieldsNotFoundException(type, id);
-				}
 			} else {
 				throw new AdditionalFieldsNotFoundException(type, set);
 			}
@@ -226,6 +200,44 @@ public class ReadWriteNonCoreDataServiceImpl implements
 
 			genericDataService.dbClose(db_statement2, db_connection);
 		}
+	}
+
+	private List<ResultsetDataRow> getResultsetDataRows(
+			List<ResultsetColumnHeader> columnHeaders, String sql,
+			String sqlErrorMsg, String type, Long id) {
+
+		List<ResultsetDataRow> resultsetDataRows = null;
+		CachedRowSetImpl rs = genericDataService.getCachedResultSet(sql,
+				sqlErrorMsg);
+
+		try {
+			if (rs.next()) {
+				String columnName = null;
+				String columnValue = null;
+				resultsetDataRows = new ArrayList<ResultsetDataRow>();
+				ResultsetDataRow resultsetDataRow;
+				do {
+					resultsetDataRow = new ResultsetDataRow();
+					List<String> columnValues = new ArrayList<String>();
+
+					for (int i = 0; i < columnHeaders.size(); i++) {
+						columnName = columnHeaders.get(i).getColumnName();
+						columnValue = rs.getString(columnName);
+						columnValues.add(columnValue);
+					}
+					resultsetDataRow.setRow(columnValues);
+					resultsetDataRows.add(resultsetDataRow);
+				} while (rs.next());
+				return resultsetDataRows;
+			}
+		} catch (SQLException e) {
+			throw new PlatformDataIntegrityException("error.msg.sql.error",
+					e.getMessage(), sqlErrorMsg);
+		}
+		// could also be not found because of data scope so need to split this
+		// up
+		throw new AdditionalFieldsNotFoundException(type, id);
+
 	}
 
 	@Override
