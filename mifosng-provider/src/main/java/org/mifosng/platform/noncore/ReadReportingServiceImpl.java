@@ -331,7 +331,6 @@ public class ReadReportingServiceImpl implements
 		manager.registerDefaults();
 		Resource res;
 
-		logger.info("outputType: " + outputType);
 		try {
 			res = manager.createDirectly(reportPath, MasterReport.class);
 			MasterReport masterReport = (MasterReport) res.getResource();

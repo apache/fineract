@@ -81,8 +81,8 @@ public class GenericDataServiceImpl implements GenericDataService {
 
 	@Override
 	public String replace(String str, String pattern, String replace) {
-		// JPW - this replace may / may not be any better or quick that the
-		// apache stringutils equivalent. It works. but if someone shows the
+		// JPW - this replace may / may not be any better or quicker than the
+		// apache stringutils equivalent. It works, but if someone shows the
 		// apache one to be about the same then this can be removed.
 		int s = 0;
 		int e = 0;

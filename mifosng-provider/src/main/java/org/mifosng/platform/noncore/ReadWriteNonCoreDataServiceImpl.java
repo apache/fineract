@@ -25,6 +25,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.sun.rowset.CachedRowSetImpl;
+
 @Service
 public class ReadWriteNonCoreDataServiceImpl implements
 		ReadWriteNonCoreDataService {
@@ -65,6 +67,7 @@ public class ReadWriteNonCoreDataServiceImpl implements
 			} else {
 				andClause = " and t.`name` = '" + type + "'";
 			}
+			// PERMITTED ADDITIONAL FIELDS datasets
 			String sql = "select d.id, d.`name` as 'set', t.`name` as 'type' "
 					+ " from stretchydata_dataset d join stretchydata_datasettype t on t.id = d.datasettype_id "
 					+ " where exists"
@@ -112,16 +115,29 @@ public class ReadWriteNonCoreDataServiceImpl implements
 			final String type, final String set, final Long id) {
 
 		Connection db_connection = null;
-		Statement db_statement1 = null;
+		// Statement db_statement1 = null;
 		Statement db_statement2 = null;
 		Statement db_statement3 = null;
 		try {
+
+			/*
+			 * while (crs.next()) { logger.info("Cached - Name: " +
+			 * crs.getString("name") + "    Data Type: " +
+			 * crs.getString("data_type") + "    Data Length: " +
+			 * crs.getString("data_length") + "    Display Type: " +
+			 * crs.getString("display_type") + "    allowed_list_id: " +
+			 * crs.getString("allowed_list_id")); }
+			 */
+
 			db_connection = dataSource.getConnection();
-			db_statement1 = db_connection.createStatement();
+			// db_statement1 = db_connection.createStatement();
 			String sql = "select f.`name`, f.data_type, f.data_length, f.display_type, f.allowed_list_id from stretchydata_datasettype t join stretchydata_dataset d on d.datasettype_id = t.id join stretchydata_dataset_fields f on f.dataset_id = d.id where d.`name` = '"
 					+ set + "' and t.`name` = '" + type + "' order by f.id";
 
-			ResultSet rsmd = db_statement1.executeQuery(sql);
+			String sqlErrorMsg = "Additional Fields Type: " + type + "   Set: "
+					+ set + "   Id: " + id;
+			CachedRowSetImpl rsmd = getCachedResultSet(sql, sqlErrorMsg);
+			// ResultSet rsmd = db_statement1.executeQuery(sql);
 
 			List<ResultsetColumnHeader> columnHeaders = null;
 			List<ResultsetDataRow> resultsetDataRows = null;
@@ -151,8 +167,10 @@ public class ReadWriteNonCoreDataServiceImpl implements
 					rsch.setColumnType(rsmd.getString("data_type"));
 					if (rsmd.getInt("data_length") > 0)
 						rsch.setColumnLength(rsmd.getInt("data_length"));
+					
 					rsch.setColumnDisplayType(rsmd.getString("display_type"));
 					allowedListId = rsmd.getInt("allowed_list_id");
+					
 					if (allowedListId > 0) {
 
 						// logger.info("allowedListId != null: Column: " +
@@ -211,9 +229,9 @@ public class ReadWriteNonCoreDataServiceImpl implements
 					e.getMessage(), "Additional Fields Type: " + type
 							+ "   Set: " + set + "   Id: " + id);
 		} finally {
+
 			genericDataService.dbClose(db_statement2, null);
-			genericDataService.dbClose(db_statement3, null);
-			genericDataService.dbClose(db_statement1, db_connection);
+			genericDataService.dbClose(db_statement3, db_connection);
 		}
 	}
 
@@ -508,4 +526,25 @@ public class ReadWriteNonCoreDataServiceImpl implements
 
 	}
 
+	private CachedRowSetImpl getCachedResultSet(String sql, String errorMsg) {
+
+		Connection db_connection = null;
+		Statement db_statement = null;
+		try {
+			db_connection = dataSource.getConnection();
+			db_statement = db_connection.createStatement();
+			ResultSet rs = db_statement.executeQuery(sql);
+
+			CachedRowSetImpl crs = new CachedRowSetImpl();
+			crs.populate(rs);
+			return crs;
+		} catch (SQLException e) {
+			throw new PlatformDataIntegrityException("error.msg.sql.error",
+					e.getMessage(), errorMsg);
+		} finally {
+			genericDataService.dbClose(db_statement, db_connection);
+
+		}
+
+	}
 }
