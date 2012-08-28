@@ -159,7 +159,7 @@ public class GoogleGsonApiJsonSerializerService implements
 			Arrays.asList("id", "name", "amount", "currency", "active",
 					"chargeAppliesTo", "chargeTimeType",
 					"chargeCalculationType", "chargeCalculationTypeOptions",
-					"currencyOptions"));
+                    "chargeAppliesToOptions", "chargeTimeTypeOptions", "currencyOptions"));
 
 	private final GoogleGsonSerializerHelper helper;
 
