@@ -8,6 +8,7 @@ import org.mifosng.platform.charge.domain.ChargeCalculationMethod;
 import org.mifosng.platform.charge.domain.ChargeTimeType;
 import org.mifosng.platform.currency.service.CurrencyReadPlatformService;
 import org.mifosng.platform.exceptions.ChargeNotFoundException;
+import org.mifosng.platform.infrastructure.JdbcSupport;
 import org.mifosng.platform.infrastructure.TenantAwareRoutingDataSource;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,12 +73,11 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
 
     @Override
     public ChargeData retrieveNewChargeDetails() {
+
         this.context.authenticatedUser();
 
         List<CurrencyData> currencyOptions = currencyReadPlatformService.retrieveAllowedCurrencies();
-        CurrencyData currency = new CurrencyData("", "", 0, "", "");
 
-        EnumOptionData allowedChargeCalculationType = chargeCalculationType(ChargeCalculationMethod.FLAT);
         List<EnumOptionData> allowedChargeCalculationMethodsOptions = Arrays.asList(
                 chargeCalculationType(ChargeCalculationMethod.FLAT),
                 chargeCalculationType(ChargeCalculationMethod.PERCENT_OF_AMOUNT),
@@ -85,14 +85,11 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
                 chargeCalculationType(ChargeCalculationMethod.PERCENT_OF_INTEREST)
         );
 
-        EnumOptionData allowedChargeAppliesTo = chargeAppliesTo(ChargeAppliesTo.LOAN);
-        List<EnumOptionData> allowedChargeAppliesToOptions = Arrays.asList(allowedChargeAppliesTo);
+        List<EnumOptionData> allowedChargeAppliesToOptions = Arrays.asList(chargeAppliesTo(ChargeAppliesTo.LOAN));
 
-        EnumOptionData allowedChargeTime = chargeTimeType(ChargeTimeType.DISBURSEMENT);
-        List<EnumOptionData> allowedChargeTimeOptions = Arrays.asList(allowedChargeTime);
+        List<EnumOptionData> allowedChargeTimeOptions = Arrays.asList(chargeTimeType(ChargeTimeType.DISBURSEMENT));
 
-        return ChargeData.template(currency, allowedChargeTime, allowedChargeAppliesTo, allowedChargeCalculationType,
-                currencyOptions, allowedChargeCalculationMethodsOptions,
+        return ChargeData.template(currencyOptions, allowedChargeCalculationMethodsOptions,
                 allowedChargeAppliesToOptions, allowedChargeTimeOptions);
     }
 
@@ -101,7 +98,10 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
         public String chargeSchema(){
             return "c.id as id, c.name as name, c.amount as amount, c.currency_code as currencyCode, " +
                    "charge_applies_to_enum as chargeAppliesTo, charge_time_enum as chargeTime, " +
-                   "charge_calculation_enum as chargeCalculation, is_active as active from m_charge c ";
+                   "charge_calculation_enum as chargeCalculation, is_active as active, oc.name as currencyName, " +
+                   "oc.decimal_places as currencyDecimalPlaces, oc.display_symbol as currencyDisplaySymbol, " +
+                   "oc.internationalized_name_code as currencyNameCode from m_charge c " +
+                   "join m_organisation_currency oc on c.currency_code = oc.code";
         }
 
         @Override
@@ -109,8 +109,15 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
             Long id = rs.getLong("id");
             String name = rs.getString("name");
             BigDecimal amount = rs.getBigDecimal("amount");
+
             String currencyCode = rs.getString("currencyCode");
-            CurrencyData currency = new CurrencyData(currencyCode, "", 0, "", "");
+            String currencyName = rs.getString("currencyName");
+            String currencyNameCode = rs.getString("currencyNameCode");
+            String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
+            Integer currencyDecimalPlaces = JdbcSupport.getInteger(rs, "currencyDecimalPlaces");
+
+            CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDecimalPlaces,
+                    currencyDisplaySymbol, currencyNameCode);
 
             int chargeAppliesTo = rs.getInt("chargeAppliesTo");
             EnumOptionData chargeAppliesToType = ChargeEnumerations.chargeAppliesTo(chargeAppliesTo);
