@@ -16,11 +16,11 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriInfo;
 
-import org.mifosng.platform.ReadExtraDataAndReportingService;
 import org.mifosng.platform.api.data.GenericResultsetData;
 import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
 import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
 import org.mifosng.platform.exceptions.NoAuthorizationException;
+import org.mifosng.platform.noncore.ReadReportingService;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.user.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +40,7 @@ public class ReportsApiResource {
 	}
 
 	@Autowired
-	private ReadExtraDataAndReportingService readExtraDataAndReportingService;
+	private ReadReportingService readExtraDataAndReportingService;
 
 	@Autowired
 	private ApiJsonSerializerService apiJsonSerializerService;

@@ -23,7 +23,6 @@ import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.mifosng.platform.InvalidSqlException;
-import org.mifosng.platform.ReadExtraDataAndReportingService;
 import org.mifosng.platform.api.data.AdditionalFieldsSetData;
 import org.mifosng.platform.api.data.ApiParameterError;
 import org.mifosng.platform.api.data.EntityIdentifier;
@@ -32,6 +31,7 @@ import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
 import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
 import org.mifosng.platform.exceptions.NoAuthorizationException;
 import org.mifosng.platform.exceptions.PlatformApiDataValidationException;
+import org.mifosng.platform.noncore.ReadWriteNonCoreDataService;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.user.domain.AppUser;
 import org.slf4j.Logger;
@@ -56,7 +56,7 @@ public class AdditionalFieldsApiResource {
 	}
 
 	@Autowired
-	private ReadExtraDataAndReportingService readExtraDataAndReportingService;
+	private ReadWriteNonCoreDataService readWriteAdditionalFieldsService;
 
 	@Autowired
 	private ApiJsonSerializerService apiJsonSerializerService;
@@ -67,7 +67,7 @@ public class AdditionalFieldsApiResource {
 	public String datasets(@QueryParam("type") final String type,
 			@Context final UriInfo uriInfo) {
 
-		List<AdditionalFieldsSetData> result = this.readExtraDataAndReportingService
+		List<AdditionalFieldsSetData> result = this.readWriteAdditionalFieldsService
 				.retrieveExtraDatasetNames(type);
 
 		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo
@@ -87,7 +87,7 @@ public class AdditionalFieldsApiResource {
 		checkUserPermissionForSet(type, set, "READ");
 
 		try {
-			GenericResultsetData result = this.readExtraDataAndReportingService
+			GenericResultsetData result = this.readWriteAdditionalFieldsService
 					.retrieveExtraData(type, set, id);
 
 			boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo
@@ -142,7 +142,7 @@ public class AdditionalFieldsApiResource {
 						.entity("JSON body is wrong").build());
 			}
 
-			this.readExtraDataAndReportingService.updateExtraData(type, set,
+			this.readWriteAdditionalFieldsService.updateExtraData(type, set,
 					id, queryParams);
 
 			EntityIdentifier entityIdentifier = new EntityIdentifier(

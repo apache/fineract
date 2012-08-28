@@ -12,9 +12,9 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import org.mifosng.platform.InvalidSqlException;
-import org.mifosng.platform.ReadExtraDataAndReportingService;
 import org.mifosng.platform.api.data.ApiParameterError;
 import org.mifosng.platform.exceptions.PlatformApiDataValidationException;
+import org.mifosng.platform.noncore.ReadWriteNonCoreDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -24,28 +24,34 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class DataTableApiResource {
 
-//	private final static Logger logger = LoggerFactory.getLogger(DataTableApiResource.class);
+	// private final static Logger logger =
+	// LoggerFactory.getLogger(DataTableApiResource.class);
 
 	@Autowired
-	private ReadExtraDataAndReportingService readExtraDataAndReportingService;
-	
+	private ReadWriteNonCoreDataService readWriteNonCoreDataService;
+
 	@GET
 	@Path("{datatable}")
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
 	public String extraData(@PathParam("datatable") final String datatable,
 			@QueryParam("sqlFields") final String sqlFields,
 			@QueryParam("sqlSearch") final String sqlSearch,
 			@QueryParam("sqlOrder") final String sqlOrder
-//			,@Context final UriInfo uriInfo
-			) {
+	// ,@Context final UriInfo uriInfo
+	) {
 
 		try {
-			//GenericResultsetData result = this.readExtraDataAndReportingService.retrieveDataTable(datatable);
-			return this.readExtraDataAndReportingService.retrieveDataTable(datatable, sqlFields, sqlSearch, sqlOrder);
+			// GenericResultsetData result =
+			// this.readExtraDataAndReportingService.retrieveDataTable(datatable);
+			return this.readWriteNonCoreDataService.retrieveDataTable(
+					datatable, sqlFields, sqlSearch, sqlOrder);
 
-			//boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-			//return this.apiDataConversionService.convertGenericResultsetDataToJson(prettyPrint, result);
+			// boolean prettyPrint =
+			// ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+			// return
+			// this.apiDataConversionService.convertGenericResultsetDataToJson(prettyPrint,
+			// result);
 		} catch (InvalidSqlException e) {
 			List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 			ApiParameterError error = ApiParameterError.parameterError(
