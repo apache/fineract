@@ -36,10 +36,10 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
 
             ChargeAppliesTo chargeAppliesTo = ChargeAppliesTo.fromInt(command.getChargeAppliesTo());
             ChargeTimeType chargeTimeType = ChargeTimeType.fromInt(command.getChargeTimeType());
-            ChargeCalculationMethod chargeCalculationMethod = ChargeCalculationMethod.fromInt(command.getChargeCalculationType());
+            ChargeCalculationType chargeCalculationType = ChargeCalculationType.fromInt(command.getChargeCalculationType());
 
             Charge charge = Charge.createNew(command.getName(), command.getAmount(), command.getCurrencyCode(),
-                    chargeAppliesTo, chargeTimeType, chargeCalculationMethod, command.isActive());
+                    chargeAppliesTo, chargeTimeType, chargeCalculationType, command.isActive());
 
             this.chargeRepository.saveAndFlush(charge);
 
