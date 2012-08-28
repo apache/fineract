@@ -23,17 +23,13 @@ public class ChargeData {
     private final List<EnumOptionData> chargeTimeTypeOptions;
     
     public static ChargeData template(
-            final CurrencyData currency,
-    		final EnumOptionData chargeTimeType,
-    		final EnumOptionData chargeAppliesToType,
-    		final EnumOptionData chargeCalculationType,
-    		final List<CurrencyData> currencyOptions,
-    		final List<EnumOptionData> chargeCalculationTypeOptions,
+            final List<CurrencyData> currencyOptions,
+            final List<EnumOptionData> chargeCalculationTypeOptions,
             final List<EnumOptionData> chargeAppliesToOptions,
             final List<EnumOptionData> chargeTimeTypeOptions) {
-		return new ChargeData(null, null, null, currency, chargeTimeType, chargeAppliesToType, chargeCalculationType, false,
+        return new ChargeData(null, null, null, null, null, null, null, false,
                 currencyOptions, chargeCalculationTypeOptions, chargeAppliesToOptions, chargeTimeTypeOptions);
-	}
+    }
 
     public ChargeData(ChargeData charge, ChargeData template){
         this(charge.getId(), charge.getName(), charge.getAmount(), charge.getCurrency(), charge.getChargeTimeType(),
