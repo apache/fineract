@@ -96,7 +96,9 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
 		public String officeTransactionSchema() {
 			return " ot.id as id, ot.transaction_date as transactionDate, ot.from_office_id as fromOfficeId, fromoff.name as fromOfficeName, "
 					+ " ot.to_office_id as toOfficeId, tooff.name as toOfficeName, ot.transaction_amount as transactionAmount, ot.description as description, "
-					+ " ot.currency_code as currencyCode, rc.decimal_places as digitsAfterDecimal"
+					+ " ot.currency_code as currencyCode, rc.decimal_places as currencyDigits, "
+					+ "rc.name as currencyName, rc.internationalized_name_code as currencyNameCode, rc.display_symbol as currencyDisplaySymbol "
+
 					+ " from m_office_transaction ot "
 					+ " left join m_office fromoff on fromoff.id = ot.from_office_id "
 					+ " left join m_office tooff on tooff.id = ot.to_office_id "
@@ -114,16 +116,26 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
 			String fromOfficeName = rs.getString("fromOfficeName");
 			Long toOfficeId = JdbcSupport.getLong(rs, "toOfficeId");
 			String toOfficeName = rs.getString("toOfficeName");
+
 			String currencyCode = rs.getString("currencyCode");
-			Integer digitsAfterDecimal = JdbcSupport.getInteger(rs,
-					"digitsAfterDecimal");
+			String currencyName = rs.getString("currencyName");
+			String currencyNameCode = rs.getString("currencyNameCode");
+			String currencyDisplaySymbol = rs
+					.getString("currencyDisplaySymbol");
+			Integer currencyDigits = JdbcSupport.getInteger(rs,
+					"currencyDigits");
+
+			CurrencyData currencyData = new CurrencyData(currencyCode,
+					currencyName, currencyDigits, currencyDisplaySymbol,
+					currencyNameCode);
+
 			BigDecimal transactionAmount = rs
 					.getBigDecimal("transactionAmount");
 			String description = rs.getString("description");
 
 			return new OfficeTransactionData(id, transactionDate, fromOfficeId,
-					fromOfficeName, toOfficeId, toOfficeName, currencyCode,
-					digitsAfterDecimal, transactionAmount, description);
+					fromOfficeName, toOfficeId, toOfficeName, currencyData,
+					transactionAmount, description);
 		}
 	}
 
@@ -221,11 +233,13 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
 		String hierarchySearchString = hierarchy + "%";
 
 		OfficeTransactionMapper rm = new OfficeTransactionMapper();
-		String sql = "select " + rm.officeTransactionSchema()
+		String sql = "select "
+				+ rm.officeTransactionSchema()
 				+ " where (fromoff.hierarchy like ? or tooff.hierarchy like ?) order by ot.transaction_date, ot.id";
 
-		return this.jdbcTemplate.query(sql, rm,
-				new Object[] { hierarchySearchString, hierarchySearchString });	}
+		return this.jdbcTemplate.query(sql, rm, new Object[] {
+				hierarchySearchString, hierarchySearchString });
+	}
 
 	@Override
 	public OfficeTransactionData retrieveNewOfficeTransactionDetails() {

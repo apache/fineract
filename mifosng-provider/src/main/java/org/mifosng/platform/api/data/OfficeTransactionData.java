@@ -16,8 +16,7 @@ public class OfficeTransactionData {
 	private final String fromOfficeName;
 	private final Long toOfficeId;
 	private final String toOfficeName;
-	private final String currencyCode;
-	private final Integer digitsAfterDecimal;
+	private CurrencyData currency;
 	private final BigDecimal transactionAmount;
 	private final String description;
 	private final List<CurrencyData> currencyOptions;
@@ -34,8 +33,7 @@ public class OfficeTransactionData {
 		this.fromOfficeName = null;
 		this.toOfficeId = null;
 		this.toOfficeName = null;
-		this.currencyCode = null;
-		this.digitsAfterDecimal = null;
+		this.currency = null;
 		this.transactionAmount = null;
 		this.description = null;
 	}
@@ -43,16 +41,14 @@ public class OfficeTransactionData {
 	public OfficeTransactionData(final Long id,
 			final LocalDate transactionDate, final Long fromOfficeId,
 			final String fromOfficeName, final Long toOfficeId,
-			final String toOfficeName, final String currencyCode,
-			final Integer digitsAfterDecimal,
+			final String toOfficeName, final CurrencyData currency,
 			final BigDecimal transactionAmount, final String description) {
 		this.id = id;
 		this.fromOfficeId = fromOfficeId;
 		this.fromOfficeName = fromOfficeName;
 		this.toOfficeId = toOfficeId;
 		this.toOfficeName = toOfficeName;
-		this.currencyCode = currencyCode;
-		this.digitsAfterDecimal = digitsAfterDecimal;
+		this.currency = currency;
 		this.transactionAmount = transactionAmount;
 		this.description = description;
 		this.transactionDate = transactionDate;
@@ -93,12 +89,8 @@ public class OfficeTransactionData {
 		return toOfficeName;
 	}
 
-	public String getCurrencyCode() {
-		return currencyCode;
-	}
-
-	public Integer getDigitsAfterDecimal() {
-		return digitsAfterDecimal;
+	public CurrencyData getCurrency() {
+		return currency;
 	}
 
 	public BigDecimal getTransactionAmount() {
