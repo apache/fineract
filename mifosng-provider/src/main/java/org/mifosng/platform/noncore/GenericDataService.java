@@ -5,7 +5,11 @@ import java.sql.Statement;
 
 import org.mifosng.platform.api.data.GenericResultsetData;
 
+import com.sun.rowset.CachedRowSetImpl;
+
 public interface GenericDataService {
+
+	public CachedRowSetImpl getCachedResultSet(String sql, String errorMsg);
 
 	GenericResultsetData fillGenericResultSet(final String sql);
 

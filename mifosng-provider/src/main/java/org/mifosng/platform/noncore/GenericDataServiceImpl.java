@@ -20,6 +20,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.sun.rowset.CachedRowSetImpl;
+
 @Service
 public class GenericDataServiceImpl implements GenericDataService {
 
@@ -32,6 +34,29 @@ public class GenericDataServiceImpl implements GenericDataService {
 	public GenericDataServiceImpl(final TenantAwareRoutingDataSource dataSource) {
 
 		this.dataSource = dataSource;
+	}
+
+	@Override
+	public CachedRowSetImpl getCachedResultSet(String sql, String errorMsg) {
+
+		Connection db_connection = null;
+		Statement db_statement = null;
+		try {
+			db_connection = dataSource.getConnection();
+			db_statement = db_connection.createStatement();
+			ResultSet rs = db_statement.executeQuery(sql);
+
+			CachedRowSetImpl crs = new CachedRowSetImpl();
+			crs.populate(rs);
+			return crs;
+		} catch (SQLException e) {
+			throw new PlatformDataIntegrityException("error.msg.sql.error",
+					e.getMessage(), errorMsg);
+		} finally {
+			dbClose(db_statement, db_connection);
+
+		}
+
 	}
 
 	@Override

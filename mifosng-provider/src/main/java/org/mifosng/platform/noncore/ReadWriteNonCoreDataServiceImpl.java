@@ -114,30 +114,23 @@ public class ReadWriteNonCoreDataServiceImpl implements
 	private GenericResultsetData fillExtraDataGenericResultSet(
 			final String type, final String set, final Long id) {
 
+
+		String sql = "select f.`name`, f.data_type, f.data_length, f.display_type, f.allowed_list_id from stretchydata_datasettype t join stretchydata_dataset d on d.datasettype_id = t.id join stretchydata_dataset_fields f on f.dataset_id = d.id where d.`name` = '"
+				+ set + "' and t.`name` = '" + type + "' order by f.id";
+
+		String sqlErrorMsg = "Additional Fields Type: " + type + "   Set: "
+				+ set + "   Id: " + id;
+		
+		CachedRowSetImpl rsmd = genericDataService.getCachedResultSet(sql, sqlErrorMsg);
+		
+		
+		
+		
 		Connection db_connection = null;
-		// Statement db_statement1 = null;
 		Statement db_statement2 = null;
-		Statement db_statement3 = null;
+		//Statement db_statement3 = null;
 		try {
-
-			/*
-			 * while (crs.next()) { logger.info("Cached - Name: " +
-			 * crs.getString("name") + "    Data Type: " +
-			 * crs.getString("data_type") + "    Data Length: " +
-			 * crs.getString("data_length") + "    Display Type: " +
-			 * crs.getString("display_type") + "    allowed_list_id: " +
-			 * crs.getString("allowed_list_id")); }
-			 */
-
 			db_connection = dataSource.getConnection();
-			// db_statement1 = db_connection.createStatement();
-			String sql = "select f.`name`, f.data_type, f.data_length, f.display_type, f.allowed_list_id from stretchydata_datasettype t join stretchydata_dataset d on d.datasettype_id = t.id join stretchydata_dataset_fields f on f.dataset_id = d.id where d.`name` = '"
-					+ set + "' and t.`name` = '" + type + "' order by f.id";
-
-			String sqlErrorMsg = "Additional Fields Type: " + type + "   Set: "
-					+ set + "   Id: " + id;
-			CachedRowSetImpl rsmd = getCachedResultSet(sql, sqlErrorMsg);
-			// ResultSet rsmd = db_statement1.executeQuery(sql);
 
 			List<ResultsetColumnHeader> columnHeaders = null;
 			List<ResultsetDataRow> resultsetDataRows = null;
@@ -186,16 +179,17 @@ public class ReadWriteNonCoreDataServiceImpl implements
 					columnHeaders.add(rsch);
 				} while (rsmd.next());
 
+				
 				String unScopedSQL = "select " + selectFieldList + " from `"
 						+ type + "` t ${dataScopeCriteria} left join `"
 						+ fullDatasetName + "` s on s.id = t.id "
 						+ " where t.id = " + id;
-
 				sql = dataScopedSQL(unScopedSQL, type);
-
 				logger.info("addition fields sql: " + sql);
-				db_statement3 = db_connection.createStatement();
-				ResultSet rs = db_statement3.executeQuery(sql);
+
+				CachedRowSetImpl rs = genericDataService.getCachedResultSet(sql, sqlErrorMsg);
+				//db_statement3 = db_connection.createStatement();
+				//ResultSet rs = db_statement3.executeQuery(sql);
 
 				if (rs.next()) {
 					String columnName = null;
@@ -230,8 +224,7 @@ public class ReadWriteNonCoreDataServiceImpl implements
 							+ "   Set: " + set + "   Id: " + id);
 		} finally {
 
-			genericDataService.dbClose(db_statement2, null);
-			genericDataService.dbClose(db_statement3, db_connection);
+			genericDataService.dbClose(db_statement2, db_connection);
 		}
 	}
 
@@ -526,25 +519,4 @@ public class ReadWriteNonCoreDataServiceImpl implements
 
 	}
 
-	private CachedRowSetImpl getCachedResultSet(String sql, String errorMsg) {
-
-		Connection db_connection = null;
-		Statement db_statement = null;
-		try {
-			db_connection = dataSource.getConnection();
-			db_statement = db_connection.createStatement();
-			ResultSet rs = db_statement.executeQuery(sql);
-
-			CachedRowSetImpl crs = new CachedRowSetImpl();
-			crs.populate(rs);
-			return crs;
-		} catch (SQLException e) {
-			throw new PlatformDataIntegrityException("error.msg.sql.error",
-					e.getMessage(), errorMsg);
-		} finally {
-			genericDataService.dbClose(db_statement, db_connection);
-
-		}
-
-	}
 }
