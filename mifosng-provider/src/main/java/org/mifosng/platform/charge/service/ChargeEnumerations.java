@@ -2,7 +2,7 @@ package org.mifosng.platform.charge.service;
 
 import org.mifosng.platform.api.data.EnumOptionData;
 import org.mifosng.platform.charge.domain.ChargeAppliesTo;
-import org.mifosng.platform.charge.domain.ChargeCalculationMethod;
+import org.mifosng.platform.charge.domain.ChargeCalculationType;
 import org.mifosng.platform.charge.domain.ChargeTimeType;
 
 public class ChargeEnumerations {
@@ -42,26 +42,26 @@ public class ChargeEnumerations {
     }
 
     public static EnumOptionData chargeCalculationType(final int id){
-        return chargeCalculationType(ChargeCalculationMethod.fromInt(id));
+        return chargeCalculationType(ChargeCalculationType.fromInt(id));
     }
 
-    public static EnumOptionData chargeCalculationType(ChargeCalculationMethod type){
+    public static EnumOptionData chargeCalculationType(ChargeCalculationType type){
         EnumOptionData optionData = null;
         switch (type){
             case FLAT:
-                optionData = new EnumOptionData(ChargeCalculationMethod.FLAT.getValue().longValue(), ChargeCalculationMethod.FLAT.getCode(), "Flat");
+                optionData = new EnumOptionData(ChargeCalculationType.FLAT.getValue().longValue(), ChargeCalculationType.FLAT.getCode(), "Flat");
                 break;
             case PERCENT_OF_AMOUNT:
-                optionData = new EnumOptionData(ChargeCalculationMethod.PERCENT_OF_AMOUNT.getValue().longValue(), ChargeCalculationMethod.PERCENT_OF_AMOUNT.getCode(), "% Amount");
+                optionData = new EnumOptionData(ChargeCalculationType.PERCENT_OF_AMOUNT.getValue().longValue(), ChargeCalculationType.PERCENT_OF_AMOUNT.getCode(), "% Amount");
                 break;
             case PERCENT_OF_AMOUNT_AND_INTEREST:
-                optionData = new EnumOptionData(ChargeCalculationMethod.PERCENT_OF_AMOUNT_AND_INTEREST.getValue().longValue(),ChargeCalculationMethod.PERCENT_OF_AMOUNT_AND_INTEREST.getCode(), "% Loan Amount + Interest");
+                optionData = new EnumOptionData(ChargeCalculationType.PERCENT_OF_AMOUNT_AND_INTEREST.getValue().longValue(), ChargeCalculationType.PERCENT_OF_AMOUNT_AND_INTEREST.getCode(), "% Loan Amount + Interest");
                 break;
             case PERCENT_OF_INTEREST:
-                optionData = new EnumOptionData(ChargeCalculationMethod.PERCENT_OF_INTEREST.getValue().longValue(), ChargeCalculationMethod.PERCENT_OF_INTEREST.getCode(), "% Interest");
+                optionData = new EnumOptionData(ChargeCalculationType.PERCENT_OF_INTEREST.getValue().longValue(), ChargeCalculationType.PERCENT_OF_INTEREST.getCode(), "% Interest");
                 break;
             default:
-                optionData = new EnumOptionData(ChargeCalculationMethod.INVALID.getValue().longValue(), ChargeCalculationMethod.INVALID.getCode(), "Invalid");
+                optionData = new EnumOptionData(ChargeCalculationType.INVALID.getValue().longValue(), ChargeCalculationType.INVALID.getCode(), "Invalid");
                 break;
         }
         return optionData;

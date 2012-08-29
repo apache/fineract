@@ -4,7 +4,7 @@ import org.mifosng.platform.api.data.ChargeData;
 import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.EnumOptionData;
 import org.mifosng.platform.charge.domain.ChargeAppliesTo;
-import org.mifosng.platform.charge.domain.ChargeCalculationMethod;
+import org.mifosng.platform.charge.domain.ChargeCalculationType;
 import org.mifosng.platform.charge.domain.ChargeTimeType;
 import org.mifosng.platform.currency.service.CurrencyReadPlatformService;
 import org.mifosng.platform.exceptions.ChargeNotFoundException;
@@ -78,18 +78,18 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
 
         List<CurrencyData> currencyOptions = currencyReadPlatformService.retrieveAllowedCurrencies();
 
-        List<EnumOptionData> allowedChargeCalculationMethodsOptions = Arrays.asList(
-                chargeCalculationType(ChargeCalculationMethod.FLAT),
-                chargeCalculationType(ChargeCalculationMethod.PERCENT_OF_AMOUNT),
-                chargeCalculationType(ChargeCalculationMethod.PERCENT_OF_AMOUNT_AND_INTEREST),
-                chargeCalculationType(ChargeCalculationMethod.PERCENT_OF_INTEREST)
+        List<EnumOptionData> allowedChargeCalculationTypeOptions = Arrays.asList(
+                chargeCalculationType(ChargeCalculationType.FLAT),
+                chargeCalculationType(ChargeCalculationType.PERCENT_OF_AMOUNT),
+                chargeCalculationType(ChargeCalculationType.PERCENT_OF_AMOUNT_AND_INTEREST),
+                chargeCalculationType(ChargeCalculationType.PERCENT_OF_INTEREST)
         );
 
         List<EnumOptionData> allowedChargeAppliesToOptions = Arrays.asList(chargeAppliesTo(ChargeAppliesTo.LOAN));
 
         List<EnumOptionData> allowedChargeTimeOptions = Arrays.asList(chargeTimeType(ChargeTimeType.DISBURSEMENT));
 
-        return ChargeData.template(currencyOptions, allowedChargeCalculationMethodsOptions,
+        return ChargeData.template(currencyOptions, allowedChargeCalculationTypeOptions,
                 allowedChargeAppliesToOptions, allowedChargeTimeOptions);
     }
 
