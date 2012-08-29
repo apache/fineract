@@ -5,16 +5,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.sql.Connection;
 import java.sql.Date;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.sql.DataSource;
 import javax.sql.rowset.CachedRowSet;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
@@ -25,7 +21,6 @@ import org.mifosng.platform.api.data.ResultsetColumnHeader;
 import org.mifosng.platform.api.data.ResultsetDataRow;
 import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
 import org.mifosng.platform.exceptions.ReportNotFoundException;
-import org.mifosng.platform.infrastructure.TenantAwareRoutingDataSource;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.user.domain.AppUser;
 import org.pentaho.reporting.engine.classic.core.ClassicEngineBoot;
@@ -54,18 +49,15 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 	private final static Logger logger = LoggerFactory
 			.getLogger(ReadReportingServiceImpl.class);
 
-	private final DataSource dataSource;
 	private Boolean noPentaho = false;
 
 	@Autowired
-	public ReadReportingServiceImpl(final PlatformSecurityContext context,
-			final TenantAwareRoutingDataSource dataSource) {
+	public ReadReportingServiceImpl(final PlatformSecurityContext context) {
 		// kick off pentaho reports server
 		ClassicEngineBoot.getInstance().start();
 		noPentaho = false;
 
 		this.context = context;
-		this.dataSource = dataSource;
 	}
 
 	@Autowired
@@ -197,7 +189,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
 	private String getSQLtoRun(final String name, final String type,
 			final Map<String, String> queryParams) {
-		
+
 		String sql = getSql(name, type);
 
 		Set<String> keys = queryParams.keySet();
@@ -238,7 +230,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 		String inputSql = "select " + type + "_sql as the_sql from stretchy_"
 				+ type + " where " + type + "_name = '" + name + "'";
 		inputSql = wrapSQL(inputSql);
-		
+
 		String sqlErrorMsg = "Sql: " + inputSql;
 		CachedRowSet rs = genericDataService.getCachedResultSet(inputSql,
 				sqlErrorMsg);
@@ -261,30 +253,25 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 	public String getReportType(String reportName) {
 		String sql = "SELECT ifnull(report_type,'') as report_type FROM `stretchy_report` where report_name = '"
 				+ reportName + "'";
-		String reportType = "";
 
-		Connection db_connection = null;
-		Statement db_statement = null;
-		ResultSet rs = null;
+		sql = wrapSQL(sql);
+
+		String sqlErrorMsg = "Report Name: " + reportName + "   Sql: " + sql;
+		CachedRowSet rs = genericDataService.getCachedResultSet(sql,
+				sqlErrorMsg);
+
 		try {
-			db_connection = dataSource.getConnection();
-			db_statement = db_connection.createStatement();
-			rs = db_statement.executeQuery(sql);
 
 			if (rs.next()) {
-				reportType = rs.getString("report_type");
-			} else {
-				throw new ReportNotFoundException(sql);
+				return rs.getString("report_type");
 			}
+			throw new ReportNotFoundException(sql);
+
 		} catch (SQLException e) {
 			throw new PlatformDataIntegrityException("error.msg.sql.error",
-					e.getMessage(), "Report Name: " + reportName + "   Sql: "
-							+ sql);
-		} finally {
-			genericDataService.dbClose(db_statement, db_connection);
+					e.getMessage(), sqlErrorMsg);
 		}
 
-		return reportType;
 	}
 
 	@Override
