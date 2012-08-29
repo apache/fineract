@@ -3,13 +3,13 @@ package org.mifosng.platform.noncore;
 import java.sql.Connection;
 import java.sql.Statement;
 
-import org.mifosng.platform.api.data.GenericResultsetData;
+import javax.sql.rowset.CachedRowSet;
 
-import com.sun.rowset.CachedRowSetImpl;
+import org.mifosng.platform.api.data.GenericResultsetData;
 
 public interface GenericDataService {
 
-	public CachedRowSetImpl getCachedResultSet(String sql, String errorMsg);
+	public CachedRowSet getCachedResultSet(String sql, String errorMsg);
 
 	GenericResultsetData fillGenericResultSet(final String sql);
 

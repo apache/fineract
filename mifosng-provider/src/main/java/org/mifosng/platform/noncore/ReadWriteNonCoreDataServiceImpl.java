@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.sql.DataSource;
+import javax.sql.rowset.CachedRowSet;
 
 import org.mifosng.platform.api.data.AdditionalFieldsSetData;
 import org.mifosng.platform.api.data.GenericResultsetData;
@@ -24,8 +25,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import com.sun.rowset.CachedRowSetImpl;
 
 @Service
 public class ReadWriteNonCoreDataServiceImpl implements
@@ -120,7 +119,7 @@ public class ReadWriteNonCoreDataServiceImpl implements
 		String sqlErrorMsg = "Additional Fields Type: " + type + "   Set: "
 				+ set + "   Id: " + id;
 
-		CachedRowSetImpl rsmd = genericDataService.getCachedResultSet(sql,
+		CachedRowSet rsmd = genericDataService.getCachedResultSet(sql,
 				sqlErrorMsg);
 
 		List<ResultsetColumnHeader> columnHeaders = getResultsetColumnHeaders(
@@ -157,7 +156,7 @@ public class ReadWriteNonCoreDataServiceImpl implements
 	}
 
 	private List<ResultsetColumnHeader> getResultsetColumnHeaders(
-			CachedRowSetImpl rsmd, String sqlErrorMsg, String type, String set) {
+			CachedRowSet rsmd, String sqlErrorMsg, String type, String set) {
 
 		List<ResultsetColumnHeader> columnHeaders = null;
 
@@ -183,7 +182,7 @@ public class ReadWriteNonCoreDataServiceImpl implements
 						// rsch.getColumnName());
 						String sql = "select v.`name` from stretchydata_allowed_value v where allowed_list_id = "
 								+ allowedListId + " order by id";
-						CachedRowSetImpl rsValues = genericDataService
+						CachedRowSet rsValues = genericDataService
 								.getCachedResultSet(sql, sqlErrorMsg);
 						while (rsValues.next()) {
 							rsch.getColumnValues().add(
@@ -209,7 +208,7 @@ public class ReadWriteNonCoreDataServiceImpl implements
 			String sqlErrorMsg, String type, Long id) {
 
 		List<ResultsetDataRow> resultsetDataRows = null;
-		CachedRowSetImpl rs = genericDataService.getCachedResultSet(sql,
+		CachedRowSet rs = genericDataService.getCachedResultSet(sql,
 				sqlErrorMsg);
 
 		try {

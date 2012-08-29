@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.sql.DataSource;
+import javax.sql.rowset.CachedRowSet;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
@@ -46,8 +47,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ReadReportingServiceImpl implements
-		ReadReportingService {
+public class ReadReportingServiceImpl implements ReadReportingService {
 
 	private final PlatformSecurityContext context;
 
@@ -58,8 +58,7 @@ public class ReadReportingServiceImpl implements
 	private Boolean noPentaho = false;
 
 	@Autowired
-	public ReadReportingServiceImpl(
-			final PlatformSecurityContext context,
+	public ReadReportingServiceImpl(final PlatformSecurityContext context,
 			final TenantAwareRoutingDataSource dataSource) {
 		// kick off pentaho reports server
 		ClassicEngineBoot.getInstance().start();
@@ -231,41 +230,38 @@ public class ReadReportingServiceImpl implements
 	}
 
 	private String getReportSql(String reportName) {
-		String sql = "select report_sql as the_sql from stretchy_report where report_name = '"
-				+ reportName + "'";
+		// http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=7046875 - prevent
+		// Invalid Column Name bug in sun's CachedRowSetImpl where it doesn't
+		// pick up on label names, only column names
+		String sql = "select * from (select report_sql as the_sql from stretchy_report where report_name = '"
+				+ reportName + "') x";
 		return getSql(sql);
 	}
 
 	private String getParameterSql(String parameterName) {
-		String sql = "select parameter_sql as the_sql from stretchy_parameter where parameter_name = '"
-				+ parameterName + "'";
+		String sql = "select * from (select parameter_sql as the_sql from stretchy_parameter where parameter_name = '"
+				+ parameterName + "') x";
 		return getSql(sql);
 	}
 
 	private String getSql(String inputSql) {
 
-		String sql = null;
-		Connection db_connection = null;
-		Statement db_statement = null;
-		try {
-			db_connection = dataSource.getConnection();
-			db_statement = db_connection.createStatement();
-			ResultSet rs = db_statement.executeQuery(inputSql);
+		String sqlErrorMsg = "Sql: " + inputSql;
+		CachedRowSet rs = genericDataService.getCachedResultSet(inputSql,
+				sqlErrorMsg);
 
+		try {
 			if (rs.next()) {
-				sql = rs.getString("the_sql");
-			} else {
-				throw new ReportNotFoundException(inputSql);
+				return rs.getString("the_sql");
 			}
+			throw new ReportNotFoundException(inputSql);
 
 		} catch (SQLException e) {
+			logger.info("msg: " + e.getMessage() + "   sql: " + inputSql);
 			throw new PlatformDataIntegrityException("error.msg.sql.error",
-					e.getMessage(), "Input Sql: " + inputSql);
-		} finally {
-			genericDataService.dbClose(db_statement, db_connection);
+					e.getMessage(), sqlErrorMsg);
 		}
 
-		return sql;
 	}
 
 	@Override

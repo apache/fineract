@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.sql.DataSource;
+import javax.sql.rowset.CachedRowSet;
 
 import org.mifosng.platform.api.data.GenericResultsetData;
 import org.mifosng.platform.api.data.ResultsetColumnHeader;
@@ -37,7 +38,7 @@ public class GenericDataServiceImpl implements GenericDataService {
 	}
 
 	@Override
-	public CachedRowSetImpl getCachedResultSet(String sql, String sqlErrorMsg) {
+	public CachedRowSet getCachedResultSet(String sql, String sqlErrorMsg) {
 
 		Connection db_connection = null;
 		Statement db_statement = null;
@@ -46,8 +47,9 @@ public class GenericDataServiceImpl implements GenericDataService {
 			db_statement = db_connection.createStatement();
 			ResultSet rs = db_statement.executeQuery(sql);
 
-			CachedRowSetImpl crs = new CachedRowSetImpl();
+			CachedRowSet crs = new CachedRowSetImpl();
 			crs.populate(rs);
+			//logger.info("RS Size: " + crs.size() + "     getCachedResultSet sql: " + sql);
 			return crs;
 		} catch (SQLException e) {
 			throw new PlatformDataIntegrityException("error.msg.sql.error",
@@ -62,15 +64,13 @@ public class GenericDataServiceImpl implements GenericDataService {
 	@Override
 	public GenericResultsetData fillGenericResultSet(final String sql) {
 
-		Connection db_connection = null;
-		Statement db_statement = null;
-		try {
-			db_connection = dataSource.getConnection();
-			db_statement = db_connection.createStatement();
-			ResultSet rs = db_statement.executeQuery(sql);
+		String sqlErrorMsg = "Sql: " + sql;
+		CachedRowSet rs = getCachedResultSet(sql, sqlErrorMsg);
 
-			List<ResultsetColumnHeader> columnHeaders = new ArrayList<ResultsetColumnHeader>();
-			List<ResultsetDataRow> resultsetDataRows = new ArrayList<ResultsetDataRow>();
+		List<ResultsetColumnHeader> columnHeaders = new ArrayList<ResultsetColumnHeader>();
+		List<ResultsetDataRow> resultsetDataRows = new ArrayList<ResultsetDataRow>();
+
+		try {
 
 			ResultSetMetaData rsmd = rs.getMetaData();
 			String columnName = null;
@@ -98,9 +98,7 @@ public class GenericDataServiceImpl implements GenericDataService {
 			return new GenericResultsetData(columnHeaders, resultsetDataRows);
 		} catch (SQLException e) {
 			throw new PlatformDataIntegrityException("error.msg.sql.error",
-					e.getMessage(), "Sql: " + sql);
-		} finally {
-			dbClose(db_statement, db_connection);
+					e.getMessage(), sqlErrorMsg);
 		}
 	}
 
