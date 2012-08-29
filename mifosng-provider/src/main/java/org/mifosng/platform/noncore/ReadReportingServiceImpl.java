@@ -197,13 +197,8 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
 	private String getSQLtoRun(final String name, final String type,
 			final Map<String, String> queryParams) {
-		String sql = null;
-
-		if (type.equals("report")) {
-			sql = getReportSql(name);
-		} else {
-			sql = getParameterSql(name);
-		}
+		
+		String sql = getSql(name, type);
 
 		Set<String> keys = queryParams.keySet();
 		for (String key : keys) {
@@ -222,30 +217,28 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 		sql = genericDataService.replace(sql, "${currentUserId}", currentUser
 				.getId().toString());
 
-		// wrap sql to prevent JDBC sql errors and also prevent malicious sql
-		sql = "select x.* from (" + sql + ") x";
+		sql = wrapSQL(sql);
 
 		return sql;
 
 	}
 
-	private String getReportSql(String reportName) {
+	private String wrapSQL(String sql) {
+		// wrap sql to prevent JDBC sql errors, prevent malicious sql and a
+		// CachedRowSetImpl bug
+
 		// http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=7046875 - prevent
 		// Invalid Column Name bug in sun's CachedRowSetImpl where it doesn't
 		// pick up on label names, only column names
-		String sql = "select * from (select report_sql as the_sql from stretchy_report where report_name = '"
-				+ reportName + "') x";
-		return getSql(sql);
+		return "select x.* from (" + sql + ") x";
 	}
 
-	private String getParameterSql(String parameterName) {
-		String sql = "select * from (select parameter_sql as the_sql from stretchy_parameter where parameter_name = '"
-				+ parameterName + "') x";
-		return getSql(sql);
-	}
+	private String getSql(String name, String type) {
 
-	private String getSql(String inputSql) {
-
+		String inputSql = "select " + type + "_sql as the_sql from stretchy_"
+				+ type + " where " + type + "_name = '" + name + "'";
+		inputSql = wrapSQL(inputSql);
+		
 		String sqlErrorMsg = "Sql: " + inputSql;
 		CachedRowSet rs = genericDataService.getCachedResultSet(inputSql,
 				sqlErrorMsg);
