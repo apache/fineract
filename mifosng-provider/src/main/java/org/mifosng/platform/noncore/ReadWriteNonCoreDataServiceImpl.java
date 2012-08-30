@@ -94,18 +94,7 @@ public class ReadWriteNonCoreDataServiceImpl implements
 			Long id) {
 
 		long startTime = System.currentTimeMillis();
-
-		GenericResultsetData result = fillExtraDataGenericResultSet(type, set,
-				id);
-		long elapsed = System.currentTimeMillis() - startTime;
-
-		logger.info("FINISHING SET: " + set + "     Elapsed Time: " + elapsed);
-		return result;
-	}
-
-	private GenericResultsetData fillExtraDataGenericResultSet(
-			final String type, final String set, final Long id) {
-
+		
 		checkMainResourceExistsWithinScope(type, id);
 
 		CachedRowSet columnDefinitions = getAdditionalFieldsMetaData(type, set);
@@ -117,12 +106,15 @@ public class ReadWriteNonCoreDataServiceImpl implements
 
 		String selectFieldList = getSelectFieldListFromColumnHeaders(columnHeaders);
 
-		String sql = "select " + selectFieldList + " from `" + getFullDatasetName(type, set) + "` on id = " + id;
+		String sql = "select " + selectFieldList + " from `" + type + "` t left join `" + getFullDatasetName(type, set) + "` s on s.id = t.id where t.id = " + id;
 		logger.info("addition fields sql: " + sql);
 
 		List<ResultsetDataRow> resultsetDataRows = getResultsetDataRows(
 				columnHeaders, sql, sqlErrorMsg);
 
+		long elapsed = System.currentTimeMillis() - startTime;
+		logger.info("FINISHING SET: " + set + "     Elapsed Time: " + elapsed);
+		
 		return new GenericResultsetData(columnHeaders, resultsetDataRows);
 
 	}
@@ -141,7 +133,7 @@ public class ReadWriteNonCoreDataServiceImpl implements
 			} else {
 				selectFieldSeparator = ", ";
 			}
-			selectFieldList += selectFieldSeparator + "`"
+			selectFieldList += selectFieldSeparator + "s.`"
 					+ columnHeader.getColumnName() + "`";
 		}
 		return selectFieldList;
