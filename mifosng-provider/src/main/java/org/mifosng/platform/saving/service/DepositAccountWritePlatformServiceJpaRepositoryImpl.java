@@ -129,7 +129,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 
 	@Transactional
 	@Override
-	public EntityIdentifier approveDepositApplication(DepositStateTransitionApprovalCommand command) {
+	public EntityIdentifier approveDepositApplication(final DepositStateTransitionApprovalCommand command) {
 		
 		AppUser currentUser = context.authenticatedUser();
 		
@@ -144,6 +144,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 		
 		DepositApprovalData depositApprovalData=this.depositAccountAssembler.assembleFrom(command);
 		
+		// FIXME - madhukar - you are checking for loan permission here instead of some specific deposit account permission.
 		LocalDate eventDate = command.getEventDate();
 		if (this.isBeforeToday(eventDate) && currentUser.canNotApproveLoanInPast()) {
 			throw new NoAuthorizationException("User has no authority to approve deposit with a date in the past.");
@@ -151,7 +152,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 		
 		BigDecimal depositAmount = command.getDepositAmount();
 		
-		account.approve(eventDate, defaultDepositLifecycleStateMachine(), depositApprovalData,depositAmount);
+		account.approve(eventDate, defaultDepositLifecycleStateMachine(), depositApprovalData, depositAmount);
 		this.depositAccountRepository.save(account);
 
 		return new EntityIdentifier(account.getId());
@@ -210,7 +211,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 			throw new NoAuthorizationException("User has no authority to approve deposit with a date in the past.");
 		}
 		
-		account.withdraw(eventDate, defaultDepositLifecycleStateMachine());
+		account.withdrawnByApplicant(eventDate, defaultDepositLifecycleStateMachine());
 		return new EntityIdentifier(account.getId());
 	}
 

@@ -6,8 +6,6 @@ import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -30,10 +28,12 @@ import org.mifosng.platform.user.domain.AppUser;
 @Table(name = "m_deposit_account", uniqueConstraints = @UniqueConstraint(name="deposit_acc_external_id", columnNames = { "external_id" }))
 public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 	
+	@SuppressWarnings("unused")
 	@ManyToOne
 	@JoinColumn(name = "client_id", nullable = false)
 	private Client client;
 
+	@SuppressWarnings("unused")
 	@ManyToOne
 	@JoinColumn(name = "product_id")
 	private final DepositProduct product;
@@ -41,24 +41,27 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 	@Column(name = "external_id")
 	private String externalId;
 	
+	@SuppressWarnings("unused")
 	@Embedded
 	private MonetaryCurrency currency;
 	
 	@Column(name = "deposit_amount", scale = 6, precision = 19, nullable = false)
 	private BigDecimal depositAmount;
 	
+	@SuppressWarnings("unused")
 	@Column(name = "maturity_nominal_interest_rate", scale = 6, precision = 19, nullable = false)
 	private BigDecimal interestRate;
 	
 	@Column(name = "tenure_months", nullable=false)
 	private Integer tenureInMonths;
 	
+	@SuppressWarnings("unused")
 	@Column(name = "interest_compounded_every", nullable = false)
 	private Integer interestCompoundedEvery;
 
-	@Enumerated(EnumType.ORDINAL)
+	@SuppressWarnings("unused")
 	@Column(name = "interest_compounded_every_period_enum", nullable = false)
-	private PeriodFrequencyType interestCompoundedFrequencyType;
+	private Integer interestCompoundedFrequencyType;
 	
 	@Temporal(TemporalType.DATE)
 	@Column(name = "projected_commencement_date")
@@ -68,32 +71,41 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 	@Column(name = "actual_commencement_date")
 	private Date actualCommencementDate;
 	
+	@SuppressWarnings("unused")
 	@Temporal(TemporalType.DATE)
 	@Column(name = "projected_maturity_date")
 	private Date projectedMaturityDate;
 	
+	@SuppressWarnings("unused")
 	@Temporal(TemporalType.DATE)
 	@Column(name = "actual_maturity_date")
 	private Date actualMaturityDate;
 	
+	@SuppressWarnings("unused")
 	@Column(name = "projected_interest_accrued_on_maturity", scale = 6, precision = 19, nullable = false)
 	private BigDecimal projectedInterestAccruedOnMaturity;
 	
+	@SuppressWarnings("unused")
 	@Column(name = "actual_interest_accrued", scale = 6, precision = 19, nullable = false)
 	private BigDecimal interestAccrued;
 	
+	@SuppressWarnings("unused")
 	@Column(name = "projected_total_maturity_amount", scale = 6, precision = 19, nullable = false)
 	private BigDecimal projectedTotalOnMaturity;
 	
+	@SuppressWarnings("unused")
 	@Column(name = "actual_total_amount", scale = 6, precision = 19, nullable = false)
 	private BigDecimal total;
 	
+	@SuppressWarnings("unused")
 	@Column(name = "pre_closure_interest_rate", scale = 6, precision = 19, nullable = false)
 	private BigDecimal preClosureInterestRate;
 	
+	@SuppressWarnings("unused")
 	@Column(name = "is_renewal_allowed", nullable = false)
 	private boolean renewalAllowed = false;
 	
+	@SuppressWarnings("unused")
 	@Column(name = "is_preclosure_allowed", nullable = false)
 	private boolean preClosureAllowed = false;
 	
@@ -103,14 +115,17 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 	@Column(name = "status_enum", nullable = false)
 	private Integer depositStatus;
 	
+	@SuppressWarnings("unused")
 	@Temporal(TemporalType.DATE)
 	@Column(name = "closedon_date")
 	private Date closedOnDate;
 	
+	@SuppressWarnings("unused")
 	@Temporal(TemporalType.DATE)
 	@Column(name = "rejectedon_date")
 	private Date rejectedOnDate;
 	
+	@SuppressWarnings("unused")
 	@Temporal(TemporalType.DATE)
 	@Column(name = "withdrawnon_date")
 	private Date withdrawnOnDate;	
@@ -167,7 +182,7 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 		this.tenureInMonths = termInMonths;
 		
 		this.interestCompoundedEvery = interestCompoundedEvery;
-		this.interestCompoundedFrequencyType = interestCompoundedFrequencyPeriodType;
+		this.interestCompoundedFrequencyType = interestCompoundedFrequencyPeriodType.getValue();
 		if (commencementDate != null) {
 			this.projectedCommencementDate = commencementDate.toDate();
 			this.projectedMaturityDate = commencementDate.plusMonths(this.tenureInMonths).toDate();
@@ -202,14 +217,18 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 
 	}
 
-	public void approve(final LocalDate actualCommencementDate, DepositLifecycleStateMachine depositLifecycleStateMachine, DepositApprovalData depositApprovalData, BigDecimal depositAmount) {
+	public void approve(
+			final LocalDate actualCommencementDate, 
+			final DepositLifecycleStateMachine depositLifecycleStateMachine, 
+			final DepositApprovalData depositApprovalData, 
+			final BigDecimal depositAmount) {
 
 		DepositStatus statusEnum = depositLifecycleStateMachine.transition(DepositEvent.DEPOSIT_APPROVED, DepositStatus.fromInt(this.depositStatus));
 		this.depositStatus = statusEnum.getValue();
 		
 		this.tenureInMonths = depositApprovalData.getTenureInMonths();
 		this.depositAmount = depositAmount;
-		this.interestCompoundedFrequencyType = depositApprovalData.getInterestCompoundedEveryPeriodType();
+		this.interestCompoundedFrequencyType = depositApprovalData.getInterestCompoundedEveryPeriodType().getValue();
 
 		this.actualCommencementDate = actualCommencementDate.toDateTimeAtCurrentTime().toDate();
 		
@@ -236,75 +255,88 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 		}
 	}
 
-		public LocalDate getActualCommencementDate() {
-			LocalDate date=null;
-			if(this.actualCommencementDate!=null){
-				date = new LocalDate(this.actualCommencementDate);
-			}
-			return date;
+	public LocalDate getActualCommencementDate() {
+		LocalDate date = null;
+		if (this.actualCommencementDate != null) {
+			date = new LocalDate(this.actualCommencementDate);
+		}
+		return date;
+	}
+
+	public LocalDate getProjectedCommencementDate() {
+		LocalDate date = null;
+		if (this.projectedCommencementDate != null) {
+			date = new LocalDate(this.projectedCommencementDate);
+		}
+		return date;
+	}
+
+	public void reject(final LocalDate rejectedOn,
+			final DepositLifecycleStateMachine depositLifecycleStateMachine) {
+
+		DepositStatus statusEnum = depositLifecycleStateMachine.transition(
+				DepositEvent.DEPOSIT_REJECTED,
+				DepositStatus.fromInt(this.depositStatus));
+		this.depositStatus = statusEnum.getValue();
+
+		this.rejectedOnDate = rejectedOn.toDateTimeAtCurrentTime().toDate();
+		this.closedOnDate = rejectedOn.toDateTimeAtCurrentTime().toDate();
+
+		if (rejectedOn.isBefore(getProjectedCommencementDate())) {
+
+			final String errorMessage = "The date on which a deposit is rejected cannot be before its submittal date: "
+					+ getProjectedCommencementDate().toString();
+			throw new InvalidDepositStateTransitionException("reject",
+					"cannot.be.before.submittal.date", errorMessage,
+					rejectedOn, getProjectedCommencementDate());
+
+		}
+		if (rejectedOn.isAfter(new LocalDate())) {
+
+			final String errorMessage = "The date on which a deposit is rejected cannot be in the future.";
+			throw new InvalidDepositStateTransitionException("reject",
+					"cannot.be.a.future.date", errorMessage, rejectedOn);
+
+		}
+
+	}
+
+	public void withdrawnByApplicant(final LocalDate withdrawnOn,
+			final DepositLifecycleStateMachine depositLifecycleStateMachine) {
+
+		DepositStatus statusEnum = depositLifecycleStateMachine.transition(
+				DepositEvent.DEPOSIT_WITHDRAWN,
+				DepositStatus.fromInt(this.depositStatus));
+		this.depositStatus = statusEnum.getValue();
+
+		this.withdrawnOnDate = withdrawnOn.toDateTimeAtCurrentTime().toDate();
+		this.closedOnDate = withdrawnOn.toDateTimeAtCurrentTime().toDate();
+
+		if (withdrawnOn.isBefore(getProjectedCommencementDate())) {
+
+			final String errorMessage = "The date on which a deposit is rejected cannot be before its submittal date: "
+					+ getProjectedCommencementDate().toString();
+			throw new InvalidDepositStateTransitionException("reject",
+					"cannot.be.before.submittal.date", errorMessage,
+					withdrawnOn, getProjectedCommencementDate());
+
 		}
 		
-		public LocalDate getProjectedCommencementDate() {
-			LocalDate date=null;
-			if(this.projectedCommencementDate!=null){
-				date = new LocalDate(this.projectedCommencementDate);
-			}
-			return date;
+		if (withdrawnOn.isAfter(new LocalDate())) {
+			final String errorMessage = "The date on which a deposit is rejected cannot be in the future.";
+			throw new InvalidDepositStateTransitionException("reject",
+					"cannot.be.a.future.date", errorMessage, withdrawnOn);
 		}
+	}
 
-		public void reject(LocalDate rejectedOn,	DepositLifecycleStateMachine depositLifecycleStateMachine) {
-			
-			DepositStatus statusEnum = depositLifecycleStateMachine.transition(DepositEvent.DEPOSIT_REJECTED, DepositStatus.fromInt(this.depositStatus));
-			this.depositStatus = statusEnum.getValue();
-			
-			this.rejectedOnDate = rejectedOn.toDateTimeAtCurrentTime().toDate();
-			this.closedOnDate = rejectedOn.toDateTimeAtCurrentTime().toDate();
-			
-			if (rejectedOn.isBefore(getProjectedCommencementDate())) {
-				
-				final String errorMessage = "The date on which a deposit is rejected cannot be before its submittal date: "	+ getProjectedCommencementDate().toString();
-				throw new InvalidDepositStateTransitionException("reject", "cannot.be.before.submittal.date", errorMessage, rejectedOn, getProjectedCommencementDate());
-			
-			}
-			if (rejectedOn.isAfter(new LocalDate())) {
-				
-				final String errorMessage = "The date on which a deposit is rejected cannot be in the future.";
-				throw new InvalidDepositStateTransitionException("reject", "cannot.be.a.future.date", errorMessage, rejectedOn);
-			
-			}
+	public void undoDepositApproval(final DepositLifecycleStateMachine depositLifecycleStateMachine) {
 
-		}
+		DepositStatus statusEnum = depositLifecycleStateMachine.transition(
+				DepositEvent.DEPOSIT_APPROVAL_UNDO,
+				DepositStatus.fromInt(this.depositStatus));
+		this.depositStatus = statusEnum.getValue();
 
-		public void withdraw(LocalDate withdrawnOn, DepositLifecycleStateMachine depositLifecycleStateMachine) {
-			
-			DepositStatus statusEnum = depositLifecycleStateMachine.transition(DepositEvent.DEPOSIT_WITHDRAWN, DepositStatus.fromInt(this.depositStatus));
-			this.depositStatus = statusEnum.getValue();
-			
-			this.withdrawnOnDate = withdrawnOn.toDateTimeAtCurrentTime().toDate();
-			this.closedOnDate = withdrawnOn.toDateTimeAtCurrentTime().toDate();
-			
-			if (withdrawnOn.isBefore(getProjectedCommencementDate())) {
-				
-				final String errorMessage = "The date on which a deposit is rejected cannot be before its submittal date: "	+ getProjectedCommencementDate().toString();
-				throw new InvalidDepositStateTransitionException("reject", "cannot.be.before.submittal.date", errorMessage, withdrawnOn, getProjectedCommencementDate());
-			
-			}
-			if (withdrawnOn.isAfter(new LocalDate())) {
-				
-				final String errorMessage = "The date on which a deposit is rejected cannot be in the future.";
-				throw new InvalidDepositStateTransitionException("reject", "cannot.be.a.future.date", errorMessage, withdrawnOn);
-			
-			}
-			
-		}
-
-		public void undoDepositApproval(DepositLifecycleStateMachine depositLifecycleStateMachine) {
-			
-			DepositStatus statusEnum = depositLifecycleStateMachine.transition(DepositEvent.DEPOSIT_APPROVAL_UNDO, DepositStatus.fromInt(this.depositStatus));
-			this.depositStatus = statusEnum.getValue();
-			
-			this.actualCommencementDate = null;
-			this.actualMaturityDate=null;
-			
-		}
+		this.actualCommencementDate = null;
+		this.actualMaturityDate = null;
+	}
 }

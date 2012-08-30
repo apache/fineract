@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 
-import org.joda.time.LocalDate;
 import org.mifosng.platform.api.commands.DepositAccountCommand;
 import org.mifosng.platform.api.commands.DepositStateTransitionApprovalCommand;
 import org.mifosng.platform.client.domain.Client;
@@ -12,7 +11,6 @@ import org.mifosng.platform.client.domain.ClientRepository;
 import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.exceptions.ClientNotFoundException;
 import org.mifosng.platform.exceptions.DepositProductNotFoundException;
-import org.mifosng.platform.exceptions.NoAuthorizationException;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 import org.mifosng.platform.saving.domain.DepositAccount;
 import org.mifosng.platform.saving.domain.DepositApprovalData;
