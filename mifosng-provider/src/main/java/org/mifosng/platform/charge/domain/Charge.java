@@ -19,7 +19,6 @@ public class Charge extends AbstractAuditableCustom<AppUser, Long> {
     @Column(name = "amount", scale = 6, precision = 19, nullable = false)
     private BigDecimal amount;
 
-    @SuppressWarnings("unused")
 	@Column(name = "currency_code", length=3)
     private String currencyCode;
 
@@ -35,7 +34,6 @@ public class Charge extends AbstractAuditableCustom<AppUser, Long> {
 	@Column(name = "charge_calculation_enum")
     private Integer chargeCalculation;
 
-    @SuppressWarnings("unused")
 	@Column(name = "is_active", nullable = false)
     private boolean active;
 

@@ -47,7 +47,8 @@ public class LoanProduct extends AbstractAuditableCustom<AppUser, Long> {
 	@Column(name = "description")
 	private String description;
 
-    @ManyToMany
+    @SuppressWarnings("unused")
+	@ManyToMany
     @JoinTable(name = "m_product_loan_charge",
             joinColumns = @JoinColumn(name = "product_loan_id"),
             inverseJoinColumns = @JoinColumn(name = "charge_id"))
