@@ -291,9 +291,9 @@ public class ReadWriteNonCoreDataServiceImpl implements
 		List<ResultsetColumnHeader> columnHeaders = readResultset
 				.getColumnHeaders();
 		List<String> columnValues = readResultset.getData().get(0).getRow();
-		
+
 		Map<String, String> updatedColumns = new HashMap<String, String>();
-		
+
 		for (String key : keys) {
 			if (!(key.equalsIgnoreCase("id"))) {
 				keyUpdated = genericDataService.replace(key, underscore, space);
@@ -310,14 +310,18 @@ public class ReadWriteNonCoreDataServiceImpl implements
 			}
 		}
 
-		
+		// just updating fields that have changed since pre-update read - though
+		// its possible these values are different from the page the user was
+		// looking at and even different from the current db values (if some
+		// other update got in quick) - would need a version field for
+		// completeness but its okay to take this risk with additional fields
+		// data
 
 		for (String key : updatedColumns.keySet()) {
-			logger.info("Update Column: " + key + " - Value: " + updatedColumns.get(key));
+			logger.info("Update Column: " + key + " - Value: "
+					+ updatedColumns.get(key));
 		}
-		
-		
-		
+
 		String pValueWrite = "";
 		String saveSql = "";
 		String singleQuote = "'";
@@ -326,29 +330,23 @@ public class ReadWriteNonCoreDataServiceImpl implements
 			boolean firstColumn = true;
 			saveSql = "update `" + fullSetName + "` ";
 
-			for (String key : keys) {
-				if (!(key.equalsIgnoreCase("id"))) {
-					if (firstColumn) {
-						saveSql += " set ";
-						firstColumn = false;
-					} else {
-						saveSql += ", ";
-					}
-
-					pValue = queryParams.get(key);
-					if (pValue == null || pValue.equals("")) {
-						pValueWrite = "null";
-					} else {
-						pValueWrite = singleQuote
-								+ genericDataService.replace(pValue,
-										singleQuote, singleQuote + singleQuote)
-								+ singleQuote;
-					}
-					saveSql += "`"
-							+ genericDataService
-									.replace(key, underscore, space) + "` = "
-							+ pValueWrite;
+			for (String key : updatedColumns.keySet()) {
+				if (firstColumn) {
+					saveSql += " set ";
+					firstColumn = false;
+				} else {
+					saveSql += ", ";
 				}
+
+				pValue = updatedColumns.get(key);
+				if (StringUtils.isEmpty(pValue)) {
+					pValueWrite = "null";
+				} else {
+					pValueWrite = singleQuote
+							+ genericDataService.replace(pValue, singleQuote,
+									singleQuote + singleQuote) + singleQuote;
+				}
+				saveSql += "`" + key + "` = " + pValueWrite;
 			}
 
 			saveSql += " where id = " + id;
@@ -356,25 +354,19 @@ public class ReadWriteNonCoreDataServiceImpl implements
 			String insertColumns = "";
 			String selectColumns = "";
 			String columnName = "";
-			for (String key : keys) {
-				pValue = queryParams.get(key);
-				if (!(key.equalsIgnoreCase("id"))) {
+			for (String key : updatedColumns.keySet()) {
+				pValue = updatedColumns.get(key);
 
-					pValue = queryParams.get(key);
-					if (pValue == null || pValue.equals("")) {
-						pValueWrite = "null";
-					} else {
-						pValueWrite = singleQuote
-								+ genericDataService.replace(pValue,
-										singleQuote, singleQuote + singleQuote)
-								+ singleQuote;
-					}
-					columnName = "`"
-							+ genericDataService
-									.replace(key, underscore, space) + "`";
-					insertColumns += ", " + columnName;
-					selectColumns += "," + pValueWrite + " as " + columnName;
+				if (StringUtils.isEmpty(pValue)) {
+					pValueWrite = "null";
+				} else {
+					pValueWrite = singleQuote
+							+ genericDataService.replace(pValue, singleQuote,
+									singleQuote + singleQuote) + singleQuote;
 				}
+				columnName = "`" + key + "`";
+				insertColumns += ", " + columnName;
+				selectColumns += "," + pValueWrite + " as " + columnName;
 			}
 
 			saveSql = "insert into `" + fullSetName + "` (id" + insertColumns
