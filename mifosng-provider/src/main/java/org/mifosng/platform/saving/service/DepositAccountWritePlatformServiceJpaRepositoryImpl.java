@@ -1,6 +1,5 @@
 package org.mifosng.platform.saving.service;
 
-import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 
@@ -16,10 +15,10 @@ import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
 import org.mifosng.platform.exceptions.ProductNotFoundException;
 import org.mifosng.platform.saving.domain.DepositAccount;
 import org.mifosng.platform.saving.domain.DepositAccountRepository;
-import org.mifosng.platform.saving.domain.DepositApprovalData;
 import org.mifosng.platform.saving.domain.DepositLifecycleStateMachine;
 import org.mifosng.platform.saving.domain.DepositLifecycleStateMachineImpl;
 import org.mifosng.platform.saving.domain.DepositStatus;
+import org.mifosng.platform.saving.domain.FixedTermDepositInterestCalculator;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.user.domain.AppUser;
 import org.slf4j.Logger;
@@ -37,16 +36,18 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 	private final PlatformSecurityContext context;
 	private final DepositAccountRepository depositAccountRepository;
 	private final DepositAccountAssembler depositAccountAssembler;
+	private final FixedTermDepositInterestCalculator fixedTermDepositInterestCalculator;
 	
 	@Autowired
 	public DepositAccountWritePlatformServiceJpaRepositoryImpl(
 			final PlatformSecurityContext context, 
 			final DepositAccountRepository depositAccountRepository, 
-			final DepositAccountAssembler depositAccountAssembler) {
-		
+			final DepositAccountAssembler depositAccountAssembler,
+			final FixedTermDepositInterestCalculator fixedTermDepositInterestCalculator) {
 		this.context=context;
 		this.depositAccountRepository = depositAccountRepository;
 		this.depositAccountAssembler = depositAccountAssembler;
+		this.fixedTermDepositInterestCalculator = fixedTermDepositInterestCalculator;
 	}
 
 	/*
@@ -136,13 +137,10 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 		DepositStateTransitionApprovalCommandValidator validator = new DepositStateTransitionApprovalCommandValidator(command);
 		validator.validate();
 		
-		
 		DepositAccount account = this.depositAccountRepository.findOne(command.getAccountId());
 		if (account == null || account.isDeleted()) {
 			throw new DepositAccountNotFoundException(command.getAccountId());
 		}
-		
-		DepositApprovalData depositApprovalData=this.depositAccountAssembler.assembleFrom(command);
 		
 		// FIXME - madhukar - you are checking for loan permission here instead of some specific deposit account permission.
 		LocalDate eventDate = command.getEventDate();
@@ -150,9 +148,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 			throw new NoAuthorizationException("User has no authority to approve deposit with a date in the past.");
 		}
 		
-		BigDecimal depositAmount = command.getDepositAmount();
-		
-		account.approve(eventDate, defaultDepositLifecycleStateMachine(), depositApprovalData, depositAmount);
+		account.approve(eventDate, defaultDepositLifecycleStateMachine(), command, this.fixedTermDepositInterestCalculator);
 		this.depositAccountRepository.save(account);
 
 		return new EntityIdentifier(account.getId());

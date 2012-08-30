@@ -15,6 +15,7 @@ import javax.persistence.UniqueConstraint;
 
 import org.joda.time.LocalDate;
 import org.mifosng.platform.api.commands.DepositAccountCommand;
+import org.mifosng.platform.api.commands.DepositStateTransitionApprovalCommand;
 import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.currency.domain.Money;
@@ -41,25 +42,21 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 	@Column(name = "external_id")
 	private String externalId;
 	
-	@SuppressWarnings("unused")
 	@Embedded
 	private MonetaryCurrency currency;
 	
 	@Column(name = "deposit_amount", scale = 6, precision = 19, nullable = false)
 	private BigDecimal depositAmount;
 	
-	@SuppressWarnings("unused")
 	@Column(name = "maturity_nominal_interest_rate", scale = 6, precision = 19, nullable = false)
 	private BigDecimal interestRate;
 	
 	@Column(name = "tenure_months", nullable=false)
 	private Integer tenureInMonths;
 	
-	@SuppressWarnings("unused")
 	@Column(name = "interest_compounded_every", nullable = false)
 	private Integer interestCompoundedEvery;
 
-	@SuppressWarnings("unused")
 	@Column(name = "interest_compounded_every_period_enum", nullable = false)
 	private Integer interestCompoundedFrequencyType;
 	
@@ -220,35 +217,39 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 	public void approve(
 			final LocalDate actualCommencementDate, 
 			final DepositLifecycleStateMachine depositLifecycleStateMachine, 
-			final DepositApprovalData depositApprovalData, 
-			final BigDecimal depositAmount) {
+			final DepositStateTransitionApprovalCommand command,
+			final FixedTermDepositInterestCalculator calculator) {
 
 		DepositStatus statusEnum = depositLifecycleStateMachine.transition(DepositEvent.DEPOSIT_APPROVED, DepositStatus.fromInt(this.depositStatus));
 		this.depositStatus = statusEnum.getValue();
 		
-		this.tenureInMonths = depositApprovalData.getTenureInMonths();
-		this.depositAmount = depositAmount;
-		this.interestCompoundedFrequencyType = depositApprovalData.getInterestCompoundedEveryPeriodType().getValue();
-
-		this.actualCommencementDate = actualCommencementDate.toDateTimeAtCurrentTime().toDate();
+		if (command.getTenureInMonths() != null) {
+			this.tenureInMonths = command.getTenureInMonths();
+		}
 		
-		if(this.actualCommencementDate != null)
+		if (command.getDepositAmount() != null) {
+			this.depositAmount = command.getDepositAmount();
+		}
+		
+		if (command.getInterestCompoundedEveryPeriodType() != null) {
+			this.interestCompoundedFrequencyType = PeriodFrequencyType.fromInt(command.getInterestCompoundedEveryPeriodType()).getValue();
+		}
+
+		this.actualCommencementDate = actualCommencementDate.toDate();
 		this.actualMaturityDate = new LocalDate(this.actualCommencementDate).plusMonths(this.tenureInMonths).toDate();
 		
-		FixedTermDepositInterestCalculator fixedTermDepositInterestCalculator = depositApprovalData.getFixedTermDepositInterestCalculator();
+		Money futureValueOnMaturity = calculator.calculateInterestOnMaturityFor(getDeposit(), this.tenureInMonths, 
+				this.interestRate, this.interestCompoundedEvery, getInterestCompoundedFrequencyType());
 		
-		Money futureValueOnMaturity = fixedTermDepositInterestCalculator.calculateInterestOnMaturityFor(depositApprovalData.getDeposit(), depositApprovalData.getTenureInMonths(), 
-				depositApprovalData.getMaturityInterestRate(), depositApprovalData.getInterestCompoundedEvery(), depositApprovalData.getInterestCompoundedEveryPeriodType());
-		
-		this.projectedInterestAccruedOnMaturity = futureValueOnMaturity.minus(depositApprovalData.getDeposit()).getAmount();
+		this.projectedInterestAccruedOnMaturity = futureValueOnMaturity.minus(getDeposit()).getAmount();
 		this.projectedTotalOnMaturity = futureValueOnMaturity.getAmount();
-		
 
 		LocalDate submittalDate = new LocalDate(this.projectedCommencementDate);
 		if (actualCommencementDate.isBefore(submittalDate)) {
 			final String errorMessage = "The date on which a deposit is approved cannot be before its submittal date: "	+ submittalDate.toString();
 			throw new InvalidDepositStateTransitionException("approval", "cannot.be.before.submittal.date", errorMessage, getActualCommencementDate(), submittalDate);
 		}
+		
 		if (actualCommencementDate.isAfter(new LocalDate())) {
 			final String errorMessage = "The date on which a deposit is approved cannot be in the future.";
 			throw new InvalidDepositStateTransitionException("approval", "cannot.be.a.future.date", errorMessage, getActualCommencementDate());
@@ -338,5 +339,13 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 
 		this.actualCommencementDate = null;
 		this.actualMaturityDate = null;
+	}
+
+	public PeriodFrequencyType getInterestCompoundedFrequencyType() {
+		return PeriodFrequencyType.fromInt(this.interestCompoundedFrequencyType);
+	}
+
+	public Money getDeposit() {
+		return Money.of(this.currency, this.depositAmount);
 	}
 }
