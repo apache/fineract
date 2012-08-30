@@ -127,4 +127,15 @@ public class ChargeData {
     public List<EnumOptionData> getChargeTimeTypeOptions() {
         return chargeTimeTypeOptions;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        ChargeData chargeData = (ChargeData) obj;
+        return this.id.equals(chargeData.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return this.id.hashCode();
+    }
 }

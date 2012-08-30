@@ -345,13 +345,14 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 			throw new InvalidJsonException();
 		}
 		
-		Type typeOfMap = new TypeToken<Map<String, String>>(){}.getType();
-	    Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
+		Type typeOfMap = new TypeToken<Map<String, Object>>(){}.getType();
+	    Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
 	    
 	    Set<String> supportedParams = new HashSet<String>(
 	    		Arrays.asList("name", "description", "fundId", "transactionProcessingStrategyId", "currencyCode", "digitsAfterDecimal", 
 	    				"principal", "inArrearsTolerance", "interestRatePerPeriod", "repaymentEvery", "numberOfRepayments", 
-	    				"repaymentFrequencyType", "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType", "locale")
+	    				"repaymentFrequencyType", "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType",
+                        "charges", "locale")
 	    );
 	    
 	    checkForUnsupportedParameters(requestMap, supportedParams);
@@ -376,10 +377,28 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	    Integer amortizationTypeValue = extractIntegerParameter("amortizationType", requestMap, modifiedParameters);
 	    Integer interestTypeValue = extractIntegerParameter("interestType", requestMap, modifiedParameters);
 	    Integer interestCalculationPeriodTypeValue = extractIntegerParameter("interestCalculationPeriodType", requestMap, modifiedParameters);
-	    
+
+        // check array
+        JsonParser parser = new JsonParser();
+
+        String[] charges = null;
+        JsonElement element = parser.parse(json);
+        if (element.isJsonObject()) {
+            JsonObject object = element.getAsJsonObject();
+            if (object.has("charges")) {
+                modifiedParameters.add("charges");
+                JsonArray array = object.get("charges").getAsJsonArray();
+                charges = new String[array.size()];
+                for (int i=0; i<array.size(); i++) {
+                    charges[i] = array.get(i).getAsString();
+                }
+            }
+        }
+        //
+
 		return new LoanProductCommand(modifiedParameters, resourceIdentifier, name, description, fundId, transactionProcessingStrategyId, 
 				currencyCode, digitsAfterDecimalValue, principalValue, inArrearsToleranceValue, numberOfRepaymentsValue, repaymentEveryValue, interestRatePerPeriodValue,
-				repaymentFrequencyTypeValue, interestRateFrequencyTypeValue, amortizationTypeValue, interestTypeValue, interestCalculationPeriodTypeValue);
+				repaymentFrequencyTypeValue, interestRateFrequencyTypeValue, amortizationTypeValue, interestTypeValue, interestCalculationPeriodTypeValue, charges);
 	}
 	
 	@Override

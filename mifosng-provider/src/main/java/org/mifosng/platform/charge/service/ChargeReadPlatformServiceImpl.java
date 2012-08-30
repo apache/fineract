@@ -93,6 +93,29 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
                 allowedChargeAppliesToOptions, allowedChargeTimeOptions);
     }
 
+    @Override
+    public Collection<ChargeData> retrieveLoanProductCharges(Long loanProductId) {
+
+        this.context.authenticatedUser();
+
+        ChargeMapper rm = new ChargeMapper();
+
+        String sql = "select " + rm.loanProductChargeSchema() + " where c.is_deleted=0 and plc.product_loan_id=?";
+
+        return this.jdbcTemplate.query(sql, rm, new Object[] {loanProductId});
+    }
+
+    @Override
+    public Collection<ChargeData> retrieveLoanApplicableCharges() {
+        this.context.authenticatedUser();
+
+        ChargeMapper rm = new ChargeMapper();
+
+        String sql = "select " + rm.chargeSchema() + " where c.is_deleted=0 and c.is_active=1 and c.charge_applies_to_enum=? order by c.name ";
+
+        return this.jdbcTemplate.query(sql, rm, new Object[] {ChargeAppliesTo.LOAN.getValue()});
+    }
+
     private static final class ChargeMapper implements RowMapper<ChargeData> {
 
         public String chargeSchema(){
@@ -102,6 +125,10 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
                    "oc.decimal_places as currencyDecimalPlaces, oc.display_symbol as currencyDisplaySymbol, " +
                    "oc.internationalized_name_code as currencyNameCode from m_charge c " +
                    "join m_organisation_currency oc on c.currency_code = oc.code";
+        }
+
+        public String loanProductChargeSchema(){
+            return chargeSchema() + " join m_product_loan_charge plc on plc.charge_id = c.id";
         }
 
         @Override

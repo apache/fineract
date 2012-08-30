@@ -71,6 +71,14 @@ public class Charge extends AbstractAuditableCustom<AppUser, Long> {
         return amount;
     }
 
+    public String getCurrencyCode() {
+        return currencyCode;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
     public boolean isDeleted() {
         return deleted;
     }

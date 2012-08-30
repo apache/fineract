@@ -30,7 +30,9 @@ public class LoanProductCommand {
 	private final Integer amortizationType;
 	private final Integer interestType;
 	private final Integer interestCalculationPeriodType;
-	
+
+    private final String[] charges;
+
 	private final Set<String> modifiedParameters;
 	
 	public LoanProductCommand(final Set<String> modifiedParameters, final Long id, final String name, final String description, 
@@ -39,7 +41,7 @@ public class LoanProductCommand {
 			final BigDecimal principal, final BigDecimal inArrearsTolerance, final Integer numberOfRepayments, 
 			final Integer repaymentEvery, final BigDecimal interestRatePerPeriod,
 			final Integer repaymentFrequencyType, final Integer interestRateFrequencyType, final Integer amortizationType, final Integer interestType, 
-			final Integer interestCalculationPeriodType) {
+			final Integer interestCalculationPeriodType, final String[] charges) {
 		this.modifiedParameters = modifiedParameters;
 		this.id = id;
 		this.name = name;
@@ -58,6 +60,7 @@ public class LoanProductCommand {
 		this.amortizationType = amortizationType;
 		this.interestType = interestType;
 		this.interestCalculationPeriodType = interestCalculationPeriodType;
+        this.charges = charges;
 	}
 
 	public Long getId() {
@@ -128,7 +131,11 @@ public class LoanProductCommand {
 		return interestCalculationPeriodType;
 	}
 
-	public boolean isNameChanged() {
+    public String[] getCharges() {
+        return charges;
+    }
+
+    public boolean isNameChanged() {
 		return this.modifiedParameters.contains("name");
 	}
 
@@ -191,4 +198,8 @@ public class LoanProductCommand {
 	public boolean isInterestCalculationPeriodTypeChanged() {
 		return this.modifiedParameters.contains("interestCalculationPeriodType");
 	}
+
+    public boolean isChargesChanged() {
+        return this.modifiedParameters.contains("charges");
+    }
 }

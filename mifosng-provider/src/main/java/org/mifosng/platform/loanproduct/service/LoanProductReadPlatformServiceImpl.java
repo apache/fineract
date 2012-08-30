@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.joda.time.DateTime;
+import org.mifosng.platform.api.data.ChargeData;
 import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.EnumOptionData;
 import org.mifosng.platform.api.data.FundData;
@@ -14,6 +15,7 @@ import org.mifosng.platform.api.data.LoanProductData;
 import org.mifosng.platform.api.data.LoanProductLookup;
 import org.mifosng.platform.api.data.MoneyData;
 import org.mifosng.platform.api.data.TransactionProcessingStrategyData;
+import org.mifosng.platform.charge.service.ChargeReadPlatformService;
 import org.mifosng.platform.currency.service.CurrencyReadPlatformService;
 import org.mifosng.platform.exceptions.LoanProductNotFoundException;
 import org.mifosng.platform.fund.service.FundReadPlatformService;
@@ -38,6 +40,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 	private final JdbcTemplate jdbcTemplate;
 	private final LoanDropdownReadPlatformService dropdownReadPlatformService;
 	private final FundReadPlatformService fundReadPlatformService;
+    private final ChargeReadPlatformService chargeReadPlatformService;
 
 	@Autowired
 	public LoanProductReadPlatformServiceImpl(
@@ -45,11 +48,13 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 			final CurrencyReadPlatformService currencyReadPlatformService,
 			final FundReadPlatformService fundReadPlatformService,
 			final LoanDropdownReadPlatformService dropdownReadPlatformService,
+            final ChargeReadPlatformService chargeReadPlatformService,
 			final TenantAwareRoutingDataSource dataSource) {
 		this.context = context;
 		this.currencyReadPlatformService = currencyReadPlatformService;
 		this.fundReadPlatformService = fundReadPlatformService;
 		this.dropdownReadPlatformService = dropdownReadPlatformService;
+        this.chargeReadPlatformService = chargeReadPlatformService;
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
 
@@ -63,6 +68,9 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
 			LoanProductData productData = this.jdbcTemplate.queryForObject(sql,
 					rm, new Object[] { loanProductId });
+
+            Collection<ChargeData> charges = this.chargeReadPlatformService.retrieveLoanProductCharges(loanProductId);
+            productData.setCharges(charges);
 
 			populateProductDataWithDropdownOptions(productData);
 
@@ -81,7 +89,13 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
 		String sql = "select " + rm.loanProductSchema();
 
-		return this.jdbcTemplate.query(sql, rm, new Object[] {});
+		Collection<LoanProductData> loanProducts = this.jdbcTemplate.query(sql, rm, new Object[] {});
+        for (LoanProductData loanProduct : loanProducts){
+            Collection<ChargeData> charges = this.chargeReadPlatformService.retrieveLoanProductCharges(loanProduct.getId());
+            loanProduct.setCharges(charges);
+        }
+
+        return loanProducts;
 	}
 
 	@Override
@@ -111,6 +125,8 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 		productData.setInterestRateFrequencyType(LoanEnumerations.interestRateFrequencyType(PeriodFrequencyType.MONTHS));
 		
 		productData.setInterestCalculationPeriodType(LoanEnumerations.interestCalculationPeriodType(InterestCalculationPeriodMethod.SAME_AS_REPAYMENT_PERIOD));
+
+        productData.setChargeOptions(this.chargeReadPlatformService.retrieveLoanApplicableCharges());
 
 		populateProductDataWithDropdownOptions(productData);
 		

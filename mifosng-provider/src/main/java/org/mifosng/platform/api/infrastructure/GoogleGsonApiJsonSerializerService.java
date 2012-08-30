@@ -72,12 +72,13 @@ public class GoogleGsonApiJsonSerializerService implements
 					"annualInterestRate", "repaymentFrequencyType",
 					"interestRateFrequencyType", "amortizationType",
 					"interestType", "interestCalculationPeriodType",
+                    "charges",
 					"createdOn", "lastModifedOn", "currencyOptions",
 					"amortizationTypeOptions", "interestTypeOptions",
 					"interestCalculationPeriodTypeOptions",
 					"repaymentFrequencyTypeOptions",
 					"interestRateFrequencyTypeOptions", "fundOptions",
-					"transactionProcessingStrategyOptions"));
+					"transactionProcessingStrategyOptions", "chargeOptions"));
 
 	private static final Set<String> SAVINGS_PRODUCT_DATA_PARAMETERS = new HashSet<String>(
 			Arrays.asList("id", "name", "description", "createdOn",

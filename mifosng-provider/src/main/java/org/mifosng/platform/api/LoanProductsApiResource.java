@@ -18,11 +18,13 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.mifosng.platform.api.commands.LoanProductCommand;
+import org.mifosng.platform.api.data.ChargeData;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.LoanProductData;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
 import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
+import org.mifosng.platform.charge.service.ChargeReadPlatformService;
 import org.mifosng.platform.loanproduct.service.LoanProductReadPlatformService;
 import org.mifosng.platform.loanproduct.service.LoanProductWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +41,9 @@ public class LoanProductsApiResource {
 
 	@Autowired
 	private LoanProductWritePlatformService loanProductWritePlatformService;
+
+    @Autowired
+    private ChargeReadPlatformService chargeReadPlatformService;
 
 	@Autowired
 	private ApiDataConversionService apiDataConversionService;
@@ -67,7 +72,7 @@ public class LoanProductsApiResource {
 				Arrays.asList("id", "name", "description", "fundId", "fundName", "principal", "inArrearsTolerance", "numberOfRepayments",
 						"repaymentEvery", "interestRatePerPeriod", "annualInterestRate", 
 						"repaymentFrequencyType", "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType",
-						"createdOn", "lastModifedOn")
+						"charges", "createdOn", "lastModifedOn")
 		);
 		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
@@ -97,9 +102,9 @@ public class LoanProductsApiResource {
 				Arrays.asList("id", "name", "description", "fundId", "fundName", "transactionProcessingStrategyId", "transactionProcessingStrategyName",  
 						"principal", "inArrearsTolerance", "numberOfRepayments",
 						"repaymentEvery", "interestRatePerPeriod", "annualInterestRate", 
-						"repaymentFrequencyType", "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType",
+						"repaymentFrequencyType", "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType", "charges",
 						"createdOn", "lastModifedOn","currencyOptions", "amortizationTypeOptions", "interestTypeOptions", "interestCalculationPeriodTypeOptions", 
-						"repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "fundOptions", "transactionProcessingStrategyOptions")
+						"repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "fundOptions", "transactionProcessingStrategyOptions", "chargeOptions")
 		);
 		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
@@ -124,7 +129,8 @@ public class LoanProductsApiResource {
 						"transactionProcessingStrategyId", "transactionProcessingStrategyName",
 						"principal", "inArrearsTolerance", "numberOfRepayments",
 						"repaymentEvery", "interestRatePerPeriod", "annualInterestRate", 
-						"repaymentFrequencyType", "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType",
+						"repaymentFrequencyType", "interestRateFrequencyType", "amortizationType", "interestType",
+                        "interestCalculationPeriodType", "charges",
 						"createdOn", "lastModifedOn")
 		);
 		
@@ -138,7 +144,10 @@ public class LoanProductsApiResource {
 		LoanProductData loanProduct = this.loanProductReadPlatformService.retrieveLoanProduct(productId);
 		if (template) {
 			responseParameters.addAll(Arrays.asList("currencyOptions", "amortizationTypeOptions", "interestTypeOptions", "interestCalculationPeriodTypeOptions", 
-					"repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "fundOptions", "transactionProcessingStrategyOptions"));
+					"repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "fundOptions", "transactionProcessingStrategyOptions", "chargeOptions"));
+            Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveLoanApplicableCharges();
+            chargeOptions.removeAll(loanProduct.getCharges());
+            loanProduct.setChargeOptions(chargeOptions);
 		}
 		
 		return this.apiJsonSerializerService.serializeLoanProductDataToJson(prettyPrint, responseParameters, loanProduct);

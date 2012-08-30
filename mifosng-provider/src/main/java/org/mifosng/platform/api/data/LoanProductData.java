@@ -36,6 +36,8 @@ public class LoanProductData {
 	private EnumOptionData interestType;
 	private EnumOptionData interestCalculationPeriodType;
 
+    private Collection<ChargeData> charges;
+
 	private DateTime createdOn;
 	private DateTime lastModifedOn;
 
@@ -48,6 +50,7 @@ public class LoanProductData {
 	private List<EnumOptionData> repaymentFrequencyTypeOptions = new ArrayList<EnumOptionData>();
 	private List<EnumOptionData> interestRateFrequencyTypeOptions = new ArrayList<EnumOptionData>();
 	private List<EnumOptionData> loanTermFrequencyTypeOptions = new ArrayList<EnumOptionData>();
+    private Collection<ChargeData> chargeOptions = new ArrayList<ChargeData>();
 
 	public LoanProductData() {
 		//
@@ -354,4 +357,20 @@ public class LoanProductData {
 			List<EnumOptionData> interestCalculationPeriodTypeOptions) {
 		this.interestCalculationPeriodTypeOptions = interestCalculationPeriodTypeOptions;
 	}
+
+    public Collection<ChargeData> getCharges() {
+        return charges;
+    }
+
+    public void setCharges(Collection<ChargeData> charges) {
+        this.charges = charges;
+    }
+
+    public Collection<ChargeData> getChargeOptions() {
+        return chargeOptions;
+    }
+
+    public void setChargeOptions(Collection<ChargeData> chargeOptions) {
+        this.chargeOptions = chargeOptions;
+    }
 }

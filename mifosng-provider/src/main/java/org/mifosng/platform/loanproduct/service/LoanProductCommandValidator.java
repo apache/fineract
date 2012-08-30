@@ -45,7 +45,7 @@ public class LoanProductCommandValidator {
 		
 		baseDataValidator.reset().anyOfNotNull(command.getFundId(), command.getTransactionProcessingStrategyId(), command.getName(), command.getDescription(), command.getCurrencyCode(), command.getDigitsAfterDecimal(),
 				command.getPrincipal(), command.getInArrearsTolerance(), command.getRepaymentFrequencyType(), command.getRepaymentEvery(), command.getNumberOfRepayments(),
-				command.getInterestRatePerPeriod(), command.getInterestRateFrequencyType(), command.getAmortizationType(), command.getInterestType(), command.getInterestCalculationPeriodType());
+				command.getInterestRatePerPeriod(), command.getInterestRateFrequencyType(), command.getAmortizationType(), command.getInterestType(), command.getInterestCalculationPeriodType(), command.getCharges());
 		
 		if (!dataValidationErrors.isEmpty()) {
 			throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);

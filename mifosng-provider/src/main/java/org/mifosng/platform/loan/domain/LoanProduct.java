@@ -1,16 +1,20 @@
 package org.mifosng.platform.loan.domain;
 
 import java.math.BigDecimal;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosng.platform.api.commands.LoanProductCommand;
+import org.mifosng.platform.charge.domain.Charge;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.fund.domain.Fund;
@@ -43,6 +47,12 @@ public class LoanProduct extends AbstractAuditableCustom<AppUser, Long> {
 	@Column(name = "description")
 	private String description;
 
+    @ManyToMany
+    @JoinTable(name = "m_product_loan_charge",
+            joinColumns = @JoinColumn(name = "product_loan_id"),
+            inverseJoinColumns = @JoinColumn(name = "charge_id"))
+    private Set<Charge> charges;
+
 	@Embedded
 	private final LoanProductRelatedDetail loanProductRelatedDetail;
 
@@ -58,7 +68,7 @@ public class LoanProduct extends AbstractAuditableCustom<AppUser, Long> {
             final BigDecimal defaultNominalInterestRatePerPeriod, final PeriodFrequencyType interestPeriodFrequencyType, final BigDecimal defaultAnnualNominalInterestRate, 
             final InterestMethod interestMethod, final InterestCalculationPeriodMethod interestCalculationPeriodMethod, 
             final Integer repayEvery, final PeriodFrequencyType repaymentFrequencyType, final Integer defaultNumberOfInstallments, final AmortizationMethod amortizationMethod,
-            final BigDecimal inArrearsTolerance) {
+            final BigDecimal inArrearsTolerance, final Set<Charge> charges) {
 		this.fund = fund;
 		this.transactionProcessingStrategy = transactionProcessingStrategy;
         this.name = name.trim();
@@ -67,7 +77,11 @@ public class LoanProduct extends AbstractAuditableCustom<AppUser, Long> {
         } else {
             this.description = null;
         }
-        
+
+        if (charges != null){
+            this.charges = charges;
+        }
+
         this.loanProductRelatedDetail = new LoanProductRelatedDetail(currency,
         		defaultPrincipal, defaultNominalInterestRatePerPeriod, interestPeriodFrequencyType, defaultAnnualNominalInterestRate, 
         		interestMethod, interestCalculationPeriodMethod,
@@ -138,7 +152,8 @@ public class LoanProduct extends AbstractAuditableCustom<AppUser, Long> {
 		return transactionProcessingStrategy;
 	}
 
-	public void update(final LoanProductCommand command, final Fund fund, final LoanTransactionProcessingStrategy strategy) {
+	public void update(final LoanProductCommand command, final Fund fund, final LoanTransactionProcessingStrategy strategy,
+                       final Set<Charge> charges) {
 		
 		if (command.isNameChanged()) {
 			this.name = command.getName();
@@ -155,7 +170,11 @@ public class LoanProduct extends AbstractAuditableCustom<AppUser, Long> {
 		if (command.isTransactionProcessingStrategyChanged()) {
 			this.transactionProcessingStrategy = strategy;
 		}
-		
+
+        if (command.isChargesChanged()){
+            this.charges = charges;
+        }
+
 		this.loanProductRelatedDetail.update(command);
 	}
 }
