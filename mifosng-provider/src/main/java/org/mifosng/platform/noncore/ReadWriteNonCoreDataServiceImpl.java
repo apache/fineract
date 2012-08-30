@@ -2,6 +2,7 @@ package org.mifosng.platform.noncore;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -290,20 +291,33 @@ public class ReadWriteNonCoreDataServiceImpl implements
 		List<ResultsetColumnHeader> columnHeaders = readResultset
 				.getColumnHeaders();
 		List<String> columnValues = readResultset.getData().get(0).getRow();
+		
+		Map<String, String> updatedColumns = new HashMap<String, String>();
+		
 		for (String key : keys) {
 			if (!(key.equalsIgnoreCase("id"))) {
-				keyUpdated = genericDataService
-						.replace(key, underscore, space);
+				keyUpdated = genericDataService.replace(key, underscore, space);
 				currValue = getCurrentColumnValue(keyUpdated, columnHeaders,
 						columnValues);
 				pValue = queryParams.get(key);
-				
+
 				if (notTheSame(currValue, pValue)) {
-					logger.info("Difference - Column: " + keyUpdated + "- Current Value" + currValue + "    New Value: " + pValue);
+					logger.info("Difference - Column: " + keyUpdated
+							+ "- Current Value: " + currValue
+							+ "    New Value: " + pValue);
+					updatedColumns.put(keyUpdated, pValue);
 				}
 			}
 		}
 
+		
+
+		for (String key : updatedColumns.keySet()) {
+			logger.info("Update Column: " + key + " - Value: " + updatedColumns.get(key));
+		}
+		
+		
+		
 		String pValueWrite = "";
 		String saveSql = "";
 		String singleQuote = "'";
