@@ -7,7 +7,7 @@ public class AdditionalFieldsNotFoundException extends AbstractPlatformResourceN
 
 	public AdditionalFieldsNotFoundException(final String type, final Long id) {
 		super("error.msg.type.value.not.found", "Additional Fields Type: "
-				+ type + " Id Not Found for " + id);
+				+ type + " Id: " + id + " is not accessible");
 	}
 
 	public AdditionalFieldsNotFoundException(final String type, final String set) {

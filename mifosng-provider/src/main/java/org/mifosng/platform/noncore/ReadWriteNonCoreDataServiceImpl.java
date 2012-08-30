@@ -106,6 +106,8 @@ public class ReadWriteNonCoreDataServiceImpl implements
 	private GenericResultsetData fillExtraDataGenericResultSet(
 			final String type, final String set, final Long id) {
 
+		checkMainResourceExistsWithinScope(type, id);
+
 		CachedRowSet columnDefinitions = getAdditionalFieldsMetaData(type, set);
 
 		String sqlErrorMsg = "Additional Fields Type: " + type + "   Set: "
@@ -115,13 +117,9 @@ public class ReadWriteNonCoreDataServiceImpl implements
 
 		String selectFieldList = getSelectFieldListFromColumnHeaders(columnHeaders);
 
-		String unScopedSQL = "select " + selectFieldList + " from `" + type
-				+ "` t ${dataScopeCriteria} left join `"
-				+ getFullDatasetName(type, set) + "` s on s.id = t.id "
-				+ " where t.id = " + id;
-		String sql = dataScopedSQL(unScopedSQL, type);
+		String sql = "select " + selectFieldList + " from `" + getFullDatasetName(type, set) + "` on id = " + id;
 		logger.info("addition fields sql: " + sql);
-		
+
 		List<ResultsetDataRow> resultsetDataRows = getResultsetDataRows(
 				columnHeaders, sql, sqlErrorMsg);
 
@@ -143,7 +141,7 @@ public class ReadWriteNonCoreDataServiceImpl implements
 			} else {
 				selectFieldSeparator = ", ";
 			}
-			selectFieldList += selectFieldSeparator + "s.`"
+			selectFieldList += selectFieldSeparator + "`"
 					+ columnHeader.getColumnName() + "`";
 		}
 		return selectFieldList;
@@ -160,16 +158,13 @@ public class ReadWriteNonCoreDataServiceImpl implements
 				+ type
 				+ "' order by f.id";
 
-		String sqlErrorMsg = "Additional Fields Type: " + type + "   Set: "
-				+ set + " - SQL: " + sql;
-
 		CachedRowSet columnDefinitions = genericDataService.getCachedResultSet(
-				sql, sqlErrorMsg);
+				sql, "SQL: " + sql);
+
 		if (columnDefinitions.size() > 0)
 			return columnDefinitions;
 
-		throw new PlatformDataIntegrityException("error.msg.sql.error",
-				"Additional Fields Meta Data Not Found - " + sqlErrorMsg);
+		throw new AdditionalFieldsNotFoundException(type, set);
 	}
 
 	private List<ResultsetColumnHeader> getResultsetColumnHeaders(
@@ -262,7 +257,7 @@ public class ReadWriteNonCoreDataServiceImpl implements
 
 		long startTime = System.currentTimeMillis();
 
-		checkResourceTypeThere(type, set);
+		checkResourceTypeAndSetThere(type, set);// /delete
 		String fullDatasetName = getFullDatasetName(type, set);
 		String transType = getTransType(type, fullDatasetName, id);
 
@@ -277,7 +272,7 @@ public class ReadWriteNonCoreDataServiceImpl implements
 				+ "       - type: " + type + "    set: " + set + "  id: " + id);
 	}
 
-	private void checkResourceTypeThere(String type, String set) {
+	private void checkResourceTypeAndSetThere(String type, String set) {
 
 		String sql = "select t.id from stretchydata_datasettype t join stretchydata_dataset d on d.datasettype_id = t.id where d.`name` = '"
 				+ set + "' and t.`name` = '" + type + "'";
@@ -400,7 +395,22 @@ public class ReadWriteNonCoreDataServiceImpl implements
 		return saveSql;
 	}
 
-	private String dataScopedSQL(String unScopedSQL, String type) {
+	private void checkMainResourceExistsWithinScope(String type, Long id) {
+
+		String unscopedSql = "select t.id from " + type
+				+ " t ${dataScopeCriteria} where t.id = " + id;
+
+		String sql = dataScopedSQL(unscopedSql, type);
+
+		CachedRowSet rs = genericDataService.getCachedResultSet(sql, "SQL : "
+				+ sql);
+
+		if (rs.size() == 0)
+			throw new AdditionalFieldsNotFoundException(type, id);
+
+	}
+
+	private String dataScopedSQL(String unscopedSQL, String type) {
 		String dataScopeCriteria = null;
 		/*
 		 * unfortunately have to, one way or another, be able to restrict data
@@ -427,7 +437,7 @@ public class ReadWriteNonCoreDataServiceImpl implements
 							+ " not catered for in data Scoping");
 		}
 
-		return genericDataService.replace(unScopedSQL, "${dataScopeCriteria}",
+		return genericDataService.replace(unscopedSQL, "${dataScopeCriteria}",
 				dataScopeCriteria);
 
 	}
