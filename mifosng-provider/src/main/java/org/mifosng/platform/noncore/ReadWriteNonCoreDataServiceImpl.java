@@ -8,6 +8,7 @@ import java.util.Set;
 
 import javax.sql.rowset.CachedRowSet;
 
+import org.apache.commons.lang.StringUtils;
 import org.mifosng.platform.api.data.AdditionalFieldsSetData;
 import org.mifosng.platform.api.data.GenericResultsetData;
 import org.mifosng.platform.api.data.ResultsetColumnHeader;
@@ -94,7 +95,7 @@ public class ReadWriteNonCoreDataServiceImpl implements
 			Long id) {
 
 		long startTime = System.currentTimeMillis();
-		
+
 		checkMainResourceExistsWithinScope(type, id);
 
 		CachedRowSet columnDefinitions = getAdditionalFieldsMetaData(type, set);
@@ -106,7 +107,9 @@ public class ReadWriteNonCoreDataServiceImpl implements
 
 		String selectFieldList = getSelectFieldListFromColumnHeaders(columnHeaders);
 
-		String sql = "select " + selectFieldList + " from `" + type + "` t left join `" + getFullDatasetName(type, set) + "` s on s.id = t.id where t.id = " + id;
+		String sql = "select " + selectFieldList + " from `" + type
+				+ "` t left join `" + getFullDatasetName(type, set)
+				+ "` s on s.id = t.id where t.id = " + id;
 		logger.info("addition fields sql: " + sql);
 
 		List<ResultsetDataRow> resultsetDataRows = getResultsetDataRows(
@@ -114,7 +117,7 @@ public class ReadWriteNonCoreDataServiceImpl implements
 
 		long elapsed = System.currentTimeMillis() - startTime;
 		logger.info("FINISHING SET: " + set + "     Elapsed Time: " + elapsed);
-		
+
 		return new GenericResultsetData(columnHeaders, resultsetDataRows);
 
 	}
@@ -162,11 +165,14 @@ public class ReadWriteNonCoreDataServiceImpl implements
 	private List<ResultsetColumnHeader> getResultsetColumnHeaders(
 			CachedRowSet columnDefinitions, String sqlErrorMsg) {
 
-		List<ResultsetColumnHeader> columnHeaders = null;
+		List<ResultsetColumnHeader> columnHeaders = new ArrayList<ResultsetColumnHeader>();
+		ResultsetColumnHeader rschId = new ResultsetColumnHeader();
+		rschId.setColumnName("id");
+		rschId.setColumnType("Integer");
+		columnHeaders.add(rschId);
 
 		try {
 
-			columnHeaders = new ArrayList<ResultsetColumnHeader>();
 			Integer allowedListId;
 			while (columnDefinitions.next()) {
 				ResultsetColumnHeader rsch = new ResultsetColumnHeader();
@@ -249,11 +255,17 @@ public class ReadWriteNonCoreDataServiceImpl implements
 
 		long startTime = System.currentTimeMillis();
 
-		checkResourceTypeAndSetThere(type, set);// /delete
-		String fullDatasetName = getFullDatasetName(type, set);
-		String transType = getTransType(type, fullDatasetName, id);
+		GenericResultsetData readResultset = retrieveExtraData(type, set, id);
 
-		String saveSql = getSaveSql(fullDatasetName, id, transType, queryParams);
+		String idValue = readResultset.getData().get(0).getRow().get(0);
+		String transType = "E";
+		if (idValue == null)
+			transType = "A";
+
+		String fullDatasetName = getFullDatasetName(type, set);
+
+		String saveSql = getSaveSql(readResultset, fullDatasetName, id,
+				transType, queryParams);
 
 		String sqlErrorMsg = "Additional Fields Type: " + type + "   Set: "
 				+ set + "   Id: " + id;
@@ -264,67 +276,37 @@ public class ReadWriteNonCoreDataServiceImpl implements
 				+ "       - type: " + type + "    set: " + set + "  id: " + id);
 	}
 
-	private void checkResourceTypeAndSetThere(String type, String set) {
-
-		String sql = "select t.id from stretchydata_datasettype t join stretchydata_dataset d on d.datasettype_id = t.id where d.`name` = '"
-				+ set + "' and t.`name` = '" + type + "'";
-
-		String sqlErrorMsg = "Additional Fields Type: " + type + "   Set: "
-				+ set + "   Sql: " + sql;
-		CachedRowSet rs = genericDataService.getCachedResultSet(sql,
-				sqlErrorMsg);
-
-		try {
-
-			if (!(rs.next())) {
-				throw new AdditionalFieldsNotFoundException(type, set);
-			}
-
-		} catch (SQLException e) {
-			throw new PlatformDataIntegrityException("error.msg.sql.error",
-					e.getMessage(), sqlErrorMsg);
-		}
-
-	}
-
-	private String getTransType(String type, String fullDatasetName, Long id) {
-
-		String sql = "select s.id from `" + type + "` t left join `"
-				+ fullDatasetName + "` s on s.id = t.id where t.id = " + id;
-
-		String sqlErrorMsg = "Additional Fields Type: " + type
-				+ "   Full Set Name: " + fullDatasetName + "   Sql: " + sql;
-		CachedRowSet rs = genericDataService.getCachedResultSet(sql,
-				sqlErrorMsg);
-
-		try {
-
-			if (rs.next()) {
-				String idValue = rs.getString("id");
-				if (idValue != null)
-					return "E"; // update (edit)
-
-				return "A"; // create (add)
-			}
-			throw new AdditionalFieldsNotFoundException(type, id);
-
-		} catch (SQLException e) {
-			throw new PlatformDataIntegrityException("error.msg.sql.error",
-					e.getMessage(), sqlErrorMsg);
-		}
-
-	}
-
-	private String getSaveSql(String fullSetName, Long id, String transType,
+	private String getSaveSql(GenericResultsetData readResultset,
+			String fullSetName, Long id, String transType,
 			Map<String, String> queryParams) {
 
-		String pValue = "";
+		Set<String> keys = queryParams.keySet();
+
+		String underscore = "_";
+		String space = " ";
+		String pValue = null;
+		String currValue = null;
+		String keyUpdated = null;
+		List<ResultsetColumnHeader> columnHeaders = readResultset
+				.getColumnHeaders();
+		List<String> columnValues = readResultset.getData().get(0).getRow();
+		for (String key : keys) {
+			if (!(key.equalsIgnoreCase("id"))) {
+				keyUpdated = genericDataService
+						.replace(key, underscore, space);
+				currValue = getCurrentColumnValue(keyUpdated, columnHeaders,
+						columnValues);
+				pValue = queryParams.get(key);
+				
+				if (notTheSame(currValue, pValue)) {
+					logger.info("Difference - Column: " + keyUpdated + "- Current Value" + currValue + "    New Value: " + pValue);
+				}
+			}
+		}
+
 		String pValueWrite = "";
 		String saveSql = "";
 		String singleQuote = "'";
-		String underscore = "_";
-		String space = " ";
-		Set<String> keys = queryParams.keySet();
 
 		if (transType.equals("E")) {
 			boolean firstColumn = true;
@@ -385,6 +367,35 @@ public class ReadWriteNonCoreDataServiceImpl implements
 					+ ")" + " select " + id + " as id" + selectColumns;
 		}
 		return saveSql;
+	}
+
+	private boolean notTheSame(String currValue, String pValue) {
+		if (StringUtils.isEmpty(currValue) && StringUtils.isEmpty(pValue))
+			return false;
+
+		if (StringUtils.isEmpty(currValue))
+			return true;
+
+		if (StringUtils.isEmpty(pValue))
+			return true;
+
+		if (currValue.equals(pValue))
+			return false;
+
+		return true;
+	}
+
+	private String getCurrentColumnValue(String key,
+			List<ResultsetColumnHeader> columnHeaders, List<String> columnValues) {
+
+		for (int i = 0; i < columnHeaders.size(); i++) {
+			if (columnHeaders.get(i).getColumnName().equalsIgnoreCase(key))
+				return columnValues.get(i);
+		}
+
+		throw new PlatformDataIntegrityException(
+				"error.msg.invalid.columnName", "Parameter Column Name: " + key
+						+ " not found");
 	}
 
 	private void checkMainResourceExistsWithinScope(String type, Long id) {
