@@ -209,27 +209,17 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 		sql = genericDataService.replace(sql, "${currentUserId}", currentUser
 				.getId().toString());
 
-		sql = wrapSQL(sql);
+		sql = genericDataService.wrapSQL(sql);
 
 		return sql;
 
-	}
-
-	private String wrapSQL(String sql) {
-		// wrap sql to prevent JDBC sql errors, prevent malicious sql and a
-		// CachedRowSetImpl bug
-
-		// http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=7046875 - prevent
-		// Invalid Column Name bug in sun's CachedRowSetImpl where it doesn't
-		// pick up on label names, only column names
-		return "select x.* from (" + sql + ") x";
 	}
 
 	private String getSql(String name, String type) {
 
 		String inputSql = "select " + type + "_sql as the_sql from stretchy_"
 				+ type + " where " + type + "_name = '" + name + "'";
-		inputSql = wrapSQL(inputSql);
+		inputSql = genericDataService.wrapSQL(inputSql);
 
 		String sqlErrorMsg = "Sql: " + inputSql;
 		CachedRowSet rs = genericDataService.getCachedResultSet(inputSql,
@@ -254,7 +244,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 		String sql = "SELECT ifnull(report_type,'') as report_type FROM `stretchy_report` where report_name = '"
 				+ reportName + "'";
 
-		sql = wrapSQL(sql);
+		sql = genericDataService.wrapSQL(sql);
 
 		String sqlErrorMsg = "Report Name: " + reportName + "   Sql: " + sql;
 		CachedRowSet rs = genericDataService.getCachedResultSet(sql,

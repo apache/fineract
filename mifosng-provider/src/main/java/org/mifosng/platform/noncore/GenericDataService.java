@@ -9,11 +9,15 @@ import org.mifosng.platform.api.data.GenericResultsetData;
 
 public interface GenericDataService {
 
-	public CachedRowSet getCachedResultSet(String sql, String errorMsg);
+	CachedRowSet getCachedResultSet(String sql, String errorMsg);
+
+	void updateSQL(String sql, String sqlErrorMsg);
 
 	GenericResultsetData fillGenericResultSet(final String sql);
 
 	String replace(String str, String pattern, String replace);
+
+	String wrapSQL(String sql);
 
 	void dbClose(Statement db_statement, Connection db_connection);
 

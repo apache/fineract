@@ -1,15 +1,11 @@
 package org.mifosng.platform.noncore;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.sql.DataSource;
 import javax.sql.rowset.CachedRowSet;
 
 import org.mifosng.platform.api.data.AdditionalFieldsSetData;
@@ -18,7 +14,6 @@ import org.mifosng.platform.api.data.ResultsetColumnHeader;
 import org.mifosng.platform.api.data.ResultsetDataRow;
 import org.mifosng.platform.exceptions.AdditionalFieldsNotFoundException;
 import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
-import org.mifosng.platform.infrastructure.TenantAwareRoutingDataSource;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.user.domain.AppUser;
 import org.slf4j.Logger;
@@ -35,15 +30,9 @@ public class ReadWriteNonCoreDataServiceImpl implements
 	private final static Logger logger = LoggerFactory
 			.getLogger(ReadWriteNonCoreDataServiceImpl.class);
 
-	private final DataSource dataSource;
-
 	@Autowired
-	public ReadWriteNonCoreDataServiceImpl(
-			final PlatformSecurityContext context,
-			final TenantAwareRoutingDataSource dataSource) {
-
+	public ReadWriteNonCoreDataServiceImpl(final PlatformSecurityContext context) {
 		this.context = context;
-		this.dataSource = dataSource;
 	}
 
 	@Autowired
@@ -52,36 +41,36 @@ public class ReadWriteNonCoreDataServiceImpl implements
 	@Override
 	public List<AdditionalFieldsSetData> retrieveExtraDatasetNames(String type) {
 
+		long startTime = System.currentTimeMillis();
 		List<AdditionalFieldsSetData> additionalFieldsSets = new ArrayList<AdditionalFieldsSetData>();
 
-		Connection db_connection = null;
-		Statement db_statement = null;
+		String andClause;
+		if (type == null) {
+			andClause = "";
+		} else {
+			andClause = " and t.`name` = '" + type + "'";
+		}
+		// PERMITTED ADDITIONAL FIELDS datasets
+		String sql = "select d.id, d.`name` as 'set', t.`name` as 'type' "
+				+ " from stretchydata_dataset d join stretchydata_datasettype t on t.id = d.datasettype_id "
+				+ " where exists"
+				+ " (select 'f'"
+				+ " from m_appuser_role ur "
+				+ " join m_role r on r.id = ur.role_id"
+				+ " left join m_role_permission rp on rp.role_id = r.id"
+				+ " left join m_permission p on p.id = rp.permission_id"
+				+ " where ur.appuser_id = "
+				+ context.authenticatedUser().getId()
+				+ " and (r.name = 'Super User' or r.name = 'Read Only') or p.code = concat('CAN_READ_', t.`name`, '_x', d.`name`)) "
+				+ andClause + " order by d.`name`";
+
+		sql = genericDataService.wrapSQL(sql);
+		String sqlErrorMsg = "Additional Fields Type: " + type + "   sql: "
+				+ sql;
+		CachedRowSet rs = genericDataService.getCachedResultSet(sql,
+				sqlErrorMsg);
+
 		try {
-			db_connection = dataSource.getConnection();
-			db_statement = db_connection.createStatement();
-
-			String andClause;
-			if (type == null) {
-				andClause = "";
-			} else {
-				andClause = " and t.`name` = '" + type + "'";
-			}
-			// PERMITTED ADDITIONAL FIELDS datasets
-			String sql = "select d.id, d.`name` as 'set', t.`name` as 'type' "
-					+ " from stretchydata_dataset d join stretchydata_datasettype t on t.id = d.datasettype_id "
-					+ " where exists"
-					+ " (select 'f'"
-					+ " from m_appuser_role ur "
-					+ " join m_role r on r.id = ur.role_id"
-					+ " left join m_role_permission rp on rp.role_id = r.id"
-					+ " left join m_permission p on p.id = rp.permission_id"
-					+ " where ur.appuser_id = "
-					+ context.authenticatedUser().getId()
-					+ " and (r.name = 'Super User' or r.name = 'Read Only') or p.code = concat('CAN_READ_', t.`name`, '_x', d.`name`)) "
-					+ andClause + " order by d.`name`";
-
-			ResultSet rs = db_statement.executeQuery(sql);
-
 			while (rs.next()) {
 				additionalFieldsSets.add(new AdditionalFieldsSetData(rs
 						.getInt("id"), rs.getString("set"), rs
@@ -90,10 +79,12 @@ public class ReadWriteNonCoreDataServiceImpl implements
 
 		} catch (SQLException e) {
 			throw new PlatformDataIntegrityException("error.msg.sql.error",
-					e.getMessage(), "Additional Fields Type: " + type);
-		} finally {
-			genericDataService.dbClose(db_statement, db_connection);
+					e.getMessage(), sqlErrorMsg);
 		}
+
+		long elapsed = System.currentTimeMillis() - startTime;
+		logger.info("FINISHING retrieveExtraDatasetNames:      Elapsed Time: "
+				+ elapsed);
 
 		return additionalFieldsSets;
 	}
@@ -244,8 +235,8 @@ public class ReadWriteNonCoreDataServiceImpl implements
 	@Override
 	public void updateExtraData(String type, String set, Long id,
 			Map<String, String> queryParams) {
-		logger.info("updateExtraData - type: " + type + "    set: " + set
-				+ "  id: " + id);
+
+		long startTime = System.currentTimeMillis();
 
 		checkResourceTypeThere(type, set);
 		String fullDatasetName = getFullDatasetName(type, set);
@@ -253,35 +244,26 @@ public class ReadWriteNonCoreDataServiceImpl implements
 
 		String saveSql = getSaveSql(fullDatasetName, id, transType, queryParams);
 
-		logger.info("saveSQL: " + saveSql);
-		Connection db_connection = null;
-		Statement db_statement = null;
-		try {
-			db_connection = dataSource.getConnection();
-			db_statement = db_connection.createStatement();
-			db_statement.executeUpdate(saveSql);
+		String sqlErrorMsg = "Additional Fields Type: " + type + "   Set: "
+				+ set + "   Id: " + id;
+		genericDataService.updateSQL(saveSql, sqlErrorMsg);
 
-		} catch (SQLException e) {
-			throw new PlatformDataIntegrityException("error.msg.sql.error",
-					e.getMessage(), "Additional Fields Type: " + type
-							+ "   Set: " + set + "   Id: " + id);
-		} finally {
-			genericDataService.dbClose(db_statement, db_connection);
-		}
-
+		long elapsed = System.currentTimeMillis() - startTime;
+		logger.info("FINISHING updateExtraData:      Elapsed Time: " + elapsed
+				+ "       - type: " + type + "    set: " + set + "  id: " + id);
 	}
 
 	private void checkResourceTypeThere(String type, String set) {
 
-		String sql = "select 'f' from stretchydata_datasettype t join stretchydata_dataset d on d.datasettype_id = t.id where d.`name` = '"
+		String sql = "select t.id from stretchydata_datasettype t join stretchydata_dataset d on d.datasettype_id = t.id where d.`name` = '"
 				+ set + "' and t.`name` = '" + type + "'";
 
-		Connection db_connection = null;
-		Statement db_statement = null;
+		String sqlErrorMsg = "Additional Fields Type: " + type + "   Set: "
+				+ set + "   Sql: " + sql;
+		CachedRowSet rs = genericDataService.getCachedResultSet(sql,
+				sqlErrorMsg);
+
 		try {
-			db_connection = dataSource.getConnection();
-			db_statement = db_connection.createStatement();
-			ResultSet rs = db_statement.executeQuery(sql);
 
 			if (!(rs.next())) {
 				throw new AdditionalFieldsNotFoundException(type, set);
@@ -289,47 +271,37 @@ public class ReadWriteNonCoreDataServiceImpl implements
 
 		} catch (SQLException e) {
 			throw new PlatformDataIntegrityException("error.msg.sql.error",
-					e.getMessage(), "Additional Fields Type: " + type
-							+ "   Set: " + set + "   Sql: " + sql);
-		} finally {
-			genericDataService.dbClose(db_statement, db_connection);
+					e.getMessage(), sqlErrorMsg);
 		}
 
 	}
 
 	private String getTransType(String type, String fullDatasetName, Long id) {
-		String transType = null;
 
 		String sql = "select s.id from `" + type + "` t left join `"
 				+ fullDatasetName + "` s on s.id = t.id where t.id = " + id;
 
-		Connection db_connection = null;
-		Statement db_statement = null;
+		String sqlErrorMsg = "Additional Fields Type: " + type
+				+ "   Full Set Name: " + fullDatasetName + "   Sql: " + sql;
+		CachedRowSet rs = genericDataService.getCachedResultSet(sql,
+				sqlErrorMsg);
+
 		try {
-			db_connection = dataSource.getConnection();
-			db_statement = db_connection.createStatement();
-			ResultSet rs = db_statement.executeQuery(sql);
 
 			if (rs.next()) {
 				String idValue = rs.getString("id");
-				if (idValue != null) {
-					transType = "E";
-				} else {
-					transType = "A";
-				}
-			} else {
-				throw new AdditionalFieldsNotFoundException(type, id);
+				if (idValue != null)
+					return "E"; // update (edit)
+
+				return "A"; // create (add)
 			}
+			throw new AdditionalFieldsNotFoundException(type, id);
+
 		} catch (SQLException e) {
 			throw new PlatformDataIntegrityException("error.msg.sql.error",
-					e.getMessage(), "Additional Fields Type: " + type
-							+ "   Full Set Name: " + fullDatasetName
-							+ "   Sql: " + sql);
-		} finally {
-			genericDataService.dbClose(db_statement, db_connection);
+					e.getMessage(), sqlErrorMsg);
 		}
 
-		return transType;
 	}
 
 	private String getSaveSql(String fullSetName, Long id, String transType,

@@ -40,17 +40,19 @@ public class GenericDataServiceImpl implements GenericDataService {
 	@Override
 	public CachedRowSet getCachedResultSet(String sql, String sqlErrorMsg) {
 
+		long startTime = System.currentTimeMillis();
 		Connection db_connection = null;
 		Statement db_statement = null;
+		CachedRowSet crs = null;
 		try {
 			db_connection = dataSource.getConnection();
 			db_statement = db_connection.createStatement();
 			ResultSet rs = db_statement.executeQuery(sql);
+			crs = new CachedRowSetImpl();
 
-			CachedRowSet crs = new CachedRowSetImpl();
 			crs.populate(rs);
-			//logger.info("RS Size: " + crs.size() + "     getCachedResultSet sql: " + sql);
-			return crs;
+			// logger.info("RS Size: " + crs.size() +
+			// "     getCachedResultSet sql: " + sql);
 		} catch (SQLException e) {
 			throw new PlatformDataIntegrityException("error.msg.sql.error",
 					e.getMessage(), sqlErrorMsg);
@@ -59,6 +61,30 @@ public class GenericDataServiceImpl implements GenericDataService {
 
 		}
 
+		long elapsed = System.currentTimeMillis() - startTime;
+		logger.info("Elapsed Time: " + elapsed + "    SQL: " + sql);
+		return crs;
+	}
+	
+	@Override
+	public void updateSQL(String sql, String sqlErrorMsg) {
+
+		long startTime = System.currentTimeMillis();
+		Connection db_connection = null;
+		Statement db_statement = null;
+		try {
+			db_connection = dataSource.getConnection();
+			db_statement = db_connection.createStatement();
+			db_statement.executeUpdate(sql);
+		} catch (SQLException e) {
+			throw new PlatformDataIntegrityException("error.msg.sql.error",
+					e.getMessage(), sqlErrorMsg);
+		} finally {
+			dbClose(db_statement, db_connection);
+		}
+
+		long elapsed = System.currentTimeMillis() - startTime;
+		logger.info("Elapsed Time FOR UPDATE: " + elapsed + "    SQL: " + sql);
 	}
 
 	@Override
@@ -118,6 +144,17 @@ public class GenericDataServiceImpl implements GenericDataService {
 		}
 		result.append(str.substring(s));
 		return result.toString();
+	}
+
+	@Override
+	public String wrapSQL(String sql) {
+		// wrap sql to prevent JDBC sql errors, prevent malicious sql and a
+		// CachedRowSetImpl bug
+
+		// http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=7046875 - prevent
+		// Invalid Column Name bug in sun's CachedRowSetImpl where it doesn't
+		// pick up on label names, only column names
+		return "select x.* from (" + sql + ") x";
 	}
 
 	@Override
