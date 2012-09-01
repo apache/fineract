@@ -268,9 +268,11 @@ public class ReadWriteNonCoreDataServiceImpl implements
 		String saveSql = getSaveSql(readResultset, fullDatasetName, id,
 				transType, queryParams);
 
-		String sqlErrorMsg = "Additional Fields Type: " + type + "   Set: "
-				+ set + "   Id: " + id;
-		genericDataService.updateSQL(saveSql, sqlErrorMsg);
+		if (saveSql != null) {
+			String sqlErrorMsg = "Additional Fields Type: " + type + "   Set: "
+					+ set + "   Id: " + id;
+			genericDataService.updateSQL(saveSql, sqlErrorMsg);
+		}
 
 		long elapsed = System.currentTimeMillis() - startTime;
 		logger.info("FINISHING updateExtraData:      Elapsed Time: " + elapsed
@@ -286,7 +288,6 @@ public class ReadWriteNonCoreDataServiceImpl implements
 		String underscore = "_";
 		String space = " ";
 		String pValue = null;
-		String currValue = null;
 		String keyUpdated = null;
 		List<ResultsetColumnHeader> columnHeaders = readResultset
 				.getColumnHeaders();
@@ -297,16 +298,12 @@ public class ReadWriteNonCoreDataServiceImpl implements
 		for (String key : keys) {
 			if (!(key.equalsIgnoreCase("id"))) {
 				keyUpdated = genericDataService.replace(key, underscore, space);
-				currValue = getCurrentColumnValue(keyUpdated, columnHeaders,
-						columnValues);
 				pValue = queryParams.get(key);
 
-				if (notTheSame(currValue, pValue)) {
-					logger.info("Difference - Column: " + keyUpdated
-							+ "- Current Value: " + currValue
-							+ "    New Value: " + pValue);
+				if (newValueValidAndChanged(keyUpdated, columnHeaders,
+						columnValues, pValue))
 					updatedColumns.put(keyUpdated, pValue);
-				}
+
 			}
 		}
 
@@ -317,10 +314,8 @@ public class ReadWriteNonCoreDataServiceImpl implements
 		// completeness but its okay to take this risk with additional fields
 		// data
 
-		for (String key : updatedColumns.keySet()) {
-			logger.info("Update Column: " + key + " - Value: "
-					+ updatedColumns.get(key));
-		}
+		if (updatedColumns.size() == 0)
+			return null;
 
 		String pValueWrite = "";
 		String saveSql = "";
@@ -391,12 +386,36 @@ public class ReadWriteNonCoreDataServiceImpl implements
 		return true;
 	}
 
-	private String getCurrentColumnValue(String key,
-			List<ResultsetColumnHeader> columnHeaders, List<String> columnValues) {
+	private boolean newValueValidAndChanged(String key,
+			List<ResultsetColumnHeader> columnHeaders,
+			List<String> columnValues, String newValue) {
 
+		String columnValue = null;
 		for (int i = 0; i < columnHeaders.size(); i++) {
-			if (columnHeaders.get(i).getColumnName().equalsIgnoreCase(key))
-				return columnValues.get(i);
+			if (columnHeaders.get(i).getColumnName().equalsIgnoreCase(key)) {
+				columnValue = columnValues.get(i);
+
+				if ((!StringUtils.isEmpty(newValue))
+						&& columnHeaders.get(i).getColumnValues().size() > 0) {
+					if (!(columnHeaders.get(i).getColumnValues()
+							.contains(newValue))) {
+						throw new PlatformDataIntegrityException(
+								"error.msg.invalid.columnValue",
+								"Parameter Column Name: " + key + " - Value '"
+										+ newValue
+										+ "' not found in Allowed Value list");
+					}
+				}
+
+				if (notTheSame(columnValue, newValue)) {
+					logger.info("Difference - Column: " + key
+							+ "- Current Value: " + columnValue
+							+ "    New Value: " + newValue);
+					return true;
+
+				}
+				return false;
+			}
 		}
 
 		throw new PlatformDataIntegrityException(
