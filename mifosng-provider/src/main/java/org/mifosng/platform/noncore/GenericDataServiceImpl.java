@@ -65,7 +65,7 @@ public class GenericDataServiceImpl implements GenericDataService {
 		logger.info("Elapsed Time: " + elapsed + "    SQL: " + sql);
 		return crs;
 	}
-	
+
 	@Override
 	public void updateSQL(String sql, String sqlErrorMsg) {
 
@@ -157,8 +157,7 @@ public class GenericDataServiceImpl implements GenericDataService {
 		return "select x.* from (" + sql + ") x";
 	}
 
-	@Override
-	public void dbClose(Statement db_statement, Connection db_connection) {
+	private void dbClose(Statement db_statement, Connection db_connection) {
 		logger.debug("dbClose");
 		try {
 			if (db_statement != null) {

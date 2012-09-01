@@ -49,8 +49,6 @@ DROP TABLE IF EXISTS `r_enum_value`;
 -- additional data and report tables
 DROP TABLE IF EXISTS `stretchydata_dataset_fields`;
 DROP TABLE IF EXISTS `stretchydata_dataset`;
-DROP TABLE IF EXISTS `stretchydata_allowed_value`;
-DROP TABLE IF EXISTS `stretchydata_allowed_list`;
 DROP TABLE IF EXISTS `stretchydata_datasettype`;
 DROP TABLE IF EXISTS `stretchy_parameter`;
 DROP TABLE IF EXISTS `stretchy_report_parameter`;
@@ -620,22 +618,6 @@ CREATE TABLE `stretchy_parameter` (
   UNIQUE KEY `name_UNIQUE` (`parameter_name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
-CREATE TABLE `stretchydata_allowed_list` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(45) NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
-
-CREATE TABLE `stretchydata_allowed_value` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(45) NOT NULL,
-  `allowed_list_id` int(11) NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `stretchydata_allowed_value_fk1` (`allowed_list_id`,`name`),
-  CONSTRAINT `stretchydata_allowed_value_fk1` FOREIGN KEY (`allowed_list_id`) REFERENCES `stretchydata_allowed_list` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
-
 CREATE TABLE `stretchydata_dataset` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(45) NOT NULL,
@@ -652,13 +634,13 @@ CREATE TABLE `stretchydata_dataset_fields` (
   `data_length` int(11) DEFAULT NULL,
   `display_type` varchar(45) DEFAULT NULL,
   `dataset_id` int(11) NOT NULL,
-  `allowed_list_id` int(11) DEFAULT NULL,
+  `code_id` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `stretchydata_dataset_fields_fk1` (`dataset_id`,`name`),
-  KEY `stretchydata_dataset_fields_fk2` (`allowed_list_id`),
-  CONSTRAINT `stretchydata_dataset_fields_fk1` FOREIGN KEY (`dataset_id`) REFERENCES `stretchydata_dataset` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `stretchydata_dataset_fields_fk2` FOREIGN KEY (`allowed_list_id`) REFERENCES `stretchydata_allowed_list` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+  KEY `stretchydata_dataset_fields_fk2` (`code_id`),
+  CONSTRAINT `stretchydata_dataset_fields_fk2` FOREIGN KEY (`code_id`) REFERENCES `m_code` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `stretchydata_dataset_fields_fk1` FOREIGN KEY (`dataset_id`) REFERENCES `stretchydata_dataset` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `stretchy_report` (
   `report_id` int(11) NOT NULL AUTO_INCREMENT,

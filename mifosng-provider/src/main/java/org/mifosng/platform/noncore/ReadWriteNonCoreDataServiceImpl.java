@@ -144,7 +144,7 @@ public class ReadWriteNonCoreDataServiceImpl implements
 	}
 
 	private CachedRowSet getAdditionalFieldsMetaData(String type, String set) {
-		String sql = "select f.`name`, f.data_type, f.data_length, f.display_type, f.allowed_list_id "
+		String sql = "select f.`name`, f.data_type, f.data_length, f.display_type, f.code_id "
 				+ " from stretchydata_datasettype t "
 				+ " join stretchydata_dataset d on d.datasettype_id = t.id "
 				+ " join stretchydata_dataset_fields f on f.dataset_id = d.id "
@@ -174,7 +174,7 @@ public class ReadWriteNonCoreDataServiceImpl implements
 
 		try {
 
-			Integer allowedListId;
+			Integer codeId;
 			while (columnDefinitions.next()) {
 				ResultsetColumnHeader rsch = new ResultsetColumnHeader();
 				rsch.setColumnName(columnDefinitions.getString("name"));
@@ -186,16 +186,16 @@ public class ReadWriteNonCoreDataServiceImpl implements
 
 				rsch.setColumnDisplayType(columnDefinitions
 						.getString("display_type"));
-				allowedListId = columnDefinitions.getInt("allowed_list_id");
+				codeId = columnDefinitions.getInt("code_id");
 
-				if (allowedListId > 0) {
-
-					String sql = "select v.`name` from stretchydata_allowed_value v where allowed_list_id = "
-							+ allowedListId + " order by id";
+				if (codeId > 0) {
+					String sql = "select code_value from m_code_value where code_id = "
+							+ codeId + " order by order_position, id";
 					CachedRowSet rsValues = genericDataService
 							.getCachedResultSet(sql, "SQL: " + sql);
 					while (rsValues.next()) {
-						rsch.getColumnValues().add(rsValues.getString("name"));
+						rsch.getColumnValues().add(
+								rsValues.getString("code_value"));
 					}
 				}
 				columnHeaders.add(rsch);
