@@ -172,7 +172,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 					+ " left join m_permission p on p.id = rp.permission_id"
 					+ " where ur.appuser_id = "
 					+ context.authenticatedUser().getId()
-					+ " and (r.name = 'Super User' or r.name = 'Read Only') or p.code = concat('CAN_RUN_', r.report_name))"
+					+ " and (p.code in ('ALL_FUNCTIONS', 'ALL_FUNCTIONS_READ') or p.code = concat('CAN_RUN_', r.report_name))) "
 					+ " order by r.report_name, rp.parameter_id";
 		} else {
 			sql = getSQLtoRun(name, type, queryParams);
