@@ -35,6 +35,7 @@ import org.mifosng.platform.api.commands.OfficeCommand;
 import org.mifosng.platform.api.commands.OrganisationCurrencyCommand;
 import org.mifosng.platform.api.commands.RoleCommand;
 import org.mifosng.platform.api.commands.SavingProductCommand;
+import org.mifosng.platform.api.commands.StaffCommand;
 import org.mifosng.platform.api.commands.SubmitLoanApplicationCommand;
 import org.mifosng.platform.api.commands.UserCommand;
 import org.mifosng.platform.api.data.ApiParameterError;
@@ -117,6 +118,32 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	    String externalId = extractStringParameter("externalId", requestMap, modifiedParameters);
 	    
 		return new FundCommand(modifiedParameters, resourceIdentifier, name, externalId);
+	}
+    
+	@Override
+	public StaffCommand convertJsonToStaffCommand(Long resourceIdentifier,
+			String json) {
+
+		if (StringUtils.isBlank(json)) {
+			throw new InvalidJsonException();
+		}
+		
+		Type typeOfMap = new TypeToken<Map<String, String>>(){}.getType();
+	    Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
+	    
+	    
+	    Set<String> supportedParams = new HashSet<String>(
+	    		Arrays.asList("firstname", "lastname")
+	    );
+	    
+	    checkForUnsupportedParameters(requestMap, supportedParams);
+	    
+	    Set<String> modifiedParameters = new HashSet<String>();
+	    
+	    String firstname = extractStringParameter("firstname", requestMap, modifiedParameters);
+	    String lastname = extractStringParameter("lastname", requestMap, modifiedParameters);
+	    
+		return new StaffCommand(modifiedParameters, resourceIdentifier, firstname, lastname);
 	}
 	
 	@Override
@@ -1074,4 +1101,6 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	    
 		return new DepositStateTransitionApprovalCommand(resourceIdentifier, productId, eventDate, tenureInMonths, depositAmount, interestCompoundedEveryPeriodType,interestCompoundedEvery);
 	}
+
+
 }

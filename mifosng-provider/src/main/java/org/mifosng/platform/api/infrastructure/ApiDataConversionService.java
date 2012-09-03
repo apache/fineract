@@ -18,6 +18,7 @@ import org.mifosng.platform.api.commands.OfficeCommand;
 import org.mifosng.platform.api.commands.OrganisationCurrencyCommand;
 import org.mifosng.platform.api.commands.RoleCommand;
 import org.mifosng.platform.api.commands.SavingProductCommand;
+import org.mifosng.platform.api.commands.StaffCommand;
 import org.mifosng.platform.api.commands.SubmitLoanApplicationCommand;
 import org.mifosng.platform.api.commands.UserCommand;
 
@@ -63,4 +64,6 @@ public interface ApiDataConversionService {
 	DepositStateTransitionCommand convertJsonToDepositStateTransitionCommand(Long resourceIdentifier, String jsonRequestBody);
 	
 	DepositStateTransitionApprovalCommand convertJsonToDepositStateTransitionApprovalCommand(Long resourceIdentifier, String jsonRequestBody);
+
+	StaffCommand convertJsonToStaffCommand(Long resourceIdentifier, String json);
 }

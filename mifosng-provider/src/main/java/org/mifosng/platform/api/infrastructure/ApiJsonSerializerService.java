@@ -25,6 +25,7 @@ import org.mifosng.platform.api.data.OfficeTransactionData;
 import org.mifosng.platform.api.data.PermissionData;
 import org.mifosng.platform.api.data.RoleData;
 import org.mifosng.platform.api.data.SavingProductData;
+import org.mifosng.platform.api.data.StaffData;
 
 public interface ApiJsonSerializerService {
 
@@ -97,4 +98,8 @@ public interface ApiJsonSerializerService {
 	String serializeChargeDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<ChargeData> charges);
 
 	String serializeChargeDataToJson(boolean prettyPrint, Set<String> responseParameters, ChargeData charge);
+
+	String serializeStaffDataToJson(boolean prettyPrint, Set<String> responseParameters, StaffData staff);
+	
+	String serializeStaffDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<StaffData> staff);
 }

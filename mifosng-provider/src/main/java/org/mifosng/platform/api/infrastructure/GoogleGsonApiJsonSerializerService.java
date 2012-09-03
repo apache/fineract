@@ -27,6 +27,7 @@ import org.mifosng.platform.api.data.OfficeTransactionData;
 import org.mifosng.platform.api.data.PermissionData;
 import org.mifosng.platform.api.data.RoleData;
 import org.mifosng.platform.api.data.SavingProductData;
+import org.mifosng.platform.api.data.StaffData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -62,7 +63,8 @@ public class GoogleGsonApiJsonSerializerService implements
 			Arrays.asList("selectedCurrencyOptions", "currencyOptions"));
 	private static final Set<String> FUND_DATA_PARAMETERS = new HashSet<String>(
 			Arrays.asList("id", "name", "externalId"));
-
+	private static final Set<String> STAFF_DATA_PARAMETERS = new HashSet<String>(
+			Arrays.asList("id", "firstname", "lastname","displayName"));
 	private static final Set<String> LOAN_PRODUCT_DATA_PARAMETERS = new HashSet<String>(
 			Arrays.asList("id", "name", "description", "fundId", "fundName",
 					"transactionProcessingStrategyId",
@@ -534,5 +536,24 @@ public class GoogleGsonApiJsonSerializerService implements
 						CHARGES_DATA_PARAMETERS, prettyPrint,
 						responseParameters);
 		return helper.serializedJsonFrom(gsonDeserializer, charge);
+	}
+
+	@Override
+	public String serializeStaffDataToJson(boolean prettyPrint,
+			Set<String> responseParameters, StaffData staff) {
+		final Gson gsonDeserializer = helper
+				.createGsonBuilderWithParameterExclusionSerializationStrategy(
+						STAFF_DATA_PARAMETERS, prettyPrint, responseParameters);
+		return helper.serializedJsonFrom(gsonDeserializer, staff);
+	}
+
+	@Override
+	public String serializeStaffDataToJson(boolean prettyPrint,
+			Set<String> responseParameters, Collection<StaffData> staff) {
+		final Gson gsonDeserializer = helper
+				.createGsonBuilderWithParameterExclusionSerializationStrategy(
+						STAFF_DATA_PARAMETERS, prettyPrint, responseParameters);
+		return helper.serializedJsonFrom(gsonDeserializer,
+				staff.toArray(new StaffData[staff.size()]));
 	}
 }
