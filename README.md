@@ -31,12 +31,12 @@ see https://github.com/keithwoodlock/mifosx/wiki/Git-Usuage for info around usin
 
 see https://www.ohloh.net/p/mifosx for activity overview and basic code analysis.
 
-Amazon Public AMI (currently out-of-date and will be updated - so don't use
+Amazon Public AMI
 =================
 
-Launch instance <a target="_blank" href="https://console.aws.amazon.com/ec2/home?region=eu-west-1#launchAmi=ami-7b0e0a0f" title="mifos platform api beta 2">ami-7b0e0a0f</a>
+Launch instance <a target="_blank" href="https://console.aws.amazon.com/ec2/home?region=eu-west-1#launchAmi=ami-65e6e011" title="Mifos X Public AMI 1">ami-65e6e011</a>
 
- - mifos-platform-api-beta-2
+ - Mifos X Public AMI 1
  - Ubuntu11.10, tomcat7.0.21 (with SSL),MySql 5.1.62, Java 1.6_30, Mifos X Platform
 
 Roadmap
