@@ -26,11 +26,9 @@ public class Client extends AbstractAuditableCustom<AppUser, Long> {
     @JoinColumn(name = "office_id", nullable = false)
     private Office       office;
 
-    @SuppressWarnings("unused")
 	@Column(name = "firstname", length=50)
     private String       firstName;
     
-    @SuppressWarnings("unused")
 	@Column(name = "lastname", length=50)
     private String       lastName;
     
