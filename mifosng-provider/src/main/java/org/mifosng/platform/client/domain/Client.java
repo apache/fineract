@@ -33,6 +33,10 @@ public class Client extends AbstractAuditableCustom<AppUser, Long> {
     @SuppressWarnings("unused")
 	@Column(name = "lastname", length=50)
     private String       lastName;
+    
+    @SuppressWarnings("unused")
+   	@Column(name = "display_name", length=50)
+    private String       displayName;
 
     @SuppressWarnings("unused")
 	@Column(name = "joining_date")
@@ -71,6 +75,12 @@ public class Client extends AbstractAuditableCustom<AppUser, Long> {
         	this.firstName = null;
         }
         this.lastName = lastName.trim();
+        //populate display name
+        if(this.firstName!=null){
+    		this.displayName = this.firstName + " " + this.lastName;
+        }else{
+        	this.displayName = this.lastName;
+        }
     }
 
 	public boolean identifiedBy(final String identifier) {
@@ -89,6 +99,9 @@ public class Client extends AbstractAuditableCustom<AppUser, Long> {
 		if (StringUtils.isNotBlank(command.getClientOrBusinessName())) {
 			this.firstName = null;
 			this.lastName = command.getClientOrBusinessName().trim();
+			this.displayName = this.lastName;
+		}else{
+			deriveDisplayName();
 		}
 		
 		if (StringUtils.isNotBlank(command.getExternalId())) {
@@ -115,11 +128,19 @@ public class Client extends AbstractAuditableCustom<AppUser, Long> {
 		if (command.isClientOrBusinessNameChanged() && StringUtils.isNotBlank(command.getClientOrBusinessName())) {
 			this.lastName = command.getClientOrBusinessName();
 			this.firstName = null;
+			this.displayName = this.lastName;
+		}else if(command.isFirstnameChanged() || command.isLastnameChanged()) {
+			//do not want to enter this condition for business names
+			deriveDisplayName();
 		}
 		
 		if (command.isExternalIdChanged()) {
 			 this.externalId = StringUtils.defaultIfEmpty(command.getExternalId().trim(), null);
 		}
+	}
+
+	private void deriveDisplayName() {
+		this.displayName = this.firstName + " " + this.lastName;
 	}
 
 	/**

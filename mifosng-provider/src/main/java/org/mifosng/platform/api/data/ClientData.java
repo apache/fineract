@@ -22,32 +22,29 @@ public class ClientData {
 
 	public ClientData(final Long officeId, final String officeName,
 			final Long id, final String firstname, final String lastname,
-			final String externalId, final LocalDate joinedDate) {
+			final String displayName, final String externalId,
+			final LocalDate joinedDate) {
 		this.officeId = officeId;
 		this.officeName = officeName;
 		this.id = id;
 		this.firstname = firstname;
+		this.displayName = displayName;
 
-		StringBuilder nameBuilder = new StringBuilder(this.firstname);
-		if (StringUtils.isNotBlank(nameBuilder.toString())) {
-			nameBuilder.append(' ');
-		}
-		nameBuilder.append(lastname);
-
-		this.displayName = nameBuilder.toString();
+		/*** unset last name for business name **/
 		if (StringUtils.isBlank(this.firstname)) {
 			this.lastname = null;
-			this.clientOrBusinessName = nameBuilder.toString();
+			this.clientOrBusinessName = lastname;
 		} else {
 			this.lastname = lastname;
 			this.clientOrBusinessName = null;
 		}
-		
+
 		this.externalId = externalId;
 		this.joinedDate = joinedDate;
 	}
 
-	public ClientData(final Long officeId, final LocalDate joinedDate, final List<OfficeLookup> offices) {
+	public ClientData(final Long officeId, final LocalDate joinedDate,
+			final List<OfficeLookup> offices) {
 		this.id = null;
 		this.officeId = officeId;
 		this.officeName = null;
@@ -63,7 +60,7 @@ public class ClientData {
 	public Long getId() {
 		return id;
 	}
-	
+
 	public Long getOfficeId() {
 		return officeId;
 	}
@@ -79,7 +76,7 @@ public class ClientData {
 	public String getLastname() {
 		return lastname;
 	}
-	
+
 	public String getClientOrBusinessName() {
 		return clientOrBusinessName;
 	}

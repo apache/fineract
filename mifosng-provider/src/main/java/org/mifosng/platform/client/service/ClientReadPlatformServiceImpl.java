@@ -131,8 +131,8 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 		}
 
 		public String clientSchema() {
-			return "c.office_id as officeId, c.id as id, c.firstname as firstname, c.lastname as lastname, c.external_id as externalId, " +
-					"c.joining_date as joinedDate from m_client c";
+			return "c.office_id as officeId, c.id as id, c.firstname as firstname, c.lastname as lastname, c.display_name as displayName, " +
+				   "c.external_id as externalId, c.joining_date as joinedDate from m_client c";
 		}
 
 		@Override
@@ -146,13 +146,14 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 				firstname = "";
 			}
 			String lastname = rs.getString("lastname");
+			String displayName = rs.getString("displayName");
 			String externalId = rs.getString("externalId");
 			LocalDate joinedDate = JdbcSupport.getLocalDate(rs, "joinedDate");
 
 			String officeName = fromOfficeList(this.offices, officeId);
 
 			return new ClientData(officeId, officeName, id, firstname,
-					lastname, externalId, joinedDate);
+					lastname, displayName, externalId, joinedDate);
 		}
 
 		private String fromOfficeList(final List<OfficeData> officeList,
