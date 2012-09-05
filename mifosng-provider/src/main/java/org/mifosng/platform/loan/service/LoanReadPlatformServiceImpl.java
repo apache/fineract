@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import org.joda.time.LocalDate;
+import org.mifosng.platform.api.data.ChargeData;
 import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.EnumOptionData;
@@ -20,6 +21,7 @@ import org.mifosng.platform.api.data.LoanTransactionData;
 import org.mifosng.platform.api.data.LoanRepaymentTransactionData;
 import org.mifosng.platform.api.data.MoneyData;
 import org.mifosng.platform.api.data.NewLoanData;
+import org.mifosng.platform.charge.service.ChargeReadPlatformService;
 import org.mifosng.platform.client.service.ClientReadPlatformService;
 import org.mifosng.platform.currency.domain.ApplicationCurrency;
 import org.mifosng.platform.currency.domain.ApplicationCurrencyRepository;
@@ -54,6 +56,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 	private final LoanProductReadPlatformService loanProductReadPlatformService;
 	private final ClientReadPlatformService clientReadPlatformService;
 	private final LoanTransactionRepository loanTransactionRepository;
+    private final ChargeReadPlatformService chargeReadPlatformService;
 
 	@Autowired
 	public LoanReadPlatformServiceImpl(
@@ -63,6 +66,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 			final ApplicationCurrencyRepository applicationCurrencyRepository,
 			final LoanProductReadPlatformService loanProductReadPlatformService,
 			final ClientReadPlatformService clientReadPlatformService,
+            final ChargeReadPlatformService chargeReadPlatformService,
 			final TenantAwareRoutingDataSource dataSource) {
 		this.context = context;
 		this.loanRepository = loanRepository;
@@ -70,6 +74,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 		this.applicationCurrencyRepository = applicationCurrencyRepository;
 		this.loanProductReadPlatformService = loanProductReadPlatformService;
 		this.clientReadPlatformService = clientReadPlatformService;
+        this.chargeReadPlatformService = chargeReadPlatformService;
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
 
@@ -274,6 +279,9 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 			if (loanProductLookup.getId().equals(productId)) {
 				match = this.loanProductReadPlatformService
 						.retrieveLoanProduct(loanProductLookup.getId());
+                Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveLoanApplicableCharges();
+                chargeOptions.removeAll(match.getCharges());
+                match.setChargeOptions(chargeOptions);
 				break;
 			}
 		}

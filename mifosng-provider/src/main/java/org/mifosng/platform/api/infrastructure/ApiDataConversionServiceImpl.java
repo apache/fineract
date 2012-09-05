@@ -27,6 +27,7 @@ import org.mifosng.platform.api.commands.DepositStateTransitionApprovalCommand;
 import org.mifosng.platform.api.commands.DepositStateTransitionCommand;
 import org.mifosng.platform.api.commands.FundCommand;
 import org.mifosng.platform.api.commands.GroupCommand;
+import org.mifosng.platform.api.commands.LoanChargeCommand;
 import org.mifosng.platform.api.commands.LoanProductCommand;
 import org.mifosng.platform.api.commands.LoanStateTransitionCommand;
 import org.mifosng.platform.api.commands.LoanTransactionCommand;
@@ -479,14 +480,49 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	    LocalDate submittedOnDate = extractLocalDateParameter("submittedOnDate", requestMap, modifiedParameters);
 	    
 	    String submittedOnNote = extractStringParameter("submittedOnNote", requestMap, modifiedParameters);
-	    
+
+        JsonParser parser = new JsonParser();
+
+        LoanChargeCommand[] charges = null;
+        JsonElement element = parser.parse(json);
+        if (element.isJsonObject()) {
+            JsonObject object = element.getAsJsonObject();
+            if (object.has("charges")) {
+                modifiedParameters.add("charges");
+                JsonArray array = object.get("charges").getAsJsonArray();
+                charges = new LoanChargeCommand[array.size()];
+                for (int i=0; i<array.size(); i++) {
+                    JsonObject loanCharge = array.get(i).getAsJsonObject();
+                    Set<String> chargeModifiedParameters = new HashSet<String>();
+                    Long id = loanCharge.get("id").getAsLong();
+                    BigDecimal amount = null;
+                    Integer chargeTimeType = null;
+                    Integer chargeCalculationType = null;
+
+                    if (loanCharge.has("amount")){
+                        chargeModifiedParameters.add("amount");
+                        amount = loanCharge.get("amount").getAsBigDecimal();
+                    }
+                    if (loanCharge.has("chargeTimeType")){
+                        chargeModifiedParameters.add("chargeTimeType");
+                        chargeTimeType = loanCharge.get("chargeTimeType").getAsInt();
+                    }
+                    if (loanCharge.has("chargeCalculationType")){
+                        chargeModifiedParameters.add("chargeCalculationType");
+                        chargeCalculationType = loanCharge.get("chargeCalculationType").getAsInt();
+                    }
+                    charges[i] = new LoanChargeCommand(chargeModifiedParameters, id, amount, chargeTimeType, chargeCalculationType);
+                }
+            }
+        }
+
 		return new SubmitLoanApplicationCommand(clientId, productId, externalId, fundId, transactionProcessingStrategyId,
 				submittedOnDate, submittedOnNote, 
 	    		expectedDisbursementDate, repaymentsStartingFromDate, interestChargedFromDate, 
 	    		principal, interestRatePerPeriod, interestRateFrequencyTypeValue, interestTypeValue, interestCalculationPeriodTypeValue, 
 	    		repaymentEvery, repaymentFrequencyType, numberOfRepayments, amortizationTypeValue, 
 	    		loanTermFrequency, loanTermFrequencyType,
-	    		inArrearsToleranceValue);
+	    		inArrearsToleranceValue, charges);
 	}
 	
 	@Override
@@ -1101,6 +1137,4 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	    
 		return new DepositStateTransitionApprovalCommand(resourceIdentifier, productId, eventDate, tenureInMonths, depositAmount, interestCompoundedEveryPeriodType,interestCompoundedEvery);
 	}
-
-
 }

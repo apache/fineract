@@ -153,7 +153,11 @@ public class LoanProduct extends AbstractAuditableCustom<AppUser, Long> {
 		return transactionProcessingStrategy;
 	}
 
-	public void update(final LoanProductCommand command, final Fund fund, final LoanTransactionProcessingStrategy strategy,
+    public Set<Charge> getCharges() {
+        return charges;
+    }
+
+    public void update(final LoanProductCommand command, final Fund fund, final LoanTransactionProcessingStrategy strategy,
                        final Set<Charge> charges) {
 		
 		if (command.isNameChanged()) {

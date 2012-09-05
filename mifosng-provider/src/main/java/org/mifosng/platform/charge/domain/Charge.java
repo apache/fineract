@@ -73,6 +73,14 @@ public class Charge extends AbstractAuditableCustom<AppUser, Long> {
         return currencyCode;
     }
 
+    public Integer getChargeTime() {
+        return chargeTime;
+    }
+
+    public Integer getChargeCalculation() {
+        return chargeCalculation;
+    }
+
     public boolean isActive() {
         return active;
     }

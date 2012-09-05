@@ -2,17 +2,25 @@ package org.mifosng.platform.loan.service;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import org.mifosng.platform.api.commands.LoanChargeCommand;
 import org.mifosng.platform.api.commands.SubmitLoanApplicationCommand;
 import org.mifosng.platform.api.data.LoanSchedule;
 import org.mifosng.platform.api.data.MoneyData;
 import org.mifosng.platform.api.data.ScheduledLoanInstallment;
+import org.mifosng.platform.charge.domain.Charge;
+import org.mifosng.platform.charge.domain.ChargeRepository;
 import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.client.domain.ClientRepository;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
+import org.mifosng.platform.exceptions.ChargeIsNotActiveException;
+import org.mifosng.platform.exceptions.ChargeNotFoundException;
 import org.mifosng.platform.exceptions.ClientNotFoundException;
 import org.mifosng.platform.exceptions.FundNotFoundException;
+import org.mifosng.platform.exceptions.InvalidCurrencyException;
 import org.mifosng.platform.exceptions.LoanProductNotFoundException;
 import org.mifosng.platform.exceptions.LoanTransactionProcessingStrategyNotFoundException;
 import org.mifosng.platform.fund.domain.Fund;
@@ -22,6 +30,7 @@ import org.mifosng.platform.loan.domain.DefaultLoanLifecycleStateMachine;
 import org.mifosng.platform.loan.domain.InterestCalculationPeriodMethod;
 import org.mifosng.platform.loan.domain.InterestMethod;
 import org.mifosng.platform.loan.domain.Loan;
+import org.mifosng.platform.loan.domain.LoanCharge;
 import org.mifosng.platform.loan.domain.LoanLifecycleStateMachine;
 import org.mifosng.platform.loan.domain.LoanProduct;
 import org.mifosng.platform.loan.domain.LoanProductRelatedDetail;
@@ -34,6 +43,7 @@ import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 import org.mifosng.platform.loanschedule.domain.AprCalculator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 @Service
 public class LoanAssembler {
@@ -42,6 +52,7 @@ public class LoanAssembler {
 	private final ClientRepository clientRepository;
 	private final AprCalculator aprCalculator = new AprCalculator();
 	private final FundRepository fundRepository;
+    private final ChargeRepository chargeRepository;
 	private final LoanTransactionProcessingStrategyRepository loanTransactionProcessingStrategyRepository;
 	
 	@Autowired
@@ -49,10 +60,12 @@ public class LoanAssembler {
 			final LoanProductRepository loanProductRepository,
 			final ClientRepository clientRepository,
 			final FundRepository fundRepository,
+            final ChargeRepository chargeRepository,
 			final LoanTransactionProcessingStrategyRepository loanTransactionProcessingStrategyRepository) {
 		this.loanProductRepository = loanProductRepository;
 		this.clientRepository = clientRepository;
 		this.fundRepository = fundRepository;
+        this.chargeRepository = chargeRepository;
 		this.loanTransactionProcessingStrategyRepository = loanTransactionProcessingStrategyRepository;
 	}
 	
@@ -96,10 +109,13 @@ public class LoanAssembler {
 		// associating fund with loan product at creation is optional for now.
 		Fund fund = findFundByIdIfProvided(command.getFundId());
 		LoanTransactionProcessingStrategy loanTransactionProcessingStrategy = findStrategyByIdIfProvided(command.getTransactionProcessingStrategyId());
-		
+
 		Loan loan = Loan.createNew(fund, loanTransactionProcessingStrategy, loanProduct, client, loanRepaymentScheduleDetail);
 		loan.setExternalId(command.getExternalId());
-		
+
+        final Set<LoanCharge> charges = this.assembleSetOfCharges(command, loan, loanProduct, currency.getCode());
+        loan.setCharges(charges);
+
 		for (ScheduledLoanInstallment scheduledLoanInstallment : loanRepaymentSchedule) {
 
 			MoneyData readPrincipalDue = scheduledLoanInstallment.getPrincipalDue();
@@ -111,7 +127,7 @@ public class LoanAssembler {
 					readInterestDue.getAmount());
 			loan.addRepaymentScheduleInstallment(installment);
 		}
-		
+
 		loan.submitApplication(loanTermFrequency, loanTermFrequencyType, 
 				command.getSubmittedOnDate(), command.getExpectedDisbursementDate(), 
 				command.getRepaymentsStartingFromDate(), command.getInterestChargedFromDate(), 
@@ -146,4 +162,35 @@ public class LoanAssembler {
 		}
 		return strategy;
 	}
+
+    private Set<LoanCharge> assembleSetOfCharges(final SubmitLoanApplicationCommand command, final Loan loan,
+                                                 final LoanProduct product, final String currencyCode) {
+
+        Set<LoanCharge> charges = new HashSet<LoanCharge>();
+        LoanChargeCommand[] loanChargesArray = command.getCharges();
+
+        if (!ObjectUtils.isEmpty(loanChargesArray)) {
+            for (LoanChargeCommand loanChargeCommand : loanChargesArray) {
+                Long id = loanChargeCommand.getId();
+                Charge charge = this.chargeRepository.findOne(id);
+                if (charge == null || charge.isDeleted()) {
+                    throw new ChargeNotFoundException(id);
+                }
+                if (!charge.isActive()){
+                    throw new ChargeIsNotActiveException(id);
+                }
+                if (!currencyCode.equals(charge.getCurrencyCode())){
+                    String errorMessage = "Charge and Loan must have the same currency.";
+                    throw new InvalidCurrencyException("charge", "attach.to.loan", errorMessage);
+                }
+                charges.add(new LoanCharge(loan, charge, loanChargeCommand));
+            }
+        } else {
+           for (Charge productCharge : product.getCharges()){
+               charges.add(new LoanCharge(loan, productCharge));
+           }
+        }
+
+        return charges;
+    }
 }

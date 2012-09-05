@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.mifosng.platform.api.commands.CalculateLoanScheduleCommand;
+import org.mifosng.platform.api.commands.LoanChargeCommand;
 import org.mifosng.platform.api.commands.SubmitLoanApplicationCommand;
 import org.mifosng.platform.api.data.ApiParameterError;
 import org.mifosng.platform.exceptions.PlatformApiDataValidationException;
@@ -46,7 +47,18 @@ public class SubmitLoanApplicationCommandValidator {
 		} catch (PlatformApiDataValidationException e) {
 			dataValidationErrors.addAll(e.getErrors());
 		}
-		
+
+        if (this.command.getCharges() != null){
+            for (LoanChargeCommand loanChargeCommand : this.command.getCharges()){
+                try {
+                    LoanChargeCommandValidator validator = new LoanChargeCommandValidator(loanChargeCommand);
+                    validator.validate();
+                } catch (PlatformApiDataValidationException e) {
+                    dataValidationErrors.addAll(e.getErrors());
+                }
+            }
+        }
+
 		if (!dataValidationErrors.isEmpty()) {
 			throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);
 		}

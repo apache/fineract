@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -128,6 +129,11 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	@Column(name = "maturedon_date")
 	private Date maturedOnDate;
 
+    @SuppressWarnings("unused")
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true)
+    private Set<LoanCharge> charges;
+
 	// see
 	// http://stackoverflow.com/questions/4334970/hibernate-cannot-simultaneously-fetch-multiple-bags
 	@LazyCollection(LazyCollectionOption.FALSE)
@@ -160,6 +166,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		this.client = null;
 		this.loanProduct = null;
 		this.loanRepaymentScheduleDetail = null;
+        this.charges = charges;
 	}
 
 	public Loan(final Client client, Fund fund, LoanTransactionProcessingStrategy transactionProcessingStrategy, final LoanProduct loanProduct,
@@ -924,7 +931,15 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		return possibleMaturityDate;
 	}
 
-	public void addRepaymentScheduleInstallment(
+    public Set<LoanCharge> getCharges() {
+        return charges;
+    }
+
+    public void setCharges(Set<LoanCharge> charges) {
+        this.charges = charges;
+    }
+
+    public void addRepaymentScheduleInstallment(
 			final LoanRepaymentScheduleInstallment installment) {
 		installment.updateLoan(this);
 		this.repaymentScheduleInstallments.add(installment);

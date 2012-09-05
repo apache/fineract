@@ -38,7 +38,9 @@ public class SubmitLoanApplicationCommand {
 	private final LocalDate interestChargedFromDate;
 	private final LocalDate submittedOnDate;
 	private final String submittedOnNote;
-	
+
+    private final LoanChargeCommand[] charges;
+
 	private LoanSchedule loanSchedule;
 
 	public SubmitLoanApplicationCommand(
@@ -55,7 +57,7 @@ public class SubmitLoanApplicationCommand {
 			final Integer interestCalculationPeriodMethod,
 			final Integer repaymentEvery, final Integer repaymentFrequency, final Integer numberOfRepayments, Integer amortizationMethod, 
 			final Integer loanTermFrequency, final Integer loanTermFrequencyType,
-			final BigDecimal toleranceAmount) {
+			final BigDecimal toleranceAmount, final LoanChargeCommand[] charges) {
 		this.clientId = clientId;
 		this.productId = productId;
 		this.externalId = externalId;
@@ -81,6 +83,8 @@ public class SubmitLoanApplicationCommand {
 		this.repaymentFrequencyType = repaymentFrequency;
 		this.numberOfRepayments = numberOfRepayments;
 		this.amortizationType = amortizationMethod;
+
+        this.charges = charges;
 	}
 	
 	public CalculateLoanScheduleCommand toCalculateLoanScheduleCommand() {
@@ -185,4 +189,9 @@ public class SubmitLoanApplicationCommand {
 	public String getSubmittedOnNote() {
 		return submittedOnNote;
 	}
+
+    public LoanChargeCommand[] getCharges() {
+        return charges;
+    }
+
 }
