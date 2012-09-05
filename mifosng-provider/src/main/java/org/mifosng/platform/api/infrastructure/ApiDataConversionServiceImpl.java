@@ -436,13 +436,13 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 			throw new InvalidJsonException();
 		}
 		
-		Type typeOfMap = new TypeToken<Map<String, String>>(){}.getType();
-	    Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
+		Type typeOfMap = new TypeToken<Map<String, Object>>(){}.getType();
+	    Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
 	    
 	    Set<String> supportedParams = new HashSet<String>(
 	    		Arrays.asList("clientId", "productId", "externalId", "fundId", "transactionProcessingStrategyId",
 	    				"principal", "inArrearsTolerance", "interestRatePerPeriod", "repaymentEvery", "numberOfRepayments", 
-	    				"loanTermFrequency", "loanTermFrequencyType",
+	    				"loanTermFrequency", "loanTermFrequencyType", "charges",
 	    				"repaymentFrequencyType", "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType",
 	    				"expectedDisbursementDate", "repaymentsStartingFromDate", "interestChargedFromDate", "submittedOnDate", "submittedOnNote",
 	    				"locale", "dateFormat")
@@ -487,7 +487,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
         JsonElement element = parser.parse(json);
         if (element.isJsonObject()) {
             JsonObject object = element.getAsJsonObject();
-            if (object.has("charges")) {
+            if (object.has("charges") && object.get("charges").isJsonArray()) {
                 modifiedParameters.add("charges");
                 JsonArray array = object.get("charges").getAsJsonArray();
                 charges = new LoanChargeCommand[array.size()];

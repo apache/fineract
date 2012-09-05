@@ -15,4 +15,6 @@ public interface ChargeReadPlatformService {
     Collection<ChargeData> retrieveLoanApplicableCharges();
 
     Collection<ChargeData> retrieveLoanProductCharges(Long loanProductId);
+
+    Collection<ChargeData> retrieveLoanCharges(Long loanId);
 }

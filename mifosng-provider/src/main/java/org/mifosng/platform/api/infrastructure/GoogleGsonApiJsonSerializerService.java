@@ -152,7 +152,7 @@ public class GoogleGsonApiJsonSerializerService implements
 					"closedOnDate", "expectedMaturityDate",
 					"lifeCycleStatusId", "lifeCycleStatusText",
 					"lifeCycleStatusDate", "summary", "repaymentSchedule",
-					"loanRepayments", "permissions", "convenienceData"));
+					"loanRepayments", "permissions", "convenienceData", "charges"));
 
 	private static final Set<String> LOAN_TRANSACTION_DATA_PARAMETERS = new HashSet<String>(
 			Arrays.asList("id", "transactionType", "date", "principal",

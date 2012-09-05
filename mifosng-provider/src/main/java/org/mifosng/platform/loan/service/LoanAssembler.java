@@ -185,7 +185,7 @@ public class LoanAssembler {
                 }
                 charges.add(new LoanCharge(loan, charge, loanChargeCommand));
             }
-        } else {
+        } else if (loanChargesArray == null) {
            for (Charge productCharge : product.getCharges()){
                charges.add(new LoanCharge(loan, productCharge));
            }

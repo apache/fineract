@@ -49,6 +49,8 @@ public class LoanAccountData {
 
 	private LoanConvenienceData convenienceData;
 
+    private Collection<ChargeData> charges;
+
 	protected LoanAccountData() {
 		//
 	}
@@ -57,11 +59,12 @@ public class LoanAccountData {
 			LoanAccountSummaryData summary,
 			Collection<LoanRepaymentPeriodData> repaymentSchedule,
 			Collection<LoanRepaymentTransactionData> loanRepayments,
-			LoanPermissionData permissions) {
+			LoanPermissionData permissions, Collection<ChargeData> charges) {
 		this.summary = summary;
 		this.repaymentSchedule = repaymentSchedule;
 		this.loanRepayments = loanRepayments;
 		this.permissions = permissions;
+        this.charges = charges;
 
 		int maxSubmittedOnOffsetFromToday = basicDetails
 				.getMaxSubmittedOnOffsetFromToday();
@@ -384,4 +387,11 @@ public class LoanAccountData {
 		this.lifeCycleStatusId = lifeCycleStatusId;
 	}
 
+    public Collection<ChargeData> getCharges() {
+        return charges;
+    }
+
+    public void setCharges(Collection<ChargeData> charges) {
+        this.charges = charges;
+    }
 }

@@ -25,6 +25,7 @@ import org.mifosng.platform.api.commands.LoanStateTransitionCommand;
 import org.mifosng.platform.api.commands.LoanTransactionCommand;
 import org.mifosng.platform.api.commands.SubmitLoanApplicationCommand;
 import org.mifosng.platform.api.commands.UndoStateTransitionCommand;
+import org.mifosng.platform.api.data.ChargeData;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.LoanAccountData;
 import org.mifosng.platform.api.data.LoanAccountSummaryData;
@@ -38,6 +39,7 @@ import org.mifosng.platform.api.data.NewLoanData;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
 import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
+import org.mifosng.platform.charge.service.ChargeReadPlatformService;
 import org.mifosng.platform.exceptions.UnrecognizedQueryParamException;
 import org.mifosng.platform.loan.service.CalculationPlatformService;
 import org.mifosng.platform.loan.service.LoanReadPlatformService;
@@ -56,6 +58,9 @@ public class LoansApiResource {
 
 	@Autowired
 	private LoanWritePlatformService loanWritePlatformService;
+
+    @Autowired
+    private ChargeReadPlatformService chargeReadPlatformService;
 
 	@Autowired
 	private CalculationPlatformService calculationPlatformService;
@@ -118,11 +123,12 @@ public class LoansApiResource {
 		Collection<LoanRepaymentPeriodData> repaymentSchedule = null;
 		LoanAccountSummaryData summary = null;
 		LoanPermissionData permissions = null;
-		
+        Collection<ChargeData> charges = null;
+
 		Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (!associationParameters.isEmpty()) {
 			if (associationParameters.contains("all")) {
-				responseParameters.addAll(Arrays.asList("summary", "repaymentSchedule", "loanRepayments", "permissions", "convenienceData"));
+				responseParameters.addAll(Arrays.asList("summary", "repaymentSchedule", "loanRepayments", "permissions", "convenienceData", "charges"));
 			} else {
 				responseParameters.addAll(associationParameters);
 			}
@@ -134,9 +140,11 @@ public class LoansApiResource {
 
 			boolean isWaiveAllowed = summary.isWaiveAllowed(loanBasicDetails.getInArrearsTolerance());
 			permissions = this.loanReadPlatformService.retrieveLoanPermissions(loanBasicDetails, isWaiveAllowed, loanRepayments.size());
+
+            charges = this.chargeReadPlatformService.retrieveLoanCharges(loanId);
 		}
 
-		LoanAccountData loanAccount = new LoanAccountData(loanBasicDetails, summary, repaymentSchedule, loanRepayments, permissions);
+		LoanAccountData loanAccount = new LoanAccountData(loanBasicDetails, summary, repaymentSchedule, loanRepayments, permissions, charges);
 		
 		return this.apiJsonSerializerService.serialzieLoanAccountDataToJson(prettyPrint, responseParameters, loanAccount);
 	}
