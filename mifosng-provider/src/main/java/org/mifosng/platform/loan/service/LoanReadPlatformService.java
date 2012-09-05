@@ -2,13 +2,13 @@ package org.mifosng.platform.loan.service;
 
 import java.util.Collection;
 
+import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.LoanAccountSummaryData;
 import org.mifosng.platform.api.data.LoanBasicDetailsData;
 import org.mifosng.platform.api.data.LoanPermissionData;
 import org.mifosng.platform.api.data.LoanRepaymentPeriodData;
-import org.mifosng.platform.api.data.LoanTransactionData;
 import org.mifosng.platform.api.data.LoanRepaymentTransactionData;
-import org.mifosng.platform.api.data.MoneyData;
+import org.mifosng.platform.api.data.LoanTransactionData;
 import org.mifosng.platform.api.data.NewLoanData;
 
 public interface LoanReadPlatformService {
@@ -19,7 +19,7 @@ public interface LoanReadPlatformService {
 
 	Collection<LoanRepaymentTransactionData> retrieveLoanPayments(Long loanId);
 
-	LoanAccountSummaryData retrieveSummary(MoneyData principal,
+	LoanAccountSummaryData retrieveSummary(CurrencyData currency,
 			Collection<LoanRepaymentPeriodData> repaymentSchedule,
 			Collection<LoanRepaymentTransactionData> loanRepayments);
 

@@ -1,5 +1,7 @@
 package org.mifosng.platform.api.data;
 
+import java.math.BigDecimal;
+
 public class LoanAccountSummaryData {
 
 	private MoneyData originalPrincipal;
@@ -46,7 +48,8 @@ public class LoanAccountSummaryData {
 		this.totalInArrears = totalInArrears;
 	}
 
-	public boolean isWaiveAllowed(MoneyData tolerance) {
+	public boolean isWaiveAllowed(final CurrencyData currency, final BigDecimal toleranceAmount) {
+		MoneyData tolerance = MoneyData.of(currency, toleranceAmount);
 		return this.totalOutstanding.isGreaterThanZero() && (tolerance.isGreaterThan(this.totalOutstanding) || tolerance.isEqualTo(this.totalOutstanding));
 	}
 	

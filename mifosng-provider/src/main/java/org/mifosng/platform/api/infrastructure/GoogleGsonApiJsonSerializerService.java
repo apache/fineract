@@ -151,9 +151,11 @@ public class GoogleGsonApiJsonSerializerService implements
 					"expectedDisbursementDate", "actualDisbursementDate",
 					"expectedFirstRepaymentOnDate", "interestChargedFromDate",
 					"closedOnDate", "expectedMaturityDate",
-					"lifeCycleStatusId", "lifeCycleStatusText",
+					"status",
 					"lifeCycleStatusDate", "summary", "repaymentSchedule",
-					"loanRepayments", "permissions", "convenienceData", "charges"));
+					"loanRepayments", "permissions", "convenienceData", "charges",
+					"productOptions", "amortizationTypeOptions", "interestTypeOptions", "interestCalculationPeriodTypeOptions", 
+					"repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "fundOptions", "transactionProcessingStrategyOptions", "chargeOptions"));
 
 	private static final Set<String> LOAN_TRANSACTION_DATA_PARAMETERS = new HashSet<String>(
 			Arrays.asList("id", "transactionType", "date", "principal",

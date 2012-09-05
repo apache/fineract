@@ -2,6 +2,7 @@ package org.mifosng.platform.api.data;
 
 import java.math.BigDecimal;
 import java.util.Collection;
+import java.util.List;
 
 import org.joda.time.LocalDate;
 
@@ -17,45 +18,54 @@ public class LoanAccountData {
 	private final Long loanProductId;
 	private final String loanProductName;
 	private final String loanProductDescription;
-	private final Integer lifeCycleStatusId;
-	private final String lifeCycleStatusText;
-	private final LocalDate lifeCycleStatusDate;
-	
+	private final EnumOptionData status;
 	private final Long fundId;
 	private final String fundName;
-
+	private final CurrencyData currency;
+	private final BigDecimal principal;
+	private final BigDecimal inArrearsTolerance;
+	
+	private final Integer termFrequency;
+	private final EnumOptionData termPeriodFrequencyType;
+	private final Integer numberOfRepayments;
+	private final Integer repaymentEvery;
+	private final EnumOptionData repaymentFrequencyType;
+	private final Integer transactionStrategyId;
+	private final EnumOptionData amortizationType;
+	private final BigDecimal interestRatePerPeriod;
+	private final EnumOptionData interestRateFrequencyType;
+	private final BigDecimal annualInterestRate;
+	private final EnumOptionData interestType;
+	private final EnumOptionData interestCalculationPeriodType;
+	
+	private Collection<ChargeData> charges;
+	
 	private final LocalDate submittedOnDate;
 	private final LocalDate approvedOnDate;
 	private final LocalDate expectedDisbursementDate;
 	private final LocalDate actualDisbursementDate;
-	private final LocalDate expectedFirstRepaymentOnDate;
+	private final LocalDate repaymentsStartingFromDate;
 	private final LocalDate interestChargedFromDate;
 	private final LocalDate closedOnDate;
 	private final LocalDate expectedMaturityDate;
-
-	private final CurrencyData currency;
-	private final MoneyData principal;
-	private final MoneyData inArrearsTolerance;
-
-	private final Integer numberOfRepayments;
-	private final Integer repaymentEvery;
-	private final BigDecimal interestRatePerPeriod;
-	private final BigDecimal annualInterestRate;
-
-	private final EnumOptionData repaymentFrequencyType;
-	private final EnumOptionData interestRateFrequencyType;
-	private final EnumOptionData amortizationType;
-	private final EnumOptionData interestType;
-	private final EnumOptionData interestCalculationPeriodType;
-
+	private final LocalDate lifeCycleStatusDate;
+	
+	// template
+	private final Collection<LoanProductLookup> productOptions;
+	private final List<EnumOptionData> termFrequencyTypeOptions;
+	private final List<EnumOptionData> repaymentFrequencyTypeOptions;
+	private final Collection<TransactionProcessingStrategyData> repaymentStrategyOptions;
+	private final Collection<FundData> fundOptions;
+	
+	// associations
 	private final LoanAccountSummaryData summary;
 	private final Collection<LoanRepaymentPeriodData> repaymentSchedule;
 	private final Collection<LoanRepaymentTransactionData> loanRepayments;
 
 	private final LoanPermissionData permissions;
-
 	private final LoanConvenienceData convenienceData;
-	private Collection<ChargeData> charges;
+	private final List<EnumOptionData> interestRateFrequencyTypeOptions;
+	
 
 	public LoanAccountData(
 			final LoanBasicDetailsData basicDetails,
@@ -63,12 +73,24 @@ public class LoanAccountData {
 			final Collection<LoanRepaymentPeriodData> repaymentSchedule,
 			final Collection<LoanRepaymentTransactionData> loanRepayments,
 			final LoanPermissionData permissions, 
-			final Collection<ChargeData> charges) {
+			final Collection<ChargeData> charges, 
+			final Collection<LoanProductLookup> productOptions, 
+			final List<EnumOptionData> termFrequencyTypeOptions, 
+			final List<EnumOptionData> repaymentFrequencyTypeOptions, 
+			final Collection<TransactionProcessingStrategyData> transactionProcessingStrategyOptions, 
+			final List<EnumOptionData> interestRateFrequencyTypeOptions, 
+			final Collection<FundData> fundOptions) {
 		this.summary = summary;
 		this.repaymentSchedule = repaymentSchedule;
 		this.loanRepayments = loanRepayments;
 		this.permissions = permissions;
         this.charges = charges;
+		this.productOptions = productOptions;
+		this.termFrequencyTypeOptions = termFrequencyTypeOptions;
+		this.repaymentFrequencyTypeOptions = repaymentFrequencyTypeOptions;
+		this.repaymentStrategyOptions = transactionProcessingStrategyOptions;
+		this.interestRateFrequencyTypeOptions = interestRateFrequencyTypeOptions;
+		this.fundOptions = fundOptions;
 
 		int maxSubmittedOnOffsetFromToday = basicDetails
 				.getMaxSubmittedOnOffsetFromToday();
@@ -104,16 +126,18 @@ public class LoanAccountData {
 		this.actualDisbursementDate = basicDetails.getActualDisbursementDate();
 		this.closedOnDate = basicDetails.getClosedOnDate();
 		this.expectedMaturityDate = basicDetails.getExpectedMaturityDate();
-		this.expectedFirstRepaymentOnDate = basicDetails
-				.getExpectedFirstRepaymentOnDate();
-		this.interestChargedFromDate = basicDetails
-				.getInterestChargedFromDate();
+		this.repaymentsStartingFromDate = basicDetails.getExpectedFirstRepaymentOnDate();
+		this.interestChargedFromDate = basicDetails.getInterestChargedFromDate();
 		
 		this.currency = basicDetails.getCurrency();
 		this.principal = basicDetails.getPrincipal();
 		this.inArrearsTolerance = basicDetails.getInArrearsTolerance();
+		
+		this.termFrequency = basicDetails.getTermFrequency();
+		this.termPeriodFrequencyType = basicDetails.getTermPeriodFrequencyType();
 		this.numberOfRepayments = basicDetails.getNumberOfRepayments();
 		this.repaymentEvery = basicDetails.getRepaymentEvery();
+		this.transactionStrategyId = basicDetails.getTransactionStrategyId();
 		this.interestRatePerPeriod = basicDetails.getInterestRatePerPeriod();
 		this.annualInterestRate = basicDetails.getAnnualInterestRate();
 		this.repaymentFrequencyType = basicDetails.getRepaymentFrequencyType();
@@ -123,8 +147,8 @@ public class LoanAccountData {
 		this.interestType = basicDetails.getInterestType();
 		this.interestCalculationPeriodType = basicDetails
 				.getInterestCalculationPeriodType();
-		this.lifeCycleStatusText = basicDetails.getLifeCycleStatusText();
-		this.lifeCycleStatusId = basicDetails.getLifeCycleStatusId();
+		
+		this.status = basicDetails.getStatus();
 		this.lifeCycleStatusDate = basicDetails.getLifeCycleStatusDate();
 	}
 
@@ -155,6 +179,10 @@ public class LoanAccountData {
 	public String getLoanProductDescription() {
 		return loanProductDescription;
 	}
+	
+	public EnumOptionData getStatus() {
+		return status;
+	}
 
 	public Long getFundId() {
 		return fundId;
@@ -179,9 +207,9 @@ public class LoanAccountData {
 	public LocalDate getActualDisbursementDate() {
 		return actualDisbursementDate;
 	}
-
-	public LocalDate getExpectedFirstRepaymentOnDate() {
-		return expectedFirstRepaymentOnDate;
+	
+	public LocalDate getRepaymentsStartingFromDate() {
+		return repaymentsStartingFromDate;
 	}
 
 	public LocalDate getInterestChargedFromDate() {
@@ -200,12 +228,20 @@ public class LoanAccountData {
 		return currency;
 	}
 
-	public MoneyData getPrincipal() {
-		return principal;
+	public BigDecimal getPrincipal() {
+		return this.principal;
 	}
 
-	public MoneyData getInArrearsTolerance() {
-		return inArrearsTolerance;
+	public BigDecimal getInArrearsTolerance() {
+		return this.inArrearsTolerance;
+	}
+	
+	public Integer getTermFrequency() {
+		return termFrequency;
+	}
+
+	public EnumOptionData getTermPeriodFrequencyType() {
+		return termPeriodFrequencyType;
 	}
 
 	public Integer getNumberOfRepayments() {
@@ -214,6 +250,10 @@ public class LoanAccountData {
 
 	public Integer getRepaymentEvery() {
 		return repaymentEvery;
+	}
+	
+	public Integer getTransactionStrategyId() {
+		return transactionStrategyId;
 	}
 
 	public BigDecimal getInterestRatePerPeriod() {
@@ -242,14 +282,6 @@ public class LoanAccountData {
 
 	public EnumOptionData getInterestCalculationPeriodType() {
 		return interestCalculationPeriodType;
-	}
-
-	public Integer getLifeCycleStatusId() {
-		return lifeCycleStatusId;
-	}
-
-	public String getLifeCycleStatusText() {
-		return lifeCycleStatusText;
 	}
 
 	public LocalDate getLifeCycleStatusDate() {
@@ -283,4 +315,28 @@ public class LoanAccountData {
     public void setCharges(Collection<ChargeData> charges) {
         this.charges = charges;
     }
+    
+	public Collection<LoanProductLookup> getProductOptions() {
+		return productOptions;
+	}
+	
+	public List<EnumOptionData> getTermFrequencyTypeOptions() {
+		return termFrequencyTypeOptions;
+	}
+
+	public List<EnumOptionData> getRepaymentFrequencyTypeOptions() {
+		return repaymentFrequencyTypeOptions;
+	}
+	
+	public Collection<TransactionProcessingStrategyData> getRepaymentStrategyOptions() {
+		return repaymentStrategyOptions;
+	}
+	
+	public List<EnumOptionData> getInterestRateFrequencyTypeOptions() {
+		return interestRateFrequencyTypeOptions;
+	}
+
+	public Collection<FundData> getFundOptions() {
+		return fundOptions;
+	}
 }

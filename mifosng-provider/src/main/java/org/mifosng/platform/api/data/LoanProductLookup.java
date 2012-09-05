@@ -1,17 +1,17 @@
 package org.mifosng.platform.api.data;
 
-import java.io.Serializable;
+/**
+ * Immutable data object used for basic loan product info for lookup situations.
+ * 
+ * TODO - kw - this can be replace and the normal {@link LoanProductData} used where only id and name are populated as google gson does 
+ * not return null attributes/parameters.
+ */
+public class LoanProductLookup {
 
-public class LoanProductLookup implements Serializable {
+	private final Long id;
+	private final String name;
 
-	private Long id;
-	private String name;
-
-	public LoanProductLookup() {
-		//
-	}
-
-	public LoanProductLookup(Long id, String name) {
+	public LoanProductLookup(final Long id, final String name) {
 		this.id = id;
 		this.name = name;
 	}
@@ -20,15 +20,7 @@ public class LoanProductLookup implements Serializable {
 		return id;
 	}
 
-	public void setId(Long id) {
-		this.id = id;
-	}
-
 	public String getName() {
 		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
 	}
 }

@@ -1,8 +1,10 @@
 package org.mifosng.platform.api;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
@@ -26,24 +28,33 @@ import org.mifosng.platform.api.commands.LoanTransactionCommand;
 import org.mifosng.platform.api.commands.SubmitLoanApplicationCommand;
 import org.mifosng.platform.api.commands.UndoStateTransitionCommand;
 import org.mifosng.platform.api.data.ChargeData;
+import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.EntityIdentifier;
+import org.mifosng.platform.api.data.EnumOptionData;
+import org.mifosng.platform.api.data.FundData;
 import org.mifosng.platform.api.data.LoanAccountData;
 import org.mifosng.platform.api.data.LoanAccountSummaryData;
 import org.mifosng.platform.api.data.LoanBasicDetailsData;
 import org.mifosng.platform.api.data.LoanPermissionData;
+import org.mifosng.platform.api.data.LoanProductLookup;
 import org.mifosng.platform.api.data.LoanRepaymentPeriodData;
 import org.mifosng.platform.api.data.LoanRepaymentTransactionData;
 import org.mifosng.platform.api.data.LoanSchedule;
 import org.mifosng.platform.api.data.LoanTransactionData;
 import org.mifosng.platform.api.data.NewLoanData;
+import org.mifosng.platform.api.data.TransactionProcessingStrategyData;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
 import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
 import org.mifosng.platform.charge.service.ChargeReadPlatformService;
+import org.mifosng.platform.currency.service.CurrencyReadPlatformService;
 import org.mifosng.platform.exceptions.UnrecognizedQueryParamException;
+import org.mifosng.platform.fund.service.FundReadPlatformService;
 import org.mifosng.platform.loan.service.CalculationPlatformService;
 import org.mifosng.platform.loan.service.LoanReadPlatformService;
 import org.mifosng.platform.loan.service.LoanWritePlatformService;
+import org.mifosng.platform.loanproduct.service.LoanDropdownReadPlatformService;
+import org.mifosng.platform.loanproduct.service.LoanProductReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -58,7 +69,16 @@ public class LoansApiResource {
 
 	@Autowired
 	private LoanWritePlatformService loanWritePlatformService;
+	
+	@Autowired
+	private LoanProductReadPlatformService loanProductReadPlatformService;
 
+	@Autowired
+	private LoanDropdownReadPlatformService dropdownReadPlatformService;
+
+	@Autowired
+	private FundReadPlatformService fundReadPlatformService;
+	
     @Autowired
     private ChargeReadPlatformService chargeReadPlatformService;
 
@@ -70,7 +90,7 @@ public class LoansApiResource {
 	
 	@Autowired
 	private ApiJsonSerializerService apiJsonSerializerService;
-
+	
 	@GET
 	@Path("template")
 	@Consumes({ MediaType.APPLICATION_JSON })
@@ -110,7 +130,7 @@ public class LoansApiResource {
 						"repaymentFrequencyType", "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType",
 						"submittedOnDate", "approvedOnDate", "expectedDisbursementDate", "actualDisbursementDate", 
 						"expectedFirstRepaymentOnDate", "interestChargedFromDate", "closedOnDate", "expectedMaturityDate", 
-						"lifeCycleStatusId", "lifeCycleStatusText", "lifeCycleStatusDate")
+						"status", "lifeCycleStatusDate")
 				);
 		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
@@ -138,15 +158,47 @@ public class LoansApiResource {
 			loanRepayments = this.loanReadPlatformService.retrieveLoanPayments(loanId);
 			repaymentSchedule = this.loanReadPlatformService.retrieveRepaymentSchedule(loanId);
 
-			summary = this.loanReadPlatformService.retrieveSummary(loanBasicDetails.getPrincipal(), repaymentSchedule, loanRepayments);
+			summary = this.loanReadPlatformService.retrieveSummary(loanBasicDetails.getCurrency(), repaymentSchedule, loanRepayments);
 
-			boolean isWaiveAllowed = summary.isWaiveAllowed(loanBasicDetails.getInArrearsTolerance());
+			boolean isWaiveAllowed = summary.isWaiveAllowed(loanBasicDetails.getCurrency(), loanBasicDetails.getInArrearsTolerance());
 			permissions = this.loanReadPlatformService.retrieveLoanPermissions(loanBasicDetails, isWaiveAllowed, loanRepayments.size());
 
             charges = this.chargeReadPlatformService.retrieveLoanCharges(loanId);
 		}
 
-		LoanAccountData loanAccount = new LoanAccountData(loanBasicDetails, summary, repaymentSchedule, loanRepayments, permissions, charges);
+		Collection<LoanProductLookup> productOptions = new ArrayList<LoanProductLookup>();
+		List<EnumOptionData> loanTermFrequencyTypeOptions = new ArrayList<EnumOptionData>();
+		List<EnumOptionData> repaymentFrequencyTypeOptions = new ArrayList<EnumOptionData>();
+		Collection<TransactionProcessingStrategyData> transactionProcessingStrategyOptions = new ArrayList<TransactionProcessingStrategyData>();
+		
+		List<EnumOptionData> interestRateFrequencyTypeOptions = new ArrayList<EnumOptionData>();
+		List<EnumOptionData> amortizationTypeOptions = new ArrayList<EnumOptionData>();
+		List<EnumOptionData> interestTypeOptions = new ArrayList<EnumOptionData>();
+		List<EnumOptionData> interestCalculationPeriodTypeOptions = new ArrayList<EnumOptionData>();
+		Collection<FundData> fundOptions = new ArrayList<FundData>();
+		
+		final boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
+		if(template) {
+			responseParameters.addAll(Arrays.asList("productOptions", "amortizationTypeOptions", "interestTypeOptions", "interestCalculationPeriodTypeOptions", 
+						"repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "fundOptions", "transactionProcessingStrategyOptions", "chargeOptions"));
+			
+			productOptions = this.loanProductReadPlatformService.retrieveAllLoanProductsForLookup();
+			loanTermFrequencyTypeOptions = dropdownReadPlatformService.retrieveLoanTermFrequencyTypeOptions();
+			repaymentFrequencyTypeOptions = dropdownReadPlatformService.retrieveRepaymentFrequencyTypeOptions();
+			interestRateFrequencyTypeOptions = dropdownReadPlatformService.retrieveInterestRateFrequencyTypeOptions();
+			
+			amortizationTypeOptions = dropdownReadPlatformService.retrieveLoanAmortizationTypeOptions();
+			interestTypeOptions = dropdownReadPlatformService.retrieveLoanInterestTypeOptions();
+			interestCalculationPeriodTypeOptions = dropdownReadPlatformService.retrieveLoanInterestRateCalculatedInPeriodOptions();
+
+			fundOptions = this.fundReadPlatformService.retrieveAllFunds();
+			transactionProcessingStrategyOptions = this.dropdownReadPlatformService.retreiveTransactionProcessingStrategies();
+		}
+
+		LoanAccountData loanAccount = new LoanAccountData(loanBasicDetails, summary, repaymentSchedule, loanRepayments, permissions, charges, 
+				productOptions, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions, 
+				transactionProcessingStrategyOptions, interestRateFrequencyTypeOptions,
+				fundOptions);
 		
 		return this.apiJsonSerializerService.serialzieLoanAccountDataToJson(prettyPrint, responseParameters, loanAccount);
 	}

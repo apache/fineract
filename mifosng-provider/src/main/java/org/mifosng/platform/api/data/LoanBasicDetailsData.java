@@ -18,6 +18,7 @@ public class LoanBasicDetailsData {
 	private final String loanProductDescription;
 	private final Long fundId;
 	private final String fundName;
+	private final EnumOptionData status;
 	
 	private final LocalDate submittedOnDate;
 	private final LocalDate approvedOnDate;
@@ -29,11 +30,14 @@ public class LoanBasicDetailsData {
 	private final LocalDate expectedMaturityDate;
 
 	private final CurrencyData currency;
-	private final MoneyData principal;
-	private final MoneyData inArrearsTolerance;
+	private final BigDecimal principal;
+	private final BigDecimal inArrearsTolerance;
 
+	private final Integer termFrequency;
+	private final EnumOptionData termPeriodFrequencyType;
 	private final Integer numberOfRepayments;
 	private final Integer repaymentEvery;
+	private final Integer transactionStrategyId;
 	private final BigDecimal interestRatePerPeriod;
 	private final BigDecimal annualInterestRate;
 
@@ -43,8 +47,6 @@ public class LoanBasicDetailsData {
 	private final EnumOptionData interestType;
 	private final EnumOptionData interestCalculationPeriodType;
 
-	private final Integer lifeCycleStatusId;
-	private final String lifeCycleStatusText;
 	private final LocalDate lifeCycleStatusDate;
 
 	public LoanBasicDetailsData(
@@ -64,8 +66,8 @@ public class LoanBasicDetailsData {
 			final LocalDate expectedFirstRepaymentOnDate,
 			final LocalDate interestChargedFromDate, 
 			final CurrencyData currency,
-			final MoneyData principal,
-			final MoneyData inArrearsTolerance, 
+			final BigDecimal principal,
+			final BigDecimal inArrearsTolerance, 
 			final Integer numberOfRepayments,
 			final Integer repaymentEvery, 
 			final BigDecimal interestRatePerPeriod,
@@ -75,9 +77,11 @@ public class LoanBasicDetailsData {
 			final EnumOptionData amortizationType, 
 			final EnumOptionData interestType,
 			final EnumOptionData interestCalculationPeriodType,
-			final Integer lifeCycleStatusId, 
-			final String lifeCycleStatusText,
-			final LocalDate lifeCycleStatusDate) {
+			final EnumOptionData status,
+			final LocalDate lifeCycleStatusDate, 
+			final Integer termFrequency, 
+			final EnumOptionData termPeriodFrequencyType, 
+			final Integer transactionStrategyId) {
 		this.id = id;
 		this.externalId = externalId;
 		this.clientId = clientId;
@@ -107,9 +111,11 @@ public class LoanBasicDetailsData {
 		this.amortizationType = amortizationType;
 		this.interestType = interestType;
 		this.interestCalculationPeriodType = interestCalculationPeriodType;
-		this.lifeCycleStatusId = lifeCycleStatusId;
-		this.lifeCycleStatusText = lifeCycleStatusText;
+		this.status = status;
 		this.lifeCycleStatusDate = lifeCycleStatusDate;
+		this.termFrequency = termFrequency;
+		this.termPeriodFrequencyType = termPeriodFrequencyType;
+		this.transactionStrategyId = transactionStrategyId;
 	}
 
 	public int getMaxSubmittedOnOffsetFromToday() {
@@ -236,6 +242,18 @@ public class LoanBasicDetailsData {
 	public String getLoanProductDescription() {
 		return loanProductDescription;
 	}
+	
+	public EnumOptionData getStatus() {
+		return status;
+	}
+	
+	public Integer getTermFrequency() {
+		return termFrequency;
+	}
+
+	public EnumOptionData getTermPeriodFrequencyType() {
+		return termPeriodFrequencyType;
+	}
 
 	public LocalDate getSubmittedOnDate() {
 		return submittedOnDate;
@@ -273,11 +291,11 @@ public class LoanBasicDetailsData {
 		return currency;
 	}
 
-	public MoneyData getPrincipal() {
+	public BigDecimal getPrincipal() {
 		return principal;
 	}
 
-	public MoneyData getInArrearsTolerance() {
+	public BigDecimal getInArrearsTolerance() {
 		return inArrearsTolerance;
 	}
 
@@ -317,15 +335,11 @@ public class LoanBasicDetailsData {
 		return interestCalculationPeriodType;
 	}
 
-	public Integer getLifeCycleStatusId() {
-		return lifeCycleStatusId;
-	}
-
-	public String getLifeCycleStatusText() {
-		return lifeCycleStatusText;
-	}
-
 	public LocalDate getLifeCycleStatusDate() {
 		return lifeCycleStatusDate;
+	}
+
+	public Integer getTransactionStrategyId() {
+		return transactionStrategyId;
 	}
 }

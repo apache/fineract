@@ -1,16 +1,10 @@
 package org.mifosng.platform.api.data;
 
-import java.io.Serializable;
+public class EnumOptionData {
 
-public class EnumOptionData implements Serializable {
-
-	private Long id;
-	private String code;
-	private String value;
-
-	protected EnumOptionData() {
-		//
-	}
+	private final Long id;
+	private final String code;
+	private final String value;
 
 	public EnumOptionData(final Long id, final String code, final String value) {
 		this.id = id;
@@ -19,26 +13,14 @@ public class EnumOptionData implements Serializable {
 	}
 
 	public Long getId() {
-		return this.id;
-	}
-
-	public void setId(final Long id) {
-		this.id = id;
-	}
-
-	public String getValue() {
-		return this.value;
-	}
-
-	public void setValue(final String value) {
-		this.value = value;
+		return id;
 	}
 
 	public String getCode() {
 		return code;
 	}
 
-	public void setCode(String code) {
-		this.code = code;
+	public String getValue() {
+		return value;
 	}
 }

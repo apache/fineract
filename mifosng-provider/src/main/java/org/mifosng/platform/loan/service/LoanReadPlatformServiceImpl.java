@@ -17,8 +17,8 @@ import org.mifosng.platform.api.data.LoanPermissionData;
 import org.mifosng.platform.api.data.LoanProductData;
 import org.mifosng.platform.api.data.LoanProductLookup;
 import org.mifosng.platform.api.data.LoanRepaymentPeriodData;
-import org.mifosng.platform.api.data.LoanTransactionData;
 import org.mifosng.platform.api.data.LoanRepaymentTransactionData;
+import org.mifosng.platform.api.data.LoanTransactionData;
 import org.mifosng.platform.api.data.MoneyData;
 import org.mifosng.platform.api.data.NewLoanData;
 import org.mifosng.platform.charge.service.ChargeReadPlatformService;
@@ -33,7 +33,6 @@ import org.mifosng.platform.infrastructure.JdbcSupport;
 import org.mifosng.platform.infrastructure.TenantAwareRoutingDataSource;
 import org.mifosng.platform.loan.domain.Loan;
 import org.mifosng.platform.loan.domain.LoanRepository;
-import org.mifosng.platform.loan.domain.LoanStatus;
 import org.mifosng.platform.loan.domain.LoanTransaction;
 import org.mifosng.platform.loan.domain.LoanTransactionRepository;
 import org.mifosng.platform.loan.domain.LoanTransactionType;
@@ -114,14 +113,10 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 	}
 
 	@Override
-	public LoanAccountSummaryData retrieveSummary(MoneyData principal,
-			Collection<LoanRepaymentPeriodData> repaymentSchedule,
-			Collection<LoanRepaymentTransactionData> loanRepayments) {
-
-		CurrencyData currencyData = new CurrencyData(
-				principal.getCurrencyCode(), principal.getDefaultName(),
-				principal.getDigitsAfterDecimal(),
-				principal.getDisplaySymbol(), principal.getNameCode());
+	public LoanAccountSummaryData retrieveSummary(
+			final CurrencyData currencyData,
+			final Collection<LoanRepaymentPeriodData> repaymentSchedule,
+			final Collection<LoanRepaymentTransactionData> loanRepayments) {
 
 		BigDecimal originalPrincipal = BigDecimal.ZERO;
 		BigDecimal principalPaid = BigDecimal.ZERO;
@@ -214,11 +209,9 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 			LoanBasicDetailsData loanBasicDetails, boolean isWaiverAllowed,
 			int repaymentAndWaiveCount) {
 
-		boolean pendingApproval = (loanBasicDetails.getLifeCycleStatusId()
-				.equals(100));
-		boolean waitingForDisbursal = (loanBasicDetails.getLifeCycleStatusId()
-				.equals(200));
-		boolean isActive = (loanBasicDetails.getLifeCycleStatusId().equals(300));
+		boolean pendingApproval = (loanBasicDetails.getStatus().getId().equals(100L));
+		boolean waitingForDisbursal = (loanBasicDetails.getStatus().getId().equals(200L));
+		boolean isActive = (loanBasicDetails.getStatus().getId().equals(300L));
 
 		boolean waiveAllowed = isWaiverAllowed && isActive;
 		boolean makeRepaymentAllowed = isActive;
@@ -421,8 +414,9 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 					+ " l.principal_amount as principal, l.arrearstolerance_amount as inArrearsTolerance, l.number_of_repayments as numberOfRepayments, l.repay_every as repaymentEvery,"
 					+ " l.nominal_interest_rate_per_period as interestRatePerPeriod, l.annual_nominal_interest_rate as annualInterestRate, "
 					+ " l.repayment_period_frequency_enum as repaymentFrequencyType, l.interest_period_frequency_enum as interestRateFrequencyType, "
+					+ " l.term_frequency as termFrequency, l.term_period_frequency_enum as termPeriodFrequencyType, "
 					+ " l.amortization_method_enum as amortizationType, l.interest_method_enum as interestType, l.interest_calculated_in_period_enum as interestCalculationPeriodType,"
-					+ " l.loan_status_id as lifeCycleStatusId, "
+					+ " l.loan_status_id as lifeCycleStatusId, l.loan_transaction_strategy_id as transactionStrategyId, "
 					+ " l.currency_code as currencyCode, l.currency_digits as currencyDigits, rc.`name` as currencyName, rc.display_symbol as currencyDisplaySymbol, rc.internationalized_name_code as currencyNameCode"
 					+ " from m_loan l"
 					+ " join m_client c on c.id = l.client_id"
@@ -471,45 +465,37 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 			LocalDate expectedMaturityDate = JdbcSupport.getLocalDate(rs,
 					"expectedMaturityDate");
 
-			BigDecimal principalBD = rs.getBigDecimal("principal");
-			MoneyData principal = MoneyData.of(currencyData, principalBD);
-			BigDecimal inArrearsToleranceBD = rs
-					.getBigDecimal("inArrearsTolerance");
-			MoneyData inArrearsTolerance = MoneyData.of(currencyData,
-					inArrearsToleranceBD);
+			BigDecimal principal = rs.getBigDecimal("principal");
+			BigDecimal inArrearsTolerance = rs.getBigDecimal("inArrearsTolerance");
 
-			Integer numberOfRepayments = JdbcSupport.getInteger(rs,
-					"numberOfRepayments");
-			Integer repaymentEvery = JdbcSupport.getInteger(rs,
-					"repaymentEvery");
-			BigDecimal interestRatePerPeriod = rs
-					.getBigDecimal("interestRatePerPeriod");
-			BigDecimal annualInterestRate = rs
-					.getBigDecimal("annualInterestRate");
+			Integer numberOfRepayments = JdbcSupport.getInteger(rs,"numberOfRepayments");
+			Integer repaymentEvery = JdbcSupport.getInteger(rs,"repaymentEvery");
+			BigDecimal interestRatePerPeriod = rs.getBigDecimal("interestRatePerPeriod");
+			BigDecimal annualInterestRate = rs.getBigDecimal("annualInterestRate");
 
-			int repaymentFrequencyTypeInt = JdbcSupport.getInteger(rs,
-					"repaymentFrequencyType");
-			int interestRateFrequencyTypeInt = JdbcSupport.getInteger(rs,
-					"interestRateFrequencyType");
-			int amortizationTypeInt = JdbcSupport.getInteger(rs,
-					"amortizationType");
+			Integer termFrequency = JdbcSupport.getInteger(rs,"termFrequency");
+			Integer termPeriodFrequencyTypeInt = JdbcSupport.getInteger(rs,"termPeriodFrequencyType");
+			EnumOptionData termPeriodFrequencyType = LoanEnumerations.termFrequencyType(termPeriodFrequencyTypeInt);
+			
+			int repaymentFrequencyTypeInt = JdbcSupport.getInteger(rs,"repaymentFrequencyType");
+			EnumOptionData repaymentFrequencyType = LoanEnumerations.repaymentFrequencyType(repaymentFrequencyTypeInt);
+			
+			int interestRateFrequencyTypeInt = JdbcSupport.getInteger(rs,"interestRateFrequencyType");
+			EnumOptionData interestRateFrequencyType = LoanEnumerations.interestRateFrequencyType(interestRateFrequencyTypeInt);
+
+			Integer transactionStrategyId = JdbcSupport.getInteger(rs,"transactionStrategyId");
+			
+			int amortizationTypeInt = JdbcSupport.getInteger(rs,"amortizationType");
 			int interestTypeInt = JdbcSupport.getInteger(rs, "interestType");
-			int interestCalculationPeriodTypeInt = JdbcSupport.getInteger(rs,
-					"interestCalculationPeriodType");
-			EnumOptionData repaymentFrequencyType = LoanEnumerations
-					.repaymentFrequencyType(repaymentFrequencyTypeInt);
-			EnumOptionData interestRateFrequencyType = LoanEnumerations
-					.interestRateFrequencyType(interestRateFrequencyTypeInt);
-			EnumOptionData amortizationType = LoanEnumerations
-					.amortizationType(amortizationTypeInt);
-			EnumOptionData interestType = LoanEnumerations
-					.interestType(interestTypeInt);
-			EnumOptionData interestCalculationPeriodType = LoanEnumerations
-					.interestCalculationPeriodType(interestCalculationPeriodTypeInt);
+			int interestCalculationPeriodTypeInt = JdbcSupport.getInteger(rs,"interestCalculationPeriodType");
+			
+			EnumOptionData amortizationType = LoanEnumerations.amortizationType(amortizationTypeInt);
+			EnumOptionData interestType = LoanEnumerations.interestType(interestTypeInt);
+			EnumOptionData interestCalculationPeriodType = LoanEnumerations.interestCalculationPeriodType(interestCalculationPeriodTypeInt);
 
 			Integer lifeCycleStatusId = JdbcSupport.getInteger(rs, "lifeCycleStatusId");
-			String lifeCycleStatusText = LoanStatus.fromInt(lifeCycleStatusId).getCode();
-
+			EnumOptionData status = LoanEnumerations.status(lifeCycleStatusId);
+			
 			LocalDate lifeCycleStatusDate = submittedOnDate;
 			if (approvedOnDate != null) {
 				lifeCycleStatusDate = approvedOnDate;
@@ -523,7 +509,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
 			return new LoanBasicDetailsData(id, externalId, clientId, clientName, 
 					loanProductId, loanProductName, loanProductDescription,
-					fundId, fundName, closedOnDate,
+					fundId, fundName, 
+					closedOnDate,
 					submittedOnDate, approvedOnDate, expectedDisbursementDate,
 					actualDisbursementDate, expectedMaturityDate,
 					expectedFirstRepaymentOnDate, interestChargedFromDate,
@@ -532,8 +519,9 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 					repaymentEvery, interestRatePerPeriod, annualInterestRate,
 					repaymentFrequencyType, interestRateFrequencyType,
 					amortizationType, interestType,
-					interestCalculationPeriodType, lifeCycleStatusId,
-					lifeCycleStatusText, lifeCycleStatusDate);
+					interestCalculationPeriodType, 
+					status,
+					lifeCycleStatusDate, termFrequency, termPeriodFrequencyType, transactionStrategyId);
 		}
 	}
 
