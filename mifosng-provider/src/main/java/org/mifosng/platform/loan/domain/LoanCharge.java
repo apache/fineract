@@ -7,17 +7,21 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
-@Entity @IdClass(LoanCharge.LoanChargePK.class)
+@Entity 
+@IdClass(LoanCharge.LoanChargePK.class)
 @Table(name = "m_loan_charge")
 public class LoanCharge {
 
-    @Id
+    @SuppressWarnings("unused")
+	@Id
     private Loan loan;
 
-    @Id
+    @SuppressWarnings("unused")
+	@Id
     private Charge charge;
 
-    @Column(name = "amount", scale = 6, precision = 19, nullable = false)
+    @SuppressWarnings("unused")
+	@Column(name = "amount", scale = 6, precision = 19, nullable = false)
     private BigDecimal amount;
 
     @SuppressWarnings("unused")
@@ -28,7 +32,8 @@ public class LoanCharge {
     @Column(name = "charge_calculation_enum")
     private Integer chargeCalculation;
 
-    public LoanCharge() {
+    protected LoanCharge() {
+    	//
     }
 
     public LoanCharge(Loan loan, Charge charge, LoanChargeCommand command) {
@@ -54,11 +59,11 @@ public class LoanCharge {
         }
     }
 
-    public LoanCharge(Loan loan, Charge charge) {
+    public LoanCharge(final Loan loan, final Charge charge) {
         this(loan, charge, charge.getAmount(), charge.getChargeTime(), charge.getChargeCalculation());
     }
 
-    public LoanCharge(Loan loan, Charge charge, BigDecimal amount, Integer chargeTime, Integer chargeCalculation) {
+    public LoanCharge(final Loan loan, final Charge charge, final BigDecimal amount, final Integer chargeTime, final Integer chargeCalculation) {
         this.loan = loan;
         this.charge = charge;
         this.amount = amount;
@@ -66,13 +71,15 @@ public class LoanCharge {
         this.chargeCalculation = chargeCalculation;
     }
 
-    public static class LoanChargePK implements Serializable{
-        @Id
+    public static class LoanChargePK implements Serializable {
+        @SuppressWarnings("unused")
+		@Id
         @ManyToOne(optional = false)
         @JoinColumn(name = "loan_id", referencedColumnName = "id", nullable=false)
         private Loan loan;
 
-        @Id
+        @SuppressWarnings("unused")
+		@Id
         @ManyToOne(optional = false)
         @JoinColumn(name = "charge_id", referencedColumnName = "id", nullable=false)
         private Charge charge;

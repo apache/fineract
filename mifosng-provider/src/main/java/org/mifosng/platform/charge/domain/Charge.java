@@ -26,11 +26,9 @@ public class Charge extends AbstractAuditableCustom<AppUser, Long> {
 	@Column(name = "charge_applies_to_enum", nullable = false)
     private Integer chargeAppliesTo;
 
-    @SuppressWarnings("unused")
 	@Column(name = "charge_time_enum", nullable = false)
     private Integer chargeTime;
 
-    @SuppressWarnings("unused")
 	@Column(name = "charge_calculation_enum")
     private Integer chargeCalculation;
 

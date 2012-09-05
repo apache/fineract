@@ -33,7 +33,7 @@ public class CalculateLoanScheduleCommandValidator {
 		
 		// FIXME - this constraint doesnt really need to be here. should be possible to express loan term as say 12 months whilst also saying
 		//       - that the repayment structure is 6 repayments every bi-monthly.
-		if (!command.getLoanTermFrequencyType().equals(command.getRepaymentFrequencyType())) {
+		if (command.getLoanTermFrequencyType() != null && !command.getLoanTermFrequencyType().equals(command.getRepaymentFrequencyType())) {
 			ApiParameterError error = ApiParameterError.parameterError("validation.msg.loan.loanTermFrequencyType.not.the.same.as.repaymentFrequencyType", 
 					"The parameters loanTermFrequencyType and repaymentFrequencyType must be the same.", "loanTermFrequencyType", 
 					command.getLoanTermFrequencyType(), command.getRepaymentFrequencyType());

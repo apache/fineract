@@ -129,7 +129,6 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	@Column(name = "maturedon_date")
 	private Date maturedOnDate;
 
-    @SuppressWarnings("unused")
     @LazyCollection(LazyCollectionOption.FALSE)
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true)
     private Set<LoanCharge> charges;
@@ -162,11 +161,11 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		return new Loan(client, fund, transactionProcessingStrategy, loanProduct, loanRepaymentScheduleDetail, null);
 	}
 
-	public Loan() {
+	protected Loan() {
 		this.client = null;
 		this.loanProduct = null;
 		this.loanRepaymentScheduleDetail = null;
-        this.charges = charges;
+        this.charges = null;
 	}
 
 	public Loan(final Client client, Fund fund, LoanTransactionProcessingStrategy transactionProcessingStrategy, final LoanProduct loanProduct,
