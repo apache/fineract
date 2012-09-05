@@ -413,7 +413,9 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 			RowMapper<LoanBasicDetailsData> {
 
 		public String loanSchema() {
-			return "l.id as id, l.external_id as externalId, l.fund_id as fundId, f.name as fundName, lp.id as loanProductId, lp.name as loanProductName, l.submittedon_date as submittedOnDate,"
+			return "l.id as id, l.external_id as externalId, l.fund_id as fundId, f.name as fundName, " 
+					+ " lp.id as loanProductId, lp.name as loanProductName, lp.description as loanProductDescription, c.id as clientId, c.display_name as clientName, " 
+					+ " l.submittedon_date as submittedOnDate,"
 					+ " l.approvedon_date as approvedOnDate, l.expected_disbursedon_date as expectedDisbursementDate, l.disbursedon_date as actualDisbursementDate, l.expected_firstrepaymenton_date as expectedFirstRepaymentOnDate,"
 					+ " l.interest_calculated_from_date as interestChargedFromDate, l.closedon_date as closedOnDate, l.expected_maturedon_date as expectedMaturityDate, "
 					+ " l.principal_amount as principal, l.arrearstolerance_amount as inArrearsTolerance, l.number_of_repayments as numberOfRepayments, l.repay_every as repaymentEvery,"
@@ -423,6 +425,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 					+ " l.loan_status_id as lifeCycleStatusId, "
 					+ " l.currency_code as currencyCode, l.currency_digits as currencyDigits, rc.`name` as currencyName, rc.display_symbol as currencyDisplaySymbol, rc.internationalized_name_code as currencyNameCode"
 					+ " from m_loan l"
+					+ " join m_client c on c.id = l.client_id"
 					+ " join m_product_loan lp on lp.id = l.product_id"
 					+ " join m_currency rc on rc.`code` = l.currency_code"
 					+ " left join m_fund f on f.id = l.fund_id";
@@ -435,20 +438,22 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 			String currencyCode = rs.getString("currencyCode");
 			String currencyName = rs.getString("currencyName");
 			String currencyNameCode = rs.getString("currencyNameCode");
-			String currencyDisplaySymbol = rs
-					.getString("currencyDisplaySymbol");
-			Integer currencyDigits = JdbcSupport.getInteger(rs,
-					"currencyDigits");
+			String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
+			Integer currencyDigits = JdbcSupport.getInteger(rs,"currencyDigits");
 			CurrencyData currencyData = new CurrencyData(currencyCode,
 					currencyName, currencyDigits, currencyDisplaySymbol,
 					currencyNameCode);
 
 			Long id = rs.getLong("id");
 			String externalId = rs.getString("externalId");
+			Long clientId = JdbcSupport.getLong(rs, "clientId");
+			String clientName = rs.getString("clientName");
 			Long fundId = JdbcSupport.getLong(rs, "fundId");
 			String fundName = rs.getString("fundName");
 			Long loanProductId = JdbcSupport.getLong(rs, "loanProductId");
 			String loanProductName = rs.getString("loanProductName");
+			String loanProductDescription = rs.getString("loanProductDescription");
+			
 			LocalDate submittedOnDate = JdbcSupport.getLocalDate(rs,
 					"submittedOnDate");
 			LocalDate approvedOnDate = JdbcSupport.getLocalDate(rs,
@@ -516,11 +521,13 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 				lifeCycleStatusDate = closedOnDate;
 			}
 
-			return new LoanBasicDetailsData(id, externalId, loanProductId,
-					loanProductName, fundId, fundName, closedOnDate,
+			return new LoanBasicDetailsData(id, externalId, clientId, clientName, 
+					loanProductId, loanProductName, loanProductDescription,
+					fundId, fundName, closedOnDate,
 					submittedOnDate, approvedOnDate, expectedDisbursementDate,
 					actualDisbursementDate, expectedMaturityDate,
 					expectedFirstRepaymentOnDate, interestChargedFromDate,
+					currencyData,
 					principal, inArrearsTolerance, numberOfRepayments,
 					repaymentEvery, interestRatePerPeriod, annualInterestRate,
 					repaymentFrequencyType, interestRateFrequencyType,

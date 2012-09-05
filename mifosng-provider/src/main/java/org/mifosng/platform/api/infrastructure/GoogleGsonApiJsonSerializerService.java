@@ -139,8 +139,9 @@ public class GoogleGsonApiJsonSerializerService implements
 					"allowedProducts"));
 
 	private static final Set<String> LOAN_DATA_PARAMETERS = new HashSet<String>(
-			Arrays.asList("id", "externalId", "fundId", "fundName",
-					"loanProductId", "loanProductName", "principal",
+			Arrays.asList("id", "externalId", "clientId", "clientName", "fundId", "fundName",
+					"loanProductId", "loanProductName", "loanProductDescription", 
+					"currency", "principal",
 					"inArrearsTolerance", "numberOfRepayments",
 					"repaymentEvery", "interestRatePerPeriod",
 					"annualInterestRate", "repaymentFrequencyType",

@@ -5,61 +5,65 @@ import java.util.Collection;
 
 import org.joda.time.LocalDate;
 
+/**
+ * Immutable data object representing loan account data.
+ */
 public class LoanAccountData {
 
-	private Long id;
-	private String externalId;
-	private Long fundId;
-	private String fundName;
-	private Long loanProductId;
-	private String loanProductName;
+	private final Long id;
+	private final String externalId;
+	private final Long clientId;
+	private final String clientName;
+	private final Long loanProductId;
+	private final String loanProductName;
+	private final String loanProductDescription;
+	private final Integer lifeCycleStatusId;
+	private final String lifeCycleStatusText;
+	private final LocalDate lifeCycleStatusDate;
+	
+	private final Long fundId;
+	private final String fundName;
 
-	private LocalDate submittedOnDate;
-	private LocalDate approvedOnDate;
-	private LocalDate expectedDisbursementDate;
-	private LocalDate actualDisbursementDate;
-	private LocalDate expectedFirstRepaymentOnDate;
-	private LocalDate interestChargedFromDate;
-	private LocalDate closedOnDate;
-	private LocalDate expectedMaturityDate;
+	private final LocalDate submittedOnDate;
+	private final LocalDate approvedOnDate;
+	private final LocalDate expectedDisbursementDate;
+	private final LocalDate actualDisbursementDate;
+	private final LocalDate expectedFirstRepaymentOnDate;
+	private final LocalDate interestChargedFromDate;
+	private final LocalDate closedOnDate;
+	private final LocalDate expectedMaturityDate;
 
-	private MoneyData principal;
-	private MoneyData inArrearsTolerance;
+	private final CurrencyData currency;
+	private final MoneyData principal;
+	private final MoneyData inArrearsTolerance;
 
-	private Integer numberOfRepayments;
-	private Integer repaymentEvery;
-	private BigDecimal interestRatePerPeriod;
-	private BigDecimal annualInterestRate;
+	private final Integer numberOfRepayments;
+	private final Integer repaymentEvery;
+	private final BigDecimal interestRatePerPeriod;
+	private final BigDecimal annualInterestRate;
 
-	private EnumOptionData repaymentFrequencyType;
-	private EnumOptionData interestRateFrequencyType;
-	private EnumOptionData amortizationType;
-	private EnumOptionData interestType;
-	private EnumOptionData interestCalculationPeriodType;
+	private final EnumOptionData repaymentFrequencyType;
+	private final EnumOptionData interestRateFrequencyType;
+	private final EnumOptionData amortizationType;
+	private final EnumOptionData interestType;
+	private final EnumOptionData interestCalculationPeriodType;
 
-	private Integer lifeCycleStatusId;
-	private String lifeCycleStatusText;
-	private LocalDate lifeCycleStatusDate;
+	private final LoanAccountSummaryData summary;
+	private final Collection<LoanRepaymentPeriodData> repaymentSchedule;
+	private final Collection<LoanRepaymentTransactionData> loanRepayments;
 
-	private LoanAccountSummaryData summary;
-	private Collection<LoanRepaymentPeriodData> repaymentSchedule;
-	private Collection<LoanRepaymentTransactionData> loanRepayments;
+	private final LoanPermissionData permissions;
 
-	private LoanPermissionData permissions;
+	private final LoanConvenienceData convenienceData;
+	private Collection<ChargeData> charges;
 
-	private LoanConvenienceData convenienceData;
-
-    private Collection<ChargeData> charges;
-
-	protected LoanAccountData() {
-		//
-	}
-
-	public LoanAccountData(LoanBasicDetailsData basicDetails,
-			LoanAccountSummaryData summary,
-			Collection<LoanRepaymentPeriodData> repaymentSchedule,
-			Collection<LoanRepaymentTransactionData> loanRepayments,
-			LoanPermissionData permissions, Collection<ChargeData> charges) {
+	public LoanAccountData(
+			final LoanBasicDetailsData basicDetails,
+			final LoanAccountSummaryData summary,
+			final Collection<LoanRepaymentPeriodData> repaymentSchedule,
+			final Collection<LoanRepaymentTransactionData> loanRepayments,
+			final LoanPermissionData permissions, 
+			final Collection<ChargeData> charges) {
 		this.summary = summary;
 		this.repaymentSchedule = repaymentSchedule;
 		this.loanRepayments = loanRepayments;
@@ -85,10 +89,14 @@ public class LoanAccountData {
 
 		this.id = basicDetails.getId();
 		this.externalId = basicDetails.getExternalId();
-		this.fundId = basicDetails.getFundId();
-		this.fundName = basicDetails.getFundName();
+		this.clientId = basicDetails.getClientId();
+		this.clientName = basicDetails.getClientName();
 		this.loanProductId = basicDetails.getLoanProductId();
 		this.loanProductName = basicDetails.getLoanProductName();
+		this.loanProductDescription = basicDetails.getLoanProductDescription();
+		this.fundId = basicDetails.getFundId();
+		this.fundName = basicDetails.getFundName();
+		
 		this.submittedOnDate = basicDetails.getSubmittedOnDate();
 		this.approvedOnDate = basicDetails.getApprovedOnDate();
 		this.expectedDisbursementDate = basicDetails
@@ -100,6 +108,8 @@ public class LoanAccountData {
 				.getExpectedFirstRepaymentOnDate();
 		this.interestChargedFromDate = basicDetails
 				.getInterestChargedFromDate();
+		
+		this.currency = basicDetails.getCurrency();
 		this.principal = basicDetails.getPrincipal();
 		this.inArrearsTolerance = basicDetails.getInArrearsTolerance();
 		this.numberOfRepayments = basicDetails.getNumberOfRepayments();
@@ -118,277 +128,156 @@ public class LoanAccountData {
 		this.lifeCycleStatusDate = basicDetails.getLifeCycleStatusDate();
 	}
 
-	public LoanConvenienceData getConvenienceData() {
-		return convenienceData;
-	}
-
-	public void setConvenienceData(LoanConvenienceData convenienceData) {
-		this.convenienceData = convenienceData;
-	}
-
-	public LoanPermissionData getPermissions() {
-		return permissions;
-	}
-
-	public void setPermissions(LoanPermissionData permissions) {
-		this.permissions = permissions;
-	}
-
-	public LoanAccountSummaryData getSummary() {
-		return summary;
-	}
-
-	public void setSummary(LoanAccountSummaryData summary) {
-		this.summary = summary;
-	}
-
-	public Collection<LoanRepaymentPeriodData> getRepaymentSchedule() {
-		return repaymentSchedule;
-	}
-
-	public void setRepaymentSchedule(
-			Collection<LoanRepaymentPeriodData> repaymentSchedule) {
-		this.repaymentSchedule = repaymentSchedule;
-	}
-
-	public Collection<LoanRepaymentTransactionData> getLoanRepayments() {
-		return loanRepayments;
-	}
-
-	public void setLoanRepayments(
-			Collection<LoanRepaymentTransactionData> loanRepayments) {
-		this.loanRepayments = loanRepayments;
-	}
-
 	public Long getId() {
 		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
 	}
 
 	public String getExternalId() {
 		return externalId;
 	}
 
-	public void setExternalId(String externalId) {
-		this.externalId = externalId;
+	public Long getClientId() {
+		return clientId;
 	}
 
-	public String getLoanProductName() {
-		return loanProductName;
-	}
-
-	public void setLoanProductName(String loanProductName) {
-		this.loanProductName = loanProductName;
-	}
-
-	public LocalDate getSubmittedOnDate() {
-		return submittedOnDate;
-	}
-
-	public void setSubmittedOnDate(LocalDate submittedOnDate) {
-		this.submittedOnDate = submittedOnDate;
-	}
-
-	public LocalDate getApprovedOnDate() {
-		return approvedOnDate;
-	}
-
-	public void setApprovedOnDate(LocalDate approvedOnDate) {
-		this.approvedOnDate = approvedOnDate;
-	}
-
-	public LocalDate getExpectedDisbursementDate() {
-		return expectedDisbursementDate;
-	}
-
-	public void setExpectedDisbursementDate(LocalDate expectedDisbursementDate) {
-		this.expectedDisbursementDate = expectedDisbursementDate;
-	}
-
-	public LocalDate getActualDisbursementDate() {
-		return actualDisbursementDate;
-	}
-
-	public void setActualDisbursementDate(LocalDate actualDisbursementDate) {
-		this.actualDisbursementDate = actualDisbursementDate;
-	}
-
-	public LocalDate getExpectedFirstRepaymentOnDate() {
-		return expectedFirstRepaymentOnDate;
-	}
-
-	public void setExpectedFirstRepaymentOnDate(
-			LocalDate expectedFirstRepaymentOnDate) {
-		this.expectedFirstRepaymentOnDate = expectedFirstRepaymentOnDate;
-	}
-
-	public LocalDate getInterestChargedFromDate() {
-		return interestChargedFromDate;
-	}
-
-	public void setInterestChargedFromDate(LocalDate interestChargedFromDate) {
-		this.interestChargedFromDate = interestChargedFromDate;
-	}
-
-	public LocalDate getClosedOnDate() {
-		return closedOnDate;
-	}
-
-	public void setClosedOnDate(LocalDate closedOnDate) {
-		this.closedOnDate = closedOnDate;
-	}
-
-	public LocalDate getExpectedMaturityDate() {
-		return expectedMaturityDate;
-	}
-
-	public void setExpectedMaturityDate(LocalDate expectedMaturityDate) {
-		this.expectedMaturityDate = expectedMaturityDate;
-	}
-
-	public MoneyData getPrincipal() {
-		return principal;
-	}
-
-	public void setPrincipal(MoneyData principal) {
-		this.principal = principal;
-	}
-
-	public MoneyData getInArrearsTolerance() {
-		return inArrearsTolerance;
-	}
-
-	public void setInArrearsTolerance(MoneyData inArrearsTolerance) {
-		this.inArrearsTolerance = inArrearsTolerance;
-	}
-
-	public Integer getNumberOfRepayments() {
-		return numberOfRepayments;
-	}
-
-	public void setNumberOfRepayments(Integer numberOfRepayments) {
-		this.numberOfRepayments = numberOfRepayments;
-	}
-
-	public Integer getRepaymentEvery() {
-		return repaymentEvery;
-	}
-
-	public void setRepaymentEvery(Integer repaymentEvery) {
-		this.repaymentEvery = repaymentEvery;
-	}
-
-	public BigDecimal getInterestRatePerPeriod() {
-		return interestRatePerPeriod;
-	}
-
-	public void setInterestRatePerPeriod(BigDecimal interestRatePerPeriod) {
-		this.interestRatePerPeriod = interestRatePerPeriod;
-	}
-
-	public BigDecimal getAnnualInterestRate() {
-		return annualInterestRate;
-	}
-
-	public void setAnnualInterestRate(BigDecimal annualInterestRate) {
-		this.annualInterestRate = annualInterestRate;
-	}
-
-	public EnumOptionData getRepaymentFrequencyType() {
-		return repaymentFrequencyType;
-	}
-
-	public void setRepaymentFrequencyType(EnumOptionData repaymentFrequencyType) {
-		this.repaymentFrequencyType = repaymentFrequencyType;
-	}
-
-	public EnumOptionData getInterestRateFrequencyType() {
-		return interestRateFrequencyType;
-	}
-
-	public void setInterestRateFrequencyType(
-			EnumOptionData interestRateFrequencyType) {
-		this.interestRateFrequencyType = interestRateFrequencyType;
-	}
-
-	public EnumOptionData getAmortizationType() {
-		return amortizationType;
-	}
-
-	public void setAmortizationType(EnumOptionData amortizationType) {
-		this.amortizationType = amortizationType;
-	}
-
-	public EnumOptionData getInterestType() {
-		return interestType;
-	}
-
-	public void setInterestType(EnumOptionData interestType) {
-		this.interestType = interestType;
-	}
-
-	public EnumOptionData getInterestCalculationPeriodType() {
-		return interestCalculationPeriodType;
-	}
-
-	public void setInterestCalculationPeriodType(
-			EnumOptionData interestCalculationPeriodType) {
-		this.interestCalculationPeriodType = interestCalculationPeriodType;
-	}
-
-	public String getLifeCycleStatusText() {
-		return lifeCycleStatusText;
-	}
-
-	public void setLifeCycleStatusText(String lifeCycleStatusText) {
-		this.lifeCycleStatusText = lifeCycleStatusText;
-	}
-
-	public LocalDate getLifeCycleStatusDate() {
-		return lifeCycleStatusDate;
-	}
-
-	public void setLifeCycleStatusDate(LocalDate lifeCycleStatusDate) {
-		this.lifeCycleStatusDate = lifeCycleStatusDate;
-	}
-
-	public Long getFundId() {
-		return fundId;
-	}
-
-	public void setFundId(Long fundId) {
-		this.fundId = fundId;
-	}
-
-	public String getFundName() {
-		return fundName;
-	}
-
-	public void setFundName(String fundName) {
-		this.fundName = fundName;
+	public String getClientName() {
+		return clientName;
 	}
 
 	public Long getLoanProductId() {
 		return loanProductId;
 	}
 
-	public void setLoanProductId(Long loanProductId) {
-		this.loanProductId = loanProductId;
+	public String getLoanProductName() {
+		return loanProductName;
+	}
+
+	public String getLoanProductDescription() {
+		return loanProductDescription;
+	}
+
+	public Long getFundId() {
+		return fundId;
+	}
+
+	public String getFundName() {
+		return fundName;
+	}
+	
+	public LocalDate getSubmittedOnDate() {
+		return submittedOnDate;
+	}
+
+	public LocalDate getApprovedOnDate() {
+		return approvedOnDate;
+	}
+
+	public LocalDate getExpectedDisbursementDate() {
+		return expectedDisbursementDate;
+	}
+
+	public LocalDate getActualDisbursementDate() {
+		return actualDisbursementDate;
+	}
+
+	public LocalDate getExpectedFirstRepaymentOnDate() {
+		return expectedFirstRepaymentOnDate;
+	}
+
+	public LocalDate getInterestChargedFromDate() {
+		return interestChargedFromDate;
+	}
+
+	public LocalDate getClosedOnDate() {
+		return closedOnDate;
+	}
+
+	public LocalDate getExpectedMaturityDate() {
+		return expectedMaturityDate;
+	}
+	
+	public CurrencyData getCurrency() {
+		return currency;
+	}
+
+	public MoneyData getPrincipal() {
+		return principal;
+	}
+
+	public MoneyData getInArrearsTolerance() {
+		return inArrearsTolerance;
+	}
+
+	public Integer getNumberOfRepayments() {
+		return numberOfRepayments;
+	}
+
+	public Integer getRepaymentEvery() {
+		return repaymentEvery;
+	}
+
+	public BigDecimal getInterestRatePerPeriod() {
+		return interestRatePerPeriod;
+	}
+
+	public BigDecimal getAnnualInterestRate() {
+		return annualInterestRate;
+	}
+
+	public EnumOptionData getRepaymentFrequencyType() {
+		return repaymentFrequencyType;
+	}
+
+	public EnumOptionData getInterestRateFrequencyType() {
+		return interestRateFrequencyType;
+	}
+
+	public EnumOptionData getAmortizationType() {
+		return amortizationType;
+	}
+
+	public EnumOptionData getInterestType() {
+		return interestType;
+	}
+
+	public EnumOptionData getInterestCalculationPeriodType() {
+		return interestCalculationPeriodType;
 	}
 
 	public Integer getLifeCycleStatusId() {
 		return lifeCycleStatusId;
 	}
 
-	public void setLifeCycleStatusId(Integer lifeCycleStatusId) {
-		this.lifeCycleStatusId = lifeCycleStatusId;
+	public String getLifeCycleStatusText() {
+		return lifeCycleStatusText;
+	}
+
+	public LocalDate getLifeCycleStatusDate() {
+		return lifeCycleStatusDate;
+	}
+
+	public LoanAccountSummaryData getSummary() {
+		return summary;
+	}
+
+	public Collection<LoanRepaymentPeriodData> getRepaymentSchedule() {
+		return repaymentSchedule;
+	}
+
+	public Collection<LoanRepaymentTransactionData> getLoanRepayments() {
+		return loanRepayments;
+	}
+
+	public LoanPermissionData getPermissions() {
+		return permissions;
+	}
+
+	public LoanConvenienceData getConvenienceData() {
+		return convenienceData;
 	}
 
     public Collection<ChargeData> getCharges() {
-        return charges;
+        return this.charges;
     }
 
     public void setCharges(Collection<ChargeData> charges) {

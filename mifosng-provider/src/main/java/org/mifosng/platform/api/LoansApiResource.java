@@ -103,7 +103,9 @@ public class LoansApiResource {
 			@Context final UriInfo uriInfo) {
 
 		Set<String> typicalResponseParameters = new HashSet<String>(
-				Arrays.asList("id", "externalId", "fundId", "fundName", "loanProductId", "loanProductName", "principal", "inArrearsTolerance", "numberOfRepayments",
+				Arrays.asList("id", "externalId", "clientId", "clientName", "fundId", "fundName", "loanProductId", "loanProductName", "loanProductDescription",
+						"currency",
+						"principal", "inArrearsTolerance", "numberOfRepayments",
 						"repaymentEvery", "interestRatePerPeriod", "annualInterestRate", 
 						"repaymentFrequencyType", "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType",
 						"submittedOnDate", "approvedOnDate", "expectedDisbursementDate", "actualDisbursementDate", 
