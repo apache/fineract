@@ -21,7 +21,6 @@ import javax.persistence.UniqueConstraint;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.LocalDate;
-import org.mifosng.platform.api.commands.DepositAccountCommand;
 import org.mifosng.platform.api.commands.DepositStateTransitionApprovalCommand;
 import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
@@ -225,10 +224,6 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 		this.externalId = this.getId() + "_" + this.externalId;
 	}
 
-	public void update(final DepositAccountCommand command) {
-
-	}
-
 	public void approve(
 			final LocalDate actualCommencementDate, 
 			final DepositLifecycleStateMachine depositLifecycleStateMachine, 
@@ -251,7 +246,10 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 		}
 
 		this.actualCommencementDate = actualCommencementDate.toDate();
-		this.actualMaturityDate = new LocalDate(this.actualCommencementDate).plusMonths(this.tenureInMonths).toDate();
+		
+		// TODO - KW - there was probably no need for 'projected' and 'actual' maturity dates - a single 'matures_on' attribute is sufficient
+		this.projectedMaturityDate = getActualCommencementDate().plusMonths(this.tenureInMonths).toDate();
+		this.actualMaturityDate = getActualCommencementDate().plusMonths(this.tenureInMonths).toDate();
 		
 		Money futureValueOnMaturity = calculator.calculateInterestOnMaturityFor(getDeposit(), this.tenureInMonths, 
 				this.interestRate, this.interestCompoundedEvery, getInterestCompoundedFrequencyType());
@@ -259,11 +257,10 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 		this.interestAccrued = futureValueOnMaturity.minus(getDeposit()).getAmount();
 		this.total = futureValueOnMaturity.getAmount();
 		
-		DepositAccountTransaction depositaccountTransaction = DepositAccountTransaction.deposit(futureValueOnMaturity,new LocalDate(this.actualCommencementDate));
+		DepositAccountTransaction depositaccountTransaction = DepositAccountTransaction.deposit(futureValueOnMaturity, getActualCommencementDate());
+		depositaccountTransaction.updateAccount(this);
 		this.depositaccountTransactions.add(depositaccountTransaction);
 		
-		depositaccountTransaction.updateAccount(this);
-
 		LocalDate submittalDate = new LocalDate(this.projectedCommencementDate);
 		if (actualCommencementDate.isBefore(submittalDate)) {
 			final String errorMessage = "The date on which a deposit is approved cannot be before its submittal date: "	+ submittalDate.toString();

@@ -84,33 +84,6 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 			 return new EntityIdentifier(Long.valueOf(-1));
 		}
 	}
-	
-	@Transactional
-	@Override
-	public EntityIdentifier updateDepositAccount(final DepositAccountCommand command) {
-		
-		try {
-			
-			this.context.authenticatedUser();
-			
-			DepositAccountCommandValidator validator = new DepositAccountCommandValidator(command);
-			validator.validateForUpdate();
-			
-			// FIXME - update scenarios to be completely done
-			final DepositAccount account = this.depositAccountAssembler.assembleFrom(command);
-			if (account == null || account.isDeleted()) {
-				throw new DepositAccountNotFoundException(command.getId());
-			}
-	
-			account.update(command);
-			this.depositAccountRepository.save(account);
-			
-			return new EntityIdentifier(account.getId());
-		} catch (DataIntegrityViolationException dve) {
-			 handleDataIntegrityIssues(command, dve);
-			 return new EntityIdentifier(Long.valueOf(-1));
-		}
-	}
 
 	@Transactional
 	@Override

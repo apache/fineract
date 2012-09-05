@@ -13,9 +13,6 @@ public interface DepositAccountWritePlatformService {
 	EntityIdentifier createDepositAccount(DepositAccountCommand command);
 	
 	@PreAuthorize(value = "hasRole('ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE')")
-	EntityIdentifier updateDepositAccount(DepositAccountCommand command);
-	
-	@PreAuthorize(value = "hasRole('ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE')")
 	EntityIdentifier deleteDepositAccount(Long productId);
 
 	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE', 'CAN_APPROVE_DEPOSIT_ROLE', 'CAN_APPROVE_DEPOSIT_IN_THE_PAST_ROLE')")
