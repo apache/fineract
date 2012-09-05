@@ -43,7 +43,8 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 			final PlatformSecurityContext context, 
 			final DepositAccountRepository depositAccountRepository, 
 			final DepositAccountAssembler depositAccountAssembler,
-			final FixedTermDepositInterestCalculator fixedTermDepositInterestCalculator) {
+			final FixedTermDepositInterestCalculator fixedTermDepositInterestCalculator
+			) {
 		this.context=context;
 		this.depositAccountRepository = depositAccountRepository;
 		this.depositAccountAssembler = depositAccountAssembler;
@@ -149,7 +150,9 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 		}
 		
 		account.approve(eventDate, defaultDepositLifecycleStateMachine(), command, this.fixedTermDepositInterestCalculator);
+		
 		this.depositAccountRepository.save(account);
+		
 
 		return new EntityIdentifier(account.getId());
 	

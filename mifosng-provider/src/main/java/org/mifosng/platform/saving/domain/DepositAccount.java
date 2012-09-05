@@ -1,18 +1,25 @@
 package org.mifosng.platform.saving.domain;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.LocalDate;
 import org.mifosng.platform.api.commands.DepositAccountCommand;
 import org.mifosng.platform.api.commands.DepositStateTransitionApprovalCommand;
@@ -126,6 +133,14 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 	@Temporal(TemporalType.DATE)
 	@Column(name = "withdrawnon_date")
 	private Date withdrawnOnDate;	
+	
+	
+	// see
+	// http://stackoverflow.com/questions/4334970/hibernate-cannot-simultaneously-fetch-multiple-bags
+	@OrderBy(value = "id")
+	@LazyCollection(LazyCollectionOption.FALSE)
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "depositAccount", orphanRemoval = true)
+	private final List<DepositAccountTransaction> depositaccountTransactions = new ArrayList<DepositAccountTransaction>();
     
 	public DepositAccount openNew(
 			final Client client, final DepositProduct product,
@@ -241,8 +256,13 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 		Money futureValueOnMaturity = calculator.calculateInterestOnMaturityFor(getDeposit(), this.tenureInMonths, 
 				this.interestRate, this.interestCompoundedEvery, getInterestCompoundedFrequencyType());
 		
-		this.projectedInterestAccruedOnMaturity = futureValueOnMaturity.minus(getDeposit()).getAmount();
-		this.projectedTotalOnMaturity = futureValueOnMaturity.getAmount();
+		this.interestAccrued = futureValueOnMaturity.minus(getDeposit()).getAmount();
+		this.total = futureValueOnMaturity.getAmount();
+		
+		DepositAccountTransaction depositaccountTransaction = DepositAccountTransaction.deposit(futureValueOnMaturity,new LocalDate(this.actualCommencementDate));
+		this.depositaccountTransactions.add(depositaccountTransaction);
+		
+		depositaccountTransaction.updateAccount(this);
 
 		LocalDate submittalDate = new LocalDate(this.projectedCommencementDate);
 		if (actualCommencementDate.isBefore(submittalDate)) {
@@ -339,6 +359,9 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 
 		this.actualCommencementDate = null;
 		this.actualMaturityDate = null;
+		this.total=null;
+		this.interestAccrued=null;
+		this.depositaccountTransactions.clear();
 	}
 
 	public PeriodFrequencyType getInterestCompoundedFrequencyType() {
