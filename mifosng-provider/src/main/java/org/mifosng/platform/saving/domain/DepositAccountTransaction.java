@@ -31,7 +31,7 @@ public class DepositAccountTransaction extends AbstractPersistable<Long> {
 	
 	@Enumerated(EnumType.ORDINAL)
 	@Column(name = "transaction_type_enum", nullable = false)
-	private DepositTransactionType typeOf;
+	private DepositAccountTransactionType typeOf;
 	
 	@OneToOne(optional=true, cascade={CascadeType.PERSIST})
 	@JoinColumn(name="contra_id")
@@ -53,7 +53,7 @@ public class DepositAccountTransaction extends AbstractPersistable<Long> {
 		
 	}
 	
-	private DepositAccountTransaction(DepositTransactionType type, final BigDecimal amount, final LocalDate date) {
+	private DepositAccountTransaction(DepositAccountTransactionType type, final BigDecimal amount, final LocalDate date) {
 		
 		this.typeOf = type;
         this.amount = amount;
@@ -69,7 +69,7 @@ public class DepositAccountTransaction extends AbstractPersistable<Long> {
 		return amount;
 	}
 
-	public DepositTransactionType getTypeOf() {
+	public DepositAccountTransactionType getTypeOf() {
 		return typeOf;
 	}
 
@@ -94,20 +94,20 @@ public class DepositAccountTransaction extends AbstractPersistable<Long> {
 	}
 	
 	public boolean isDeposit(){
-		return DepositTransactionType.DEPOSIT.equals(typeOf) && isNotContra();
+		return DepositAccountTransactionType.DEPOSIT.equals(typeOf) && isNotContra();
 	}
 
 	public static DepositAccountTransaction deposit(Money amount, LocalDate paymentDate) {
-		return new DepositAccountTransaction(DepositTransactionType.DEPOSIT, amount.getAmount(), paymentDate);
+		return new DepositAccountTransaction(DepositAccountTransactionType.DEPOSIT, amount.getAmount(), paymentDate);
 	}
 	 
 	public static DepositAccountTransaction withdraw(Money amount, LocalDate paymentDate) {
-		return new DepositAccountTransaction(DepositTransactionType.WITHDRAW, amount.getAmount(), paymentDate);
+		return new DepositAccountTransaction(DepositAccountTransactionType.WITHDRAW, amount.getAmount(), paymentDate);
 	}
 	
 	private static DepositAccountTransaction contra(DepositAccountTransaction originalTransaction) {
 		
-		DepositAccountTransaction contra = new DepositAccountTransaction(DepositTransactionType.REVERSAL, originalTransaction.getAmount().negate(), new LocalDate(originalTransaction.getDateOf()));
+		DepositAccountTransaction contra = new DepositAccountTransaction(DepositAccountTransactionType.REVERSAL, originalTransaction.getAmount().negate(), new LocalDate(originalTransaction.getDateOf()));
 		contra.updateContra(originalTransaction);
 		
 		return contra;

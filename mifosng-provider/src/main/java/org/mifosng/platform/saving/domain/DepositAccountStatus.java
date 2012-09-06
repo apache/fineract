@@ -1,6 +1,6 @@
 package org.mifosng.platform.saving.domain;
 
-public enum DepositStatus {
+public enum DepositAccountStatus {
 	
 	INVALID(0, "depositStatusType.invalid"), // 
 	SUBMITED_AND_PENDING_APPROVAL(100, "depositStatusType.submitted.and.pending.approval"), //
@@ -14,12 +14,12 @@ public enum DepositStatus {
     private final Integer value;
 	private final String code;
 	
-	private DepositStatus(final Integer value, final String code) {
+	private DepositAccountStatus(final Integer value, final String code) {
 		this.value = value;
 		this.code = code;
 	}
 	
-    public boolean hasStateOf(final DepositStatus state) {
+    public boolean hasStateOf(final DepositAccountStatus state) {
 		return this.value.equals(state.getValue());
 	}
 
@@ -32,53 +32,53 @@ public enum DepositStatus {
 	}
 	
 	public boolean isSubmittedAndPendingApproval() {
-		return this.value.equals(DepositStatus.SUBMITED_AND_PENDING_APPROVAL.getValue());
+		return this.value.equals(DepositAccountStatus.SUBMITED_AND_PENDING_APPROVAL.getValue());
 	}
 	
 	public boolean isApproved() {
-		return this.value.equals(DepositStatus.APPROVED.getValue());
+		return this.value.equals(DepositAccountStatus.APPROVED.getValue());
 	}
 	
 	public boolean isActive() {
-		return this.value.equals(DepositStatus.ACTIVE.getValue());
+		return this.value.equals(DepositAccountStatus.ACTIVE.getValue());
 	}
 
 	public boolean isClosed() {
-		return this.value.equals(DepositStatus.CLOSED.getValue());
+		return this.value.equals(DepositAccountStatus.CLOSED.getValue());
 	}
 
 	public boolean isWithdrawnByClient() {
-		return this.value.equals(DepositStatus.WITHDRAWN_BY_CLIENT.getValue());
+		return this.value.equals(DepositAccountStatus.WITHDRAWN_BY_CLIENT.getValue());
 	}
 
 	public boolean isRejected() {
-		return this.value.equals(DepositStatus.REJECTED.getValue());
+		return this.value.equals(DepositAccountStatus.REJECTED.getValue());
 	}
 	
-	public static DepositStatus fromInt(final Integer statusValue) {
+	public static DepositAccountStatus fromInt(final Integer statusValue) {
 
-		DepositStatus enumeration = DepositStatus.INVALID;
+		DepositAccountStatus enumeration = DepositAccountStatus.INVALID;
 		switch (statusValue) {
 		case 100:
-			enumeration = DepositStatus.SUBMITED_AND_PENDING_APPROVAL;
+			enumeration = DepositAccountStatus.SUBMITED_AND_PENDING_APPROVAL;
 			break;
 		case 200:
-			enumeration = DepositStatus.APPROVED;
+			enumeration = DepositAccountStatus.APPROVED;
 			break;
 		case 300:
-			enumeration = DepositStatus.ACTIVE;
+			enumeration = DepositAccountStatus.ACTIVE;
 			break;
 		case 400:
-			enumeration = DepositStatus.WITHDRAWN_BY_CLIENT;
+			enumeration = DepositAccountStatus.WITHDRAWN_BY_CLIENT;
 			break;
 		case 500:
-			enumeration = DepositStatus.REJECTED;
+			enumeration = DepositAccountStatus.REJECTED;
 			break;
 		case 600:
-			enumeration = DepositStatus.CLOSED;
+			enumeration = DepositAccountStatus.CLOSED;
 			break;
 		case 700:
-			enumeration = DepositStatus.MATURED;
+			enumeration = DepositAccountStatus.MATURED;
 			break;
 		}
 		return enumeration;

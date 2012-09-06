@@ -7,26 +7,26 @@ import org.mifosng.platform.exceptions.InvalidDepositStateTransitionException;
 public class DepositLifecycleStateMachineImpl implements
 		DepositLifecycleStateMachine {
 	
-	private final List<DepositStatus> allowedDepositStatuses;
+	private final List<DepositAccountStatus> allowedDepositStatuses;
 	
-	public DepositLifecycleStateMachineImpl(List<DepositStatus> allowedDepositStatuses) {
+	public DepositLifecycleStateMachineImpl(List<DepositAccountStatus> allowedDepositStatuses) {
 		this.allowedDepositStatuses=allowedDepositStatuses;
 	}
 
 	@Override
-	public DepositStatus transition(DepositEvent depositEvent, DepositStatus from) {
+	public DepositAccountStatus transition(DepositAccountEvent depositEvent, DepositAccountStatus from) {
 		
-		DepositStatus newState = null;
+		DepositAccountStatus newState = null;
 		
 		switch (depositEvent) {
 		case DEPOSIT_CREATED:
 			if (from == null) {
-				newState = stateOf(DepositStatus.SUBMITED_AND_PENDING_APPROVAL, allowedDepositStatuses);
+				newState = stateOf(DepositAccountStatus.SUBMITED_AND_PENDING_APPROVAL, allowedDepositStatuses);
 			}
 			break;
 		case DEPOSIT_REJECTED:
-			if (from.hasStateOf(DepositStatus.SUBMITED_AND_PENDING_APPROVAL)) {
-				newState = stateOf(DepositStatus.REJECTED, allowedDepositStatuses);
+			if (from.hasStateOf(DepositAccountStatus.SUBMITED_AND_PENDING_APPROVAL)) {
+				newState = stateOf(DepositAccountStatus.REJECTED, allowedDepositStatuses);
 			}
 			else{
 				final String errorMessage = "The DepositApplication can not be rejected from "+from.getCode() ;
@@ -34,8 +34,8 @@ public class DepositLifecycleStateMachineImpl implements
 			}
 			break;
 		case DEPOSIT_APPROVED:
-			if (from.hasStateOf(DepositStatus.SUBMITED_AND_PENDING_APPROVAL)) {
-				newState = stateOf(DepositStatus.APPROVED, allowedDepositStatuses);
+			if (from.hasStateOf(DepositAccountStatus.SUBMITED_AND_PENDING_APPROVAL)) {
+				newState = stateOf(DepositAccountStatus.APPROVED, allowedDepositStatuses);
 			}
 			else{
 				final String errorMessage = "The DepositApplication can not be approved from "+from.getCode() ;
@@ -43,8 +43,8 @@ public class DepositLifecycleStateMachineImpl implements
 			}
 			break;
 		case DEPOSIT_WITHDRAWN:
-			if (this.anyOfAllowedWhenComingFrom(from, DepositStatus.SUBMITED_AND_PENDING_APPROVAL, DepositStatus.APPROVED)) {
-				newState = stateOf(DepositStatus.WITHDRAWN_BY_CLIENT, allowedDepositStatuses);
+			if (this.anyOfAllowedWhenComingFrom(from, DepositAccountStatus.SUBMITED_AND_PENDING_APPROVAL, DepositAccountStatus.APPROVED)) {
+				newState = stateOf(DepositAccountStatus.WITHDRAWN_BY_CLIENT, allowedDepositStatuses);
 			}
 			else{
 				final String errorMessage = "The DepositApplication can not be withdrawn from "+from.getCode() ;
@@ -52,8 +52,8 @@ public class DepositLifecycleStateMachineImpl implements
 			}
 			break;
 		case DEPOSIT_APPROVAL_UNDO:
-			if (from.hasStateOf(DepositStatus.APPROVED)) {
-				newState = stateOf(DepositStatus.SUBMITED_AND_PENDING_APPROVAL, allowedDepositStatuses);
+			if (from.hasStateOf(DepositAccountStatus.APPROVED)) {
+				newState = stateOf(DepositAccountStatus.SUBMITED_AND_PENDING_APPROVAL, allowedDepositStatuses);
 			}
 			else{
 				final String errorMessage = "The DepositApplication can not be unapproved from "+from.getCode() ;
@@ -61,8 +61,8 @@ public class DepositLifecycleStateMachineImpl implements
 			}
 			break;
 		case DEPOSIT_MATURED:
-			if (from.hasStateOf(DepositStatus.APPROVED) ){
-				newState = stateOf(DepositStatus.MATURED, allowedDepositStatuses);
+			if (from.hasStateOf(DepositAccountStatus.APPROVED) ){
+				newState = stateOf(DepositAccountStatus.MATURED, allowedDepositStatuses);
 			}
 			else{
 				final String errorMessage = "The DepositApplication can not be matured from "+from.getCode() ;
@@ -74,9 +74,9 @@ public class DepositLifecycleStateMachineImpl implements
 		return newState;
 	}
 	
-	private DepositStatus stateOf(DepositStatus state, List<DepositStatus> allowedLoanStatuses) {
-		DepositStatus match = null;
-		for (DepositStatus depositStatus : allowedLoanStatuses) {
+	private DepositAccountStatus stateOf(DepositAccountStatus state, List<DepositAccountStatus> allowedLoanStatuses) {
+		DepositAccountStatus match = null;
+		for (DepositAccountStatus depositStatus : allowedLoanStatuses) {
 			if (depositStatus.hasStateOf(state)) {
 				match = depositStatus;
 				break;
@@ -85,10 +85,10 @@ public class DepositLifecycleStateMachineImpl implements
 		return match;
 	}
 
-	private boolean anyOfAllowedWhenComingFrom(final DepositStatus state, final DepositStatus... allowedStates) {
+	private boolean anyOfAllowedWhenComingFrom(final DepositAccountStatus state, final DepositAccountStatus... allowedStates) {
 		boolean allowed = false;
 
-		for (DepositStatus allowedState : allowedStates) {
+		for (DepositAccountStatus allowedState : allowedStates) {
 			if (state.hasStateOf(allowedState)) {
 				allowed = true;
 				break;

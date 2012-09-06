@@ -17,7 +17,7 @@ import org.mifosng.platform.saving.domain.DepositAccount;
 import org.mifosng.platform.saving.domain.DepositAccountRepository;
 import org.mifosng.platform.saving.domain.DepositLifecycleStateMachine;
 import org.mifosng.platform.saving.domain.DepositLifecycleStateMachineImpl;
-import org.mifosng.platform.saving.domain.DepositStatus;
+import org.mifosng.platform.saving.domain.DepositAccountStatus;
 import org.mifosng.platform.saving.domain.FixedTermDepositInterestCalculator;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.user.domain.AppUser;
@@ -135,7 +135,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 		return date.isBefore(new LocalDate());
 	}
 	private DepositLifecycleStateMachine defaultDepositLifecycleStateMachine() {
-		List<DepositStatus> allowedDepositStatuses = Arrays.asList(DepositStatus.values());
+		List<DepositAccountStatus> allowedDepositStatuses = Arrays.asList(DepositAccountStatus.values());
 		return new DepositLifecycleStateMachineImpl(allowedDepositStatuses);
 	}
 

@@ -1,31 +1,31 @@
 package org.mifosng.platform.saving.service;
 
 import org.mifosng.platform.api.data.EnumOptionData;
-import org.mifosng.platform.saving.domain.DepositTransactionType;
+import org.mifosng.platform.saving.domain.DepositAccountTransactionType;
 
 public class DepositAccountTransactionEnumerations {
 	
 	public static EnumOptionData depositType(final Integer statusId) {
-		return depositType(DepositTransactionType.fromInt(statusId));
+		return depositType(DepositAccountTransactionType.fromInt(statusId));
 	}
 
-	private static EnumOptionData depositType(DepositTransactionType transactionType) {
+	private static EnumOptionData depositType(DepositAccountTransactionType transactionType) {
 		
 		EnumOptionData optionData=null;
 		switch (transactionType) {
 		case DEPOSIT:
-			optionData=new EnumOptionData(DepositTransactionType.DEPOSIT.getValue().longValue(), DepositTransactionType.DEPOSIT.getCode(), "Deposit");
+			optionData=new EnumOptionData(DepositAccountTransactionType.DEPOSIT.getValue().longValue(), DepositAccountTransactionType.DEPOSIT.getCode(), "Deposit");
 			break;
 			
 		case WITHDRAW:
-			optionData=new EnumOptionData(DepositTransactionType.WITHDRAW.getValue().longValue(), DepositTransactionType.WITHDRAW.getCode(), "Withdraw");
+			optionData=new EnumOptionData(DepositAccountTransactionType.WITHDRAW.getValue().longValue(), DepositAccountTransactionType.WITHDRAW.getCode(), "Withdraw");
 			break;
 			
 		case REVERSAL:
-			optionData=new EnumOptionData(DepositTransactionType.REVERSAL.getValue().longValue(), DepositTransactionType.REVERSAL.getCode(), "Revarsal");	
+			optionData=new EnumOptionData(DepositAccountTransactionType.REVERSAL.getValue().longValue(), DepositAccountTransactionType.REVERSAL.getCode(), "Revarsal");	
 			break;
 		default:
-			optionData=new EnumOptionData(DepositTransactionType.INVALID.getValue().longValue(), DepositTransactionType.INVALID.getCode(), "Invalid Transaction");
+			optionData=new EnumOptionData(DepositAccountTransactionType.INVALID.getValue().longValue(), DepositAccountTransactionType.INVALID.getCode(), "Invalid Transaction");
 			break;
 		}
 		return optionData;

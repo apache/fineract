@@ -14,7 +14,7 @@ import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 import org.mifosng.platform.saving.domain.DepositAccount;
 import org.mifosng.platform.saving.domain.DepositLifecycleStateMachine;
 import org.mifosng.platform.saving.domain.DepositLifecycleStateMachineImpl;
-import org.mifosng.platform.saving.domain.DepositStatus;
+import org.mifosng.platform.saving.domain.DepositAccountStatus;
 import org.mifosng.platform.saving.domain.FixedTermDepositInterestCalculator;
 import org.mifosng.platform.savingproduct.domain.DepositProduct;
 import org.mifosng.platform.savingproduct.domain.DepositProductRepository;
@@ -96,7 +96,7 @@ public class DepositAccountAssembler {
 	}
 	
 	private DepositLifecycleStateMachine defaultDepositLifecycleStateMachine() {
-		List<DepositStatus> allowedDepositStatuses = Arrays.asList(DepositStatus.values());
+		List<DepositAccountStatus> allowedDepositStatuses = Arrays.asList(DepositAccountStatus.values());
 		return new DepositLifecycleStateMachineImpl(allowedDepositStatuses);
 	}
 }

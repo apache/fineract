@@ -76,8 +76,8 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 	
 	@SuppressWarnings("unused")
 	@Temporal(TemporalType.DATE)
-	@Column(name = "matured_on")
-	private Date maturedOn;
+	@Column(name = "matures_on_date")
+	private Date maturesOnDate;
 	
 	@SuppressWarnings("unused")
 	@Column(name = "projected_interest_accrued_on_maturity", scale = 6, precision = 19, nullable = false)
@@ -151,12 +151,12 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 				maturityInterestRate, interestCompoundedEvery, interestCompoundedFrequencyPeriodType);
 		
 		
-		DepositStatus from = null;
+		DepositAccountStatus from = null;
 		if (depositStatus != null) {
-			from = DepositStatus.fromInt(depositStatus);
+			from = DepositAccountStatus.fromInt(depositStatus);
 		}
 
-		DepositStatus statusEnum = depositLifecycleStateMachine.transition(DepositEvent.DEPOSIT_CREATED, from);
+		DepositAccountStatus statusEnum = depositLifecycleStateMachine.transition(DepositAccountEvent.DEPOSIT_CREATED, from);
 		depositStatus = statusEnum.getValue();
 		
 		return new DepositAccount(client, product, externalId, deposit, maturityInterestRate, tenureInMonths, 
@@ -191,7 +191,7 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 		this.interestCompoundedFrequencyType = interestCompoundedFrequencyPeriodType.getValue();
 		if (commencementDate != null) {
 			this.projectedCommencementDate = commencementDate.toDate();
-			this.maturedOn = commencementDate.plusMonths(this.tenureInMonths).toDate();
+			this.maturesOnDate = commencementDate.plusMonths(this.tenureInMonths).toDate();
 		}
 		
 		this.renewalAllowed = renewalAllowed;
@@ -225,7 +225,7 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 			final DepositStateTransitionApprovalCommand command,
 			final FixedTermDepositInterestCalculator calculator) {
 
-		DepositStatus statusEnum = depositLifecycleStateMachine.transition(DepositEvent.DEPOSIT_APPROVED, DepositStatus.fromInt(this.depositStatus));
+		DepositAccountStatus statusEnum = depositLifecycleStateMachine.transition(DepositAccountEvent.DEPOSIT_APPROVED, DepositAccountStatus.fromInt(this.depositStatus));
 		this.depositStatus = statusEnum.getValue();
 		
 		if (command.getTenureInMonths() != null) {
@@ -241,9 +241,7 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 		}
 
 		this.actualCommencementDate = actualCommencementDate.toDate();
-		
-		// TODO - KW - there was probably no need for 'projected' and 'actual' maturity dates - a single 'matures_on' attribute is sufficient
-		this.maturedOn = getActualCommencementDate().plusMonths(this.tenureInMonths).toDate();
+		this.maturesOnDate = getActualCommencementDate().plusMonths(this.tenureInMonths).toDate();
 		
 		Money futureValueOnMaturity = calculator.calculateInterestOnMaturityFor(getDeposit(), this.tenureInMonths, 
 				this.interestRate, this.interestCompoundedEvery, getInterestCompoundedFrequencyType());
@@ -286,9 +284,9 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 	public void reject(final LocalDate rejectedOn,
 			final DepositLifecycleStateMachine depositLifecycleStateMachine) {
 
-		DepositStatus statusEnum = depositLifecycleStateMachine.transition(
-				DepositEvent.DEPOSIT_REJECTED,
-				DepositStatus.fromInt(this.depositStatus));
+		DepositAccountStatus statusEnum = depositLifecycleStateMachine.transition(
+				DepositAccountEvent.DEPOSIT_REJECTED,
+				DepositAccountStatus.fromInt(this.depositStatus));
 		this.depositStatus = statusEnum.getValue();
 
 		this.rejectedOnDate = rejectedOn.toDateTimeAtCurrentTime().toDate();
@@ -316,9 +314,9 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 	public void withdrawnByApplicant(final LocalDate withdrawnOn,
 			final DepositLifecycleStateMachine depositLifecycleStateMachine) {
 
-		DepositStatus statusEnum = depositLifecycleStateMachine.transition(
-				DepositEvent.DEPOSIT_WITHDRAWN,
-				DepositStatus.fromInt(this.depositStatus));
+		DepositAccountStatus statusEnum = depositLifecycleStateMachine.transition(
+				DepositAccountEvent.DEPOSIT_WITHDRAWN,
+				DepositAccountStatus.fromInt(this.depositStatus));
 		this.depositStatus = statusEnum.getValue();
 
 		this.withdrawnOnDate = withdrawnOn.toDateTimeAtCurrentTime().toDate();
@@ -343,13 +341,13 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 
 	public void undoDepositApproval(final DepositLifecycleStateMachine depositLifecycleStateMachine) {
 
-		DepositStatus statusEnum = depositLifecycleStateMachine.transition(
-				DepositEvent.DEPOSIT_APPROVAL_UNDO,
-				DepositStatus.fromInt(this.depositStatus));
+		DepositAccountStatus statusEnum = depositLifecycleStateMachine.transition(
+				DepositAccountEvent.DEPOSIT_APPROVAL_UNDO,
+				DepositAccountStatus.fromInt(this.depositStatus));
 		this.depositStatus = statusEnum.getValue();
 
 		this.actualCommencementDate = null;
-		this.maturedOn = getProjectedCommencementDate().plusMonths(this.tenureInMonths).toDate();
+		this.maturesOnDate = getProjectedCommencementDate().plusMonths(this.tenureInMonths).toDate();
 		this.total=null;
 		this.interestAccrued=null;
 		this.depositaccountTransactions.clear();
