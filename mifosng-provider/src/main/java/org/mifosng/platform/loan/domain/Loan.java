@@ -226,6 +226,30 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 			this.submittedOnDate = command.getSubmittedOnDate().toDate();
 		}
 		
+		if (command.isExpectedDisbursementDateChanged()) {
+			if (command.getExpectedDisbursementDate() != null) {
+				this.expectedDisbursedOnDate = command.getExpectedDisbursementDate().toDate();
+			} else {
+				this.expectedDisbursedOnDate = null;
+			}
+		}
+		
+		if (command.isRepaymentsStartingFromDateChanged()) {
+			if (command.getRepaymentsStartingFromDate() != null) {
+				this.expectedFirstRepaymentOnDate = command.getRepaymentsStartingFromDate().toDate();
+			} else {
+				this.expectedFirstRepaymentOnDate = null;
+			}
+		}
+		
+		if (command.isInterestChargedFromDateChanged()) {
+			if (command.getInterestChargedFromDate() != null) {
+				this.interestChargedFromDate = command.getInterestChargedFromDate().toDate();
+			} else {
+				this.interestChargedFromDate = null;
+			}
+		}
+		
 		this.loanRepaymentScheduleDetail.update(command.toLoanProductCommand());
 		
 		// FIXME - rewrite over loan schedule by default for now but worth putting in check to see if required
@@ -474,7 +498,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		if (loanTransactionDate.isAfter(new LocalDate())) {
 			final String errorMessage = "The transaction date cannot be in the future.";
 			throw new InvalidLoanStateTransitionException("waive",
-					"cannot.be.a.futre.date", errorMessage, loanTransactionDate);
+					"cannot.be.a.future.date", errorMessage, loanTransactionDate);
 		}
 
 		if (getTotalOutstanding().isGreaterThan(this.getInArrearsTolerance())) {
@@ -534,7 +558,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		if (loanTransactionDate.isAfter(new LocalDate())) {
 			final String errorMessage = "The transaction date cannot be in the future.";
 			throw new InvalidLoanStateTransitionException("repayment",
-					"cannot.be.a.futre.date", errorMessage, loanTransactionDate);
+					"cannot.be.a.future.date", errorMessage, loanTransactionDate);
 		}
 		
 		List<LoanTransaction> repaymentsOrWaivers = new ArrayList<LoanTransaction>();

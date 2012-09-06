@@ -247,4 +247,16 @@ public class LoanApplicationCommand {
 	public boolean isSubmittedOnDateChanged() {
 		return this.modifiedParameters.contains("submittedOnDate");
 	}
+
+	public boolean isExpectedDisbursementDateChanged() {
+		return this.modifiedParameters.contains("expectedDisbursementDate");
+	}
+
+	public boolean isRepaymentsStartingFromDateChanged() {
+		return this.modifiedParameters.contains("repaymentsStartingFromDate");
+	}
+
+	public boolean isInterestChargedFromDateChanged() {
+		return this.modifiedParameters.contains("interestChargedFromDate");
+	}
 }
