@@ -76,13 +76,8 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 	
 	@SuppressWarnings("unused")
 	@Temporal(TemporalType.DATE)
-	@Column(name = "projected_maturity_date")
-	private Date projectedMaturityDate;
-	
-	@SuppressWarnings("unused")
-	@Temporal(TemporalType.DATE)
-	@Column(name = "actual_maturity_date")
-	private Date actualMaturityDate;
+	@Column(name = "matured_on")
+	private Date maturedOn;
 	
 	@SuppressWarnings("unused")
 	@Column(name = "projected_interest_accrued_on_maturity", scale = 6, precision = 19, nullable = false)
@@ -196,7 +191,7 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 		this.interestCompoundedFrequencyType = interestCompoundedFrequencyPeriodType.getValue();
 		if (commencementDate != null) {
 			this.projectedCommencementDate = commencementDate.toDate();
-			this.projectedMaturityDate = commencementDate.plusMonths(this.tenureInMonths).toDate();
+			this.maturedOn = commencementDate.plusMonths(this.tenureInMonths).toDate();
 		}
 		
 		this.renewalAllowed = renewalAllowed;
@@ -248,8 +243,7 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 		this.actualCommencementDate = actualCommencementDate.toDate();
 		
 		// TODO - KW - there was probably no need for 'projected' and 'actual' maturity dates - a single 'matures_on' attribute is sufficient
-		this.projectedMaturityDate = getActualCommencementDate().plusMonths(this.tenureInMonths).toDate();
-		this.actualMaturityDate = getActualCommencementDate().plusMonths(this.tenureInMonths).toDate();
+		this.maturedOn = getActualCommencementDate().plusMonths(this.tenureInMonths).toDate();
 		
 		Money futureValueOnMaturity = calculator.calculateInterestOnMaturityFor(getDeposit(), this.tenureInMonths, 
 				this.interestRate, this.interestCompoundedEvery, getInterestCompoundedFrequencyType());
@@ -257,7 +251,7 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 		this.interestAccrued = futureValueOnMaturity.minus(getDeposit()).getAmount();
 		this.total = futureValueOnMaturity.getAmount();
 		
-		DepositAccountTransaction depositaccountTransaction = DepositAccountTransaction.deposit(futureValueOnMaturity, getActualCommencementDate());
+		DepositAccountTransaction depositaccountTransaction = DepositAccountTransaction.deposit(getDeposit(), getActualCommencementDate());
 		depositaccountTransaction.updateAccount(this);
 		this.depositaccountTransactions.add(depositaccountTransaction);
 		
@@ -355,7 +349,7 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 		this.depositStatus = statusEnum.getValue();
 
 		this.actualCommencementDate = null;
-		this.actualMaturityDate = null;
+		this.maturedOn = getProjectedCommencementDate().plusMonths(this.tenureInMonths).toDate();
 		this.total=null;
 		this.interestAccrued=null;
 		this.depositaccountTransactions.clear();

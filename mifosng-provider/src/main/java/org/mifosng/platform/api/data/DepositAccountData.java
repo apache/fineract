@@ -27,8 +27,7 @@ public class DepositAccountData {
 	private final Integer tenureInMonths;
 	private final LocalDate projectedCommencementDate;
 	private final LocalDate actualCommencementDate;
-	private final LocalDate projectedMaturityDate;
-	private final LocalDate actualMaturityDate;
+	private final LocalDate maturedOn;
 	private final LocalDate withdrawnonDate;
 	private final LocalDate rejectedonDate;
 	private final LocalDate closedonDate;
@@ -71,8 +70,7 @@ public class DepositAccountData {
 		this.tenureInMonths = null;
 		this.projectedCommencementDate = null;
 		this.actualCommencementDate = null;
-		this.projectedMaturityDate = null;
-		this.actualMaturityDate = null;
+		this.maturedOn = null;
 		this.projectedInterestAccrued = null;
 		this.actualInterestAccrued = null;
 		this.projectedMaturityAmount = null;
@@ -110,8 +108,7 @@ public class DepositAccountData {
 		this.tenureInMonths = account.getTenureInMonths();
 		this.projectedCommencementDate = account.getProjectedCommencementDate();
 		this.actualCommencementDate = account.getActualCommencementDate();
-		this.projectedMaturityDate = account.getProjectedMaturityDate();
-		this.actualMaturityDate = account.getActualMaturityDate();
+		this.maturedOn = account.getMaturedOn();
 		this.projectedInterestAccrued = account.getProjectedInterestAccrued();
 		this.actualInterestAccrued = account.getActualInterestAccrued();
 		this.projectedMaturityAmount = account.getProjectedMaturityAmount();
@@ -145,8 +142,7 @@ public class DepositAccountData {
 			final Integer tenureInMonths, 
 			final LocalDate projectedCommencementDate, 
 			final LocalDate actualCommencementDate, 
-			final LocalDate projectedMaturityDate, 
-			final LocalDate actualMaturityDate, 
+			final LocalDate maturedOn, 
 			final BigDecimal projectedInterestAccrued, 
 			final BigDecimal actualInterestAccrued, 
 			final BigDecimal projectedMaturityAmount, 
@@ -172,8 +168,7 @@ public class DepositAccountData {
 		this.tenureInMonths = tenureInMonths;
 		this.projectedCommencementDate = projectedCommencementDate;
 		this.actualCommencementDate = actualCommencementDate;
-		this.projectedMaturityDate = projectedMaturityDate;
-		this.actualMaturityDate = actualMaturityDate;
+		this.maturedOn = maturedOn;
 		this.projectedInterestAccrued = projectedInterestAccrued;
 		this.actualInterestAccrued = actualInterestAccrued;
 		this.projectedMaturityAmount = projectedMaturityAmount;
@@ -220,8 +215,7 @@ public class DepositAccountData {
 		this.tenureInMonths = tenureInMonths;
 		this.projectedCommencementDate = null;
 		this.actualCommencementDate = null;
-		this.projectedMaturityDate = null;
-		this.actualMaturityDate = null;
+		this.maturedOn = null;
 		this.projectedInterestAccrued = null;
 		this.actualInterestAccrued = null;
 		this.projectedMaturityAmount = null;
@@ -294,12 +288,8 @@ public class DepositAccountData {
 		return actualCommencementDate;
 	}
 
-	public LocalDate getProjectedMaturityDate() {
-		return projectedMaturityDate;
-	}
-
-	public LocalDate getActualMaturityDate() {
-		return actualMaturityDate;
+	public LocalDate getMaturedOn() {
+		return maturedOn;
 	}
 
 	public BigDecimal getProjectedInterestAccrued() {

@@ -152,7 +152,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 				+  " da.currency_code as currencyCode, da.currency_digits as currencyDigits, " 
 				+  " da.deposit_amount as depositAmount, da.status_enum as statusId, "	
 				+  " da.maturity_nominal_interest_rate as interestRate, da.tenure_months as termInMonths, da.projected_commencement_date as projectedCommencementDate," 
-				+  " da.actual_commencement_date as actualCommencementDate, da.projected_maturity_date as projectedMaturityDate, da.actual_maturity_date as actualMaturityDate,"
+				+  " da.actual_commencement_date as actualCommencementDate, da.matured_on as maturedOn,"
 				+  " da.projected_interest_accrued_on_maturity as projectedInterestAccrued, da.actual_interest_accrued as actualInterestAccrued, "
 				+  " da.projected_total_maturity_amount as projectedMaturityAmount, da.actual_total_amount as actualMaturityAmount, "
 				+  " da.interest_compounded_every as interestCompoundedEvery, da.interest_compounded_every_period_enum as interestCompoundedEveryPeriodType, "
@@ -194,8 +194,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 			
 			LocalDate projectedCommencementDate = JdbcSupport.getLocalDate(rs, "projectedCommencementDate");
 			LocalDate actualCommencementDate = JdbcSupport.getLocalDate(rs, "actualCommencementDate");
-			LocalDate projectedMaturityDate = JdbcSupport.getLocalDate(rs, "projectedMaturityDate");
-			LocalDate actualMaturityDate = JdbcSupport.getLocalDate(rs, "actualMaturityDate");
+			LocalDate maturedOn = JdbcSupport.getLocalDate(rs, "maturedOn");
 			BigDecimal projectedInterestAccrued = rs.getBigDecimal("projectedInterestAccrued");
 			BigDecimal actualInterestAccrued = rs.getBigDecimal("actualInterestAccrued");
 			
@@ -216,7 +215,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 			LocalDate closedonDate = JdbcSupport.getLocalDate(rs, "closedonDate");
 			
 			return new DepositAccountData(id, externalId, status, clientId, clientName, productId, productName, currencyData, depositAmount, 
-					interestRate, termInMonths, projectedCommencementDate, actualCommencementDate, projectedMaturityDate, actualMaturityDate, 
+					interestRate, termInMonths, projectedCommencementDate, actualCommencementDate, maturedOn, 
 					projectedInterestAccrued, actualInterestAccrued, projectedMaturityAmount, actualMaturityAmount, 
 					interestCompoundedEvery, interestCompoundedEveryPeriodType,
 					renewalAllowed, preClosureAllowed, preClosureInterestRate, 

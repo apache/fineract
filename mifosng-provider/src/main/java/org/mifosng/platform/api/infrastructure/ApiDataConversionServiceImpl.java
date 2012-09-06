@@ -1016,7 +1016,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 
 		// preClosureInterestRate
 		Set<String> supportedParams = new HashSet<String>(
-				Arrays.asList("clientId", "productId", "externalId", "depositAmount", "maturityInterestRate", 
+				Arrays.asList("clientId", "productId", "externalId", "deposit", "maturityInterestRate", 
 						"tenureInMonths", "interestCompoundedEvery", "interestCompoundedEveryPeriodType", "commencementDate",
 						"renewalAllowed", "preClosureAllowed",
 						"locale", "dateFormat")
@@ -1027,7 +1027,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		Long clientId = extractLongParameter("clientId", requestMap, modifiedParameters);
 		Long productId = extractLongParameter("productId", requestMap, modifiedParameters);
 		String externalId = extractStringParameter("externalId", requestMap,modifiedParameters);
-		BigDecimal depositAmount=extractBigDecimalParameter("depositAmount", requestMap, modifiedParameters);
+		BigDecimal deposit=extractBigDecimalParameter("deposit", requestMap, modifiedParameters);
 		BigDecimal interestRate = extractBigDecimalParameter("maturityInterestRate", requestMap, modifiedParameters);
 		Integer tenureInMonths = extractIntegerParameter("tenureInMonths", requestMap, modifiedParameters);
 		
@@ -1039,7 +1039,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		boolean preClosureAllowed = extractBooleanParameter("preClosureAllowed", requestMap, modifiedParameters);
 		
 		return new DepositAccountCommand(modifiedParameters, resourceIdentifier, clientId, productId, 
-				externalId, depositAmount, interestRate, tenureInMonths, 
+				externalId, deposit, interestRate, tenureInMonths, 
 				interestCompoundedEvery, interestCompoundedEveryPeriodType, commencementDate, renewalAllowed, preClosureAllowed);
 	}
 
@@ -1122,19 +1122,19 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		Type typeOfMap = new TypeToken<Map<String, String>>(){}.getType();
 	    Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
 	    
-	    Set<String> supportedParams = new HashSet<String>(Arrays.asList("locale","eventDate", "dateFormat", "tenureInMonths", "depositAmount", "interestCompoundedEveryPeriodType", "productId","interestCompoundedEvery"));
+	    Set<String> supportedParams = new HashSet<String>(Arrays.asList("locale","commencementDate", "dateFormat", "tenureInMonths", "deposit", "interestCompoundedEveryPeriodType", "productId","interestCompoundedEvery"));
 	    
 	    checkForUnsupportedParameters(requestMap, supportedParams);
 	    
 	    Set<String> modifiedParameters = new HashSet<String>();
 	    
-	    LocalDate eventDate = extractLocalDateParameter("eventDate", requestMap, modifiedParameters);
-	    BigDecimal depositAmount=extractBigDecimalParameter("depositAmount", requestMap, modifiedParameters);
+	    LocalDate commencementDate = extractLocalDateParameter("commencementDate", requestMap, modifiedParameters);
+	    BigDecimal deposit=extractBigDecimalParameter("deposit", requestMap, modifiedParameters);
 		Integer tenureInMonths = extractIntegerParameter("tenureInMonths", requestMap, modifiedParameters);
 	    Integer interestCompoundedEveryPeriodType = extractIntegerParameter("interestCompoundedEveryPeriodType", requestMap, modifiedParameters);
 	    Integer interestCompoundedEvery = extractIntegerParameter("interestCompoundedEvery", requestMap, modifiedParameters);
 	    Long productId = extractLongParameter("productId", requestMap, modifiedParameters);
 	    
-		return new DepositStateTransitionApprovalCommand(resourceIdentifier, productId, eventDate, tenureInMonths, depositAmount, interestCompoundedEveryPeriodType,interestCompoundedEvery);
+		return new DepositStateTransitionApprovalCommand(resourceIdentifier, productId, commencementDate, tenureInMonths, deposit, interestCompoundedEveryPeriodType,interestCompoundedEvery);
 	}
 }
