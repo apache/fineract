@@ -152,7 +152,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 				+  " da.currency_code as currencyCode, da.currency_digits as currencyDigits, " 
 				+  " da.deposit_amount as depositAmount, da.status_enum as statusId, "	
 				+  " da.maturity_nominal_interest_rate as interestRate, da.tenure_months as termInMonths, da.projected_commencement_date as projectedCommencementDate," 
-				+  " da.actual_commencement_date as actualCommencementDate, da.matured_on as maturedOn,"
+				+  " da.actual_commencement_date as actualCommencementDate, da.matures_on_date as maturedOn,"
 				+  " da.projected_interest_accrued_on_maturity as projectedInterestAccrued, da.actual_interest_accrued as actualInterestAccrued, "
 				+  " da.projected_total_maturity_amount as projectedMaturityAmount, da.actual_total_amount as actualMaturityAmount, "
 				+  " da.interest_compounded_every as interestCompoundedEvery, da.interest_compounded_every_period_enum as interestCompoundedEveryPeriodType, "
