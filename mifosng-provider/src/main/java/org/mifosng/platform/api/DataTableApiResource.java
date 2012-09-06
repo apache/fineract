@@ -31,37 +31,29 @@ public class DataTableApiResource {
 	private ReadWriteNonCoreDataService readWriteNonCoreDataService;
 
 	@GET
-	@Path("{datatable}")
+	@Path("{datatable}/{id}")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	public String extraData(@PathParam("datatable") final String datatable,
+			@PathParam("id") final Long id,
 			@QueryParam("sqlFields") final String sqlFields,
 			@QueryParam("sqlSearch") final String sqlSearch,
-			@QueryParam("sqlOrder") final String sqlOrder
-	// ,@Context final UriInfo uriInfo
-	) {
+			@QueryParam("sqlOrder") final String sqlOrder) {
 
-		try {
-			// GenericResultsetData result =
-			// this.readExtraDataAndReportingService.retrieveDataTable(datatable);
-			return this.readWriteNonCoreDataService.retrieveDataTable(
-					datatable, sqlFields, sqlSearch, sqlOrder);
-
-			// boolean prettyPrint =
-			// ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-			// return
-			// this.apiDataConversionService.convertGenericResultsetDataToJson(prettyPrint,
-			// result);
-		} catch (InvalidSqlException e) {
-			List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-			ApiParameterError error = ApiParameterError.parameterError(
-					"extradata.invalid.sql", "The sql is invalid.", "sql",
-					e.getSql());
-			dataValidationErrors.add(error);
-			throw new PlatformApiDataValidationException(
-					"validation.msg.validation.errors.exist",
-					"Validation errors exist.", dataValidationErrors);
-		}
+		return this.readWriteNonCoreDataService.retrieveDataTable(datatable, id,
+				sqlFields, sqlSearch, sqlOrder);
+		/*
+		 * try { return this.readWriteNonCoreDataService.retrieveDataTable(
+		 * datatable, sqlFields, sqlSearch, sqlOrder); } catch
+		 * (InvalidSqlException e) { List<ApiParameterError>
+		 * dataValidationErrors = new ArrayList<ApiParameterError>();
+		 * ApiParameterError error = ApiParameterError.parameterError(
+		 * "extradata.invalid.sql", "The sql is invalid.", "sql", e.getSql());
+		 * dataValidationErrors.add(error); throw new
+		 * PlatformApiDataValidationException(
+		 * "validation.msg.validation.errors.exist", "Validation errors exist.",
+		 * dataValidationErrors); }
+		 */
 	}
 
 }

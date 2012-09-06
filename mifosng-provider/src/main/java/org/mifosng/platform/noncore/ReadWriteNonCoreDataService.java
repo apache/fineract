@@ -15,6 +15,6 @@ public interface ReadWriteNonCoreDataService {
 	void updateExtraData(String type, String set, Long id,
 			Map<String, String> queryParams);	
 
-	String retrieveDataTable(String datatable, String sqlFields, String sqlSearch, String sqlOrder);	
+	String retrieveDataTable(String datatable, Long id, String sqlFields, String sqlSearch, String sqlOrder);	
 
 }

@@ -15,6 +15,7 @@ import org.mifosng.platform.api.data.GenericResultsetData;
 import org.mifosng.platform.api.data.ResultsetColumnHeader;
 import org.mifosng.platform.api.data.ResultsetDataRow;
 import org.mifosng.platform.exceptions.AdditionalFieldsNotFoundException;
+import org.mifosng.platform.exceptions.DataTableNotFoundException;
 import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.user.domain.AppUser;
@@ -93,8 +94,8 @@ public class ReadWriteNonCoreDataServiceImpl implements
 
 	@Override
 	public GenericResultsetData retrieveExtraData(String type, String set,
-			Long id) {
-
+			Long id) { 
+		
 		long startTime = System.currentTimeMillis();
 
 		checkMainResourceExistsWithinScope(type, id);
@@ -423,19 +424,18 @@ public class ReadWriteNonCoreDataServiceImpl implements
 						+ " not found");
 	}
 
-	private void checkMainResourceExistsWithinScope(String type, Long id) {
+	private void checkMainResourceExistsWithinScope(String tableName, Long id) {
 
-		String unscopedSql = "select t.id from " + type
+		String unscopedSql = "select t.id from " + tableName
 				+ " t ${dataScopeCriteria} where t.id = " + id;
 
-		String sql = dataScopedSQL(unscopedSql, type);
+		String sql = dataScopedSQL(unscopedSql, tableName);
 
 		CachedRowSet rs = genericDataService.getCachedResultSet(sql, "SQL : "
 				+ sql);
 
 		if (rs.size() == 0)
-			throw new AdditionalFieldsNotFoundException(type, id);
-
+			throw new DataTableNotFoundException(tableName, id);
 	}
 
 	private String dataScopedSQL(String unscopedSQL, String type) {
@@ -475,23 +475,29 @@ public class ReadWriteNonCoreDataServiceImpl implements
 	}
 
 	@Override
-	public String retrieveDataTable(String datatable, String sqlFields,
+	public String retrieveDataTable(String datatable, Long id, String sqlFields,
 			String sqlSearch, String sqlOrder) {
 		long startTime = System.currentTimeMillis();
 
+		String applicationTableName = getApplicationTableName(datatable);
+
+		checkMainResourceExistsWithinScope(applicationTableName, id);
+		
+		String fkField = applicationTableName.substring(2) + "_id";
+		
 		String sql = "select ";
 		if (sqlFields != null)
 			sql = sql + sqlFields;
 		else
 			sql = sql + " * ";
 
-		sql = sql + " from " + datatable;
+		sql = sql + " from " + datatable + " where " + fkField + " = " + id;
 
 		if (sqlSearch != null)
-			sql = sql + " where " + sqlSearch;
+			sql = sql + " and ( " + sqlSearch + ")";
 		if (sqlOrder != null)
 			sql = sql + " order by " + sqlOrder;
-
+		logger.info(sql);
 		GenericResultsetData result = genericDataService
 				.fillGenericResultSet(sql);
 
@@ -502,6 +508,24 @@ public class ReadWriteNonCoreDataServiceImpl implements
 		logger.info("FINISHING DATATABLE: " + datatable + "     Elapsed Time: "
 				+ elapsed);
 		return jsonString;
+	}
+	
+	private String getApplicationTableName(String datatable) {
+		String sql = "SELECT application_table_name FROM x_registered_table where registered_table_name = '" + datatable + "'";
+
+		CachedRowSet rs = genericDataService.getCachedResultSet(sql, "SQL : "
+				+ sql);
+
+		if (rs.size() == 0)
+			throw new DataTableNotFoundException(datatable);
+		
+		try {
+			rs.next();
+			return rs.getString("application_table_name");
+		} catch (SQLException e) {
+			throw new PlatformDataIntegrityException("error.msg.sql.error",
+					e.getMessage());
+		}
 	}
 
 	private static String generateJsonFromGenericResultsetData(
