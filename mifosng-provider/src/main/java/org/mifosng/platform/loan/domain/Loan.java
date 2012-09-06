@@ -11,8 +11,6 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -29,6 +27,10 @@ import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
+import org.mifosng.platform.api.commands.LoanApplicationCommand;
+import org.mifosng.platform.api.data.LoanSchedule;
+import org.mifosng.platform.api.data.MoneyData;
+import org.mifosng.platform.api.data.ScheduledLoanInstallment;
 import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.currency.domain.Money;
@@ -44,12 +46,13 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 
 	@ManyToOne
 	@JoinColumn(name = "client_id", nullable = false)
-	private final Client client;
+	private Client client;
 
 	@ManyToOne
 	@JoinColumn(name = "product_id")
-	private final LoanProduct loanProduct;
+	private LoanProduct loanProduct;
 
+	@SuppressWarnings("unused")
 	@ManyToOne
 	@JoinColumn(name = "fund_id", nullable = true)
 	private Fund fund;
@@ -62,16 +65,15 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	private String externalId;
 
 	@Embedded
-	private final LoanProductRelatedDetail loanRepaymentScheduleDetail;
+	private LoanProductRelatedDetail loanRepaymentScheduleDetail;
 	
 	@SuppressWarnings("unused")
 	@Column(name = "term_frequency", nullable = false)
 	private Integer termFrequency;
 
 	@SuppressWarnings("unused")
-	@Enumerated(EnumType.ORDINAL)
 	@Column(name = "term_period_frequency_enum", nullable = false)
-	private PeriodFrequencyType termPeriodFrequencyType;
+	private Integer termPeriodFrequencyType;
 
 	@Column(name = "loan_status_id", nullable = false)
 	private Integer loanStatus;
@@ -184,20 +186,75 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		this.interestRebateOwed = BigDecimal.ZERO;
 	}
 
-	public Client getClient() {
+	public Client client() {
 		return this.client;
 	}
 
-	public Fund getFund() {
-		return this.fund;
-	}
-
-	public LoanProduct getLoanProduct() {
+	public LoanProduct loanProduct() {
 		return this.loanProduct;
 	}
 
-	public LoanProductRelatedDetail getLoanRepaymentScheduleDetail() {
+	public LoanProductRelatedDetail repaymentScheduleDetail() {
 		return this.loanRepaymentScheduleDetail;
+	}
+	
+	public void modifyLoanApplication(final LoanApplicationCommand command, final Client client, final LoanProduct loanProduct, 
+			final Fund fund, final LoanTransactionProcessingStrategy strategy, final LoanSchedule modifiedLoanSchedule) {
+		
+		if (command.isClientChanged()) {
+			this.client = client;
+		}
+		if (command.isProductChanged()) {
+			this.loanProduct = loanProduct;
+		}
+		if (command.isFundChanged()) {
+			this.fund = fund;
+		}
+		if (command.isTransactionStrategyChanged()) {
+			this.transactionProcessingStrategy = strategy;
+		}
+		
+		if (command.isTermFrequencyChanged()) {
+			this.termFrequency = command.getLoanTermFrequency();
+		}
+		
+		if (command.isTermFrequencyTypeChanged()) {
+			this.termPeriodFrequencyType = PeriodFrequencyType.fromInt(command.getLoanTermFrequencyType()).getValue();
+		}
+		
+		if (command.isSubmittedOnDateChanged()) {
+			this.submittedOnDate = command.getSubmittedOnDate().toDate();
+		}
+		
+		this.loanRepaymentScheduleDetail.update(command.toLoanProductCommand());
+		
+		// FIXME - rewrite over loan schedule by default for now but worth putting in check to see if required
+		// i.e. only a client change wouldn't require it, only if one of parameters related to loan schedule calculation is changed.
+		this.repaymentScheduleInstallments.clear();
+		for (ScheduledLoanInstallment scheduledLoanInstallment : modifiedLoanSchedule.getScheduledLoanInstallments()) {
+
+			MoneyData readPrincipalDue = scheduledLoanInstallment.getPrincipalDue();
+			MoneyData readInterestDue = scheduledLoanInstallment.getInterestDue();
+
+			LoanRepaymentScheduleInstallment installment = new LoanRepaymentScheduleInstallment(
+					this, scheduledLoanInstallment.getInstallmentNumber(),
+					scheduledLoanInstallment.getPeriodEnd(), readPrincipalDue.getAmount(),
+					readInterestDue.getAmount());
+			this.addRepaymentScheduleInstallment(installment);
+		}
+		
+		// if the loan application/contract is modified when repayments are already against it - then need to re-process it
+		List<LoanTransaction> repaymentsOrWaivers = new ArrayList<LoanTransaction>();
+		for (LoanTransaction transaction : this.loanTransactions) {
+			if (!transaction.isDisbursement() && transaction.isNotContra()) {
+				repaymentsOrWaivers.add(transaction);
+			}
+		}
+		LoanTransactionComparator transactionComparator = new LoanTransactionComparator();
+		Collections.sort(repaymentsOrWaivers, transactionComparator);
+		
+		final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessor.determineProcessor(this.transactionProcessingStrategy);
+		loanRepaymentScheduleTransactionProcessor.handleTransaction(repaymentsOrWaivers, getCurrency(), this.repaymentScheduleInstallments);
 	}
 
 	public void submitApplication(
@@ -218,7 +275,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		this.loanStatus = statusEnum.getValue();
 
 		this.termFrequency = loanTermFrequency;
-		this.termPeriodFrequencyType = loanTermFrequencyType;
+		this.termPeriodFrequencyType = loanTermFrequencyType.getValue();
 		
 		this.submittedOnDate = submittedOn.toDateTimeAtCurrentTime().toDate();
 
@@ -257,8 +314,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		}
 	}
 
-	public void reject(final LocalDate rejectedOn,
-			LoanLifecycleStateMachine loanLifecycleStateMachine) {
+	public void reject(final LocalDate rejectedOn, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
 
 		LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_REJECTED, LoanStatus.fromInt(this.loanStatus));
 		this.loanStatus = statusEnum.getValue();
@@ -1118,5 +1174,4 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		return this.loanRepaymentScheduleDetail.getPrincipal()
 				.getCurrencyCode();
 	}
-
 }

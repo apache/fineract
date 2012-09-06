@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.mifosng.platform.api.commands.LoanChargeCommand;
-import org.mifosng.platform.api.commands.SubmitLoanApplicationCommand;
+import org.mifosng.platform.api.commands.LoanApplicationCommand;
 import org.mifosng.platform.api.data.LoanSchedule;
 import org.mifosng.platform.api.data.MoneyData;
 import org.mifosng.platform.api.data.ScheduledLoanInstallment;
@@ -69,7 +69,7 @@ public class LoanAssembler {
 		this.loanTransactionProcessingStrategyRepository = loanTransactionProcessingStrategyRepository;
 	}
 	
-	public Loan assembleFrom(final SubmitLoanApplicationCommand command) {
+	public Loan assembleFrom(final LoanApplicationCommand command) {
 		
 		LoanProduct loanProduct = this.loanProductRepository.findOne(command.getProductId());
 		if (loanProduct == null) {
@@ -82,26 +82,10 @@ public class LoanAssembler {
 		}
 		
 		MonetaryCurrency currency = loanProduct.getCurrency();
-		final BigDecimal defaultNominalInterestRatePerPeriod = command.getInterestRatePerPeriod();
-		final PeriodFrequencyType interestPeriodFrequencyType = PeriodFrequencyType.fromInt(command.getInterestRateFrequencyType());
-		
-		BigDecimal defaultAnnualNominalInterestRate = aprCalculator.calculateFrom(interestPeriodFrequencyType, command.getInterestRatePerPeriod());
-		
-		final InterestMethod interestMethod = InterestMethod.fromInt(command.getInterestType());
-		final InterestCalculationPeriodMethod interestCalculationPeriodMethod = InterestCalculationPeriodMethod.fromInt(command.getInterestCalculationPeriodType());
-		
 		final Integer loanTermFrequency = command.getLoanTermFrequency();
 		final PeriodFrequencyType loanTermFrequencyType = PeriodFrequencyType.fromInt(command.getLoanTermFrequencyType());
-		final Integer defaultNumberOfInstallments = command.getNumberOfRepayments();
-		final Integer repayEvery = command.getRepaymentEvery();
-		final PeriodFrequencyType repaymentFrequencyType = PeriodFrequencyType.fromInt(command.getRepaymentFrequencyType());
 		
-		final AmortizationMethod amortizationMethod = AmortizationMethod.fromInt(command.getAmortizationType());
-		
-		LoanProductRelatedDetail loanRepaymentScheduleDetail = new LoanProductRelatedDetail(currency,
-				command.getPrincipal(), defaultNominalInterestRatePerPeriod, interestPeriodFrequencyType, defaultAnnualNominalInterestRate, 
-				interestMethod, interestCalculationPeriodMethod,
-				repayEvery, repaymentFrequencyType, defaultNumberOfInstallments, amortizationMethod, command.getInArrearsTolerance());
+		LoanProductRelatedDetail loanRepaymentScheduleDetail = assembleLoanProductRelatedDetailFrom(command, currency);
 
 		LoanSchedule loanSchedule = command.getLoanSchedule();
 		List<ScheduledLoanInstallment> loanRepaymentSchedule = loanSchedule.getScheduledLoanInstallments();
@@ -136,12 +120,35 @@ public class LoanAssembler {
 		return loan;
 	}
 
+	public LoanProductRelatedDetail assembleLoanProductRelatedDetailFrom(final LoanApplicationCommand command, MonetaryCurrency currency) {
+		final BigDecimal defaultNominalInterestRatePerPeriod = command.getInterestRatePerPeriod();
+		final PeriodFrequencyType interestPeriodFrequencyType = PeriodFrequencyType.fromInt(command.getInterestRateFrequencyType());
+		
+		BigDecimal defaultAnnualNominalInterestRate = aprCalculator.calculateFrom(interestPeriodFrequencyType, command.getInterestRatePerPeriod());
+		
+		final InterestMethod interestMethod = InterestMethod.fromInt(command.getInterestType());
+		final InterestCalculationPeriodMethod interestCalculationPeriodMethod = InterestCalculationPeriodMethod.fromInt(command.getInterestCalculationPeriodType());
+		
+		
+		final Integer defaultNumberOfInstallments = command.getNumberOfRepayments();
+		final Integer repayEvery = command.getRepaymentEvery();
+		final PeriodFrequencyType repaymentFrequencyType = PeriodFrequencyType.fromInt(command.getRepaymentFrequencyType());
+		
+		final AmortizationMethod amortizationMethod = AmortizationMethod.fromInt(command.getAmortizationType());
+		
+		LoanProductRelatedDetail loanRepaymentScheduleDetail = new LoanProductRelatedDetail(currency,
+				command.getPrincipal(), defaultNominalInterestRatePerPeriod, interestPeriodFrequencyType, defaultAnnualNominalInterestRate, 
+				interestMethod, interestCalculationPeriodMethod,
+				repayEvery, repaymentFrequencyType, defaultNumberOfInstallments, amortizationMethod, command.getInArrearsTolerance());
+		return loanRepaymentScheduleDetail;
+	}
+
 	private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
 		List<LoanStatus> allowedLoanStatuses = Arrays.asList(LoanStatus.values());
 		return new DefaultLoanLifecycleStateMachine(allowedLoanStatuses);
 	}
 	
-	private Fund findFundByIdIfProvided(final Long fundId) {
+	public Fund findFundByIdIfProvided(final Long fundId) {
 		Fund fund = null;
 		if (fundId != null) {
 			fund = this.fundRepository.findOne(fundId);
@@ -152,7 +159,7 @@ public class LoanAssembler {
 		return fund;
 	}
 	
-	private LoanTransactionProcessingStrategy findStrategyByIdIfProvided(final Long transactionProcessingStrategyId) {
+	public LoanTransactionProcessingStrategy findStrategyByIdIfProvided(final Long transactionProcessingStrategyId) {
 		LoanTransactionProcessingStrategy strategy = null;
 		if (transactionProcessingStrategyId != null) {
 			strategy = this.loanTransactionProcessingStrategyRepository.findOne(transactionProcessingStrategyId);
@@ -163,7 +170,7 @@ public class LoanAssembler {
 		return strategy;
 	}
 
-    private Set<LoanCharge> assembleSetOfCharges(final SubmitLoanApplicationCommand command, final Loan loan,
+    private Set<LoanCharge> assembleSetOfCharges(final LoanApplicationCommand command, final Loan loan,
                                                  final LoanProduct product, final String currencyCode) {
 
         Set<LoanCharge> charges = new HashSet<LoanCharge>();

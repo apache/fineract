@@ -5,15 +5,15 @@ import java.util.List;
 
 import org.mifosng.platform.api.commands.CalculateLoanScheduleCommand;
 import org.mifosng.platform.api.commands.LoanChargeCommand;
-import org.mifosng.platform.api.commands.SubmitLoanApplicationCommand;
+import org.mifosng.platform.api.commands.LoanApplicationCommand;
 import org.mifosng.platform.api.data.ApiParameterError;
 import org.mifosng.platform.exceptions.PlatformApiDataValidationException;
 
-public class SubmitLoanApplicationCommandValidator {
+public class LoanApplicationCommandValidator {
 
-	private final SubmitLoanApplicationCommand command;
+	private final LoanApplicationCommand command;
 
-	public SubmitLoanApplicationCommandValidator(SubmitLoanApplicationCommand command) {
+	public LoanApplicationCommandValidator(LoanApplicationCommand command) {
 		this.command = command;
 	}
 

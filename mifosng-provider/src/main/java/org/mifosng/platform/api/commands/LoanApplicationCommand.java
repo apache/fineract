@@ -1,6 +1,7 @@
 package org.mifosng.platform.api.commands;
 
 import java.math.BigDecimal;
+import java.util.Set;
 
 import org.joda.time.LocalDate;
 import org.mifosng.platform.api.data.LoanSchedule;
@@ -8,8 +9,9 @@ import org.mifosng.platform.api.data.LoanSchedule;
 /**
  * Immutable command for submitting new loan application.
  */
-public class SubmitLoanApplicationCommand {
+public class LoanApplicationCommand {
 	
+	private final Long loanId;
 	private final Long clientId;
 	private final Long productId;
 	private final String externalId;
@@ -42,8 +44,12 @@ public class SubmitLoanApplicationCommand {
     private final LoanChargeCommand[] charges;
 
 	private LoanSchedule loanSchedule;
+	
+	private final Set<String> modifiedParameters;
 
-	public SubmitLoanApplicationCommand(
+	public LoanApplicationCommand(
+			final Set<String> modifiedParameters,
+			final Long loanId,
 			final Long clientId, final Long productId, final String externalId, 
 			final Long fundId, final Long transactionProcessingStrategyId,
 			final LocalDate submittedOnDate, final String submittedOnNote,
@@ -58,6 +64,8 @@ public class SubmitLoanApplicationCommand {
 			final Integer repaymentEvery, final Integer repaymentFrequency, final Integer numberOfRepayments, Integer amortizationMethod, 
 			final Integer loanTermFrequency, final Integer loanTermFrequencyType,
 			final BigDecimal toleranceAmount, final LoanChargeCommand[] charges) {
+		this.modifiedParameters = modifiedParameters;
+		this.loanId = loanId;
 		this.clientId = clientId;
 		this.productId = productId;
 		this.externalId = externalId;
@@ -100,6 +108,10 @@ public class SubmitLoanApplicationCommand {
 
 	public void setLoanSchedule(LoanSchedule loanSchedule) {
 		this.loanSchedule = loanSchedule;
+	}
+	
+	public Long getLoanId() {
+		return loanId;
 	}
 
 	public Long getClientId() {
@@ -194,4 +206,45 @@ public class SubmitLoanApplicationCommand {
         return charges;
     }
 
+	public LoanProductCommand toLoanProductCommand() {
+		
+		// TODO - FIX UP FOR CHARGES.
+		return new LoanProductCommand(modifiedParameters, this.productId, null, null, 
+				this.fundId, this.transactionProcessingStrategyId, 
+				null, null, 
+				this.principal, this.inArrearsTolerance, 
+				this.numberOfRepayments, this.repaymentEvery, this.interestRatePerPeriod, 
+				this.repaymentFrequencyType, this.interestRateFrequencyType, 
+				this.amortizationType, this.interestType, 
+				this.interestCalculationPeriodType,
+				null);
+	}
+
+	public boolean isClientChanged() {
+		return this.modifiedParameters.contains("clientId");
+	}
+
+	public boolean isProductChanged() {
+		return this.modifiedParameters.contains("productId");
+	}
+
+	public boolean isFundChanged() {
+		return this.modifiedParameters.contains("fundId");
+	}
+
+	public boolean isTransactionStrategyChanged() {
+		return this.modifiedParameters.contains("transactionProcessingStrategyId");
+	}
+
+	public boolean isTermFrequencyChanged() {
+		return this.modifiedParameters.contains("loanTermFrequency");
+	}
+
+	public boolean isTermFrequencyTypeChanged() {
+		return this.modifiedParameters.contains("loanTermFrequencyType");
+	}
+
+	public boolean isSubmittedOnDateChanged() {
+		return this.modifiedParameters.contains("submittedOnDate");
+	}
 }

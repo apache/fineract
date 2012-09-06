@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -25,10 +25,9 @@ import org.mifosng.platform.api.commands.AdjustLoanTransactionCommand;
 import org.mifosng.platform.api.commands.CalculateLoanScheduleCommand;
 import org.mifosng.platform.api.commands.LoanStateTransitionCommand;
 import org.mifosng.platform.api.commands.LoanTransactionCommand;
-import org.mifosng.platform.api.commands.SubmitLoanApplicationCommand;
+import org.mifosng.platform.api.commands.LoanApplicationCommand;
 import org.mifosng.platform.api.commands.UndoStateTransitionCommand;
 import org.mifosng.platform.api.data.ChargeData;
-import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.EnumOptionData;
 import org.mifosng.platform.api.data.FundData;
@@ -47,7 +46,6 @@ import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
 import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
 import org.mifosng.platform.charge.service.ChargeReadPlatformService;
-import org.mifosng.platform.currency.service.CurrencyReadPlatformService;
 import org.mifosng.platform.exceptions.UnrecognizedQueryParamException;
 import org.mifosng.platform.fund.service.FundReadPlatformService;
 import org.mifosng.platform.loan.service.CalculationPlatformService;
@@ -167,14 +165,14 @@ public class LoansApiResource {
 		}
 
 		Collection<LoanProductLookup> productOptions = new ArrayList<LoanProductLookup>();
-		List<EnumOptionData> loanTermFrequencyTypeOptions = new ArrayList<EnumOptionData>();
-		List<EnumOptionData> repaymentFrequencyTypeOptions = new ArrayList<EnumOptionData>();
+		Collection<EnumOptionData> loanTermFrequencyTypeOptions = new ArrayList<EnumOptionData>();
+		Collection<EnumOptionData> repaymentFrequencyTypeOptions = new ArrayList<EnumOptionData>();
 		Collection<TransactionProcessingStrategyData> transactionProcessingStrategyOptions = new ArrayList<TransactionProcessingStrategyData>();
 		
-		List<EnumOptionData> interestRateFrequencyTypeOptions = new ArrayList<EnumOptionData>();
-		List<EnumOptionData> amortizationTypeOptions = new ArrayList<EnumOptionData>();
-		List<EnumOptionData> interestTypeOptions = new ArrayList<EnumOptionData>();
-		List<EnumOptionData> interestCalculationPeriodTypeOptions = new ArrayList<EnumOptionData>();
+		Collection<EnumOptionData> interestRateFrequencyTypeOptions = new ArrayList<EnumOptionData>();
+		Collection<EnumOptionData> amortizationTypeOptions = new ArrayList<EnumOptionData>();
+		Collection<EnumOptionData> interestTypeOptions = new ArrayList<EnumOptionData>();
+		Collection<EnumOptionData> interestCalculationPeriodTypeOptions = new ArrayList<EnumOptionData>();
 		Collection<FundData> fundOptions = new ArrayList<FundData>();
 		
 		final boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
@@ -195,10 +193,10 @@ public class LoansApiResource {
 			transactionProcessingStrategyOptions = this.dropdownReadPlatformService.retreiveTransactionProcessingStrategies();
 		}
 
-		LoanAccountData loanAccount = new LoanAccountData(loanBasicDetails, summary, repaymentSchedule, loanRepayments, permissions, charges, 
+		final LoanAccountData loanAccount = new LoanAccountData(loanBasicDetails, summary, repaymentSchedule, loanRepayments, permissions, charges, 
 				productOptions, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions, 
-				transactionProcessingStrategyOptions, interestRateFrequencyTypeOptions,
-				fundOptions);
+				transactionProcessingStrategyOptions, interestRateFrequencyTypeOptions, 
+				amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions, fundOptions);
 		
 		return this.apiJsonSerializerService.serialzieLoanAccountDataToJson(prettyPrint, responseParameters, loanAccount);
 	}
@@ -210,8 +208,7 @@ public class LoansApiResource {
 			@QueryParam("command") final String commandParam,
 			final String jsonRequestBody) {
 
-		SubmitLoanApplicationCommand command = this.apiDataConversionService
-				.convertJsonToSubmitLoanApplicationCommand(jsonRequestBody);
+		LoanApplicationCommand command = this.apiDataConversionService.convertJsonToLoanApplicationCommand(null, jsonRequestBody);
 
 		CalculateLoanScheduleCommand calculateLoanScheduleCommand = command.toCalculateLoanScheduleCommand();
 		LoanSchedule loanSchedule = this.calculationPlatformService.calculateLoanSchedule(calculateLoanScheduleCommand);
@@ -225,6 +222,33 @@ public class LoansApiResource {
 		}
 
 		EntityIdentifier identifier = this.loanWritePlatformService.submitLoanApplication(command);
+
+		return Response.ok().entity(identifier).build();
+	}
+	
+	@PUT
+	@Path("{loanId}")
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
+	public Response modifyLoanApplication(
+			@PathParam("loanId") final Long loanId,
+			@QueryParam("command") final String commandParam,
+			final String jsonRequestBody) {
+
+		final LoanApplicationCommand command = this.apiDataConversionService.convertJsonToLoanApplicationCommand(loanId, jsonRequestBody);
+
+		final CalculateLoanScheduleCommand calculateLoanScheduleCommand = command.toCalculateLoanScheduleCommand();
+		final LoanSchedule loanSchedule = this.calculationPlatformService.calculateLoanSchedule(calculateLoanScheduleCommand);
+
+		// for now just auto generating the loan schedule and setting support
+		// for 'manual' loan schedule creation later.
+		command.setLoanSchedule(loanSchedule);
+
+		if (is(commandParam, "calculateLoanSchedule")) {
+			return Response.ok().entity(loanSchedule).build();
+		}
+
+		EntityIdentifier identifier = this.loanWritePlatformService.modifyLoanApplication(command);
 
 		return Response.ok().entity(identifier).build();
 	}

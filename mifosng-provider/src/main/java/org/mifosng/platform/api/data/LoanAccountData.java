@@ -2,7 +2,6 @@ package org.mifosng.platform.api.data;
 
 import java.math.BigDecimal;
 import java.util.Collection;
-import java.util.List;
 
 import org.joda.time.LocalDate;
 
@@ -52,9 +51,13 @@ public class LoanAccountData {
 	
 	// template
 	private final Collection<LoanProductLookup> productOptions;
-	private final List<EnumOptionData> termFrequencyTypeOptions;
-	private final List<EnumOptionData> repaymentFrequencyTypeOptions;
+	private final Collection<EnumOptionData> termFrequencyTypeOptions;
+	private final Collection<EnumOptionData> repaymentFrequencyTypeOptions;
 	private final Collection<TransactionProcessingStrategyData> repaymentStrategyOptions;
+	private final Collection<EnumOptionData> interestRateFrequencyTypeOptions;
+	private final Collection<EnumOptionData> amortizationTypeOptions;
+	private final Collection<EnumOptionData> interestTypeOptions;
+	private final Collection<EnumOptionData> interestCalculationPeriodTypeOptions;
 	private final Collection<FundData> fundOptions;
 	
 	// associations
@@ -64,8 +67,6 @@ public class LoanAccountData {
 
 	private final LoanPermissionData permissions;
 	private final LoanConvenienceData convenienceData;
-	private final List<EnumOptionData> interestRateFrequencyTypeOptions;
-	
 
 	public LoanAccountData(
 			final LoanBasicDetailsData basicDetails,
@@ -75,10 +76,13 @@ public class LoanAccountData {
 			final LoanPermissionData permissions, 
 			final Collection<ChargeData> charges, 
 			final Collection<LoanProductLookup> productOptions, 
-			final List<EnumOptionData> termFrequencyTypeOptions, 
-			final List<EnumOptionData> repaymentFrequencyTypeOptions, 
+			final Collection<EnumOptionData> termFrequencyTypeOptions, 
+			final Collection<EnumOptionData> repaymentFrequencyTypeOptions, 
 			final Collection<TransactionProcessingStrategyData> transactionProcessingStrategyOptions, 
-			final List<EnumOptionData> interestRateFrequencyTypeOptions, 
+			final Collection<EnumOptionData> interestRateFrequencyTypeOptions, 
+			final Collection<EnumOptionData> amortizationTypeOptions, 
+			final Collection<EnumOptionData> interestTypeOptions, 
+			final Collection<EnumOptionData> interestCalculationPeriodTypeOptions, 
 			final Collection<FundData> fundOptions) {
 		this.summary = summary;
 		this.repaymentSchedule = repaymentSchedule;
@@ -90,6 +94,9 @@ public class LoanAccountData {
 		this.repaymentFrequencyTypeOptions = repaymentFrequencyTypeOptions;
 		this.repaymentStrategyOptions = transactionProcessingStrategyOptions;
 		this.interestRateFrequencyTypeOptions = interestRateFrequencyTypeOptions;
+		this.amortizationTypeOptions = amortizationTypeOptions;
+		this.interestTypeOptions = interestTypeOptions;
+		this.interestCalculationPeriodTypeOptions = interestCalculationPeriodTypeOptions;
 		this.fundOptions = fundOptions;
 
 		int maxSubmittedOnOffsetFromToday = basicDetails
@@ -315,25 +322,37 @@ public class LoanAccountData {
     public void setCharges(Collection<ChargeData> charges) {
         this.charges = charges;
     }
-    
+
 	public Collection<LoanProductLookup> getProductOptions() {
 		return productOptions;
 	}
-	
-	public List<EnumOptionData> getTermFrequencyTypeOptions() {
+
+	public Collection<EnumOptionData> getTermFrequencyTypeOptions() {
 		return termFrequencyTypeOptions;
 	}
 
-	public List<EnumOptionData> getRepaymentFrequencyTypeOptions() {
+	public Collection<EnumOptionData> getRepaymentFrequencyTypeOptions() {
 		return repaymentFrequencyTypeOptions;
 	}
-	
+
 	public Collection<TransactionProcessingStrategyData> getRepaymentStrategyOptions() {
 		return repaymentStrategyOptions;
 	}
-	
-	public List<EnumOptionData> getInterestRateFrequencyTypeOptions() {
+
+	public Collection<EnumOptionData> getInterestRateFrequencyTypeOptions() {
 		return interestRateFrequencyTypeOptions;
+	}
+
+	public Collection<EnumOptionData> getAmortizationTypeOptions() {
+		return amortizationTypeOptions;
+	}
+
+	public Collection<EnumOptionData> getInterestTypeOptions() {
+		return interestTypeOptions;
+	}
+
+	public Collection<EnumOptionData> getInterestCalculationPeriodTypeOptions() {
+		return interestCalculationPeriodTypeOptions;
 	}
 
 	public Collection<FundData> getFundOptions() {

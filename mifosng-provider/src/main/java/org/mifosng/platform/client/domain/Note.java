@@ -83,7 +83,7 @@ public class Note extends AbstractAuditableCustom<AppUser, Long> {
     
     private Note(Loan loan, String note) {
     	this.loan = loan;
-		this.client = loan.getClient();
+		this.client = loan.client();
 		this.note = note;
 		this.noteTypeId = NoteType.LOAN.getValue();
 	}
@@ -91,7 +91,7 @@ public class Note extends AbstractAuditableCustom<AppUser, Long> {
     private Note(Loan loan, LoanTransaction loanTransaction, String note) {
     	this.loan = loan;
     	this.loanTransaction = loanTransaction;
-		this.client = loan.getClient();
+		this.client = loan.client();
 		this.note = note;
 		this.noteTypeId = NoteType.LOAN_TRANSACTION.getValue();
 	}

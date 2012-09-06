@@ -9,28 +9,36 @@ import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.mifosng.platform.api.commands.AdjustLoanTransactionCommand;
 import org.mifosng.platform.api.commands.CalculateLoanScheduleCommand;
+import org.mifosng.platform.api.commands.LoanApplicationCommand;
 import org.mifosng.platform.api.commands.LoanStateTransitionCommand;
 import org.mifosng.platform.api.commands.LoanTransactionCommand;
-import org.mifosng.platform.api.commands.SubmitLoanApplicationCommand;
 import org.mifosng.platform.api.commands.UndoStateTransitionCommand;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.LoanSchedule;
 import org.mifosng.platform.api.data.ScheduledLoanInstallment;
+import org.mifosng.platform.client.domain.Client;
+import org.mifosng.platform.client.domain.ClientRepository;
 import org.mifosng.platform.client.domain.Note;
 import org.mifosng.platform.client.domain.NoteRepository;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.currency.domain.Money;
+import org.mifosng.platform.exceptions.ClientNotFoundException;
 import org.mifosng.platform.exceptions.LoanNotFoundException;
 import org.mifosng.platform.exceptions.LoanNotInSubmittedAndPendingApprovalStateCannotBeDeleted;
+import org.mifosng.platform.exceptions.LoanProductNotFoundException;
 import org.mifosng.platform.exceptions.LoanTransactionNotFoundException;
 import org.mifosng.platform.exceptions.NoAuthorizationException;
+import org.mifosng.platform.fund.domain.Fund;
 import org.mifosng.platform.loan.domain.DefaultLoanLifecycleStateMachine;
 import org.mifosng.platform.loan.domain.Loan;
 import org.mifosng.platform.loan.domain.LoanLifecycleStateMachine;
+import org.mifosng.platform.loan.domain.LoanProduct;
+import org.mifosng.platform.loan.domain.LoanProductRepository;
 import org.mifosng.platform.loan.domain.LoanRepaymentScheduleInstallment;
 import org.mifosng.platform.loan.domain.LoanRepository;
 import org.mifosng.platform.loan.domain.LoanStatus;
 import org.mifosng.platform.loan.domain.LoanTransaction;
+import org.mifosng.platform.loan.domain.LoanTransactionProcessingStrategy;
 import org.mifosng.platform.loan.domain.LoanTransactionRepository;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 import org.mifosng.platform.security.PlatformSecurityContext;
@@ -49,17 +57,22 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 	private final CalculationPlatformService calculationPlatformService;	
 	private final LoanTransactionRepository loanTransactionRepository;
 	private final LoanAssembler loanAssembler;
+	private final ClientRepository clientRepository;
+	private final LoanProductRepository loanProductRepository;
 	
 	@Autowired
 	public LoanWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final LoanAssembler loanAssembler,
 			final LoanRepository loanRepository, final LoanTransactionRepository loanTransactionRepository,
-			final NoteRepository noteRepository, final CalculationPlatformService calculationPlatformService) {
+			final NoteRepository noteRepository, final CalculationPlatformService calculationPlatformService,
+			final ClientRepository clientRepository, final LoanProductRepository loanProductRepository) {
 		this.context = context;
 		this.loanAssembler = loanAssembler;
 		this.loanRepository = loanRepository;
 		this.loanTransactionRepository = loanTransactionRepository;
 		this.noteRepository = noteRepository;
 		this.calculationPlatformService = calculationPlatformService;
+		this.clientRepository = clientRepository;
+		this.loanProductRepository = loanProductRepository;
 	}
 	
 	private boolean isBeforeToday(final LocalDate date) {
@@ -73,11 +86,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 	
 	@Transactional
 	@Override
-	public EntityIdentifier submitLoanApplication(final SubmitLoanApplicationCommand command) {
+	public EntityIdentifier submitLoanApplication(final LoanApplicationCommand command) {
 
 		AppUser currentUser = context.authenticatedUser();
 		
-		SubmitLoanApplicationCommandValidator validator = new SubmitLoanApplicationCommandValidator(command);
+		LoanApplicationCommandValidator validator = new LoanApplicationCommandValidator(command);
 		validator.validate();
 
 		LocalDate submittedOn = command.getSubmittedOnDate();
@@ -87,6 +100,51 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
 		Loan loan = loanAssembler.assembleFrom(command);
 
+		this.loanRepository.save(loan);
+		
+		if (StringUtils.isNotBlank(command.getSubmittedOnNote())) {
+			Note note = Note.loanNote(loan, command.getSubmittedOnNote());
+			this.noteRepository.save(note);
+		}
+		
+		return new EntityIdentifier(loan.getId());
+	}
+	
+	@Transactional
+	@Override
+	public EntityIdentifier modifyLoanApplication(final LoanApplicationCommand command) {
+		AppUser currentUser = context.authenticatedUser();
+		
+		LoanApplicationCommandValidator validator = new LoanApplicationCommandValidator(command);
+		validator.validate();
+
+		// TODO - fix up permissions for loan modification
+		LocalDate submittedOn = command.getSubmittedOnDate();
+		if (this.isBeforeToday(submittedOn) && currentUser.hasNotPermissionForAnyOf("CAN_SUBMIT_HISTORIC_LOAN_APPLICATION_ROLE", "PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE")) {
+			throw new NoAuthorizationException("Cannot modify backdated loan.");
+		}
+
+		Loan loan = this.loanRepository.findOne(command.getLoanId());
+		if (loan == null) {
+			throw new LoanNotFoundException(command.getLoanId());
+		}
+		
+		LoanProduct loanProduct = this.loanProductRepository.findOne(command.getProductId());
+		if (loanProduct == null) {
+			throw new LoanProductNotFoundException(command.getProductId());
+		}
+
+		Client client = this.clientRepository.findOne(command.getClientId());
+		if (client == null || client.isDeleted()) {
+			throw new ClientNotFoundException(command.getClientId());
+		}
+		
+		Fund fund = this.loanAssembler.findFundByIdIfProvided(command.getFundId());
+		LoanTransactionProcessingStrategy strategy = this.loanAssembler.findStrategyByIdIfProvided(command.getTransactionProcessingStrategyId());
+		
+		LoanSchedule loanSchedule = this.calculationPlatformService.calculateLoanSchedule(command.toCalculateLoanScheduleCommand());
+		loan.modifyLoanApplication(command, client, loanProduct, fund, strategy, loanSchedule);
+		
 		this.loanRepository.save(loan);
 		
 		if (StringUtils.isNotBlank(command.getSubmittedOnNote())) {
@@ -261,13 +319,13 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 			LocalDate repaymentsStartingFromDate = loan.getExpectedFirstRepaymentOnDate();
 			LocalDate interestCalculatedFromDate = loan.getInterestChargedFromDate();
 
-			BigDecimal principalAsDecimal = loan.getLoanRepaymentScheduleDetail().getPrincipal().getAmount();
-			BigDecimal interestRatePerYear = loan.getLoanRepaymentScheduleDetail().getAnnualNominalInterestRate();
-			Integer numberOfInstallments = loan.getLoanRepaymentScheduleDetail().getNumberOfRepayments();
+			BigDecimal principalAsDecimal = loan.repaymentScheduleDetail().getPrincipal().getAmount();
+			BigDecimal interestRatePerYear = loan.repaymentScheduleDetail().getAnnualNominalInterestRate();
+			Integer numberOfInstallments = loan.repaymentScheduleDetail().getNumberOfRepayments();
 			
-			Integer repaidEvery = loan.getLoanRepaymentScheduleDetail().getRepayEvery();
-			Integer selectedRepaymentFrequency = loan.getLoanRepaymentScheduleDetail().getRepaymentPeriodFrequencyType().getValue();
-			Integer selectedAmortizationMethod = loan.getLoanRepaymentScheduleDetail().getAmortizationMethod().getValue();
+			Integer repaidEvery = loan.repaymentScheduleDetail().getRepayEvery();
+			Integer selectedRepaymentFrequency = loan.repaymentScheduleDetail().getRepaymentPeriodFrequencyType().getValue();
+			Integer selectedAmortizationMethod = loan.repaymentScheduleDetail().getAmortizationMethod().getValue();
 			
 			// FIXME - use values from loan table here instead of inferring.
 			Integer loanTermFrequency = repaidEvery * numberOfInstallments;
@@ -277,11 +335,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 			BigDecimal interestRatePerPeriod = interestRatePerYear;
 			Integer interestRateFrequencyMethod = PeriodFrequencyType.YEARS.getValue();
 			
-			Integer interestMethod = loan.getLoanRepaymentScheduleDetail().getInterestMethod().getValue();
-			Integer interestCalculationInPeriod = loan.getLoanRepaymentScheduleDetail().getInterestCalculationPeriodMethod().getValue();
+			Integer interestMethod = loan.repaymentScheduleDetail().getInterestMethod().getValue();
+			Integer interestCalculationInPeriod = loan.repaymentScheduleDetail().getInterestCalculationPeriodMethod().getValue();
 			
 			CalculateLoanScheduleCommand calculateCommand = new CalculateLoanScheduleCommand(
-					loan.getLoanProduct().getId(),
+					loan.loanProduct().getId(),
 					principalAsDecimal, 
 					interestRatePerPeriod, interestRateFrequencyMethod, interestMethod, interestCalculationInPeriod,
 					repaidEvery, selectedRepaymentFrequency, numberOfInstallments, selectedAmortizationMethod, 
@@ -374,7 +432,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 			throw new NoAuthorizationException("error.msg.no.permission.to.make.repayment.on.loan.in.past");
 		}
 
-		Money repayment = Money.of(loan.getLoanRepaymentScheduleDetail()
+		Money repayment = Money.of(loan.repaymentScheduleDetail()
 				.getPrincipal().getCurrency(),
 				command.getTransactionAmount());
 
@@ -412,7 +470,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		}
 		
 		Money transactionAmount = Money.of(loan
-				.getLoanRepaymentScheduleDetail().getPrincipal()
+				.repaymentScheduleDetail().getPrincipal()
 				.getCurrency(), command.getTransactionAmount());
 
 		// adjustment is only supported for repayments and waivers at present
@@ -451,7 +509,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 			throw new LoanNotFoundException(command.getLoanId());
 		}
 		
-		Money waived = Money.of(loan.getLoanRepaymentScheduleDetail()
+		Money waived = Money.of(loan.repaymentScheduleDetail()
 				.getPrincipal().getCurrency(),
 				command.getTransactionAmount());
 

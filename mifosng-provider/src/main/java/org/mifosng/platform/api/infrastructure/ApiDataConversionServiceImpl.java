@@ -37,7 +37,7 @@ import org.mifosng.platform.api.commands.OrganisationCurrencyCommand;
 import org.mifosng.platform.api.commands.RoleCommand;
 import org.mifosng.platform.api.commands.SavingProductCommand;
 import org.mifosng.platform.api.commands.StaffCommand;
-import org.mifosng.platform.api.commands.SubmitLoanApplicationCommand;
+import org.mifosng.platform.api.commands.LoanApplicationCommand;
 import org.mifosng.platform.api.commands.UserCommand;
 import org.mifosng.platform.api.data.ApiParameterError;
 import org.mifosng.platform.api.errorhandling.InvalidJsonException;
@@ -430,7 +430,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	}
 	
 	@Override
-	public SubmitLoanApplicationCommand convertJsonToSubmitLoanApplicationCommand(final String json) {
+	public LoanApplicationCommand convertJsonToLoanApplicationCommand(final Long resourceIdentifier, final String json) {
 		
 		if (StringUtils.isBlank(json)) {
 			throw new InvalidJsonException();
@@ -516,7 +516,8 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
             }
         }
 
-		return new SubmitLoanApplicationCommand(clientId, productId, externalId, fundId, transactionProcessingStrategyId,
+		return new LoanApplicationCommand(modifiedParameters,
+				resourceIdentifier, clientId, productId, externalId, fundId, transactionProcessingStrategyId,
 				submittedOnDate, submittedOnNote, 
 	    		expectedDisbursementDate, repaymentsStartingFromDate, interestChargedFromDate, 
 	    		principal, interestRatePerPeriod, interestRateFrequencyTypeValue, interestTypeValue, interestCalculationPeriodTypeValue, 

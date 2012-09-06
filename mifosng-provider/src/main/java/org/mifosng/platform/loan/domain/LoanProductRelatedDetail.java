@@ -17,8 +17,7 @@ import org.mifosng.platform.currency.domain.Money;
  * {@link LoanProduct} that are also used and persisted by a {@link Loan}.
  */
 @Embeddable
-public class LoanProductRelatedDetail implements
-		LoanProductMinimumRepaymentScheduleRelatedDetail {
+public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentScheduleRelatedDetail {
 
 	@Embedded
 	private MonetaryCurrency currency;

@@ -19,7 +19,7 @@ import org.mifosng.platform.api.commands.OrganisationCurrencyCommand;
 import org.mifosng.platform.api.commands.RoleCommand;
 import org.mifosng.platform.api.commands.SavingProductCommand;
 import org.mifosng.platform.api.commands.StaffCommand;
-import org.mifosng.platform.api.commands.SubmitLoanApplicationCommand;
+import org.mifosng.platform.api.commands.LoanApplicationCommand;
 import org.mifosng.platform.api.commands.UserCommand;
 
 public interface ApiDataConversionService {
@@ -46,7 +46,7 @@ public interface ApiDataConversionService {
 
 	GroupCommand convertJsonToGroupCommand(Long resourceIdentifier, String jsonRequestBody);
 	
-	SubmitLoanApplicationCommand convertJsonToSubmitLoanApplicationCommand(String jsonRequestBody);
+	LoanApplicationCommand convertJsonToLoanApplicationCommand(Long resourceIdentifier, String jsonRequestBody);
 
 	LoanStateTransitionCommand convertJsonToLoanStateTransitionCommand(Long resourceIdentifier, String jsonRequestBody);
 

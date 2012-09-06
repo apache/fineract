@@ -293,7 +293,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 			throw new LoanNotFoundException(loanId);
 		}
 
-		final String currencyCode = loan.getLoanRepaymentScheduleDetail()
+		final String currencyCode = loan.repaymentScheduleDetail()
 				.getPrincipal().getCurrencyCode();
 		ApplicationCurrency currency = this.applicationCurrencyRepository
 				.findOneByCode(currencyCode);
@@ -332,7 +332,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 			throw new LoanNotFoundException(loanId);
 		}
 
-		final String currencyCode = loan.getLoanRepaymentScheduleDetail()
+		final String currencyCode = loan.repaymentScheduleDetail()
 				.getPrincipal().getCurrencyCode();
 		ApplicationCurrency currency = this.applicationCurrencyRepository
 				.findOneByCode(currencyCode);
@@ -368,7 +368,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 			throw new LoanNotFoundException(loanId);
 		}
 
-		final String currencyCode = loan.getLoanRepaymentScheduleDetail()
+		final String currencyCode = loan.repaymentScheduleDetail()
 				.getPrincipal().getCurrencyCode();
 		ApplicationCurrency currency = this.applicationCurrencyRepository
 				.findOneByCode(currencyCode);
