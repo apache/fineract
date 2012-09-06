@@ -46,6 +46,8 @@ public class DepositAccountData {
 	private final List<EnumOptionData> interestCompoundedEveryPeriodTypeOptions;
 	private final List<DepositProductLookup> productOptions;
 	
+	private Collection<DepositAccountTransactionData> transactions;
+	
 	/*
 	 * used when returning account template data but only a clientId is passed, no selected product.
 	 */
@@ -87,6 +89,8 @@ public class DepositAccountData {
 		this.withdrawnonDate=null;
 		this.closedonDate=null;
 		this.rejectedonDate=null;
+		
+		this.transactions=null;
 	}
 
 	public DepositAccountData(
@@ -124,6 +128,8 @@ public class DepositAccountData {
 		this.withdrawnonDate=account.getWithdrawnonDate();
 		this.rejectedonDate=account.getRejectedonDate();
 		this.closedonDate=account.getClosedonDate();
+		
+		this.transactions=account.getTransactions();
 	}
 	
 	public DepositAccountData(
@@ -184,6 +190,8 @@ public class DepositAccountData {
 		this.withdrawnonDate = withdrawnonDate;
 		this.rejectedonDate = rejectedonDate;
 		this.closedonDate = closedonDate;
+		
+		this.transactions = null;
 	}
 	
 	public DepositAccountData(
@@ -230,6 +238,8 @@ public class DepositAccountData {
 		this.withdrawnonDate=null;
 		this.closedonDate=null;
 		this.rejectedonDate=null;
+		
+		this.transactions = null;
 	}
 
 	public Long getId() {
@@ -347,4 +357,13 @@ public class DepositAccountData {
 	public LocalDate getClosedonDate() {
 		return closedonDate;
 	}
+
+	public Collection<DepositAccountTransactionData> getTransactions() {
+		return transactions;
+	}
+	
+	public void setTransactions(Collection<DepositAccountTransactionData> transactions) {
+		this.transactions = transactions;
+	}
+	
 }

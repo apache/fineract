@@ -3,12 +3,15 @@ package org.mifosng.platform.saving.service;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.joda.time.LocalDate;
 import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.DepositAccountData;
+import org.mifosng.platform.api.data.DepositAccountTransactionData;
 import org.mifosng.platform.api.data.DepositProductData;
 import org.mifosng.platform.api.data.DepositProductLookup;
 import org.mifosng.platform.api.data.EnumOptionData;
@@ -50,7 +53,23 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 		
 		String sql = "select " + mapper.schema() + " where da.is_deleted=0";
 		
-		return this.jdbcTemplate.query(sql,mapper, new Object[]{});
+		Collection<DepositAccountData> depositAccountDatas = this.jdbcTemplate.query(sql,mapper, new Object[]{});
+		
+		DepositAccountTransactionMapper transactionMapper = new DepositAccountTransactionMapper();
+		String transactionSchema = "Select "+transactionMapper.schema();
+		Collection<DepositAccountTransactionData> depositAccountTransactionDatas = this.jdbcTemplate.query(transactionSchema, transactionMapper, new Object[]{});
+		
+		 for(DepositAccountData depositAccountData : depositAccountDatas){
+			 List<DepositAccountTransactionData> myAccountTransactionDatas = new ArrayList<DepositAccountTransactionData>();
+			 for(DepositAccountTransactionData depositAccountTransactionData : depositAccountTransactionDatas){
+				 if(depositAccountData.getId().equals(depositAccountTransactionData.getAccountId())){
+					 myAccountTransactionDatas.add(depositAccountTransactionData);
+				 }
+			 depositAccountData.setTransactions(myAccountTransactionDatas);	 
+			 }
+		 }
+		
+		return depositAccountDatas;
 	
 	}
 
@@ -63,6 +82,20 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 					+ " where da.id = ? and da.is_deleted=0";
 			
 			DepositAccountData productData = this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { accountId });
+			
+			DepositAccountTransactionMapper transactionMapper = new DepositAccountTransactionMapper();
+			String transactionSchema = "Select "+transactionMapper.schema() +"  where  txn.deposit_account_id = ? ";
+			Collection<DepositAccountTransactionData> depositAccountTransactionDatas = this.jdbcTemplate.query(transactionSchema, transactionMapper, new Object[]{accountId});
+			
+			 List<DepositAccountTransactionData> myAccountTransactionDatas = new ArrayList<DepositAccountTransactionData>();
+			 for(DepositAccountTransactionData depositAccountTransactionData : depositAccountTransactionDatas){
+				 
+				    if(productData.getId().equals(depositAccountTransactionData.getAccountId()))
+					 myAccountTransactionDatas.add(depositAccountTransactionData);
+				    
+				 }
+			
+			productData.setTransactions(myAccountTransactionDatas);	 
 			
 			return productData;
 		} catch (EmptyResultDataAccessException e) {
@@ -126,11 +159,11 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 				+  " da.is_renewal_allowed as renewalAllowed, da.is_preclosure_allowed as preClosureAllowed, da.pre_closure_interest_rate as preClosureInterestRate, "
 				+  " da.withdrawnon_date as withdrawnonDate, da.rejectedon_date as rejectedonDate, da.closedon_date as closedonDate, "
 				+  " c.firstname as firstname, c.lastname as lastname, pd.name as productName,"
-				+  " curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, curr.display_symbol as currencyDisplaySymbol" 
+				+  " curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, curr.display_symbol as currencyDisplaySymbol " 
 				+  " from m_deposit_account da " 
 				+  " join m_currency curr on curr.code = da.currency_code " 
 				+  " join m_client c on c.id = da.client_id " 
-				+  " join m_product_deposit pd on pd.id = da.product_id";
+				+  " join m_product_deposit pd on pd.id = da.product_id"; 
 		}
 
 		@Override
@@ -189,5 +222,28 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 					renewalAllowed, preClosureAllowed, preClosureInterestRate, 
 					withdrawnonDate,rejectedonDate,closedonDate);
 		}
+	}
+	
+	private static final class DepositAccountTransactionMapper implements RowMapper<DepositAccountTransactionData>{
+		
+		public String schema() {
+			return " txn.id as transactionId, txn.deposit_account_id as accountId, txn.transaction_type_enum as transactionType, txn.transaction_date as transactionDate, txn.amount as transactionAmount " 
+				+  " from m_deposit_account_transaction txn";
+		}
+
+		@Override
+		public DepositAccountTransactionData mapRow(ResultSet rs, int rowNum)
+				throws SQLException {
+			
+			Long transactionId = rs.getLong("transactionId");
+			Long accountId = rs.getLong("accountId");
+			Integer transactionTypeValue = JdbcSupport.getInteger(rs, "transactionType");
+			EnumOptionData transactionType=DepositAccountTransactionEnumerations.depositType(transactionTypeValue);
+			LocalDate transactionDate = JdbcSupport.getLocalDate(rs, "transactionDate");
+			BigDecimal transactionAmount = rs.getBigDecimal("transactionAmount");
+			
+			return new DepositAccountTransactionData(transactionId, accountId, transactionType, transactionDate, transactionAmount);
+		}
+		
 	}
 }

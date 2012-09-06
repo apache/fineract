@@ -68,7 +68,7 @@ public class DepositAccountsApiResource {
 					"interestCompoundedEvery",
 					"interestCompoundedEveryPeriodType", "renewalAllowed",
 					"preClosureAllowed", "preClosureInterestRate", 
-					"withdrawnonDate","rejectedonDate","closedonDate"));
+					"withdrawnonDate","rejectedonDate","closedonDate","transactions"));
 	
 	
 	@POST

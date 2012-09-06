@@ -105,7 +105,7 @@ public class GoogleGsonApiJsonSerializerService implements
 					"currency", "deposit", "maturityInterestRate", "tenureInMonths", 
 					"interestCompoundedEvery", "interestCompoundedEveryPeriodType",
 					"renewalAllowed","preClosureAllowed","preClosureInterestRate", 
-					"withdrawnonDate","rejectedonDate","closedonDate"
+					"withdrawnonDate","rejectedonDate","closedonDate","transactions"
 					)
 			);
 	
@@ -559,4 +559,5 @@ public class GoogleGsonApiJsonSerializerService implements
 		return helper.serializedJsonFrom(gsonDeserializer,
 				staff.toArray(new StaffData[staff.size()]));
 	}
+
 }
