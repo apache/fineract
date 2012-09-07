@@ -9,8 +9,8 @@ import org.mifosng.platform.api.data.AdditionalFieldsSetData;
 import org.mifosng.platform.api.data.AppUserData;
 import org.mifosng.platform.api.data.AuthenticatedUserData;
 import org.mifosng.platform.api.data.ChargeData;
-import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.ClientAccountSummaryCollectionData;
+import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.ConfigurationData;
 import org.mifosng.platform.api.data.DepositAccountData;
 import org.mifosng.platform.api.data.DepositProductData;
@@ -20,7 +20,6 @@ import org.mifosng.platform.api.data.GroupData;
 import org.mifosng.platform.api.data.LoanAccountData;
 import org.mifosng.platform.api.data.LoanProductData;
 import org.mifosng.platform.api.data.LoanTransactionData;
-import org.mifosng.platform.api.data.NewLoanData;
 import org.mifosng.platform.api.data.NoteData;
 import org.mifosng.platform.api.data.OfficeData;
 import org.mifosng.platform.api.data.OfficeTransactionData;
@@ -38,8 +37,7 @@ import com.google.gson.Gson;
  * serialize Java object representation into JSON.
  */
 @Service
-public class GoogleGsonApiJsonSerializerService implements
-		ApiJsonSerializerService {
+public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerService {
 
 	private static final Set<String> PERMISSION_DATA_PARAMETERS = new HashSet<String>(
 			Arrays.asList("id", "name", "description", "code"));
@@ -132,11 +130,6 @@ public class GoogleGsonApiJsonSerializerService implements
 					"noteType", "note", "createdById", "createdByUsername",
 					"createdOn", "updatedById", "updatedByUsername",
 					"updatedOn"));
-
-	private static final Set<String> NEW_LOAN_DATA_PARAMETERS = new HashSet<String>(
-			Arrays.asList("clientId", "clientName", "productId", "productName",
-					"selectedProduct", "expectedDisbursementDate",
-					"allowedProducts"));
 
 	private static final Set<String> LOAN_DATA_PARAMETERS = new HashSet<String>(
 			Arrays.asList("id", "externalId", "clientId", "clientName", "fundId", "fundName",
@@ -486,16 +479,6 @@ public class GoogleGsonApiJsonSerializerService implements
 				.createGsonBuilderWithParameterExclusionSerializationStrategy(
 						NOTE_DATA_PARAMETERS, prettyPrint, responseParameters);
 		return helper.serializedJsonFrom(gsonDeserializer, note);
-	}
-
-	@Override
-	public String serializeNewLoanDataToJson(final boolean prettyPrint,
-			final Set<String> responseParameters, final NewLoanData newLoan) {
-		final Gson gsonDeserializer = helper
-				.createGsonBuilderWithParameterExclusionSerializationStrategy(
-						NEW_LOAN_DATA_PARAMETERS, prettyPrint,
-						responseParameters);
-		return helper.serializedJsonFrom(gsonDeserializer, newLoan);
 	}
 
 	@Override

@@ -7,6 +7,9 @@ import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.joda.time.Months;
 
+/**
+ * Immutable data object for core details of loan to be combined with {@link LoanAccountData} usage.
+ */
 public class LoanBasicDetailsData {
 
 	private final Long id;
@@ -16,38 +19,156 @@ public class LoanBasicDetailsData {
 	private final Long loanProductId;
 	private final String loanProductName;
 	private final String loanProductDescription;
+	private final EnumOptionData status;
 	private final Long fundId;
 	private final String fundName;
-	private final EnumOptionData status;
+	private final CurrencyData currency;
+	private final BigDecimal principal;
+	private final BigDecimal inArrearsTolerance;
+	
+	private final Integer termFrequency;
+	private final EnumOptionData termPeriodFrequencyType;
+	private final Integer numberOfRepayments;
+	private final Integer repaymentEvery;
+	private final EnumOptionData repaymentFrequencyType;
+	private final Integer transactionStrategyId;
+	private final EnumOptionData amortizationType;
+	private final BigDecimal interestRatePerPeriod;
+	private final EnumOptionData interestRateFrequencyType;
+	private final BigDecimal annualInterestRate;
+	private final EnumOptionData interestType;
+	private final EnumOptionData interestCalculationPeriodType;
 	
 	private final LocalDate submittedOnDate;
 	private final LocalDate approvedOnDate;
 	private final LocalDate expectedDisbursementDate;
 	private final LocalDate actualDisbursementDate;
-	private final LocalDate expectedFirstRepaymentOnDate;
+	private final LocalDate repaymentsStartingFromDate;
 	private final LocalDate interestChargedFromDate;
 	private final LocalDate closedOnDate;
 	private final LocalDate expectedMaturityDate;
-
-	private final CurrencyData currency;
-	private final BigDecimal principal;
-	private final BigDecimal inArrearsTolerance;
-
-	private final Integer termFrequency;
-	private final EnumOptionData termPeriodFrequencyType;
-	private final Integer numberOfRepayments;
-	private final Integer repaymentEvery;
-	private final Integer transactionStrategyId;
-	private final BigDecimal interestRatePerPeriod;
-	private final BigDecimal annualInterestRate;
-
-	private final EnumOptionData repaymentFrequencyType;
-	private final EnumOptionData interestRateFrequencyType;
-	private final EnumOptionData amortizationType;
-	private final EnumOptionData interestType;
-	private final EnumOptionData interestCalculationPeriodType;
-
 	private final LocalDate lifeCycleStatusDate;
+	
+	public static LoanBasicDetailsData populateForNewLoanCreation(final Long clientId, final String clientName, final LocalDate expectedDisbursementDate) {
+		return new LoanBasicDetailsData(clientId, clientName, expectedDisbursementDate);
+	}
+	
+	public static LoanBasicDetailsData populateForNewLoanCreation(final LoanBasicDetailsData loanAccount, final LoanProductData product) {
+		
+		final Integer termFrequency = product.getNumberOfRepayments() * product.getRepaymentEvery();
+		final EnumOptionData termPeriodFrequencyType = product.getRepaymentFrequencyType();
+		return new LoanBasicDetailsData(
+				loanAccount.clientId, loanAccount.clientName, 
+				product.getId(), product.getName(), product.getDescription(), product.getFundId(), product.getFundName(), 
+				product.getCurrency(), product.getPrincipal(), product.getInArrearsTolerance(),
+				termFrequency, termPeriodFrequencyType, product.getNumberOfRepayments(), product.getRepaymentEvery(), product.getRepaymentFrequencyType(),
+				product.getTransactionProcessingStrategyId(), product.getAmortizationType(), 
+				product.getInterestRatePerPeriod(), product.getInterestRateFrequencyType(), product.getInterestType(), product.getInterestCalculationPeriodType(),
+				loanAccount.expectedDisbursementDate);
+	}
+	
+	private LoanBasicDetailsData(
+			final Long clientId, final String clientName, 
+			final Long productId, final String productName, final String productDescription, final Long fundId, final String fundName, 
+			final CurrencyData currency,  final BigDecimal principal, final BigDecimal inArrearsTolerance,
+			final Integer termFrequency,
+			final EnumOptionData termPeriodFrequencyType,
+			final Integer numberOfRepayments,
+			final Integer repaymentEvery,
+			final EnumOptionData repaymentFrequencyType,
+			final Long transactionStrategyId,
+			final EnumOptionData amortizationType,
+			final BigDecimal interestRatePerPeriod,
+			final EnumOptionData interestRateFrequencyType,
+			final EnumOptionData interestType,
+			final EnumOptionData interestCalculationPeriodType,
+			final LocalDate expectedDisbursementDate) {
+		this.id = null;
+		this.externalId = null;
+		this.clientId = clientId;
+		this.clientName = clientName;
+		this.loanProductId =  productId;
+		this.loanProductName = productName;
+		this.loanProductDescription= productDescription;
+		this.status = null;
+		this.fundId = fundId;
+		this.fundName = fundName;
+		this.currency = currency;
+		this.principal = principal;
+		this.inArrearsTolerance = inArrearsTolerance;
+		
+		this.termFrequency = termFrequency;
+		this.termPeriodFrequencyType = termPeriodFrequencyType;
+		this.numberOfRepayments = numberOfRepayments;
+		this.repaymentEvery = repaymentEvery;
+		this.repaymentFrequencyType = repaymentFrequencyType;
+		
+		// FIXME - kw - settle on using either long or integer for this throughout product and account fields for loan.
+		if (transactionStrategyId != null) {
+			this.transactionStrategyId = transactionStrategyId.intValue();
+		} else {
+			this.transactionStrategyId = null;
+		}
+		this.amortizationType = amortizationType;
+		
+		this.interestRatePerPeriod = interestRatePerPeriod;
+		this.annualInterestRate = null;
+		this.interestRateFrequencyType = interestRateFrequencyType;
+		this.interestType = interestType;
+		this.interestCalculationPeriodType = interestCalculationPeriodType;
+		
+		this.submittedOnDate = null;
+		this.approvedOnDate = null;
+		this.expectedDisbursementDate = expectedDisbursementDate;
+		
+		this.actualDisbursementDate = null;
+		this.closedOnDate = null;
+		this.expectedMaturityDate = null;
+		this.repaymentsStartingFromDate = null;
+		this.interestChargedFromDate = null;
+		this.lifeCycleStatusDate = null;
+	}
+	
+	private LoanBasicDetailsData(final Long clientId, final String clientName, final LocalDate expectedDisbursementDate) {
+		this.id = null;
+		this.externalId = null;
+		this.clientId = clientId;
+		this.clientName = clientName;
+		this.loanProductId =  null;
+		this.loanProductName = null;
+		this.loanProductDescription= null;
+		this.status = null;
+		this.fundId = null;
+		this.fundName = null;
+		
+		this.currency = null;
+		this.principal = null;
+		this.inArrearsTolerance = null;
+		this.termFrequency = null;
+		this.termPeriodFrequencyType = null;
+		this.numberOfRepayments = null;
+		this.repaymentEvery = null;
+		this.transactionStrategyId = null;
+		this.interestRatePerPeriod = null;
+		this.annualInterestRate = null;
+		this.repaymentFrequencyType = null;
+		this.interestRateFrequencyType = null;
+		this.amortizationType = null;
+		this.interestType = null;
+		this.interestCalculationPeriodType = null;
+		
+		this.lifeCycleStatusDate = null;
+		
+		this.submittedOnDate = null;
+		this.approvedOnDate = null;
+		this.expectedDisbursementDate = expectedDisbursementDate;
+		
+		this.actualDisbursementDate = null;
+		this.closedOnDate = null;
+		this.expectedMaturityDate = null;
+		this.repaymentsStartingFromDate = null;
+		this.interestChargedFromDate = null;
+	}
 
 	public LoanBasicDetailsData(
 			final Long id, 
@@ -63,7 +184,7 @@ public class LoanBasicDetailsData {
 			final LocalDate expectedDisbursementDate,
 			final LocalDate actualDisbursementDate, 
 			final LocalDate expectedMaturityDate,
-			final LocalDate expectedFirstRepaymentOnDate,
+			final LocalDate repaymentsStartingFromDate,
 			final LocalDate interestChargedFromDate, 
 			final CurrencyData currency,
 			final BigDecimal principal,
@@ -97,7 +218,7 @@ public class LoanBasicDetailsData {
 		this.expectedDisbursementDate = expectedDisbursementDate;
 		this.actualDisbursementDate = actualDisbursementDate;
 		this.expectedMaturityDate = expectedMaturityDate;
-		this.expectedFirstRepaymentOnDate = expectedFirstRepaymentOnDate;
+		this.repaymentsStartingFromDate = repaymentsStartingFromDate;
 		this.interestChargedFromDate = interestChargedFromDate;
 		this.currency = currency;
 		this.principal = principal;
@@ -270,9 +391,9 @@ public class LoanBasicDetailsData {
 	public LocalDate getActualDisbursementDate() {
 		return actualDisbursementDate;
 	}
-
-	public LocalDate getExpectedFirstRepaymentOnDate() {
-		return expectedFirstRepaymentOnDate;
+	
+	public LocalDate getRepaymentsStartingFromDate() {
+		return repaymentsStartingFromDate;
 	}
 
 	public LocalDate getInterestChargedFromDate() {

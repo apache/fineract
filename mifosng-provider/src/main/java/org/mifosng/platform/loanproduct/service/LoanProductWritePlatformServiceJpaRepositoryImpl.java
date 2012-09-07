@@ -141,7 +141,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
 		
 		LoanTransactionProcessingStrategy loanTransactionProcessingStrategy = null;
 		if (command.isTransactionProcessingStrategyChanged()) {
-			findStrategyByIdIfProvided(command.getTransactionProcessingStrategyId());
+			loanTransactionProcessingStrategy = findStrategyByIdIfProvided(command.getTransactionProcessingStrategyId());
 		}
 
         final Set<Charge> charges = this.assembleSetOfCharges(command, product.getCurrency().getCode());

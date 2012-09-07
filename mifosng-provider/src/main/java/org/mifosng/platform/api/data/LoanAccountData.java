@@ -67,9 +67,10 @@ public class LoanAccountData {
 
 	private final LoanPermissionData permissions;
 	private final LoanConvenienceData convenienceData;
-
+	
 	public LoanAccountData(
 			final LoanBasicDetailsData basicDetails,
+			final boolean convenienceDataRequired, 
 			final LoanAccountSummaryData summary,
 			final Collection<LoanRepaymentPeriodData> repaymentSchedule,
 			final Collection<LoanRepaymentTransactionData> loanRepayments,
@@ -99,22 +100,26 @@ public class LoanAccountData {
 		this.interestCalculationPeriodTypeOptions = interestCalculationPeriodTypeOptions;
 		this.fundOptions = fundOptions;
 
-		int maxSubmittedOnOffsetFromToday = basicDetails
-				.getMaxSubmittedOnOffsetFromToday();
-		int maxApprovedOnOffsetFromToday = basicDetails
-				.getMaxApprovedOnOffsetFromToday();
-		int maxDisbursedOnOffsetFromToday = basicDetails
-				.getMaxDisbursedOnOffsetFromToday();
-		int expectedLoanTermInDays = basicDetails.getLoanTermInDays();
-		int expectedLoanTermInMonths = basicDetails.getLoanTermInMonths();
-		int actualLoanTermInDays = basicDetails.getActualLoanTermInDays();
-		int actualLoanTermInMonths = basicDetails.getActualLoanTermInMonths();
-
-		this.convenienceData = new LoanConvenienceData(
-				maxSubmittedOnOffsetFromToday, maxApprovedOnOffsetFromToday,
-				maxDisbursedOnOffsetFromToday, expectedLoanTermInDays,
-				actualLoanTermInDays, expectedLoanTermInMonths,
-				actualLoanTermInMonths);
+		if (convenienceDataRequired) {
+			int maxSubmittedOnOffsetFromToday = basicDetails
+					.getMaxSubmittedOnOffsetFromToday();
+			int maxApprovedOnOffsetFromToday = basicDetails
+					.getMaxApprovedOnOffsetFromToday();
+			int maxDisbursedOnOffsetFromToday = basicDetails
+					.getMaxDisbursedOnOffsetFromToday();
+			int expectedLoanTermInDays = basicDetails.getLoanTermInDays();
+			int expectedLoanTermInMonths = basicDetails.getLoanTermInMonths();
+			int actualLoanTermInDays = basicDetails.getActualLoanTermInDays();
+			int actualLoanTermInMonths = basicDetails.getActualLoanTermInMonths();
+	
+			this.convenienceData = new LoanConvenienceData(
+					maxSubmittedOnOffsetFromToday, maxApprovedOnOffsetFromToday,
+					maxDisbursedOnOffsetFromToday, expectedLoanTermInDays,
+					actualLoanTermInDays, expectedLoanTermInMonths,
+					actualLoanTermInMonths);
+		} else {
+			this.convenienceData = null;
+		}
 
 		this.id = basicDetails.getId();
 		this.externalId = basicDetails.getExternalId();
@@ -133,7 +138,7 @@ public class LoanAccountData {
 		this.actualDisbursementDate = basicDetails.getActualDisbursementDate();
 		this.closedOnDate = basicDetails.getClosedOnDate();
 		this.expectedMaturityDate = basicDetails.getExpectedMaturityDate();
-		this.repaymentsStartingFromDate = basicDetails.getExpectedFirstRepaymentOnDate();
+		this.repaymentsStartingFromDate = basicDetails.getRepaymentsStartingFromDate();
 		this.interestChargedFromDate = basicDetails.getInterestChargedFromDate();
 		
 		this.currency = basicDetails.getCurrency();

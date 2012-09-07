@@ -9,7 +9,6 @@ import org.mifosng.platform.api.data.LoanPermissionData;
 import org.mifosng.platform.api.data.LoanRepaymentPeriodData;
 import org.mifosng.platform.api.data.LoanRepaymentTransactionData;
 import org.mifosng.platform.api.data.LoanTransactionData;
-import org.mifosng.platform.api.data.NewLoanData;
 
 public interface LoanReadPlatformService {
 
@@ -27,13 +26,11 @@ public interface LoanReadPlatformService {
 			LoanBasicDetailsData loanBasicDetails, boolean isWaiverAllowed,
 			int repaymentAndWaiveCount);
 
-	NewLoanData retrieveClientAndProductDetails(Long clientId, Long productId);
+	LoanBasicDetailsData retrieveClientAndProductDetails(Long clientId, Long productId);
 
 	LoanTransactionData retrieveNewLoanRepaymentDetails(Long loanId);
 
 	LoanTransactionData retrieveNewLoanWaiverDetails(Long loanId);
 
-	LoanTransactionData retrieveLoanTransactionDetails(Long loanId,
-			Long transactionId);
-
+	LoanTransactionData retrieveLoanTransactionDetails(Long loanId, Long transactionId);
 }

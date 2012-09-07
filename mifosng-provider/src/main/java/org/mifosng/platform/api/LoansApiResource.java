@@ -23,9 +23,9 @@ import javax.ws.rs.core.UriInfo;
 import org.apache.commons.lang.StringUtils;
 import org.mifosng.platform.api.commands.AdjustLoanTransactionCommand;
 import org.mifosng.platform.api.commands.CalculateLoanScheduleCommand;
+import org.mifosng.platform.api.commands.LoanApplicationCommand;
 import org.mifosng.platform.api.commands.LoanStateTransitionCommand;
 import org.mifosng.platform.api.commands.LoanTransactionCommand;
-import org.mifosng.platform.api.commands.LoanApplicationCommand;
 import org.mifosng.platform.api.commands.UndoStateTransitionCommand;
 import org.mifosng.platform.api.data.ChargeData;
 import org.mifosng.platform.api.data.EntityIdentifier;
@@ -40,7 +40,6 @@ import org.mifosng.platform.api.data.LoanRepaymentPeriodData;
 import org.mifosng.platform.api.data.LoanRepaymentTransactionData;
 import org.mifosng.platform.api.data.LoanSchedule;
 import org.mifosng.platform.api.data.LoanTransactionData;
-import org.mifosng.platform.api.data.NewLoanData;
 import org.mifosng.platform.api.data.TransactionProcessingStrategyData;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
@@ -98,8 +97,23 @@ public class LoansApiResource {
 			@QueryParam("productId") final Long productId,
 			@Context final UriInfo uriInfo) {
 		
-		Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("clientId", "clientName", "productId", "productName",
-				"selectedProduct", "expectedDisbursementDate", "allowedProducts"));
+		Set<String> typicalResponseParameters = new HashSet<String>(
+				Arrays.asList("id", "externalId", "clientId", "clientName", "fundId", "fundName",
+						"loanProductId", "loanProductName", "loanProductDescription", 
+						"currency", "principal",
+						"inArrearsTolerance", "numberOfRepayments",
+						"repaymentEvery", "interestRatePerPeriod",
+						"annualInterestRate", "repaymentFrequencyType",
+						"interestRateFrequencyType", "amortizationType",
+						"interestType", "interestCalculationPeriodType",
+						"submittedOnDate", "approvedOnDate",
+						"expectedDisbursementDate", "actualDisbursementDate",
+						"expectedFirstRepaymentOnDate", "interestChargedFromDate",
+						"closedOnDate", "expectedMaturityDate",
+						"status",
+						"lifeCycleStatusDate", "summary", "repaymentSchedule",
+						"loanRepayments", "permissions", "convenienceData", "charges")
+				);
 		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (responseParameters.isEmpty()) {
@@ -107,9 +121,32 @@ public class LoansApiResource {
 		}
 		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 		
-		NewLoanData workflowData = this.loanReadPlatformService.retrieveClientAndProductDetails(clientId, productId);
+		responseParameters.addAll(Arrays.asList("productOptions", "amortizationTypeOptions", "interestTypeOptions", "interestCalculationPeriodTypeOptions", 
+				"repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "fundOptions", "transactionProcessingStrategyOptions", "chargeOptions"));
+	
+		// tempate related
+		Collection<LoanProductLookup> productOptions = this.loanProductReadPlatformService.retrieveAllLoanProductsForLookup();
+		Collection<EnumOptionData>loanTermFrequencyTypeOptions = dropdownReadPlatformService.retrieveLoanTermFrequencyTypeOptions();
+		Collection<EnumOptionData>repaymentFrequencyTypeOptions = dropdownReadPlatformService.retrieveRepaymentFrequencyTypeOptions();
+		Collection<EnumOptionData>interestRateFrequencyTypeOptions = dropdownReadPlatformService.retrieveInterestRateFrequencyTypeOptions();
+		
+		Collection<EnumOptionData>amortizationTypeOptions = dropdownReadPlatformService.retrieveLoanAmortizationTypeOptions();
+		Collection<EnumOptionData>interestTypeOptions = dropdownReadPlatformService.retrieveLoanInterestTypeOptions();
+		Collection<EnumOptionData>interestCalculationPeriodTypeOptions = dropdownReadPlatformService.retrieveLoanInterestRateCalculatedInPeriodOptions();
+	
+		Collection<FundData> fundOptions = this.fundReadPlatformService.retrieveAllFunds();
+		Collection<TransactionProcessingStrategyData> transactionProcessingStrategyOptions = this.dropdownReadPlatformService.retreiveTransactionProcessingStrategies();
+		
+		LoanBasicDetailsData loanBasicDetails = this.loanReadPlatformService.retrieveClientAndProductDetails(clientId, productId);
+		
+		final boolean convenienceDataRequired = false;
+		Collection<ChargeData> charges = null;
+		final LoanAccountData newLoanAccount = new LoanAccountData(loanBasicDetails, convenienceDataRequired, null, null, null, null, charges, 
+				productOptions, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions, 
+				transactionProcessingStrategyOptions, interestRateFrequencyTypeOptions, 
+				amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions, fundOptions);
 
-		return this.apiJsonSerializerService.serializeNewLoanDataToJson(prettyPrint, responseParameters, workflowData);
+		return this.apiJsonSerializerService.serialzieLoanAccountDataToJson(prettyPrint, responseParameters, newLoanAccount);
 	}
 
 	@GET
@@ -145,6 +182,7 @@ public class LoansApiResource {
 		LoanPermissionData permissions = null;
         Collection<ChargeData> charges = null;
 
+        boolean convenienceDataRequired = false;
 		Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (!associationParameters.isEmpty()) {
 			if (associationParameters.contains("all")) {
@@ -160,7 +198,8 @@ public class LoansApiResource {
 
 			boolean isWaiveAllowed = summary.isWaiveAllowed(loanBasicDetails.getCurrency(), loanBasicDetails.getInArrearsTolerance());
 			permissions = this.loanReadPlatformService.retrieveLoanPermissions(loanBasicDetails, isWaiveAllowed, loanRepayments.size());
-
+			convenienceDataRequired = true;
+			
             charges = this.chargeReadPlatformService.retrieveLoanCharges(loanId);
 		}
 
@@ -193,7 +232,7 @@ public class LoansApiResource {
 			transactionProcessingStrategyOptions = this.dropdownReadPlatformService.retreiveTransactionProcessingStrategies();
 		}
 
-		final LoanAccountData loanAccount = new LoanAccountData(loanBasicDetails, summary, repaymentSchedule, loanRepayments, permissions, charges, 
+		final LoanAccountData loanAccount = new LoanAccountData(loanBasicDetails, convenienceDataRequired, summary, repaymentSchedule, loanRepayments, permissions, charges, 
 				productOptions, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions, 
 				transactionProcessingStrategyOptions, interestRateFrequencyTypeOptions, 
 				amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions, fundOptions);

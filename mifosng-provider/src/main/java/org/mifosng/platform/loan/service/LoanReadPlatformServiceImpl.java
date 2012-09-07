@@ -3,11 +3,9 @@ package org.mifosng.platform.loan.service;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collection;
 
 import org.joda.time.LocalDate;
-import org.mifosng.platform.api.data.ChargeData;
 import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.EnumOptionData;
@@ -15,13 +13,10 @@ import org.mifosng.platform.api.data.LoanAccountSummaryData;
 import org.mifosng.platform.api.data.LoanBasicDetailsData;
 import org.mifosng.platform.api.data.LoanPermissionData;
 import org.mifosng.platform.api.data.LoanProductData;
-import org.mifosng.platform.api.data.LoanProductLookup;
 import org.mifosng.platform.api.data.LoanRepaymentPeriodData;
 import org.mifosng.platform.api.data.LoanRepaymentTransactionData;
 import org.mifosng.platform.api.data.LoanTransactionData;
 import org.mifosng.platform.api.data.MoneyData;
-import org.mifosng.platform.api.data.NewLoanData;
-import org.mifosng.platform.charge.service.ChargeReadPlatformService;
 import org.mifosng.platform.client.service.ClientReadPlatformService;
 import org.mifosng.platform.currency.domain.ApplicationCurrency;
 import org.mifosng.platform.currency.domain.ApplicationCurrencyRepository;
@@ -55,7 +50,6 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 	private final LoanProductReadPlatformService loanProductReadPlatformService;
 	private final ClientReadPlatformService clientReadPlatformService;
 	private final LoanTransactionRepository loanTransactionRepository;
-    private final ChargeReadPlatformService chargeReadPlatformService;
 
 	@Autowired
 	public LoanReadPlatformServiceImpl(
@@ -65,7 +59,6 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 			final ApplicationCurrencyRepository applicationCurrencyRepository,
 			final LoanProductReadPlatformService loanProductReadPlatformService,
 			final ClientReadPlatformService clientReadPlatformService,
-            final ChargeReadPlatformService chargeReadPlatformService,
 			final TenantAwareRoutingDataSource dataSource) {
 		this.context = context;
 		this.loanRepository = loanRepository;
@@ -73,7 +66,6 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 		this.applicationCurrencyRepository = applicationCurrencyRepository;
 		this.loanProductReadPlatformService = loanProductReadPlatformService;
 		this.clientReadPlatformService = clientReadPlatformService;
-        this.chargeReadPlatformService = chargeReadPlatformService;
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
 
@@ -234,51 +226,21 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 	}
 
 	@Override
-	public NewLoanData retrieveClientAndProductDetails(final Long clientId,
-			final Long productId) {
+	public LoanBasicDetailsData retrieveClientAndProductDetails(final Long clientId, final Long productId) {
 
 		context.authenticatedUser();
 
-		NewLoanData workflowData = new NewLoanData();
-
-		Collection<LoanProductLookup> loanProducts = this.loanProductReadPlatformService
-				.retrieveAllLoanProductsForLookup();
-		workflowData.setAllowedProducts(new ArrayList<LoanProductLookup>(
-				loanProducts));
-
+		final LocalDate expectedDisbursementDate = new LocalDate();
+		final ClientData clientAccount = this.clientReadPlatformService.retrieveIndividualClient(clientId);
+		
+		LoanBasicDetailsData loanDetails = LoanBasicDetailsData.populateForNewLoanCreation(clientAccount.getId(), clientAccount.getDisplayName(), expectedDisbursementDate);
+		
 		if (productId != null) {
-			LoanProductData selectedProduct = findLoanProductById(loanProducts, productId);
-
-			workflowData.setProductId(selectedProduct.getId());
-			workflowData.setProductName(selectedProduct.getName());
-			workflowData.setSelectedProduct(selectedProduct);
+			LoanProductData selectedProduct = this.loanProductReadPlatformService.retrieveLoanProduct(productId);
+			loanDetails = LoanBasicDetailsData.populateForNewLoanCreation(loanDetails, selectedProduct);
 		}
 
-		ClientData clientAccount = this.clientReadPlatformService
-				.retrieveIndividualClient(clientId);
-		workflowData.setClientId(clientAccount.getId());
-		workflowData.setClientName(clientAccount.getDisplayName());
-
-		workflowData.setExpectedDisbursementDate(new LocalDate());
-
-		return workflowData;
-	}
-
-	private LoanProductData findLoanProductById(
-			Collection<LoanProductLookup> loanProducts, Long productId) {
-		LoanProductData match = this.loanProductReadPlatformService
-				.retrieveNewLoanProductDetails();
-		for (LoanProductLookup loanProductLookup : loanProducts) {
-			if (loanProductLookup.getId().equals(productId)) {
-				match = this.loanProductReadPlatformService
-						.retrieveLoanProduct(loanProductLookup.getId());
-                Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveLoanApplicableCharges();
-                chargeOptions.removeAll(match.getCharges());
-                match.setChargeOptions(chargeOptions);
-				break;
-			}
-		}
-		return match;
+		return loanDetails;
 	}
 
 	@Override
