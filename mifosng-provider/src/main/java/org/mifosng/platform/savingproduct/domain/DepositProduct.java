@@ -69,7 +69,6 @@ public class DepositProduct extends AbstractAuditableCustom<AppUser, Long> {
 	@Column(name = "is_preclosure_allowed", nullable=false)
 	private boolean preClosureAllowed = false;
 	
-	@SuppressWarnings("unused")
 	@Column(name = "pre_closure_interest_rate", scale = 6, precision = 19, nullable = false)
 	private BigDecimal preClosureInterestRate;
 	
@@ -133,6 +132,14 @@ public class DepositProduct extends AbstractAuditableCustom<AppUser, Long> {
 	
 	public BigDecimal getMaturityDefaultInterestRate() {
 		return maturityDefaultInterestRate;
+	}
+
+	public BigDecimal getMaturityMinInterestRate() {
+		return maturityMinInterestRate;
+	}
+
+	public BigDecimal getPreClosureInterestRate() {
+		return preClosureInterestRate;
 	}
 
 	public boolean isRenewalAllowed() {

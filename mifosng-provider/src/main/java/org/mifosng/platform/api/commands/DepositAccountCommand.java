@@ -17,6 +17,7 @@ public class DepositAccountCommand {
 
 	private final BigDecimal depositAmount;
 	private final BigDecimal maturityInterestRate;
+	private final BigDecimal preClosureInterestRate;
 	private final Integer tenureInMonths;
 	
 	private final Integer interestCompoundedEvery;
@@ -34,7 +35,7 @@ public class DepositAccountCommand {
 			final Long productId, 
 			final String externalId,
 			final BigDecimal depositAmount, 
-			final BigDecimal interestRate, 
+			final BigDecimal interestRate, final BigDecimal preClosureInterestRate,
 			final Integer tenureInMonths, final Integer compoundingInterestFrequency, final Integer compoundingInterestFrequencyType, final LocalDate commencementDate,
 			final boolean renewalAllowed, final boolean preClosureAllowed) {
 		this.id = id;
@@ -44,6 +45,7 @@ public class DepositAccountCommand {
 		
 		this.depositAmount = depositAmount;
 		this.maturityInterestRate = interestRate;
+		this.preClosureInterestRate = preClosureInterestRate;
 		this.tenureInMonths = tenureInMonths;
 		
 		this.modifiedParameters = modifiedParameters;
@@ -78,6 +80,10 @@ public class DepositAccountCommand {
 		return maturityInterestRate;
 	}
 	
+	public BigDecimal getPreClosureInterestRate() {
+		return preClosureInterestRate;
+	}
+
 	public Integer getTenureInMonths() {
 		return tenureInMonths;
 	}
@@ -112,6 +118,10 @@ public class DepositAccountCommand {
 	
 	public boolean isMaturityActualInterestRateChanged() {
 		return this.modifiedParameters.contains("interestRate");
+	}
+	
+	public boolean isPreClosureInterestRateChanged(){
+		return this.modifiedParameters.contains("preClosureInterestRate");
 	}
 	
 	public boolean isRenewalAllowedChanged() {

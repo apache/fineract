@@ -9,12 +9,13 @@ import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.client.domain.ClientRepository;
 import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.exceptions.ClientNotFoundException;
+import org.mifosng.platform.exceptions.DepositAccounDataValidationtException;
 import org.mifosng.platform.exceptions.DepositProductNotFoundException;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 import org.mifosng.platform.saving.domain.DepositAccount;
+import org.mifosng.platform.saving.domain.DepositAccountStatus;
 import org.mifosng.platform.saving.domain.DepositLifecycleStateMachine;
 import org.mifosng.platform.saving.domain.DepositLifecycleStateMachineImpl;
-import org.mifosng.platform.saving.domain.DepositAccountStatus;
 import org.mifosng.platform.saving.domain.FixedTermDepositInterestCalculator;
 import org.mifosng.platform.savingproduct.domain.DepositProduct;
 import org.mifosng.platform.savingproduct.domain.DepositProductRepository;
@@ -63,6 +64,15 @@ public class DepositAccountAssembler {
 		if (command.getMaturityInterestRate() != null) {
 			maturityInterestRate = command.getMaturityInterestRate();
 		}
+		
+		BigDecimal preClosureInterestRate = product.getPreClosureInterestRate();
+		if(command.getPreClosureInterestRate()!=null){
+			preClosureInterestRate = command.getPreClosureInterestRate();
+		}
+		
+		if(product.getMaturityMinInterestRate().compareTo(preClosureInterestRate)==-1){
+			throw new DepositAccounDataValidationtException(preClosureInterestRate, product.getMaturityMinInterestRate());
+		}
 			
 		Integer compoundingInterestEvery = product.getInterestCompoundedEvery();
 		if (command.getInterestCompoundedEvery() != null) {
@@ -87,7 +97,7 @@ public class DepositAccountAssembler {
 		
 		DepositAccount account =new DepositAccount().openNew(client, product, command.getExternalId(), 
 				deposit, 
-				maturityInterestRate, 
+				maturityInterestRate, preClosureInterestRate, 
 				tenureInMonths, compoundingInterestEvery, compoundingInterestFrequency, 
 				command.getCommencementDate(), 
 				renewalAllowed, preClosureAllowed, this.fixedTermDepositInterestCalculator, defaultDepositLifecycleStateMachine());

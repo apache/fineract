@@ -138,7 +138,7 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
     
 	public DepositAccount openNew(
 			final Client client, final DepositProduct product,
-			final String externalId, final Money deposit, final BigDecimal maturityInterestRate, final Integer tenureInMonths, 
+			final String externalId, final Money deposit, final BigDecimal maturityInterestRate, final BigDecimal preClosureInterestRate, final Integer tenureInMonths, 
 			final Integer interestCompoundedEvery, 
 			final PeriodFrequencyType interestCompoundedFrequencyPeriodType, 
 			final LocalDate commencementDate, 
@@ -159,7 +159,7 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 		DepositAccountStatus statusEnum = depositLifecycleStateMachine.transition(DepositAccountEvent.DEPOSIT_CREATED, from);
 		depositStatus = statusEnum.getValue();
 		
-		return new DepositAccount(client, product, externalId, deposit, maturityInterestRate, tenureInMonths, 
+		return new DepositAccount(client, product, externalId, deposit, maturityInterestRate, preClosureInterestRate, tenureInMonths, 
 				interestCompoundedEvery, interestCompoundedFrequencyPeriodType, commencementDate, renewalAllowed, preClosureAllowed, futureValueOnMaturity,depositStatus);
 	}
 	
@@ -169,7 +169,7 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 
 	public DepositAccount(
 			final Client client, final DepositProduct product,
-			final String externalId, final Money deposit, final BigDecimal interestRate, final Integer termInMonths, 
+			final String externalId, final Money deposit, final BigDecimal interestRate, final BigDecimal preClosureInterestRate,  final Integer termInMonths, 
 			final Integer interestCompoundedEvery, 
 			final PeriodFrequencyType interestCompoundedFrequencyPeriodType, 
 			final LocalDate commencementDate,
@@ -197,7 +197,7 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 		this.renewalAllowed = renewalAllowed;
 		this.preClosureAllowed = preClosureAllowed;
 		
-		this.preClosureInterestRate = BigDecimal.ZERO;
+		this.preClosureInterestRate = preClosureInterestRate;
 		
 		// derived fields
 		this.projectedInterestAccruedOnMaturity = futureValueOnMaturity.minus(deposit).getAmount();

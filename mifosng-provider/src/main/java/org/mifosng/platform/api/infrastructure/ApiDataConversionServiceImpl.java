@@ -1017,7 +1017,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 
 		// preClosureInterestRate
 		Set<String> supportedParams = new HashSet<String>(
-				Arrays.asList("clientId", "productId", "externalId", "deposit", "maturityInterestRate", 
+				Arrays.asList("clientId", "productId", "externalId", "deposit", "maturityInterestRate", "preClosureInterestRate",
 						"tenureInMonths", "interestCompoundedEvery", "interestCompoundedEveryPeriodType", "commencementDate",
 						"renewalAllowed", "preClosureAllowed",
 						"locale", "dateFormat")
@@ -1030,6 +1030,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		String externalId = extractStringParameter("externalId", requestMap,modifiedParameters);
 		BigDecimal deposit=extractBigDecimalParameter("deposit", requestMap, modifiedParameters);
 		BigDecimal interestRate = extractBigDecimalParameter("maturityInterestRate", requestMap, modifiedParameters);
+		BigDecimal preClosureInterestRate = extractBigDecimalParameter("preClosureInterestRate", requestMap, modifiedParameters);
 		Integer tenureInMonths = extractIntegerParameter("tenureInMonths", requestMap, modifiedParameters);
 		
 		Integer interestCompoundedEvery = extractIntegerParameter("interestCompoundedEvery", requestMap, modifiedParameters);
@@ -1040,7 +1041,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		boolean preClosureAllowed = extractBooleanParameter("preClosureAllowed", requestMap, modifiedParameters);
 		
 		return new DepositAccountCommand(modifiedParameters, resourceIdentifier, clientId, productId, 
-				externalId, deposit, interestRate, tenureInMonths, 
+				externalId, deposit, interestRate, preClosureInterestRate, tenureInMonths, 
 				interestCompoundedEvery, interestCompoundedEveryPeriodType, commencementDate, renewalAllowed, preClosureAllowed);
 	}
 
