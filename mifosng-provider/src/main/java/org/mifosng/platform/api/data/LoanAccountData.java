@@ -37,8 +37,6 @@ public class LoanAccountData {
 	private final EnumOptionData interestType;
 	private final EnumOptionData interestCalculationPeriodType;
 	
-	private Collection<ChargeData> charges;
-	
 	private final LocalDate submittedOnDate;
 	private final LocalDate approvedOnDate;
 	private final LocalDate expectedDisbursementDate;
@@ -48,6 +46,14 @@ public class LoanAccountData {
 	private final LocalDate closedOnDate;
 	private final LocalDate expectedMaturityDate;
 	private final LocalDate lifeCycleStatusDate;
+	
+	// associations
+	private final LoanAccountSummaryData summary;
+	private final Collection<LoanRepaymentPeriodData> repaymentSchedule;
+	private final Collection<LoanRepaymentTransactionData> loanRepayments;
+	private final Collection<ChargeData> charges;
+	private final LoanPermissionData permissions;
+	private final LoanConvenienceData convenienceData;
 	
 	// template
 	private final Collection<LoanProductLookup> productOptions;
@@ -59,14 +65,7 @@ public class LoanAccountData {
 	private final Collection<EnumOptionData> interestTypeOptions;
 	private final Collection<EnumOptionData> interestCalculationPeriodTypeOptions;
 	private final Collection<FundData> fundOptions;
-	
-	// associations
-	private final LoanAccountSummaryData summary;
-	private final Collection<LoanRepaymentPeriodData> repaymentSchedule;
-	private final Collection<LoanRepaymentTransactionData> loanRepayments;
-
-	private final LoanPermissionData permissions;
-	private final LoanConvenienceData convenienceData;
+	private final Collection<ChargeData> chargeOptions;
 	
 	public LoanAccountData(
 			final LoanBasicDetailsData basicDetails,
@@ -84,7 +83,8 @@ public class LoanAccountData {
 			final Collection<EnumOptionData> amortizationTypeOptions, 
 			final Collection<EnumOptionData> interestTypeOptions, 
 			final Collection<EnumOptionData> interestCalculationPeriodTypeOptions, 
-			final Collection<FundData> fundOptions) {
+			final Collection<FundData> fundOptions,
+			final Collection<ChargeData> chargeOptions) {
 		this.summary = summary;
 		this.repaymentSchedule = repaymentSchedule;
 		this.loanRepayments = loanRepayments;
@@ -99,6 +99,7 @@ public class LoanAccountData {
 		this.interestTypeOptions = interestTypeOptions;
 		this.interestCalculationPeriodTypeOptions = interestCalculationPeriodTypeOptions;
 		this.fundOptions = fundOptions;
+		this.chargeOptions = chargeOptions;
 
 		if (convenienceDataRequired) {
 			int maxSubmittedOnOffsetFromToday = basicDetails
@@ -324,10 +325,6 @@ public class LoanAccountData {
         return this.charges;
     }
 
-    public void setCharges(Collection<ChargeData> charges) {
-        this.charges = charges;
-    }
-
 	public Collection<LoanProductLookup> getProductOptions() {
 		return productOptions;
 	}
@@ -362,5 +359,9 @@ public class LoanAccountData {
 
 	public Collection<FundData> getFundOptions() {
 		return fundOptions;
+	}
+
+	public Collection<ChargeData> getChargeOptions() {
+		return chargeOptions;
 	}
 }

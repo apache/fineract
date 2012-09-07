@@ -137,14 +137,19 @@ public class LoansApiResource {
 		Collection<FundData> fundOptions = this.fundReadPlatformService.retrieveAllFunds();
 		Collection<TransactionProcessingStrategyData> transactionProcessingStrategyOptions = this.dropdownReadPlatformService.retreiveTransactionProcessingStrategies();
 		
-		LoanBasicDetailsData loanBasicDetails = this.loanReadPlatformService.retrieveClientAndProductDetails(clientId, productId);
+        Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveLoanApplicableCharges();
+
+        LoanBasicDetailsData loanBasicDetails = this.loanReadPlatformService.retrieveClientAndProductDetails(clientId, productId);
+        if (loanBasicDetails.getCharges() != null) {
+        	chargeOptions.removeAll(loanBasicDetails.getCharges());
+        }
 		
 		final boolean convenienceDataRequired = false;
-		Collection<ChargeData> charges = null;
+		Collection<ChargeData> charges = loanBasicDetails.getCharges();
 		final LoanAccountData newLoanAccount = new LoanAccountData(loanBasicDetails, convenienceDataRequired, null, null, null, null, charges, 
 				productOptions, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions, 
 				transactionProcessingStrategyOptions, interestRateFrequencyTypeOptions, 
-				amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions, fundOptions);
+				amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions, fundOptions, chargeOptions);
 
 		return this.apiJsonSerializerService.serialzieLoanAccountDataToJson(prettyPrint, responseParameters, newLoanAccount);
 	}
@@ -213,6 +218,7 @@ public class LoansApiResource {
 		Collection<EnumOptionData> interestTypeOptions = new ArrayList<EnumOptionData>();
 		Collection<EnumOptionData> interestCalculationPeriodTypeOptions = new ArrayList<EnumOptionData>();
 		Collection<FundData> fundOptions = new ArrayList<FundData>();
+		Collection<ChargeData> chargeOptions = null;
 		
 		final boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
 		if(template) {
@@ -230,12 +236,16 @@ public class LoansApiResource {
 
 			fundOptions = this.fundReadPlatformService.retrieveAllFunds();
 			transactionProcessingStrategyOptions = this.dropdownReadPlatformService.retreiveTransactionProcessingStrategies();
+			chargeOptions = this.chargeReadPlatformService.retrieveLoanApplicableCharges();
+			if (charges != null) {
+				chargeOptions.removeAll(charges);
+			}
 		}
 
 		final LoanAccountData loanAccount = new LoanAccountData(loanBasicDetails, convenienceDataRequired, summary, repaymentSchedule, loanRepayments, permissions, charges, 
 				productOptions, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions, 
 				transactionProcessingStrategyOptions, interestRateFrequencyTypeOptions, 
-				amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions, fundOptions);
+				amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions, fundOptions, chargeOptions);
 		
 		return this.apiJsonSerializerService.serialzieLoanAccountDataToJson(prettyPrint, responseParameters, loanAccount);
 	}

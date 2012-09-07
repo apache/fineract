@@ -1,6 +1,7 @@
 package org.mifosng.platform.api.data;
 
 import java.math.BigDecimal;
+import java.util.Collection;
 
 import org.joda.time.DateTime;
 import org.joda.time.Days;
@@ -49,6 +50,8 @@ public class LoanBasicDetailsData {
 	private final LocalDate expectedMaturityDate;
 	private final LocalDate lifeCycleStatusDate;
 	
+	private final Collection<ChargeData> charges;
+	
 	public static LoanBasicDetailsData populateForNewLoanCreation(final Long clientId, final String clientName, final LocalDate expectedDisbursementDate) {
 		return new LoanBasicDetailsData(clientId, clientName, expectedDisbursementDate);
 	}
@@ -64,7 +67,7 @@ public class LoanBasicDetailsData {
 				termFrequency, termPeriodFrequencyType, product.getNumberOfRepayments(), product.getRepaymentEvery(), product.getRepaymentFrequencyType(),
 				product.getTransactionProcessingStrategyId(), product.getAmortizationType(), 
 				product.getInterestRatePerPeriod(), product.getInterestRateFrequencyType(), product.getInterestType(), product.getInterestCalculationPeriodType(),
-				loanAccount.expectedDisbursementDate);
+				loanAccount.expectedDisbursementDate, product.getCharges());
 	}
 	
 	private LoanBasicDetailsData(
@@ -82,7 +85,7 @@ public class LoanBasicDetailsData {
 			final EnumOptionData interestRateFrequencyType,
 			final EnumOptionData interestType,
 			final EnumOptionData interestCalculationPeriodType,
-			final LocalDate expectedDisbursementDate) {
+			final LocalDate expectedDisbursementDate, final Collection<ChargeData> charges) {
 		this.id = null;
 		this.externalId = null;
 		this.clientId = clientId;
@@ -127,6 +130,8 @@ public class LoanBasicDetailsData {
 		this.repaymentsStartingFromDate = null;
 		this.interestChargedFromDate = null;
 		this.lifeCycleStatusDate = null;
+		
+		this.charges = charges;
 	}
 	
 	private LoanBasicDetailsData(final Long clientId, final String clientName, final LocalDate expectedDisbursementDate) {
@@ -168,6 +173,8 @@ public class LoanBasicDetailsData {
 		this.expectedMaturityDate = null;
 		this.repaymentsStartingFromDate = null;
 		this.interestChargedFromDate = null;
+		
+		this.charges = null;
 	}
 
 	public LoanBasicDetailsData(
@@ -202,7 +209,8 @@ public class LoanBasicDetailsData {
 			final LocalDate lifeCycleStatusDate, 
 			final Integer termFrequency, 
 			final EnumOptionData termPeriodFrequencyType, 
-			final Integer transactionStrategyId) {
+			final Integer transactionStrategyId,
+			final Collection<ChargeData> charges) {
 		this.id = id;
 		this.externalId = externalId;
 		this.clientId = clientId;
@@ -237,6 +245,7 @@ public class LoanBasicDetailsData {
 		this.termFrequency = termFrequency;
 		this.termPeriodFrequencyType = termPeriodFrequencyType;
 		this.transactionStrategyId = transactionStrategyId;
+		this.charges = charges;
 	}
 
 	public int getMaxSubmittedOnOffsetFromToday() {
@@ -462,5 +471,9 @@ public class LoanBasicDetailsData {
 
 	public Integer getTransactionStrategyId() {
 		return transactionStrategyId;
+	}
+
+	public Collection<ChargeData> getCharges() {
+		return charges;
 	}
 }
