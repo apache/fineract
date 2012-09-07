@@ -173,4 +173,14 @@ public class GenericDataServiceImpl implements GenericDataService {
 					e.getMessage(), "Error closing database connection");
 		}
 	}
+
+	@Override
+	public String getDatabaseName() {
+		try {
+			return dataSource.getConnection().getCatalog();
+		} catch (SQLException e) {
+			throw new PlatformDataIntegrityException("error.msg.sql.error",
+					e.getMessage(), "Error Accessing Database Name");
+		}
+	}
 }

@@ -94,8 +94,8 @@ public class ReadWriteNonCoreDataServiceImpl implements
 
 	@Override
 	public GenericResultsetData retrieveExtraData(String type, String set,
-			Long id) { 
-		
+			Long id) {
+
 		long startTime = System.currentTimeMillis();
 
 		checkMainResourceExistsWithinScope(type, id);
@@ -475,16 +475,34 @@ public class ReadWriteNonCoreDataServiceImpl implements
 	}
 
 	@Override
-	public String retrieveDataTable(String datatable, Long id, String sqlFields,
-			String sqlSearch, String sqlOrder) {
+	public String retrieveDataTableJSONObject(String datatable, Long id,
+			String sqlFields, String sqlSearch, String sqlOrder) {
+		long startTime = System.currentTimeMillis();
+
+		GenericResultsetData result = retrieveDataTableGenericResultSet(
+				datatable, id, sqlFields, sqlSearch, sqlOrder);
+
+		String jsonString = generateJsonFromGenericResultsetData(result);
+
+		long elapsed = System.currentTimeMillis() - startTime;
+		logger.info("FINISHING DATATABLE JSON OBJECT: " + datatable + "     Elapsed Time: "
+				+ elapsed);
+		return jsonString;
+	}
+
+	@Override
+	public GenericResultsetData retrieveDataTableGenericResultSet(
+			String datatable, Long id, String sqlFields, String sqlSearch,
+			String sqlOrder) {
+
 		long startTime = System.currentTimeMillis();
 
 		String applicationTableName = getApplicationTableName(datatable);
 
 		checkMainResourceExistsWithinScope(applicationTableName, id);
-		
+
 		String fkField = applicationTableName.substring(2) + "_id";
-		
+
 		String sql = "select ";
 		if (sqlFields != null)
 			sql = sql + sqlFields;
@@ -501,24 +519,23 @@ public class ReadWriteNonCoreDataServiceImpl implements
 		GenericResultsetData result = genericDataService
 				.fillGenericResultSet(sql);
 
-		String jsonString = generateJsonFromGenericResultsetData(result);
-
-		logger.info("JSON is: " + jsonString);
 		long elapsed = System.currentTimeMillis() - startTime;
 		logger.info("FINISHING DATATABLE: " + datatable + "     Elapsed Time: "
 				+ elapsed);
-		return jsonString;
+
+		return result;
 	}
-	
+
 	private String getApplicationTableName(String datatable) {
-		String sql = "SELECT application_table_name FROM x_registered_table where registered_table_name = '" + datatable + "'";
+		String sql = "SELECT application_table_name FROM x_registered_table where registered_table_name = '"
+				+ datatable + "'";
 
 		CachedRowSet rs = genericDataService.getCachedResultSet(sql, "SQL : "
 				+ sql);
 
 		if (rs.size() == 0)
 			throw new DataTableNotFoundException(datatable);
-		
+
 		try {
 			rs.next();
 			return rs.getString("application_table_name");

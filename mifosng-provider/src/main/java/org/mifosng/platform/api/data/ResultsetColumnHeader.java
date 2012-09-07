@@ -10,6 +10,7 @@ public class ResultsetColumnHeader {
 	private Integer columnLength;
 	private String columnDisplayType;
 	private List<String> columnValues = new ArrayList<String>();
+	private List<ResultsetColumnValue> columnValuesNew = new ArrayList<ResultsetColumnValue>();
 
 	public ResultsetColumnHeader() {
 
@@ -53,6 +54,14 @@ public class ResultsetColumnHeader {
 
 	public void setColumnDisplayType(String columnDisplayType) {
 		this.columnDisplayType = columnDisplayType;
+	}
+
+	public List<ResultsetColumnValue> getColumnValuesNew() {
+		return columnValuesNew;
+	}
+
+	public void setColumnValuesNew(List<ResultsetColumnValue> columnValuesNew) {
+		this.columnValuesNew = columnValuesNew;
 	}
 
 }

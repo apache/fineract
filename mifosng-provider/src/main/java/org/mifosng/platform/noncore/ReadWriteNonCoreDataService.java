@@ -13,8 +13,12 @@ public interface ReadWriteNonCoreDataService {
 	GenericResultsetData retrieveExtraData(String type, String set, Long id);
 
 	void updateExtraData(String type, String set, Long id,
-			Map<String, String> queryParams);	
+			Map<String, String> queryParams);
 
-	String retrieveDataTable(String datatable, Long id, String sqlFields, String sqlSearch, String sqlOrder);	
+	GenericResultsetData retrieveDataTableGenericResultSet(String datatable,
+			Long id, String sqlFields, String sqlSearch, String sqlOrder);
+
+	String retrieveDataTableJSONObject(String datatable, Long id,
+			String sqlFields, String sqlSearch, String sqlOrder);
 
 }

@@ -262,7 +262,28 @@ public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements
 
 	public boolean hasNotPermissionForReport(String reportName) {
 
-		if (hasNotPermissionForAnyOf("ALL_FUNCTIONS", "ALL_FUNCTIONS_READ", "CAN_RUN_" + reportName))
+		if (hasNotPermissionForAnyOf("ALL_FUNCTIONS", "ALL_FUNCTIONS_READ",
+				"CAN_RUN_" + reportName))
+			return true;
+
+		return false;
+	}
+
+	public boolean hasNotPermissionForDatatable(String datatable,
+			String accessType) {
+
+		String matchPermission = "CAN_" + accessType + "_" + datatable;
+
+		if (accessType.equalsIgnoreCase("READ")) {
+
+			if (hasNotPermissionForAnyOf("ALL_FUNCTIONS", "ALL_FUNCTIONS_READ",
+					matchPermission))
+				return true;
+
+			return false;
+		}
+
+		if (hasNotPermissionForAnyOf("ALL_FUNCTIONS", matchPermission))
 			return true;
 
 		return false;
@@ -275,15 +296,16 @@ public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements
 
 		if (accessType.equalsIgnoreCase("READ")) {
 
-			if (hasNotPermissionForAnyOf("ALL_FUNCTIONS", "ALL_FUNCTIONS_READ", matchPermission))
+			if (hasNotPermissionForAnyOf("ALL_FUNCTIONS", "ALL_FUNCTIONS_READ",
+					matchPermission))
 				return true;
-			
+
 			return false;
 		}
 
 		if (hasNotPermissionForAnyOf("ALL_FUNCTIONS", matchPermission))
 			return true;
-		
+
 		return false;
 	}
 

@@ -16,4 +16,6 @@ public interface GenericDataService {
 
 	String wrapSQL(String sql);
 
+	String getDatabaseName();
+
 }
