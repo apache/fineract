@@ -2,27 +2,28 @@ package org.mifosng.platform.api.data;
 
 public class ResultsetColumnValue {
 
-	private Long id;
-	private String Value;
+	private int id;
+	private String value;
 
-	public ResultsetColumnValue() {
-
+	public ResultsetColumnValue(int id, String value) {
+		this.id = id;
+		this.value = value;
 	}
 
-	public Long getId() {
+	public int getId() {
 		return id;
 	}
 
-	public void setId(Long id) {
+	public void setId(int id) {
 		this.id = id;
 	}
 
 	public String getValue() {
-		return Value;
+		return value;
 	}
 
 	public void setValue(String value) {
-		Value = value;
+		this.value = value;
 	}
 
 }

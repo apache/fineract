@@ -13,6 +13,7 @@ import org.apache.commons.lang.StringUtils;
 import org.mifosng.platform.api.data.AdditionalFieldsSetData;
 import org.mifosng.platform.api.data.GenericResultsetData;
 import org.mifosng.platform.api.data.ResultsetColumnHeader;
+import org.mifosng.platform.api.data.ResultsetColumnValue;
 import org.mifosng.platform.api.data.ResultsetDataRow;
 import org.mifosng.platform.exceptions.AdditionalFieldsNotFoundException;
 import org.mifosng.platform.exceptions.DataTableNotFoundException;
@@ -183,7 +184,7 @@ public class ReadWriteNonCoreDataServiceImpl implements
 				rsch.setColumnType(columnDefinitions.getString("data_type"));
 				if (columnDefinitions.getInt("data_length") > 0)
 					rsch.setColumnLength(columnDefinitions
-							.getInt("data_length"));
+							.getLong("data_length"));
 
 				rsch.setColumnDisplayType(columnDefinitions
 						.getString("display_type"));
@@ -501,6 +502,11 @@ public class ReadWriteNonCoreDataServiceImpl implements
 
 		checkMainResourceExistsWithinScope(applicationTableName, id);
 
+		CachedRowSet columnDefinitions = getDatatableMetaData(datatable);
+
+		List<ResultsetColumnHeader> columnHeaders = getDatatableResultsetColumnHeaders(
+				columnDefinitions);
+		
 		String fkField = applicationTableName.substring(2) + "_id";
 
 		String sql = "select ";
@@ -516,14 +522,37 @@ public class ReadWriteNonCoreDataServiceImpl implements
 		if (sqlOrder != null)
 			sql = sql + " order by " + sqlOrder;
 		logger.info(sql);
-		GenericResultsetData result = genericDataService
-				.fillGenericResultSet(sql);
+		
+		
+		//GenericResultsetData result = genericDataService
+		//		.fillGenericResultSet(sql);
 
 		long elapsed = System.currentTimeMillis() - startTime;
 		logger.info("FINISHING DATATABLE: " + datatable + "     Elapsed Time: "
 				+ elapsed);
 
-		return result;
+		return new GenericResultsetData(columnHeaders, new ArrayList<ResultsetDataRow>());
+		
+/*
+		List<ResultsetColumnHeader> columnHeaders = getResultsetColumnHeaders(
+				columnDefinitions, sqlErrorMsg);
+
+		String selectFieldList = getSelectFieldListFromColumnHeaders(columnHeaders);
+
+		String sql = "select " + selectFieldList + " from `" + type
+				+ "` t left join `" + getFullDatasetName(type, set)
+				+ "` s on s.id = t.id where t.id = " + id;
+		logger.info("addition fields sql: " + sql);
+
+		List<ResultsetDataRow> resultsetDataRows = getResultsetDataRows(
+				columnHeaders, sql, sqlErrorMsg);
+
+		long elapsed = System.currentTimeMillis() - startTime;
+		logger.info("FINISHING SET: " + set + "     Elapsed Time: " + elapsed);
+
+		return new GenericResultsetData(columnHeaders, resultsetDataRows);
+		*/
+		
 	}
 
 	private String getApplicationTableName(String datatable) {
@@ -543,6 +572,96 @@ public class ReadWriteNonCoreDataServiceImpl implements
 			throw new PlatformDataIntegrityException("error.msg.sql.error",
 					e.getMessage());
 		}
+	}
+
+
+	private CachedRowSet getDatatableMetaData(String datatable) {
+
+		String sql = "select COLUMN_NAME, IS_NULLABLE, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH, COLUMN_KEY"
+				+ " from INFORMATION_SCHEMA.COLUMNS "
+				+ " where TABLE_SCHEMA = schema() and TABLE_NAME = '"
+				+ datatable + "'order by ORDINAL_POSITION";
+		
+		CachedRowSet columnDefinitions = genericDataService.getCachedResultSet(
+				sql, "SQL: " + sql);
+
+		if (columnDefinitions.size() > 0)
+			return columnDefinitions;
+
+		throw new DataTableNotFoundException(datatable);
+	}
+
+	private List<ResultsetColumnHeader> getDatatableResultsetColumnHeaders(
+			CachedRowSet columnDefinitions) {
+
+		List<ResultsetColumnHeader> columnHeaders = new ArrayList<ResultsetColumnHeader>();
+
+		try {
+
+			while (columnDefinitions.next()) {
+				ResultsetColumnHeader rsch = new ResultsetColumnHeader();
+				
+				rsch.setColumnName(columnDefinitions.getString("COLUMN_NAME"));
+
+				String isNullable = columnDefinitions.getString("IS_NULLABLE");
+				if (isNullable.equalsIgnoreCase("YES")) rsch.setColumnNullable(true);
+				else rsch.setColumnNullable(false);
+				
+				String isPrimaryKey = columnDefinitions.getString("COLUMN_KEY");
+				if (isPrimaryKey.equalsIgnoreCase("PRI")) rsch.setColumnPrimaryKey(true);
+				else rsch.setColumnPrimaryKey(false);
+
+				Long columnLength = columnDefinitions.getLong("CHARACTER_MAXIMUM_LENGTH");
+				if (columnLength > 0 ) rsch.setColumnLength(columnDefinitions.getLong("CHARACTER_MAXIMUM_LENGTH"));
+				
+				rsch.setColumnType(columnDefinitions.getString("DATA_TYPE"));
+
+				rsch.setColumnDisplayType(null);
+				
+				/* look for codes */
+				if (rsch.getColumnType().equalsIgnoreCase("varchar")) 
+					addCodesValueIfNecessary(rsch, "_cv");
+					
+				if (rsch.getColumnType().equalsIgnoreCase("int")) 
+					addCodesValueIfNecessary(rsch, "_cd");
+				
+				columnHeaders.add(rsch);
+			}
+			;
+			return columnHeaders;
+
+		} catch (SQLException e) {
+			throw new PlatformDataIntegrityException("error.msg.sql.error",
+					e.getMessage());
+		}
+
+	}
+
+	
+	
+	
+	private void addCodesValueIfNecessary(ResultsetColumnHeader rsch, String code_suffix) {
+		int codePosition = rsch.getColumnName().indexOf(code_suffix);
+		if (codePosition > 0){
+			String codeName = rsch.getColumnName().substring(0, codePosition);
+			
+			String sql = "select v.id, v.code_value from m_code m "
+					+ " join m_code_value v on v.code_id = m.id "
+					+ " where m.code_name = '" + codeName + "' order by v.order_position, v.id";
+			
+			CachedRowSet rsValues = genericDataService
+					.getCachedResultSet(sql, "SQL: " + sql);
+			
+			try {
+				while (rsValues.next()) {
+					rsch.getColumnValuesNew().add( new ResultsetColumnValue(rsValues.getInt("id"), rsValues.getString("code_value")));
+				}
+			} catch (SQLException e) {
+				throw new PlatformDataIntegrityException("error.msg.sql.error",
+						e.getMessage());
+			}
+		}
+		
 	}
 
 	private static String generateJsonFromGenericResultsetData(

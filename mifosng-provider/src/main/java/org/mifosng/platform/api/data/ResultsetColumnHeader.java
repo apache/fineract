@@ -7,8 +7,10 @@ public class ResultsetColumnHeader {
 
 	private String columnName;
 	private String columnType;
-	private Integer columnLength;
+	private Long columnLength;
 	private String columnDisplayType;
+	private boolean isColumnNullable;
+	private boolean isColumnPrimaryKey;
 	private List<String> columnValues = new ArrayList<String>();
 	private List<ResultsetColumnValue> columnValuesNew = new ArrayList<ResultsetColumnValue>();
 
@@ -40,11 +42,11 @@ public class ResultsetColumnHeader {
 		this.columnType = columnType;
 	}
 
-	public Integer getColumnLength() {
+	public Long getColumnLength() {
 		return columnLength;
 	}
 
-	public void setColumnLength(Integer columnLength) {
+	public void setColumnLength(Long columnLength) {
 		this.columnLength = columnLength;
 	}
 
@@ -62,6 +64,22 @@ public class ResultsetColumnHeader {
 
 	public void setColumnValuesNew(List<ResultsetColumnValue> columnValuesNew) {
 		this.columnValuesNew = columnValuesNew;
+	}
+
+	public boolean isColumnNullable() {
+		return isColumnNullable;
+	}
+
+	public void setColumnNullable(boolean isColumnNullable) {
+		this.isColumnNullable = isColumnNullable;
+	}
+
+	public boolean isColumnPrimaryKey() {
+		return isColumnPrimaryKey;
+	}
+
+	public void setColumnPrimaryKey(boolean isColumnPrimaryKey) {
+		this.isColumnPrimaryKey = isColumnPrimaryKey;
 	}
 
 }
