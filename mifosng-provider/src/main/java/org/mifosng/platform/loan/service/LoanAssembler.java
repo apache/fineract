@@ -23,6 +23,8 @@ import org.mifosng.platform.exceptions.FundNotFoundException;
 import org.mifosng.platform.exceptions.InvalidCurrencyException;
 import org.mifosng.platform.exceptions.LoanProductNotFoundException;
 import org.mifosng.platform.exceptions.LoanTransactionProcessingStrategyNotFoundException;
+import org.mifosng.platform.exceptions.StaffNotFoundException;
+import org.mifosng.platform.exceptions.StaffRoleException;
 import org.mifosng.platform.fund.domain.Fund;
 import org.mifosng.platform.fund.domain.FundRepository;
 import org.mifosng.platform.loan.domain.AmortizationMethod;
@@ -41,6 +43,8 @@ import org.mifosng.platform.loan.domain.LoanTransactionProcessingStrategy;
 import org.mifosng.platform.loan.domain.LoanTransactionProcessingStrategyRepository;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 import org.mifosng.platform.loanschedule.domain.AprCalculator;
+import org.mifosng.platform.staff.domain.Staff;
+import org.mifosng.platform.staff.domain.StaffRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
@@ -54,6 +58,7 @@ public class LoanAssembler {
 	private final FundRepository fundRepository;
     private final ChargeRepository chargeRepository;
 	private final LoanTransactionProcessingStrategyRepository loanTransactionProcessingStrategyRepository;
+	private final StaffRepository staffRepository;
 	
 	@Autowired
 	public LoanAssembler(
@@ -61,12 +66,14 @@ public class LoanAssembler {
 			final ClientRepository clientRepository,
 			final FundRepository fundRepository,
             final ChargeRepository chargeRepository,
-			final LoanTransactionProcessingStrategyRepository loanTransactionProcessingStrategyRepository) {
+			final LoanTransactionProcessingStrategyRepository loanTransactionProcessingStrategyRepository,
+	  		final StaffRepository staffRepository) {
 		this.loanProductRepository = loanProductRepository;
 		this.clientRepository = clientRepository;
 		this.fundRepository = fundRepository;
         this.chargeRepository = chargeRepository;
 		this.loanTransactionProcessingStrategyRepository = loanTransactionProcessingStrategyRepository;
+		this.staffRepository = staffRepository;
 	}
 	
 	public Loan assembleFrom(final LoanApplicationCommand command) {
@@ -94,7 +101,10 @@ public class LoanAssembler {
 		Fund fund = findFundByIdIfProvided(command.getFundId());
 		LoanTransactionProcessingStrategy loanTransactionProcessingStrategy = findStrategyByIdIfProvided(command.getTransactionProcessingStrategyId());
 
-		Loan loan = Loan.createNew(fund, loanTransactionProcessingStrategy, loanProduct, client, loanRepaymentScheduleDetail);
+		//optionally associate a loan officer to the loan
+		Staff loanOfficer= findLoanOfficerByIdIfProvided(command.getLoanOfficerId());
+
+		Loan loan = Loan.createNew(fund,loanOfficer, loanTransactionProcessingStrategy, loanProduct, client, loanRepaymentScheduleDetail);
 		loan.setExternalId(command.getExternalId());
 
         final Set<LoanCharge> charges = this.assembleSetOfCharges(command, loan, loanProduct, currency.getCode());
@@ -157,6 +167,20 @@ public class LoanAssembler {
 			}
 		}
 		return fund;
+	}
+	
+	private Staff findLoanOfficerByIdIfProvided(final Long loanOfficerId) {
+		Staff staff = null;
+		if (loanOfficerId != null) {
+			staff = this.staffRepository.findOne(loanOfficerId);
+			if (staff == null) {
+				throw new StaffNotFoundException(loanOfficerId);
+			} else if (!staff.getLoanOfficerFlag()) {
+				throw new StaffRoleException(loanOfficerId,
+						StaffRoleException.STAFF_ROLE.LOAN_OFFICER);
+			}
+		}
+		return staff;
 	}
 	
 	public LoanTransactionProcessingStrategy findStrategyByIdIfProvided(final Long transactionProcessingStrategyId) {

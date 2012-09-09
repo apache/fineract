@@ -2,11 +2,14 @@ package org.mifosng.platform.staff.service;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosng.platform.api.commands.StaffCommand;
-import org.mifosng.platform.exceptions.StaffNotFoundException;
+import org.mifosng.platform.exceptions.OfficeNotFoundException;
 import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
+import org.mifosng.platform.exceptions.StaffNotFoundException;
+import org.mifosng.platform.organisation.domain.Office;
+import org.mifosng.platform.organisation.domain.OfficeRepository;
+import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.staff.domain.Staff;
 import org.mifosng.platform.staff.domain.StaffRepository;
-import org.mifosng.platform.security.PlatformSecurityContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,13 +26,16 @@ public class StaffWritePlatformServiceJpaRepositoryImpl implements
 
 	private final PlatformSecurityContext context;
 	private final StaffRepository staffRepository;
+	private final OfficeRepository officeRepository;
 
 	@Autowired
 	public StaffWritePlatformServiceJpaRepositoryImpl(
 			final PlatformSecurityContext context,
-			final StaffRepository staffRepository) {
+			final StaffRepository staffRepository,
+			final OfficeRepository officeRepository) {
 		this.context = context;
 		this.staffRepository = staffRepository;
+		this.officeRepository = officeRepository;
 	}
 
 	@Transactional
@@ -42,8 +48,14 @@ public class StaffWritePlatformServiceJpaRepositoryImpl implements
 			StaffCommandValidator validator = new StaffCommandValidator(command);
 			validator.validateForCreate();
 
-			Staff staff = Staff.createNew(command.getFirstName(),
-					command.getLastName());
+			Office staffOffice = this.officeRepository.findOne(command
+					.getOfficeId());
+			if (staffOffice == null) {
+				throw new OfficeNotFoundException(command.getOfficeId());
+			}
+
+			Staff staff = Staff.createNew(staffOffice, command.getFirstName(),
+					command.getLastName(), command.isLoanOfficerFlag());
 
 			this.staffRepository.saveAndFlush(staff);
 
@@ -69,7 +81,17 @@ public class StaffWritePlatformServiceJpaRepositoryImpl implements
 			if (staff == null) {
 				throw new StaffNotFoundException(staffId);
 			}
-			staff.update(command);
+
+			Office staffOffice = null;
+			Long officeId = command.getOfficeId();
+			if (command.isOfficeChanged() && officeId != null) {
+				staffOffice = this.officeRepository.findOne(officeId);
+				if (staffOffice == null) {
+					throw new OfficeNotFoundException(command.getOfficeId());
+				}
+			}
+
+			staff.update(command, staffOffice);
 
 			this.staffRepository.saveAndFlush(staff);
 

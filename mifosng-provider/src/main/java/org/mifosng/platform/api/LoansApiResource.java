@@ -40,6 +40,7 @@ import org.mifosng.platform.api.data.LoanRepaymentPeriodData;
 import org.mifosng.platform.api.data.LoanRepaymentTransactionData;
 import org.mifosng.platform.api.data.LoanSchedule;
 import org.mifosng.platform.api.data.LoanTransactionData;
+import org.mifosng.platform.api.data.StaffData;
 import org.mifosng.platform.api.data.TransactionProcessingStrategyData;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
@@ -52,6 +53,7 @@ import org.mifosng.platform.loan.service.LoanReadPlatformService;
 import org.mifosng.platform.loan.service.LoanWritePlatformService;
 import org.mifosng.platform.loanproduct.service.LoanDropdownReadPlatformService;
 import org.mifosng.platform.loanproduct.service.LoanProductReadPlatformService;
+import org.mifosng.platform.staff.service.StaffReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -88,6 +90,9 @@ public class LoansApiResource {
 	@Autowired
 	private ApiJsonSerializerService apiJsonSerializerService;
 	
+	@Autowired
+	private StaffReadPlatformService staffReadPlatformService;
+	
 	@GET
 	@Path("template")
 	@Consumes({ MediaType.APPLICATION_JSON })
@@ -118,6 +123,9 @@ public class LoansApiResource {
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (responseParameters.isEmpty()) {
 			responseParameters.addAll(typicalResponseParameters);
+		}else if (responseParameters.contains("loanOfficerOptions")  && (responseParameters.size() == 1)) {
+			// TODO Vishwas: check if response parameters should be additive
+			responseParameters.addAll(typicalResponseParameters);
 		}
 		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 		
@@ -146,10 +154,19 @@ public class LoansApiResource {
 		
 		final boolean convenienceDataRequired = false;
 		Collection<ChargeData> charges = loanBasicDetails.getCharges();
+		
+		// populate loan officers if query param is passed in
+		Collection<StaffData> allowedLoanOfficers = null;
+		if (responseParameters.contains("loanOfficerOptions")) {
+			// get applicable loan officers
+			allowedLoanOfficers = this.staffReadPlatformService
+					.retrieveAllStaff(" office_id = "
+							+ loanBasicDetails.getClientOfficeId() + " and is_loan_officer = 1");
+		}
 		final LoanAccountData newLoanAccount = new LoanAccountData(loanBasicDetails, convenienceDataRequired, null, null, null, null, charges, 
 				productOptions, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions, 
 				transactionProcessingStrategyOptions, interestRateFrequencyTypeOptions, 
-				amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions, fundOptions, chargeOptions);
+				amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, allowedLoanOfficers);
 
 		return this.apiJsonSerializerService.serialzieLoanAccountDataToJson(prettyPrint, responseParameters, newLoanAccount);
 	}
@@ -175,6 +192,10 @@ public class LoansApiResource {
 		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (responseParameters.isEmpty()) {
+			responseParameters.addAll(typicalResponseParameters);
+		} else if ((responseParameters.contains("loanOfficerName") || responseParameters
+				.contains("loanOfficerId")) && (responseParameters.size() <= 2)) {
+			// TODO Vishwas: check if response parameters should be additive
 			responseParameters.addAll(typicalResponseParameters);
 		}
 		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
@@ -241,11 +262,19 @@ public class LoansApiResource {
 				chargeOptions.removeAll(charges);
 			}
 		}
+		
+		Collection<StaffData> allowedLoanOfficers = null;
+		if (responseParameters.contains("loanOfficerOptions")) {
+			// get applicable loan officers
+			allowedLoanOfficers = this.staffReadPlatformService
+					.retrieveAllStaff(" office_id = "
+							+ loanBasicDetails.getClientOfficeId() + " and is_loan_officer = 1");
+		}
 
 		final LoanAccountData loanAccount = new LoanAccountData(loanBasicDetails, convenienceDataRequired, summary, repaymentSchedule, loanRepayments, permissions, charges, 
 				productOptions, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions, 
 				transactionProcessingStrategyOptions, interestRateFrequencyTypeOptions, 
-				amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions, fundOptions, chargeOptions);
+				amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, allowedLoanOfficers);
 		
 		return this.apiJsonSerializerService.serialzieLoanAccountDataToJson(prettyPrint, responseParameters, loanAccount);
 	}

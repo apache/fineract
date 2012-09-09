@@ -1,7 +1,9 @@
 package org.mifosng.platform.api.data;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.joda.time.LocalDate;
 
@@ -20,6 +22,8 @@ public class LoanAccountData {
 	private final EnumOptionData status;
 	private final Long fundId;
 	private final String fundName;
+	private Long loanOfficerId;
+	private String loanOfficerName;
 	private final CurrencyData currency;
 	private final BigDecimal principal;
 	private final BigDecimal inArrearsTolerance;
@@ -66,6 +70,7 @@ public class LoanAccountData {
 	private final Collection<EnumOptionData> interestCalculationPeriodTypeOptions;
 	private final Collection<FundData> fundOptions;
 	private final Collection<ChargeData> chargeOptions;
+	private final Collection<StaffData> loanOfficerOptions;
 	
 	public LoanAccountData(
 			final LoanBasicDetailsData basicDetails,
@@ -84,7 +89,8 @@ public class LoanAccountData {
 			final Collection<EnumOptionData> interestTypeOptions, 
 			final Collection<EnumOptionData> interestCalculationPeriodTypeOptions, 
 			final Collection<FundData> fundOptions,
-			final Collection<ChargeData> chargeOptions) {
+			final Collection<ChargeData> chargeOptions,
+			final Collection<StaffData> loanOfficerOptions) {
 		this.summary = summary;
 		this.repaymentSchedule = repaymentSchedule;
 		this.loanRepayments = loanRepayments;
@@ -100,6 +106,7 @@ public class LoanAccountData {
 		this.interestCalculationPeriodTypeOptions = interestCalculationPeriodTypeOptions;
 		this.fundOptions = fundOptions;
 		this.chargeOptions = chargeOptions;
+		this.loanOfficerOptions = loanOfficerOptions;
 
 		if (convenienceDataRequired) {
 			int maxSubmittedOnOffsetFromToday = basicDetails
@@ -131,6 +138,9 @@ public class LoanAccountData {
 		this.loanProductDescription = basicDetails.getLoanProductDescription();
 		this.fundId = basicDetails.getFundId();
 		this.fundName = basicDetails.getFundName();
+    	this.loanOfficerId = basicDetails.getLoanOfficerId();
+		this.loanOfficerName = basicDetails.getLoanOfficerName();
+
 		
 		this.submittedOnDate = basicDetails.getSubmittedOnDate();
 		this.approvedOnDate = basicDetails.getApprovedOnDate();
@@ -363,5 +373,21 @@ public class LoanAccountData {
 
 	public Collection<ChargeData> getChargeOptions() {
 		return chargeOptions;
+	}
+
+	public Long getLoanOfficerId() {
+		return loanOfficerId;
+	}
+
+	public void setLoanOfficerId(Long loanOfficerId) {
+		this.loanOfficerId = loanOfficerId;
+	}
+
+	public String getLoanOfficerName() {
+		return loanOfficerName;
+	}
+
+	public void setLoanOfficerName(String loanOfficerName) {
+		this.loanOfficerName = loanOfficerName;
 	}
 }

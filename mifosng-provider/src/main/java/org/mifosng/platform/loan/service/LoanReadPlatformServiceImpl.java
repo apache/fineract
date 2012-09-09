@@ -234,7 +234,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 		final LocalDate expectedDisbursementDate = new LocalDate();
 		final ClientData clientAccount = this.clientReadPlatformService.retrieveIndividualClient(clientId);
 		
-		LoanBasicDetailsData loanDetails = LoanBasicDetailsData.populateForNewLoanCreation(clientAccount.getId(), clientAccount.getDisplayName(), expectedDisbursementDate);
+		LoanBasicDetailsData loanDetails = LoanBasicDetailsData.populateForNewLoanCreation(clientAccount.getId(), clientAccount.getDisplayName(), expectedDisbursementDate,
+				clientAccount.getOfficeId());
 		
 		if (productId != null) {
 			LoanProductData selectedProduct = this.loanProductReadPlatformService.retrieveLoanProduct(productId);
@@ -371,7 +372,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 		public String loanSchema() {
 			return "l.id as id, l.external_id as externalId, l.fund_id as fundId, f.name as fundName, " 
 					+ " lp.id as loanProductId, lp.name as loanProductName, lp.description as loanProductDescription, c.id as clientId, c.display_name as clientName, " 
-					+ " l.submittedon_date as submittedOnDate,"
+					+ " c.office_id as clientOfficeId,l.submittedon_date as submittedOnDate,"
 					+ " l.approvedon_date as approvedOnDate, l.expected_disbursedon_date as expectedDisbursementDate, l.disbursedon_date as actualDisbursementDate, l.expected_firstrepaymenton_date as expectedFirstRepaymentOnDate,"
 					+ " l.interest_calculated_from_date as interestChargedFromDate, l.closedon_date as closedOnDate, l.expected_maturedon_date as expectedMaturityDate, "
 					+ " l.principal_amount as principal, l.arrearstolerance_amount as inArrearsTolerance, l.number_of_repayments as numberOfRepayments, l.repay_every as repaymentEvery,"
@@ -380,12 +381,14 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 					+ " l.term_frequency as termFrequency, l.term_period_frequency_enum as termPeriodFrequencyType, "
 					+ " l.amortization_method_enum as amortizationType, l.interest_method_enum as interestType, l.interest_calculated_in_period_enum as interestCalculationPeriodType,"
 					+ " l.loan_status_id as lifeCycleStatusId, l.loan_transaction_strategy_id as transactionStrategyId, "
-					+ " l.currency_code as currencyCode, l.currency_digits as currencyDigits, rc.`name` as currencyName, rc.display_symbol as currencyDisplaySymbol, rc.internationalized_name_code as currencyNameCode"
+					+ " l.currency_code as currencyCode, l.currency_digits as currencyDigits, rc.`name` as currencyName, rc.display_symbol as currencyDisplaySymbol, rc.internationalized_name_code as currencyNameCode, "
+					+ " l.loan_officer_id as loanOfficerId, s.display_name as loanOfficerName"
 					+ " from m_loan l"
 					+ " join m_client c on c.id = l.client_id"
 					+ " join m_product_loan lp on lp.id = l.product_id"
 					+ " join m_currency rc on rc.`code` = l.currency_code"
-					+ " left join m_fund f on f.id = l.fund_id";
+					+ " left join m_fund f on f.id = l.fund_id"
+					+ " left join m_staff s on s.id = l.loan_officer_id";
 		}
 
 		@Override
@@ -404,9 +407,12 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 			Long id = rs.getLong("id");
 			String externalId = rs.getString("externalId");
 			Long clientId = JdbcSupport.getLong(rs, "clientId");
+			Long clientOfficeId = JdbcSupport.getLong(rs, "clientOfficeId");
 			String clientName = rs.getString("clientName");
 			Long fundId = JdbcSupport.getLong(rs, "fundId");
 			String fundName = rs.getString("fundName");
+			Long loanOfficerId = JdbcSupport.getLong(rs, "loanOfficerId");
+			String loanOfficerName = rs.getString("loanOfficerName");
 			Long loanProductId = JdbcSupport.getLong(rs, "loanProductId");
 			String loanProductName = rs.getString("loanProductName");
 			String loanProductDescription = rs.getString("loanProductDescription");
@@ -471,7 +477,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 			}
 
 			Collection<ChargeData> charges = null;
-			return new LoanBasicDetailsData(id, externalId, clientId, clientName, 
+			return new LoanBasicDetailsData(id, externalId, clientId, clientName, clientOfficeId,
 					loanProductId, loanProductName, loanProductDescription,
 					fundId, fundName, 
 					closedOnDate,
@@ -485,7 +491,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 					amortizationType, interestType,
 					interestCalculationPeriodType, 
 					status,
-					lifeCycleStatusDate, termFrequency, termPeriodFrequencyType, transactionStrategyId, charges);
+					lifeCycleStatusDate, termFrequency, termPeriodFrequencyType, transactionStrategyId, charges,
+					loanOfficerId, loanOfficerName);
 		}
 	}
 

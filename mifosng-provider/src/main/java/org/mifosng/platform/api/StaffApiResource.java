@@ -1,5 +1,6 @@
 package org.mifosng.platform.api;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Set;
 
@@ -10,19 +11,25 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.commons.lang.StringUtils;
 import org.mifosng.platform.api.commands.StaffCommand;
 import org.mifosng.platform.api.data.EntityIdentifier;
+import org.mifosng.platform.api.data.OfficeLookup;
 import org.mifosng.platform.api.data.StaffData;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
 import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
+import org.mifosng.platform.organisation.service.OfficeReadPlatformService;
 import org.mifosng.platform.staff.service.StaffReadPlatformService;
 import org.mifosng.platform.staff.service.StaffWritePlatformService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -44,10 +51,18 @@ public class StaffApiResource {
 	@Autowired
 	private ApiJsonSerializerService apiJsonSerializerService;
 
+	@Autowired
+	private OfficeReadPlatformService officeReadPlatformService;
+
+	private final static Logger logger = LoggerFactory
+			.getLogger(StaffApiResource.class);
+
 	@GET
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrieveStaffs(@Context final UriInfo uriInfo) {
+	public String retrieveStaff(@Context final UriInfo uriInfo,
+			@QueryParam("sqlSearch") final String sqlSearch,
+			@QueryParam("officeId") final Integer officeId) {
 
 		Set<String> responseParameters = ApiParameterHelper
 				.extractFieldsForResponseIfProvided(uriInfo
@@ -55,8 +70,9 @@ public class StaffApiResource {
 		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo
 				.getQueryParameters());
 
+		final String extraCriteria = getStaffCriteria(sqlSearch, officeId);
 		final Collection<StaffData> staff = this.readPlatformService
-				.retrieveAllStaff();
+				.retrieveAllStaff(extraCriteria);
 
 		return this.apiJsonSerializerService.serializeStaffDataToJson(
 				prettyPrint, responseParameters, staff);
@@ -87,8 +103,14 @@ public class StaffApiResource {
 						.getQueryParameters());
 		final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo
 				.getQueryParameters());
+		boolean template = ApiParameterHelper.template(uriInfo
+				.getQueryParameters());
 
 		final StaffData staff = this.readPlatformService.retrieveStaff(staffId);
+		if (template) {
+			staff.setAllowedOffices(new ArrayList<OfficeLookup>(
+					officeReadPlatformService.retrieveAllOfficesForLookup()));
+		}
 
 		return this.apiJsonSerializerService.serializeStaffDataToJson(
 				prettyPrint, responseParameters, staff);
@@ -108,4 +130,24 @@ public class StaffApiResource {
 
 		return Response.ok().entity(new EntityIdentifier(entityId)).build();
 	}
+
+	private String getStaffCriteria(String sqlSearch, Integer officeId) {
+
+		String extraCriteria = "";
+
+		if (sqlSearch != null) {
+			extraCriteria = " and (" + sqlSearch + ")";
+		}
+		if (officeId != null) {
+			extraCriteria += " and office_id = " + officeId;
+		}
+
+		if (StringUtils.isNotBlank(extraCriteria)) {
+			extraCriteria = extraCriteria.substring(4);
+		}
+		logger.info("extraCriteria; " + extraCriteria);
+
+		return extraCriteria;
+	}
+
 }

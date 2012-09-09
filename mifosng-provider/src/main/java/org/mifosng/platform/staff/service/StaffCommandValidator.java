@@ -29,6 +29,10 @@ public class StaffCommandValidator {
 		baseDataValidator.reset().parameter("lastname")
 				.value(command.getLastName()).notBlank()
 				.notExceedingLengthOf(50);
+		baseDataValidator.reset().parameter("officeId")
+				.value(command.getOfficeId()).notNull()
+				.integerGreaterThanZero();
+		
 
 		if (!dataValidationErrors.isEmpty()) {
 			throw new PlatformApiDataValidationException(

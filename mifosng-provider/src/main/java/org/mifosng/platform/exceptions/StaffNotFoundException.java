@@ -7,7 +7,7 @@ public class StaffNotFoundException extends
 		AbstractPlatformResourceNotFoundException {
 
 	public StaffNotFoundException(final Long id) {
-		super("error.msg.fund.id.invalid", "Staff with identifier " + id
+		super("error.msg.staff.id.invalid", "Staff with identifier " + id
 				+ " does not exist", id);
 	}
 }

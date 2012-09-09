@@ -134,7 +134,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	    
 	    
 	    Set<String> supportedParams = new HashSet<String>(
-	    		Arrays.asList("firstname", "lastname")
+	    		Arrays.asList("firstname", "lastname","officeId", "loanOfficerFlag")
 	    );
 	    
 	    checkForUnsupportedParameters(requestMap, supportedParams);
@@ -143,8 +143,10 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	    
 	    String firstname = extractStringParameter("firstname", requestMap, modifiedParameters);
 	    String lastname = extractStringParameter("lastname", requestMap, modifiedParameters);
+	    Boolean isLoanOfficer = extractBooleanParameter("loanOfficerFlag", requestMap, modifiedParameters);
+	    Long officeId = extractLongParameter("officeId", requestMap, modifiedParameters);
 	    
-		return new StaffCommand(modifiedParameters, resourceIdentifier, firstname, lastname);
+		return new StaffCommand(modifiedParameters, resourceIdentifier, officeId,firstname, lastname, isLoanOfficer);
 	}
 	
 	@Override
@@ -445,7 +447,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	    				"loanTermFrequency", "loanTermFrequencyType", "charges",
 	    				"repaymentFrequencyType", "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType",
 	    				"expectedDisbursementDate", "repaymentsStartingFromDate", "interestChargedFromDate", "submittedOnDate", "submittedOnNote",
-	    				"locale", "dateFormat")
+	    				"locale", "dateFormat", "loanOfficerId")
 	    );
 	    
 	    checkForUnsupportedParameters(requestMap, supportedParams);
@@ -455,6 +457,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	    Long clientId = extractLongParameter("clientId", requestMap, modifiedParameters);
 	    Long productId = extractLongParameter("productId", requestMap, modifiedParameters);
 	    Long fundId = extractLongParameter("fundId", requestMap, modifiedParameters);
+	    Long loanOfficerId = extractLongParameter("loanOfficerId", requestMap, modifiedParameters);
 	    Long transactionProcessingStrategyId = extractLongParameter("transactionProcessingStrategyId", requestMap, modifiedParameters);
 	    String externalId = extractStringParameter("externalId", requestMap, modifiedParameters);
 	    
@@ -523,7 +526,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	    		principal, interestRatePerPeriod, interestRateFrequencyTypeValue, interestTypeValue, interestCalculationPeriodTypeValue, 
 	    		repaymentEvery, repaymentFrequencyType, numberOfRepayments, amortizationTypeValue, 
 	    		loanTermFrequency, loanTermFrequencyType,
-	    		inArrearsToleranceValue, charges);
+	    		inArrearsToleranceValue, charges,loanOfficerId);
 	}
 	
 	@Override

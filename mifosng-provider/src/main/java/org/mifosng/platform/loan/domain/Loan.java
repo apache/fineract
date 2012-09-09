@@ -38,6 +38,7 @@ import org.mifosng.platform.exceptions.InvalidLoanStateTransitionException;
 import org.mifosng.platform.exceptions.InvalidLoanTransactionTypeException;
 import org.mifosng.platform.fund.domain.Fund;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
+import org.mifosng.platform.staff.domain.Staff;
 import org.mifosng.platform.user.domain.AppUser;
 
 @Entity
@@ -56,6 +57,10 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	@ManyToOne
 	@JoinColumn(name = "fund_id", nullable = true)
 	private Fund fund;
+	
+	@ManyToOne
+	@JoinColumn(name = "loan_officer_id", nullable = true)
+	private Staff loanofficer;
 	
 	@ManyToOne
 	@JoinColumn(name = "loan_transaction_strategy_id", nullable = true)
@@ -157,10 +162,10 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	@Transient
 	private final LoanRepaymentScheduleTransactionProcessorFactory transactionProcessor = new LoanRepaymentScheduleTransactionProcessorFactory();
 
-	public static Loan createNew(final Fund fund, final LoanTransactionProcessingStrategy transactionProcessingStrategy,
+	public static Loan createNew(final Fund fund,final Staff loanOfficer, final LoanTransactionProcessingStrategy transactionProcessingStrategy,
 			final LoanProduct loanProduct, final Client client,
 			final LoanProductRelatedDetail loanRepaymentScheduleDetail) {
-		return new Loan(client, fund, transactionProcessingStrategy, loanProduct, loanRepaymentScheduleDetail, null);
+		return new Loan(client, fund,loanOfficer, transactionProcessingStrategy, loanProduct, loanRepaymentScheduleDetail, null);
 	}
 
 	protected Loan() {
@@ -170,11 +175,12 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         this.charges = null;
 	}
 
-	public Loan(final Client client, Fund fund, LoanTransactionProcessingStrategy transactionProcessingStrategy, final LoanProduct loanProduct,
+	public Loan(final Client client, Fund fund, Staff loanOfficer, LoanTransactionProcessingStrategy transactionProcessingStrategy, final LoanProduct loanProduct,
 			final LoanProductRelatedDetail loanRepaymentScheduleDetail,
 			final LoanStatus loanStatus) {
 		this.client = client;
 		this.fund = fund;
+		this.loanofficer = loanOfficer;
 		this.transactionProcessingStrategy = transactionProcessingStrategy;
 		this.loanProduct = loanProduct;
 		this.loanRepaymentScheduleDetail = loanRepaymentScheduleDetail;
@@ -192,6 +198,10 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 
 	public LoanProduct loanProduct() {
 		return this.loanProduct;
+	}
+
+	public Staff getLoanofficer() {
+		return loanofficer;
 	}
 
 	public LoanProductRelatedDetail repaymentScheduleDetail() {

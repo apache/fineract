@@ -10,3 +10,4 @@ repos
 *.jar
 *.war
 *.ear
+*.bak

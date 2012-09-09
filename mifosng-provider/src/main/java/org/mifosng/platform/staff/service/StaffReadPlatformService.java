@@ -8,5 +8,5 @@ public interface StaffReadPlatformService {
 
 	StaffData retrieveStaff(Long staffId);
 
-	Collection<StaffData> retrieveAllStaff();
+	Collection<StaffData> retrieveAllStaff(final String extraCriteria);
 }

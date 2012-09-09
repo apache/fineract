@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
+import org.apache.commons.lang.StringUtils;
 import org.mifosng.platform.api.data.StaffData;
 import org.mifosng.platform.exceptions.StaffNotFoundException;
 import org.mifosng.platform.infrastructure.TenantAwareRoutingDataSource;
@@ -30,7 +31,9 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
 	private static final class StaffMapper implements RowMapper<StaffData> {
 
 		public String schema() {
-			return " s.id as id, s.firstname as firstname, s.lastname as lastname, s.display_name as displayName from m_staff s ";
+			return " s.id as id,s.office_id as officeId, o.name as officeName, s.firstname as firstname, s.lastname as lastname,"
+					+ " s.display_name as displayName, s.is_loan_officer as isLoanOfficer from m_staff s "
+					+ " join m_office o on o.id = s.office_id";
 		}
 
 		@Override
@@ -41,19 +44,27 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
 			String firstname = rs.getString("firstname");
 			String lastname = rs.getString("lastname");
 			String displayName = rs.getString("displayName");
-			
-			return new StaffData(id, firstname, lastname,displayName);
+			Long officeId = rs.getLong("officeId");
+			boolean isLoanOfficer = rs.getBoolean("isLoanOfficer");
+			String officeName = rs.getString("officeName");
+
+			return new StaffData(id, firstname, lastname, displayName,
+					officeId, officeName, isLoanOfficer);
 		}
+
 	}
 
 	@Override
-	public Collection<StaffData> retrieveAllStaff() {
+	public Collection<StaffData> retrieveAllStaff(final String extraCriteria) {
 
 		context.authenticatedUser();
 
 		StaffMapper rm = new StaffMapper();
-		String sql = "select " + rm.schema() + " order by s.lastname";
-
+		String sql = "select " + rm.schema();
+		if (StringUtils.isNotBlank(extraCriteria)) {
+			sql += " where " + extraCriteria;
+		}
+		sql = sql + " order by s.lastname";
 		return this.jdbcTemplate.query(sql, rm, new Object[] {});
 	}
 

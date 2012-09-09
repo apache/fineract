@@ -63,7 +63,8 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 	private static final Set<String> FUND_DATA_PARAMETERS = new HashSet<String>(
 			Arrays.asList("id", "name", "externalId"));
 	private static final Set<String> STAFF_DATA_PARAMETERS = new HashSet<String>(
-			Arrays.asList("id", "firstname", "lastname","displayName"));
+			Arrays.asList("id", "firstname", "lastname","displayName", "officeId", "officeName",
+					"loanOfficerFlag","allowedOffices"));
 	private static final Set<String> LOAN_PRODUCT_DATA_PARAMETERS = new HashSet<String>(
 			Arrays.asList("id", "name", "description", "fundId", "fundName",
 					"transactionProcessingStrategyId",
@@ -149,7 +150,8 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 					"lifeCycleStatusDate", "summary", "repaymentSchedule",
 					"loanRepayments", "permissions", "convenienceData", "charges",
 					"productOptions", "amortizationTypeOptions", "interestTypeOptions", "interestCalculationPeriodTypeOptions", 
-					"repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "fundOptions", "transactionProcessingStrategyOptions", "chargeOptions"));
+					"repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "fundOptions", "transactionProcessingStrategyOptions", "chargeOptions",
+					"loanOfficerId", "loanOfficerName", "loanOfficerOptions"));
 
 	private static final Set<String> LOAN_TRANSACTION_DATA_PARAMETERS = new HashSet<String>(
 			Arrays.asList("id", "transactionType", "date", "principal",

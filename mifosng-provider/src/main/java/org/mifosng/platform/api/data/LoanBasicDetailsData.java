@@ -13,9 +13,14 @@ import org.joda.time.Months;
  */
 public class LoanBasicDetailsData {
 
+	public Long getClientOfficeId() {
+		return clientOfficeId;
+	}
+
 	private final Long id;
 	private final String externalId;
 	private final Long clientId;
+	private final Long clientOfficeId;
 	private final String clientName;
 	private final Long loanProductId;
 	private final String loanProductName;
@@ -23,6 +28,8 @@ public class LoanBasicDetailsData {
 	private final EnumOptionData status;
 	private final Long fundId;
 	private final String fundName;
+	private Long loanOfficerId;
+	private String loanOfficerName;
 	private final CurrencyData currency;
 	private final BigDecimal principal;
 	private final BigDecimal inArrearsTolerance;
@@ -52,8 +59,9 @@ public class LoanBasicDetailsData {
 	
 	private final Collection<ChargeData> charges;
 	
-	public static LoanBasicDetailsData populateForNewLoanCreation(final Long clientId, final String clientName, final LocalDate expectedDisbursementDate) {
-		return new LoanBasicDetailsData(clientId, clientName, expectedDisbursementDate);
+	public static LoanBasicDetailsData populateForNewLoanCreation(final Long clientId, final String clientName, final LocalDate expectedDisbursementDate,
+																	final Long clientOfficeId) {
+		return new LoanBasicDetailsData(clientId, clientName, expectedDisbursementDate, clientOfficeId);
 	}
 	
 	public static LoanBasicDetailsData populateForNewLoanCreation(final LoanBasicDetailsData loanAccount, final LoanProductData product) {
@@ -61,7 +69,7 @@ public class LoanBasicDetailsData {
 		final Integer termFrequency = product.getNumberOfRepayments() * product.getRepaymentEvery();
 		final EnumOptionData termPeriodFrequencyType = product.getRepaymentFrequencyType();
 		return new LoanBasicDetailsData(
-				loanAccount.clientId, loanAccount.clientName, 
+				loanAccount.clientId, loanAccount.clientName, loanAccount.clientOfficeId,
 				product.getId(), product.getName(), product.getDescription(), product.getFundId(), product.getFundName(), 
 				product.getCurrency(), product.getPrincipal(), product.getInArrearsTolerance(),
 				termFrequency, termPeriodFrequencyType, product.getNumberOfRepayments(), product.getRepaymentEvery(), product.getRepaymentFrequencyType(),
@@ -71,7 +79,7 @@ public class LoanBasicDetailsData {
 	}
 	
 	private LoanBasicDetailsData(
-			final Long clientId, final String clientName, 
+			final Long clientId, final String clientName, final Long clientOfficeId,
 			final Long productId, final String productName, final String productDescription, final Long fundId, final String fundName, 
 			final CurrencyData currency,  final BigDecimal principal, final BigDecimal inArrearsTolerance,
 			final Integer termFrequency,
@@ -90,6 +98,7 @@ public class LoanBasicDetailsData {
 		this.externalId = null;
 		this.clientId = clientId;
 		this.clientName = clientName;
+		this.clientOfficeId = clientOfficeId;
 		this.loanProductId =  productId;
 		this.loanProductName = productName;
 		this.loanProductDescription= productDescription;
@@ -134,18 +143,20 @@ public class LoanBasicDetailsData {
 		this.charges = charges;
 	}
 	
-	private LoanBasicDetailsData(final Long clientId, final String clientName, final LocalDate expectedDisbursementDate) {
+	private LoanBasicDetailsData(final Long clientId, final String clientName, final LocalDate expectedDisbursementDate, final Long clientOfficeId) {
 		this.id = null;
 		this.externalId = null;
 		this.clientId = clientId;
 		this.clientName = clientName;
+		this.clientOfficeId = clientOfficeId;
 		this.loanProductId =  null;
 		this.loanProductName = null;
 		this.loanProductDescription= null;
 		this.status = null;
 		this.fundId = null;
 		this.fundName = null;
-		
+		this.loanOfficerId = null;
+		this.loanOfficerName = null;
 		this.currency = null;
 		this.principal = null;
 		this.inArrearsTolerance = null;
@@ -181,7 +192,7 @@ public class LoanBasicDetailsData {
 			final Long id, 
 			final String externalId,
 			final Long clientId, final String clientName,
-			final Long loanProductId,
+			final Long clientOfficeId, final Long loanProductId,
 			final String loanProductName,
 			final String loanProductDescription,
 			final Long fundId, String fundName,
@@ -210,16 +221,20 @@ public class LoanBasicDetailsData {
 			final Integer termFrequency, 
 			final EnumOptionData termPeriodFrequencyType, 
 			final Integer transactionStrategyId,
-			final Collection<ChargeData> charges) {
+			final Collection<ChargeData> charges,
+			final Long loanOfficerId, String loanOfficerName) {
 		this.id = id;
 		this.externalId = externalId;
 		this.clientId = clientId;
 		this.clientName = clientName;
+		this.clientOfficeId = clientOfficeId;
 		this.loanProductId = loanProductId;
 		this.loanProductName = loanProductName;
 		this.loanProductDescription = loanProductDescription;
 		this.fundId = fundId;
 		this.fundName = fundName;
+	    this.loanOfficerId = loanOfficerId;
+		this.loanOfficerName = loanOfficerName;
 		this.closedOnDate = closedOnDate;
 		this.submittedOnDate = submittedOnDate;
 		this.approvedOnDate = approvedOnDate;
@@ -475,5 +490,21 @@ public class LoanBasicDetailsData {
 
 	public Collection<ChargeData> getCharges() {
 		return charges;
+	}
+
+	public Long getLoanOfficerId() {
+		return loanOfficerId;
+	}
+
+	public void setLoanOfficerId(Long loanOfficerId) {
+		this.loanOfficerId = loanOfficerId;
+	}
+
+	public String getLoanOfficerName() {
+		return loanOfficerName;
+	}
+
+	public void setLoanOfficerName(String loanOfficerName) {
+		this.loanOfficerName = loanOfficerName;
 	}
 }

@@ -17,6 +17,7 @@ public class LoanApplicationCommand {
 	private final String externalId;
 	
 	private final Long fundId;
+	private final Long loanOfficerId;
 	private final Long transactionProcessingStrategyId;
 	
 	private final BigDecimal principal;
@@ -63,13 +64,15 @@ public class LoanApplicationCommand {
 			final Integer interestCalculationPeriodMethod,
 			final Integer repaymentEvery, final Integer repaymentFrequency, final Integer numberOfRepayments, Integer amortizationMethod, 
 			final Integer loanTermFrequency, final Integer loanTermFrequencyType,
-			final BigDecimal toleranceAmount, final LoanChargeCommand[] charges) {
+			final BigDecimal toleranceAmount, final LoanChargeCommand[] charges,
+			final Long loanOfficerId) {
 		this.modifiedParameters = modifiedParameters;
 		this.loanId = loanId;
 		this.clientId = clientId;
 		this.productId = productId;
 		this.externalId = externalId;
 		this.fundId = fundId;
+		this.loanOfficerId = loanOfficerId;
 		this.transactionProcessingStrategyId = transactionProcessingStrategyId;
 		
 		this.submittedOnDate = submittedOnDate;
@@ -231,6 +234,10 @@ public class LoanApplicationCommand {
 	public boolean isFundChanged() {
 		return this.modifiedParameters.contains("fundId");
 	}
+	
+	public boolean isLoanOfficerChanged() {
+		return this.modifiedParameters.contains("loanOfficerId");
+	}
 
 	public boolean isTransactionStrategyChanged() {
 		return this.modifiedParameters.contains("transactionProcessingStrategyId");
@@ -258,5 +265,9 @@ public class LoanApplicationCommand {
 
 	public boolean isInterestChargedFromDateChanged() {
 		return this.modifiedParameters.contains("interestChargedFromDate");
+	}
+
+	public Long getLoanOfficerId() {
+		return loanOfficerId;
 	}
 }
