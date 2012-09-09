@@ -91,3 +91,8 @@ VALUES
 (9,1,NULL,'Moustapha','Yattabar','2009-02-18',1,'2012-04-14 10:24:20','2012-04-14 10:24:20',1),
 (10,1,NULL,NULL,'Mali fruit sales ltd.','2009-02-18',1,'2012-04-14 10:25:37','2012-04-14 10:25:37',1),
 (11,1,NULL,NULL,'Djenne co-op group','2009-02-25',1,'2012-04-14 10:31:03','2012-04-14 10:31:03',1);
+
+
+
+update m_client set display_name = concat_ws(' ',firstname,lastname);
+

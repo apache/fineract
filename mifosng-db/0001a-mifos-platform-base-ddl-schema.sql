@@ -45,6 +45,7 @@ DROP TABLE IF EXISTS `ref_loan_transaction_processing_strategy`;
 DROP TABLE IF EXISTS `m_code_value`;
 DROP TABLE IF EXISTS `m_code`;
 DROP TABLE IF EXISTS `r_enum_value`;
+DROP TABLE IF EXISTS `x_registered_table`;
 
 -- additional data and report tables
 DROP TABLE IF EXISTS `stretchydata_dataset_fields`;
@@ -109,6 +110,15 @@ CREATE TABLE `r_enum_value` (
   PRIMARY KEY (`enum_name`, `enum_id`),
   UNIQUE KEY `enum_message_property` (`enum_name`, `enum_message_property`),
   UNIQUE KEY `enum_value` (`enum_name`, `enum_value`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+/* used to link MySql tables to Mifos X application tables for additional data needs */
+CREATE TABLE `x_registered_table` (
+  `registered_table_name` varchar(50) NOT NULL,
+  `registered_table_label` varchar(80) NOT NULL,
+  `application_table_name` varchar(50) NOT NULL,
+  PRIMARY KEY (`registered_table_name`),
+  UNIQUE KEY `registered_table_label` (`registered_table_label`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- DDL for organisation wide related concepts
@@ -295,6 +305,7 @@ CREATE TABLE `m_client` (
   `external_id` varchar(100) DEFAULT NULL,
   `firstname` varchar(50) DEFAULT NULL,
   `lastname` varchar(50) DEFAULT NULL,
+  `display_name` varchar(50) DEFAULT NULL,
   `joining_date` date DEFAULT NULL,
   `createdby_id` bigint(20) DEFAULT NULL,
   `created_date` datetime DEFAULT NULL,
@@ -302,6 +313,7 @@ CREATE TABLE `m_client` (
   `lastmodifiedby_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `external_id` (`external_id`),
+  KEY `display_name` (`display_name`),
   KEY `FKCE00CAB3E0DD567A` (`office_id`),
   KEY `FKAUD0000000000001` (`createdby_id`),
   KEY `FKAUD0000000000002` (`lastmodifiedby_id`),

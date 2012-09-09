@@ -1,5 +1,6 @@
 package org.mifosng.platform.noncore;
 
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -560,7 +561,6 @@ public class ReadWriteNonCoreDataServiceImpl implements
 				columnDefinitions);
 		
 		String fkField = applicationTableName.substring(2) + "_id";
-
 		String sql = "select ";
 		if (sqlFields != null)
 			sql = sql + sqlFields;
@@ -568,41 +568,53 @@ public class ReadWriteNonCoreDataServiceImpl implements
 			sql = sql + " * ";
 
 		sql = sql + " from " + datatable + " where " + fkField + " = " + id;
-
 		if (sqlOrder != null)
 			sql = sql + " order by " + sqlOrder;
 		logger.info(sql);
 		
-		
-		//GenericResultsetData result = genericDataService
-		//		.fillGenericResultSet(sql);
+		List<ResultsetDataRow> result = fillDatatableResultSetDataRows(sql);
 
 		long elapsed = System.currentTimeMillis() - startTime;
 		logger.info("FINISHING DATATABLE: " + datatable + "     Elapsed Time: "
 				+ elapsed);
 
-		return new GenericResultsetData(columnHeaders, new ArrayList<ResultsetDataRow>());
-		
-/*
-		List<ResultsetColumnHeader> columnHeaders = getResultsetColumnHeaders(
-				columnDefinitions, sqlErrorMsg);
+		return new GenericResultsetData(columnHeaders, result);
+				
+	}
+ 
+	
+	private List<ResultsetDataRow> fillDatatableResultSetDataRows(final String sql) {
 
-		String selectFieldList = getSelectFieldListFromColumnHeaders(columnHeaders);
+		String sqlErrorMsg = "Sql: " + sql;
+		CachedRowSet rs = genericDataService.getCachedResultSet(sql, sqlErrorMsg);
 
-		String sql = "select " + selectFieldList + " from `" + type
-				+ "` t left join `" + getFullDatasetName(type, set)
-				+ "` s on s.id = t.id where t.id = " + id;
-		logger.info("addition fields sql: " + sql);
+		List<ResultsetDataRow> resultsetDataRows = new ArrayList<ResultsetDataRow>();
 
-		List<ResultsetDataRow> resultsetDataRows = getResultsetDataRows(
-				columnHeaders, sql, sqlErrorMsg);
+		try {
 
-		long elapsed = System.currentTimeMillis() - startTime;
-		logger.info("FINISHING SET: " + set + "     Elapsed Time: " + elapsed);
+			ResultSetMetaData rsmd = rs.getMetaData();
+			int columnCount = rsmd.getColumnCount();
+			
+			ResultsetDataRow resultsetDataRow;
+			String columnName = null;
+			String columnValue = null;
+			while (rs.next()) {
+				resultsetDataRow = new ResultsetDataRow();
+				List<String> columnValues = new ArrayList<String>();
+				for (int i = 0; i < columnCount; i++) {
+					columnName = rsmd.getColumnName(i + 1);
+					columnValue = rs.getString(columnName);
+					columnValues.add(columnValue);
+				}
+				resultsetDataRow.setRow(columnValues);
+				resultsetDataRows.add(resultsetDataRow);
+			}
 
-		return new GenericResultsetData(columnHeaders, resultsetDataRows);
-		*/
-		
+			return resultsetDataRows;
+		} catch (SQLException e) {
+			throw new PlatformDataIntegrityException("error.msg.sql.error",
+					e.getMessage(), sqlErrorMsg);
+		}
 	}
 
 	private String getApplicationTableName(String datatable) {
