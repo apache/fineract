@@ -11,6 +11,7 @@ import javax.sql.rowset.CachedRowSet;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosng.platform.api.data.AdditionalFieldsSetData;
+import org.mifosng.platform.api.data.DatatableData;
 import org.mifosng.platform.api.data.GenericResultsetData;
 import org.mifosng.platform.api.data.ResultsetColumnHeader;
 import org.mifosng.platform.api.data.ResultsetColumnValue;
@@ -476,12 +477,63 @@ public class ReadWriteNonCoreDataServiceImpl implements
 	}
 
 	@Override
+	public List<DatatableData> retrieveDatatableNames(String appTable) {
+
+		long startTime = System.currentTimeMillis();
+
+		String andClause;
+		if (appTable == null) {
+			andClause = "";
+		} else {
+			andClause = " and application_table_name = '" + appTable + "'";
+		}
+		// PERMITTED datatables
+		String sql = "select application_table_name, registered_table_name, registered_table_label"
+				+ " from x_registered_table "
+				+ " where exists"
+				+ " (select 'f'"
+				+ " from m_appuser_role ur "
+				+ " join m_role r on r.id = ur.role_id"
+				+ " left join m_role_permission rp on rp.role_id = r.id"
+				+ " left join m_permission p on p.id = rp.permission_id"
+				+ " where ur.appuser_id = "
+				+ context.authenticatedUser().getId()
+				+ " and (p.code in ('ALL_FUNCTIONS', 'ALL_FUNCTIONS_READ') or p.code = concat('CAN_READ_', registered_table_name))) "
+				+ andClause + " order by application_table_name, registered_table_name";
+
+		//sql = genericDataService.wrapSQL(sql);
+		String sqlErrorMsg = "Application Table Name: " + appTable + "   sql: "
+				+ sql;
+		CachedRowSet rs = genericDataService.getCachedResultSet(sql,
+				sqlErrorMsg);
+
+		List<DatatableData> datatables = new ArrayList<DatatableData>();
+		try {
+			while (rs.next()) {
+				datatables.add(new DatatableData(rs
+						.getString("application_table_name"), rs.getString("registered_table_name"), rs
+						.getString("registered_table_label")));
+			}
+
+		} catch (SQLException e) {
+			throw new PlatformDataIntegrityException("error.msg.sql.error",
+					e.getMessage(), sqlErrorMsg);
+		}
+
+		long elapsed = System.currentTimeMillis() - startTime;
+		logger.info("FINISHING retrieveDatatableNames:      Elapsed Time: "
+				+ elapsed);
+
+		return datatables;
+	}
+
+	@Override
 	public String retrieveDataTableJSONObject(String datatable, Long id,
-			String sqlFields, String sqlSearch, String sqlOrder) {
+			String sqlFields, String sqlOrder) {
 		long startTime = System.currentTimeMillis();
 
 		GenericResultsetData result = retrieveDataTableGenericResultSet(
-				datatable, id, sqlFields, sqlSearch, sqlOrder);
+				datatable, id, sqlFields, sqlOrder);
 
 		String jsonString = generateJsonFromGenericResultsetData(result);
 
@@ -493,7 +545,7 @@ public class ReadWriteNonCoreDataServiceImpl implements
 
 	@Override
 	public GenericResultsetData retrieveDataTableGenericResultSet(
-			String datatable, Long id, String sqlFields, String sqlSearch,
+			String datatable, Long id, String sqlFields, 
 			String sqlOrder) {
 
 		long startTime = System.currentTimeMillis();
@@ -517,8 +569,6 @@ public class ReadWriteNonCoreDataServiceImpl implements
 
 		sql = sql + " from " + datatable + " where " + fkField + " = " + id;
 
-		if (sqlSearch != null)
-			sql = sql + " and ( " + sqlSearch + ")";
 		if (sqlOrder != null)
 			sql = sql + " order by " + sqlOrder;
 		logger.info(sql);

@@ -1,5 +1,7 @@
 package org.mifosng.platform.api;
 
+import java.util.List;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -10,6 +12,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
+import org.mifosng.platform.api.data.DatatableData;
 import org.mifosng.platform.api.data.GenericResultsetData;
 import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
 import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
@@ -43,13 +46,27 @@ public class DataTableApiResource {
 	private ApiJsonSerializerService apiJsonSerializerService;
 
 	@GET
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String datasets(@QueryParam("appTable") final String appTable,
+			@Context final UriInfo uriInfo) {
+
+		List<DatatableData> result = this.readWriteNonCoreDataService
+				.retrieveDatatableNames(appTable);
+
+		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo
+				.getQueryParameters());
+		return this.apiJsonSerializerService.serializeDatatableDataToJson(
+				prettyPrint, result);
+	}
+
+	@GET
 	@Path("{datatable}/{id}")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	public String getDatatable(@PathParam("datatable") final String datatable,
 			@PathParam("id") final Long id,
 			@QueryParam("sqlFields") final String sqlFields,
-			@QueryParam("sqlSearch") final String sqlSearch,
 			@QueryParam("sqlOrder") final String sqlOrder,
 			@Context final UriInfo uriInfo) {
 
@@ -59,13 +76,12 @@ public class DataTableApiResource {
 		 * Dont use this for now... but its the code for returning data as json
 		 * objects rather than a generic resultset String resultStr =
 		 * this.readWriteNonCoreDataService
-		 * .retrieveDataTableJSONObject(datatable, id, sqlFields, sqlSearch,
-		 * sqlOrder);
+		 * .retrieveDataTableJSONObject(datatable, id, sqlFields, sqlOrder);
 		 */
 
 		GenericResultsetData results = this.readWriteNonCoreDataService
 				.retrieveDataTableGenericResultSet(datatable, id, sqlFields,
-						sqlSearch, sqlOrder);
+						sqlOrder);
 
 		boolean prettyPrints = ApiParameterHelper.prettyPrint(uriInfo
 				.getQueryParameters());

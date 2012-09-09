@@ -12,6 +12,7 @@ import org.mifosng.platform.api.data.ChargeData;
 import org.mifosng.platform.api.data.ClientAccountSummaryCollectionData;
 import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.ConfigurationData;
+import org.mifosng.platform.api.data.DatatableData;
 import org.mifosng.platform.api.data.DepositAccountData;
 import org.mifosng.platform.api.data.DepositProductData;
 import org.mifosng.platform.api.data.FundData;
@@ -191,6 +192,15 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 		final Gson gsonDeserializer = helper.createGsonBuilder(prettyPrint);
 		return helper.serializedJsonFrom(gsonDeserializer,
 				datasets.toArray(new AdditionalFieldsSetData[datasets.size()]));
+	}
+	
+	@Override
+	public String serializeDatatableDataToJson(
+			final boolean prettyPrint,
+			final Collection<DatatableData> datatables) {
+		final Gson gsonDeserializer = helper.createGsonBuilder(prettyPrint);
+		return helper.serializedJsonFrom(gsonDeserializer,
+				datatables.toArray(new DatatableData[datatables.size()]));
 	}
 
 	@Override

@@ -10,6 +10,7 @@ import org.mifosng.platform.api.data.ChargeData;
 import org.mifosng.platform.api.data.ClientAccountSummaryCollectionData;
 import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.ConfigurationData;
+import org.mifosng.platform.api.data.DatatableData;
 import org.mifosng.platform.api.data.DepositAccountData;
 import org.mifosng.platform.api.data.DepositProductData;
 import org.mifosng.platform.api.data.FundData;
@@ -33,6 +34,8 @@ public interface ApiJsonSerializerService {
 	String serializeGenericResultsetDataToJson(boolean prettyPrint, GenericResultsetData result);
 
 	String serializeAdditionalFieldsSetDataToJson(boolean prettyPrint, Collection<AdditionalFieldsSetData> result);
+	
+	String serializeDatatableDataToJson(boolean prettyPrint, Collection<DatatableData> result);
 	
 	String serializePermissionDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<PermissionData> permissions);
 
