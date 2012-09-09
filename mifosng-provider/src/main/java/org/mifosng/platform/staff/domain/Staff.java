@@ -34,7 +34,6 @@ public class Staff extends AbstractAuditableCustom<AppUser, Long> {
 	private Office office;
 
 	// Flag determines if employee is a loan Officer
-	@SuppressWarnings("unused")
 	@Column(name = "is_loan_officer ", nullable = false)
 	private Boolean loanOfficerFlag;
 

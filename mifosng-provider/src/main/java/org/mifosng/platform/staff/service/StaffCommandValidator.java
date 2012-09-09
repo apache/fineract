@@ -20,9 +20,10 @@ public class StaffCommandValidator {
 
 		List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 
-		DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(
-				dataValidationErrors).resource("staff");
+		DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("staff");
 
+		baseDataValidator.reset().parameter("officeId").value(command.getOfficeId()).notNull().integerGreaterThanZero();
+		
 		baseDataValidator.reset().parameter("firstname")
 				.value(command.getFirstName()).ignoreIfNull()
 				.notExceedingLengthOf(50);
@@ -44,20 +45,20 @@ public class StaffCommandValidator {
 	public void validateForUpdate() {
 		List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 
-		DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(
-				dataValidationErrors).resource("staff");
+		DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("staff");
 
-		baseDataValidator.reset().parameter("id").value(command.getId())
-				.notNull();
+		baseDataValidator.reset().parameter("id").value(command.getId()).notNull();
+		baseDataValidator.reset().parameter("officeId").value(command.getOfficeId()).ignoreIfNull().integerGreaterThanZero();
 		baseDataValidator.reset().parameter("firstname")
 				.value(command.getFirstName()).ignoreIfNull()
 				.notExceedingLengthOf(50);
 		baseDataValidator.reset().parameter("lastname")
-				.value(command.getFirstName()).ignoreIfNull().notBlank()
+				.value(command.getLastName()).ignoreIfNull().notBlank()
 				.notExceedingLengthOf(50);
+		
+		baseDataValidator.reset().parameter("loanOfficerFlag").value(command.getLoanOfficerFlag()).ignoreIfNull();
 
-		baseDataValidator.reset().anyOfNotNull(command.getFirstName(),
-				command.getLastName());
+		baseDataValidator.reset().anyOfNotNull(command.getFirstName(), command.getLastName(), command.getOfficeId(), command.getLoanOfficerFlag());
 
 		if (!dataValidationErrors.isEmpty()) {
 			throw new PlatformApiDataValidationException(

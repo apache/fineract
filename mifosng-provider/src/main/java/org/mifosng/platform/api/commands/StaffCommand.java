@@ -11,13 +11,13 @@ public class StaffCommand {
 	private final String firstName;
 	private final String lastName;
 	private final Long officeId;
-	private final boolean loanOfficerFlag;
+	private final Boolean loanOfficerFlag;
 
 	private final Set<String> modifiedParameters;
 
 	public StaffCommand(final Set<String> modifiedParameters, final Long id,
 			final Long officeId, final String firstName, final String lastName,
-			final boolean loanOfficerFlag) {
+			final Boolean loanOfficerFlag) {
 		this.modifiedParameters = modifiedParameters;
 		this.id = id;
 		this.firstName = firstName;
@@ -41,9 +41,17 @@ public class StaffCommand {
 	public Long getOfficeId() {
 		return officeId;
 	}
-
-	public boolean isLoanOfficerFlag() {
+	
+	public Boolean getLoanOfficerFlag() {
 		return loanOfficerFlag;
+	}
+	
+	public boolean isLoanOfficerFlag() {
+		boolean isLoanOfficer = false;
+		if (loanOfficerFlag != null) {
+			isLoanOfficer = loanOfficerFlag.booleanValue();
+		}
+		return isLoanOfficer;
 	}
 
 	public boolean isFirstNameChanged() {
@@ -61,5 +69,4 @@ public class StaffCommand {
 	public boolean isOfficeChanged() {
 		return this.modifiedParameters.contains("officeId");
 	}
-
 }

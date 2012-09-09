@@ -1,9 +1,7 @@
 package org.mifosng.platform.api.data;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import org.joda.time.LocalDate;
 
