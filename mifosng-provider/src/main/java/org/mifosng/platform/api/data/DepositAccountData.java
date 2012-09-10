@@ -46,6 +46,7 @@ public class DepositAccountData {
 	private final List<DepositProductLookup> productOptions;
 	
 	private Collection<DepositAccountTransactionData> transactions;
+	private DepositPermissionData permissions;
 	
 	/*
 	 * used when returning account template data but only a clientId is passed, no selected product.
@@ -89,6 +90,7 @@ public class DepositAccountData {
 		this.rejectedonDate=null;
 		
 		this.transactions=null;
+		this.permissions=null;
 	}
 
 	public DepositAccountData(
@@ -127,6 +129,7 @@ public class DepositAccountData {
 		this.closedonDate=account.getClosedonDate();
 		
 		this.transactions=account.getTransactions();
+		this.permissions=account.getPermissions();
 	}
 	
 	public DepositAccountData(
@@ -187,6 +190,7 @@ public class DepositAccountData {
 		this.closedonDate = closedonDate;
 		
 		this.transactions = null;
+		this.permissions = null;
 	}
 	
 	public DepositAccountData(
@@ -234,6 +238,7 @@ public class DepositAccountData {
 		this.rejectedonDate=null;
 		
 		this.transactions = null;
+		this.permissions = null;
 	}
 
 	public Long getId() {
@@ -354,6 +359,14 @@ public class DepositAccountData {
 	
 	public void setTransactions(Collection<DepositAccountTransactionData> transactions) {
 		this.transactions = transactions;
+	}
+
+	public DepositPermissionData getPermissions() {
+		return permissions;
+	}
+
+	public void setPermissions(DepositPermissionData permissions) {
+		this.permissions = permissions;
 	}
 	
 }

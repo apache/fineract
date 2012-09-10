@@ -25,6 +25,7 @@ import org.mifosng.platform.api.commands.DepositStateTransitionApprovalCommand;
 import org.mifosng.platform.api.commands.DepositStateTransitionCommand;
 import org.mifosng.platform.api.commands.UndoStateTransitionCommand;
 import org.mifosng.platform.api.data.DepositAccountData;
+import org.mifosng.platform.api.data.DepositPermissionData;
 import org.mifosng.platform.api.data.DepositProductLookup;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.EnumOptionData;
@@ -106,6 +107,9 @@ public class DepositAccountsApiResource {
 	public String retrieveDepositAccount(@PathParam("accountId") final Long accountId, @Context final UriInfo uriInfo) {
 		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+		
+		DepositPermissionData permissions = null;
+		
 		if (responseParameters.isEmpty()) {
 			responseParameters.addAll(typicalResponseParameters);
 		}
@@ -117,6 +121,18 @@ public class DepositAccountsApiResource {
 		if (template) {
 			account = handleTemplateRelatedData(responseParameters, account);
 		}
+		
+		Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
+		if (!associationParameters.isEmpty()) {
+			if (associationParameters.contains("all")) {
+				responseParameters.addAll(Arrays.asList("permissions"));
+			} else {
+				responseParameters.addAll(associationParameters);
+			}
+			permissions = this.depositAccountReadPlatformService.retrieveDepositAccountsPermissions(account);
+		}
+		
+		account.setPermissions(permissions);
 		
 		return this.apiJsonSerializerService.serializeDepositAccountDataToJson(prettyPrint, responseParameters, account);
 	}
