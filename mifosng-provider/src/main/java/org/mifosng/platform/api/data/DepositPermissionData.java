@@ -9,6 +9,7 @@ public class DepositPermissionData {
 	private final boolean isActive;
 	
 	private final boolean anyActionOnAccountAllowed;
+
 	
 	public DepositPermissionData(final boolean rejectAllowed,final boolean withdrawnByApplicantAllowed,final boolean undoApprovalAllowed,final boolean pendingApproval,final boolean isActive) {
 		this.rejectAllowed = rejectAllowed;
