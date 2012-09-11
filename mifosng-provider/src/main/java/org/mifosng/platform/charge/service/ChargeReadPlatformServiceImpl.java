@@ -127,6 +127,23 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
         return this.jdbcTemplate.query(sql, rm, new Object[] {ChargeAppliesTo.LOAN.getValue()});
     }
 
+    @Override
+    public ChargeData retrieveLoanChargeTemplate() {
+        this.context.authenticatedUser();
+
+        List<EnumOptionData> allowedChargeCalculationTypeOptions = Arrays.asList(
+                chargeCalculationType(ChargeCalculationType.FLAT),
+                chargeCalculationType(ChargeCalculationType.PERCENT_OF_AMOUNT),
+                chargeCalculationType(ChargeCalculationType.PERCENT_OF_AMOUNT_AND_INTEREST),
+                chargeCalculationType(ChargeCalculationType.PERCENT_OF_INTEREST)
+        );
+
+        List<EnumOptionData> allowedChargeTimeOptions = Arrays.asList(chargeTimeType(ChargeTimeType.DISBURSEMENT));
+
+        return ChargeData.template(null, allowedChargeCalculationTypeOptions,
+                null, allowedChargeTimeOptions);
+    }
+
     private static final class ChargeMapper implements RowMapper<ChargeData> {
 
         public String chargeSchema(){

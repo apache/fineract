@@ -68,6 +68,7 @@ public class LoanAccountData {
 	private final Collection<EnumOptionData> interestCalculationPeriodTypeOptions;
 	private final Collection<FundData> fundOptions;
 	private final Collection<ChargeData> chargeOptions;
+    private final ChargeData chargeTemplate;
 	private final Collection<StaffData> loanOfficerOptions;
 	
 	public LoanAccountData(
@@ -88,6 +89,7 @@ public class LoanAccountData {
 			final Collection<EnumOptionData> interestCalculationPeriodTypeOptions, 
 			final Collection<FundData> fundOptions,
 			final Collection<ChargeData> chargeOptions,
+            final ChargeData chargeTemplate,
 			final Collection<StaffData> loanOfficerOptions) {
 		this.summary = summary;
 		this.repaymentSchedule = repaymentSchedule;
@@ -104,6 +106,7 @@ public class LoanAccountData {
 		this.interestCalculationPeriodTypeOptions = interestCalculationPeriodTypeOptions;
 		this.fundOptions = fundOptions;
 		this.chargeOptions = chargeOptions;
+        this.chargeTemplate = chargeTemplate;
 		this.loanOfficerOptions = loanOfficerOptions;
 
 		if (convenienceDataRequired) {
