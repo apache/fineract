@@ -19,12 +19,12 @@ import org.joda.time.LocalDate;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.currency.domain.Money;
 import org.springframework.data.jpa.domain.AbstractPersistable;
-import org.springframework.format.annotation.DateTimeFormat;
 
 @Entity
 @Table(name="m_deposit_account_transaction")
 public class DepositAccountTransaction extends AbstractPersistable<Long> {
 	
+	@SuppressWarnings("unused")
 	@ManyToOne(optional = false)
     @JoinColumn(name = "deposit_account_id", nullable=false)
     private DepositAccount depositAccount;
@@ -33,6 +33,7 @@ public class DepositAccountTransaction extends AbstractPersistable<Long> {
 	@Column(name = "transaction_type_enum", nullable = false)
 	private DepositAccountTransactionType typeOf;
 	
+	@SuppressWarnings("unused")
 	@OneToOne(optional=true, cascade={CascadeType.PERSIST})
 	@JoinColumn(name="contra_id")
 	private DepositAccountTransaction contra;
@@ -45,20 +46,16 @@ public class DepositAccountTransaction extends AbstractPersistable<Long> {
 	private final BigDecimal amount;
 	
 	protected DepositAccountTransaction(){
-		
 		this.depositAccount=null;
 		this.typeOf=null;
 		this.amount=null;
 		this.dateOf=null;
-		
 	}
 	
 	private DepositAccountTransaction(DepositAccountTransactionType type, final BigDecimal amount, final LocalDate date) {
-		
 		this.typeOf = type;
         this.amount = amount;
 		this.dateOf = date.toDateMidnight().toDate();
-   
 	}
 
 	public Date getDateOf() {
@@ -72,29 +69,17 @@ public class DepositAccountTransaction extends AbstractPersistable<Long> {
 	public DepositAccountTransactionType getTypeOf() {
 		return typeOf;
 	}
-
 	
 	public Money getAmount(MonetaryCurrency currency) {
 		return Money.of(currency, this.amount);
 	}
-
-
 	
-	@DateTimeFormat(style="-M")
     public LocalDate getTransactionDate() {
         return new LocalDate(this.dateOf);
     }
 
-	public DepositAccountTransaction getContra() {
-		return contra;
-	}
-	
-	public boolean isNotContra() {
-		return this.contra == null;
-	}
-	
 	public boolean isDeposit(){
-		return DepositAccountTransactionType.DEPOSIT.equals(typeOf) && isNotContra();
+		return DepositAccountTransactionType.DEPOSIT.equals(typeOf);
 	}
 
 	public static DepositAccountTransaction deposit(Money amount, LocalDate paymentDate) {
@@ -105,29 +90,7 @@ public class DepositAccountTransaction extends AbstractPersistable<Long> {
 		return new DepositAccountTransaction(DepositAccountTransactionType.WITHDRAW, amount.getAmount(), paymentDate);
 	}
 	
-	private static DepositAccountTransaction contra(DepositAccountTransaction originalTransaction) {
-		
-		DepositAccountTransaction contra = new DepositAccountTransaction(DepositAccountTransactionType.REVERSAL, originalTransaction.getAmount().negate(), new LocalDate(originalTransaction.getDateOf()));
-		contra.updateContra(originalTransaction);
-		
-		return contra;
-	}
-	
-	public void updateContra(DepositAccountTransaction transaction) {
-		this.contra = transaction;
-	}
-
-	public DepositAccount getDepositAccount() {
-		return depositAccount;
-	}
-
-	public void setDepositAccount(DepositAccount depositAccount) {
-		this.depositAccount = depositAccount;
-	}
-
 	public void updateAccount(DepositAccount depositAccount) {
 		this.depositAccount=depositAccount;
-		
 	}
-
 }

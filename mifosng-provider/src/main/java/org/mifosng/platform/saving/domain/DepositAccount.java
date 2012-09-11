@@ -18,6 +18,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.LocalDate;
@@ -179,7 +180,8 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 			final Integer depositStatus) {
 		this.client = client;
 		this.product = product;
-		this.externalId = externalId;
+		setExternalId(externalId);
+		
 		this.currency = deposit.getCurrency();
 		this.depositAmount = deposit.getAmount();
 		product.validateDepositInRange(this.depositAmount);
@@ -203,6 +205,14 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 		this.projectedInterestAccruedOnMaturity = futureValueOnMaturity.minus(deposit).getAmount();
 		this.projectedTotalOnMaturity = futureValueOnMaturity.getAmount();
 		this.depositStatus=depositStatus;
+	}
+	
+	private void setExternalId(final String externalId) {
+		if (StringUtils.isNotBlank(externalId)) {
+			this.externalId = externalId.trim();
+		} else {
+			this.externalId = null;
+		}
 	}
 	
 	public boolean isDeleted() {

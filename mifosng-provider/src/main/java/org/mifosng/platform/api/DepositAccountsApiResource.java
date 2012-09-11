@@ -130,9 +130,8 @@ public class DepositAccountsApiResource {
 				responseParameters.addAll(associationParameters);
 			}
 			permissions = this.depositAccountReadPlatformService.retrieveDepositAccountsPermissions(account);
+			account = new DepositAccountData(account, permissions, account.getTransactions());
 		}
-		
-		account.setPermissions(permissions);
 		
 		return this.apiJsonSerializerService.serializeDepositAccountDataToJson(prettyPrint, responseParameters, account);
 	}

@@ -3,9 +3,7 @@ package org.mifosng.platform.saving.service;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import org.joda.time.LocalDate;
 import org.mifosng.platform.api.data.ClientData;
@@ -54,24 +52,27 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 		
 		String sql = "select " + mapper.schema() + " where da.is_deleted=0";
 		
-		Collection<DepositAccountData> depositAccountDatas = this.jdbcTemplate.query(sql,mapper, new Object[]{});
+		return this.jdbcTemplate.query(sql,mapper, new Object[]{});
 		
-		DepositAccountTransactionMapper transactionMapper = new DepositAccountTransactionMapper();
-		String transactionSchema = "Select "+transactionMapper.schema();
-		Collection<DepositAccountTransactionData> depositAccountTransactionDatas = this.jdbcTemplate.query(transactionSchema, transactionMapper, new Object[]{});
+		// NOTE: when retrieving a list of deposit accounts, its unlikey we want to much detail so at that point in time, 
+		// not likely that returning what transactions have is useful so removing it.
 		
-		 for(DepositAccountData depositAccountData : depositAccountDatas){
-			 List<DepositAccountTransactionData> myAccountTransactionDatas = new ArrayList<DepositAccountTransactionData>();
-			 for(DepositAccountTransactionData depositAccountTransactionData : depositAccountTransactionDatas){
-				 if(depositAccountData.getId().equals(depositAccountTransactionData.getAccountId())){
-					 myAccountTransactionDatas.add(depositAccountTransactionData);
-				 }
-			 depositAccountData.setTransactions(myAccountTransactionDatas);	 
-			 }
-		 }
+//		DepositAccountTransactionMapper transactionMapper = new DepositAccountTransactionMapper();
+//		String transactionSchema = "Select " + transactionMapper.schema();
+//		Collection<DepositAccountTransactionData> depositAccountTransactionDatas = this.jdbcTemplate.query(transactionSchema, transactionMapper, new Object[]{});
 		
-		return depositAccountDatas;
-	
+//		for (DepositAccountData depositAccountData : depositAccountDatas) {
+//			List<DepositAccountTransactionData> myAccountTransactionDatas = new ArrayList<DepositAccountTransactionData>();
+//			
+//			for (DepositAccountTransactionData depositAccountTransactionData : depositAccountTransactionDatas) {
+//				if (depositAccountData.getId().equals(depositAccountTransactionData.getAccountId())) {
+//					myAccountTransactionDatas.add(depositAccountTransactionData);
+//				}
+//				depositAccountData.setTransactions(myAccountTransactionDatas);
+//			}
+//		}
+		
+//		return depositAccountDatas;
 	}
 
 	@Override
@@ -79,26 +80,20 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 		try{
 			DepositAccountMapper mapper = new DepositAccountMapper();
 			
-			String sql = "select " + mapper.schema()
-					+ " where da.id = ? and da.is_deleted=0";
+			String sql = "select " + mapper.schema() + " where da.id = ? and da.is_deleted=0";
 			
-			DepositAccountData productData = this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { accountId });
+			DepositAccountData depositAccountData = this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { accountId });
 			
 			DepositAccountTransactionMapper transactionMapper = new DepositAccountTransactionMapper();
-			String transactionSchema = "Select "+transactionMapper.schema() +"  where  txn.deposit_account_id = ? ";
-			Collection<DepositAccountTransactionData> depositAccountTransactionDatas = this.jdbcTemplate.query(transactionSchema, transactionMapper, new Object[]{accountId});
+			String transactionSchema = "select " + transactionMapper.schema() + " where txn.deposit_account_id = ? ";
 			
-			 List<DepositAccountTransactionData> myAccountTransactionDatas = new ArrayList<DepositAccountTransactionData>();
-			 for(DepositAccountTransactionData depositAccountTransactionData : depositAccountTransactionDatas){
-				 
-				    if(productData.getId().equals(depositAccountTransactionData.getAccountId()))
-					 myAccountTransactionDatas.add(depositAccountTransactionData);
-				    
-				 }
+			Collection<DepositAccountTransactionData> depositAccountTransactions = this.jdbcTemplate.query(transactionSchema, transactionMapper, new Object[]{accountId});
+			if (!depositAccountTransactions.isEmpty()) {
+				DepositPermissionData permissions = null;
+				depositAccountData = new DepositAccountData(depositAccountData, permissions, depositAccountTransactions);
+			}
 			
-			productData.setTransactions(myAccountTransactionDatas);	 
-			
-			return productData;
+			return depositAccountData;
 		} catch (EmptyResultDataAccessException e) {
 			throw new LoanProductNotFoundException(accountId);
 		}

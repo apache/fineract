@@ -916,7 +916,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		if (StringUtils.isNotBlank(externalSystemIdentifer)) {
 			this.externalId = externalSystemIdentifer.trim();
 		} else {
-			this.externalId = externalSystemIdentifer;
+			this.externalId = null;
 		}
 	}
 

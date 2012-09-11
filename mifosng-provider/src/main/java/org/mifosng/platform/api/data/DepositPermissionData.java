@@ -8,7 +8,7 @@ public class DepositPermissionData {
 	private final boolean pendingApproval;
 	private final boolean isActive;
 	
-	private final boolean anyActionOnLoanAllowed;
+	private final boolean anyActionOnAccountAllowed;
 	
 	public DepositPermissionData(final boolean rejectAllowed,final boolean withdrawnByApplicantAllowed,final boolean undoApprovalAllowed,final boolean pendingApproval,final boolean isActive) {
 		this.rejectAllowed = rejectAllowed;
@@ -16,7 +16,7 @@ public class DepositPermissionData {
 		this.undoApprovalAllowed = undoApprovalAllowed;
 		this.pendingApproval = pendingApproval;
 		this.isActive=isActive;
-		this.anyActionOnLoanAllowed = isRejectAllowed() || isPendingApproval() || isUndoApprovalAllowed() || isWithdrawnByApplicantAllowed();
+		this.anyActionOnAccountAllowed = isRejectAllowed() || isPendingApproval() || isUndoApprovalAllowed() || isWithdrawnByApplicantAllowed();
 	}
 
 	public boolean isRejectAllowed() {
@@ -34,9 +34,9 @@ public class DepositPermissionData {
 	public boolean isPendingApproval() {
 		return pendingApproval;
 	}
-
-	public boolean isAnyActionOnLoanAllowed() {
-		return anyActionOnLoanAllowed;
+	
+	public boolean isAnyActionOnAccountAllowed() {
+		return anyActionOnAccountAllowed;
 	}
 
 	public boolean isActive() {

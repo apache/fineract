@@ -45,8 +45,8 @@ public class DepositAccountData {
 	private final List<EnumOptionData> interestCompoundedEveryPeriodTypeOptions;
 	private final List<DepositProductLookup> productOptions;
 	
-	private Collection<DepositAccountTransactionData> transactions;
-	private DepositPermissionData permissions;
+	private final Collection<DepositAccountTransactionData> transactions;
+	private final DepositPermissionData permissions;
 	
 	/*
 	 * used when returning account template data but only a clientId is passed, no selected product.
@@ -130,6 +130,42 @@ public class DepositAccountData {
 		
 		this.transactions=account.getTransactions();
 		this.permissions=account.getPermissions();
+	}
+	
+	public DepositAccountData(final DepositAccountData account, final DepositPermissionData permissions, final Collection<DepositAccountTransactionData> transactions) {
+		this.id = account.getId();
+		this.externalId = account.getExternalId();
+		this.status = account.getStatus();
+		this.clientId = account.getClientId();
+		this.clientName = account.getClientName();
+		this.productId = account.getProductId();
+		this.productName = account.getProductName();
+		this.currency = account.getCurrency();
+		this.deposit = account.getDeposit();
+		this.maturityInterestRate = account.getMaturityInterestRate();
+		this.tenureInMonths = account.getTenureInMonths();
+		this.projectedCommencementDate = account.getProjectedCommencementDate();
+		this.actualCommencementDate = account.getActualCommencementDate();
+		this.maturedOn = account.getMaturedOn();
+		this.projectedInterestAccrued = account.getProjectedInterestAccrued();
+		this.actualInterestAccrued = account.getActualInterestAccrued();
+		this.projectedMaturityAmount = account.getProjectedMaturityAmount();
+		this.actualMaturityAmount = account.getActualMaturityAmount();
+		this.interestCompoundedEvery = account.getInterestCompoundedEvery();
+		this.interestCompoundedEveryPeriodType = account.getInterestCompoundedEveryPeriodType();
+		this.renewalAllowed = account.isRenewalAllowed();
+		this.preClosureAllowed = account.isPreClosureAllowed();
+		this.preClosureInterestRate = account.getPreClosureInterestRate();
+		
+		this.interestCompoundedEveryPeriodTypeOptions = account.getInterestCompoundedEveryPeriodTypeOptions();
+		this.productOptions = account.getProductOptions();
+		
+		this.withdrawnonDate=account.getWithdrawnonDate();
+		this.rejectedonDate=account.getRejectedonDate();
+		this.closedonDate=account.getClosedonDate();
+		
+		this.transactions=transactions;
+		this.permissions=permissions;
 	}
 	
 	public DepositAccountData(
@@ -357,16 +393,7 @@ public class DepositAccountData {
 		return transactions;
 	}
 	
-	public void setTransactions(Collection<DepositAccountTransactionData> transactions) {
-		this.transactions = transactions;
-	}
-
 	public DepositPermissionData getPermissions() {
 		return permissions;
 	}
-
-	public void setPermissions(DepositPermissionData permissions) {
-		this.permissions = permissions;
-	}
-	
 }

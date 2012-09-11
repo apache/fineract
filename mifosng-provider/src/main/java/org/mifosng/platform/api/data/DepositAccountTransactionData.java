@@ -4,6 +4,9 @@ import java.math.BigDecimal;
 
 import org.joda.time.LocalDate;
 
+/**
+ * Immutable data object to represent transactions on a deposit account.
+ */
 public class DepositAccountTransactionData {
 	
 	private final Long transactionId;
@@ -12,18 +15,9 @@ public class DepositAccountTransactionData {
 	private final BigDecimal transactionAmount;
 	private final Long accountId;
 	
-	public DepositAccountTransactionData() {
-		
-		this.transactionId = null;
-		this.accountId = null;
-		this.transactionType = null;
-		this.transactionDate = null;
-		this.transactionAmount = null;
-		
-	}
-	
-	public DepositAccountTransactionData(final Long transactionId, final Long accountId, final EnumOptionData transactionType, final LocalDate transactionDate, final BigDecimal transactionAmount ){
-		
+	public DepositAccountTransactionData(
+			final Long transactionId, final Long accountId, final EnumOptionData transactionType, 
+			final LocalDate transactionDate, final BigDecimal transactionAmount ) {
 		this.transactionId = transactionId;
 		this.accountId = accountId;
 		this.transactionType = transactionType;
@@ -50,7 +44,4 @@ public class DepositAccountTransactionData {
 	public BigDecimal getTransactionAmount() {
 		return transactionAmount;
 	}
-	
-	
-
 }
