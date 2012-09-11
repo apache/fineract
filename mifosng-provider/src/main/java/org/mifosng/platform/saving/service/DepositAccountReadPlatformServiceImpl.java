@@ -84,6 +84,8 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 			
 			DepositAccountData depositAccountData = this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { accountId });
 			
+			// FIXME - kw - the call to find transactions for deposit account to add to the deposit account payload can be decided at the api level
+			//              depending on whether the requester wants them or not instead of always getting the transactions
 			DepositAccountTransactionMapper transactionMapper = new DepositAccountTransactionMapper();
 			String transactionSchema = "select " + transactionMapper.schema() + " where txn.deposit_account_id = ? ";
 			
