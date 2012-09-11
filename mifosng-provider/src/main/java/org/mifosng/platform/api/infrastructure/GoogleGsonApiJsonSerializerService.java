@@ -105,7 +105,7 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 					"currency", "deposit", "maturityInterestRate", "tenureInMonths", 
 					"interestCompoundedEvery", "interestCompoundedEveryPeriodType",
 					"renewalAllowed","preClosureAllowed","preClosureInterestRate", 
-					"withdrawnonDate","rejectedonDate","closedonDate","transactions"
+					"withdrawnonDate","rejectedonDate","closedonDate","transactions","permissions"
 					)
 			);
 	

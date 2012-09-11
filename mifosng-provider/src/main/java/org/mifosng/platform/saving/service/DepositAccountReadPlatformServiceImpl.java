@@ -12,6 +12,7 @@ import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.DepositAccountData;
 import org.mifosng.platform.api.data.DepositAccountTransactionData;
+import org.mifosng.platform.api.data.DepositPermissionData;
 import org.mifosng.platform.api.data.DepositProductData;
 import org.mifosng.platform.api.data.DepositProductLookup;
 import org.mifosng.platform.api.data.EnumOptionData;
@@ -244,5 +245,16 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 			return new DepositAccountTransactionData(transactionId, accountId, transactionType, transactionDate, transactionAmount);
 		}
 		
+	}
+
+	@Override
+	public DepositPermissionData retrieveDepositAccountsPermissions(DepositAccountData depositAccountData) {
+		boolean pendingApproval = (depositAccountData.getStatus().getId().equals(100L));
+		boolean undoApprovalAllowed = (depositAccountData.getStatus().getId().equals(200L));
+		boolean isActive = (depositAccountData.getStatus().getId().equals(300L));
+		boolean rejectAllowed = pendingApproval;
+		boolean withdrawnByApplicantAllowed = pendingApproval;
+
+		return new DepositPermissionData(rejectAllowed, withdrawnByApplicantAllowed, undoApprovalAllowed, pendingApproval,isActive);
 	}
 }
