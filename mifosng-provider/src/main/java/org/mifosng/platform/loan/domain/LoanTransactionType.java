@@ -1,7 +1,12 @@
 package org.mifosng.platform.loan.domain;
 
 public enum LoanTransactionType {
-	INVALID(0, "loanTransactionType.invalid"), DISBURSEMENT(1, "loanTransactionType.disbursement"), REPAYMENT(2, "loanTransactionType.repayment"), REVERSAL(3, "loanTransactionType.reversal"), WAIVED(4, "loanTransactionType.waiver");
+	
+	INVALID(0, "loanTransactionType.invalid"), //
+	DISBURSEMENT(1, "loanTransactionType.disbursement"), //
+	REPAYMENT(2, "loanTransactionType.repayment"), //
+	REVERSAL(3, "loanTransactionType.reversal"), //
+	WAIVED(4, "loanTransactionType.waiver");
 
     private final Integer value;
     private final String code;

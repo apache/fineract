@@ -52,7 +52,7 @@ public class LoanTransaction extends AbstractAuditableCustom<AppUser, Long> {
     
     @Enumerated(EnumType.ORDINAL)
 	@Column(name = "transaction_type_enum", nullable = false)
-	private LoanTransactionType typeOf;
+	private Integer typeOf;
     
     @OneToOne(optional=true, cascade={CascadeType.PERSIST})
     @JoinColumn(name="contra_id")
@@ -65,32 +65,30 @@ public class LoanTransaction extends AbstractAuditableCustom<AppUser, Long> {
         this.typeOf = null;
     }
     
-    public static LoanTransaction disbursement(Money amount, LocalDate disbursementDate) {
+    public static LoanTransaction disbursement(final Money amount, final LocalDate disbursementDate) {
 		return new LoanTransaction(LoanTransactionType.DISBURSEMENT, amount.getAmount(), disbursementDate);
 	}
     
-	public static LoanTransaction repayment(Money amount, LocalDate paymentDate) {
+	public static LoanTransaction repayment(final Money amount, final LocalDate paymentDate) {
 		return new LoanTransaction(LoanTransactionType.REPAYMENT, amount.getAmount(), paymentDate);
 	}
 	
-	public static LoanTransaction waiver(Money waived, LocalDate waiveDate) {
+	public static LoanTransaction waiver(final Money waived, final LocalDate waiveDate) {
 		return new LoanTransaction(LoanTransactionType.WAIVED, waived.getAmount(), waiveDate);
 	}
 	
 	private static LoanTransaction contra(LoanTransaction originalTransaction) {
-		
 		LoanTransaction contra = new LoanTransaction(LoanTransactionType.REVERSAL, originalTransaction.getAmount().negate(), new LocalDate(originalTransaction.getDateOf()));
 		contra.updateContra(originalTransaction);
-		
 		return contra;
 	}
 	
-	public void updateContra(LoanTransaction transaction) {
+	public void updateContra(final LoanTransaction transaction) {
 		this.contra = transaction;
 	}
 
-	private LoanTransaction(LoanTransactionType type, final BigDecimal amount, final LocalDate date) {
-		this.typeOf = type;
+	private LoanTransaction(final LoanTransactionType type, final BigDecimal amount, final LocalDate date) {
+		this.typeOf = type.getValue();
         this.amount = amount;
 		this.dateOf = date.toDateMidnight().toDate();
     }
@@ -113,11 +111,11 @@ public class LoanTransaction extends AbstractAuditableCustom<AppUser, Long> {
 	}
 
 	public LoanTransactionType getTypeOf() {
-		return typeOf;
+		return LoanTransactionType.fromInt(this.typeOf);
 	}
 
 	public boolean isRepayment() {
-		return LoanTransactionType.REPAYMENT.equals(typeOf) && isNotContra();
+		return LoanTransactionType.REPAYMENT.equals(getTypeOf()) && isNotContra();
 	}
 	
 	public boolean isNotRepayment() {
@@ -129,11 +127,11 @@ public class LoanTransaction extends AbstractAuditableCustom<AppUser, Long> {
 	}
 
 	public boolean isDisbursement() {
-		return LoanTransactionType.DISBURSEMENT.equals(typeOf);
+		return LoanTransactionType.DISBURSEMENT.equals(getTypeOf());
 	}
 	
 	public boolean isWaiver() {
-		return LoanTransactionType.WAIVED.equals(typeOf) && isNotContra();
+		return LoanTransactionType.WAIVED.equals(getTypeOf()) && isNotContra();
 	}
 	
 	public boolean isNotWaiver() {

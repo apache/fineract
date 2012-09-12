@@ -6,8 +6,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.mifosng.platform.api.commands.LoanChargeCommand;
 import org.mifosng.platform.api.commands.LoanApplicationCommand;
+import org.mifosng.platform.api.commands.LoanChargeCommand;
 import org.mifosng.platform.api.data.LoanSchedule;
 import org.mifosng.platform.api.data.MoneyData;
 import org.mifosng.platform.api.data.ScheduledLoanInstallment;
@@ -20,7 +20,6 @@ import org.mifosng.platform.exceptions.ChargeIsNotActiveException;
 import org.mifosng.platform.exceptions.ChargeNotFoundException;
 import org.mifosng.platform.exceptions.ClientNotFoundException;
 import org.mifosng.platform.exceptions.FundNotFoundException;
-import org.mifosng.platform.exceptions.InvalidCurrencyException;
 import org.mifosng.platform.exceptions.LoanProductNotFoundException;
 import org.mifosng.platform.exceptions.LoanTransactionProcessingStrategyNotFoundException;
 import org.mifosng.platform.exceptions.StaffNotFoundException;
@@ -94,22 +93,23 @@ public class LoanAssembler {
 		
 		LoanProductRelatedDetail loanRepaymentScheduleDetail = assembleLoanProductRelatedDetailFrom(command, currency);
 
-		LoanSchedule loanSchedule = command.getLoanSchedule();
-		List<ScheduledLoanInstallment> loanRepaymentSchedule = loanSchedule.getScheduledLoanInstallments();
-		
 		// associating fund with loan product at creation is optional for now.
 		Fund fund = findFundByIdIfProvided(command.getFundId());
 		LoanTransactionProcessingStrategy loanTransactionProcessingStrategy = findStrategyByIdIfProvided(command.getTransactionProcessingStrategyId());
 
 		//optionally associate a loan officer to the loan
 		Staff loanOfficer= findLoanOfficerByIdIfProvided(command.getLoanOfficerId());
-
-		Loan loan = Loan.createNew(fund,loanOfficer, loanTransactionProcessingStrategy, loanProduct, client, loanRepaymentScheduleDetail);
+		
+		// optionally, see if charges are associated with loan on creation (through loan product or by being directly added)
+		final Set<LoanCharge> loanCharges = assembleSetOfLoanCharges(command.getCharges(), loanProduct.getCharges());
+				
+		Loan loan = Loan.createNew(fund,loanOfficer, loanTransactionProcessingStrategy, loanProduct, client, loanRepaymentScheduleDetail, loanCharges);
 		loan.setExternalId(command.getExternalId());
 
-        final Set<LoanCharge> charges = this.assembleSetOfCharges(command, loan, loanProduct);
-        loan.setCharges(charges);
-
+        // TODO - user service to calculate loan schedule at this point
+        LoanSchedule loanSchedule = command.getLoanSchedule();
+		List<ScheduledLoanInstallment> loanRepaymentSchedule = loanSchedule.getScheduledLoanInstallments();
+		
 		for (ScheduledLoanInstallment scheduledLoanInstallment : loanRepaymentSchedule) {
 
 			MoneyData readPrincipalDue = scheduledLoanInstallment.getPrincipalDue();
@@ -128,6 +128,33 @@ public class LoanAssembler {
 				defaultLoanLifecycleStateMachine());
 		
 		return loan;
+	}
+
+	public Set<LoanCharge> assembleSetOfLoanCharges(LoanChargeCommand[] chargesPassedAtCreation, Set<Charge> chargesInheritedFromProduct) {
+		Set<LoanCharge> loanCharges = new HashSet<LoanCharge>();
+		
+		if (!ObjectUtils.isEmpty(chargesPassedAtCreation)) {
+			for (LoanChargeCommand loanChargeCommand : chargesPassedAtCreation) {
+				
+				Long chargeDefinitionId = loanChargeCommand.getId();
+				Charge chargeDefinition = this.chargeRepository.findOne(chargeDefinitionId);
+				if (chargeDefinition == null || chargeDefinition.isDeleted()) {
+					throw new ChargeNotFoundException(chargeDefinitionId);
+				}
+				
+				if (!chargeDefinition.isActive()) {
+					throw new ChargeIsNotActiveException(chargeDefinitionId);
+				}
+				
+				loanCharges.add(LoanCharge.createNew(chargeDefinition, loanChargeCommand));
+			}
+		} else if (chargesPassedAtCreation == null) {
+			for (Charge productCharge : chargesInheritedFromProduct) {
+				loanCharges.add(LoanCharge.createNew(productCharge));
+			}
+		}
+		
+		return loanCharges;
 	}
 
 	public LoanProductRelatedDetail assembleLoanProductRelatedDetailFrom(final LoanApplicationCommand command, MonetaryCurrency currency) {
@@ -193,39 +220,4 @@ public class LoanAssembler {
 		}
 		return strategy;
 	}
-
-    public Set<LoanCharge> assembleSetOfCharges(final LoanApplicationCommand command, final Loan loan,
-                                                 final LoanProduct product) {
-
-        Set<LoanCharge> charges = new HashSet<LoanCharge>();
-        LoanChargeCommand[] loanChargesArray = command.getCharges();
-		String loanCurrencyCode = loan.getCurrencyCode();
-		if (loanCurrencyCode == null){
-			loanCurrencyCode = product.getCurrency().getCode();
-		}
-
-        if (!ObjectUtils.isEmpty(loanChargesArray)) {
-            for (LoanChargeCommand loanChargeCommand : loanChargesArray) {
-                Long id = loanChargeCommand.getId();
-                Charge charge = this.chargeRepository.findOne(id);
-                if (charge == null || charge.isDeleted()) {
-                    throw new ChargeNotFoundException(id);
-                }
-                if (!charge.isActive()){
-                    throw new ChargeIsNotActiveException(id);
-                }
-                if (!loanCurrencyCode.equals(charge.getCurrencyCode())){
-                    String errorMessage = "Charge and Loan must have the same currency.";
-                    throw new InvalidCurrencyException("charge", "attach.to.loan", errorMessage);
-                }
-                charges.add(new LoanCharge(loan, charge, loanChargeCommand));
-            }
-        } else if (loanChargesArray == null) {
-           for (Charge productCharge : product.getCharges()){
-               charges.add(new LoanCharge(loan, productCharge));
-           }
-        }
-
-        return charges;
-    }
 }

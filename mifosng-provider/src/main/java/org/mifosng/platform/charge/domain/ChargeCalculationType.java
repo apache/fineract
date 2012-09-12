@@ -2,10 +2,10 @@ package org.mifosng.platform.charge.domain;
 
 public enum ChargeCalculationType {
 	
-	INVALID(0, "chargeCalculationType.invalid"),
-    FLAT(1, "chargeCalculationType.flat"),
-    PERCENT_OF_AMOUNT(2, "chargeCalculationType.percent.of.amount"),
-    PERCENT_OF_AMOUNT_AND_INTEREST(3, "chargeCalculationType.percent.of.amount.and.interest"),
+	INVALID(0, "chargeCalculationType.invalid"), //
+    FLAT(1, "chargeCalculationType.flat"), //
+    PERCENT_OF_AMOUNT(2, "chargeCalculationType.percent.of.amount"), //
+    PERCENT_OF_AMOUNT_AND_INTEREST(3, "chargeCalculationType.percent.of.amount.and.interest"), //
     PERCENT_OF_INTEREST(4, "chargeCalculationType.percent.of.interest");
     
     private final Integer value;

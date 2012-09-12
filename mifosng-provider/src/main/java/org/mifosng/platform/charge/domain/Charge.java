@@ -47,7 +47,7 @@ public class Charge extends AbstractAuditableCustom<AppUser, Long> {
     	//
     }
 
-    public Charge(final String name, final BigDecimal amount, final String currencyCode, 
+    private Charge(final String name, final BigDecimal amount, final String currencyCode, 
     		final ChargeAppliesTo chargeAppliesTo, final ChargeTimeType chargeTime, 
     		final ChargeCalculationType chargeCalculationType, final boolean active) {
         this.name = name;

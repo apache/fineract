@@ -155,6 +155,10 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 
 	@Column(name = "interest_rebate_amount", scale = 6, precision = 19)
 	private BigDecimal interestRebateOwed;
+	
+	@SuppressWarnings("unused") // derived field used in GETs only at present
+	@Column(name = "total_charges_due_at_disbursement_derived", scale = 6, precision = 19)
+	private BigDecimal totalChargesDueAtDisbursement;
 
 	@Transient
 	private final InterestRebateCalculatorFactory interestRebateCalculatorFactory = new DailyEquivalentInterestRebateCalculatorFactory();
@@ -164,8 +168,8 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 
 	public static Loan createNew(final Fund fund,final Staff loanOfficer, final LoanTransactionProcessingStrategy transactionProcessingStrategy,
 			final LoanProduct loanProduct, final Client client,
-			final LoanProductRelatedDetail loanRepaymentScheduleDetail) {
-		return new Loan(client, fund,loanOfficer, transactionProcessingStrategy, loanProduct, loanRepaymentScheduleDetail, null);
+			final LoanProductRelatedDetail loanRepaymentScheduleDetail, final Set<LoanCharge> loanCharges) {
+		return new Loan(client, fund,loanOfficer, transactionProcessingStrategy, loanProduct, loanRepaymentScheduleDetail, null, loanCharges);
 	}
 
 	protected Loan() {
@@ -175,9 +179,12 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         this.charges = null;
 	}
 
-	public Loan(final Client client, Fund fund, Staff loanOfficer, LoanTransactionProcessingStrategy transactionProcessingStrategy, final LoanProduct loanProduct,
+	private Loan(
+			final Client client, Fund fund, Staff loanOfficer, 
+			final LoanTransactionProcessingStrategy transactionProcessingStrategy, 
+			final LoanProduct loanProduct,
 			final LoanProductRelatedDetail loanRepaymentScheduleDetail,
-			final LoanStatus loanStatus) {
+			final LoanStatus loanStatus, final Set<LoanCharge> loanCharges) {
 		this.client = client;
 		this.fund = fund;
 		this.loanofficer = loanOfficer;
@@ -189,7 +196,35 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		} else {
 			this.loanStatus = null;
 		}
+		if (loanCharges != null && !loanCharges.isEmpty()) {
+			this.charges = associateChargesWithThisLoan(loanCharges);
+			this.totalChargesDueAtDisbursement = deriveSumTotalOfChargesDueAtDisbursement();
+		} else {
+			this.charges = null;
+		}
 		this.interestRebateOwed = BigDecimal.ZERO;
+	}
+
+	private BigDecimal deriveSumTotalOfChargesDueAtDisbursement() {
+		
+		Money chargesDue = Money.of(getCurrency(), BigDecimal.ZERO);
+		
+		for (LoanCharge charge : this.charges) {
+			if (charge.isDueAtDisbursement()) {
+				chargesDue = chargesDue.plus(charge.calculateMonetaryAmount());
+			}
+		}
+		
+		return chargesDue.getAmount();
+	}
+
+	private Set<LoanCharge> associateChargesWithThisLoan(Set<LoanCharge> loanCharges) {
+		
+		for (LoanCharge loanCharge : loanCharges) {
+			loanCharge.update(this);
+		}
+		
+		return loanCharges;
 	}
 
 	public Client client() {
@@ -266,7 +301,9 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 
         if (command.isChargesChanged()) {
 			this.charges.clear();
-			this.charges.addAll(charges);
+			
+			this.charges = associateChargesWithThisLoan(charges);
+			this.totalChargesDueAtDisbursement = deriveSumTotalOfChargesDueAtDisbursement();
 		}
 
 		this.loanRepaymentScheduleDetail.update(command.toLoanProductCommand());
@@ -1216,5 +1253,9 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	public String getCurrencyCode() {
 		return this.loanRepaymentScheduleDetail.getPrincipal()
 				.getCurrencyCode();
+	}
+
+	public Money getPrincpal() {
+		return this.loanRepaymentScheduleDetail.getPrincipal();
 	}
 }
