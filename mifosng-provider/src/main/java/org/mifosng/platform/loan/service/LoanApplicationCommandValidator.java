@@ -3,6 +3,7 @@ package org.mifosng.platform.loan.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.mifosng.platform.DataValidatorBuilder;
 import org.mifosng.platform.api.commands.CalculateLoanScheduleCommand;
 import org.mifosng.platform.api.commands.LoanChargeCommand;
 import org.mifosng.platform.api.commands.LoanApplicationCommand;
@@ -37,6 +38,11 @@ public class LoanApplicationCommandValidator {
 						command.getSubmittedOnDate(), command.getExpectedDisbursementDate());
 				dataValidationErrors.add(error);
 			}
+		}
+		
+		if (command.getTransactionProcessingStrategyId() == null) {
+			DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");
+			baseDataValidator.reset().parameter("transactionProcessingStrategyId").value(command.getTransactionProcessingStrategyId()).notNull().inMinMaxRange(2, 2);
 		}
 		
 		try {
