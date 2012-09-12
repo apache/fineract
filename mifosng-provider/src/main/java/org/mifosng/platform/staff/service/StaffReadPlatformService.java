@@ -9,4 +9,6 @@ public interface StaffReadPlatformService {
 	StaffData retrieveStaff(Long staffId);
 
 	Collection<StaffData> retrieveAllStaff(final String extraCriteria);
+
+	Collection<StaffData> retrieveAllLoanOfficersByOffice(final long officeId);
 }

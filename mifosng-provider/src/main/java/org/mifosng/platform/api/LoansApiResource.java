@@ -118,14 +118,12 @@ public class LoansApiResource {
 						"closedOnDate", "expectedMaturityDate",
 						"status",
 						"lifeCycleStatusDate", "summary", "repaymentSchedule",
-						"loanRepayments", "permissions", "convenienceData", "charges")
+						"loanRepayments", "permissions", "convenienceData", "charges",
+						"loanOfficerOptions")
 				);
 		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (responseParameters.isEmpty()) {
-			responseParameters.addAll(typicalResponseParameters);
-		}else if (responseParameters.contains("loanOfficerOptions")  && (responseParameters.size() == 1)) {
-			// TODO Vishwas: check if response parameters should be additive
 			responseParameters.addAll(typicalResponseParameters);
 		}
 		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
@@ -159,13 +157,8 @@ public class LoansApiResource {
 		Collection<ChargeData> charges = loanBasicDetails.getCharges();
 		
 		// populate loan officers if query param is passed in
-		Collection<StaffData> allowedLoanOfficers = null;
-		if (responseParameters.contains("loanOfficerOptions")) {
-			// get applicable loan officers
-			allowedLoanOfficers = this.staffReadPlatformService
-					.retrieveAllStaff(" office_id = "
-							+ loanBasicDetails.getClientOfficeId() + " and is_loan_officer = 1");
-		}
+		Collection<StaffData> allowedLoanOfficers =  this.staffReadPlatformService.retrieveAllLoanOfficersByOffice(loanBasicDetails.getClientOfficeId());
+		
 		final LoanAccountData newLoanAccount = new LoanAccountData(loanBasicDetails, convenienceDataRequired, null, null, null, null, charges, 
 				productOptions, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions, 
 				transactionProcessingStrategyOptions, interestRateFrequencyTypeOptions, 
@@ -190,15 +183,11 @@ public class LoansApiResource {
 						"repaymentFrequencyType", "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType",
 						"submittedOnDate", "approvedOnDate", "expectedDisbursementDate", "actualDisbursementDate", 
 						"expectedFirstRepaymentOnDate", "interestChargedFromDate", "closedOnDate", "expectedMaturityDate", 
-						"status", "lifeCycleStatusDate")
+						"status", "lifeCycleStatusDate", "loanOfficerName", "loanOfficerId")
 				);
 		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (responseParameters.isEmpty()) {
-			responseParameters.addAll(typicalResponseParameters);
-		} else if ((responseParameters.contains("loanOfficerName") || responseParameters
-				.contains("loanOfficerId")) && (responseParameters.size() <= 2)) {
-			// TODO Vishwas: check if response parameters should be additive
 			responseParameters.addAll(typicalResponseParameters);
 		}
 		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
@@ -249,11 +238,13 @@ public class LoansApiResource {
 		Collection<FundData> fundOptions = new ArrayList<FundData>();
 		Collection<ChargeData> chargeOptions = null;
 		ChargeData chargeTemplate = null;
+		Collection<StaffData> allowedLoanOfficers = null;
 
 		final boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
 		if(template) {
 			responseParameters.addAll(Arrays.asList("productOptions", "amortizationTypeOptions", "interestTypeOptions", "interestCalculationPeriodTypeOptions", 
-						"repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "fundOptions", "transactionProcessingStrategyOptions", "chargeOptions"));
+						"repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "fundOptions", "transactionProcessingStrategyOptions", "chargeOptions",
+						"loanOfficerOptions"));
 			
 			productOptions = this.loanProductReadPlatformService.retrieveAllLoanProductsForLookup();
 			loanTermFrequencyTypeOptions = dropdownReadPlatformService.retrieveLoanTermFrequencyTypeOptions();
@@ -270,16 +261,10 @@ public class LoansApiResource {
 			if (charges != null) {
 				chargeOptions.removeAll(charges);
 			}
+			allowedLoanOfficers =  this.staffReadPlatformService.retrieveAllLoanOfficersByOffice(loanBasicDetails.getClientOfficeId());
+
 		}
 		
-		Collection<StaffData> allowedLoanOfficers = null;
-		if (responseParameters.contains("loanOfficerOptions")) {
-			// get applicable loan officers
-			allowedLoanOfficers = this.staffReadPlatformService
-					.retrieveAllStaff(" office_id = "
-							+ loanBasicDetails.getClientOfficeId() + " and is_loan_officer = 1");
-		}
-
 		final LoanAccountData loanAccount = new LoanAccountData(loanBasicDetails, convenienceDataRequired, summary, repaymentSchedule, loanRepayments, permissions, charges, 
 				productOptions, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions, 
 				transactionProcessingStrategyOptions, interestRateFrequencyTypeOptions, 

@@ -169,7 +169,7 @@ public class LoanAssembler {
 		return fund;
 	}
 	
-	private Staff findLoanOfficerByIdIfProvided(final Long loanOfficerId) {
+	public Staff findLoanOfficerByIdIfProvided(final Long loanOfficerId) {
 		Staff staff = null;
 		if (loanOfficerId != null) {
 			staff = this.staffRepository.findOne(loanOfficerId);

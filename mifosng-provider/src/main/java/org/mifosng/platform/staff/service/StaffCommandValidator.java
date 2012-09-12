@@ -22,10 +22,8 @@ public class StaffCommandValidator {
 
 		DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("staff");
 
-		baseDataValidator.reset().parameter("officeId").value(command.getOfficeId()).notNull().integerGreaterThanZero();
-		
 		baseDataValidator.reset().parameter("firstname")
-				.value(command.getFirstName()).ignoreIfNull()
+				.value(command.getFirstName()).notBlank()
 				.notExceedingLengthOf(50);
 		baseDataValidator.reset().parameter("lastname")
 				.value(command.getLastName()).notBlank()
@@ -50,7 +48,7 @@ public class StaffCommandValidator {
 		baseDataValidator.reset().parameter("id").value(command.getId()).notNull();
 		baseDataValidator.reset().parameter("officeId").value(command.getOfficeId()).ignoreIfNull().integerGreaterThanZero();
 		baseDataValidator.reset().parameter("firstname")
-				.value(command.getFirstName()).ignoreIfNull()
+				.value(command.getFirstName()).ignoreIfNull().notBlank()
 				.notExceedingLengthOf(50);
 		baseDataValidator.reset().parameter("lastname")
 				.value(command.getLastName()).ignoreIfNull().notBlank()
@@ -58,7 +56,9 @@ public class StaffCommandValidator {
 		
 		baseDataValidator.reset().parameter("loanOfficerFlag").value(command.getLoanOfficerFlag()).ignoreIfNull();
 
-		baseDataValidator.reset().anyOfNotNull(command.getFirstName(), command.getLastName(), command.getOfficeId(), command.getLoanOfficerFlag());
+		baseDataValidator.reset().anyOfNotNull(command.getFirstName(),
+				command.getLastName(), command.getOfficeId(),
+				command.getLoanOfficerFlag());
 
 		if (!dataValidationErrors.isEmpty()) {
 			throw new PlatformApiDataValidationException(

@@ -209,7 +209,8 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	}
 	
 	public void modifyLoanApplication(final LoanApplicationCommand command, final Client client, final LoanProduct loanProduct, 
-			final Fund fund, final LoanTransactionProcessingStrategy strategy, final LoanSchedule modifiedLoanSchedule) {
+			final Fund fund, final LoanTransactionProcessingStrategy strategy, final LoanSchedule modifiedLoanSchedule,
+			final Staff loanOfficer) {
 		
 		if (command.isClientChanged()) {
 			this.client = client;
@@ -219,6 +220,9 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		}
 		if (command.isFundChanged()) {
 			this.fund = fund;
+		}
+		if(command.isLoanOfficerChanged()){
+			this.loanofficer = loanOfficer;
 		}
 		if (command.isTransactionStrategyChanged()) {
 			this.transactionProcessingStrategy = strategy;

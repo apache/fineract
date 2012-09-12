@@ -42,6 +42,7 @@ import org.mifosng.platform.loan.domain.LoanTransactionProcessingStrategy;
 import org.mifosng.platform.loan.domain.LoanTransactionRepository;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 import org.mifosng.platform.security.PlatformSecurityContext;
+import org.mifosng.platform.staff.domain.Staff;
 import org.mifosng.platform.user.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -140,10 +141,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		}
 		
 		Fund fund = this.loanAssembler.findFundByIdIfProvided(command.getFundId());
+		Staff loanOfficer = this.loanAssembler.findLoanOfficerByIdIfProvided(command.getLoanOfficerId());
 		LoanTransactionProcessingStrategy strategy = this.loanAssembler.findStrategyByIdIfProvided(command.getTransactionProcessingStrategyId());
 		
 		LoanSchedule loanSchedule = this.calculationPlatformService.calculateLoanSchedule(command.toCalculateLoanScheduleCommand());
-		loan.modifyLoanApplication(command, client, loanProduct, fund, strategy, loanSchedule);
+		loan.modifyLoanApplication(command, client, loanProduct, fund, strategy, loanSchedule, loanOfficer);
 		
 		this.loanRepository.save(loan);
 		
