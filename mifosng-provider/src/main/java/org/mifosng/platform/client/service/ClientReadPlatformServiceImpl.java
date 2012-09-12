@@ -44,53 +44,40 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
 
-	private String generateOfficeIdInClause(List<OfficeData> offices) {
-		String officeIdsList = "";
-		for (int i = 0; i < offices.size(); i++) {
-			Long id = offices.get(i).getId();
-			if (i == 0) {
-				officeIdsList = id.toString();
-			} else {
-				officeIdsList += "," + id.toString();
-			}
-		}
-		return officeIdsList;
-	}
 
 	@Override
 	public Collection<ClientData> retrieveAllIndividualClients(final String extraCriteria) {
 
-		this.context.authenticatedUser();
+		AppUser currentUser = context.authenticatedUser();
+		String hierarchy = currentUser.getOffice().getHierarchy();
+		String hierarchySearchString = hierarchy + "%";	
+		
+		ClientMapper rm = new ClientMapper();
 
-		List<OfficeData> offices = new ArrayList<OfficeData>(officeReadPlatformService.retrieveAllOffices());
-		String officeIdsList = generateOfficeIdInClause(offices);
-
-		ClientMapper rm = new ClientMapper(offices);
-
-		String sql = "select " + rm.clientSchema() + " where c.office_id in (" + officeIdsList + ") and c.is_deleted=0";
+		String sql = "select " + rm.clientSchema();
 
 		if (StringUtils.isNotBlank(extraCriteria))			
-			sql += " and " + extraCriteria;
+			sql += " and (" + extraCriteria + ")";
 
 		sql += " order by c.lastname ASC, c.firstname ASC";
 
-		return this.jdbcTemplate.query(sql, rm, new Object[] {}); 
+		return this.jdbcTemplate.query(sql, rm, new Object[] {hierarchySearchString});
 	}
 
 	@Override
 	public ClientData retrieveIndividualClient(final Long clientId) {
 
 		try {
-			this.context.authenticatedUser();
-			// TODO - JW include office name in query rather than get the lot
-			// for office name
-			List<OfficeData> offices = new ArrayList<OfficeData>(
-					officeReadPlatformService.retrieveAllOffices());
-			ClientMapper rm = new ClientMapper(offices);
 
-			String sql = "select " + rm.clientSchema() + " where c.id = ? and c.is_deleted=0";
+			AppUser currentUser = context.authenticatedUser();
+			String hierarchy = currentUser.getOffice().getHierarchy();
+			String hierarchySearchString = hierarchy + "%";	
+			
+			ClientMapper rm = new ClientMapper();
 
-			return this.jdbcTemplate.queryForObject(sql, rm, new Object[] {clientId});
+			String sql = "select " + rm.clientSchema() + " and c.id = " + clientId;
+
+			return this.jdbcTemplate.queryForObject(sql, rm, new Object[] {hierarchySearchString});
 		} catch (EmptyResultDataAccessException e) {
 			throw new ClientNotFoundException(clientId);
 		}
@@ -124,15 +111,10 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
 	private static final class ClientMapper implements RowMapper<ClientData> {
 
-		private final List<OfficeData> offices;
-
-		public ClientMapper(final List<OfficeData> offices) {
-			this.offices = offices;
-		}
-
 		public String clientSchema() {
-			return "c.office_id as officeId, c.id as id, c.firstname as firstname, c.lastname as lastname, c.display_name as displayName, " +
-				   "c.external_id as externalId, c.joining_date as joinedDate from m_client c";
+			return "c.office_id as officeId, o.name as officeName, c.id as id, c.firstname as firstname, c.lastname as lastname, c.display_name as displayName, " +
+				   "c.external_id as externalId, c.joining_date as joinedDate from m_client c join m_office o on o.id = c.office_id " +
+					" where o.hierarchy like ? and c.is_deleted=0 ";
 		}
 
 		@Override
@@ -150,23 +132,12 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 			String externalId = rs.getString("externalId");
 			LocalDate joinedDate = JdbcSupport.getLocalDate(rs, "joinedDate");
 
-			String officeName = fromOfficeList(this.offices, officeId);
+			String officeName = rs.getString("officeName");
 
 			return new ClientData(officeId, officeName, id, firstname,
 					lastname, displayName, externalId, joinedDate);
 		}
 
-		private String fromOfficeList(final List<OfficeData> officeList,
-				final Long officeId) {
-			String match = "";
-			for (OfficeData office : officeList) {
-				if (office.getId().equals(officeId)) {
-					match = office.getName();
-				}
-			}
-
-			return match;
-		}
 	}
 
     private static final class ClientLookupMapper implements RowMapper<ClientLookup>{
