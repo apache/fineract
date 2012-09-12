@@ -370,4 +370,8 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 	public Money getDeposit() {
 		return Money.of(this.currency, this.depositAmount);
 	}
+	
+	public Client client() {
+		return this.client;
+	}
 }

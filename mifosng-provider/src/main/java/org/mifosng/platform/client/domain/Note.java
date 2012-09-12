@@ -9,6 +9,7 @@ import javax.persistence.Table;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
 import org.mifosng.platform.loan.domain.Loan;
 import org.mifosng.platform.loan.domain.LoanTransaction;
+import org.mifosng.platform.saving.domain.DepositAccount;
 import org.mifosng.platform.user.domain.AppUser;
 
 @Entity
@@ -37,8 +38,12 @@ public class Note extends AbstractAuditableCustom<AppUser, Long> {
 	@Column(name = "note_type_enum")
     private Integer       noteTypeId;
     
+    @ManyToOne
+    @JoinColumn(name = "deposit_account_id", nullable = true)
+    private DepositAccount depositAccount;
+    
     public enum NoteType {
-        CLIENT(100, "noteType.client"), LOAN(200, "noteType.loan"), LOAN_TRANSACTION(300, "noteType.loan.transaction");
+        CLIENT(100, "noteType.client"), LOAN(200, "noteType.loan"), LOAN_TRANSACTION(300, "noteType.loan.transaction"), DEPOSIT(400, "noteType.deposit");
 
         private Integer value;
         private String code;
@@ -104,11 +109,22 @@ public class Note extends AbstractAuditableCustom<AppUser, Long> {
         this.noteTypeId = null;
     }
 
+	public Note(DepositAccount account, String note) {
+		this.depositAccount=account;
+		this.client = account.client();
+		this.note = note;
+		this.noteTypeId = NoteType.DEPOSIT.getValue();
+	}
+
 	public void update(final String note) {
 		this.note = note;
 	}
 
 	public boolean isNotAgainstClientWithIdOf(Long clientId) {
 		return !this.client.identifiedBy(clientId);
+	}
+
+	public static Note depositNote(DepositAccount account, String noteText) {
+		return new Note(account,noteText);
 	}
 }

@@ -1105,15 +1105,16 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		Type typeOfMap = new TypeToken<Map<String, Object>>(){}.getType();
 	    Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
 	    
-	    Set<String> supportedParams = new HashSet<String>( Arrays.asList("eventDate", "dateFormat"));
+	    Set<String> supportedParams = new HashSet<String>( Arrays.asList("eventDate", "dateFormat", "note"));
 	    
 	    checkForUnsupportedParameters(requestMap, supportedParams);
 	    
 	    Set<String> modifiedParameters = new HashSet<String>();
 	    
 	    LocalDate eventDate = extractLocalDateParameter("eventDate", requestMap, modifiedParameters);
+	    String note =extractStringParameter("note", requestMap, modifiedParameters);
 	    
-		return new DepositStateTransitionCommand(resourceIdentifier, eventDate);
+		return new DepositStateTransitionCommand(resourceIdentifier, eventDate, note);
 	}
 	
 	@Override
@@ -1127,7 +1128,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		Type typeOfMap = new TypeToken<Map<String, String>>(){}.getType();
 	    Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
 	    
-	    Set<String> supportedParams = new HashSet<String>(Arrays.asList("locale","commencementDate", "dateFormat", "tenureInMonths", "deposit", "interestCompoundedEveryPeriodType", "productId","interestCompoundedEvery"));
+	    Set<String> supportedParams = new HashSet<String>(Arrays.asList("locale","commencementDate", "dateFormat", "tenureInMonths", "deposit", "interestCompoundedEveryPeriodType", "productId","interestCompoundedEvery","note"));
 	    
 	    checkForUnsupportedParameters(requestMap, supportedParams);
 	    
@@ -1139,7 +1140,8 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	    Integer interestCompoundedEveryPeriodType = extractIntegerParameter("interestCompoundedEveryPeriodType", requestMap, modifiedParameters);
 	    Integer interestCompoundedEvery = extractIntegerParameter("interestCompoundedEvery", requestMap, modifiedParameters);
 	    Long productId = extractLongParameter("productId", requestMap, modifiedParameters);
+	    String note = extractStringParameter("note", requestMap, modifiedParameters);
 	    
-		return new DepositStateTransitionApprovalCommand(resourceIdentifier, productId, commencementDate, tenureInMonths, deposit, interestCompoundedEveryPeriodType,interestCompoundedEvery);
+		return new DepositStateTransitionApprovalCommand(resourceIdentifier, productId, commencementDate, tenureInMonths, deposit, interestCompoundedEveryPeriodType,interestCompoundedEvery, note);
 	}
 }

@@ -197,23 +197,23 @@ public class DepositAccountsApiResource {
 			EntityIdentifier identifier = this.depositAccountWritePlatformService.approveDepositApplication(command);
 			response = Response.ok().entity(identifier).build();
 		} 
-		else if (is(commandParam, "reject")) {
-			DepositStateTransitionCommand command=apiDataConversionService.convertJsonToDepositStateTransitionCommand(accountId, jsonRequestBody);
-			EntityIdentifier identifier = this.depositAccountWritePlatformService.rejectDepositApplication(command);
-			response = Response.ok().entity(identifier).build();
-		}  else if (is(commandParam, "withdrewbyclient")) {
-			DepositStateTransitionCommand command=apiDataConversionService.convertJsonToDepositStateTransitionCommand(accountId, jsonRequestBody);
-			EntityIdentifier identifier = this.depositAccountWritePlatformService.withdrawDepositApplication(command);
-			response = Response.ok().entity(identifier).build();
-		}
+		else{ 
+				DepositStateTransitionCommand command=apiDataConversionService.convertJsonToDepositStateTransitionCommand(accountId, jsonRequestBody);
+				if (is(commandParam, "reject")) {
+					EntityIdentifier identifier = this.depositAccountWritePlatformService.rejectDepositApplication(command);
+					response = Response.ok().entity(identifier).build();
+				}  else if (is(commandParam, "withdrewbyclient")) {
+					EntityIdentifier identifier = this.depositAccountWritePlatformService.withdrawDepositApplication(command);
+					response = Response.ok().entity(identifier).build();
+				}
 		
-		UndoStateTransitionCommand undoCommand = new UndoStateTransitionCommand(accountId);
+				UndoStateTransitionCommand undoCommand = new UndoStateTransitionCommand(accountId, command.getNote());
 		
-		if (is(commandParam, "undoapproval")) {
-			EntityIdentifier identifier = this.depositAccountWritePlatformService.undoDepositApproval(undoCommand);
-			response = Response.ok().entity(identifier).build();
-		}
-		
+				if (is(commandParam, "undoapproval")) {
+					EntityIdentifier identifier = this.depositAccountWritePlatformService.undoDepositApproval(undoCommand);
+					response = Response.ok().entity(identifier).build();
+				}
+			}
 		if (response == null) {
 			throw new UnrecognizedQueryParamException("command", commandParam);
 		}

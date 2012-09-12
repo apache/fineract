@@ -3,12 +3,15 @@ package org.mifosng.platform.saving.service;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.mifosng.platform.api.commands.DepositAccountCommand;
 import org.mifosng.platform.api.commands.DepositStateTransitionApprovalCommand;
 import org.mifosng.platform.api.commands.DepositStateTransitionCommand;
 import org.mifosng.platform.api.commands.UndoStateTransitionCommand;
 import org.mifosng.platform.api.data.EntityIdentifier;
+import org.mifosng.platform.client.domain.Note;
+import org.mifosng.platform.client.domain.NoteRepository;
 import org.mifosng.platform.exceptions.DepositAccountNotFoundException;
 import org.mifosng.platform.exceptions.NoAuthorizationException;
 import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
@@ -37,18 +40,21 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 	private final DepositAccountRepository depositAccountRepository;
 	private final DepositAccountAssembler depositAccountAssembler;
 	private final FixedTermDepositInterestCalculator fixedTermDepositInterestCalculator;
+	private final NoteRepository noteRepository;
 	
 	@Autowired
 	public DepositAccountWritePlatformServiceJpaRepositoryImpl(
 			final PlatformSecurityContext context, 
 			final DepositAccountRepository depositAccountRepository, 
 			final DepositAccountAssembler depositAccountAssembler,
-			final FixedTermDepositInterestCalculator fixedTermDepositInterestCalculator
+			final FixedTermDepositInterestCalculator fixedTermDepositInterestCalculator,
+			final NoteRepository noteRepository
 			) {
 		this.context=context;
 		this.depositAccountRepository = depositAccountRepository;
 		this.depositAccountAssembler = depositAccountAssembler;
 		this.fixedTermDepositInterestCalculator = fixedTermDepositInterestCalculator;
+		this.noteRepository = noteRepository;
 	}
 
 	/*
@@ -126,6 +132,12 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 		
 		this.depositAccountRepository.save(account);
 		
+		String noteText = command.getNote();
+		if (StringUtils.isNotBlank(noteText)) {
+			Note note = Note.depositNote(account, noteText);
+			this.noteRepository.save(note);
+		}
+		
 
 		return new EntityIdentifier(account.getId());
 	
@@ -160,6 +172,12 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 		
 		account.reject(eventDate, defaultDepositLifecycleStateMachine());
 		this.depositAccountRepository.save(account);
+		
+		String noteText = command.getNote();
+		if (StringUtils.isNotBlank(noteText)) {
+			Note note = Note.depositNote(account, noteText);
+			this.noteRepository.save(note);
+		}
 
 		return new EntityIdentifier(account.getId());
 	}
@@ -184,6 +202,14 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 		}
 		
 		account.withdrawnByApplicant(eventDate, defaultDepositLifecycleStateMachine());
+		this.depositAccountRepository.save(account);
+		
+		String noteText = command.getNote();
+		if (StringUtils.isNotBlank(noteText)) {
+			Note note = Note.depositNote(account, noteText);
+			this.noteRepository.save(note);
+		}
+		
 		return new EntityIdentifier(account.getId());
 	}
 
@@ -201,6 +227,11 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 		account.undoDepositApproval(defaultDepositLifecycleStateMachine());
 		this.depositAccountRepository.save(account);
 		
+		String noteText = command.getNote();
+		if (StringUtils.isNotBlank(noteText)) {
+			Note note = Note.depositNote(account, noteText);
+			this.noteRepository.save(note);
+		}
 		return new EntityIdentifier(account.getId());
 	}
 }

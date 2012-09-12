@@ -22,6 +22,7 @@ public class DepositStateTransitionCommandValidator {
 		DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("deposit.transition");
 		baseDataValidator.reset().parameter("accountId").value(command.getAccountId()).notNull().integerGreaterThanZero();
 		baseDataValidator.reset().parameter("eventDate").value(command.getEventDate()).notNull();
+		baseDataValidator.reset().parameter("note").value(command.getNote()).notNull();
 		
 		if (!dataValidationErrors.isEmpty()) {
 			throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);

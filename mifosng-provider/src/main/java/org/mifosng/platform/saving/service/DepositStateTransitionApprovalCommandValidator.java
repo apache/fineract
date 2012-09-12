@@ -23,11 +23,13 @@ public class DepositStateTransitionApprovalCommandValidator {
 		List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 		DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("deposit.transition");
 		baseDataValidator.reset().parameter("accountId").value(command.getAccountId()).notNull().integerGreaterThanZero();
-		baseDataValidator.reset().parameter("eventDate").value(command.getEventDate()).notNull();
+		baseDataValidator.reset().parameter("commencementDate").value(command.getEventDate()).notNull();
 		
 		baseDataValidator.reset().parameter("depositAmount").value(command.getDepositAmount()).ignoreIfNull().zeroOrPositiveAmount();
 		baseDataValidator.reset().parameter("tenureInMonths").value(command.getTenureInMonths()).ignoreIfNull().integerGreaterThanZero();
 		baseDataValidator.reset().parameter("interestCompoundedEveryPeriodType").value(command.getInterestCompoundedEveryPeriodType()).ignoreIfNull().inMinMaxRange(2, 2);
+		
+		baseDataValidator.reset().parameter("note").value(command.getNote()).notNull();
 		
 		if (!dataValidationErrors.isEmpty()) {
 			throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);

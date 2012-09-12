@@ -13,11 +13,6 @@ public class UndoStateTransitionCommand {
 		this.note = note;
 	}
 	
-	public UndoStateTransitionCommand(final Long loanId) {
-		this.loanId = loanId;
-		this.note=null;
-	}
-
 	public Long getLoanId() {
 		return this.loanId;
 	}
