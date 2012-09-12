@@ -41,13 +41,13 @@ Launch instance <a target="_blank" href="https://console.aws.amazon.com/ec2/home
 
 Roadmap
 ==============
- - Add spine of Fixed-Term Deposit Accounts and Savings Accounts (@madhukar-At-hugo - see https://mifosforge.jira.com/browse/MIFOSX-1)
+- Add spine of Fixed-Term Deposit Accounts and Savings Accounts (@madhukar-At-hugo - see https://mifosforge.jira.com/browse/MIFOSX-1)
  
-- Solidatory Groups & Loans to these groups (@michal-At-soldevho - see https://mifosforge.jira.com/browse/MIFOSX-5)
+- Solidatory Groups & Linking loan functionality to these groups (@michal-At-soldevho - see https://mifosforge.jira.com/browse/MIFOSX-5)
  
 - Round out **Individual Lending** platform and application cababilities through working with (ENDA, Al Majmoua, GK-maarg http://www.gfspl.in/maarg) - see see https://mifosforge.jira.com/browse/MIFOSX-31
-     - One-Time Charges on loans (see https://mifosforge.jira.com/browse/MIFOSX-55)
-     - Staff and associated relationship to loans (see https://mifosforge.jira.com/browse/MIFOSX-54)
+     - One-Time Charges on loans (@michal-At-soldevho see https://mifosforge.jira.com/browse/MIFOSX-55)
+     - Staff and associated relationship to loans (@vishwas-At-conflux see https://mifosforge.jira.com/browse/MIFOSX-54)
  
 - API improvements from feedback
     - paging support
