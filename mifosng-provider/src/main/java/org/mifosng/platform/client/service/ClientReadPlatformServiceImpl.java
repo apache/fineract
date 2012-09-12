@@ -74,7 +74,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
 		sql += " order by c.lastname ASC, c.firstname ASC";
 
-		return this.jdbcTemplate.query(sql, rm, new Object[] {});
+		return this.jdbcTemplate.query(sql, rm, new Object[] {}); 
 	}
 
 	@Override
