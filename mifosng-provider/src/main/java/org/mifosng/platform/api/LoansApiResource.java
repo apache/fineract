@@ -57,6 +57,7 @@ import org.mifosng.platform.staff.service.StaffReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 @Path("/loans")
 @Component
@@ -204,6 +205,7 @@ public class LoansApiResource {
 		
 		LoanBasicDetailsData loanBasicDetails = this.loanReadPlatformService.retrieveLoanAccountDetails(loanId);
 		
+		int loanRepaymentsCount = 0;
 		Collection<LoanRepaymentTransactionData> loanRepayments = null;
 		Collection<LoanRepaymentPeriodData> repaymentSchedule = null;
 		LoanAccountSummaryData summary = null;
@@ -219,13 +221,17 @@ public class LoansApiResource {
 				responseParameters.addAll(associationParameters);
 			}
 			
-			loanRepayments = this.loanReadPlatformService.retrieveLoanPayments(loanId);
+			Collection<LoanRepaymentTransactionData> currentLoanRepayments = this.loanReadPlatformService.retrieveLoanPayments(loanId);
+			if (!CollectionUtils.isEmpty(currentLoanRepayments)) {
+				loanRepayments = currentLoanRepayments;
+				loanRepaymentsCount = loanRepayments.size();
+			}
 			repaymentSchedule = this.loanReadPlatformService.retrieveRepaymentSchedule(loanId);
 
 			summary = this.loanReadPlatformService.retrieveSummary(loanBasicDetails.getCurrency(), repaymentSchedule, loanRepayments);
 
 			boolean isWaiveAllowed = summary.isWaiveAllowed(loanBasicDetails.getCurrency(), loanBasicDetails.getInArrearsTolerance());
-			permissions = this.loanReadPlatformService.retrieveLoanPermissions(loanBasicDetails, isWaiveAllowed, loanRepayments.size());
+			permissions = this.loanReadPlatformService.retrieveLoanPermissions(loanBasicDetails, isWaiveAllowed, loanRepaymentsCount);
 			convenienceDataRequired = true;
 			
             charges = this.chargeReadPlatformService.retrieveLoanCharges(loanId);

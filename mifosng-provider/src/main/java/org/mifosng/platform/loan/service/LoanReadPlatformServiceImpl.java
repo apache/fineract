@@ -148,12 +148,14 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 		// sum up all repayment transactions
 		Long waiverType = (long) 4;
 		MoneyData totalRepaymentAmount = MoneyData.of(currencyData, BigDecimal.ZERO);
-		for (LoanRepaymentTransactionData loanRepayment : loanRepayments) {
-			Long transactionType = loanRepayment.getTransactionType().getId();
-			if (transactionType.equals(waiverType)) {
-				// skip
-			} else {
-				totalRepaymentAmount = totalRepaymentAmount.plus(loanRepayment.getTotal());
+		if (loanRepayments != null) {
+			for (LoanRepaymentTransactionData loanRepayment : loanRepayments) {
+				Long transactionType = loanRepayment.getTransactionType().getId();
+				if (transactionType.equals(waiverType)) {
+					// skip
+				} else {
+					totalRepaymentAmount = totalRepaymentAmount.plus(loanRepayment.getTotal());
+				}
 			}
 		}
 		
