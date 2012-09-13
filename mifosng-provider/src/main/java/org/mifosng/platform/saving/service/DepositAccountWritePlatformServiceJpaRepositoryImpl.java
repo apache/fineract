@@ -262,7 +262,6 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 			this.depositAccountRepository.save(renewedAccount);
 			return new EntityIdentifier(renewedAccount.getId()); //returns the new deposit application id
 		}
-		
 		String noteText = command.getNote();
 		if (StringUtils.isNotBlank(noteText)) {
 			Note note = Note.depositNote(account, noteText);
