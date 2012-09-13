@@ -205,7 +205,7 @@ public class DepositAccountsApiResource {
 				}  else if (is(commandParam, "withdrewbyclient")) {
 					EntityIdentifier identifier = this.depositAccountWritePlatformService.withdrawDepositApplication(command);
 					response = Response.ok().entity(identifier).build();
-				}  else if (is(commandParam, "matureAccount")){
+				}  else if (is(commandParam, "mature")){
 					EntityIdentifier identifier = this.depositAccountWritePlatformService.matureDepositApplication(command);
 					response = Response.ok().entity(identifier).build();
 				}

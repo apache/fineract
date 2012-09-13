@@ -69,6 +69,17 @@ public class DepositLifecycleStateMachineImpl implements
 				throw new InvalidDepositStateTransitionException("mature", "failed", errorMessage,from);
 			}
 			break;
+		case DEPOSIT_CLOSED:
+			if (from.hasStateOf(DepositAccountStatus.MATURED) ){
+				newState = stateOf(DepositAccountStatus.CLOSED, allowedDepositStatuses);
+			}
+			else{
+				final String errorMessage = "The DepositApplication can not be closed from "+from.getCode() ;
+				throw new InvalidDepositStateTransitionException("closed", "failed", errorMessage,from);
+			}
+			break;
+		default:
+			break;
 		}
 		
 		return newState;
