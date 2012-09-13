@@ -75,9 +75,10 @@ public class ClientsApiResource {
 			@QueryParam("externalId") final String externalId,
 			@QueryParam("displayName") final String displayName,
 			@QueryParam("firstName") final String firstName,
-			@QueryParam("lastName") final String lastName) {
+			@QueryParam("lastName") final String lastName,
+			@QueryParam("underHierarchy") final String hierarchy) {
 
-		final String extraCriteria = getClientCriteria(sqlSearch, officeId, externalId, displayName, firstName, lastName);
+		final String extraCriteria = getClientCriteria(sqlSearch, officeId, externalId, displayName, firstName, lastName, hierarchy);
 		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (responseParameters.isEmpty()) {
@@ -92,7 +93,7 @@ public class ClientsApiResource {
 
 	private String getClientCriteria(String sqlSearch, Integer officeId,
 			String externalId, String displayName, String firstName,
-			String lastName) {
+			String lastName, String hierarchy) {
 
 		String extraCriteria = "";
 
@@ -112,6 +113,9 @@ public class ClientsApiResource {
 					+ sqlEncodeString(firstName);
 		if (lastName != null)
 			extraCriteria += " and lastname like " + sqlEncodeString(lastName);
+		if(hierarchy != null){
+			extraCriteria += " and o.hierarchy like " + sqlEncodeString(hierarchy+"%");
+		}
 
 		if (StringUtils.isNotBlank(extraCriteria))
 			extraCriteria = extraCriteria.substring(4);
