@@ -18,9 +18,9 @@ import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
 import org.mifosng.platform.exceptions.ProductNotFoundException;
 import org.mifosng.platform.saving.domain.DepositAccount;
 import org.mifosng.platform.saving.domain.DepositAccountRepository;
+import org.mifosng.platform.saving.domain.DepositAccountStatus;
 import org.mifosng.platform.saving.domain.DepositLifecycleStateMachine;
 import org.mifosng.platform.saving.domain.DepositLifecycleStateMachineImpl;
-import org.mifosng.platform.saving.domain.DepositAccountStatus;
 import org.mifosng.platform.saving.domain.FixedTermDepositInterestCalculator;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.user.domain.AppUser;
@@ -232,6 +232,37 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 			Note note = Note.depositNote(account, noteText);
 			this.noteRepository.save(note);
 		}
+		return new EntityIdentifier(account.getId());
+	}
+
+	@Transactional
+	@Override
+	public EntityIdentifier matureDepositApplication(DepositStateTransitionCommand command) {
+		
+		AppUser currentUser = context.authenticatedUser();
+		
+		DepositStateTransitionCommandValidator validator = new DepositStateTransitionCommandValidator(command);
+		validator.validate();
+		
+		DepositAccount account = this.depositAccountRepository.findOne(command.getAccountId());
+		if (account == null || account.isDeleted()) {
+			throw new DepositAccountNotFoundException(command.getAccountId());
+		}
+		
+		LocalDate eventDate = command.getEventDate();
+		if (this.isBeforeToday(eventDate) && currentUser.canNotApproveLoanInPast()) {
+			throw new NoAuthorizationException("User has no authority to mature deposit with a date in the past.");
+		}
+		
+		account.matureDepositApplication(eventDate, defaultDepositLifecycleStateMachine());
+		this.depositAccountRepository.save(account);
+		
+		String noteText = command.getNote();
+		if (StringUtils.isNotBlank(noteText)) {
+			Note note = Note.depositNote(account, noteText);
+			this.noteRepository.save(note);
+		}
+		
 		return new EntityIdentifier(account.getId());
 	}
 }

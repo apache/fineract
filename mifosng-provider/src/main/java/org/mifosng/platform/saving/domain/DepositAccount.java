@@ -289,6 +289,14 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 		}
 		return date;
 	}
+	
+	public LocalDate getMaturityDate() {
+		LocalDate date = null;
+		if (this.maturesOnDate != null) {
+			date = new LocalDate(this.maturesOnDate);
+		}
+		return date;
+	}
 
 	public void reject(final LocalDate rejectedOn,
 			final DepositLifecycleStateMachine depositLifecycleStateMachine) {
@@ -372,5 +380,40 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 	
 	public Client client() {
 		return this.client;
+	}
+
+	public void matureDepositApplication(LocalDate maturedOnDate, DepositLifecycleStateMachine depositLifecycleStateMachine) {
+		
+		if (maturedOnDate.isAfter(maturesOnDate()) || new LocalDate().equals(maturesOnDate())) {
+			DepositAccountStatus statusEnum = depositLifecycleStateMachine.transition(
+					DepositAccountEvent.DEPOSIT_MATURED,
+					DepositAccountStatus.fromInt(this.depositStatus));
+			this.depositStatus = statusEnum.getValue();
+			
+			if(!this.renewalAllowed){
+				DepositAccountTransaction depositaccountTransaction = DepositAccountTransaction.withdraw(Money.of(this.currency, this.total), maturedOnDate);
+				depositaccountTransaction.updateAccount(this);
+				this.depositaccountTransactions.add(depositaccountTransaction);
+			}
+
+		}
+		
+		if (maturesOnDate().isBefore(new LocalDate())) {
+
+			final String errorMessage = "The date on which a deposit is rejected cannot be before its submittal date: "
+					+ new LocalDate().toString();
+			throw new InvalidDepositStateTransitionException("reject",
+					"cannot.be.before.submittal.date", errorMessage,
+					maturedOnDate, new LocalDate());
+
+		}
+	}
+	
+	public LocalDate maturesOnDate() {
+		LocalDate date = null;
+		if (this.maturesOnDate != null) {
+			date = new LocalDate(this.maturesOnDate);
+		}
+		return date;
 	}
 }

@@ -27,4 +27,7 @@ public interface DepositAccountWritePlatformService {
 	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE', 'CAN_APPROVE_DEPOSIT_ROLE', 'CAN_APPROVE_DEPOSIT_IN_THE_PAST_ROLE')")
 	EntityIdentifier undoDepositApproval(UndoStateTransitionCommand undoCommand);
 
+	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE', 'CAN_APPROVE_DEPOSIT_ROLE', 'CAN_APPROVE_DEPOSIT_IN_THE_PAST_ROLE')")
+	EntityIdentifier matureDepositApplication(DepositStateTransitionCommand command);
+
 }
