@@ -301,8 +301,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 
         if (command.isChargesChanged()) {
 			this.charges.clear();
-			
-			this.charges = associateChargesWithThisLoan(charges);
+			this.charges.addAll(associateChargesWithThisLoan(charges));
 			this.totalChargesDueAtDisbursement = deriveSumTotalOfChargesDueAtDisbursement();
 		}
 

@@ -183,7 +183,7 @@ public class LoansApiResource {
 						"repaymentFrequencyType", "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType",
 						"submittedOnDate", "approvedOnDate", "expectedDisbursementDate", "actualDisbursementDate", 
 						"expectedFirstRepaymentOnDate", "interestChargedFromDate", "closedOnDate", "expectedMaturityDate", 
-						"status", "lifeCycleStatusDate", "loanOfficerName", "loanOfficerId", "charges")
+						"status", "lifeCycleStatusDate", "loanOfficerName", "loanOfficerId")
 				);
 		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
@@ -245,7 +245,7 @@ public class LoansApiResource {
 			responseParameters.addAll(
 						Arrays.asList("productOptions", "amortizationTypeOptions", "interestTypeOptions", "interestCalculationPeriodTypeOptions", 
 						"repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "fundOptions", 
-						"repaymentStrategyOptions", "chargeOptions", "loanOfficerOptions")
+						"repaymentStrategyOptions", "chargeOptions", "chargeTemplate", "loanOfficerOptions")
 			);
 			
 			productOptions = this.loanProductReadPlatformService.retrieveAllLoanProductsForLookup();
