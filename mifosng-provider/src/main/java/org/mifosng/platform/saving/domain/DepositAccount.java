@@ -41,7 +41,6 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 	@JoinColumn(name = "client_id", nullable = false)
 	private Client client;
 
-	@SuppressWarnings("unused")
 	@ManyToOne
 	@JoinColumn(name = "product_id")
 	private final DepositProduct product;
@@ -75,7 +74,6 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 	@Column(name = "actual_commencement_date")
 	private Date actualCommencementDate;
 	
-	@SuppressWarnings("unused")
 	@Temporal(TemporalType.DATE)
 	@Column(name = "matures_on_date")
 	private Date maturesOnDate;
@@ -92,7 +90,6 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 	@Column(name = "projected_total_maturity_amount", scale = 6, precision = 19, nullable = false)
 	private BigDecimal projectedTotalOnMaturity;
 	
-	@SuppressWarnings("unused")
 	@Column(name = "actual_total_amount", scale = 6, precision = 19, nullable = false)
 	private BigDecimal total;
 	
@@ -100,7 +97,6 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 	@Column(name = "pre_closure_interest_rate", scale = 6, precision = 19, nullable = false)
 	private BigDecimal preClosureInterestRate;
 	
-	@SuppressWarnings("unused")
 	@Column(name = "is_renewal_allowed", nullable = false)
 	private boolean renewalAllowed = false;
 	
@@ -137,6 +133,7 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "depositAccount", orphanRemoval = true)
 	private final List<DepositAccountTransaction> depositaccountTransactions = new ArrayList<DepositAccountTransaction>();
 	
+	@SuppressWarnings("unused")
 	@OneToOne(optional=true, cascade={CascadeType.PERSIST})
 	@JoinColumn(name = "renewed_account_id")
 	private DepositAccount renewdAccount;
