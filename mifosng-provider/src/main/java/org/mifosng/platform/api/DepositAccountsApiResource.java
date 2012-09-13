@@ -206,8 +206,7 @@ public class DepositAccountsApiResource {
 				response = Response.ok().entity(identifier).build();
 			}  else if (is(commandParam, "mature")){
 				EntityIdentifier identifier = this.depositAccountWritePlatformService.matureDepositApplication(command);
-				response = Response.ok().entity(identifier).build();
-			}
+				response = Response.ok().entity(identifier).build();			}
 	
 			UndoStateTransitionCommand undoCommand = new UndoStateTransitionCommand(accountId, command.getNote());
 	
