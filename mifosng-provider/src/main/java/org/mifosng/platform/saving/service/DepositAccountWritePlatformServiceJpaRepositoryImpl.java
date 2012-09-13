@@ -257,6 +257,12 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 		account.matureDepositApplication(eventDate, defaultDepositLifecycleStateMachine());
 		this.depositAccountRepository.save(account);
 		
+		if(account.isRenewalAllowed()){
+			final DepositAccount renewedAccount = this.depositAccountAssembler.assembleFrom(account);
+			this.depositAccountRepository.save(renewedAccount);
+			return new EntityIdentifier(renewedAccount.getId()); //returns the new deposit application id
+		}
+		
 		String noteText = command.getNote();
 		if (StringUtils.isNotBlank(noteText)) {
 			Note note = Note.depositNote(account, noteText);

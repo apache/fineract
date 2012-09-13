@@ -12,6 +12,7 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -135,6 +136,10 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 	@LazyCollection(LazyCollectionOption.FALSE)
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "depositAccount", orphanRemoval = true)
 	private final List<DepositAccountTransaction> depositaccountTransactions = new ArrayList<DepositAccountTransaction>();
+	
+	@OneToOne(optional=true, cascade={CascadeType.PERSIST})
+	@JoinColumn(name = "renewed_account_id")
+	private DepositAccount renewdAccount;
     
 	public DepositAccount openNew(
 			final Client client, final DepositProduct product,
@@ -381,10 +386,22 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 	public Client client() {
 		return this.client;
 	}
+	
+	public DepositProduct product(){
+		return this.product;
+	}
+	
+	public String getExternalId() {
+		return this.externalId;
+	}
+	
+	public boolean isRenewalAllowed() {
+		return renewalAllowed;
+	}
 
 	public void matureDepositApplication(LocalDate maturedOnDate, DepositLifecycleStateMachine depositLifecycleStateMachine) {
 		
-		if (maturedOnDate.isAfter(maturesOnDate()) || new LocalDate().equals(maturesOnDate())) {
+		if (maturedOnDate.isAfter(maturesOnDate()) || (new LocalDate().equals(maturesOnDate()) && maturedOnDate.equals(maturesOnDate()))) {
 			DepositAccountStatus statusEnum = depositLifecycleStateMachine.transition(
 					DepositAccountEvent.DEPOSIT_MATURED,
 					DepositAccountStatus.fromInt(this.depositStatus));
@@ -394,18 +411,48 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 				DepositAccountTransaction depositaccountTransaction = DepositAccountTransaction.withdraw(Money.of(this.currency, this.total), maturedOnDate);
 				depositaccountTransaction.updateAccount(this);
 				this.depositaccountTransactions.add(depositaccountTransaction);
+				
+				DepositAccountStatus statusEnumForClose = depositLifecycleStateMachine.transition(
+						DepositAccountEvent.DEPOSIT_CLOSED,
+						DepositAccountStatus.fromInt(this.depositStatus));
+				this.depositStatus = statusEnumForClose.getValue();
+				
+				this.depositAmount = null;
+				this.interestRate = null;
+				this.tenureInMonths = null;
+				this.interestCompoundedEvery = null;
+				this.interestCompoundedFrequencyType = null;
+				this.closedOnDate = maturedOnDate.toDate();
+				this.withdrawnOnDate = null;
+				this.rejectedOnDate = null;
+				
+			}else if(this.renewalAllowed){
+				DepositAccountStatus statusEnumForClose = depositLifecycleStateMachine.transition(
+						DepositAccountEvent.DEPOSIT_CLOSED,
+						DepositAccountStatus.fromInt(this.depositStatus));
+				this.depositStatus = statusEnumForClose.getValue();
+				this.closedOnDate = maturedOnDate.toDate();
+				this.withdrawnOnDate = null;
+				this.rejectedOnDate = null;
 			}
 
 		}
-		
-		if (maturesOnDate().isBefore(new LocalDate())) {
-
-			final String errorMessage = "The date on which a deposit is rejected cannot be before its submittal date: "
+		if (maturedOnDate.isBefore(new LocalDate()) || maturedOnDate.isBefore(maturesOnDate())) {
+			
+			final String errorMessage = "The date on which a deposit matured is cannot be before its matured date: "
 					+ new LocalDate().toString();
-			throw new InvalidDepositStateTransitionException("reject",
-					"cannot.be.before.submittal.date", errorMessage,
+			throw new InvalidDepositStateTransitionException("matured",
+					"cannot.be.before.mature.date", errorMessage,
 					maturedOnDate, new LocalDate());
 
+		}
+		
+		if(maturedOnDate.equals(maturesOnDate())&& !(maturesOnDate().equals(new LocalDate()))){
+			final String errorMessage = "You can not manually mature the deposit account till the maturity date reached "
+					+ new LocalDate().toString();
+			throw new InvalidDepositStateTransitionException("matured",
+					"cannot.manual.mature.deposit.account.date", errorMessage,
+					maturedOnDate, new LocalDate());
 		}
 	}
 	
@@ -415,5 +462,11 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 			date = new LocalDate(this.maturesOnDate);
 		}
 		return date;
+	}
+
+	public void updateAccount(DepositAccount account) {
+		
+		this.renewdAccount = account;
+		
 	}
 }

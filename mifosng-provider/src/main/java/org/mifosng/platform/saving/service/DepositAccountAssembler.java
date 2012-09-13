@@ -109,4 +109,42 @@ public class DepositAccountAssembler {
 		List<DepositAccountStatus> allowedDepositStatuses = Arrays.asList(DepositAccountStatus.values());
 		return new DepositLifecycleStateMachineImpl(allowedDepositStatuses);
 	}
+
+	public DepositAccount assembleFrom(DepositAccount account) {
+		
+		Client client = account.client();
+		
+		DepositProduct product = account.product();
+		
+		Money deposit = Money.of(product.getCurrency(), account.getDeposit().getAmount());
+		
+		Integer tenureInMonths = product.getTenureInMonths();
+		
+		BigDecimal maturityInterestRate = product.getMaturityDefaultInterestRate();
+		
+		BigDecimal preClosureInterestRate = product.getPreClosureInterestRate();
+		
+		if(product.getMaturityMinInterestRate().compareTo(preClosureInterestRate)==-1){
+			throw new DepositAccounDataValidationtException(preClosureInterestRate, product.getMaturityMinInterestRate());
+		}
+		
+		Integer compoundingInterestEvery = product.getInterestCompoundedEvery();
+		
+		PeriodFrequencyType compoundingInterestFrequency = product.getInterestCompoundedEveryPeriodType();
+		
+		boolean renewalAllowed = product.isRenewalAllowed();
+		
+		boolean preClosureAllowed = product.isPreClosureAllowed();
+		
+		DepositAccount newAccount =new DepositAccount().openNew(client, product, null, 
+				deposit, 
+				maturityInterestRate, preClosureInterestRate, 
+				tenureInMonths, compoundingInterestEvery, compoundingInterestFrequency, 
+				account.maturesOnDate(), 
+				renewalAllowed, preClosureAllowed, this.fixedTermDepositInterestCalculator, defaultDepositLifecycleStateMachine());
+		
+		newAccount.updateAccount(account);
+		
+		return newAccount;
+	}
 }
