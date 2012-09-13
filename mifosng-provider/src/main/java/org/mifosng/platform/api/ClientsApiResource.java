@@ -97,28 +97,38 @@ public class ClientsApiResource {
 
 		String extraCriteria = "";
 
-		if (sqlSearch != null)
+		if (sqlSearch != null) {
 			extraCriteria = " and (" + sqlSearch + ")";
+		}
 
-		if (officeId != null)
+		if (officeId != null) {
 			extraCriteria += " and office_id = " + officeId;
-		if (externalId != null)
-			extraCriteria += " and external_id like "
-					+ sqlEncodeString(externalId);
-		if (displayName != null)
+		}
+		
+		if (externalId != null) {
+			extraCriteria += " and external_id like " + sqlEncodeString(externalId);
+		}
+		
+		if (displayName != null) {
 			extraCriteria += " and concat(ifnull(firstname, ''), if(firstname > '',' ', '') , ifnull(lastname, '')) like "
 					+ sqlEncodeString(displayName);
-		if (firstName != null)
-			extraCriteria += " and firstname like "
-					+ sqlEncodeString(firstName);
-		if (lastName != null)
+		}
+		
+		if (firstName != null) {
+			extraCriteria += " and firstname like " + sqlEncodeString(firstName);
+		}
+		
+		if (lastName != null) {
 			extraCriteria += " and lastname like " + sqlEncodeString(lastName);
-		if(hierarchy != null){
+		}
+		
+		if (hierarchy != null) {
 			extraCriteria += " and o.hierarchy like " + sqlEncodeString(hierarchy+"%");
 		}
 
-		if (StringUtils.isNotBlank(extraCriteria))
+		if (StringUtils.isNotBlank(extraCriteria)) {
 			extraCriteria = extraCriteria.substring(4);
+		}
 
 		logger.info("extraCriteria; " + extraCriteria);
 

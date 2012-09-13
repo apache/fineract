@@ -224,6 +224,9 @@ public class LoansApiResource {
 			convenienceDataRequired = true;
 			
             charges = this.chargeReadPlatformService.retrieveLoanCharges(loanId);
+            if (CollectionUtils.isEmpty(charges)) {
+            	charges = null;
+			}
 		}
 
 		Collection<LoanProductLookup> productOptions = new ArrayList<LoanProductLookup>();
