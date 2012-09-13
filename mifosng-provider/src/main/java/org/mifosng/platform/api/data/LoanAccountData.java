@@ -84,7 +84,7 @@ public class LoanAccountData {
 			final Collection<LoanProductLookup> productOptions, 
 			final Collection<EnumOptionData> termFrequencyTypeOptions, 
 			final Collection<EnumOptionData> repaymentFrequencyTypeOptions, 
-			final Collection<TransactionProcessingStrategyData> transactionProcessingStrategyOptions, 
+			final Collection<TransactionProcessingStrategyData> repaymentStrategyOptions, 
 			final Collection<EnumOptionData> interestRateFrequencyTypeOptions, 
 			final Collection<EnumOptionData> amortizationTypeOptions, 
 			final Collection<EnumOptionData> interestTypeOptions, 
@@ -101,7 +101,7 @@ public class LoanAccountData {
 		this.productOptions = productOptions;
 		this.termFrequencyTypeOptions = termFrequencyTypeOptions;
 		this.repaymentFrequencyTypeOptions = repaymentFrequencyTypeOptions;
-		this.repaymentStrategyOptions = transactionProcessingStrategyOptions;
+		this.repaymentStrategyOptions = repaymentStrategyOptions;
 		this.interestRateFrequencyTypeOptions = interestRateFrequencyTypeOptions;
 		this.amortizationTypeOptions = amortizationTypeOptions;
 		this.interestTypeOptions = interestTypeOptions;

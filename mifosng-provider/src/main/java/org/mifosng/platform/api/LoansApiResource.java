@@ -129,7 +129,7 @@ public class LoansApiResource {
 		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 		
 		responseParameters.addAll(Arrays.asList("productOptions", "amortizationTypeOptions", "interestTypeOptions", "interestCalculationPeriodTypeOptions", 
-				"repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "fundOptions", "transactionProcessingStrategyOptions", "chargeOptions",
+				"repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "fundOptions", "repaymentStrategyOptions", "chargeOptions",
                 "chargeTemplate"));
 	
 		// tempate related
@@ -143,7 +143,7 @@ public class LoansApiResource {
 		Collection<EnumOptionData>interestCalculationPeriodTypeOptions = dropdownReadPlatformService.retrieveLoanInterestRateCalculatedInPeriodOptions();
 	
 		Collection<FundData> fundOptions = this.fundReadPlatformService.retrieveAllFunds();
-		Collection<TransactionProcessingStrategyData> transactionProcessingStrategyOptions = this.dropdownReadPlatformService.retreiveTransactionProcessingStrategies();
+		Collection<TransactionProcessingStrategyData> repaymentStrategyOptions = this.dropdownReadPlatformService.retreiveTransactionProcessingStrategies();
 		
         Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveLoanApplicableCharges();
         ChargeData chargeTemplate = this.chargeReadPlatformService.retrieveLoanChargeTemplate();
@@ -161,7 +161,7 @@ public class LoansApiResource {
 		
 		final LoanAccountData newLoanAccount = new LoanAccountData(loanBasicDetails, convenienceDataRequired, null, null, null, null, charges, 
 				productOptions, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions, 
-				transactionProcessingStrategyOptions, interestRateFrequencyTypeOptions, 
+				repaymentStrategyOptions, interestRateFrequencyTypeOptions, 
 				amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, chargeTemplate, allowedLoanOfficers);
 
 		return this.apiJsonSerializerService.serialzieLoanAccountDataToJson(prettyPrint, responseParameters, newLoanAccount);
@@ -227,9 +227,9 @@ public class LoansApiResource {
 		}
 
 		Collection<LoanProductLookup> productOptions = new ArrayList<LoanProductLookup>();
-		Collection<EnumOptionData> loanTermFrequencyTypeOptions = new ArrayList<EnumOptionData>();
+		Collection<EnumOptionData> loanTermFrequencyTypeOptions = null;
 		Collection<EnumOptionData> repaymentFrequencyTypeOptions = new ArrayList<EnumOptionData>();
-		Collection<TransactionProcessingStrategyData> transactionProcessingStrategyOptions = new ArrayList<TransactionProcessingStrategyData>();
+		Collection<TransactionProcessingStrategyData> repaymentStrategyOptions = null;
 		
 		Collection<EnumOptionData> interestRateFrequencyTypeOptions = new ArrayList<EnumOptionData>();
 		Collection<EnumOptionData> amortizationTypeOptions = new ArrayList<EnumOptionData>();
@@ -242,10 +242,12 @@ public class LoansApiResource {
 
 		final boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
 		if(template) {
-			responseParameters.addAll(Arrays.asList("productOptions", "amortizationTypeOptions", "interestTypeOptions", "interestCalculationPeriodTypeOptions", 
-						"repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "fundOptions", "transactionProcessingStrategyOptions", "chargeOptions",
-						"loanOfficerOptions", "chargeTemplate"));
-
+			responseParameters.addAll(
+						Arrays.asList("productOptions", "amortizationTypeOptions", "interestTypeOptions", "interestCalculationPeriodTypeOptions", 
+						"repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "fundOptions", 
+						"repaymentStrategyOptions", "chargeOptions", "loanOfficerOptions")
+			);
+			
 			productOptions = this.loanProductReadPlatformService.retrieveAllLoanProductsForLookup();
 			loanTermFrequencyTypeOptions = dropdownReadPlatformService.retrieveLoanTermFrequencyTypeOptions();
 			repaymentFrequencyTypeOptions = dropdownReadPlatformService.retrieveRepaymentFrequencyTypeOptions();
@@ -256,7 +258,7 @@ public class LoansApiResource {
 			interestCalculationPeriodTypeOptions = dropdownReadPlatformService.retrieveLoanInterestRateCalculatedInPeriodOptions();
 
 			fundOptions = this.fundReadPlatformService.retrieveAllFunds();
-			transactionProcessingStrategyOptions = this.dropdownReadPlatformService.retreiveTransactionProcessingStrategies();
+			repaymentStrategyOptions = this.dropdownReadPlatformService.retreiveTransactionProcessingStrategies();
 			chargeOptions = this.chargeReadPlatformService.retrieveLoanApplicableCharges();
 			if (charges != null) {
 				chargeOptions.removeAll(charges);
@@ -267,7 +269,7 @@ public class LoansApiResource {
 		
 		final LoanAccountData loanAccount = new LoanAccountData(loanBasicDetails, convenienceDataRequired, summary, repaymentSchedule, loanRepayments, permissions, charges, 
 				productOptions, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions, 
-				transactionProcessingStrategyOptions, interestRateFrequencyTypeOptions, 
+				repaymentStrategyOptions, interestRateFrequencyTypeOptions, 
 				amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, chargeTemplate, allowedLoanOfficers);
 		
 		return this.apiJsonSerializerService.serialzieLoanAccountDataToJson(prettyPrint, responseParameters, loanAccount);

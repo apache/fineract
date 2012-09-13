@@ -150,7 +150,7 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 					"lifeCycleStatusDate", "summary", "repaymentSchedule",
 					"loanRepayments", "permissions", "convenienceData", "charges",
 					"productOptions", "amortizationTypeOptions", "interestTypeOptions", "interestCalculationPeriodTypeOptions", 
-					"repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "fundOptions", "transactionProcessingStrategyOptions", "chargeOptions",
+					"repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "fundOptions", "repaymentStrategyOptions", "chargeOptions",
 					"loanOfficerId", "loanOfficerName", "loanOfficerOptions", "chargeTemplate"));
 
 	private static final Set<String> LOAN_TRANSACTION_DATA_PARAMETERS = new HashSet<String>(
