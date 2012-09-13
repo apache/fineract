@@ -20,8 +20,8 @@ public class LoanAccountData {
 	private final EnumOptionData status;
 	private final Long fundId;
 	private final String fundName;
-	private Long loanOfficerId;
-	private String loanOfficerName;
+	private final Long loanOfficerId;
+	private final String loanOfficerName;
 	private final CurrencyData currency;
 	private final BigDecimal principal;
 	private final BigDecimal inArrearsTolerance;
@@ -58,6 +58,8 @@ public class LoanAccountData {
 	private final LoanConvenienceData convenienceData;
 	
 	// template
+	@SuppressWarnings("unused")
+	private final Collection<StaffData> loanOfficerOptions;
 	private final Collection<LoanProductLookup> productOptions;
 	private final Collection<EnumOptionData> termFrequencyTypeOptions;
 	private final Collection<EnumOptionData> repaymentFrequencyTypeOptions;
@@ -68,8 +70,8 @@ public class LoanAccountData {
 	private final Collection<EnumOptionData> interestCalculationPeriodTypeOptions;
 	private final Collection<FundData> fundOptions;
 	private final Collection<ChargeData> chargeOptions;
-    private final ChargeData chargeTemplate;
-	private final Collection<StaffData> loanOfficerOptions;
+    @SuppressWarnings("unused")
+	private final ChargeData chargeTemplate;
 	
 	public LoanAccountData(
 			final LoanBasicDetailsData basicDetails,
@@ -380,15 +382,7 @@ public class LoanAccountData {
 		return loanOfficerId;
 	}
 
-	public void setLoanOfficerId(Long loanOfficerId) {
-		this.loanOfficerId = loanOfficerId;
-	}
-
 	public String getLoanOfficerName() {
 		return loanOfficerName;
-	}
-
-	public void setLoanOfficerName(String loanOfficerName) {
-		this.loanOfficerName = loanOfficerName;
 	}
 }

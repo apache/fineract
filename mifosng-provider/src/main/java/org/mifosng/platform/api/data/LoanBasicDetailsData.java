@@ -13,10 +13,6 @@ import org.joda.time.Months;
  */
 public class LoanBasicDetailsData {
 
-	public Long getClientOfficeId() {
-		return clientOfficeId;
-	}
-
 	private final Long id;
 	private final String externalId;
 	private final Long clientId;
@@ -28,8 +24,8 @@ public class LoanBasicDetailsData {
 	private final EnumOptionData status;
 	private final Long fundId;
 	private final String fundName;
-	private Long loanOfficerId;
-	private String loanOfficerName;
+	private final Long loanOfficerId;
+	private final String loanOfficerName;
 	private final CurrencyData currency;
 	private final BigDecimal principal;
 	private final BigDecimal inArrearsTolerance;
@@ -105,6 +101,8 @@ public class LoanBasicDetailsData {
 		this.status = null;
 		this.fundId = fundId;
 		this.fundName = fundName;
+		this.loanOfficerId = null;
+		this.loanOfficerName = null;
 		this.currency = currency;
 		this.principal = principal;
 		this.inArrearsTolerance = inArrearsTolerance;
@@ -367,6 +365,10 @@ public class LoanBasicDetailsData {
 	public String getClientName() {
 		return clientName;
 	}
+	
+	public Long getClientOfficeId() {
+		return clientOfficeId;
+	}
 
 	public Long getFundId() {
 		return fundId;
@@ -496,15 +498,7 @@ public class LoanBasicDetailsData {
 		return loanOfficerId;
 	}
 
-	public void setLoanOfficerId(Long loanOfficerId) {
-		this.loanOfficerId = loanOfficerId;
-	}
-
 	public String getLoanOfficerName() {
 		return loanOfficerName;
-	}
-
-	public void setLoanOfficerName(String loanOfficerName) {
-		this.loanOfficerName = loanOfficerName;
 	}
 }

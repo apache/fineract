@@ -36,7 +36,6 @@ import org.mifosng.platform.user.domain.AppUser;
 @Table(name = "m_deposit_account", uniqueConstraints = @UniqueConstraint(name="deposit_acc_external_id", columnNames = { "external_id" }))
 public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 	
-	@SuppressWarnings("unused")
 	@ManyToOne
 	@JoinColumn(name = "client_id", nullable = false)
 	private Client client;

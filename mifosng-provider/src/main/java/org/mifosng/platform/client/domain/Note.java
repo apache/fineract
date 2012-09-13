@@ -38,7 +38,8 @@ public class Note extends AbstractAuditableCustom<AppUser, Long> {
 	@Column(name = "note_type_enum")
     private Integer       noteTypeId;
     
-    @ManyToOne
+    @SuppressWarnings("unused")
+	@ManyToOne
     @JoinColumn(name = "deposit_account_id", nullable = true)
     private DepositAccount depositAccount;
     
