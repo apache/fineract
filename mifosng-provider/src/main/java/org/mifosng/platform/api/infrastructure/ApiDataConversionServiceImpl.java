@@ -504,7 +504,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 
                     if (loanCharge.has("amount")){
                         chargeModifiedParameters.add("amount");
-                        amount = loanCharge.get("amount").getAsBigDecimal();
+                        amount = convertFrom(loanCharge.get("amount").getAsString(), "amount", extractLocaleValue(requestMap));
                     }
                     if (loanCharge.has("chargeTimeType")){
                         chargeModifiedParameters.add("chargeTimeType");

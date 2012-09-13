@@ -107,7 +107,7 @@ public class LoanAssembler {
 		Loan loan = Loan.createNew(fund,loanOfficer, loanTransactionProcessingStrategy, loanProduct, client, loanRepaymentScheduleDetail);
 		loan.setExternalId(command.getExternalId());
 
-        final Set<LoanCharge> charges = this.assembleSetOfCharges(command, loan, loanProduct, currency.getCode());
+        final Set<LoanCharge> charges = this.assembleSetOfCharges(command, loan, loanProduct);
         loan.setCharges(charges);
 
 		for (ScheduledLoanInstallment scheduledLoanInstallment : loanRepaymentSchedule) {
@@ -194,11 +194,15 @@ public class LoanAssembler {
 		return strategy;
 	}
 
-    private Set<LoanCharge> assembleSetOfCharges(final LoanApplicationCommand command, final Loan loan,
-                                                 final LoanProduct product, final String currencyCode) {
+    public Set<LoanCharge> assembleSetOfCharges(final LoanApplicationCommand command, final Loan loan,
+                                                 final LoanProduct product) {
 
         Set<LoanCharge> charges = new HashSet<LoanCharge>();
         LoanChargeCommand[] loanChargesArray = command.getCharges();
+		String loanCurrencyCode = loan.getCurrencyCode();
+		if (loanCurrencyCode == null){
+			loanCurrencyCode = product.getCurrency().getCode();
+		}
 
         if (!ObjectUtils.isEmpty(loanChargesArray)) {
             for (LoanChargeCommand loanChargeCommand : loanChargesArray) {
@@ -210,7 +214,7 @@ public class LoanAssembler {
                 if (!charge.isActive()){
                     throw new ChargeIsNotActiveException(id);
                 }
-                if (!currencyCode.equals(charge.getCurrencyCode())){
+                if (!loanCurrencyCode.equals(charge.getCurrencyCode())){
                     String errorMessage = "Charge and Loan must have the same currency.";
                     throw new InvalidCurrencyException("charge", "attach.to.loan", errorMessage);
                 }

@@ -209,9 +209,9 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	}
 	
 	public void modifyLoanApplication(final LoanApplicationCommand command, final Client client, final LoanProduct loanProduct, 
-			final Fund fund, final LoanTransactionProcessingStrategy strategy, final LoanSchedule modifiedLoanSchedule,
+			final Fund fund, final LoanTransactionProcessingStrategy strategy, final LoanSchedule modifiedLoanSchedule, final Set<LoanCharge> charges,
 			final Staff loanOfficer) {
-		
+
 		if (command.isClientChanged()) {
 			this.client = client;
 		}
@@ -263,7 +263,12 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 				this.interestChargedFromDate = null;
 			}
 		}
-		
+
+        if (command.isChargesChanged()) {
+			this.charges.clear();
+			this.charges.addAll(charges);
+		}
+
 		this.loanRepaymentScheduleDetail.update(command.toLoanProductCommand());
 		
 		// FIXME - rewrite over loan schedule by default for now but worth putting in check to see if required

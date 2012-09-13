@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
@@ -31,6 +32,7 @@ import org.mifosng.platform.exceptions.NoAuthorizationException;
 import org.mifosng.platform.fund.domain.Fund;
 import org.mifosng.platform.loan.domain.DefaultLoanLifecycleStateMachine;
 import org.mifosng.platform.loan.domain.Loan;
+import org.mifosng.platform.loan.domain.LoanCharge;
 import org.mifosng.platform.loan.domain.LoanLifecycleStateMachine;
 import org.mifosng.platform.loan.domain.LoanProduct;
 import org.mifosng.platform.loan.domain.LoanProductRepository;
@@ -143,10 +145,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		Fund fund = this.loanAssembler.findFundByIdIfProvided(command.getFundId());
 		Staff loanOfficer = this.loanAssembler.findLoanOfficerByIdIfProvided(command.getLoanOfficerId());
 		LoanTransactionProcessingStrategy strategy = this.loanAssembler.findStrategyByIdIfProvided(command.getTransactionProcessingStrategyId());
-		
+        Set<LoanCharge> charges = this.loanAssembler.assembleSetOfCharges(command, loan, loanProduct) ;
+
 		LoanSchedule loanSchedule = this.calculationPlatformService.calculateLoanSchedule(command.toCalculateLoanScheduleCommand());
-		loan.modifyLoanApplication(command, client, loanProduct, fund, strategy, loanSchedule, loanOfficer);
-		
+		loan.modifyLoanApplication(command, client, loanProduct, fund, strategy, loanSchedule, charges, loanOfficer);
+
 		this.loanRepository.save(loan);
 		
 		if (StringUtils.isNotBlank(command.getSubmittedOnNote())) {

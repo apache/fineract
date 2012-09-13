@@ -267,6 +267,10 @@ public class LoanApplicationCommand {
 		return this.modifiedParameters.contains("interestChargedFromDate");
 	}
 
+	public boolean isChargesChanged() {
+		return this.modifiedParameters.contains("charges");
+	}
+
 	public Long getLoanOfficerId() {
 		return loanOfficerId;
 	}

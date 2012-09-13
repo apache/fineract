@@ -183,7 +183,7 @@ public class LoansApiResource {
 						"repaymentFrequencyType", "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType",
 						"submittedOnDate", "approvedOnDate", "expectedDisbursementDate", "actualDisbursementDate", 
 						"expectedFirstRepaymentOnDate", "interestChargedFromDate", "closedOnDate", "expectedMaturityDate", 
-						"status", "lifeCycleStatusDate", "loanOfficerName", "loanOfficerId")
+						"status", "lifeCycleStatusDate", "loanOfficerName", "loanOfficerId", "charges")
 				);
 		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
@@ -244,8 +244,8 @@ public class LoansApiResource {
 		if(template) {
 			responseParameters.addAll(Arrays.asList("productOptions", "amortizationTypeOptions", "interestTypeOptions", "interestCalculationPeriodTypeOptions", 
 						"repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "fundOptions", "transactionProcessingStrategyOptions", "chargeOptions",
-						"loanOfficerOptions"));
-			
+						"loanOfficerOptions", "chargeTemplate"));
+
 			productOptions = this.loanProductReadPlatformService.retrieveAllLoanProductsForLookup();
 			loanTermFrequencyTypeOptions = dropdownReadPlatformService.retrieveLoanTermFrequencyTypeOptions();
 			repaymentFrequencyTypeOptions = dropdownReadPlatformService.retrieveRepaymentFrequencyTypeOptions();
@@ -262,7 +262,7 @@ public class LoansApiResource {
 				chargeOptions.removeAll(charges);
 			}
 			allowedLoanOfficers =  this.staffReadPlatformService.retrieveAllLoanOfficersByOffice(loanBasicDetails.getClientOfficeId());
-
+			chargeTemplate = this.chargeReadPlatformService.retrieveLoanChargeTemplate();
 		}
 		
 		final LoanAccountData loanAccount = new LoanAccountData(loanBasicDetails, convenienceDataRequired, summary, repaymentSchedule, loanRepayments, permissions, charges, 
