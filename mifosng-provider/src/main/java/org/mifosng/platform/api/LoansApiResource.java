@@ -94,6 +94,23 @@ public class LoansApiResource {
 	@Autowired
 	private StaffReadPlatformService staffReadPlatformService;
 	
+	private final static Set<String> typicalResponseParameters = new HashSet<String>(
+			Arrays.asList("id", "externalId", "clientId", "clientName", "fundId", "fundName",
+					"loanProductId", "loanProductName", "loanProductDescription", 
+					"loanOfficerName", "loanOfficerId",
+					"currency", "principal",
+					"inArrearsTolerance", "numberOfRepayments",
+					"repaymentEvery", "interestRatePerPeriod",
+					"annualInterestRate", "repaymentFrequencyType",
+					"interestRateFrequencyType", "amortizationType",
+					"interestType", "interestCalculationPeriodType",
+					"submittedOnDate", "approvedOnDate",
+					"expectedDisbursementDate", "actualDisbursementDate",
+					"expectedFirstRepaymentOnDate", "interestChargedFromDate",
+					"closedOnDate", "expectedMaturityDate",
+					"status",
+					"lifeCycleStatusDate"));
+	
 	@GET
 	@Path("template")
 	@Consumes({ MediaType.APPLICATION_JSON })
@@ -103,24 +120,6 @@ public class LoansApiResource {
 			@QueryParam("productId") final Long productId,
 			@Context final UriInfo uriInfo) {
 		
-		Set<String> typicalResponseParameters = new HashSet<String>(
-				Arrays.asList("id", "externalId", "clientId", "clientName", "fundId", "fundName",
-						"loanProductId", "loanProductName", "loanProductDescription", 
-						"currency", "principal",
-						"inArrearsTolerance", "numberOfRepayments",
-						"repaymentEvery", "interestRatePerPeriod",
-						"annualInterestRate", "repaymentFrequencyType",
-						"interestRateFrequencyType", "amortizationType",
-						"interestType", "interestCalculationPeriodType",
-						"submittedOnDate", "approvedOnDate",
-						"expectedDisbursementDate", "actualDisbursementDate",
-						"expectedFirstRepaymentOnDate", "interestChargedFromDate",
-						"closedOnDate", "expectedMaturityDate",
-						"status",
-						"lifeCycleStatusDate", "summary", "repaymentSchedule",
-						"loanRepayments", "permissions", "convenienceData", "charges",
-						"loanOfficerOptions")
-				);
 		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (responseParameters.isEmpty()) {
@@ -156,7 +155,6 @@ public class LoansApiResource {
 		final boolean convenienceDataRequired = false;
 		Collection<ChargeData> charges = loanBasicDetails.getCharges();
 		
-		// populate loan officers if query param is passed in
 		Collection<StaffData> allowedLoanOfficers =  this.staffReadPlatformService.retrieveAllLoanOfficersByOffice(loanBasicDetails.getClientOfficeId());
 		
 		final LoanAccountData newLoanAccount = new LoanAccountData(loanBasicDetails, convenienceDataRequired, null, null, null, charges, 
@@ -175,17 +173,6 @@ public class LoansApiResource {
 			@PathParam("loanId") final Long loanId,
 			@Context final UriInfo uriInfo) {
 
-		Set<String> typicalResponseParameters = new HashSet<String>(
-				Arrays.asList("id", "externalId", "clientId", "clientName", "fundId", "fundName", "loanProductId", "loanProductName", "loanProductDescription",
-						"currency",
-						"principal", "inArrearsTolerance", "numberOfRepayments",
-						"repaymentEvery", "interestRatePerPeriod", "annualInterestRate", 
-						"repaymentFrequencyType", "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType",
-						"submittedOnDate", "approvedOnDate", "expectedDisbursementDate", "actualDisbursementDate", 
-						"expectedFirstRepaymentOnDate", "interestChargedFromDate", "closedOnDate", "expectedMaturityDate", 
-						"status", "lifeCycleStatusDate", "loanOfficerName", "loanOfficerId")
-				);
-		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (responseParameters.isEmpty()) {
 			responseParameters.addAll(typicalResponseParameters);
