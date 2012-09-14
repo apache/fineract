@@ -147,7 +147,7 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 					"expectedFirstRepaymentOnDate", "interestChargedFromDate",
 					"closedOnDate", "expectedMaturityDate",
 					"status",
-					"lifeCycleStatusDate", "summary", "repaymentSchedule",
+					"lifeCycleStatusDate", "repaymentSchedule",
 					"loanRepayments", "permissions", "convenienceData", "charges",
 					"productOptions", "amortizationTypeOptions", "interestTypeOptions", "interestCalculationPeriodTypeOptions", 
 					"repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "fundOptions", "repaymentStrategyOptions", "chargeOptions",

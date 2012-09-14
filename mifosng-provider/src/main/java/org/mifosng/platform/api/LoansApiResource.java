@@ -32,14 +32,14 @@ import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.EnumOptionData;
 import org.mifosng.platform.api.data.FundData;
 import org.mifosng.platform.api.data.LoanAccountData;
-import org.mifosng.platform.api.data.LoanAccountSummaryData;
 import org.mifosng.platform.api.data.LoanBasicDetailsData;
 import org.mifosng.platform.api.data.LoanPermissionData;
 import org.mifosng.platform.api.data.LoanProductLookup;
-import org.mifosng.platform.api.data.LoanRepaymentPeriodData;
 import org.mifosng.platform.api.data.LoanRepaymentTransactionData;
 import org.mifosng.platform.api.data.LoanSchedule;
+import org.mifosng.platform.api.data.LoanScheduleData;
 import org.mifosng.platform.api.data.LoanTransactionData;
+import org.mifosng.platform.api.data.MoneyData;
 import org.mifosng.platform.api.data.StaffData;
 import org.mifosng.platform.api.data.TransactionProcessingStrategyData;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
@@ -159,7 +159,7 @@ public class LoansApiResource {
 		// populate loan officers if query param is passed in
 		Collection<StaffData> allowedLoanOfficers =  this.staffReadPlatformService.retrieveAllLoanOfficersByOffice(loanBasicDetails.getClientOfficeId());
 		
-		final LoanAccountData newLoanAccount = new LoanAccountData(loanBasicDetails, convenienceDataRequired, null, null, null, null, charges, 
+		final LoanAccountData newLoanAccount = new LoanAccountData(loanBasicDetails, convenienceDataRequired, null, null, null, charges, 
 				productOptions, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions, 
 				repaymentStrategyOptions, interestRateFrequencyTypeOptions, 
 				amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, chargeTemplate, allowedLoanOfficers);
@@ -196,16 +196,15 @@ public class LoansApiResource {
 		
 		int loanRepaymentsCount = 0;
 		Collection<LoanRepaymentTransactionData> loanRepayments = null;
-		Collection<LoanRepaymentPeriodData> repaymentSchedule = null;
-		LoanAccountSummaryData summary = null;
+		LoanScheduleData repaymentSchedule = null;
 		LoanPermissionData permissions = null;
         Collection<ChargeData> charges = null;
 
         boolean convenienceDataRequired = false;
-		Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
+		final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (!associationParameters.isEmpty()) {
 			if (associationParameters.contains("all")) {
-				responseParameters.addAll(Arrays.asList("summary", "repaymentSchedule", "loanRepayments", "permissions", "convenienceData", "charges"));
+				responseParameters.addAll(Arrays.asList("repaymentSchedule", "loanRepayments", "permissions", "convenienceData", "charges"));
 			} else {
 				responseParameters.addAll(associationParameters);
 			}
@@ -215,11 +214,12 @@ public class LoansApiResource {
 				loanRepayments = currentLoanRepayments;
 				loanRepaymentsCount = loanRepayments.size();
 			}
-			repaymentSchedule = this.loanReadPlatformService.retrieveRepaymentSchedule(loanId);
+			repaymentSchedule = this.loanReadPlatformService.retrieveRepaymentSchedule(loanId, loanBasicDetails.getCurrency(), loanRepayments);
 
-			summary = this.loanReadPlatformService.retrieveSummary(loanBasicDetails.getCurrency(), repaymentSchedule, loanRepayments);
-
-			boolean isWaiveAllowed = summary.isWaiveAllowed(loanBasicDetails.getCurrency(), loanBasicDetails.getInArrearsTolerance());
+			MoneyData tolerance = MoneyData.of(loanBasicDetails.getCurrency(), loanBasicDetails.getInArrearsTolerance());
+			MoneyData totalOutstandingMoney = MoneyData.of(loanBasicDetails.getCurrency(), repaymentSchedule.totalOutstanding());
+			boolean isWaiveAllowed = totalOutstandingMoney.isGreaterThanZero() && (tolerance.isGreaterThan(totalOutstandingMoney) || tolerance.isEqualTo(totalOutstandingMoney));
+			
 			permissions = this.loanReadPlatformService.retrieveLoanPermissions(loanBasicDetails, isWaiveAllowed, loanRepaymentsCount);
 			convenienceDataRequired = true;
 			
@@ -270,7 +270,8 @@ public class LoansApiResource {
 			chargeTemplate = this.chargeReadPlatformService.retrieveLoanChargeTemplate();
 		}
 		
-		final LoanAccountData loanAccount = new LoanAccountData(loanBasicDetails, convenienceDataRequired, summary, repaymentSchedule, loanRepayments, permissions, charges, 
+		final LoanAccountData loanAccount = new LoanAccountData(loanBasicDetails, convenienceDataRequired, 
+				repaymentSchedule, loanRepayments, permissions, charges, 
 				productOptions, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions, 
 				repaymentStrategyOptions, interestRateFrequencyTypeOptions, 
 				amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, chargeTemplate, allowedLoanOfficers);

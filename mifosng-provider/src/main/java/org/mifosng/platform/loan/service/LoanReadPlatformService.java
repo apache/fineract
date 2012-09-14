@@ -3,24 +3,19 @@ package org.mifosng.platform.loan.service;
 import java.util.Collection;
 
 import org.mifosng.platform.api.data.CurrencyData;
-import org.mifosng.platform.api.data.LoanAccountSummaryData;
 import org.mifosng.platform.api.data.LoanBasicDetailsData;
 import org.mifosng.platform.api.data.LoanPermissionData;
-import org.mifosng.platform.api.data.LoanRepaymentPeriodData;
 import org.mifosng.platform.api.data.LoanRepaymentTransactionData;
+import org.mifosng.platform.api.data.LoanScheduleData;
 import org.mifosng.platform.api.data.LoanTransactionData;
 
 public interface LoanReadPlatformService {
 
 	LoanBasicDetailsData retrieveLoanAccountDetails(Long loanId);
 
-	Collection<LoanRepaymentPeriodData> retrieveRepaymentSchedule(Long loanId);
+	LoanScheduleData retrieveRepaymentSchedule(Long loanId, CurrencyData currencyData, Collection<LoanRepaymentTransactionData> loanRepayments);
 
 	Collection<LoanRepaymentTransactionData> retrieveLoanPayments(Long loanId);
-
-	LoanAccountSummaryData retrieveSummary(CurrencyData currency,
-			Collection<LoanRepaymentPeriodData> repaymentSchedule,
-			Collection<LoanRepaymentTransactionData> loanRepayments);
 
 	LoanPermissionData retrieveLoanPermissions(
 			LoanBasicDetailsData loanBasicDetails, boolean isWaiverAllowed,
