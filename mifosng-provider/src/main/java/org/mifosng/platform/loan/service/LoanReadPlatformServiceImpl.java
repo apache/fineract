@@ -431,25 +431,13 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 			return " ls.loan_id as loanId, ls.installment as period, ls.duedate as `date`, "
 					+ " ls.principal_amount as principal, ls.principal_completed_derived as principalPaid, "
 					+ " ls.interest_amount as interest, ls.interest_completed_derived as interestPaid, ls.interest_waived_derived as interestWaived, "
-					+ " l.currency_code as currencyCode, l.currency_digits as currencyDigits, rc.`name` as currencyName, rc.display_symbol as currencyDisplaySymbol, rc.internationalized_name_code as currencyNameCode "
 					+ " from m_loan l "
-					+ " join m_loan_repayment_schedule ls on ls.loan_id = l.id "
-					+ " join m_currency rc on rc.`code` = l.currency_code ";
+					+ " join m_loan_repayment_schedule ls on ls.loan_id = l.id ";
 		}
 
 		@Override
 		public LoanRepaymentPeriodData mapRow(final ResultSet rs,
 				final int rowNum) throws SQLException {
-
-			// FIXME - kw - currency not need per installment period any longer, just at loan schedule level.
-			String currencyCode = rs.getString("currencyCode");
-			String currencyName = rs.getString("currencyName");
-			String currencyNameCode = rs.getString("currencyNameCode");
-			String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
-			Integer currencyDigits = JdbcSupport.getInteger(rs,"currencyDigits");
-			CurrencyData currencyData = new CurrencyData(currencyCode,
-					currencyName, currencyDigits, currencyDisplaySymbol,
-					currencyNameCode);
 
 			Long loanId = rs.getLong("loanId");
 			Integer period = JdbcSupport.getInteger(rs, "period");
