@@ -430,7 +430,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
 			return " ls.loan_id as loanId, ls.installment as period, ls.duedate as `date`, "
 					+ " ls.principal_amount as principal, ls.principal_completed_derived as principalPaid, "
-					+ " ls.interest_amount as interest, ls.interest_completed_derived as interestPaid, ls.interest_waived_derived as interestWaived, "
+					+ " ls.interest_amount as interest, ls.interest_completed_derived as interestPaid, ls.interest_waived_derived as interestWaived "
 					+ " from m_loan l "
 					+ " join m_loan_repayment_schedule ls on ls.loan_id = l.id ";
 		}
