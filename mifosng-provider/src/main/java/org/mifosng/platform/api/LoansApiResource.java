@@ -129,7 +129,7 @@ public class LoansApiResource {
 		
 		responseParameters.addAll(Arrays.asList("productOptions", "amortizationTypeOptions", "interestTypeOptions", "interestCalculationPeriodTypeOptions", 
 				"repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "fundOptions", "repaymentStrategyOptions", "chargeOptions",
-                "chargeTemplate"));
+                "chargeTemplate", "charges"));
 	
 		// tempate related
 		Collection<LoanProductLookup> productOptions = this.loanProductReadPlatformService.retrieveAllLoanProductsForLookup();
