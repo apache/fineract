@@ -270,14 +270,9 @@ public class LoansApiResource {
 
 		LoanApplicationCommand command = this.apiDataConversionService.convertJsonToLoanApplicationCommand(null, jsonRequestBody);
 
-		CalculateLoanScheduleCommand calculateLoanScheduleCommand = command.toCalculateLoanScheduleCommand();
-		LoanSchedule loanSchedule = this.calculationPlatformService.calculateLoanSchedule(calculateLoanScheduleCommand);
-
-		// for now just auto generating the loan schedule and setting support
-		// for 'manual' loan schedule creation later.
-		command.setLoanSchedule(loanSchedule);
-
 		if (is(commandParam, "calculateLoanSchedule")) {
+			CalculateLoanScheduleCommand calculateLoanScheduleCommand = command.toCalculateLoanScheduleCommand();
+			NewLoanScheduleData loanSchedule = this.calculationPlatformService.calculateLoanScheduleNew(calculateLoanScheduleCommand);
 			return Response.ok().entity(loanSchedule).build();
 		}
 
@@ -297,14 +292,13 @@ public class LoansApiResource {
 
 		final LoanApplicationCommand command = this.apiDataConversionService.convertJsonToLoanApplicationCommand(loanId, jsonRequestBody);
 
-		final CalculateLoanScheduleCommand calculateLoanScheduleCommand = command.toCalculateLoanScheduleCommand();
-		final LoanSchedule loanSchedule = this.calculationPlatformService.calculateLoanSchedule(calculateLoanScheduleCommand);
-
 		// for now just auto generating the loan schedule and setting support
 		// for 'manual' loan schedule creation later.
-		command.setLoanSchedule(loanSchedule);
+//		command.setLoanSchedule(loanSchedule);
 
 		if (is(commandParam, "calculateLoanSchedule")) {
+			final CalculateLoanScheduleCommand calculateLoanScheduleCommand = command.toCalculateLoanScheduleCommand();
+			final LoanSchedule loanSchedule = this.calculationPlatformService.calculateLoanSchedule(calculateLoanScheduleCommand);
 			return Response.ok().entity(loanSchedule).build();
 		}
 

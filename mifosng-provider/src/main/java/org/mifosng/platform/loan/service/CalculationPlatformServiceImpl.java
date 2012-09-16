@@ -3,6 +3,7 @@ package org.mifosng.platform.loan.service;
 import java.math.BigDecimal;
 
 import org.joda.time.LocalDate;
+import org.mifosng.platform.api.NewLoanScheduleData;
 import org.mifosng.platform.api.commands.CalculateLoanScheduleCommand;
 import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.LoanSchedule;
@@ -32,8 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class CalculationPlatformServiceImpl implements
-		CalculationPlatformService {
+public class CalculationPlatformServiceImpl implements CalculationPlatformService {
 
 	private final LoanScheduleGeneratorFactory loanScheduleFactory;
 	private final LoanRepository loanRepository;
@@ -41,17 +41,54 @@ public class CalculationPlatformServiceImpl implements
 	private final ApplicationCurrencyRepository applicationCurrencyRepository;
 	private final AprCalculator aprCalculator;
 	private final PlatformSecurityContext context;
+	private final LoanProductRelatedDetailAssembler loanProductRelatedDetailAssembler;
 	
 	@Autowired
-	public CalculationPlatformServiceImpl(final PlatformSecurityContext context,
-			final LoanRepository loanRepository, final LoanProductRepository loanProductRepository,
-			final ApplicationCurrencyRepository applicationCurrencyRepository, final AprCalculator aprCalculator) {
+	public CalculationPlatformServiceImpl(
+			final PlatformSecurityContext context,
+			final LoanRepository loanRepository, 
+			final LoanProductRepository loanProductRepository,
+			final ApplicationCurrencyRepository applicationCurrencyRepository, 
+			final AprCalculator aprCalculator,
+			final LoanProductRelatedDetailAssembler loanProductRelatedDetailAssembler) {
 		this.context = context;
 		this.loanRepository = loanRepository;
 		this.loanProductRepository = loanProductRepository;
 		this.applicationCurrencyRepository = applicationCurrencyRepository;
 		this.aprCalculator = aprCalculator;
 		this.loanScheduleFactory = new DefaultLoanScheduleGeneratorFactory();
+		this.loanProductRelatedDetailAssembler = loanProductRelatedDetailAssembler;
+	}
+	
+	@Override
+	public NewLoanScheduleData calculateLoanScheduleNew(final CalculateLoanScheduleCommand command) {
+		
+		context.authenticatedUser();
+		
+		CalculateLoanScheduleCommandValidator validator = new CalculateLoanScheduleCommandValidator(command);
+		validator.validate();
+		
+		LoanProductRelatedDetail loanScheduleRelatedDetails = this.loanProductRelatedDetailAssembler.assembleFrom(command);
+		
+		final Integer loanTermFrequency = command.getLoanTermFrequency();
+		final PeriodFrequencyType loanTermFrequencyType = PeriodFrequencyType.fromInt(command.getLoanTermFrequencyType());
+		final InterestMethod interestMethod = InterestMethod.fromInt(command.getInterestType());
+		
+		LoanScheduleGenerator loanScheduleGenerator = this.loanScheduleFactory.create(interestMethod);
+
+		ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneByCode(loanScheduleRelatedDetails.getCurrency().getCode());
+		
+		CurrencyData currencyData = new CurrencyData(
+				applicationCurrency.getCode(), 
+				applicationCurrency.getName(), 
+				loanScheduleRelatedDetails.getCurrency().getDigitsAfterDecimal(),
+				applicationCurrency.getDisplaySymbol(), 
+				applicationCurrency.getNameCode());
+		
+		return loanScheduleGenerator.generate(loanScheduleRelatedDetails, 
+												command.getExpectedDisbursementDate(), 
+												command.getRepaymentsStartingFromDate(), 
+												command.getInterestChargedFromDate());
 	}
 
 	@Override
@@ -144,4 +181,5 @@ public class CalculationPlatformServiceImpl implements
 				totalInterestOutstandingBasedOnExpectedMaturityDate,
 				totalInterestOutstandingBasedOnPayoffDate, interestRebateOwed);
 	}
+
 }

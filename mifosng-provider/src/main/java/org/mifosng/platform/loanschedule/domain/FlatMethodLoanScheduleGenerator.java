@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.joda.time.LocalDate;
+import org.mifosng.platform.api.NewLoanScheduleData;
 import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.LoanSchedule;
 import org.mifosng.platform.api.data.MoneyData;
@@ -19,7 +20,15 @@ public class FlatMethodLoanScheduleGenerator implements LoanScheduleGenerator {
 
 	private final ScheduledDateGenerator scheduledDateGenerator = new DefaultScheduledDateGenerator();
 	private final PaymentPeriodsInOneYearCalculator paymentPeriodsInOneYearCalculator = new DefaultPaymentPeriodsInOneYearCalculator();
-
+	
+	@Override
+	public NewLoanScheduleData generate(
+			LoanProductRelatedDetail loanScheduleInfo,
+			LocalDate disbursementDate, LocalDate firstRepaymentDate,
+			LocalDate interestCalculatedFrom) {
+		return null;
+	}
+	
 	@Override
 	public LoanSchedule generate(
 			final LoanProductRelatedDetail loanScheduleInfo,

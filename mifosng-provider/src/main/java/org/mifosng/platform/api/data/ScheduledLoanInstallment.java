@@ -1,11 +1,10 @@
 package org.mifosng.platform.api.data;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 
 import org.joda.time.LocalDate;
 
-public class ScheduledLoanInstallment implements Serializable {
+public class ScheduledLoanInstallment {
 
 	private Integer installmentNumber;
 	private LocalDate periodStart;

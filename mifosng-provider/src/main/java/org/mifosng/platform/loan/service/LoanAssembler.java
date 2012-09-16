@@ -1,6 +1,7 @@
 package org.mifosng.platform.loan.service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -8,7 +9,6 @@ import java.util.Set;
 
 import org.mifosng.platform.api.commands.LoanApplicationCommand;
 import org.mifosng.platform.api.commands.LoanChargeCommand;
-import org.mifosng.platform.api.data.LoanSchedule;
 import org.mifosng.platform.api.data.MoneyData;
 import org.mifosng.platform.api.data.ScheduledLoanInstallment;
 import org.mifosng.platform.charge.domain.Charge;
@@ -108,8 +108,9 @@ public class LoanAssembler {
 		loan.setExternalId(command.getExternalId());
 
         // TODO - user service to calculate loan schedule at this point
-        LoanSchedule loanSchedule = command.getLoanSchedule();
-		List<ScheduledLoanInstallment> loanRepaymentSchedule = loanSchedule.getScheduledLoanInstallments();
+//        LoanSchedule loanSchedule = command.getLoanSchedule();
+		List<ScheduledLoanInstallment> loanRepaymentSchedule = new ArrayList<ScheduledLoanInstallment>();
+//				loanSchedule.getScheduledLoanInstallments();
 		
 		for (ScheduledLoanInstallment scheduledLoanInstallment : loanRepaymentSchedule) {
 

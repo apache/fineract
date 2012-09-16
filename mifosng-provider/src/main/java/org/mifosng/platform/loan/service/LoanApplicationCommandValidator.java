@@ -21,11 +21,11 @@ public class LoanApplicationCommandValidator {
 	public void validate() {
 		List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 		
-		if (command.getLoanSchedule() == null) {
-			ApiParameterError error = ApiParameterError.parameterError("validation.msg.submit.loan.loan.schedule.cannot.be.blank", 
-					"The parameter loanSchedule cannot be empty.", "loanSchedule");
-			dataValidationErrors.add(error);
-		}
+//		if (command.getLoanSchedule() == null) {
+//			ApiParameterError error = ApiParameterError.parameterError("validation.msg.submit.loan.loan.schedule.cannot.be.blank", 
+//					"The parameter loanSchedule cannot be empty.", "loanSchedule");
+//			dataValidationErrors.add(error);
+//		}
 		
 		if (command.getSubmittedOnDate() == null) {
 			ApiParameterError error = ApiParameterError.parameterError("validation.msg.loan.submitted.on.date.cannot.be.blank", 

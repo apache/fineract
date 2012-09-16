@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.util.Set;
 
 import org.joda.time.LocalDate;
-import org.mifosng.platform.api.data.LoanSchedule;
 
 /**
  * Immutable command for submitting new loan application.
@@ -44,8 +43,6 @@ public class LoanApplicationCommand {
 
     private final LoanChargeCommand[] charges;
 
-	private LoanSchedule loanSchedule;
-	
 	private final Set<String> modifiedParameters;
 
 	public LoanApplicationCommand(
@@ -103,14 +100,6 @@ public class LoanApplicationCommand {
 				principal, interestRatePerPeriod, interestRateFrequencyType, interestType, interestCalculationPeriodType, repaymentEvery, repaymentFrequencyType, numberOfRepayments, amortizationType,
 				this.loanTermFrequency, this.loanTermFrequencyType,
 				expectedDisbursementDate, repaymentsStartingFromDate, interestChargedFromDate);
-	}
-
-	public LoanSchedule getLoanSchedule() {
-		return loanSchedule;
-	}
-
-	public void setLoanSchedule(LoanSchedule loanSchedule) {
-		this.loanSchedule = loanSchedule;
 	}
 	
 	public Long getLoanId() {

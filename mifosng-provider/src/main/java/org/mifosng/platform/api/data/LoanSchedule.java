@@ -1,10 +1,9 @@
 package org.mifosng.platform.api.data;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LoanSchedule implements Serializable {
+public class LoanSchedule {
 
 	private List<ScheduledLoanInstallment> scheduledLoanInstallments = new ArrayList<ScheduledLoanInstallment>();
 
@@ -17,10 +16,6 @@ public class LoanSchedule implements Serializable {
 		return new CurrencyData(code, name, decimalPlaces, displaySymbol, nameCode);
 	}
 	
-	public LoanSchedule() {
-		//
-	}
-
     public LoanSchedule(final List<ScheduledLoanInstallment> scheduledLoanInstallments) {
         this.scheduledLoanInstallments = scheduledLoanInstallments;
     }

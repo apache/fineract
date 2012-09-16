@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
+import org.mifosng.platform.api.NewLoanScheduleData;
 import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.LoanSchedule;
 import org.mifosng.platform.api.data.MoneyData;
@@ -18,6 +19,18 @@ public class EqualPrincipalAmortizationLoanScheduleGenerator implements Amortiza
 
 	private final PeriodicInterestRateCalculator periodicInterestRateCalculator = new PeriodicInterestRateCalculator();
 	private final PaymentPeriodsInOneYearCalculator paymentPeriodsInOneYearCalculator = new DefaultPaymentPeriodsInOneYearCalculator();
+	
+	@Override
+	public NewLoanScheduleData generate(
+			LoanProductRelatedDetail loanScheduleInfo,
+			LocalDate disbursementDate, LocalDate firstRepaymentDate,
+			LocalDate interestCalculatedFrom,
+			BigDecimal periodInterestRateForRepaymentPeriod,
+			LocalDate idealDisbursementDateBasedOnFirstRepaymentDate,
+			List<LocalDate> scheduledDates) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	
 	@Override
 	public LoanSchedule generate(final LoanProductRelatedDetail loanScheduleInfo, 
