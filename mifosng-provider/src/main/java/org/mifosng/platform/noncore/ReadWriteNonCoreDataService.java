@@ -24,4 +24,7 @@ public interface ReadWriteNonCoreDataService {
 	String retrieveDataTableJSONObject(String datatable, Long id,
 			String sqlFields, String sqlOrder);
 
+	void newDatatableEntry(String datatable, Long id,
+			Map<String, String> queryParams);
+
 }

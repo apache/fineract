@@ -477,6 +477,29 @@ public class ReadWriteNonCoreDataServiceImpl implements
 		return type + "_x" + set;
 	}
 
+	// only exclusively datatable functions below here
+	@Override
+	public void newDatatableEntry(String datatable, Long id,
+			Map<String, String> queryParams) {
+		long startTime = System.currentTimeMillis();
+
+		String applicationTableName = getApplicationTableName(datatable);
+
+		checkMainResourceExistsWithinScope(applicationTableName, id);
+
+		List<ResultsetColumnHeader> columnHeaders = getDatatableResultsetColumnHeaders(datatable);
+
+		String sql = getAddSql(columnHeaders, datatable, getFKField(applicationTableName), id, queryParams);
+
+		String sqlErrorMsg = "SQL: " + sql;
+		genericDataService.updateSQL(sql, sqlErrorMsg);
+
+		long elapsed = System.currentTimeMillis() - startTime;
+		logger.info("FINISHING newDatatableEntry:      Elapsed Time: "
+				+ elapsed + "       - datatable: " + datatable + "  id: " + id);
+
+	}
+
 	@Override
 	public List<DatatableData> retrieveDatatableNames(String appTable) {
 
@@ -500,9 +523,10 @@ public class ReadWriteNonCoreDataServiceImpl implements
 				+ " where ur.appuser_id = "
 				+ context.authenticatedUser().getId()
 				+ " and (p.code in ('ALL_FUNCTIONS', 'ALL_FUNCTIONS_READ') or p.code = concat('CAN_READ_', registered_table_name))) "
-				+ andClause + " order by application_table_name, registered_table_name";
+				+ andClause
+				+ " order by application_table_name, registered_table_name";
 
-		//sql = genericDataService.wrapSQL(sql);
+		// sql = genericDataService.wrapSQL(sql);
 		String sqlErrorMsg = "Application Table Name: " + appTable + "   sql: "
 				+ sql;
 		CachedRowSet rs = genericDataService.getCachedResultSet(sql,
@@ -512,7 +536,8 @@ public class ReadWriteNonCoreDataServiceImpl implements
 		try {
 			while (rs.next()) {
 				datatables.add(new DatatableData(rs
-						.getString("application_table_name"), rs.getString("registered_table_name"), rs
+						.getString("application_table_name"), rs
+						.getString("registered_table_name"), rs
 						.getString("registered_table_label")));
 			}
 
@@ -539,15 +564,14 @@ public class ReadWriteNonCoreDataServiceImpl implements
 		String jsonString = generateJsonFromGenericResultsetData(result);
 
 		long elapsed = System.currentTimeMillis() - startTime;
-		logger.info("FINISHING DATATABLE JSON OBJECT: " + datatable + "     Elapsed Time: "
-				+ elapsed);
+		logger.info("FINISHING DATATABLE JSON OBJECT: " + datatable
+				+ "     Elapsed Time: " + elapsed);
 		return jsonString;
 	}
 
 	@Override
 	public GenericResultsetData retrieveDataTableGenericResultSet(
-			String datatable, Long id, String sqlFields, 
-			String sqlOrder) {
+			String datatable, Long id, String sqlFields, String sqlOrder) {
 
 		long startTime = System.currentTimeMillis();
 
@@ -555,23 +579,20 @@ public class ReadWriteNonCoreDataServiceImpl implements
 
 		checkMainResourceExistsWithinScope(applicationTableName, id);
 
-		CachedRowSet columnDefinitions = getDatatableMetaData(datatable);
+		List<ResultsetColumnHeader> columnHeaders = getDatatableResultsetColumnHeaders(datatable);
 
-		List<ResultsetColumnHeader> columnHeaders = getDatatableResultsetColumnHeaders(
-				columnDefinitions);
-		
-		String fkField = applicationTableName.substring(2) + "_id";
 		String sql = "select ";
 		if (sqlFields != null)
 			sql = sql + sqlFields;
 		else
 			sql = sql + " * ";
 
-		sql = sql + " from " + datatable + " where " + fkField + " = " + id;
+		sql = sql + " from " + datatable + " where "
+				+ getFKField(applicationTableName) + " = " + id;
 		if (sqlOrder != null)
 			sql = sql + " order by " + sqlOrder;
 		logger.info(sql);
-		
+
 		List<ResultsetDataRow> result = fillDatatableResultSetDataRows(sql);
 
 		long elapsed = System.currentTimeMillis() - startTime;
@@ -579,14 +600,15 @@ public class ReadWriteNonCoreDataServiceImpl implements
 				+ elapsed);
 
 		return new GenericResultsetData(columnHeaders, result);
-				
+
 	}
- 
-	
-	private List<ResultsetDataRow> fillDatatableResultSetDataRows(final String sql) {
+
+	private List<ResultsetDataRow> fillDatatableResultSetDataRows(
+			final String sql) {
 
 		String sqlErrorMsg = "Sql: " + sql;
-		CachedRowSet rs = genericDataService.getCachedResultSet(sql, sqlErrorMsg);
+		CachedRowSet rs = genericDataService.getCachedResultSet(sql,
+				sqlErrorMsg);
 
 		List<ResultsetDataRow> resultsetDataRows = new ArrayList<ResultsetDataRow>();
 
@@ -594,7 +616,7 @@ public class ReadWriteNonCoreDataServiceImpl implements
 
 			ResultSetMetaData rsmd = rs.getMetaData();
 			int columnCount = rsmd.getColumnCount();
-			
+
 			ResultsetDataRow resultsetDataRow;
 			String columnName = null;
 			String columnValue = null;
@@ -636,6 +658,10 @@ public class ReadWriteNonCoreDataServiceImpl implements
 		}
 	}
 
+	private String getFKField(String applicationTableName) {
+
+		return applicationTableName.substring(2) + "_id";
+	}
 
 	private CachedRowSet getDatatableMetaData(String datatable) {
 
@@ -643,7 +669,7 @@ public class ReadWriteNonCoreDataServiceImpl implements
 				+ " from INFORMATION_SCHEMA.COLUMNS "
 				+ " where TABLE_SCHEMA = schema() and TABLE_NAME = '"
 				+ datatable + "'order by ORDINAL_POSITION";
-		
+
 		CachedRowSet columnDefinitions = genericDataService.getCachedResultSet(
 				sql, "SQL: " + sql);
 
@@ -654,7 +680,9 @@ public class ReadWriteNonCoreDataServiceImpl implements
 	}
 
 	private List<ResultsetColumnHeader> getDatatableResultsetColumnHeaders(
-			CachedRowSet columnDefinitions) {
+			String datatable) {
+
+		CachedRowSet columnDefinitions = getDatatableMetaData(datatable);
 
 		List<ResultsetColumnHeader> columnHeaders = new ArrayList<ResultsetColumnHeader>();
 
@@ -662,31 +690,38 @@ public class ReadWriteNonCoreDataServiceImpl implements
 
 			while (columnDefinitions.next()) {
 				ResultsetColumnHeader rsch = new ResultsetColumnHeader();
-				
+
 				rsch.setColumnName(columnDefinitions.getString("COLUMN_NAME"));
 
 				String isNullable = columnDefinitions.getString("IS_NULLABLE");
-				if (isNullable.equalsIgnoreCase("YES")) rsch.setColumnNullable(true);
-				else rsch.setColumnNullable(false);
-				
-				String isPrimaryKey = columnDefinitions.getString("COLUMN_KEY");
-				if (isPrimaryKey.equalsIgnoreCase("PRI")) rsch.setColumnPrimaryKey(true);
-				else rsch.setColumnPrimaryKey(false);
+				if (isNullable.equalsIgnoreCase("YES"))
+					rsch.setColumnNullable(true);
+				else
+					rsch.setColumnNullable(false);
 
-				Long columnLength = columnDefinitions.getLong("CHARACTER_MAXIMUM_LENGTH");
-				if (columnLength > 0 ) rsch.setColumnLength(columnDefinitions.getLong("CHARACTER_MAXIMUM_LENGTH"));
-				
+				String isPrimaryKey = columnDefinitions.getString("COLUMN_KEY");
+				if (isPrimaryKey.equalsIgnoreCase("PRI"))
+					rsch.setColumnPrimaryKey(true);
+				else
+					rsch.setColumnPrimaryKey(false);
+
+				Long columnLength = columnDefinitions
+						.getLong("CHARACTER_MAXIMUM_LENGTH");
+				if (columnLength > 0)
+					rsch.setColumnLength(columnDefinitions
+							.getLong("CHARACTER_MAXIMUM_LENGTH"));
+
 				rsch.setColumnType(columnDefinitions.getString("DATA_TYPE"));
 
 				rsch.setColumnDisplayType(null);
-				
+
 				/* look for codes */
-				if (rsch.getColumnType().equalsIgnoreCase("varchar")) 
+				if (rsch.getColumnType().equalsIgnoreCase("varchar"))
 					addCodesValueIfNecessary(rsch, "_cv");
-					
-				if (rsch.getColumnType().equalsIgnoreCase("int")) 
+
+				if (rsch.getColumnType().equalsIgnoreCase("int"))
 					addCodesValueIfNecessary(rsch, "_cd");
-				
+
 				columnHeaders.add(rsch);
 			}
 			;
@@ -699,31 +734,32 @@ public class ReadWriteNonCoreDataServiceImpl implements
 
 	}
 
-	
-	
-	
-	private void addCodesValueIfNecessary(ResultsetColumnHeader rsch, String code_suffix) {
+	private void addCodesValueIfNecessary(ResultsetColumnHeader rsch,
+			String code_suffix) {
 		int codePosition = rsch.getColumnName().indexOf(code_suffix);
-		if (codePosition > 0){
+		if (codePosition > 0) {
 			String codeName = rsch.getColumnName().substring(0, codePosition);
-			
+
 			String sql = "select v.id, v.code_value from m_code m "
 					+ " join m_code_value v on v.code_id = m.id "
-					+ " where m.code_name = '" + codeName + "' order by v.order_position, v.id";
-			
-			CachedRowSet rsValues = genericDataService
-					.getCachedResultSet(sql, "SQL: " + sql);
-			
+					+ " where m.code_name = '" + codeName
+					+ "' order by v.order_position, v.id";
+
+			CachedRowSet rsValues = genericDataService.getCachedResultSet(sql,
+					"SQL: " + sql);
+
 			try {
 				while (rsValues.next()) {
-					rsch.getColumnValuesNew().add( new ResultsetColumnValue(rsValues.getInt("id"), rsValues.getString("code_value")));
+					rsch.getColumnValuesNew().add(
+							new ResultsetColumnValue(rsValues.getInt("id"),
+									rsValues.getString("code_value")));
 				}
 			} catch (SQLException e) {
 				throw new PlatformDataIntegrityException("error.msg.sql.error",
 						e.getMessage());
 			}
 		}
-		
+
 	}
 
 	private static String generateJsonFromGenericResultsetData(
@@ -778,14 +814,55 @@ public class ReadWriteNonCoreDataServiceImpl implements
 		writer.append("\n]");
 		return writer.toString();
 
-		/*
-		 * JSONObject js = null; try { js = new JSONObject(writer.toString()); }
-		 * catch (JSONException e) { throw new WebApplicationException(Response
-		 * .status(Status.BAD_REQUEST).entity("JSON body is wrong") .build()); }
-		 * 
-		 * return js.toString();
-		 */
+	}
 
+	private String getAddSql(List<ResultsetColumnHeader> columnHeaders,
+			String datatable, String FKField, Long id, Map<String, String> queryParams) {
+
+		Set<String> keys = queryParams.keySet();
+
+		String underscore = "_";
+		String space = " ";
+		String pValue = null;
+		String keyUpdated = null;
+
+		Map<String, String> updatedColumns = new HashMap<String, String>();
+
+		for (String key : keys) {
+			if (!(key.equalsIgnoreCase("id"))) {
+				//keyUpdated = genericDataService.replace(key, underscore, space);
+				keyUpdated = key;
+				pValue = queryParams.get(key);
+				updatedColumns.put(keyUpdated, pValue);
+			}
+		}
+
+		String pValueWrite = "";
+		String saveSql = "";
+		String singleQuote = "'";
+
+		String insertColumns = "";
+		String selectColumns = "";
+		String columnName = "";
+		for (String key : updatedColumns.keySet()) {
+			pValue = updatedColumns.get(key);
+
+			if (StringUtils.isEmpty(pValue)) {
+				pValueWrite = "null";
+			} else {
+				pValueWrite = singleQuote
+						+ genericDataService.replace(pValue, singleQuote,
+								singleQuote + singleQuote) + singleQuote;
+			}
+			columnName = "`" + key + "`";
+			insertColumns += ", " + columnName;
+			selectColumns += "," + pValueWrite + " as " + columnName;
+		}
+
+		saveSql = "insert into `" + datatable + "` (" + FKField + insertColumns + ")"
+				+ " select " + id + " as id" + selectColumns;
+
+		return saveSql;
 	}
 
 }
