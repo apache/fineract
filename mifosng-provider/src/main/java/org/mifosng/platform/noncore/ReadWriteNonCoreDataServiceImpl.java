@@ -489,7 +489,8 @@ public class ReadWriteNonCoreDataServiceImpl implements
 
 		List<ResultsetColumnHeader> columnHeaders = getDatatableResultsetColumnHeaders(datatable);
 
-		String sql = getAddSql(columnHeaders, datatable, getFKField(applicationTableName), id, queryParams);
+		String sql = getAddSql(columnHeaders, datatable,
+				getFKField(applicationTableName), id, queryParams);
 
 		String sqlErrorMsg = "SQL: " + sql;
 		genericDataService.updateSQL(sql, sqlErrorMsg);
@@ -817,25 +818,11 @@ public class ReadWriteNonCoreDataServiceImpl implements
 	}
 
 	private String getAddSql(List<ResultsetColumnHeader> columnHeaders,
-			String datatable, String FKField, Long id, Map<String, String> queryParams) {
+			String datatable, String FKField, Long id,
+			Map<String, String> queryParams) {
 
-		Set<String> keys = queryParams.keySet();
-
-		String underscore = "_";
-		String space = " ";
-		String pValue = null;
-		String keyUpdated = null;
-
-		Map<String, String> updatedColumns = new HashMap<String, String>();
-
-		for (String key : keys) {
-			if (!(key.equalsIgnoreCase("id"))) {
-				//keyUpdated = genericDataService.replace(key, underscore, space);
-				keyUpdated = key;
-				pValue = queryParams.get(key);
-				updatedColumns.put(keyUpdated, pValue);
-			}
-		}
+		Map<String, String> affectedColumns = getAffectedColumns(columnHeaders,
+				queryParams);
 
 		String pValueWrite = "";
 		String saveSql = "";
@@ -844,8 +831,9 @@ public class ReadWriteNonCoreDataServiceImpl implements
 		String insertColumns = "";
 		String selectColumns = "";
 		String columnName = "";
-		for (String key : updatedColumns.keySet()) {
-			pValue = updatedColumns.get(key);
+		String pValue = null;
+		for (String key : affectedColumns.keySet()) {
+			pValue = affectedColumns.get(key);
 
 			if (StringUtils.isEmpty(pValue)) {
 				pValueWrite = "null";
@@ -859,10 +847,56 @@ public class ReadWriteNonCoreDataServiceImpl implements
 			selectColumns += "," + pValueWrite + " as " + columnName;
 		}
 
-		saveSql = "insert into `" + datatable + "` (" + FKField + insertColumns + ")"
-				+ " select " + id + " as id" + selectColumns;
+		saveSql = "insert into `" + datatable + "` (`" + FKField + "` "
+				+ insertColumns + ")" + " select " + id + " as id"
+				+ selectColumns;
 
 		return saveSql;
+	}
+
+	private Map<String, String> getAffectedColumns(
+			List<ResultsetColumnHeader> columnHeaders,
+			Map<String, String> queryParams) {
+
+		String underscore = "_";
+		String space = " ";
+		String pValue = null;
+		String queryParamColumnUnderscored;
+		String columnHeaderUnderscored;
+		boolean notFound;
+
+		Map<String, String> affectedColumns = new HashMap<String, String>();
+		Set<String> keys = queryParams.keySet();
+		for (String key : keys) {
+			// ignore any id field and matches incoming fields with and without
+			// underscores (spaces and underscores considered the same)
+			if (!(key.equalsIgnoreCase("id"))) {
+				notFound = true;
+				queryParamColumnUnderscored = genericDataService.replace(key,
+						space, underscore);
+				for (ResultsetColumnHeader columnHeader : columnHeaders) {
+					if (notFound) {
+						columnHeaderUnderscored = genericDataService
+								.replace(columnHeader.getColumnName(), space,
+										underscore);
+						if (queryParamColumnUnderscored
+								.equalsIgnoreCase(columnHeaderUnderscored)) {
+							pValue = queryParams.get(key);
+							affectedColumns.put(columnHeader.getColumnName(),
+									pValue);
+							notFound = false;
+						}
+					}
+
+				}
+				if (notFound) {
+					throw new PlatformDataIntegrityException(
+							"error.msg.column.not.found", "Column: " + key
+									+ " Not Found");
+				}
+			}
+		}
+		return affectedColumns;
 	}
 
 }
