@@ -13,6 +13,7 @@ import org.mifosng.platform.loan.domain.LoanProductRelatedDetail;
 import org.mifosng.platform.loan.domain.LoanProductRepository;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 import org.mifosng.platform.loanschedule.domain.AprCalculator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -21,6 +22,7 @@ public class LoanProductRelatedDetailAssembler {
 	private final LoanProductRepository loanProductRepository;
 	private final AprCalculator aprCalculator;
 
+	@Autowired
 	public LoanProductRelatedDetailAssembler(
 			final LoanProductRepository loanProductRepository,
 			final AprCalculator aprCalculator) {

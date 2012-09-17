@@ -42,15 +42,15 @@ public class DecliningBalanceMethodLoanScheduleGenerator implements LoanSchedule
 			final LocalDate interestCalculatedFrom) {
 		
 		// 1. generate valid set of 'due dates' based on some of the 'loan attributes'
-		List<LocalDate> scheduledDates = this.scheduledDateGenerator.generate(loanScheduleInfo, disbursementDate, firstRepaymentDate);
+		final List<LocalDate> scheduledDates = this.scheduledDateGenerator.generate(loanScheduleInfo, disbursementDate, firstRepaymentDate);
 		
-		LocalDate idealDisbursementDateBasedOnFirstRepaymentDate = this.scheduledDateGenerator.idealDisbursementDateBasedOnFirstRepaymentDate(loanScheduleInfo, scheduledDates);
+		final LocalDate idealDisbursementDateBasedOnFirstRepaymentDate = this.scheduledDateGenerator.idealDisbursementDateBasedOnFirstRepaymentDate(loanScheduleInfo, scheduledDates);
 		
 		// 2. determine the 'periodic' interest rate based on the 'repayment periods' so we can use 
 		final BigDecimal periodInterestRateForRepaymentPeriod = this.periodicInterestRateCalculator.calculateFrom(loanScheduleInfo);
 		
 		// Determine with 'amortisation' approach to use
-		AmortizationLoanScheduleGenerator generator = this.amortizationLoanScheduleGeneratorFactory.createGenerator(loanScheduleInfo.getAmortizationMethod());
+		final AmortizationLoanScheduleGenerator generator = this.amortizationLoanScheduleGeneratorFactory.createGenerator(loanScheduleInfo.getAmortizationMethod());
 		
 		return generator.generate(
 				loanScheduleInfo, 
