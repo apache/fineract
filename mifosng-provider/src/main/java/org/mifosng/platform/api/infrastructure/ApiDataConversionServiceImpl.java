@@ -1156,7 +1156,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		Type typeOfMap = new TypeToken<Map<String, String>>(){}.getType();
 	    Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
 	    
-	    Set<String> supportedParams = new HashSet<String>(Arrays.asList("renewAccount","deposit", "note"));
+	    Set<String> supportedParams = new HashSet<String>(Arrays.asList("renewAccount","deposit", "note","locale"));
 	    
 	    checkForUnsupportedParameters(requestMap, supportedParams);
 	    

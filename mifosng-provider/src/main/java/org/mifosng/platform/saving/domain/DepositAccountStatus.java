@@ -9,7 +9,8 @@ public enum DepositAccountStatus {
 	WITHDRAWN_BY_CLIENT(400, "depositStatusType.withdrawn.by.client"), //
 	REJECTED(500, "depositStatusType.rejected"), //
 	CLOSED(600, "depositStatusType.closed"), //
-	MATURED(700,"depositStatusType.matured");
+	MATURED(700,"depositStatusType.matured"),
+	PRECLOSED(800,"depositStatusType.preclosed");
 	
     private final Integer value;
 	private final String code;
@@ -55,6 +56,10 @@ public enum DepositAccountStatus {
 		return this.value.equals(DepositAccountStatus.REJECTED.getValue());
 	}
 	
+	public boolean isPreClosed(){
+		return this.value.equals(DepositAccountStatus.PRECLOSED.getValue());
+	}
+	
 	public static DepositAccountStatus fromInt(final Integer statusValue) {
 
 		DepositAccountStatus enumeration = DepositAccountStatus.INVALID;
@@ -80,7 +85,10 @@ public enum DepositAccountStatus {
 		case 700:
 			enumeration = DepositAccountStatus.MATURED;
 			break;
-		}
+		case 800:
+			enumeration = DepositAccountStatus.PRECLOSED;
+			break;
+			}
 		return enumeration;
     }   
 }

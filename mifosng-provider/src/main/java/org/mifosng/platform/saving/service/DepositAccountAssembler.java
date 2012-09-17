@@ -147,4 +147,8 @@ public class DepositAccountAssembler {
 		
 		return newAccount;
 	}
+
+	public void adjustTotalAmountForPreclosureInterest(DepositAccount account) {
+		account.adjustTotalAmountForPreclosureInterest(account,this.fixedTermDepositInterestCalculator);
+	}
 }

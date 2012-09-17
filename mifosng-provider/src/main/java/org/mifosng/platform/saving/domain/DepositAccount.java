@@ -23,6 +23,7 @@ import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.LocalDate;
+import org.joda.time.Months;
 import org.mifosng.platform.api.commands.DepositStateTransitionApprovalCommand;
 import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
@@ -304,6 +305,10 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 		return projectedTotalOnMaturity;
 	}
 
+	public BigDecimal getTotal() {
+		return total;
+	}
+
 	public void reject(final LocalDate rejectedOn,
 			final DepositLifecycleStateMachine depositLifecycleStateMachine) {
 
@@ -474,46 +479,49 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 	public void withdrawDepositAccountMoney(boolean renewAccount, DepositLifecycleStateMachine depositLifecycleStateMachine) {
 		
 		if (new LocalDate().isAfter(maturesOnDate()) || new LocalDate().equals(maturesOnDate())) {
-			DepositAccountStatus statusEnum = depositLifecycleStateMachine.transition(
-					DepositAccountEvent.DEPOSIT_MATURED,
-					DepositAccountStatus.fromInt(this.depositStatus));
+				
+			DepositAccountStatus statusEnum = depositLifecycleStateMachine.transition(DepositAccountEvent.DEPOSIT_MATURED, DepositAccountStatus.fromInt(this.depositStatus));
 			this.depositStatus = statusEnum.getValue();
 			
-			if(!renewAccount){
-				DepositAccountTransaction depositaccountTransaction = DepositAccountTransaction.withdraw(Money.of(this.currency, this.total), new LocalDate());
-				depositaccountTransaction.updateAccount(this);
-				this.depositaccountTransactions.add(depositaccountTransaction);
+			DepositAccountTransaction depositaccountTransaction = DepositAccountTransaction.withdraw(Money.of(this.currency, this.total), new LocalDate());
+			depositaccountTransaction.updateAccount(this);
+			this.depositaccountTransactions.add(depositaccountTransaction);
 				
-				DepositAccountStatus statusEnumForClose = depositLifecycleStateMachine.transition(
-						DepositAccountEvent.DEPOSIT_CLOSED,
-						DepositAccountStatus.fromInt(this.depositStatus));
-				this.depositStatus = statusEnumForClose.getValue();
+			DepositAccountStatus statusEnumForClose = depositLifecycleStateMachine.transition(DepositAccountEvent.DEPOSIT_CLOSED, DepositAccountStatus.fromInt(this.depositStatus));
+			this.depositStatus = statusEnumForClose.getValue();
 				
-				this.depositAmount = null;
-				this.interestRate = null;
-				this.tenureInMonths = null;
-				this.interestCompoundedEvery = null;
-				this.interestCompoundedFrequencyType = null;
-				this.closedOnDate = new LocalDate().toDate();
-				this.withdrawnOnDate = null;
-				this.rejectedOnDate = null;
+			this.closedOnDate = new LocalDate().toDate();
+			this.withdrawnOnDate = null;
+			this.rejectedOnDate = null;
 				
-			}else if(renewAccount){
-				DepositAccountStatus statusEnumForClose = depositLifecycleStateMachine.transition(
-						DepositAccountEvent.DEPOSIT_CLOSED,
-						DepositAccountStatus.fromInt(this.depositStatus));
-				this.depositStatus = statusEnumForClose.getValue();
+		}else if(new LocalDate().isBefore(maturesOnDate())){
+			
+			DepositAccountStatus statusEnum = depositLifecycleStateMachine.transition(DepositAccountEvent.DEPOSIT_PRECLOSED, DepositAccountStatus.fromInt(this.depositStatus));
+			this.depositStatus = statusEnum.getValue();
+			
+			DepositAccountTransaction depositaccountTransaction = DepositAccountTransaction.withdraw(Money.of(this.currency, this.total), new LocalDate());
+			depositaccountTransaction.updateAccount(this);
+			this.depositaccountTransactions.add(depositaccountTransaction);
 				
-				DepositAccountTransaction depositaccountTransaction = DepositAccountTransaction.withdraw(Money.of(this.currency, this.total), new LocalDate());
-				depositaccountTransaction.updateAccount(this);
-				this.depositaccountTransactions.add(depositaccountTransaction);
-				
-				this.closedOnDate = new LocalDate().toDate();
-				this.withdrawnOnDate = null;
-				this.rejectedOnDate = null;
-			}
+			this.closedOnDate = new LocalDate().toDate();
+			this.withdrawnOnDate = null;
+			this.rejectedOnDate = null;
+			
 		}
+	}
+
+	public void adjustTotalAmountForPreclosureInterest(DepositAccount account, FixedTermDepositInterestCalculator fixedTermDepositInterestCalculator) {
 		
+		LocalDate commnencementDate = new LocalDate(this.actualCommencementDate);
+		LocalDate preClosedDate = new LocalDate();
+		
+		Integer tenure = Months.monthsBetween(commnencementDate, preClosedDate).getMonths();
+		
+		Money deposit = Money.of(account.getDeposit().getCurrency(), account.getDeposit().getAmount());
+		Money accuredtotalAmount = fixedTermDepositInterestCalculator.calculateInterestOnMaturityFor(deposit, tenure, 
+				preClosureInterestRate, interestCompoundedEvery, this.product.getInterestCompoundedEveryPeriodType());
+		
+		this.total = accuredtotalAmount.getAmount();
 		
 	}
 }

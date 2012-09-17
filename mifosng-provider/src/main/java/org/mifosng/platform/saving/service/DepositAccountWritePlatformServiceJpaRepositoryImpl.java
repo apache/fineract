@@ -15,6 +15,7 @@ import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.client.domain.Note;
 import org.mifosng.platform.client.domain.NoteRepository;
 import org.mifosng.platform.exceptions.DepositAccountNotFoundException;
+import org.mifosng.platform.exceptions.DepositAccountReopenException;
 import org.mifosng.platform.exceptions.NoAuthorizationException;
 import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
 import org.mifosng.platform.exceptions.ProductNotFoundException;
@@ -285,14 +286,20 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 			throw new DepositAccountNotFoundException(command.getAccountId());
 		}
 		
+		if(new LocalDate().isBefore(account.maturesOnDate())){
+			this.depositAccountAssembler.adjustTotalAmountForPreclosureInterest(account);
+		}
 		account.withdrawDepositAccountMoney(command.isRenewAccount(), defaultDepositLifecycleStateMachine());
 		this.depositAccountRepository.save(account);
 		
-		BigDecimal deposit = account.getProjectedTotalOnMaturity();
-		if(command.getDeposit() != null)
-			deposit = command.getDeposit();
-		
 		if(command.isRenewAccount()){
+			
+			BigDecimal deposit = account.getTotal();
+			if(command.getDeposit() != null)
+				deposit = command.getDeposit();
+			if(new LocalDate().isBefore(account.maturesOnDate())){
+				throw new DepositAccountReopenException(account.maturesOnDate());
+			}
 			final DepositAccount renewedAccount = this.depositAccountAssembler.assembleFrom(account,deposit);
 			this.depositAccountRepository.save(renewedAccount);
 			return new EntityIdentifier(renewedAccount.getId()); //returns the new deposit application id

@@ -209,9 +209,6 @@ public class DepositAccountsApiResource {
 			}  else if (is(commandParam, "withdrewbyclient")) {
 				EntityIdentifier identifier = this.depositAccountWritePlatformService.withdrawDepositApplication(command);
 				response = Response.ok().entity(identifier).build();
-			/*}  else if (is(commandParam, "withdrawal")){
-				EntityIdentifier identifier = this.depositAccountWritePlatformService.matureDepositApplication(command);
-				response = Response.ok().entity(identifier).build();*/
 			}
 	
 			UndoStateTransitionCommand undoCommand = new UndoStateTransitionCommand(accountId, command.getNote());

@@ -33,6 +33,9 @@ public class DepositAccountEnumerations {
 		case CLOSED:
 			optionData = new EnumOptionData(DepositAccountStatus.CLOSED.getValue().longValue(), DepositAccountStatus.CLOSED.getCode(), "Closed");
 			break;
+		case PRECLOSED:
+			optionData = new EnumOptionData(DepositAccountStatus.PRECLOSED.getValue().longValue(), DepositAccountStatus.PRECLOSED.getCode(), "Preclosed");
+			break;
 		default:
 			optionData = new EnumOptionData(DepositAccountStatus.INVALID.getValue().longValue(), DepositAccountStatus.INVALID.getCode(), "Invalid");
 			break;
