@@ -277,7 +277,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 
 	@Transactional
 	@Override
-	public EntityIdentifier withdrawDepositAccountMoney(DepositAccountWithdrawalCommand command) {
+	public EntityIdentifier withdrawDepositAccountMoney(final DepositAccountWithdrawalCommand command) {
 		
 		context.authenticatedUser();
 		

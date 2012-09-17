@@ -87,14 +87,12 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 	@Column(name = "actual_interest_accrued", scale = 6, precision = 19, nullable = false)
 	private BigDecimal interestAccrued;
 	
-	@SuppressWarnings("unused")
 	@Column(name = "projected_total_maturity_amount", scale = 6, precision = 19, nullable = false)
 	private BigDecimal projectedTotalOnMaturity;
 	
 	@Column(name = "actual_total_amount", scale = 6, precision = 19, nullable = false)
 	private BigDecimal total;
 	
-	@SuppressWarnings("unused")
 	@Column(name = "pre_closure_interest_rate", scale = 6, precision = 19, nullable = false)
 	private BigDecimal preClosureInterestRate;
 	
