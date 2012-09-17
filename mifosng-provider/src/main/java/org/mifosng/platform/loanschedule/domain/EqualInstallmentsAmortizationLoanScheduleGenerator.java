@@ -2,6 +2,7 @@ package org.mifosng.platform.loanschedule.domain;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.joda.time.Days;
@@ -38,7 +39,7 @@ public class EqualInstallmentsAmortizationLoanScheduleGenerator implements Amort
 		// 1. add disbursements to loan schedule
 		
 		// 2.
-		List<LoanSchedulePeriodData> periods = new ArrayList<LoanSchedulePeriodData>();
+		Collection<LoanSchedulePeriodData> periods = new ArrayList<LoanSchedulePeriodData>();
 		
 		// determine 'total payment' for each repayment based on pmt function (and hence the total due overall)
 		final MonetaryCurrency monetaryCurrency = loanScheduleInfo.getPrincipal().getCurrency();
@@ -57,12 +58,17 @@ public class EqualInstallmentsAmortizationLoanScheduleGenerator implements Amort
 				scheduledDates, 
 				idealDisbursementDateBasedOnFirstRepaymentDate);
 		
+		
+		// create entries of disbursement period on loan schedule
+		final LoanSchedulePeriodData disbursementPeriod = LoanSchedulePeriodData.disbursement(disbursementDate, loanScheduleInfo.getPrincipal().getAmount());
+		periods.add(disbursementPeriod);
+		
 		LocalDate startDate = disbursementDate;
-		int installmentNumber = 1;
+		int periodNumber = 1;
 		for (LocalDate scheduledDueDate : scheduledDates) {
 
 			// number of days from startDate to this scheduledDate
-			int daysInPeriod = Days.daysBetween(startDate.toDateMidnight().toDateTime(), scheduledDueDate.toDateMidnight().toDateTime()).getDays();
+			int daysInPeriod = Days.daysBetween(startDate, scheduledDueDate).getDays();
 			
 			Money interestForInstallment = this.periodicInterestRateCalculator.calculateInterestOn(outstandingBalance, periodInterestRateForRepaymentPeriod, daysInPeriod, loanScheduleInfo);
 			Money principalForInstallment = this.periodicInterestRateCalculator.calculatePrincipalOn(totalDuePerInstallment, interestForInstallment, loanScheduleInfo);
@@ -82,7 +88,7 @@ public class EqualInstallmentsAmortizationLoanScheduleGenerator implements Amort
 			totalPrincipal = totalPrincipal.plus(principalForInstallment);
 			totalInterest = totalInterest.plus(interestForInstallment);
 			
-			if (installmentNumber == loanScheduleInfo.getNumberOfRepayments()) {
+			if (periodNumber == loanScheduleInfo.getNumberOfRepayments()) {
 				Money principalDifference = totalPrincipal.minus(loanScheduleInfo.getPrincipal());
 				if (principalDifference.isLessThanZero()) {
 					principalForInstallment = principalForInstallment.plus(principalDifference.abs());
@@ -102,30 +108,20 @@ public class EqualInstallmentsAmortizationLoanScheduleGenerator implements Amort
 
 			outstandingBalance = outstandingBalance.minus(principalForInstallment);
 			
-//			MoneyData principalPerInstallmentValue = MoneyData.of(currencyData, principalForInstallment.getAmount());
-//			MoneyData interestPerInstallmentValue = MoneyData.of(currencyData, interestForInstallment.getAmount());
-//			MoneyData totalInstallmentDueValue = MoneyData.of(currencyData, totalInstallmentDue.getAmount());
-//			MoneyData outstandingBalanceValue = MoneyData.of(currencyData, outstandingBalance.getAmount());
-					
-//			ScheduledLoanInstallment installment = new ScheduledLoanInstallment(
-//					Integer.valueOf(installmentNumber), startDate,
-//					scheduledDueDate, principalPerInstallmentValue,
-//					interestPerInstallmentValue, 
-//					totalInstallmentDueValue,
-//					outstandingBalanceValue);
-			
-			LoanSchedulePeriodData installment = new LoanSchedulePeriodData();
+			LoanSchedulePeriodData installment = LoanSchedulePeriodData.repaymentPeriod(periodNumber, startDate, 
+					scheduledDueDate, 
+					principalForInstallment.getAmount(), 
+					outstandingBalance.getAmount(), 
+					interestForInstallment.getAmount(), totalInstallmentDue.getAmount());
 
 			periods.add(installment);
 
 			startDate = scheduledDueDate;
 
-			installmentNumber++;
+			periodNumber++;
 		}
-
 		
-		
-		return null;
+		return new NewLoanScheduleData(periods);
 	}
 	
 	@Override

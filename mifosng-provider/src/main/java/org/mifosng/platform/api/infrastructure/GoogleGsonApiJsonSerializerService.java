@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.mifosng.platform.api.NewLoanScheduleData;
 import org.mifosng.platform.api.data.AdditionalFieldsSetData;
 import org.mifosng.platform.api.data.AppUserData;
 import org.mifosng.platform.api.data.AuthenticatedUserData;
@@ -15,6 +16,7 @@ import org.mifosng.platform.api.data.ConfigurationData;
 import org.mifosng.platform.api.data.DatatableData;
 import org.mifosng.platform.api.data.DepositAccountData;
 import org.mifosng.platform.api.data.DepositProductData;
+import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.FundData;
 import org.mifosng.platform.api.data.GenericResultsetData;
 import org.mifosng.platform.api.data.GroupData;
@@ -133,6 +135,9 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 					"createdOn", "updatedById", "updatedByUsername",
 					"updatedOn"));
 
+	private static final Set<String> LOAN_SCHEDULE_DATA_PARAMETERS = new HashSet<String>(
+			Arrays.asList("periods", "cumulativePrincipalDisbursed"));
+	
 	private static final Set<String> LOAN_DATA_PARAMETERS = new HashSet<String>(
 			Arrays.asList("id", "externalId", "clientId", "clientName", "fundId", "fundName",
 					"loanProductId", "loanProductName", "loanProductDescription", 
@@ -494,7 +499,14 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 	}
 
 	@Override
-	public String serialzieLoanAccountDataToJson(final boolean prettyPrint,
+	public String serializeLoanScheduleDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final NewLoanScheduleData loanSchedule) {
+		final Gson gsonDeserializer = helper
+				.createGsonBuilderWithParameterExclusionSerializationStrategy(LOAN_SCHEDULE_DATA_PARAMETERS, prettyPrint, responseParameters);
+		return helper.serializedJsonFrom(gsonDeserializer, loanSchedule);
+	}
+	
+	@Override
+	public String serializeLoanAccountDataToJson(final boolean prettyPrint,
 			final Set<String> responseParameters,
 			final LoanAccountData loanAccount) {
 		final Gson gsonDeserializer = helper
@@ -555,4 +567,10 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 				staff.toArray(new StaffData[staff.size()]));
 	}
 
+	@Override
+	public String serializeEntityIdentifier(final EntityIdentifier identifier) {
+		final Set<String> DATA_PARAMETERS = new HashSet<String>(Arrays.asList("entityId"));
+		final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(DATA_PARAMETERS, false, DATA_PARAMETERS);
+		return helper.serializedJsonFrom(gsonDeserializer, identifier);
+	}
 }

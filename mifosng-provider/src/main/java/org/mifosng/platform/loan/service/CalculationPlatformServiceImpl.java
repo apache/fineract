@@ -70,20 +70,20 @@ public class CalculationPlatformServiceImpl implements CalculationPlatformServic
 		
 		LoanProductRelatedDetail loanScheduleRelatedDetails = this.loanProductRelatedDetailAssembler.assembleFrom(command);
 		
-		final Integer loanTermFrequency = command.getLoanTermFrequency();
-		final PeriodFrequencyType loanTermFrequencyType = PeriodFrequencyType.fromInt(command.getLoanTermFrequencyType());
+//		final Integer loanTermFrequency = command.getLoanTermFrequency();
+//		final PeriodFrequencyType loanTermFrequencyType = PeriodFrequencyType.fromInt(command.getLoanTermFrequencyType());
 		final InterestMethod interestMethod = InterestMethod.fromInt(command.getInterestType());
 		
 		LoanScheduleGenerator loanScheduleGenerator = this.loanScheduleFactory.create(interestMethod);
 
-		ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneByCode(loanScheduleRelatedDetails.getCurrency().getCode());
+//		ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneByCode(loanScheduleRelatedDetails.getCurrency().getCode());
 		
-		CurrencyData currencyData = new CurrencyData(
-				applicationCurrency.getCode(), 
-				applicationCurrency.getName(), 
-				loanScheduleRelatedDetails.getCurrency().getDigitsAfterDecimal(),
-				applicationCurrency.getDisplaySymbol(), 
-				applicationCurrency.getNameCode());
+//		CurrencyData currencyData = new CurrencyData(
+//				applicationCurrency.getCode(), 
+//				applicationCurrency.getName(), 
+//				loanScheduleRelatedDetails.getCurrency().getDigitsAfterDecimal(),
+//				applicationCurrency.getDisplaySymbol(), 
+//				applicationCurrency.getNameCode());
 		
 		return loanScheduleGenerator.generate(loanScheduleRelatedDetails, 
 												command.getExpectedDisbursementDate(), 

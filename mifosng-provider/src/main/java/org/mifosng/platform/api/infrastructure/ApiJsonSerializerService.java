@@ -3,6 +3,7 @@ package org.mifosng.platform.api.infrastructure;
 import java.util.Collection;
 import java.util.Set;
 
+import org.mifosng.platform.api.NewLoanScheduleData;
 import org.mifosng.platform.api.data.AdditionalFieldsSetData;
 import org.mifosng.platform.api.data.AppUserData;
 import org.mifosng.platform.api.data.AuthenticatedUserData;
@@ -13,6 +14,7 @@ import org.mifosng.platform.api.data.ConfigurationData;
 import org.mifosng.platform.api.data.DatatableData;
 import org.mifosng.platform.api.data.DepositAccountData;
 import org.mifosng.platform.api.data.DepositProductData;
+import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.FundData;
 import org.mifosng.platform.api.data.GenericResultsetData;
 import org.mifosng.platform.api.data.GroupData;
@@ -90,8 +92,10 @@ public interface ApiJsonSerializerService {
 	String serializeNoteDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<NoteData> notes);
 
 	String serializeNoteDataToJson(boolean prettyPrint, Set<String> responseParameters, NoteData note);
+	
+	String serializeLoanScheduleDataToJson(boolean prettyPrint, Set<String> responseParameters, NewLoanScheduleData loanSchedule);
 
-	String serialzieLoanAccountDataToJson(boolean prettyPrint, Set<String> responseParameters, LoanAccountData loanAccount);
+	String serializeLoanAccountDataToJson(boolean prettyPrint, Set<String> responseParameters, LoanAccountData loanAccount);
 
 	String serializeLoanTransactionDataToJson(boolean prettyPrint, Set<String> responseParameters, LoanTransactionData transaction);
 
@@ -102,4 +106,6 @@ public interface ApiJsonSerializerService {
 	String serializeStaffDataToJson(boolean prettyPrint, Set<String> responseParameters, StaffData staff);
 	
 	String serializeStaffDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<StaffData> staff);
+
+	String serializeEntityIdentifier(EntityIdentifier identifier);
 }

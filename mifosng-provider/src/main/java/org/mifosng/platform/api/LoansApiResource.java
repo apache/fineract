@@ -160,7 +160,7 @@ public class LoansApiResource {
 				repaymentStrategyOptions, interestRateFrequencyTypeOptions, 
 				amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, chargeTemplate, allowedLoanOfficers);
 
-		return this.apiJsonSerializerService.serialzieLoanAccountDataToJson(prettyPrint, responseParameters, newLoanAccount);
+		return this.apiJsonSerializerService.serializeLoanAccountDataToJson(prettyPrint, responseParameters, newLoanAccount);
 	}
 
 	@GET
@@ -258,14 +258,15 @@ public class LoansApiResource {
 				repaymentStrategyOptions, interestRateFrequencyTypeOptions, 
 				amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, chargeTemplate, allowedLoanOfficers);
 		
-		return this.apiJsonSerializerService.serialzieLoanAccountDataToJson(prettyPrint, responseParameters, loanAccount);
+		return this.apiJsonSerializerService.serializeLoanAccountDataToJson(prettyPrint, responseParameters, loanAccount);
 	}
 
 	@POST
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public Response calculateLoanScheduleOrSubmitLoanApplication(
+	public String calculateLoanScheduleOrSubmitLoanApplication(
 			@QueryParam("command") final String commandParam,
+			@Context final UriInfo uriInfo,
 			final String jsonRequestBody) {
 
 		LoanApplicationCommand command = this.apiDataConversionService.convertJsonToLoanApplicationCommand(null, jsonRequestBody);
@@ -273,12 +274,22 @@ public class LoansApiResource {
 		if (is(commandParam, "calculateLoanSchedule")) {
 			CalculateLoanScheduleCommand calculateLoanScheduleCommand = command.toCalculateLoanScheduleCommand();
 			NewLoanScheduleData loanSchedule = this.calculationPlatformService.calculateLoanScheduleNew(calculateLoanScheduleCommand);
-			return Response.ok().entity(loanSchedule).build();
+		
+			final Set<String> typicalLoanScheduleResponseParameters = new HashSet<String>(
+					Arrays.asList("periods", "cumulativePrincipalDisbursed"));
+			
+			Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+			if (responseParameters.isEmpty()) {
+				responseParameters.addAll(typicalLoanScheduleResponseParameters);
+			}
+			boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+			
+			return this.apiJsonSerializerService.serializeLoanScheduleDataToJson(prettyPrint, responseParameters, loanSchedule);
 		}
 
-		EntityIdentifier identifier = this.loanWritePlatformService.submitLoanApplication(command);
+		final EntityIdentifier identifier = this.loanWritePlatformService.submitLoanApplication(command);
 
-		return Response.ok().entity(identifier).build();
+		return this.apiJsonSerializerService.serializeEntityIdentifier(identifier);
 	}
 	
 	@PUT
