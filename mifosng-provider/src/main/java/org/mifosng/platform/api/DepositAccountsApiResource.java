@@ -21,6 +21,7 @@ import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosng.platform.api.commands.DepositAccountCommand;
+import org.mifosng.platform.api.commands.DepositAccountWithdrawalCommand;
 import org.mifosng.platform.api.commands.DepositStateTransitionApprovalCommand;
 import org.mifosng.platform.api.commands.DepositStateTransitionCommand;
 import org.mifosng.platform.api.commands.UndoStateTransitionCommand;
@@ -196,6 +197,10 @@ public class DepositAccountsApiResource {
 			DepositStateTransitionApprovalCommand command=apiDataConversionService.convertJsonToDepositStateTransitionApprovalCommand(accountId, jsonRequestBody);
 			EntityIdentifier identifier = this.depositAccountWritePlatformService.approveDepositApplication(command);
 			response = Response.ok().entity(identifier).build();
+		} else if(is(commandParam, "withdrawal")){
+			DepositAccountWithdrawalCommand command = apiDataConversionService.convertJsonToDepositWithdrawalCommand(accountId, jsonRequestBody);
+			EntityIdentifier identifier = this.depositAccountWritePlatformService.withdrawDepositAccountMoney(command);
+			response = Response.ok().entity(identifier).build();
 		} else { 
 			DepositStateTransitionCommand command=apiDataConversionService.convertJsonToDepositStateTransitionCommand(accountId, jsonRequestBody);
 			if (is(commandParam, "reject")) {
@@ -204,9 +209,10 @@ public class DepositAccountsApiResource {
 			}  else if (is(commandParam, "withdrewbyclient")) {
 				EntityIdentifier identifier = this.depositAccountWritePlatformService.withdrawDepositApplication(command);
 				response = Response.ok().entity(identifier).build();
-			}  else if (is(commandParam, "mature")){
+			/*}  else if (is(commandParam, "withdrawal")){
 				EntityIdentifier identifier = this.depositAccountWritePlatformService.matureDepositApplication(command);
-				response = Response.ok().entity(identifier).build();			}
+				response = Response.ok().entity(identifier).build();*/
+			}
 	
 			UndoStateTransitionCommand undoCommand = new UndoStateTransitionCommand(accountId, command.getNote());
 	

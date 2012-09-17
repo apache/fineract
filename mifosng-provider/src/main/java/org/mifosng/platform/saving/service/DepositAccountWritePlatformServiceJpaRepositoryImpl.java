@@ -1,11 +1,13 @@
 package org.mifosng.platform.saving.service;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.mifosng.platform.api.commands.DepositAccountCommand;
+import org.mifosng.platform.api.commands.DepositAccountWithdrawalCommand;
 import org.mifosng.platform.api.commands.DepositStateTransitionApprovalCommand;
 import org.mifosng.platform.api.commands.DepositStateTransitionCommand;
 import org.mifosng.platform.api.commands.UndoStateTransitionCommand;
@@ -257,17 +259,50 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 		account.matureDepositApplication(eventDate, defaultDepositLifecycleStateMachine());
 		this.depositAccountRepository.save(account);
 		
-		if(account.isRenewalAllowed()){
+		/*if(account.isRenewalAllowed()){
 			final DepositAccount renewedAccount = this.depositAccountAssembler.assembleFrom(account);
 			this.depositAccountRepository.save(renewedAccount);
 			return new EntityIdentifier(renewedAccount.getId()); //returns the new deposit application id
-		}
+		}*/
+		
 		String noteText = command.getNote();
 		if (StringUtils.isNotBlank(noteText)) {
 			Note note = Note.depositNote(account, noteText);
 			this.noteRepository.save(note);
 		}
 		
+		return new EntityIdentifier(account.getId());
+	}
+
+	@Transactional
+	@Override
+	public EntityIdentifier withdrawDepositAccountMoney(DepositAccountWithdrawalCommand command) {
+		
+		context.authenticatedUser();
+		
+		DepositAccount account = this.depositAccountRepository.findOne(command.getAccountId());
+		if (account == null || account.isDeleted()) {
+			throw new DepositAccountNotFoundException(command.getAccountId());
+		}
+		
+		account.withdrawDepositAccountMoney(command.isRenewAccount(), defaultDepositLifecycleStateMachine());
+		this.depositAccountRepository.save(account);
+		
+		BigDecimal deposit = account.getProjectedTotalOnMaturity();
+		if(command.getDeposit() != null)
+			deposit = command.getDeposit();
+		
+		if(command.isRenewAccount()){
+			final DepositAccount renewedAccount = this.depositAccountAssembler.assembleFrom(account,deposit);
+			this.depositAccountRepository.save(renewedAccount);
+			return new EntityIdentifier(renewedAccount.getId()); //returns the new deposit application id
+		}
+		
+		String noteText = command.getNote();
+		if (StringUtils.isNotBlank(noteText)) {
+			Note note = Note.depositNote(account, noteText);
+			this.noteRepository.save(note);
+		}
 		return new EntityIdentifier(account.getId());
 	}
 }

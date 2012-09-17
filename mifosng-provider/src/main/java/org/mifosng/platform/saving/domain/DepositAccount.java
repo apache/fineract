@@ -300,6 +300,10 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 		return date;
 	}
 
+	public BigDecimal getProjectedTotalOnMaturity() {
+		return projectedTotalOnMaturity;
+	}
+
 	public void reject(final LocalDate rejectedOn,
 			final DepositLifecycleStateMachine depositLifecycleStateMachine) {
 
@@ -464,6 +468,52 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 	public void updateAccount(DepositAccount account) {
 		
 		this.renewdAccount = account;
+		
+	}
+
+	public void withdrawDepositAccountMoney(boolean renewAccount, DepositLifecycleStateMachine depositLifecycleStateMachine) {
+		
+		if (new LocalDate().isAfter(maturesOnDate()) || new LocalDate().equals(maturesOnDate())) {
+			DepositAccountStatus statusEnum = depositLifecycleStateMachine.transition(
+					DepositAccountEvent.DEPOSIT_MATURED,
+					DepositAccountStatus.fromInt(this.depositStatus));
+			this.depositStatus = statusEnum.getValue();
+			
+			if(!renewAccount){
+				DepositAccountTransaction depositaccountTransaction = DepositAccountTransaction.withdraw(Money.of(this.currency, this.total), new LocalDate());
+				depositaccountTransaction.updateAccount(this);
+				this.depositaccountTransactions.add(depositaccountTransaction);
+				
+				DepositAccountStatus statusEnumForClose = depositLifecycleStateMachine.transition(
+						DepositAccountEvent.DEPOSIT_CLOSED,
+						DepositAccountStatus.fromInt(this.depositStatus));
+				this.depositStatus = statusEnumForClose.getValue();
+				
+				this.depositAmount = null;
+				this.interestRate = null;
+				this.tenureInMonths = null;
+				this.interestCompoundedEvery = null;
+				this.interestCompoundedFrequencyType = null;
+				this.closedOnDate = new LocalDate().toDate();
+				this.withdrawnOnDate = null;
+				this.rejectedOnDate = null;
+				
+			}else if(renewAccount){
+				DepositAccountStatus statusEnumForClose = depositLifecycleStateMachine.transition(
+						DepositAccountEvent.DEPOSIT_CLOSED,
+						DepositAccountStatus.fromInt(this.depositStatus));
+				this.depositStatus = statusEnumForClose.getValue();
+				
+				DepositAccountTransaction depositaccountTransaction = DepositAccountTransaction.withdraw(Money.of(this.currency, this.total), new LocalDate());
+				depositaccountTransaction.updateAccount(this);
+				this.depositaccountTransactions.add(depositaccountTransaction);
+				
+				this.closedOnDate = new LocalDate().toDate();
+				this.withdrawnOnDate = null;
+				this.rejectedOnDate = null;
+			}
+		}
+		
 		
 	}
 }

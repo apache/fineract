@@ -5,6 +5,7 @@ import org.mifosng.platform.api.commands.BranchMoneyTransferCommand;
 import org.mifosng.platform.api.commands.ChargeCommand;
 import org.mifosng.platform.api.commands.ClientCommand;
 import org.mifosng.platform.api.commands.DepositAccountCommand;
+import org.mifosng.platform.api.commands.DepositAccountWithdrawalCommand;
 import org.mifosng.platform.api.commands.DepositProductCommand;
 import org.mifosng.platform.api.commands.DepositStateTransitionApprovalCommand;
 import org.mifosng.platform.api.commands.DepositStateTransitionCommand;
@@ -66,4 +67,6 @@ public interface ApiDataConversionService {
 	DepositStateTransitionApprovalCommand convertJsonToDepositStateTransitionApprovalCommand(Long resourceIdentifier, String jsonRequestBody);
 
 	StaffCommand convertJsonToStaffCommand(Long resourceIdentifier, String json);
+	
+	DepositAccountWithdrawalCommand convertJsonToDepositWithdrawalCommand(Long resourceIdentifier, String jsonRequestBody);
 }

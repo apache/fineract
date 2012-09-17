@@ -110,13 +110,13 @@ public class DepositAccountAssembler {
 		return new DepositLifecycleStateMachineImpl(allowedDepositStatuses);
 	}
 
-	public DepositAccount assembleFrom(DepositAccount account) {
+	public DepositAccount assembleFrom(DepositAccount account, BigDecimal newDepositAmount) {
 		
 		Client client = account.client();
 		
 		DepositProduct product = account.product();
 		
-		Money deposit = Money.of(product.getCurrency(), account.getDeposit().getAmount());
+		Money deposit = Money.of(product.getCurrency(), newDepositAmount);
 		
 		Integer tenureInMonths = product.getTenureInMonths();
 		

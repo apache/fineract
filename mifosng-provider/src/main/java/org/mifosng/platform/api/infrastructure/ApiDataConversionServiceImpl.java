@@ -22,6 +22,7 @@ import org.mifosng.platform.api.commands.BranchMoneyTransferCommand;
 import org.mifosng.platform.api.commands.ChargeCommand;
 import org.mifosng.platform.api.commands.ClientCommand;
 import org.mifosng.platform.api.commands.DepositAccountCommand;
+import org.mifosng.platform.api.commands.DepositAccountWithdrawalCommand;
 import org.mifosng.platform.api.commands.DepositProductCommand;
 import org.mifosng.platform.api.commands.DepositStateTransitionApprovalCommand;
 import org.mifosng.platform.api.commands.DepositStateTransitionCommand;
@@ -1143,5 +1144,28 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	    String note = extractStringParameter("note", requestMap, modifiedParameters);
 	    
 		return new DepositStateTransitionApprovalCommand(resourceIdentifier, productId, commencementDate, tenureInMonths, deposit, interestCompoundedEveryPeriodType,interestCompoundedEvery, note);
+	}
+
+	@Override
+	public DepositAccountWithdrawalCommand convertJsonToDepositWithdrawalCommand(final Long resourceIdentifier, final String json) {
+		
+		if (StringUtils.isBlank(json)) {
+			throw new InvalidJsonException();
+		}
+		
+		Type typeOfMap = new TypeToken<Map<String, String>>(){}.getType();
+	    Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
+	    
+	    Set<String> supportedParams = new HashSet<String>(Arrays.asList("renewAccount","deposit", "note"));
+	    
+	    checkForUnsupportedParameters(requestMap, supportedParams);
+	    
+	    Set<String> modifiedParameters = new HashSet<String>();
+	    
+	    BigDecimal deposit=extractBigDecimalParameter("deposit", requestMap, modifiedParameters);
+	    boolean renewAccount=extractBooleanParameter("renewAccount", requestMap, modifiedParameters);
+	    String note = extractStringParameter("note", requestMap, modifiedParameters);
+	    
+		return new DepositAccountWithdrawalCommand(resourceIdentifier,renewAccount, deposit, note);
 	}
 }
