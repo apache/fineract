@@ -27,6 +27,9 @@ public interface ReadWriteNonCoreDataService {
 
 	void newDatatableEntry(String datatable, Long appTableId,
 			Map<String, String> queryParams);
+	
+	void updateDatatableEntryOnetoOne(String datatable, Long appTableId,
+			Map<String, String> queryParams);
 
 	void deleteDatatableEntries(String datatable, Long appTableId);
 

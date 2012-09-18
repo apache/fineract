@@ -8,6 +8,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -124,6 +125,29 @@ public class DataTableApiResource {
 		return Response.ok().entity(entityIdentifier).build();
 
 	}
+	
+
+	@PUT
+	@Path("{datatable}/{appTableId}")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public Response updateDatatableEntryOnetoOne(
+			@PathParam("datatable") final String datatable,
+			@PathParam("appTableId") final Long appTableId,
+			final String jsonRequestBody) {
+
+		checkUserPermissionForDatatable(datatable, "UPDATE");
+		Map<String, String> queryParams = getQueryParamsFromJsonRequestBody(jsonRequestBody);
+
+		this.readWriteNonCoreDataService.updateDatatableEntryOnetoOne(datatable,
+				appTableId, queryParams);
+
+		EntityIdentifier entityIdentifier = new EntityIdentifier(
+				Long.valueOf(appTableId));
+
+		return Response.ok().entity(entityIdentifier).build();
+
+	}
 
 	@DELETE
 	@Path("{datatable}/{appTableId}")
@@ -180,7 +204,7 @@ public class DataTableApiResource {
 				for (int i = 0; i < jsonArr.length(); i++) {
 					pName = (String) jsonArr.get(i);
 					pValue = jsonObj.getString(pName);
-					logger.info(pName + " - " + pValue);
+					logger.info("getQueryParamsFromJsonRequestBody: " + pName + " - " + pValue);
 					queryParams.put(pName, pValue);
 				}
 				return queryParams;

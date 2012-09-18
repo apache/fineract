@@ -12,6 +12,7 @@ import javax.sql.rowset.CachedRowSet;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosng.platform.api.data.AdditionalFieldsSetData;
+import org.mifosng.platform.api.data.ApiParameterError;
 import org.mifosng.platform.api.data.DatatableData;
 import org.mifosng.platform.api.data.GenericResultsetData;
 import org.mifosng.platform.api.data.ResultsetColumnHeader;
@@ -19,6 +20,7 @@ import org.mifosng.platform.api.data.ResultsetColumnValue;
 import org.mifosng.platform.api.data.ResultsetDataRow;
 import org.mifosng.platform.exceptions.AdditionalFieldsNotFoundException;
 import org.mifosng.platform.exceptions.DataTableNotFoundException;
+import org.mifosng.platform.exceptions.PlatformApiDataValidationException;
 import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.user.domain.AppUser;
@@ -427,19 +429,24 @@ public class ReadWriteNonCoreDataServiceImpl implements
 						+ " not found");
 	}
 
-	private void checkMainResourceExistsWithinScope(String tableName,
+	private String getFullDatasetName(final String type, final String set) {
+		return type + "_x" + set;
+	}
+
+	// only exclusively datatable functions below here
+	private void checkMainResourceExistsWithinScope(String appTable,
 			Long appTableId) {
 
-		String unscopedSql = "select t.id from " + tableName
+		String unscopedSql = "select t.id from " + appTable
 				+ " t ${dataScopeCriteria} where t.id = " + appTableId;
 
-		String sql = dataScopedSQL(unscopedSql, tableName);
+		String sql = dataScopedSQL(unscopedSql, appTable);
 
 		CachedRowSet rs = genericDataService.getCachedResultSet(sql, "SQL : "
 				+ sql);
 
 		if (rs.size() == 0)
-			throw new DataTableNotFoundException(tableName, appTableId);
+			throw new DataTableNotFoundException(appTable, appTableId);
 	}
 
 	private String dataScopedSQL(String unscopedSQL, String appTable) {
@@ -475,11 +482,6 @@ public class ReadWriteNonCoreDataServiceImpl implements
 
 	}
 
-	private String getFullDatasetName(final String type, final String set) {
-		return type + "_x" + set;
-	}
-
-	// only exclusively datatable functions below here
 	@Override
 	public void newDatatableEntry(String datatable, Long appTableId,
 			Map<String, String> queryParams) {
@@ -498,6 +500,36 @@ public class ReadWriteNonCoreDataServiceImpl implements
 		long elapsed = System.currentTimeMillis() - startTime;
 		logger.info("FINISHING newDatatableEntry:      Elapsed Time: "
 				+ elapsed + "       - datatable: " + datatable + "  id: "
+				+ appTableId);
+
+	}
+
+	@Override
+	public void updateDatatableEntryOnetoOne(String datatable, Long appTableId,
+			Map<String, String> queryParams) {
+		long startTime = System.currentTimeMillis();
+
+		GenericResultsetData grs = retrieveDataTableGenericResultSet(datatable,
+				appTableId, null, null);
+
+		if (grs.getData().size() == 0)
+			throw new DataTableNotFoundException(datatable, appTableId);
+
+		String sql = getUpdateSql(grs, datatable,
+				getFKField(getApplicationTableName(datatable)), appTableId,
+				queryParams);
+
+		if (sql != null)
+			genericDataService.updateSQL(sql, "SQL: " + sql);
+		else
+			logger.info("No Changes");
+
+		long elapsed = System.currentTimeMillis() - startTime;
+		logger.info("FINISHING updateDatatableEntryOnetoOne:      Elapsed Time: "
+				+ elapsed
+				+ "       - datatable: "
+				+ datatable
+				+ "  id: "
 				+ appTableId);
 
 	}
@@ -702,6 +734,27 @@ public class ReadWriteNonCoreDataServiceImpl implements
 		}
 	}
 
+	private String getApplicationTableName(String datatable) {
+		// TODO - only used for update... can probably remove this after as its
+		// a reread
+		String sql = "SELECT application_table_name FROM x_registered_table where registered_table_name = '"
+				+ datatable + "'";
+
+		CachedRowSet rs = genericDataService.getCachedResultSet(sql, "SQL : "
+				+ sql);
+
+		if (rs.size() == 0)
+			throw new DataTableNotFoundException(datatable);
+
+		try {
+			rs.next();
+			return rs.getString("application_table_name");
+		} catch (SQLException e) {
+			throw new PlatformDataIntegrityException("error.msg.sql.error",
+					e.getMessage());
+		}
+	}
+
 	private String getFKField(String applicationTableName) {
 
 		return applicationTableName.substring(2) + "_id";
@@ -897,6 +950,97 @@ public class ReadWriteNonCoreDataServiceImpl implements
 		return addSql;
 	}
 
+	private String getUpdateSql(GenericResultsetData grs, String datatable,
+			String fkField, Long appTableId, Map<String, String> queryParams) {
+
+		Map<String, String> affectedAndChangedColumns = getAffectedAndChangedColumns(
+				grs, queryParams);
+
+		// just updating fields that have changed since pre-update read - though
+		// its possible these values are different from the page the user was
+		// looking at and even different from the current db values (if some
+		// other update got in quick) - would need a version field for
+		// completeness but its okay to take this risk with additional fields
+		// data
+
+		if (affectedAndChangedColumns.size() == 0)
+			return null;
+
+		String pValue = null;
+		String pValueWrite = "";
+		String singleQuote = "'";
+		boolean firstColumn = true;
+		String sql = "update `" + datatable + "` ";
+
+		for (String key : affectedAndChangedColumns.keySet()) {
+			if (firstColumn) {
+				sql += " set ";
+				firstColumn = false;
+			} else {
+				sql += ", ";
+			}
+
+			pValue = affectedAndChangedColumns.get(key);
+			if (StringUtils.isEmpty(pValue)) {
+				pValueWrite = "null";
+			} else {
+				pValueWrite = singleQuote
+						+ genericDataService.replace(pValue, singleQuote,
+								singleQuote + singleQuote) + singleQuote;
+			}
+			sql += "`" + key + "` = " + pValueWrite;
+		}
+
+		sql += " where " + fkField + " = " + appTableId;
+
+		return sql;
+	}
+
+	private Map<String, String> getAffectedAndChangedColumns(
+			GenericResultsetData grs, Map<String, String> queryParams) {
+
+		Map<String, String> affectedColumns = getAffectedColumns(
+				grs.getColumnHeaders(), queryParams);
+		Map<String, String> affectedAndChangedColumns = new HashMap<String, String>();
+		String columnValue;
+
+		for (String key : affectedColumns.keySet()) {
+			columnValue = affectedColumns.get(key);
+			if (columnChanged(key, columnValue, grs)) {
+				affectedAndChangedColumns.put(key, columnValue);
+			}
+		}
+
+		return affectedAndChangedColumns;
+	}
+
+	private boolean columnChanged(String key, String keyValue,
+			GenericResultsetData grs) {
+
+		List<String> columnValues = grs.getData().get(0).getRow();
+
+		String columnValue = null;
+		for (int i = 0; i < grs.getColumnHeaders().size(); i++) {
+
+			if (key.equals(grs.getColumnHeaders().get(i).getColumnName())) {
+				columnValue = columnValues.get(i);
+
+				if (notTheSame(columnValue, keyValue)) {
+					logger.info("Difference - Column: " + key
+							+ "- Current Value: " + columnValue
+							+ "    New Value: " + keyValue);
+					return true;
+
+				}
+				return false;
+			}
+		}
+
+		throw new PlatformDataIntegrityException(
+				"error.msg.invalid.columnName", "Parameter Column Name: " + key
+						+ " not found");
+	}
+
 	private Map<String, String> getAffectedColumns(
 			List<ResultsetColumnHeader> columnHeaders,
 			Map<String, String> queryParams) {
@@ -911,7 +1055,7 @@ public class ReadWriteNonCoreDataServiceImpl implements
 		Map<String, String> affectedColumns = new HashMap<String, String>();
 		Set<String> keys = queryParams.keySet();
 		for (String key : keys) {
-			// ignore any id field and matches incoming fields with and without
+			// ignores any id field and matches incoming fields with and without
 			// underscores (spaces and underscores considered the same)
 			if (!(key.equalsIgnoreCase("id"))) {
 				notFound = true;
@@ -925,6 +1069,7 @@ public class ReadWriteNonCoreDataServiceImpl implements
 						if (queryParamColumnUnderscored
 								.equalsIgnoreCase(columnHeaderUnderscored)) {
 							pValue = queryParams.get(key);
+							validateColumn(columnHeader, pValue);
 							affectedColumns.put(columnHeader.getColumnName(),
 									pValue);
 							notFound = false;
@@ -942,6 +1087,69 @@ public class ReadWriteNonCoreDataServiceImpl implements
 		return affectedColumns;
 	}
 
+	private void validateColumn(ResultsetColumnHeader columnHeader,
+			String pValue) {
+
+		if ((StringUtils.isEmpty(pValue))
+				&& (!(columnHeader.isColumnNullable()))) {
+
+			List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+			ApiParameterError error = ApiParameterError.parameterError(
+					"error.msg.column.mandatory", columnHeader.getColumnName(),
+					"Mandatory");
+			dataValidationErrors.add(error);
+			throw new PlatformApiDataValidationException(
+					"validation.msg.validation.errors.exist",
+					"Validation errors exist.", dataValidationErrors);
+		}
+
+		// check allowed values
+		if ((!StringUtils.isEmpty(pValue))
+				&& columnHeader.getColumnValuesNew().size() > 0) {
+
+			List<ResultsetColumnValue> allowedValues = columnHeader
+					.getColumnValuesNew();
+			if (columnHeader.getColumnType().equalsIgnoreCase("varchar")) {
+				for (ResultsetColumnValue allowedValue : allowedValues) {
+					if (pValue.equalsIgnoreCase(allowedValue.getValue()))
+						return;
+				}
+				List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+				ApiParameterError error = ApiParameterError.parameterError(
+						"error.msg.invalid.columnValue",
+						columnHeader.getColumnName(), "Value :" + pValue
+								+ "' not found in Allowed Value list");
+				dataValidationErrors.add(error);
+				throw new PlatformApiDataValidationException(
+						"validation.msg.validation.errors.exist",
+						"Validation errors exist.", dataValidationErrors);
+			}
+
+			if (columnHeader.getColumnType().equalsIgnoreCase("int")) {
+				for (ResultsetColumnValue allowedValue : allowedValues) {
+					if (pValue.equals(Integer.toString(allowedValue.getId())))
+						return;
+				}
+				List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+				ApiParameterError error = ApiParameterError.parameterError(
+						"error.msg.invalid.columnValue",
+						columnHeader.getColumnName(), "Value :" + pValue
+								+ "' not found in Allowed Value list");
+				dataValidationErrors.add(error);
+				throw new PlatformApiDataValidationException(
+						"validation.msg.validation.errors.exist",
+						"Validation errors exist.", dataValidationErrors);
+			}
+
+			throw new PlatformDataIntegrityException(
+					"error.msg.invalid.columnType.", "Code: "
+							+ columnHeader.getColumnName() + " - Invalid Type "
+							+ columnHeader.getColumnType()
+							+ " (neither varchar nor int)");
+		}
+
+	}
+
 	private String getDeleteEntriesSql(String datatable, String FKField,
 			Long appTableId) {
 
@@ -955,4 +1163,5 @@ public class ReadWriteNonCoreDataServiceImpl implements
 		return "delete from `" + datatable + "` where `id` = " + datatableId;
 
 	}
+
 }
