@@ -1,6 +1,7 @@
 package org.mifosng.platform.api.data;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collection;
 
 import org.joda.time.DateTime;
@@ -53,7 +54,7 @@ public class LoanBasicDetailsData {
 	private final LocalDate expectedMaturityDate;
 	private final LocalDate lifeCycleStatusDate;
 	
-	private final Collection<ChargeData> charges;
+	private final Collection<LoanChargeData> charges;
 	
 	public static LoanBasicDetailsData populateForNewLoanCreation(final Long clientId, final String clientName, final LocalDate expectedDisbursementDate,
 																	final Long clientOfficeId) {
@@ -64,6 +65,12 @@ public class LoanBasicDetailsData {
 		
 		final Integer termFrequency = product.getNumberOfRepayments() * product.getRepaymentEvery();
 		final EnumOptionData termPeriodFrequencyType = product.getRepaymentFrequencyType();
+        final Collection<LoanChargeData> charges = new ArrayList<LoanChargeData>();
+        for (ChargeData charge : product.getCharges()){
+            charges.add(new LoanChargeData(null, charge.getId(), charge.getName(), charge.getCurrency(),
+                    charge.getAmount(), charge.getChargeTimeType(), charge.getChargeCalculationType()));
+        }
+
 		return new LoanBasicDetailsData(
 				loanAccount.clientId, loanAccount.clientName, loanAccount.clientOfficeId,
 				product.getId(), product.getName(), product.getDescription(), product.getFundId(), product.getFundName(), 
@@ -71,7 +78,7 @@ public class LoanBasicDetailsData {
 				termFrequency, termPeriodFrequencyType, product.getNumberOfRepayments(), product.getRepaymentEvery(), product.getRepaymentFrequencyType(),
 				product.getTransactionProcessingStrategyId(), product.getAmortizationType(), 
 				product.getInterestRatePerPeriod(), product.getInterestRateFrequencyType(), product.getInterestType(), product.getInterestCalculationPeriodType(),
-				loanAccount.expectedDisbursementDate, product.getCharges());
+				loanAccount.expectedDisbursementDate, charges);
 	}
 	
 	private LoanBasicDetailsData(
@@ -89,7 +96,7 @@ public class LoanBasicDetailsData {
 			final EnumOptionData interestRateFrequencyType,
 			final EnumOptionData interestType,
 			final EnumOptionData interestCalculationPeriodType,
-			final LocalDate expectedDisbursementDate, final Collection<ChargeData> charges) {
+			final LocalDate expectedDisbursementDate, final Collection<LoanChargeData> charges) {
 		this.id = null;
 		this.externalId = null;
 		this.clientId = clientId;
@@ -219,7 +226,7 @@ public class LoanBasicDetailsData {
 			final Integer termFrequency, 
 			final EnumOptionData termPeriodFrequencyType, 
 			final Integer transactionStrategyId,
-			final Collection<ChargeData> charges,
+			final Collection<LoanChargeData> charges,
 			final Long loanOfficerId, String loanOfficerName) {
 		this.id = id;
 		this.externalId = externalId;
@@ -490,7 +497,7 @@ public class LoanBasicDetailsData {
 		return transactionStrategyId;
 	}
 
-	public Collection<ChargeData> getCharges() {
+	public Collection<LoanChargeData> getCharges() {
 		return charges;
 	}
 

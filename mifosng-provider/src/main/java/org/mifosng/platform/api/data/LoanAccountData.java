@@ -54,7 +54,7 @@ public class LoanAccountData {
 	// associations
 	private final LoanScheduleData repaymentSchedule;
 	private final Collection<LoanRepaymentTransactionData> loanRepayments;
-	private final Collection<ChargeData> charges;
+	private final Collection<LoanChargeData> charges;
 	private final LoanPermissionData permissions;
 	private final LoanConvenienceData convenienceData;
 	
@@ -78,7 +78,7 @@ public class LoanAccountData {
 			final LoanScheduleData repaymentSchedule,
 			final Collection<LoanRepaymentTransactionData> loanRepayments,
 			final LoanPermissionData permissions, 
-			final Collection<ChargeData> charges, 
+			final Collection<LoanChargeData> charges,
 			final Collection<LoanProductLookup> productOptions, 
 			final Collection<EnumOptionData> termFrequencyTypeOptions, 
 			final Collection<EnumOptionData> repaymentFrequencyTypeOptions, 

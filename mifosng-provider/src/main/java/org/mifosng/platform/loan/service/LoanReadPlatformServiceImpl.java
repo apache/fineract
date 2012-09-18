@@ -6,11 +6,11 @@ import java.sql.SQLException;
 import java.util.Collection;
 
 import org.joda.time.LocalDate;
-import org.mifosng.platform.api.data.ChargeData;
 import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.EnumOptionData;
 import org.mifosng.platform.api.data.LoanBasicDetailsData;
+import org.mifosng.platform.api.data.LoanChargeData;
 import org.mifosng.platform.api.data.LoanPermissionData;
 import org.mifosng.platform.api.data.LoanProductData;
 import org.mifosng.platform.api.data.LoanRepaymentPeriodData;
@@ -403,7 +403,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 				lifeCycleStatusDate = closedOnDate;
 			}
 
-			Collection<ChargeData> charges = null;
+			Collection<LoanChargeData> charges = null;
 			return new LoanBasicDetailsData(id, externalId, clientId, clientName, clientOfficeId,
 					loanProductId, loanProductName, loanProductDescription,
 					fundId, fundName, 

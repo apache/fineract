@@ -1,13 +1,10 @@
 package org.mifosng.platform.loan.domain;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.IdClass;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -16,17 +13,20 @@ import org.mifosng.platform.api.commands.LoanChargeCommand;
 import org.mifosng.platform.charge.domain.Charge;
 import org.mifosng.platform.charge.domain.ChargeCalculationType;
 import org.mifosng.platform.charge.domain.ChargeTimeType;
+import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity 
-@IdClass(LoanCharge.LoanChargePK.class)
 @Table(name = "m_loan_charge")
-public class LoanCharge {
+public class LoanCharge extends AbstractPersistable<Long> {
 
-	@Id
+    @SuppressWarnings("unused")
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "loan_id", referencedColumnName = "id", nullable=false)
     private Loan loan;
 
     @SuppressWarnings("unused")
-	@Id
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "charge_id", referencedColumnName = "id", nullable=false)
     private Charge charge;
 
 	@Column(name = "amount", scale = 6, precision = 19, nullable = false)
@@ -83,20 +83,6 @@ public class LoanCharge {
         this.amount = amount;
         this.chargeTime = chargeTime;
         this.chargeCalculation = chargeCalculation;
-    }
-
-    public static class LoanChargePK implements Serializable {
-        @SuppressWarnings("unused")
-		@Id
-        @ManyToOne(optional = false)
-        @JoinColumn(name = "loan_id", referencedColumnName = "id", nullable=false)
-        private Loan loan;
-
-        @SuppressWarnings("unused")
-		@Id
-        @ManyToOne(optional = false)
-        @JoinColumn(name = "charge_id", referencedColumnName = "id", nullable=false)
-        private Charge charge;
     }
 
 	public void update(final Loan loan) {

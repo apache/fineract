@@ -20,6 +20,7 @@ import org.mifosng.platform.exceptions.ChargeIsNotActiveException;
 import org.mifosng.platform.exceptions.ChargeNotFoundException;
 import org.mifosng.platform.exceptions.ClientNotFoundException;
 import org.mifosng.platform.exceptions.FundNotFoundException;
+import org.mifosng.platform.exceptions.InvalidCurrencyException;
 import org.mifosng.platform.exceptions.LoanProductNotFoundException;
 import org.mifosng.platform.exceptions.LoanTransactionProcessingStrategyNotFoundException;
 import org.mifosng.platform.exceptions.StaffNotFoundException;
@@ -101,7 +102,7 @@ public class LoanAssembler {
 		Staff loanOfficer= findLoanOfficerByIdIfProvided(command.getLoanOfficerId());
 		
 		// optionally, see if charges are associated with loan on creation (through loan product or by being directly added)
-		final Set<LoanCharge> loanCharges = assembleSetOfLoanCharges(command.getCharges(), loanProduct.getCharges());
+		final Set<LoanCharge> loanCharges = assembleSetOfLoanCharges(command.getCharges(), loanProduct.getCharges(), loanProduct.getCurrency().getCode());
 				
 		Loan loan = Loan.createNew(fund,loanOfficer, loanTransactionProcessingStrategy, loanProduct, client, loanRepaymentScheduleDetail, loanCharges);
 		loan.setExternalId(command.getExternalId());
@@ -130,13 +131,14 @@ public class LoanAssembler {
 		return loan;
 	}
 
-	public Set<LoanCharge> assembleSetOfLoanCharges(LoanChargeCommand[] chargesPassedAtCreation, Set<Charge> chargesInheritedFromProduct) {
+	public Set<LoanCharge> assembleSetOfLoanCharges(LoanChargeCommand[] chargesPassedAtCreation,
+                                                    Set<Charge> chargesInheritedFromProduct, String loanCurrencyCode) {
 		Set<LoanCharge> loanCharges = new HashSet<LoanCharge>();
 		
 		if (!ObjectUtils.isEmpty(chargesPassedAtCreation)) {
 			for (LoanChargeCommand loanChargeCommand : chargesPassedAtCreation) {
 				
-				Long chargeDefinitionId = loanChargeCommand.getId();
+				Long chargeDefinitionId = loanChargeCommand.getChargeId();
 				Charge chargeDefinition = this.chargeRepository.findOne(chargeDefinitionId);
 				if (chargeDefinition == null || chargeDefinition.isDeleted()) {
 					throw new ChargeNotFoundException(chargeDefinitionId);
@@ -145,7 +147,12 @@ public class LoanAssembler {
 				if (!chargeDefinition.isActive()) {
 					throw new ChargeIsNotActiveException(chargeDefinitionId);
 				}
-				
+
+                if (!loanCurrencyCode.equals(chargeDefinition.getCurrencyCode())){
+                    String errorMessage = "Charge and Loan must have the same currency.";
+                    throw new InvalidCurrencyException("charge", "attach.to.loan", errorMessage);
+                }
+
 				loanCharges.add(LoanCharge.createNew(chargeDefinition, loanChargeCommand));
 			}
 		} else if (chargesPassedAtCreation == null) {

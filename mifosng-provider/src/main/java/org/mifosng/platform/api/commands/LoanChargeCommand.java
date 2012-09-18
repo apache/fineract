@@ -6,6 +6,7 @@ import java.util.Set;
 public class LoanChargeCommand {
 
     private final Long id;
+    private final Long chargeId;
     private final BigDecimal amount;
 
     private final Integer chargeTimeType;
@@ -13,10 +14,11 @@ public class LoanChargeCommand {
 
     private final Set<String> modifiedParameters;
 
-    public LoanChargeCommand(final Set<String> modifiedParameters, final Long id, final BigDecimal amount,
-                             final Integer chargeTimeType, final Integer chargeCalculationType) {
+    public LoanChargeCommand(final Set<String> modifiedParameters, final Long id, final Long chargeId,
+                             final BigDecimal amount, final Integer chargeTimeType, final Integer chargeCalculationType) {
         this.modifiedParameters = modifiedParameters;
         this.id = id;
+        this.chargeId = chargeId;
         this.amount = amount;
         this.chargeTimeType = chargeTimeType;
         this.chargeCalculationType = chargeCalculationType;
@@ -24,6 +26,10 @@ public class LoanChargeCommand {
 
     public Long getId() {
         return id;
+    }
+
+    public Long getChargeId() {
+        return chargeId;
     }
 
     public BigDecimal getAmount() {

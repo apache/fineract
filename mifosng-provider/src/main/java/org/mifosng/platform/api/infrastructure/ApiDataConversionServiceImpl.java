@@ -497,25 +497,19 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
                 charges = new LoanChargeCommand[array.size()];
                 for (int i=0; i<array.size(); i++) {
                     JsonObject loanCharge = array.get(i).getAsJsonObject();
+                    Map<String, Object> chargeRequestMap = gsonConverter.fromJson(loanCharge, typeOfMap);
+                    if (requestMap.containsKey("locale")){
+                        chargeRequestMap.put("locale", requestMap.get("locale"));
+                    }
                     Set<String> chargeModifiedParameters = new HashSet<String>();
-                    Long id = loanCharge.get("id").getAsLong();
-                    BigDecimal amount = null;
-                    Integer chargeTimeType = null;
-                    Integer chargeCalculationType = null;
 
-                    if (loanCharge.has("amount")){
-                        chargeModifiedParameters.add("amount");
-                        amount = convertFrom(loanCharge.get("amount").getAsString(), "amount", extractLocaleValue(requestMap));
-                    }
-                    if (loanCharge.has("chargeTimeType")){
-                        chargeModifiedParameters.add("chargeTimeType");
-                        chargeTimeType = loanCharge.get("chargeTimeType").getAsInt();
-                    }
-                    if (loanCharge.has("chargeCalculationType")){
-                        chargeModifiedParameters.add("chargeCalculationType");
-                        chargeCalculationType = loanCharge.get("chargeCalculationType").getAsInt();
-                    }
-                    charges[i] = new LoanChargeCommand(chargeModifiedParameters, id, amount, chargeTimeType, chargeCalculationType);
+                    Long chargeId = extractLongParameter("chargeId", chargeRequestMap, chargeModifiedParameters);
+                    BigDecimal amount = extractBigDecimalParameter("amount", chargeRequestMap, chargeModifiedParameters);
+                    Integer chargeTimeType = extractIntegerParameter("chargeTimeType", chargeRequestMap, chargeModifiedParameters);
+                    Integer chargeCalculationType = extractIntegerParameter("chargeCalculationType", chargeRequestMap, chargeModifiedParameters);
+
+                    charges[i] = new LoanChargeCommand(chargeModifiedParameters, null, chargeId, amount,
+                            chargeTimeType, chargeCalculationType);
                 }
             }
         }
@@ -709,7 +703,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		}
 		return paramValue;
 	}
-	
+
 	private boolean extractBooleanParameter(final String paramName, final Map<String, ?> requestMap, final Set<String> modifiedParameters) {
 		boolean paramValue = false;
 		String paramValueAsString = null;

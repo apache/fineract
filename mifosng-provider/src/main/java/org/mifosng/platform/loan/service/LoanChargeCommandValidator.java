@@ -22,6 +22,7 @@ public class LoanChargeCommandValidator {
 
         DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("charge");
 
+        baseDataValidator.reset().parameter("chargeId").value(command.getChargeId()).notNull().longGreaterThanZero();
         baseDataValidator.reset().parameter("amount").value(command.getAmount()).ignoreIfNull().positiveAmount();
         baseDataValidator.reset().parameter("chargeTimeType").value(command.getChargeTimeType()).ignoreIfNull().inMinMaxRange(1, 1);
         baseDataValidator.reset().parameter("chargeCalculationType").value(command.getChargeCalculationType()).ignoreIfNull().inMinMaxRange(1, 4);

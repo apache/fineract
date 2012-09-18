@@ -33,6 +33,7 @@ import org.mifosng.platform.api.data.EnumOptionData;
 import org.mifosng.platform.api.data.FundData;
 import org.mifosng.platform.api.data.LoanAccountData;
 import org.mifosng.platform.api.data.LoanBasicDetailsData;
+import org.mifosng.platform.api.data.LoanChargeData;
 import org.mifosng.platform.api.data.LoanPermissionData;
 import org.mifosng.platform.api.data.LoanProductLookup;
 import org.mifosng.platform.api.data.LoanRepaymentTransactionData;
@@ -148,12 +149,9 @@ public class LoansApiResource {
         ChargeData chargeTemplate = this.chargeReadPlatformService.retrieveLoanChargeTemplate();
 
         LoanBasicDetailsData loanBasicDetails = this.loanReadPlatformService.retrieveClientAndProductDetails(clientId, productId);
-        if (loanBasicDetails.getCharges() != null) {
-        	chargeOptions.removeAll(loanBasicDetails.getCharges());
-        }
 		
 		final boolean convenienceDataRequired = false;
-		Collection<ChargeData> charges = loanBasicDetails.getCharges();
+		Collection<LoanChargeData> charges = loanBasicDetails.getCharges();
 		
 		Collection<StaffData> allowedLoanOfficers =  this.staffReadPlatformService.retrieveAllLoanOfficersByOffice(loanBasicDetails.getClientOfficeId());
 		
@@ -185,7 +183,7 @@ public class LoansApiResource {
 		Collection<LoanRepaymentTransactionData> loanRepayments = null;
 		LoanScheduleData repaymentSchedule = null;
 		LoanPermissionData permissions = null;
-        Collection<ChargeData> charges = null;
+        Collection<LoanChargeData> charges = null;
 
         boolean convenienceDataRequired = false;
 		final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
@@ -250,9 +248,6 @@ public class LoansApiResource {
 			fundOptions = this.fundReadPlatformService.retrieveAllFunds();
 			repaymentStrategyOptions = this.dropdownReadPlatformService.retreiveTransactionProcessingStrategies();
 			chargeOptions = this.chargeReadPlatformService.retrieveLoanApplicableCharges();
-			if (charges != null) {
-				chargeOptions.removeAll(charges);
-			}
 			allowedLoanOfficers =  this.staffReadPlatformService.retrieveAllLoanOfficersByOffice(loanBasicDetails.getClientOfficeId());
 			chargeTemplate = this.chargeReadPlatformService.retrieveLoanChargeTemplate();
 		}

@@ -201,6 +201,23 @@ public class DataValidatorBuilder {
 		}
 		return this;
 	}
+
+    public DataValidatorBuilder longGreaterThanZero() {
+        if (value == null && ignoreNullValue) {
+            return this;
+        }
+
+        if (value != null) {
+            Long number = Long.valueOf(value.toString());
+            if (number < 1) {
+                StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(resource).append(".").append(parameter).append(".not.greater.than.zero");
+                StringBuilder defaultEnglishMessage = new StringBuilder("The parameter ").append(parameter).append(" must be greater than 0.");
+                ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(), defaultEnglishMessage.toString(), parameter, number, 0);
+                dataValidationErrors.add(error);
+            }
+        }
+        return this;
+    }
 	
 	public DataValidatorBuilder arrayNotEmpty() {
 		if (value == null && ignoreNullValue) {

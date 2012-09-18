@@ -3,6 +3,7 @@ package org.mifosng.platform.charge.service;
 import org.mifosng.platform.api.data.ChargeData;
 import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.EnumOptionData;
+import org.mifosng.platform.api.data.LoanChargeData;
 import org.mifosng.platform.charge.domain.ChargeAppliesTo;
 import org.mifosng.platform.charge.domain.ChargeCalculationType;
 import org.mifosng.platform.charge.domain.ChargeTimeType;
@@ -106,10 +107,10 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
     }
 
     @Override
-    public Collection<ChargeData> retrieveLoanCharges(Long loanId) {
+    public Collection<LoanChargeData> retrieveLoanCharges(Long loanId) {
         this.context.authenticatedUser();
 
-        ChargeMapper rm = new ChargeMapper();
+        LoanChargeMapper rm = new LoanChargeMapper();
 
         String sql = "select " + rm.loanChargeSchema() + " where c.is_deleted=0 and lc.loan_id=?";
 
@@ -159,15 +160,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
             return chargeSchema() + " join m_product_loan_charge plc on plc.charge_id = c.id";
         }
 
-        public String loanChargeSchema(){
-            return "c.id as id, c.name as name, lc.amount as amount, c.currency_code as currencyCode, " +
-                   "c.charge_applies_to_enum as chargeAppliesTo, lc.charge_time_enum as chargeTime, " +
-                   "lc.charge_calculation_enum as chargeCalculation, is_active as active, oc.name as currencyName, " +
-                    "oc.decimal_places as currencyDecimalPlaces, oc.display_symbol as currencyDisplaySymbol, " +
-                    "oc.internationalized_name_code as currencyNameCode from m_charge c " +
-                    "join m_organisation_currency oc on c.currency_code = oc.code " +
-                    "join m_loan_charge lc on lc.charge_id = c.id ";
-        }
+
 
         @Override
         public ChargeData mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -196,6 +189,44 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
             boolean active = rs.getBoolean("active");
 
             return new ChargeData(id, name, amount, currency, chargeTimeType, chargeAppliesToType, chargeCalculationType, active);
+        }
+    }
+
+    private static final class LoanChargeMapper implements RowMapper<LoanChargeData> {
+
+        public String loanChargeSchema(){
+            return "lc.id as id, c.id as chargeId, c.name as name, lc.amount as amount, c.currency_code as currencyCode, " +
+                    "lc.charge_time_enum as chargeTime, " +
+                    "lc.charge_calculation_enum as chargeCalculation, oc.name as currencyName, " +
+                    "oc.decimal_places as currencyDecimalPlaces, oc.display_symbol as currencyDisplaySymbol, " +
+                    "oc.internationalized_name_code as currencyNameCode from m_charge c " +
+                    "join m_organisation_currency oc on c.currency_code = oc.code " +
+                    "join m_loan_charge lc on lc.charge_id = c.id ";
+        }
+
+        @Override
+        public LoanChargeData mapRow(ResultSet rs, int rowNum) throws SQLException {
+            Long id = rs.getLong("id");
+            Long chargeId = rs.getLong("chargeId");
+            String name = rs.getString("name");
+            BigDecimal amount = rs.getBigDecimal("amount");
+
+            String currencyCode = rs.getString("currencyCode");
+            String currencyName = rs.getString("currencyName");
+            String currencyNameCode = rs.getString("currencyNameCode");
+            String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
+            Integer currencyDecimalPlaces = JdbcSupport.getInteger(rs, "currencyDecimalPlaces");
+
+            CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDecimalPlaces,
+                    currencyDisplaySymbol, currencyNameCode);
+
+            int chargeTime = rs.getInt("chargeTime");
+            EnumOptionData chargeTimeType = ChargeEnumerations.chargeTimeType(chargeTime);
+
+            int chargeCalculation = rs.getInt("chargeCalculation");
+            EnumOptionData chargeCalculationType = ChargeEnumerations.chargeCalculationType(chargeCalculation);
+
+            return new LoanChargeData(id, chargeId, name, currency, amount, chargeTimeType, chargeCalculationType);
         }
     }
 }
