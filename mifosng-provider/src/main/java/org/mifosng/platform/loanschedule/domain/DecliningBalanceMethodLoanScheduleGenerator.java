@@ -5,8 +5,6 @@ import java.util.List;
 
 import org.joda.time.LocalDate;
 import org.mifosng.platform.api.NewLoanScheduleData;
-import org.mifosng.platform.api.data.CurrencyData;
-import org.mifosng.platform.api.data.LoanSchedule;
 import org.mifosng.platform.currency.domain.ApplicationCurrency;
 import org.mifosng.platform.loan.domain.AmortizationMethod;
 import org.mifosng.platform.loan.domain.LoanProductRelatedDetail;
@@ -64,31 +62,5 @@ public class DecliningBalanceMethodLoanScheduleGenerator implements LoanSchedule
 				periodInterestRateForRepaymentPeriod, 
 				idealDisbursementDateBasedOnFirstRepaymentDate, 
 				scheduledDates);
-	}
-	
-	@Deprecated
-	@Override
-	public LoanSchedule generate(
-			final LoanProductRelatedDetail loanScheduleInfo,
-			final Integer loanTermFrequency, 
-			final PeriodFrequencyType loanTermFrequencyType, 
-			final LocalDate disbursementDate, 
-			final LocalDate firstRepaymentDate, 
-			final LocalDate interestCalculatedFrom, 
-			final CurrencyData currencyData) {
-
-		// 1. generate valid set of 'due dates' based on some of the 'loan attributes'
-		List<LocalDate> scheduledDates = this.scheduledDateGenerator.generate(loanScheduleInfo, disbursementDate, firstRepaymentDate);
-		
-		LocalDate idealDisbursementDateBasedOnFirstRepaymentDate = this.scheduledDateGenerator.idealDisbursementDateBasedOnFirstRepaymentDate(loanScheduleInfo, scheduledDates);
-		
-		// 2. determine the 'periodic' interest rate based on the 'repayment periods' so we can use 
-		final BigDecimal periodInterestRateForRepaymentPeriod = this.periodicInterestRateCalculator.calculateFrom(loanScheduleInfo);
-		
-		// Determine with 'amortisation' approach to use
-		AmortizationLoanScheduleGenerator generator = this.amortizationLoanScheduleGeneratorFactory.createGenerator(loanScheduleInfo.getAmortizationMethod());
-		
-		return generator.generate(loanScheduleInfo, disbursementDate, firstRepaymentDate, interestCalculatedFrom, currencyData,
-				periodInterestRateForRepaymentPeriod, idealDisbursementDateBasedOnFirstRepaymentDate, scheduledDates);
 	}
 }
