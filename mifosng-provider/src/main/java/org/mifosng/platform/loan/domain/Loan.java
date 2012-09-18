@@ -27,10 +27,9 @@ import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
+import org.mifosng.platform.api.NewLoanScheduleData;
 import org.mifosng.platform.api.commands.LoanApplicationCommand;
-import org.mifosng.platform.api.data.LoanSchedule;
-import org.mifosng.platform.api.data.MoneyData;
-import org.mifosng.platform.api.data.ScheduledLoanInstallment;
+import org.mifosng.platform.api.data.LoanSchedulePeriodData;
 import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.currency.domain.Money;
@@ -244,7 +243,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	}
 	
 	public void modifyLoanApplication(final LoanApplicationCommand command, final Client client, final LoanProduct loanProduct, 
-			final Fund fund, final LoanTransactionProcessingStrategy strategy, final LoanSchedule modifiedLoanSchedule, final Set<LoanCharge> charges,
+			final Fund fund, final LoanTransactionProcessingStrategy strategy, final NewLoanScheduleData modifiedLoanSchedule, final Set<LoanCharge> charges,
 			final Staff loanOfficer) {
 
 		if (command.isClientChanged()) {
@@ -310,16 +309,16 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		// FIXME - rewrite over loan schedule by default for now but worth putting in check to see if required
 		// i.e. only a client change wouldn't require it, only if one of parameters related to loan schedule calculation is changed.
 		this.repaymentScheduleInstallments.clear();
-		for (ScheduledLoanInstallment scheduledLoanInstallment : modifiedLoanSchedule.getScheduledLoanInstallments()) {
-
-			MoneyData readPrincipalDue = scheduledLoanInstallment.getPrincipalDue();
-			MoneyData readInterestDue = scheduledLoanInstallment.getInterestDue();
-
-			LoanRepaymentScheduleInstallment installment = new LoanRepaymentScheduleInstallment(
-					this, scheduledLoanInstallment.getInstallmentNumber(),
-					scheduledLoanInstallment.getPeriodEnd(), readPrincipalDue.getAmount(),
-					readInterestDue.getAmount());
-			this.addRepaymentScheduleInstallment(installment);
+		for (LoanSchedulePeriodData scheduledLoanInstallment : modifiedLoanSchedule.getPeriods()) {
+			
+			if (scheduledLoanInstallment.isRepaymentPeriod()) {
+				LoanRepaymentScheduleInstallment installment = new LoanRepaymentScheduleInstallment(
+						this, scheduledLoanInstallment.periodNumber(),
+						scheduledLoanInstallment.periodDueDate(), 
+						scheduledLoanInstallment.principalDue(),
+						scheduledLoanInstallment.interestDue());
+				this.addRepaymentScheduleInstallment(installment);
+			}
 		}
 		
 		// if the loan application/contract is modified when repayments are already against it - then need to re-process it

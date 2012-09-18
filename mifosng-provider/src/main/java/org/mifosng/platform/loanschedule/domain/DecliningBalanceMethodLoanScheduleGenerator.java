@@ -7,6 +7,7 @@ import org.joda.time.LocalDate;
 import org.mifosng.platform.api.NewLoanScheduleData;
 import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.LoanSchedule;
+import org.mifosng.platform.currency.domain.ApplicationCurrency;
 import org.mifosng.platform.loan.domain.AmortizationMethod;
 import org.mifosng.platform.loan.domain.LoanProductRelatedDetail;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
@@ -36,7 +37,10 @@ public class DecliningBalanceMethodLoanScheduleGenerator implements LoanSchedule
 	
 	@Override
 	public NewLoanScheduleData generate(
-			final LoanProductRelatedDetail loanScheduleInfo, 
+			final ApplicationCurrency applicationCurrency,
+			final LoanProductRelatedDetail loanScheduleInfo,
+			final Integer loanTermFrequency, 
+			final PeriodFrequencyType loanTermFrequencyType, 
 			final LocalDate disbursementDate, 
 			final LocalDate firstRepaymentDate,
 			final LocalDate interestCalculatedFrom) {
@@ -52,7 +56,7 @@ public class DecliningBalanceMethodLoanScheduleGenerator implements LoanSchedule
 		// Determine with 'amortisation' approach to use
 		final AmortizationLoanScheduleGenerator generator = this.amortizationLoanScheduleGeneratorFactory.createGenerator(loanScheduleInfo.getAmortizationMethod());
 		
-		return generator.generate(
+		return generator.generate(applicationCurrency,
 				loanScheduleInfo, 
 				disbursementDate, 
 				firstRepaymentDate,
@@ -62,6 +66,7 @@ public class DecliningBalanceMethodLoanScheduleGenerator implements LoanSchedule
 				scheduledDates);
 	}
 	
+	@Deprecated
 	@Override
 	public LoanSchedule generate(
 			final LoanProductRelatedDetail loanScheduleInfo,

@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
+import org.mifosng.platform.api.NewLoanScheduleData;
 import org.mifosng.platform.api.commands.AdjustLoanTransactionCommand;
 import org.mifosng.platform.api.commands.CalculateLoanScheduleCommand;
 import org.mifosng.platform.api.commands.LoanApplicationCommand;
@@ -15,13 +16,11 @@ import org.mifosng.platform.api.commands.LoanStateTransitionCommand;
 import org.mifosng.platform.api.commands.LoanTransactionCommand;
 import org.mifosng.platform.api.commands.UndoStateTransitionCommand;
 import org.mifosng.platform.api.data.EntityIdentifier;
-import org.mifosng.platform.api.data.LoanSchedule;
-import org.mifosng.platform.api.data.ScheduledLoanInstallment;
+import org.mifosng.platform.api.data.LoanSchedulePeriodData;
 import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.client.domain.ClientRepository;
 import org.mifosng.platform.client.domain.Note;
 import org.mifosng.platform.client.domain.NoteRepository;
-import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.exceptions.ClientNotFoundException;
 import org.mifosng.platform.exceptions.LoanNotFoundException;
@@ -147,7 +146,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		LoanTransactionProcessingStrategy strategy = this.loanAssembler.findStrategyByIdIfProvided(command.getTransactionProcessingStrategyId());
         Set<LoanCharge> charges = this.loanAssembler.assembleSetOfLoanCharges(command.getCharges(), loanProduct.getCharges(), loan.getCurrency().getCode());
 
-		LoanSchedule loanSchedule = this.calculationPlatformService.calculateLoanSchedule(command.toCalculateLoanScheduleCommand());
+        final NewLoanScheduleData loanSchedule = this.calculationPlatformService.calculateLoanScheduleNew(command.toCalculateLoanScheduleCommand());
 		loan.modifyLoanApplication(command, client, loanProduct, fund, strategy, loanSchedule, charges, loanOfficer);
 
 		this.loanRepository.save(loan);
@@ -332,7 +331,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 			Integer selectedRepaymentFrequency = loan.repaymentScheduleDetail().getRepaymentPeriodFrequencyType().getValue();
 			Integer selectedAmortizationMethod = loan.repaymentScheduleDetail().getAmortizationMethod().getValue();
 			
-			// FIXME - use values from loan table here instead of inferring.
+			// FIXME - KW - use values from loan table here instead of inferring.
 			Integer loanTermFrequency = repaidEvery * numberOfInstallments;
 			Integer loanTermFrequencyType = selectedRepaymentFrequency;
 			
@@ -351,29 +350,20 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 					loanTermFrequency, loanTermFrequencyType,
 					actualDisbursementDate, repaymentsStartingFromDate, interestCalculatedFromDate);
 
-			LoanSchedule loanSchedule = this.calculationPlatformService.calculateLoanSchedule(calculateCommand);
+			NewLoanScheduleData loanSchedule = this.calculationPlatformService.calculateLoanScheduleNew(calculateCommand);
 
 			List<LoanRepaymentScheduleInstallment> modifiedLoanRepaymentSchedule = new ArrayList<LoanRepaymentScheduleInstallment>();
 			
-			for (ScheduledLoanInstallment scheduledLoanInstallment : loanSchedule
-					.getScheduledLoanInstallments()) {
-				
-				final MonetaryCurrency monetaryCurrency = new MonetaryCurrency(
-										scheduledLoanInstallment.getPrincipalDue().getCurrencyCode(), 
-										scheduledLoanInstallment.getPrincipalDue().getDigitsAfterDecimal());
-
-				Money principal = Money.of(monetaryCurrency,
-						scheduledLoanInstallment.getPrincipalDue().getAmount());
-
-				Money interest = Money.of(monetaryCurrency,
-						scheduledLoanInstallment.getInterestDue().getAmount());
-
-				LoanRepaymentScheduleInstallment installment = new LoanRepaymentScheduleInstallment(
-						loan, scheduledLoanInstallment.getInstallmentNumber(),
-//						scheduledLoanInstallment.getPeriodStart(),
-						scheduledLoanInstallment.getPeriodEnd(), principal.getAmount(),
-						interest.getAmount());
-				modifiedLoanRepaymentSchedule.add(installment);
+			for (LoanSchedulePeriodData scheduledLoanPeriod : loanSchedule.getPeriods()) {
+				if (scheduledLoanPeriod.isRepaymentPeriod()) {
+					LoanRepaymentScheduleInstallment installment = new LoanRepaymentScheduleInstallment(
+							loan, scheduledLoanPeriod.periodNumber(),
+							scheduledLoanPeriod.periodDueDate(), 
+							scheduledLoanPeriod.principalDue(),
+							scheduledLoanPeriod.interestDue());
+					
+					modifiedLoanRepaymentSchedule.add(installment);
+				}
 			}
 			loan.disburseWithModifiedRepaymentSchedule(actualDisbursementDate, modifiedLoanRepaymentSchedule, defaultLoanLifecycleStateMachine());
 		} else {
@@ -402,7 +392,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		}
 
 		if (loan.isActualDisbursedOnDateEarlierOrLaterThanExpected()) {
-			// FIXME - handle this use case - recalculate loan schedule using original settings.
+			// FIXME - KW - handle this use case - recalculate loan schedule using original settings.
 		}
 
 		loan.undoDisbursal(defaultLoanLifecycleStateMachine());

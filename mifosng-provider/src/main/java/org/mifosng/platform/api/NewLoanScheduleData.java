@@ -3,6 +3,7 @@ package org.mifosng.platform.api;
 import java.math.BigDecimal;
 import java.util.Collection;
 
+import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.LoanSchedulePeriodData;
 
 /**
@@ -16,10 +17,18 @@ import org.mifosng.platform.api.data.LoanSchedulePeriodData;
 @SuppressWarnings("unused")
 public class NewLoanScheduleData {
 
+	private final Integer loanTermInDays;
+	
+	/**
+	 * The currency associated with all monetary values in loan schedule.
+	 */
+	private final CurrencyData currency;
+	
 	/**
 	 * The cumulative total of all money (principal) disbursed to the loan applicant.
 	 */
 	private final BigDecimal cumulativePrincipalDisbursed;
+	private final BigDecimal cumulativePrincipalDue;
 	private final BigDecimal cumulativePrincipalPaid;
 	private final BigDecimal cumulativePrincipalOutstanding;
 	
@@ -55,13 +64,16 @@ public class NewLoanScheduleData {
 	private final BigDecimal totalInArrears;
 	
 	/**
-	 * <code>periods</code> 
+	 * <code>periods</code> is collection of data objects containing specific
+	 * information to each period of the loan schedule including disbursment and
+	 * repayment information.
 	 */
 	private final Collection<LoanSchedulePeriodData> periods;
 
 	public NewLoanScheduleData() {
 		this.cumulativePrincipalDisbursed = null;
 		this.cumulativePrincipalPaid = null;
+		this.cumulativePrincipalDue = null;
 		this.cumulativePrincipalOutstanding = null;
 		
 		this.cumulativeInterestExpected = null;
@@ -78,28 +90,52 @@ public class NewLoanScheduleData {
 		this.totalExpectedRepayment = null;
 		this.totalInArrears = null;
 		
+		this.currency = null;
 		this.periods = null;
+		this.loanTermInDays = null;
 	}
 
-	public NewLoanScheduleData(final Collection<LoanSchedulePeriodData> periods) {
+	public NewLoanScheduleData(
+			final CurrencyData currency,
+			final Collection<LoanSchedulePeriodData> periods, 
+			final Integer loanTermInDays, 
+			final BigDecimal cumulativePrincipalDisbursed, 
+			final BigDecimal cumulativePrincipalDue, 
+			final BigDecimal cumulativePrincipalOutstanding, 
+			final BigDecimal cumulativeInterestExpected, 
+			final BigDecimal cumulativeChargesToDate, 
+			final BigDecimal totalExpectedRepayment) {
+		this.currency = currency;
 		this.periods = periods;
+		this.loanTermInDays = loanTermInDays;
 		
-		this.cumulativePrincipalDisbursed = null;
+		this.cumulativePrincipalDisbursed = cumulativePrincipalDisbursed;
+		this.cumulativePrincipalDue = cumulativePrincipalDue;
 		this.cumulativePrincipalPaid = null;
-		this.cumulativePrincipalOutstanding = null;
+		this.cumulativePrincipalOutstanding = cumulativePrincipalOutstanding;
 		
-		this.cumulativeInterestExpected = null;
+		this.cumulativeInterestExpected = cumulativeInterestExpected;
 		this.cumulativeInterestPaid = null;
 		this.cumulativeInterestWaived = null;
 		this.cumulativeInterestOutstanding = null;
 		
-		this.cumulativeChargesToDate = null;
+		this.cumulativeChargesToDate = cumulativeChargesToDate;
 		this.cumulativeChargesPaid = null;
 		this.cumulativeChargesOutstanding = null;
 		
-		this.totalCostOfLoan = null;
+		if (cumulativeChargesToDate != null) {
+			this.totalCostOfLoan = cumulativeInterestExpected.add(cumulativeChargesToDate);
+		} else if (cumulativeInterestExpected != null) {
+			this.totalCostOfLoan = cumulativeInterestExpected;
+		} else {
+			this.totalCostOfLoan = null;
+		}
 		
-		this.totalExpectedRepayment = null;
+		this.totalExpectedRepayment = totalExpectedRepayment;
 		this.totalInArrears = null;
+	}
+
+	public Collection<LoanSchedulePeriodData> getPeriods() {
+		return periods;
 	}
 }

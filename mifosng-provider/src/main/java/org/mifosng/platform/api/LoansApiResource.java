@@ -37,7 +37,6 @@ import org.mifosng.platform.api.data.LoanChargeData;
 import org.mifosng.platform.api.data.LoanPermissionData;
 import org.mifosng.platform.api.data.LoanProductLookup;
 import org.mifosng.platform.api.data.LoanRepaymentTransactionData;
-import org.mifosng.platform.api.data.LoanSchedule;
 import org.mifosng.platform.api.data.LoanScheduleData;
 import org.mifosng.platform.api.data.LoanTransactionData;
 import org.mifosng.platform.api.data.MoneyData;
@@ -273,49 +272,50 @@ public class LoansApiResource {
 
 		if (is(commandParam, "calculateLoanSchedule")) {
 			CalculateLoanScheduleCommand calculateLoanScheduleCommand = command.toCalculateLoanScheduleCommand();
-			NewLoanScheduleData loanSchedule = this.calculationPlatformService.calculateLoanScheduleNew(calculateLoanScheduleCommand);
-		
-			final Set<String> typicalLoanScheduleResponseParameters = new HashSet<String>(
-					Arrays.asList("periods", "cumulativePrincipalDisbursed"));
-			
-			Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-			if (responseParameters.isEmpty()) {
-				responseParameters.addAll(typicalLoanScheduleResponseParameters);
-			}
-			boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-			
-			return this.apiJsonSerializerService.serializeLoanScheduleDataToJson(prettyPrint, responseParameters, loanSchedule);
+			return calculateLoanSchedule(uriInfo, calculateLoanScheduleCommand);
 		}
 
 		final EntityIdentifier identifier = this.loanWritePlatformService.submitLoanApplication(command);
 
 		return this.apiJsonSerializerService.serializeEntityIdentifier(identifier);
 	}
+
+	private String calculateLoanSchedule(final UriInfo uriInfo, final CalculateLoanScheduleCommand command) {
+		
+		final NewLoanScheduleData loanSchedule = this.calculationPlatformService.calculateLoanScheduleNew(command);
+
+		final Set<String> typicalLoanScheduleResponseParameters = new HashSet<String>(
+				Arrays.asList("periods", "cumulativePrincipalDisbursed"));
+		
+		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+		if (responseParameters.isEmpty()) {
+			responseParameters.addAll(typicalLoanScheduleResponseParameters);
+		}
+		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+		
+		return this.apiJsonSerializerService.serializeLoanScheduleDataToJson(prettyPrint, responseParameters, loanSchedule);
+	}
 	
 	@PUT
 	@Path("{loanId}")
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
-	public Response modifyLoanApplication(
+	public String modifyLoanApplication(
 			@PathParam("loanId") final Long loanId,
-			@QueryParam("command") final String commandParam,
+//			@QueryParam("command") final String commandParam,
+//			@Context final UriInfo uriInfo,
 			final String jsonRequestBody) {
 
 		final LoanApplicationCommand command = this.apiDataConversionService.convertJsonToLoanApplicationCommand(loanId, jsonRequestBody);
 
-		// for now just auto generating the loan schedule and setting support
-		// for 'manual' loan schedule creation later.
-//		command.setLoanSchedule(loanSchedule);
+//		if (is(commandParam, "calculateLoanSchedule")) {
+//			CalculateLoanScheduleCommand calculateLoanScheduleCommand = command.toCalculateLoanScheduleCommand();
+//			return calculateLoanSchedule(uriInfo, calculateLoanScheduleCommand);
+//		}
 
-		if (is(commandParam, "calculateLoanSchedule")) {
-			final CalculateLoanScheduleCommand calculateLoanScheduleCommand = command.toCalculateLoanScheduleCommand();
-			final LoanSchedule loanSchedule = this.calculationPlatformService.calculateLoanSchedule(calculateLoanScheduleCommand);
-			return Response.ok().entity(loanSchedule).build();
-		}
+		final EntityIdentifier identifier = this.loanWritePlatformService.modifyLoanApplication(command);
 
-		EntityIdentifier identifier = this.loanWritePlatformService.modifyLoanApplication(command);
-
-		return Response.ok().entity(identifier).build();
+		return this.apiJsonSerializerService.serializeEntityIdentifier(identifier);
 	}
 
 	@DELETE
@@ -324,8 +324,7 @@ public class LoansApiResource {
 	@Produces({ MediaType.APPLICATION_JSON })
 	public Response deleteLoanApplication(@PathParam("loanId") final Long loanId) {
 
-		EntityIdentifier identifier = this.loanWritePlatformService
-				.deleteLoan(loanId);
+		EntityIdentifier identifier = this.loanWritePlatformService.deleteLoan(loanId);
 
 		return Response.ok().entity(identifier).build();
 	}

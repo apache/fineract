@@ -111,4 +111,28 @@ public class LoanSchedulePeriodData {
 		
 		this.totalDueForPeriod = totalDueForPeriod;
 	}
+
+	public boolean isRepaymentPeriod() {
+		boolean isRepaymentPeriod = false;
+		if (principalDue != null && this.interestDue != null) {
+			isRepaymentPeriod = BigDecimal.ZERO.compareTo(this.principalDue) == -1 || BigDecimal.ZERO.compareTo(this.interestDue) == -1;
+		}
+		return isRepaymentPeriod;
+	}
+
+	public Integer periodNumber() {
+		return this.period;
+	}
+
+	public LocalDate periodDueDate() {
+		return this.dueDate;
+	}
+
+	public BigDecimal principalDue() {
+		return this.principalDue;
+	}
+
+	public BigDecimal interestDue() {
+		return this.interestDue;
+	}
 }

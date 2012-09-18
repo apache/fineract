@@ -13,6 +13,7 @@ import org.mifosng.platform.api.data.LoanSchedule;
 import org.mifosng.platform.api.data.LoanSchedulePeriodData;
 import org.mifosng.platform.api.data.MoneyData;
 import org.mifosng.platform.api.data.ScheduledLoanInstallment;
+import org.mifosng.platform.currency.domain.ApplicationCurrency;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.loan.domain.LoanProductRelatedDetail;
@@ -28,6 +29,7 @@ public class EqualInstallmentsAmortizationLoanScheduleGenerator implements Amort
 	
 	@Override
 	public NewLoanScheduleData generate(
+			final ApplicationCurrency currency,
 			final LoanProductRelatedDetail loanScheduleInfo, 
 			final LocalDate disbursementDate, 
 			final LocalDate firstRepaymentDate,
@@ -36,10 +38,7 @@ public class EqualInstallmentsAmortizationLoanScheduleGenerator implements Amort
 			final LocalDate idealDisbursementDateBasedOnFirstRepaymentDate,
 			final List<LocalDate> scheduledDates) {
 		
-		// 1. add disbursements to loan schedule
-		
-		// 2.
-		Collection<LoanSchedulePeriodData> periods = new ArrayList<LoanSchedulePeriodData>();
+		final Collection<LoanSchedulePeriodData> periods = new ArrayList<LoanSchedulePeriodData>();
 		
 		// determine 'total payment' for each repayment based on pmt function (and hence the total due overall)
 		final MonetaryCurrency monetaryCurrency = loanScheduleInfo.getPrincipal().getCurrency();
@@ -58,10 +57,16 @@ public class EqualInstallmentsAmortizationLoanScheduleGenerator implements Amort
 				scheduledDates, 
 				idealDisbursementDateBasedOnFirstRepaymentDate);
 		
-		
 		// create entries of disbursement period on loan schedule
 		final LoanSchedulePeriodData disbursementPeriod = LoanSchedulePeriodData.disbursement(disbursementDate, loanScheduleInfo.getPrincipal().getAmount());
 		periods.add(disbursementPeriod);
+		
+		int loanTermInDays = Integer.valueOf(0);
+		BigDecimal cumulativePrincipalDisbursed = loanScheduleInfo.getPrincipal().getAmount();
+		BigDecimal cumulativePrincipalDue = BigDecimal.ZERO;
+		BigDecimal cumulativeInterestExpected = BigDecimal.ZERO;
+		BigDecimal cumulativeChargesToDate = BigDecimal.ZERO;
+		BigDecimal totalExpectedRepayment = BigDecimal.ZERO;
 		
 		LocalDate startDate = disbursementDate;
 		int periodNumber = 1;
@@ -115,15 +120,31 @@ public class EqualInstallmentsAmortizationLoanScheduleGenerator implements Amort
 					interestForInstallment.getAmount(), totalInstallmentDue.getAmount());
 
 			periods.add(installment);
-
+			
+			// handle cumulative fields
+			loanTermInDays += daysInPeriod;
+			cumulativePrincipalDue = cumulativePrincipalDue.add(principalForInstallment.getAmount());
+			cumulativeInterestExpected = cumulativeInterestExpected.add(interestForInstallment.getAmount());
+			totalExpectedRepayment = totalExpectedRepayment.add(totalInstallmentDue.getAmount());
 			startDate = scheduledDueDate;
 
 			periodNumber++;
 		}
 		
-		return new NewLoanScheduleData(periods);
+		final BigDecimal cumulativePrincipalOutstanding = cumulativePrincipalDisbursed.subtract(cumulativePrincipalDue);
+		
+		CurrencyData currencyData = new CurrencyData(
+				currency.getCode(), 
+				currency.getName(),
+				monetaryCurrency.getDigitsAfterDecimal(),
+				currency.getDisplaySymbol(),
+				currency.getNameCode());
+		
+		return new NewLoanScheduleData(currencyData, periods, loanTermInDays, cumulativePrincipalDisbursed, cumulativePrincipalDue, 
+				cumulativePrincipalOutstanding, cumulativeInterestExpected, cumulativeChargesToDate, totalExpectedRepayment);
 	}
 	
+	@Deprecated
 	@Override
 	public LoanSchedule generate(final LoanProductRelatedDetail loanScheduleInfo, 
 			final LocalDate disbursementDate, 

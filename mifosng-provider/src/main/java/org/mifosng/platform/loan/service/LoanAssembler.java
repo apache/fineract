@@ -1,16 +1,15 @@
 package org.mifosng.platform.loan.service;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.mifosng.platform.api.NewLoanScheduleData;
 import org.mifosng.platform.api.commands.LoanApplicationCommand;
 import org.mifosng.platform.api.commands.LoanChargeCommand;
-import org.mifosng.platform.api.data.MoneyData;
-import org.mifosng.platform.api.data.ScheduledLoanInstallment;
+import org.mifosng.platform.api.data.LoanSchedulePeriodData;
 import org.mifosng.platform.charge.domain.Charge;
 import org.mifosng.platform.charge.domain.ChargeRepository;
 import org.mifosng.platform.client.domain.Client;
@@ -59,6 +58,7 @@ public class LoanAssembler {
     private final ChargeRepository chargeRepository;
 	private final LoanTransactionProcessingStrategyRepository loanTransactionProcessingStrategyRepository;
 	private final StaffRepository staffRepository;
+	private final CalculationPlatformService calculationPlatformService;
 	
 	@Autowired
 	public LoanAssembler(
@@ -67,13 +67,15 @@ public class LoanAssembler {
 			final FundRepository fundRepository,
             final ChargeRepository chargeRepository,
 			final LoanTransactionProcessingStrategyRepository loanTransactionProcessingStrategyRepository,
-	  		final StaffRepository staffRepository) {
+	  		final StaffRepository staffRepository,
+	  		final CalculationPlatformService calculationPlatformService) {
 		this.loanProductRepository = loanProductRepository;
 		this.clientRepository = clientRepository;
 		this.fundRepository = fundRepository;
         this.chargeRepository = chargeRepository;
 		this.loanTransactionProcessingStrategyRepository = loanTransactionProcessingStrategyRepository;
 		this.staffRepository = staffRepository;
+		this.calculationPlatformService = calculationPlatformService;
 	}
 	
 	public Loan assembleFrom(final LoanApplicationCommand command) {
@@ -107,21 +109,17 @@ public class LoanAssembler {
 		Loan loan = Loan.createNew(fund,loanOfficer, loanTransactionProcessingStrategy, loanProduct, client, loanRepaymentScheduleDetail, loanCharges);
 		loan.setExternalId(command.getExternalId());
 
-        // TODO - user service to calculate loan schedule at this point
-//        LoanSchedule loanSchedule = command.getLoanSchedule();
-		List<ScheduledLoanInstallment> loanRepaymentSchedule = new ArrayList<ScheduledLoanInstallment>();
-//				loanSchedule.getScheduledLoanInstallments();
+		final NewLoanScheduleData loanSchedule = this.calculationPlatformService.calculateLoanScheduleNew(command.toCalculateLoanScheduleCommand());
 		
-		for (ScheduledLoanInstallment scheduledLoanInstallment : loanRepaymentSchedule) {
-
-			MoneyData readPrincipalDue = scheduledLoanInstallment.getPrincipalDue();
-			MoneyData readInterestDue = scheduledLoanInstallment.getInterestDue();
-
-			LoanRepaymentScheduleInstallment installment = new LoanRepaymentScheduleInstallment(
-					loan, scheduledLoanInstallment.getInstallmentNumber(),
-					scheduledLoanInstallment.getPeriodEnd(), readPrincipalDue.getAmount(),
-					readInterestDue.getAmount());
-			loan.addRepaymentScheduleInstallment(installment);
+		for (LoanSchedulePeriodData scheduledLoanInstallment : loanSchedule.getPeriods()) {
+			if (scheduledLoanInstallment.isRepaymentPeriod()) {
+				LoanRepaymentScheduleInstallment installment = new LoanRepaymentScheduleInstallment(
+						loan, scheduledLoanInstallment.periodNumber(),
+						scheduledLoanInstallment.periodDueDate(), 
+						scheduledLoanInstallment.principalDue(),
+						scheduledLoanInstallment.interestDue());
+				loan.addRepaymentScheduleInstallment(installment);
+			}
 		}
 
 		loan.submitApplication(loanTermFrequency, loanTermFrequencyType, 

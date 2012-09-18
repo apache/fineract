@@ -3,6 +3,7 @@ package org.mifosng.platform.api.data;
 import java.util.ArrayList;
 import java.util.List;
 
+@Deprecated
 public class LoanSchedule {
 
 	private List<ScheduledLoanInstallment> scheduledLoanInstallments = new ArrayList<ScheduledLoanInstallment>();

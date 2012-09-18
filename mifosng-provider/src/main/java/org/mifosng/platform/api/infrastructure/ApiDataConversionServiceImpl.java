@@ -439,56 +439,54 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 			throw new InvalidJsonException();
 		}
 		
-		Type typeOfMap = new TypeToken<Map<String, String>>(){}.getType();
-	    Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
+		Type typeOfMap = new TypeToken<Map<String, Object>>(){}.getType();
+	    Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
 	    
 	    Set<String> supportedParams = new HashSet<String>(
-	    		Arrays.asList("clientId", "productId", "externalId", "fundId", "transactionProcessingStrategyId",
-	    				"principal", "inArrearsTolerance", "interestRatePerPeriod", "repaymentEvery", "numberOfRepayments", 
-	    				"loanTermFrequency", "loanTermFrequencyType", "charges",
-	    				"repaymentFrequencyType", "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType",
-	    				"expectedDisbursementDate", "repaymentsStartingFromDate", "interestChargedFromDate", "submittedOnDate", "submittedOnNote",
-	    				"locale", "dateFormat", "loanOfficerId")
+    		Arrays.asList("clientId", "productId", "externalId", "fundId", "transactionProcessingStrategyId",
+    				"principal", "inArrearsTolerance", "interestRatePerPeriod", "repaymentEvery", "numberOfRepayments", 
+    				"loanTermFrequency", "loanTermFrequencyType", "charges",
+    				"repaymentFrequencyType", "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType",
+    				"expectedDisbursementDate", "repaymentsStartingFromDate", "interestChargedFromDate", "submittedOnDate", "submittedOnNote",
+    				"locale", "dateFormat", "loanOfficerId", "id")
 	    );
 	    
 	    checkForUnsupportedParameters(requestMap, supportedParams);
 	    
 	    Set<String> modifiedParameters = new HashSet<String>();
-
-	    Long clientId = extractLongParameter("clientId", requestMap, modifiedParameters);
-	    Long productId = extractLongParameter("productId", requestMap, modifiedParameters);
-	    Long fundId = extractLongParameter("fundId", requestMap, modifiedParameters);
-	    Long loanOfficerId = extractLongParameter("loanOfficerId", requestMap, modifiedParameters);
-	    Long transactionProcessingStrategyId = extractLongParameter("transactionProcessingStrategyId", requestMap, modifiedParameters);
-	    String externalId = extractStringParameter("externalId", requestMap, modifiedParameters);
 	    
-	    BigDecimal principal = extractBigDecimalParameter("principal", requestMap, modifiedParameters);
-	    BigDecimal inArrearsToleranceValue = extractBigDecimalParameter("inArrearsTolerance", requestMap, modifiedParameters);
-	    BigDecimal interestRatePerPeriod = extractBigDecimalParameter("interestRatePerPeriod", requestMap, modifiedParameters);
+	    JsonParser parser = new JsonParser();
+	    JsonElement element = parser.parse(json);
+	    JsonParserHelper helper = new JsonParserHelper();
 	    
-	    Integer repaymentEvery = extractIntegerParameter("repaymentEvery", requestMap, modifiedParameters);
-	    Integer numberOfRepayments = extractIntegerParameter("numberOfRepayments", requestMap, modifiedParameters);
-	    Integer repaymentFrequencyType = extractIntegerParameter("repaymentFrequencyType", requestMap, modifiedParameters);
+	    final Long clientId = helper.extractLongNamed("clientId", element, modifiedParameters);
+	    final Long productId = helper.extractLongNamed("productId", element, modifiedParameters);
+	    final Long fundId = helper.extractLongNamed("fundId", element, modifiedParameters);
+	    final Long loanOfficerId = helper.extractLongNamed("loanOfficerId", element, modifiedParameters);
+	    final Long transactionProcessingStrategyId = helper.extractLongNamed("transactionProcessingStrategyId", element, modifiedParameters);
+	    final String externalId = helper.extractStringNamed("externalId", element, modifiedParameters);
+	    final BigDecimal principal = helper.extractBigDecimalNamed("principal", element, modifiedParameters);
+	    final BigDecimal inArrearsToleranceValue = helper.extractBigDecimalNamed("inArrearsTolerance", element, modifiedParameters);
+	    final BigDecimal interestRatePerPeriod = helper.extractBigDecimalNamed("interestRatePerPeriod", element, modifiedParameters);
 	    
-	    Integer loanTermFrequency = extractIntegerParameter("loanTermFrequency", requestMap, modifiedParameters);
-	    Integer loanTermFrequencyType = extractIntegerParameter("loanTermFrequencyType", requestMap, modifiedParameters);
+	    final Integer repaymentEvery = helper.extractIntegerNamed("repaymentEvery", element, modifiedParameters);
+	    final Integer numberOfRepayments = helper.extractIntegerNamed("numberOfRepayments", element, modifiedParameters);
+	    final Integer repaymentFrequencyType = helper.extractIntegerNamed("repaymentFrequencyType", element, modifiedParameters);
+	    final Integer loanTermFrequency = helper.extractIntegerNamed("loanTermFrequency", element, modifiedParameters);
+	    final Integer loanTermFrequencyType = helper.extractIntegerNamed("loanTermFrequencyType", element, modifiedParameters);
+	    final Integer interestRateFrequencyType = helper.extractIntegerNamed("interestRateFrequencyType", element, modifiedParameters);
+	    final Integer amortizationType = helper.extractIntegerNamed("amortizationType", element, modifiedParameters);
+	    final Integer interestType = helper.extractIntegerNamed("interestType", element, modifiedParameters);
+	    final Integer interestCalculationPeriodType = helper.extractIntegerNamed("interestCalculationPeriodType", element, modifiedParameters);
 	    
-	    Integer interestRateFrequencyTypeValue = extractIntegerParameter("interestRateFrequencyType", requestMap, modifiedParameters);
-	    Integer amortizationTypeValue = extractIntegerParameter("amortizationType", requestMap, modifiedParameters);
-	    Integer interestTypeValue = extractIntegerParameter("interestType", requestMap, modifiedParameters);
-	    Integer interestCalculationPeriodTypeValue = extractIntegerParameter("interestCalculationPeriodType", requestMap, modifiedParameters);
+	    final LocalDate expectedDisbursementDate = helper.extractLocalDateNamed("expectedDisbursementDate", element, modifiedParameters);
+	    final LocalDate repaymentsStartingFromDate = helper.extractLocalDateNamed("repaymentsStartingFromDate", element, modifiedParameters);
+	    final LocalDate interestChargedFromDate = helper.extractLocalDateNamed("interestChargedFromDate", element, modifiedParameters);
+	    final LocalDate submittedOnDate = helper.extractLocalDateNamed("submittedOnDate", element, modifiedParameters);
 	    
-	    LocalDate expectedDisbursementDate = extractLocalDateParameter("expectedDisbursementDate", requestMap, modifiedParameters);
-	    LocalDate repaymentsStartingFromDate = extractLocalDateParameter("repaymentsStartingFromDate", requestMap, modifiedParameters);
-	    LocalDate interestChargedFromDate = extractLocalDateParameter("interestChargedFromDate", requestMap, modifiedParameters);
-	    LocalDate submittedOnDate = extractLocalDateParameter("submittedOnDate", requestMap, modifiedParameters);
+	    final String submittedOnNote = helper.extractStringNamed("submittedOnNote", element, modifiedParameters);
 	    
-	    String submittedOnNote = extractStringParameter("submittedOnNote", requestMap, modifiedParameters);
-
-        JsonParser parser = new JsonParser();
-
         LoanChargeCommand[] charges = null;
-        JsonElement element = parser.parse(json);
         if (element.isJsonObject()) {
             JsonObject object = element.getAsJsonObject();
             if (object.has("charges") && object.get("charges").isJsonArray()) {
@@ -518,8 +516,8 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 				resourceIdentifier, clientId, productId, externalId, fundId, transactionProcessingStrategyId,
 				submittedOnDate, submittedOnNote, 
 	    		expectedDisbursementDate, repaymentsStartingFromDate, interestChargedFromDate, 
-	    		principal, interestRatePerPeriod, interestRateFrequencyTypeValue, interestTypeValue, interestCalculationPeriodTypeValue, 
-	    		repaymentEvery, repaymentFrequencyType, numberOfRepayments, amortizationTypeValue, 
+	    		principal, interestRatePerPeriod, interestRateFrequencyType, interestType, interestCalculationPeriodType, 
+	    		repaymentEvery, repaymentFrequencyType, numberOfRepayments, amortizationType, 
 	    		loanTermFrequency, loanTermFrequencyType,
 	    		inArrearsToleranceValue, charges,loanOfficerId);
 	}

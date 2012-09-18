@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 
 import org.joda.time.LocalDate;
 
+@Deprecated
 public class ScheduledLoanInstallment {
 
 	private Integer installmentNumber;

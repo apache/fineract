@@ -1,30 +1,20 @@
 package org.mifosng.platform.loan.service;
 
-import java.math.BigDecimal;
-
 import org.joda.time.LocalDate;
 import org.mifosng.platform.api.NewLoanScheduleData;
 import org.mifosng.platform.api.commands.CalculateLoanScheduleCommand;
 import org.mifosng.platform.api.data.CurrencyData;
-import org.mifosng.platform.api.data.LoanSchedule;
 import org.mifosng.platform.api.data.MoneyData;
 import org.mifosng.platform.currency.domain.ApplicationCurrency;
 import org.mifosng.platform.currency.domain.ApplicationCurrencyRepository;
-import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.exceptions.CurrencyNotFoundException;
 import org.mifosng.platform.exceptions.LoanNotFoundException;
-import org.mifosng.platform.exceptions.LoanProductNotFoundException;
-import org.mifosng.platform.loan.domain.AmortizationMethod;
-import org.mifosng.platform.loan.domain.InterestCalculationPeriodMethod;
 import org.mifosng.platform.loan.domain.InterestMethod;
 import org.mifosng.platform.loan.domain.Loan;
 import org.mifosng.platform.loan.domain.LoanPayoffSummary;
-import org.mifosng.platform.loan.domain.LoanProduct;
 import org.mifosng.platform.loan.domain.LoanProductRelatedDetail;
-import org.mifosng.platform.loan.domain.LoanProductRepository;
 import org.mifosng.platform.loan.domain.LoanRepository;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
-import org.mifosng.platform.loanschedule.domain.AprCalculator;
 import org.mifosng.platform.loanschedule.domain.DefaultLoanScheduleGeneratorFactory;
 import org.mifosng.platform.loanschedule.domain.LoanScheduleGenerator;
 import org.mifosng.platform.loanschedule.domain.LoanScheduleGeneratorFactory;
@@ -37,9 +27,7 @@ public class CalculationPlatformServiceImpl implements CalculationPlatformServic
 
 	private final LoanScheduleGeneratorFactory loanScheduleFactory;
 	private final LoanRepository loanRepository;
-	private final LoanProductRepository loanProductRepository;
 	private final ApplicationCurrencyRepository applicationCurrencyRepository;
-	private final AprCalculator aprCalculator;
 	private final PlatformSecurityContext context;
 	private final LoanProductRelatedDetailAssembler loanProductRelatedDetailAssembler;
 	
@@ -47,15 +35,11 @@ public class CalculationPlatformServiceImpl implements CalculationPlatformServic
 	public CalculationPlatformServiceImpl(
 			final PlatformSecurityContext context,
 			final LoanRepository loanRepository, 
-			final LoanProductRepository loanProductRepository,
 			final ApplicationCurrencyRepository applicationCurrencyRepository, 
-			final AprCalculator aprCalculator,
 			final LoanProductRelatedDetailAssembler loanProductRelatedDetailAssembler) {
 		this.context = context;
 		this.loanRepository = loanRepository;
-		this.loanProductRepository = loanProductRepository;
 		this.applicationCurrencyRepository = applicationCurrencyRepository;
-		this.aprCalculator = aprCalculator;
 		this.loanScheduleFactory = new DefaultLoanScheduleGeneratorFactory();
 		this.loanProductRelatedDetailAssembler = loanProductRelatedDetailAssembler;
 	}
@@ -70,76 +54,19 @@ public class CalculationPlatformServiceImpl implements CalculationPlatformServic
 		
 		LoanProductRelatedDetail loanScheduleRelatedDetails = this.loanProductRelatedDetailAssembler.assembleFrom(command);
 		
-//		final Integer loanTermFrequency = command.getLoanTermFrequency();
-//		final PeriodFrequencyType loanTermFrequencyType = PeriodFrequencyType.fromInt(command.getLoanTermFrequencyType());
-		final InterestMethod interestMethod = InterestMethod.fromInt(command.getInterestType());
-		
-		LoanScheduleGenerator loanScheduleGenerator = this.loanScheduleFactory.create(interestMethod);
-
-//		ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneByCode(loanScheduleRelatedDetails.getCurrency().getCode());
-		
-//		CurrencyData currencyData = new CurrencyData(
-//				applicationCurrency.getCode(), 
-//				applicationCurrency.getName(), 
-//				loanScheduleRelatedDetails.getCurrency().getDigitsAfterDecimal(),
-//				applicationCurrency.getDisplaySymbol(), 
-//				applicationCurrency.getNameCode());
-		
-		return loanScheduleGenerator.generate(loanScheduleRelatedDetails, 
-												command.getExpectedDisbursementDate(), 
-												command.getRepaymentsStartingFromDate(), 
-												command.getInterestChargedFromDate());
-	}
-
-	@Override
-	public LoanSchedule calculateLoanSchedule(final CalculateLoanScheduleCommand command) {
-		
-		context.authenticatedUser();
-		
-		CalculateLoanScheduleCommandValidator validator = new CalculateLoanScheduleCommandValidator(command);
-		validator.validate();
-		
-		final BigDecimal principalAmount = command.getPrincipal();
-		final BigDecimal defaultNominalInterestRatePerPeriod = command.getInterestRatePerPeriod();
-		final PeriodFrequencyType interestPeriodFrequencyType = PeriodFrequencyType.fromInt(command.getInterestRateFrequencyType());
-		final InterestMethod interestMethod = InterestMethod.fromInt(command.getInterestType());
-		final InterestCalculationPeriodMethod interestCalculationPeriodMethod = InterestCalculationPeriodMethod.fromInt(command.getInterestCalculationPeriodType());
-		
 		final Integer loanTermFrequency = command.getLoanTermFrequency();
 		final PeriodFrequencyType loanTermFrequencyType = PeriodFrequencyType.fromInt(command.getLoanTermFrequencyType());
-		
-		final Integer defaultNumberOfInstallments = command.getNumberOfRepayments();
-		final Integer repayEvery = command.getRepaymentEvery();
-		final PeriodFrequencyType repaymentFrequencyType = PeriodFrequencyType.fromInt(command.getRepaymentFrequencyType());
-		
-		final AmortizationMethod amortizationMethod = AmortizationMethod.fromInt(command.getAmortizationType());
-		
-		final BigDecimal defaultAnnualNominalInterestRate = this.aprCalculator.calculateFrom(interestPeriodFrequencyType, defaultNominalInterestRatePerPeriod);
-		
-		LoanProduct loanProduct = this.loanProductRepository.findOne(command.getProductId());
-		if (loanProduct == null) {
-			throw new LoanProductNotFoundException(command.getProductId());
-		}
-		
-		final MonetaryCurrency currency = loanProduct.getCurrency();
-		
-		// in arrerars tolerance isnt relevant when auto-calculating a loan schedule 
-		final BigDecimal inArrearsTolerance = BigDecimal.ZERO;
-				
-		LoanProductRelatedDetail loanScheduleInfo = new LoanProductRelatedDetail(currency, principalAmount,
-				defaultNominalInterestRatePerPeriod, interestPeriodFrequencyType, defaultAnnualNominalInterestRate, 
-				interestMethod, interestCalculationPeriodMethod,
-				repayEvery, repaymentFrequencyType, defaultNumberOfInstallments, amortizationMethod, 
-				inArrearsTolerance);
+		final InterestMethod interestMethod = InterestMethod.fromInt(command.getInterestType());
 		
 		LoanScheduleGenerator loanScheduleGenerator = this.loanScheduleFactory.create(interestMethod);
 
-		ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneByCode(currency.getCode());
-		CurrencyData currencyData = new CurrencyData(applicationCurrency.getCode(), applicationCurrency.getName(), currency.getDigitsAfterDecimal(),
-				applicationCurrency.getDisplaySymbol(), applicationCurrency.getNameCode());
+		ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneByCode(loanScheduleRelatedDetails.getCurrency().getCode());
 		
-		return loanScheduleGenerator.generate(loanScheduleInfo, loanTermFrequency, loanTermFrequencyType, command.getExpectedDisbursementDate(), command.getRepaymentsStartingFromDate(), 
-				command.getInterestChargedFromDate(), currencyData);
+		return loanScheduleGenerator.generate(applicationCurrency,
+				loanScheduleRelatedDetails, loanTermFrequency,
+				loanTermFrequencyType, command.getExpectedDisbursementDate(),
+				command.getRepaymentsStartingFromDate(),
+				command.getInterestChargedFromDate());
 	}
 
 	@Override
