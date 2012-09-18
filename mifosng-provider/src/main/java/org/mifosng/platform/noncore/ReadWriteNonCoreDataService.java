@@ -16,15 +16,21 @@ public interface ReadWriteNonCoreDataService {
 	void updateExtraData(String type, String set, Long id,
 			Map<String, String> queryParams);
 
+	/* remove the additional fields functionality above when datatables complete */
 	List<DatatableData> retrieveDatatableNames(String appTable);
 
 	GenericResultsetData retrieveDataTableGenericResultSet(String datatable,
-			Long id, String sqlFields, String sqlOrder);
+			Long appTableId, String sqlFields, String sqlOrder);
 
-	String retrieveDataTableJSONObject(String datatable, Long id,
+	String retrieveDataTableJSONObject(String datatable, Long appTableId,
 			String sqlFields, String sqlOrder);
 
-	void newDatatableEntry(String datatable, Long id,
+	void newDatatableEntry(String datatable, Long appTableId,
 			Map<String, String> queryParams);
+
+	void deleteDatatableEntries(String datatable, Long appTableId);
+
+	void deleteDatatableEntry(String datatable, Long appTableId,
+			Long datatableId);
 
 }

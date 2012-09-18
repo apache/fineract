@@ -427,10 +427,11 @@ public class ReadWriteNonCoreDataServiceImpl implements
 						+ " not found");
 	}
 
-	private void checkMainResourceExistsWithinScope(String tableName, Long id) {
+	private void checkMainResourceExistsWithinScope(String tableName,
+			Long appTableId) {
 
 		String unscopedSql = "select t.id from " + tableName
-				+ " t ${dataScopeCriteria} where t.id = " + id;
+				+ " t ${dataScopeCriteria} where t.id = " + appTableId;
 
 		String sql = dataScopedSQL(unscopedSql, tableName);
 
@@ -438,10 +439,10 @@ public class ReadWriteNonCoreDataServiceImpl implements
 				+ sql);
 
 		if (rs.size() == 0)
-			throw new DataTableNotFoundException(tableName, id);
+			throw new DataTableNotFoundException(tableName, appTableId);
 	}
 
-	private String dataScopedSQL(String unscopedSQL, String type) {
+	private String dataScopedSQL(String unscopedSQL, String appTable) {
 		String dataScopeCriteria = null;
 		/*
 		 * unfortunately have to, one way or another, be able to restrict data
@@ -452,11 +453,11 @@ public class ReadWriteNonCoreDataServiceImpl implements
 		 */
 
 		AppUser currentUser = context.authenticatedUser();
-		if (type.equalsIgnoreCase("m_client")) {
+		if (appTable.equalsIgnoreCase("m_client")) {
 			dataScopeCriteria = " join m_office o on o.id = t.office_id and o.hierarchy like '"
 					+ currentUser.getOffice().getHierarchy() + "%'";
 		}
-		if (type.equalsIgnoreCase("m_loan")) {
+		if (appTable.equalsIgnoreCase("m_loan")) {
 			dataScopeCriteria = " join m_client c on c.id = t.client_id "
 					+ " join m_office o on o.id = c.office_id and o.hierarchy like '"
 					+ currentUser.getOffice().getHierarchy() + "%'";
@@ -464,7 +465,8 @@ public class ReadWriteNonCoreDataServiceImpl implements
 
 		if (dataScopeCriteria == null) {
 			throw new PlatformDataIntegrityException(
-					"error.msg.invalid.dataScopeCriteria", "Type: " + type
+					"error.msg.invalid.dataScopeCriteria",
+					"Application Table: " + appTable
 							+ " not catered for in data Scoping");
 		}
 
@@ -479,25 +481,62 @@ public class ReadWriteNonCoreDataServiceImpl implements
 
 	// only exclusively datatable functions below here
 	@Override
-	public void newDatatableEntry(String datatable, Long id,
+	public void newDatatableEntry(String datatable, Long appTableId,
 			Map<String, String> queryParams) {
 		long startTime = System.currentTimeMillis();
 
-		String applicationTableName = getApplicationTableName(datatable);
-
-		checkMainResourceExistsWithinScope(applicationTableName, id);
+		String appTable = getWithinScopeApplicationTableName(datatable,
+				appTableId);
 
 		List<ResultsetColumnHeader> columnHeaders = getDatatableResultsetColumnHeaders(datatable);
 
-		String sql = getAddSql(columnHeaders, datatable,
-				getFKField(applicationTableName), id, queryParams);
+		String sql = getAddSql(columnHeaders, datatable, getFKField(appTable),
+				appTableId, queryParams);
 
-		String sqlErrorMsg = "SQL: " + sql;
-		genericDataService.updateSQL(sql, sqlErrorMsg);
+		genericDataService.updateSQL(sql, "SQL: " + sql);
 
 		long elapsed = System.currentTimeMillis() - startTime;
 		logger.info("FINISHING newDatatableEntry:      Elapsed Time: "
-				+ elapsed + "       - datatable: " + datatable + "  id: " + id);
+				+ elapsed + "       - datatable: " + datatable + "  id: "
+				+ appTableId);
+
+	}
+
+	@Override
+	public void deleteDatatableEntries(String datatable, Long appTableId) {
+		long startTime = System.currentTimeMillis();
+
+		String appTable = getWithinScopeApplicationTableName(datatable,
+				appTableId);
+
+		String sql = getDeleteEntriesSql(datatable, getFKField(appTable),
+				appTableId);
+
+		genericDataService.updateSQL(sql, "SQL: " + sql);
+
+		long elapsed = System.currentTimeMillis() - startTime;
+		logger.info("FINISHING deleteDatatableEntries:      Elapsed Time: "
+				+ elapsed + "       - datatable: " + datatable
+				+ "  App Table Id: " + appTableId);
+
+	}
+
+	@Override
+	public void deleteDatatableEntry(String datatable, Long appTableId,
+			Long datatableId) {
+		long startTime = System.currentTimeMillis();
+
+		getWithinScopeApplicationTableName(datatable, appTableId);
+
+		String sql = getDeleteEntrySql(datatable, datatableId);
+
+		genericDataService.updateSQL(sql, "SQL: " + sql);
+
+		long elapsed = System.currentTimeMillis() - startTime;
+		logger.info("FINISHING deleteDatatableEntry:      Elapsed Time: "
+				+ elapsed + "       - datatable: " + datatable
+				+ "  App Table Id: " + appTableId + "   Data Table Id: "
+				+ datatableId);
 
 	}
 
@@ -555,12 +594,12 @@ public class ReadWriteNonCoreDataServiceImpl implements
 	}
 
 	@Override
-	public String retrieveDataTableJSONObject(String datatable, Long id,
-			String sqlFields, String sqlOrder) {
+	public String retrieveDataTableJSONObject(String datatable,
+			Long appTableId, String sqlFields, String sqlOrder) {
 		long startTime = System.currentTimeMillis();
 
 		GenericResultsetData result = retrieveDataTableGenericResultSet(
-				datatable, id, sqlFields, sqlOrder);
+				datatable, appTableId, sqlFields, sqlOrder);
 
 		String jsonString = generateJsonFromGenericResultsetData(result);
 
@@ -572,13 +611,12 @@ public class ReadWriteNonCoreDataServiceImpl implements
 
 	@Override
 	public GenericResultsetData retrieveDataTableGenericResultSet(
-			String datatable, Long id, String sqlFields, String sqlOrder) {
+			String datatable, Long appTableId, String sqlFields, String sqlOrder) {
 
 		long startTime = System.currentTimeMillis();
 
-		String applicationTableName = getApplicationTableName(datatable);
-
-		checkMainResourceExistsWithinScope(applicationTableName, id);
+		String appTable = getWithinScopeApplicationTableName(datatable,
+				appTableId);
 
 		List<ResultsetColumnHeader> columnHeaders = getDatatableResultsetColumnHeaders(datatable);
 
@@ -588,8 +626,8 @@ public class ReadWriteNonCoreDataServiceImpl implements
 		else
 			sql = sql + " * ";
 
-		sql = sql + " from " + datatable + " where "
-				+ getFKField(applicationTableName) + " = " + id;
+		sql = sql + " from " + datatable + " where " + getFKField(appTable)
+				+ " = " + appTableId;
 		if (sqlOrder != null)
 			sql = sql + " order by " + sqlOrder;
 		logger.info(sql);
@@ -640,7 +678,8 @@ public class ReadWriteNonCoreDataServiceImpl implements
 		}
 	}
 
-	private String getApplicationTableName(String datatable) {
+	private String getWithinScopeApplicationTableName(String datatable,
+			Long appTableId) {
 		String sql = "SELECT application_table_name FROM x_registered_table where registered_table_name = '"
 				+ datatable + "'";
 
@@ -652,7 +691,11 @@ public class ReadWriteNonCoreDataServiceImpl implements
 
 		try {
 			rs.next();
-			return rs.getString("application_table_name");
+			String appTable = rs.getString("application_table_name");
+
+			checkMainResourceExistsWithinScope(appTable, appTableId);
+
+			return appTable;
 		} catch (SQLException e) {
 			throw new PlatformDataIntegrityException("error.msg.sql.error",
 					e.getMessage());
@@ -818,14 +861,14 @@ public class ReadWriteNonCoreDataServiceImpl implements
 	}
 
 	private String getAddSql(List<ResultsetColumnHeader> columnHeaders,
-			String datatable, String FKField, Long id,
+			String datatable, String FKField, Long appTableId,
 			Map<String, String> queryParams) {
 
 		Map<String, String> affectedColumns = getAffectedColumns(columnHeaders,
 				queryParams);
 
 		String pValueWrite = "";
-		String saveSql = "";
+		String addSql = "";
 		String singleQuote = "'";
 
 		String insertColumns = "";
@@ -847,11 +890,11 @@ public class ReadWriteNonCoreDataServiceImpl implements
 			selectColumns += "," + pValueWrite + " as " + columnName;
 		}
 
-		saveSql = "insert into `" + datatable + "` (`" + FKField + "` "
-				+ insertColumns + ")" + " select " + id + " as id"
+		addSql = "insert into `" + datatable + "` (`" + FKField + "` "
+				+ insertColumns + ")" + " select " + appTableId + " as id"
 				+ selectColumns;
 
-		return saveSql;
+		return addSql;
 	}
 
 	private Map<String, String> getAffectedColumns(
@@ -899,4 +942,17 @@ public class ReadWriteNonCoreDataServiceImpl implements
 		return affectedColumns;
 	}
 
+	private String getDeleteEntriesSql(String datatable, String FKField,
+			Long appTableId) {
+
+		return "delete from `" + datatable + "` where `" + FKField + "` = "
+				+ appTableId;
+
+	}
+
+	private String getDeleteEntrySql(String datatable, Long datatableId) {
+
+		return "delete from `" + datatable + "` where `id` = " + datatableId;
+
+	}
 }
