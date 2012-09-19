@@ -3,19 +3,21 @@ package org.mifosng.platform.loan.service;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
 
 import org.joda.time.LocalDate;
+import org.mifosng.platform.api.NewLoanScheduleData;
 import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.CurrencyData;
+import org.mifosng.platform.api.data.DisbursementData;
 import org.mifosng.platform.api.data.EnumOptionData;
 import org.mifosng.platform.api.data.LoanBasicDetailsData;
 import org.mifosng.platform.api.data.LoanChargeData;
 import org.mifosng.platform.api.data.LoanPermissionData;
 import org.mifosng.platform.api.data.LoanProductData;
-import org.mifosng.platform.api.data.LoanRepaymentPeriodData;
 import org.mifosng.platform.api.data.LoanRepaymentTransactionData;
-import org.mifosng.platform.api.data.LoanScheduleData;
+import org.mifosng.platform.api.data.LoanSchedulePeriodData;
 import org.mifosng.platform.api.data.LoanTransactionData;
 import org.mifosng.platform.api.data.MoneyData;
 import org.mifosng.platform.client.service.ClientReadPlatformService;
@@ -89,17 +91,49 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 	}
 
 	@Override
-	public LoanScheduleData retrieveRepaymentSchedule(final Long loanId, final CurrencyData currency, final Collection<LoanRepaymentTransactionData> loanRepayments) {
+	public NewLoanScheduleData retrieveRepaymentSchedule(final Long loanId, final CurrencyData currency, final DisbursementData disbursement) {
 
 		try {
 			context.authenticatedUser();
 
-			LoanScheduleMapper rm = new LoanScheduleMapper();
-			String sql = "select " + rm.loanScheduleSchema()
-					+ " where l.id = ? order by ls.loan_id, ls.installment";
-			Collection<LoanRepaymentPeriodData> repaymentSchedulePeriods = this.jdbcTemplate.query(sql, rm, new Object[] { loanId });
+			final LoanScheduleMapper rm = new LoanScheduleMapper(disbursement);
+			final String sql = "select " + rm.loanScheduleSchema() + " where l.id = ? order by ls.loan_id, ls.installment";
 			
-			return new LoanScheduleData(currency, repaymentSchedulePeriods, loanRepayments);
+			final LoanSchedulePeriodData disbursementPeriod = LoanSchedulePeriodData.disbursement(disbursement.disbursementDate(), disbursement.amount());
+			
+			final Collection<LoanSchedulePeriodData> repaymentSchedulePeriods = this.jdbcTemplate.query(sql, rm, new Object[] { loanId });
+			
+			final Collection<LoanSchedulePeriodData> periods = new ArrayList<LoanSchedulePeriodData>(repaymentSchedulePeriods.size()+1);
+			periods.add(disbursementPeriod);
+			periods.addAll(repaymentSchedulePeriods);
+			
+			LoanSchedulePeriodDataWrapper wrapper = new LoanSchedulePeriodDataWrapper(periods);
+			
+			final Integer loanTermInDays = null;
+			final BigDecimal cumulativePrincipalDisbursed = wrapper.deriveCumulativePrincipalDisbursed();
+			final BigDecimal cumulativePrincipalDue = wrapper.deriveCumulativePrincipalDue();
+			final BigDecimal cumulativePrincipalPaid = wrapper.deriveCumulativePrincipalPaid();
+			final BigDecimal cumulativePrincipalOutstanding = wrapper.deriveCumulativePrincipalOutstanding();
+			final BigDecimal cumulativeInterestExpected =  wrapper.deriveCumulativeInterestExpected();
+			final BigDecimal cumulativeInterestPaid = wrapper.deriveCumulativeInterestPaid();
+			final BigDecimal cumulativeInterestWaived = wrapper.deriveCumulativeInterestWaived();
+			final BigDecimal cumulativeInterestOutstanding = wrapper.deriveCumulativeInterestOutstanding();
+			final BigDecimal cumulativeChargesToDate = wrapper.deriveCumulativeChargesToDate();
+			final BigDecimal cumulativeChargesPaid = wrapper.deriveCumulativeChargesPaid();
+			final BigDecimal cumulativeChargesOutstanding = wrapper.deriveCumulativeChargesOutstanding();
+			
+			final BigDecimal totalCostOfLoan = cumulativeInterestExpected.add(cumulativeChargesToDate);
+			final BigDecimal totalExpectedRepayment = cumulativePrincipalDisbursed.add(totalCostOfLoan);
+			final BigDecimal totalPaidToDate = cumulativePrincipalPaid.add(cumulativeInterestPaid).add(cumulativeChargesPaid);
+			final BigDecimal totalWaivedToDate = cumulativeInterestWaived;
+			final BigDecimal totalOutstanding = cumulativePrincipalOutstanding.add(cumulativeInterestOutstanding).add(cumulativeChargesOutstanding);
+			final BigDecimal totalInArrears = null;
+			
+			return new NewLoanScheduleData(currency, periods, loanTermInDays, 
+					cumulativePrincipalDisbursed, cumulativePrincipalDue, cumulativePrincipalPaid, cumulativePrincipalOutstanding, 
+					cumulativeInterestExpected, cumulativeInterestPaid, cumulativeInterestWaived, cumulativeInterestOutstanding, 
+					cumulativeChargesToDate, cumulativeChargesPaid, cumulativeChargesOutstanding, 
+					totalCostOfLoan, totalExpectedRepayment, totalPaidToDate, totalWaivedToDate, totalOutstanding, totalInArrears);
 		} catch (EmptyResultDataAccessException e) {
 			throw new LoanNotFoundException(loanId);
 		}
@@ -319,7 +353,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 		}
 
 		@Override
-		public LoanBasicDetailsData mapRow(final ResultSet rs, final int rowNum)
+		public LoanBasicDetailsData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
 				throws SQLException {
 
 			String currencyCode = rs.getString("currencyCode");
@@ -423,47 +457,58 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 		}
 	}
 
-	private static final class LoanScheduleMapper implements
-			RowMapper<LoanRepaymentPeriodData> {
+	private static final class LoanScheduleMapper implements RowMapper<LoanSchedulePeriodData> {
+
+		private LocalDate lastDueDate;
+		private BigDecimal outstandingLoanBalance;
+		
+		public LoanScheduleMapper(final DisbursementData disbursement) {
+			this.lastDueDate = disbursement.disbursementDate();
+			this.outstandingLoanBalance = disbursement.amount();
+		}
 
 		public String loanScheduleSchema() {
 
-			return " ls.loan_id as loanId, ls.installment as period, ls.duedate as `date`, "
-					+ " ls.principal_amount as principal, ls.principal_completed_derived as principalPaid, "
-					+ " ls.interest_amount as interest, ls.interest_completed_derived as interestPaid, ls.interest_waived_derived as interestWaived "
+			return " ls.loan_id as loanId, ls.installment as period, ls.duedate as dueDate, "
+					+ " ls.principal_amount as principalDue, ls.principal_completed_derived as principalPaid, "
+					+ " ls.interest_amount as interestDue, ls.interest_completed_derived as interestPaid, ls.interest_waived_derived as interestWaived "
 					+ " from m_loan l "
 					+ " join m_loan_repayment_schedule ls on ls.loan_id = l.id ";
 		}
 
 		@Override
-		public LoanRepaymentPeriodData mapRow(final ResultSet rs,
-				final int rowNum) throws SQLException {
+		public LoanSchedulePeriodData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
-			Long loanId = rs.getLong("loanId");
-			Integer period = JdbcSupport.getInteger(rs, "period");
-			LocalDate date = JdbcSupport.getLocalDate(rs, "date");
-
-			BigDecimal principal = rs.getBigDecimal("principal");
-			BigDecimal principalPaid = rs.getBigDecimal("principalPaid");
-			BigDecimal principalOutstanding = principal.subtract(principalPaid);
-
-			BigDecimal interest = rs.getBigDecimal("interest");
-			BigDecimal interestPaid = rs.getBigDecimal("interestPaid");
+			final Long loanId = rs.getLong("loanId");
+			final Integer period = JdbcSupport.getInteger(rs, "period");
+			final LocalDate dueDate = JdbcSupport.getLocalDate(rs, "dueDate");
+			final BigDecimal principalDue = rs.getBigDecimal("principalDue");
+			final BigDecimal principalPaid = rs.getBigDecimal("principalPaid");
+			final BigDecimal principalOutstanding = principalDue.subtract(principalPaid);
+			final BigDecimal interestDue = rs.getBigDecimal("interestDue");
+			final BigDecimal interestPaid = rs.getBigDecimal("interestPaid");
 			BigDecimal interestWaived = rs.getBigDecimal("interestWaived");
 			if (interestWaived == null) {
 				interestWaived = BigDecimal.ZERO;
 			}
-			BigDecimal interestOutstanding = interest.subtract(interestPaid).subtract(interestWaived);
+			final BigDecimal interestOutstanding = interestDue.subtract(interestPaid).subtract(interestWaived);
 
-			BigDecimal total = principal.add(interest);
-			BigDecimal totalPaid = principalPaid.add(interestPaid);
-			BigDecimal totalWaived = interestWaived;
-			BigDecimal totalOutstanding = principalOutstanding.add(interestOutstanding);
+			final BigDecimal totalDueForPeriod = principalDue.add(interestDue);
+			final BigDecimal totalPaidForPeriod = principalPaid.add(interestPaid);
+			final BigDecimal totalWaivedForPeriod = interestWaived;
+			final BigDecimal totalOutstandingForPeriod = principalOutstanding.add(interestOutstanding);
 
-			return new LoanRepaymentPeriodData(loanId, period, date,
-					principal, principalPaid, principalOutstanding, interest,
-					interestPaid, interestWaived, interestOutstanding, total, totalPaid, totalWaived,
-					totalOutstanding);
+			final LocalDate fromDate = this.lastDueDate;
+			final BigDecimal outstandingPrincipleBalanceOfLoan = outstandingLoanBalance.subtract(principalDue);
+			
+			// update based on current period values
+			this.lastDueDate = dueDate;
+			outstandingLoanBalance = outstandingLoanBalance.subtract(principalDue);
+			
+			return LoanSchedulePeriodData.repaymentPeriodWithPayments(loanId, period, fromDate, dueDate, 
+					principalDue, principalPaid, principalOutstanding, outstandingPrincipleBalanceOfLoan, interestDue,
+					interestPaid, interestWaived, interestOutstanding, totalDueForPeriod, totalPaidForPeriod, totalWaivedForPeriod,
+					totalOutstandingForPeriod);
 		}
 	}
 
@@ -481,7 +526,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
 		@Override
 		public LoanRepaymentTransactionData mapRow(final ResultSet rs,
-				final int rowNum) throws SQLException {
+				@SuppressWarnings("unused") final int rowNum) throws SQLException {
 
 			String currencyCode = rs.getString("currencyCode");
 			String currencyName = rs.getString("currencyName");

@@ -508,4 +508,8 @@ public class LoanBasicDetailsData {
 	public String getLoanOfficerName() {
 		return loanOfficerName;
 	}
+
+	public DisbursementData toDisburementData() {
+		return new DisbursementData(this.expectedDisbursementDate, this.actualDisbursementDate, this.principal);
+	}
 }

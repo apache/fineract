@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.Collection;
 
 import org.joda.time.LocalDate;
+import org.mifosng.platform.api.NewLoanScheduleData;
 
 /**
  * Immutable data object representing loan account data.
@@ -52,7 +53,7 @@ public class LoanAccountData {
 	private final LocalDate lifeCycleStatusDate;
 	
 	// associations
-	private final LoanScheduleData repaymentSchedule;
+	private final NewLoanScheduleData repaymentSchedule;
 	private final Collection<LoanRepaymentTransactionData> loanRepayments;
 	private final Collection<LoanChargeData> charges;
 	private final LoanPermissionData permissions;
@@ -75,7 +76,7 @@ public class LoanAccountData {
 	public LoanAccountData(
 			final LoanBasicDetailsData basicDetails,
 			final boolean convenienceDataRequired, 
-			final LoanScheduleData repaymentSchedule,
+			final NewLoanScheduleData repaymentSchedule,
 			final Collection<LoanRepaymentTransactionData> loanRepayments,
 			final LoanPermissionData permissions, 
 			final Collection<LoanChargeData> charges,

@@ -10,6 +10,7 @@ import java.math.BigDecimal;
  * Note: getter/setter not added on purpose - google-gson only requires fields to generate json.
  */
 @SuppressWarnings("unused")
+@Deprecated
 public class LoanAccountSummaryData {
 
 	private final CurrencyData currency;

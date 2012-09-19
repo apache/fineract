@@ -28,6 +28,7 @@ import org.mifosng.platform.api.commands.LoanStateTransitionCommand;
 import org.mifosng.platform.api.commands.LoanTransactionCommand;
 import org.mifosng.platform.api.commands.UndoStateTransitionCommand;
 import org.mifosng.platform.api.data.ChargeData;
+import org.mifosng.platform.api.data.DisbursementData;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.EnumOptionData;
 import org.mifosng.platform.api.data.FundData;
@@ -37,7 +38,6 @@ import org.mifosng.platform.api.data.LoanChargeData;
 import org.mifosng.platform.api.data.LoanPermissionData;
 import org.mifosng.platform.api.data.LoanProductLookup;
 import org.mifosng.platform.api.data.LoanRepaymentTransactionData;
-import org.mifosng.platform.api.data.LoanScheduleData;
 import org.mifosng.platform.api.data.LoanTransactionData;
 import org.mifosng.platform.api.data.MoneyData;
 import org.mifosng.platform.api.data.StaffData;
@@ -180,7 +180,7 @@ public class LoansApiResource {
 		
 		int loanRepaymentsCount = 0;
 		Collection<LoanRepaymentTransactionData> loanRepayments = null;
-		LoanScheduleData repaymentSchedule = null;
+		NewLoanScheduleData repaymentSchedule = null;
 		LoanPermissionData permissions = null;
         Collection<LoanChargeData> charges = null;
 
@@ -198,7 +198,8 @@ public class LoansApiResource {
 				loanRepayments = currentLoanRepayments;
 				loanRepaymentsCount = loanRepayments.size();
 			}
-			repaymentSchedule = this.loanReadPlatformService.retrieveRepaymentSchedule(loanId, loanBasicDetails.getCurrency(), loanRepayments);
+			DisbursementData singleDisbursement = loanBasicDetails.toDisburementData();
+			repaymentSchedule = this.loanReadPlatformService.retrieveRepaymentSchedule(loanId, loanBasicDetails.getCurrency(), singleDisbursement);
 
 			MoneyData tolerance = MoneyData.of(loanBasicDetails.getCurrency(), loanBasicDetails.getInArrearsTolerance());
 			MoneyData totalOutstandingMoney = MoneyData.of(loanBasicDetails.getCurrency(), repaymentSchedule.totalOutstanding());
