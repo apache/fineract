@@ -510,13 +510,43 @@ public class ReadWriteNonCoreDataServiceImpl implements
 		long startTime = System.currentTimeMillis();
 
 		GenericResultsetData grs = retrieveDataTableGenericResultSet(datatable,
-				appTableId, null, null);
+				appTableId, null, null, null);
 
 		if (grs.getData().size() == 0)
 			throw new DataTableNotFoundException(datatable, appTableId);
 
-		String sql = getUpdateSql(grs, datatable,
-				getFKField(getApplicationTableName(datatable)), appTableId,
+		String fkName = getFKField(getApplicationTableName(datatable));
+		String sql = getUpdateSql(grs, datatable, fkName, appTableId,
+				queryParams);
+
+		if (sql != null)
+			genericDataService.updateSQL(sql, "SQL: " + sql);
+		else
+			logger.info("No Changes");
+
+		long elapsed = System.currentTimeMillis() - startTime;
+		logger.info("FINISHING updateDatatableEntryOnetoOne:      Elapsed Time: "
+				+ elapsed
+				+ "       - datatable: "
+				+ datatable
+				+ fkName
+				+ ": "
+				+ appTableId);
+
+	}
+
+	@Override
+	public void updateDatatableEntryOnetoMany(String datatable,
+			Long appTableId, Long datatableId, Map<String, String> queryParams) {
+		long startTime = System.currentTimeMillis();
+
+		GenericResultsetData grs = retrieveDataTableGenericResultSet(datatable,
+				appTableId, null, null, datatableId);
+
+		if (grs.getData().size() == 0)
+			throw new DataTableNotFoundException(datatable, appTableId);
+
+		String sql = getUpdateSql(grs, datatable, "id", datatableId,
 				queryParams);
 
 		if (sql != null)
@@ -530,8 +560,7 @@ public class ReadWriteNonCoreDataServiceImpl implements
 				+ "       - datatable: "
 				+ datatable
 				+ "  id: "
-				+ appTableId);
-
+				+ datatableId);
 	}
 
 	@Override
@@ -631,7 +660,7 @@ public class ReadWriteNonCoreDataServiceImpl implements
 		long startTime = System.currentTimeMillis();
 
 		GenericResultsetData result = retrieveDataTableGenericResultSet(
-				datatable, appTableId, sqlFields, sqlOrder);
+				datatable, appTableId, sqlFields, sqlOrder, null);
 
 		String jsonString = generateJsonFromGenericResultsetData(result);
 
@@ -643,7 +672,8 @@ public class ReadWriteNonCoreDataServiceImpl implements
 
 	@Override
 	public GenericResultsetData retrieveDataTableGenericResultSet(
-			String datatable, Long appTableId, String sqlFields, String sqlOrder) {
+			String datatable, Long appTableId, String sqlFields,
+			String sqlOrder, Long id) {
 
 		long startTime = System.currentTimeMillis();
 
@@ -658,17 +688,23 @@ public class ReadWriteNonCoreDataServiceImpl implements
 		else
 			sql = sql + " * ";
 
-		sql = sql + " from " + datatable + " where " + getFKField(appTable)
-				+ " = " + appTableId;
+		// id only used for reading a specific entry in a one to many datatable
+		// (when updating)
+		if (id == null) {
+			sql = sql + " from " + datatable + " where " + getFKField(appTable)
+					+ " = " + appTableId;
+		} else {
+			sql = sql + " from " + datatable + " where id = " + id;
+		}
+
 		if (sqlOrder != null)
 			sql = sql + " order by " + sqlOrder;
-		logger.info(sql);
 
 		List<ResultsetDataRow> result = fillDatatableResultSetDataRows(sql);
 
 		long elapsed = System.currentTimeMillis() - startTime;
 		logger.info("FINISHING DATATABLE: " + datatable + "     Elapsed Time: "
-				+ elapsed);
+				+ elapsed + "    SQL: " + sql);
 
 		return new GenericResultsetData(columnHeaders, result);
 
@@ -914,11 +950,11 @@ public class ReadWriteNonCoreDataServiceImpl implements
 	}
 
 	private String getAddSql(List<ResultsetColumnHeader> columnHeaders,
-			String datatable, String FKField, Long appTableId,
+			String datatable, String fkName, Long appTableId,
 			Map<String, String> queryParams) {
 
 		Map<String, String> affectedColumns = getAffectedColumns(columnHeaders,
-				queryParams);
+				queryParams, fkName);
 
 		String pValueWrite = "";
 		String addSql = "";
@@ -943,7 +979,7 @@ public class ReadWriteNonCoreDataServiceImpl implements
 			selectColumns += "," + pValueWrite + " as " + columnName;
 		}
 
-		addSql = "insert into `" + datatable + "` (`" + FKField + "` "
+		addSql = "insert into `" + datatable + "` (`" + fkName + "` "
 				+ insertColumns + ")" + " select " + appTableId + " as id"
 				+ selectColumns;
 
@@ -951,10 +987,10 @@ public class ReadWriteNonCoreDataServiceImpl implements
 	}
 
 	private String getUpdateSql(GenericResultsetData grs, String datatable,
-			String fkField, Long appTableId, Map<String, String> queryParams) {
+			String keyFieldName, Long keyFieldValue, Map<String, String> queryParams) {
 
 		Map<String, String> affectedAndChangedColumns = getAffectedAndChangedColumns(
-				grs, queryParams);
+				grs, queryParams, keyFieldName);
 
 		// just updating fields that have changed since pre-update read - though
 		// its possible these values are different from the page the user was
@@ -991,16 +1027,16 @@ public class ReadWriteNonCoreDataServiceImpl implements
 			sql += "`" + key + "` = " + pValueWrite;
 		}
 
-		sql += " where " + fkField + " = " + appTableId;
+		sql += " where " + keyFieldName + " = " + keyFieldValue;
 
 		return sql;
 	}
 
 	private Map<String, String> getAffectedAndChangedColumns(
-			GenericResultsetData grs, Map<String, String> queryParams) {
+			GenericResultsetData grs, Map<String, String> queryParams, String fkName) {
 
 		Map<String, String> affectedColumns = getAffectedColumns(
-				grs.getColumnHeaders(), queryParams);
+				grs.getColumnHeaders(), queryParams, fkName);
 		Map<String, String> affectedAndChangedColumns = new HashMap<String, String>();
 		String columnValue;
 
@@ -1043,7 +1079,7 @@ public class ReadWriteNonCoreDataServiceImpl implements
 
 	private Map<String, String> getAffectedColumns(
 			List<ResultsetColumnHeader> columnHeaders,
-			Map<String, String> queryParams) {
+			Map<String, String> queryParams, String keyFieldName) {
 
 		String underscore = "_";
 		String space = " ";
@@ -1055,10 +1091,11 @@ public class ReadWriteNonCoreDataServiceImpl implements
 		Map<String, String> affectedColumns = new HashMap<String, String>();
 		Set<String> keys = queryParams.keySet();
 		for (String key : keys) {
-			// ignores any id field and matches incoming fields with and without
-			// underscores (spaces and underscores considered the same)
-			if (!(key.equalsIgnoreCase("id"))) {
+			// ignores id and foreign key fields 
+			if (!((key.equalsIgnoreCase("id")) || (key.equalsIgnoreCase(keyFieldName)))) {
 				notFound = true;
+				// ignores any id field and matches incoming fields with and without
+				// underscores (spaces and underscores considered the same)
 				queryParamColumnUnderscored = genericDataService.replace(key,
 						space, underscore);
 				for (ResultsetColumnHeader columnHeader : columnHeaders) {

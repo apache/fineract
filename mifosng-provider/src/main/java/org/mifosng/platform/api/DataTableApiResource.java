@@ -95,7 +95,7 @@ public class DataTableApiResource {
 
 		GenericResultsetData results = this.readWriteNonCoreDataService
 				.retrieveDataTableGenericResultSet(datatable, appTableId,
-						sqlFields, sqlOrder);
+						sqlFields, sqlOrder, null);
 
 		boolean prettyPrints = ApiParameterHelper.prettyPrint(uriInfo
 				.getQueryParameters());
@@ -135,12 +135,35 @@ public class DataTableApiResource {
 			@PathParam("datatable") final String datatable,
 			@PathParam("appTableId") final Long appTableId,
 			final String jsonRequestBody) {
-
+/* for updating one to one relationships (where foreign key is the primary key)*/
 		checkUserPermissionForDatatable(datatable, "UPDATE");
 		Map<String, String> queryParams = getQueryParamsFromJsonRequestBody(jsonRequestBody);
 
 		this.readWriteNonCoreDataService.updateDatatableEntryOnetoOne(datatable,
 				appTableId, queryParams);
+
+		EntityIdentifier entityIdentifier = new EntityIdentifier(
+				Long.valueOf(appTableId));
+
+		return Response.ok().entity(entityIdentifier).build();
+
+	}
+	
+	@PUT
+	@Path("{datatable}/{appTableId}/{datatableId}")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public Response updateDatatableEntryOnetoOne(
+			@PathParam("datatable") final String datatable,
+			@PathParam("appTableId") final Long appTableId,
+			@PathParam("datatableId") final Long datatableId,
+			final String jsonRequestBody) {
+/* for updating one to many relationships (where foreign key isn't the primary key)*/
+		checkUserPermissionForDatatable(datatable, "UPDATE");
+		Map<String, String> queryParams = getQueryParamsFromJsonRequestBody(jsonRequestBody);
+
+		this.readWriteNonCoreDataService.updateDatatableEntryOnetoMany(datatable,
+				appTableId, datatableId, queryParams);
 
 		EntityIdentifier entityIdentifier = new EntityIdentifier(
 				Long.valueOf(appTableId));
