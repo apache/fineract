@@ -4,13 +4,13 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import org.joda.time.LocalDate;
-import org.mifosng.platform.api.NewLoanScheduleData;
+import org.mifosng.platform.api.LoanScheduleNewData;
 import org.mifosng.platform.currency.domain.ApplicationCurrency;
 import org.mifosng.platform.loan.domain.LoanProductRelatedDetail;
 
 public interface AmortizationLoanScheduleGenerator {
 
-	NewLoanScheduleData generate(
+	LoanScheduleNewData generate(
 			ApplicationCurrency applicationCurrency, 
 			LoanProductRelatedDetail loanScheduleInfo,
 			LocalDate disbursementDate, 

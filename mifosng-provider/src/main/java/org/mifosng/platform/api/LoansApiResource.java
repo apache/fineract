@@ -180,7 +180,7 @@ public class LoansApiResource {
 		
 		int loanRepaymentsCount = 0;
 		Collection<LoanRepaymentTransactionData> loanRepayments = null;
-		NewLoanScheduleData repaymentSchedule = null;
+		LoanScheduleNewData repaymentSchedule = null;
 		LoanPermissionData permissions = null;
         Collection<LoanChargeData> charges = null;
 
@@ -283,7 +283,7 @@ public class LoansApiResource {
 
 	private String calculateLoanSchedule(final UriInfo uriInfo, final CalculateLoanScheduleCommand command) {
 		
-		final NewLoanScheduleData loanSchedule = this.calculationPlatformService.calculateLoanScheduleNew(command);
+		final LoanScheduleNewData loanSchedule = this.calculationPlatformService.calculateLoanScheduleNew(command);
 
 		final Set<String> typicalLoanScheduleResponseParameters = new HashSet<String>(
 				Arrays.asList("periods", "cumulativePrincipalDisbursed"));

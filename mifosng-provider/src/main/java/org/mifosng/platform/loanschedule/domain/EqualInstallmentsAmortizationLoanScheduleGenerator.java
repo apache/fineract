@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
-import org.mifosng.platform.api.NewLoanScheduleData;
+import org.mifosng.platform.api.LoanScheduleNewData;
 import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.LoanSchedulePeriodData;
 import org.mifosng.platform.currency.domain.ApplicationCurrency;
@@ -25,7 +25,7 @@ public class EqualInstallmentsAmortizationLoanScheduleGenerator implements Amort
 	private final PmtCalculator pmtCalculator = new PmtCalculator();
 	
 	@Override
-	public NewLoanScheduleData generate(
+	public LoanScheduleNewData generate(
 			final ApplicationCurrency currency,
 			final LoanProductRelatedDetail loanScheduleInfo, 
 			final LocalDate disbursementDate, 
@@ -137,7 +137,7 @@ public class EqualInstallmentsAmortizationLoanScheduleGenerator implements Amort
 				currency.getDisplaySymbol(),
 				currency.getNameCode());
 		
-		return new NewLoanScheduleData(currencyData, periods, loanTermInDays, cumulativePrincipalDisbursed, cumulativePrincipalDue, 
+		return new LoanScheduleNewData(currencyData, periods, loanTermInDays, cumulativePrincipalDisbursed, cumulativePrincipalDue, 
 				cumulativePrincipalOutstanding, cumulativeInterestExpected, cumulativeChargesToDate, totalExpectedRepayment);
 	}
 }

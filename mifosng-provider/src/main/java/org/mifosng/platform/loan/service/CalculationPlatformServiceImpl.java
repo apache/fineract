@@ -1,7 +1,7 @@
 package org.mifosng.platform.loan.service;
 
 import org.joda.time.LocalDate;
-import org.mifosng.platform.api.NewLoanScheduleData;
+import org.mifosng.platform.api.LoanScheduleNewData;
 import org.mifosng.platform.api.commands.CalculateLoanScheduleCommand;
 import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.MoneyData;
@@ -45,7 +45,7 @@ public class CalculationPlatformServiceImpl implements CalculationPlatformServic
 	}
 	
 	@Override
-	public NewLoanScheduleData calculateLoanScheduleNew(final CalculateLoanScheduleCommand command) {
+	public LoanScheduleNewData calculateLoanScheduleNew(final CalculateLoanScheduleCommand command) {
 		
 		context.authenticatedUser();
 		

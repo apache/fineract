@@ -27,7 +27,7 @@ import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
-import org.mifosng.platform.api.NewLoanScheduleData;
+import org.mifosng.platform.api.LoanScheduleNewData;
 import org.mifosng.platform.api.commands.LoanApplicationCommand;
 import org.mifosng.platform.api.data.LoanSchedulePeriodData;
 import org.mifosng.platform.client.domain.Client;
@@ -243,7 +243,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	}
 	
 	public void modifyLoanApplication(final LoanApplicationCommand command, final Client client, final LoanProduct loanProduct, 
-			final Fund fund, final LoanTransactionProcessingStrategy strategy, final NewLoanScheduleData modifiedLoanSchedule, final Set<LoanCharge> charges,
+			final Fund fund, final LoanTransactionProcessingStrategy strategy, final LoanScheduleNewData modifiedLoanSchedule, final Set<LoanCharge> charges,
 			final Staff loanOfficer) {
 
 		if (command.isClientChanged()) {

@@ -8,7 +8,7 @@ import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
-import org.mifosng.platform.api.NewLoanScheduleData;
+import org.mifosng.platform.api.LoanScheduleNewData;
 import org.mifosng.platform.api.commands.AdjustLoanTransactionCommand;
 import org.mifosng.platform.api.commands.CalculateLoanScheduleCommand;
 import org.mifosng.platform.api.commands.LoanApplicationCommand;
@@ -146,7 +146,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		LoanTransactionProcessingStrategy strategy = this.loanAssembler.findStrategyByIdIfProvided(command.getTransactionProcessingStrategyId());
         Set<LoanCharge> charges = this.loanAssembler.assembleSetOfLoanCharges(command.getCharges(), loanProduct.getCharges(), loan.getCurrency().getCode());
 
-        final NewLoanScheduleData loanSchedule = this.calculationPlatformService.calculateLoanScheduleNew(command.toCalculateLoanScheduleCommand());
+        final LoanScheduleNewData loanSchedule = this.calculationPlatformService.calculateLoanScheduleNew(command.toCalculateLoanScheduleCommand());
 		loan.modifyLoanApplication(command, client, loanProduct, fund, strategy, loanSchedule, charges, loanOfficer);
 
 		this.loanRepository.save(loan);
@@ -350,7 +350,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 					loanTermFrequency, loanTermFrequencyType,
 					actualDisbursementDate, repaymentsStartingFromDate, interestCalculatedFromDate);
 
-			NewLoanScheduleData loanSchedule = this.calculationPlatformService.calculateLoanScheduleNew(calculateCommand);
+			LoanScheduleNewData loanSchedule = this.calculationPlatformService.calculateLoanScheduleNew(calculateCommand);
 
 			List<LoanRepaymentScheduleInstallment> modifiedLoanRepaymentSchedule = new ArrayList<LoanRepaymentScheduleInstallment>();
 			

@@ -2,7 +2,7 @@ package org.mifosng.platform.loan.service;
 
 import java.util.Collection;
 
-import org.mifosng.platform.api.NewLoanScheduleData;
+import org.mifosng.platform.api.LoanScheduleNewData;
 import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.DisbursementData;
 import org.mifosng.platform.api.data.LoanBasicDetailsData;
@@ -14,7 +14,7 @@ public interface LoanReadPlatformService {
 
 	LoanBasicDetailsData retrieveLoanAccountDetails(Long loanId);
 
-	NewLoanScheduleData retrieveRepaymentSchedule(Long loanId, CurrencyData currency, DisbursementData disbursement);
+	LoanScheduleNewData retrieveRepaymentSchedule(Long loanId, CurrencyData currency, DisbursementData disbursement);
 
 	Collection<LoanRepaymentTransactionData> retrieveLoanPayments(Long loanId);
 

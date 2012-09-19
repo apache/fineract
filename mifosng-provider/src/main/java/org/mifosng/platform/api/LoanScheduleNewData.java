@@ -14,8 +14,9 @@ import org.mifosng.platform.api.data.LoanSchedulePeriodData;
  *     <li>repayment schedule  - the principal due, outstanding balance and cost of loan items such as interest and charges</li>
  * </ul>
  */
+// TODO - KW - rename file
 @SuppressWarnings("unused")
-public class NewLoanScheduleData {
+public class LoanScheduleNewData {
 
 	private final Integer loanTermInDays;
 	
@@ -95,7 +96,7 @@ public class NewLoanScheduleData {
 	 */
 	private final Collection<LoanSchedulePeriodData> periods;
 
-	public NewLoanScheduleData() {
+	public LoanScheduleNewData() {
 		this.cumulativePrincipalDisbursed = null;
 		this.cumulativePrincipalPaid = null;
 		this.cumulativePrincipalDue = null;
@@ -123,7 +124,7 @@ public class NewLoanScheduleData {
 		this.loanTermInDays = null;
 	}
 
-	public NewLoanScheduleData(
+	public LoanScheduleNewData(
 			final CurrencyData currency,
 			final Collection<LoanSchedulePeriodData> periods, 
 			final Integer loanTermInDays, 
@@ -169,7 +170,7 @@ public class NewLoanScheduleData {
 	/*
 	 * Used when fully populating
 	 */
-	public NewLoanScheduleData(final CurrencyData currency, final Collection<LoanSchedulePeriodData> periods,
+	public LoanScheduleNewData(final CurrencyData currency, final Collection<LoanSchedulePeriodData> periods,
 			final Integer loanTermInDays,
 			final BigDecimal cumulativePrincipalDisbursed,
 			final BigDecimal cumulativePrincipalDue,

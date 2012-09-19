@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import org.joda.time.LocalDate;
-import org.mifosng.platform.api.NewLoanScheduleData;
+import org.mifosng.platform.api.LoanScheduleNewData;
 import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.DisbursementData;
@@ -91,7 +91,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 	}
 
 	@Override
-	public NewLoanScheduleData retrieveRepaymentSchedule(final Long loanId, final CurrencyData currency, final DisbursementData disbursement) {
+	public LoanScheduleNewData retrieveRepaymentSchedule(final Long loanId, final CurrencyData currency, final DisbursementData disbursement) {
 
 		try {
 			context.authenticatedUser();
@@ -129,7 +129,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 			final BigDecimal totalOutstanding = cumulativePrincipalOutstanding.add(cumulativeInterestOutstanding).add(cumulativeChargesOutstanding);
 			final BigDecimal totalInArrears = null;
 			
-			return new NewLoanScheduleData(currency, periods, loanTermInDays, 
+			return new LoanScheduleNewData(currency, periods, loanTermInDays, 
 					cumulativePrincipalDisbursed, cumulativePrincipalDue, cumulativePrincipalPaid, cumulativePrincipalOutstanding, 
 					cumulativeInterestExpected, cumulativeInterestPaid, cumulativeInterestWaived, cumulativeInterestOutstanding, 
 					cumulativeChargesToDate, cumulativeChargesPaid, cumulativeChargesOutstanding, 

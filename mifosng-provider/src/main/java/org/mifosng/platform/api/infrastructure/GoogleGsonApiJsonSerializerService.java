@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.mifosng.platform.api.NewLoanScheduleData;
+import org.mifosng.platform.api.LoanScheduleNewData;
 import org.mifosng.platform.api.data.AdditionalFieldsSetData;
 import org.mifosng.platform.api.data.AppUserData;
 import org.mifosng.platform.api.data.AuthenticatedUserData;
@@ -499,7 +499,7 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 	}
 
 	@Override
-	public String serializeLoanScheduleDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final NewLoanScheduleData loanSchedule) {
+	public String serializeLoanScheduleDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final LoanScheduleNewData loanSchedule) {
 		final Gson gsonDeserializer = helper
 				.createGsonBuilderWithParameterExclusionSerializationStrategy(LOAN_SCHEDULE_DATA_PARAMETERS, prettyPrint, responseParameters);
 		return helper.serializedJsonFrom(gsonDeserializer, loanSchedule);
