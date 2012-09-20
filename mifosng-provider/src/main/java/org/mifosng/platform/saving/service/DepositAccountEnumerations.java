@@ -15,9 +15,9 @@ public class DepositAccountEnumerations {
 		case SUBMITED_AND_PENDING_APPROVAL:
 			optionData = new EnumOptionData(DepositAccountStatus.SUBMITED_AND_PENDING_APPROVAL.getValue().longValue(), DepositAccountStatus.SUBMITED_AND_PENDING_APPROVAL.getCode(), "Submitted and pending approval");
 			break;
-		case APPROVED:
+		/*case APPROVED:
 			optionData = new EnumOptionData(DepositAccountStatus.APPROVED.getValue().longValue(), DepositAccountStatus.APPROVED.getCode(), "Approved");
-			break;
+			break;*/
 		case ACTIVE:
 			optionData = new EnumOptionData(DepositAccountStatus.ACTIVE.getValue().longValue(), DepositAccountStatus.ACTIVE.getCode(), "Active");
 			break;

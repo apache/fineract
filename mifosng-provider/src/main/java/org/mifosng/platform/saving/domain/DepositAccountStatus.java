@@ -4,7 +4,7 @@ public enum DepositAccountStatus {
 	
 	INVALID(0, "depositStatusType.invalid"), // 
 	SUBMITED_AND_PENDING_APPROVAL(100, "depositStatusType.submitted.and.pending.approval"), //
-	APPROVED(200, "depositStatusType.approved"), //
+	//APPROVED(200, "depositStatusType.approved"), //
 	ACTIVE(300, "depositStatusType.active"), //
 	WITHDRAWN_BY_CLIENT(400, "depositStatusType.withdrawn.by.client"), //
 	REJECTED(500, "depositStatusType.rejected"), //
@@ -36,9 +36,9 @@ public enum DepositAccountStatus {
 		return this.value.equals(DepositAccountStatus.SUBMITED_AND_PENDING_APPROVAL.getValue());
 	}
 	
-	public boolean isApproved() {
+	/*public boolean isApproved() {
 		return this.value.equals(DepositAccountStatus.APPROVED.getValue());
-	}
+	}*/
 	
 	public boolean isActive() {
 		return this.value.equals(DepositAccountStatus.ACTIVE.getValue());
@@ -67,9 +67,9 @@ public enum DepositAccountStatus {
 		case 100:
 			enumeration = DepositAccountStatus.SUBMITED_AND_PENDING_APPROVAL;
 			break;
-		case 200:
+		/*case 200:
 			enumeration = DepositAccountStatus.APPROVED;
-			break;
+			break;*/
 		case 300:
 			enumeration = DepositAccountStatus.ACTIVE;
 			break;

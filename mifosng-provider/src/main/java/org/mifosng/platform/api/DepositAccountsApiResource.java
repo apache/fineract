@@ -21,6 +21,7 @@ import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosng.platform.api.commands.DepositAccountCommand;
+import org.mifosng.platform.api.commands.DepositAccountWithdrawInterestCommand;
 import org.mifosng.platform.api.commands.DepositAccountWithdrawalCommand;
 import org.mifosng.platform.api.commands.DepositStateTransitionApprovalCommand;
 import org.mifosng.platform.api.commands.DepositStateTransitionCommand;
@@ -200,6 +201,10 @@ public class DepositAccountsApiResource {
 		} else if(is(commandParam, "withdrawal")){
 			DepositAccountWithdrawalCommand command = apiDataConversionService.convertJsonToDepositWithdrawalCommand(accountId, jsonRequestBody);
 			EntityIdentifier identifier = this.depositAccountWritePlatformService.withdrawDepositAccountMoney(command);
+			response = Response.ok().entity(identifier).build();
+		} else if(is(commandParam, "interestwithdraw")){
+			DepositAccountWithdrawInterestCommand command = apiDataConversionService.convertJsonToDepositAccountWithdrawInterestCommand(accountId, jsonRequestBody);
+			EntityIdentifier identifier = this.depositAccountWritePlatformService.withdrawDepositAccountInterestMoney(command);
 			response = Response.ok().entity(identifier).build();
 		} else { 
 			DepositStateTransitionCommand command=apiDataConversionService.convertJsonToDepositStateTransitionCommand(accountId, jsonRequestBody);

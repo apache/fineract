@@ -259,9 +259,13 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 		this.interestAccrued = futureValueOnMaturity.minus(getDeposit()).getAmount();
 		this.total = futureValueOnMaturity.getAmount();
 		
-		DepositAccountTransaction depositaccountTransaction = DepositAccountTransaction.deposit(getDeposit(), getActualCommencementDate());
+		DepositAccountTransaction depositaccountTransaction = DepositAccountTransaction.deposit(getDeposit(), getActualCommencementDate(),getAccuredInterest());
 		depositaccountTransaction.updateAccount(this);
-		this.depositaccountTransactions.add(depositaccountTransaction);
+		this.depositaccountTransactions.add(depositaccountTransaction);/*
+		
+		depositaccountTransaction = DepositAccountTransaction.deposit(getAccuredInterest(), getActualCommencementDate(), getAccuredInterest());
+		depositaccountTransaction.updateAccount(this);
+		this.depositaccountTransactions.add(depositaccountTransaction);*/
 		
 		LocalDate submittalDate = new LocalDate(this.projectedCommencementDate);
 		if (actualCommencementDate.isBefore(submittalDate)) {
@@ -387,6 +391,10 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 		return Money.of(this.currency, this.depositAmount);
 	}
 	
+	public Money getAccuredInterest(){
+		return Money.of(this.currency, this.interestAccrued);
+	}
+	
 	public Client client() {
 		return this.client;
 	}
@@ -400,10 +408,18 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 	}
 	
 	public boolean isRenewalAllowed() {
-		return renewalAllowed;
+		return this.renewalAllowed;
+	}
+	
+	public Integer getTenureInMonths() {
+		return tenureInMonths;
 	}
 
-	public void matureDepositApplication(LocalDate maturedOnDate, DepositLifecycleStateMachine depositLifecycleStateMachine) {
+	public Integer getInterestCompoundedEvery() {
+		return this.interestCompoundedEvery;
+	}
+	
+	/*public void matureDepositApplication(LocalDate maturedOnDate, DepositLifecycleStateMachine depositLifecycleStateMachine) {
 		
 		if (maturedOnDate.isAfter(maturesOnDate()) || (new LocalDate().equals(maturesOnDate()) && maturedOnDate.equals(maturesOnDate()))) {
 			DepositAccountStatus statusEnum = depositLifecycleStateMachine.transition(
@@ -458,7 +474,7 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 					"cannot.manual.mature.deposit.account.date", errorMessage,
 					maturedOnDate, new LocalDate());
 		}
-	}
+	}*/
 	
 	public LocalDate maturesOnDate() {
 		LocalDate date = null;
@@ -481,9 +497,13 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 			DepositAccountStatus statusEnum = depositLifecycleStateMachine.transition(DepositAccountEvent.DEPOSIT_MATURED, DepositAccountStatus.fromInt(this.depositStatus));
 			this.depositStatus = statusEnum.getValue();
 			
-			DepositAccountTransaction depositaccountTransaction = DepositAccountTransaction.withdraw(Money.of(this.currency, this.total), new LocalDate());
+			DepositAccountTransaction depositaccountTransaction = DepositAccountTransaction.withdraw(getDeposit(), new LocalDate(),getAccuredInterest());
 			depositaccountTransaction.updateAccount(this);
-			this.depositaccountTransactions.add(depositaccountTransaction);
+			this.depositaccountTransactions.add(depositaccountTransaction);/*
+			
+			depositaccountTransaction = DepositAccountTransaction.withdraw(getAccuredInterest(), new LocalDate(),getAccuredInterest());
+			depositaccountTransaction.updateAccount(this);
+			this.depositaccountTransactions.add(depositaccountTransaction);*/
 				
 			DepositAccountStatus statusEnumForClose = depositLifecycleStateMachine.transition(DepositAccountEvent.DEPOSIT_CLOSED, DepositAccountStatus.fromInt(this.depositStatus));
 			this.depositStatus = statusEnumForClose.getValue();
@@ -497,9 +517,13 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 			DepositAccountStatus statusEnum = depositLifecycleStateMachine.transition(DepositAccountEvent.DEPOSIT_PRECLOSED, DepositAccountStatus.fromInt(this.depositStatus));
 			this.depositStatus = statusEnum.getValue();
 			
-			DepositAccountTransaction depositaccountTransaction = DepositAccountTransaction.withdraw(Money.of(this.currency, this.total), new LocalDate());
+			DepositAccountTransaction depositaccountTransaction = DepositAccountTransaction.withdraw(getDeposit(), new LocalDate(),getAccuredInterest());
 			depositaccountTransaction.updateAccount(this);
-			this.depositaccountTransactions.add(depositaccountTransaction);
+			this.depositaccountTransactions.add(depositaccountTransaction);/*
+			
+			depositaccountTransaction = DepositAccountTransaction.withdraw(getAccuredInterest(), new LocalDate(),getAccuredInterest());
+			depositaccountTransaction.updateAccount(this);
+			this.depositaccountTransactions.add(depositaccountTransaction);*/
 				
 			this.closedOnDate = new LocalDate().toDate();
 			this.withdrawnOnDate = null;
@@ -520,6 +544,7 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 				preClosureInterestRate, interestCompoundedEvery, this.product.getInterestCompoundedEveryPeriodType());
 		
 		this.total = accuredtotalAmount.getAmount();
+		this.interestAccrued = accuredtotalAmount.minus(deposit).getAmount();
 		
 	}
 }

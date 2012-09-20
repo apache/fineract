@@ -247,11 +247,11 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 	@Override
 	public DepositPermissionData retrieveDepositAccountsPermissions(DepositAccountData depositAccountData) {
 		boolean pendingApproval = (depositAccountData.getStatus().getId().equals(100L));
-		boolean undoApprovalAllowed = (depositAccountData.getStatus().getId().equals(200L));
-		boolean isActive = (depositAccountData.getStatus().getId().equals(300L));
+		boolean undoApprovalAllowed = (depositAccountData.getStatus().getId().equals(300L));
+		//boolean isActive = (depositAccountData.getStatus().getId().equals(300L));
 		boolean rejectAllowed = pendingApproval;
 		boolean withdrawnByApplicantAllowed = pendingApproval;
 
-		return new DepositPermissionData(rejectAllowed, withdrawnByApplicantAllowed, undoApprovalAllowed, pendingApproval,isActive);
+		return new DepositPermissionData(rejectAllowed, withdrawnByApplicantAllowed, undoApprovalAllowed, pendingApproval);
 	}
 }

@@ -208,7 +208,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
 					if (row.getAccountStatusId() == 100) {
 						pendingApprovalDepositAccounts.add(row);
-					} else if (row.getAccountStatusId() == 200) {
+					} else if (row.getAccountStatusId() == 300) {
 						approvedDepositAccounts.add(row);
 					} 
 				}

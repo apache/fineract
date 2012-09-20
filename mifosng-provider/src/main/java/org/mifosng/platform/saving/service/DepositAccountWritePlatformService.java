@@ -1,6 +1,7 @@
 package org.mifosng.platform.saving.service;
 
 import org.mifosng.platform.api.commands.DepositAccountCommand;
+import org.mifosng.platform.api.commands.DepositAccountWithdrawInterestCommand;
 import org.mifosng.platform.api.commands.DepositAccountWithdrawalCommand;
 import org.mifosng.platform.api.commands.DepositStateTransitionApprovalCommand;
 import org.mifosng.platform.api.commands.DepositStateTransitionCommand;
@@ -28,11 +29,13 @@ public interface DepositAccountWritePlatformService {
 	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE', 'CAN_APPROVE_DEPOSIT_ROLE', 'CAN_APPROVE_DEPOSIT_IN_THE_PAST_ROLE')")
 	EntityIdentifier undoDepositApproval(UndoStateTransitionCommand undoCommand);
 
-	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE', 'CAN_APPROVE_DEPOSIT_ROLE', 'CAN_APPROVE_DEPOSIT_IN_THE_PAST_ROLE')")
-	EntityIdentifier matureDepositApplication(DepositStateTransitionCommand command);
+	/*@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE', 'CAN_APPROVE_DEPOSIT_ROLE', 'CAN_APPROVE_DEPOSIT_IN_THE_PAST_ROLE')")
+	EntityIdentifier matureDepositApplication(DepositStateTransitionCommand command);*/
 
 	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE', 'CAN_APPROVE_DEPOSIT_ROLE', 'CAN_APPROVE_DEPOSIT_IN_THE_PAST_ROLE')")
 	EntityIdentifier withdrawDepositAccountMoney(DepositAccountWithdrawalCommand command);
-	
+
+	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE', 'CAN_APPROVE_DEPOSIT_ROLE', 'CAN_APPROVE_DEPOSIT_IN_THE_PAST_ROLE')")
+	EntityIdentifier withdrawDepositAccountInterestMoney(DepositAccountWithdrawInterestCommand command);	
 
 }

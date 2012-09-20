@@ -25,7 +25,7 @@ public class DepositStateTransitionApprovalCommandValidator {
 		baseDataValidator.reset().parameter("accountId").value(command.getAccountId()).notNull().integerGreaterThanZero();
 		baseDataValidator.reset().parameter("commencementDate").value(command.getEventDate()).notNull();
 		
-		baseDataValidator.reset().parameter("depositAmount").value(command.getDepositAmount()).ignoreIfNull().zeroOrPositiveAmount();
+		baseDataValidator.reset().parameter("deposit").value(command.getDepositAmount()).ignoreIfNull().zeroOrPositiveAmount();
 		baseDataValidator.reset().parameter("tenureInMonths").value(command.getTenureInMonths()).ignoreIfNull().integerGreaterThanZero();
 		baseDataValidator.reset().parameter("interestCompoundedEveryPeriodType").value(command.getInterestCompoundedEveryPeriodType()).ignoreIfNull().inMinMaxRange(2, 2);
 		

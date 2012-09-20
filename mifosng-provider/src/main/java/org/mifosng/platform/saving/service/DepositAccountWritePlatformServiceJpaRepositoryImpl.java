@@ -6,7 +6,9 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
+import org.joda.time.Months;
 import org.mifosng.platform.api.commands.DepositAccountCommand;
+import org.mifosng.platform.api.commands.DepositAccountWithdrawInterestCommand;
 import org.mifosng.platform.api.commands.DepositAccountWithdrawalCommand;
 import org.mifosng.platform.api.commands.DepositStateTransitionApprovalCommand;
 import org.mifosng.platform.api.commands.DepositStateTransitionCommand;
@@ -238,7 +240,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 		return new EntityIdentifier(account.getId());
 	}
 
-	@Transactional
+	/*@Transactional
 	@Override
 	public EntityIdentifier matureDepositApplication(DepositStateTransitionCommand command) {
 		
@@ -260,11 +262,11 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 		account.matureDepositApplication(eventDate, defaultDepositLifecycleStateMachine());
 		this.depositAccountRepository.save(account);
 		
-		/*if(account.isRenewalAllowed()){
+		if(account.isRenewalAllowed()){
 			final DepositAccount renewedAccount = this.depositAccountAssembler.assembleFrom(account);
 			this.depositAccountRepository.save(renewedAccount);
 			return new EntityIdentifier(renewedAccount.getId()); //returns the new deposit application id
-		}*/
+		}
 		
 		String noteText = command.getNote();
 		if (StringUtils.isNotBlank(noteText)) {
@@ -273,13 +275,16 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 		}
 		
 		return new EntityIdentifier(account.getId());
-	}
+	}*/
 
 	@Transactional
 	@Override
 	public EntityIdentifier withdrawDepositAccountMoney(final DepositAccountWithdrawalCommand command) {
 		
 		context.authenticatedUser();
+		
+		DepositAccountWithdrawalCommandValidator validator = new DepositAccountWithdrawalCommandValidator(command);
+		validator.validate();
 		
 		DepositAccount account = this.depositAccountRepository.findOne(command.getAccountId());
 		if (account == null || account.isDeleted()) {
@@ -309,6 +314,43 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 		if (StringUtils.isNotBlank(noteText)) {
 			Note note = Note.depositNote(account, noteText);
 			this.noteRepository.save(note);
+		}
+		return new EntityIdentifier(account.getId());
+	}
+
+	@Transactional
+	@Override
+	public EntityIdentifier withdrawDepositAccountInterestMoney(DepositAccountWithdrawInterestCommand command) {
+		
+		context.authenticatedUser();
+		
+		WithDrawDepositAccountInterestCommandValidator validator = new WithDrawDepositAccountInterestCommandValidator(command);
+		validator.validate();
+		
+		DepositAccount account = this.depositAccountRepository.findOne(command.getAccountId());
+		if (account == null || account.isDeleted()) {
+			throw new DepositAccountNotFoundException(command.getAccountId());
+		}
+		
+		BigDecimal actualInterestAccured = account.getAccuredInterest().getAmount();
+		Integer tenure = account.getTenureInMonths();
+		BigDecimal interstGettingForPeriod = actualInterestAccured.divide(new BigDecimal(tenure));
+		
+		
+		Integer interestCompoundEvery = account.getInterestCompoundedEvery();
+		LocalDate lastInterestTakenDate = account.getActualCommencementDate();
+		LocalDate todaysDate = new LocalDate();
+		Integer noOfMonthsforInterestCal = Months.monthsBetween(lastInterestTakenDate, todaysDate).getMonths();
+		Integer noOfPeriods = noOfMonthsforInterestCal / interestCompoundEvery;
+		BigDecimal availableInterestAmountForWithDrawal = interstGettingForPeriod.multiply(new BigDecimal(noOfPeriods));
+		Integer iswithdrawable = availableInterestAmountForWithDrawal.compareTo(command.getWithdrawInterest());
+		
+		if(noOfPeriods > 0 ){
+			
+		}else if(noOfPeriods <= 0){
+			if(iswithdrawable==-1){
+				throw new RuntimeException();
+			}
 		}
 		return new EntityIdentifier(account.getId());
 	}

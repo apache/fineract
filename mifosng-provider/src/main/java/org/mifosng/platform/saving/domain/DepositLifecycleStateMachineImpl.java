@@ -35,7 +35,7 @@ public class DepositLifecycleStateMachineImpl implements
 			break;
 		case DEPOSIT_APPROVED:
 			if (from.hasStateOf(DepositAccountStatus.SUBMITED_AND_PENDING_APPROVAL)) {
-				newState = stateOf(DepositAccountStatus.APPROVED, allowedDepositStatuses);
+				newState = stateOf(DepositAccountStatus.ACTIVE, allowedDepositStatuses);
 			}
 			else{
 				final String errorMessage = "The DepositApplication can not be approved from "+from.getCode() ;
@@ -43,7 +43,7 @@ public class DepositLifecycleStateMachineImpl implements
 			}
 			break;
 		case DEPOSIT_WITHDRAWN:
-			if (this.anyOfAllowedWhenComingFrom(from, DepositAccountStatus.SUBMITED_AND_PENDING_APPROVAL, DepositAccountStatus.APPROVED)) {
+			if (this.anyOfAllowedWhenComingFrom(from, DepositAccountStatus.SUBMITED_AND_PENDING_APPROVAL, DepositAccountStatus.ACTIVE)) {
 				newState = stateOf(DepositAccountStatus.WITHDRAWN_BY_CLIENT, allowedDepositStatuses);
 			}
 			else{
@@ -52,7 +52,7 @@ public class DepositLifecycleStateMachineImpl implements
 			}
 			break;
 		case DEPOSIT_APPROVAL_UNDO:
-			if (from.hasStateOf(DepositAccountStatus.APPROVED)) {
+			if (from.hasStateOf(DepositAccountStatus.ACTIVE)) {
 				newState = stateOf(DepositAccountStatus.SUBMITED_AND_PENDING_APPROVAL, allowedDepositStatuses);
 			}
 			else{
@@ -61,7 +61,7 @@ public class DepositLifecycleStateMachineImpl implements
 			}
 			break;
 		case DEPOSIT_MATURED:
-			if (from.hasStateOf(DepositAccountStatus.APPROVED) ){
+			if (from.hasStateOf(DepositAccountStatus.ACTIVE) ){
 				newState = stateOf(DepositAccountStatus.MATURED, allowedDepositStatuses);
 			}
 			else{
@@ -79,7 +79,7 @@ public class DepositLifecycleStateMachineImpl implements
 			}
 			break;
 		case DEPOSIT_PRECLOSED:
-			if (from.hasStateOf(DepositAccountStatus.APPROVED) ){
+			if (from.hasStateOf(DepositAccountStatus.ACTIVE) ){
 				newState = stateOf(DepositAccountStatus.PRECLOSED, allowedDepositStatuses);
 			}
 			else{

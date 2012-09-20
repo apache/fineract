@@ -45,17 +45,27 @@ public class DepositAccountTransaction extends AbstractPersistable<Long> {
 	@Column(name = "amount", scale = 6, precision = 19, nullable = false)
 	private final BigDecimal amount;
 	
+	@Column(name = "interest", scale = 6, precision = 19, nullable = false)
+	private final BigDecimal interest;
+	
+	@Column(name = "total", scale = 6, precision = 19, nullable = false)
+	private final BigDecimal total;
+	
 	protected DepositAccountTransaction(){
 		this.depositAccount=null;
 		this.typeOf=null;
 		this.amount=null;
 		this.dateOf=null;
+		this.interest=null;
+		this.total=null;
 	}
 	
-	private DepositAccountTransaction(DepositAccountTransactionType type, final BigDecimal amount, final LocalDate date) {
+	private DepositAccountTransaction(DepositAccountTransactionType type, final BigDecimal amount, final LocalDate date, final BigDecimal interest) {
 		this.typeOf = type;
         this.amount = amount;
 		this.dateOf = date.toDateMidnight().toDate();
+		this.interest = interest;
+		this.total = amount.add(interest);
 	}
 
 	public Date getDateOf() {
@@ -82,12 +92,12 @@ public class DepositAccountTransaction extends AbstractPersistable<Long> {
 		return DepositAccountTransactionType.DEPOSIT.equals(typeOf);
 	}
 
-	public static DepositAccountTransaction deposit(Money amount, LocalDate paymentDate) {
-		return new DepositAccountTransaction(DepositAccountTransactionType.DEPOSIT, amount.getAmount(), paymentDate);
+	public static DepositAccountTransaction deposit(Money amount, LocalDate paymentDate, Money interest) {
+		return new DepositAccountTransaction(DepositAccountTransactionType.DEPOSIT, amount.getAmount(), paymentDate, interest.getAmount());
 	}
 	 
-	public static DepositAccountTransaction withdraw(Money amount, LocalDate paymentDate) {
-		return new DepositAccountTransaction(DepositAccountTransactionType.WITHDRAW, amount.getAmount(), paymentDate);
+	public static DepositAccountTransaction withdraw(Money amount, LocalDate paymentDate, Money interest) {
+		return new DepositAccountTransaction(DepositAccountTransactionType.WITHDRAW, amount.getAmount(), paymentDate, interest.getAmount());
 	}
 	
 	public void updateAccount(DepositAccount depositAccount) {
