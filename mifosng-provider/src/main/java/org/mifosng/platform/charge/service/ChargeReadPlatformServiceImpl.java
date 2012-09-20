@@ -163,7 +163,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
 
 
         @Override
-        public ChargeData mapRow(ResultSet rs, int rowNum) throws SQLException {
+        public ChargeData mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
             Long id = rs.getLong("id");
             String name = rs.getString("name");
             BigDecimal amount = rs.getBigDecimal("amount");
@@ -205,7 +205,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
         }
 
         @Override
-        public LoanChargeData mapRow(ResultSet rs, int rowNum) throws SQLException {
+        public LoanChargeData mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
             Long id = rs.getLong("id");
             Long chargeId = rs.getLong("chargeId");
             String name = rs.getString("name");

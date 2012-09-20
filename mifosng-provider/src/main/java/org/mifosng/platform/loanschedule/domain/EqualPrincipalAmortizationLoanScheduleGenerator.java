@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
@@ -13,6 +14,7 @@ import org.mifosng.platform.api.data.LoanSchedulePeriodData;
 import org.mifosng.platform.currency.domain.ApplicationCurrency;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.currency.domain.Money;
+import org.mifosng.platform.loan.domain.LoanCharge;
 import org.mifosng.platform.loan.domain.LoanProductRelatedDetail;
 
 public class EqualPrincipalAmortizationLoanScheduleGenerator implements AmortizationLoanScheduleGenerator {
@@ -22,13 +24,15 @@ public class EqualPrincipalAmortizationLoanScheduleGenerator implements Amortiza
 	
 	@Override
 	public LoanScheduleNewData generate(
-			ApplicationCurrency currency,
-			LoanProductRelatedDetail loanScheduleInfo,
-			LocalDate disbursementDate, LocalDate firstRepaymentDate,
-			LocalDate interestCalculatedFrom,
-			BigDecimal periodInterestRateForRepaymentPeriod,
-			LocalDate idealDisbursementDateBasedOnFirstRepaymentDate,
-			List<LocalDate> scheduledDates) {
+			final ApplicationCurrency currency,
+			final LoanProductRelatedDetail loanScheduleInfo,
+			final LocalDate disbursementDate, 
+			final LocalDate firstRepaymentDate,
+			final LocalDate interestCalculatedFrom,
+			final BigDecimal periodInterestRateForRepaymentPeriod,
+			final LocalDate idealDisbursementDateBasedOnFirstRepaymentDate,
+			final List<LocalDate> scheduledDates,
+			final Set<LoanCharge> loanCharges) {
 
 		final Collection<LoanSchedulePeriodData> periods = new ArrayList<LoanSchedulePeriodData>();
 		
@@ -37,22 +41,32 @@ public class EqualPrincipalAmortizationLoanScheduleGenerator implements Amortiza
 		Money totalDuePerInstallment = Money.zero(monetaryCurrency);
 
 		Money outstandingBalance = loanScheduleInfo.getPrincipal();
+		Money principalDisbursed = loanScheduleInfo.getPrincipal(); 
 		Money totalPrincipal = Money.zero(monetaryCurrency);
 		Money totalInterest = Money.zero(monetaryCurrency);
 		
 		double interestCalculationGraceOnRepaymentPeriodFraction = this.paymentPeriodsInOneYearCalculator.calculateRepaymentPeriodAsAFractionOfDays(loanScheduleInfo.getRepaymentPeriodFrequencyType(), 
 												loanScheduleInfo.getRepayEvery(), interestCalculatedFrom, scheduledDates, idealDisbursementDateBasedOnFirstRepaymentDate);
 		
+		BigDecimal chargesDueAtTimeOfDisbursement = BigDecimal.ZERO;
+		for (LoanCharge loanCharge : loanCharges) {
+			// FIXME - KW - right now only charges at disbursement are supported.
+			if (loanCharge.isDueAtDisbursement()) {
+				chargesDueAtTimeOfDisbursement = chargesDueAtTimeOfDisbursement.add(loanCharge.calculateMonetaryAmount(principalDisbursed));
+			}
+		}
+		
+		BigDecimal cumulativeChargesToDate = chargesDueAtTimeOfDisbursement;
+		
 		// create entries of disbursement period on loan schedule
-		final LoanSchedulePeriodData disbursementPeriod = LoanSchedulePeriodData.disbursement(disbursementDate, loanScheduleInfo.getPrincipal().getAmount());
+		final LoanSchedulePeriodData disbursementPeriod = LoanSchedulePeriodData.disbursementOnlyPeriod(disbursementDate, principalDisbursed.getAmount(), chargesDueAtTimeOfDisbursement);
 		periods.add(disbursementPeriod);
 		
 		int loanTermInDays = Integer.valueOf(0);
-		BigDecimal cumulativePrincipalDisbursed = loanScheduleInfo.getPrincipal().getAmount();
+		BigDecimal cumulativePrincipalDisbursed = principalDisbursed.getAmount();
 		BigDecimal cumulativePrincipalDue = BigDecimal.ZERO;
 		BigDecimal cumulativeInterestExpected = BigDecimal.ZERO;
-		BigDecimal cumulativeChargesToDate = BigDecimal.ZERO;
-		BigDecimal totalExpectedRepayment = BigDecimal.ZERO;
+		BigDecimal totalExpectedRepayment = chargesDueAtTimeOfDisbursement;
 		
 		LocalDate startDate = disbursementDate;
 		int periodNumber = 1;
@@ -90,7 +104,7 @@ public class EqualPrincipalAmortizationLoanScheduleGenerator implements Amortiza
 
 			outstandingBalance = outstandingBalance.minus(principalForInstallment);
 			
-			LoanSchedulePeriodData installment = LoanSchedulePeriodData.repaymentPeriod(periodNumber, startDate, 
+			LoanSchedulePeriodData installment = LoanSchedulePeriodData.repaymentOnlyPeriod(periodNumber, startDate, 
 					scheduledDueDate, 
 					principalForInstallment.getAmount(), 
 					outstandingBalance.getAmount(), 

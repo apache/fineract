@@ -39,7 +39,7 @@ public class PermissionReadPlatformServiceImpl implements PermissionReadPlatform
 	private static final class PermissionMapper implements RowMapper<PermissionData> {
 
 		@Override
-		public PermissionData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
+		public PermissionData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
 			Long id = JdbcSupport.getLong(rs, "id");
 			String name = rs.getString("name");

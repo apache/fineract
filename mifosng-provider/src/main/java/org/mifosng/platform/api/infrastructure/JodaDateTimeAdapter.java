@@ -14,6 +14,7 @@ import com.google.gson.JsonSerializer;
  */
 public class JodaDateTimeAdapter implements JsonSerializer<DateTime> {
 
+	@SuppressWarnings("unused")
 	@Override
 	public JsonElement serialize(DateTime src, Type typeOfSrc, JsonSerializationContext context) {
 		

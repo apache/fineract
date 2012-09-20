@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
 public class InvalidTenantIdentifierExceptionMapper implements ExceptionMapper<InvalidTenantIdentiferException> {
 
 	@Override
-	public Response toResponse(final InvalidTenantIdentiferException e) {
+	public Response toResponse(@SuppressWarnings("unused") final InvalidTenantIdentiferException e) {
 		return Response.status(Status.UNAUTHORIZED).entity(ApiGlobalErrorResponse.invalidTenantIdentifier()).type(MediaType.APPLICATION_JSON).build();
 	}
 }

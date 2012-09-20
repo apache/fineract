@@ -28,6 +28,7 @@ public class CalculateLoanScheduleCommand {
 	private final LocalDate expectedDisbursementDate;
 	private final LocalDate repaymentsStartingFromDate;
 	private final LocalDate interestChargedFromDate;
+	private final LoanChargeCommand[] charges;
 
 	public CalculateLoanScheduleCommand(
 			final Long productId,
@@ -36,7 +37,7 @@ public class CalculateLoanScheduleCommand {
 			final Integer repaymentEvery, final Integer repaymentFrequency, final Integer numberOfRepayments, Integer amortizationMethod,
 			final Integer loanTermFrequency, final Integer loanTermFrequencyType,
 			final LocalDate expectedDisbursementDate,
-			final LocalDate repaymentsStartingFromDate, final LocalDate interestCalculatedFromDate) {
+			final LocalDate repaymentsStartingFromDate, final LocalDate interestCalculatedFromDate, final LoanChargeCommand[] charges) {
 		
 		this.productId = productId;
 		this.principal = principal;
@@ -54,6 +55,7 @@ public class CalculateLoanScheduleCommand {
 		this.expectedDisbursementDate = expectedDisbursementDate;
 		this.repaymentsStartingFromDate = repaymentsStartingFromDate;
 		this.interestChargedFromDate= interestCalculatedFromDate;
+		this.charges = charges;
 	}
 
 	public Long getProductId() {
@@ -114,5 +116,9 @@ public class CalculateLoanScheduleCommand {
 
 	public LocalDate getInterestChargedFromDate() {
 		return interestChargedFromDate;
+	}
+
+	public LoanChargeCommand[] getCharges() {
+		return charges;
 	}
 }

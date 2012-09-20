@@ -2,6 +2,8 @@ package org.mifosng.platform.loan.domain;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -13,6 +15,7 @@ import org.mifosng.platform.api.commands.LoanChargeCommand;
 import org.mifosng.platform.charge.domain.Charge;
 import org.mifosng.platform.charge.domain.ChargeCalculationType;
 import org.mifosng.platform.charge.domain.ChargeTimeType;
+import org.mifosng.platform.currency.domain.Money;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity 
@@ -23,7 +26,6 @@ public class LoanCharge extends AbstractPersistable<Long> {
     @JoinColumn(name = "loan_id", referencedColumnName = "id", nullable=false)
     private Loan loan;
 
-    @SuppressWarnings("unused")
     @ManyToOne(optional = false)
     @JoinColumn(name = "charge_id", referencedColumnName = "id", nullable=false)
     private Charge charge;
@@ -92,7 +94,7 @@ public class LoanCharge extends AbstractPersistable<Long> {
 		return ChargeTimeType.fromInt(this.chargeTime).equals(ChargeTimeType.DISBURSEMENT);
 	}
 
-	public BigDecimal calculateMonetaryAmount() {
+	public BigDecimal calculateMonetaryAmount(final Money principalDisbursed) {
 		BigDecimal calculatedAmount = BigDecimal.ZERO;
 		
 		if (ChargeCalculationType.fromInt(chargeCalculation).equals(ChargeCalculationType.FLAT)) {
@@ -104,13 +106,22 @@ public class LoanCharge extends AbstractPersistable<Long> {
 				amountAsPercentageFactor = this.amount.divide(BigDecimal.valueOf(Double.valueOf("100")));
 			}
 			
-			calculatedAmount = this.loan.getPrincpal().multiplyRetainScale(amountAsPercentageFactor, RoundingMode.HALF_EVEN).getAmount();
+			calculatedAmount = principalDisbursed.multiplyRetainScale(amountAsPercentageFactor, RoundingMode.HALF_EVEN).getAmount();
 		}
 		
 		return calculatedAmount;
 	}
+	
+	public BigDecimal calculateMonetaryAmount() {
+		return calculateMonetaryAmount(this.loan.getPrincpal());
+	}
 
 	private boolean isGreaterThanZero(final BigDecimal value) {
 		return value.compareTo(BigDecimal.ZERO) == 1;
+	}
+
+	public LoanChargeCommand toData() {
+		Set<String> modifiedParameters = new HashSet<String>();
+		return new LoanChargeCommand(modifiedParameters, this.getId(), this.charge.getId(), this.amount, this.chargeTime, this.chargeCalculation);
 	}
 }

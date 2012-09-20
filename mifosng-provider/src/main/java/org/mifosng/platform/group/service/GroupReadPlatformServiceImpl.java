@@ -80,7 +80,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         }
 
         @Override
-        public GroupData mapRow(ResultSet rs, int rowNum) throws SQLException {
+        public GroupData mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
 
             Long id = rs.getLong("id");
             String name = rs.getString("name");
@@ -110,7 +110,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         }
 
         @Override
-        public ClientLookup mapRow(ResultSet rs, int rowNum) throws SQLException {
+        public ClientLookup mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
             Long id = rs.getLong("id");
             String firstname = rs.getString("firstname");
             String lastname = rs.getString("lastname");

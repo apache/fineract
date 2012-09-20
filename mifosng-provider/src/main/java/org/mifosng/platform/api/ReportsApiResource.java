@@ -153,7 +153,7 @@ public class ReportsApiResource {
 		if (!parameterType) {
 			AppUser currentUser = context.authenticatedUser();
 			if (currentUser.hasNotPermissionForReport(reportName)) {
-				// TODO - message isnt passing back the message in the string in
+				// FIXME - JW - message isnt passing back the message in the string in
 				// the json just a generalised not authorised message
 				throw new NoAuthorizationException(
 						"Not Authorised to Run Report: " + reportName);

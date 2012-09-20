@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 public class InvalidJsonExceptionMapper implements ExceptionMapper<InvalidJsonException> {
 
 	@Override
-	public Response toResponse(final InvalidJsonException exception) {
+	public Response toResponse(@SuppressWarnings("unused") final InvalidJsonException exception) {
 		
 		String globalisationMessageCode = "error.msg.invalid.request.body";
 		String defaultUserMessage = "The JSON provided in the body of the request is invalid or missing.";

@@ -18,6 +18,7 @@ import org.mifosng.platform.currency.domain.Money;
  * 
  * If the entire principal of an installment is paid in advance then the interest component is waived.
  */
+@SuppressWarnings("unused")
 public class HeavensFamilyLoanRepaymentScheduleTransactionProcessor extends AbstractLoanRepaymentScheduleTransactionProcessor {
 	
 	/**

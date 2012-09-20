@@ -23,7 +23,7 @@ import org.springframework.stereotype.Component;
 public class NoAuthorizationExceptionMapper implements ExceptionMapper<NoAuthorizationException> {
 
 	@Override
-	public Response toResponse(NoAuthorizationException exception) {
+	public Response toResponse(@SuppressWarnings("unused") NoAuthorizationException exception) {
 		// Status code 403 really reads as: "Authenticated - but not authorized":
 		return Response.status(Status.FORBIDDEN).entity(ApiGlobalErrorResponse.unAuthorized()).type(MediaType.APPLICATION_JSON).build();
 	}

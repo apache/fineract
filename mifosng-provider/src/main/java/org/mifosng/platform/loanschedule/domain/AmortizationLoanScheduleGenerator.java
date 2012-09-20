@@ -2,10 +2,12 @@ package org.mifosng.platform.loanschedule.domain;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Set;
 
 import org.joda.time.LocalDate;
 import org.mifosng.platform.api.LoanScheduleNewData;
 import org.mifosng.platform.currency.domain.ApplicationCurrency;
+import org.mifosng.platform.loan.domain.LoanCharge;
 import org.mifosng.platform.loan.domain.LoanProductRelatedDetail;
 
 public interface AmortizationLoanScheduleGenerator {
@@ -18,5 +20,6 @@ public interface AmortizationLoanScheduleGenerator {
 			LocalDate interestCalculatedFrom,
 			BigDecimal periodInterestRateForRepaymentPeriod,
 			LocalDate idealDisbursementDateBasedOnFirstRepaymentDate,
-			List<LocalDate> scheduledDates);
+			List<LocalDate> scheduledDates, 
+			Set<LoanCharge> loanCharges);
 }

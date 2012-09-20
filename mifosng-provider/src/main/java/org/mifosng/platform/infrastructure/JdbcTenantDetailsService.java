@@ -43,7 +43,7 @@ public class JdbcTenantDetailsService implements TenantDetailsService {
 	private static final class TenantMapper implements RowMapper<MifosPlatformTenant> {
 
 		@Override
-		public MifosPlatformTenant mapRow(final ResultSet rs, final int rowNum) throws SQLException {
+		public MifosPlatformTenant mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
 			Long id = rs.getLong("id");
 			String name = rs.getString("name");

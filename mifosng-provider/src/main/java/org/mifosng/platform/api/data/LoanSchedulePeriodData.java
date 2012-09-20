@@ -39,13 +39,16 @@ public class LoanSchedulePeriodData {
 	private final BigDecimal totalWaivedForPeriod;
 	private final BigDecimal totalOutstandingForPeriod;
 
-	public static LoanSchedulePeriodData disbursement(final LocalDate disbursementDate, final BigDecimal principalDisbursed) {
+	public static LoanSchedulePeriodData disbursementOnlyPeriod(
+			final LocalDate disbursementDate, 
+			final BigDecimal principalDisbursed, 
+			final BigDecimal chargesDueAtTimeOfDisbursement) {
 		Integer periodNumber = Integer.valueOf(0);
 		LocalDate from = null;
-		return new LoanSchedulePeriodData(periodNumber, from, disbursementDate, principalDisbursed);
+		return new LoanSchedulePeriodData(periodNumber, from, disbursementDate, principalDisbursed, chargesDueAtTimeOfDisbursement);
 	}
 	
-	public static LoanSchedulePeriodData repaymentPeriod(final Integer periodNumber,
+	public static LoanSchedulePeriodData repaymentOnlyPeriod(final Integer periodNumber,
 			final LocalDate fromDate, final LocalDate dueDate, final BigDecimal principalDue,
 			final BigDecimal principalOutstanding, final BigDecimal interestDueOnPrincipalOutstanding, final BigDecimal totalDueForPeriod) {
 		
@@ -84,7 +87,8 @@ public class LoanSchedulePeriodData {
 			final Integer periodNumber, 
 			final LocalDate fromDate, 
 			final LocalDate dueDate,
-			final BigDecimal principalDisbursed) {
+			final BigDecimal principalDisbursed,
+			final BigDecimal chargesDueAtTimeOfDisbursement) {
 		this.period = periodNumber;
 		this.fromDate = fromDate;
 		this.dueDate = dueDate;
@@ -106,12 +110,12 @@ public class LoanSchedulePeriodData {
 		this.interestWaived = null;
 		this.interestOutstanding = null;
 	
-		this.chargesDue = BigDecimal.ZERO;
+		this.chargesDue = chargesDueAtTimeOfDisbursement;
 		this.chargesPaid = null;
-		this.chargesOutstanding = null;
+		this.chargesOutstanding = chargesDueAtTimeOfDisbursement;
 		
-		this.totalOriginalDueForPeriod = null;
-		this.totalDueForPeriod = null;
+		this.totalOriginalDueForPeriod = chargesDueAtTimeOfDisbursement;
+		this.totalDueForPeriod = chargesDueAtTimeOfDisbursement;
 		this.totalPaidForPeriod = BigDecimal.ZERO;
 		this.totalWaivedForPeriod = null;
 		this.totalOutstandingForPeriod = null;

@@ -15,6 +15,7 @@ import org.mifosng.platform.currency.domain.Money;
  * means, recalculate the interest component based on the how much principal is outstanding at a point in time;
  * but this isnt trying to model that option only the basic one for now.
  */
+@SuppressWarnings("unused")
 public class MifosStyleLoanRepaymentScheduleTransactionProcessor extends
 		AbstractLoanRepaymentScheduleTransactionProcessor {
 

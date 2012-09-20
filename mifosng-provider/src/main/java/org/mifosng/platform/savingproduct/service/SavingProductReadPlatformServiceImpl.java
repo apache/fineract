@@ -77,7 +77,7 @@ public class SavingProductReadPlatformServiceImpl implements
 		} catch (EmptyResultDataAccessException e) {
 			throw new LoanProductNotFoundException(savingProductId);
 		}
-	}		// TODO Auto-generated method stub
+	}
 
 	@Override
 	public SavingProductData retrieveNewSavingProductDetails() {
@@ -98,7 +98,7 @@ public class SavingProductReadPlatformServiceImpl implements
 		}
 
 		@Override
-		public SavingProductData mapRow(ResultSet rs, int rowNum)
+		public SavingProductData mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum)
 				throws SQLException {
 			
 			Long id = rs.getLong("id");
@@ -132,7 +132,7 @@ public class SavingProductReadPlatformServiceImpl implements
 		}
 
 		@Override
-		public SavingProductLookup mapRow(final ResultSet rs, final int rowNum)
+		public SavingProductLookup mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
 				throws SQLException {
 
 			Long id = rs.getLong("id");

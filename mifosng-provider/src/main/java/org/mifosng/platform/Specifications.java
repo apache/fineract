@@ -9,6 +9,7 @@ import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.loan.domain.Loan;
 import org.springframework.data.jpa.domain.Specification;
 
+@SuppressWarnings("unused")
 public final class Specifications {
 	
 	public static Specification<Loan> loansThatMatch(final Client client) {

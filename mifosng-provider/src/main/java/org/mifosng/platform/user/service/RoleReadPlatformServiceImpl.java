@@ -56,7 +56,7 @@ public class RoleReadPlatformServiceImpl implements RoleReadPlatformService {
 	protected static final class RoleMapper implements RowMapper<RoleData> {
 
 		@Override
-		public RoleData mapRow(final ResultSet rs, final int rowNum)
+		public RoleData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
 				throws SQLException {
 
 			Long id = JdbcSupport.getLong(rs, "id");

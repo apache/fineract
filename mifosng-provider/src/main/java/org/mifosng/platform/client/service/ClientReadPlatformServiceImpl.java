@@ -118,7 +118,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 		}
 
 		@Override
-		public ClientData mapRow(final ResultSet rs, final int rowNum)
+		public ClientData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
 				throws SQLException {
 
 			Long officeId = JdbcSupport.getLong(rs, "officeId");
@@ -147,7 +147,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         }
 
         @Override
-        public ClientLookup mapRow(ResultSet rs, int rowNum) throws SQLException {
+        public ClientLookup mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
             Long id = rs.getLong("id");
             String firstname = rs.getString("firstname");
             String lastname = rs.getString("lastname");
@@ -238,7 +238,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
 		@Override
 		public ClientAccountSummaryData mapRow(final ResultSet rs,
-				final int rowNum) throws SQLException {
+				@SuppressWarnings("unused") final int rowNum) throws SQLException {
 
 			Long id = JdbcSupport.getLong(rs, "id");
 			String externalId = rs.getString("externalId");
@@ -265,7 +265,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 		
 		@Override
 		public ClientAccountSummaryData mapRow(final ResultSet rs,
-				final int rowNum) throws SQLException {
+				@SuppressWarnings("unused") final int rowNum) throws SQLException {
 		
 			Long id = JdbcSupport.getLong(rs, "id");
 			String externalId = rs.getString("externalId");
@@ -341,7 +341,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 		}
 
 		@Override
-		public NoteData mapRow(final ResultSet rs, final int rowNum)
+		public NoteData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
 				throws SQLException {
 
 			Long id = JdbcSupport.getLong(rs, "id");

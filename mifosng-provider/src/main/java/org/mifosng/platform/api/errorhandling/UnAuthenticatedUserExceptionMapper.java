@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 public class UnAuthenticatedUserExceptionMapper implements ExceptionMapper<UnAuthenticatedUserException> {
 
 	@Override
-	public Response toResponse(UnAuthenticatedUserException exception) {
+	public Response toResponse(@SuppressWarnings("unused") UnAuthenticatedUserException exception) {
 		// Status code 401 really reads as: "Unauthenticated":
 		return Response.status(Status.UNAUTHORIZED).entity(ApiGlobalErrorResponse.unAuthenticated()).type(MediaType.APPLICATION_JSON).build();
 	}

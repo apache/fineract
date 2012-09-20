@@ -6,6 +6,7 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
@@ -15,6 +16,7 @@ import org.mifosng.platform.api.data.LoanSchedulePeriodData;
 import org.mifosng.platform.currency.domain.ApplicationCurrency;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.currency.domain.Money;
+import org.mifosng.platform.loan.domain.LoanCharge;
 import org.mifosng.platform.loan.domain.LoanProductRelatedDetail;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 
@@ -31,7 +33,8 @@ public class FlatMethodLoanScheduleGenerator implements LoanScheduleGenerator {
 			final PeriodFrequencyType loanTermFrequencyType, 
 			final LocalDate disbursementDate, 
 			final LocalDate firstRepaymentDate,
-			final LocalDate interestCalculatedFrom) {
+			final LocalDate interestCalculatedFrom,
+			final Set<LoanCharge> loanCharges) {
 		
 		final Collection<LoanSchedulePeriodData> periods = new ArrayList<LoanSchedulePeriodData>();
 		
@@ -56,19 +59,29 @@ public class FlatMethodLoanScheduleGenerator implements LoanScheduleGenerator {
 						RoundingMode.HALF_EVEN);
 
 		Money outstandingBalance = loanScheduleInfo.getPrincipal();
+		Money principalDisbursed = loanScheduleInfo.getPrincipal(); 
 		Money totalPrincipal = Money.zero(outstandingBalance.getCurrency());
 		Money totalInterest = Money.zero(outstandingBalance.getCurrency());
-
+		
+		BigDecimal chargesDueAtTimeOfDisbursement = BigDecimal.ZERO;
+		for (LoanCharge loanCharge : loanCharges) {
+			// FIXME - KW - right now only charges at disbursement are supported.
+			if (loanCharge.isDueAtDisbursement()) {
+				chargesDueAtTimeOfDisbursement = chargesDueAtTimeOfDisbursement.add(loanCharge.calculateMonetaryAmount(principalDisbursed));
+			}
+		}
+		
+		BigDecimal cumulativeChargesToDate = chargesDueAtTimeOfDisbursement;
+		
 		// create entries of disbursement period on loan schedule
-		final LoanSchedulePeriodData disbursementPeriod = LoanSchedulePeriodData.disbursement(disbursementDate, loanScheduleInfo.getPrincipal().getAmount());
+		final LoanSchedulePeriodData disbursementPeriod = LoanSchedulePeriodData.disbursementOnlyPeriod(disbursementDate, principalDisbursed.getAmount(), chargesDueAtTimeOfDisbursement);
 		periods.add(disbursementPeriod);
 		
 		int loanTermInDays = Integer.valueOf(0);
-		BigDecimal cumulativePrincipalDisbursed = loanScheduleInfo.getPrincipal().getAmount();
+		BigDecimal cumulativePrincipalDisbursed = principalDisbursed.getAmount();
 		BigDecimal cumulativePrincipalDue = BigDecimal.ZERO;
 		BigDecimal cumulativeInterestExpected = BigDecimal.ZERO;
-		BigDecimal cumulativeChargesToDate = BigDecimal.ZERO;
-		BigDecimal totalExpectedRepayment = BigDecimal.ZERO;
+		BigDecimal totalExpectedRepayment = chargesDueAtTimeOfDisbursement;
 		
 		LocalDate startDate = disbursementDate;
 		int periodNumber = 1;
@@ -98,7 +111,7 @@ public class FlatMethodLoanScheduleGenerator implements LoanScheduleGenerator {
 			Money totalInstallmentDue = principalPerInstallment.plus(interestPerInstallment);
 			outstandingBalance = outstandingBalance.minus(principalPerInstallment);
 			
-			LoanSchedulePeriodData installment = LoanSchedulePeriodData.repaymentPeriod(periodNumber, startDate, 
+			LoanSchedulePeriodData installment = LoanSchedulePeriodData.repaymentOnlyPeriod(periodNumber, startDate, 
 					scheduledDueDate, 
 					principalPerInstallment.getAmount(), 
 					outstandingBalance.getAmount(), 

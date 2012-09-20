@@ -303,16 +303,9 @@ public class LoansApiResource {
 	@Produces({MediaType.APPLICATION_JSON})
 	public String modifyLoanApplication(
 			@PathParam("loanId") final Long loanId,
-//			@QueryParam("command") final String commandParam,
-//			@Context final UriInfo uriInfo,
 			final String jsonRequestBody) {
 
 		final LoanApplicationCommand command = this.apiDataConversionService.convertJsonToLoanApplicationCommand(loanId, jsonRequestBody);
-
-//		if (is(commandParam, "calculateLoanSchedule")) {
-//			CalculateLoanScheduleCommand calculateLoanScheduleCommand = command.toCalculateLoanScheduleCommand();
-//			return calculateLoanSchedule(uriInfo, calculateLoanScheduleCommand);
-//		}
 
 		final EntityIdentifier identifier = this.loanWritePlatformService.modifyLoanApplication(command);
 

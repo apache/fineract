@@ -21,7 +21,7 @@ import com.google.gson.stream.MalformedJsonException;
 public class MalformedJsonExceptionMapper implements ExceptionMapper<MalformedJsonException> {
 
 	@Override
-	public Response toResponse(final MalformedJsonException exception) {
+	public Response toResponse(@SuppressWarnings("unused") final MalformedJsonException exception) {
 		
 		String globalisationMessageCode = "error.msg.invalid.request.body";
 		String defaultUserMessage = "The JSON provided in the body of the request is invalid or missing.";

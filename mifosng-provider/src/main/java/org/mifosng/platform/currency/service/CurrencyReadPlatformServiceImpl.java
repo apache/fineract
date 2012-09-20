@@ -50,7 +50,7 @@ public class CurrencyReadPlatformServiceImpl implements CurrencyReadPlatformServ
 	private static final class CurrencyMapper implements RowMapper<CurrencyData> {
 
 		@Override
-		public CurrencyData mapRow(final ResultSet rs, final int rowNum)
+		public CurrencyData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
 				throws SQLException {
 
 			String code = rs.getString("code");

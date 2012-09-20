@@ -18,6 +18,7 @@ public class ParameterListExclusionStrategy implements ExclusionStrategy {
 		return parameterNamesToSkip.contains(f.getName());
 	}
 
+	@SuppressWarnings("unused")
 	@Override
 	public boolean shouldSkipClass(Class<?> clazz) {
 		return false;

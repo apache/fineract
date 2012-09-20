@@ -34,7 +34,7 @@ public class FundReadPlatformServiceImpl implements FundReadPlatformService {
 		}
 
 		@Override
-		public FundData mapRow(final ResultSet rs, final int rowNum)
+		public FundData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
 				throws SQLException {
 
 			Long id = rs.getLong("id");

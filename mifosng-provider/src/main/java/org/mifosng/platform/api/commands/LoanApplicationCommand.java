@@ -96,10 +96,12 @@ public class LoanApplicationCommand {
 	}
 	
 	public CalculateLoanScheduleCommand toCalculateLoanScheduleCommand() {
-		return new CalculateLoanScheduleCommand(productId,
-				principal, interestRatePerPeriod, interestRateFrequencyType, interestType, interestCalculationPeriodType, repaymentEvery, repaymentFrequencyType, numberOfRepayments, amortizationType,
+		return new CalculateLoanScheduleCommand(this.productId,
+				this.principal, this.interestRatePerPeriod, this.interestRateFrequencyType, 
+				this.interestType, this.interestCalculationPeriodType, this.repaymentEvery, 
+				this.repaymentFrequencyType, this.numberOfRepayments, this.amortizationType,
 				this.loanTermFrequency, this.loanTermFrequencyType,
-				expectedDisbursementDate, repaymentsStartingFromDate, interestChargedFromDate);
+				this.expectedDisbursementDate, this.repaymentsStartingFromDate, this.interestChargedFromDate, this.charges);
 	}
 	
 	public Long getLoanId() {
@@ -200,7 +202,7 @@ public class LoanApplicationCommand {
 
 	public LoanProductCommand toLoanProductCommand() {
 		
-		// TODO - FIX UP FOR CHARGES.
+		// FIXME - KW - CHARGE - FIX UP FOR CHARGES - take look at loan product charges also and align usage with other loan areas.
 		return new LoanProductCommand(modifiedParameters, this.productId, null, null, 
 				this.fundId, this.transactionProcessingStrategyId, 
 				null, null, 

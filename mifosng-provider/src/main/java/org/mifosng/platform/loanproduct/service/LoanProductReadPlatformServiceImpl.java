@@ -167,7 +167,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 		}
 
 		@Override
-		public LoanProductData mapRow(final ResultSet rs, final int rowNum)
+		public LoanProductData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
 				throws SQLException {
 
 			Long id = rs.getLong("id");
@@ -246,7 +246,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 		}
 
 		@Override
-		public LoanProductLookup mapRow(final ResultSet rs, final int rowNum)
+		public LoanProductLookup mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
 				throws SQLException {
 
 			Long id = rs.getLong("id");

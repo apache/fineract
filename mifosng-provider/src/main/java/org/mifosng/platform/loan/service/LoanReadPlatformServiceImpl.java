@@ -99,7 +99,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 			final LoanScheduleMapper rm = new LoanScheduleMapper(disbursement);
 			final String sql = "select " + rm.loanScheduleSchema() + " where l.id = ? order by ls.loan_id, ls.installment";
 			
-			final LoanSchedulePeriodData disbursementPeriod = LoanSchedulePeriodData.disbursement(disbursement.disbursementDate(), disbursement.amount());
+			// FIXME - KW - pass through total chargesDueAtTimeOfDisbursementFigure
+			final LoanSchedulePeriodData disbursementPeriod = LoanSchedulePeriodData.disbursementOnlyPeriod(disbursement.disbursementDate(), disbursement.amount(), BigDecimal.ZERO);
 			
 			final Collection<LoanSchedulePeriodData> repaymentSchedulePeriods = this.jdbcTemplate.query(sql, rm, new Object[] { loanId });
 			

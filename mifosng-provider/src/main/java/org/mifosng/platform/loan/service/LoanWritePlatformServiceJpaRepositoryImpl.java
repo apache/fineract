@@ -12,6 +12,7 @@ import org.mifosng.platform.api.LoanScheduleNewData;
 import org.mifosng.platform.api.commands.AdjustLoanTransactionCommand;
 import org.mifosng.platform.api.commands.CalculateLoanScheduleCommand;
 import org.mifosng.platform.api.commands.LoanApplicationCommand;
+import org.mifosng.platform.api.commands.LoanChargeCommand;
 import org.mifosng.platform.api.commands.LoanStateTransitionCommand;
 import org.mifosng.platform.api.commands.LoanTransactionCommand;
 import org.mifosng.platform.api.commands.UndoStateTransitionCommand;
@@ -342,13 +343,21 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 			Integer interestMethod = loan.repaymentScheduleDetail().getInterestMethod().getValue();
 			Integer interestCalculationInPeriod = loan.repaymentScheduleDetail().getInterestCalculationPeriodMethod().getValue();
 			
+			Set<LoanCharge> loanCharges = loan.getCharges();
+			List<LoanChargeCommand> commands = new ArrayList<LoanChargeCommand>();
+			for (LoanCharge loanCharge : loanCharges) {
+				commands.add(loanCharge.toData());
+			}
+			
+			LoanChargeCommand[] loanChargeCommands = commands.toArray(new LoanChargeCommand[commands.size()]);
+			
 			CalculateLoanScheduleCommand calculateCommand = new CalculateLoanScheduleCommand(
 					loan.loanProduct().getId(),
 					principalAsDecimal, 
 					interestRatePerPeriod, interestRateFrequencyMethod, interestMethod, interestCalculationInPeriod,
 					repaidEvery, selectedRepaymentFrequency, numberOfInstallments, selectedAmortizationMethod, 
 					loanTermFrequency, loanTermFrequencyType,
-					actualDisbursementDate, repaymentsStartingFromDate, interestCalculatedFromDate);
+					actualDisbursementDate, repaymentsStartingFromDate, interestCalculatedFromDate, loanChargeCommands);
 
 			LoanScheduleNewData loanSchedule = this.calculationPlatformService.calculateLoanScheduleNew(calculateCommand);
 

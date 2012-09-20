@@ -15,6 +15,7 @@ import com.google.gson.JsonSerializer;
  */
 public class JodaLocalDateAdapter implements JsonSerializer<LocalDate> {
 
+	@SuppressWarnings("unused")
 	@Override
 	public JsonElement serialize(LocalDate src, Type typeOfSrc, JsonSerializationContext context) {
 		

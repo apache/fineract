@@ -25,6 +25,7 @@ public class AdhikarLoanRepaymentScheduleTransactionProcessor extends AbstractLo
 	 * For creocore, early is defined as any date before the installment due
 	 * date
 	 */
+	@SuppressWarnings("unused")
 	@Override
 	protected boolean isTransactionInAdvanceOfInstallment(
 			final int currentInstallmentIndex,
@@ -39,6 +40,7 @@ public class AdhikarLoanRepaymentScheduleTransactionProcessor extends AbstractLo
 	/**
 	 * For early/'in advance' repayments, pays off principal component only.
 	 */
+	@SuppressWarnings("unused")
 	@Override
 	protected Money handleTransactionThatIsPaymentInAdvanceOfInstallment(
 			final LoanRepaymentScheduleInstallment currentInstallment,
@@ -53,6 +55,7 @@ public class AdhikarLoanRepaymentScheduleTransactionProcessor extends AbstractLo
 	 * For late repayments, pay off in the same way as on-time payments,
 	 * interest first then principal.
 	 */
+	@SuppressWarnings("unused")
 	@Override
 	protected Money handleTransactionThatIsALateRepaymentOfInstallment(
 			final LoanRepaymentScheduleInstallment currentInstallment,
@@ -135,6 +138,7 @@ public class AdhikarLoanRepaymentScheduleTransactionProcessor extends AbstractLo
 		return transactionAmountRemaining;
 	}
 
+	@SuppressWarnings("unused")
 	@Override
 	protected void onLoanOverpayment(final LoanTransaction loanTransaction,
 			final Money loanOverPaymentAmount) {

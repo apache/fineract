@@ -165,7 +165,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 		}
 
 		@Override
-		public DepositAccountData mapRow(ResultSet rs, int rowNum)
+		public DepositAccountData mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum)
 				throws SQLException {
 			
 			Long id = rs.getLong("id");
@@ -229,7 +229,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 		}
 
 		@Override
-		public DepositAccountTransactionData mapRow(ResultSet rs, int rowNum)
+		public DepositAccountTransactionData mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum)
 				throws SQLException {
 			
 			Long transactionId = rs.getLong("transactionId");

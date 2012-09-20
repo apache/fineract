@@ -2,11 +2,13 @@ package org.mifosng.platform.loanschedule.domain;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Set;
 
 import org.joda.time.LocalDate;
 import org.mifosng.platform.api.LoanScheduleNewData;
 import org.mifosng.platform.currency.domain.ApplicationCurrency;
 import org.mifosng.platform.loan.domain.AmortizationMethod;
+import org.mifosng.platform.loan.domain.LoanCharge;
 import org.mifosng.platform.loan.domain.LoanProductRelatedDetail;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 
@@ -41,7 +43,8 @@ public class DecliningBalanceMethodLoanScheduleGenerator implements LoanSchedule
 			final PeriodFrequencyType loanTermFrequencyType, 
 			final LocalDate disbursementDate, 
 			final LocalDate firstRepaymentDate,
-			final LocalDate interestCalculatedFrom) {
+			final LocalDate interestCalculatedFrom,
+			final Set<LoanCharge> loanCharges) {
 		
 		// 1. generate valid set of 'due dates' based on some of the 'loan attributes'
 		final List<LocalDate> scheduledDates = this.scheduledDateGenerator.generate(loanScheduleInfo, disbursementDate, firstRepaymentDate);
@@ -61,6 +64,6 @@ public class DecliningBalanceMethodLoanScheduleGenerator implements LoanSchedule
 				interestCalculatedFrom,
 				periodInterestRateForRepaymentPeriod, 
 				idealDisbursementDateBasedOnFirstRepaymentDate, 
-				scheduledDates);
+				scheduledDates, loanCharges);
 	}
 }

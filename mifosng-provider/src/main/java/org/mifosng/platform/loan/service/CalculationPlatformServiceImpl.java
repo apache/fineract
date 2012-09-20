@@ -1,5 +1,7 @@
 package org.mifosng.platform.loan.service;
 
+import java.util.Set;
+
 import org.joda.time.LocalDate;
 import org.mifosng.platform.api.LoanScheduleNewData;
 import org.mifosng.platform.api.commands.CalculateLoanScheduleCommand;
@@ -11,6 +13,7 @@ import org.mifosng.platform.exceptions.CurrencyNotFoundException;
 import org.mifosng.platform.exceptions.LoanNotFoundException;
 import org.mifosng.platform.loan.domain.InterestMethod;
 import org.mifosng.platform.loan.domain.Loan;
+import org.mifosng.platform.loan.domain.LoanCharge;
 import org.mifosng.platform.loan.domain.LoanPayoffSummary;
 import org.mifosng.platform.loan.domain.LoanProductRelatedDetail;
 import org.mifosng.platform.loan.domain.LoanRepository;
@@ -30,18 +33,21 @@ public class CalculationPlatformServiceImpl implements CalculationPlatformServic
 	private final ApplicationCurrencyRepository applicationCurrencyRepository;
 	private final PlatformSecurityContext context;
 	private final LoanProductRelatedDetailAssembler loanProductRelatedDetailAssembler;
+	private final LoanChargeAssembler loanChargeAssembler;
 	
 	@Autowired
 	public CalculationPlatformServiceImpl(
 			final PlatformSecurityContext context,
 			final LoanRepository loanRepository, 
 			final ApplicationCurrencyRepository applicationCurrencyRepository, 
-			final LoanProductRelatedDetailAssembler loanProductRelatedDetailAssembler) {
+			final LoanProductRelatedDetailAssembler loanProductRelatedDetailAssembler,
+			final LoanChargeAssembler loanChargeAssembler) {
 		this.context = context;
 		this.loanRepository = loanRepository;
 		this.applicationCurrencyRepository = applicationCurrencyRepository;
 		this.loanScheduleFactory = new DefaultLoanScheduleGeneratorFactory();
 		this.loanProductRelatedDetailAssembler = loanProductRelatedDetailAssembler;
+		this.loanChargeAssembler = loanChargeAssembler;
 	}
 	
 	@Override
@@ -49,24 +55,26 @@ public class CalculationPlatformServiceImpl implements CalculationPlatformServic
 		
 		context.authenticatedUser();
 		
-		CalculateLoanScheduleCommandValidator validator = new CalculateLoanScheduleCommandValidator(command);
+		final CalculateLoanScheduleCommandValidator validator = new CalculateLoanScheduleCommandValidator(command);
 		validator.validate();
 		
-		LoanProductRelatedDetail loanScheduleRelatedDetails = this.loanProductRelatedDetailAssembler.assembleFrom(command);
+		final LoanProductRelatedDetail loanScheduleRelatedDetails = this.loanProductRelatedDetailAssembler.assembleFrom(command);
 		
 		final Integer loanTermFrequency = command.getLoanTermFrequency();
 		final PeriodFrequencyType loanTermFrequencyType = PeriodFrequencyType.fromInt(command.getLoanTermFrequencyType());
 		final InterestMethod interestMethod = InterestMethod.fromInt(command.getInterestType());
 		
-		LoanScheduleGenerator loanScheduleGenerator = this.loanScheduleFactory.create(interestMethod);
+		final LoanScheduleGenerator loanScheduleGenerator = this.loanScheduleFactory.create(interestMethod);
 
-		ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneByCode(loanScheduleRelatedDetails.getCurrency().getCode());
+		final ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneByCode(loanScheduleRelatedDetails.getCurrency().getCode());
+		
+		final Set<LoanCharge> loanCharges = this.loanChargeAssembler.assembleFrom(command.getCharges());
 		
 		return loanScheduleGenerator.generate(applicationCurrency,
 				loanScheduleRelatedDetails, loanTermFrequency,
 				loanTermFrequencyType, command.getExpectedDisbursementDate(),
 				command.getRepaymentsStartingFromDate(),
-				command.getInterestChargedFromDate());
+				command.getInterestChargedFromDate(), loanCharges);
 	}
 
 	@Override
