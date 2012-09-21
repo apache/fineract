@@ -303,6 +303,10 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 		return date;
 	}
 
+	public List<DepositAccountTransaction> getDepositaccountTransactions() {
+		return depositaccountTransactions;
+	}
+
 	public BigDecimal getProjectedTotalOnMaturity() {
 		return projectedTotalOnMaturity;
 	}
@@ -545,6 +549,16 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 		
 		this.total = accuredtotalAmount.getAmount();
 		this.interestAccrued = accuredtotalAmount.minus(deposit).getAmount();
+		
+	}
+
+	public void withdrawInterest(Money interest) {
+		
+		if(this.depositStatus == 300 ){
+			DepositAccountTransaction depositAccountTransaction = DepositAccountTransaction.withdraw(null, new LocalDate(), interest);
+			depositAccountTransaction.updateAccount(this);
+			this.depositaccountTransactions.add(depositAccountTransaction);
+		}
 		
 	}
 }

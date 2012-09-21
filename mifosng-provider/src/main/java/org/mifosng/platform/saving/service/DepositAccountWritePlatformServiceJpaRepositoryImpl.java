@@ -1,7 +1,9 @@
 package org.mifosng.platform.saving.service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -16,6 +18,7 @@ import org.mifosng.platform.api.commands.UndoStateTransitionCommand;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.client.domain.Note;
 import org.mifosng.platform.client.domain.NoteRepository;
+import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.exceptions.DepositAccountNotFoundException;
 import org.mifosng.platform.exceptions.DepositAccountReopenException;
 import org.mifosng.platform.exceptions.NoAuthorizationException;
@@ -24,6 +27,8 @@ import org.mifosng.platform.exceptions.ProductNotFoundException;
 import org.mifosng.platform.saving.domain.DepositAccount;
 import org.mifosng.platform.saving.domain.DepositAccountRepository;
 import org.mifosng.platform.saving.domain.DepositAccountStatus;
+import org.mifosng.platform.saving.domain.DepositAccountTransaction;
+import org.mifosng.platform.saving.domain.DepositAccountTransactionType;
 import org.mifosng.platform.saving.domain.DepositLifecycleStateMachine;
 import org.mifosng.platform.saving.domain.DepositLifecycleStateMachineImpl;
 import org.mifosng.platform.saving.domain.FixedTermDepositInterestCalculator;
@@ -332,26 +337,42 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 			throw new DepositAccountNotFoundException(command.getAccountId());
 		}
 		
-		BigDecimal actualInterestAccured = account.getAccuredInterest().getAmount();
-		Integer tenure = account.getTenureInMonths();
-		BigDecimal interstGettingForPeriod = actualInterestAccured.divide(new BigDecimal(tenure));
-		
-		
-		Integer interestCompoundEvery = account.getInterestCompoundedEvery();
-		LocalDate lastInterestTakenDate = account.getActualCommencementDate();
-		LocalDate todaysDate = new LocalDate();
-		Integer noOfMonthsforInterestCal = Months.monthsBetween(lastInterestTakenDate, todaysDate).getMonths();
-		Integer noOfPeriods = noOfMonthsforInterestCal / interestCompoundEvery;
+		BigDecimal interstGettingForPeriod = BigDecimal.valueOf(account.getAccuredInterest().getAmount().doubleValue()/new Double(account.getTenureInMonths()));
+		LocalDate lastInterestTakenDate = getLastTxnDate(account);
+		Integer noOfMonthsforInterestCal = Months.monthsBetween(lastInterestTakenDate, new LocalDate()).getMonths();
+		Integer noOfPeriods = noOfMonthsforInterestCal / account.getInterestCompoundedEvery();
 		BigDecimal availableInterestAmountForWithDrawal = interstGettingForPeriod.multiply(new BigDecimal(noOfPeriods));
+		BigDecimal cmdInterest = command.getWithdrawInterest();
 		Integer iswithdrawable = availableInterestAmountForWithDrawal.compareTo(command.getWithdrawInterest());
 		
+		
 		if(noOfPeriods > 0 ){
-			
+			if(iswithdrawable >= 0){
+				account.withdrawInterest(Money.of(account.getDeposit().getCurrency(), cmdInterest));
+				this.depositAccountRepository.save(account);
+			}
 		}else if(noOfPeriods <= 0){
 			if(iswithdrawable==-1){
 				throw new RuntimeException();
 			}
 		}
 		return new EntityIdentifier(account.getId());
+	}
+
+	private LocalDate getLastTxnDate(DepositAccount account) {
+		List<LocalDate> lastTransactionDates = new ArrayList<LocalDate>();
+		LocalDate lastTransactionDate=null;
+		List<DepositAccountTransaction> depositAccountTransactions=account.getDepositaccountTransactions();
+		for(DepositAccountTransaction depositAccountTransaction : depositAccountTransactions){
+			if(depositAccountTransaction.getTypeOf().equals(DepositAccountTransactionType.WITHDRAW)){
+				lastTransactionDate = depositAccountTransaction.getTransactionDate();
+				lastTransactionDates.add(lastTransactionDate);
+			}
+		}
+		if(lastTransactionDates.size()>0)
+			lastTransactionDate = Collections.max(lastTransactionDates);
+		else
+			lastTransactionDate = account.getActualCommencementDate();
+		return lastTransactionDate;
 	}
 }
