@@ -11,6 +11,7 @@ import org.mifosng.platform.api.commands.DepositStateTransitionApprovalCommand;
 import org.mifosng.platform.api.commands.DepositStateTransitionCommand;
 import org.mifosng.platform.api.commands.FundCommand;
 import org.mifosng.platform.api.commands.GroupCommand;
+import org.mifosng.platform.api.commands.LoanChargeCommand;
 import org.mifosng.platform.api.commands.LoanProductCommand;
 import org.mifosng.platform.api.commands.LoanStateTransitionCommand;
 import org.mifosng.platform.api.commands.LoanTransactionCommand;
@@ -48,6 +49,8 @@ public interface ApiDataConversionService {
 	GroupCommand convertJsonToGroupCommand(Long resourceIdentifier, String jsonRequestBody);
 	
 	LoanApplicationCommand convertJsonToLoanApplicationCommand(Long resourceIdentifier, String jsonRequestBody);
+
+    LoanChargeCommand convertJsonToLoanChargeCommand(Long loanChargeId, Long loanId, String jsonRequestBody);
 
 	LoanStateTransitionCommand convertJsonToLoanStateTransitionCommand(Long resourceIdentifier, String jsonRequestBody);
 

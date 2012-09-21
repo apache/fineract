@@ -38,7 +38,11 @@ public class LoanCharge extends AbstractPersistable<Long> {
 
     @Column(name = "charge_calculation_enum")
     private Integer chargeCalculation;
-    
+
+    public static LoanCharge createNew(final Loan loan, final Charge chargeDefinition, final LoanChargeCommand command) {
+        return new LoanCharge(loan, chargeDefinition, command);
+    }
+
 	public static LoanCharge createNew(final Charge chargeDefinition, final LoanChargeCommand command) {
 		return new LoanCharge(null, chargeDefinition, command);
 	}
@@ -90,6 +94,22 @@ public class LoanCharge extends AbstractPersistable<Long> {
 		this.loan = loan;
 	}
 
+    public void update(final LoanChargeCommand command){
+
+        if (command.isAmountChanged()) {
+            this.amount = command.getAmount();
+        }
+
+        if (command.isChargeTimeTypeChanged()){
+            this.chargeTime = ChargeTimeType.fromInt(command.getChargeTimeType()).getValue();
+        }
+
+        if (command.isChargeCalculationTypeChanged()){
+            this.chargeCalculation = ChargeCalculationType.fromInt(command.getChargeCalculationType()).getValue();
+        }
+
+    }
+
 	public boolean isDueAtDisbursement() {
 		return ChargeTimeType.fromInt(this.chargeTime).equals(ChargeTimeType.DISBURSEMENT);
 	}
@@ -122,6 +142,7 @@ public class LoanCharge extends AbstractPersistable<Long> {
 
 	public LoanChargeCommand toData() {
 		Set<String> modifiedParameters = new HashSet<String>();
-		return new LoanChargeCommand(modifiedParameters, this.getId(), this.charge.getId(), this.amount, this.chargeTime, this.chargeCalculation);
+		return new LoanChargeCommand(modifiedParameters, this.getId(), this.loan.getId(), this.charge.getId(),
+                this.amount, this.chargeTime, this.chargeCalculation);
 	}
 }

@@ -7,6 +7,7 @@ public class LoanChargeCommand {
 
     private final Long id;
     private final Long chargeId;
+    private final Long loanId;
     private final BigDecimal amount;
 
     private final Integer chargeTimeType;
@@ -14,11 +15,11 @@ public class LoanChargeCommand {
 
     private final Set<String> modifiedParameters;
 
-    public LoanChargeCommand(final Set<String> modifiedParameters, final Long id, final Long chargeId,
-                             final BigDecimal amount, final Integer chargeTimeType, final Integer chargeCalculationType) {
+    public LoanChargeCommand(Set<String> modifiedParameters, Long id, Long loanId, Long chargeId, BigDecimal amount, Integer chargeTimeType, Integer chargeCalculationType) {
         this.modifiedParameters = modifiedParameters;
         this.id = id;
         this.chargeId = chargeId;
+        this.loanId = loanId;
         this.amount = amount;
         this.chargeTimeType = chargeTimeType;
         this.chargeCalculationType = chargeCalculationType;
@@ -30,6 +31,10 @@ public class LoanChargeCommand {
 
     public Long getChargeId() {
         return chargeId;
+    }
+
+    public Long getLoanId() {
+        return loanId;
     }
 
     public BigDecimal getAmount() {

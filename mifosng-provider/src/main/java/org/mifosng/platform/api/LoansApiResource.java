@@ -24,6 +24,7 @@ import org.apache.commons.lang.StringUtils;
 import org.mifosng.platform.api.commands.AdjustLoanTransactionCommand;
 import org.mifosng.platform.api.commands.CalculateLoanScheduleCommand;
 import org.mifosng.platform.api.commands.LoanApplicationCommand;
+import org.mifosng.platform.api.commands.LoanChargeCommand;
 import org.mifosng.platform.api.commands.LoanStateTransitionCommand;
 import org.mifosng.platform.api.commands.LoanTransactionCommand;
 import org.mifosng.platform.api.commands.UndoStateTransitionCommand;
@@ -481,4 +482,49 @@ public class LoansApiResource {
 
 		return Response.ok().entity(identifier).build();
 	}
+
+    @POST
+    @Path("{loanId}/charges")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public Response addLoanCharge(
+            @PathParam("loanId") final Long loanId,
+            final String jsonRequestBody){
+
+        LoanChargeCommand command = this.apiDataConversionService.convertJsonToLoanChargeCommand(null, loanId, jsonRequestBody);
+
+        EntityIdentifier identifier = this.loanWritePlatformService.addLoanCharge(command);
+
+        return Response.ok().entity(identifier).build();
+    }
+
+    @PUT
+    @Path("{loanId}/charges/{chargeId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public Response updateLoanCharge(
+            @PathParam("loanId") final Long loanId,
+            @PathParam("chargeId") final Long loanChargeId,
+            final String jsonRequestBody){
+
+        LoanChargeCommand command = this.apiDataConversionService.convertJsonToLoanChargeCommand(loanChargeId, loanId, jsonRequestBody);
+
+        EntityIdentifier identifier = this.loanWritePlatformService.updateLoanCharge(command);
+
+        return Response.ok().entity(identifier).build();
+    }
+
+    @DELETE
+    @Path("{loanId}/charges/{chargeId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public Response deleteLoanCharge(
+            @PathParam("loanId") final Long loanId,
+            @PathParam("chargeId") final Long loanChargeId){
+
+        EntityIdentifier identifier = this.loanWritePlatformService.deleteLoanCharge(loanId, loanChargeId);
+
+        return Response.ok().entity(identifier).build();
+    }
+
 }

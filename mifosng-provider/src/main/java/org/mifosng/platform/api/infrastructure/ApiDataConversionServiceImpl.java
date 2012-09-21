@@ -506,7 +506,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
                     Integer chargeTimeType = extractIntegerParameter("chargeTimeType", chargeRequestMap, chargeModifiedParameters);
                     Integer chargeCalculationType = extractIntegerParameter("chargeCalculationType", chargeRequestMap, chargeModifiedParameters);
 
-                    charges[i] = new LoanChargeCommand(chargeModifiedParameters, null, chargeId, amount,
+                    charges[i] = new LoanChargeCommand(chargeModifiedParameters, null, null,chargeId, amount,
                             chargeTimeType, chargeCalculationType);
                 }
             }
@@ -521,8 +521,34 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	    		loanTermFrequency, loanTermFrequencyType,
 	    		inArrearsToleranceValue, charges,loanOfficerId);
 	}
-	
-	@Override
+
+    @Override
+    public LoanChargeCommand convertJsonToLoanChargeCommand(Long loanChargeId, Long loanId, String json) {
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
+
+        Type typeOfMap = new TypeToken<Map<String, String>>(){}.getType();
+        Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
+
+        Set<String> supportedParams = new HashSet<String>(
+                Arrays.asList("chargeId", "amount", "chargeTimeType", "chargeCalculationType", "locale")
+        );
+
+        checkForUnsupportedParameters(requestMap, supportedParams);
+
+        Set<String> modifiedParameters = new HashSet<String>();
+
+        Long chargeId = extractLongParameter("chargeId", requestMap, modifiedParameters);
+        BigDecimal amount = extractBigDecimalParameter("amount", requestMap, modifiedParameters);
+        Integer chargeTimeType = extractIntegerParameter("chargeTimeType", requestMap, modifiedParameters);
+        Integer chargeCalculationType = extractIntegerParameter("chargeCalculationType", requestMap, modifiedParameters);
+
+        return new LoanChargeCommand(modifiedParameters, loanChargeId, loanId, chargeId, amount,
+                chargeTimeType, chargeCalculationType);
+    }
+
+    @Override
 	public LoanStateTransitionCommand convertJsonToLoanStateTransitionCommand(final Long resourceIdentifier, final String json) {
 		if (StringUtils.isBlank(json)) {
 			throw new InvalidJsonException();

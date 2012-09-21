@@ -1,6 +1,7 @@
 package org.mifosng.platform.loan.service;
 
 import org.mifosng.platform.api.commands.AdjustLoanTransactionCommand;
+import org.mifosng.platform.api.commands.LoanChargeCommand;
 import org.mifosng.platform.api.commands.LoanStateTransitionCommand;
 import org.mifosng.platform.api.commands.LoanTransactionCommand;
 import org.mifosng.platform.api.commands.LoanApplicationCommand;
@@ -45,4 +46,13 @@ public interface LoanWritePlatformService {
 
 	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE')")
 	EntityIdentifier waiveLoanAmount(LoanTransactionCommand command);
+
+    @PreAuthorize(value = "hasRole('ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE')")
+    EntityIdentifier addLoanCharge(LoanChargeCommand command);
+
+    @PreAuthorize(value = "hasRole('ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE')")
+    EntityIdentifier updateLoanCharge(LoanChargeCommand command);
+
+    @PreAuthorize(value = "hasRole('ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE')")
+    EntityIdentifier deleteLoanCharge(final Long loanId, final Long loanChargeId);
 }

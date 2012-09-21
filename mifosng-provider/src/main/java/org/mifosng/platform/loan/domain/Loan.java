@@ -577,6 +577,10 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		doPostLoanTransactionChecks(loanTransaction, loanLifecycleStateMachine);
 	}
 
+    public void updateTotalChargesDueAtDisbursement(){
+        this.totalChargesDueAtDisbursement = deriveSumTotalOfChargesDueAtDisbursement();
+    }
+
 	public void makeRepayment(final LoanTransaction loanTransaction, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
 		handleRepaymentTransaction(loanTransaction, loanLifecycleStateMachine, false);
 	}

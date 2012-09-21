@@ -58,7 +58,7 @@ public class LoanApplicationCommandValidator {
             for (LoanChargeCommand loanChargeCommand : this.command.getCharges()){
                 try {
                     LoanChargeCommandValidator validator = new LoanChargeCommandValidator(loanChargeCommand);
-                    validator.validate();
+                    validator.validateForCreate();
                 } catch (PlatformApiDataValidationException e) {
                     dataValidationErrors.addAll(e.getErrors());
                 }

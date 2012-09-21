@@ -18,12 +18,17 @@ import org.mifosng.platform.api.commands.LoanTransactionCommand;
 import org.mifosng.platform.api.commands.UndoStateTransitionCommand;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.LoanSchedulePeriodData;
+import org.mifosng.platform.charge.domain.Charge;
+import org.mifosng.platform.charge.domain.ChargeRepository;
 import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.client.domain.ClientRepository;
 import org.mifosng.platform.client.domain.Note;
 import org.mifosng.platform.client.domain.NoteRepository;
 import org.mifosng.platform.currency.domain.Money;
+import org.mifosng.platform.exceptions.ChargeIsNotActiveException;
+import org.mifosng.platform.exceptions.ChargeNotFoundException;
 import org.mifosng.platform.exceptions.ClientNotFoundException;
+import org.mifosng.platform.exceptions.InvalidCurrencyException;
 import org.mifosng.platform.exceptions.LoanNotFoundException;
 import org.mifosng.platform.exceptions.LoanNotInSubmittedAndPendingApprovalStateCannotBeDeleted;
 import org.mifosng.platform.exceptions.LoanProductNotFoundException;
@@ -33,6 +38,7 @@ import org.mifosng.platform.fund.domain.Fund;
 import org.mifosng.platform.loan.domain.DefaultLoanLifecycleStateMachine;
 import org.mifosng.platform.loan.domain.Loan;
 import org.mifosng.platform.loan.domain.LoanCharge;
+import org.mifosng.platform.loan.domain.LoanChargeRepository;
 import org.mifosng.platform.loan.domain.LoanLifecycleStateMachine;
 import org.mifosng.platform.loan.domain.LoanProduct;
 import org.mifosng.platform.loan.domain.LoanProductRepository;
@@ -62,12 +68,15 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 	private final LoanAssembler loanAssembler;
 	private final ClientRepository clientRepository;
 	private final LoanProductRepository loanProductRepository;
+    private final ChargeRepository chargeRepository;
+    private final LoanChargeRepository loanChargeRepository;
 	
 	@Autowired
 	public LoanWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final LoanAssembler loanAssembler,
 			final LoanRepository loanRepository, final LoanTransactionRepository loanTransactionRepository,
 			final NoteRepository noteRepository, final CalculationPlatformService calculationPlatformService,
-			final ClientRepository clientRepository, final LoanProductRepository loanProductRepository) {
+			final ClientRepository clientRepository, final LoanProductRepository loanProductRepository,
+            final ChargeRepository chargeRepository, final LoanChargeRepository loanChargeRepository) {
 		this.context = context;
 		this.loanAssembler = loanAssembler;
 		this.loanRepository = loanRepository;
@@ -76,6 +85,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		this.calculationPlatformService = calculationPlatformService;
 		this.clientRepository = clientRepository;
 		this.loanProductRepository = loanProductRepository;
+        this.chargeRepository = chargeRepository;
+        this.loanChargeRepository = loanChargeRepository;
 	}
 	
 	private boolean isBeforeToday(final LocalDate date) {
@@ -533,4 +544,89 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
 		return new EntityIdentifier(loan.getId());
 	}
+
+    @Override
+    public EntityIdentifier addLoanCharge(LoanChargeCommand command) {
+        this.context.authenticatedUser();
+
+        LoanChargeCommandValidator validator = new LoanChargeCommandValidator(command);
+        validator.validateForCreate();
+
+        Loan loan = this.loanRepository.findOne(command.getLoanId());
+        if (loan == null) {
+            throw new LoanNotFoundException(command.getLoanId());
+        }
+
+        Charge chargeDefinition = this.chargeRepository.findOne(command.getChargeId());
+        if (chargeDefinition == null) {
+            throw new ChargeNotFoundException(command.getChargeId());
+        }
+
+        LoanCharge loanCharge = LoanCharge.createNew(loan, chargeDefinition, command);
+
+        if (!chargeDefinition.isActive()) {
+            throw new ChargeIsNotActiveException(chargeDefinition.getId());
+        }
+
+        if (!loan.getCurrency().getCode().equals(chargeDefinition.getCurrencyCode())){
+            String errorMessage = "Charge and Loan must have the same currency.";
+            throw new InvalidCurrencyException("charge", "attach.to.loan", errorMessage);
+        }
+
+        this.loanChargeRepository.saveAndFlush(loanCharge);
+
+        loan.getCharges().add(loanCharge);
+        loan.updateTotalChargesDueAtDisbursement();
+
+        this.loanRepository.saveAndFlush(loan);
+
+        return new EntityIdentifier(loanCharge.getId());
+    }
+
+    @Override
+    public EntityIdentifier updateLoanCharge(LoanChargeCommand command) {
+
+        this.context.authenticatedUser();
+
+        LoanChargeCommandValidator validator = new LoanChargeCommandValidator(command);
+        validator.validateForUpdate();
+
+        Loan loan = this.loanRepository.findOne(command.getLoanId());
+        if (loan == null) {
+            throw new LoanNotFoundException(command.getLoanId());
+        }
+
+        for (LoanCharge loanCharge : loan.getCharges()){
+            if (loanCharge.getId().equals(command.getId())){
+                loanCharge.update(command);
+                loan.updateTotalChargesDueAtDisbursement();
+                this.loanRepository.saveAndFlush(loan);
+                return new EntityIdentifier(loanCharge.getId());
+            }
+        }
+
+        throw new ChargeNotFoundException(command.getId());
+    }
+
+    @Override
+    public EntityIdentifier deleteLoanCharge(Long loanId, Long loanChargeId) {
+
+        this.context.authenticatedUser();
+
+        Loan loan = this.loanRepository.findOne(loanId);
+        if (loan == null) {
+            throw new LoanNotFoundException(loanId);
+        }
+
+        for (LoanCharge loanCharge : loan.getCharges()){
+            if (loanCharge.getId().equals(loanChargeId)){
+                loan.getCharges().remove(loanCharge);
+                loan.updateTotalChargesDueAtDisbursement();
+                this.loanRepository.saveAndFlush(loan);
+                return new EntityIdentifier(loanCharge.getId());
+            }
+        }
+
+        throw new ChargeNotFoundException(loanChargeId);
+    }
 }
