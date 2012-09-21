@@ -83,7 +83,6 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 	@Column(name = "projected_interest_accrued_on_maturity", scale = 6, precision = 19, nullable = false)
 	private BigDecimal projectedInterestAccruedOnMaturity;
 	
-	@SuppressWarnings("unused")
 	@Column(name = "actual_interest_accrued", scale = 6, precision = 19, nullable = false)
 	private BigDecimal interestAccrued;
 	
@@ -158,13 +157,18 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 			final boolean isInterstWithdrawable,final boolean interestCompoundingAllowed) {
 		
 		Money futureValueOnMaturity =null;
-		
-		if(interestCompoundingAllowed){
-			futureValueOnMaturity = fixedTermDepositInterestCalculator.calculateInterestOnMaturityFor(deposit, tenureInMonths, 
-				maturityInterestRate, interestCompoundedEvery, interestCompoundedFrequencyPeriodType);
-		}else if(!interestCompoundingAllowed){
-			futureValueOnMaturity = fixedTermDepositInterestCalculator.calculateInterestOnMaturityForSimpleInterest(deposit, tenureInMonths, 
-					maturityInterestRate, interestCompoundedEvery, interestCompoundedFrequencyPeriodType);
+
+		if (interestCompoundingAllowed) {
+			futureValueOnMaturity = fixedTermDepositInterestCalculator
+					.calculateInterestOnMaturityFor(deposit, tenureInMonths,
+							maturityInterestRate, interestCompoundedEvery,
+							interestCompoundedFrequencyPeriodType);
+		} else {
+			futureValueOnMaturity = fixedTermDepositInterestCalculator
+					.calculateInterestOnMaturityForSimpleInterest(deposit,
+							tenureInMonths, maturityInterestRate,
+							interestCompoundedEvery,
+							interestCompoundedFrequencyPeriodType);
 		}
 		
 		DepositAccountStatus from = null;
@@ -276,15 +280,20 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 		
 		Money futureValueOnMaturity =null;
 		
-		 if(this.interestCompoundingAllowed){  
-		    futureValueOnMaturity = calculator.calculateInterestOnMaturityFor(getDeposit(), this.tenureInMonths, 
-				this.interestRate, this.interestCompoundedEvery, getInterestCompoundedFrequencyType());
-		 } else if(!this.interestCompoundingAllowed){
-			 futureValueOnMaturity = calculator.calculateInterestOnMaturityForSimpleInterest(getDeposit(), this.tenureInMonths, 
-						this.interestRate, this.interestCompoundedEvery, getInterestCompoundedFrequencyType());
-		 }
+		if (this.interestCompoundingAllowed) {
+			futureValueOnMaturity = calculator.calculateInterestOnMaturityFor(
+					getDeposit(), this.tenureInMonths, this.interestRate,
+					this.interestCompoundedEvery,
+					getInterestCompoundedFrequencyType());
+		} else {
+			futureValueOnMaturity = calculator
+					.calculateInterestOnMaturityForSimpleInterest(getDeposit(),
+							this.tenureInMonths, this.interestRate,
+							this.interestCompoundedEvery,
+							getInterestCompoundedFrequencyType());
+		}
 		this.interestAccrued = futureValueOnMaturity.minus(getDeposit()).getAmount();
-		this.total = this.interestCompoundingAllowed?futureValueOnMaturity.getAmount():getDeposit().getAmount();
+		this.total = this.interestCompoundingAllowed ? futureValueOnMaturity.getAmount() : getDeposit().getAmount();
 		
 		DepositAccountTransaction depositaccountTransaction = DepositAccountTransaction.deposit(getDeposit(), getActualCommencementDate(),getAccuredInterest());
 		depositaccountTransaction.updateAccount(this);
@@ -572,10 +581,17 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 		
 		Money deposit = Money.of(account.getDeposit().getCurrency(), account.getDeposit().getAmount());
 		Money accuredtotalAmount = null;
-		if(account.isInterestCompoundingAllowed()){
-			accuredtotalAmount = fixedTermDepositInterestCalculator.calculateInterestOnMaturityFor(deposit, tenure, preClosureInterestRate, interestCompoundedEvery, this.product.getInterestCompoundedEveryPeriodType());
-		}else if(!account.isInterestCompoundingAllowed()){
-			accuredtotalAmount = fixedTermDepositInterestCalculator.calculateInterestOnMaturityForSimpleInterest(deposit, tenure, preClosureInterestRate, interestCompoundedEvery, this.product.getInterestCompoundedEveryPeriodType());
+		if (account.isInterestCompoundingAllowed()) {
+			accuredtotalAmount = fixedTermDepositInterestCalculator
+					.calculateInterestOnMaturityFor(deposit, tenure,
+							preClosureInterestRate, interestCompoundedEvery,
+							this.product.getInterestCompoundedEveryPeriodType());
+		} else {
+			accuredtotalAmount = fixedTermDepositInterestCalculator
+					.calculateInterestOnMaturityForSimpleInterest(deposit,
+							tenure, preClosureInterestRate,
+							interestCompoundedEvery,
+							this.product.getInterestCompoundedEveryPeriodType());
 		}
 		this.total = account.isInterestCompoundingAllowed()?accuredtotalAmount.getAmount():getDeposit().getAmount();
 		this.interestAccrued = accuredtotalAmount.minus(deposit).getAmount();
