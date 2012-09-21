@@ -63,4 +63,23 @@ public class FixedTermDepositInterestCalculator {
 		}
 		return retval;
 	}
+
+	public Money calculateInterestOnMaturityForSimpleInterest(Money deposit,
+			Integer tenureInMonths, BigDecimal maturityInterestRate,
+			Integer interestCompoundedEvery,
+			PeriodFrequencyType interestCompoundedFrequencyPeriodType) {
+		
+		MathContext mc = new MathContext(8, RoundingMode.HALF_EVEN);
+		Integer monthsInYear = 12;
+		
+		BigDecimal interestRateAsFraction = maturityInterestRate.divide(BigDecimal.valueOf(100), mc);
+		BigDecimal interestRateForOneMonth = interestRateAsFraction.divide(BigDecimal.valueOf(monthsInYear.doubleValue()), mc);
+		BigDecimal ratePerCompoundingPeriod = interestRateForOneMonth.multiply(BigDecimal.valueOf(interestCompoundedEvery.doubleValue()), mc);
+		Integer numberOfPeriods = tenureInMonths / interestCompoundedEvery;
+		
+		BigDecimal interest = ratePerCompoundingPeriod.multiply(deposit.getAmount()).multiply(BigDecimal.valueOf(new Double(numberOfPeriods)));
+		BigDecimal totalAmount =deposit.getAmount().add(interest);
+		
+		return Money.of(deposit.getCurrency(), totalAmount);
+	}
 }

@@ -42,6 +42,10 @@ public class DepositAccountData {
 	private final boolean preClosureAllowed;
 	private final BigDecimal preClosureInterestRate;
 	
+	private final boolean isInterestWithdrawable;
+	private final BigDecimal interestPaid;
+	private final boolean interestCompoundingAllowed;
+	
 	private final List<EnumOptionData> interestCompoundedEveryPeriodTypeOptions;
 	private final List<DepositProductLookup> productOptions;
 	
@@ -91,6 +95,10 @@ public class DepositAccountData {
 		
 		this.transactions=null;
 		this.permissions=null;
+		
+		this.interestPaid=null;
+		this.isInterestWithdrawable=false;
+		this.interestCompoundingAllowed = true;
 	}
 
 	public DepositAccountData(
@@ -130,6 +138,9 @@ public class DepositAccountData {
 		
 		this.transactions=account.getTransactions();
 		this.permissions=account.getPermissions();
+		this.interestPaid=account.getInterestPaid();
+		this.isInterestWithdrawable=account.isInterestWithdrawable();
+		this.interestCompoundingAllowed=account.isInterestCompoundingAllowed();
 	}
 	
 	public DepositAccountData(final DepositAccountData account, final DepositPermissionData permissions, final Collection<DepositAccountTransactionData> transactions) {
@@ -166,6 +177,9 @@ public class DepositAccountData {
 		
 		this.transactions=transactions;
 		this.permissions=permissions;
+		this.interestPaid=account.getInterestPaid();
+		this.isInterestWithdrawable=account.isInterestWithdrawable();
+		this.interestCompoundingAllowed = account.isInterestCompoundingAllowed();
 	}
 	
 	public DepositAccountData(
@@ -193,7 +207,10 @@ public class DepositAccountData {
 			final BigDecimal preClosureInterestRate,
 			final LocalDate withdrawnonDate,
 			final LocalDate rejectedonDate,
-			final LocalDate closedonDate) {
+			final LocalDate closedonDate,
+			final boolean isInterestWithdrawable,
+			final BigDecimal interestPaid,
+			final boolean interestCompoundingAllowed) {
 		this.id=id;
 		this.externalId = externalId;
 		this.status = status;
@@ -227,6 +244,10 @@ public class DepositAccountData {
 		
 		this.transactions = null;
 		this.permissions = null;
+		
+		this.interestPaid =interestPaid;
+		this.isInterestWithdrawable=isInterestWithdrawable;
+		this.interestCompoundingAllowed = interestCompoundingAllowed;
 	}
 	
 	public DepositAccountData(
@@ -275,6 +296,9 @@ public class DepositAccountData {
 		
 		this.transactions = null;
 		this.permissions = null;
+		this.interestPaid=null;
+		this.isInterestWithdrawable=false;
+		this.interestCompoundingAllowed=true;
 	}
 
 	public Long getId() {
@@ -396,4 +420,17 @@ public class DepositAccountData {
 	public DepositPermissionData getPermissions() {
 		return permissions;
 	}
+
+	public boolean isInterestWithdrawable() {
+		return isInterestWithdrawable;
+	}
+
+	public BigDecimal getInterestPaid() {
+		return interestPaid;
+	}
+
+	public boolean isInterestCompoundingAllowed() {
+		return interestCompoundingAllowed;
+	}
+	
 }

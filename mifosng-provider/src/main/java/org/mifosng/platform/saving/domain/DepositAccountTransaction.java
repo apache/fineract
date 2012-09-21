@@ -65,7 +65,7 @@ public class DepositAccountTransaction extends AbstractPersistable<Long> {
         this.amount = amount;
 		this.dateOf = date.toDateMidnight().toDate();
 		this.interest = interest;
-		this.total = amount.equals(0)?new BigDecimal(0):amount.add(interest);
+		this.total = amount.doubleValue()==0?new BigDecimal(0):amount.add(interest);
 	}
 
 	public Date getDateOf() {

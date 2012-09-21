@@ -26,6 +26,8 @@ public class DepositProductCommand {
 	private final boolean renewalAllowed;
 	private final boolean preClosureAllowed;
 	private final BigDecimal preClosureInterestRate;
+	
+	private final boolean interestCompoundingAllowed;
 
 	private final Set<String> modifiedParameters;
 	
@@ -37,7 +39,8 @@ public class DepositProductCommand {
 			final BigDecimal maturityMinInterestRate, final BigDecimal maturityMaxInterestRate,
 			final Integer interestCompoundedEvery,
 			final Integer interestCompoundedEveryPeriodType,
-			final boolean renewalAllowed, final boolean preClosureAllowed, final BigDecimal preClosureInterestRate ) {
+			final boolean renewalAllowed, final boolean preClosureAllowed, 
+			final BigDecimal preClosureInterestRate, final boolean interestCompoundingAllowed ) {
 		this.id = id;
 		this.externalId = externalId;
 		this.name = name;
@@ -59,7 +62,7 @@ public class DepositProductCommand {
 		
 		this.renewalAllowed = renewalAllowed;
 		this.preClosureAllowed = preClosureAllowed;
-
+		this.interestCompoundingAllowed = interestCompoundingAllowed;
 		this.modifiedParameters = modifiedParameters;		
 		
 	}
@@ -132,6 +135,10 @@ public class DepositProductCommand {
 		return preClosureInterestRate;
 	}
 	
+	public boolean isInterestCompoundingAllowed() {
+		return interestCompoundingAllowed;
+	}
+
 	public boolean isExternalIdChanged() {
 		return this.modifiedParameters.contains("externalId");
 	}
@@ -202,5 +209,9 @@ public class DepositProductCommand {
 
 	public boolean isNoFieldChanged() {
 		return this.modifiedParameters.isEmpty();
+	}
+	
+	public boolean interestCompoundingAllowedChanged(){
+		return this.modifiedParameters.contains("interestCompoundingAllowed");
 	}
 }

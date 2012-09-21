@@ -155,7 +155,8 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 				+  " da.projected_total_maturity_amount as projectedMaturityAmount, da.actual_total_amount as actualMaturityAmount, "
 				+  " da.interest_compounded_every as interestCompoundedEvery, da.interest_compounded_every_period_enum as interestCompoundedEveryPeriodType, "
 				+  " da.is_renewal_allowed as renewalAllowed, da.is_preclosure_allowed as preClosureAllowed, da.pre_closure_interest_rate as preClosureInterestRate, "
-				+  " da.withdrawnon_date as withdrawnonDate, da.rejectedon_date as rejectedonDate, da.closedon_date as closedonDate, "
+				+  " da.withdrawnon_date as withdrawnonDate, da.rejectedon_date as rejectedonDate, da.closedon_date as closedonDate, " 
+				+  " da.interest_paid as interestPaid, da.is_interest_withdrawable as isInterestWithdrawable, da.is_compounding_interest_allowed as interestCompoundingAllowed, "
 				+  " c.firstname as firstname, c.lastname as lastname, pd.name as productName,"
 				+  " curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, curr.display_symbol as currencyDisplaySymbol " 
 				+  " from m_deposit_account da " 
@@ -205,6 +206,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 			
 			boolean renewalAllowed = rs.getBoolean("renewalAllowed");
 			boolean preClosureAllowed = rs.getBoolean("preClosureAllowed");
+			boolean interestCompoundingAllowed = rs.getBoolean("interestCompoundingAllowed");
 			
 			BigDecimal preClosureInterestRate = rs.getBigDecimal("preClosureInterestRate");
 			
@@ -212,12 +214,15 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 			LocalDate rejectedonDate = JdbcSupport.getLocalDate(rs, "rejectedonDate");
 			LocalDate closedonDate = JdbcSupport.getLocalDate(rs, "closedonDate");
 			
+			boolean isInterestWithdrawable = rs.getBoolean("isInterestWithdrawable");
+			BigDecimal interestPaid = rs.getBigDecimal("interestPaid");
+			
 			return new DepositAccountData(id, externalId, status, clientId, clientName, productId, productName, currencyData, depositAmount, 
 					interestRate, termInMonths, projectedCommencementDate, actualCommencementDate, maturedOn, 
 					projectedInterestAccrued, actualInterestAccrued, projectedMaturityAmount, actualMaturityAmount, 
 					interestCompoundedEvery, interestCompoundedEveryPeriodType,
 					renewalAllowed, preClosureAllowed, preClosureInterestRate, 
-					withdrawnonDate,rejectedonDate,closedonDate);
+					withdrawnonDate,rejectedonDate,closedonDate,isInterestWithdrawable,interestPaid,interestCompoundingAllowed);
 		}
 	}
 	

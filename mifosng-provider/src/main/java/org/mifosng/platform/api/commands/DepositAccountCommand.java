@@ -26,6 +26,8 @@ public class DepositAccountCommand {
 	
 	private final boolean renewalAllowed;
 	private final boolean preClosureAllowed;
+	private final boolean isInterestWithdrawable;
+	private final boolean interestCompoundingAllowed;
 	
 	private final Set<String> modifiedParameters;
 
@@ -37,7 +39,7 @@ public class DepositAccountCommand {
 			final BigDecimal depositAmount, 
 			final BigDecimal interestRate, final BigDecimal preClosureInterestRate,
 			final Integer tenureInMonths, final Integer compoundingInterestFrequency, final Integer compoundingInterestFrequencyType, final LocalDate commencementDate,
-			final boolean renewalAllowed, final boolean preClosureAllowed) {
+			final boolean renewalAllowed, final boolean preClosureAllowed,final boolean isInterstWithdrawable, final boolean interestCompoundingAllowed) {
 		this.id = id;
 		this.clientId = clientId;
 		this.productId = productId;
@@ -54,6 +56,8 @@ public class DepositAccountCommand {
 		this.commencementDate = commencementDate;
 		this.renewalAllowed = renewalAllowed;
 		this.preClosureAllowed = preClosureAllowed;
+		this.isInterestWithdrawable = isInterstWithdrawable;
+		this.interestCompoundingAllowed = interestCompoundingAllowed;
 	}
 
 	public Long getId() {
@@ -100,12 +104,20 @@ public class DepositAccountCommand {
 		return commencementDate;
 	}
 	
+	public boolean isInterestWithdrawable() {
+		return isInterestWithdrawable;
+	}
+
 	public boolean isRenewalAllowed() {
 		return renewalAllowed;
 	}
 
 	public boolean isPreClosureAllowed() {
 		return preClosureAllowed;
+	}
+
+	public boolean isInterestCompoundingAllowed() {
+		return interestCompoundingAllowed;
 	}
 
 	public boolean isNoFieldChanged() {
@@ -130,5 +142,13 @@ public class DepositAccountCommand {
 	
 	public boolean isPreClosureAllowedChanged() {
 		return this.modifiedParameters.contains("preClosureAllowed");
+	}
+	
+	public boolean isInterestWithdrawableChanged(){
+		return this.modifiedParameters.contains("isInterestWithdrawable");
+	}
+	
+	public boolean isInterestCompoundingAllowedChanged(){
+		return this.modifiedParameters.contains("interestCompoundingAllowed");
 	}
 }

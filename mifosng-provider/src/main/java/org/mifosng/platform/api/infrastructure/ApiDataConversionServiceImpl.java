@@ -1042,8 +1042,8 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		Set<String> supportedParams = new HashSet<String>(
 				Arrays.asList("clientId", "productId", "externalId", "deposit", "maturityInterestRate", "preClosureInterestRate",
 						"tenureInMonths", "interestCompoundedEvery", "interestCompoundedEveryPeriodType", "commencementDate",
-						"renewalAllowed", "preClosureAllowed",
-						"locale", "dateFormat")
+						"renewalAllowed", "preClosureAllowed","interestCompoundingAllowed",
+						"locale", "dateFormat","isInterestWithdrawable")
 		);
 		checkForUnsupportedParameters(requestMap, supportedParams);
 		Set<String> modifiedParameters = new HashSet<String>();
@@ -1062,10 +1062,13 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 
 		boolean renewalAllowed = extractBooleanParameter("renewalAllowed", requestMap, modifiedParameters);
 		boolean preClosureAllowed = extractBooleanParameter("preClosureAllowed", requestMap, modifiedParameters);
+		boolean isInterestWithdrawable = extractBooleanParameter("isInterestWithdrawable", requestMap, modifiedParameters);
+		boolean interestCompoundingAllowed = extractBooleanParameter("interestCompoundingAllowed", requestMap, modifiedParameters);
 		
 		return new DepositAccountCommand(modifiedParameters, resourceIdentifier, clientId, productId, 
 				externalId, deposit, interestRate, preClosureInterestRate, tenureInMonths, 
-				interestCompoundedEvery, interestCompoundedEveryPeriodType, commencementDate, renewalAllowed, preClosureAllowed);
+				interestCompoundedEvery, interestCompoundedEveryPeriodType, commencementDate, renewalAllowed,
+				preClosureAllowed, isInterestWithdrawable, interestCompoundingAllowed);
 	}
 
 	@Override
@@ -1082,7 +1085,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 				Arrays.asList("locale", "name", "externalId", "description","currencyCode", "digitsAfterDecimal","minimumBalance","maximumBalance","tenureInMonths",
 						"maturityDefaultInterestRate","maturityMinInterestRate","maturityMaxInterestRate", 
 						"interestCompoundedEvery", "interestCompoundedEveryPeriodType",
-						"renewalAllowed","preClosureAllowed","preClosureInterestRate")
+						"renewalAllowed","preClosureAllowed","preClosureInterestRate","interestCompoundingAllowed")
 				);
 		checkForUnsupportedParameters(requestMap, supportedParams);
 		Set<String> modifiedParameters = new HashSet<String>();
@@ -1103,6 +1106,8 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		Integer interestCompoundedEvery = extractIntegerParameter("interestCompoundedEvery", requestMap, modifiedParameters);
 		Integer interestCompoundedEveryPeriodType = extractIntegerParameter("interestCompoundedEveryPeriodType", requestMap, modifiedParameters);
 		
+		boolean interestCompoundingAllowed = extractBooleanParameter("interestCompoundingAllowed", requestMap, modifiedParameters);
+		
 	    boolean canRenew = extractBooleanParameter("renewalAllowed", requestMap, modifiedParameters);
 	    boolean canPreClose = extractBooleanParameter("preClosureAllowed", requestMap, modifiedParameters);
 	    BigDecimal preClosureInterestRate = extractBigDecimalParameter("preClosureInterestRate", requestMap, modifiedParameters);
@@ -1111,7 +1116,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 				name, description, currencyCode, digitsAfterDecimalValue, minimumBalance,maximumBalance, 
 				tenureMonths, maturityDefaultInterestRate, maturityMinInterestRate, maturityMaxInterestRate, 
 				interestCompoundedEvery, interestCompoundedEveryPeriodType,
-				canRenew, canPreClose, preClosureInterestRate);
+				canRenew, canPreClose, preClosureInterestRate, interestCompoundingAllowed);
 	}
 
 	@Override

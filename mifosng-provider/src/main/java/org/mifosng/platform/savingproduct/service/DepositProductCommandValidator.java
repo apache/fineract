@@ -44,6 +44,7 @@ public class DepositProductCommandValidator {
 		
 		baseDataValidator.reset().parameter("renewalAllowed").trueOrFalseRequired(command.isRenewalAllowedChanged());
 		baseDataValidator.reset().parameter("preClosureAllowed").trueOrFalseRequired(command.isPreClosureAllowedChanged());
+		baseDataValidator.reset().parameter("interestCompoundingAllowed").trueOrFalseRequired(command.interestCompoundingAllowedChanged());
 
 		baseDataValidator.reset().parameter("preClosureInterestRate").value(command.getPreClosureInterestRate()).notNull().zeroOrPositiveAmount();
 		baseDataValidator.reset().parameter("preClosureInterestRate").comapareMinAndMaxOfTwoBigDecmimalNos(command.getPreClosureInterestRate(), command.getMaturityMinInterestRate());
@@ -79,7 +80,6 @@ public class DepositProductCommandValidator {
 		
 		baseDataValidator.reset().parameter("interestCompoundedEvery").value(command.getInterestCompoundedEvery()).ignoreIfNull().zeroOrPositiveAmount();
 		baseDataValidator.reset().parameter("interestCompoundedEveryPeriodType").value(command.getInterestCompoundedEveryPeriodType()).ignoreIfNull().inMinMaxRange(1, 3);
-		
 		baseDataValidator.reset().parameter("preClosureInterestRate").value(command.getPreClosureInterestRate()).ignoreIfNull().zeroOrPositiveAmount();
 		baseDataValidator.reset().comapareMinAndMaxOfTwoBigDecmimalNos(command.getPreClosureInterestRate(), command.getMaturityMinInterestRate());
 		

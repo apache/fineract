@@ -72,7 +72,7 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
 			return " dp.id as id, dp.external_id as exernalId, dp.name as name, dp.description as description,dp.currency_code as currencyCode, dp.currency_digits as currencyDigits,dp.minimum_balance as minimumBalance,dp.maximum_balance as maximumBalance," +
 					"dp.created_date as createdon, dp.lastmodified_date as modifiedon,dp.tenure_months as tenureMonths, " +
 					"dp.interest_compounded_every as interestCompoundedEvery, dp.interest_compounded_every_period_enum as interestCompoundedEveryPeriodType, " +
-					"dp.maturity_default_interest_rate as maturityDefaultInterestRate, " +
+					"dp.maturity_default_interest_rate as maturityDefaultInterestRate, dp.is_compounding_interest_allowed as interestCompoundingAllowed, "  +
 					"dp.maturity_min_interest_rate as maturityMinInterestRate, dp.maturity_max_interest_rate as maturityMaxInterestRate, dp.is_renewal_allowed as canRenew, dp.is_preclosure_allowed as canPreClose, dp.pre_closure_interest_rate as preClosureInterestRate, " +
 					"curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, curr.display_symbol as currencyDisplaySymbol " +
 					"from m_product_deposit dp join m_currency curr on curr.code = dp.currency_code ";
@@ -107,13 +107,14 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
 			
 			Boolean canRenew = rs.getBoolean("canRenew");
 			Boolean canPreClose=rs.getBoolean("canPreClose");
+			Boolean interestCompoundingAllowed= rs.getBoolean("interestCompoundingAllowed");
 			
 			BigDecimal preClosureInterestRate=rs.getBigDecimal("preClosureInterestRate");
 			
 			return new DepositProductData(createdOn, lastModifedOn, id, exernalId, name, description, currencyCode, currencyDigits, minimumBalance, maximumBalance,
 					tenureMonths, maturityDefaultInterestRate,maturityMinInterestRate,maturityMaxInterestRate, 
 					interestCompoundedEvery, interestCompoundedEveryPeriodType,
-					canRenew,canPreClose,preClosureInterestRate);
+					canRenew,canPreClose,preClosureInterestRate,interestCompoundingAllowed);
 		}
 		
 	}

@@ -29,6 +29,7 @@ public class DepositProductData {
 	private final boolean renewalAllowed;
 	private final boolean preClosureAllowed;
 	private final BigDecimal preClosureInterestRate;
+	private final boolean interestCompoundingAllowed;
 	
 	private final DateTime createdOn;
 	private final DateTime lastModifedOn;
@@ -55,7 +56,8 @@ public class DepositProductData {
 			final EnumOptionData interestCompoundedEveryPeriodType, 
 			final boolean renewalAllowed, 
 			final boolean preClosureAllowed, 
-			final BigDecimal preClosureInterestRate) {
+			final BigDecimal preClosureInterestRate,
+			final boolean interestCompoundingAllowed) {
 		
 		this.createdOn=createdOn;
 		this.lastModifedOn=lastModifedOn;
@@ -77,6 +79,7 @@ public class DepositProductData {
 		this.renewalAllowed=renewalAllowed;
 		this.preClosureAllowed=preClosureAllowed;
 		this.preClosureInterestRate=preClosureInterestRate;
+		this.interestCompoundingAllowed=interestCompoundingAllowed;
 		
 		this.currencyOptions = new ArrayList<CurrencyData>();
 		this.interestCompoundedEveryPeriodTypeOptions = new ArrayList<EnumOptionData>();
@@ -107,6 +110,7 @@ public class DepositProductData {
 		this.renewalAllowed=true;
 		this.preClosureAllowed=true;
 		this.preClosureInterestRate=BigDecimal.ZERO;
+		this.interestCompoundingAllowed=true;
 		
 		this.currencyOptions = currencyOptions;
 		this.interestCompoundedEveryPeriodTypeOptions = interestCompoundedEveryPeriodTypeOptions;
@@ -137,6 +141,7 @@ public class DepositProductData {
 		this.renewalAllowed=product.isRenewalAllowed();
 		this.preClosureAllowed=product.isPreClosureAllowed();
 		this.preClosureInterestRate=product.getPreClosureInterestRate();
+		this.interestCompoundingAllowed=product.isInterestCompoundingAllowed();
 		
 		this.currencyOptions = currencyOptions;
 		this.interestCompoundedEveryPeriodTypeOptions = interestCompoundedEveryPeriodTypeOptions;
@@ -224,5 +229,9 @@ public class DepositProductData {
 
 	public List<EnumOptionData> getInterestCompoundedEveryPeriodTypeOptions() {
 		return interestCompoundedEveryPeriodTypeOptions;
+	}
+
+	public boolean isInterestCompoundingAllowed() {
+		return interestCompoundingAllowed;
 	}
 }

@@ -62,7 +62,7 @@ public class DepositProductWritePlatformServiceJpaRepositoryImpl implements Depo
 					command.getTenureInMonths(),command.getMaturityDefaultInterestRate(),command.getMaturityMinInterestRate(),command.getMaturityMaxInterestRate(),
 					command.getInterestCompoundedEvery(), interestCompoundingPeriodType,
 					command.isRenewalAllowed(), command.isPreClosureAllowed(),
-					command.getPreClosureInterestRate());
+					command.getPreClosureInterestRate(),command.isInterestCompoundingAllowed());
 			this.depositProductRepository.save(product);
 			
 			return new EntityIdentifier(product.getId());

@@ -52,6 +52,8 @@ public class DepositAccountAssembler {
 			throw new DepositProductNotFoundException(command.getProductId());
 		} 
 		
+		boolean isInterestWithdrawable = command.isInterestWithdrawable();
+		
 		// details inherited from product setting (unless allowed to be overridden through account creation api
 		Money deposit = Money.of(product.getCurrency(), command.getDepositAmount());
 		
@@ -93,6 +95,11 @@ public class DepositAccountAssembler {
 		if (command.isPreClosureAllowedChanged()) {
 			preClosureAllowed = command.isPreClosureAllowed();
 		}
+		
+		boolean interestCompoundingAllowed= product.isInterestCompoundingAllowed();
+		if(command.isInterestCompoundingAllowedChanged()){
+			interestCompoundingAllowed = command.isInterestCompoundingAllowed();
+		}
 		// end of details allowed to be overriden from product
 		
 		DepositAccount account =new DepositAccount().openNew(client, product, command.getExternalId(), 
@@ -100,7 +107,8 @@ public class DepositAccountAssembler {
 				maturityInterestRate, preClosureInterestRate, 
 				tenureInMonths, compoundingInterestEvery, compoundingInterestFrequency, 
 				command.getCommencementDate(), 
-				renewalAllowed, preClosureAllowed, this.fixedTermDepositInterestCalculator, defaultDepositLifecycleStateMachine());
+				renewalAllowed, preClosureAllowed, this.fixedTermDepositInterestCalculator,
+				defaultDepositLifecycleStateMachine(),isInterestWithdrawable,interestCompoundingAllowed);
 		
 		return account;
 	}
@@ -141,7 +149,8 @@ public class DepositAccountAssembler {
 				maturityInterestRate, preClosureInterestRate, 
 				tenureInMonths, compoundingInterestEvery, compoundingInterestFrequency, 
 				account.maturesOnDate(), 
-				renewalAllowed, preClosureAllowed, this.fixedTermDepositInterestCalculator, defaultDepositLifecycleStateMachine());
+				renewalAllowed, preClosureAllowed, this.fixedTermDepositInterestCalculator, defaultDepositLifecycleStateMachine(),
+				account.isInterestWithdrawable(),product.isInterestCompoundingAllowed());
 		
 		newAccount.updateAccount(account);
 		

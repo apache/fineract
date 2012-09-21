@@ -69,6 +69,9 @@ public class DepositProduct extends AbstractAuditableCustom<AppUser, Long> {
 	@Column(name = "is_preclosure_allowed", nullable=false)
 	private boolean preClosureAllowed = false;
 	
+	@Column(name = "is_compounding_interest_allowed", nullable=false)
+	private boolean interestCompoundingAllowed = false;
+	
 	@Column(name = "pre_closure_interest_rate", scale = 6, precision = 19, nullable = false)
 	private BigDecimal preClosureInterestRate;
 	
@@ -87,7 +90,8 @@ public class DepositProduct extends AbstractAuditableCustom<AppUser, Long> {
 			final PeriodFrequencyType interestCompoundedEveryPeriodType, 
 			final boolean canRenew,
 			final boolean canPreClose, 
-			final BigDecimal preClosureInterestRate) {
+			final BigDecimal preClosureInterestRate,
+			final boolean isInterestCompoundingAllowed) {
 		this.name = name.trim();
 		if (StringUtils.isNotBlank(description)) {
 			this.description = description.trim();
@@ -112,6 +116,7 @@ public class DepositProduct extends AbstractAuditableCustom<AppUser, Long> {
 		this.renewalAllowed = canRenew;
 		this.preClosureAllowed = canPreClose;
 		this.preClosureInterestRate = preClosureInterestRate;
+		this.interestCompoundingAllowed = isInterestCompoundingAllowed;
 	}
 	
 	public MonetaryCurrency getCurrency() {
@@ -150,6 +155,10 @@ public class DepositProduct extends AbstractAuditableCustom<AppUser, Long> {
 		return this.preClosureAllowed;
 	}
 	
+	public boolean isInterestCompoundingAllowed() {
+		return interestCompoundingAllowed;
+	}
+
 	public boolean isDeleted() {
 		return deleted;
 	}
@@ -235,6 +244,10 @@ public class DepositProduct extends AbstractAuditableCustom<AppUser, Long> {
 		
 		if (command.isPreClosureInterestRateChanged()) {
 			this.preClosureInterestRate=command.getPreClosureInterestRate();
+		}
+		
+		if(command.interestCompoundingAllowedChanged()){
+			this.interestCompoundingAllowed = command.isInterestCompoundingAllowed();
 		}
 	}
 	

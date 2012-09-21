@@ -68,10 +68,10 @@ public class DepositAccountsApiResource {
 			Arrays.asList("id", "externalId", "clientId", "clientName",
 					"productId", "productName", "status", "currency",
 					"deposit", "maturityInterestRate", "tenureInMonths",
-					"interestCompoundedEvery",
+					"interestCompoundedEvery","interestCompoundingAllowed",
 					"interestCompoundedEveryPeriodType", "renewalAllowed",
 					"preClosureAllowed", "preClosureInterestRate", 
-					"withdrawnonDate","rejectedonDate","closedonDate","transactions"));
+					"withdrawnonDate","rejectedonDate","closedonDate","transactions","interestPaid","isInterestWithdrawable"));
 	
 	
 	@POST
