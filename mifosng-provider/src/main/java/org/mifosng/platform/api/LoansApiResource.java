@@ -498,6 +498,21 @@ public class LoansApiResource {
         return Response.ok().entity(identifier).build();
     }
 
+    @GET
+    @Path("{loanId}/charges/template")
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
+    public String retrieveNewLoanChargeDetails(@Context final UriInfo uriInfo) {
+        Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+
+        boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+
+        Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveLoanApplicableCharges();
+        LoanChargeData loanChargeTemplate = LoanChargeData.template(chargeOptions);
+
+        return this.apiJsonSerializerService.serializeLoanChargeDataToJson(prettyPrint, responseParameters, loanChargeTemplate);
+    }
+
     @PUT
     @Path("{loanId}/charges/{chargeId}")
     @Consumes({ MediaType.APPLICATION_JSON })

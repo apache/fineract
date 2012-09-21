@@ -21,6 +21,7 @@ import org.mifosng.platform.api.data.FundData;
 import org.mifosng.platform.api.data.GenericResultsetData;
 import org.mifosng.platform.api.data.GroupData;
 import org.mifosng.platform.api.data.LoanAccountData;
+import org.mifosng.platform.api.data.LoanChargeData;
 import org.mifosng.platform.api.data.LoanProductData;
 import org.mifosng.platform.api.data.LoanTransactionData;
 import org.mifosng.platform.api.data.NoteData;
@@ -168,6 +169,9 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 					"chargeAppliesTo", "chargeTimeType",
 					"chargeCalculationType", "chargeCalculationTypeOptions",
                     "chargeAppliesToOptions", "chargeTimeTypeOptions", "currencyOptions"));
+
+    private static final Set<String> LOAN_CHARGES_DATA_PARAMETERS = new HashSet<String>(
+            Arrays.asList("chargeOptions"));
 
 	private final GoogleGsonSerializerHelper helper;
 
@@ -549,7 +553,16 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 		return helper.serializedJsonFrom(gsonDeserializer, charge);
 	}
 
-	@Override
+    @Override
+    public String serializeLoanChargeDataToJson(boolean prettyPrint, Set<String> responseParameters, LoanChargeData charge) {
+        final Gson gsonDeserializer = helper
+                .createGsonBuilderWithParameterExclusionSerializationStrategy(
+                        LOAN_CHARGES_DATA_PARAMETERS, prettyPrint,
+                        responseParameters);
+        return helper.serializedJsonFrom(gsonDeserializer, charge);
+    }
+
+    @Override
 	public String serializeStaffDataToJson(boolean prettyPrint,
 			Set<String> responseParameters, StaffData staff) {
 		final Gson gsonDeserializer = helper
