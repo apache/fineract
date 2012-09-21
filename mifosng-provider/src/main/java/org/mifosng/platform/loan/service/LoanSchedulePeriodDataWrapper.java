@@ -100,4 +100,22 @@ public class LoanSchedulePeriodDataWrapper {
 		}
 		return cumulativeValue;
 	}
+
+	public Integer deriveCumulativeLoanTermInDays() {
+		Integer cumulativeValue = Integer.valueOf(0);
+		for (LoanSchedulePeriodData period : this.periods) {
+			if (period.daysInPeriod() != null) {
+				cumulativeValue += period.daysInPeriod();
+			}
+		}
+		return cumulativeValue;
+	}
+
+	public BigDecimal deriveCumulativeTotalOverdue() {
+		BigDecimal cumulativeValue = BigDecimal.ZERO;
+		for (LoanSchedulePeriodData period : this.periods) {
+			cumulativeValue = cumulativeValue.add(period.totalOverdue());
+		}
+		return cumulativeValue;
+	}
 }

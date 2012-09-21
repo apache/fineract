@@ -54,6 +54,7 @@ public class LoanBasicDetailsData {
 	private final LocalDate expectedMaturityDate;
 	private final LocalDate lifeCycleStatusDate;
 	
+	private final BigDecimal totalDisbursementCharges;
 	private final Collection<LoanChargeData> charges;
 	
 	public static LoanBasicDetailsData populateForNewLoanCreation(final Long clientId, final String clientName, final LocalDate expectedDisbursementDate,
@@ -146,6 +147,7 @@ public class LoanBasicDetailsData {
 		this.lifeCycleStatusDate = null;
 		
 		this.charges = charges;
+		this.totalDisbursementCharges = BigDecimal.ZERO;
 	}
 	
 	private LoanBasicDetailsData(final Long clientId, final String clientName, final LocalDate expectedDisbursementDate, final Long clientOfficeId) {
@@ -191,6 +193,7 @@ public class LoanBasicDetailsData {
 		this.interestChargedFromDate = null;
 		
 		this.charges = null;
+		this.totalDisbursementCharges = BigDecimal.ZERO;
 	}
 
 	public LoanBasicDetailsData(
@@ -227,7 +230,8 @@ public class LoanBasicDetailsData {
 			final EnumOptionData termPeriodFrequencyType, 
 			final Integer transactionStrategyId,
 			final Collection<LoanChargeData> charges,
-			final Long loanOfficerId, String loanOfficerName) {
+			final Long loanOfficerId, String loanOfficerName, 
+			final BigDecimal totalDisbursementCharges) {
 		this.id = id;
 		this.externalId = externalId;
 		this.clientId = clientId;
@@ -266,6 +270,7 @@ public class LoanBasicDetailsData {
 		this.termPeriodFrequencyType = termPeriodFrequencyType;
 		this.transactionStrategyId = transactionStrategyId;
 		this.charges = charges;
+		this.totalDisbursementCharges = totalDisbursementCharges;
 	}
 
 	public int getMaxSubmittedOnOffsetFromToday() {
@@ -507,6 +512,10 @@ public class LoanBasicDetailsData {
 
 	public String getLoanOfficerName() {
 		return loanOfficerName;
+	}
+
+	public BigDecimal getTotalDisbursementCharges() {
+		return totalDisbursementCharges;
 	}
 
 	public DisbursementData toDisburementData() {

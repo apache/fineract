@@ -91,7 +91,11 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 	}
 
 	@Override
-	public LoanScheduleNewData retrieveRepaymentSchedule(final Long loanId, final CurrencyData currency, final DisbursementData disbursement) {
+	public LoanScheduleNewData retrieveRepaymentSchedule(final Long loanId, 
+			final CurrencyData currency, 
+			final DisbursementData disbursement,
+			final BigDecimal totalChargesAtDisbursement,
+			final BigDecimal inArrearsTolerance) {
 
 		try {
 			context.authenticatedUser();
@@ -99,8 +103,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 			final LoanScheduleMapper rm = new LoanScheduleMapper(disbursement);
 			final String sql = "select " + rm.loanScheduleSchema() + " where l.id = ? order by ls.loan_id, ls.installment";
 			
-			// FIXME - KW - pass through total chargesDueAtTimeOfDisbursementFigure
-			final LoanSchedulePeriodData disbursementPeriod = LoanSchedulePeriodData.disbursementOnlyPeriod(disbursement.disbursementDate(), disbursement.amount(), BigDecimal.ZERO);
+			final LoanSchedulePeriodData disbursementPeriod = LoanSchedulePeriodData.disbursementOnlyPeriod(disbursement.disbursementDate(), disbursement.amount(), totalChargesAtDisbursement);
 			
 			final Collection<LoanSchedulePeriodData> repaymentSchedulePeriods = this.jdbcTemplate.query(sql, rm, new Object[] { loanId });
 			
@@ -110,7 +113,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 			
 			LoanSchedulePeriodDataWrapper wrapper = new LoanSchedulePeriodDataWrapper(periods);
 			
-			final Integer loanTermInDays = null;
+			final Integer loanTermInDays = wrapper.deriveCumulativeLoanTermInDays();
 			final BigDecimal cumulativePrincipalDisbursed = wrapper.deriveCumulativePrincipalDisbursed();
 			final BigDecimal cumulativePrincipalDue = wrapper.deriveCumulativePrincipalDue();
 			final BigDecimal cumulativePrincipalPaid = wrapper.deriveCumulativePrincipalPaid();
@@ -128,7 +131,17 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 			final BigDecimal totalPaidToDate = cumulativePrincipalPaid.add(cumulativeInterestPaid).add(cumulativeChargesPaid);
 			final BigDecimal totalWaivedToDate = cumulativeInterestWaived;
 			final BigDecimal totalOutstanding = cumulativePrincipalOutstanding.add(cumulativeInterestOutstanding).add(cumulativeChargesOutstanding);
-			final BigDecimal totalInArrears = null;
+
+			final BigDecimal totalOverdue = wrapper.deriveCumulativeTotalOverdue();
+			
+			MoneyData tolerance = MoneyData.of(currency, inArrearsTolerance);
+			MoneyData totalOverdueMoney = MoneyData.of(currency, totalOverdue);
+			boolean isWaiveAllowed = totalOverdueMoney.isGreaterThanZero() && (tolerance.isGreaterThan(totalOverdueMoney) || tolerance.isEqualTo(totalOverdueMoney));
+
+			BigDecimal totalInArrears = null;
+			if (!isWaiveAllowed) {
+				totalInArrears = totalOverdueMoney.getAmount();
+			}
 			
 			return new LoanScheduleNewData(currency, periods, loanTermInDays, 
 					cumulativePrincipalDisbursed, cumulativePrincipalDue, cumulativePrincipalPaid, cumulativePrincipalOutstanding, 
@@ -335,6 +348,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 			return "l.id as id, l.external_id as externalId, l.fund_id as fundId, f.name as fundName, " 
 					+ " lp.id as loanProductId, lp.name as loanProductName, lp.description as loanProductDescription, c.id as clientId, c.display_name as clientName, " 
 					+ " c.office_id as clientOfficeId,l.submittedon_date as submittedOnDate,"
+					+ " l.total_charges_due_at_disbursement_derived as totalDisbursementCharges,"
 					+ " l.approvedon_date as approvedOnDate, l.expected_disbursedon_date as expectedDisbursementDate, l.disbursedon_date as actualDisbursementDate, l.expected_firstrepaymenton_date as expectedFirstRepaymentOnDate,"
 					+ " l.interest_calculated_from_date as interestChargedFromDate, l.closedon_date as closedOnDate, l.expected_maturedon_date as expectedMaturityDate, "
 					+ " l.principal_amount as principal, l.arrearstolerance_amount as inArrearsTolerance, l.number_of_repayments as numberOfRepayments, l.repay_every as repaymentEvery,"
@@ -398,6 +412,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
 			BigDecimal principal = rs.getBigDecimal("principal");
 			BigDecimal inArrearsTolerance = rs.getBigDecimal("inArrearsTolerance");
+			BigDecimal totalDisbursementCharges = rs.getBigDecimal("totalDisbursementCharges");
 
 			Integer numberOfRepayments = JdbcSupport.getInteger(rs,"numberOfRepayments");
 			Integer repaymentEvery = JdbcSupport.getInteger(rs,"repaymentEvery");
@@ -454,7 +469,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 					interestCalculationPeriodType, 
 					status,
 					lifeCycleStatusDate, termFrequency, termPeriodFrequencyType, transactionStrategyId, charges,
-					loanOfficerId, loanOfficerName);
+					loanOfficerId, loanOfficerName, totalDisbursementCharges);
 		}
 	}
 

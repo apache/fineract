@@ -199,13 +199,15 @@ public class LoansApiResource {
 				loanRepayments = currentLoanRepayments;
 				loanRepaymentsCount = loanRepayments.size();
 			}
+			
 			DisbursementData singleDisbursement = loanBasicDetails.toDisburementData();
-			repaymentSchedule = this.loanReadPlatformService.retrieveRepaymentSchedule(loanId, loanBasicDetails.getCurrency(), singleDisbursement);
+			repaymentSchedule = this.loanReadPlatformService.retrieveRepaymentSchedule(loanId, loanBasicDetails.getCurrency(), 
+					singleDisbursement, loanBasicDetails.getTotalDisbursementCharges(), loanBasicDetails.getInArrearsTolerance());
 
 			MoneyData tolerance = MoneyData.of(loanBasicDetails.getCurrency(), loanBasicDetails.getInArrearsTolerance());
 			MoneyData totalOutstandingMoney = MoneyData.of(loanBasicDetails.getCurrency(), repaymentSchedule.totalOutstanding());
 			boolean isWaiveAllowed = totalOutstandingMoney.isGreaterThanZero() && (tolerance.isGreaterThan(totalOutstandingMoney) || tolerance.isEqualTo(totalOutstandingMoney));
-			
+
 			permissions = this.loanReadPlatformService.retrieveLoanPermissions(loanBasicDetails, isWaiveAllowed, loanRepaymentsCount);
 			convenienceDataRequired = true;
 			

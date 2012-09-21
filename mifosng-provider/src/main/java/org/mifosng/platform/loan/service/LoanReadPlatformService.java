@@ -1,5 +1,6 @@
 package org.mifosng.platform.loan.service;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 
 import org.mifosng.platform.api.LoanScheduleNewData;
@@ -14,7 +15,7 @@ public interface LoanReadPlatformService {
 
 	LoanBasicDetailsData retrieveLoanAccountDetails(Long loanId);
 
-	LoanScheduleNewData retrieveRepaymentSchedule(Long loanId, CurrencyData currency, DisbursementData disbursement);
+	LoanScheduleNewData retrieveRepaymentSchedule(Long loanId, CurrencyData currency, DisbursementData disbursement, BigDecimal totalChargesAtDisbursement, BigDecimal inArrearsTolerance);
 
 	Collection<LoanRepaymentTransactionData> retrieveLoanPayments(Long loanId);
 

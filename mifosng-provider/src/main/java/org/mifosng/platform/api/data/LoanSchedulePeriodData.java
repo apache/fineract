@@ -38,6 +38,7 @@ public class LoanSchedulePeriodData {
 	private final BigDecimal totalPaidForPeriod;
 	private final BigDecimal totalWaivedForPeriod;
 	private final BigDecimal totalOutstandingForPeriod;
+	private final BigDecimal totalOverdue;
 
 	public static LoanSchedulePeriodData disbursementOnlyPeriod(
 			final LocalDate disbursementDate, 
@@ -118,7 +119,12 @@ public class LoanSchedulePeriodData {
 		this.totalDueForPeriod = chargesDueAtTimeOfDisbursement;
 		this.totalPaidForPeriod = BigDecimal.ZERO;
 		this.totalWaivedForPeriod = null;
-		this.totalOutstandingForPeriod = null;
+		this.totalOutstandingForPeriod = chargesDueAtTimeOfDisbursement;
+		if (dueDate.isBefore(new LocalDate())) {
+			this.totalOverdue = this.totalOutstandingForPeriod;
+		} else {
+			this.totalOverdue = null;
+		}
 	}
 	
 	private LoanSchedulePeriodData(
@@ -159,6 +165,11 @@ public class LoanSchedulePeriodData {
 		this.totalPaidForPeriod = BigDecimal.ZERO;
 		this.totalWaivedForPeriod = null;
 		this.totalOutstandingForPeriod = totalDueForPeriod;
+		if (dueDate.isBefore(new LocalDate())) {
+			this.totalOverdue = this.totalOutstandingForPeriod;
+		} else {
+			this.totalOverdue = null;
+		}
 	}
 	
 	/*
@@ -204,6 +215,12 @@ public class LoanSchedulePeriodData {
 		this.totalPaidForPeriod = BigDecimal.ZERO;
 		this.totalWaivedForPeriod = BigDecimal.ZERO;
 		this.totalOutstandingForPeriod = totalDueForPeriod;
+		
+		if (dueDate.isBefore(new LocalDate())) {
+			this.totalOverdue = this.totalOutstandingForPeriod;
+		} else {
+			this.totalOverdue = null;
+		}
 	}
 	
 	private BigDecimal defaultToZeroIfNull(final BigDecimal possibleNullValue) {
@@ -228,6 +245,10 @@ public class LoanSchedulePeriodData {
 
 	public LocalDate periodDueDate() {
 		return this.dueDate;
+	}
+	
+	public Integer daysInPeriod() {
+		return this.daysInPeriod;
 	}
 	
 	public BigDecimal principalDisbursed() {
@@ -272,5 +293,9 @@ public class LoanSchedulePeriodData {
 
 	public BigDecimal chargesOutstanding() {
 		return defaultToZeroIfNull(this.chargesOutstanding);
+	}
+
+	public BigDecimal totalOverdue() {
+		return defaultToZeroIfNull(this.totalOverdue);
 	}
 }
