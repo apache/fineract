@@ -31,6 +31,7 @@ import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
 import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
 import org.mifosng.platform.exceptions.NoAuthorizationException;
 import org.mifosng.platform.exceptions.PlatformApiDataValidationException;
+import org.mifosng.platform.noncore.AdditionalFieldsService;
 import org.mifosng.platform.noncore.ReadWriteNonCoreDataService;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.user.domain.AppUser;
@@ -56,7 +57,7 @@ public class AdditionalFieldsApiResource {
 	}
 
 	@Autowired
-	private ReadWriteNonCoreDataService readWriteAdditionalFieldsService;
+	private AdditionalFieldsService readWriteAdditionalFieldsService;
 
 	@Autowired
 	private ApiJsonSerializerService apiJsonSerializerService;
