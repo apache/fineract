@@ -1,12 +1,7 @@
 package org.mifosng.platform.noncore;
 
-import java.math.BigDecimal;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.text.NumberFormat;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,14 +12,13 @@ import java.util.Set;
 import javax.sql.rowset.CachedRowSet;
 
 import org.apache.commons.lang.StringUtils;
-import org.joda.time.LocalDate;
-import org.joda.time.format.DateTimeFormat;
 import org.mifosng.platform.api.data.ApiParameterError;
 import org.mifosng.platform.api.data.DatatableData;
 import org.mifosng.platform.api.data.GenericResultsetData;
 import org.mifosng.platform.api.data.ResultsetColumnHeader;
 import org.mifosng.platform.api.data.ResultsetColumnValue;
 import org.mifosng.platform.api.data.ResultsetDataRow;
+import org.mifosng.platform.api.infrastructure.JsonParserHelper;
 import org.mifosng.platform.exceptions.DataTableNotFoundException;
 import org.mifosng.platform.exceptions.PlatformApiDataValidationException;
 import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
@@ -33,7 +27,6 @@ import org.mifosng.platform.user.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.number.NumberFormatter;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -770,7 +763,7 @@ public class ReadWriteNonCoreDataServiceImpl implements
 					"validation.msg.validation.errors.exist",
 					"Validation errors exist.", dataValidationErrors);
 		}
-
+	    
 		if (!StringUtils.isEmpty(paramValue)) {
 
 			if (columnHeader.getColumnValuesNew().size() > 0) {
@@ -821,22 +814,23 @@ public class ReadWriteNonCoreDataServiceImpl implements
 								+ " (neither varchar nor int)");
 			}
 
+		    JsonParserHelper helper = new JsonParserHelper();
+		    
 			if (columnHeader.getColumnDisplayTypeNew().equals("DATE"))
-				paramValue = convertFrom(paramValue,
+				paramValue = helper.convertFrom(paramValue,
 						columnHeader.getColumnName(), dateFormat,
 						clientApplicationLocale).toString();
 
 			if (columnHeader.getColumnDisplayTypeNew().equals("INTEGER"))
-				paramValue = convertToInteger(paramValue,
+				paramValue = helper.convertToInteger(paramValue,
 						columnHeader.getColumnName(), clientApplicationLocale)
 						.toString();
 
 			if (columnHeader.getColumnDisplayTypeNew().equals("DECIMAL"))
-				paramValue = convertFrom(paramValue,
+				paramValue = helper.convertFrom(paramValue,
 						columnHeader.getColumnName(), clientApplicationLocale)
 						.toString();
-
-			logger.info("Converted Value: " + paramValue + " - was: " + pValue);
+			//logger.info("Converted Value: " + paramValue + " - was: " + pValue);
 
 		}
 
@@ -871,219 +865,6 @@ public class ReadWriteNonCoreDataServiceImpl implements
 			return false;
 
 		return true;
-	}
-
-	private LocalDate convertFrom(final String dateAsString,
-			final String parameterName, final String dateFormat,
-			final Locale clientApplicationLocale) {
-
-		if (StringUtils.isBlank(dateFormat) || clientApplicationLocale == null) {
-
-			List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-			if (StringUtils.isBlank(dateFormat)) {
-				String defaultMessage = new StringBuilder(
-						"The parameter '"
-								+ parameterName
-								+ "' requires a 'dateFormat' parameter to be passed with it.")
-						.toString();
-				ApiParameterError error = ApiParameterError.parameterError(
-						"validation.msg.missing.dateFormat.parameter",
-						defaultMessage, parameterName);
-				dataValidationErrors.add(error);
-			}
-			if (clientApplicationLocale == null) {
-				String defaultMessage = new StringBuilder(
-						"The parameter '"
-								+ parameterName
-								+ "' requires a 'locale' parameter to be passed with it.")
-						.toString();
-				ApiParameterError error = ApiParameterError.parameterError(
-						"validation.msg.missing.locale.parameter",
-						defaultMessage, parameterName);
-				dataValidationErrors.add(error);
-			}
-			throw new PlatformApiDataValidationException(
-					"validation.msg.validation.errors.exist",
-					"Validation errors exist.", dataValidationErrors);
-		}
-
-		LocalDate eventLocalDate = null;
-		if (StringUtils.isNotBlank(dateAsString)) {
-			try {
-				// Locale locale = LocaleContextHolder.getLocale();
-				eventLocalDate = DateTimeFormat
-						.forPattern(dateFormat)
-						.withLocale(clientApplicationLocale)
-						.parseLocalDate(
-								dateAsString
-										.toLowerCase(clientApplicationLocale));
-			} catch (IllegalArgumentException e) {
-				List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-				ApiParameterError error = ApiParameterError.parameterError(
-						"validation.msg.invalid.date.format", "The parameter "
-								+ parameterName
-								+ " is invalid based on the dateFormat: '"
-								+ dateFormat + "' and locale: '"
-								+ clientApplicationLocale + "' provided:",
-						parameterName, dateAsString, dateFormat);
-				dataValidationErrors.add(error);
-
-				throw new PlatformApiDataValidationException(
-						"validation.msg.validation.errors.exist",
-						"Validation errors exist.", dataValidationErrors);
-			}
-		}
-
-		return eventLocalDate;
-	}
-
-	private Integer convertToInteger(final String numericalValueFormatted,
-			final String parameterName, final Locale clientApplicationLocale) {
-
-		if (clientApplicationLocale == null) {
-
-			List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-			String defaultMessage = new StringBuilder("The parameter '"
-					+ parameterName
-					+ "' requires a 'locale' parameter to be passed with it.")
-					.toString();
-			ApiParameterError error = ApiParameterError.parameterError(
-					"validation.msg.missing.locale.parameter", defaultMessage,
-					parameterName);
-			dataValidationErrors.add(error);
-
-			throw new PlatformApiDataValidationException(
-					"validation.msg.validation.errors.exist",
-					"Validation errors exist.", dataValidationErrors);
-		}
-
-		try {
-			Integer number = null;
-
-			if (StringUtils.isNotBlank(numericalValueFormatted)) {
-
-				String source = numericalValueFormatted.trim();
-
-				NumberFormat format = NumberFormat
-						.getInstance(clientApplicationLocale);
-				DecimalFormat df = (DecimalFormat) format;
-				DecimalFormatSymbols symbols = df.getDecimalFormatSymbols();
-				df.setParseBigDecimal(true);
-
-				// http://bugs.sun.com/view_bug.do?bug_id=4510618
-				char groupingSeparator = symbols.getGroupingSeparator();
-				if (groupingSeparator == '\u00a0') {
-					source = source.replaceAll(" ",
-							Character.toString('\u00a0'));
-				}
-
-				Number parsedNumber = df.parse(source);
-
-				double parsedNumberDouble = parsedNumber.doubleValue();
-				int parsedNumberInteger = parsedNumber.intValue();
-
-				if (source.contains(Character.toString(symbols
-						.getDecimalSeparator()))) {
-					throw new ParseException(source, 0);
-				}
-
-				if (!Double.valueOf(parsedNumberDouble).equals(
-						Double.valueOf(Integer.valueOf(parsedNumberInteger)))) {
-					throw new ParseException(source, 0);
-				}
-
-				number = parsedNumber.intValue();
-			}
-
-			return number;
-		} catch (ParseException e) {
-
-			List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-			ApiParameterError error = ApiParameterError
-					.parameterError(
-							"validation.msg.invalid.integer.format",
-							"The parameter "
-									+ parameterName
-									+ " has value: "
-									+ numericalValueFormatted
-									+ " which is invalid integer value for provided locale of ["
-									+ clientApplicationLocale.toString() + "].",
-							parameterName, numericalValueFormatted,
-							clientApplicationLocale);
-			dataValidationErrors.add(error);
-
-			throw new PlatformApiDataValidationException(
-					"validation.msg.validation.errors.exist",
-					"Validation errors exist.", dataValidationErrors);
-		}
-	}
-
-	private BigDecimal convertFrom(final String numericalValueFormatted,
-			final String parameterName, final Locale clientApplicationLocale) {
-
-		if (clientApplicationLocale == null) {
-
-			List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-			String defaultMessage = new StringBuilder("The parameter '"
-					+ parameterName
-					+ "' requires a 'locale' parameter to be passed with it.")
-					.toString();
-			ApiParameterError error = ApiParameterError.parameterError(
-					"validation.msg.missing.locale.parameter", defaultMessage,
-					parameterName);
-			dataValidationErrors.add(error);
-
-			throw new PlatformApiDataValidationException(
-					"validation.msg.validation.errors.exist",
-					"Validation errors exist.", dataValidationErrors);
-		}
-
-		try {
-			BigDecimal number = null;
-
-			if (StringUtils.isNotBlank(numericalValueFormatted)) {
-
-				String source = numericalValueFormatted.trim();
-
-				NumberFormat format = NumberFormat
-						.getNumberInstance(clientApplicationLocale);
-				DecimalFormat df = (DecimalFormat) format;
-				DecimalFormatSymbols symbols = df.getDecimalFormatSymbols();
-				// http://bugs.sun.com/view_bug.do?bug_id=4510618
-				char groupingSeparator = symbols.getGroupingSeparator();
-				if (groupingSeparator == '\u00a0') {
-					source = source.replaceAll(" ",
-							Character.toString('\u00a0'));
-				}
-
-				NumberFormatter numberFormatter = new NumberFormatter();
-				Number parsedNumber = numberFormatter.parse(source,
-						clientApplicationLocale);
-				number = BigDecimal.valueOf(Double.valueOf(parsedNumber
-						.doubleValue()));
-			}
-
-			return number;
-		} catch (ParseException e) {
-
-			List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-			ApiParameterError error = ApiParameterError
-					.parameterError(
-							"validation.msg.invalid.decimal.format",
-							"The parameter "
-									+ parameterName
-									+ " has value: "
-									+ numericalValueFormatted
-									+ " which is invalid decimal value for provided locale of ["
-									+ clientApplicationLocale.toString() + "].",
-							parameterName, numericalValueFormatted,
-							clientApplicationLocale);
-			dataValidationErrors.add(error);
-
-			throw new PlatformApiDataValidationException(
-					"validation.msg.validation.errors.exist",
-					"Validation errors exist.", dataValidationErrors);
-		}
 	}
 
 }

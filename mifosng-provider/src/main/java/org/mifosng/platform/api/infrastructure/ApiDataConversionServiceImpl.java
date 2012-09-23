@@ -29,6 +29,7 @@ import org.mifosng.platform.api.commands.DepositStateTransitionApprovalCommand;
 import org.mifosng.platform.api.commands.DepositStateTransitionCommand;
 import org.mifosng.platform.api.commands.FundCommand;
 import org.mifosng.platform.api.commands.GroupCommand;
+import org.mifosng.platform.api.commands.LoanApplicationCommand;
 import org.mifosng.platform.api.commands.LoanChargeCommand;
 import org.mifosng.platform.api.commands.LoanProductCommand;
 import org.mifosng.platform.api.commands.LoanStateTransitionCommand;
@@ -39,13 +40,11 @@ import org.mifosng.platform.api.commands.OrganisationCurrencyCommand;
 import org.mifosng.platform.api.commands.RoleCommand;
 import org.mifosng.platform.api.commands.SavingProductCommand;
 import org.mifosng.platform.api.commands.StaffCommand;
-import org.mifosng.platform.api.commands.LoanApplicationCommand;
 import org.mifosng.platform.api.commands.UserCommand;
 import org.mifosng.platform.api.data.ApiParameterError;
 import org.mifosng.platform.api.errorhandling.InvalidJsonException;
 import org.mifosng.platform.api.errorhandling.UnsupportedParameterException;
 import org.mifosng.platform.exceptions.PlatformApiDataValidationException;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.format.number.NumberFormatter;
 import org.springframework.stereotype.Service;
 
@@ -161,7 +160,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	    Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
 	    
 	    Set<String> supportedParams = new HashSet<String>(
-	    		Arrays.asList("name", "externalId", "parentId", "openingDate", "dateFormat")
+	    		Arrays.asList("name", "externalId", "parentId", "openingDate", "locale", "dateFormat")
 	    );
 	    
 	    checkForUnsupportedParameters(requestMap, supportedParams);
@@ -312,7 +311,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	    Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
 	    
 	    Set<String> supportedParams = new HashSet<String>(
-	    		Arrays.asList("externalId", "firstname", "lastname", "clientOrBusinessName", "officeId", "joiningDate", "dateFormat")
+	    		Arrays.asList("externalId", "firstname", "lastname", "clientOrBusinessName", "officeId", "joiningDate", "locale", "dateFormat")
 	    );
 	    
 	    checkForUnsupportedParameters(requestMap, supportedParams);
@@ -559,7 +558,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	    Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
 	    
 	    Set<String> supportedParams = new HashSet<String>(
-	    		Arrays.asList("eventDate", "note", "dateFormat")
+	    		Arrays.asList("eventDate", "note", "locale", "dateFormat")
 	    );
 	    
 	    checkForUnsupportedParameters(requestMap, supportedParams);
@@ -763,7 +762,8 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 			String valueAsString = (String) requestMap.get(paramName);
 			if (StringUtils.isNotBlank(valueAsString)) {
 				final String dateFormat = (String) requestMap.get("dateFormat");
-				paramValue = convertFrom(valueAsString, paramName, dateFormat);
+				final Locale locale = new Locale((String) requestMap.get("locale"));
+				paramValue = convertFrom(valueAsString, paramName, dateFormat, locale);
 			}
 			modifiedParameters.add(paramName);
 		}
@@ -780,6 +780,222 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		return clientApplicationLocale;
 	}
 	
+
+	private LocalDate convertFrom(final String dateAsString,
+			final String parameterName, final String dateFormat,
+			final Locale clientApplicationLocale) {
+
+		if (StringUtils.isBlank(dateFormat) || clientApplicationLocale == null) {
+
+			List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+			if (StringUtils.isBlank(dateFormat)) {
+				String defaultMessage = new StringBuilder(
+						"The parameter '"
+								+ parameterName
+								+ "' requires a 'dateFormat' parameter to be passed with it.")
+						.toString();
+				ApiParameterError error = ApiParameterError.parameterError(
+						"validation.msg.missing.dateFormat.parameter",
+						defaultMessage, parameterName);
+				dataValidationErrors.add(error);
+			}
+			if (clientApplicationLocale == null) {
+				String defaultMessage = new StringBuilder(
+						"The parameter '"
+								+ parameterName
+								+ "' requires a 'locale' parameter to be passed with it.")
+						.toString();
+				ApiParameterError error = ApiParameterError.parameterError(
+						"validation.msg.missing.locale.parameter",
+						defaultMessage, parameterName);
+				dataValidationErrors.add(error);
+			}
+			throw new PlatformApiDataValidationException(
+					"validation.msg.validation.errors.exist",
+					"Validation errors exist.", dataValidationErrors);
+		}
+
+		LocalDate eventLocalDate = null;
+		if (StringUtils.isNotBlank(dateAsString)) {
+			try {
+				// Locale locale = LocaleContextHolder.getLocale();
+				eventLocalDate = DateTimeFormat
+						.forPattern(dateFormat)
+						.withLocale(clientApplicationLocale)
+						.parseLocalDate(
+								dateAsString
+										.toLowerCase(clientApplicationLocale));
+			} catch (IllegalArgumentException e) {
+				List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+				ApiParameterError error = ApiParameterError.parameterError(
+						"validation.msg.invalid.date.format", "The parameter "
+								+ parameterName
+								+ " is invalid based on the dateFormat: '"
+								+ dateFormat + "' and locale: '"
+								+ clientApplicationLocale + "' provided:",
+						parameterName, dateAsString, dateFormat);
+				dataValidationErrors.add(error);
+
+				throw new PlatformApiDataValidationException(
+						"validation.msg.validation.errors.exist",
+						"Validation errors exist.", dataValidationErrors);
+			}
+		}
+
+		return eventLocalDate;
+	}
+
+	private Integer convertToInteger(final String numericalValueFormatted,
+			final String parameterName, final Locale clientApplicationLocale) {
+
+		if (clientApplicationLocale == null) {
+
+			List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+			String defaultMessage = new StringBuilder("The parameter '"
+					+ parameterName
+					+ "' requires a 'locale' parameter to be passed with it.")
+					.toString();
+			ApiParameterError error = ApiParameterError.parameterError(
+					"validation.msg.missing.locale.parameter", defaultMessage,
+					parameterName);
+			dataValidationErrors.add(error);
+
+			throw new PlatformApiDataValidationException(
+					"validation.msg.validation.errors.exist",
+					"Validation errors exist.", dataValidationErrors);
+		}
+
+		try {
+			Integer number = null;
+
+			if (StringUtils.isNotBlank(numericalValueFormatted)) {
+
+				String source = numericalValueFormatted.trim();
+
+				NumberFormat format = NumberFormat
+						.getInstance(clientApplicationLocale);
+				DecimalFormat df = (DecimalFormat) format;
+				DecimalFormatSymbols symbols = df.getDecimalFormatSymbols();
+				df.setParseBigDecimal(true);
+
+				// http://bugs.sun.com/view_bug.do?bug_id=4510618
+				char groupingSeparator = symbols.getGroupingSeparator();
+				if (groupingSeparator == '\u00a0') {
+					source = source.replaceAll(" ",
+							Character.toString('\u00a0'));
+				}
+
+				Number parsedNumber = df.parse(source);
+
+				double parsedNumberDouble = parsedNumber.doubleValue();
+				int parsedNumberInteger = parsedNumber.intValue();
+
+				if (source.contains(Character.toString(symbols
+						.getDecimalSeparator()))) {
+					throw new ParseException(source, 0);
+				}
+
+				if (!Double.valueOf(parsedNumberDouble).equals(
+						Double.valueOf(Integer.valueOf(parsedNumberInteger)))) {
+					throw new ParseException(source, 0);
+				}
+
+				number = parsedNumber.intValue();
+			}
+
+			return number;
+		} catch (ParseException e) {
+
+			List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+			ApiParameterError error = ApiParameterError
+					.parameterError(
+							"validation.msg.invalid.integer.format",
+							"The parameter "
+									+ parameterName
+									+ " has value: "
+									+ numericalValueFormatted
+									+ " which is invalid integer value for provided locale of ["
+									+ clientApplicationLocale.toString() + "].",
+							parameterName, numericalValueFormatted,
+							clientApplicationLocale);
+			dataValidationErrors.add(error);
+
+			throw new PlatformApiDataValidationException(
+					"validation.msg.validation.errors.exist",
+					"Validation errors exist.", dataValidationErrors);
+		}
+	}
+
+	private BigDecimal convertFrom(final String numericalValueFormatted,
+			final String parameterName, final Locale clientApplicationLocale) {
+
+		if (clientApplicationLocale == null) {
+
+			List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+			String defaultMessage = new StringBuilder("The parameter '"
+					+ parameterName
+					+ "' requires a 'locale' parameter to be passed with it.")
+					.toString();
+			ApiParameterError error = ApiParameterError.parameterError(
+					"validation.msg.missing.locale.parameter", defaultMessage,
+					parameterName);
+			dataValidationErrors.add(error);
+
+			throw new PlatformApiDataValidationException(
+					"validation.msg.validation.errors.exist",
+					"Validation errors exist.", dataValidationErrors);
+		}
+
+		try {
+			BigDecimal number = null;
+
+			if (StringUtils.isNotBlank(numericalValueFormatted)) {
+
+				String source = numericalValueFormatted.trim();
+
+				NumberFormat format = NumberFormat
+						.getNumberInstance(clientApplicationLocale);
+				DecimalFormat df = (DecimalFormat) format;
+				DecimalFormatSymbols symbols = df.getDecimalFormatSymbols();
+				// http://bugs.sun.com/view_bug.do?bug_id=4510618
+				char groupingSeparator = symbols.getGroupingSeparator();
+				if (groupingSeparator == '\u00a0') {
+					source = source.replaceAll(" ",
+							Character.toString('\u00a0'));
+				}
+
+				NumberFormatter numberFormatter = new NumberFormatter();
+				Number parsedNumber = numberFormatter.parse(source,
+						clientApplicationLocale);
+				number = BigDecimal.valueOf(Double.valueOf(parsedNumber
+						.doubleValue()));
+			}
+
+			return number;
+		} catch (ParseException e) {
+
+			List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+			ApiParameterError error = ApiParameterError
+					.parameterError(
+							"validation.msg.invalid.decimal.format",
+							"The parameter "
+									+ parameterName
+									+ " has value: "
+									+ numericalValueFormatted
+									+ " which is invalid decimal value for provided locale of ["
+									+ clientApplicationLocale.toString() + "].",
+							parameterName, numericalValueFormatted,
+							clientApplicationLocale);
+			dataValidationErrors.add(error);
+
+			throw new PlatformApiDataValidationException(
+					"validation.msg.validation.errors.exist",
+					"Validation errors exist.", dataValidationErrors);
+		}
+	}
+
+
+	/*
 	private LocalDate convertFrom(final String dateAsString, final String parameterName, final String dateFormat) {
 		
 		if (StringUtils.isBlank(dateFormat)) {
@@ -940,7 +1156,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 					"Validation errors exist.", dataValidationErrors);
 		}
 	}
-
+*/
 	private Locale localeFromString(final String localeAsString) {
 		
 		if (StringUtils.isBlank(localeAsString)) {
@@ -1130,7 +1346,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		Type typeOfMap = new TypeToken<Map<String, Object>>(){}.getType();
 	    Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
 	    
-	    Set<String> supportedParams = new HashSet<String>( Arrays.asList("eventDate", "dateFormat", "note"));
+	    Set<String> supportedParams = new HashSet<String>( Arrays.asList("eventDate", "locale", "dateFormat", "note"));
 	    
 	    checkForUnsupportedParameters(requestMap, supportedParams);
 	    
@@ -1153,7 +1369,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		Type typeOfMap = new TypeToken<Map<String, String>>(){}.getType();
 	    Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
 	    
-	    Set<String> supportedParams = new HashSet<String>(Arrays.asList("locale","commencementDate", "dateFormat", "tenureInMonths", "deposit", "interestCompoundedEveryPeriodType", "productId","interestCompoundedEvery","note"));
+	    Set<String> supportedParams = new HashSet<String>(Arrays.asList("locale","commencementDate", "locale", "dateFormat", "tenureInMonths", "deposit", "interestCompoundedEveryPeriodType", "productId","interestCompoundedEvery","note"));
 	    
 	    checkForUnsupportedParameters(requestMap, supportedParams);
 	    
