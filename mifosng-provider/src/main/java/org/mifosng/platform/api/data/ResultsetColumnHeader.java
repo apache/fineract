@@ -3,16 +3,23 @@ package org.mifosng.platform.api.data;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
+
 public class ResultsetColumnHeader {
 
 	private String columnName;
 	private String columnType;
 	private Long columnLength;
+	private String columnDisplayTypeNew;
+	// TODO - remove columnDisplayType when Additional Fields functionality
+	// removed and rename columnDisplayTypeNew to columnDisplayType
 	private String columnDisplayType;
 	private boolean isColumnNullable;
 	private boolean isColumnPrimaryKey;
-	private List<String> columnValues = new ArrayList<String>();
 	private List<ResultsetColumnValue> columnValuesNew = new ArrayList<ResultsetColumnValue>();
+	// TODO - remove columnValues when Additional Fields functionality removed
+	// and rename columnValuesNew to columnValues
+	private List<String> columnValues = new ArrayList<String>();
 
 	public ResultsetColumnHeader() {
 
@@ -80,6 +87,67 @@ public class ResultsetColumnHeader {
 
 	public void setColumnPrimaryKey(boolean isColumnPrimaryKey) {
 		this.isColumnPrimaryKey = isColumnPrimaryKey;
+	}
+
+	public String getColumnDisplayTypeNew() {
+		return columnDisplayTypeNew;
+	}
+
+	public void setColumnDisplayTypeNew() {
+
+		if (this.getColumnValuesNew().size() > 0) {
+
+			if (this.getColumnType().equalsIgnoreCase("int")) {
+				this.columnDisplayTypeNew = "CODELOOKUP";
+				return;
+			}
+			if (this.getColumnType().equalsIgnoreCase("varchar")) {
+				this.columnDisplayTypeNew = "CODEVALUE";
+				return;
+			}
+
+			throw new PlatformDataIntegrityException(
+					"error.msg.invalid.lookup.type", "Invalid Lookup Type:"
+							+ this.getColumnType() + " - Column Name: "
+							+ this.getColumnName());
+		}
+
+		if (this.getColumnType().equalsIgnoreCase("varchar") || this.getColumnType().equalsIgnoreCase("char")) {
+			this.columnDisplayTypeNew = "STRING";
+			return;
+		}
+
+		if (this.getColumnType().equalsIgnoreCase("int")
+				|| this.getColumnType().equalsIgnoreCase("bigint")
+				|| this.getColumnType().equalsIgnoreCase("smallint")
+				|| this.getColumnType().equalsIgnoreCase("mediumint")
+				|| this.getColumnType().equalsIgnoreCase("tinyint")) {
+			this.columnDisplayTypeNew = "INTEGER";
+			return;
+		}
+
+		if (this.getColumnType().equalsIgnoreCase("date")) {
+			this.columnDisplayTypeNew = "DATE";
+			return;
+		}
+
+		if (this.getColumnType().equalsIgnoreCase("decimal")) {
+			this.columnDisplayTypeNew = "DECIMAL";
+			return;
+		}
+
+		if (this.getColumnType().equalsIgnoreCase("text")
+				|| this.getColumnType().equalsIgnoreCase("mediumtext")
+				|| this.getColumnType().equalsIgnoreCase("longtext")
+				|| this.getColumnType().equalsIgnoreCase("tinytext")) {
+			this.columnDisplayTypeNew = "TEXT";
+			return;
+		}
+
+		throw new PlatformDataIntegrityException(
+				"error.msg.unsupported.column.type", "Unsupported Column Type:"
+						+ this.getColumnType() + " - Column Name: "
+						+ this.getColumnName());
 	}
 
 }

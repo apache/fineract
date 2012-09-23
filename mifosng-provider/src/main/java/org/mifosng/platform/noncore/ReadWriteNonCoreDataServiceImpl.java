@@ -465,14 +465,14 @@ public class ReadWriteNonCoreDataServiceImpl implements
 
 				rsch.setColumnType(columnDefinitions.getString("DATA_TYPE"));
 
-				rsch.setColumnDisplayType(null);
-
 				/* look for codes */
 				if (rsch.getColumnType().equalsIgnoreCase("varchar"))
 					addCodesValueIfNecessary(rsch, "_cv");
 
 				if (rsch.getColumnType().equalsIgnoreCase("int"))
 					addCodesValueIfNecessary(rsch, "_cd");
+
+				rsch.setColumnDisplayTypeNew();
 
 				columnHeaders.add(rsch);
 			}
@@ -539,15 +539,11 @@ public class ReadWriteNonCoreDataServiceImpl implements
 
 				writer.append('\"' + columnHeaders.get(j).getColumnName()
 						+ '\"' + ": ");
-				currColType = columnHeaders.get(j).getColumnType();
+				currColType = columnHeaders.get(j).getColumnDisplayTypeNew();
 				currVal = row.get(j);
 				if (currVal != null) {
 					if (currColType.equals("DECIMAL")
-							|| currColType.equals("DOUBLE")
-							|| currColType.equals("BIGINT")
-							|| currColType.equals("SMALLINT")
-							|| currColType.equals("TINYINT")
-							|| currColType.equals("INT"))
+							|| currColType.equals("INTEGER"))
 						writer.append(currVal);
 					else
 						writer.append('\"' + currVal + '\"');
@@ -781,7 +777,7 @@ public class ReadWriteNonCoreDataServiceImpl implements
 				// match code value or id
 				List<ResultsetColumnValue> allowedValues = columnHeader
 						.getColumnValuesNew();
-				if (columnHeader.getColumnType().equalsIgnoreCase("varchar")) {
+				if (columnHeader.getColumnDisplayTypeNew().equals("CODEVALUE")) {
 					for (ResultsetColumnValue allowedValue : allowedValues) {
 						if (paramValue
 								.equalsIgnoreCase(allowedValue.getValue()))
@@ -799,7 +795,7 @@ public class ReadWriteNonCoreDataServiceImpl implements
 							"Validation errors exist.", dataValidationErrors);
 				}
 
-				if (columnHeader.getColumnType().equalsIgnoreCase("int")) {
+				if (columnHeader.getColumnDisplayTypeNew().equals("CODELOOKUP")) {
 					for (ResultsetColumnValue allowedValue : allowedValues) {
 						if (paramValue.equals(Integer.toString(allowedValue
 								.getId())))
@@ -816,6 +812,7 @@ public class ReadWriteNonCoreDataServiceImpl implements
 							"validation.msg.validation.errors.exist",
 							"Validation errors exist.", dataValidationErrors);
 				}
+
 				throw new PlatformDataIntegrityException(
 						"error.msg.invalid.columnType.", "Code: "
 								+ columnHeader.getColumnName()
@@ -824,22 +821,17 @@ public class ReadWriteNonCoreDataServiceImpl implements
 								+ " (neither varchar nor int)");
 			}
 
-			if (columnHeader.getColumnType().equalsIgnoreCase("date"))
+			if (columnHeader.getColumnDisplayTypeNew().equals("DATE"))
 				paramValue = convertFrom(paramValue,
 						columnHeader.getColumnName(), dateFormat,
 						clientApplicationLocale).toString();
 
-			if (columnHeader.getColumnType().equalsIgnoreCase("bigint")
-					|| columnHeader.getColumnType()
-							.equalsIgnoreCase("smallint")
-					|| columnHeader.getColumnType().equalsIgnoreCase("tinyint")
-					|| columnHeader.getColumnType().equalsIgnoreCase("int"))
+			if (columnHeader.getColumnDisplayTypeNew().equals("INTEGER"))
 				paramValue = convertToInteger(paramValue,
 						columnHeader.getColumnName(), clientApplicationLocale)
 						.toString();
 
-			if (columnHeader.getColumnType().equalsIgnoreCase("decimal")
-					|| columnHeader.getColumnType().equalsIgnoreCase("long"))
+			if (columnHeader.getColumnDisplayTypeNew().equals("DECIMAL"))
 				paramValue = convertFrom(paramValue,
 						columnHeader.getColumnName(), clientApplicationLocale)
 						.toString();
