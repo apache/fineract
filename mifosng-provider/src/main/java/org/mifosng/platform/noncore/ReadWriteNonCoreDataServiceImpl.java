@@ -1,16 +1,24 @@
 package org.mifosng.platform.noncore;
 
+import java.math.BigDecimal;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
 import javax.sql.rowset.CachedRowSet;
 
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.LocalDate;
+import org.joda.time.format.DateTimeFormat;
 import org.mifosng.platform.api.data.ApiParameterError;
 import org.mifosng.platform.api.data.DatatableData;
 import org.mifosng.platform.api.data.GenericResultsetData;
@@ -25,6 +33,7 @@ import org.mifosng.platform.user.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.number.NumberFormatter;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -537,6 +546,7 @@ public class ReadWriteNonCoreDataServiceImpl implements
 							|| currColType.equals("DOUBLE")
 							|| currColType.equals("BIGINT")
 							|| currColType.equals("SMALLINT")
+							|| currColType.equals("TINYINT")
 							|| currColType.equals("INT"))
 						writer.append(currVal);
 					else
@@ -693,6 +703,12 @@ public class ReadWriteNonCoreDataServiceImpl implements
 			List<ResultsetColumnHeader> columnHeaders,
 			Map<String, String> queryParams, String keyFieldName) {
 
+		String dateFormat = queryParams.get("dateFormat");
+		Locale clientApplicationLocale = null;
+		String localeQueryParam = queryParams.get("locale");
+		if (!(StringUtils.isBlank(localeQueryParam)))
+			clientApplicationLocale = new Locale(queryParams.get("locale"));
+
 		String underscore = "_";
 		String space = " ";
 		String pValue = null;
@@ -708,8 +724,7 @@ public class ReadWriteNonCoreDataServiceImpl implements
 			// validating numeric and date data
 			if (!((key.equalsIgnoreCase("id"))
 					|| (key.equalsIgnoreCase(keyFieldName))
-					|| (key.equalsIgnoreCase("locale")) || (key
-						.equalsIgnoreCase("dateformat")))) {
+					|| (key.equals("locale")) || (key.equals("dateFormat")))) {
 				notFound = true;
 				// matches incoming fields with and without underscores (spaces
 				// and underscores considered the same)
@@ -723,7 +738,8 @@ public class ReadWriteNonCoreDataServiceImpl implements
 						if (queryParamColumnUnderscored
 								.equalsIgnoreCase(columnHeaderUnderscored)) {
 							pValue = queryParams.get(key);
-							validateColumn(columnHeader, pValue);
+							pValue = validateColumn(columnHeader, pValue,
+									dateFormat, clientApplicationLocale);
 							affectedColumns.put(columnHeader.getColumnName(),
 									pValue);
 							notFound = false;
@@ -741,10 +757,12 @@ public class ReadWriteNonCoreDataServiceImpl implements
 		return affectedColumns;
 	}
 
-	private void validateColumn(ResultsetColumnHeader columnHeader,
-			String pValue) {
+	private String validateColumn(ResultsetColumnHeader columnHeader,
+			String pValue, String dateFormat, Locale clientApplicationLocale) {
 
-		if ((StringUtils.isEmpty(pValue))
+		String paramValue = pValue;
+
+		if ((StringUtils.isEmpty(paramValue))
 				&& (!(columnHeader.isColumnNullable()))) {
 
 			List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
@@ -757,51 +775,80 @@ public class ReadWriteNonCoreDataServiceImpl implements
 					"Validation errors exist.", dataValidationErrors);
 		}
 
-		// check allowed values
-		if ((!StringUtils.isEmpty(pValue))
-				&& columnHeader.getColumnValuesNew().size() > 0) {
+		if (!StringUtils.isEmpty(paramValue)) {
 
-			List<ResultsetColumnValue> allowedValues = columnHeader
-					.getColumnValuesNew();
-			if (columnHeader.getColumnType().equalsIgnoreCase("varchar")) {
-				for (ResultsetColumnValue allowedValue : allowedValues) {
-					if (pValue.equalsIgnoreCase(allowedValue.getValue()))
-						return;
+			if (columnHeader.getColumnValuesNew().size() > 0) {
+				// match code value or id
+				List<ResultsetColumnValue> allowedValues = columnHeader
+						.getColumnValuesNew();
+				if (columnHeader.getColumnType().equalsIgnoreCase("varchar")) {
+					for (ResultsetColumnValue allowedValue : allowedValues) {
+						if (paramValue
+								.equalsIgnoreCase(allowedValue.getValue()))
+							return paramValue;
+					}
+					List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+					ApiParameterError error = ApiParameterError.parameterError(
+							"error.msg.invalid.columnValue",
+							columnHeader.getColumnName(), "Value :"
+									+ paramValue
+									+ "' not found in Allowed Value list");
+					dataValidationErrors.add(error);
+					throw new PlatformApiDataValidationException(
+							"validation.msg.validation.errors.exist",
+							"Validation errors exist.", dataValidationErrors);
 				}
-				List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-				ApiParameterError error = ApiParameterError.parameterError(
-						"error.msg.invalid.columnValue",
-						columnHeader.getColumnName(), "Value :" + pValue
-								+ "' not found in Allowed Value list");
-				dataValidationErrors.add(error);
-				throw new PlatformApiDataValidationException(
-						"validation.msg.validation.errors.exist",
-						"Validation errors exist.", dataValidationErrors);
+
+				if (columnHeader.getColumnType().equalsIgnoreCase("int")) {
+					for (ResultsetColumnValue allowedValue : allowedValues) {
+						if (paramValue.equals(Integer.toString(allowedValue
+								.getId())))
+							return paramValue;
+					}
+					List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+					ApiParameterError error = ApiParameterError.parameterError(
+							"error.msg.invalid.columnValue",
+							columnHeader.getColumnName(), "Value :"
+									+ paramValue
+									+ "' not found in Allowed Value list");
+					dataValidationErrors.add(error);
+					throw new PlatformApiDataValidationException(
+							"validation.msg.validation.errors.exist",
+							"Validation errors exist.", dataValidationErrors);
+				}
+				throw new PlatformDataIntegrityException(
+						"error.msg.invalid.columnType.", "Code: "
+								+ columnHeader.getColumnName()
+								+ " - Invalid Type "
+								+ columnHeader.getColumnType()
+								+ " (neither varchar nor int)");
 			}
 
-			if (columnHeader.getColumnType().equalsIgnoreCase("int")) {
-				for (ResultsetColumnValue allowedValue : allowedValues) {
-					if (pValue.equals(Integer.toString(allowedValue.getId())))
-						return;
-				}
-				List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-				ApiParameterError error = ApiParameterError.parameterError(
-						"error.msg.invalid.columnValue",
-						columnHeader.getColumnName(), "Value :" + pValue
-								+ "' not found in Allowed Value list");
-				dataValidationErrors.add(error);
-				throw new PlatformApiDataValidationException(
-						"validation.msg.validation.errors.exist",
-						"Validation errors exist.", dataValidationErrors);
-			}
+			if (columnHeader.getColumnType().equalsIgnoreCase("date"))
+				paramValue = convertFrom(paramValue,
+						columnHeader.getColumnName(), dateFormat,
+						clientApplicationLocale).toString();
 
-			throw new PlatformDataIntegrityException(
-					"error.msg.invalid.columnType.", "Code: "
-							+ columnHeader.getColumnName() + " - Invalid Type "
-							+ columnHeader.getColumnType()
-							+ " (neither varchar nor int)");
+			if (columnHeader.getColumnType().equalsIgnoreCase("bigint")
+					|| columnHeader.getColumnType()
+							.equalsIgnoreCase("smallint")
+					|| columnHeader.getColumnType().equalsIgnoreCase("tinyint")
+					|| columnHeader.getColumnType().equalsIgnoreCase("int"))
+				paramValue = convertToInteger(paramValue,
+						columnHeader.getColumnName(), clientApplicationLocale)
+						.toString();
+
+			if (columnHeader.getColumnType().equalsIgnoreCase("decimal")
+					|| columnHeader.getColumnType().equalsIgnoreCase("long"))
+				paramValue = convertFrom(paramValue,
+						columnHeader.getColumnName(), clientApplicationLocale)
+						.toString();
+
+			logger.info("Converted Value: " + paramValue + " - was: " + pValue);
+
 		}
 
+		return paramValue;
 	}
 
 	private String getDeleteEntriesSql(String datatable, String FKField,
@@ -833,4 +880,218 @@ public class ReadWriteNonCoreDataServiceImpl implements
 
 		return true;
 	}
+
+	private LocalDate convertFrom(final String dateAsString,
+			final String parameterName, final String dateFormat,
+			final Locale clientApplicationLocale) {
+
+		if (StringUtils.isBlank(dateFormat) || clientApplicationLocale == null) {
+
+			List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+			if (StringUtils.isBlank(dateFormat)) {
+				String defaultMessage = new StringBuilder(
+						"The parameter '"
+								+ parameterName
+								+ "' requires a 'dateFormat' parameter to be passed with it.")
+						.toString();
+				ApiParameterError error = ApiParameterError.parameterError(
+						"validation.msg.missing.dateFormat.parameter",
+						defaultMessage, parameterName);
+				dataValidationErrors.add(error);
+			}
+			if (clientApplicationLocale == null) {
+				String defaultMessage = new StringBuilder(
+						"The parameter '"
+								+ parameterName
+								+ "' requires a 'locale' parameter to be passed with it.")
+						.toString();
+				ApiParameterError error = ApiParameterError.parameterError(
+						"validation.msg.missing.locale.parameter",
+						defaultMessage, parameterName);
+				dataValidationErrors.add(error);
+			}
+			throw new PlatformApiDataValidationException(
+					"validation.msg.validation.errors.exist",
+					"Validation errors exist.", dataValidationErrors);
+		}
+
+		LocalDate eventLocalDate = null;
+		if (StringUtils.isNotBlank(dateAsString)) {
+			try {
+				// Locale locale = LocaleContextHolder.getLocale();
+				eventLocalDate = DateTimeFormat
+						.forPattern(dateFormat)
+						.withLocale(clientApplicationLocale)
+						.parseLocalDate(
+								dateAsString
+										.toLowerCase(clientApplicationLocale));
+			} catch (IllegalArgumentException e) {
+				List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+				ApiParameterError error = ApiParameterError.parameterError(
+						"validation.msg.invalid.date.format", "The parameter "
+								+ parameterName
+								+ " is invalid based on the dateFormat: '"
+								+ dateFormat + "' and locale: '"
+								+ clientApplicationLocale + "' provided:",
+						parameterName, dateAsString, dateFormat);
+				dataValidationErrors.add(error);
+
+				throw new PlatformApiDataValidationException(
+						"validation.msg.validation.errors.exist",
+						"Validation errors exist.", dataValidationErrors);
+			}
+		}
+
+		return eventLocalDate;
+	}
+
+	private Integer convertToInteger(final String numericalValueFormatted,
+			final String parameterName, final Locale clientApplicationLocale) {
+
+		if (clientApplicationLocale == null) {
+
+			List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+			String defaultMessage = new StringBuilder("The parameter '"
+					+ parameterName
+					+ "' requires a 'locale' parameter to be passed with it.")
+					.toString();
+			ApiParameterError error = ApiParameterError.parameterError(
+					"validation.msg.missing.locale.parameter", defaultMessage,
+					parameterName);
+			dataValidationErrors.add(error);
+
+			throw new PlatformApiDataValidationException(
+					"validation.msg.validation.errors.exist",
+					"Validation errors exist.", dataValidationErrors);
+		}
+
+		try {
+			Integer number = null;
+
+			if (StringUtils.isNotBlank(numericalValueFormatted)) {
+
+				String source = numericalValueFormatted.trim();
+
+				NumberFormat format = NumberFormat
+						.getInstance(clientApplicationLocale);
+				DecimalFormat df = (DecimalFormat) format;
+				DecimalFormatSymbols symbols = df.getDecimalFormatSymbols();
+				df.setParseBigDecimal(true);
+
+				// http://bugs.sun.com/view_bug.do?bug_id=4510618
+				char groupingSeparator = symbols.getGroupingSeparator();
+				if (groupingSeparator == '\u00a0') {
+					source = source.replaceAll(" ",
+							Character.toString('\u00a0'));
+				}
+
+				Number parsedNumber = df.parse(source);
+
+				double parsedNumberDouble = parsedNumber.doubleValue();
+				int parsedNumberInteger = parsedNumber.intValue();
+
+				if (source.contains(Character.toString(symbols
+						.getDecimalSeparator()))) {
+					throw new ParseException(source, 0);
+				}
+
+				if (!Double.valueOf(parsedNumberDouble).equals(
+						Double.valueOf(Integer.valueOf(parsedNumberInteger)))) {
+					throw new ParseException(source, 0);
+				}
+
+				number = parsedNumber.intValue();
+			}
+
+			return number;
+		} catch (ParseException e) {
+
+			List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+			ApiParameterError error = ApiParameterError
+					.parameterError(
+							"validation.msg.invalid.integer.format",
+							"The parameter "
+									+ parameterName
+									+ " has value: "
+									+ numericalValueFormatted
+									+ " which is invalid integer value for provided locale of ["
+									+ clientApplicationLocale.toString() + "].",
+							parameterName, numericalValueFormatted,
+							clientApplicationLocale);
+			dataValidationErrors.add(error);
+
+			throw new PlatformApiDataValidationException(
+					"validation.msg.validation.errors.exist",
+					"Validation errors exist.", dataValidationErrors);
+		}
+	}
+
+	private BigDecimal convertFrom(final String numericalValueFormatted,
+			final String parameterName, final Locale clientApplicationLocale) {
+
+		if (clientApplicationLocale == null) {
+
+			List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+			String defaultMessage = new StringBuilder("The parameter '"
+					+ parameterName
+					+ "' requires a 'locale' parameter to be passed with it.")
+					.toString();
+			ApiParameterError error = ApiParameterError.parameterError(
+					"validation.msg.missing.locale.parameter", defaultMessage,
+					parameterName);
+			dataValidationErrors.add(error);
+
+			throw new PlatformApiDataValidationException(
+					"validation.msg.validation.errors.exist",
+					"Validation errors exist.", dataValidationErrors);
+		}
+
+		try {
+			BigDecimal number = null;
+
+			if (StringUtils.isNotBlank(numericalValueFormatted)) {
+
+				String source = numericalValueFormatted.trim();
+
+				NumberFormat format = NumberFormat
+						.getNumberInstance(clientApplicationLocale);
+				DecimalFormat df = (DecimalFormat) format;
+				DecimalFormatSymbols symbols = df.getDecimalFormatSymbols();
+				// http://bugs.sun.com/view_bug.do?bug_id=4510618
+				char groupingSeparator = symbols.getGroupingSeparator();
+				if (groupingSeparator == '\u00a0') {
+					source = source.replaceAll(" ",
+							Character.toString('\u00a0'));
+				}
+
+				NumberFormatter numberFormatter = new NumberFormatter();
+				Number parsedNumber = numberFormatter.parse(source,
+						clientApplicationLocale);
+				number = BigDecimal.valueOf(Double.valueOf(parsedNumber
+						.doubleValue()));
+			}
+
+			return number;
+		} catch (ParseException e) {
+
+			List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+			ApiParameterError error = ApiParameterError
+					.parameterError(
+							"validation.msg.invalid.decimal.format",
+							"The parameter "
+									+ parameterName
+									+ " has value: "
+									+ numericalValueFormatted
+									+ " which is invalid decimal value for provided locale of ["
+									+ clientApplicationLocale.toString() + "].",
+							parameterName, numericalValueFormatted,
+							clientApplicationLocale);
+			dataValidationErrors.add(error);
+
+			throw new PlatformApiDataValidationException(
+					"validation.msg.validation.errors.exist",
+					"Validation errors exist.", dataValidationErrors);
+		}
+	}
+
 }
