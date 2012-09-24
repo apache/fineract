@@ -177,7 +177,7 @@ public class ReadWriteNonCoreDataServiceImpl implements
 			andClause = " and application_table_name = '" + appTable + "'";
 		}
 		// PERMITTED datatables
-		String sql = "select application_table_name, registered_table_name, registered_table_label"
+		String sql = "select application_table_name, registered_table_name"
 				+ " from x_registered_table "
 				+ " where exists"
 				+ " (select 'f'"
@@ -202,8 +202,7 @@ public class ReadWriteNonCoreDataServiceImpl implements
 			while (rs.next()) {
 				datatables.add(new DatatableData(rs
 						.getString("application_table_name"), rs
-						.getString("registered_table_name"), rs
-						.getString("registered_table_label")));
+						.getString("registered_table_name")));
 			}
 
 		} catch (SQLException e) {
