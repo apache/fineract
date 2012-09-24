@@ -255,10 +255,10 @@ public class ReadWriteNonCoreDataServiceImpl implements
 		// id only used for reading a specific entry in a one to many datatable
 		// (when updating)
 		if (id == null) {
-			sql = sql + " from " + datatable + " where " + getFKField(appTable)
+			sql = sql + " from `" + datatable + "` where " + getFKField(appTable)
 					+ " = " + appTableId;
 		} else {
-			sql = sql + " from " + datatable + " where id = " + id;
+			sql = sql + " from `" + datatable + "` where id = " + id;
 		}
 
 		if (sqlOrder != null)
@@ -277,8 +277,8 @@ public class ReadWriteNonCoreDataServiceImpl implements
 	private void checkMainResourceExistsWithinScope(String appTable,
 			Long appTableId) {
 
-		String unscopedSql = "select t.id from " + appTable
-				+ " t ${dataScopeCriteria} where t.id = " + appTableId;
+		String unscopedSql = "select t.id from `" + appTable
+				+ "` t ${dataScopeCriteria} where t.id = " + appTableId;
 
 		String sql = dataScopedSQL(unscopedSql, appTable);
 
