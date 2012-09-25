@@ -262,7 +262,8 @@ public class DepositAccountData {
 			final EnumOptionData interestCompoundedEveryPeriodType, 
 			final boolean renewalAllowed, 
 			final boolean preClosureAllowed, 
-			final BigDecimal preClosureInterestRate) {
+			final BigDecimal preClosureInterestRate,
+			final boolean interestCompoundingAllowed) {
 		this.id=null;
 		this.externalId = null;
 		this.status = null;
@@ -298,7 +299,7 @@ public class DepositAccountData {
 		this.permissions = null;
 		this.interestPaid=null;
 		this.isInterestWithdrawable=false;
-		this.interestCompoundingAllowed=true;
+		this.interestCompoundingAllowed=interestCompoundingAllowed;
 	}
 
 	public Long getId() {

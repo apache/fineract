@@ -1,5 +1,6 @@
 package org.mifosng.platform.saving.service;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 
 import org.mifosng.platform.api.data.DepositAccountData;
@@ -13,5 +14,7 @@ public interface DepositAccountReadPlatformService {
 
 	DepositAccountData retrieveNewDepositAccountDetails(Long clientId, Long productId);
 
-	DepositPermissionData retrieveDepositAccountsPermissions(DepositAccountData depositAccountData);	
+	DepositPermissionData retrieveDepositAccountsPermissions(DepositAccountData depositAccountData);
+
+	BigDecimal retrieveAvailableInterestForWithdrawal(DepositAccountData account);	
 }

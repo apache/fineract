@@ -336,7 +336,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 		if (account == null || account.isDeleted()) {
 			throw new DepositAccountNotFoundException(command.getAccountId());
 		}
-		if(account.isInterestWithdrawable()){
+		if(account.isInterestWithdrawable() && !account.isInterestCompoundingAllowed()){
 			/*BigDecimal interstGettingForPeriod = BigDecimal.valueOf(account.getAccuredInterest().getAmount().doubleValue()/new Double(account.getTenureInMonths()));
 			LocalDate lastInterestTakenDate = getLastTxnDate(account);
 			Integer noOfMonthsforInterestCal = Months.monthsBetween(lastInterestTakenDate, new LocalDate()).getMonths();

@@ -196,8 +196,10 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 			
 			List<ClientAccountSummaryData> pendingApprovalDepositAccounts = new ArrayList<ClientAccountSummaryData>();
 			List<ClientAccountSummaryData> approvedDepositAccounts = new ArrayList<ClientAccountSummaryData>();
-//			List<ClientLoanAccountSummaryData> openDepositAccounts = new ArrayList<ClientLoanAccountSummaryData>();
-//			List<ClientLoanAccountSummaryData> closedDepositAccounts = new ArrayList<ClientLoanAccountSummaryData>();
+			List<ClientAccountSummaryData> withdrawnByClientDespositAccounts = new ArrayList<ClientAccountSummaryData>();
+			List<ClientAccountSummaryData> closedDepositAccounts = new ArrayList<ClientAccountSummaryData>();
+			List<ClientAccountSummaryData> rejectedDepositAccounts = new ArrayList<ClientAccountSummaryData>();
+			List<ClientAccountSummaryData> preclosedDepositAccounts = new ArrayList<ClientAccountSummaryData>();
 			
 			ClientDespoitAccountSummaryDataMapper depositAccountMapper = new ClientDespoitAccountSummaryDataMapper();
 
@@ -210,12 +212,21 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 						pendingApprovalDepositAccounts.add(row);
 					} else if (row.getAccountStatusId() == 300) {
 						approvedDepositAccounts.add(row);
-					} 
+					} else if (row.getAccountStatusId() == 400) {
+						withdrawnByClientDespositAccounts.add(row);
+					} else if (row.getAccountStatusId() == 500) {
+						rejectedDepositAccounts.add(row);
+					} else if (row.getAccountStatusId() == 600) {
+						closedDepositAccounts.add(row);
+					} else if (row.getAccountStatusId() == 800) {
+						preclosedDepositAccounts.add(row);
+					}
 				}
 			}
 
 			return new ClientAccountSummaryCollectionData(pendingApprovalLoans, awaitingDisbursalLoans, openLoans, closedLoans, 
-					pendingApprovalDepositAccounts, approvedDepositAccounts);
+					pendingApprovalDepositAccounts, approvedDepositAccounts, withdrawnByClientDespositAccounts,
+					rejectedDepositAccounts,closedDepositAccounts,preclosedDepositAccounts);
 		} catch (EmptyResultDataAccessException e) {
 			throw new ClientNotFoundException(clientId);
 		}

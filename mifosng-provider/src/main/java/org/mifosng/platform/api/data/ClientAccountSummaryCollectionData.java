@@ -20,6 +20,14 @@ public class ClientAccountSummaryCollectionData {
 	private final List<ClientAccountSummaryData> pendingApprovalDepositAccounts;
 	private final int approvedDespositAccountsCount;
 	private final List<ClientAccountSummaryData> approvedDepositAccounts;
+	private final int withdrawnByClientDespositAccountsCount;
+	private final List<ClientAccountSummaryData> withdrawnByClientDespositAccounts;
+	private final int closedDepositAccountsCount;
+	private final List<ClientAccountSummaryData> closedDepositAccounts;
+	private final int rejectedDepositAccountsCount;
+	private final List<ClientAccountSummaryData> rejectedDepositAccounts;
+	private final int preclosedDepositAccountsCount;
+	private final List<ClientAccountSummaryData> preclosedDepositAccounts;
 	
 	public ClientAccountSummaryCollectionData(
 			final List<ClientAccountSummaryData> pendingApprovalLoans,
@@ -27,13 +35,21 @@ public class ClientAccountSummaryCollectionData {
 			final List<ClientAccountSummaryData> openLoans,
 			final List<ClientAccountSummaryData> closedLoans, 
 			final List<ClientAccountSummaryData> pendingApprovalDepositAccounts, 
-			final List<ClientAccountSummaryData> approvedDepositAccounts) {
+			final List<ClientAccountSummaryData> approvedDepositAccounts,
+			final List<ClientAccountSummaryData> withdrawnByClientDespositAccounts,
+			final List<ClientAccountSummaryData> rejectedDepositAccounts,
+			final List<ClientAccountSummaryData> closedDepositAccounts,
+			final List<ClientAccountSummaryData> preclosedDepositAccounts) {
 		this.pendingApprovalLoans = pendingApprovalLoans;
 		this.awaitingDisbursalLoans = awaitingDisbursalLoans;
 		this.openLoans = openLoans;
 		this.closedLoans = closedLoans;
 		this.pendingApprovalDepositAccounts = pendingApprovalDepositAccounts;
 		this.approvedDepositAccounts = approvedDepositAccounts;
+		this.withdrawnByClientDespositAccounts = withdrawnByClientDespositAccounts;
+		this.closedDepositAccounts = closedDepositAccounts;
+		this.rejectedDepositAccounts = rejectedDepositAccounts;
+		this.preclosedDepositAccounts = preclosedDepositAccounts;
 		
 		this.pendingApprovalLoanCount = this.pendingApprovalLoans.size();
 		this.awaitingDisbursalLoanCount = this.awaitingDisbursalLoans.size();
@@ -43,6 +59,11 @@ public class ClientAccountSummaryCollectionData {
 		
 		this.pendingApprovalDespositAccountsCount = this.pendingApprovalDepositAccounts.size();
 		this.approvedDespositAccountsCount = this.approvedDepositAccounts.size();
+		this.withdrawnByClientDespositAccountsCount = this.withdrawnByClientDespositAccounts.size();
+		this.closedDepositAccountsCount = this.closedDepositAccounts.size();
+		this.rejectedDepositAccountsCount = this.rejectedDepositAccounts.size();
+		this.preclosedDepositAccountsCount = this.preclosedDepositAccounts.size();
+		
 	}
 
 	public int getAnyLoanCount() {
@@ -95,5 +116,37 @@ public class ClientAccountSummaryCollectionData {
 
 	public List<ClientAccountSummaryData> getApprovedDepositAccounts() {
 		return approvedDepositAccounts;
+	}
+
+	public int getWithdrawnByClientDespositAccountsCount() {
+		return withdrawnByClientDespositAccountsCount;
+	}
+
+	public List<ClientAccountSummaryData> getWithdrawnByClientDespositAccounts() {
+		return withdrawnByClientDespositAccounts;
+	}
+
+	public int getClosedDepositAccountsCount() {
+		return closedDepositAccountsCount;
+	}
+
+	public List<ClientAccountSummaryData> getClosedDepositAccounts() {
+		return closedDepositAccounts;
+	}
+
+	public int getRejectedDepositAccountsCount() {
+		return rejectedDepositAccountsCount;
+	}
+
+	public List<ClientAccountSummaryData> getRejectedDepositAccounts() {
+		return rejectedDepositAccounts;
+	}
+
+	public int getPreclosedDepositAccountsCount() {
+		return preclosedDepositAccountsCount;
+	}
+
+	public List<ClientAccountSummaryData> getPreclosedDepositAccounts() {
+		return preclosedDepositAccounts;
 	}
 }

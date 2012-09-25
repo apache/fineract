@@ -109,8 +109,8 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 					"interestCompoundedEvery", "interestCompoundedEveryPeriodType",
 					"renewalAllowed","preClosureAllowed","preClosureInterestRate", 
 					"withdrawnonDate","rejectedonDate","closedonDate","transactions",
-					"permissions","isInterestWithdrawable","interestPaid","interestCompoundingAllowed"
-					)
+					"permissions","isInterestWithdrawable","interestPaid","interestCompoundingAllowed",
+					"availableInterestForWithdrawal")
 			);
 	
 	private static final Set<String> CLIENT_DATA_PARAMETERS = new HashSet<String>(
@@ -125,7 +125,11 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 					"activeLoanCount", "closedLoanCount",
 					"pendingApprovalDespositAccountsCount",
 					"pendingApprovalDespositAccounts",
-					"approvedDespositAccountsCount", "approvedDespositAccounts"));
+					"approvedDespositAccountsCount", "approvedDespositAccounts",
+					"withdrawnByClientDespositAccountsCount","withdrawnByClientDespositAccounts",
+					"closedDepositAccountsCount","closedDepositAccounts",
+					"rejectedDepositAccountsCount","rejectedDepositAccounts",
+					"preclosedDepositAccountsCount","preclosedDepositAccounts"));
 
 	private static final Set<String> GROUP_DATA_PARAMETERS = new HashSet<String>(
 			Arrays.asList("id", "name", "externalId", "clientMembers",

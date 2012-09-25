@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 
 import org.joda.time.LocalDate;
+import org.joda.time.Months;
 import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.DepositAccountData;
@@ -122,7 +123,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 					currency, selectedProduct.getMinimumBalance(), selectedProduct.getMaturityDefaultInterestRate(), 
 					selectedProduct.getTenureInMonths(), selectedProduct.getInterestCompoundedEvery(), selectedProduct.getInterestCompoundedEveryPeriodType(), 
 					selectedProduct.isRenewalAllowed(), selectedProduct.isPreClosureAllowed(), 
-					selectedProduct.getPreClosureInterestRate());
+					selectedProduct.getPreClosureInterestRate(),selectedProduct.isInterestCompoundingAllowed());
 		} else {
 			accountData = DepositAccountData.createFrom(clientAccount.getId(), clientAccount.getDisplayName());
 		}
@@ -256,7 +257,16 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 		//boolean isActive = (depositAccountData.getStatus().getId().equals(300L));
 		boolean rejectAllowed = pendingApproval;
 		boolean withdrawnByApplicantAllowed = pendingApproval;
+		boolean interestWithdrawAllowed = depositAccountData.isInterestWithdrawable();
 
-		return new DepositPermissionData(rejectAllowed, withdrawnByApplicantAllowed, undoApprovalAllowed, pendingApproval);
+		return new DepositPermissionData(rejectAllowed, withdrawnByApplicantAllowed, undoApprovalAllowed, pendingApproval, interestWithdrawAllowed);
+	}
+
+	@Override
+	public BigDecimal retrieveAvailableInterestForWithdrawal(DepositAccountData account) {
+		BigDecimal interstGettingForPeriod = BigDecimal.valueOf(account.getActualInterestAccrued().doubleValue()/new Double(account.getTenureInMonths()));
+		Integer noOfMonthsforInterestCal = Months.monthsBetween(account.getActualCommencementDate(), new LocalDate()).getMonths();
+		Integer noOfPeriods = noOfMonthsforInterestCal / account.getInterestCompoundedEvery();
+		return BigDecimal.valueOf(interstGettingForPeriod.multiply(new BigDecimal(noOfPeriods)).doubleValue()-account.getInterestPaid().doubleValue());
 	}
 }

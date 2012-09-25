@@ -1,5 +1,6 @@
 package org.mifosng.platform.api;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -111,6 +112,7 @@ public class DepositAccountsApiResource {
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		
 		DepositPermissionData permissions = null;
+		BigDecimal availableInterestForWithdrawal = null;
 		
 		if (responseParameters.isEmpty()) {
 			responseParameters.addAll(typicalResponseParameters);
@@ -127,11 +129,12 @@ public class DepositAccountsApiResource {
 		Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (!associationParameters.isEmpty()) {
 			if (associationParameters.contains("all")) {
-				responseParameters.addAll(Arrays.asList("permissions"));
+				responseParameters.addAll(Arrays.asList("permissions","availableInterestForWithdrawal"));
 			} else {
 				responseParameters.addAll(associationParameters);
 			}
 			permissions = this.depositAccountReadPlatformService.retrieveDepositAccountsPermissions(account);
+			availableInterestForWithdrawal = this.depositAccountReadPlatformService.retrieveAvailableInterestForWithdrawal(account);
 			account = new DepositAccountData(account, permissions, account.getTransactions());
 		}
 		

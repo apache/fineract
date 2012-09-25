@@ -293,7 +293,7 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 							getInterestCompoundedFrequencyType());
 		}
 		this.interestAccrued = futureValueOnMaturity.minus(getDeposit()).getAmount();
-		this.total = this.interestCompoundingAllowed ? futureValueOnMaturity.getAmount() : getDeposit().getAmount();
+		this.total = futureValueOnMaturity.getAmount();
 		
 		DepositAccountTransaction depositaccountTransaction = DepositAccountTransaction.deposit(getDeposit(), getActualCommencementDate(),getAccuredInterest());
 		depositaccountTransaction.updateAccount(this);
@@ -593,7 +593,7 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 							interestCompoundedEvery,
 							this.product.getInterestCompoundedEveryPeriodType());
 		}
-		this.total = account.isInterestCompoundingAllowed()?accuredtotalAmount.getAmount():getDeposit().getAmount();
+		this.total = account.isInterestCompoundingAllowed()?accuredtotalAmount.getAmount():BigDecimal.valueOf(accuredtotalAmount.getAmount().doubleValue()-this.interstPaid.doubleValue());
 		this.interestAccrued = accuredtotalAmount.minus(deposit).getAmount();
 		
 	}
@@ -605,6 +605,7 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 			depositAccountTransaction.updateAccount(this);
 			this.depositaccountTransactions.add(depositAccountTransaction);
 			this.interstPaid = this.interstPaid.add(interest.getAmount());
+			this.total = this.total.subtract(this.interstPaid);
 		}
 		
 	}

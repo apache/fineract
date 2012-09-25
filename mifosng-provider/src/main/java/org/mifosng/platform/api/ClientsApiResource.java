@@ -231,7 +231,9 @@ public class ClientsApiResource {
 		Set<String> typicalResponseParameters = new HashSet<String>(
 				Arrays.asList("pendingApprovalLoans", "awaitingDisbursalLoans", "openLoans", "closedLoans", 
 						"anyLoanCount", "pendingApprovalLoanCount", "awaitingDisbursalLoanCount", "activeLoanCount", "closedLoanCount",
-						"pendingApprovalDespositAccountsCount", "pendingApprovalDespositAccounts", "approvedDespositAccountsCount", "approvedDespositAccounts")
+						"pendingApprovalDespositAccountsCount", "pendingApprovalDespositAccounts", "approvedDespositAccountsCount", "approvedDespositAccounts",
+						"withdrawnByClientDespositAccountsCount","withdrawnByClientDespositAccounts","closedDepositAccountsCount","closedDepositAccounts",
+						"rejectedDepositAccountsCount","rejectedDepositAccounts","preclosedDepositAccountsCount","preclosedDepositAccounts")
 		);
 		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
