@@ -21,6 +21,7 @@ import org.mifosng.platform.client.domain.NoteRepository;
 import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.exceptions.DepositAccountNotFoundException;
 import org.mifosng.platform.exceptions.DepositAccountReopenException;
+import org.mifosng.platform.exceptions.DepositAccountTransactionsException;
 import org.mifosng.platform.exceptions.NoAuthorizationException;
 import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
 import org.mifosng.platform.exceptions.ProductNotFoundException;
@@ -349,11 +350,11 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 			BigDecimal remainInterestForWithdrawal = totalAvailableInterestForWithdrawal.subtract(interestPaid);
 			
 			if(remainInterestForWithdrawal.doubleValue() > 0){
-				if(remainInterestForWithdrawal.doubleValue() > command.getWithdrawInterest().doubleValue()){
+				if(remainInterestForWithdrawal.doubleValue() >= command.getWithdrawInterest().doubleValue()&&command.getWithdrawInterest().doubleValue()>0){
 					account.withdrawInterest(Money.of(account.getDeposit().getCurrency(), command.getWithdrawInterest()));
 					this.depositAccountRepository.save(account);
 				}else {
-					throw new RuntimeException("You can Withdraw "+remainInterestForWithdrawal+" only, \n please enter a valid amount for withdrawal");
+					throw new DepositAccountTransactionsException("You can Withdraw "+remainInterestForWithdrawal+" only");
 				}
 				
 			}
@@ -369,7 +370,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 					throw new RuntimeException();
 			}*/
 		}else{
-			throw new RuntimeException("You can not withdraw interst for this account");
+			throw new DepositAccountTransactionsException("You can not withdraw interst for this account");
 		}
 		return new EntityIdentifier(account.getId());
 	}

@@ -72,7 +72,7 @@ public class DepositAccountsApiResource {
 					"interestCompoundedEvery","interestCompoundingAllowed",
 					"interestCompoundedEveryPeriodType", "renewalAllowed",
 					"preClosureAllowed", "preClosureInterestRate", 
-					"withdrawnonDate","rejectedonDate","closedonDate","transactions","interestPaid","isInterestWithdrawable"));
+					"withdrawnonDate","rejectedonDate","closedonDate","transactions","interestPaid","isInterestWithdrawable","availableInterestForWithdrawal"));
 	
 	
 	@POST
@@ -112,7 +112,6 @@ public class DepositAccountsApiResource {
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		
 		DepositPermissionData permissions = null;
-		BigDecimal availableInterestForWithdrawal = null;
 		
 		if (responseParameters.isEmpty()) {
 			responseParameters.addAll(typicalResponseParameters);
@@ -129,12 +128,11 @@ public class DepositAccountsApiResource {
 		Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (!associationParameters.isEmpty()) {
 			if (associationParameters.contains("all")) {
-				responseParameters.addAll(Arrays.asList("permissions","availableInterestForWithdrawal"));
+				responseParameters.addAll(Arrays.asList("permissions"));
 			} else {
 				responseParameters.addAll(associationParameters);
 			}
 			permissions = this.depositAccountReadPlatformService.retrieveDepositAccountsPermissions(account);
-			availableInterestForWithdrawal = this.depositAccountReadPlatformService.retrieveAvailableInterestForWithdrawal(account);
 			account = new DepositAccountData(account, permissions, account.getTransactions());
 		}
 		

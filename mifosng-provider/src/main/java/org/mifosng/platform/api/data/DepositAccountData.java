@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.joda.time.LocalDate;
+import org.joda.time.Months;
 
 /**
  * Immutable data object for deposit accounts.
@@ -51,6 +52,7 @@ public class DepositAccountData {
 	
 	private final Collection<DepositAccountTransactionData> transactions;
 	private final DepositPermissionData permissions;
+	private final BigDecimal availableInterestForWithdrawal;
 	
 	/*
 	 * used when returning account template data but only a clientId is passed, no selected product.
@@ -99,6 +101,7 @@ public class DepositAccountData {
 		this.interestPaid=null;
 		this.isInterestWithdrawable=false;
 		this.interestCompoundingAllowed = true;
+		this.availableInterestForWithdrawal = new BigDecimal(0);
 	}
 
 	public DepositAccountData(
@@ -141,6 +144,7 @@ public class DepositAccountData {
 		this.interestPaid=account.getInterestPaid();
 		this.isInterestWithdrawable=account.isInterestWithdrawable();
 		this.interestCompoundingAllowed=account.isInterestCompoundingAllowed();
+		this.availableInterestForWithdrawal=new BigDecimal(0);
 	}
 	
 	public DepositAccountData(final DepositAccountData account, final DepositPermissionData permissions, final Collection<DepositAccountTransactionData> transactions) {
@@ -180,6 +184,7 @@ public class DepositAccountData {
 		this.interestPaid=account.getInterestPaid();
 		this.isInterestWithdrawable=account.isInterestWithdrawable();
 		this.interestCompoundingAllowed = account.isInterestCompoundingAllowed();
+		this.availableInterestForWithdrawal=getAvailableInterestForWithdrawal(account);;
 	}
 	
 	public DepositAccountData(
@@ -248,6 +253,7 @@ public class DepositAccountData {
 		this.interestPaid =interestPaid;
 		this.isInterestWithdrawable=isInterestWithdrawable;
 		this.interestCompoundingAllowed = interestCompoundingAllowed;
+		this.availableInterestForWithdrawal =  new BigDecimal(0);
 	}
 	
 	public DepositAccountData(
@@ -300,6 +306,7 @@ public class DepositAccountData {
 		this.interestPaid=null;
 		this.isInterestWithdrawable=false;
 		this.interestCompoundingAllowed=interestCompoundingAllowed;
+		this.availableInterestForWithdrawal= new BigDecimal(0);
 	}
 
 	public Long getId() {
@@ -433,5 +440,19 @@ public class DepositAccountData {
 	public boolean isInterestCompoundingAllowed() {
 		return interestCompoundingAllowed;
 	}
-	
+
+	public BigDecimal getAvailableInterestForWithdrawal() {
+		return availableInterestForWithdrawal;
+	}
+	public BigDecimal getAvailableInterestForWithdrawal(DepositAccountData account) {
+		if(account.getStatus().getId()==300){
+			BigDecimal interstGettingForPeriod = BigDecimal.valueOf(account.getActualInterestAccrued().doubleValue()/new Double(account.getTenureInMonths()));
+			Integer noOfMonthsforInterestCal = Months.monthsBetween(account.getActualCommencementDate(), new LocalDate()).getMonths();
+			Integer noOfPeriods = noOfMonthsforInterestCal / account.getInterestCompoundedEvery();
+			return BigDecimal.valueOf(interstGettingForPeriod.multiply(new BigDecimal(noOfPeriods)).doubleValue()-account.getInterestPaid().doubleValue());
+		}
+		else{
+			return new BigDecimal(0);
+		}
+	}
 }
