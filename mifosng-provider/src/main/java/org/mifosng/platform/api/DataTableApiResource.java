@@ -75,7 +75,7 @@ public class DataTableApiResource {
 	}
 
 	@POST
-	@Path("{datatable}/register/{appTable}")
+	@Path("/register/{datatable}/{appTable}")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	public Response registerDatatable(
@@ -89,7 +89,7 @@ public class DataTableApiResource {
 	}
 
 	@POST
-	@Path("{datatable}/deregister")
+	@Path("/deregister/{datatable}")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	public Response deregisterDatatable(
