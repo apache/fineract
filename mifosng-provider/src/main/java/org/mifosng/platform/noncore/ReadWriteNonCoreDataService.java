@@ -5,10 +5,17 @@ import java.util.Map;
 
 import org.mifosng.platform.api.data.DatatableData;
 import org.mifosng.platform.api.data.GenericResultsetData;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface ReadWriteNonCoreDataService {
 
 	List<DatatableData> retrieveDatatableNames(String appTable);
+
+	@PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'CAN_REGISTER_DATATABLE')")
+	void registerDatatable(String datatable, String appTable);
+
+	@PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'CAN_DEREGISTER_DATATABLE')")
+	void deregisterDatatable(String datatable);
 
 	GenericResultsetData retrieveDataTableGenericResultSet(String datatable,
 			Long appTableId, String sqlFields, String sqlOrder, Long id);

@@ -47,6 +47,135 @@ public class ReadWriteNonCoreDataServiceImpl implements
 	private GenericDataService genericDataService;
 
 	@Override
+	public List<DatatableData> retrieveDatatableNames(String appTable) {
+
+		long startTime = System.currentTimeMillis();
+
+		String andClause;
+		if (appTable == null) {
+			andClause = "";
+		} else {
+			andClause = " and application_table_name = '" + appTable + "'";
+		}
+		// PERMITTED datatables
+		String sql = "select application_table_name, registered_table_name"
+				+ " from x_registered_table "
+				+ " where exists"
+				+ " (select 'f'"
+				+ " from m_appuser_role ur "
+				+ " join m_role r on r.id = ur.role_id"
+				+ " left join m_role_permission rp on rp.role_id = r.id"
+				+ " left join m_permission p on p.id = rp.permission_id"
+				+ " where ur.appuser_id = "
+				+ context.authenticatedUser().getId()
+				+ " and (p.code in ('ALL_FUNCTIONS', 'ALL_FUNCTIONS_READ') or p.code = concat('CAN_READ_', registered_table_name))) "
+				+ andClause
+				+ " order by application_table_name, registered_table_name";
+
+		String sqlErrorMsg = "Application Table Name: " + appTable + "   sql: "
+				+ sql;
+		CachedRowSet rs = genericDataService.getCachedResultSet(sql,
+				sqlErrorMsg);
+
+		List<DatatableData> datatables = new ArrayList<DatatableData>();
+		try {
+			while (rs.next()) {
+				datatables.add(new DatatableData(rs
+						.getString("application_table_name"), rs
+						.getString("registered_table_name")));
+			}
+
+		} catch (SQLException e) {
+			throw new PlatformDataIntegrityException("error.msg.sql.error",
+					e.getMessage(), sqlErrorMsg);
+		}
+
+		long elapsed = System.currentTimeMillis() - startTime;
+		logger.info("FINISHING retrieveDatatableNames:      Elapsed Time: "
+				+ elapsed);
+
+		return datatables;
+	}
+
+	@Override
+	public void registerDatatable(String datatable, String appTable) {
+
+		long startTime = System.currentTimeMillis();
+
+		validateAppTable(appTable);
+
+		String createPermission = "'CAN_CREATE_" + datatable + "'";
+		String readPermission = "'CAN_READ_" + datatable + "'";
+		String updatePermission = "'CAN_UPDATE_" + datatable + "'";
+		String deletePermission = "'CAN_DELETE_" + datatable + "'";
+		// TODO - put in batch command later
+		String sql = "insert into x_registered_table (registered_table_name, application_table_name) values ('"
+				+ datatable + "', '" + appTable + "')";
+
+		genericDataService.updateSQL(sql, "SQL: " + sql);
+
+		sql = "insert into m_permission (group_enum, code, default_description, default_name) values "
+				+ "(3, "
+				+ createPermission
+				+ ", "
+				+ createPermission
+				+ ", "
+				+ createPermission
+				+ "),"
+				+ "(3, "
+				+ readPermission
+				+ ", "
+				+ readPermission
+				+ ", "
+				+ readPermission
+				+ "),"
+				+ "(3, "
+				+ updatePermission
+				+ ", "
+				+ updatePermission
+				+ ", "
+				+ updatePermission
+				+ "),"
+				+ "(3, "
+				+ deletePermission
+				+ ", "
+				+ deletePermission + ", " + deletePermission + ")";
+
+		genericDataService.updateSQL(sql, "SQL: " + sql);
+
+		long elapsed = System.currentTimeMillis() - startTime;
+		logger.info("FINISHING registerDatatable:      Elapsed Time: "
+				+ elapsed + "       - datatable: " + datatable
+				+ "  application table: " + appTable);
+	}
+
+	@Override
+	public void deregisterDatatable(String datatable) {
+		long startTime = System.currentTimeMillis();
+
+		// TODO - put in batch command later
+
+		String permissionList = "('CAN_CREATE_" + datatable + "', 'CAN_READ_"
+				+ datatable + "', 'CAN_UPDATE_" + datatable + "', 'CAN_DELETE_"
+				+ datatable + "')";
+
+		String sql = "delete from m_role_permission where m_role_permission.permission_id in (select id from m_permission where code in "
+				+ permissionList + ")";
+		genericDataService.updateSQL(sql, "SQL: " + sql);
+
+		sql = "delete from m_permission where code in " + permissionList;
+		genericDataService.updateSQL(sql, "SQL: " + sql);
+
+		sql = "delete from x_registered_table where registered_table_name = '"
+				+ datatable + "'";
+		genericDataService.updateSQL(sql, "SQL: " + sql);
+
+		long elapsed = System.currentTimeMillis() - startTime;
+		logger.info("FINISHING deregisterDatatable:      Elapsed Time: "
+				+ elapsed + "       - datatable: " + datatable);
+	}
+
+	@Override
 	public void newDatatableEntry(String datatable, Long appTableId,
 			Map<String, String> queryParams) {
 		long startTime = System.currentTimeMillis();
@@ -166,58 +295,6 @@ public class ReadWriteNonCoreDataServiceImpl implements
 	}
 
 	@Override
-	public List<DatatableData> retrieveDatatableNames(String appTable) {
-
-		long startTime = System.currentTimeMillis();
-
-		String andClause;
-		if (appTable == null) {
-			andClause = "";
-		} else {
-			andClause = " and application_table_name = '" + appTable + "'";
-		}
-		// PERMITTED datatables
-		String sql = "select application_table_name, registered_table_name"
-				+ " from x_registered_table "
-				+ " where exists"
-				+ " (select 'f'"
-				+ " from m_appuser_role ur "
-				+ " join m_role r on r.id = ur.role_id"
-				+ " left join m_role_permission rp on rp.role_id = r.id"
-				+ " left join m_permission p on p.id = rp.permission_id"
-				+ " where ur.appuser_id = "
-				+ context.authenticatedUser().getId()
-				+ " and (p.code in ('ALL_FUNCTIONS', 'ALL_FUNCTIONS_READ') or p.code = concat('CAN_READ_', registered_table_name))) "
-				+ andClause
-				+ " order by application_table_name, registered_table_name";
-
-		// sql = genericDataService.wrapSQL(sql);
-		String sqlErrorMsg = "Application Table Name: " + appTable + "   sql: "
-				+ sql;
-		CachedRowSet rs = genericDataService.getCachedResultSet(sql,
-				sqlErrorMsg);
-
-		List<DatatableData> datatables = new ArrayList<DatatableData>();
-		try {
-			while (rs.next()) {
-				datatables.add(new DatatableData(rs
-						.getString("application_table_name"), rs
-						.getString("registered_table_name")));
-			}
-
-		} catch (SQLException e) {
-			throw new PlatformDataIntegrityException("error.msg.sql.error",
-					e.getMessage(), sqlErrorMsg);
-		}
-
-		long elapsed = System.currentTimeMillis() - startTime;
-		logger.info("FINISHING retrieveDatatableNames:      Elapsed Time: "
-				+ elapsed);
-
-		return datatables;
-	}
-
-	@Override
 	public String retrieveDataTableJSONObject(String datatable,
 			Long appTableId, String sqlFields, String sqlOrder) {
 		long startTime = System.currentTimeMillis();
@@ -254,8 +331,8 @@ public class ReadWriteNonCoreDataServiceImpl implements
 		// id only used for reading a specific entry in a one to many datatable
 		// (when updating)
 		if (id == null) {
-			sql = sql + " from `" + datatable + "` where " + getFKField(appTable)
-					+ " = " + appTableId;
+			sql = sql + " from `" + datatable + "` where "
+					+ getFKField(appTable) + " = " + appTableId;
 		} else {
 			sql = sql + " from `" + datatable + "` where id = " + id;
 		}
@@ -319,6 +396,18 @@ public class ReadWriteNonCoreDataServiceImpl implements
 		return genericDataService.replace(unscopedSQL, "${dataScopeCriteria}",
 				dataScopeCriteria);
 
+	}
+
+	private void validateAppTable(String appTable) {
+
+		if (appTable.equalsIgnoreCase("m_client"))
+			return;
+		if (appTable.equalsIgnoreCase("m_loan"))
+			return;
+
+		throw new PlatformDataIntegrityException(
+				"error.msg.invalid.application.table",
+				"Invalid Application Table: " + appTable);
 	}
 
 	private List<ResultsetDataRow> fillDatatableResultSetDataRows(
@@ -762,7 +851,7 @@ public class ReadWriteNonCoreDataServiceImpl implements
 					"validation.msg.validation.errors.exist",
 					"Validation errors exist.", dataValidationErrors);
 		}
-	    
+
 		if (!StringUtils.isEmpty(paramValue)) {
 
 			if (columnHeader.getColumnValuesNew().size() > 0) {
@@ -813,8 +902,8 @@ public class ReadWriteNonCoreDataServiceImpl implements
 								+ " (neither varchar nor int)");
 			}
 
-		    JsonParserHelper helper = new JsonParserHelper();
-		    
+			JsonParserHelper helper = new JsonParserHelper();
+
 			if (columnHeader.getColumnDisplayTypeNew().equals("DATE"))
 				paramValue = helper.convertFrom(paramValue,
 						columnHeader.getColumnName(), dateFormat,
@@ -829,7 +918,8 @@ public class ReadWriteNonCoreDataServiceImpl implements
 				paramValue = helper.convertFrom(paramValue,
 						columnHeader.getColumnName(), clientApplicationLocale)
 						.toString();
-			//logger.info("Converted Value: " + paramValue + " - was: " + pValue);
+			// logger.info("Converted Value: " + paramValue + " - was: " +
+			// pValue);
 
 		}
 

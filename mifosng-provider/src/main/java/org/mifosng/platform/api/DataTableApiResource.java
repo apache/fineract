@@ -62,7 +62,7 @@ public class DataTableApiResource {
 	@GET
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public String datasets(@QueryParam("appTable") final String appTable,
+	public String getDatatables(@QueryParam("appTable") final String appTable,
 			@Context final UriInfo uriInfo) {
 
 		List<DatatableData> result = this.readWriteNonCoreDataService
@@ -72,6 +72,33 @@ public class DataTableApiResource {
 				.getQueryParameters());
 		return this.apiJsonSerializerService.serializeDatatableDataToJson(
 				prettyPrint, result);
+	}
+
+	@POST
+	@Path("{datatable}/register/{appTable}")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public Response registerDatatable(
+			@PathParam("datatable") final String datatable,
+			@PathParam("appTable") final String appTable) {
+
+		this.readWriteNonCoreDataService.registerDatatable(datatable, appTable);
+
+		EntityIdentifier entityIdentifier = new EntityIdentifier();
+		return Response.ok().entity(entityIdentifier).build();
+	}
+
+	@POST
+	@Path("{datatable}/deregister")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public Response deregisterDatatable(
+			@PathParam("datatable") final String datatable) {
+
+		this.readWriteNonCoreDataService.deregisterDatatable(datatable);
+
+		EntityIdentifier entityIdentifier = new EntityIdentifier();
+		return Response.ok().entity(entityIdentifier).build();
 	}
 
 	@GET
@@ -125,7 +152,6 @@ public class DataTableApiResource {
 		return Response.ok().entity(entityIdentifier).build();
 
 	}
-	
 
 	@PUT
 	@Path("{datatable}/{appTableId}")
@@ -135,12 +161,15 @@ public class DataTableApiResource {
 			@PathParam("datatable") final String datatable,
 			@PathParam("appTableId") final Long appTableId,
 			final String jsonRequestBody) {
-/* for updating one to one relationships (where foreign key is the primary key)*/
+		/*
+		 * for updating one to one relationships (where foreign key is the
+		 * primary key)
+		 */
 		checkUserPermissionForDatatable(datatable, "UPDATE");
 		Map<String, String> queryParams = getQueryParamsFromJsonRequestBody(jsonRequestBody);
 
-		this.readWriteNonCoreDataService.updateDatatableEntryOnetoOne(datatable,
-				appTableId, queryParams);
+		this.readWriteNonCoreDataService.updateDatatableEntryOnetoOne(
+				datatable, appTableId, queryParams);
 
 		EntityIdentifier entityIdentifier = new EntityIdentifier(
 				Long.valueOf(appTableId));
@@ -148,7 +177,7 @@ public class DataTableApiResource {
 		return Response.ok().entity(entityIdentifier).build();
 
 	}
-	
+
 	@PUT
 	@Path("{datatable}/{appTableId}/{datatableId}")
 	@Consumes({ MediaType.APPLICATION_JSON })
@@ -158,12 +187,15 @@ public class DataTableApiResource {
 			@PathParam("appTableId") final Long appTableId,
 			@PathParam("datatableId") final Long datatableId,
 			final String jsonRequestBody) {
-/* for updating one to many relationships (where foreign key isn't the primary key)*/
+		/*
+		 * for updating one to many relationships (where foreign key isn't the
+		 * primary key)
+		 */
 		checkUserPermissionForDatatable(datatable, "UPDATE");
 		Map<String, String> queryParams = getQueryParamsFromJsonRequestBody(jsonRequestBody);
 
-		this.readWriteNonCoreDataService.updateDatatableEntryOnetoMany(datatable,
-				appTableId, datatableId, queryParams);
+		this.readWriteNonCoreDataService.updateDatatableEntryOnetoMany(
+				datatable, appTableId, datatableId, queryParams);
 
 		EntityIdentifier entityIdentifier = new EntityIdentifier(
 				Long.valueOf(appTableId));
@@ -227,7 +259,8 @@ public class DataTableApiResource {
 				for (int i = 0; i < jsonArr.length(); i++) {
 					pName = (String) jsonArr.get(i);
 					pValue = jsonObj.getString(pName);
-					logger.info("getQueryParamsFromJsonRequestBody: " + pName + " - " + pValue);
+					logger.info("getQueryParamsFromJsonRequestBody: " + pName
+							+ " - " + pValue);
 					queryParams.put(pName, pValue);
 				}
 				return queryParams;
