@@ -74,7 +74,7 @@ public class FlatMethodLoanScheduleGenerator implements LoanScheduleGenerator {
 		BigDecimal cumulativeChargesToDate = chargesDueAtTimeOfDisbursement;
 		
 		// create entries of disbursement period on loan schedule
-		final LoanSchedulePeriodData disbursementPeriod = LoanSchedulePeriodData.disbursementOnlyPeriod(disbursementDate, principalDisbursed.getAmount(), chargesDueAtTimeOfDisbursement);
+		final LoanSchedulePeriodData disbursementPeriod = LoanSchedulePeriodData.disbursementOnlyPeriod(disbursementDate, principalDisbursed.getAmount(), chargesDueAtTimeOfDisbursement, false);
 		periods.add(disbursementPeriod);
 		
 		int loanTermInDays = Integer.valueOf(0);

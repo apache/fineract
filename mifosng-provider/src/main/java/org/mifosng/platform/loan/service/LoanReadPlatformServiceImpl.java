@@ -103,7 +103,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 			final LoanScheduleMapper rm = new LoanScheduleMapper(disbursement);
 			final String sql = "select " + rm.loanScheduleSchema() + " where l.id = ? order by ls.loan_id, ls.installment";
 			
-			final LoanSchedulePeriodData disbursementPeriod = LoanSchedulePeriodData.disbursementOnlyPeriod(disbursement.disbursementDate(), disbursement.amount(), totalChargesAtDisbursement);
+			final LoanSchedulePeriodData disbursementPeriod = LoanSchedulePeriodData.disbursementOnlyPeriod(disbursement.disbursementDate(), disbursement.amount(), totalChargesAtDisbursement, disbursement.isDisbursed());
 			
 			final Collection<LoanSchedulePeriodData> repaymentSchedulePeriods = this.jdbcTemplate.query(sql, rm, new Object[] { loanId });
 			
@@ -162,9 +162,10 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
 			// retrieve all loan transactions that are not invalid (0) and not
 			// disbursements (1) and have not been 'contra'ed by another transaction
+			// repayments at time of disbursement (e.g. charges)
 			String sql = "select "
 					+ rm.LoanPaymentsSchema()
-					+ " where tr.loan_id = ? and tr.transaction_type_enum not in (0, 1) and tr.contra_id is null order by tr.transaction_date ASC";
+					+ " where tr.loan_id = ? and tr.transaction_type_enum not in (0, 1, 5) and tr.contra_id is null order by tr.transaction_date ASC";
 			return this.jdbcTemplate.query(sql, rm, new Object[] { loanId });
 
 		} catch (EmptyResultDataAccessException e) {

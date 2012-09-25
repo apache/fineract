@@ -90,10 +90,8 @@ public class CreocoreLoanRepaymentScheduleTransactionProcessor extends
 		transactionAmountRemaining = transactionAmountRemaining
 				.minus(principalPortion);
 
-		Money interestWaivedPortion = Money.zero(transactionAmountRemaining
-				.getCurrency());
-		loanTransaction.updateComponents(principalPortion, interestPortion,
-				interestWaivedPortion);
+		Money interestWaivedPortion = Money.zero(transactionAmountRemaining.getCurrency());
+		loanTransaction.updateComponents(principalPortion, interestPortion, interestWaivedPortion, Money.zero(transactionAmountRemaining.getCurrency()));
 
 		return transactionAmountRemaining;
 	}

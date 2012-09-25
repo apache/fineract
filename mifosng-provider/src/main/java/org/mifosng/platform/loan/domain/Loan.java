@@ -155,7 +155,6 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	@Column(name = "interest_rebate_amount", scale = 6, precision = 19)
 	private BigDecimal interestRebateOwed;
 	
-	@SuppressWarnings("unused") // derived field used in GETs only at present
 	@Column(name = "total_charges_due_at_disbursement_derived", scale = 6, precision = 19)
 	private BigDecimal totalChargesDueAtDisbursement;
 
@@ -322,14 +321,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		}
 		
 		// if the loan application/contract is modified when repayments are already against it - then need to re-process it
-		List<LoanTransaction> repaymentsOrWaivers = new ArrayList<LoanTransaction>();
-		for (LoanTransaction transaction : this.loanTransactions) {
-			if (!transaction.isDisbursement() && transaction.isNotContra()) {
-				repaymentsOrWaivers.add(transaction);
-			}
-		}
-		LoanTransactionComparator transactionComparator = new LoanTransactionComparator();
-		Collections.sort(repaymentsOrWaivers, transactionComparator);
+		final List<LoanTransaction> repaymentsOrWaivers = retreiveListOfRepaymentOrWaiverTransactionsPostDisbursement();
 		
 		final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessor.determineProcessor(this.transactionProcessingStrategy);
 		loanRepaymentScheduleTransactionProcessor.handleTransaction(repaymentsOrWaivers, getCurrency(), this.repaymentScheduleInstallments);
@@ -481,8 +473,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		disburse(disbursedOn, loanLifecycleStateMachine);
 	}
 
-	public void disburse(final LocalDate disbursedOn,
-			LoanLifecycleStateMachine loanLifecycleStateMachine) {
+	public void disburse(final LocalDate disbursedOn, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
 		
 		LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_DISBURSED, LoanStatus.fromInt(this.loanStatus));
 		this.loanStatus = statusEnum.getValue();
@@ -492,10 +483,23 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 				.get(this.repaymentScheduleInstallments.size() - 1)
 				.getDueDate().toDateMidnight().toDate();
 
-		LoanTransaction loanTransaction = LoanTransaction.disbursement(
-				this.loanRepaymentScheduleDetail.getPrincipal(), disbursedOn);
+		// add disbursement transaction to track outgoing money from mfi to client
+		LoanTransaction loanTransaction = LoanTransaction.disbursement(this.loanRepaymentScheduleDetail.getPrincipal(), disbursedOn);
 		loanTransaction.updateLoan(this);
 		this.loanTransactions.add(loanTransaction);
+		
+		// add repayment transaction to track incoming money from client to mfi for (charges due at time of disbursement)
+		if (getTotalChargesDueAtDisbursement().isGreaterThanZero()) {
+			
+			// FIXME - add charges component to 'transactions'
+			LoanTransaction chargesPayment = LoanTransaction.repaymentAtDisbursement(getTotalChargesDueAtDisbursement(), disbursedOn);
+			Money zero = Money.zero(getCurrency());
+			chargesPayment.updateComponents(zero, zero, zero, getTotalChargesDueAtDisbursement());
+			chargesPayment.updateLoan(this);
+			this.loanTransactions.add(chargesPayment);
+			
+			// should also pay-off the time-of-disbursement charges
+		}
 
 		if (disbursedOn.isBefore(getApprovedOnDate())) {
 			final String errorMessage = "The date on which a loan is disbursed cannot be before its approval date: "
@@ -619,15 +623,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 					"cannot.be.a.future.date", errorMessage, loanTransactionDate);
 		}
 		
-		List<LoanTransaction> repaymentsOrWaivers = new ArrayList<LoanTransaction>();
-		for (LoanTransaction transaction : this.loanTransactions) {
-			if (!transaction.isDisbursement() && transaction.isNotContra()) {
-				repaymentsOrWaivers.add(transaction);
-			}
-		}
-		LoanTransactionComparator transactionComparator = new LoanTransactionComparator();
-		Collections.sort(repaymentsOrWaivers, transactionComparator);
-		
+		List<LoanTransaction> repaymentsOrWaivers = retreiveListOfRepaymentOrWaiverTransactionsPostDisbursement();
 		
 		final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessor.determineProcessor(this.transactionProcessingStrategy);
 		if (isTransactionChronologicallyLatest && !adjusted) {
@@ -637,6 +633,18 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		}
 		
 		doPostLoanTransactionChecks(loanTransaction, loanLifecycleStateMachine);
+	}
+
+	private List<LoanTransaction> retreiveListOfRepaymentOrWaiverTransactionsPostDisbursement() {
+		List<LoanTransaction> repaymentsOrWaivers = new ArrayList<LoanTransaction>();
+		for (LoanTransaction transaction : this.loanTransactions) {
+			if (!transaction.isDisbursement() && transaction.isNotContra()) {
+				repaymentsOrWaivers.add(transaction);
+			}
+		}
+		LoanTransactionComparator transactionComparator = new LoanTransactionComparator();
+		Collections.sort(repaymentsOrWaivers, transactionComparator);
+		return repaymentsOrWaivers;
 	}
 
 	private void doPostLoanTransactionChecks(final LoanTransaction loanTransaction, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
@@ -1259,5 +1267,9 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 
 	public Money getPrincpal() {
 		return this.loanRepaymentScheduleDetail.getPrincipal();
+	}
+	
+	public Money getTotalChargesDueAtDisbursement() {
+		return Money.of(getCurrency(), this.totalChargesDueAtDisbursement);
 	}
 }

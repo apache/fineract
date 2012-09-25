@@ -46,6 +46,9 @@ public class LoanTransaction extends AbstractAuditableCustom<AppUser, Long> {
 	@Column(name = "interest_waived_derived", scale = 6, precision = 19)
 	private BigDecimal interestWaivedPortion = BigDecimal.ZERO;
 	
+	@Column(name = "charges_portion_derived", scale = 6, precision = 19, nullable = false)
+	private BigDecimal chargesPortion = BigDecimal.ZERO;
+	
     @Temporal(TemporalType.DATE)
     @Column(name = "transaction_date", nullable=false)
     private final Date  dateOf;
@@ -71,6 +74,10 @@ public class LoanTransaction extends AbstractAuditableCustom<AppUser, Long> {
     
 	public static LoanTransaction repayment(final Money amount, final LocalDate paymentDate) {
 		return new LoanTransaction(LoanTransactionType.REPAYMENT, amount.getAmount(), paymentDate);
+	}
+	
+	public static LoanTransaction repaymentAtDisbursement(final Money amount, final LocalDate paymentDate) {
+		return new LoanTransaction(LoanTransactionType.REPAYMENT_AT_DISBURSEMENT, amount.getAmount(), paymentDate);
 	}
 	
 	public static LoanTransaction waiver(final Money waived, final LocalDate waiveDate) {
@@ -130,6 +137,10 @@ public class LoanTransaction extends AbstractAuditableCustom<AppUser, Long> {
 		return LoanTransactionType.DISBURSEMENT.equals(getTypeOf());
 	}
 	
+	public boolean isRepaymentAtDisbursement() {
+		return LoanTransactionType.REPAYMENT_AT_DISBURSEMENT.equals(getTypeOf());
+	}
+	
 	public boolean isWaiver() {
 		return LoanTransactionType.WAIVED.equals(getTypeOf()) && isNotContra();
 	}
@@ -168,30 +179,40 @@ public class LoanTransaction extends AbstractAuditableCustom<AppUser, Long> {
 	 * 
 	 * This accumulates the values passed to the already existent values for each of the portions.
 	 */
-	public void updateComponents(final Money principal, final Money interest, final Money interestWaivedPortion) {
+	public void updateComponents(final Money principal, final Money interest, final Money interestWaivedPortion, final Money charges) {
 		MonetaryCurrency currency = principal.getCurrency();
 		this.principalPortion = getPrincipalPortion(currency).plus(principal).getAmount();
 		this.interestPortion = getInterestPortion(currency).plus(interest).getAmount();
 		this.interestWaivedPortion = getInterestWaivedPortion(currency).plus(interestWaivedPortion).getAmount();
+		this.chargesPortion = getChargesPortion(currency).plus(charges).getAmount();
 	}
 
-	public Money getPrincipalPortion(MonetaryCurrency currency) {
+	public Money getPrincipalPortion(final MonetaryCurrency currency) {
 		return Money.of(currency, principalPortion);
 	}
 
-	public Money getInterestPortion(MonetaryCurrency currency) {
+	public Money getInterestPortion(final MonetaryCurrency currency) {
 		return  Money.of(currency, interestPortion);
 	}
 	
-	public Money getInterestWaivedPortion(MonetaryCurrency currency) {
+	public Money getInterestWaivedPortion(final MonetaryCurrency currency) {
 		if (this.interestWaivedPortion == null) {
 			this.interestWaivedPortion = BigDecimal.ZERO;
 		}
 		return  Money.of(currency, interestWaivedPortion);
 	}
+	
+	public Money getChargesPortion(final MonetaryCurrency currency) {
+		if (this.chargesPortion == null) {
+			this.chargesPortion = BigDecimal.ZERO;
+		}
+		return  Money.of(currency, chargesPortion);
+	}
 
 	public void resetDerivedComponents() {
-		this.principalPortion = BigDecimal.ZERO;
-		this.interestPortion = BigDecimal.ZERO;
+		this.principalPortion = null;
+		this.interestPortion = null;
+		this.interestWaivedPortion = null;
+		this.chargesPortion = null;
 	}
 }

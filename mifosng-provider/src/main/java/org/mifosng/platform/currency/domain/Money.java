@@ -39,7 +39,7 @@ public class Money implements Comparable<Money>, Serializable {
         return total;
     }
     
-	public static Money of(MonetaryCurrency currency, BigDecimal newAmount) {
+	public static Money of(final MonetaryCurrency currency, final BigDecimal newAmount) {
 		  return new Money(currency.getCode(), currency.getDigitsAfterDecimal(), newAmount);
 	}
 	
@@ -56,8 +56,12 @@ public class Money implements Comparable<Money>, Serializable {
     private Money(final String currencyCode, final int digitsAfterDecimal, final BigDecimal amount) {
         this.currencyCode = currencyCode;
         this.currencyDigitsAfterDecimal = digitsAfterDecimal;
-        BigDecimal amountStripped = amount.stripTrailingZeros();
-        this.amount = amountStripped.setScale(this.currencyDigitsAfterDecimal, RoundingMode.HALF_EVEN);
+        if (amount != null) {
+        	BigDecimal amountStripped = amount.stripTrailingZeros();
+        	this.amount = amountStripped.setScale(this.currencyDigitsAfterDecimal, RoundingMode.HALF_EVEN);
+        } else {
+        	this.amount = BigDecimal.ZERO;
+        }
     }
 
     public Money copy() {

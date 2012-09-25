@@ -6,7 +6,8 @@ public enum LoanTransactionType {
 	DISBURSEMENT(1, "loanTransactionType.disbursement"), //
 	REPAYMENT(2, "loanTransactionType.repayment"), //
 	REVERSAL(3, "loanTransactionType.reversal"), //
-	WAIVED(4, "loanTransactionType.waiver");
+	WAIVED(4, "loanTransactionType.waiver"), //
+	REPAYMENT_AT_DISBURSEMENT(5, "loanTransactionType.repaymentAtDisbursement");
 
     private final Integer value;
     private final String code;
@@ -43,6 +44,9 @@ public enum LoanTransactionType {
 			break;
 		case 4:
 			loanTransactionType = LoanTransactionType.WAIVED;
+			break;
+		case 5:
+			loanTransactionType = LoanTransactionType.REPAYMENT_AT_DISBURSEMENT;
 			break;
 		default:
 			loanTransactionType = LoanTransactionType.INVALID;

@@ -79,7 +79,7 @@ public class AdhikarLoanRepaymentScheduleTransactionProcessor extends AbstractLo
 				
 				Money principalPortion = Money.zero(currency);
 				Money interestWaivedPortion = Money.zero(currency);
-				loanTransaction.updateComponents(principalPortion, interestPortion, interestWaivedPortion);
+				loanTransaction.updateComponents(principalPortion, interestPortion, interestWaivedPortion, Money.zero(transactionAmountRemaining.getCurrency()));
 			}
 		}
 		
@@ -91,7 +91,7 @@ public class AdhikarLoanRepaymentScheduleTransactionProcessor extends AbstractLo
 				
 				Money interestPortion = Money.zero(currency);
 				Money interestWaivedPortion = Money.zero(currency);
-				loanTransaction.updateComponents(principalPortion, interestPortion, interestWaivedPortion);
+				loanTransaction.updateComponents(principalPortion, interestPortion, interestWaivedPortion, Money.zero(transactionAmountRemaining.getCurrency()));
 			}
 		}
 
@@ -125,15 +125,11 @@ public class AdhikarLoanRepaymentScheduleTransactionProcessor extends AbstractLo
 		Money interestPortion = currentInstallment.payInterestComponent(transactionAmountRemaining);
 		transactionAmountRemaining = transactionAmountRemaining.minus(interestPortion);
 
-		Money principalPortion = currentInstallment
-				.payPrincipalComponent(transactionAmountRemaining);
-		transactionAmountRemaining = transactionAmountRemaining
-				.minus(principalPortion);
+		Money principalPortion = currentInstallment.payPrincipalComponent(transactionAmountRemaining);
+		transactionAmountRemaining = transactionAmountRemaining.minus(principalPortion);
 
-		Money interestWaivedPortion = Money.zero(transactionAmountRemaining
-				.getCurrency());
-		loanTransaction.updateComponents(principalPortion, interestPortion,
-				interestWaivedPortion);
+		Money interestWaivedPortion = Money.zero(transactionAmountRemaining.getCurrency());
+		loanTransaction.updateComponents(principalPortion, interestPortion,interestWaivedPortion, Money.zero(transactionAmountRemaining.getCurrency()));
 
 		return transactionAmountRemaining;
 	}

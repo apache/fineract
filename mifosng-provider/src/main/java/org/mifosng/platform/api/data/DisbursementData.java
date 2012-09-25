@@ -30,4 +30,8 @@ public class DisbursementData {
 	public BigDecimal amount() {
 		return this.principalDisbursed;
 	}
+	
+	public boolean isDisbursed() {
+		return this.actualDisbursementDate != null;
+	}
 }

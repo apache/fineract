@@ -43,10 +43,11 @@ public class LoanSchedulePeriodData {
 	public static LoanSchedulePeriodData disbursementOnlyPeriod(
 			final LocalDate disbursementDate, 
 			final BigDecimal principalDisbursed, 
-			final BigDecimal chargesDueAtTimeOfDisbursement) {
+			final BigDecimal chargesDueAtTimeOfDisbursement, 
+			final boolean isDisbursed) {
 		Integer periodNumber = Integer.valueOf(0);
 		LocalDate from = null;
-		return new LoanSchedulePeriodData(periodNumber, from, disbursementDate, principalDisbursed, chargesDueAtTimeOfDisbursement);
+		return new LoanSchedulePeriodData(periodNumber, from, disbursementDate, principalDisbursed, chargesDueAtTimeOfDisbursement, isDisbursed);
 	}
 	
 	public static LoanSchedulePeriodData repaymentOnlyPeriod(final Integer periodNumber,
@@ -89,7 +90,8 @@ public class LoanSchedulePeriodData {
 			final LocalDate fromDate, 
 			final LocalDate dueDate,
 			final BigDecimal principalDisbursed,
-			final BigDecimal chargesDueAtTimeOfDisbursement) {
+			final BigDecimal chargesDueAtTimeOfDisbursement, 
+			final boolean isDisbursed) {
 		this.period = periodNumber;
 		this.fromDate = fromDate;
 		this.dueDate = dueDate;
@@ -112,14 +114,19 @@ public class LoanSchedulePeriodData {
 		this.interestOutstanding = null;
 	
 		this.chargesDue = chargesDueAtTimeOfDisbursement;
-		this.chargesPaid = null;
-		this.chargesOutstanding = chargesDueAtTimeOfDisbursement;
+		if (isDisbursed) {
+			this.chargesPaid = chargesDueAtTimeOfDisbursement;
+			this.chargesOutstanding = BigDecimal.ZERO;
+		} else {
+			this.chargesPaid = BigDecimal.ZERO;
+			this.chargesOutstanding = chargesDueAtTimeOfDisbursement;
+		}
 		
 		this.totalOriginalDueForPeriod = chargesDueAtTimeOfDisbursement;
 		this.totalDueForPeriod = chargesDueAtTimeOfDisbursement;
-		this.totalPaidForPeriod = BigDecimal.ZERO;
+		this.totalPaidForPeriod = this.chargesPaid;
 		this.totalWaivedForPeriod = null;
-		this.totalOutstandingForPeriod = chargesDueAtTimeOfDisbursement;
+		this.totalOutstandingForPeriod = this.chargesOutstanding;
 		if (dueDate.isBefore(new LocalDate())) {
 			this.totalOverdue = this.totalOutstandingForPeriod;
 		} else {
