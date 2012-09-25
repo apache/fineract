@@ -77,8 +77,8 @@ public class LoanSchedulePeriodData {
 		
 		return new LoanSchedulePeriodData(periodNumber, fromDate, dueDate, 
 				principalOriginalDue, principalPaid, principalOutstanding, outstandingPrincipalBalanceOfLoan, 
-				interestDueOnPrincipalOutstanding, 
-				totalDueForPeriod);
+				interestDueOnPrincipalOutstanding, interestPaid, interestWaived, interestOutstanding,
+				totalDueForPeriod, totalPaid, totalWaived, totalOutstanding);
 	}
 	
 	/*
@@ -184,7 +184,13 @@ public class LoanSchedulePeriodData {
 			final BigDecimal principalOutstanding, 
 			final BigDecimal principalLoanBalanceOutstanding, 
 			final BigDecimal interestDueOnPrincipalOutstanding, 
-			final BigDecimal totalDueForPeriod) {
+			final BigDecimal interestPaid,
+			final BigDecimal interestWaived, 
+			final BigDecimal interestOutstanding,
+			final BigDecimal totalDueForPeriod,
+			final BigDecimal totalPaid, 
+			final BigDecimal totalWaived,
+			final BigDecimal totalOutstanding) {
 		this.period = periodNumber;
 		this.fromDate = fromDate;
 		this.dueDate = dueDate;
@@ -202,9 +208,9 @@ public class LoanSchedulePeriodData {
 		
 		this.interestOriginalDue = interestDueOnPrincipalOutstanding;
 		this.interestDue = interestDueOnPrincipalOutstanding;
-		this.interestPaid = BigDecimal.ZERO;
-		this.interestWaived = BigDecimal.ZERO;
-		this.interestOutstanding = interestDueOnPrincipalOutstanding;
+		this.interestPaid = interestPaid;
+		this.interestWaived = interestWaived;
+		this.interestOutstanding = interestOutstanding;
 	
 		this.chargesDue = BigDecimal.ZERO;
 		this.chargesPaid = BigDecimal.ZERO;
@@ -212,9 +218,9 @@ public class LoanSchedulePeriodData {
 		
 		this.totalOriginalDueForPeriod = totalDueForPeriod;
 		this.totalDueForPeriod = totalDueForPeriod;
-		this.totalPaidForPeriod = BigDecimal.ZERO;
-		this.totalWaivedForPeriod = BigDecimal.ZERO;
-		this.totalOutstandingForPeriod = totalDueForPeriod;
+		this.totalPaidForPeriod = totalPaid;
+		this.totalWaivedForPeriod = totalWaived;
+		this.totalOutstandingForPeriod = totalOutstanding;
 		
 		if (dueDate.isBefore(new LocalDate())) {
 			this.totalOverdue = this.totalOutstandingForPeriod;

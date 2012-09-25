@@ -188,6 +188,7 @@ public class LoansApiResource {
         boolean convenienceDataRequired = false;
 		final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (!associationParameters.isEmpty()) {
+			
 			if (associationParameters.contains("all")) {
 				responseParameters.addAll(Arrays.asList("repaymentSchedule", "loanRepayments", "permissions", "convenienceData", "charges"));
 			} else {
@@ -200,16 +201,18 @@ public class LoansApiResource {
 				loanRepaymentsCount = loanRepayments.size();
 			}
 			
-			DisbursementData singleDisbursement = loanBasicDetails.toDisburementData();
-			repaymentSchedule = this.loanReadPlatformService.retrieveRepaymentSchedule(loanId, loanBasicDetails.getCurrency(), 
+			if (responseParameters.contains("repaymentSchedule")) {
+				DisbursementData singleDisbursement = loanBasicDetails.toDisburementData();
+				repaymentSchedule = this.loanReadPlatformService.retrieveRepaymentSchedule(loanId, loanBasicDetails.getCurrency(), 
 					singleDisbursement, loanBasicDetails.getTotalDisbursementCharges(), loanBasicDetails.getInArrearsTolerance());
+				
+				MoneyData tolerance = MoneyData.of(loanBasicDetails.getCurrency(), loanBasicDetails.getInArrearsTolerance());
+				MoneyData totalOutstandingMoney = MoneyData.of(loanBasicDetails.getCurrency(), repaymentSchedule.totalOutstanding());
+				boolean isWaiveAllowed = totalOutstandingMoney.isGreaterThanZero() && (tolerance.isGreaterThan(totalOutstandingMoney) || tolerance.isEqualTo(totalOutstandingMoney));
 
-			MoneyData tolerance = MoneyData.of(loanBasicDetails.getCurrency(), loanBasicDetails.getInArrearsTolerance());
-			MoneyData totalOutstandingMoney = MoneyData.of(loanBasicDetails.getCurrency(), repaymentSchedule.totalOutstanding());
-			boolean isWaiveAllowed = totalOutstandingMoney.isGreaterThanZero() && (tolerance.isGreaterThan(totalOutstandingMoney) || tolerance.isEqualTo(totalOutstandingMoney));
-
-			permissions = this.loanReadPlatformService.retrieveLoanPermissions(loanBasicDetails, isWaiveAllowed, loanRepaymentsCount);
-			convenienceDataRequired = true;
+				permissions = this.loanReadPlatformService.retrieveLoanPermissions(loanBasicDetails, isWaiveAllowed, loanRepaymentsCount);
+				convenienceDataRequired = true;
+			}
 			
             charges = this.chargeReadPlatformService.retrieveLoanCharges(loanId);
             if (CollectionUtils.isEmpty(charges)) {
