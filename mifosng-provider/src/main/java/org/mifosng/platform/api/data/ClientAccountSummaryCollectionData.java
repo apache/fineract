@@ -55,7 +55,6 @@ public class ClientAccountSummaryCollectionData {
 		this.awaitingDisbursalLoanCount = this.awaitingDisbursalLoans.size();
 		this.activeLoanCount = this.openLoans.size();
 		this.closedLoanCount = this.closedLoans.size();
-		this.anyLoanCount = this.pendingApprovalLoanCount + this.awaitingDisbursalLoanCount + this.activeLoanCount + this.closedLoanCount;
 		
 		this.pendingApprovalDespositAccountsCount = this.pendingApprovalDepositAccounts.size();
 		this.approvedDespositAccountsCount = this.approvedDepositAccounts.size();
@@ -63,6 +62,10 @@ public class ClientAccountSummaryCollectionData {
 		this.closedDepositAccountsCount = this.closedDepositAccounts.size();
 		this.rejectedDepositAccountsCount = this.rejectedDepositAccounts.size();
 		this.preclosedDepositAccountsCount = this.preclosedDepositAccounts.size();
+		
+		this.anyLoanCount = this.pendingApprovalLoanCount + this.awaitingDisbursalLoanCount + this.activeLoanCount + this.closedLoanCount
+				+this.pendingApprovalDespositAccountsCount+this.approvedDespositAccountsCount+this.withdrawnByClientDespositAccountsCount+this.closedDepositAccountsCount
+				+this.rejectedDepositAccountsCount+this.preclosedDepositAccountsCount;
 		
 	}
 
