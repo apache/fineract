@@ -184,7 +184,7 @@ public class DepositAccountData {
 		this.interestPaid=account.getInterestPaid();
 		this.isInterestWithdrawable=account.isInterestWithdrawable();
 		this.interestCompoundingAllowed = account.isInterestCompoundingAllowed();
-		this.availableInterestForWithdrawal=getAvailableInterestForWithdrawal(account);;
+		this.availableInterestForWithdrawal=determineAvailableInterestForWithdrawal(account);;
 	}
 	
 	public DepositAccountData(
@@ -444,15 +444,26 @@ public class DepositAccountData {
 	public BigDecimal getAvailableInterestForWithdrawal() {
 		return availableInterestForWithdrawal;
 	}
-	public BigDecimal getAvailableInterestForWithdrawal(DepositAccountData account) {
-		if(account.getStatus().getId()==300){
-			BigDecimal interstGettingForPeriod = BigDecimal.valueOf(account.getActualInterestAccrued().doubleValue()/new Double(account.getTenureInMonths()));
-			Integer noOfMonthsforInterestCal = Months.monthsBetween(account.getActualCommencementDate(), new LocalDate()).getMonths();
-			Integer noOfPeriods = noOfMonthsforInterestCal / account.getInterestCompoundedEvery();
-			return BigDecimal.valueOf(interstGettingForPeriod.multiply(new BigDecimal(noOfPeriods)).doubleValue()-account.getInterestPaid().doubleValue());
+	
+	private BigDecimal determineAvailableInterestForWithdrawal(final DepositAccountData account) {
+		BigDecimal availableInterestForWithdrawal = BigDecimal.ZERO;
+		
+		if (account.getStatus().getId() == 300) {
+			BigDecimal interestGettingForPeriod = BigDecimal.valueOf(account
+					.getActualInterestAccrued().doubleValue()
+					/ new Double(account.getTenureInMonths()));
+			Integer noOfMonthsforInterestCal = Months.monthsBetween(
+					account.getActualCommencementDate(), new LocalDate())
+					.getMonths();
+			Integer noOfPeriods = noOfMonthsforInterestCal
+					/ account.getInterestCompoundedEvery();
+
+			availableInterestForWithdrawal = BigDecimal
+					.valueOf(interestGettingForPeriod.multiply(
+							new BigDecimal(noOfPeriods)).doubleValue()
+							- account.getInterestPaid().doubleValue());
 		}
-		else{
-			return new BigDecimal(0);
-		}
+		
+		return availableInterestForWithdrawal;
 	}
 }

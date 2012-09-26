@@ -45,9 +45,11 @@ public class DepositAccountTransaction extends AbstractPersistable<Long> {
 	@Column(name = "amount", scale = 6, precision = 19, nullable = false)
 	private final BigDecimal amount;
 	
+	@SuppressWarnings("unused")
 	@Column(name = "interest", scale = 6, precision = 19, nullable = false)
 	private final BigDecimal interest;
 	
+	@SuppressWarnings("unused")
 	@Column(name = "total", scale = 6, precision = 19, nullable = false)
 	private final BigDecimal total;
 	
