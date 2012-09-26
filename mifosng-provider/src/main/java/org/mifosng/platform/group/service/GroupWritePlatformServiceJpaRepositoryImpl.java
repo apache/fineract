@@ -9,9 +9,12 @@ import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.client.domain.ClientRepository;
 import org.mifosng.platform.exceptions.ClientNotFoundException;
 import org.mifosng.platform.exceptions.GroupNotFoundException;
+import org.mifosng.platform.exceptions.OfficeNotFoundException;
 import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
 import org.mifosng.platform.group.domain.Group;
 import org.mifosng.platform.group.domain.GroupRepository;
+import org.mifosng.platform.organisation.domain.Office;
+import org.mifosng.platform.organisation.domain.OfficeRepository;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,12 +35,15 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
 
     private final ClientRepository clientRepository;
 
+    private final OfficeRepository officeRepository;
+
     @Autowired
     public GroupWritePlatformServiceJpaRepositoryImpl(PlatformSecurityContext context, GroupRepository groupRepository,
-            ClientRepository clientRepository) {
+            ClientRepository clientRepository, OfficeRepository officeRepository) {
         this.context = context;
         this.groupRepository = groupRepository;
         this.clientRepository = clientRepository;
+        this.officeRepository = officeRepository;
     }
 
     @Transactional
@@ -49,9 +55,14 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
             GroupCommandValidator validator = new GroupCommandValidator(command);
             validator.validateForCreate();
 
+            Office groupOffice = this.officeRepository.findOne(command.getOfficeId());
+            if (groupOffice == null) {
+                throw new OfficeNotFoundException(command.getOfficeId());
+            }
+
             final Set<Client> clientMembers = assembleSetOfClients(command);
 
-            Group newGroup = Group.newGroup(command.getName(), command.getExternalId(), clientMembers);
+            Group newGroup = Group.newGroup(groupOffice, command.getName(), command.getExternalId(), clientMembers);
 
             this.groupRepository.saveAndFlush(newGroup);
 
@@ -77,9 +88,18 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
                 throw new GroupNotFoundException(command.getId());
             }
 
+            Office groupOffice = null;
+            Long officeId = command.getOfficeId();
+            if (command.isOfficeIdChanged() && officeId != null) {
+                groupOffice = this.officeRepository.findOne(officeId);
+                if (groupOffice == null) {
+                    throw new OfficeNotFoundException(command.getOfficeId());
+                }
+            }
+
             final Set<Client> clientMembers = assembleSetOfClients(command);
 
-            groupForUpdate.update(command, clientMembers);
+            groupForUpdate.update(command, groupOffice, clientMembers);
 
             groupRepository.saveAndFlush(groupForUpdate);
 

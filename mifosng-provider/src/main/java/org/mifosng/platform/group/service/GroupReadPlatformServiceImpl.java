@@ -9,9 +9,11 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.mifosng.platform.api.data.ClientLookup;
 import org.mifosng.platform.api.data.GroupData;
+import org.mifosng.platform.api.data.OfficeLookup;
 import org.mifosng.platform.client.service.ClientReadPlatformService;
 import org.mifosng.platform.exceptions.GroupNotFoundException;
 import org.mifosng.platform.infrastructure.TenantAwareRoutingDataSource;
+import org.mifosng.platform.organisation.service.OfficeReadPlatformService;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -25,13 +27,16 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
     private final ClientReadPlatformService clientReadPlatformService;
+    private final OfficeReadPlatformService officeReadPlatformService;
 
     @Autowired
     public GroupReadPlatformServiceImpl(final PlatformSecurityContext context,
-            final TenantAwareRoutingDataSource dataSource, ClientReadPlatformService clientReadPlatformService) {
+            final TenantAwareRoutingDataSource dataSource, ClientReadPlatformService clientReadPlatformService,
+            final OfficeReadPlatformService officeReadPlatformService) {
         this.context = context;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.clientReadPlatformService = clientReadPlatformService;
+        this.officeReadPlatformService = officeReadPlatformService;
     }
 
     @Override
@@ -70,13 +75,16 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         List<ClientLookup> allowedClients = new ArrayList<ClientLookup>(
                 this.clientReadPlatformService.retrieveAllIndividualClientsForLookup());
 
-        return new GroupData(allowedClients);
+        List<OfficeLookup> allowedOffices = new ArrayList<OfficeLookup>(officeReadPlatformService.retrieveAllOfficesForLookup());
+
+        return new GroupData(allowedClients, allowedOffices);
     }
 
     private static final class GroupMapper implements RowMapper<GroupData> {
 
         public String groupSchema() {
-            return "g.id as id, g.external_id as externalId, g.name as name from m_group g";
+            return "g.office_id as officeId, o.name as officeName, g.id as id, g.external_id as externalId, " +
+                   "g.name as name from m_group g join m_office o on o.id = g.office_id";
         }
 
         @Override
@@ -86,7 +94,10 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
             String name = rs.getString("name");
             String externalId = rs.getString("externalId");
 
-            return new GroupData(id, name, externalId);
+            Long officeId = rs.getLong("officeId");
+            String officeName = rs.getString("officeName");
+
+            return new GroupData(id, officeId, officeName, name, externalId);
         }
 
     }

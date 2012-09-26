@@ -338,13 +338,14 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
         Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
 
         Set<String> supportedParams = new HashSet<String>(
-                Arrays.asList("name", "externalId", "clientMembers")
+                Arrays.asList("name", "officeId", "externalId", "clientMembers")
         );
         
         checkForUnsupportedParameters(requestMap, supportedParams);
 
         Set<String> modifiedParameters = new HashSet<String>();
-        
+
+        Long officeId = extractLongParameter("officeId", requestMap, modifiedParameters);
         String externalId = extractStringParameter("externalId", requestMap, modifiedParameters);
         String name = extractStringParameter("name", requestMap, modifiedParameters);
 
@@ -366,7 +367,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
         }
         //
         
-        return new GroupCommand(modifiedParameters, resourceIdentifier, externalId, name, clientMembers);
+        return new GroupCommand(modifiedParameters, resourceIdentifier, externalId, name, officeId, clientMembers);
     }
 
     @Override

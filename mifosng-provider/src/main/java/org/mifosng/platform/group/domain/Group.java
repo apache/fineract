@@ -8,17 +8,23 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosng.platform.api.commands.GroupCommand;
 import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
+import org.mifosng.platform.organisation.domain.Office;
 import org.mifosng.platform.user.domain.AppUser;
 
 @Entity
 @Table(name = "m_group")
 public class Group extends AbstractAuditableCustom<AppUser, Long> {
+
+    @ManyToOne
+    @JoinColumn(name = "office_id", nullable = false)
+    private Office office;
 
     @Column(name = "name", length = 100, unique = true)
     private String name;
@@ -41,11 +47,12 @@ public class Group extends AbstractAuditableCustom<AppUser, Long> {
         this.clientMembers = new HashSet<Client>();
     }
 
-    public static Group newGroup(String name, String externalId, Set<Client> clientMembers){
-        return new Group(name, externalId, clientMembers);
+    public static Group newGroup(Office office, String name, String externalId, Set<Client> clientMembers){
+        return new Group(office, name, externalId, clientMembers);
     }
     
-    public Group(String name, String externalId, Set<Client> clientMembers) {
+    public Group(Office office, String name, String externalId, Set<Client> clientMembers) {
+        this.office = office;
         if (StringUtils.isNotBlank(name)) {
             this.name = name.trim();
         } else {
@@ -61,9 +68,13 @@ public class Group extends AbstractAuditableCustom<AppUser, Long> {
         }
     }
     
-    public void update(final GroupCommand command, final Set<Client> clientMembers) {
+    public void update(final GroupCommand command, final Office groupOffice, final Set<Client> clientMembers) {
         if (command.isExternalIdChanged()) {
             this.externalId = command.getExternalId();
+        }
+
+        if (command.isOfficeIdChanged()) {
+            this.office = groupOffice;
         }
 
         if (command.isNameChanged()) {

@@ -1,5 +1,6 @@
 package org.mifosng.platform.api;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -22,12 +23,14 @@ import org.mifosng.platform.api.commands.GroupCommand;
 import org.mifosng.platform.api.data.ClientLookup;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.GroupData;
+import org.mifosng.platform.api.data.OfficeLookup;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
 import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
 import org.mifosng.platform.client.service.ClientReadPlatformService;
 import org.mifosng.platform.group.service.GroupReadPlatformService;
 import org.mifosng.platform.group.service.GroupWritePlatformService;
+import org.mifosng.platform.organisation.service.OfficeReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -48,19 +51,22 @@ public class GroupsApiResource {
 
     @Autowired
     private ApiDataConversionService apiDataConversionService;
-    
+
+    @Autowired
+    private OfficeReadPlatformService officeReadPlatformService;
+
 	@Autowired
 	private ApiJsonSerializerService apiJsonSerializerService;
-    
+
+    private static final Set<String> typicalResponseParameters = new HashSet<String>(
+            Arrays.asList("id", "officeId", "name", "externalId", "clientMembers")
+    );
+
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveAllGroups(@Context final UriInfo uriInfo){
-        
-        Set<String> typicalResponseParameters = new HashSet<String>(
-                Arrays.asList("id", "name", "externalId")
-        );
-        
+
         Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
         if (responseParameters.isEmpty()) {
             responseParameters.addAll(typicalResponseParameters);
@@ -78,8 +84,6 @@ public class GroupsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveGroupData(@PathParam("groupId") final Long groupId, @Context final UriInfo uriInfo) {
-
-        Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "name", "externalId", "clientMembers"));
 
         Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo
                 .getQueryParameters());
@@ -101,6 +105,9 @@ public class GroupsApiResource {
             group.setAllowedClients(availableClients);
 
             responseParameters.add("allowedClients");
+
+            group.setAllowedOffices(new ArrayList<OfficeLookup>(officeReadPlatformService.retrieveAllOfficesForLookup()));
+            responseParameters.add("allowedOffices");
         }
         
         return this.apiJsonSerializerService.serializeGroupDataToJson(prettyPrint, responseParameters, group);
@@ -112,13 +119,13 @@ public class GroupsApiResource {
     @Produces({MediaType.APPLICATION_JSON})
     public String newGroupDetails(@Context final UriInfo uriInfo) {
 
-        Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "name", "externalId", "allowedClients"));
-
         Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
         if (responseParameters.isEmpty()) {
             responseParameters.addAll(typicalResponseParameters);
         }
         boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+
+        responseParameters.addAll(Arrays.asList("allowedClients", "allowedOffices"));
 
         GroupData groupData = this.groupReadPlatformService.retrieveNewGroupDetails();
 

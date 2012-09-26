@@ -132,8 +132,8 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 					"preclosedDepositAccountsCount","preclosedDepositAccounts"));
 
 	private static final Set<String> GROUP_DATA_PARAMETERS = new HashSet<String>(
-			Arrays.asList("id", "name", "externalId", "clientMembers",
-					"allowedClients"));
+			Arrays.asList("id", "officeId", "name", "externalId", "clientMembers",
+					"allowedClients", "allowedOffices"));
 
 	private static final Set<String> NOTE_DATA_PARAMETERS = new HashSet<String>(
 			Arrays.asList("id", "clientId", "loanId", "loanTransactionId",
