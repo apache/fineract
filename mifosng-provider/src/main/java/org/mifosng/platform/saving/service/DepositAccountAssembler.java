@@ -118,31 +118,72 @@ public class DepositAccountAssembler {
 		return new DepositLifecycleStateMachineImpl(allowedDepositStatuses);
 	}
 
-	public DepositAccount assembleFrom(DepositAccount account, BigDecimal newDepositAmount) {
+	public DepositAccount assembleFrom(DepositAccount account, DepositAccountCommand command) {
 		
 		Client client = account.client();
 		
 		DepositProduct product = account.product();
+		if(command.getProductId() != null){
+			 product = this.depositProductRepository.findOne(command.getProductId());
+				if (product == null || product.isDeleted()) {
+					throw new DepositProductNotFoundException(command.getProductId());
+				} 
+		}
 		
-		Money deposit = Money.of(product.getCurrency(), newDepositAmount);
+		Money deposit = account.getDeposit();
+		if(command.getDepositAmount() != null){
+			deposit = Money.of(account.getDeposit().getCurrency(), command.getDepositAmount());
+		}
 		
-		Integer tenureInMonths = product.getTenureInMonths();
+		Integer tenureInMonths = account.getTenureInMonths();
+		if(command.getTenureInMonths() != null){
+			tenureInMonths =command.getTenureInMonths();
+		}
 		
-		BigDecimal maturityInterestRate = product.getMaturityDefaultInterestRate();
+		BigDecimal maturityInterestRate = account.getInterestRate();
+		if(command.getMaturityInterestRate() != null){
+			maturityInterestRate = command.getMaturityInterestRate();
+		}
 		
-		BigDecimal preClosureInterestRate = product.getPreClosureInterestRate();
+		BigDecimal preClosureInterestRate = account.getPreClosureInterestRate();
+		if(command.getPreClosureInterestRate() != null){
+			preClosureInterestRate = command.getPreClosureInterestRate();
+		}
+		
 		
 		if(product.getMaturityMinInterestRate().compareTo(preClosureInterestRate)==-1){
 			throw new DepositAccounDataValidationtException(preClosureInterestRate, product.getMaturityMinInterestRate());
 		}
 		
-		Integer compoundingInterestEvery = product.getInterestCompoundedEvery();
+		Integer compoundingInterestEvery = account.getInterestCompoundedEvery();
+		if(command.getInterestCompoundedEvery() != null){
+			compoundingInterestEvery = command.getInterestCompoundedEvery();
+		}
 		
-		PeriodFrequencyType compoundingInterestFrequency = product.getInterestCompoundedEveryPeriodType();
+		PeriodFrequencyType compoundingInterestFrequency = account.getInterestCompoundedFrequencyType();
+		if(command.getInterestCompoundedEveryPeriodType() !=null){
+			compoundingInterestFrequency = PeriodFrequencyType.fromInt(command.getInterestCompoundedEveryPeriodType());
+		}
 		
-		boolean renewalAllowed = product.isRenewalAllowed();
+		boolean renewalAllowed = account.isRenewalAllowed();
+		if(command.isRenewalAllowedChanged()){
+			renewalAllowed = command.isRenewalAllowed();
+		}
 		
-		boolean preClosureAllowed = product.isPreClosureAllowed();
+		boolean preClosureAllowed = account.isPreClosureAllowed();
+		if(command.isPreClosureAllowedChanged()){
+			preClosureAllowed =  command.isPreClosureAllowed();
+		}
+		
+		boolean isInterestWithdrawable = account.isInterestWithdrawable();
+		if(command.isInterestWithdrawableChanged()){
+			isInterestWithdrawable = command.isInterestWithdrawable();
+		}
+		
+		boolean isInterestCompoundingAllowed = account.isInterestCompoundingAllowed();
+		if(command.isInterestCompoundingAllowedChanged()){
+			isInterestCompoundingAllowed = command.isInterestCompoundingAllowed();
+		}
 		
 		DepositAccount newAccount =new DepositAccount().openNew(client, product, null, 
 				deposit, 
@@ -150,7 +191,7 @@ public class DepositAccountAssembler {
 				tenureInMonths, compoundingInterestEvery, compoundingInterestFrequency, 
 				account.maturesOnDate(), 
 				renewalAllowed, preClosureAllowed, this.fixedTermDepositInterestCalculator, defaultDepositLifecycleStateMachine(),
-				account.isInterestWithdrawable(),product.isInterestCompoundingAllowed());
+				isInterestWithdrawable,isInterestCompoundingAllowed);
 		
 		newAccount.updateAccount(account);
 		

@@ -1,6 +1,5 @@
 package org.mifosng.platform.api;
 
-import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -72,7 +71,8 @@ public class DepositAccountsApiResource {
 					"interestCompoundedEvery","interestCompoundingAllowed",
 					"interestCompoundedEveryPeriodType", "renewalAllowed",
 					"preClosureAllowed", "preClosureInterestRate", 
-					"withdrawnonDate","rejectedonDate","closedonDate","transactions","interestPaid","isInterestWithdrawable","availableInterestForWithdrawal"));
+					"withdrawnonDate","rejectedonDate","closedonDate","transactions","interestPaid","isInterestWithdrawable",
+					"availableInterestForWithdrawal","availableWithdrawalAmount"));
 	
 	
 	@POST
@@ -207,6 +207,10 @@ public class DepositAccountsApiResource {
 			DepositAccountWithdrawInterestCommand command = apiDataConversionService.convertJsonToDepositAccountWithdrawInterestCommand(accountId, jsonRequestBody);
 			EntityIdentifier identifier = this.depositAccountWritePlatformService.withdrawDepositAccountInterestMoney(command);
 			response = Response.ok().entity(identifier).build();
+		} else if(is(commandParam, "renew")){
+			DepositAccountCommand command = apiDataConversionService.convertJsonToDepositAccountCommand(accountId, jsonRequestBody);
+			EntityIdentifier entityIdentifier = this.depositAccountWritePlatformService.renewDepositAccount(command);
+			return Response.ok().entity(entityIdentifier).build();
 		} else { 
 			DepositStateTransitionCommand command=apiDataConversionService.convertJsonToDepositStateTransitionCommand(accountId, jsonRequestBody);
 			if (is(commandParam, "reject")) {

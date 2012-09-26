@@ -1,9 +1,7 @@
 package org.mifosng.platform.saving.service;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -28,8 +26,6 @@ import org.mifosng.platform.exceptions.ProductNotFoundException;
 import org.mifosng.platform.saving.domain.DepositAccount;
 import org.mifosng.platform.saving.domain.DepositAccountRepository;
 import org.mifosng.platform.saving.domain.DepositAccountStatus;
-import org.mifosng.platform.saving.domain.DepositAccountTransaction;
-import org.mifosng.platform.saving.domain.DepositAccountTransactionType;
 import org.mifosng.platform.saving.domain.DepositLifecycleStateMachine;
 import org.mifosng.platform.saving.domain.DepositLifecycleStateMachineImpl;
 import org.mifosng.platform.saving.domain.FixedTermDepositInterestCalculator;
@@ -300,27 +296,15 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 		if(new LocalDate().isBefore(account.maturesOnDate())){
 			this.depositAccountAssembler.adjustTotalAmountForPreclosureInterest(account);
 		}
-		account.withdrawDepositAccountMoney(command.isRenewAccount(), defaultDepositLifecycleStateMachine());
+		account.withdrawDepositAccountMoney(defaultDepositLifecycleStateMachine());
 		this.depositAccountRepository.save(account);
-		
-		if(command.isRenewAccount()){
-			
-			BigDecimal deposit = account.getTotal();
-			if(command.getDeposit() != null)
-				deposit = command.getDeposit();
-			if(new LocalDate().isBefore(account.maturesOnDate())){
-				throw new DepositAccountReopenException(account.maturesOnDate());
-			}
-			final DepositAccount renewedAccount = this.depositAccountAssembler.assembleFrom(account,deposit);
-			this.depositAccountRepository.save(renewedAccount);
-			return new EntityIdentifier(renewedAccount.getId()); //returns the new deposit application id
-		}
 		
 		String noteText = command.getNote();
 		if (StringUtils.isNotBlank(noteText)) {
 			Note note = Note.depositNote(account, noteText);
 			this.noteRepository.save(note);
 		}
+		
 		return new EntityIdentifier(account.getId());
 	}
 
@@ -338,12 +322,6 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 			throw new DepositAccountNotFoundException(command.getAccountId());
 		}
 		if(account.isInterestWithdrawable() && !account.isInterestCompoundingAllowed()){
-			/*BigDecimal interstGettingForPeriod = BigDecimal.valueOf(account.getAccuredInterest().getAmount().doubleValue()/new Double(account.getTenureInMonths()));
-			LocalDate lastInterestTakenDate = getLastTxnDate(account);
-			Integer noOfMonthsforInterestCal = Months.monthsBetween(lastInterestTakenDate, new LocalDate()).getMonths();
-			Integer noOfPeriods = noOfMonthsforInterestCal / account.getInterestCompoundedEvery();
-			BigDecimal availableInterestAmountForWithDrawal = interstGettingForPeriod.multiply(new BigDecimal(noOfPeriods));
-			Integer iswithdrawable = availableInterestAmountForWithDrawal.compareTo(command.getWithdrawInterest());*/
 			
 			BigDecimal totalAvailableInterestForWithdrawal = getTotalWithdrawableInterestAvailable(account);
 			BigDecimal interestPaid = account.getInterstPaid();
@@ -356,40 +334,13 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 				}else {
 					throw new DepositAccountTransactionsException("You can Withdraw "+remainInterestForWithdrawal+" only");
 				}
-				
+			}else {
+				throw new DepositAccountTransactionsException("You don't have enough money for withdrawal");
 			}
-		
-			/*if(noOfPeriods > 0 ){
-			if(iswithdrawable >= 0){
-				account.withdrawInterest(Money.of(account.getDeposit().getCurrency(), command.getWithdrawInterest()));
-				this.depositAccountRepository.save(account);
-			}else if(iswithdrawable == -1){
-				throw new RuntimeException();
-			}
-			}else if(noOfPeriods <= 0){
-					throw new RuntimeException();
-			}*/
 		}else{
 			throw new DepositAccountTransactionsException("You can not withdraw interst for this account");
 		}
 		return new EntityIdentifier(account.getId());
-	}
-
-	private LocalDate getLastTxnDate(DepositAccount account) {
-		List<LocalDate> lastTransactionDates = new ArrayList<LocalDate>();
-		LocalDate lastTransactionDate=null;
-		List<DepositAccountTransaction> depositAccountTransactions=account.getDepositaccountTransactions();
-		for(DepositAccountTransaction depositAccountTransaction : depositAccountTransactions){
-			if(depositAccountTransaction.getTypeOf().equals(DepositAccountTransactionType.WITHDRAW)){
-				lastTransactionDate = depositAccountTransaction.getTransactionDate();
-				lastTransactionDates.add(lastTransactionDate);
-			}
-		}
-		if(lastTransactionDates.size()>0)
-			lastTransactionDate = Collections.max(lastTransactionDates);
-		else
-			lastTransactionDate = account.getActualCommencementDate();
-		return lastTransactionDate;
 	}
 	
 	private BigDecimal getTotalWithdrawableInterestAvailable(DepositAccount account){
@@ -397,5 +348,33 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 		Integer noOfMonthsforInterestCal = Months.monthsBetween(account.getActualCommencementDate(), new LocalDate()).getMonths();
 		Integer noOfPeriods = noOfMonthsforInterestCal / account.getInterestCompoundedEvery();
 		return interstGettingForPeriod.multiply(new BigDecimal(noOfPeriods));
+	}
+
+	@Transactional
+	@Override
+	public EntityIdentifier renewDepositAccount(DepositAccountCommand command) {
+		
+		this.context.authenticatedUser();
+		
+		RenewDepositAccountCommandValidator validator = new RenewDepositAccountCommandValidator(command);
+		validator.validateForCreate();
+		
+		DepositAccount account = this.depositAccountRepository.findOne(command.getId());
+		if (account == null || account.isDeleted()) {
+			throw new DepositAccountNotFoundException(command.getId());
+		}
+		if(account.isRenewalAllowed()&&(new LocalDate().isAfter(account.maturesOnDate())||new LocalDate().isEqual(account.maturesOnDate()))){
+			if(account.getDepositStatus().equals(DepositAccountStatus.ACTIVE.getValue())){
+				final DepositAccount renewedAccount = this.depositAccountAssembler.assembleFrom(account,command);
+				this.depositAccountRepository.save(renewedAccount);
+				account.closeDepositAccount(defaultDepositLifecycleStateMachine());
+				this.depositAccountRepository.save(account);
+				return new EntityIdentifier(renewedAccount.getId());
+			}else{
+				throw new DepositAccountReopenException(account.getMaturityDate());
+			}
+		}else{
+			throw new DepositAccountReopenException(account.getMaturityDate());
+		}
 	}
 }

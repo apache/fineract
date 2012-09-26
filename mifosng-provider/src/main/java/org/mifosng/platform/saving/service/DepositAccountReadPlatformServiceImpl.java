@@ -5,6 +5,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
+import javax.security.auth.login.AccountException;
+
 import org.joda.time.LocalDate;
 import org.joda.time.Months;
 import org.mifosng.platform.api.data.ClientData;
@@ -254,12 +256,13 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 	public DepositPermissionData retrieveDepositAccountsPermissions(DepositAccountData depositAccountData) {
 		boolean pendingApproval = (depositAccountData.getStatus().getId().equals(100L));
 		boolean undoApprovalAllowed = (depositAccountData.getStatus().getId().equals(300L));
-		//boolean isActive = (depositAccountData.getStatus().getId().equals(300L));
+		boolean renewelAllowed = depositAccountData.isRenewalAllowed()&&(new LocalDate().isAfter(depositAccountData.getMaturedOn())||depositAccountData.getMaturedOn().isEqual(new LocalDate()));
 		boolean rejectAllowed = pendingApproval;
 		boolean withdrawnByApplicantAllowed = pendingApproval;
 		boolean interestWithdrawAllowed = depositAccountData.isInterestWithdrawable();
+		boolean isMaturedDepositAccount = (depositAccountData.getStatus().getId().equals(700L));
 
-		return new DepositPermissionData(rejectAllowed, withdrawnByApplicantAllowed, undoApprovalAllowed, pendingApproval, interestWithdrawAllowed);
+		return new DepositPermissionData(rejectAllowed, withdrawnByApplicantAllowed, undoApprovalAllowed, pendingApproval, interestWithdrawAllowed, renewelAllowed, isMaturedDepositAccount);
 	}
 
 	@Override

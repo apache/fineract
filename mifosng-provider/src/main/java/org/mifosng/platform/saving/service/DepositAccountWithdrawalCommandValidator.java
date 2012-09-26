@@ -20,8 +20,6 @@ public class DepositAccountWithdrawalCommandValidator {
 		DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("deposit.transaction");
 
 		baseDataValidator.reset().parameter("accountId").value(command.getAccountId()).notNull().integerGreaterThanZero();
-		baseDataValidator.reset().parameter("renewAccount").value(command.isRenewAccount()).notNull();
-		baseDataValidator.reset().parameter("deposit").value(command.getDeposit()).ignoreIfNull().zeroOrPositiveAmount();
 		baseDataValidator.reset().parameter("note").value(command.getNote()).notNull();
 		
 		if (!dataValidationErrors.isEmpty()) {

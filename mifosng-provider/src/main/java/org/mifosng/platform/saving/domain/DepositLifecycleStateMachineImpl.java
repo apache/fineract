@@ -70,7 +70,7 @@ public class DepositLifecycleStateMachineImpl implements
 			}
 			break;
 		case DEPOSIT_CLOSED:
-			if (from.hasStateOf(DepositAccountStatus.MATURED) ){
+			if (from.hasStateOf(DepositAccountStatus.ACTIVE) ){
 				newState = stateOf(DepositAccountStatus.CLOSED, allowedDepositStatuses);
 			}
 			else{

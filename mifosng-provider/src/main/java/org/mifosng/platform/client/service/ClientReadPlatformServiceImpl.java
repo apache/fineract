@@ -200,6 +200,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 			List<ClientAccountSummaryData> closedDepositAccounts = new ArrayList<ClientAccountSummaryData>();
 			List<ClientAccountSummaryData> rejectedDepositAccounts = new ArrayList<ClientAccountSummaryData>();
 			List<ClientAccountSummaryData> preclosedDepositAccounts = new ArrayList<ClientAccountSummaryData>();
+			List<ClientAccountSummaryData> maturedDepositAccounts = new ArrayList<ClientAccountSummaryData>();
 			
 			ClientDespoitAccountSummaryDataMapper depositAccountMapper = new ClientDespoitAccountSummaryDataMapper();
 
@@ -218,7 +219,9 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 						rejectedDepositAccounts.add(row);
 					} else if (row.getAccountStatusId() == 600) {
 						closedDepositAccounts.add(row);
-					} else if (row.getAccountStatusId() == 800) {
+					} else if (row.getAccountStatusId() == 700) {
+						maturedDepositAccounts.add(row);
+					}else if (row.getAccountStatusId() == 800) {
 						preclosedDepositAccounts.add(row);
 					}
 				}
@@ -226,7 +229,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
 			return new ClientAccountSummaryCollectionData(pendingApprovalLoans, awaitingDisbursalLoans, openLoans, closedLoans, 
 					pendingApprovalDepositAccounts, approvedDepositAccounts, withdrawnByClientDespositAccounts,
-					rejectedDepositAccounts,closedDepositAccounts,preclosedDepositAccounts);
+					rejectedDepositAccounts,closedDepositAccounts,preclosedDepositAccounts,maturedDepositAccounts);
 		} catch (EmptyResultDataAccessException e) {
 			throw new ClientNotFoundException(clientId);
 		}

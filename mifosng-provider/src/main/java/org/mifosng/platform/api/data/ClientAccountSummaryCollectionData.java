@@ -28,6 +28,8 @@ public class ClientAccountSummaryCollectionData {
 	private final List<ClientAccountSummaryData> rejectedDepositAccounts;
 	private final int preclosedDepositAccountsCount;
 	private final List<ClientAccountSummaryData> preclosedDepositAccounts;
+	private final int maturedDepositAccountsCount;
+	private final List<ClientAccountSummaryData> maturedDepositAccounts;
 	
 	public ClientAccountSummaryCollectionData(
 			final List<ClientAccountSummaryData> pendingApprovalLoans,
@@ -39,7 +41,8 @@ public class ClientAccountSummaryCollectionData {
 			final List<ClientAccountSummaryData> withdrawnByClientDespositAccounts,
 			final List<ClientAccountSummaryData> rejectedDepositAccounts,
 			final List<ClientAccountSummaryData> closedDepositAccounts,
-			final List<ClientAccountSummaryData> preclosedDepositAccounts) {
+			final List<ClientAccountSummaryData> preclosedDepositAccounts,
+			final List<ClientAccountSummaryData> maturedDepositAccounts) {
 		this.pendingApprovalLoans = pendingApprovalLoans;
 		this.awaitingDisbursalLoans = awaitingDisbursalLoans;
 		this.openLoans = openLoans;
@@ -50,6 +53,7 @@ public class ClientAccountSummaryCollectionData {
 		this.closedDepositAccounts = closedDepositAccounts;
 		this.rejectedDepositAccounts = rejectedDepositAccounts;
 		this.preclosedDepositAccounts = preclosedDepositAccounts;
+		this.maturedDepositAccounts = maturedDepositAccounts;
 		
 		this.pendingApprovalLoanCount = this.pendingApprovalLoans.size();
 		this.awaitingDisbursalLoanCount = this.awaitingDisbursalLoans.size();
@@ -62,10 +66,11 @@ public class ClientAccountSummaryCollectionData {
 		this.closedDepositAccountsCount = this.closedDepositAccounts.size();
 		this.rejectedDepositAccountsCount = this.rejectedDepositAccounts.size();
 		this.preclosedDepositAccountsCount = this.preclosedDepositAccounts.size();
+		this.maturedDepositAccountsCount = this.maturedDepositAccounts.size();
 		
 		this.anyLoanCount = this.pendingApprovalLoanCount + this.awaitingDisbursalLoanCount + this.activeLoanCount + this.closedLoanCount
 				+this.pendingApprovalDespositAccountsCount+this.approvedDespositAccountsCount+this.withdrawnByClientDespositAccountsCount+this.closedDepositAccountsCount
-				+this.rejectedDepositAccountsCount+this.preclosedDepositAccountsCount;
+				+this.rejectedDepositAccountsCount+this.preclosedDepositAccountsCount+this.maturedDepositAccountsCount;
 		
 	}
 

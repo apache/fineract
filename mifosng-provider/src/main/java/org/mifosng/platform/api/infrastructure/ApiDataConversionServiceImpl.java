@@ -1398,17 +1398,15 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		Type typeOfMap = new TypeToken<Map<String, String>>(){}.getType();
 	    Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
 	    
-	    Set<String> supportedParams = new HashSet<String>(Arrays.asList("renewAccount","deposit", "note","locale"));
+	    Set<String> supportedParams = new HashSet<String>(Arrays.asList("note","locale"));
 	    
 	    checkForUnsupportedParameters(requestMap, supportedParams);
 	    
 	    Set<String> modifiedParameters = new HashSet<String>();
 	    
-	    BigDecimal deposit=extractBigDecimalParameter("deposit", requestMap, modifiedParameters);
-	    boolean renewAccount=extractBooleanParameter("renewAccount", requestMap, modifiedParameters);
 	    String note = extractStringParameter("note", requestMap, modifiedParameters);
 	    
-		return new DepositAccountWithdrawalCommand(resourceIdentifier,renewAccount, deposit, note);
+		return new DepositAccountWithdrawalCommand(resourceIdentifier,note);
 	}
 
 	@Override
