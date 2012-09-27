@@ -133,14 +133,19 @@ function getBaseURL(docURL)
             </div>
         </div>
         <div class="flybar-nav">
-            <h2 class="flybar-button">Additional Fields</h2>
+            <h2 class="flybar-button">Non-Core Data</h2>
             <div  id="toc-menu2" class="flybar-menu">
                 <div class="tocMatrix">
                     <table class=matrixHeading>
                         <tr class="matrixHeadingBG"><td colspan=2 valign="top"><div class="matrixHeadingVerbs"><table><tr><td>RESOURCES</td></tr></table></div></td><td><table><tr><td><div class="matrixHeadingVerbs">POST</div></td></tr><tr><td><div class=matrixHeadingCommands>create/complex update</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">GET</div></td></tr><tr><td><div class=matrixHeadingCommands>read</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">PUT</div></td></tr><tr><td><div class=matrixHeadingCommands>update</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">DELETE</div></td></tr><tr><td><div class=matrixHeadingCommands>delete</div></td></tr></table></td></tr>
-                        <tr><td><a href="#additionalfields">ADDITIONAL FIELDS</a></td><td>additionalfields</td><td></td><td><a href="#additionalfields_list">List Additional Fields Sets</a></td><td></td><td></td></tr>
-                        <tr class="alt"><td></td><td>additionalfields/{Type}/{Set}/{id}</td><td><a href="#additionalfields_update">Update Additional Fields</a></td><td><a href="#additionalfields_retrieve">Retrieve Additional Fields</a></td><td></td><td></td></tr>
-                    </table>
+                        <tr><td><a href="#additionalfields">ADDITIONAL FIELDS</a></td><td>additionalfields (deprecated)</td><td></td><td><a href="#additionalfields_list">List Additional Fields Sets</a></td><td></td><td></td></tr>
+                        <tr class="alt"><td></td><td>additionalfields/{Type}/{Set}/{id} (deprecated)</td><td><a href="#additionalfields_update">Update Additional Fields</a></td><td><a href="#additionalfields_retrieve">Retrieve Additional Fields</a></td><td></td><td></td></tr>
+                        <tr><td><a href="#datatables">DATA TABLE</a></td><td>datatables</td><td></td><td><a href="#datatables_list">List Data Tables</a></td><td></td><td></td></tr>
+                        <tr class="alt"><td></td><td>datatables/register/{datatable}/{apptable}</td><td><a href="#datatables_register">Register Data Table</a></td><td></td><td></td><td></td></tr>
+                        <tr><td></td><td>datatables/deregister/{datatable}</td><td><a href="#datatables_deregister">Deregister Data Table</a></td><td></td><td></td><td></td></tr>
+                        <tr class="alt"><td></td><td>datatables/{datatable}/{apptableId}</td><td><a href="#datatables_create">Create Entry in Data Table</a></td><td><a href="#datatables_retrieve">Retrieve Entry(s) from Data Table</a></td><td><a href="#datatables_update">Update Entry in Data Table (One to One)</a></td><td><a href="#datatables_delete">Delete Entry(s) in Data Table</a></td></tr>
+                        <tr><td></td><td>datatables/{datatable}/{apptableId}/{datatableId}</td><td></td><td><a href="#datatables_update_1M">Update Entry in Data Table (One to Many)</a></td><td></td><td><a href="#datatables_delete_1M">Delete Entry in Data Table (One to Many)</a></td></tr>
+                   </table>
                 </div>                
             </div>
         </div>
@@ -2214,7 +2219,7 @@ Request Body:{
         <a id="additionalfields" name="additionalfields" class="old-syle-anchor">&nbsp;</a>
         <div class="method-section">
             <div class="method-description">
-                <h3>Additional Fields</h3>
+                <h3>Additional Fields (Deprecated)</h3>
                 <p>
                 In Mifos X, any number of "Sets" of "Additional Fields" can be configured for a Mifos X database table ("Type").
                 </p>
@@ -3171,16 +3176,21 @@ Request body:
             <tr class="alt"><td><a href="#loanproducts">LOAN PRODUCT</a></td><td>loanproducts</td><td><a href="#loanproducts_create">Create a Loan Product</a></td><td><a href="#loanproducts_list">List Loan Products</a></td><td></td><td></td></tr>
             <tr><td></td><td>loanproducts/{productId}</td><td></td><td><a href="#loanproducts_retrieve">Retrieve a Loan Product</a></td><td><a href="#loanproducts_update">Update a Loan Product</a></td><td></td></tr>
             <tr class="alt"><td><a href="#configs">CONFIGURATION</a></td><td>configurations/currency</td><td></td><td><a href="#configs_currencyretrieve">Retrieve Currency Configuration</a></td><td><a href="#configs_currencyupdate">Update Currency Configuration</a></td><td></td></tr>
-            <tr><td><a href="#additionalfields">ADDITIONAL FIELDS</a></td><td>additionalfields</td><td></td><td><a href="#additionalfields_list">List Additional Fields Sets</a></td><td></td><td></td></tr>
-            <tr class="alt"><td></td><td>additionalfields/{Type}/{Set}/{id}</td><td><a href="#additionalfields_update">Update Additional Fields</a></td><td><a href="#additionalfields_retrieve">Retrieve Additional Fields</a></td><td></td><td></td></tr>
-            <tr><td><a href="#reports">REPORT</a></td><td>reports</td><td></td><td><a href="#reports_list">List Reports</a></td><td></td><td></td></tr>
-            <tr class="alt"><td></td><td>reports/{reportName}</td><td></td><td><a href="#report_run">Run a Report</a></td><td></td><td></td></tr>
-            <tr><td><a href="#authentication">AUTHENTICATION</a></td><td>authentication</td><td><a href="#authentication_permissions">Verify Authentication</a></td><td></td><td></td><td></td></tr>
-            <tr class="alt"><td><a href="#users">USER</a></td><td>users</td><td><a href="#users_create">Create a User</a></td><td><a href="#users_list">List Users</a></td><td></td><td></td></tr>
-            <tr><td></td><td>users/{userId}</td><td></td><td><a href="#users_retrieve">Retrieve a User</a></td><td><a href="#users_update">Update a User</a></td><td><a href="#users_delete">Delete a User</a></td></tr>
-            <tr class="alt"><td><a href="#roles">ROLE</a></td><td>roles</td><td><a href="#roles_create">Create a New Role</a></td><td><a href="#roles_list">List Roles</a></td><td></td><td></td></tr>
-            <tr><td></td><td>roles/{roleId}</td><td></td><td><a href="#roles_retrieve">Retrieve a Role</a></td><td><a href="#roles_update">Update a Role</a></td><td></td></tr>
-            <tr class="alt"><td><a href="#permissions">PERMISSION</a></td><td>permissions</td><td></td><td><a href="#permissions_list">List Application Permissions</a></td><td></td><td></td></tr>
+            <tr><td><a href="#additionalfields">ADDITIONAL FIELDS</a></td><td>additionalfields (deprecated)</td><td></td><td><a href="#additionalfields_list">List Additional Fields Sets</a></td><td></td><td></td></tr>
+            <tr class="alt"><td></td><td>additionalfields/{Type}/{Set}/{id} (deprecated)</td><td><a href="#additionalfields_update">Update Additional Fields</a></td><td><a href="#additionalfields_retrieve">Retrieve Additional Fields</a></td><td></td><td></td></tr>
+            <tr><td><a href="#datatables">DATA TABLE</a></td><td>datatables</td><td></td><td><a href="#datatables_list">List Data Tables</a></td><td></td><td></td></tr>
+            <tr class="alt"><td></td><td>datatables/register/{datatable}/{apptable}</td><td><a href="#datatables_register">Register Data Table</a></td><td></td><td></td><td></td></tr>
+            <tr><td></td><td>datatables/deregister/{datatable}</td><td><a href="#datatables_deregister">Deregister Data Table</a></td><td></td><td></td><td></td></tr>
+            <tr class="alt"><td></td><td>datatables/{datatable}/{apptableId}</td><td><a href="#datatables_create">Create Entry in Data Table</a></td><td><a href="#datatables_retrieve">Retrieve Entry(s) from Data Table</a></td><td><a href="#datatables_update">Update Entry in Data Table (One to One)</a></td><td><a href="#datatables_delete">Delete Entry(s) in Data Table</a></td></tr>
+            <tr><td></td><td>datatables/{datatable}/{apptableId}/{datatableId}</td><td></td><td><a href="#datatables_update_1M">Update Entry in Data Table (One to Many)</a></td><td></td><td><a href="#datatables_delete_1M">Delete Entry in Data Table (One to Many)</a></td></tr>
+            <tr class="alt"><td><a href="#reports">REPORT</a></td><td>reports</td><td></td><td><a href="#reports_list">List Reports</a></td><td></td><td></td></tr>
+            <tr><td></td><td>reports/{reportName}</td><td></td><td><a href="#report_run">Run a Report</a></td><td></td><td></td></tr>
+            <tr class="alt"><td><a href="#authentication">AUTHENTICATION</a></td><td>authentication</td><td><a href="#authentication_permissions">Verify Authentication</a></td><td></td><td></td><td></td></tr>
+            <tr><td><a href="#users">USER</a></td><td>users</td><td><a href="#users_create">Create a User</a></td><td><a href="#users_list">List Users</a></td><td></td><td></td></tr>
+            <tr class="alt"><td></td><td>users/{userId}</td><td></td><td><a href="#users_retrieve">Retrieve a User</a></td><td><a href="#users_update">Update a User</a></td><td><a href="#users_delete">Delete a User</a></td></tr>
+            <tr><td><a href="#roles">ROLE</a></td><td>roles</td><td><a href="#roles_create">Create a New Role</a></td><td><a href="#roles_list">List Roles</a></td><td></td><td></td></tr>
+            <tr class="alt"><td></td><td>roles/{roleId}</td><td></td><td><a href="#roles_retrieve">Retrieve a Role</a></td><td><a href="#roles_update">Update a Role</a></td><td></td></tr>
+            <tr><td><a href="#permissions">PERMISSION</a></td><td>permissions</td><td></td><td><a href="#permissions_list">List Application Permissions</a></td><td></td><td></td></tr>
         </table>
         <br>
         <table class=matrixHeading>
