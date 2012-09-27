@@ -156,7 +156,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		Fund fund = this.loanAssembler.findFundByIdIfProvided(command.getFundId());
 		Staff loanOfficer = this.loanAssembler.findLoanOfficerByIdIfProvided(command.getLoanOfficerId());
 		LoanTransactionProcessingStrategy strategy = this.loanAssembler.findStrategyByIdIfProvided(command.getTransactionProcessingStrategyId());
-        Set<LoanCharge> charges = this.loanAssembler.assembleSetOfLoanCharges(command.getCharges(), loanProduct.getCharges(), loan.getCurrency().getCode());
+        Set<LoanCharge> charges = this.loanAssembler.assembleSetOfLoanCharges(command.getCharges(), loanProduct.getCharges(), loan.getCurrency().getCode(), loan.getPrincpal().getAmount());
 
         final LoanScheduleNewData loanSchedule = this.calculationPlatformService.calculateLoanScheduleNew(command.toCalculateLoanScheduleCommand());
 		loan.modifyLoanApplication(command, client, loanProduct, fund, strategy, loanSchedule, charges, loanOfficer);

@@ -68,7 +68,7 @@ public class CalculationPlatformServiceImpl implements CalculationPlatformServic
 
 		final ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneByCode(loanScheduleRelatedDetails.getCurrency().getCode());
 		
-		final Set<LoanCharge> loanCharges = this.loanChargeAssembler.assembleFrom(command.getCharges());
+		final Set<LoanCharge> loanCharges = this.loanChargeAssembler.assembleFrom(command.getCharges(), loanScheduleRelatedDetails.getPrincipal().getAmount());
 		
 		return loanScheduleGenerator.generate(applicationCurrency,
 				loanScheduleRelatedDetails, loanTermFrequency,

@@ -195,9 +195,12 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
     private static final class LoanChargeMapper implements RowMapper<LoanChargeData> {
 
         public String loanChargeSchema(){
-            return "lc.id as id, c.id as chargeId, c.name as name, lc.amount as amount, c.currency_code as currencyCode, " +
-                    "lc.charge_time_enum as chargeTime, " +
-                    "lc.charge_calculation_enum as chargeCalculation, oc.name as currencyName, " +
+            return  "lc.id as id, c.id as chargeId, c.name as name, " +
+            		"lc.amount as amountDue, lc.amount_paid_derived as amountPaid, lc.amount_outstanding_derived as amountOutstanding, " +
+            		"lc.calculation_percentage as percentageOf, lc.calculation_on_amount as amountPercentageAppliedTo, " +
+            		"lc.charge_time_enum as chargeTime, " +
+                    "lc.charge_calculation_enum as chargeCalculation, " +
+                    "c.currency_code as currencyCode, oc.name as currencyName, " +
                     "oc.decimal_places as currencyDecimalPlaces, oc.display_symbol as currencyDisplaySymbol, " +
                     "oc.internationalized_name_code as currencyNameCode from m_charge c " +
                     "join m_organisation_currency oc on c.currency_code = oc.code " +
@@ -205,28 +208,37 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
         }
 
         @Override
-        public LoanChargeData mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
-            Long id = rs.getLong("id");
-            Long chargeId = rs.getLong("chargeId");
-            String name = rs.getString("name");
-            BigDecimal amount = rs.getBigDecimal("amount");
+        public LoanChargeData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+            
+        	final Long id = rs.getLong("id");
+        	final Long chargeId = rs.getLong("chargeId");
+        	final String name = rs.getString("name");
+        	final BigDecimal amount = rs.getBigDecimal("amountDue");
+        	BigDecimal amountPaid = rs.getBigDecimal("amountPaid");
+        	if (amountPaid == null) {
+        		amountPaid = BigDecimal.ZERO;
+        	}
+        	final BigDecimal amountOutstanding = rs.getBigDecimal("amountOutstanding");
+        	
+        	final BigDecimal percentageOf = rs.getBigDecimal("percentageOf");
+        	final BigDecimal amountPercentageAppliedTo = rs.getBigDecimal("amountPercentageAppliedTo");
 
-            String currencyCode = rs.getString("currencyCode");
-            String currencyName = rs.getString("currencyName");
-            String currencyNameCode = rs.getString("currencyNameCode");
-            String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
-            Integer currencyDecimalPlaces = JdbcSupport.getInteger(rs, "currencyDecimalPlaces");
+        	final String currencyCode = rs.getString("currencyCode");
+        	final String currencyName = rs.getString("currencyName");
+        	final String currencyNameCode = rs.getString("currencyNameCode");
+        	final String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
+        	final Integer currencyDecimalPlaces = JdbcSupport.getInteger(rs, "currencyDecimalPlaces");
 
-            CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDecimalPlaces,
+        	final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDecimalPlaces,
                     currencyDisplaySymbol, currencyNameCode);
 
-            int chargeTime = rs.getInt("chargeTime");
-            EnumOptionData chargeTimeType = ChargeEnumerations.chargeTimeType(chargeTime);
+        	final int chargeTime = rs.getInt("chargeTime");
+        	final EnumOptionData chargeTimeType = ChargeEnumerations.chargeTimeType(chargeTime);
 
-            int chargeCalculation = rs.getInt("chargeCalculation");
-            EnumOptionData chargeCalculationType = ChargeEnumerations.chargeCalculationType(chargeCalculation);
+        	final int chargeCalculation = rs.getInt("chargeCalculation");
+        	final EnumOptionData chargeCalculationType = ChargeEnumerations.chargeCalculationType(chargeCalculation);
 
-            return new LoanChargeData(id, chargeId, name, currency, amount, chargeTimeType, chargeCalculationType);
+            return new LoanChargeData(id, chargeId, name, currency, amount, amountPaid, amountOutstanding, chargeTimeType, chargeCalculationType, percentageOf, amountPercentageAppliedTo);
         }
     }
 }

@@ -491,14 +491,17 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		// add repayment transaction to track incoming money from client to mfi for (charges due at time of disbursement)
 		if (getTotalChargesDueAtDisbursement().isGreaterThanZero()) {
 			
-			// FIXME - add charges component to 'transactions'
 			LoanTransaction chargesPayment = LoanTransaction.repaymentAtDisbursement(getTotalChargesDueAtDisbursement(), disbursedOn);
 			Money zero = Money.zero(getCurrency());
 			chargesPayment.updateComponents(zero, zero, zero, getTotalChargesDueAtDisbursement());
 			chargesPayment.updateLoan(this);
 			this.loanTransactions.add(chargesPayment);
 			
-			// should also pay-off the time-of-disbursement charges
+			for (LoanCharge charge : this.charges) {
+				if (charge.isDueAtDisbursement()) {
+					charge.markAsFullyPaid();
+				}
+			}
 		}
 
 		if (disbursedOn.isBefore(getApprovedOnDate())) {
@@ -515,8 +518,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 					"cannot.be.a.future.date", errorMessage, disbursedOn);
 		}
 
-		LocalDate firstRepaymentDueDate = this.repaymentScheduleInstallments
-				.get(0).getDueDate();
+		LocalDate firstRepaymentDueDate = this.repaymentScheduleInstallments.get(0).getDueDate();
 		if (disbursedOn.isAfter(firstRepaymentDueDate)) {
 			final String errorMessage = "The date on which a loan is disbursed cannot be after the first expected repayment date: "
 					+ firstRepaymentDueDate.toString();
@@ -526,14 +528,19 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		}
 	}
 
-	public void undoDisbursal(
-			LoanLifecycleStateMachine loanLifecycleStateMachine) {
+	public void undoDisbursal(final LoanLifecycleStateMachine loanLifecycleStateMachine) {
 		
-		LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_DISBURSAL_UNDO, LoanStatus.fromInt(this.loanStatus));
+		final LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_DISBURSAL_UNDO, LoanStatus.fromInt(this.loanStatus));
 		this.loanStatus = statusEnum.getValue();
 		
 		this.loanTransactions.clear();
 		this.disbursedOnDate = null;
+		
+		for (LoanCharge charge : this.charges) {
+			if (charge.isDueAtDisbursement()) {
+				charge.resetToOriginal();
+			}
+		}
 	}
 
 	public void waive(final LoanTransaction loanTransaction, final LoanLifecycleStateMachine loanLifecycleStateMachine) {

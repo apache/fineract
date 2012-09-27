@@ -214,9 +214,11 @@ public class LoansApiResource {
 				convenienceDataRequired = true;
 			}
 			
-            charges = this.chargeReadPlatformService.retrieveLoanCharges(loanId);
-            if (CollectionUtils.isEmpty(charges)) {
-            	charges = null;
+			if (responseParameters.contains("charges")) {
+	            charges = this.chargeReadPlatformService.retrieveLoanCharges(loanId);
+	            if (CollectionUtils.isEmpty(charges)) {
+	            	charges = null; // set back to null so doesnt appear in JSON is no charges exist.
+				}
 			}
 		}
 

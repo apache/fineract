@@ -104,7 +104,7 @@ public class LoanAssembler {
 		Staff loanOfficer= findLoanOfficerByIdIfProvided(command.getLoanOfficerId());
 		
 		// optionally, see if charges are associated with loan on creation (through loan product or by being directly added)
-		final Set<LoanCharge> loanCharges = assembleSetOfLoanCharges(command.getCharges(), loanProduct.getCharges(), loanProduct.getCurrency().getCode());
+		final Set<LoanCharge> loanCharges = assembleSetOfLoanCharges(command.getCharges(), loanProduct.getCharges(), loanProduct.getCurrency().getCode(), command.getPrincipal());
 				
 		Loan loan = Loan.createNew(fund,loanOfficer, loanTransactionProcessingStrategy, loanProduct, client, loanRepaymentScheduleDetail, loanCharges);
 		loan.setExternalId(command.getExternalId());
@@ -130,8 +130,11 @@ public class LoanAssembler {
 		return loan;
 	}
 
-	public Set<LoanCharge> assembleSetOfLoanCharges(LoanChargeCommand[] chargesPassedAtCreation,
-                                                    Set<Charge> chargesInheritedFromProduct, String loanCurrencyCode) {
+	public Set<LoanCharge> assembleSetOfLoanCharges(final LoanChargeCommand[] chargesPassedAtCreation,
+                                                    final Set<Charge> chargesInheritedFromProduct, 
+                                                    final String loanCurrencyCode, 
+                                                    final BigDecimal loanPrincipal) {
+		
 		Set<LoanCharge> loanCharges = new HashSet<LoanCharge>();
 		
 		if (!ObjectUtils.isEmpty(chargesPassedAtCreation)) {
@@ -152,7 +155,7 @@ public class LoanAssembler {
                     throw new InvalidCurrencyException("charge", "attach.to.loan", errorMessage);
                 }
 
-				loanCharges.add(LoanCharge.createNew(chargeDefinition, loanChargeCommand));
+				loanCharges.add(LoanCharge.createNewWithoutLoan(chargeDefinition, loanChargeCommand, loanPrincipal));
 			}
 		} else if (chargesPassedAtCreation == null) {
 			for (Charge productCharge : chargesInheritedFromProduct) {
