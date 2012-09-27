@@ -2386,7 +2386,180 @@ Request Body:
             </div>
         </div>
     
+    <!-- start of datatables api docs -->
+        <a id="additionalfields" name="additionalfields" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h3>Additional Fields (Deprecated)</h3>
+                <p>
+                In Mifos X, any number of "Sets" of "Additional Fields" can be configured for a Mifos X database table ("Type").
+                </p>
+                <p>  For example, portfolio_client is the database table that holds client data.  Typically, MFI's want more client related fields than is provided by Mifos X out-of-the-box.  
+                The MFI might add a Set called "Additional Info" containing some fields that are typically input when creating a client.
+                They might then add another Set called "Highly Improbable Info" containing some fields that are only input in exceptional
+                circumstances.
+                </p>
+                <p>
+                The additional fields resource allows you to retrieve and update any Additional Fields data that has been configured in Mifos X.
+                </p>
+                <p>
+                The Mifos X Individual Lending client application uses a JQuery plugin called stretchydata which, itself, uses this
+                additional fields resource to provide a pretty flexible additional fields User Interface (UI).
+                </p>
+            </div>
+        </div>
     
+    
+        <a id="additionalfields_list" name="additionalfields_list" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>List Additional Fields Sets</h4>
+                <p>
+                Lists the Sets of additional fields have been defined in Mifos X. 
+                </p>
+                
+                <h5>Arguments</h5>
+                <dl class="argument-list">
+                    <dt>type</dt>
+                    <dd><span>optional</span></dd>
+                    <dd>The Additional Fields Type (Mifos X database table) to restrict the output to</dd>
+                </dl>
+                <p>Example Requests: </p>
+                <div class=apiClick>additionalfields?type=m_client</div>
+                <br><br>
+                <div class=apiClick>additionalfields</div>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">GET https://Domain Name/api/v1/additionalfields</code>
+                <code class="method-response">[ {
+  "id" : 1,
+  "name" : "Additional Information",
+  "type" : "portfolio_client"
+}, {
+  "id" : 8,
+  "name" : "Additional Information",
+  "type" : "portfolio_loan"
+}, {
+  "id" : 9,
+  "name" : "Highly Improbable Info",
+  "type" : "portfolio_client"
+} ]
+                </code>
+            </div>
+        </div>
+    
+    
+        <a id="additionalfields_retrieve" name="additionalfields_retrieve" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>Retrieve Additional Fields</h4>
+                <p>
+                Returns the Set of Additional Fields data for the ID provided.  The ID is the id field of the Type table e.g. portfolio_client might have an id value of 4.  The output is a JSON formatted "Generic Resultset".  The Generic Resultset contains Column Heading as well as Data information.  The Column Heading information may include allowed values (columnValues array).
+                </p>
+                <p>Example Request: 
+                <div class=apiClick>additionalfields/m_client/Additional Information/2</div>
+                </p>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">GET https://Domain Name/api/v1/additionalfields/{type}/{set}/{id}</code>
+                <code class="method-response">{
+  "columnHeaders" : [ {
+    "columnName" : "Ethnic Group",
+    "columnType" : "String",
+    "columnLength" : 50,
+    "columnDisplayType" : "List",
+    "columnValues" : [ "Bedouin", "Berber", "Italian", "Miknasa", "Mrazig", "Other", "Unknown" ]
+  }, {
+    "columnName" : "Ethnic Group Other",
+    "columnType" : "String",
+    "columnLength" : 50,
+    "columnDisplayType" : null,
+    "columnValues" : [ ]
+  }, {
+    "columnName" : "Household Location",
+    "columnType" : "String",
+    "columnLength" : 50,
+    "columnDisplayType" : "List",
+    "columnValues" : [ "East Sikkim", "North Sikkim", "South Sikkim", "West Sikkim", "Other" ]
+  }, {
+    "columnName" : "Household Location Other",
+    "columnType" : "String",
+    "columnLength" : 50,
+    "columnDisplayType" : null,
+    "columnValues" : [ ]
+  }, {
+    "columnName" : "Religion",
+    "columnType" : "String",
+    "columnLength" : 50,
+    "columnDisplayType" : "List",
+    "columnValues" : [ "Protestant", "Catholic", "Muslim", "Animist", "Atheist", "Other", "Unknown" ]
+  }, {
+    "columnName" : "Religion Other",
+    "columnType" : "String",
+    "columnLength" : 50,
+    "columnDisplayType" : null,
+    "columnValues" : [ ]
+  }, {
+    "columnName" : "Knowledge of Person",
+    "columnType" : "String",
+    "columnLength" : 50,
+    "columnDisplayType" : "List",
+    "columnValues" : [ "Staff member", "Spouse of staff member", "Son/daughter of staff member", "Friend of staff member", "Not known by any staff member", "Other" ]
+  }, {
+    "columnName" : "Gender",
+    "columnType" : "String",
+    "columnLength" : 10,
+    "columnDisplayType" : "List",
+    "columnValues" : [ "Female", "Male" ]
+  }, {
+    "columnName" : "Whois",
+    "columnType" : "Text",
+    "columnLength" : null,
+    "columnDisplayType" : null,
+    "columnValues" : [ ]
+  } ],
+  "data" : [ {
+    "row" : [ "Bedouin", null, "East Sikkim", null, "Animist", "Agnostic", "Friend of staff member", "Female", "A person of honesty & clear thought" ]
+  } ]
+}
+                </code>
+            </div>
+        </div>
+        <a id="additionalfields_update" name="additionalfields_update" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+            <h4>Update Additional Fields</h4>
+            <p>
+            Updates (or creates) the Set of Additional Fields data for the ID provided.  The ID is the id field of the Type table e.g. portfolio_client might have an id value of 4.
+            </p>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">POST https://Domain Name/api/v1/additionalfields/{type}/{set}/{id}</code>
+                <code class="method-request">POST additionalfields/portfolio_client/Additional Information/2
+Content-Type: application/json
+Request Body:
+{
+ "Ethnic_Group":"Berber",
+ "Ethnic_Group_Other":"",
+ "Household_Location":"East Sikkim",
+ "Household_Location_Other":"",
+ "Religion":"Animist",
+ "Religion_Other":"jjjjjjj",
+ "Knowledge_of_Person":"Son/daughter of staff member",
+ "Gender":"Female",
+ "Whois":"its\r\nme of\r\ncourse\r\nyes\r\nend and the end of it all"
+}
+</code>
+                <code class="method-response">{
+ "entityId": 2
+}
+                </code>
+            </div>
+        </div>
+        
+        
+
+    <!-- start of reports api docs -->
         <a id="reports" name="reports" class="old-syle-anchor">&nbsp;</a>
         <div class="method-section">
             <div class="method-description">

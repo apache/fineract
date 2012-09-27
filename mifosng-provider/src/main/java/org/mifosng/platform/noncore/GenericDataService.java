@@ -12,6 +12,8 @@ public interface GenericDataService {
 
 	GenericResultsetData fillGenericResultSet(final String sql);
 
+	String generateJsonFromGenericResultsetData(GenericResultsetData grs);
+
 	String replace(String str, String pattern, String replace);
 
 	String wrapSQL(String sql);

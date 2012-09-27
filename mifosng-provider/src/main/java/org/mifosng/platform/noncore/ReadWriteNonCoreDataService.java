@@ -20,9 +20,6 @@ public interface ReadWriteNonCoreDataService {
 	GenericResultsetData retrieveDataTableGenericResultSet(String datatable,
 			Long appTableId, String sqlFields, String sqlOrder, Long id);
 
-	String retrieveDataTableJSONObject(String datatable, Long appTableId,
-			String sqlFields, String sqlOrder);
-
 	void newDatatableEntry(String datatable, Long appTableId,
 			Map<String, String> queryParams);
 

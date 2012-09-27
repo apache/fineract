@@ -60,7 +60,7 @@ public class ApiParameterHelper {
 		}
 		return parameterType;
 	}
-	
+
 	public static boolean template(final MultivaluedMap<String, String> queryParams) {
 		boolean template = false;
 		if (queryParams.getFirst("template") != null) {
@@ -68,5 +68,14 @@ public class ApiParameterHelper {
 			template = "true".equalsIgnoreCase(prettyPrintValue);
 		}
 		return template;
+	}
+	
+	public static boolean genericResultSet(final MultivaluedMap<String, String> queryParams) {
+		boolean genericResultSet = false;
+		if (queryParams.getFirst("genericResultSet") != null) {
+			String genericResultSetValue = queryParams.getFirst("genericResultSet");
+			genericResultSet = "true".equalsIgnoreCase(genericResultSetValue);
+		}
+		return genericResultSet;
 	}
 }

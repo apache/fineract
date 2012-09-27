@@ -11,6 +11,7 @@ import java.util.List;
 import javax.sql.DataSource;
 import javax.sql.rowset.CachedRowSet;
 
+import org.joda.time.LocalDate;
 import org.mifosng.platform.api.data.GenericResultsetData;
 import org.mifosng.platform.api.data.ResultsetColumnHeader;
 import org.mifosng.platform.api.data.ResultsetDataRow;
@@ -22,7 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sun.rowset.CachedRowSetImpl;
-
+//TODO - Performance Item - most items (code values etc) can be cached but not doing that yet
 @Service
 public class GenericDataServiceImpl implements GenericDataService {
 
@@ -39,6 +40,7 @@ public class GenericDataServiceImpl implements GenericDataService {
 
 	@Override
 	public CachedRowSet getCachedResultSet(String sql, String sqlErrorMsg) {
+		//TODO - Need to reimplement this away from Sun library - could be mixture of Lists and jdbcTemplate.query
 
 		long startTime = System.currentTimeMillis();
 		Connection db_connection = null;
@@ -155,6 +157,62 @@ public class GenericDataServiceImpl implements GenericDataService {
 		// Invalid Column Name bug in sun's CachedRowSetImpl where it doesn't
 		// pick up on label names, only column names
 		return "select x.* from (" + sql + ") x";
+	}
+
+	@Override
+	public String generateJsonFromGenericResultsetData(GenericResultsetData grs) {
+
+		StringBuffer writer = new StringBuffer();
+
+		writer.append("[");
+
+		List<ResultsetColumnHeader> columnHeaders = grs.getColumnHeaders();
+		logger.info("NO. of Columns: " + columnHeaders.size());
+
+		List<ResultsetDataRow> data = grs.getData();
+		List<String> row;
+		Integer rSize;
+		String currColType;
+		String currVal;
+		logger.info("NO. of Rows: " + data.size());
+		for (int i = 0; i < data.size(); i++) {
+			writer.append("\n{");
+
+			row = data.get(i).getRow();
+			rSize = row.size();
+			for (int j = 0; j < rSize; j++) {
+
+				writer.append('\"' + columnHeaders.get(j).getColumnName()
+						+ '\"' + ": ");
+				currColType = columnHeaders.get(j).getColumnDisplayTypeNew();
+				currVal = row.get(j);
+				if (currVal != null) {
+					if (currColType.equals("DECIMAL")
+							|| currColType.equals("INTEGER"))
+						writer.append(currVal);
+					else {
+						if (currColType.equals("DATE")) {
+							LocalDate localDate = new LocalDate(currVal);
+							writer.append("[" + localDate.getYear() + ", " + localDate.getMonthOfYear() + ", " + localDate.getDayOfMonth() + "]");
+						} else
+							writer.append('\"' + currVal + '\"');
+					}
+				} else
+					writer.append("null");
+
+				if (j < (rSize - 1))
+					writer.append(",\n");
+			}
+
+			if (i < (data.size() - 1))
+				writer.append("},");
+			else
+				writer.append("}");
+		}
+
+		writer.append("\n]");
+		return writer.toString();
+
 	}
 
 	private void dbClose(Statement db_statement, Connection db_connection) {

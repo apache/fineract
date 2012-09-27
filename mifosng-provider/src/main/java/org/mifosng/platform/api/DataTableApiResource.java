@@ -29,6 +29,7 @@ import org.mifosng.platform.api.data.GenericResultsetData;
 import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
 import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
 import org.mifosng.platform.exceptions.NoAuthorizationException;
+import org.mifosng.platform.noncore.GenericDataService;
 import org.mifosng.platform.noncore.ReadWriteNonCoreDataService;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.user.domain.AppUser;
@@ -52,6 +53,9 @@ public class DataTableApiResource {
 	public DataTableApiResource(final PlatformSecurityContext context) {
 		this.context = context;
 	}
+
+	@Autowired
+	private GenericDataService genericDataService;
 
 	@Autowired
 	private ReadWriteNonCoreDataService readWriteNonCoreDataService;
@@ -113,21 +117,23 @@ public class DataTableApiResource {
 
 		checkUserPermissionForDatatable(datatable, "READ");
 
-		/*
-		 * Dont use this for now... but its the code for returning data as json
-		 * objects rather than a generic resultset String resultStr =
-		 * this.readWriteNonCoreDataService
-		 * .retrieveDataTableJSONObject(datatable, id, sqlFields, sqlOrder);
-		 */
-
 		GenericResultsetData results = this.readWriteNonCoreDataService
 				.retrieveDataTableGenericResultSet(datatable, apptableId,
 						sqlFields, sqlOrder, null);
 
-		boolean prettyPrints = ApiParameterHelper.prettyPrint(uriInfo
+		boolean genericResultSet = ApiParameterHelper.genericResultSet(uriInfo
 				.getQueryParameters());
-		return this.apiJsonSerializerService
-				.serializeGenericResultsetDataToJson(prettyPrints, results);
+
+		if (genericResultSet) {
+			boolean prettyPrints = ApiParameterHelper.prettyPrint(uriInfo
+					.getQueryParameters());
+			return this.apiJsonSerializerService
+					.serializeGenericResultsetDataToJson(prettyPrints, results);
+		} else {
+
+			return this.genericDataService
+					.generateJsonFromGenericResultsetData(results);
+		}
 
 	}
 

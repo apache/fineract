@@ -295,22 +295,6 @@ public class ReadWriteNonCoreDataServiceImpl implements
 	}
 
 	@Override
-	public String retrieveDataTableJSONObject(String datatable,
-			Long appTableId, String sqlFields, String sqlOrder) {
-		long startTime = System.currentTimeMillis();
-
-		GenericResultsetData result = retrieveDataTableGenericResultSet(
-				datatable, appTableId, sqlFields, sqlOrder, null);
-
-		String jsonString = generateJsonFromGenericResultsetData(result);
-
-		long elapsed = System.currentTimeMillis() - startTime;
-		logger.info("FINISHING DATATABLE JSON OBJECT: " + datatable
-				+ "     Elapsed Time: " + elapsed);
-		return jsonString;
-	}
-
-	@Override
 	public GenericResultsetData retrieveDataTableGenericResultSet(
 			String datatable, Long appTableId, String sqlFields,
 			String sqlOrder, Long id) {
@@ -592,57 +576,6 @@ public class ReadWriteNonCoreDataServiceImpl implements
 						e.getMessage());
 			}
 		}
-
-	}
-
-	private static String generateJsonFromGenericResultsetData(
-			GenericResultsetData result) {
-
-		StringBuffer writer = new StringBuffer();
-
-		writer.append("[");
-
-		List<ResultsetColumnHeader> columnHeaders = result.getColumnHeaders();
-		logger.info("NO. of Columns: " + columnHeaders.size());
-
-		List<ResultsetDataRow> data = result.getData();
-		List<String> row;
-		Integer rSize;
-		String currColType;
-		String currVal;
-		logger.info("NO. of Rows: " + data.size());
-		for (int i = 0; i < data.size(); i++) {
-			writer.append("\n{");
-
-			row = data.get(i).getRow();
-			rSize = row.size();
-			for (int j = 0; j < rSize; j++) {
-
-				writer.append('\"' + columnHeaders.get(j).getColumnName()
-						+ '\"' + ": ");
-				currColType = columnHeaders.get(j).getColumnDisplayTypeNew();
-				currVal = row.get(j);
-				if (currVal != null) {
-					if (currColType.equals("DECIMAL")
-							|| currColType.equals("INTEGER"))
-						writer.append(currVal);
-					else
-						writer.append('\"' + currVal + '\"');
-				} else
-					writer.append("null");
-
-				if (j < (rSize - 1))
-					writer.append(",\n");
-			}
-
-			if (i < (data.size() - 1))
-				writer.append("},");
-			else
-				writer.append("}");
-		}
-
-		writer.append("\n]");
-		return writer.toString();
 
 	}
 
