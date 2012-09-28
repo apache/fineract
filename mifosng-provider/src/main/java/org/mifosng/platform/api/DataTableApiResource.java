@@ -66,7 +66,7 @@ public class DataTableApiResource {
 	@GET
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public String getDatatables(@QueryParam("apptable") final String apptable,
+	public String getDatatables(@QueryParam("appTable") final String apptable,
 			@Context final UriInfo uriInfo) {
 
 		List<DatatableData> result = this.readWriteNonCoreDataService
