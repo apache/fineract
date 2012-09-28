@@ -783,8 +783,8 @@ public class ReadWriteNonCoreDataServiceImpl implements
 
 			List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 			ApiParameterError error = ApiParameterError.parameterError(
-					"error.msg.column.mandatory", columnHeader.getColumnName(),
-					"Mandatory");
+					"error.msg.column.mandatory", "Mandatory",
+					columnHeader.getColumnName());
 			dataValidationErrors.add(error);
 			throw new PlatformApiDataValidationException(
 					"validation.msg.validation.errors.exist",
@@ -806,9 +806,7 @@ public class ReadWriteNonCoreDataServiceImpl implements
 					List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 					ApiParameterError error = ApiParameterError.parameterError(
 							"error.msg.invalid.columnValue",
-							columnHeader.getColumnName(), "Value :"
-									+ paramValue
-									+ "' not found in Allowed Value list");
+							 "Value not found in Allowed Value list", columnHeader.getColumnName(), paramValue);
 					dataValidationErrors.add(error);
 					throw new PlatformApiDataValidationException(
 							"validation.msg.validation.errors.exist",
@@ -824,9 +822,7 @@ public class ReadWriteNonCoreDataServiceImpl implements
 					List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 					ApiParameterError error = ApiParameterError.parameterError(
 							"error.msg.invalid.columnValue",
-							columnHeader.getColumnName(), "Value :"
-									+ paramValue
-									+ "' not found in Allowed Value list");
+							 "Value not found in Allowed Value list", columnHeader.getColumnName(), paramValue);
 					dataValidationErrors.add(error);
 					throw new PlatformApiDataValidationException(
 							"validation.msg.validation.errors.exist",
