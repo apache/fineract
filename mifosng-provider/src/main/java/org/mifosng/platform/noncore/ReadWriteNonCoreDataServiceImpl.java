@@ -208,6 +208,12 @@ public class ReadWriteNonCoreDataServiceImpl implements
 		if (grs.getData().size() == 0)
 			throw new DataTableNotFoundException(datatable, appTableId);
 
+		if (grs.getData().size() > 1)
+			throw new PlatformDataIntegrityException(
+					"error.msg.attempting.multiple.update",
+					"Application Table: " + datatable + "   Foreign Key Id: "
+							+ appTableId);
+
 		String fkName = getFKField(getApplicationTableName(datatable));
 		String sql = getUpdateSql(grs, datatable, fkName, appTableId,
 				queryParams);
