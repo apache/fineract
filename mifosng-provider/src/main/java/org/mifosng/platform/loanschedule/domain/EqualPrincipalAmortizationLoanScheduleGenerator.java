@@ -52,7 +52,7 @@ public class EqualPrincipalAmortizationLoanScheduleGenerator implements Amortiza
 		for (LoanCharge loanCharge : loanCharges) {
 			// FIXME - KW - right now only charges at disbursement are supported.
 			if (loanCharge.isDueAtDisbursement()) {
-				chargesDueAtTimeOfDisbursement = chargesDueAtTimeOfDisbursement.add(loanCharge.calculateMonetaryAmount(principalDisbursed));
+				chargesDueAtTimeOfDisbursement = chargesDueAtTimeOfDisbursement.add(loanCharge.amount());
 			}
 		}
 		

@@ -2,24 +2,17 @@ package org.mifosng.platform.loan.service;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.mifosng.platform.api.LoanScheduleNewData;
 import org.mifosng.platform.api.commands.LoanApplicationCommand;
-import org.mifosng.platform.api.commands.LoanChargeCommand;
 import org.mifosng.platform.api.data.LoanSchedulePeriodData;
-import org.mifosng.platform.charge.domain.Charge;
-import org.mifosng.platform.charge.domain.ChargeRepository;
 import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.client.domain.ClientRepository;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
-import org.mifosng.platform.exceptions.ChargeIsNotActiveException;
-import org.mifosng.platform.exceptions.ChargeNotFoundException;
 import org.mifosng.platform.exceptions.ClientNotFoundException;
 import org.mifosng.platform.exceptions.FundNotFoundException;
-import org.mifosng.platform.exceptions.InvalidCurrencyException;
 import org.mifosng.platform.exceptions.LoanProductNotFoundException;
 import org.mifosng.platform.exceptions.LoanTransactionProcessingStrategyNotFoundException;
 import org.mifosng.platform.exceptions.StaffNotFoundException;
@@ -46,7 +39,6 @@ import org.mifosng.platform.staff.domain.Staff;
 import org.mifosng.platform.staff.domain.StaffRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ObjectUtils;
 
 @Service
 public class LoanAssembler {
@@ -55,27 +47,27 @@ public class LoanAssembler {
 	private final ClientRepository clientRepository;
 	private final AprCalculator aprCalculator = new AprCalculator();
 	private final FundRepository fundRepository;
-    private final ChargeRepository chargeRepository;
 	private final LoanTransactionProcessingStrategyRepository loanTransactionProcessingStrategyRepository;
 	private final StaffRepository staffRepository;
 	private final CalculationPlatformService calculationPlatformService;
+	private final LoanChargeAssembler loanChargeAssembler;
 	
 	@Autowired
 	public LoanAssembler(
 			final LoanProductRepository loanProductRepository,
 			final ClientRepository clientRepository,
 			final FundRepository fundRepository,
-            final ChargeRepository chargeRepository,
 			final LoanTransactionProcessingStrategyRepository loanTransactionProcessingStrategyRepository,
 	  		final StaffRepository staffRepository,
-	  		final CalculationPlatformService calculationPlatformService) {
+	  		final CalculationPlatformService calculationPlatformService,
+	  		final LoanChargeAssembler loanChargeAssembler) {
 		this.loanProductRepository = loanProductRepository;
 		this.clientRepository = clientRepository;
 		this.fundRepository = fundRepository;
-        this.chargeRepository = chargeRepository;
 		this.loanTransactionProcessingStrategyRepository = loanTransactionProcessingStrategyRepository;
 		this.staffRepository = staffRepository;
 		this.calculationPlatformService = calculationPlatformService;
+		this.loanChargeAssembler = loanChargeAssembler;
 	}
 	
 	public Loan assembleFrom(final LoanApplicationCommand command) {
@@ -104,7 +96,7 @@ public class LoanAssembler {
 		Staff loanOfficer= findLoanOfficerByIdIfProvided(command.getLoanOfficerId());
 		
 		// optionally, see if charges are associated with loan on creation (through loan product or by being directly added)
-		final Set<LoanCharge> loanCharges = assembleSetOfLoanCharges(command.getCharges(), loanProduct.getCharges(), loanProduct.getCurrency().getCode(), command.getPrincipal());
+		final Set<LoanCharge> loanCharges = this.loanChargeAssembler.assembleFrom(command.getCharges(), loanProduct.getCharges(), command.getPrincipal());
 				
 		Loan loan = Loan.createNew(fund,loanOfficer, loanTransactionProcessingStrategy, loanProduct, client, loanRepaymentScheduleDetail, loanCharges);
 		loan.setExternalId(command.getExternalId());
@@ -128,42 +120,6 @@ public class LoanAssembler {
 				defaultLoanLifecycleStateMachine());
 		
 		return loan;
-	}
-
-	public Set<LoanCharge> assembleSetOfLoanCharges(final LoanChargeCommand[] chargesPassedAtCreation,
-                                                    final Set<Charge> chargesInheritedFromProduct, 
-                                                    final String loanCurrencyCode, 
-                                                    final BigDecimal loanPrincipal) {
-		
-		Set<LoanCharge> loanCharges = new HashSet<LoanCharge>();
-		
-		if (!ObjectUtils.isEmpty(chargesPassedAtCreation)) {
-			for (LoanChargeCommand loanChargeCommand : chargesPassedAtCreation) {
-				
-				Long chargeDefinitionId = loanChargeCommand.getChargeId();
-				Charge chargeDefinition = this.chargeRepository.findOne(chargeDefinitionId);
-				if (chargeDefinition == null || chargeDefinition.isDeleted()) {
-					throw new ChargeNotFoundException(chargeDefinitionId);
-				}
-				
-				if (!chargeDefinition.isActive()) {
-					throw new ChargeIsNotActiveException(chargeDefinitionId);
-				}
-
-                if (!loanCurrencyCode.equals(chargeDefinition.getCurrencyCode())){
-                    String errorMessage = "Charge and Loan must have the same currency.";
-                    throw new InvalidCurrencyException("charge", "attach.to.loan", errorMessage);
-                }
-
-				loanCharges.add(LoanCharge.createNewWithoutLoan(chargeDefinition, loanChargeCommand, loanPrincipal));
-			}
-		} else if (chargesPassedAtCreation == null) {
-			for (Charge productCharge : chargesInheritedFromProduct) {
-				loanCharges.add(LoanCharge.createNew(productCharge));
-			}
-		}
-		
-		return loanCharges;
 	}
 
 	public LoanProductRelatedDetail assembleLoanProductRelatedDetailFrom(final LoanApplicationCommand command, MonetaryCurrency currency) {

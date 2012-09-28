@@ -16,7 +16,6 @@ import org.mifosng.platform.api.commands.LoanChargeCommand;
 import org.mifosng.platform.charge.domain.Charge;
 import org.mifosng.platform.charge.domain.ChargeCalculationType;
 import org.mifosng.platform.charge.domain.ChargeTimeType;
-import org.mifosng.platform.currency.domain.Money;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity 
@@ -184,11 +183,7 @@ public class LoanCharge extends AbstractPersistable<Long> {
 		this.loan = loan;
 	}
 
-    public void update(final LoanChargeCommand command){
-
-        if (command.isAmountChanged()) {
-            this.amount = command.getAmount();
-        }
+    public void update(final LoanChargeCommand command, final BigDecimal loanPrincipal){
 
         if (command.isChargeTimeTypeChanged()){
             this.chargeTime = ChargeTimeType.fromInt(command.getChargeTimeType()).getValue();
@@ -197,51 +192,79 @@ public class LoanCharge extends AbstractPersistable<Long> {
         if (command.isChargeCalculationTypeChanged()){
             this.chargeCalculation = ChargeCalculationType.fromInt(command.getChargeCalculationType()).getValue();
         }
+        
+        if (command.isAmountChanged()) {
+            switch (ChargeCalculationType.fromInt(this.chargeCalculation)) {
+			case INVALID:
+				break;
+			case FLAT:
+				 this.amount = command.getAmount();
+				break;
+			case PERCENT_OF_AMOUNT:
+				this.percentage = command.getAmount();
+				this.amountPercentageAppliedTo = loanPrincipal;
+				this.amount = percentageOf(this.amountPercentageAppliedTo, this.percentage);
+				this.amountOutstanding = calculateOutstanding();
+				break;
+			case PERCENT_OF_AMOUNT_AND_INTEREST:
+				this.percentage = command.getAmount();
+				this.amount = null;
+				this.amountPercentageAppliedTo = null;
+				this.amountOutstanding = null;
+				break;
+			case PERCENT_OF_INTEREST:
+				this.percentage = command.getAmount();
+				this.amount = null;
+				this.amountPercentageAppliedTo = null;
+				this.amountOutstanding = null;
+				break;
+			}
+        }
     }
 
 	public boolean isDueAtDisbursement() {
 		return ChargeTimeType.fromInt(this.chargeTime).equals(ChargeTimeType.DISBURSEMENT);
 	}
 
-	public BigDecimal calculateMonetaryAmount(final Money principalDisbursed) {
-		BigDecimal calculatedAmount = BigDecimal.ZERO;
-		
-		   switch (ChargeCalculationType.fromInt(this.chargeCalculation)) {
-			case INVALID:
-				calculatedAmount = this.amount;
-				break;
-			case FLAT:
-				calculatedAmount = this.amount;
-				break;
-			case PERCENT_OF_AMOUNT:
-				this.amountPercentageAppliedTo = principalDisbursed.getAmount();
-				this.amount = percentageOf(this.amountPercentageAppliedTo, this.percentage);
-				this.amountPaid = null;
-				this.amountOutstanding = calculateOutstanding();
-				calculatedAmount = this.amount;
-				break;
-			case PERCENT_OF_AMOUNT_AND_INTEREST:
-				this.percentage = null;
-				this.amount = null;
-				this.amountPercentageAppliedTo = null;
-				this.amountPaid = null;
-				this.amountOutstanding = null;
-				break;
-			case PERCENT_OF_INTEREST:
-				this.percentage = null;
-				this.amount = null;
-				this.amountPercentageAppliedTo = null;
-				this.amountPaid = null;
-				this.amountOutstanding = null;
-				break;
-			}
-		
-		return calculatedAmount;
-	}
-	
-	public BigDecimal calculateMonetaryAmount() {
-		return calculateMonetaryAmount(this.loan.getPrincpal());
-	}
+//	public BigDecimal calculateMonetaryAmount(final Money principalDisbursed) {
+//		BigDecimal calculatedAmount = BigDecimal.ZERO;
+//		
+//		   switch (ChargeCalculationType.fromInt(this.chargeCalculation)) {
+//			case INVALID:
+//				calculatedAmount = this.amount;
+//				break;
+//			case FLAT:
+//				calculatedAmount = this.amount;
+//				break;
+//			case PERCENT_OF_AMOUNT:
+//				this.amountPercentageAppliedTo = principalDisbursed.getAmount();
+//				this.amount = percentageOf(this.amountPercentageAppliedTo, this.percentage);
+//				this.amountPaid = null;
+//				this.amountOutstanding = calculateOutstanding();
+//				calculatedAmount = this.amount;
+//				break;
+//			case PERCENT_OF_AMOUNT_AND_INTEREST:
+//				this.percentage = null;
+//				this.amount = null;
+//				this.amountPercentageAppliedTo = null;
+//				this.amountPaid = null;
+//				this.amountOutstanding = null;
+//				break;
+//			case PERCENT_OF_INTEREST:
+//				this.percentage = null;
+//				this.amount = null;
+//				this.amountPercentageAppliedTo = null;
+//				this.amountPaid = null;
+//				this.amountOutstanding = null;
+//				break;
+//			}
+//		
+//		return calculatedAmount;
+//	}
+//	
+//	public BigDecimal calculateMonetaryAmount() {
+//		return calculateMonetaryAmount(this.loan.getPrincpal());
+//	}
 
 	private boolean isGreaterThanZero(final BigDecimal value) {
 		return value.compareTo(BigDecimal.ZERO) == 1;
@@ -290,5 +313,9 @@ public class LoanCharge extends AbstractPersistable<Long> {
 		this.amountPaid = BigDecimal.ZERO;
 		this.amountOutstanding = this.amount;
 		this.paid = false;
+	}
+
+	public BigDecimal amount() {
+		return this.amount;
 	}
 }

@@ -502,13 +502,13 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
                     }
                     Set<String> chargeModifiedParameters = new HashSet<String>();
 
+                    Long id = extractLongParameter("id", chargeRequestMap, chargeModifiedParameters);
                     Long chargeId = extractLongParameter("chargeId", chargeRequestMap, chargeModifiedParameters);
                     BigDecimal amount = extractBigDecimalParameter("amount", chargeRequestMap, chargeModifiedParameters);
                     Integer chargeTimeType = extractIntegerParameter("chargeTimeType", chargeRequestMap, chargeModifiedParameters);
                     Integer chargeCalculationType = extractIntegerParameter("chargeCalculationType", chargeRequestMap, chargeModifiedParameters);
 
-                    charges[i] = new LoanChargeCommand(chargeModifiedParameters, null, null,chargeId, amount,
-                            chargeTimeType, chargeCalculationType);
+                    charges[i] = new LoanChargeCommand(chargeModifiedParameters, id, null,chargeId, amount, chargeTimeType, chargeCalculationType);
                 }
             }
         }

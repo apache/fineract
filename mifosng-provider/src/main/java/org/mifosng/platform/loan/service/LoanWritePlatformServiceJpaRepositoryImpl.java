@@ -70,15 +70,18 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 	private final LoanProductRepository loanProductRepository;
     private final ChargeRepository chargeRepository;
     private final LoanChargeRepository loanChargeRepository;
+	private final LoanChargeAssembler loanChargeAssembler;
 	
 	@Autowired
-	public LoanWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final LoanAssembler loanAssembler,
+	public LoanWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, 
+			final LoanAssembler loanAssembler, final LoanChargeAssembler loanChargeAssembler,
 			final LoanRepository loanRepository, final LoanTransactionRepository loanTransactionRepository,
 			final NoteRepository noteRepository, final CalculationPlatformService calculationPlatformService,
 			final ClientRepository clientRepository, final LoanProductRepository loanProductRepository,
             final ChargeRepository chargeRepository, final LoanChargeRepository loanChargeRepository) {
 		this.context = context;
 		this.loanAssembler = loanAssembler;
+		this.loanChargeAssembler = loanChargeAssembler;
 		this.loanRepository = loanRepository;
 		this.loanTransactionRepository = loanTransactionRepository;
 		this.noteRepository = noteRepository;
@@ -133,30 +136,30 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		validator.validate();
 
 		// TODO - fix up permissions for loan modification
-		LocalDate submittedOn = command.getSubmittedOnDate();
+		final LocalDate submittedOn = command.getSubmittedOnDate();
 		if (this.isBeforeToday(submittedOn) && currentUser.hasNotPermissionForAnyOf("CAN_SUBMIT_HISTORIC_LOAN_APPLICATION_ROLE", "PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE")) {
 			throw new NoAuthorizationException("Cannot modify backdated loan.");
 		}
 
-		Loan loan = this.loanRepository.findOne(command.getLoanId());
+		final Loan loan = this.loanRepository.findOne(command.getLoanId());
 		if (loan == null) {
 			throw new LoanNotFoundException(command.getLoanId());
 		}
 		
-		LoanProduct loanProduct = this.loanProductRepository.findOne(command.getProductId());
+		final LoanProduct loanProduct = this.loanProductRepository.findOne(command.getProductId());
 		if (loanProduct == null) {
 			throw new LoanProductNotFoundException(command.getProductId());
 		}
 
-		Client client = this.clientRepository.findOne(command.getClientId());
+		final Client client = this.clientRepository.findOne(command.getClientId());
 		if (client == null || client.isDeleted()) {
 			throw new ClientNotFoundException(command.getClientId());
 		}
 		
-		Fund fund = this.loanAssembler.findFundByIdIfProvided(command.getFundId());
-		Staff loanOfficer = this.loanAssembler.findLoanOfficerByIdIfProvided(command.getLoanOfficerId());
-		LoanTransactionProcessingStrategy strategy = this.loanAssembler.findStrategyByIdIfProvided(command.getTransactionProcessingStrategyId());
-        Set<LoanCharge> charges = this.loanAssembler.assembleSetOfLoanCharges(command.getCharges(), loanProduct.getCharges(), loan.getCurrency().getCode(), loan.getPrincpal().getAmount());
+		final Fund fund = this.loanAssembler.findFundByIdIfProvided(command.getFundId());
+		final Staff loanOfficer = this.loanAssembler.findLoanOfficerByIdIfProvided(command.getLoanOfficerId());
+		final LoanTransactionProcessingStrategy strategy = this.loanAssembler.findStrategyByIdIfProvided(command.getTransactionProcessingStrategyId());
+		final Set<LoanCharge> charges = this.loanChargeAssembler.assembleFrom(command.getCharges(), loanProduct.getCharges(), loan.getPrincpal().getAmount());
 
         final LoanScheduleNewData loanSchedule = this.calculationPlatformService.calculateLoanScheduleNew(command.toCalculateLoanScheduleCommand());
 		loan.modifyLoanApplication(command, client, loanProduct, fund, strategy, loanSchedule, charges, loanOfficer);
@@ -584,7 +587,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     }
 
     @Override
-    public EntityIdentifier updateLoanCharge(LoanChargeCommand command) {
+    public EntityIdentifier updateLoanCharge(final LoanChargeCommand command) {
 
         this.context.authenticatedUser();
 
@@ -598,7 +601,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         for (LoanCharge loanCharge : loan.getCharges()){
             if (loanCharge.getId().equals(command.getId())){
-                loanCharge.update(command);
+                loanCharge.update(command, loan.getPrincpal().getAmount());
                 loan.updateTotalChargesDueAtDisbursement();
                 this.loanRepository.saveAndFlush(loan);
                 return new EntityIdentifier(loanCharge.getId());

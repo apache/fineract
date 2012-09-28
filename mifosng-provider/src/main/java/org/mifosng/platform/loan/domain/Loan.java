@@ -209,19 +209,17 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		
 		for (LoanCharge charge : this.charges) {
 			if (charge.isDueAtDisbursement()) {
-				chargesDue = chargesDue.plus(charge.calculateMonetaryAmount());
+				chargesDue = chargesDue.plus(charge.amount());
 			}
 		}
 		
 		return chargesDue.getAmount();
 	}
 
-	private Set<LoanCharge> associateChargesWithThisLoan(Set<LoanCharge> loanCharges) {
-		
+	private Set<LoanCharge> associateChargesWithThisLoan(final Set<LoanCharge> loanCharges) {
 		for (LoanCharge loanCharge : loanCharges) {
 			loanCharge.update(this);
 		}
-		
 		return loanCharges;
 	}
 

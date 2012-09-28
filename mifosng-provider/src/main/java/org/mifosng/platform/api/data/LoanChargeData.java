@@ -18,7 +18,6 @@ public class LoanChargeData {
     private final EnumOptionData chargeTimeType;
 	@SuppressWarnings("unused")
     private final EnumOptionData chargeCalculationType;
-	@SuppressWarnings("unused")
 	private final BigDecimal percentage;
 	@SuppressWarnings("unused")
 	private final BigDecimal amountPercentageAppliedTo;
@@ -30,6 +29,8 @@ public class LoanChargeData {
 	private final BigDecimal amountPaid;
 	@SuppressWarnings("unused")
 	private final BigDecimal amountOutstanding;
+	@SuppressWarnings("unused")
+	private final BigDecimal amountOrPercentage;
 	
     @SuppressWarnings("unused")
 	private final Collection<ChargeData> chargeOptions;
@@ -75,6 +76,12 @@ public class LoanChargeData {
 		this.percentage = percentage;
 		this.amountPercentageAppliedTo = amountPercentageAppliedTo;
 
+		if (chargeCalculationType != null && chargeCalculationType.getId().intValue() > 1) {
+			this.amountOrPercentage = this.percentage;
+		} else {
+			this.amountOrPercentage = amount;
+		}
+		
         this.chargeOptions = null;
     }
 
@@ -98,6 +105,13 @@ public class LoanChargeData {
         this.chargeCalculationType = chargeCalculationType;
         this.percentage = null;
 		this.amountPercentageAppliedTo = null;
+		
+		if (chargeCalculationType != null && chargeCalculationType.getId().intValue() > 1) {
+			this.amountOrPercentage = this.percentage;
+		} else {
+			this.amountOrPercentage = amount;
+		}
+		
         this.chargeOptions = chargeOptions;
     }
 }
