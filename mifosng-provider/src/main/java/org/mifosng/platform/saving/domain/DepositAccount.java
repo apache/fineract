@@ -567,7 +567,7 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 			depositAccountTransaction.updateAccount(this);
 			this.depositaccountTransactions.add(depositAccountTransaction);
 			this.interstPaid = this.interstPaid.add(interest.getAmount());
-			this.total = this.total.subtract(this.interstPaid);
+			this.total = this.total.subtract(interest.getAmount());
 		}
 		
 	}
