@@ -12,6 +12,7 @@ public class LoanApplicationCommand {
 	
 	private final Long loanId;
 	private final Long clientId;
+	private final Long groupId;
 	private final Long productId;
 	private final String externalId;
 	
@@ -48,7 +49,7 @@ public class LoanApplicationCommand {
 	public LoanApplicationCommand(
 			final Set<String> modifiedParameters,
 			final Long loanId,
-			final Long clientId, final Long productId, final String externalId, 
+			final Long clientId, final Long groupId, final Long productId, final String externalId,
 			final Long fundId, final Long transactionProcessingStrategyId,
 			final LocalDate submittedOnDate, final String submittedOnNote,
 			final LocalDate expectedDisbursementDate,
@@ -66,6 +67,7 @@ public class LoanApplicationCommand {
 		this.modifiedParameters = modifiedParameters;
 		this.loanId = loanId;
 		this.clientId = clientId;
+		this.groupId = groupId;
 		this.productId = productId;
 		this.externalId = externalId;
 		this.fundId = fundId;
@@ -110,6 +112,10 @@ public class LoanApplicationCommand {
 
 	public Long getClientId() {
 		return clientId;
+	}
+
+	public Long getGroupId() {
+		return groupId;
 	}
 
 	public Long getProductId() {

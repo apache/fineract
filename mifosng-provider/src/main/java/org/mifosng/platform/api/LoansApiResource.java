@@ -96,7 +96,7 @@ public class LoansApiResource {
 	private StaffReadPlatformService staffReadPlatformService;
 	
 	private final static Set<String> typicalResponseParameters = new HashSet<String>(
-			Arrays.asList("id", "externalId", "clientId", "clientName", "fundId", "fundName",
+			Arrays.asList("id", "externalId", "clientId", "groupId", "clientName", "groupName", "fundId", "fundName",
 					"loanProductId", "loanProductName", "loanProductDescription", 
 					"loanOfficerName", "loanOfficerId",
 					"currency", "principal",
@@ -118,6 +118,7 @@ public class LoansApiResource {
 	@Produces({ MediaType.APPLICATION_JSON })
 	public String retrieveDetailsForNewLoanApplicationStepOne(
 			@QueryParam("clientId") final Long clientId,
+            @QueryParam("groupId") final Long groupId,
 			@QueryParam("productId") final Long productId,
 			@Context final UriInfo uriInfo) {
 		
@@ -145,17 +146,26 @@ public class LoansApiResource {
 		Collection<FundData> fundOptions = this.fundReadPlatformService.retrieveAllFunds();
 		Collection<TransactionProcessingStrategyData> repaymentStrategyOptions = this.dropdownReadPlatformService.retreiveTransactionProcessingStrategies();
 		
-        Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveLoanApplicableCharges();
-        ChargeData chargeTemplate = this.chargeReadPlatformService.retrieveLoanChargeTemplate();
+		Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveLoanApplicableCharges();
+		ChargeData chargeTemplate = this.chargeReadPlatformService.retrieveLoanChargeTemplate();
 
-        LoanBasicDetailsData loanBasicDetails = this.loanReadPlatformService.retrieveClientAndProductDetails(clientId, productId);
-		
+		LoanBasicDetailsData loanBasicDetails;
+		Long officeId;
+
+		if ( clientId != null ){
+			loanBasicDetails = this.loanReadPlatformService.retrieveClientAndProductDetails(clientId, productId);
+			officeId = loanBasicDetails.getClientOfficeId();
+		} else {
+			loanBasicDetails = this.loanReadPlatformService.retrieveGroupAndProductDetails(groupId, productId);
+			officeId = loanBasicDetails.getGroupOfficeId();
+        }
+
 		final boolean convenienceDataRequired = false;
 		Collection<LoanChargeData> charges = loanBasicDetails.getCharges();
-		
-		Collection<StaffData> allowedLoanOfficers =  this.staffReadPlatformService.retrieveAllLoanOfficersByOffice(loanBasicDetails.getClientOfficeId());
-		
-		final LoanAccountData newLoanAccount = new LoanAccountData(loanBasicDetails, convenienceDataRequired, null, null, null, charges, 
+
+		Collection<StaffData> allowedLoanOfficers = this.staffReadPlatformService.retrieveAllLoanOfficersByOffice(officeId);
+
+		final LoanAccountData newLoanAccount = new LoanAccountData(loanBasicDetails, convenienceDataRequired, null, null, null, charges,
 				productOptions, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions, 
 				repaymentStrategyOptions, interestRateFrequencyTypeOptions, 
 				amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, chargeTemplate, allowedLoanOfficers);

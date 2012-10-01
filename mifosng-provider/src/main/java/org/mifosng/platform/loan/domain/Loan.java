@@ -36,6 +36,7 @@ import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.exceptions.InvalidLoanStateTransitionException;
 import org.mifosng.platform.exceptions.InvalidLoanTransactionTypeException;
 import org.mifosng.platform.fund.domain.Fund;
+import org.mifosng.platform.group.domain.Group;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
 import org.mifosng.platform.staff.domain.Staff;
 import org.mifosng.platform.user.domain.AppUser;
@@ -44,9 +45,13 @@ import org.mifosng.platform.user.domain.AppUser;
 @Table(name = "m_loan", uniqueConstraints = @UniqueConstraint(columnNames = { "external_id" }))
 public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 
-	@ManyToOne
-	@JoinColumn(name = "client_id", nullable = false)
+	@ManyToOne(optional = true)
+	@JoinColumn(name = "client_id")
 	private Client client;
+
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "group_id")
+    private Group group;
 
 	@ManyToOne
 	@JoinColumn(name = "product_id")
@@ -170,8 +175,15 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		return new Loan(client, fund,loanOfficer, transactionProcessingStrategy, loanProduct, loanRepaymentScheduleDetail, null, loanCharges);
 	}
 
+	public static Loan createNew(final Fund fund,final Staff loanOfficer, final LoanTransactionProcessingStrategy transactionProcessingStrategy,
+								 final LoanProduct loanProduct, final Group group,
+								 final LoanProductRelatedDetail loanRepaymentScheduleDetail, final Set<LoanCharge> loanCharges) {
+		return new Loan(group, fund,loanOfficer, transactionProcessingStrategy, loanProduct, loanRepaymentScheduleDetail, null, loanCharges);
+	}
+
 	protected Loan() {
 		this.client = null;
+        this.group = null;
 		this.loanProduct = null;
 		this.loanRepaymentScheduleDetail = null;
         this.charges = null;
@@ -184,6 +196,32 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 			final LoanProductRelatedDetail loanRepaymentScheduleDetail,
 			final LoanStatus loanStatus, final Set<LoanCharge> loanCharges) {
 		this.client = client;
+		this.fund = fund;
+		this.loanofficer = loanOfficer;
+		this.transactionProcessingStrategy = transactionProcessingStrategy;
+		this.loanProduct = loanProduct;
+		this.loanRepaymentScheduleDetail = loanRepaymentScheduleDetail;
+		if (loanStatus != null) {
+			this.loanStatus = loanStatus.getValue();
+		} else {
+			this.loanStatus = null;
+		}
+		if (loanCharges != null && !loanCharges.isEmpty()) {
+			this.charges = associateChargesWithThisLoan(loanCharges);
+			this.totalChargesDueAtDisbursement = deriveSumTotalOfChargesDueAtDisbursement();
+		} else {
+			this.charges = null;
+		}
+		this.interestRebateOwed = BigDecimal.ZERO;
+	}
+
+	private Loan(
+			final Group group, Fund fund, Staff loanOfficer,
+			final LoanTransactionProcessingStrategy transactionProcessingStrategy,
+			final LoanProduct loanProduct,
+			final LoanProductRelatedDetail loanRepaymentScheduleDetail,
+			final LoanStatus loanStatus, final Set<LoanCharge> loanCharges) {
+		this.group = group;
 		this.fund = fund;
 		this.loanofficer = loanOfficer;
 		this.transactionProcessingStrategy = transactionProcessingStrategy;
@@ -227,7 +265,11 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		return this.client;
 	}
 
-	public LoanProduct loanProduct() {
+    public Group getGroup() {
+        return group;
+    }
+
+    public LoanProduct loanProduct() {
 		return this.loanProduct;
 	}
 

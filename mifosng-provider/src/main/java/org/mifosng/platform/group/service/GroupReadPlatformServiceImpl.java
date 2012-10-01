@@ -8,10 +8,14 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosng.platform.api.data.ClientLookup;
+import org.mifosng.platform.api.data.GroupAccountSummaryCollectionData;
+import org.mifosng.platform.api.data.GroupAccountSummaryData;
 import org.mifosng.platform.api.data.GroupData;
 import org.mifosng.platform.api.data.OfficeLookup;
 import org.mifosng.platform.client.service.ClientReadPlatformService;
+import org.mifosng.platform.client.service.LoanStatusMapper;
 import org.mifosng.platform.exceptions.GroupNotFoundException;
+import org.mifosng.platform.infrastructure.JdbcSupport;
 import org.mifosng.platform.infrastructure.TenantAwareRoutingDataSource;
 import org.mifosng.platform.organisation.service.OfficeReadPlatformService;
 import org.mifosng.platform.security.PlatformSecurityContext;
@@ -132,5 +136,75 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         }
 
     }
-    
+
+    @Override
+    public GroupAccountSummaryCollectionData retrieveGroupAccountDetails(Long groupId) {
+        try {
+            this.context.authenticatedUser();
+
+            // Check if group exists
+            retrieveGroup(groupId);
+
+            List<GroupAccountSummaryData> pendingApprovalLoans = new ArrayList<GroupAccountSummaryData>();
+            List<GroupAccountSummaryData> awaitingDisbursalLoans = new ArrayList<GroupAccountSummaryData>();
+            List<GroupAccountSummaryData> openLoans = new ArrayList<GroupAccountSummaryData>();
+            List<GroupAccountSummaryData> closedLoans = new ArrayList<GroupAccountSummaryData>();
+
+            GroupLoanAccountSummaryDataMapper rm = new GroupLoanAccountSummaryDataMapper();
+
+            String sql = "select " + rm.loanAccountSummarySchema() + " where l.group_id = ?";
+
+            List<GroupAccountSummaryData> results = this.jdbcTemplate.query(sql, rm, new Object[] {groupId});
+            if (results != null) {
+                for (GroupAccountSummaryData row : results) {
+
+                    LoanStatusMapper statusMapper = new LoanStatusMapper(row.getAccountStatusId());
+
+                    if (statusMapper.isOpen()) {
+                        openLoans.add(row);
+                    } else if (statusMapper.isAwaitingDisbursal()) {
+                        awaitingDisbursalLoans.add(row);
+                    } else if (statusMapper.isPendingApproval()) {
+                        pendingApprovalLoans.add(row);
+                    } else {
+                        closedLoans.add(row);
+                    }
+                }
+            }
+
+            return new GroupAccountSummaryCollectionData(pendingApprovalLoans,
+                    awaitingDisbursalLoans, openLoans, closedLoans);
+        } catch (EmptyResultDataAccessException e) {
+            throw new GroupNotFoundException(groupId);
+        }
+    }
+
+    private static final class GroupLoanAccountSummaryDataMapper implements
+            RowMapper<GroupAccountSummaryData> {
+
+        public String loanAccountSummarySchema() {
+
+            StringBuilder accountsSummary = new StringBuilder("l.id as id, l.external_id as externalId,");
+            accountsSummary
+                    .append("l.product_id as productId, lp.name as productName,")
+                    .append("l.loan_status_id as statusId ")
+                    .append("from m_loan l ")
+                    .append("LEFT JOIN m_product_loan AS lp ON lp.id = l.product_id ");
+
+            return accountsSummary.toString();
+        }
+
+        @Override
+        public GroupAccountSummaryData mapRow(final ResultSet rs,
+                                               @SuppressWarnings("unused") final int rowNum) throws SQLException {
+
+            Long id = JdbcSupport.getLong(rs, "id");
+            String externalId = rs.getString("externalId");
+            Long productId = JdbcSupport.getLong(rs, "productId");
+            String loanProductName = rs.getString("productName");
+            Integer loanStatusId = JdbcSupport.getInteger(rs, "statusId");
+
+            return new GroupAccountSummaryData(id, externalId, productId, loanProductName, loanStatusId);
+        }
+    }
 }

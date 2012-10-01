@@ -17,6 +17,8 @@ public class LoanAccountData {
 	private final String externalId;
 	private final Long clientId;
 	private final String clientName;
+	private final Long groupId;
+	private final String groupName;
 	private final Long loanProductId;
 	private final String loanProductName;
 	private final String loanProductDescription;
@@ -134,6 +136,8 @@ public class LoanAccountData {
 		this.externalId = basicDetails.getExternalId();
 		this.clientId = basicDetails.getClientId();
 		this.clientName = basicDetails.getClientName();
+		this.groupId = basicDetails.getGroupId();
+		this.groupName = basicDetails.getGroupName();
 		this.loanProductId = basicDetails.getLoanProductId();
 		this.loanProductName = basicDetails.getLoanProductName();
 		this.loanProductDescription = basicDetails.getLoanProductDescription();

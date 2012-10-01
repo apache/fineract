@@ -19,6 +19,9 @@ public class LoanBasicDetailsData {
 	private final Long clientId;
 	private final Long clientOfficeId;
 	private final String clientName;
+	private final Long groupId;
+	private final Long groupOfficeId;
+	private final String groupName;
 	private final Long loanProductId;
 	private final String loanProductName;
 	private final String loanProductDescription;
@@ -57,11 +60,17 @@ public class LoanBasicDetailsData {
 	private final BigDecimal totalDisbursementCharges;
 	private final Collection<LoanChargeData> charges;
 	
-	public static LoanBasicDetailsData populateForNewLoanCreation(final Long clientId, final String clientName, final LocalDate expectedDisbursementDate,
-																	final Long clientOfficeId) {
-		return new LoanBasicDetailsData(clientId, clientName, expectedDisbursementDate, clientOfficeId);
+	public static LoanBasicDetailsData populateForNewIndividualClientLoanCreation(final Long clientId, final String clientName, final LocalDate expectedDisbursementDate,
+																				  final Long clientOfficeId) {
+		return new LoanBasicDetailsData(clientId, clientName, clientOfficeId, null, null, null, expectedDisbursementDate);
 	}
-	
+
+	public static LoanBasicDetailsData populateForNewGroupLoanCreation(final Long groupId, final String groupName,
+																	   final LocalDate expectedDisbursementDate,
+																	   final Long groupOfficeId){
+		return new LoanBasicDetailsData(null, null, null, groupId, groupName, groupOfficeId, expectedDisbursementDate);
+	}
+
 	public static LoanBasicDetailsData populateForNewLoanCreation(final LoanBasicDetailsData loanAccount, final LoanProductData product) {
 		
 		final Integer termFrequency = product.getNumberOfRepayments() * product.getRepaymentEvery();
@@ -75,7 +84,8 @@ public class LoanBasicDetailsData {
 
 		return new LoanBasicDetailsData(
 				loanAccount.clientId, loanAccount.clientName, loanAccount.clientOfficeId,
-				product.getId(), product.getName(), product.getDescription(), product.getFundId(), product.getFundName(), 
+				loanAccount.groupId, loanAccount.groupName, loanAccount.groupOfficeId,
+				product.getId(), product.getName(), product.getDescription(), product.getFundId(), product.getFundName(),
 				product.getCurrency(), product.getPrincipal(), product.getInArrearsTolerance(),
 				termFrequency, termPeriodFrequencyType, product.getNumberOfRepayments(), product.getRepaymentEvery(), product.getRepaymentFrequencyType(),
 				product.getTransactionProcessingStrategyId(), product.getAmortizationType(), 
@@ -85,6 +95,7 @@ public class LoanBasicDetailsData {
 	
 	private LoanBasicDetailsData(
 			final Long clientId, final String clientName, final Long clientOfficeId,
+			final Long groupId, final String groupName, final Long groupOfficeId,
 			final Long productId, final String productName, final String productDescription, final Long fundId, final String fundName, 
 			final CurrencyData currency,  final BigDecimal principal, final BigDecimal inArrearsTolerance,
 			final Integer termFrequency,
@@ -104,6 +115,9 @@ public class LoanBasicDetailsData {
 		this.clientId = clientId;
 		this.clientName = clientName;
 		this.clientOfficeId = clientOfficeId;
+		this.groupId = groupId;
+		this.groupName = groupName;
+		this.groupOfficeId = groupOfficeId;
 		this.loanProductId =  productId;
 		this.loanProductName = productName;
 		this.loanProductDescription= productDescription;
@@ -151,12 +165,17 @@ public class LoanBasicDetailsData {
 		this.totalDisbursementCharges = BigDecimal.ZERO;
 	}
 	
-	private LoanBasicDetailsData(final Long clientId, final String clientName, final LocalDate expectedDisbursementDate, final Long clientOfficeId) {
+	private LoanBasicDetailsData(final Long clientId, final String clientName, final Long clientOfficeId,
+								 final Long groupId, final String groupName, final Long groupOfficeId,
+								 final LocalDate expectedDisbursementDate) {
 		this.id = null;
 		this.externalId = null;
 		this.clientId = clientId;
 		this.clientName = clientName;
 		this.clientOfficeId = clientOfficeId;
+		this.groupId = groupId;
+		this.groupName = groupName;
+		this.groupOfficeId = groupOfficeId;
 		this.loanProductId =  null;
 		this.loanProductName = null;
 		this.loanProductDescription= null;
@@ -201,7 +220,11 @@ public class LoanBasicDetailsData {
 			final Long id, 
 			final String externalId,
 			final Long clientId, final String clientName,
-			final Long clientOfficeId, final Long loanProductId,
+			final Long clientOfficeId,
+			final Long groupId,
+			final String groupName,
+			final Long groupOfficeId,
+			final Long loanProductId,
 			final String loanProductName,
 			final String loanProductDescription,
 			final Long fundId, String fundName,
@@ -238,6 +261,9 @@ public class LoanBasicDetailsData {
 		this.clientId = clientId;
 		this.clientName = clientName;
 		this.clientOfficeId = clientOfficeId;
+		this.groupId = groupId;
+		this.groupName = groupName;
+		this.groupOfficeId = groupOfficeId;
 		this.loanProductId = loanProductId;
 		this.loanProductName = loanProductName;
 		this.loanProductDescription = loanProductDescription;
@@ -381,6 +407,18 @@ public class LoanBasicDetailsData {
 	
 	public Long getClientOfficeId() {
 		return clientOfficeId;
+	}
+
+	public Long getGroupId() {
+		return groupId;
+	}
+
+	public Long getGroupOfficeId() {
+		return groupOfficeId;
+	}
+
+	public String getGroupName() {
+		return groupName;
 	}
 
 	public Long getFundId() {

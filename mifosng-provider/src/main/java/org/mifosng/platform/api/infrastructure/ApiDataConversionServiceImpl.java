@@ -444,7 +444,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	    Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
 	    
 	    Set<String> supportedParams = new HashSet<String>(
-    		Arrays.asList("clientId", "productId", "externalId", "fundId", "transactionProcessingStrategyId",
+    		Arrays.asList("clientId", "groupId", "productId", "externalId", "fundId", "transactionProcessingStrategyId",
     				"principal", "inArrearsTolerance", "interestRatePerPeriod", "repaymentEvery", "numberOfRepayments", 
     				"loanTermFrequency", "loanTermFrequencyType", "charges",
     				"repaymentFrequencyType", "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType",
@@ -461,6 +461,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	    JsonParserHelper helper = new JsonParserHelper();
 	    
 	    final Long clientId = helper.extractLongNamed("clientId", element, modifiedParameters);
+		final Long groupId = helper.extractLongNamed("groupId", element, modifiedParameters);
 	    final Long productId = helper.extractLongNamed("productId", element, modifiedParameters);
 	    final Long fundId = helper.extractLongNamed("fundId", element, modifiedParameters);
 	    final Long loanOfficerId = helper.extractLongNamed("loanOfficerId", element, modifiedParameters);
@@ -514,7 +515,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
         }
 
 		return new LoanApplicationCommand(modifiedParameters,
-				resourceIdentifier, clientId, productId, externalId, fundId, transactionProcessingStrategyId,
+				resourceIdentifier, clientId, groupId, productId, externalId, fundId, transactionProcessingStrategyId,
 				submittedOnDate, submittedOnNote, 
 	    		expectedDisbursementDate, repaymentsStartingFromDate, interestChargedFromDate, 
 	    		principal, interestRatePerPeriod, interestRateFrequencyType, interestType, interestCalculationPeriodType, 

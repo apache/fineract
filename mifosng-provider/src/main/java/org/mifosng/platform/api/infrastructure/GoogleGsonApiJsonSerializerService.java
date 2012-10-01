@@ -19,6 +19,7 @@ import org.mifosng.platform.api.data.DepositProductData;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.FundData;
 import org.mifosng.platform.api.data.GenericResultsetData;
+import org.mifosng.platform.api.data.GroupAccountSummaryCollectionData;
 import org.mifosng.platform.api.data.GroupData;
 import org.mifosng.platform.api.data.LoanAccountData;
 import org.mifosng.platform.api.data.LoanChargeData;
@@ -131,6 +132,12 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 					"rejectedDepositAccountsCount","rejectedDepositAccounts",
 					"preclosedDepositAccountsCount","preclosedDepositAccounts"));
 
+    private static final Set<String> GROUP_ACCOUNTS_DATA_PARAMETERS = new HashSet<String>(
+            Arrays.asList("pendingApprovalLoans", "awaitingDisbursalLoans",
+                    "openLoans", "closedLoans", "anyLoanCount",
+                    "pendingApprovalLoanCount", "awaitingDisbursalLoanCount",
+                    "activeLoanCount", "closedLoanCount"));
+
 	private static final Set<String> GROUP_DATA_PARAMETERS = new HashSet<String>(
 			Arrays.asList("id", "officeId", "name", "externalId", "clientMembers",
 					"allowedClients", "allowedOffices"));
@@ -145,7 +152,7 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 			Arrays.asList("periods", "cumulativePrincipalDisbursed"));
 	
 	private static final Set<String> LOAN_DATA_PARAMETERS = new HashSet<String>(
-			Arrays.asList("id", "externalId", "clientId", "clientName", "fundId", "fundName",
+			Arrays.asList("id", "externalId", "clientId","groupId", "clientName", "groupName", "fundId", "fundName",
 					"loanProductId", "loanProductName", "loanProductDescription", 
 					"currency", "principal",
 					"inArrearsTolerance", "numberOfRepayments",
@@ -467,6 +474,17 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 						responseParameters);
 		return helper.serializedJsonFrom(gsonDeserializer, clientAccount);
 	}
+
+    @Override
+    public String serializeGroupAccountSummaryCollectionDataToJson(
+            final boolean prettyPrint, final Set<String> responseParameters,
+            final GroupAccountSummaryCollectionData groupAccount) {
+        final Gson gsonDeserializer = helper
+                .createGsonBuilderWithParameterExclusionSerializationStrategy(
+                        GROUP_ACCOUNTS_DATA_PARAMETERS, prettyPrint,
+                        responseParameters);
+        return helper.serializedJsonFrom(gsonDeserializer, groupAccount);
+    }
 
 	@Override
 	public String serializeGroupDataToJson(final boolean prettyPrint,

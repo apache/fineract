@@ -42,7 +42,15 @@ public class GroupData {
         return name;
     }
 
-    public String getExternalId() {
+	public Long getOfficeId() {
+		return officeId;
+	}
+
+	public String getOfficeName() {
+		return officeName;
+	}
+
+	public String getExternalId() {
         return externalId;
     }
 

@@ -25,6 +25,8 @@ public interface LoanReadPlatformService {
 
 	LoanBasicDetailsData retrieveClientAndProductDetails(Long clientId, Long productId);
 
+    LoanBasicDetailsData retrieveGroupAndProductDetails(Long groupId, Long productId);
+
 	LoanTransactionData retrieveNewLoanRepaymentDetails(Long loanId);
 
 	LoanTransactionData retrieveNewLoanWaiverDetails(Long loanId);

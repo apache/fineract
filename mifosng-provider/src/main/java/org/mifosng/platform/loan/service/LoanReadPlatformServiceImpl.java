@@ -12,6 +12,7 @@ import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.DisbursementData;
 import org.mifosng.platform.api.data.EnumOptionData;
+import org.mifosng.platform.api.data.GroupData;
 import org.mifosng.platform.api.data.LoanBasicDetailsData;
 import org.mifosng.platform.api.data.LoanChargeData;
 import org.mifosng.platform.api.data.LoanPermissionData;
@@ -27,6 +28,7 @@ import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.exceptions.CurrencyNotFoundException;
 import org.mifosng.platform.exceptions.LoanNotFoundException;
 import org.mifosng.platform.exceptions.LoanTransactionNotFoundException;
+import org.mifosng.platform.group.service.GroupReadPlatformService;
 import org.mifosng.platform.infrastructure.JdbcSupport;
 import org.mifosng.platform.infrastructure.TenantAwareRoutingDataSource;
 import org.mifosng.platform.loan.domain.Loan;
@@ -52,6 +54,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 	private final ApplicationCurrencyRepository applicationCurrencyRepository;
 	private final LoanProductReadPlatformService loanProductReadPlatformService;
 	private final ClientReadPlatformService clientReadPlatformService;
+	private final GroupReadPlatformService groupReadPlatformService;
 	private final LoanTransactionRepository loanTransactionRepository;
 
 	@Autowired
@@ -62,6 +65,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 			final ApplicationCurrencyRepository applicationCurrencyRepository,
 			final LoanProductReadPlatformService loanProductReadPlatformService,
 			final ClientReadPlatformService clientReadPlatformService,
+			final GroupReadPlatformService groupReadPlatformService,
 			final TenantAwareRoutingDataSource dataSource) {
 		this.context = context;
 		this.loanRepository = loanRepository;
@@ -69,6 +73,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 		this.applicationCurrencyRepository = applicationCurrencyRepository;
 		this.loanProductReadPlatformService = loanProductReadPlatformService;
 		this.clientReadPlatformService = clientReadPlatformService;
+		this.groupReadPlatformService = groupReadPlatformService;
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
 
@@ -210,7 +215,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 		final LocalDate expectedDisbursementDate = new LocalDate();
 		final ClientData clientAccount = this.clientReadPlatformService.retrieveIndividualClient(clientId);
 		
-		LoanBasicDetailsData loanDetails = LoanBasicDetailsData.populateForNewLoanCreation(clientAccount.getId(), clientAccount.getDisplayName(), expectedDisbursementDate,
+		LoanBasicDetailsData loanDetails = LoanBasicDetailsData.populateForNewIndividualClientLoanCreation(clientAccount.getId(), clientAccount.getDisplayName(), expectedDisbursementDate,
 				clientAccount.getOfficeId());
 		
 		if (productId != null) {
@@ -221,7 +226,26 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 		return loanDetails;
 	}
 
-	@Override
+    @Override
+    public LoanBasicDetailsData retrieveGroupAndProductDetails(Long groupId, Long productId) {
+
+		context.authenticatedUser();
+
+		final LocalDate expectedDisbursementDate = new LocalDate();
+		final GroupData groupAccount = this.groupReadPlatformService.retrieveGroup(groupId);
+
+		LoanBasicDetailsData loanDetails = LoanBasicDetailsData.populateForNewGroupLoanCreation(groupAccount.getId(), groupAccount.getName(), expectedDisbursementDate,
+				groupAccount.getOfficeId());
+
+		if (productId != null) {
+			LoanProductData selectedProduct = this.loanProductReadPlatformService.retrieveLoanProduct(productId);
+			loanDetails = LoanBasicDetailsData.populateForNewLoanCreation(loanDetails, selectedProduct);
+		}
+
+		return loanDetails;
+    }
+
+    @Override
 	public LoanTransactionData retrieveNewLoanRepaymentDetails(final Long loanId) {
 
 		context.authenticatedUser();
@@ -348,7 +372,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 		public String loanSchema() {
 			return "l.id as id, l.external_id as externalId, l.fund_id as fundId, f.name as fundName, " 
 					+ " lp.id as loanProductId, lp.name as loanProductName, lp.description as loanProductDescription, c.id as clientId, c.display_name as clientName, " 
-					+ " c.office_id as clientOfficeId,l.submittedon_date as submittedOnDate,"
+					+ " c.office_id as clientOfficeId, g.id as groupId, g.name as groupName, g.office_id as groupOfficeId,"
+					+ " l.submittedon_date as submittedOnDate,"
 					+ " l.total_charges_due_at_disbursement_derived as totalDisbursementCharges,"
 					+ " l.approvedon_date as approvedOnDate, l.expected_disbursedon_date as expectedDisbursementDate, l.disbursedon_date as actualDisbursementDate, l.expected_firstrepaymenton_date as expectedFirstRepaymentOnDate,"
 					+ " l.interest_calculated_from_date as interestChargedFromDate, l.closedon_date as closedOnDate, l.expected_maturedon_date as expectedMaturityDate, "
@@ -361,7 +386,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 					+ " l.currency_code as currencyCode, l.currency_digits as currencyDigits, rc.`name` as currencyName, rc.display_symbol as currencyDisplaySymbol, rc.internationalized_name_code as currencyNameCode, "
 					+ " l.loan_officer_id as loanOfficerId, s.display_name as loanOfficerName"
 					+ " from m_loan l"
-					+ " join m_client c on c.id = l.client_id"
+					+ " left join m_client c on c.id = l.client_id"
+					+ " left join m_group g on g.id = l.group_id"
 					+ " join m_product_loan lp on lp.id = l.product_id"
 					+ " join m_currency rc on rc.`code` = l.currency_code"
 					+ " left join m_fund f on f.id = l.fund_id"
@@ -383,9 +409,15 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
 			Long id = rs.getLong("id");
 			String externalId = rs.getString("externalId");
+
 			Long clientId = JdbcSupport.getLong(rs, "clientId");
-			Long clientOfficeId = JdbcSupport.getLong(rs, "clientOfficeId");
+			Long clientOfficeId = JdbcSupport.getLong(rs, "clientOfficeId");;
 			String clientName = rs.getString("clientName");
+
+			Long groupId = JdbcSupport.getLong(rs, "groupId");
+			Long groupOfficeId = JdbcSupport.getLong(rs, "groupOfficeId");;
+			String groupName = rs.getString("groupName");
+
 			Long fundId = JdbcSupport.getLong(rs, "fundId");
 			String fundName = rs.getString("fundName");
 			Long loanOfficerId = JdbcSupport.getLong(rs, "loanOfficerId");
@@ -455,7 +487,9 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 			}
 
 			Collection<LoanChargeData> charges = null;
-			return new LoanBasicDetailsData(id, externalId, clientId, clientName, clientOfficeId,
+			return new LoanBasicDetailsData(id, externalId,
+					clientId, clientName, clientOfficeId,
+					groupId, groupName, groupOfficeId,
 					loanProductId, loanProductName, loanProductDescription,
 					fundId, fundName, 
 					closedOnDate,

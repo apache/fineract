@@ -13,12 +13,15 @@ import org.mifosng.platform.client.domain.ClientRepository;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.exceptions.ClientNotFoundException;
 import org.mifosng.platform.exceptions.FundNotFoundException;
+import org.mifosng.platform.exceptions.GroupNotFoundException;
 import org.mifosng.platform.exceptions.LoanProductNotFoundException;
 import org.mifosng.platform.exceptions.LoanTransactionProcessingStrategyNotFoundException;
 import org.mifosng.platform.exceptions.StaffNotFoundException;
 import org.mifosng.platform.exceptions.StaffRoleException;
 import org.mifosng.platform.fund.domain.Fund;
 import org.mifosng.platform.fund.domain.FundRepository;
+import org.mifosng.platform.group.domain.Group;
+import org.mifosng.platform.group.domain.GroupRepository;
 import org.mifosng.platform.loan.domain.AmortizationMethod;
 import org.mifosng.platform.loan.domain.DefaultLoanLifecycleStateMachine;
 import org.mifosng.platform.loan.domain.InterestCalculationPeriodMethod;
@@ -45,6 +48,7 @@ public class LoanAssembler {
 
 	private final LoanProductRepository loanProductRepository;
 	private final ClientRepository clientRepository;
+	private final GroupRepository groupRepository;
 	private final AprCalculator aprCalculator = new AprCalculator();
 	private final FundRepository fundRepository;
 	private final LoanTransactionProcessingStrategyRepository loanTransactionProcessingStrategyRepository;
@@ -56,6 +60,7 @@ public class LoanAssembler {
 	public LoanAssembler(
 			final LoanProductRepository loanProductRepository,
 			final ClientRepository clientRepository,
+			final GroupRepository groupRepository,
 			final FundRepository fundRepository,
 			final LoanTransactionProcessingStrategyRepository loanTransactionProcessingStrategyRepository,
 	  		final StaffRepository staffRepository,
@@ -63,6 +68,7 @@ public class LoanAssembler {
 	  		final LoanChargeAssembler loanChargeAssembler) {
 		this.loanProductRepository = loanProductRepository;
 		this.clientRepository = clientRepository;
+		this.groupRepository = groupRepository;
 		this.fundRepository = fundRepository;
 		this.loanTransactionProcessingStrategyRepository = loanTransactionProcessingStrategyRepository;
 		this.staffRepository = staffRepository;
@@ -77,11 +83,20 @@ public class LoanAssembler {
 			throw new LoanProductNotFoundException(command.getProductId());
 		}
 
-		Client client = this.clientRepository.findOne(command.getClientId());
-		if (client == null || client.isDeleted()) {
-			throw new ClientNotFoundException(command.getClientId());
+		Client client = null;
+		Group group = null;
+		if (command.getClientId() != null) {
+			client = this.clientRepository.findOne(command.getClientId());
+			if (client == null || client.isDeleted()) {
+				throw new ClientNotFoundException(command.getClientId());
+			}
+		} else {
+			group = this.groupRepository.findOne(command.getGroupId());
+			if (group == null || group.isDeleted()) {
+				throw new GroupNotFoundException(command.getGroupId());
+			}
 		}
-		
+
 		MonetaryCurrency currency = loanProduct.getCurrency();
 		final Integer loanTermFrequency = command.getLoanTermFrequency();
 		final PeriodFrequencyType loanTermFrequencyType = PeriodFrequencyType.fromInt(command.getLoanTermFrequencyType());
@@ -97,8 +112,14 @@ public class LoanAssembler {
 		
 		// optionally, see if charges are associated with loan on creation (through loan product or by being directly added)
 		final Set<LoanCharge> loanCharges = this.loanChargeAssembler.assembleFrom(command.getCharges(), loanProduct.getCharges(), command.getPrincipal());
-				
-		Loan loan = Loan.createNew(fund,loanOfficer, loanTransactionProcessingStrategy, loanProduct, client, loanRepaymentScheduleDetail, loanCharges);
+
+		Loan loan;
+		if (client != null) {
+			loan = Loan.createNew(fund,loanOfficer, loanTransactionProcessingStrategy, loanProduct, client, loanRepaymentScheduleDetail, loanCharges);
+		} else {
+			loan = Loan.createNew(fund,loanOfficer, loanTransactionProcessingStrategy, loanProduct, group, loanRepaymentScheduleDetail, loanCharges);
+		}
+
 		loan.setExternalId(command.getExternalId());
 
 		final LoanScheduleNewData loanSchedule = this.calculationPlatformService.calculateLoanScheduleNew(command.toCalculateLoanScheduleCommand());

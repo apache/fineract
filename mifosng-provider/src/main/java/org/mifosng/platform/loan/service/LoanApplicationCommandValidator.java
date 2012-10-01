@@ -26,7 +26,15 @@ public class LoanApplicationCommandValidator {
 //					"The parameter loanSchedule cannot be empty.", "loanSchedule");
 //			dataValidationErrors.add(error);
 //		}
-		
+		DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");
+
+		if (command.getGroupId() != null){
+			baseDataValidator.reset().parameter("clientId").value(command.getClientId()).mustBeBlankWhenParameterProvided("groupId", command.getGroupId()).longGreaterThanZero();
+		}
+		if (command.getClientId() != null){
+			baseDataValidator.reset().parameter("groupId").value(command.getGroupId()).mustBeBlankWhenParameterProvided("clientId", command.getClientId()).longGreaterThanZero();
+		}
+
 		if (command.getSubmittedOnDate() == null) {
 			ApiParameterError error = ApiParameterError.parameterError("validation.msg.loan.submitted.on.date.cannot.be.blank", 
 					"The parameter submittedOnDate cannot be empty.", "submittedOnDate");
@@ -41,7 +49,6 @@ public class LoanApplicationCommandValidator {
 		}
 		
 		if (command.getTransactionProcessingStrategyId() == null) {
-			DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");
 			baseDataValidator.reset().parameter("transactionProcessingStrategyId").value(command.getTransactionProcessingStrategyId()).notNull().inMinMaxRange(2, 2);
 		}
 		

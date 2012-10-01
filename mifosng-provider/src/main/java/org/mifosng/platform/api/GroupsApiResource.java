@@ -20,8 +20,10 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.mifosng.platform.api.commands.GroupCommand;
+import org.mifosng.platform.api.data.ClientAccountSummaryCollectionData;
 import org.mifosng.platform.api.data.ClientLookup;
 import org.mifosng.platform.api.data.EntityIdentifier;
+import org.mifosng.platform.api.data.GroupAccountSummaryCollectionData;
 import org.mifosng.platform.api.data.GroupData;
 import org.mifosng.platform.api.data.OfficeLookup;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
@@ -166,5 +168,29 @@ public class GroupsApiResource {
         EntityIdentifier entityIdentifier = this.groupWritePlatformService.deleteGroup(groupId);
 
         return Response.ok().entity(entityIdentifier).build();
+    }
+
+    @GET
+    @Path("{groupId}/loans")
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
+    public String retrieveGroupAccount(@PathParam("groupId") final Long groupId,
+                                       @Context final UriInfo uriInfo) {
+
+        Set<String> typicalResponseParameters = new HashSet<String>(
+                Arrays.asList("pendingApprovalLoans", "awaitingDisbursalLoans", "openLoans", "closedLoans",
+                        "anyLoanCount", "pendingApprovalLoanCount", "awaitingDisbursalLoanCount",
+                        "activeLoanCount", "closedLoanCount")
+        );
+
+        Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+        if (responseParameters.isEmpty()) {
+            responseParameters.addAll(typicalResponseParameters);
+        }
+        boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+
+        GroupAccountSummaryCollectionData clientAccount = this.groupReadPlatformService.retrieveGroupAccountDetails(groupId);
+
+        return this.apiJsonSerializerService.serializeGroupAccountSummaryCollectionDataToJson(prettyPrint, responseParameters, clientAccount);
     }
 }
