@@ -6,8 +6,10 @@ public class ClientLookup {
 
     private final Long id;
     private final String displayName;
+    private final Long officeId;
+    private final String officeName;
 
-    public ClientLookup(final Long id, final String firstname, final String lastname) {
+    public ClientLookup(final Long id, final String firstname, final String lastname, final Long officeId, String officeName) {
         this.id = id;
         
         StringBuilder displayNameBuilder = new StringBuilder(firstname);
@@ -17,7 +19,24 @@ public class ClientLookup {
         displayNameBuilder.append(lastname);
 
         this.displayName = displayNameBuilder.toString();
-        
+
+        this.officeId = officeId;
+        this.officeName = officeName;
+    }
+
+    public ClientLookup(final Long id, final String firstname, final String lastname) {
+        this.id = id;
+
+        StringBuilder displayNameBuilder = new StringBuilder(firstname);
+        if (StringUtils.isNotBlank(displayNameBuilder.toString())) {
+            displayNameBuilder.append(' ');
+        }
+        displayNameBuilder.append(lastname);
+
+        this.displayName = displayNameBuilder.toString();
+
+        this.officeId = null;
+        this.officeName = null;
     }
 
     public Long getId() {

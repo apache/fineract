@@ -141,7 +141,11 @@ public class Client extends AbstractAuditableCustom<AppUser, Long> {
 		this.displayName = this.firstName + " " + this.lastName;
 	}
 
-	/**
+    public Office getOffice() {
+        return office;
+    }
+
+    /**
 	 * Delete is a <i>soft delete</i>. Updates flag on client so it wont appear in query/report results.
 	 * 
 	 * Any fields with unique constraints and prepended with id of record.

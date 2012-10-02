@@ -143,7 +143,9 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     private static final class ClientLookupMapper implements RowMapper<ClientLookup>{
 
         public String clientLookupSchema() {
-            return "c.id as id, c.firstname as firstname, c.lastname as lastname from m_client c";
+            return "c.id as id, c.firstname as firstname, c.lastname as lastname, " +
+                   "c.office_id as officeId, o.name as officeName " +
+                   "from m_client c join m_office o on o.id = c.office_id";
         }
 
         @Override
@@ -154,7 +156,11 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             if (StringUtils.isBlank(firstname)) {
                 firstname = "";
             }
-            return new ClientLookup(id, firstname, lastname);
+
+            Long officeId = rs.getLong("officeId");
+            String officeName = rs.getString("officeName");
+
+            return new ClientLookup(id, firstname, lastname, officeId, officeName);
         }
     }
 

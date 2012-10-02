@@ -9,6 +9,7 @@ import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.client.domain.ClientRepository;
 import org.mifosng.platform.exceptions.ClientNotFoundException;
 import org.mifosng.platform.exceptions.GroupNotFoundException;
+import org.mifosng.platform.exceptions.InvalidOfficeException;
 import org.mifosng.platform.exceptions.OfficeNotFoundException;
 import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
 import org.mifosng.platform.group.domain.Group;
@@ -137,6 +138,10 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
                 Client client = this.clientRepository.findOne(id);
                 if (client == null || client.isDeleted()) {
                     throw new ClientNotFoundException(id);
+                }
+                if (!client.getOffice().getId().equals(command.getOfficeId())){
+                    String errorMessage = "Group and Client must have the same office.";
+                    throw new InvalidOfficeException("client", "attach.to.group", errorMessage);
                 }
                 clientMembers.add(client);
             }
