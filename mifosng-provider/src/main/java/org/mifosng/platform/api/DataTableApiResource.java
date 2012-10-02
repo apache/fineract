@@ -121,20 +121,16 @@ public class DataTableApiResource {
 				.retrieveDataTableGenericResultSet(datatable, apptableId,
 						sqlFields, sqlOrder, null);
 
-		boolean genericResultSet = ApiParameterHelper.genericResultSet(uriInfo
-				.getQueryParameters());
-
+		String json = "";
+		final boolean genericResultSet = ApiParameterHelper.genericResultSet(uriInfo.getQueryParameters());
 		if (genericResultSet) {
-			boolean prettyPrints = ApiParameterHelper.prettyPrint(uriInfo
-					.getQueryParameters());
-			return this.apiJsonSerializerService
-					.serializeGenericResultsetDataToJson(prettyPrints, results);
+			boolean prettyPrints = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+			json = this.apiJsonSerializerService.serializeGenericResultsetDataToJson(prettyPrints, results);
 		} else {
-
-			return this.genericDataService
-					.generateJsonFromGenericResultsetData(results);
+			json = this.genericDataService.generateJsonFromGenericResultsetData(results);
 		}
-
+		
+		return json;
 	}
 
 	@POST

@@ -98,7 +98,6 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 	@Column(name = "is_renewal_allowed", nullable = false)
 	private boolean renewalAllowed = false;
 	
-	@SuppressWarnings("unused")
 	@Column(name = "is_preclosure_allowed", nullable = false)
 	private boolean preClosureAllowed = false;
 	

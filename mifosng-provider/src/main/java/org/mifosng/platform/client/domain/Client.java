@@ -21,7 +21,6 @@ import org.mifosng.platform.user.domain.AppUser;
 @Table(name = "m_client")
 public class Client extends AbstractAuditableCustom<AppUser, Long> {
 
-    @SuppressWarnings("unused")
 	@ManyToOne
     @JoinColumn(name = "office_id", nullable = false)
     private Office       office;
@@ -51,7 +50,7 @@ public class Client extends AbstractAuditableCustom<AppUser, Long> {
 		return new Client(clientOffice, firstname, lastname, joiningDate, externalId);
 	}
 
-    public Client() {
+    protected Client() {
         this.office = null;
         this.joiningDate = null;
         this.firstName = null;
@@ -141,10 +140,6 @@ public class Client extends AbstractAuditableCustom<AppUser, Long> {
 		this.displayName = this.firstName + " " + this.lastName;
 	}
 
-    public Office getOffice() {
-        return office;
-    }
-
     /**
 	 * Delete is a <i>soft delete</i>. Updates flag on client so it wont appear in query/report results.
 	 * 
@@ -157,5 +152,9 @@ public class Client extends AbstractAuditableCustom<AppUser, Long> {
 
 	public boolean isDeleted() {
 		return deleted;
+	}
+
+	public boolean isOfficeIdentifiedBy(final Long officeId) {
+		return this.office.identifiedBy(officeId);
 	}
 }

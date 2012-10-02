@@ -5,8 +5,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
-import javax.security.auth.login.AccountException;
-
 import org.joda.time.LocalDate;
 import org.joda.time.Months;
 import org.mifosng.platform.api.data.ClientData;
@@ -56,26 +54,6 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 		String sql = "select " + mapper.schema() + " where da.is_deleted=0";
 		
 		return this.jdbcTemplate.query(sql,mapper, new Object[]{});
-		
-		// NOTE: when retrieving a list of deposit accounts, its unlikey we want to much detail so at that point in time, 
-		// not likely that returning what transactions have is useful so removing it.
-		
-//		DepositAccountTransactionMapper transactionMapper = new DepositAccountTransactionMapper();
-//		String transactionSchema = "Select " + transactionMapper.schema();
-//		Collection<DepositAccountTransactionData> depositAccountTransactionDatas = this.jdbcTemplate.query(transactionSchema, transactionMapper, new Object[]{});
-		
-//		for (DepositAccountData depositAccountData : depositAccountDatas) {
-//			List<DepositAccountTransactionData> myAccountTransactionDatas = new ArrayList<DepositAccountTransactionData>();
-//			
-//			for (DepositAccountTransactionData depositAccountTransactionData : depositAccountTransactionDatas) {
-//				if (depositAccountData.getId().equals(depositAccountTransactionData.getAccountId())) {
-//					myAccountTransactionDatas.add(depositAccountTransactionData);
-//				}
-//				depositAccountData.setTransactions(myAccountTransactionDatas);
-//			}
-//		}
-		
-//		return depositAccountDatas;
 	}
 
 	@Override

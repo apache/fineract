@@ -1,6 +1,5 @@
 package org.mifosng.platform.api;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -20,7 +19,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.mifosng.platform.api.commands.GroupCommand;
-import org.mifosng.platform.api.data.ClientAccountSummaryCollectionData;
 import org.mifosng.platform.api.data.ClientLookup;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.GroupAccountSummaryCollectionData;
@@ -94,23 +92,26 @@ public class GroupsApiResource {
         }
 
         boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-        boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
-
+        
         GroupData group = this.groupReadPlatformService.retrieveGroup(groupId);
+        final Collection<ClientLookup> clientMembers = this.groupReadPlatformService.retrieveClientMembers(groupId);
+        Collection<ClientLookup> availableClients = null;
+        Collection<OfficeLookup> allowedOffices = null;
+        
+        group = new GroupData(group, clientMembers, availableClients, allowedOffices);
+        
+        boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
+		if (template) {
+			responseParameters.add("allowedClients");
+			responseParameters.add("allowedOffices");
 
-        Collection<ClientLookup> clientMembers = this.groupReadPlatformService.retrieveClientMembers(groupId);
-        group.setClientMembers(clientMembers);
+			availableClients = this.clientReadPlatformService.retrieveAllIndividualClientsForLookup();
+			availableClients.removeAll(group.clientMembers());
 
-        if (template) {
-            Collection<ClientLookup>  availableClients = this.clientReadPlatformService.retrieveAllIndividualClientsForLookup();
-            availableClients.removeAll(group.getClientMembers());
-            group.setAllowedClients(availableClients);
+			allowedOffices = officeReadPlatformService.retrieveAllOfficesForLookup();
 
-            responseParameters.add("allowedClients");
-
-            group.setAllowedOffices(new ArrayList<OfficeLookup>(officeReadPlatformService.retrieveAllOfficesForLookup()));
-            responseParameters.add("allowedOffices");
-        }
+			group = new GroupData(group, group.clientMembers(), availableClients, allowedOffices);
+		}
         
         return this.apiJsonSerializerService.serializeGroupDataToJson(prettyPrint, responseParameters, group);
     }

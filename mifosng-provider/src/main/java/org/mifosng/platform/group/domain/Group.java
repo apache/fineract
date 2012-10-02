@@ -22,7 +22,8 @@ import org.mifosng.platform.user.domain.AppUser;
 @Table(name = "m_group")
 public class Group extends AbstractAuditableCustom<AppUser, Long> {
 
-    @ManyToOne
+    @SuppressWarnings("unused")
+	@ManyToOne
     @JoinColumn(name = "office_id", nullable = false)
     private Office office;
 

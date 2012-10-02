@@ -56,7 +56,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
     }
 
     @Override
-    public GroupData retrieveGroup(Long groupId) {
+    public GroupData retrieveGroup(final Long groupId) {
         
         try{
             this.context.authenticatedUser();

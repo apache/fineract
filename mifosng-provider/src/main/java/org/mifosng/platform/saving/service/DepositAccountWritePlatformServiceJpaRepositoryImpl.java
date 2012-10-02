@@ -363,18 +363,27 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 		if (account == null || account.isDeleted()) {
 			throw new DepositAccountNotFoundException(command.getId());
 		}
-		if(account.isRenewalAllowed()&&(new LocalDate().isAfter(account.maturesOnDate())||new LocalDate().isEqual(account.maturesOnDate()))){
-			if(account.getDepositStatus().equals(DepositAccountStatus.ACTIVE.getValue())){
-				final DepositAccount renewedAccount = this.depositAccountAssembler.assembleFrom(account,command);
+		
+		// FIXME - KW - extract whats in this if into a method that naturally describes what you are checking.
+		if (account.isRenewalAllowed()
+				&& (new LocalDate().isAfter(account.maturesOnDate()) || new LocalDate()
+						.isEqual(account.maturesOnDate()))) {
+			
+			// FIXME - KW - rather than getting the status from account and then checking, 
+			// add isActive behaviour on account so all places that use account dont have to repeat this type of checking.
+			if (account.getDepositStatus().equals(
+					DepositAccountStatus.ACTIVE.getValue())) {
+				final DepositAccount renewedAccount = this.depositAccountAssembler
+						.assembleFrom(account, command);
 				this.depositAccountRepository.save(renewedAccount);
 				account.closeDepositAccount(defaultDepositLifecycleStateMachine());
 				this.depositAccountRepository.save(account);
 				return new EntityIdentifier(renewedAccount.getId());
-			}else{
-				throw new DepositAccountReopenException(account.getMaturityDate());
 			}
-		}else{
+
 			throw new DepositAccountReopenException(account.getMaturityDate());
 		}
+
+		throw new DepositAccountReopenException(account.getMaturityDate());
 	}
 }

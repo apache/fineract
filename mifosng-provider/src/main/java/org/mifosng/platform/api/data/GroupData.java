@@ -1,46 +1,76 @@
 package org.mifosng.platform.api.data;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
+/**
+ * Immutable data object representing groups.
+ */
 public class GroupData {
-    
-    private final Long id;
-    private final String name;
-    private final String externalId;
-    private final Long officeId;
-    private final String officeName;
 
-    private Collection<ClientLookup> clientMembers = new ArrayList<ClientLookup>();
-    private Collection<ClientLookup> allowedClients = new ArrayList<ClientLookup>();
-    private Collection<OfficeLookup> allowedOffices = new ArrayList<OfficeLookup>();
+	private final Long id;
+	private final String name;
+	private final String externalId;
+	private final Long officeId;
+	private final String officeName;
 
-    public GroupData(Long id, Long officeId, String officeName, String name, String externalId) {
-        this.id = id;
-        this.name = name;
-        this.externalId = externalId;
-        this.officeId = officeId;
-        this.officeName = officeName;
-    }
+	private final Collection<ClientLookup> clientMembers;
+	@SuppressWarnings("unused")
+	private final Collection<ClientLookup> allowedClients;
+	@SuppressWarnings("unused")
+	private final Collection<OfficeLookup> allowedOffices;
 
-    public GroupData(Collection<ClientLookup> allowedClients, Collection<OfficeLookup> allowedOffices){
-        this.id = null;
-        this.name = null;
-        this.externalId = null;
-        this.officeId = null;
-        this.officeName = null;
-        this.allowedClients = allowedClients;
-        this.allowedOffices = allowedOffices;
-    }
+	public GroupData(
+			final Long id, 
+			final Long officeId,
+			final String officeName, 
+			final String name, 
+			final String externalId) {
+		this.id = id;
+		this.officeId = officeId;
+		this.officeName = officeName;
+		this.name = name;
+		this.externalId = externalId;
 
-    public Long getId() {
-        return id;
-    }
+		this.clientMembers = null;
+		this.allowedClients = null;
+		this.allowedOffices = null;
+	}
 
-    public String getName() {
-        return name;
-    }
+	public GroupData(final GroupData group, final Collection<ClientLookup> clientMembers, final Collection<ClientLookup> allowedClients,
+			final Collection<OfficeLookup> allowedOffices) {
+		this.id = group.getId();
+		this.officeId = group.getOfficeId();
+		this.officeName = group.getOfficeName();
+		this.name = group.getName();
+		this.externalId = group.getExternalId();
+		
+		this.clientMembers = clientMembers;
+		this.allowedClients = allowedClients;
+		this.allowedOffices = allowedOffices;
+	}
+	
+	public GroupData(final Collection<ClientLookup> allowedClients, final Collection<OfficeLookup> allowedOffices) {
+		this.id = null;
+		this.officeId = null;
+		this.officeName = null;
+		this.name = null;
+		this.externalId = null;
+		this.clientMembers = null;
+		this.allowedClients = allowedClients;
+		this.allowedOffices = allowedOffices;
+	}
+	
+	public Long getId() {
+		return id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public String getExternalId() {
+		return externalId;
+	}
 
 	public Long getOfficeId() {
 		return officeId;
@@ -50,31 +80,7 @@ public class GroupData {
 		return officeName;
 	}
 
-	public String getExternalId() {
-        return externalId;
-    }
-
-    public Collection<ClientLookup> getClientMembers() {
-        return clientMembers;
-    }
-
-    public void setClientMembers(Collection<ClientLookup> clientMembers) {
-        this.clientMembers = clientMembers;
-    }
-
-    public Collection<ClientLookup> getAllowedClients() {
-        return allowedClients;
-    }
-
-    public void setAllowedClients(Collection<ClientLookup> allowedClients) {
-        this.allowedClients = allowedClients;
-    }
-
-    public Collection<OfficeLookup> getAllowedOffices() {
-        return allowedOffices;
-    }
-
-    public void setAllowedOffices(Collection<OfficeLookup> allowedOffices) {
-        this.allowedOffices = allowedOffices;
-    }
+	public Collection<ClientLookup> clientMembers() {
+		return this.clientMembers;
+	}
 }

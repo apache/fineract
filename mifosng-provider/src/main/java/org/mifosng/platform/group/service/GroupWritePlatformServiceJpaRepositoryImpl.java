@@ -134,12 +134,12 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
 
         if (command.isClientMembersChanged() && !ObjectUtils.isEmpty(clientMembersArray)) {
             for (String clientId : clientMembersArray) {
-                Long id = Long.valueOf(clientId);
+                final Long id = Long.valueOf(clientId);
                 Client client = this.clientRepository.findOne(id);
                 if (client == null || client.isDeleted()) {
                     throw new ClientNotFoundException(id);
                 }
-                if (!client.getOffice().getId().equals(command.getOfficeId())){
+                if (!client.isOfficeIdentifiedBy(command.getOfficeId())){
                     String errorMessage = "Group and Client must have the same office.";
                     throw new InvalidOfficeException("client", "attach.to.group", errorMessage);
                 }

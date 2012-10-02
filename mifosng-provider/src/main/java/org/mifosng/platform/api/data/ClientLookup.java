@@ -5,11 +5,14 @@ import org.apache.commons.lang.StringUtils;
 public class ClientLookup {
 
     private final Long id;
+    @SuppressWarnings("unused")
     private final String displayName;
-    private final Long officeId;
-    private final String officeName;
+    @SuppressWarnings("unused")
+	private final Long officeId;
+    @SuppressWarnings("unused")
+	private final String officeName;
 
-    public ClientLookup(final Long id, final String firstname, final String lastname, final Long officeId, String officeName) {
+    public ClientLookup(final Long id, final String firstname, final String lastname, final Long officeId, final String officeName) {
         this.id = id;
         
         StringBuilder displayNameBuilder = new StringBuilder(firstname);
@@ -39,18 +42,10 @@ public class ClientLookup {
         this.officeName = null;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public String getDisplayName() {
-        return displayName;
-    }
-
     @Override
     public boolean equals(Object obj) {
         ClientLookup clientLookup = (ClientLookup) obj;
-        return this.id.equals(clientLookup.getId());
+        return this.id.equals(clientLookup.id);
     }
 
     @Override
