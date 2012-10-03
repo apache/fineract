@@ -79,7 +79,6 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 	@Column(name = "matures_on_date")
 	private Date maturesOnDate;
 	
-	@SuppressWarnings("unused")
 	@Column(name = "projected_interest_accrued_on_maturity", scale = 6, precision = 19, nullable = false)
 	private BigDecimal projectedInterestAccruedOnMaturity;
 	
@@ -637,5 +636,13 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 	public void update(final boolean renewalAllowed, final boolean isInterestWithdrawable) {
 		this.renewalAllowed=renewalAllowed;
 		this.isInterestWithdrawable=isInterestWithdrawable;
+	}
+
+	public boolean isSubmittedAndPendingApproval() {
+		return DepositAccountStatus.fromInt(this.depositStatus).isSubmittedAndPendingApproval();
+	}
+
+	public boolean isActive() {
+		return DepositAccountStatus.fromInt(this.depositStatus).isActive();
 	}
 }

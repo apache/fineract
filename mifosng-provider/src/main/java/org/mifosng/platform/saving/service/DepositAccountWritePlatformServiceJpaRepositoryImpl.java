@@ -55,8 +55,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 			final DepositAccountRepository depositAccountRepository, 
 			final DepositAccountAssembler depositAccountAssembler,
 			final FixedTermDepositInterestCalculator fixedTermDepositInterestCalculator,
-			final NoteRepository noteRepository
-			) {
+			final NoteRepository noteRepository) {
 		this.context=context;
 		this.depositAccountRepository = depositAccountRepository;
 		this.depositAccountAssembler = depositAccountAssembler;
@@ -369,12 +368,8 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 				&& (new LocalDate().isAfter(account.maturesOnDate()) || new LocalDate()
 						.isEqual(account.maturesOnDate()))) {
 			
-			// FIXME - KW - rather than getting the status from account and then checking, 
-			// add isActive behaviour on account so all places that use account dont have to repeat this type of checking.
-			if (account.getDepositStatus().equals(
-					DepositAccountStatus.ACTIVE.getValue())) {
-				final DepositAccount renewedAccount = this.depositAccountAssembler
-						.assembleFrom(account, command);
+			if (account.isActive()) {
+				final DepositAccount renewedAccount = this.depositAccountAssembler.assembleFrom(account, command);
 				this.depositAccountRepository.save(renewedAccount);
 				account.closeDepositAccount(defaultDepositLifecycleStateMachine());
 				this.depositAccountRepository.save(account);
@@ -396,14 +391,17 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 			DepositAccountCommandValidator validator = new DepositAccountCommandValidator(command);
 			validator.validateForUpdate();
 			
-			DepositAccount account = this.depositAccountRepository.findOne(command.getId());
+			final DepositAccount account = this.depositAccountRepository.findOne(command.getId());
 			if (account == null || account.isDeleted()) {
 				throw new DepositAccountNotFoundException(command.getId());
 			}
-			if(account.getDepositStatus() == 100)
-				this.depositAccountAssembler.assembleUpdatedDepositAccount(account,command);
-			else if(account.getDepositStatus() == 300)
-				this.depositAccountAssembler.updateApprovedDepositAccount(account,command);
+			
+			if (account.isSubmittedAndPendingApproval()) {
+				this.depositAccountAssembler.assembleUpdatedDepositAccount(account, command);
+			} else if (account.isActive()) {
+				this.depositAccountAssembler.updateApprovedDepositAccount(account, command);
+			}
+			
 			this.depositAccountRepository.save(account);
 			
 			return new EntityIdentifier(account.getId());
@@ -411,7 +409,5 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 			 handleDataIntegrityIssues(command, dve);
 			 return new EntityIdentifier(Long.valueOf(-1));
 		}
-	
-		
 	}
 }
