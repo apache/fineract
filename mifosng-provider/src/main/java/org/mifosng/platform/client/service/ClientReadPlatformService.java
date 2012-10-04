@@ -15,7 +15,7 @@ public interface ClientReadPlatformService {
 
 	ClientData retrieveNewClientDetails();
 
-    Collection<ClientLookup> retrieveAllIndividualClientsForLookup();
+    Collection<ClientLookup> retrieveAllIndividualClientsForLookup(String extraCriteria);
 
 	ClientAccountSummaryCollectionData retrieveClientAccountDetails(Long clientId);
 

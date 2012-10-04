@@ -84,13 +84,17 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 	}
 
     @Override
-    public Collection<ClientLookup> retrieveAllIndividualClientsForLookup() {
+    public Collection<ClientLookup> retrieveAllIndividualClientsForLookup(String extraCriteria) {
 
         this.context.authenticatedUser();
 
         ClientLookupMapper rm = new ClientLookupMapper();
 
-        String sql = "select " + rm.clientLookupSchema() + " where c.is_deleted = 0";
+        String sql = "select " + rm.clientLookupSchema();
+
+        if (StringUtils.isNotBlank(extraCriteria)){
+            sql += " and (" + extraCriteria + ")";
+        }
 
         return this.jdbcTemplate.query(sql, rm, new Object[] {});
     }
@@ -145,7 +149,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         public String clientLookupSchema() {
             return "c.id as id, c.firstname as firstname, c.lastname as lastname, " +
                    "c.office_id as officeId, o.name as officeName " +
-                   "from m_client c join m_office o on o.id = c.office_id";
+                   "from m_client c join m_office o on o.id = c.office_id where c.is_deleted=0 ";
         }
 
         @Override

@@ -72,12 +72,12 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
     }
 
     @Override
-    public GroupData retrieveNewGroupDetails() {
+    public GroupData retrieveNewGroupDetails(String extraCriteria) {
 
         this.context.authenticatedUser();
 
         List<ClientLookup> allowedClients = new ArrayList<ClientLookup>(
-                this.clientReadPlatformService.retrieveAllIndividualClientsForLookup());
+                this.clientReadPlatformService.retrieveAllIndividualClientsForLookup(extraCriteria));
 
         List<OfficeLookup> allowedOffices = new ArrayList<OfficeLookup>(officeReadPlatformService.retrieveAllOfficesForLookup());
 
