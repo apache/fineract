@@ -68,22 +68,26 @@ public class MifosStyleLoanRepaymentScheduleTransactionProcessor extends
 			final LoanRepaymentScheduleInstallment currentInstallment,
 			final LoanTransaction loanTransaction,
 			final Money transactionAmountUnprocessed) {
-
+		
 		Money transactionAmountRemaining = transactionAmountUnprocessed;
-
-		Money interestPortion = currentInstallment
-				.payInterestComponent(transactionAmountRemaining);
-		transactionAmountRemaining = transactionAmountRemaining
-				.minus(interestPortion);
-
-		Money principalPortion = currentInstallment
-				.payPrincipalComponent(transactionAmountRemaining);
-		transactionAmountRemaining = transactionAmountRemaining
-				.minus(principalPortion);
-
 		Money interestWaivedPortion = Money.zero(transactionAmountRemaining.getCurrency());
-		loanTransaction.updateComponents(principalPortion, interestPortion,interestWaivedPortion, Money.zero(transactionAmountRemaining.getCurrency()));
-
+		Money principalPortion = Money.zero(transactionAmountRemaining.getCurrency());
+		Money interestPortion = Money.zero(transactionAmountRemaining.getCurrency());
+		Money chargesPortion = Money.zero(transactionAmountRemaining.getCurrency());
+		
+		if (loanTransaction.isWaiver()) {
+			interestWaivedPortion = currentInstallment.waiveInterestComponent(transactionAmountRemaining);
+			transactionAmountRemaining = transactionAmountRemaining.minus(interestWaivedPortion);
+		} else {
+		
+			interestPortion = currentInstallment.payInterestComponent(transactionAmountRemaining);
+			transactionAmountRemaining = transactionAmountRemaining.minus(interestPortion);
+	
+			principalPortion = currentInstallment.payPrincipalComponent(transactionAmountRemaining);
+			transactionAmountRemaining = transactionAmountRemaining.minus(principalPortion);
+		}
+		
+		loanTransaction.updateComponents(principalPortion, interestPortion, interestWaivedPortion, chargesPortion);
 		return transactionAmountRemaining;
 	}
 

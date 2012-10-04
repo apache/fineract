@@ -93,6 +93,10 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableCustom<Ap
 		return Money.of(currency, this.principalCompleted);
 	}
 	
+	public Money getPrincipalOutstanding(final MonetaryCurrency currency) {
+		return getPrincipal(currency).minus(getPrincipalCompleted(currency));
+	}
+	
 	public Money getInterest(final MonetaryCurrency currency) {
 		return Money.of(currency, this.interest);
 	}
@@ -104,13 +108,21 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableCustom<Ap
 	public Money getInterestWaived(final MonetaryCurrency currency) {
 		return Money.of(currency, this.interestWaived);
 	}
+	
+	public Money getInterestOutstanding(final MonetaryCurrency currency) {
+		return getInterest(currency).minus(getInterestCompleted(currency).plus(getInterestWaived(currency)));
+	}
 
 	public boolean isInterestDue(final MonetaryCurrency currency) {
 		return getInterest(currency).minus(getInterestCompleted(currency).plus(getInterestWaived(currency))).isGreaterThanZero();
 	}
 	
-	public Money getTotal(MonetaryCurrency currency) {
+	public Money getTotal(final MonetaryCurrency currency) {
 		return getPrincipal(currency).plus(getInterest(currency));
+	}
+	
+	public Money getTotalOutstanding(final MonetaryCurrency currency) {
+		return getPrincipalOutstanding(currency).plus(getInterestOutstanding(currency));
 	}
 	
 	public void updateLoan(final Loan loan) {
@@ -151,12 +163,10 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableCustom<Ap
 
 	public Money payInterestComponent(final Money transactionAmountRemaining) {
 		
-		MonetaryCurrency currency = transactionAmountRemaining.getCurrency();
-		
+		final MonetaryCurrency currency = transactionAmountRemaining.getCurrency();
 		Money interestPortionOfTransaction = Money.zero(currency);
 		
-		Money interestExpected = getInterest(currency);
-		Money interestDue = interestExpected.minus(getInterestCompleted(currency));
+		final Money interestDue = getInterestOutstanding(currency);
 		if (transactionAmountRemaining.isGreaterThanOrEqualTo(interestDue)) {
 			this.interestCompleted = getInterestCompleted(currency).plus(interestDue).getAmount();
 			interestPortionOfTransaction = interestPortionOfTransaction.plus(interestDue);
@@ -172,11 +182,10 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableCustom<Ap
 
 	public Money payPrincipalComponent(final Money transactionAmountRemaining) {
 		
-		MonetaryCurrency currency = transactionAmountRemaining.getCurrency();
+		final MonetaryCurrency currency = transactionAmountRemaining.getCurrency();
 		Money principalPortionOfTransaction = Money.zero(currency);
 		
-		Money principalExpected = getPrincipal(currency);
-		Money principalDue = principalExpected.minus(getPrincipalCompleted(currency));
+		final Money principalDue = getPrincipalOutstanding(currency);
 		if (transactionAmountRemaining.isGreaterThanOrEqualTo(principalDue)) {
 			this.principalCompleted = getPrincipalCompleted(currency).plus(principalDue).getAmount();
 			principalPortionOfTransaction = principalPortionOfTransaction.plus(principalDue);
@@ -194,8 +203,7 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableCustom<Ap
 		MonetaryCurrency currency = transactionAmountRemaining.getCurrency();
 		Money waivedInterestPortionOfTransaction = Money.zero(currency);
 		
-		Money interestExpected = getInterest(currency);
-		Money interestDue = interestExpected.minus(getInterestCompleted(currency));
+		Money interestDue = getInterestOutstanding(currency);
 		if (transactionAmountRemaining.isGreaterThanOrEqualTo(interestDue)) {
 			this.interestWaived = getInterestWaived(currency).plus(interestDue).getAmount();
 			waivedInterestPortionOfTransaction = waivedInterestPortionOfTransaction.plus(interestDue);

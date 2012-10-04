@@ -582,65 +582,42 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 			}
 		}
 	}
-
-	public void waive(final LoanTransaction loanTransaction, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
+	
+	/**
+	 * 
+	 * @param amount The amount of interest to be waived.
+	 * @param transactionDate The date on which the interest waiver is to be processed against.
+	 * @param defaultLoanLifecycleStateMachine 
+	 * 
+	 * @return {@link LoanTransaction} details of executed transaction
+	 */
+	public LoanTransaction waiveInterest(
+			final BigDecimal amount, 
+			final LocalDate transactionDate,
+			final LoanLifecycleStateMachine loanLifecycleStateMachine) {
 		
-		LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_REPAYMENT, LoanStatus.fromInt(this.loanStatus));
-		this.loanStatus = statusEnum.getValue();
+		final Money amountToWaive = Money.of(loanCurrency(), amount);
+		final LoanTransaction waiveInterestTransaction = LoanTransaction.waiver(this, amountToWaive, transactionDate);
 		
-		loanTransaction.updateLoan(this);
-		this.loanTransactions.add(loanTransaction);
-
-		LocalDate loanTransactionDate = loanTransaction.getTransactionDate();
-		if (loanTransactionDate.isBefore(this.getDisbursementDate())) {
-			final String errorMessage = "The transaction date cannot be before the loan disbursement date: "
-					+ getApprovedOnDate().toString();
-			throw new InvalidLoanStateTransitionException("waive",
-					"cannot.be.before.disbursement.date", errorMessage,
-					loanTransactionDate, this.getDisbursementDate());
-		}
-
-		if (loanTransactionDate.isAfter(new LocalDate())) {
-			final String errorMessage = "The transaction date cannot be in the future.";
-			throw new InvalidLoanStateTransitionException("waive",
-					"cannot.be.a.future.date", errorMessage, loanTransactionDate);
-		}
-
-		if (getTotalOutstanding().isGreaterThan(this.getInArrearsTolerance())) {
-			final String errorMessage = "Waiver is only allowed when the total outstanding amount left on loan ("
-					+ getTotalOutstanding()
-					+ ") is less than the in arrears tolerance setting of "
-					+ getInArrearsTolerance().getAmount();
-			throw new InvalidLoanStateTransitionException("waive",
-					"cannot.exceed.in.arrears.tolerance.setting", errorMessage,
-					getTotalOutstanding(), getInArrearsTolerance());
-		}
-
-		Money waived = Money.of(getCurrency(), loanTransaction.getAmount());
-		if (waived.isGreaterThan(this.getInArrearsTolerance())) {
-			final String errorMessage = "The amount being waived cannot exceed the in arrears tolerance setting of "
-					+ getInArrearsTolerance().getAmount();
-			throw new InvalidLoanStateTransitionException("waive",
-					"cannot.exceed.in.arrears.tolerance.setting", errorMessage,
-					waived, getInArrearsTolerance());
-		}
-
-		doPostLoanTransactionChecks(loanTransaction, loanLifecycleStateMachine);
+		handleRepaymentOrWaiverTransaction(waiveInterestTransaction, loanLifecycleStateMachine, null);		
+		
+		return waiveInterestTransaction;
 	}
 
-    public void updateTotalChargesDueAtDisbursement(){
+    public void updateTotalChargesDueAtDisbursement() {
         this.totalChargesDueAtDisbursement = deriveSumTotalOfChargesDueAtDisbursement();
     }
 
 	public void makeRepayment(final LoanTransaction loanTransaction, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
-		handleRepaymentTransaction(loanTransaction, loanLifecycleStateMachine, false);
+		handleRepaymentOrWaiverTransaction(loanTransaction, loanLifecycleStateMachine, null);
 	}
 
-	private void handleRepaymentTransaction(
+	private void handleRepaymentOrWaiverTransaction(
 			final LoanTransaction loanTransaction,
-			final LoanLifecycleStateMachine loanLifecycleStateMachine, final boolean adjusted) {
+			final LoanLifecycleStateMachine loanLifecycleStateMachine,
+			final LoanTransaction adjustedTransaction) {
 		
-		LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_REPAYMENT, LoanStatus.fromInt(this.loanStatus));
+		LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_REPAYMENT_OR_WAIVER, LoanStatus.fromInt(this.loanStatus));
 		this.loanStatus = statusEnum.getValue();
 		
 		loanTransaction.updateLoan(this);
@@ -649,33 +626,44 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		
 		this.loanTransactions.add(loanTransaction);
 
-		if (loanTransaction.isNotRepayment()) {
-			final String errorMessage = "A transaction of type repayment was expected but not received.";
+		if (loanTransaction.isNotRepayment() && loanTransaction.isNotWaiver()) {
+			final String errorMessage = "A transaction of type repayment or waiver was expected but not received.";
 			throw new InvalidLoanTransactionTypeException("transaction",
-					"is.not.a.repayment.transaction", errorMessage);
+					"is.not.a.repayment.or.waiver.transaction", errorMessage);
 		}
 
 		LocalDate loanTransactionDate = loanTransaction.getTransactionDate();
 		if (loanTransactionDate.isBefore(this.getDisbursementDate())) {
 			final String errorMessage = "The transaction date cannot be before the loan disbursement date: "
 					+ getApprovedOnDate().toString();
-			throw new InvalidLoanStateTransitionException("repayment",
+			throw new InvalidLoanStateTransitionException("transaction",
 					"cannot.be.before.disbursement.date", errorMessage,
 					loanTransactionDate, this.getDisbursementDate());
 		}
 
 		if (loanTransactionDate.isAfter(new LocalDate())) {
 			final String errorMessage = "The transaction date cannot be in the future.";
-			throw new InvalidLoanStateTransitionException("repayment",
+			throw new InvalidLoanStateTransitionException("transaction",
 					"cannot.be.a.future.date", errorMessage, loanTransactionDate);
 		}
 		
-		List<LoanTransaction> repaymentsOrWaivers = retreiveListOfRepaymentOrWaiverTransactionsPostDisbursement();
+		if (loanTransaction.isWaiver()) {
+			Money totalInterestOutstandingOnLoan = getTotalInterestOutstandingOnLoan();
+			if (adjustedTransaction != null) {
+				totalInterestOutstandingOnLoan = totalInterestOutstandingOnLoan.plus(adjustedTransaction.getAmount());
+			}
+			if (loanTransaction.getAmount(loanCurrency()).isGreaterThan(totalInterestOutstandingOnLoan)) {
+				final String errorMessage = "The amount of interest to waive cannot be greater than total interest outstanding on loan.";
+				throw new InvalidLoanStateTransitionException("waive.interest",
+						"amount.exceeds.total.outstanding.interest", errorMessage, loanTransaction.getAmount(), totalInterestOutstandingOnLoan.getAmount());
+			}
+		}
 		
 		final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessor.determineProcessor(this.transactionProcessingStrategy);
-		if (isTransactionChronologicallyLatest && !adjusted) {
+		if (isTransactionChronologicallyLatest && adjustedTransaction == null) {
 			loanRepaymentScheduleTransactionProcessor.handleTransaction(loanTransaction, getCurrency(), this.repaymentScheduleInstallments);
 		} else {
+			final List<LoanTransaction> repaymentsOrWaivers = retreiveListOfRepaymentOrWaiverTransactionsPostDisbursement();
 			loanRepaymentScheduleTransactionProcessor.handleTransaction(repaymentsOrWaivers, getCurrency(), this.repaymentScheduleInstallments);
 		}
 		
@@ -777,8 +765,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	}
 
 	public Money possibleNextRepaymentAmount() {
-		MonetaryCurrency currency = this.loanRepaymentScheduleDetail
-				.getPrincipal().getCurrency();
+		MonetaryCurrency currency = this.loanRepaymentScheduleDetail.getPrincipal().getCurrency();
 		Money possibleNextRepaymentAmount = Money.zero(currency);
 
 		for (LoanRepaymentScheduleInstallment installment : this.repaymentScheduleInstallments) {
@@ -790,26 +777,43 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 
 		return possibleNextRepaymentAmount;
 	}
+	
+	public LoanTransaction deriveDefaultInterestWaiverTransaction() {
+		
+		final Money totalInterestOutstanding = getTotalInterestOutstandingOnLoan();
+		Money possibleInterestToWaive = totalInterestOutstanding.copy();
+		LocalDate transactionDate = new LocalDate();
+		
+		if (totalInterestOutstanding.isGreaterThanZero()) {
+			// find earliest known instance of overdue interest and default to that
+			for (LoanRepaymentScheduleInstallment scheduledRepayment : this.repaymentScheduleInstallments) {
+				
+				final Money outstandingForPeriod = scheduledRepayment.getInterestOutstanding(loanCurrency());
+				if (scheduledRepayment.isOverdueOn(new LocalDate()) && scheduledRepayment.isNotFullyCompleted() && outstandingForPeriod.isGreaterThanZero()) {
+					transactionDate = scheduledRepayment.getDueDate();
+					possibleInterestToWaive = outstandingForPeriod;
+					break;
+				}
+			}
+		}
+
+		return LoanTransaction.waiver(this, possibleInterestToWaive, transactionDate);
+	}
 
 	public void adjustExistingTransaction(
-			LoanTransaction transactionForAdjustment,
-			LoanTransaction newTransactionDetail,
-			LoanLifecycleStateMachine loanLifecycleStateMachine) {
+			final LoanTransaction transactionForAdjustment,
+			final LoanTransaction newTransactionDetail,
+			final LoanLifecycleStateMachine loanLifecycleStateMachine) {
 
-		if (transactionForAdjustment.isNotRepayment()
-				&& transactionForAdjustment.isNotWaiver()) {
+		if (transactionForAdjustment.isNotRepayment() && transactionForAdjustment.isNotWaiver()) {
 			final String errorMessage = "A transaction of type repayment or waiver was expected but not received.";
 			throw new InvalidLoanTransactionTypeException("transaction",
 					"is.not.a.repayment.or.waiver.transaction", errorMessage);
 		}
 
 		transactionForAdjustment.contra();
-		if (newTransactionDetail.isRepayment()) {
-			handleRepaymentTransaction(newTransactionDetail, loanLifecycleStateMachine, true);
-		}
-
-		if (newTransactionDetail.isWaiver()) {
-			waive(newTransactionDetail, loanLifecycleStateMachine);
+		if (newTransactionDetail.isRepayment() || newTransactionDetail.isWaiver()) {
+			handleRepaymentOrWaiverTransaction(newTransactionDetail, loanLifecycleStateMachine, transactionForAdjustment);
 		}
 	}
 
@@ -1240,8 +1244,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	}
 
 	private Money getTotalInterestOnLoan() {
-		Money cumulativeInterest = Money.zero(this.loanRepaymentScheduleDetail
-				.getPrincipal().getCurrency());
+		Money cumulativeInterest = Money.zero(loanCurrency());
 
 		for (LoanRepaymentScheduleInstallment scheduledRepayment : this.repaymentScheduleInstallments) {
 			cumulativeInterest = cumulativeInterest.plus(scheduledRepayment
@@ -1249,6 +1252,31 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		}
 
 		return cumulativeInterest;
+	}
+	
+	private Money getTotalInterestOutstandingOnLoan() {
+		Money cumulativeInterest = Money.zero(loanCurrency());
+
+		for (LoanRepaymentScheduleInstallment scheduledRepayment : this.repaymentScheduleInstallments) {
+			cumulativeInterest = cumulativeInterest.plus(scheduledRepayment.getInterestOutstanding(loanCurrency()));
+		}
+
+		return cumulativeInterest;
+	}
+	
+	@SuppressWarnings("unused")
+	private Money getTotalInterestOverdueOnLoan() {
+		Money cumulativeInterestOverdue = Money.zero(this.loanRepaymentScheduleDetail.getPrincipal().getCurrency());
+
+		for (LoanRepaymentScheduleInstallment scheduledRepayment : this.repaymentScheduleInstallments) {
+			
+			final Money interestOutstandingForPeriod = scheduledRepayment.getInterestOutstanding(loanCurrency());
+			if (scheduledRepayment.isOverdueOn(new LocalDate())) {
+				cumulativeInterestOverdue = cumulativeInterestOverdue.plus(interestOutstandingForPeriod);
+			}
+		}
+
+		return cumulativeInterestOverdue;
 	}
 
 	private Money getTotalPrincipalOnLoan() {

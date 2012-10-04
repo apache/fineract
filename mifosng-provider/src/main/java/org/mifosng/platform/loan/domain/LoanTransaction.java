@@ -69,23 +69,23 @@ public class LoanTransaction extends AbstractAuditableCustom<AppUser, Long> {
     }
     
     public static LoanTransaction disbursement(final Money amount, final LocalDate disbursementDate) {
-		return new LoanTransaction(LoanTransactionType.DISBURSEMENT, amount.getAmount(), disbursementDate);
+		return new LoanTransaction(null, LoanTransactionType.DISBURSEMENT, amount.getAmount(), disbursementDate);
 	}
     
 	public static LoanTransaction repayment(final Money amount, final LocalDate paymentDate) {
-		return new LoanTransaction(LoanTransactionType.REPAYMENT, amount.getAmount(), paymentDate);
+		return new LoanTransaction(null, LoanTransactionType.REPAYMENT, amount.getAmount(), paymentDate);
 	}
 	
 	public static LoanTransaction repaymentAtDisbursement(final Money amount, final LocalDate paymentDate) {
-		return new LoanTransaction(LoanTransactionType.REPAYMENT_AT_DISBURSEMENT, amount.getAmount(), paymentDate);
+		return new LoanTransaction(null, LoanTransactionType.REPAYMENT_AT_DISBURSEMENT, amount.getAmount(), paymentDate);
 	}
 	
-	public static LoanTransaction waiver(final Money waived, final LocalDate waiveDate) {
-		return new LoanTransaction(LoanTransactionType.WAIVED, waived.getAmount(), waiveDate);
+	public static LoanTransaction waiver(final Loan loan, final Money waived, final LocalDate waiveDate) {
+		return new LoanTransaction(loan, LoanTransactionType.WAIVED, waived.getAmount(), waiveDate);
 	}
 	
-	private static LoanTransaction contra(LoanTransaction originalTransaction) {
-		LoanTransaction contra = new LoanTransaction(LoanTransactionType.REVERSAL, originalTransaction.getAmount().negate(), new LocalDate(originalTransaction.getDateOf()));
+	private static LoanTransaction contra(final LoanTransaction originalTransaction) {
+		LoanTransaction contra = new LoanTransaction(null, LoanTransactionType.REVERSAL, originalTransaction.getAmount().negate(), new LocalDate(originalTransaction.getDateOf()));
 		contra.updateContra(originalTransaction);
 		return contra;
 	}
@@ -94,7 +94,8 @@ public class LoanTransaction extends AbstractAuditableCustom<AppUser, Long> {
 		this.contra = transaction;
 	}
 
-	private LoanTransaction(final LoanTransactionType type, final BigDecimal amount, final LocalDate date) {
+	private LoanTransaction(final Loan loan, final LoanTransactionType type, final BigDecimal amount, final LocalDate date) {
+		this.loan = loan;
 		this.typeOf = type.getValue();
         this.amount = amount;
 		this.dateOf = date.toDateMidnight().toDate();

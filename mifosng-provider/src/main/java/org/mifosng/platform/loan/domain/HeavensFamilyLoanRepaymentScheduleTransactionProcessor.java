@@ -65,31 +65,38 @@ public class HeavensFamilyLoanRepaymentScheduleTransactionProcessor extends Abst
 			final List<LoanRepaymentScheduleInstallment> installments,
 			final LoanTransaction loanTransaction,
 			final LocalDate transactionDate, final Money paymentInAdvance) {
-
+		
+		final MonetaryCurrency currency = paymentInAdvance.getCurrency();
 		Money transactionAmountRemaining = paymentInAdvance;
-		MonetaryCurrency currency = paymentInAdvance.getCurrency();
+		Money interestWaivedPortion = Money.zero(transactionAmountRemaining.getCurrency());
+		Money principalPortion = Money.zero(transactionAmountRemaining.getCurrency());
+		Money interestPortion = Money.zero(transactionAmountRemaining.getCurrency());
+		Money chargesPortion = Money.zero(transactionAmountRemaining.getCurrency());
+		
+		if (loanTransaction.isWaiver()) {
+			interestWaivedPortion = currentInstallment.waiveInterestComponent(transactionAmountRemaining);
+			transactionAmountRemaining = transactionAmountRemaining.minus(interestWaivedPortion);
+		} else {
 
-		// placeholders for tracking the breakdown of components relevant to
-		// this transaction.
-		Money principalPortion = Money.zero(currency);
-		Money interestPortion = Money.zero(currency);
-		Money interestWaivedPortion = Money.zero(currency);
+			if (currentInstallment.isPrincipalNotCompleted(currency)) {
+				principalPortion = currentInstallment.payPrincipalComponent(transactionAmountRemaining);
+				if (currentInstallment.isPrincipalCompleted(currency)) {
+					interestWaivedPortion = currentInstallment.waiveInterestComponent(currentInstallment.getInterest(currency));
+				}
 
-		if (currentInstallment.isPrincipalNotCompleted(currency)) {
-			principalPortion = currentInstallment
-					.payPrincipalComponent(transactionAmountRemaining);
-			if (currentInstallment.isPrincipalCompleted(currency)) {
-				interestWaivedPortion = currentInstallment
-						.waiveInterestComponent(currentInstallment
-								.getInterest(currency));
+				loanTransaction.updateComponents(principalPortion, interestPortion, interestWaivedPortion, chargesPortion);
+
+				transactionAmountRemaining = transactionAmountRemaining.minus(principalPortion);
 			}
-
-			loanTransaction.updateComponents(principalPortion, interestPortion, interestWaivedPortion, Money.zero(transactionAmountRemaining.getCurrency()));
-
-			transactionAmountRemaining = transactionAmountRemaining
-					.minus(principalPortion);
+		
+			interestPortion = currentInstallment.payInterestComponent(transactionAmountRemaining);
+			transactionAmountRemaining = transactionAmountRemaining.minus(interestPortion);
+	
+			principalPortion = currentInstallment.payPrincipalComponent(transactionAmountRemaining);
+			transactionAmountRemaining = transactionAmountRemaining.minus(principalPortion);
 		}
-
+		
+		loanTransaction.updateComponents(principalPortion, interestPortion, interestWaivedPortion, chargesPortion);
 		return transactionAmountRemaining;
 	}
 	
@@ -101,18 +108,27 @@ public class HeavensFamilyLoanRepaymentScheduleTransactionProcessor extends Abst
 			final LoanRepaymentScheduleInstallment currentInstallment,
 			final LoanTransaction loanTransaction,
 			final Money transactionAmountUnprocessed) {
-
+		
+		
 		Money transactionAmountRemaining = transactionAmountUnprocessed;
-
-		Money interestPortion = currentInstallment.payInterestComponent(transactionAmountRemaining);
-		transactionAmountRemaining = transactionAmountRemaining.minus(interestPortion);
-
-		Money principalPortion = currentInstallment.payPrincipalComponent(transactionAmountRemaining);
-		transactionAmountRemaining = transactionAmountRemaining.minus(principalPortion);
-
 		Money interestWaivedPortion = Money.zero(transactionAmountRemaining.getCurrency());
-		loanTransaction.updateComponents(principalPortion, interestPortion, interestWaivedPortion, Money.zero(transactionAmountRemaining.getCurrency()));
-
+		Money principalPortion = Money.zero(transactionAmountRemaining.getCurrency());
+		Money interestPortion = Money.zero(transactionAmountRemaining.getCurrency());
+		Money chargesPortion = Money.zero(transactionAmountRemaining.getCurrency());
+		
+		if (loanTransaction.isWaiver()) {
+			interestWaivedPortion = currentInstallment.waiveInterestComponent(transactionAmountRemaining);
+			transactionAmountRemaining = transactionAmountRemaining.minus(interestWaivedPortion);
+		} else {
+		
+			interestPortion = currentInstallment.payInterestComponent(transactionAmountRemaining);
+			transactionAmountRemaining = transactionAmountRemaining.minus(interestPortion);
+	
+			principalPortion = currentInstallment.payPrincipalComponent(transactionAmountRemaining);
+			transactionAmountRemaining = transactionAmountRemaining.minus(principalPortion);
+		}
+		
+		loanTransaction.updateComponents(principalPortion, interestPortion, interestWaivedPortion, chargesPortion);
 		return transactionAmountRemaining;
 	}
 

@@ -55,7 +55,6 @@ public class AdhikarLoanRepaymentScheduleTransactionProcessor extends AbstractLo
 	 * For late repayments, pay off in the same way as on-time payments,
 	 * interest first then principal.
 	 */
-	@SuppressWarnings("unused")
 	@Override
 	protected Money handleTransactionThatIsALateRepaymentOfInstallment(
 			final LoanRepaymentScheduleInstallment currentInstallment,
@@ -64,37 +63,47 @@ public class AdhikarLoanRepaymentScheduleTransactionProcessor extends AbstractLo
 			final Money transactionAmountUnprocessed) {
 		
 		// pay of overdue and current interest due given transaction date
-		MonetaryCurrency currency = transactionAmountUnprocessed.getCurrency();
+		final MonetaryCurrency currency = transactionAmountUnprocessed.getCurrency();
 		Money transactionAmountRemaining = transactionAmountUnprocessed;
+		Money interestWaivedPortion = Money.zero(transactionAmountRemaining.getCurrency());
+		Money chargesPortion = Money.zero(transactionAmountRemaining.getCurrency());
 		
-		LoanRepaymentScheduleInstallment currentInstallmentBasedOnTransactionDate = nearestInstallment(loanTransaction.getTransactionDate(), installments);
+		if (loanTransaction.isWaiver()) {
+			interestWaivedPortion = currentInstallment.waiveInterestComponent(transactionAmountRemaining);
+			transactionAmountRemaining = transactionAmountRemaining.minus(interestWaivedPortion);
+			
+			final Money principalPortion = Money.zero(transactionAmountRemaining.getCurrency());
+			final Money interestPortion = Money.zero(transactionAmountRemaining.getCurrency());
+			loanTransaction.updateComponents(principalPortion, interestPortion, interestWaivedPortion, chargesPortion);
+		} else {
 		
-		for (LoanRepaymentScheduleInstallment installment : installments) {
-			if (
-				installment.isInterestDue(currency) && 
-				(installment.isOverdueOn(loanTransaction.getTransactionDate()) || installment.getInstallmentNumber().equals(currentInstallmentBasedOnTransactionDate.getInstallmentNumber()))
-			   ) {	
-				Money interestPortion = installment.payInterestComponent(transactionAmountRemaining);
-				transactionAmountRemaining = transactionAmountRemaining.minus(interestPortion);
-				
-				Money principalPortion = Money.zero(currency);
-				Money interestWaivedPortion = Money.zero(currency);
-				loanTransaction.updateComponents(principalPortion, interestPortion, interestWaivedPortion, Money.zero(transactionAmountRemaining.getCurrency()));
+			LoanRepaymentScheduleInstallment currentInstallmentBasedOnTransactionDate = nearestInstallment(loanTransaction.getTransactionDate(), installments);
+			
+			for (LoanRepaymentScheduleInstallment installment : installments) {
+				if (
+					installment.isInterestDue(currency) && 
+					(installment.isOverdueOn(loanTransaction.getTransactionDate()) || installment.getInstallmentNumber().equals(currentInstallmentBasedOnTransactionDate.getInstallmentNumber()))
+				   ) {	
+					Money interestPortion = installment.payInterestComponent(transactionAmountRemaining);
+					transactionAmountRemaining = transactionAmountRemaining.minus(interestPortion);
+					
+					Money principalPortion = Money.zero(currency);
+					loanTransaction.updateComponents(principalPortion, interestPortion, interestWaivedPortion, Money.zero(transactionAmountRemaining.getCurrency()));
+				}
+			}
+			
+			// With whatever is remaining, pay off principal components of installments
+			for (LoanRepaymentScheduleInstallment installment : installments) {
+				if (installment.isPrincipalNotCompleted(currency) && transactionAmountRemaining.isGreaterThanZero()) {
+					Money principalPortion = installment.payPrincipalComponent(transactionAmountRemaining);
+					transactionAmountRemaining = transactionAmountRemaining.minus(principalPortion);
+					
+					Money interestPortion = Money.zero(currency);
+					loanTransaction.updateComponents(principalPortion, interestPortion, interestWaivedPortion, Money.zero(transactionAmountRemaining.getCurrency()));
+				}
 			}
 		}
 		
-		// With whatever is remaining, pay off principal components of installments
-		for (LoanRepaymentScheduleInstallment installment : installments) {
-			if (installment.isPrincipalNotCompleted(currency) && transactionAmountRemaining.isGreaterThanZero()) {
-				Money principalPortion = installment.payPrincipalComponent(transactionAmountRemaining);
-				transactionAmountRemaining = transactionAmountRemaining.minus(principalPortion);
-				
-				Money interestPortion = Money.zero(currency);
-				Money interestWaivedPortion = Money.zero(currency);
-				loanTransaction.updateComponents(principalPortion, interestPortion, interestWaivedPortion, Money.zero(transactionAmountRemaining.getCurrency()));
-			}
-		}
-
 		return transactionAmountRemaining;
 	}
 
@@ -119,18 +128,26 @@ public class AdhikarLoanRepaymentScheduleTransactionProcessor extends AbstractLo
 			final LoanRepaymentScheduleInstallment currentInstallment,
 			final LoanTransaction loanTransaction,
 			final Money transactionAmountUnprocessed) {
-
-		Money transactionAmountRemaining = transactionAmountUnprocessed;
 		
-		Money interestPortion = currentInstallment.payInterestComponent(transactionAmountRemaining);
-		transactionAmountRemaining = transactionAmountRemaining.minus(interestPortion);
-
-		Money principalPortion = currentInstallment.payPrincipalComponent(transactionAmountRemaining);
-		transactionAmountRemaining = transactionAmountRemaining.minus(principalPortion);
-
+		Money transactionAmountRemaining = transactionAmountUnprocessed;
 		Money interestWaivedPortion = Money.zero(transactionAmountRemaining.getCurrency());
-		loanTransaction.updateComponents(principalPortion, interestPortion,interestWaivedPortion, Money.zero(transactionAmountRemaining.getCurrency()));
-
+		Money principalPortion = Money.zero(transactionAmountRemaining.getCurrency());
+		Money interestPortion = Money.zero(transactionAmountRemaining.getCurrency());
+		Money chargesPortion = Money.zero(transactionAmountRemaining.getCurrency());
+		
+		if (loanTransaction.isWaiver()) {
+			interestWaivedPortion = currentInstallment.waiveInterestComponent(transactionAmountRemaining);
+			transactionAmountRemaining = transactionAmountRemaining.minus(interestWaivedPortion);
+		} else {
+		
+			interestPortion = currentInstallment.payInterestComponent(transactionAmountRemaining);
+			transactionAmountRemaining = transactionAmountRemaining.minus(interestPortion);
+	
+			principalPortion = currentInstallment.payPrincipalComponent(transactionAmountRemaining);
+			transactionAmountRemaining = transactionAmountRemaining.minus(principalPortion);
+		}
+		
+		loanTransaction.updateComponents(principalPortion, interestPortion, interestWaivedPortion, chargesPortion);
 		return transactionAmountRemaining;
 	}
 

@@ -40,6 +40,7 @@ import org.mifosng.platform.api.data.LoanPermissionData;
 import org.mifosng.platform.api.data.LoanProductLookup;
 import org.mifosng.platform.api.data.LoanRepaymentTransactionData;
 import org.mifosng.platform.api.data.LoanTransactionData;
+import org.mifosng.platform.api.data.LoanTransactionNewData;
 import org.mifosng.platform.api.data.MoneyData;
 import org.mifosng.platform.api.data.StaffData;
 import org.mifosng.platform.api.data.TransactionProcessingStrategyData;
@@ -414,9 +415,9 @@ public class LoansApiResource {
 			EntityIdentifier identifier = this.loanWritePlatformService
 					.makeLoanRepayment(command);
 			response = Response.ok().entity(identifier).build();
-		} else if (is(commandParam, "waiver")) {
+		} else if (is(commandParam, "waiveinterest")) {
 			EntityIdentifier identifier = this.loanWritePlatformService
-					.waiveLoanAmount(command);
+					.waiveInterestOnLoan(command);
 			response = Response.ok().entity(identifier).build();
 		}
 
@@ -436,26 +437,34 @@ public class LoansApiResource {
 			@QueryParam("command") final String commandParam,
 			@Context final UriInfo uriInfo) {
 		
-		Set<String> typicalResponseParameters = new HashSet<String>(
-				Arrays.asList("id", "transactionType", "date", "principal", "interest", "total", "totalWaived", "overpaid")
-				);
-		
-		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-		if (responseParameters.isEmpty()) {
-			responseParameters.addAll(typicalResponseParameters);
-		}
-		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-		
 		LoanTransactionData transactionData = null;
 		if (is(commandParam, "repayment")) {
+			Set<String> typicalResponseParameters = new HashSet<String>(
+					Arrays.asList("id", "transactionType", "date", "principal", "interest", "total", "totalWaived", "overpaid")
+					);
+			
+			Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+			if (responseParameters.isEmpty()) {
+				responseParameters.addAll(typicalResponseParameters);
+			}
+			boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 			transactionData = this.loanReadPlatformService.retrieveNewLoanRepaymentDetails(loanId);
-		} else if (is(commandParam, "waiver")) {
-			transactionData = this.loanReadPlatformService.retrieveNewLoanWaiverDetails(loanId);
+			return this.apiJsonSerializerService.serializeLoanTransactionDataToJson(prettyPrint, responseParameters, transactionData);
+		} else if (is(commandParam, "waiveinterest")) {
+			
+			final Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "type", "date", "currency", "amount"));
+			
+			Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+			if (responseParameters.isEmpty()) {
+				responseParameters.addAll(typicalResponseParameters);
+			}
+			boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+			
+			LoanTransactionNewData newTransactionData = this.loanReadPlatformService.retrieveNewLoanWaiveInterestDetails(loanId);
+			return this.apiJsonSerializerService.serializeLoanTransactionDataToJson(prettyPrint, responseParameters, newTransactionData);
 		} else {
 			throw new UnrecognizedQueryParamException("command", commandParam);
 		}
-
-		return this.apiJsonSerializerService.serializeLoanTransactionDataToJson(prettyPrint, responseParameters, transactionData);
 	}
 
 	@GET

@@ -45,7 +45,7 @@ public interface LoanWritePlatformService {
 	EntityIdentifier adjustLoanTransaction(AdjustLoanTransactionCommand command);
 
 	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE')")
-	EntityIdentifier waiveLoanAmount(LoanTransactionCommand command);
+	EntityIdentifier waiveInterestOnLoan(LoanTransactionCommand command);
 
     @PreAuthorize(value = "hasRole('ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE')")
     EntityIdentifier addLoanCharge(LoanChargeCommand command);

@@ -495,7 +495,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		LocalDate transactionDate = command.getTransactionDate();
 		LoanTransaction newTransactionDetail = LoanTransaction.repayment(transactionAmount, transactionDate);
 		if (transactionToAdjust.isWaiver()) {
-			newTransactionDetail = LoanTransaction.waiver(transactionAmount, transactionDate);
+			newTransactionDetail = LoanTransaction.waiver(loan, transactionAmount, transactionDate);
 		}
 
 		loan.adjustExistingTransaction(transactionToAdjust, newTransactionDetail, defaultLoanLifecycleStateMachine());
@@ -515,33 +515,26 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 	
 	@Transactional
 	@Override
-	public EntityIdentifier waiveLoanAmount(LoanTransactionCommand command) {
+	public EntityIdentifier waiveInterestOnLoan(final LoanTransactionCommand command) {
 		
 		context.authenticatedUser();
 
-		LoanTransactionCommandValidator validator = new LoanTransactionCommandValidator(command);
+		final LoanTransactionCommandValidator validator = new LoanTransactionCommandValidator(command);
 		validator.validate();
 		
-		Loan loan = this.loanRepository.findOne(command.getLoanId());
+		final Loan loan = this.loanRepository.findOne(command.getLoanId());
 		if (loan == null) {
 			throw new LoanNotFoundException(command.getLoanId());
 		}
 		
-		Money waived = Money.of(loan.repaymentScheduleDetail()
-				.getPrincipal().getCurrency(),
-				command.getTransactionAmount());
-
-		LoanTransaction waiver = LoanTransaction.waiver(waived, command.getTransactionDate());
+		final LoanTransaction waiveTransaction = loan.waiveInterest(command.getTransactionAmount(), command.getTransactionDate(), defaultLoanLifecycleStateMachine());
 		
-		loan.waive(waiver, defaultLoanLifecycleStateMachine());
-		
-		this.loanTransactionRepository.save(waiver);
-		
+		this.loanTransactionRepository.save(waiveTransaction);
 		this.loanRepository.save(loan);
 		
-		String noteText = command.getNote();
+		final String noteText = command.getNote();
 		if (StringUtils.isNotBlank(noteText)) {
-			Note note = Note.loanTransactionNote(loan, waiver, noteText);
+			final Note note = Note.loanTransactionNote(loan, waiveTransaction, noteText);
 			this.noteRepository.save(note);
 		}
 

@@ -10,6 +10,7 @@ import org.mifosng.platform.api.data.LoanBasicDetailsData;
 import org.mifosng.platform.api.data.LoanPermissionData;
 import org.mifosng.platform.api.data.LoanRepaymentTransactionData;
 import org.mifosng.platform.api.data.LoanTransactionData;
+import org.mifosng.platform.api.data.LoanTransactionNewData;
 
 public interface LoanReadPlatformService {
 
@@ -29,7 +30,7 @@ public interface LoanReadPlatformService {
 
 	LoanTransactionData retrieveNewLoanRepaymentDetails(Long loanId);
 
-	LoanTransactionData retrieveNewLoanWaiverDetails(Long loanId);
+	LoanTransactionNewData retrieveNewLoanWaiveInterestDetails(Long loanId);
 
 	LoanTransactionData retrieveLoanTransactionDetails(Long loanId, Long transactionId);
 }

@@ -20,6 +20,7 @@ import org.mifosng.platform.api.data.LoanProductData;
 import org.mifosng.platform.api.data.LoanRepaymentTransactionData;
 import org.mifosng.platform.api.data.LoanSchedulePeriodData;
 import org.mifosng.platform.api.data.LoanTransactionData;
+import org.mifosng.platform.api.data.LoanTransactionNewData;
 import org.mifosng.platform.api.data.MoneyData;
 import org.mifosng.platform.client.service.ClientReadPlatformService;
 import org.mifosng.platform.currency.domain.ApplicationCurrency;
@@ -285,40 +286,30 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 	}
 
 	@Override
-	public LoanTransactionData retrieveNewLoanWaiverDetails(final Long loanId) {
+	public LoanTransactionNewData retrieveNewLoanWaiveInterestDetails(final Long loanId) {
 
 		context.authenticatedUser();
 
-		// TODO - OPTIMIZE - write simple sql query to fetch back date of
-		// possible next transaction date.
+		// TODO - OPTIMIZE - write simple sql query to fetch back overdue interest that can be waived along with the date of repayment period interest is overdue.
 		Loan loan = this.loanRepository.findOne(loanId);
 		if (loan == null) {
 			throw new LoanNotFoundException(loanId);
 		}
 
-		final String currencyCode = loan.repaymentScheduleDetail()
-				.getPrincipal().getCurrencyCode();
-		ApplicationCurrency currency = this.applicationCurrencyRepository
-				.findOneByCode(currencyCode);
+		final String currencyCode = loan.repaymentScheduleDetail().getPrincipal().getCurrencyCode();
+		ApplicationCurrency currency = this.applicationCurrencyRepository.findOneByCode(currencyCode);
 		if (currency == null) {
 			throw new CurrencyNotFoundException(currencyCode);
 		}
-
 		CurrencyData currencyData = new CurrencyData(currency.getCode(),
 				currency.getName(), currency.getDecimalPlaces(),
 				currency.getDisplaySymbol(), currency.getNameCode());
 
-		Money totalOutstanding = loan.getTotalOutstanding();
-		MoneyData totalOutstandingData = MoneyData.of(currencyData,
-				totalOutstanding.getAmount());
+		LoanTransaction waiveOfInterest = loan.deriveDefaultInterestWaiverTransaction();
 
-		LoanTransactionData newWaiverDetails = new LoanTransactionData();
-		newWaiverDetails.setTransactionType(LoanEnumerations
-				.transactionType(LoanTransactionType.WAIVED));
-		newWaiverDetails.setDate(new LocalDate());
-		newWaiverDetails.setTotal(totalOutstandingData);
-
-		return newWaiverDetails;
+		EnumOptionData waiverEnum = LoanEnumerations.transactionType(LoanTransactionType.WAIVED);
+		
+		return new LoanTransactionNewData(waiverEnum, currencyData, waiveOfInterest.getTransactionDate(), waiveOfInterest.getAmount());
 	}
 
 	@Override
