@@ -2393,59 +2393,55 @@ Request Body:
             <div class="method-description">
                 <h3>Data Tables</h3>
                 <p>
-                In Mifos X, any number of "Sets" of "Additional Fields" can be configured for a Mifos X database table ("Type").
-                </p>
-                <p>  For example, portfolio_client is the database table that holds client data.  Typically, MFI's want more client related fields than is provided by Mifos X out-of-the-box.  
-                The MFI might add a Set called "Additional Info" containing some fields that are typically input when creating a client.
-                They might then add another Set called "Highly Improbable Info" containing some fields that are only input in exceptional
-                circumstances.
+                The datatables API allows you to plug-in your own tables (MySql) that have a relationship to a Mifos X core table.
+                For example, you might want to add some extra client fields and record information about each of the clients' family members.
+                Via the API you can create, read, update and delete entries for each 'plugged-in' table.
+                The API checks for permission and for 'data scoping' (only data within the users' office hierarchy can be managed by the user).
                 </p>
                 <p>
-                The additional fields resource allows you to retrieve and update any Additional Fields data that has been configured in Mifos X.
-                </p>
-                <p>
-                The Mifos X Reference APP a JQuery plugin called stretchydatatables which, itself, uses this
-                datatables resource to provide a pretty flexible additional fields/extra data User Interface (UI).
+                The Mifos X Reference App uses a JQuery plugin called stretchydatatables (which in turn uses this
+                datatables resource) to provide a pretty flexible CRUD (Create, Read, Update, Delete) User Interface.
                 </p>
                 <p><a href="https://mifosforge.jira.com/wiki/display/MIFOSX/Mifos+X+-+Plugging+In+Non-Core+and+User+Defined+Data">More Documentation</a></p>
             </div>
         </div>
     
     
-        <a id="additionalfields_list" name="additionalfields_list" class="old-syle-anchor">&nbsp;</a>
+        <a id="datatables_list" name="datatables_list" class="old-syle-anchor">&nbsp;</a>
         <div class="method-section">
             <div class="method-description">
-                <h4>List Additional Fields Sets</h4>
+                <h4>List Data Tables</h4>
                 <p>
-                Lists the Sets of additional fields have been defined in Mifos X. 
+                Lists the registered data tables and the Mifos X Core application table they are registered to. 
                 </p>
                 
                 <h5>Arguments</h5>
                 <dl class="argument-list">
-                    <dt>type</dt>
+                    <dt>appTable</dt>
                     <dd><span>optional</span></dd>
-                    <dd>The Additional Fields Type (Mifos X database table) to restrict the output to</dd>
+                    <dd>The Mifos X core table to restrict the output to</dd>
                 </dl>
                 <p>Example Requests: </p>
-                <div class=apiClick>additionalfields?type=m_client</div>
+                <div class=apiClick>datatables?appTable=m_client</div>
                 <br><br>
-                <div class=apiClick>additionalfields</div>
+                <div class=apiClick>datatables</div>
             </div>
             <div class="method-example">
-                <code class="method-declaration">GET https://Domain Name/api/v1/additionalfields</code>
-                <code class="method-response">[ {
-  "id" : 1,
-  "name" : "Additional Information",
-  "type" : "portfolio_client"
-}, {
-  "id" : 8,
-  "name" : "Additional Information",
-  "type" : "portfolio_loan"
-}, {
-  "id" : 9,
-  "name" : "Highly Improbable Info",
-  "type" : "portfolio_client"
-} ]
+                <code class="method-declaration">GET https://Domain Name/api/v1/datatables</code>
+                <code class="method-response">[
+  {
+    "applicationTableName": "m_client",
+    "registeredTableName": "Additional Client Fields Data"
+  },
+  {
+    "applicationTableName": "m_client",
+    "registeredTableName": "Extra Family Details Data"
+  },
+  {
+    "applicationTableName": "m_loan",
+    "registeredTableName": "Additional Loan Fields Data"
+  }
+]
                 </code>
             </div>
         </div>
