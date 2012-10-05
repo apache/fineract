@@ -66,11 +66,11 @@ public class DataTableApiResource {
 	@GET
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public String getDatatables(@QueryParam("appTable") final String appTable,
+	public String getDatatables(@QueryParam("apptable") final String apptable,
 			@Context final UriInfo uriInfo) {
 
 		List<DatatableData> result = this.readWriteNonCoreDataService
-				.retrieveDatatableNames(appTable);
+				.retrieveDatatableNames(apptable);
 
 		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo
 				.getQueryParameters());
@@ -79,14 +79,14 @@ public class DataTableApiResource {
 	}
 
 	@POST
-	@Path("register/{datatable}/{appTable}")
+	@Path("register/{datatable}/{apptable}")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	public Response registerDatatable(
 			@PathParam("datatable") final String datatable,
-			@PathParam("appTable") final String appTable) {
+			@PathParam("apptable") final String apptable) {
 
-		this.readWriteNonCoreDataService.registerDatatable(datatable, appTable);
+		this.readWriteNonCoreDataService.registerDatatable(datatable, apptable);
 
 		EntityIdentifier entityIdentifier = new EntityIdentifier();
 		return Response.ok().entity(entityIdentifier).build();
@@ -106,20 +106,19 @@ public class DataTableApiResource {
 	}
 
 	@GET
-	@Path("{datatable}/{appTableId}")
+	@Path("{datatable}/{apptableId}")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	public String getDatatable(@PathParam("datatable") final String datatable,
-			@PathParam("appTableId") final Long appTableId,
-			@QueryParam("sqlFields") final String sqlFields,
-			@QueryParam("sqlOrder") final String sqlOrder,
+			@PathParam("apptableId") final Long apptableId,
+			@QueryParam("order") final String order,
 			@Context final UriInfo uriInfo) {
 
 		checkUserPermissionForDatatable(datatable, "READ");
 
 		GenericResultsetData results = this.readWriteNonCoreDataService
-				.retrieveDataTableGenericResultSet(datatable, appTableId,
-						sqlFields, sqlOrder, null);
+				.retrieveDataTableGenericResultSet(datatable, apptableId,
+						order, null);
 
 		String json = "";
 		final boolean genericResultSet = ApiParameterHelper.genericResultSet(uriInfo.getQueryParameters());
@@ -134,34 +133,34 @@ public class DataTableApiResource {
 	}
 
 	@POST
-	@Path("{datatable}/{appTableId}")
+	@Path("{datatable}/{apptableId}")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	public Response newDatatableEntry(
 			@PathParam("datatable") final String datatable,
-			@PathParam("appTableId") final Long appTableId,
+			@PathParam("apptableId") final Long apptableId,
 			final String jsonRequestBody) {
 
 		checkUserPermissionForDatatable(datatable, "CREATE");
 		Map<String, String> queryParams = getQueryParamsFromJsonRequestBody(jsonRequestBody);
 
 		this.readWriteNonCoreDataService.newDatatableEntry(datatable,
-				appTableId, queryParams);
+				apptableId, queryParams);
 
 		EntityIdentifier entityIdentifier = new EntityIdentifier(
-				Long.valueOf(appTableId));
+				Long.valueOf(apptableId));
 
 		return Response.ok().entity(entityIdentifier).build();
 
 	}
 
 	@PUT
-	@Path("{datatable}/{appTableId}")
+	@Path("{datatable}/{apptableId}")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	public Response updateDatatableEntryOnetoOne(
 			@PathParam("datatable") final String datatable,
-			@PathParam("appTableId") final Long appTableId,
+			@PathParam("apptableId") final Long apptableId,
 			final String jsonRequestBody) {
 		/*
 		 * for updating one to one relationships (where foreign key is the
@@ -171,22 +170,22 @@ public class DataTableApiResource {
 		Map<String, String> queryParams = getQueryParamsFromJsonRequestBody(jsonRequestBody);
 
 		this.readWriteNonCoreDataService.updateDatatableEntryOnetoOne(
-				datatable, appTableId, queryParams);
+				datatable, apptableId, queryParams);
 
 		EntityIdentifier entityIdentifier = new EntityIdentifier(
-				Long.valueOf(appTableId));
+				Long.valueOf(apptableId));
 
 		return Response.ok().entity(entityIdentifier).build();
 
 	}
 
 	@PUT
-	@Path("{datatable}/{appTableId}/{datatableId}")
+	@Path("{datatable}/{apptableId}/{datatableId}")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	public Response updateDatatableEntryOnetoOne(
 			@PathParam("datatable") final String datatable,
-			@PathParam("appTableId") final Long appTableId,
+			@PathParam("apptableId") final Long apptableId,
 			@PathParam("datatableId") final Long datatableId,
 			final String jsonRequestBody) {
 		/*
@@ -197,51 +196,51 @@ public class DataTableApiResource {
 		Map<String, String> queryParams = getQueryParamsFromJsonRequestBody(jsonRequestBody);
 
 		this.readWriteNonCoreDataService.updateDatatableEntryOnetoMany(
-				datatable, appTableId, datatableId, queryParams);
+				datatable, apptableId, datatableId, queryParams);
 
 		EntityIdentifier entityIdentifier = new EntityIdentifier(
-				Long.valueOf(appTableId));
+				Long.valueOf(apptableId));
 
 		return Response.ok().entity(entityIdentifier).build();
 
 	}
 
 	@DELETE
-	@Path("{datatable}/{appTableId}")
+	@Path("{datatable}/{apptableId}")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	public Response deleteDatatableEntries(
 			@PathParam("datatable") final String datatable,
-			@PathParam("appTableId") final Long appTableId) {
+			@PathParam("apptableId") final Long apptableId) {
 
 		checkUserPermissionForDatatable(datatable, "DELETE");
 
 		this.readWriteNonCoreDataService.deleteDatatableEntries(datatable,
-				appTableId);
+				apptableId);
 
 		EntityIdentifier entityIdentifier = new EntityIdentifier(
-				Long.valueOf(appTableId));
+				Long.valueOf(apptableId));
 
 		return Response.ok().entity(entityIdentifier).build();
 
 	}
 
 	@DELETE
-	@Path("{datatable}/{appTableId}/{datatableId}")
+	@Path("{datatable}/{apptableId}/{datatableId}")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	public Response deleteDatatableEntries(
 			@PathParam("datatable") final String datatable,
-			@PathParam("appTableId") final Long appTableId,
+			@PathParam("apptableId") final Long apptableId,
 			@PathParam("datatableId") final Long datatableId) {
 
 		checkUserPermissionForDatatable(datatable, "DELETE");
 
 		this.readWriteNonCoreDataService.deleteDatatableEntry(datatable,
-				appTableId, datatableId);
+				apptableId, datatableId);
 
 		EntityIdentifier entityIdentifier = new EntityIdentifier(
-				Long.valueOf(appTableId));
+				Long.valueOf(apptableId));
 
 		return Response.ok().entity(entityIdentifier).build();
 

@@ -203,7 +203,7 @@ public class ReadWriteNonCoreDataServiceImpl implements
 		long startTime = System.currentTimeMillis();
 
 		GenericResultsetData grs = retrieveDataTableGenericResultSet(datatable,
-				appTableId, null, null, null);
+				appTableId, null, null);
 
 		if (grs.getData().size() == 0)
 			throw new DataTableNotFoundException(datatable, appTableId);
@@ -240,7 +240,7 @@ public class ReadWriteNonCoreDataServiceImpl implements
 		long startTime = System.currentTimeMillis();
 
 		GenericResultsetData grs = retrieveDataTableGenericResultSet(datatable,
-				appTableId, null, null, datatableId);
+				appTableId, null, datatableId);
 
 		if (grs.getData().size() == 0)
 			throw new DataTableNotFoundException(datatable, appTableId);
@@ -302,8 +302,7 @@ public class ReadWriteNonCoreDataServiceImpl implements
 
 	@Override
 	public GenericResultsetData retrieveDataTableGenericResultSet(
-			String datatable, Long appTableId, String sqlFields,
-			String sqlOrder, Long id) {
+			String datatable, Long appTableId, String order, Long id) {
 
 		long startTime = System.currentTimeMillis();
 
@@ -312,23 +311,19 @@ public class ReadWriteNonCoreDataServiceImpl implements
 
 		List<ResultsetColumnHeader> columnHeaders = getDatatableResultsetColumnHeaders(datatable);
 
-		String sql = "select ";
-		if (sqlFields != null)
-			sql = sql + sqlFields;
-		else
-			sql = sql + " * ";
+		String sql = "";
 
 		// id only used for reading a specific entry in a one to many datatable
 		// (when updating)
 		if (id == null) {
-			sql = sql + " from `" + datatable + "` where "
+			sql = sql + "select * from `" + datatable + "` where "
 					+ getFKField(appTable) + " = " + appTableId;
 		} else {
-			sql = sql + " from `" + datatable + "` where id = " + id;
+			sql = sql + "select * from `" + datatable + "` where id = " + id;
 		}
 
-		if (sqlOrder != null)
-			sql = sql + " order by " + sqlOrder;
+		if (order != null)
+			sql = sql + " order by " + order;
 
 		List<ResultsetDataRow> result = fillDatatableResultSetDataRows(sql);
 
@@ -806,7 +801,8 @@ public class ReadWriteNonCoreDataServiceImpl implements
 					List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 					ApiParameterError error = ApiParameterError.parameterError(
 							"error.msg.invalid.columnValue",
-							 "Value not found in Allowed Value list", columnHeader.getColumnName(), paramValue);
+							"Value not found in Allowed Value list",
+							columnHeader.getColumnName(), paramValue);
 					dataValidationErrors.add(error);
 					throw new PlatformApiDataValidationException(
 							"validation.msg.validation.errors.exist",
@@ -822,7 +818,8 @@ public class ReadWriteNonCoreDataServiceImpl implements
 					List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 					ApiParameterError error = ApiParameterError.parameterError(
 							"error.msg.invalid.columnValue",
-							 "Value not found in Allowed Value list", columnHeader.getColumnName(), paramValue);
+							"Value not found in Allowed Value list",
+							columnHeader.getColumnName(), paramValue);
 					dataValidationErrors.add(error);
 					throw new PlatformApiDataValidationException(
 							"validation.msg.validation.errors.exist",

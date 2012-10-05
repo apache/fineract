@@ -2417,12 +2417,12 @@ Request Body:
                 
                 <h5>Arguments</h5>
                 <dl class="argument-list">
-                    <dt>appTable</dt>
+                    <dt>apptable</dt>
                     <dd><span>optional</span></dd>
                     <dd>The Mifos X core application table.</dd>
                 </dl>
                 <p>Example Requests: </p>
-                <div class=apiClick>datatables?appTable=m_client</div>
+                <div class=apiClick>datatables?apptable=m_client</div>
                 <br><br>
                 <div class=apiClick>datatables</div>
             </div>
@@ -2451,112 +2451,242 @@ Request Body:
             <div class="method-description">
             <h4>Register Data Table</h4>
             <p>
-            Registers a data table with the Mifos X Core application table.
+            Registers a data table with the Mifos X Core application table.  This allows the data table to be maintained through the API.
             </p>
             </div>
             <div class="method-example">
-                <code class="method-declaration">POST https://Domain Name/api/v1/datatable/{datatable}/{set}/{id}</code>
-                <code class="method-request">POST additionalfields/portfolio_client/Additional Information/2
+                <code class="method-declaration">POST https://Domain Name/api/v1/datatables/register/{datatable}/{apptable}</code>
+                <code class="method-request">POST datatables/register/New Table/m_client
 Content-Type: application/json
 Request Body:
 {
- "Ethnic_Group":"Berber",
- "Ethnic_Group_Other":"",
- "Household_Location":"East Sikkim",
- "Household_Location_Other":"",
- "Religion":"Animist",
- "Religion_Other":"jjjjjjj",
- "Knowledge_of_Person":"Son/daughter of staff member",
- "Gender":"Female",
- "Whois":"its\r\nme of\r\ncourse\r\nyes\r\nend and the end of it all"
 }
 </code>
                 <code class="method-response">{
- "entityId": 2
+  "entityId": null
 }
                 </code>
             </div>
         </div>
         
     
-        <a id="additionalfields_retrieve" name="additionalfields_retrieve" class="old-syle-anchor">&nbsp;</a>
+        <a id="datatables_deregister" name="datatables_deregister" class="old-syle-anchor">&nbsp;</a>
         <div class="method-section">
             <div class="method-description">
-                <h4>Retrieve Additional Fields</h4>
-                <p>
-                Returns the Set of Additional Fields data for the ID provided.  The ID is the id field of the Type table e.g. portfolio_client might have an id value of 4.  The output is a JSON formatted "Generic Resultset".  The Generic Resultset contains Column Heading as well as Data information.  The Column Heading information may include allowed values (columnValues array).
-                </p>
-                <p>Example Request: 
-                <div class=apiClick>additionalfields/m_client/Additional Information/2</div>
-                </p>
+            <h4>Deregister Data Table</h4>
+            <p>
+            Deregisters a data table.  It will no longer be available through the API.
+            </p>
             </div>
             <div class="method-example">
-                <code class="method-declaration">GET https://Domain Name/api/v1/additionalfields/{type}/{set}/{id}</code>
+                <code class="method-declaration">POST https://Domain Name/api/v1/datatables/deregister/{datatable}</code>
+                <code class="method-request">POST datatables/register/New Table
+Content-Type: application/json
+Request Body:
+{
+}
+</code>
                 <code class="method-response">{
-  "columnHeaders" : [ {
-    "columnName" : "Ethnic Group",
-    "columnType" : "String",
-    "columnLength" : 50,
-    "columnDisplayType" : "List",
-    "columnValues" : [ "Bedouin", "Berber", "Italian", "Miknasa", "Mrazig", "Other", "Unknown" ]
-  }, {
-    "columnName" : "Ethnic Group Other",
-    "columnType" : "String",
-    "columnLength" : 50,
-    "columnDisplayType" : null,
-    "columnValues" : [ ]
-  }, {
-    "columnName" : "Household Location",
-    "columnType" : "String",
-    "columnLength" : 50,
-    "columnDisplayType" : "List",
-    "columnValues" : [ "East Sikkim", "North Sikkim", "South Sikkim", "West Sikkim", "Other" ]
-  }, {
-    "columnName" : "Household Location Other",
-    "columnType" : "String",
-    "columnLength" : 50,
-    "columnDisplayType" : null,
-    "columnValues" : [ ]
-  }, {
-    "columnName" : "Religion",
-    "columnType" : "String",
-    "columnLength" : 50,
-    "columnDisplayType" : "List",
-    "columnValues" : [ "Protestant", "Catholic", "Muslim", "Animist", "Atheist", "Other", "Unknown" ]
-  }, {
-    "columnName" : "Religion Other",
-    "columnType" : "String",
-    "columnLength" : 50,
-    "columnDisplayType" : null,
-    "columnValues" : [ ]
-  }, {
-    "columnName" : "Knowledge of Person",
-    "columnType" : "String",
-    "columnLength" : 50,
-    "columnDisplayType" : "List",
-    "columnValues" : [ "Staff member", "Spouse of staff member", "Son/daughter of staff member", "Friend of staff member", "Not known by any staff member", "Other" ]
-  }, {
-    "columnName" : "Gender",
-    "columnType" : "String",
-    "columnLength" : 10,
-    "columnDisplayType" : "List",
-    "columnValues" : [ "Female", "Male" ]
-  }, {
-    "columnName" : "Whois",
-    "columnType" : "Text",
-    "columnLength" : null,
-    "columnDisplayType" : null,
-    "columnValues" : [ ]
-  } ],
-  "data" : [ {
-    "row" : [ "Bedouin", null, "East Sikkim", null, "Animist", "Agnostic", "Friend of staff member", "Female", "A person of honesty & clear thought" ]
-  } ]
+  "entityId": null
 }
                 </code>
             </div>
         </div>
         
+        
+        <a id="datatables_create" name="datatables_create" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+            <h4>Create Entry in Data Table</h4>
+            <p>
+            Adds a row to the data table.
+            </p>
+            <p>
+            Note that the default datatable UI functionality converts any field name containing spaces to underscores when using the API.
+            This means the field name "Business Description" is considered the same as "Business_Description".
+            So you shouldn't have both "versions" in any data table.
+            </p>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">POST https://Domain Name/api/v1/datatables/{datatable}/{apptableId}</code>
+                <code class="method-request">POST datatables/Additional Client Fields Data/1
+Content-Type: application/json
+Request Body:
+{
+    "Business Description": "Livestock sales",
+    Comment: "First comment\nmade",
+    Education_cv: "Trade",
+    Gender_cd: "21",
+    "Highest Rate Paid": "8.5",
+    "Next Visit": "01 October 2012",
+    "Years in Business": "5",
+    dateFormat: "dd MMMM yyyy",
+    locale: "en"
+}
+</code>
+                <code class="method-response">{
+  "entityId": 1
+}
+                </code>
+            </div>
+        </div>
 
+        <a id="datatables_retrieve" name="datatables_retrieve" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+                <h4>Retrieve Entry(s) from Data Table</h4>
+                <p>
+                Gets the entry (if it exists) for data tables that are one to one with the application table. <br>
+                Gets the entries (if they exist) for data tables that are one to many with the application table. 
+                </p>
+                <p>Note: The 'fields' parameter is not available for datatables.</p>
+                
+                <h5>Arguments</h5>
+                <dl class="argument-list">
+                    <dt>order</dt>
+                    <dd><span>optional</span></dd>
+                    <dd>Specifies the order in which data is returned.</dd>
+                    <dt>genericResultSet</dt>
+                    <dd><span>optional</span></dd>
+                    <dd>If 'true' a Generic Result Set JSON format is returned.
+                    This format is used by the default data tables UI functionality.</dd>
+                </dl>
+                
+                <p>Example Requests: </p>
+                <div class=apiClick>datatables/Additional Client Fields Data/1</div>
+                <br><br>
+                <div class=apiClick>datatables/Extra Family Details Data/1?order=`Date of Birth` desc</div>
+                <br><br>
+                <div class=apiClick>datatables/Additional Client Fields Data/1?genericResultSet=true</div>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">GET https://Domain Name/api/v1/datatables/{datatable}/{apptableId}</code>
+                <code class="method-response">[
+{"client_id": 1,
+"Business Description": "Livestock sales",
+"Years in Business": 5,
+"Gender_cd": "21",
+"Education_cv": "Trade",
+"Next Visit": [2012, 10, 1],
+"Highest Rate Paid": 8.500000,
+"Comment": "First comment
+made"}
+]
+                </code>
+            </div>
+        </div>
+        
+        
+        <a id="datatables_update" name="datatables_update" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+            <h4>Update Entry in Data Table (One to One)</h4>
+            <p>
+            Updates the row (if it exists) of the data table.
+            </p>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">PUT https://Domain Name/api/v1/datatables/{datatable}/{apptableId}</code>
+                <code class="method-request">PUT datatables/Additional Client Fields Data/1
+Content-Type: application/json
+Request Body:
+{
+    "Business Description": "Livestock sales updated",
+    Comment: "First comment\nmade",
+    Education_cv: "Trade",
+    Gender_cd: "21",
+    "Highest Rate Paid": "8.5",
+    "Next Visit": "01 October 2012",
+    "Years in Business": "5",
+    dateFormat: "dd MMMM yyyy",
+    locale: "en"
+}
+</code>
+                <code class="method-response">{
+  "entityId": 1
+}
+                </code>
+            </div>
+        </div>
+
+        <a id="datatables_update_1M" name="datatables_update_1M" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+            <h4>Update Entry in Data Table (One to Many)</h4>
+            <p>
+            Updates the row (if it exists) of the data table.
+            </p>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">PUT https://Domain Name/api/v1/datatables/{datatable}/{apptableId}/{datatableId}</code>
+                <code class="method-request">PUT datatables/Extra Family Details Data/1/2
+Content-Type: application/json
+Request Body:
+{
+    "Date of Birth": "01 June 1982",
+    Education_cdHighest: "5",
+    Name: "June",
+    "Other Notes": "More\nnotes",
+    "Points Score": "20",
+    dateFormat: "dd MMMM yyyy",
+    locale: "en"	
+}
+</code>
+                <code class="method-response">{
+  "entityId": 1
+}
+                </code>
+            </div>
+        </div>
+
+        <a id="datatables_delete" name="datatables_delete" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+            <h4>Delete Entry(s) in Data Table</h4>
+            <p>
+                Deletes the entry (if it exists) for data tables that are one to one with the application table. <br>
+                Deletes the entries (if they exist) for data tables that are one to many with the application table. 
+            </p>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">DELETE https://Domain Name/api/v1/datatables/{datatable}/{apptableId}</code>
+                <code class="method-request">DELETE datatables/Additional Client Fields Data/1
+Content-Type: application/json
+Request Body:
+{
+}
+</code>
+                <code class="method-response">{
+  "entityId": 1
+}
+                </code>
+            </div>
+        </div>
+
+        <a id="datatables_delete_1M" name="datatables_delete_1M" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+            <h4>Delete Entry in Data Table (One to Many)</h4>
+            <p>
+                Deletes the entry (if it exists) for data tables that are one to many with the application table. 
+            </p>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">DELETE https://Domain Name/api/v1/datatables/{datatable}/{apptableId}/{datatableId}</code>
+                <code class="method-request">DELETE datatables/Extra Family Details Data/1/2
+Content-Type: application/json
+Request Body:
+{
+}
+</code>
+                <code class="method-response">{
+  "entityId": 1
+}
+                </code>
+            </div>
+        </div>
+        
+        
     <!-- start of reports api docs -->
         <a id="reports" name="reports" class="old-syle-anchor">&nbsp;</a>
         <div class="method-section">

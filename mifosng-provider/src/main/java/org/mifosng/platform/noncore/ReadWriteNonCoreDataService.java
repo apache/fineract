@@ -18,7 +18,7 @@ public interface ReadWriteNonCoreDataService {
 	void deregisterDatatable(String datatable);
 
 	GenericResultsetData retrieveDataTableGenericResultSet(String datatable,
-			Long appTableId, String sqlFields, String sqlOrder, Long id);
+			Long appTableId, String order, Long id);
 
 	void newDatatableEntry(String datatable, Long appTableId,
 			Map<String, String> queryParams);
