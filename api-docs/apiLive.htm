@@ -2412,14 +2412,14 @@ Request Body:
             <div class="method-description">
                 <h4>List Data Tables</h4>
                 <p>
-                Lists the registered data tables and the Mifos X Core application table they are registered to. 
+                Lists registered data tables and the Mifos X Core application table they are registered to. 
                 </p>
                 
                 <h5>Arguments</h5>
                 <dl class="argument-list">
                     <dt>appTable</dt>
                     <dd><span>optional</span></dd>
-                    <dd>The Mifos X core table to restrict the output to</dd>
+                    <dd>The Mifos X core application table.</dd>
                 </dl>
                 <p>Example Requests: </p>
                 <div class=apiClick>datatables?appTable=m_client</div>
@@ -2446,6 +2446,38 @@ Request Body:
             </div>
         </div>
     
+        <a id="datatables_register" name="datatables_register" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+            <h4>Register Data Table</h4>
+            <p>
+            Registers a data table with the Mifos X Core application table.
+            </p>
+            </div>
+            <div class="method-example">
+                <code class="method-declaration">POST https://Domain Name/api/v1/datatable/{datatable}/{set}/{id}</code>
+                <code class="method-request">POST additionalfields/portfolio_client/Additional Information/2
+Content-Type: application/json
+Request Body:
+{
+ "Ethnic_Group":"Berber",
+ "Ethnic_Group_Other":"",
+ "Household_Location":"East Sikkim",
+ "Household_Location_Other":"",
+ "Religion":"Animist",
+ "Religion_Other":"jjjjjjj",
+ "Knowledge_of_Person":"Son/daughter of staff member",
+ "Gender":"Female",
+ "Whois":"its\r\nme of\r\ncourse\r\nyes\r\nend and the end of it all"
+}
+</code>
+                <code class="method-response">{
+ "entityId": 2
+}
+                </code>
+            </div>
+        </div>
+        
     
         <a id="additionalfields_retrieve" name="additionalfields_retrieve" class="old-syle-anchor">&nbsp;</a>
         <div class="method-section">
@@ -2523,38 +2555,6 @@ Request Body:
                 </code>
             </div>
         </div>
-        <a id="additionalfields_update" name="additionalfields_update" class="old-syle-anchor">&nbsp;</a>
-        <div class="method-section">
-            <div class="method-description">
-            <h4>Update Additional Fields</h4>
-            <p>
-            Updates (or creates) the Set of Additional Fields data for the ID provided.  The ID is the id field of the Type table e.g. portfolio_client might have an id value of 4.
-            </p>
-            </div>
-            <div class="method-example">
-                <code class="method-declaration">POST https://Domain Name/api/v1/additionalfields/{type}/{set}/{id}</code>
-                <code class="method-request">POST additionalfields/portfolio_client/Additional Information/2
-Content-Type: application/json
-Request Body:
-{
- "Ethnic_Group":"Berber",
- "Ethnic_Group_Other":"",
- "Household_Location":"East Sikkim",
- "Household_Location_Other":"",
- "Religion":"Animist",
- "Religion_Other":"jjjjjjj",
- "Knowledge_of_Person":"Son/daughter of staff member",
- "Gender":"Female",
- "Whois":"its\r\nme of\r\ncourse\r\nyes\r\nend and the end of it all"
-}
-</code>
-                <code class="method-response">{
- "entityId": 2
-}
-                </code>
-            </div>
-        </div>
-        
         
 
     <!-- start of reports api docs -->
