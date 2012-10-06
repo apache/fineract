@@ -12,6 +12,7 @@ import org.mifosng.platform.api.data.AuthenticatedUserData;
 import org.mifosng.platform.api.data.ChargeData;
 import org.mifosng.platform.api.data.ClientAccountSummaryCollectionData;
 import org.mifosng.platform.api.data.ClientData;
+import org.mifosng.platform.api.data.ClientIdentifierData;
 import org.mifosng.platform.api.data.ConfigurationData;
 import org.mifosng.platform.api.data.DatatableData;
 import org.mifosng.platform.api.data.DepositAccountData;
@@ -119,6 +120,10 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 			Arrays.asList("id", "officeId", "officeName", "externalId",
 					"firstname", "lastname", "joinedDate", "displayName",
 					"clientOrBusinessName", "allowedOffices"));
+	
+	private static final Set<String> CLIENT_IDENTIFIER_DATA_PARAMETERS = new HashSet<String>(
+			Arrays.asList("id", "clientId", "documentTypeId", "documentKey",
+					"description", "documentTypeName" ,"allowedDocumentTypes"));
 
 	private static final Set<String> CLIENT_ACCOUNTS_DATA_PARAMETERS = new HashSet<String>(
 			Arrays.asList("pendingApprovalLoans", "awaitingDisbursalLoans",
@@ -623,5 +628,26 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 		final Set<String> DATA_PARAMETERS = new HashSet<String>(Arrays.asList("entityId"));
 		final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(DATA_PARAMETERS, false, DATA_PARAMETERS);
 		return helper.serializedJsonFrom(gsonDeserializer, identifier);
+	}
+
+	@Override
+	public String serializeClientIdentifierDataToJson(boolean prettyPrint,
+			Set<String> responseParameters,
+			Collection<ClientIdentifierData> clientIdentifiers) {
+		final Gson gsonDeserializer = helper
+				.createGsonBuilderWithParameterExclusionSerializationStrategy(
+						CLIENT_IDENTIFIER_DATA_PARAMETERS, prettyPrint, responseParameters);
+		return helper.serializedJsonFrom(gsonDeserializer,
+				clientIdentifiers.toArray(new ClientIdentifierData[clientIdentifiers.size()]));
+	}
+
+	@Override
+	public String serializeClientIdentifierDataToJson(boolean prettyPrint,
+			Set<String> responseParameters,
+			ClientIdentifierData clientIdentifierData) {
+		final Gson gsonDeserializer = helper
+				.createGsonBuilderWithParameterExclusionSerializationStrategy(
+						CLIENT_IDENTIFIER_DATA_PARAMETERS, prettyPrint, responseParameters);
+		return helper.serializedJsonFrom(gsonDeserializer, clientIdentifierData);
 	}
 }

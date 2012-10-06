@@ -10,6 +10,7 @@ import org.mifosng.platform.api.data.AuthenticatedUserData;
 import org.mifosng.platform.api.data.ChargeData;
 import org.mifosng.platform.api.data.ClientAccountSummaryCollectionData;
 import org.mifosng.platform.api.data.ClientData;
+import org.mifosng.platform.api.data.ClientIdentifierData;
 import org.mifosng.platform.api.data.ConfigurationData;
 import org.mifosng.platform.api.data.DatatableData;
 import org.mifosng.platform.api.data.DepositAccountData;
@@ -117,4 +118,8 @@ public interface ApiJsonSerializerService {
 	String serializeStaffDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<StaffData> staff);
 
 	String serializeEntityIdentifier(EntityIdentifier identifier);
+	
+	String serializeClientIdentifierDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<ClientIdentifierData> clientIdentifiers);
+
+	String serializeClientIdentifierDataToJson(boolean prettyPrint, Set<String> responseParameters, ClientIdentifierData clientIdentifierData);
 }

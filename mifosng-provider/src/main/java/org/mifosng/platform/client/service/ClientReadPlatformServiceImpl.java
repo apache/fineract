@@ -11,10 +11,12 @@ import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.mifosng.platform.api.data.*;
 import org.mifosng.platform.client.domain.NoteEnumerations;
+import org.mifosng.platform.common.ApplicationConstants;
 import org.mifosng.platform.exceptions.ClientNotFoundException;
 import org.mifosng.platform.exceptions.NoteNotFoundException;
 import org.mifosng.platform.infrastructure.JdbcSupport;
 import org.mifosng.platform.infrastructure.TenantAwareRoutingDataSource;
+import org.mifosng.platform.organisation.service.CodeValueReadPlatformService;
 import org.mifosng.platform.organisation.service.OfficeReadPlatformService;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.user.domain.AppUser;
@@ -32,16 +34,19 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 	private final PlatformSecurityContext context;
 	private final OfficeReadPlatformService officeReadPlatformService;
 	private final AppUserReadPlatformService appUserReadPlatformService;
+	private final CodeValueReadPlatformService codeValuePlatformService;
 
 	@Autowired
 	public ClientReadPlatformServiceImpl(final PlatformSecurityContext context,
 			final TenantAwareRoutingDataSource dataSource,
 			final OfficeReadPlatformService officeReadPlatformService,
-			final AppUserReadPlatformService appUserReadPlatformService) {
+			final AppUserReadPlatformService appUserReadPlatformService,
+			final CodeValueReadPlatformService codeValuePlatformService) {
 		this.context = context;
 		this.officeReadPlatformService = officeReadPlatformService;
 		this.appUserReadPlatformService = appUserReadPlatformService;
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
+		this.codeValuePlatformService = codeValuePlatformService;
 	}
 
 
@@ -401,4 +406,96 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 			return username;
 		}
 	}
+
+	@Override
+	public Collection<ClientIdentifierData> retrieveClientIdentifiers(
+			Long clientId) {
+
+		AppUser currentUser = context.authenticatedUser();
+		String hierarchy = currentUser.getOffice().getHierarchy();
+		String hierarchySearchString = hierarchy + "%";
+
+		ClientIdentityMapper rm = new ClientIdentityMapper();
+
+		String sql = "select " + rm.schema();
+
+		sql += " order by ci.id";
+
+		return this.jdbcTemplate.query(sql, rm, new Object[] { clientId,
+				hierarchySearchString });
+	}
+	
+	@Override
+	public ClientIdentifierData retrieveClientIdentifier(Long clientId,
+			Long clientIdentifierId) {
+		AppUser currentUser = context.authenticatedUser();
+		String hierarchy = currentUser.getOffice().getHierarchy();
+		String hierarchySearchString = hierarchy + "%";
+
+		ClientIdentityMapper rm = new ClientIdentityMapper();
+
+		String sql = "select " + rm.schema();
+
+		sql += " and ci.id = ?";
+
+		ClientIdentifierData clientIdentifierData = this.jdbcTemplate
+				.queryForObject(sql, rm, new Object[] { clientId,
+						hierarchySearchString, clientIdentifierId });
+
+		if(clientIdentifierData!=null){
+		clientIdentifierData.setAllowedDocumentTypes(new ArrayList<CodeValueData>(
+				codeValuePlatformService
+				.retrieveAllCodeValues(ApplicationConstants.CLIENT_IDENTITY_CODE_ID)));
+		}
+		return clientIdentifierData;
+				
+	}
+	
+	 @Override
+	public ClientIdentifierData retrieveNewClientIdentifierDetails() {
+
+		context.authenticatedUser();
+
+		List<CodeValueData> codeValueDatas = new ArrayList<CodeValueData>(
+				codeValuePlatformService.retrieveAllCodeValues(ApplicationConstants.CLIENT_IDENTITY_CODE_ID));
+
+		return new ClientIdentifierData(null,null,null,null,null,codeValueDatas);
+	}
+
+	private static final class ClientIdentityMapper implements
+			RowMapper<ClientIdentifierData> {
+
+		public ClientIdentityMapper() {
+		}
+
+		public String schema() {
+			return "ci.id as id, ci.client_id as clientId, ci.document_type_id as documentTypeId, ci.document_key as documentKey,"
+					+ " ci.description as description, cv.code_value as documentType "
+					+ " from m_client_identifier ci, m_client c, m_office o, m_code_value cv"
+					+ " where ci.client_id=c.id and c.office_id=o.id"
+					+ " and ci.document_type_id=cv.id"
+					+ " and ci.client_id = ? and o.hierarchy like ? ";
+		}
+
+		@Override
+		public ClientIdentifierData mapRow(final ResultSet rs,
+				@SuppressWarnings("unused") final int rowNum)
+				throws SQLException {
+
+			Long id = JdbcSupport.getLong(rs, "id");
+			Long clientId = JdbcSupport.getLong(rs, "clientId");
+			Long documentTypeId = JdbcSupport.getLong(rs, "documentTypeId");
+			String documentKey = rs.getString("documentKey");
+			String description = rs.getString("description");
+			String documentTypeName = rs.getString("documentType");
+
+			return new ClientIdentifierData(id, clientId, documentTypeId,
+					documentKey, description,documentTypeName);
+		}
+
+	}
+
+	
+	
+	
 }

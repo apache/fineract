@@ -21,6 +21,7 @@ import org.mifosng.platform.api.commands.AdjustLoanTransactionCommand;
 import org.mifosng.platform.api.commands.BranchMoneyTransferCommand;
 import org.mifosng.platform.api.commands.ChargeCommand;
 import org.mifosng.platform.api.commands.ClientCommand;
+import org.mifosng.platform.api.commands.ClientIdentifierCommand;
 import org.mifosng.platform.api.commands.DepositAccountCommand;
 import org.mifosng.platform.api.commands.DepositAccountWithdrawInterestCommand;
 import org.mifosng.platform.api.commands.DepositAccountWithdrawalCommand;
@@ -1431,5 +1432,28 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	    String note = extractStringParameter("note", requestMap, modifiedParameters);
 		
 		return new DepositAccountWithdrawInterestCommand(resourceIdentifier, amount, note);
+	}
+	
+	@Override
+	public ClientIdentifierCommand convertJsonToClientIdentifierCommand(
+			Long resourceIdentifier, Long clientId, String json) {
+		if (StringUtils.isBlank(json)) {
+			throw new InvalidJsonException();
+		}
+		
+		Type typeOfMap = new TypeToken<Map<String, String>>(){}.getType();
+	    Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
+	    
+	    Set<String> supportedParams = new HashSet<String>(Arrays.asList("clientId", "documentTypeId", "documentKey", "description"));
+	    
+	    checkForUnsupportedParameters(requestMap, supportedParams);
+	    
+	    Set<String> modifiedParameters = new HashSet<String>();
+	   
+	    Long documentTypeId = extractLongParameter("documentTypeId", requestMap, modifiedParameters);
+	    String documentKey = extractStringParameter("documentKey", requestMap, modifiedParameters);
+	    String documentDescription = extractStringParameter("description", requestMap, modifiedParameters);
+	    
+	    return new ClientIdentifierCommand(modifiedParameters,resourceIdentifier,clientId,documentTypeId,documentKey,documentDescription);
 	}
 }
