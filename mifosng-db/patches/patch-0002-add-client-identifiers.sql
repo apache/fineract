@@ -13,9 +13,7 @@ CREATE TABLE `m_client_identifier` (
 	INDEX `FK_m_client_document_m_code_value` (`document_type_id`),
 	CONSTRAINT `FK_m_client_document_m_client` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`),
 	CONSTRAINT `FK_m_client_document_m_code_value` FOREIGN KEY (`document_type_id`) REFERENCES `m_code_value` (`id`)
-)
-COLLATE='latin1_swedish_ci'
-ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 insert into m_code values(9,'Customer Identifier');
 
