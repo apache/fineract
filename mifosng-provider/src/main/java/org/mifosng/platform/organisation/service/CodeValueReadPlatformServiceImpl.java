@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CodeValueReadPlatformServiceImpl implements CodeValueReadPlatformService {
@@ -35,7 +34,7 @@ public class CodeValueReadPlatformServiceImpl implements CodeValueReadPlatformSe
 		}
 
 		@Override
-		public CodeValueData mapRow(final ResultSet rs, final int rowNum)
+		public CodeValueData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
 				throws SQLException {
 
 			Long id = rs.getLong("id");
@@ -47,7 +46,7 @@ public class CodeValueReadPlatformServiceImpl implements CodeValueReadPlatformSe
 	}
 
 	@Override
-	public Collection<CodeValueData> retrieveAllCodeValues(Long codeId) {
+	public Collection<CodeValueData> retrieveAllCodeValues(final Long codeId) {
 		context.authenticatedUser();
 
 		CodeValueDataMapper rm = new CodeValueDataMapper();

@@ -220,10 +220,12 @@ public class GenericDataServiceImpl implements GenericDataService {
 		try {
 			if (db_statement != null) {
 				db_statement.close();
+				// parameter assignment in this case is ok.
 				db_statement = null;
 			}
 			if (db_connection != null) {
 				db_connection.close();
+				// parameter assignment in this case is ok.
 				db_connection = null;
 			}
 		} catch (SQLException e) {

@@ -1,39 +1,25 @@
 package org.mifosng.platform.api.data;
 
+/**
+ * Immutable data object represent code-value data in system.
+ */
 public class CodeValueData {
 
-	private Long id;
-	private String name;
-	private Integer position;
+	@SuppressWarnings("unused")
+	private final Long id;
+	
+	@SuppressWarnings("unused")
+	private final String name;
+	
+	@SuppressWarnings("unused")
+	private final Integer position;
 
-	public CodeValueData(final Long id, final String name,
+	public CodeValueData(
+			final Long id, 
+			final String name,
 			final Integer position) {
 		this.id = id;
 		this.name = name;
-	}
-
-	public Long getId() {
-		return this.id;
-	}
-
-	public String getName() {
-		return this.name;
-	}
-
-	public Integer getPosition() {
-		return position;
-	}
-
-	public void setPosition(Integer position) {
 		this.position = position;
 	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
 }

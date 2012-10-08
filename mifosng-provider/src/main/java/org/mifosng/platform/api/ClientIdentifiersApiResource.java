@@ -19,18 +19,13 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.mifosng.platform.api.commands.ClientIdentifierCommand;
-import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.ClientIdentifierData;
-import org.mifosng.platform.api.data.ClientLookup;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
 import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
 import org.mifosng.platform.client.service.ClientReadPlatformService;
 import org.mifosng.platform.client.service.ClientWritePlatformService;
-import org.mifosng.platform.organisation.service.OfficeReadPlatformService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -40,8 +35,7 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class ClientIdentifiersApiResource {
 
-	private final static Logger logger = LoggerFactory
-			.getLogger(ClientIdentifiersApiResource.class);
+//	private final static Logger logger = LoggerFactory.getLogger(ClientIdentifiersApiResource.class);
 
 	@Autowired
 	private ClientReadPlatformService clientReadPlatformService;
@@ -179,7 +173,7 @@ public class ClientIdentifiersApiResource {
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	public Response deleteClientIdentifier(
-			@PathParam("clientId") final Long clientId,
+//			@PathParam("clientId") final Long clientId,
 			@PathParam("identifierId") final Long clientIdentifierId) {
 
 		this.clientWritePlatformService

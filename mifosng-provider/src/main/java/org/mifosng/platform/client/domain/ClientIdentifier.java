@@ -16,10 +16,12 @@ import org.mifosng.platform.user.domain.AppUser;
 @Table(name = "m_client_identifier")
 public class ClientIdentifier extends AbstractAuditableCustom<AppUser, Long> {
 
+	@SuppressWarnings("unused")
 	@ManyToOne
 	@JoinColumn(name = "client_id", nullable = false)
 	private Client client;
 
+	@SuppressWarnings("unused")
 	@ManyToOne
 	@JoinColumn(name = "document_type_id", nullable = false)
 	private CodeValue documentType;
@@ -39,14 +41,15 @@ public class ClientIdentifier extends AbstractAuditableCustom<AppUser, Long> {
 		this.description = null;
 	}
 
-	public static ClientIdentifier createNew(Client client,
-			final CodeValue documentType, final String documentKey,
+	public static ClientIdentifier createNew(
+			final Client client,
+			final CodeValue documentType, 
+			final String documentKey,
 			final String description) {
-		return new ClientIdentifier(client, documentType, documentKey,
-				description);
+		return new ClientIdentifier(client, documentType, documentKey, description);
 	}
 
-	private ClientIdentifier(Client client, final CodeValue documentType,
+	private ClientIdentifier(final Client client, final CodeValue documentType,
 			final String documentKey, final String description) {
 		this.client = client;
 		this.documentType = documentType;
@@ -69,7 +72,5 @@ public class ClientIdentifier extends AbstractAuditableCustom<AppUser, Long> {
 			this.description = StringUtils.defaultIfEmpty(
 					command.getDescription(), null);
 		}
-
 	}
-
 }
