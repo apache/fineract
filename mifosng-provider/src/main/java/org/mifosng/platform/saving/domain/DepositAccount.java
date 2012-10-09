@@ -107,14 +107,17 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 	@Column(name = "status_enum", nullable = false)
 	private Integer depositStatus;
 	
+	@SuppressWarnings("unused")
 	@Temporal(TemporalType.DATE)
 	@Column(name = "closedon_date")
 	private Date closedOnDate;
 	
+	@SuppressWarnings("unused")
 	@Temporal(TemporalType.DATE)
 	@Column(name = "rejectedon_date")
 	private Date rejectedOnDate;
 	
+	@SuppressWarnings("unused")
 	@Temporal(TemporalType.DATE)
 	@Column(name = "withdrawnon_date")
 	private Date withdrawnOnDate;	
@@ -135,6 +138,7 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "depositAccount", orphanRemoval = true)
 	private final List<DepositAccountTransaction> depositaccountTransactions = new ArrayList<DepositAccountTransaction>();
 	
+	@SuppressWarnings("unused")
 	@OneToOne(optional=true, cascade={CascadeType.PERSIST})
 	@JoinColumn(name = "renewed_account_id")
 	private DepositAccount renewdAccount;
@@ -633,7 +637,7 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 			final boolean renewalAllowed, final boolean preClosureAllowed,
 			final boolean isInterestWithdrawable, final boolean isInterestCompoundingAllowed,
 			final FixedTermDepositInterestCalculator fixedTermDepositInterestCalculator, 
-			final DepositLifecycleStateMachine depositLifecycleStateMachine,
+			@SuppressWarnings("unused") final DepositLifecycleStateMachine depositLifecycleStateMachine,
 			final boolean isLockinPeriodAllowed,
 			final Integer lockinPeriod,
 			final PeriodFrequencyType lockinPeriodType) {

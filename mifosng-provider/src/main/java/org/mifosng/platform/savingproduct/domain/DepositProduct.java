@@ -9,7 +9,6 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang.StringUtils;
-import org.hibernate.metamodel.binding.CollectionElementNature;
 import org.mifosng.platform.api.commands.DepositProductCommand;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.exceptions.ValueOutsideRangeException;
