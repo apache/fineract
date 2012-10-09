@@ -6,6 +6,6 @@ package org.mifosng.platform.exceptions;
 public class CodeValueNotFoundException extends AbstractPlatformResourceNotFoundException {
 
 	public CodeValueNotFoundException(Long id) {
-		super("error.msg.client.id.invalid", "Code value with identifier " + id + " does not exist", id);
+		super("error.msg.codevalue.id.invalid", "Code value with identifier " + id + " does not exist", id);
 	}
 }

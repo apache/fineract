@@ -15,6 +15,7 @@ import org.mifosng.platform.api.data.ConfigurationData;
 import org.mifosng.platform.api.data.DatatableData;
 import org.mifosng.platform.api.data.DepositAccountData;
 import org.mifosng.platform.api.data.DepositProductData;
+import org.mifosng.platform.api.data.DocumentData;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.FundData;
 import org.mifosng.platform.api.data.GenericResultsetData;
@@ -122,4 +123,9 @@ public interface ApiJsonSerializerService {
 	String serializeClientIdentifierDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<ClientIdentifierData> clientIdentifiers);
 
 	String serializeClientIdentifierDataToJson(boolean prettyPrint, Set<String> responseParameters, ClientIdentifierData clientIdentifierData);
+	
+	String serializeDocumentDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<DocumentData> documentDatas);
+
+	String serializeDocumentDataToJson(boolean prettyPrint, Set<String> responseParameters, DocumentData documentData);
+
 }

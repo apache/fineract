@@ -17,6 +17,7 @@ import org.mifosng.platform.api.data.ConfigurationData;
 import org.mifosng.platform.api.data.DatatableData;
 import org.mifosng.platform.api.data.DepositAccountData;
 import org.mifosng.platform.api.data.DepositProductData;
+import org.mifosng.platform.api.data.DocumentData;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.FundData;
 import org.mifosng.platform.api.data.GenericResultsetData;
@@ -126,6 +127,10 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 	private static final Set<String> CLIENT_IDENTIFIER_DATA_PARAMETERS = new HashSet<String>(
 			Arrays.asList("id", "clientId", "documentTypeId", "documentKey",
 					"description", "documentTypeName" ,"allowedDocumentTypes"));
+	
+	private static final Set<String> DOCUMENT_DATA_PARAMETERS = new HashSet<String>(
+			Arrays.asList("id", "parentEntityType", "parentEntityId", "name",
+					"fileName", "type", "size", "description"));
 
 	private static final Set<String> CLIENT_ACCOUNTS_DATA_PARAMETERS = new HashSet<String>(
 			Arrays.asList("pendingApprovalLoans", "awaitingDisbursalLoans",
@@ -651,5 +656,26 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 				.createGsonBuilderWithParameterExclusionSerializationStrategy(
 						CLIENT_IDENTIFIER_DATA_PARAMETERS, prettyPrint, responseParameters);
 		return helper.serializedJsonFrom(gsonDeserializer, clientIdentifierData);
+	}
+	
+	@Override
+	public String serializeDocumentDataToJson(boolean prettyPrint,
+			Set<String> responseParameters,
+			Collection<DocumentData> documentDatas) {
+		final Gson gsonDeserializer = helper
+				.createGsonBuilderWithParameterExclusionSerializationStrategy(
+						DOCUMENT_DATA_PARAMETERS, prettyPrint, responseParameters);
+		return helper.serializedJsonFrom(gsonDeserializer,
+				documentDatas.toArray(new DocumentData[documentDatas.size()]));
+	}
+
+	@Override
+	public String serializeDocumentDataToJson(boolean prettyPrint,
+			Set<String> responseParameters,
+			DocumentData documentData) {
+		final Gson gsonDeserializer = helper
+				.createGsonBuilderWithParameterExclusionSerializationStrategy(
+						DOCUMENT_DATA_PARAMETERS, prettyPrint, responseParameters);
+		return helper.serializedJsonFrom(gsonDeserializer, documentData);
 	}
 }
