@@ -25,11 +25,13 @@ public class LoanTransactionNewData {
 	private BigDecimal amount;
 	
 	public LoanTransactionNewData(
-			final EnumOptionData transactionsType, 
+			final Long id,
+			final EnumOptionData transactionType, 
 			final CurrencyData currency,
 			final LocalDate date, 
 			final BigDecimal amount) {
-		this.type = transactionsType;
+		this.id = id;
+		this.type = transactionType;
 		this.currency = currency;
 		this.date = date;
 		this.amount = amount;

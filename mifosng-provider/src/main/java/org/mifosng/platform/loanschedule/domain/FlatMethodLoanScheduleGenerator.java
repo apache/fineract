@@ -10,7 +10,7 @@ import java.util.Set;
 
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
-import org.mifosng.platform.api.LoanScheduleNewData;
+import org.mifosng.platform.api.LoanScheduleData;
 import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.LoanSchedulePeriodData;
 import org.mifosng.platform.currency.domain.ApplicationCurrency;
@@ -26,7 +26,7 @@ public class FlatMethodLoanScheduleGenerator implements LoanScheduleGenerator {
 	private final PaymentPeriodsInOneYearCalculator paymentPeriodsInOneYearCalculator = new DefaultPaymentPeriodsInOneYearCalculator();
 	
 	@Override
-	public LoanScheduleNewData generate(
+	public LoanScheduleData generate(
 			final ApplicationCurrency currency,
 			final LoanProductRelatedDetail loanScheduleInfo,
 			final Integer loanTermFrequency, 
@@ -138,7 +138,7 @@ public class FlatMethodLoanScheduleGenerator implements LoanScheduleGenerator {
 				currency.getDisplaySymbol(),
 				currency.getNameCode());
 		
-		return new LoanScheduleNewData(currencyData, periods, loanTermInDays, cumulativePrincipalDisbursed, cumulativePrincipalDue, 
+		return new LoanScheduleData(currencyData, periods, loanTermInDays, cumulativePrincipalDisbursed, cumulativePrincipalDue, 
 				cumulativePrincipalOutstanding, cumulativeInterestExpected, cumulativeChargesToDate, totalExpectedRepayment);
 	}
 }

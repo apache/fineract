@@ -27,7 +27,7 @@ import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
-import org.mifosng.platform.api.LoanScheduleNewData;
+import org.mifosng.platform.api.LoanScheduleData;
 import org.mifosng.platform.api.commands.LoanApplicationCommand;
 import org.mifosng.platform.api.data.LoanSchedulePeriodData;
 import org.mifosng.platform.client.domain.Client;
@@ -282,7 +282,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	}
 	
 	public void modifyLoanApplication(final LoanApplicationCommand command, final Client client, final LoanProduct loanProduct, 
-			final Fund fund, final LoanTransactionProcessingStrategy strategy, final LoanScheduleNewData modifiedLoanSchedule, final Set<LoanCharge> charges,
+			final Fund fund, final LoanTransactionProcessingStrategy strategy, final LoanScheduleData modifiedLoanSchedule, final Set<LoanCharge> charges,
 			final Staff loanOfficer) {
 
 		if (command.isClientChanged()) {
@@ -361,7 +361,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		}
 		
 		// if the loan application/contract is modified when repayments are already against it - then need to re-process it
-		final List<LoanTransaction> repaymentsOrWaivers = retreiveListOfRepaymentOrWaiverTransactionsPostDisbursement();
+		final List<LoanTransaction> repaymentsOrWaivers = retreiveListOfTransactionsPostDisbursement();
 		
 		final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessor.determineProcessor(this.transactionProcessingStrategy);
 		loanRepaymentScheduleTransactionProcessor.handleTransaction(repaymentsOrWaivers, getCurrency(), this.repaymentScheduleInstallments);
@@ -617,7 +617,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 			final LoanLifecycleStateMachine loanLifecycleStateMachine,
 			final LoanTransaction adjustedTransaction) {
 		
-		LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_REPAYMENT_OR_WAIVER, LoanStatus.fromInt(this.loanStatus));
+		final LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_REPAYMENT_OR_WAIVER, LoanStatus.fromInt(this.loanStatus));
 		this.loanStatus = statusEnum.getValue();
 		
 		loanTransaction.updateLoan(this);
@@ -626,7 +626,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		
 		this.loanTransactions.add(loanTransaction);
 
-		if (loanTransaction.isNotRepayment() && loanTransaction.isNotWaiver()) {
+		if (loanTransaction.isNotRepayment() && loanTransaction.isNotInterestWaiver()) {
 			final String errorMessage = "A transaction of type repayment or waiver was expected but not received.";
 			throw new InvalidLoanTransactionTypeException("transaction",
 					"is.not.a.repayment.or.waiver.transaction", errorMessage);
@@ -647,7 +647,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 					"cannot.be.a.future.date", errorMessage, loanTransactionDate);
 		}
 		
-		if (loanTransaction.isWaiver()) {
+		if (loanTransaction.isInterestWaiver()) {
 			Money totalInterestOutstandingOnLoan = getTotalInterestOutstandingOnLoan();
 			if (adjustedTransaction != null) {
 				totalInterestOutstandingOnLoan = totalInterestOutstandingOnLoan.plus(adjustedTransaction.getAmount());
@@ -663,14 +663,14 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		if (isTransactionChronologicallyLatest && adjustedTransaction == null) {
 			loanRepaymentScheduleTransactionProcessor.handleTransaction(loanTransaction, getCurrency(), this.repaymentScheduleInstallments);
 		} else {
-			final List<LoanTransaction> repaymentsOrWaivers = retreiveListOfRepaymentOrWaiverTransactionsPostDisbursement();
+			final List<LoanTransaction> repaymentsOrWaivers = retreiveListOfTransactionsPostDisbursement();
 			loanRepaymentScheduleTransactionProcessor.handleTransaction(repaymentsOrWaivers, getCurrency(), this.repaymentScheduleInstallments);
 		}
 		
 		doPostLoanTransactionChecks(loanTransaction, loanLifecycleStateMachine);
 	}
 
-	private List<LoanTransaction> retreiveListOfRepaymentOrWaiverTransactionsPostDisbursement() {
+	private List<LoanTransaction> retreiveListOfTransactionsPostDisbursement() {
 		List<LoanTransaction> repaymentsOrWaivers = new ArrayList<LoanTransaction>();
 		for (LoanTransaction transaction : this.loanTransactions) {
 			if (!transaction.isDisbursement() && transaction.isNotContra()) {
@@ -738,6 +738,26 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		
 		return isChronologicallyLatestRepaymentOrWaiver;
 	}
+	
+	private boolean isChronologicallyLatestTransaction(
+			final LoanTransaction loanTransaction,
+			final List<LoanTransaction> loanTransactions) {
+		
+		boolean isChronologicallyLatestRepaymentOrWaiver = true;
+		
+		LocalDate currentTransactionDate = loanTransaction.getTransactionDate();
+		for (LoanTransaction previousTransaction : loanTransactions) {
+			if (previousTransaction.isNotContra()) {
+				if (currentTransactionDate.isBefore(previousTransaction.getTransactionDate()) ||
+						currentTransactionDate.isEqual(previousTransaction.getTransactionDate())) {
+					isChronologicallyLatestRepaymentOrWaiver = false;
+					break;
+				}
+			}
+		}
+		
+		return isChronologicallyLatestRepaymentOrWaiver;
+	}
 
 	public LocalDate possibleNextRepaymentDate() {
 		LocalDate earliestUnpaidInstallmentDate = new LocalDate();
@@ -770,7 +790,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 
 		for (LoanRepaymentScheduleInstallment installment : this.repaymentScheduleInstallments) {
 			if (installment.isNotFullyCompleted()) {
-				possibleNextRepaymentAmount = installment.getTotalDue(currency);
+				possibleNextRepaymentAmount = installment.getTotalOutstanding(currency);
 				break;
 			}
 		}
@@ -805,14 +825,20 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 			final LoanTransaction newTransactionDetail,
 			final LoanLifecycleStateMachine loanLifecycleStateMachine) {
 
-		if (transactionForAdjustment.isNotRepayment() && transactionForAdjustment.isNotWaiver()) {
-			final String errorMessage = "A transaction of type repayment or waiver was expected but not received.";
+		if (transactionForAdjustment.isNotRepayment() && transactionForAdjustment.isNotInterestWaiver()) {
+			final String errorMessage = "Only transactions of type repayment or interest waiver can be adjusted.";
 			throw new InvalidLoanTransactionTypeException("transaction",
-					"is.not.a.repayment.or.waiver.transaction", errorMessage);
+					"adjustment.is.only.allowed.to.repayment.or.waiver.transaction", errorMessage);
+		}
+		
+		if (isClosed()) {
+			final String errorMessage = "Transactions of a closed loan cannot be adjusted.";
+			throw new InvalidLoanTransactionTypeException("transaction",
+					"adjustment.is.not.allowed.on.closed.loan", errorMessage);
 		}
 
 		transactionForAdjustment.contra();
-		if (newTransactionDetail.isRepayment() || newTransactionDetail.isWaiver()) {
+		if (newTransactionDetail.isRepayment() || newTransactionDetail.isInterestWaiver()) {
 			handleRepaymentOrWaiverTransaction(newTransactionDetail, loanLifecycleStateMachine, transactionForAdjustment);
 		}
 	}
@@ -867,32 +893,49 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		return this.loanRepaymentScheduleDetail.getCurrency();
 	}
 
-	public void writeOff(final DateTime writtenOffOn,
+	public LoanTransaction closeAsWrittenOff(
+			final LocalDate writtenOffOnLocalDate,
 			final LoanLifecycleStateMachine loanLifecycleStateMachine) {
 		
-		LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_WRITE_OFF, LoanStatus.fromInt(this.loanStatus));
+		final LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.WRITE_OFF_OUTSTANDING, LoanStatus.fromInt(this.loanStatus));
 		this.loanStatus = statusEnum.getValue();
 		
-		this.closedOnDate = writtenOffOn.toDate();
-		this.writtenOffOnDate = writtenOffOn.toDate();
+		this.closedOnDate = writtenOffOnLocalDate.toDate();
+		this.writtenOffOnDate = writtenOffOnLocalDate.toDate();
 
-		LocalDate writtenOffOnLocalDate = new LocalDate(writtenOffOnDate);
 		if (writtenOffOnLocalDate.isBefore(this.getDisbursementDate())) {
-			final String errorMessage = "The date on which a loan is withdrawn cannot be before the loan disbursement date: "
+			final String errorMessage = "The date on which a loan is written off cannot be before the loan disbursement date: "
 					+ getDisbursementDate().toString();
 			throw new InvalidLoanStateTransitionException("writeoff",
 					"cannot.be.before.submittal.date", errorMessage,
 					writtenOffOnLocalDate, getDisbursementDate());
 		}
+		
 		if (writtenOffOnLocalDate.isAfter(new LocalDate())) {
 			final String errorMessage = "The date on which a loan is written off cannot be in the future.";
 			throw new InvalidLoanStateTransitionException("writeoff",
 					"cannot.be.a.future.date", errorMessage,
 					writtenOffOnLocalDate);
 		}
+		
+		final LoanTransaction loanTransaction = LoanTransaction.writeoff(this, writtenOffOnLocalDate);
+		boolean isLastTransaction = isChronologicallyLatestTransaction(loanTransaction, loanTransactions);
+		if (!isLastTransaction) {
+			final String errorMessage = "The date of the writeoff transaction must occur on or before previous transactions.";
+			throw new InvalidLoanStateTransitionException("writeoff","must.occur.on.or.after.other.transaction.dates", errorMessage, writtenOffOnLocalDate);
+		}
+		
+		this.loanTransactions.add(loanTransaction);
+		
+		final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessor.determineProcessor(this.transactionProcessingStrategy);
+		loanRepaymentScheduleTransactionProcessor.handleWriteOff(loanTransaction, loanCurrency(), this.repaymentScheduleInstallments);
+		
+		return loanTransaction;
 	}
 
-	public void reschedule(final DateTime rescheduledOn,
+	// FIXME - KW - finish off reschedule/restructure capability for loans.
+	public void reschedule(
+			final DateTime rescheduledOn,
 			final LoanLifecycleStateMachine loanLifecycleStateMachine) {
 		
 		LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_RESCHEDULE, LoanStatus.fromInt(this.loanStatus));

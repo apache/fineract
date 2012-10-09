@@ -3,7 +3,7 @@ package org.mifosng.platform.api.infrastructure;
 import java.util.Collection;
 import java.util.Set;
 
-import org.mifosng.platform.api.LoanScheduleNewData;
+import org.mifosng.platform.api.LoanScheduleData;
 import org.mifosng.platform.api.data.AdditionalFieldsSetData;
 import org.mifosng.platform.api.data.AppUserData;
 import org.mifosng.platform.api.data.AuthenticatedUserData;
@@ -99,7 +99,7 @@ public interface ApiJsonSerializerService {
 
 	String serializeNoteDataToJson(boolean prettyPrint, Set<String> responseParameters, NoteData note);
 	
-	String serializeLoanScheduleDataToJson(boolean prettyPrint, Set<String> responseParameters, LoanScheduleNewData loanSchedule);
+	String serializeLoanScheduleDataToJson(boolean prettyPrint, Set<String> responseParameters, LoanScheduleData loanSchedule);
 
 	String serializeLoanAccountDataToJson(boolean prettyPrint, Set<String> responseParameters, LoanAccountData loanAccount);
 

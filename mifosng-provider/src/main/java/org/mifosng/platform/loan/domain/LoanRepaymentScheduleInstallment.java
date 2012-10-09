@@ -19,7 +19,7 @@ import org.mifosng.platform.user.domain.AppUser;
 
 @Entity
 @Table(name = "m_loan_repayment_schedule")
-public class LoanRepaymentScheduleInstallment extends AbstractAuditableCustom<AppUser, Long> {
+public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCustom<AppUser, Long> {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "loan_id")
@@ -37,11 +37,17 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableCustom<Ap
     @Column(name = "principal_completed_derived", scale=6, precision=19)
     private BigDecimal   principalCompleted = BigDecimal.ZERO;
     
+    @Column(name = "principal_writtenoff_derived", scale=6, precision=19)
+    private BigDecimal   principalWrittenOff = BigDecimal.ZERO;
+    
 	@Column(name = "interest_completed_derived", scale = 6, precision = 19)
 	private BigDecimal interestCompleted = BigDecimal.ZERO;
 	
 	@Column(name = "interest_waived_derived", scale = 6, precision = 19)
 	private BigDecimal interestWaived = BigDecimal.ZERO;
+	
+	@Column(name = "interest_writtenoff_derived", scale=6, precision=19)
+	private BigDecimal   interestWrittenOff = BigDecimal.ZERO;
     
     @Column(name="completed_derived")
     private boolean completed;
@@ -93,8 +99,13 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableCustom<Ap
 		return Money.of(currency, this.principalCompleted);
 	}
 	
+	public Money getPrincipalWrittenOff(final MonetaryCurrency currency) {
+		return Money.of(currency, this.principalWrittenOff);
+	}
+	
 	public Money getPrincipalOutstanding(final MonetaryCurrency currency) {
-		return getPrincipal(currency).minus(getPrincipalCompleted(currency));
+		final Money principalAccountedFor = getPrincipalCompleted(currency).plus(getPrincipalWrittenOff(currency));
+		return getPrincipal(currency).minus(principalAccountedFor);
 	}
 	
 	public Money getInterest(final MonetaryCurrency currency) {
@@ -109,15 +120,20 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableCustom<Ap
 		return Money.of(currency, this.interestWaived);
 	}
 	
+	public Money getInterestWrittenOff(final MonetaryCurrency currency) {
+		return Money.of(currency, this.interestWrittenOff);
+	}
+	
 	public Money getInterestOutstanding(final MonetaryCurrency currency) {
-		return getInterest(currency).minus(getInterestCompleted(currency).plus(getInterestWaived(currency)));
+		final Money interestAccountedFor = getInterestCompleted(currency).plus(getInterestWaived(currency)).plus(getInterestWrittenOff(currency));
+		return getInterest(currency).minus(interestAccountedFor);
 	}
 
 	public boolean isInterestDue(final MonetaryCurrency currency) {
-		return getInterest(currency).minus(getInterestCompleted(currency).plus(getInterestWaived(currency))).isGreaterThanZero();
+		return getInterestOutstanding(currency).isGreaterThanZero();
 	}
 	
-	public Money getTotal(final MonetaryCurrency currency) {
+	public Money getTotalPrincipalAndInterest(final MonetaryCurrency currency) {
 		return getPrincipal(currency).plus(getInterest(currency));
 	}
 	
@@ -142,22 +158,15 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableCustom<Ap
 	}
 	
 	public boolean isPrincipalCompleted(final MonetaryCurrency currency) {
-		return getPrincipal(currency).minus(getPrincipalCompleted(currency)).isZero();
-	}
-
-	public Money getTotalDue(MonetaryCurrency currency) {
-		final Money totalPaidOrWaived = getInterestWaived(currency).plus(getTotalCompleted(currency));
-		return getTotal(currency).minus(totalPaidOrWaived);
-	}
-
-	private Money getTotalCompleted(MonetaryCurrency currency) {
-		return getPrincipalCompleted(currency).plus(getInterestCompleted(currency));
+		return getPrincipalOutstanding(currency).isZero();
 	}
 
 	public void resetDerivedComponents() {
 		this.principalCompleted = BigDecimal.ZERO;
+		this.principalWrittenOff = BigDecimal.ZERO;
 		this.interestCompleted = BigDecimal.ZERO;
 		this.interestWaived = BigDecimal.ZERO;
+		this.interestWrittenOff = BigDecimal.ZERO;
 		this.completed = false;
 	}
 
@@ -175,7 +184,7 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableCustom<Ap
 			interestPortionOfTransaction = interestPortionOfTransaction.plus(transactionAmountRemaining);
 		}
 		
-		this.completed = getTotalDue(currency).isZero();
+		this.completed = getTotalOutstanding(currency).isZero();
 		
 		return interestPortionOfTransaction;
 	}
@@ -194,7 +203,7 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableCustom<Ap
 			principalPortionOfTransaction = principalPortionOfTransaction.plus(transactionAmountRemaining);
 		}
 		
-		this.completed = getTotalDue(currency).isZero();
+		this.completed = getTotalOutstanding(currency).isZero();
 		
 		return principalPortionOfTransaction;
 	}
@@ -212,9 +221,27 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableCustom<Ap
 			waivedInterestPortionOfTransaction = waivedInterestPortionOfTransaction.plus(transactionAmountRemaining);
 		}
 		
-		this.completed = getTotalDue(currency).isZero();
+		this.completed = getTotalOutstanding(currency).isZero();
 		
 		return waivedInterestPortionOfTransaction;
+	}
+	
+	public Money writeOffOutstandingPrincipal(final MonetaryCurrency currency) {
+		
+		final Money principalDue = getPrincipalOutstanding(currency);
+		this.principalWrittenOff = principalDue.getAmount();
+		this.completed = getTotalOutstanding(currency).isZero();
+		
+		return principalDue;
+	}
+	
+	public Money writeOffOutstandingInterest(final MonetaryCurrency currency) {
+		
+		final Money interestDue = getInterestOutstanding(currency);
+		this.interestWrittenOff = interestDue.getAmount();
+		this.completed = getTotalOutstanding(currency).isZero();
+		
+		return interestDue;
 	}
 
 	public boolean isOverdueOn(final LocalDate transactionDate) {

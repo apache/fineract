@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.mifosng.platform.api.LoanScheduleNewData;
+import org.mifosng.platform.api.LoanScheduleData;
 import org.mifosng.platform.api.data.AdditionalFieldsSetData;
 import org.mifosng.platform.api.data.AppUserData;
 import org.mifosng.platform.api.data.AuthenticatedUserData;
@@ -172,7 +172,7 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 					"closedOnDate", "expectedMaturityDate",
 					"status",
 					"lifeCycleStatusDate", "repaymentSchedule",
-					"loanRepayments", "permissions", "convenienceData", "charges",
+					"transactions", "permissions", "convenienceData", "charges",
 					"productOptions", "amortizationTypeOptions", "interestTypeOptions", "interestCalculationPeriodTypeOptions", 
 					"repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "fundOptions", "repaymentStrategyOptions", "chargeOptions",
 					"loanOfficerId", "loanOfficerName", "loanOfficerOptions", "chargeTemplate"));
@@ -535,7 +535,7 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 	}
 
 	@Override
-	public String serializeLoanScheduleDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final LoanScheduleNewData loanSchedule) {
+	public String serializeLoanScheduleDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final LoanScheduleData loanSchedule) {
 		final Gson gsonDeserializer = helper
 				.createGsonBuilderWithParameterExclusionSerializationStrategy(LOAN_SCHEDULE_DATA_PARAMETERS, prettyPrint, responseParameters);
 		return helper.serializedJsonFrom(gsonDeserializer, loanSchedule);

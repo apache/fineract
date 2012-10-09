@@ -11,7 +11,9 @@ public enum LoanStatus {
 	ACTIVE(300, "loanStatusType.active"), //
 	WITHDRAWN_BY_CLIENT(400, "loanStatusType.withdrawn.by.client"), //
 	REJECTED(500, "loanStatusType.rejected"), //
-	CLOSED(600, "loanStatusType.closed"), //
+	CLOSED_OBLIGATIONS_MET(600, "loanStatusType.closed.obligations.met"), //
+	CLOSED_WRITTEN_OFF(601, "loanStatusType.closed.written.off"), //
+	CLOSED_RESCHEDULE_OUTSTANDING_AMOUNT(602, "loanStatusType.closed.reschedule.outstanding.amount"), //
 	OVERPAID(700, "loanStatusType.overpaid"); 
 
     private final Integer value;
@@ -37,7 +39,13 @@ public enum LoanStatus {
 			enumeration = LoanStatus.REJECTED;
 			break;
 		case 600:
-			enumeration = LoanStatus.CLOSED;
+			enumeration = LoanStatus.CLOSED_OBLIGATIONS_MET;
+			break;
+		case 601:
+			enumeration = LoanStatus.CLOSED_WRITTEN_OFF;
+			break;
+		case 602:
+			enumeration = LoanStatus.CLOSED_RESCHEDULE_OUTSTANDING_AMOUNT;
 			break;
 		case 700:
 			enumeration = LoanStatus.OVERPAID;
@@ -76,9 +84,21 @@ public enum LoanStatus {
 	}
 
 	public boolean isClosed() {
-		return this.value.equals(LoanStatus.CLOSED.getValue());
+		return isClosedObligationsMet() || isClosedWrittenOff() || isClosedWithOutsandingAmountMarkedForReschedule();
+	}
+	
+	public boolean isClosedObligationsMet() {
+		return this.value.equals(LoanStatus.CLOSED_OBLIGATIONS_MET.getValue());
+	}
+	
+	public boolean isClosedWrittenOff() {
+		return this.value.equals(LoanStatus.CLOSED_WRITTEN_OFF.getValue());
 	}
 
+	public boolean isClosedWithOutsandingAmountMarkedForReschedule() {
+		return this.value.equals(LoanStatus.CLOSED_RESCHEDULE_OUTSTANDING_AMOUNT.getValue());
+	}
+	
 	public boolean isWithdrawnByClient() {
 		return this.value.equals(LoanStatus.WITHDRAWN_BY_CLIENT.getValue());
 	}

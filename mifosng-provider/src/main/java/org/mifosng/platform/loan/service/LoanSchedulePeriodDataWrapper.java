@@ -36,6 +36,14 @@ public class LoanSchedulePeriodDataWrapper {
 		}
 		return cumulativeValue;
 	}
+	
+	public BigDecimal deriveCumulativePrincipalWrittenOff() {
+		BigDecimal cumulativeValue = BigDecimal.ZERO;
+		for (LoanSchedulePeriodData period : this.periods) {
+			cumulativeValue = cumulativeValue.add(period.principalWrittenOff());
+		}
+		return cumulativeValue;
+	}
 
 	public BigDecimal deriveCumulativePrincipalOutstanding() {
 		BigDecimal cumulativeValue = BigDecimal.ZERO;
@@ -65,6 +73,14 @@ public class LoanSchedulePeriodDataWrapper {
 		BigDecimal cumulativeValue = BigDecimal.ZERO;
 		for (LoanSchedulePeriodData period : this.periods) {
 			cumulativeValue = cumulativeValue.add(period.interestWaived());
+		}
+		return cumulativeValue;
+	}
+	
+	public BigDecimal deriveCumulativeInterestWrittenOff() {
+		BigDecimal cumulativeValue = BigDecimal.ZERO;
+		for (LoanSchedulePeriodData period : this.periods) {
+			cumulativeValue = cumulativeValue.add(period.interestWrittenOff());
 		}
 		return cumulativeValue;
 	}

@@ -23,7 +23,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 	 */
 	@Override
 	public void handleTransaction(
-			final List<LoanTransaction> repaymentsOrWaivers,
+			final List<LoanTransaction> transactionsPostDisbursement,
 			final MonetaryCurrency currency,
 			final List<LoanRepaymentScheduleInstallment> installments) {
 		
@@ -31,10 +31,15 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 			currentInstallment.resetDerivedComponents();
 		}
 		
-		for (LoanTransaction loanTransaction : repaymentsOrWaivers) {
+		for (LoanTransaction loanTransaction : transactionsPostDisbursement) {
 			
-			loanTransaction.resetDerivedComponents();
-			handleTransaction(loanTransaction, currency, installments);
+			if (loanTransaction.isRepayment() || loanTransaction.isInterestWaiver()) {
+				loanTransaction.resetDerivedComponents();
+				handleTransaction(loanTransaction, currency, installments);
+			} else if (loanTransaction.isWriteOff()) {
+				loanTransaction.resetDerivedComponents();
+				handleWriteOff(loanTransaction, currency, installments);
+			}
 		}
 	}
 	
@@ -75,6 +80,29 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 		if (transactionAmountUnprocessed.isGreaterThanZero()) {
 			onLoanOverpayment(loanTransaction, transactionAmountUnprocessed);
 		}
+	}
+	
+	@Override
+	public void handleWriteOff(
+			final LoanTransaction loanTransaction,
+			final MonetaryCurrency currency,
+			final List<LoanRepaymentScheduleInstallment> installments) {
+		
+		final Money interestWaivedPortion = Money.zero(currency);
+		Money principalPortion = Money.zero(currency);
+		Money interestPortion = Money.zero(currency);
+		Money chargesPortion = Money.zero(currency);
+		
+		// determine how much is written off in total and breakdown for principal, interest and charges
+		for (LoanRepaymentScheduleInstallment currentInstallment : installments) {
+			
+			if (currentInstallment.isNotFullyCompleted()) {
+				principalPortion = principalPortion.plus(currentInstallment.writeOffOutstandingPrincipal(currency));
+				interestPortion = interestPortion.plus(currentInstallment.writeOffOutstandingInterest(currency));
+			}
+		}
+		
+		loanTransaction.updateComponentsAndTotal(principalPortion, interestPortion, interestWaivedPortion, chargesPortion);
 	}
 
 	// abstract interface

@@ -14,42 +14,57 @@ import org.mifosng.platform.api.data.LoanSchedulePeriodData;
  *     <li>repayment schedule  - the principal due, outstanding balance and cost of loan items such as interest and charges</li>
  * </ul>
  */
-// TODO - KW - rename file
-@SuppressWarnings("unused")
-public class LoanScheduleNewData {
+public class LoanScheduleData {
 
+	@SuppressWarnings("unused")
 	private final Integer loanTermInDays;
 	
 	/**
 	 * The currency associated with all monetary values in loan schedule.
 	 */
+	@SuppressWarnings("unused")
 	private final CurrencyData currency;
 	
 	/**
 	 * The cumulative total of all money (principal) disbursed to the loan applicant.
 	 */
+	@SuppressWarnings("unused")
 	private final BigDecimal cumulativePrincipalDisbursed;
 	
 	/**
 	 * The cumulative total of all <code>principalDue</code> for each period of loan schedule. (originalPrincipal)
 	 */
+	@SuppressWarnings("unused")
 	private final BigDecimal cumulativePrincipalDue;
+	@SuppressWarnings("unused")
 	private final BigDecimal cumulativePrincipalPaid;
+	@SuppressWarnings("unused")
+	private final BigDecimal cumulativePrincipalWrittenOff;
+	@SuppressWarnings("unused")
 	private final BigDecimal cumulativePrincipalOutstanding;
 	
 	/**
 	 * The cumulative total of interest expected on any principal disbursed. (originalInterest)
 	 */
+	@SuppressWarnings("unused")
 	private final BigDecimal cumulativeInterestExpected;
+	@SuppressWarnings("unused")
 	private final BigDecimal cumulativeInterestPaid;
+	@SuppressWarnings("unused")
 	private final BigDecimal cumulativeInterestWaived;
+	@SuppressWarnings("unused")
+	private final BigDecimal cumulativeInterestWrittenOff;
+	@SuppressWarnings("unused")
 	private final BigDecimal cumulativeInterestOutstanding;
 	
 	/**
 	 * The cumulative total of all charges applied on the loan to date.
 	 */
+	@SuppressWarnings("unused")
 	private final BigDecimal cumulativeChargesToDate;
+	@SuppressWarnings("unused")
 	private final BigDecimal cumulativeChargesPaid;
+	@SuppressWarnings("unused")
 	private final BigDecimal cumulativeChargesOutstanding;
 	
 	/**
@@ -60,22 +75,32 @@ public class LoanScheduleNewData {
 	 *     <li>Charges (fees and penalties)</li>
 	 * </ul>
 	 */
+	@SuppressWarnings("unused")
 	private final BigDecimal totalCostOfLoan;
 	
 	/**
 	 * The sum of <code>principalDisbursed</code> and <code>totalCostOfLoan</code>. (originalTotal)
 	 */
+	@SuppressWarnings("unused")
 	private final BigDecimal totalExpectedRepayment;
 	
 	/**
 	 * The cumulative sum of all repayments to date. (totalPaid)
 	 */
+	@SuppressWarnings("unused")
 	private final BigDecimal totalPaidToDate;
 	
 	/**
 	 * The cumulative sum of all waivers to date.
 	 */
+	@SuppressWarnings("unused")
 	private final BigDecimal totalWaivedToDate;
+	
+	/**
+	 * The cumulative sum of all waivers to date.
+	 */
+	@SuppressWarnings("unused")
+	private final BigDecimal totalWrittenOffToDate;
 	
 	/**
 	 * The cumulative sum of all principal, interest & charges outstanding.
@@ -87,6 +112,7 @@ public class LoanScheduleNewData {
 	 * 
 	 * Different to outstanding as arrears is based on whether a portion of the total outstanding is late and above any tolerance setting.
 	 */
+	@SuppressWarnings("unused")
 	private final BigDecimal totalInArrears;
 	
 	/**
@@ -96,15 +122,17 @@ public class LoanScheduleNewData {
 	 */
 	private final Collection<LoanSchedulePeriodData> periods;
 
-	public LoanScheduleNewData() {
+	public LoanScheduleData() {
 		this.cumulativePrincipalDisbursed = null;
 		this.cumulativePrincipalPaid = null;
+		this.cumulativePrincipalWrittenOff = null;
 		this.cumulativePrincipalDue = null;
 		this.cumulativePrincipalOutstanding = null;
 		
 		this.cumulativeInterestExpected = null;
 		this.cumulativeInterestPaid = null;
 		this.cumulativeInterestWaived = null;
+		this.cumulativeInterestWrittenOff = null;
 		this.cumulativeInterestOutstanding = null;
 		
 		this.cumulativeChargesToDate = null;
@@ -116,6 +144,7 @@ public class LoanScheduleNewData {
 		this.totalExpectedRepayment = null;
 		this.totalPaidToDate = null;
 		this.totalWaivedToDate = null;
+		this.totalWrittenOffToDate = null;
 		this.totalOutstanding = null;
 		this.totalInArrears = null;
 		
@@ -124,7 +153,7 @@ public class LoanScheduleNewData {
 		this.loanTermInDays = null;
 	}
 
-	public LoanScheduleNewData(
+	public LoanScheduleData(
 			final CurrencyData currency,
 			final Collection<LoanSchedulePeriodData> periods, 
 			final Integer loanTermInDays, 
@@ -141,11 +170,13 @@ public class LoanScheduleNewData {
 		this.cumulativePrincipalDisbursed = cumulativePrincipalDisbursed;
 		this.cumulativePrincipalDue = cumulativePrincipalDue;
 		this.cumulativePrincipalPaid = null;
+		this.cumulativePrincipalWrittenOff = null;
 		this.cumulativePrincipalOutstanding = cumulativePrincipalOutstanding;
 		
 		this.cumulativeInterestExpected = cumulativeInterestExpected;
 		this.cumulativeInterestPaid = null;
 		this.cumulativeInterestWaived = null;
+		this.cumulativeInterestWrittenOff = null;
 		this.cumulativeInterestOutstanding = null;
 		
 		this.cumulativeChargesToDate = cumulativeChargesToDate;
@@ -163,6 +194,7 @@ public class LoanScheduleNewData {
 		this.totalExpectedRepayment = totalExpectedRepayment;
 		this.totalPaidToDate = BigDecimal.ZERO;
 		this.totalWaivedToDate = BigDecimal.ZERO;
+		this.totalWrittenOffToDate = BigDecimal.ZERO;
 		this.totalOutstanding = totalExpectedRepayment;
 		this.totalInArrears = BigDecimal.ZERO;
 	}
@@ -170,15 +202,17 @@ public class LoanScheduleNewData {
 	/*
 	 * Used when fully populating
 	 */
-	public LoanScheduleNewData(final CurrencyData currency, final Collection<LoanSchedulePeriodData> periods,
+	public LoanScheduleData(final CurrencyData currency, final Collection<LoanSchedulePeriodData> periods,
 			final Integer loanTermInDays,
 			final BigDecimal cumulativePrincipalDisbursed,
 			final BigDecimal cumulativePrincipalDue,
 			final BigDecimal cumulativePrincipalPaid,
+			final BigDecimal cumulativePrincipalWrittenOff,
 			final BigDecimal cumulativePrincipalOutstanding,
 			final BigDecimal cumulativeInterestExpected,
 			final BigDecimal cumulativeInterestPaid,
 			final BigDecimal cumulativeInterestWaived,
+			final BigDecimal cumulativeInterestWrittenOff,
 			final BigDecimal cumulativeInterestOutstanding,
 			final BigDecimal cumulativeChargesToDate,
 			final BigDecimal cumulativeChargesPaid,
@@ -187,6 +221,7 @@ public class LoanScheduleNewData {
 			final BigDecimal totalExpectedRepayment,
 			final BigDecimal totalPaidToDate,
 			final BigDecimal totalWaivedToDate,
+			final BigDecimal totalWrittenOffToDate,
 			final BigDecimal totalOutstanding,
 			final BigDecimal totalInArrears) {
 		this.currency = currency;
@@ -196,9 +231,11 @@ public class LoanScheduleNewData {
 		this.cumulativePrincipalDisbursed = cumulativePrincipalDisbursed;
 		this.cumulativePrincipalDue = cumulativePrincipalDue;
 		this.cumulativePrincipalPaid = cumulativePrincipalPaid;
+		this.cumulativePrincipalWrittenOff = cumulativePrincipalWrittenOff;
 		this.cumulativePrincipalOutstanding = cumulativePrincipalOutstanding;
 		this.cumulativeInterestExpected = cumulativeInterestExpected;
 		this.cumulativeInterestPaid = cumulativeInterestPaid;
+		this.cumulativeInterestWrittenOff = cumulativeInterestWrittenOff;
 		this.cumulativeInterestWaived = cumulativeInterestWaived;
 		this.cumulativeInterestOutstanding = cumulativeInterestOutstanding;
 		this.cumulativeChargesToDate = cumulativeChargesToDate;
@@ -208,6 +245,7 @@ public class LoanScheduleNewData {
 		this.totalExpectedRepayment = totalExpectedRepayment;
 		this.totalPaidToDate = totalPaidToDate;
 		this.totalWaivedToDate = totalWaivedToDate;
+		this.totalWrittenOffToDate = totalWrittenOffToDate;
 		this.totalOutstanding = totalOutstanding;
 		this.totalInArrears = totalInArrears;
 	}

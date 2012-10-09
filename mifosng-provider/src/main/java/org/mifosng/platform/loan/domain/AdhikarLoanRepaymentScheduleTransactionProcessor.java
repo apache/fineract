@@ -68,7 +68,7 @@ public class AdhikarLoanRepaymentScheduleTransactionProcessor extends AbstractLo
 		Money interestWaivedPortion = Money.zero(transactionAmountRemaining.getCurrency());
 		Money chargesPortion = Money.zero(transactionAmountRemaining.getCurrency());
 		
-		if (loanTransaction.isWaiver()) {
+		if (loanTransaction.isInterestWaiver()) {
 			interestWaivedPortion = currentInstallment.waiveInterestComponent(transactionAmountRemaining);
 			transactionAmountRemaining = transactionAmountRemaining.minus(interestWaivedPortion);
 			
@@ -135,7 +135,7 @@ public class AdhikarLoanRepaymentScheduleTransactionProcessor extends AbstractLo
 		Money interestPortion = Money.zero(transactionAmountRemaining.getCurrency());
 		Money chargesPortion = Money.zero(transactionAmountRemaining.getCurrency());
 		
-		if (loanTransaction.isWaiver()) {
+		if (loanTransaction.isInterestWaiver()) {
 			interestWaivedPortion = currentInstallment.waiveInterestComponent(transactionAmountRemaining);
 			transactionAmountRemaining = transactionAmountRemaining.minus(interestWaivedPortion);
 		} else {

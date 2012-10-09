@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-import org.mifosng.platform.api.LoanScheduleNewData;
+import org.mifosng.platform.api.LoanScheduleData;
 import org.mifosng.platform.api.commands.LoanApplicationCommand;
 import org.mifosng.platform.api.data.LoanSchedulePeriodData;
 import org.mifosng.platform.client.domain.Client;
@@ -122,7 +122,7 @@ public class LoanAssembler {
 
 		loan.setExternalId(command.getExternalId());
 
-		final LoanScheduleNewData loanSchedule = this.calculationPlatformService.calculateLoanScheduleNew(command.toCalculateLoanScheduleCommand());
+		final LoanScheduleData loanSchedule = this.calculationPlatformService.calculateLoanScheduleNew(command.toCalculateLoanScheduleCommand());
 		
 		for (LoanSchedulePeriodData scheduledLoanInstallment : loanSchedule.getPeriods()) {
 			if (scheduledLoanInstallment.isRepaymentPeriod()) {

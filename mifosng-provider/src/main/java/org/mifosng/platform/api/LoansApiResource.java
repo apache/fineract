@@ -38,7 +38,6 @@ import org.mifosng.platform.api.data.LoanBasicDetailsData;
 import org.mifosng.platform.api.data.LoanChargeData;
 import org.mifosng.platform.api.data.LoanPermissionData;
 import org.mifosng.platform.api.data.LoanProductLookup;
-import org.mifosng.platform.api.data.LoanRepaymentTransactionData;
 import org.mifosng.platform.api.data.LoanTransactionData;
 import org.mifosng.platform.api.data.LoanTransactionNewData;
 import org.mifosng.platform.api.data.MoneyData;
@@ -191,8 +190,8 @@ public class LoansApiResource {
 		LoanBasicDetailsData loanBasicDetails = this.loanReadPlatformService.retrieveLoanAccountDetails(loanId);
 		
 		int loanRepaymentsCount = 0;
-		Collection<LoanRepaymentTransactionData> loanRepayments = null;
-		LoanScheduleNewData repaymentSchedule = null;
+		Collection<LoanTransactionNewData> loanRepayments = null;
+		LoanScheduleData repaymentSchedule = null;
 		LoanPermissionData permissions = null;
         Collection<LoanChargeData> charges = null;
 
@@ -201,18 +200,21 @@ public class LoansApiResource {
 		if (!associationParameters.isEmpty()) {
 			
 			if (associationParameters.contains("all")) {
-				responseParameters.addAll(Arrays.asList("repaymentSchedule", "loanRepayments", "permissions", "convenienceData", "charges"));
+				responseParameters.addAll(Arrays.asList("repaymentSchedule", "transactions", "permissions", "convenienceData", "charges"));
 			} else {
 				responseParameters.addAll(associationParameters);
 			}
 			
-			Collection<LoanRepaymentTransactionData> currentLoanRepayments = this.loanReadPlatformService.retrieveLoanPayments(loanId);
-			if (!CollectionUtils.isEmpty(currentLoanRepayments)) {
-				loanRepayments = currentLoanRepayments;
-				loanRepaymentsCount = loanRepayments.size();
+			if (responseParameters.contains("transactions")) {
+				Collection<LoanTransactionNewData> currentLoanRepayments = this.loanReadPlatformService.retrieveLoanTransactions(loanId);
+				if (!CollectionUtils.isEmpty(currentLoanRepayments)) {
+					loanRepayments = currentLoanRepayments;
+					loanRepaymentsCount = loanRepayments.size();
+				}
 			}
 			
 			if (responseParameters.contains("repaymentSchedule")) {
+				
 				DisbursementData singleDisbursement = loanBasicDetails.toDisburementData();
 				repaymentSchedule = this.loanReadPlatformService.retrieveRepaymentSchedule(loanId, loanBasicDetails.getCurrency(), 
 					singleDisbursement, loanBasicDetails.getTotalDisbursementCharges(), loanBasicDetails.getInArrearsTolerance());
@@ -275,7 +277,8 @@ public class LoansApiResource {
 				repaymentSchedule, loanRepayments, permissions, charges, 
 				productOptions, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions, 
 				repaymentStrategyOptions, interestRateFrequencyTypeOptions, 
-				amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, chargeTemplate, allowedLoanOfficers);
+				amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions, 
+				fundOptions, chargeOptions, chargeTemplate, allowedLoanOfficers);
 		
 		return this.apiJsonSerializerService.serializeLoanAccountDataToJson(prettyPrint, responseParameters, loanAccount);
 	}
@@ -302,7 +305,7 @@ public class LoansApiResource {
 
 	private String calculateLoanSchedule(final UriInfo uriInfo, final CalculateLoanScheduleCommand command) {
 		
-		final LoanScheduleNewData loanSchedule = this.calculationPlatformService.calculateLoanScheduleNew(command);
+		final LoanScheduleData loanSchedule = this.calculationPlatformService.calculateLoanScheduleNew(command);
 
 		final Set<String> typicalLoanScheduleResponseParameters = new HashSet<String>(
 				Arrays.asList("periods", "cumulativePrincipalDisbursed"));
@@ -406,26 +409,24 @@ public class LoansApiResource {
 			@QueryParam("command") final String commandParam,
 			final String jsonRequestBody) {
 
-		final LoanTransactionCommand command = this.apiDataConversionService
-				.convertJsonToLoanTransactionCommand(loanId, jsonRequestBody);
+		final LoanTransactionCommand command = this.apiDataConversionService.convertJsonToLoanTransactionCommand(loanId, jsonRequestBody);
 
-		Response response = null;
-
+		EntityIdentifier identifier = null;
 		if (is(commandParam, "repayment")) {
-			EntityIdentifier identifier = this.loanWritePlatformService
-					.makeLoanRepayment(command);
-			response = Response.ok().entity(identifier).build();
+			identifier = this.loanWritePlatformService.makeLoanRepayment(command);
 		} else if (is(commandParam, "waiveinterest")) {
-			EntityIdentifier identifier = this.loanWritePlatformService
-					.waiveInterestOnLoan(command);
-			response = Response.ok().entity(identifier).build();
+			identifier = this.loanWritePlatformService.waiveInterestOnLoan(command);
+		} else if (is(commandParam, "writeoff")) {
+			identifier = this.loanWritePlatformService.writeOff(command);
+		} else if (is(commandParam, "closeasrescheduled")) {
+			identifier = this.loanWritePlatformService.closeAsRescheduled(command);
 		}
 
-		if (response == null) {
+		if (identifier == null) {
 			throw new UnrecognizedQueryParamException("command", commandParam);
 		}
 
-		return response;
+		return Response.ok().entity(identifier).build();
 	}
 
 	@GET
@@ -440,8 +441,8 @@ public class LoansApiResource {
 		LoanTransactionData transactionData = null;
 		if (is(commandParam, "repayment")) {
 			Set<String> typicalResponseParameters = new HashSet<String>(
-					Arrays.asList("id", "transactionType", "date", "principal", "interest", "total", "totalWaived", "overpaid")
-					);
+					Arrays.asList("id", "transactionType", "date", "principal",
+							"interest", "total", "totalWaived", "overpaid"));
 			
 			Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 			if (responseParameters.isEmpty()) {
@@ -460,7 +461,29 @@ public class LoansApiResource {
 			}
 			boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 			
-			LoanTransactionNewData newTransactionData = this.loanReadPlatformService.retrieveNewLoanWaiveInterestDetails(loanId);
+			final LoanTransactionNewData newTransactionData = this.loanReadPlatformService.retrieveNewLoanWaiveInterestDetails(loanId);
+			return this.apiJsonSerializerService.serializeLoanTransactionDataToJson(prettyPrint, responseParameters, newTransactionData);
+		} else if (is(commandParam, "writeoff")) {
+			final Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "type", "date", "currency", "amount"));
+			
+			Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+			if (responseParameters.isEmpty()) {
+				responseParameters.addAll(typicalResponseParameters);
+			}
+			boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+			
+			final LoanTransactionNewData newTransactionData = this.loanReadPlatformService.retrieveNewClosureDetails();
+			return this.apiJsonSerializerService.serializeLoanTransactionDataToJson(prettyPrint, responseParameters, newTransactionData);
+		} else if (is(commandParam, "closeasrescheduled")) {
+			final Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "type", "date", "currency", "amount"));
+			
+			Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+			if (responseParameters.isEmpty()) {
+				responseParameters.addAll(typicalResponseParameters);
+			}
+			boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+			
+			final LoanTransactionNewData newTransactionData = this.loanReadPlatformService.retrieveNewClosureDetails();
 			return this.apiJsonSerializerService.serializeLoanTransactionDataToJson(prettyPrint, responseParameters, newTransactionData);
 		} else {
 			throw new UnrecognizedQueryParamException("command", commandParam);

@@ -8,7 +8,7 @@ import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
-import org.mifosng.platform.api.LoanScheduleNewData;
+import org.mifosng.platform.api.LoanScheduleData;
 import org.mifosng.platform.api.commands.AdjustLoanTransactionCommand;
 import org.mifosng.platform.api.commands.CalculateLoanScheduleCommand;
 import org.mifosng.platform.api.commands.LoanApplicationCommand;
@@ -161,7 +161,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		final LoanTransactionProcessingStrategy strategy = this.loanAssembler.findStrategyByIdIfProvided(command.getTransactionProcessingStrategyId());
 		final Set<LoanCharge> charges = this.loanChargeAssembler.assembleFrom(command.getCharges(), loanProduct.getCharges(), loan.getPrincpal().getAmount());
 
-        final LoanScheduleNewData loanSchedule = this.calculationPlatformService.calculateLoanScheduleNew(command.toCalculateLoanScheduleCommand());
+        final LoanScheduleData loanSchedule = this.calculationPlatformService.calculateLoanScheduleNew(command.toCalculateLoanScheduleCommand());
 		loan.modifyLoanApplication(command, client, loanProduct, fund, strategy, loanSchedule, charges, loanOfficer);
 
 		this.loanRepository.save(loan);
@@ -373,7 +373,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 					loanTermFrequency, loanTermFrequencyType,
 					actualDisbursementDate, repaymentsStartingFromDate, interestCalculatedFromDate, loanChargeCommands);
 
-			LoanScheduleNewData loanSchedule = this.calculationPlatformService.calculateLoanScheduleNew(calculateCommand);
+			LoanScheduleData loanSchedule = this.calculationPlatformService.calculateLoanScheduleNew(calculateCommand);
 
 			List<LoanRepaymentScheduleInstallment> modifiedLoanRepaymentSchedule = new ArrayList<LoanRepaymentScheduleInstallment>();
 			
@@ -494,7 +494,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		// adjustment is only supported for repayments and waivers at present
 		LocalDate transactionDate = command.getTransactionDate();
 		LoanTransaction newTransactionDetail = LoanTransaction.repayment(transactionAmount, transactionDate);
-		if (transactionToAdjust.isWaiver()) {
+		if (transactionToAdjust.isInterestWaiver()) {
 			newTransactionDetail = LoanTransaction.waiver(loan, transactionAmount, transactionDate);
 		}
 
@@ -540,7 +540,63 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
 		return new EntityIdentifier(loan.getId());
 	}
+	
+	@Transactional
+	@Override
+	public EntityIdentifier writeOff(final LoanTransactionCommand command) {
+		context.authenticatedUser();
 
+		final LoanTransactionCommandValidator validator = new LoanTransactionCommandValidator(command);
+		validator.validateNonMonetaryTransaction();
+		
+		final Loan loan = this.loanRepository.findOne(command.getLoanId());
+		if (loan == null) {
+			throw new LoanNotFoundException(command.getLoanId());
+		}
+		
+		final LoanTransaction writeoff = loan.closeAsWrittenOff(command.getTransactionDate(), defaultLoanLifecycleStateMachine());
+		
+		this.loanTransactionRepository.save(writeoff);
+		this.loanRepository.save(loan);
+		
+		final String noteText = command.getNote();
+		if (StringUtils.isNotBlank(noteText)) {
+			final Note note = Note.loanTransactionNote(loan, writeoff, noteText);
+			this.noteRepository.save(note);
+		}
+
+		return new EntityIdentifier(loan.getId());
+	}
+	
+	@Transactional
+	@Override
+	public EntityIdentifier closeAsRescheduled(final LoanTransactionCommand command) {
+		context.authenticatedUser();
+
+		final LoanTransactionCommandValidator validator = new LoanTransactionCommandValidator(command);
+		validator.validateNonMonetaryTransaction();
+		
+		final Loan loan = this.loanRepository.findOne(command.getLoanId());
+		if (loan == null) {
+			throw new LoanNotFoundException(command.getLoanId());
+		}
+		
+		// FIXME - kw - HANDLE closed and rescheduled case.
+		final LoanTransaction writeoff = loan.closeAsWrittenOff(command.getTransactionDate(), defaultLoanLifecycleStateMachine());
+		
+		this.loanTransactionRepository.save(writeoff);
+		this.loanRepository.save(loan);
+		
+		final String noteText = command.getNote();
+		if (StringUtils.isNotBlank(noteText)) {
+			final Note note = Note.loanTransactionNote(loan, writeoff, noteText);
+			this.noteRepository.save(note);
+		}
+
+		return new EntityIdentifier(loan.getId());
+	}
+
+	@Transactional
     @Override
     public EntityIdentifier addLoanCharge(LoanChargeCommand command) {
         this.context.authenticatedUser();
@@ -579,6 +635,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         return new EntityIdentifier(loanCharge.getId());
     }
 
+	@Transactional
     @Override
     public EntityIdentifier updateLoanCharge(final LoanChargeCommand command) {
 
@@ -604,6 +661,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         throw new ChargeNotFoundException(command.getId());
     }
 
+	@Transactional
     @Override
     public EntityIdentifier deleteLoanCharge(Long loanId, Long loanChargeId) {
 

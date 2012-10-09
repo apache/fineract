@@ -3,12 +3,11 @@ package org.mifosng.platform.loan.service;
 import java.math.BigDecimal;
 import java.util.Collection;
 
-import org.mifosng.platform.api.LoanScheduleNewData;
+import org.mifosng.platform.api.LoanScheduleData;
 import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.DisbursementData;
 import org.mifosng.platform.api.data.LoanBasicDetailsData;
 import org.mifosng.platform.api.data.LoanPermissionData;
-import org.mifosng.platform.api.data.LoanRepaymentTransactionData;
 import org.mifosng.platform.api.data.LoanTransactionData;
 import org.mifosng.platform.api.data.LoanTransactionNewData;
 
@@ -16,9 +15,9 @@ public interface LoanReadPlatformService {
 
 	LoanBasicDetailsData retrieveLoanAccountDetails(Long loanId);
 
-	LoanScheduleNewData retrieveRepaymentSchedule(Long loanId, CurrencyData currency, DisbursementData disbursement, BigDecimal totalChargesAtDisbursement, BigDecimal inArrearsTolerance);
+	LoanScheduleData retrieveRepaymentSchedule(Long loanId, CurrencyData currency, DisbursementData disbursement, BigDecimal totalChargesAtDisbursement, BigDecimal inArrearsTolerance);
 
-	Collection<LoanRepaymentTransactionData> retrieveLoanPayments(Long loanId);
+	Collection<LoanTransactionNewData> retrieveLoanTransactions(Long loanId);
 
 	LoanPermissionData retrieveLoanPermissions(
 			LoanBasicDetailsData loanBasicDetails, boolean isWaiverAllowed,
@@ -33,4 +32,6 @@ public interface LoanReadPlatformService {
 	LoanTransactionNewData retrieveNewLoanWaiveInterestDetails(Long loanId);
 
 	LoanTransactionData retrieveLoanTransactionDetails(Long loanId, Long transactionId);
+
+	LoanTransactionNewData retrieveNewClosureDetails();
 }

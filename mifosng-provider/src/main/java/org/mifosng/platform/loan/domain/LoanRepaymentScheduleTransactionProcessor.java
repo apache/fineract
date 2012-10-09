@@ -10,4 +10,8 @@ public interface LoanRepaymentScheduleTransactionProcessor {
 
 	void handleTransaction(List<LoanTransaction> repaymentsOrWaivers, MonetaryCurrency currency, List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments);
 
+	void handleWriteOff(LoanTransaction loanTransaction,
+			MonetaryCurrency loanCurrency,
+			List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments);
+
 }

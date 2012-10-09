@@ -35,7 +35,7 @@ public class LoanTransaction extends AbstractAuditableCustom<AppUser, Long> {
     private Loan        loan;
 
 	@Column(name = "amount", scale = 6, precision = 19, nullable = false)
-	private final BigDecimal amount;
+	private BigDecimal amount;
 	
 	@Column(name = "principal_portion_derived", scale = 6, precision = 19, nullable = false)
 	private BigDecimal principalPortion = BigDecimal.ZERO;
@@ -63,7 +63,6 @@ public class LoanTransaction extends AbstractAuditableCustom<AppUser, Long> {
     
     protected LoanTransaction() {
         this.loan = null;
-        this.amount = null;
         this.dateOf = null;
         this.typeOf = null;
     }
@@ -81,13 +80,17 @@ public class LoanTransaction extends AbstractAuditableCustom<AppUser, Long> {
 	}
 	
 	public static LoanTransaction waiver(final Loan loan, final Money waived, final LocalDate waiveDate) {
-		return new LoanTransaction(loan, LoanTransactionType.WAIVED, waived.getAmount(), waiveDate);
+		return new LoanTransaction(loan, LoanTransactionType.WAIVE_INTEREST, waived.getAmount(), waiveDate);
 	}
 	
 	private static LoanTransaction contra(final LoanTransaction originalTransaction) {
-		LoanTransaction contra = new LoanTransaction(null, LoanTransactionType.REVERSAL, originalTransaction.getAmount().negate(), new LocalDate(originalTransaction.getDateOf()));
+		LoanTransaction contra = new LoanTransaction(null, LoanTransactionType.CONTRA, originalTransaction.getAmount().negate(), new LocalDate(originalTransaction.getDateOf()));
 		contra.updateContra(originalTransaction);
 		return contra;
+	}
+	
+	public static LoanTransaction writeoff(final Loan loan, final LocalDate writeOffDate) {
+		return new LoanTransaction(loan, LoanTransactionType.WRITEOFF, null, writeOffDate);
 	}
 	
 	public void updateContra(final LoanTransaction transaction) {
@@ -142,23 +145,27 @@ public class LoanTransaction extends AbstractAuditableCustom<AppUser, Long> {
 		return LoanTransactionType.REPAYMENT_AT_DISBURSEMENT.equals(getTypeOf());
 	}
 	
-	public boolean isWaiver() {
-		return LoanTransactionType.WAIVED.equals(getTypeOf()) && isNotContra();
+	public boolean isInterestWaiver() {
+		return LoanTransactionType.WAIVE_INTEREST.equals(getTypeOf()) && isNotContra();
 	}
 	
-	public boolean isNotWaiver() {
-		return !isWaiver();
+	public boolean isNotInterestWaiver() {
+		return !isInterestWaiver();
+	}
+	
+	public boolean isWriteOff() {
+		return getTypeOf().isWriteOff() && isNotContra();
 	}
 
-	public boolean isIdentifiedBy(Long identifier) {
+	public boolean isIdentifiedBy(final Long identifier) {
 		return this.getId().equals(identifier);
 	}
 	
-	public boolean isBelongingToLoanOf(Loan check) {
+	public boolean isBelongingToLoanOf(final Loan check) {
 		return this.loan.getId().equals(check.getId());
 	}
 	
-	public boolean isNotBelongingToLoanOf(Loan check) {
+	public boolean isNotBelongingToLoanOf(final Loan check) {
 		return !isBelongingToLoanOf(check);
 	}
 
@@ -186,6 +193,13 @@ public class LoanTransaction extends AbstractAuditableCustom<AppUser, Long> {
 		this.interestPortion = getInterestPortion(currency).plus(interest).getAmount();
 		this.interestWaivedPortion = getInterestWaivedPortion(currency).plus(interestWaivedPortion).getAmount();
 		this.chargesPortion = getChargesPortion(currency).plus(charges).getAmount();
+	}
+	
+	public void updateComponentsAndTotal(final Money principal, final Money interest, final Money interestWaivedPortion, final Money charges) {
+		updateComponents(principal, interest, interestWaivedPortion, charges);
+		
+		final MonetaryCurrency currency = principal.getCurrency();
+		this.amount = getPrincipalPortion(currency).plus(getInterestPortion(currency)).plus(this.chargesPortion).getAmount();
 	}
 
 	public Money getPrincipalPortion(final MonetaryCurrency currency) {

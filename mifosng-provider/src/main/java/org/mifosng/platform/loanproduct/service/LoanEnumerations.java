@@ -173,20 +173,32 @@ public class LoanEnumerations {
 	public static EnumOptionData transactionType(final LoanTransactionType type) {
 		EnumOptionData optionData = null;
 		switch (type) {
+		case INVALID:
+			optionData = new EnumOptionData(LoanTransactionType.INVALID.getValue().longValue(), LoanTransactionType.INVALID.getCode(), "Invalid");
+			break;
 		case DISBURSEMENT:
 			optionData= new EnumOptionData(LoanTransactionType.DISBURSEMENT.getValue().longValue(), LoanTransactionType.DISBURSEMENT.getCode(), "Dibursement");
 			break;
 		case REPAYMENT:
 			optionData = new EnumOptionData(LoanTransactionType.REPAYMENT.getValue().longValue(), LoanTransactionType.REPAYMENT.getCode(), "Repayment");
 			break;
-		case REVERSAL:
-			optionData = new EnumOptionData(LoanTransactionType.REVERSAL.getValue().longValue(), LoanTransactionType.REVERSAL.getCode(), "Reversal");
+		case REPAYMENT_AT_DISBURSEMENT:
+			optionData = new EnumOptionData(LoanTransactionType.REPAYMENT_AT_DISBURSEMENT.getValue().longValue(), LoanTransactionType.REPAYMENT_AT_DISBURSEMENT.getCode(), "Repayment (at time of disbursement)");
 			break;
-		case WAIVED:
-			optionData = new EnumOptionData(LoanTransactionType.WAIVED.getValue().longValue(), LoanTransactionType.WAIVED.getCode(), "Waiver");
+		case CONTRA:
+			optionData = new EnumOptionData(LoanTransactionType.CONTRA.getValue().longValue(), LoanTransactionType.CONTRA.getCode(), "Reversal");
 			break;
-		default:
-			optionData = new EnumOptionData(LoanTransactionType.INVALID.getValue().longValue(), LoanTransactionType.INVALID.getCode(), "Invalid");
+		case WAIVE_INTEREST:
+			optionData = new EnumOptionData(LoanTransactionType.WAIVE_INTEREST.getValue().longValue(), LoanTransactionType.WAIVE_INTEREST.getCode(), "Waive interest");
+			break;
+		case MARKED_FOR_RESCHEDULING:
+			optionData = new EnumOptionData(LoanTransactionType.MARKED_FOR_RESCHEDULING.getValue().longValue(), LoanTransactionType.MARKED_FOR_RESCHEDULING.getCode(), "Close (as rescheduled)");
+			break;
+		case WRITEOFF:
+			optionData = new EnumOptionData(LoanTransactionType.WRITEOFF.getValue().longValue(), LoanTransactionType.WRITEOFF.getCode(), "Close (as written-off)");
+			break;
+		case RECOVERY_REPAYMENT:
+			optionData = new EnumOptionData(LoanTransactionType.RECOVERY_REPAYMENT.getValue().longValue(), LoanTransactionType.RECOVERY_REPAYMENT.getCode(), "Repayment (after write-off)");
 			break;
 		}
 		return optionData;
@@ -197,8 +209,11 @@ public class LoanEnumerations {
 	}
 	
 	public static EnumOptionData status(final LoanStatus status) {
-		EnumOptionData optionData = null;
+		EnumOptionData optionData = new EnumOptionData(LoanStatus.INVALID.getValue().longValue(), LoanStatus.INVALID.getCode(), "Invalid");
 		switch (status) {
+		case INVALID:
+			optionData = new EnumOptionData(LoanStatus.INVALID.getValue().longValue(), LoanStatus.INVALID.getCode(), "Invalid");
+			break;
 		case SUBMITED_AND_PENDING_APPROVAL:
 			optionData = new EnumOptionData(LoanStatus.SUBMITED_AND_PENDING_APPROVAL.getValue().longValue(), LoanStatus.SUBMITED_AND_PENDING_APPROVAL.getCode(), "Submitted and pending approval");
 			break;
@@ -214,16 +229,20 @@ public class LoanEnumerations {
 		case WITHDRAWN_BY_CLIENT:
 			optionData = new EnumOptionData(LoanStatus.WITHDRAWN_BY_CLIENT.getValue().longValue(), LoanStatus.WITHDRAWN_BY_CLIENT.getCode(), "Withdrawn by applicant");
 			break;
-		case CLOSED:
-			optionData = new EnumOptionData(LoanStatus.CLOSED.getValue().longValue(), LoanStatus.CLOSED.getCode(), "Closed");
+		case CLOSED_OBLIGATIONS_MET:
+			optionData = new EnumOptionData(LoanStatus.CLOSED_OBLIGATIONS_MET.getValue().longValue(), LoanStatus.CLOSED_OBLIGATIONS_MET.getCode(), "Closed (obligations met)");
+			break;
+		case CLOSED_WRITTEN_OFF:
+			optionData = new EnumOptionData(LoanStatus.CLOSED_WRITTEN_OFF.getValue().longValue(), LoanStatus.CLOSED_WRITTEN_OFF.getCode(), "Closed (written off)");
+			break;
+		case CLOSED_RESCHEDULE_OUTSTANDING_AMOUNT:
+			optionData = new EnumOptionData(LoanStatus.CLOSED_RESCHEDULE_OUTSTANDING_AMOUNT.getValue().longValue(), LoanStatus.CLOSED_RESCHEDULE_OUTSTANDING_AMOUNT.getCode(), "Closed (rescheduled)");
 			break;
 		case OVERPAID:
 			optionData = new EnumOptionData(LoanStatus.OVERPAID.getValue().longValue(), LoanStatus.OVERPAID.getCode(), "Overpaid");
 			break;
-		default:
-			optionData = new EnumOptionData(LoanStatus.INVALID.getValue().longValue(), LoanStatus.INVALID.getCode(), "Invalid");
-			break;
 		}
+		
 		return optionData;
 	}
 }

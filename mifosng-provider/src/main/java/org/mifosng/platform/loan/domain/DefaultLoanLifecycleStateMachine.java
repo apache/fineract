@@ -53,7 +53,7 @@ public class DefaultLoanLifecycleStateMachine implements LoanLifecycleStateMachi
 			}
 			break;
 		case LOAN_REPAYMENT_OR_WAIVER:
-			if (this.anyOfAllowedWhenComingFrom(from, LoanStatus.ACTIVE, LoanStatus.CLOSED, LoanStatus.OVERPAID)) {
+			if (this.anyOfAllowedWhenComingFrom(from, LoanStatus.ACTIVE, LoanStatus.CLOSED_OBLIGATIONS_MET, LoanStatus.OVERPAID)) {
 				newState = stateOf(LoanStatus.ACTIVE, allowedLoanStatuses);
 			} else {
 				newState = from;
@@ -61,26 +61,26 @@ public class DefaultLoanLifecycleStateMachine implements LoanLifecycleStateMachi
 			break;
 		case REPAID_IN_FULL:
 			if (this.anyOfAllowedWhenComingFrom(from, LoanStatus.ACTIVE)) {
-				newState = stateOf(LoanStatus.CLOSED, allowedLoanStatuses);
+				newState = stateOf(LoanStatus.CLOSED_OBLIGATIONS_MET, allowedLoanStatuses);
 			}
 			break;
-		case LOAN_WRITE_OFF:
+		case WRITE_OFF_OUTSTANDING:
 			if (this.anyOfAllowedWhenComingFrom(from,LoanStatus.ACTIVE)) {
-				newState = stateOf(LoanStatus.CLOSED, allowedLoanStatuses);
+				newState = stateOf(LoanStatus.CLOSED_WRITTEN_OFF, allowedLoanStatuses);
 			}
 			break;
 		case LOAN_RESCHEDULE:
 			if (this.anyOfAllowedWhenComingFrom(from, LoanStatus.ACTIVE)) {
-				newState = stateOf(LoanStatus.CLOSED, allowedLoanStatuses);
+				newState = stateOf(LoanStatus.CLOSED_RESCHEDULE_OUTSTANDING_AMOUNT, allowedLoanStatuses);
 			}
 			break;
 		case INTERST_REBATE_OWED:
-			if (this.anyOfAllowedWhenComingFrom(from, LoanStatus.CLOSED)) {
-				newState = stateOf(LoanStatus.CLOSED, allowedLoanStatuses);
+			if (this.anyOfAllowedWhenComingFrom(from, LoanStatus.CLOSED_OBLIGATIONS_MET)) {
+				newState = stateOf(LoanStatus.CLOSED_OBLIGATIONS_MET, allowedLoanStatuses);
 			}
 			break;
 		case LOAN_OVERPAYMENT:
-			if (this.anyOfAllowedWhenComingFrom(from, LoanStatus.CLOSED, LoanStatus.ACTIVE)) {
+			if (this.anyOfAllowedWhenComingFrom(from, LoanStatus.CLOSED_OBLIGATIONS_MET, LoanStatus.ACTIVE)) {
 				newState = stateOf(LoanStatus.OVERPAID, allowedLoanStatuses);
 			}
 			break;

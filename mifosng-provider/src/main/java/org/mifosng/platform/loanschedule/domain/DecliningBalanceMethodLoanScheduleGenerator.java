@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.joda.time.LocalDate;
-import org.mifosng.platform.api.LoanScheduleNewData;
+import org.mifosng.platform.api.LoanScheduleData;
 import org.mifosng.platform.currency.domain.ApplicationCurrency;
 import org.mifosng.platform.loan.domain.AmortizationMethod;
 import org.mifosng.platform.loan.domain.LoanCharge;
@@ -36,7 +36,7 @@ public class DecliningBalanceMethodLoanScheduleGenerator implements LoanSchedule
 	private final AmortizationLoanScheduleGeneratorFactory amortizationLoanScheduleGeneratorFactory = new AmortizationLoanScheduleGeneratorFactory();
 	
 	@Override
-	public LoanScheduleNewData generate(
+	public LoanScheduleData generate(
 			final ApplicationCurrency applicationCurrency,
 			final LoanProductRelatedDetail loanScheduleInfo,
 			final Integer loanTermFrequency, 
