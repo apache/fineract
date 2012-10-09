@@ -100,7 +100,8 @@ public class DepositProductsApiResource {
 				"currencyCode","digitsAfterDecimal","minimumBalance","maximumBalance","tenureInMonths",
 				"maturityDefaultInterestRate","maturityMinInterestRate","maturityMaxInterestRate",
 				"interestCompoundedEvery", "interestCompoundedEveryPeriodType",
-				"renewalAllowed","preClosureAllowed","preClosureInterestRate","interestCompoundingAllowed"));
+				"renewalAllowed","preClosureAllowed","preClosureInterestRate","interestCompoundingAllowed",
+				"isLockinPeriodAllowed","lockinPeriod","lockinPeriodType"));
 		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (responseParameters.isEmpty()) {
@@ -123,7 +124,8 @@ public class DepositProductsApiResource {
 				"currencyCode","digitsAfterDecimal","minimumBalance","maximumBalance","tenureInMonths",
 				"maturityDefaultInterestRate","maturityMinInterestRate","maturityMaxInterestRate",
 				"interestCompoundedEvery", "interestCompoundedEveryPeriodType",
-				"renewalAllowed","preClosureAllowed","preClosureInterestRate","interestCompoundingAllowed"));
+				"renewalAllowed","preClosureAllowed","preClosureInterestRate","interestCompoundingAllowed",
+				"isLockinPeriodAllowed","lockinPeriod","lockinPeriodType"));
 		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (responseParameters.isEmpty()) {
@@ -153,7 +155,8 @@ public class DepositProductsApiResource {
 				"currencyCode","digitsAfterDecimal","minimumBalance","maximumBalance","tenureInMonths",
 				"maturityDefaultInterestRate","maturityMinInterestRate","maturityMaxInterestRate",
 				"interestCompoundedEvery", "interestCompoundedEveryPeriodType",
-				"renewalAllowed","preClosureAllowed","preClosureInterestRate"));
+				"renewalAllowed","preClosureAllowed","preClosureInterestRate",
+				"isLockinPeriodAllowed","lockinPeriod","lockinPeriodType"));
 		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (responseParameters.isEmpty()) {

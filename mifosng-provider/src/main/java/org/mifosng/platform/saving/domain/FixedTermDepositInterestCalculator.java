@@ -82,4 +82,16 @@ public class FixedTermDepositInterestCalculator {
 		
 		return Money.of(deposit.getCurrency(), totalAmount);
 	}
+	
+	public Money calculateRemainInterest(Money deposit, Integer days, BigDecimal interestRate){
+		
+		MathContext mc = new MathContext(8, RoundingMode.HALF_EVEN);
+		Integer daysInYear = 365;
+		
+		BigDecimal interestRateAsFraction = interestRate.divide(BigDecimal.valueOf(100), mc);
+		BigDecimal interestRateForOneDay = interestRateAsFraction.divide(BigDecimal.valueOf(daysInYear.doubleValue()), mc);
+		BigDecimal interest = BigDecimal.valueOf(deposit.getAmount().doubleValue()*days.doubleValue()*interestRateForOneDay.doubleValue());
+		
+		return Money.of(deposit.getCurrency(), interest);
+	}
 }

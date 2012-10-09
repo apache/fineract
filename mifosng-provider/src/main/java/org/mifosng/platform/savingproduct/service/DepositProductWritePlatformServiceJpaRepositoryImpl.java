@@ -57,12 +57,14 @@ public class DepositProductWritePlatformServiceJpaRepositoryImpl implements Depo
 			validator.validateForCreate();
 			
 			PeriodFrequencyType interestCompoundingPeriodType = PeriodFrequencyType.fromInt(command.getInterestCompoundedEveryPeriodType());
+			PeriodFrequencyType lockinPeriodType = PeriodFrequencyType.fromInt(command.getLockinPeriodType());
 			MonetaryCurrency currency = new MonetaryCurrency(command.getCurrencyCode(), command.getDigitsAfterDecimal());
 			DepositProduct product = new DepositProduct(command.getName(), command.getExternalId(), command.getDescription(),currency,command.getMinimumBalance(),command.getMaximumBalance(),
 					command.getTenureInMonths(),command.getMaturityDefaultInterestRate(),command.getMaturityMinInterestRate(),command.getMaturityMaxInterestRate(),
 					command.getInterestCompoundedEvery(), interestCompoundingPeriodType,
 					command.isRenewalAllowed(), command.isPreClosureAllowed(),
-					command.getPreClosureInterestRate(),command.isInterestCompoundingAllowed());
+					command.getPreClosureInterestRate(),command.isInterestCompoundingAllowed(),
+					command.isLockinPeriodAllowed(),command.getLockinPeriod(),lockinPeriodType);
 			this.depositProductRepository.save(product);
 			
 			return new EntityIdentifier(product.getId());
@@ -91,7 +93,12 @@ public class DepositProductWritePlatformServiceJpaRepositoryImpl implements Depo
 				interestCompoundingFrequency = PeriodFrequencyType.fromInt(command.getInterestCompoundedEveryPeriodType());
 			}
 			
-			product.update(command, interestCompoundingFrequency);
+			PeriodFrequencyType lockinPeriodType = null;
+			if (command.isLockinPeriodTypeChanged()) {
+				lockinPeriodType = PeriodFrequencyType.fromInt(command.getLockinPeriodType());
+			}
+			
+			product.update(command, interestCompoundingFrequency, lockinPeriodType);
 			this.depositProductRepository.save(product);
 			return new EntityIdentifier(Long.valueOf(product.getId()));
 		} catch (DataIntegrityViolationException dve) {

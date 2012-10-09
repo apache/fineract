@@ -22,6 +22,9 @@ public class DepositProductCommand {
 	private final BigDecimal maturityMaxInterestRate;
 	private final Integer interestCompoundedEvery;
 	private final Integer interestCompoundedEveryPeriodType;
+	private final boolean isLockinPeriodAllowed;
+	private final Integer lockinPeriod;
+	private final Integer lockinPeriodType;
 	
 	private final boolean renewalAllowed;
 	private final boolean preClosureAllowed;
@@ -40,7 +43,8 @@ public class DepositProductCommand {
 			final Integer interestCompoundedEvery,
 			final Integer interestCompoundedEveryPeriodType,
 			final boolean renewalAllowed, final boolean preClosureAllowed, 
-			final BigDecimal preClosureInterestRate, final boolean interestCompoundingAllowed ) {
+			final BigDecimal preClosureInterestRate, final boolean interestCompoundingAllowed, 
+			final boolean isLockinPeriodAllowed,final Integer lockinPeriod,final Integer lockinPeriodType ) {
 		this.id = id;
 		this.externalId = externalId;
 		this.name = name;
@@ -63,6 +67,11 @@ public class DepositProductCommand {
 		this.renewalAllowed = renewalAllowed;
 		this.preClosureAllowed = preClosureAllowed;
 		this.interestCompoundingAllowed = interestCompoundingAllowed;
+		
+		this.isLockinPeriodAllowed = isLockinPeriodAllowed;
+		this.lockinPeriod = lockinPeriod;
+		this.lockinPeriodType = lockinPeriodType;
+		
 		this.modifiedParameters = modifiedParameters;		
 		
 	}
@@ -139,6 +148,18 @@ public class DepositProductCommand {
 		return interestCompoundingAllowed;
 	}
 
+	public boolean isLockinPeriodAllowed() {
+		return isLockinPeriodAllowed;
+	}
+
+	public Integer getLockinPeriod() {
+		return lockinPeriod;
+	}
+
+	public Integer getLockinPeriodType() {
+		return lockinPeriodType;
+	}
+
 	public boolean isExternalIdChanged() {
 		return this.modifiedParameters.contains("externalId");
 	}
@@ -213,5 +234,17 @@ public class DepositProductCommand {
 	
 	public boolean interestCompoundingAllowedChanged(){
 		return this.modifiedParameters.contains("interestCompoundingAllowed");
+	}
+	
+	public boolean isLockinPeriodAllowedChanged() {
+		return this.modifiedParameters.contains("isLockinPeriodAllowed");
+	}
+
+	public boolean isLockinPeriodChanged() {
+		return this.modifiedParameters.contains("lockinPeriod");
+	}
+
+	public boolean isLockinPeriodTypeChanged() {
+		return this.modifiedParameters.contains("lockinPeriodType");
 	}
 }

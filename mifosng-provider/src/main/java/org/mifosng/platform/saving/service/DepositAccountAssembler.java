@@ -101,6 +101,21 @@ public class DepositAccountAssembler {
 		if(command.isInterestCompoundingAllowedChanged()){
 			interestCompoundingAllowed = command.isInterestCompoundingAllowed();
 		}
+		
+		boolean isLockinPeriodAllowed = product.isLockinPeriodAllowed();
+		if(command.isLockinPeriodChanged()){
+			isLockinPeriodAllowed = command.isLockinPeriodAllowed();
+		}
+		
+		Integer lockinPeriod = product.getLockinPeriod();
+		if(command.getLockinPeriod() != null){
+			lockinPeriod = command.getLockinPeriod();
+		}
+		
+		PeriodFrequencyType lockinPeriodType = product.getLockinPeriodType();
+		if(command.getLockinPeriodType() != null){
+			lockinPeriodType = PeriodFrequencyType.fromInt(command.getLockinPeriodType());
+		}
 		// end of details allowed to be overriden from product
 		
 		DepositAccount account =new DepositAccount().openNew(client, product, command.getExternalId(), 
@@ -109,7 +124,8 @@ public class DepositAccountAssembler {
 				tenureInMonths, compoundingInterestEvery, compoundingInterestFrequency, 
 				command.getCommencementDate(), 
 				renewalAllowed, preClosureAllowed, this.fixedTermDepositInterestCalculator,
-				defaultDepositLifecycleStateMachine(),isInterestWithdrawable,interestCompoundingAllowed);
+				defaultDepositLifecycleStateMachine(),isInterestWithdrawable,interestCompoundingAllowed,
+				isLockinPeriodAllowed,lockinPeriod,lockinPeriodType);
 		
 		return account;
 	}
@@ -186,21 +202,36 @@ public class DepositAccountAssembler {
 			isInterestCompoundingAllowed = command.isInterestCompoundingAllowed();
 		}
 		
+		boolean isLockinPeriodAllowed = account.isLockinPeriodAllowed();
+		if(command.isLockinPeriodChanged()){
+			isLockinPeriodAllowed = command.isLockinPeriodAllowed();
+		}
+		
+		Integer lockinPeriod = account.getLockinPeriod();
+		if(command.getLockinPeriod() != null){
+			lockinPeriod = command.getLockinPeriod();
+		}
+		
+		PeriodFrequencyType lockinPeriodType = account.getLockinPeriodType();
+		if(command.getLockinPeriodType() != null){
+			lockinPeriodType = PeriodFrequencyType.fromInt(command.getLockinPeriodType());
+		}
+		
 		DepositAccount newAccount =new DepositAccount().openNew(client, product, null, 
 				deposit, 
 				maturityInterestRate, preClosureInterestRate, 
 				tenureInMonths, compoundingInterestEvery, compoundingInterestFrequency, 
-				account.maturesOnDate(), 
+				account.maturesOnDate().plusDays(1), 
 				renewalAllowed, preClosureAllowed, this.fixedTermDepositInterestCalculator, defaultDepositLifecycleStateMachine(),
-				isInterestWithdrawable,isInterestCompoundingAllowed);
+				isInterestWithdrawable,isInterestCompoundingAllowed,isLockinPeriodAllowed,lockinPeriod,lockinPeriodType);
 		
 		newAccount.updateAccount(account);
 		
 		return newAccount;
 	}
 
-	public void adjustTotalAmountForPreclosureInterest(DepositAccount account) {
-		account.adjustTotalAmountForPreclosureInterest(account,this.fixedTermDepositInterestCalculator);
+	public void adjustTotalAmountForPreclosureInterest(DepositAccount account,LocalDate eventDate) {
+		account.adjustTotalAmountForPreclosureInterest(account,this.fixedTermDepositInterestCalculator,eventDate);
 	}
 
 	public void assembleUpdatedDepositAccount(DepositAccount account,DepositAccountCommand command) {
@@ -276,8 +307,23 @@ public class DepositAccountAssembler {
 		if(command.isInterestCompoundingAllowedChanged()){
 			isInterestCompoundingAllowed = command.isInterestCompoundingAllowed();
 		}
+		
+		boolean isLockinPeriodAllowed = account.isLockinPeriodAllowed();
+		if(command.isLockinPeriodChanged()){
+			isLockinPeriodAllowed = command.isLockinPeriodAllowed();
+		}
+		
+		Integer lockinPeriod = account.getLockinPeriod();
+		if(command.getLockinPeriod() != null){
+			lockinPeriod = command.getLockinPeriod();
+		}
+		
+		PeriodFrequencyType lockinPeriodType = account.getLockinPeriodType();
+		if(command.getLockinPeriodType() != null){
+			lockinPeriodType = PeriodFrequencyType.fromInt(command.getLockinPeriodType());
+		}
 		account.update(product,externalId,commencementDate,deposit,tenureInMonths,maturityInterestRate,preClosureInterestRate,compoundingInterestEvery,compoundingInterestFrequency,renewalAllowed,
-				preClosureAllowed,isInterestWithdrawable,isInterestCompoundingAllowed,this.fixedTermDepositInterestCalculator,defaultDepositLifecycleStateMachine());
+				preClosureAllowed,isInterestWithdrawable,isInterestCompoundingAllowed,this.fixedTermDepositInterestCalculator,defaultDepositLifecycleStateMachine(),isLockinPeriodAllowed,lockinPeriod,lockinPeriodType);
 	}
 
 	public void updateApprovedDepositAccount(DepositAccount account, DepositAccountCommand command) {

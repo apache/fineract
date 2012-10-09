@@ -292,12 +292,20 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 			throw new DepositAccountNotFoundException(command.getAccountId());
 		}
 		
-		if(command.getMaturesOnDate().isBefore(account.maturesOnDate())){
-			this.depositAccountAssembler.adjustTotalAmountForPreclosureInterest(account);
-		}
-		account.withdrawDepositAccountMoney(defaultDepositLifecycleStateMachine());
-		this.depositAccountRepository.save(account);
+		LocalDate eventDate = command.getMaturesOnDate();
 		
+		Integer lockinPeriod = account.getLockinPeriod();
+		LocalDate lockinPeriodExpDate = account.getActualCommencementDate().plusMonths(Integer.valueOf(lockinPeriod));
+		if(account.isLockinPeriodAllowed()){
+			if(eventDate.isBefore(lockinPeriodExpDate)){
+				throw new DepositAccountTransactionsException("deposit.transaction.canot.withdraw.before.lockinperiod.reached","You can not withdraw your application before maturity date reached");
+			}
+		}
+		if(eventDate.isBefore(account.maturesOnDate())){
+			this.depositAccountAssembler.adjustTotalAmountForPreclosureInterest(account,eventDate);
+		}
+		account.withdrawDepositAccountMoney(defaultDepositLifecycleStateMachine(),fixedTermDepositInterestCalculator,eventDate);
+		this.depositAccountRepository.save(account);
 		String noteText = command.getNote();
 		if (StringUtils.isNotBlank(noteText)) {
 			Note note = Note.depositNote(account, noteText);
@@ -331,13 +339,13 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 					account.withdrawInterest(Money.of(account.getDeposit().getCurrency(), command.getWithdrawInterest()));
 					this.depositAccountRepository.save(account);
 				}else {
-					throw new DepositAccountTransactionsException("You can Withdraw "+remainInterestForWithdrawal+" only");
+					throw new DepositAccountTransactionsException("deposit.transaction.interest.withdrawal.exceed","You can Withdraw "+remainInterestForWithdrawal+" only");
 				}
 			}else {
-				throw new DepositAccountTransactionsException("You don't have enough money for withdrawal");
+				throw new DepositAccountTransactionsException("deposit.transaction.interest.withdrawal.insufficient.amount","You don't have enough money for withdrawal");
 			}
 		}else{
-			throw new DepositAccountTransactionsException("You can not withdraw interst for this account");
+			throw new DepositAccountTransactionsException("deposit.transaction.interest.withdrawal.cannot.withdraw","You can not withdraw interst for this account");
 		}
 		return new EntityIdentifier(account.getId());
 	}

@@ -9,6 +9,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.metamodel.binding.CollectionElementNature;
 import org.mifosng.platform.api.commands.DepositProductCommand;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.exceptions.ValueOutsideRangeException;
@@ -75,6 +76,15 @@ public class DepositProduct extends AbstractAuditableCustom<AppUser, Long> {
 	@Column(name = "pre_closure_interest_rate", scale = 6, precision = 19, nullable = false)
 	private BigDecimal preClosureInterestRate;
 	
+	@Column(name = "is_lock_in_period_allowed", nullable=false)
+	private boolean isLockinPeriodAllowed = false;
+	
+	@Column(name = "lock_in_period", nullable=false)
+	private Integer lockinPeriod;
+	
+	@Column(name = "lock_in_period_type", nullable=false)
+	private PeriodFrequencyType lockinPeriodType;
+	
 	protected DepositProduct() {
 		//
 	}
@@ -91,7 +101,10 @@ public class DepositProduct extends AbstractAuditableCustom<AppUser, Long> {
 			final boolean canRenew,
 			final boolean canPreClose, 
 			final BigDecimal preClosureInterestRate,
-			final boolean isInterestCompoundingAllowed) {
+			final boolean isInterestCompoundingAllowed,
+			final boolean isLockinPeriodAllowed,
+			final Integer lockinPeriod,
+			final PeriodFrequencyType lockinPeriodType) {
 		this.name = name.trim();
 		if (StringUtils.isNotBlank(description)) {
 			this.description = description.trim();
@@ -117,6 +130,9 @@ public class DepositProduct extends AbstractAuditableCustom<AppUser, Long> {
 		this.preClosureAllowed = canPreClose;
 		this.preClosureInterestRate = preClosureInterestRate;
 		this.interestCompoundingAllowed = isInterestCompoundingAllowed;
+		this.isLockinPeriodAllowed = isLockinPeriodAllowed;
+		this.lockinPeriod = lockinPeriod;
+		this.lockinPeriodType = lockinPeriodType;
 	}
 	
 	public MonetaryCurrency getCurrency() {
@@ -159,6 +175,18 @@ public class DepositProduct extends AbstractAuditableCustom<AppUser, Long> {
 		return interestCompoundingAllowed;
 	}
 
+	public boolean isLockinPeriodAllowed() {
+		return isLockinPeriodAllowed;
+	}
+
+	public Integer getLockinPeriod() {
+		return lockinPeriod;
+	}
+
+	public PeriodFrequencyType getLockinPeriodType() {
+		return lockinPeriodType;
+	}
+
 	public boolean isDeleted() {
 		return deleted;
 	}
@@ -174,7 +202,7 @@ public class DepositProduct extends AbstractAuditableCustom<AppUser, Long> {
 		this.externalId = this.getId() + "_DELETED_" + this.externalId;
 	}
 	
-	public void update(final DepositProductCommand command, final PeriodFrequencyType interestCompoundingFrequency){
+	public void update(final DepositProductCommand command, final PeriodFrequencyType interestCompoundingFrequency, final PeriodFrequencyType lockinPeriodType){
 		
 		if (command.isExternalIdChanged()) {
 			this.externalId = command.getExternalId();
@@ -248,6 +276,18 @@ public class DepositProduct extends AbstractAuditableCustom<AppUser, Long> {
 		
 		if(command.interestCompoundingAllowedChanged()){
 			this.interestCompoundingAllowed = command.isInterestCompoundingAllowed();
+		}
+		
+		if(command.isLockinPeriodAllowedChanged()){
+			this.isLockinPeriodAllowed = command.isLockinPeriodAllowed();
+		}
+		
+		if(command.isLockinPeriodChanged()){
+			this.lockinPeriod = command.getLockinPeriod();
+		}
+		
+		if(command.isLockinPeriodTypeChanged()){
+			this.lockinPeriodType = lockinPeriodType;
 		}
 	}
 	

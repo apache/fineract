@@ -74,6 +74,7 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
 					"dp.interest_compounded_every as interestCompoundedEvery, dp.interest_compounded_every_period_enum as interestCompoundedEveryPeriodType, " +
 					"dp.maturity_default_interest_rate as maturityDefaultInterestRate, dp.is_compounding_interest_allowed as interestCompoundingAllowed, "  +
 					"dp.maturity_min_interest_rate as maturityMinInterestRate, dp.maturity_max_interest_rate as maturityMaxInterestRate, dp.is_renewal_allowed as canRenew, dp.is_preclosure_allowed as canPreClose, dp.pre_closure_interest_rate as preClosureInterestRate, " +
+					"dp.is_lock_in_period_allowed as isLockinPeriodAllowed, dp.lock_in_period as lockinPeriod, dp.lock_in_period_type as lockinPeriodType, "+
 					"curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, curr.display_symbol as currencyDisplaySymbol " +
 					"from m_product_deposit dp join m_currency curr on curr.code = dp.currency_code ";
 		}
@@ -111,10 +112,16 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
 			
 			BigDecimal preClosureInterestRate=rs.getBigDecimal("preClosureInterestRate");
 			
+			Boolean isLockinPeriodAllowed=rs.getBoolean("isLockinPeriodAllowed");
+			Integer lockinPeriod = JdbcSupport.getInteger(rs, "lockinPeriod");
+			Integer lockinPeriodTypeValue = JdbcSupport.getInteger(rs, "lockinPeriodType");
+			EnumOptionData lockinPeriodType = SavingsDepositEnumerations.interestCompoundingPeriodType(lockinPeriodTypeValue);
+			
+			
 			return new DepositProductData(createdOn, lastModifedOn, id, exernalId, name, description, currencyCode, currencyDigits, minimumBalance, maximumBalance,
 					tenureMonths, maturityDefaultInterestRate,maturityMinInterestRate,maturityMaxInterestRate, 
 					interestCompoundedEvery, interestCompoundedEveryPeriodType,
-					canRenew,canPreClose,preClosureInterestRate,interestCompoundingAllowed);
+					canRenew,canPreClose,preClosureInterestRate,interestCompoundingAllowed,isLockinPeriodAllowed,lockinPeriod,lockinPeriodType);
 		}
 		
 	}

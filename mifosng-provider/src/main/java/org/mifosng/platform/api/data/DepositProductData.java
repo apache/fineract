@@ -31,6 +31,10 @@ public class DepositProductData {
 	private final BigDecimal preClosureInterestRate;
 	private final boolean interestCompoundingAllowed;
 	
+	private final boolean isLockinPeriodAllowed;
+	private final Integer lockinPeriod;
+	private final EnumOptionData lockinPeriodType;
+	
 	private final DateTime createdOn;
 	private final DateTime lastModifedOn;
 	
@@ -57,7 +61,10 @@ public class DepositProductData {
 			final boolean renewalAllowed, 
 			final boolean preClosureAllowed, 
 			final BigDecimal preClosureInterestRate,
-			final boolean interestCompoundingAllowed) {
+			final boolean interestCompoundingAllowed,
+			final boolean isLockinPeriodAllowed,
+			final Integer lockinPeriod,
+			final EnumOptionData lockinPeriodType) {
 		
 		this.createdOn=createdOn;
 		this.lastModifedOn=lastModifedOn;
@@ -80,6 +87,10 @@ public class DepositProductData {
 		this.preClosureAllowed=preClosureAllowed;
 		this.preClosureInterestRate=preClosureInterestRate;
 		this.interestCompoundingAllowed=interestCompoundingAllowed;
+		
+		this.lockinPeriod=lockinPeriod;
+		this.lockinPeriodType=lockinPeriodType;
+		this.isLockinPeriodAllowed=isLockinPeriodAllowed;
 		
 		this.currencyOptions = new ArrayList<CurrencyData>();
 		this.interestCompoundedEveryPeriodTypeOptions = new ArrayList<EnumOptionData>();
@@ -112,6 +123,10 @@ public class DepositProductData {
 		this.preClosureInterestRate=BigDecimal.ZERO;
 		this.interestCompoundingAllowed=true;
 		
+		this.isLockinPeriodAllowed=true;
+		this.lockinPeriod=Integer.valueOf(0);
+		this.lockinPeriodType=defaultInterestCompoundedEveryPeriodType;
+		
 		this.currencyOptions = currencyOptions;
 		this.interestCompoundedEveryPeriodTypeOptions = interestCompoundedEveryPeriodTypeOptions;
 	}
@@ -142,6 +157,10 @@ public class DepositProductData {
 		this.preClosureAllowed=product.isPreClosureAllowed();
 		this.preClosureInterestRate=product.getPreClosureInterestRate();
 		this.interestCompoundingAllowed=product.isInterestCompoundingAllowed();
+		
+		this.lockinPeriod=product.getLockinPeriod();
+		this.lockinPeriodType=product.getLockinPeriodType();
+		this.isLockinPeriodAllowed=product.isLockinPeriodAllowed();
 		
 		this.currencyOptions = currencyOptions;
 		this.interestCompoundedEveryPeriodTypeOptions = interestCompoundedEveryPeriodTypeOptions;
@@ -234,4 +253,17 @@ public class DepositProductData {
 	public boolean isInterestCompoundingAllowed() {
 		return interestCompoundingAllowed;
 	}
+
+	public boolean isLockinPeriodAllowed() {
+		return isLockinPeriodAllowed;
+	}
+
+	public Integer getLockinPeriod() {
+		return lockinPeriod;
+	}
+
+	public EnumOptionData getLockinPeriodType() {
+		return lockinPeriodType;
+	}
+	
 }

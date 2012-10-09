@@ -138,6 +138,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 				+  " da.is_renewal_allowed as renewalAllowed, da.is_preclosure_allowed as preClosureAllowed, da.pre_closure_interest_rate as preClosureInterestRate, "
 				+  " da.withdrawnon_date as withdrawnonDate, da.rejectedon_date as rejectedonDate, da.closedon_date as closedonDate, " 
 				+  " da.interest_paid as interestPaid, da.is_interest_withdrawable as isInterestWithdrawable, da.is_compounding_interest_allowed as interestCompoundingAllowed, "
+				+  " da.is_lock_in_period_allowed as isLockinPeriodAllowed, da.lock_in_period as lockinPeriod, da.lock_in_period_type lockinPeriodType, "
 				+  " c.firstname as firstname, c.lastname as lastname, pd.name as productName,"
 				+  " curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, curr.display_symbol as currencyDisplaySymbol " 
 				+  " from m_deposit_account da " 
@@ -198,12 +199,18 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 			boolean isInterestWithdrawable = rs.getBoolean("isInterestWithdrawable");
 			BigDecimal interestPaid = rs.getBigDecimal("interestPaid");
 			
+			boolean isLockinPeriodAllowed = rs.getBoolean("isLockinPeriodAllowed");
+			Integer lockinPeriod = JdbcSupport.getInteger(rs, "lockinPeriod");
+			Integer lockinPeriodTypeValue = JdbcSupport.getInteger(rs, "lockinPeriodType");
+			EnumOptionData lockinPeriodType = SavingsDepositEnumerations.interestCompoundingPeriodType(lockinPeriodTypeValue);
+			
 			return new DepositAccountData(id, externalId, status, clientId, clientName, productId, productName, currencyData, depositAmount, 
 					interestRate, termInMonths, projectedCommencementDate, actualCommencementDate, maturedOn, 
 					projectedInterestAccrued, actualInterestAccrued, projectedMaturityAmount, actualMaturityAmount, 
 					interestCompoundedEvery, interestCompoundedEveryPeriodType,
 					renewalAllowed, preClosureAllowed, preClosureInterestRate, 
-					withdrawnonDate,rejectedonDate,closedonDate,isInterestWithdrawable,interestPaid,interestCompoundingAllowed);
+					withdrawnonDate,rejectedonDate,closedonDate,isInterestWithdrawable,interestPaid,interestCompoundingAllowed,
+					isLockinPeriodAllowed, lockinPeriod, lockinPeriodType);
 		}
 	}
 	

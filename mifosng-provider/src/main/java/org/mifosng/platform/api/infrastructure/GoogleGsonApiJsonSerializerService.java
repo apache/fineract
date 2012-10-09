@@ -103,7 +103,8 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 					"maturityDefaultInterestRate", "maturityMinInterestRate",
 					"maturityMaxInterestRate", "interestCompoundedEvery",
 					"interestCompoundedEveryPeriodType", "renewalAllowed",
-					"preClosureAllowed", "preClosureInterestRate", "interestCompoundingAllowed"));
+					"preClosureAllowed", "preClosureInterestRate", "interestCompoundingAllowed",
+					"isLockinPeriodAllowed","lockinPeriod","lockinPeriodType"));
 
 	private static final Set<String> SAVINGS_DEPOSIT_ACCOUNT_DATA_PARAMETERS = new HashSet<String>(
 			Arrays.asList("productOptions", "interestCompoundedEveryPeriodTypeOptions",
@@ -113,7 +114,8 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 					"renewalAllowed","preClosureAllowed","preClosureInterestRate", 
 					"withdrawnonDate","rejectedonDate","closedonDate","transactions",
 					"permissions","isInterestWithdrawable","interestPaid","interestCompoundingAllowed",
-					"availableInterestForWithdrawal","availableWithdrawalAmount")
+					"availableInterestForWithdrawal","availableWithdrawalAmount","todaysDate",
+					"isLockinPeriodAllowed","lockinPeriod","lockinPeriodType")
 			);
 	
 	private static final Set<String> CLIENT_DATA_PARAMETERS = new HashSet<String>(

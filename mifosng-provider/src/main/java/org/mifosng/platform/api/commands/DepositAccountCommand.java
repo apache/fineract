@@ -20,6 +20,10 @@ public class DepositAccountCommand {
 	private final BigDecimal preClosureInterestRate;
 	private final Integer tenureInMonths;
 	
+	private final boolean isLockinPeriodAllowed;
+	private final Integer lockinPeriod;
+	private final Integer lockinPeriodType;
+	
 	private final Integer interestCompoundedEvery;
 	private final Integer interestCompoundedEveryPeriodType;
 	private final LocalDate commencementDate;
@@ -39,7 +43,8 @@ public class DepositAccountCommand {
 			final BigDecimal depositAmount, 
 			final BigDecimal interestRate, final BigDecimal preClosureInterestRate,
 			final Integer tenureInMonths, final Integer compoundingInterestFrequency, final Integer compoundingInterestFrequencyType, final LocalDate commencementDate,
-			final boolean renewalAllowed, final boolean preClosureAllowed,final boolean isInterstWithdrawable, final boolean interestCompoundingAllowed) {
+			final boolean renewalAllowed, final boolean preClosureAllowed,final boolean isInterstWithdrawable, final boolean interestCompoundingAllowed,
+			final boolean isLockinPeriodAllowed, final Integer lockInPeriod, final Integer lockinPeriodType) {
 		this.id = id;
 		this.clientId = clientId;
 		this.productId = productId;
@@ -58,6 +63,10 @@ public class DepositAccountCommand {
 		this.preClosureAllowed = preClosureAllowed;
 		this.isInterestWithdrawable = isInterstWithdrawable;
 		this.interestCompoundingAllowed = interestCompoundingAllowed;
+		
+		this.isLockinPeriodAllowed = isLockinPeriodAllowed;
+		this.lockinPeriod = lockInPeriod;
+		this.lockinPeriodType = lockinPeriodType;
 	}
 
 	public Long getId() {
@@ -120,6 +129,18 @@ public class DepositAccountCommand {
 		return interestCompoundingAllowed;
 	}
 
+	public boolean isLockinPeriodAllowed() {
+		return isLockinPeriodAllowed;
+	}
+
+	public Integer getLockinPeriod() {
+		return lockinPeriod;
+	}
+
+	public Integer getLockinPeriodType() {
+		return lockinPeriodType;
+	}
+
 	public boolean isNoFieldChanged() {
 		return this.modifiedParameters.isEmpty();
 	}
@@ -134,6 +155,10 @@ public class DepositAccountCommand {
 
 	public boolean isTenureInMonthsChanged() {
 		return this.modifiedParameters.contains("tenureInMonths");
+	}
+	
+	public boolean isLockinPeriodChanged() {
+		return this.modifiedParameters.contains("lockinPeriod");
 	}
 	
 	public boolean isMaturityActualInterestRateChanged() {

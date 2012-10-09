@@ -1262,7 +1262,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 				Arrays.asList("clientId", "productId", "externalId", "deposit", "maturityInterestRate", "preClosureInterestRate",
 						"tenureInMonths", "interestCompoundedEvery", "interestCompoundedEveryPeriodType", "commencementDate",
 						"renewalAllowed", "preClosureAllowed","interestCompoundingAllowed",
-						"locale", "dateFormat","isInterestWithdrawable")
+						"locale", "dateFormat","isInterestWithdrawable","isLockinPeriodAllowed","lockinPeriod","lockinPeriodType")
 		);
 		checkForUnsupportedParameters(requestMap, supportedParams);
 		Set<String> modifiedParameters = new HashSet<String>();
@@ -1275,6 +1275,10 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		BigDecimal preClosureInterestRate = extractBigDecimalParameter("preClosureInterestRate", requestMap, modifiedParameters);
 		Integer tenureInMonths = extractIntegerParameter("tenureInMonths", requestMap, modifiedParameters);
 		
+		boolean isLockinPeriodAllowed = extractBooleanParameter("isLockinPeriodAllowed", requestMap, modifiedParameters);
+		Integer lockinPeriod = extractIntegerParameter("lockinPeriod", requestMap, modifiedParameters);
+		Integer lockinPeriodType = extractIntegerParameter("lockinPeriodType", requestMap, modifiedParameters);
+		
 		Integer interestCompoundedEvery = extractIntegerParameter("interestCompoundedEvery", requestMap, modifiedParameters);
 		Integer interestCompoundedEveryPeriodType = extractIntegerParameter("interestCompoundedEveryPeriodType", requestMap, modifiedParameters);
 		LocalDate commencementDate = extractLocalDateParameter("commencementDate", requestMap, modifiedParameters);
@@ -1285,9 +1289,10 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		boolean interestCompoundingAllowed = extractBooleanParameter("interestCompoundingAllowed", requestMap, modifiedParameters);
 		
 		return new DepositAccountCommand(modifiedParameters, resourceIdentifier, clientId, productId, 
-				externalId, deposit, interestRate, preClosureInterestRate, tenureInMonths, 
+				externalId, deposit, interestRate, preClosureInterestRate, tenureInMonths,
 				interestCompoundedEvery, interestCompoundedEveryPeriodType, commencementDate, renewalAllowed,
-				preClosureAllowed, isInterestWithdrawable, interestCompoundingAllowed);
+				preClosureAllowed, isInterestWithdrawable, interestCompoundingAllowed,
+				isLockinPeriodAllowed,lockinPeriod,lockinPeriodType);
 	}
 
 	@Override
@@ -1304,7 +1309,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 				Arrays.asList("locale", "name", "externalId", "description","currencyCode", "digitsAfterDecimal","minimumBalance","maximumBalance","tenureInMonths",
 						"maturityDefaultInterestRate","maturityMinInterestRate","maturityMaxInterestRate", 
 						"interestCompoundedEvery", "interestCompoundedEveryPeriodType",
-						"renewalAllowed","preClosureAllowed","preClosureInterestRate","interestCompoundingAllowed")
+						"renewalAllowed","preClosureAllowed","preClosureInterestRate","interestCompoundingAllowed","isLockinPeriodAllowed","lockinPeriod","lockinPeriodType")
 				);
 		checkForUnsupportedParameters(requestMap, supportedParams);
 		Set<String> modifiedParameters = new HashSet<String>();
@@ -1330,12 +1335,18 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	    boolean canRenew = extractBooleanParameter("renewalAllowed", requestMap, modifiedParameters);
 	    boolean canPreClose = extractBooleanParameter("preClosureAllowed", requestMap, modifiedParameters);
 	    BigDecimal preClosureInterestRate = extractBigDecimalParameter("preClosureInterestRate", requestMap, modifiedParameters);
+	    
+	    boolean isLockinPeriodAllowed = extractBooleanParameter("isLockinPeriodAllowed", requestMap, modifiedParameters);
+	    Integer lockinPeriod = extractIntegerParameter("lockinPeriod", requestMap, modifiedParameters);
+	    Integer lockinPeriodType = extractIntegerParameter("lockinPeriodType", requestMap, modifiedParameters);
+	    
+	    
 		
 		return new DepositProductCommand(modifiedParameters, resourceIdentifier, externalId, 
 				name, description, currencyCode, digitsAfterDecimalValue, minimumBalance,maximumBalance, 
 				tenureMonths, maturityDefaultInterestRate, maturityMinInterestRate, maturityMaxInterestRate, 
 				interestCompoundedEvery, interestCompoundedEveryPeriodType,
-				canRenew, canPreClose, preClosureInterestRate, interestCompoundingAllowed);
+				canRenew, canPreClose, preClosureInterestRate, interestCompoundingAllowed,isLockinPeriodAllowed,lockinPeriod,lockinPeriodType);
 	}
 
 	@Override
