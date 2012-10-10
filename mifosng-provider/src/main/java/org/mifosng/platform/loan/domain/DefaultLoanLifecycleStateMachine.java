@@ -60,7 +60,7 @@ public class DefaultLoanLifecycleStateMachine implements LoanLifecycleStateMachi
 			}
 			break;
 		case REPAID_IN_FULL:
-			if (this.anyOfAllowedWhenComingFrom(from, LoanStatus.ACTIVE)) {
+			if (this.anyOfAllowedWhenComingFrom(from, LoanStatus.ACTIVE, LoanStatus.OVERPAID)) {
 				newState = stateOf(LoanStatus.CLOSED_OBLIGATIONS_MET, allowedLoanStatuses);
 			}
 			break;

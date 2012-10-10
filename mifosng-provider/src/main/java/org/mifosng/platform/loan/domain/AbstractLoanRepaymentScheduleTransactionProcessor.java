@@ -88,7 +88,6 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 			final MonetaryCurrency currency,
 			final List<LoanRepaymentScheduleInstallment> installments) {
 		
-		final Money interestWaivedPortion = Money.zero(currency);
 		Money principalPortion = Money.zero(currency);
 		Money interestPortion = Money.zero(currency);
 		Money chargesPortion = Money.zero(currency);
@@ -102,7 +101,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 			}
 		}
 		
-		loanTransaction.updateComponentsAndTotal(principalPortion, interestPortion, interestWaivedPortion, chargesPortion);
+		loanTransaction.updateComponentsAndTotal(principalPortion, interestPortion, chargesPortion);
 	}
 
 	// abstract interface

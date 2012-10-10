@@ -570,6 +570,35 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 	
 	@Transactional
 	@Override
+	public EntityIdentifier closeLoan(final LoanTransactionCommand command) {
+		
+		context.authenticatedUser();
+
+		final LoanTransactionCommandValidator validator = new LoanTransactionCommandValidator(command);
+		validator.validateNonMonetaryTransaction();
+		
+		final Loan loan = this.loanRepository.findOne(command.getLoanId());
+		if (loan == null) {
+			throw new LoanNotFoundException(command.getLoanId());
+		}
+		
+		final LoanTransaction possibleClosingTransaction = loan.close(command.getTransactionDate(), defaultLoanLifecycleStateMachine());
+		if (possibleClosingTransaction != null) {
+			this.loanTransactionRepository.save(possibleClosingTransaction);
+		}
+		this.loanRepository.save(loan);
+		
+		final String noteText = command.getNote();
+		if (StringUtils.isNotBlank(noteText)) {
+			final Note note = Note.loanNote(loan, noteText);
+			this.noteRepository.save(note);
+		}
+
+		return new EntityIdentifier(loan.getId());
+	}
+	
+	@Transactional
+	@Override
 	public EntityIdentifier closeAsRescheduled(final LoanTransactionCommand command) {
 		context.authenticatedUser();
 
@@ -581,15 +610,13 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 			throw new LoanNotFoundException(command.getLoanId());
 		}
 		
-		// FIXME - kw - HANDLE closed and rescheduled case.
-		final LoanTransaction writeoff = loan.closeAsWrittenOff(command.getTransactionDate(), defaultLoanLifecycleStateMachine());
+		loan.closeAsMarkedForReschedule(command.getTransactionDate(), defaultLoanLifecycleStateMachine());
 		
-		this.loanTransactionRepository.save(writeoff);
 		this.loanRepository.save(loan);
 		
 		final String noteText = command.getNote();
 		if (StringUtils.isNotBlank(noteText)) {
-			final Note note = Note.loanTransactionNote(loan, writeoff, noteText);
+			final Note note = Note.loanNote(loan, noteText);
 			this.noteRepository.save(note);
 		}
 

@@ -185,28 +185,34 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 			final boolean isWaiverAllowed,
 			final int repaymentAndWaiveCount) {
 
-		boolean pendingApproval = (loanBasicDetails.getStatus().getId().equals(100L));
-		boolean waitingForDisbursal = (loanBasicDetails.getStatus().getId().equals(200L));
-		boolean isActive = (loanBasicDetails.getStatus().getId().equals(300L));
+		final boolean pendingApproval = (loanBasicDetails.getStatus().getId().equals(100L));
+		final boolean waitingForDisbursal = (loanBasicDetails.getStatus().getId().equals(200L));
+		final boolean isActive = (loanBasicDetails.getStatus().getId().equals(300L));
+		final boolean closedObligationsMet = (loanBasicDetails.getStatus().getId().equals(600L));
+		final boolean isOverpaid = (loanBasicDetails.getStatus().getId().equals(700L));
+		final boolean addLoanChargeAllowed = !closedObligationsMet || !isOverpaid;
 
-		boolean waiveAllowed = isWaiverAllowed && isActive;
-		boolean makeRepaymentAllowed = isActive;
-
-		boolean rejectAllowed = pendingApproval;
-		boolean withdrawnByApplicantAllowed = waitingForDisbursal
+		final boolean waiveAllowed = isWaiverAllowed && isActive;
+		final boolean makeRepaymentAllowed = isActive;
+		final boolean closeLoanAllowed = !closedObligationsMet;
+		final boolean closeLoanAsRescheduledAllowed = !closedObligationsMet && !isOverpaid;
+		
+		final boolean rejectAllowed = pendingApproval;
+		final boolean withdrawnByApplicantAllowed = waitingForDisbursal
 				|| pendingApproval;
 
-		boolean undoApprovalAllowed = waitingForDisbursal;
+		final boolean undoApprovalAllowed = waitingForDisbursal;
 
-		boolean undoDisbursalAllowed = isActive
+		final boolean undoDisbursalAllowed = isActive
 				&& (repaymentAndWaiveCount == 0);
 
-		boolean disbursalAllowed = waitingForDisbursal;
+		final boolean disbursalAllowed = waitingForDisbursal;
 
-		return new LoanPermissionData(waiveAllowed, makeRepaymentAllowed,
+		return new LoanPermissionData(closeLoanAllowed, closeLoanAsRescheduledAllowed, 
+				addLoanChargeAllowed, waiveAllowed, makeRepaymentAllowed,
 				rejectAllowed, withdrawnByApplicantAllowed,
 				undoApprovalAllowed, undoDisbursalAllowed, disbursalAllowed,
-				pendingApproval, waitingForDisbursal);
+				pendingApproval, waitingForDisbursal, closedObligationsMet);
 	}
 
 	@Override

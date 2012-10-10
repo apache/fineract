@@ -4,6 +4,7 @@ import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.mifosng.platform.currency.domain.Money;
 
+@Deprecated
 public class LoanPayoffSummary {
 
 	private final Long reference;

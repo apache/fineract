@@ -77,6 +77,10 @@ public class CalculationPlatformServiceImpl implements CalculationPlatformServic
 				command.getInterestChargedFromDate(), loanCharges);
 	}
 
+	/**
+	 * @deprecated functionality from early prototype work with creocore
+	 */
+	@Deprecated
 	@Override
 	public LoanPayoffReadModel calculatePayoffOn(final Long loanId, final LocalDate payoffDate) {
 		

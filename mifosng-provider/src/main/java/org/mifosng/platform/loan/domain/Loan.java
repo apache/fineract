@@ -25,7 +25,6 @@ import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
-import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.mifosng.platform.api.LoanScheduleData;
 import org.mifosng.platform.api.commands.LoanApplicationCommand;
@@ -533,7 +532,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 			
 			LoanTransaction chargesPayment = LoanTransaction.repaymentAtDisbursement(getTotalChargesDueAtDisbursement(), disbursedOn);
 			Money zero = Money.zero(getCurrency());
-			chargesPayment.updateComponents(zero, zero, zero, getTotalChargesDueAtDisbursement());
+			chargesPayment.updateComponents(zero, zero, getTotalChargesDueAtDisbursement());
 			chargesPayment.updateLoan(this);
 			this.loanTransactions.add(chargesPayment);
 			
@@ -871,10 +870,14 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	}
 	
 	private boolean isOverPaid() {
+		return getTotalOverpayment().isGreaterThanZero();
+	}
+	
+	private Money getTotalOverpayment() {
 		
-		Money totalPaidInRepayments = getTotalPaidInRepayments();
+		final Money totalPaidInRepayments = getTotalPaidInRepayments();
 		
-		MonetaryCurrency currency = loanCurrency();
+		final MonetaryCurrency currency = loanCurrency();
 
 		Money cumulativeOriginalExpectedTotal = Money.zero(currency);
 		Money cumulativeTotalPaidOnInstallments = Money.zero(currency);
@@ -886,7 +889,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 			cumulativeTotalWaivedOnInstallments = cumulativeTotalWaivedOnInstallments.plus(scheduledRepayment.getInterestWaived(currency));
 		}
 		
-		return totalPaidInRepayments.isGreaterThan(cumulativeTotalPaidOnInstallments);
+		return totalPaidInRepayments.minus(cumulativeTotalPaidOnInstallments);
 	}
 
 	private MonetaryCurrency loanCurrency() {
@@ -932,13 +935,76 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		
 		return loanTransaction;
 	}
-
-	// FIXME - KW - finish off reschedule/restructure capability for loans.
-	public void reschedule(
-			final DateTime rescheduledOn,
+	
+	public LoanTransaction close(
+			final LocalDate closureDate, 
 			final LoanLifecycleStateMachine loanLifecycleStateMachine) {
 		
-		LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_RESCHEDULE, LoanStatus.fromInt(this.loanStatus));
+		if (closureDate.isBefore(this.getDisbursementDate())) {
+			final String errorMessage = "The date on which a loan is closed cannot be before the loan disbursement date: " + getDisbursementDate().toString();
+			throw new InvalidLoanStateTransitionException("close","cannot.be.before.submittal.date", errorMessage, closureDate, getDisbursementDate());
+		}
+		
+		if (closureDate.isAfter(new LocalDate())) {
+			final String errorMessage = "The date on which a loan is closed cannot be in the future.";
+			throw new InvalidLoanStateTransitionException("close", "cannot.be.a.future.date", errorMessage, closureDate);
+		}
+		
+		LoanTransaction loanTransaction = null;
+		if (isOpen()) {
+			// 1. check total outstanding
+			final Money outstanding = getTotalOutstanding();
+			if (outstanding.isGreaterThanZero() && getInArrearsTolerance().isGreaterThanOrEqualTo(outstanding)) {
+
+				updateLoanForClosure(closureDate, loanLifecycleStateMachine);
+				
+				loanTransaction = LoanTransaction.writeoff(this, closureDate);
+				boolean isLastTransaction = isChronologicallyLatestTransaction(loanTransaction, loanTransactions);
+				if (!isLastTransaction) {
+					final String errorMessage = "The closing date of the loan must be on or after latest transaction date.";
+					throw new InvalidLoanStateTransitionException("close.loan","must.occur.on.or.after.latest.transaction.date", errorMessage, closureDate);
+				}
+				
+				this.loanTransactions.add(loanTransaction);
+				
+				final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessor.determineProcessor(this.transactionProcessingStrategy);
+				loanRepaymentScheduleTransactionProcessor.handleWriteOff(loanTransaction, loanCurrency(), this.repaymentScheduleInstallments);
+				
+			} else if (outstanding.isGreaterThanZero()) {
+				final String errorMessage = "A loan with money outstanding cannot be closed";
+				throw new InvalidLoanStateTransitionException("close", "loan.has.money.outstanding", errorMessage, outstanding.toString());
+			}
+		}
+		
+		if (isOverPaid()) {
+			final Money totalLoanOverpayment = getTotalOverpayment();
+			// FIXME - kw - use overpaymentTolerance setting when in place on loan product settings.
+			if (totalLoanOverpayment.isGreaterThanZero() && getInArrearsTolerance().isGreaterThanOrEqualTo(totalLoanOverpayment)) {
+				// TODO - technically should set somewhere that this loan has 'overpaid' amount
+				updateLoanForClosure(closureDate, loanLifecycleStateMachine);
+			} else if (totalLoanOverpayment.isGreaterThanZero()) {
+				final String errorMessage = "The loan is marked as 'Overpaid' and cannot be moved to 'Closed (obligations met).";
+				throw new InvalidLoanStateTransitionException("close", "loan.is.overpaid", errorMessage, totalLoanOverpayment.toString());
+			}
+		}
+		
+		return loanTransaction;
+	}
+
+	private void updateLoanForClosure(final LocalDate closureDate, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
+		final LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.REPAID_IN_FULL, LoanStatus.fromInt(this.loanStatus));
+		this.loanStatus = statusEnum.getValue();
+		this.closedOnDate = closureDate.toDate();
+	}
+
+	/**
+	 * Behaviour added to comply with capability of previous mifos product to support easier transition to mifosx platform.
+	 */
+	public void closeAsMarkedForReschedule(
+			final LocalDate rescheduledOn,
+			final LoanLifecycleStateMachine loanLifecycleStateMachine) {
+		
+		final LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_RESCHEDULE, LoanStatus.fromInt(this.loanStatus));
 		this.loanStatus = statusEnum.getValue();
 		
 		this.closedOnDate = rescheduledOn.toDate();
@@ -948,15 +1014,12 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		if (rescheduledOnLocalDate.isBefore(this.getDisbursementDate())) {
 			final String errorMessage = "The date on which a loan is rescheduled cannot be before the loan disbursement date: "
 					+ getDisbursementDate().toString();
-			throw new InvalidLoanStateTransitionException("writeoff",
-					"cannot.be.before.submittal.date", errorMessage,
-					rescheduledOnLocalDate, getDisbursementDate());
+			throw new InvalidLoanStateTransitionException("close.reschedule","cannot.be.before.submittal.date", errorMessage, rescheduledOnLocalDate, getDisbursementDate());
 		}
+		
 		if (rescheduledOnLocalDate.isAfter(new LocalDate())) {
 			final String errorMessage = "The date on which a loan is rescheduled cannot be in the future.";
-			throw new InvalidLoanStateTransitionException("writeoff",
-					"cannot.be.a.future.date", errorMessage,
-					rescheduledOnLocalDate);
+			throw new InvalidLoanStateTransitionException("close.reschedule", "cannot.be.a.future.date", errorMessage, rescheduledOnLocalDate);
 		}
 	}
 
@@ -1219,6 +1282,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		return regenerationRequired;
 	}
 
+	@Deprecated
 	public LoanPayoffSummary getPayoffSummaryOn(
 			final LocalDate projectedPayoffDate) {
 
@@ -1246,6 +1310,10 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 				rebateGivenOnProjectedPayoffDate);
 	}
 
+	/*
+	 * FIXME - KW - change what outstanding balance on loan can be accessed. This total outstanding method is wrong and 
+	 */
+	@Deprecated
 	public Money getTotalOutstanding() {
 		return getTotalPrincipalOnLoan().plus(getTotalInterestOnLoan()).minus(getTotalPaidInRepayments());
 	}
@@ -1262,6 +1330,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		return cumulativePaid;
 	}
 
+	@Deprecated
 	public Money calculateRebateWhenPaidInFullOn(final LocalDate paidInFullDate) {
 
 		Money loanPrincipal = this.loanRepaymentScheduleDetail.getPrincipal();
@@ -1290,8 +1359,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		Money cumulativeInterest = Money.zero(loanCurrency());
 
 		for (LoanRepaymentScheduleInstallment scheduledRepayment : this.repaymentScheduleInstallments) {
-			cumulativeInterest = cumulativeInterest.plus(scheduledRepayment
-					.getInterest(loanCurrency()));
+			cumulativeInterest = cumulativeInterest.plus(scheduledRepayment.getInterest(loanCurrency()));
 		}
 
 		return cumulativeInterest;

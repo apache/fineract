@@ -187,7 +187,7 @@ public class LoansApiResource {
 		}
 		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 		
-		LoanBasicDetailsData loanBasicDetails = this.loanReadPlatformService.retrieveLoanAccountDetails(loanId);
+		final LoanBasicDetailsData loanBasicDetails = this.loanReadPlatformService.retrieveLoanAccountDetails(loanId);
 		
 		int loanRepaymentsCount = 0;
 		Collection<LoanTransactionNewData> loanRepayments = null;
@@ -223,7 +223,9 @@ public class LoansApiResource {
 				MoneyData totalOutstandingMoney = MoneyData.of(loanBasicDetails.getCurrency(), repaymentSchedule.totalOutstanding());
 				boolean isWaiveAllowed = totalOutstandingMoney.isGreaterThanZero() && (tolerance.isGreaterThan(totalOutstandingMoney) || tolerance.isEqualTo(totalOutstandingMoney));
 
-				permissions = this.loanReadPlatformService.retrieveLoanPermissions(loanBasicDetails, isWaiveAllowed, loanRepaymentsCount);
+				if (responseParameters.contains("permissions")) {
+					permissions = this.loanReadPlatformService.retrieveLoanPermissions(loanBasicDetails, isWaiveAllowed, loanRepaymentsCount);
+				}
 				convenienceDataRequired = true;
 			}
 			
@@ -418,8 +420,10 @@ public class LoansApiResource {
 			identifier = this.loanWritePlatformService.waiveInterestOnLoan(command);
 		} else if (is(commandParam, "writeoff")) {
 			identifier = this.loanWritePlatformService.writeOff(command);
-		} else if (is(commandParam, "closeasrescheduled")) {
+		} else if (is(commandParam, "close-rescheduled")) {
 			identifier = this.loanWritePlatformService.closeAsRescheduled(command);
+		} else if (is(commandParam, "close")) {
+			identifier = this.loanWritePlatformService.closeLoan(command);
 		}
 
 		if (identifier == null) {
@@ -474,7 +478,7 @@ public class LoansApiResource {
 			
 			final LoanTransactionNewData newTransactionData = this.loanReadPlatformService.retrieveNewClosureDetails();
 			return this.apiJsonSerializerService.serializeLoanTransactionDataToJson(prettyPrint, responseParameters, newTransactionData);
-		} else if (is(commandParam, "closeasrescheduled")) {
+		} else if (is(commandParam, "close-rescheduled")) {
 			final Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "type", "date", "currency", "amount"));
 			
 			Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
@@ -485,7 +489,18 @@ public class LoansApiResource {
 			
 			final LoanTransactionNewData newTransactionData = this.loanReadPlatformService.retrieveNewClosureDetails();
 			return this.apiJsonSerializerService.serializeLoanTransactionDataToJson(prettyPrint, responseParameters, newTransactionData);
-		} else {
+		} else if (is(commandParam, "close")) {
+			final Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "type", "date", "currency", "amount"));
+			
+			final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+			if (responseParameters.isEmpty()) {
+				responseParameters.addAll(typicalResponseParameters);
+			}
+			boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+			
+			final LoanTransactionNewData newTransactionData = this.loanReadPlatformService.retrieveNewClosureDetails();
+			return this.apiJsonSerializerService.serializeLoanTransactionDataToJson(prettyPrint, responseParameters, newTransactionData);
+		}  else {
 			throw new UnrecognizedQueryParamException("command", commandParam);
 		}
 	}

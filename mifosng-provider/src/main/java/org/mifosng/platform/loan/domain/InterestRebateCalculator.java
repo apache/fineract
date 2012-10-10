@@ -6,6 +6,7 @@ import java.util.List;
 import org.joda.time.LocalDate;
 import org.mifosng.platform.currency.domain.Money;
 
+@Deprecated
 public interface InterestRebateCalculator {
 
 	Money calculate(

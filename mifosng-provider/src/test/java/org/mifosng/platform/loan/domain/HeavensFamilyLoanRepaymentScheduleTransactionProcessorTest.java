@@ -278,7 +278,7 @@ public class HeavensFamilyLoanRepaymentScheduleTransactionProcessorTest {
 		LoanRepaymentScheduleInstallment thirdInstallment = this.installments.get(2);
 		assertThatLoanInstallmentHasDerivedFieldsOf(principalOf("800.00"), interestOf("0.00"), interestWaivedOf("0.00"), thirdInstallment, usDollars);
 		
-		assertThatLoanTransactionHasDerivedFieldsOf(principalOf("2800.00"), interestOf("200.00"), interestWaivedOf("200.00"), onTimePartialPayment, usDollars);
+		assertThatLoanTransactionHasDerivedFieldsOf(principalOf("2800.00"), interestOf("200.00"), onTimePartialPayment, usDollars);
 	}
 	
 	/**
@@ -353,7 +353,7 @@ public class HeavensFamilyLoanRepaymentScheduleTransactionProcessorTest {
 		LoanRepaymentScheduleInstallment thirdInstallment = this.installments.get(2);
 		assertThatLoanInstallmentHasDerivedFieldsOf(principalOf("1000.00"), interestOf("200.00"), interestWaivedOf("0.00"), thirdInstallment, usDollars);
 		
-		assertThatLoanTransactionHasDerivedFieldsOf(principalOf("3000.00"), interestOf("600.00"), interestWaivedOf("0.00"), lateRepaymentTransaction, usDollars);
+		assertThatLoanTransactionHasDerivedFieldsOf(principalOf("3000.00"), interestOf("600.00"), lateRepaymentTransaction, usDollars);
 	}
 	
 
@@ -379,7 +379,6 @@ public class HeavensFamilyLoanRepaymentScheduleTransactionProcessorTest {
 	private void assertThatLoanTransactionHasDerivedFieldsOf(
 			final String principal, 
 			final String interest, 
-			final String interestWaived, 
 			final LoanTransaction transaction, final MonetaryCurrency currency) {
 		
 		Money expectedPrincipalPortion = new MoneyBuilder().with(currency).with(principal).build();
@@ -387,9 +386,6 @@ public class HeavensFamilyLoanRepaymentScheduleTransactionProcessorTest {
 		
 		Money expectedInterestPortion = new MoneyBuilder().with(currency).with(interest).build();
 		assertThat("Interest portion of transaction not as expected: ", transaction.getInterestPortion(currency).toString(), is(expectedInterestPortion.toString()));
-		
-		Money expectedInterestWaivedPortion = new MoneyBuilder().with(currency).with(interestWaived).build();
-		assertThat("Interest waived portion of transaction not as expected: ",transaction.getInterestWaivedPortion(currency).toString(), is(expectedInterestWaivedPortion.toString()));
 	}
 	
 	private void assertThatLoanInstallmentHasDerivedFieldsOf(

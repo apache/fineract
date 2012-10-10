@@ -1,0 +1,1 @@
+alter table m_loan_transaction drop column interest_waived_derived;

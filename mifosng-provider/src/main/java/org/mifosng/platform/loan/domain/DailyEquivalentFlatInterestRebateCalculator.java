@@ -9,8 +9,8 @@ import org.joda.time.LocalDate;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.currency.domain.Money;
 
-// FIXME - KW - this might be deprecated now
 @SuppressWarnings("unused")
+@Deprecated
 public class DailyEquivalentFlatInterestRebateCalculator implements
 		InterestRebateCalculator {
 
