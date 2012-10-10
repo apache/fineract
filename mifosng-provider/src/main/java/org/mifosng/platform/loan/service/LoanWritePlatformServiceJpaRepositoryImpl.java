@@ -647,7 +647,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             throw new ChargeIsNotActiveException(chargeDefinition.getId());
         }
 
-        if (!loan.getCurrency().getCode().equals(chargeDefinition.getCurrencyCode())){
+        if (!loan.hasCurrencyCodeOf(chargeDefinition.getCurrencyCode())){
             String errorMessage = "Charge and Loan must have the same currency.";
             throw new InvalidCurrencyException("charge", "attach.to.loan", errorMessage);
         }

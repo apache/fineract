@@ -189,13 +189,21 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 		final boolean waitingForDisbursal = (loanBasicDetails.getStatus().getId().equals(200L));
 		final boolean isActive = (loanBasicDetails.getStatus().getId().equals(300L));
 		final boolean closedObligationsMet = (loanBasicDetails.getStatus().getId().equals(600L));
+		final boolean closedWrittenOff = (loanBasicDetails.getStatus().getId().equals(602L));
+		final boolean closedRescheduled = (loanBasicDetails.getStatus().getId().equals(602L));
+		
+		final boolean closed = closedObligationsMet || closedWrittenOff || closedRescheduled;
+		
 		final boolean isOverpaid = (loanBasicDetails.getStatus().getId().equals(700L));
-		final boolean addLoanChargeAllowed = !closedObligationsMet || !isOverpaid;
+		boolean addLoanChargeAllowed = true;
+		if (closed || isOverpaid) {
+			addLoanChargeAllowed = false;
+		}
 
 		final boolean waiveAllowed = isWaiverAllowed && isActive;
 		final boolean makeRepaymentAllowed = isActive;
-		final boolean closeLoanAllowed = !closedObligationsMet;
-		final boolean closeLoanAsRescheduledAllowed = !closedObligationsMet && !isOverpaid;
+		final boolean closeLoanAllowed = !closed && isActive;
+		final boolean closeLoanAsRescheduledAllowed = !closed && !isOverpaid && isActive;
 		
 		final boolean rejectAllowed = pendingApproval;
 		final boolean withdrawnByApplicantAllowed = waitingForDisbursal

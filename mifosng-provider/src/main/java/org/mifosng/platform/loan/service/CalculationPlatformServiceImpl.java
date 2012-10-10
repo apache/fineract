@@ -2,21 +2,13 @@ package org.mifosng.platform.loan.service;
 
 import java.util.Set;
 
-import org.joda.time.LocalDate;
 import org.mifosng.platform.api.LoanScheduleData;
 import org.mifosng.platform.api.commands.CalculateLoanScheduleCommand;
-import org.mifosng.platform.api.data.CurrencyData;
-import org.mifosng.platform.api.data.MoneyData;
 import org.mifosng.platform.currency.domain.ApplicationCurrency;
 import org.mifosng.platform.currency.domain.ApplicationCurrencyRepository;
-import org.mifosng.platform.exceptions.CurrencyNotFoundException;
-import org.mifosng.platform.exceptions.LoanNotFoundException;
 import org.mifosng.platform.loan.domain.InterestMethod;
-import org.mifosng.platform.loan.domain.Loan;
 import org.mifosng.platform.loan.domain.LoanCharge;
-import org.mifosng.platform.loan.domain.LoanPayoffSummary;
 import org.mifosng.platform.loan.domain.LoanProductRelatedDetail;
-import org.mifosng.platform.loan.domain.LoanRepository;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 import org.mifosng.platform.loanschedule.domain.DefaultLoanScheduleGeneratorFactory;
 import org.mifosng.platform.loanschedule.domain.LoanScheduleGenerator;
@@ -29,7 +21,6 @@ import org.springframework.stereotype.Service;
 public class CalculationPlatformServiceImpl implements CalculationPlatformService {
 
 	private final LoanScheduleGeneratorFactory loanScheduleFactory;
-	private final LoanRepository loanRepository;
 	private final ApplicationCurrencyRepository applicationCurrencyRepository;
 	private final PlatformSecurityContext context;
 	private final LoanProductRelatedDetailAssembler loanProductRelatedDetailAssembler;
@@ -38,12 +29,10 @@ public class CalculationPlatformServiceImpl implements CalculationPlatformServic
 	@Autowired
 	public CalculationPlatformServiceImpl(
 			final PlatformSecurityContext context,
-			final LoanRepository loanRepository, 
 			final ApplicationCurrencyRepository applicationCurrencyRepository, 
 			final LoanProductRelatedDetailAssembler loanProductRelatedDetailAssembler,
 			final LoanChargeAssembler loanChargeAssembler) {
 		this.context = context;
-		this.loanRepository = loanRepository;
 		this.applicationCurrencyRepository = applicationCurrencyRepository;
 		this.loanScheduleFactory = new DefaultLoanScheduleGeneratorFactory();
 		this.loanProductRelatedDetailAssembler = loanProductRelatedDetailAssembler;
@@ -76,49 +65,4 @@ public class CalculationPlatformServiceImpl implements CalculationPlatformServic
 				command.getRepaymentsStartingFromDate(),
 				command.getInterestChargedFromDate(), loanCharges);
 	}
-
-	/**
-	 * @deprecated functionality from early prototype work with creocore
-	 */
-	@Deprecated
-	@Override
-	public LoanPayoffReadModel calculatePayoffOn(final Long loanId, final LocalDate payoffDate) {
-		
-		final Loan loan = this.loanRepository.findOne(loanId);
-		if (loan == null) {
-			throw new LoanNotFoundException(loanId);
-		}
-
-		final LoanPayoffSummary payoffSummary = loan.getPayoffSummaryOn(payoffDate);
-
-		final String currencyCode = payoffSummary.getTotalPaidToDate().getCurrencyCode();
-		
-		ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneByCode(currencyCode);
-		if (applicationCurrency == null) {
-			throw new CurrencyNotFoundException(currencyCode);
-		}
-		final int currencyDigitsAfterDecimal = payoffSummary.getTotalPaidToDate().getCurrencyDigitsAfterDecimal();
-
-		CurrencyData currency = new CurrencyData(currencyCode, applicationCurrency.getName(), currencyDigitsAfterDecimal, applicationCurrency.getDisplaySymbol(), applicationCurrency.getNameCode());
-		MoneyData totalPaidToDate = MoneyData.of(currency, payoffSummary.getTotalPaidToDate()
-				.getAmount());
-				
-		MoneyData totalInterestOutstandingBasedOnExpectedMaturityDate = MoneyData.of(currency, payoffSummary.getTotalOutstandingBasedOnExpectedMaturityDate()
-				.getAmount());
-
-		MoneyData totalInterestOutstandingBasedOnPayoffDate = MoneyData.of(currency, payoffSummary.getTotalOutstandingBasedOnPayoffDate()
-				.getAmount());
-				
-		MoneyData interestRebateOwed = MoneyData.of(currency, payoffSummary.getRebateOwed().getAmount());
-				
-		return new LoanPayoffReadModel(payoffSummary.getReference().toString(),
-				payoffSummary.getAcutalDisbursementDate(),
-				payoffSummary.getExpectedMaturityDate(),
-				payoffSummary.getProjectedMaturityDate(),
-				payoffSummary.getExpectedLoanTermInDays(),
-				payoffSummary.getProjectedLoanTermInDays(), totalPaidToDate,
-				totalInterestOutstandingBasedOnExpectedMaturityDate,
-				totalInterestOutstandingBasedOnPayoffDate, interestRebateOwed);
-	}
-
 }

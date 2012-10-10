@@ -108,14 +108,6 @@ public class LoanProduct extends AbstractAuditableCustom<AppUser, Long> {
         return this.loanProductRelatedDetail.getRepayEvery();
     }
 
-    public boolean isFlexibleRepaymentSchedule() {
-        return this.loanProductRelatedDetail.isFlexibleRepaymentSchedule();
-    }
-
-	public boolean isInterestRebateAllowed() {
-		return this.loanProductRelatedDetail.isInterestRebateAllowed();
-	}
-
 	public BigDecimal getDefaultNominalInterestRatePerPeriod() {
 		return this.loanProductRelatedDetail.getNominalInterestRatePerPeriod();
 	}

@@ -57,12 +57,6 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
 	@Column(name = "amortization_method_enum", nullable = false)
 	private AmortizationMethod amortizationMethod;
 
-	@Column(name = "flexible_repayment_schedule", nullable = false)
-	private boolean flexibleRepaymentSchedule;
-
-	@Column(name = "interest_rebate", nullable = false)
-	private boolean interestRebateAllowed;
-
 	@Column(name = "arrearstolerance_amount", scale = 6, precision = 19, nullable = false)
 	private BigDecimal inArrearsTolerance;
 
@@ -78,9 +72,6 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
 		this.numberOfRepayments = null;
 		this.amortizationMethod = null;
 		this.inArrearsTolerance = null;
-		
-		this.flexibleRepaymentSchedule = false;
-		this.interestRebateAllowed = false;
 	}
 
 	public LoanProductRelatedDetail(final MonetaryCurrency currency,
@@ -107,8 +98,6 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
 		this.numberOfRepayments = defaultNumberOfRepayments;
 		this.amortizationMethod = amortizationMethod;
 		this.inArrearsTolerance = inArrearsTolerance;
-		this.flexibleRepaymentSchedule = false;
-		this.interestRebateAllowed = false;
 	}
 	
 	public MonetaryCurrency getCurrency() {
@@ -160,14 +149,6 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
 
 	public AmortizationMethod getAmortizationMethod() {
 		return amortizationMethod;
-	}
-
-	public boolean isFlexibleRepaymentSchedule() {
-		return flexibleRepaymentSchedule;
-	}
-
-	public boolean isInterestRebateAllowed() {
-		return interestRebateAllowed;
 	}
 
 	public void update(final LoanProductCommand command) {
