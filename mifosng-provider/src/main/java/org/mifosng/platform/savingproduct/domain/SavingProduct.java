@@ -11,6 +11,7 @@ import org.apache.commons.lang.StringUtils;
 import org.mifosng.platform.api.commands.SavingProductCommand;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
+import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 import org.mifosng.platform.user.domain.AppUser;
 
 @Entity
@@ -34,18 +35,23 @@ public class SavingProduct extends AbstractAuditableCustom<AppUser, Long> {
         this.description = null;
         this.savingProductRelatedDetail = null;
 	}
-
-	public SavingProduct(final String name, final String description, final MonetaryCurrency currency,final BigDecimal interestRate, final BigDecimal minimumBalance,final BigDecimal maximumBalance) {
+	
+	public SavingProduct(final String name, final String description, final MonetaryCurrency currency,final BigDecimal interestRate, final BigDecimal minInterestRate, final BigDecimal maxInterestRate, final BigDecimal savingsDepositAmount,
+			final SavingProductType savingProductType, final TenureTypeEnum tenureType, final Integer tenure, final SavingFrequencyType savingFrequencyType, 
+			final SavingsInterestType savingsInterestType, SavingInterestCalculationMethod savingInterestCalculationMethod, final BigDecimal minimumBalanceForWithdrawal, 
+			final boolean isPartialDepositAllowed, final boolean isLockinPeriodAllowed, final Integer lockinPeriod, final PeriodFrequencyType lockinPeriodType){
+		
 		this.name = name.trim();
 		if (StringUtils.isNotBlank(description)) {
 			this.description = description.trim();
 		} else {
 			this.description = null;
 		}
-		this.savingProductRelatedDetail=new SavingProductRelatedDetail(currency, interestRate,minimumBalance,maximumBalance);
+		this.savingProductRelatedDetail = new SavingProductRelatedDetail(currency, interestRate, minInterestRate, maxInterestRate, savingsDepositAmount, savingProductType, tenureType, tenure,
+				savingFrequencyType, savingsInterestType, savingInterestCalculationMethod, minimumBalanceForWithdrawal, isPartialDepositAllowed, isLockinPeriodAllowed, lockinPeriod, lockinPeriodType);
 	}
-	
-    public String getName() {
+
+	public String getName() {
         return this.name;
     }
 
@@ -65,10 +71,6 @@ public class SavingProduct extends AbstractAuditableCustom<AppUser, Long> {
 		return this.savingProductRelatedDetail.getMinimumBalance();
 	}
 	
-	public BigDecimal getMaximumBalance(){
-		return this.savingProductRelatedDetail.getMaximumBalance();
-	}
-	
 	public boolean isDeleted() {
 		return deleted;
 	}
@@ -76,6 +78,10 @@ public class SavingProduct extends AbstractAuditableCustom<AppUser, Long> {
 	public void delete() {
 		this.deleted = true;
 	}	
+
+	public SavingProductRelatedDetail getSavingProductRelatedDetail() {
+		return savingProductRelatedDetail;
+	}
 
 	public void update(final SavingProductCommand command) {
 

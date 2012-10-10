@@ -514,7 +514,7 @@ public class DepositAccountData {
 		if(this.status!=null){
 		if (account.getStatus().getId() == 300) {
 			BigDecimal interestGettingForPeriod = BigDecimal.valueOf(account.getActualInterestAccrued().doubleValue()/ new Double(account.getTenureInMonths()));
-			LocalDate interestWithdrawingDate= new LocalDate().isAfter(getMaturedOn())?getMaturedOn().plusDays(1):new LocalDate();
+			LocalDate interestWithdrawingDate= new LocalDate().isBefore(getMaturedOn())?new LocalDate():getMaturedOn().plusDays(1);
 			Integer noOfMonthsforInterestCal = Months.monthsBetween(account.getActualCommencementDate(), interestWithdrawingDate).getMonths();
 			Integer noOfPeriods = noOfMonthsforInterestCal/ account.getInterestCompoundedEvery();
 
@@ -532,7 +532,7 @@ public class DepositAccountData {
 		BigDecimal avalablePreclosureWithdrawalAmount = BigDecimal.ZERO;
 		if(this.status != null){
 			if (account.getStatus().getId() == 300) {
-				if(new LocalDate().isBefore(account.getMaturedOn())){
+				if(new LocalDate().isBefore(account.getMaturedOn()) || new LocalDate().isEqual(account.getMaturedOn())){
 					MathContext mc = new MathContext(8, RoundingMode.HALF_EVEN);
 					Integer monthsInYear = 12;
 					BigDecimal interestRateAsFraction = account.getPreClosureInterestRate().divide(BigDecimal.valueOf(100), mc);
@@ -541,7 +541,7 @@ public class DepositAccountData {
 					Integer days = Days.daysBetween(account.getActualCommencementDate().plusMonths(noOfMonthsforInterestCal), new LocalDate()).getDays();
 					BigDecimal interest = BigDecimal.valueOf(account.getDeposit().doubleValue()*new Double(noOfMonthsforInterestCal)*interestRateForOneMonth.doubleValue()); 
 					avalablePreclosureWithdrawalAmount = interest.add(account.getDeposit()).subtract(account.getInterestPaid()).add(determineRemainInerestAmount(account.getDeposit(), account.getPreClosureInterestRate(), days));
-				}else if(new LocalDate().isAfter(account.getMaturedOn()) || new LocalDate().isEqual(account.getMaturedOn())){
+				}else if(new LocalDate().isAfter(account.getMaturedOn())){
 					Integer days = Days.daysBetween(account.getMaturedOn(), new LocalDate()).getDays();
 					avalablePreclosureWithdrawalAmount=determineAvailableInterestForWithdrawal(account).add(account.getDeposit()).add(determineRemainInerestAmount(account.getDeposit(), account.getPreClosureInterestRate(), days));
 				}

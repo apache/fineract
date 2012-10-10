@@ -32,6 +32,7 @@ import org.mifosng.platform.api.data.OfficeData;
 import org.mifosng.platform.api.data.OfficeTransactionData;
 import org.mifosng.platform.api.data.PermissionData;
 import org.mifosng.platform.api.data.RoleData;
+import org.mifosng.platform.api.data.SavingAccountData;
 import org.mifosng.platform.api.data.SavingProductData;
 import org.mifosng.platform.api.data.StaffData;
 
@@ -132,5 +133,9 @@ public interface ApiJsonSerializerService {
 	String serializeCodeDataToJson(boolean prettyPrint,Set<String> responseParameters, Collection<CodeData> codes);
 
 	String serializeCodeDataToJson(boolean prettyPrint,Set<String> responseParameters, CodeData code);
+
+	String serializeSavingAccountsDataToJson(boolean prettyPrint, Set<String> responseParameters, SavingAccountData account);
+
+	String serializeSavingAccountsDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<SavingAccountData> accounts);
 
 }

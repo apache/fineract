@@ -3,6 +3,7 @@ package org.mifosng.platform.api;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
@@ -19,11 +20,21 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.mifosng.platform.api.commands.SavingProductCommand;
+import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.EntityIdentifier;
+import org.mifosng.platform.api.data.EnumOptionData;
 import org.mifosng.platform.api.data.SavingProductData;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
 import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
+import org.mifosng.platform.currency.service.CurrencyReadPlatformService;
+import org.mifosng.platform.savingproduct.domain.SavingFrequencyType;
+import org.mifosng.platform.savingproduct.domain.SavingInterestCalculationMethod;
+import org.mifosng.platform.savingproduct.domain.SavingProductType;
+import org.mifosng.platform.savingproduct.domain.SavingsInterestType;
+import org.mifosng.platform.savingproduct.domain.SavingsLockinPeriodEnum;
+import org.mifosng.platform.savingproduct.domain.TenureTypeEnum;
+import org.mifosng.platform.savingproduct.service.SavingProductEnumerations;
 import org.mifosng.platform.savingproduct.service.SavingProductReadPlatformService;
 import org.mifosng.platform.savingproduct.service.SavingProductWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +57,9 @@ public class SavingProductsApiResource {
 	
     @Autowired
     private ApiJsonSerializerService apiJsonSerializerService;
+    
+    @Autowired
+	private CurrencyReadPlatformService currencyReadPlatformService;
 	
 	@POST
 	@Consumes({MediaType.APPLICATION_JSON})
@@ -75,8 +89,10 @@ public class SavingProductsApiResource {
 	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveAllSavingProducts(@Context final UriInfo uriInfo) {
 
-		Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "name", "description", "createdOn", "lastModifedOn",
-				"interestRate","currencyCode","digitsAfterDecimal","minimumBalance","maximumBalance"));
+		Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "createdOn", "lastModifedOn",
+				"locale", "name", "description","currencyCode", "digitsAfterDecimal","interstRate", "minInterestRate","maxInterestRate",
+				"savingsDepositAmount","savingProductType","tenureType","tenure", "frequency","interestType","interestCalculationMethod",
+				"minimumBalanceForWithdrawal","isPartialDepositAllowed","isLockinPeriodAllowed","lockinPeriod","lockinPeriodType"));
 		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (responseParameters.isEmpty()) {
@@ -95,8 +111,10 @@ public class SavingProductsApiResource {
 	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveSavingProductDetails(@PathParam("productId") final Long productId, @Context final UriInfo uriInfo) {
 
-		Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "name", "description", "createdOn", "lastModifedOn",
-				"interestRate","currencyCode","digitsAfterDecimal","minimumBalance","maximumBalance"));
+		Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "createdOn", "lastModifedOn",
+				"locale", "name", "description","currencyCode", "digitsAfterDecimal","interstRate", "minInterestRate","maxInterestRate",
+				"savingsDepositAmount","savingProductType","tenureType","tenure", "frequency","interestType","interestCalculationMethod",
+				"minimumBalanceForWithdrawal","isPartialDepositAllowed","isLockinPeriodAllowed","lockinPeriod","lockinPeriodType"));
 		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (responseParameters.isEmpty()) {
@@ -120,7 +138,10 @@ public class SavingProductsApiResource {
 	public String retrieveNewSavingProductDetails(@Context final UriInfo uriInfo) {
 		
 		Set<String> typicalResponseParameters = new HashSet<String>(
-				Arrays.asList("id", "name", "description", "createdOn", "lastModifedOn","interestRate","currencyCode","digitsAfterDecimal", "currencyOptions","minimumBalance","maximumBalance"));
+				Arrays.asList("id", "createdOn", "lastModifedOn",
+						"locale", "name", "description","currencyCode", "digitsAfterDecimal","interstRate", 
+						"savingsDepositAmount","savingProductType","tenureType","tenure", "frequency","interestType","interestCalculationMethod",
+						"minimumBalanceForWithdrawal","isPartialDepositAllowed","isLockinPeriodAllowed","lockinPeriod","lockinPeriodType","currencyOptions"));
 		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (responseParameters.isEmpty()) {
@@ -129,10 +150,42 @@ public class SavingProductsApiResource {
 		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 
 		SavingProductData savingProduct = this.savingProductReadPlatformService.retrieveNewSavingProductDetails();
-		
+		savingProduct = handleTemplateRelatedData(responseParameters,savingProduct);
 		return this.apiJsonSerializerService.serializeSavingProductDataToJson(prettyPrint, responseParameters, savingProduct);
 	}
 	
+	private SavingProductData handleTemplateRelatedData(Set<String> responseParameters, SavingProductData savingProduct) {
+		
+		responseParameters.addAll(Arrays.asList("currencyOptions", "savingsProductTypeOptions", "tenureTypeOptions", "savingFrequencyOptions", "savingsInterestTypeOptions",
+				"lockinPeriodTypeOptions", "interestCalculationOptions"));
+		List<CurrencyData> currencyOptions = this.currencyReadPlatformService.retrieveAllowedCurrencies();
+		
+		EnumOptionData reccuring = SavingProductEnumerations.savingProductType(SavingProductType.RECCURING);
+		EnumOptionData regular = SavingProductEnumerations.savingProductType(SavingProductType.REGULAR);
+		List<EnumOptionData> savingsProductTypeOptions = Arrays.asList(reccuring,regular);
+		
+		EnumOptionData fixed = SavingProductEnumerations.tenureTypeEnum(TenureTypeEnum.FIXED_PERIOD);
+		EnumOptionData perpetual = SavingProductEnumerations.tenureTypeEnum(TenureTypeEnum.PERPETUAL);
+		List<EnumOptionData> tenureTypeOptions = Arrays.asList(fixed,perpetual);
+		
+		EnumOptionData monthly = SavingProductEnumerations.interestFrequencyType(SavingFrequencyType.MONTHLY);
+		List<EnumOptionData> savingFrequencyOptions = Arrays.asList(monthly);
+		
+		EnumOptionData simple = SavingProductEnumerations.savingInterestType(SavingsInterestType.SIMPLE);
+		EnumOptionData compounding = SavingProductEnumerations.savingInterestType(SavingsInterestType.COMPOUNDING);
+		List<EnumOptionData> savingsInterestTypeOptions = Arrays.asList(simple,compounding);
+		
+		EnumOptionData months = SavingProductEnumerations.savingsLockinPeriod(SavingsLockinPeriodEnum.MONTHS);
+		List<EnumOptionData> lockinPeriodTypeOptions = Arrays.asList(months);
+		
+		EnumOptionData averagebal = SavingProductEnumerations.savingInterestCalculationMethod(SavingInterestCalculationMethod.AVERAGEBAL); 
+		EnumOptionData minbal = SavingProductEnumerations.savingInterestCalculationMethod(SavingInterestCalculationMethod.MINBAL);
+		EnumOptionData monthlyCollection = SavingProductEnumerations.savingInterestCalculationMethod(SavingInterestCalculationMethod.MONTHLYCOLLECTION);
+		List<EnumOptionData> interestCalculationOptions= Arrays.asList(averagebal,minbal,monthlyCollection);
+		
+		return new SavingProductData(savingProduct,currencyOptions,savingsProductTypeOptions,tenureTypeOptions,savingFrequencyOptions,savingsInterestTypeOptions,lockinPeriodTypeOptions,interestCalculationOptions);
+	}
+
 	@DELETE
 	@Path("{productId}")
 	@Consumes({MediaType.APPLICATION_JSON})

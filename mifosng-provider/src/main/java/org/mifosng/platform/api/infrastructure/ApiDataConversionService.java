@@ -24,6 +24,7 @@ import org.mifosng.platform.api.commands.NoteCommand;
 import org.mifosng.platform.api.commands.OfficeCommand;
 import org.mifosng.platform.api.commands.OrganisationCurrencyCommand;
 import org.mifosng.platform.api.commands.RoleCommand;
+import org.mifosng.platform.api.commands.SavingAccountCommand;
 import org.mifosng.platform.api.commands.SavingProductCommand;
 import org.mifosng.platform.api.commands.StaffCommand;
 import org.mifosng.platform.api.commands.UserCommand;
@@ -84,5 +85,7 @@ public interface ApiDataConversionService {
 	ClientIdentifierCommand convertJsonToClientIdentifierCommand(Long resourceIdentifier, Long clientId, String jsonRequestBody);
 
 	CodeCommand convertJsonToCodeCommand(Long resourceIdentifier, String json);
+
+	SavingAccountCommand convertJsonToSavingAccountCommand(Long resourceIdentifier,String jsonRequestBody);
 
 }

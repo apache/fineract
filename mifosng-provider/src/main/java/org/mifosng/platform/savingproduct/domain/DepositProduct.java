@@ -29,7 +29,6 @@ public class DepositProduct extends AbstractAuditableCustom<AppUser, Long> {
 	@Column(name = "external_id", length=100)
 	private String externalId;
 
-	@SuppressWarnings("unused")
 	@Column(name = "description")
 	private String description;
 	

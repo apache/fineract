@@ -14,15 +14,19 @@ public class DepositAccountTransactionData {
 	private final LocalDate transactionDate;
 	private final BigDecimal transactionAmount;
 	private final Long accountId;
+	private final BigDecimal interestAmount;
+	private final BigDecimal total;
 	
 	public DepositAccountTransactionData(
 			final Long transactionId, final Long accountId, final EnumOptionData transactionType, 
-			final LocalDate transactionDate, final BigDecimal transactionAmount ) {
+			final LocalDate transactionDate, final BigDecimal transactionAmount, final BigDecimal interstAmount, final BigDecimal total ) {
 		this.transactionId = transactionId;
 		this.accountId = accountId;
 		this.transactionType = transactionType;
 		this.transactionDate = transactionDate;
 		this.transactionAmount = transactionAmount;
+		this.interestAmount = interstAmount;
+		this.total = total;
 	}
 
 	public Long getAccountId() {
@@ -43,5 +47,13 @@ public class DepositAccountTransactionData {
 
 	public BigDecimal getTransactionAmount() {
 		return transactionAmount;
+	}
+
+	public BigDecimal getInterestAmount() {
+		return interestAmount;
+	}
+
+	public BigDecimal getTotal() {
+		return total;
 	}
 }

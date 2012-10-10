@@ -34,6 +34,7 @@ import org.mifosng.platform.api.data.OfficeData;
 import org.mifosng.platform.api.data.OfficeTransactionData;
 import org.mifosng.platform.api.data.PermissionData;
 import org.mifosng.platform.api.data.RoleData;
+import org.mifosng.platform.api.data.SavingAccountData;
 import org.mifosng.platform.api.data.SavingProductData;
 import org.mifosng.platform.api.data.StaffData;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -91,10 +92,12 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 					"transactionProcessingStrategyOptions", "chargeOptions"));
 
 	private static final Set<String> SAVINGS_PRODUCT_DATA_PARAMETERS = new HashSet<String>(
-			Arrays.asList("id", "name", "description", "createdOn",
-					"lastModifedOn", "interestRate", "currencyCode",
-					"digitsAfterDecimal", "currencyOptions", "minimumBalance",
-					"maximumBalance"));
+			Arrays.asList("currencyOptions", "id", "createdOn", "lastModifedOn",
+					"locale", "name", "description","currencyCode", "digitsAfterDecimal","interstRate", "minInterestRate","maxInterestRate",
+					"savingsDepositAmount","savingProductType","tenureType","tenure", "frequency","interestType","interestCalculationMethod",
+					"minimumBalanceForWithdrawal","isPartialDepositAllowed","isLockinPeriodAllowed","lockinPeriod","lockinPeriodType",
+					"currencyOptions", "savingsProductTypeOptions", "tenureTypeOptions", "savingFrequencyOptions", "savingsInterestTypeOptions",
+					"lockinPeriodTypeOptions", "interestCalculationOptions"));
 
 	private static final Set<String> SAVINGS_DEPOSIT_PRODUCT_DATA_PARAMETERS = new HashSet<String>(
 			Arrays.asList("currencyOptions",
@@ -203,6 +206,12 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
     
 	private static final Set<String> CODE_DATA_PARAMETERS = new HashSet<String>(
 			Arrays.asList("id", "codename"));
+	
+	private static final Set<String> SAVINGS_ACCOUNTS_DATA_PARAMETERS = new HashSet<String>(
+			Arrays.asList("id", "status", "externalId", "clientId", "clientName", "productId", "productName", "productType", "currencyData", "savingsDepostiAmountPerPeriod", "savingsFrequencyType", 
+					"totalDepositAmount", "reccuringInterestRate", "savingInterestRate", "interestType", "interestCalculationMethod", "tenure", "tenureType", "projectedCommencementDate", 
+					"actualCommencementDate", "maturesOnDate", "projectedInterestAccuredOnMaturity", "actualInterestAccured", "projectedMaturityAmount", "actualMaturityAmount", "preClosureAllowed", 
+					"preClosureInterestRate", "withdrawnonDate", "rejectedonDate", "closedonDate", "isLockinPeriodAllowed", "lockinPeriod", "lockinPeriodType"));
 
 	private final GoogleGsonSerializerHelper helper;
 
@@ -702,4 +711,25 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 		return helper.serializedJsonFrom(gsonDeserializer, code);
 	}
 	
+	@Override
+	public String serializeSavingAccountsDataToJson(boolean prettyPrint,
+			Set<String> responseParameters, SavingAccountData account) {
+		final Gson gsonDeserializer = helper
+				.createGsonBuilderWithParameterExclusionSerializationStrategy(
+						SAVINGS_ACCOUNTS_DATA_PARAMETERS, prettyPrint, responseParameters);
+		return helper.serializedJsonFrom(gsonDeserializer, account);
+	}
+
+	@Override
+	public String serializeSavingAccountsDataToJson(boolean prettyPrint,
+			Set<String> responseParameters,
+			Collection<SavingAccountData> accounts) {
+		final Gson gsonDeserializer = helper
+				.createGsonBuilderWithParameterExclusionSerializationStrategy(
+						SAVINGS_ACCOUNTS_DATA_PARAMETERS, prettyPrint, responseParameters);
+		return helper.serializedJsonFrom(gsonDeserializer, 
+				accounts.toArray(new SavingAccountData[accounts.size()]));
+		
+	}
+
 }

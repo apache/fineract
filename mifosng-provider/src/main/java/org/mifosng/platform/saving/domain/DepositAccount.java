@@ -245,7 +245,9 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 		this.projectedInterestAccruedOnMaturity = futureValueOnMaturity.minus(deposit).getAmount();
 		this.projectedTotalOnMaturity = futureValueOnMaturity.getAmount();
 		this.depositStatus=depositStatus;
-		this.interstPaid = BigDecimal.ZERO;
+		this.interestAccrued=BigDecimal.ZERO;
+		this.interstPaid=BigDecimal.ZERO;
+		this.total=BigDecimal.ZERO;
 	}
 	
 	private void setExternalId(final String externalId) {
@@ -677,6 +679,7 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 		this.isLockinPeriodAllowed = isLockinPeriodAllowed;
 		this.lockinPeriod = lockinPeriod;
 		this.lockinPeriodType = lockinPeriodType;
+		this.interestAccrued=BigDecimal.ZERO;
 		
 	}
 

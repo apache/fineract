@@ -217,7 +217,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 	private static final class DepositAccountTransactionMapper implements RowMapper<DepositAccountTransactionData>{
 		
 		public String schema() {
-			return " txn.id as transactionId, txn.deposit_account_id as accountId, txn.transaction_type_enum as transactionType, txn.transaction_date as transactionDate, txn.amount as transactionAmount " 
+			return " txn.id as transactionId, txn.deposit_account_id as accountId, txn.transaction_type_enum as transactionType, txn.transaction_date as transactionDate, txn.amount as transactionAmount, txn.interest as interestAmount " 
 				+  " from m_deposit_account_transaction txn";
 		}
 
@@ -231,8 +231,10 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 			EnumOptionData transactionType=DepositAccountTransactionEnumerations.depositType(transactionTypeValue);
 			LocalDate transactionDate = JdbcSupport.getLocalDate(rs, "transactionDate");
 			BigDecimal transactionAmount = rs.getBigDecimal("transactionAmount");
+			BigDecimal interestAmount = rs.getBigDecimal("interestAmount");
+			BigDecimal total = transactionAmount.add(interestAmount);
 			
-			return new DepositAccountTransactionData(transactionId, accountId, transactionType, transactionDate, transactionAmount);
+			return new DepositAccountTransactionData(transactionId, accountId, transactionType, transactionDate, transactionAmount, interestAmount, total);
 		}
 		
 	}
@@ -243,7 +245,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 		boolean undoApprovalAllowed = (depositAccountData.getStatus().getId().equals(300L));
 		boolean renewelAllowed = false;
 		if(depositAccountData.getMaturedOn()!=null){
-			if(new LocalDate().isAfter(depositAccountData.getMaturedOn())||depositAccountData.getMaturedOn().isEqual(new LocalDate())){
+			if(new LocalDate().isAfter(depositAccountData.getMaturedOn())/*||depositAccountData.getMaturedOn().isEqual(new LocalDate())*/){
 				renewelAllowed = depositAccountData.isRenewalAllowed();
 			}
 		}
