@@ -63,7 +63,7 @@ public class LoanAccountData {
 	
 	// template
 	private final Collection<StaffData> loanOfficerOptions;
-	private final Collection<LoanProductLookup> productOptions;
+	private final Collection<LoanProductData> productOptions;
 	private final Collection<EnumOptionData> termFrequencyTypeOptions;
 	private final Collection<EnumOptionData> repaymentFrequencyTypeOptions;
 	private final Collection<TransactionProcessingStrategyData> repaymentStrategyOptions;
@@ -82,7 +82,7 @@ public class LoanAccountData {
 			final Collection<LoanTransactionNewData> transactions,
 			final LoanPermissionData permissions, 
 			final Collection<LoanChargeData> charges,
-			final Collection<LoanProductLookup> productOptions, 
+			final Collection<LoanProductData> productOptions, 
 			final Collection<EnumOptionData> termFrequencyTypeOptions, 
 			final Collection<EnumOptionData> repaymentFrequencyTypeOptions, 
 			final Collection<TransactionProcessingStrategyData> repaymentStrategyOptions, 

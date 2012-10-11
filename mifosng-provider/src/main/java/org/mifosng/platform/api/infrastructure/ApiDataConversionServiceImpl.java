@@ -335,23 +335,23 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
             throw new InvalidJsonException();
         }
         
-        Type typeOfMap = new TypeToken<Map<String, Object>>(){}.getType();
-        Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
+        final Type typeOfMap = new TypeToken<Map<String, Object>>(){}.getType();
+        final Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
 
-        Set<String> supportedParams = new HashSet<String>(
+        final Set<String> supportedParams = new HashSet<String>(
                 Arrays.asList("name", "officeId", "externalId", "clientMembers")
         );
         
         checkForUnsupportedParameters(requestMap, supportedParams);
 
-        Set<String> modifiedParameters = new HashSet<String>();
+        final Set<String> modifiedParameters = new HashSet<String>();
 
-        Long officeId = extractLongParameter("officeId", requestMap, modifiedParameters);
-        String externalId = extractStringParameter("externalId", requestMap, modifiedParameters);
-        String name = extractStringParameter("name", requestMap, modifiedParameters);
+        final Long officeId = extractLongParameter("officeId", requestMap, modifiedParameters);
+        final String externalId = extractStringParameter("externalId", requestMap, modifiedParameters);
+        final String name = extractStringParameter("name", requestMap, modifiedParameters);
 
         // check array
-        JsonParser parser = new JsonParser();
+        final JsonParser parser = new JsonParser();
         
         String[] clientMembers = null;
         JsonElement element = parser.parse(json);
@@ -378,44 +378,54 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 			throw new InvalidJsonException();
 		}
 		
-		Type typeOfMap = new TypeToken<Map<String, Object>>(){}.getType();
-	    Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
+		final Type typeOfMap = new TypeToken<Map<String, Object>>(){}.getType();
+	    final Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
 	    
-	    Set<String> supportedParams = new HashSet<String>(
-	    		Arrays.asList("name", "description", "fundId", "transactionProcessingStrategyId", "currencyCode", "digitsAfterDecimal", 
-	    				"principal", "inArrearsTolerance", "interestRatePerPeriod", "repaymentEvery", "numberOfRepayments", 
-	    				"repaymentFrequencyType", "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType",
+// FIXME - A - LoanProduct - KW - Do we add support for "overpaidTolerance" parameter?
+	    final Set<String> supportedParams = new HashSet<String>(
+	    		Arrays.asList("name", "description", "fundId", "transactionProcessingStrategyId", 
+	    				"currencyCode", "digitsAfterDecimal", 
+	    				"principal", "inArrearsTolerance", 
+	    				"interestRatePerPeriod", "repaymentEvery", "numberOfRepayments", 
+	    				"repaymentFrequencyType", "interestRateFrequencyType", 
+	    				"amortizationType", "interestType", "interestCalculationPeriodType",
                         "charges", "locale")
 	    );
 	    
 	    checkForUnsupportedParameters(requestMap, supportedParams);
 	    
-	    Set<String> modifiedParameters = new HashSet<String>();
-
-	    String name = extractStringParameter("name", requestMap, modifiedParameters);
-	    String description = extractStringParameter("description", requestMap, modifiedParameters);
-	    Long fundId = extractLongParameter("fundId", requestMap, modifiedParameters);
-	    Long transactionProcessingStrategyId = extractLongParameter("transactionProcessingStrategyId", requestMap, modifiedParameters);
-	    String currencyCode = extractStringParameter("currencyCode", requestMap, modifiedParameters);
-	    Integer digitsAfterDecimalValue = extractIntegerParameter("digitsAfterDecimal", requestMap, modifiedParameters);
-	    BigDecimal principalValue = extractBigDecimalParameter("principal", requestMap, modifiedParameters);
-	    BigDecimal inArrearsToleranceValue = extractBigDecimalParameter("inArrearsTolerance", requestMap, modifiedParameters);
-	    BigDecimal interestRatePerPeriodValue = extractBigDecimalParameter("interestRatePerPeriod", requestMap, modifiedParameters);
+	    final JsonParser parser = new JsonParser();
+	    final JsonElement element = parser.parse(json);
+	    final JsonParserHelper helper = new JsonParserHelper();
 	    
-	    Integer repaymentEveryValue = extractIntegerParameter("repaymentEvery", requestMap, modifiedParameters);
-	    Integer numberOfRepaymentsValue = extractIntegerParameter("numberOfRepayments", requestMap, modifiedParameters);
-	    Integer repaymentFrequencyTypeValue = extractIntegerParameter("repaymentFrequencyType", requestMap, modifiedParameters);
+	    final Set<String> modifiedParameters = new HashSet<String>();
+	    final String name = helper.extractStringNamed("name", element, modifiedParameters);
+	    final String description = helper.extractStringNamed("description", element, modifiedParameters);
+	    final Long fundId = helper.extractLongNamed("fundId", element, modifiedParameters);
 	    
-	    Integer interestRateFrequencyTypeValue = extractIntegerParameter("interestRateFrequencyType", requestMap, modifiedParameters);
-	    Integer amortizationTypeValue = extractIntegerParameter("amortizationType", requestMap, modifiedParameters);
-	    Integer interestTypeValue = extractIntegerParameter("interestType", requestMap, modifiedParameters);
-	    Integer interestCalculationPeriodTypeValue = extractIntegerParameter("interestCalculationPeriodType", requestMap, modifiedParameters);
-
-        // check array
-        JsonParser parser = new JsonParser();
-
+		final Long transactionProcessingStrategyId = helper.extractLongNamed("transactionProcessingStrategyId", element, modifiedParameters);
+		
+		final String currencyCode = helper.extractStringNamed("currencyCode", element, modifiedParameters);
+		final Integer digitsAfterDecimal = helper.extractIntegerNamed("digitsAfterDecimal", element, modifiedParameters);
+		
+	    final BigDecimal principal = helper.extractBigDecimalNamed("principal", element, modifiedParameters);
+	    final BigDecimal inArrearsTolerance = helper.extractBigDecimalNamed("inArrearsTolerance", element, modifiedParameters);
+	    final BigDecimal interestRatePerPeriod = helper.extractBigDecimalNamed("interestRatePerPeriod", element, modifiedParameters);
+	    final Integer repaymentEvery = helper.extractIntegerNamed("repaymentEvery", element, modifiedParameters);
+	    final Integer numberOfRepayments = helper.extractIntegerNamed("numberOfRepayments", element, modifiedParameters);
+	    final Integer repaymentFrequencyType = helper.extractIntegerNamed("repaymentFrequencyType", element, modifiedParameters);
+	    
+// FIXME - A - LoanProduct - KW - should loan term fields be part of product also as are basic part of 'loan terms' 
+//	    final Integer loanTermFrequency = helper.extractIntegerNamed("loanTermFrequency", element, modifiedParameters);
+//	    final Integer loanTermFrequencyType = helper.extractIntegerNamed("loanTermFrequencyType", element, modifiedParameters);
+	    final Integer interestRateFrequencyType = helper.extractIntegerNamed("interestRateFrequencyType", element, modifiedParameters);
+	    final Integer amortizationType = helper.extractIntegerNamed("amortizationType", element, modifiedParameters);
+	    final Integer interestType = helper.extractIntegerNamed("interestType", element, modifiedParameters);
+	    final Integer interestCalculationPeriodType = helper.extractIntegerNamed("interestCalculationPeriodType", element, modifiedParameters);
+	    
+	    // FIXME - A - LoanProduct - KW - product charges at present dont allow for adding 'charge' to loan product and setting its 'amount', might this be needed?
+        // loan product charges 
         String[] charges = null;
-        JsonElement element = parser.parse(json);
         if (element.isJsonObject()) {
             JsonObject object = element.getAsJsonObject();
             if (object.has("charges")) {
@@ -427,11 +437,10 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
                 }
             }
         }
-        //
 
 		return new LoanProductCommand(modifiedParameters, resourceIdentifier, name, description, fundId, transactionProcessingStrategyId, 
-				currencyCode, digitsAfterDecimalValue, principalValue, inArrearsToleranceValue, numberOfRepaymentsValue, repaymentEveryValue, interestRatePerPeriodValue,
-				repaymentFrequencyTypeValue, interestRateFrequencyTypeValue, amortizationTypeValue, interestTypeValue, interestCalculationPeriodTypeValue, charges);
+				currencyCode, digitsAfterDecimal, principal, inArrearsTolerance, numberOfRepayments, repaymentEvery, interestRatePerPeriod,
+				repaymentFrequencyType, interestRateFrequencyType, amortizationType, interestType, interestCalculationPeriodType, charges);
 	}
 	
 	@Override
@@ -441,10 +450,10 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 			throw new InvalidJsonException();
 		}
 		
-		Type typeOfMap = new TypeToken<Map<String, Object>>(){}.getType();
-	    Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
+		final Type typeOfMap = new TypeToken<Map<String, Object>>(){}.getType();
+		final Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
 	    
-	    Set<String> supportedParams = new HashSet<String>(
+		final Set<String> supportedParams = new HashSet<String>(
     		Arrays.asList("clientId", "groupId", "productId", "externalId", "fundId", "transactionProcessingStrategyId",
     				"principal", "inArrearsTolerance", "interestRatePerPeriod", "repaymentEvery", "numberOfRepayments", 
     				"loanTermFrequency", "loanTermFrequencyType", "charges",
@@ -455,11 +464,11 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	    
 	    checkForUnsupportedParameters(requestMap, supportedParams);
 	    
-	    Set<String> modifiedParameters = new HashSet<String>();
+	    final Set<String> modifiedParameters = new HashSet<String>();
 	    
-	    JsonParser parser = new JsonParser();
-	    JsonElement element = parser.parse(json);
-	    JsonParserHelper helper = new JsonParserHelper();
+	    final JsonParser parser = new JsonParser();
+	    final JsonElement element = parser.parse(json);
+	    final JsonParserHelper helper = new JsonParserHelper();
 	    
 	    final Long clientId = helper.extractLongNamed("clientId", element, modifiedParameters);
 		final Long groupId = helper.extractLongNamed("groupId", element, modifiedParameters);

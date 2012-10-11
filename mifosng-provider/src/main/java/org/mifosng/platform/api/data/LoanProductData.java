@@ -6,76 +6,161 @@ import java.util.Collection;
 import java.util.List;
 
 import org.joda.time.DateTime;
+import org.mifosng.platform.loan.domain.AmortizationMethod;
+import org.mifosng.platform.loan.domain.InterestCalculationPeriodMethod;
+import org.mifosng.platform.loan.domain.InterestMethod;
+import org.mifosng.platform.loan.domain.PeriodFrequencyType;
+import org.mifosng.platform.loanproduct.service.LoanEnumerations;
 
+/**
+ * Immutable data object to represent loan products.
+ */
 public class LoanProductData {
 
-	private Long id;
-	private String name;
-	private String description;
+	private final Long id;
+	private final String name;
+	private final String description;
 
-	private Long fundId;
-	private String fundName;
+	private final Long fundId;
+	private final String fundName;
 	
-	private Long transactionProcessingStrategyId;
-	private String transactionProcessingStrategyName;
+	private final Long transactionProcessingStrategyId;
+	private final String transactionProcessingStrategyName;
 
-	private CurrencyData currency;
-	private BigDecimal principal;
-	private BigDecimal inArrearsTolerance;
+	private final CurrencyData currency;
+	private final BigDecimal principal;
+	private final BigDecimal inArrearsTolerance;
 
-	private Integer numberOfRepayments;
-	private Integer loanTermFrequency;
-	private Integer repaymentEvery;
-	private BigDecimal interestRatePerPeriod = BigDecimal.ZERO;
-	private BigDecimal annualInterestRate = BigDecimal.ZERO;
+	private final Integer numberOfRepayments;
+	private final Integer loanTermFrequency;
+	private final Integer repaymentEvery;
+	private final BigDecimal interestRatePerPeriod;
+	private final BigDecimal annualInterestRate;
 
-	private EnumOptionData loanTermFrequencyType;
-	private EnumOptionData repaymentFrequencyType;
-	private EnumOptionData interestRateFrequencyType;
-	private EnumOptionData amortizationType;
-	private EnumOptionData interestType;
-	private EnumOptionData interestCalculationPeriodType;
+	private final EnumOptionData loanTermFrequencyType;
+	private final EnumOptionData repaymentFrequencyType;
+	private final EnumOptionData interestRateFrequencyType;
+	private final EnumOptionData amortizationType;
+	private final EnumOptionData interestType;
+	private final EnumOptionData interestCalculationPeriodType;
 
-    private Collection<ChargeData> charges;
+    private final Collection<ChargeData> charges;
 
-	private DateTime createdOn;
-	private DateTime lastModifedOn;
+	private final DateTime createdOn;
+	private final DateTime lastModifedOn;
+	
+	private final List<CurrencyData> currencyOptions;
+	private final Collection<FundData> fundOptions;
+	private final Collection<TransactionProcessingStrategyData> transactionProcessingStrategyOptions;
+	private final List<EnumOptionData> amortizationTypeOptions;
+	private final List<EnumOptionData> interestTypeOptions;
+	private final List<EnumOptionData> interestCalculationPeriodTypeOptions;
+	private final List<EnumOptionData> repaymentFrequencyTypeOptions;
+	private final List<EnumOptionData> interestRateFrequencyTypeOptions;
+	private final List<EnumOptionData> loanTermFrequencyTypeOptions;
+	private final Collection<ChargeData> chargeOptions;
+	
+	/**
+	 * Used when returning lookup information about loan product for dropdowns.
+	 */
+	public static LoanProductData lookup(final Long id, final String name) {
+		final DateTime createdOn = null;
+		final DateTime lastModifedOn = null;
+		final String description = null;
+		final CurrencyData currency = null;
+		final BigDecimal principal = null;
+		final BigDecimal tolerance = null;
+		final Integer numberOfRepayments = null;
+		final Integer loanTermFrequency = null;
+		final Integer repaymentEvery = null;
+		final BigDecimal interestRatePerPeriod = null;
+		final BigDecimal annualInterestRate = null;
+		final EnumOptionData loanTermFrequencyType = null;
+		final EnumOptionData repaymentFrequencyType = null;
+		final EnumOptionData interestRateFrequencyType = null;
+		final EnumOptionData amortizationType = null;
+		final EnumOptionData interestType = null;
+		final EnumOptionData interestCalculationPeriodType = null;
+		final Long fundId = null;
+		final String fundName = null;
+		final Long transactionProcessingStrategyId = null;
+		final String transactionProcessingStrategyName = null;
+		final Collection<ChargeData> charges = null;
+		
+		return new LoanProductData(createdOn, lastModifedOn, id, name, description, currency, principal, tolerance, 
+				numberOfRepayments, loanTermFrequency, repaymentEvery, interestRatePerPeriod, annualInterestRate, 
+				loanTermFrequencyType, repaymentFrequencyType, interestRateFrequencyType, 
+				amortizationType, interestType, interestCalculationPeriodType, 
+				fundId, fundName, transactionProcessingStrategyId, transactionProcessingStrategyName, charges);
+	}
+	
+	public static LoanProductData sensibleDefaultsForNewLoanProductCreation() {
 
-	private List<CurrencyData> currencyOptions = new ArrayList<CurrencyData>();
-	private Collection<FundData> fundOptions = new ArrayList<FundData>();
-	private Collection<TransactionProcessingStrategyData> transactionProcessingStrategyOptions = new ArrayList<TransactionProcessingStrategyData>();
-	private List<EnumOptionData> amortizationTypeOptions = new ArrayList<EnumOptionData>();
-	private List<EnumOptionData> interestTypeOptions = new ArrayList<EnumOptionData>();
-	private List<EnumOptionData> interestCalculationPeriodTypeOptions = new ArrayList<EnumOptionData>();
-	private List<EnumOptionData> repaymentFrequencyTypeOptions = new ArrayList<EnumOptionData>();
-	private List<EnumOptionData> interestRateFrequencyTypeOptions = new ArrayList<EnumOptionData>();
-	private List<EnumOptionData> loanTermFrequencyTypeOptions = new ArrayList<EnumOptionData>();
-    private Collection<ChargeData> chargeOptions = new ArrayList<ChargeData>();
-
-	public LoanProductData() {
-		//
+		final DateTime createdOn = null;
+		final DateTime lastModifedOn = null;
+		final Long id = null;
+		final String name = null;
+		final String description = null;
+		final CurrencyData currency = CurrencyData.blank();
+		final BigDecimal principal = null;
+		final BigDecimal tolerance = null;
+		final Integer numberOfRepayments = null;
+		final Integer loanTermFrequency = null;
+		final Integer repaymentEvery = null;
+		final BigDecimal interestRatePerPeriod = null;
+		final BigDecimal annualInterestRate = null;
+		final EnumOptionData loanTermFrequencyType = LoanEnumerations.loanTermFrequencyType(PeriodFrequencyType.MONTHS);
+		final EnumOptionData repaymentFrequencyType = LoanEnumerations.repaymentFrequencyType(PeriodFrequencyType.MONTHS);
+		final EnumOptionData interestRateFrequencyType = LoanEnumerations.interestRateFrequencyType(PeriodFrequencyType.MONTHS);
+		final EnumOptionData amortizationType = LoanEnumerations.amortizationType(AmortizationMethod.EQUAL_INSTALLMENTS);
+		final EnumOptionData interestType = LoanEnumerations.interestType(InterestMethod.DECLINING_BALANCE);
+		final EnumOptionData interestCalculationPeriodType = LoanEnumerations.interestCalculationPeriodType(InterestCalculationPeriodMethod.SAME_AS_REPAYMENT_PERIOD);
+		final Long fundId = null;
+		final String fundName = null;
+		final Long transactionProcessingStrategyId = null;
+		final String transactionProcessingStrategyName = null;
+		final Collection<ChargeData> charges = null;
+		
+		return new LoanProductData(createdOn, lastModifedOn, id, name, description, currency, principal, tolerance, 
+				numberOfRepayments, loanTermFrequency, repaymentEvery, interestRatePerPeriod, annualInterestRate, 
+				loanTermFrequencyType, repaymentFrequencyType, interestRateFrequencyType, 
+				amortizationType, interestType, interestCalculationPeriodType, 
+				fundId, fundName, transactionProcessingStrategyId, transactionProcessingStrategyName, charges);
 	}
 
-	public LoanProductData(DateTime createdOn, DateTime lastModifedOn, Long id,
-			String name, String description, MoneyData principal,
-			MoneyData tolerance, Integer numberOfRepayments,
-			Integer loanTermFrequency,
-			Integer repaymentEvery, BigDecimal interestRatePerPeriod,
-			BigDecimal annualInterestRate,
-			EnumOptionData loanTermFrequencyType,
-			EnumOptionData repaymentFrequencyType,
-			EnumOptionData interestRateFrequencyType,
-			EnumOptionData amortizationType, EnumOptionData interestType,
-			EnumOptionData interestCalculationPeriodType, Long fundId,
-			String fundName, Long transactionProcessingStrategyId, String transactionProcessingStrategyName) {
+	public LoanProductData(
+			final DateTime createdOn, 
+			final DateTime lastModifedOn, 
+			final Long id,
+			final String name, 
+			final String description, 
+			final CurrencyData currency,
+			final BigDecimal principal,
+			final BigDecimal tolerance, 
+			final Integer numberOfRepayments,
+			final Integer loanTermFrequency,
+			final Integer repaymentEvery, 
+			final BigDecimal interestRatePerPeriod,
+			final BigDecimal annualInterestRate,
+			final EnumOptionData loanTermFrequencyType,
+			final EnumOptionData repaymentFrequencyType,
+			final EnumOptionData interestRateFrequencyType,
+			final EnumOptionData amortizationType, 
+			final EnumOptionData interestType,
+			final EnumOptionData interestCalculationPeriodType, 
+			final Long fundId,
+			final String fundName, 
+			final Long transactionProcessingStrategyId, 
+			final String transactionProcessingStrategyName, 
+			final Collection<ChargeData> charges) {
 		this.createdOn = createdOn;
 		this.lastModifedOn = lastModifedOn;
 		this.id = id;
 		this.name = name;
 		this.description = description;
-		this.currency = new CurrencyData(principal.getCurrencyCode(), principal.getDefaultName(), principal.getDigitsAfterDecimal(), principal.getDisplaySymbol(), principal.getNameCode());
-		this.principal = principal.getAmount();
-		this.inArrearsTolerance = tolerance.getAmount();
+		this.currency = currency;
+		this.principal = principal;
+		this.inArrearsTolerance = tolerance;
 		this.numberOfRepayments = numberOfRepayments;
 		this.loanTermFrequency = loanTermFrequency;
 		this.repaymentEvery = repaymentEvery;
@@ -91,286 +176,210 @@ public class LoanProductData {
 		this.fundName = fundName;
 		this.transactionProcessingStrategyId = transactionProcessingStrategyId;
 		this.transactionProcessingStrategyName = transactionProcessingStrategyName;
+		this.charges = charges;
+		
+		this.chargeOptions = null;
+		this.currencyOptions = null;
+		this.fundOptions = null;
+		this.transactionProcessingStrategyOptions = null;
+		this.amortizationTypeOptions = null;
+		this.interestTypeOptions = null;
+		this.interestCalculationPeriodTypeOptions = null;
+		this.loanTermFrequencyTypeOptions = null;
+		this.repaymentFrequencyTypeOptions = null;
+		this.interestRateFrequencyTypeOptions = null;
+	}
+
+	public LoanProductData(
+			final LoanProductData productData,
+			final Collection<ChargeData> chargeOptions,
+			final List<CurrencyData> currencyOptions,
+			final List<EnumOptionData> amortizationTypeOptions,
+			final List<EnumOptionData> interestTypeOptions,
+			final List<EnumOptionData> interestCalculationPeriodTypeOptions,
+			final List<EnumOptionData> loanTermFrequencyTypeOptions,
+			final List<EnumOptionData> repaymentFrequencyTypeOptions,
+			final List<EnumOptionData> interestRateFrequencyTypeOptions, 
+			final Collection<FundData> fundOptions, 
+			final Collection<TransactionProcessingStrategyData> transactionProcessingStrategyOptions) {
+		this.createdOn = productData.createdOn;
+		this.lastModifedOn = productData.lastModifedOn;
+		this.id = productData.id;
+		this.name = productData.name;
+		this.description = productData.description;
+		this.principal = productData.principal;
+		this.inArrearsTolerance = productData.inArrearsTolerance;
+		this.numberOfRepayments = productData.numberOfRepayments;
+		this.loanTermFrequency = productData.loanTermFrequency;
+		this.repaymentEvery = productData.repaymentEvery;
+		this.interestRatePerPeriod = productData.interestRatePerPeriod;
+		this.annualInterestRate = productData.annualInterestRate;
+		this.loanTermFrequencyType = productData.loanTermFrequencyType;
+		this.repaymentFrequencyType = productData.repaymentFrequencyType;
+		this.interestRateFrequencyType = productData.interestRateFrequencyType;
+		this.amortizationType = productData.amortizationType;
+		this.interestType = productData.interestType;
+		this.interestCalculationPeriodType = productData.interestCalculationPeriodType;
+		this.fundId = productData.fundId;
+		this.fundName = productData.fundName;
+		this.transactionProcessingStrategyId = productData.transactionProcessingStrategyId;
+		this.transactionProcessingStrategyName = productData.transactionProcessingStrategyName;
+		this.charges = null;
+		
+		this.chargeOptions = chargeOptions;
+		this.currencyOptions = currencyOptions;
+		if (this.currencyOptions.size() == 1) {
+			this.currency = this.currencyOptions.get(0);
+		} else {
+			this.currency = productData.currency;
+		}
+		this.fundOptions = fundOptions;
+		this.transactionProcessingStrategyOptions = transactionProcessingStrategyOptions;
+		this.amortizationTypeOptions = amortizationTypeOptions;
+		this.interestTypeOptions = interestTypeOptions;
+		this.interestCalculationPeriodTypeOptions = interestCalculationPeriodTypeOptions;
+		this.loanTermFrequencyTypeOptions = loanTermFrequencyTypeOptions;
+		this.repaymentFrequencyTypeOptions = repaymentFrequencyTypeOptions;
+		this.interestRateFrequencyTypeOptions = interestRateFrequencyTypeOptions;
+	}
+
+	public Collection<ChargeData> charges() {
+		Collection<ChargeData> chargesLocal = new ArrayList<ChargeData>();
+		if (this.charges != null) {
+			chargesLocal = this.charges;
+		}
+		return chargesLocal;
 	}
 
 	public Long getId() {
 		return id;
 	}
 
-	public void setId(Long id) {
-		this.id = id;
-	}
-
 	public String getName() {
 		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
 	}
 
 	public String getDescription() {
 		return description;
 	}
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
 	public Long getFundId() {
 		return fundId;
-	}
-
-	public void setFundId(Long fundId) {
-		this.fundId = fundId;
 	}
 
 	public String getFundName() {
 		return fundName;
 	}
 
-	public void setFundName(String fundName) {
-		this.fundName = fundName;
-	}
-	
 	public Long getTransactionProcessingStrategyId() {
 		return transactionProcessingStrategyId;
-	}
-
-	public void setTransactionProcessingStrategyId(Long transactionProcessingStrategyId) {
-		this.transactionProcessingStrategyId = transactionProcessingStrategyId;
 	}
 
 	public String getTransactionProcessingStrategyName() {
 		return transactionProcessingStrategyName;
 	}
 
-	public void setTransactionProcessingStrategyName(
-			String transactionProcessingStrategyName) {
-		this.transactionProcessingStrategyName = transactionProcessingStrategyName;
-	}
-	
 	public CurrencyData getCurrency() {
 		return currency;
-	}
-
-	public void setCurrency(CurrencyData currency) {
-		this.currency = currency;
 	}
 
 	public BigDecimal getPrincipal() {
 		return principal;
 	}
 
-	public void setPrincipal(BigDecimal principal) {
-		this.principal = principal;
-	}
-
 	public BigDecimal getInArrearsTolerance() {
 		return inArrearsTolerance;
-	}
-
-	public void setInArrearsTolerance(BigDecimal inArrearsTolerance) {
-		this.inArrearsTolerance = inArrearsTolerance;
 	}
 
 	public Integer getNumberOfRepayments() {
 		return numberOfRepayments;
 	}
 
-	public void setNumberOfRepayments(Integer numberOfRepayments) {
-		this.numberOfRepayments = numberOfRepayments;
-	}
-	
 	public Integer getLoanTermFrequency() {
 		return loanTermFrequency;
-	}
-
-	public void setLoanTermFrequency(Integer loanTermFrequency) {
-		this.loanTermFrequency = loanTermFrequency;
 	}
 
 	public Integer getRepaymentEvery() {
 		return repaymentEvery;
 	}
 
-	public void setRepaymentEvery(Integer repaymentEvery) {
-		this.repaymentEvery = repaymentEvery;
-	}
-
 	public BigDecimal getInterestRatePerPeriod() {
 		return interestRatePerPeriod;
-	}
-
-	public void setInterestRatePerPeriod(BigDecimal interestRatePerPeriod) {
-		this.interestRatePerPeriod = interestRatePerPeriod;
 	}
 
 	public BigDecimal getAnnualInterestRate() {
 		return annualInterestRate;
 	}
 
-	public void setAnnualInterestRate(BigDecimal annualInterestRate) {
-		this.annualInterestRate = annualInterestRate;
-	}
-
-	public DateTime getCreatedOn() {
-		return createdOn;
-	}
-
-	public void setCreatedOn(DateTime createdOn) {
-		this.createdOn = createdOn;
-	}
-
-	public DateTime getLastModifedOn() {
-		return lastModifedOn;
-	}
-
-	public void setLastModifedOn(DateTime lastModifedOn) {
-		this.lastModifedOn = lastModifedOn;
+	public EnumOptionData getLoanTermFrequencyType() {
+		return loanTermFrequencyType;
 	}
 
 	public EnumOptionData getRepaymentFrequencyType() {
 		return repaymentFrequencyType;
 	}
 
-	public void setRepaymentFrequencyType(EnumOptionData repaymentFrequencyType) {
-		this.repaymentFrequencyType = repaymentFrequencyType;
-	}
-
 	public EnumOptionData getInterestRateFrequencyType() {
 		return interestRateFrequencyType;
-	}
-
-	public void setInterestRateFrequencyType(
-			EnumOptionData interestRateFrequencyType) {
-		this.interestRateFrequencyType = interestRateFrequencyType;
 	}
 
 	public EnumOptionData getAmortizationType() {
 		return amortizationType;
 	}
 
-	public void setAmortizationType(EnumOptionData amortizationType) {
-		this.amortizationType = amortizationType;
-	}
-
 	public EnumOptionData getInterestType() {
 		return interestType;
-	}
-
-	public void setInterestType(EnumOptionData interestType) {
-		this.interestType = interestType;
 	}
 
 	public EnumOptionData getInterestCalculationPeriodType() {
 		return interestCalculationPeriodType;
 	}
 
-	public void setInterestCalculationPeriodType(
-			EnumOptionData interestCalculationPeriodType) {
-		this.interestCalculationPeriodType = interestCalculationPeriodType;
+	public DateTime getCreatedOn() {
+		return createdOn;
 	}
 
-	public List<EnumOptionData> getRepaymentFrequencyTypeOptions() {
-		return repaymentFrequencyTypeOptions;
-	}
-
-	public void setRepaymentFrequencyTypeOptions(
-			List<EnumOptionData> repaymentFrequencyTypeOptions) {
-		this.repaymentFrequencyTypeOptions = repaymentFrequencyTypeOptions;
-	}
-
-	public List<EnumOptionData> getInterestRateFrequencyTypeOptions() {
-		return interestRateFrequencyTypeOptions;
-	}
-
-	public void setInterestRateFrequencyTypeOptions(
-			List<EnumOptionData> interestRateFrequencyTypeOptions) {
-		this.interestRateFrequencyTypeOptions = interestRateFrequencyTypeOptions;
-	}
-	
-	public EnumOptionData getLoanTermFrequencyType() {
-		return loanTermFrequencyType;
-	}
-
-	public void setLoanTermFrequencyType(EnumOptionData loanTermFrequencyType) {
-		this.loanTermFrequencyType = loanTermFrequencyType;
-	}
-
-	public List<EnumOptionData> getLoanTermFrequencyTypeOptions() {
-		return loanTermFrequencyTypeOptions;
-	}
-
-	public void setLoanTermFrequencyTypeOptions(
-			List<EnumOptionData> loanTermFrequencyTypeOptions) {
-		this.loanTermFrequencyTypeOptions = loanTermFrequencyTypeOptions;
+	public DateTime getLastModifedOn() {
+		return lastModifedOn;
 	}
 
 	public List<CurrencyData> getCurrencyOptions() {
 		return currencyOptions;
 	}
 
-	public void setCurrencyOptions(List<CurrencyData> currencyOptions) {
-		this.currencyOptions = currencyOptions;
-	}
-
 	public Collection<FundData> getFundOptions() {
 		return fundOptions;
 	}
 
-	public void setFundOptions(Collection<FundData> fundOptions) {
-		this.fundOptions = fundOptions;
-	}
-	
 	public Collection<TransactionProcessingStrategyData> getTransactionProcessingStrategyOptions() {
 		return transactionProcessingStrategyOptions;
-	}
-
-	public void setTransactionProcessingStrategyOptions(
-			Collection<TransactionProcessingStrategyData> transactionProcessingStrategyOptions) {
-		this.transactionProcessingStrategyOptions = transactionProcessingStrategyOptions;
 	}
 
 	public List<EnumOptionData> getAmortizationTypeOptions() {
 		return amortizationTypeOptions;
 	}
 
-	public void setAmortizationTypeOptions(
-			List<EnumOptionData> amortizationTypeOptions) {
-		this.amortizationTypeOptions = amortizationTypeOptions;
-	}
-
 	public List<EnumOptionData> getInterestTypeOptions() {
 		return interestTypeOptions;
-	}
-
-	public void setInterestTypeOptions(List<EnumOptionData> interestTypeOptions) {
-		this.interestTypeOptions = interestTypeOptions;
 	}
 
 	public List<EnumOptionData> getInterestCalculationPeriodTypeOptions() {
 		return interestCalculationPeriodTypeOptions;
 	}
 
-	public void setInterestCalculationPeriodTypeOptions(
-			List<EnumOptionData> interestCalculationPeriodTypeOptions) {
-		this.interestCalculationPeriodTypeOptions = interestCalculationPeriodTypeOptions;
+	public List<EnumOptionData> getRepaymentFrequencyTypeOptions() {
+		return repaymentFrequencyTypeOptions;
 	}
 
-    public Collection<ChargeData> getCharges() {
-        return charges;
-    }
+	public List<EnumOptionData> getInterestRateFrequencyTypeOptions() {
+		return interestRateFrequencyTypeOptions;
+	}
 
-    public void setCharges(Collection<ChargeData> charges) {
-        this.charges = charges;
-    }
+	public List<EnumOptionData> getLoanTermFrequencyTypeOptions() {
+		return loanTermFrequencyTypeOptions;
+	}
 
-    public Collection<ChargeData> getChargeOptions() {
-        return chargeOptions;
-    }
-
-    public void setChargeOptions(Collection<ChargeData> chargeOptions) {
-        this.chargeOptions = chargeOptions;
-    }
+	public Collection<ChargeData> getChargeOptions() {
+		return chargeOptions;
+	}
 }

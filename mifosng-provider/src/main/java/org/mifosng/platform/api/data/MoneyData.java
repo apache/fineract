@@ -4,6 +4,10 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+/**
+ * @deprecated - Want to remove this and its usage around loans in full. In its place we just pass back a {@link BigDecimal} for the amount and a {@link CurrencyData} is also passed back.
+ */
+@Deprecated
 public class MoneyData implements Serializable, Comparable<MoneyData> {
 
 	private String currencyCode;

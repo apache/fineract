@@ -46,18 +46,16 @@ public class JsonParserHelper {
 		return longValue;
 	}
 
-	public String extractStringNamed(final String parameterName,
-			final JsonElement element, final Set<String> modifiedParameters) {
+	public String extractStringNamed(final String parameterName, final JsonElement element, final Set<String> modifiedParameters) {
 		String stringValue = null;
 		if (element.isJsonObject()) {
 			JsonObject object = element.getAsJsonObject();
-			if (object.has(parameterName)
-					&& object.get(parameterName).isJsonPrimitive()) {
+			if (object.has(parameterName) && object.get(parameterName).isJsonPrimitive()) {
 				modifiedParameters.add(parameterName);
-				JsonPrimitive primitive = object.get(parameterName)
-						.getAsJsonPrimitive();
-				if (StringUtils.isNotBlank(stringValue)) {
-					stringValue = primitive.getAsString();
+				final JsonPrimitive primitive = object.get(parameterName).getAsJsonPrimitive();
+				final String valueAsString = primitive.getAsString();
+				if (StringUtils.isNotBlank(valueAsString)) {
+					stringValue = valueAsString;
 				}
 			}
 		}

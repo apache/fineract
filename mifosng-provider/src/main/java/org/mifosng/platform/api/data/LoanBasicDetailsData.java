@@ -77,7 +77,7 @@ public class LoanBasicDetailsData {
 		final EnumOptionData termPeriodFrequencyType = product.getRepaymentFrequencyType();
         final Collection<LoanChargeData> charges = new ArrayList<LoanChargeData>();
         
-        for (ChargeData charge : product.getCharges()) {
+        for (ChargeData charge : product.charges()) {
             charges.add(LoanChargeData.newChargeDetails(charge.getId(), charge.getName(), charge.getCurrency(),
                     charge.getAmount(), charge.getChargeTimeType(), charge.getChargeCalculationType()));
         }

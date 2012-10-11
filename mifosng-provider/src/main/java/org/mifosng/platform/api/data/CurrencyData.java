@@ -1,8 +1,9 @@
 package org.mifosng.platform.api.data;
 
-import java.io.Serializable;
-
-public class CurrencyData implements Serializable {
+/**
+ * Immutable data object representing currency.
+ */
+public class CurrencyData {
 
 	private final String code;
 	private final String name;
@@ -11,6 +12,10 @@ public class CurrencyData implements Serializable {
 	private final String nameCode;
 	private final String displayLabel;
 
+	public static CurrencyData blank() {
+		return new CurrencyData("", "", 0, "", "");
+	}
+	
 	public CurrencyData(final String code, final String name, final int decimalPlaces, final String displaySymbol, final String nameCode) {
 		this.code = code;
 		this.name = name;

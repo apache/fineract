@@ -37,7 +37,7 @@ import org.mifosng.platform.api.data.LoanAccountData;
 import org.mifosng.platform.api.data.LoanBasicDetailsData;
 import org.mifosng.platform.api.data.LoanChargeData;
 import org.mifosng.platform.api.data.LoanPermissionData;
-import org.mifosng.platform.api.data.LoanProductLookup;
+import org.mifosng.platform.api.data.LoanProductData;
 import org.mifosng.platform.api.data.LoanTransactionData;
 import org.mifosng.platform.api.data.LoanTransactionNewData;
 import org.mifosng.platform.api.data.MoneyData;
@@ -134,7 +134,7 @@ public class LoansApiResource {
                 "chargeTemplate", "charges"));
 	
 		// tempate related
-		Collection<LoanProductLookup> productOptions = this.loanProductReadPlatformService.retrieveAllLoanProductsForLookup();
+		Collection<LoanProductData> productOptions = this.loanProductReadPlatformService.retrieveAllLoanProductsForLookup();
 		Collection<EnumOptionData>loanTermFrequencyTypeOptions = dropdownReadPlatformService.retrieveLoanTermFrequencyTypeOptions();
 		Collection<EnumOptionData>repaymentFrequencyTypeOptions = dropdownReadPlatformService.retrieveRepaymentFrequencyTypeOptions();
 		Collection<EnumOptionData>interestRateFrequencyTypeOptions = dropdownReadPlatformService.retrieveInterestRateFrequencyTypeOptions();
@@ -237,7 +237,7 @@ public class LoansApiResource {
 			}
 		}
 
-		Collection<LoanProductLookup> productOptions = new ArrayList<LoanProductLookup>();
+		Collection<LoanProductData> productOptions = new ArrayList<LoanProductData>();
 		Collection<EnumOptionData> loanTermFrequencyTypeOptions = null;
 		Collection<EnumOptionData> repaymentFrequencyTypeOptions = new ArrayList<EnumOptionData>();
 		Collection<TransactionProcessingStrategyData> repaymentStrategyOptions = null;
