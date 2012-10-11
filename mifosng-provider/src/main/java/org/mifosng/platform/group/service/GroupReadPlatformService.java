@@ -8,7 +8,7 @@ import org.mifosng.platform.api.data.GroupData;
 
 public interface GroupReadPlatformService {
 
-    Collection<GroupData> retrieveAllGroups();
+    Collection<GroupData> retrieveAllGroups(String extraCriteria);
     
     GroupData retrieveGroup(Long groupId);
 

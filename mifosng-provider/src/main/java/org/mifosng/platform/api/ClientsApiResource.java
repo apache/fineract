@@ -106,24 +106,24 @@ public class ClientsApiResource {
 		}
 		
 		if (externalId != null) {
-			extraCriteria += " and external_id like " + sqlEncodeString(externalId);
+			extraCriteria += " and external_id like " + ApiParameterHelper.sqlEncodeString(externalId);
 		}
 		
 		if (displayName != null) {
 			extraCriteria += " and concat(ifnull(firstname, ''), if(firstname > '',' ', '') , ifnull(lastname, '')) like "
-					+ sqlEncodeString(displayName);
+					+ ApiParameterHelper.sqlEncodeString(displayName);
 		}
 		
 		if (firstName != null) {
-			extraCriteria += " and firstname like " + sqlEncodeString(firstName);
+			extraCriteria += " and firstname like " + ApiParameterHelper.sqlEncodeString(firstName);
 		}
 		
 		if (lastName != null) {
-			extraCriteria += " and lastname like " + sqlEncodeString(lastName);
+			extraCriteria += " and lastname like " + ApiParameterHelper.sqlEncodeString(lastName);
 		}
 		
 		if (hierarchy != null) {
-			extraCriteria += " and o.hierarchy like " + sqlEncodeString(hierarchy+"%");
+			extraCriteria += " and o.hierarchy like " + ApiParameterHelper.sqlEncodeString(hierarchy+"%");
 		}
 
 		if (StringUtils.isNotBlank(extraCriteria)) {
@@ -133,14 +133,6 @@ public class ClientsApiResource {
 		logger.info("extraCriteria; " + extraCriteria);
 
 		return extraCriteria;
-	}
-
-	private String sqlEncodeString(String str) {
-		String singleQuote = "'";
-		String twoSingleQuotes = "''";
-		return singleQuote
-				+ StringUtils.replace(str, singleQuote, twoSingleQuotes, -1)
-				+ singleQuote;
 	}
 
 	@GET

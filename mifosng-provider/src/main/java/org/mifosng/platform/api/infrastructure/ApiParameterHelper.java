@@ -78,4 +78,12 @@ public class ApiParameterHelper {
 		}
 		return genericResultSet;
 	}
+
+    public static String sqlEncodeString(String str) {
+        String singleQuote = "'";
+        String twoSingleQuotes = "''";
+        return singleQuote
+                + StringUtils.replace(str, singleQuote, twoSingleQuotes, -1)
+                + singleQuote;
+    }
 }

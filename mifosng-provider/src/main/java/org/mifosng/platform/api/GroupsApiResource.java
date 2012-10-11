@@ -19,6 +19,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.commons.lang.StringUtils;
 import org.mifosng.platform.api.commands.GroupCommand;
 import org.mifosng.platform.api.data.ClientLookup;
 import org.mifosng.platform.api.data.EntityIdentifier;
@@ -70,7 +71,14 @@ public class GroupsApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveAllGroups(@Context final UriInfo uriInfo){
+    public String retrieveAllGroups(@Context final UriInfo uriInfo,
+                                    @QueryParam("sqlSearch") final String sqlSearch,
+                                    @QueryParam("officeId") final Long officeId,
+                                    @QueryParam("externalId") final String externalId,
+                                    @QueryParam("name") final String name,
+                                    @QueryParam("underHierarchy") final String hierarchy){
+
+        final String extraCriteria = getGroupExtraCriteria(sqlSearch, officeId, externalId, name, hierarchy);
 
         Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
         if (responseParameters.isEmpty()) {
@@ -79,7 +87,7 @@ public class GroupsApiResource {
 
         boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 
-        Collection<GroupData> groups = this.groupReadPlatformService.retrieveAllGroups();
+        Collection<GroupData> groups = this.groupReadPlatformService.retrieveAllGroups(extraCriteria);
 
         return this.apiJsonSerializerService.serializeGroupDataToJson(prettyPrint, responseParameters, groups);
     }
@@ -92,7 +100,7 @@ public class GroupsApiResource {
                                     @PathParam("groupId") final Long groupId,
                                     @QueryParam("officeId") final Long officeId) {
 
-        Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo
+                Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo
                 .getQueryParameters());
         if (responseParameters.isEmpty()) {
             responseParameters.addAll(typicalResponseParameters);
@@ -114,9 +122,9 @@ public class GroupsApiResource {
 
             final String extraCriteria;
             if (officeId != null){
-                extraCriteria = getGroupExtraCriteria(officeId);
+                extraCriteria = getGroupExtraCriteria(null, officeId, null, null, null);
             } else {
-                extraCriteria = getGroupExtraCriteria(group.getOfficeId());
+                extraCriteria = getGroupExtraCriteria(null, group.getOfficeId(), null, null, null);
             }
 
 			availableClients = this.clientReadPlatformService.retrieveAllIndividualClientsForLookup(extraCriteria);
@@ -145,7 +153,7 @@ public class GroupsApiResource {
 
         responseParameters.addAll(Arrays.asList("allowedClients", "allowedOffices"));
 
-        final String extraCriteria = getGroupExtraCriteria(officeId);
+        final String extraCriteria = getGroupExtraCriteria(null, officeId, null, null, null);
 
         GroupData groupData = this.groupReadPlatformService.retrieveNewGroupDetails(extraCriteria);
 
@@ -212,12 +220,38 @@ public class GroupsApiResource {
         return this.apiJsonSerializerService.serializeGroupAccountSummaryCollectionDataToJson(prettyPrint, responseParameters, clientAccount);
     }
 
-    private String getGroupExtraCriteria(Long officeId){
+    // 'g.' preffix because of ERROR 1052 (23000): Column 'column_name' in where clause is ambiguous
+    // caused by the same name of columns in m_office and m_group tables
+    private String getGroupExtraCriteria(String sqlSearch, Long officeId,
+                                         String externalId, String name,
+                                         String hierarchy){
 
         String extraCriteria = "";
 
+        if (sqlSearch != null) {
+            sqlSearch = sqlSearch.replaceAll(" name ", " g.name ");
+            sqlSearch = sqlSearch.replaceAll("name ", "g.name ");
+            extraCriteria = " and (" + sqlSearch + ")";
+        }
+
         if (officeId != null) {
-            extraCriteria += " office_id = " + officeId;
+            extraCriteria += " and office_id = " + officeId;
+        }
+
+        if (externalId != null) {
+            extraCriteria += " and g.external_id like " + ApiParameterHelper.sqlEncodeString(externalId);
+        }
+
+        if (name != null) {
+            extraCriteria += " and g.name = " + ApiParameterHelper.sqlEncodeString(name);
+        }
+
+        if (hierarchy != null) {
+            extraCriteria += " and o.hierarchy like " + ApiParameterHelper.sqlEncodeString(hierarchy + "%");
+        }
+
+        if (StringUtils.isNotBlank(extraCriteria)) {
+            extraCriteria = extraCriteria.substring(4);
         }
 
         logger.info("extraCriteria; " + extraCriteria);

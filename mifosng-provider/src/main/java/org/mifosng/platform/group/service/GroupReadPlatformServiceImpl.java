@@ -44,13 +44,17 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
     }
 
     @Override
-    public Collection<GroupData> retrieveAllGroups() {
+    public Collection<GroupData> retrieveAllGroups(final String extraCriteria) {
 
         this.context.authenticatedUser();
 
         GroupMapper rm = new GroupMapper();
 
         String sql = "select " + rm.groupSchema() + " where g.is_deleted=0";
+
+        if (StringUtils.isNotBlank(extraCriteria)){
+            sql += " and (" + extraCriteria + ")";
+        }
 
         return this.jdbcTemplate.query(sql, rm, new Object[] {});
     }
