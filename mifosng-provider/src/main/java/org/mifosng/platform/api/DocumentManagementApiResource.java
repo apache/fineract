@@ -27,8 +27,10 @@ import org.mifosng.platform.api.data.DocumentData;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
 import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
+import org.mifosng.platform.common.ApplicationConstants;
 import org.mifosng.platform.documentmanagement.service.DocumentReadPlatformService;
 import org.mifosng.platform.documentmanagement.service.DocumentWritePlatformService;
+import org.mifosng.platform.exceptions.DocumentManagementException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -55,6 +57,12 @@ public class DocumentManagementApiResource {
 			Arrays.asList("id", "parentEntityType", "parentEntityId", "name",
 					"fileName", "type", "size", "description"));
 
+	/**
+	 * @param uriInfo
+	 * @param entityType
+	 * @param entityId
+	 * @return
+	 */
 	@GET
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
@@ -78,29 +86,43 @@ public class DocumentManagementApiResource {
 				prettyPrint, responseParameters, documentDatas);
 	}
 
+	/**
+	 * @param entityType
+	 * @param entityId
+	 * @param fileSize
+	 * @param inputStream
+	 * @param fileDetails
+	 * @param bodyPart
+	 * @param name
+	 * @param description
+	 * @return
+	 */
 	@POST
 	@Consumes({ MediaType.MULTIPART_FORM_DATA })
 	@Produces({ MediaType.APPLICATION_JSON })
 	public Response createDocument(@PathParam("entityType") String entityType,
 			@PathParam("entityId") Long entityId,
+			@HeaderParam("Content-Length") Long fileSize,
 			@FormDataParam("file") InputStream inputStream,
 			@FormDataParam("file") FormDataContentDisposition fileDetails,
 			@FormDataParam("file") FormDataBodyPart bodyPart,
-			@HeaderParam("Content-Length") Long fileSize) {
+			@FormDataParam("name") String name,
+			@FormDataParam("description") String description) {
 
-		// TODO: Using Content-Length gives me size of the entire request, need
-		// to filter out only the size of the file
+		initialFileCheckerFastFail(fileSize, name);
 
-		// TODO: Need to add a Fast fail for checking size of file depending on
-		// the size sent by client, also need to have a backup and stop reading
-		// from stream after size is reached to protect against malicious
-		// clients
+		/**
+		 * TODO: also need to have a backup and stop reading from stream after
+		 * max size is reached to protect against malicious clients
+		 **/
+
+		/**
+		 * TODO: need to extract the actual file type and determine fi they are
+		 * permissable
+		 **/
 		DocumentCommand documentCommand = new DocumentCommand(null, null,
-				entityType, entityId, "test", fileDetails.getFileName(),
-				fileSize, bodyPart.getMediaType().toString(), "description",
-				null);
-
-		bodyPart.getMediaType();
+				entityType, entityId, name, fileDetails.getFileName(),
+				fileSize, bodyPart.getMediaType().toString(), description, null);
 
 		Long documentId = this.documentWritePlatformService.createDocument(
 				documentCommand, inputStream);
@@ -108,6 +130,87 @@ public class DocumentManagementApiResource {
 		return Response.ok().entity(new EntityIdentifier(documentId)).build();
 	}
 
+	/**
+	 * @param entityType
+	 * @param entityId
+	 * @param documentId
+	 * @param fileSize
+	 * @param inputStream
+	 * @param fileDetails
+	 * @param bodyPart
+	 * @param name
+	 * @param description
+	 * @return
+	 */
+	@PUT
+	@Path("{documentId}")
+	@Consumes({ MediaType.MULTIPART_FORM_DATA })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public Response updateDocument(@PathParam("entityType") String entityType,
+			@PathParam("entityId") Long entityId,
+			@PathParam("documentId") Long documentId,
+			@HeaderParam("Content-Length") Long fileSize,
+			@FormDataParam("file") InputStream inputStream,
+			@FormDataParam("file") FormDataContentDisposition fileDetails,
+			@FormDataParam("file") FormDataBodyPart bodyPart,
+			@FormDataParam("name") String name,
+			@FormDataParam("description") String description) {
+
+		initialFileCheckerFastFail(fileSize, name);
+
+		Set<String> modifiedParams = new HashSet<String>();
+		modifiedParams.add("name");
+		modifiedParams.add("description");
+
+		/***
+		 * Populate Document command based on whether a file has also been
+		 * passed in as a part of the update
+		 ***/
+		DocumentCommand documentCommand = null;
+		if (inputStream != null) {
+			modifiedParams.add("fileName");
+			modifiedParams.add("size");
+			modifiedParams.add("type");
+			modifiedParams.add("location");
+			documentCommand = new DocumentCommand(modifiedParams, documentId,
+					entityType, entityId, name, fileDetails.getFileName(),
+					fileSize, bodyPart.getMediaType().toString(), description,
+					null);
+		} else {
+			documentCommand = new DocumentCommand(modifiedParams, documentId,
+					entityType, entityId, name, null, null, null, description,
+					null);
+		}
+		EntityIdentifier identifier = this.documentWritePlatformService
+				.updateDocument(documentCommand, inputStream);
+
+		return Response.ok().entity(identifier).build();
+	}
+
+	/**
+	 * @param fileSize
+	 * @param name
+	 */
+	private void initialFileCheckerFastFail(Long fileSize, String name) {
+		/**
+		 * Using Content-Length gives me size of the entire request, which is
+		 * good enough for now for a fast fail as the length of the rest of the
+		 * content i.e name and description while compared to the uploaded file
+		 * size is negligible
+		 **/
+		if (fileSize != null
+				&& ((fileSize / (1024 * 1024)) > ApplicationConstants.MAX_FILE_UPLOAD_SIZE_IN_MB)) {
+			throw new DocumentManagementException(name, fileSize);
+		}
+	}
+
+	/**
+	 * @param entityType
+	 * @param entityId
+	 * @param documentId
+	 * @param uriInfo
+	 * @return
+	 */
 	@GET
 	@Path("{documentId}")
 	@Consumes({ MediaType.APPLICATION_JSON })
@@ -134,6 +237,12 @@ public class DocumentManagementApiResource {
 				prettyPrint, responseParameters, documentData);
 	}
 
+	/**
+	 * @param entityType
+	 * @param entityId
+	 * @param documentId
+	 * @return
+	 */
 	@GET
 	@Path("{documentId}/attachment")
 	@Consumes({ MediaType.APPLICATION_JSON })
@@ -152,22 +261,12 @@ public class DocumentManagementApiResource {
 		return response.build();
 	}
 
-	@PUT
-	@Path("{documentId}")
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public Response updateDocument(@PathParam("entityType") String entityType,
-			@PathParam("entityId") Long entityId,
-			@PathParam("documentId") Long documentId) {
-
-		// TODO
-		// EntityIdentifier identifier =
-		// this.documentWritePlatformService.updateDocument(documentCommand,
-		// inputStream, fileDetails)
-
-		return Response.ok().entity(null).build();
-	}
-
+	/**
+	 * @param entityType
+	 * @param entityId
+	 * @param documentId
+	 * @return
+	 */
 	@DELETE
 	@Path("{documentId}")
 	@Consumes({ MediaType.APPLICATION_JSON })

@@ -24,16 +24,13 @@ public class DocumentCommandValidator {
 
 		baseDataValidator.reset().parameter("name").value(command.getName())
 				.ignoreIfNull().notBlank();
-		/*** TODO:Validate for max length of File to be stored **/
 		baseDataValidator.reset().parameter("size").value(command.getSize())
 				.ignoreIfNull().integerGreaterThanZero();
 		baseDataValidator.reset().parameter("fileName")
 				.value(command.getFileName()).ignoreIfNull().notBlank()
-				.integerGreaterThanZero();
+				.notExceedingLengthOf(250);
 		baseDataValidator.reset().parameter("location")
-				.value(command.getLocation()).ignoreIfNull().notBlank()
-				.integerGreaterThanZero();
-		/*** TODO: Validate for permissable types ***/
+				.value(command.getLocation()).ignoreIfNull().notBlank();
 		baseDataValidator.reset().parameter("type").value(command.getName())
 				.ignoreIfNull().notBlank().notExceedingLengthOf(250);
 		baseDataValidator.reset().parameter("description")
@@ -63,18 +60,16 @@ public class DocumentCommandValidator {
 				.value(command.getParentEntityId()).integerGreaterThanZero();
 		baseDataValidator.reset().parameter("name").value(command.getName())
 				.notBlank().notExceedingLengthOf(250);
-		/*** TODO:Validate for max length of File to be stored **/
 		baseDataValidator.reset().parameter("size").value(command.getSize())
 				.integerGreaterThanZero();
 		baseDataValidator.reset().parameter("fileName")
 				.value(command.getFileName()).notBlank()
 				.notExceedingLengthOf(250);
-		/*** TODO: Validate for permissable types ***/
 		baseDataValidator.reset().parameter("type").value(command.getName())
 				.notBlank().notExceedingLengthOf(250);
 		baseDataValidator.reset().parameter("description")
 				.value(command.getName()).notExceedingLengthOf(250);
- 
+
 		if (!dataValidationErrors.isEmpty()) {
 			throw new PlatformApiDataValidationException(
 					"validation.msg.validation.errors.exist",

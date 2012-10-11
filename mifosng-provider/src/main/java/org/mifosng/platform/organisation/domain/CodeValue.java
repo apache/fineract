@@ -15,11 +15,9 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 		"code_id", "code_value" }, name = "code_value_duplicate") })
 public class CodeValue extends AbstractPersistable<Long> {
 
-	@SuppressWarnings("unused")
 	@Column(name = "code_value", length = 100)
 	private String label;
 
-	@SuppressWarnings("unused")
 	@Column(name = "order_position")
 	private int position;
 
@@ -44,4 +42,20 @@ public class CodeValue extends AbstractPersistable<Long> {
 		this.position = position;
 	}
 
+	public String getLabel() {
+		return label;
+	}
+
+	public void setLabel(String label) {
+		this.label = label;
+	}
+
+	public int getPosition() {
+		return position;
+	}
+
+	public void setPosition(int position) {
+		this.position = position;
+	}
+	
 }

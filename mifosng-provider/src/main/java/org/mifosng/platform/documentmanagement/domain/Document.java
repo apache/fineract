@@ -13,35 +13,27 @@ import org.mifosng.platform.user.domain.AppUser;
 @Table(name = "m_document")
 public class Document extends AbstractAuditableCustom<AppUser, Long> {
 
-	@SuppressWarnings("unused")
 	@Column(name = "parent_entity_type", length = 50)
 	private String parentEntityType;
 
-	@SuppressWarnings("unused")
 	@Column(name = "parent_entity_id", length = 1000)
 	private Long parentEntityId;
 
-	@SuppressWarnings("unused")
 	@Column(name = "name", length = 250)
 	private String name;
 
-	@SuppressWarnings("unused")
 	@Column(name = "file_name", length = 250)
 	private String fileName;
 
-	@SuppressWarnings("unused")
 	@Column(name = "size")
 	private Long size;
 
-	@SuppressWarnings("unused")
 	@Column(name = "type", length = 50)
 	private String type;
 
-	@SuppressWarnings("unused")
 	@Column(name = "description", length = 1000)
 	private String description;
 
-	@SuppressWarnings("unused")
 	@Column(name = "location", length = 500)
 	private String location;
 
@@ -89,6 +81,70 @@ public class Document extends AbstractAuditableCustom<AppUser, Long> {
 			this.size = command.getSize();
 		}
 
+	}
+
+	public String getParentEntityType() {
+		return parentEntityType;
+	}
+
+	public void setParentEntityType(String parentEntityType) {
+		this.parentEntityType = parentEntityType;
+	}
+
+	public Long getParentEntityId() {
+		return parentEntityId;
+	}
+
+	public void setParentEntityId(Long parentEntityId) {
+		this.parentEntityId = parentEntityId;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getFileName() {
+		return fileName;
+	}
+
+	public void setFileName(String fileName) {
+		this.fileName = fileName;
+	}
+
+	public Long getSize() {
+		return size;
+	}
+
+	public void setSize(Long size) {
+		this.size = size;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public String getLocation() {
+		return location;
+	}
+
+	public void setLocation(String location) {
+		this.location = location;
 	}
 
 }

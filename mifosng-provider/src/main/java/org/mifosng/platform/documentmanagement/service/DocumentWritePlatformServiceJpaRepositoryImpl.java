@@ -12,7 +12,7 @@ import org.mifosng.platform.common.FileUtils;
 import org.mifosng.platform.documentmanagement.domain.Document;
 import org.mifosng.platform.documentmanagement.domain.DocumentRepository;
 import org.mifosng.platform.exceptions.DocumentNotFoundException;
-import org.mifosng.platform.exceptions.DocumentSaveException;
+import org.mifosng.platform.exceptions.DocumentManagementException;
 import org.mifosng.platform.exceptions.InvalidEntityTypeForDocumentManagementException;
 import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
 import org.mifosng.platform.loan.domain.LoanRepository;
@@ -79,9 +79,6 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements
 				new File(fileUploadLocation).mkdirs();
 			}
 
-			// TODO check if entity id is valid and within data scope for the
-			// user
-			// TODO replace file system appender with an Amazon S3 appender
 			String fileLocation = FileUtils.saveToFileSystem(inputStream,
 					fileUploadLocation, documentCommand.getFileName());
 
@@ -102,7 +99,7 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements
 					"Unknown data integrity issue with resource.");
 		} catch (IOException ioe) {
 			logger.error(ioe.getMessage(), ioe);
-			throw new DocumentSaveException(documentCommand.getName());
+			throw new DocumentManagementException(documentCommand.getName());
 		}
 	}
 
@@ -111,7 +108,7 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements
 	public EntityIdentifier updateDocument(DocumentCommand documentCommand,
 			InputStream inputStream) {
 		try {
-
+			String oldLocation = null;
 			DocumentCommandValidator validator = new DocumentCommandValidator(
 					documentCommand);
 			validator.validateForUpdate();
@@ -125,7 +122,7 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements
 						documentCommand.getParentEntityId(),
 						documentCommand.getId());
 			}
-
+			oldLocation = documentForUpdate.getLocation();
 			// if a new file is also passed in
 			if (inputStream != null) {
 				String fileUploadLocation = FileUtils
@@ -142,10 +139,15 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements
 				// TODO delete the file at the previous location
 				String fileLocation = FileUtils.saveToFileSystem(inputStream,
 						fileUploadLocation, documentCommand.getFileName());
-				documentCommand.setSize(documentCommand.getSize());
+				documentCommand.setLocation(fileLocation);
 			}
 
 			documentForUpdate.update(documentCommand);
+
+			if (inputStream != null) {
+				// delete previous file
+				deleteFile(documentCommand.getName(), oldLocation);
+			}
 
 			this.documentRepository.saveAndFlush(documentForUpdate);
 
@@ -157,7 +159,7 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements
 					"Unknown data integrity issue with resource.");
 		} catch (IOException ioe) {
 			logger.error(ioe.getMessage(), ioe);
-			throw new DocumentSaveException(documentCommand.getName());
+			throw new DocumentManagementException(documentCommand.getName());
 		}
 	}
 
@@ -176,9 +178,16 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements
 		}
 
 		this.documentRepository.delete(document);
-		// TODO: delete the actual file from File system/ Amazon S3
-
+		deleteFile(document.getName(), document.getLocation());
 		return new EntityIdentifier(document.getId());
+	}
+
+	private void deleteFile(String documentName, String location) {
+		File fileToBeDeleted = new File(location);
+		boolean fileDeleted = fileToBeDeleted.delete();
+		if (!fileDeleted) {
+			throw new DocumentManagementException(documentName);
+		}
 	}
 
 	private void validateParentEntityType(DocumentCommand documentCommand) {

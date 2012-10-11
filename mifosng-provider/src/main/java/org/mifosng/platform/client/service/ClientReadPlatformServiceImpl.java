@@ -9,9 +9,19 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
-import org.mifosng.platform.api.data.*;
+import org.mifosng.platform.api.data.AppUserData;
+import org.mifosng.platform.api.data.ClientAccountSummaryCollectionData;
+import org.mifosng.platform.api.data.ClientAccountSummaryData;
+import org.mifosng.platform.api.data.ClientData;
+import org.mifosng.platform.api.data.ClientIdentifierData;
+import org.mifosng.platform.api.data.ClientLookup;
+import org.mifosng.platform.api.data.CodeValueData;
+import org.mifosng.platform.api.data.EnumOptionData;
+import org.mifosng.platform.api.data.NoteData;
+import org.mifosng.platform.api.data.OfficeLookup;
 import org.mifosng.platform.client.domain.NoteEnumerations;
 import org.mifosng.platform.common.ApplicationConstants;
+import org.mifosng.platform.exceptions.ClientIdentifierNotFoundException;
 import org.mifosng.platform.exceptions.ClientNotFoundException;
 import org.mifosng.platform.exceptions.NoteNotFoundException;
 import org.mifosng.platform.infrastructure.JdbcSupport;
@@ -156,9 +166,17 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
                    "c.office_id as officeId, o.name as officeName " +
                    "from m_client c join m_office o on o.id = c.office_id where c.is_deleted=0 ";
         }
+        
+        public String clientLookupByIdentifierSchema() {
+            return "c.id as id, c.firstname as firstname, c.lastname as lastname, " +
+                   "c.office_id as officeId, o.name as officeName " +
+                   "from m_client c, m_office o, m_client_identifier ci " +
+                   "where o.id = c.office_id and c.id=ci.client_id " +
+                   "and ci.document_type_id= ? and ci.document_key like ?";
+        }
 
         @Override
-        public ClientLookup mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
+        public ClientLookup mapRow(ResultSet rs, int rowNum) throws SQLException {
             Long id = rs.getLong("id");
             String firstname = rs.getString("firstname");
             String lastname = rs.getString("lastname");
@@ -428,27 +446,30 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 	@Override
 	public ClientIdentifierData retrieveClientIdentifier(Long clientId,
 			Long clientIdentifierId) {
-		AppUser currentUser = context.authenticatedUser();
-		String hierarchy = currentUser.getOffice().getHierarchy();
-		String hierarchySearchString = hierarchy + "%";
+		try {
+			AppUser currentUser = context.authenticatedUser();
+			String hierarchy = currentUser.getOffice().getHierarchy();
+			String hierarchySearchString = hierarchy + "%";
 
-		ClientIdentityMapper rm = new ClientIdentityMapper();
+			ClientIdentityMapper rm = new ClientIdentityMapper();
 
-		String sql = "select " + rm.schema();
+			String sql = "select " + rm.schema();
 
-		sql += " and ci.id = ?";
+			sql += " and ci.id = ?";
 
-		ClientIdentifierData clientIdentifierData = this.jdbcTemplate
-				.queryForObject(sql, rm, new Object[] { clientId,
-						hierarchySearchString, clientIdentifierId });
+			ClientIdentifierData clientIdentifierData = this.jdbcTemplate
+					.queryForObject(sql, rm, new Object[] { clientId,
+							hierarchySearchString, clientIdentifierId });
 
-		if(clientIdentifierData!=null){
-		clientIdentifierData.setAllowedDocumentTypes(new ArrayList<CodeValueData>(
-				codeValuePlatformService
-				.retrieveAllCodeValues(ApplicationConstants.CLIENT_IDENTITY_CODE_ID)));
+			clientIdentifierData
+					.setAllowedDocumentTypes(new ArrayList<CodeValueData>(
+							codeValuePlatformService
+									.retrieveAllCodeValues(ApplicationConstants.CLIENT_IDENTITY_CODE_ID)));
+			return clientIdentifierData;
+		} catch (EmptyResultDataAccessException e) {
+			throw new ClientIdentifierNotFoundException(clientIdentifierId);
 		}
-		return clientIdentifierData;
-				
+
 	}
 	
 	 @Override
@@ -495,7 +516,43 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
 	}
 
-	
-	
+	@Override
+	public Boolean existsClientIdentifier(Long clientId, Long identifierTypeId) {
+		try {
+			AppUser currentUser = context.authenticatedUser();
+			String hierarchy = currentUser.getOffice().getHierarchy();
+			String hierarchySearchString = hierarchy + "%";
+
+			ClientIdentityMapper rm = new ClientIdentityMapper();
+
+			String sql = "select " + rm.schema() + " and ci.document_type_id=?";
+			/****query for Object throws an exception if exactly one row is not returned***/
+			this.jdbcTemplate.queryForObject(sql, rm, new Object[] { clientId,
+					hierarchySearchString, identifierTypeId });
+			return true;
+		} catch (EmptyResultDataAccessException e) {
+			return false;
+		}
+	}
+
+
+	@Override
+	public ClientLookup getClientByIdentifier(Long identifierTypeId,
+			String identifierKey) {
+		try {
+			ClientLookupMapper mapper = new ClientLookupMapper();
+
+			String sql = "select " + mapper.clientLookupByIdentifierSchema();
+			/****
+			 * query for Object throws an exception if exactly one row is not
+			 * returned
+			 ***/
+			ClientLookup clientLookup = jdbcTemplate.queryForObject(sql,
+					mapper, new Object[] { identifierTypeId, identifierKey });
+			return clientLookup;
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}
+	}
 	
 }

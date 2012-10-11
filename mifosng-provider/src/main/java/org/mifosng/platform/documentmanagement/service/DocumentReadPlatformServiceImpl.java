@@ -26,7 +26,7 @@ public class DocumentReadPlatformServiceImpl implements
 
 	private final JdbcTemplate jdbcTemplate;
 
-	// TODO: use these services to check if passed n entities for document
+	// TODO: use these services to check if passed in entities for document
 	// management exists (and ensure appropriate errors are thrown)
 	private final PlatformSecurityContext context;
 	private final OfficeReadPlatformService officeReadPlatformService;

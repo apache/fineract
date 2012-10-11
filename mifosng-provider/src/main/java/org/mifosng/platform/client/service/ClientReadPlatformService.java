@@ -37,4 +37,6 @@ public interface ClientReadPlatformService {
 	 * @return
 	 */
 	ClientIdentifierData retrieveNewClientIdentifierDetails();
+	Boolean existsClientIdentifier(Long clientId,Long identifierTypeId);
+	ClientLookup getClientByIdentifier(Long identifierTypeId, String identifierKey);
 }

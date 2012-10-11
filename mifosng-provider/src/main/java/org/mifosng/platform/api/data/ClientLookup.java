@@ -5,11 +5,8 @@ import org.apache.commons.lang.StringUtils;
 public class ClientLookup {
 
     private final Long id;
-    @SuppressWarnings("unused")
     private final String displayName;
-    @SuppressWarnings("unused")
 	private final Long officeId;
-    @SuppressWarnings("unused")
 	private final String officeName;
 
     public ClientLookup(final Long id, final String firstname, final String lastname, final Long officeId, final String officeName) {
@@ -52,4 +49,22 @@ public class ClientLookup {
     public int hashCode() {
         return this.id.hashCode();
     }
+
+	public Long getId() {
+		return id;
+	}
+
+	public String getDisplayName() {
+		return displayName;
+	}
+
+	public Long getOfficeId() {
+		return officeId;
+	}
+
+	public String getOfficeName() {
+		return officeName;
+	}
+    
+    
 }
