@@ -24,6 +24,7 @@ import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.client.domain.ClientRepository;
 import org.mifosng.platform.client.domain.Note;
 import org.mifosng.platform.client.domain.NoteRepository;
+import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.exceptions.ChargeIsNotActiveException;
 import org.mifosng.platform.exceptions.ChargeNotFoundException;
@@ -487,9 +488,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 			throw new LoanTransactionNotFoundException(command.getTransactionId());
 		}
 		
-		Money transactionAmount = Money.of(loan
-				.repaymentScheduleDetail().getPrincipal()
-				.getCurrency(), command.getTransactionAmount());
+		final MonetaryCurrency currency = loan.repaymentScheduleDetail().getPrincipal().getCurrency();
+		final Money transactionAmount = Money.of(currency, command.getTransactionAmount());
 
 		// adjustment is only supported for repayments and waivers at present
 		LocalDate transactionDate = command.getTransactionDate();
@@ -500,7 +500,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
 		loan.adjustExistingTransaction(transactionToAdjust, newTransactionDetail, defaultLoanLifecycleStateMachine());
 
-		this.loanTransactionRepository.save(newTransactionDetail);
+		if (newTransactionDetail.isGreaterThanZero(currency)) {
+			this.loanTransactionRepository.save(newTransactionDetail);
+		}
 
 		this.loanRepository.save(loan);
 

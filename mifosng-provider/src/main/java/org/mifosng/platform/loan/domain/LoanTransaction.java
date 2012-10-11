@@ -37,13 +37,13 @@ public class LoanTransaction extends AbstractAuditableCustom<AppUser, Long> {
 	@Column(name = "amount", scale = 6, precision = 19, nullable = false)
 	private BigDecimal amount;
 	
-	@Column(name = "principal_portion_derived", scale = 6, precision = 19, nullable = false)
+	@Column(name = "principal_portion_derived", scale = 6, precision = 19, nullable = true)
 	private BigDecimal principalPortion = BigDecimal.ZERO;
 	
-	@Column(name = "interest_portion_derived", scale = 6, precision = 19, nullable = false)
+	@Column(name = "interest_portion_derived", scale = 6, precision = 19, nullable = true)
 	private BigDecimal interestPortion = BigDecimal.ZERO;
 	
-	@Column(name = "charges_portion_derived", scale = 6, precision = 19, nullable = false)
+	@Column(name = "charges_portion_derived", scale = 6, precision = 19, nullable = true)
 	private BigDecimal chargesPortion = BigDecimal.ZERO;
 	
     @Temporal(TemporalType.DATE)
@@ -217,5 +217,13 @@ public class LoanTransaction extends AbstractAuditableCustom<AppUser, Long> {
 		this.principalPortion = null;
 		this.interestPortion = null;
 		this.chargesPortion = null;
+	}
+
+	public boolean isGreaterThanZero(final MonetaryCurrency currency) {
+		return getAmount(currency).isGreaterThanZero();
+	}
+
+	public boolean isNotZero(final MonetaryCurrency currency) {
+		return !getAmount(currency).isZero();
 	}
 }

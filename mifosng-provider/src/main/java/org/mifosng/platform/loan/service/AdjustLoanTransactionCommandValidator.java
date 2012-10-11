@@ -25,7 +25,7 @@ public class AdjustLoanTransactionCommandValidator {
 		baseDataValidator.reset().parameter("loanId").value(command.getLoanId()).notNull().integerGreaterThanZero();
 		baseDataValidator.reset().parameter("transactionId").value(command.getTransactionId()).notNull().integerGreaterThanZero();
 		baseDataValidator.reset().parameter("transactionDate").value(command.getTransactionDate()).notNull();
-		baseDataValidator.reset().parameter("transactionAmount").value(command.getTransactionAmount()).notNull().positiveAmount();
+		baseDataValidator.reset().parameter("transactionAmount").value(command.getTransactionAmount()).notNull().zeroOrPositiveAmount();
 		baseDataValidator.reset().parameter("note").value(command.getNote()).notExceedingLengthOf(1000);
 		
 		if (!dataValidationErrors.isEmpty()) {

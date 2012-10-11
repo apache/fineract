@@ -35,7 +35,9 @@ public class LoanProductCommand {
 
 	private final Set<String> modifiedParameters;
 	
-	public LoanProductCommand(final Set<String> modifiedParameters, final Long id, final String name, final String description, 
+	public LoanProductCommand(
+			final Set<String> modifiedParameters, 
+			final Long id, final String name, final String description, 
 			final Long fundId, final Long transactionProcessingStrategyId,
 			final String currencyCode, final Integer digitsAfterDecimal, 
 			final BigDecimal principal, final BigDecimal inArrearsTolerance, final Integer numberOfRepayments, 
@@ -51,7 +53,11 @@ public class LoanProductCommand {
 		this.currencyCode = currencyCode;
 		this.digitsAfterDecimal = digitsAfterDecimal;
 		this.principal = principal;
-		this.inArrearsTolerance = inArrearsTolerance;
+		if (inArrearsTolerance != null && BigDecimal.ZERO.compareTo(inArrearsTolerance) == 0) {
+			this.inArrearsTolerance = null;
+		} else {
+			this.inArrearsTolerance = inArrearsTolerance;
+		}
 		this.numberOfRepayments = numberOfRepayments;
 		this.repaymentEvery = repaymentEvery;
 		this.interestRatePerPeriod = interestRatePerPeriod;

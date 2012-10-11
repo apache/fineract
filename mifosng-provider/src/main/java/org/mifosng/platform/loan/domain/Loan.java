@@ -616,7 +616,9 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		
 		boolean isTransactionChronologicallyLatest = isChronologicallyLatestRepaymentOrWaiver(loanTransaction, this.loanTransactions);
 		
-		this.loanTransactions.add(loanTransaction);
+		if (loanTransaction.isNotZero(loanCurrency())) {
+			this.loanTransactions.add(loanTransaction);
+		}
 
 		if (loanTransaction.isNotRepayment() && loanTransaction.isNotInterestWaiver()) {
 			final String errorMessage = "A transaction of type repayment or waiver was expected but not received.";

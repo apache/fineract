@@ -64,11 +64,13 @@ public class LoanProductCommandValidator {
 		baseDataValidator.reset().parameter("digitsAfterDecimal").value(command.getDigitsAfterDecimal()).notNull().inMinMaxRange(0, 6);
 		
 		baseDataValidator.reset().parameter("principal").value(command.getPrincipal()).notNull().positiveAmount();
-		baseDataValidator.reset().parameter("inArrearsTolerance").value(command.getInArrearsTolerance()).notNull().zeroOrPositiveAmount();
+		baseDataValidator.reset().parameter("inArrearsTolerance").value(command.getInArrearsTolerance()).ignoreIfNull().zeroOrPositiveAmount();
 		
 		baseDataValidator.reset().parameter("repaymentFrequencyType").value(command.getRepaymentFrequencyType()).notNull().inMinMaxRange(0, 3);
 		baseDataValidator.reset().parameter("repaymentEvery").value(command.getRepaymentEvery()).notNull().integerGreaterThanZero();
 		baseDataValidator.reset().parameter("numberOfRepayments").value(command.getNumberOfRepayments()).notNull().integerGreaterThanZero();
+		
+		// transactionProcessingStrategyId defaults to mifos strategy if left null
 		
 		baseDataValidator.reset().parameter("interestRatePerPeriod").value(command.getInterestRatePerPeriod()).notNull();
 		baseDataValidator.reset().parameter("interestRateFrequencyType").value(command.getInterestRateFrequencyType()).notNull().inMinMaxRange(0, 3);

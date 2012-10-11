@@ -57,21 +57,11 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
 	@Column(name = "amortization_method_enum", nullable = false)
 	private AmortizationMethod amortizationMethod;
 
-	@Column(name = "arrearstolerance_amount", scale = 6, precision = 19, nullable = false)
+	@Column(name = "arrearstolerance_amount", scale = 6, precision = 19, nullable = true)
 	private BigDecimal inArrearsTolerance;
 
 	protected LoanProductRelatedDetail() {
-		this.principal = null;
-		this.nominalInterestRatePerPeriod = null;
-		this.interestPeriodFrequencyType = null;
-		this.annualNominalInterestRate = null;
-		this.interestMethod = null;
-
-		this.repayEvery = null;
-		this.repaymentPeriodFrequencyType = null;
-		this.numberOfRepayments = null;
-		this.amortizationMethod = null;
-		this.inArrearsTolerance = null;
+		//
 	}
 
 	public LoanProductRelatedDetail(final MonetaryCurrency currency,
@@ -97,7 +87,11 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
 		this.repaymentPeriodFrequencyType = repaymentFrequencyType;
 		this.numberOfRepayments = defaultNumberOfRepayments;
 		this.amortizationMethod = amortizationMethod;
-		this.inArrearsTolerance = inArrearsTolerance;
+		if (inArrearsTolerance != null && BigDecimal.ZERO.compareTo(inArrearsTolerance) == 0) {
+			this.inArrearsTolerance = null;
+		} else {
+			this.inArrearsTolerance = inArrearsTolerance;
+		}
 	}
 	
 	public MonetaryCurrency getCurrency() {
