@@ -38,15 +38,15 @@ import org.mifosng.platform.api.data.LoanBasicDetailsData;
 import org.mifosng.platform.api.data.LoanChargeData;
 import org.mifosng.platform.api.data.LoanPermissionData;
 import org.mifosng.platform.api.data.LoanProductData;
-import org.mifosng.platform.api.data.LoanTransactionData;
 import org.mifosng.platform.api.data.LoanTransactionNewData;
-import org.mifosng.platform.api.data.MoneyData;
 import org.mifosng.platform.api.data.StaffData;
 import org.mifosng.platform.api.data.TransactionProcessingStrategyData;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
 import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
 import org.mifosng.platform.charge.service.ChargeReadPlatformService;
+import org.mifosng.platform.currency.domain.MonetaryCurrency;
+import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.exceptions.UnrecognizedQueryParamException;
 import org.mifosng.platform.fund.service.FundReadPlatformService;
 import org.mifosng.platform.loan.service.CalculationPlatformService;
@@ -111,6 +111,8 @@ public class LoansApiResource {
 					"closedOnDate", "expectedMaturityDate",
 					"status",
 					"lifeCycleStatusDate"));
+	
+	final Set<String> typicalTransactionResponseParameters = new HashSet<String>(Arrays.asList("id", "type", "date", "currency", "amount"));
 	
 	@GET
 	@Path("template")
@@ -219,8 +221,11 @@ public class LoansApiResource {
 				repaymentSchedule = this.loanReadPlatformService.retrieveRepaymentSchedule(loanId, loanBasicDetails.getCurrency(), 
 					singleDisbursement, loanBasicDetails.getTotalDisbursementCharges(), loanBasicDetails.getInArrearsTolerance());
 				
-				MoneyData tolerance = MoneyData.of(loanBasicDetails.getCurrency(), loanBasicDetails.getInArrearsTolerance());
-				MoneyData totalOutstandingMoney = MoneyData.of(loanBasicDetails.getCurrency(), repaymentSchedule.totalOutstanding());
+				// FIXME - KW - Waive feature was changed to waive interest at anytime so this permission checking is probably not needed - look into.
+				final MonetaryCurrency currency = new MonetaryCurrency(loanBasicDetails.getCurrency().getCode(), loanBasicDetails.getCurrency().getDecimalPlaces());
+				final Money tolerance = Money.of(currency, loanBasicDetails.getInArrearsTolerance());
+				final Money totalOutstandingMoney = Money.of(currency, repaymentSchedule.totalOutstanding());	
+				
 				boolean isWaiveAllowed = totalOutstandingMoney.isGreaterThanZero() && (tolerance.isGreaterThan(totalOutstandingMoney) || tolerance.isEqualTo(totalOutstandingMoney));
 
 				if (responseParameters.contains("permissions")) {
@@ -442,67 +447,28 @@ public class LoansApiResource {
 			@QueryParam("command") final String commandParam,
 			@Context final UriInfo uriInfo) {
 		
-		LoanTransactionData transactionData = null;
+		final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+		if (responseParameters.isEmpty()) {
+			responseParameters.addAll(typicalTransactionResponseParameters);
+		}
+		final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+		
+		LoanTransactionNewData transactionData = null;
 		if (is(commandParam, "repayment")) {
-			Set<String> typicalResponseParameters = new HashSet<String>(
-					Arrays.asList("id", "transactionType", "date", "principal",
-							"interest", "total", "totalWaived", "overpaid"));
-			
-			Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-			if (responseParameters.isEmpty()) {
-				responseParameters.addAll(typicalResponseParameters);
-			}
-			boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 			transactionData = this.loanReadPlatformService.retrieveNewLoanRepaymentDetails(loanId);
-			return this.apiJsonSerializerService.serializeLoanTransactionDataToJson(prettyPrint, responseParameters, transactionData);
 		} else if (is(commandParam, "waiveinterest")) {
-			
-			final Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "type", "date", "currency", "amount"));
-			
-			Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-			if (responseParameters.isEmpty()) {
-				responseParameters.addAll(typicalResponseParameters);
-			}
-			boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-			
-			final LoanTransactionNewData newTransactionData = this.loanReadPlatformService.retrieveNewLoanWaiveInterestDetails(loanId);
-			return this.apiJsonSerializerService.serializeLoanTransactionDataToJson(prettyPrint, responseParameters, newTransactionData);
+			transactionData = this.loanReadPlatformService.retrieveNewLoanWaiveInterestDetails(loanId);
 		} else if (is(commandParam, "writeoff")) {
-			final Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "type", "date", "currency", "amount"));
-			
-			Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-			if (responseParameters.isEmpty()) {
-				responseParameters.addAll(typicalResponseParameters);
-			}
-			boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-			
-			final LoanTransactionNewData newTransactionData = this.loanReadPlatformService.retrieveNewClosureDetails();
-			return this.apiJsonSerializerService.serializeLoanTransactionDataToJson(prettyPrint, responseParameters, newTransactionData);
+			transactionData = this.loanReadPlatformService.retrieveNewClosureDetails();
 		} else if (is(commandParam, "close-rescheduled")) {
-			final Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "type", "date", "currency", "amount"));
-			
-			Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-			if (responseParameters.isEmpty()) {
-				responseParameters.addAll(typicalResponseParameters);
-			}
-			boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-			
-			final LoanTransactionNewData newTransactionData = this.loanReadPlatformService.retrieveNewClosureDetails();
-			return this.apiJsonSerializerService.serializeLoanTransactionDataToJson(prettyPrint, responseParameters, newTransactionData);
+			transactionData = this.loanReadPlatformService.retrieveNewClosureDetails();
 		} else if (is(commandParam, "close")) {
-			final Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "type", "date", "currency", "amount"));
-			
-			final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-			if (responseParameters.isEmpty()) {
-				responseParameters.addAll(typicalResponseParameters);
-			}
-			boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-			
-			final LoanTransactionNewData newTransactionData = this.loanReadPlatformService.retrieveNewClosureDetails();
-			return this.apiJsonSerializerService.serializeLoanTransactionDataToJson(prettyPrint, responseParameters, newTransactionData);
+			transactionData = this.loanReadPlatformService.retrieveNewClosureDetails();
 		}  else {
 			throw new UnrecognizedQueryParamException("command", commandParam);
 		}
+		
+		return this.apiJsonSerializerService.serializeLoanTransactionDataToJson(prettyPrint, responseParameters, transactionData);
 	}
 
 	@GET
@@ -513,17 +479,13 @@ public class LoansApiResource {
 			@PathParam("transactionId") final Long transactionId,
 			@Context final UriInfo uriInfo) {
 		
-		Set<String> typicalResponseParameters = new HashSet<String>(
-				Arrays.asList("id", "transactionType", "date", "principal", "interest", "total", "totalWaived", "overpaid")
-				);
-		
-		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+		final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (responseParameters.isEmpty()) {
-			responseParameters.addAll(typicalResponseParameters);
+			responseParameters.addAll(typicalTransactionResponseParameters);
 		}
-		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+		final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 		
-		LoanTransactionData transactionData = this.loanReadPlatformService.retrieveLoanTransactionDetails(loanId, transactionId);
+		final LoanTransactionNewData transactionData = this.loanReadPlatformService.retrieveLoanTransactionDetails(loanId, transactionId);
 
 		return this.apiJsonSerializerService.serializeLoanTransactionDataToJson(prettyPrint, responseParameters, transactionData);
 	}

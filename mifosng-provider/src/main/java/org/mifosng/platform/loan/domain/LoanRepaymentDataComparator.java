@@ -2,14 +2,12 @@ package org.mifosng.platform.loan.domain;
 
 import java.util.Comparator;
 
-import org.mifosng.platform.api.data.LoanTransactionData;
+import org.mifosng.platform.api.data.LoanTransactionNewData;
 
-
-public class LoanRepaymentDataComparator implements Comparator<LoanTransactionData> {
+public class LoanRepaymentDataComparator implements Comparator<LoanTransactionNewData> {
 
     @Override
-    public int compare(final LoanTransactionData o1, final LoanTransactionData o2) {
-		return o2.getDate().compareTo(o1.getDate());
+    public int compare(final LoanTransactionNewData o1, final LoanTransactionNewData o2) {
+		return o2.dateOf().compareTo(o1.dateOf());
     }
-
 }

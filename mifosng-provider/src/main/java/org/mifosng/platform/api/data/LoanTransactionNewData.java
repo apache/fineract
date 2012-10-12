@@ -15,7 +15,6 @@ public class LoanTransactionNewData {
 	@SuppressWarnings("unused")
 	private EnumOptionData type;
 	
-	@SuppressWarnings("unused")
 	private LocalDate date;
 	
 	@SuppressWarnings("unused")
@@ -35,5 +34,9 @@ public class LoanTransactionNewData {
 		this.currency = currency;
 		this.date = date;
 		this.amount = amount;
+	}
+
+	public LocalDate dateOf() {
+		return this.date;
 	}
 }

@@ -18,12 +18,11 @@ import org.mifosng.platform.api.data.LoanChargeData;
 import org.mifosng.platform.api.data.LoanPermissionData;
 import org.mifosng.platform.api.data.LoanProductData;
 import org.mifosng.platform.api.data.LoanSchedulePeriodData;
-import org.mifosng.platform.api.data.LoanTransactionData;
 import org.mifosng.platform.api.data.LoanTransactionNewData;
-import org.mifosng.platform.api.data.MoneyData;
 import org.mifosng.platform.client.service.ClientReadPlatformService;
 import org.mifosng.platform.currency.domain.ApplicationCurrency;
 import org.mifosng.platform.currency.domain.ApplicationCurrencyRepository;
+import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.exceptions.CurrencyNotFoundException;
 import org.mifosng.platform.exceptions.LoanNotFoundException;
@@ -142,8 +141,9 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
 			final BigDecimal totalOverdue = wrapper.deriveCumulativeTotalOverdue();
 			
-			MoneyData tolerance = MoneyData.of(currency, inArrearsTolerance);
-			MoneyData totalOverdueMoney = MoneyData.of(currency, totalOverdue);
+			final MonetaryCurrency monetaryCurrency = new MonetaryCurrency(currency.getCode(), currency.getDecimalPlaces());
+			final Money tolerance = Money.of(monetaryCurrency, inArrearsTolerance);
+			final Money totalOverdueMoney = Money.of(monetaryCurrency, totalOverdue);
 			boolean isWaiveAllowed = totalOverdueMoney.isGreaterThanZero() && (tolerance.isGreaterThan(totalOverdueMoney) || tolerance.isEqualTo(totalOverdueMoney));
 
 			BigDecimal totalInArrears = null;
@@ -262,7 +262,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     }
 
     @Override
-	public LoanTransactionData retrieveNewLoanRepaymentDetails(final Long loanId) {
+	public LoanTransactionNewData retrieveNewLoanRepaymentDetails(final Long loanId) {
 
 		context.authenticatedUser();
 
@@ -273,31 +273,21 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 			throw new LoanNotFoundException(loanId);
 		}
 
-		final String currencyCode = loan.repaymentScheduleDetail()
-				.getPrincipal().getCurrencyCode();
-		ApplicationCurrency currency = this.applicationCurrencyRepository
-				.findOneByCode(currencyCode);
+		final String currencyCode = loan.repaymentScheduleDetail().getPrincipal().getCurrencyCode();
+		ApplicationCurrency currency = this.applicationCurrencyRepository.findOneByCode(currencyCode);
 		if (currency == null) {
 			throw new CurrencyNotFoundException(currencyCode);
 		}
 
-		CurrencyData currencyData = new CurrencyData(currency.getCode(),
+		final CurrencyData currencyData = new CurrencyData(currency.getCode(),
 				currency.getName(), currency.getDecimalPlaces(),
 				currency.getDisplaySymbol(), currency.getNameCode());
 
-		LocalDate earliestUnpaidInstallmentDate = loan
-				.possibleNextRepaymentDate();
-		Money possibleNextRepaymentAmount = loan.possibleNextRepaymentAmount();
-		MoneyData possibleNextRepayment = MoneyData.of(currencyData,
-				possibleNextRepaymentAmount.getAmount());
-
-		LoanTransactionData newRepaymentDetails = new LoanTransactionData();
-		newRepaymentDetails.setTransactionType(LoanEnumerations
-				.transactionType(LoanTransactionType.REPAYMENT));
-		newRepaymentDetails.setDate(earliestUnpaidInstallmentDate);
-		newRepaymentDetails.setTotal(possibleNextRepayment);
-
-		return newRepaymentDetails;
+		final LocalDate earliestUnpaidInstallmentDate = loan.possibleNextRepaymentDate();
+		
+		final Money possibleNextRepaymentAmount = loan.possibleNextRepaymentAmount();
+		final EnumOptionData transactionType = LoanEnumerations.transactionType(LoanTransactionType.REPAYMENT);
+		return new LoanTransactionNewData(null, transactionType, currencyData, earliestUnpaidInstallmentDate, possibleNextRepaymentAmount.getAmount());
 	}
 
 	@Override
@@ -306,23 +296,24 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 		context.authenticatedUser();
 
 		// TODO - OPTIMIZE - write simple sql query to fetch back overdue interest that can be waived along with the date of repayment period interest is overdue.
-		Loan loan = this.loanRepository.findOne(loanId);
+		final Loan loan = this.loanRepository.findOne(loanId);
 		if (loan == null) {
 			throw new LoanNotFoundException(loanId);
 		}
 
 		final String currencyCode = loan.repaymentScheduleDetail().getPrincipal().getCurrencyCode();
-		ApplicationCurrency currency = this.applicationCurrencyRepository.findOneByCode(currencyCode);
+		final ApplicationCurrency currency = this.applicationCurrencyRepository.findOneByCode(currencyCode);
 		if (currency == null) {
 			throw new CurrencyNotFoundException(currencyCode);
 		}
-		CurrencyData currencyData = new CurrencyData(currency.getCode(),
+		
+		final CurrencyData currencyData = new CurrencyData(currency.getCode(),
 				currency.getName(), currency.getDecimalPlaces(),
 				currency.getDisplaySymbol(), currency.getNameCode());
 
-		LoanTransaction waiveOfInterest = loan.deriveDefaultInterestWaiverTransaction();
+		final LoanTransaction waiveOfInterest = loan.deriveDefaultInterestWaiverTransaction();
 
-		EnumOptionData transactionType = LoanEnumerations.transactionType(LoanTransactionType.WAIVE_INTEREST);
+		final EnumOptionData transactionType = LoanEnumerations.transactionType(LoanTransactionType.WAIVE_INTEREST);
 		
 		return new LoanTransactionNewData(null, transactionType, currencyData, waiveOfInterest.getTransactionDate(), waiveOfInterest.getAmount());
 	}
@@ -338,26 +329,23 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 	}
 
 	@Override
-	public LoanTransactionData retrieveLoanTransactionDetails(
+	public LoanTransactionNewData retrieveLoanTransactionDetails(
 			final Long loanId, final Long transactionId) {
 
 		context.authenticatedUser();
 
-		Loan loan = this.loanRepository.findOne(loanId);
+		final Loan loan = this.loanRepository.findOne(loanId);
 		if (loan == null) {
 			throw new LoanNotFoundException(loanId);
 		}
 
-		final String currencyCode = loan.repaymentScheduleDetail()
-				.getPrincipal().getCurrencyCode();
-		ApplicationCurrency currency = this.applicationCurrencyRepository
-				.findOneByCode(currencyCode);
+		final String currencyCode = loan.repaymentScheduleDetail().getPrincipal().getCurrencyCode();
+		final ApplicationCurrency currency = this.applicationCurrencyRepository.findOneByCode(currencyCode);
 		if (currency == null) {
 			throw new CurrencyNotFoundException(currencyCode);
 		}
 
-		LoanTransaction transaction = this.loanTransactionRepository
-				.findOne(transactionId);
+		final LoanTransaction transaction = this.loanTransactionRepository.findOne(transactionId);
 		if (transaction == null) {
 			throw new LoanTransactionNotFoundException(transactionId);
 		}
@@ -366,20 +354,12 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 			throw new LoanTransactionNotFoundException(transactionId, loanId);
 		}
 
-		CurrencyData currencyData = new CurrencyData(currency.getCode(),
+		final CurrencyData currencyData = new CurrencyData(currency.getCode(),
 				currency.getName(), currency.getDecimalPlaces(),
 				currency.getDisplaySymbol(), currency.getNameCode());
-		MoneyData total = MoneyData.of(currencyData, transaction.getAmount());
-		LocalDate date = transaction.getTransactionDate();
-
-		LoanTransactionData loanRepaymentData = new LoanTransactionData();
-		loanRepaymentData.setTransactionType(LoanEnumerations
-				.transactionType(transaction.getTypeOf()));
-		loanRepaymentData.setId(transactionId);
-		loanRepaymentData.setTotal(total);
-		loanRepaymentData.setDate(date);
-
-		return loanRepaymentData;
+		
+		final EnumOptionData transactionType = LoanEnumerations.transactionType(transaction.getTypeOf());
+		return new LoanTransactionNewData(transactionId, transactionType, currencyData, transaction.getTransactionDate(), transaction.getAmount());
 	}
 
 	private static final class LoanMapper implements

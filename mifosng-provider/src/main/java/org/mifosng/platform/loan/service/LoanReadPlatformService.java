@@ -8,7 +8,6 @@ import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.DisbursementData;
 import org.mifosng.platform.api.data.LoanBasicDetailsData;
 import org.mifosng.platform.api.data.LoanPermissionData;
-import org.mifosng.platform.api.data.LoanTransactionData;
 import org.mifosng.platform.api.data.LoanTransactionNewData;
 
 public interface LoanReadPlatformService {
@@ -27,11 +26,11 @@ public interface LoanReadPlatformService {
 
     LoanBasicDetailsData retrieveGroupAndProductDetails(Long groupId, Long productId);
 
-	LoanTransactionData retrieveNewLoanRepaymentDetails(Long loanId);
+    LoanTransactionNewData retrieveNewLoanRepaymentDetails(Long loanId);
 
 	LoanTransactionNewData retrieveNewLoanWaiveInterestDetails(Long loanId);
 
-	LoanTransactionData retrieveLoanTransactionDetails(Long loanId, Long transactionId);
+	LoanTransactionNewData retrieveLoanTransactionDetails(Long loanId, Long transactionId);
 
 	LoanTransactionNewData retrieveNewClosureDetails();
 }

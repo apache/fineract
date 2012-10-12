@@ -176,7 +176,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         }
 
         @Override
-        public ClientLookup mapRow(ResultSet rs, int rowNum) throws SQLException {
+        public ClientLookup mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
             Long id = rs.getLong("id");
             String firstname = rs.getString("firstname");
             String lastname = rs.getString("lastname");
