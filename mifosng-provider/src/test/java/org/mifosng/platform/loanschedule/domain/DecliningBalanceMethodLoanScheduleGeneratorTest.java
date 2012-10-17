@@ -4,6 +4,7 @@ package org.mifosng.platform.loanschedule.domain;
 //import static org.junit.Assert.*;
 
 import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.loan.domain.LoanProductRelatedDetail;
@@ -25,6 +26,11 @@ public class DecliningBalanceMethodLoanScheduleGeneratorTest {
 		currencyData = new CurrencyData("USD", "US Dollar", 2, "$", "currency.USD");
 		
 		decliningBalanceGenerator = new DecliningBalanceMethodLoanScheduleGenerator();
+	}
+	
+	@Test
+	public void testVoid() {
+		
 	}
 	
 //	@Test
