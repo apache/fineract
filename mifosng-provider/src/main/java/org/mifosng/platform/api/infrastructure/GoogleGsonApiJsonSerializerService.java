@@ -26,7 +26,7 @@ import org.mifosng.platform.api.data.GroupData;
 import org.mifosng.platform.api.data.LoanAccountData;
 import org.mifosng.platform.api.data.LoanChargeData;
 import org.mifosng.platform.api.data.LoanProductData;
-import org.mifosng.platform.api.data.LoanTransactionNewData;
+import org.mifosng.platform.api.data.LoanTransactionData;
 import org.mifosng.platform.api.data.NoteData;
 import org.mifosng.platform.api.data.OfficeData;
 import org.mifosng.platform.api.data.OfficeTransactionData;
@@ -556,7 +556,7 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 	@Override
 	public String serializeLoanTransactionDataToJson(final boolean prettyPrint,
 			final Set<String> responseParameters,
-			final LoanTransactionNewData transaction) {
+			final LoanTransactionData transaction) {
 		final Gson gsonDeserializer = helper
 				.createGsonBuilderWithParameterExclusionSerializationStrategy(
 						LOAN_TRANSACTION_NEW_DATA_PARAMETERS, prettyPrint,

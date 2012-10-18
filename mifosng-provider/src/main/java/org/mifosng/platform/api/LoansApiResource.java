@@ -38,7 +38,7 @@ import org.mifosng.platform.api.data.LoanBasicDetailsData;
 import org.mifosng.platform.api.data.LoanChargeData;
 import org.mifosng.platform.api.data.LoanPermissionData;
 import org.mifosng.platform.api.data.LoanProductData;
-import org.mifosng.platform.api.data.LoanTransactionNewData;
+import org.mifosng.platform.api.data.LoanTransactionData;
 import org.mifosng.platform.api.data.StaffData;
 import org.mifosng.platform.api.data.TransactionProcessingStrategyData;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
@@ -192,7 +192,7 @@ public class LoansApiResource {
 		final LoanBasicDetailsData loanBasicDetails = this.loanReadPlatformService.retrieveLoanAccountDetails(loanId);
 		
 		int loanRepaymentsCount = 0;
-		Collection<LoanTransactionNewData> loanRepayments = null;
+		Collection<LoanTransactionData> loanRepayments = null;
 		LoanScheduleData repaymentSchedule = null;
 		LoanPermissionData permissions = null;
         Collection<LoanChargeData> charges = null;
@@ -208,10 +208,9 @@ public class LoansApiResource {
 			}
 			
 			if (responseParameters.contains("transactions")) {
-				Collection<LoanTransactionNewData> currentLoanRepayments = this.loanReadPlatformService.retrieveLoanTransactions(loanId);
+				final Collection<LoanTransactionData> currentLoanRepayments = this.loanReadPlatformService.retrieveLoanTransactions(loanId);
 				if (!CollectionUtils.isEmpty(currentLoanRepayments)) {
 					loanRepayments = currentLoanRepayments;
-					loanRepaymentsCount = loanRepayments.size();
 				}
 			}
 			
@@ -229,6 +228,7 @@ public class LoansApiResource {
 				boolean isWaiveAllowed = totalOutstandingMoney.isGreaterThanZero() && (tolerance.isGreaterThan(totalOutstandingMoney) || tolerance.isEqualTo(totalOutstandingMoney));
 
 				if (responseParameters.contains("permissions")) {
+					loanRepaymentsCount = retrieveNonDisbursementTransactions(loanRepayments);
 					permissions = this.loanReadPlatformService.retrieveLoanPermissions(loanBasicDetails, isWaiveAllowed, loanRepaymentsCount);
 				}
 				convenienceDataRequired = true;
@@ -288,6 +288,19 @@ public class LoansApiResource {
 				fundOptions, chargeOptions, chargeTemplate, allowedLoanOfficers);
 		
 		return this.apiJsonSerializerService.serializeLoanAccountDataToJson(prettyPrint, responseParameters, loanAccount);
+	}
+
+	private int retrieveNonDisbursementTransactions(final Collection<LoanTransactionData> loanRepayments) {
+		int loanRepaymentsCount = 0;
+		if (!CollectionUtils.isEmpty(loanRepayments)) {
+			for (LoanTransactionData transaction : loanRepayments) {
+				if (transaction.isNotDisbursement()) {
+					// use this to decide if undo disbural should permission should be set to true.
+					loanRepaymentsCount++;
+				}
+			}
+		}
+		return loanRepaymentsCount;
 	}
 
 	@POST
@@ -453,7 +466,7 @@ public class LoansApiResource {
 		}
 		final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 		
-		LoanTransactionNewData transactionData = null;
+		LoanTransactionData transactionData = null;
 		if (is(commandParam, "repayment")) {
 			transactionData = this.loanReadPlatformService.retrieveNewLoanRepaymentDetails(loanId);
 		} else if (is(commandParam, "waiveinterest")) {
@@ -485,7 +498,7 @@ public class LoansApiResource {
 		}
 		final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 		
-		final LoanTransactionNewData transactionData = this.loanReadPlatformService.retrieveLoanTransactionDetails(loanId, transactionId);
+		final LoanTransactionData transactionData = this.loanReadPlatformService.retrieveLoanTransactionDetails(loanId, transactionId);
 
 		return this.apiJsonSerializerService.serializeLoanTransactionDataToJson(prettyPrint, responseParameters, transactionData);
 	}

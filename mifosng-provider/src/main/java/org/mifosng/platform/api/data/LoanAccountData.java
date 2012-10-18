@@ -56,7 +56,7 @@ public class LoanAccountData {
 	
 	// associations
 	private final LoanScheduleData repaymentSchedule;
-	private final Collection<LoanTransactionNewData> transactions;
+	private final Collection<LoanTransactionData> transactions;
 	private final Collection<LoanChargeData> charges;
 	private final LoanPermissionData permissions;
 	private final LoanConvenienceData convenienceData;
@@ -79,7 +79,7 @@ public class LoanAccountData {
 			final LoanBasicDetailsData basicDetails,
 			final boolean convenienceDataRequired, 
 			final LoanScheduleData repaymentSchedule,
-			final Collection<LoanTransactionNewData> transactions,
+			final Collection<LoanTransactionData> transactions,
 			final LoanPermissionData permissions, 
 			final Collection<LoanChargeData> charges,
 			final Collection<LoanProductData> productOptions, 

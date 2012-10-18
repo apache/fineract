@@ -7,12 +7,11 @@ import org.joda.time.LocalDate;
 /**
  * Immutable data object representing a loan transaction.
  */
-public class LoanTransactionNewData {
+public class LoanTransactionData {
 
 	@SuppressWarnings("unused")
 	private Long id;
 	
-	@SuppressWarnings("unused")
 	private EnumOptionData type;
 	
 	private LocalDate date;
@@ -23,7 +22,7 @@ public class LoanTransactionNewData {
 	@SuppressWarnings("unused")
 	private BigDecimal amount;
 	
-	public LoanTransactionNewData(
+	public LoanTransactionData(
 			final Long id,
 			final EnumOptionData transactionType, 
 			final CurrencyData currency,
@@ -38,5 +37,9 @@ public class LoanTransactionNewData {
 
 	public LocalDate dateOf() {
 		return this.date;
+	}
+
+	public boolean isNotDisbursement() {
+		return type.getId().equals(Integer.valueOf(1));
 	}
 }

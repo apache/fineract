@@ -18,7 +18,7 @@ import org.mifosng.platform.api.data.LoanChargeData;
 import org.mifosng.platform.api.data.LoanPermissionData;
 import org.mifosng.platform.api.data.LoanProductData;
 import org.mifosng.platform.api.data.LoanSchedulePeriodData;
-import org.mifosng.platform.api.data.LoanTransactionNewData;
+import org.mifosng.platform.api.data.LoanTransactionData;
 import org.mifosng.platform.client.service.ClientReadPlatformService;
 import org.mifosng.platform.currency.domain.ApplicationCurrency;
 import org.mifosng.platform.currency.domain.ApplicationCurrencyRepository;
@@ -162,7 +162,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 	}
 
 	@Override
-	public Collection<LoanTransactionNewData> retrieveLoanTransactions(final Long loanId) {
+	public Collection<LoanTransactionData> retrieveLoanTransactions(final Long loanId) {
 		try {
 			context.authenticatedUser();
 
@@ -262,7 +262,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     }
 
     @Override
-	public LoanTransactionNewData retrieveNewLoanRepaymentDetails(final Long loanId) {
+	public LoanTransactionData retrieveNewLoanRepaymentDetails(final Long loanId) {
 
 		context.authenticatedUser();
 
@@ -287,11 +287,11 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 		
 		final Money possibleNextRepaymentAmount = loan.possibleNextRepaymentAmount();
 		final EnumOptionData transactionType = LoanEnumerations.transactionType(LoanTransactionType.REPAYMENT);
-		return new LoanTransactionNewData(null, transactionType, currencyData, earliestUnpaidInstallmentDate, possibleNextRepaymentAmount.getAmount());
+		return new LoanTransactionData(null, transactionType, currencyData, earliestUnpaidInstallmentDate, possibleNextRepaymentAmount.getAmount());
 	}
 
 	@Override
-	public LoanTransactionNewData retrieveNewLoanWaiveInterestDetails(final Long loanId) {
+	public LoanTransactionData retrieveNewLoanWaiveInterestDetails(final Long loanId) {
 
 		context.authenticatedUser();
 
@@ -315,21 +315,21 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
 		final EnumOptionData transactionType = LoanEnumerations.transactionType(LoanTransactionType.WAIVE_INTEREST);
 		
-		return new LoanTransactionNewData(null, transactionType, currencyData, waiveOfInterest.getTransactionDate(), waiveOfInterest.getAmount());
+		return new LoanTransactionData(null, transactionType, currencyData, waiveOfInterest.getTransactionDate(), waiveOfInterest.getAmount());
 	}
 	
 	@Override
-	public LoanTransactionNewData retrieveNewClosureDetails() {
+	public LoanTransactionData retrieveNewClosureDetails() {
 		
 		context.authenticatedUser();
 
 		EnumOptionData transactionType = LoanEnumerations.transactionType(LoanTransactionType.WRITEOFF);
 		
-		return new LoanTransactionNewData(null, transactionType, null, new LocalDate(), null);
+		return new LoanTransactionData(null, transactionType, null, new LocalDate(), null);
 	}
 
 	@Override
-	public LoanTransactionNewData retrieveLoanTransactionDetails(
+	public LoanTransactionData retrieveLoanTransactionDetails(
 			final Long loanId, final Long transactionId) {
 
 		context.authenticatedUser();
@@ -359,7 +359,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 				currency.getDisplaySymbol(), currency.getNameCode());
 		
 		final EnumOptionData transactionType = LoanEnumerations.transactionType(transaction.getTypeOf());
-		return new LoanTransactionNewData(transactionId, transactionType, currencyData, transaction.getTransactionDate(), transaction.getAmount());
+		return new LoanTransactionData(transactionId, transactionType, currencyData, transaction.getTransactionDate(), transaction.getAmount());
 	}
 
 	private static final class LoanMapper implements
@@ -573,7 +573,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 		}
 	}
 
-	private static final class LoanTransactionsMapper implements RowMapper<LoanTransactionNewData> {
+	private static final class LoanTransactionsMapper implements RowMapper<LoanTransactionData> {
 
 		public String LoanPaymentsSchema() {
 
@@ -586,7 +586,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 		}
 
 		@Override
-		public LoanTransactionNewData mapRow(final ResultSet rs,
+		public LoanTransactionData mapRow(final ResultSet rs,
 				@SuppressWarnings("unused") final int rowNum) throws SQLException {
 
 			String currencyCode = rs.getString("currencyCode");
@@ -604,7 +604,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 			LocalDate date = JdbcSupport.getLocalDate(rs, "date");
 			BigDecimal totalAmount = rs.getBigDecimal("total");
 
-			return new LoanTransactionNewData(id, transactionType, currencyData, date, totalAmount);
+			return new LoanTransactionData(id, transactionType, currencyData, date, totalAmount);
 		}
 	}
 }

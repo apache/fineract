@@ -8,7 +8,7 @@ import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.DisbursementData;
 import org.mifosng.platform.api.data.LoanBasicDetailsData;
 import org.mifosng.platform.api.data.LoanPermissionData;
-import org.mifosng.platform.api.data.LoanTransactionNewData;
+import org.mifosng.platform.api.data.LoanTransactionData;
 
 public interface LoanReadPlatformService {
 
@@ -16,7 +16,7 @@ public interface LoanReadPlatformService {
 
 	LoanScheduleData retrieveRepaymentSchedule(Long loanId, CurrencyData currency, DisbursementData disbursement, BigDecimal totalChargesAtDisbursement, BigDecimal inArrearsTolerance);
 
-	Collection<LoanTransactionNewData> retrieveLoanTransactions(Long loanId);
+	Collection<LoanTransactionData> retrieveLoanTransactions(Long loanId);
 
 	LoanPermissionData retrieveLoanPermissions(
 			LoanBasicDetailsData loanBasicDetails, boolean isWaiverAllowed,
@@ -26,11 +26,11 @@ public interface LoanReadPlatformService {
 
     LoanBasicDetailsData retrieveGroupAndProductDetails(Long groupId, Long productId);
 
-    LoanTransactionNewData retrieveNewLoanRepaymentDetails(Long loanId);
+    LoanTransactionData retrieveNewLoanRepaymentDetails(Long loanId);
 
-	LoanTransactionNewData retrieveNewLoanWaiveInterestDetails(Long loanId);
+	LoanTransactionData retrieveNewLoanWaiveInterestDetails(Long loanId);
 
-	LoanTransactionNewData retrieveLoanTransactionDetails(Long loanId, Long transactionId);
+	LoanTransactionData retrieveLoanTransactionDetails(Long loanId, Long transactionId);
 
-	LoanTransactionNewData retrieveNewClosureDetails();
+	LoanTransactionData retrieveNewClosureDetails();
 }
