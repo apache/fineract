@@ -7,7 +7,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'bmuschko:gradle-tomcat-plugin:0.9.3'
+        classpath 'bmuschko:gradle-tomcat-plugin:0.9.5'
     }
 }
 

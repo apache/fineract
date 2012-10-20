@@ -163,7 +163,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		final Set<LoanCharge> charges = this.loanChargeAssembler.assembleFrom(command.getCharges(), loanProduct.getCharges(), loan.getPrincpal().getAmount());
 
         final LoanScheduleData loanSchedule = this.calculationPlatformService.calculateLoanScheduleNew(command.toCalculateLoanScheduleCommand());
-		loan.modifyLoanApplication(command, client, loanProduct, fund, strategy, loanSchedule, charges, loanOfficer);
+		loan.modifyLoanApplication(command, client, loanProduct, fund, strategy, loanSchedule, charges, loanOfficer, defaultLoanLifecycleStateMachine());
 
 		this.loanRepository.save(loan);
 		
@@ -391,7 +391,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 			}
 			loan.disburseWithModifiedRepaymentSchedule(actualDisbursementDate, modifiedLoanRepaymentSchedule, defaultLoanLifecycleStateMachine());
 		} else {
-			loan.disburse(actualDisbursementDate, defaultLoanLifecycleStateMachine());
+			loan.disburse(actualDisbursementDate, defaultLoanLifecycleStateMachine(), true);
 		}
 
 		this.loanRepository.save(loan);

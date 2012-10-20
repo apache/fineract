@@ -274,7 +274,8 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	
 	public void modifyLoanApplication(final LoanApplicationCommand command, final Client client, final LoanProduct loanProduct, 
 			final Fund fund, final LoanTransactionProcessingStrategy strategy, final LoanScheduleData modifiedLoanSchedule, final Set<LoanCharge> charges,
-			final Staff loanOfficer) {
+			final Staff loanOfficer, 
+			final LoanLifecycleStateMachine loanLifecycleStateMachine) {
 
 		if (command.isClientChanged()) {
 			this.client = client;
@@ -307,6 +308,8 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		if (command.isExpectedDisbursementDateChanged()) {
 			if (command.getExpectedDisbursementDate() != null) {
 				this.expectedDisbursedOnDate = command.getExpectedDisbursementDate().toDate();
+				removeFirstDisbursementTransaction();
+				disburse(command.getExpectedDisbursementDate(), loanLifecycleStateMachine, false);
 			} else {
 				this.expectedDisbursedOnDate = null;
 			}
@@ -356,6 +359,15 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		
 		final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessor.determineProcessor(this.transactionProcessingStrategy);
 		loanRepaymentScheduleTransactionProcessor.handleTransaction(repaymentsOrWaivers, getCurrency(), this.repaymentScheduleInstallments);
+	}
+
+	private void removeFirstDisbursementTransaction() {
+		for (LoanTransaction loanTransaction : loanTransactions) {
+			if (loanTransaction.isDisbursement()) {
+				loanTransactions.remove(loanTransaction);
+				break;
+			}
+		}
 	}
 
 	public void submitApplication(
@@ -502,13 +514,15 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 			modifiedInstallment.updateLoan(this);
 			this.repaymentScheduleInstallments.add(modifiedInstallment);
 		}
-		disburse(disbursedOn, loanLifecycleStateMachine);
+		disburse(disbursedOn, loanLifecycleStateMachine, true);
 	}
 
-	public void disburse(final LocalDate disbursedOn, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
+	public void disburse(final LocalDate disbursedOn, final LoanLifecycleStateMachine loanLifecycleStateMachine, final boolean statusTransition) {
 		
-		LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_DISBURSED, LoanStatus.fromInt(this.loanStatus));
-		this.loanStatus = statusEnum.getValue();
+		if (statusTransition) {
+			LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_DISBURSED, LoanStatus.fromInt(this.loanStatus));
+			this.loanStatus = statusEnum.getValue();
+		}
 		
 		this.disbursedOnDate = disbursedOn.toDateTimeAtCurrentTime().toDate();
 		this.expectedMaturityDate = this.repaymentScheduleInstallments
