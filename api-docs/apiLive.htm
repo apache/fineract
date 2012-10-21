@@ -50,22 +50,28 @@ function clickAPILink(apiLink)
 
 function getBaseURL(docURL)
 {
-    var hostName = "";
-    if (QueryParameters["hostname"]) hostName = QueryParameters["hostname"];
-    else
+	var localhostUrl = "https://localhost:8443/mifosng-provider/api/v1/";
+	var openmfDemoUrl = "/mifosng-provider/api/v1/";
+	
+	var baseUrl = "";
+    
+    if (docURL.substring(0,4).toLowerCase() == "http")
     {
-        if (docURL.substring(0,4).toLowerCase() == "http")
-        {
-            var l = getLocation(docURL);
-            hostName = l.hostname;
-        }
-        else
-        {
-            //assume running locally
-            hostName = "localhost";
+        var l = getLocation(docURL);
+        
+        if (l.hostname == "demo.openmf.org") {
+        	baseUrl = openmfDemoUrl;
+        } else {
+        	baseUrl = "https://" + l.hostname + ":8443/mifosng-provider/api/v1/"
         }
     }
-    return "https://" + hostName + ":8443/mifosng-provider/api/v1/"; 
+    else
+    {
+        //assume running locally
+        baseUrl = localhostUrl;
+    }
+        
+    return baseUrl; 
 }
 
 </script>
