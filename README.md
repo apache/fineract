@@ -11,12 +11,12 @@ http://www.youtube.com/watch?v=zN5Dn1Lc_js
 Online Client Application Demos
 =============================
 
-<a target="_blank" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/IndividualLendingGeneralJavaScript/IndivLendHome.html?tenantIdentifier=default" title="Client apps: Individual Lending">Individual Lending App</a>
+<a target="_blank" href="https://demo.openmf.org" title="Client apps: Individual Lending">Individual Lending App</a>
 
 Mifos Platform API
 =====================
 
-<a target="_blank" href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/api-docs/apiLive.htm" title="mifos platform api beta 1">API Documentation (Demo Server)</a>
+<a target="_blank" href="https://demo.openmf.org/api-docs/apiLive.htm" title="mifos platform api beta 1">API Documentation (Demo Server)</a>
 
 Developers
 ==========
