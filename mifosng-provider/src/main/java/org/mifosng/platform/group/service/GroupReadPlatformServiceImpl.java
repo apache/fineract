@@ -19,6 +19,7 @@ import org.mifosng.platform.infrastructure.JdbcSupport;
 import org.mifosng.platform.infrastructure.TenantAwareRoutingDataSource;
 import org.mifosng.platform.organisation.service.OfficeReadPlatformService;
 import org.mifosng.platform.security.PlatformSecurityContext;
+import org.mifosng.platform.user.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -76,16 +77,14 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
     }
 
     @Override
-    public GroupData retrieveNewGroupDetails(String extraCriteria) {
-
-        this.context.authenticatedUser();
+    public GroupData retrieveNewGroupDetails(final Long officeId) {
 
         List<ClientLookup> allowedClients = new ArrayList<ClientLookup>(
-                this.clientReadPlatformService.retrieveAllIndividualClientsForLookup(extraCriteria));
+                this.clientReadPlatformService.retrieveAllIndividualClientsForLookupByOfficeId(officeId));
 
         List<OfficeLookup> allowedOffices = new ArrayList<OfficeLookup>(officeReadPlatformService.retrieveAllOfficesForLookup());
 
-        return new GroupData(allowedClients, allowedOffices);
+        return new GroupData(officeId, allowedClients, allowedOffices);
     }
 
     private static final class GroupMapper implements RowMapper<GroupData> {

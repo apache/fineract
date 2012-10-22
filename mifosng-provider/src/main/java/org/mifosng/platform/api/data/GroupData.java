@@ -49,9 +49,9 @@ public class GroupData {
 		this.allowedOffices = allowedOffices;
 	}
 	
-	public GroupData(final Collection<ClientLookup> allowedClients, final Collection<OfficeLookup> allowedOffices) {
+	public GroupData(final Long officeId, final Collection<ClientLookup> allowedClients, final Collection<OfficeLookup> allowedOffices) {
 		this.id = null;
-		this.officeId = null;
+		this.officeId = officeId;
 		this.officeName = null;
 		this.name = null;
 		this.externalId = null;

@@ -115,6 +115,17 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     }
 
     @Override
+    public Collection<ClientLookup> retrieveAllIndividualClientsForLookupByOfficeId(Long officeId) {
+        this.context.authenticatedUser();
+
+        ClientLookupMapper rm = new ClientLookupMapper();
+
+        String sql = "select " + rm.clientLookupSchema() + " and c.office_id = " + officeId;
+
+        return this.jdbcTemplate.query(sql, rm, new Object[] {});
+    }
+
+    @Override
 	public ClientData retrieveNewClientDetails() {
 
 		AppUser currentUser = context.authenticatedUser();

@@ -18,6 +18,8 @@ public interface ClientReadPlatformService {
 
     Collection<ClientLookup> retrieveAllIndividualClientsForLookup(String extraCriteria);
 
+    Collection<ClientLookup> retrieveAllIndividualClientsForLookupByOfficeId(Long officeId);
+
 	ClientAccountSummaryCollectionData retrieveClientAccountDetails(Long clientId);
 
 	Collection<NoteData> retrieveAllClientNotes(Long clientId);

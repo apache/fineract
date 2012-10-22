@@ -33,6 +33,7 @@ import org.mifosng.platform.client.service.ClientReadPlatformService;
 import org.mifosng.platform.group.service.GroupReadPlatformService;
 import org.mifosng.platform.group.service.GroupWritePlatformService;
 import org.mifosng.platform.organisation.service.OfficeReadPlatformService;
+import org.mifosng.platform.security.PlatformSecurityContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,6 +64,9 @@ public class GroupsApiResource {
 
 	@Autowired
 	private ApiJsonSerializerService apiJsonSerializerService;
+
+    @Autowired
+    private PlatformSecurityContext context;
 
     private static final Set<String> typicalResponseParameters = new HashSet<String>(
             Arrays.asList("id", "officeId", "name", "externalId", "clientMembers")
@@ -120,14 +124,12 @@ public class GroupsApiResource {
 			responseParameters.add("allowedClients");
 			responseParameters.add("allowedOffices");
 
-            final String extraCriteria;
             if (officeId != null){
-                extraCriteria = getGroupExtraCriteria(null, officeId, null, null, null);
+                availableClients = this.clientReadPlatformService.retrieveAllIndividualClientsForLookupByOfficeId(officeId);
             } else {
-                extraCriteria = getGroupExtraCriteria(null, group.getOfficeId(), null, null, null);
+                availableClients = this.clientReadPlatformService.retrieveAllIndividualClientsForLookupByOfficeId(group.getOfficeId());
             }
 
-			availableClients = this.clientReadPlatformService.retrieveAllIndividualClientsForLookup(extraCriteria);
 			availableClients.removeAll(group.clientMembers());
 
 			allowedOffices = officeReadPlatformService.retrieveAllOfficesForLookup();
@@ -151,11 +153,14 @@ public class GroupsApiResource {
         }
         boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 
-        responseParameters.addAll(Arrays.asList("allowedClients", "allowedOffices"));
+        responseParameters.addAll(Arrays.asList("officeId", "allowedClients", "allowedOffices"));
 
-        final String extraCriteria = getGroupExtraCriteria(null, officeId, null, null, null);
-
-        GroupData groupData = this.groupReadPlatformService.retrieveNewGroupDetails(extraCriteria);
+        GroupData groupData;
+        if (officeId != null){
+            groupData = this.groupReadPlatformService.retrieveNewGroupDetails(officeId);
+        } else {
+            groupData = this.groupReadPlatformService.retrieveNewGroupDetails(context.authenticatedUser().getOffice().getId());
+        }
 
         return this.apiJsonSerializerService.serializeGroupDataToJson(prettyPrint, responseParameters, groupData);
     }

@@ -12,7 +12,7 @@ public interface GroupReadPlatformService {
     
     GroupData retrieveGroup(Long groupId);
 
-    GroupData retrieveNewGroupDetails(String extraCriteria);
+    GroupData retrieveNewGroupDetails(Long officeId);
 
     Collection<ClientLookup> retrieveClientMembers(Long groupId);
 
