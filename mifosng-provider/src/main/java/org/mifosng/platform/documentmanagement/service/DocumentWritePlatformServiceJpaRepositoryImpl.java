@@ -124,7 +124,7 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements
 			}
 			oldLocation = documentForUpdate.getLocation();
 			// if a new file is also passed in
-			if (inputStream != null) {
+			if (inputStream != null && documentCommand.isFileNameChanged()) {
 				String fileUploadLocation = FileUtils
 						.generateFileParentDirectory(
 								documentCommand.getParentEntityType(),
@@ -136,7 +136,6 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements
 				}
 
 				// TODO replace file system appender with an Amazon S3 appender
-				// TODO delete the file at the previous location
 				String fileLocation = FileUtils.saveToFileSystem(inputStream,
 						fileUploadLocation, documentCommand.getFileName());
 				documentCommand.setLocation(fileLocation);
@@ -144,7 +143,7 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements
 
 			documentForUpdate.update(documentCommand);
 
-			if (inputStream != null) {
+			if (inputStream != null && documentCommand.isFileNameChanged()) {
 				// delete previous file
 				deleteFile(documentCommand.getName(), oldLocation);
 			}

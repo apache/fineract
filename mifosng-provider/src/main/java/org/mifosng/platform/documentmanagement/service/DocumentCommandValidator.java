@@ -31,8 +31,6 @@ public class DocumentCommandValidator {
 				.notExceedingLengthOf(250);
 		baseDataValidator.reset().parameter("location")
 				.value(command.getLocation()).ignoreIfNull().notBlank();
-		baseDataValidator.reset().parameter("type").value(command.getName())
-				.ignoreIfNull().notBlank().notExceedingLengthOf(250);
 		baseDataValidator.reset().parameter("description")
 				.value(command.getName()).ignoreIfNull()
 				.notExceedingLengthOf(250);
@@ -65,8 +63,6 @@ public class DocumentCommandValidator {
 		baseDataValidator.reset().parameter("fileName")
 				.value(command.getFileName()).notBlank()
 				.notExceedingLengthOf(250);
-		baseDataValidator.reset().parameter("type").value(command.getName())
-				.notBlank().notExceedingLengthOf(250);
 		baseDataValidator.reset().parameter("description")
 				.value(command.getName()).notExceedingLengthOf(250);
 

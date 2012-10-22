@@ -167,7 +167,7 @@ public class DocumentManagementApiResource {
 		 * passed in as a part of the update
 		 ***/
 		DocumentCommand documentCommand = null;
-		if (inputStream != null) {
+		if (inputStream != null && fileDetails.getFileName() != null) {
 			modifiedParams.add("fileName");
 			modifiedParams.add("size");
 			modifiedParams.add("type");
