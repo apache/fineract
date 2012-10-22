@@ -224,7 +224,7 @@ public class LoanProductData {
 		this.fundName = productData.fundName;
 		this.transactionProcessingStrategyId = productData.transactionProcessingStrategyId;
 		this.transactionProcessingStrategyName = productData.transactionProcessingStrategyName;
-		this.charges = null;
+		this.charges = productData.charges();
 		
 		this.chargeOptions = chargeOptions;
 		this.currencyOptions = currencyOptions;
