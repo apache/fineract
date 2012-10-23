@@ -318,4 +318,12 @@ public class LoanCharge extends AbstractPersistable<Long> {
 	public BigDecimal amount() {
 		return this.amount;
 	}
+
+	public boolean hasNotLoanIdentifiedBy(final Long loanId) {
+		return !hasLoanIdentifiedBy(loanId);
+	}
+	
+	public boolean hasLoanIdentifiedBy(final Long loanId) {
+		return this.loan.hasIdentifyOf(loanId);
+	}
 }

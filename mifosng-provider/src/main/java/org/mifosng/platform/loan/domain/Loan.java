@@ -28,6 +28,7 @@ import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.LocalDate;
 import org.mifosng.platform.api.LoanScheduleData;
 import org.mifosng.platform.api.commands.LoanApplicationCommand;
+import org.mifosng.platform.api.commands.LoanChargeCommand;
 import org.mifosng.platform.api.data.LoanSchedulePeriodData;
 import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
@@ -48,7 +49,8 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	@JoinColumn(name = "client_id")
 	private Client client;
 
-    @ManyToOne(optional = true)
+    @SuppressWarnings("unused")
+	@ManyToOne(optional = true)
     @JoinColumn(name = "group_id")
     private Group group;
 
@@ -251,14 +253,36 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		}
 		return loanCharges;
 	}
+	
+    private void updateTotalChargesDueAtDisbursement() {
+        this.totalChargesDueAtDisbursement = deriveSumTotalOfChargesDueAtDisbursement();
+    }
+	
+	public void addLoanCharge(final LoanCharge loanCharge) {
+		loanCharge.update(this);
+		this.charges.add(loanCharge);
+		
+		updateTotalChargesDueAtDisbursement();
+	}
+	
+	public void removeLoanCharge(final LoanCharge loanCharge) {
+		boolean removed = this.charges.remove(loanCharge);
+		if (removed) {
+			updateTotalChargesDueAtDisbursement();
+		}
+	}
+	
+	public void updateLoanCharge(final LoanCharge loanCharge, final LoanChargeCommand command) {
+		
+		if (this.charges.contains(loanCharge)) {
+			loanCharge.update(command, getPrincpal().getAmount());
+			updateTotalChargesDueAtDisbursement();
+		}
+	}
 
 	public Client client() {
 		return this.client;
 	}
-
-    public Group getGroup() {
-        return group;
-    }
 
     public LoanProduct loanProduct() {
 		return this.loanProduct;
@@ -609,10 +633,6 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		
 		return waiveInterestTransaction;
 	}
-
-    public void updateTotalChargesDueAtDisbursement() {
-        this.totalChargesDueAtDisbursement = deriveSumTotalOfChargesDueAtDisbursement();
-    }
 
 	public void makeRepayment(final LoanTransaction loanTransaction, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
 		handleRepaymentOrWaiverTransaction(loanTransaction, loanLifecycleStateMachine, null);
@@ -1333,6 +1353,10 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	public boolean identifiedBy(String identifier) {
 		return identifier.equalsIgnoreCase(this.externalId)
 				|| identifier.equalsIgnoreCase(this.getId().toString());
+	}
+	
+	public boolean hasIdentifyOf(final Long loanId) {
+		return loanId.equals(this.getId());
 	}
 
 	public LocalDate getInterestChargedFromDate() {

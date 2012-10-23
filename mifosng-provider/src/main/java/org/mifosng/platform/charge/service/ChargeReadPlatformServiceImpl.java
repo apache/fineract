@@ -83,19 +83,19 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
     }
 
     @Override
-    public Collection<ChargeData> retrieveLoanProductCharges(Long loanProductId) {
+    public Collection<ChargeData> retrieveLoanProductCharges(final Long loanProductId) {
 
         this.context.authenticatedUser();
 
         final ChargeMapper rm = new ChargeMapper();
 
-        final String sql = "select " + rm.loanProductChargeSchema() + " where c.is_deleted=0 and plc.product_loan_id=?";
+        final String sql = "select " + rm.loanProductChargeSchema() + " where c.is_deleted=0 and c.is_active=1 and plc.product_loan_id=?";
 
         return this.jdbcTemplate.query(sql, rm, new Object[] {loanProductId});
     }
 
     @Override
-    public Collection<LoanChargeData> retrieveLoanCharges(Long loanId) {
+    public Collection<LoanChargeData> retrieveLoanCharges(final Long loanId) {
         this.context.authenticatedUser();
 
         final LoanChargeMapper rm = new LoanChargeMapper();
@@ -130,8 +130,8 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
 
         public String chargeSchema(){
             return "c.id as id, c.name as name, c.amount as amount, c.currency_code as currencyCode, " +
-                   "charge_applies_to_enum as chargeAppliesTo, charge_time_enum as chargeTime, " +
-                   "charge_calculation_enum as chargeCalculation, is_active as active, oc.name as currencyName, " +
+                   "c.charge_applies_to_enum as chargeAppliesTo, c.charge_time_enum as chargeTime, " +
+                   "c.charge_calculation_enum as chargeCalculation, c.is_active as active, oc.name as currencyName, " +
                    "oc.decimal_places as currencyDecimalPlaces, oc.display_symbol as currencyDisplaySymbol, " +
                    "oc.internationalized_name_code as currencyNameCode from m_charge c " +
                    "join m_organisation_currency oc on c.currency_code = oc.code";

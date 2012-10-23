@@ -633,13 +633,13 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         LoanChargeCommandValidator validator = new LoanChargeCommandValidator(command);
         validator.validateForCreate();
 
-        Loan loan = this.loanRepository.findOne(command.getLoanId());
+        final Loan loan = this.loanRepository.findOne(command.getLoanId());
         if (loan == null) {
             throw new LoanNotFoundException(command.getLoanId());
         }
 
-        Charge chargeDefinition = this.chargeRepository.findOne(command.getChargeId());
-        if (chargeDefinition == null) {
+        final Charge chargeDefinition = this.chargeRepository.findOne(command.getChargeId());
+        if (chargeDefinition == null || chargeDefinition.isDeleted()) {
             throw new ChargeNotFoundException(command.getChargeId());
         }
 
@@ -654,12 +654,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             throw new InvalidCurrencyException("charge", "attach.to.loan", errorMessage);
         }
 
-        this.loanChargeRepository.saveAndFlush(loanCharge);
-
-        // FIXME - KW - 
-        loan.getCharges().add(loanCharge);
-        loan.updateTotalChargesDueAtDisbursement();
-
+        loan.addLoanCharge(loanCharge);
         this.loanRepository.saveAndFlush(loan);
 
         return new EntityIdentifier(loanCharge.getId());
@@ -674,43 +669,55 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         LoanChargeCommandValidator validator = new LoanChargeCommandValidator(command);
         validator.validateForUpdate();
 
-        Loan loan = this.loanRepository.findOne(command.getLoanId());
+        final Long loanId = command.getLoanId();
+        final Loan loan = this.loanRepository.findOne(loanId);
         if (loan == null) {
-            throw new LoanNotFoundException(command.getLoanId());
+            throw new LoanNotFoundException(loanId);
         }
-
-        for (LoanCharge loanCharge : loan.getCharges()){
-            if (loanCharge.getId().equals(command.getId())){
-                loanCharge.update(command, loan.getPrincpal().getAmount());
-                loan.updateTotalChargesDueAtDisbursement();
-                this.loanRepository.saveAndFlush(loan);
-                return new EntityIdentifier(loanCharge.getId());
-            }
+        
+        final Long loanChargeId = command.getId();
+		final LoanCharge loanCharge = this.loanChargeRepository.findOne(loanChargeId);
+        if (loanCharge == null) {
+        	// FIXME - kw - should be loan charge not found, not charge not found.
+        	throw new ChargeNotFoundException(loanChargeId);
         }
+        
+        if (loanCharge.hasNotLoanIdentifiedBy(loanId)) {
+        	// FIXME - kw - should be loan charge not found, not charge not found.
+        	throw new ChargeNotFoundException(loanChargeId);
+        }
+        
+        loan.updateLoanCharge(loanCharge, command);
+        this.loanRepository.saveAndFlush(loan);
 
-        throw new ChargeNotFoundException(command.getId());
+        return new EntityIdentifier(loanCharge.getId());
     }
 
 	@Transactional
     @Override
-    public EntityIdentifier deleteLoanCharge(Long loanId, Long loanChargeId) {
+    public EntityIdentifier deleteLoanCharge(final Long loanId, final Long loanChargeId) {
 
         this.context.authenticatedUser();
 
-        Loan loan = this.loanRepository.findOne(loanId);
+        final Loan loan = this.loanRepository.findOne(loanId);
         if (loan == null) {
             throw new LoanNotFoundException(loanId);
         }
-
-        for (LoanCharge loanCharge : loan.getCharges()){
-            if (loanCharge.getId().equals(loanChargeId)){
-                loan.getCharges().remove(loanCharge);
-                loan.updateTotalChargesDueAtDisbursement();
-                this.loanRepository.saveAndFlush(loan);
-                return new EntityIdentifier(loanCharge.getId());
-            }
+        
+        final LoanCharge loanCharge = this.loanChargeRepository.findOne(loanChargeId);
+        if (loanCharge == null) {
+        	// FIXME - kw - should be loan charge not found, not charge not found.
+        	throw new ChargeNotFoundException(loanChargeId);
         }
+        
+        if (loanCharge.hasNotLoanIdentifiedBy(loanId)) {
+        	// FIXME - kw - should be loan charge not found, not charge not found.
+        	throw new ChargeNotFoundException(loanChargeId);
+        }
+        
+        loan.removeLoanCharge(loanCharge);
+        this.loanRepository.saveAndFlush(loan);
 
-        throw new ChargeNotFoundException(loanChargeId);
+        return new EntityIdentifier(loanCharge.getId());
     }
 }
