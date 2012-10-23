@@ -171,7 +171,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
                     throw new ChargeNotFoundException(id);
                 }
                 if (!charge.isActive()){
-                    throw new ChargeIsNotActiveException(id);
+                    throw new ChargeIsNotActiveException(id, charge.getName());
                 }
                 if (!loanProductCurrencyCode.equals(charge.getCurrencyCode())){
                     String errorMessage = "Charge and Loan Product must have the same currency.";

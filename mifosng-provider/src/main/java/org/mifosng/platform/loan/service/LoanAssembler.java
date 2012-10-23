@@ -97,18 +97,18 @@ public class LoanAssembler {
 			}
 		}
 
-		MonetaryCurrency currency = loanProduct.getCurrency();
+		final MonetaryCurrency currency = loanProduct.getCurrency();
 		final Integer loanTermFrequency = command.getLoanTermFrequency();
 		final PeriodFrequencyType loanTermFrequencyType = PeriodFrequencyType.fromInt(command.getLoanTermFrequencyType());
 		
-		LoanProductRelatedDetail loanRepaymentScheduleDetail = assembleLoanProductRelatedDetailFrom(command, currency);
+		final LoanProductRelatedDetail loanRepaymentScheduleDetail = assembleLoanProductRelatedDetailFrom(command, currency);
 
 		// associating fund with loan product at creation is optional for now.
-		Fund fund = findFundByIdIfProvided(command.getFundId());
-		LoanTransactionProcessingStrategy loanTransactionProcessingStrategy = findStrategyByIdIfProvided(command.getTransactionProcessingStrategyId());
+		final Fund fund = findFundByIdIfProvided(command.getFundId());
+		final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy = findStrategyByIdIfProvided(command.getTransactionProcessingStrategyId());
 
 		//optionally associate a loan officer to the loan
-		Staff loanOfficer= findLoanOfficerByIdIfProvided(command.getLoanOfficerId());
+		final Staff loanOfficer= findLoanOfficerByIdIfProvided(command.getLoanOfficerId());
 		
 		// optionally, see if charges are associated with loan on creation (through loan product or by being directly added)
 		final Set<LoanCharge> loanCharges = this.loanChargeAssembler.assembleFrom(command.getCharges(), loanProduct.getCharges(), command.getPrincipal());

@@ -7,6 +7,7 @@ import java.util.Set;
 import org.mifosng.platform.api.commands.LoanChargeCommand;
 import org.mifosng.platform.charge.domain.Charge;
 import org.mifosng.platform.charge.domain.ChargeRepository;
+import org.mifosng.platform.exceptions.ChargeIsNotActiveException;
 import org.mifosng.platform.exceptions.ChargeNotFoundException;
 import org.mifosng.platform.loan.domain.LoanCharge;
 import org.mifosng.platform.loan.domain.LoanChargeRepository;
@@ -36,6 +37,10 @@ public class LoanChargeAssembler {
 					final Charge chargeDefinition = this.chargeRepository.findOne(chargeDefinitionId);
 					if (chargeDefinition == null || chargeDefinition.isDeleted()) {
 						throw new ChargeNotFoundException(chargeDefinitionId);
+					}
+					
+					if (!chargeDefinition.isActive()) {
+						throw new ChargeIsNotActiveException(chargeDefinitionId, chargeDefinition.getName());
 					}
 					final LoanCharge loanCharge = LoanCharge.createNewWithoutLoan(chargeDefinition, loanChargeCommand, loanPrincipal);
 					loanCharges.add(loanCharge);	

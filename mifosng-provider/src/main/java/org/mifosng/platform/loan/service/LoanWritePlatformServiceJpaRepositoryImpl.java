@@ -643,11 +643,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             throw new ChargeNotFoundException(command.getChargeId());
         }
 
-        LoanCharge loanCharge = LoanCharge.createNew(loan, chargeDefinition, command);
-
         if (!chargeDefinition.isActive()) {
-            throw new ChargeIsNotActiveException(chargeDefinition.getId());
+            throw new ChargeIsNotActiveException(chargeDefinition.getId(), chargeDefinition.getName());
         }
+        
+        final LoanCharge loanCharge = LoanCharge.createNew(loan, chargeDefinition, command);
 
         if (!loan.hasCurrencyCodeOf(chargeDefinition.getCurrencyCode())){
             String errorMessage = "Charge and Loan must have the same currency.";
@@ -656,6 +656,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         this.loanChargeRepository.saveAndFlush(loanCharge);
 
+        // FIXME - KW - 
         loan.getCharges().add(loanCharge);
         loan.updateTotalChargesDueAtDisbursement();
 
