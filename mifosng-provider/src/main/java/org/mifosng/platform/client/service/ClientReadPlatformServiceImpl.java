@@ -178,14 +178,6 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
                    "from m_client c join m_office o on o.id = c.office_id where c.is_deleted=0 ";
         }
         
-        public String clientLookupByIdentifierSchema() {
-            return "c.id as id, c.firstname as firstname, c.lastname as lastname, " +
-                   "c.office_id as officeId, o.name as officeName " +
-                   "from m_client c, m_office o, m_client_identifier ci " +
-                   "where o.id = c.office_id and c.id=ci.client_id " +
-                   "and ci.document_type_id= ? and ci.document_key like ?";
-        }
-
         @Override
         public ClientLookup mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
             Long id = rs.getLong("id");
@@ -528,42 +520,46 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 	}
 
 	@Override
-	public Boolean existsClientIdentifier(Long clientId, Long identifierTypeId) {
+	public ClientData retrieveClientByIdentifier(
+			final Long identifierTypeId,
+			final String identifierKey) {
 		try {
-			AppUser currentUser = context.authenticatedUser();
-			String hierarchy = currentUser.getOffice().getHierarchy();
-			String hierarchySearchString = hierarchy + "%";
+			final ClientIdentifierMapper mapper = new ClientIdentifierMapper();
 
-			ClientIdentityMapper rm = new ClientIdentityMapper();
+			final String sql = "select " + mapper.clientLookupByIdentifierSchema();
 
-			String sql = "select " + rm.schema() + " and ci.document_type_id=?";
-			/****query for Object throws an exception if exactly one row is not returned***/
-			this.jdbcTemplate.queryForObject(sql, rm, new Object[] { clientId,
-					hierarchySearchString, identifierTypeId });
-			return true;
-		} catch (EmptyResultDataAccessException e) {
-			return false;
-		}
-	}
-
-
-	@Override
-	public ClientLookup getClientByIdentifier(Long identifierTypeId,
-			String identifierKey) {
-		try {
-			ClientLookupMapper mapper = new ClientLookupMapper();
-
-			String sql = "select " + mapper.clientLookupByIdentifierSchema();
-			/****
-			 * query for Object throws an exception if exactly one row is not
-			 * returned
-			 ***/
-			ClientLookup clientLookup = jdbcTemplate.queryForObject(sql,
-					mapper, new Object[] { identifierTypeId, identifierKey });
-			return clientLookup;
+			return jdbcTemplate.queryForObject(sql, mapper, new Object[] { identifierTypeId, identifierKey });
 		} catch (EmptyResultDataAccessException e) {
 			return null;
 		}
 	}
 	
+	private static final class ClientIdentifierMapper implements RowMapper<ClientData> {
+
+		public String clientLookupByIdentifierSchema() {
+			return "c.id as id, c.firstname as firstname, c.lastname as lastname, "
+					+ "c.office_id as officeId, o.name as officeName "
+					+ "from m_client c, m_office o, m_client_identifier ci "
+					+ "where o.id = c.office_id and c.id=ci.client_id "
+					+ "and ci.document_type_id= ? and ci.document_key like ?";
+		}
+
+		@Override
+		public ClientData mapRow(final ResultSet rs,
+				@SuppressWarnings("unused") final int rowNum)
+				throws SQLException {
+			
+			final Long id = rs.getLong("id");
+			String firstname = rs.getString("firstname");
+			if (StringUtils.isBlank(firstname)) {
+				firstname = "";
+			}
+			final String lastname = rs.getString("lastname");
+			
+			final Long officeId = rs.getLong("officeId");
+			final String officeName = rs.getString("officeName");
+			
+			return ClientData.clientIdentifier(id, firstname, lastname, officeId, officeName);
+		}
+	}
 }

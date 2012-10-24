@@ -55,8 +55,10 @@ public class ClientIdentifier extends AbstractAuditableCustom<AppUser, Long> {
 		this.description = StringUtils.defaultIfEmpty(description, null);
 	}
 
-	public void update(final ClientIdentifierCommand command,
+	public void update(
+			final ClientIdentifierCommand command,
 			final CodeValue documentType) {
+		
 		if (command.isDocumentTypeChanged()) {
 			this.documentType = documentType;
 		}

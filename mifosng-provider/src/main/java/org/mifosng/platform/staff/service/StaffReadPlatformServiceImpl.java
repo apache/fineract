@@ -22,7 +22,8 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
 	private final PlatformSecurityContext context;
 
 	@Autowired
-	public StaffReadPlatformServiceImpl(final PlatformSecurityContext context,
+	public StaffReadPlatformServiceImpl(
+			final PlatformSecurityContext context,
 			final TenantAwareRoutingDataSource dataSource) {
 		this.context = context;
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
@@ -37,7 +38,7 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
 		}
 
 		@Override
-		public StaffData mapRow(final ResultSet rs, final int rowNum)
+		public StaffData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
 				throws SQLException {
 
 			Long id = rs.getLong("id");

@@ -26,19 +26,11 @@ public interface ClientReadPlatformService {
 
 	NoteData retrieveClientNote(Long clientId, Long noteId);
 	
-	
-	/**
-	 * @param clientId
-	 * @return
-	 */
 	Collection<ClientIdentifierData> retrieveClientIdentifiers(Long clientId);
 	
 	ClientIdentifierData retrieveClientIdentifier(Long clientId,Long clientIdentifierId); 
 
-	/**
-	 * @return
-	 */
 	ClientIdentifierData retrieveNewClientIdentifierDetails();
-	Boolean existsClientIdentifier(Long clientId,Long identifierTypeId);
-	ClientLookup getClientByIdentifier(Long identifierTypeId, String identifierKey);
+
+	ClientData retrieveClientByIdentifier(Long identifierTypeId, String identifierKey);
 }

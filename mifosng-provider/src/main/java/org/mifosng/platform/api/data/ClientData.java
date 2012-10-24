@@ -6,6 +6,9 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 
+/**
+ * FIXME - KW - make ClientData immutable without needs for getter/setters as is mostly intended for conversion back to JSON.
+ */
 public class ClientData {
 
 	private final Long id;
@@ -19,6 +22,22 @@ public class ClientData {
 	private final LocalDate joinedDate;
 
 	private List<OfficeLookup> allowedOffices = new ArrayList<OfficeLookup>();
+	
+	public static ClientData clientIdentifier(
+			final Long id, 
+			final String firstname,
+			final String lastname, 
+			final Long officeId, 
+			final String officeName) {
+		
+		StringBuilder displayNameBuilder = new StringBuilder(firstname);
+		if (StringUtils.isNotBlank(displayNameBuilder.toString())) {
+			displayNameBuilder.append(' ');
+		}
+		displayNameBuilder.append(lastname);
+		
+		return new ClientData(officeId, officeName, id, firstname, lastname, displayNameBuilder.toString(), null, null);
+	}
 
 	public ClientData(final Long officeId, final String officeName,
 			final Long id, final String firstname, final String lastname,
@@ -99,5 +118,13 @@ public class ClientData {
 
 	public void setAllowedOffices(List<OfficeLookup> allowedOffices) {
 		this.allowedOffices = allowedOffices;
+	}
+
+	public String displayName() {
+		return this.displayName;
+	}
+
+	public String officeName() {
+		return this.officeName;
 	}
 }

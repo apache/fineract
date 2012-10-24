@@ -19,6 +19,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.mifosng.platform.api.commands.ClientIdentifierCommand;
+import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.ClientIdentifierData;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
@@ -26,6 +27,7 @@ import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
 import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
 import org.mifosng.platform.client.service.ClientReadPlatformService;
 import org.mifosng.platform.client.service.ClientWritePlatformService;
+import org.mifosng.platform.exceptions.DuplicateClientIdentifierException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -34,8 +36,6 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope("singleton")
 public class ClientIdentifiersApiResource {
-
-//	private final static Logger logger = LoggerFactory.getLogger(ClientIdentifiersApiResource.class);
 
 	@Autowired
 	private ClientReadPlatformService clientReadPlatformService;
@@ -105,15 +105,22 @@ public class ClientIdentifiersApiResource {
 			@PathParam("clientId") final Long clientId,
 			final String jsonRequestBody) {
 
-		ClientIdentifierCommand command = this.apiDataConversionService
-				.convertJsonToClientIdentifierCommand(null, clientId,
-						jsonRequestBody);
-
-		Long clientIdentifierId = this.clientWritePlatformService
-				.addClientIdentifier(command);
-
-		return Response.ok().entity(new EntityIdentifier(clientIdentifierId))
-				.build();
+		try {
+			final ClientIdentifierCommand command = this.apiDataConversionService.convertJsonToClientIdentifierCommand(null, clientId, jsonRequestBody);
+			
+			Long clientIdentifierId = this.clientWritePlatformService.addClientIdentifier(command);
+			
+			return Response.ok().entity(new EntityIdentifier(clientIdentifierId)).build();
+		}
+		catch (DuplicateClientIdentifierException e) {
+			DuplicateClientIdentifierException rethrowas = e;
+			if (e.getDocumentTypeId() != null) {
+				// need to fetch client info
+				ClientData clientInfo = this.clientReadPlatformService.retrieveClientByIdentifier(e.getDocumentTypeId(), e.getIdentifierKey());
+				rethrowas = new DuplicateClientIdentifierException(clientInfo.displayName(), clientInfo.officeName(), e.getIdentifierType(), e.getIdentifierKey());
+			}
+			throw rethrowas;
+		}
 	}
 
 	@GET
@@ -125,24 +132,18 @@ public class ClientIdentifiersApiResource {
 			@PathParam("identifierId") final Long clientIdentifierId,
 			@Context final UriInfo uriInfo) {
 
-		Set<String> responseParameters = ApiParameterHelper
-				.extractFieldsForResponseIfProvided(uriInfo
-						.getQueryParameters());
+		final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (responseParameters.isEmpty()) {
 			responseParameters.addAll(typicalResponseParameters);
 		}
 
-		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo
-				.getQueryParameters());
-		boolean template = ApiParameterHelper.template(uriInfo
-				.getQueryParameters());
-
+		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+		boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
 		if (template) {
 			responseParameters.add("allowedDocumentTypes");
 		}
 
-		ClientIdentifierData clientIdentifierData = this.clientReadPlatformService
-				.retrieveClientIdentifier(clientId, clientIdentifierId);
+		final ClientIdentifierData clientIdentifierData = this.clientReadPlatformService.retrieveClientIdentifier(clientId, clientIdentifierId);
 
 		return this.apiJsonSerializerService
 				.serializeClientIdentifierDataToJson(prettyPrint,
@@ -151,21 +152,28 @@ public class ClientIdentifiersApiResource {
 
 	@PUT
 	@Path("{identifierId}")
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
 	public Response updateClientIdentifer(
 			@PathParam("clientId") final Long clientId,
 			@PathParam("identifierId") final Long clientIdentifierId,
 			final String jsonRequestBody) {
 
-		ClientIdentifierCommand command = this.apiDataConversionService
-				.convertJsonToClientIdentifierCommand(clientIdentifierId,
-						clientId, jsonRequestBody);
+		try {
+			final ClientIdentifierCommand command = this.apiDataConversionService.convertJsonToClientIdentifierCommand(clientIdentifierId, clientId, jsonRequestBody);
 
-		EntityIdentifier identifier = this.clientWritePlatformService
-				.updateClientIdentifier(command);
+			final EntityIdentifier identifier = this.clientWritePlatformService.updateClientIdentifier(command);
 
-		return Response.ok().entity(identifier).build();
+			return Response.ok().entity(identifier).build();
+		}
+		catch (DuplicateClientIdentifierException e) {
+			DuplicateClientIdentifierException reThrowAs = e;
+			if (e.getDocumentTypeId() != null) {
+				ClientData clientInfo = this.clientReadPlatformService.retrieveClientByIdentifier(e.getDocumentTypeId(), e.getIdentifierKey());
+				reThrowAs = new DuplicateClientIdentifierException(clientInfo.displayName(), clientInfo.officeName(), e.getIdentifierType(), e.getIdentifierKey());
+			}
+			throw reThrowAs;
+		}
 	}
 
 	@DELETE
@@ -173,13 +181,10 @@ public class ClientIdentifiersApiResource {
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	public Response deleteClientIdentifier(
-//			@PathParam("clientId") final Long clientId,
 			@PathParam("identifierId") final Long clientIdentifierId) {
 
-		this.clientWritePlatformService
-				.deleteClientIdentifier(clientIdentifierId);
+		this.clientWritePlatformService.deleteClientIdentifier(clientIdentifierId);
 
 		return Response.ok(new EntityIdentifier(clientIdentifierId)).build();
 	}
-
 }

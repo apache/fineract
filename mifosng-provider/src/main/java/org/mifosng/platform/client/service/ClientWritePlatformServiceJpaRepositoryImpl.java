@@ -31,11 +31,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class ClientWritePlatformServiceJpaRepositoryImpl implements
-		ClientWritePlatformService {
+public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWritePlatformService {
 
-	private final static Logger logger = LoggerFactory
-			.getLogger(ClientWritePlatformServiceJpaRepositoryImpl.class);
+	private final static Logger logger = LoggerFactory.getLogger(ClientWritePlatformServiceJpaRepositoryImpl.class);
 
 	private final PlatformSecurityContext context;
 	private final ClientRepository clientRepository;
@@ -64,7 +62,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements
 	@Override
 	public EntityIdentifier deleteClient(final Long clientId) {
 
-		Client client = this.clientRepository.findOne(clientId);
+		final Client client = this.clientRepository.findOne(clientId);
 		if (client == null || client.isDeleted()) {
 			throw new ClientNotFoundException(clientId);
 		}
@@ -104,12 +102,10 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements
 		try {
 			context.authenticatedUser();
 
-			ClientCommandValidator validator = new ClientCommandValidator(
-					command);
+			final ClientCommandValidator validator = new ClientCommandValidator(command);
 			validator.validateForCreate();
 
-			Office clientOffice = this.officeRepository.findOne(command
-					.getOfficeId());
+			final Office clientOffice = this.officeRepository.findOne(command.getOfficeId());
 			if (clientOffice == null) {
 				throw new OfficeNotFoundException(command.getOfficeId());
 			}
@@ -141,8 +137,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements
 		try {
 			context.authenticatedUser();
 
-			ClientCommandValidator validator = new ClientCommandValidator(
-					command);
+			final ClientCommandValidator validator = new ClientCommandValidator(command);
 			validator.validateForUpdate();
 
 			Office clientOffice = null;
@@ -154,8 +149,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements
 				}
 			}
 
-			Client clientForUpdate = this.clientRepository.findOne(command
-					.getId());
+			final Client clientForUpdate = this.clientRepository.findOne(command.getId());
 			if (clientForUpdate == null || clientForUpdate.isDeleted()) {
 				throw new ClientNotFoundException(command.getId());
 			}
@@ -176,13 +170,12 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements
 
 		context.authenticatedUser();
 
-		Client clientForUpdate = this.clientRepository.findOne(command
-				.getClientId());
+		final Client clientForUpdate = this.clientRepository.findOne(command.getClientId());
 		if (clientForUpdate == null) {
 			throw new ClientNotFoundException(command.getClientId());
 		}
 
-		Note note = Note.clientNote(clientForUpdate, command.getNote());
+		final Note note = Note.clientNote(clientForUpdate, command.getNote());
 
 		this.noteRepository.save(note);
 
@@ -195,12 +188,10 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements
 
 		context.authenticatedUser();
 
-		Note noteForUpdate = this.noteRepository.findOne(command.getId());
+		final Note noteForUpdate = this.noteRepository.findOne(command.getId());
 		if (noteForUpdate == null
-				|| noteForUpdate.isNotAgainstClientWithIdOf(command
-						.getClientId())) {
-			throw new NoteNotFoundException(command.getId(),
-					command.getClientId(), "client");
+				|| noteForUpdate.isNotAgainstClientWithIdOf(command.getClientId())) {
+			throw new NoteNotFoundException(command.getId(),command.getClientId(), "client");
 		}
 
 		noteForUpdate.update(command.getNote());
@@ -210,150 +201,122 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements
 
 	@Transactional
 	@Override
-	public Long addClientIdentifier(
-			ClientIdentifierCommand clientIdentifierCommand) {
-		CodeValue documentType = null;
-		String documentKey = null;
+	public Long addClientIdentifier(final ClientIdentifierCommand command) {
+		
+		String documentTypeLabel = null;
+		Long documentTypeId = null; 
+		final String documentKey = command.getDocumentKey();
+		
 		try {
 			context.authenticatedUser();
 
-			ClientIdentifierCommandValidator validator = new ClientIdentifierCommandValidator(
-					clientIdentifierCommand);
+			final ClientIdentifierCommandValidator validator = new ClientIdentifierCommandValidator(command);
 			validator.validateForCreate();
 
-			Client client = this.clientRepository
-					.findOne(clientIdentifierCommand.getClientId());
-			if (client == null) {
-				throw new ClientNotFoundException(
-						clientIdentifierCommand.getClientId());
+			final Client client = this.clientRepository.findOne(command.getClientId());
+			if (client == null || client.isDeleted()) {
+				throw new ClientNotFoundException(command.getClientId());
 			}
 
-			documentType = this.codeValueRepository
-					.findOne(clientIdentifierCommand.getDocumentTypeId());
+			final CodeValue documentType = this.codeValueRepository.findOne(command.getDocumentTypeId());
 			if (documentType == null) {
-				throw new CodeValueNotFoundException(
-						clientIdentifierCommand.getDocumentTypeId());
+				throw new CodeValueNotFoundException(command.getDocumentTypeId());
 			}
+			documentTypeId = documentType.getId();
+			documentTypeLabel = documentType.getLabel();
 
-			documentKey = clientIdentifierCommand.getDocumentKey();
-			String description = clientIdentifierCommand.getDescription();
-
-			ClientIdentifier clientIdentifier = ClientIdentifier.createNew(
-					client, documentType, documentKey, description);
+			final ClientIdentifier clientIdentifier = ClientIdentifier.createNew(client, documentType, documentKey, command.getDescription());
 
 			this.clientIdentifierRepository.save(clientIdentifier);
 
 			return clientIdentifier.getId();
 		} catch (DataIntegrityViolationException dve) {
-			logger.error(dve.getMessage(), dve);
-			if (dve.getMostSpecificCause().getMessage().contains("unique_client_identifier")) {
-				throw new DuplicateClientIdentifierException(
-						documentType.getLabel());
-			}else if(dve.getMostSpecificCause().getMessage().contains("unique_identifier_key")){
-				handleDuplicateClientIdentifierKeyScenario(documentType.getId(),
-						documentType.getLabel(), documentKey);
-			}
-			throw new PlatformDataIntegrityException(
-					"error.msg.clientIdentifier.unknown.data.integrity.issue",
-					"Unknown data integrity issue with resource.");
+			handleClientIdentifierDataIntegrityViolation(documentTypeLabel, documentTypeId, documentKey, dve);
+			return Long.valueOf(-1);
 		}
 	}
-
 	
 	@Transactional
 	@Override
-	public EntityIdentifier updateClientIdentifier(
-			ClientIdentifierCommand clientIdentifierCommand) {
-		CodeValue documentType = null;
-		Long documentTypeId = null;
-		ClientIdentifier clientIdentifierForUpdate = null;
+	public EntityIdentifier updateClientIdentifier(final ClientIdentifierCommand command) {
+		
+		String documentTypeLabel = null;
+		Long documentTypeId = null; 
+		String documentKey = command.getDocumentKey();
+		
 		try {
 			context.authenticatedUser();
 
-			ClientIdentifierCommandValidator validator = new ClientIdentifierCommandValidator(
-					clientIdentifierCommand);
+			final ClientIdentifierCommandValidator validator = new ClientIdentifierCommandValidator(command);
 			validator.validateForUpdate();
 
-			documentTypeId = clientIdentifierCommand.getDocumentTypeId();
-			if (clientIdentifierCommand.isDocumentTypeChanged()
-					&& documentTypeId != null) {
+			CodeValue documentType = null;
+			documentTypeId = command.getDocumentTypeId();
+			if (command.isDocumentTypeChanged() && documentTypeId != null) {
 				documentType = this.codeValueRepository.findOne(documentTypeId);
 				if (documentType == null) {
-					throw new CodeValueNotFoundException(
-							clientIdentifierCommand.getDocumentTypeId());
+					throw new CodeValueNotFoundException(command.getDocumentTypeId());
 				}
+				documentTypeId = documentType.getId();
+				documentTypeLabel = documentType.getLabel();
 			}
 
-			clientIdentifierForUpdate = this.clientIdentifierRepository
-					.findOne(clientIdentifierCommand.getId());
+			final ClientIdentifier clientIdentifierForUpdate = this.clientIdentifierRepository.findOne(command.getId());
 			if (clientIdentifierForUpdate == null) {
-				throw new ClientIdentifierNotFoundException(
-						clientIdentifierCommand.getId());
+				throw new ClientIdentifierNotFoundException(command.getId());
 			}
 			
-			clientIdentifierForUpdate.update(clientIdentifierCommand,
-					documentType);
+			// TODO - KW - why need to check what changed when integrity violation occurs?
+			if (command.isDocumentTypeChanged() && command.isDocumentKeyChanged()) {
+				documentTypeId = command.getDocumentTypeId();
+				documentKey = command.getDocumentKey();
+			} else if (command.isDocumentTypeChanged() && !command.isDocumentKeyChanged()) {
+				documentTypeId = command.getDocumentTypeId();
+				documentKey = clientIdentifierForUpdate.getDocumentKey();
+			} else if (!command.isDocumentTypeChanged() && command.isDocumentKeyChanged()) {
+				documentTypeId = clientIdentifierForUpdate.getDocumentType().getId();
+				documentKey = clientIdentifierForUpdate.getDocumentKey();
+			}
+			
+			clientIdentifierForUpdate.update(command, documentType);
 
-			this.clientIdentifierRepository
-					.saveAndFlush(clientIdentifierForUpdate);
+			this.clientIdentifierRepository.saveAndFlush(clientIdentifierForUpdate);
 
 			return new EntityIdentifier(clientIdentifierForUpdate.getId());
 		} catch (DataIntegrityViolationException dve) {
-			logger.error(dve.getMessage(), dve);
-			if (dve.getMostSpecificCause().getMessage().contains("unique_client_identifier")) {
-				throw new DuplicateClientIdentifierException(
-						documentType.getLabel());
-			}else if(dve.getMostSpecificCause().getMessage().contains("unique_identifier_key")){
-				/*** Throw error with details of existing customer with same identifier ***/
-				if (clientIdentifierCommand.isDocumentTypeChanged()
-						&& clientIdentifierCommand.isDocumentKeyChanged()) {
-					handleDuplicateClientIdentifierKeyScenario(
-							clientIdentifierCommand.getDocumentTypeId(),
-							documentType.getLabel(),
-							clientIdentifierCommand.getDocumentKey());
-				} else if (clientIdentifierCommand.isDocumentTypeChanged()
-						&& !clientIdentifierCommand.isDocumentKeyChanged()) {
-					handleDuplicateClientIdentifierKeyScenario(
-							clientIdentifierCommand.getDocumentTypeId(),
-							documentType.getLabel(),
-							clientIdentifierForUpdate.getDocumentKey());
-				} else if (!clientIdentifierCommand.isDocumentTypeChanged()
-						&& clientIdentifierCommand.isDocumentKeyChanged()) {
-					handleDuplicateClientIdentifierKeyScenario(clientIdentifierForUpdate 
-							.getDocumentType().getId(), documentType.getLabel(),
-							clientIdentifierCommand.getDocumentKey());
-				}
-			}
-			throw new PlatformDataIntegrityException(
-					"error.msg.clientIdentifier.unknown.data.integrity.issue",
-					"Unknown data integrity issue with resource.");
+			handleClientIdentifierDataIntegrityViolation(documentTypeLabel, documentTypeId, documentKey, dve);
+			return new EntityIdentifier(Long.valueOf(-1));
 		}
+	}
+
+	private void handleClientIdentifierDataIntegrityViolation(
+			final String documentTypeLabel, 
+			final Long documentTypeId, 
+			final String documentKey,
+			final DataIntegrityViolationException dve) {
+		
+		if (dve.getMostSpecificCause().getMessage().contains("unique_client_identifier")) {
+			throw new DuplicateClientIdentifierException(documentTypeLabel);
+		} else if (dve.getMostSpecificCause().getMessage().contains("unique_identifier_key")) {
+			throw new DuplicateClientIdentifierException(documentTypeId, documentTypeLabel, documentKey);
+		}
+		
+		// only log as error if unexpected data integrity violation.
+		logger.error(dve.getMessage(), dve);
+		throw new PlatformDataIntegrityException(
+				"error.msg.clientIdentifier.unknown.data.integrity.issue",
+				"Unknown data integrity issue with resource.");
 	}
 
 	@Transactional
 	@Override
-	public EntityIdentifier deleteClientIdentifier(Long clientIdentifierId) {
-		ClientIdentifier clientIdentifier = this.clientIdentifierRepository
-				.findOne(clientIdentifierId);
+	public EntityIdentifier deleteClientIdentifier(final Long clientIdentifierId) {
+		final ClientIdentifier clientIdentifier = this.clientIdentifierRepository.findOne(clientIdentifierId);
 		if (clientIdentifier == null) {
 			throw new ClientIdentifierNotFoundException(clientIdentifierId);
 		}
 		this.clientIdentifierRepository.delete(clientIdentifier);
 
 		return new EntityIdentifier(clientIdentifierId);
-	}
-	
-	/**
-	 * @param documentTypeId
-	 * @param documentTypeLabel
-	 * @param documentKey
-	 */
-	private void handleDuplicateClientIdentifierKeyScenario(Long documentTypeId,
-			String documentTypeLabel, String documentKey) {
-		Client client = this.clientIdentifierRepository
-				.getClientIdentifierByDocumentTypeAndKey(documentTypeId, documentKey).getClient();
-		throw new DuplicateClientIdentifierException(
-				client.getDisplayName(), client.getOffice().getName(),
-				documentTypeLabel, documentKey);
 	}
 }

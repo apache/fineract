@@ -65,6 +65,4 @@ public class ClientLookup {
 	public String getOfficeName() {
 		return officeName;
 	}
-    
-    
 }
