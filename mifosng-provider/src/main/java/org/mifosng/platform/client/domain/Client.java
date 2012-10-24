@@ -31,11 +31,9 @@ public class Client extends AbstractAuditableCustom<AppUser, Long> {
 	@Column(name = "lastname", length=50)
     private String       lastName;
     
-    @SuppressWarnings("unused")
    	@Column(name = "display_name", length=50)
     private String       displayName;
 
-    @SuppressWarnings("unused")
 	@Column(name = "joining_date")
     @Temporal(TemporalType.DATE)
     private Date         joiningDate;
@@ -157,4 +155,58 @@ public class Client extends AbstractAuditableCustom<AppUser, Long> {
 	public boolean isOfficeIdentifiedBy(final Long officeId) {
 		return this.office.identifiedBy(officeId);
 	}
+
+	public Office getOffice() {
+		return office;
+	}
+
+	public void setOffice(Office office) {
+		this.office = office;
+	}
+
+	public String getFirstName() {
+		return firstName;
+	}
+
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
+
+	public String getLastName() {
+		return lastName;
+	}
+
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
+
+	public String getDisplayName() {
+		return displayName;
+	}
+
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
+	}
+
+	public Date getJoiningDate() {
+		return joiningDate;
+	}
+
+	public void setJoiningDate(Date joiningDate) {
+		this.joiningDate = joiningDate;
+	}
+
+	public String getExternalId() {
+		return externalId;
+	}
+
+	public void setExternalId(String externalId) {
+		this.externalId = externalId;
+	}
+
+	public void setDeleted(boolean deleted) {
+		this.deleted = deleted;
+	}
+	
+	
 }

@@ -5,6 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosng.platform.api.commands.ClientIdentifierCommand;
@@ -13,7 +14,9 @@ import org.mifosng.platform.organisation.domain.CodeValue;
 import org.mifosng.platform.user.domain.AppUser;
 
 @Entity
-@Table(name = "m_client_identifier")
+@Table(name = "m_client_identifier", uniqueConstraints = {
+		@UniqueConstraint(columnNames = { "document_type_id", "document_key" }, name = "unique_identifier_key"),
+		@UniqueConstraint(columnNames = { "client_id", "document_type_id" }, name = "unique_client_identifier") })
 public class ClientIdentifier extends AbstractAuditableCustom<AppUser, Long> {
 
 	@ManyToOne

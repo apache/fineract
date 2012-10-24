@@ -4,7 +4,6 @@ import org.apache.commons.lang.StringUtils;
 import org.mifosng.platform.api.commands.ClientCommand;
 import org.mifosng.platform.api.commands.ClientIdentifierCommand;
 import org.mifosng.platform.api.commands.NoteCommand;
-import org.mifosng.platform.api.data.ClientLookup;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.client.domain.ClientIdentifier;
@@ -44,7 +43,6 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements
 	private final OfficeRepository officeRepository;
 	private final NoteRepository noteRepository;
 	private final CodeValueRepository codeValueRepository;
-	private final ClientReadPlatformService clientReadPlatformService;
 
 	@Autowired
 	public ClientWritePlatformServiceJpaRepositoryImpl(
@@ -53,15 +51,13 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements
 			final ClientIdentifierRepository clientIdentifierRepository,
 			final OfficeRepository officeRepository,
 			NoteRepository noteRepository,
-			final CodeValueRepository codeValueRepository,
-			final ClientReadPlatformService clientReadPlatformService) {
+			final CodeValueRepository codeValueRepository) {
 		this.context = context;
 		this.clientRepository = clientRepository;
 		this.clientIdentifierRepository = clientIdentifierRepository;
 		this.officeRepository = officeRepository;
 		this.noteRepository = noteRepository;
 		this.codeValueRepository = codeValueRepository;
-		this.clientReadPlatformService = clientReadPlatformService;
 	}
 
 	@Transactional
@@ -216,6 +212,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements
 	@Override
 	public Long addClientIdentifier(
 			ClientIdentifierCommand clientIdentifierCommand) {
+		CodeValue documentType = null;
+		String documentKey = null;
 		try {
 			context.authenticatedUser();
 
@@ -230,31 +228,15 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements
 						clientIdentifierCommand.getClientId());
 			}
 
-			CodeValue documentType = this.codeValueRepository
+			documentType = this.codeValueRepository
 					.findOne(clientIdentifierCommand.getDocumentTypeId());
 			if (documentType == null) {
 				throw new CodeValueNotFoundException(
 						clientIdentifierCommand.getDocumentTypeId());
 			}
 
-			String documentKey = clientIdentifierCommand.getDocumentKey();
+			documentKey = clientIdentifierCommand.getDocumentKey();
 			String description = clientIdentifierCommand.getDescription();
-
-			/**
-			 * check if a client identifier of the given type already exists for
-			 * the client
-			 **/
-			if (clientReadPlatformService.existsClientIdentifier(
-					clientIdentifierCommand.getClientId(),
-					clientIdentifierCommand.getDocumentTypeId())) {
-				throw new DuplicateClientIdentifierException(
-						documentType.getLabel());
-			}
-
-			/*** Check if any Client has the same identifier ***/
-			checkIdentifierUniqueness(documentType.getId(),
-					documentType.getLabel(), documentKey,
-					clientIdentifierCommand.getClientId());
 
 			ClientIdentifier clientIdentifier = ClientIdentifier.createNew(
 					client, documentType, documentKey, description);
@@ -264,6 +246,13 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements
 			return clientIdentifier.getId();
 		} catch (DataIntegrityViolationException dve) {
 			logger.error(dve.getMessage(), dve);
+			if (dve.getMostSpecificCause().getMessage().contains("unique_client_identifier")) {
+				throw new DuplicateClientIdentifierException(
+						documentType.getLabel());
+			}else if(dve.getMostSpecificCause().getMessage().contains("unique_identifier_key")){
+				handleDuplicateClientIdentifierKeyScenario(documentType.getId(),
+						documentType.getLabel(), documentKey);
+			}
 			throw new PlatformDataIntegrityException(
 					"error.msg.clientIdentifier.unknown.data.integrity.issue",
 					"Unknown data integrity issue with resource.");
@@ -275,7 +264,9 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements
 	@Override
 	public EntityIdentifier updateClientIdentifier(
 			ClientIdentifierCommand clientIdentifierCommand) {
-
+		CodeValue documentType = null;
+		Long documentTypeId = null;
+		ClientIdentifier clientIdentifierForUpdate = null;
 		try {
 			context.authenticatedUser();
 
@@ -283,8 +274,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements
 					clientIdentifierCommand);
 			validator.validateForUpdate();
 
-			CodeValue documentType = null;
-			Long documentTypeId = clientIdentifierCommand.getDocumentTypeId();
+			documentTypeId = clientIdentifierCommand.getDocumentTypeId();
 			if (clientIdentifierCommand.isDocumentTypeChanged()
 					&& documentTypeId != null) {
 				documentType = this.codeValueRepository.findOne(documentTypeId);
@@ -294,49 +284,11 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements
 				}
 			}
 
-			ClientIdentifier clientIdentifierForUpdate = this.clientIdentifierRepository
+			clientIdentifierForUpdate = this.clientIdentifierRepository
 					.findOne(clientIdentifierCommand.getId());
 			if (clientIdentifierForUpdate == null) {
 				throw new ClientIdentifierNotFoundException(
 						clientIdentifierCommand.getId());
-			}
-			
-			/**
-			 * check if a client identifier of the given type already exists for
-			 * the client
-			 **/
-			if (clientIdentifierForUpdate.getDocumentType().getId() != clientIdentifierCommand
-					.getDocumentTypeId()) {
-				if (clientReadPlatformService.existsClientIdentifier(
-						clientIdentifierCommand.getClientId(),
-						clientIdentifierCommand.getDocumentTypeId())) {
-					throw new DuplicateClientIdentifierException(
-							documentType.getLabel());
-				}
-			}
-
-			/*** Check if any Client has the same identifier ***/
-		
-			if (clientIdentifierCommand.isDocumentTypeChanged()
-					&& clientIdentifierCommand.isDocumentKeyChanged()) {
-				checkIdentifierUniqueness(
-						clientIdentifierCommand.getDocumentTypeId(),
-						documentType.getLabel(),
-						clientIdentifierCommand.getDocumentKey(),
-						clientIdentifierForUpdate.getClient().getId());
-			} else if (clientIdentifierCommand.isDocumentTypeChanged()
-					&& !clientIdentifierCommand.isDocumentKeyChanged()) {
-				checkIdentifierUniqueness(
-						clientIdentifierCommand.getDocumentTypeId(),
-						documentType.getLabel(),
-						clientIdentifierForUpdate.getDocumentKey(),
-						clientIdentifierForUpdate.getClient().getId());
-			} else if (!clientIdentifierCommand.isDocumentTypeChanged()
-					&& clientIdentifierCommand.isDocumentKeyChanged()) {
-				checkIdentifierUniqueness(clientIdentifierForUpdate 
-						.getDocumentType().getId(), documentType.getLabel(),
-						clientIdentifierCommand.getDocumentKey(),
-						clientIdentifierForUpdate.getClient().getId());
 			}
 			
 			clientIdentifierForUpdate.update(clientIdentifierCommand,
@@ -348,6 +300,30 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements
 			return new EntityIdentifier(clientIdentifierForUpdate.getId());
 		} catch (DataIntegrityViolationException dve) {
 			logger.error(dve.getMessage(), dve);
+			if (dve.getMostSpecificCause().getMessage().contains("unique_client_identifier")) {
+				throw new DuplicateClientIdentifierException(
+						documentType.getLabel());
+			}else if(dve.getMostSpecificCause().getMessage().contains("unique_identifier_key")){
+				/*** Throw error with details of existing customer with same identifier ***/
+				if (clientIdentifierCommand.isDocumentTypeChanged()
+						&& clientIdentifierCommand.isDocumentKeyChanged()) {
+					handleDuplicateClientIdentifierKeyScenario(
+							clientIdentifierCommand.getDocumentTypeId(),
+							documentType.getLabel(),
+							clientIdentifierCommand.getDocumentKey());
+				} else if (clientIdentifierCommand.isDocumentTypeChanged()
+						&& !clientIdentifierCommand.isDocumentKeyChanged()) {
+					handleDuplicateClientIdentifierKeyScenario(
+							clientIdentifierCommand.getDocumentTypeId(),
+							documentType.getLabel(),
+							clientIdentifierForUpdate.getDocumentKey());
+				} else if (!clientIdentifierCommand.isDocumentTypeChanged()
+						&& clientIdentifierCommand.isDocumentKeyChanged()) {
+					handleDuplicateClientIdentifierKeyScenario(clientIdentifierForUpdate 
+							.getDocumentType().getId(), documentType.getLabel(),
+							clientIdentifierCommand.getDocumentKey());
+				}
+			}
 			throw new PlatformDataIntegrityException(
 					"error.msg.clientIdentifier.unknown.data.integrity.issue",
 					"Unknown data integrity issue with resource.");
@@ -372,13 +348,12 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements
 	 * @param documentTypeLabel
 	 * @param documentKey
 	 */
-	private void checkIdentifierUniqueness(Long documentTypeId,
-			String documentTypeLabel, String documentKey, Long callingClientId) {
-		ClientLookup clientLookup = clientReadPlatformService
-				.getClientByIdentifier(documentTypeId, documentKey);
-		if (clientLookup != null && clientLookup.getId()!=callingClientId) {
-			throw new DuplicateClientIdentifierException(clientLookup.getDisplayName(),
-					clientLookup.getOfficeName(), documentTypeLabel, documentKey);
-		}
+	private void handleDuplicateClientIdentifierKeyScenario(Long documentTypeId,
+			String documentTypeLabel, String documentKey) {
+		Client client = this.clientIdentifierRepository
+				.getClientIdentifierByDocumentTypeAndKey(documentTypeId, documentKey).getClient();
+		throw new DuplicateClientIdentifierException(
+				client.getDisplayName(), client.getOffice().getName(),
+				documentTypeLabel, documentKey);
 	}
 }
