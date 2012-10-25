@@ -13,6 +13,7 @@ import org.mifosng.platform.api.data.ChargeData;
 import org.mifosng.platform.api.data.ClientAccountSummaryCollectionData;
 import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.ClientIdentifierData;
+import org.mifosng.platform.api.data.CodeData;
 import org.mifosng.platform.api.data.ConfigurationData;
 import org.mifosng.platform.api.data.DatatableData;
 import org.mifosng.platform.api.data.DepositAccountData;
@@ -194,6 +195,9 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 
     private static final Set<String> LOAN_CHARGES_DATA_PARAMETERS = new HashSet<String>(
             Arrays.asList("chargeOptions"));
+    
+	private static final Set<String> CODE_DATA_PARAMETERS = new HashSet<String>(
+			Arrays.asList("id", "codename"));
 
 	private final GoogleGsonSerializerHelper helper;
 
@@ -662,4 +666,24 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 						DOCUMENT_DATA_PARAMETERS, prettyPrint, responseParameters);
 		return helper.serializedJsonFrom(gsonDeserializer, documentData);
 	}
+
+	@Override
+	public String serializeCodeDataToJson(boolean prettyPrint,
+			Set<String> responseParameters, Collection<CodeData> codes) {
+		final Gson gsonDeserializer = helper
+				.createGsonBuilderWithParameterExclusionSerializationStrategy(
+						CODE_DATA_PARAMETERS, prettyPrint, responseParameters);
+		return helper.serializedJsonFrom(gsonDeserializer,
+				codes.toArray(new CodeData[codes.size()]));
+	}
+
+	@Override
+	public String serializeCodeDataToJson(boolean prettyPrint,
+			Set<String> responseParameters, CodeData code) {
+		final Gson gsonDeserializer = helper
+				.createGsonBuilderWithParameterExclusionSerializationStrategy(
+						CODE_DATA_PARAMETERS, prettyPrint, responseParameters);
+		return helper.serializedJsonFrom(gsonDeserializer, code);
+	}
+	
 }

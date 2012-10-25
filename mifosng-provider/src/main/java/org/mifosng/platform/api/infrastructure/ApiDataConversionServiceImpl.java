@@ -22,6 +22,7 @@ import org.mifosng.platform.api.commands.BranchMoneyTransferCommand;
 import org.mifosng.platform.api.commands.ChargeCommand;
 import org.mifosng.platform.api.commands.ClientCommand;
 import org.mifosng.platform.api.commands.ClientIdentifierCommand;
+import org.mifosng.platform.api.commands.CodeCommand;
 import org.mifosng.platform.api.commands.DepositAccountCommand;
 import org.mifosng.platform.api.commands.DepositAccountWithdrawInterestCommand;
 import org.mifosng.platform.api.commands.DepositAccountWithdrawalCommand;
@@ -1476,5 +1477,33 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	    
 	    return new ClientIdentifierCommand(modifiedParameters,resourceIdentifier,clientId,documentTypeId,documentKey,documentDescription);
 	}
+	
+	@Override
+	public CodeCommand convertJsonToCodeCommand(Long resourceIdentifier,String json) {
+		// TODO Auto-generated method stub
+		if (StringUtils.isBlank(json)) {
+			throw new InvalidJsonException();
+		}
+		
+		Type typeOfMap = new TypeToken<Map<String, String>>(){}.getType();
+	    Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
+	    
+	    
+	    Set<String> supportedParams = new HashSet<String>(
+	    		Arrays.asList("name")
+	    );
+	    
+	    checkForUnsupportedParameters(requestMap, supportedParams);
+	    
+	    Set<String> modifiedParameters = new HashSet<String>();
+	    
+	    String name = extractStringParameter("name", requestMap, modifiedParameters);
+	    
+		return new CodeCommand(modifiedParameters, resourceIdentifier, name);
+
+		
+	}
+
+	
 
 }
