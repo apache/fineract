@@ -34,8 +34,6 @@ import org.mifosng.platform.api.data.RoleData;
 import org.mifosng.platform.api.data.SavingProductData;
 import org.mifosng.platform.api.data.StaffData;
 
-import com.google.gson.Gson;
-
 public interface ApiJsonSerializerService {
 
 	String serializeAuthenticatedUserDataToJson(boolean prettyPrint, AuthenticatedUserData authenticatedUserData);

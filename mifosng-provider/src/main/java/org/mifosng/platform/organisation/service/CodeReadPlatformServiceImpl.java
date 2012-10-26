@@ -5,7 +5,6 @@ import java.sql.SQLException;
 import java.util.Collection;
 
 import org.mifosng.platform.api.data.CodeData;
-import org.mifosng.platform.api.data.FundData;
 import org.mifosng.platform.exceptions.FundNotFoundException;
 import org.mifosng.platform.infrastructure.TenantAwareRoutingDataSource;
 import org.mifosng.platform.security.PlatformSecurityContext;
@@ -34,7 +33,7 @@ public class CodeReadPlatformServiceImpl implements CodeReadPlatformService {
 		}
 
 		@Override
-		public CodeData mapRow(final ResultSet rs, final int rowNum)
+		public CodeData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
 				throws SQLException {
 
 			Long id = rs.getLong("id");
