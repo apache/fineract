@@ -1,9 +1,11 @@
-
+ 
 /* table used as an additional table for GK risk analysis 
-Also putting in default database as well for demos */
+Also putting in default database as well for demos but not used for other tenants*/
 
+DROP TABLE IF EXISTS `risk_analysis`;
 CREATE TABLE `risk_analysis` (
   `client_id` bigint(20) NOT NULL,
+  `proposed_loan_amount` decimal(19,6) DEFAULT NULL,
   `assets_cash` decimal(19,6) DEFAULT NULL,
   `assets_bank_accounts` decimal(19,6) DEFAULT NULL,
   `assets_accounts_receivable` decimal(19,6) DEFAULT NULL,
