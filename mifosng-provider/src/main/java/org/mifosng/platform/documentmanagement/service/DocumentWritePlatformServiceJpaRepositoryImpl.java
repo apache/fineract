@@ -6,19 +6,15 @@ import java.io.InputStream;
 
 import org.mifosng.platform.api.commands.DocumentCommand;
 import org.mifosng.platform.api.data.EntityIdentifier;
-import org.mifosng.platform.client.domain.ClientRepository;
 import org.mifosng.platform.common.ApplicationConstants;
 import org.mifosng.platform.common.FileUtils;
 import org.mifosng.platform.documentmanagement.domain.Document;
 import org.mifosng.platform.documentmanagement.domain.DocumentRepository;
-import org.mifosng.platform.exceptions.DocumentNotFoundException;
 import org.mifosng.platform.exceptions.DocumentManagementException;
+import org.mifosng.platform.exceptions.DocumentNotFoundException;
 import org.mifosng.platform.exceptions.InvalidEntityTypeForDocumentManagementException;
 import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
-import org.mifosng.platform.loan.domain.LoanRepository;
-import org.mifosng.platform.organisation.domain.OfficeRepository;
 import org.mifosng.platform.security.PlatformSecurityContext;
-import org.mifosng.platform.staff.domain.StaffRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,41 +26,40 @@ import org.springframework.transaction.annotation.Transactional;
 public class DocumentWritePlatformServiceJpaRepositoryImpl implements
 		DocumentWritePlatformService {
 
-	private final static Logger logger = LoggerFactory
-			.getLogger(DocumentWritePlatformServiceJpaRepositoryImpl.class);
+	private final static Logger logger = LoggerFactory.getLogger(DocumentWritePlatformServiceJpaRepositoryImpl.class);
 
 	// TODO: Use these services to ensure that the appropriate entities exist,
 	// are active, check data scope for user etc
 	private final PlatformSecurityContext context;
-	private final ClientRepository clientRepository;
-	private final OfficeRepository officeRepository;
-	private final LoanRepository loanRepository;
-	private final StaffRepository staffRepository;
+//	private final ClientRepository clientRepository;
+//	private final OfficeRepository officeRepository;
+//	private final LoanRepository loanRepository;
+//	private final StaffRepository staffRepository;
 	private final DocumentRepository documentRepository;
 
 	@Autowired
 	public DocumentWritePlatformServiceJpaRepositoryImpl(
 			final PlatformSecurityContext context,
-			final ClientRepository clientRepository,
-			final DocumentRepository documentRepository,
-			final OfficeRepository officeRepository,
-			final LoanRepository loanRepository,
-			final StaffRepository staffRepository) {
+//			final ClientRepository clientRepository,
+//			final OfficeRepository officeRepository,
+//			final LoanRepository loanRepository,
+//			final StaffRepository staffRepository,
+			final DocumentRepository documentRepository) {
 		this.context = context;
-		this.clientRepository = clientRepository;
+//		this.clientRepository = clientRepository;
+//		this.officeRepository = officeRepository;
+//		this.loanRepository = loanRepository;
+//		this.staffRepository = staffRepository;
 		this.documentRepository = documentRepository;
-		this.officeRepository = officeRepository;
-		this.loanRepository = loanRepository;
-		this.staffRepository = staffRepository;
 	}
 
 	@Transactional
 	@Override
-	public Long createDocument(DocumentCommand documentCommand,
-			InputStream inputStream) {
+	public Long createDocument(final DocumentCommand documentCommand, final InputStream inputStream) {
 		try {
-			DocumentCommandValidator validator = new DocumentCommandValidator(
-					documentCommand);
+			context.authenticatedUser();
+			
+			DocumentCommandValidator validator = new DocumentCommandValidator(documentCommand);
 
 			validateParentEntityType(documentCommand);
 
@@ -105,12 +100,12 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements
 
 	@Transactional
 	@Override
-	public EntityIdentifier updateDocument(DocumentCommand documentCommand,
-			InputStream inputStream) {
+	public EntityIdentifier updateDocument(final DocumentCommand documentCommand, final InputStream inputStream) {
 		try {
+			context.authenticatedUser();
+			
 			String oldLocation = null;
-			DocumentCommandValidator validator = new DocumentCommandValidator(
-					documentCommand);
+			DocumentCommandValidator validator = new DocumentCommandValidator(documentCommand);
 			validator.validateForUpdate();
 			// TODO check if entity id is valid and within data scope for the
 			// user
@@ -164,11 +159,12 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements
 
 	@Transactional
 	@Override
-	public EntityIdentifier deleteDocument(DocumentCommand documentCommand) {
+	public EntityIdentifier deleteDocument(final DocumentCommand documentCommand) {
+		context.authenticatedUser();
+		
 		validateParentEntityType(documentCommand);
 		// TODO: Check document is present under this entity Id
-		Document document = this.documentRepository.findOne(documentCommand
-				.getId());
+		Document document = this.documentRepository.findOne(documentCommand.getId());
 		if (document == null) {
 			throw new DocumentNotFoundException(
 					documentCommand.getParentEntityType(),
