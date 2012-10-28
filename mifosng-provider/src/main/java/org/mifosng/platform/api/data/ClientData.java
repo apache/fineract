@@ -20,6 +20,8 @@ public class ClientData {
 	private final String officeName;
 	private final String externalId;
 	private final LocalDate joinedDate;
+	private final String imageKey;
+	private boolean imagePresent;
 
 	private List<OfficeLookup> allowedOffices = new ArrayList<OfficeLookup>();
 	
@@ -36,13 +38,14 @@ public class ClientData {
 		}
 		displayNameBuilder.append(lastname);
 		
-		return new ClientData(officeId, officeName, id, firstname, lastname, displayNameBuilder.toString(), null, null);
+		return new ClientData(officeId, officeName, id, firstname, lastname, displayNameBuilder.toString(), null, null, null);
 	}
 
 	public ClientData(final Long officeId, final String officeName,
 			final Long id, final String firstname, final String lastname,
 			final String displayName, final String externalId,
-			final LocalDate joinedDate) {
+			final LocalDate joinedDate,
+			final String imageKey) {
 		this.officeId = officeId;
 		this.officeName = officeName;
 		this.id = id;
@@ -60,6 +63,13 @@ public class ClientData {
 
 		this.externalId = externalId;
 		this.joinedDate = joinedDate;
+		this.imageKey = imageKey;
+		if (imageKey == null) {
+			imagePresent = false;
+		}else{
+			imagePresent = true;
+		}
+		
 	}
 
 	public ClientData(final Long officeId, final LocalDate joinedDate,
@@ -74,6 +84,7 @@ public class ClientData {
 		this.externalId = null;
 		this.joinedDate = joinedDate;
 		this.allowedOffices = offices;
+		this.imageKey = null;
 	}
 
 	public Long getId() {
@@ -127,4 +138,20 @@ public class ClientData {
 	public String officeName() {
 		return this.officeName;
 	}
+
+	public String getImageKey() {
+		return imageKey;
+	}
+
+	public boolean isImagePresent() {
+		return imagePresent;
+	}
+
+	public void setImagePresent(boolean imagePresent) {
+		this.imagePresent = imagePresent;
+	}
+	
+	
+	
+	
 }

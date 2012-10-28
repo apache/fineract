@@ -1,5 +1,7 @@
 package org.mifosng.platform.client.service;
 
+import java.io.InputStream;
+
 import org.mifosng.platform.api.commands.ClientCommand;
 import org.mifosng.platform.api.commands.ClientIdentifierCommand;
 import org.mifosng.platform.api.commands.NoteCommand;
@@ -13,6 +15,12 @@ public interface ClientWritePlatformService {
 	
 	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE')")
 	EntityIdentifier updateClientDetails(ClientCommand command);
+	
+	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE')")
+	EntityIdentifier saveOrUpdateClientImage(Long clientId, String imageName, InputStream inputStream);
+	
+	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE')")
+	EntityIdentifier deleteClientImage(Long clientId);
 
 	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE')")
 	EntityIdentifier addClientNote(NoteCommand command);

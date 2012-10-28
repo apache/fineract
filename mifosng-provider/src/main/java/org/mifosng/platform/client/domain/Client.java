@@ -43,6 +43,9 @@ public class Client extends AbstractAuditableCustom<AppUser, Long> {
 
     @Column(name = "is_deleted", nullable=false)
 	private boolean deleted = false;
+    
+    @Column(name = "image_key", length=500)
+    private String imageKey;
 
 	public static Client newClient(Office clientOffice, String firstname, String lastname, LocalDate joiningDate, String externalId) {
 		return new Client(clientOffice, firstname, lastname, joiningDate, externalId);
@@ -207,6 +210,16 @@ public class Client extends AbstractAuditableCustom<AppUser, Long> {
 	public void setDeleted(boolean deleted) {
 		this.deleted = deleted;
 	}
+
+	public String getImageKey() {
+		return imageKey;
+	}
+
+	public void setImageKey(String imageKey) {
+		this.imageKey = imageKey;
+	}
+	
+	
 	
 	
 }

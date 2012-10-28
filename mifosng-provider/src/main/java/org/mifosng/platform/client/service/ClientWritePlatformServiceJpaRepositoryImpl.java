@@ -1,5 +1,9 @@
 package org.mifosng.platform.client.service;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+
 import org.apache.commons.lang.StringUtils;
 import org.mifosng.platform.api.commands.ClientCommand;
 import org.mifosng.platform.api.commands.ClientIdentifierCommand;
@@ -11,9 +15,12 @@ import org.mifosng.platform.client.domain.ClientIdentifierRepository;
 import org.mifosng.platform.client.domain.ClientRepository;
 import org.mifosng.platform.client.domain.Note;
 import org.mifosng.platform.client.domain.NoteRepository;
+import org.mifosng.platform.common.ApplicationConstants;
+import org.mifosng.platform.common.FileUtils;
 import org.mifosng.platform.exceptions.ClientIdentifierNotFoundException;
 import org.mifosng.platform.exceptions.ClientNotFoundException;
 import org.mifosng.platform.exceptions.CodeValueNotFoundException;
+import org.mifosng.platform.exceptions.DocumentManagementException;
 import org.mifosng.platform.exceptions.DuplicateClientIdentifierException;
 import org.mifosng.platform.exceptions.NoteNotFoundException;
 import org.mifosng.platform.exceptions.OfficeNotFoundException;
@@ -319,4 +326,65 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
 		return new EntityIdentifier(clientIdentifierId);
 	}
+
+	@Transactional
+	@Override
+	public EntityIdentifier saveOrUpdateClientImage(Long clientId,
+			String imageName, InputStream inputStream) {
+		try {
+			final Client client = this.clientRepository.findOne(clientId);
+			if (client == null || client.isDeleted()) {
+				throw new ClientNotFoundException(clientId);
+			}
+
+			String imageUploadLocation = FileUtils
+					.generateImageParentDirectory(
+							ApplicationConstants.IMAGE_MANAGEMENT_ENTITY.CLIENTS,
+							clientId);
+			// delete previous image from the file system
+			if (StringUtils.isNotEmpty(client.getImageKey())) {
+				FileUtils.deleteImage(
+						ApplicationConstants.IMAGE_MANAGEMENT_ENTITY.CLIENTS,
+						clientId, client.getImageKey());
+			}
+
+			/** Recursively create the directory if it does not exist **/
+			if (!new File(imageUploadLocation).isDirectory()) {
+				new File(imageUploadLocation).mkdirs();
+			}
+
+			String imageLocation = FileUtils.saveToFileSystem(inputStream,
+					imageUploadLocation, imageName);
+
+			
+			client.setImageKey(imageLocation);
+			this.clientRepository.save(client);
+
+			return new EntityIdentifier(clientId);
+		} catch (IOException ioe) {
+			logger.error(ioe.getMessage(), ioe);
+			throw new DocumentManagementException(imageName);
+		}
+	}
+
+	@Transactional
+	@Override
+	public EntityIdentifier deleteClientImage(Long clientId) {
+		final Client client = this.clientRepository.findOne(clientId);
+		if (client == null || client.isDeleted()) {
+			throw new ClientNotFoundException(clientId);
+		}
+		// delete image from the file system
+		if (StringUtils.isNotEmpty(client.getImageKey())) {
+			FileUtils.deleteImage(
+					ApplicationConstants.IMAGE_MANAGEMENT_ENTITY.CLIENTS,
+					clientId, client.getImageKey());
+		}
+		client.setImageKey(null);
+		this.clientRepository.save(client);
+		return new EntityIdentifier(clientId);
+	}
+	
+	
+	
 }

@@ -143,7 +143,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
 		public String clientSchema() {
 			return "c.office_id as officeId, o.name as officeName, c.id as id, c.firstname as firstname, c.lastname as lastname, c.display_name as displayName, " +
-				   "c.external_id as externalId, c.joining_date as joinedDate from m_client c join m_office o on o.id = c.office_id " +
+				   "c.external_id as externalId, c.joining_date as joinedDate, c.image_key as imagekey from m_client c join m_office o on o.id = c.office_id " +
 					" where o.hierarchy like ? and c.is_deleted=0 ";
 		}
 
@@ -161,11 +161,12 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 			String displayName = rs.getString("displayName");
 			String externalId = rs.getString("externalId");
 			LocalDate joinedDate = JdbcSupport.getLocalDate(rs, "joinedDate");
+			String imageKey = rs.getString("imageKey");
 
 			String officeName = rs.getString("officeName");
 
 			return new ClientData(officeId, officeName, id, firstname,
-					lastname, displayName, externalId, joinedDate);
+					lastname, displayName, externalId, joinedDate,imageKey);
 		}
 
 	}

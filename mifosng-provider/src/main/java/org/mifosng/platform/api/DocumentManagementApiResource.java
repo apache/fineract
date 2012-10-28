@@ -28,9 +28,9 @@ import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
 import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
 import org.mifosng.platform.common.ApplicationConstants;
+import org.mifosng.platform.common.FileUtils;
 import org.mifosng.platform.documentmanagement.service.DocumentReadPlatformService;
 import org.mifosng.platform.documentmanagement.service.DocumentWritePlatformService;
-import org.mifosng.platform.exceptions.DocumentManagementException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -109,7 +109,7 @@ public class DocumentManagementApiResource {
 			@FormDataParam("name") String name,
 			@FormDataParam("description") String description) {
 
-		initialFileCheckerFastFail(fileSize, name);
+		FileUtils.validateFileSizeWithinPermissibleRange(fileSize, name, ApplicationConstants.MAX_FILE_UPLOAD_SIZE_IN_MB);
 
 		/**
 		 * TODO: also need to have a backup and stop reading from stream after
@@ -117,7 +117,7 @@ public class DocumentManagementApiResource {
 		 **/
 
 		/**
-		 * TODO: need to extract the actual file type and determine fi they are
+		 * TODO: need to extract the actual file type and determine if they are
 		 * permissable
 		 **/
 		DocumentCommand documentCommand = new DocumentCommand(null, null,
@@ -156,7 +156,7 @@ public class DocumentManagementApiResource {
 			@FormDataParam("name") String name,
 			@FormDataParam("description") String description) {
 
-		initialFileCheckerFastFail(fileSize, name);
+		FileUtils.validateFileSizeWithinPermissibleRange(fileSize, name, ApplicationConstants.MAX_FILE_UPLOAD_SIZE_IN_MB);
 
 		Set<String> modifiedParams = new HashSet<String>();
 		modifiedParams.add("name");
@@ -187,22 +187,6 @@ public class DocumentManagementApiResource {
 		return Response.ok().entity(identifier).build();
 	}
 
-	/**
-	 * @param fileSize
-	 * @param name
-	 */
-	private void initialFileCheckerFastFail(Long fileSize, String name) {
-		/**
-		 * Using Content-Length gives me size of the entire request, which is
-		 * good enough for now for a fast fail as the length of the rest of the
-		 * content i.e name and description while compared to the uploaded file
-		 * size is negligible
-		 **/
-		if (fileSize != null
-				&& ((fileSize / (1024 * 1024)) > ApplicationConstants.MAX_FILE_UPLOAD_SIZE_IN_MB)) {
-			throw new DocumentManagementException(name, fileSize);
-		}
-	}
 
 	/**
 	 * @param entityType

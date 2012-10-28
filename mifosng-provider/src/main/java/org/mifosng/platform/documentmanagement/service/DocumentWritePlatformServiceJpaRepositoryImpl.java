@@ -193,7 +193,7 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements
 	}
 
 	private static boolean checkValidEntityType(String entityType) {
-		for (ApplicationConstants.DOCUMENT_MANAGEMENT_ENTITIES entities : ApplicationConstants.DOCUMENT_MANAGEMENT_ENTITIES
+		for (ApplicationConstants.DOCUMENT_MANAGEMENT_ENTITY entities : ApplicationConstants.DOCUMENT_MANAGEMENT_ENTITY
 				.values()) {
 			if (entities.name().equalsIgnoreCase(entityType)) {
 				return true;
