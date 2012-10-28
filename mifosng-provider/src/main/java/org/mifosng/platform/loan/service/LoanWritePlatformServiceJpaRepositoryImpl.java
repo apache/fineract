@@ -162,7 +162,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		final LoanTransactionProcessingStrategy strategy = this.loanAssembler.findStrategyByIdIfProvided(command.getTransactionProcessingStrategyId());
 		final Set<LoanCharge> charges = this.loanChargeAssembler.assembleFrom(command.getCharges(), loanProduct.getCharges(), loan.getPrincpal().getAmount());
 
-        final LoanScheduleData loanSchedule = this.calculationPlatformService.calculateLoanScheduleNew(command.toCalculateLoanScheduleCommand());
+        final LoanScheduleData loanSchedule = this.calculationPlatformService.calculateLoanSchedule(command.toCalculateLoanScheduleCommand());
 		loan.modifyLoanApplication(command, client, loanProduct, fund, strategy, loanSchedule, charges, loanOfficer, defaultLoanLifecycleStateMachine());
 
 		this.loanRepository.save(loan);
@@ -361,7 +361,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 			Set<LoanCharge> loanCharges = loan.getCharges();
 			List<LoanChargeCommand> commands = new ArrayList<LoanChargeCommand>();
 			for (LoanCharge loanCharge : loanCharges) {
-				commands.add(loanCharge.toData());
+				commands.add(loanCharge.toCommand());
 			}
 			
 			LoanChargeCommand[] loanChargeCommands = commands.toArray(new LoanChargeCommand[commands.size()]);
@@ -374,7 +374,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 					loanTermFrequency, loanTermFrequencyType,
 					actualDisbursementDate, repaymentsStartingFromDate, interestCalculatedFromDate, loanChargeCommands);
 
-			LoanScheduleData loanSchedule = this.calculationPlatformService.calculateLoanScheduleNew(calculateCommand);
+			LoanScheduleData loanSchedule = this.calculationPlatformService.calculateLoanSchedule(calculateCommand);
 
 			List<LoanRepaymentScheduleInstallment> modifiedLoanRepaymentSchedule = new ArrayList<LoanRepaymentScheduleInstallment>();
 			
@@ -384,7 +384,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 							loan, scheduledLoanPeriod.periodNumber(),
 							scheduledLoanPeriod.periodDueDate(), 
 							scheduledLoanPeriod.principalDue(),
-							scheduledLoanPeriod.interestDue());
+							scheduledLoanPeriod.interestDue(),
+							scheduledLoanPeriod.chargesDue());
 					
 					modifiedLoanRepaymentSchedule.add(installment);
 				}

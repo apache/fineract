@@ -1,5 +1,6 @@
 package org.mifosng.platform.infrastructure;
 
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -36,7 +37,20 @@ public class JdbcSupport {
 		return (Long) JdbcUtils.getResultSetValue(rs, rs.findColumn(columnName), Long.class);
 	}
 
-	public static Integer getInteger(ResultSet rs, String columnName) throws SQLException {
+	public static Integer getInteger(final ResultSet rs, final String columnName) throws SQLException {
 		return (Integer) JdbcUtils.getResultSetValue(rs, rs.findColumn(columnName), Integer.class);
+	}
+
+	public static BigDecimal getBigDecimalDefaultToZeroIfNull(final ResultSet rs, final String columnName) throws SQLException {
+		final BigDecimal value = rs.getBigDecimal(columnName);
+		return defaultToZeroIfNull(value);
+	}
+	
+	private static BigDecimal defaultToZeroIfNull(final BigDecimal value) {
+		BigDecimal result = BigDecimal.ZERO;
+		if (value != null) {
+			result = value;
+		}
+		return result;
 	}
 }

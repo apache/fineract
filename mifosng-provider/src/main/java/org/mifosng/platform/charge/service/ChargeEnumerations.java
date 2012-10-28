@@ -11,11 +11,14 @@ public class ChargeEnumerations {
         return chargeTimeType(ChargeTimeType.fromInt(id));
     }
 
-    public static EnumOptionData chargeTimeType(ChargeTimeType type){
+    public static EnumOptionData chargeTimeType(final ChargeTimeType type){
         EnumOptionData optionData = null;
         switch (type){
             case DISBURSEMENT:
                 optionData = new EnumOptionData(ChargeTimeType.DISBURSEMENT.getValue().longValue(), ChargeTimeType.DISBURSEMENT.getCode(), "Disbursement");
+                break;
+            case SPECIFIED_DUE_DATE:
+                optionData = new EnumOptionData(ChargeTimeType.SPECIFIED_DUE_DATE.getValue().longValue(), ChargeTimeType.SPECIFIED_DUE_DATE.getCode(), "Specified due date");
                 break;
             default:
                 optionData = new EnumOptionData(ChargeTimeType.INVALID.getValue().longValue(), ChargeTimeType.INVALID.getCode(), "Invalid");
@@ -28,7 +31,7 @@ public class ChargeEnumerations {
         return chargeAppliesTo(ChargeAppliesTo.fromInt(id));
     }
 
-    public static EnumOptionData chargeAppliesTo(ChargeAppliesTo type){
+    public static EnumOptionData chargeAppliesTo(final ChargeAppliesTo type){
         EnumOptionData optionData = null;
         switch (type){
             case LOAN:
@@ -45,7 +48,7 @@ public class ChargeEnumerations {
         return chargeCalculationType(ChargeCalculationType.fromInt(id));
     }
 
-    public static EnumOptionData chargeCalculationType(ChargeCalculationType type){
+    public static EnumOptionData chargeCalculationType(final ChargeCalculationType type){
         EnumOptionData optionData = null;
         switch (type){
             case FLAT:

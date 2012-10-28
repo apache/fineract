@@ -20,7 +20,7 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
     private final ChargeRepository chargeRepository;
 
     @Autowired
-    public ChargeWritePlatformServiceJpaRepositoryImpl(PlatformSecurityContext context, ChargeRepository chargeRepository) {
+    public ChargeWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final ChargeRepository chargeRepository) {
         this.context = context;
         this.chargeRepository = chargeRepository;
     }
@@ -31,21 +31,21 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
         try {
             this.context.authenticatedUser();
 
-            ChargeCommandValidator validator = new ChargeCommandValidator(command);
+            final ChargeCommandValidator validator = new ChargeCommandValidator(command);
             validator.validateForCreate();
 
-            ChargeAppliesTo chargeAppliesTo = ChargeAppliesTo.fromInt(command.getChargeAppliesTo());
-            ChargeTimeType chargeTimeType = ChargeTimeType.fromInt(command.getChargeTimeType());
-            ChargeCalculationType chargeCalculationType = ChargeCalculationType.fromInt(command.getChargeCalculationType());
+            final ChargeAppliesTo chargeAppliesTo = ChargeAppliesTo.fromInt(command.getChargeAppliesTo());
+            final ChargeTimeType chargeTimeType = ChargeTimeType.fromInt(command.getChargeTimeType());
+            final ChargeCalculationType chargeCalculationType = ChargeCalculationType.fromInt(command.getChargeCalculationType());
 
-            Charge charge = Charge.createNew(command.getName(), command.getAmount(), command.getCurrencyCode(),
+            final Charge charge = Charge.createNew(command.getName(), command.getAmount(), command.getCurrencyCode(),
                     chargeAppliesTo, chargeTimeType, chargeCalculationType, command.isActive());
 
             this.chargeRepository.saveAndFlush(charge);
 
             return charge.getId();
         } catch (DataIntegrityViolationException dve) {
-            handleFundDataIntegrityIssues(command, dve);
+            handleDataIntegrityIssues(command, dve);
             return Long.valueOf(-1);
         }
     }
@@ -61,7 +61,7 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
             validator.validateForUpdate();
 
             final Long chargeId = command.getId();
-            Charge chargeForUpdate = this.chargeRepository.findOne(chargeId);
+            final Charge chargeForUpdate = this.chargeRepository.findOne(chargeId);
 
             if (chargeForUpdate == null){
                 throw new ChargeNotFoundException(chargeId);
@@ -72,7 +72,7 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
 
             return chargeForUpdate.getId();
         } catch (DataIntegrityViolationException dve) {
-            handleFundDataIntegrityIssues(command, dve);
+            handleDataIntegrityIssues(command, dve);
             return Long.valueOf(-1);
         }
     }
@@ -83,7 +83,7 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
 
         this.context.authenticatedUser();
 
-        Charge chargeForDelete = this.chargeRepository.findOne(chargeId);
+        final Charge chargeForDelete = this.chargeRepository.findOne(chargeId);
         if (chargeForDelete == null || chargeForDelete.isDeleted()){
             throw new ChargeNotFoundException(chargeId);
         }
@@ -97,7 +97,7 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
     /*
     * Guaranteed to throw an exception no matter what the data integrity issue is.
     */
-    private void handleFundDataIntegrityIssues(final ChargeCommand command, DataIntegrityViolationException dve)  {
+    private void handleDataIntegrityIssues(final ChargeCommand command, final DataIntegrityViolationException dve)  {
 
         Throwable realCause = dve.getMostSpecificCause();
         if (realCause.getMessage().contains("name")) {

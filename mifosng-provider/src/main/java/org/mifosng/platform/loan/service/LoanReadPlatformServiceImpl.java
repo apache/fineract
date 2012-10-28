@@ -507,18 +507,19 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 	private static final class LoanScheduleMapper implements RowMapper<LoanSchedulePeriodData> {
 
 		private LocalDate lastDueDate;
-		private BigDecimal outstandingLoanBalance;
+		private BigDecimal outstandingLoanPrincipalBalance;
 		
 		public LoanScheduleMapper(final DisbursementData disbursement) {
 			this.lastDueDate = disbursement.disbursementDate();
-			this.outstandingLoanBalance = disbursement.amount();
+			this.outstandingLoanPrincipalBalance = disbursement.amount();
 		}
 
 		public String loanScheduleSchema() {
 
 			return " ls.loan_id as loanId, ls.installment as period, ls.duedate as dueDate, "
 					+ " ls.principal_amount as principalDue, ls.principal_completed_derived as principalPaid, ls.principal_writtenoff_derived as principalWrittenOff, "
-					+ " ls.interest_amount as interestDue, ls.interest_completed_derived as interestPaid, ls.interest_waived_derived as interestWaived, ls.interest_writtenoff_derived as interestWrittenOff "
+					+ " ls.interest_amount as interestDue, ls.interest_completed_derived as interestPaid, ls.interest_waived_derived as interestWaived, ls.interest_writtenoff_derived as interestWrittenOff, "
+					+ " ls.fee_charges_amount as feeChargesDue, ls.fee_charges_completed_derived as feeChargesPaid, ls.fee_charges_waived_derived as feeChargesWaived, ls.fee_charges_writtenoff_derived as feeChargesWrittenOff "
 					+ " from m_loan l "
 					+ " join m_loan_repayment_schedule ls on ls.loan_id = l.id ";
 		}
@@ -529,47 +530,46 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 			final Long loanId = rs.getLong("loanId");
 			final Integer period = JdbcSupport.getInteger(rs, "period");
 			final LocalDate dueDate = JdbcSupport.getLocalDate(rs, "dueDate");
-			final BigDecimal principalDue = rs.getBigDecimal("principalDue");
-			final BigDecimal principalPaid = rs.getBigDecimal("principalPaid");
-			BigDecimal principalWrittenOff = rs.getBigDecimal("principalWrittenOff");
-			if (principalWrittenOff == null) {
-				principalWrittenOff = BigDecimal.ZERO;
-			}
+			final BigDecimal principalDue = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "principalDue");
+			final BigDecimal principalPaid = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "principalPaid");
+			final BigDecimal principalWrittenOff = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "principalWrittenOff");
 			
 			// TODO - KW - rather than calculate this here should we put calculation on derived column on table like other columns?
 			final BigDecimal principalOutstanding = principalDue.subtract(principalPaid).subtract(principalWrittenOff);
 			
-			final BigDecimal interestDue = rs.getBigDecimal("interestDue");
-			final BigDecimal interestPaid = rs.getBigDecimal("interestPaid");
-			BigDecimal interestWaived = rs.getBigDecimal("interestWaived");
-			if (interestWaived == null) {
-				interestWaived = BigDecimal.ZERO;
-			}
-			BigDecimal interestWrittenOff = rs.getBigDecimal("interestWrittenOff");
-			if (interestWrittenOff == null) {
-				interestWrittenOff = BigDecimal.ZERO;
-			}
+			final BigDecimal interestDue = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "interestDue");
+			final BigDecimal interestPaid = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "interestPaid");
+			final BigDecimal interestWaived = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "interestWaived");
+			final BigDecimal interestWrittenOff = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "interestWrittenOff");
 			
 			// TODO - KW - rather than calculate this here should we put calculation on derived column on table like other columns?
 			final BigDecimal interestOutstanding = interestDue.subtract(interestPaid).subtract(interestWaived).subtract(interestWrittenOff);
+			
+			final BigDecimal feeChargesDue = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "feeChargesDue");
+			final BigDecimal feeChargesPaid = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "feeChargesPaid");
+			final BigDecimal feeChargesWaived = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "feeChargesWaived");
+			final BigDecimal feeChargesWrittenOff = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "feeChargesWrittenOff");
+			
+			final BigDecimal feeChargesOutstanding = feeChargesDue.subtract(feeChargesPaid).subtract(feeChargesWaived).subtract(feeChargesWrittenOff);
 
-			final BigDecimal totalDueForPeriod = principalDue.add(interestDue);
-			final BigDecimal totalPaidForPeriod = principalPaid.add(interestPaid);
-			final BigDecimal totalWaivedForPeriod = interestWaived;
-			final BigDecimal totalWrittenOffForPeriod = principalWrittenOff.add(interestWrittenOff);
-			final BigDecimal totalOutstandingForPeriod = principalOutstanding.add(interestOutstanding);
+			final BigDecimal totalDueForPeriod = principalDue.add(interestDue).add(feeChargesDue);
+			final BigDecimal totalPaidForPeriod = principalPaid.add(interestPaid).add(feeChargesPaid);
+			final BigDecimal totalWaivedForPeriod = interestWaived.add(feeChargesWaived);
+			final BigDecimal totalWrittenOffForPeriod = principalWrittenOff.add(interestWrittenOff).add(feeChargesWrittenOff);
+			final BigDecimal totalOutstandingForPeriod = principalOutstanding.add(interestOutstanding).add(feeChargesOutstanding);
 
 			final LocalDate fromDate = this.lastDueDate;
-			final BigDecimal outstandingPrincipleBalanceOfLoan = outstandingLoanBalance.subtract(principalDue);
+			final BigDecimal outstandingPrincipleBalanceOfLoan = outstandingLoanPrincipalBalance.subtract(principalDue);
 			
 			// update based on current period values
 			this.lastDueDate = dueDate;
-			outstandingLoanBalance = outstandingLoanBalance.subtract(principalDue);
+			outstandingLoanPrincipalBalance = outstandingLoanPrincipalBalance.subtract(principalDue);
 			
 			return LoanSchedulePeriodData.repaymentPeriodWithPayments(loanId, period, fromDate, dueDate, 
-					principalDue, principalPaid, principalWrittenOff, principalOutstanding, outstandingPrincipleBalanceOfLoan, interestDue,
-					interestPaid, interestWaived, interestWrittenOff, interestOutstanding, totalDueForPeriod, totalPaidForPeriod, totalWaivedForPeriod, totalWrittenOffForPeriod,
-					totalOutstandingForPeriod);
+					principalDue, principalPaid, principalWrittenOff, principalOutstanding, outstandingPrincipleBalanceOfLoan, 
+					interestDue, interestPaid, interestWaived, interestWrittenOff, interestOutstanding, 
+					feeChargesDue, feeChargesPaid, feeChargesWaived, feeChargesWrittenOff, feeChargesOutstanding,
+					totalDueForPeriod, totalPaidForPeriod, totalWaivedForPeriod, totalWrittenOffForPeriod, totalOutstandingForPeriod);
 		}
 	}
 

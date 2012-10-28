@@ -40,7 +40,7 @@ public class CalculationPlatformServiceImpl implements CalculationPlatformServic
 	}
 	
 	@Override
-	public LoanScheduleData calculateLoanScheduleNew(final CalculateLoanScheduleCommand command) {
+	public LoanScheduleData calculateLoanSchedule(final CalculateLoanScheduleCommand command) {
 		
 		context.authenticatedUser();
 		

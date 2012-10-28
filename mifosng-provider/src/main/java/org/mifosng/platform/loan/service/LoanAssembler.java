@@ -84,19 +84,21 @@ public class LoanAssembler {
 		}
 
 		Client client = null;
-		Group group = null;
 		if (command.getClientId() != null) {
 			client = this.clientRepository.findOne(command.getClientId());
 			if (client == null || client.isDeleted()) {
 				throw new ClientNotFoundException(command.getClientId());
 			}
-		} else {
+		} 
+		
+		Group group = null;
+		if (command.getGroupId() != null) {
 			group = this.groupRepository.findOne(command.getGroupId());
 			if (group == null || group.isDeleted()) {
 				throw new GroupNotFoundException(command.getGroupId());
 			}
 		}
-
+		
 		final MonetaryCurrency currency = loanProduct.getCurrency();
 		final Integer loanTermFrequency = command.getLoanTermFrequency();
 		final PeriodFrequencyType loanTermFrequencyType = PeriodFrequencyType.fromInt(command.getLoanTermFrequencyType());
@@ -113,24 +115,34 @@ public class LoanAssembler {
 		// optionally, see if charges are associated with loan on creation (through loan product or by being directly added)
 		final Set<LoanCharge> loanCharges = this.loanChargeAssembler.assembleFrom(command.getCharges(), loanProduct.getCharges(), command.getPrincipal());
 
-		Loan loan;
+		Loan loan = null;
+		if (group != null) {
+			loan = Loan.createNew(fund,loanOfficer, loanTransactionProcessingStrategy, loanProduct, group, loanRepaymentScheduleDetail, loanCharges);
+			loan.setExternalId(command.getExternalId());
+		}
+		
 		if (client != null) {
 			loan = Loan.createNew(fund,loanOfficer, loanTransactionProcessingStrategy, loanProduct, client, loanRepaymentScheduleDetail, loanCharges);
-		} else {
-			loan = Loan.createNew(fund,loanOfficer, loanTransactionProcessingStrategy, loanProduct, group, loanRepaymentScheduleDetail, loanCharges);
+			loan.setExternalId(command.getExternalId());
+		}
+		
+		if (loan == null) {
+			// FIXME - kw - put in appropriate exception here.
+			throw new RuntimeException();
 		}
 
-		loan.setExternalId(command.getExternalId());
-
-		final LoanScheduleData loanSchedule = this.calculationPlatformService.calculateLoanScheduleNew(command.toCalculateLoanScheduleCommand());
+		final LoanScheduleData loanSchedule = this.calculationPlatformService.calculateLoanSchedule(command.toCalculateLoanScheduleCommand());
 		
 		for (LoanSchedulePeriodData scheduledLoanInstallment : loanSchedule.getPeriods()) {
 			if (scheduledLoanInstallment.isRepaymentPeriod()) {
-				LoanRepaymentScheduleInstallment installment = new LoanRepaymentScheduleInstallment(
+				
+				final LoanRepaymentScheduleInstallment installment = new LoanRepaymentScheduleInstallment(
 						loan, scheduledLoanInstallment.periodNumber(),
 						scheduledLoanInstallment.periodDueDate(), 
 						scheduledLoanInstallment.principalDue(),
-						scheduledLoanInstallment.interestDue());
+						scheduledLoanInstallment.interestDue(),
+						scheduledLoanInstallment.chargesDue());
+				
 				loan.addRepaymentScheduleInstallment(installment);
 			}
 		}

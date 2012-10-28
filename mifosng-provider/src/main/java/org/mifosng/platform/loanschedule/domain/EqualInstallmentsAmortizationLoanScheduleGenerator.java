@@ -31,7 +31,6 @@ public class EqualInstallmentsAmortizationLoanScheduleGenerator implements Amort
 			final ApplicationCurrency currency,
 			final LoanProductRelatedDetail loanScheduleInfo, 
 			final LocalDate disbursementDate, 
-			final LocalDate firstRepaymentDate,
 			final LocalDate interestCalculatedFrom,
 			final BigDecimal periodInterestRateForRepaymentPeriod, 
 			final LocalDate idealDisbursementDateBasedOnFirstRepaymentDate,
@@ -60,7 +59,6 @@ public class EqualInstallmentsAmortizationLoanScheduleGenerator implements Amort
 		
 		BigDecimal chargesDueAtTimeOfDisbursement = BigDecimal.ZERO;
 		for (LoanCharge loanCharge : loanCharges) {
-			// FIXME - KW - right now only charges at disbursement are supported.
 			if (loanCharge.isDueAtDisbursement()) {
 				chargesDueAtTimeOfDisbursement = chargesDueAtTimeOfDisbursement.add(loanCharge.amount());
 			}
@@ -119,15 +117,19 @@ public class EqualInstallmentsAmortizationLoanScheduleGenerator implements Amort
 				}
 			}
 
-			Money totalInstallmentDue = principalForInstallment.plus(interestForInstallment);
-
 			outstandingBalance = outstandingBalance.minus(principalForInstallment);
+			
+			Money chargesForInstallment = cumulativeChargesDueWithin(startDate, scheduledDueDate, loanCharges, monetaryCurrency);
+			Money totalInstallmentDue = principalForInstallment.plus(interestForInstallment).plus(chargesForInstallment);
+			cumulativeChargesToDate = cumulativeChargesToDate.add(chargesForInstallment.getAmount());
 			
 			LoanSchedulePeriodData installment = LoanSchedulePeriodData.repaymentOnlyPeriod(periodNumber, startDate, 
 					scheduledDueDate, 
 					principalForInstallment.getAmount(), 
 					outstandingBalance.getAmount(), 
-					interestForInstallment.getAmount(), totalInstallmentDue.getAmount());
+					interestForInstallment.getAmount(),
+					chargesForInstallment.getAmount(),
+					totalInstallmentDue.getAmount());
 
 			periods.add(installment);
 			
@@ -152,5 +154,22 @@ public class EqualInstallmentsAmortizationLoanScheduleGenerator implements Amort
 		
 		return new LoanScheduleData(currencyData, periods, loanTermInDays, cumulativePrincipalDisbursed, cumulativePrincipalDue, 
 				cumulativePrincipalOutstanding, cumulativeInterestExpected, cumulativeChargesToDate, totalExpectedRepayment);
+	}
+
+	private Money cumulativeChargesDueWithin(
+			final LocalDate periodStart,
+			final LocalDate periodEnd, 
+			final Set<LoanCharge> loanCharges, 
+			final MonetaryCurrency monetaryCurrency) {
+		
+		Money cumulative = Money.zero(monetaryCurrency);
+		
+		for (LoanCharge loanCharge : loanCharges) {
+			if (loanCharge.isDueForCollectionBetween(periodStart, periodEnd)) {
+				cumulative = cumulative.plus(loanCharge.amount());
+			}
+		}
+		
+		return cumulative;
 	}
 }

@@ -60,7 +60,6 @@ public class DecliningBalanceMethodLoanScheduleGenerator implements LoanSchedule
 		return generator.generate(applicationCurrency,
 				loanScheduleInfo, 
 				disbursementDate, 
-				firstRepaymentDate,
 				interestCalculatedFrom,
 				periodInterestRateForRepaymentPeriod, 
 				idealDisbursementDateBasedOnFirstRepaymentDate, 

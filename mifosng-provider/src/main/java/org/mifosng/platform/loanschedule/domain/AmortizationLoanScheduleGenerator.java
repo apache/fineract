@@ -16,7 +16,6 @@ public interface AmortizationLoanScheduleGenerator {
 			ApplicationCurrency applicationCurrency, 
 			LoanProductRelatedDetail loanScheduleInfo,
 			LocalDate disbursementDate, 
-			LocalDate firstRepaymentDate,
 			LocalDate interestCalculatedFrom,
 			BigDecimal periodInterestRateForRepaymentPeriod,
 			LocalDate idealDisbursementDateBasedOnFirstRepaymentDate,

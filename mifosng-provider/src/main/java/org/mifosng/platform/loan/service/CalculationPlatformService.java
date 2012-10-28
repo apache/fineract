@@ -5,5 +5,5 @@ import org.mifosng.platform.api.commands.CalculateLoanScheduleCommand;
 
 public interface CalculationPlatformService {
 
-	LoanScheduleData calculateLoanScheduleNew(CalculateLoanScheduleCommand command);
+	LoanScheduleData calculateLoanSchedule(CalculateLoanScheduleCommand command);
 }

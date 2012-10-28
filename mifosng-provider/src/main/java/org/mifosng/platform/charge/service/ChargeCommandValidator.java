@@ -12,11 +12,11 @@ public class ChargeCommandValidator {
 
     private final ChargeCommand command;
 
-    public ChargeCommandValidator(ChargeCommand command) {
+    public ChargeCommandValidator(final ChargeCommand command) {
         this.command = command;
     }
 
-    public void validateForCreate(){
+    public void validateForCreate() {
         List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 
         DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("charge");
@@ -25,7 +25,7 @@ public class ChargeCommandValidator {
         baseDataValidator.reset().parameter("amount").value(command.getAmount()).notNull().positiveAmount();
         baseDataValidator.reset().parameter("currencyCode").value(command.getCurrencyCode()).notBlank();
         baseDataValidator.reset().parameter("chargeAppliesTo").value(command.getChargeAppliesTo()).notNull().inMinMaxRange(1, 1);
-        baseDataValidator.reset().parameter("chargeTimeType").value(command.getChargeTimeType()).notNull().inMinMaxRange(1, 1);
+        baseDataValidator.reset().parameter("chargeTimeType").value(command.getChargeTimeType()).notNull().inMinMaxRange(1, 2);
         baseDataValidator.reset().parameter("chargeCalculationType").value(command.getChargeCalculationType()).notNull().inMinMaxRange(1, 4);
 
         if (!dataValidationErrors.isEmpty()) {
@@ -33,7 +33,7 @@ public class ChargeCommandValidator {
         }
     }
 
-    public void validateForUpdate(){
+    public void validateForUpdate() {
         List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 
         DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("charge");
@@ -43,7 +43,7 @@ public class ChargeCommandValidator {
         baseDataValidator.reset().parameter("amount").value(command.getAmount()).ignoreIfNull().positiveAmount();
         baseDataValidator.reset().parameter("currencyCode").value(command.getCurrencyCode()).ignoreIfNull().notBlank();
         baseDataValidator.reset().parameter("chargeAppliesTo").value(command.getChargeAppliesTo()).ignoreIfNull().notNull().inMinMaxRange(1, 1);
-        baseDataValidator.reset().parameter("chargeTimeType").value(command.getChargeTimeType()).ignoreIfNull().notNull().inMinMaxRange(1, 1);
+        baseDataValidator.reset().parameter("chargeTimeType").value(command.getChargeTimeType()).ignoreIfNull().notNull().inMinMaxRange(1, 2);
         baseDataValidator.reset().parameter("chargeCalculationType").value(command.getChargeCalculationType()).ignoreIfNull().notNull().inMinMaxRange(1, 4);
 
         if (!dataValidationErrors.isEmpty()) {

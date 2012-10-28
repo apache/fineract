@@ -263,6 +263,10 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		this.charges.add(loanCharge);
 		
 		updateTotalChargesDueAtDisbursement();
+		
+		// reprocess loan schedule based on charge been removed.
+		LoanScheduleWrapper wrapper = new LoanScheduleWrapper();
+		wrapper.reprocess(getCurrency(), getDisbursementDate(), this.repaymentScheduleInstallments, this.charges, this.loanTransactions);
 	}
 	
 	public void removeLoanCharge(final LoanCharge loanCharge) {
@@ -270,6 +274,10 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		if (removed) {
 			updateTotalChargesDueAtDisbursement();
 		}
+		
+		// reprocess loan schedule based on charge been removed.
+		LoanScheduleWrapper wrapper = new LoanScheduleWrapper();
+		wrapper.reprocess(getCurrency(), getDisbursementDate(), this.repaymentScheduleInstallments, this.charges, this.loanTransactions);
 	}
 	
 	public void updateLoanCharge(final LoanCharge loanCharge, final LoanChargeCommand command) {
@@ -373,7 +381,8 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 						this, scheduledLoanInstallment.periodNumber(),
 						scheduledLoanInstallment.periodDueDate(), 
 						scheduledLoanInstallment.principalDue(),
-						scheduledLoanInstallment.interestDue());
+						scheduledLoanInstallment.interestDue(),
+						scheduledLoanInstallment.chargesDue());
 				this.addRepaymentScheduleInstallment(installment);
 			}
 		}

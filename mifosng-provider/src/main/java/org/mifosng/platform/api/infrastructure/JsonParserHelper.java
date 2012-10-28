@@ -62,8 +62,24 @@ public class JsonParserHelper {
 		return stringValue;
 	}
 
-	public BigDecimal extractBigDecimalNamed(final String parameterName,
-			final JsonElement element, final Set<String> modifiedParameters) {
+	public BigDecimal extractBigDecimalNamed(
+			final String parameterName,
+			final JsonElement element, 
+			final Set<String> modifiedParameters) {
+		BigDecimal value = null;
+		if (element.isJsonObject()) {
+			final JsonObject object = element.getAsJsonObject();
+			final Locale locale = extractLocaleValue(object);
+			value = extractBigDecimalNamed(parameterName, object, locale, modifiedParameters);
+		}
+		return value;
+	}
+	
+	public BigDecimal extractBigDecimalNamed(
+			final String parameterName,
+			final JsonObject element, 
+			final Locale locale,
+			final Set<String> modifiedParameters) {
 		BigDecimal value = null;
 		if (element.isJsonObject()) {
 			JsonObject object = element.getAsJsonObject();
@@ -74,68 +90,115 @@ public class JsonParserHelper {
 						.getAsJsonPrimitive();
 				String valueAsString = primitive.getAsString();
 				if (StringUtils.isNotBlank(valueAsString)) {
-					value = convertFrom(valueAsString, parameterName,
-							extractLocaleValue(object));
+					value = convertFrom(valueAsString, parameterName, locale);
 				}
 			}
 		}
 		return value;
 	}
 
-	public Integer extractIntegerNamed(final String parameterName,
-			final JsonElement element, final Set<String> modifiedParameters) {
+	public Integer extractIntegerNamed(
+			final String parameterName,
+			final JsonElement element, 
+			final Set<String> modifiedParameters) {
 		Integer value = null;
 		if (element.isJsonObject()) {
-			JsonObject object = element.getAsJsonObject();
-			if (object.has(parameterName)
-					&& object.get(parameterName).isJsonPrimitive()) {
+			final JsonObject object = element.getAsJsonObject();
+			final Locale locale = extractLocaleValue(object);
+			value = extractIntegerNamed(parameterName, object, locale, modifiedParameters);
+		}
+		return value;
+	}
+	
+	public Integer extractIntegerNamed(
+			final String parameterName,
+			final JsonElement element,
+			final Locale locale,
+			final Set<String> modifiedParameters) {
+		Integer value = null;
+		if (element.isJsonObject()) {
+			final JsonObject object = element.getAsJsonObject();
+			if (object.has(parameterName) && object.get(parameterName).isJsonPrimitive()) {
 				modifiedParameters.add(parameterName);
 				JsonPrimitive primitive = object.get(parameterName)
 						.getAsJsonPrimitive();
 				String valueAsString = primitive.getAsString();
 				if (StringUtils.isNotBlank(valueAsString)) {
-					value = convertToInteger(valueAsString, parameterName,
-							extractLocaleValue(object));
+					value = convertToInteger(valueAsString, parameterName, locale);
 				}
 			}
 		}
 		return value;
 	}
+	
+	public String extractDateFormatParameter(final JsonObject element) {
+		String value = null;
+		if (element.isJsonObject()) {
+			JsonObject object = element.getAsJsonObject();
 
-	public LocalDate extractLocalDateNamed(final String parameterName,
-			final JsonElement element, final Set<String> modifiedParameters) {
+			final String dateFormatParameter = "dateFormat";
+			if (object.has(dateFormatParameter)
+					&& object.get(dateFormatParameter).isJsonPrimitive()) {
+				final JsonPrimitive primitive = object.get(dateFormatParameter).getAsJsonPrimitive();
+				value = primitive.getAsString();
+			}
+		}
+		return value;
+	}
+	
+	public Locale extractLocaleParameter(final JsonObject element) {
+		Locale clientApplicationLocale = null;
+		if (element.isJsonObject()) {
+			JsonObject object = element.getAsJsonObject();
+			
+			String locale = null;
+			final String localeParameter = "locale";
+			if (object.has(localeParameter)
+					&& object.get(localeParameter).isJsonPrimitive()) {
+				final JsonPrimitive primitive = object.get(localeParameter).getAsJsonPrimitive();
+				locale = primitive.getAsString();
+				clientApplicationLocale = localeFromString(locale);
+			}
+		}
+		return clientApplicationLocale;
+	}
+
+	public LocalDate extractLocalDateNamed(
+			final String parameterName,
+			final JsonElement element, 
+			final Set<String> parametersPassedInCommand) {
+
+		LocalDate value = null;
+		
+		if (element.isJsonObject()) {
+			JsonObject object = element.getAsJsonObject();
+
+			final String dateFormat = extractDateFormatParameter(object);
+			final Locale clientApplicationLocale = extractLocaleParameter(object);
+			value = extractLocalDateNamed(parameterName, object, dateFormat, clientApplicationLocale, parametersPassedInCommand);
+		}
+		return value;
+	}
+	
+	public LocalDate extractLocalDateNamed(
+			final String parameterName,
+			final JsonObject element,
+			final String dateFormat,
+			final Locale clientApplicationLocale,
+			final Set<String> parametersPassedInCommand) {
 		LocalDate value = null;
 		if (element.isJsonObject()) {
 			JsonObject object = element.getAsJsonObject();
 
-			String dateFormat = null;
-			final String dateFormatParameter = "dateFormat";
-			if (object.has(dateFormatParameter)
-					&& object.get(dateFormatParameter).isJsonPrimitive()) {
-				JsonPrimitive primitive = object.get(dateFormatParameter)
-						.getAsJsonPrimitive();
-				dateFormat = primitive.getAsString();
-			}
-			String locale = null;
-			Locale clientApplicationLocale = null;
-			final String localeParameter = "locale";
-			if (object.has(localeParameter)
-					&& object.get(localeParameter).isJsonPrimitive()) {
-				JsonPrimitive primitive = object.get(localeParameter)
-						.getAsJsonPrimitive();
-				locale = primitive.getAsString();
-				clientApplicationLocale = localeFromString(locale);
-			}
-
 			if (object.has(parameterName)
 					&& object.get(parameterName).isJsonPrimitive()) {
-				modifiedParameters.add(parameterName);
-				JsonPrimitive primitive = object.get(parameterName)
-						.getAsJsonPrimitive();
+				
+				parametersPassedInCommand.add(parameterName);
+				
+				final JsonPrimitive primitive = object.get(parameterName).getAsJsonPrimitive();
 				final String valueAsString = primitive.getAsString();
 				if (StringUtils.isNotBlank(valueAsString)) {
-					value = convertFrom(valueAsString, parameterName,
-							dateFormat, clientApplicationLocale);
+					value = convertFrom(valueAsString, parameterName, dateFormat, clientApplicationLocale);
 				}
 			}
 
@@ -356,156 +419,6 @@ public class JsonParserHelper {
 		}
 	}
 
-	/*
-	 * private LocalDate convertFrom(final String dateAsString, final String
-	 * parameterName, final String dateFormat) {
-	 * 
-	 * if (StringUtils.isBlank(dateFormat)) {
-	 * 
-	 * List<ApiParameterError> dataValidationErrors = new
-	 * ArrayList<ApiParameterError>(); String defaultMessage = new
-	 * StringBuilder("The parameter '" + parameterName +
-	 * "' requires a 'dateFormat' parameter to be passed with it.").toString();
-	 * ApiParameterError error = ApiParameterError.parameterError(
-	 * "validation.msg.missing.dateFormat.parameter", defaultMessage,
-	 * parameterName); dataValidationErrors.add(error);
-	 * 
-	 * throw new PlatformApiDataValidationException(
-	 * "validation.msg.validation.errors.exist", "Validation errors exist.",
-	 * dataValidationErrors); }
-	 * 
-	 * LocalDate eventLocalDate = null; if
-	 * (StringUtils.isNotBlank(dateAsString)) { try { Locale locale =
-	 * LocaleContextHolder.getLocale(); eventLocalDate =
-	 * DateTimeFormat.forPattern(dateFormat) .withLocale(locale)
-	 * .parseLocalDate(dateAsString.toLowerCase(locale)); } catch
-	 * (IllegalArgumentException e) { List<ApiParameterError>
-	 * dataValidationErrors = new ArrayList<ApiParameterError>();
-	 * ApiParameterError error = ApiParameterError .parameterError(
-	 * "validation.msg.invalid.date.format", "The parameter " + parameterName +
-	 * " is invalid based on the dateFormat provided:" + dateFormat,
-	 * parameterName, dateAsString, dateFormat);
-	 * dataValidationErrors.add(error);
-	 * 
-	 * throw new PlatformApiDataValidationException(
-	 * "validation.msg.validation.errors.exist", "Validation errors exist.",
-	 * dataValidationErrors); } }
-	 * 
-	 * return eventLocalDate; }
-	 * 
-	 * private BigDecimal convertFrom(final String numericalValueFormatted,
-	 * final String parameterName, final Locale clientApplicationLocale) {
-	 * 
-	 * if (clientApplicationLocale == null) {
-	 * 
-	 * List<ApiParameterError> dataValidationErrors = new
-	 * ArrayList<ApiParameterError>(); String defaultMessage = new
-	 * StringBuilder("The parameter '" + parameterName +
-	 * "' requires a 'locale' parameter to be passed with it.").toString();
-	 * ApiParameterError error =
-	 * ApiParameterError.parameterError("validation.msg.missing.locale.parameter"
-	 * , defaultMessage, parameterName); dataValidationErrors.add(error);
-	 * 
-	 * throw new PlatformApiDataValidationException(
-	 * "validation.msg.validation.errors.exist", "Validation errors exist.",
-	 * dataValidationErrors); }
-	 * 
-	 * try { BigDecimal number = null;
-	 * 
-	 * if (StringUtils.isNotBlank(numericalValueFormatted)) {
-	 * 
-	 * String source = numericalValueFormatted.trim();
-	 * 
-	 * NumberFormat format =
-	 * NumberFormat.getNumberInstance(clientApplicationLocale); DecimalFormat df
-	 * = (DecimalFormat) format; DecimalFormatSymbols symbols =
-	 * df.getDecimalFormatSymbols(); //
-	 * http://bugs.sun.com/view_bug.do?bug_id=4510618 char groupingSeparator =
-	 * symbols.getGroupingSeparator(); if (groupingSeparator == '\u00a0') {
-	 * source = source.replaceAll(" ", Character.toString('\u00a0')); }
-	 * 
-	 * NumberFormatter numberFormatter = new NumberFormatter(); Number
-	 * parsedNumber = numberFormatter.parse(source, clientApplicationLocale);
-	 * number = BigDecimal.valueOf(Double.valueOf(parsedNumber.doubleValue()));
-	 * }
-	 * 
-	 * return number; } catch (ParseException e) {
-	 * 
-	 * List<ApiParameterError> dataValidationErrors = new
-	 * ArrayList<ApiParameterError>(); ApiParameterError error =
-	 * ApiParameterError.parameterError(
-	 * "validation.msg.invalid.decimal.format", "The parameter " + parameterName
-	 * + " has value: " + numericalValueFormatted +
-	 * " which is invalid decimal value for provided locale of [" +
-	 * clientApplicationLocale.toString() + "].", parameterName,
-	 * numericalValueFormatted, clientApplicationLocale);
-	 * dataValidationErrors.add(error);
-	 * 
-	 * throw new PlatformApiDataValidationException(
-	 * "validation.msg.validation.errors.exist", "Validation errors exist.",
-	 * dataValidationErrors); } }
-	 * 
-	 * private Integer convertToInteger(final String numericalValueFormatted,
-	 * final String parameterName, final Locale clientApplicationLocale) {
-	 * 
-	 * if (clientApplicationLocale == null) {
-	 * 
-	 * List<ApiParameterError> dataValidationErrors = new
-	 * ArrayList<ApiParameterError>(); String defaultMessage = new
-	 * StringBuilder("The parameter '" + parameterName +
-	 * "' requires a 'locale' parameter to be passed with it.").toString();
-	 * ApiParameterError error =
-	 * ApiParameterError.parameterError("validation.msg.missing.locale.parameter"
-	 * , defaultMessage, parameterName); dataValidationErrors.add(error);
-	 * 
-	 * throw new PlatformApiDataValidationException(
-	 * "validation.msg.validation.errors.exist", "Validation errors exist.",
-	 * dataValidationErrors); }
-	 * 
-	 * try { Integer number = null;
-	 * 
-	 * if (StringUtils.isNotBlank(numericalValueFormatted)) {
-	 * 
-	 * String source = numericalValueFormatted.trim();
-	 * 
-	 * NumberFormat format = NumberFormat.getInstance(clientApplicationLocale);
-	 * DecimalFormat df = (DecimalFormat) format; DecimalFormatSymbols symbols =
-	 * df.getDecimalFormatSymbols(); df.setParseBigDecimal(true);
-	 * 
-	 * // http://bugs.sun.com/view_bug.do?bug_id=4510618 char groupingSeparator
-	 * = symbols.getGroupingSeparator(); if (groupingSeparator == '\u00a0') {
-	 * source = source.replaceAll(" ", Character.toString('\u00a0')); }
-	 * 
-	 * Number parsedNumber = df.parse(source);
-	 * 
-	 * double parsedNumberDouble = parsedNumber.doubleValue(); int
-	 * parsedNumberInteger = parsedNumber.intValue();
-	 * 
-	 * if (source.contains(Character.toString(symbols.getDecimalSeparator()))) {
-	 * throw new ParseException(source, 0); }
-	 * 
-	 * if
-	 * (!Double.valueOf(parsedNumberDouble).equals(Double.valueOf(Integer.valueOf
-	 * (parsedNumberInteger)))) { throw new ParseException(source, 0); }
-	 * 
-	 * number = parsedNumber.intValue(); }
-	 * 
-	 * return number; } catch (ParseException e) {
-	 * 
-	 * List<ApiParameterError> dataValidationErrors = new
-	 * ArrayList<ApiParameterError>(); ApiParameterError error =
-	 * ApiParameterError.parameterError(
-	 * "validation.msg.invalid.integer.format", "The parameter " + parameterName
-	 * + " has value: " + numericalValueFormatted +
-	 * " which is invalid integer value for provided locale of [" +
-	 * clientApplicationLocale.toString() + "].", parameterName,
-	 * numericalValueFormatted, clientApplicationLocale);
-	 * dataValidationErrors.add(error);
-	 * 
-	 * throw new PlatformApiDataValidationException(
-	 * "validation.msg.validation.errors.exist", "Validation errors exist.",
-	 * dataValidationErrors); } }
-	 */
 	private Locale localeFromString(final String localeAsString) {
 
 		if (StringUtils.isBlank(localeAsString)) {

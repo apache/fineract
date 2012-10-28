@@ -3,7 +3,8 @@ package org.mifosng.platform.charge.domain;
 public enum ChargeTimeType {
 	
     INVALID(0, "chargeTimeType.invalid"),
-    DISBURSEMENT(1, "chargeTimeType.disbursement");
+    DISBURSEMENT(1, "chargeTimeType.disbursement"),
+    SPECIFIED_DUE_DATE(2, "chargeTimeType.specifiedDueDate");
 
     private final Integer value;
     private final String code;
@@ -26,6 +27,9 @@ public enum ChargeTimeType {
         switch(chargeTime){
             case 1:
                 chargeTimeType = DISBURSEMENT;
+                break;
+            case 2:
+                chargeTimeType = SPECIFIED_DUE_DATE;
                 break;
             default:
                 chargeTimeType = INVALID;

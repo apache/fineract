@@ -311,7 +311,7 @@ public class LoansApiResource {
 			@Context final UriInfo uriInfo,
 			final String jsonRequestBody) {
 
-		LoanApplicationCommand command = this.apiDataConversionService.convertJsonToLoanApplicationCommand(null, jsonRequestBody);
+		final LoanApplicationCommand command = this.apiDataConversionService.convertJsonToLoanApplicationCommand(null, jsonRequestBody);
 
 		if (is(commandParam, "calculateLoanSchedule")) {
 			CalculateLoanScheduleCommand calculateLoanScheduleCommand = command.toCalculateLoanScheduleCommand();
@@ -325,7 +325,7 @@ public class LoansApiResource {
 
 	private String calculateLoanSchedule(final UriInfo uriInfo, final CalculateLoanScheduleCommand command) {
 		
-		final LoanScheduleData loanSchedule = this.calculationPlatformService.calculateLoanScheduleNew(command);
+		final LoanScheduleData loanSchedule = this.calculationPlatformService.calculateLoanSchedule(command);
 
 		final Set<String> typicalLoanScheduleResponseParameters = new HashSet<String>(
 				Arrays.asList("periods", "cumulativePrincipalDisbursed"));

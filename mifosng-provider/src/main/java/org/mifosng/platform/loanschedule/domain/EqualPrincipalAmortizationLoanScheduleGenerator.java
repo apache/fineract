@@ -27,7 +27,6 @@ public class EqualPrincipalAmortizationLoanScheduleGenerator implements Amortiza
 			final ApplicationCurrency currency,
 			final LoanProductRelatedDetail loanScheduleInfo,
 			final LocalDate disbursementDate, 
-			final LocalDate firstRepaymentDate,
 			final LocalDate interestCalculatedFrom,
 			final BigDecimal periodInterestRateForRepaymentPeriod,
 			final LocalDate idealDisbursementDateBasedOnFirstRepaymentDate,
@@ -50,7 +49,6 @@ public class EqualPrincipalAmortizationLoanScheduleGenerator implements Amortiza
 		
 		BigDecimal chargesDueAtTimeOfDisbursement = BigDecimal.ZERO;
 		for (LoanCharge loanCharge : loanCharges) {
-			// FIXME - KW - right now only charges at disbursement are supported.
 			if (loanCharge.isDueAtDisbursement()) {
 				chargesDueAtTimeOfDisbursement = chargesDueAtTimeOfDisbursement.add(loanCharge.amount());
 			}
@@ -100,15 +98,21 @@ public class EqualPrincipalAmortizationLoanScheduleGenerator implements Amortiza
 				}
 			}
 
-			Money totalInstallmentDue = principalForInstallment.plus(interestForInstallment);
-
 			outstandingBalance = outstandingBalance.minus(principalForInstallment);
+			
+			// FIXME - KW - charges
+//			Money chargesForInstallment = cumulativeChargesDueWithin(startDate, scheduledDueDate, loanCharges, monetaryCurrency);
+			Money chargesForInstallment = Money.zero(monetaryCurrency);
+			Money totalInstallmentDue = principalForInstallment.plus(interestForInstallment).plus(chargesForInstallment);
+			cumulativeChargesToDate = cumulativeChargesToDate.add(chargesForInstallment.getAmount());
 			
 			LoanSchedulePeriodData installment = LoanSchedulePeriodData.repaymentOnlyPeriod(periodNumber, startDate, 
 					scheduledDueDate, 
 					principalForInstallment.getAmount(), 
 					outstandingBalance.getAmount(), 
-					interestForInstallment.getAmount(), totalInstallmentDue.getAmount());
+					interestForInstallment.getAmount(), 
+					chargesForInstallment.getAmount(),
+					totalInstallmentDue.getAmount());
 
 			periods.add(installment);
 			

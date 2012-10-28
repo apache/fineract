@@ -1,7 +1,9 @@
 package org.mifosng.platform.loan.domain;
 
 import java.util.List;
+import java.util.Set;
 
+import org.joda.time.LocalDate;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.currency.domain.Money;
 
@@ -23,5 +25,45 @@ public class LoanScheduleWrapper {
 		}
 
 		return cumulativeValue;
+	}
+
+	/**
+	 * FIXME - this is not a side effect free approach so move this into a specific wrapper than makes this obvious from the read-only wrapper.
+	 * @param localDate 
+	 */
+	public void reprocess(
+			final MonetaryCurrency currency,
+			final LocalDate disbursementDate, 
+			final List<LoanRepaymentScheduleInstallment> repaymentPeriods,
+			final Set<LoanCharge> loanCharges, 
+			final List<LoanTransaction> transactions) {
+		
+		LocalDate startDate = disbursementDate;
+		for (LoanRepaymentScheduleInstallment period : repaymentPeriods) {
+			
+			// FIXME - kw - also need to handle case where some of these charges are paid/writtenoff/waived so that those components are updated on repayment period.
+			final Money feeChargesDueForRepaymentPeriod = cumulativeChargesDueWithin(startDate, period.getDueDate(), loanCharges, currency);
+//			if (feeChargesDueForRepaymentPeriod.isGreaterThanZero()) {
+				period.updateChargePortion(feeChargesDueForRepaymentPeriod);
+//			}
+			startDate = period.getDueDate();
+		}	
+	}
+	
+	private Money cumulativeChargesDueWithin(
+			final LocalDate periodStart,
+			final LocalDate periodEnd, 
+			final Set<LoanCharge> loanCharges, 
+			final MonetaryCurrency monetaryCurrency) {
+		
+		Money cumulative = Money.zero(monetaryCurrency);
+		
+		for (LoanCharge loanCharge : loanCharges) {
+			if (loanCharge.isDueForCollectionBetween(periodStart, periodEnd)) {
+				cumulative = cumulative.plus(loanCharge.amount());
+			}
+		}
+		
+		return cumulative;
 	}
 }

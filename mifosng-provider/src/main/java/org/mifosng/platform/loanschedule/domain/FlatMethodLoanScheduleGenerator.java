@@ -65,7 +65,6 @@ public class FlatMethodLoanScheduleGenerator implements LoanScheduleGenerator {
 		
 		BigDecimal chargesDueAtTimeOfDisbursement = BigDecimal.ZERO;
 		for (LoanCharge loanCharge : loanCharges) {
-			// FIXME - KW - right now only charges at disbursement are supported.
 			if (loanCharge.isDueAtDisbursement()) {
 				chargesDueAtTimeOfDisbursement = chargesDueAtTimeOfDisbursement.add(loanCharge.amount());
 			}
@@ -108,14 +107,20 @@ public class FlatMethodLoanScheduleGenerator implements LoanScheduleGenerator {
 				}
 			}
 
-			Money totalInstallmentDue = principalPerInstallment.plus(interestPerInstallment);
 			outstandingBalance = outstandingBalance.minus(principalPerInstallment);
+
+//			Money chargesForInstallment = cumulativeChargesDueWithin(startDate, scheduledDueDate, loanCharges, monetaryCurrency);
+			Money chargesForInstallment = Money.zero(monetaryCurrency);
+			Money totalInstallmentDue = principalPerInstallment.plus(interestPerInstallment).plus(chargesForInstallment);
+			cumulativeChargesToDate = cumulativeChargesToDate.add(chargesForInstallment.getAmount());
 			
 			LoanSchedulePeriodData installment = LoanSchedulePeriodData.repaymentOnlyPeriod(periodNumber, startDate, 
 					scheduledDueDate, 
 					principalPerInstallment.getAmount(), 
 					outstandingBalance.getAmount(), 
-					interestPerInstallment.getAmount(), totalInstallmentDue.getAmount());
+					interestPerInstallment.getAmount(),
+					chargesForInstallment.getAmount(),
+					totalInstallmentDue.getAmount());
 
 			periods.add(installment);
 			

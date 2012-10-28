@@ -465,67 +465,68 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	    
 	    checkForUnsupportedParameters(requestMap, supportedParams);
 	    
-	    final Set<String> modifiedParameters = new HashSet<String>();
+	    final Set<String> parametersPassedInCommand = new HashSet<String>();
 	    
 	    final JsonParser parser = new JsonParser();
 	    final JsonElement element = parser.parse(json);
 	    final JsonParserHelper helper = new JsonParserHelper();
 	    
-	    final Long clientId = helper.extractLongNamed("clientId", element, modifiedParameters);
-		final Long groupId = helper.extractLongNamed("groupId", element, modifiedParameters);
-	    final Long productId = helper.extractLongNamed("productId", element, modifiedParameters);
-	    final Long fundId = helper.extractLongNamed("fundId", element, modifiedParameters);
-	    final Long loanOfficerId = helper.extractLongNamed("loanOfficerId", element, modifiedParameters);
-	    final Long transactionProcessingStrategyId = helper.extractLongNamed("transactionProcessingStrategyId", element, modifiedParameters);
-	    final String externalId = helper.extractStringNamed("externalId", element, modifiedParameters);
-	    final BigDecimal principal = helper.extractBigDecimalNamed("principal", element, modifiedParameters);
-	    final BigDecimal inArrearsToleranceValue = helper.extractBigDecimalNamed("inArrearsTolerance", element, modifiedParameters);
-	    final BigDecimal interestRatePerPeriod = helper.extractBigDecimalNamed("interestRatePerPeriod", element, modifiedParameters);
+	    final Long clientId = helper.extractLongNamed("clientId", element, parametersPassedInCommand);
+		final Long groupId = helper.extractLongNamed("groupId", element, parametersPassedInCommand);
+	    final Long productId = helper.extractLongNamed("productId", element, parametersPassedInCommand);
+	    final Long fundId = helper.extractLongNamed("fundId", element, parametersPassedInCommand);
+	    final Long loanOfficerId = helper.extractLongNamed("loanOfficerId", element, parametersPassedInCommand);
+	    final Long transactionProcessingStrategyId = helper.extractLongNamed("transactionProcessingStrategyId", element, parametersPassedInCommand);
+	    final String externalId = helper.extractStringNamed("externalId", element, parametersPassedInCommand);
+	    final BigDecimal principal = helper.extractBigDecimalNamed("principal", element, parametersPassedInCommand);
+	    final BigDecimal inArrearsToleranceValue = helper.extractBigDecimalNamed("inArrearsTolerance", element, parametersPassedInCommand);
+	    final BigDecimal interestRatePerPeriod = helper.extractBigDecimalNamed("interestRatePerPeriod", element, parametersPassedInCommand);
 	    
-	    final Integer repaymentEvery = helper.extractIntegerNamed("repaymentEvery", element, modifiedParameters);
-	    final Integer numberOfRepayments = helper.extractIntegerNamed("numberOfRepayments", element, modifiedParameters);
-	    final Integer repaymentFrequencyType = helper.extractIntegerNamed("repaymentFrequencyType", element, modifiedParameters);
-	    final Integer loanTermFrequency = helper.extractIntegerNamed("loanTermFrequency", element, modifiedParameters);
-	    final Integer loanTermFrequencyType = helper.extractIntegerNamed("loanTermFrequencyType", element, modifiedParameters);
-	    final Integer interestRateFrequencyType = helper.extractIntegerNamed("interestRateFrequencyType", element, modifiedParameters);
-	    final Integer amortizationType = helper.extractIntegerNamed("amortizationType", element, modifiedParameters);
-	    final Integer interestType = helper.extractIntegerNamed("interestType", element, modifiedParameters);
-	    final Integer interestCalculationPeriodType = helper.extractIntegerNamed("interestCalculationPeriodType", element, modifiedParameters);
+	    final Integer repaymentEvery = helper.extractIntegerNamed("repaymentEvery", element, parametersPassedInCommand);
+	    final Integer numberOfRepayments = helper.extractIntegerNamed("numberOfRepayments", element, parametersPassedInCommand);
+	    final Integer repaymentFrequencyType = helper.extractIntegerNamed("repaymentFrequencyType", element, parametersPassedInCommand);
+	    final Integer loanTermFrequency = helper.extractIntegerNamed("loanTermFrequency", element, parametersPassedInCommand);
+	    final Integer loanTermFrequencyType = helper.extractIntegerNamed("loanTermFrequencyType", element, parametersPassedInCommand);
+	    final Integer interestRateFrequencyType = helper.extractIntegerNamed("interestRateFrequencyType", element, parametersPassedInCommand);
+	    final Integer amortizationType = helper.extractIntegerNamed("amortizationType", element, parametersPassedInCommand);
+	    final Integer interestType = helper.extractIntegerNamed("interestType", element, parametersPassedInCommand);
+	    final Integer interestCalculationPeriodType = helper.extractIntegerNamed("interestCalculationPeriodType", element, parametersPassedInCommand);
 	    
-	    final LocalDate expectedDisbursementDate = helper.extractLocalDateNamed("expectedDisbursementDate", element, modifiedParameters);
-	    final LocalDate repaymentsStartingFromDate = helper.extractLocalDateNamed("repaymentsStartingFromDate", element, modifiedParameters);
-	    final LocalDate interestChargedFromDate = helper.extractLocalDateNamed("interestChargedFromDate", element, modifiedParameters);
-	    final LocalDate submittedOnDate = helper.extractLocalDateNamed("submittedOnDate", element, modifiedParameters);
+	    final LocalDate expectedDisbursementDate = helper.extractLocalDateNamed("expectedDisbursementDate", element, parametersPassedInCommand);
+	    final LocalDate repaymentsStartingFromDate = helper.extractLocalDateNamed("repaymentsStartingFromDate", element, parametersPassedInCommand);
+	    final LocalDate interestChargedFromDate = helper.extractLocalDateNamed("interestChargedFromDate", element, parametersPassedInCommand);
+	    final LocalDate submittedOnDate = helper.extractLocalDateNamed("submittedOnDate", element, parametersPassedInCommand);
 	    
-	    final String submittedOnNote = helper.extractStringNamed("submittedOnNote", element, modifiedParameters);
+	    final String submittedOnNote = helper.extractStringNamed("submittedOnNote", element, parametersPassedInCommand);
 	    
         LoanChargeCommand[] charges = null;
         if (element.isJsonObject()) {
-            JsonObject object = element.getAsJsonObject();
-            if (object.has("charges") && object.get("charges").isJsonArray()) {
-                modifiedParameters.add("charges");
-                JsonArray array = object.get("charges").getAsJsonArray();
+            final JsonObject topLevelJsonElement = element.getAsJsonObject();
+            final String dateFormat = helper.extractDateFormatParameter(topLevelJsonElement);
+            final Locale locale = helper.extractLocaleParameter(topLevelJsonElement);
+            if (topLevelJsonElement.has("charges") && topLevelJsonElement.get("charges").isJsonArray()) {
+                
+            	parametersPassedInCommand.add("charges");
+                final JsonArray array = topLevelJsonElement.get("charges").getAsJsonArray();
                 charges = new LoanChargeCommand[array.size()];
                 for (int i=0; i<array.size(); i++) {
-                    JsonObject loanCharge = array.get(i).getAsJsonObject();
-                    Map<String, Object> chargeRequestMap = gsonConverter.fromJson(loanCharge, typeOfMap);
-                    if (requestMap.containsKey("locale")){
-                        chargeRequestMap.put("locale", requestMap.get("locale"));
-                    }
-                    Set<String> chargeModifiedParameters = new HashSet<String>();
+                	
+                    final JsonObject loanChargeElement = array.get(i).getAsJsonObject();
+                    final Set<String> chargeModifiedParameters = new HashSet<String>();
 
-                    Long id = extractLongParameter("id", chargeRequestMap, chargeModifiedParameters);
-                    Long chargeId = extractLongParameter("chargeId", chargeRequestMap, chargeModifiedParameters);
-                    BigDecimal amount = extractBigDecimalParameter("amount", chargeRequestMap, chargeModifiedParameters);
-                    Integer chargeTimeType = extractIntegerParameter("chargeTimeType", chargeRequestMap, chargeModifiedParameters);
-                    Integer chargeCalculationType = extractIntegerParameter("chargeCalculationType", chargeRequestMap, chargeModifiedParameters);
-
-                    charges[i] = new LoanChargeCommand(chargeModifiedParameters, id, null,chargeId, amount, chargeTimeType, chargeCalculationType);
+                    final Long id = helper.extractLongNamed("id", loanChargeElement, chargeModifiedParameters);
+                    final Long chargeId = helper.extractLongNamed("chargeId", loanChargeElement, chargeModifiedParameters);
+                    final BigDecimal amount = helper.extractBigDecimalNamed("amount", loanChargeElement, locale, chargeModifiedParameters);
+                    final Integer chargeTimeType = helper.extractIntegerNamed("chargeTimeType", loanChargeElement, locale, chargeModifiedParameters);
+                    final Integer chargeCalculationType = helper.extractIntegerNamed("chargeCalculationType", loanChargeElement, locale, chargeModifiedParameters);
+                    final LocalDate specifiedDueDate = helper.extractLocalDateNamed("specifiedDueDate", loanChargeElement, dateFormat, locale, parametersPassedInCommand);
+                    
+                    charges[i] = new LoanChargeCommand(chargeModifiedParameters, id, null, chargeId, amount, chargeTimeType, chargeCalculationType, specifiedDueDate);
                 }
             }
         }
 
-		return new LoanApplicationCommand(modifiedParameters,
+		return new LoanApplicationCommand(parametersPassedInCommand,
 				resourceIdentifier, clientId, groupId, productId, externalId, fundId, transactionProcessingStrategyId,
 				submittedOnDate, submittedOnNote, 
 	    		expectedDisbursementDate, repaymentsStartingFromDate, interestChargedFromDate, 
@@ -535,8 +536,9 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	    		inArrearsToleranceValue, charges,loanOfficerId);
 	}
 
+	// FIXME - KW - charges
     @Override
-    public LoanChargeCommand convertJsonToLoanChargeCommand(Long loanChargeId, Long loanId, String json) {
+    public LoanChargeCommand convertJsonToLoanChargeCommand(final Long loanChargeId, final Long loanId, final String json) {
         if (StringUtils.isBlank(json)) {
             throw new InvalidJsonException();
         }
@@ -544,8 +546,8 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
         Type typeOfMap = new TypeToken<Map<String, String>>(){}.getType();
         Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
 
-        Set<String> supportedParams = new HashSet<String>(
-                Arrays.asList("chargeId", "amount", "chargeTimeType", "chargeCalculationType", "locale")
+        final Set<String> supportedParams = new HashSet<String>(
+        		Arrays.asList("chargeId", "amount", "chargeTimeType", "chargeCalculationType", "specifiedDueDate", "locale", "dateFormat")
         );
 
         checkForUnsupportedParameters(requestMap, supportedParams);
@@ -556,9 +558,10 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
         BigDecimal amount = extractBigDecimalParameter("amount", requestMap, modifiedParameters);
         Integer chargeTimeType = extractIntegerParameter("chargeTimeType", requestMap, modifiedParameters);
         Integer chargeCalculationType = extractIntegerParameter("chargeCalculationType", requestMap, modifiedParameters);
+        final LocalDate submittedOnDate = extractLocalDateParameter("specifiedDueDate", requestMap, modifiedParameters);
 
         return new LoanChargeCommand(modifiedParameters, loanChargeId, loanId, chargeId, amount,
-                chargeTimeType, chargeCalculationType);
+                chargeTimeType, chargeCalculationType, submittedOnDate);
     }
 
     @Override

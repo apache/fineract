@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 
+import org.joda.time.LocalDate;
 import org.mifosng.platform.api.data.ChargeData;
 import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.EnumOptionData;
@@ -177,6 +178,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
             		"lc.amount as amountDue, lc.amount_paid_derived as amountPaid, lc.amount_outstanding_derived as amountOutstanding, " +
             		"lc.calculation_percentage as percentageOf, lc.calculation_on_amount as amountPercentageAppliedTo, " +
             		"lc.charge_time_enum as chargeTime, " +
+            		"lc.due_for_collection_as_of_date as dueAsOfDate, " +
                     "lc.charge_calculation_enum as chargeCalculation, " +
                     "c.currency_code as currencyCode, oc.name as currencyName, " +
                     "oc.decimal_places as currencyDecimalPlaces, oc.display_symbol as currencyDisplaySymbol, " +
@@ -213,10 +215,12 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
         	final int chargeTime = rs.getInt("chargeTime");
         	final EnumOptionData chargeTimeType = ChargeEnumerations.chargeTimeType(chargeTime);
 
+        	final LocalDate dueAsOfDate = JdbcSupport.getLocalDate(rs, "dueAsOfDate");
+        	
         	final int chargeCalculation = rs.getInt("chargeCalculation");
         	final EnumOptionData chargeCalculationType = ChargeEnumerations.chargeCalculationType(chargeCalculation);
 
-            return new LoanChargeData(id, chargeId, name, currency, amount, amountPaid, amountOutstanding, chargeTimeType, chargeCalculationType, percentageOf, amountPercentageAppliedTo);
+            return new LoanChargeData(id, chargeId, name, currency, amount, amountPaid, amountOutstanding, chargeTimeType, dueAsOfDate, chargeCalculationType, percentageOf, amountPercentageAppliedTo);
         }
     }
 }

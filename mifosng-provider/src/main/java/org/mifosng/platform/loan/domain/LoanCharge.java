@@ -3,6 +3,7 @@ package org.mifosng.platform.loan.domain;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -11,11 +12,15 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
+import org.joda.time.LocalDate;
 import org.mifosng.platform.api.commands.LoanChargeCommand;
 import org.mifosng.platform.charge.domain.Charge;
 import org.mifosng.platform.charge.domain.ChargeCalculationType;
 import org.mifosng.platform.charge.domain.ChargeTimeType;
+import org.mifosng.platform.exceptions.LoanChargeWithoutMandatoryFieldException;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity 
@@ -32,6 +37,10 @@ public class LoanCharge extends AbstractPersistable<Long> {
 
     @Column(name = "charge_time_enum", nullable = false)
     private Integer chargeTime;
+    
+	@Temporal(TemporalType.DATE)
+	@Column(name = "due_for_collection_as_of_date")
+	private Date dueForCollectionAsOfDate;
 
     @Column(name = "charge_calculation_enum")
     private Integer chargeCalculation;
@@ -80,13 +89,25 @@ public class LoanCharge extends AbstractPersistable<Long> {
     	 this.loan = null;
     	 this.charge = chargeDefinition;
     	 
-    	 if (command.isChargeTimeTypeChanged()){
+    	 if (command.isChargeTimeTypeChanged()) {
              this.chargeTime = command.getChargeTimeType();
          } else {
              this.chargeTime = chargeDefinition.getChargeTime();
          }
+    	 
+    	 if (ChargeTimeType.fromInt(this.chargeTime).equals(ChargeTimeType.SPECIFIED_DUE_DATE)) {
+    		 
+    		 if (command.getSpecifiedDueDate() == null) {
+    			final String defaultUserMessage = "Loan charge is missing specified due date";
+				throw new LoanChargeWithoutMandatoryFieldException("loancharge", "specifiedDueDate", defaultUserMessage, command.getId(), chargeDefinition.getName());
+    		 }
+    		 
+    		 this.dueForCollectionAsOfDate = command.getSpecifiedDueDate().toDate();
+    	 } else {
+    		 this.dueForCollectionAsOfDate = null;
+    	 }
 
-         if (command.isChargeCalculationTypeChanged()){
+         if (command.isChargeCalculationTypeChanged()) {
              this.chargeCalculation = command.getChargeCalculationType();
          } else {
              this.chargeCalculation = chargeDefinition.getChargeCalculation();
@@ -110,6 +131,20 @@ public class LoanCharge extends AbstractPersistable<Long> {
         } else {
             this.chargeTime = chargeDefinition.getChargeTime();
         }
+        
+		if (ChargeTimeType.fromInt(this.chargeTime).equals(ChargeTimeType.SPECIFIED_DUE_DATE)) {
+
+			if (command.getSpecifiedDueDate() == null) {
+				final String defaultUserMessage = "Loan charge is missing specified due date";
+				throw new LoanChargeWithoutMandatoryFieldException(
+						"loancharge", "specifiedDueDate", defaultUserMessage,
+						command.getId(), chargeDefinition.getName());
+			}
+
+			this.dueForCollectionAsOfDate = command.getSpecifiedDueDate().toDate();
+		} else {
+			this.dueForCollectionAsOfDate = null;
+		}
 
         if (command.isChargeCalculationTypeChanged()){
             this.chargeCalculation = command.getChargeCalculationType();
@@ -226,54 +261,24 @@ public class LoanCharge extends AbstractPersistable<Long> {
 		return ChargeTimeType.fromInt(this.chargeTime).equals(ChargeTimeType.DISBURSEMENT);
 	}
 
-//	public BigDecimal calculateMonetaryAmount(final Money principalDisbursed) {
-//		BigDecimal calculatedAmount = BigDecimal.ZERO;
-//		
-//		   switch (ChargeCalculationType.fromInt(this.chargeCalculation)) {
-//			case INVALID:
-//				calculatedAmount = this.amount;
-//				break;
-//			case FLAT:
-//				calculatedAmount = this.amount;
-//				break;
-//			case PERCENT_OF_AMOUNT:
-//				this.amountPercentageAppliedTo = principalDisbursed.getAmount();
-//				this.amount = percentageOf(this.amountPercentageAppliedTo, this.percentage);
-//				this.amountPaid = null;
-//				this.amountOutstanding = calculateOutstanding();
-//				calculatedAmount = this.amount;
-//				break;
-//			case PERCENT_OF_AMOUNT_AND_INTEREST:
-//				this.percentage = null;
-//				this.amount = null;
-//				this.amountPercentageAppliedTo = null;
-//				this.amountPaid = null;
-//				this.amountOutstanding = null;
-//				break;
-//			case PERCENT_OF_INTEREST:
-//				this.percentage = null;
-//				this.amount = null;
-//				this.amountPercentageAppliedTo = null;
-//				this.amountPaid = null;
-//				this.amountOutstanding = null;
-//				break;
-//			}
-//		
-//		return calculatedAmount;
-//	}
-//	
-//	public BigDecimal calculateMonetaryAmount() {
-//		return calculateMonetaryAmount(this.loan.getPrincpal());
-//	}
-
 	private boolean isGreaterThanZero(final BigDecimal value) {
 		return value.compareTo(BigDecimal.ZERO) == 1;
 	}
 
-	public LoanChargeCommand toData() {
-		Set<String> modifiedParameters = new HashSet<String>();
+	public LoanChargeCommand toCommand() {
+		
+		final LocalDate specifiedDueDate = getDueForCollectionAsOfLocalDate();
+		final Set<String> modifiedParameters = new HashSet<String>();
 		return new LoanChargeCommand(modifiedParameters, this.getId(), this.loan.getId(), this.charge.getId(),
-                this.amount, this.chargeTime, this.chargeCalculation);
+                this.amount, this.chargeTime, this.chargeCalculation, specifiedDueDate);
+	}
+
+	private LocalDate getDueForCollectionAsOfLocalDate() {
+		LocalDate specifiedDueDate = null;
+		if (this.dueForCollectionAsOfDate != null) {
+			specifiedDueDate = new LocalDate(this.dueForCollectionAsOfDate);
+		}
+		return specifiedDueDate;
 	}
 	
     private boolean determineIfFullyPaid() {
@@ -325,5 +330,18 @@ public class LoanCharge extends AbstractPersistable<Long> {
 	
 	public boolean hasLoanIdentifiedBy(final Long loanId) {
 		return this.loan.hasIdentifyOf(loanId);
+	}
+
+	public boolean isDueForCollectionBetween(final LocalDate fromNotInclusive, final LocalDate toInclusive) {
+		final LocalDate specifiedDueDate = getDueForCollectionAsOfLocalDate();
+		
+		return specifiedDueDateFallsWithinPeriod(fromNotInclusive, toInclusive, specifiedDueDate);
+	}
+
+	private boolean specifiedDueDateFallsWithinPeriod(
+			final LocalDate fromNotInclusive, 
+			final LocalDate toInclusive,
+			final LocalDate specifiedDueDate) {
+		return specifiedDueDate != null && fromNotInclusive.isBefore(specifiedDueDate) && (toInclusive.isAfter(specifiedDueDate) || toInclusive.isEqual(specifiedDueDate));
 	}
 }

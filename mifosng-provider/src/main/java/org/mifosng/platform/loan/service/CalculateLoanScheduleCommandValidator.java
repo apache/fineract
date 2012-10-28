@@ -83,6 +83,17 @@ public class CalculateLoanScheduleCommandValidator {
 			}
 		}
 		
+//		if (command.getCharges() != null) {
+//			for (LoanChargeCommand loanCharge : command.getCharges()) {
+//				try {
+//					LoanChargeCommandValidator validator = new LoanChargeCommandValidator(loanCharge);
+//					validator.validateForCreate();
+//				} catch (PlatformApiDataValidationException e) {
+//					dataValidationErrors.addAll(e.getErrors());
+//				}
+//			}
+//		}
+		
 		if (!dataValidationErrors.isEmpty()) {
 			throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);
 		}
