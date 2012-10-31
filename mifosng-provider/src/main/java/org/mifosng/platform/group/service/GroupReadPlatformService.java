@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import org.mifosng.platform.api.data.GroupAccountSummaryCollectionData;
 import org.mifosng.platform.api.data.ClientLookup;
+import org.mifosng.platform.api.data.GroupAccountSummaryData;
 import org.mifosng.platform.api.data.GroupData;
 
 public interface GroupReadPlatformService {
@@ -17,4 +18,6 @@ public interface GroupReadPlatformService {
     Collection<ClientLookup> retrieveClientMembers(Long groupId);
 
     GroupAccountSummaryCollectionData retrieveGroupAccountDetails(Long groupId);
+
+    Collection<GroupAccountSummaryData> retrieveGroupLoanAccountsByLoanOfficerId(Long groupId, Long loanOfficerId);
 }

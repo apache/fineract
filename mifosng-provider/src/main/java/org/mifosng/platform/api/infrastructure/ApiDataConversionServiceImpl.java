@@ -19,6 +19,7 @@ import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.mifosng.platform.api.commands.AdjustLoanTransactionCommand;
 import org.mifosng.platform.api.commands.BranchMoneyTransferCommand;
+import org.mifosng.platform.api.commands.BulkLoanReassignmentCommand;
 import org.mifosng.platform.api.commands.ChargeCommand;
 import org.mifosng.platform.api.commands.ClientCommand;
 import org.mifosng.platform.api.commands.ClientIdentifierCommand;
@@ -152,7 +153,49 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	    
 		return new StaffCommand(modifiedParameters, resourceIdentifier, officeId,firstname, lastname, isLoanOfficer);
 	}
-	
+
+    @Override
+    public BulkLoanReassignmentCommand convertJsonToBulkLoanReassignmentCommand(String json) {
+
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
+
+        Type typeOfMap = new TypeToken<Map<String, Object>>(){}.getType();
+        Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
+
+        Set<String> supportedParams = new HashSet<String>(
+                Arrays.asList("fromLoanOfficerId", "toLoanOfficerId","loans")
+        );
+
+        checkForUnsupportedParameters(requestMap, supportedParams);
+
+        Set<String> modifiedParameters = new HashSet<String>();
+
+        Long fromLoanOfficerId = extractLongParameter("fromLoanOfficerId", requestMap, modifiedParameters);
+        Long toLoanOfficerId = extractLongParameter("toLoanOfficerId", requestMap, modifiedParameters);
+
+        // check array
+        JsonParser parser = new JsonParser();
+
+        String[] loans = null;
+        JsonElement element = parser.parse(json);
+        if (element.isJsonObject()) {
+            JsonObject object = element.getAsJsonObject();
+            if (object.has("loans")) {
+                modifiedParameters.add("loans");
+                JsonArray array = object.get("loans").getAsJsonArray();
+                loans = new String[array.size()];
+                for (int i=0; i<array.size(); i++) {
+                    loans[i] = array.get(i).getAsString();
+                }
+            }
+        }
+        //
+
+        return new BulkLoanReassignmentCommand(modifiedParameters, fromLoanOfficerId, toLoanOfficerId, loans);
+	}
+
 	@Override
 	public OfficeCommand convertJsonToOfficeCommand(final Long resourceIdentifier, final String json) {
 		if (StringUtils.isBlank(json)) {

@@ -181,6 +181,23 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         }
     }
 
+    @Override
+    public Collection<GroupAccountSummaryData> retrieveGroupLoanAccountsByLoanOfficerId(Long groupId, Long loanOfficerId) {
+
+        this.context.authenticatedUser();
+
+        // Check if group exists
+        retrieveGroup(groupId);
+
+        GroupLoanAccountSummaryDataMapper rm = new GroupLoanAccountSummaryDataMapper();
+
+        String sql = "select " + rm.loanAccountSummarySchema() + " where l.group_id = ? and l.loan_officer_id = ?";
+
+        List<GroupAccountSummaryData> loanAccounts = this.jdbcTemplate.query(sql, rm, new Object[] {groupId, loanOfficerId});
+
+        return loanAccounts;
+    }
+
     private static final class GroupLoanAccountSummaryDataMapper implements
             RowMapper<GroupAccountSummaryData> {
 

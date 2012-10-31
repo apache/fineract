@@ -25,6 +25,7 @@ import org.mifosng.platform.api.data.GroupData;
 import org.mifosng.platform.api.data.LoanAccountData;
 import org.mifosng.platform.api.data.LoanChargeData;
 import org.mifosng.platform.api.data.LoanProductData;
+import org.mifosng.platform.api.data.LoanReassignmentData;
 import org.mifosng.platform.api.data.LoanTransactionData;
 import org.mifosng.platform.api.data.NoteData;
 import org.mifosng.platform.api.data.OfficeData;
@@ -105,6 +106,8 @@ public interface ApiJsonSerializerService {
 	String serializeLoanAccountDataToJson(boolean prettyPrint, Set<String> responseParameters, LoanAccountData loanAccount);
 
 	String serializeLoanTransactionDataToJson(boolean prettyPrint, Set<String> responseParameters, LoanTransactionData newTransactionData);
+
+    String serializeLoanReassignmentDataToJson(boolean prettyPrint, Set<String> responseParameters, LoanReassignmentData loanReassignmentData);
 
 	String serializeChargeDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<ChargeData> charges);
 

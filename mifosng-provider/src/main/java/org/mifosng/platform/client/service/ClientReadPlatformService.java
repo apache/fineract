@@ -3,6 +3,7 @@ package org.mifosng.platform.client.service;
 import java.util.Collection;
 
 import org.mifosng.platform.api.data.ClientAccountSummaryCollectionData;
+import org.mifosng.platform.api.data.ClientAccountSummaryData;
 import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.ClientIdentifierData;
 import org.mifosng.platform.api.data.ClientLookup;
@@ -21,6 +22,8 @@ public interface ClientReadPlatformService {
     Collection<ClientLookup> retrieveAllIndividualClientsForLookupByOfficeId(Long officeId);
 
 	ClientAccountSummaryCollectionData retrieveClientAccountDetails(Long clientId);
+
+    Collection<ClientAccountSummaryData> retrieveClientLoanAccountsByLoanOfficerId(Long clientId, Long loanOfficerId);
 
 	Collection<NoteData> retrieveAllClientNotes(Long clientId);
 

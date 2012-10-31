@@ -272,6 +272,23 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 		}
 	}
 
+    @Override
+    public Collection<ClientAccountSummaryData> retrieveClientLoanAccountsByLoanOfficerId(Long clientId, Long loanOfficerId) {
+
+        this.context.authenticatedUser();
+
+        // Check if client exists
+        retrieveIndividualClient(clientId);
+
+        ClientLoanAccountSummaryDataMapper rm = new ClientLoanAccountSummaryDataMapper();
+
+        String sql = "select " + rm.loanAccountSummarySchema() + " where l.client_id = ? and l.loan_officer_id = ?";
+
+        List<ClientAccountSummaryData> loanAccounts = this.jdbcTemplate.query(sql, rm, new Object[] {clientId, loanOfficerId});
+
+        return loanAccounts;
+    }
+
 	private static final class ClientLoanAccountSummaryDataMapper implements
 			RowMapper<ClientAccountSummaryData> {
 

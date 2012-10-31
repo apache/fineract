@@ -2,6 +2,7 @@ package org.mifosng.platform.api.infrastructure;
 
 import org.mifosng.platform.api.commands.AdjustLoanTransactionCommand;
 import org.mifosng.platform.api.commands.BranchMoneyTransferCommand;
+import org.mifosng.platform.api.commands.BulkLoanReassignmentCommand;
 import org.mifosng.platform.api.commands.ChargeCommand;
 import org.mifosng.platform.api.commands.ClientCommand;
 import org.mifosng.platform.api.commands.ClientIdentifierCommand;
@@ -73,7 +74,9 @@ public interface ApiDataConversionService {
 	DepositStateTransitionApprovalCommand convertJsonToDepositStateTransitionApprovalCommand(Long resourceIdentifier, String jsonRequestBody);
 
 	StaffCommand convertJsonToStaffCommand(Long resourceIdentifier, String json);
-	
+
+    BulkLoanReassignmentCommand convertJsonToBulkLoanReassignmentCommand(String jsonRequestBody);
+
 	DepositAccountWithdrawalCommand convertJsonToDepositWithdrawalCommand(Long resourceIdentifier, String jsonRequestBody);
 	
 	DepositAccountWithdrawInterestCommand convertJsonToDepositAccountWithdrawInterestCommand(Long resourceIdentifier, String jsonRequestBody);

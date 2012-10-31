@@ -27,6 +27,7 @@ import org.mifosng.platform.api.data.GroupData;
 import org.mifosng.platform.api.data.LoanAccountData;
 import org.mifosng.platform.api.data.LoanChargeData;
 import org.mifosng.platform.api.data.LoanProductData;
+import org.mifosng.platform.api.data.LoanReassignmentData;
 import org.mifosng.platform.api.data.LoanTransactionData;
 import org.mifosng.platform.api.data.NoteData;
 import org.mifosng.platform.api.data.OfficeData;
@@ -186,6 +187,10 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 
 	private static final Set<String> LOAN_TRANSACTION_NEW_DATA_PARAMETERS = new HashSet<String>(
 			Arrays.asList("id", "type", "date", "currency", "amount"));
+
+    private static final Set<String> LOAN_REASSIGNMENT_DATA_PARAMETERS = new HashSet<String>(
+            Arrays.asList("officeId", "fromLoanOfficerId", "officeOptions", "loanOfficerOptions", "accountSummaryCollection")
+    );
 
 	private static final Set<String> CHARGES_DATA_PARAMETERS = new HashSet<String>(
 			Arrays.asList("id", "name", "amount", "currency", "penalty", "active",
@@ -566,6 +571,17 @@ public class GoogleGsonApiJsonSerializerService implements ApiJsonSerializerServ
 						LOAN_TRANSACTION_NEW_DATA_PARAMETERS, prettyPrint,
 						responseParameters);
 		return helper.serializedJsonFrom(gsonDeserializer, transaction);
+	}
+
+    @Override
+    public String serializeLoanReassignmentDataToJson(boolean prettyPrint,
+                                                      Set<String> responseParameters,
+                                                      LoanReassignmentData loanReassignmentData) {
+        final Gson gsonDeserializer = helper
+                .createGsonBuilderWithParameterExclusionSerializationStrategy(
+                        LOAN_REASSIGNMENT_DATA_PARAMETERS, prettyPrint,
+                        responseParameters);
+        return helper.serializedJsonFrom(gsonDeserializer, loanReassignmentData);
 	}
 
 	@Override

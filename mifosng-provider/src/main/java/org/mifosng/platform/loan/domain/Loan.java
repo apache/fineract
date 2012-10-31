@@ -300,6 +300,10 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		return loanofficer;
 	}
 
+    public void setLoanofficer(Staff loanofficer) {
+        this.loanofficer = loanofficer;
+    }
+
 	public LoanProductRelatedDetail repaymentScheduleDetail() {
 		return this.loanRepaymentScheduleDetail;
 	}

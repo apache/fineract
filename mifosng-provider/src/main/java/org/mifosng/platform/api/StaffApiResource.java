@@ -18,13 +18,17 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.StringUtils;
+import org.mifosng.platform.api.commands.BulkLoanReassignmentCommand;
 import org.mifosng.platform.api.commands.StaffCommand;
 import org.mifosng.platform.api.data.EntityIdentifier;
+import org.mifosng.platform.api.data.LoanReassignmentData;
 import org.mifosng.platform.api.data.OfficeLookup;
+import org.mifosng.platform.api.data.StaffAccountSummaryCollectionData;
 import org.mifosng.platform.api.data.StaffData;
 import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
 import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
+import org.mifosng.platform.loan.service.LoanWritePlatformService;
 import org.mifosng.platform.organisation.service.OfficeReadPlatformService;
 import org.mifosng.platform.staff.service.StaffReadPlatformService;
 import org.mifosng.platform.staff.service.StaffWritePlatformService;
@@ -53,6 +57,9 @@ public class StaffApiResource {
 
 	@Autowired
 	private OfficeReadPlatformService officeReadPlatformService;
+
+    @Autowired
+    private LoanWritePlatformService loanWritePlatformService;
 
 	private final static Logger logger = LoggerFactory
 			.getLogger(StaffApiResource.class);
@@ -130,6 +137,53 @@ public class StaffApiResource {
 
 		return Response.ok().entity(new EntityIdentifier(entityId)).build();
 	}
+
+    @POST
+    @Path("loanreassignment")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public Response loanReassignment(final String jsonRequestBody){
+
+        BulkLoanReassignmentCommand command =
+                this.apiDataConversionService.convertJsonToBulkLoanReassignmentCommand(jsonRequestBody);
+
+        EntityIdentifier loanOfficerIdentifier = this.loanWritePlatformService.bulkLoanReassignment(command);
+
+        return Response.ok().entity(loanOfficerIdentifier).build();
+    }
+
+    @GET
+    @Path("loanreassignment/template")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String loanReassignmentTemplate(@QueryParam("officeId") final Long officeId,
+                                           @QueryParam("fromLoanOfficerId") final Long loanOfficerId,
+                                           @Context final UriInfo uriInfo){
+
+        final Set<String> responseParameters = ApiParameterHelper
+                .extractFieldsForResponseIfProvided(uriInfo
+                        .getQueryParameters());
+
+        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo
+                .getQueryParameters());
+
+        Collection<OfficeLookup> offices = this.officeReadPlatformService.retrieveAllOfficesForLookup();
+
+        Collection<StaffData> loanOfficers = null;
+        StaffAccountSummaryCollectionData staffAccountSummaryCollectionData = null;
+
+        if (officeId != null){
+            loanOfficers = this.readPlatformService.retrieveAllLoanOfficersByOffice(officeId);
+        }
+        if (loanOfficerId != null){
+            staffAccountSummaryCollectionData = this.readPlatformService.retrieveLoanOfficerAccountSummary(loanOfficerId);
+        }
+
+        LoanReassignmentData loanReassignmentData = new LoanReassignmentData(officeId, loanOfficerId, offices,
+                loanOfficers, staffAccountSummaryCollectionData);
+
+        return this.apiJsonSerializerService.serializeLoanReassignmentDataToJson(prettyPrint, responseParameters, loanReassignmentData);
+    }
 
 	private String getStaffCriteria(String sqlSearch, Integer officeId) {
 
