@@ -1,8 +1,6 @@
 package org.mifosng.platform.api;
 
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -66,19 +64,6 @@ public class LoanProductsApiResource {
     
     @Autowired
     private LoanDropdownReadPlatformService dropdownReadPlatformService;
-
-    private final Set<String> typicalResponseParameters = new HashSet<String>(
-			Arrays.asList("id", "name", "description", 
-					"fundId", "fundName", 
-					"transactionProcessingStrategyId", "transactionProcessingStrategyName",
-					"principal", "inArrearsTolerance",
-					"numberOfRepayments", "repaymentEvery", 
-					"interestRatePerPeriod", "annualInterestRate", 
-					"repaymentFrequencyType", "interestRateFrequencyType", 
-					"amortizationType", "interestType", "interestCalculationPeriodType",
-					"charges", 
-					"createdOn", "lastModifedOn")
-	);
     
 	@POST
 	@Consumes({MediaType.APPLICATION_JSON})
@@ -98,9 +83,6 @@ public class LoanProductsApiResource {
 	public String retrieveAllLoanProducts(@Context final UriInfo uriInfo) {
 
 		final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-		if (responseParameters.isEmpty()) {
-			responseParameters.addAll(typicalResponseParameters);
-		}
 		final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 
 		final Collection<LoanProductData> products = this.loanProductReadPlatformService.retrieveAllLoanProducts();
@@ -115,13 +97,10 @@ public class LoanProductsApiResource {
 	public String retrieveNewLoanProductDetails(@Context final UriInfo uriInfo) {
 		
 		final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-		if (responseParameters.isEmpty()) {
-			responseParameters.addAll(typicalResponseParameters);
-		}
 		final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 
 		LoanProductData loanProduct = this.loanProductReadPlatformService.retrieveNewLoanProductDetails();
-		loanProduct = handleTemplate(loanProduct, responseParameters);
+		loanProduct = handleTemplate(loanProduct);
 		
 		return this.apiJsonSerializerService.serializeLoanProductDataToJson(prettyPrint, responseParameters, loanProduct);
 	}
@@ -133,15 +112,12 @@ public class LoanProductsApiResource {
 	public String retrieveLoanProductDetails(@PathParam("productId") final Long productId, @Context final UriInfo uriInfo) {
 
 		final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-		if (responseParameters.isEmpty()) {
-			responseParameters.addAll(typicalResponseParameters);
-		}
 		final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 		final boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
 
 		LoanProductData loanProduct = this.loanProductReadPlatformService.retrieveLoanProduct(productId);
 		if (template) {
-			loanProduct = handleTemplate(loanProduct, responseParameters);
+			loanProduct = handleTemplate(loanProduct);
 		}
 		
 		return this.apiJsonSerializerService.serializeLoanProductDataToJson(prettyPrint, responseParameters, loanProduct);
@@ -160,24 +136,22 @@ public class LoanProductsApiResource {
 		return apiJsonSerializerService.serializeEntityIdentifier(identifier);
 	}
 	
-	private LoanProductData handleTemplate(final LoanProductData productData, final Set<String> responseParameters) {
+	private LoanProductData handleTemplate(final LoanProductData productData) {
 
-		responseParameters.addAll(Arrays.asList("currencyOptions", "amortizationTypeOptions", "interestTypeOptions", "interestCalculationPeriodTypeOptions", 
-				"repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "fundOptions", "transactionProcessingStrategyOptions", "chargeOptions"));
-		
-        Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveLoanApplicableCharges();
+		final boolean feeChargesOnly = true;
+        Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveLoanApplicableCharges(feeChargesOnly);
         chargeOptions.removeAll(productData.charges());
         
-        List<CurrencyData> currencyOptions = currencyReadPlatformService.retrieveAllowedCurrencies();
-		List<EnumOptionData> amortizationTypeOptions = dropdownReadPlatformService.retrieveLoanAmortizationTypeOptions();
-		List<EnumOptionData> interestTypeOptions = dropdownReadPlatformService.retrieveLoanInterestTypeOptions();
-		List<EnumOptionData> interestCalculationPeriodTypeOptions = dropdownReadPlatformService.retrieveLoanInterestRateCalculatedInPeriodOptions();
-		List<EnumOptionData> loanTermFrequencyTypeOptions = dropdownReadPlatformService.retrieveLoanTermFrequencyTypeOptions();
-		List<EnumOptionData> repaymentFrequencyTypeOptions = dropdownReadPlatformService.retrieveRepaymentFrequencyTypeOptions();
-		List<EnumOptionData> interestRateFrequencyTypeOptions = dropdownReadPlatformService.retrieveInterestRateFrequencyTypeOptions();
+        final List<CurrencyData> currencyOptions = currencyReadPlatformService.retrieveAllowedCurrencies();
+        final List<EnumOptionData> amortizationTypeOptions = dropdownReadPlatformService.retrieveLoanAmortizationTypeOptions();
+        final List<EnumOptionData> interestTypeOptions = dropdownReadPlatformService.retrieveLoanInterestTypeOptions();
+        final List<EnumOptionData> interestCalculationPeriodTypeOptions = dropdownReadPlatformService.retrieveLoanInterestRateCalculatedInPeriodOptions();
+        final List<EnumOptionData> loanTermFrequencyTypeOptions = dropdownReadPlatformService.retrieveLoanTermFrequencyTypeOptions();
+        final List<EnumOptionData> repaymentFrequencyTypeOptions = dropdownReadPlatformService.retrieveRepaymentFrequencyTypeOptions();
+        final List<EnumOptionData> interestRateFrequencyTypeOptions = dropdownReadPlatformService.retrieveInterestRateFrequencyTypeOptions();
 
-		Collection<FundData> fundOptions = this.fundReadPlatformService.retrieveAllFunds();
-		Collection<TransactionProcessingStrategyData> transactionProcessingStrategyOptions = this.dropdownReadPlatformService.retreiveTransactionProcessingStrategies();
+        final Collection<FundData> fundOptions = this.fundReadPlatformService.retrieveAllFunds();
+        final Collection<TransactionProcessingStrategyData> transactionProcessingStrategyOptions = this.dropdownReadPlatformService.retreiveTransactionProcessingStrategies();
         
         return new LoanProductData(productData, chargeOptions, currencyOptions, amortizationTypeOptions, interestTypeOptions, 
         		interestCalculationPeriodTypeOptions, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions, interestRateFrequencyTypeOptions, fundOptions, transactionProcessingStrategyOptions);

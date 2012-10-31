@@ -11,6 +11,7 @@ public class ChargeData {
     private final Long id;
     private final String name;
     private final boolean active;
+    private final boolean penalty;
     private final CurrencyData currency;
     private final BigDecimal amount;
     private final EnumOptionData chargeTimeType;
@@ -27,22 +28,24 @@ public class ChargeData {
             final List<EnumOptionData> chargeCalculationTypeOptions,
             final List<EnumOptionData> chargeAppliesToOptions,
             final List<EnumOptionData> chargeTimeTypeOptions) {
-        return new ChargeData(null, null, null, null, null, null, null, false,
+    	
+        return new ChargeData(null, null, null, null, null, null, null, false, false,
                 currencyOptions, chargeCalculationTypeOptions, chargeAppliesToOptions, chargeTimeTypeOptions);
     }
 
-    public ChargeData(ChargeData charge, ChargeData template){
-        this(charge.getId(), charge.getName(), charge.getAmount(), charge.getCurrency(), charge.getChargeTimeType(),
-                charge.getChargeAppliesTo(), charge.getChargeCalculationType(), charge.isActive(),
-                template.getCurrencyOptions(), template.getChargeCalculationTypeOptions(),
-                template.getChargeAppliesToOptions(), template.getChargeTimeTypeOptions());
+    public ChargeData(final ChargeData charge, final ChargeData template){
+        this(charge.id, charge.name, charge.amount, charge.currency, charge.chargeTimeType,
+                charge.chargeAppliesTo, charge.chargeCalculationType, 
+                charge.penalty, charge.active,
+                template.currencyOptions, template.chargeCalculationTypeOptions,
+                template.chargeAppliesToOptions, template.chargeTimeTypeOptions);
     }
 
 	public ChargeData(final Long id, final String name,
 			final BigDecimal amount, final CurrencyData currency,
 			final EnumOptionData chargeTimeType,
 			final EnumOptionData chargeAppliesTo,
-			final EnumOptionData chargeCalculationType, final boolean active) {
+			final EnumOptionData chargeCalculationType, final boolean penalty, final boolean active) {
 		this.id = id;
 		this.name = name;
 		this.amount = amount;
@@ -50,6 +53,7 @@ public class ChargeData {
 		this.chargeTimeType = chargeTimeType;
 		this.chargeAppliesTo = chargeAppliesTo;
 		this.chargeCalculationType = chargeCalculationType;
+		this.penalty = penalty;
 		this.active = active;
 		this.currencyOptions = null;
 		this.chargeCalculationTypeOptions = null;
@@ -61,7 +65,9 @@ public class ChargeData {
 			final BigDecimal amount, final CurrencyData currency,
 			final EnumOptionData chargeTimeType,
 			final EnumOptionData chargeAppliesTo,
-			final EnumOptionData chargeCalculationType, final boolean active,
+			final EnumOptionData chargeCalculationType, 
+			final boolean penalty,
+			final boolean active,
 			final List<CurrencyData> currencyOptions,
 			final List<EnumOptionData> chargeCalculationTypeOptions,
             final List<EnumOptionData> chargeAppliesToOptions,
@@ -73,6 +79,7 @@ public class ChargeData {
 		this.chargeTimeType = chargeTimeType;
 		this.chargeAppliesTo = chargeAppliesTo;
 		this.chargeCalculationType = chargeCalculationType;
+		this.penalty = penalty;
 		this.active = active;
 		this.currencyOptions = currencyOptions;
 		this.chargeCalculationTypeOptions = chargeCalculationTypeOptions;
@@ -88,10 +95,10 @@ public class ChargeData {
 		return name;
 	}
 
-	public boolean isActive() {
-		return active;
+	public boolean isPenalty() {
+		return this.penalty;
 	}
-
+	
 	public BigDecimal getAmount() {
 		return amount;
 	}
@@ -104,34 +111,14 @@ public class ChargeData {
 		return chargeTimeType;
 	}
 
-	public EnumOptionData getChargeAppliesTo() {
-		return chargeAppliesTo;
-	}
-
 	public EnumOptionData getChargeCalculationType() {
 		return chargeCalculationType;
 	}
 
-	public List<CurrencyData> getCurrencyOptions() {
-		return currencyOptions;
-	}
-
-	public List<EnumOptionData> getChargeCalculationTypeOptions() {
-		return chargeCalculationTypeOptions;
-	}
-
-    public List<EnumOptionData> getChargeAppliesToOptions() {
-        return chargeAppliesToOptions;
-    }
-
-    public List<EnumOptionData> getChargeTimeTypeOptions() {
-        return chargeTimeTypeOptions;
-    }
-
     @Override
     public boolean equals(Object obj) {
         ChargeData chargeData = (ChargeData) obj;
-        return this.id.equals(chargeData.getId());
+        return this.id.equals(chargeData.id);
     }
 
     @Override

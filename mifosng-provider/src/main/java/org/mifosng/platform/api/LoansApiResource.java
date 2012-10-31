@@ -1,6 +1,5 @@
 package org.mifosng.platform.api;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -95,25 +94,6 @@ public class LoansApiResource {
 	@Autowired
 	private StaffReadPlatformService staffReadPlatformService;
 	
-	private final static Set<String> typicalResponseParameters = new HashSet<String>(
-			Arrays.asList("id", "externalId", "clientId", "groupId", "clientName", "groupName", "fundId", "fundName",
-					"loanProductId", "loanProductName", "loanProductDescription", 
-					"loanOfficerName", "loanOfficerId",
-					"currency", "principal",
-					"inArrearsTolerance", "numberOfRepayments",
-					"repaymentEvery", "interestRatePerPeriod",
-					"annualInterestRate", "repaymentFrequencyType",
-					"interestRateFrequencyType", "amortizationType",
-					"interestType", "interestCalculationPeriodType",
-					"submittedOnDate", "approvedOnDate",
-					"expectedDisbursementDate", "actualDisbursementDate",
-					"expectedFirstRepaymentOnDate", "interestChargedFromDate",
-					"closedOnDate", "expectedMaturityDate",
-					"status",
-					"lifeCycleStatusDate"));
-	
-	final Set<String> typicalTransactionResponseParameters = new HashSet<String>(Arrays.asList("id", "type", "date", "currency", "amount"));
-	
 	@GET
 	@Path("template")
 	@Consumes({ MediaType.APPLICATION_JSON })
@@ -124,31 +104,24 @@ public class LoansApiResource {
 			@QueryParam("productId") final Long productId,
 			@Context final UriInfo uriInfo) {
 		
+		final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+		final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 		
-		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-		if (responseParameters.isEmpty()) {
-			responseParameters.addAll(typicalResponseParameters);
-		}
-		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-		
-		responseParameters.addAll(Arrays.asList("productOptions", "amortizationTypeOptions", "interestTypeOptions", "interestCalculationPeriodTypeOptions", 
-				"repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "fundOptions", "repaymentStrategyOptions", "chargeOptions",
-                "chargeTemplate", "charges"));
-	
 		// tempate related
 		Collection<LoanProductData> productOptions = this.loanProductReadPlatformService.retrieveAllLoanProductsForLookup();
-		Collection<EnumOptionData>loanTermFrequencyTypeOptions = dropdownReadPlatformService.retrieveLoanTermFrequencyTypeOptions();
-		Collection<EnumOptionData>repaymentFrequencyTypeOptions = dropdownReadPlatformService.retrieveRepaymentFrequencyTypeOptions();
-		Collection<EnumOptionData>interestRateFrequencyTypeOptions = dropdownReadPlatformService.retrieveInterestRateFrequencyTypeOptions();
+		Collection<EnumOptionData> loanTermFrequencyTypeOptions = dropdownReadPlatformService.retrieveLoanTermFrequencyTypeOptions();
+		Collection<EnumOptionData> repaymentFrequencyTypeOptions = dropdownReadPlatformService.retrieveRepaymentFrequencyTypeOptions();
+		Collection<EnumOptionData> interestRateFrequencyTypeOptions = dropdownReadPlatformService.retrieveInterestRateFrequencyTypeOptions();
 		
-		Collection<EnumOptionData>amortizationTypeOptions = dropdownReadPlatformService.retrieveLoanAmortizationTypeOptions();
-		Collection<EnumOptionData>interestTypeOptions = dropdownReadPlatformService.retrieveLoanInterestTypeOptions();
-		Collection<EnumOptionData>interestCalculationPeriodTypeOptions = dropdownReadPlatformService.retrieveLoanInterestRateCalculatedInPeriodOptions();
+		Collection<EnumOptionData> amortizationTypeOptions = dropdownReadPlatformService.retrieveLoanAmortizationTypeOptions();
+		Collection<EnumOptionData> interestTypeOptions = dropdownReadPlatformService.retrieveLoanInterestTypeOptions();
+		Collection<EnumOptionData> interestCalculationPeriodTypeOptions = dropdownReadPlatformService.retrieveLoanInterestRateCalculatedInPeriodOptions();
 	
 		Collection<FundData> fundOptions = this.fundReadPlatformService.retrieveAllFunds();
 		Collection<TransactionProcessingStrategyData> repaymentStrategyOptions = this.dropdownReadPlatformService.retreiveTransactionProcessingStrategies();
 		
-		Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveLoanApplicableCharges();
+		final boolean feeChargesOnly = false;
+		Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveLoanApplicableCharges(feeChargesOnly);
 		ChargeData chargeTemplate = this.chargeReadPlatformService.retrieveLoanChargeTemplate();
 
 		LoanBasicDetailsData loanBasicDetails;
@@ -183,11 +156,8 @@ public class LoansApiResource {
 			@PathParam("loanId") final Long loanId,
 			@Context final UriInfo uriInfo) {
 
-		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-		if (responseParameters.isEmpty()) {
-			responseParameters.addAll(typicalResponseParameters);
-		}
-		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+		final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+		final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 		
 		final LoanBasicDetailsData loanBasicDetails = this.loanReadPlatformService.retrieveLoanAccountDetails(loanId);
 		
@@ -202,19 +172,17 @@ public class LoansApiResource {
 		if (!associationParameters.isEmpty()) {
 			
 			if (associationParameters.contains("all")) {
-				responseParameters.addAll(Arrays.asList("repaymentSchedule", "transactions", "permissions", "convenienceData", "charges"));
-			} else {
-				responseParameters.addAll(associationParameters);
+				associationParameters.addAll(Arrays.asList("repaymentSchedule", "transactions", "permissions", "convenienceData", "charges"));
 			}
 			
-			if (responseParameters.contains("transactions")) {
+			if (associationParameters.contains("transactions")) {
 				final Collection<LoanTransactionData> currentLoanRepayments = this.loanReadPlatformService.retrieveLoanTransactions(loanId);
 				if (!CollectionUtils.isEmpty(currentLoanRepayments)) {
 					loanRepayments = currentLoanRepayments;
 				}
 			}
 			
-			if (responseParameters.contains("repaymentSchedule")) {
+			if (associationParameters.contains("repaymentSchedule")) {
 				
 				DisbursementData singleDisbursement = loanBasicDetails.toDisburementData();
 				repaymentSchedule = this.loanReadPlatformService.retrieveRepaymentSchedule(loanId, loanBasicDetails.getCurrency(), 
@@ -227,14 +195,14 @@ public class LoansApiResource {
 				
 				boolean isWaiveAllowed = totalOutstandingMoney.isGreaterThanZero() && (tolerance.isGreaterThan(totalOutstandingMoney) || tolerance.isEqualTo(totalOutstandingMoney));
 
-				if (responseParameters.contains("permissions")) {
+				if (associationParameters.contains("permissions")) {
 					loanRepaymentsCount = retrieveNonDisbursementTransactions(loanRepayments);
 					permissions = this.loanReadPlatformService.retrieveLoanPermissions(loanBasicDetails, isWaiveAllowed, loanRepaymentsCount);
 				}
 				convenienceDataRequired = true;
 			}
 			
-			if (responseParameters.contains("charges")) {
+			if (associationParameters.contains("charges")) {
 	            charges = this.chargeReadPlatformService.retrieveLoanCharges(loanId);
 	            if (CollectionUtils.isEmpty(charges)) {
 	            	charges = null; // set back to null so doesnt appear in JSON is no charges exist.
@@ -242,28 +210,21 @@ public class LoansApiResource {
 			}
 		}
 
-		Collection<LoanProductData> productOptions = new ArrayList<LoanProductData>();
+		Collection<LoanProductData> productOptions = null;
 		Collection<EnumOptionData> loanTermFrequencyTypeOptions = null;
-		Collection<EnumOptionData> repaymentFrequencyTypeOptions = new ArrayList<EnumOptionData>();
+		Collection<EnumOptionData> repaymentFrequencyTypeOptions = null;
 		Collection<TransactionProcessingStrategyData> repaymentStrategyOptions = null;
-		
-		Collection<EnumOptionData> interestRateFrequencyTypeOptions = new ArrayList<EnumOptionData>();
-		Collection<EnumOptionData> amortizationTypeOptions = new ArrayList<EnumOptionData>();
-		Collection<EnumOptionData> interestTypeOptions = new ArrayList<EnumOptionData>();
-		Collection<EnumOptionData> interestCalculationPeriodTypeOptions = new ArrayList<EnumOptionData>();
-		Collection<FundData> fundOptions = new ArrayList<FundData>();
+		Collection<EnumOptionData> interestRateFrequencyTypeOptions = null;
+		Collection<EnumOptionData> amortizationTypeOptions = null;
+		Collection<EnumOptionData> interestTypeOptions = null;
+		Collection<EnumOptionData> interestCalculationPeriodTypeOptions = null;
+		Collection<FundData> fundOptions = null;
+		Collection<StaffData> allowedLoanOfficers = null;
 		Collection<ChargeData> chargeOptions = null;
 		ChargeData chargeTemplate = null;
-		Collection<StaffData> allowedLoanOfficers = null;
-
+		
 		final boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
 		if(template) {
-			responseParameters.addAll(
-						Arrays.asList("productOptions", "amortizationTypeOptions", "interestTypeOptions", "interestCalculationPeriodTypeOptions", 
-						"repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "fundOptions", 
-						"repaymentStrategyOptions", "chargeOptions", "chargeTemplate", "loanOfficerOptions")
-			);
-			
 			productOptions = this.loanProductReadPlatformService.retrieveAllLoanProductsForLookup();
 			loanTermFrequencyTypeOptions = dropdownReadPlatformService.retrieveLoanTermFrequencyTypeOptions();
 			repaymentFrequencyTypeOptions = dropdownReadPlatformService.retrieveRepaymentFrequencyTypeOptions();
@@ -275,7 +236,8 @@ public class LoansApiResource {
 
 			fundOptions = this.fundReadPlatformService.retrieveAllFunds();
 			repaymentStrategyOptions = this.dropdownReadPlatformService.retreiveTransactionProcessingStrategies();
-			chargeOptions = this.chargeReadPlatformService.retrieveLoanApplicableCharges();
+			final boolean feeChargesOnly = false;
+			chargeOptions = this.chargeReadPlatformService.retrieveLoanApplicableCharges(feeChargesOnly);
 			allowedLoanOfficers =  this.staffReadPlatformService.retrieveAllLoanOfficersByOffice(loanBasicDetails.getClientOfficeId());
 			chargeTemplate = this.chargeReadPlatformService.retrieveLoanChargeTemplate();
 		}
@@ -461,9 +423,6 @@ public class LoansApiResource {
 			@Context final UriInfo uriInfo) {
 		
 		final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-		if (responseParameters.isEmpty()) {
-			responseParameters.addAll(typicalTransactionResponseParameters);
-		}
 		final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 		
 		LoanTransactionData transactionData = null;
@@ -493,9 +452,6 @@ public class LoansApiResource {
 			@Context final UriInfo uriInfo) {
 		
 		final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-		if (responseParameters.isEmpty()) {
-			responseParameters.addAll(typicalTransactionResponseParameters);
-		}
 		final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 		
 		final LoanTransactionData transactionData = this.loanReadPlatformService.retrieveLoanTransactionDetails(loanId, transactionId);
@@ -530,9 +486,9 @@ public class LoansApiResource {
             @PathParam("loanId") final Long loanId,
             final String jsonRequestBody){
 
-        LoanChargeCommand command = this.apiDataConversionService.convertJsonToLoanChargeCommand(null, loanId, jsonRequestBody);
+        final LoanChargeCommand command = this.apiDataConversionService.convertJsonToLoanChargeCommand(null, loanId, jsonRequestBody);
 
-        EntityIdentifier identifier = this.loanWritePlatformService.addLoanCharge(command);
+        final EntityIdentifier identifier = this.loanWritePlatformService.addLoanCharge(command);
 
         return Response.ok().entity(identifier).build();
     }
@@ -542,12 +498,14 @@ public class LoansApiResource {
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     public String retrieveNewLoanChargeDetails(@Context final UriInfo uriInfo) {
-        Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+        
+    	final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 
-        boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+    	final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 
-        Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveLoanApplicableCharges();
-        LoanChargeData loanChargeTemplate = LoanChargeData.template(chargeOptions);
+        final boolean feeChargesOnly = false;
+        final Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveLoanApplicableCharges(feeChargesOnly);
+        final LoanChargeData loanChargeTemplate = LoanChargeData.template(chargeOptions);
 
         return this.apiJsonSerializerService.serializeLoanChargeDataToJson(prettyPrint, responseParameters, loanChargeTemplate);
     }

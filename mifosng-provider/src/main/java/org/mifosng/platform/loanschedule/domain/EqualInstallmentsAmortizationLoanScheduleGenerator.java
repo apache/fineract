@@ -119,16 +119,18 @@ public class EqualInstallmentsAmortizationLoanScheduleGenerator implements Amort
 
 			outstandingBalance = outstandingBalance.minus(principalForInstallment);
 			
-			Money chargesForInstallment = cumulativeChargesDueWithin(startDate, scheduledDueDate, loanCharges, monetaryCurrency);
-			Money totalInstallmentDue = principalForInstallment.plus(interestForInstallment).plus(chargesForInstallment);
-			cumulativeChargesToDate = cumulativeChargesToDate.add(chargesForInstallment.getAmount());
+			final Money feeChargesForInstallment = cumulativeFeeChargesDueWithin(startDate, scheduledDueDate, loanCharges, monetaryCurrency);
+			final Money penaltyChargesForInstallment = cumulativePenaltyChargesDueWithin(startDate, scheduledDueDate, loanCharges, monetaryCurrency);
+			final Money totalInstallmentDue = principalForInstallment.plus(interestForInstallment).plus(feeChargesForInstallment).plus(penaltyChargesForInstallment);
+			cumulativeChargesToDate = cumulativeChargesToDate.add(feeChargesForInstallment.getAmount());
 			
 			LoanSchedulePeriodData installment = LoanSchedulePeriodData.repaymentOnlyPeriod(periodNumber, startDate, 
 					scheduledDueDate, 
 					principalForInstallment.getAmount(), 
 					outstandingBalance.getAmount(), 
 					interestForInstallment.getAmount(),
-					chargesForInstallment.getAmount(),
+					feeChargesForInstallment.getAmount(),
+					penaltyChargesForInstallment.getAmount(),
 					totalInstallmentDue.getAmount());
 
 			periods.add(installment);
@@ -156,7 +158,7 @@ public class EqualInstallmentsAmortizationLoanScheduleGenerator implements Amort
 				cumulativePrincipalOutstanding, cumulativeInterestExpected, cumulativeChargesToDate, totalExpectedRepayment);
 	}
 
-	private Money cumulativeChargesDueWithin(
+	private Money cumulativeFeeChargesDueWithin(
 			final LocalDate periodStart,
 			final LocalDate periodEnd, 
 			final Set<LoanCharge> loanCharges, 
@@ -165,7 +167,24 @@ public class EqualInstallmentsAmortizationLoanScheduleGenerator implements Amort
 		Money cumulative = Money.zero(monetaryCurrency);
 		
 		for (LoanCharge loanCharge : loanCharges) {
-			if (loanCharge.isDueForCollectionBetween(periodStart, periodEnd)) {
+			if (loanCharge.isDueForCollectionBetween(periodStart, periodEnd) && loanCharge.isFeeCharge()) {
+				cumulative = cumulative.plus(loanCharge.amount());
+			}
+		}
+		
+		return cumulative;
+	}
+	
+	private Money cumulativePenaltyChargesDueWithin(
+			final LocalDate periodStart,
+			final LocalDate periodEnd, 
+			final Set<LoanCharge> loanCharges, 
+			final MonetaryCurrency monetaryCurrency) {
+		
+		Money cumulative = Money.zero(monetaryCurrency);
+		
+		for (LoanCharge loanCharge : loanCharges) {
+			if (loanCharge.isDueForCollectionBetween(periodStart, periodEnd) && loanCharge.isPenaltyCharge()) {
 				cumulative = cumulative.plus(loanCharge.amount());
 			}
 		}

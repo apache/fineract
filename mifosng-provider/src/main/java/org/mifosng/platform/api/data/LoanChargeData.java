@@ -51,21 +51,25 @@ public class LoanChargeData {
     @SuppressWarnings("unused")
 	private final Collection<ChargeData> chargeOptions;
 
+    @SuppressWarnings("unused")
+	private final boolean penalty;
+
     public static LoanChargeData template(final Collection<ChargeData> chargeOptions){
-        return new LoanChargeData(null,null,null,null,null,null,null, chargeOptions);
+        return new LoanChargeData(null,null,null,null,null,null,null, chargeOptions, false);
     }
     
     /**
      * used when populating with details from charge definition (for crud on charges)
      */
-	public static LoanChargeData newChargeDetails(
+	public static LoanChargeData newLoanChargeDetails(
 			final Long chargeId, 
 			final String name,
 			final CurrencyData currency, 
 			final BigDecimal value,
 			final EnumOptionData chargeTimeType,
-			final EnumOptionData chargeCalculationType) {
-		return new LoanChargeData(null, chargeId, name, currency, value, chargeTimeType, chargeCalculationType, null);
+			final EnumOptionData chargeCalculationType,
+			final boolean penalty) {
+		return new LoanChargeData(null, chargeId, name, currency, value, chargeTimeType, chargeCalculationType, null, penalty);
 	}
 
     public LoanChargeData(
@@ -80,7 +84,8 @@ public class LoanChargeData {
     		final LocalDate dueAsOfDate, 
     		final EnumOptionData chargeCalculationType, 
     		final BigDecimal percentage, 
-    		final BigDecimal amountPercentageAppliedTo) {
+    		final BigDecimal amountPercentageAppliedTo, 
+    		final boolean penalty) {
         this.id = id;
         this.chargeId = chargeId;
         this.name = name;
@@ -93,6 +98,7 @@ public class LoanChargeData {
         this.chargeCalculationType = chargeCalculationType;
 		this.percentage = percentage;
 		this.amountPercentageAppliedTo = amountPercentageAppliedTo;
+		this.penalty = penalty;
 
 		if (chargeCalculationType != null && chargeCalculationType.getId().intValue() > 1) {
 			this.amountOrPercentage = this.percentage;
@@ -111,7 +117,8 @@ public class LoanChargeData {
     		final BigDecimal amount,
     		final EnumOptionData chargeTimeType, 
     		final EnumOptionData chargeCalculationType,
-            final Collection<ChargeData> chargeOptions) {
+            final Collection<ChargeData> chargeOptions,
+            final boolean penalty) {
         this.id = id;
         this.chargeId = chargeId;
         this.name = name;
@@ -124,6 +131,7 @@ public class LoanChargeData {
         this.chargeCalculationType = chargeCalculationType;
         this.percentage = null;
 		this.amountPercentageAppliedTo = null;
+		this.penalty = penalty;
 		
 		if (chargeCalculationType != null && chargeCalculationType.getId().intValue() > 1) {
 			this.amountOrPercentage = this.percentage;

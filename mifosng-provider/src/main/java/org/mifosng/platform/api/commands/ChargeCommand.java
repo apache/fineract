@@ -3,6 +3,9 @@ package org.mifosng.platform.api.commands;
 import java.math.BigDecimal;
 import java.util.Set;
 
+/**
+ * Immutable data object for creating and modifying defined charges.
+ */
 public class ChargeCommand {
 
     private final Long id;
@@ -14,12 +17,22 @@ public class ChargeCommand {
     private final Integer chargeAppliesTo;
     private final Integer chargeCalculationType;
 
+    private final boolean penalty;
     private final boolean active;
 
     private final Set<String> modifiedParameters;
 
-    public ChargeCommand(Set<String> modifiedParameters, Long id, String name, BigDecimal amount, String currencyCode,
-                         Integer chargeTimeType, Integer chargeAppliesTo, Integer chargeCalculationType, boolean active) {
+    public ChargeCommand(
+    		final Set<String> modifiedParameters, 
+    		final Long id, 
+    		final String name, 
+    		final BigDecimal amount, 
+    		final String currencyCode, 
+    		final Integer chargeTimeType, 
+    		final Integer chargeAppliesTo, 
+    		final Integer chargeCalculationType,
+    		final boolean penalty,
+    		final boolean active) {
         this.id = id;
         this.name = name;
         this.amount = amount;
@@ -28,6 +41,7 @@ public class ChargeCommand {
         this.chargeAppliesTo = chargeAppliesTo;
         this.chargeCalculationType = chargeCalculationType;
         this.modifiedParameters = modifiedParameters;
+        this.penalty = penalty;
         this.active = active;
     }
 
@@ -62,8 +76,16 @@ public class ChargeCommand {
     public Integer getChargeTimeType() {
         return chargeTimeType;
     }
+    
+    public boolean isPenalty() {
+		return penalty;
+	}
+    
+    public boolean isFee() {
+		return !penalty;
+	}
 
-    public boolean isActive() {
+	public boolean isActive() {
         return active;
     }
 
@@ -91,6 +113,10 @@ public class ChargeCommand {
         return this.modifiedParameters.contains("chargeCalculationType");
     }
 
+    public boolean isPenaltyChanged(){
+        return this.modifiedParameters.contains("penalty");
+    }
+    
     public boolean isActiveChanged(){
         return this.modifiedParameters.contains("active");
     }

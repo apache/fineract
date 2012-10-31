@@ -13,7 +13,7 @@ public interface ChargeReadPlatformService {
 
     ChargeData retrieveNewChargeDetails();
 
-    Collection<ChargeData> retrieveLoanApplicableCharges();
+    Collection<ChargeData> retrieveLoanApplicableCharges(boolean feeChargesOnly);
 
     Collection<ChargeData> retrieveLoanProductCharges(Long loanProductId);
 

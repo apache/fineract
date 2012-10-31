@@ -381,11 +381,14 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 			for (LoanSchedulePeriodData scheduledLoanPeriod : loanSchedule.getPeriods()) {
 				if (scheduledLoanPeriod.isRepaymentPeriod()) {
 					LoanRepaymentScheduleInstallment installment = new LoanRepaymentScheduleInstallment(
-							loan, scheduledLoanPeriod.periodNumber(),
+							loan, 
+							scheduledLoanPeriod.periodNumber(),
+							scheduledLoanPeriod.periodFromDate(),
 							scheduledLoanPeriod.periodDueDate(), 
 							scheduledLoanPeriod.principalDue(),
 							scheduledLoanPeriod.interestDue(),
-							scheduledLoanPeriod.chargesDue());
+							scheduledLoanPeriod.feeChargesDue(),
+							scheduledLoanPeriod.penaltyChargesDue());
 					
 					modifiedLoanRepaymentSchedule.add(installment);
 				}
@@ -628,7 +631,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
 	@Transactional
     @Override
-    public EntityIdentifier addLoanCharge(LoanChargeCommand command) {
+    public EntityIdentifier addLoanCharge(final LoanChargeCommand command) {
         this.context.authenticatedUser();
 
         LoanChargeCommandValidator validator = new LoanChargeCommandValidator(command);

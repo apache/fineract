@@ -378,11 +378,14 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 			
 			if (scheduledLoanInstallment.isRepaymentPeriod()) {
 				LoanRepaymentScheduleInstallment installment = new LoanRepaymentScheduleInstallment(
-						this, scheduledLoanInstallment.periodNumber(),
+						this, 
+						scheduledLoanInstallment.periodNumber(),
+						scheduledLoanInstallment.periodFromDate(),
 						scheduledLoanInstallment.periodDueDate(), 
 						scheduledLoanInstallment.principalDue(),
 						scheduledLoanInstallment.interestDue(),
-						scheduledLoanInstallment.chargesDue());
+						scheduledLoanInstallment.feeChargesDue(),
+						scheduledLoanInstallment.penaltyChargesDue());
 				this.addRepaymentScheduleInstallment(installment);
 			}
 		}

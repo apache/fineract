@@ -109,17 +109,19 @@ public class FlatMethodLoanScheduleGenerator implements LoanScheduleGenerator {
 
 			outstandingBalance = outstandingBalance.minus(principalPerInstallment);
 
-//			Money chargesForInstallment = cumulativeChargesDueWithin(startDate, scheduledDueDate, loanCharges, monetaryCurrency);
-			Money chargesForInstallment = Money.zero(monetaryCurrency);
-			Money totalInstallmentDue = principalPerInstallment.plus(interestPerInstallment).plus(chargesForInstallment);
-			cumulativeChargesToDate = cumulativeChargesToDate.add(chargesForInstallment.getAmount());
+			Money feeChargesForInstallment = Money.zero(monetaryCurrency);
+			Money penaltyChargesForInstallment = Money.zero(monetaryCurrency);
+			
+			Money totalInstallmentDue = principalPerInstallment.plus(interestPerInstallment).plus(feeChargesForInstallment).plus(penaltyChargesForInstallment);
+			cumulativeChargesToDate = cumulativeChargesToDate.add(feeChargesForInstallment.getAmount()).add(penaltyChargesForInstallment.getAmount());
 			
 			LoanSchedulePeriodData installment = LoanSchedulePeriodData.repaymentOnlyPeriod(periodNumber, startDate, 
 					scheduledDueDate, 
 					principalPerInstallment.getAmount(), 
 					outstandingBalance.getAmount(), 
 					interestPerInstallment.getAmount(),
-					chargesForInstallment.getAmount(),
+					feeChargesForInstallment.getAmount(),
+					penaltyChargesForInstallment.getAmount(),
 					totalInstallmentDue.getAmount());
 
 			periods.add(installment);

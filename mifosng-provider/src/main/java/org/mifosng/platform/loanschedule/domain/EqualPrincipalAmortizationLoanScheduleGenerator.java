@@ -100,18 +100,18 @@ public class EqualPrincipalAmortizationLoanScheduleGenerator implements Amortiza
 
 			outstandingBalance = outstandingBalance.minus(principalForInstallment);
 			
-			// FIXME - KW - charges
-//			Money chargesForInstallment = cumulativeChargesDueWithin(startDate, scheduledDueDate, loanCharges, monetaryCurrency);
-			Money chargesForInstallment = Money.zero(monetaryCurrency);
-			Money totalInstallmentDue = principalForInstallment.plus(interestForInstallment).plus(chargesForInstallment);
-			cumulativeChargesToDate = cumulativeChargesToDate.add(chargesForInstallment.getAmount());
+			Money feeChargesForInstallment = Money.zero(monetaryCurrency);
+			Money penaltyChargesForInstallment = Money.zero(monetaryCurrency);
+			Money totalInstallmentDue = principalForInstallment.plus(interestForInstallment).plus(feeChargesForInstallment);
+			cumulativeChargesToDate = cumulativeChargesToDate.add(feeChargesForInstallment.getAmount());
 			
 			LoanSchedulePeriodData installment = LoanSchedulePeriodData.repaymentOnlyPeriod(periodNumber, startDate, 
 					scheduledDueDate, 
 					principalForInstallment.getAmount(), 
 					outstandingBalance.getAmount(), 
 					interestForInstallment.getAmount(), 
-					chargesForInstallment.getAmount(),
+					feeChargesForInstallment.getAmount(),
+					penaltyChargesForInstallment.getAmount(),
 					totalInstallmentDue.getAmount());
 
 			periods.add(installment);

@@ -72,31 +72,32 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
             throw new InvalidJsonException();
         }
 
-        Type typeOfMap = new TypeToken<Map<String, String>>(){}.getType();
-        Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
+        final Type typeOfMap = new TypeToken<Map<String, String>>(){}.getType();
+        final Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
 
-
-        Set<String> supportedParams = new HashSet<String>(Arrays.asList("name", "amount", "locale", "currencyCode",
+        final Set<String> supportedParams = new HashSet<String>(
+        		Arrays.asList("name", "amount", "locale", "currencyCode",
             "currencyOptions", "chargeAppliesTo", "chargeTimeType",
-            "chargeCalculationType", "chargeCalculationTypeOptions", "active"
+            "chargeCalculationType", "chargeCalculationTypeOptions", "penalty", "active"
         ));
 
         checkForUnsupportedParameters(requestMap, supportedParams);
 
         Set<String> modifiedParameters = new HashSet<String>();
 
-        String name = extractStringParameter("name", requestMap, modifiedParameters);
-        BigDecimal amount = extractBigDecimalParameter("amount", requestMap, modifiedParameters);
-        String currencyCode = extractStringParameter("currencyCode", requestMap, modifiedParameters);
+        final String name = extractStringParameter("name", requestMap, modifiedParameters);
+        final BigDecimal amount = extractBigDecimalParameter("amount", requestMap, modifiedParameters);
+        final String currencyCode = extractStringParameter("currencyCode", requestMap, modifiedParameters);
 
-        Integer chargeTimeType = extractIntegerParameter("chargeTimeType", requestMap, modifiedParameters);
-        Integer chargeAppliesTo = extractIntegerParameter("chargeAppliesTo", requestMap, modifiedParameters);
-        Integer chargeCalculationType = extractIntegerParameter("chargeCalculationType", requestMap, modifiedParameters);
+        final Integer chargeTimeType = extractIntegerParameter("chargeTimeType", requestMap, modifiedParameters);
+        final Integer chargeAppliesTo = extractIntegerParameter("chargeAppliesTo", requestMap, modifiedParameters);
+        final Integer chargeCalculationType = extractIntegerParameter("chargeCalculationType", requestMap, modifiedParameters);
 
-        boolean active = extractBooleanParameter("active", requestMap, modifiedParameters);
+        final boolean penalty = extractBooleanParameter("penalty", requestMap, modifiedParameters);
+        final boolean active = extractBooleanParameter("active", requestMap, modifiedParameters);
 
         return new ChargeCommand(modifiedParameters, resourceIdentifier, name, amount,
-                currencyCode, chargeTimeType, chargeAppliesTo, chargeCalculationType, active);
+                currencyCode, chargeTimeType, chargeAppliesTo, chargeCalculationType, penalty, active);
     }
 
     @Override

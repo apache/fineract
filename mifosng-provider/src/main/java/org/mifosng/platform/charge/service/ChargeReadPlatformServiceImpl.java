@@ -101,18 +101,22 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
 
         final LoanChargeMapper rm = new LoanChargeMapper();
 
-        final String sql = "select " + rm.loanChargeSchema() + " where c.is_deleted=0 and lc.loan_id=?";
+        final String sql = "select " + rm.loanChargeSchema() + " where c.is_deleted=0 and lc.loan_id=? " +
+        				   " order by lc.charge_time_enum ASC, lc.due_for_collection_as_of_date ASC, lc.is_penalty ASC";
 
         return this.jdbcTemplate.query(sql, rm, new Object[] {loanId});
     }
 
     @Override
-    public Collection<ChargeData> retrieveLoanApplicableCharges() {
+    public Collection<ChargeData> retrieveLoanApplicableCharges(final boolean feeChargesOnly) {
         this.context.authenticatedUser();
 
         final ChargeMapper rm = new ChargeMapper();
 
-        final String sql = "select " + rm.chargeSchema() + " where c.is_deleted=0 and c.is_active=1 and c.charge_applies_to_enum=? order by c.name ";
+        String sql = "select " + rm.chargeSchema() + " where c.is_deleted=0 and c.is_active=1 and c.charge_applies_to_enum=? order by c.name ";
+        if (feeChargesOnly) {
+        	sql = "select " + rm.chargeSchema() + " where c.is_deleted=0 and c.is_active=1 and c.is_penalty=0 and c.charge_applies_to_enum=? order by c.name ";
+        }
 
         return this.jdbcTemplate.query(sql, rm, new Object[] {ChargeAppliesTo.LOAN.getValue()});
     }
@@ -132,7 +136,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
         public String chargeSchema(){
             return "c.id as id, c.name as name, c.amount as amount, c.currency_code as currencyCode, " +
                    "c.charge_applies_to_enum as chargeAppliesTo, c.charge_time_enum as chargeTime, " +
-                   "c.charge_calculation_enum as chargeCalculation, c.is_active as active, oc.name as currencyName, " +
+                   "c.charge_calculation_enum as chargeCalculation, c.is_penalty as penalty, c.is_active as active, oc.name as currencyName, " +
                    "oc.decimal_places as currencyDecimalPlaces, oc.display_symbol as currencyDisplaySymbol, " +
                    "oc.internationalized_name_code as currencyNameCode from m_charge c " +
                    "join m_organisation_currency oc on c.currency_code = oc.code";
@@ -165,9 +169,10 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
 
             final int chargeCalculation = rs.getInt("chargeCalculation");
             final EnumOptionData chargeCalculationType = ChargeEnumerations.chargeCalculationType(chargeCalculation);
+            final boolean penalty = rs.getBoolean("penalty");
             final boolean active = rs.getBoolean("active");
 
-            return new ChargeData(id, name, amount, currency, chargeTimeType, chargeAppliesToType, chargeCalculationType, active);
+            return new ChargeData(id, name, amount, currency, chargeTimeType, chargeAppliesToType, chargeCalculationType, penalty, active);
         }
     }
 
@@ -178,6 +183,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
             		"lc.amount as amountDue, lc.amount_paid_derived as amountPaid, lc.amount_outstanding_derived as amountOutstanding, " +
             		"lc.calculation_percentage as percentageOf, lc.calculation_on_amount as amountPercentageAppliedTo, " +
             		"lc.charge_time_enum as chargeTime, " +
+            		"lc.is_penalty as penalty, " +
             		"lc.due_for_collection_as_of_date as dueAsOfDate, " +
                     "lc.charge_calculation_enum as chargeCalculation, " +
                     "c.currency_code as currencyCode, oc.name as currencyName, " +
@@ -194,14 +200,11 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
         	final Long chargeId = rs.getLong("chargeId");
         	final String name = rs.getString("name");
         	final BigDecimal amount = rs.getBigDecimal("amountDue");
-        	BigDecimal amountPaid = rs.getBigDecimal("amountPaid");
-        	if (amountPaid == null) {
-        		amountPaid = BigDecimal.ZERO;
-        	}
+        	final BigDecimal amountPaid =  JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "amountPaid");
         	final BigDecimal amountOutstanding = rs.getBigDecimal("amountOutstanding");
         	
-        	final BigDecimal percentageOf = rs.getBigDecimal("percentageOf");
-        	final BigDecimal amountPercentageAppliedTo = rs.getBigDecimal("amountPercentageAppliedTo");
+        	final BigDecimal percentageOf = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "percentageOf");
+        	final BigDecimal amountPercentageAppliedTo = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "amountPercentageAppliedTo");
 
         	final String currencyCode = rs.getString("currencyCode");
         	final String currencyName = rs.getString("currencyName");
@@ -219,8 +222,9 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
         	
         	final int chargeCalculation = rs.getInt("chargeCalculation");
         	final EnumOptionData chargeCalculationType = ChargeEnumerations.chargeCalculationType(chargeCalculation);
-
-            return new LoanChargeData(id, chargeId, name, currency, amount, amountPaid, amountOutstanding, chargeTimeType, dueAsOfDate, chargeCalculationType, percentageOf, amountPercentageAppliedTo);
+        	final boolean penalty = rs.getBoolean("penalty");
+        	
+            return new LoanChargeData(id, chargeId, name, currency, amount, amountPaid, amountOutstanding, chargeTimeType, dueAsOfDate, chargeCalculationType, percentageOf, amountPercentageAppliedTo, penalty);
         }
     }
 }

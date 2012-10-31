@@ -60,6 +60,9 @@ public class LoanCharge extends AbstractPersistable<Long> {
     @SuppressWarnings("unused")
 	@Column(name = "amount_outstanding_derived", scale = 6, precision = 19, nullable = false)
     private BigDecimal amountOutstanding;
+
+	@Column(name = "is_penalty", nullable=false)
+	private boolean penaltyCharge = false;
     
     @SuppressWarnings("unused")
 	@Column(name = "is_paid_derived", nullable=false)
@@ -83,11 +86,11 @@ public class LoanCharge extends AbstractPersistable<Long> {
     protected LoanCharge() {
     	//
     }
-
     
     public LoanCharge(final Charge chargeDefinition, final LoanChargeCommand command, final BigDecimal loanPrincipal) {
     	 this.loan = null;
     	 this.charge = chargeDefinition;
+    	 this.penaltyCharge = chargeDefinition.isPenalty();
     	 
     	 if (command.isChargeTimeTypeChanged()) {
              this.chargeTime = command.getChargeTimeType();
@@ -125,7 +128,7 @@ public class LoanCharge extends AbstractPersistable<Long> {
     private LoanCharge(final Loan loan, final Charge chargeDefinition, final LoanChargeCommand command) {
         this.loan = loan;
         this.charge = chargeDefinition;
-
+        this.penaltyCharge = chargeDefinition.isPenalty();
         if (command.isChargeTimeTypeChanged()){
             this.chargeTime = command.getChargeTimeType();
         } else {
@@ -343,5 +346,13 @@ public class LoanCharge extends AbstractPersistable<Long> {
 			final LocalDate toInclusive,
 			final LocalDate specifiedDueDate) {
 		return specifiedDueDate != null && fromNotInclusive.isBefore(specifiedDueDate) && (toInclusive.isAfter(specifiedDueDate) || toInclusive.isEqual(specifiedDueDate));
+	}
+
+	public boolean isFeeCharge() {
+		return !this.penaltyCharge;
+	}
+	
+	public boolean isPenaltyCharge() {
+		return this.penaltyCharge;
 	}
 }

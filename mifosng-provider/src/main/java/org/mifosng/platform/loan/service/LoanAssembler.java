@@ -137,11 +137,14 @@ public class LoanAssembler {
 			if (scheduledLoanInstallment.isRepaymentPeriod()) {
 				
 				final LoanRepaymentScheduleInstallment installment = new LoanRepaymentScheduleInstallment(
-						loan, scheduledLoanInstallment.periodNumber(),
+						loan, 
+						scheduledLoanInstallment.periodNumber(),
+						scheduledLoanInstallment.periodFromDate(),
 						scheduledLoanInstallment.periodDueDate(), 
 						scheduledLoanInstallment.principalDue(),
 						scheduledLoanInstallment.interestDue(),
-						scheduledLoanInstallment.chargesDue());
+						scheduledLoanInstallment.feeChargesDue(),
+						scheduledLoanInstallment.penaltyChargesDue());
 				
 				loan.addRepaymentScheduleInstallment(installment);
 			}

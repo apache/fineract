@@ -39,7 +39,7 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
             final ChargeCalculationType chargeCalculationType = ChargeCalculationType.fromInt(command.getChargeCalculationType());
 
             final Charge charge = Charge.createNew(command.getName(), command.getAmount(), command.getCurrencyCode(),
-                    chargeAppliesTo, chargeTimeType, chargeCalculationType, command.isActive());
+                    chargeAppliesTo, chargeTimeType, chargeCalculationType, command.isPenalty(), command.isActive());
 
             this.chargeRepository.saveAndFlush(charge);
 

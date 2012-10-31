@@ -32,15 +32,23 @@ public class Charge extends AbstractAuditableCustom<AppUser, Long> {
 	@Column(name = "charge_calculation_enum")
     private Integer chargeCalculation;
 
+	@Column(name = "is_penalty", nullable = false)
+    private boolean penalty;
+	
 	@Column(name = "is_active", nullable = false)
     private boolean active;
 
     @Column(name = "is_deleted", nullable=false)
     private boolean deleted = false;
 
-    public static Charge createNew(final String name, final BigDecimal amount, final String currencyCode, 
-    		final ChargeAppliesTo chargeAppliesTo, final ChargeTimeType chargeTime, final ChargeCalculationType chargeCalculationType, final boolean active) {
-        return new Charge(name, amount, currencyCode, chargeAppliesTo, chargeTime, chargeCalculationType, active);
+    public static Charge createNew(
+    		final String name, final BigDecimal amount, final String currencyCode, 
+    		final ChargeAppliesTo chargeAppliesTo, 
+    		final ChargeTimeType chargeTime, 
+    		final ChargeCalculationType chargeCalculationType, 
+    		final boolean penalty,
+    		final boolean active) {
+        return new Charge(name, amount, currencyCode, chargeAppliesTo, chargeTime, chargeCalculationType, penalty, active);
     }
 
     protected Charge() {
@@ -49,13 +57,14 @@ public class Charge extends AbstractAuditableCustom<AppUser, Long> {
 
     private Charge(final String name, final BigDecimal amount, final String currencyCode, 
     		final ChargeAppliesTo chargeAppliesTo, final ChargeTimeType chargeTime, 
-    		final ChargeCalculationType chargeCalculationType, final boolean active) {
+    		final ChargeCalculationType chargeCalculationType, final boolean penalty, boolean active) {
         this.name = name;
         this.amount = amount;
         this.currencyCode = currencyCode;
         this.chargeAppliesTo = chargeAppliesTo.getValue();
         this.chargeTime = chargeTime.getValue();
         this.chargeCalculation = chargeCalculationType.getValue();
+        this.penalty = penalty;
         this.active = active;
     }
 
@@ -81,6 +90,10 @@ public class Charge extends AbstractAuditableCustom<AppUser, Long> {
 
     public boolean isActive() {
         return active;
+    }
+    
+    public boolean isPenalty() {
+        return penalty;
     }
 
     public boolean isDeleted() {

@@ -27,6 +27,10 @@ public class ChargeCommandValidator {
         baseDataValidator.reset().parameter("chargeAppliesTo").value(command.getChargeAppliesTo()).notNull().inMinMaxRange(1, 1);
         baseDataValidator.reset().parameter("chargeTimeType").value(command.getChargeTimeType()).notNull().inMinMaxRange(1, 2);
         baseDataValidator.reset().parameter("chargeCalculationType").value(command.getChargeCalculationType()).notNull().inMinMaxRange(1, 4);
+        
+        if (command.isPenalty() && command.getChargeTimeType().equals(Integer.valueOf(1))) {
+        	// FIXME - KW - cannot have penalty charge at time of disbursement
+        }
 
         if (!dataValidationErrors.isEmpty()) {
             throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);

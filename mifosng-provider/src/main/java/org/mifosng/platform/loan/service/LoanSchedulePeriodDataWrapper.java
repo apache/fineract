@@ -93,26 +93,50 @@ public class LoanSchedulePeriodDataWrapper {
 		return cumulativeValue;
 	}
 
-	public BigDecimal deriveCumulativeChargesToDate() {
+	public BigDecimal deriveCumulativeFeeChargesToDate() {
 		BigDecimal cumulativeValue = BigDecimal.ZERO;
 		for (LoanSchedulePeriodData period : this.periods) {
-			cumulativeValue = cumulativeValue.add(period.chargesDue());
+			cumulativeValue = cumulativeValue.add(period.feeChargesDue());
 		}
 		return cumulativeValue;
 	}
 
-	public BigDecimal deriveCumulativeChargesPaid() {
+	public BigDecimal deriveCumulativeFeeChargesPaid() {
 		BigDecimal cumulativeValue = BigDecimal.ZERO;
 		for (LoanSchedulePeriodData period : this.periods) {
-			cumulativeValue = cumulativeValue.add(period.chargesPaid());
+			cumulativeValue = cumulativeValue.add(period.feeChargesPaid());
 		}
 		return cumulativeValue;
 	}
 
-	public BigDecimal deriveCumulativeChargesOutstanding() {
+	public BigDecimal deriveCumulativeFeeChargesOutstanding() {
 		BigDecimal cumulativeValue = BigDecimal.ZERO;
 		for (LoanSchedulePeriodData period : this.periods) {
-			cumulativeValue = cumulativeValue.add(period.chargesOutstanding());
+			cumulativeValue = cumulativeValue.add(period.feeChargesOutstanding());
+		}
+		return cumulativeValue;
+	}
+	
+	public BigDecimal deriveCumulativePenaltyChargesToDate() {
+		BigDecimal cumulativeValue = BigDecimal.ZERO;
+		for (LoanSchedulePeriodData period : this.periods) {
+			cumulativeValue = cumulativeValue.add(period.penaltyChargesDue());
+		}
+		return cumulativeValue;
+	}
+
+	public BigDecimal deriveCumulativePenaltyChargesPaid() {
+		BigDecimal cumulativeValue = BigDecimal.ZERO;
+		for (LoanSchedulePeriodData period : this.periods) {
+			cumulativeValue = cumulativeValue.add(period.penaltyChargesPaid());
+		}
+		return cumulativeValue;
+	}
+
+	public BigDecimal deriveCumulativePenaltyChargesOutstanding() {
+		BigDecimal cumulativeValue = BigDecimal.ZERO;
+		for (LoanSchedulePeriodData period : this.periods) {
+			cumulativeValue = cumulativeValue.add(period.penaltyChargesOutstanding());
 		}
 		return cumulativeValue;
 	}

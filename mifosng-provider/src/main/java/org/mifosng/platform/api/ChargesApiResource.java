@@ -50,10 +50,10 @@ public class ChargesApiResource {
     @Produces({MediaType.APPLICATION_JSON})
     public String retrieveAllCharges(@Context final UriInfo uriInfo){
 
-        Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-        boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 
-        Collection<ChargeData> charges = this.chargeReadPlatformService.retrieveAllCharges();
+        final Collection<ChargeData> charges = this.chargeReadPlatformService.retrieveAllCharges();
 
         return this.apiJsonSerializerService.serializeChargeDataToJson(prettyPrint, responseParameters, charges);
     }
@@ -63,16 +63,15 @@ public class ChargesApiResource {
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     public String retrieveCharge(@PathParam("chargeId") final Long chargeId, @Context final UriInfo uriInfo){
-        Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+        
+    	final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 
-        boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-        boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
+        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+        final boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
 
         ChargeData charge = this.chargeReadPlatformService.retrieveCharge(chargeId);
-
-        if (template){
+        if (template) {
             ChargeData templateData = this.chargeReadPlatformService.retrieveNewChargeDetails();
-
             charge = new ChargeData(charge, templateData);
         }
 
@@ -84,11 +83,12 @@ public class ChargesApiResource {
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     public String retrieveNewChargeDetails(@Context final UriInfo uriInfo) {
-        Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+    	
+    	final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 
-        boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+    	final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 
-        ChargeData chargeData = this.chargeReadPlatformService.retrieveNewChargeDetails();
+    	final ChargeData chargeData = this.chargeReadPlatformService.retrieveNewChargeDetails();
 
         return this.apiJsonSerializerService.serializeChargeDataToJson(prettyPrint, responseParameters, chargeData);
     }
@@ -98,9 +98,9 @@ public class ChargesApiResource {
     @Produces({MediaType.APPLICATION_JSON})
     public Response createCharge(final String jsonRequestBody){
 
-        ChargeCommand command = this.apiDataConversionService.convertJsonToChargeCommand(null, jsonRequestBody);
+    	final ChargeCommand command = this.apiDataConversionService.convertJsonToChargeCommand(null, jsonRequestBody);
 
-        Long chargeId = this.chargeWritePlatformService.createCharge(command);
+    	final Long chargeId = this.chargeWritePlatformService.createCharge(command);
 
         return Response.ok().entity(new EntityIdentifier(chargeId)).build();
     }
@@ -111,9 +111,9 @@ public class ChargesApiResource {
     @Produces({MediaType.APPLICATION_JSON})
     public Response updateCharge(@PathParam("chargeId") final Long chargeId, final String jsonRequestBody){
 
-        ChargeCommand command = this.apiDataConversionService.convertJsonToChargeCommand(chargeId, jsonRequestBody);
+    	final ChargeCommand command = this.apiDataConversionService.convertJsonToChargeCommand(chargeId, jsonRequestBody);
 
-        Long entityId = this.chargeWritePlatformService.updateCharge(command);
+    	final Long entityId = this.chargeWritePlatformService.updateCharge(command);
 
         return Response.ok().entity(new EntityIdentifier(entityId)).build();
     }

@@ -38,7 +38,7 @@ public class GoogleGsonSerializerHelper {
 
 		if (!responseParameters.isEmpty()) {
 
-			// strip out all know support parameters from expected response to
+			// strip out all known support parameters from expected response to
 			// see if unsupported parameters requested for response.
 			final Set<String> differentParametersDetectedSet = new HashSet<String>(responseParameters);
 			differentParametersDetectedSet.removeAll(supportedParameters);
