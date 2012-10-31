@@ -48,8 +48,7 @@ public class StaffWritePlatformServiceJpaRepositoryImpl implements
 			StaffCommandValidator validator = new StaffCommandValidator(command);
 			validator.validateForCreate();
 
-			Office staffOffice = this.officeRepository.findOne(command
-					.getOfficeId());
+			Office staffOffice = this.officeRepository.findOne(command.getOfficeId());
 			if (staffOffice == null) {
 				throw new OfficeNotFoundException(command.getOfficeId());
 			}

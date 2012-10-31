@@ -164,22 +164,22 @@ public class StaffApiResource {
                 .extractFieldsForResponseIfProvided(uriInfo
                         .getQueryParameters());
 
-        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo
-                .getQueryParameters());
+        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 
-        Collection<OfficeLookup> offices = this.officeReadPlatformService.retrieveAllOfficesForLookup();
+        final Collection<OfficeLookup> offices = this.officeReadPlatformService.retrieveAllOfficesForLookup();
 
         Collection<StaffData> loanOfficers = null;
         StaffAccountSummaryCollectionData staffAccountSummaryCollectionData = null;
 
-        if (officeId != null){
+        if (officeId != null) {
             loanOfficers = this.readPlatformService.retrieveAllLoanOfficersByOffice(officeId);
         }
-        if (loanOfficerId != null){
+        
+        if (loanOfficerId != null) {
             staffAccountSummaryCollectionData = this.readPlatformService.retrieveLoanOfficerAccountSummary(loanOfficerId);
         }
 
-        LoanReassignmentData loanReassignmentData = new LoanReassignmentData(officeId, loanOfficerId, offices,
+        final LoanReassignmentData loanReassignmentData = new LoanReassignmentData(officeId, loanOfficerId, offices,
                 loanOfficers, staffAccountSummaryCollectionData);
 
         return this.apiJsonSerializerService.serializeLoanReassignmentDataToJson(prettyPrint, responseParameters, loanReassignmentData);

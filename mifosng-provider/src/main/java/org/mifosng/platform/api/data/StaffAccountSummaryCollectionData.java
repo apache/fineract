@@ -1,83 +1,78 @@
 package org.mifosng.platform.api.data;
 
-
 import java.util.Collection;
 import java.util.List;
 
+/**
+ *
+ */
 public class StaffAccountSummaryCollectionData {
 
-    private final List<ClientSummary> clients;
+	@SuppressWarnings("unused")
+	private final List<ClientSummary> clients;
+	@SuppressWarnings("unused")
+	private final List<GroupSummary> groups;
 
-    private final List<GroupSummary> groups;
+	public StaffAccountSummaryCollectionData(final List<ClientSummary> clients, final List<GroupSummary> groups) {
+		this.clients = clients;
+		this.groups = groups;
+	}
 
-    public StaffAccountSummaryCollectionData(List<ClientSummary> clients, List<GroupSummary> groups) {
-        this.clients = clients;
-        this.groups = groups;
-    }
+	public static final class ClientSummary {
 
-    public List<ClientSummary> getClients() {
-        return clients;
-    }
+		private final Long id;
+		private final String displayName;
 
-    public List<GroupSummary> getGroups() {
-        return groups;
-    }
+		private Collection<ClientAccountSummaryData> loans;
 
-    public static final class ClientSummary {
+		public ClientSummary(Long id, String displayName) {
+			this.id = id;
+			this.displayName = displayName;
+		}
 
-        private final Long id;
-        private final String displayName;
+		public Long getId() {
+			return id;
+		}
 
-        private Collection<ClientAccountSummaryData> loans;
+		public String getDisplayName() {
+			return displayName;
+		}
 
-        public ClientSummary(Long id, String displayName) {
-            this.id = id;
-            this.displayName = displayName;
-        }
+		public Collection<ClientAccountSummaryData> getLoans() {
+			return loans;
+		}
 
-        public Long getId() {
-            return id;
-        }
+		public void setLoans(Collection<ClientAccountSummaryData> loans) {
+			this.loans = loans;
+		}
+	}
 
-        public String getDisplayName() {
-            return displayName;
-        }
+	public static final class GroupSummary {
 
-        public Collection<ClientAccountSummaryData> getLoans() {
-            return loans;
-        }
+		private final Long id;
+		private final String name;
 
-        public void setLoans(Collection<ClientAccountSummaryData> loans) {
-            this.loans = loans;
-        }
-    }
+		private Collection<GroupAccountSummaryData> loans;
 
-    public static final class GroupSummary {
+		public GroupSummary(Long id, String name) {
+			this.id = id;
+			this.name = name;
+		}
 
-        private final Long id;
-        private final String name;
+		public Long getId() {
+			return id;
+		}
 
-        private Collection<GroupAccountSummaryData> loans;
+		public String getName() {
+			return name;
+		}
 
-        public GroupSummary(Long id, String name) {
-            this.id = id;
-            this.name = name;
-        }
+		public Collection<GroupAccountSummaryData> getLoans() {
+			return loans;
+		}
 
-        public Long getId() {
-            return id;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public Collection<GroupAccountSummaryData> getLoans() {
-            return loans;
-        }
-
-        public void setLoans(Collection<GroupAccountSummaryData> loans) {
-            this.loans = loans;
-        }
-    }
+		public void setLoans(Collection<GroupAccountSummaryData> loans) {
+			this.loans = loans;
+		}
+	}
 }

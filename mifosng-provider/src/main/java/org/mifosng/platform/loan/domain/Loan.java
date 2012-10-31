@@ -296,14 +296,6 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		return this.loanProduct;
 	}
 
-	public Staff getLoanofficer() {
-		return loanofficer;
-	}
-
-    public void setLoanofficer(Staff loanofficer) {
-        this.loanofficer = loanofficer;
-    }
-
 	public LoanProductRelatedDetail repaymentScheduleDetail() {
 		return this.loanRepaymentScheduleDetail;
 	}
@@ -1374,6 +1366,18 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	public boolean hasIdentifyOf(final Long loanId) {
 		return loanId.equals(this.getId());
 	}
+	
+	public boolean hasLoanOfficer(final Staff fromLoanOfficer) {
+		
+		boolean matchesCurrentLoanOfficer = false;
+		if (this.loanofficer != null) {
+			matchesCurrentLoanOfficer = this.loanofficer.identifiedBy(fromLoanOfficer);
+		} else {
+			matchesCurrentLoanOfficer = fromLoanOfficer == null;
+		}
+		
+		return matchesCurrentLoanOfficer;
+	}
 
 	public LocalDate getInterestChargedFromDate() {
 		LocalDate interestChargedFrom = null;
@@ -1419,5 +1423,9 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	
 	private MonetaryCurrency getCurrency() {
 		return this.loanRepaymentScheduleDetail.getCurrency();
+	}
+
+	public void updateLoanofficer(final Staff newLoanOfficer) {
+		this.loanofficer = newLoanOfficer;
 	}
 }

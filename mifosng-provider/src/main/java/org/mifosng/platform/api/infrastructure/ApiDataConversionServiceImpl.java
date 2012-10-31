@@ -155,7 +155,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	}
 
     @Override
-    public BulkLoanReassignmentCommand convertJsonToBulkLoanReassignmentCommand(String json) {
+    public BulkLoanReassignmentCommand convertJsonToBulkLoanReassignmentCommand(final String json) {
 
         if (StringUtils.isBlank(json)) {
             throw new InvalidJsonException();
@@ -193,7 +193,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
         }
         //
 
-        return new BulkLoanReassignmentCommand(modifiedParameters, fromLoanOfficerId, toLoanOfficerId, loans);
+        return new BulkLoanReassignmentCommand(fromLoanOfficerId, toLoanOfficerId, loans);
 	}
 
 	@Override

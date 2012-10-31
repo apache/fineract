@@ -728,8 +728,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         return new EntityIdentifier(loanCharge.getId());
     }
 
+	@Transactional
     @Override
-    public EntityIdentifier bulkLoanReassignment(BulkLoanReassignmentCommand command) {
+    public EntityIdentifier bulkLoanReassignment(final BulkLoanReassignmentCommand command) {
 
         this.context.authenticatedUser();
 
@@ -746,11 +747,12 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             if (loan == null) {
                 throw new LoanNotFoundException(loanId);
             }
-            if (!loan.getLoanofficer().equals(fromLoanOfficer)){
+            
+            if (!loan.hasLoanOfficer(fromLoanOfficer)){
                 throw new LoanOfficerAssignmentException(loan.getId(), fromLoanOfficer.getId());
             }
 
-            loan.setLoanofficer(toLoanOfficer);
+            loan.updateLoanofficer(toLoanOfficer);
             this.loanRepository.save(loan);
         }
 
