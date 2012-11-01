@@ -81,7 +81,8 @@ public class CreocoreLoanRepaymentScheduleTransactionProcessor extends
 		Money transactionAmountRemaining = transactionAmountUnprocessed;
 		Money principalPortion = Money.zero(transactionAmountRemaining.getCurrency());
 		Money interestPortion = Money.zero(transactionAmountRemaining.getCurrency());
-		Money chargesPortion = Money.zero(transactionAmountRemaining.getCurrency());
+		Money feeChargesPortion = Money.zero(transactionAmountRemaining.getCurrency());
+		Money penaltyChargesPortion = Money.zero(transactionAmountRemaining.getCurrency());
 		
 		if (loanTransaction.isInterestWaiver()) {
 			interestPortion = currentInstallment.waiveInterestComponent(transactionAmountRemaining);
@@ -95,7 +96,7 @@ public class CreocoreLoanRepaymentScheduleTransactionProcessor extends
 			transactionAmountRemaining = transactionAmountRemaining.minus(principalPortion);
 		}
 		
-		loanTransaction.updateComponents(principalPortion, interestPortion, chargesPortion);
+		loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
 		return transactionAmountRemaining;
 	}
 

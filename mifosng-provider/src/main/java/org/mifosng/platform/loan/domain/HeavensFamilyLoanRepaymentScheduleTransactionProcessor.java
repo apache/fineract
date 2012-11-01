@@ -68,9 +68,10 @@ public class HeavensFamilyLoanRepaymentScheduleTransactionProcessor extends Abst
 		
 		final MonetaryCurrency currency = paymentInAdvance.getCurrency();
 		Money transactionAmountRemaining = paymentInAdvance;
-		Money principalPortion = Money.zero(transactionAmountRemaining.getCurrency());
-		Money interestPortion = Money.zero(transactionAmountRemaining.getCurrency());
-		Money chargesPortion = Money.zero(transactionAmountRemaining.getCurrency());
+		Money principalPortion = Money.zero(currency);
+		Money interestPortion = Money.zero(currency);
+		Money feeChargesPortion = Money.zero(currency);
+		Money penaltyChargesPortion = Money.zero(currency);
 		
 		if (loanTransaction.isInterestWaiver()) {
 			interestPortion = currentInstallment.waiveInterestComponent(transactionAmountRemaining);
@@ -84,7 +85,7 @@ public class HeavensFamilyLoanRepaymentScheduleTransactionProcessor extends Abst
 					currentInstallment.waiveInterestComponent(currentInstallment.getInterest(currency));
 				}
 
-				loanTransaction.updateComponents(principalPortion, interestPortion, chargesPortion);
+				loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
 
 				transactionAmountRemaining = transactionAmountRemaining.minus(principalPortion);
 			}
@@ -96,7 +97,7 @@ public class HeavensFamilyLoanRepaymentScheduleTransactionProcessor extends Abst
 			transactionAmountRemaining = transactionAmountRemaining.minus(principalPortion);
 		}
 		
-		loanTransaction.updateComponents(principalPortion, interestPortion, chargesPortion);
+		loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
 		return transactionAmountRemaining;
 	}
 	
@@ -109,11 +110,11 @@ public class HeavensFamilyLoanRepaymentScheduleTransactionProcessor extends Abst
 			final LoanTransaction loanTransaction,
 			final Money transactionAmountUnprocessed) {
 		
-		
 		Money transactionAmountRemaining = transactionAmountUnprocessed;
 		Money principalPortion = Money.zero(transactionAmountRemaining.getCurrency());
 		Money interestPortion = Money.zero(transactionAmountRemaining.getCurrency());
-		Money chargesPortion = Money.zero(transactionAmountRemaining.getCurrency());
+		Money feeChargesPortion = Money.zero(transactionAmountRemaining.getCurrency());
+		Money penaltyChargesPortion = Money.zero(transactionAmountRemaining.getCurrency());
 		
 		if (loanTransaction.isInterestWaiver()) {
 			interestPortion = currentInstallment.waiveInterestComponent(transactionAmountRemaining);
@@ -127,7 +128,7 @@ public class HeavensFamilyLoanRepaymentScheduleTransactionProcessor extends Abst
 			transactionAmountRemaining = transactionAmountRemaining.minus(principalPortion);
 		}
 		
-		loanTransaction.updateComponents(principalPortion, interestPortion, chargesPortion);
+		loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
 		return transactionAmountRemaining;
 	}
 

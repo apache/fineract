@@ -72,13 +72,19 @@ public class MifosStyleLoanRepaymentScheduleTransactionProcessor extends
 		Money transactionAmountRemaining = transactionAmountUnprocessed;
 		Money principalPortion = Money.zero(transactionAmountRemaining.getCurrency());
 		Money interestPortion = Money.zero(transactionAmountRemaining.getCurrency());
-		Money chargesPortion = Money.zero(transactionAmountRemaining.getCurrency());
+		Money feeChargesPortion = Money.zero(transactionAmountRemaining.getCurrency());
+		Money penaltyChargesPortion = Money.zero(transactionAmountRemaining.getCurrency());
 		
 		if (loanTransaction.isInterestWaiver()) {
 			interestPortion = currentInstallment.waiveInterestComponent(transactionAmountRemaining);
 			transactionAmountRemaining = transactionAmountRemaining.minus(interestPortion);
 		} else {
-		
+			penaltyChargesPortion = currentInstallment.payPenaltyChargesComponent(transactionAmountRemaining);
+			transactionAmountRemaining = transactionAmountRemaining.minus(penaltyChargesPortion);
+			
+			feeChargesPortion = currentInstallment.payFeeChargesComponent(transactionAmountRemaining);
+			transactionAmountRemaining = transactionAmountRemaining.minus(feeChargesPortion);
+			
 			interestPortion = currentInstallment.payInterestComponent(transactionAmountRemaining);
 			transactionAmountRemaining = transactionAmountRemaining.minus(interestPortion);
 	
@@ -86,13 +92,13 @@ public class MifosStyleLoanRepaymentScheduleTransactionProcessor extends
 			transactionAmountRemaining = transactionAmountRemaining.minus(principalPortion);
 		}
 		
-		loanTransaction.updateComponents(principalPortion, interestPortion, chargesPortion);
+		loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
 		return transactionAmountRemaining;
 	}
 
 	@Override
 	protected void onLoanOverpayment(final LoanTransaction loanTransaction,
 			final Money loanOverPaymentAmount) {
-		// dont do anything for with loan over-payment
+		// TODO - KW - dont do anything with loan over-payment for now
 	}
 }

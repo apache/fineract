@@ -422,10 +422,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 			throw new LoanNotFoundException(command.getLoanId());
 		}
 
-		if (loan.isActualDisbursedOnDateEarlierOrLaterThanExpected()) {
-			// FIXME - KW - handle this use case - recalculate loan schedule using original settings.
-		}
-
 		loan.undoDisbursal(defaultLoanLifecycleStateMachine());
 
 		this.loanRepository.save(loan);

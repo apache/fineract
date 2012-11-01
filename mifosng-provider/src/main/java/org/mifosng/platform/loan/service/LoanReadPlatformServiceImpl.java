@@ -118,29 +118,39 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 			LoanSchedulePeriodDataWrapper wrapper = new LoanSchedulePeriodDataWrapper(periods);
 			
 			final Integer loanTermInDays = wrapper.deriveCumulativeLoanTermInDays();
+			
 			final BigDecimal cumulativePrincipalDisbursed = wrapper.deriveCumulativePrincipalDisbursed();
 			final BigDecimal cumulativePrincipalDue = wrapper.deriveCumulativePrincipalDue();
 			final BigDecimal cumulativePrincipalPaid = wrapper.deriveCumulativePrincipalPaid();
 			final BigDecimal cumulativePrincipalWrittenOff = wrapper.deriveCumulativePrincipalWrittenOff();
 			final BigDecimal cumulativePrincipalOutstanding = wrapper.deriveCumulativePrincipalOutstanding();
+			
 			final BigDecimal cumulativeInterestExpected =  wrapper.deriveCumulativeInterestExpected();
 			final BigDecimal cumulativeInterestPaid = wrapper.deriveCumulativeInterestPaid();
 			final BigDecimal cumulativeInterestWaived = wrapper.deriveCumulativeInterestWaived();
 			final BigDecimal cumulativeInterestWrittenOff = wrapper.deriveCumulativeInterestWrittenOff();
 			final BigDecimal cumulativeInterestOutstanding = wrapper.deriveCumulativeInterestOutstanding();
-			final BigDecimal cumulativeFeeChargesToDate = wrapper.deriveCumulativeFeeChargesToDate();
+			
+			final BigDecimal cumulativeFeeChargesExpected = wrapper.deriveCumulativeFeeChargesToDate();
 			final BigDecimal cumulativeFeeChargesPaid = wrapper.deriveCumulativeFeeChargesPaid();
+			final BigDecimal cumulativeFeeChargesWaived = wrapper.deriveCumulativeFeeChargesWaived();
+			final BigDecimal cumulativeFeeChargesWrittenOff = wrapper.deriveCumulativeFeeChargesWrittenOff();
 			final BigDecimal cumulativeFeeChargesOutstanding = wrapper.deriveCumulativeFeeChargesOutstanding();
-			final BigDecimal cumulativePenaltyChargesToDate = wrapper.deriveCumulativePenaltyChargesToDate();
+			
+			final BigDecimal cumulativePenaltyChargesExpected = wrapper.deriveCumulativePenaltyChargesToDate();
 			final BigDecimal cumulativePenaltyChargesPaid = wrapper.deriveCumulativePenaltyChargesPaid();
+			final BigDecimal cumulativePenaltyChargesWaived = wrapper.deriveCumulativePenaltyChargesWaived();
+			final BigDecimal cumulativePenaltyChargesWrittenOff = wrapper.deriveCumulativePenaltyChargesWrittenOff();
 			final BigDecimal cumulativePenaltyChargesOutstanding = wrapper.deriveCumulativePenaltyChargesOutstanding();
 			
-			final BigDecimal totalCostOfLoan = cumulativeInterestExpected.add(cumulativeFeeChargesToDate).add(cumulativePenaltyChargesToDate);
-			final BigDecimal totalExpectedRepayment = cumulativePrincipalDisbursed.add(totalCostOfLoan);
-			final BigDecimal totalPaidToDate = cumulativePrincipalPaid.add(cumulativeInterestPaid).add(cumulativeFeeChargesPaid);
-			final BigDecimal totalWaivedToDate = cumulativeInterestWaived;
-			final BigDecimal totalWrittenOffToDate = cumulativePrincipalWrittenOff.add(cumulativeInterestWrittenOff);
-			final BigDecimal totalOutstanding = cumulativePrincipalOutstanding.add(cumulativeInterestOutstanding).add(cumulativeFeeChargesOutstanding);
+			final BigDecimal totalExpectedCostOfLoan = cumulativeInterestExpected.add(cumulativeFeeChargesExpected).add(cumulativePenaltyChargesExpected);
+			final BigDecimal totalExpectedRepayment = cumulativePrincipalDisbursed.add(totalExpectedCostOfLoan);
+			
+			final BigDecimal totalPaidToDate = cumulativePrincipalPaid.add(cumulativeInterestPaid).add(cumulativeFeeChargesPaid).add(cumulativePenaltyChargesPaid);
+			final BigDecimal totalWaivedToDate = cumulativeInterestWaived.add(cumulativeFeeChargesWaived).add(cumulativePenaltyChargesWaived);
+			final BigDecimal totalWrittenOffToDate = cumulativePrincipalWrittenOff.add(cumulativeInterestWrittenOff).add(cumulativeFeeChargesWrittenOff).add(cumulativePenaltyChargesWrittenOff);
+			
+			final BigDecimal totalOutstanding = cumulativePrincipalOutstanding.add(cumulativeInterestOutstanding).add(cumulativeFeeChargesOutstanding).add(cumulativePenaltyChargesOutstanding);
 
 			final BigDecimal totalOverdue = wrapper.deriveCumulativeTotalOverdue();
 			
@@ -157,9 +167,9 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 			return new LoanScheduleData(currency, periods, loanTermInDays, 
 					cumulativePrincipalDisbursed, cumulativePrincipalDue, cumulativePrincipalPaid, cumulativePrincipalWrittenOff, cumulativePrincipalOutstanding, 
 					cumulativeInterestExpected, cumulativeInterestPaid, cumulativeInterestWaived, cumulativeInterestWrittenOff, cumulativeInterestOutstanding, 
-					cumulativeFeeChargesToDate, cumulativeFeeChargesPaid, cumulativeFeeChargesOutstanding, 
-					cumulativePenaltyChargesToDate, cumulativePenaltyChargesPaid, cumulativePenaltyChargesOutstanding, 
-					totalCostOfLoan, totalExpectedRepayment, totalPaidToDate, totalWaivedToDate, totalWrittenOffToDate, totalOutstanding, totalInArrears);
+					cumulativeFeeChargesExpected, cumulativeFeeChargesPaid, cumulativeFeeChargesOutstanding, 
+					cumulativePenaltyChargesExpected, cumulativePenaltyChargesPaid, cumulativePenaltyChargesOutstanding, 
+					totalExpectedCostOfLoan, totalExpectedRepayment, totalPaidToDate, totalWaivedToDate, totalWrittenOffToDate, totalOutstanding, totalInArrears);
 		} catch (EmptyResultDataAccessException e) {
 			throw new LoanNotFoundException(loanId);
 		}
@@ -571,10 +581,11 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 			final BigDecimal totalExpectedCostOfLoanForPeriod = interestExpectedDue.add(feeChargesExpectedDue).add(penaltyChargesExpectedDue);
 			
 			final BigDecimal totalDueForPeriod = principalDue.add(totalExpectedCostOfLoanForPeriod);
-			final BigDecimal totalPaidForPeriod = principalPaid.add(interestPaid).add(feeChargesPaid);
+			final BigDecimal totalPaidForPeriod = principalPaid.add(interestPaid).add(feeChargesPaid).add(penaltyChargesPaid);
 			final BigDecimal totalWaivedForPeriod = interestWaived.add(feeChargesWaived);
-			final BigDecimal totalWrittenOffForPeriod = principalWrittenOff.add(interestWrittenOff).add(feeChargesWrittenOff);
-			final BigDecimal totalOutstandingForPeriod = principalOutstanding.add(interestOutstanding).add(feeChargesOutstanding);
+			final BigDecimal totalWrittenOffForPeriod = principalWrittenOff.add(interestWrittenOff).add(feeChargesWrittenOff).add(penaltyChargesWrittenOff);
+			final BigDecimal totalOutstandingForPeriod = principalOutstanding.add(interestOutstanding).add(feeChargesOutstanding).add(penaltyChargesOutstanding);
+			
 			final BigDecimal totalActualCostOfLoanForPeriod = interestActualDue.add(feeChargesActualDue).add(penaltyChargesActualDue);
 			
 			if (fromDate == null) {

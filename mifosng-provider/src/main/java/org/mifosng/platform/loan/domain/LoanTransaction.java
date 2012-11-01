@@ -43,8 +43,11 @@ public class LoanTransaction extends AbstractAuditableCustom<AppUser, Long> {
 	@Column(name = "interest_portion_derived", scale = 6, precision = 19, nullable = true)
 	private BigDecimal interestPortion = BigDecimal.ZERO;
 	
-	@Column(name = "charges_portion_derived", scale = 6, precision = 19, nullable = true)
-	private BigDecimal chargesPortion = BigDecimal.ZERO;
+	@Column(name = "fee_charges_portion_derived", scale = 6, precision = 19, nullable = true)
+	private BigDecimal feeChargesPortion = BigDecimal.ZERO;
+	
+	@Column(name = "penalty_charges_portion_derived", scale = 6, precision = 19, nullable = true)
+	private BigDecimal penaltyChargesPortion = BigDecimal.ZERO;
 	
     @Temporal(TemporalType.DATE)
     @Column(name = "transaction_date", nullable=false)
@@ -184,39 +187,41 @@ public class LoanTransaction extends AbstractAuditableCustom<AppUser, Long> {
 	 * 
 	 * This accumulates the values passed to the already existent values for each of the portions.
 	 */
-	public void updateComponents(final Money principal, final Money interest, final Money charges) {
-		MonetaryCurrency currency = principal.getCurrency();
-		this.principalPortion = getPrincipalPortion(currency).plus(principal).getAmount();
-		this.interestPortion = getInterestPortion(currency).plus(interest).getAmount();
-		this.chargesPortion = getChargesPortion(currency).plus(charges).getAmount();
+	public void updateComponents(final Money principal, final Money interest, final Money feeCharges, final Money penaltyCharges) {
+		final MonetaryCurrency currency = principal.getCurrency();
+		this.principalPortion = defaultToNullIfZero(getPrincipalPortion(currency).plus(principal).getAmount());
+		this.interestPortion = defaultToNullIfZero(getInterestPortion(currency).plus(interest).getAmount());
+		this.feeChargesPortion = defaultToNullIfZero(getFeeChargesPortion(currency).plus(feeCharges).getAmount());
+		this.penaltyChargesPortion = defaultToNullIfZero(getPenaltyChargesPortion(currency).plus(penaltyCharges).getAmount());
 	}
 	
-	public void updateComponentsAndTotal(final Money principal, final Money interest, final Money charges) {
-		updateComponents(principal, interest, charges);
+	public void updateComponentsAndTotal(final Money principal, final Money interest, final Money feeCharges, final Money penaltyCharges) {
+		updateComponents(principal, interest, feeCharges, penaltyCharges);
 		
 		final MonetaryCurrency currency = principal.getCurrency();
-		this.amount = getPrincipalPortion(currency).plus(getInterestPortion(currency)).plus(this.chargesPortion).getAmount();
+		this.amount = getPrincipalPortion(currency).plus(getInterestPortion(currency)).plus(getFeeChargesPortion(currency)).plus(getPenaltyChargesPortion(currency)).getAmount();
 	}
 
 	public Money getPrincipalPortion(final MonetaryCurrency currency) {
-		return Money.of(currency, principalPortion);
+		return Money.of(currency, this.principalPortion);
 	}
 
 	public Money getInterestPortion(final MonetaryCurrency currency) {
-		return  Money.of(currency, interestPortion);
+		return Money.of(currency, this.interestPortion);
 	}
 	
-	public Money getChargesPortion(final MonetaryCurrency currency) {
-		if (this.chargesPortion == null) {
-			this.chargesPortion = BigDecimal.ZERO;
-		}
-		return  Money.of(currency, chargesPortion);
+	public Money getFeeChargesPortion(final MonetaryCurrency currency) {
+		return Money.of(currency, this.feeChargesPortion);
+	}
+	
+	public Money getPenaltyChargesPortion(final MonetaryCurrency currency) {
+		return Money.of(currency, this.penaltyChargesPortion);
 	}
 
 	public void resetDerivedComponents() {
 		this.principalPortion = null;
 		this.interestPortion = null;
-		this.chargesPortion = null;
+		this.feeChargesPortion = null;
 	}
 
 	public boolean isGreaterThanZero(final MonetaryCurrency currency) {
@@ -225,5 +230,13 @@ public class LoanTransaction extends AbstractAuditableCustom<AppUser, Long> {
 
 	public boolean isNotZero(final MonetaryCurrency currency) {
 		return !getAmount(currency).isZero();
+	}
+	
+	private BigDecimal defaultToNullIfZero(final BigDecimal value) {
+		BigDecimal result = value;
+		if (BigDecimal.ZERO.compareTo(value) == 0) {
+			result = null;
+		}
+		return result;
 	}
 }

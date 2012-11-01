@@ -266,7 +266,14 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		
 		// reprocess loan schedule based on charge been removed.
 		LoanScheduleWrapper wrapper = new LoanScheduleWrapper();
-		wrapper.reprocess(getCurrency(), getDisbursementDate(), this.repaymentScheduleInstallments, this.charges, this.loanTransactions);
+		wrapper.reprocess(getCurrency(), getDisbursementDate(), this.repaymentScheduleInstallments, this.charges);
+		
+		final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessor.determineProcessor(this.transactionProcessingStrategy);
+				
+		if (!loanCharge.isDueAtDisbursement()) { // TODO - only need to reprocess transactions against loan schedule if loan charge is added with due date before latest transaction.
+			final List<LoanTransaction> allNonContraTransactionsPostDisbursement = retreiveListOfTransactionsPostDisbursement();
+			loanRepaymentScheduleTransactionProcessor.handleTransaction(allNonContraTransactionsPostDisbursement, getCurrency(), this.repaymentScheduleInstallments, this.charges);
+		}
 	}
 	
 	public void removeLoanCharge(final LoanCharge loanCharge) {
@@ -277,7 +284,13 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		
 		// reprocess loan schedule based on charge been removed.
 		LoanScheduleWrapper wrapper = new LoanScheduleWrapper();
-		wrapper.reprocess(getCurrency(), getDisbursementDate(), this.repaymentScheduleInstallments, this.charges, this.loanTransactions);
+		wrapper.reprocess(getCurrency(), getDisbursementDate(), this.repaymentScheduleInstallments, this.charges);
+		
+		final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessor.determineProcessor(this.transactionProcessingStrategy);
+		if (!loanCharge.isDueAtDisbursement() && loanCharge.isPaidOrPartiallyPaid(loanCurrency())) {
+			final List<LoanTransaction> allNonContraTransactionsPostDisbursement = retreiveListOfTransactionsPostDisbursement();
+			loanRepaymentScheduleTransactionProcessor.handleTransaction(allNonContraTransactionsPostDisbursement, getCurrency(), this.repaymentScheduleInstallments, this.charges);
+		}
 	}
 	
 	public void updateLoanCharge(final LoanCharge loanCharge, final LoanChargeCommand command) {
@@ -390,7 +403,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		final List<LoanTransaction> repaymentsOrWaivers = retreiveListOfTransactionsPostDisbursement();
 		
 		final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessor.determineProcessor(this.transactionProcessingStrategy);
-		loanRepaymentScheduleTransactionProcessor.handleTransaction(repaymentsOrWaivers, getCurrency(), this.repaymentScheduleInstallments);
+		loanRepaymentScheduleTransactionProcessor.handleTransaction(repaymentsOrWaivers, getCurrency(), this.repaymentScheduleInstallments, this.charges);
 	}
 
 	private void removeFirstDisbursementTransaction() {
@@ -550,7 +563,10 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	}
 
 	public void disburse(final LocalDate disbursedOn, final LoanLifecycleStateMachine loanLifecycleStateMachine, final boolean statusTransition) {
-		
+
+		// ensure loan is in pre-disbursal state
+		updateLoanToPreDisbursalState();
+				
 		if (statusTransition) {
 			LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_DISBURSED, LoanStatus.fromInt(this.loanStatus));
 			this.loanStatus = statusEnum.getValue();
@@ -571,7 +587,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 			
 			LoanTransaction chargesPayment = LoanTransaction.repaymentAtDisbursement(getTotalChargesDueAtDisbursement(), disbursedOn);
 			Money zero = Money.zero(getCurrency());
-			chargesPayment.updateComponents(zero, zero, getTotalChargesDueAtDisbursement());
+			chargesPayment.updateComponents(zero, zero, getTotalChargesDueAtDisbursement(), zero);
 			chargesPayment.updateLoan(this);
 			this.loanTransactions.add(chargesPayment);
 			
@@ -611,14 +627,25 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		final LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_DISBURSAL_UNDO, LoanStatus.fromInt(this.loanStatus));
 		this.loanStatus = statusEnum.getValue();
 		
+		updateLoanToPreDisbursalState();
+	}
+	
+	private void updateLoanToPreDisbursalState() {
+		this.loanStatus = LoanStatus.APPROVED.getValue();
+		
 		this.loanTransactions.clear();
 		this.disbursedOnDate = null;
 		
 		for (LoanCharge charge : this.charges) {
-			if (charge.isDueAtDisbursement()) {
-				charge.resetToOriginal();
-			}
+			charge.resetToOriginal();
 		}
+		
+		for (LoanRepaymentScheduleInstallment currentInstallment : this.repaymentScheduleInstallments) {
+			currentInstallment.resetDerivedComponents();
+		}
+		
+		LoanScheduleWrapper wrapper = new LoanScheduleWrapper();
+		wrapper.reprocess(getCurrency(), getDisbursementDate(), this.repaymentScheduleInstallments, this.charges);
 	}
 	
 	/**
@@ -697,10 +724,10 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		
 		final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessor.determineProcessor(this.transactionProcessingStrategy);
 		if (isTransactionChronologicallyLatest && adjustedTransaction == null) {
-			loanRepaymentScheduleTransactionProcessor.handleTransaction(loanTransaction, getCurrency(), this.repaymentScheduleInstallments);
+			loanRepaymentScheduleTransactionProcessor.handleTransaction(loanTransaction, getCurrency(), this.repaymentScheduleInstallments, this.charges);
 		} else {
-			final List<LoanTransaction> repaymentsOrWaivers = retreiveListOfTransactionsPostDisbursement();
-			loanRepaymentScheduleTransactionProcessor.handleTransaction(repaymentsOrWaivers, getCurrency(), this.repaymentScheduleInstallments);
+			final List<LoanTransaction> allNonContraTransactionsPostDisbursement = retreiveListOfTransactionsPostDisbursement();
+			loanRepaymentScheduleTransactionProcessor.handleTransaction(allNonContraTransactionsPostDisbursement, getCurrency(), this.repaymentScheduleInstallments, this.charges);
 		}
 		
 		doPostLoanTransactionChecks(loanTransaction, loanLifecycleStateMachine);
@@ -897,25 +924,28 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	}
 	
 	private boolean isOverPaid() {
-		return getTotalOverpayment().isGreaterThanZero();
+		return calculateTotalOverpayment().isGreaterThanZero();
 	}
 	
-	private Money getTotalOverpayment() {
-		
+	private Money calculateTotalOverpayment() {
+
 		final Money totalPaidInRepayments = getTotalPaidInRepayments();
 		
 		final MonetaryCurrency currency = loanCurrency();
-
-		Money cumulativeOriginalExpectedTotal = Money.zero(currency);
 		Money cumulativeTotalPaidOnInstallments = Money.zero(currency);
 		Money cumulativeTotalWaivedOnInstallments = Money.zero(currency);
 		
 		for (LoanRepaymentScheduleInstallment scheduledRepayment : this.repaymentScheduleInstallments) {
-			cumulativeOriginalExpectedTotal = cumulativeOriginalExpectedTotal.plus(scheduledRepayment.getPrincipal(currency));
-			cumulativeTotalPaidOnInstallments = cumulativeTotalPaidOnInstallments.plus(scheduledRepayment.getPrincipalCompleted(currency).plus(scheduledRepayment.getInterestCompleted(currency)));
+			
+			cumulativeTotalPaidOnInstallments = cumulativeTotalPaidOnInstallments.plus(scheduledRepayment.getPrincipalCompleted(currency)
+																				 .plus(scheduledRepayment.getInterestCompleted(currency)))
+																				 .plus(scheduledRepayment.getFeeChargesCompleted(currency))
+																				 .plus(scheduledRepayment.getPenaltyChargesCompleted(currency));
+			
 			cumulativeTotalWaivedOnInstallments = cumulativeTotalWaivedOnInstallments.plus(scheduledRepayment.getInterestWaived(currency));
 		}
-		
+
+		// if total paid in transactions doesnt match repayment schedule then theres an overpayment.
 		return totalPaidInRepayments.minus(cumulativeTotalPaidOnInstallments);
 	}
 
@@ -1004,7 +1034,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		}
 		
 		if (isOverPaid()) {
-			final Money totalLoanOverpayment = getTotalOverpayment();
+			final Money totalLoanOverpayment = calculateTotalOverpayment();
 			// FIXME - kw - use overpaymentTolerance setting when in place on loan product settings.
 			if (totalLoanOverpayment.isGreaterThanZero() && getInArrearsTolerance().isGreaterThanOrEqualTo(totalLoanOverpayment)) {
 				// TODO - technically should set somewhere that this loan has 'overpaid' amount
@@ -1284,13 +1314,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		this.repaymentScheduleInstallments.add(installment);
 	}
 
-	public boolean isActualDisbursedOnDateEarlierOrLaterThanExpected() {
-		return isActualDisbursedOnDateEarlierOrLaterThanExpected(new LocalDate(
-				this.disbursedOnDate));
-	}
-
-	public boolean isActualDisbursedOnDateEarlierOrLaterThanExpected(
-			final LocalDate actualDisbursedOnDate) {
+	public boolean isActualDisbursedOnDateEarlierOrLaterThanExpected(final LocalDate actualDisbursedOnDate) {
 		return !new LocalDate(this.expectedDisbursedOnDate)
 				.isEqual(actualDisbursedOnDate);
 	}
@@ -1319,16 +1343,6 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		return cumulativePaid;
 	}
 
-//	private Money getTotalInterestOnLoan() {
-//		Money cumulativeInterest = Money.zero(loanCurrency());
-//
-//		for (LoanRepaymentScheduleInstallment scheduledRepayment : this.repaymentScheduleInstallments) {
-//			cumulativeInterest = cumulativeInterest.plus(scheduledRepayment.getInterest(loanCurrency()));
-//		}
-//
-//		return cumulativeInterest;
-//	}
-	
 	private Money getTotalInterestOutstandingOnLoan() {
 		Money cumulativeInterest = Money.zero(loanCurrency());
 

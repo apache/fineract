@@ -34,8 +34,7 @@ public class LoanScheduleWrapper {
 			final MonetaryCurrency currency,
 			final LocalDate disbursementDate, 
 			final List<LoanRepaymentScheduleInstallment> repaymentPeriods,
-			final Set<LoanCharge> loanCharges, 
-			final List<LoanTransaction> transactions) {
+			final Set<LoanCharge> loanCharges) {
 		
 		LocalDate startDate = disbursementDate;
 		for (LoanRepaymentScheduleInstallment period : repaymentPeriods) {
@@ -46,7 +45,7 @@ public class LoanScheduleWrapper {
 			period.updateChargePortion(feeChargesDueForRepaymentPeriod, penaltyChargesDueForRepaymentPeriod);
 
 			startDate = period.getDueDate();
-		}	
+		}
 	}
 	
 	private Money cumulativeFeeChargesDueWithin(

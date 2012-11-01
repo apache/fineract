@@ -127,6 +127,15 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
         return this.installmentNumber;
     }
 
+    public LocalDate getFromDate() {
+    	LocalDate fromLocalDate = null;
+    	if (this.fromDate != null) {
+    		fromLocalDate = new LocalDate(this.fromDate);
+    	}
+    	
+    	return fromLocalDate;
+    }
+    
     public LocalDate getDueDate() {
         return new LocalDate(this.dueDate);
     }
@@ -189,6 +198,27 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
 		final Money feeChargesAccountedFor = getFeeChargesCompleted(currency).plus(getFeeChargesWaived(currency)).plus(getFeeChargesWrittenOff(currency));
 		return getFeeCharges(currency).minus(feeChargesAccountedFor);
 	}
+	
+	public Money getPenaltyCharges(final MonetaryCurrency currency) {
+		return Money.of(currency, this.penaltyCharges);
+	}
+	
+	public Money getPenaltyChargesCompleted(final MonetaryCurrency currency) {
+		return Money.of(currency, this.penaltyChargesCompleted);
+	}
+	
+	public Money getPenaltyChargesWaived(final MonetaryCurrency currency) {
+		return Money.of(currency, this.penaltyChargesWaived);
+	}
+	
+	public Money getPenaltyChargesWrittenOff(final MonetaryCurrency currency) {
+		return Money.of(currency, this.penaltyChargesWrittenOff);
+	}
+	
+	public Money getPenaltyChargesOutstanding(final MonetaryCurrency currency) {
+		final Money feeChargesAccountedFor = getPenaltyChargesCompleted(currency).plus(getPenaltyChargesWaived(currency)).plus(getPenaltyChargesWrittenOff(currency));
+		return getPenaltyCharges(currency).minus(feeChargesAccountedFor);
+	}
 
 	public boolean isInterestDue(final MonetaryCurrency currency) {
 		return getInterestOutstanding(currency).isGreaterThanZero();
@@ -199,7 +229,7 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
 	}
 	
 	public Money getTotalOutstanding(final MonetaryCurrency currency) {
-		return getPrincipalOutstanding(currency).plus(getInterestOutstanding(currency));
+		return getPrincipalOutstanding(currency).plus(getInterestOutstanding(currency)).plus(getFeeChargesOutstanding(currency)).plus(getPenaltyChargesOutstanding(currency));
 	}
 	
 	public void updateLoan(final Loan loan) {
@@ -228,9 +258,58 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
 		this.interestCompleted = null;
 		this.interestWaived = null;
 		this.interestWrittenOff = null;
+		this.feeChargesCompleted = null;
+		this.feeChargesWaived = null;
+		this.feeChargesWrittenOff = null;
+		this.penaltyChargesCompleted = null;
+		this.penaltyChargesWaived = null;
+		this.penaltyChargesWrittenOff = null;
+		
 		this.completed = false;
 	}
 
+	public Money payPenaltyChargesComponent(final Money transactionAmountRemaining) {
+		
+		final MonetaryCurrency currency = transactionAmountRemaining.getCurrency();
+		Money penaltyPortionOfTransaction = Money.zero(currency);
+		
+		final Money penaltyChargesDue = getPenaltyChargesOutstanding(currency);
+		if (transactionAmountRemaining.isGreaterThanOrEqualTo(penaltyChargesDue)) {
+			this.penaltyChargesCompleted = getPenaltyChargesCompleted(currency).plus(penaltyChargesDue).getAmount();
+			penaltyPortionOfTransaction = penaltyPortionOfTransaction.plus(penaltyChargesDue);
+		} else {
+			this.penaltyChargesCompleted = getPenaltyChargesCompleted(currency).plus(transactionAmountRemaining).getAmount();
+			penaltyPortionOfTransaction = penaltyPortionOfTransaction.plus(transactionAmountRemaining);
+		}
+		
+		this.penaltyChargesCompleted = defaultToNullIfZero(this.penaltyChargesCompleted);
+		
+		this.completed = getTotalOutstanding(currency).isZero();
+		
+		return penaltyPortionOfTransaction;
+	}
+	
+	public Money payFeeChargesComponent(final Money transactionAmountRemaining) {
+		
+		final MonetaryCurrency currency = transactionAmountRemaining.getCurrency();
+		Money feePortionOfTransaction = Money.zero(currency);
+		
+		final Money feeChargesDue = getFeeChargesOutstanding(currency);
+		if (transactionAmountRemaining.isGreaterThanOrEqualTo(feeChargesDue)) {
+			this.feeChargesCompleted = getFeeChargesCompleted(currency).plus(feeChargesDue).getAmount();
+			feePortionOfTransaction = feePortionOfTransaction.plus(feeChargesDue);
+		} else {
+			this.feeChargesCompleted = getFeeChargesCompleted(currency).plus(transactionAmountRemaining).getAmount();
+			feePortionOfTransaction = feePortionOfTransaction.plus(transactionAmountRemaining);
+		}
+		
+		this.feeChargesCompleted = defaultToNullIfZero(this.feeChargesCompleted);
+		
+		this.completed = getTotalOutstanding(currency).isZero();
+		
+		return feePortionOfTransaction;
+	}
+	
 	public Money payInterestComponent(final Money transactionAmountRemaining) {
 		
 		final MonetaryCurrency currency = transactionAmountRemaining.getCurrency();

@@ -65,15 +65,16 @@ public class AdhikarLoanRepaymentScheduleTransactionProcessor extends AbstractLo
 		// pay of overdue and current interest due given transaction date
 		final MonetaryCurrency currency = transactionAmountUnprocessed.getCurrency();
 		Money transactionAmountRemaining = transactionAmountUnprocessed;
-		Money interestWaivedPortion = Money.zero(transactionAmountRemaining.getCurrency());
-		Money chargesPortion = Money.zero(transactionAmountRemaining.getCurrency());
+		Money interestWaivedPortion = Money.zero(currency);
+		Money feeChargesPortion = Money.zero(currency);
+		Money penaltyChargesPortion = Money.zero(currency);
 		
 		if (loanTransaction.isInterestWaiver()) {
 			interestWaivedPortion = currentInstallment.waiveInterestComponent(transactionAmountRemaining);
 			transactionAmountRemaining = transactionAmountRemaining.minus(interestWaivedPortion);
 			
 			final Money principalPortion = Money.zero(transactionAmountRemaining.getCurrency());
-			loanTransaction.updateComponents(principalPortion, interestWaivedPortion, chargesPortion);
+			loanTransaction.updateComponents(principalPortion, interestWaivedPortion, feeChargesPortion, penaltyChargesPortion);
 		} else {
 		
 			LoanRepaymentScheduleInstallment currentInstallmentBasedOnTransactionDate = nearestInstallment(loanTransaction.getTransactionDate(), installments);
@@ -87,7 +88,7 @@ public class AdhikarLoanRepaymentScheduleTransactionProcessor extends AbstractLo
 					transactionAmountRemaining = transactionAmountRemaining.minus(interestPortion);
 					
 					Money principalPortion = Money.zero(currency);
-					loanTransaction.updateComponents(principalPortion, interestPortion, Money.zero(transactionAmountRemaining.getCurrency()));
+					loanTransaction.updateComponents(principalPortion, interestPortion, Money.zero(currency), Money.zero(currency));
 				}
 			}
 			
@@ -98,7 +99,7 @@ public class AdhikarLoanRepaymentScheduleTransactionProcessor extends AbstractLo
 					transactionAmountRemaining = transactionAmountRemaining.minus(principalPortion);
 					
 					Money interestPortion = Money.zero(currency);
-					loanTransaction.updateComponents(principalPortion, interestPortion, Money.zero(transactionAmountRemaining.getCurrency()));
+					loanTransaction.updateComponents(principalPortion, interestPortion, Money.zero(currency), Money.zero(currency));
 				}
 			}
 		}
@@ -131,7 +132,8 @@ public class AdhikarLoanRepaymentScheduleTransactionProcessor extends AbstractLo
 		Money transactionAmountRemaining = transactionAmountUnprocessed;
 		Money principalPortion = Money.zero(transactionAmountRemaining.getCurrency());
 		Money interestPortion = Money.zero(transactionAmountRemaining.getCurrency());
-		Money chargesPortion = Money.zero(transactionAmountRemaining.getCurrency());
+		Money feeChargesPortion = Money.zero(transactionAmountRemaining.getCurrency());
+		Money penaltyChargesPortion = Money.zero(transactionAmountRemaining.getCurrency());
 		
 		if (loanTransaction.isInterestWaiver()) {
 			interestPortion = currentInstallment.waiveInterestComponent(transactionAmountRemaining);
@@ -145,7 +147,7 @@ public class AdhikarLoanRepaymentScheduleTransactionProcessor extends AbstractLo
 			transactionAmountRemaining = transactionAmountRemaining.minus(principalPortion);
 		}
 		
-		loanTransaction.updateComponents(principalPortion, interestPortion, chargesPortion);
+		loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
 		return transactionAmountRemaining;
 	}
 

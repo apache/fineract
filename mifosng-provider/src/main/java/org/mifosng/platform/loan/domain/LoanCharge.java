@@ -20,6 +20,8 @@ import org.mifosng.platform.api.commands.LoanChargeCommand;
 import org.mifosng.platform.charge.domain.Charge;
 import org.mifosng.platform.charge.domain.ChargeCalculationType;
 import org.mifosng.platform.charge.domain.ChargeTimeType;
+import org.mifosng.platform.currency.domain.MonetaryCurrency;
+import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.exceptions.LoanChargeWithoutMandatoryFieldException;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
@@ -57,14 +59,12 @@ public class LoanCharge extends AbstractPersistable<Long> {
     @Column(name = "amount_paid_derived", scale = 6, precision = 19, nullable = true)
     private BigDecimal amountPaid;
     
-    @SuppressWarnings("unused")
 	@Column(name = "amount_outstanding_derived", scale = 6, precision = 19, nullable = false)
     private BigDecimal amountOutstanding;
 
 	@Column(name = "is_penalty", nullable=false)
 	private boolean penaltyCharge = false;
     
-    @SuppressWarnings("unused")
 	@Column(name = "is_paid_derived", nullable=false)
 	private boolean paid = false;
 
@@ -354,5 +354,40 @@ public class LoanCharge extends AbstractPersistable<Long> {
 	
 	public boolean isPenaltyCharge() {
 		return this.penaltyCharge;
+	}
+	
+	public boolean isNotFullyPaid() {
+		return !isPaid();
+	}
+
+	public boolean isPaid() {
+		return this.paid;
+	}
+	
+	public boolean isPaidOrPartiallyPaid(final MonetaryCurrency currency) {
+		return Money.of(currency, this.amountPaid).isGreaterThanZero();
+	}
+
+	public Money updatePaidAmountBy(final Money incrementBy) {
+		
+		Money amountPaidToDate = Money.of(incrementBy.getCurrency(), this.amountPaid);
+		Money amountOutstanding = Money.of(incrementBy.getCurrency(), this.amountOutstanding);
+		
+		Money amountPaidOnThisCharge = Money.zero(incrementBy.getCurrency());
+		if (incrementBy.isGreaterThanOrEqualTo(amountOutstanding)) {
+			amountPaidOnThisCharge = amountOutstanding;
+			amountPaidToDate = amountPaidToDate.plus(amountOutstanding);
+			this.amountPaid = amountPaidToDate.getAmount();
+			this.amountOutstanding = BigDecimal.ZERO;
+		} else {
+			amountPaidOnThisCharge = incrementBy;
+			amountPaidToDate = amountPaidToDate.plus(incrementBy);
+			this.amountPaid = amountPaidToDate.getAmount();
+			
+			Money amountExpected = Money.of(incrementBy.getCurrency(), this.amount);
+			this.amountOutstanding = amountExpected.minus(amountPaidToDate).getAmount();
+		}
+		
+		return incrementBy.minus(amountPaidOnThisCharge);
 	}
 }

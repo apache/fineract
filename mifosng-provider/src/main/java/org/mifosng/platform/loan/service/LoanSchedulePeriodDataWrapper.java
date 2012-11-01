@@ -108,6 +108,22 @@ public class LoanSchedulePeriodDataWrapper {
 		}
 		return cumulativeValue;
 	}
+	
+	public BigDecimal deriveCumulativeFeeChargesWaived() {
+		BigDecimal cumulativeValue = BigDecimal.ZERO;
+		for (LoanSchedulePeriodData period : this.periods) {
+			cumulativeValue = cumulativeValue.add(period.feeChargesWaived());
+		}
+		return cumulativeValue;
+	}
+	
+	public BigDecimal deriveCumulativeFeeChargesWrittenOff() {
+		BigDecimal cumulativeValue = BigDecimal.ZERO;
+		for (LoanSchedulePeriodData period : this.periods) {
+			cumulativeValue = cumulativeValue.add(period.feeChargesWrittenOff());
+		}
+		return cumulativeValue;
+	}
 
 	public BigDecimal deriveCumulativeFeeChargesOutstanding() {
 		BigDecimal cumulativeValue = BigDecimal.ZERO;
@@ -129,6 +145,22 @@ public class LoanSchedulePeriodDataWrapper {
 		BigDecimal cumulativeValue = BigDecimal.ZERO;
 		for (LoanSchedulePeriodData period : this.periods) {
 			cumulativeValue = cumulativeValue.add(period.penaltyChargesPaid());
+		}
+		return cumulativeValue;
+	}
+	
+	public BigDecimal deriveCumulativePenaltyChargesWaived() {
+		BigDecimal cumulativeValue = BigDecimal.ZERO;
+		for (LoanSchedulePeriodData period : this.periods) {
+			cumulativeValue = cumulativeValue.add(period.penaltyChargesWaived());
+		}
+		return cumulativeValue;
+	}
+	
+	public BigDecimal deriveCumulativePenaltyChargesWrittenOff() {
+		BigDecimal cumulativeValue = BigDecimal.ZERO;
+		for (LoanSchedulePeriodData period : this.periods) {
+			cumulativeValue = cumulativeValue.add(period.penaltyChargesWrittenOff());
 		}
 		return cumulativeValue;
 	}

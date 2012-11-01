@@ -1,6 +1,7 @@
 package org.mifosng.platform.loan.domain;
 
 import java.util.List;
+import java.util.Set;
 
 import org.joda.time.LocalDate;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
@@ -25,7 +26,14 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 	public void handleTransaction(
 			final List<LoanTransaction> transactionsPostDisbursement,
 			final MonetaryCurrency currency,
-			final List<LoanRepaymentScheduleInstallment> installments) {
+			final List<LoanRepaymentScheduleInstallment> installments,
+			final Set<LoanCharge> charges) {
+		
+		for (LoanCharge loanCharge : charges) {
+			if (!loanCharge.isDueAtDisbursement()) {
+				loanCharge.resetToOriginal();
+			}
+		}
 		
 		for (LoanRepaymentScheduleInstallment currentInstallment : installments) {
 			currentInstallment.resetDerivedComponents();
@@ -35,7 +43,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 			
 			if (loanTransaction.isRepayment() || loanTransaction.isInterestWaiver()) {
 				loanTransaction.resetDerivedComponents();
-				handleTransaction(loanTransaction, currency, installments);
+				handleTransaction(loanTransaction, currency, installments, charges);
 			} else if (loanTransaction.isWriteOff()) {
 				loanTransaction.resetDerivedComponents();
 				handleWriteOff(loanTransaction, currency, installments);
@@ -50,7 +58,8 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 	public void handleTransaction(
 			final LoanTransaction loanTransaction, 
 			final MonetaryCurrency currency, 
-			final List<LoanRepaymentScheduleInstallment> installments) {
+			final List<LoanRepaymentScheduleInstallment> installments,
+			final Set<LoanCharge> charges) {
 		
 		// find earliest unpaid installment for which to apply this transaction to.
 		int installmentIndex = 0;
@@ -77,11 +86,45 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 			installmentIndex++;
 		}
 		
+		Money feeCharges = loanTransaction.getFeeChargesPortion(currency);
+		if (feeCharges.isGreaterThanZero()) {
+			updateFeeChargesPaidAmountBy(feeCharges, charges);
+		}
+		
+		Money penaltyCharges = loanTransaction.getPenaltyChargesPortion(currency);
+		if (penaltyCharges.isGreaterThanZero()) {
+			updatePenaltyChargesPaidAmountBy(penaltyCharges, charges);
+		}
+		
 		if (transactionAmountUnprocessed.isGreaterThanZero()) {
 			onLoanOverpayment(loanTransaction, transactionAmountUnprocessed);
 		}
 	}
 	
+	private void updateFeeChargesPaidAmountBy(final Money feeCharges, final Set<LoanCharge> charges) {
+		
+		Money amountRemaining = feeCharges;
+		for (LoanCharge loanCharge : charges) {
+			if (!loanCharge.isDueAtDisbursement()) {
+				if (loanCharge.isFeeCharge() && loanCharge.isNotFullyPaid() && amountRemaining.isGreaterThanZero()) {
+					amountRemaining = loanCharge.updatePaidAmountBy(amountRemaining);
+				}
+			}
+		}
+	}
+	
+	private void updatePenaltyChargesPaidAmountBy(final Money feeCharges, final Set<LoanCharge> charges) {
+		
+		Money amountRemaining = feeCharges;
+		for (LoanCharge loanCharge : charges) {
+			if (!loanCharge.isDueAtDisbursement()) {
+				if (loanCharge.isPenaltyCharge() && loanCharge.isNotFullyPaid() && amountRemaining.isGreaterThanZero()) {
+					amountRemaining = loanCharge.updatePaidAmountBy(amountRemaining);
+				}
+			}
+		}
+	}
+
 	@Override
 	public void handleWriteOff(
 			final LoanTransaction loanTransaction,
@@ -90,7 +133,8 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 		
 		Money principalPortion = Money.zero(currency);
 		Money interestPortion = Money.zero(currency);
-		Money chargesPortion = Money.zero(currency);
+		Money feeChargesPortion = Money.zero(currency);
+		Money penaltychargesPortion = Money.zero(currency);
 		
 		// determine how much is written off in total and breakdown for principal, interest and charges
 		for (LoanRepaymentScheduleInstallment currentInstallment : installments) {
@@ -101,7 +145,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 			}
 		}
 		
-		loanTransaction.updateComponentsAndTotal(principalPortion, interestPortion, chargesPortion);
+		loanTransaction.updateComponentsAndTotal(principalPortion, interestPortion, feeChargesPortion, penaltychargesPortion);
 	}
 
 	// abstract interface
