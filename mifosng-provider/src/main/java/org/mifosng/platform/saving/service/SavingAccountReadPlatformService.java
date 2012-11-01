@@ -9,7 +9,4 @@ public interface SavingAccountReadPlatformService {
 	Collection<SavingAccountData> retrieveAllSavingsAccounts();
 	
 	SavingAccountData retrieveSavingsAccount(Long accountId);
-	
-	SavingAccountData retrieveNewSavingsAccountDetails(Long clientId, Long productId);
-
 }

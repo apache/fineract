@@ -39,18 +39,21 @@ public class SavingAccount extends AbstractAuditableCustom<AppUser, Long> {
 	@JoinColumn(name = "product_id")
 	private SavingProduct product;
 	
+	// FIXME - MADHUKAR - Do not use the actual enum type here but instead use Integer e.g. private Integer savingProductType;
 	@Column(name = "savings_product_type", nullable=false)
 	private SavingProductType savingProductType;
 	
 	@Column(name = "external_id")
 	private String externalId;
 	
+	@SuppressWarnings("unused")
 	@Embedded
 	private MonetaryCurrency currency;
 	
 	@Column(name = "deposit_amount_per_period", scale = 6, precision = 19, nullable = false)
 	private BigDecimal savingsDepositAmountPerPeriod;
 	
+	@SuppressWarnings("unused")
 	@Column(name = "total_deposit_amount", scale = 6, precision = 19, nullable = false)
 	private BigDecimal totalSavingsAmount;
 	
@@ -66,12 +69,15 @@ public class SavingAccount extends AbstractAuditableCustom<AppUser, Long> {
 	@Column(name = "tenure_type", nullable=false)
 	private TenureTypeEnum tenureType;
 	
+	// FIXME - MADHUKAR - Do not use the actual enum type here but instead use Integer e.g. private Integer savingProductType;
 	@Column(name = "frequency", nullable=false)
 	private SavingFrequencyType frequency;
 	
+	// FIXME - MADHUKAR - Do not use the actual enum type here but instead use Integer e.g. private Integer savingProductType;
 	@Column(name = "interest_type", nullable=false)
 	private SavingsInterestType interestType;
 	
+	// FIXME - MADHUKAR - Do not use the actual enum type here but instead use Integer e.g. private Integer savingProductType;
 	@Column(name = "interest_calculation_method")
 	private SavingInterestCalculationMethod interestCalculationMethod;
 	
@@ -79,23 +85,29 @@ public class SavingAccount extends AbstractAuditableCustom<AppUser, Long> {
 	@Column(name = "projected_commencement_date")
 	private Date projectedCommencementDate;
 	
+	@SuppressWarnings("unused")
 	@Temporal(TemporalType.DATE)
 	@Column(name = "actual_commencement_date")
 	private Date actualCommencementDate;
 	
+	@SuppressWarnings("unused")
 	@Temporal(TemporalType.DATE)
 	@Column(name = "matures_on_date")
 	private Date maturesOnDate;
 	
+	@SuppressWarnings("unused")
 	@Column(name = "projected_interest_accrued_on_maturity", scale = 6, precision = 19, nullable = false)
 	private BigDecimal projectedInterestAccruedOnMaturity;
 	
+	@SuppressWarnings("unused")
 	@Column(name = "actual_interest_accrued", scale = 6, precision = 19, nullable = false)
 	private BigDecimal interestAccrued;
 	
+	@SuppressWarnings("unused")
 	@Column(name = "projected_total_maturity_amount", scale = 6, precision = 19, nullable = false)
 	private BigDecimal projectedTotalOnMaturity;
 	
+	@SuppressWarnings("unused")
 	@Column(name = "actual_total_amount", scale = 6, precision = 19, nullable = false)
 	private BigDecimal total;
 	
@@ -111,10 +123,12 @@ public class SavingAccount extends AbstractAuditableCustom<AppUser, Long> {
 	@Column(name = "status_enum", nullable = false)
 	private Integer accountStatus;
 	
+	@SuppressWarnings("unused")
 	@Temporal(TemporalType.DATE)
 	@Column(name = "closedon_date")
 	private Date closedOnDate;
 	
+	@SuppressWarnings("unused")
 	@Temporal(TemporalType.DATE)
 	@Column(name = "rejectedon_date")
 	private Date rejectedOnDate;
@@ -253,11 +267,12 @@ public class SavingAccount extends AbstractAuditableCustom<AppUser, Long> {
 		this.isLockinPeriodAllowed = isLockinPeriodAllowed;
 		this.lockinPeriod = lockinPeriod;
 		this.lockinPeriodType = lockinPeriodType;
+		
+		// FIXME - MADHUKAR - futureValueOnMaturity is possibly null
 		this.projectedTotalOnMaturity = futureValueOnMaturity.getAmount();
 		this.projectedInterestAccruedOnMaturity =futureValueOnMaturity.getAmount().subtract(BigDecimal.valueOf(savingsDeposit.getAmount().doubleValue()*tenure.doubleValue()));
 	}
 	
-
 	public boolean isDeleted() {
 		return this.deleted;
 	}

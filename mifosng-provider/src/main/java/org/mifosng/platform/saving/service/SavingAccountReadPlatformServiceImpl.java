@@ -9,11 +9,9 @@ import org.joda.time.LocalDate;
 import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.EnumOptionData;
 import org.mifosng.platform.api.data.SavingAccountData;
-import org.mifosng.platform.client.service.ClientReadPlatformService;
 import org.mifosng.platform.infrastructure.JdbcSupport;
 import org.mifosng.platform.infrastructure.TenantAwareRoutingDataSource;
 import org.mifosng.platform.savingproduct.service.SavingProductEnumerations;
-import org.mifosng.platform.savingproduct.service.SavingProductReadPlatformService;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -26,19 +24,20 @@ public class SavingAccountReadPlatformServiceImpl implements
 	
 	private final PlatformSecurityContext context;
 	private final JdbcTemplate jdbcTemplate;
-	private final SavingProductReadPlatformService savingProductReadPlatformService;
-	private final ClientReadPlatformService clientReadPlatformService;
+//	private final SavingProductReadPlatformService savingProductReadPlatformService;
+//	private final ClientReadPlatformService clientReadPlatformService;
 	
 	@Autowired
 	public SavingAccountReadPlatformServiceImpl(
 			final PlatformSecurityContext context,
-			final TenantAwareRoutingDataSource dataSource,
-			SavingProductReadPlatformService savingProductReadPlatformService,
-			final ClientReadPlatformService clientReadPlatformService ) {
+			final TenantAwareRoutingDataSource dataSource
+//			final SavingProductReadPlatformService savingProductReadPlatformService,
+//			final ClientReadPlatformService clientReadPlatformService 
+			) {
 		this.context = context;
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
-		this.savingProductReadPlatformService = savingProductReadPlatformService;
-		this.clientReadPlatformService = clientReadPlatformService;
+//		this.savingProductReadPlatformService = savingProductReadPlatformService;
+//		this.clientReadPlatformService = clientReadPlatformService;
 	}
 
 	@Override
@@ -61,13 +60,6 @@ public class SavingAccountReadPlatformServiceImpl implements
 		return savingAccountData;
 	}
 
-	@Override
-	public SavingAccountData retrieveNewSavingsAccountDetails(Long clientId,
-			Long productId) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
 	private static final class SavingAccountMapper implements RowMapper<SavingAccountData> {
 
 		public String schema() {
@@ -93,7 +85,7 @@ public class SavingAccountReadPlatformServiceImpl implements
 	}
 		 
 		@Override
-		public SavingAccountData mapRow(ResultSet rs, int rowNum) throws SQLException {
+		public SavingAccountData mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
 			
 			Long id = rs.getLong("id");
 			String externalId = rs.getString("externalId");
@@ -153,8 +145,6 @@ public class SavingAccountReadPlatformServiceImpl implements
 					maturesOnDate,projectedInterestAccuredOnMaturity, actualInterestAccured, 
 					projectedMaturityAmount, actualMaturityAmount, preClosureAllowed, preClosureInterestRate, withdrawnonDate, 
 					rejectedonDate, closedonDate, isLockinPeriodAllowed, lockinPeriod, lockinPeriodType);
-		}
-		
+		}	
 	}
-
 }

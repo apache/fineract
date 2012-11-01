@@ -26,7 +26,6 @@ import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
 import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
 import org.mifosng.platform.saving.service.SavingAccountReadPlatformService;
 import org.mifosng.platform.saving.service.SavingAccountWritePlatformService;
-import org.mifosng.platform.savingproduct.service.SavingProductReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -41,9 +40,6 @@ public class SavingsAccountApiResource {
 	
 	@Autowired
 	private SavingAccountReadPlatformService savingAccountReadPlatformService;
-	
-	@Autowired
-	private SavingProductReadPlatformService savingProductReadPlatformService;
 	
 	@Autowired
 	private ApiDataConversionService apiDataConversionService;
@@ -116,6 +112,7 @@ public class SavingsAccountApiResource {
 		return this.apiJsonSerializerService.serializeSavingAccountsDataToJson(prettyPrint, responseParameters, account);
 	}
 
+	@SuppressWarnings("unused")
 	@GET
 	@Path("template")
 	@Consumes({MediaType.APPLICATION_JSON})
@@ -131,9 +128,9 @@ public class SavingsAccountApiResource {
 		}
 		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 		
-		SavingAccountData account = this.savingAccountReadPlatformService.retrieveNewSavingsAccountDetails(clientId, productId);
+		SavingAccountData account = null;
+//				this.savingAccountReadPlatformService.retrieveNewSavingsAccountDetails(clientId, productId);
 		
 		return this.apiJsonSerializerService.serializeSavingAccountsDataToJson(prettyPrint, responseParameters, account);
 	}
-
 }

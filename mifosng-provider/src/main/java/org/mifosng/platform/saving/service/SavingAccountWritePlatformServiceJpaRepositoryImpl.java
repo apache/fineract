@@ -56,12 +56,6 @@ public class SavingAccountWritePlatformServiceJpaRepositoryImpl implements Savin
 	}
 
 	@Override
-	public EntityIdentifier deleteSavingAccount(SavingAccountCommand command) {
-		
-		return null;
-	}
-
-	@Override
 	public EntityIdentifier updateSavingAccount(SavingAccountCommand command) {
 		try {
 			this.context.authenticatedUser();

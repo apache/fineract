@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ReccuringDepositInterestCalculator {
 
+	// FIXME - MADHUKAR - Are the unused field here needed?
 	public Money calculateInterestOnMaturityFor(Money savingsDepositPerPeriod,
 			Integer tenure, BigDecimal reccuringInterestRate,
 			LocalDate commencementDate, TenureTypeEnum tenureTypeEnum,
@@ -72,5 +73,4 @@ public class ReccuringDepositInterestCalculator {
 		
 		return Money.of(savingsDepositPerPeriod.getCurrency(), finalAmount);
 	}
-
 }

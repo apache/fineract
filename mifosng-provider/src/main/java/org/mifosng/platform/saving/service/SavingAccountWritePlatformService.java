@@ -10,9 +10,5 @@ public interface SavingAccountWritePlatformService {
 	EntityIdentifier createSavingAccount(SavingAccountCommand command);
 	
 	@PreAuthorize(value = "hasRole('ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE')")
-	EntityIdentifier deleteSavingAccount(SavingAccountCommand command);
-	
-	@PreAuthorize(value = "hasRole('ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE')")
 	EntityIdentifier updateSavingAccount(SavingAccountCommand command);
-
 }

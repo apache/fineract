@@ -19,9 +19,11 @@ public class SavingProductRelatedDetail {
 	@Column(name = "interest_rate", scale = 6, precision = 19, nullable = false)
 	private BigDecimal interestRate;
 	
+	@SuppressWarnings("unused")
 	@Column(name = "min_interest_rate", scale = 6, precision = 19, nullable = false)
 	private BigDecimal minInterestRate;
 	
+	@SuppressWarnings("unused")
 	@Column(name = "max_interest_rate", scale = 6, precision = 19, nullable = false)
 	private BigDecimal maxInterestRate;
 	

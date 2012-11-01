@@ -4,40 +4,76 @@ import java.math.BigDecimal;
 
 import org.joda.time.LocalDate;
 
+/**
+ * Immutable data object reprsenting a savings account.
+ */
 public class SavingAccountData {
 	
+	@SuppressWarnings("unused")
 	private final Long id;
+	@SuppressWarnings("unused")
 	private final EnumOptionData status;
+	@SuppressWarnings("unused")
 	private final String externalId;
+	@SuppressWarnings("unused")
 	private final Long clientId;
+	@SuppressWarnings("unused")
 	private final String clientName;
+	@SuppressWarnings("unused")
 	private final Long productId;
+	@SuppressWarnings("unused")
 	private final String productName;
+	@SuppressWarnings("unused")
 	private final EnumOptionData productType;
+	@SuppressWarnings("unused")
 	private final CurrencyData currencyData;
+	@SuppressWarnings("unused")
 	private final BigDecimal savingsDepostiAmountPerPeriod;
+	@SuppressWarnings("unused")
 	private final EnumOptionData savingsFrequencyType;
+	@SuppressWarnings("unused")
 	private final BigDecimal totalDepositAmount;
+	@SuppressWarnings("unused")
 	private final BigDecimal reccuringInterestRate;
+	@SuppressWarnings("unused")
 	private final BigDecimal savingInterestRate;
+	@SuppressWarnings("unused")
 	private final EnumOptionData interestType;
+	@SuppressWarnings("unused")
 	private final EnumOptionData interestCalculationMethod;
+	@SuppressWarnings("unused")
 	private final Integer tenure;
+	@SuppressWarnings("unused")
 	private final EnumOptionData tenureType;
+	@SuppressWarnings("unused")
 	private final LocalDate projectedCommencementDate;
+	@SuppressWarnings("unused")
 	private final LocalDate actualCommencementDate;
+	@SuppressWarnings("unused")
 	private final LocalDate maturesOnDate;
+	@SuppressWarnings("unused")
 	private final BigDecimal projectedInterestAccuredOnMaturity;
+	@SuppressWarnings("unused")
 	private final BigDecimal actualInterestAccured;
+	@SuppressWarnings("unused")
 	private final BigDecimal projectedMaturityAmount;
+	@SuppressWarnings("unused")
 	private final BigDecimal actualMaturityAmount;
+	@SuppressWarnings("unused")
 	private final boolean preClosureAllowed;
-	private final BigDecimal preClosureInterestRate; 
+	@SuppressWarnings("unused")
+	private final BigDecimal preClosureInterestRate;
+	@SuppressWarnings("unused")
 	private final LocalDate withdrawnonDate;
+	@SuppressWarnings("unused")
 	private final LocalDate rejectedonDate;
+	@SuppressWarnings("unused")
 	private final LocalDate closedonDate;
+	@SuppressWarnings("unused")
 	private final boolean isLockinPeriodAllowed;
+	@SuppressWarnings("unused")
 	private final Integer lockinPeriod;
+	@SuppressWarnings("unused")
 	private final EnumOptionData lockinPeriodType;
 
 	public SavingAccountData(Long id, EnumOptionData status, String externalId, 
@@ -59,7 +95,6 @@ public class SavingAccountData {
 			LocalDate rejectedonDate, LocalDate closedonDate,
 			boolean isLockinPeriodAllowed, Integer lockinPeriod,
 			EnumOptionData lockinPeriodType) {
-		
 		this.id = id;
 		this.status = status;
 		this.externalId = externalId;
@@ -93,139 +128,5 @@ public class SavingAccountData {
 		this.isLockinPeriodAllowed = isLockinPeriodAllowed;
 		this.lockinPeriod = lockinPeriod;
 		this.lockinPeriodType = lockinPeriodType;
-		
 	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public EnumOptionData getStatus() {
-		return status;
-	}
-
-	public String getExternalId() {
-		return externalId;
-	}
-
-	public Long getClientId() {
-		return clientId;
-	}
-
-	public String getClientName() {
-		return clientName;
-	}
-
-	public Long getProductId() {
-		return productId;
-	}
-
-	public String getProductName() {
-		return productName;
-	}
-
-	public EnumOptionData getProductType() {
-		return productType;
-	}
-
-	public CurrencyData getCurrencyData() {
-		return currencyData;
-	}
-
-	public BigDecimal getSavingsDepostiAmountPerPeriod() {
-		return savingsDepostiAmountPerPeriod;
-	}
-
-	public EnumOptionData getSavingsFrequencyType() {
-		return savingsFrequencyType;
-	}
-
-	public BigDecimal getTotalDepositAmount() {
-		return totalDepositAmount;
-	}
-
-	public BigDecimal getReccuringInterestRate() {
-		return reccuringInterestRate;
-	}
-
-	public BigDecimal getSavingInterestRate() {
-		return savingInterestRate;
-	}
-
-	public EnumOptionData getInterestType() {
-		return interestType;
-	}
-
-	public EnumOptionData getInterestCalculationMethod() {
-		return interestCalculationMethod;
-	}
-
-	public Integer getTenure() {
-		return tenure;
-	}
-
-	public EnumOptionData getTenureType() {
-		return tenureType;
-	}
-
-	public LocalDate getProjectedCommencementDate() {
-		return projectedCommencementDate;
-	}
-
-	public LocalDate getActualCommencementDate() {
-		return actualCommencementDate;
-	}
-
-	public LocalDate getMaturesOnDate() {
-		return maturesOnDate;
-	}
-
-	public BigDecimal getProjectedInterestAccuredOnMaturity() {
-		return projectedInterestAccuredOnMaturity;
-	}
-
-	public BigDecimal getActualInterestAccured() {
-		return actualInterestAccured;
-	}
-
-	public BigDecimal getProjectedMaturityAmount() {
-		return projectedMaturityAmount;
-	}
-
-	public BigDecimal getActualMaturityAmount() {
-		return actualMaturityAmount;
-	}
-
-	public boolean isPreClosureAllowed() {
-		return preClosureAllowed;
-	}
-
-	public BigDecimal getPreClosureInterestRate() {
-		return preClosureInterestRate;
-	}
-
-	public LocalDate getWithdrawnonDate() {
-		return withdrawnonDate;
-	}
-
-	public LocalDate getRejectedonDate() {
-		return rejectedonDate;
-	}
-
-	public LocalDate getClosedonDate() {
-		return closedonDate;
-	}
-
-	public boolean isLockinPeriodAllowed() {
-		return isLockinPeriodAllowed;
-	}
-
-	public Integer getLockinPeriod() {
-		return lockinPeriod;
-	}
-
-	public EnumOptionData getLockinPeriodType() {
-		return lockinPeriodType;
-	}
-
 }
