@@ -224,6 +224,10 @@ public class LoanTransaction extends AbstractAuditableCustom<AppUser, Long> {
 		this.feeChargesPortion = null;
 	}
 
+	public boolean isGreaterThan(final Money monetaryAmount) {
+		return getAmount(monetaryAmount.getCurrency()).isGreaterThan(monetaryAmount);
+	}
+	
 	public boolean isGreaterThanZero(final MonetaryCurrency currency) {
 		return getAmount(currency).isGreaterThanZero();
 	}

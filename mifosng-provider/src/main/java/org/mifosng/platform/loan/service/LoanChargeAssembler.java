@@ -9,6 +9,7 @@ import org.mifosng.platform.charge.domain.Charge;
 import org.mifosng.platform.charge.domain.ChargeRepository;
 import org.mifosng.platform.exceptions.ChargeIsNotActiveException;
 import org.mifosng.platform.exceptions.ChargeNotFoundException;
+import org.mifosng.platform.exceptions.LoanChargeNotFoundException;
 import org.mifosng.platform.loan.domain.LoanCharge;
 import org.mifosng.platform.loan.domain.LoanChargeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +49,7 @@ public class LoanChargeAssembler {
 					final Long loanChargeId = loanChargeCommand.getId();
 					final LoanCharge loanCharge = this.loanChargeRepository.findOne(loanChargeId);
 					if (loanCharge == null) {
-						throw new ChargeNotFoundException(loanChargeId);
+						throw new LoanChargeNotFoundException(loanChargeId);
 					}
 					
 					loanCharge.update(loanChargeCommand, loanPrincipal);

@@ -231,6 +231,10 @@ public class LoanCharge extends AbstractPersistable<Long> {
             this.chargeCalculation = ChargeCalculationType.fromInt(command.getChargeCalculationType()).getValue();
         }
         
+        if (command.isSpecifiedDueDateChanged()) {
+        	this.dueForCollectionAsOfDate = command.getSpecifiedDueDate().toDate();
+        }
+        
         if (command.isAmountChanged()) {
             switch (ChargeCalculationType.fromInt(this.chargeCalculation)) {
 			case INVALID:
@@ -263,6 +267,10 @@ public class LoanCharge extends AbstractPersistable<Long> {
 	public boolean isDueAtDisbursement() {
 		return ChargeTimeType.fromInt(this.chargeTime).equals(ChargeTimeType.DISBURSEMENT);
 	}
+	
+	public boolean isSpecifiedDueDate() {
+		return ChargeTimeType.fromInt(this.chargeTime).equals(ChargeTimeType.SPECIFIED_DUE_DATE);
+	}
 
 	private boolean isGreaterThanZero(final BigDecimal value) {
 		return value.compareTo(BigDecimal.ZERO) == 1;
@@ -276,7 +284,7 @@ public class LoanCharge extends AbstractPersistable<Long> {
                 this.amount, this.chargeTime, this.chargeCalculation, specifiedDueDate);
 	}
 
-	private LocalDate getDueForCollectionAsOfLocalDate() {
+	public LocalDate getDueForCollectionAsOfLocalDate() {
 		LocalDate specifiedDueDate = null;
 		if (this.dueForCollectionAsOfDate != null) {
 			specifiedDueDate = new LocalDate(this.dueForCollectionAsOfDate);
@@ -389,5 +397,9 @@ public class LoanCharge extends AbstractPersistable<Long> {
 		}
 		
 		return incrementBy.minus(amountPaidOnThisCharge);
+	}
+
+	public String name() {
+		return this.charge.getName();
 	}
 }

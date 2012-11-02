@@ -2,7 +2,6 @@ package org.mifosng.platform.api;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
@@ -289,13 +288,7 @@ public class LoansApiResource {
 		
 		final LoanScheduleData loanSchedule = this.calculationPlatformService.calculateLoanSchedule(command);
 
-		final Set<String> typicalLoanScheduleResponseParameters = new HashSet<String>(
-				Arrays.asList("periods", "cumulativePrincipalDisbursed"));
-		
-		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-		if (responseParameters.isEmpty()) {
-			responseParameters.addAll(typicalLoanScheduleResponseParameters);
-		}
+		final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 		
 		return this.apiJsonSerializerService.serializeLoanScheduleDataToJson(prettyPrint, responseParameters, loanSchedule);

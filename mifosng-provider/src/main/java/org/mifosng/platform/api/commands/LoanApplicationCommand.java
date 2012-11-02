@@ -252,7 +252,7 @@ public class LoanApplicationCommand {
 		return this.modifiedParameters.contains("submittedOnDate");
 	}
 
-	public boolean isExpectedDisbursementDateChanged() {
+	public boolean isExpectedDisbursementDatePassed() {
 		return this.modifiedParameters.contains("expectedDisbursementDate");
 	}
 

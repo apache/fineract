@@ -31,6 +31,7 @@ import org.mifosng.platform.exceptions.ChargeIsNotActiveException;
 import org.mifosng.platform.exceptions.ChargeNotFoundException;
 import org.mifosng.platform.exceptions.ClientNotFoundException;
 import org.mifosng.platform.exceptions.InvalidCurrencyException;
+import org.mifosng.platform.exceptions.LoanChargeNotFoundException;
 import org.mifosng.platform.exceptions.LoanNotFoundException;
 import org.mifosng.platform.exceptions.LoanNotInSubmittedAndPendingApprovalStateCannotBeDeleted;
 import org.mifosng.platform.exceptions.LoanOfficerAssignmentException;
@@ -145,10 +146,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 			throw new NoAuthorizationException("Cannot modify backdated loan.");
 		}
 
-		final Loan loan = this.loanRepository.findOne(command.getLoanId());
-		if (loan == null) {
-			throw new LoanNotFoundException(command.getLoanId());
-		}
+		final Loan loan = retrieveLoanBy(command.getLoanId());
 		
 		final LoanProduct loanProduct = this.loanProductRepository.findOne(command.getProductId());
 		if (loanProduct == null) {
@@ -166,6 +164,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		final Set<LoanCharge> charges = this.loanChargeAssembler.assembleFrom(command.getCharges(), loanProduct.getCharges(), loan.getPrincpal().getAmount());
 
         final LoanScheduleData loanSchedule = this.calculationPlatformService.calculateLoanSchedule(command.toCalculateLoanScheduleCommand());
+        
+        // FIXME - kw - restrict ability to modify loan to modifying the 'loan application' stage - once it has been disbursed, should be allowed to use this feature
+        //       - other facilities are in place such as 'undo disbursal'
 		loan.modifyLoanApplication(command, client, loanProduct, fund, strategy, loanSchedule, charges, loanOfficer, defaultLoanLifecycleStateMachine());
 
 		this.loanRepository.save(loan);
@@ -184,10 +185,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		
 		context.authenticatedUser();
 
-		Loan loan = this.loanRepository.findOne(loanId);
-		if (loan == null) {
-			throw new LoanNotFoundException(loanId);
-		}
+		final Loan loan = retrieveLoanBy(loanId);
 		
 		if (loan.isNotSubmittedAndPendingApproval()) {
 			throw new LoanNotInSubmittedAndPendingApprovalStateCannotBeDeleted(loanId);
@@ -210,10 +208,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		LoanStateTransitionCommandValidator validator = new LoanStateTransitionCommandValidator(command);
 		validator.validate();
 
-		Loan loan = this.loanRepository.findOne(command.getLoanId());
-		if (loan == null) {
-			throw new LoanNotFoundException(command.getLoanId());
-		}
+		final Loan loan = retrieveLoanBy(command.getLoanId());
 		
 		LocalDate eventDate = command.getEventDate();
 		if (this.isBeforeToday(eventDate) && currentUser.canNotApproveLoanInPast()) {
@@ -238,10 +233,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
 		context.authenticatedUser();
 
-		Loan loan = this.loanRepository.findOne(command.getLoanId());
-		if (loan == null) {
-			throw new LoanNotFoundException(command.getLoanId());
-		}
+		final Loan loan = retrieveLoanBy(command.getLoanId());
 		
 		loan.undoApproval(defaultLoanLifecycleStateMachine());
 		this.loanRepository.save(loan);
@@ -264,10 +256,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		LoanStateTransitionCommandValidator validator = new LoanStateTransitionCommandValidator(command);
 		validator.validate();
 
-		Loan loan = this.loanRepository.findOne(command.getLoanId());
-		if (loan == null) {
-			throw new LoanNotFoundException(command.getLoanId());
-		}
+		final Loan loan = retrieveLoanBy(command.getLoanId());
 
 		LocalDate eventDate = command.getEventDate();
 		if (this.isBeforeToday(eventDate) && currentUser.canNotRejectLoanInPast()) {
@@ -295,10 +284,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		LoanStateTransitionCommandValidator validator = new LoanStateTransitionCommandValidator(command);
 		validator.validate();
 		
-		Loan loan = this.loanRepository.findOne(command.getLoanId());
-		if (loan == null) {
-			throw new LoanNotFoundException(command.getLoanId());
-		}
+		final Loan loan = retrieveLoanBy(command.getLoanId());
 		
 		LocalDate eventDate = command.getEventDate();
 		if (this.isBeforeToday(eventDate) && currentUser.canNotWithdrawByClientLoanInPast()) {
@@ -326,10 +312,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		LoanStateTransitionCommandValidator validator = new LoanStateTransitionCommandValidator(command);
 		validator.validate();
 
-		Loan loan = this.loanRepository.findOne(command.getLoanId());
-		if (loan == null) {
-			throw new LoanNotFoundException(command.getLoanId());
-		}
+		final Loan loan = retrieveLoanBy(command.getLoanId());
 
 		String noteText = command.getNote();
 		LocalDate actualDisbursementDate = command.getEventDate();
@@ -673,22 +656,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         validator.validateForUpdate();
 
         final Long loanId = command.getLoanId();
-        final Loan loan = this.loanRepository.findOne(loanId);
-        if (loan == null) {
-            throw new LoanNotFoundException(loanId);
-        }
+        final Loan loan = retrieveLoanBy(loanId);
         
         final Long loanChargeId = command.getId();
-		final LoanCharge loanCharge = this.loanChargeRepository.findOne(loanChargeId);
-        if (loanCharge == null) {
-        	// FIXME - kw - should be loan charge not found, not charge not found.
-        	throw new ChargeNotFoundException(loanChargeId);
-        }
-        
-        if (loanCharge.hasNotLoanIdentifiedBy(loanId)) {
-        	// FIXME - kw - should be loan charge not found, not charge not found.
-        	throw new ChargeNotFoundException(loanChargeId);
-        }
+		final LoanCharge loanCharge = retrieveLoanChargeBy(loanId, loanChargeId);
         
         loan.updateLoanCharge(loanCharge, command);
         this.loanRepository.saveAndFlush(loan);
@@ -702,27 +673,35 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         this.context.authenticatedUser();
 
-        final Loan loan = this.loanRepository.findOne(loanId);
-        if (loan == null) {
-            throw new LoanNotFoundException(loanId);
-        }
+        final Loan loan = retrieveLoanBy(loanId);
         
-        final LoanCharge loanCharge = this.loanChargeRepository.findOne(loanChargeId);
-        if (loanCharge == null) {
-        	// FIXME - kw - should be loan charge not found, not charge not found.
-        	throw new ChargeNotFoundException(loanChargeId);
-        }
-        
-        if (loanCharge.hasNotLoanIdentifiedBy(loanId)) {
-        	// FIXME - kw - should be loan charge not found, not charge not found.
-        	throw new ChargeNotFoundException(loanChargeId);
-        }
+        final LoanCharge loanCharge = retrieveLoanChargeBy(loanId, loanChargeId);
         
         loan.removeLoanCharge(loanCharge);
         this.loanRepository.saveAndFlush(loan);
 
         return new EntityIdentifier(loanCharge.getId());
     }
+	
+	private Loan retrieveLoanBy(final Long loanId) {
+		final Loan loan = this.loanRepository.findOne(loanId);
+        if (loan == null) {
+            throw new LoanNotFoundException(loanId);
+        }
+		return loan;
+	}
+
+	private LoanCharge retrieveLoanChargeBy(final Long loanId, final Long loanChargeId) {
+		final LoanCharge loanCharge = this.loanChargeRepository.findOne(loanChargeId);
+        if (loanCharge == null) {
+        	throw new LoanChargeNotFoundException(loanChargeId);
+        }
+        
+        if (loanCharge.hasNotLoanIdentifiedBy(loanId)) {
+        	throw new LoanChargeNotFoundException(loanChargeId, loanId);
+        }
+		return loanCharge;
+	}
 
 	@Transactional
     @Override
@@ -739,10 +718,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         for (String loanIdString : command.getLoans()){
             final Long loanId = Long.valueOf(loanIdString);
 
-            final Loan loan = this.loanRepository.findOne(loanId);
-            if (loan == null) {
-                throw new LoanNotFoundException(loanId);
-            }
+            final Loan loan = retrieveLoanBy(loanId);
             
             if (!loan.hasLoanOfficer(fromLoanOfficer)){
                 throw new LoanOfficerAssignmentException(loan.getId(), fromLoanOfficer.getId());

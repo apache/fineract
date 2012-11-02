@@ -35,6 +35,7 @@ import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.exceptions.InvalidLoanStateTransitionException;
 import org.mifosng.platform.exceptions.InvalidLoanTransactionTypeException;
+import org.mifosng.platform.exceptions.LoanChargeCannotBeAddedException;
 import org.mifosng.platform.fund.domain.Fund;
 import org.mifosng.platform.group.domain.Group;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
@@ -259,6 +260,23 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
     }
 	
 	public void addLoanCharge(final LoanCharge loanCharge) {
+		
+		if (isDisbursed() && loanCharge.isDueAtDisbursement()) {
+			// Note: added this constraint to restrict adding charges to a loan after it is disbursed
+			// if the loan charge payment type is 'Disbursement'.
+			// To undo this constraint would mean resolving how charges due are disbursement are handled at present.
+			// When a loan is disbursed and has charges due at disbursement, a transaction is created to auto record
+			// payment of the charges (user has no choice in saying they were or werent paid) - so its assumed they were paid.
+			
+			final String defaultUserMessage = "This charge which is due at disbursement cannot be added as the loan is already disbursed.";
+			throw new LoanChargeCannotBeAddedException("loanCharge", "due.at.disbursement.and.loan.is.disbursed", defaultUserMessage, getId(), loanCharge.name());
+		}
+		
+		if (loanCharge.isSpecifiedDueDate() && !loanCharge.isDueForCollectionBetween(getDisbursementDate(), getLastRepaymentPeriodDueDate())) {
+			final String defaultUserMessage = "This charge which is due at disbursement cannot be added as the loan is already disbursed.";
+			throw new LoanChargeCannotBeAddedException("loanCharge", "specified.due.date.outside.range", defaultUserMessage, getDisbursementDate(), getLastRepaymentPeriodDueDate(), loanCharge.name());
+		}
+		
 		loanCharge.update(this);
 		this.charges.add(loanCharge);
 		
@@ -276,6 +294,10 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		}
 	}
 	
+	private LocalDate getLastRepaymentPeriodDueDate() {
+		return this.repaymentScheduleInstallments.get(this.repaymentScheduleInstallments.size()-1).getDueDate();
+	}
+
 	public void removeLoanCharge(final LoanCharge loanCharge) {
 		boolean removed = this.charges.remove(loanCharge);
 		if (removed) {
@@ -285,6 +307,32 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		// reprocess loan schedule based on charge been removed.
 		LoanScheduleWrapper wrapper = new LoanScheduleWrapper();
 		wrapper.reprocess(getCurrency(), getDisbursementDate(), this.repaymentScheduleInstallments, this.charges);
+		
+		// if removing disbursement charge - accomodate this on the transaction that tracked its payment
+		if (loanCharge.isDueAtDisbursement()) {
+			LoanTransaction transactionToRemove = null;
+			for (LoanTransaction transaction : this.loanTransactions) {
+				if (transaction.isRepaymentAtDisbursement()) {
+					
+					final MonetaryCurrency currency = loanCurrency();
+					final Money chargeAmount = Money.of(currency, loanCharge.amount());
+					if (transaction.isGreaterThan(chargeAmount)) {
+						final Money principalPortion = Money.zero(currency);
+						final Money interestPortion = Money.zero(currency);
+						final Money penaltychargesPortion = Money.zero(currency);
+						
+						final Money feeChargesPortion = chargeAmount;
+						transaction.updateComponentsAndTotal(principalPortion, interestPortion, feeChargesPortion, penaltychargesPortion);
+					} else {
+						transactionToRemove = transaction;
+					}
+				} 
+			}
+			
+			if (transactionToRemove != null) {
+				this.loanTransactions.remove(transactionToRemove);
+			}
+		}
 		
 		final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessor.determineProcessor(this.transactionProcessingStrategy);
 		if (!loanCharge.isDueAtDisbursement() && loanCharge.isPaidOrPartiallyPaid(loanCurrency())) {
@@ -318,6 +366,8 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 			final Staff loanOfficer, 
 			final LoanLifecycleStateMachine loanLifecycleStateMachine) {
 
+		// FIXME - KW - whilst the methods are named isXXXChanged, this really only is asking has the parameter for that field been passed in request, 
+		// an additional check to see if the value passed is different to the current value may bee need for all these like it is for expectedDisbursementDate
 		if (command.isClientChanged()) {
 			this.client = client;
 		}
@@ -346,13 +396,11 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 			this.submittedOnDate = command.getSubmittedOnDate().toDate();
 		}
 		
-		if (command.isExpectedDisbursementDateChanged()) {
-			if (command.getExpectedDisbursementDate() != null) {
+		if (command.isExpectedDisbursementDatePassed()) {
+			if (dateHasChanged(getExpectedDisbursedOnLocalDate(), command.getExpectedDisbursementDate())) {
 				this.expectedDisbursedOnDate = command.getExpectedDisbursementDate().toDate();
 				removeFirstDisbursementTransaction();
 				disburse(command.getExpectedDisbursementDate(), loanLifecycleStateMachine, false);
-			} else {
-				this.expectedDisbursedOnDate = null;
 			}
 		}
 		
@@ -404,6 +452,19 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		
 		final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessor.determineProcessor(this.transactionProcessingStrategy);
 		loanRepaymentScheduleTransactionProcessor.handleTransaction(repaymentsOrWaivers, getCurrency(), this.repaymentScheduleInstallments, this.charges);
+	}
+
+	private boolean dateHasChanged(final LocalDate originalLocalDate, final LocalDate providedLocalDate) {
+		
+		boolean dateHasChanged = false;
+		
+		if (originalLocalDate != null) {
+			dateHasChanged = originalLocalDate.equals(providedLocalDate);
+		} else {
+			dateHasChanged = (providedLocalDate != null);
+		}
+		
+		return dateHasChanged;
 	}
 
 	private void removeFirstDisbursementTransaction() {
@@ -564,10 +625,10 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 
 	public void disburse(final LocalDate disbursedOn, final LoanLifecycleStateMachine loanLifecycleStateMachine, final boolean statusTransition) {
 
-		// ensure loan is in pre-disbursal state
-		updateLoanToPreDisbursalState();
-				
 		if (statusTransition) {
+			// ensure loan is in pre-disbursal state
+			updateLoanToPreDisbursalState();
+			
 			LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_DISBURSED, LoanStatus.fromInt(this.loanStatus));
 			this.loanStatus = statusEnum.getValue();
 		}

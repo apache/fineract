@@ -557,16 +557,16 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
                 for (int i=0; i<array.size(); i++) {
                 	
                     final JsonObject loanChargeElement = array.get(i).getAsJsonObject();
-                    final Set<String> chargeModifiedParameters = new HashSet<String>();
+                    final Set<String> parametersPassedInForChargesCommand = new HashSet<String>();
 
-                    final Long id = helper.extractLongNamed("id", loanChargeElement, chargeModifiedParameters);
-                    final Long chargeId = helper.extractLongNamed("chargeId", loanChargeElement, chargeModifiedParameters);
-                    final BigDecimal amount = helper.extractBigDecimalNamed("amount", loanChargeElement, locale, chargeModifiedParameters);
-                    final Integer chargeTimeType = helper.extractIntegerNamed("chargeTimeType", loanChargeElement, locale, chargeModifiedParameters);
-                    final Integer chargeCalculationType = helper.extractIntegerNamed("chargeCalculationType", loanChargeElement, locale, chargeModifiedParameters);
-                    final LocalDate specifiedDueDate = helper.extractLocalDateNamed("specifiedDueDate", loanChargeElement, dateFormat, locale, parametersPassedInCommand);
+                    final Long id = helper.extractLongNamed("id", loanChargeElement, parametersPassedInForChargesCommand);
+                    final Long chargeId = helper.extractLongNamed("chargeId", loanChargeElement, parametersPassedInForChargesCommand);
+                    final BigDecimal amount = helper.extractBigDecimalNamed("amount", loanChargeElement, locale, parametersPassedInForChargesCommand);
+                    final Integer chargeTimeType = helper.extractIntegerNamed("chargeTimeType", loanChargeElement, locale, parametersPassedInForChargesCommand);
+                    final Integer chargeCalculationType = helper.extractIntegerNamed("chargeCalculationType", loanChargeElement, locale, parametersPassedInForChargesCommand);
+                    final LocalDate specifiedDueDate = helper.extractLocalDateNamed("specifiedDueDate", loanChargeElement, dateFormat, locale, parametersPassedInForChargesCommand);
                     
-                    charges[i] = new LoanChargeCommand(chargeModifiedParameters, id, null, chargeId, amount, chargeTimeType, chargeCalculationType, specifiedDueDate);
+                    charges[i] = new LoanChargeCommand(parametersPassedInForChargesCommand, id, null, chargeId, amount, chargeTimeType, chargeCalculationType, specifiedDueDate);
                 }
             }
         }
