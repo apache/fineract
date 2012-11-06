@@ -5,9 +5,13 @@ repos
 .project
 .settings
 .gradle
+.idea
 *.log
 *.class
 *.jar
 *.war
 *.ear
 *.bak
+*.iml
+*.ipr
+*.iws
