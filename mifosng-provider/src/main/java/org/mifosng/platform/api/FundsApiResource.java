@@ -18,11 +18,11 @@ import javax.ws.rs.core.UriInfo;
 import org.mifosng.platform.api.commands.FundCommand;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.FundData;
-import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
-import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
-import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
+import org.mifosng.platform.api.infrastructure.PortfolioApiDataConversionService;
+import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService;
 import org.mifosng.platform.fund.service.FundReadPlatformService;
 import org.mifosng.platform.fund.service.FundWritePlatformService;
+import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -39,10 +39,10 @@ public class FundsApiResource {
 	private FundWritePlatformService writePlatformService;
 
 	@Autowired
-	private ApiDataConversionService apiDataConversionService;
+	private PortfolioApiDataConversionService apiDataConversionService;
 	
 	@Autowired
-	private ApiJsonSerializerService apiJsonSerializerService;
+	private PortfolioApiJsonSerializerService apiJsonSerializerService;
 	
 	@GET
 	@Consumes({MediaType.APPLICATION_JSON})

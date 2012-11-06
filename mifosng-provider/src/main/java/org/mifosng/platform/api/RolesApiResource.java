@@ -22,9 +22,9 @@ import org.mifosng.platform.api.commands.RoleCommand;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.PermissionData;
 import org.mifosng.platform.api.data.RoleData;
-import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
-import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
-import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
+import org.mifosng.platform.api.infrastructure.PortfolioApiDataConversionService;
+import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService;
+import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
 import org.mifosng.platform.user.service.PermissionReadPlatformService;
 import org.mifosng.platform.user.service.RoleReadPlatformService;
 import org.mifosng.platform.user.service.RoleWritePlatformService;
@@ -47,10 +47,10 @@ public class RolesApiResource {
 	private RoleWritePlatformService roleWritePlatformService;
 
 	@Autowired
-	private ApiDataConversionService apiDataConversionService;
+	private PortfolioApiDataConversionService apiDataConversionService;
 	
 	@Autowired
-	private ApiJsonSerializerService apiJsonSerializerService;
+	private PortfolioApiJsonSerializerService apiJsonSerializerService;
 
 	@GET
 	@Consumes({MediaType.APPLICATION_JSON})

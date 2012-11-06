@@ -24,10 +24,10 @@ import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.EnumOptionData;
 import org.mifosng.platform.api.data.SavingProductData;
-import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
-import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
-import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
+import org.mifosng.platform.api.infrastructure.PortfolioApiDataConversionService;
+import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService;
 import org.mifosng.platform.currency.service.CurrencyReadPlatformService;
+import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
 import org.mifosng.platform.savingproduct.domain.SavingFrequencyType;
 import org.mifosng.platform.savingproduct.domain.SavingInterestCalculationMethod;
 import org.mifosng.platform.savingproduct.domain.SavingProductType;
@@ -53,10 +53,10 @@ public class SavingProductsApiResource {
 	private SavingProductWritePlatformService savingProductWritePlatformService;
 
 	@Autowired
-	private ApiDataConversionService apiDataConversionService;
+	private PortfolioApiDataConversionService apiDataConversionService;
 	
     @Autowired
-    private ApiJsonSerializerService apiJsonSerializerService;
+    private PortfolioApiJsonSerializerService apiJsonSerializerService;
     
     @Autowired
 	private CurrencyReadPlatformService currencyReadPlatformService;

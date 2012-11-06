@@ -32,10 +32,10 @@ import org.mifosng.platform.api.data.DepositPermissionData;
 import org.mifosng.platform.api.data.DepositProductLookup;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.EnumOptionData;
-import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
-import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
-import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
+import org.mifosng.platform.api.infrastructure.PortfolioApiDataConversionService;
+import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService;
 import org.mifosng.platform.exceptions.UnrecognizedQueryParamException;
+import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 import org.mifosng.platform.saving.service.DepositAccountReadPlatformService;
 import org.mifosng.platform.saving.service.DepositAccountWritePlatformService;
@@ -60,10 +60,10 @@ public class DepositAccountsApiResource {
 	private DepositAccountWritePlatformService depositAccountWritePlatformService;
 
 	@Autowired
-	private ApiDataConversionService apiDataConversionService;
+	private PortfolioApiDataConversionService apiDataConversionService;
 	
 	@Autowired
-	private ApiJsonSerializerService apiJsonSerializerService;
+	private PortfolioApiJsonSerializerService apiJsonSerializerService;
 
 	private static final Set<String> typicalResponseParameters = new HashSet<String>(
 			Arrays.asList("id", "externalId", "clientId", "clientName",

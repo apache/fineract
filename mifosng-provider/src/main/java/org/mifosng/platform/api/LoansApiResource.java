@@ -39,14 +39,14 @@ import org.mifosng.platform.api.data.LoanProductData;
 import org.mifosng.platform.api.data.LoanTransactionData;
 import org.mifosng.platform.api.data.StaffData;
 import org.mifosng.platform.api.data.TransactionProcessingStrategyData;
-import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
-import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
-import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
+import org.mifosng.platform.api.infrastructure.PortfolioApiDataConversionService;
+import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService;
 import org.mifosng.platform.charge.service.ChargeReadPlatformService;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.exceptions.UnrecognizedQueryParamException;
 import org.mifosng.platform.fund.service.FundReadPlatformService;
+import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
 import org.mifosng.platform.loan.service.CalculationPlatformService;
 import org.mifosng.platform.loan.service.LoanReadPlatformService;
 import org.mifosng.platform.loan.service.LoanWritePlatformService;
@@ -85,10 +85,10 @@ public class LoansApiResource {
 	private CalculationPlatformService calculationPlatformService;
 
 	@Autowired
-	private ApiDataConversionService apiDataConversionService;
+	private PortfolioApiDataConversionService apiDataConversionService;
 	
 	@Autowired
-	private ApiJsonSerializerService apiJsonSerializerService;
+	private PortfolioApiJsonSerializerService apiJsonSerializerService;
 	
 	@Autowired
 	private StaffReadPlatformService staffReadPlatformService;

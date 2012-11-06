@@ -11,7 +11,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import org.mifosng.platform.api.data.AuthenticatedUserData;
-import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
+import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService;
 import org.mifosng.platform.user.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -34,7 +34,7 @@ public class AuthenticationApiResource {
 	private DaoAuthenticationProvider customAuthenticationProvider;
 	
 	@Autowired
-	private ApiJsonSerializerService apiJsonSerializerService;
+	private PortfolioApiJsonSerializerService apiJsonSerializerService;
 	
     @POST
 	@Consumes({MediaType.APPLICATION_JSON})

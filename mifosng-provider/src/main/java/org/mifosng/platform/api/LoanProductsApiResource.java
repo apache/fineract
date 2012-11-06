@@ -23,12 +23,12 @@ import org.mifosng.platform.api.data.EnumOptionData;
 import org.mifosng.platform.api.data.FundData;
 import org.mifosng.platform.api.data.LoanProductData;
 import org.mifosng.platform.api.data.TransactionProcessingStrategyData;
-import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
-import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
-import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
+import org.mifosng.platform.api.infrastructure.PortfolioApiDataConversionService;
+import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService;
 import org.mifosng.platform.charge.service.ChargeReadPlatformService;
 import org.mifosng.platform.currency.service.CurrencyReadPlatformService;
 import org.mifosng.platform.fund.service.FundReadPlatformService;
+import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
 import org.mifosng.platform.loanproduct.service.LoanDropdownReadPlatformService;
 import org.mifosng.platform.loanproduct.service.LoanProductReadPlatformService;
 import org.mifosng.platform.loanproduct.service.LoanProductWritePlatformService;
@@ -51,10 +51,10 @@ public class LoanProductsApiResource {
     private ChargeReadPlatformService chargeReadPlatformService;
 
 	@Autowired
-	private ApiDataConversionService apiDataConversionService;
+	private PortfolioApiDataConversionService apiDataConversionService;
 	
     @Autowired
-    private ApiJsonSerializerService apiJsonSerializerService;
+    private PortfolioApiJsonSerializerService apiJsonSerializerService;
     
     @Autowired
     private CurrencyReadPlatformService currencyReadPlatformService;

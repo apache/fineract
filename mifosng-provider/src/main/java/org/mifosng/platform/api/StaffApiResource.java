@@ -25,9 +25,9 @@ import org.mifosng.platform.api.data.LoanReassignmentData;
 import org.mifosng.platform.api.data.OfficeLookup;
 import org.mifosng.platform.api.data.StaffAccountSummaryCollectionData;
 import org.mifosng.platform.api.data.StaffData;
-import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
-import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
-import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
+import org.mifosng.platform.api.infrastructure.PortfolioApiDataConversionService;
+import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService;
+import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
 import org.mifosng.platform.loan.service.LoanWritePlatformService;
 import org.mifosng.platform.organisation.service.OfficeReadPlatformService;
 import org.mifosng.platform.staff.service.StaffReadPlatformService;
@@ -50,10 +50,10 @@ public class StaffApiResource {
 	private StaffWritePlatformService writePlatformService;
 
 	@Autowired
-	private ApiDataConversionService apiDataConversionService;
+	private PortfolioApiDataConversionService apiDataConversionService;
 
 	@Autowired
-	private ApiJsonSerializerService apiJsonSerializerService;
+	private PortfolioApiJsonSerializerService apiJsonSerializerService;
 
 	@Autowired
 	private OfficeReadPlatformService officeReadPlatformService;

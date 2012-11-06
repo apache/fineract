@@ -25,12 +25,12 @@ import javax.ws.rs.core.UriInfo;
 import org.mifosng.platform.api.commands.DocumentCommand;
 import org.mifosng.platform.api.data.DocumentData;
 import org.mifosng.platform.api.data.EntityIdentifier;
-import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
-import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
+import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService;
 import org.mifosng.platform.common.ApplicationConstants;
 import org.mifosng.platform.common.FileUtils;
 import org.mifosng.platform.documentmanagement.service.DocumentReadPlatformService;
 import org.mifosng.platform.documentmanagement.service.DocumentWritePlatformService;
+import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -51,7 +51,7 @@ public class DocumentManagementApiResource {
 	private DocumentWritePlatformService documentWritePlatformService;
 
 	@Autowired
-	private ApiJsonSerializerService apiJsonSerializerService;
+	private PortfolioApiJsonSerializerService apiJsonSerializerService;
 
 	private static final Set<String> typicalResponseParameters = new HashSet<String>(
 			Arrays.asList("id", "parentEntityType", "parentEntityId", "name",

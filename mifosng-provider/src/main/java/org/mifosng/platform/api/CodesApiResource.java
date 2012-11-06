@@ -18,9 +18,9 @@ import javax.ws.rs.core.UriInfo;
 import org.mifosng.platform.api.commands.CodeCommand;
 import org.mifosng.platform.api.data.CodeData;
 import org.mifosng.platform.api.data.EntityIdentifier;
-import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
-import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
-import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
+import org.mifosng.platform.api.infrastructure.PortfolioApiDataConversionService;
+import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService;
+import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
 import org.mifosng.platform.organisation.service.CodeWritePlatformService;
 import org.mifosng.platform.organisation.service.CodeReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,10 +39,10 @@ public class CodesApiResource {
 	private CodeWritePlatformService writePlatformService;
 
 	@Autowired
-	private ApiDataConversionService apiDataConversionService;
+	private PortfolioApiDataConversionService apiDataConversionService;
 	
 	@Autowired
-	private ApiJsonSerializerService apiJsonSerializerService;
+	private PortfolioApiJsonSerializerService apiJsonSerializerService;
 	
 	@GET
 	@Consumes({MediaType.APPLICATION_JSON})

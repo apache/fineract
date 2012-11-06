@@ -24,10 +24,10 @@ import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.DepositProductData;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.EnumOptionData;
-import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
-import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
-import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
+import org.mifosng.platform.api.infrastructure.PortfolioApiDataConversionService;
+import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService;
 import org.mifosng.platform.currency.service.CurrencyReadPlatformService;
+import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 import org.mifosng.platform.savingproduct.service.DepositProductReadPlatformService;
 import org.mifosng.platform.savingproduct.service.DepositProductWritePlatformService;
@@ -51,10 +51,10 @@ public class DepositProductsApiResource {
 	private DepositProductWritePlatformService depositProductWritePlatformService;
 	
 	@Autowired
-	private ApiDataConversionService apiDataConversionService;
+	private PortfolioApiDataConversionService apiDataConversionService;
 	
 	@Autowired
-	private ApiJsonSerializerService apiJsonSerializerService;
+	private PortfolioApiJsonSerializerService apiJsonSerializerService;
 	
 	@POST
 	@Consumes({MediaType.APPLICATION_JSON})

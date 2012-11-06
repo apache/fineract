@@ -26,12 +26,12 @@ import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.GroupAccountSummaryCollectionData;
 import org.mifosng.platform.api.data.GroupData;
 import org.mifosng.platform.api.data.OfficeLookup;
-import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
-import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
-import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
+import org.mifosng.platform.api.infrastructure.PortfolioApiDataConversionService;
+import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService;
 import org.mifosng.platform.client.service.ClientReadPlatformService;
 import org.mifosng.platform.group.service.GroupReadPlatformService;
 import org.mifosng.platform.group.service.GroupWritePlatformService;
+import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
 import org.mifosng.platform.organisation.service.OfficeReadPlatformService;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.slf4j.Logger;
@@ -57,13 +57,13 @@ public class GroupsApiResource {
     private ClientReadPlatformService clientReadPlatformService;
 
     @Autowired
-    private ApiDataConversionService apiDataConversionService;
+    private PortfolioApiDataConversionService apiDataConversionService;
 
     @Autowired
     private OfficeReadPlatformService officeReadPlatformService;
 
 	@Autowired
-	private ApiJsonSerializerService apiJsonSerializerService;
+	private PortfolioApiJsonSerializerService apiJsonSerializerService;
 
     @Autowired
     private PlatformSecurityContext context;

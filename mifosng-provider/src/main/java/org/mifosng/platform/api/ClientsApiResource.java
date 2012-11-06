@@ -30,15 +30,15 @@ import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.NoteData;
 import org.mifosng.platform.api.data.OfficeLookup;
-import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
-import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
-import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
+import org.mifosng.platform.api.infrastructure.PortfolioApiDataConversionService;
+import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService;
 import org.mifosng.platform.client.service.ClientReadPlatformService;
 import org.mifosng.platform.client.service.ClientWritePlatformService;
 import org.mifosng.platform.common.ApplicationConstants;
 import org.mifosng.platform.common.FileUtils;
 import org.mifosng.platform.exceptions.ClientNotFoundException;
 import org.mifosng.platform.exceptions.ImageNotFoundException;
+import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
 import org.mifosng.platform.organisation.service.OfficeReadPlatformService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,13 +65,13 @@ public class ClientsApiResource {
 	private ClientWritePlatformService clientWritePlatformService;
 
 	@Autowired
-	private ApiDataConversionService apiDataConversionService;
+	private PortfolioApiDataConversionService apiDataConversionService;
 
 	@Autowired
 	private OfficeReadPlatformService officeReadPlatformService;
 	
 	@Autowired
-	private ApiJsonSerializerService apiJsonSerializerService;
+	private PortfolioApiJsonSerializerService apiJsonSerializerService;
 
 	private static final Set<String> typicalResponseParameters = new HashSet<String>(
 			Arrays.asList("id", "officeId", "officeName", "externalId", "firstname", "lastname", "joinedDate", "displayName", "clientOrBusinessName", "imagePresent")

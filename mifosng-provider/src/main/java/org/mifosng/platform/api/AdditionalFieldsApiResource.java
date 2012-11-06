@@ -27,10 +27,10 @@ import org.mifosng.platform.api.data.AdditionalFieldsSetData;
 import org.mifosng.platform.api.data.ApiParameterError;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.GenericResultsetData;
-import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
-import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
+import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService;
 import org.mifosng.platform.exceptions.NoAuthorizationException;
 import org.mifosng.platform.exceptions.PlatformApiDataValidationException;
+import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
 import org.mifosng.platform.noncore.AdditionalFieldsService;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.user.domain.AppUser;
@@ -59,7 +59,7 @@ public class AdditionalFieldsApiResource {
 	private AdditionalFieldsService readWriteAdditionalFieldsService;
 
 	@Autowired
-	private ApiJsonSerializerService apiJsonSerializerService;
+	private PortfolioApiJsonSerializerService apiJsonSerializerService;
 
 	@GET
 	@Consumes({ MediaType.APPLICATION_JSON })

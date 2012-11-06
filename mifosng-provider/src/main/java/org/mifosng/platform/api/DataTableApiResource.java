@@ -26,9 +26,9 @@ import org.codehaus.jettison.json.JSONObject;
 import org.mifosng.platform.api.data.DatatableData;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.GenericResultsetData;
-import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
-import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
+import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService;
 import org.mifosng.platform.exceptions.NoAuthorizationException;
+import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
 import org.mifosng.platform.noncore.GenericDataService;
 import org.mifosng.platform.noncore.ReadWriteNonCoreDataService;
 import org.mifosng.platform.security.PlatformSecurityContext;
@@ -61,7 +61,7 @@ public class DataTableApiResource {
 	private ReadWriteNonCoreDataService readWriteNonCoreDataService;
 
 	@Autowired
-	private ApiJsonSerializerService apiJsonSerializerService;
+	private PortfolioApiJsonSerializerService apiJsonSerializerService;
 
 	@GET
 	@Consumes({ MediaType.APPLICATION_JSON })

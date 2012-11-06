@@ -17,7 +17,7 @@ public class OfficeCommand {
 
 	private final Set<String> modifiedParameters;
 	
-	public OfficeCommand(Set<String> modifiedParameters, final Long id, final String officeName,
+	public OfficeCommand(final Set<String> modifiedParameters, final Long id, final String officeName,
 			final String externalId, final Long parentId,
 			final LocalDate openingDate) {
 		this.modifiedParameters = modifiedParameters;

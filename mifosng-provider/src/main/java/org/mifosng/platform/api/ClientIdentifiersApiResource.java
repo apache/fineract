@@ -22,12 +22,12 @@ import org.mifosng.platform.api.commands.ClientIdentifierCommand;
 import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.ClientIdentifierData;
 import org.mifosng.platform.api.data.EntityIdentifier;
-import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
-import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
-import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
+import org.mifosng.platform.api.infrastructure.PortfolioApiDataConversionService;
+import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService;
 import org.mifosng.platform.client.service.ClientReadPlatformService;
 import org.mifosng.platform.client.service.ClientWritePlatformService;
 import org.mifosng.platform.exceptions.DuplicateClientIdentifierException;
+import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -44,10 +44,10 @@ public class ClientIdentifiersApiResource {
 	private ClientWritePlatformService clientWritePlatformService;
 
 	@Autowired
-	private ApiDataConversionService apiDataConversionService;
+	private PortfolioApiDataConversionService apiDataConversionService;
 
 	@Autowired
-	private ApiJsonSerializerService apiJsonSerializerService;
+	private PortfolioApiJsonSerializerService apiJsonSerializerService;
 
 	private static final Set<String> typicalResponseParameters = new HashSet<String>(
 			Arrays.asList("id", "clientId", "documentTypeId", "description",

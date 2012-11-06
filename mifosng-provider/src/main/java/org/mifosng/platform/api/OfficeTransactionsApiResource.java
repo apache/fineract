@@ -18,9 +18,9 @@ import javax.ws.rs.core.UriInfo;
 import org.mifosng.platform.api.commands.BranchMoneyTransferCommand;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.OfficeTransactionData;
-import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
-import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
-import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
+import org.mifosng.platform.api.infrastructure.PortfolioApiDataConversionService;
+import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService;
+import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
 import org.mifosng.platform.organisation.service.OfficeReadPlatformService;
 import org.mifosng.platform.organisation.service.OfficeWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,10 +39,10 @@ public class OfficeTransactionsApiResource {
 	private OfficeReadPlatformService readPlatformService;
 
 	@Autowired
-	private ApiDataConversionService apiDataConversionService;
+	private PortfolioApiDataConversionService apiDataConversionService;
 
 	@Autowired
-	private ApiJsonSerializerService apiJsonSerializerService;
+	private PortfolioApiJsonSerializerService apiJsonSerializerService;
 
 	@GET
 	@Consumes({ MediaType.APPLICATION_JSON })

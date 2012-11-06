@@ -21,9 +21,9 @@ import javax.ws.rs.core.UriInfo;
 import org.mifosng.platform.api.commands.SavingAccountCommand;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.SavingAccountData;
-import org.mifosng.platform.api.infrastructure.ApiDataConversionService;
-import org.mifosng.platform.api.infrastructure.ApiJsonSerializerService;
-import org.mifosng.platform.api.infrastructure.ApiParameterHelper;
+import org.mifosng.platform.api.infrastructure.PortfolioApiDataConversionService;
+import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService;
+import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
 import org.mifosng.platform.saving.service.SavingAccountReadPlatformService;
 import org.mifosng.platform.saving.service.SavingAccountWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,10 +42,10 @@ public class SavingsAccountApiResource {
 	private SavingAccountReadPlatformService savingAccountReadPlatformService;
 	
 	@Autowired
-	private ApiDataConversionService apiDataConversionService;
+	private PortfolioApiDataConversionService apiDataConversionService;
 	
 	@Autowired
-	private ApiJsonSerializerService apiJsonSerializerService;
+	private PortfolioApiJsonSerializerService apiJsonSerializerService;
 	
 	private static final Set<String> typicalResponseParameters = new HashSet<String>(
 			Arrays.asList("id", "status", "externalId", "clientId", "clientName", "productId", "productName", "productType", "currencyData", "savingsDepostiAmountPerPeriod", "savingsFrequencyType", 
