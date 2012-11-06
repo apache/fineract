@@ -261,6 +261,8 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	
 	public void addLoanCharge(final LoanCharge loanCharge) {
 		
+		validateLoanIsNotClosed(loanCharge);
+		
 		if (isDisbursed() && loanCharge.isDueAtDisbursement()) {
 			// Note: added this constraint to restrict adding charges to a loan after it is disbursed
 			// if the loan charge payment type is 'Disbursement'.
@@ -272,10 +274,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 			throw new LoanChargeCannotBeAddedException("loanCharge", "due.at.disbursement.and.loan.is.disbursed", defaultUserMessage, getId(), loanCharge.name());
 		}
 		
-		if (loanCharge.isSpecifiedDueDate() && !loanCharge.isDueForCollectionBetween(getDisbursementDate(), getLastRepaymentPeriodDueDate())) {
-			final String defaultUserMessage = "This charge which is due at disbursement cannot be added as the loan is already disbursed.";
-			throw new LoanChargeCannotBeAddedException("loanCharge", "specified.due.date.outside.range", defaultUserMessage, getDisbursementDate(), getLastRepaymentPeriodDueDate(), loanCharge.name());
-		}
+		validateChargeHasValidSpecifiedDateIfApplicable(loanCharge, getDisbursementDate(), getLastRepaymentPeriodDueDate());
 		
 		loanCharge.update(this);
 		this.charges.add(loanCharge);
@@ -293,12 +292,29 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 			loanRepaymentScheduleTransactionProcessor.handleTransaction(allNonContraTransactionsPostDisbursement, getCurrency(), this.repaymentScheduleInstallments, this.charges);
 		}
 	}
+
+	private void validateLoanIsNotClosed(final LoanCharge loanCharge) {
+		if (isClosed()) {
+			final String defaultUserMessage = "This charge cannot be added as the loan is already closed.";
+			throw new LoanChargeCannotBeAddedException("loanCharge", "loan.is.closed", defaultUserMessage, getId(), loanCharge.name());
+		}
+	}
+
+	private void validateChargeHasValidSpecifiedDateIfApplicable(final LoanCharge loanCharge, final LocalDate disbursementDate, final LocalDate lastRepaymentPeriodDueDate) {
+		if (loanCharge.isSpecifiedDueDate() && !loanCharge.isDueForCollectionBetween(disbursementDate, lastRepaymentPeriodDueDate)) {
+			final String defaultUserMessage = "This charge which is due at disbursement cannot be added as the loan is already disbursed.";
+			throw new LoanChargeCannotBeAddedException("loanCharge", "specified.due.date.outside.range", defaultUserMessage, getDisbursementDate(), getLastRepaymentPeriodDueDate(), loanCharge.name());
+		}
+	}
 	
 	private LocalDate getLastRepaymentPeriodDueDate() {
 		return this.repaymentScheduleInstallments.get(this.repaymentScheduleInstallments.size()-1).getDueDate();
 	}
 
 	public void removeLoanCharge(final LoanCharge loanCharge) {
+		
+		validateLoanIsNotClosed(loanCharge);
+		
 		boolean removed = this.charges.remove(loanCharge);
 		if (removed) {
 			updateTotalChargesDueAtDisbursement();
@@ -530,6 +546,10 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 			throw new InvalidLoanStateTransitionException("submittal",
 					"cannot.be.after.expected.disbursement.date", errorMessage,
 					submittedOn, getExpectedDisbursedOnLocalDate());
+		}
+		
+		for (LoanCharge loanCharge : this.charges) {
+			validateChargeHasValidSpecifiedDateIfApplicable(loanCharge, getDisbursementDate(), getLastRepaymentPeriodDueDate());
 		}
 	}
 

@@ -7,7 +7,7 @@ import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.currency.domain.Money;
 
 /**
- * Adhikar style {@link LoanRepaymentScheduleTransactionProcessor}.
+ * Adhikar/RBI style {@link LoanRepaymentScheduleTransactionProcessor}.
  * 
  * From https://mifosforge.jira.com/browse/MIFOS-5636:
  * 
@@ -19,7 +19,7 @@ import org.mifosng.platform.currency.domain.Money;
  * 20 Payment to interest on Installment #1 (200 principal remaining)
  * 20 Payment to interest on Installment #2 (200 principal remaining)
  */
-public class AdhikarLoanRepaymentScheduleTransactionProcessor extends AbstractLoanRepaymentScheduleTransactionProcessor {
+public class RBILoanRepaymentScheduleTransactionProcessor extends AbstractLoanRepaymentScheduleTransactionProcessor {
 
 	/**
 	 * For creocore, early is defined as any date before the installment due
@@ -83,7 +83,13 @@ public class AdhikarLoanRepaymentScheduleTransactionProcessor extends AbstractLo
 				if (
 					installment.isInterestDue(currency) && 
 					(installment.isOverdueOn(loanTransaction.getTransactionDate()) || installment.getInstallmentNumber().equals(currentInstallmentBasedOnTransactionDate.getInstallmentNumber()))
-				   ) {	
+				   ) {
+					penaltyChargesPortion = currentInstallment.payPenaltyChargesComponent(transactionAmountRemaining);
+					transactionAmountRemaining = transactionAmountRemaining.minus(penaltyChargesPortion);
+					
+					feeChargesPortion = currentInstallment.payFeeChargesComponent(transactionAmountRemaining);
+					transactionAmountRemaining = transactionAmountRemaining.minus(feeChargesPortion);
+					
 					Money interestPortion = installment.payInterestComponent(transactionAmountRemaining);
 					transactionAmountRemaining = transactionAmountRemaining.minus(interestPortion);
 					
@@ -139,6 +145,12 @@ public class AdhikarLoanRepaymentScheduleTransactionProcessor extends AbstractLo
 			interestPortion = currentInstallment.waiveInterestComponent(transactionAmountRemaining);
 			transactionAmountRemaining = transactionAmountRemaining.minus(interestPortion);
 		} else {
+			
+			penaltyChargesPortion = currentInstallment.payPenaltyChargesComponent(transactionAmountRemaining);
+			transactionAmountRemaining = transactionAmountRemaining.minus(penaltyChargesPortion);
+			
+			feeChargesPortion = currentInstallment.payFeeChargesComponent(transactionAmountRemaining);
+			transactionAmountRemaining = transactionAmountRemaining.minus(feeChargesPortion);
 		
 			interestPortion = currentInstallment.payInterestComponent(transactionAmountRemaining);
 			transactionAmountRemaining = transactionAmountRemaining.minus(interestPortion);

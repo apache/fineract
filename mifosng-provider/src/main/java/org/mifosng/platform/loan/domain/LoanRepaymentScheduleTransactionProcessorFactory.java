@@ -25,7 +25,7 @@ public class LoanRepaymentScheduleTransactionProcessorFactory {
 			}
 			
 			if (transactionProcessingStrategy.isIndianRBIStrategy()) {
-				processor = new AdhikarLoanRepaymentScheduleTransactionProcessor();
+				processor = new RBILoanRepaymentScheduleTransactionProcessor();
 			}
 		}
 		

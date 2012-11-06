@@ -90,6 +90,12 @@ public class HeavensFamilyLoanRepaymentScheduleTransactionProcessor extends Abst
 				transactionAmountRemaining = transactionAmountRemaining.minus(principalPortion);
 			}
 		
+			penaltyChargesPortion = currentInstallment.payPenaltyChargesComponent(transactionAmountRemaining);
+			transactionAmountRemaining = transactionAmountRemaining.minus(penaltyChargesPortion);
+			
+			feeChargesPortion = currentInstallment.payFeeChargesComponent(transactionAmountRemaining);
+			transactionAmountRemaining = transactionAmountRemaining.minus(feeChargesPortion);
+			
 			interestPortion = currentInstallment.payInterestComponent(transactionAmountRemaining);
 			transactionAmountRemaining = transactionAmountRemaining.minus(interestPortion);
 	
@@ -120,7 +126,12 @@ public class HeavensFamilyLoanRepaymentScheduleTransactionProcessor extends Abst
 			interestPortion = currentInstallment.waiveInterestComponent(transactionAmountRemaining);
 			transactionAmountRemaining = transactionAmountRemaining.minus(interestPortion);
 		} else {
-		
+			penaltyChargesPortion = currentInstallment.payPenaltyChargesComponent(transactionAmountRemaining);
+			transactionAmountRemaining = transactionAmountRemaining.minus(penaltyChargesPortion);
+			
+			feeChargesPortion = currentInstallment.payFeeChargesComponent(transactionAmountRemaining);
+			transactionAmountRemaining = transactionAmountRemaining.minus(feeChargesPortion);
+			
 			interestPortion = currentInstallment.payInterestComponent(transactionAmountRemaining);
 			transactionAmountRemaining = transactionAmountRemaining.minus(interestPortion);
 	

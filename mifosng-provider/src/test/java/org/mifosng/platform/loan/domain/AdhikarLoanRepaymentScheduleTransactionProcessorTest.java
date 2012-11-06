@@ -18,7 +18,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class AdhikarLoanRepaymentScheduleTransactionProcessorTest {
 	
 	// class under test
-	private AdhikarLoanRepaymentScheduleTransactionProcessor processor;
+	private RBILoanRepaymentScheduleTransactionProcessor processor;
 	
 	//
 	private LocalDate july2nd = new LocalDate(2012, 7, 2);
@@ -30,7 +30,7 @@ public class AdhikarLoanRepaymentScheduleTransactionProcessorTest {
 		
 		installments = LoanScheduleTestDataHelper.createSimpleLoanSchedule(july2nd, usDollars);
 		
-		processor = new AdhikarLoanRepaymentScheduleTransactionProcessor();
+		processor = new RBILoanRepaymentScheduleTransactionProcessor();
 	}
 
 	/**

@@ -88,6 +88,11 @@ public class CreocoreLoanRepaymentScheduleTransactionProcessor extends
 			interestPortion = currentInstallment.waiveInterestComponent(transactionAmountRemaining);
 			transactionAmountRemaining = transactionAmountRemaining.minus(interestPortion);
 		} else {
+			penaltyChargesPortion = currentInstallment.payPenaltyChargesComponent(transactionAmountRemaining);
+			transactionAmountRemaining = transactionAmountRemaining.minus(penaltyChargesPortion);
+			
+			feeChargesPortion = currentInstallment.payFeeChargesComponent(transactionAmountRemaining);
+			transactionAmountRemaining = transactionAmountRemaining.minus(feeChargesPortion);
 		
 			interestPortion = currentInstallment.payInterestComponent(transactionAmountRemaining);
 			transactionAmountRemaining = transactionAmountRemaining.minus(interestPortion);
