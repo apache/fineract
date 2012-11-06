@@ -301,7 +301,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 		
 		final Money possibleNextRepaymentAmount = loan.possibleNextRepaymentAmount();
 		final EnumOptionData transactionType = LoanEnumerations.transactionType(LoanTransactionType.REPAYMENT);
-		return new LoanTransactionData(null, transactionType, currencyData, earliestUnpaidInstallmentDate, possibleNextRepaymentAmount.getAmount());
+		return new LoanTransactionData(null, transactionType, currencyData, earliestUnpaidInstallmentDate, possibleNextRepaymentAmount.getAmount(), null, null, null, null);
 	}
 
 	@Override
@@ -329,7 +329,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
 		final EnumOptionData transactionType = LoanEnumerations.transactionType(LoanTransactionType.WAIVE_INTEREST);
 		
-		return new LoanTransactionData(null, transactionType, currencyData, waiveOfInterest.getTransactionDate(), waiveOfInterest.getAmount());
+		return new LoanTransactionData(null, transactionType, currencyData, waiveOfInterest.getTransactionDate(), waiveOfInterest.getAmount(), null, null, null, null);
 	}
 	
 	@Override
@@ -339,7 +339,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
 		EnumOptionData transactionType = LoanEnumerations.transactionType(LoanTransactionType.WRITEOFF);
 		
-		return new LoanTransactionData(null, transactionType, null, new LocalDate(), null);
+		return new LoanTransactionData(null, transactionType, null, new LocalDate(), null, null, null, null, null);
 	}
 
 	@Override
@@ -372,8 +372,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 				currency.getName(), currency.getDecimalPlaces(),
 				currency.getDisplaySymbol(), currency.getNameCode());
 		
-		final EnumOptionData transactionType = LoanEnumerations.transactionType(transaction.getTypeOf());
-		return new LoanTransactionData(transactionId, transactionType, currencyData, transaction.getTransactionDate(), transaction.getAmount());
+		return transaction.toData(currencyData);
 	}
 
 	private static final class LoanMapper implements
@@ -611,6 +610,10 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 		public String LoanPaymentsSchema() {
 
 			return " tr.id as id, tr.transaction_type_enum as transactionType, tr.transaction_date as `date`, tr.amount as total, "
+					+ "tr.principal_portion_derived as principal, "
+					+ "tr.interest_portion_derived as interest, "
+					+ "tr.fee_charges_portion_derived as fees, "
+					+ "tr.penalty_charges_portion_derived as penalties, "
 					+ " l.currency_code as currencyCode, l.currency_digits as currencyDigits, rc.`name` as currencyName, " 
 					+ " rc.display_symbol as currencyDisplaySymbol, rc.internationalized_name_code as currencyNameCode "
 					+ " from m_loan l "
@@ -622,22 +625,26 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 		public LoanTransactionData mapRow(final ResultSet rs,
 				@SuppressWarnings("unused") final int rowNum) throws SQLException {
 
-			String currencyCode = rs.getString("currencyCode");
-			String currencyName = rs.getString("currencyName");
-			String currencyNameCode = rs.getString("currencyNameCode");
-			String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
-			Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
-			CurrencyData currencyData = new CurrencyData(currencyCode,
+			final String currencyCode = rs.getString("currencyCode");
+			final String currencyName = rs.getString("currencyName");
+			final String currencyNameCode = rs.getString("currencyNameCode");
+			final String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
+			final Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
+			final CurrencyData currencyData = new CurrencyData(currencyCode,
 					currencyName, currencyDigits, currencyDisplaySymbol,
 					currencyNameCode);
 
-			Long id = rs.getLong("id");
-			int transactionTypeInt = JdbcSupport.getInteger(rs, "transactionType");
-			EnumOptionData transactionType = LoanEnumerations.transactionType(transactionTypeInt);
-			LocalDate date = JdbcSupport.getLocalDate(rs, "date");
-			BigDecimal totalAmount = rs.getBigDecimal("total");
-
-			return new LoanTransactionData(id, transactionType, currencyData, date, totalAmount);
+			final Long id = rs.getLong("id");
+			final int transactionTypeInt = JdbcSupport.getInteger(rs, "transactionType");
+			final EnumOptionData transactionType = LoanEnumerations.transactionType(transactionTypeInt);
+			final LocalDate date = JdbcSupport.getLocalDate(rs, "date");
+			final BigDecimal totalAmount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "total");
+			final BigDecimal principalPortion = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "principal");
+			final BigDecimal interestPortion = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "interest");
+			final BigDecimal feeChargesPortion = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "fees");
+			final BigDecimal penaltyChargesPortion = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "penalties");
+			
+			return new LoanTransactionData(id, transactionType, currencyData, date, totalAmount, principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
 		}
 	}
 }

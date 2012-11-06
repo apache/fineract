@@ -16,9 +16,13 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.joda.time.LocalDate;
+import org.mifosng.platform.api.data.CurrencyData;
+import org.mifosng.platform.api.data.EnumOptionData;
+import org.mifosng.platform.api.data.LoanTransactionData;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
+import org.mifosng.platform.loanproduct.service.LoanEnumerations;
 import org.mifosng.platform.user.domain.AppUser;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -242,5 +246,11 @@ public class LoanTransaction extends AbstractAuditableCustom<AppUser, Long> {
 			result = null;
 		}
 		return result;
+	}
+
+	public LoanTransactionData toData(final CurrencyData currencyData) {
+		final EnumOptionData transactionType = LoanEnumerations.transactionType(this.typeOf);
+		return new LoanTransactionData(this.getId(), transactionType, currencyData, getTransactionDate(), 
+				this.amount, this.principalPortion, this.interestPortion, this.feeChargesPortion, this.penaltyChargesPortion);
 	}
 }
