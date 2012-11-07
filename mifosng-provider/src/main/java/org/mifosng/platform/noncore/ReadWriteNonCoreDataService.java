@@ -11,10 +11,10 @@ public interface ReadWriteNonCoreDataService {
 
 	List<DatatableData> retrieveDatatableNames(String appTable);
 
-	@PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'CAN_REGISTER_DATATABLE')")
+	@PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'REGISTER_DATATABLE')")
 	void registerDatatable(String datatable, String appTable);
 
-	@PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'CAN_DEREGISTER_DATATABLE')")
+	@PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'DEREGISTER_DATATABLE')")
 	void deregisterDatatable(String datatable);
 
 	GenericResultsetData retrieveDataTableGenericResultSet(String datatable,

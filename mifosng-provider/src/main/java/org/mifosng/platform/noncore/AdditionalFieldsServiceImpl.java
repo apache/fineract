@@ -64,7 +64,7 @@ public class AdditionalFieldsServiceImpl implements AdditionalFieldsService {
 				+ " left join m_permission p on p.id = rp.permission_id"
 				+ " where ur.appuser_id = "
 				+ context.authenticatedUser().getId()
-				+ " and (p.code in ('ALL_FUNCTIONS', 'ALL_FUNCTIONS_READ') or p.code = concat('CAN_READ_', t.`name`, '_x', d.`name`))) "
+				+ " and (p.code in ('ALL_FUNCTIONS', 'ALL_FUNCTIONS_READ') or p.code = concat('READ_', t.`name`, '_x', d.`name`))) "
 				+ andClause + " order by d.`name`";
 
 		sql = genericDataService.wrapSQL(sql);
