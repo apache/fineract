@@ -180,7 +180,11 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
 
         public String loanChargeSchema(){
             return  "lc.id as id, c.id as chargeId, c.name as name, " +
-            		"lc.amount as amountDue, lc.amount_paid_derived as amountPaid, lc.amount_outstanding_derived as amountOutstanding, " +
+            		"lc.amount as amountDue, " +
+            		"lc.amount_paid_derived as amountPaid, " +
+            		"lc.amount_waived_derived as amountWaived, " +
+            		"lc.amount_writtenoff_derived as amountWrittenOff, " +
+            		"lc.amount_outstanding_derived as amountOutstanding, " +
             		"lc.calculation_percentage as percentageOf, lc.calculation_on_amount as amountPercentageAppliedTo, " +
             		"lc.charge_time_enum as chargeTime, " +
             		"lc.is_penalty as penalty, " +
@@ -201,6 +205,8 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
         	final String name = rs.getString("name");
         	final BigDecimal amount = rs.getBigDecimal("amountDue");
         	final BigDecimal amountPaid =  JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "amountPaid");
+        	final BigDecimal amountWaived =  JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "amountWaived");
+        	final BigDecimal amountWrittenOff =  JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "amountWrittenOff");
         	final BigDecimal amountOutstanding = rs.getBigDecimal("amountOutstanding");
         	
         	final BigDecimal percentageOf = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "percentageOf");
@@ -224,7 +230,9 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
         	final EnumOptionData chargeCalculationType = ChargeEnumerations.chargeCalculationType(chargeCalculation);
         	final boolean penalty = rs.getBoolean("penalty");
         	
-            return new LoanChargeData(id, chargeId, name, currency, amount, amountPaid, amountOutstanding, chargeTimeType, dueAsOfDate, chargeCalculationType, percentageOf, amountPercentageAppliedTo, penalty);
+            return new LoanChargeData(id, chargeId, name, currency, 
+            		amount, amountPaid, amountWaived, amountWrittenOff,
+            		amountOutstanding, chargeTimeType, dueAsOfDate, chargeCalculationType, percentageOf, amountPercentageAppliedTo, penalty);
         }
     }
 }

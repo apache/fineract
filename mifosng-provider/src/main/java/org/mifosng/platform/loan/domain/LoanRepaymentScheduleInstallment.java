@@ -372,6 +372,46 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
 		return waivedInterestPortionOfTransaction;
 	}
 	
+	public Money waivePenaltyChargesComponent(final Money transactionAmountRemaining) {
+		MonetaryCurrency currency = transactionAmountRemaining.getCurrency();
+		Money waivedPenaltyChargesPortionOfTransaction = Money.zero(currency);
+		
+		Money penanltiesDue = getPenaltyChargesOutstanding(currency);
+		if (transactionAmountRemaining.isGreaterThanOrEqualTo(penanltiesDue)) {
+			this.penaltyChargesWaived = getPenaltyChargesWaived(currency).plus(penanltiesDue).getAmount();
+			waivedPenaltyChargesPortionOfTransaction = waivedPenaltyChargesPortionOfTransaction.plus(penanltiesDue);
+		} else {
+			this.penaltyChargesWaived = getPenaltyChargesWaived(currency).plus(transactionAmountRemaining).getAmount();
+			waivedPenaltyChargesPortionOfTransaction = waivedPenaltyChargesPortionOfTransaction.plus(transactionAmountRemaining);
+		}
+		
+		this.penaltyChargesWaived = defaultToNullIfZero(this.penaltyChargesWaived);
+		
+		this.completed = getTotalOutstanding(currency).isZero();
+		
+		return waivedPenaltyChargesPortionOfTransaction;
+	}
+	
+	public Money waiveFeeChargesComponent(final Money transactionAmountRemaining) {
+		MonetaryCurrency currency = transactionAmountRemaining.getCurrency();
+		Money waivedFeeChargesPortionOfTransaction = Money.zero(currency);
+		
+		Money feesDue = getPenaltyChargesOutstanding(currency);
+		if (transactionAmountRemaining.isGreaterThanOrEqualTo(feesDue)) {
+			this.feeChargesWaived = getFeeChargesWaived(currency).plus(feesDue).getAmount();
+			waivedFeeChargesPortionOfTransaction = waivedFeeChargesPortionOfTransaction.plus(feesDue);
+		} else {
+			this.feeChargesWaived = getFeeChargesWaived(currency).plus(transactionAmountRemaining).getAmount();
+			waivedFeeChargesPortionOfTransaction = waivedFeeChargesPortionOfTransaction.plus(transactionAmountRemaining);
+		}
+		
+		this.feeChargesWaived = defaultToNullIfZero(this.feeChargesWaived);
+		
+		this.completed = getTotalOutstanding(currency).isZero();
+		
+		return waivedFeeChargesPortionOfTransaction;
+	}
+	
 	public Money writeOffOutstandingPrincipal(final MonetaryCurrency currency) {
 		
 		final Money principalDue = getPrincipalOutstanding(currency);
@@ -394,8 +434,18 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
 		return this.getDueDate().isBefore(transactionDate);
 	}
 
-	public void updateChargePortion(final Money feeChargesDue, final Money penaltyChargesDue) {
+	public void updateChargePortion(
+			final Money feeChargesDue,
+			final Money feeChargesWaived,
+			final Money feeChargesWrittenOff,
+			final Money penaltyChargesDue,
+			final Money penaltyChargesWaived,
+			final Money penaltyChargesWrittenOff) {
 		this.feeCharges = defaultToNullIfZero(feeChargesDue.getAmount());
+		this.feeChargesWaived = defaultToNullIfZero(feeChargesWaived.getAmount());
+		this.feeChargesWrittenOff = defaultToNullIfZero(feeChargesWrittenOff.getAmount());
 		this.penaltyCharges = defaultToNullIfZero(penaltyChargesDue.getAmount());
+		this.penaltyChargesWaived = defaultToNullIfZero(penaltyChargesWaived.getAmount());
+		this.penaltyChargesWrittenOff = defaultToNullIfZero(penaltyChargesWrittenOff.getAmount());
 	}
 }

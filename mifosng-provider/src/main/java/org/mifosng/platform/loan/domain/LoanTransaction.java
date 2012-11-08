@@ -87,6 +87,13 @@ public class LoanTransaction extends AbstractAuditableCustom<AppUser, Long> {
 		return new LoanTransaction(loan, LoanTransactionType.WAIVE_INTEREST, waived.getAmount(), waiveDate);
 	}
 	
+	public static LoanTransaction waiveLoanCharge(final Loan loan, final Money waived, final LocalDate waiveDate, final Money feeChargesWaived, final Money penaltyChargesWaived) {
+		LoanTransaction waiver = new LoanTransaction(loan, LoanTransactionType.WAIVE_CHARGES, waived.getAmount(), waiveDate);
+		waiver.updateChargesComponents(feeChargesWaived, penaltyChargesWaived);
+		
+		return waiver;
+	}
+
 	private static LoanTransaction contra(final LoanTransaction originalTransaction) {
 		LoanTransaction contra = new LoanTransaction(null, LoanTransactionType.CONTRA, originalTransaction.getAmount().negate(), new LocalDate(originalTransaction.getDateOf()));
 		contra.updateContra(originalTransaction);
@@ -153,8 +160,20 @@ public class LoanTransaction extends AbstractAuditableCustom<AppUser, Long> {
 		return LoanTransactionType.WAIVE_INTEREST.equals(getTypeOf()) && isNotContra();
 	}
 	
+	public boolean isChargesWaiver() {
+		return LoanTransactionType.WAIVE_CHARGES.equals(getTypeOf()) && isNotContra();
+	}
+	
 	public boolean isNotInterestWaiver() {
 		return !isInterestWaiver();
+	}
+	
+	public boolean isWaiver() {
+		return isInterestWaiver() || isChargesWaiver();
+	}
+	
+	public boolean isNotWaiver() {
+		return !isInterestWaiver() && !isChargesWaiver();
 	}
 	
 	public boolean isWriteOff() {
@@ -195,6 +214,11 @@ public class LoanTransaction extends AbstractAuditableCustom<AppUser, Long> {
 		final MonetaryCurrency currency = principal.getCurrency();
 		this.principalPortion = defaultToNullIfZero(getPrincipalPortion(currency).plus(principal).getAmount());
 		this.interestPortion = defaultToNullIfZero(getInterestPortion(currency).plus(interest).getAmount());
+		updateChargesComponents(feeCharges, penaltyCharges);
+	}
+	
+	private void updateChargesComponents(final Money feeCharges, final Money penaltyCharges) {
+		final MonetaryCurrency currency = feeCharges.getCurrency();
 		this.feeChargesPortion = defaultToNullIfZero(getFeeChargesPortion(currency).plus(feeCharges).getAmount());
 		this.penaltyChargesPortion = defaultToNullIfZero(getPenaltyChargesPortion(currency).plus(penaltyCharges).getAmount());
 	}
@@ -205,7 +229,7 @@ public class LoanTransaction extends AbstractAuditableCustom<AppUser, Long> {
 		final MonetaryCurrency currency = principal.getCurrency();
 		this.amount = getPrincipalPortion(currency).plus(getInterestPortion(currency)).plus(getFeeChargesPortion(currency)).plus(getPenaltyChargesPortion(currency)).getAmount();
 	}
-
+	
 	public Money getPrincipalPortion(final MonetaryCurrency currency) {
 		return Money.of(currency, this.principalPortion);
 	}
@@ -226,6 +250,7 @@ public class LoanTransaction extends AbstractAuditableCustom<AppUser, Long> {
 		this.principalPortion = null;
 		this.interestPortion = null;
 		this.feeChargesPortion = null;
+		this.penaltyChargesPortion = null;
 	}
 
 	public boolean isGreaterThan(final Money monetaryAmount) {

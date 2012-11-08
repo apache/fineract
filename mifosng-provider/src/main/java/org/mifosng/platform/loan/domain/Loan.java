@@ -281,15 +281,15 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		
 		updateTotalChargesDueAtDisbursement();
 		
-		// reprocess loan schedule based on charge been removed.
-		LoanScheduleWrapper wrapper = new LoanScheduleWrapper();
-		wrapper.reprocess(getCurrency(), getDisbursementDate(), this.repaymentScheduleInstallments, this.charges);
-		
 		final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessor.determineProcessor(this.transactionProcessingStrategy);
 				
 		if (!loanCharge.isDueAtDisbursement()) { // TODO - only need to reprocess transactions against loan schedule if loan charge is added with due date before latest transaction.
 			final List<LoanTransaction> allNonContraTransactionsPostDisbursement = retreiveListOfTransactionsPostDisbursement();
-			loanRepaymentScheduleTransactionProcessor.handleTransaction(allNonContraTransactionsPostDisbursement, getCurrency(), this.repaymentScheduleInstallments, this.charges);
+			loanRepaymentScheduleTransactionProcessor.handleTransaction(getDisbursementDate(), allNonContraTransactionsPostDisbursement, getCurrency(), this.repaymentScheduleInstallments, this.charges);
+		} else {
+			// just reprocess the loan schedule only for now.
+			LoanScheduleWrapper wrapper = new LoanScheduleWrapper();
+			wrapper.reprocess(getCurrency(), getDisbursementDate(), this.repaymentScheduleInstallments, this.charges);
 		}
 	}
 
@@ -320,10 +320,6 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 			updateTotalChargesDueAtDisbursement();
 		}
 		
-		// reprocess loan schedule based on charge been removed.
-		LoanScheduleWrapper wrapper = new LoanScheduleWrapper();
-		wrapper.reprocess(getCurrency(), getDisbursementDate(), this.repaymentScheduleInstallments, this.charges);
-		
 		// if removing disbursement charge - accomodate this on the transaction that tracked its payment
 		if (loanCharge.isDueAtDisbursement()) {
 			LoanTransaction transactionToRemove = null;
@@ -353,7 +349,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessor.determineProcessor(this.transactionProcessingStrategy);
 		if (!loanCharge.isDueAtDisbursement() && loanCharge.isPaidOrPartiallyPaid(loanCurrency())) {
 			final List<LoanTransaction> allNonContraTransactionsPostDisbursement = retreiveListOfTransactionsPostDisbursement();
-			loanRepaymentScheduleTransactionProcessor.handleTransaction(allNonContraTransactionsPostDisbursement, getCurrency(), this.repaymentScheduleInstallments, this.charges);
+			loanRepaymentScheduleTransactionProcessor.handleTransaction(getDisbursementDate(), allNonContraTransactionsPostDisbursement, getCurrency(), this.repaymentScheduleInstallments, this.charges);
 		}
 	}
 	
@@ -363,6 +359,44 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 			loanCharge.update(command, getPrincpal().getAmount());
 			updateTotalChargesDueAtDisbursement();
 		}
+	}
+	
+	public LoanTransaction waiveLoanCharge(final LoanCharge loanCharge, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
+		
+		validateLoanIsNotClosed(loanCharge);
+		
+		final Money amountWaived = loanCharge.waive(loanCurrency());
+		
+		Money feeChargesWaived = Money.of(loanCurrency(), loanCharge.amount());
+		Money penaltyChargesWaived = Money.zero(loanCurrency());
+		if (loanCharge.isPenaltyCharge()) {
+			penaltyChargesWaived = Money.of(loanCurrency(), loanCharge.amount());
+			feeChargesWaived = Money.zero(loanCurrency());
+		}
+		
+		LocalDate transactionDate = getDisbursementDate();
+		if (loanCharge.isSpecifiedDueDate()) {
+			transactionDate = loanCharge.getDueForCollectionAsOfLocalDate();
+		}
+		
+		updateTotalChargesDueAtDisbursement();
+		
+		final LoanTransaction waiveLoanChargeTransaction = LoanTransaction.waiveLoanCharge(this, amountWaived, transactionDate,feeChargesWaived, penaltyChargesWaived);
+		
+		// reprocess loan schedule based on charge been added.
+		LoanScheduleWrapper wrapper = new LoanScheduleWrapper();
+		wrapper.reprocess(getCurrency(), getDisbursementDate(), this.repaymentScheduleInstallments, this.charges);
+
+		// Waive of charges whose due date falls after latest 'repayment' transaction dont require entire loan schedule to be reprocessed.
+		final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessor.determineProcessor(this.transactionProcessingStrategy);
+		if (!loanCharge.isDueAtDisbursement() && loanCharge.isPaidOrPartiallyPaid(loanCurrency())) {
+			final List<LoanTransaction> allNonContraTransactionsPostDisbursement = retreiveListOfTransactionsPostDisbursement();
+			loanRepaymentScheduleTransactionProcessor.handleTransaction(getDisbursementDate(), allNonContraTransactionsPostDisbursement, getCurrency(), this.repaymentScheduleInstallments, this.charges);
+		}
+		
+		doPostLoanTransactionChecks(waiveLoanChargeTransaction.getTransactionDate(), loanLifecycleStateMachine);
+		
+		return waiveLoanChargeTransaction;
 	}
 
 	public Client client() {
@@ -467,7 +501,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		final List<LoanTransaction> repaymentsOrWaivers = retreiveListOfTransactionsPostDisbursement();
 		
 		final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessor.determineProcessor(this.transactionProcessingStrategy);
-		loanRepaymentScheduleTransactionProcessor.handleTransaction(repaymentsOrWaivers, getCurrency(), this.repaymentScheduleInstallments, this.charges);
+		loanRepaymentScheduleTransactionProcessor.handleTransaction(getDisbursementDate(), repaymentsOrWaivers, getCurrency(), this.repaymentScheduleInstallments, this.charges);
 	}
 
 	private boolean dateHasChanged(final LocalDate originalLocalDate, final LocalDate providedLocalDate) {
@@ -512,26 +546,19 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		this.termFrequency = loanTermFrequency;
 		this.termPeriodFrequencyType = loanTermFrequencyType.getValue();
 		
-		this.submittedOnDate = submittedOn.toDateTimeAtCurrentTime().toDate();
-
-		// TODO - this should also match expectedDisbursmentDate + loan term
-		this.expectedMaturityDate = this.repaymentScheduleInstallments
-				.get(this.repaymentScheduleInstallments.size() - 1)
-				.getDueDate().toDateMidnight().toDate();
+		this.submittedOnDate = submittedOn.toDate();
+		this.expectedMaturityDate = determineExpectedMaturityDate().toDate();
 		if (expectedDisbursementDate != null) {
 			// can be null during bulk upload of loans
-			this.expectedDisbursedOnDate = expectedDisbursementDate
-					.toDateMidnight().toDate();
+			this.expectedDisbursedOnDate = expectedDisbursementDate.toDate();
 		}
 
 		if (repaymentsStartingFromDate != null) {
-			this.expectedFirstRepaymentOnDate = repaymentsStartingFromDate
-					.toDateMidnight().toDate();
+			this.expectedFirstRepaymentOnDate = repaymentsStartingFromDate.toDate();
 		}
 
 		if (interestChargedFromDate != null) {
-			this.interestChargedFromDate = interestChargedFromDate
-					.toDateMidnight().toDate();
+			this.interestChargedFromDate = interestChargedFromDate.toDate();
 		}
 
 		if (submittedOn.isAfter(new LocalDate())) {
@@ -551,6 +578,11 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		for (LoanCharge loanCharge : this.charges) {
 			validateChargeHasValidSpecifiedDateIfApplicable(loanCharge, getDisbursementDate(), getLastRepaymentPeriodDueDate());
 		}
+	}
+
+	private LocalDate determineExpectedMaturityDate() {
+		int numberOfInstallments = this.repaymentScheduleInstallments.size();
+		return this.repaymentScheduleInstallments.get(numberOfInstallments - 1).getDueDate();
 	}
 
 	public void reject(final LocalDate rejectedOn, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
@@ -718,7 +750,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		this.disbursedOnDate = null;
 		
 		for (LoanCharge charge : this.charges) {
-			charge.resetToOriginal();
+			charge.resetToOriginal(loanCurrency());
 		}
 		
 		for (LoanRepaymentScheduleInstallment currentInstallment : this.repaymentScheduleInstallments) {
@@ -770,7 +802,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 			this.loanTransactions.add(loanTransaction);
 		}
 
-		if (loanTransaction.isNotRepayment() && loanTransaction.isNotInterestWaiver()) {
+		if (loanTransaction.isNotRepayment() && loanTransaction.isNotWaiver()) {
 			final String errorMessage = "A transaction of type repayment or waiver was expected but not received.";
 			throw new InvalidLoanTransactionTypeException("transaction",
 					"is.not.a.repayment.or.waiver.transaction", errorMessage);
@@ -808,10 +840,10 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 			loanRepaymentScheduleTransactionProcessor.handleTransaction(loanTransaction, getCurrency(), this.repaymentScheduleInstallments, this.charges);
 		} else {
 			final List<LoanTransaction> allNonContraTransactionsPostDisbursement = retreiveListOfTransactionsPostDisbursement();
-			loanRepaymentScheduleTransactionProcessor.handleTransaction(allNonContraTransactionsPostDisbursement, getCurrency(), this.repaymentScheduleInstallments, this.charges);
+			loanRepaymentScheduleTransactionProcessor.handleTransaction(getDisbursementDate(), allNonContraTransactionsPostDisbursement, getCurrency(), this.repaymentScheduleInstallments, this.charges);
 		}
 		
-		doPostLoanTransactionChecks(loanTransaction, loanLifecycleStateMachine);
+		doPostLoanTransactionChecks(loanTransaction.getTransactionDate(), loanLifecycleStateMachine);
 	}
 
 	private List<LoanTransaction> retreiveListOfTransactionsPostDisbursement() {
@@ -826,25 +858,27 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		return repaymentsOrWaivers;
 	}
 
-	private void doPostLoanTransactionChecks(final LoanTransaction loanTransaction, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
+	private void doPostLoanTransactionChecks(final LocalDate transactionDate, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
 		
 		if (this.isOverPaid()) {
-			handleLoanOverpayment(loanTransaction, loanLifecycleStateMachine);
+			handleLoanOverpayment(loanLifecycleStateMachine);
 		} else if (this.isRepaidInFull()) {
-			handleLoanRepaymentInFull(loanTransaction, loanLifecycleStateMachine);
+			// TODO - KW - probably should not close the loan automatically but let user decide if loan is closed or not and provide closing date.
+			//      - need to dig into loan closure scenarios with MFIs
+			handleLoanRepaymentInFull(transactionDate, loanLifecycleStateMachine);
 		}
 	}
 
-	private void handleLoanRepaymentInFull(final LoanTransaction loanTransaction, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
+	private void handleLoanRepaymentInFull(final LocalDate transactionDate, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
 		
 		LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.REPAID_IN_FULL, LoanStatus.fromInt(this.loanStatus));
 		this.loanStatus = statusEnum.getValue();
 		
-		this.closedOnDate = loanTransaction.getTransactionDate().toDate();
-		this.maturedOnDate = loanTransaction.getTransactionDate().toDate();
+		this.closedOnDate = transactionDate.toDate();
+		this.maturedOnDate = transactionDate.toDate();
 	}
 
-	private void handleLoanOverpayment(@SuppressWarnings("unused") final LoanTransaction loanTransaction, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
+	private void handleLoanOverpayment(final LoanLifecycleStateMachine loanLifecycleStateMachine) {
 		
 		LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_OVERPAYMENT, LoanStatus.fromInt(this.loanStatus));
 		this.loanStatus = statusEnum.getValue();
@@ -959,8 +993,8 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 			final LoanTransaction newTransactionDetail,
 			final LoanLifecycleStateMachine loanLifecycleStateMachine) {
 
-		if (transactionForAdjustment.isNotRepayment() && transactionForAdjustment.isNotInterestWaiver()) {
-			final String errorMessage = "Only transactions of type repayment or interest waiver can be adjusted.";
+		if (transactionForAdjustment.isNotRepayment() && transactionForAdjustment.isNotWaiver()) {
+			final String errorMessage = "Only transactions of type repayment or waiver can be adjusted.";
 			throw new InvalidLoanTransactionTypeException("transaction",
 					"adjustment.is.only.allowed.to.repayment.or.waiver.transaction", errorMessage);
 		}

@@ -59,6 +59,12 @@ public class LoanCharge extends AbstractPersistable<Long> {
     @Column(name = "amount_paid_derived", scale = 6, precision = 19, nullable = true)
     private BigDecimal amountPaid;
     
+	@Column(name = "amount_waived_derived", scale = 6, precision = 19, nullable = true)
+    private BigDecimal amountWaived;
+
+    @Column(name = "amount_writtenoff_derived", scale = 6, precision = 19, nullable = true)
+    private BigDecimal amountWrittenOff;
+    
 	@Column(name = "amount_outstanding_derived", scale = 6, precision = 19, nullable = false)
     private BigDecimal amountOutstanding;
 
@@ -172,7 +178,9 @@ public class LoanCharge extends AbstractPersistable<Long> {
 			this.amount = null;
 			this.amountPercentageAppliedTo = null;
 			this.amountPaid = null;
-			this.amountOutstanding = null;
+			this.amountOutstanding = BigDecimal.ZERO;
+			this.amountWaived = null;
+			this.amountWrittenOff = null;
 			break;
 		case FLAT:
 			this.percentage = null;
@@ -180,6 +188,8 @@ public class LoanCharge extends AbstractPersistable<Long> {
 			this.amountPercentageAppliedTo = null;
 			this.amountPaid = null;
 			this.amountOutstanding = chargeAmount;
+			this.amountWaived = null;
+			this.amountWrittenOff = null;
 			break;
 		case PERCENT_OF_AMOUNT:
 			this.percentage = chargeAmount;
@@ -187,20 +197,26 @@ public class LoanCharge extends AbstractPersistable<Long> {
 			this.amount = percentageOf(this.amountPercentageAppliedTo, this.percentage);
 			this.amountPaid = null;
 			this.amountOutstanding = calculateOutstanding();
+			this.amountWaived = null;
+			this.amountWrittenOff = null;
 			break;
 		case PERCENT_OF_AMOUNT_AND_INTEREST:
 			this.percentage = null;
 			this.amount = null;
 			this.amountPercentageAppliedTo = null;
 			this.amountPaid = null;
-			this.amountOutstanding = null;
+			this.amountOutstanding = BigDecimal.ZERO;
+			this.amountWaived = null;
+			this.amountWrittenOff = null;
 			break;
 		case PERCENT_OF_INTEREST:
 			this.percentage = null;
 			this.amount = null;
 			this.amountPercentageAppliedTo = null;
 			this.amountPaid = null;
-			this.amountOutstanding = null;
+			this.amountOutstanding = BigDecimal.ZERO;
+			this.amountWaived = null;
+			this.amountWrittenOff = null;
 			break;
 		}
 	}
@@ -216,6 +232,36 @@ public class LoanCharge extends AbstractPersistable<Long> {
         this.chargeTime = chargeTime;
         this.chargeCalculation = chargeCalculation;
     }
+    
+    public void markAsFullyPaid() {
+		this.amountPaid = this.amount;
+		this.amountOutstanding = BigDecimal.ZERO;
+		this.paid = true;
+	}
+
+	public void resetToOriginal(final MonetaryCurrency currency) {
+		this.amountPaid = BigDecimal.ZERO;
+		this.amountWaived = BigDecimal.ZERO;
+		this.amountWrittenOff = BigDecimal.ZERO;
+		this.amountOutstanding = calculateAmountOutstanding(currency);
+		this.paid = false;
+	}
+	
+	public void resetPaidAmount(final MonetaryCurrency currency) {
+		this.amountPaid = BigDecimal.ZERO;
+		this.amountOutstanding = calculateAmountOutstanding(currency);
+		this.paid = false;
+	}
+    
+    public Money waive(final MonetaryCurrency currency) {
+    	this.amountWaived = this.amount;
+		this.amountOutstanding = calculateAmountOutstanding(currency);
+		return getAmountWaived(currency);
+	}
+
+	private BigDecimal calculateAmountOutstanding(final MonetaryCurrency currency) {
+		return getAmount(currency).minus(getAmountWaived(currency)).minus(getAmountPaid(currency)).getAmount();
+	}
 
 	public void update(final Loan loan) {
 		this.loan = loan;
@@ -319,22 +365,10 @@ public class LoanCharge extends AbstractPersistable<Long> {
     	return percentageOf;
 	}
 
-	public void markAsFullyPaid() {
-		this.amountPaid = this.amount;
-		this.amountOutstanding = BigDecimal.ZERO;
-		this.paid = true;
-	}
-
-	public void resetToOriginal() {
-		this.amountPaid = BigDecimal.ZERO;
-		this.amountOutstanding = this.amount;
-		this.paid = false;
-	}
-
 	public BigDecimal amount() {
 		return this.amount;
 	}
-
+	
 	public boolean hasNotLoanIdentifiedBy(final Long loanId) {
 		return !hasLoanIdentifiedBy(loanId);
 	}
@@ -373,7 +407,25 @@ public class LoanCharge extends AbstractPersistable<Long> {
 	}
 	
 	public boolean isPaidOrPartiallyPaid(final MonetaryCurrency currency) {
-		return Money.of(currency, this.amountPaid).isGreaterThanZero();
+		
+		final Money amountWaivedOrWrittenOff = getAmountWaived(currency).plus(getAmountWrittenOff(currency));
+		return Money.of(currency, this.amountPaid).plus(amountWaivedOrWrittenOff).isGreaterThanZero();
+	}
+
+	private Money getAmount(final MonetaryCurrency currency) {
+		return Money.of(currency, this.amount);
+	}
+	
+	private Money getAmountPaid(final MonetaryCurrency currency) {
+		return Money.of(currency, this.amountPaid);
+	}
+	
+	public Money getAmountWaived(final MonetaryCurrency currency) {
+		return Money.of(currency, this.amountWaived);
+	}
+	
+	public Money getAmountWrittenOff(final MonetaryCurrency currency) {
+		return Money.of(currency, this.amountWrittenOff);
 	}
 
 	public Money updatePaidAmountBy(final Money incrementBy) {

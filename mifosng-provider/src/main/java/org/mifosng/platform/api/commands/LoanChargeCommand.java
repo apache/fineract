@@ -1,6 +1,7 @@
 package org.mifosng.platform.api.commands;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.joda.time.LocalDate;
@@ -23,7 +24,12 @@ public class LoanChargeCommand {
      * Used to capture what parameters were passed in the json api request. 
      * It does not indicate that these values are modified from their original values when tyring to update.
      */
-    private final Set<String> parametersPassedInCommand;
+    private final Set<String> requestParameters;
+    
+    public static LoanChargeCommand forWaiver(final Long id, final Long loanId) {
+		final Set<String> parametersPassedInCommand = new HashSet<String>();
+		return new LoanChargeCommand(parametersPassedInCommand, id, loanId, null, null, null, null, null);
+	}
 
     public LoanChargeCommand(
     		final Set<String> parametersPassedInCommand, 
@@ -34,7 +40,7 @@ public class LoanChargeCommand {
     		final Integer chargeTimeType, 
     		final Integer chargeCalculationType, 
     		final LocalDate specifiedDueDate) {
-        this.parametersPassedInCommand = parametersPassedInCommand;
+        this.requestParameters = parametersPassedInCommand;
         this.id = id;
         this.chargeId = chargeId;
         this.loanId = loanId;
@@ -73,18 +79,18 @@ public class LoanChargeCommand {
     }
 
     public boolean isAmountChanged(){
-        return this.parametersPassedInCommand.contains("amount");
+        return this.requestParameters.contains("amount");
     }
 
     public boolean isChargeTimeTypeChanged(){
-        return this.parametersPassedInCommand.contains("chargeTimeType");
+        return this.requestParameters.contains("chargeTimeType");
     }
     
     public boolean isSpecifiedDueDateChanged(){
-        return this.parametersPassedInCommand.contains("specifiedDueDate");
+        return this.requestParameters.contains("specifiedDueDate");
     }
 
     public boolean isChargeCalculationTypeChanged(){
-        return this.parametersPassedInCommand.contains("chargeCalculationType");
+        return this.requestParameters.contains("chargeCalculationType");
     }
 }

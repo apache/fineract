@@ -666,6 +666,35 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         return new EntityIdentifier(loanCharge.getId());
     }
+	
+	@Transactional
+	@Override
+	public EntityIdentifier waiveLoanCharge(final LoanChargeCommand command) {
+		
+		 this.context.authenticatedUser();
+
+//        LoanChargeCommandValidator validator = new LoanChargeCommandValidator(command);
+//        validator.validateForUpdate();
+
+        final Long loanId = command.getLoanId();
+        final Loan loan = retrieveLoanBy(loanId);
+        
+        final Long loanChargeId = command.getId();
+		final LoanCharge loanCharge = retrieveLoanChargeBy(loanId, loanChargeId);
+		
+		final LoanTransaction waiveTransaction = loan.waiveLoanCharge(loanCharge, defaultLoanLifecycleStateMachine());
+		
+		this.loanTransactionRepository.save(waiveTransaction);
+		this.loanRepository.save(loan);
+		
+		final String noteText = ""; //command.getNote();
+		if (StringUtils.isNotBlank(noteText)) {
+			final Note note = Note.loanTransactionNote(loan, waiveTransaction, noteText);
+			this.noteRepository.save(note);
+		}
+        
+        return new EntityIdentifier(loanCharge.getId());
+	}
 
 	@Transactional
     @Override

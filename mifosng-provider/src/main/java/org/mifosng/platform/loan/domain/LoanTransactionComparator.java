@@ -13,9 +13,9 @@ public class LoanTransactionComparator implements Comparator<LoanTransaction> {
 		final int comparsion = o1.getTransactionDate().compareTo(o2.getTransactionDate());
 		if (comparsion == 0) {
 			// equal transaction dates
-			if (o1.isInterestWaiver() && o2.isNotInterestWaiver()) {
+			if (o1.isWaiver() && o2.isNotWaiver()) {
 				compareResult = -1;
-			} else if (o1.isNotInterestWaiver() && o2.isInterestWaiver()) {
+			} else if (o1.isNotWaiver() && o2.isWaiver()) {
 				compareResult = 1;
 			} else {
 				compareResult = 0;

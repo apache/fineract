@@ -57,15 +57,18 @@ public interface LoanWritePlatformService {
 	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE')")
 	EntityIdentifier closeAsRescheduled(LoanTransactionCommand command);
 	
-    @PreAuthorize(value = "hasRole('ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE')")
+	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE')")
     EntityIdentifier addLoanCharge(LoanChargeCommand command);
 
-    @PreAuthorize(value = "hasRole('ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE')")
+	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE')")
     EntityIdentifier updateLoanCharge(LoanChargeCommand command);
 
-    @PreAuthorize(value = "hasRole('ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE')")
+    @PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE')")
     EntityIdentifier deleteLoanCharge(final Long loanId, final Long loanChargeId);
+    
+    @PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE')")
+	EntityIdentifier waiveLoanCharge(LoanChargeCommand command);
 
-    @PreAuthorize(value = "hasRole('ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE')")
+    @PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE')")
     EntityIdentifier bulkLoanReassignment(final BulkLoanReassignmentCommand command);
 }

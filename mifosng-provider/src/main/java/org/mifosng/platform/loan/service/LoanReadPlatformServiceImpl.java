@@ -167,8 +167,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 			return new LoanScheduleData(currency, periods, loanTermInDays, 
 					cumulativePrincipalDisbursed, cumulativePrincipalDue, cumulativePrincipalPaid, cumulativePrincipalWrittenOff, cumulativePrincipalOutstanding, 
 					cumulativeInterestExpected, cumulativeInterestPaid, cumulativeInterestWaived, cumulativeInterestWrittenOff, cumulativeInterestOutstanding, 
-					cumulativeFeeChargesExpected, cumulativeFeeChargesPaid, cumulativeFeeChargesOutstanding, 
-					cumulativePenaltyChargesExpected, cumulativePenaltyChargesPaid, cumulativePenaltyChargesOutstanding, 
+					cumulativeFeeChargesExpected, cumulativeFeeChargesPaid, cumulativeFeeChargesWaived, cumulativeFeeChargesWrittenOff, cumulativeFeeChargesOutstanding, 
+					cumulativePenaltyChargesExpected, cumulativePenaltyChargesPaid, cumulativePenaltyChargesWaived, cumulativePenaltyChargesWrittenOff, cumulativePenaltyChargesOutstanding, 
 					totalExpectedCostOfLoan, totalExpectedRepayment, totalPaidToDate, totalWaivedToDate, totalWrittenOffToDate, totalOutstanding, totalInArrears);
 		} catch (EmptyResultDataAccessException e) {
 			throw new LoanNotFoundException(loanId);
@@ -581,7 +581,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 			
 			final BigDecimal totalDueForPeriod = principalDue.add(totalExpectedCostOfLoanForPeriod);
 			final BigDecimal totalPaidForPeriod = principalPaid.add(interestPaid).add(feeChargesPaid).add(penaltyChargesPaid);
-			final BigDecimal totalWaivedForPeriod = interestWaived.add(feeChargesWaived);
+			final BigDecimal totalWaivedForPeriod = interestWaived.add(feeChargesWaived).add(penaltyChargesWaived);
 			final BigDecimal totalWrittenOffForPeriod = principalWrittenOff.add(interestWrittenOff).add(feeChargesWrittenOff).add(penaltyChargesWrittenOff);
 			final BigDecimal totalOutstandingForPeriod = principalOutstanding.add(interestOutstanding).add(feeChargesOutstanding).add(penaltyChargesOutstanding);
 			

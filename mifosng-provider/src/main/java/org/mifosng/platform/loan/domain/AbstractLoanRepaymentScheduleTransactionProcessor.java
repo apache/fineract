@@ -24,6 +24,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 	 */
 	@Override
 	public void handleTransaction(
+			final LocalDate disbursementDate,
 			final List<LoanTransaction> transactionsPostDisbursement,
 			final MonetaryCurrency currency,
 			final List<LoanRepaymentScheduleInstallment> installments,
@@ -31,13 +32,17 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 		
 		for (LoanCharge loanCharge : charges) {
 			if (!loanCharge.isDueAtDisbursement()) {
-				loanCharge.resetToOriginal();
+				loanCharge.resetPaidAmount(currency);
 			}
 		}
 		
 		for (LoanRepaymentScheduleInstallment currentInstallment : installments) {
 			currentInstallment.resetDerivedComponents();
 		}
+		
+		// re-process loan charges over repayment periods (picking up on waived loan charges)
+		LoanScheduleWrapper wrapper = new LoanScheduleWrapper();
+		wrapper.reprocess(currency, disbursementDate, installments, charges);
 		
 		for (LoanTransaction loanTransaction : transactionsPostDisbursement) {
 			
@@ -86,14 +91,16 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 			installmentIndex++;
 		}
 		
-		Money feeCharges = loanTransaction.getFeeChargesPortion(currency);
-		if (feeCharges.isGreaterThanZero()) {
-			updateFeeChargesPaidAmountBy(feeCharges, charges);
-		}
-		
-		Money penaltyCharges = loanTransaction.getPenaltyChargesPortion(currency);
-		if (penaltyCharges.isGreaterThanZero()) {
-			updatePenaltyChargesPaidAmountBy(penaltyCharges, charges);
+		if (loanTransaction.isNotWaiver()) {
+			Money feeCharges = loanTransaction.getFeeChargesPortion(currency);
+			if (feeCharges.isGreaterThanZero()) {
+				updateFeeChargesPaidAmountBy(feeCharges, charges);
+			}
+			
+			Money penaltyCharges = loanTransaction.getPenaltyChargesPortion(currency);
+			if (penaltyCharges.isGreaterThanZero()) {
+				updatePenaltyChargesPaidAmountBy(penaltyCharges, charges);
+			}
 		}
 		
 		if (transactionAmountUnprocessed.isGreaterThanZero()) {

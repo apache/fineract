@@ -39,10 +39,16 @@ public class LoanScheduleWrapper {
 		LocalDate startDate = disbursementDate;
 		for (LoanRepaymentScheduleInstallment period : repaymentPeriods) {
 			
-			// FIXME - kw - also need to handle case where some of these charges are paid/writtenoff/waived so that those components are updated on repayment period.
 			final Money feeChargesDueForRepaymentPeriod = cumulativeFeeChargesDueWithin(startDate, period.getDueDate(), loanCharges, currency);
+			final Money feeChargesWaivedForRepaymentPeriod = cumulativeFeeChargesWaivedWithin(startDate, period.getDueDate(), loanCharges, currency);
+			final Money feeChargesWrittenOffForRepaymentPeriod = cumulativeFeeChargesWrittenOffWithin(startDate, period.getDueDate(), loanCharges, currency);
+			
 			final Money penaltyChargesDueForRepaymentPeriod = cumulativePenaltyChargesDueWithin(startDate, period.getDueDate(), loanCharges, currency);
-			period.updateChargePortion(feeChargesDueForRepaymentPeriod, penaltyChargesDueForRepaymentPeriod);
+			final Money penaltyChargesWaivedForRepaymentPeriod = cumulativePenaltyChargesWaivedWithin(startDate, period.getDueDate(), loanCharges, currency);
+			final Money penaltyChargesWrittenOffForRepaymentPeriod = cumulativePenaltyChargesWrittenOffWithin(startDate, period.getDueDate(), loanCharges, currency);
+			
+			period.updateChargePortion(feeChargesDueForRepaymentPeriod, feeChargesWaivedForRepaymentPeriod, feeChargesWrittenOffForRepaymentPeriod,
+					penaltyChargesDueForRepaymentPeriod, penaltyChargesWaivedForRepaymentPeriod, penaltyChargesWrittenOffForRepaymentPeriod);
 
 			startDate = period.getDueDate();
 		}
@@ -65,17 +71,85 @@ public class LoanScheduleWrapper {
 		return cumulative;
 	}
 	
+	private Money cumulativeFeeChargesWaivedWithin(
+			final LocalDate periodStart,
+			final LocalDate periodEnd, 
+			final Set<LoanCharge> loanCharges, 
+			final MonetaryCurrency currency) {
+		
+		Money cumulative = Money.zero(currency);
+		
+		for (LoanCharge loanCharge : loanCharges) {
+			if (loanCharge.isDueForCollectionBetween(periodStart, periodEnd)  && loanCharge.isFeeCharge()) {
+				cumulative = cumulative.plus(loanCharge.getAmountWaived(currency));
+			}
+		}
+		
+		return cumulative;
+	}
+	
+	private Money cumulativeFeeChargesWrittenOffWithin(
+			final LocalDate periodStart,
+			final LocalDate periodEnd, 
+			final Set<LoanCharge> loanCharges, 
+			final MonetaryCurrency currency) {
+		
+		Money cumulative = Money.zero(currency);
+		
+		for (LoanCharge loanCharge : loanCharges) {
+			if (loanCharge.isDueForCollectionBetween(periodStart, periodEnd)  && loanCharge.isFeeCharge()) {
+				cumulative = cumulative.plus(loanCharge.getAmountWrittenOff(currency));
+			}
+		}
+		
+		return cumulative;
+	}
+	
 	private Money cumulativePenaltyChargesDueWithin(
 			final LocalDate periodStart,
 			final LocalDate periodEnd, 
 			final Set<LoanCharge> loanCharges, 
-			final MonetaryCurrency monetaryCurrency) {
+			final MonetaryCurrency currency) {
 		
-		Money cumulative = Money.zero(monetaryCurrency);
+		Money cumulative = Money.zero(currency);
 		
 		for (LoanCharge loanCharge : loanCharges) {
 			if (loanCharge.isDueForCollectionBetween(periodStart, periodEnd)  && loanCharge.isPenaltyCharge()) {
 				cumulative = cumulative.plus(loanCharge.amount());
+			}
+		}
+		
+		return cumulative;
+	}
+	
+	private Money cumulativePenaltyChargesWaivedWithin(
+			final LocalDate periodStart,
+			final LocalDate periodEnd, 
+			final Set<LoanCharge> loanCharges, 
+			final MonetaryCurrency currency) {
+		
+		Money cumulative = Money.zero(currency);
+		
+		for (LoanCharge loanCharge : loanCharges) {
+			if (loanCharge.isDueForCollectionBetween(periodStart, periodEnd)  && loanCharge.isPenaltyCharge()) {
+				cumulative = cumulative.plus(loanCharge.getAmountWaived(currency));
+			}
+		}
+		
+		return cumulative;
+	}
+	
+	private Money cumulativePenaltyChargesWrittenOffWithin(
+			final LocalDate periodStart,
+			final LocalDate periodEnd, 
+			final Set<LoanCharge> loanCharges, 
+			final MonetaryCurrency currency) {
+		
+		Money cumulative = Money.zero(currency);
+		
+		for (LoanCharge loanCharge : loanCharges) {
+			if (loanCharge.isDueForCollectionBetween(periodStart, periodEnd)  && loanCharge.isPenaltyCharge()) {
+				cumulative = cumulative.plus(loanCharge.getAmountWrittenOff(currency));
 			}
 		}
 		

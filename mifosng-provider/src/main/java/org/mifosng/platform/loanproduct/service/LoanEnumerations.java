@@ -200,6 +200,9 @@ public class LoanEnumerations {
 		case RECOVERY_REPAYMENT:
 			optionData = new EnumOptionData(LoanTransactionType.RECOVERY_REPAYMENT.getValue().longValue(), LoanTransactionType.RECOVERY_REPAYMENT.getCode(), "Repayment (after write-off)");
 			break;
+		case WAIVE_CHARGES:
+			optionData = new EnumOptionData(LoanTransactionType.WAIVE_CHARGES.getValue().longValue(), LoanTransactionType.WAIVE_CHARGES.getCode(), "Waive loan charges");
+			break;
 		}
 		return optionData;
 	}

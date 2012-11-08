@@ -13,7 +13,8 @@ public enum LoanTransactionType {
 	/**
 	 * This type of transactions is allowed on written-off loans where mfi still attempts to recover payments from applicant after writing-off.
 	 */
-	RECOVERY_REPAYMENT(8, "loanTransactionType.recoveryRepayment");
+	RECOVERY_REPAYMENT(8, "loanTransactionType.recoveryRepayment"),
+	WAIVE_CHARGES(9, "loanTransactionType.waiveCharges");
 
     private final Integer value;
     private final String code;
@@ -59,6 +60,12 @@ public enum LoanTransactionType {
 			break;
 		case 7:
 			loanTransactionType = LoanTransactionType.MARKED_FOR_RESCHEDULING;
+			break;
+		case 8:
+			loanTransactionType = LoanTransactionType.RECOVERY_REPAYMENT;
+			break;
+		case 9:
+			loanTransactionType = LoanTransactionType.WAIVE_CHARGES;
 			break;
 		default:
 			loanTransactionType = LoanTransactionType.INVALID;

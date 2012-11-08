@@ -518,6 +518,31 @@ public class LoansApiResource {
 
         return Response.ok().entity(identifier).build();
     }
+    
+    @POST
+    @Path("{loanId}/charges/{chargeId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String waiveLoanCharge(
+            @PathParam("loanId") final Long loanId,
+            @PathParam("chargeId") final Long loanChargeId,
+            @QueryParam("command") final String commandParam,
+            final String jsonRequestBody){
+
+//        LoanChargeCommand command = this.apiDataConversionService.convertJsonToLoanChargeCommand(loanChargeId, loanId, jsonRequestBody);
+        
+    	LoanChargeCommand command = LoanChargeCommand.forWaiver(loanChargeId, loanId);
+    	
+        String json = "";
+		if (is(commandParam, "waive")) {
+			EntityIdentifier identifier = this.loanWritePlatformService.waiveLoanCharge(command);
+			json = this.apiJsonSerializerService.serializeEntityIdentifier(identifier);
+		}  else {
+			throw new UnrecognizedQueryParamException("command", commandParam);
+		}
+
+        return json;
+    }
 
     @DELETE
     @Path("{loanId}/charges/{chargeId}")

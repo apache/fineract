@@ -65,12 +65,20 @@ public class LoanScheduleData {
 	@SuppressWarnings("unused")
 	private final BigDecimal cumulativeFeeChargesPaid;
 	@SuppressWarnings("unused")
+	private final BigDecimal cumulativeFeeChargesWaived;
+	@SuppressWarnings("unused")
+	private final BigDecimal cumulativeFeeChargesWrittenOff;
+	@SuppressWarnings("unused")
 	private final BigDecimal cumulativeFeeChargesOutstanding;
 	
 	@SuppressWarnings("unused")
 	private final BigDecimal cumulativePenaltyChargesToDate;
 	@SuppressWarnings("unused")
 	private final BigDecimal cumulativePenaltyChargesPaid;
+	@SuppressWarnings("unused")
+	private final BigDecimal cumulativePenaltyChargesWaived;
+	@SuppressWarnings("unused")
+	private final BigDecimal cumulativePenaltyChargesWrittenOff;
 	@SuppressWarnings("unused")
 	private final BigDecimal cumulativePenaltyChargesOutstanding;
 	
@@ -144,10 +152,14 @@ public class LoanScheduleData {
 		
 		this.cumulativeFeeChargesToDate = null;
 		this.cumulativeFeeChargesPaid = null;
+		this.cumulativeFeeChargesWaived = null;
+		this.cumulativeFeeChargesWrittenOff = null;
 		this.cumulativeFeeChargesOutstanding = null;
 		
 		this.cumulativePenaltyChargesToDate = null;
 		this.cumulativePenaltyChargesPaid = null;
+		this.cumulativePenaltyChargesWaived = null;
+		this.cumulativePenaltyChargesWrittenOff = null;
 		this.cumulativePenaltyChargesOutstanding = null;
 		
 		this.totalCostOfLoan = null;
@@ -192,10 +204,14 @@ public class LoanScheduleData {
 		
 		this.cumulativeFeeChargesToDate = cumulativeFeeChargesToDate;
 		this.cumulativeFeeChargesPaid = null;
+		this.cumulativeFeeChargesWaived = null;
+		this.cumulativeFeeChargesWrittenOff = null;
 		this.cumulativeFeeChargesOutstanding = null;
 		
 		this.cumulativePenaltyChargesToDate = null;
 		this.cumulativePenaltyChargesPaid = null;
+		this.cumulativePenaltyChargesWaived = null;
+		this.cumulativePenaltyChargesWrittenOff = null;
 		this.cumulativePenaltyChargesOutstanding = null;
 		
 		if (cumulativeFeeChargesToDate != null) {
@@ -231,9 +247,13 @@ public class LoanScheduleData {
 			final BigDecimal cumulativeInterestOutstanding,
 			final BigDecimal cumulativeFeeChargesToDate,
 			final BigDecimal cumulativeFeeChargesPaid,
+			final BigDecimal cumulativeFeeChargesWaived,
+			final BigDecimal cumulativeFeeChargesWrittenOff,
 			final BigDecimal cumulativeFeeChargesOutstanding,
 			final BigDecimal cumulativePenaltyChargesToDate,
 			final BigDecimal cumulativePenaltyChargesPaid,
+			final BigDecimal cumulativePenaltyChargesWaived,
+			final BigDecimal cumulativePenaltyChargesWrittenOff,
 			final BigDecimal cumulativePenaltyChargesOutstanding,
 			final BigDecimal totalCostOfLoan,
 			final BigDecimal totalExpectedRepayment,
@@ -258,9 +278,13 @@ public class LoanScheduleData {
 		this.cumulativeInterestOutstanding = cumulativeInterestOutstanding;
 		this.cumulativeFeeChargesToDate = cumulativeFeeChargesToDate;
 		this.cumulativeFeeChargesPaid = cumulativeFeeChargesPaid;
+		this.cumulativeFeeChargesWaived = cumulativeFeeChargesWaived;
+		this.cumulativeFeeChargesWrittenOff = cumulativeFeeChargesWrittenOff;
 		this.cumulativeFeeChargesOutstanding = cumulativeFeeChargesOutstanding;
 		this.cumulativePenaltyChargesToDate = cumulativePenaltyChargesToDate;
 		this.cumulativePenaltyChargesPaid = cumulativePenaltyChargesPaid;
+		this.cumulativePenaltyChargesWaived = cumulativePenaltyChargesWaived;
+		this.cumulativePenaltyChargesWrittenOff = cumulativePenaltyChargesWrittenOff;
 		this.cumulativePenaltyChargesOutstanding = cumulativePenaltyChargesOutstanding;
 		this.totalCostOfLoan = totalCostOfLoan;
 		this.totalExpectedRepayment = totalExpectedRepayment;

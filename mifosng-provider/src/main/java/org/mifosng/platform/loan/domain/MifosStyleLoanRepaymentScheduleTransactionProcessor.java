@@ -3,6 +3,7 @@ package org.mifosng.platform.loan.domain;
 import java.util.List;
 
 import org.joda.time.LocalDate;
+import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.currency.domain.Money;
 
 /**
@@ -69,15 +70,27 @@ public class MifosStyleLoanRepaymentScheduleTransactionProcessor extends
 			final LoanTransaction loanTransaction,
 			final Money transactionAmountUnprocessed) {
 		
+		final MonetaryCurrency currency = transactionAmountUnprocessed.getCurrency();
 		Money transactionAmountRemaining = transactionAmountUnprocessed;
 		Money principalPortion = Money.zero(transactionAmountRemaining.getCurrency());
 		Money interestPortion = Money.zero(transactionAmountRemaining.getCurrency());
 		Money feeChargesPortion = Money.zero(transactionAmountRemaining.getCurrency());
 		Money penaltyChargesPortion = Money.zero(transactionAmountRemaining.getCurrency());
 		
-		if (loanTransaction.isInterestWaiver()) {
+		if (loanTransaction.isChargesWaiver()) {
+//			penaltyChargesPortion = currentInstallment.waivePenaltyChargesComponent(loanTransaction.getPenaltyChargesPortion(currency));
+//			transactionAmountRemaining = transactionAmountRemaining.minus(penaltyChargesPortion);
+//			
+//			feeChargesPortion = currentInstallment.waiveFeeChargesComponent(loanTransaction.getFeeChargesPortion(currency));
+//			transactionAmountRemaining = transactionAmountRemaining.minus(feeChargesPortion);
+//			
+			// zero this type of transaction and ignore it for now.
+			transactionAmountRemaining = Money.zero(currency);
+		} else if (loanTransaction.isInterestWaiver()) {
 			interestPortion = currentInstallment.waiveInterestComponent(transactionAmountRemaining);
 			transactionAmountRemaining = transactionAmountRemaining.minus(interestPortion);
+			
+			loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
 		} else {
 			penaltyChargesPortion = currentInstallment.payPenaltyChargesComponent(transactionAmountRemaining);
 			transactionAmountRemaining = transactionAmountRemaining.minus(penaltyChargesPortion);
@@ -90,9 +103,10 @@ public class MifosStyleLoanRepaymentScheduleTransactionProcessor extends
 	
 			principalPortion = currentInstallment.payPrincipalComponent(transactionAmountRemaining);
 			transactionAmountRemaining = transactionAmountRemaining.minus(principalPortion);
+			
+			loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
 		}
 		
-		loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
 		return transactionAmountRemaining;
 	}
 
