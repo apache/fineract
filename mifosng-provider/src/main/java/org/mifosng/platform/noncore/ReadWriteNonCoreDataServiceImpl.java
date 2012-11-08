@@ -114,29 +114,29 @@ public class ReadWriteNonCoreDataServiceImpl implements
 
 		genericDataService.updateSQL(sql, "SQL: " + sql);
 
-		sql = "insert into m_permission (group_enum, code, default_description, default_name) values "
-				+ "(3, "
+		sql = "insert into m_permission (grouping, code, default_description, default_name) values "
+				+ "('datatable', "
 				+ createPermission
 				+ ", "
 				+ createPermission
 				+ ", "
 				+ createPermission
 				+ "),"
-				+ "(3, "
+				+ "('datatable', "
 				+ readPermission
 				+ ", "
 				+ readPermission
 				+ ", "
 				+ readPermission
 				+ "),"
-				+ "(3, "
+				+ "('datatable', "
 				+ updatePermission
 				+ ", "
 				+ updatePermission
 				+ ", "
 				+ updatePermission
 				+ "),"
-				+ "(3, "
+				+ "('datatable', "
 				+ deletePermission
 				+ ", "
 				+ deletePermission + ", " + deletePermission + ")";
