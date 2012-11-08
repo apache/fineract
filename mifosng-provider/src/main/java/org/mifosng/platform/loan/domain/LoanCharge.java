@@ -411,6 +411,10 @@ public class LoanCharge extends AbstractPersistable<Long> {
 		final Money amountWaivedOrWrittenOff = getAmountWaived(currency).plus(getAmountWrittenOff(currency));
 		return Money.of(currency, this.amountPaid).plus(amountWaivedOrWrittenOff).isGreaterThanZero();
 	}
+	
+	public boolean isWaivedOrPartiallyWaived(final MonetaryCurrency currency) {
+		return getAmountWaived(currency).isGreaterThanZero();
+	}
 
 	private Money getAmount(final MonetaryCurrency currency) {
 		return Money.of(currency, this.amount);

@@ -299,6 +299,13 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 			throw new LoanChargeCannotBeAddedException("loanCharge", "loan.is.closed", defaultUserMessage, getId(), loanCharge.name());
 		}
 	}
+	
+	private void validateLoanChargeIsNotWaived(final LoanCharge loanCharge) {
+		if (loanCharge.isWaivedOrPartiallyWaived(loanCurrency())) {
+			final String defaultUserMessage = "This loan charge cannot be removed as the charge as already been waived.";
+			throw new LoanChargeCannotBeAddedException("loanCharge", "loanCharge.is.waived", defaultUserMessage, getId(), loanCharge.name());
+		}
+	}
 
 	private void validateChargeHasValidSpecifiedDateIfApplicable(final LoanCharge loanCharge, final LocalDate disbursementDate, final LocalDate lastRepaymentPeriodDueDate) {
 		if (loanCharge.isSpecifiedDueDate() && !loanCharge.isDueForCollectionBetween(disbursementDate, lastRepaymentPeriodDueDate)) {
@@ -315,12 +322,26 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		
 		validateLoanIsNotClosed(loanCharge);
 		
+		// NOTE: to remove this constraint requires that loan transactions 
+		//       that represent the waive of charges also be removed (or reversed)
+		//       if you want ability to remove loan charges that are waived.
+		validateLoanChargeIsNotWaived(loanCharge);
+		
 		boolean removed = this.charges.remove(loanCharge);
 		if (removed) {
 			updateTotalChargesDueAtDisbursement();
 		}
 		
-		// if removing disbursement charge - accomodate this on the transaction that tracked its payment
+		removeOrModifyTransactionAssociatedWithLoanChargeIfDueAtDisbursement(loanCharge);
+		
+		final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessor.determineProcessor(this.transactionProcessingStrategy);
+		if (!loanCharge.isDueAtDisbursement() && loanCharge.isPaidOrPartiallyPaid(loanCurrency())) {
+			final List<LoanTransaction> allNonContraTransactionsPostDisbursement = retreiveListOfTransactionsPostDisbursement();
+			loanRepaymentScheduleTransactionProcessor.handleTransaction(getDisbursementDate(), allNonContraTransactionsPostDisbursement, getCurrency(), this.repaymentScheduleInstallments, this.charges);
+		}
+	}
+
+	private void removeOrModifyTransactionAssociatedWithLoanChargeIfDueAtDisbursement(final LoanCharge loanCharge) {
 		if (loanCharge.isDueAtDisbursement()) {
 			LoanTransaction transactionToRemove = null;
 			for (LoanTransaction transaction : this.loanTransactions) {
@@ -344,12 +365,6 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 			if (transactionToRemove != null) {
 				this.loanTransactions.remove(transactionToRemove);
 			}
-		}
-		
-		final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessor.determineProcessor(this.transactionProcessingStrategy);
-		if (!loanCharge.isDueAtDisbursement() && loanCharge.isPaidOrPartiallyPaid(loanCurrency())) {
-			final List<LoanTransaction> allNonContraTransactionsPostDisbursement = retreiveListOfTransactionsPostDisbursement();
-			loanRepaymentScheduleTransactionProcessor.handleTransaction(getDisbursementDate(), allNonContraTransactionsPostDisbursement, getCurrency(), this.repaymentScheduleInstallments, this.charges);
 		}
 	}
 	

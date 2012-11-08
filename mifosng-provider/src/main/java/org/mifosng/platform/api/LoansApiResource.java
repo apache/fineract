@@ -507,16 +507,16 @@ public class LoansApiResource {
     @Path("{loanId}/charges/{chargeId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response updateLoanCharge(
+    public String updateLoanCharge(
             @PathParam("loanId") final Long loanId,
             @PathParam("chargeId") final Long loanChargeId,
             final String jsonRequestBody){
 
-        LoanChargeCommand command = this.apiDataConversionService.convertJsonToLoanChargeCommand(loanChargeId, loanId, jsonRequestBody);
+        final LoanChargeCommand command = this.apiDataConversionService.convertJsonToLoanChargeCommand(loanChargeId, loanId, jsonRequestBody);
 
-        EntityIdentifier identifier = this.loanWritePlatformService.updateLoanCharge(command);
+        final EntityIdentifier identifier = this.loanWritePlatformService.updateLoanCharge(command);
 
-        return Response.ok().entity(identifier).build();
+        return this.apiJsonSerializerService.serializeEntityIdentifier(identifier);
     }
     
     @POST
@@ -526,16 +526,13 @@ public class LoansApiResource {
     public String waiveLoanCharge(
             @PathParam("loanId") final Long loanId,
             @PathParam("chargeId") final Long loanChargeId,
-            @QueryParam("command") final String commandParam,
-            final String jsonRequestBody){
+            @QueryParam("command") final String commandParam){
 
-//        LoanChargeCommand command = this.apiDataConversionService.convertJsonToLoanChargeCommand(loanChargeId, loanId, jsonRequestBody);
-        
-    	LoanChargeCommand command = LoanChargeCommand.forWaiver(loanChargeId, loanId);
+    	final LoanChargeCommand command = LoanChargeCommand.forWaiver(loanChargeId, loanId);
     	
         String json = "";
 		if (is(commandParam, "waive")) {
-			EntityIdentifier identifier = this.loanWritePlatformService.waiveLoanCharge(command);
+			final EntityIdentifier identifier = this.loanWritePlatformService.waiveLoanCharge(command);
 			json = this.apiJsonSerializerService.serializeEntityIdentifier(identifier);
 		}  else {
 			throw new UnrecognizedQueryParamException("command", commandParam);
@@ -548,13 +545,11 @@ public class LoansApiResource {
     @Path("{loanId}/charges/{chargeId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response deleteLoanCharge(
+    public String deleteLoanCharge(
             @PathParam("loanId") final Long loanId,
             @PathParam("chargeId") final Long loanChargeId){
 
-        EntityIdentifier identifier = this.loanWritePlatformService.deleteLoanCharge(loanId, loanChargeId);
-
-        return Response.ok().entity(identifier).build();
+        final EntityIdentifier identifier = this.loanWritePlatformService.deleteLoanCharge(loanId, loanChargeId);
+        return this.apiJsonSerializerService.serializeEntityIdentifier(identifier);
     }
-
 }
