@@ -662,7 +662,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		final LoanCharge loanCharge = retrieveLoanChargeBy(loanId, loanChargeId);
         
         loan.updateLoanCharge(loanCharge, command);
-        this.loanRepository.saveAndFlush(loan);
+        
+        this.loanRepository.save(loan);
 
         return new EntityIdentifier(loanCharge.getId());
     }

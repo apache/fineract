@@ -125,11 +125,27 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 		Money amountRemaining = feeCharges;
 		for (LoanCharge loanCharge : charges) {
 			if (!loanCharge.isDueAtDisbursement()) {
-				if (loanCharge.isPenaltyCharge() && loanCharge.isNotFullyPaid() && amountRemaining.isGreaterThanZero()) {
-					amountRemaining = loanCharge.updatePaidAmountBy(amountRemaining);
+				
+				if (loanCharge.isPenaltyCharge() && amountRemaining.isGreaterThanZero()) {
+					final LoanCharge unpaidCharge = findEarliestUnpaidChargeFromUnOrderedSet(charges);
+					amountRemaining = unpaidCharge.updatePaidAmountBy(amountRemaining);
 				}
 			}
 		}
+	}
+
+	private LoanCharge findEarliestUnpaidChargeFromUnOrderedSet(Set<LoanCharge> charges) {
+		LoanCharge earliestUnpaidCharge = null;
+
+		for (LoanCharge loanCharge : charges) {
+			if (loanCharge.isNotFullyPaid() && !loanCharge.isDueAtDisbursement()) {
+				if (earliestUnpaidCharge == null || loanCharge.getDueForCollectionAsOfLocalDate().isBefore(earliestUnpaidCharge.getDueForCollectionAsOfLocalDate())) {
+					earliestUnpaidCharge = loanCharge;
+				}
+			}
+		}
+		
+		return earliestUnpaidCharge;
 	}
 
 	@Override

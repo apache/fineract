@@ -493,7 +493,6 @@ public class LoansApiResource {
     public String retrieveNewLoanChargeDetails(@Context final UriInfo uriInfo) {
         
     	final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-
     	final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 
         final boolean feeChargesOnly = false;
@@ -503,6 +502,23 @@ public class LoansApiResource {
         return this.apiJsonSerializerService.serializeLoanChargeDataToJson(prettyPrint, responseParameters, loanChargeTemplate);
     }
 
+    @GET
+    @Path("{loanId}/charges/{chargeId}")
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
+    public String retrieveLoanCharge(
+            @PathParam("loanId") final Long loanId,
+            @PathParam("chargeId") final Long loanChargeId,
+            @Context final UriInfo uriInfo){
+
+    	final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+    	final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+    	
+        final LoanChargeData loanCharge = this.chargeReadPlatformService.retrieveLoanChargeDetails(loanChargeId, loanId);
+        
+        return this.apiJsonSerializerService.serializeLoanChargeDataToJson(prettyPrint, responseParameters, loanCharge);
+    }
+    
     @PUT
     @Path("{loanId}/charges/{chargeId}")
     @Consumes({ MediaType.APPLICATION_JSON })

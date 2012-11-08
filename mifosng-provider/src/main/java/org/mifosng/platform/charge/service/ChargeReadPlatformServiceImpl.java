@@ -101,11 +101,23 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
 
         final LoanChargeMapper rm = new LoanChargeMapper();
 
+        // TODO - KW - check to see if its important that 'c.is_deleted=0' is required here?
         final String sql = "select " + rm.loanChargeSchema() + " where c.is_deleted=0 and lc.loan_id=? " +
         				   " order by lc.charge_time_enum ASC, lc.due_for_collection_as_of_date ASC, lc.is_penalty ASC";
 
         return this.jdbcTemplate.query(sql, rm, new Object[] {loanId});
     }
+    
+	@Override
+	public LoanChargeData retrieveLoanChargeDetails(final Long id, final Long loanId) {
+		 this.context.authenticatedUser();
+
+        final LoanChargeMapper rm = new LoanChargeMapper();
+
+        final String sql = "select " + rm.loanChargeSchema() + " where lc.id=? and lc.loan_id=?";
+
+        return this.jdbcTemplate.queryForObject(sql, rm, new Object[] {id, loanId});
+	}
 
     @Override
     public Collection<ChargeData> retrieveLoanApplicableCharges(final boolean feeChargesOnly) {

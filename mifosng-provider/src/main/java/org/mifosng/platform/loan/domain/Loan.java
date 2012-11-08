@@ -370,9 +370,21 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	
 	public void updateLoanCharge(final LoanCharge loanCharge, final LoanChargeCommand command) {
 		
+		validateLoanIsNotClosed(loanCharge);
+		
 		if (this.charges.contains(loanCharge)) {
 			loanCharge.update(command, getPrincpal().getAmount());
 			updateTotalChargesDueAtDisbursement();
+		}
+		
+		final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessor.determineProcessor(this.transactionProcessingStrategy);
+		if (!loanCharge.isDueAtDisbursement()) {
+			final List<LoanTransaction> allNonContraTransactionsPostDisbursement = retreiveListOfTransactionsPostDisbursement();
+			loanRepaymentScheduleTransactionProcessor.handleTransaction(getDisbursementDate(), allNonContraTransactionsPostDisbursement, getCurrency(), this.repaymentScheduleInstallments, this.charges);
+		} else {
+			// reprocess loan schedule based on charge been waived.
+			LoanScheduleWrapper wrapper = new LoanScheduleWrapper();
+			wrapper.reprocess(getCurrency(), getDisbursementDate(), this.repaymentScheduleInstallments, this.charges);
 		}
 	}
 	
@@ -398,15 +410,15 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		
 		final LoanTransaction waiveLoanChargeTransaction = LoanTransaction.waiveLoanCharge(this, amountWaived, transactionDate,feeChargesWaived, penaltyChargesWaived);
 		
-		// reprocess loan schedule based on charge been added.
-		LoanScheduleWrapper wrapper = new LoanScheduleWrapper();
-		wrapper.reprocess(getCurrency(), getDisbursementDate(), this.repaymentScheduleInstallments, this.charges);
-
 		// Waive of charges whose due date falls after latest 'repayment' transaction dont require entire loan schedule to be reprocessed.
 		final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessor.determineProcessor(this.transactionProcessingStrategy);
 		if (!loanCharge.isDueAtDisbursement() && loanCharge.isPaidOrPartiallyPaid(loanCurrency())) {
 			final List<LoanTransaction> allNonContraTransactionsPostDisbursement = retreiveListOfTransactionsPostDisbursement();
 			loanRepaymentScheduleTransactionProcessor.handleTransaction(getDisbursementDate(), allNonContraTransactionsPostDisbursement, getCurrency(), this.repaymentScheduleInstallments, this.charges);
+		} else {
+			// reprocess loan schedule based on charge been waived.
+			LoanScheduleWrapper wrapper = new LoanScheduleWrapper();
+			wrapper.reprocess(getCurrency(), getDisbursementDate(), this.repaymentScheduleInstallments, this.charges);
 		}
 		
 		doPostLoanTransactionChecks(waiveLoanChargeTransaction.getTransactionDate(), loanLifecycleStateMachine);

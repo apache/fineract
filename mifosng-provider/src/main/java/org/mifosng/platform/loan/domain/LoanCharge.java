@@ -256,6 +256,7 @@ public class LoanCharge extends AbstractPersistable<Long> {
     public Money waive(final MonetaryCurrency currency) {
     	this.amountWaived = this.amount;
 		this.amountOutstanding = calculateAmountOutstanding(currency);
+		this.paid = determineIfFullyPaid();
 		return getAmountWaived(currency);
 	}
 
@@ -349,7 +350,19 @@ public class LoanCharge extends AbstractPersistable<Long> {
     		amountPaidLocal = this.amountPaid;
     	}
     	
-		return this.amount.subtract(amountPaidLocal);
+    	BigDecimal amountWaivedLocal = BigDecimal.ZERO;
+    	if (this.amountWaived != null) {
+    		amountWaivedLocal = this.amountWaived;
+    	}
+    	
+    	BigDecimal amountWrittenOffLocal = BigDecimal.ZERO;
+    	if (this.amountWrittenOff != null) {
+    		amountWrittenOffLocal = this.amountWrittenOff;
+    	}
+    	
+    	final BigDecimal totalAccountedFor = amountPaidLocal.add(amountWaivedLocal).add(amountWrittenOffLocal);
+    	
+		return this.amount.subtract(totalAccountedFor);
 	}
 
 	private BigDecimal percentageOf(final BigDecimal value, final BigDecimal percentage) {
@@ -451,6 +464,8 @@ public class LoanCharge extends AbstractPersistable<Long> {
 			Money amountExpected = Money.of(incrementBy.getCurrency(), this.amount);
 			this.amountOutstanding = amountExpected.minus(amountPaidToDate).getAmount();
 		}
+		
+		this.paid = determineIfFullyPaid();
 		
 		return incrementBy.minus(amountPaidOnThisCharge);
 	}
