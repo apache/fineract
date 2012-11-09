@@ -2,8 +2,6 @@ package org.mifosng.platform.user.domain;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
 import org.mifosng.platform.api.data.PermissionData;
@@ -13,10 +11,12 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 @Table(name = "m_permission")
 public class Permission extends AbstractPersistable<Long> {
 
-    @Column(name = "grouping", nullable = false, length=45)
+    @SuppressWarnings("unused")
+	@Column(name = "grouping", nullable = false, length=45)
     private final String          grouping;
     
-    @Column(name = "order_in_grouping", nullable = false)
+    @SuppressWarnings("unused")
+	@Column(name = "order_in_grouping", nullable = false)
     private final Integer          orderInGrouping;
     
     @Column(name = "code", nullable = false, length=100)

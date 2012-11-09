@@ -536,7 +536,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		boolean dateHasChanged = false;
 		
 		if (originalLocalDate != null) {
-			dateHasChanged = originalLocalDate.equals(providedLocalDate);
+			dateHasChanged = !originalLocalDate.equals(providedLocalDate);
 		} else {
 			dateHasChanged = (providedLocalDate != null);
 		}
@@ -602,8 +602,11 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 					submittedOn, getExpectedDisbursedOnLocalDate());
 		}
 		
-		for (LoanCharge loanCharge : this.charges) {
-			validateChargeHasValidSpecifiedDateIfApplicable(loanCharge, getDisbursementDate(), getLastRepaymentPeriodDueDate());
+		// charges are optional
+		if (this.charges != null) {
+			for (LoanCharge loanCharge : this.charges) {
+				validateChargeHasValidSpecifiedDateIfApplicable(loanCharge, getDisbursementDate(), getLastRepaymentPeriodDueDate());
+			}
 		}
 	}
 

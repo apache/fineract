@@ -68,11 +68,14 @@ public class LoanChargeAssembler {
 		
 		if (charges != null) {
 			loanCharges = assembleFrom(charges, loanPrincipal);
-		} else {
-			for (Charge productCharge : chargesInheritedFromProduct) {
-				loanCharges.add(LoanCharge.createNew(productCharge));
-			}
 		}
+		// TODO - kw - dont inherit charges from product by default, user may remove charges (that were default) during creation - expect 
+		//             charges to be passed along in request at time of creation
+//		else {
+//			for (Charge productCharge : chargesInheritedFromProduct) {
+//				loanCharges.add(LoanCharge.createNew(productCharge));
+//			}
+//		}
 		
 		return loanCharges;
 	}

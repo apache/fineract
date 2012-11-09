@@ -354,7 +354,7 @@ public class ClientsApiResource {
 				fileDetails.getFileName(),
 				ApplicationConstants.MAX_FILE_UPLOAD_SIZE_IN_MB);
 		
-		System.out.println( bodyPart.getMediaType().toString());
+		logger.debug(bodyPart.getMediaType().toString());
 
 		EntityIdentifier entityIdentifier = this.clientWritePlatformService
 				.saveOrUpdateClientImage(clientId, fileDetails.getFileName(),
