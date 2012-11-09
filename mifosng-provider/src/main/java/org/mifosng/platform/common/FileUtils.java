@@ -11,11 +11,14 @@ import java.util.Random;
 
 import org.mifosng.platform.api.data.ApiParameterError;
 import org.mifosng.platform.exceptions.DocumentManagementException;
+import org.mifosng.platform.exceptions.ImageDataURLNotValidException;
 import org.mifosng.platform.exceptions.ImageUploadException;
 import org.mifosng.platform.exceptions.PlatformApiDataValidationException;
 import org.mifosng.platform.infrastructure.ThreadLocalContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.lowagie.text.pdf.codec.Base64;
 
 public class FileUtils {
 
@@ -107,6 +110,25 @@ public class FileUtils {
 		out.close();
 		return fileLocation;
 	}
+	
+	
+	/**
+	 * @param base64EncodedImage
+	 * @param uploadedFileLocation
+	 * @param fileName
+	 * @return
+	 * @throws IOException
+	 */
+	public static String saveToFileSystem(Base64EncodedImage base64EncodedImage,
+			String uploadedFileLocation, String fileName) throws IOException {
+		String fileLocation = uploadedFileLocation + File.separator + fileName + base64EncodedImage.getFileExtension();
+		OutputStream out = new FileOutputStream(new File(fileLocation));
+		byte[] imgBytes = Base64.decode(base64EncodedImage.getBase64EncodedString());
+		out.write(imgBytes);
+		out.flush();
+		out.close();
+		return fileLocation;
+	}
 
 	/**
 	 * @param fileSize
@@ -137,8 +159,35 @@ public class FileUtils {
 			throw new ImageUploadException();
 		}
 	}
-	
-	
+
+	/**
+	 * Extracts Image from a Data URL
+	 * 
+	 * @param mimeType
+	 */
+	public static Base64EncodedImage extractImageFromDataURL(String dataURL) {
+		String fileExtension = "";
+		String base64EncodedString = null;
+		String gifDataURLSnippet = "data:image/gif;base64,";
+		String pngDataURLSnippet = "data:image/png;base64,";
+		String jpegDataURLSnippet = "data:image/jpeg;base64,";
+
+		if (dataURL.contains(gifDataURLSnippet)) {
+			base64EncodedString = dataURL.replaceAll(gifDataURLSnippet, "");
+			fileExtension = ".gif";
+		} else if (dataURL.contains(pngDataURLSnippet)) {
+			base64EncodedString = dataURL.replaceAll(pngDataURLSnippet, "");
+			fileExtension = ".png";
+		} else if (dataURL.contains(jpegDataURLSnippet)) {
+			base64EncodedString = dataURL.replaceAll(jpegDataURLSnippet, "");
+			fileExtension = ".jpeg";
+		} else {
+			throw new ImageDataURLNotValidException();
+		}
+		
+		return new Base64EncodedImage(base64EncodedString, fileExtension);
+	}
+
 	public static void validateClientImageNotEmpty(String imageFileName) {
 		List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 		if (imageFileName == null) {

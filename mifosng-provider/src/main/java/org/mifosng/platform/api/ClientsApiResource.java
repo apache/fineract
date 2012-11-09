@@ -35,6 +35,7 @@ import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService
 import org.mifosng.platform.client.service.ClientReadPlatformService;
 import org.mifosng.platform.client.service.ClientWritePlatformService;
 import org.mifosng.platform.common.ApplicationConstants;
+import org.mifosng.platform.common.Base64EncodedImage;
 import org.mifosng.platform.common.FileUtils;
 import org.mifosng.platform.exceptions.ClientNotFoundException;
 import org.mifosng.platform.exceptions.ImageNotFoundException;
@@ -325,6 +326,14 @@ public class ClientsApiResource {
 		return Response.ok().entity(identifier).build();
 	}
 	
+	/** Upload images through multi-part form upload
+	 * @param clientId
+	 * @param fileSize
+	 * @param inputStream
+	 * @param fileDetails
+	 * @param bodyPart
+	 * @return
+	 */
 	@POST
 	@Path("{clientId}/image")
 	@Consumes({ MediaType.MULTIPART_FORM_DATA })
@@ -355,8 +364,33 @@ public class ClientsApiResource {
 		return Response.ok().entity(entityIdentifier).build();
 
 	}
+	
 
-	/**Returns a base 64 encoded client image
+	/** Upload image as a Data URL (essentially a base64 encoded stream)
+	 * @param clientId
+	 * @param jsonRequestBody
+	 * @return
+	 */
+	@POST
+	@Path("{clientId}/image")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public Response addNewClientImage(
+			@PathParam("clientId") final Long clientId,
+			final String jsonRequestBody) {
+
+		Base64EncodedImage base64EncodedImage = FileUtils
+				.extractImageFromDataURL(jsonRequestBody);
+
+		EntityIdentifier entityIdentifier = this.clientWritePlatformService
+				.saveOrUpdateClientImage(clientId, base64EncodedImage);
+
+		// return identifier of the client whose image was updated
+		return Response.ok().entity(entityIdentifier).build();
+	}
+
+	/**
+	 * Returns a base 64 encoded client image
 	 * @param clientId
 	 * @return
 	 */
@@ -412,5 +446,26 @@ public class ClientsApiResource {
 	public Response deleteClientImage(@PathParam("clientId") final Long clientId) {
 		this.clientWritePlatformService.deleteClientImage(clientId);
 		return Response.ok(new EntityIdentifier(clientId)).build();
+	}
+	
+	
+	/**
+	 *  This method is added only for consistency with other URL patterns
+	 *  and for maintaining consistency of usage of the HTTP "verb"
+	 *  at the client side
+	 *  
+	 * Upload image as a Data URL (essentially a base64 encoded stream)
+	 * @param clientId
+	 * @param jsonRequestBody
+	 * @return
+	 */
+	@PUT
+	@Path("{clientId}/image")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public Response updateClientImage(
+			@PathParam("clientId") final Long clientId,
+			final String jsonRequestBody) {
+		return addNewClientImage(clientId, jsonRequestBody);
 	}
 }

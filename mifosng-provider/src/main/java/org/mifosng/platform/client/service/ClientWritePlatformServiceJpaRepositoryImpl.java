@@ -16,6 +16,7 @@ import org.mifosng.platform.client.domain.ClientRepository;
 import org.mifosng.platform.client.domain.Note;
 import org.mifosng.platform.client.domain.NoteRepository;
 import org.mifosng.platform.common.ApplicationConstants;
+import org.mifosng.platform.common.Base64EncodedImage;
 import org.mifosng.platform.common.FileUtils;
 import org.mifosng.platform.exceptions.ClientIdentifierNotFoundException;
 import org.mifosng.platform.exceptions.ClientNotFoundException;
@@ -333,34 +334,14 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 			String imageName, InputStream inputStream) {
 		try {
 			final Client client = this.clientRepository.findOne(clientId);
-			if (client == null || client.isDeleted()) {
-				throw new ClientNotFoundException(clientId);
-			}
-
-			String imageUploadLocation = FileUtils
-					.generateImageParentDirectory(
-							ApplicationConstants.IMAGE_MANAGEMENT_ENTITY.CLIENTS,
-							clientId);
-			// delete previous image from the file system
-			if (StringUtils.isNotEmpty(client.getImageKey())) {
-				FileUtils.deleteImage(
-						ApplicationConstants.IMAGE_MANAGEMENT_ENTITY.CLIENTS,
-						clientId, client.getImageKey());
-			}
-
-			/** Recursively create the directory if it does not exist **/
-			if (!new File(imageUploadLocation).isDirectory()) {
-				new File(imageUploadLocation).mkdirs();
-			}
+			String imageUploadLocation = setupForClientImageUpdate(clientId,
+					client);
 
 			String imageLocation = FileUtils.saveToFileSystem(inputStream,
 					imageUploadLocation, imageName);
 
 			
-			client.setImageKey(imageLocation);
-			this.clientRepository.save(client);
-
-			return new EntityIdentifier(clientId);
+			return updateClientImage(clientId, client, imageLocation);
 		} catch (IOException ioe) {
 			logger.error(ioe.getMessage(), ioe);
 			throw new DocumentManagementException(imageName);
@@ -380,8 +361,66 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 					ApplicationConstants.IMAGE_MANAGEMENT_ENTITY.CLIENTS,
 					clientId, client.getImageKey());
 		}
-		client.setImageKey(null);
+		return updateClientImage(clientId, client, null);
+	}
+
+	@Override
+	public EntityIdentifier saveOrUpdateClientImage(Long clientId,
+			Base64EncodedImage encodedImage) {
+		try {
+			final Client client = this.clientRepository.findOne(clientId);
+			String imageUploadLocation = setupForClientImageUpdate(clientId,
+					client);
+
+			String imageLocation = FileUtils.saveToFileSystem(encodedImage, imageUploadLocation, "image");
+			
+			return updateClientImage(clientId, client, imageLocation);
+		} catch (IOException ioe) {
+			logger.error(ioe.getMessage(), ioe);
+			throw new DocumentManagementException("image");
+		}
+	}
+
+	/**
+	 * @param clientId
+	 * @param client
+	 * @return
+	 */
+	private String setupForClientImageUpdate(Long clientId, final Client client) {
+		if (client == null || client.isDeleted()) {
+			throw new ClientNotFoundException(clientId);
+		}
+
+		String imageUploadLocation = FileUtils
+				.generateImageParentDirectory(
+						ApplicationConstants.IMAGE_MANAGEMENT_ENTITY.CLIENTS,
+						clientId);
+		// delete previous image from the file system
+		if (StringUtils.isNotEmpty(client.getImageKey())) {
+			FileUtils.deleteImage(
+					ApplicationConstants.IMAGE_MANAGEMENT_ENTITY.CLIENTS,
+					clientId, client.getImageKey());
+		}
+
+		/** Recursively create the directory if it does not exist **/
+		if (!new File(imageUploadLocation).isDirectory()) {
+			new File(imageUploadLocation).mkdirs();
+		}
+		return imageUploadLocation;
+	}
+	
+	
+	/**
+	 * @param clientId
+	 * @param client
+	 * @param imageLocation
+	 * @return
+	 */
+	private EntityIdentifier updateClientImage(Long clientId,
+			final Client client, String imageLocation) {
+		client.setImageKey(imageLocation);
 		this.clientRepository.save(client);
+
 		return new EntityIdentifier(clientId);
 	}
 	

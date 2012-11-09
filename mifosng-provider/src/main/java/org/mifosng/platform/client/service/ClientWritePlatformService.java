@@ -6,6 +6,7 @@ import org.mifosng.platform.api.commands.ClientCommand;
 import org.mifosng.platform.api.commands.ClientIdentifierCommand;
 import org.mifosng.platform.api.commands.NoteCommand;
 import org.mifosng.platform.api.data.EntityIdentifier;
+import org.mifosng.platform.common.Base64EncodedImage;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface ClientWritePlatformService {
@@ -18,6 +19,9 @@ public interface ClientWritePlatformService {
 	
 	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE')")
 	EntityIdentifier saveOrUpdateClientImage(Long clientId, String imageName, InputStream inputStream);
+	
+	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE')")
+	EntityIdentifier saveOrUpdateClientImage(Long clientId, Base64EncodedImage encodedImage);
 	
 	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE')")
 	EntityIdentifier deleteClientImage(Long clientId);
