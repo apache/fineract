@@ -13,6 +13,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -144,4 +145,35 @@ public class RolesApiResource {
 		
 		return Response.ok().entity(new EntityIdentifier(roleId)).build();
 	}
+	
+/*
+	@GET
+	@Path("{roleId}/permissions")
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
+	public String retrieveRolePermissions(@PathParam("roleId") final Long roleId, @Context final UriInfo uriInfo) {
+		
+		Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "name", "description", jpw));
+		
+		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+		if (responseParameters.isEmpty()) {
+			responseParameters.addAll(typicalResponseParameters);
+		}
+		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+		boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
+
+		RoleData role = this.roleReadPlatformService.retrieveRole(roleId);
+
+		if (template) {
+			Collection<PermissionData> availablePermissions = this.permissionReadPlatformService.retrieveAllPermissions();
+			availablePermissions.removeAll(role.getSelectedPermissions());
+			
+			role = new RoleData(role, availablePermissions);
+			
+			responseParameters.add("availablePermissions");
+			responseParameters.add("selectedPermissions");
+		}
+		return this.apiJsonSerializerService.serializeRoleDataToJson(prettyPrint, responseParameters, role);
+	}
+	*/
 }
