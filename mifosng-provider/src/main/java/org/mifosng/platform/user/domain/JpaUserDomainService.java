@@ -1,26 +1,15 @@
 package org.mifosng.platform.user.domain;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.mifosng.platform.infrastructure.EmailDetail;
 import org.mifosng.platform.infrastructure.PlatformEmailService;
 import org.mifosng.platform.infrastructure.PlatformPasswordEncoder;
 import org.mifosng.platform.infrastructure.RandomPasswordGenerator;
-import org.mifosng.platform.organisation.domain.Office;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class JpaUserDomainService implements UserDomainService {
-
-    @Autowired
-    private UserPriviledgeDomainService userPriviledgeDomainService;
-
-    @Autowired
-    private RoleRepository roleRepository;
 
     @Autowired
     private AppUserRepository userRepository;
@@ -30,23 +19,6 @@ public class JpaUserDomainService implements UserDomainService {
 
     @Autowired
     private PlatformEmailService emailService;
-
-	@Transactional
-    @Override
-    public void createDefaultAdminUser(final Office office) {
-
-        this.userPriviledgeDomainService.createAllOrganisationRolesAndPermissions();
-
-        List<Role> organisationalRoles = this.roleRepository.findAll();
-        Set<Role> allRoles = new HashSet<Role>(organisationalRoles);
-
-        String username = "admin";
-        String password = "";
-
-		AppUser defaultAdministrator = AppUser.createNew(office, allRoles, username, "email?", "Organisation", "Administrator", password);
-
-        this.create(defaultAdministrator);
-    }
 
     @Transactional
     @Override

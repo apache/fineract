@@ -28,20 +28,12 @@ public class Permission extends AbstractPersistable<Long> {
 	@Column(name = "default_description", nullable = false, length=500)
     private final String          defaultDescription;
 
-    public Permission() {
+    protected Permission() {
         this.grouping = null;
         this.orderInGrouping = null;
         this.code = null;
         this.defaultDescription = null;
         this.defaultName = null;
-    }
-//TODO - This constructor probably not used in app (JPW)
-    public Permission(final String code, final String defaultDescription, final String defaultName) {
-        this.grouping = "";
-        this.orderInGrouping = 0;
-        this.code = code;
-        this.defaultDescription = defaultDescription;
-        this.defaultName = defaultName;
     }
 
 	public boolean hasCode(String checkCode) {
