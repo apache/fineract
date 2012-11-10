@@ -231,7 +231,6 @@ public class SavingAccountCommand {
     public boolean isPartialDepositAllowedChanged() {
         return this.modifiedParameters.contains("isPartialDepositAllowed");
     }
-
     public boolean isPayEveryChanged() {
         return this.modifiedParameters.contains("payEvery");
     }

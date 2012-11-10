@@ -27,6 +27,11 @@ public class DepositAccountTransactionEnumerations {
                 optionData = new EnumOptionData(DepositAccountTransactionType.REVERSAL.getValue().longValue(),
                         DepositAccountTransactionType.REVERSAL.getCode(), "Revarsal");
             break;
+            
+            case INTEREST_POSTING:
+    			optionData=new EnumOptionData(DepositAccountTransactionType.INTEREST_POSTING.getValue().longValue(), DepositAccountTransactionType.INTEREST_POSTING.getCode(), "Interest posting");
+    			break;
+    			
             default:
                 optionData = new EnumOptionData(DepositAccountTransactionType.INVALID.getValue().longValue(),
                         DepositAccountTransactionType.INVALID.getCode(), "Invalid Transaction");

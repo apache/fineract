@@ -313,8 +313,7 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long> {
         this.interestAccrued = futureValueOnMaturity.minus(getDeposit()).getAmount();
         this.total = futureValueOnMaturity.getAmount();
 
-        DepositAccountTransaction depositaccountTransaction = DepositAccountTransaction.deposit(getDeposit(), getActualCommencementDate(),
-                getAccuredInterest());
+        DepositAccountTransaction depositaccountTransaction = DepositAccountTransaction.deposit(getDeposit(), getActualCommencementDate(), null);
         depositaccountTransaction.updateAccount(this);
         this.depositaccountTransactions.add(depositaccountTransaction);
 
@@ -559,9 +558,9 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long> {
         Money accuredInterestAfterMaturityToTillDate = fixedTermDepositInterestCalculator.calculateRemainInterest(getDeposit(), days,
                 preClosureInterestRate);
         this.interestAccrued = this.interestAccrued.add(accuredInterestAfterMaturityToTillDate.getAmount());
-
-        DepositAccountTransaction depositaccountTransaction = DepositAccountTransaction.withdraw(getDeposit(), eventDate,
-                getAccuredInterest());
+        this.availableInterest = this.availableInterest.add(accuredInterestAfterMaturityToTillDate.getAmount());
+        DepositAccountTransaction depositaccountTransaction = DepositAccountTransaction.withdraw(getDeposit(), eventDate,Money.of(currency, this.availableInterest),getDeposit().getAmount().add(this.availableInterest));
+        //DepositAccountTransaction depositaccountTransaction = DepositAccountTransaction.withdraw(getDeposit(), eventDate, getAccuredInterest());
         depositaccountTransaction.updateAccount(this);
         this.depositaccountTransactions.add(depositaccountTransaction);
 
@@ -619,7 +618,8 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long> {
         @SuppressWarnings("unused")
         boolean statustest = isActive();
         if (isActive()) {
-            DepositAccountTransaction depositAccountTransaction = DepositAccountTransaction.withdraw(null, new LocalDate(), interest);
+            //DepositAccountTransaction depositAccountTransaction = DepositAccountTransaction.withdraw(null, new LocalDate(), interest);
+        	DepositAccountTransaction depositAccountTransaction = DepositAccountTransaction.withdraw(null, new LocalDate(), interest,getDeposit().getAmount().add(this.availableInterest).subtract(interest.getAmount()));
             depositAccountTransaction.updateAccount(this);
             this.depositaccountTransactions.add(depositAccountTransaction);
             this.interstPaid = this.interstPaid.add(interest.getAmount());
@@ -634,8 +634,9 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long> {
                 DepositAccountStatus.fromInt(this.depositStatus));
         this.depositStatus = statusEnumForClose.getValue();
 
-        DepositAccountTransaction depositaccountTransaction = DepositAccountTransaction.withdraw(getDeposit(), new LocalDate(),
-                Money.of(getDeposit().getCurrency(), getTotal()).minus(getDeposit()));
+      //DepositAccountTransaction depositaccountTransaction = DepositAccountTransaction.withdraw(getDeposit(), new LocalDate(),Money.of(getDeposit().getCurrency(), getTotal()).minus(getDeposit()));
+        DepositAccountTransaction depositaccountTransaction = DepositAccountTransaction.withdraw(getDeposit(), new LocalDate(),Money.of(getDeposit().getCurrency(), getTotal()).minus(getDeposit()),
+        		getDeposit().plus(Money.of(getDeposit().getCurrency(), getTotal()).minus(getDeposit())).getAmount());
         depositaccountTransaction.updateAccount(this);
         this.depositaccountTransactions.add(depositaccountTransaction);
 
@@ -713,7 +714,7 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long> {
             if (lastInterestPostedDate.isBefore(getMaturityDate())) {
                 if (nextInterestPostingDate.isAfter(getMaturityDate())) {
                     Integer noofRemainMonthsAfterMaturity = Months.monthsBetween(getMaturityDate(), nextInterestPostingDate).getMonths();
-                    Integer noOfMonthsBeforeMaturity = Months.monthsBetween(lastInterestPostedDate, getMaturityDate()).getMonths();
+                    Integer noOfMonthsBeforeMaturity = Months.monthsBetween(lastInterestPostedDate, getMaturityDate().plusDays(1)).getMonths();
                     Money futureValueOnMaturity = null;
                     if (noOfMonthsBeforeMaturity > 0) {
 
@@ -750,8 +751,8 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long> {
                     }
 
                     // add transaction entry for each interest posting
-                    DepositAccountTransaction depositaccountTransaction = DepositAccountTransaction.postInterest(null,
-                            nextInterestPostingDate, futureValueOnMaturity.minus(deposit));
+                    DepositAccountTransaction depositaccountTransaction = DepositAccountTransaction.postInterest(null, nextInterestPostingDate,futureValueOnMaturity.minus(deposit),deposit.getAmount().add(this.availableInterest));
+                  //DepositAccountTransaction depositaccountTransaction = DepositAccountTransaction.postInterest(null, nextInterestPostingDate, futureValueOnMaturity.minus(deposit));
 
                     depositaccountTransaction.updateAccount(this);
                     this.depositaccountTransactions.add(depositaccountTransaction);
@@ -772,8 +773,8 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long> {
                     this.nextInterestPostingDate = nextInterestPostingDate.plusMonths(this.interestCompoundedEvery).toDate();
 
                     // add transaction entry for each interest posting
-                    DepositAccountTransaction depositaccountTransaction = DepositAccountTransaction.postInterest(null,
-                            nextInterestPostingDate, futureValueOnMaturity.minus(deposit));
+                 // DepositAccountTransaction depositaccountTransaction = DepositAccountTransaction.postInterest(null, nextInterestPostingDate, futureValueOnMaturity.minus(deposit));
+                    DepositAccountTransaction depositaccountTransaction = DepositAccountTransaction.postInterest(null, nextInterestPostingDate,futureValueOnMaturity.minus(deposit),deposit.getAmount().add(this.availableInterest));
                     depositaccountTransaction.updateAccount(this);
                     this.depositaccountTransactions.add(depositaccountTransaction);
                 }
@@ -794,8 +795,7 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long> {
                 this.nextInterestPostingDate = nextInterestPostingDate.plusMonths(this.interestCompoundedEvery).toDate();
 
                 // add transaction entry for each interest posting
-                DepositAccountTransaction depositaccountTransaction = DepositAccountTransaction.postInterest(null, nextInterestPostingDate,
-                        futureValueOnMaturity.minus(deposit));
+                DepositAccountTransaction depositaccountTransaction = DepositAccountTransaction.postInterest(null, nextInterestPostingDate, futureValueOnMaturity.minus(deposit),deposit.getAmount().add(this.availableInterest));
                 depositaccountTransaction.updateAccount(this);
                 this.depositaccountTransactions.add(depositaccountTransaction);
             }
@@ -831,5 +831,4 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long> {
     public BigDecimal getInterestPostedAmount() {
         return interestPostedAmount;
     }
-
 }

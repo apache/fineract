@@ -215,4 +215,5 @@ public class SavingAccountAssembler {
         List<DepositAccountStatus> allowedDepositStatuses = Arrays.asList(DepositAccountStatus.values());
         return new DepositLifecycleStateMachineImpl(allowedDepositStatuses);
     }
+
 }

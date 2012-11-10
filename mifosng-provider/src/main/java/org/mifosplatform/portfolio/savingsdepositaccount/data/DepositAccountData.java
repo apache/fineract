@@ -65,11 +65,16 @@ public class DepositAccountData {
     private final boolean isLockinPeriodAllowed;
     private final Integer lockinPeriod;
     private final EnumOptionData lockinPeriodType;
-
+    
     private final BigDecimal availableInterest;
-    private final BigDecimal interestPostedAmount;
-    private final LocalDate lastInterestPostedDate;
-    private final LocalDate nextInterestPostedDate;
+	private final BigDecimal interestPostedAmount;
+	private final LocalDate lastInterestPostedDate; 
+	private final LocalDate nextInterestPostedDate;
+	
+	private final String imageKey;
+	private String printFDdetailsLocation;
+	private final String fatherName;
+	private final String address;
 
     /*
      * used when returning account template data but only a clientId is passed,
@@ -129,6 +134,12 @@ public class DepositAccountData {
         this.interestPostedAmount = BigDecimal.ZERO;
         this.lastInterestPostedDate = null;
         this.nextInterestPostedDate = null;
+        
+        this.imageKey = null;
+		this.printFDdetailsLocation = null;
+		this.fatherName = null;
+		this.address = null;
+
     }
 
     public DepositAccountData(final DepositAccountData account, final List<EnumOptionData> interestCompoundedEveryPeriodTypeOptions,
@@ -181,6 +192,11 @@ public class DepositAccountData {
         this.interestPostedAmount = account.getInterestPostedAmount();
         this.lastInterestPostedDate = account.getLastInterestPostedDate();
         this.nextInterestPostedDate = account.getNextInterestPostedDate();
+        
+        this.imageKey = account.getImageKey();
+        this.printFDdetailsLocation = account.getPrintFDdetailsLocation();
+        this.fatherName=account.getFatherName();
+        this.address=account.getAddress();
     }
 
     public DepositAccountData(final DepositAccountData account, final DepositPermissionData permissions,
@@ -233,6 +249,10 @@ public class DepositAccountData {
         this.interestPostedAmount = account.getInterestPostedAmount();
         this.lastInterestPostedDate = account.getLastInterestPostedDate();
         this.nextInterestPostedDate = account.getNextInterestPostedDate();
+        this.imageKey = account.getImageKey();
+        this.printFDdetailsLocation = account.getPrintFDdetailsLocation();
+        this.fatherName=account.getFatherName();
+        this.address=account.getAddress();
     }
 
     public DepositAccountData(final Long id, final String externalId, final EnumOptionData status, final Long clientId,
@@ -245,7 +265,8 @@ public class DepositAccountData {
             final LocalDate rejectedonDate, final LocalDate closedonDate, final boolean isInterestWithdrawable,
             final BigDecimal interestPaid, final boolean interestCompoundingAllowed, final boolean isLockinPeriodAllowed,
             final Integer lockinPeriod, final EnumOptionData lockinPeriodType, final BigDecimal availableInterest,
-            final BigDecimal interestPostedAmount, final LocalDate lastInterestPostedDate, final LocalDate nextInterestPostedDate) {
+            final BigDecimal interestPostedAmount, final LocalDate lastInterestPostedDate, final LocalDate nextInterestPostedDate,
+            final String fatherName, final String address, final String imageKey) {
         this.id = id;
         this.externalId = externalId;
         this.status = status;
@@ -295,6 +316,11 @@ public class DepositAccountData {
         this.interestPostedAmount = interestPostedAmount;
         this.lastInterestPostedDate = lastInterestPostedDate;
         this.nextInterestPostedDate = nextInterestPostedDate;
+        
+        this.imageKey = imageKey;
+        this.fatherName = fatherName;
+        this.address = address;
+        this.printFDdetailsLocation = null;
     }
 
     public DepositAccountData(final Long clientId, final String clientName, final Long productId, final String productName,
@@ -350,6 +376,11 @@ public class DepositAccountData {
         this.interestPostedAmount = BigDecimal.ZERO;
         this.lastInterestPostedDate = null;
         this.nextInterestPostedDate = null;
+        
+        this.imageKey = null;
+        this.printFDdetailsLocation = null;
+        this.fatherName=null;
+        this.address=null;
     }
 
     public Long getId() {
@@ -524,7 +555,27 @@ public class DepositAccountData {
         return this.nextInterestPostedDate;
     }
 
-    private BigDecimal determineAvailableInterestForWithdrawal(final DepositAccountData account) {
+    public String getPrintFDdetailsLocation() {
+		return this.printFDdetailsLocation;
+	}
+
+	public void setPrintFDdetailsLocation(String printFDdetailsLocation) {
+		this.printFDdetailsLocation = printFDdetailsLocation;
+	}
+
+	public String getImageKey() {
+		return this.imageKey;
+	}
+
+	public String getFatherName() {
+		return this.fatherName;
+	}
+
+	public String getAddress() {
+		return this.address;
+	}
+
+	private BigDecimal determineAvailableInterestForWithdrawal(final DepositAccountData account) {
         BigDecimal availableInterestForWithdrawal = BigDecimal.ZERO;
 
         if (this.status != null) {
@@ -582,4 +633,5 @@ public class DepositAccountData {
         return BigDecimal.valueOf(depsoitAmount.doubleValue() * days.doubleValue() * interestRateForOneDay.doubleValue());
 
     }
+
 }

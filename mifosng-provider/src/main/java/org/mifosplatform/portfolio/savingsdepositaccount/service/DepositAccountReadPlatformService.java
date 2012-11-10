@@ -21,3 +21,4 @@ public interface DepositAccountReadPlatformService {
 
     Collection<DepositAccountsForLookup> retrieveDepositAccountForLookup();
 }
+

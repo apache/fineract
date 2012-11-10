@@ -77,4 +77,5 @@ public interface PortfolioApiJsonSerializerService {
 
     String serializeSavingScheduleDataToJson(boolean prettyPrint, Set<String> responseParameters, SavingScheduleData savingScheduleData);
 
+
 }

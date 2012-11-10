@@ -55,4 +55,5 @@ public interface DepositAccountWritePlatformService {
 
     @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'PORTFOLIO_MANAGEMENT_SUPER_USER')")
     EntityIdentifier postInterestToDepositAccount(Collection<DepositAccountsForLookup> accounts);
+
 }

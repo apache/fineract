@@ -132,23 +132,27 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
     private static final class DepositAccountMapper implements RowMapper<DepositAccountData> {
 
         public String schema() {
-            return "da.id as id, da.external_id as externalId, da.client_id as clientId, da.product_id as productId, "
-                    + " da.currency_code as currencyCode, da.currency_digits as currencyDigits, "
-                    + " da.deposit_amount as depositAmount, da.status_enum as statusId, "
-                    + " da.maturity_nominal_interest_rate as interestRate, da.tenure_months as termInMonths, da.projected_commencement_date as projectedCommencementDate,"
-                    + " da.actual_commencement_date as actualCommencementDate, da.matures_on_date as maturedOn,"
-                    + " da.projected_interest_accrued_on_maturity as projectedInterestAccrued, da.actual_interest_accrued as actualInterestAccrued, "
-                    + " da.projected_total_maturity_amount as projectedMaturityAmount, da.actual_total_amount as actualMaturityAmount, "
-                    + " da.interest_compounded_every as interestCompoundedEvery, da.interest_compounded_every_period_enum as interestCompoundedEveryPeriodType, "
-                    + " da.is_renewal_allowed as renewalAllowed, da.is_preclosure_allowed as preClosureAllowed, da.pre_closure_interest_rate as preClosureInterestRate, "
-                    + " da.withdrawnon_date as withdrawnonDate, da.rejectedon_date as rejectedonDate, da.closedon_date as closedonDate, "
-                    + " da.interest_paid as interestPaid, da.is_interest_withdrawable as isInterestWithdrawable, da.is_compounding_interest_allowed as interestCompoundingAllowed, "
-                    + " da.is_lock_in_period_allowed as isLockinPeriodAllowed, da.lock_in_period as lockinPeriod, da.lock_in_period_type lockinPeriodType, "
-                    + " da.available_interest as availableInterest, da.interest_posted_amount as interestPostedAmount, da.last_interest_posted_date as lastInterestPostedDate, da.next_interest_posting_date as nextInterestPostedDate,"
-                    + " c.firstname as firstname, c.lastname as lastname, pd.name as productName,"
-                    + " curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, curr.display_symbol as currencyDisplaySymbol "
-                    + " from m_deposit_account da " + " join m_currency curr on curr.code = da.currency_code "
-                    + " join m_client c on c.id = da.client_id " + " join m_product_deposit pd on pd.id = da.product_id";
+            return "da.id as id, da.external_id as externalId, da.client_id as clientId, da.product_id as productId, " 
+    				+  " da.currency_code as currencyCode, da.currency_digits as currencyDigits, " 
+    				+  " da.deposit_amount as depositAmount, da.status_enum as statusId, "	
+    				+  " da.maturity_nominal_interest_rate as interestRate, da.tenure_months as termInMonths, da.projected_commencement_date as projectedCommencementDate," 
+    				+  " da.actual_commencement_date as actualCommencementDate, da.matures_on_date as maturedOn,"
+    				+  " da.projected_interest_accrued_on_maturity as projectedInterestAccrued, da.actual_interest_accrued as actualInterestAccrued, "
+    				+  " da.projected_total_maturity_amount as projectedMaturityAmount, da.actual_total_amount as actualMaturityAmount, "
+    				+  " da.interest_compounded_every as interestCompoundedEvery, da.interest_compounded_every_period_enum as interestCompoundedEveryPeriodType, "
+    				+  " da.is_renewal_allowed as renewalAllowed, da.is_preclosure_allowed as preClosureAllowed, da.pre_closure_interest_rate as preClosureInterestRate, "
+    				+  " da.withdrawnon_date as withdrawnonDate, da.rejectedon_date as rejectedonDate, da.closedon_date as closedonDate, " 
+    				+  " da.interest_paid as interestPaid, da.is_interest_withdrawable as isInterestWithdrawable, da.is_compounding_interest_allowed as interestCompoundingAllowed, "
+    				+  " da.is_lock_in_period_allowed as isLockinPeriodAllowed, da.lock_in_period as lockinPeriod, da.lock_in_period_type lockinPeriodType, "
+    				+  " da.available_interest as availableInterest, da.interest_posted_amount as interestPostedAmount, da.last_interest_posted_date as lastInterestPostedDate, da.next_interest_posting_date as nextInterestPostedDate,"
+    				+  " c.firstname as firstname, c.lastname as lastname, pd.name as productName, c.image_key as imageKey, "
+    				+  " curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, curr.display_symbol as currencyDisplaySymbol, "
+    				+  " ecd.father_name as fatherName, ecd.client_address as clientAddress "
+    				+  " from m_deposit_account da " 
+    				+  " join m_currency curr on curr.code = da.currency_code " 
+    				+  " join m_client c on c.id = da.client_id " 
+    				+  " join m_product_deposit pd on pd.id = da.product_id"
+    				+  " left join extra_client_details ecd on da.client_id = ecd.client_id "; 
         }
 
         @Override
@@ -208,11 +212,14 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             Integer lockinPeriod = JdbcSupport.getInteger(rs, "lockinPeriod");
             Integer lockinPeriodTypeValue = JdbcSupport.getInteger(rs, "lockinPeriodType");
             EnumOptionData lockinPeriodType = SavingsDepositEnumerations.interestCompoundingPeriodType(lockinPeriodTypeValue);
-
+            
             BigDecimal availableInterest = rs.getBigDecimal("availableInterest");
-            BigDecimal interestPostedAmount = rs.getBigDecimal("interestPostedAmount");
-            LocalDate lastInterestPostedDate = JdbcSupport.getLocalDate(rs, "lastInterestPostedDate");
-            LocalDate nextInterestPostedDate = JdbcSupport.getLocalDate(rs, "nextInterestPostedDate");
+			BigDecimal interestPostedAmount = rs.getBigDecimal("interestPostedAmount");
+			LocalDate lastInterestPostedDate = JdbcSupport.getLocalDate(rs, "lastInterestPostedDate");
+			LocalDate nextInterestPostedDate = JdbcSupport.getLocalDate(rs, "nextInterestPostedDate");
+			String imageKey = rs.getString("imageKey");
+			String fatherName = rs.getString("fatherName");
+			String address = rs.getString("clientAddress");
 
             return new DepositAccountData(id, externalId, status, clientId, clientName, productId, productName, currencyData,
                     depositAmount, interestRate, termInMonths, projectedCommencementDate, actualCommencementDate, maturedOn,
@@ -220,15 +227,15 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
                     interestCompoundedEvery, interestCompoundedEveryPeriodType, renewalAllowed, preClosureAllowed, preClosureInterestRate,
                     withdrawnonDate, rejectedonDate, closedonDate, isInterestWithdrawable, interestPaid, interestCompoundingAllowed,
                     isLockinPeriodAllowed, lockinPeriod, lockinPeriodType, availableInterest, interestPostedAmount, lastInterestPostedDate,
-                    nextInterestPostedDate);
+                    nextInterestPostedDate,fatherName,address,imageKey);
         }
     }
 
     private static final class DepositAccountTransactionMapper implements RowMapper<DepositAccountTransactionData> {
 
         public String schema() {
-            return " txn.id as transactionId, txn.deposit_account_id as accountId, txn.transaction_type_enum as transactionType, txn.transaction_date as transactionDate, txn.amount as transactionAmount, txn.interest as interestAmount "
-                    + " from m_deposit_account_transaction txn";
+            return " txn.id as transactionId, txn.deposit_account_id as accountId, txn.transaction_type_enum as transactionType, txn.transaction_date as transactionDate, txn.amount as transactionAmount, txn.interest as interestAmount, " 
+    				+  "txn.total as total from m_deposit_account_transaction txn";
         }
 
         @Override
@@ -241,7 +248,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             LocalDate transactionDate = JdbcSupport.getLocalDate(rs, "transactionDate");
             BigDecimal transactionAmount = rs.getBigDecimal("transactionAmount");
             BigDecimal interestAmount = rs.getBigDecimal("interestAmount");
-            BigDecimal total = transactionAmount.add(interestAmount);
+            BigDecimal total = rs.getBigDecimal("total");
 
             return new DepositAccountTransactionData(transactionId, accountId, transactionType, transactionDate, transactionAmount,
                     interestAmount, total);
@@ -255,18 +262,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
         boolean undoApprovalAllowed = (depositAccountData.getStatus().getId().equals(300L));
         boolean renewelAllowed = false;
         if (depositAccountData.getMaturedOn() != null) {
-            if (new LocalDate().isAfter(depositAccountData.getMaturedOn())/*
-                                                                           * ||
-                                                                           * depositAccountData
-                                                                           * .
-                                                                           * getMaturedOn
-                                                                           * ().
-                                                                           * isEqual
-                                                                           * (
-                                                                           * new
-                                                                           * LocalDate
-                                                                           * ())
-                                                                           */) {
+            if (new LocalDate().isAfter(depositAccountData.getMaturedOn())/* || depositAccountData.getMaturedOn().isEqual(new LocalDate()) */) {
                 renewelAllowed = depositAccountData.isRenewalAllowed();
             }
         }
@@ -312,4 +308,5 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
         }
 
     }
+
 }
