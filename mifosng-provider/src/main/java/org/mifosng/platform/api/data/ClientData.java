@@ -150,8 +150,4 @@ public class ClientData {
 	public void setImagePresent(boolean imagePresent) {
 		this.imagePresent = imagePresent;
 	}
-	
-	
-	
-	
 }

@@ -40,6 +40,7 @@ import org.mifosng.platform.common.FileUtils;
 import org.mifosng.platform.exceptions.ClientNotFoundException;
 import org.mifosng.platform.exceptions.ImageNotFoundException;
 import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
+import org.mifosng.platform.makerchecker.service.PortfolioMakerCheckerService;
 import org.mifosng.platform.organisation.service.OfficeReadPlatformService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,6 +68,9 @@ public class ClientsApiResource {
 
 	@Autowired
 	private PortfolioApiDataConversionService apiDataConversionService;
+	
+	@Autowired
+	private PortfolioMakerCheckerService portfolioMakerCheckerService;
 
 	@Autowired
 	private OfficeReadPlatformService officeReadPlatformService;
@@ -192,37 +196,47 @@ public class ClientsApiResource {
 	@POST
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
-	public Response enrollClient(final String jsonRequestBody) {
-
-		ClientCommand command = this.apiDataConversionService.convertJsonToClientCommand(null, jsonRequestBody);
+	public String enrollClient(final String jsonRequestBody) {
 		
-		Long clientId = this.clientWritePlatformService.enrollClient(command);
-
-		return Response.ok().entity(new EntityIdentifier(clientId)).build();
+		String jsonResult = "";
+		// hardcode to false before checking in until configuration for enabling is done.
+		final boolean makerCheckerEnabledForTask = false;
+		if (makerCheckerEnabledForTask) {
+			final Long makerCheckerId = this.portfolioMakerCheckerService.logNewEntry("CREATE_CLIENT", jsonRequestBody);
+			jsonResult = this.apiJsonSerializerService.serializeEntityIdentifier(EntityIdentifier.makerChecker(makerCheckerId));
+		} else {
+			final ClientCommand command = this.apiDataConversionService.convertJsonToClientCommand(null, jsonRequestBody);
+			
+			final Long clientId = this.clientWritePlatformService.enrollClient(command);
+	
+			jsonResult = this.apiJsonSerializerService.serializeEntityIdentifier(new EntityIdentifier(clientId));
+		}
+		
+		return jsonResult;
 	}
 
 	@PUT
 	@Path("{clientId}")
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
-	public Response updateClient(@PathParam("clientId") final Long clientId, final String jsonRequestBody) {
+	public String updateClient(@PathParam("clientId") final Long clientId, final String jsonRequestBody) {
 
-		ClientCommand command = this.apiDataConversionService.convertJsonToClientCommand(clientId, jsonRequestBody);
+		final ClientCommand command = this.apiDataConversionService.convertJsonToClientCommand(clientId, jsonRequestBody);
 
-		EntityIdentifier identifier = this.clientWritePlatformService.updateClientDetails(command);
+		final EntityIdentifier identifier = this.clientWritePlatformService.updateClientDetails(command);
 
-		return Response.ok().entity(identifier).build();
+		return this.apiJsonSerializerService.serializeEntityIdentifier(identifier);
 	}
 	
 	@DELETE
 	@Path("{clientId}")
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
-	public Response deleteClient(@PathParam("clientId") final Long clientId) {
+	public String deleteClient(@PathParam("clientId") final Long clientId) {
 
 		this.clientWritePlatformService.deleteClient(clientId);
 
-		return Response.ok(new EntityIdentifier(clientId)).build();
+		return this.apiJsonSerializerService.serializeEntityIdentifier(new EntityIdentifier(clientId));
 	}
 
 	@GET
