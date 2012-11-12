@@ -2,10 +2,8 @@ package org.mifosng.platform.user.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collection;
 
-import org.mifosng.platform.api.data.PermissionData;
 import org.mifosng.platform.api.data.RoleData;
 import org.mifosng.platform.exceptions.RoleNotFoundException;
 import org.mifosng.platform.infrastructure.JdbcSupport;
@@ -36,8 +34,8 @@ public class RoleReadPlatformServiceImpl implements RoleReadPlatformService {
 	public Collection<RoleData> retrieveAllRoles() {
 		context.authenticatedUser();
 
-		RoleMapper mapper = new RoleMapper();
-		String sql = "select " + mapper.schema() + " order by r.id";
+		final RoleMapper mapper = new RoleMapper();
+		final String sql = "select " + mapper.schema() + " order by r.id";
 
 		return this.jdbcTemplate.query(sql, mapper, new Object[] {});
 	}
@@ -46,7 +44,7 @@ public class RoleReadPlatformServiceImpl implements RoleReadPlatformService {
 	public RoleData retrieveRole(final Long id) {
 		context.authenticatedUser();
 		
-		Role role = this.roleRepository.findOne(id);
+		final Role role = this.roleRepository.findOne(id);
 		if (role == null) {
 			throw new RoleNotFoundException(id);
 		}
@@ -59,12 +57,11 @@ public class RoleReadPlatformServiceImpl implements RoleReadPlatformService {
 		public RoleData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
 				throws SQLException {
 
-			Long id = JdbcSupport.getLong(rs, "id");
-			String name = rs.getString("name");
-			String description = rs.getString("description");
+			final Long id = JdbcSupport.getLong(rs, "id");
+			final String name = rs.getString("name");
+			final String description = rs.getString("description");
 
-			Collection<PermissionData> selectedPermissions = new ArrayList<PermissionData>(0);
-			return new RoleData(id, name, description, selectedPermissions);
+			return new RoleData(id, name, description);
 		}
 
 		public String schema() {

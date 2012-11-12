@@ -12,17 +12,25 @@ public class RoleData {
 	private final String name;
 	private final String description;
 	
+	@SuppressWarnings("unused")
 	private final Collection<PermissionData> availablePermissions;
 	private final Collection<PermissionData> selectedPermissions;
 
+	public RoleData(final Long id, final String name, final String description) {
+		this.id = id;
+		this.name = name;
+		this.description = description;
+		this.availablePermissions = null;
+		this.selectedPermissions = null;
+	}
+	
 	public RoleData(final Long id, final String name, final String description, final Collection<PermissionData> selectedPermissions) {
 		this.id = id;
 		this.name = name;
 		this.description = description;
-		this.availablePermissions = new ArrayList<PermissionData>();
-		this.selectedPermissions = new ArrayList<PermissionData>(selectedPermissions);
+		this.availablePermissions = null;
+		this.selectedPermissions = selectedPermissions;
 	}
-	
 	public RoleData(final Collection<PermissionData> availablePermissions, final Collection<PermissionData> selectedPermissions) {
 		this.id = null;
 		this.name = null;
@@ -31,18 +39,18 @@ public class RoleData {
 		this.selectedPermissions = new ArrayList<PermissionData>(selectedPermissions);
 	}
 
-	public RoleData(RoleData role, final Collection<PermissionData> availablePermissions) {
-		this.id = role.getId();
-		this.name = role.getName();
-		this.description = role.getDescription();
-		this.availablePermissions = new ArrayList<PermissionData>(availablePermissions);
-		this.selectedPermissions = role.getSelectedPermissions();
+	public RoleData(final RoleData role, final Collection<PermissionData> availablePermissions) {
+		this.id = role.id;
+		this.name = role.name;
+		this.description = role.description;
+		this.availablePermissions = availablePermissions;
+		this.selectedPermissions = role.selectedPermissions;
 	}
 
 	@Override
 	public boolean equals(final Object obj) {
-		RoleData role = (RoleData) obj;
-		return this.id.equals(role.getId());
+		final RoleData role = (RoleData) obj;
+		return this.id.equals(role.id);
 	}
 	
 	@Override
@@ -50,23 +58,7 @@ public class RoleData {
 		return this.id.hashCode();
 	}
 
-	public Long getId() {
-		return id;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public Collection<PermissionData> getAvailablePermissions() {
-		return availablePermissions;
-	}
-
-	public Collection<PermissionData> getSelectedPermissions() {
-		return selectedPermissions;
+	public Collection<PermissionData> selectedPermissions() {
+		return this.selectedPermissions;
 	}
 }

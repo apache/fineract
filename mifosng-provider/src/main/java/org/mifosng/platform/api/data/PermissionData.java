@@ -5,8 +5,11 @@ package org.mifosng.platform.api.data;
  */
 public class PermissionData {
 
+	@SuppressWarnings("unused")
 	private final Long id;
+	@SuppressWarnings("unused")
 	private final String name;
+	@SuppressWarnings("unused")
 	private final String description;
 	private final String code;
 
@@ -26,21 +29,5 @@ public class PermissionData {
 	@Override
 	public int hashCode() {
 		return this.code.hashCode();
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public String getCode() {
-		return code;
 	}
 }

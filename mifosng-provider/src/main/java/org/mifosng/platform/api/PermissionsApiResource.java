@@ -35,10 +35,10 @@ public class PermissionsApiResource {
 	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveAllPermissions(@Context final UriInfo uriInfo) {
 
-		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+		final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+		final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 		
-		Collection<PermissionData> permissions = this.permissionReadPlatformService.retrieveAllPermissions();
+		final Collection<PermissionData> permissions = this.permissionReadPlatformService.retrieveAllPermissions();
 		
 		return this.apiJsonSerializerService.serializePermissionDataToJson(prettyPrint, responseParameters, permissions);
 	}

@@ -30,8 +30,8 @@ public class PermissionReadPlatformServiceImpl implements PermissionReadPlatform
 
 		context.authenticatedUser();
 
-		PermissionMapper mapper = new PermissionMapper();
-		String sql = "select " + mapper.schema() + " order by p.id";
+		final PermissionMapper mapper = new PermissionMapper();
+		final String sql = "select " + mapper.schema() + " order by p.id";
 
 		return this.jdbcTemplate.query(sql, mapper, new Object[] {});
 	}
@@ -41,10 +41,10 @@ public class PermissionReadPlatformServiceImpl implements PermissionReadPlatform
 		@Override
 		public PermissionData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
-			Long id = JdbcSupport.getLong(rs, "id");
-			String name = rs.getString("name");
-			String description = rs.getString("description");
-			String code = rs.getString("code");
+			final Long id = JdbcSupport.getLong(rs, "id");
+			final String name = rs.getString("name");
+			final String description = rs.getString("description");
+			final String code = rs.getString("code");
 
 			return new PermissionData(id, name, description, code);
 		}
