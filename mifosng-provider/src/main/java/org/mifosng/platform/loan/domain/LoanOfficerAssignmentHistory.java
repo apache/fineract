@@ -1,6 +1,5 @@
 package org.mifosng.platform.loan.domain;
 
-
 import org.joda.time.LocalDate;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
 import org.mifosng.platform.staff.domain.Staff;
@@ -19,7 +18,7 @@ import java.util.Date;
 @Table(name = "m_loan_officer_assignment_history")
 public class LoanOfficerAssignmentHistory extends AbstractAuditableCustom<AppUser, Long> {
 
-    @SuppressWarnings("unused")
+	@SuppressWarnings("unused")
     @ManyToOne
     @JoinColumn(name = "loan_id", nullable = false)
     private Loan loan;
@@ -33,54 +32,50 @@ public class LoanOfficerAssignmentHistory extends AbstractAuditableCustom<AppUse
     @Column(name = "start_date")
     private Date startDate;
 
-    @SuppressWarnings("unused")
-    @Temporal(TemporalType.DATE)
+	@Temporal(TemporalType.DATE)
     @Column(name = "end_date")
     private Date endDate;
 
-    public static LoanOfficerAssignmentHistory createNew(Loan loan, Staff loanOfficer,
-                                                         LocalDate startDate){
+    public static LoanOfficerAssignmentHistory createNew(final Loan loan, final Staff loanOfficer, final LocalDate startDate) {
         return new LoanOfficerAssignmentHistory(loan, loanOfficer, startDate.toDate(), null);
     }
 
-    @SuppressWarnings("unused")
     protected LoanOfficerAssignmentHistory() {
-        this.loan = null;
-        this.loanOfficer = null;
-        this.startDate = null;
-        this.endDate = null;
+    	//
     }
 
-    private LoanOfficerAssignmentHistory(Loan loan, Staff loanOfficer,
-                                        Date startDate, Date endDate) {
+    private LoanOfficerAssignmentHistory(final Loan loan, final Staff loanOfficer, final Date startDate, final Date endDate) {
         this.loan = loan;
         this.loanOfficer = loanOfficer;
         this.startDate = startDate;
         this.endDate = endDate;
     }
 
-    public Loan getLoan() {
-        return loan;
-    }
-
-    public LocalDate getStartDate() {
-        return new LocalDate(startDate);
-    }
-
-    public Date getEndDate() {
-        return endDate;
-    }
-
     public void updateLoanOfficer(Staff loanOfficer) {
         this.loanOfficer = loanOfficer;
     }
 
-    public void updateStartDate(LocalDate startDate){
+    public void updateStartDate(LocalDate startDate) {
         this.startDate = startDate.toDate();
     }
 
-    public void updateEndDate(LocalDate endDate){
+    public void updateEndDate(LocalDate endDate) {
         this.endDate = endDate.toDate();
     }
 
+	public boolean matchesStartDateOf(final LocalDate matchingDate) {
+		return getStartDate().isEqual(matchingDate);
+	}
+	
+	private LocalDate getStartDate() {
+		return new LocalDate(startDate);
+	}
+
+	public boolean hasStartDateBefore(final LocalDate matchingDate) {
+		return matchingDate.isBefore(getStartDate());
+	}
+
+	public boolean isCurrentRecord() {
+		return this.endDate == null;
+	}
 }

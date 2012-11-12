@@ -13,11 +13,12 @@ public class BulkLoanReassignmentCommand {
 
 	private final String[] loans;
 
-	public BulkLoanReassignmentCommand(Long fromLoanOfficerId,
-			Long toLoanOfficerId, LocalDate assignmentDate, String[] loans) {
+	public BulkLoanReassignmentCommand(final Long fromLoanOfficerId,
+			final Long toLoanOfficerId, final LocalDate assignmentDate,
+			final String[] loans) {
 		this.fromLoanOfficerId = fromLoanOfficerId;
 		this.toLoanOfficerId = toLoanOfficerId;
-        this.assignmentDate = assignmentDate;
+		this.assignmentDate = assignmentDate;
 		this.loans = loans;
 	}
 

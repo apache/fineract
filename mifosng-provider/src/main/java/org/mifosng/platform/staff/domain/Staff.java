@@ -91,7 +91,7 @@ public class Staff extends AbstractAuditableCustom<AppUser, Long> {
 		return loanOfficerFlag;
 	}
 
-	public boolean identifiedBy(Staff staff) {
+	public boolean identifiedBy(final Staff staff) {
 		return getId().equals(staff.getId());
 	}
 }

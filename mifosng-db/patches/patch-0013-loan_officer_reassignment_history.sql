@@ -1,3 +1,4 @@
+drop table `m_loan_officer_assignment_history`;
 CREATE TABLE `m_loan_officer_assignment_history` (
 `id` bigint(20) NOT NULL AUTO_INCREMENT,
 `loan_id` bigint(20) NOT NULL ,

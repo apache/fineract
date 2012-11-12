@@ -754,7 +754,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 throw new LoanOfficerAssignmentException(loan.getId(), fromLoanOfficer.getId());
             }
 
-            loan.updateLoanOfficer(toLoanOfficer, command.getAssignmentDate());
+            loan.reassignLoanOfficer(toLoanOfficer, command.getAssignmentDate());
             this.loanRepository.save(loan);
         }
 
