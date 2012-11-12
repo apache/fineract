@@ -36,6 +36,7 @@ import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.exceptions.InvalidLoanStateTransitionException;
 import org.mifosng.platform.exceptions.InvalidLoanTransactionTypeException;
 import org.mifosng.platform.exceptions.LoanChargeCannotBeAddedException;
+import org.mifosng.platform.exceptions.LoanOfficerAssignmentException;
 import org.mifosng.platform.fund.domain.Fund;
 import org.mifosng.platform.group.domain.Group;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
@@ -146,6 +147,10 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true)
     private Set<LoanCharge> charges;
 
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @OneToMany(cascade =  CascadeType.ALL, mappedBy = "loan", orphanRemoval = true)
+    private Set<LoanOfficerAssignmentHistory> loanOfficerAssignmentHistorySet;
+
 	// see
 	// http://stackoverflow.com/questions/4334970/hibernate-cannot-simultaneously-fetch-multiple-bags
 	@LazyCollection(LazyCollectionOption.FALSE)
@@ -183,6 +188,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		this.loanProduct = null;
 		this.loanRepaymentScheduleDetail = null;
         this.charges = null;
+        this.loanOfficerAssignmentHistorySet = null;
 	}
 
 	private Loan(
@@ -208,6 +214,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		} else {
 			this.charges = null;
 		}
+        this.loanOfficerAssignmentHistorySet = null;
 	}
 
 	private Loan(
@@ -233,6 +240,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		} else {
 			this.charges = null;
 		}
+        this.loanOfficerAssignmentHistorySet = null;
 	}
 
 	private BigDecimal deriveSumTotalOfChargesDueAtDisbursement() {
@@ -434,7 +442,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		return this.loanProduct;
 	}
 
-	public LoanProductRelatedDetail repaymentScheduleDetail() {
+    public LoanProductRelatedDetail repaymentScheduleDetail() {
 		return this.loanRepaymentScheduleDetail;
 	}
 	
@@ -683,6 +691,13 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 					"cannot.be.a.future.date", errorMessage,
 					getApprovedOnDate());
 		}
+
+        if (this.loanofficer != null){
+            LoanOfficerAssignmentHistory loanOfficerAssignmentHistory =
+                    LoanOfficerAssignmentHistory.createNew(this, this.loanofficer, approvedOn);
+            this.loanOfficerAssignmentHistorySet.add(loanOfficerAssignmentHistory);
+        }
+
 	}
 
 	public void undoApproval(LoanLifecycleStateMachine loanLifecycleStateMachine) {
@@ -691,6 +706,8 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		this.loanStatus = statusEnum.getValue();
 		
 		this.approvedOnDate = null;
+
+        this.loanOfficerAssignmentHistorySet.clear();
 	}
 
 	public void disburseWithModifiedRepaymentSchedule(
@@ -1584,7 +1601,31 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		return this.loanRepaymentScheduleDetail.getCurrency();
 	}
 
-	public void updateLoanofficer(final Staff newLoanOfficer) {
-		this.loanofficer = newLoanOfficer;
+	public void updateLoanOfficer(final Staff newLoanOfficer, final LocalDate assignmentDate) {
+        boolean createNewLoanOfficerAssignmentHistoryRecord = true;
+        for (LoanOfficerAssignmentHistory lastLoanOfficerAssignmentHistoryRecord : this.loanOfficerAssignmentHistorySet){
+            if (lastLoanOfficerAssignmentHistoryRecord.getEndDate() == null){
+                if (this.loanofficer.identifiedBy(newLoanOfficer)){
+                    lastLoanOfficerAssignmentHistoryRecord.updateStartDate(assignmentDate);
+                    createNewLoanOfficerAssignmentHistoryRecord = false;
+                } else if (lastLoanOfficerAssignmentHistoryRecord.getStartDate().isEqual(assignmentDate)){
+                    lastLoanOfficerAssignmentHistoryRecord.updateLoanOfficer(newLoanOfficer);
+                    createNewLoanOfficerAssignmentHistoryRecord = false;
+                } else if (assignmentDate.isBefore(lastLoanOfficerAssignmentHistoryRecord.getStartDate())){
+                    throw new LoanOfficerAssignmentException(this.getId(), assignmentDate);
+                } else {
+                    lastLoanOfficerAssignmentHistoryRecord.updateEndDate(assignmentDate);
+                }
+                break;
+            }
+        }
+
+        if (createNewLoanOfficerAssignmentHistoryRecord){
+            LoanOfficerAssignmentHistory loanOfficerAssignmentHistory =
+                    LoanOfficerAssignmentHistory.createNew(this, this.loanofficer, assignmentDate);
+            this.loanOfficerAssignmentHistorySet.add(loanOfficerAssignmentHistory);
+        }
+
+        this.loanofficer = newLoanOfficer;
 	}
 }

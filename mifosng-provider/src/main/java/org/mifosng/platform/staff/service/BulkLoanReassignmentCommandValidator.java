@@ -26,6 +26,8 @@ public class BulkLoanReassignmentCommandValidator {
         baseDataValidator.reset().parameter("toLoanOfficerId").value(command.getToLoanOfficerId()).notNull().
                 integerGreaterThanZero().notSameAsParameter("fromLoanOfficerId", command.getFromLoanOfficerId());
 
+        baseDataValidator.reset().parameter("assignmentDate").value(command.getAssignmentDate()).notNull();
+
         baseDataValidator.reset().parameter("loans").value(command.getLoans()).arrayNotEmpty();
 
         if (!dataValidationErrors.isEmpty()) {

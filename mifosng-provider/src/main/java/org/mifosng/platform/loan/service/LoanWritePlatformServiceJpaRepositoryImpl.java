@@ -76,7 +76,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private final ChargeRepository chargeRepository;
     private final LoanChargeRepository loanChargeRepository;
 	private final LoanChargeAssembler loanChargeAssembler;
-	
+
 	@Autowired
 	public LoanWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, 
 			final LoanAssembler loanAssembler, final LoanChargeAssembler loanChargeAssembler,
@@ -217,7 +217,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		
 		loan.approve(eventDate, defaultLoanLifecycleStateMachine());
 		this.loanRepository.save(loan);
-		
+
 		String noteText = command.getNote();
 		if (StringUtils.isNotBlank(noteText)) {
 			Note note = Note.loanNote(loan, noteText);
@@ -237,7 +237,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		
 		loan.undoApproval(defaultLoanLifecycleStateMachine());
 		this.loanRepository.save(loan);
-		
+
 		String noteText = command.getNote();
 		if (StringUtils.isNotBlank(noteText)) {
 			Note note = Note.loanNote(loan, noteText);
@@ -754,7 +754,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 throw new LoanOfficerAssignmentException(loan.getId(), fromLoanOfficer.getId());
             }
 
-            loan.updateLoanofficer(toLoanOfficer);
+            loan.updateLoanOfficer(toLoanOfficer, command.getAssignmentDate());
             this.loanRepository.save(loan);
         }
 
