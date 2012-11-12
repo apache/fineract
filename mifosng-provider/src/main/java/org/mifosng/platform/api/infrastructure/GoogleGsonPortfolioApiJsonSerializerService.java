@@ -194,7 +194,8 @@ public class GoogleGsonPortfolioApiJsonSerializerService implements PortfolioApi
 			Arrays.asList("id", "type", "date", "currency", "amount"));
 
     private static final Set<String> LOAN_REASSIGNMENT_DATA_PARAMETERS = new HashSet<String>(
-            Arrays.asList("officeId", "fromLoanOfficerId", "officeOptions", "loanOfficerOptions", "accountSummaryCollection")
+            Arrays.asList("officeId", "fromLoanOfficerId", "assignmentDate",
+                    "officeOptions", "loanOfficerOptions", "accountSummaryCollection")
     );
 
 	private static final Set<String> CHARGES_DATA_PARAMETERS = new HashSet<String>(

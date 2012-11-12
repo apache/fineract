@@ -1,5 +1,7 @@
 package org.mifosng.platform.api.commands;
 
+import org.joda.time.LocalDate;
+
 /**
  * Immutable data object for reassigning loan officers on loans in bulk.
  */
@@ -7,13 +9,15 @@ public class BulkLoanReassignmentCommand {
 
 	private final Long fromLoanOfficerId;
 	private final Long toLoanOfficerId;
+    private final LocalDate assignmentDate;
 
 	private final String[] loans;
 
 	public BulkLoanReassignmentCommand(Long fromLoanOfficerId,
-			Long toLoanOfficerId, String[] loans) {
+			Long toLoanOfficerId, LocalDate assignmentDate, String[] loans) {
 		this.fromLoanOfficerId = fromLoanOfficerId;
 		this.toLoanOfficerId = toLoanOfficerId;
+        this.assignmentDate = assignmentDate;
 		this.loans = loans;
 	}
 
@@ -25,7 +29,11 @@ public class BulkLoanReassignmentCommand {
 		return toLoanOfficerId;
 	}
 
-	public String[] getLoans() {
+    public LocalDate getAssignmentDate() {
+        return assignmentDate;
+    }
+
+    public String[] getLoans() {
 		return loans;
 	}
 }

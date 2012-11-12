@@ -167,7 +167,7 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
 
         Set<String> supportedParams = new HashSet<String>(
-                Arrays.asList("fromLoanOfficerId", "toLoanOfficerId","loans")
+                Arrays.asList("fromLoanOfficerId", "toLoanOfficerId", "assignmentDate", "locale", "dateFormat", "loans")
         );
 
         checkForUnsupportedParameters(requestMap, supportedParams);
@@ -176,6 +176,7 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
 
         Long fromLoanOfficerId = extractLongParameter("fromLoanOfficerId", requestMap, modifiedParameters);
         Long toLoanOfficerId = extractLongParameter("toLoanOfficerId", requestMap, modifiedParameters);
+        LocalDate assignmentDate = extractLocalDateParameter("assignmentDate", requestMap, modifiedParameters);
 
         // check array
         JsonParser parser = new JsonParser();
@@ -195,7 +196,7 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         }
         //
 
-        return new BulkLoanReassignmentCommand(fromLoanOfficerId, toLoanOfficerId, loans);
+        return new BulkLoanReassignmentCommand(fromLoanOfficerId, toLoanOfficerId, assignmentDate, loans);
 	}
 
 	@Override
@@ -365,7 +366,7 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
 	    checkForUnsupportedParameters(requestMap, supportedParams);
 	    
 	    Set<String> modifiedParameters = new HashSet<String>();
-	   
+
 	    String externalId = extractStringParameter("externalId", requestMap, modifiedParameters);
 	    Long officeId = extractLongParameter("officeId", requestMap, modifiedParameters);
 	    LocalDate joiningDate = extractLocalDateParameter("joiningDate", requestMap, modifiedParameters);

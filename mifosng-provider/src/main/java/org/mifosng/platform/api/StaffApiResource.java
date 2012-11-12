@@ -18,6 +18,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.LocalDate;
 import org.mifosng.platform.api.commands.BulkLoanReassignmentCommand;
 import org.mifosng.platform.api.commands.StaffCommand;
 import org.mifosng.platform.api.data.EntityIdentifier;
@@ -179,8 +180,8 @@ public class StaffApiResource {
             staffAccountSummaryCollectionData = this.readPlatformService.retrieveLoanOfficerAccountSummary(loanOfficerId);
         }
 
-        final LoanReassignmentData loanReassignmentData = new LoanReassignmentData(officeId, loanOfficerId, offices,
-                loanOfficers, staffAccountSummaryCollectionData);
+        final LoanReassignmentData loanReassignmentData = new LoanReassignmentData(officeId, loanOfficerId,
+                new LocalDate(), offices, loanOfficers, staffAccountSummaryCollectionData);
 
         return this.apiJsonSerializerService.serializeLoanReassignmentDataToJson(prettyPrint, responseParameters, loanReassignmentData);
     }
