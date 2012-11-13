@@ -245,8 +245,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 		final LocalDate expectedDisbursementDate = new LocalDate();
 		final ClientData clientAccount = this.clientReadPlatformService.retrieveIndividualClient(clientId);
 		
-		LoanBasicDetailsData loanDetails = LoanBasicDetailsData.populateForNewIndividualClientLoanCreation(clientAccount.getId(), clientAccount.getDisplayName(), expectedDisbursementDate,
-				clientAccount.getOfficeId());
+		LoanBasicDetailsData loanDetails = LoanBasicDetailsData.populateForNewIndividualClientLoanCreation(clientAccount.id(), clientAccount.displayName(), expectedDisbursementDate,
+				clientAccount.officeId());
 		
 		if (productId != null) {
 			LoanProductData selectedProduct = this.loanProductReadPlatformService.retrieveLoanProduct(productId);

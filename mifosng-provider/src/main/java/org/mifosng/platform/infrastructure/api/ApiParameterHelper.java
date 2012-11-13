@@ -10,6 +10,17 @@ import org.apache.commons.lang.StringUtils;
 
 public class ApiParameterHelper {
 
+	public static Long makerCheckerId(final MultivaluedMap<String, String> queryParams) {
+		Long id = null;
+		if (queryParams.getFirst("makerCheckerId") != null) {
+			final String value = queryParams.getFirst("makerCheckerId");
+			if (StringUtils.isNotBlank(value)) {
+				id = Long.valueOf(value);
+			}
+		}
+		return id;
+	}
+	
 	public static Set<String> extractFieldsForResponseIfProvided(final MultivaluedMap<String, String> queryParams) {
 		Set<String> fields = new HashSet<String>();
 		String commaSerperatedParameters = "";

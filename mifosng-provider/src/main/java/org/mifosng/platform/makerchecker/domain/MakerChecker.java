@@ -19,6 +19,7 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 @Table(name = "m_maker_checker")
 public class MakerChecker extends AbstractPersistable<Long> {
 
+	@SuppressWarnings("unused")
 	@Column(name = "task_name", length = 100)
 	private String taskName;
 
@@ -26,18 +27,22 @@ public class MakerChecker extends AbstractPersistable<Long> {
 	private String taskJson;
 
 	// should maker and checker be a staff member as opposed to just any application user?
+	@SuppressWarnings("unused")
 	@ManyToOne
 	@JoinColumn(name = "maker_id", nullable = false)
 	private AppUser maker;
 	
+	@SuppressWarnings("unused")
 	@Column(name = "made_on_date", nullable = false)
     @Temporal(TemporalType.DATE)
 	private Date madeOnDate;
 	
+	@SuppressWarnings("unused")
 	@ManyToOne
 	@JoinColumn(name = "checker_id", nullable = true)
 	private AppUser checker;
 	
+	@SuppressWarnings("unused")
 	@Column(name = "checked_on_date", nullable = false)
     @Temporal(TemporalType.DATE)
 	private Date checkedOnDate;
@@ -63,5 +68,14 @@ public class MakerChecker extends AbstractPersistable<Long> {
 		this.taskJson = StringUtils.defaultIfEmpty(taskJson, null);
 		this.maker = maker;
 		this.madeOnDate = madeOnDate.toDate();
+	}
+
+	public void markAsChecked(final AppUser checker, final LocalDate checkedOnDate) {
+		this.checker = checker;
+		this.checkedOnDate = checkedOnDate.toDate();
+	}
+
+	public String json() {
+		return this.taskJson;
 	}
 }

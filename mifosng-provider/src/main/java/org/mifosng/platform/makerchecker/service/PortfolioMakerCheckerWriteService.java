@@ -1,7 +1,8 @@
 package org.mifosng.platform.makerchecker.service;
 
-public interface PortfolioMakerCheckerService {
+public interface PortfolioMakerCheckerWriteService {
 
 	Long logNewEntry(String taskName, String taskJson);
 
+	Long approveEntry(Long id);
 }

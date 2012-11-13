@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
@@ -28,6 +29,7 @@ import org.mifosng.platform.api.commands.NoteCommand;
 import org.mifosng.platform.api.data.ClientAccountSummaryCollectionData;
 import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.EntityIdentifier;
+import org.mifosng.platform.api.data.MakerCheckerData;
 import org.mifosng.platform.api.data.NoteData;
 import org.mifosng.platform.api.data.OfficeLookup;
 import org.mifosng.platform.api.infrastructure.PortfolioApiDataConversionService;
@@ -40,7 +42,8 @@ import org.mifosng.platform.common.FileUtils;
 import org.mifosng.platform.exceptions.ClientNotFoundException;
 import org.mifosng.platform.exceptions.ImageNotFoundException;
 import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
-import org.mifosng.platform.makerchecker.service.PortfolioMakerCheckerService;
+import org.mifosng.platform.makerchecker.service.PortfolioMakerCheckerReadPlatformService;
+import org.mifosng.platform.makerchecker.service.PortfolioMakerCheckerWriteService;
 import org.mifosng.platform.organisation.service.OfficeReadPlatformService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,18 +73,17 @@ public class ClientsApiResource {
 	private PortfolioApiDataConversionService apiDataConversionService;
 	
 	@Autowired
-	private PortfolioMakerCheckerService portfolioMakerCheckerService;
+	private PortfolioMakerCheckerWriteService portfolioMakerCheckerService;
 
 	@Autowired
 	private OfficeReadPlatformService officeReadPlatformService;
 	
 	@Autowired
 	private PortfolioApiJsonSerializerService apiJsonSerializerService;
-
-	private static final Set<String> typicalResponseParameters = new HashSet<String>(
-			Arrays.asList("id", "officeId", "officeName", "externalId", "firstname", "lastname", "joinedDate", "displayName", "clientOrBusinessName", "imagePresent")
-	);
 	
+	@Autowired
+	private PortfolioMakerCheckerReadPlatformService makerCheckerReadPlatformService;
+
 	@GET
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
@@ -96,13 +98,10 @@ public class ClientsApiResource {
 
 		final String extraCriteria = getClientCriteria(sqlSearch, officeId, externalId, displayName, firstName, lastName, hierarchy);
 		
-		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-		if (responseParameters.isEmpty()) {
-			responseParameters.addAll(typicalResponseParameters);
-		}
-		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+		final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+		final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 
-		Collection<ClientData> clients = this.clientReadPlatformService.retrieveAllIndividualClients(extraCriteria);
+		final Collection<ClientData> clients = this.clientReadPlatformService.retrieveAllIndividualClients(extraCriteria);
 		
 		return this.apiJsonSerializerService.serializeClientDataToJson(prettyPrint, responseParameters, clients);
 	}
@@ -159,17 +158,14 @@ public class ClientsApiResource {
 			@PathParam("clientId") final Long clientId,
 			@Context final UriInfo uriInfo) {
 		
-		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-		if (responseParameters.isEmpty()) {
-			responseParameters.addAll(typicalResponseParameters);
-		}
-		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-		boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
+		final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+		final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+		final boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
 		
 		ClientData clientData = this.clientReadPlatformService.retrieveIndividualClient(clientId);
 		if (template) {
-			clientData.setAllowedOffices(new ArrayList<OfficeLookup>(officeReadPlatformService.retrieveAllOfficesForLookup()));
-			responseParameters.add("allowedOffices");
+			final List<OfficeLookup> allowedOffices = new ArrayList<OfficeLookup>(officeReadPlatformService.retrieveAllOfficesForLookup());
+			clientData = ClientData.templateOnTop(clientData, allowedOffices);
 		}
 
 		return this.apiJsonSerializerService.serializeClientDataToJson(prettyPrint, responseParameters, clientData);
@@ -181,14 +177,17 @@ public class ClientsApiResource {
 	@Produces({MediaType.APPLICATION_JSON})
 	public String newClientDetails(@Context final UriInfo uriInfo) {
 		
-		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-		if (responseParameters.isEmpty()) {
-			responseParameters.addAll(typicalResponseParameters);
-			responseParameters.add("allowedOffices");
-		}
-		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+		final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+		final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+		final Long makerCheckerId = ApiParameterHelper.makerCheckerId(uriInfo.getQueryParameters());
 		
 		ClientData clientData = this.clientReadPlatformService.retrieveNewClientDetails();
+		if (makerCheckerId != null) {
+			final MakerCheckerData entry = this.makerCheckerReadPlatformService.retrieveById(makerCheckerId);
+			final ClientCommand command = this.apiDataConversionService.convertJsonToClientCommand(null, entry.json());
+
+			clientData = ClientData.mergeWithCommand(clientData, command);
+		}
 		
 		return this.apiJsonSerializerService.serializeClientDataToJson(prettyPrint, responseParameters, clientData);
 	}
@@ -198,6 +197,9 @@ public class ClientsApiResource {
 	@Produces({MediaType.APPLICATION_JSON})
 	public String enrollClient(final String jsonRequestBody) {
 		
+		final ClientCommand command = this.apiDataConversionService.convertJsonToClientCommand(null, jsonRequestBody);
+		command.validateForCreate();
+		
 		String jsonResult = "";
 		// hardcode to false before checking in until configuration for enabling is done.
 		final boolean makerCheckerEnabledForTask = false;
@@ -205,8 +207,6 @@ public class ClientsApiResource {
 			final Long makerCheckerId = this.portfolioMakerCheckerService.logNewEntry("CREATE_CLIENT", jsonRequestBody);
 			jsonResult = this.apiJsonSerializerService.serializeEntityIdentifier(EntityIdentifier.makerChecker(makerCheckerId));
 		} else {
-			final ClientCommand command = this.apiDataConversionService.convertJsonToClientCommand(null, jsonRequestBody);
-			
 			final Long clientId = this.clientWritePlatformService.enrollClient(command);
 	
 			jsonResult = this.apiJsonSerializerService.serializeEntityIdentifier(new EntityIdentifier(clientId));
@@ -415,15 +415,15 @@ public class ClientsApiResource {
 	public Response retrieveClientImage(
 			@PathParam("clientId") final Long clientId) {
 		
-		ClientData clientData = this.clientReadPlatformService.retrieveIndividualClient(clientId);
+		final ClientData clientData = this.clientReadPlatformService.retrieveIndividualClient(clientId);
 		//validate if client does not exist or image key is null
 		if(clientData == null){
 			throw new ClientNotFoundException(clientId);
 		}
-		else if(clientData.getImageKey()== null){
+		else if(clientData.imageKeyDoesNotExist()){
 			throw new ImageNotFoundException(ApplicationConstants.IMAGE_MANAGEMENT_ENTITY.CLIENTS, clientId);
 		}
-		return Response.ok().entity(Base64.encodeFromFile(clientData.getImageKey())).build();
+		return Response.ok().entity(Base64.encodeFromFile(clientData.imageKey())).build();
 	}
 
 	

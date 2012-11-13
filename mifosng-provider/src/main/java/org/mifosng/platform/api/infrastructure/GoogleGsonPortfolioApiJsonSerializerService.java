@@ -30,6 +30,7 @@ import org.mifosng.platform.api.data.LoanChargeData;
 import org.mifosng.platform.api.data.LoanProductData;
 import org.mifosng.platform.api.data.LoanReassignmentData;
 import org.mifosng.platform.api.data.LoanTransactionData;
+import org.mifosng.platform.api.data.MakerCheckerData;
 import org.mifosng.platform.api.data.NoteData;
 import org.mifosng.platform.api.data.OfficeData;
 import org.mifosng.platform.api.data.OfficeTransactionData;
@@ -209,6 +210,9 @@ public class GoogleGsonPortfolioApiJsonSerializerService implements PortfolioApi
     
 	private static final Set<String> CODE_DATA_PARAMETERS = new HashSet<String>(
 			Arrays.asList("id", "codename"));
+	
+	private static final Set<String> MAKER_CHECKER_DATA_PARAMETERS = new HashSet<String>(
+			Arrays.asList("id", "taskName", "madeOnDate"));
 	
 	private static final Set<String> SAVINGS_ACCOUNTS_DATA_PARAMETERS = new HashSet<String>(
 			Arrays.asList("id", "status", "externalId", "clientId", "clientName", "productId", "productName", "productType", "currencyData", "savingsDepostiAmountPerPeriod", "savingsFrequencyType", 
@@ -699,8 +703,10 @@ public class GoogleGsonPortfolioApiJsonSerializerService implements PortfolioApi
 	}
 
 	@Override
-	public String serializeCodeDataToJson(boolean prettyPrint,
-			Set<String> responseParameters, Collection<CodeData> codes) {
+	public String serializeCodeDataToJson(
+			final boolean prettyPrint,
+			final Set<String> responseParameters, 
+			final Collection<CodeData> codes) {
 		final Gson gsonDeserializer = helper
 				.createGsonBuilderWithParameterExclusionSerializationStrategy(
 						CODE_DATA_PARAMETERS, prettyPrint, responseParameters);
@@ -709,12 +715,26 @@ public class GoogleGsonPortfolioApiJsonSerializerService implements PortfolioApi
 	}
 
 	@Override
-	public String serializeCodeDataToJson(boolean prettyPrint,
-			Set<String> responseParameters, CodeData code) {
+	public String serializeCodeDataToJson(
+			final boolean prettyPrint,
+			final Set<String> responseParameters, 
+			final CodeData code) {
 		final Gson gsonDeserializer = helper
 				.createGsonBuilderWithParameterExclusionSerializationStrategy(
 						CODE_DATA_PARAMETERS, prettyPrint, responseParameters);
 		return helper.serializedJsonFrom(gsonDeserializer, code);
+	}
+	
+	@Override
+	public String serializeMakerCheckerDataToJson(
+			final boolean prettyPrint,
+			final Set<String> responseParameters, 
+			final Collection<MakerCheckerData> entries) {
+		final Gson gsonDeserializer = helper
+				.createGsonBuilderWithParameterExclusionSerializationStrategy(
+						MAKER_CHECKER_DATA_PARAMETERS, prettyPrint, responseParameters);
+		return helper.serializedJsonFrom(gsonDeserializer,
+				entries.toArray(new MakerCheckerData[entries.size()]));
 	}
 	
 	@Override

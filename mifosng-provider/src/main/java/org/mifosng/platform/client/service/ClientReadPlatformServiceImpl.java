@@ -128,13 +128,12 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     @Override
 	public ClientData retrieveNewClientDetails() {
 
-		AppUser currentUser = context.authenticatedUser();
+		final AppUser currentUser = context.authenticatedUser();
 
-		List<OfficeLookup> offices = new ArrayList<OfficeLookup>(
-				officeReadPlatformService.retrieveAllOfficesForLookup());
-
+		final List<OfficeLookup> offices = new ArrayList<OfficeLookup>(officeReadPlatformService.retrieveAllOfficesForLookup());
 		final Long officeId = currentUser.getOffice().getId();
-		return new ClientData(officeId, new LocalDate(), offices);
+		
+		return ClientData.template(officeId, new LocalDate(), offices);
 	}
 
 
@@ -151,22 +150,21 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 		public ClientData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
 				throws SQLException {
 
-			Long officeId = JdbcSupport.getLong(rs, "officeId");
-			Long id = JdbcSupport.getLong(rs, "id");
+			final Long officeId = JdbcSupport.getLong(rs, "officeId");
+			final Long id = JdbcSupport.getLong(rs, "id");
 			String firstname = rs.getString("firstname");
 			if (StringUtils.isBlank(firstname)) {
 				firstname = "";
 			}
-			String lastname = rs.getString("lastname");
-			String displayName = rs.getString("displayName");
-			String externalId = rs.getString("externalId");
-			LocalDate joinedDate = JdbcSupport.getLocalDate(rs, "joinedDate");
-			String imageKey = rs.getString("imageKey");
-
-			String officeName = rs.getString("officeName");
+			final String lastname = rs.getString("lastname");
+			final String displayName = rs.getString("displayName");
+			final String externalId = rs.getString("externalId");
+			final LocalDate joinedDate = JdbcSupport.getLocalDate(rs, "joinedDate");
+			final String imageKey = rs.getString("imageKey");
+			final String officeName = rs.getString("officeName");
 
 			return new ClientData(officeId, officeName, id, firstname,
-					lastname, displayName, externalId, joinedDate,imageKey);
+					lastname, displayName, externalId, joinedDate,imageKey, null);
 		}
 
 	}

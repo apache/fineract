@@ -3,6 +3,7 @@ package org.mifosng.platform.api.commands;
 import java.util.Set;
 
 import org.joda.time.LocalDate;
+import org.mifosng.platform.client.service.ClientCommandValidator;
 
 public class ClientCommand {
 
@@ -15,9 +16,18 @@ public class ClientCommand {
 	private final LocalDate joiningDate;
 	
 	private final Set<String> modifiedParameters;
+	
+	private final ClientCommandValidator validator;
 
-	public ClientCommand(final Set<String> modifiedParameters, final Long id, final String externalId, final String firstname, final String lastname, final String clientOrBusinessName, 
-			final Long officeId, final LocalDate joiningDate) {
+	public ClientCommand(
+			final Set<String> modifiedParameters, 
+			final Long id, 
+			final String externalId, 
+			final String firstname, 
+			final String lastname, 
+			final String clientOrBusinessName, 
+			final Long officeId, 
+			final LocalDate joiningDate) {
 		this.modifiedParameters = modifiedParameters;
 		this.id = id;
 		this.externalId = externalId;
@@ -26,6 +36,7 @@ public class ClientCommand {
 		this.clientOrBusinessName = clientOrBusinessName;
 		this.officeId = officeId;
 		this.joiningDate = joiningDate;
+		this.validator = new ClientCommandValidator(this);
 	}
 
 	public Long getId() {
@@ -78,5 +89,9 @@ public class ClientCommand {
 	
 	public boolean isOfficeChanged() {
 		return this.modifiedParameters.contains("officeId");
+	}
+
+	public void validateForCreate() {
+		this.validator.validateForCreate();
 	}
 }

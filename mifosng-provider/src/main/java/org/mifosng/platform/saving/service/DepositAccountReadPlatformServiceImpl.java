@@ -99,13 +99,13 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 			CurrencyData currency = new CurrencyData(selectedProduct.getCurrencyCode(), "", selectedProduct.getDigitsAfterDecimal(), "", "");
 			
 			accountData = new DepositAccountData(
-					clientAccount.getId(), clientAccount.getDisplayName(), selectedProduct.getId(), selectedProduct.getName(),
+					clientAccount.id(), clientAccount.displayName(), selectedProduct.getId(), selectedProduct.getName(),
 					currency, selectedProduct.getMinimumBalance(), selectedProduct.getMaturityDefaultInterestRate(), 
 					selectedProduct.getTenureInMonths(), selectedProduct.getInterestCompoundedEvery(), selectedProduct.getInterestCompoundedEveryPeriodType(), 
 					selectedProduct.isRenewalAllowed(), selectedProduct.isPreClosureAllowed(), 
 					selectedProduct.getPreClosureInterestRate(),selectedProduct.isInterestCompoundingAllowed());
 		} else {
-			accountData = DepositAccountData.createFrom(clientAccount.getId(), clientAccount.getDisplayName());
+			accountData = DepositAccountData.createFrom(clientAccount.id(), clientAccount.displayName());
 		}
 		
 		return accountData;
