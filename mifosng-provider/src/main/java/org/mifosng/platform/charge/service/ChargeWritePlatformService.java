@@ -5,12 +5,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface ChargeWritePlatformService {
 
-	@PreAuthorize(value = "hasAnyRole('ORGANISATION_ADMINISTRATION_SUPER_USER', 'CREATE_CHARGE')")
+	@PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'ORGANISATION_ADMINISTRATION_SUPER_USER', 'CREATE_CHARGE')")
     Long createCharge(final ChargeCommand command);
 
-	@PreAuthorize(value = "hasAnyRole('ORGANISATION_ADMINISTRATION_SUPER_USER', 'UPDATE_CHARGE')")
+	@PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'ORGANISATION_ADMINISTRATION_SUPER_USER', 'UPDATE_CHARGE')")
     Long updateCharge(final ChargeCommand command);
 
-	@PreAuthorize(value = "hasAnyRole('ORGANISATION_ADMINISTRATION_SUPER_USER', 'DELETE_CHARGE')")
+	@PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'ORGANISATION_ADMINISTRATION_SUPER_USER', 'DELETE_CHARGE')")
     Long deleteCharge(final Long chargeId);
 }
