@@ -6,12 +6,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface OfficeWritePlatformService {
 
-	@PreAuthorize(value = "hasRole('ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE')")
+	@PreAuthorize(value = "hasRole('ORGANISATION_ADMINISTRATION_SUPER_USER')")
 	Long createOffice(final OfficeCommand command);
 	
-	@PreAuthorize(value = "hasRole('ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE')")
+	@PreAuthorize(value = "hasRole('ORGANISATION_ADMINISTRATION_SUPER_USER')")
 	Long updateOffice(final OfficeCommand command);
 
-	@PreAuthorize(value = "hasRole('ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE')")
+	@PreAuthorize(value = "hasRole('ORGANISATION_ADMINISTRATION_SUPER_USER')")
 	Long externalBranchMoneyTransfer(BranchMoneyTransferCommand command);
 }

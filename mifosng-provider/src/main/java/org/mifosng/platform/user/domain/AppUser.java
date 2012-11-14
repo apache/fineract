@@ -17,6 +17,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import org.mifosng.platform.api.commands.UserCommand;
+import org.mifosng.platform.exceptions.NoAuthorizationException;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
 import org.mifosng.platform.infrastructure.PlatformUser;
 import org.mifosng.platform.organisation.domain.Office;
@@ -235,29 +236,28 @@ public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements
 	}
 
 	public boolean canNotApproveLoanInPast() {
-		return hasNotPermissionForAnyOf("CAN_APPROVE_LOAN_IN_THE_PAST_ROLE",
-				"PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE");
+		return hasNotPermissionForAnyOf("APPROVEINPAST_LOAN",
+				"PORTFOLIO_MANAGEMENT_SUPER_USER");
 	}
 
 	public boolean canNotRejectLoanInPast() {
-		return hasNotPermissionForAnyOf("CAN_REJECT_LOAN_IN_THE_PAST_ROLE",
-				"PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE");
+		return hasNotPermissionForAnyOf("REJECTINPAST_LOAN",
+				"PORTFOLIO_MANAGEMENT_SUPER_USER");
 	}
 
 	public boolean canNotWithdrawByClientLoanInPast() {
-		return hasNotPermissionForAnyOf("CAN_WITHDRAW_LOAN_IN_THE_PAST_ROLE",
-				"PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE");
+		return hasNotPermissionForAnyOf("WITHDRAWINPAST_LOAN",
+				"PORTFOLIO_MANAGEMENT_SUPER_USER");
 	}
 
 	public boolean canNotDisburseLoanInPast() {
-		return hasNotPermissionForAnyOf("CAN_DISBURSE_LOAN_IN_THE_PAST_ROLE",
-				"PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE");
+		return hasNotPermissionForAnyOf("DISBURSEINPAST_LOAN",
+				"PORTFOLIO_MANAGEMENT_SUPER_USER");
 	}
 
 	public boolean canNotMakeRepaymentOnLoanInPast() {
-		return hasNotPermissionForAnyOf(
-				"CAN_MAKE_LOAN_REPAYMENT_IN_THE_PAST_ROLE",
-				"PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE");
+		return hasNotPermissionForAnyOf("REPAYMENTINPAST_LOAN",
+				"PORTFOLIO_MANAGEMENT_SUPER_USER");
 	}
 
 	public boolean hasNotPermissionForReport(String reportName) {
@@ -319,6 +319,35 @@ public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements
 			}
 		}
 		return hasNotPermission;
+	}
+
+	public void validateHasReadPermission(final String entityType) {
+
+		String authorizationMessage = "User has no authority to view "
+				+ entityType.toLowerCase() + "s";
+		String matchPermission = "READ_" + entityType.toUpperCase();
+
+		if (hasNotPermissionForAnyOf("ALL_FUNCTIONS_READ", matchPermission))
+			throw new NoAuthorizationException(authorizationMessage);
+
+		String higherPermission = "";
+		if (entityType.equalsIgnoreCase("CHARGE")) {
+			higherPermission = "ORGANISATION_ADMINISTRATION_SUPER_USER";
+		} else if (entityType.equalsIgnoreCase("CLIENT")) {
+			higherPermission = "PORTFOLIO_MANAGEMENT_SUPER_USER";
+		} else if (entityType.equalsIgnoreCase("CLIENTNOTE")) {
+			higherPermission = "PORTFOLIO_MANAGEMENT_SUPER_USER";
+		} else if (entityType.equalsIgnoreCase("CLIENTIDENTIFIER")) {
+			higherPermission = "PORTFOLIO_MANAGEMENT_SUPER_USER";
+		} else if (entityType.equalsIgnoreCase("CLIENTIMAGE")) {
+			higherPermission = "PORTFOLIO_MANAGEMENT_SUPER_USER";
+		}
+
+		if (!(higherPermission.equals(""))) {
+			if (hasNotPermissionForAnyOf(higherPermission))
+				throw new NoAuthorizationException(authorizationMessage);
+		}
+
 	}
 
 	private boolean hasPermissionTo(final String permissionCode) {

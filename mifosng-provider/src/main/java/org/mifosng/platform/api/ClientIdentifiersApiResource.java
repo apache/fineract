@@ -28,6 +28,7 @@ import org.mifosng.platform.client.service.ClientReadPlatformService;
 import org.mifosng.platform.client.service.ClientWritePlatformService;
 import org.mifosng.platform.exceptions.DuplicateClientIdentifierException;
 import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
+import org.mifosng.platform.security.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -52,13 +53,23 @@ public class ClientIdentifiersApiResource {
 	private static final Set<String> typicalResponseParameters = new HashSet<String>(
 			Arrays.asList("id", "clientId", "documentTypeId", "description",
 					"documentKey", "documentTypeName"));
+	
+	private final String entityType = "CLIENTIDENTIFIER";
+	private final PlatformSecurityContext context;
 
+	@Autowired
+	public ClientIdentifiersApiResource(final PlatformSecurityContext context) {
+		this.context = context;
+	}
+	
 	@GET
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	public String retrieveAllClientIdentifiers(@Context final UriInfo uriInfo,
 			@PathParam("clientId") final Long clientId) {
 
+		context.authenticatedUser().validateHasReadPermission(entityType);
+		
 		Set<String> responseParameters = ApiParameterHelper
 				.extractFieldsForResponseIfProvided(uriInfo
 						.getQueryParameters());
@@ -82,6 +93,8 @@ public class ClientIdentifiersApiResource {
 	@Produces({ MediaType.APPLICATION_JSON })
 	public String newClientDetails(@Context final UriInfo uriInfo) {
 
+		context.authenticatedUser().validateHasReadPermission(entityType);
+		
 		Set<String> responseParameters = ApiParameterHelper
 				.extractFieldsForResponseIfProvided(uriInfo
 						.getQueryParameters());
@@ -132,6 +145,8 @@ public class ClientIdentifiersApiResource {
 			@PathParam("identifierId") final Long clientIdentifierId,
 			@Context final UriInfo uriInfo) {
 
+		context.authenticatedUser().validateHasReadPermission(entityType);
+		
 		final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (responseParameters.isEmpty()) {
 			responseParameters.addAll(typicalResponseParameters);

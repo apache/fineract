@@ -116,7 +116,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		validator.validate();
 
 		LocalDate submittedOn = command.getSubmittedOnDate();
-		if (this.isBeforeToday(submittedOn) && currentUser.hasNotPermissionForAnyOf("CAN_SUBMIT_HISTORIC_LOAN_APPLICATION_ROLE", "PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE")) {
+		if (this.isBeforeToday(submittedOn) && currentUser.hasNotPermissionForAnyOf("CREATEHISTORIC_LOAN", "PORTFOLIO_MANAGEMENT_SUPER_USER")) {
 			throw new NoAuthorizationException("Cannot add backdated loan.");
 		}
 
@@ -142,7 +142,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
 		// TODO - fix up permissions for loan modification
 		final LocalDate submittedOn = command.getSubmittedOnDate();
-		if (this.isBeforeToday(submittedOn) && currentUser.hasNotPermissionForAnyOf("CAN_SUBMIT_HISTORIC_LOAN_APPLICATION_ROLE", "PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE")) {
+		if (this.isBeforeToday(submittedOn) && currentUser.hasNotPermissionForAnyOf("CREATEHISTORIC_LOAN", "PORTFOLIO_MANAGEMENT_SUPER_USER")) {
 			throw new NoAuthorizationException("Cannot modify backdated loan.");
 		}
 

@@ -12,63 +12,63 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface LoanWritePlatformService {
 	
-	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE', 'CAN_SUBMIT_NEW_LOAN_APPLICATION_ROLE', 'CAN_SUBMIT_HISTORIC_LOAN_APPLICATION_ROLE')")
+	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER', 'CREATE_LOAN', 'CREATEHISTORIC_LOAN')")
 	EntityIdentifier submitLoanApplication(LoanApplicationCommand command);
 	
-	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE', 'CAN_SUBMIT_NEW_LOAN_APPLICATION_ROLE', 'CAN_SUBMIT_HISTORIC_LOAN_APPLICATION_ROLE')")
+	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER', 'CREATE_LOAN', 'CREATEHISTORIC_LOAN')")
 	EntityIdentifier modifyLoanApplication(LoanApplicationCommand command);
 	
-	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE', 'CAN_DELETE_LOAN_THAT_IS_SUBMITTED_AND_NOT_APPROVED')")
+	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER', 'DELETE_LOAN')")
 	EntityIdentifier deleteLoan(Long loanId);
 	
-	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE', 'CAN_APPROVE_LOAN_ROLE', 'CAN_APPROVE_LOAN_IN_THE_PAST_ROLE')")
+	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER', 'APPROVE_LOAN', 'APPROVEINPAST_LOAN')")
 	EntityIdentifier approveLoanApplication(LoanStateTransitionCommand command);
 
-	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE', 'CAN_UNDO_LOAN_APPROVAL_ROLE')")
+	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER', 'APPROVALUNDO_LOAN')")
 	EntityIdentifier undoLoanApproval(UndoStateTransitionCommand command);
 
-	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE', 'CAN_REJECT_LOAN_ROLE', 'CAN_REJECT_LOAN_IN_THE_PAST_ROLE')")
+	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER', 'REJECT_LOAN', 'REJECTINPAST_LOAN')")
 	EntityIdentifier rejectLoan(LoanStateTransitionCommand command);
 
-	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE', 'CAN_WITHDRAW_LOAN_ROLE', 'CAN_WITHDRAW_LOAN_IN_THE_PAST_ROLE')")
+	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER', 'WITHDRAW_LOAN', 'WITHDRAWINPAST_LOAN')")
 	EntityIdentifier withdrawLoan(LoanStateTransitionCommand command);
 	
-	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE', 'CAN_DISBURSE_LOAN_ROLE', 'CAN_DISBURSE_LOAN_IN_THE_PAST_ROLE')")
+	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER', 'DISBURSE_LOAN', 'DISBURSEINPAST_LOAN')")
 	EntityIdentifier disburseLoan(LoanStateTransitionCommand command);
 
-	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE', 'CAN_UNDO_LOAN_DISBURSAL_ROLE')")
+	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER', 'DISBURSALUNDO_LOAN')")
 	public EntityIdentifier undoLoanDisbursal(UndoStateTransitionCommand command);
 	
-	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE', 'CAN_MAKE_LOAN_REPAYMENT_ROLE', 'CAN_MAKE_LOAN_REPAYMENT_IN_THE_PAST_ROLE')")
+	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER', 'REPAYMENT_LOAN', 'REPAYMENTINPAST_LOAN')")
 	public EntityIdentifier makeLoanRepayment(LoanTransactionCommand command);
 
-	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE')")
+	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER')")
 	EntityIdentifier adjustLoanTransaction(AdjustLoanTransactionCommand command);
 
-	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE')")
+	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER')")
 	EntityIdentifier waiveInterestOnLoan(LoanTransactionCommand command);
 	
-	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE')")
+	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER')")
 	EntityIdentifier writeOff(LoanTransactionCommand command);
 	
-	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE')")
+	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER')")
 	EntityIdentifier closeLoan(LoanTransactionCommand command);
 
-	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE')")
+	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER')")
 	EntityIdentifier closeAsRescheduled(LoanTransactionCommand command);
 	
-	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE')")
+	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER')")
     EntityIdentifier addLoanCharge(LoanChargeCommand command);
 
-	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE')")
+	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER')")
     EntityIdentifier updateLoanCharge(LoanChargeCommand command);
 
-    @PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE')")
+    @PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER')")
     EntityIdentifier deleteLoanCharge(final Long loanId, final Long loanChargeId);
     
-    @PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE')")
+    @PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER')")
 	EntityIdentifier waiveLoanCharge(LoanChargeCommand command);
 
-    @PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE')")
+    @PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER')")
     EntityIdentifier bulkLoanReassignment(final BulkLoanReassignmentCommand command);
 }

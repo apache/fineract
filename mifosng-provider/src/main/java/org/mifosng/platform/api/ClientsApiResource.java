@@ -45,6 +45,7 @@ import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
 import org.mifosng.platform.makerchecker.service.PortfolioMakerCheckerReadPlatformService;
 import org.mifosng.platform.makerchecker.service.PortfolioMakerCheckerWriteService;
 import org.mifosng.platform.organisation.service.OfficeReadPlatformService;
+import org.mifosng.platform.security.PlatformSecurityContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,6 +85,13 @@ public class ClientsApiResource {
 	@Autowired
 	private PortfolioMakerCheckerReadPlatformService makerCheckerReadPlatformService;
 
+	private final PlatformSecurityContext context;
+
+	@Autowired
+	public ClientsApiResource(final PlatformSecurityContext context) {
+		this.context = context;
+	}
+	
 	@GET
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
@@ -96,6 +104,8 @@ public class ClientsApiResource {
 			@QueryParam("lastName") final String lastName,
 			@QueryParam("underHierarchy") final String hierarchy) {
 
+		context.authenticatedUser().validateHasReadPermission("CLIENT");
+		
 		final String extraCriteria = getClientCriteria(sqlSearch, officeId, externalId, displayName, firstName, lastName, hierarchy);
 		
 		final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
@@ -157,6 +167,8 @@ public class ClientsApiResource {
 	public String retrieveClientData(
 			@PathParam("clientId") final Long clientId,
 			@Context final UriInfo uriInfo) {
+
+		context.authenticatedUser().validateHasReadPermission("CLIENT");
 		
 		final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
@@ -176,6 +188,8 @@ public class ClientsApiResource {
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
 	public String newClientDetails(@Context final UriInfo uriInfo) {
+
+		context.authenticatedUser().validateHasReadPermission("CLIENT");
 		
 		final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
@@ -246,6 +260,8 @@ public class ClientsApiResource {
 	public String retrieveClientAccount(@PathParam("clientId") final Long clientId, 
 										@Context final UriInfo uriInfo) {
 
+		context.authenticatedUser().validateHasReadPermission("CLIENT");
+		
 		Set<String> typicalResponseParameters = new HashSet<String>(
 				Arrays.asList("pendingApprovalLoans", "awaitingDisbursalLoans", "openLoans", "closedLoans", 
 						"anyLoanCount", "pendingApprovalLoanCount", "awaitingDisbursalLoanCount", "activeLoanCount", "closedLoanCount",
@@ -271,6 +287,8 @@ public class ClientsApiResource {
 	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveAllClientNotes(@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
 
+		context.authenticatedUser().validateHasReadPermission("CLIENTNOTE");
+		
 		Set<String> typicalResponseParameters = new HashSet<String>(
 				Arrays.asList("id", "clientId", "loanId", "loanTransactionId", "noteType", "note", "createdById", "createdByUsername", 
 						"createdOn", "updatedById", "updatedByUsername", "updatedOn")
@@ -308,6 +326,8 @@ public class ClientsApiResource {
 			@PathParam("clientId") final Long clientId,
 			@PathParam("noteId") final Long noteId, 
 			@Context final UriInfo uriInfo) {
+
+		context.authenticatedUser().validateHasReadPermission("CLIENTNOTE");
 		
 		Set<String> typicalResponseParameters = new HashSet<String>(
 				Arrays.asList("id", "clientId", "loanId", "loanTransactionId", "noteType", "note", "createdById", "createdByUsername", 
@@ -414,6 +434,8 @@ public class ClientsApiResource {
 	@Produces({MediaType.APPLICATION_JSON})
 	public Response retrieveClientImage(
 			@PathParam("clientId") final Long clientId) {
+
+		context.authenticatedUser().validateHasReadPermission("CLIENTIMAGE");
 		
 		final ClientData clientData = this.clientReadPlatformService.retrieveIndividualClient(clientId);
 		//validate if client does not exist or image key is null

@@ -11,36 +11,36 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface ClientWritePlatformService {
 
-	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE', 'CAN_ENROLL_NEW_CLIENT_ROLE')")
+	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER', 'CREATE_CLIENT')")
 	Long enrollClient(ClientCommand command);
 	
-	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE')")
+	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER', 'UPDATE_CLIENT')")
 	EntityIdentifier updateClientDetails(ClientCommand command);
 	
-	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE')")
-	EntityIdentifier saveOrUpdateClientImage(Long clientId, String imageName, InputStream inputStream);
-	
-	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE')")
-	EntityIdentifier saveOrUpdateClientImage(Long clientId, Base64EncodedImage encodedImage);
-	
-	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE')")
-	EntityIdentifier deleteClientImage(Long clientId);
-
-	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE')")
-	EntityIdentifier addClientNote(NoteCommand command);
-
-	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE')")
-	EntityIdentifier updateNote(NoteCommand command);
-
-	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE', 'CAN_DELETE_CLIENT_ROLE')")
+	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER', 'DELETE_CLIENT')")
 	EntityIdentifier deleteClient(Long clientId);
 	
-	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE')")
+	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER', 'CREATE_CLIENTIMAGE')")
+	EntityIdentifier saveOrUpdateClientImage(Long clientId, String imageName, InputStream inputStream);
+	
+	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER', 'CREATE_CLIENTIMAGE')")
+	EntityIdentifier saveOrUpdateClientImage(Long clientId, Base64EncodedImage encodedImage);
+	
+	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER', 'DELETE_CLIENTIMAGE')")
+	EntityIdentifier deleteClientImage(Long clientId);
+
+	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER', 'CREATE_CLIENTNOTE')")
+	EntityIdentifier addClientNote(NoteCommand command);
+
+	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER', 'UPDATE_CLIENTNOTE')")
+	EntityIdentifier updateNote(NoteCommand command);
+
+	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER', 'CREATE_CLIENTIDENTIFIER')")
 	Long addClientIdentifier(ClientIdentifierCommand clientIdentifierCommand);
 	
-	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE')")
+	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER', 'UPDATE_CLIENTIDENTIFIER')")
 	EntityIdentifier updateClientIdentifier(ClientIdentifierCommand clientIdentifierCommand);
 	
-	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE')")
+	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER', 'DELETE_CLIENTIDENTIFIER')")
 	EntityIdentifier deleteClientIdentifier(Long clientIdentifierId);
 }

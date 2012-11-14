@@ -8,14 +8,14 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface DocumentWritePlatformService {
 
-	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE')")
+	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER')")
 	Long createDocument(DocumentCommand documentCommand, InputStream inputStream);
 
-	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE')")
+	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER')")
 	EntityIdentifier updateDocument(DocumentCommand documentCommand,
 			InputStream inputStream);
 
-	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE')")
+	@PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER')")
 	EntityIdentifier deleteDocument(DocumentCommand documentCommand);
 
 }

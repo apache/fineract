@@ -24,6 +24,7 @@ import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService
 import org.mifosng.platform.charge.service.ChargeReadPlatformService;
 import org.mifosng.platform.charge.service.ChargeWritePlatformService;
 import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
+import org.mifosng.platform.security.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -32,7 +33,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope("singleton")
 public class ChargesApiResource {
-
+	
     @Autowired
     private ChargeReadPlatformService chargeReadPlatformService;
 
@@ -44,12 +45,22 @@ public class ChargesApiResource {
     
     @Autowired
     private PortfolioApiJsonSerializerService apiJsonSerializerService;
+	
+	private final String entityType = "CHARGE";
+	private final PlatformSecurityContext context;
 
+	@Autowired
+	public ChargesApiResource(final PlatformSecurityContext context) {
+		this.context = context;
+	}
+	
     @GET
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     public String retrieveAllCharges(@Context final UriInfo uriInfo){
 
+    	context.authenticatedUser().validateHasReadPermission(entityType);
+    	
         final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
         final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 
@@ -63,7 +74,9 @@ public class ChargesApiResource {
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     public String retrieveCharge(@PathParam("chargeId") final Long chargeId, @Context final UriInfo uriInfo){
-        
+
+    	context.authenticatedUser().validateHasReadPermission(entityType);
+		
     	final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 
         final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
@@ -83,7 +96,9 @@ public class ChargesApiResource {
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     public String retrieveNewChargeDetails(@Context final UriInfo uriInfo) {
-    	
+
+    	context.authenticatedUser().validateHasReadPermission(entityType);
+		
     	final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 
     	final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());

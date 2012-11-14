@@ -6,9 +6,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface LoanProductWritePlatformService {
 
-	@PreAuthorize(value = "hasRole('ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE')")
+	@PreAuthorize(value = "hasRole('ORGANISATION_ADMINISTRATION_SUPER_USER')")
 	EntityIdentifier createLoanProduct(LoanProductCommand command);
 	
-	@PreAuthorize(value = "hasRole('ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE')")
+	@PreAuthorize(value = "hasRole('ORGANISATION_ADMINISTRATION_SUPER_USER')")
 	EntityIdentifier updateLoanProduct(LoanProductCommand command);
 }
