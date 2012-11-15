@@ -85,12 +85,8 @@ public class ClientsApiResource {
 	@Autowired
 	private PortfolioMakerCheckerReadPlatformService makerCheckerReadPlatformService;
 
-	private final PlatformSecurityContext context;
-
-	@Autowired
-	public ClientsApiResource(final PlatformSecurityContext context) {
-		this.context = context;
-	}
+    @Autowired
+    private PlatformSecurityContext context;
 	
 	@GET
 	@Consumes({MediaType.APPLICATION_JSON})

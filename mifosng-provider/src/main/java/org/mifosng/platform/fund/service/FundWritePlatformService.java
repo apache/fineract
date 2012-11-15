@@ -5,9 +5,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface FundWritePlatformService {
 
-	@PreAuthorize(value = "hasRole('ORGANISATION_ADMINISTRATION_SUPER_USER')")
+	@PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'ORGANISATION_ADMINISTRATION_SUPER_USER', 'CREATE_FUND')")
 	Long createFund(final FundCommand command);
 	
-	@PreAuthorize(value = "hasRole('ORGANISATION_ADMINISTRATION_SUPER_USER')")
+	@PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'ORGANISATION_ADMINISTRATION_SUPER_USER', 'UPDATE_FUND')")
 	Long updateFund(final FundCommand command);
 }

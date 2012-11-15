@@ -32,12 +32,8 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class ReportsApiResource {
 
-	private final PlatformSecurityContext context;
-
-	@Autowired
-	public ReportsApiResource(final PlatformSecurityContext context) {
-		this.context = context;
-	}
+    @Autowired
+    private PlatformSecurityContext context;
 
 	@Autowired
 	private ReadReportingService readExtraDataAndReportingService;

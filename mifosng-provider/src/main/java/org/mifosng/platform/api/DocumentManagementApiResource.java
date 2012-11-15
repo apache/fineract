@@ -31,6 +31,7 @@ import org.mifosng.platform.common.FileUtils;
 import org.mifosng.platform.documentmanagement.service.DocumentReadPlatformService;
 import org.mifosng.platform.documentmanagement.service.DocumentWritePlatformService;
 import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
+import org.mifosng.platform.security.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -57,6 +58,10 @@ public class DocumentManagementApiResource {
 			Arrays.asList("id", "parentEntityType", "parentEntityId", "name",
 					"fileName", "type", "size", "description"));
 
+	private final String SystemEntityType = "DOCUMENT";
+    @Autowired
+    private PlatformSecurityContext context;
+	
 	/**
 	 * @param uriInfo
 	 * @param entityType
@@ -70,6 +75,8 @@ public class DocumentManagementApiResource {
 			@PathParam("entityType") String entityType,
 			@PathParam("entityId") Long entityId) {
 
+    	context.authenticatedUser().validateHasReadPermission(SystemEntityType);
+    	
 		Set<String> responseParameters = ApiParameterHelper
 				.extractFieldsForResponseIfProvided(uriInfo
 						.getQueryParameters());
@@ -204,6 +211,8 @@ public class DocumentManagementApiResource {
 			@PathParam("documentId") Long documentId,
 			@Context final UriInfo uriInfo) {
 
+    	context.authenticatedUser().validateHasReadPermission(SystemEntityType);
+    	
 		Set<String> responseParameters = ApiParameterHelper
 				.extractFieldsForResponseIfProvided(uriInfo
 						.getQueryParameters());
@@ -235,6 +244,8 @@ public class DocumentManagementApiResource {
 			@PathParam("entityId") Long entityId,
 			@PathParam("documentId") Long documentId) {
 
+    	context.authenticatedUser().validateHasReadPermission(SystemEntityType);
+    	
 		DocumentData documentData = this.documentReadPlatformService
 				.retrieveDocument(entityType, entityId, documentId);
 		File file = new File(documentData.getLocation());

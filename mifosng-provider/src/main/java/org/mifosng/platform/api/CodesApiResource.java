@@ -46,12 +46,8 @@ public class CodesApiResource {
 	private PortfolioApiJsonSerializerService apiJsonSerializerService;
 
 	private final String entityType = "CODE";
-	private final PlatformSecurityContext context;
-
-	@Autowired
-	public CodesApiResource(final PlatformSecurityContext context) {
-		this.context = context;
-	}
+    @Autowired
+    private PlatformSecurityContext context;
 	
 	@GET
 	@Consumes({MediaType.APPLICATION_JSON})

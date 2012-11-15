@@ -55,12 +55,8 @@ public class ClientIdentifiersApiResource {
 					"documentKey", "documentTypeName"));
 	
 	private final String entityType = "CLIENTIDENTIFIER";
-	private final PlatformSecurityContext context;
-
-	@Autowired
-	public ClientIdentifiersApiResource(final PlatformSecurityContext context) {
-		this.context = context;
-	}
+    @Autowired
+    private PlatformSecurityContext context;
 	
 	@GET
 	@Consumes({ MediaType.APPLICATION_JSON })

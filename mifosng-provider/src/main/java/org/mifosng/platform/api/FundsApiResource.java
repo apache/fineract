@@ -23,6 +23,7 @@ import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService
 import org.mifosng.platform.fund.service.FundReadPlatformService;
 import org.mifosng.platform.fund.service.FundWritePlatformService;
 import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
+import org.mifosng.platform.security.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -43,12 +44,18 @@ public class FundsApiResource {
 	
 	@Autowired
 	private PortfolioApiJsonSerializerService apiJsonSerializerService;
+
+	private final String entityType = "FUND";
+    @Autowired
+    private PlatformSecurityContext context;
 	
 	@GET
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveFunds(@Context final UriInfo uriInfo) {
 
+    	context.authenticatedUser().validateHasReadPermission(entityType);
+    	
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 		
@@ -73,8 +80,10 @@ public class FundsApiResource {
 	@Path("{fundId}")
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
-	public String retreiveOffice(@PathParam("fundId") final Long fundId, @Context final UriInfo uriInfo) {
-		
+	public String retreiveFund(@PathParam("fundId") final Long fundId, @Context final UriInfo uriInfo) {
+
+    	context.authenticatedUser().validateHasReadPermission(entityType);
+    	
 		final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 		

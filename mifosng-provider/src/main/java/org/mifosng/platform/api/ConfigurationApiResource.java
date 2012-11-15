@@ -43,12 +43,9 @@ public class ConfigurationApiResource {
 	@Autowired
 	private PortfolioApiJsonSerializerService apiJsonSerializerService;
 
-	private final PlatformSecurityContext context;
-
-	@Autowired
-	public ConfigurationApiResource(final PlatformSecurityContext context) {
-		this.context = context;
-	}
+    @Autowired
+    private PlatformSecurityContext context;
+    
 	@GET
 	@Path("currency")
 	@Consumes({MediaType.APPLICATION_JSON})

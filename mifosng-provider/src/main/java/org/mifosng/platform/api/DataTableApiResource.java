@@ -47,12 +47,8 @@ public class DataTableApiResource {
 	private final static Logger logger = LoggerFactory
 			.getLogger(DataTableApiResource.class);
 
-	private final PlatformSecurityContext context;
-
-	@Autowired
-	public DataTableApiResource(final PlatformSecurityContext context) {
-		this.context = context;
-	}
+    @Autowired
+    private PlatformSecurityContext context;
 
 	@Autowired
 	private GenericDataService genericDataService;

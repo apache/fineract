@@ -346,6 +346,10 @@ public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements
 			higherPermission = "ORGANISATION_ADMINISTRATION_SUPER_USER";
 		} else if (entityType.equalsIgnoreCase("CURRENCY")) {
 			higherPermission = "ORGANISATION_ADMINISTRATION_SUPER_USER";
+		} else if (entityType.equalsIgnoreCase("DOCUMENTMAN")) {
+			higherPermission = "PORTFOLIO_MANAGEMENT_SUPER_USER";
+		} else if (entityType.equalsIgnoreCase("FUND")) {
+			higherPermission = "ORGANISATION_ADMINISTRATION_SUPER_USER";
 		}
 
 		if (!(higherPermission.equals(""))) {

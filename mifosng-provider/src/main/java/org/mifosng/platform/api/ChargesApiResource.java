@@ -47,12 +47,8 @@ public class ChargesApiResource {
     private PortfolioApiJsonSerializerService apiJsonSerializerService;
 	
 	private final String entityType = "CHARGE";
-	private final PlatformSecurityContext context;
-
-	@Autowired
-	public ChargesApiResource(final PlatformSecurityContext context) {
-		this.context = context;
-	}
+    @Autowired
+    private PlatformSecurityContext context;
 	
     @GET
     @Consumes({MediaType.APPLICATION_JSON})
