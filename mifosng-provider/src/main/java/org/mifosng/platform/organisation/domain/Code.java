@@ -5,7 +5,11 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.apache.commons.lang.StringUtils;
+import org.mifosng.platform.api.commands.CodeCommand;
+
 import org.springframework.data.jpa.domain.AbstractPersistable;
+
 
 @Entity
 @Table(name = "m_code", uniqueConstraints = { @UniqueConstraint(columnNames = { "code_name" }, name = "code_name") })
@@ -25,6 +29,13 @@ public class Code extends AbstractPersistable<Long> {
 
 	private Code(final String codeName) {
 		this.codeName = codeName;
+	}
+
+	public void update(final CodeCommand command)
+	{
+		if (command.isNameChanged()) {
+			this.codeName = StringUtils.defaultIfEmpty(command.getCodeName(), null);
+		}
 	}
 
 }
