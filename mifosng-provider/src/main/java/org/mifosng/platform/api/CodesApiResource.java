@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -41,26 +42,30 @@ public class CodesApiResource {
 
 	@Autowired
 	private PortfolioApiDataConversionService apiDataConversionService;
-	
+
 	@Autowired
 	private PortfolioApiJsonSerializerService apiJsonSerializerService;
 
 	private final String entityType = "CODE";
-    @Autowired
-    private PlatformSecurityContext context;
-	
+	private final PlatformSecurityContext context;
+
+	@Autowired
+	public CodesApiResource(final PlatformSecurityContext context) {
+		this.context = context;
+	}
+
 	@GET
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveCodes(@Context final UriInfo uriInfo) {
 
     	context.authenticatedUser().validateHasReadPermission(entityType);
-    	
+
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-		
+
 		final Collection<CodeData> codes = this.readPlatformService.retrieveAllCodes();
-		
+
 		return this.apiJsonSerializerService.serializeCodeDataToJson(prettyPrint, responseParameters, codes);
 	}
 
@@ -68,21 +73,49 @@ public class CodesApiResource {
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
 	public Response createCode(final String jsonRequestBody) {
-		
+
 		final CodeCommand command = this.apiDataConversionService.convertJsonToCodeCommand(null, jsonRequestBody);
-		
+
 		final Long id = this.writePlatformService.createCode(command);
 
 		return Response.ok().entity(new EntityIdentifier(id)).build();
 	}
 
+	@GET
+	@Path("{codeId}")
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
+	public String retreiveOffice(@PathParam("codeId") final Long codeId, @Context final UriInfo uriInfo) {
+
+		final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+		final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+
+		final CodeData code = this.readPlatformService.retrieveCode(codeId);
+
+		return this.apiJsonSerializerService.serializeCodeDataToJson(prettyPrint, responseParameters, code);
+	}
 
 	@PUT
 	@Path("{Id}")
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
-	public Response updateCode(@PathParam("Id") final Long Id, final String jsonRequestBody) {
+	public Response updateCode(@PathParam("Id") final Long codeId, final String jsonRequestBody) {
 
-		return null;
+		final CodeCommand command = this.apiDataConversionService.convertJsonToCodeCommand(codeId, jsonRequestBody);
+		final Long entityId = this.writePlatformService.updateCode(command);
+		return Response.ok().entity(new EntityIdentifier(entityId)).build();
+
 	}
+
+	@DELETE
+	@Path("{codeId}")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public Response deleteCodeApplication(@PathParam("codeId") final Long Id) {
+
+		EntityIdentifier identifier = this.writePlatformService.deleteCode(Id);
+
+		return Response.ok().entity(identifier).build();
+	}
+
 }

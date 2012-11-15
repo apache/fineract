@@ -25,9 +25,9 @@ public class CodeCommand {
 	public String getCodeName() {
 		return codeName;
 	}
-	
+
 	public boolean isNameChanged() {
-		return this.modifiedParameters.contains("codename");
+		return this.modifiedParameters.contains("name");
 	}
 
 }
