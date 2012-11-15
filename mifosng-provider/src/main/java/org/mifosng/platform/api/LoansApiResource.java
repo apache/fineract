@@ -52,6 +52,7 @@ import org.mifosng.platform.loan.service.LoanReadPlatformService;
 import org.mifosng.platform.loan.service.LoanWritePlatformService;
 import org.mifosng.platform.loanproduct.service.LoanDropdownReadPlatformService;
 import org.mifosng.platform.loanproduct.service.LoanProductReadPlatformService;
+import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.staff.service.StaffReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -92,7 +93,10 @@ public class LoansApiResource {
 	
 	@Autowired
 	private StaffReadPlatformService staffReadPlatformService;
-	
+
+    @Autowired
+    private PlatformSecurityContext context;
+    
 	@GET
 	@Path("template")
 	@Consumes({ MediaType.APPLICATION_JSON })
@@ -102,6 +106,8 @@ public class LoansApiResource {
             @QueryParam("groupId") final Long groupId,
 			@QueryParam("productId") final Long productId,
 			@Context final UriInfo uriInfo) {
+
+		context.authenticatedUser().validateHasReadPermission("LOAN");
 		
 		final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
@@ -155,6 +161,8 @@ public class LoansApiResource {
 			@PathParam("loanId") final Long loanId,
 			@Context final UriInfo uriInfo) {
 
+		context.authenticatedUser().validateHasReadPermission("LOAN");
+		
 		final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 		
@@ -414,6 +422,8 @@ public class LoansApiResource {
 			@PathParam("loanId") final Long loanId,
 			@QueryParam("command") final String commandParam,
 			@Context final UriInfo uriInfo) {
+
+		context.authenticatedUser().validateHasReadPermission("LOAN");
 		
 		final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
@@ -443,6 +453,8 @@ public class LoansApiResource {
 	public String retrieveTransaction(@PathParam("loanId") final Long loanId,
 			@PathParam("transactionId") final Long transactionId,
 			@Context final UriInfo uriInfo) {
+
+		context.authenticatedUser().validateHasReadPermission("LOAN");
 		
 		final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
@@ -491,7 +503,9 @@ public class LoansApiResource {
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     public String retrieveNewLoanChargeDetails(@Context final UriInfo uriInfo) {
-        
+
+		context.authenticatedUser().validateHasReadPermission("LOAN");
+		
     	final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
     	final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 
@@ -511,6 +525,8 @@ public class LoansApiResource {
             @PathParam("chargeId") final Long loanChargeId,
             @Context final UriInfo uriInfo){
 
+		context.authenticatedUser().validateHasReadPermission("LOAN");
+		
     	final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
     	final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
     	

@@ -81,6 +81,8 @@ public class GroupsApiResource {
                                     @QueryParam("externalId") final String externalId,
                                     @QueryParam("name") final String name,
                                     @QueryParam("underHierarchy") final String hierarchy){
+    	
+    	context.authenticatedUser().validateHasReadPermission("GROUP");
 
         final String extraCriteria = getGroupExtraCriteria(sqlSearch, officeId, externalId, name, hierarchy);
 
@@ -103,6 +105,8 @@ public class GroupsApiResource {
     public String retrieveGroupData(@Context final UriInfo uriInfo,
                                     @PathParam("groupId") final Long groupId,
                                     @QueryParam("officeId") final Long officeId) {
+
+    	context.authenticatedUser().validateHasReadPermission("GROUP");
 
                 Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo
                 .getQueryParameters());
@@ -146,6 +150,8 @@ public class GroupsApiResource {
     @Produces({MediaType.APPLICATION_JSON})
     public String newGroupDetails(@Context final UriInfo uriInfo,
                                   @QueryParam("officeId") final Long officeId) {
+
+    	context.authenticatedUser().validateHasReadPermission("GROUP");
 
         Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
         if (responseParameters.isEmpty()) {
@@ -207,6 +213,8 @@ public class GroupsApiResource {
     @Produces({MediaType.APPLICATION_JSON})
     public String retrieveGroupAccount(@PathParam("groupId") final Long groupId,
                                        @Context final UriInfo uriInfo) {
+
+    	context.authenticatedUser().validateHasReadPermission("GROUP");
 
         Set<String> typicalResponseParameters = new HashSet<String>(
                 Arrays.asList("pendingApprovalLoans", "awaitingDisbursalLoans", "openLoans", "closedLoans",

@@ -32,6 +32,7 @@ import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
 import org.mifosng.platform.loanproduct.service.LoanDropdownReadPlatformService;
 import org.mifosng.platform.loanproduct.service.LoanProductReadPlatformService;
 import org.mifosng.platform.loanproduct.service.LoanProductWritePlatformService;
+import org.mifosng.platform.security.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -64,6 +65,10 @@ public class LoanProductsApiResource {
     
     @Autowired
     private LoanDropdownReadPlatformService dropdownReadPlatformService;
+
+	private final String entityType = "LOANPRODUCT";
+    @Autowired
+    private PlatformSecurityContext context;
     
 	@POST
 	@Consumes({MediaType.APPLICATION_JSON})
@@ -81,6 +86,8 @@ public class LoanProductsApiResource {
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveAllLoanProducts(@Context final UriInfo uriInfo) {
+		
+    	context.authenticatedUser().validateHasReadPermission(entityType);
 
 		final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
@@ -95,7 +102,9 @@ public class LoanProductsApiResource {
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveNewLoanProductDetails(@Context final UriInfo uriInfo) {
-		
+
+    	context.authenticatedUser().validateHasReadPermission(entityType);
+
 		final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 
@@ -110,6 +119,8 @@ public class LoanProductsApiResource {
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveLoanProductDetails(@PathParam("productId") final Long productId, @Context final UriInfo uriInfo) {
+
+    	context.authenticatedUser().validateHasReadPermission(entityType);
 
 		final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());

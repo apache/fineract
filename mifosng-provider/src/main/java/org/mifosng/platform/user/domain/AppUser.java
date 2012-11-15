@@ -236,27 +236,27 @@ public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements
 	}
 
 	public boolean canNotApproveLoanInPast() {
-		return hasNotPermissionForAnyOf("APPROVEINPAST_LOAN",
+		return hasNotPermissionForAnyOf("ALL_FUNCTIONS", "APPROVEINPAST_LOAN",
 				"PORTFOLIO_MANAGEMENT_SUPER_USER");
 	}
 
 	public boolean canNotRejectLoanInPast() {
-		return hasNotPermissionForAnyOf("REJECTINPAST_LOAN",
+		return hasNotPermissionForAnyOf("ALL_FUNCTIONS", "REJECTINPAST_LOAN",
 				"PORTFOLIO_MANAGEMENT_SUPER_USER");
 	}
 
 	public boolean canNotWithdrawByClientLoanInPast() {
-		return hasNotPermissionForAnyOf("WITHDRAWINPAST_LOAN",
+		return hasNotPermissionForAnyOf("ALL_FUNCTIONS", "WITHDRAWINPAST_LOAN",
 				"PORTFOLIO_MANAGEMENT_SUPER_USER");
 	}
 
 	public boolean canNotDisburseLoanInPast() {
-		return hasNotPermissionForAnyOf("DISBURSEINPAST_LOAN",
+		return hasNotPermissionForAnyOf("ALL_FUNCTIONS", "DISBURSEINPAST_LOAN",
 				"PORTFOLIO_MANAGEMENT_SUPER_USER");
 	}
 
 	public boolean canNotMakeRepaymentOnLoanInPast() {
-		return hasNotPermissionForAnyOf("REPAYMENTINPAST_LOAN",
+		return hasNotPermissionForAnyOf("ALL_FUNCTIONS", "REPAYMENTINPAST_LOAN",
 				"PORTFOLIO_MANAGEMENT_SUPER_USER");
 	}
 
@@ -350,6 +350,12 @@ public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements
 			higherPermission = "PORTFOLIO_MANAGEMENT_SUPER_USER";
 		} else if (entityType.equalsIgnoreCase("FUND")) {
 			higherPermission = "ORGANISATION_ADMINISTRATION_SUPER_USER";
+		} else if (entityType.equalsIgnoreCase("GROUP")) {
+			higherPermission = "PORTFOLIO_MANAGEMENT_SUPER_USER";
+		} else if (entityType.equalsIgnoreCase("LOANPRODUCT")) {
+			higherPermission = "ORGANISATION_ADMINISTRATION_SUPER_USER";
+		} else if (entityType.equalsIgnoreCase("LOAN")) {
+			higherPermission = "PORTFOLIO_MANAGEMENT_SUPER_USER";
 		}
 
 		if (!(higherPermission.equals(""))) {

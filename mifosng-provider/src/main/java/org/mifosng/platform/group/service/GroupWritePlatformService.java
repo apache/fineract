@@ -6,13 +6,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface GroupWritePlatformService {
 
-    @PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER')")
+    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'PORTFOLIO_MANAGEMENT_SUPER_USER', 'CREATE_GROUP')")
     EntityIdentifier createGroup(GroupCommand command);
 
-    @PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER')")
+    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'PORTFOLIO_MANAGEMENT_SUPER_USER', 'UPDATE_GROUP')")
     EntityIdentifier updateGroup(GroupCommand command);
 
-    @PreAuthorize(value = "hasAnyRole('PORTFOLIO_MANAGEMENT_SUPER_USER')")
+    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'PORTFOLIO_MANAGEMENT_SUPER_USER', 'DELETE_GROUP')")
     EntityIdentifier deleteGroup(Long groupId);
     
 }
