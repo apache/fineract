@@ -327,8 +327,9 @@ public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements
 				+ entityType.toLowerCase() + "s";
 		String matchPermission = "READ_" + entityType.toUpperCase();
 
-		if (hasNotPermissionForAnyOf("ALL_FUNCTIONS_READ", matchPermission))
-			throw new NoAuthorizationException(authorizationMessage);
+		if (!(hasNotPermissionForAnyOf("ALL_FUNCTIONS", "ALL_FUNCTIONS_READ",
+				matchPermission)))
+			return;
 
 		String higherPermission = "";
 		if (entityType.equalsIgnoreCase("CHARGE")) {
@@ -341,6 +342,10 @@ public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements
 			higherPermission = "PORTFOLIO_MANAGEMENT_SUPER_USER";
 		} else if (entityType.equalsIgnoreCase("CLIENTIMAGE")) {
 			higherPermission = "PORTFOLIO_MANAGEMENT_SUPER_USER";
+		} else if (entityType.equalsIgnoreCase("CODE")) {
+			higherPermission = "ORGANISATION_ADMINISTRATION_SUPER_USER";
+		} else if (entityType.equalsIgnoreCase("CURRENCY")) {
+			higherPermission = "ORGANISATION_ADMINISTRATION_SUPER_USER";
 		}
 
 		if (!(higherPermission.equals(""))) {

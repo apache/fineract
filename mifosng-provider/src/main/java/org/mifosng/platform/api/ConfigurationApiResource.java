@@ -21,6 +21,7 @@ import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService
 import org.mifosng.platform.configuration.service.ConfigurationReadPlatformService;
 import org.mifosng.platform.configuration.service.ConfigurationWritePlatformService;
 import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
+import org.mifosng.platform.security.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -41,12 +42,20 @@ public class ConfigurationApiResource {
 	
 	@Autowired
 	private PortfolioApiJsonSerializerService apiJsonSerializerService;
-	
+
+	private final PlatformSecurityContext context;
+
+	@Autowired
+	public ConfigurationApiResource(final PlatformSecurityContext context) {
+		this.context = context;
+	}
 	@GET
 	@Path("currency")
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveCurrencyDataForConfiguration(@Context final UriInfo uriInfo) {
+
+		context.authenticatedUser().validateHasReadPermission("CURRENCY");
 		
 		Set<String> typicalResponseParameters = new HashSet<String>(
 				Arrays.asList("selectedCurrencyOptions", "currencyOptions"));

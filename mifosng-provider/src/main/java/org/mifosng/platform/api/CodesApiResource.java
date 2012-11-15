@@ -23,6 +23,7 @@ import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService
 import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
 import org.mifosng.platform.organisation.service.CodeWritePlatformService;
 import org.mifosng.platform.organisation.service.CodeReadPlatformService;
+import org.mifosng.platform.security.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -43,12 +44,22 @@ public class CodesApiResource {
 	
 	@Autowired
 	private PortfolioApiJsonSerializerService apiJsonSerializerService;
+
+	private final String entityType = "CODE";
+	private final PlatformSecurityContext context;
+
+	@Autowired
+	public CodesApiResource(final PlatformSecurityContext context) {
+		this.context = context;
+	}
 	
 	@GET
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveCodes(@Context final UriInfo uriInfo) {
 
+    	context.authenticatedUser().validateHasReadPermission(entityType);
+    	
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 		
