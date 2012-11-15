@@ -74,7 +74,6 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
 			handleCodeDataIntegrityIssues(command, dve);
 			return Long.valueOf(-1);
 		}
-
 	}
 
 	/*
