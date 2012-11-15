@@ -22,6 +22,7 @@ import org.mifosng.platform.exceptions.UnrecognizedQueryParamException;
 import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
 import org.mifosng.platform.makerchecker.service.PortfolioMakerCheckerReadPlatformService;
 import org.mifosng.platform.makerchecker.service.PortfolioMakerCheckerWriteService;
+import org.mifosng.platform.security.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -39,12 +40,18 @@ public class MakerCheckerApiResource {
 
 	@Autowired
 	private PortfolioApiJsonSerializerService apiJsonSerializerService;
-	
+
+	private final String entityType = "MAKERCHECKER";
+    @Autowired
+    private PlatformSecurityContext context;
+    
 	@GET
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveCodes(@Context final UriInfo uriInfo) {
 
+    	context.authenticatedUser().validateHasReadPermission(entityType);
+    	
 		final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 		

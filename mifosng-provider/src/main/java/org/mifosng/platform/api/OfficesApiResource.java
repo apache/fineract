@@ -28,6 +28,7 @@ import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService
 import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
 import org.mifosng.platform.organisation.service.OfficeReadPlatformService;
 import org.mifosng.platform.organisation.service.OfficeWritePlatformService;
+import org.mifosng.platform.security.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -49,11 +50,17 @@ public class OfficesApiResource {
 	@Autowired
 	private PortfolioApiJsonSerializerService apiJsonSerializerService;
 
+	private final String entityType = "OFFICE";
+    @Autowired
+    private PlatformSecurityContext context;
+    
 	@GET
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveOffices(@Context final UriInfo uriInfo) {
-		
+
+    	context.authenticatedUser().validateHasReadPermission(entityType);
+    	
 		Set<String> typicalResponseParameters = new HashSet<String>(
 				Arrays.asList("id", "name", "nameDecorated", "externalId", "openingDate", 
 				"hierarchy", "parentId", "parentName"));
@@ -75,6 +82,8 @@ public class OfficesApiResource {
 	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveOfficeTemplate(@Context final UriInfo uriInfo) {
 
+    	context.authenticatedUser().validateHasReadPermission(entityType);
+    	
 		Set<String> typicalResponseParameters = new HashSet<String>(
 				Arrays.asList("id", "name", "nameDecorated", "externalId", "openingDate", 
 				"hierarchy", "parentId", "parentName", "allowedParents"));
@@ -106,7 +115,9 @@ public class OfficesApiResource {
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
 	public String retreiveOffice(@PathParam("officeId") final Long officeId, @Context final UriInfo uriInfo) {
-		
+
+    	context.authenticatedUser().validateHasReadPermission(entityType);
+    	
 		Set<String> typicalResponseParameters = new HashSet<String>(
 				Arrays.asList("id", "name", "nameDecorated", "externalId", "openingDate", 
 				"hierarchy", "parentId", "parentName"));

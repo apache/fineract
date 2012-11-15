@@ -6,12 +6,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface OfficeWritePlatformService {
 
-	@PreAuthorize(value = "hasRole('ORGANISATION_ADMINISTRATION_SUPER_USER')")
+    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'ORGANISATION_ADMINISTRATION_SUPER_USER', 'CREATE_OFFICE')")
 	Long createOffice(final OfficeCommand command);
-	
-	@PreAuthorize(value = "hasRole('ORGANISATION_ADMINISTRATION_SUPER_USER')")
+
+    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'ORGANISATION_ADMINISTRATION_SUPER_USER', 'UPDATE_OFFICE')")
 	Long updateOffice(final OfficeCommand command);
 
-	@PreAuthorize(value = "hasRole('ORGANISATION_ADMINISTRATION_SUPER_USER')")
+    //TODO - complete permissions for office transactions when more functionality add or it is replaced by simple accounting equivalent (JPW)
+    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'ORGANISATION_ADMINISTRATION_SUPER_USER')")
 	Long externalBranchMoneyTransfer(BranchMoneyTransferCommand command);
 }
