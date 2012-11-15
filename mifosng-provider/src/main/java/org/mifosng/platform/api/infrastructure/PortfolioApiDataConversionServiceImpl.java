@@ -351,30 +351,33 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
 	}
 	
 	@Override
-	public ClientCommand convertJsonToClientCommand(final Long resourceIdentifier, final String json) {
+	public ClientCommand convertJsonToClientCommand(final Long resourceIdentifier, final String json, final boolean makerCheckerApproval) {
 		if (StringUtils.isBlank(json)) {
 			throw new InvalidJsonException();
 		}
 		
-		Type typeOfMap = new TypeToken<Map<String, String>>(){}.getType();
-	    Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
+		final Type typeOfMap = new TypeToken<Map<String, String>>(){}.getType();
+	    final Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
 	    
-	    Set<String> supportedParams = new HashSet<String>(
+	    final Set<String> supportedParams = new HashSet<String>(
 	    		Arrays.asList("externalId", "firstname", "lastname", "clientOrBusinessName", "officeId", "joiningDate", "locale", "dateFormat")
 	    );
 	    
 	    checkForUnsupportedParameters(requestMap, supportedParams);
 	    
-	    Set<String> modifiedParameters = new HashSet<String>();
-
-	    String externalId = extractStringParameter("externalId", requestMap, modifiedParameters);
-	    Long officeId = extractLongParameter("officeId", requestMap, modifiedParameters);
-	    LocalDate joiningDate = extractLocalDateParameter("joiningDate", requestMap, modifiedParameters);
-	    String firstname = extractStringParameter("firstname", requestMap, modifiedParameters);
-	    String lastname = extractStringParameter("lastname", requestMap, modifiedParameters);
-	    String clientOrBusinessName = extractStringParameter("clientOrBusinessName", requestMap, modifiedParameters);
+	    final JsonParser parser = new JsonParser();
+	    final JsonElement element = parser.parse(json);
+	    final JsonParserHelper helper = new JsonParserHelper();
+	    final Set<String> parametersPassedInRequest = new HashSet<String>();
 	    
-	    return new ClientCommand(modifiedParameters, resourceIdentifier, externalId, firstname, lastname, clientOrBusinessName, officeId, joiningDate);
+	    final Long officeId = helper.extractLongNamed("officeId", element, parametersPassedInRequest);	
+	    final String externalId = helper.extractStringNamed("externalId", element, parametersPassedInRequest);
+	    final String firstname = helper.extractStringNamed("firstname", element, parametersPassedInRequest);
+	    final String lastname = helper.extractStringNamed("lastname", element, parametersPassedInRequest);
+	    final String clientOrBusinessName = helper.extractStringNamed("clientOrBusinessName", element, parametersPassedInRequest);
+	    final LocalDate joiningDate = helper.extractLocalDateNamed("joiningDate", element, parametersPassedInRequest);
+
+	    return new ClientCommand(parametersPassedInRequest, resourceIdentifier, externalId, firstname, lastname, clientOrBusinessName, officeId, joiningDate, makerCheckerApproval);
 	}
 	
 	@Override

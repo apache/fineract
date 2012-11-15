@@ -16,15 +16,20 @@ import org.mifosng.platform.user.domain.AppUser;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
-@Table(name = "m_maker_checker")
-public class MakerChecker extends AbstractPersistable<Long> {
+@Table(name = "m_portfolio_command_source")
+public class CommandSource extends AbstractPersistable<Long> {
 
-	@SuppressWarnings("unused")
-	@Column(name = "task_name", length = 100)
-	private String taskName;
-
-	@Column(name = "task_json", length = 1000)
-	private String taskJson;
+	@Column(name = "api_operation", length = 20)
+	private String apiOperation;
+	
+	@Column(name = "api_resource", length = 20)
+	private String resource;
+	
+	@Column(name = "resource_id")
+	private Long resourceId;
+	
+	@Column(name = "command_as_json", length = 1000)
+	private String commandAsJson;
 
 	// should maker and checker be a staff member as opposed to just any application user?
 	@SuppressWarnings("unused")
@@ -47,25 +52,31 @@ public class MakerChecker extends AbstractPersistable<Long> {
     @Temporal(TemporalType.DATE)
 	private Date checkedOnDate;
 
-	public static MakerChecker makerEntry(
-			final String taskName,
+	public static CommandSource createdBy(
+			final String apiOperation,
+			final String resource,
+			final Long resourceId, 
 			final String jsonRequestBody,
 			final AppUser maker,
 			final LocalDate madeOnDate) {
-		return new MakerChecker(taskName, jsonRequestBody, maker, madeOnDate);
+		return new CommandSource(apiOperation, resource, resourceId, jsonRequestBody, maker, madeOnDate);
 	}
 
-	protected MakerChecker() {
+	protected CommandSource() {
 		//
 	}
 
-	private MakerChecker(
-			final String taskName,
-			final String taskJson,
+	private CommandSource(
+			final String apiOperation,
+			final String resource,
+			final Long resourceId,
+			final String jsonRequestBody,
 			final AppUser maker,
 			final LocalDate madeOnDate) {
-		this.taskName = StringUtils.defaultIfEmpty(taskName, null);
-		this.taskJson = StringUtils.defaultIfEmpty(taskJson, null);
+		this.apiOperation = StringUtils.defaultIfEmpty(apiOperation, null);
+		this.resource = StringUtils.defaultIfEmpty(resource, null);
+		this.resourceId = resourceId;
+		this.commandAsJson = StringUtils.defaultIfEmpty(jsonRequestBody, null);
 		this.maker = maker;
 		this.madeOnDate = madeOnDate.toDate();
 	}
@@ -74,8 +85,28 @@ public class MakerChecker extends AbstractPersistable<Long> {
 		this.checker = checker;
 		this.checkedOnDate = checkedOnDate.toDate();
 	}
+	
+	public Long resourceId() {
+		return this.resourceId;
+	}
 
 	public String json() {
-		return this.taskJson;
+		return this.commandAsJson;
+	}
+
+	public boolean isClientResource() {
+		return this.resource.equalsIgnoreCase("CLIENTS");
+	}
+
+	public boolean isCreate() {
+		return this.apiOperation.equalsIgnoreCase("CREATE");
+	}
+
+	public boolean isUpdate() {
+		return this.apiOperation.equalsIgnoreCase("UPDATE") && this.resourceId != null;
+	}
+
+	public boolean isDelete() {
+		return this.apiOperation.equalsIgnoreCase("DELETE") && this.resourceId != null;
 	}
 }

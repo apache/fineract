@@ -30,7 +30,7 @@ import org.mifosng.platform.api.data.LoanChargeData;
 import org.mifosng.platform.api.data.LoanProductData;
 import org.mifosng.platform.api.data.LoanReassignmentData;
 import org.mifosng.platform.api.data.LoanTransactionData;
-import org.mifosng.platform.api.data.MakerCheckerData;
+import org.mifosng.platform.api.data.CommandSourceData;
 import org.mifosng.platform.api.data.NoteData;
 import org.mifosng.platform.api.data.OfficeData;
 import org.mifosng.platform.api.data.OfficeTransactionData;
@@ -729,12 +729,12 @@ public class GoogleGsonPortfolioApiJsonSerializerService implements PortfolioApi
 	public String serializeMakerCheckerDataToJson(
 			final boolean prettyPrint,
 			final Set<String> responseParameters, 
-			final Collection<MakerCheckerData> entries) {
+			final Collection<CommandSourceData> entries) {
 		final Gson gsonDeserializer = helper
 				.createGsonBuilderWithParameterExclusionSerializationStrategy(
 						MAKER_CHECKER_DATA_PARAMETERS, prettyPrint, responseParameters);
 		return helper.serializedJsonFrom(gsonDeserializer,
-				entries.toArray(new MakerCheckerData[entries.size()]));
+				entries.toArray(new CommandSourceData[entries.size()]));
 	}
 	
 	@Override

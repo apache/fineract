@@ -2,7 +2,6 @@ package org.mifosng.platform.api.data;
 
 import java.util.List;
 
-import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.mifosng.platform.api.commands.ClientCommand;
@@ -24,27 +23,53 @@ final public class ClientData {
 	private final String imageKey;
 	@SuppressWarnings("unused")
 	private final boolean imagePresent;
+	
 	private final List<OfficeLookup> allowedOffices;
 	
-	// essential override existing data with data from command
-	public static ClientData mergeWithCommand(final ClientData clientData, final ClientCommand command) {
-		
-		final Long officeId = (Long) ObjectUtils.defaultIfNull(command.getId(), clientData.officeId);
-		final String firstname = (String) ObjectUtils.defaultIfNull(command.getFirstname(), clientData.firstname);
-		final String lastname = (String) ObjectUtils.defaultIfNull(command.getLastname(), clientData.lastname);
-		final String clientOrBusinessName = (String) ObjectUtils.defaultIfNull(command.getClientOrBusinessName(), clientData.clientOrBusinessName);
-		final String externalId = (String) ObjectUtils.defaultIfNull(command.getExternalId(), clientData.externalId);
-		final LocalDate joinedDate = (LocalDate) ObjectUtils.defaultIfNull(command.getJoiningDate(), clientData.joinedDate);
-		
-		return new ClientData(officeId, clientData.officeName, clientData.id, firstname, lastname, clientOrBusinessName, externalId, joinedDate, clientData.imageKey, clientData.allowedOffices);
+	@SuppressWarnings("unused")
+	private final ClientCommand changes;
+	
+	private static String buildDisplayNameFrom(final String firstname, final String lastname) {
+		String displayName = null;
+		StringBuilder displayNameBuilder = new StringBuilder();
+		if (StringUtils.isNotBlank(firstname)) {
+			displayNameBuilder.append(firstname).append(' ');
+		}
+
+		if (StringUtils.isNotBlank(lastname)) {
+			displayNameBuilder.append(lastname);
+			displayName = displayNameBuilder.toString();
+		}
+		return displayName;
+	}
+	
+	public static ClientData integrateChanges(final ClientData clientData, final ClientCommand command) {
+		String firstname = clientData.firstname;
+		String lastname = clientData.lastname;
+		if (StringUtils.isNotBlank(clientData.clientOrBusinessName)) {
+			firstname = null;
+			lastname = clientData.clientOrBusinessName;
+		}
+		final String displayName = buildDisplayNameFrom(firstname, lastname);
+		return new ClientData(clientData.officeId, clientData.officeName, clientData.id, firstname, lastname, displayName, 
+				clientData.externalId, clientData.joinedDate, clientData.imageKey, clientData.allowedOffices, command);
 	}
 	
 	public static ClientData template(final Long officeId, final LocalDate joinedDate, final List<OfficeLookup> allowedOffices) {
-		return new ClientData(officeId, null, null, null, null, null, null, joinedDate, null, allowedOffices);
+		return new ClientData(officeId, null, null, null, null, null, null, joinedDate, null, allowedOffices, null);
 	}
 	
 	public static ClientData templateOnTop(final ClientData clientData, final List<OfficeLookup> allowedOffices) {
-		return new ClientData(clientData.officeId, clientData.officeName, clientData.id, clientData.firstname, clientData.lastname, clientData.clientOrBusinessName, clientData.externalId, clientData.joinedDate, clientData.imageKey, allowedOffices);
+		
+		String firstname = clientData.firstname;
+		String lastname = clientData.lastname;
+		if (StringUtils.isNotBlank(clientData.clientOrBusinessName)) {
+			firstname = null;
+			lastname = clientData.clientOrBusinessName;
+		}
+		final String displayName = buildDisplayNameFrom(firstname, lastname);
+		return new ClientData(clientData.officeId, clientData.officeName, clientData.id, firstname, lastname, displayName, 
+				clientData.externalId, clientData.joinedDate, clientData.imageKey, allowedOffices, null);
 	}
 	
 	public static ClientData clientIdentifier(
@@ -54,46 +79,43 @@ final public class ClientData {
 			final Long officeId, 
 			final String officeName) {
 		
-		StringBuilder displayNameBuilder = new StringBuilder(firstname);
-		if (StringUtils.isNotBlank(displayNameBuilder.toString())) {
-			displayNameBuilder.append(' ');
-		}
-		displayNameBuilder.append(lastname);
+		final String displayName = buildDisplayNameFrom(firstname, lastname);
 		
-		return new ClientData(officeId, officeName, id, firstname, lastname, displayNameBuilder.toString(), null, null, null, null);
+		return new ClientData(officeId, officeName, id, firstname, lastname, displayName, null, null, null, null, null);
 	}
 
-	public ClientData(final Long officeId, final String officeName,
-			final Long id, final String firstname, final String lastname,
-			final String displayName, final String externalId,
+	public ClientData(
+			final Long officeId, 
+			final String officeName,
+			final Long id, 
+			final String firstname, 
+			final String lastname,
+			final String displayName, 
+			final String externalId,
 			final LocalDate joinedDate,
 			final String imageKey,
-			final List<OfficeLookup> allowedOffices) {
+			final List<OfficeLookup> allowedOffices,
+			final ClientCommand changes) {
 		this.officeId = officeId;
 		this.officeName = officeName;
 		this.id = id;
 		this.firstname = firstname;
-		this.displayName = displayName;
 
 		/*** unset last name for business name **/
-		if (StringUtils.isBlank(this.firstname)) {
+		if (StringUtils.isBlank(firstname)) {
 			this.lastname = null;
 			this.clientOrBusinessName = lastname;
 		} else {
 			this.lastname = lastname;
 			this.clientOrBusinessName = null;
 		}
-
+		this.displayName = displayName;
 		this.externalId = externalId;
 		this.joinedDate = joinedDate;
 		this.imageKey = imageKey;
-		if (imageKey == null) {
-			imagePresent = false;
-		}else{
-			imagePresent = true;
-		}
-		
+		this.imagePresent = (imageKey != null);
 		this.allowedOffices = allowedOffices;
+		this.changes = changes;
 	}
 
 	public String displayName() {

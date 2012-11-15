@@ -28,7 +28,7 @@ import org.mifosng.platform.api.data.LoanChargeData;
 import org.mifosng.platform.api.data.LoanProductData;
 import org.mifosng.platform.api.data.LoanReassignmentData;
 import org.mifosng.platform.api.data.LoanTransactionData;
-import org.mifosng.platform.api.data.MakerCheckerData;
+import org.mifosng.platform.api.data.CommandSourceData;
 import org.mifosng.platform.api.data.NoteData;
 import org.mifosng.platform.api.data.OfficeData;
 import org.mifosng.platform.api.data.OfficeTransactionData;
@@ -136,7 +136,7 @@ public interface PortfolioApiJsonSerializerService {
 
 	String serializeCodeDataToJson(boolean prettyPrint,Set<String> responseParameters, CodeData code);
 	
-	String serializeMakerCheckerDataToJson(boolean prettyPrint,Set<String> responseParameters, Collection<MakerCheckerData> entries);
+	String serializeMakerCheckerDataToJson(boolean prettyPrint,Set<String> responseParameters, Collection<CommandSourceData> entries);
 
 	String serializeSavingAccountsDataToJson(boolean prettyPrint, Set<String> responseParameters, SavingAccountData account);
 

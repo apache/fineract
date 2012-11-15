@@ -3,8 +3,10 @@ package org.mifosng.platform.api.commands;
 import java.util.Set;
 
 import org.joda.time.LocalDate;
-import org.mifosng.platform.client.service.ClientCommandValidator;
 
+/**
+ *
+ */
 public class ClientCommand {
 
 	private final Long id;
@@ -14,11 +16,11 @@ public class ClientCommand {
 	private final String clientOrBusinessName;
 	private final Long officeId;
 	private final LocalDate joiningDate;
-	
-	private final Set<String> modifiedParameters;
-	
-	private final ClientCommandValidator validator;
 
+	// made transient as dont want them to be serialized/converted to JSON
+	private final transient boolean makerCheckerApproval;
+	private final transient Set<String> parametersPassedInRequest;
+	
 	public ClientCommand(
 			final Set<String> modifiedParameters, 
 			final Long id, 
@@ -27,8 +29,9 @@ public class ClientCommand {
 			final String lastname, 
 			final String clientOrBusinessName, 
 			final Long officeId, 
-			final LocalDate joiningDate) {
-		this.modifiedParameters = modifiedParameters;
+			final LocalDate joiningDate, 
+			final boolean makerCheckerApproval) {
+		this.parametersPassedInRequest = modifiedParameters;
 		this.id = id;
 		this.externalId = externalId;
 		this.firstname = firstname;
@@ -36,7 +39,7 @@ public class ClientCommand {
 		this.clientOrBusinessName = clientOrBusinessName;
 		this.officeId = officeId;
 		this.joiningDate = joiningDate;
-		this.validator = new ClientCommandValidator(this);
+		this.makerCheckerApproval = makerCheckerApproval;
 	}
 
 	public Long getId() {
@@ -68,30 +71,30 @@ public class ClientCommand {
 	}
 	
 	public boolean isFirstnameChanged() {
-		return this.modifiedParameters.contains("firstname");
+		return this.parametersPassedInRequest.contains("firstname");
 	}
 	
 	public boolean isLastnameChanged() {
-		return this.modifiedParameters.contains("lastname");
+		return this.parametersPassedInRequest.contains("lastname");
 	}
 	
 	public boolean isClientOrBusinessNameChanged() {
-		return this.modifiedParameters.contains("clientOrBusinessName");
+		return this.parametersPassedInRequest.contains("clientOrBusinessName");
 	}
 	
 	public boolean isExternalIdChanged() {
-		return this.modifiedParameters.contains("externalId");
+		return this.parametersPassedInRequest.contains("externalId");
 	}
 	
 	public boolean isJoiningDateChanged() {
-		return this.modifiedParameters.contains("joiningDate");
+		return this.parametersPassedInRequest.contains("joiningDate");
 	}
 	
 	public boolean isOfficeChanged() {
-		return this.modifiedParameters.contains("officeId");
+		return this.parametersPassedInRequest.contains("officeId");
 	}
 
-	public void validateForCreate() {
-		this.validator.validateForCreate();
+	public boolean isApprovedByChecker() {
+		return this.makerCheckerApproval;
 	}
 }

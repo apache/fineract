@@ -12,13 +12,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 public interface ClientWritePlatformService {
 
 	@PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'PORTFOLIO_MANAGEMENT_SUPER_USER', 'CREATE_CLIENT')")
-	Long enrollClient(ClientCommand command);
+	Long createClient(ClientCommand command);
 	
 	@PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'PORTFOLIO_MANAGEMENT_SUPER_USER', 'UPDATE_CLIENT')")
 	EntityIdentifier updateClientDetails(ClientCommand command);
 	
 	@PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'PORTFOLIO_MANAGEMENT_SUPER_USER', 'DELETE_CLIENT')")
-	EntityIdentifier deleteClient(Long clientId);
+	EntityIdentifier deleteClient(ClientCommand command);
 	
 	@PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'PORTFOLIO_MANAGEMENT_SUPER_USER', 'CREATE_CLIENTIMAGE')")
 	EntityIdentifier saveOrUpdateClientImage(Long clientId, String imageName, InputStream inputStream);

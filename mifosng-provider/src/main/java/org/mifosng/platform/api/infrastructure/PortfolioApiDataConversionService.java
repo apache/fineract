@@ -49,7 +49,7 @@ public interface PortfolioApiDataConversionService {
 	
 	DepositProductCommand convertJsonToDepositProductCommand(Long resourceIdentifier, String json);
 
-	ClientCommand convertJsonToClientCommand(Long resourceIdentifier, String json);
+	ClientCommand convertJsonToClientCommand(Long resourceIdentifier, String json, boolean makerCheckerApproval);
 
 	GroupCommand convertJsonToGroupCommand(Long resourceIdentifier, String json);
 	

@@ -133,7 +133,7 @@ public class Client extends AbstractAuditableCustom<AppUser, Long> {
 		}
 		
 		if (command.isExternalIdChanged()) {
-			 this.externalId = StringUtils.defaultIfEmpty(command.getExternalId().trim(), null);
+			 this.externalId = StringUtils.defaultIfEmpty(command.getExternalId(), null);
 		}
 	}
 

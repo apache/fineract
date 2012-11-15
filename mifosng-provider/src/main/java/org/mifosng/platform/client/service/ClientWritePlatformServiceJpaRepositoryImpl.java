@@ -50,6 +50,9 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 	private final NoteRepository noteRepository;
 	private final CodeValueRepository codeValueRepository;
 
+	// FIXME - kw - this value is hardcoded for now but will be retrieved from coinfiguration
+	private boolean makerCheckerEnabledForTask = false;
+
 	@Autowired
 	public ClientWritePlatformServiceJpaRepositoryImpl(
 			final PlatformSecurityContext context,
@@ -68,8 +71,9 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
 	@Transactional
 	@Override
-	public EntityIdentifier deleteClient(final Long clientId) {
+	public EntityIdentifier deleteClient(final ClientCommand command) {
 
+		final Long clientId = command.getId();
 		final Client client = this.clientRepository.findOne(clientId);
 		if (client == null || client.isDeleted()) {
 			throw new ClientNotFoundException(clientId);
@@ -77,6 +81,10 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
 		client.delete();
 		this.clientRepository.save(client);
+		
+		if (this.makerCheckerEnabledForTask && !command.isApprovedByChecker()) {
+			throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException();
+		}
 
 		return new EntityIdentifier(client.getId());
 	}
@@ -105,7 +113,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
 	@Transactional
 	@Override
-	public Long enrollClient(final ClientCommand command) {
+	public Long createClient(final ClientCommand command) {
 
 		try {
 			context.authenticatedUser();
@@ -125,12 +133,16 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 				firstname = null;
 			}
 
-			Client newClient = Client
+			final Client newClient = Client
 					.newClient(clientOffice, firstname, lastname,
 							command.getJoiningDate(), command.getExternalId());
 
 			this.clientRepository.save(newClient);
 
+			if (this.makerCheckerEnabledForTask && !command.isApprovedByChecker()) {
+				throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException();
+			}
+			
 			return newClient.getId();
 		} catch (DataIntegrityViolationException dve) {
 			handleDataIntegrityIssues(command, dve);
@@ -164,6 +176,10 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 			clientForUpdate.update(clientOffice, command);
 
 			this.clientRepository.saveAndFlush(clientForUpdate);
+			
+			if (this.makerCheckerEnabledForTask && !command.isApprovedByChecker()) {
+				throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException();
+			}
 
 			return new EntityIdentifier(clientForUpdate.getId());
 		} catch (DataIntegrityViolationException dve) {

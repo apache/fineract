@@ -164,7 +164,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 			final String officeName = rs.getString("officeName");
 
 			return new ClientData(officeId, officeName, id, firstname,
-					lastname, displayName, externalId, joinedDate,imageKey, null);
+					lastname, displayName, externalId, joinedDate,imageKey, null, null);
 		}
 
 	}

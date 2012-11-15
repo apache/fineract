@@ -13,6 +13,10 @@ public class EntityIdentifier {
 		return new EntityIdentifier(null, makerCheckerId);
 	}
 	
+	public static EntityIdentifier makerChecker(final Long resourceId, final Long makerCheckerId) {
+		return new EntityIdentifier(resourceId, makerCheckerId);
+	}
+	
 	public EntityIdentifier() {
 		//
 	}
