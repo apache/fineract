@@ -113,6 +113,8 @@ public class OfficeTransactionsApiResource {
 	@Produces({ MediaType.APPLICATION_JSON })
 	public Response transferMoneyFrom(final String jsonRequestBody) {
 
+    	context.authenticatedUser().validateHasReadPermission("OFFICETRANSACTION");
+    	
 		BranchMoneyTransferCommand command = this.apiDataConversionService
 				.convertJsonToBranchMoneyTransferCommand(jsonRequestBody);
 

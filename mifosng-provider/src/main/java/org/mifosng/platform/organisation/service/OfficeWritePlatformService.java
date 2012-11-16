@@ -13,6 +13,6 @@ public interface OfficeWritePlatformService {
 	Long updateOffice(final OfficeCommand command);
 
     //TODO - complete permissions for office transactions when more functionality add or it is replaced by simple accounting equivalent (JPW)
-    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'ORGANISATION_ADMINISTRATION_SUPER_USER')")
+    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'ORGANISATION_ADMINISTRATION_SUPER_USER', 'CREATE_OFFICETRANSACTION')")
 	Long externalBranchMoneyTransfer(BranchMoneyTransferCommand command);
 }

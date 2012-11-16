@@ -14,6 +14,7 @@ import javax.ws.rs.core.UriInfo;
 import org.mifosng.platform.api.data.PermissionData;
 import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService;
 import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
+import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.user.service.PermissionReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -30,11 +31,17 @@ public class PermissionsApiResource {
 	@Autowired
 	private PortfolioApiJsonSerializerService apiJsonSerializerService;
 
+	private final String entityType = "PERMISSION";
+    @Autowired
+    private PlatformSecurityContext context;
+    
 	@GET
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveAllPermissions(@Context final UriInfo uriInfo) {
 
+    	context.authenticatedUser().validateHasReadPermission(entityType);
+    	
 		final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 		

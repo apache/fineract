@@ -256,8 +256,8 @@ public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements
 	}
 
 	public boolean canNotMakeRepaymentOnLoanInPast() {
-		return hasNotPermissionForAnyOf("ALL_FUNCTIONS", "REPAYMENTINPAST_LOAN",
-				"PORTFOLIO_MANAGEMENT_SUPER_USER");
+		return hasNotPermissionForAnyOf("ALL_FUNCTIONS",
+				"REPAYMENTINPAST_LOAN", "PORTFOLIO_MANAGEMENT_SUPER_USER");
 	}
 
 	public boolean hasNotPermissionForReport(String reportName) {
@@ -359,6 +359,18 @@ public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements
 		} else if (entityType.equalsIgnoreCase("OFFICE")) {
 			higherPermission = "ORGANISATION_ADMINISTRATION_SUPER_USER";
 		} else if (entityType.equalsIgnoreCase("OFFICETRANSACTION")) {
+			higherPermission = "ORGANISATION_ADMINISTRATION_SUPER_USER";
+		} else if (entityType.equalsIgnoreCase("PERMISSION")) {
+			higherPermission = "USER_ADMINISTRATION_SUPER_USER";
+		} else if (entityType.equalsIgnoreCase("ROLE")) {
+			higherPermission = "USER_ADMINISTRATION_SUPER_USER";
+		} else if (entityType.equalsIgnoreCase("USER")) {
+			higherPermission = "USER_ADMINISTRATION_SUPER_USER";
+		} else if (entityType.equalsIgnoreCase("STAFF")) {
+			higherPermission = "ORGANISATION_ADMINISTRATION_SUPER_USER";
+		} else if (entityType.equalsIgnoreCase("SAVINGSPRODUCT")) {
+			higherPermission = "ORGANISATION_ADMINISTRATION_SUPER_USER";
+		} else if (entityType.equalsIgnoreCase("DEPOSITPRODUCT")) {
 			higherPermission = "ORGANISATION_ADMINISTRATION_SUPER_USER";
 		}
 

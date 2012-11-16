@@ -32,6 +32,7 @@ import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 import org.mifosng.platform.savingproduct.service.DepositProductReadPlatformService;
 import org.mifosng.platform.savingproduct.service.DepositProductWritePlatformService;
 import org.mifosng.platform.savingproduct.service.SavingsDepositEnumerations;
+import org.mifosng.platform.security.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -55,6 +56,10 @@ public class DepositProductsApiResource {
 	
 	@Autowired
 	private PortfolioApiJsonSerializerService apiJsonSerializerService;
+
+	private final String entityType = "DEPOSITPRODUCT";
+	@Autowired
+	private PlatformSecurityContext context;
 	
 	@POST
 	@Consumes({MediaType.APPLICATION_JSON})
@@ -94,7 +99,9 @@ public class DepositProductsApiResource {
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveAllDepositProducts(@Context final UriInfo uriInfo) {
-		
+
+    	context.authenticatedUser().validateHasReadPermission(entityType);
+    	
 		Set<String> typicalResponseParameters = new HashSet<String>(
 				Arrays.asList("id", "externalId", "name", "description", "createdOn", "lastModifedOn",
 				"currencyCode","digitsAfterDecimal","minimumBalance","maximumBalance","tenureInMonths",
@@ -118,7 +125,9 @@ public class DepositProductsApiResource {
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveDepositProductDetails(@PathParam("productId") final Long productId, @Context final UriInfo uriInfo) {
-		
+
+    	context.authenticatedUser().validateHasReadPermission(entityType);
+    	
 		Set<String> typicalResponseParameters = new HashSet<String>(
 				Arrays.asList("id", "externalId", "name", "description", "createdOn", "lastModifedOn",
 				"currencyCode","digitsAfterDecimal","minimumBalance","maximumBalance","tenureInMonths",
@@ -148,7 +157,9 @@ public class DepositProductsApiResource {
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveNewDepositProductDetails(@Context final UriInfo uriInfo) {
-		
+
+    	context.authenticatedUser().validateHasReadPermission(entityType);
+    	
 		Set<String> typicalResponseParameters = new HashSet<String>(
 				Arrays.asList("currencyOptions", "interestCompoundedEveryPeriodTypeOptions", 
 				"id", "externalId", "name", "description", "createdOn", "lastModifedOn",

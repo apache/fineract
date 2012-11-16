@@ -37,6 +37,7 @@ import org.mifosng.platform.savingproduct.domain.TenureTypeEnum;
 import org.mifosng.platform.savingproduct.service.SavingProductEnumerations;
 import org.mifosng.platform.savingproduct.service.SavingProductReadPlatformService;
 import org.mifosng.platform.savingproduct.service.SavingProductWritePlatformService;
+import org.mifosng.platform.security.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -60,6 +61,10 @@ public class SavingProductsApiResource {
     
     @Autowired
 	private CurrencyReadPlatformService currencyReadPlatformService;
+
+	private final String entityType = "SAVINGSPRODUCT";
+	@Autowired
+	private PlatformSecurityContext context;
 	
 	@POST
 	@Consumes({MediaType.APPLICATION_JSON})
@@ -89,6 +94,8 @@ public class SavingProductsApiResource {
 	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveAllSavingProducts(@Context final UriInfo uriInfo) {
 
+    	context.authenticatedUser().validateHasReadPermission(entityType);
+    	
 		Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "createdOn", "lastModifedOn",
 				"locale", "name", "description","currencyCode", "digitsAfterDecimal","interstRate", "minInterestRate","maxInterestRate",
 				"savingsDepositAmount","savingProductType","tenureType","tenure", "frequency","interestType","interestCalculationMethod",
@@ -111,6 +118,8 @@ public class SavingProductsApiResource {
 	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveSavingProductDetails(@PathParam("productId") final Long productId, @Context final UriInfo uriInfo) {
 
+    	context.authenticatedUser().validateHasReadPermission(entityType);
+    	
 		Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "createdOn", "lastModifedOn",
 				"locale", "name", "description","currencyCode", "digitsAfterDecimal","interstRate", "minInterestRate","maxInterestRate",
 				"savingsDepositAmount","savingProductType","tenureType","tenure", "frequency","interestType","interestCalculationMethod",
@@ -136,7 +145,9 @@ public class SavingProductsApiResource {
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveNewSavingProductDetails(@Context final UriInfo uriInfo) {
-		
+
+    	context.authenticatedUser().validateHasReadPermission(entityType);
+    	
 		Set<String> typicalResponseParameters = new HashSet<String>(
 				Arrays.asList("id", "createdOn", "lastModifedOn",
 						"locale", "name", "description","currencyCode", "digitsAfterDecimal","interstRate", 

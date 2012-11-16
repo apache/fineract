@@ -31,6 +31,7 @@ import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService
 import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
 import org.mifosng.platform.loan.service.LoanWritePlatformService;
 import org.mifosng.platform.organisation.service.OfficeReadPlatformService;
+import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.staff.service.StaffReadPlatformService;
 import org.mifosng.platform.staff.service.StaffWritePlatformService;
 import org.slf4j.Logger;
@@ -62,6 +63,10 @@ public class StaffApiResource {
     @Autowired
     private LoanWritePlatformService loanWritePlatformService;
 
+	private final String entityType = "STAFF";
+	@Autowired
+	private PlatformSecurityContext context;
+	
 	private final static Logger logger = LoggerFactory
 			.getLogger(StaffApiResource.class);
 
@@ -72,6 +77,8 @@ public class StaffApiResource {
 			@QueryParam("sqlSearch") final String sqlSearch,
 			@QueryParam("officeId") final Integer officeId) {
 
+    	context.authenticatedUser().validateHasReadPermission(entityType);
+    	
 		Set<String> responseParameters = ApiParameterHelper
 				.extractFieldsForResponseIfProvided(uriInfo
 						.getQueryParameters());
@@ -106,6 +113,8 @@ public class StaffApiResource {
 	public String retreiveStaff(@PathParam("staffId") final Long staffId,
 			@Context final UriInfo uriInfo) {
 
+    	context.authenticatedUser().validateHasReadPermission(entityType);
+    	
 		final Set<String> responseParameters = ApiParameterHelper
 				.extractFieldsForResponseIfProvided(uriInfo
 						.getQueryParameters());
@@ -161,6 +170,8 @@ public class StaffApiResource {
                                            @QueryParam("fromLoanOfficerId") final Long loanOfficerId,
                                            @Context final UriInfo uriInfo){
 
+    	context.authenticatedUser().validateHasReadPermission("LOAN");
+    	
         final Set<String> responseParameters = ApiParameterHelper
                 .extractFieldsForResponseIfProvided(uriInfo
                         .getQueryParameters());

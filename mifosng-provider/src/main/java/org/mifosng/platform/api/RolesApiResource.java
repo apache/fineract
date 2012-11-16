@@ -22,6 +22,7 @@ import org.mifosng.platform.api.data.RoleData;
 import org.mifosng.platform.api.infrastructure.PortfolioApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService;
 import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
+import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.user.service.PermissionReadPlatformService;
 import org.mifosng.platform.user.service.RoleReadPlatformService;
 import org.mifosng.platform.user.service.RoleWritePlatformService;
@@ -49,11 +50,17 @@ public class RolesApiResource {
 	@Autowired
 	private PortfolioApiJsonSerializerService apiJsonSerializerService;
 
+	private final String entityType = "ROLE";
+    @Autowired
+    private PlatformSecurityContext context;
+    
 	@GET
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveAllRoles(@Context final UriInfo uriInfo) {
-		
+
+    	context.authenticatedUser().validateHasReadPermission(entityType);
+    	
 		final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 
@@ -68,6 +75,8 @@ public class RolesApiResource {
 	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveNewRoleDetails(@Context final UriInfo uriInfo) {
 
+    	context.authenticatedUser().validateHasReadPermission(entityType);
+    	
 		final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 		
@@ -99,7 +108,9 @@ public class RolesApiResource {
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveRole(@PathParam("roleId") final Long roleId, @Context final UriInfo uriInfo) {
-		
+
+    	context.authenticatedUser().validateHasReadPermission(entityType);
+    	
 		final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 		final boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
@@ -135,6 +146,8 @@ public class RolesApiResource {
 	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveRolePermissions(@PathParam("roleId") final Long roleId, @Context final UriInfo uriInfo) {
 		
+    	context.authenticatedUser().validateHasReadPermission(entityType);
+    	
 		Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "name", "description", jpw));
 		
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
