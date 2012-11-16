@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 
 import org.mifosng.platform.api.data.PermissionData;
+import org.mifosng.platform.api.data.PermissionUsageData;
 import org.mifosng.platform.infrastructure.JdbcSupport;
 import org.mifosng.platform.infrastructure.TenantAwareRoutingDataSource;
 import org.mifosng.platform.security.PlatformSecurityContext;
@@ -53,4 +54,35 @@ public class PermissionReadPlatformServiceImpl implements PermissionReadPlatform
 			return " p.id as id, p.default_name as name, p.default_description as description, p.code as code from m_permission p ";
 		}
 	}
+
+	@Override
+	public Collection<PermissionUsageData> retrieveAllRolePermissions(Long roleId) {
+		
+		final PermissionUsageDataMapper mapper = new PermissionUsageDataMapper();
+		final String sql = mapper.schema();
+
+		return this.jdbcTemplate.query(sql, mapper, new Object[] {roleId});
+	}
+	
+
+	private static final class PermissionUsageDataMapper implements RowMapper<PermissionUsageData> {
+
+		@Override
+		public PermissionUsageData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+
+			final String grouping = rs.getString("grouping");
+			final String code = rs.getString("code");
+			final Boolean selected = rs.getBoolean("selected");
+
+			return new PermissionUsageData(grouping, code, selected);
+		}
+
+		public String schema() {
+			return " select p.grouping, p.code, if(isnull(rp.role_id), false, true) as selected " + 
+					" from m_permission p " +
+					" left join m_role_permission rp on rp.permission_id = p.id and rp.role_id = ? " +
+					" order by p.grouping, p.order_in_grouping, p.code ";
+		}
+	}
+	
 }

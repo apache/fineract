@@ -36,6 +36,7 @@ import org.mifosng.platform.api.data.OfficeData;
 import org.mifosng.platform.api.data.OfficeTransactionData;
 import org.mifosng.platform.api.data.PermissionData;
 import org.mifosng.platform.api.data.RoleData;
+import org.mifosng.platform.api.data.RolePermissionData;
 import org.mifosng.platform.api.data.SavingAccountData;
 import org.mifosng.platform.api.data.SavingProductData;
 import org.mifosng.platform.api.data.StaffData;
@@ -57,6 +58,8 @@ public class GoogleGsonPortfolioApiJsonSerializerService implements PortfolioApi
 	private static final Set<String> ROLE_DATA_PARAMETERS = new HashSet<String>(
 			Arrays.asList("id", "name", "description", "availablePermissions",
 					"selectedPermissions"));
+	private static final Set<String> ROLE_PERMISSION_DATA_PARAMETERS = new HashSet<String>(
+			Arrays.asList("id", "name", "description", "permissionUsageData"));
 	private static final Set<String> APP_USER_DATA_PARAMETERS = new HashSet<String>(
 			Arrays.asList("id", "officeId", "officeName", "username",
 					"firstname", "lastname", "email", "allowedOffices",
@@ -295,6 +298,16 @@ public class GoogleGsonPortfolioApiJsonSerializerService implements PortfolioApi
 				.createGsonBuilderWithParameterExclusionSerializationStrategy(
 						ROLE_DATA_PARAMETERS, prettyPrint, responseParameters);
 		return helper.serializedJsonFrom(gsonDeserializer, role);
+	}
+
+	@Override
+	public String serializeRolePermissionDataToJson(final boolean prettyPrint,
+			final Set<String> responseParameters,
+			final RolePermissionData rolePermissionData) {
+		final Gson gsonDeserializer = helper
+				.createGsonBuilderWithParameterExclusionSerializationStrategy(
+						ROLE_PERMISSION_DATA_PARAMETERS, prettyPrint, responseParameters);
+		return helper.serializedJsonFrom(gsonDeserializer, rolePermissionData);
 	}
 
 	@Override

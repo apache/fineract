@@ -61,4 +61,17 @@ public class RoleData {
 	public Collection<PermissionData> selectedPermissions() {
 		return this.selectedPermissions;
 	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+	
 }

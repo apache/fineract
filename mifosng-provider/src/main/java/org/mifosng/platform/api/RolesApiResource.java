@@ -18,7 +18,9 @@ import javax.ws.rs.core.UriInfo;
 import org.mifosng.platform.api.commands.RoleCommand;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.PermissionData;
+import org.mifosng.platform.api.data.PermissionUsageData;
 import org.mifosng.platform.api.data.RoleData;
+import org.mifosng.platform.api.data.RolePermissionData;
 import org.mifosng.platform.api.infrastructure.PortfolioApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService;
 import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
@@ -138,37 +140,23 @@ public class RolesApiResource {
 		
 		return this.apiJsonSerializerService.serializeEntityIdentifier(new EntityIdentifier(roleId));
 	}
-	
-/*
+
 	@GET
 	@Path("{roleId}/permissions")
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveRolePermissions(@PathParam("roleId") final Long roleId, @Context final UriInfo uriInfo) {
-		
+
     	context.authenticatedUser().validateHasReadPermission(entityType);
     	
-		Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "name", "description", jpw));
-		
-		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-		if (responseParameters.isEmpty()) {
-			responseParameters.addAll(typicalResponseParameters);
-		}
-		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-		boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
+		final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+		final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 
 		RoleData role = this.roleReadPlatformService.retrieveRole(roleId);
-
-		if (template) {
-			Collection<PermissionData> availablePermissions = this.permissionReadPlatformService.retrieveAllPermissions();
-			availablePermissions.removeAll(role.getSelectedPermissions());
+		Collection<PermissionUsageData> permissionUsageData = this.permissionReadPlatformService.retrieveAllRolePermissions(roleId);
+		RolePermissionData rolePermissionData = new RolePermissionData(role.getId(), role.getName(), role.getDescription(), permissionUsageData);
 			
-			role = new RoleData(role, availablePermissions);
-			
-			responseParameters.add("availablePermissions");
-			responseParameters.add("selectedPermissions");
-		}
-		return this.apiJsonSerializerService.serializeRoleDataToJson(prettyPrint, responseParameters, role);
+		return this.apiJsonSerializerService.serializeRolePermissionDataToJson(prettyPrint, responseParameters, rolePermissionData);
 	}
-	*/
+	
 }
