@@ -86,6 +86,10 @@ public class CommandSource extends AbstractPersistable<Long> {
 		this.checkedOnDate = checkedOnDate.toDate();
 	}
 	
+	public void updateResourceId(final Long resourceId) {
+		this.resourceId = resourceId;
+	}
+	
 	public Long resourceId() {
 		return this.resourceId;
 	}

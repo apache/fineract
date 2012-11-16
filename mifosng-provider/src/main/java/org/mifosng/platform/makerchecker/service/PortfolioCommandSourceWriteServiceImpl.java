@@ -53,6 +53,7 @@ public class PortfolioCommandSourceWriteServiceImpl implements PortfolioCommandS
 				try {
 					resourceId = this.clientWritePlatformService.createClient(command);
 					entity.markAsChecked(maker, asToday);
+					entity.updateResourceId(resourceId);
 					} catch (RollbackTransactionAsCommandIsNotApprovedByCheckerException e) {
 						// swallow this rollback transaction by design
 					}
@@ -102,6 +103,8 @@ public class PortfolioCommandSourceWriteServiceImpl implements PortfolioCommandS
 				resourceId = result.getEntityId();
 			}
 		}
+		
+		entity.updateResourceId(resourceId);
 		
 		commandSourceRepository.save(entity);
 		

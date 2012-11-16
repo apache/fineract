@@ -69,30 +69,14 @@ VALUES
 (163,'ZWD',2,NULL,'Zimbabwe Dollar','currency.ZWD');
 
 
-INSERT INTO `m_permission` (`id`, `group_enum`, `code`, `default_description`, `default_name`) 
+INSERT INTO `m_permission` (`id`, `code`, `default_description`, `default_name`) 
 VALUES 
-(1,0,'ALL_FUNCTIONS','An application user will have permission to execute all read tasks.','ALL'),
-(2,0,'ALL_FUNCTIONS_READ','An application user will have permission to execute all tasks.','ALL READ'),
-(3,1,'USER_ADMINISTRATION_SUPER_USER_ROLE','An application user will have permission to execute all tasks related to user administration.','User administration ALL'),
-(4,2,'ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE','An application user will have permission to execute all tasks related to organisation administration.','Organisation adminsitration ALL'),
-(5,3,'PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE','An application user will have permission to execute all tasks related to portfolio management.','Portfolio management ALL'),
-(6,4,'REPORTING_SUPER_USER_ROLE','An application user will have permission to execute and view all reports.','Reporting ALL'),
-(7,3,'CAN_SUBMIT_NEW_LOAN_APPLICATION_ROLE','Allows an application user to sumit new loan application.','Can submit new loan application'),
-(8,3,'CAN_SUBMIT_HISTORIC_LOAN_APPLICATION_ROLE','Allows an application user to sumit new loan application where the submitted on date is in the past.','Can submit historic loan application'),
-(9,3,'CAN_APPROVE_LOAN_ROLE','Allows an application user to approve a loan application.','Can approve loan application'),
-(10,3,'CAN_APPROVE_LOAN_IN_THE_PAST_ROLE','Allows an application user to approve a loan application where the approval date is in the past.','Can approve loan application in the past'),
-(11,3,'CAN_REJECT_LOAN_ROLE','Allows an application user to reject a loan application.','Can reject loan application'),
-(12,3,'CAN_REJECT_LOAN_IN_THE_PAST_ROLE','Allows an application user to reject a loan application where the rejected date is in the past.','Can reject loan application in the past'),
-(13,3,'CAN_WITHDRAW_LOAN_ROLE','Allows an application user to mark loan application as withdrawn by client.','Can withdraw loan application'),
-(14,3,'CAN_WITHDRAW_LOAN_IN_THE_PAST_ROLE','Allows an application user to mark loan application as withdrawn by client where the withdran on date is in the past.','Can withdraw loan application in the past'),
-(15,3,'CAN_DELETE_LOAN_THAT_IS_SUBMITTED_AND_NOT_APPROVED','Allows an application user to complete delete the loan application if it is submitted but not approved.','Can delete submitted loan application'),
-(16,3,'CAN_UNDO_LOAN_APPROVAL_ROLE','Allows an application user to undo a loan approval.','Can undo loan approval'),
-(17,3,'CAN_DISBURSE_LOAN_ROLE','Allows an application user to disburse a loan application.','Can disburse loan'),
-(18,3,'CAN_DISBURSE_LOAN_IN_THE_PAST_ROLE','Allows an application user to disburse a loan where the disbursement date is in the past.','Can disburse loan in the past'),
-(19,3,'CAN_UNDO_LOAN_DISBURSAL_ROLE','Allows an application user to undo a loan disbursal if not payments already made.','Can undo loan disbursal'),
-(20,3,'CAN_MAKE_LOAN_REPAYMENT_LOAN_ROLE','Allows an application user to enter a repayment on the loan.','Can enter a repayment against a loan'),
-(21,3,'CAN_MAKE_LOAN_REPAYMENT_IN_THE_PAST_ROLE','Allows an application user to enter a repayment on the loan where the repayment date is in the past.','Can enter a repayment against a loan in the past'),
-(22,3,'CAN_ENROLL_NEW_CLIENT_ROLE','Allows an application user to add a new client.','Can add a new client.');
+(1,'ALL_FUNCTIONS','An application user will have permission to execute all read tasks.','ALL'),
+(2,'ALL_FUNCTIONS_READ','An application user will have permission to execute all tasks.','ALL READ'),
+(3,'USER_ADMINISTRATION_SUPER_USER','An application user will have permission to execute all tasks related to user administration.','User administration ALL'),
+(4,'ORGANISATION_ADMINISTRATION_SUPER_USER','An application user will have permission to execute all tasks related to organisation administration.','Organisation adminsitration ALL'),
+(5,'PORTFOLIO_MANAGEMENT_SUPER_USER','An application user will have permission to execute all tasks related to portfolio management.','Portfolio management ALL'),
+(6,'REPORTING_SUPER_USER','An application user will have permission to execute and view all reports.','Reporting ALL');
 
 
 INSERT INTO `stretchy_parameter` VALUES (3,'FullReportList',NULL,'n/a','n/a','n/a','n/a','Y',NULL,NULL,'select r.report_id, r.report_name, r.report_type, r.report_subtype, r.report_category,\r\nrp.parameter_id, rp.report_parameter_name, p.parameter_name\r\nfrom stretchy_report r\r\nleft join stretchy_report_parameter rp on rp.report_id = r.report_id\r\nleft join stretchy_parameter p on p.parameter_id = rp.parameter_id\r\nwhere r.use_report is true\r\nand exists\r\n(select \'f\' \r\nfrom m_appuser_role ur \r\njoin m_role r on r.id = ur.role_id\r\nleft join m_role_permission rp on rp.role_id = r.id\r\nleft join m_permission p on p.id = rp.permission_id\r\nwhere ur.appuser_id = ${currentUserId}\r\nand (r.name = \'Super User\' or r.name = \'Read Only\') or p.code = concat(\"CAN_RUN_\", r.report_name))\r\norder by r.report_name, rp.parameter_id'),(4,'FullParameterList',NULL,'n/a','n/a','n/a','n/a','Y',NULL,NULL,'select parameter_name, parameter_variable, parameter_label, parameter_displayType, parameter_FormatType, parameter_default, selectOne,  selectAll\r\nfrom stretchy_parameter p\r\nwhere special is null\r\norder by parameter_id'),(5,'selectOfficeId','officeId','Office','select','number','0',NULL,'Y',NULL,'select id, \r\nconcat(substring(\"........................................\", 1, \r\n   ((LENGTH(`hierarchy`) - LENGTH(REPLACE(`hierarchy`, \'.\', \'\')) - 1) * 4)), \r\n   `name`) as tc\r\nfrom m_office\r\nwhere hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\norder by hierarchy'),(6,'currencyIdSelectAll','currencyId','Currency','select','number','0',NULL,'Y','Y','select `code`, `name`\r\nfrom m_organisation_currency\r\norder by `code`'),(7,'currencyIdSelectOne','currencyId','Currency','select','number','0',NULL,'Y',NULL,'select `code`, `name`\r\nfrom m_organisation_currency\r\norder by `code`'),(10,'fundIdSelectAll','fundId','Fund','select','number','0',NULL,'Y','Y','(select id, `name`\r\nfrom m_fund\r\norder by `name`)\r\nunion all\r\n(select -10, \'-\')'),(80,'selectStartDate','startDate','startDate','date','date','today',NULL,NULL,NULL,NULL),(81,'selectEndDate','endDate','endDate','date','date','today',NULL,NULL,NULL,NULL),(82,'reportCategoryList',NULL,'n/a','n/a','n/a','n/a','Y',NULL,NULL,'select r.report_id, r.report_name, r.report_type, r.report_subtype, r.report_category,\r\nrp.parameter_id, rp.report_parameter_name, p.parameter_name\r\nfrom stretchy_report r\r\nleft join stretchy_report_parameter rp on rp.report_id = r.report_id\r\nleft join stretchy_parameter p on p.parameter_id = rp.parameter_id\r\nwhere r.report_category = \'${reportCategory}\'\r\nand r.use_report is true\r\nand exists\r\n(select \'f\' \r\nfrom m_appuser_role ur \r\njoin m_role r on r.id = ur.role_id\r\nleft join m_role_permission rp on rp.role_id = r.id\r\nleft join m_permission p on p.id = rp.permission_id\r\nwhere ur.appuser_id = ${currentUserId}\r\nand (r.name = \'Super User\' or r.name = \'Read Only\') or p.code = concat(\"CAN_RUN_\", r.report_name))\r\norder by r.report_name, rp.parameter_id');
@@ -126,3 +110,12 @@ INSERT INTO `m_appuser_role` (`appuser_id`, `role_id`) VALUES (1,1);
 INSERT INTO `m_organisation_currency` (`id`, `code`, `decimal_places`, `name`, `display_symbol`, `internationalized_name_code`, `createdby_id`, `created_date`, `lastmodified_date`, `lastmodifiedby_id`) 
 VALUES 
 (21,'USD',2,'US Dollar','$','currency.USD',1,'2012-05-01 22:43:02','2012-05-01 22:43:02',1);
+
+-- create single code and code value for client identifiers
+INSERT INTO `m_code`
+(`id`,`code_name`) VALUES (1,'Customer Identifier');
+
+INSERT INTO `m_code_value`
+(`id`,`code_id`,`code_value`,`order_position`)
+VALUES 
+(1,1,'Passport number',0);
