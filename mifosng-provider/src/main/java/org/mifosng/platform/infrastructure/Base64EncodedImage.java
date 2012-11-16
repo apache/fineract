@@ -1,4 +1,4 @@
-package org.mifosng.platform.common;
+package org.mifosng.platform.infrastructure;
 
 public class Base64EncodedImage {
 

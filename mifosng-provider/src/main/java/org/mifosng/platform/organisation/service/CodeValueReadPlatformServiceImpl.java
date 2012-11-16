@@ -19,41 +19,38 @@ public class CodeValueReadPlatformServiceImpl implements CodeValueReadPlatformSe
 	private final PlatformSecurityContext context;
 
 	@Autowired
-	public CodeValueReadPlatformServiceImpl(final PlatformSecurityContext context,
-			final TenantAwareRoutingDataSource dataSource) {
+	public CodeValueReadPlatformServiceImpl(final PlatformSecurityContext context, final TenantAwareRoutingDataSource dataSource) {
 		this.context = context;
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
 
-	private static final class CodeValueDataMapper implements
-			RowMapper<CodeValueData> {
+	private static final class CodeValueDataMapper implements RowMapper<CodeValueData> {
 
 		public String schema() {
-			return " cv.id as id,cv.code_value as value,cv.code_id as codeId, cv.order_position as position"
-					+ " from m_code_value as cv ";
+			return " cv.id as id, cv.code_value as value, cv.code_id as codeId, cv.order_position as position"
+					+ " from m_code_value as cv join m_code c on cv.code_id = c.id ";
 		}
 
 		@Override
 		public CodeValueData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
 				throws SQLException {
 
-			Long id = rs.getLong("id");
-			String value = rs.getString("value");
-			Integer position = rs.getInt("position");
+			final Long id = rs.getLong("id");
+			final String value = rs.getString("value");
+			final Integer position = rs.getInt("position");
 
 			return new CodeValueData(id, value, position);
 		}
 	}
-
+	
 	@Override
-	public Collection<CodeValueData> retrieveAllCodeValues(final Long codeId) {
+	public Collection<CodeValueData> retrieveCustomIdentifierCodeValues() {
+		
 		context.authenticatedUser();
 
-		CodeValueDataMapper rm = new CodeValueDataMapper();
-		String sql = "select " + rm.schema()
-				+ "where cv.code_id = ? order by position";
+		final CodeValueDataMapper rm = new CodeValueDataMapper();
+		final String sql = "select " + rm.schema() + "where c.code_name like ? order by position";
 
-		return this.jdbcTemplate.query(sql, rm, new Object[] { codeId });
+		return this.jdbcTemplate.query(sql, rm, new Object[] {"Customer Identifier"});
 	}
-
 }

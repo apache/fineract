@@ -6,7 +6,7 @@ import org.mifosng.platform.api.commands.ClientCommand;
 import org.mifosng.platform.api.commands.ClientIdentifierCommand;
 import org.mifosng.platform.api.commands.NoteCommand;
 import org.mifosng.platform.api.data.EntityIdentifier;
-import org.mifosng.platform.common.Base64EncodedImage;
+import org.mifosng.platform.infrastructure.Base64EncodedImage;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface ClientWritePlatformService {

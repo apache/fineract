@@ -25,11 +25,11 @@ import javax.ws.rs.core.UriInfo;
 import org.mifosng.platform.api.commands.DocumentCommand;
 import org.mifosng.platform.api.data.DocumentData;
 import org.mifosng.platform.api.data.EntityIdentifier;
+import org.mifosng.platform.api.infrastructure.ApiConstants;
 import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService;
-import org.mifosng.platform.common.ApplicationConstants;
-import org.mifosng.platform.common.FileUtils;
 import org.mifosng.platform.documentmanagement.service.DocumentReadPlatformService;
 import org.mifosng.platform.documentmanagement.service.DocumentWritePlatformService;
+import org.mifosng.platform.infrastructure.FileUtils;
 import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -116,7 +116,7 @@ public class DocumentManagementApiResource {
 			@FormDataParam("name") String name,
 			@FormDataParam("description") String description) {
 
-		FileUtils.validateFileSizeWithinPermissibleRange(fileSize, name, ApplicationConstants.MAX_FILE_UPLOAD_SIZE_IN_MB);
+		FileUtils.validateFileSizeWithinPermissibleRange(fileSize, name, ApiConstants.MAX_FILE_UPLOAD_SIZE_IN_MB);
 
 		/**
 		 * TODO: also need to have a backup and stop reading from stream after
@@ -163,7 +163,7 @@ public class DocumentManagementApiResource {
 			@FormDataParam("name") String name,
 			@FormDataParam("description") String description) {
 
-		FileUtils.validateFileSizeWithinPermissibleRange(fileSize, name, ApplicationConstants.MAX_FILE_UPLOAD_SIZE_IN_MB);
+		FileUtils.validateFileSizeWithinPermissibleRange(fileSize, name, ApiConstants.MAX_FILE_UPLOAD_SIZE_IN_MB);
 
 		Set<String> modifiedParams = new HashSet<String>();
 		modifiedParams.add("name");

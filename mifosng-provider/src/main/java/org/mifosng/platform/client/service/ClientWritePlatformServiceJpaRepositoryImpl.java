@@ -15,9 +15,6 @@ import org.mifosng.platform.client.domain.ClientIdentifierRepository;
 import org.mifosng.platform.client.domain.ClientRepository;
 import org.mifosng.platform.client.domain.Note;
 import org.mifosng.platform.client.domain.NoteRepository;
-import org.mifosng.platform.common.ApplicationConstants;
-import org.mifosng.platform.common.Base64EncodedImage;
-import org.mifosng.platform.common.FileUtils;
 import org.mifosng.platform.exceptions.ClientIdentifierNotFoundException;
 import org.mifosng.platform.exceptions.ClientNotFoundException;
 import org.mifosng.platform.exceptions.CodeValueNotFoundException;
@@ -26,6 +23,8 @@ import org.mifosng.platform.exceptions.DuplicateClientIdentifierException;
 import org.mifosng.platform.exceptions.NoteNotFoundException;
 import org.mifosng.platform.exceptions.OfficeNotFoundException;
 import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
+import org.mifosng.platform.infrastructure.Base64EncodedImage;
+import org.mifosng.platform.infrastructure.FileUtils;
 import org.mifosng.platform.organisation.domain.CodeValue;
 import org.mifosng.platform.organisation.domain.CodeValueRepository;
 import org.mifosng.platform.organisation.domain.Office;
@@ -50,7 +49,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 	private final NoteRepository noteRepository;
 	private final CodeValueRepository codeValueRepository;
 
-	// FIXME - kw - this value is hardcoded for now but will be retrieved from coinfiguration
+	// FIXME - kw - this value is hardcoded for now but will be retrieved from configuration
 	private boolean makerCheckerEnabledForTask = false;
 
 	@Autowired
@@ -366,29 +365,27 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
 	@Transactional
 	@Override
-	public EntityIdentifier deleteClientImage(Long clientId) {
+	public EntityIdentifier deleteClientImage(final Long clientId) {
+		
 		final Client client = this.clientRepository.findOne(clientId);
 		if (client == null || client.isDeleted()) {
 			throw new ClientNotFoundException(clientId);
 		}
+		
 		// delete image from the file system
 		if (StringUtils.isNotEmpty(client.getImageKey())) {
-			FileUtils.deleteImage(
-					ApplicationConstants.IMAGE_MANAGEMENT_ENTITY.CLIENTS,
-					clientId, client.getImageKey());
+			FileUtils.deleteClientImage(clientId, client.getImageKey());
 		}
 		return updateClientImage(clientId, client, null);
 	}
 
 	@Override
-	public EntityIdentifier saveOrUpdateClientImage(Long clientId,
-			Base64EncodedImage encodedImage) {
+	public EntityIdentifier saveOrUpdateClientImage(final Long clientId, final Base64EncodedImage encodedImage) {
 		try {
 			final Client client = this.clientRepository.findOne(clientId);
-			String imageUploadLocation = setupForClientImageUpdate(clientId,
-					client);
+			final String imageUploadLocation = setupForClientImageUpdate(clientId, client);
 
-			String imageLocation = FileUtils.saveToFileSystem(encodedImage, imageUploadLocation, "image");
+			final String imageLocation = FileUtils.saveToFileSystem(encodedImage, imageUploadLocation, "image");
 			
 			return updateClientImage(clientId, client, imageLocation);
 		} catch (IOException ioe) {
@@ -397,25 +394,15 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 		}
 	}
 
-	/**
-	 * @param clientId
-	 * @param client
-	 * @return
-	 */
-	private String setupForClientImageUpdate(Long clientId, final Client client) {
+	private String setupForClientImageUpdate(final Long clientId, final Client client) {
 		if (client == null || client.isDeleted()) {
 			throw new ClientNotFoundException(clientId);
 		}
 
-		String imageUploadLocation = FileUtils
-				.generateImageParentDirectory(
-						ApplicationConstants.IMAGE_MANAGEMENT_ENTITY.CLIENTS,
-						clientId);
+		final String imageUploadLocation = FileUtils.generateClientImageParentDirectory(clientId);
 		// delete previous image from the file system
 		if (StringUtils.isNotEmpty(client.getImageKey())) {
-			FileUtils.deleteImage(
-					ApplicationConstants.IMAGE_MANAGEMENT_ENTITY.CLIENTS,
-					clientId, client.getImageKey());
+			FileUtils.deleteClientImage(clientId, client.getImageKey());
 		}
 
 		/** Recursively create the directory if it does not exist **/
@@ -425,21 +412,10 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 		return imageUploadLocation;
 	}
 	
-	
-	/**
-	 * @param clientId
-	 * @param client
-	 * @param imageLocation
-	 * @return
-	 */
-	private EntityIdentifier updateClientImage(Long clientId,
-			final Client client, String imageLocation) {
+	private EntityIdentifier updateClientImage(final Long clientId, final Client client, final String imageLocation) {
 		client.setImageKey(imageLocation);
 		this.clientRepository.save(client);
 
 		return new EntityIdentifier(clientId);
 	}
-	
-	
-	
 }

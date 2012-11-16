@@ -1,35 +1,17 @@
 package org.mifosng.platform.api.data;
 
-import java.io.Serializable;
+/**
+ * Immutable data object representing a code.
+ */
+public class CodeData {
 
-public class CodeData implements Serializable {
+	@SuppressWarnings("unused")
+	private final Long id;
+	@SuppressWarnings("unused")
+	private final String name;
 
-	private Long id;
-	private String codeName;
-
-	public CodeData() {
-		//
-	}
-
-	public CodeData(final Long id, final String codeName) {
+	public CodeData(final Long id, final String name) {
 		this.id = id;
-		this.codeName = codeName;
+		this.name = name;
 	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public String getCodeName() {
-		return codeName;
-	}
-
-	public void setName(String codeName) {
-		this.codeName = codeName;
-	}
-
 }

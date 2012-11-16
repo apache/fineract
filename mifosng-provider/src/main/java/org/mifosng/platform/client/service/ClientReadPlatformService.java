@@ -33,7 +33,5 @@ public interface ClientReadPlatformService {
 	
 	ClientIdentifierData retrieveClientIdentifier(Long clientId,Long clientIdentifierId); 
 
-	ClientIdentifierData retrieveNewClientIdentifierDetails();
-
 	ClientData retrieveClientByIdentifier(Long identifierTypeId, String identifierKey);
 }

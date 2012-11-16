@@ -32,15 +32,14 @@ import org.mifosng.platform.api.data.CommandSourceData;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.NoteData;
 import org.mifosng.platform.api.data.OfficeLookup;
+import org.mifosng.platform.api.infrastructure.ApiConstants;
 import org.mifosng.platform.api.infrastructure.PortfolioApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService;
 import org.mifosng.platform.client.service.ClientReadPlatformService;
 import org.mifosng.platform.client.service.ClientWritePlatformService;
-import org.mifosng.platform.common.ApplicationConstants;
-import org.mifosng.platform.common.Base64EncodedImage;
-import org.mifosng.platform.common.FileUtils;
-import org.mifosng.platform.exceptions.ClientNotFoundException;
 import org.mifosng.platform.exceptions.ImageNotFoundException;
+import org.mifosng.platform.infrastructure.Base64EncodedImage;
+import org.mifosng.platform.infrastructure.FileUtils;
 import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
 import org.mifosng.platform.makerchecker.service.PortfolioCommandSourceWritePlatformService;
 import org.mifosng.platform.makerchecker.service.PortfolioCommandsReadPlatformService;
@@ -348,13 +347,8 @@ public class ClientsApiResource {
 		return Response.ok().entity(identifier).build();
 	}
 	
-	/** Upload images through multi-part form upload
-	 * @param clientId
-	 * @param fileSize
-	 * @param inputStream
-	 * @param fileDetails
-	 * @param bodyPart
-	 * @return
+	/** 
+	 * Upload images through multi-part form upload
 	 */
 	@POST
 	@Path("{clientId}/image")
@@ -374,7 +368,7 @@ public class ClientsApiResource {
 		FileUtils.validateImageMimeType(bodyPart.getMediaType().toString());
 		FileUtils.validateFileSizeWithinPermissibleRange(fileSize,
 				fileDetails.getFileName(),
-				ApplicationConstants.MAX_FILE_UPLOAD_SIZE_IN_MB);
+				ApiConstants.MAX_FILE_UPLOAD_SIZE_IN_MB);
 		
 		logger.debug(bodyPart.getMediaType().toString());
 
@@ -382,16 +376,12 @@ public class ClientsApiResource {
 				.saveOrUpdateClientImage(clientId, fileDetails.getFileName(),
 						inputStream);
 
-		// return identifier of the client whose image was updated
 		return Response.ok().entity(entityIdentifier).build();
-
 	}
 	
 
-	/** Upload image as a Data URL (essentially a base64 encoded stream)
-	 * @param clientId
-	 * @param jsonRequestBody
-	 * @return
+	/** 
+	 * Upload image as a Data URL (essentially a base64 encoded stream)
 	 */
 	@POST
 	@Path("{clientId}/image")
@@ -407,14 +397,11 @@ public class ClientsApiResource {
 		EntityIdentifier entityIdentifier = this.clientWritePlatformService
 				.saveOrUpdateClientImage(clientId, base64EncodedImage);
 
-		// return identifier of the client whose image was updated
 		return Response.ok().entity(entityIdentifier).build();
 	}
 
 	/**
 	 * Returns a base 64 encoded client image
-	 * @param clientId
-	 * @return
 	 */
 	@GET
 	@Path("{clientId}/image")
@@ -426,28 +413,17 @@ public class ClientsApiResource {
 		context.authenticatedUser().validateHasReadPermission("CLIENTIMAGE");
 		
 		final ClientData clientData = this.clientReadPlatformService.retrieveIndividualClient(clientId);
-		//validate if client does not exist or image key is null
-		if(clientData == null){
-			throw new ClientNotFoundException(clientId);
-		}
-		else if(clientData.imageKeyDoesNotExist()){
-			throw new ImageNotFoundException(ApplicationConstants.IMAGE_MANAGEMENT_ENTITY.CLIENTS, clientId);
+
+		if (clientData.imageKeyDoesNotExist()) {
+			throw new ImageNotFoundException("clients", clientId);
 		}
 		return Response.ok().entity(Base64.encodeFromFile(clientData.imageKey())).build();
 	}
-
 	
-	
-	/** This method is added only for consistency with other URL patterns
-	 *  and for maintaining consistency of usage of the HTTP "verb"
-	 *  at the client side
-	 * 
-	 * @param clientId
-	 * @param fileSize
-	 * @param inputStream
-	 * @param fileDetails
-	 * @param bodyPart
-	 * @return
+	/** 
+	 * This method is added only for consistency with other URL patterns
+	 * and for maintaining consistency of usage of the HTTP "verb"
+	 * at the client side
 	 */
 	@PUT
 	@Path("{clientId}/image")
@@ -479,9 +455,6 @@ public class ClientsApiResource {
 	 *  at the client side
 	 *  
 	 * Upload image as a Data URL (essentially a base64 encoded stream)
-	 * @param clientId
-	 * @param jsonRequestBody
-	 * @return
 	 */
 	@PUT
 	@Path("{clientId}/image")

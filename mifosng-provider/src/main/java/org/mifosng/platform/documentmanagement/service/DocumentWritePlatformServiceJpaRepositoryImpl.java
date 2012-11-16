@@ -6,14 +6,13 @@ import java.io.InputStream;
 
 import org.mifosng.platform.api.commands.DocumentCommand;
 import org.mifosng.platform.api.data.EntityIdentifier;
-import org.mifosng.platform.common.ApplicationConstants;
-import org.mifosng.platform.common.FileUtils;
 import org.mifosng.platform.documentmanagement.domain.Document;
 import org.mifosng.platform.documentmanagement.domain.DocumentRepository;
 import org.mifosng.platform.exceptions.DocumentManagementException;
 import org.mifosng.platform.exceptions.DocumentNotFoundException;
 import org.mifosng.platform.exceptions.InvalidEntityTypeForDocumentManagementException;
 import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
+import org.mifosng.platform.infrastructure.FileUtils;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,28 +27,14 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements
 
 	private final static Logger logger = LoggerFactory.getLogger(DocumentWritePlatformServiceJpaRepositoryImpl.class);
 
-	// TODO: Use these services to ensure that the appropriate entities exist,
-	// are active, check data scope for user etc
 	private final PlatformSecurityContext context;
-//	private final ClientRepository clientRepository;
-//	private final OfficeRepository officeRepository;
-//	private final LoanRepository loanRepository;
-//	private final StaffRepository staffRepository;
 	private final DocumentRepository documentRepository;
 
 	@Autowired
 	public DocumentWritePlatformServiceJpaRepositoryImpl(
 			final PlatformSecurityContext context,
-//			final ClientRepository clientRepository,
-//			final OfficeRepository officeRepository,
-//			final LoanRepository loanRepository,
-//			final StaffRepository staffRepository,
 			final DocumentRepository documentRepository) {
 		this.context = context;
-//		this.clientRepository = clientRepository;
-//		this.officeRepository = officeRepository;
-//		this.loanRepository = loanRepository;
-//		this.staffRepository = staffRepository;
 		this.documentRepository = documentRepository;
 	}
 
@@ -192,13 +177,22 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements
 		}
 	}
 
-	private static boolean checkValidEntityType(String entityType) {
-		for (ApplicationConstants.DOCUMENT_MANAGEMENT_ENTITY entities : ApplicationConstants.DOCUMENT_MANAGEMENT_ENTITY
-				.values()) {
+	private static boolean checkValidEntityType(final String entityType) {
+		
+		for (DOCUMENT_MANAGEMENT_ENTITY entities : DOCUMENT_MANAGEMENT_ENTITY.values()) {
 			if (entities.name().equalsIgnoreCase(entityType)) {
 				return true;
 			}
 		}
 		return false;
+	}
+	
+	/*** Entities for document Management **/
+	public static enum DOCUMENT_MANAGEMENT_ENTITY {
+		CLIENTS, CLIENT_IDENTIFIERS, STAFF, LOANS, SAVINGS;
+		@Override
+		public String toString() {
+			return name().toString().toLowerCase();
+		}
 	}
 }

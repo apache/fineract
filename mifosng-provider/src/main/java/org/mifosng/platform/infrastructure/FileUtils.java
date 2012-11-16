@@ -1,4 +1,4 @@
-package org.mifosng.platform.common;
+package org.mifosng.platform.infrastructure;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -14,7 +14,6 @@ import org.mifosng.platform.exceptions.DocumentManagementException;
 import org.mifosng.platform.exceptions.ImageDataURLNotValidException;
 import org.mifosng.platform.exceptions.ImageUploadException;
 import org.mifosng.platform.exceptions.PlatformApiDataValidationException;
-import org.mifosng.platform.infrastructure.ThreadLocalContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,20 +73,14 @@ public class FileUtils {
 
 	/**
 	 * Generate directory path for storing new Image
-	 * 
-	 * @param entityType
-	 * @param entityId
-	 * @return
 	 */
-	public static String generateImageParentDirectory(
-			ApplicationConstants.IMAGE_MANAGEMENT_ENTITY entityType,
-			Long entityId) {
+	public static String generateClientImageParentDirectory(final Long resourceId) {
 		return FileUtils.MIFOSX_BASE_DIR
 				+ File.separator
 				+ ThreadLocalContextUtil.getTenant().getName()
 						.replaceAll(" ", "").trim() + File.separator + "images"
-				+ File.separator + entityType.toString() + File.separator
-				+ entityId;
+				+ File.separator + "clients" + File.separator
+				+ resourceId;
 	}
 
 	/**
@@ -205,20 +198,12 @@ public class FileUtils {
 		}
 	}
 
-	/**
-	 * @param entityType
-	 * @param entityId
-	 * @param location
-	 */
-	public static void deleteImage(
-			ApplicationConstants.IMAGE_MANAGEMENT_ENTITY entityType,
-			Long entityId, String location) {
+	public static void deleteClientImage(final Long resourceId, final String location) {
 		File fileToBeDeleted = new File(location);
 		boolean fileDeleted = fileToBeDeleted.delete();
 		if (!fileDeleted) {
 			// no need to throw an Error, simply log a warning
-			logger.warn("Unable to delete image associated with "
-					+ entityType.toString() + " with Id " + entityId);
+			logger.warn("Unable to delete image associated with clients with Id " + resourceId);
 		}
 	}
 }

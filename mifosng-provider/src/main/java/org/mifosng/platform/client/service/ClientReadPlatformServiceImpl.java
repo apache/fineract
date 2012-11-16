@@ -15,18 +15,15 @@ import org.mifosng.platform.api.data.ClientAccountSummaryData;
 import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.ClientIdentifierData;
 import org.mifosng.platform.api.data.ClientLookup;
-import org.mifosng.platform.api.data.CodeValueData;
 import org.mifosng.platform.api.data.EnumOptionData;
 import org.mifosng.platform.api.data.NoteData;
 import org.mifosng.platform.api.data.OfficeLookup;
 import org.mifosng.platform.client.domain.NoteEnumerations;
-import org.mifosng.platform.common.ApplicationConstants;
 import org.mifosng.platform.exceptions.ClientIdentifierNotFoundException;
 import org.mifosng.platform.exceptions.ClientNotFoundException;
 import org.mifosng.platform.exceptions.NoteNotFoundException;
 import org.mifosng.platform.infrastructure.JdbcSupport;
 import org.mifosng.platform.infrastructure.TenantAwareRoutingDataSource;
-import org.mifosng.platform.organisation.service.CodeValueReadPlatformService;
 import org.mifosng.platform.organisation.service.OfficeReadPlatformService;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.user.domain.AppUser;
@@ -44,21 +41,17 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 	private final PlatformSecurityContext context;
 	private final OfficeReadPlatformService officeReadPlatformService;
 	private final AppUserReadPlatformService appUserReadPlatformService;
-	private final CodeValueReadPlatformService codeValuePlatformService;
 
 	@Autowired
 	public ClientReadPlatformServiceImpl(final PlatformSecurityContext context,
 			final TenantAwareRoutingDataSource dataSource,
 			final OfficeReadPlatformService officeReadPlatformService,
-			final AppUserReadPlatformService appUserReadPlatformService,
-			final CodeValueReadPlatformService codeValuePlatformService) {
+			final AppUserReadPlatformService appUserReadPlatformService) {
 		this.context = context;
 		this.officeReadPlatformService = officeReadPlatformService;
 		this.appUserReadPlatformService = appUserReadPlatformService;
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
-		this.codeValuePlatformService = codeValuePlatformService;
 	}
-
 
 	@Override
 	public Collection<ClientData> retrieveAllIndividualClients(final String extraCriteria) {
@@ -445,8 +438,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 	}
 
 	@Override
-	public Collection<ClientIdentifierData> retrieveClientIdentifiers(
-			Long clientId) {
+	public Collection<ClientIdentifierData> retrieveClientIdentifiers(final Long clientId) {
 
 		AppUser currentUser = context.authenticatedUser();
 		String hierarchy = currentUser.getOffice().getHierarchy();
@@ -458,13 +450,13 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
 		sql += " order by ci.id";
 
-		return this.jdbcTemplate.query(sql, rm, new Object[] { clientId,
-				hierarchySearchString });
+		return this.jdbcTemplate.query(sql, rm, new Object[] { clientId, hierarchySearchString });
 	}
 	
 	@Override
-	public ClientIdentifierData retrieveClientIdentifier(Long clientId,
-			Long clientIdentifierId) {
+	public ClientIdentifierData retrieveClientIdentifier(
+			final Long clientId,
+			final Long clientIdentifierId) {
 		try {
 			AppUser currentUser = context.authenticatedUser();
 			String hierarchy = currentUser.getOffice().getHierarchy();
@@ -476,14 +468,10 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
 			sql += " and ci.id = ?";
 
-			ClientIdentifierData clientIdentifierData = this.jdbcTemplate
+			final ClientIdentifierData clientIdentifierData = this.jdbcTemplate
 					.queryForObject(sql, rm, new Object[] { clientId,
 							hierarchySearchString, clientIdentifierId });
 
-			clientIdentifierData
-					.setAllowedDocumentTypes(new ArrayList<CodeValueData>(
-							codeValuePlatformService
-									.retrieveAllCodeValues(ApplicationConstants.CLIENT_IDENTITY_CODE_ID)));
 			return clientIdentifierData;
 		} catch (EmptyResultDataAccessException e) {
 			throw new ClientIdentifierNotFoundException(clientIdentifierId);
@@ -491,19 +479,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
 	}
 	
-	 @Override
-	public ClientIdentifierData retrieveNewClientIdentifierDetails() {
-
-		context.authenticatedUser();
-
-		List<CodeValueData> codeValueDatas = new ArrayList<CodeValueData>(
-				codeValuePlatformService.retrieveAllCodeValues(ApplicationConstants.CLIENT_IDENTITY_CODE_ID));
-
-		return new ClientIdentifierData(null,null,null,null,null,codeValueDatas);
-	}
-
-	private static final class ClientIdentityMapper implements
-			RowMapper<ClientIdentifierData> {
+	private static final class ClientIdentityMapper implements RowMapper<ClientIdentifierData> {
 
 		public ClientIdentityMapper() {
 		}
@@ -522,15 +498,14 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 				@SuppressWarnings("unused") final int rowNum)
 				throws SQLException {
 
-			Long id = JdbcSupport.getLong(rs, "id");
-			Long clientId = JdbcSupport.getLong(rs, "clientId");
-			Long documentTypeId = JdbcSupport.getLong(rs, "documentTypeId");
-			String documentKey = rs.getString("documentKey");
-			String description = rs.getString("description");
-			String documentTypeName = rs.getString("documentType");
+			final Long id = JdbcSupport.getLong(rs, "id");
+			final Long clientId = JdbcSupport.getLong(rs, "clientId");
+			final Long documentTypeId = JdbcSupport.getLong(rs, "documentTypeId");
+			final String documentKey = rs.getString("documentKey");
+			final String description = rs.getString("description");
+			final String documentTypeName = rs.getString("documentType");
 
-			return new ClientIdentifierData(id, clientId, documentTypeId,
-					documentKey, description,documentTypeName);
+			return ClientIdentifierData.singleItem(id, clientId, documentTypeId,documentKey, description,documentTypeName);
 		}
 
 	}
