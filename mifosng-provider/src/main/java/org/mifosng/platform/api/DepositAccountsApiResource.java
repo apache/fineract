@@ -41,6 +41,7 @@ import org.mifosng.platform.saving.service.DepositAccountReadPlatformService;
 import org.mifosng.platform.saving.service.DepositAccountWritePlatformService;
 import org.mifosng.platform.savingproduct.service.DepositProductReadPlatformService;
 import org.mifosng.platform.savingproduct.service.SavingsDepositEnumerations;
+import org.mifosng.platform.security.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -65,6 +66,10 @@ public class DepositAccountsApiResource {
 	@Autowired
 	private PortfolioApiJsonSerializerService apiJsonSerializerService;
 
+	private final String entityType = "DEPOSITACCOUNT";
+	@Autowired
+	private PlatformSecurityContext context;
+	
 	private static final Set<String> typicalResponseParameters = new HashSet<String>(
 			Arrays.asList("id", "externalId", "clientId", "clientName",
 					"productId", "productName", "status", "currency",
@@ -107,6 +112,8 @@ public class DepositAccountsApiResource {
 	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveAllDepositAccounts(@Context final UriInfo uriInfo) {
 
+    	context.authenticatedUser().validateHasReadPermission(entityType);
+    	
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (responseParameters.isEmpty()) {
 			responseParameters.addAll(typicalResponseParameters);
@@ -123,7 +130,9 @@ public class DepositAccountsApiResource {
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveDepositAccount(@PathParam("accountId") final Long accountId, @Context final UriInfo uriInfo) {
-		
+
+    	context.authenticatedUser().validateHasReadPermission(entityType);
+    	
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		
 		DepositPermissionData permissions = null;
@@ -162,7 +171,9 @@ public class DepositAccountsApiResource {
 			@QueryParam("clientId") final Long clientId,
 			@QueryParam("productId") final Long productId,
 			@Context final UriInfo uriInfo) {
-		
+
+    	context.authenticatedUser().validateHasReadPermission(entityType);
+    	
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (responseParameters.isEmpty()) {
 			responseParameters.addAll(typicalResponseParameters);

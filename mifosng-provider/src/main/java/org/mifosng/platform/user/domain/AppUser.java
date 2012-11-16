@@ -262,7 +262,7 @@ public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements
 
 	public boolean hasNotPermissionForReport(String reportName) {
 
-		if (hasNotPermissionForAnyOf("ALL_FUNCTIONS", "ALL_FUNCTIONS_READ",
+		if (hasNotPermissionForAnyOf("ALL_FUNCTIONS", "ALL_FUNCTIONS_READ", "REPORTING_SUPER_USER",
 				"READ_" + reportName))
 			return true;
 
@@ -372,6 +372,10 @@ public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements
 			higherPermission = "ORGANISATION_ADMINISTRATION_SUPER_USER";
 		} else if (entityType.equalsIgnoreCase("DEPOSITPRODUCT")) {
 			higherPermission = "ORGANISATION_ADMINISTRATION_SUPER_USER";
+		} else if (entityType.equalsIgnoreCase("DEPOSITACCOUNT")) {
+			higherPermission = "PORTFOLIO_MANAGEMENT_SUPER_USER";
+		} else if (entityType.equalsIgnoreCase("SAVINGSACCOUNT")) {
+			higherPermission = "PORTFOLIO_MANAGEMENT_SUPER_USER";
 		}
 
 		if (!(higherPermission.equals(""))) {

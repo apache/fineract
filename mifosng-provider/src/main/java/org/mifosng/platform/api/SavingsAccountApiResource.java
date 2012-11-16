@@ -26,6 +26,7 @@ import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService
 import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
 import org.mifosng.platform.saving.service.SavingAccountReadPlatformService;
 import org.mifosng.platform.saving.service.SavingAccountWritePlatformService;
+import org.mifosng.platform.security.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -46,6 +47,10 @@ public class SavingsAccountApiResource {
 	
 	@Autowired
 	private PortfolioApiJsonSerializerService apiJsonSerializerService;
+
+	private final String entityType = "SAVINGSACCOUNT";
+	@Autowired
+	private PlatformSecurityContext context;
 	
 	private static final Set<String> typicalResponseParameters = new HashSet<String>(
 			Arrays.asList("id", "status", "externalId", "clientId", "clientName", "productId", "productName", "productType", "currencyData", "savingsDepostiAmountPerPeriod", "savingsFrequencyType", 
@@ -83,6 +88,8 @@ public class SavingsAccountApiResource {
 	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveAllDepositAccounts(@Context final UriInfo uriInfo) {
 
+    	context.authenticatedUser().validateHasReadPermission(entityType);
+    	
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (responseParameters.isEmpty()) {
 			responseParameters.addAll(typicalResponseParameters);
@@ -99,7 +106,9 @@ public class SavingsAccountApiResource {
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
 	public String retrieveDepositAccount(@PathParam("accountId") final Long accountId, @Context final UriInfo uriInfo) {
-		
+
+    	context.authenticatedUser().validateHasReadPermission(entityType);
+    	
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		
 		if (responseParameters.isEmpty()) {
@@ -121,7 +130,9 @@ public class SavingsAccountApiResource {
 			@QueryParam("clientId") final Long clientId,
 			@QueryParam("productId") final Long productId,
 			@Context final UriInfo uriInfo) {
-		
+
+    	context.authenticatedUser().validateHasReadPermission(entityType);
+    	
 		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (responseParameters.isEmpty()) {
 			responseParameters.addAll(typicalResponseParameters);

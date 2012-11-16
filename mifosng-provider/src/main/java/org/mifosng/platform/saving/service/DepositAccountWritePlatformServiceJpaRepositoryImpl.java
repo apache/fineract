@@ -20,7 +20,6 @@ import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.exceptions.DepositAccountNotFoundException;
 import org.mifosng.platform.exceptions.DepositAccountReopenException;
 import org.mifosng.platform.exceptions.DepositAccountTransactionsException;
-import org.mifosng.platform.exceptions.NoAuthorizationException;
 import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
 import org.mifosng.platform.exceptions.ProductNotFoundException;
 import org.mifosng.platform.saving.domain.DepositAccount;
@@ -30,7 +29,6 @@ import org.mifosng.platform.saving.domain.DepositLifecycleStateMachine;
 import org.mifosng.platform.saving.domain.DepositLifecycleStateMachineImpl;
 import org.mifosng.platform.saving.domain.FixedTermDepositInterestCalculator;
 import org.mifosng.platform.security.PlatformSecurityContext;
-import org.mifosng.platform.user.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -118,7 +116,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 	@Override
 	public EntityIdentifier approveDepositApplication(final DepositStateTransitionApprovalCommand command) {
 		
-		AppUser currentUser = context.authenticatedUser();
+		//AppUser currentUser = context.authenticatedUser();
 		
 		DepositStateTransitionApprovalCommandValidator validator = new DepositStateTransitionApprovalCommandValidator(command);
 		validator.validate();
@@ -129,10 +127,11 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 		}
 		
 		// FIXME - madhukar - you are checking for loan permission here instead of some specific deposit account permission.
+		// removing check for now until rules dealing with creating and maintaining deposit accounts in the past is clarified
 		LocalDate eventDate = command.getEventDate();
-		if (this.isBeforeToday(eventDate) && currentUser.canNotApproveLoanInPast()) {
-			throw new NoAuthorizationException("User has no authority to approve deposit with a date in the past.");
-		}
+		//if (this.isBeforeToday(eventDate) && currentUser.canNotApproveLoanInPast()) {
+		//	throw new NoAuthorizationException("User has no authority to approve deposit with a date in the past.");
+		//}
 		
 		account.approve(eventDate, defaultDepositLifecycleStateMachine(), command, this.fixedTermDepositInterestCalculator);
 		
@@ -149,9 +148,9 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 	
 	}
 	
-	private boolean isBeforeToday(final LocalDate date) {
-		return date.isBefore(new LocalDate());
-	}
+	//private boolean isBeforeToday(final LocalDate date) {
+	//	return date.isBefore(new LocalDate());
+	//}
 	private DepositLifecycleStateMachine defaultDepositLifecycleStateMachine() {
 		List<DepositAccountStatus> allowedDepositStatuses = Arrays.asList(DepositAccountStatus.values());
 		return new DepositLifecycleStateMachineImpl(allowedDepositStatuses);
@@ -161,7 +160,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 	@Override
 	public EntityIdentifier rejectDepositApplication(DepositStateTransitionCommand command) {
 		
-		AppUser currentUser = context.authenticatedUser();
+		//AppUser currentUser = context.authenticatedUser();
 		
 		DepositStateTransitionCommandValidator validator = new DepositStateTransitionCommandValidator(command);
 		validator.validate();
@@ -170,11 +169,12 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 		if (account == null || account.isDeleted()) {
 			throw new DepositAccountNotFoundException(command.getAccountId());
 		}
-		
+
+		// removing check for now until rules dealing with creating and maintaining deposit accounts in the past is clarified
 		LocalDate eventDate = command.getEventDate();
-		if (this.isBeforeToday(eventDate) && currentUser.canNotApproveLoanInPast()) {
-			throw new NoAuthorizationException("User has no authority to approve deposit with a date in the past.");
-		}
+		//if (this.isBeforeToday(eventDate) && currentUser.canNotApproveLoanInPast()) {
+		//	throw new NoAuthorizationException("User has no authority to approve deposit with a date in the past.");
+		//}
 		
 		account.reject(eventDate, defaultDepositLifecycleStateMachine());
 		this.depositAccountRepository.save(account);
@@ -192,7 +192,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 	@Override
 	public EntityIdentifier withdrawDepositApplication(DepositStateTransitionCommand command) {
 		
-		AppUser currentUser = context.authenticatedUser();
+		//AppUser currentUser = context.authenticatedUser();
 		
 		DepositStateTransitionCommandValidator validator = new DepositStateTransitionCommandValidator(command);
 		validator.validate();
@@ -201,11 +201,12 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 		if (account == null || account.isDeleted()) {
 			throw new DepositAccountNotFoundException(command.getAccountId());
 		}
-		
+
+		// removing check for now until rules dealing with creating and maintaining deposit accounts in the past is clarified
 		LocalDate eventDate = command.getEventDate();
-		if (this.isBeforeToday(eventDate) && currentUser.canNotApproveLoanInPast()) {
-			throw new NoAuthorizationException("User has no authority to approve deposit with a date in the past.");
-		}
+		//if (this.isBeforeToday(eventDate) && currentUser.canNotApproveLoanInPast()) {
+		//	throw new NoAuthorizationException("User has no authority to approve deposit with a date in the past.");
+		//}
 		
 		account.withdrawnByApplicant(eventDate, defaultDepositLifecycleStateMachine());
 		this.depositAccountRepository.save(account);
