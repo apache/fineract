@@ -11,13 +11,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface DepositAccountWritePlatformService {
 
-	@PreAuthorize(value = "hasRole('ALL_FUNCTIONS', 'PORTFOLIO_MANAGEMENT_SUPER_USER', 'CREATE_DEPOSITACCOUNT')")
+	@PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'PORTFOLIO_MANAGEMENT_SUPER_USER', 'CREATE_DEPOSITACCOUNT')")
 	EntityIdentifier createDepositAccount(DepositAccountCommand command);
 
-	@PreAuthorize(value = "hasRole('ALL_FUNCTIONS', 'PORTFOLIO_MANAGEMENT_SUPER_USER', 'UPDATE_DEPOSITACCOUNT')")
+	@PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'PORTFOLIO_MANAGEMENT_SUPER_USER', 'UPDATE_DEPOSITACCOUNT')")
 	EntityIdentifier updateDepositAccount(DepositAccountCommand command);
 
-	@PreAuthorize(value = "hasRole('ALL_FUNCTIONS', 'PORTFOLIO_MANAGEMENT_SUPER_USER', 'DELETE_DEPOSITACCOUNT')")
+	@PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'PORTFOLIO_MANAGEMENT_SUPER_USER', 'DELETE_DEPOSITACCOUNT')")
 	EntityIdentifier deleteDepositAccount(Long productId);
 
 	// NOTE - took out permissions relating to doing things with deposit
@@ -45,14 +45,11 @@ public interface DepositAccountWritePlatformService {
 	 */
 
 	@PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'PORTFOLIO_MANAGEMENT_SUPER_USER', 'WITHDRAWAL_DEPOSITACCOUNT')")
-	EntityIdentifier withdrawDepositAccountMoney(
-			DepositAccountWithdrawalCommand command);
+	EntityIdentifier withdrawDepositAccountMoney(DepositAccountWithdrawalCommand command);
 
 	@PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'PORTFOLIO_MANAGEMENT_SUPER_USER', 'INTEREST_DEPOSITACCOUNT')")
-	EntityIdentifier withdrawDepositAccountInterestMoney(
-			DepositAccountWithdrawInterestCommand command);
+	EntityIdentifier withdrawDepositAccountInterestMoney(DepositAccountWithdrawInterestCommand command);
 
-	@PreAuthorize(value = "hasRole('ALL_FUNCTIONS', 'ORGANISATION_ADMINISTRATION_SUPER_USER', 'RENEW_DEPOSITACCOUNT')")
+	@PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'ORGANISATION_ADMINISTRATION_SUPER_USER', 'RENEW_DEPOSITACCOUNT')")
 	EntityIdentifier renewDepositAccount(DepositAccountCommand command);
-
 }

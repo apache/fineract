@@ -5,9 +5,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface StaffWritePlatformService {
 
-	@PreAuthorize(value = "hasRole('ALL_FUNCTIONS', 'ORGANISATION_ADMINISTRATION_SUPER_USER', 'CREATE_STAFF')")
+	@PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'ORGANISATION_ADMINISTRATION_SUPER_USER', 'CREATE_STAFF')")
 	Long createStaff(final StaffCommand command);
 	
-	@PreAuthorize(value = "hasRole('ALL_FUNCTIONS', 'ORGANISATION_ADMINISTRATION_SUPER_USER', 'UPDATE_STAFF')")
+	@PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'ORGANISATION_ADMINISTRATION_SUPER_USER', 'UPDATE_STAFF')")
 	Long updateStaff(final StaffCommand command);
 }

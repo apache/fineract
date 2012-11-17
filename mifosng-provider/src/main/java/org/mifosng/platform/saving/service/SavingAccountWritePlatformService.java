@@ -6,9 +6,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface SavingAccountWritePlatformService {
 	
-	@PreAuthorize(value = "hasRole('ALL_FUNCTIONS', 'PORTFOLIO_MANAGEMENT_SUPER_USER', 'CREATE_SAVINGSACCOUNT')")
+	@PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'PORTFOLIO_MANAGEMENT_SUPER_USER', 'CREATE_SAVINGSACCOUNT')")
 	EntityIdentifier createSavingAccount(SavingAccountCommand command);
 	
-	@PreAuthorize(value = "hasRole('ALL_FUNCTIONS', 'PORTFOLIO_MANAGEMENT_SUPER_USER', 'UPDATE_SAVINGSACCOUNT')")
+	@PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'PORTFOLIO_MANAGEMENT_SUPER_USER', 'UPDATE_SAVINGSACCOUNT')")
 	EntityIdentifier updateSavingAccount(SavingAccountCommand command);
 }

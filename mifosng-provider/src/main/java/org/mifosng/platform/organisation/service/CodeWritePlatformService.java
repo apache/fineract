@@ -6,12 +6,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface CodeWritePlatformService {
 
-	@PreAuthorize(value = "hasRole('ALL_FUNCTIONS', 'ORGANISATION_ADMINISTRATION_SUPER_USER', 'CREATE_CODE')")
+	@PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'ORGANISATION_ADMINISTRATION_SUPER_USER', 'CREATE_CODE')")
 	Long createCode(final CodeCommand command);
 
-	@PreAuthorize(value = "hasRole('ALL_FUNCTIONS', 'ORGANISATION_ADMINISTRATION_SUPER_USER', 'UPDATE_CODE)")
+	@PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'ORGANISATION_ADMINISTRATION_SUPER_USER', 'UPDATE_CODE)")
 	Long updateCode(final CodeCommand command);
 
-	@PreAuthorize(value = "hasRole('ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE')")
+	@PreAuthorize(value = "hasAnyRole('ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE')")
 	EntityIdentifier deleteCode(Long codeId);
 }
