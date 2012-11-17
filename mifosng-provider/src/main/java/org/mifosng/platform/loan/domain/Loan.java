@@ -1612,8 +1612,10 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
             }
 
         	this.loanofficer = newLoanOfficer;
-        	final LoanOfficerAssignmentHistory loanOfficerAssignmentHistory = LoanOfficerAssignmentHistory.createNew(this, this.loanofficer, assignmentDate);
-            this.loanOfficerHistory.add(loanOfficerAssignmentHistory);
+            if (this.isNotSubmittedAndPendingApproval()){
+                final LoanOfficerAssignmentHistory loanOfficerAssignmentHistory = LoanOfficerAssignmentHistory.createNew(this, this.loanofficer, assignmentDate);
+                this.loanOfficerHistory.add(loanOfficerAssignmentHistory);
+            }
         }
 	}
 
