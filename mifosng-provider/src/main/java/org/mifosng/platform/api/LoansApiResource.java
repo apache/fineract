@@ -19,10 +19,12 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.LocalDate;
 import org.mifosng.platform.api.commands.AdjustLoanTransactionCommand;
 import org.mifosng.platform.api.commands.CalculateLoanScheduleCommand;
 import org.mifosng.platform.api.commands.LoanApplicationCommand;
 import org.mifosng.platform.api.commands.LoanChargeCommand;
+import org.mifosng.platform.api.commands.LoanReassignmentCommand;
 import org.mifosng.platform.api.commands.LoanStateTransitionCommand;
 import org.mifosng.platform.api.commands.LoanTransactionCommand;
 import org.mifosng.platform.api.commands.UndoStateTransitionCommand;
@@ -36,6 +38,7 @@ import org.mifosng.platform.api.data.LoanBasicDetailsData;
 import org.mifosng.platform.api.data.LoanChargeData;
 import org.mifosng.platform.api.data.LoanPermissionData;
 import org.mifosng.platform.api.data.LoanProductData;
+import org.mifosng.platform.api.data.LoanReassignmentData;
 import org.mifosng.platform.api.data.LoanTransactionData;
 import org.mifosng.platform.api.data.StaffData;
 import org.mifosng.platform.api.data.TransactionProcessingStrategyData;
@@ -226,7 +229,6 @@ public class LoansApiResource {
 		Collection<EnumOptionData> interestTypeOptions = null;
 		Collection<EnumOptionData> interestCalculationPeriodTypeOptions = null;
 		Collection<FundData> fundOptions = null;
-		Collection<StaffData> allowedLoanOfficers = null;
 		Collection<ChargeData> chargeOptions = null;
 		ChargeData chargeTemplate = null;
 		
@@ -245,7 +247,6 @@ public class LoansApiResource {
 			repaymentStrategyOptions = this.dropdownReadPlatformService.retreiveTransactionProcessingStrategies();
 			final boolean feeChargesOnly = false;
 			chargeOptions = this.chargeReadPlatformService.retrieveLoanApplicableCharges(feeChargesOnly);
-			allowedLoanOfficers =  this.staffReadPlatformService.retrieveAllLoanOfficersByOffice(loanBasicDetails.getClientOfficeId());
 			chargeTemplate = this.chargeReadPlatformService.retrieveLoanChargeTemplate();
 		}
 		
@@ -254,7 +255,7 @@ public class LoansApiResource {
 				productOptions, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions, 
 				repaymentStrategyOptions, interestRateFrequencyTypeOptions, 
 				amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions, 
-				fundOptions, chargeOptions, chargeTemplate, allowedLoanOfficers);
+				fundOptions, chargeOptions, chargeTemplate, null);
 		
 		return this.apiJsonSerializerService.serializeLoanAccountDataToJson(prettyPrint, responseParameters, loanAccount);
 	}
@@ -583,5 +584,44 @@ public class LoansApiResource {
 
         final EntityIdentifier identifier = this.loanWritePlatformService.deleteLoanCharge(loanId, loanChargeId);
         return this.apiJsonSerializerService.serializeEntityIdentifier(identifier);
+    }
+
+    @POST
+    @Path("{loanId}/assign")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public Response assignLoanOfficer(
+            @PathParam("loanId") final Long loanId,
+            final String jsonRequestBody){
+
+        final LoanReassignmentCommand command = this.apiDataConversionService.convertJsonToLoanReassignmentCommand(loanId, jsonRequestBody);
+
+        EntityIdentifier identifier = this.loanWritePlatformService.loanReassignment(command);
+
+        return Response.ok().entity(identifier).build();
+    }
+
+    @GET
+    @Path("{loanId}/assign/template")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String assignLoanOfficerTemplate(
+            @PathParam("loanId") final Long loanId,
+            @Context final UriInfo uriInfo){
+
+        final Set<String> responseParameters = ApiParameterHelper
+                .extractFieldsForResponseIfProvided(uriInfo
+                        .getQueryParameters());
+
+        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+
+        LoanBasicDetailsData loanBasicDetails = this.loanReadPlatformService.retrieveLoanAccountDetails(loanId);
+
+        Collection<StaffData> allowedLoanOfficers = this.staffReadPlatformService.retrieveAllLoanOfficersByOffice(loanBasicDetails.getOfficeId());
+        Long fromLoanOfficerId = loanBasicDetails.getLoanOfficerId();
+
+        LoanReassignmentData loanReassignmentData = LoanReassignmentData.template(fromLoanOfficerId, allowedLoanOfficers, new LocalDate());
+
+        return this.apiJsonSerializerService.serializeLoanReassignmentDataToJson(prettyPrint, responseParameters, loanReassignmentData);
     }
 }

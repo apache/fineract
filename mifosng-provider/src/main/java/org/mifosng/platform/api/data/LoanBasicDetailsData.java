@@ -560,4 +560,15 @@ public class LoanBasicDetailsData {
 	public DisbursementData toDisburementData() {
 		return new DisbursementData(this.expectedDisbursementDate, this.actualDisbursementDate, this.principal);
 	}
+
+    public Long getOfficeId(){
+        Long officeId = this.clientOfficeId;
+
+        if (officeId == null){
+            officeId = this.groupOfficeId;
+        }
+
+        return officeId;
+    }
+
 }

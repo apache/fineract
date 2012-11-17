@@ -448,7 +448,6 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	
 	public void modifyLoanApplication(final LoanApplicationCommand command, final Client client, final LoanProduct loanProduct, 
 			final Fund fund, final LoanTransactionProcessingStrategy strategy, final LoanScheduleData modifiedLoanSchedule, final Set<LoanCharge> charges,
-			final Staff loanOfficer, 
 			final LoanLifecycleStateMachine loanLifecycleStateMachine) {
 
 		// FIXME - KW - whilst the methods are named isXXXChanged, this really only is asking has the parameter for that field been passed in request, 
@@ -461,9 +460,6 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		}
 		if (command.isFundChanged()) {
 			this.fund = fund;
-		}
-		if(command.isLoanOfficerChanged()){
-			this.loanofficer = loanOfficer;
 		}
 		if (command.isTransactionStrategyChanged()) {
 			this.transactionProcessingStrategy = strategy;
@@ -1601,18 +1597,20 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	public void reassignLoanOfficer(final Staff newLoanOfficer, final LocalDate assignmentDate) {
 		
         final LoanOfficerAssignmentHistory latestHistoryRecord = findLatestIncompleteHistoryRecord();
-        
-        if (this.loanofficer.identifiedBy(newLoanOfficer)) {
+
+        if (latestHistoryRecord != null && this.loanofficer.identifiedBy(newLoanOfficer)) {
         	latestHistoryRecord.updateStartDate(assignmentDate);
-        } else if (latestHistoryRecord.matchesStartDateOf(assignmentDate)) {
+        } else if (latestHistoryRecord != null && latestHistoryRecord.matchesStartDateOf(assignmentDate)) {
         	latestHistoryRecord.updateLoanOfficer(newLoanOfficer);
         	this.loanofficer = newLoanOfficer;
-        } else if (latestHistoryRecord.hasStartDateBefore(assignmentDate)) {
+        } else if (latestHistoryRecord != null && latestHistoryRecord.hasStartDateBefore(assignmentDate)) {
             throw new LoanOfficerAssignmentException(this.getId(), assignmentDate);
         } else {
-        	// loan officer correctly changed from previous loan officer to new loan officer
-        	latestHistoryRecord.updateEndDate(assignmentDate);
-        	
+            if (latestHistoryRecord != null){
+                // loan officer correctly changed from previous loan officer to new loan officer
+                latestHistoryRecord.updateEndDate(assignmentDate);
+            }
+
         	this.loanofficer = newLoanOfficer;
         	final LoanOfficerAssignmentHistory loanOfficerAssignmentHistory = LoanOfficerAssignmentHistory.createNew(this, this.loanofficer, assignmentDate);
             this.loanOfficerHistory.add(loanOfficerAssignmentHistory);

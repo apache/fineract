@@ -10,7 +10,7 @@ import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.mifosng.platform.api.LoanScheduleData;
 import org.mifosng.platform.api.commands.AdjustLoanTransactionCommand;
-import org.mifosng.platform.api.commands.BulkLoanReassignmentCommand;
+import org.mifosng.platform.api.commands.LoanReassignmentCommand;
 import org.mifosng.platform.api.commands.CalculateLoanScheduleCommand;
 import org.mifosng.platform.api.commands.LoanApplicationCommand;
 import org.mifosng.platform.api.commands.LoanChargeCommand;
@@ -55,7 +55,6 @@ import org.mifosng.platform.loan.domain.LoanTransactionRepository;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.staff.domain.Staff;
-import org.mifosng.platform.staff.service.BulkLoanReassignmentCommandValidator;
 import org.mifosng.platform.user.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -158,7 +157,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		}
 		
 		final Fund fund = this.loanAssembler.findFundByIdIfProvided(command.getFundId());
-		final Staff loanOfficer = this.loanAssembler.findLoanOfficerByIdIfProvided(command.getLoanOfficerId());
 		final LoanTransactionProcessingStrategy strategy = this.loanAssembler.findStrategyByIdIfProvided(command.getTransactionProcessingStrategyId());
 		final Set<LoanCharge> charges = this.loanChargeAssembler.assembleFrom(command.getCharges(), loanProduct.getCharges(), loan.getPrincpal().getAmount());
 
@@ -166,7 +164,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         
         // FIXME - kw - restrict ability to modify loan to modifying the 'loan application' stage - once it has been disbursed, should be allowed to use this feature
         //       - other facilities are in place such as 'undo disbursal'
-		loan.modifyLoanApplication(command, client, loanProduct, fund, strategy, loanSchedule, charges, loanOfficer, defaultLoanLifecycleStateMachine());
+		loan.modifyLoanApplication(command, client, loanProduct, fund, strategy, loanSchedule, charges, defaultLoanLifecycleStateMachine());
 
 		this.loanRepository.save(loan);
 		
@@ -732,14 +730,39 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 		return loanCharge;
 	}
 
-	@Transactional
+    @Transactional
     @Override
-    public EntityIdentifier bulkLoanReassignment(final BulkLoanReassignmentCommand command) {
+    public EntityIdentifier loanReassignment(LoanReassignmentCommand command) {
 
         this.context.authenticatedUser();
 
-        BulkLoanReassignmentCommandValidator validator = new BulkLoanReassignmentCommandValidator(command);
-        validator.validateLoanReassignment();
+        LoanReassignmentCommandValidator validator = new LoanReassignmentCommandValidator(command);
+        validator.validateForLoanReassignment();
+
+        final Staff fromLoanOfficer = loanAssembler.findLoanOfficerByIdIfProvided(command.getFromLoanOfficerId());
+        final Staff toLoanOfficer = loanAssembler.findLoanOfficerByIdIfProvided(command.getToLoanOfficerId());
+
+        final Loan loan = retrieveLoanBy(command.getLoanId());
+
+        if (!loan.hasLoanOfficer(fromLoanOfficer)){
+            throw new LoanOfficerAssignmentException(loan.getId(), fromLoanOfficer.getId());
+        }
+
+        loan.reassignLoanOfficer(toLoanOfficer, command.getAssignmentDate());
+
+        this.loanRepository.saveAndFlush(loan);
+
+        return new EntityIdentifier(loan.getId());
+    }
+
+    @Transactional
+    @Override
+    public EntityIdentifier bulkLoanReassignment(final LoanReassignmentCommand command) {
+
+        this.context.authenticatedUser();
+
+        LoanReassignmentCommandValidator validator = new LoanReassignmentCommandValidator(command);
+        validator.validateForBulkLoanReassignment();
 
         Staff fromLoanOfficer = loanAssembler.findLoanOfficerByIdIfProvided(command.getFromLoanOfficerId());
         Staff toLoanOfficer = loanAssembler.findLoanOfficerByIdIfProvided(command.getToLoanOfficerId());

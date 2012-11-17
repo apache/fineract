@@ -19,7 +19,7 @@ import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.mifosng.platform.api.commands.AdjustLoanTransactionCommand;
 import org.mifosng.platform.api.commands.BranchMoneyTransferCommand;
-import org.mifosng.platform.api.commands.BulkLoanReassignmentCommand;
+import org.mifosng.platform.api.commands.LoanReassignmentCommand;
 import org.mifosng.platform.api.commands.ChargeCommand;
 import org.mifosng.platform.api.commands.ClientCommand;
 import org.mifosng.platform.api.commands.ClientIdentifierCommand;
@@ -157,7 +157,32 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
 	}
 
     @Override
-    public BulkLoanReassignmentCommand convertJsonToBulkLoanReassignmentCommand(final String json) {
+    public LoanReassignmentCommand convertJsonToLoanReassignmentCommand(Long resourceIdentifier, String json) {
+
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
+
+        Type typeOfMap = new TypeToken<Map<String, String>>(){}.getType();
+        Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
+
+        Set<String> supportedParams = new HashSet<String>(
+                Arrays.asList("fromLoanOfficerId", "toLoanOfficerId", "assignmentDate", "locale", "dateFormat")
+        );
+
+        checkForUnsupportedParameters(requestMap, supportedParams);
+
+        Set<String> modifiedParameters = new HashSet<String>();
+
+        Long fromLoanOfficerId = extractLongParameter("fromLoanOfficerId", requestMap, modifiedParameters);
+        Long toLoanOfficerId = extractLongParameter("toLoanOfficerId", requestMap, modifiedParameters);
+        LocalDate assignmentDate = extractLocalDateParameter("assignmentDate", requestMap, modifiedParameters);
+
+        return new LoanReassignmentCommand(resourceIdentifier, fromLoanOfficerId, toLoanOfficerId, assignmentDate);
+    }
+
+    @Override
+    public LoanReassignmentCommand convertJsonToBulkLoanReassignmentCommand(final String json) {
 
         if (StringUtils.isBlank(json)) {
             throw new InvalidJsonException();
@@ -196,7 +221,7 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         }
         //
 
-        return new BulkLoanReassignmentCommand(fromLoanOfficerId, toLoanOfficerId, assignmentDate, loans);
+        return new LoanReassignmentCommand(fromLoanOfficerId, toLoanOfficerId, assignmentDate, loans);
 	}
 
 	@Override

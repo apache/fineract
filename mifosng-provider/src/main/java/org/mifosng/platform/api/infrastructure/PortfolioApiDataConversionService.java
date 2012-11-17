@@ -2,7 +2,7 @@ package org.mifosng.platform.api.infrastructure;
 
 import org.mifosng.platform.api.commands.AdjustLoanTransactionCommand;
 import org.mifosng.platform.api.commands.BranchMoneyTransferCommand;
-import org.mifosng.platform.api.commands.BulkLoanReassignmentCommand;
+import org.mifosng.platform.api.commands.LoanReassignmentCommand;
 import org.mifosng.platform.api.commands.ChargeCommand;
 import org.mifosng.platform.api.commands.ClientCommand;
 import org.mifosng.platform.api.commands.ClientIdentifierCommand;
@@ -76,7 +76,9 @@ public interface PortfolioApiDataConversionService {
 
 	StaffCommand convertJsonToStaffCommand(Long resourceIdentifier, String json);
 
-    BulkLoanReassignmentCommand convertJsonToBulkLoanReassignmentCommand(String json);
+    LoanReassignmentCommand convertJsonToLoanReassignmentCommand(Long resourceIdentifier, String json);
+
+    LoanReassignmentCommand convertJsonToBulkLoanReassignmentCommand(String json);
 
 	DepositAccountWithdrawalCommand convertJsonToDepositWithdrawalCommand(Long resourceIdentifier, String json);
 	

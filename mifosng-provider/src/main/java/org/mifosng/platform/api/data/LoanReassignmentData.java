@@ -24,7 +24,22 @@ public class LoanReassignmentData {
     @SuppressWarnings("unused")
     private final StaffAccountSummaryCollectionData accountSummaryCollection;
 
-    public LoanReassignmentData(
+    public static LoanReassignmentData templateForBulk(final Long officeId,
+                                                       final Long fromLoanOfficerId,
+                                                       final LocalDate assignmentDate,
+                                                       final Collection<OfficeLookup> officeOptions,
+                                                       final Collection<StaffData> loanOfficerOptions,
+                                                       final StaffAccountSummaryCollectionData accountSummaryCollection) {
+        return new LoanReassignmentData(officeId, fromLoanOfficerId, assignmentDate, officeOptions, loanOfficerOptions, accountSummaryCollection);
+    }
+
+    public static LoanReassignmentData template(final Long fromLoanOfficerId,
+                                                final Collection<StaffData> loanOfficerOptions,
+                                                final LocalDate assignmentDate){
+        return new LoanReassignmentData(null, fromLoanOfficerId, assignmentDate, null, loanOfficerOptions, null);
+    }
+
+    private LoanReassignmentData(
     		final Long officeId, 
     		final Long fromLoanOfficerId,
             final LocalDate assignmentDate,

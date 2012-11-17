@@ -19,7 +19,7 @@ import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
-import org.mifosng.platform.api.commands.BulkLoanReassignmentCommand;
+import org.mifosng.platform.api.commands.LoanReassignmentCommand;
 import org.mifosng.platform.api.commands.StaffCommand;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.LoanReassignmentData;
@@ -154,7 +154,7 @@ public class StaffApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public Response loanReassignment(final String jsonRequestBody){
 
-        BulkLoanReassignmentCommand command =
+        LoanReassignmentCommand command =
                 this.apiDataConversionService.convertJsonToBulkLoanReassignmentCommand(jsonRequestBody);
 
         EntityIdentifier loanOfficerIdentifier = this.loanWritePlatformService.bulkLoanReassignment(command);
@@ -191,7 +191,7 @@ public class StaffApiResource {
             staffAccountSummaryCollectionData = this.readPlatformService.retrieveLoanOfficerAccountSummary(loanOfficerId);
         }
 
-        final LoanReassignmentData loanReassignmentData = new LoanReassignmentData(officeId, loanOfficerId,
+        final LoanReassignmentData loanReassignmentData = LoanReassignmentData.templateForBulk(officeId, loanOfficerId,
                 new LocalDate(), offices, loanOfficers, staffAccountSummaryCollectionData);
 
         return this.apiJsonSerializerService.serializeLoanReassignmentDataToJson(prettyPrint, responseParameters, loanReassignmentData);
