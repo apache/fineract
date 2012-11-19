@@ -72,16 +72,18 @@ public class PermissionReadPlatformServiceImpl implements PermissionReadPlatform
 
 			final String grouping = rs.getString("grouping");
 			final String code = rs.getString("code");
+			final String entityName = rs.getString("entityName");
+			final String actionName = rs.getString("actionName");
 			final Boolean selected = rs.getBoolean("selected");
 
-			return new PermissionUsageData(grouping, code, selected);
+			return new PermissionUsageData(grouping, code, entityName, actionName, selected);
 		}
 
 		public String schema() {
-			return " select p.grouping, p.code, if(isnull(rp.role_id), false, true) as selected " + 
-					" from m_permission p " +
-					" left join m_role_permission rp on rp.permission_id = p.id and rp.role_id = ? " +
-					" order by p.grouping, p.order_in_grouping, p.code ";
+			return "select p.grouping, p.code, p.entity_name as entityName, p.action_name as actionName, if(isnull(rp.role_id), false, true) as selected " + 
+					 "from m_permission p " +
+					 "left join m_role_permission rp on rp.permission_id = p.id and rp.role_id = ? " +
+					 "order by p.grouping, ifnull(entity_name, ''), p.code";
 		}
 	}
 	

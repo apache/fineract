@@ -14,11 +14,7 @@ public class Permission extends AbstractPersistable<Long> {
     @SuppressWarnings("unused")
 	@Column(name = "grouping", nullable = false, length=45)
     private final String          grouping;
-    
-    @SuppressWarnings("unused")
-	@Column(name = "order_in_grouping", nullable = false)
-    private final Integer          orderInGrouping;
-    
+        
     @Column(name = "code", nullable = false, length=100)
     private final String          code;
 
@@ -28,12 +24,22 @@ public class Permission extends AbstractPersistable<Long> {
 	@Column(name = "default_description", nullable = false, length=500)
     private final String          defaultDescription;
 
+    @SuppressWarnings("unused")
+	@Column(name = "entity_name", nullable = true, length=100)
+    private final String          entityName;
+
+    @SuppressWarnings("unused")
+	@Column(name = "action_name", nullable = true, length=100)
+    private final String          actionName;
+	
+	
     protected Permission() {
         this.grouping = null;
-        this.orderInGrouping = null;
         this.code = null;
         this.defaultDescription = null;
         this.defaultName = null;
+        this.entityName = null;
+        this.actionName = null;
     }
 
 	public boolean hasCode(String checkCode) {
