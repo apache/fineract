@@ -69,4 +69,13 @@ public class PortfolioCommandsReadPlatformServiceImpl implements PortfolioComman
 
 		return this.jdbcTemplate.queryForObject(sql, rm, new Object[] {id});
 	}
+
+	@Override
+	public Collection<CommandSourceData> retrieveUnprocessChangesByResourceId(final String apiResource, final Long resourceId) {
+		
+		final CommandSourceMapper rm = new CommandSourceMapper();
+		final String sql = "select " + rm.schema() + " where mc.api_resource like ? and mc.resource_id = ? and mc.checker_id is null order by mc.made_on_date DESC, mc.api_operation ASC";
+
+		return this.jdbcTemplate.query(sql, rm, new Object[] {apiResource, resourceId});
+	}
 }

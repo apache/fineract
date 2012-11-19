@@ -193,10 +193,11 @@ CREATE TABLE `m_office_transaction` (
 CREATE TABLE `m_permission` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `grouping` varchar(45) DEFAULT NULL,
-  `order_in_grouping` int(11) DEFAULT NULL,
   `code` varchar(100) NOT NULL,
   `default_description` varchar(500) NOT NULL,
   `default_name` varchar(100) NOT NULL,
+  `entity_name` varchar(100) DEFAULT NULL,
+  `action_name` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `code` (`code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

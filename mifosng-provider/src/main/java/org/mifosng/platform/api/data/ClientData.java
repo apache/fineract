@@ -1,10 +1,10 @@
 package org.mifosng.platform.api.data;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
-import org.mifosng.platform.api.commands.ClientCommand;
 
 /**
  * Immutable data object representing client data.
@@ -22,13 +22,13 @@ final public class ClientData {
 	private final LocalDate joinedDate;
 	private final String imageKey;
 	@SuppressWarnings("unused")
-	private final boolean imagePresent;
+	private final Boolean imagePresent;
 	
 	private final List<OfficeLookup> allowedOffices;
 	
-	@SuppressWarnings("unused")
-	private final ClientCommand changes;
-	
+	private final ClientData currentChange;
+	private final Collection<ClientData> allChanges;
+
 	private static String buildDisplayNameFrom(final String firstname, final String lastname) {
 		String displayName = null;
 		StringBuilder displayNameBuilder = new StringBuilder();
@@ -43,7 +43,27 @@ final public class ClientData {
 		return displayName;
 	}
 	
-	public static ClientData integrateChanges(final ClientData clientData, final ClientCommand command) {
+	public static ClientData dataChangeInstance(
+			final Long id,
+			final Long officeId, 
+			final String externalId, 
+			final String firstname,
+			final String lastname, 
+			final String clientOrBusinessName,
+			final LocalDate joiningDate) {
+		
+		String firstnameValue = firstname;
+		String lastnameValue = lastname;
+		if (StringUtils.isNotBlank(clientOrBusinessName)) {
+			firstnameValue = null;
+			lastnameValue = clientOrBusinessName;
+		}
+		final String displayName = buildDisplayNameFrom(firstnameValue, lastnameValue);
+		
+		return new ClientData(officeId, null, id, firstname, lastname, displayName, externalId, joiningDate, null, null, null, null);
+	}
+	
+	public static ClientData integrateChanges(final ClientData clientData, ClientData currentChange, final Collection<ClientData> allChanges) {
 		String firstname = clientData.firstname;
 		String lastname = clientData.lastname;
 		if (StringUtils.isNotBlank(clientData.clientOrBusinessName)) {
@@ -52,11 +72,11 @@ final public class ClientData {
 		}
 		final String displayName = buildDisplayNameFrom(firstname, lastname);
 		return new ClientData(clientData.officeId, clientData.officeName, clientData.id, firstname, lastname, displayName, 
-				clientData.externalId, clientData.joinedDate, clientData.imageKey, clientData.allowedOffices, command);
+				clientData.externalId, clientData.joinedDate, clientData.imageKey, clientData.allowedOffices, currentChange, allChanges);
 	}
 	
 	public static ClientData template(final Long officeId, final LocalDate joinedDate, final List<OfficeLookup> allowedOffices) {
-		return new ClientData(officeId, null, null, null, null, null, null, joinedDate, null, allowedOffices, null);
+		return new ClientData(officeId, null, null, null, null, null, null, joinedDate, null, allowedOffices, null, null);
 	}
 	
 	public static ClientData templateOnTop(final ClientData clientData, final List<OfficeLookup> allowedOffices) {
@@ -69,7 +89,7 @@ final public class ClientData {
 		}
 		final String displayName = buildDisplayNameFrom(firstname, lastname);
 		return new ClientData(clientData.officeId, clientData.officeName, clientData.id, firstname, lastname, displayName, 
-				clientData.externalId, clientData.joinedDate, clientData.imageKey, allowedOffices, null);
+				clientData.externalId, clientData.joinedDate, clientData.imageKey, allowedOffices, clientData.currentChange, clientData.allChanges);
 	}
 	
 	public static ClientData clientIdentifier(
@@ -81,7 +101,7 @@ final public class ClientData {
 		
 		final String displayName = buildDisplayNameFrom(firstname, lastname);
 		
-		return new ClientData(officeId, officeName, id, firstname, lastname, displayName, null, null, null, null, null);
+		return new ClientData(officeId, officeName, id, firstname, lastname, displayName, null, null, null, null, null, null);
 	}
 
 	public ClientData(
@@ -95,7 +115,8 @@ final public class ClientData {
 			final LocalDate joinedDate,
 			final String imageKey,
 			final List<OfficeLookup> allowedOffices,
-			final ClientCommand changes) {
+			final ClientData currentChange,
+			final Collection<ClientData> allChanges) {
 		this.officeId = officeId;
 		this.officeName = officeName;
 		this.id = id;
@@ -113,9 +134,14 @@ final public class ClientData {
 		this.externalId = externalId;
 		this.joinedDate = joinedDate;
 		this.imageKey = imageKey;
-		this.imagePresent = (imageKey != null);
+		if (imageKey != null) {
+			this.imagePresent = Boolean.TRUE;
+		} else {
+			this.imagePresent = null;
+		}
 		this.allowedOffices = allowedOffices;
-		this.changes = changes;
+		this.currentChange = currentChange;
+		this.allChanges = allChanges;
 	}
 
 	public String displayName() {
@@ -144,5 +170,9 @@ final public class ClientData {
 
 	public Long officeId() {
 		return this.officeId;
+	}
+
+	public ClientData currentChange() {
+		return this.currentChange;
 	}
 }

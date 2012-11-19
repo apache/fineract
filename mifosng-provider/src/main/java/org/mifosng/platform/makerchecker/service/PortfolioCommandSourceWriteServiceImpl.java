@@ -2,8 +2,11 @@ package org.mifosng.platform.makerchecker.service;
 
 import org.joda.time.LocalDate;
 import org.mifosng.platform.api.commands.ClientCommand;
+import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.infrastructure.PortfolioApiDataConversionService;
+import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService;
+import org.mifosng.platform.client.service.ClientReadPlatformService;
 import org.mifosng.platform.client.service.ClientWritePlatformService;
 import org.mifosng.platform.client.service.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
 import org.mifosng.platform.makerchecker.domain.CommandSource;
@@ -14,71 +17,91 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- *
- */
 @Service
 public class PortfolioCommandSourceWriteServiceImpl implements PortfolioCommandSourceWritePlatformService {
 
 	private final PlatformSecurityContext context;
 	private final CommandSourceRepository commandSourceRepository;
 	private final PortfolioApiDataConversionService apiDataConversionService;
+	private final PortfolioApiJsonSerializerService apiJsonSerializerService;
 	private final ClientWritePlatformService clientWritePlatformService;
+	private final ClientReadPlatformService clientReadPlatformService;
 
 	@Autowired
 	public PortfolioCommandSourceWriteServiceImpl(final PlatformSecurityContext context, final CommandSourceRepository makerCheckerRepository,
 			final PortfolioApiDataConversionService apiDataConversionService,
-			final ClientWritePlatformService clientWritePlatformService) {
+			final PortfolioApiJsonSerializerService apiJsonSerializerService,
+			final ClientWritePlatformService clientWritePlatformService,
+			final ClientReadPlatformService clientReadPlatformService) {
 		this.context = context;
 		this.commandSourceRepository = makerCheckerRepository;
 		this.apiDataConversionService = apiDataConversionService;
+		this.apiJsonSerializerService = apiJsonSerializerService;
 		this.clientWritePlatformService = clientWritePlatformService;
+		this.clientReadPlatformService = clientReadPlatformService;
 	}
 
 	// NOT TRANSACTIONAL BY DESIGN FOR NOW
 	@Override
-	public EntityIdentifier logCommandSource(final String taskOperation, final String taskEntity, final Long entityId, final String taskJson) {
+	public EntityIdentifier logCommandSource(final String apiOperation, final String resource, final Long resourceId, final String jsonRequestBody) {
 		
 		final AppUser maker = context.authenticatedUser();
 		
 		final LocalDate asToday = new LocalDate();
 		
-		final CommandSource entity = CommandSource.createdBy(taskOperation, taskEntity, entityId, taskJson, maker, asToday);
+		final CommandSource commandSource = CommandSource.createdBy(apiOperation, resource, resourceId, maker, asToday);
 		
-		final boolean makerCheckerApproval = false;
-		Long resourceId = null;
-		if (entity.isClientResource()) {
-			final ClientCommand command = this.apiDataConversionService.convertJsonToClientCommand(entityId, entity.json(), makerCheckerApproval);
-			if (entity.isCreate()) {
+		Long newResourceId = null;
+		if (commandSource.isClientResource()) {
+			
+			// translate incoming api request json into java object catering for local and dateFormat parts of api
+			final ClientCommand command = this.apiDataConversionService.convertApiRequestJsonToClientCommand(resourceId, jsonRequestBody);
+			// produce serialized json of internal java object representation for persistence.
+			final String internalCommandSerializedAsJson = this.apiJsonSerializerService.serializeClientCommandToJson(command);
+			commandSource.updateJsonTo(internalCommandSerializedAsJson);
+			
+			if (commandSource.isCreate()) {
 				try {
-					resourceId = this.clientWritePlatformService.createClient(command);
-					entity.markAsChecked(maker, asToday);
-					entity.updateResourceId(resourceId);
+					newResourceId = this.clientWritePlatformService.createClient(command);
+					commandSource.markAsChecked(maker, asToday);
+					commandSource.updateResourceId(newResourceId);
 					} catch (RollbackTransactionAsCommandIsNotApprovedByCheckerException e) {
 						// swallow this rollback transaction by design
 					}
-			} else if (entity.isUpdate()) {
+			} else if (commandSource.isUpdate()) {
 				try {
-					EntityIdentifier result = this.clientWritePlatformService.updateClientDetails(command);
-					resourceId = result.getEntityId();
-					entity.markAsChecked(maker, asToday);
+					// useful to employ change detection on update scenario to only store what details have changed
+					final ClientData originalClient = this.clientReadPlatformService.retrieveIndividualClient(resourceId);
+					final ClientData changedClient = this.apiDataConversionService.convertInternalJsonFormatToClientDataChange(resourceId, internalCommandSerializedAsJson);
+
+					final String baseJson = this.apiJsonSerializerService.serializeClientDataToJson(originalClient);
+					final String workingJson = this.apiJsonSerializerService.serializeClientDataToJson(changedClient);
+					final ClientCommand changesOnly = this.apiDataConversionService.detectChanges(resourceId, baseJson, workingJson);
+
+					final String changesOnlyJson = this.apiJsonSerializerService.serializeClientCommandToJson(changesOnly);
+					commandSource.updateJsonTo(changesOnlyJson);
+					
+					EntityIdentifier result = this.clientWritePlatformService.updateClientDetails(changesOnly);
+					newResourceId = result.getEntityId();
+					
+					commandSource.markAsChecked(maker, asToday);
 				} catch (RollbackTransactionAsCommandIsNotApprovedByCheckerException e) {
 					// swallow this rollback transaction by design
 				}
-			} else if (entity.isDelete()) {
+			} else if (commandSource.isDelete()) {
 				try {
 					EntityIdentifier result = this.clientWritePlatformService.deleteClient(command);
-					resourceId = result.getEntityId();
-					entity.markAsChecked(maker, asToday);
+					newResourceId = result.getEntityId();
+					commandSource.markAsChecked(maker, asToday);
 				} catch (RollbackTransactionAsCommandIsNotApprovedByCheckerException e) {
 					// swallow this rollback transaction by design
 				}
 			}
 		}
 		
-		commandSourceRepository.save(entity);
+		commandSourceRepository.save(commandSource);
 		
-		return EntityIdentifier.makerChecker(resourceId, entity.getId());
+		return EntityIdentifier.makerChecker(newResourceId, commandSource.getId());
 	}
 
 	@Transactional
@@ -92,7 +115,7 @@ public class PortfolioCommandSourceWriteServiceImpl implements PortfolioCommandS
 		
 		Long resourceId = null;
 		if (entity.isClientResource()) {
-			final ClientCommand command = this.apiDataConversionService.convertJsonToClientCommand(entity.resourceId(), entity.json(), true);
+			final ClientCommand command = this.apiDataConversionService.convertInternalJsonFormatToClientCommand(entity.resourceId(), entity.json(), true);
 			if (entity.isCreate()) {
 				resourceId = this.clientWritePlatformService.createClient(command);
 			} else if (entity.isUpdate()) {

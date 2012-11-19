@@ -18,6 +18,7 @@ import org.mifosng.platform.api.data.ApiParameterError;
 import org.mifosng.platform.exceptions.PlatformApiDataValidationException;
 import org.springframework.format.number.NumberFormatter;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
@@ -175,6 +176,32 @@ public class JsonParserHelper {
 			}
 		}
 		return clientApplicationLocale;
+	}
+	
+	/**
+	 * Used with the local date is in array format
+	 */
+	public LocalDate extractLocalDateAsArrayNamed(final String parameterName, final JsonElement element, final Set<String> parametersPassedInCommand) {
+		LocalDate value = null;
+		if (element.isJsonObject()) {
+			JsonObject object = element.getAsJsonObject();
+
+			if (object.has(parameterName) && object.get(parameterName).isJsonArray()) {
+				
+				parametersPassedInCommand.add(parameterName);
+
+				
+				final JsonArray dateArray = object.get(parameterName).getAsJsonArray();
+				
+				Integer year = dateArray.get(0).getAsInt();
+				Integer month = dateArray.get(1).getAsInt();
+				Integer day = dateArray.get(2).getAsInt();
+				
+				value = new LocalDate().withYearOfEra(year).withMonthOfYear(month).withDayOfMonth(day);
+			}
+
+		}
+		return value;
 	}
 
 	public LocalDate extractLocalDateNamed(

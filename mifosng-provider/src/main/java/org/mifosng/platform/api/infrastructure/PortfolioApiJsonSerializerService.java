@@ -5,6 +5,7 @@ import java.util.Set;
 
 import org.mifosng.platform.accounting.api.data.ChartOfAccountsData;
 import org.mifosng.platform.api.LoanScheduleData;
+import org.mifosng.platform.api.commands.ClientCommand;
 import org.mifosng.platform.api.data.AdditionalFieldsSetData;
 import org.mifosng.platform.api.data.AppUserData;
 import org.mifosng.platform.api.data.AuthenticatedUserData;
@@ -91,10 +92,14 @@ public interface PortfolioApiJsonSerializerService {
 
 	String serializeDepositAccountDataToJson(boolean prettyPrint, Set<String> responseParameters, DepositAccountData account);
 
-	String serializeClientDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<ClientData> clients);
-
+	String serializeClientCommandToJson(ClientCommand command);
+	
+	String serializeClientDataToJson(ClientData clientData);
+	
 	String serializeClientDataToJson(boolean prettyPrint, Set<String> responseParameters, ClientData clientData);
-
+	
+	String serializeClientDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<ClientData> clients);
+	
 	String serializeClientAccountSummaryCollectionDataToJson(boolean prettyPrint, Set<String> responseParameters, ClientAccountSummaryCollectionData clientAccount);
 
     String serializeGroupAccountSummaryCollectionDataToJson(boolean prettyPrint, Set<String> responseParameters, GroupAccountSummaryCollectionData groupAccount);

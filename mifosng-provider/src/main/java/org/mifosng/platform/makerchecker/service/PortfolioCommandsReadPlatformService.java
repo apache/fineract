@@ -10,4 +10,6 @@ public interface PortfolioCommandsReadPlatformService {
 
 	CommandSourceData retrieveById(Long id);
 
+	Collection<CommandSourceData> retrieveUnprocessChangesByResourceId(String apiResource, Long clientId);
+
 }

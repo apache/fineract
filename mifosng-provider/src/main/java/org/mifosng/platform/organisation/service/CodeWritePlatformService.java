@@ -12,6 +12,6 @@ public interface CodeWritePlatformService {
 	@PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'ORGANISATION_ADMINISTRATION_SUPER_USER', 'UPDATE_CODE)")
 	Long updateCode(final CodeCommand command);
 
-	@PreAuthorize(value = "hasAnyRole('ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE')")
+	@PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE', 'DELETE_CODE')")
 	EntityIdentifier deleteCode(Long codeId);
 }

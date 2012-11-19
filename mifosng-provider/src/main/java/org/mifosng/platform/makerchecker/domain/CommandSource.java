@@ -56,10 +56,9 @@ public class CommandSource extends AbstractPersistable<Long> {
 			final String apiOperation,
 			final String resource,
 			final Long resourceId, 
-			final String jsonRequestBody,
 			final AppUser maker,
 			final LocalDate madeOnDate) {
-		return new CommandSource(apiOperation, resource, resourceId, jsonRequestBody, maker, madeOnDate);
+		return new CommandSource(apiOperation, resource, resourceId, maker, madeOnDate);
 	}
 
 	protected CommandSource() {
@@ -70,13 +69,11 @@ public class CommandSource extends AbstractPersistable<Long> {
 			final String apiOperation,
 			final String resource,
 			final Long resourceId,
-			final String jsonRequestBody,
 			final AppUser maker,
 			final LocalDate madeOnDate) {
 		this.apiOperation = StringUtils.defaultIfEmpty(apiOperation, null);
 		this.resource = StringUtils.defaultIfEmpty(resource, null);
 		this.resourceId = resourceId;
-		this.commandAsJson = StringUtils.defaultIfEmpty(jsonRequestBody, null);
 		this.maker = maker;
 		this.madeOnDate = madeOnDate.toDate();
 	}
@@ -88,6 +85,10 @@ public class CommandSource extends AbstractPersistable<Long> {
 	
 	public void updateResourceId(final Long resourceId) {
 		this.resourceId = resourceId;
+	}
+	
+	public void updateJsonTo(final String json) {
+		this.commandAsJson = json;
 	}
 	
 	public Long resourceId() {

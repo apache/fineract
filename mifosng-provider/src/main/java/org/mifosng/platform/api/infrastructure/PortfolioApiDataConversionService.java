@@ -28,6 +28,7 @@ import org.mifosng.platform.api.commands.SavingAccountCommand;
 import org.mifosng.platform.api.commands.SavingProductCommand;
 import org.mifosng.platform.api.commands.StaffCommand;
 import org.mifosng.platform.api.commands.UserCommand;
+import org.mifosng.platform.api.data.ClientData;
 
 public interface PortfolioApiDataConversionService {
 	
@@ -49,7 +50,13 @@ public interface PortfolioApiDataConversionService {
 	
 	DepositProductCommand convertJsonToDepositProductCommand(Long resourceIdentifier, String json);
 
-	ClientCommand convertJsonToClientCommand(Long resourceIdentifier, String json, boolean makerCheckerApproval);
+	ClientCommand convertApiRequestJsonToClientCommand(Long resourceIdentifier, String json);
+	
+	ClientCommand convertInternalJsonFormatToClientCommand(Long resourceIdentifier, String json, boolean checkerApproved);
+	
+	ClientData convertInternalJsonFormatToClientDataChange(Long clientId, String json);
+	
+	ClientCommand detectChanges(Long resourceId, String baseJson, String workingJson);
 
 	GroupCommand convertJsonToGroupCommand(Long resourceIdentifier, String json);
 	

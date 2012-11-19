@@ -16,6 +16,14 @@ apply plugin: 'eclipse'
 apply plugin: 'tomcat'
 apply plugin: 'project-report'
 
+/* define the valid syntax level for source files */
+sourceCompatibility = JavaVersion.VERSION_1_6
+/* define binary compatiblity version */
+targetCompatibility = JavaVersion.VERSION_1_6
+
+// targetCompatibility = 1.6
+// sourceCompatibility = 1.6
+
 project.ext.springVersion = '3.1.1.RELEASE'
 project.ext.springSecurityVersion = '3.1.0.RELEASE'
 project.ext.hibernateValidatorVersion = '4.3.0.Final'

@@ -19,7 +19,6 @@ import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.mifosng.platform.api.commands.AdjustLoanTransactionCommand;
 import org.mifosng.platform.api.commands.BranchMoneyTransferCommand;
-import org.mifosng.platform.api.commands.LoanReassignmentCommand;
 import org.mifosng.platform.api.commands.ChargeCommand;
 import org.mifosng.platform.api.commands.ClientCommand;
 import org.mifosng.platform.api.commands.ClientIdentifierCommand;
@@ -35,6 +34,7 @@ import org.mifosng.platform.api.commands.GroupCommand;
 import org.mifosng.platform.api.commands.LoanApplicationCommand;
 import org.mifosng.platform.api.commands.LoanChargeCommand;
 import org.mifosng.platform.api.commands.LoanProductCommand;
+import org.mifosng.platform.api.commands.LoanReassignmentCommand;
 import org.mifosng.platform.api.commands.LoanStateTransitionCommand;
 import org.mifosng.platform.api.commands.LoanTransactionCommand;
 import org.mifosng.platform.api.commands.NoteCommand;
@@ -46,6 +46,7 @@ import org.mifosng.platform.api.commands.SavingProductCommand;
 import org.mifosng.platform.api.commands.StaffCommand;
 import org.mifosng.platform.api.commands.UserCommand;
 import org.mifosng.platform.api.data.ApiParameterError;
+import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.exceptions.PlatformApiDataValidationException;
 import org.mifosng.platform.infrastructure.api.JsonParserHelper;
 import org.mifosng.platform.infrastructure.errorhandling.InvalidJsonException;
@@ -376,7 +377,96 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
 	}
 	
 	@Override
-	public ClientCommand convertJsonToClientCommand(final Long resourceIdentifier, final String json, final boolean makerCheckerApproval) {
+	public ClientCommand detectChanges(final Long resourceIdentifier, final String baseJson, final String workingJson) {
+		
+		final Type typeOfMap = new TypeToken<Map<String, Object>>(){}.getType();
+	    final Map<String, Object> workingVersion = gsonConverter.fromJson(workingJson, typeOfMap);
+	    
+	    final Set<String> workingParameters = workingVersion.keySet();
+	    
+		final JsonParser parser = new JsonParser();
+	    final JsonElement baseElement = parser.parse(baseJson);
+	    final JsonElement workingElement = parser.parse(workingJson);
+	    
+	    final JsonParserHelper helper = new JsonParserHelper();
+	    final Set<String> ignoreParameters = new HashSet<String>();
+	    final Set<String> parametersPassedInRequest = new HashSet<String>();
+	    
+	    Long officeId = null;
+	    String externalId = null;
+	    String firstname = null;
+	    String lastname = null;
+	    String clientOrBusinessName = null;
+	    LocalDate joiningDate = null;
+	    
+	    for (final String parameter : workingParameters) {
+	    	
+	    	final String officeIdParameterName = "officeId";
+			if (officeIdParameterName.equalsIgnoreCase(parameter)) {
+	    		final Long baseOfficeId = helper.extractLongNamed(officeIdParameterName, baseElement, ignoreParameters);
+	    		final Long workingOfficeId = helper.extractLongNamed(officeIdParameterName, workingElement, ignoreParameters);
+	    		if (!workingOfficeId.equals(baseOfficeId)) {
+	    			officeId = workingOfficeId;
+	    			parametersPassedInRequest.add(officeIdParameterName);
+	    		}
+	    	}
+	    	
+	    	final String externalIdParamName = "externalId";
+			if (externalIdParamName.equalsIgnoreCase(parameter)) {
+	    		final String baseExternalId = helper.extractStringNamed(externalIdParamName, baseElement, ignoreParameters);
+	    		final String workingExternalId = helper.extractStringNamed(externalIdParamName, workingElement, ignoreParameters);
+	    		if (!baseExternalId.equals(workingExternalId)) {
+	    			externalId = workingExternalId;
+	    			parametersPassedInRequest.add(externalIdParamName);
+	    		}
+	    	}
+			
+			final String firstnameParamName = "firstname";
+			if (firstnameParamName.equalsIgnoreCase(parameter)) {
+	    		final String baseValue = helper.extractStringNamed(firstnameParamName, baseElement, ignoreParameters);
+	    		final String workingCopyValue = helper.extractStringNamed(firstnameParamName, workingElement, ignoreParameters);
+	    		if (!baseValue.equals(workingCopyValue)) {
+	    			firstname = workingCopyValue;
+	    			parametersPassedInRequest.add(firstnameParamName);
+	    		}
+	    	}
+			
+			final String lastnameParamName = "lastname";
+			if (lastnameParamName.equalsIgnoreCase(parameter)) {
+	    		final String baseValue = helper.extractStringNamed(lastnameParamName, baseElement, ignoreParameters);
+	    		final String workingCopyValue = helper.extractStringNamed(lastnameParamName, workingElement, ignoreParameters);
+	    		if (!baseValue.equals(workingCopyValue)) {
+	    			lastname = workingCopyValue;
+	    			parametersPassedInRequest.add(lastnameParamName);
+	    		}
+	    	}
+			
+			final String clientOrBusinessNameParamName = "clientOrBusinessName";
+			if (clientOrBusinessNameParamName.equalsIgnoreCase(parameter)) {
+	    		final String baseValue = helper.extractStringNamed(clientOrBusinessNameParamName, baseElement, ignoreParameters);
+	    		final String workingCopyValue = helper.extractStringNamed(clientOrBusinessNameParamName, workingElement, ignoreParameters);
+	    		if (!baseValue.equals(workingCopyValue)) {
+	    			clientOrBusinessName = workingCopyValue;
+	    			parametersPassedInRequest.add(clientOrBusinessNameParamName);
+	    		}
+	    	}
+
+			final String joinedDateParamName = "joinedDate";
+			if (joinedDateParamName.equalsIgnoreCase(parameter)) {
+	    		final LocalDate baseValue = helper.extractLocalDateAsArrayNamed(joinedDateParamName, baseElement, ignoreParameters);
+	    		final LocalDate workingCopyValue = helper.extractLocalDateAsArrayNamed(joinedDateParamName, workingElement, ignoreParameters);
+	    		if (!baseValue.isEqual(workingCopyValue)) {
+	    			joiningDate = workingCopyValue;
+	    			parametersPassedInRequest.add(joinedDateParamName);
+	    		}
+	    	}
+		}
+	    
+		return new ClientCommand(parametersPassedInRequest, resourceIdentifier, externalId, firstname, lastname, clientOrBusinessName, officeId, joiningDate, false);
+	}
+	
+	@Override
+	public ClientCommand convertApiRequestJsonToClientCommand(final Long resourceIdentifier, final String json) {
 		if (StringUtils.isBlank(json)) {
 			throw new InvalidJsonException();
 		}
@@ -385,7 +475,7 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
 	    final Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
 	    
 	    final Set<String> supportedParams = new HashSet<String>(
-	    		Arrays.asList("externalId", "firstname", "lastname", "clientOrBusinessName", "officeId", "joiningDate", "locale", "dateFormat")
+	    		Arrays.asList("id", "externalId", "firstname", "lastname", "clientOrBusinessName", "officeId", "joiningDate", "locale", "dateFormat")
 	    );
 	    
 	    checkForUnsupportedParameters(requestMap, supportedParams);
@@ -402,7 +492,46 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
 	    final String clientOrBusinessName = helper.extractStringNamed("clientOrBusinessName", element, parametersPassedInRequest);
 	    final LocalDate joiningDate = helper.extractLocalDateNamed("joiningDate", element, parametersPassedInRequest);
 
-	    return new ClientCommand(parametersPassedInRequest, resourceIdentifier, externalId, firstname, lastname, clientOrBusinessName, officeId, joiningDate, makerCheckerApproval);
+	    return new ClientCommand(parametersPassedInRequest, resourceIdentifier, externalId, firstname, lastname, clientOrBusinessName, officeId, joiningDate, false);
+	}
+	
+	@Override
+	public ClientCommand convertInternalJsonFormatToClientCommand(final Long resourceIdentifier, final String json, final boolean checkerApproved) {
+		if (StringUtils.isBlank(json)) {
+			throw new InvalidJsonException();
+		}
+		
+		final Type typeOfMap = new TypeToken<Map<String, Object>>(){}.getType();
+	    final Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
+	    
+	    final Set<String> supportedParams = new HashSet<String>(
+	    	Arrays.asList("id", "externalId", "firstname", "lastname", "clientOrBusinessName", "officeId", "joiningDate")
+	    );
+	    
+	    checkForUnsupportedParameters(requestMap, supportedParams);
+	    
+	    final JsonParser parser = new JsonParser();
+	    final JsonElement element = parser.parse(json);
+	    final JsonParserHelper helper = new JsonParserHelper();
+	    final Set<String> parametersPassedInRequest = new HashSet<String>();
+	    
+	    final Long officeId = helper.extractLongNamed("officeId", element, parametersPassedInRequest);	
+	    final String externalId = helper.extractStringNamed("externalId", element, parametersPassedInRequest);
+	    final String firstname = helper.extractStringNamed("firstname", element, parametersPassedInRequest);
+	    final String lastname = helper.extractStringNamed("lastname", element, parametersPassedInRequest);
+	    final String clientOrBusinessName = helper.extractStringNamed("clientOrBusinessName", element, parametersPassedInRequest);
+	    final LocalDate joiningDate = helper.extractLocalDateAsArrayNamed("joiningDate", element, parametersPassedInRequest);
+	    
+	    return new ClientCommand(parametersPassedInRequest, resourceIdentifier, externalId, firstname, lastname, clientOrBusinessName, officeId, joiningDate, checkerApproved);
+	}
+	
+	@Override
+	public ClientData convertInternalJsonFormatToClientDataChange(final Long resourceIdentifier, final String json) {
+		
+		final ClientCommand command = convertInternalJsonFormatToClientCommand(resourceIdentifier, json, false);
+		
+	    return ClientData.dataChangeInstance(resourceIdentifier, command.getOfficeId(), command.getExternalId(), 
+	    		command.getFirstname(), command.getLastname(), command.getClientOrBusinessName(), command.getJoiningDate());
 	}
 	
 	@Override

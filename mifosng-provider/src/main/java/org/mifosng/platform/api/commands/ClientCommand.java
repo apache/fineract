@@ -9,7 +9,6 @@ import org.joda.time.LocalDate;
  */
 public class ClientCommand {
 
-	private final Long id;
 	private final String externalId;
 	private final String firstname;
 	private final String lastname;
@@ -18,6 +17,7 @@ public class ClientCommand {
 	private final LocalDate joiningDate;
 
 	// made transient as dont want them to be serialized/converted to JSON
+	private final transient Long id;
 	private final transient boolean makerCheckerApproval;
 	private final transient Set<String> parametersPassedInRequest;
 	

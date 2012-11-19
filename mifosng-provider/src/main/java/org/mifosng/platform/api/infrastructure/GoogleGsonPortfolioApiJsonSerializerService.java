@@ -7,6 +7,7 @@ import java.util.Set;
 
 import org.mifosng.platform.accounting.api.data.ChartOfAccountsData;
 import org.mifosng.platform.api.LoanScheduleData;
+import org.mifosng.platform.api.commands.ClientCommand;
 import org.mifosng.platform.api.data.AdditionalFieldsSetData;
 import org.mifosng.platform.api.data.AppUserData;
 import org.mifosng.platform.api.data.AuthenticatedUserData;
@@ -497,14 +498,15 @@ public class GoogleGsonPortfolioApiJsonSerializerService implements PortfolioApi
 	}
 
 	@Override
-	public String serializeClientDataToJson(final boolean prettyPrint,
-			final Set<String> responseParameters,
-			final Collection<ClientData> clients) {
+	public String serializeClientCommandToJson(final ClientCommand command) {
 		final Gson gsonDeserializer = helper
-				.createGsonBuilderWithParameterExclusionSerializationStrategy(
-						CLIENT_DATA_PARAMETERS, prettyPrint, responseParameters);
-		return helper.serializedJsonFrom(gsonDeserializer,
-				clients.toArray(new ClientData[clients.size()]));
+				.createGsonBuilderWithParameterExclusionSerializationStrategy(new HashSet<String>(), false, new HashSet<String>());
+		return helper.serializedJsonFrom(gsonDeserializer, command);
+	}
+	
+	@Override
+	public String serializeClientDataToJson(final ClientData client) {
+		return serializeClientDataToJson(false, new HashSet<String>(), client);
 	}
 
 	@Override
@@ -514,6 +516,17 @@ public class GoogleGsonPortfolioApiJsonSerializerService implements PortfolioApi
 				.createGsonBuilderWithParameterExclusionSerializationStrategy(
 						CLIENT_DATA_PARAMETERS, prettyPrint, responseParameters);
 		return helper.serializedJsonFrom(gsonDeserializer, client);
+	}
+	
+	@Override
+	public String serializeClientDataToJson(final boolean prettyPrint,
+			final Set<String> responseParameters,
+			final Collection<ClientData> clients) {
+		final Gson gsonDeserializer = helper
+				.createGsonBuilderWithParameterExclusionSerializationStrategy(
+						CLIENT_DATA_PARAMETERS, prettyPrint, responseParameters);
+		return helper.serializedJsonFrom(gsonDeserializer,
+				clients.toArray(new ClientData[clients.size()]));
 	}
 
 	@Override

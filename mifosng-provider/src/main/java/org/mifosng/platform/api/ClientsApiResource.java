@@ -24,7 +24,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.StringUtils;
-import org.mifosng.platform.api.commands.ClientCommand;
 import org.mifosng.platform.api.commands.NoteCommand;
 import org.mifosng.platform.api.data.ClientAccountSummaryCollectionData;
 import org.mifosng.platform.api.data.ClientData;
@@ -159,7 +158,7 @@ public class ClientsApiResource {
 	@Path("{clientId}")
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
-	public String retrieveClientData(
+	public String retrieveClient(
 			@PathParam("clientId") final Long clientId,
 			@Context final UriInfo uriInfo) {
 
@@ -176,13 +175,44 @@ public class ClientsApiResource {
 			clientData = ClientData.templateOnTop(clientData, allowedOffices);
 		}
 		if (makerCheckerId != null) {
-			final CommandSourceData entry = this.commandSourceReadPlatformService.retrieveById(makerCheckerId);
-			final ClientCommand command = this.apiDataConversionService.convertJsonToClientCommand(null, entry.json(), false);
-
-			clientData = ClientData.integrateChanges(clientData, command);
+			clientData = handleMakerCheckerRequest(clientId, makerCheckerId, clientData);
+		}
+		
+		boolean retrieveChanges = true;
+		if (retrieveChanges) {
+			final Collection<ClientData> dataChanges = retrieveAllUnprocessedDataChanges(clientId);
+			clientData = ClientData.integrateChanges(clientData, clientData.currentChange(), dataChanges);
 		}
 
 		return this.apiJsonSerializerService.serializeClientDataToJson(prettyPrint, responseParameters, clientData);
+	}
+
+	private ClientData handleMakerCheckerRequest(final Long clientId, final Long makerCheckerId, ClientData clientData) {
+		final CommandSourceData entry = this.commandSourceReadPlatformService.retrieveById(makerCheckerId);
+		final ClientData currentChange = this.apiDataConversionService.convertInternalJsonFormatToClientDataChange(clientId, entry.json());
+		
+		final Collection<ClientData> dataChanges = retrieveAllUnprocessedDataChanges(clientId);
+		clientData = ClientData.integrateChanges(clientData, currentChange, dataChanges);
+		return clientData;
+	}
+
+	private Collection<ClientData> retrieveAllUnprocessedDataChanges(final Long clientId) {
+		Collection<ClientData> dataChanges = new ArrayList<ClientData>();
+		
+		boolean retrieveChanges = true;
+		if (retrieveChanges) {
+			Collection<CommandSourceData> unprocessedChanges = this.commandSourceReadPlatformService.retrieveUnprocessChangesByResourceId("clients", clientId);
+			for (CommandSourceData commandSourceData : unprocessedChanges) {
+				ClientData change = this.apiDataConversionService.convertInternalJsonFormatToClientDataChange(clientId, commandSourceData.json());
+				dataChanges.add(change);
+			}
+		}
+		
+		if (dataChanges.isEmpty()) {
+			dataChanges = null;
+		}
+		
+		return dataChanges;
 	}
 
 	@GET
@@ -199,10 +229,7 @@ public class ClientsApiResource {
 		
 		ClientData clientData = this.clientReadPlatformService.retrieveNewClientDetails();
 		if (makerCheckerId != null) {
-			final CommandSourceData entry = this.commandSourceReadPlatformService.retrieveById(makerCheckerId);
-			final ClientCommand command = this.apiDataConversionService.convertJsonToClientCommand(null, entry.json(), false);
-
-			clientData = ClientData.integrateChanges(clientData, command);
+			clientData = handleMakerCheckerRequest(null, makerCheckerId, clientData);
 		}
 		
 		return this.apiJsonSerializerService.serializeClientDataToJson(prettyPrint, responseParameters, clientData);
