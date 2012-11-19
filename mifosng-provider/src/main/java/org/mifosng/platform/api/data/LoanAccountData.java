@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.util.Collection;
 
 import org.joda.time.LocalDate;
-import org.mifosng.platform.api.LoanScheduleData;
 
 /**
  * Immutable data object representing loan account data.

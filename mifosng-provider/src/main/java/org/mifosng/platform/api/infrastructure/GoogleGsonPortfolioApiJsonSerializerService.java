@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.mifosng.platform.accounting.api.data.ChartOfAccountsData;
-import org.mifosng.platform.api.LoanScheduleData;
 import org.mifosng.platform.api.commands.ClientCommand;
 import org.mifosng.platform.api.data.AdditionalFieldsSetData;
 import org.mifosng.platform.api.data.AppUserData;
@@ -30,6 +29,7 @@ import org.mifosng.platform.api.data.LoanAccountData;
 import org.mifosng.platform.api.data.LoanChargeData;
 import org.mifosng.platform.api.data.LoanProductData;
 import org.mifosng.platform.api.data.LoanReassignmentData;
+import org.mifosng.platform.api.data.LoanScheduleData;
 import org.mifosng.platform.api.data.LoanTransactionData;
 import org.mifosng.platform.api.data.CommandSourceData;
 import org.mifosng.platform.api.data.NoteData;

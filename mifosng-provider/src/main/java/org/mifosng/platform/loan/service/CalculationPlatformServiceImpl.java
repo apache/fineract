@@ -2,8 +2,8 @@ package org.mifosng.platform.loan.service;
 
 import java.util.Set;
 
-import org.mifosng.platform.api.LoanScheduleData;
 import org.mifosng.platform.api.commands.CalculateLoanScheduleCommand;
+import org.mifosng.platform.api.data.LoanScheduleData;
 import org.mifosng.platform.currency.domain.ApplicationCurrency;
 import org.mifosng.platform.currency.domain.ApplicationCurrencyRepository;
 import org.mifosng.platform.loan.domain.InterestMethod;

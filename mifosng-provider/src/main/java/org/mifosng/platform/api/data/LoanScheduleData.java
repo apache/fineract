@@ -1,10 +1,8 @@
-package org.mifosng.platform.api;
+package org.mifosng.platform.api.data;
 
 import java.math.BigDecimal;
 import java.util.Collection;
 
-import org.mifosng.platform.api.data.CurrencyData;
-import org.mifosng.platform.api.data.LoanSchedulePeriodData;
 
 /**
  * Immutable data object to represent aspects of a loan schedule such as:
