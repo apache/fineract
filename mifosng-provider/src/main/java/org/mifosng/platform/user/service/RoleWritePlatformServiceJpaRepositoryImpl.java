@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.mifosng.platform.accounting.api.commands.RolePermissionCommand;
 import org.mifosng.platform.api.commands.RoleCommand;
+import org.mifosng.platform.exceptions.PermissionNotFoundException;
 import org.mifosng.platform.exceptions.RoleNotFoundException;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.user.domain.Permission;
@@ -19,103 +20,136 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
 @Service
-public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatformService {
+public class RoleWritePlatformServiceJpaRepositoryImpl implements
+		RoleWritePlatformService {
 
-    private final PlatformSecurityContext context;
-    private final RoleRepository roleRepository;
+	private final PlatformSecurityContext context;
+	private final RoleRepository roleRepository;
 
-    private final PermissionRepository permissionRepository;
+	private final PermissionRepository permissionRepository;
 
-    @Autowired
-    public RoleWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final RoleRepository roleRepository,
-            final PermissionRepository permissionRepository) {
-        this.context = context;
-        this.roleRepository = roleRepository;
-        this.permissionRepository = permissionRepository;
-    }
+	@Autowired
+	public RoleWritePlatformServiceJpaRepositoryImpl(
+			final PlatformSecurityContext context,
+			final RoleRepository roleRepository,
+			final PermissionRepository permissionRepository) {
+		this.context = context;
+		this.roleRepository = roleRepository;
+		this.permissionRepository = permissionRepository;
+	}
 
-    @Transactional
-    @Override
-    public Long createRole(final RoleCommand command) {
+	@Transactional
+	@Override
+	public Long createRole(final RoleCommand command) {
 
-        context.authenticatedUser();
+		context.authenticatedUser();
 
-        RoleCommandValidator validator = new RoleCommandValidator(command);
-        validator.validateForCreate();
+		RoleCommandValidator validator = new RoleCommandValidator(command);
+		validator.validateForCreate();
 
-        List<Permission> selectedPermissions = assembleListOfSelectedPermissions(command.getPermissions());
+		List<Permission> selectedPermissions = assembleListOfSelectedPermissions(command
+				.getPermissions());
 
-        Role entity = new Role(command.getName(), command.getDescription(), selectedPermissions);
+		Role entity = new Role(command.getName(), command.getDescription(),
+				selectedPermissions);
 
-        this.roleRepository.save(entity);
+		this.roleRepository.save(entity);
 
-        return entity.getId();
-    }
+		return entity.getId();
+	}
 
-    @Transactional
-    @Override
-    public Long updateRole(RoleCommand command) {
+	@Transactional
+	@Override
+	public Long updateRole(RoleCommand command) {
 
-        context.authenticatedUser();
+		context.authenticatedUser();
 
-        RoleCommandValidator validator = new RoleCommandValidator(command);
-        validator.validateForUpdate();
+		RoleCommandValidator validator = new RoleCommandValidator(command);
+		validator.validateForUpdate();
 
-        List<Permission> selectedPermissions = assembleListOfSelectedPermissions(command.getPermissions());
+		List<Permission> selectedPermissions = assembleListOfSelectedPermissions(command
+				.getPermissions());
 
-        Role role = this.roleRepository.findOne(command.getId());
-        if (role == null) { throw new RoleNotFoundException(command.getId()); }
-        role.update(command, selectedPermissions);
+		Role role = this.roleRepository.findOne(command.getId());
+		if (role == null) {
+			throw new RoleNotFoundException(command.getId());
+		}
+		role.update(command, selectedPermissions);
 
-        this.roleRepository.save(role);
+		this.roleRepository.save(role);
 
-        return role.getId();
-    }
+		return role.getId();
+	}
 
-    @Transactional
-    @Override
-    public Long updateRolePermissions(final RolePermissionCommand command) {
-        context.authenticatedUser();
+	@Transactional
+	@Override
+	public Long updateRolePermissions(final RolePermissionCommand command) {
+		context.authenticatedUser();
 
-//        RoleCommandValidator validator = new RoleCommandValidator(command);
-//        validator.validateForUpdate();
+		final Role role = this.roleRepository.findOne(command.getRoleId());
+		if (role == null) {
+			throw new RoleNotFoundException(command.getRoleId());
+		}
 
-        final Role role = this.roleRepository.findOne(command.getRoleId());
-        if (role == null) { 
-            throw new RoleNotFoundException(command.getRoleId());
-        }
-        
-        Map<String, Boolean> permissions = command.getPermissions();
-        for (String permissionCode : permissions.keySet()) {
-            Boolean selected = permissions.get(permissionCode);
-            if (selected.booleanValue()) {
-//                this.permissionRepository.findOne(id)
-            }
-        }
-        
-//        role.update(command, selectedPermissions);
+		Collection<Permission> allPermissions = this.permissionRepository
+				.findAll();
 
-        this.roleRepository.save(role);
+		Map<String, Boolean> commandPermissions = command.getPermissions();
+		for (String permissionCode : commandPermissions.keySet()) {
+			Boolean selected = commandPermissions.get(permissionCode);
 
-        return role.getId();
-    }
+			Permission permission = getPermissionByCode(allPermissions,
+					permissionCode);
 
-    private List<Permission> assembleListOfSelectedPermissions(final String[] selectedPermissionsArray) {
-        List<Long> selectedPermissionIds = new ArrayList<Long>();
-        List<Permission> selectedPermissions = new ArrayList<Permission>();
+			if (role.getPermissions().contains(permission)) {
+				if (!(selected)) {
+					role.getPermissions().remove(permission);
+				}
 
-        if (!ObjectUtils.isEmpty(selectedPermissionsArray)) {
-            for (String selectedId : selectedPermissionsArray) {
-                selectedPermissionIds.add(Long.valueOf(selectedId));
-            }
+			} else {
+				if (selected) {
+					role.getPermissions().add(permission);
+				}
 
-            Collection<Permission> allPermissions = this.permissionRepository.findAll();
-            for (Permission permission : allPermissions) {
-                if (selectedPermissionIds.contains(permission.getId())) {
-                    selectedPermissions.add(permission);
-                }
-            }
-        }
-        return selectedPermissions;
-    }
+			}
+		}
+
+		this.roleRepository.save(role);
+
+		return role.getId();
+	}
+
+	private Permission getPermissionByCode(
+			Collection<Permission> allPermissions, String permissionCode) {
+				
+		if (allPermissions != null) {
+			for (Permission permission : allPermissions) {
+				if (permission.code().equals(permissionCode)) return permission;
+				
+			}
+		}
+
+		throw new PermissionNotFoundException(permissionCode);
+	}
+
+	private List<Permission> assembleListOfSelectedPermissions(
+			final String[] selectedPermissionsArray) {
+		List<Long> selectedPermissionIds = new ArrayList<Long>();
+		List<Permission> selectedPermissions = new ArrayList<Permission>();
+
+		if (!ObjectUtils.isEmpty(selectedPermissionsArray)) {
+			for (String selectedId : selectedPermissionsArray) {
+				selectedPermissionIds.add(Long.valueOf(selectedId));
+			}
+
+			Collection<Permission> allPermissions = this.permissionRepository
+					.findAll();
+			for (Permission permission : allPermissions) {
+				if (selectedPermissionIds.contains(permission.getId())) {
+					selectedPermissions.add(permission);
+				}
+			}
+		}
+		return selectedPermissions;
+	}
 }
