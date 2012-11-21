@@ -159,4 +159,21 @@ public class RolesApiResource {
 		return this.apiJsonSerializerService.serializeRolePermissionDataToJson(prettyPrint, responseParameters, rolePermissionData);
 	}
 	
+	@PUT
+	@Path("{roleId}/permissions")
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
+	public String updateRolePermissions(@PathParam("roleId") final Long roleId, @Context final UriInfo uriInfo) {
+		return "{}";
+    	/*
+		final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+		final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+
+		RoleData role = this.roleReadPlatformService.retrieveRole(roleId);
+		Collection<PermissionUsageData> permissionUsageData = this.permissionReadPlatformService.retrieveAllRolePermissions(roleId);
+		RolePermissionData rolePermissionData = new RolePermissionData(role.getId(), role.getName(), role.getDescription(), permissionUsageData);
+			
+		return this.apiJsonSerializerService.serializeRolePermissionDataToJson(prettyPrint, responseParameters, rolePermissionData);*/
+	}
+	
 }
