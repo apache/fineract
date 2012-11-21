@@ -1,8 +1,6 @@
 package org.mifosng.platform.user.service;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 import org.mifosng.platform.accounting.api.commands.RolePermissionCommand;
@@ -17,7 +15,6 @@ import org.mifosng.platform.user.domain.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.ObjectUtils;
 
 @Service
 public class RoleWritePlatformServiceJpaRepositoryImpl implements
@@ -47,11 +44,7 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements
 		RoleCommandValidator validator = new RoleCommandValidator(command);
 		validator.validateForCreate();
 
-		List<Permission> selectedPermissions = assembleListOfSelectedPermissions(command
-				.getPermissions());
-
-		Role entity = new Role(command.getName(), command.getDescription(),
-				selectedPermissions);
+		Role entity = new Role(command.getName(), command.getDescription());
 
 		this.roleRepository.save(entity);
 
@@ -67,14 +60,11 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements
 		RoleCommandValidator validator = new RoleCommandValidator(command);
 		validator.validateForUpdate();
 
-		List<Permission> selectedPermissions = assembleListOfSelectedPermissions(command
-				.getPermissions());
-
 		Role role = this.roleRepository.findOne(command.getId());
 		if (role == null) {
 			throw new RoleNotFoundException(command.getId());
 		}
-		role.update(command, selectedPermissions);
+		role.update(command);
 
 		this.roleRepository.save(role);
 
@@ -130,26 +120,5 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements
 		}
 
 		throw new PermissionNotFoundException(permissionCode);
-	}
-
-	private List<Permission> assembleListOfSelectedPermissions(
-			final String[] selectedPermissionsArray) {
-		List<Long> selectedPermissionIds = new ArrayList<Long>();
-		List<Permission> selectedPermissions = new ArrayList<Permission>();
-
-		if (!ObjectUtils.isEmpty(selectedPermissionsArray)) {
-			for (String selectedId : selectedPermissionsArray) {
-				selectedPermissionIds.add(Long.valueOf(selectedId));
-			}
-
-			Collection<Permission> allPermissions = this.permissionRepository
-					.findAll();
-			for (Permission permission : allPermissions) {
-				if (selectedPermissionIds.contains(permission.getId())) {
-					selectedPermissions.add(permission);
-				}
-			}
-		}
-		return selectedPermissions;
 	}
 }

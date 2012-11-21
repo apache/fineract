@@ -23,7 +23,6 @@ public class RoleCommandValidator {
 		
 		baseDataValidator.reset().parameter("name").value(command.getName()).notBlank();
 		baseDataValidator.reset().parameter("description").value(command.getDescription()).notBlank().notExceedingLengthOf(500);
-		baseDataValidator.reset().parameter("permissions").value(command.getPermissions()).arrayNotEmpty();
 		
 		if (!dataValidationErrors.isEmpty()) {
 			throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);
@@ -38,9 +37,8 @@ public class RoleCommandValidator {
 		baseDataValidator.reset().parameter("id").value(command.getId()).notNull();
 		baseDataValidator.reset().parameter("name").value(command.getName()).ignoreIfNull().notBlank();
 		baseDataValidator.reset().parameter("description").value(command.getDescription()).ignoreIfNull().notBlank().notExceedingLengthOf(500);
-		baseDataValidator.reset().parameter("permissions").value(command.getPermissions()).ignoreIfNull().arrayNotEmpty();
 		
-		baseDataValidator.reset().anyOfNotNull(command.getName(), command.getDescription(), command.getPermissions());
+		baseDataValidator.reset().anyOfNotNull(command.getName(), command.getDescription());
 		
 		if (!dataValidationErrors.isEmpty()) {
 			throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);

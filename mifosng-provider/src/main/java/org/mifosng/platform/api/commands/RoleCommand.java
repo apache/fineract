@@ -10,7 +10,6 @@ public class RoleCommand {
 	private final Long id;
 	private final String name;
 	private final String description;
-	private final String[] permissions;
 	
 	private final Set<String> modifiedParameters;
 
@@ -19,7 +18,6 @@ public class RoleCommand {
 		this.id = id;
 		this.name = name;
 		this.description = description;
-		this.permissions = permissionIds;
 	}
 
 	public Long getId() {
@@ -32,10 +30,6 @@ public class RoleCommand {
 
 	public String getDescription() {
 		return description;
-	}
-
-	public String[] getPermissions() {
-		return permissions;
 	}
 
 	public boolean isNameChanged() {

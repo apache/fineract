@@ -3,7 +3,6 @@ package org.mifosng.platform.user.domain;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -39,10 +38,9 @@ public class Role extends AbstractAuditableCustom<AppUser, Long> {
         this.permissions = new HashSet<Permission>();
     }
 
-    public Role(final String name, final String description, final List<Permission> rolePermissions) {
+    public Role(final String name, final String description) {
         this.name = name.trim();
         this.description = description.trim();
-        this.permissions = new HashSet<Permission>(rolePermissions);
     }
 
     public Collection<Permission> getPermissions() {
@@ -71,7 +69,7 @@ public class Role extends AbstractAuditableCustom<AppUser, Long> {
 		return new RoleData(this.getId(), this.name, this.description, rolePermissions);
 	}
 
-	public void update(final RoleCommand command, final List<Permission> selectedPermissions) {
+	public void update(final RoleCommand command) {
 		if (command.isNameChanged()) {
 			this.name = command.getName();
 		}
@@ -80,10 +78,6 @@ public class Role extends AbstractAuditableCustom<AppUser, Long> {
 			this.description = command.getDescription();
 		}
 		
-		if (command.isPermissionsChanged()) {
-			this.permissions.clear();
-			this.permissions = new HashSet<Permission>(selectedPermissions);
-		}
 	}
 
 	public String getName() {
