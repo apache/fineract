@@ -35,84 +35,72 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class GuarantorsApiResource {
 
-	@Autowired
-	private GuarantorWritePlatformService guarantorWritePlatformService;
+    @Autowired
+    private GuarantorWritePlatformService guarantorWritePlatformService;
 
-	@Autowired
-	private GuarantorReadPlatformService guarantorReadPlatformService;
+    @Autowired
+    private GuarantorReadPlatformService guarantorReadPlatformService;
 
-	@Autowired
-	private PortfolioApiDataConversionService apiDataConversionService;
+    @Autowired
+    private PortfolioApiDataConversionService apiDataConversionService;
 
-	@Autowired
-	private PortfolioApiJsonSerializerService apiJsonSerializerService;
+    @Autowired
+    private PortfolioApiJsonSerializerService apiJsonSerializerService;
 
-	private static final Set<String> typicalResponseParameters = new HashSet<String>(
-			Arrays.asList("externalGuarantor", "existingClientId", "firstname",
-					"lastname", "addressLine1", "addressLine2", "city",
-					"state", "zip", "country", "mobileNumber",
-					"housePhoneNumber", "comment", "dob"));
+    private static final Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("externalGuarantor", "existingClientId",
+            "firstname", "lastname", "addressLine1", "addressLine2", "city", "state", "zip", "country", "mobileNumber", "housePhoneNumber",
+            "comment", "dob"));
 
-	private final String SystemEntityType = "m_guarantor_external";
+    private final String SystemEntityType = "m_guarantor_external";
 
-	@Autowired
-	private PlatformSecurityContext context;
+    @Autowired
+    private PlatformSecurityContext context;
 
-	@GET
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrieveGuarantorDetails(@Context final UriInfo uriInfo,
-			@PathParam("loanId") final Long loanId) {
-		context.authenticatedUser().validateHasReadPermission(SystemEntityType);
-		Set<String> responseParameters = ApiParameterHelper
-				.extractFieldsForResponseIfProvided(uriInfo
-						.getQueryParameters());
-		if (responseParameters.isEmpty()) {
-			responseParameters.addAll(typicalResponseParameters);
-		}
-		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo
-				.getQueryParameters());
+    @GET
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String retrieveGuarantorDetails(@Context final UriInfo uriInfo, @PathParam("loanId") final Long loanId) {
+        context.authenticatedUser().validateHasReadPermission(SystemEntityType);
+        Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+        if (responseParameters.isEmpty()) {
+            responseParameters.addAll(typicalResponseParameters);
+        }
+        boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 
-		GuarantorData guarantorData = guarantorReadPlatformService
-				.retrieveGuarantor(loanId);
+        GuarantorData guarantorData = guarantorReadPlatformService.retrieveGuarantor(loanId);
 
-		return this.apiJsonSerializerService.serializeGuarantorDataToJson(
-				prettyPrint, responseParameters, guarantorData);
-	}
+        return this.apiJsonSerializerService.serializeGuarantorDataToJson(prettyPrint, responseParameters, guarantorData);
+    }
 
-	@POST
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public Response createGuarantor(@PathParam("loanId") final Long loanId,
-			final String jsonRequestBody) {
+    @POST
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public Response createGuarantor(@PathParam("loanId") final Long loanId, final String jsonRequestBody) {
 
-		final GuarantorCommand command = this.apiDataConversionService
-				.convertJsonToGuarantorCommand(null, loanId, jsonRequestBody);
+        final GuarantorCommand command = this.apiDataConversionService.convertJsonToGuarantorCommand(null, loanId, jsonRequestBody);
 
-		this.guarantorWritePlatformService.createGuarantor(loanId, command);
+        this.guarantorWritePlatformService.createGuarantor(loanId, command);
 
-		// returns the loan Identifier for which the guarantor was associated
-		return Response.ok().entity(new EntityIdentifier(loanId)).build();
-	}
+        // returns the loan Identifier for which the guarantor was associated
+        return Response.ok().entity(new EntityIdentifier(loanId)).build();
+    }
 
-	@PUT
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public Response updateGuarantor(@PathParam("loanId") final Long loanId,
-			final String jsonRequestBody) {
-		final GuarantorCommand command = this.apiDataConversionService
-				.convertJsonToGuarantorCommand(null, loanId, jsonRequestBody);
+    @PUT
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public Response updateGuarantor(@PathParam("loanId") final Long loanId, final String jsonRequestBody) {
+        final GuarantorCommand command = this.apiDataConversionService.convertJsonToGuarantorCommand(null, loanId, jsonRequestBody);
 
-		this.guarantorWritePlatformService.updateGuarantor(loanId, command);
+        this.guarantorWritePlatformService.updateGuarantor(loanId, command);
 
-		return Response.ok().entity(new EntityIdentifier(loanId)).build();
-	}
+        return Response.ok().entity(new EntityIdentifier(loanId)).build();
+    }
 
-	@DELETE
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public Response deleteGuarantor(@PathParam("loanId") final Long loanId) {
-		this.guarantorWritePlatformService.removeGuarantor(loanId);
-		return Response.ok(new EntityIdentifier(loanId)).build();
-	}
+    @DELETE
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public Response deleteGuarantor(@PathParam("loanId") final Long loanId) {
+        this.guarantorWritePlatformService.removeGuarantor(loanId);
+        return Response.ok(new EntityIdentifier(loanId)).build();
+    }
 }

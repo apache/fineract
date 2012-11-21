@@ -7,135 +7,132 @@ import java.util.Set;
  */
 public class GuarantorCommand {
 
-	private final boolean externalGuarantor;
+    private final boolean externalGuarantor;
 
-	/*** Fields for current customers serving as guarantors **/
-	private final Long existingClientId;
+    /*** Fields for current customers serving as guarantors **/
+    private final Long existingClientId;
 
-	/*** Fields for external persons serving as guarantors ***/
-	private final String firstname;
-	private final String lastname;
-	private final String addressLine1;
-	private final String addressLine2;
-	private final String city;
-	private final String state;
-	private final String zip;
-	private final String country;
-	private final String mobileNumber;
-	private final String housePhoneNumber;
-	private final String comment;
-	private final String dob;
-	
-	/**Feilds for passing Locale info to generic data service api**/
-	private String dateFormat;
-	private String locale;
+    /*** Fields for external persons serving as guarantors ***/
+    // FIXME - kw - what the details for collecting guarantors change? we are using datatable approach but fixing here?
+    private final String firstname;
+    private final String lastname;
+    private final String addressLine1;
+    private final String addressLine2;
+    private final String city;
+    private final String state;
+    private final String zip;
+    private final String country;
+    private final String mobileNumber;
+    private final String housePhoneNumber;
+    private final String comment;
+    private final String dob;
 
-	private final Set<String> modifiedParameters;
+    /** Feilds for passing Locale info to generic data service api **/
+    private String dateFormat;
+    private String locale;
 
-	public GuarantorCommand(final Set<String> modifiedParameters,
-			final Long existingClientId, final String firstname,
-			final String lastname, final Boolean externalGuarantor,
-			final String addressLine1, final String addressLine2,
-			final String city, final String state, final String zip,
-			final String country, final String mobileNumber,
-			final String housePhoneNumber, final String comment,
-			final String dob) {
-		this.modifiedParameters = modifiedParameters;
+    private final Set<String> modifiedParameters;
 
-		this.externalGuarantor = externalGuarantor;
+    public GuarantorCommand(final Set<String> modifiedParameters, final Long existingClientId, final String firstname,
+            final String lastname, final Boolean externalGuarantor, final String addressLine1, final String addressLine2,
+            final String city, final String state, final String zip, final String country, final String mobileNumber,
+            final String housePhoneNumber, final String comment, final String dob) {
+        this.modifiedParameters = modifiedParameters;
 
-		/*** Fields for current customers serving as guarantors **/
-		this.existingClientId = existingClientId;
+        this.externalGuarantor = externalGuarantor;
 
-		/*** Fields for external persons serving as guarantors ***/
-		this.firstname = firstname;
-		this.lastname = lastname;
-		this.addressLine1 = addressLine1;
-		this.addressLine2 = addressLine2;
-		this.city = city;
-		this.state = state;
-		this.zip = zip;
-		this.country = country;
-		this.mobileNumber = mobileNumber;
-		this.housePhoneNumber = housePhoneNumber;
-		this.comment = comment;
-		this.dob = dob;
-	}
+        /*** Fields for current customers serving as guarantors **/
+        this.existingClientId = existingClientId;
 
-	public String getFirstname() {
-		return firstname;
-	}
+        /*** Fields for external persons serving as guarantors ***/
+        this.firstname = firstname;
+        this.lastname = lastname;
+        this.addressLine1 = addressLine1;
+        this.addressLine2 = addressLine2;
+        this.city = city;
+        this.state = state;
+        this.zip = zip;
+        this.country = country;
+        this.mobileNumber = mobileNumber;
+        this.housePhoneNumber = housePhoneNumber;
+        this.comment = comment;
+        this.dob = dob;
+    }
 
-	public String getLastname() {
-		return lastname;
-	}
+    public String getFirstname() {
+        return firstname;
+    }
 
-	public Boolean isExternalGuarantor() {
-		return externalGuarantor;
-	}
+    public String getLastname() {
+        return lastname;
+    }
 
-	public Long getExistingClientId() {
-		return existingClientId;
-	}
+    public Boolean isExternalGuarantor() {
+        return externalGuarantor;
+    }
 
-	public String getAddressLine1() {
-		return addressLine1;
-	}
+    public Long getExistingClientId() {
+        return existingClientId;
+    }
 
-	public String getAddressLine2() {
-		return addressLine2;
-	}
+    public String getAddressLine1() {
+        return addressLine1;
+    }
 
-	public String getCity() {
-		return city;
-	}
+    public String getAddressLine2() {
+        return addressLine2;
+    }
 
-	public String getState() {
-		return state;
-	}
+    public String getCity() {
+        return city;
+    }
 
-	public String getZip() {
-		return zip;
-	}
+    public String getState() {
+        return state;
+    }
 
-	public String getCountry() {
-		return country;
-	}
+    public String getZip() {
+        return zip;
+    }
 
-	public String getMobileNumber() {
-		return mobileNumber;
-	}
+    public String getCountry() {
+        return country;
+    }
 
-	public String getHousePhoneNumber() {
-		return housePhoneNumber;
-	}
+    public String getMobileNumber() {
+        return mobileNumber;
+    }
 
-	public String getComment() {
-		return comment;
-	}
+    public String getHousePhoneNumber() {
+        return housePhoneNumber;
+    }
 
-	public Set<String> getModifiedParameters() {
-		return modifiedParameters;
-	}
+    public String getComment() {
+        return comment;
+    }
 
-	public String getDob() {
-		return dob;
-	}
+    public Set<String> getModifiedParameters() {
+        return modifiedParameters;
+    }
 
-	public String getDateFormat() {
-		return dateFormat;
-	}
+    public String getDob() {
+        return dob;
+    }
 
-	public void setDateFormat(String dateFormat) {
-		this.dateFormat = dateFormat;
-	}
+    public String getDateFormat() {
+        return dateFormat;
+    }
 
-	public String getLocale() {
-		return locale;
-	}
+    public void setDateFormat(String dateFormat) {
+        this.dateFormat = dateFormat;
+    }
 
-	public void setLocale(String locale) {
-		this.locale = locale;
-	}
+    public String getLocale() {
+        return locale;
+    }
+
+    public void setLocale(String locale) {
+        this.locale = locale;
+    }
 
 }

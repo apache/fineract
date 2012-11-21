@@ -95,7 +95,7 @@ public interface PortfolioApiDataConversionService {
 
     CodeCommand convertJsonToCodeCommand(Long resourceIdentifier, String json);
 
-	SavingAccountCommand convertJsonToSavingAccountCommand(Long resourceIdentifier,String json);
-	
-	GuarantorCommand convertJsonToGuarantorCommand(Long resourceIdentifier, Long loanId, String json);
+    SavingAccountCommand convertJsonToSavingAccountCommand(Long resourceIdentifier, String json);
+
+    GuarantorCommand convertJsonToGuarantorCommand(Long resourceIdentifier, Long loanId, String json);
 }

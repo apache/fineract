@@ -70,442 +70,418 @@ import org.springframework.util.CollectionUtils;
 @Scope("singleton")
 public class LoansApiResource {
 
-	@Autowired
-	private LoanReadPlatformService loanReadPlatformService;
+    @Autowired
+    private LoanReadPlatformService loanReadPlatformService;
 
-	@Autowired
-	private LoanWritePlatformService loanWritePlatformService;
-	
-	@Autowired
-	private LoanProductReadPlatformService loanProductReadPlatformService;
+    @Autowired
+    private LoanWritePlatformService loanWritePlatformService;
 
-	@Autowired
-	private LoanDropdownReadPlatformService dropdownReadPlatformService;
+    @Autowired
+    private LoanProductReadPlatformService loanProductReadPlatformService;
 
-	@Autowired
-	private FundReadPlatformService fundReadPlatformService;
-	
+    @Autowired
+    private LoanDropdownReadPlatformService dropdownReadPlatformService;
+
+    @Autowired
+    private FundReadPlatformService fundReadPlatformService;
+
     @Autowired
     private ChargeReadPlatformService chargeReadPlatformService;
 
-	@Autowired
-	private CalculationPlatformService calculationPlatformService;
+    @Autowired
+    private CalculationPlatformService calculationPlatformService;
 
-	@Autowired
-	private PortfolioApiDataConversionService apiDataConversionService;
-	
-	@Autowired
-	private PortfolioApiJsonSerializerService apiJsonSerializerService;
-	
-	@Autowired
-	private StaffReadPlatformService staffReadPlatformService;
+    @Autowired
+    private PortfolioApiDataConversionService apiDataConversionService;
+
+    @Autowired
+    private PortfolioApiJsonSerializerService apiJsonSerializerService;
+
+    @Autowired
+    private StaffReadPlatformService staffReadPlatformService;
 
     @Autowired
     private PlatformSecurityContext context;
-	
-	@Autowired
-	private GuarantorReadPlatformService guarantorReadPlatformService;
-	
-	@GET
-	@Path("template")
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrieveDetailsForNewLoanApplicationStepOne(
-			@QueryParam("clientId") final Long clientId,
-            @QueryParam("groupId") final Long groupId,
-			@QueryParam("productId") final Long productId,
-			@Context final UriInfo uriInfo) {
 
-		context.authenticatedUser().validateHasReadPermission("LOAN");
-		
-		final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-		final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-		
-		// tempate related
-		Collection<LoanProductData> productOptions = this.loanProductReadPlatformService.retrieveAllLoanProductsForLookup();
-		Collection<EnumOptionData> loanTermFrequencyTypeOptions = dropdownReadPlatformService.retrieveLoanTermFrequencyTypeOptions();
-		Collection<EnumOptionData> repaymentFrequencyTypeOptions = dropdownReadPlatformService.retrieveRepaymentFrequencyTypeOptions();
-		Collection<EnumOptionData> interestRateFrequencyTypeOptions = dropdownReadPlatformService.retrieveInterestRateFrequencyTypeOptions();
-		
-		Collection<EnumOptionData> amortizationTypeOptions = dropdownReadPlatformService.retrieveLoanAmortizationTypeOptions();
-		Collection<EnumOptionData> interestTypeOptions = dropdownReadPlatformService.retrieveLoanInterestTypeOptions();
-		Collection<EnumOptionData> interestCalculationPeriodTypeOptions = dropdownReadPlatformService.retrieveLoanInterestRateCalculatedInPeriodOptions();
-	
-		Collection<FundData> fundOptions = this.fundReadPlatformService.retrieveAllFunds();
-		Collection<TransactionProcessingStrategyData> repaymentStrategyOptions = this.dropdownReadPlatformService.retreiveTransactionProcessingStrategies();
-		
-		final boolean feeChargesOnly = false;
-		Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveLoanApplicableCharges(feeChargesOnly);
-		ChargeData chargeTemplate = this.chargeReadPlatformService.retrieveLoanChargeTemplate();
+    @Autowired
+    private GuarantorReadPlatformService guarantorReadPlatformService;
 
-		LoanBasicDetailsData loanBasicDetails;
-		Long officeId;
+    @GET
+    @Path("template")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String retrieveDetailsForNewLoanApplicationStepOne(@QueryParam("clientId") final Long clientId,
+            @QueryParam("groupId") final Long groupId, @QueryParam("productId") final Long productId, @Context final UriInfo uriInfo) {
 
-		if ( clientId != null ){
-			loanBasicDetails = this.loanReadPlatformService.retrieveClientAndProductDetails(clientId, productId);
-			officeId = loanBasicDetails.getClientOfficeId();
-		} else {
-			loanBasicDetails = this.loanReadPlatformService.retrieveGroupAndProductDetails(groupId, productId);
-			officeId = loanBasicDetails.getGroupOfficeId();
+        context.authenticatedUser().validateHasReadPermission("LOAN");
+
+        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+
+        // tempate related
+        Collection<LoanProductData> productOptions = this.loanProductReadPlatformService.retrieveAllLoanProductsForLookup();
+        Collection<EnumOptionData> loanTermFrequencyTypeOptions = dropdownReadPlatformService.retrieveLoanTermFrequencyTypeOptions();
+        Collection<EnumOptionData> repaymentFrequencyTypeOptions = dropdownReadPlatformService.retrieveRepaymentFrequencyTypeOptions();
+        Collection<EnumOptionData> interestRateFrequencyTypeOptions = dropdownReadPlatformService
+                .retrieveInterestRateFrequencyTypeOptions();
+
+        Collection<EnumOptionData> amortizationTypeOptions = dropdownReadPlatformService.retrieveLoanAmortizationTypeOptions();
+        Collection<EnumOptionData> interestTypeOptions = dropdownReadPlatformService.retrieveLoanInterestTypeOptions();
+        Collection<EnumOptionData> interestCalculationPeriodTypeOptions = dropdownReadPlatformService
+                .retrieveLoanInterestRateCalculatedInPeriodOptions();
+
+        Collection<FundData> fundOptions = this.fundReadPlatformService.retrieveAllFunds();
+        Collection<TransactionProcessingStrategyData> repaymentStrategyOptions = this.dropdownReadPlatformService
+                .retreiveTransactionProcessingStrategies();
+
+        final boolean feeChargesOnly = false;
+        Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveLoanApplicableCharges(feeChargesOnly);
+        ChargeData chargeTemplate = this.chargeReadPlatformService.retrieveLoanChargeTemplate();
+
+        LoanBasicDetailsData loanBasicDetails;
+        Long officeId;
+
+        if (clientId != null) {
+            loanBasicDetails = this.loanReadPlatformService.retrieveClientAndProductDetails(clientId, productId);
+            officeId = loanBasicDetails.getClientOfficeId();
+        } else {
+            loanBasicDetails = this.loanReadPlatformService.retrieveGroupAndProductDetails(groupId, productId);
+            officeId = loanBasicDetails.getGroupOfficeId();
         }
 
-		final boolean convenienceDataRequired = false;
-		Collection<LoanChargeData> charges = loanBasicDetails.getCharges();
+        final boolean convenienceDataRequired = false;
+        Collection<LoanChargeData> charges = loanBasicDetails.getCharges();
 
-		Collection<StaffData> allowedLoanOfficers = this.staffReadPlatformService.retrieveAllLoanOfficersByOffice(officeId);
+        Collection<StaffData> allowedLoanOfficers = this.staffReadPlatformService.retrieveAllLoanOfficersByOffice(officeId);
 
-		final LoanAccountData newLoanAccount = new LoanAccountData(loanBasicDetails, convenienceDataRequired, null, null, null, charges,
-				productOptions, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions, 
-				repaymentStrategyOptions, interestRateFrequencyTypeOptions, 
-				amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, chargeTemplate, allowedLoanOfficers,null);
+        final LoanAccountData newLoanAccount = new LoanAccountData(loanBasicDetails, convenienceDataRequired, null, null, null, charges,
+                productOptions, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions, repaymentStrategyOptions,
+                interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions,
+                fundOptions, chargeOptions, chargeTemplate, allowedLoanOfficers, null);
 
-		return this.apiJsonSerializerService.serializeLoanAccountDataToJson(prettyPrint, responseParameters, newLoanAccount);
-	}
+        return this.apiJsonSerializerService.serializeLoanAccountDataToJson(prettyPrint, responseParameters, newLoanAccount);
+    }
 
-	@GET
-	@Path("{loanId}")
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrieveLoanAccountDetails(
-			@PathParam("loanId") final Long loanId,
-			@Context final UriInfo uriInfo) {
+    @GET
+    @Path("{loanId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String retrieveLoanAccountDetails(@PathParam("loanId") final Long loanId, @Context final UriInfo uriInfo) {
 
-		context.authenticatedUser().validateHasReadPermission("LOAN");
-		
-		final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-		final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-		
-		final LoanBasicDetailsData loanBasicDetails = this.loanReadPlatformService.retrieveLoanAccountDetails(loanId);
-		
-		int loanRepaymentsCount = 0;
-		Collection<LoanTransactionData> loanRepayments = null;
-		LoanScheduleData repaymentSchedule = null;
-		LoanPermissionData permissions = null;
+        context.authenticatedUser().validateHasReadPermission("LOAN");
+
+        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+
+        final LoanBasicDetailsData loanBasicDetails = this.loanReadPlatformService.retrieveLoanAccountDetails(loanId);
+
+        int loanRepaymentsCount = 0;
+        Collection<LoanTransactionData> loanRepayments = null;
+        LoanScheduleData repaymentSchedule = null;
+        LoanPermissionData permissions = null;
         Collection<LoanChargeData> charges = null;
         GuarantorData guarantorData = null;
 
         boolean convenienceDataRequired = false;
-		final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
-		if (!associationParameters.isEmpty()) {
-			
-			if (associationParameters.contains("all")) {
-				associationParameters.addAll(Arrays.asList("repaymentSchedule", "transactions", "permissions", "convenienceData", "charges", "guarantor"));
-			}
-			
-			boolean existsGuarantor = false;
-			if (associationParameters.contains("guarantor")) {
-				if(guarantorReadPlatformService.existsGuarantor(loanId)){
-					guarantorData = this.guarantorReadPlatformService.retrieveGuarantor(loanId);
-					existsGuarantor = true;
-				}
-			}
-			
-			if (associationParameters.contains("transactions")) {
-				final Collection<LoanTransactionData> currentLoanRepayments = this.loanReadPlatformService.retrieveLoanTransactions(loanId);
-				if (!CollectionUtils.isEmpty(currentLoanRepayments)) {
-					loanRepayments = currentLoanRepayments;
-				}
-			}
-			
-			if (associationParameters.contains("repaymentSchedule")) {
-				
-				DisbursementData singleDisbursement = loanBasicDetails.toDisburementData();
-				repaymentSchedule = this.loanReadPlatformService.retrieveRepaymentSchedule(loanId, loanBasicDetails.getCurrency(), 
-					singleDisbursement, loanBasicDetails.getTotalDisbursementCharges(), loanBasicDetails.getInArrearsTolerance());
-				
-				// FIXME - KW - Waive feature was changed to waive interest at anytime so this permission checking is probably not needed - look into.
-				final MonetaryCurrency currency = new MonetaryCurrency(loanBasicDetails.getCurrency().getCode(), loanBasicDetails.getCurrency().getDecimalPlaces());
-				final Money tolerance = Money.of(currency, loanBasicDetails.getInArrearsTolerance());
-				final Money totalOutstandingMoney = Money.of(currency, repaymentSchedule.totalOutstanding());	
-				
-				boolean isWaiveAllowed = totalOutstandingMoney.isGreaterThanZero() && (tolerance.isGreaterThan(totalOutstandingMoney) || tolerance.isEqualTo(totalOutstandingMoney));
+        final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
+        if (!associationParameters.isEmpty()) {
 
-				if (associationParameters.contains("permissions")) {
-					loanRepaymentsCount = retrieveNonDisbursementTransactions(loanRepayments);
-					permissions = this.loanReadPlatformService.retrieveLoanPermissions(loanBasicDetails, isWaiveAllowed, loanRepaymentsCount, existsGuarantor);
-				}
-				convenienceDataRequired = true;
-			}
-			
-			if (associationParameters.contains("charges")) {
-	            charges = this.chargeReadPlatformService.retrieveLoanCharges(loanId);
-	            if (CollectionUtils.isEmpty(charges)) {
-	            	charges = null; // set back to null so doesnt appear in JSON is no charges exist.
-				}
-			}
-		}
+            if (associationParameters.contains("all")) {
+                associationParameters.addAll(Arrays.asList("repaymentSchedule", "transactions", "permissions", "convenienceData",
+                        "charges", "guarantor"));
+            }
 
-		Collection<LoanProductData> productOptions = null;
-		Collection<EnumOptionData> loanTermFrequencyTypeOptions = null;
-		Collection<EnumOptionData> repaymentFrequencyTypeOptions = null;
-		Collection<TransactionProcessingStrategyData> repaymentStrategyOptions = null;
-		Collection<EnumOptionData> interestRateFrequencyTypeOptions = null;
-		Collection<EnumOptionData> amortizationTypeOptions = null;
-		Collection<EnumOptionData> interestTypeOptions = null;
-		Collection<EnumOptionData> interestCalculationPeriodTypeOptions = null;
-		Collection<FundData> fundOptions = null;
-		Collection<ChargeData> chargeOptions = null;
-		ChargeData chargeTemplate = null;
-		
-		final boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
-		if(template) {
-			productOptions = this.loanProductReadPlatformService.retrieveAllLoanProductsForLookup();
-			loanTermFrequencyTypeOptions = dropdownReadPlatformService.retrieveLoanTermFrequencyTypeOptions();
-			repaymentFrequencyTypeOptions = dropdownReadPlatformService.retrieveRepaymentFrequencyTypeOptions();
-			interestRateFrequencyTypeOptions = dropdownReadPlatformService.retrieveInterestRateFrequencyTypeOptions();
-			
-			amortizationTypeOptions = dropdownReadPlatformService.retrieveLoanAmortizationTypeOptions();
-			interestTypeOptions = dropdownReadPlatformService.retrieveLoanInterestTypeOptions();
-			interestCalculationPeriodTypeOptions = dropdownReadPlatformService.retrieveLoanInterestRateCalculatedInPeriodOptions();
+            boolean existsGuarantor = false;
+            if (associationParameters.contains("guarantor")) {
+                if (guarantorReadPlatformService.existsGuarantor(loanId)) {
+                    guarantorData = this.guarantorReadPlatformService.retrieveGuarantor(loanId);
+                    existsGuarantor = true;
+                }
+            }
 
-			fundOptions = this.fundReadPlatformService.retrieveAllFunds();
-			repaymentStrategyOptions = this.dropdownReadPlatformService.retreiveTransactionProcessingStrategies();
-			final boolean feeChargesOnly = false;
-			chargeOptions = this.chargeReadPlatformService.retrieveLoanApplicableCharges(feeChargesOnly);
-			chargeTemplate = this.chargeReadPlatformService.retrieveLoanChargeTemplate();
-		}
-		
-		final LoanAccountData loanAccount = new LoanAccountData(loanBasicDetails, convenienceDataRequired, 
-				repaymentSchedule, loanRepayments, permissions, charges, 
-				productOptions, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions, 
-				repaymentStrategyOptions, interestRateFrequencyTypeOptions, 
-				amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions, 
-				fundOptions, chargeOptions, chargeTemplate, null, guarantorData);
-		
-		return this.apiJsonSerializerService.serializeLoanAccountDataToJson(prettyPrint, responseParameters, loanAccount);
-	}
+            if (associationParameters.contains("transactions")) {
+                final Collection<LoanTransactionData> currentLoanRepayments = this.loanReadPlatformService.retrieveLoanTransactions(loanId);
+                if (!CollectionUtils.isEmpty(currentLoanRepayments)) {
+                    loanRepayments = currentLoanRepayments;
+                }
+            }
 
-	private int retrieveNonDisbursementTransactions(final Collection<LoanTransactionData> loanRepayments) {
-		int loanRepaymentsCount = 0;
-		if (!CollectionUtils.isEmpty(loanRepayments)) {
-			for (LoanTransactionData transaction : loanRepayments) {
-				if (transaction.isNotDisbursement()) {
-					// use this to decide if undo disbural should permission should be set to true.
-					loanRepaymentsCount++;
-				}
-			}
-		}
-		return loanRepaymentsCount;
-	}
+            if (associationParameters.contains("repaymentSchedule")) {
 
-	@POST
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public String calculateLoanScheduleOrSubmitLoanApplication(
-			@QueryParam("command") final String commandParam,
-			@Context final UriInfo uriInfo,
-			final String jsonRequestBody) {
+                DisbursementData singleDisbursement = loanBasicDetails.toDisburementData();
+                repaymentSchedule = this.loanReadPlatformService.retrieveRepaymentSchedule(loanId, loanBasicDetails.getCurrency(),
+                        singleDisbursement, loanBasicDetails.getTotalDisbursementCharges(), loanBasicDetails.getInArrearsTolerance());
 
-		final LoanApplicationCommand command = this.apiDataConversionService.convertJsonToLoanApplicationCommand(null, jsonRequestBody);
+                // FIXME - KW - Waive feature was changed to waive interest at
+                // anytime so this permission checking is probably not needed -
+                // look into.
+                final MonetaryCurrency currency = new MonetaryCurrency(loanBasicDetails.getCurrency().getCode(), loanBasicDetails
+                        .getCurrency().getDecimalPlaces());
+                final Money tolerance = Money.of(currency, loanBasicDetails.getInArrearsTolerance());
+                final Money totalOutstandingMoney = Money.of(currency, repaymentSchedule.totalOutstanding());
 
-		if (is(commandParam, "calculateLoanSchedule")) {
-			CalculateLoanScheduleCommand calculateLoanScheduleCommand = command.toCalculateLoanScheduleCommand();
-			return calculateLoanSchedule(uriInfo, calculateLoanScheduleCommand);
-		}
+                boolean isWaiveAllowed = totalOutstandingMoney.isGreaterThanZero()
+                        && (tolerance.isGreaterThan(totalOutstandingMoney) || tolerance.isEqualTo(totalOutstandingMoney));
 
-		final EntityIdentifier identifier = this.loanWritePlatformService.submitLoanApplication(command);
+                if (associationParameters.contains("permissions")) {
+                    loanRepaymentsCount = retrieveNonDisbursementTransactions(loanRepayments);
+                    permissions = this.loanReadPlatformService.retrieveLoanPermissions(loanBasicDetails, isWaiveAllowed,
+                            loanRepaymentsCount, existsGuarantor);
+                }
+                convenienceDataRequired = true;
+            }
 
-		return this.apiJsonSerializerService.serializeEntityIdentifier(identifier);
-	}
+            if (associationParameters.contains("charges")) {
+                charges = this.chargeReadPlatformService.retrieveLoanCharges(loanId);
+                if (CollectionUtils.isEmpty(charges)) {
+                    charges = null; // set back to null so doesnt appear in JSON
+                                    // is no charges exist.
+                }
+            }
+        }
 
-	private String calculateLoanSchedule(final UriInfo uriInfo, final CalculateLoanScheduleCommand command) {
-		
-		final LoanScheduleData loanSchedule = this.calculationPlatformService.calculateLoanSchedule(command);
+        Collection<LoanProductData> productOptions = null;
+        Collection<EnumOptionData> loanTermFrequencyTypeOptions = null;
+        Collection<EnumOptionData> repaymentFrequencyTypeOptions = null;
+        Collection<TransactionProcessingStrategyData> repaymentStrategyOptions = null;
+        Collection<EnumOptionData> interestRateFrequencyTypeOptions = null;
+        Collection<EnumOptionData> amortizationTypeOptions = null;
+        Collection<EnumOptionData> interestTypeOptions = null;
+        Collection<EnumOptionData> interestCalculationPeriodTypeOptions = null;
+        Collection<FundData> fundOptions = null;
+        Collection<ChargeData> chargeOptions = null;
+        ChargeData chargeTemplate = null;
 
-		final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-		
-		return this.apiJsonSerializerService.serializeLoanScheduleDataToJson(prettyPrint, responseParameters, loanSchedule);
-	}
-	
-	@PUT
-	@Path("{loanId}")
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
-	public String modifyLoanApplication(
-			@PathParam("loanId") final Long loanId,
-			final String jsonRequestBody) {
+        final boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
+        if (template) {
+            productOptions = this.loanProductReadPlatformService.retrieveAllLoanProductsForLookup();
+            loanTermFrequencyTypeOptions = dropdownReadPlatformService.retrieveLoanTermFrequencyTypeOptions();
+            repaymentFrequencyTypeOptions = dropdownReadPlatformService.retrieveRepaymentFrequencyTypeOptions();
+            interestRateFrequencyTypeOptions = dropdownReadPlatformService.retrieveInterestRateFrequencyTypeOptions();
 
-		final LoanApplicationCommand command = this.apiDataConversionService.convertJsonToLoanApplicationCommand(loanId, jsonRequestBody);
+            amortizationTypeOptions = dropdownReadPlatformService.retrieveLoanAmortizationTypeOptions();
+            interestTypeOptions = dropdownReadPlatformService.retrieveLoanInterestTypeOptions();
+            interestCalculationPeriodTypeOptions = dropdownReadPlatformService.retrieveLoanInterestRateCalculatedInPeriodOptions();
 
-		final EntityIdentifier identifier = this.loanWritePlatformService.modifyLoanApplication(command);
+            fundOptions = this.fundReadPlatformService.retrieveAllFunds();
+            repaymentStrategyOptions = this.dropdownReadPlatformService.retreiveTransactionProcessingStrategies();
+            final boolean feeChargesOnly = false;
+            chargeOptions = this.chargeReadPlatformService.retrieveLoanApplicableCharges(feeChargesOnly);
+            chargeTemplate = this.chargeReadPlatformService.retrieveLoanChargeTemplate();
+        }
 
-		return this.apiJsonSerializerService.serializeEntityIdentifier(identifier);
-	}
+        final LoanAccountData loanAccount = new LoanAccountData(loanBasicDetails, convenienceDataRequired, repaymentSchedule,
+                loanRepayments, permissions, charges, productOptions, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions,
+                repaymentStrategyOptions, interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions,
+                interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, chargeTemplate, null, guarantorData);
 
-	@DELETE
-	@Path("{loanId}")
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public Response deleteLoanApplication(@PathParam("loanId") final Long loanId) {
+        return this.apiJsonSerializerService.serializeLoanAccountDataToJson(prettyPrint, responseParameters, loanAccount);
+    }
 
-		EntityIdentifier identifier = this.loanWritePlatformService.deleteLoan(loanId);
+    private int retrieveNonDisbursementTransactions(final Collection<LoanTransactionData> loanRepayments) {
+        int loanRepaymentsCount = 0;
+        if (!CollectionUtils.isEmpty(loanRepayments)) {
+            for (LoanTransactionData transaction : loanRepayments) {
+                if (transaction.isNotDisbursement()) {
+                    // use this to decide if undo disbural should permission
+                    // should be set to true.
+                    loanRepaymentsCount++;
+                }
+            }
+        }
+        return loanRepaymentsCount;
+    }
 
-		return Response.ok().entity(identifier).build();
-	}
+    @POST
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String calculateLoanScheduleOrSubmitLoanApplication(@QueryParam("command") final String commandParam,
+            @Context final UriInfo uriInfo, final String jsonRequestBody) {
 
-	@POST
-	@Path("{loanId}")
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public Response stateTransitions(@PathParam("loanId") final Long loanId,
-			@QueryParam("command") final String commandParam,
-			final String jsonRequestBody) {
+        final LoanApplicationCommand command = this.apiDataConversionService.convertJsonToLoanApplicationCommand(null, jsonRequestBody);
 
-		LoanStateTransitionCommand command = this.apiDataConversionService.convertJsonToLoanStateTransitionCommand(loanId, jsonRequestBody);
+        if (is(commandParam, "calculateLoanSchedule")) {
+            CalculateLoanScheduleCommand calculateLoanScheduleCommand = command.toCalculateLoanScheduleCommand();
+            return calculateLoanSchedule(uriInfo, calculateLoanScheduleCommand);
+        }
 
-		Response response = null;
+        final EntityIdentifier identifier = this.loanWritePlatformService.submitLoanApplication(command);
 
-		if (is(commandParam, "reject")) {
-			EntityIdentifier identifier = this.loanWritePlatformService
-					.rejectLoan(command);
-			response = Response.ok().entity(identifier).build();
-		} else if (is(commandParam, "withdrewbyclient")) {
-			EntityIdentifier identifier = this.loanWritePlatformService
-					.withdrawLoan(command);
-			response = Response.ok().entity(identifier).build();
-		} else if (is(commandParam, "approve")) {
-			EntityIdentifier identifier = this.loanWritePlatformService
-					.approveLoanApplication(command);
-			response = Response.ok().entity(identifier).build();
-		} else if (is(commandParam, "disburse")) {
-			EntityIdentifier identifier = this.loanWritePlatformService
-					.disburseLoan(command);
-			response = Response.ok().entity(identifier).build();
-		}
+        return this.apiJsonSerializerService.serializeEntityIdentifier(identifier);
+    }
 
-		UndoStateTransitionCommand undoCommand = new UndoStateTransitionCommand(
-				loanId, command.getNote());
+    private String calculateLoanSchedule(final UriInfo uriInfo, final CalculateLoanScheduleCommand command) {
 
-		if (is(commandParam, "undoapproval")) {
-			EntityIdentifier identifier = this.loanWritePlatformService
-					.undoLoanApproval(undoCommand);
-			response = Response.ok().entity(identifier).build();
-		} else if (is(commandParam, "undodisbursal")) {
-			EntityIdentifier identifier = this.loanWritePlatformService
-					.undoLoanDisbursal(undoCommand);
-			response = Response.ok().entity(identifier).build();
-		}
+        final LoanScheduleData loanSchedule = this.calculationPlatformService.calculateLoanSchedule(command);
 
-		if (response == null) {
-			throw new UnrecognizedQueryParamException("command", commandParam);
-		}
+        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+        boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 
-		return response;
-	}
+        return this.apiJsonSerializerService.serializeLoanScheduleDataToJson(prettyPrint, responseParameters, loanSchedule);
+    }
 
-	private boolean is(final String commandParam, final String commandValue) {
-		return StringUtils.isNotBlank(commandParam)
-				&& commandParam.trim().equalsIgnoreCase(commandValue);
-	}
+    @PUT
+    @Path("{loanId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String modifyLoanApplication(@PathParam("loanId") final Long loanId, final String jsonRequestBody) {
 
-	@POST
-	@Path("{loanId}/transactions")
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public Response executeLoanTransaction(
-			@PathParam("loanId") final Long loanId,
-			@QueryParam("command") final String commandParam,
-			final String jsonRequestBody) {
+        final LoanApplicationCommand command = this.apiDataConversionService.convertJsonToLoanApplicationCommand(loanId, jsonRequestBody);
 
-		final LoanTransactionCommand command = this.apiDataConversionService.convertJsonToLoanTransactionCommand(loanId, jsonRequestBody);
+        final EntityIdentifier identifier = this.loanWritePlatformService.modifyLoanApplication(command);
 
-		EntityIdentifier identifier = null;
-		if (is(commandParam, "repayment")) {
-			identifier = this.loanWritePlatformService.makeLoanRepayment(command);
-		} else if (is(commandParam, "waiveinterest")) {
-			identifier = this.loanWritePlatformService.waiveInterestOnLoan(command);
-		} else if (is(commandParam, "writeoff")) {
-			identifier = this.loanWritePlatformService.writeOff(command);
-		} else if (is(commandParam, "close-rescheduled")) {
-			identifier = this.loanWritePlatformService.closeAsRescheduled(command);
-		} else if (is(commandParam, "close")) {
-			identifier = this.loanWritePlatformService.closeLoan(command);
-		}
+        return this.apiJsonSerializerService.serializeEntityIdentifier(identifier);
+    }
 
-		if (identifier == null) {
-			throw new UnrecognizedQueryParamException("command", commandParam);
-		}
+    @DELETE
+    @Path("{loanId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public Response deleteLoanApplication(@PathParam("loanId") final Long loanId) {
 
-		return Response.ok().entity(identifier).build();
-	}
+        EntityIdentifier identifier = this.loanWritePlatformService.deleteLoan(loanId);
 
-	@GET
-	@Path("{loanId}/transactions/template")
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrieveNewRepaymentDetails(
-			@PathParam("loanId") final Long loanId,
-			@QueryParam("command") final String commandParam,
-			@Context final UriInfo uriInfo) {
+        return Response.ok().entity(identifier).build();
+    }
 
-		context.authenticatedUser().validateHasReadPermission("LOAN");
-		
-		final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-		final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-		
-		LoanTransactionData transactionData = null;
-		if (is(commandParam, "repayment")) {
-			transactionData = this.loanReadPlatformService.retrieveNewLoanRepaymentDetails(loanId);
-		} else if (is(commandParam, "waiveinterest")) {
-			transactionData = this.loanReadPlatformService.retrieveNewLoanWaiveInterestDetails(loanId);
-		} else if (is(commandParam, "writeoff")) {
-			transactionData = this.loanReadPlatformService.retrieveNewClosureDetails();
-		} else if (is(commandParam, "close-rescheduled")) {
-			transactionData = this.loanReadPlatformService.retrieveNewClosureDetails();
-		} else if (is(commandParam, "close")) {
-			transactionData = this.loanReadPlatformService.retrieveNewClosureDetails();
-		}  else {
-			throw new UnrecognizedQueryParamException("command", commandParam);
-		}
-		
-		return this.apiJsonSerializerService.serializeLoanTransactionDataToJson(prettyPrint, responseParameters, transactionData);
-	}
+    @POST
+    @Path("{loanId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public Response stateTransitions(@PathParam("loanId") final Long loanId, @QueryParam("command") final String commandParam,
+            final String jsonRequestBody) {
 
-	@GET
-	@Path("{loanId}/transactions/{transactionId}")
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrieveTransaction(@PathParam("loanId") final Long loanId,
-			@PathParam("transactionId") final Long transactionId,
-			@Context final UriInfo uriInfo) {
+        LoanStateTransitionCommand command = this.apiDataConversionService.convertJsonToLoanStateTransitionCommand(loanId, jsonRequestBody);
 
-		context.authenticatedUser().validateHasReadPermission("LOAN");
-		
-		final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-		final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-		
-		final LoanTransactionData transactionData = this.loanReadPlatformService.retrieveLoanTransactionDetails(loanId, transactionId);
+        Response response = null;
 
-		return this.apiJsonSerializerService.serializeLoanTransactionDataToJson(prettyPrint, responseParameters, transactionData);
-	}
+        if (is(commandParam, "reject")) {
+            EntityIdentifier identifier = this.loanWritePlatformService.rejectLoan(command);
+            response = Response.ok().entity(identifier).build();
+        } else if (is(commandParam, "withdrewbyclient")) {
+            EntityIdentifier identifier = this.loanWritePlatformService.withdrawLoan(command);
+            response = Response.ok().entity(identifier).build();
+        } else if (is(commandParam, "approve")) {
+            EntityIdentifier identifier = this.loanWritePlatformService.approveLoanApplication(command);
+            response = Response.ok().entity(identifier).build();
+        } else if (is(commandParam, "disburse")) {
+            EntityIdentifier identifier = this.loanWritePlatformService.disburseLoan(command);
+            response = Response.ok().entity(identifier).build();
+        }
 
-	@POST
-	@Path("{loanId}/transactions/{transactionId}")
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public Response adjustLoanTransaction(
-			@PathParam("loanId") final Long loanId,
-			@PathParam("transactionId") final Long transactionId,
-			final String jsonRequestBody) {
+        UndoStateTransitionCommand undoCommand = new UndoStateTransitionCommand(loanId, command.getNote());
 
-		final AdjustLoanTransactionCommand command = this.apiDataConversionService
-				.convertJsonToAdjustLoanTransactionCommand(loanId,
-						transactionId, jsonRequestBody);
+        if (is(commandParam, "undoapproval")) {
+            EntityIdentifier identifier = this.loanWritePlatformService.undoLoanApproval(undoCommand);
+            response = Response.ok().entity(identifier).build();
+        } else if (is(commandParam, "undodisbursal")) {
+            EntityIdentifier identifier = this.loanWritePlatformService.undoLoanDisbursal(undoCommand);
+            response = Response.ok().entity(identifier).build();
+        }
 
-		EntityIdentifier identifier = this.loanWritePlatformService
-				.adjustLoanTransaction(command);
+        if (response == null) { throw new UnrecognizedQueryParamException("command", commandParam); }
 
-		return Response.ok().entity(identifier).build();
-	}
+        return response;
+    }
+
+    private boolean is(final String commandParam, final String commandValue) {
+        return StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase(commandValue);
+    }
+
+    @POST
+    @Path("{loanId}/transactions")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public Response executeLoanTransaction(@PathParam("loanId") final Long loanId, @QueryParam("command") final String commandParam,
+            final String jsonRequestBody) {
+
+        final LoanTransactionCommand command = this.apiDataConversionService.convertJsonToLoanTransactionCommand(loanId, jsonRequestBody);
+
+        EntityIdentifier identifier = null;
+        if (is(commandParam, "repayment")) {
+            identifier = this.loanWritePlatformService.makeLoanRepayment(command);
+        } else if (is(commandParam, "waiveinterest")) {
+            identifier = this.loanWritePlatformService.waiveInterestOnLoan(command);
+        } else if (is(commandParam, "writeoff")) {
+            identifier = this.loanWritePlatformService.writeOff(command);
+        } else if (is(commandParam, "close-rescheduled")) {
+            identifier = this.loanWritePlatformService.closeAsRescheduled(command);
+        } else if (is(commandParam, "close")) {
+            identifier = this.loanWritePlatformService.closeLoan(command);
+        }
+
+        if (identifier == null) { throw new UnrecognizedQueryParamException("command", commandParam); }
+
+        return Response.ok().entity(identifier).build();
+    }
+
+    @GET
+    @Path("{loanId}/transactions/template")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String retrieveNewRepaymentDetails(@PathParam("loanId") final Long loanId, @QueryParam("command") final String commandParam,
+            @Context final UriInfo uriInfo) {
+
+        context.authenticatedUser().validateHasReadPermission("LOAN");
+
+        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+
+        LoanTransactionData transactionData = null;
+        if (is(commandParam, "repayment")) {
+            transactionData = this.loanReadPlatformService.retrieveNewLoanRepaymentDetails(loanId);
+        } else if (is(commandParam, "waiveinterest")) {
+            transactionData = this.loanReadPlatformService.retrieveNewLoanWaiveInterestDetails(loanId);
+        } else if (is(commandParam, "writeoff")) {
+            transactionData = this.loanReadPlatformService.retrieveNewClosureDetails();
+        } else if (is(commandParam, "close-rescheduled")) {
+            transactionData = this.loanReadPlatformService.retrieveNewClosureDetails();
+        } else if (is(commandParam, "close")) {
+            transactionData = this.loanReadPlatformService.retrieveNewClosureDetails();
+        } else {
+            throw new UnrecognizedQueryParamException("command", commandParam);
+        }
+
+        return this.apiJsonSerializerService.serializeLoanTransactionDataToJson(prettyPrint, responseParameters, transactionData);
+    }
+
+    @GET
+    @Path("{loanId}/transactions/{transactionId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String retrieveTransaction(@PathParam("loanId") final Long loanId, @PathParam("transactionId") final Long transactionId,
+            @Context final UriInfo uriInfo) {
+
+        context.authenticatedUser().validateHasReadPermission("LOAN");
+
+        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+
+        final LoanTransactionData transactionData = this.loanReadPlatformService.retrieveLoanTransactionDetails(loanId, transactionId);
+
+        return this.apiJsonSerializerService.serializeLoanTransactionDataToJson(prettyPrint, responseParameters, transactionData);
+    }
+
+    @POST
+    @Path("{loanId}/transactions/{transactionId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public Response adjustLoanTransaction(@PathParam("loanId") final Long loanId, @PathParam("transactionId") final Long transactionId,
+            final String jsonRequestBody) {
+
+        final AdjustLoanTransactionCommand command = this.apiDataConversionService.convertJsonToAdjustLoanTransactionCommand(loanId,
+                transactionId, jsonRequestBody);
+
+        EntityIdentifier identifier = this.loanWritePlatformService.adjustLoanTransaction(command);
+
+        return Response.ok().entity(identifier).build();
+    }
 
     @POST
     @Path("{loanId}/charges")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response addLoanCharge(
-            @PathParam("loanId") final Long loanId,
-            final String jsonRequestBody){
+    public Response addLoanCharge(@PathParam("loanId") final Long loanId, final String jsonRequestBody) {
 
         final LoanChargeCommand command = this.apiDataConversionService.convertJsonToLoanChargeCommand(null, loanId, jsonRequestBody);
 
@@ -516,14 +492,14 @@ public class LoansApiResource {
 
     @GET
     @Path("{loanId}/charges/template")
-    @Consumes({MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_JSON})
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveNewLoanChargeDetails(@Context final UriInfo uriInfo) {
 
-		context.authenticatedUser().validateHasReadPermission("LOAN");
-		
-    	final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-    	final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+        context.authenticatedUser().validateHasReadPermission("LOAN");
+
+        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 
         final boolean feeChargesOnly = false;
         final Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveLoanApplicableCharges(feeChargesOnly);
@@ -534,57 +510,52 @@ public class LoansApiResource {
 
     @GET
     @Path("{loanId}/charges/{chargeId}")
-    @Consumes({MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_JSON})
-    public String retrieveLoanCharge(
-            @PathParam("loanId") final Long loanId,
-            @PathParam("chargeId") final Long loanChargeId,
-            @Context final UriInfo uriInfo){
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String retrieveLoanCharge(@PathParam("loanId") final Long loanId, @PathParam("chargeId") final Long loanChargeId,
+            @Context final UriInfo uriInfo) {
 
-		context.authenticatedUser().validateHasReadPermission("LOAN");
-		
-    	final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-    	final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-    	
+        context.authenticatedUser().validateHasReadPermission("LOAN");
+
+        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+
         final LoanChargeData loanCharge = this.chargeReadPlatformService.retrieveLoanChargeDetails(loanChargeId, loanId);
-        
+
         return this.apiJsonSerializerService.serializeLoanChargeDataToJson(prettyPrint, responseParameters, loanCharge);
     }
-    
+
     @PUT
     @Path("{loanId}/charges/{chargeId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String updateLoanCharge(
-            @PathParam("loanId") final Long loanId,
-            @PathParam("chargeId") final Long loanChargeId,
-            final String jsonRequestBody){
+    public String updateLoanCharge(@PathParam("loanId") final Long loanId, @PathParam("chargeId") final Long loanChargeId,
+            final String jsonRequestBody) {
 
-        final LoanChargeCommand command = this.apiDataConversionService.convertJsonToLoanChargeCommand(loanChargeId, loanId, jsonRequestBody);
+        final LoanChargeCommand command = this.apiDataConversionService.convertJsonToLoanChargeCommand(loanChargeId, loanId,
+                jsonRequestBody);
 
         final EntityIdentifier identifier = this.loanWritePlatformService.updateLoanCharge(command);
 
         return this.apiJsonSerializerService.serializeEntityIdentifier(identifier);
     }
-    
+
     @POST
     @Path("{loanId}/charges/{chargeId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String waiveLoanCharge(
-            @PathParam("loanId") final Long loanId,
-            @PathParam("chargeId") final Long loanChargeId,
-            @QueryParam("command") final String commandParam){
+    public String waiveLoanCharge(@PathParam("loanId") final Long loanId, @PathParam("chargeId") final Long loanChargeId,
+            @QueryParam("command") final String commandParam) {
 
-    	final LoanChargeCommand command = LoanChargeCommand.forWaiver(loanChargeId, loanId);
-    	
+        final LoanChargeCommand command = LoanChargeCommand.forWaiver(loanChargeId, loanId);
+
         String json = "";
-		if (is(commandParam, "waive")) {
-			final EntityIdentifier identifier = this.loanWritePlatformService.waiveLoanCharge(command);
-			json = this.apiJsonSerializerService.serializeEntityIdentifier(identifier);
-		}  else {
-			throw new UnrecognizedQueryParamException("command", commandParam);
-		}
+        if (is(commandParam, "waive")) {
+            final EntityIdentifier identifier = this.loanWritePlatformService.waiveLoanCharge(command);
+            json = this.apiJsonSerializerService.serializeEntityIdentifier(identifier);
+        } else {
+            throw new UnrecognizedQueryParamException("command", commandParam);
+        }
 
         return json;
     }
@@ -593,9 +564,7 @@ public class LoansApiResource {
     @Path("{loanId}/charges/{chargeId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String deleteLoanCharge(
-            @PathParam("loanId") final Long loanId,
-            @PathParam("chargeId") final Long loanChargeId){
+    public String deleteLoanCharge(@PathParam("loanId") final Long loanId, @PathParam("chargeId") final Long loanChargeId) {
 
         final EntityIdentifier identifier = this.loanWritePlatformService.deleteLoanCharge(loanId, loanChargeId);
         return this.apiJsonSerializerService.serializeEntityIdentifier(identifier);
@@ -605,9 +574,7 @@ public class LoansApiResource {
     @Path("{loanId}/assign")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response assignLoanOfficer(
-            @PathParam("loanId") final Long loanId,
-            final String jsonRequestBody){
+    public Response assignLoanOfficer(@PathParam("loanId") final Long loanId, final String jsonRequestBody) {
 
         final LoanReassignmentCommand command = this.apiDataConversionService.convertJsonToLoanReassignmentCommand(loanId, jsonRequestBody);
 
@@ -620,19 +587,16 @@ public class LoansApiResource {
     @Path("{loanId}/assign/template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String assignLoanOfficerTemplate(
-            @PathParam("loanId") final Long loanId,
-            @Context final UriInfo uriInfo){
+    public String assignLoanOfficerTemplate(@PathParam("loanId") final Long loanId, @Context final UriInfo uriInfo) {
 
-        final Set<String> responseParameters = ApiParameterHelper
-                .extractFieldsForResponseIfProvided(uriInfo
-                        .getQueryParameters());
+        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 
         final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 
         LoanBasicDetailsData loanBasicDetails = this.loanReadPlatformService.retrieveLoanAccountDetails(loanId);
 
-        Collection<StaffData> allowedLoanOfficers = this.staffReadPlatformService.retrieveAllLoanOfficersByOffice(loanBasicDetails.getOfficeId());
+        Collection<StaffData> allowedLoanOfficers = this.staffReadPlatformService.retrieveAllLoanOfficersByOffice(loanBasicDetails
+                .getOfficeId());
         Long fromLoanOfficerId = loanBasicDetails.getLoanOfficerId();
 
         LoanReassignmentData loanReassignmentData = LoanReassignmentData.template(fromLoanOfficerId, allowedLoanOfficers, new LocalDate());

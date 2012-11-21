@@ -1629,68 +1629,46 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
                 savingProductType, tenureType, frequency, interestType, minimumBalanceForWithdrawal, interestCalculationMethod,
                 isLockinPeriodAllowed, isPartialDepositAllowed, lockinPeriod, lockinPeriodType);
     }
-    
+
     @Override
-	public GuarantorCommand convertJsonToGuarantorCommand(
-			Long resourceIdentifier, Long loanId, String json) {
-		if (StringUtils.isBlank(json)) {
-			throw new InvalidJsonException();
-		}
+    public GuarantorCommand convertJsonToGuarantorCommand(Long resourceIdentifier, Long loanId, String json) {
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
-		Type typeOfMap = new TypeToken<Map<String, String>>() {
-		}.getType();
-		Map<String, String> requestMap = gsonConverter
-				.fromJson(json, typeOfMap);
+        Type typeOfMap = new TypeToken<Map<String, String>>() {}.getType();
+        Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
 
-		Set<String> supportedParams = new HashSet<String>(Arrays.asList(
-				"externalGuarantor", "existingClientId", "firstname",
-				"lastname", "addressLine1", "addressLine2", "city", "state",
-				"zip", "country", "mobileNumber", "housePhoneNumber",
-				"comment", "dob", "locale", "dateFormat"));
+        Set<String> supportedParams = new HashSet<String>(Arrays.asList("externalGuarantor", "existingClientId", "firstname", "lastname",
+                "addressLine1", "addressLine2", "city", "state", "zip", "country", "mobileNumber", "housePhoneNumber", "comment", "dob",
+                "locale", "dateFormat"));
 
-		checkForUnsupportedParameters(requestMap, supportedParams);
+        checkForUnsupportedParameters(requestMap, supportedParams);
 
-		Set<String> modifiedParameters = new HashSet<String>();
+        Set<String> modifiedParameters = new HashSet<String>();
 
-		boolean externalGuarantor = extractBooleanParameter(
-				"externalGuarantor", requestMap, modifiedParameters);
+        boolean externalGuarantor = extractBooleanParameter("externalGuarantor", requestMap, modifiedParameters);
 
-		Long existingClientId = extractLongParameter("existingClientId",
-				requestMap, modifiedParameters);
-		String firstname = extractStringParameter("firstname", requestMap,
-				modifiedParameters);
-		String lastname = extractStringParameter("lastname", requestMap,
-				modifiedParameters);
-		String addressLine1 = extractStringParameter("addressLine1",
-				requestMap, modifiedParameters);
-		String addressLine2 = extractStringParameter("addressLine2",
-				requestMap, modifiedParameters);
-		String city = extractStringParameter("city", requestMap,
-				modifiedParameters);
-		String state = extractStringParameter("state", requestMap,
-				modifiedParameters);
-		String zip = extractStringParameter("zip", requestMap,
-				modifiedParameters);
-		String country = extractStringParameter("country", requestMap,
-				modifiedParameters);
-		String mobileNumber = extractStringParameter("mobileNumber",
-				requestMap, modifiedParameters);
-		String housePhoneNumber = extractStringParameter("housePhoneNumber",
-				requestMap, modifiedParameters);
-		String comment = extractStringParameter("comment", requestMap,
-				modifiedParameters);
-		String dob = extractStringParameter("dob", requestMap,
-				modifiedParameters);
-		// workaround for passing locale info to data table api
-		final String dateFormat = (String) requestMap.get("dateFormat");
-		final String locale = (String) requestMap.get("locale");
+        Long existingClientId = extractLongParameter("existingClientId", requestMap, modifiedParameters);
+        String firstname = extractStringParameter("firstname", requestMap, modifiedParameters);
+        String lastname = extractStringParameter("lastname", requestMap, modifiedParameters);
+        String addressLine1 = extractStringParameter("addressLine1", requestMap, modifiedParameters);
+        String addressLine2 = extractStringParameter("addressLine2", requestMap, modifiedParameters);
+        String city = extractStringParameter("city", requestMap, modifiedParameters);
+        String state = extractStringParameter("state", requestMap, modifiedParameters);
+        String zip = extractStringParameter("zip", requestMap, modifiedParameters);
+        String country = extractStringParameter("country", requestMap, modifiedParameters);
+        String mobileNumber = extractStringParameter("mobileNumber", requestMap, modifiedParameters);
+        String housePhoneNumber = extractStringParameter("housePhoneNumber", requestMap, modifiedParameters);
+        String comment = extractStringParameter("comment", requestMap, modifiedParameters);
+        String dob = extractStringParameter("dob", requestMap, modifiedParameters);
+        
+        // workaround for passing locale info to data table api
+        final String dateFormat = requestMap.get("dateFormat");
+        final String locale = requestMap.get("locale");
 
-		GuarantorCommand command = new GuarantorCommand(modifiedParameters,
-				existingClientId, firstname, lastname, externalGuarantor,
-				addressLine1, addressLine2, city, state, zip, country,
-				mobileNumber, housePhoneNumber, comment, dob);
-		command.setDateFormat(dateFormat);
-		command.setLocale(locale);
-		return command;
-	}
+        GuarantorCommand command = new GuarantorCommand(modifiedParameters, existingClientId, firstname, lastname, externalGuarantor,
+                addressLine1, addressLine2, city, state, zip, country, mobileNumber, housePhoneNumber, comment, dob);
+        command.setDateFormat(dateFormat);
+        command.setLocale(locale);
+        return command;
+    }
 }
