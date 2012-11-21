@@ -59,6 +59,7 @@ public class LoanAccountData {
 	private final Collection<LoanChargeData> charges;
 	private final LoanPermissionData permissions;
 	private final LoanConvenienceData convenienceData;
+	private final GuarantorData guarantorData;
 	
 	// template
 	private final Collection<StaffData> loanOfficerOptions;
@@ -92,7 +93,8 @@ public class LoanAccountData {
 			final Collection<FundData> fundOptions,
 			final Collection<ChargeData> chargeOptions,
             final ChargeData chargeTemplate,
-			final Collection<StaffData> loanOfficerOptions) {
+			final Collection<StaffData> loanOfficerOptions,
+			final GuarantorData guarantorData) {
 		this.repaymentSchedule = repaymentSchedule;
 		this.transactions = transactions;
 		this.permissions = permissions;
@@ -109,6 +111,7 @@ public class LoanAccountData {
 		this.chargeOptions = chargeOptions;
         this.chargeTemplate = chargeTemplate;
 		this.loanOfficerOptions = loanOfficerOptions;
+		this.guarantorData = guarantorData;
 
 		if (convenienceDataRequired) {
 			int maxSubmittedOnOffsetFromToday = basicDetails

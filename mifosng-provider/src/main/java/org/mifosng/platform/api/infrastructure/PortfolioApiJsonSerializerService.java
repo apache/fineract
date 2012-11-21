@@ -23,6 +23,7 @@ import org.mifosng.platform.api.data.FundData;
 import org.mifosng.platform.api.data.GenericResultsetData;
 import org.mifosng.platform.api.data.GroupAccountSummaryCollectionData;
 import org.mifosng.platform.api.data.GroupData;
+import org.mifosng.platform.api.data.GuarantorData;
 import org.mifosng.platform.api.data.LoanAccountData;
 import org.mifosng.platform.api.data.LoanChargeData;
 import org.mifosng.platform.api.data.LoanProductData;
@@ -156,7 +157,9 @@ public interface PortfolioApiJsonSerializerService {
 
     String serializeSavingAccountsDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<SavingAccountData> accounts);
 
-    // TODO - KW - might devide serialize up into portfolio and account to
-    // reduce interface
-    String serializeChartOfAccountDataToJson(boolean prettyPrint, Set<String> responseParameters, ChartOfAccountsData chartOfAccounts);
+	// TODO - KW - might devide serialize up into portfolio and account to reduce interface
+	String serializeChartOfAccountDataToJson(boolean prettyPrint, Set<String> responseParameters, ChartOfAccountsData chartOfAccounts);
+	
+	String serializeGuarantorDataToJson(boolean prettyPrint,Set<String> responseParameters, GuarantorData guarantorData);
+
 }

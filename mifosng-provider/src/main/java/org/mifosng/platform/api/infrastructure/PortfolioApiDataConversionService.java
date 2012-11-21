@@ -15,6 +15,7 @@ import org.mifosng.platform.api.commands.DepositStateTransitionApprovalCommand;
 import org.mifosng.platform.api.commands.DepositStateTransitionCommand;
 import org.mifosng.platform.api.commands.FundCommand;
 import org.mifosng.platform.api.commands.GroupCommand;
+import org.mifosng.platform.api.commands.GuarantorCommand;
 import org.mifosng.platform.api.commands.LoanApplicationCommand;
 import org.mifosng.platform.api.commands.LoanChargeCommand;
 import org.mifosng.platform.api.commands.LoanProductCommand;
@@ -94,5 +95,7 @@ public interface PortfolioApiDataConversionService {
 
     CodeCommand convertJsonToCodeCommand(Long resourceIdentifier, String json);
 
-    SavingAccountCommand convertJsonToSavingAccountCommand(Long resourceIdentifier, String json);
+	SavingAccountCommand convertJsonToSavingAccountCommand(Long resourceIdentifier,String json);
+	
+	GuarantorCommand convertJsonToGuarantorCommand(Long resourceIdentifier, Long loanId, String json);
 }

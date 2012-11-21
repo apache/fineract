@@ -20,7 +20,7 @@ public interface LoanReadPlatformService {
 
 	LoanPermissionData retrieveLoanPermissions(
 			LoanBasicDetailsData loanBasicDetails, boolean isWaiverAllowed,
-			int repaymentAndWaiveCount);
+			int repaymentAndWaiveCount, boolean existsGuarantor);
 
 	LoanBasicDetailsData retrieveClientAndProductDetails(Long clientId, Long productId);
 

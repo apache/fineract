@@ -19,6 +19,10 @@ public class LoanPermissionData {
 	private final boolean undoDisbursalAllowed;
 	private final boolean anyActionOnLoanAllowed;
 	
+	//permissions for setting/removing guarantors for Loans
+	private final boolean setGuarantorAllowed;
+	private final boolean editGuarantorAllowed;
+	
 	// status of loan
 	private final boolean pendingApproval;
 	private final boolean waitingForDisbursal;
@@ -35,6 +39,8 @@ public class LoanPermissionData {
 			final boolean undoApprovalAllowed,
 			final boolean undoDisbursalAllowed, 
 			final boolean disbursalAllowed, 
+			final boolean setGuarantorAllowed,
+			final boolean editGuarantorAllowed,
 			final boolean pendingApproval, 
 			final boolean waitingForDisbursal,
 			final boolean closedObligationsMet) {
@@ -49,6 +55,8 @@ public class LoanPermissionData {
 		this.undoDisbursalAllowed = undoDisbursalAllowed;
 		this.disbursalAllowed = disbursalAllowed;
 		this.pendingApproval = pendingApproval;
+		this.setGuarantorAllowed = setGuarantorAllowed;
+		this.editGuarantorAllowed = editGuarantorAllowed;
 		this.waitingForDisbursal = waitingForDisbursal;
 		this.closedObligationsMet = closedObligationsMet;
 		this.anyActionOnLoanAllowed = closeLoanAllowed || closeLoanAsRescheduledAllowed || rejectAllowed || withdrawnByApplicantAllowed || pendingApproval || undoDisbursalAllowed || makeRepaymentAllowed;

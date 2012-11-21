@@ -50,6 +50,10 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 	@ManyToOne(optional = true)
 	@JoinColumn(name = "client_id")
 	private Client client;
+	
+	@ManyToOne(optional = true)
+	@JoinColumn(name = "guarantor_id")
+	private Client guarantor;
 
     @SuppressWarnings("unused")
 	@ManyToOne(optional = true)
@@ -1629,4 +1633,17 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 		}
 		return latestRecordWithNoEndDate;
 	}
+
+	public Client getGuarantor() {
+		return guarantor;
+	}
+
+	public void setGuarantor(Client guarantor) {
+		this.guarantor = guarantor;
+	}
+
+	public Client getClient() {
+		return client;
+	}
+	
 }
