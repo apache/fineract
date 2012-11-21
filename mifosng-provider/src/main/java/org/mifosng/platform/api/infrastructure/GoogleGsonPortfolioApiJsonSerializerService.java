@@ -38,7 +38,7 @@ import org.mifosng.platform.api.data.OfficeData;
 import org.mifosng.platform.api.data.OfficeTransactionData;
 import org.mifosng.platform.api.data.PermissionData;
 import org.mifosng.platform.api.data.RoleData;
-import org.mifosng.platform.api.data.RolePermissionData;
+import org.mifosng.platform.api.data.RolePermissionsData;
 import org.mifosng.platform.api.data.SavingAccountData;
 import org.mifosng.platform.api.data.SavingProductData;
 import org.mifosng.platform.api.data.StaffData;
@@ -232,7 +232,7 @@ public class GoogleGsonPortfolioApiJsonSerializerService implements PortfolioApi
 
     @Override
     public String serializeRolePermissionDataToJson(final boolean prettyPrint, final Set<String> responseParameters,
-            final RolePermissionData rolePermissionData) {
+            final RolePermissionsData rolePermissionData) {
         final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(ROLE_PERMISSION_DATA_PARAMETERS,
                 prettyPrint, responseParameters);
         return helper.serializedJsonFrom(gsonDeserializer, rolePermissionData);

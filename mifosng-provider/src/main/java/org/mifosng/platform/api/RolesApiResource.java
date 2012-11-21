@@ -15,12 +15,13 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
+import org.mifosng.platform.accounting.api.commands.RolePermissionCommand;
 import org.mifosng.platform.api.commands.RoleCommand;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.PermissionData;
 import org.mifosng.platform.api.data.PermissionUsageData;
 import org.mifosng.platform.api.data.RoleData;
-import org.mifosng.platform.api.data.RolePermissionData;
+import org.mifosng.platform.api.data.RolePermissionsData;
 import org.mifosng.platform.api.infrastructure.PortfolioApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService;
 import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
@@ -37,143 +38,144 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class RolesApiResource {
 
-	@Autowired
-	private RoleReadPlatformService roleReadPlatformService;
+    @Autowired
+    private RoleReadPlatformService roleReadPlatformService;
 
-	@Autowired
-	private PermissionReadPlatformService permissionReadPlatformService;
+    @Autowired
+    private PermissionReadPlatformService permissionReadPlatformService;
 
-	@Autowired
-	private RoleWritePlatformService roleWritePlatformService;
+    @Autowired
+    private RoleWritePlatformService roleWritePlatformService;
 
-	@Autowired
-	private PortfolioApiDataConversionService apiDataConversionService;
-	
-	@Autowired
-	private PortfolioApiJsonSerializerService apiJsonSerializerService;
+    @Autowired
+    private PortfolioApiDataConversionService apiDataConversionService;
 
-	private final String entityType = "ROLE";
+    @Autowired
+    private PortfolioApiJsonSerializerService apiJsonSerializerService;
+
+    private final String entityType = "ROLE";
     @Autowired
     private PlatformSecurityContext context;
+
+    @GET
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String retrieveAllRoles(@Context final UriInfo uriInfo) {
+
+        context.authenticatedUser().validateHasReadPermission(entityType);
+
+        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+
+        final Collection<RoleData> roles = this.roleReadPlatformService.retrieveAllRoles();
+
+        return this.apiJsonSerializerService.serializeRoleDataToJson(prettyPrint, responseParameters, roles);
+    }
+
+    @GET
+    @Path("template")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String retrieveNewRoleDetails(@Context final UriInfo uriInfo) {
+
+        context.authenticatedUser().validateHasReadPermission(entityType);
+
+        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+
+        final Collection<PermissionData> allPermissions = this.permissionReadPlatformService.retrieveAllPermissions();
+
+        final RoleData role = new RoleData(allPermissions, new ArrayList<PermissionData>());
+
+        return this.apiJsonSerializerService.serializeRoleDataToJson(prettyPrint, responseParameters, role);
+    }
+
+    @POST
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String createRole(final String jsonRequestBody) {
+
+        final RoleCommand command = this.apiDataConversionService.convertJsonToRoleCommand(null, jsonRequestBody);
+
+        final Long roleId = this.roleWritePlatformService.createRole(command);
+
+        return this.apiJsonSerializerService.serializeEntityIdentifier(new EntityIdentifier(roleId));
+    }
+
+    // TODO - General thing to fix about REST API is if use partial response
+    // approach of fields=id,name,selectedPermissions
+    // It will return just id,name parameters of RoleData and ignore
+    // description, however as PermissionData used in selectedPermissions
+    // collection
+    // also has a field called description it gets ignored also. This is because
+    // of the implementation of ParameterListExclusionStrategy which doesnt take
+    // into account the Object its looking at.
+    @GET
+    @Path("{roleId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String retrieveRole(@PathParam("roleId") final Long roleId, @Context final UriInfo uriInfo) {
+
+        context.authenticatedUser().validateHasReadPermission(entityType);
+
+        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+        final boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
+
+        RoleData role = this.roleReadPlatformService.retrieveRole(roleId);
+
+        if (template) {
+            final Collection<PermissionData> availablePermissions = this.permissionReadPlatformService.retrieveAllPermissions();
+            availablePermissions.removeAll(role.selectedPermissions());
+
+            role = new RoleData(role, availablePermissions);
+        }
+        return this.apiJsonSerializerService.serializeRoleDataToJson(prettyPrint, responseParameters, role);
+    }
+
+    @PUT
+    @Path("{roleId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String updateRole(@PathParam("roleId") final Long roleId, final String jsonRequestBody) {
+
+        final RoleCommand command = this.apiDataConversionService.convertJsonToRoleCommand(roleId, jsonRequestBody);
+
+        this.roleWritePlatformService.updateRole(command);
+
+        return this.apiJsonSerializerService.serializeEntityIdentifier(new EntityIdentifier(roleId));
+    }
+
+    @GET
+    @Path("{roleId}/permissions")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String retrieveRolePermissions(@PathParam("roleId") final Long roleId, @Context final UriInfo uriInfo) {
+
+        context.authenticatedUser().validateHasReadPermission(entityType);
+
+        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+
+        RoleData role = this.roleReadPlatformService.retrieveRole(roleId);
+        Collection<PermissionUsageData> permissionUsageData = this.permissionReadPlatformService.retrieveAllRolePermissions(roleId);
+        RolePermissionsData permissionsData = new RolePermissionsData(role.getId(), role.getName(), role.getDescription(),
+                permissionUsageData);
+
+        return this.apiJsonSerializerService.serializeRolePermissionDataToJson(prettyPrint, responseParameters, permissionsData);
+    }
+
     
-	@GET
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
-	public String retrieveAllRoles(@Context final UriInfo uriInfo) {
+    @PUT
+    @Path("{roleId}/permissions")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String updateRolePermissions(@PathParam("roleId") final Long roleId, final String jsonRequestBody) {
 
-    	context.authenticatedUser().validateHasReadPermission(entityType);
-    	
-		final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-		final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+        final RolePermissionCommand command = this.apiDataConversionService.convertJsonToRolePermissionCommand(roleId, jsonRequestBody);
 
-		final Collection<RoleData> roles = this.roleReadPlatformService.retrieveAllRoles();
-		
-		return this.apiJsonSerializerService.serializeRoleDataToJson(prettyPrint, responseParameters, roles);
-	}
+        this.roleWritePlatformService.updateRolePermissions(command);
 
-	@GET
-	@Path("template")
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
-	public String retrieveNewRoleDetails(@Context final UriInfo uriInfo) {
-
-    	context.authenticatedUser().validateHasReadPermission(entityType);
-    	
-		final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-		final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-		
-		final Collection<PermissionData> allPermissions = this.permissionReadPlatformService.retrieveAllPermissions();
-
-		final RoleData role = new RoleData(allPermissions, new ArrayList<PermissionData>());
-		
-		return this.apiJsonSerializerService.serializeRoleDataToJson(prettyPrint, responseParameters, role);
-	}
-
-	@POST
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
-	public String createRole(final String jsonRequestBody) {
-
-		final RoleCommand command = this.apiDataConversionService.convertJsonToRoleCommand(null, jsonRequestBody);
-		
-		final Long roleId = this.roleWritePlatformService.createRole(command);
-		
-		return this.apiJsonSerializerService.serializeEntityIdentifier(new EntityIdentifier(roleId));
-	}
-
-	// TODO - General thing to fix about REST API is if use partial response approach of fields=id,name,selectedPermissions
-	//        It will return just id,name parameters of RoleData and ignore description, however as PermissionData used in selectedPermissions collection
-	//        also has a field called description it gets ignored also. This is because of the implementation of ParameterListExclusionStrategy which doesnt take
-	//        into account the Object its looking at.
-	@GET
-	@Path("{roleId}")
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
-	public String retrieveRole(@PathParam("roleId") final Long roleId, @Context final UriInfo uriInfo) {
-
-    	context.authenticatedUser().validateHasReadPermission(entityType);
-    	
-		final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-		final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-		final boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
-
-		RoleData role = this.roleReadPlatformService.retrieveRole(roleId);
-
-		if (template) {
-			final Collection<PermissionData> availablePermissions = this.permissionReadPlatformService.retrieveAllPermissions();
-			availablePermissions.removeAll(role.selectedPermissions());
-			
-			role = new RoleData(role, availablePermissions);
-		}
-		return this.apiJsonSerializerService.serializeRoleDataToJson(prettyPrint, responseParameters, role);
-	}
-
-	@PUT
-	@Path("{roleId}")
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
-	public String updateRole(@PathParam("roleId") final Long roleId, final String jsonRequestBody) {
-
-		final RoleCommand command = this.apiDataConversionService.convertJsonToRoleCommand(roleId, jsonRequestBody);
-			
-		this.roleWritePlatformService.updateRole(command);
-		
-		return this.apiJsonSerializerService.serializeEntityIdentifier(new EntityIdentifier(roleId));
-	}
-
-	@GET
-	@Path("{roleId}/permissions")
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
-	public String retrieveRolePermissions(@PathParam("roleId") final Long roleId, @Context final UriInfo uriInfo) {
-
-    	context.authenticatedUser().validateHasReadPermission(entityType);
-    	
-		final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-		final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-
-		RoleData role = this.roleReadPlatformService.retrieveRole(roleId);
-		Collection<PermissionUsageData> permissionUsageData = this.permissionReadPlatformService.retrieveAllRolePermissions(roleId);
-		RolePermissionData rolePermissionData = new RolePermissionData(role.getId(), role.getName(), role.getDescription(), permissionUsageData);
-			
-		return this.apiJsonSerializerService.serializeRolePermissionDataToJson(prettyPrint, responseParameters, rolePermissionData);
-	}
-	
-	@PUT
-	@Path("{roleId}/permissions")
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
-	public String updateRolePermissions(@PathParam("roleId") final Long roleId, @Context final UriInfo uriInfo) {
-		return "{}";
-    	/*
-		final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-		final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-
-		RoleData role = this.roleReadPlatformService.retrieveRole(roleId);
-		Collection<PermissionUsageData> permissionUsageData = this.permissionReadPlatformService.retrieveAllRolePermissions(roleId);
-		RolePermissionData rolePermissionData = new RolePermissionData(role.getId(), role.getName(), role.getDescription(), permissionUsageData);
-			
-		return this.apiJsonSerializerService.serializeRolePermissionDataToJson(prettyPrint, responseParameters, rolePermissionData);*/
-	}
-	
+        return this.apiJsonSerializerService.serializeEntityIdentifier(new EntityIdentifier(roleId));
+    }
 }

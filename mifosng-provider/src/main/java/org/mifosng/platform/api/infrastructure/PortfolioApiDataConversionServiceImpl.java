@@ -17,6 +17,7 @@ import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
+import org.mifosng.platform.accounting.api.commands.RolePermissionCommand;
 import org.mifosng.platform.api.commands.AdjustLoanTransactionCommand;
 import org.mifosng.platform.api.commands.BranchMoneyTransferCommand;
 import org.mifosng.platform.api.commands.ChargeCommand;
@@ -262,6 +263,17 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         String description = extractStringParameter("description", requestMap, modifiedParameters);
 
         return new RoleCommand(modifiedParameters, resourceIdentifier, name, description, permissionIds);
+    }
+    
+    @Override
+    public RolePermissionCommand convertJsonToRolePermissionCommand(final Long roleId, final String json) {
+        
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+
+        final Type typeOfMap = new TypeToken<Map<String, Boolean>>() {}.getType();
+        final Map<String, Boolean> permissionsMap = gsonConverter.fromJson(json, typeOfMap);
+        
+        return new RolePermissionCommand(roleId, permissionsMap);
     }
 
     @Override
