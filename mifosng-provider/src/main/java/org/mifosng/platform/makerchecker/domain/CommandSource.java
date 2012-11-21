@@ -19,99 +19,108 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 @Table(name = "m_portfolio_command_source")
 public class CommandSource extends AbstractPersistable<Long> {
 
-	@Column(name = "api_operation", length = 20)
-	private String apiOperation;
-	
-	@Column(name = "api_resource", length = 20)
-	private String resource;
-	
-	@Column(name = "resource_id")
-	private Long resourceId;
-	
-	@Column(name = "command_as_json", length = 1000)
-	private String commandAsJson;
+    @Column(name = "api_operation", length = 20)
+    private String apiOperation;
 
-	// should maker and checker be a staff member as opposed to just any application user?
-	@SuppressWarnings("unused")
-	@ManyToOne
-	@JoinColumn(name = "maker_id", nullable = false)
-	private AppUser maker;
-	
-	@SuppressWarnings("unused")
-	@Column(name = "made_on_date", nullable = false)
+    @Column(name = "api_resource", length = 20)
+    private String resource;
+
+    @Column(name = "resource_id")
+    private Long resourceId;
+
+    @Column(name = "command_as_json", length = 1000)
+    private String commandAsJson;
+
+    @ManyToOne
+    @JoinColumn(name = "maker_id", nullable = false)
+    private AppUser maker;
+
+    @Column(name = "made_on_date", nullable = false)
     @Temporal(TemporalType.DATE)
-	private Date madeOnDate;
-	
-	@SuppressWarnings("unused")
-	@ManyToOne
-	@JoinColumn(name = "checker_id", nullable = true)
-	private AppUser checker;
-	
-	@SuppressWarnings("unused")
-	@Column(name = "checked_on_date", nullable = false)
+    private Date madeOnDate;
+
+    @SuppressWarnings("unused")
+    @ManyToOne
+    @JoinColumn(name = "checker_id", nullable = true)
+    private AppUser checker;
+
+    @SuppressWarnings("unused")
+    @Column(name = "checked_on_date", nullable = false)
     @Temporal(TemporalType.DATE)
-	private Date checkedOnDate;
+    private Date checkedOnDate;
 
-	public static CommandSource createdBy(
-			final String apiOperation,
-			final String resource,
-			final Long resourceId, 
-			final AppUser maker,
-			final LocalDate madeOnDate) {
-		return new CommandSource(apiOperation, resource, resourceId, maker, madeOnDate);
-	}
+    public static CommandSource createdBy(final String apiOperation, final String resource, final Long resourceId, final AppUser maker,
+            final LocalDate madeOnDate) {
+        return new CommandSource(apiOperation, resource, resourceId, maker, madeOnDate);
+    }
 
-	protected CommandSource() {
-		//
-	}
+    protected CommandSource() {
+        //
+    }
 
-	private CommandSource(
-			final String apiOperation,
-			final String resource,
-			final Long resourceId,
-			final AppUser maker,
-			final LocalDate madeOnDate) {
-		this.apiOperation = StringUtils.defaultIfEmpty(apiOperation, null);
-		this.resource = StringUtils.defaultIfEmpty(resource, null);
-		this.resourceId = resourceId;
-		this.maker = maker;
-		this.madeOnDate = madeOnDate.toDate();
-	}
+    private CommandSource(final String apiOperation, final String resource, final Long resourceId, final AppUser maker,
+            final LocalDate madeOnDate) {
+        this.apiOperation = StringUtils.defaultIfEmpty(apiOperation, null);
+        this.resource = StringUtils.defaultIfEmpty(resource, null);
+        this.resourceId = resourceId;
+        this.maker = maker;
+        this.madeOnDate = madeOnDate.toDate();
+    }
 
-	public void markAsChecked(final AppUser checker, final LocalDate checkedOnDate) {
-		this.checker = checker;
-		this.checkedOnDate = checkedOnDate.toDate();
-	}
-	
-	public void updateResourceId(final Long resourceId) {
-		this.resourceId = resourceId;
-	}
-	
-	public void updateJsonTo(final String json) {
-		this.commandAsJson = json;
-	}
-	
-	public Long resourceId() {
-		return this.resourceId;
-	}
+    public CommandSource copy() {
+        LocalDate madeOnLocalDate = null;
+        if (this.madeOnDate != null) {
+            madeOnLocalDate = new LocalDate(this.madeOnDate);
+        }
+        return new CommandSource(this.apiOperation, this.resource, this.resourceId, this.maker, madeOnLocalDate);
+    }
 
-	public String json() {
-		return this.commandAsJson;
-	}
+    public void markAsChecked(final AppUser checker, final LocalDate checkedOnDate) {
+        this.checker = checker;
+        this.checkedOnDate = checkedOnDate.toDate();
+    }
 
-	public boolean isClientResource() {
-		return this.resource.equalsIgnoreCase("CLIENTS");
-	}
+    public void updateResourceId(final Long resourceId) {
+        this.resourceId = resourceId;
+    }
 
-	public boolean isCreate() {
-		return this.apiOperation.equalsIgnoreCase("CREATE");
-	}
+    public void updateJsonTo(final String json) {
+        this.commandAsJson = json;
+    }
 
-	public boolean isUpdate() {
-		return this.apiOperation.equalsIgnoreCase("UPDATE") && this.resourceId != null;
-	}
+    public Long resourceId() {
+        return this.resourceId;
+    }
 
-	public boolean isDelete() {
-		return this.apiOperation.equalsIgnoreCase("DELETE") && this.resourceId != null;
-	}
+    public String json() {
+        return this.commandAsJson;
+    }
+
+    public String commandName() {
+        return this.apiOperation + '-' + this.resource;
+    }
+    
+    public String resourceName() {
+        return this.resource;
+    }
+    
+    public String operation() {
+        return this.apiOperation;
+    }
+
+    public boolean isClientResource() {
+        return this.resource.equalsIgnoreCase("CLIENTS");
+    }
+
+    public boolean isCreate() {
+        return this.apiOperation.equalsIgnoreCase("CREATE");
+    }
+
+    public boolean isUpdate() {
+        return this.apiOperation.equalsIgnoreCase("UPDATE") && this.resourceId != null;
+    }
+
+    public boolean isDelete() {
+        return this.apiOperation.equalsIgnoreCase("DELETE") && this.resourceId != null;
+    }
 }

@@ -31,69 +31,68 @@ import org.mifosng.platform.api.commands.UserCommand;
 import org.mifosng.platform.api.data.ClientData;
 
 public interface PortfolioApiDataConversionService {
-	
+
     ChargeCommand convertJsonToChargeCommand(Long resourceIdentifier, String json);
 
-	FundCommand convertJsonToFundCommand(Long resourceIdentifier, String json);
-	
-	OfficeCommand convertJsonToOfficeCommand(Long resourceIdentifier, String json);
-	
-	RoleCommand convertJsonToRoleCommand(Long resourceIdentifier, String json);
+    FundCommand convertJsonToFundCommand(Long resourceIdentifier, String json);
 
-	UserCommand convertJsonToUserCommand(Long resourceIdentifier, String json);
+    OfficeCommand convertJsonToOfficeCommand(Long resourceIdentifier, String json);
 
-	BranchMoneyTransferCommand convertJsonToBranchMoneyTransferCommand(String json);
-	
-	LoanProductCommand convertJsonToLoanProductCommand(Long resourceIdentifier, String json);
-	
-	SavingProductCommand convertJsonToSavingProductCommand(Long resourceIdentifier, String json);
-	
-	DepositProductCommand convertJsonToDepositProductCommand(Long resourceIdentifier, String json);
+    RoleCommand convertJsonToRoleCommand(Long resourceIdentifier, String json);
 
-	ClientCommand convertApiRequestJsonToClientCommand(Long resourceIdentifier, String json);
-	
-	ClientCommand convertInternalJsonFormatToClientCommand(Long resourceIdentifier, String json, boolean checkerApproved);
-	
-	ClientData convertInternalJsonFormatToClientDataChange(Long clientId, String json);
-	
-	ClientCommand detectChanges(Long resourceId, String baseJson, String workingJson);
+    UserCommand convertJsonToUserCommand(Long resourceIdentifier, String json);
 
-	GroupCommand convertJsonToGroupCommand(Long resourceIdentifier, String json);
-	
-	LoanApplicationCommand convertJsonToLoanApplicationCommand(Long resourceIdentifier, String json);
+    BranchMoneyTransferCommand convertJsonToBranchMoneyTransferCommand(String json);
+
+    LoanProductCommand convertJsonToLoanProductCommand(Long resourceIdentifier, String json);
+
+    SavingProductCommand convertJsonToSavingProductCommand(Long resourceIdentifier, String json);
+
+    DepositProductCommand convertJsonToDepositProductCommand(Long resourceIdentifier, String json);
+
+    ClientCommand convertApiRequestJsonToClientCommand(Long resourceIdentifier, String json);
+
+    ClientCommand convertInternalJsonFormatToClientCommand(Long resourceIdentifier, String json, boolean checkerApproved);
+
+    ClientData convertInternalJsonFormatToClientDataChange(Long clientId, String json);
+
+    ClientCommand detectChanges(Long resourceId, String baseJson, String workingJson);
+
+    GroupCommand convertJsonToGroupCommand(Long resourceIdentifier, String json);
+
+    LoanApplicationCommand convertJsonToLoanApplicationCommand(Long resourceIdentifier, String json);
 
     LoanChargeCommand convertJsonToLoanChargeCommand(Long loanChargeId, Long loanId, String json);
 
-	LoanStateTransitionCommand convertJsonToLoanStateTransitionCommand(Long resourceIdentifier, String json);
+    LoanStateTransitionCommand convertJsonToLoanStateTransitionCommand(Long resourceIdentifier, String json);
 
-	LoanTransactionCommand convertJsonToLoanTransactionCommand(Long resourceIdentifier, String json);
+    LoanTransactionCommand convertJsonToLoanTransactionCommand(Long resourceIdentifier, String json);
 
-	AdjustLoanTransactionCommand convertJsonToAdjustLoanTransactionCommand(
-			Long loanId, Long transactionId, String json);
+    AdjustLoanTransactionCommand convertJsonToAdjustLoanTransactionCommand(Long loanId, Long transactionId, String json);
 
-	OrganisationCurrencyCommand convertJsonToOrganisationCurrencyCommand(String json);
+    OrganisationCurrencyCommand convertJsonToOrganisationCurrencyCommand(String json);
 
-	NoteCommand convertJsonToNoteCommand(Long resourceIdentifier, Long clientId, String json);
+    NoteCommand convertJsonToNoteCommand(Long resourceIdentifier, Long clientId, String json);
 
-	DepositAccountCommand convertJsonToDepositAccountCommand(Long resourceIdentifier, String json);
-	
-	DepositStateTransitionCommand convertJsonToDepositStateTransitionCommand(Long resourceIdentifier, String json);
-	
-	DepositStateTransitionApprovalCommand convertJsonToDepositStateTransitionApprovalCommand(Long resourceIdentifier, String json);
+    DepositAccountCommand convertJsonToDepositAccountCommand(Long resourceIdentifier, String json);
 
-	StaffCommand convertJsonToStaffCommand(Long resourceIdentifier, String json);
+    DepositStateTransitionCommand convertJsonToDepositStateTransitionCommand(Long resourceIdentifier, String json);
+
+    DepositStateTransitionApprovalCommand convertJsonToDepositStateTransitionApprovalCommand(Long resourceIdentifier, String json);
+
+    StaffCommand convertJsonToStaffCommand(Long resourceIdentifier, String json);
 
     LoanReassignmentCommand convertJsonToLoanReassignmentCommand(Long resourceIdentifier, String json);
 
     LoanReassignmentCommand convertJsonToBulkLoanReassignmentCommand(String json);
 
-	DepositAccountWithdrawalCommand convertJsonToDepositWithdrawalCommand(Long resourceIdentifier, String json);
-	
-	DepositAccountWithdrawInterestCommand convertJsonToDepositAccountWithdrawInterestCommand(Long resourceIdentifier, String json);
-	
-	ClientIdentifierCommand convertJsonToClientIdentifierCommand(Long resourceIdentifier, Long clientId, String json);
+    DepositAccountWithdrawalCommand convertJsonToDepositWithdrawalCommand(Long resourceIdentifier, String json);
 
-	CodeCommand convertJsonToCodeCommand(Long resourceIdentifier, String json);
+    DepositAccountWithdrawInterestCommand convertJsonToDepositAccountWithdrawInterestCommand(Long resourceIdentifier, String json);
 
-	SavingAccountCommand convertJsonToSavingAccountCommand(Long resourceIdentifier,String json);
+    ClientIdentifierCommand convertJsonToClientIdentifierCommand(Long resourceIdentifier, Long clientId, String json);
+
+    CodeCommand convertJsonToCodeCommand(Long resourceIdentifier, String json);
+
+    SavingAccountCommand convertJsonToSavingAccountCommand(Long resourceIdentifier, String json);
 }

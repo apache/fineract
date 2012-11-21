@@ -42,114 +42,121 @@ import org.mifosng.platform.api.data.StaffData;
 
 public interface PortfolioApiJsonSerializerService {
 
-	String serializeAuthenticatedUserDataToJson(boolean prettyPrint, AuthenticatedUserData authenticatedUserData);
-	
-	String serializeGenericResultsetDataToJson(boolean prettyPrint, GenericResultsetData result);
+    String serializeAuthenticatedUserDataToJson(boolean prettyPrint, AuthenticatedUserData authenticatedUserData);
 
-	String serializeAdditionalFieldsSetDataToJson(boolean prettyPrint, Collection<AdditionalFieldsSetData> result);
-	
-	String serializeDatatableDataToJson(boolean prettyPrint, Collection<DatatableData> result);
-	
-	String serializePermissionDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<PermissionData> permissions);
+    String serializeGenericResultsetDataToJson(boolean prettyPrint, GenericResultsetData result);
 
-	String serializeRoleDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<RoleData> roles);
+    String serializeAdditionalFieldsSetDataToJson(boolean prettyPrint, Collection<AdditionalFieldsSetData> result);
 
-	String serializeRoleDataToJson(boolean prettyPrint, Set<String> responseParameters, RoleData role);
-	
-	String serializeRolePermissionDataToJson(boolean prettyPrint, Set<String> responseParameters, RolePermissionData rolePermissionData);
+    String serializeDatatableDataToJson(boolean prettyPrint, Collection<DatatableData> result);
 
-	String serializeAppUserDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<AppUserData> users);
+    String serializePermissionDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<PermissionData> permissions);
 
-	String serializeAppUserDataToJson(boolean prettyPrint, Set<String> responseParameters, AppUserData user);
+    String serializeRoleDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<RoleData> roles);
 
-	String serializeOfficeDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<OfficeData> offices);
+    String serializeRoleDataToJson(boolean prettyPrint, Set<String> responseParameters, RoleData role);
 
-	String serializeOfficeDataToJson(boolean prettyPrint, Set<String> responseParameters, OfficeData office);
+    String serializeRolePermissionDataToJson(boolean prettyPrint, Set<String> responseParameters, RolePermissionData rolePermissionData);
 
-	String serializeOfficeTransactionDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<OfficeTransactionData> officeTransactions);
-	
-	String serializeOfficeTransactionDataToJson(boolean prettyPrint, Set<String> responseParameters, OfficeTransactionData officeTransaction);
+    String serializeAppUserDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<AppUserData> users);
 
-	String serializeConfigurationDataToJson(boolean prettyPrint, Set<String> responseParameters, ConfigurationData configuration);
+    String serializeAppUserDataToJson(boolean prettyPrint, Set<String> responseParameters, AppUserData user);
 
-	String serializeFundDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<FundData> funds);
+    String serializeOfficeDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<OfficeData> offices);
 
-	String serializeFundDataToJson(boolean prettyPrint, Set<String> responseParameters, FundData fund);
+    String serializeOfficeDataToJson(boolean prettyPrint, Set<String> responseParameters, OfficeData office);
 
-	String serializeLoanProductDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<LoanProductData> products);
-	
-	String serializeLoanProductDataToJson(boolean prettyPrint, Set<String> responseParameters, LoanProductData loanProduct);
+    String serializeOfficeTransactionDataToJson(boolean prettyPrint, Set<String> responseParameters,
+            Collection<OfficeTransactionData> officeTransactions);
 
-	String serializeSavingProductDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<SavingProductData> products);
+    String serializeOfficeTransactionDataToJson(boolean prettyPrint, Set<String> responseParameters, OfficeTransactionData officeTransaction);
 
-	String serializeSavingProductDataToJson(boolean prettyPrint, Set<String> responseParameters, SavingProductData savingProduct);
+    String serializeConfigurationDataToJson(boolean prettyPrint, Set<String> responseParameters, ConfigurationData configuration);
 
-	String serializeDepositProductDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<DepositProductData> products);
+    String serializeFundDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<FundData> funds);
 
-	String serializeDepositProductDataToJson(boolean prettyPrint, Set<String> responseParameters, DepositProductData depositProduct);
+    String serializeFundDataToJson(boolean prettyPrint, Set<String> responseParameters, FundData fund);
 
-	String serializeDepositAccountDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<DepositAccountData> accounts);
+    String serializeLoanProductDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<LoanProductData> products);
 
-	String serializeDepositAccountDataToJson(boolean prettyPrint, Set<String> responseParameters, DepositAccountData account);
+    String serializeLoanProductDataToJson(boolean prettyPrint, Set<String> responseParameters, LoanProductData loanProduct);
 
-	String serializeClientCommandToJson(ClientCommand command);
-	
-	String serializeClientDataToJson(ClientData clientData);
-	
-	String serializeClientDataToJson(boolean prettyPrint, Set<String> responseParameters, ClientData clientData);
-	
-	String serializeClientDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<ClientData> clients);
-	
-	String serializeClientAccountSummaryCollectionDataToJson(boolean prettyPrint, Set<String> responseParameters, ClientAccountSummaryCollectionData clientAccount);
+    String serializeSavingProductDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<SavingProductData> products);
 
-    String serializeGroupAccountSummaryCollectionDataToJson(boolean prettyPrint, Set<String> responseParameters, GroupAccountSummaryCollectionData groupAccount);
+    String serializeSavingProductDataToJson(boolean prettyPrint, Set<String> responseParameters, SavingProductData savingProduct);
 
-	String serializeGroupDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<GroupData> groups);
+    String serializeDepositProductDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<DepositProductData> products);
 
-	String serializeGroupDataToJson(boolean prettyPrint, Set<String> responseParameters, GroupData group);
+    String serializeDepositProductDataToJson(boolean prettyPrint, Set<String> responseParameters, DepositProductData depositProduct);
 
-	String serializeNoteDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<NoteData> notes);
+    String serializeDepositAccountDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<DepositAccountData> accounts);
 
-	String serializeNoteDataToJson(boolean prettyPrint, Set<String> responseParameters, NoteData note);
-	
-	String serializeLoanScheduleDataToJson(boolean prettyPrint, Set<String> responseParameters, LoanScheduleData loanSchedule);
+    String serializeDepositAccountDataToJson(boolean prettyPrint, Set<String> responseParameters, DepositAccountData account);
 
-	String serializeLoanAccountDataToJson(boolean prettyPrint, Set<String> responseParameters, LoanAccountData loanAccount);
+    String serializeClientCommandToJson(ClientCommand command);
 
-	String serializeLoanTransactionDataToJson(boolean prettyPrint, Set<String> responseParameters, LoanTransactionData newTransactionData);
+    String serializeClientDataToJson(ClientData clientData);
 
-    String serializeLoanReassignmentDataToJson(boolean prettyPrint, Set<String> responseParameters, LoanReassignmentData loanReassignmentData);
+    String serializeClientDataToJson(boolean prettyPrint, Set<String> responseParameters, ClientData clientData);
 
-	String serializeChargeDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<ChargeData> charges);
+    String serializeClientDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<ClientData> clients);
 
-	String serializeChargeDataToJson(boolean prettyPrint, Set<String> responseParameters, ChargeData charge);
+    String serializeClientAccountSummaryCollectionDataToJson(boolean prettyPrint, Set<String> responseParameters,
+            ClientAccountSummaryCollectionData clientAccount);
+
+    String serializeGroupAccountSummaryCollectionDataToJson(boolean prettyPrint, Set<String> responseParameters,
+            GroupAccountSummaryCollectionData groupAccount);
+
+    String serializeGroupDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<GroupData> groups);
+
+    String serializeGroupDataToJson(boolean prettyPrint, Set<String> responseParameters, GroupData group);
+
+    String serializeNoteDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<NoteData> notes);
+
+    String serializeNoteDataToJson(boolean prettyPrint, Set<String> responseParameters, NoteData note);
+
+    String serializeLoanScheduleDataToJson(boolean prettyPrint, Set<String> responseParameters, LoanScheduleData loanSchedule);
+
+    String serializeLoanAccountDataToJson(boolean prettyPrint, Set<String> responseParameters, LoanAccountData loanAccount);
+
+    String serializeLoanTransactionDataToJson(boolean prettyPrint, Set<String> responseParameters, LoanTransactionData newTransactionData);
+
+    String serializeLoanReassignmentDataToJson(boolean prettyPrint, Set<String> responseParameters,
+            LoanReassignmentData loanReassignmentData);
+
+    String serializeChargeDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<ChargeData> charges);
+
+    String serializeChargeDataToJson(boolean prettyPrint, Set<String> responseParameters, ChargeData charge);
 
     String serializeLoanChargeDataToJson(boolean prettyPrint, Set<String> responseParameters, LoanChargeData charge);
 
-	String serializeStaffDataToJson(boolean prettyPrint, Set<String> responseParameters, StaffData staff);
-	
-	String serializeStaffDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<StaffData> staff);
+    String serializeStaffDataToJson(boolean prettyPrint, Set<String> responseParameters, StaffData staff);
 
-	String serializeEntityIdentifier(EntityIdentifier identifier);
-	
-	String serializeClientIdentifierDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<ClientIdentifierData> clientIdentifiers);
+    String serializeStaffDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<StaffData> staff);
 
-	String serializeClientIdentifierDataToJson(boolean prettyPrint, Set<String> responseParameters, ClientIdentifierData clientIdentifierData);
-	
-	String serializeDocumentDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<DocumentData> documentDatas);
+    String serializeEntityIdentifier(EntityIdentifier identifier);
 
-	String serializeDocumentDataToJson(boolean prettyPrint, Set<String> responseParameters, DocumentData documentData);
+    String serializeClientIdentifierDataToJson(boolean prettyPrint, Set<String> responseParameters,
+            Collection<ClientIdentifierData> clientIdentifiers);
 
-	String serializeCodeDataToJson(boolean prettyPrint,Set<String> responseParameters, Collection<CodeData> codes);
+    String serializeClientIdentifierDataToJson(boolean prettyPrint, Set<String> responseParameters,
+            ClientIdentifierData clientIdentifierData);
 
-	String serializeCodeDataToJson(boolean prettyPrint,Set<String> responseParameters, CodeData code);
-	
-	String serializeMakerCheckerDataToJson(boolean prettyPrint,Set<String> responseParameters, Collection<CommandSourceData> entries);
+    String serializeDocumentDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<DocumentData> documentDatas);
 
-	String serializeSavingAccountsDataToJson(boolean prettyPrint, Set<String> responseParameters, SavingAccountData account);
+    String serializeDocumentDataToJson(boolean prettyPrint, Set<String> responseParameters, DocumentData documentData);
 
-	String serializeSavingAccountsDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<SavingAccountData> accounts);
+    String serializeCodeDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<CodeData> codes);
 
-	// TODO - KW - might devide serialize up into portfolio and account to reduce interface
-	String serializeChartOfAccountDataToJson(boolean prettyPrint, Set<String> responseParameters, ChartOfAccountsData chartOfAccounts);
+    String serializeCodeDataToJson(boolean prettyPrint, Set<String> responseParameters, CodeData code);
+
+    String serializeMakerCheckerDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<CommandSourceData> entries);
+
+    String serializeSavingAccountsDataToJson(boolean prettyPrint, Set<String> responseParameters, SavingAccountData account);
+
+    String serializeSavingAccountsDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<SavingAccountData> accounts);
+
+    // TODO - KW - might devide serialize up into portfolio and account to
+    // reduce interface
+    String serializeChartOfAccountDataToJson(boolean prettyPrint, Set<String> responseParameters, ChartOfAccountsData chartOfAccounts);
 }

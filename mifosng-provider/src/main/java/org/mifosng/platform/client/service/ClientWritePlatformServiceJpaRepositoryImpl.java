@@ -40,382 +40,332 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWritePlatformService {
 
-	private final static Logger logger = LoggerFactory.getLogger(ClientWritePlatformServiceJpaRepositoryImpl.class);
+    private final static Logger logger = LoggerFactory.getLogger(ClientWritePlatformServiceJpaRepositoryImpl.class);
 
-	private final PlatformSecurityContext context;
-	private final ClientRepository clientRepository;
-	private final ClientIdentifierRepository clientIdentifierRepository;
-	private final OfficeRepository officeRepository;
-	private final NoteRepository noteRepository;
-	private final CodeValueRepository codeValueRepository;
+    private final PlatformSecurityContext context;
+    private final ClientRepository clientRepository;
+    private final ClientIdentifierRepository clientIdentifierRepository;
+    private final OfficeRepository officeRepository;
+    private final NoteRepository noteRepository;
+    private final CodeValueRepository codeValueRepository;
 
-	// FIXME - kw - this value is hardcoded for now but will be retrieved from configuration
-	private boolean makerCheckerEnabledForTask = false;
+    // FIXME - kw - this value is hardcoded for now but will be retrieved from
+    // configuration
+    private boolean makerCheckerEnabledForTask = false;
 
-	@Autowired
-	public ClientWritePlatformServiceJpaRepositoryImpl(
-			final PlatformSecurityContext context,
-			final ClientRepository clientRepository,
-			final ClientIdentifierRepository clientIdentifierRepository,
-			final OfficeRepository officeRepository,
-			NoteRepository noteRepository,
-			final CodeValueRepository codeValueRepository) {
-		this.context = context;
-		this.clientRepository = clientRepository;
-		this.clientIdentifierRepository = clientIdentifierRepository;
-		this.officeRepository = officeRepository;
-		this.noteRepository = noteRepository;
-		this.codeValueRepository = codeValueRepository;
-	}
+    @Autowired
+    public ClientWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final ClientRepository clientRepository,
+            final ClientIdentifierRepository clientIdentifierRepository, final OfficeRepository officeRepository,
+            NoteRepository noteRepository, final CodeValueRepository codeValueRepository) {
+        this.context = context;
+        this.clientRepository = clientRepository;
+        this.clientIdentifierRepository = clientIdentifierRepository;
+        this.officeRepository = officeRepository;
+        this.noteRepository = noteRepository;
+        this.codeValueRepository = codeValueRepository;
+    }
 
-	@Transactional
-	@Override
-	public EntityIdentifier deleteClient(final ClientCommand command) {
+    @Transactional
+    @Override
+    public EntityIdentifier deleteClient(final ClientCommand command) {
 
-		final Long clientId = command.getId();
-		final Client client = this.clientRepository.findOne(clientId);
-		if (client == null || client.isDeleted()) {
-			throw new ClientNotFoundException(clientId);
-		}
+        final Long clientId = command.getId();
+        final Client client = this.clientRepository.findOne(clientId);
+        if (client == null || client.isDeleted()) { throw new ClientNotFoundException(clientId); }
 
-		client.delete();
-		this.clientRepository.save(client);
-		
-		if (this.makerCheckerEnabledForTask && !command.isApprovedByChecker()) {
-			throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException();
-		}
+        client.delete();
+        this.clientRepository.save(client);
 
-		return new EntityIdentifier(client.getId());
-	}
+        if (this.makerCheckerEnabledForTask && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
 
-	/*
-	 * Guaranteed to throw an exception no matter what the data integrity issue
-	 * is.
-	 */
-	private void handleDataIntegrityIssues(final ClientCommand command,
-			final DataIntegrityViolationException dve) {
+        return new EntityIdentifier(client.getId());
+    }
 
-		Throwable realCause = dve.getMostSpecificCause();
-		if (realCause.getMessage().contains("external_id")) {
-			throw new PlatformDataIntegrityException(
-					"error.msg.client.duplicate.externalId",
-					"Client with externalId `" + command.getExternalId()
-							+ "` already exists", "externalId",
-					command.getExternalId());
-		}
+    /*
+     * Guaranteed to throw an exception no matter what the data integrity issue
+     * is.
+     */
+    private void handleDataIntegrityIssues(final ClientCommand command, final DataIntegrityViolationException dve) {
 
-		logger.error(dve.getMessage(), dve);
-		throw new PlatformDataIntegrityException(
-				"error.msg.client.unknown.data.integrity.issue",
-				"Unknown data integrity issue with resource.");
-	}
+        Throwable realCause = dve.getMostSpecificCause();
+        if (realCause.getMessage().contains("external_id")) { throw new PlatformDataIntegrityException(
+                "error.msg.client.duplicate.externalId", "Client with externalId `" + command.getExternalId() + "` already exists",
+                "externalId", command.getExternalId()); }
 
-	@Transactional
-	@Override
-	public Long createClient(final ClientCommand command) {
+        logger.error(dve.getMessage(), dve);
+        throw new PlatformDataIntegrityException("error.msg.client.unknown.data.integrity.issue",
+                "Unknown data integrity issue with resource.");
+    }
 
-		try {
-			context.authenticatedUser();
+    @Transactional
+    @Override
+    public Long createClient(final ClientCommand command) {
 
-			final ClientCommandValidator validator = new ClientCommandValidator(command);
-			validator.validateForCreate();
+        try {
+            context.authenticatedUser();
 
-			final Office clientOffice = this.officeRepository.findOne(command.getOfficeId());
-			if (clientOffice == null) {
-				throw new OfficeNotFoundException(command.getOfficeId());
-			}
+            final ClientCommandValidator validator = new ClientCommandValidator(command);
+            validator.validateForCreate();
 
-			String firstname = command.getFirstname();
-			String lastname = command.getLastname();
-			if (StringUtils.isNotBlank(command.getClientOrBusinessName())) {
-				lastname = command.getClientOrBusinessName();
-				firstname = null;
-			}
+            final Office clientOffice = this.officeRepository.findOne(command.getOfficeId());
+            if (clientOffice == null) { throw new OfficeNotFoundException(command.getOfficeId()); }
 
-			final Client newClient = Client
-					.newClient(clientOffice, firstname, lastname,
-							command.getJoiningDate(), command.getExternalId());
+            String firstname = command.getFirstname();
+            String lastname = command.getLastname();
+            if (StringUtils.isNotBlank(command.getClientOrBusinessName())) {
+                lastname = command.getClientOrBusinessName();
+                firstname = null;
+            }
 
-			this.clientRepository.save(newClient);
+            final Client newClient = Client.newClient(clientOffice, firstname, lastname, command.getJoiningDate(), command.getExternalId());
 
-			if (this.makerCheckerEnabledForTask && !command.isApprovedByChecker()) {
-				throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException();
-			}
-			
-			return newClient.getId();
-		} catch (DataIntegrityViolationException dve) {
-			handleDataIntegrityIssues(command, dve);
-			return Long.valueOf(-1);
-		}
-	}
+            this.clientRepository.save(newClient);
 
-	@Transactional
-	@Override
-	public EntityIdentifier updateClientDetails(final ClientCommand command) {
+            if (this.makerCheckerEnabledForTask && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
 
-		try {
-			context.authenticatedUser();
+            return newClient.getId();
+        } catch (DataIntegrityViolationException dve) {
+            handleDataIntegrityIssues(command, dve);
+            return Long.valueOf(-1);
+        }
+    }
 
-			final ClientCommandValidator validator = new ClientCommandValidator(command);
-			validator.validateForUpdate();
+    @Transactional
+    @Override
+    public EntityIdentifier updateClientDetails(final ClientCommand command) {
 
-			Office clientOffice = null;
-			Long officeId = command.getOfficeId();
-			if (command.isOfficeChanged() && officeId != null) {
-				clientOffice = this.officeRepository.findOne(officeId);
-				if (clientOffice == null) {
-					throw new OfficeNotFoundException(command.getOfficeId());
-				}
-			}
+        try {
+            context.authenticatedUser();
 
-			final Client clientForUpdate = this.clientRepository.findOne(command.getId());
-			if (clientForUpdate == null || clientForUpdate.isDeleted()) {
-				throw new ClientNotFoundException(command.getId());
-			}
-			clientForUpdate.update(clientOffice, command);
+            final ClientCommandValidator validator = new ClientCommandValidator(command);
+            validator.validateForUpdate();
 
-			this.clientRepository.saveAndFlush(clientForUpdate);
-			
-			if (this.makerCheckerEnabledForTask && !command.isApprovedByChecker()) {
-				throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException();
-			}
+            Office clientOffice = null;
+            Long officeId = command.getOfficeId();
+            if (command.isOfficeChanged() && officeId != null) {
+                clientOffice = this.officeRepository.findOne(officeId);
+                if (clientOffice == null) { throw new OfficeNotFoundException(command.getOfficeId()); }
+            }
 
-			return new EntityIdentifier(clientForUpdate.getId());
-		} catch (DataIntegrityViolationException dve) {
-			handleDataIntegrityIssues(command, dve);
-			return new EntityIdentifier(Long.valueOf(-1));
-		}
-	}
+            final Client clientForUpdate = this.clientRepository.findOne(command.getId());
+            if (clientForUpdate == null || clientForUpdate.isDeleted()) { throw new ClientNotFoundException(command.getId()); }
+            clientForUpdate.update(clientOffice, command);
 
-	@Transactional
-	@Override
-	public EntityIdentifier addClientNote(final NoteCommand command) {
+            this.clientRepository.saveAndFlush(clientForUpdate);
 
-		context.authenticatedUser();
+            if (this.makerCheckerEnabledForTask && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
 
-		final Client clientForUpdate = this.clientRepository.findOne(command.getClientId());
-		if (clientForUpdate == null) {
-			throw new ClientNotFoundException(command.getClientId());
-		}
+            return new EntityIdentifier(clientForUpdate.getId());
+        } catch (DataIntegrityViolationException dve) {
+            handleDataIntegrityIssues(command, dve);
+            return new EntityIdentifier(Long.valueOf(-1));
+        }
+    }
 
-		final Note note = Note.clientNote(clientForUpdate, command.getNote());
+    @Transactional
+    @Override
+    public EntityIdentifier addClientNote(final NoteCommand command) {
 
-		this.noteRepository.save(note);
+        context.authenticatedUser();
 
-		return new EntityIdentifier(note.getId());
-	}
+        final Client clientForUpdate = this.clientRepository.findOne(command.getClientId());
+        if (clientForUpdate == null) { throw new ClientNotFoundException(command.getClientId()); }
 
-	@Transactional
-	@Override
-	public EntityIdentifier updateNote(final NoteCommand command) {
+        final Note note = Note.clientNote(clientForUpdate, command.getNote());
 
-		context.authenticatedUser();
+        this.noteRepository.save(note);
 
-		final Note noteForUpdate = this.noteRepository.findOne(command.getId());
-		if (noteForUpdate == null
-				|| noteForUpdate.isNotAgainstClientWithIdOf(command.getClientId())) {
-			throw new NoteNotFoundException(command.getId(),command.getClientId(), "client");
-		}
+        return new EntityIdentifier(note.getId());
+    }
 
-		noteForUpdate.update(command.getNote());
+    @Transactional
+    @Override
+    public EntityIdentifier updateNote(final NoteCommand command) {
 
-		return new EntityIdentifier(noteForUpdate.getId());
-	}
+        context.authenticatedUser();
 
-	@Transactional
-	@Override
-	public Long addClientIdentifier(final ClientIdentifierCommand command) {
-		
-		String documentTypeLabel = null;
-		Long documentTypeId = null; 
-		final String documentKey = command.getDocumentKey();
-		
-		try {
-			context.authenticatedUser();
+        final Note noteForUpdate = this.noteRepository.findOne(command.getId());
+        if (noteForUpdate == null || noteForUpdate.isNotAgainstClientWithIdOf(command.getClientId())) { throw new NoteNotFoundException(
+                command.getId(), command.getClientId(), "client"); }
 
-			final ClientIdentifierCommandValidator validator = new ClientIdentifierCommandValidator(command);
-			validator.validateForCreate();
+        noteForUpdate.update(command.getNote());
 
-			final Client client = this.clientRepository.findOne(command.getClientId());
-			if (client == null || client.isDeleted()) {
-				throw new ClientNotFoundException(command.getClientId());
-			}
+        return new EntityIdentifier(noteForUpdate.getId());
+    }
 
-			final CodeValue documentType = this.codeValueRepository.findOne(command.getDocumentTypeId());
-			if (documentType == null) {
-				throw new CodeValueNotFoundException(command.getDocumentTypeId());
-			}
-			documentTypeId = documentType.getId();
-			documentTypeLabel = documentType.getLabel();
+    @Transactional
+    @Override
+    public Long addClientIdentifier(final ClientIdentifierCommand command) {
 
-			final ClientIdentifier clientIdentifier = ClientIdentifier.createNew(client, documentType, documentKey, command.getDescription());
+        String documentTypeLabel = null;
+        Long documentTypeId = null;
+        final String documentKey = command.getDocumentKey();
 
-			this.clientIdentifierRepository.save(clientIdentifier);
+        try {
+            context.authenticatedUser();
 
-			return clientIdentifier.getId();
-		} catch (DataIntegrityViolationException dve) {
-			handleClientIdentifierDataIntegrityViolation(documentTypeLabel, documentTypeId, documentKey, dve);
-			return Long.valueOf(-1);
-		}
-	}
-	
-	@Transactional
-	@Override
-	public EntityIdentifier updateClientIdentifier(final ClientIdentifierCommand command) {
-		
-		String documentTypeLabel = null;
-		Long documentTypeId = null; 
-		String documentKey = command.getDocumentKey();
-		
-		try {
-			context.authenticatedUser();
+            final ClientIdentifierCommandValidator validator = new ClientIdentifierCommandValidator(command);
+            validator.validateForCreate();
 
-			final ClientIdentifierCommandValidator validator = new ClientIdentifierCommandValidator(command);
-			validator.validateForUpdate();
+            final Client client = this.clientRepository.findOne(command.getClientId());
+            if (client == null || client.isDeleted()) { throw new ClientNotFoundException(command.getClientId()); }
 
-			CodeValue documentType = null;
-			documentTypeId = command.getDocumentTypeId();
-			if (command.isDocumentTypeChanged() && documentTypeId != null) {
-				documentType = this.codeValueRepository.findOne(documentTypeId);
-				if (documentType == null) {
-					throw new CodeValueNotFoundException(command.getDocumentTypeId());
-				}
-				documentTypeId = documentType.getId();
-				documentTypeLabel = documentType.getLabel();
-			}
+            final CodeValue documentType = this.codeValueRepository.findOne(command.getDocumentTypeId());
+            if (documentType == null) { throw new CodeValueNotFoundException(command.getDocumentTypeId()); }
+            documentTypeId = documentType.getId();
+            documentTypeLabel = documentType.getLabel();
 
-			final ClientIdentifier clientIdentifierForUpdate = this.clientIdentifierRepository.findOne(command.getId());
-			if (clientIdentifierForUpdate == null) {
-				throw new ClientIdentifierNotFoundException(command.getId());
-			}
-			
-			// TODO - KW - why need to check what changed when integrity violation occurs?
-			if (command.isDocumentTypeChanged() && command.isDocumentKeyChanged()) {
-				documentTypeId = command.getDocumentTypeId();
-				documentKey = command.getDocumentKey();
-			} else if (command.isDocumentTypeChanged() && !command.isDocumentKeyChanged()) {
-				documentTypeId = command.getDocumentTypeId();
-				documentKey = clientIdentifierForUpdate.getDocumentKey();
-			} else if (!command.isDocumentTypeChanged() && command.isDocumentKeyChanged()) {
-				documentTypeId = clientIdentifierForUpdate.getDocumentType().getId();
-				documentKey = clientIdentifierForUpdate.getDocumentKey();
-			}
-			
-			clientIdentifierForUpdate.update(command, documentType);
+            final ClientIdentifier clientIdentifier = ClientIdentifier.createNew(client, documentType, documentKey,
+                    command.getDescription());
 
-			this.clientIdentifierRepository.saveAndFlush(clientIdentifierForUpdate);
+            this.clientIdentifierRepository.save(clientIdentifier);
 
-			return new EntityIdentifier(clientIdentifierForUpdate.getId());
-		} catch (DataIntegrityViolationException dve) {
-			handleClientIdentifierDataIntegrityViolation(documentTypeLabel, documentTypeId, documentKey, dve);
-			return new EntityIdentifier(Long.valueOf(-1));
-		}
-	}
+            return clientIdentifier.getId();
+        } catch (DataIntegrityViolationException dve) {
+            handleClientIdentifierDataIntegrityViolation(documentTypeLabel, documentTypeId, documentKey, dve);
+            return Long.valueOf(-1);
+        }
+    }
 
-	private void handleClientIdentifierDataIntegrityViolation(
-			final String documentTypeLabel, 
-			final Long documentTypeId, 
-			final String documentKey,
-			final DataIntegrityViolationException dve) {
-		
-		if (dve.getMostSpecificCause().getMessage().contains("unique_client_identifier")) {
-			throw new DuplicateClientIdentifierException(documentTypeLabel);
-		} else if (dve.getMostSpecificCause().getMessage().contains("unique_identifier_key")) {
-			throw new DuplicateClientIdentifierException(documentTypeId, documentTypeLabel, documentKey);
-		}
-		
-		// only log as error if unexpected data integrity violation.
-		logger.error(dve.getMessage(), dve);
-		throw new PlatformDataIntegrityException(
-				"error.msg.clientIdentifier.unknown.data.integrity.issue",
-				"Unknown data integrity issue with resource.");
-	}
+    @Transactional
+    @Override
+    public EntityIdentifier updateClientIdentifier(final ClientIdentifierCommand command) {
 
-	@Transactional
-	@Override
-	public EntityIdentifier deleteClientIdentifier(final Long clientIdentifierId) {
-		final ClientIdentifier clientIdentifier = this.clientIdentifierRepository.findOne(clientIdentifierId);
-		if (clientIdentifier == null) {
-			throw new ClientIdentifierNotFoundException(clientIdentifierId);
-		}
-		this.clientIdentifierRepository.delete(clientIdentifier);
+        String documentTypeLabel = null;
+        Long documentTypeId = null;
+        String documentKey = command.getDocumentKey();
 
-		return new EntityIdentifier(clientIdentifierId);
-	}
+        try {
+            context.authenticatedUser();
 
-	@Transactional
-	@Override
-	public EntityIdentifier saveOrUpdateClientImage(Long clientId,
-			String imageName, InputStream inputStream) {
-		try {
-			final Client client = this.clientRepository.findOne(clientId);
-			String imageUploadLocation = setupForClientImageUpdate(clientId,
-					client);
+            final ClientIdentifierCommandValidator validator = new ClientIdentifierCommandValidator(command);
+            validator.validateForUpdate();
 
-			String imageLocation = FileUtils.saveToFileSystem(inputStream,
-					imageUploadLocation, imageName);
+            CodeValue documentType = null;
+            documentTypeId = command.getDocumentTypeId();
+            if (command.isDocumentTypeChanged() && documentTypeId != null) {
+                documentType = this.codeValueRepository.findOne(documentTypeId);
+                if (documentType == null) { throw new CodeValueNotFoundException(command.getDocumentTypeId()); }
+                documentTypeId = documentType.getId();
+                documentTypeLabel = documentType.getLabel();
+            }
 
-			
-			return updateClientImage(clientId, client, imageLocation);
-		} catch (IOException ioe) {
-			logger.error(ioe.getMessage(), ioe);
-			throw new DocumentManagementException(imageName);
-		}
-	}
+            final ClientIdentifier clientIdentifierForUpdate = this.clientIdentifierRepository.findOne(command.getId());
+            if (clientIdentifierForUpdate == null) { throw new ClientIdentifierNotFoundException(command.getId()); }
 
-	@Transactional
-	@Override
-	public EntityIdentifier deleteClientImage(final Long clientId) {
-		
-		final Client client = this.clientRepository.findOne(clientId);
-		if (client == null || client.isDeleted()) {
-			throw new ClientNotFoundException(clientId);
-		}
-		
-		// delete image from the file system
-		if (StringUtils.isNotEmpty(client.getImageKey())) {
-			FileUtils.deleteClientImage(clientId, client.getImageKey());
-		}
-		return updateClientImage(clientId, client, null);
-	}
+            // TODO - KW - why need to check what changed when integrity
+            // violation occurs?
+            if (command.isDocumentTypeChanged() && command.isDocumentKeyChanged()) {
+                documentTypeId = command.getDocumentTypeId();
+                documentKey = command.getDocumentKey();
+            } else if (command.isDocumentTypeChanged() && !command.isDocumentKeyChanged()) {
+                documentTypeId = command.getDocumentTypeId();
+                documentKey = clientIdentifierForUpdate.getDocumentKey();
+            } else if (!command.isDocumentTypeChanged() && command.isDocumentKeyChanged()) {
+                documentTypeId = clientIdentifierForUpdate.getDocumentType().getId();
+                documentKey = clientIdentifierForUpdate.getDocumentKey();
+            }
 
-	@Override
-	public EntityIdentifier saveOrUpdateClientImage(final Long clientId, final Base64EncodedImage encodedImage) {
-		try {
-			final Client client = this.clientRepository.findOne(clientId);
-			final String imageUploadLocation = setupForClientImageUpdate(clientId, client);
+            clientIdentifierForUpdate.update(command, documentType);
 
-			final String imageLocation = FileUtils.saveToFileSystem(encodedImage, imageUploadLocation, "image");
-			
-			return updateClientImage(clientId, client, imageLocation);
-		} catch (IOException ioe) {
-			logger.error(ioe.getMessage(), ioe);
-			throw new DocumentManagementException("image");
-		}
-	}
+            this.clientIdentifierRepository.saveAndFlush(clientIdentifierForUpdate);
 
-	private String setupForClientImageUpdate(final Long clientId, final Client client) {
-		if (client == null || client.isDeleted()) {
-			throw new ClientNotFoundException(clientId);
-		}
+            return new EntityIdentifier(clientIdentifierForUpdate.getId());
+        } catch (DataIntegrityViolationException dve) {
+            handleClientIdentifierDataIntegrityViolation(documentTypeLabel, documentTypeId, documentKey, dve);
+            return new EntityIdentifier(Long.valueOf(-1));
+        }
+    }
 
-		final String imageUploadLocation = FileUtils.generateClientImageParentDirectory(clientId);
-		// delete previous image from the file system
-		if (StringUtils.isNotEmpty(client.getImageKey())) {
-			FileUtils.deleteClientImage(clientId, client.getImageKey());
-		}
+    private void handleClientIdentifierDataIntegrityViolation(final String documentTypeLabel, final Long documentTypeId,
+            final String documentKey, final DataIntegrityViolationException dve) {
 
-		/** Recursively create the directory if it does not exist **/
-		if (!new File(imageUploadLocation).isDirectory()) {
-			new File(imageUploadLocation).mkdirs();
-		}
-		return imageUploadLocation;
-	}
-	
-	private EntityIdentifier updateClientImage(final Long clientId, final Client client, final String imageLocation) {
-		client.setImageKey(imageLocation);
-		this.clientRepository.save(client);
+        if (dve.getMostSpecificCause().getMessage().contains("unique_client_identifier")) {
+            throw new DuplicateClientIdentifierException(documentTypeLabel);
+        } else if (dve.getMostSpecificCause().getMessage().contains("unique_identifier_key")) { throw new DuplicateClientIdentifierException(
+                documentTypeId, documentTypeLabel, documentKey); }
 
-		return new EntityIdentifier(clientId);
-	}
+        // only log as error if unexpected data integrity violation.
+        logger.error(dve.getMessage(), dve);
+        throw new PlatformDataIntegrityException("error.msg.clientIdentifier.unknown.data.integrity.issue",
+                "Unknown data integrity issue with resource.");
+    }
+
+    @Transactional
+    @Override
+    public EntityIdentifier deleteClientIdentifier(final Long clientIdentifierId) {
+        final ClientIdentifier clientIdentifier = this.clientIdentifierRepository.findOne(clientIdentifierId);
+        if (clientIdentifier == null) { throw new ClientIdentifierNotFoundException(clientIdentifierId); }
+        this.clientIdentifierRepository.delete(clientIdentifier);
+
+        return new EntityIdentifier(clientIdentifierId);
+    }
+
+    @Transactional
+    @Override
+    public EntityIdentifier saveOrUpdateClientImage(Long clientId, String imageName, InputStream inputStream) {
+        try {
+            final Client client = this.clientRepository.findOne(clientId);
+            String imageUploadLocation = setupForClientImageUpdate(clientId, client);
+
+            String imageLocation = FileUtils.saveToFileSystem(inputStream, imageUploadLocation, imageName);
+
+            return updateClientImage(clientId, client, imageLocation);
+        } catch (IOException ioe) {
+            logger.error(ioe.getMessage(), ioe);
+            throw new DocumentManagementException(imageName);
+        }
+    }
+
+    @Transactional
+    @Override
+    public EntityIdentifier deleteClientImage(final Long clientId) {
+
+        final Client client = this.clientRepository.findOne(clientId);
+        if (client == null || client.isDeleted()) { throw new ClientNotFoundException(clientId); }
+
+        // delete image from the file system
+        if (StringUtils.isNotEmpty(client.getImageKey())) {
+            FileUtils.deleteClientImage(clientId, client.getImageKey());
+        }
+        return updateClientImage(clientId, client, null);
+    }
+
+    @Override
+    public EntityIdentifier saveOrUpdateClientImage(final Long clientId, final Base64EncodedImage encodedImage) {
+        try {
+            final Client client = this.clientRepository.findOne(clientId);
+            final String imageUploadLocation = setupForClientImageUpdate(clientId, client);
+
+            final String imageLocation = FileUtils.saveToFileSystem(encodedImage, imageUploadLocation, "image");
+
+            return updateClientImage(clientId, client, imageLocation);
+        } catch (IOException ioe) {
+            logger.error(ioe.getMessage(), ioe);
+            throw new DocumentManagementException("image");
+        }
+    }
+
+    private String setupForClientImageUpdate(final Long clientId, final Client client) {
+        if (client == null || client.isDeleted()) { throw new ClientNotFoundException(clientId); }
+
+        final String imageUploadLocation = FileUtils.generateClientImageParentDirectory(clientId);
+        // delete previous image from the file system
+        if (StringUtils.isNotEmpty(client.getImageKey())) {
+            FileUtils.deleteClientImage(clientId, client.getImageKey());
+        }
+
+        /** Recursively create the directory if it does not exist **/
+        if (!new File(imageUploadLocation).isDirectory()) {
+            new File(imageUploadLocation).mkdirs();
+        }
+        return imageUploadLocation;
+    }
+
+    private EntityIdentifier updateClientImage(final Long clientId, final Client client, final String imageLocation) {
+        client.setImageKey(imageLocation);
+        this.clientRepository.save(client);
+
+        return new EntityIdentifier(clientId);
+    }
 }
