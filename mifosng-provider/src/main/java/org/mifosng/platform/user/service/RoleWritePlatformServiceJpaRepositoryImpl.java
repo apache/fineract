@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.mifosng.platform.accounting.api.commands.RolePermissionCommand;
 import org.mifosng.platform.api.commands.RoleCommand;
+import org.mifosng.platform.client.service.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
 import org.mifosng.platform.exceptions.PermissionNotFoundException;
 import org.mifosng.platform.exceptions.RoleNotFoundException;
 import org.mifosng.platform.security.PlatformSecurityContext;
@@ -17,108 +18,102 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class RoleWritePlatformServiceJpaRepositoryImpl implements
-		RoleWritePlatformService {
+public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatformService {
 
-	private final PlatformSecurityContext context;
-	private final RoleRepository roleRepository;
+    private final PlatformSecurityContext context;
+    private final RoleRepository roleRepository;
+    private final PermissionRepository permissionRepository;
 
-	private final PermissionRepository permissionRepository;
+    // FIXME - kw - this value is hardcoded for now but will be retrieved from
+    // configuration
+    private boolean makerCheckerEnabledForTask = false;
+    
+    @Autowired
+    public RoleWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final RoleRepository roleRepository,
+            final PermissionRepository permissionRepository) {
+        this.context = context;
+        this.roleRepository = roleRepository;
+        this.permissionRepository = permissionRepository;
+    }
 
-	@Autowired
-	public RoleWritePlatformServiceJpaRepositoryImpl(
-			final PlatformSecurityContext context,
-			final RoleRepository roleRepository,
-			final PermissionRepository permissionRepository) {
-		this.context = context;
-		this.roleRepository = roleRepository;
-		this.permissionRepository = permissionRepository;
-	}
+    @Transactional
+    @Override
+    public Long createRole(final RoleCommand command) {
 
-	@Transactional
-	@Override
-	public Long createRole(final RoleCommand command) {
+        context.authenticatedUser();
 
-		context.authenticatedUser();
+        RoleCommandValidator validator = new RoleCommandValidator(command);
+        validator.validateForCreate();
 
-		RoleCommandValidator validator = new RoleCommandValidator(command);
-		validator.validateForCreate();
+        Role entity = new Role(command.getName(), command.getDescription());
 
-		Role entity = new Role(command.getName(), command.getDescription());
+        this.roleRepository.save(entity);
+        
+        if (this.makerCheckerEnabledForTask && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
 
-		this.roleRepository.save(entity);
+        return entity.getId();
+    }
 
-		return entity.getId();
-	}
+    @Transactional
+    @Override
+    public Long updateRole(RoleCommand command) {
 
-	@Transactional
-	@Override
-	public Long updateRole(RoleCommand command) {
+        context.authenticatedUser();
 
-		context.authenticatedUser();
+        RoleCommandValidator validator = new RoleCommandValidator(command);
+        validator.validateForUpdate();
 
-		RoleCommandValidator validator = new RoleCommandValidator(command);
-		validator.validateForUpdate();
+        Role role = this.roleRepository.findOne(command.getId());
+        if (role == null) { throw new RoleNotFoundException(command.getId()); }
+        role.update(command);
 
-		Role role = this.roleRepository.findOne(command.getId());
-		if (role == null) {
-			throw new RoleNotFoundException(command.getId());
-		}
-		role.update(command);
+        this.roleRepository.save(role);
+        
+        if (this.makerCheckerEnabledForTask && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
 
-		this.roleRepository.save(role);
+        return role.getId();
+    }
 
-		return role.getId();
-	}
+    @Transactional
+    @Override
+    public Long updateRolePermissions(final RolePermissionCommand command) {
+        context.authenticatedUser();
 
-	@Transactional
-	@Override
-	public Long updateRolePermissions(final RolePermissionCommand command) {
-		context.authenticatedUser();
+        final Role role = this.roleRepository.findOne(command.getRoleId());
+        if (role == null) { throw new RoleNotFoundException(command.getRoleId()); }
 
-		final Role role = this.roleRepository.findOne(command.getRoleId());
-		if (role == null) {
-			throw new RoleNotFoundException(command.getRoleId());
-		}
+        Collection<Permission> allPermissions = this.permissionRepository.findAll();
 
-		Collection<Permission> allPermissions = this.permissionRepository
-				.findAll();
+        Map<String, Boolean> commandPermissions = command.getPermissions();
+        for (String permissionCode : commandPermissions.keySet()) {
+            Boolean selected = commandPermissions.get(permissionCode);
 
-		Map<String, Boolean> commandPermissions = command.getPermissions();
-		for (String permissionCode : commandPermissions.keySet()) {
-			Boolean selected = commandPermissions.get(permissionCode);
+            final Permission permission = findPermissionByCode(allPermissions, permissionCode);
 
-			Permission permission = getPermissionByCode(allPermissions,
-					permissionCode);
+            if (role.getPermissions().contains(permission)) {
+                if (!(selected)) {
+                    role.getPermissions().remove(permission);
+                }
+            } else {
+                if (selected) {
+                    role.getPermissions().add(permission);
+                }
+            }
+        }
 
-			if (role.getPermissions().contains(permission)) {
-				if (!(selected)) {
-					role.getPermissions().remove(permission);
-				}
+        this.roleRepository.save(role);
 
-			} else {
-				if (selected) {
-					role.getPermissions().add(permission);
-				}
+        return role.getId();
+    }
 
-			}
-		}
+    private Permission findPermissionByCode(Collection<Permission> allPermissions, String permissionCode) {
 
-		this.roleRepository.save(role);
+        if (allPermissions != null) {
+            for (Permission permission : allPermissions) {
+                if (permission.hasCode(permissionCode)) {return permission;}
+            }
+        }
 
-		return role.getId();
-	}
-
-	private Permission getPermissionByCode(
-			Collection<Permission> allPermissions, String permissionCode) {
-				
-		if (allPermissions != null) {
-			for (Permission permission : allPermissions) {
-				if (permission.code().equals(permissionCode)) return permission;
-				
-			}
-		}
-
-		throw new PermissionNotFoundException(permissionCode);
-	}
+        throw new PermissionNotFoundException(permissionCode);
+    }
 }

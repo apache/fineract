@@ -53,6 +53,7 @@ import org.mifosng.platform.exceptions.PlatformApiDataValidationException;
 import org.mifosng.platform.infrastructure.api.JsonParserHelper;
 import org.mifosng.platform.infrastructure.errorhandling.InvalidJsonException;
 import org.mifosng.platform.infrastructure.errorhandling.UnsupportedParameterException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.number.NumberFormatter;
 import org.springframework.stereotype.Service;
 
@@ -66,9 +67,20 @@ import com.google.gson.reflect.TypeToken;
 @Service
 public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataConversionService {
 
+    /**
+     * Used in places where the support json of the api request is not any
+     * different to that of the json of a serialized command object.
+     */
+    private final PortfolioCommandDeserializerService portfolioCommandDeserializerService;
+    
+    /**
+     * Google-gson class for converting to and from json.
+     */
     private final Gson gsonConverter;
 
-    public PortfolioApiDataConversionServiceImpl() {
+    @Autowired
+    public PortfolioApiDataConversionServiceImpl(final PortfolioCommandDeserializerService portfolioCommandDeserializerService) {
+        this.portfolioCommandDeserializerService = portfolioCommandDeserializerService;
         gsonConverter = new Gson();
     }
 
@@ -229,22 +241,20 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
     }
 
     @Override
-    public RoleCommand convertJsonToRoleCommand(final Long resourceIdentifier, final String json) {
+    public RoleCommand convertApiRequestJsonToRoleCommand(final Long resourceIdentifier, final String json) {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
-        Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
 
-        Set<String> supportedParams = new HashSet<String>(Arrays.asList("name", "description", "permissions"));
+        final Set<String> supportedParams = new HashSet<String>(Arrays.asList("id", "name", "description"));
 
         checkForUnsupportedParameters(requestMap, supportedParams);
 
-        Set<String> modifiedParameters = new HashSet<String>();
-
-        String name = extractStringParameter("name", requestMap, modifiedParameters);
-        String description = extractStringParameter("description", requestMap, modifiedParameters);
-
-        return new RoleCommand(modifiedParameters, resourceIdentifier, name, description);
+        // no difference between the api json and internal command
+        // representation of json so reuse this code to de-serialize into
+        // command object
+        return this.portfolioCommandDeserializerService.deserializeRoleCommand(resourceIdentifier, json, false);
     }
     
     @Override

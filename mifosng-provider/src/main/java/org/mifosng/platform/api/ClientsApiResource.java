@@ -60,436 +60,402 @@ import com.sun.jersey.multipart.FormDataParam;
 @Scope("singleton")
 public class ClientsApiResource {
 
-	private final static Logger logger = LoggerFactory.getLogger(ClientsApiResource.class);
+    private final static Logger logger = LoggerFactory.getLogger(ClientsApiResource.class);
 
-	@Autowired
-	private ClientReadPlatformService clientReadPlatformService;
+    @Autowired
+    private ClientReadPlatformService clientReadPlatformService;
 
-	@Autowired
-	private ClientWritePlatformService clientWritePlatformService;
-	
-	@Autowired
-	private PortfolioCommandsReadPlatformService commandSourceReadPlatformService;
-	
-	@Autowired
-	private PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+    @Autowired
+    private ClientWritePlatformService clientWritePlatformService;
 
-	@Autowired
-	private OfficeReadPlatformService officeReadPlatformService;
+    @Autowired
+    private PortfolioCommandsReadPlatformService commandSourceReadPlatformService;
 
-	@Autowired
-	private PortfolioApiDataConversionService apiDataConversionService;
-	
-	@Autowired
-	private PortfolioApiJsonSerializerService apiJsonSerializerService;
-	
+    @Autowired
+    private PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+
+    @Autowired
+    private OfficeReadPlatformService officeReadPlatformService;
+
+    @Autowired
+    private PortfolioApiDataConversionService apiDataConversionService;
+
+    @Autowired
+    private PortfolioApiJsonSerializerService apiJsonSerializerService;
+
     @Autowired
     private PlatformSecurityContext context;
-	
-	@GET
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
-	public String retrieveAllIndividualClients(@Context final UriInfo uriInfo,
-			@QueryParam("sqlSearch") final String sqlSearch,
-			@QueryParam("officeId") final Integer officeId,
-			@QueryParam("externalId") final String externalId,
-			@QueryParam("displayName") final String displayName,
-			@QueryParam("firstName") final String firstName,
-			@QueryParam("lastName") final String lastName,
-			@QueryParam("underHierarchy") final String hierarchy) {
 
-		context.authenticatedUser().validateHasReadPermission("CLIENT");
-		
-		final String extraCriteria = getClientCriteria(sqlSearch, officeId, externalId, displayName, firstName, lastName, hierarchy);
-		
-		final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-		final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+    @GET
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String retrieveAllIndividualClients(@Context final UriInfo uriInfo, @QueryParam("sqlSearch") final String sqlSearch,
+            @QueryParam("officeId") final Integer officeId, @QueryParam("externalId") final String externalId,
+            @QueryParam("displayName") final String displayName, @QueryParam("firstName") final String firstName,
+            @QueryParam("lastName") final String lastName, @QueryParam("underHierarchy") final String hierarchy) {
 
-		final Collection<ClientData> clients = this.clientReadPlatformService.retrieveAllIndividualClients(extraCriteria);
-		
-		return this.apiJsonSerializerService.serializeClientDataToJson(prettyPrint, responseParameters, clients);
-	}
+        context.authenticatedUser().validateHasReadPermission("CLIENT");
 
-	private String getClientCriteria(String sqlSearch, Integer officeId,
-			String externalId, String displayName, String firstName,
-			String lastName, String hierarchy) {
+        final String extraCriteria = getClientCriteria(sqlSearch, officeId, externalId, displayName, firstName, lastName, hierarchy);
 
-		String extraCriteria = "";
+        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 
-		if (sqlSearch != null) {
-			extraCriteria = " and (" + sqlSearch + ")";
-		}
+        final Collection<ClientData> clients = this.clientReadPlatformService.retrieveAllIndividualClients(extraCriteria);
 
-		if (officeId != null) {
-			extraCriteria += " and office_id = " + officeId;
-		}
-		
-		if (externalId != null) {
-			extraCriteria += " and external_id like " + ApiParameterHelper.sqlEncodeString(externalId);
-		}
-		
-		if (displayName != null) {
-			extraCriteria += " and concat(ifnull(firstname, ''), if(firstname > '',' ', '') , ifnull(lastname, '')) like "
-					+ ApiParameterHelper.sqlEncodeString(displayName);
-		}
-		
-		if (firstName != null) {
-			extraCriteria += " and firstname like " + ApiParameterHelper.sqlEncodeString(firstName);
-		}
-		
-		if (lastName != null) {
-			extraCriteria += " and lastname like " + ApiParameterHelper.sqlEncodeString(lastName);
-		}
-		
-		if (hierarchy != null) {
-			extraCriteria += " and o.hierarchy like " + ApiParameterHelper.sqlEncodeString(hierarchy+"%");
-		}
+        return this.apiJsonSerializerService.serializeClientDataToJson(prettyPrint, responseParameters, clients);
+    }
 
-		if (StringUtils.isNotBlank(extraCriteria)) {
-			extraCriteria = extraCriteria.substring(4);
-		}
+    private String getClientCriteria(String sqlSearch, Integer officeId, String externalId, String displayName, String firstName,
+            String lastName, String hierarchy) {
 
-		logger.info("extraCriteria; " + extraCriteria);
+        String extraCriteria = "";
 
-		return extraCriteria;
-	}
+        if (sqlSearch != null) {
+            extraCriteria = " and (" + sqlSearch + ")";
+        }
 
-	@GET
-	@Path("{clientId}")
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
-	public String retrieveClient(
-			@PathParam("clientId") final Long clientId,
-			@Context final UriInfo uriInfo) {
+        if (officeId != null) {
+            extraCriteria += " and office_id = " + officeId;
+        }
 
-		context.authenticatedUser().validateHasReadPermission("CLIENT");
-		
-		final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-		final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-		final boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
-		final Long makerCheckerId = ApiParameterHelper.makerCheckerId(uriInfo.getQueryParameters());
-		
-		ClientData clientData = this.clientReadPlatformService.retrieveIndividualClient(clientId);
-		if (template) {
-			final List<OfficeLookup> allowedOffices = new ArrayList<OfficeLookup>(officeReadPlatformService.retrieveAllOfficesForLookup());
-			clientData = ClientData.templateOnTop(clientData, allowedOffices);
-		}
-		if (makerCheckerId != null) {
-			clientData = handleMakerCheckerRequest(clientId, makerCheckerId, clientData);
-		}
-		
-		boolean retrieveChanges = true;
-		if (retrieveChanges) {
-			final Collection<ClientData> dataChanges = retrieveAllUnprocessedDataChanges(clientId);
-			clientData = ClientData.integrateChanges(clientData, clientData.currentChange(), dataChanges);
-		}
+        if (externalId != null) {
+            extraCriteria += " and external_id like " + ApiParameterHelper.sqlEncodeString(externalId);
+        }
 
-		return this.apiJsonSerializerService.serializeClientDataToJson(prettyPrint, responseParameters, clientData);
-	}
+        if (displayName != null) {
+            extraCriteria += " and concat(ifnull(firstname, ''), if(firstname > '',' ', '') , ifnull(lastname, '')) like "
+                    + ApiParameterHelper.sqlEncodeString(displayName);
+        }
 
-	private ClientData handleMakerCheckerRequest(final Long clientId, final Long makerCheckerId, ClientData clientData) {
-		final CommandSourceData entry = this.commandSourceReadPlatformService.retrieveById(makerCheckerId);
-		final ClientData currentChange = this.apiDataConversionService.convertInternalJsonFormatToClientDataChange(clientId, entry.json());
-		
-		final Collection<ClientData> dataChanges = retrieveAllUnprocessedDataChanges(clientId);
-		clientData = ClientData.integrateChanges(clientData, currentChange, dataChanges);
-		return clientData;
-	}
+        if (firstName != null) {
+            extraCriteria += " and firstname like " + ApiParameterHelper.sqlEncodeString(firstName);
+        }
 
-	private Collection<ClientData> retrieveAllUnprocessedDataChanges(final Long clientId) {
-		Collection<ClientData> dataChanges = new ArrayList<ClientData>();
-		
-		boolean retrieveChanges = true;
-		if (retrieveChanges) {
-			Collection<CommandSourceData> unprocessedChanges = this.commandSourceReadPlatformService.retrieveUnprocessChangesByResourceId("clients", clientId);
-			for (CommandSourceData commandSourceData : unprocessedChanges) {
-				ClientData change = this.apiDataConversionService.convertInternalJsonFormatToClientDataChange(clientId, commandSourceData.json());
-				dataChanges.add(change);
-			}
-		}
-		
-		if (dataChanges.isEmpty()) {
-			dataChanges = null;
-		}
-		
-		return dataChanges;
-	}
+        if (lastName != null) {
+            extraCriteria += " and lastname like " + ApiParameterHelper.sqlEncodeString(lastName);
+        }
 
-	@GET
-	@Path("template")
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
-	public String newClientDetails(@Context final UriInfo uriInfo) {
+        if (hierarchy != null) {
+            extraCriteria += " and o.hierarchy like " + ApiParameterHelper.sqlEncodeString(hierarchy + "%");
+        }
 
-		context.authenticatedUser().validateHasReadPermission("CLIENT");
-		
-		final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-		final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-		final Long makerCheckerId = ApiParameterHelper.makerCheckerId(uriInfo.getQueryParameters());
-		
-		ClientData clientData = this.clientReadPlatformService.retrieveNewClientDetails();
-		if (makerCheckerId != null) {
-			clientData = handleMakerCheckerRequest(null, makerCheckerId, clientData);
-		}
-		
-		return this.apiJsonSerializerService.serializeClientDataToJson(prettyPrint, responseParameters, clientData);
-	}
+        if (StringUtils.isNotBlank(extraCriteria)) {
+            extraCriteria = extraCriteria.substring(4);
+        }
 
-	@POST
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
-	public String createClient(final String jsonRequestBody) {
-		
-		final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE", "clients", null, jsonRequestBody);
-		
-		return this.apiJsonSerializerService.serializeEntityIdentifier(result);
-	}
+        logger.info("extraCriteria; " + extraCriteria);
 
-	@PUT
-	@Path("{clientId}")
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
-	public String updateClient(@PathParam("clientId") final Long clientId, final String jsonRequestBody) {
+        return extraCriteria;
+    }
 
-		final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "clients", clientId, jsonRequestBody);
-		
-		return this.apiJsonSerializerService.serializeEntityIdentifier(result);
-	}
-	
-	@DELETE
-	@Path("{clientId}")
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
-	public String deleteClient(@PathParam("clientId") final Long clientId) {
+    @GET
+    @Path("{clientId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String retrieveClient(@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
 
-		final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("DELETE", "clients", clientId, "{}");
-		
-		return this.apiJsonSerializerService.serializeEntityIdentifier(result);
-	}
+        context.authenticatedUser().validateHasReadPermission("CLIENT");
 
-	@GET
-	@Path("{clientId}/loans")
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
-	public String retrieveClientAccount(@PathParam("clientId") final Long clientId, 
-										@Context final UriInfo uriInfo) {
+        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+        final boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
+        final Long makerCheckerId = ApiParameterHelper.makerCheckerId(uriInfo.getQueryParameters());
 
-		context.authenticatedUser().validateHasReadPermission("CLIENT");
-		
-		Set<String> typicalResponseParameters = new HashSet<String>(
-				Arrays.asList("pendingApprovalLoans", "awaitingDisbursalLoans", "openLoans", "closedLoans", 
-						"anyLoanCount", "pendingApprovalLoanCount", "awaitingDisbursalLoanCount", "activeLoanCount", "closedLoanCount",
-						"pendingApprovalDespositAccountsCount", "pendingApprovalDespositAccounts", "approvedDespositAccountsCount", "approvedDespositAccounts",
-						"withdrawnByClientDespositAccountsCount","withdrawnByClientDespositAccounts","closedDepositAccountsCount","closedDepositAccounts",
-						"rejectedDepositAccountsCount","rejectedDepositAccounts","preclosedDepositAccountsCount","preclosedDepositAccounts")
-		);
-		
-		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-		if (responseParameters.isEmpty()) {
-			responseParameters.addAll(typicalResponseParameters);
-		}
-		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-		
-		ClientAccountSummaryCollectionData clientAccount = this.clientReadPlatformService.retrieveClientAccountDetails(clientId);
-		
-		return this.apiJsonSerializerService.serializeClientAccountSummaryCollectionDataToJson(prettyPrint, responseParameters, clientAccount);
-	}
+        ClientData clientData = this.clientReadPlatformService.retrieveIndividualClient(clientId);
+        if (template) {
+            final List<OfficeLookup> allowedOffices = new ArrayList<OfficeLookup>(officeReadPlatformService.retrieveAllOfficesForLookup());
+            clientData = ClientData.templateOnTop(clientData, allowedOffices);
+        }
+        if (makerCheckerId != null) {
+            clientData = handleMakerCheckerRequest(clientId, makerCheckerId, clientData);
+        }
 
-	@GET
-	@Path("{clientId}/notes")
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
-	public String retrieveAllClientNotes(@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
+        boolean retrieveChanges = true;
+        if (retrieveChanges) {
+            final Collection<ClientData> dataChanges = retrieveAllUnprocessedDataChanges(clientId);
+            clientData = ClientData.integrateChanges(clientData, clientData.currentChange(), dataChanges);
+        }
 
-		context.authenticatedUser().validateHasReadPermission("CLIENTNOTE");
-		
-		Set<String> typicalResponseParameters = new HashSet<String>(
-				Arrays.asList("id", "clientId", "loanId", "loanTransactionId", "noteType", "note", "createdById", "createdByUsername", 
-						"createdOn", "updatedById", "updatedByUsername", "updatedOn")
-		);
-		
-		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-		if (responseParameters.isEmpty()) {
-			responseParameters.addAll(typicalResponseParameters);
-		}
-		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-		
-		Collection<NoteData> notes = this.clientReadPlatformService.retrieveAllClientNotes(clientId);
-		
-		return this.apiJsonSerializerService.serializeNoteDataToJson(prettyPrint, responseParameters, notes);
-	}
+        return this.apiJsonSerializerService.serializeClientDataToJson(prettyPrint, responseParameters, clientData);
+    }
 
-	@POST
-	@Path("{clientId}/notes")
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
-	public Response addNewClientNote(@PathParam("clientId") final Long clientId, final String jsonRequestBody) {
+    private ClientData handleMakerCheckerRequest(final Long clientId, final Long makerCheckerId, ClientData clientData) {
+        final CommandSourceData entry = this.commandSourceReadPlatformService.retrieveById(makerCheckerId);
+        final ClientData currentChange = this.apiDataConversionService.convertInternalJsonFormatToClientDataChange(clientId, entry.json());
 
-		NoteCommand command = this.apiDataConversionService.convertJsonToNoteCommand(null, clientId, jsonRequestBody);
-		
-		EntityIdentifier identifier = this.clientWritePlatformService.addClientNote(command);
+        final Collection<ClientData> dataChanges = retrieveAllUnprocessedDataChanges(clientId);
+        clientData = ClientData.integrateChanges(clientData, currentChange, dataChanges);
+        return clientData;
+    }
 
-		return Response.ok().entity(identifier).build();
-	}
+    private Collection<ClientData> retrieveAllUnprocessedDataChanges(final Long clientId) {
+        Collection<ClientData> dataChanges = new ArrayList<ClientData>();
 
-	@GET
-	@Path("{clientId}/notes/{noteId}")
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
-	public String retrieveClientNote(
-			@PathParam("clientId") final Long clientId,
-			@PathParam("noteId") final Long noteId, 
-			@Context final UriInfo uriInfo) {
+        boolean retrieveChanges = true;
+        if (retrieveChanges) {
+            Collection<CommandSourceData> unprocessedChanges = this.commandSourceReadPlatformService.retrieveUnprocessChangesByResourceId(
+                    "clients", clientId);
+            for (CommandSourceData commandSourceData : unprocessedChanges) {
+                ClientData change = this.apiDataConversionService.convertInternalJsonFormatToClientDataChange(clientId,
+                        commandSourceData.json());
+                dataChanges.add(change);
+            }
+        }
 
-		context.authenticatedUser().validateHasReadPermission("CLIENTNOTE");
-		
-		Set<String> typicalResponseParameters = new HashSet<String>(
-				Arrays.asList("id", "clientId", "loanId", "loanTransactionId", "noteType", "note", "createdById", "createdByUsername", 
-						"createdOn", "updatedById", "updatedByUsername", "updatedOn")
-		);
-		
-		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-		if (responseParameters.isEmpty()) {
-			responseParameters.addAll(typicalResponseParameters);
-		}
-		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-		
-		NoteData note = this.clientReadPlatformService.retrieveClientNote(clientId, noteId);
-		
-		return this.apiJsonSerializerService.serializeNoteDataToJson(prettyPrint, responseParameters, note);
-	}
+        if (dataChanges.isEmpty()) {
+            dataChanges = null;
+        }
 
-	@PUT
-	@Path("{clientId}/notes/{noteId}")
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
-	public Response updateClientNote(
-			@PathParam("clientId") final Long clientId,
-			@PathParam("noteId") final Long noteId, final String jsonRequestBody) {
+        return dataChanges;
+    }
 
-		NoteCommand command = this.apiDataConversionService.convertJsonToNoteCommand(noteId, clientId, jsonRequestBody);
-		
-		EntityIdentifier identifier = this.clientWritePlatformService.updateNote(command);
+    @GET
+    @Path("template")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String newClientDetails(@Context final UriInfo uriInfo) {
 
-		return Response.ok().entity(identifier).build();
-	}
-	
-	/** 
-	 * Upload images through multi-part form upload
-	 */
-	@POST
-	@Path("{clientId}/image")
-	@Consumes({ MediaType.MULTIPART_FORM_DATA })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public Response addNewClientImage(
-			@PathParam("clientId") final Long clientId,
-			@HeaderParam("Content-Length") Long fileSize,
-			@FormDataParam("file") InputStream inputStream,
-			@FormDataParam("file") FormDataContentDisposition fileDetails,
-			@FormDataParam("file") FormDataBodyPart bodyPart) {
+        context.authenticatedUser().validateHasReadPermission("CLIENT");
 
-		
-		//TODO: vishwas might need more advances validation (like reading magic number) for handling malicious clients
-		//and clients not setting mime type
-		FileUtils.validateClientImageNotEmpty(fileDetails.getFileName());
-		FileUtils.validateImageMimeType(bodyPart.getMediaType().toString());
-		FileUtils.validateFileSizeWithinPermissibleRange(fileSize,
-				fileDetails.getFileName(),
-				ApiConstants.MAX_FILE_UPLOAD_SIZE_IN_MB);
-		
-		logger.debug(bodyPart.getMediaType().toString());
+        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+        final Long makerCheckerId = ApiParameterHelper.makerCheckerId(uriInfo.getQueryParameters());
 
-		EntityIdentifier entityIdentifier = this.clientWritePlatformService
-				.saveOrUpdateClientImage(clientId, fileDetails.getFileName(),
-						inputStream);
+        ClientData clientData = this.clientReadPlatformService.retrieveNewClientDetails();
+        if (makerCheckerId != null) {
+            clientData = handleMakerCheckerRequest(null, makerCheckerId, clientData);
+        }
 
-		return Response.ok().entity(entityIdentifier).build();
-	}
-	
+        return this.apiJsonSerializerService.serializeClientDataToJson(prettyPrint, responseParameters, clientData);
+    }
 
-	/** 
-	 * Upload image as a Data URL (essentially a base64 encoded stream)
-	 */
-	@POST
-	@Path("{clientId}/image")
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public Response addNewClientImage(
-			@PathParam("clientId") final Long clientId,
-			final String jsonRequestBody) {
+    @POST
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String createClient(final String jsonRequestBody) {
 
-		Base64EncodedImage base64EncodedImage = FileUtils
-				.extractImageFromDataURL(jsonRequestBody);
+        final EntityIdentifier result = this.commandsSourceWritePlatformService
+                .logCommandSource("CREATE", "clients", null, jsonRequestBody);
 
-		EntityIdentifier entityIdentifier = this.clientWritePlatformService
-				.saveOrUpdateClientImage(clientId, base64EncodedImage);
+        return this.apiJsonSerializerService.serializeEntityIdentifier(result);
+    }
 
-		return Response.ok().entity(entityIdentifier).build();
-	}
+    @PUT
+    @Path("{clientId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String updateClient(@PathParam("clientId") final Long clientId, final String jsonRequestBody) {
 
-	/**
-	 * Returns a base 64 encoded client image
-	 */
-	@GET
-	@Path("{clientId}/image")
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
-	public Response retrieveClientImage(
-			@PathParam("clientId") final Long clientId) {
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "clients", clientId,
+                jsonRequestBody);
 
-		context.authenticatedUser().validateHasReadPermission("CLIENTIMAGE");
-		
-		final ClientData clientData = this.clientReadPlatformService.retrieveIndividualClient(clientId);
+        return this.apiJsonSerializerService.serializeEntityIdentifier(result);
+    }
 
-		if (clientData.imageKeyDoesNotExist()) {
-			throw new ImageNotFoundException("clients", clientId);
-		}
-		return Response.ok().entity(Base64.encodeFromFile(clientData.imageKey())).build();
-	}
-	
-	/** 
-	 * This method is added only for consistency with other URL patterns
-	 * and for maintaining consistency of usage of the HTTP "verb"
-	 * at the client side
-	 */
-	@PUT
-	@Path("{clientId}/image")
-	@Consumes({ MediaType.MULTIPART_FORM_DATA })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public Response updateClientImage(
-			@PathParam("clientId") final Long clientId,
-			@HeaderParam("Content-Length") Long fileSize,
-			@FormDataParam("file") InputStream inputStream,
-			@FormDataParam("file") FormDataContentDisposition fileDetails,
-			@FormDataParam("file") FormDataBodyPart bodyPart) {
-		return addNewClientImage(clientId, fileSize, inputStream, fileDetails,
-				bodyPart);
-	}
-	
-	@DELETE
-	@Path("{clientId}/image")
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
-	public Response deleteClientImage(@PathParam("clientId") final Long clientId) {
-		this.clientWritePlatformService.deleteClientImage(clientId);
-		return Response.ok(new EntityIdentifier(clientId)).build();
-	}
-	
-	
-	/**
-	 *  This method is added only for consistency with other URL patterns
-	 *  and for maintaining consistency of usage of the HTTP "verb"
-	 *  at the client side
-	 *  
-	 * Upload image as a Data URL (essentially a base64 encoded stream)
-	 */
-	@PUT
-	@Path("{clientId}/image")
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public Response updateClientImage(
-			@PathParam("clientId") final Long clientId,
-			final String jsonRequestBody) {
-		return addNewClientImage(clientId, jsonRequestBody);
-	}
+    @DELETE
+    @Path("{clientId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String deleteClient(@PathParam("clientId") final Long clientId) {
+
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("DELETE", "clients", clientId, "{}");
+
+        return this.apiJsonSerializerService.serializeEntityIdentifier(result);
+    }
+
+    @GET
+    @Path("{clientId}/loans")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String retrieveClientAccount(@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
+
+        context.authenticatedUser().validateHasReadPermission("CLIENT");
+
+        Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("pendingApprovalLoans", "awaitingDisbursalLoans",
+                "openLoans", "closedLoans", "anyLoanCount", "pendingApprovalLoanCount", "awaitingDisbursalLoanCount", "activeLoanCount",
+                "closedLoanCount", "pendingApprovalDespositAccountsCount", "pendingApprovalDespositAccounts",
+                "approvedDespositAccountsCount", "approvedDespositAccounts", "withdrawnByClientDespositAccountsCount",
+                "withdrawnByClientDespositAccounts", "closedDepositAccountsCount", "closedDepositAccounts", "rejectedDepositAccountsCount",
+                "rejectedDepositAccounts", "preclosedDepositAccountsCount", "preclosedDepositAccounts"));
+
+        Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+        if (responseParameters.isEmpty()) {
+            responseParameters.addAll(typicalResponseParameters);
+        }
+        boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+
+        ClientAccountSummaryCollectionData clientAccount = this.clientReadPlatformService.retrieveClientAccountDetails(clientId);
+
+        return this.apiJsonSerializerService.serializeClientAccountSummaryCollectionDataToJson(prettyPrint, responseParameters,
+                clientAccount);
+    }
+
+    @GET
+    @Path("{clientId}/notes")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String retrieveAllClientNotes(@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
+
+        context.authenticatedUser().validateHasReadPermission("CLIENTNOTE");
+
+        Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "clientId", "loanId", "loanTransactionId",
+                "noteType", "note", "createdById", "createdByUsername", "createdOn", "updatedById", "updatedByUsername", "updatedOn"));
+
+        Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+        if (responseParameters.isEmpty()) {
+            responseParameters.addAll(typicalResponseParameters);
+        }
+        boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+
+        Collection<NoteData> notes = this.clientReadPlatformService.retrieveAllClientNotes(clientId);
+
+        return this.apiJsonSerializerService.serializeNoteDataToJson(prettyPrint, responseParameters, notes);
+    }
+
+    @POST
+    @Path("{clientId}/notes")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public Response addNewClientNote(@PathParam("clientId") final Long clientId, final String jsonRequestBody) {
+
+        NoteCommand command = this.apiDataConversionService.convertJsonToNoteCommand(null, clientId, jsonRequestBody);
+
+        EntityIdentifier identifier = this.clientWritePlatformService.addClientNote(command);
+
+        return Response.ok().entity(identifier).build();
+    }
+
+    @GET
+    @Path("{clientId}/notes/{noteId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String retrieveClientNote(@PathParam("clientId") final Long clientId, @PathParam("noteId") final Long noteId,
+            @Context final UriInfo uriInfo) {
+
+        context.authenticatedUser().validateHasReadPermission("CLIENTNOTE");
+
+        Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "clientId", "loanId", "loanTransactionId",
+                "noteType", "note", "createdById", "createdByUsername", "createdOn", "updatedById", "updatedByUsername", "updatedOn"));
+
+        Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+        if (responseParameters.isEmpty()) {
+            responseParameters.addAll(typicalResponseParameters);
+        }
+        boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+
+        NoteData note = this.clientReadPlatformService.retrieveClientNote(clientId, noteId);
+
+        return this.apiJsonSerializerService.serializeNoteDataToJson(prettyPrint, responseParameters, note);
+    }
+
+    @PUT
+    @Path("{clientId}/notes/{noteId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public Response updateClientNote(@PathParam("clientId") final Long clientId, @PathParam("noteId") final Long noteId,
+            final String jsonRequestBody) {
+
+        NoteCommand command = this.apiDataConversionService.convertJsonToNoteCommand(noteId, clientId, jsonRequestBody);
+
+        EntityIdentifier identifier = this.clientWritePlatformService.updateNote(command);
+
+        return Response.ok().entity(identifier).build();
+    }
+
+    /**
+     * Upload images through multi-part form upload
+     */
+    @POST
+    @Path("{clientId}/image")
+    @Consumes({ MediaType.MULTIPART_FORM_DATA })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public Response addNewClientImage(@PathParam("clientId") final Long clientId, @HeaderParam("Content-Length") Long fileSize,
+            @FormDataParam("file") InputStream inputStream, @FormDataParam("file") FormDataContentDisposition fileDetails,
+            @FormDataParam("file") FormDataBodyPart bodyPart) {
+
+        // TODO: vishwas might need more advances validation (like reading magic
+        // number) for handling malicious clients
+        // and clients not setting mime type
+        FileUtils.validateClientImageNotEmpty(fileDetails.getFileName());
+        FileUtils.validateImageMimeType(bodyPart.getMediaType().toString());
+        FileUtils.validateFileSizeWithinPermissibleRange(fileSize, fileDetails.getFileName(), ApiConstants.MAX_FILE_UPLOAD_SIZE_IN_MB);
+
+        logger.debug(bodyPart.getMediaType().toString());
+
+        EntityIdentifier entityIdentifier = this.clientWritePlatformService.saveOrUpdateClientImage(clientId, fileDetails.getFileName(),
+                inputStream);
+
+        return Response.ok().entity(entityIdentifier).build();
+    }
+
+    /**
+     * Upload image as a Data URL (essentially a base64 encoded stream)
+     */
+    @POST
+    @Path("{clientId}/image")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public Response addNewClientImage(@PathParam("clientId") final Long clientId, final String jsonRequestBody) {
+
+        Base64EncodedImage base64EncodedImage = FileUtils.extractImageFromDataURL(jsonRequestBody);
+
+        EntityIdentifier entityIdentifier = this.clientWritePlatformService.saveOrUpdateClientImage(clientId, base64EncodedImage);
+
+        return Response.ok().entity(entityIdentifier).build();
+    }
+
+    /**
+     * Returns a base 64 encoded client image
+     */
+    @GET
+    @Path("{clientId}/image")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public Response retrieveClientImage(@PathParam("clientId") final Long clientId) {
+
+        context.authenticatedUser().validateHasReadPermission("CLIENTIMAGE");
+
+        final ClientData clientData = this.clientReadPlatformService.retrieveIndividualClient(clientId);
+
+        if (clientData.imageKeyDoesNotExist()) { throw new ImageNotFoundException("clients", clientId); }
+        return Response.ok().entity(Base64.encodeFromFile(clientData.imageKey())).build();
+    }
+
+    /**
+     * This method is added only for consistency with other URL patterns and for
+     * maintaining consistency of usage of the HTTP "verb" at the client side
+     */
+    @PUT
+    @Path("{clientId}/image")
+    @Consumes({ MediaType.MULTIPART_FORM_DATA })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public Response updateClientImage(@PathParam("clientId") final Long clientId, @HeaderParam("Content-Length") Long fileSize,
+            @FormDataParam("file") InputStream inputStream, @FormDataParam("file") FormDataContentDisposition fileDetails,
+            @FormDataParam("file") FormDataBodyPart bodyPart) {
+        return addNewClientImage(clientId, fileSize, inputStream, fileDetails, bodyPart);
+    }
+
+    @DELETE
+    @Path("{clientId}/image")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public Response deleteClientImage(@PathParam("clientId") final Long clientId) {
+        this.clientWritePlatformService.deleteClientImage(clientId);
+        return Response.ok(new EntityIdentifier(clientId)).build();
+    }
+
+    /**
+     * This method is added only for consistency with other URL patterns and for
+     * maintaining consistency of usage of the HTTP "verb" at the client side
+     * 
+     * Upload image as a Data URL (essentially a base64 encoded stream)
+     */
+    @PUT
+    @Path("{clientId}/image")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public Response updateClientImage(@PathParam("clientId") final Long clientId, final String jsonRequestBody) {
+        return addNewClientImage(clientId, jsonRequestBody);
+    }
 }

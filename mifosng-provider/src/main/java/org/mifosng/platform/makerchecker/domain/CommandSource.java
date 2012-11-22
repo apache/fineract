@@ -108,10 +108,6 @@ public class CommandSource extends AbstractPersistable<Long> {
         return this.apiOperation;
     }
 
-    public boolean isClientResource() {
-        return this.resource.equalsIgnoreCase("CLIENTS");
-    }
-
     public boolean isCreate() {
         return this.apiOperation.equalsIgnoreCase("CREATE");
     }
@@ -122,5 +118,13 @@ public class CommandSource extends AbstractPersistable<Long> {
 
     public boolean isDelete() {
         return this.apiOperation.equalsIgnoreCase("DELETE") && this.resourceId != null;
+    }
+    
+    public boolean isClientResource() {
+        return this.resource.equalsIgnoreCase("CLIENTS");
+    }
+
+    public boolean isRoleResource() {
+        return this.resource.equalsIgnoreCase("ROLES");
     }
 }

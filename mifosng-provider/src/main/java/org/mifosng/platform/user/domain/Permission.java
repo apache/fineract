@@ -12,27 +12,26 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 public class Permission extends AbstractPersistable<Long> {
 
     @SuppressWarnings("unused")
-	@Column(name = "grouping", nullable = false, length=45)
-    private final String          grouping;
-        
-    @Column(name = "code", nullable = false, length=100)
-    private final String          code;
+    @Column(name = "grouping", nullable = false, length = 45)
+    private final String grouping;
 
-	@Column(name = "default_name", nullable = false, length=100)
-    private final String          defaultName;
+    @Column(name = "code", nullable = false, length = 100)
+    private final String code;
 
-	@Column(name = "default_description", nullable = false, length=500)
-    private final String          defaultDescription;
+    @Column(name = "default_name", nullable = false, length = 100)
+    private final String defaultName;
 
-    @SuppressWarnings("unused")
-	@Column(name = "entity_name", nullable = true, length=100)
-    private final String          entityName;
+    @Column(name = "default_description", nullable = false, length = 500)
+    private final String defaultDescription;
 
     @SuppressWarnings("unused")
-	@Column(name = "action_name", nullable = true, length=100)
-    private final String          actionName;
-	
-	
+    @Column(name = "entity_name", nullable = true, length = 100)
+    private final String entityName;
+
+    @SuppressWarnings("unused")
+    @Column(name = "action_name", nullable = true, length = 100)
+    private final String actionName;
+
     protected Permission() {
         this.grouping = null;
         this.code = null;
@@ -42,15 +41,15 @@ public class Permission extends AbstractPersistable<Long> {
         this.actionName = null;
     }
 
-	public boolean hasCode(String checkCode) {
-		return this.code.equalsIgnoreCase(checkCode);
-	}
+    public boolean hasCode(final String checkCode) {
+        return this.code.equalsIgnoreCase(checkCode);
+    }
 
-	public String code() {
-		return this.code;
-	}
+    public String code() {
+        return this.code;
+    }
 
-	public PermissionData toData() {
-		return new PermissionData(this.getId(), this.defaultName, this.defaultDescription, this.code);
-	}
+    public PermissionData toData() {
+        return new PermissionData(this.getId(), this.defaultName, this.defaultDescription, this.code);
+    }
 }

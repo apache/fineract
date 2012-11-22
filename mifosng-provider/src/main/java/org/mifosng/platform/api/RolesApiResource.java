@@ -25,6 +25,7 @@ import org.mifosng.platform.api.data.RolePermissionsData;
 import org.mifosng.platform.api.infrastructure.PortfolioApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService;
 import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
+import org.mifosng.platform.makerchecker.service.PortfolioCommandSourceWritePlatformService;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.user.service.PermissionReadPlatformService;
 import org.mifosng.platform.user.service.RoleReadPlatformService;
@@ -52,6 +53,9 @@ public class RolesApiResource {
 
     @Autowired
     private PortfolioApiJsonSerializerService apiJsonSerializerService;
+    
+    @Autowired
+    private PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @Autowired
     private PlatformSecurityContext context;
@@ -77,7 +81,7 @@ public class RolesApiResource {
     @Path("template")
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
-    public String retrieveNewRoleDetails(@Context final UriInfo uriInfo) {
+    public String retrieveRoleTemplate(@Context final UriInfo uriInfo) {
 
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 
@@ -94,13 +98,11 @@ public class RolesApiResource {
     @POST
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
-    public String createRole(final String jsonRequestBody) {
+    public String createRole(final String apiRequestBodyAsJson) {
+        
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE", "roles", null, apiRequestBodyAsJson);
 
-        final RoleCommand command = this.apiDataConversionService.convertJsonToRoleCommand(null, jsonRequestBody);
-
-        final Long roleId = this.roleWritePlatformService.createRole(command);
-
-        return this.apiJsonSerializerService.serializeEntityIdentifier(new EntityIdentifier(roleId));
+        return this.apiJsonSerializerService.serializeEntityIdentifier(result);
     }
 
     // TODO - General thing to fix about REST API is if use partial response
@@ -140,7 +142,7 @@ public class RolesApiResource {
     @Produces({MediaType.APPLICATION_JSON})
     public String updateRole(@PathParam("roleId") final Long roleId, final String jsonRequestBody) {
 
-        final RoleCommand command = this.apiDataConversionService.convertJsonToRoleCommand(roleId, jsonRequestBody);
+        final RoleCommand command = this.apiDataConversionService.convertApiRequestJsonToRoleCommand(roleId, jsonRequestBody);
 
         this.roleWritePlatformService.updateRole(command);
 
