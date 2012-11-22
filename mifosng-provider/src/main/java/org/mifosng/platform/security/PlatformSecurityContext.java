@@ -4,6 +4,5 @@ import org.mifosng.platform.user.domain.AppUser;
 
 public interface PlatformSecurityContext {
 
-	AppUser authenticatedUser();
-
+    AppUser authenticatedUser();
 }

@@ -57,8 +57,7 @@ public class ClientCommandHandler implements CommandSourceHandler {
             }
         } else if (commandSource.isUpdate()) {
             try {
-                final String jsonOfChangesOnly = this.changeDetectionService.detectChanges(commandSource.operation(),
-                        commandSource.resourceName(), commandSource.resourceId(), commandSerializedAsJson);
+                final String jsonOfChangesOnly = this.changeDetectionService.detectChangesOnUpdate(commandSource.resourceName(), commandSource.resourceId(), commandSerializedAsJson);
                 commandSourceResult.updateJsonTo(jsonOfChangesOnly);
 
                 final ClientCommand changesOnly = this.apiDataConversionService.convertInternalJsonFormatToClientCommand(

@@ -6,7 +6,7 @@ import org.mifosng.platform.api.data.RoleData;
 
 public interface RoleReadPlatformService {
 
-	Collection<RoleData> retrieveAllRoles();
+    Collection<RoleData> retrieveAllRoles();
 
-	RoleData retrieveRole(Long roleId);
+    RoleData retrieveRole(Long roleId);
 }

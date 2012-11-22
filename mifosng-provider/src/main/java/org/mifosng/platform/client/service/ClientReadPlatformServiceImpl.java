@@ -37,59 +37,56 @@ import org.springframework.stereotype.Service;
 @Service
 public class ClientReadPlatformServiceImpl implements ClientReadPlatformService {
 
-	private final JdbcTemplate jdbcTemplate;
-	private final PlatformSecurityContext context;
-	private final OfficeReadPlatformService officeReadPlatformService;
-	private final AppUserReadPlatformService appUserReadPlatformService;
+    private final JdbcTemplate jdbcTemplate;
+    private final PlatformSecurityContext context;
+    private final OfficeReadPlatformService officeReadPlatformService;
+    private final AppUserReadPlatformService appUserReadPlatformService;
 
-	@Autowired
-	public ClientReadPlatformServiceImpl(final PlatformSecurityContext context,
-			final TenantAwareRoutingDataSource dataSource,
-			final OfficeReadPlatformService officeReadPlatformService,
-			final AppUserReadPlatformService appUserReadPlatformService) {
-		this.context = context;
-		this.officeReadPlatformService = officeReadPlatformService;
-		this.appUserReadPlatformService = appUserReadPlatformService;
-		this.jdbcTemplate = new JdbcTemplate(dataSource);
-	}
+    @Autowired
+    public ClientReadPlatformServiceImpl(final PlatformSecurityContext context, final TenantAwareRoutingDataSource dataSource,
+            final OfficeReadPlatformService officeReadPlatformService, final AppUserReadPlatformService appUserReadPlatformService) {
+        this.context = context;
+        this.officeReadPlatformService = officeReadPlatformService;
+        this.appUserReadPlatformService = appUserReadPlatformService;
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    }
 
-	@Override
-	public Collection<ClientData> retrieveAllIndividualClients(final String extraCriteria) {
+    @Override
+    public Collection<ClientData> retrieveAllIndividualClients(final String extraCriteria) {
 
-		AppUser currentUser = context.authenticatedUser();
-		String hierarchy = currentUser.getOffice().getHierarchy();
-		String hierarchySearchString = hierarchy + "%";	
-		
-		ClientMapper rm = new ClientMapper();
+        AppUser currentUser = context.authenticatedUser();
+        String hierarchy = currentUser.getOffice().getHierarchy();
+        String hierarchySearchString = hierarchy + "%";
 
-		String sql = "select " + rm.clientSchema();
+        ClientMapper rm = new ClientMapper();
 
-		if (StringUtils.isNotBlank(extraCriteria))			
-			sql += " and (" + extraCriteria + ")";
+        String sql = "select " + rm.clientSchema();
 
-		sql += " order by c.lastname ASC, c.firstname ASC";
+        if (StringUtils.isNotBlank(extraCriteria)) sql += " and (" + extraCriteria + ")";
 
-		return this.jdbcTemplate.query(sql, rm, new Object[] {hierarchySearchString});
-	}
+        sql += " order by c.lastname ASC, c.firstname ASC";
 
-	@Override
-	public ClientData retrieveIndividualClient(final Long clientId) {
+        return this.jdbcTemplate.query(sql, rm, new Object[] { hierarchySearchString });
+    }
 
-		try {
+    @Override
+    public ClientData retrieveIndividualClient(final Long clientId) {
 
-			AppUser currentUser = context.authenticatedUser();
-			String hierarchy = currentUser.getOffice().getHierarchy();
-			String hierarchySearchString = hierarchy + "%";	
-			
-			ClientMapper rm = new ClientMapper();
+        try {
 
-			String sql = "select " + rm.clientSchema() + " and c.id = " + clientId;
+            AppUser currentUser = context.authenticatedUser();
+            String hierarchy = currentUser.getOffice().getHierarchy();
+            String hierarchySearchString = hierarchy + "%";
 
-			return this.jdbcTemplate.queryForObject(sql, rm, new Object[] {hierarchySearchString});
-		} catch (EmptyResultDataAccessException e) {
-			throw new ClientNotFoundException(clientId);
-		}
-	}
+            ClientMapper rm = new ClientMapper();
+
+            String sql = "select " + rm.clientSchema() + " and c.id = " + clientId;
+
+            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { hierarchySearchString });
+        } catch (EmptyResultDataAccessException e) {
+            throw new ClientNotFoundException(clientId);
+        }
+    }
 
     @Override
     public Collection<ClientLookup> retrieveAllIndividualClientsForLookup(String extraCriteria) {
@@ -100,7 +97,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
         String sql = "select " + rm.clientLookupSchema();
 
-        if (StringUtils.isNotBlank(extraCriteria)){
+        if (StringUtils.isNotBlank(extraCriteria)) {
             sql += " and (" + extraCriteria + ")";
         }
 
@@ -119,57 +116,53 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     }
 
     @Override
-	public ClientData retrieveNewClientDetails() {
+    public ClientData retrieveNewClientDetails() {
 
-		final AppUser currentUser = context.authenticatedUser();
+        final AppUser currentUser = context.authenticatedUser();
 
-		final List<OfficeLookup> offices = new ArrayList<OfficeLookup>(officeReadPlatformService.retrieveAllOfficesForLookup());
-		final Long officeId = currentUser.getOffice().getId();
-		
-		return ClientData.template(officeId, new LocalDate(), offices);
-	}
+        final List<OfficeLookup> offices = new ArrayList<OfficeLookup>(officeReadPlatformService.retrieveAllOfficesForLookup());
+        final Long officeId = currentUser.getOffice().getId();
 
+        return ClientData.template(officeId, new LocalDate(), offices);
+    }
 
+    private static final class ClientMapper implements RowMapper<ClientData> {
 
-	private static final class ClientMapper implements RowMapper<ClientData> {
+        public String clientSchema() {
+            return "c.office_id as officeId, o.name as officeName, c.id as id, c.firstname as firstname, c.lastname as lastname, c.display_name as displayName, "
+                    + "c.external_id as externalId, c.joining_date as joinedDate, c.image_key as imagekey from m_client c join m_office o on o.id = c.office_id "
+                    + " where o.hierarchy like ? and c.is_deleted=0 ";
+        }
 
-		public String clientSchema() {
-			return "c.office_id as officeId, o.name as officeName, c.id as id, c.firstname as firstname, c.lastname as lastname, c.display_name as displayName, " +
-				   "c.external_id as externalId, c.joining_date as joinedDate, c.image_key as imagekey from m_client c join m_office o on o.id = c.office_id " +
-					" where o.hierarchy like ? and c.is_deleted=0 ";
-		}
+        @Override
+        public ClientData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
-		@Override
-		public ClientData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
-				throws SQLException {
+            final Long officeId = JdbcSupport.getLong(rs, "officeId");
+            final Long id = JdbcSupport.getLong(rs, "id");
+            String firstname = rs.getString("firstname");
+            if (StringUtils.isBlank(firstname)) {
+                firstname = "";
+            }
+            final String lastname = rs.getString("lastname");
+            final String displayName = rs.getString("displayName");
+            final String externalId = rs.getString("externalId");
+            final LocalDate joinedDate = JdbcSupport.getLocalDate(rs, "joinedDate");
+            final String imageKey = rs.getString("imageKey");
+            final String officeName = rs.getString("officeName");
 
-			final Long officeId = JdbcSupport.getLong(rs, "officeId");
-			final Long id = JdbcSupport.getLong(rs, "id");
-			String firstname = rs.getString("firstname");
-			if (StringUtils.isBlank(firstname)) {
-				firstname = "";
-			}
-			final String lastname = rs.getString("lastname");
-			final String displayName = rs.getString("displayName");
-			final String externalId = rs.getString("externalId");
-			final LocalDate joinedDate = JdbcSupport.getLocalDate(rs, "joinedDate");
-			final String imageKey = rs.getString("imageKey");
-			final String officeName = rs.getString("officeName");
+            return new ClientData(officeId, officeName, id, firstname, lastname, displayName, externalId, joinedDate, imageKey, null, null,
+                    null);
+        }
 
-			return new ClientData(officeId, officeName, id, firstname,
-					lastname, displayName, externalId, joinedDate,imageKey, null, null, null);
-		}
+    }
 
-	}
-
-    private static final class ClientLookupMapper implements RowMapper<ClientLookup>{
+    private static final class ClientLookupMapper implements RowMapper<ClientLookup> {
 
         public String clientLookupSchema() {
-            return "c.id as id, c.firstname as firstname, c.lastname as lastname, " +
-                   "c.office_id as officeId, o.name as officeName " +
-                   "from m_client c join m_office o on o.id = c.office_id where c.is_deleted=0 ";
+            return "c.id as id, c.firstname as firstname, c.lastname as lastname, " + "c.office_id as officeId, o.name as officeName "
+                    + "from m_client c join m_office o on o.id = c.office_id where c.is_deleted=0 ";
         }
-        
+
         @Override
         public ClientLookup mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
             Long id = rs.getLong("id");
@@ -186,82 +179,83 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         }
     }
 
-	@Override
-	public ClientAccountSummaryCollectionData retrieveClientAccountDetails(final Long clientId) {
+    @Override
+    public ClientAccountSummaryCollectionData retrieveClientAccountDetails(final Long clientId) {
 
-		try {
-			this.context.authenticatedUser();
-			
-			// Check if client exists
-			retrieveIndividualClient(clientId);
+        try {
+            this.context.authenticatedUser();
 
-			List<ClientAccountSummaryData> pendingApprovalLoans = new ArrayList<ClientAccountSummaryData>();
-			List<ClientAccountSummaryData> awaitingDisbursalLoans = new ArrayList<ClientAccountSummaryData>();
-			List<ClientAccountSummaryData> openLoans = new ArrayList<ClientAccountSummaryData>();
-			List<ClientAccountSummaryData> closedLoans = new ArrayList<ClientAccountSummaryData>();
+            // Check if client exists
+            retrieveIndividualClient(clientId);
 
-			ClientLoanAccountSummaryDataMapper rm = new ClientLoanAccountSummaryDataMapper();
+            List<ClientAccountSummaryData> pendingApprovalLoans = new ArrayList<ClientAccountSummaryData>();
+            List<ClientAccountSummaryData> awaitingDisbursalLoans = new ArrayList<ClientAccountSummaryData>();
+            List<ClientAccountSummaryData> openLoans = new ArrayList<ClientAccountSummaryData>();
+            List<ClientAccountSummaryData> closedLoans = new ArrayList<ClientAccountSummaryData>();
 
-			String sql = "select " + rm.loanAccountSummarySchema() + " where l.client_id = ?";
+            ClientLoanAccountSummaryDataMapper rm = new ClientLoanAccountSummaryDataMapper();
 
-			List<ClientAccountSummaryData> results = this.jdbcTemplate.query(sql, rm, new Object[] {clientId});
-			if (results != null) {
-				for (ClientAccountSummaryData row : results) {
+            String sql = "select " + rm.loanAccountSummarySchema() + " where l.client_id = ?";
 
-					LoanStatusMapper statusMapper = new LoanStatusMapper(row.getAccountStatusId());
+            List<ClientAccountSummaryData> results = this.jdbcTemplate.query(sql, rm, new Object[] { clientId });
+            if (results != null) {
+                for (ClientAccountSummaryData row : results) {
 
-					if (statusMapper.isOpen()) {
-						openLoans.add(row);
-					} else if (statusMapper.isAwaitingDisbursal()) {
-						awaitingDisbursalLoans.add(row);
-					} else if (statusMapper.isPendingApproval()) {
-						pendingApprovalLoans.add(row);
-					} else {
-						closedLoans.add(row);
-					}
-				}
-			}
-			
-			List<ClientAccountSummaryData> pendingApprovalDepositAccounts = new ArrayList<ClientAccountSummaryData>();
-			List<ClientAccountSummaryData> approvedDepositAccounts = new ArrayList<ClientAccountSummaryData>();
-			List<ClientAccountSummaryData> withdrawnByClientDespositAccounts = new ArrayList<ClientAccountSummaryData>();
-			List<ClientAccountSummaryData> closedDepositAccounts = new ArrayList<ClientAccountSummaryData>();
-			List<ClientAccountSummaryData> rejectedDepositAccounts = new ArrayList<ClientAccountSummaryData>();
-			List<ClientAccountSummaryData> preclosedDepositAccounts = new ArrayList<ClientAccountSummaryData>();
-			List<ClientAccountSummaryData> maturedDepositAccounts = new ArrayList<ClientAccountSummaryData>();
-			
-			ClientDespoitAccountSummaryDataMapper depositAccountMapper = new ClientDespoitAccountSummaryDataMapper();
+                    LoanStatusMapper statusMapper = new LoanStatusMapper(row.getAccountStatusId());
 
-			String depositAccountsSql = "select " + depositAccountMapper.schema() + " where da.client_id = ? and da.is_deleted=0";
-			List<ClientAccountSummaryData> depositAccountResults = this.jdbcTemplate.query(depositAccountsSql, depositAccountMapper, new Object[] {clientId});
-			if (depositAccountResults != null) {
-				for (ClientAccountSummaryData row : depositAccountResults) {
+                    if (statusMapper.isOpen()) {
+                        openLoans.add(row);
+                    } else if (statusMapper.isAwaitingDisbursal()) {
+                        awaitingDisbursalLoans.add(row);
+                    } else if (statusMapper.isPendingApproval()) {
+                        pendingApprovalLoans.add(row);
+                    } else {
+                        closedLoans.add(row);
+                    }
+                }
+            }
 
-					if (row.getAccountStatusId() == 100) {
-						pendingApprovalDepositAccounts.add(row);
-					} else if (row.getAccountStatusId() == 300) {
-						approvedDepositAccounts.add(row);
-					} else if (row.getAccountStatusId() == 400) {
-						withdrawnByClientDespositAccounts.add(row);
-					} else if (row.getAccountStatusId() == 500) {
-						rejectedDepositAccounts.add(row);
-					} else if (row.getAccountStatusId() == 600) {
-						closedDepositAccounts.add(row);
-					} else if (row.getAccountStatusId() == 700) {
-						maturedDepositAccounts.add(row);
-					}else if (row.getAccountStatusId() == 800) {
-						preclosedDepositAccounts.add(row);
-					}
-				}
-			}
+            List<ClientAccountSummaryData> pendingApprovalDepositAccounts = new ArrayList<ClientAccountSummaryData>();
+            List<ClientAccountSummaryData> approvedDepositAccounts = new ArrayList<ClientAccountSummaryData>();
+            List<ClientAccountSummaryData> withdrawnByClientDespositAccounts = new ArrayList<ClientAccountSummaryData>();
+            List<ClientAccountSummaryData> closedDepositAccounts = new ArrayList<ClientAccountSummaryData>();
+            List<ClientAccountSummaryData> rejectedDepositAccounts = new ArrayList<ClientAccountSummaryData>();
+            List<ClientAccountSummaryData> preclosedDepositAccounts = new ArrayList<ClientAccountSummaryData>();
+            List<ClientAccountSummaryData> maturedDepositAccounts = new ArrayList<ClientAccountSummaryData>();
 
-			return new ClientAccountSummaryCollectionData(pendingApprovalLoans, awaitingDisbursalLoans, openLoans, closedLoans, 
-					pendingApprovalDepositAccounts, approvedDepositAccounts, withdrawnByClientDespositAccounts,
-					rejectedDepositAccounts,closedDepositAccounts,preclosedDepositAccounts,maturedDepositAccounts);
-		} catch (EmptyResultDataAccessException e) {
-			throw new ClientNotFoundException(clientId);
-		}
-	}
+            ClientDespoitAccountSummaryDataMapper depositAccountMapper = new ClientDespoitAccountSummaryDataMapper();
+
+            String depositAccountsSql = "select " + depositAccountMapper.schema() + " where da.client_id = ? and da.is_deleted=0";
+            List<ClientAccountSummaryData> depositAccountResults = this.jdbcTemplate.query(depositAccountsSql, depositAccountMapper,
+                    new Object[] { clientId });
+            if (depositAccountResults != null) {
+                for (ClientAccountSummaryData row : depositAccountResults) {
+
+                    if (row.getAccountStatusId() == 100) {
+                        pendingApprovalDepositAccounts.add(row);
+                    } else if (row.getAccountStatusId() == 300) {
+                        approvedDepositAccounts.add(row);
+                    } else if (row.getAccountStatusId() == 400) {
+                        withdrawnByClientDespositAccounts.add(row);
+                    } else if (row.getAccountStatusId() == 500) {
+                        rejectedDepositAccounts.add(row);
+                    } else if (row.getAccountStatusId() == 600) {
+                        closedDepositAccounts.add(row);
+                    } else if (row.getAccountStatusId() == 700) {
+                        maturedDepositAccounts.add(row);
+                    } else if (row.getAccountStatusId() == 800) {
+                        preclosedDepositAccounts.add(row);
+                    }
+                }
+            }
+
+            return new ClientAccountSummaryCollectionData(pendingApprovalLoans, awaitingDisbursalLoans, openLoans, closedLoans,
+                    pendingApprovalDepositAccounts, approvedDepositAccounts, withdrawnByClientDespositAccounts, rejectedDepositAccounts,
+                    closedDepositAccounts, preclosedDepositAccounts, maturedDepositAccounts);
+        } catch (EmptyResultDataAccessException e) {
+            throw new ClientNotFoundException(clientId);
+        }
+    }
 
     @Override
     public Collection<ClientAccountSummaryData> retrieveClientLoanAccountsByLoanOfficerId(Long clientId, Long loanOfficerId) {
@@ -275,282 +269,251 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
         String sql = "select " + rm.loanAccountSummarySchema() + " where l.client_id = ? and l.loan_officer_id = ?";
 
-        List<ClientAccountSummaryData> loanAccounts = this.jdbcTemplate.query(sql, rm, new Object[] {clientId, loanOfficerId});
+        List<ClientAccountSummaryData> loanAccounts = this.jdbcTemplate.query(sql, rm, new Object[] { clientId, loanOfficerId });
 
         return loanAccounts;
     }
 
-	private static final class ClientLoanAccountSummaryDataMapper implements
-			RowMapper<ClientAccountSummaryData> {
+    private static final class ClientLoanAccountSummaryDataMapper implements RowMapper<ClientAccountSummaryData> {
 
-		public String loanAccountSummarySchema() {
+        public String loanAccountSummarySchema() {
 
-			StringBuilder accountsSummary = new StringBuilder("l.id as id, l.external_id as externalId,");
-			accountsSummary
-					.append("l.product_id as productId, lp.name as productName,")
-					.append("l.loan_status_id as statusId ")
-					.append("from m_loan l ")
-					.append("LEFT JOIN m_product_loan AS lp ON lp.id = l.product_id ");
+            StringBuilder accountsSummary = new StringBuilder("l.id as id, l.external_id as externalId,");
+            accountsSummary.append("l.product_id as productId, lp.name as productName,").append("l.loan_status_id as statusId ")
+                    .append("from m_loan l ").append("LEFT JOIN m_product_loan AS lp ON lp.id = l.product_id ");
 
-			return accountsSummary.toString();
-		}
+            return accountsSummary.toString();
+        }
 
-		@Override
-		public ClientAccountSummaryData mapRow(final ResultSet rs,
-				@SuppressWarnings("unused") final int rowNum) throws SQLException {
+        @Override
+        public ClientAccountSummaryData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
-			Long id = JdbcSupport.getLong(rs, "id");
-			String externalId = rs.getString("externalId");
-			Long productId = JdbcSupport.getLong(rs, "productId");
-			String loanProductName = rs.getString("productName");
-			Integer loanStatusId = JdbcSupport.getInteger(rs, "statusId");
+            Long id = JdbcSupport.getLong(rs, "id");
+            String externalId = rs.getString("externalId");
+            Long productId = JdbcSupport.getLong(rs, "productId");
+            String loanProductName = rs.getString("productName");
+            Integer loanStatusId = JdbcSupport.getInteger(rs, "statusId");
 
-			return new ClientAccountSummaryData(id, externalId, productId, loanProductName, loanStatusId);
-		}
-	}
-	
-	private static final class ClientDespoitAccountSummaryDataMapper implements RowMapper<ClientAccountSummaryData> {
+            return new ClientAccountSummaryData(id, externalId, productId, loanProductName, loanStatusId);
+        }
+    }
 
-		public String schema() {
-		
-			StringBuilder accountsSummary = new StringBuilder("da.id as id, da.external_id as externalId,");
-			accountsSummary.append("da.product_id as productId, dp.name as productName,")
-						   .append("da.status_enum as statusId ")
-						   .append("from m_deposit_account da ")
-						   .append("LEFT JOIN m_product_deposit AS dp ON dp.id = da.product_id ");
-		
-			return accountsSummary.toString();
-		}
-		
-		@Override
-		public ClientAccountSummaryData mapRow(final ResultSet rs,
-				@SuppressWarnings("unused") final int rowNum) throws SQLException {
-		
-			Long id = JdbcSupport.getLong(rs, "id");
-			String externalId = rs.getString("externalId");
-			Long productId = JdbcSupport.getLong(rs, "productId");
-			String productName = rs.getString("productName");
-			Integer accountStatusId = JdbcSupport.getInteger(rs, "statusId");
-		
-			return new ClientAccountSummaryData(id, externalId, productId, productName, accountStatusId);
-		}
-	}
-	
-	
+    private static final class ClientDespoitAccountSummaryDataMapper implements RowMapper<ClientAccountSummaryData> {
 
-	@Override
-	public NoteData retrieveClientNote(Long clientId, Long noteId) {
+        public String schema() {
 
-		try {
-			context.authenticatedUser();
-			
-			// Check if client exists
-			retrieveIndividualClient(clientId);
+            StringBuilder accountsSummary = new StringBuilder("da.id as id, da.external_id as externalId,");
+            accountsSummary.append("da.product_id as productId, dp.name as productName,").append("da.status_enum as statusId ")
+                    .append("from m_deposit_account da ").append("LEFT JOIN m_product_deposit AS dp ON dp.id = da.product_id ");
 
-			// FIXME - use join on sql query to fetch user information for note
-			// rather than fetching users?
-			Collection<AppUserData> allUsers = this.appUserReadPlatformService
-					.retrieveAllUsers();
+            return accountsSummary.toString();
+        }
 
-			NoteMapper noteMapper = new NoteMapper(allUsers);
+        @Override
+        public ClientAccountSummaryData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
-			String sql = "select " + noteMapper.schema()
-					+ " where n.client_id = ? and n.id = ?";
+            Long id = JdbcSupport.getLong(rs, "id");
+            String externalId = rs.getString("externalId");
+            Long productId = JdbcSupport.getLong(rs, "productId");
+            String productName = rs.getString("productName");
+            Integer accountStatusId = JdbcSupport.getInteger(rs, "statusId");
 
-			return this.jdbcTemplate.queryForObject(sql, noteMapper, new Object[] {clientId, noteId});
-		} catch (EmptyResultDataAccessException e) {
-			throw new NoteNotFoundException(clientId);
-		}
-	}
+            return new ClientAccountSummaryData(id, externalId, productId, productName, accountStatusId);
+        }
+    }
 
-	@Override
-	public Collection<NoteData> retrieveAllClientNotes(Long clientId) {
+    @Override
+    public NoteData retrieveClientNote(Long clientId, Long noteId) {
 
-		context.authenticatedUser();
-		
-		// Check if client exists
-		retrieveIndividualClient(clientId);
+        try {
+            context.authenticatedUser();
 
-		// FIXME - use join on sql query to fetch user information for note
-		// rather than fetching users?
-		Collection<AppUserData> allUsers = this.appUserReadPlatformService
-				.retrieveAllUsers();
+            // Check if client exists
+            retrieveIndividualClient(clientId);
 
-		NoteMapper noteMapper = new NoteMapper(allUsers);
+            // FIXME - use join on sql query to fetch user information for note
+            // rather than fetching users?
+            Collection<AppUserData> allUsers = this.appUserReadPlatformService.retrieveAllUsers();
 
-		String sql = "select "
-				+ noteMapper.schema()
-				+ " where n.client_id = ? order by n.created_date DESC";
+            NoteMapper noteMapper = new NoteMapper(allUsers);
 
-		return this.jdbcTemplate.query(sql, noteMapper, new Object[] {clientId});
-	}
+            String sql = "select " + noteMapper.schema() + " where n.client_id = ? and n.id = ?";
 
-	private static final class NoteMapper implements RowMapper<NoteData> {
+            return this.jdbcTemplate.queryForObject(sql, noteMapper, new Object[] { clientId, noteId });
+        } catch (EmptyResultDataAccessException e) {
+            throw new NoteNotFoundException(clientId);
+        }
+    }
 
-		private final Collection<AppUserData> allUsers;
+    @Override
+    public Collection<NoteData> retrieveAllClientNotes(Long clientId) {
 
-		public NoteMapper(Collection<AppUserData> allUsers) {
-			this.allUsers = allUsers;
-		}
+        context.authenticatedUser();
 
-		public String schema() {
-			return "n.id as id, n.client_id as clientId, n.loan_id as loanId, n.loan_transaction_id as transactionId, n.note_type_enum as noteTypeEnum, n.note as note, "
-					+ "n.created_date as createdDate, n.createdby_id as createdById, n.lastmodified_date as lastModifiedDate, n.lastmodifiedby_id as lastModifiedById"
-					+ " from m_note n";
-		}
+        // Check if client exists
+        retrieveIndividualClient(clientId);
 
-		@Override
-		public NoteData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
-				throws SQLException {
+        // FIXME - use join on sql query to fetch user information for note
+        // rather than fetching users?
+        Collection<AppUserData> allUsers = this.appUserReadPlatformService.retrieveAllUsers();
 
-			Long id = JdbcSupport.getLong(rs, "id");
-			Long clientId = JdbcSupport.getLong(rs, "clientId");
-			Long loanId = JdbcSupport.getLong(rs, "loanId");
-			Long transactionId = JdbcSupport.getLong(rs, "transactionId");
-			Integer noteTypeId = JdbcSupport.getInteger(rs, "noteTypeEnum");
-			EnumOptionData noteType = NoteEnumerations.noteType(noteTypeId);
-			String note = rs.getString("note");
+        NoteMapper noteMapper = new NoteMapper(allUsers);
 
-			DateTime createdDate = JdbcSupport.getDateTime(rs, "createdDate");
-			Long createdById = JdbcSupport.getLong(rs, "createdById");
-			String createdByUsername = findUserById(createdById, allUsers);
+        String sql = "select " + noteMapper.schema() + " where n.client_id = ? order by n.created_date DESC";
 
-			DateTime lastModifiedDate = JdbcSupport.getDateTime(rs,
-					"lastModifiedDate");
-			Long lastModifiedById = JdbcSupport.getLong(rs, "lastModifiedById");
-			String updatedByUsername = findUserById(createdById, allUsers);
+        return this.jdbcTemplate.query(sql, noteMapper, new Object[] { clientId });
+    }
 
-			return new NoteData(id, clientId, loanId, transactionId, noteType,
-					note, createdDate, createdById, createdByUsername,
-					lastModifiedDate, lastModifiedById, updatedByUsername);
-		}
+    private static final class NoteMapper implements RowMapper<NoteData> {
 
-		private String findUserById(Long createdById, Collection<AppUserData> allUsers) {
-			String username = "";
-			for (AppUserData appUserData : allUsers) {
-				if (appUserData.getId().equals(createdById)) {
-					username = appUserData.getUsername();
-					break;
-				}
-			}
-			return username;
-		}
-	}
+        private final Collection<AppUserData> allUsers;
 
-	@Override
-	public Collection<ClientIdentifierData> retrieveClientIdentifiers(final Long clientId) {
+        public NoteMapper(Collection<AppUserData> allUsers) {
+            this.allUsers = allUsers;
+        }
 
-		AppUser currentUser = context.authenticatedUser();
-		String hierarchy = currentUser.getOffice().getHierarchy();
-		String hierarchySearchString = hierarchy + "%";
+        public String schema() {
+            return "n.id as id, n.client_id as clientId, n.loan_id as loanId, n.loan_transaction_id as transactionId, n.note_type_enum as noteTypeEnum, n.note as note, "
+                    + "n.created_date as createdDate, n.createdby_id as createdById, n.lastmodified_date as lastModifiedDate, n.lastmodifiedby_id as lastModifiedById"
+                    + " from m_note n";
+        }
 
-		ClientIdentityMapper rm = new ClientIdentityMapper();
+        @Override
+        public NoteData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
-		String sql = "select " + rm.schema();
+            Long id = JdbcSupport.getLong(rs, "id");
+            Long clientId = JdbcSupport.getLong(rs, "clientId");
+            Long loanId = JdbcSupport.getLong(rs, "loanId");
+            Long transactionId = JdbcSupport.getLong(rs, "transactionId");
+            Integer noteTypeId = JdbcSupport.getInteger(rs, "noteTypeEnum");
+            EnumOptionData noteType = NoteEnumerations.noteType(noteTypeId);
+            String note = rs.getString("note");
 
-		sql += " order by ci.id";
+            DateTime createdDate = JdbcSupport.getDateTime(rs, "createdDate");
+            Long createdById = JdbcSupport.getLong(rs, "createdById");
+            String createdByUsername = findUserById(createdById, allUsers);
 
-		return this.jdbcTemplate.query(sql, rm, new Object[] { clientId, hierarchySearchString });
-	}
-	
-	@Override
-	public ClientIdentifierData retrieveClientIdentifier(
-			final Long clientId,
-			final Long clientIdentifierId) {
-		try {
-			AppUser currentUser = context.authenticatedUser();
-			String hierarchy = currentUser.getOffice().getHierarchy();
-			String hierarchySearchString = hierarchy + "%";
+            DateTime lastModifiedDate = JdbcSupport.getDateTime(rs, "lastModifiedDate");
+            Long lastModifiedById = JdbcSupport.getLong(rs, "lastModifiedById");
+            String updatedByUsername = findUserById(createdById, allUsers);
 
-			ClientIdentityMapper rm = new ClientIdentityMapper();
+            return new NoteData(id, clientId, loanId, transactionId, noteType, note, createdDate, createdById, createdByUsername,
+                    lastModifiedDate, lastModifiedById, updatedByUsername);
+        }
 
-			String sql = "select " + rm.schema();
+        private String findUserById(final Long createdById, final Collection<AppUserData> allUsers) {
+            String username = "";
+            for (AppUserData appUserData : allUsers) {
+                if (appUserData.hasIdentifyOf(createdById)) {
+                    username = appUserData.username();
+                    break;
+                }
+            }
+            return username;
+        }
+    }
 
-			sql += " and ci.id = ?";
+    @Override
+    public Collection<ClientIdentifierData> retrieveClientIdentifiers(final Long clientId) {
 
-			final ClientIdentifierData clientIdentifierData = this.jdbcTemplate
-					.queryForObject(sql, rm, new Object[] { clientId,
-							hierarchySearchString, clientIdentifierId });
+        AppUser currentUser = context.authenticatedUser();
+        String hierarchy = currentUser.getOffice().getHierarchy();
+        String hierarchySearchString = hierarchy + "%";
 
-			return clientIdentifierData;
-		} catch (EmptyResultDataAccessException e) {
-			throw new ClientIdentifierNotFoundException(clientIdentifierId);
-		}
+        ClientIdentityMapper rm = new ClientIdentityMapper();
 
-	}
-	
-	private static final class ClientIdentityMapper implements RowMapper<ClientIdentifierData> {
+        String sql = "select " + rm.schema();
 
-		public ClientIdentityMapper() {
-		}
+        sql += " order by ci.id";
 
-		public String schema() {
-			return "ci.id as id, ci.client_id as clientId, ci.document_type_id as documentTypeId, ci.document_key as documentKey,"
-					+ " ci.description as description, cv.code_value as documentType "
-					+ " from m_client_identifier ci, m_client c, m_office o, m_code_value cv"
-					+ " where ci.client_id=c.id and c.office_id=o.id"
-					+ " and ci.document_type_id=cv.id"
-					+ " and ci.client_id = ? and o.hierarchy like ? ";
-		}
+        return this.jdbcTemplate.query(sql, rm, new Object[] { clientId, hierarchySearchString });
+    }
 
-		@Override
-		public ClientIdentifierData mapRow(final ResultSet rs,
-				@SuppressWarnings("unused") final int rowNum)
-				throws SQLException {
+    @Override
+    public ClientIdentifierData retrieveClientIdentifier(final Long clientId, final Long clientIdentifierId) {
+        try {
+            AppUser currentUser = context.authenticatedUser();
+            String hierarchy = currentUser.getOffice().getHierarchy();
+            String hierarchySearchString = hierarchy + "%";
 
-			final Long id = JdbcSupport.getLong(rs, "id");
-			final Long clientId = JdbcSupport.getLong(rs, "clientId");
-			final Long documentTypeId = JdbcSupport.getLong(rs, "documentTypeId");
-			final String documentKey = rs.getString("documentKey");
-			final String description = rs.getString("description");
-			final String documentTypeName = rs.getString("documentType");
+            ClientIdentityMapper rm = new ClientIdentityMapper();
 
-			return ClientIdentifierData.singleItem(id, clientId, documentTypeId,documentKey, description,documentTypeName);
-		}
+            String sql = "select " + rm.schema();
 
-	}
+            sql += " and ci.id = ?";
 
-	@Override
-	public ClientData retrieveClientByIdentifier(
-			final Long identifierTypeId,
-			final String identifierKey) {
-		try {
-			final ClientIdentifierMapper mapper = new ClientIdentifierMapper();
+            final ClientIdentifierData clientIdentifierData = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { clientId,
+                    hierarchySearchString, clientIdentifierId });
 
-			final String sql = "select " + mapper.clientLookupByIdentifierSchema();
+            return clientIdentifierData;
+        } catch (EmptyResultDataAccessException e) {
+            throw new ClientIdentifierNotFoundException(clientIdentifierId);
+        }
 
-			return jdbcTemplate.queryForObject(sql, mapper, new Object[] { identifierTypeId, identifierKey });
-		} catch (EmptyResultDataAccessException e) {
-			return null;
-		}
-	}
-	
-	private static final class ClientIdentifierMapper implements RowMapper<ClientData> {
+    }
 
-		public String clientLookupByIdentifierSchema() {
-			return "c.id as id, c.firstname as firstname, c.lastname as lastname, "
-					+ "c.office_id as officeId, o.name as officeName "
-					+ "from m_client c, m_office o, m_client_identifier ci "
-					+ "where o.id = c.office_id and c.id=ci.client_id "
-					+ "and ci.document_type_id= ? and ci.document_key like ?";
-		}
+    private static final class ClientIdentityMapper implements RowMapper<ClientIdentifierData> {
 
-		@Override
-		public ClientData mapRow(final ResultSet rs,
-				@SuppressWarnings("unused") final int rowNum)
-				throws SQLException {
-			
-			final Long id = rs.getLong("id");
-			String firstname = rs.getString("firstname");
-			if (StringUtils.isBlank(firstname)) {
-				firstname = "";
-			}
-			final String lastname = rs.getString("lastname");
-			
-			final Long officeId = rs.getLong("officeId");
-			final String officeName = rs.getString("officeName");
-			
-			return ClientData.clientIdentifier(id, firstname, lastname, officeId, officeName);
-		}
-	}
+        public ClientIdentityMapper() {}
+
+        public String schema() {
+            return "ci.id as id, ci.client_id as clientId, ci.document_type_id as documentTypeId, ci.document_key as documentKey,"
+                    + " ci.description as description, cv.code_value as documentType "
+                    + " from m_client_identifier ci, m_client c, m_office o, m_code_value cv"
+                    + " where ci.client_id=c.id and c.office_id=o.id" + " and ci.document_type_id=cv.id"
+                    + " and ci.client_id = ? and o.hierarchy like ? ";
+        }
+
+        @Override
+        public ClientIdentifierData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+
+            final Long id = JdbcSupport.getLong(rs, "id");
+            final Long clientId = JdbcSupport.getLong(rs, "clientId");
+            final Long documentTypeId = JdbcSupport.getLong(rs, "documentTypeId");
+            final String documentKey = rs.getString("documentKey");
+            final String description = rs.getString("description");
+            final String documentTypeName = rs.getString("documentType");
+
+            return ClientIdentifierData.singleItem(id, clientId, documentTypeId, documentKey, description, documentTypeName);
+        }
+
+    }
+
+    @Override
+    public ClientData retrieveClientByIdentifier(final Long identifierTypeId, final String identifierKey) {
+        try {
+            final ClientIdentifierMapper mapper = new ClientIdentifierMapper();
+
+            final String sql = "select " + mapper.clientLookupByIdentifierSchema();
+
+            return jdbcTemplate.queryForObject(sql, mapper, new Object[] { identifierTypeId, identifierKey });
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
+
+    private static final class ClientIdentifierMapper implements RowMapper<ClientData> {
+
+        public String clientLookupByIdentifierSchema() {
+            return "c.id as id, c.firstname as firstname, c.lastname as lastname, " + "c.office_id as officeId, o.name as officeName "
+                    + "from m_client c, m_office o, m_client_identifier ci " + "where o.id = c.office_id and c.id=ci.client_id "
+                    + "and ci.document_type_id= ? and ci.document_key like ?";
+        }
+
+        @Override
+        public ClientData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+
+            final Long id = rs.getLong("id");
+            String firstname = rs.getString("firstname");
+            if (StringUtils.isBlank(firstname)) {
+                firstname = "";
+            }
+            final String lastname = rs.getString("lastname");
+
+            final Long officeId = rs.getLong("officeId");
+            final String officeName = rs.getString("officeName");
+
+            return ClientData.clientIdentifier(id, firstname, lastname, officeId, officeName);
+        }
+    }
 }

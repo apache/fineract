@@ -36,164 +36,157 @@ import org.springframework.util.ObjectUtils;
 @Service
 public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWritePlatformService {
 
-	private final static Logger logger = LoggerFactory.getLogger(AppUserWritePlatformServiceJpaRepositoryImpl.class);
-	
-	private final PlatformSecurityContext context;
-	private final UserDomainService userDomainService;
-	private final PlatformPasswordEncoder platformPasswordEncoder;
-	private final AppUserRepository appUserRepository;
-	private final OfficeRepository officeRepository;
-	private final RoleRepository roleRepository;
-	
-	@Autowired
-	public AppUserWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final AppUserRepository appUserRepository, final UserDomainService userDomainService,
-			final OfficeRepository officeRepository, final RoleRepository roleRepository, final PlatformPasswordEncoder platformPasswordEncoder) {
-		this.context = context;
-		this.appUserRepository = appUserRepository;
-		this.userDomainService = userDomainService;
-		this.officeRepository = officeRepository;
-		this.roleRepository = roleRepository;
-		this.platformPasswordEncoder = platformPasswordEncoder;
-	}
-	
-	@Transactional
-	@Override
-	public Long createUser(final UserCommand command) {
-		
-		try {
-			context.authenticatedUser();
-			
-			UserCommandValidator validator = new UserCommandValidator(command);
-			validator.validateForCreate();
-			
-			final Set<Role> allRoles = assembleSetOfRoles(command);
+    private final static Logger logger = LoggerFactory.getLogger(AppUserWritePlatformServiceJpaRepositoryImpl.class);
 
-			Office office = this.officeRepository.findOne(command.getOfficeId());
-			if (office == null) {
-				throw new OfficeNotFoundException(command.getOfficeId());
-			}
+    private final PlatformSecurityContext context;
+    private final UserDomainService userDomainService;
+    private final PlatformPasswordEncoder platformPasswordEncoder;
+    private final AppUserRepository appUserRepository;
+    private final OfficeRepository officeRepository;
+    private final RoleRepository roleRepository;
 
-			String password = command.getPassword();
-			if (StringUtils.isBlank(password)) {
-				password = "autogenerate";
-			}
-			
-	        AppUser appUser = AppUser.createNew(office, 
-	        		allRoles, command.getUsername(), command.getEmail(), 
-	        		command.getFirstname(), command.getLastname(), 
-	        		password);
-			
-			this.userDomainService.create(appUser);
-			
-			return appUser.getId();
-		} catch (DataIntegrityViolationException dve) {
-			handleDataIntegrityIssues(command, dve);
-			return Long.valueOf(-1);
-		} catch (PlatformEmailSendException e) {
-			List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-			ApiParameterError error = ApiParameterError.parameterError("error.msg.user.email.invalid", "The parameter email is invalid.", "email", command.getEmail());
-			dataValidationErrors.add(error);
-			
-			throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);			
-		}
-	}
+    @Autowired
+    public AppUserWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final AppUserRepository appUserRepository,
+            final UserDomainService userDomainService, final OfficeRepository officeRepository, final RoleRepository roleRepository,
+            final PlatformPasswordEncoder platformPasswordEncoder) {
+        this.context = context;
+        this.appUserRepository = appUserRepository;
+        this.userDomainService = userDomainService;
+        this.officeRepository = officeRepository;
+        this.roleRepository = roleRepository;
+        this.platformPasswordEncoder = platformPasswordEncoder;
+    }
 
-	@Transactional
-	@Override
-	public Long updateUser(final UserCommand command) {
-		
-		try {
-			context.authenticatedUser();
-			
-			UserCommandValidator validator = new UserCommandValidator(command);
-			validator.validateForUpdate();
-			
-			final Set<Role> allRoles = assembleSetOfRoles(command);
+    @Transactional
+    @Override
+    public Long createUser(final UserCommand command) {
 
-			Office office = null;
-			if (command.isOfficeChanged()) {
-				office = this.officeRepository.findOne(command.getOfficeId());
-				if (office == null) {
-					throw new OfficeNotFoundException(command.getOfficeId());
-				}
-			}
+        try {
+            context.authenticatedUser();
 
-			AppUser userToUpdate = this.appUserRepository.findOne(command.getId());
-			if (userToUpdate == null) {
-				throw new UserNotFoundException(command.getId());
-			}
-			
-			userToUpdate.update(allRoles, office, command);
-			this.appUserRepository.saveAndFlush(userToUpdate);
-			
-			if (command.isPasswordChanged()) {
-				PlatformUser dummyPlatformUser = new BasicPasswordEncodablePlatformUser(
-						userToUpdate.getId(),
-						userToUpdate.getUsername(), command.getPassword());
+            UserCommandValidator validator = new UserCommandValidator(command);
+            validator.validateForCreate();
 
-				String newPasswordEncoded = this.platformPasswordEncoder.encode(dummyPlatformUser);
-				
-				userToUpdate.updatePassword(newPasswordEncoded);
-				this.appUserRepository.saveAndFlush(userToUpdate);
-			}
-			
-			return userToUpdate.getId();
-		} catch (DataIntegrityViolationException dve) {
-			handleDataIntegrityIssues(command, dve);
-			return Long.valueOf(-1);
-		}
-	}
-	
-	@Transactional
-	@Override
-	public void updateUsersOwnAccountDetails(final UserCommand command) {
-		updateUser(command);
-	}
-	
-	private Set<Role> assembleSetOfRoles(final UserCommand command) {
-		
-		final Set<Role> allRoles = new HashSet<Role>();
-		
-		String[] rolesArray = command.getRoles();
-		if (command.isRolesChanged() && !ObjectUtils.isEmpty(rolesArray)) {
-			for (String roleId : rolesArray) {
-				Long id = Long.valueOf(roleId);
-				Role role = this.roleRepository.findOne(id);
-				if (role == null) {
-					throw new RoleNotFoundException(id);
-				}
-				allRoles.add(role);
-			}
-		}
-		
-		return allRoles;
-	}
-	
-	@Transactional
-	@Override
-	public void deleteUser(final Long userId) {
-		
-		AppUser user = this.appUserRepository.findOne(userId);
-		if (user == null || user.isDeleted()) {
-			throw new UserNotFoundException(userId);
-		}
-		
-		user.delete();
-		this.appUserRepository.save(user);
-	}
-	
-	/*
-	 * Guaranteed to throw an exception no matter what the data integrity issue is.
-	 */
-	private void handleDataIntegrityIssues(final UserCommand command, final DataIntegrityViolationException dve)  {
-		
-		Throwable realCause = dve.getMostSpecificCause();
-		if (realCause.getMessage().contains("username_org")) {
-			StringBuilder defaultMessageBuilder = new StringBuilder("User with username ").append(command.getUsername()).append(" already exists.");
-			throw new PlatformDataIntegrityException("error.msg.user.duplicate.username", defaultMessageBuilder.toString(), "username", command.getUsername());
-		}
-		
-		logger.error(dve.getMessage(), dve);
-		throw new PlatformDataIntegrityException("error.msg.unknown.data.integrity.issue", "Unknown data integrity issue with resource.");
-	}
+            final Set<Role> allRoles = assembleSetOfRoles(command);
+
+            Office office = this.officeRepository.findOne(command.getOfficeId());
+            if (office == null) { throw new OfficeNotFoundException(command.getOfficeId()); }
+
+            String password = command.getPassword();
+            if (StringUtils.isBlank(password)) {
+                password = "autogenerate";
+            }
+
+            AppUser appUser = AppUser.createNew(office, allRoles, command.getUsername(), command.getEmail(), command.getFirstname(),
+                    command.getLastname(), password);
+
+            this.userDomainService.create(appUser);
+
+            return appUser.getId();
+        } catch (DataIntegrityViolationException dve) {
+            handleDataIntegrityIssues(command, dve);
+            return Long.valueOf(-1);
+        } catch (PlatformEmailSendException e) {
+            List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+            ApiParameterError error = ApiParameterError.parameterError("error.msg.user.email.invalid", "The parameter email is invalid.",
+                    "email", command.getEmail());
+            dataValidationErrors.add(error);
+
+            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                    dataValidationErrors);
+        }
+    }
+
+    @Transactional
+    @Override
+    public Long updateUser(final UserCommand command) {
+
+        try {
+            context.authenticatedUser();
+
+            UserCommandValidator validator = new UserCommandValidator(command);
+            validator.validateForUpdate();
+
+            final Set<Role> allRoles = assembleSetOfRoles(command);
+
+            Office office = null;
+            if (command.isOfficeChanged()) {
+                office = this.officeRepository.findOne(command.getOfficeId());
+                if (office == null) { throw new OfficeNotFoundException(command.getOfficeId()); }
+            }
+
+            AppUser userToUpdate = this.appUserRepository.findOne(command.getId());
+            if (userToUpdate == null) { throw new UserNotFoundException(command.getId()); }
+
+            userToUpdate.update(allRoles, office, command);
+            this.appUserRepository.saveAndFlush(userToUpdate);
+
+            if (command.isPasswordChanged()) {
+                PlatformUser dummyPlatformUser = new BasicPasswordEncodablePlatformUser(userToUpdate.getId(), userToUpdate.getUsername(),
+                        command.getPassword());
+
+                String newPasswordEncoded = this.platformPasswordEncoder.encode(dummyPlatformUser);
+
+                userToUpdate.updatePassword(newPasswordEncoded);
+                this.appUserRepository.saveAndFlush(userToUpdate);
+            }
+
+            return userToUpdate.getId();
+        } catch (DataIntegrityViolationException dve) {
+            handleDataIntegrityIssues(command, dve);
+            return Long.valueOf(-1);
+        }
+    }
+
+    @Transactional
+    @Override
+    public void updateUsersOwnAccountDetails(final UserCommand command) {
+        updateUser(command);
+    }
+
+    private Set<Role> assembleSetOfRoles(final UserCommand command) {
+
+        final Set<Role> allRoles = new HashSet<Role>();
+
+        String[] rolesArray = command.getRoles();
+        if (command.isRolesChanged() && !ObjectUtils.isEmpty(rolesArray)) {
+            for (String roleId : rolesArray) {
+                Long id = Long.valueOf(roleId);
+                Role role = this.roleRepository.findOne(id);
+                if (role == null) { throw new RoleNotFoundException(id); }
+                allRoles.add(role);
+            }
+        }
+
+        return allRoles;
+    }
+
+    @Transactional
+    @Override
+    public void deleteUser(final Long userId) {
+
+        AppUser user = this.appUserRepository.findOne(userId);
+        if (user == null || user.isDeleted()) { throw new UserNotFoundException(userId); }
+
+        user.delete();
+        this.appUserRepository.save(user);
+    }
+
+    /*
+     * Guaranteed to throw an exception no matter what the data integrity issue
+     * is.
+     */
+    private void handleDataIntegrityIssues(final UserCommand command, final DataIntegrityViolationException dve) {
+
+        Throwable realCause = dve.getMostSpecificCause();
+        if (realCause.getMessage().contains("username_org")) {
+            StringBuilder defaultMessageBuilder = new StringBuilder("User with username ").append(command.getUsername()).append(
+                    " already exists.");
+            throw new PlatformDataIntegrityException("error.msg.user.duplicate.username", defaultMessageBuilder.toString(), "username",
+                    command.getUsername());
+        }
+
+        logger.error(dve.getMessage(), dve);
+        throw new PlatformDataIntegrityException("error.msg.unknown.data.integrity.issue", "Unknown data integrity issue with resource.");
+    }
 }

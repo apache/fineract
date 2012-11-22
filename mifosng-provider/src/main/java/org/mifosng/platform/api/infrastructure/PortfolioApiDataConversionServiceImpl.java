@@ -241,28 +241,10 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
 
         Set<String> modifiedParameters = new HashSet<String>();
 
-        // check array
-        JsonParser parser = new JsonParser();
-
-        String[] permissionIds = null;
-        JsonElement element = parser.parse(json);
-        if (element.isJsonObject()) {
-            JsonObject object = element.getAsJsonObject();
-            if (object.has("permissions")) {
-                modifiedParameters.add("permissions");
-                JsonArray array = object.get("permissions").getAsJsonArray();
-                permissionIds = new String[array.size()];
-                for (int i = 0; i < array.size(); i++) {
-                    permissionIds[i] = array.get(i).getAsString();
-                }
-            }
-        }
-        //
-
         String name = extractStringParameter("name", requestMap, modifiedParameters);
         String description = extractStringParameter("description", requestMap, modifiedParameters);
 
-        return new RoleCommand(modifiedParameters, resourceIdentifier, name, description, permissionIds);
+        return new RoleCommand(modifiedParameters, resourceIdentifier, name, description);
     }
     
     @Override

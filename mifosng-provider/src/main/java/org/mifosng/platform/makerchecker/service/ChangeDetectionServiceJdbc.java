@@ -24,23 +24,26 @@ public class ChangeDetectionServiceJdbc implements ChangeDetectionService {
     }
 
     @Override
-    public String detectChanges(final String operation, final String resourceName, final Long resourceId,
-            final String commandSerializedAsJson) {
+    public String detectChangesOnUpdate(final String resourceName, final Long resourceId, final String commandSerializedAsJson) {
 
         String changesOnlyJson = "";
 
-        // FIXME - KW/JW - this change detection code for update of clients
-        // using ClientCommand can re placed when more suitable sql version is
-        // implemented.
-        final ClientData originalClient = this.clientReadPlatformService.retrieveIndividualClient(resourceId);
-        final ClientData changedClient = this.apiDataConversionService.convertInternalJsonFormatToClientDataChange(resourceId,
-                commandSerializedAsJson);
-
-        final String baseJson = this.apiJsonSerializerService.serializeClientDataToJson(originalClient);
-        final String workingJson = this.apiJsonSerializerService.serializeClientDataToJson(changedClient);
-        final ClientCommand changesOnly = this.apiDataConversionService.detectChanges(resourceId, baseJson, workingJson);
-
-        changesOnlyJson = this.apiJsonSerializerService.serializeClientCommandToJson(changesOnly);
+        if ("clients".equalsIgnoreCase(resourceName)) {
+            // FIXME - KW/JW - this change detection code for update of clients
+            // using ClientCommand can re placed when more suitable sql version is
+            // implemented.
+            final ClientData originalClient = this.clientReadPlatformService.retrieveIndividualClient(resourceId);
+            final ClientData changedClient = this.apiDataConversionService.convertInternalJsonFormatToClientDataChange(resourceId,
+                    commandSerializedAsJson);
+    
+            final String baseJson = this.apiJsonSerializerService.serializeClientDataToJson(originalClient);
+            final String workingJson = this.apiJsonSerializerService.serializeClientDataToJson(changedClient);
+            final ClientCommand changesOnly = this.apiDataConversionService.detectChanges(resourceId, baseJson, workingJson);
+    
+            changesOnlyJson = this.apiJsonSerializerService.serializeClientCommandToJson(changesOnly);
+        } else {
+            changesOnlyJson = commandSerializedAsJson;
+        }
 
         return changesOnlyJson;
     }

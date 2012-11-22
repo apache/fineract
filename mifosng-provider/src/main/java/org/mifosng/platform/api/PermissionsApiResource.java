@@ -25,28 +25,29 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class PermissionsApiResource {
 
-	@Autowired
-	private PermissionReadPlatformService permissionReadPlatformService;
+    @Autowired
+    private PermissionReadPlatformService permissionReadPlatformService;
 
-	@Autowired
-	private PortfolioApiJsonSerializerService apiJsonSerializerService;
+    @Autowired
+    private PortfolioApiJsonSerializerService apiJsonSerializerService;
 
-	private final String entityType = "PERMISSION";
     @Autowired
     private PlatformSecurityContext context;
-    
-	@GET
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
-	public String retrieveAllPermissions(@Context final UriInfo uriInfo) {
 
-    	context.authenticatedUser().validateHasReadPermission(entityType);
-    	
-		final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-		final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-		
-		final Collection<PermissionData> permissions = this.permissionReadPlatformService.retrieveAllPermissions();
-		
-		return this.apiJsonSerializerService.serializePermissionDataToJson(prettyPrint, responseParameters, permissions);
-	}
+    private final String resourceNameForPermissions = "PERMISSION";
+    
+    @GET
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
+    public String retrieveAllPermissions(@Context final UriInfo uriInfo) {
+
+        context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
+
+        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+
+        final Collection<PermissionData> permissions = this.permissionReadPlatformService.retrieveAllPermissions();
+
+        return this.apiJsonSerializerService.serializePermissionDataToJson(prettyPrint, responseParameters, permissions);
+    }
 }

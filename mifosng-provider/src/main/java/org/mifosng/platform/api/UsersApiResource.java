@@ -1,9 +1,7 @@
 package org.mifosng.platform.api;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -41,134 +39,116 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class UsersApiResource {
 
-	@Autowired
-	private AppUserReadPlatformService appUserReadPlatformService;
-	
-	@Autowired
-	private OfficeReadPlatformService officeReadPlatformService;
-	
-	@Autowired
-	private AppUserWritePlatformService appUserWritePlatformService;
+    @Autowired
+    private AppUserReadPlatformService appUserReadPlatformService;
 
-	@Autowired
-	private PortfolioApiDataConversionService apiDataConversionService;
-	
-	@Autowired
-	private PortfolioApiJsonSerializerService apiJsonSerializerService;
+    @Autowired
+    private OfficeReadPlatformService officeReadPlatformService;
 
-	private final String entityType = "USER";
-	@Autowired
-	private PlatformSecurityContext context;
+    @Autowired
+    private AppUserWritePlatformService appUserWritePlatformService;
 
-	private static final Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "officeId", "officeName", "username", "firstname", "lastname", "email", "selectedRoles"));
-	
-	@GET
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
-	public String retrieveUsers(@Context final UriInfo uriInfo) {
+    @Autowired
+    private PortfolioApiDataConversionService apiDataConversionService;
 
-    	context.authenticatedUser().validateHasReadPermission(entityType);
-    	
-		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-		if (responseParameters.isEmpty()) {
-			responseParameters.addAll(typicalResponseParameters);
-		}
-		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+    @Autowired
+    private PortfolioApiJsonSerializerService apiJsonSerializerService;
 
-		Collection<AppUserData> users = this.appUserReadPlatformService.retrieveAllUsers();
-		
-		return this.apiJsonSerializerService.serializeAppUserDataToJson(prettyPrint, responseParameters, users);
-	}
+    @Autowired
+    private PlatformSecurityContext context;
+    
+    private final String resourceNameForPermissions = "USER";
 
-	@GET
-	@Path("{userId}")
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
-	public String retrieveUser(@PathParam("userId") final Long userId, @Context final UriInfo uriInfo) {
+    @GET
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
+    public String retrieveUsers(@Context final UriInfo uriInfo) {
 
-    	context.authenticatedUser().validateHasReadPermission(entityType);
-    	
-		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-		if (responseParameters.isEmpty()) {
-			responseParameters.addAll(typicalResponseParameters);
-		}
-		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-		boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
-		
-		AppUserData user = this.appUserReadPlatformService.retrieveUser(userId);
-		if (template) {
-			List<OfficeLookup> offices = new ArrayList<OfficeLookup>(this.officeReadPlatformService.retrieveAllOfficesForLookup());
-			user = new AppUserData(user, offices);
-			addTemplateRelatedParameters(responseParameters);
-		}
-		
-		return this.apiJsonSerializerService.serializeAppUserDataToJson(prettyPrint, responseParameters, user);
-	}
+        context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 
-	private void addTemplateRelatedParameters(final Set<String> responseParameters) {
-		responseParameters.add("allowedOffices");
-		responseParameters.add("availableRoles");
-	}
+        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 
-	@GET
-	@Path("template")
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
-	public String newUserDetails(@Context final UriInfo uriInfo) {
+        final Collection<AppUserData> users = this.appUserReadPlatformService.retrieveAllUsers();
 
-    	context.authenticatedUser().validateHasReadPermission(entityType);
-    	
-		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-		if (responseParameters.isEmpty()) {
-			responseParameters.addAll(typicalResponseParameters);
-		}
-		addTemplateRelatedParameters(responseParameters);
-		
-		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-		
-		AppUserData user = this.appUserReadPlatformService.retrieveNewUserDetails();
+        return this.apiJsonSerializerService.serializeAppUserDataToJson(prettyPrint, responseParameters, users);
+    }
 
-		return this.apiJsonSerializerService.serializeAppUserDataToJson(prettyPrint, responseParameters, user);
-	}
+    @GET
+    @Path("{userId}")
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
+    public String retrieveUser(@PathParam("userId") final Long userId, @Context final UriInfo uriInfo) {
 
-	@POST
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
-	public Response createUser(final String jsonRequestBody) {
+        context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 
-		UserCommand command = this.apiDataConversionService.convertJsonToUserCommand(null, jsonRequestBody);
-		
-		Long userId = this.appUserWritePlatformService.createUser(command);
-		return Response.ok().entity(new EntityIdentifier(userId)).build();
-	}
+        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+        final boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
 
-	@DELETE
-	@Path("{userId}")
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
-	public Response deleteUser(@PathParam("userId") final Long userId) {
+        AppUserData user = this.appUserReadPlatformService.retrieveUser(userId);
+        if (template) {
+            List<OfficeLookup> offices = new ArrayList<OfficeLookup>(this.officeReadPlatformService.retrieveAllOfficesForLookup());
+            user = new AppUserData(user, offices);
+        }
 
-		this.appUserWritePlatformService.deleteUser(userId);
+        return this.apiJsonSerializerService.serializeAppUserDataToJson(prettyPrint, responseParameters, user);
+    }
 
-		return Response.ok(new EntityIdentifier(userId)).build();
-	}
+    @GET
+    @Path("template")
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
+    public String newUserDetails(@Context final UriInfo uriInfo) {
 
-	@PUT
-	@Path("{userId}")
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
-	public Response updateUser(@PathParam("userId") final Long userId, final String jsonRequestBody) {
+        context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 
-		UserCommand command = this.apiDataConversionService.convertJsonToUserCommand(userId, jsonRequestBody);
+        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 
-		AppUser loggedInUser = context.authenticatedUser();
-		
-		if (loggedInUser.hasIdOf(userId)) {
-			this.appUserWritePlatformService.updateUsersOwnAccountDetails(command);
-		} else {
-			this.appUserWritePlatformService.updateUser(command);
-		}
+        final AppUserData user = this.appUserReadPlatformService.retrieveNewUserDetails();
 
-		return Response.ok().entity(new EntityIdentifier(userId)).build();
-	}
+        return this.apiJsonSerializerService.serializeAppUserDataToJson(prettyPrint, responseParameters, user);
+    }
+
+    @POST
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
+    public Response createUser(final String jsonRequestBody) {
+
+        final UserCommand command = this.apiDataConversionService.convertJsonToUserCommand(null, jsonRequestBody);
+
+        final Long userId = this.appUserWritePlatformService.createUser(command);
+        return Response.ok().entity(new EntityIdentifier(userId)).build();
+    }
+
+    @DELETE
+    @Path("{userId}")
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
+    public Response deleteUser(@PathParam("userId") final Long userId) {
+
+        this.appUserWritePlatformService.deleteUser(userId);
+
+        return Response.ok(new EntityIdentifier(userId)).build();
+    }
+
+    @PUT
+    @Path("{userId}")
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
+    public Response updateUser(@PathParam("userId") final Long userId, final String jsonRequestBody) {
+
+        final UserCommand command = this.apiDataConversionService.convertJsonToUserCommand(userId, jsonRequestBody);
+
+        final AppUser loggedInUser = context.authenticatedUser();
+
+        if (loggedInUser.hasIdOf(userId)) {
+            this.appUserWritePlatformService.updateUsersOwnAccountDetails(command);
+        } else {
+            this.appUserWritePlatformService.updateUser(command);
+        }
+
+        return Response.ok().entity(new EntityIdentifier(userId)).build();
+    }
 }

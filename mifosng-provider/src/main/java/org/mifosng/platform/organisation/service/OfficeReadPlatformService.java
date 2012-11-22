@@ -9,17 +9,17 @@ import org.mifosng.platform.api.data.OfficeTransactionData;
 
 public interface OfficeReadPlatformService {
 
-	Collection<OfficeData> retrieveAllOffices();
+    Collection<OfficeData> retrieveAllOffices();
 
-	Collection<OfficeLookup> retrieveAllOfficesForLookup();
+    Collection<OfficeLookup> retrieveAllOfficesForLookup();
 
-	OfficeData retrieveOffice(Long officeId);
+    OfficeData retrieveOffice(Long officeId);
 
-	OfficeData retrieveNewOfficeTemplate();
+    OfficeData retrieveNewOfficeTemplate();
 
-	List<OfficeLookup> retrieveAllowedParents(Long officeId);
+    List<OfficeLookup> retrieveAllowedParents(Long officeId);
 
-	Collection<OfficeTransactionData> retrieveAllOfficeTransactions();
+    Collection<OfficeTransactionData> retrieveAllOfficeTransactions();
 
-	OfficeTransactionData retrieveNewOfficeTransactionDetails();
+    OfficeTransactionData retrieveNewOfficeTransactionDetails();
 }

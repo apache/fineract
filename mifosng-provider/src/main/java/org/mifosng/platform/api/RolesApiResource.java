@@ -53,16 +53,17 @@ public class RolesApiResource {
     @Autowired
     private PortfolioApiJsonSerializerService apiJsonSerializerService;
 
-    private final String entityType = "ROLE";
     @Autowired
     private PlatformSecurityContext context;
+    
+    private final String resourceNameForPermissions = "ROLE";
 
     @GET
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
     public String retrieveAllRoles(@Context final UriInfo uriInfo) {
 
-        context.authenticatedUser().validateHasReadPermission(entityType);
+        context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 
         final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
         final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
@@ -74,11 +75,11 @@ public class RolesApiResource {
 
     @GET
     @Path("template")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
     public String retrieveNewRoleDetails(@Context final UriInfo uriInfo) {
 
-        context.authenticatedUser().validateHasReadPermission(entityType);
+        context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 
         final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
         final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
@@ -91,8 +92,8 @@ public class RolesApiResource {
     }
 
     @POST
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
     public String createRole(final String jsonRequestBody) {
 
         final RoleCommand command = this.apiDataConversionService.convertJsonToRoleCommand(null, jsonRequestBody);
@@ -112,11 +113,11 @@ public class RolesApiResource {
     // into account the Object its looking at.
     @GET
     @Path("{roleId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
     public String retrieveRole(@PathParam("roleId") final Long roleId, @Context final UriInfo uriInfo) {
 
-        context.authenticatedUser().validateHasReadPermission(entityType);
+        context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 
         final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
         final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
@@ -135,8 +136,8 @@ public class RolesApiResource {
 
     @PUT
     @Path("{roleId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
     public String updateRole(@PathParam("roleId") final Long roleId, final String jsonRequestBody) {
 
         final RoleCommand command = this.apiDataConversionService.convertJsonToRoleCommand(roleId, jsonRequestBody);
@@ -148,28 +149,27 @@ public class RolesApiResource {
 
     @GET
     @Path("{roleId}/permissions")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
     public String retrieveRolePermissions(@PathParam("roleId") final Long roleId, @Context final UriInfo uriInfo) {
 
-        context.authenticatedUser().validateHasReadPermission(entityType);
+        context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 
         final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
         final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 
-        RoleData role = this.roleReadPlatformService.retrieveRole(roleId);
-        Collection<PermissionUsageData> permissionUsageData = this.permissionReadPlatformService.retrieveAllRolePermissions(roleId);
-        RolePermissionsData permissionsData = new RolePermissionsData(role.getId(), role.getName(), role.getDescription(),
-                permissionUsageData);
-
+        final RoleData role = this.roleReadPlatformService.retrieveRole(roleId);
+        final Collection<PermissionUsageData> permissionUsageData = this.permissionReadPlatformService.retrieveAllRolePermissions(roleId);
+        
+        final RolePermissionsData permissionsData = role.toRolePermissionData(permissionUsageData);
+                
         return this.apiJsonSerializerService.serializeRolePermissionDataToJson(prettyPrint, responseParameters, permissionsData);
     }
-
     
     @PUT
     @Path("{roleId}/permissions")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
     public String updateRolePermissions(@PathParam("roleId") final Long roleId, final String jsonRequestBody) {
 
         final RolePermissionCommand command = this.apiDataConversionService.convertJsonToRolePermissionCommand(roleId, jsonRequestBody);

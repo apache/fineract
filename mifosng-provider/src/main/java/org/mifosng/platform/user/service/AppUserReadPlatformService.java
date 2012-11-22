@@ -6,9 +6,9 @@ import org.mifosng.platform.api.data.AppUserData;
 
 public interface AppUserReadPlatformService {
 
-	Collection<AppUserData> retrieveAllUsers();
+    Collection<AppUserData> retrieveAllUsers();
 
-	AppUserData retrieveNewUserDetails();
+    AppUserData retrieveNewUserDetails();
 
-	AppUserData retrieveUser(Long userId);
+    AppUserData retrieveUser(Long userId);
 }

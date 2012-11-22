@@ -1,11 +1,19 @@
 package org.mifosng.platform.api.data;
 
+/**
+ * Immutable representation of permissions
+ */
 public class PermissionUsageData {
 
+    @SuppressWarnings("unused")
     private final String grouping;
+    @SuppressWarnings("unused")
     private final String code;
+    @SuppressWarnings("unused")
     private final String entityName;
+    @SuppressWarnings("unused")
     private final String actionName;
+    @SuppressWarnings("unused")
     private final Boolean selected;
 
     public PermissionUsageData(final String grouping, final String code, final String entityName, final String actionName,
@@ -16,25 +24,4 @@ public class PermissionUsageData {
         this.actionName = actionName;
         this.selected = selected;
     }
-
-    public String getGrouping() {
-        return grouping;
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public String getEntityName() {
-        return entityName;
-    }
-
-    public String getActionName() {
-        return actionName;
-    }
-
-    public Boolean getSelected() {
-        return selected;
-    }
-
 }
