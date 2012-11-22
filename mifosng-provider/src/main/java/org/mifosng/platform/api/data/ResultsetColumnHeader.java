@@ -10,27 +10,13 @@ public class ResultsetColumnHeader {
 	private String columnName;
 	private String columnType;
 	private Long columnLength;
-	private String columnDisplayTypeNew;
-	// TODO - remove columnDisplayType when Additional Fields functionality
-	// removed and rename columnDisplayTypeNew to columnDisplayType
 	private String columnDisplayType;
 	private boolean isColumnNullable;
 	private boolean isColumnPrimaryKey;
-	private List<ResultsetColumnValue> columnValuesNew = new ArrayList<ResultsetColumnValue>();
-	// TODO - remove columnValues when Additional Fields functionality removed
-	// and rename columnValuesNew to columnValues
-	private List<String> columnValues = new ArrayList<String>();
+	private List<ResultsetColumnValue> columnValues = new ArrayList<ResultsetColumnValue>();
 
 	public ResultsetColumnHeader() {
 
-	}
-
-	public List<String> getColumnValues() {
-		return columnValues;
-	}
-
-	public void setColumnValues(List<String> columnValues) {
-		this.columnValues = columnValues;
 	}
 
 	public String getColumnName() {
@@ -57,20 +43,12 @@ public class ResultsetColumnHeader {
 		this.columnLength = columnLength;
 	}
 
-	public String getColumnDisplayType() {
-		return columnDisplayType;
+	public List<ResultsetColumnValue> getColumnValues() {
+		return columnValues;
 	}
 
-	public void setColumnDisplayType(String columnDisplayType) {
-		this.columnDisplayType = columnDisplayType;
-	}
-
-	public List<ResultsetColumnValue> getColumnValuesNew() {
-		return columnValuesNew;
-	}
-
-	public void setColumnValuesNew(List<ResultsetColumnValue> columnValuesNew) {
-		this.columnValuesNew = columnValuesNew;
+	public void setColumnValues(List<ResultsetColumnValue> columnValues) {
+		this.columnValues = columnValues;
 	}
 
 	public boolean isColumnNullable() {
@@ -89,20 +67,20 @@ public class ResultsetColumnHeader {
 		this.isColumnPrimaryKey = isColumnPrimaryKey;
 	}
 
-	public String getColumnDisplayTypeNew() {
-		return columnDisplayTypeNew;
+	public String getColumnDisplayType() {
+		return columnDisplayType;
 	}
 
-	public void setColumnDisplayTypeNew() {
+	public void setColumnDisplayType() {
 
-		if (this.getColumnValuesNew().size() > 0) {
+		if (this.getColumnValues().size() > 0) {
 
 			if (this.getColumnType().equalsIgnoreCase("int")) {
-				this.columnDisplayTypeNew = "CODELOOKUP";
+				this.columnDisplayType = "CODELOOKUP";
 				return;
 			}
 			if (this.getColumnType().equalsIgnoreCase("varchar")) {
-				this.columnDisplayTypeNew = "CODEVALUE";
+				this.columnDisplayType = "CODEVALUE";
 				return;
 			}
 
@@ -113,7 +91,7 @@ public class ResultsetColumnHeader {
 		}
 
 		if (this.getColumnType().equalsIgnoreCase("varchar") || this.getColumnType().equalsIgnoreCase("char")) {
-			this.columnDisplayTypeNew = "STRING";
+			this.columnDisplayType = "STRING";
 			return;
 		}
 
@@ -122,17 +100,17 @@ public class ResultsetColumnHeader {
 				|| this.getColumnType().equalsIgnoreCase("smallint")
 				|| this.getColumnType().equalsIgnoreCase("mediumint")
 				|| this.getColumnType().equalsIgnoreCase("tinyint")) {
-			this.columnDisplayTypeNew = "INTEGER";
+			this.columnDisplayType = "INTEGER";
 			return;
 		}
 
 		if (this.getColumnType().equalsIgnoreCase("date")) {
-			this.columnDisplayTypeNew = "DATE";
+			this.columnDisplayType = "DATE";
 			return;
 		}
 
 		if (this.getColumnType().equalsIgnoreCase("decimal")) {
-			this.columnDisplayTypeNew = "DECIMAL";
+			this.columnDisplayType = "DECIMAL";
 			return;
 		}
 
@@ -140,7 +118,7 @@ public class ResultsetColumnHeader {
 				|| this.getColumnType().equalsIgnoreCase("mediumtext")
 				|| this.getColumnType().equalsIgnoreCase("longtext")
 				|| this.getColumnType().equalsIgnoreCase("tinytext")) {
-			this.columnDisplayTypeNew = "TEXT";
+			this.columnDisplayType = "TEXT";
 			return;
 		}
 

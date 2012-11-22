@@ -5,7 +5,6 @@ import java.util.Set;
 
 import org.mifosng.platform.accounting.api.data.ChartOfAccountsData;
 import org.mifosng.platform.api.commands.ClientCommand;
-import org.mifosng.platform.api.data.AdditionalFieldsSetData;
 import org.mifosng.platform.api.data.AppUserData;
 import org.mifosng.platform.api.data.AuthenticatedUserData;
 import org.mifosng.platform.api.data.ChargeData;
@@ -46,8 +45,6 @@ public interface PortfolioApiJsonSerializerService {
     String serializeAuthenticatedUserDataToJson(boolean prettyPrint, AuthenticatedUserData authenticatedUserData);
 
     String serializeGenericResultsetDataToJson(boolean prettyPrint, GenericResultsetData result);
-
-    String serializeAdditionalFieldsSetDataToJson(boolean prettyPrint, Collection<AdditionalFieldsSetData> result);
 
     String serializeDatatableDataToJson(boolean prettyPrint, Collection<DatatableData> result);
 

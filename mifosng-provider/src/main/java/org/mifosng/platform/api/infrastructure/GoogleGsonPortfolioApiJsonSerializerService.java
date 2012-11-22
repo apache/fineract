@@ -7,7 +7,6 @@ import java.util.Set;
 
 import org.mifosng.platform.accounting.api.data.ChartOfAccountsData;
 import org.mifosng.platform.api.commands.ClientCommand;
-import org.mifosng.platform.api.data.AdditionalFieldsSetData;
 import org.mifosng.platform.api.data.AppUserData;
 import org.mifosng.platform.api.data.AuthenticatedUserData;
 import org.mifosng.platform.api.data.ChargeData;
@@ -194,12 +193,6 @@ public class GoogleGsonPortfolioApiJsonSerializerService implements PortfolioApi
     public String serializeGenericResultsetDataToJson(final boolean prettyPrint, final GenericResultsetData resultsetData) {
         final Gson gsonDeserializer = helper.createGsonBuilder(prettyPrint);
         return helper.serializedJsonFrom(gsonDeserializer, resultsetData);
-    }
-
-    @Override
-    public String serializeAdditionalFieldsSetDataToJson(final boolean prettyPrint, final Collection<AdditionalFieldsSetData> datasets) {
-        final Gson gsonDeserializer = helper.createGsonBuilder(prettyPrint);
-        return helper.serializedJsonFrom(gsonDeserializer, datasets.toArray(new AdditionalFieldsSetData[datasets.size()]));
     }
 
     @Override

@@ -538,7 +538,7 @@ public class ReadWriteNonCoreDataServiceImpl implements
 				if (rsch.getColumnType().equalsIgnoreCase("int"))
 					addCodesValueIfNecessary(rsch, "_cd");
 
-				rsch.setColumnDisplayTypeNew();
+				rsch.setColumnDisplayType();
 
 				columnHeaders.add(rsch);
 			}
@@ -568,7 +568,7 @@ public class ReadWriteNonCoreDataServiceImpl implements
 
 			try {
 				while (rsValues.next()) {
-					rsch.getColumnValuesNew().add(
+					rsch.getColumnValues().add(
 							new ResultsetColumnValue(rsValues.getInt("id"),
 									rsValues.getString("code_value")));
 				}
@@ -788,11 +788,11 @@ public class ReadWriteNonCoreDataServiceImpl implements
 
 		if (!StringUtils.isEmpty(paramValue)) {
 
-			if (columnHeader.getColumnValuesNew().size() > 0) {
+			if (columnHeader.getColumnValues().size() > 0) {
 				// match code value or id
 				List<ResultsetColumnValue> allowedValues = columnHeader
-						.getColumnValuesNew();
-				if (columnHeader.getColumnDisplayTypeNew().equals("CODEVALUE")) {
+						.getColumnValues();
+				if (columnHeader.getColumnDisplayType().equals("CODEVALUE")) {
 					for (ResultsetColumnValue allowedValue : allowedValues) {
 						if (paramValue
 								.equalsIgnoreCase(allowedValue.getValue()))
@@ -809,7 +809,7 @@ public class ReadWriteNonCoreDataServiceImpl implements
 							"Validation errors exist.", dataValidationErrors);
 				}
 
-				if (columnHeader.getColumnDisplayTypeNew().equals("CODELOOKUP")) {
+				if (columnHeader.getColumnDisplayType().equals("CODELOOKUP")) {
 					for (ResultsetColumnValue allowedValue : allowedValues) {
 						if (paramValue.equals(Integer.toString(allowedValue
 								.getId())))
@@ -836,17 +836,17 @@ public class ReadWriteNonCoreDataServiceImpl implements
 
 			JsonParserHelper helper = new JsonParserHelper();
 
-			if (columnHeader.getColumnDisplayTypeNew().equals("DATE"))
+			if (columnHeader.getColumnDisplayType().equals("DATE"))
 				paramValue = helper.convertFrom(paramValue,
 						columnHeader.getColumnName(), dateFormat,
 						clientApplicationLocale).toString();
 
-			if (columnHeader.getColumnDisplayTypeNew().equals("INTEGER"))
+			if (columnHeader.getColumnDisplayType().equals("INTEGER"))
 				paramValue = helper.convertToInteger(paramValue,
 						columnHeader.getColumnName(), clientApplicationLocale)
 						.toString();
 
-			if (columnHeader.getColumnDisplayTypeNew().equals("DECIMAL"))
+			if (columnHeader.getColumnDisplayType().equals("DECIMAL"))
 				paramValue = helper.convertFrom(paramValue,
 						columnHeader.getColumnName(), clientApplicationLocale)
 						.toString();

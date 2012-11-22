@@ -184,7 +184,7 @@ public class GenericDataServiceImpl implements GenericDataService {
 
 				writer.append('\"' + columnHeaders.get(j).getColumnName()
 						+ '\"' + ": ");
-				currColType = columnHeaders.get(j).getColumnDisplayTypeNew();
+				currColType = columnHeaders.get(j).getColumnDisplayType();
 				currVal = row.get(j);
 				if (currVal != null) {
 					if (currColType.equals("DECIMAL")
