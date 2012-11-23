@@ -18,7 +18,6 @@ import javax.ws.rs.core.UriInfo;
 import org.mifosng.platform.accounting.api.commands.RolePermissionCommand;
 import org.mifosng.platform.api.data.CommandSourceData;
 import org.mifosng.platform.api.data.EntityIdentifier;
-import org.mifosng.platform.api.data.PermissionData;
 import org.mifosng.platform.api.data.PermissionUsageData;
 import org.mifosng.platform.api.data.RoleData;
 import org.mifosng.platform.api.data.RolePermissionsData;
@@ -77,24 +76,6 @@ public class RolesApiResource {
         return this.apiJsonSerializerService.serializeRoleDataToJson(prettyPrint, responseParameters, roles);
     }
 
-    @GET
-    @Path("template")
-    @Consumes({MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_JSON})
-    public String retrieveRoleTemplate(@Context final UriInfo uriInfo) {
-
-        context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
-
-        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-
-        final Collection<PermissionData> allPermissions = this.permissionReadPlatformService.retrieveAllPermissions();
-
-        final RoleData role = new RoleData(allPermissions, new ArrayList<PermissionData>());
-
-        return this.apiJsonSerializerService.serializeRoleDataToJson(prettyPrint, responseParameters, role);
-    }
-
     @POST
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
@@ -123,16 +104,10 @@ public class RolesApiResource {
 
         final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
         final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-        final boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
+
         final Long commandId = ApiParameterHelper.commandId(uriInfo.getQueryParameters());
         
         RoleData role = this.roleReadPlatformService.retrieveRole(roleId);
-        if (template) {
-            final Collection<PermissionData> availablePermissions = this.permissionReadPlatformService.retrieveAllPermissions();
-            availablePermissions.removeAll(role.selectedPermissions());
-
-            role = new RoleData(role, availablePermissions);
-        }
         if (commandId != null) {
 //            currentChanges = handleRequestToIntegrateProposedChangesFromCommand(roleId, commandId);
         }

@@ -176,7 +176,8 @@ function getBaseURL(docURL)
                         <tr><td></td><td>users/{userId}</td><td></td><td><a href="#users_retrieve">Retrieve a User</a></td><td><a href="#users_update">Update a User</a></td><td><a href="#users_delete">Delete a User</a></td></tr>
                         <tr class="alt"><td><a href="#roles">ROLE</a></td><td>roles</td><td><a href="#roles_create">Create a New Role</a></td><td><a href="#roles_list">List Roles</a></td><td></td><td></td></tr>
                         <tr><td></td><td>roles/{roleId}</td><td></td><td><a href="#roles_retrieve">Retrieve a Role</a></td><td><a href="#roles_update">Update a Role</a></td><td></td></tr>
-                        <tr class="alt"><td><a href="#permissions">PERMISSION</a></td><td>permissions</td><td></td><td><a href="#permissions_list">List Application Permissions</a></td><td></td><td></td></tr>
+                        <tr class="alt"><td></td><td>roles/{roleId}/permissions</td><td></td><td><a href="#rolespermissions_retrieve">Retrieve a Role's Permissions</a></td><td><a href="#rolespermissions_update">Update a Role's Permissions</a></td><td></td></tr>
+                        <tr><td><a href="#permissions">PERMISSION</a></td><td>permissions</td><td></td><td><a href="#permissions_list">List Application Permissions</a></td><td></td><td></td></tr>
                     </table>
                 </div>                
             </div>
@@ -193,7 +194,6 @@ function getBaseURL(docURL)
                         <tr><td>offices/template</td><td><a href="#offices_template">Retrieve Office Details Template</a></td></tr>
                         <tr class="alt"><td>loanproducts/template</td><td><a href="#loanproducts_template">Retrieve Loan Product Details Template</a></td></tr>
                         <tr><td>users/template</td><td><a href="#users_template">Retrieve User Details Template</a></td></tr>
-                        <tr class="alt"><td>roles/template</td><td><a href="#roles_template">Retrieve Role Details Template</a></td></tr>
                     </table>
                 </div>
             </div>
@@ -2872,53 +2872,41 @@ No Request Body
 	    <div class="method-example">
 	        <code class="method-declaration">GET https://Domain Name/api/v1/users/template</code>
 <code class="method-response">{
-  "allowedOffices" : [ {
-    "id" : 1,
-    "name" : "Demo MFI Head Office"
-  }, {
-    "id" : 2,
-    "name" : "sub branch 1"
-  }, {
-    "id" : 8,
-    "name" : "moi aussi"
-  }, {
-    "id" : 3,
-    "name" : "sub branch 2"
-  }, {
-    "id" : 4,
-    "name" : "sub branch 3"
-  }],
-  "availableRoles" : [ {
-    "id" : 1,
-    "name" : "Super user",
-    "description" : "This role provides all application permissions.",
-    "availablePermissions" : [ ],
-    "selectedPermissions" : [ ]
-  }, {
-    "id" : 2,
-    "name" : "Field officer",
-    "description" : "A field officer role allows the user to add client and loans and view reports but nothing else.",
-    "availablePermissions" : [ ],
-    "selectedPermissions" : [ ]
-  }, {
-    "id" : 3,
-    "name" : "Data Entry (Portfolio only)",
-    "description" : "This role allows a user full permissions around client and loan functionality but nothing else.",
-    "availablePermissions" : [ ],
-    "selectedPermissions" : [ ]
-  }, {
-    "id" : 4,
-    "name" : "Credit Committe Member",
-    "description" : "This role allows a user to approve reject or withdraw loans (with reporting).",
-    "availablePermissions" : [ ],
-    "selectedPermissions" : [ ]
-  }, {
-    "id" : 5,
-    "name" : "Manager",
-    "description" : "This role allows a manager to do anything related to portfolio management and also view all reports.",
-    "availablePermissions" : [ ],
-    "selectedPermissions" : [ ]
-  } ]
+  "allowedOffices": [
+    {
+      "id": 1,
+      "name": "Head Office",
+      "nameDecorated": "Head Office"
+    },
+    {
+      "id": 10,
+      "name": "Myanmar Regional Office",
+      "nameDecorated": "....Myanmar Regional Office"
+    },
+    {
+      "id": 7,
+      "name": "Myanmar 1",
+      "nameDecorated": "........Myanmar 1"
+    },...
+  ],
+  "availableRoles": [
+    {
+      "id": 1,
+      "name": "Super user",
+      "description": "This role provides all application permissions."
+    },
+    {
+      "id": 2,
+      "name": "Field officer",
+      "description": "A field officer role allows the user to add client and loans and view reports but nothing else."
+    },
+    {
+      "id": 3,
+      "name": "Data Entry (Portfolio only)",
+      "description": "This role allows a user full permissions around client and loan functionality but nothing else."
+    },...
+  ],
+  "selectedRoles": []
 }
 </code>
 	    </div>
@@ -2938,40 +2926,33 @@ No Request Body
 	    <div class="method-example">
 	        <code class="method-declaration">GET https://Domain Name/api/v1/users/1</code>
 <code class="method-response">{
-  "id" : 1,
-  "officeId" : 1,
-  "officeName" : "Demo MFI Head Office",
-  "username" : "mifos",
-  "firstname" : "App",
-  "lastname" : "Administrator",
-  "email" : "demomfi@mifos.org",
-  "selectedRoles" : [ {
-    "id" : 1,
-    "name" : "Super user",
-    "description" : "This role provides all application permissions.",
-    "availablePermissions" : [ ],
-    "selectedPermissions" : [ {
-      "id" : 1,
-      "name" : "User administration ALL",
-      "description" : "An application user will have permission to execute all tasks related to user administration.",
-      "code" : "USER_ADMINISTRATION_SUPER_USER_ROLE"
-    }, {
-      "id" : 4,
-      "name" : "Reporting ALL",
-      "description" : "An application user will have permission to execute and view all reports.",
-      "code" : "REPORTING_SUPER_USER_ROLE"
-    }, {
-      "id" : 3,
-      "name" : "Portfolio management ALL",
-      "description" : "An application user will have permission to execute all tasks related to portfolio management.",
-      "code" : "PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE"
-    }, {
-      "id" : 2,
-      "name" : "Organisation adminsitration ALL",
-      "description" : "An application user will have permission to execute all tasks related to organisation administration.",
-      "code" : "ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE"
-    } ]
-  } ]
+  "id": 1,
+  "username": "mifos",
+  "officeId": 1,
+  "officeName": "Head Office",
+  "firstname": "App(test)",
+  "lastname": "Administrator",
+  "email": "demomfi@mifos.org",
+  "allowedOffices": [],
+  "availableRoles": [
+    {
+      "id": 2,
+      "name": "Field officer",
+      "description": "A field officer role allows the user to add client and loans and view reports but nothing else."
+    },
+    {
+      "id": 3,
+      "name": "Data Entry (Portfolio only)",
+      "description": "This role allows a user full permissions around client and loan functionality but nothing else."
+    },...
+  ],
+  "selectedRoles": [
+    {
+      "id": 1,
+      "name": "Super user",
+      "description": "This role provides all application permissions."
+    }
+  ]
 }
 </code>
 	    </div>
@@ -3106,48 +3087,6 @@ No Request Body
 	    </div>
 	</div>
    
-    <a id="roles_template" name="roles_template" class="old-syle-anchor">&nbsp;</a>
-	<div class="method-section">
-	    <div class="method-description">
-	        <h4>Retrieve Role Details Template</h4>
-                <p>This is a convenience resource.  It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:
-                    <ul>
-                    <li class=normalli>Field Defaults</li>   
-                    <li class=normalli>Allowed Value Lists</li>    
-                    </ul>
-                </p>
-	        <p>Example Request: </p>
-	        <div class=apiClick>roles/template</div>
-	    </div>
-	    <div class="method-example">
-	        <code class="method-declaration">GET https://Domain Name/api/v1/roles/template</code>
-<code class="method-response">{
-  "availablePermissions" : [ {
-    "id" : 1,
-    "name" : "User administration ALL",
-    "description" : "An application user will have permission to execute all tasks related to user administration.",
-    "code" : "USER_ADMINISTRATION_SUPER_USER_ROLE"
-  }, {
-    "id" : 2,
-    "name" : "Organisation adminsitration ALL",
-    "description" : "An application user will have permission to execute all tasks related to organisation administration.",
-    "code" : "ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE"
-  }, {
-    "id" : 3,
-    "name" : "Portfolio management ALL",
-    "description" : "An application user will have permission to execute all tasks related to portfolio management.",
-    "code" : "PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE"
-  }, {
-    "id" : 4,
-    "name" : "Reporting ALL",
-    "description" : "An application user will have permission to execute and view all reports.",
-    "code" : "REPORTING_SUPER_USER_ROLE"
-  }...]
-}
-</code>
-	    </div>
-	</div>
-   
     <a id="roles_retrieve" name="roles_retrieve" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">
 	    <div class="method-description">
@@ -3155,37 +3094,14 @@ No Request Body
 	        <p>Example Requests: </p>
 	        <div class=apiClick>roles/1</div>
                 <br><br>
-	        <div class=apiClick>roles/1?template=true</div>
-                <br><br>
-	        <div class=apiClick>roles/1?fields=name,selectedPermissions</div>
+	        <div class=apiClick>roles/1?fields=name</div>
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">GET https://Domain Name/api/v1/roles/{roleId}</code>
 <code class="method-response">{
   "id" : 1,
   "name" : "Super user",
-  "description" : "This role provides all application permissions.",
-  "selectedPermissions" : [ {
-    "id" : 1,
-    "name" : "User administration ALL",
-    "description" : "An application user will have permission to execute all tasks related to user administration.",
-    "code" : "USER_ADMINISTRATION_SUPER_USER_ROLE"
-  }, {
-    "id" : 4,
-    "name" : "Reporting ALL",
-    "description" : "An application user will have permission to execute and view all reports.",
-    "code" : "REPORTING_SUPER_USER_ROLE"
-  }, {
-    "id" : 3,
-    "name" : "Portfolio management ALL",
-    "description" : "An application user will have permission to execute all tasks related to portfolio management.",
-    "code" : "PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE"
-  }, {
-    "id" : 2,
-    "name" : "Organisation adminsitration ALL",
-    "description" : "An application user will have permission to execute all tasks related to organisation administration.",
-    "code" : "ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE"
-  } ]
+  "description" : "This role provides all application permissions."
 }
 </code>
 	    </div>
@@ -3197,7 +3113,7 @@ No Request Body
 	        <h4>Create a New Role</h4>
                 <table class=matrixHeading>
                     <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields</div></td></tr>
-                    <tr class=alt><td>name, description, permissions</td></tr>
+                    <tr class=alt><td>name, description</td></tr>
                 </table>
 	    </div>
 	    <div class="method-example">
@@ -3207,8 +3123,7 @@ Content-Type: application/json
 Request body:
 { 
  "name": "Another Role Name", 
- "description": "A description outlining the purpose of this role in relation to the application.", 
- "permissions": [1, 2, 3] 
+ "description": "A description outlining the purpose of this role in relation to the application."
 }
 </code>
 <code class="method-response">{
@@ -3229,8 +3144,7 @@ Request body:
 Content-Type: application/json
 Request body:
 { 
- "name": "Updated Role Name", 
- "permissions": [1] 
+ "name": "Updated Role Name"
 }
 </code>
 <code class="method-response">{
@@ -3240,8 +3154,73 @@ Request body:
 	    </div>
 	</div>
     
+    <a id="rolespermissions_retrieve" name="rolespermissions_retrieve" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>Retrieve a Role's Permissions</h4>
+	        <p>Example Requests: </p>
+	        <div class=apiClick>roles/1/permissions</div>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://Domain Name/api/v1/roles/{roleId}/permissions</code>
+<code class="method-response">{
+  "id": 1,
+  "name": "Super user",
+  "description": "This role provides all application permissions.",
+  "permissionUsageData": [
+    {
+      "grouping": "authorisation",
+      "code": "READ_PERMISSION",
+      "entityName": "PERMISSION",
+      "actionName": "READ",
+      "selected": false,
+      "isMakerChecker": false
+    },
+    {
+      "grouping": "authorisation",
+      "code": "CREATE_ROLE",
+      "entityName": "ROLE",
+      "actionName": "CREATE",
+      "selected": false,
+      "isMakerChecker": false
+    },
+    {
+      "grouping": "authorisation",
+      "code": "DELETE_ROLE",
+      "entityName": "ROLE",
+      "actionName": "DELETE",
+      "selected": false,
+      "isMakerChecker": false
+    },...]
+}
+</code>
+	    </div>
+	</div>
     
-    <!-- start of roles api docs -->
+    <a id="rolespermissions_update" name="rolespermissions_update" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>Update a Role's Permissions</h4>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">PUT https://Domain Name/api/v1/roles/{roleId}/permissions</code>
+<code class="method-request">PUT roles/8
+Content-Type: application/json
+Request body:
+{
+ADJUST_LOAN: "true",
+ALL_FUNCTIONS: "true",
+ALL_FUNCTIONS_READ: "true"
+}
+</code>
+<code class="method-response">{
+  "entityId": 8
+}
+</code>
+	    </div>
+	</div>
+    
+    <!-- start of permissions api docs -->
 	<a id="permissions" name="permissions" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">
 		<div class="method-description">
@@ -3257,31 +3236,35 @@ Request body:
 	        <p>Example Requests: </p>
 	        <div class=apiClick>permissions</div>
                 <br><br>
-                <div class=apiClick>permissions?fields=id,code</div>
+                <div class=apiClick>permissions?fields=grouping,code</div>
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">GET https://Domain Name/api/v1/permissions</code>
-<code class="method-response">[ {
-  "id" : 1,
-  "name" : "User administration ALL",
-  "description" : "An application user will have permission to execute all tasks related to user administration.",
-  "code" : "USER_ADMINISTRATION_SUPER_USER_ROLE"
-}, {
-  "id" : 2,
-  "name" : "Organisation adminsitration ALL",
-  "description" : "An application user will have permission to execute all tasks related to organisation administration.",
-  "code" : "ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE"
-}, {
-  "id" : 3,
-  "name" : "Portfolio management ALL",
-  "description" : "An application user will have permission to execute all tasks related to portfolio management.",
-  "code" : "PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE"
-}, {
-  "id" : 4,
-  "name" : "Reporting ALL",
-  "description" : "An application user will have permission to execute and view all reports.",
-  "code" : "REPORTING_SUPER_USER_ROLE"
-}, ... ]
+<code class="method-response">[
+  {
+    "grouping": "authorisation",
+    "code": "READ_PERMISSION",
+    "entityName": "PERMISSION",
+    "actionName": "READ",
+    "selected": true,
+    "isMakerChecker": false
+  },
+  {
+    "grouping": "authorisation",
+    "code": "CREATE_ROLE",
+    "entityName": "ROLE",
+    "actionName": "CREATE",
+    "selected": true,
+    "isMakerChecker": true
+  },
+  {
+    "grouping": "authorisation",
+    "code": "DELETE_ROLE",
+    "entityName": "ROLE",
+    "actionName": "DELETE",
+    "selected": true,
+    "isMakerChecker": true
+  }, ... ]
 </code>
 	    </div>
 	</div>
@@ -3320,7 +3303,8 @@ Request body:
             <tr><td><a href="#users">USER</a></td><td>users</td><td><a href="#users_create">Create a User</a></td><td><a href="#users_list">List Users</a></td><td></td><td></td></tr>
             <tr class="alt"><td></td><td>users/{userId}</td><td></td><td><a href="#users_retrieve">Retrieve a User</a></td><td><a href="#users_update">Update a User</a></td><td><a href="#users_delete">Delete a User</a></td></tr>
             <tr><td><a href="#roles">ROLE</a></td><td>roles</td><td><a href="#roles_create">Create a New Role</a></td><td><a href="#roles_list">List Roles</a></td><td></td><td></td></tr>
-            <tr class="alt"><td></td><td>roles/{roleId}</td><td></td><td><a href="#roles_retrieve">Retrieve a Role</a></td><td><a href="#roles_update">Update a Role</a></td><td></td></tr>
+            <tr><td></td><td>roles/{roleId}</td><td></td><td><a href="#roles_retrieve">Retrieve a Role</a></td><td><a href="#roles_update">Update a Role</a></td><td></td></tr>
+            <tr class="alt"><td></td><td>roles/{roleId}/permissions</td><td></td><td><a href="#rolespermissions_retrieve">Retrieve a Role's Permissions</a></td><td><a href="#rolespermissions_update">Update a Role's Permissions</a></td><td></td></tr>
             <tr><td><a href="#permissions">PERMISSION</a></td><td>permissions</td><td></td><td><a href="#permissions_list">List Application Permissions</a></td><td></td><td></td></tr>
         </table>
         <br>
@@ -3332,7 +3316,6 @@ Request body:
             <tr><td>offices/template</td><td><a href="#offices_template">Retrieve Office Details Template</a></td></tr>
             <tr class="alt"><td>loanproducts/template</td><td><a href="#loanproducts_template">Retrieve Loan Product Details Template</a></td></tr>
             <tr><td>users/template</td><td><a href="#users_template">Retrieve User Details Template</a></td></tr>
-            <tr class="alt"><td>roles/template</td><td><a href="#roles_template">Retrieve Role Details Template</a></td></tr>
         </table>
     </div>
 </div>

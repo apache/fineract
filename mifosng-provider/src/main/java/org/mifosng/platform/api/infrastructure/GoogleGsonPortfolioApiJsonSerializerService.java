@@ -14,6 +14,7 @@ import org.mifosng.platform.api.data.ClientAccountSummaryCollectionData;
 import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.ClientIdentifierData;
 import org.mifosng.platform.api.data.CodeData;
+import org.mifosng.platform.api.data.CommandSourceData;
 import org.mifosng.platform.api.data.ConfigurationData;
 import org.mifosng.platform.api.data.DatatableData;
 import org.mifosng.platform.api.data.DepositAccountData;
@@ -31,11 +32,10 @@ import org.mifosng.platform.api.data.LoanProductData;
 import org.mifosng.platform.api.data.LoanReassignmentData;
 import org.mifosng.platform.api.data.LoanScheduleData;
 import org.mifosng.platform.api.data.LoanTransactionData;
-import org.mifosng.platform.api.data.CommandSourceData;
 import org.mifosng.platform.api.data.NoteData;
 import org.mifosng.platform.api.data.OfficeData;
 import org.mifosng.platform.api.data.OfficeTransactionData;
-import org.mifosng.platform.api.data.PermissionData;
+import org.mifosng.platform.api.data.PermissionUsageData;
 import org.mifosng.platform.api.data.RoleData;
 import org.mifosng.platform.api.data.RolePermissionsData;
 import org.mifosng.platform.api.data.SavingAccountData;
@@ -54,7 +54,7 @@ import com.google.gson.Gson;
 @Service
 public class GoogleGsonPortfolioApiJsonSerializerService implements PortfolioApiJsonSerializerService {
 
-    private static final Set<String> PERMISSION_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "name", "description", "code"));
+    private static final Set<String> PERMISSION_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("grouping", "code", "entityName", "actionName", "selected", "isMakerChecker"));
     private static final Set<String> ROLE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "name", "description",
             "availablePermissions", "selectedPermissions"));
     private static final Set<String> ROLE_PERMISSION_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "name", "description",
@@ -203,10 +203,10 @@ public class GoogleGsonPortfolioApiJsonSerializerService implements PortfolioApi
 
     @Override
     public String serializePermissionDataToJson(final boolean prettyPrint, final Set<String> responseParameters,
-            final Collection<PermissionData> permissions) {
+            final Collection<PermissionUsageData> permissions) {
         final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(PERMISSION_DATA_PARAMETERS,
                 prettyPrint, responseParameters);
-        return helper.serializedJsonFrom(gsonDeserializer, permissions.toArray(new PermissionData[permissions.size()]));
+        return helper.serializedJsonFrom(gsonDeserializer, permissions.toArray(new PermissionUsageData[permissions.size()]));
     }
 
     @Override

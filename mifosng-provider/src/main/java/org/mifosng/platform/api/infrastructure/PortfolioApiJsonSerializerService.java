@@ -33,7 +33,7 @@ import org.mifosng.platform.api.data.LoanTransactionData;
 import org.mifosng.platform.api.data.NoteData;
 import org.mifosng.platform.api.data.OfficeData;
 import org.mifosng.platform.api.data.OfficeTransactionData;
-import org.mifosng.platform.api.data.PermissionData;
+import org.mifosng.platform.api.data.PermissionUsageData;
 import org.mifosng.platform.api.data.RoleData;
 import org.mifosng.platform.api.data.RolePermissionsData;
 import org.mifosng.platform.api.data.SavingAccountData;
@@ -48,7 +48,7 @@ public interface PortfolioApiJsonSerializerService {
 
     String serializeDatatableDataToJson(boolean prettyPrint, Collection<DatatableData> result);
 
-    String serializePermissionDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<PermissionData> permissions);
+    String serializePermissionDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<PermissionUsageData> permissions);
 
     String serializeRoleDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<RoleData> roles);
 

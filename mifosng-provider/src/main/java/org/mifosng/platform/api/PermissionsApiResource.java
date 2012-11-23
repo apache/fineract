@@ -11,7 +11,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
-import org.mifosng.platform.api.data.PermissionData;
+import org.mifosng.platform.api.data.PermissionUsageData;
 import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService;
 import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
 import org.mifosng.platform.security.PlatformSecurityContext;
@@ -46,7 +46,7 @@ public class PermissionsApiResource {
         final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
         final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 
-        final Collection<PermissionData> permissions = this.permissionReadPlatformService.retrieveAllPermissions();
+        final Collection<PermissionUsageData> permissions = this.permissionReadPlatformService.retrieveAllPermissions();
 
         return this.apiJsonSerializerService.serializePermissionDataToJson(prettyPrint, responseParameters, permissions);
     }

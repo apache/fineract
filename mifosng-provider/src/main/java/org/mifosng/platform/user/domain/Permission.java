@@ -4,7 +4,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
-import org.mifosng.platform.api.data.PermissionData;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
@@ -18,12 +17,6 @@ public class Permission extends AbstractPersistable<Long> {
     @Column(name = "code", nullable = false, length = 100)
     private final String code;
 
-    @Column(name = "default_name", nullable = false, length = 100)
-    private final String defaultName;
-
-    @Column(name = "default_description", nullable = false, length = 500)
-    private final String defaultDescription;
-
     @SuppressWarnings("unused")
     @Column(name = "entity_name", nullable = true, length = 100)
     private final String entityName;
@@ -31,12 +24,15 @@ public class Permission extends AbstractPersistable<Long> {
     @SuppressWarnings("unused")
     @Column(name = "action_name", nullable = true, length = 100)
     private final String actionName;
-
+    
+    @SuppressWarnings("unused")
+    @Column(name = "is_maker_checker", nullable = false)
+	private Boolean isMakerChecker;
+    
+    
     protected Permission() {
         this.grouping = null;
         this.code = null;
-        this.defaultDescription = null;
-        this.defaultName = null;
         this.entityName = null;
         this.actionName = null;
     }
@@ -49,7 +45,4 @@ public class Permission extends AbstractPersistable<Long> {
         return this.code;
     }
 
-    public PermissionData toData() {
-        return new PermissionData(this.getId(), this.defaultName, this.defaultDescription, this.code);
-    }
 }

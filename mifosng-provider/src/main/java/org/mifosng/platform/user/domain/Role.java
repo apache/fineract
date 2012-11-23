@@ -1,6 +1,5 @@
 package org.mifosng.platform.user.domain;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -14,7 +13,6 @@ import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
 import org.mifosng.platform.api.commands.RoleCommand;
-import org.mifosng.platform.api.data.PermissionData;
 import org.mifosng.platform.api.data.RoleData;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
 
@@ -75,13 +73,6 @@ public class Role extends AbstractAuditableCustom<AppUser, Long> {
     }
 
     public RoleData toData() {
-
-        final Collection<PermissionData> rolePermissions = new ArrayList<PermissionData>(this.permissions.size());
-        for (Permission permission : this.permissions) {
-            PermissionData permissionData = permission.toData();
-            rolePermissions.add(permissionData);
-        }
-
-        return new RoleData(this.getId(), this.name, this.description, rolePermissions);
+        return new RoleData(this.getId(), this.name, this.description);
     }
 }
