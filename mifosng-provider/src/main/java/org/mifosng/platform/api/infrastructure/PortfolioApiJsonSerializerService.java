@@ -155,7 +155,7 @@ public interface PortfolioApiJsonSerializerService {
     String serializeSavingAccountsDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<SavingAccountData> accounts);
 
     String serializeGuarantorDataToJson(boolean prettyPrint, Set<String> responseParameters, GuarantorData guarantorData);
-    
+
     // TODO - KW - might devide serialize up into portfolio and account to
     // reduce interface
     String serializeChartOfAccountDataToJson(boolean prettyPrint, Set<String> responseParameters, ChartOfAccountsData chartOfAccounts);

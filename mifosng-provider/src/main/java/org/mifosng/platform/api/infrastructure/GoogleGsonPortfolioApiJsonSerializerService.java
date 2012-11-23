@@ -54,7 +54,8 @@ import com.google.gson.Gson;
 @Service
 public class GoogleGsonPortfolioApiJsonSerializerService implements PortfolioApiJsonSerializerService {
 
-    private static final Set<String> PERMISSION_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("grouping", "code", "entityName", "actionName", "selected", "isMakerChecker"));
+    private static final Set<String> PERMISSION_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("grouping", "code", "entityName",
+            "actionName", "selected", "isMakerChecker"));
     private static final Set<String> ROLE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "name", "description",
             "availablePermissions", "selectedPermissions"));
     private static final Set<String> ROLE_PERMISSION_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "name", "description",
@@ -165,13 +166,11 @@ public class GoogleGsonPortfolioApiJsonSerializerService implements PortfolioApi
             "projectedInterestAccuredOnMaturity", "actualInterestAccured", "projectedMaturityAmount", "actualMaturityAmount",
             "preClosureAllowed", "preClosureInterestRate", "withdrawnonDate", "rejectedonDate", "closedonDate", "isLockinPeriodAllowed",
             "lockinPeriod", "lockinPeriodType"));
-    
-    //guarantors
-  	private static final Set<String> GUARANTOR_DATA_PARAMETERS = new HashSet<String>(
-  			Arrays.asList("externalGuarantor", "existingClientId",
-  					"firstname", "lastname", "addressLine1",
-  					"addressLine2", "city", "state", "zip", "country",
-  					"mobileNumber", "housePhoneNumber", "comment", "dob"));
+
+    // guarantors
+    private static final Set<String> GUARANTOR_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("externalGuarantor", "existingClientId",
+            "firstname", "lastname", "addressLine1", "addressLine2", "city", "state", "zip", "country", "mobileNumber", "housePhoneNumber",
+            "comment", "dob"));
 
     // accounting
     private static final Set<String> CHART_OF_ACCOUNTS_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "name"));
@@ -587,11 +586,9 @@ public class GoogleGsonPortfolioApiJsonSerializerService implements PortfolioApi
     }
 
     @Override
-	public String serializeGuarantorDataToJson(boolean prettyPrint,
-			Set<String> responseParameters, GuarantorData guarantorData) {
-		final Gson gsonDeserializer = helper
-				.createGsonBuilderWithParameterExclusionSerializationStrategy(
-						GUARANTOR_DATA_PARAMETERS, prettyPrint, responseParameters);
-		return helper.serializedJsonFrom(gsonDeserializer, guarantorData);
-	}
+    public String serializeGuarantorDataToJson(boolean prettyPrint, Set<String> responseParameters, GuarantorData guarantorData) {
+        final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(GUARANTOR_DATA_PARAMETERS,
+                prettyPrint, responseParameters);
+        return helper.serializedJsonFrom(gsonDeserializer, guarantorData);
+    }
 }

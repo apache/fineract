@@ -46,24 +46,24 @@ public class RolesApiResource {
 
     @Autowired
     private PortfolioApiJsonSerializerService apiJsonSerializerService;
-    
+
     @Autowired
     private PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-    
+
     @Autowired
     private PortfolioCommandsReadPlatformService commandSourceReadPlatformService;
-    
+
     @Autowired
     private PortfolioCommandDeserializerService commandDeserializerService;
 
     @Autowired
     private PlatformSecurityContext context;
-    
+
     private final String resourceNameForPermissions = "ROLE";
 
     @GET
-    @Consumes({MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_JSON})
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveAllRoles(@Context final UriInfo uriInfo) {
 
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
@@ -77,11 +77,12 @@ public class RolesApiResource {
     }
 
     @POST
-    @Consumes({MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_JSON})
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
     public String createRole(final String apiRequestBodyAsJson) {
-        
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE", "roles", null, apiRequestBodyAsJson);
+
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE", "roles", null,
+                apiRequestBodyAsJson);
 
         return this.apiJsonSerializerService.serializeEntityIdentifier(result);
     }
@@ -96,8 +97,8 @@ public class RolesApiResource {
     // into account the Object its looking at.
     @GET
     @Path("{roleId}")
-    @Consumes({MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_JSON})
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveRole(@PathParam("roleId") final Long roleId, @Context final UriInfo uriInfo) {
 
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
@@ -106,30 +107,33 @@ public class RolesApiResource {
         final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 
         final Long commandId = ApiParameterHelper.commandId(uriInfo.getQueryParameters());
-        
+
         RoleData role = this.roleReadPlatformService.retrieveRole(roleId);
         if (commandId != null) {
-//            currentChanges = handleRequestToIntegrateProposedChangesFromCommand(roleId, commandId);
+            // currentChanges =
+            // handleRequestToIntegrateProposedChangesFromCommand(roleId,
+            // commandId);
         }
-        
+
         return this.apiJsonSerializerService.serializeRoleDataToJson(prettyPrint, responseParameters, role);
     }
-    
+
     @PUT
     @Path("{roleId}")
-    @Consumes({MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_JSON})
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
     public String updateRole(@PathParam("roleId") final Long roleId, final String apiRequestBodyAsJson) {
-        
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "roles", roleId, apiRequestBodyAsJson);
+
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "roles", roleId,
+                apiRequestBodyAsJson);
 
         return this.apiJsonSerializerService.serializeEntityIdentifier(result);
     }
 
     @GET
     @Path("{roleId}/permissions")
-    @Consumes({MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_JSON})
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveRolePermissions(@PathParam("roleId") final Long roleId, @Context final UriInfo uriInfo) {
 
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
@@ -137,50 +141,52 @@ public class RolesApiResource {
         final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
         final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
         final Long commandId = ApiParameterHelper.commandId(uriInfo.getQueryParameters());
-        
+
         final RoleData role = this.roleReadPlatformService.retrieveRole(roleId);
         final Collection<PermissionUsageData> permissionUsageData = this.permissionReadPlatformService.retrieveAllRolePermissions(roleId);
         Collection<PermissionUsageData> currentChanges = null;
         if (commandId != null) {
             currentChanges = handleRequestToIntegrateProposedChangesFromCommand(roleId, commandId);
         }
-        
+
         Collection<Collection<PermissionUsageData>> allChanges = retrieveAllUnprocessedDataChanges(roleId);
-        
+
         final RolePermissionsData permissionsData = role.toRolePermissionData(permissionUsageData, currentChanges, allChanges);
-                
+
         return this.apiJsonSerializerService.serializeRolePermissionDataToJson(prettyPrint, responseParameters, permissionsData);
     }
-    
+
     private Collection<PermissionUsageData> handleRequestToIntegrateProposedChangesFromCommand(final Long roleId, final Long commandId) {
         final CommandSourceData entry = this.commandSourceReadPlatformService.retrieveById(commandId);
         return assemblePermissionChanges(roleId, entry);
     }
 
     private Collection<PermissionUsageData> assemblePermissionChanges(final Long roleId, final CommandSourceData entry) {
-        final RolePermissionCommand changesOnly = this.commandDeserializerService.deserializeRolePermissionCommand(roleId, entry.json(), false);
-        
+        final RolePermissionCommand changesOnly = this.commandDeserializerService.deserializeRolePermissionCommand(roleId, entry.json(),
+                false);
+
         // assemble map of string/booleans into PermissionUsageData
-        Collection<PermissionUsageData> proposedChanges = new ArrayList<PermissionUsageData>();        
+        Collection<PermissionUsageData> proposedChanges = new ArrayList<PermissionUsageData>();
         for (final String permissionCode : changesOnly.getPermissions().keySet()) {
             final boolean isSelected = changesOnly.getPermissions().get(permissionCode).booleanValue();
             final PermissionUsageData item = PermissionUsageData.from(permissionCode, isSelected);
-            
+
             proposedChanges.add(item);
         }
-        
+
         return proposedChanges;
     }
-    
+
     private Collection<Collection<PermissionUsageData>> retrieveAllUnprocessedDataChanges(final Long roleId) {
         Collection<Collection<PermissionUsageData>> allChanges = new ArrayList<Collection<PermissionUsageData>>();
 
-        final Collection<CommandSourceData> unprocessedChanges = this.commandSourceReadPlatformService.retrieveUnprocessChangesByResourceId("roles", roleId);
+        final Collection<CommandSourceData> unprocessedChanges = this.commandSourceReadPlatformService
+                .retrieveUnprocessChangesByResourceId("roles", roleId);
         for (CommandSourceData commandSourceData : unprocessedChanges) {
-            
+
             if (commandSourceData.isRoleResource() && commandSourceData.isUpdateRolePermissions()) {
                 Collection<PermissionUsageData> dataChanges = assemblePermissionChanges(roleId, commandSourceData);
-                
+
                 allChanges.add(dataChanges);
             }
         }
@@ -191,14 +197,15 @@ public class RolesApiResource {
 
         return allChanges;
     }
-    
+
     @PUT
     @Path("{roleId}/permissions")
-    @Consumes({MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_JSON})
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
     public String updateRolePermissions(@PathParam("roleId") final Long roleId, final String apiRequestBodyAsJson) {
 
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATEPERMISSIONS", "roles", roleId, apiRequestBodyAsJson);
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATEPERMISSIONS", "roles", roleId,
+                apiRequestBodyAsJson);
 
         return this.apiJsonSerializerService.serializeEntityIdentifier(result);
     }

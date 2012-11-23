@@ -10,10 +10,10 @@ public class RoleData {
     private final Long id;
     private final String name;
     private final String description;
-    
-//    @SuppressWarnings("unused")
-//    private final Collection<RoleData> currentChanges;
-    
+
+    // @SuppressWarnings("unused")
+    // private final Collection<RoleData> currentChanges;
+
     public RoleData(final Long id, final String name, final String description) {
         this.id = id;
         this.name = name;
@@ -44,8 +44,7 @@ public class RoleData {
     }
 
     public RolePermissionsData toRolePermissionData(final Collection<PermissionUsageData> permissionUsageData,
-            final Collection<PermissionUsageData> currentChanges, 
-            final Collection<Collection<PermissionUsageData>> allChanges) {
+            final Collection<PermissionUsageData> currentChanges, final Collection<Collection<PermissionUsageData>> allChanges) {
         return new RolePermissionsData(id, name, description, permissionUsageData, currentChanges, allChanges);
     }
 }

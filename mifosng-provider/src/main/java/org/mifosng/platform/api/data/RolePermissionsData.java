@@ -22,8 +22,7 @@ public class RolePermissionsData {
     private final Collection<Collection<PermissionUsageData>> allChanges;
 
     public RolePermissionsData(final Long id, final String name, final String description,
-            final Collection<PermissionUsageData> permissionUsageData, 
-            final Collection<PermissionUsageData> currentChanges, 
+            final Collection<PermissionUsageData> permissionUsageData, final Collection<PermissionUsageData> currentChanges,
             final Collection<Collection<PermissionUsageData>> allChanges) {
         this.id = id;
         this.name = name;

@@ -35,10 +35,10 @@ public class PermissionsApiResource {
     private PlatformSecurityContext context;
 
     private final String resourceNameForPermissions = "PERMISSION";
-    
+
     @GET
-    @Consumes({MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_JSON})
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveAllPermissions(@Context final UriInfo uriInfo) {
 
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
