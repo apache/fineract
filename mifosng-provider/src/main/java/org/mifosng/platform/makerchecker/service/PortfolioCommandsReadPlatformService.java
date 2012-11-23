@@ -6,10 +6,9 @@ import org.mifosng.platform.api.data.CommandSourceData;
 
 public interface PortfolioCommandsReadPlatformService {
 
-	Collection<CommandSourceData> retrieveAllEntriesToBeChecked();
+    Collection<CommandSourceData> retrieveAllEntriesToBeChecked();
 
-	CommandSourceData retrieveById(Long id);
+    CommandSourceData retrieveById(Long id);
 
-	Collection<CommandSourceData> retrieveUnprocessChangesByResourceId(String apiResource, Long clientId);
-
+    Collection<CommandSourceData> retrieveUnprocessChangesByResourceId(String apiResource, Long clientId);
 }

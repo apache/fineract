@@ -447,4 +447,5 @@ public class JsonParserHelper {
         }
         return clientApplicationLocale;
     }
+
 }

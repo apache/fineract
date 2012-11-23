@@ -258,14 +258,14 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
     }
     
     @Override
-    public RolePermissionCommand convertJsonToRolePermissionCommand(final Long roleId, final String json) {
-        
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+    public RolePermissionCommand convertApiRequestJsonToRolePermissionCommand(final Long resourceIdentifier, final String json) {
 
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        
         final Type typeOfMap = new TypeToken<Map<String, Boolean>>() {}.getType();
         final Map<String, Boolean> permissionsMap = gsonConverter.fromJson(json, typeOfMap);
-        
-        return new RolePermissionCommand(roleId, permissionsMap);
+
+        return new RolePermissionCommand(resourceIdentifier, permissionsMap, false);
     }
 
     @Override

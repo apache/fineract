@@ -16,66 +16,66 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class PortfolioCommandsReadPlatformServiceImpl implements PortfolioCommandsReadPlatformService {
-	
-	private final JdbcTemplate jdbcTemplate;
-	private final PlatformSecurityContext context;
 
-	@Autowired
-	public PortfolioCommandsReadPlatformServiceImpl(
-			final PlatformSecurityContext context,
-			final TenantAwareRoutingDataSource dataSource) {
-		this.context = context;
-		this.jdbcTemplate = new JdbcTemplate(dataSource);
-	}
-	
-	private static final class CommandSourceMapper implements RowMapper<CommandSourceData> {
-		
-		public String schema() {
-			return " mc.id as id, mc.api_operation as taskOperation, mc.api_resource as taskEntity, mc.resource_id as entityId," +
-					"mc.command_as_json as taskJson, mc.made_on_date as madeOnDate from m_portfolio_command_source mc ";
-		}
+    private final JdbcTemplate jdbcTemplate;
+    private final PlatformSecurityContext context;
 
-		@Override
-		public CommandSourceData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
-				throws SQLException {
+    @Autowired
+    public PortfolioCommandsReadPlatformServiceImpl(final PlatformSecurityContext context, final TenantAwareRoutingDataSource dataSource) {
+        this.context = context;
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    }
 
-			final Long id = rs.getLong("id");
-			final String taskOperation = rs.getString("taskOperation");
-			final String taskEntity = rs.getString("taskEntity");
-			final Long entityId = JdbcSupport.getLong(rs, "entityId");
-			final String taskJson = rs.getString("taskJson");
-			
-			final LocalDate madeOnDate = JdbcSupport.getLocalDate(rs, "madeOnDate");
-			
-			return new CommandSourceData(id, taskOperation, taskEntity, entityId, taskJson, madeOnDate);
-		}
-	}
+    private static final class CommandSourceMapper implements RowMapper<CommandSourceData> {
 
-	@Override
-	public Collection<CommandSourceData> retrieveAllEntriesToBeChecked() {
-		context.authenticatedUser();
+        public String schema() {
+            return " mc.id as id, mc.api_operation as taskOperation, mc.api_resource as taskEntity, mc.resource_id as entityId,"
+                    + "mc.command_as_json as taskJson, mc.made_on_date as madeOnDate from m_portfolio_command_source mc ";
+        }
 
-		final CommandSourceMapper rm = new CommandSourceMapper();
-		final String sql = "select " + rm.schema() + " where mc.checker_id is null order by mc.made_on_date DESC, mc.api_resource ASC, mc.api_operation ASC";
+        @Override
+        public CommandSourceData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
-		return this.jdbcTemplate.query(sql, rm, new Object[] {});
-	}
+            final Long id = rs.getLong("id");
+            final String taskOperation = rs.getString("taskOperation");
+            final String taskEntity = rs.getString("taskEntity");
+            final Long entityId = JdbcSupport.getLong(rs, "entityId");
+            final String taskJson = rs.getString("taskJson");
 
-	@Override
-	public CommandSourceData retrieveById(final Long id) {
-		
-		final CommandSourceMapper rm = new CommandSourceMapper();
-		final String sql = "select " + rm.schema() + " where mc.id=?";
+            final LocalDate madeOnDate = JdbcSupport.getLocalDate(rs, "madeOnDate");
 
-		return this.jdbcTemplate.queryForObject(sql, rm, new Object[] {id});
-	}
+            return new CommandSourceData(id, taskOperation, taskEntity, entityId, taskJson, madeOnDate);
+        }
+    }
 
-	@Override
-	public Collection<CommandSourceData> retrieveUnprocessChangesByResourceId(final String apiResource, final Long resourceId) {
-		
-		final CommandSourceMapper rm = new CommandSourceMapper();
-		final String sql = "select " + rm.schema() + " where mc.api_resource like ? and mc.resource_id = ? and mc.checker_id is null order by mc.made_on_date DESC, mc.api_operation ASC";
+    @Override
+    public Collection<CommandSourceData> retrieveAllEntriesToBeChecked() {
+        context.authenticatedUser();
 
-		return this.jdbcTemplate.query(sql, rm, new Object[] {apiResource, resourceId});
-	}
+        final CommandSourceMapper rm = new CommandSourceMapper();
+        final String sql = "select " + rm.schema()
+                + " where mc.checker_id is null order by mc.made_on_date DESC, mc.api_resource ASC, mc.api_operation ASC";
+
+        return this.jdbcTemplate.query(sql, rm, new Object[] {});
+    }
+
+    @Override
+    public CommandSourceData retrieveById(final Long id) {
+
+        final CommandSourceMapper rm = new CommandSourceMapper();
+        final String sql = "select " + rm.schema() + " where mc.id=?";
+
+        return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { id });
+    }
+
+    @Override
+    public Collection<CommandSourceData> retrieveUnprocessChangesByResourceId(final String apiResource, final Long resourceId) {
+
+        final CommandSourceMapper rm = new CommandSourceMapper();
+        final String sql = "select "
+                + rm.schema()
+                + " where mc.api_resource like ? and mc.resource_id = ? and mc.checker_id is null order by mc.made_on_date DESC, mc.api_operation ASC";
+
+        return this.jdbcTemplate.query(sql, rm, new Object[] { apiResource, resourceId });
+    }
 }

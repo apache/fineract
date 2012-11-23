@@ -19,8 +19,7 @@ public class PortfolioCommandSourceWriteServiceImpl implements PortfolioCommandS
 
     @Autowired
     public PortfolioCommandSourceWriteServiceImpl(final PlatformSecurityContext context,
-            final CommandSourceRepository makerCheckerRepository, 
-            final CommandSourceHandlerDelegator commandSourceHandlerDelegator) {
+            final CommandSourceRepository makerCheckerRepository, final CommandSourceHandlerDelegator commandSourceHandlerDelegator) {
         this.context = context;
         this.commandSourceRepository = makerCheckerRepository;
         this.commandSourceHandlerDelegator = commandSourceHandlerDelegator;
@@ -51,7 +50,7 @@ public class PortfolioCommandSourceWriteServiceImpl implements PortfolioCommandS
         commandSourceInput.markAsChecked(checker, new LocalDate());
 
         final CommandSource commandSourceResult = this.commandSourceHandlerDelegator.handleExistingCommand(commandSourceInput);
-        
+
         commandSourceRepository.save(commandSourceResult);
 
         return EntityIdentifier.makerChecker(commandSourceResult.resourceId(), commandSourceResult.getId());

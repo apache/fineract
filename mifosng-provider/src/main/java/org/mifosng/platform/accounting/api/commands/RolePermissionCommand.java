@@ -2,14 +2,20 @@ package org.mifosng.platform.accounting.api.commands;
 
 import java.util.Map;
 
+/**
+ * Immutable command for updating permissions against a role.
+ */
 public class RolePermissionCommand {
 
-    private final Long roleId;
+    private final transient Long roleId;
     private final Map<String, Boolean> permissions;
 
-    public RolePermissionCommand(final Long roleId, final Map<String, Boolean> permissionsMap) {
+    private final transient boolean makerCheckerApproval;
+    
+    public RolePermissionCommand(final Long roleId, final Map<String, Boolean> permissionsMap, final boolean makerCheckerApproval) {
         this.roleId = roleId;
         this.permissions = permissionsMap;
+        this.makerCheckerApproval = makerCheckerApproval;
     }
 
     public Map<String, Boolean> getPermissions() {
@@ -18,5 +24,9 @@ public class RolePermissionCommand {
 
     public Long getRoleId() {
         return this.roleId;
+    }
+    
+    public boolean isApprovedByChecker() {
+        return this.makerCheckerApproval;
     }
 }

@@ -4,11 +4,13 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
+import org.mifosng.platform.accounting.api.commands.RolePermissionCommand;
 import org.mifosng.platform.api.commands.RoleCommand;
 import org.mifosng.platform.infrastructure.api.JsonParserHelper;
 import org.mifosng.platform.infrastructure.errorhandling.InvalidJsonException;
 import org.springframework.stereotype.Service;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
@@ -20,9 +22,11 @@ import com.google.gson.JsonParser;
 public class PortfolioCommandDeerializerServiceGoogleGson implements PortfolioCommandDeserializerService {
 
     private final JsonParser parser;
+    private final Gson gsonConverter;
 
     public PortfolioCommandDeerializerServiceGoogleGson() {
         parser = new JsonParser();
+        gsonConverter = new Gson();
     }
     
     @Override
@@ -38,5 +42,15 @@ public class PortfolioCommandDeerializerServiceGoogleGson implements PortfolioCo
         final String description = helper.extractStringNamed("description", element, parametersPassedInRequest);
 
         return new RoleCommand(parametersPassedInRequest, makerCheckerApproval, roleId, name, description);
+    }
+
+    @Override
+    public RolePermissionCommand deserializeRolePermissionCommand(final Long roleId, final String commandAsJson, final boolean makerCheckerApproval) {
+        
+        if (StringUtils.isBlank(commandAsJson)) { throw new InvalidJsonException(); }
+        
+        final RolePermissionCommand command = gsonConverter.fromJson(commandAsJson, RolePermissionCommand.class);
+
+        return new RolePermissionCommand(roleId, command.getPermissions(), makerCheckerApproval);
     }
 }

@@ -16,6 +16,10 @@ public class PermissionUsageData {
     @SuppressWarnings("unused")
     private final Boolean selected;
 
+    public static PermissionUsageData from(final String permissionCode, final boolean isSelected) {
+        return new PermissionUsageData(null, permissionCode, null, null, isSelected);
+    }
+    
     public PermissionUsageData(final String grouping, final String code, final String entityName, final String actionName,
             final Boolean selected) {
         this.grouping = grouping;

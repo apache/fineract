@@ -30,17 +30,33 @@ public class Role extends AbstractAuditableCustom<AppUser, Long> {
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "m_role_permission", joinColumns = @JoinColumn(name = "role_id"), inverseJoinColumns = @JoinColumn(name = "permission_id"))
-    private Set<Permission> permissions;
+    private Set<Permission> permissions = new HashSet<Permission>();
 
     protected Role() {
-        this.name = null;
-        this.description = null;
-        this.permissions = new HashSet<Permission>();
+        //
     }
 
     public Role(final String name, final String description) {
         this.name = name.trim();
         this.description = description.trim();
+    }
+    
+    public void update(final RoleCommand command) {
+        if (command.isNameChanged()) {
+            this.name = command.getName();
+        }
+
+        if (command.isDescriptionChanged()) {
+            this.description = command.getDescription();
+        }
+    }
+    
+    public boolean addPermission(final Permission permission) {
+        return this.permissions.add(permission);
+    }
+    
+    public boolean removePermission(final Permission permission) {
+        return this.permissions.remove(permission);
     }
 
     public Collection<Permission> getPermissions() {
@@ -60,7 +76,7 @@ public class Role extends AbstractAuditableCustom<AppUser, Long> {
 
     public RoleData toData() {
 
-        Collection<PermissionData> rolePermissions = new ArrayList<PermissionData>();
+        final Collection<PermissionData> rolePermissions = new ArrayList<PermissionData>(this.permissions.size());
         for (Permission permission : this.permissions) {
             PermissionData permissionData = permission.toData();
             rolePermissions.add(permissionData);
@@ -68,20 +84,4 @@ public class Role extends AbstractAuditableCustom<AppUser, Long> {
 
         return new RoleData(this.getId(), this.name, this.description, rolePermissions);
     }
-
-    public void update(final RoleCommand command) {
-        if (command.isNameChanged()) {
-            this.name = command.getName();
-        }
-
-        if (command.isDescriptionChanged()) {
-            this.description = command.getDescription();
-        }
-
-    }
-
-    public String getName() {
-        return name;
-    }
-
 }

@@ -82,26 +82,23 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
         final Role role = this.roleRepository.findOne(command.getRoleId());
         if (role == null) { throw new RoleNotFoundException(command.getRoleId()); }
 
-        Collection<Permission> allPermissions = this.permissionRepository.findAll();
+        final Collection<Permission> allPermissions = this.permissionRepository.findAll();
 
-        Map<String, Boolean> commandPermissions = command.getPermissions();
-        for (String permissionCode : commandPermissions.keySet()) {
-            Boolean selected = commandPermissions.get(permissionCode);
+        final Map<String, Boolean> commandPermissions = command.getPermissions();
+        for (final String permissionCode : commandPermissions.keySet()) {
+            final boolean isSelected = commandPermissions.get(permissionCode).booleanValue();
 
             final Permission permission = findPermissionByCode(allPermissions, permissionCode);
-
-            if (role.getPermissions().contains(permission)) {
-                if (!(selected)) {
-                    role.getPermissions().remove(permission);
-                }
+            if (isSelected) {
+                role.addPermission(permission);
             } else {
-                if (selected) {
-                    role.getPermissions().add(permission);
-                }
+                role.removePermission(permission);
             }
         }
 
         this.roleRepository.save(role);
+        
+        if (this.makerCheckerEnabledForTask && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
 
         return role.getId();
     }

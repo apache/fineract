@@ -120,6 +120,10 @@ public class CommandSource extends AbstractPersistable<Long> {
         return this.apiOperation.equalsIgnoreCase("DELETE") && this.resourceId != null;
     }
     
+    public boolean isUpdateRolePermissions() {
+        return this.apiOperation.equalsIgnoreCase("UPDATEPERMISSIONS") && this.resourceId != null;
+    }
+    
     public boolean isClientResource() {
         return this.resource.equalsIgnoreCase("CLIENTS");
     }

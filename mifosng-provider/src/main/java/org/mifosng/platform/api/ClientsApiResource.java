@@ -87,8 +87,8 @@ public class ClientsApiResource {
     private PlatformSecurityContext context;
 
     @GET
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
     public String retrieveAllIndividualClients(@Context final UriInfo uriInfo, @QueryParam("sqlSearch") final String sqlSearch,
             @QueryParam("officeId") final Integer officeId, @QueryParam("externalId") final String externalId,
             @QueryParam("displayName") final String displayName, @QueryParam("firstName") final String firstName,
@@ -151,8 +151,8 @@ public class ClientsApiResource {
 
     @GET
     @Path("{clientId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
     public String retrieveClient(@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
 
         context.authenticatedUser().validateHasReadPermission("CLIENT");
@@ -160,47 +160,41 @@ public class ClientsApiResource {
         final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
         final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
         final boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
-        final Long makerCheckerId = ApiParameterHelper.makerCheckerId(uriInfo.getQueryParameters());
+        final Long commandId = ApiParameterHelper.commandId(uriInfo.getQueryParameters());
 
         ClientData clientData = this.clientReadPlatformService.retrieveIndividualClient(clientId);
         if (template) {
             final List<OfficeLookup> allowedOffices = new ArrayList<OfficeLookup>(officeReadPlatformService.retrieveAllOfficesForLookup());
             clientData = ClientData.templateOnTop(clientData, allowedOffices);
         }
-        if (makerCheckerId != null) {
-            clientData = handleMakerCheckerRequest(clientId, makerCheckerId, clientData);
+        if (commandId != null) {
+            clientData = handleRequestToIntegrateProposedChangesFromCommand(clientId, commandId, clientData);
         }
 
-        boolean retrieveChanges = true;
-        if (retrieveChanges) {
-            final Collection<ClientData> dataChanges = retrieveAllUnprocessedDataChanges(clientId);
-            clientData = ClientData.integrateChanges(clientData, clientData.currentChange(), dataChanges);
-        }
+        // pick up possibility of changes by default - might push down a layer into the retrieve client method 
+        final Collection<ClientData> dataChanges = retrieveAllUnprocessedDataChanges(clientId);
+        clientData = ClientData.integrateChanges(clientData, clientData.currentChange(), dataChanges);
 
         return this.apiJsonSerializerService.serializeClientDataToJson(prettyPrint, responseParameters, clientData);
     }
 
-    private ClientData handleMakerCheckerRequest(final Long clientId, final Long makerCheckerId, ClientData clientData) {
-        final CommandSourceData entry = this.commandSourceReadPlatformService.retrieveById(makerCheckerId);
+    private ClientData handleRequestToIntegrateProposedChangesFromCommand(final Long clientId, final Long commandId, final ClientData clientData) {
+        final CommandSourceData entry = this.commandSourceReadPlatformService.retrieveById(commandId);
         final ClientData currentChange = this.apiDataConversionService.convertInternalJsonFormatToClientDataChange(clientId, entry.json());
 
-        final Collection<ClientData> dataChanges = retrieveAllUnprocessedDataChanges(clientId);
-        clientData = ClientData.integrateChanges(clientData, currentChange, dataChanges);
-        return clientData;
+        final Collection<ClientData> dataChanges = null; // retrieveAllUnprocessedDataChanges(clientId);
+        return ClientData.integrateChanges(clientData, currentChange, dataChanges);
     }
 
     private Collection<ClientData> retrieveAllUnprocessedDataChanges(final Long clientId) {
         Collection<ClientData> dataChanges = new ArrayList<ClientData>();
 
-        boolean retrieveChanges = true;
-        if (retrieveChanges) {
-            Collection<CommandSourceData> unprocessedChanges = this.commandSourceReadPlatformService.retrieveUnprocessChangesByResourceId(
-                    "clients", clientId);
-            for (CommandSourceData commandSourceData : unprocessedChanges) {
-                ClientData change = this.apiDataConversionService.convertInternalJsonFormatToClientDataChange(clientId,
-                        commandSourceData.json());
-                dataChanges.add(change);
-            }
+        Collection<CommandSourceData> unprocessedChanges = this.commandSourceReadPlatformService.retrieveUnprocessChangesByResourceId(
+                "clients", clientId);
+        for (CommandSourceData commandSourceData : unprocessedChanges) {
+            ClientData change = this.apiDataConversionService.convertInternalJsonFormatToClientDataChange(clientId,
+                    commandSourceData.json());
+            dataChanges.add(change);
         }
 
         if (dataChanges.isEmpty()) {
@@ -212,27 +206,27 @@ public class ClientsApiResource {
 
     @GET
     @Path("template")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
     public String newClientDetails(@Context final UriInfo uriInfo) {
 
         context.authenticatedUser().validateHasReadPermission("CLIENT");
 
         final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
         final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-        final Long makerCheckerId = ApiParameterHelper.makerCheckerId(uriInfo.getQueryParameters());
+        final Long makerCheckerId = ApiParameterHelper.commandId(uriInfo.getQueryParameters());
 
         ClientData clientData = this.clientReadPlatformService.retrieveNewClientDetails();
         if (makerCheckerId != null) {
-            clientData = handleMakerCheckerRequest(null, makerCheckerId, clientData);
+            clientData = handleRequestToIntegrateProposedChangesFromCommand(null, makerCheckerId, clientData);
         }
 
         return this.apiJsonSerializerService.serializeClientDataToJson(prettyPrint, responseParameters, clientData);
     }
 
     @POST
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
     public String createClient(final String jsonRequestBody) {
 
         final EntityIdentifier result = this.commandsSourceWritePlatformService
@@ -243,8 +237,8 @@ public class ClientsApiResource {
 
     @PUT
     @Path("{clientId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
     public String updateClient(@PathParam("clientId") final Long clientId, final String jsonRequestBody) {
 
         final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "clients", clientId,
@@ -255,8 +249,8 @@ public class ClientsApiResource {
 
     @DELETE
     @Path("{clientId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
     public String deleteClient(@PathParam("clientId") final Long clientId) {
 
         final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("DELETE", "clients", clientId, "{}");
@@ -266,8 +260,8 @@ public class ClientsApiResource {
 
     @GET
     @Path("{clientId}/loans")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
     public String retrieveClientAccount(@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
 
         context.authenticatedUser().validateHasReadPermission("CLIENT");
@@ -293,8 +287,8 @@ public class ClientsApiResource {
 
     @GET
     @Path("{clientId}/notes")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
     public String retrieveAllClientNotes(@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
 
         context.authenticatedUser().validateHasReadPermission("CLIENTNOTE");
@@ -315,8 +309,8 @@ public class ClientsApiResource {
 
     @POST
     @Path("{clientId}/notes")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
     public Response addNewClientNote(@PathParam("clientId") final Long clientId, final String jsonRequestBody) {
 
         NoteCommand command = this.apiDataConversionService.convertJsonToNoteCommand(null, clientId, jsonRequestBody);
@@ -328,8 +322,8 @@ public class ClientsApiResource {
 
     @GET
     @Path("{clientId}/notes/{noteId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
     public String retrieveClientNote(@PathParam("clientId") final Long clientId, @PathParam("noteId") final Long noteId,
             @Context final UriInfo uriInfo) {
 
@@ -351,8 +345,8 @@ public class ClientsApiResource {
 
     @PUT
     @Path("{clientId}/notes/{noteId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
     public Response updateClientNote(@PathParam("clientId") final Long clientId, @PathParam("noteId") final Long noteId,
             final String jsonRequestBody) {
 
@@ -368,8 +362,8 @@ public class ClientsApiResource {
      */
     @POST
     @Path("{clientId}/image")
-    @Consumes({ MediaType.MULTIPART_FORM_DATA })
-    @Produces({ MediaType.APPLICATION_JSON })
+    @Consumes({MediaType.MULTIPART_FORM_DATA})
+    @Produces({MediaType.APPLICATION_JSON})
     public Response addNewClientImage(@PathParam("clientId") final Long clientId, @HeaderParam("Content-Length") Long fileSize,
             @FormDataParam("file") InputStream inputStream, @FormDataParam("file") FormDataContentDisposition fileDetails,
             @FormDataParam("file") FormDataBodyPart bodyPart) {
@@ -394,8 +388,8 @@ public class ClientsApiResource {
      */
     @POST
     @Path("{clientId}/image")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
     public Response addNewClientImage(@PathParam("clientId") final Long clientId, final String jsonRequestBody) {
 
         Base64EncodedImage base64EncodedImage = FileUtils.extractImageFromDataURL(jsonRequestBody);
@@ -410,8 +404,8 @@ public class ClientsApiResource {
      */
     @GET
     @Path("{clientId}/image")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
     public Response retrieveClientImage(@PathParam("clientId") final Long clientId) {
 
         context.authenticatedUser().validateHasReadPermission("CLIENTIMAGE");
@@ -428,8 +422,8 @@ public class ClientsApiResource {
      */
     @PUT
     @Path("{clientId}/image")
-    @Consumes({ MediaType.MULTIPART_FORM_DATA })
-    @Produces({ MediaType.APPLICATION_JSON })
+    @Consumes({MediaType.MULTIPART_FORM_DATA})
+    @Produces({MediaType.APPLICATION_JSON})
     public Response updateClientImage(@PathParam("clientId") final Long clientId, @HeaderParam("Content-Length") Long fileSize,
             @FormDataParam("file") InputStream inputStream, @FormDataParam("file") FormDataContentDisposition fileDetails,
             @FormDataParam("file") FormDataBodyPart bodyPart) {
@@ -438,8 +432,8 @@ public class ClientsApiResource {
 
     @DELETE
     @Path("{clientId}/image")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
     public Response deleteClientImage(@PathParam("clientId") final Long clientId) {
         this.clientWritePlatformService.deleteClientImage(clientId);
         return Response.ok(new EntityIdentifier(clientId)).build();
@@ -453,8 +447,8 @@ public class ClientsApiResource {
      */
     @PUT
     @Path("{clientId}/image")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
     public Response updateClientImage(@PathParam("clientId") final Long clientId, final String jsonRequestBody) {
         return addNewClientImage(clientId, jsonRequestBody);
     }

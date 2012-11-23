@@ -15,7 +15,10 @@ public class RoleData {
     @SuppressWarnings("unused")
     private final Collection<PermissionData> availablePermissions;
     private final Collection<PermissionData> selectedPermissions;
-
+    
+//    @SuppressWarnings("unused")
+//    private final Collection<RoleData> currentChanges;
+    
     public RoleData(final Long id, final String name, final String description) {
         this.id = id;
         this.name = name;
@@ -63,7 +66,9 @@ public class RoleData {
         return this.selectedPermissions;
     }
 
-    public RolePermissionsData toRolePermissionData(final Collection<PermissionUsageData> permissionUsageData) {
-        return new RolePermissionsData(id, name, description, permissionUsageData);
+    public RolePermissionsData toRolePermissionData(final Collection<PermissionUsageData> permissionUsageData,
+            final Collection<PermissionUsageData> currentChanges, 
+            final Collection<Collection<PermissionUsageData>> allChanges) {
+        return new RolePermissionsData(id, name, description, permissionUsageData, currentChanges, allChanges);
     }
 }
