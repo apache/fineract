@@ -24,12 +24,11 @@ public class Permission extends AbstractPersistable<Long> {
     @SuppressWarnings("unused")
     @Column(name = "action_name", nullable = true, length = 100)
     private final String actionName;
-    
+
     @SuppressWarnings("unused")
     @Column(name = "is_maker_checker", nullable = false)
-	private Boolean isMakerChecker;
-    
-    
+    private Boolean isMakerChecker;
+
     protected Permission() {
         this.grouping = null;
         this.code = null;
@@ -44,5 +43,4 @@ public class Permission extends AbstractPersistable<Long> {
     public String code() {
         return this.code;
     }
-
 }
