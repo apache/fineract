@@ -3,7 +3,6 @@ ALTER TABLE m_permission
  ADD COLUMN `entity_name` VARCHAR(100) NULL  AFTER `default_name` , 
  ADD COLUMN `action_name` VARCHAR(100) NULL  AFTER `entity_name` ;
 
-
 /*
 this scripts removes all current m_role_permission and m_permission entries
 and then inserts new m_permission entries and just one m_role_permission entry

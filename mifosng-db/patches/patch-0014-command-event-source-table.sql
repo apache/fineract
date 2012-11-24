@@ -1,6 +1,4 @@
 drop table `m_maker_checker`;
-drop table `m_command_event_source`;
-drop table `m_portfolio_command_source`;
 CREATE TABLE `m_portfolio_command_source` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `api_operation` varchar(20) NOT NULL,

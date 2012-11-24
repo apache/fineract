@@ -1,4 +1,3 @@
-drop table `m_maker_checker`;
 CREATE TABLE `m_maker_checker` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `task_name` varchar(100) NOT NULL,
