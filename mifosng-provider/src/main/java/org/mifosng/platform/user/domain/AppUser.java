@@ -271,22 +271,6 @@ public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements P
         return false;
     }
 
-    public boolean hasNotPermissionForSet(String type, String set, String accessType) {
-
-        String matchPermission = "CAN_" + accessType + "_" + type + "_x" + set;
-
-        if (accessType.equalsIgnoreCase("READ")) {
-
-            if (hasNotPermissionForAnyOf("ALL_FUNCTIONS", "ALL_FUNCTIONS_READ", matchPermission)) return true;
-
-            return false;
-        }
-
-        if (hasNotPermissionForAnyOf("ALL_FUNCTIONS", matchPermission)) return true;
-
-        return false;
-    }
-
     public boolean hasNotPermissionForAnyOf(final String... permissionCodes) {
         boolean hasNotPermission = true;
         for (String permissionCode : permissionCodes) {
