@@ -1,2 +1,0 @@
-ALTER TABLE `m_appuser` 
-ADD COLUMN `is_deleted` TINYINT(1) DEFAULT 0 NOT NULL AFTER `id`;

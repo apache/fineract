@@ -96,6 +96,7 @@ CREATE TABLE `ref_loan_transaction_processing_strategy` (
 CREATE TABLE `m_code` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `code_name` varchar(100) DEFAULT NULL,
+  `is_system_defined` TINYINT(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `code_name` (`code_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -194,10 +195,9 @@ CREATE TABLE `m_permission` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `grouping` varchar(45) DEFAULT NULL,
   `code` varchar(100) NOT NULL,
-  `default_description` varchar(500) NOT NULL,
-  `default_name` varchar(100) NOT NULL,
   `entity_name` varchar(100) DEFAULT NULL,
   `action_name` varchar(100) DEFAULT NULL,
+  `is_maker_checker` TINYINT(1) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `code` (`code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -265,7 +265,7 @@ CREATE TABLE `m_portfolio_command_source` (
   `api_operation` varchar(20) NOT NULL,
   `api_resource` varchar(20) NOT NULL,
   `resource_id` bigint(20) DEFAULT NULL,
-  `command_as_json` varchar(1000) NOT NULL,
+  `command_as_json` varchar(5000) NOT NULL,
   `maker_id` bigint(20) NOT NULL,
   `made_on_date` date NOT NULL,
   `checker_id` bigint(20) DEFAULT NULL,
