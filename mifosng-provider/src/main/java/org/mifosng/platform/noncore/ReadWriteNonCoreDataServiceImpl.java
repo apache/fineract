@@ -105,21 +105,32 @@ public class ReadWriteNonCoreDataServiceImpl implements
 		validateAppTable(appTable);
 
 		String createPermission = "'CREATE_" + datatable + "'";
+		String createPermissionChecker = "'CREATE_" + datatable + "_CHECKER'";
 		String readPermission = "'READ_" + datatable + "'";
 		String updatePermission = "'UPDATE_" + datatable + "'";
+		String updatePermissionChecker = "'UPDATE_" + datatable + "_CHECKER'";
 		String deletePermission = "'DELETE_" + datatable + "'";
+		String deletePermissionChecker = "'DELETE_" + datatable + "_CHECKER'";
 		// TODO - put in batch command later
 		String sql = "insert into x_registered_table (registered_table_name, application_table_name) values ('"
 				+ datatable + "', '" + appTable + "')";
 
 		genericDataService.updateSQL(sql, "SQL: " + sql);
-
-		sql = "insert into m_permission (grouping, code, action_name, entity_name, is_maker_checker) values "
+		/*
+		 * add all permissions, including checker permissions for maintenance
+		 * tasks
+		 */
+		sql = "insert into m_permission (grouping, code, action_name, entity_name, can_maker_checker) values "
 				+ "('datatable', "
 				+ createPermission
 				+ ", 'CREATE', '"
 				+ datatable
 				+ "', true),"
+				+ "('datatable', "
+				+ createPermissionChecker
+				+ ", 'CREATE', '"
+				+ datatable
+				+ "', false),"
 				+ "('datatable', "
 				+ readPermission
 				+ ", 'READ', '"
@@ -131,9 +142,19 @@ public class ReadWriteNonCoreDataServiceImpl implements
 				+ datatable
 				+ "', true),"
 				+ "('datatable', "
+				+ updatePermissionChecker
+				+ ", 'UPDATE', '"
+				+ datatable
+				+ "', false),"
+				+ "('datatable', "
 				+ deletePermission
 				+ ", 'DELETE', '"
-				+ datatable + "', true)";
+				+ datatable
+				+ "', true),"
+				+ "('datatable', "
+				+ deletePermissionChecker
+				+ ", 'DELETE', '"
+				+ datatable + "', false)";
 
 		genericDataService.updateSQL(sql, "SQL: " + sql);
 
@@ -149,9 +170,9 @@ public class ReadWriteNonCoreDataServiceImpl implements
 
 		// TODO - put in batch command later
 
-		String permissionList = "('CREATE_" + datatable + "', 'READ_"
-				+ datatable + "', 'UPDATE_" + datatable + "', 'DELETE_"
-				+ datatable + "')";
+		String permissionList = "('CREATE_" + datatable + "', 'CREATE_"
+				+ datatable + "_CHECKER', 'READ_" + datatable + "', 'UPDATE_"
+				+ datatable + "', 'UPDATE_" + datatable + "_CHECKER', 'DELETE_" + datatable + "', 'DELETE_" + datatable + "_CHECKER')";
 
 		String sql = "delete from m_role_permission where m_role_permission.permission_id in (select id from m_permission where code in "
 				+ permissionList + ")";

@@ -54,19 +54,19 @@ public class PermissionReadPlatformServiceImpl implements PermissionReadPlatform
             final String entityName = rs.getString("entityName");
             final String actionName = rs.getString("actionName");
             final Boolean selected = rs.getBoolean("selected");
-            final Boolean isMakerChecker = rs.getBoolean("isMakerChecker");
+            final Boolean canMakerChecker = rs.getBoolean("canMakerChecker");
 
-            return new PermissionUsageData(grouping, code, entityName, actionName, selected, isMakerChecker);
+            return new PermissionUsageData(grouping, code, entityName, actionName, selected, canMakerChecker);
         }
 
         public String permissionSchema() {
-            return "select p.grouping, p.code, p.entity_name as entityName, p.action_name as actionName, true as selected, p.is_maker_checker as isMakerChecker"
+            return "select p.grouping, p.code, p.entity_name as entityName, p.action_name as actionName, true as selected, p.can_maker_checker as canMakerChecker"
                     + " from m_permission p " + " order by p.grouping, ifnull(entity_name, ''), p.code";
         }
 
         public String rolePermissionSchema() {
             return "select p.grouping, p.code, p.entity_name as entityName, p.action_name as actionName, if(isnull(rp.role_id), false, true) as selected, "
-                    + " if(isnull(rp.role_id), false, p.is_maker_checker) as isMakerChecker "
+                    + " if(isnull(rp.role_id), false, p.can_maker_checker) as canMakerChecker "
                     + " from m_permission p "
                     + " left join m_role_permission rp on rp.permission_id = p.id and rp.role_id = ? "
                     + " order by p.grouping, ifnull(entity_name, ''), p.code";

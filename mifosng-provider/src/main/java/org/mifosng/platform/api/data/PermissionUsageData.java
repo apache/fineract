@@ -16,19 +16,19 @@ public class PermissionUsageData {
     @SuppressWarnings("unused")
     private final Boolean selected;
     @SuppressWarnings("unused")
-    private final Boolean isMakerChecker;
+    private final Boolean canMakerChecker;
 
     public static PermissionUsageData from(final String permissionCode, final boolean isSelected) {
         return new PermissionUsageData(null, permissionCode, null, null, isSelected, null);
     }
 
     public PermissionUsageData(final String grouping, final String code, final String entityName, final String actionName,
-            final Boolean selected, final Boolean isMakerChecker) {
+            final Boolean selected, final Boolean canMakerChecker) {
         this.grouping = grouping;
         this.code = code;
         this.entityName = entityName;
         this.actionName = actionName;
         this.selected = selected;
-        this.isMakerChecker = isMakerChecker;
+        this.canMakerChecker = canMakerChecker;
     }
 }
