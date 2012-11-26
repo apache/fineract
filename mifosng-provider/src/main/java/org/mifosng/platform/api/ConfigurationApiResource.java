@@ -31,53 +31,52 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class ConfigurationApiResource {
 
-	@Autowired
-	private ConfigurationReadPlatformService configurationReadPlatformService;
+    @Autowired
+    private ConfigurationReadPlatformService configurationReadPlatformService;
 
-	@Autowired
-	private ConfigurationWritePlatformService configurationWritePlatformService;
+    @Autowired
+    private ConfigurationWritePlatformService configurationWritePlatformService;
 
-	@Autowired
-	private PortfolioApiDataConversionService apiDataConversionService;
-	
-	@Autowired
-	private PortfolioApiJsonSerializerService apiJsonSerializerService;
+    @Autowired
+    private PortfolioApiDataConversionService apiDataConversionService;
+
+    @Autowired
+    private PortfolioApiJsonSerializerService apiJsonSerializerService;
 
     @Autowired
     private PlatformSecurityContext context;
-    
-	@GET
-	@Path("currency")
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
-	public String retrieveCurrencyDataForConfiguration(@Context final UriInfo uriInfo) {
 
-		context.authenticatedUser().validateHasReadPermission("CURRENCY");
-		
-		Set<String> typicalResponseParameters = new HashSet<String>(
-				Arrays.asList("selectedCurrencyOptions", "currencyOptions"));
-		
-		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-		if (responseParameters.isEmpty()) {
-			responseParameters.addAll(typicalResponseParameters);
-		}
-		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+    @GET
+    @Path("currency")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String retrieveCurrencyDataForConfiguration(@Context final UriInfo uriInfo) {
 
-		ConfigurationData configurationData = this.configurationReadPlatformService.retrieveCurrencyConfiguration();
-		
-		return this.apiJsonSerializerService.serializeConfigurationDataToJson(prettyPrint, responseParameters, configurationData);
-	}
+        context.authenticatedUser().validateHasReadPermission("CURRENCY");
 
-	@PUT
-	@Path("currency")
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
-	public Response updateAllowedCurrenciesForOrganisation(final String jsonRequestBody) {
+        Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("selectedCurrencyOptions", "currencyOptions"));
 
-		OrganisationCurrencyCommand command = this.apiDataConversionService.convertJsonToOrganisationCurrencyCommand(jsonRequestBody);
-		
-		this.configurationWritePlatformService.updateOrganisationCurrencies(command);
+        Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+        if (responseParameters.isEmpty()) {
+            responseParameters.addAll(typicalResponseParameters);
+        }
+        boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 
-		return Response.ok().entity(command).build();
-	}
+        ConfigurationData configurationData = this.configurationReadPlatformService.retrieveCurrencyConfiguration();
+
+        return this.apiJsonSerializerService.serializeConfigurationDataToJson(prettyPrint, responseParameters, configurationData);
+    }
+
+    @PUT
+    @Path("currency")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public Response updateAllowedCurrenciesForOrganisation(final String jsonRequestBody) {
+
+        OrganisationCurrencyCommand command = this.apiDataConversionService.convertJsonToOrganisationCurrencyCommand(jsonRequestBody);
+
+        this.configurationWritePlatformService.updateOrganisationCurrencies(command);
+
+        return Response.ok().entity(command).build();
+    }
 }

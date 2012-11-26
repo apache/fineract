@@ -24,10 +24,6 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
     private final RoleRepository roleRepository;
     private final PermissionRepository permissionRepository;
 
-    // FIXME - kw - this value is hardcoded for now but will be retrieved from
-    // configuration
-    private boolean makerCheckerEnabledForTask = true;
-    
     @Autowired
     public RoleWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final RoleRepository roleRepository,
             final PermissionRepository permissionRepository) {
@@ -42,15 +38,16 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
 
         context.authenticatedUser();
 
-        RoleCommandValidator validator = new RoleCommandValidator(command);
+        final RoleCommandValidator validator = new RoleCommandValidator(command);
         validator.validateForCreate();
-
-        Role entity = new Role(command.getName(), command.getDescription());
+        
+        final Role entity = new Role(command.getName(), command.getDescription());
 
         this.roleRepository.save(entity);
         
-        if (this.makerCheckerEnabledForTask && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
-
+        final Permission thisTask = this.permissionRepository.findOneByCode("CREATE_ROLE");
+        if (thisTask.hasMakerCheckerEnabled() && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
+        
         return entity.getId();
     }
 
@@ -60,16 +57,17 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
 
         context.authenticatedUser();
 
-        RoleCommandValidator validator = new RoleCommandValidator(command);
+        final RoleCommandValidator validator = new RoleCommandValidator(command);
         validator.validateForUpdate();
-
-        Role role = this.roleRepository.findOne(command.getId());
+        
+        final Role role = this.roleRepository.findOne(command.getId());
         if (role == null) { throw new RoleNotFoundException(command.getId()); }
         role.update(command);
 
         this.roleRepository.save(role);
         
-        if (this.makerCheckerEnabledForTask && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
+        final Permission thisTask = this.permissionRepository.findOneByCode("UPDATE_ROLE");
+        if (thisTask.hasMakerCheckerEnabled() && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
 
         return role.getId();
     }
@@ -98,8 +96,9 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
 
         this.roleRepository.save(role);
         
-        if (this.makerCheckerEnabledForTask && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
-
+        final Permission thisTask = this.permissionRepository.findOneByCode("PERMISSIONS_ROLE");
+        if (thisTask.hasMakerCheckerEnabled() && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
+        
         return role.getId();
     }
 

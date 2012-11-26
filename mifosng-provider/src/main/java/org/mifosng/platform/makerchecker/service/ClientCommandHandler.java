@@ -85,6 +85,8 @@ public class ClientCommandHandler implements CommandSourceHandler {
 
     public CommandSource handle(final CommandSource commandSourceResult) {
 
+        final AppUser checker = context.authenticatedUser();
+        
         Long resourceId = null;
         if (commandSourceResult.isClientResource()) {
             final ClientCommand command = this.apiDataConversionService.convertInternalJsonFormatToClientCommand(
@@ -92,16 +94,15 @@ public class ClientCommandHandler implements CommandSourceHandler {
 
             if (commandSourceResult.isCreate()) {
                 resourceId = this.clientWritePlatformService.createClient(command);
+                commandSourceResult.markAsChecked(checker, new LocalDate());
             } else if (commandSourceResult.isUpdate()) {
-
-                // TODO - is there a case for doing change detection at this
-                // point also?
-
                 EntityIdentifier result = this.clientWritePlatformService.updateClientDetails(command);
                 resourceId = result.getEntityId();
+                commandSourceResult.markAsChecked(checker, new LocalDate());
             } else if (commandSourceResult.isDelete()) {
                 EntityIdentifier result = this.clientWritePlatformService.deleteClient(command);
                 resourceId = result.getEntityId();
+                commandSourceResult.markAsChecked(checker, new LocalDate());
             }
         }
 

@@ -131,4 +131,8 @@ public class CommandSource extends AbstractPersistable<Long> {
     public boolean isRoleResource() {
         return this.resource.equalsIgnoreCase("ROLES");
     }
+
+    public boolean isUserResource() {
+        return this.resource.equalsIgnoreCase("USERS");
+    }
 }

@@ -12,24 +12,25 @@ import org.springframework.stereotype.Service;
 @Service
 public class ConfigurationReadPlatformServiceImpl implements ConfigurationReadPlatformService {
 
-	private final CurrencyReadPlatformService currencyReadPlatformService;
+    private final CurrencyReadPlatformService currencyReadPlatformService;
 
-	@Autowired
-	public ConfigurationReadPlatformServiceImpl(final CurrencyReadPlatformService currencyReadPlatformService) {
-		this.currencyReadPlatformService = currencyReadPlatformService;
-	}
+    @Autowired
+    public ConfigurationReadPlatformServiceImpl(final CurrencyReadPlatformService currencyReadPlatformService) {
+        this.currencyReadPlatformService = currencyReadPlatformService;
+    }
 
-	@Override
-	public ConfigurationData retrieveCurrencyConfiguration() {
-		
-		List<CurrencyData> selectedCurrencyOptions = new ArrayList<CurrencyData>(this.currencyReadPlatformService.retrieveAllowedCurrencies());
-		List<CurrencyData> currencyOptions = new ArrayList<CurrencyData>(this.currencyReadPlatformService.retrieveAllPlatformCurrencies());
+    @Override
+    public ConfigurationData retrieveCurrencyConfiguration() {
 
-		// remove selected currency options
-		currencyOptions.removeAll(selectedCurrencyOptions);
-		
-		ConfigurationData configurationData = new ConfigurationData(currencyOptions, selectedCurrencyOptions);
-		
-		return configurationData;
-	}
+        List<CurrencyData> selectedCurrencyOptions = new ArrayList<CurrencyData>(
+                this.currencyReadPlatformService.retrieveAllowedCurrencies());
+        List<CurrencyData> currencyOptions = new ArrayList<CurrencyData>(this.currencyReadPlatformService.retrieveAllPlatformCurrencies());
+
+        // remove selected currency options
+        currencyOptions.removeAll(selectedCurrencyOptions);
+
+        ConfigurationData configurationData = new ConfigurationData(currencyOptions, selectedCurrencyOptions);
+
+        return configurationData;
+    }
 }

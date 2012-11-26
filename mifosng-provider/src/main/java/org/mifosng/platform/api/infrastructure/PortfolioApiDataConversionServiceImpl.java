@@ -269,58 +269,22 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
     }
 
     @Override
-    public UserCommand convertJsonToUserCommand(final Long resourceIdentifier, final String json) {
+    public UserCommand convertApiRequestJsonToUserCommand(final Long resourceIdentifier, final String json) {
 
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
-        Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
 
-        Set<String> supportedParams = new HashSet<String>(Arrays.asList("username", "firstname", "lastname", "password", "repeatPassword",
+        final Set<String> supportedParams = new HashSet<String>(Arrays.asList("username", "firstname", "lastname", "password", "repeatPassword",
                 "email", "officeId", "notSelectedRoles", "roles"));
 
         checkForUnsupportedParameters(requestMap, supportedParams);
 
-        Set<String> modifiedParameters = new HashSet<String>();
-
-        String username = extractStringParameter("username", requestMap, modifiedParameters);
-        String firstname = extractStringParameter("firstname", requestMap, modifiedParameters);
-        String lastname = extractStringParameter("lastname", requestMap, modifiedParameters);
-        String password = extractStringParameter("password", requestMap, modifiedParameters);
-        String repeatPassword = extractStringParameter("repeatPassword", requestMap, modifiedParameters);
-        String email = extractStringParameter("email", requestMap, modifiedParameters);
-        Long officeId = extractLongParameter("officeId", requestMap, modifiedParameters);
-
-        // check array
-        JsonParser parser = new JsonParser();
-
-        String[] notSelectedRoles = null;
-        String[] roles = null;
-        JsonElement element = parser.parse(json);
-        if (element.isJsonObject()) {
-            JsonObject object = element.getAsJsonObject();
-            if (object.has("notSelectedRoles")) {
-                modifiedParameters.add("notSelectedRoles");
-                JsonArray array = object.get("notSelectedRoles").getAsJsonArray();
-                notSelectedRoles = new String[array.size()];
-                for (int i = 0; i < array.size(); i++) {
-                    notSelectedRoles[i] = array.get(i).getAsString();
-                }
-            }
-
-            if (object.has("roles")) {
-                modifiedParameters.add("roles");
-                JsonArray array = object.get("roles").getAsJsonArray();
-                roles = new String[array.size()];
-                for (int i = 0; i < array.size(); i++) {
-                    roles[i] = array.get(i).getAsString();
-                }
-            }
-        }
-        //
-
-        return new UserCommand(modifiedParameters, resourceIdentifier, username, firstname, lastname, password, repeatPassword, email,
-                officeId, notSelectedRoles, roles);
+        // no difference between the api json and internal command
+        // representation of json so reuse this code to de-serialize into
+        // command object
+        return this.portfolioCommandDeserializerService.deserializeUserCommand(resourceIdentifier, json, false);
     }
 
     @Override
@@ -576,8 +540,6 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         final Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
 
-        // FIXME - A - LoanProduct - KW - Do we add support for
-        // "overpaidTolerance" parameter?
         final Set<String> supportedParams = new HashSet<String>(Arrays.asList("name", "description", "fundId",
                 "transactionProcessingStrategyId", "currencyCode", "digitsAfterDecimal", "principal", "inArrearsTolerance",
                 "interestRatePerPeriod", "repaymentEvery", "numberOfRepayments", "repaymentFrequencyType", "interestRateFrequencyType",
@@ -621,10 +583,6 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         final Integer interestCalculationPeriodType = helper.extractIntegerNamed("interestCalculationPeriodType", element,
                 modifiedParameters);
 
-        // FIXME - A - LoanProduct - KW - product charges at present dont allow
-        // for adding 'charge' to loan product and setting its 'amount', might
-        // this be needed?
-        // loan product charges
         String[] charges = null;
         if (element.isJsonObject()) {
             JsonObject object = element.getAsJsonObject();
@@ -739,7 +697,6 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
                 loanTermFrequency, loanTermFrequencyType, inArrearsToleranceValue, charges, loanOfficerId);
     }
 
-    // FIXME - KW - charges
     @Override
     public LoanChargeCommand convertJsonToLoanChargeCommand(final Long loanChargeId, final Long loanId, final String json) {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
@@ -1594,7 +1551,6 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
 
     @Override
     public CodeCommand convertJsonToCodeCommand(Long resourceIdentifier, String json) {
-        // TODO Auto-generated method stub
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         Type typeOfMap = new TypeToken<Map<String, String>>() {}.getType();

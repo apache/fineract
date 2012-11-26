@@ -44,7 +44,7 @@ public interface PortfolioApiDataConversionService {
     
     RolePermissionCommand convertApiRequestJsonToRolePermissionCommand(Long roleId, String jsonRequestBody);
 
-    UserCommand convertJsonToUserCommand(Long resourceIdentifier, String json);
+    UserCommand convertApiRequestJsonToUserCommand(Long resourceIdentifier, String json);
 
     BranchMoneyTransferCommand convertJsonToBranchMoneyTransferCommand(String json);
 

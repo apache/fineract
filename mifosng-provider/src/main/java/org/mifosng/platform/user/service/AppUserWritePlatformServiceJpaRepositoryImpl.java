@@ -8,6 +8,7 @@ import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.mifosng.platform.api.commands.UserCommand;
 import org.mifosng.platform.api.data.ApiParameterError;
+import org.mifosng.platform.client.service.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
 import org.mifosng.platform.exceptions.OfficeNotFoundException;
 import org.mifosng.platform.exceptions.PlatformApiDataValidationException;
 import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
@@ -22,6 +23,8 @@ import org.mifosng.platform.organisation.domain.OfficeRepository;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.user.domain.AppUser;
 import org.mifosng.platform.user.domain.AppUserRepository;
+import org.mifosng.platform.user.domain.Permission;
+import org.mifosng.platform.user.domain.PermissionRepository;
 import org.mifosng.platform.user.domain.Role;
 import org.mifosng.platform.user.domain.RoleRepository;
 import org.mifosng.platform.user.domain.UserDomainService;
@@ -44,17 +47,19 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
     private final AppUserRepository appUserRepository;
     private final OfficeRepository officeRepository;
     private final RoleRepository roleRepository;
-
+    private final PermissionRepository permissionRepository;
+    
     @Autowired
     public AppUserWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final AppUserRepository appUserRepository,
             final UserDomainService userDomainService, final OfficeRepository officeRepository, final RoleRepository roleRepository,
-            final PlatformPasswordEncoder platformPasswordEncoder) {
+            final PlatformPasswordEncoder platformPasswordEncoder, final PermissionRepository permissionRepository) {
         this.context = context;
         this.appUserRepository = appUserRepository;
         this.userDomainService = userDomainService;
         this.officeRepository = officeRepository;
         this.roleRepository = roleRepository;
         this.platformPasswordEncoder = platformPasswordEncoder;
+        this.permissionRepository = permissionRepository;
     }
 
     @Transactional
@@ -64,12 +69,12 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
         try {
             context.authenticatedUser();
 
-            UserCommandValidator validator = new UserCommandValidator(command);
+            final UserCommandValidator validator = new UserCommandValidator(command);
             validator.validateForCreate();
 
             final Set<Role> allRoles = assembleSetOfRoles(command);
 
-            Office office = this.officeRepository.findOne(command.getOfficeId());
+            final Office office = this.officeRepository.findOne(command.getOfficeId());
             if (office == null) { throw new OfficeNotFoundException(command.getOfficeId()); }
 
             String password = command.getPassword();
@@ -77,17 +82,17 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
                 password = "autogenerate";
             }
 
-            AppUser appUser = AppUser.createNew(office, allRoles, command.getUsername(), command.getEmail(), command.getFirstname(),
+            final AppUser appUser = AppUser.createNew(office, allRoles, command.getUsername(), command.getEmail(), command.getFirstname(),
                     command.getLastname(), password);
 
-            this.userDomainService.create(appUser);
-
+            this.userDomainService.create(appUser, command.isApprovedByChecker());
+            
             return appUser.getId();
         } catch (DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
             return Long.valueOf(-1);
         } catch (PlatformEmailSendException e) {
-            List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
             ApiParameterError error = ApiParameterError.parameterError("error.msg.user.email.invalid", "The parameter email is invalid.",
                     "email", command.getEmail());
             dataValidationErrors.add(error);
@@ -103,10 +108,10 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 
         try {
             context.authenticatedUser();
-
+            
             UserCommandValidator validator = new UserCommandValidator(command);
             validator.validateForUpdate();
-
+            
             final Set<Role> allRoles = assembleSetOfRoles(command);
 
             Office office = null;
@@ -115,7 +120,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
                 if (office == null) { throw new OfficeNotFoundException(command.getOfficeId()); }
             }
 
-            AppUser userToUpdate = this.appUserRepository.findOne(command.getId());
+            final AppUser userToUpdate = this.appUserRepository.findOne(command.getId());
             if (userToUpdate == null) { throw new UserNotFoundException(command.getId()); }
 
             userToUpdate.update(allRoles, office, command);
@@ -131,6 +136,9 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
                 this.appUserRepository.saveAndFlush(userToUpdate);
             }
 
+            final Permission thisTask = this.permissionRepository.findOneByCode("UPDATE_USER");
+            if (thisTask.hasMakerCheckerEnabled() && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
+
             return userToUpdate.getId();
         } catch (DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
@@ -138,10 +146,50 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
         }
     }
 
+    /**
+     * Different between this and <code>updateUser</code> is that we dont do
+     * maker-checker flow or require that user have particular permission to
+     * change their own details.
+     */
     @Transactional
     @Override
-    public void updateUsersOwnAccountDetails(final UserCommand command) {
-        updateUser(command);
+    public Long updateUsersOwnAccountDetails(final UserCommand command) {
+        
+        try {
+            context.authenticatedUser();
+            
+            UserCommandValidator validator = new UserCommandValidator(command);
+            validator.validateForUpdate();
+
+            final Set<Role> allRoles = assembleSetOfRoles(command);
+
+            Office office = null;
+            if (command.isOfficeChanged()) {
+                office = this.officeRepository.findOne(command.getOfficeId());
+                if (office == null) { throw new OfficeNotFoundException(command.getOfficeId()); }
+            }
+
+            final AppUser userToUpdate = this.appUserRepository.findOne(command.getId());
+            if (userToUpdate == null) { throw new UserNotFoundException(command.getId()); }
+
+            userToUpdate.update(allRoles, office, command);
+            this.appUserRepository.saveAndFlush(userToUpdate);
+
+            if (command.isPasswordChanged()) {
+                PlatformUser dummyPlatformUser = new BasicPasswordEncodablePlatformUser(userToUpdate.getId(), userToUpdate.getUsername(),
+                        command.getPassword());
+
+                String newPasswordEncoded = this.platformPasswordEncoder.encode(dummyPlatformUser);
+
+                userToUpdate.updatePassword(newPasswordEncoded);
+                this.appUserRepository.saveAndFlush(userToUpdate);
+            }
+            
+            return userToUpdate.getId();
+        } catch (DataIntegrityViolationException dve) {
+            handleDataIntegrityIssues(command, dve);
+            return Long.valueOf(-1);
+        }
     }
 
     private Set<Role> assembleSetOfRoles(final UserCommand command) {
@@ -163,13 +211,18 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 
     @Transactional
     @Override
-    public void deleteUser(final Long userId) {
+    public void deleteUser(final UserCommand command) {
+        
+        final Permission permissionForThisTask = this.permissionRepository.findOneByCode("UPDATE_USER");
 
+        final Long userId = command.getId();
         AppUser user = this.appUserRepository.findOne(userId);
         if (user == null || user.isDeleted()) { throw new UserNotFoundException(userId); }
 
         user.delete();
         this.appUserRepository.save(user);
+        
+        if (permissionForThisTask.hasMakerCheckerEnabled() && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
     }
 
     /*

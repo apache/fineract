@@ -44,13 +44,10 @@ public class PortfolioCommandSourceWriteServiceImpl implements PortfolioCommandS
     @Override
     public EntityIdentifier approveEntry(final Long id) {
 
-        final AppUser checker = context.authenticatedUser();
+        context.authenticatedUser();
 
         final CommandSource commandSourceInput = this.commandSourceRepository.findOne(id);
-        commandSourceInput.markAsChecked(checker, new LocalDate());
-
         final CommandSource commandSourceResult = this.commandSourceHandlerDelegator.handleExistingCommand(commandSourceInput);
-
         commandSourceRepository.save(commandSourceResult);
 
         return EntityIdentifier.makerChecker(commandSourceResult.resourceId(), commandSourceResult.getId());

@@ -33,66 +33,63 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class CommandsApiResource {
 
-	@Autowired
-	private PortfolioCommandsReadPlatformService readPlatformService;
-	
-	@Autowired
-	private PortfolioCommandSourceWritePlatformService writePlatformService;
+    @Autowired
+    private PortfolioCommandsReadPlatformService readPlatformService;
 
-	@Autowired
-	private PortfolioApiJsonSerializerService apiJsonSerializerService;
+    @Autowired
+    private PortfolioCommandSourceWritePlatformService writePlatformService;
 
-	private final String entityType = "MAKERCHECKER";
+    @Autowired
+    private PortfolioApiJsonSerializerService apiJsonSerializerService;
+
+    private final String entityType = "MAKERCHECKER";
     @Autowired
     private PlatformSecurityContext context;
-    
-	@GET
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
-	public String retrieveCodes(@Context final UriInfo uriInfo) {
 
-    	context.authenticatedUser().validateHasReadPermission(entityType);
-    	
-		final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-		final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-		
-		final Collection<CommandSourceData> entries = this.readPlatformService.retrieveAllEntriesToBeChecked();
-		
-		return this.apiJsonSerializerService.serializeMakerCheckerDataToJson(prettyPrint, responseParameters, entries);
-	}
-	
-	@POST
-	@Path("{makerCheckerId}")
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
-	public String approveMakerCheckerEntry(
-			@PathParam("makerCheckerId") final Long makerCheckerId,
-			@QueryParam("command") final String commandParam) {
+    @GET
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String retrieveCodes(@Context final UriInfo uriInfo) {
 
-		EntityIdentifier result = null;
-		if (is(commandParam, "approve")) {
-			result = this.writePlatformService.approveEntry(makerCheckerId);
-		} else {
-			throw new UnrecognizedQueryParamException("command", commandParam);
-		}
+        context.authenticatedUser().validateHasReadPermission(entityType);
 
-		return this.apiJsonSerializerService.serializeEntityIdentifier(result);
-	}
+        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 
-	private boolean is(final String commandParam, final String commandValue) {
-		return StringUtils.isNotBlank(commandParam)
-				&& commandParam.trim().equalsIgnoreCase(commandValue);
-	}
-	
-	@DELETE
-	@Path("{makerCheckerId}")
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
-	public String deleteMakerCheckerEntry(
-			@PathParam("makerCheckerId") final Long makerCheckerId) {
+        final Collection<CommandSourceData> entries = this.readPlatformService.retrieveAllEntriesToBeChecked();
 
-		final Long id = this.writePlatformService.deleteEntry(makerCheckerId);
+        return this.apiJsonSerializerService.serializeMakerCheckerDataToJson(prettyPrint, responseParameters, entries);
+    }
 
-		return this.apiJsonSerializerService.serializeEntityIdentifier(EntityIdentifier.makerChecker(id));
-	}
+    @POST
+    @Path("{makerCheckerId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String approveMakerCheckerEntry(@PathParam("makerCheckerId") final Long makerCheckerId,
+            @QueryParam("command") final String commandParam) {
+
+        EntityIdentifier result = null;
+        if (is(commandParam, "approve")) {
+            result = this.writePlatformService.approveEntry(makerCheckerId);
+        } else {
+            throw new UnrecognizedQueryParamException("command", commandParam);
+        }
+
+        return this.apiJsonSerializerService.serializeEntityIdentifier(result);
+    }
+
+    private boolean is(final String commandParam, final String commandValue) {
+        return StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase(commandValue);
+    }
+
+    @DELETE
+    @Path("{makerCheckerId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String deleteMakerCheckerEntry(@PathParam("makerCheckerId") final Long makerCheckerId) {
+
+        final Long id = this.writePlatformService.deleteEntry(makerCheckerId);
+
+        return this.apiJsonSerializerService.serializeEntityIdentifier(EntityIdentifier.makerChecker(id));
+    }
 }

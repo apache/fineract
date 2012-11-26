@@ -2,6 +2,7 @@ package org.mifosng.platform.api.infrastructure;
 
 import org.mifosng.platform.accounting.api.commands.RolePermissionCommand;
 import org.mifosng.platform.api.commands.RoleCommand;
+import org.mifosng.platform.api.commands.UserCommand;
 
 /**
  * Service for de-serializing JSON for a command into the platforms internal
@@ -18,4 +19,6 @@ public interface PortfolioCommandDeserializerService {
     RoleCommand deserializeRoleCommand(Long roleId, String commandAsJson, boolean makerCheckerApproval);
 
     RolePermissionCommand deserializeRolePermissionCommand(Long roleId, String commandAsJson, boolean makerCheckerApproval);
+
+    UserCommand deserializeUserCommand(Long resourceId, String jsonOfChangesOnly, boolean makerCheckerApproval);
 }

@@ -4,6 +4,6 @@ import org.mifosng.platform.api.data.ConfigurationData;
 
 public interface ConfigurationReadPlatformService {
 
-	ConfigurationData retrieveCurrencyConfiguration();
-	
+    ConfigurationData retrieveCurrencyConfiguration();
+
 }

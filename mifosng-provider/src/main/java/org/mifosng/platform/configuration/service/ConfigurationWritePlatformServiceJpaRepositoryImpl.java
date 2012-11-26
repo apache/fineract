@@ -21,54 +21,53 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ConfigurationWritePlatformServiceJpaRepositoryImpl implements ConfigurationWritePlatformService {
 
-	private final PlatformSecurityContext context;
-	private final ApplicationCurrencyRepository applicationCurrencyRepository;
-	private final OrganisationCurrencyRepository organisationCurrencyRepository;
+    private final PlatformSecurityContext context;
+    private final ApplicationCurrencyRepository applicationCurrencyRepository;
+    private final OrganisationCurrencyRepository organisationCurrencyRepository;
 
-	@Autowired
-	public ConfigurationWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, 
-			final ApplicationCurrencyRepository applicationCurrencyRepository, final OrganisationCurrencyRepository organisationCurrencyRepository) {
-		this.context = context;
-		this.applicationCurrencyRepository = applicationCurrencyRepository;
-		this.organisationCurrencyRepository = organisationCurrencyRepository;
-	}
-	
-	@Transactional
-	@Override
-	public void updateOrganisationCurrencies(final OrganisationCurrencyCommand command) {
-		
-		context.authenticatedUser();
-		
-		List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-		DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("configuration");
-		
-		baseDataValidator.reset().parameter("currencies").value(command.getCurrencies()).arrayNotEmpty();
-		
-		if (!dataValidationErrors.isEmpty()) {
-			throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);
-		}
-		
-		Set<OrganisationCurrency> allowedCurrencies = new HashSet<OrganisationCurrency>();
+    @Autowired
+    public ConfigurationWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
+            final ApplicationCurrencyRepository applicationCurrencyRepository,
+            final OrganisationCurrencyRepository organisationCurrencyRepository) {
+        this.context = context;
+        this.applicationCurrencyRepository = applicationCurrencyRepository;
+        this.organisationCurrencyRepository = organisationCurrencyRepository;
+    }
 
-		for (String currencyCode : command.getCurrencies()) {
+    @Transactional
+    @Override
+    public void updateOrganisationCurrencies(final OrganisationCurrencyCommand command) {
 
-			ApplicationCurrency currency = this.applicationCurrencyRepository.findOneByCode(currencyCode);
-			if (currency == null) {
-				baseDataValidator.reset().parameter("currencies").value(command.getCurrencies()).inValidValue("currency.code", currencyCode);
-			} else {
-				OrganisationCurrency allowedCurrency = new OrganisationCurrency(
-						currency.getCode(), currency.getName(),
-						currency.getDecimalPlaces(), currency.getNameCode(), currency.getDisplaySymbol());
+        context.authenticatedUser();
 
-				allowedCurrencies.add(allowedCurrency);				
-			}
-		}
-		
-		this.organisationCurrencyRepository.deleteAll();
-		this.organisationCurrencyRepository.save(allowedCurrencies);
-		
-		if (!dataValidationErrors.isEmpty()) {
-			throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);
-		}
-	}
+        List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("configuration");
+
+        baseDataValidator.reset().parameter("currencies").value(command.getCurrencies()).arrayNotEmpty();
+
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
+                "Validation errors exist.", dataValidationErrors); }
+
+        Set<OrganisationCurrency> allowedCurrencies = new HashSet<OrganisationCurrency>();
+
+        for (String currencyCode : command.getCurrencies()) {
+
+            ApplicationCurrency currency = this.applicationCurrencyRepository.findOneByCode(currencyCode);
+            if (currency == null) {
+                baseDataValidator.reset().parameter("currencies").value(command.getCurrencies())
+                        .inValidValue("currency.code", currencyCode);
+            } else {
+                OrganisationCurrency allowedCurrency = new OrganisationCurrency(currency.getCode(), currency.getName(),
+                        currency.getDecimalPlaces(), currency.getNameCode(), currency.getDisplaySymbol());
+
+                allowedCurrencies.add(allowedCurrency);
+            }
+        }
+
+        this.organisationCurrencyRepository.deleteAll();
+        this.organisationCurrencyRepository.save(allowedCurrencies);
+
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
+                "Validation errors exist.", dataValidationErrors); }
+    }
 }

@@ -30,6 +30,8 @@ import org.mifosng.platform.organisation.domain.CodeValueRepository;
 import org.mifosng.platform.organisation.domain.Office;
 import org.mifosng.platform.organisation.domain.OfficeRepository;
 import org.mifosng.platform.security.PlatformSecurityContext;
+import org.mifosng.platform.user.domain.Permission;
+import org.mifosng.platform.user.domain.PermissionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,21 +50,19 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     private final OfficeRepository officeRepository;
     private final NoteRepository noteRepository;
     private final CodeValueRepository codeValueRepository;
-
-    // FIXME - kw - this value is hardcoded for now but will be retrieved from
-    // configuration
-    private boolean makerCheckerEnabledForTask = false;
+    private final PermissionRepository permissionRepository;
 
     @Autowired
     public ClientWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final ClientRepository clientRepository,
             final ClientIdentifierRepository clientIdentifierRepository, final OfficeRepository officeRepository,
-            NoteRepository noteRepository, final CodeValueRepository codeValueRepository) {
+            NoteRepository noteRepository, final CodeValueRepository codeValueRepository, final PermissionRepository permissionRepository) {
         this.context = context;
         this.clientRepository = clientRepository;
         this.clientIdentifierRepository = clientIdentifierRepository;
         this.officeRepository = officeRepository;
         this.noteRepository = noteRepository;
         this.codeValueRepository = codeValueRepository;
+        this.permissionRepository = permissionRepository;
     }
 
     @Transactional
@@ -76,8 +76,9 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         client.delete();
         this.clientRepository.save(client);
 
-        if (this.makerCheckerEnabledForTask && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
-
+        final Permission thisTask = this.permissionRepository.findOneByCode("DELETE_CLIENT");
+        if (thisTask.hasMakerCheckerEnabled() && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
+        
         return new EntityIdentifier(client.getId());
     }
 
@@ -92,7 +93,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                 "error.msg.client.duplicate.externalId", "Client with externalId `" + command.getExternalId() + "` already exists",
                 "externalId", command.getExternalId()); }
 
-        logger.error(dve.getMessage(), dve);
+        logAsErrorUnexpectedDataIntegrityException(dve);
         throw new PlatformDataIntegrityException("error.msg.client.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
     }
@@ -120,8 +121,9 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             final Client newClient = Client.newClient(clientOffice, firstname, lastname, command.getJoiningDate(), command.getExternalId());
 
             this.clientRepository.save(newClient);
-
-            if (this.makerCheckerEnabledForTask && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
+            
+            final Permission thisTask = this.permissionRepository.findOneByCode("CREATE_CLIENT");
+            if (thisTask.hasMakerCheckerEnabled() && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
 
             return newClient.getId();
         } catch (DataIntegrityViolationException dve) {
@@ -153,8 +155,9 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
             this.clientRepository.saveAndFlush(clientForUpdate);
 
-            if (this.makerCheckerEnabledForTask && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
-
+            final Permission thisTask = this.permissionRepository.findOneByCode("UPDATE_CLIENT");
+            if (thisTask.hasMakerCheckerEnabled() && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
+            
             return new EntityIdentifier(clientForUpdate.getId());
         } catch (DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
@@ -285,10 +288,13 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         } else if (dve.getMostSpecificCause().getMessage().contains("unique_identifier_key")) { throw new DuplicateClientIdentifierException(
                 documentTypeId, documentTypeLabel, documentKey); }
 
-        // only log as error if unexpected data integrity violation.
-        logger.error(dve.getMessage(), dve);
+        logAsErrorUnexpectedDataIntegrityException(dve);
         throw new PlatformDataIntegrityException("error.msg.clientIdentifier.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
+    }
+
+    private void logAsErrorUnexpectedDataIntegrityException(final DataIntegrityViolationException dve) {
+        logger.error(dve.getMessage(), dve);
     }
 
     @Transactional
