@@ -18,17 +18,13 @@ public class RolePermissionsData {
     private final Collection<PermissionUsageData> permissionUsageData;
     @SuppressWarnings("unused")
     private final Collection<PermissionUsageData> currentChanges;
-    @SuppressWarnings("unused")
-    private final Collection<Collection<PermissionUsageData>> allChanges;
 
     public RolePermissionsData(final Long id, final String name, final String description,
-            final Collection<PermissionUsageData> permissionUsageData, final Collection<PermissionUsageData> currentChanges,
-            final Collection<Collection<PermissionUsageData>> allChanges) {
+            final Collection<PermissionUsageData> permissionUsageData, final Collection<PermissionUsageData> currentChanges) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.permissionUsageData = permissionUsageData;
         this.currentChanges = currentChanges;
-        this.allChanges = allChanges;
     }
 }

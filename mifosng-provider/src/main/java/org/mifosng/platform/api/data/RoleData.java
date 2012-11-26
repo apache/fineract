@@ -10,26 +10,22 @@ public class RoleData {
     private final Long id;
     private final String name;
     private final String description;
+    @SuppressWarnings("unused")
+    private final RoleData currentChanges;
+    
+    public static RoleData changes(final String name, final String description) {
+        return new RoleData(null, name, description, null);
+    }
+    
+    public static RoleData integrateChanges(final RoleData role, final RoleData currentChanges) {
+        return new RoleData(role.id, role.name, role.description, currentChanges);
+    }
 
-    // @SuppressWarnings("unused")
-    // private final Collection<RoleData> currentChanges;
-
-    public RoleData(final Long id, final String name, final String description) {
+    public RoleData(final Long id, final String name, final String description, final RoleData currentChanges) {
         this.id = id;
         this.name = name;
         this.description = description;
-    }
-
-    public RoleData() {
-        this.id = null;
-        this.name = null;
-        this.description = null;
-    }
-
-    public RoleData(final RoleData role) {
-        this.id = role.id;
-        this.name = role.name;
-        this.description = role.description;
+        this.currentChanges = currentChanges;
     }
 
     @Override
@@ -43,8 +39,7 @@ public class RoleData {
         return this.id.hashCode();
     }
 
-    public RolePermissionsData toRolePermissionData(final Collection<PermissionUsageData> permissionUsageData,
-            final Collection<PermissionUsageData> currentChanges, final Collection<Collection<PermissionUsageData>> allChanges) {
-        return new RolePermissionsData(id, name, description, permissionUsageData, currentChanges, allChanges);
+    public RolePermissionsData toRolePermissionData(final Collection<PermissionUsageData> permissionUsageData, final Collection<PermissionUsageData> currentChanges) {
+        return new RolePermissionsData(id, name, description, permissionUsageData, currentChanges);
     }
 }

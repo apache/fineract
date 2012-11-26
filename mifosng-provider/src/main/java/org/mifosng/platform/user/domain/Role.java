@@ -73,6 +73,6 @@ public class Role extends AbstractAuditableCustom<AppUser, Long> {
     }
 
     public RoleData toData() {
-        return new RoleData(this.getId(), this.name, this.description);
+        return new RoleData(this.getId(), this.name, this.description, null);
     }
 }

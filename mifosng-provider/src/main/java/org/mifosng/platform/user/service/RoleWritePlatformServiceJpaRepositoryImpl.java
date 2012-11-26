@@ -26,7 +26,7 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
 
     // FIXME - kw - this value is hardcoded for now but will be retrieved from
     // configuration
-    private boolean makerCheckerEnabledForTask = false;
+    private boolean makerCheckerEnabledForTask = true;
     
     @Autowired
     public RoleWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final RoleRepository roleRepository,

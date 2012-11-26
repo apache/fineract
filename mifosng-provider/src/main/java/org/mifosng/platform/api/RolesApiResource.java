@@ -16,6 +16,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
 import org.mifosng.platform.accounting.api.commands.RolePermissionCommand;
+import org.mifosng.platform.api.commands.RoleCommand;
 import org.mifosng.platform.api.data.CommandSourceData;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.PermissionUsageData;
@@ -87,14 +88,6 @@ public class RolesApiResource {
         return this.apiJsonSerializerService.serializeEntityIdentifier(result);
     }
 
-    // TODO - General thing to fix about REST API is if use partial response
-    // approach of fields=id,name,selectedPermissions
-    // It will return just id,name parameters of RoleData and ignore
-    // description, however as PermissionData used in selectedPermissions
-    // collection
-    // also has a field called description it gets ignored also. This is because
-    // of the implementation of ParameterListExclusionStrategy which doesnt take
-    // into account the Object its looking at.
     @GET
     @Path("{roleId}")
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -110,12 +103,22 @@ public class RolesApiResource {
 
         RoleData role = this.roleReadPlatformService.retrieveRole(roleId);
         if (commandId != null) {
-            // currentChanges =
-            // handleRequestToIntegrateProposedChangesFromCommand(roleId,
-            // commandId);
+             RoleData currentChanges = handleRequestToIntegrateProposedChangesFromRoleCommand(roleId, commandId);
+             
+             role = RoleData.integrateChanges(role, currentChanges);
         }
 
         return this.apiJsonSerializerService.serializeRoleDataToJson(prettyPrint, responseParameters, role);
+    }
+    
+    private RoleData handleRequestToIntegrateProposedChangesFromRoleCommand(final Long roleId, final Long commandId) {
+        final CommandSourceData entry = this.commandSourceReadPlatformService.retrieveById(commandId);
+        return assembleRoleChanges(roleId, entry);
+    }
+
+    private RoleData assembleRoleChanges(final Long roleId, final CommandSourceData entry) {
+        final RoleCommand changesOnly = this.commandDeserializerService.deserializeRoleCommand(roleId, entry.json(), false);
+        return RoleData.changes(changesOnly.getName(), changesOnly.getDescription());
     }
 
     @PUT
@@ -149,9 +152,7 @@ public class RolesApiResource {
             currentChanges = handleRequestToIntegrateProposedChangesFromCommand(roleId, commandId);
         }
 
-        Collection<Collection<PermissionUsageData>> allChanges = retrieveAllUnprocessedDataChanges(roleId);
-
-        final RolePermissionsData permissionsData = role.toRolePermissionData(permissionUsageData, currentChanges, allChanges);
+        final RolePermissionsData permissionsData = role.toRolePermissionData(permissionUsageData, currentChanges);
 
         return this.apiJsonSerializerService.serializeRolePermissionDataToJson(prettyPrint, responseParameters, permissionsData);
     }
@@ -175,27 +176,6 @@ public class RolesApiResource {
         }
 
         return proposedChanges;
-    }
-
-    private Collection<Collection<PermissionUsageData>> retrieveAllUnprocessedDataChanges(final Long roleId) {
-        Collection<Collection<PermissionUsageData>> allChanges = new ArrayList<Collection<PermissionUsageData>>();
-
-        final Collection<CommandSourceData> unprocessedChanges = this.commandSourceReadPlatformService
-                .retrieveUnprocessChangesByResourceId("roles", roleId);
-        for (CommandSourceData commandSourceData : unprocessedChanges) {
-
-            if (commandSourceData.isRoleResource() && commandSourceData.isUpdateRolePermissions()) {
-                Collection<PermissionUsageData> dataChanges = assemblePermissionChanges(roleId, commandSourceData);
-
-                allChanges.add(dataChanges);
-            }
-        }
-
-        if (allChanges.isEmpty()) {
-            allChanges = null;
-        }
-
-        return allChanges;
     }
 
     @PUT
