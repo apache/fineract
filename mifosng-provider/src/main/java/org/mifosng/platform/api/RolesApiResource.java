@@ -15,8 +15,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
-import org.mifosng.platform.accounting.api.commands.RolePermissionCommand;
 import org.mifosng.platform.api.commands.RoleCommand;
+import org.mifosng.platform.api.commands.RolePermissionCommand;
 import org.mifosng.platform.api.data.CommandSourceData;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.PermissionUsageData;

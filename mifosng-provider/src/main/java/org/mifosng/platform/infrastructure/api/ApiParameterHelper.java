@@ -80,6 +80,15 @@ public class ApiParameterHelper {
         }
         return template;
     }
+    
+    public static boolean makerCheckerable(final MultivaluedMap<String, String> queryParams) {
+        boolean makerCheckerable = false;
+        if (queryParams.getFirst("makerCheckerable") != null) {
+            String prettyPrintValue = queryParams.getFirst("makerCheckerable");
+            makerCheckerable = "true".equalsIgnoreCase(prettyPrintValue);
+        }
+        return makerCheckerable;
+    }
 
     public static boolean genericResultSet(final MultivaluedMap<String, String> queryParams) {
         boolean genericResultSet = false;

@@ -4,9 +4,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
-import org.mifosng.platform.accounting.api.commands.RolePermissionCommand;
 import org.mifosng.platform.api.commands.RoleCommand;
 import org.mifosng.platform.api.commands.UserCommand;
+import org.mifosng.platform.api.commands.RolePermissionCommand;
 import org.mifosng.platform.infrastructure.api.JsonParserHelper;
 import org.mifosng.platform.infrastructure.errorhandling.InvalidJsonException;
 import org.springframework.stereotype.Service;

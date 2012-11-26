@@ -17,7 +17,6 @@ import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
-import org.mifosng.platform.accounting.api.commands.RolePermissionCommand;
 import org.mifosng.platform.api.commands.AdjustLoanTransactionCommand;
 import org.mifosng.platform.api.commands.BranchMoneyTransferCommand;
 import org.mifosng.platform.api.commands.ChargeCommand;
@@ -42,7 +41,9 @@ import org.mifosng.platform.api.commands.LoanTransactionCommand;
 import org.mifosng.platform.api.commands.NoteCommand;
 import org.mifosng.platform.api.commands.OfficeCommand;
 import org.mifosng.platform.api.commands.OrganisationCurrencyCommand;
+import org.mifosng.platform.api.commands.PermissionsCommand;
 import org.mifosng.platform.api.commands.RoleCommand;
+import org.mifosng.platform.api.commands.RolePermissionCommand;
 import org.mifosng.platform.api.commands.SavingAccountCommand;
 import org.mifosng.platform.api.commands.SavingProductCommand;
 import org.mifosng.platform.api.commands.StaffCommand;
@@ -255,6 +256,17 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         // representation of json so reuse this code to de-serialize into
         // command object
         return this.portfolioCommandDeserializerService.deserializeRoleCommand(resourceIdentifier, json, false);
+    }
+
+    @Override
+    public PermissionsCommand convertApiRequestJsonToPermissionsCommand(final String json) {
+
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        
+        final Type typeOfMap = new TypeToken<Map<String, Boolean>>() {}.getType();
+        final Map<String, Boolean> permissionsMap = gsonConverter.fromJson(json, typeOfMap);
+
+        return new PermissionsCommand(permissionsMap, false);
     }
     
     @Override

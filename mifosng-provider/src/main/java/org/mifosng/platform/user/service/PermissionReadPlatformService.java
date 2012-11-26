@@ -7,6 +7,8 @@ import org.mifosng.platform.api.data.PermissionUsageData;
 public interface PermissionReadPlatformService {
 
     Collection<PermissionUsageData> retrieveAllPermissions();
+    
+    Collection<PermissionUsageData> retrieveAllMakerCheckerablePermissions();
 
     Collection<PermissionUsageData> retrieveAllRolePermissions(Long roleId);
 }

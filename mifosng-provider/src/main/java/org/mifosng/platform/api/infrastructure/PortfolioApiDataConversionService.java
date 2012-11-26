@@ -1,6 +1,5 @@
 package org.mifosng.platform.api.infrastructure;
 
-import org.mifosng.platform.accounting.api.commands.RolePermissionCommand;
 import org.mifosng.platform.api.commands.AdjustLoanTransactionCommand;
 import org.mifosng.platform.api.commands.BranchMoneyTransferCommand;
 import org.mifosng.platform.api.commands.LoanReassignmentCommand;
@@ -25,7 +24,9 @@ import org.mifosng.platform.api.commands.LoanTransactionCommand;
 import org.mifosng.platform.api.commands.NoteCommand;
 import org.mifosng.platform.api.commands.OfficeCommand;
 import org.mifosng.platform.api.commands.OrganisationCurrencyCommand;
+import org.mifosng.platform.api.commands.PermissionsCommand;
 import org.mifosng.platform.api.commands.RoleCommand;
+import org.mifosng.platform.api.commands.RolePermissionCommand;
 import org.mifosng.platform.api.commands.SavingAccountCommand;
 import org.mifosng.platform.api.commands.SavingProductCommand;
 import org.mifosng.platform.api.commands.StaffCommand;
@@ -41,6 +42,8 @@ public interface PortfolioApiDataConversionService {
     OfficeCommand convertJsonToOfficeCommand(Long resourceIdentifier, String json);
 
     RoleCommand convertApiRequestJsonToRoleCommand(Long resourceIdentifier, String json);
+
+    PermissionsCommand convertApiRequestJsonToPermissionsCommand(String jsonRequestBody);
     
     RolePermissionCommand convertApiRequestJsonToRolePermissionCommand(Long roleId, String jsonRequestBody);
 

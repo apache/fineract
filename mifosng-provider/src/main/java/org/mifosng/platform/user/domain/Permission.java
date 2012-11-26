@@ -10,7 +10,6 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 @Table(name = "m_permission")
 public class Permission extends AbstractPersistable<Long> {
 
-    @SuppressWarnings("unused")
     @Column(name = "grouping", nullable = false, length = 45)
     private final String grouping;
 
@@ -25,8 +24,9 @@ public class Permission extends AbstractPersistable<Long> {
     @Column(name = "action_name", nullable = true, length = 100)
     private final String actionName;
 
-    @Column(name = "can_maker_checker", nullable = false)
-    private final boolean canMakerChecker;
+    @SuppressWarnings("unused")
+	@Column(name = "can_maker_checker", nullable = false)
+    private boolean canMakerChecker;
 
     protected Permission() {
         this.grouping = null;
@@ -40,11 +40,20 @@ public class Permission extends AbstractPersistable<Long> {
         return this.code.equalsIgnoreCase(checkCode);
     }
 
-    public String code() {
+	public String getCode() {
         return this.code;
     }
 
     public boolean hasMakerCheckerEnabled() {
         return this.canMakerChecker;
     }
+    
+    public void setCanMakerChecker(Boolean canMakerChecker) {
+		this.canMakerChecker = canMakerChecker;
+	}
+
+	public String getGrouping() {
+		return this.grouping;
+	}
+ 
 }

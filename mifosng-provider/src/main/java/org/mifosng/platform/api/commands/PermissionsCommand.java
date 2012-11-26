@@ -1,29 +1,23 @@
-package org.mifosng.platform.accounting.api.commands;
+package org.mifosng.platform.api.commands;
 
 import java.util.Map;
 
 /**
- * Immutable command for updating permissions against a role.
+ * Immutable command for updating permissions (initially maker-checker).
  */
-public class RolePermissionCommand {
+public class PermissionsCommand {
 
-    private final transient Long roleId;
     private final Map<String, Boolean> permissions;
 
     private final transient boolean makerCheckerApproval;
     
-    public RolePermissionCommand(final Long roleId, final Map<String, Boolean> permissionsMap, final boolean makerCheckerApproval) {
-        this.roleId = roleId;
+    public PermissionsCommand(final Map<String, Boolean> permissionsMap, final boolean makerCheckerApproval) {
         this.permissions = permissionsMap;
         this.makerCheckerApproval = makerCheckerApproval;
     }
 
     public Map<String, Boolean> getPermissions() {
         return this.permissions;
-    }
-
-    public Long getRoleId() {
-        return this.roleId;
     }
     
     public boolean isApprovedByChecker() {

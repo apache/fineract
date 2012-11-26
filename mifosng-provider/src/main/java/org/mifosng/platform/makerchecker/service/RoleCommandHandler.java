@@ -1,8 +1,8 @@
 package org.mifosng.platform.makerchecker.service;
 
 import org.joda.time.LocalDate;
-import org.mifosng.platform.accounting.api.commands.RolePermissionCommand;
 import org.mifosng.platform.api.commands.RoleCommand;
+import org.mifosng.platform.api.commands.RolePermissionCommand;
 import org.mifosng.platform.api.infrastructure.PortfolioApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.PortfolioCommandDeserializerService;
 import org.mifosng.platform.api.infrastructure.PortfolioCommandSerializerService;

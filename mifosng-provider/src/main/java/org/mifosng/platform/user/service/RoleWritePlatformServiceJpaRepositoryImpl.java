@@ -3,8 +3,8 @@ package org.mifosng.platform.user.service;
 import java.util.Collection;
 import java.util.Map;
 
-import org.mifosng.platform.accounting.api.commands.RolePermissionCommand;
 import org.mifosng.platform.api.commands.RoleCommand;
+import org.mifosng.platform.api.commands.RolePermissionCommand;
 import org.mifosng.platform.client.service.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
 import org.mifosng.platform.exceptions.PermissionNotFoundException;
 import org.mifosng.platform.exceptions.RoleNotFoundException;

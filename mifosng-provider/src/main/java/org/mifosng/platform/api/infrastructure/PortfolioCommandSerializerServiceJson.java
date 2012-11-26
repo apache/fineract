@@ -2,9 +2,9 @@ package org.mifosng.platform.api.infrastructure;
 
 import java.util.HashSet;
 
-import org.mifosng.platform.accounting.api.commands.RolePermissionCommand;
 import org.mifosng.platform.api.commands.RoleCommand;
 import org.mifosng.platform.api.commands.UserCommand;
+import org.mifosng.platform.api.commands.RolePermissionCommand;
 import org.mifosng.platform.infrastructure.api.GoogleGsonSerializerHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

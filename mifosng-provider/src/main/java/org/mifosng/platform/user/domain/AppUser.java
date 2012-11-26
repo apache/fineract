@@ -172,7 +172,7 @@ public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements P
         for (Role role : this.roles) {
             Collection<Permission> permissions = role.getPermissions();
             for (Permission permission : permissions) {
-                grantedAuthorities.add(new SimpleGrantedAuthority(permission.code()));
+                grantedAuthorities.add(new SimpleGrantedAuthority(permission.getCode()));
             }
         }
         return grantedAuthorities;
