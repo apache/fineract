@@ -54,7 +54,7 @@ final public class ClientData {
         }
         final String displayName = buildDisplayNameFrom(firstnameValue, lastnameValue);
 
-        return new ClientData(officeId, null, id, firstname, lastname, displayName, externalId, joiningDate, null, null, null, null);
+        return new ClientData(officeId, null, id, firstnameValue, lastnameValue, displayName, externalId, joiningDate, null, null, null, null);
     }
 
     public static ClientData integrateChanges(final ClientData clientData, ClientData currentChange, final Collection<ClientData> allChanges) {

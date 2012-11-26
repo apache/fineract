@@ -388,8 +388,8 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
             if (externalIdParamName.equalsIgnoreCase(parameter)) {
                 final String baseExternalId = helper.extractStringNamed(externalIdParamName, baseElement, ignoreParameters);
                 final String workingExternalId = helper.extractStringNamed(externalIdParamName, workingElement, ignoreParameters);
-                if (!baseExternalId.equals(workingExternalId)) {
-                    externalId = workingExternalId;
+                if (differenceExists(baseExternalId, workingExternalId)) {
+                    firstname = workingExternalId;
                     parametersPassedInRequest.add(externalIdParamName);
                 }
             }
@@ -398,7 +398,7 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
             if (firstnameParamName.equalsIgnoreCase(parameter)) {
                 final String baseValue = helper.extractStringNamed(firstnameParamName, baseElement, ignoreParameters);
                 final String workingCopyValue = helper.extractStringNamed(firstnameParamName, workingElement, ignoreParameters);
-                if (!baseValue.equals(workingCopyValue)) {
+                if (differenceExists(baseValue, workingCopyValue)) {
                     firstname = workingCopyValue;
                     parametersPassedInRequest.add(firstnameParamName);
                 }
@@ -408,7 +408,7 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
             if (lastnameParamName.equalsIgnoreCase(parameter)) {
                 final String baseValue = helper.extractStringNamed(lastnameParamName, baseElement, ignoreParameters);
                 final String workingCopyValue = helper.extractStringNamed(lastnameParamName, workingElement, ignoreParameters);
-                if (!baseValue.equals(workingCopyValue)) {
+                if (differenceExists(baseValue, workingCopyValue)) {
                     lastname = workingCopyValue;
                     parametersPassedInRequest.add(lastnameParamName);
                 }
@@ -418,7 +418,7 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
             if (clientOrBusinessNameParamName.equalsIgnoreCase(parameter)) {
                 final String baseValue = helper.extractStringNamed(clientOrBusinessNameParamName, baseElement, ignoreParameters);
                 final String workingCopyValue = helper.extractStringNamed(clientOrBusinessNameParamName, workingElement, ignoreParameters);
-                if (!baseValue.equals(workingCopyValue)) {
+                if (differenceExists(baseValue, workingCopyValue)) {
                     clientOrBusinessName = workingCopyValue;
                     parametersPassedInRequest.add(clientOrBusinessNameParamName);
                 }
@@ -429,7 +429,7 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
                 final LocalDate baseValue = helper.extractLocalDateAsArrayNamed(joinedDateParamName, baseElement, ignoreParameters);
                 final LocalDate workingCopyValue = helper.extractLocalDateAsArrayNamed(joinedDateParamName, workingElement,
                         ignoreParameters);
-                if (!baseValue.isEqual(workingCopyValue)) {
+                if (differenceExists(baseValue, workingCopyValue)) {
                     joiningDate = workingCopyValue;
                     parametersPassedInRequest.add(joinedDateParamName);
                 }
@@ -438,6 +438,30 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
 
         return new ClientCommand(parametersPassedInRequest, resourceIdentifier, externalId, firstname, lastname, clientOrBusinessName,
                 officeId, joiningDate, false);
+    }
+
+    private boolean differenceExists(LocalDate baseValue, LocalDate workingCopyValue) {
+        boolean differenceExists = false;
+
+        if (baseValue != null) {
+            differenceExists = !baseValue.equals(workingCopyValue);
+        } else {
+            differenceExists = workingCopyValue != null;
+        }
+        
+        return differenceExists;
+    }
+
+    private boolean differenceExists(final String baseValue, final String workingCopyValue) {
+        boolean differenceExists = false;
+
+        if (StringUtils.isNotBlank(baseValue)) {
+            differenceExists = !baseValue.equals(workingCopyValue);
+        } else {
+            differenceExists = StringUtils.isNotBlank(workingCopyValue);
+        }
+        
+        return differenceExists;
     }
 
     @Override
