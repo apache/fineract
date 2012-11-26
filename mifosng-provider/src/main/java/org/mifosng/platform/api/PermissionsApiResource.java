@@ -33,13 +33,13 @@ public class PermissionsApiResource {
 
     @Autowired
     private PermissionReadPlatformService permissionReadPlatformService;
-    
+
     @Autowired
     private PermissionWritePlatformService permissionWritePlatformService;
 
-	@Autowired
-	private PortfolioApiDataConversionService apiDataConversionService;
-	
+    @Autowired
+    private PortfolioApiDataConversionService apiDataConversionService;
+
     @Autowired
     private PortfolioApiJsonSerializerService apiJsonSerializerService;
 
@@ -56,17 +56,19 @@ public class PermissionsApiResource {
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 
         final boolean makerCheckerable = ApiParameterHelper.makerCheckerable(uriInfo.getQueryParameters());
-        
+
         final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
         final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-        
+
         Collection<PermissionUsageData> permissions = null;
-        if (makerCheckerable) permissions = this.permissionReadPlatformService.retrieveAllMakerCheckerablePermissions();
-        else permissions = this.permissionReadPlatformService.retrieveAllPermissions();
+        if (makerCheckerable) {
+            permissions = this.permissionReadPlatformService.retrieveAllMakerCheckerablePermissions();
+        } else {
+            permissions = this.permissionReadPlatformService.retrieveAllPermissions();
+        }
 
         return this.apiJsonSerializerService.serializePermissionDataToJson(prettyPrint, responseParameters, permissions);
     }
-    
 
     @PUT
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -77,7 +79,6 @@ public class PermissionsApiResource {
 
         final Long entityId = this.permissionWritePlatformService.updateMakerCheckerPermissions(command);
 
-		return Response.ok().entity(new EntityIdentifier(entityId)).build();
+        return Response.ok().entity(new EntityIdentifier(entityId)).build();
     }
-    
 }

@@ -10,7 +10,7 @@ public class PermissionsCommand {
     private final Map<String, Boolean> permissions;
 
     private final transient boolean makerCheckerApproval;
-    
+
     public PermissionsCommand(final Map<String, Boolean> permissionsMap, final boolean makerCheckerApproval) {
         this.permissions = permissionsMap;
         this.makerCheckerApproval = makerCheckerApproval;
@@ -19,7 +19,7 @@ public class PermissionsCommand {
     public Map<String, Boolean> getPermissions() {
         return this.permissions;
     }
-    
+
     public boolean isApprovedByChecker() {
         return this.makerCheckerApproval;
     }

@@ -13,62 +13,50 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class PermissionWritePlatformServiceJpaRepositoryImpl implements
-		PermissionWritePlatformService {
+public class PermissionWritePlatformServiceJpaRepositoryImpl implements PermissionWritePlatformService {
 
-	private final PlatformSecurityContext context;
-	private final PermissionRepository permissionRepository;
+    private final PlatformSecurityContext context;
+    private final PermissionRepository permissionRepository;
 
-	@Autowired
-	public PermissionWritePlatformServiceJpaRepositoryImpl(
-			final PlatformSecurityContext context,
-			final PermissionRepository permissionRepository) {
-		this.context = context;
-		this.permissionRepository = permissionRepository;
-	}
+    @Autowired
+    public PermissionWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
+            final PermissionRepository permissionRepository) {
+        this.context = context;
+        this.permissionRepository = permissionRepository;
+    }
 
-	@Transactional
-	@Override
-	public Long updateMakerCheckerPermissions(final PermissionsCommand command) {
-		context.authenticatedUser();
+    @Transactional
+    @Override
+    public Long updateMakerCheckerPermissions(final PermissionsCommand command) {
+        context.authenticatedUser();
 
-		final Collection<Permission> allPermissions = this.permissionRepository
-				.findAll();
+        final Collection<Permission> allPermissions = this.permissionRepository.findAll();
 
-		final Map<String, Boolean> commandPermissions = command
-				.getPermissions();
-		for (final String permissionCode : commandPermissions.keySet()) {
+        final Map<String, Boolean> commandPermissions = command.getPermissions();
+        for (final String permissionCode : commandPermissions.keySet()) {
 
-			final Permission permission = findPermissionByCode(allPermissions,
-					permissionCode);
+            final Permission permission = findPermissionByCode(allPermissions, permissionCode);
 
-			if (permission.getCode().endsWith("_CHECKER")
-					|| permission.getCode().startsWith("READ_")
-					|| permission.getGrouping().equalsIgnoreCase("special")) {
-				throw new PermissionNotFoundException(permissionCode);
-			}
+            if (permission.getCode().endsWith("_CHECKER") || permission.getCode().startsWith("READ_")
+                    || permission.getGrouping().equalsIgnoreCase("special")) { throw new PermissionNotFoundException(permissionCode); }
 
-			final boolean isSelected = commandPermissions.get(permissionCode)
-					.booleanValue();
-			permission.setCanMakerChecker(isSelected);
+            final boolean isSelected = commandPermissions.get(permissionCode).booleanValue();
+            permission.enableMakerChecker(isSelected);
 
-			this.permissionRepository.save(permission);
-		}
+            this.permissionRepository.save(permission);
+        }
 
-		return new Long(0);
-	}
+        return new Long(0);
+    }
 
-	private Permission findPermissionByCode(
-			Collection<Permission> allPermissions, String permissionCode) {
+    private Permission findPermissionByCode(Collection<Permission> allPermissions, String permissionCode) {
 
-		if (allPermissions != null) {
-			for (Permission permission : allPermissions) {
-				if (permission.hasCode(permissionCode)) {
-					return permission;
-				}
-			}
-		}
+        if (allPermissions != null) {
+            for (Permission permission : allPermissions) {
+                if (permission.hasCode(permissionCode)) { return permission; }
+            }
+        }
 
-		throw new PermissionNotFoundException(permissionCode);
-	}
+        throw new PermissionNotFoundException(permissionCode);
+    }
 }
