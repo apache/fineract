@@ -1,6 +1,7 @@
 package org.mifosng.platform.api;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -109,6 +110,9 @@ public class UsersApiResource {
     @Produces({MediaType.APPLICATION_JSON})
     public String createUser(final String apiRequestBodyAsJson) {
 
+        final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "USER_ADMINISTRATION_SUPER_USER", "CREATE_USER");
+        context.authenticatedUser().validateHasPermissionTo("CREATE_USER", allowedPermissions);
+        
         final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE", "users", null, apiRequestBodyAsJson);
 
         return this.apiJsonSerializerService.serializeEntityIdentifier(result);
@@ -119,6 +123,9 @@ public class UsersApiResource {
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     public String deleteUser(@PathParam("userId") final Long userId) {
+        
+        final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "USER_ADMINISTRATION_SUPER_USER", "DELETE_USER");
+        context.authenticatedUser().validateHasPermissionTo("DELETE_USER", allowedPermissions);
         
         final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("DELETE", "users", userId, "{}");
 
@@ -131,6 +138,9 @@ public class UsersApiResource {
     @Produces({MediaType.APPLICATION_JSON})
     public String updateUser(@PathParam("userId") final Long userId, final String apiRequestBodyAsJson) {
 
+        final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "USER_ADMINISTRATION_SUPER_USER", "UPDATE_USER");
+        context.authenticatedUser().validateHasPermissionTo("UPDATE_USER", allowedPermissions);
+        
         final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "users", userId, apiRequestBodyAsJson);
 
         return this.apiJsonSerializerService.serializeEntityIdentifier(result);

@@ -340,7 +340,6 @@ public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements P
         if (!(higherPermission.equals(""))) {
             if (hasNotPermissionForAnyOf(higherPermission)) throw new NoAuthorizationException(authorizationMessage);
         }
-
     }
 
     private boolean hasPermissionTo(final String permissionCode) {
@@ -351,11 +350,30 @@ public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements P
                 break;
             }
         }
-
         return match;
     }
-
+    
     public boolean hasIdOf(final Long userId) {
         return getId().equals(userId);
+    }
+
+    private boolean hasAnyPermission(final List<String> requiredPermissions) {
+        boolean hasAtLeastOneOf = false;
+
+        for (final String permissionCode : requiredPermissions) {
+            if (hasPermissionTo(permissionCode)) {
+                hasAtLeastOneOf = true;
+                break;
+            }
+        }
+ 
+        return hasAtLeastOneOf;
+    }
+
+    public void validateHasPermissionTo(final String function, final List<String> allowedPermissions) {
+        if (hasAnyPermission(allowedPermissions)) {
+            final String authorizationMessage = "User has no authority to: " + function;
+            throw new NoAuthorizationException(authorizationMessage);
+        }
     }
 }

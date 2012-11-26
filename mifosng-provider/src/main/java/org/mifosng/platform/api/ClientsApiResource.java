@@ -4,7 +4,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -229,6 +228,9 @@ public class ClientsApiResource {
     @Produces({MediaType.APPLICATION_JSON})
     public String createClient(final String jsonRequestBody) {
 
+        final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "PORTFOLIO_MANAGEMENT_SUPER_USER", "CREATE_CLIENT");
+        context.authenticatedUser().validateHasPermissionTo("CREATE_CLIENT", allowedPermissions);
+        
         final EntityIdentifier result = this.commandsSourceWritePlatformService
                 .logCommandSource("CREATE", "clients", null, jsonRequestBody);
 
@@ -241,6 +243,9 @@ public class ClientsApiResource {
     @Produces({MediaType.APPLICATION_JSON})
     public String updateClient(@PathParam("clientId") final Long clientId, final String jsonRequestBody) {
 
+        final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "PORTFOLIO_MANAGEMENT_SUPER_USER", "UPDATE_CLIENT");
+        context.authenticatedUser().validateHasPermissionTo("UPDATE_CLIENT", allowedPermissions);
+        
         final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "clients", clientId,
                 jsonRequestBody);
 
@@ -253,6 +258,9 @@ public class ClientsApiResource {
     @Produces({MediaType.APPLICATION_JSON})
     public String deleteClient(@PathParam("clientId") final Long clientId) {
 
+        final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "PORTFOLIO_MANAGEMENT_SUPER_USER", "DELETE_CLIENT");
+        context.authenticatedUser().validateHasPermissionTo("DELETE_CLIENT", allowedPermissions);
+        
         final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("DELETE", "clients", clientId, "{}");
 
         return this.apiJsonSerializerService.serializeEntityIdentifier(result);
@@ -266,20 +274,10 @@ public class ClientsApiResource {
 
         context.authenticatedUser().validateHasReadPermission("CLIENT");
 
-        Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("pendingApprovalLoans", "awaitingDisbursalLoans",
-                "openLoans", "closedLoans", "anyLoanCount", "pendingApprovalLoanCount", "awaitingDisbursalLoanCount", "activeLoanCount",
-                "closedLoanCount", "pendingApprovalDespositAccountsCount", "pendingApprovalDespositAccounts",
-                "approvedDespositAccountsCount", "approvedDespositAccounts", "withdrawnByClientDespositAccountsCount",
-                "withdrawnByClientDespositAccounts", "closedDepositAccountsCount", "closedDepositAccounts", "rejectedDepositAccountsCount",
-                "rejectedDepositAccounts", "preclosedDepositAccountsCount", "preclosedDepositAccounts"));
+        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 
-        Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-        if (responseParameters.isEmpty()) {
-            responseParameters.addAll(typicalResponseParameters);
-        }
-        boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-
-        ClientAccountSummaryCollectionData clientAccount = this.clientReadPlatformService.retrieveClientAccountDetails(clientId);
+        final ClientAccountSummaryCollectionData clientAccount = this.clientReadPlatformService.retrieveClientAccountDetails(clientId);
 
         return this.apiJsonSerializerService.serializeClientAccountSummaryCollectionDataToJson(prettyPrint, responseParameters,
                 clientAccount);
@@ -293,16 +291,10 @@ public class ClientsApiResource {
 
         context.authenticatedUser().validateHasReadPermission("CLIENTNOTE");
 
-        Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "clientId", "loanId", "loanTransactionId",
-                "noteType", "note", "createdById", "createdByUsername", "createdOn", "updatedById", "updatedByUsername", "updatedOn"));
+        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 
-        Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-        if (responseParameters.isEmpty()) {
-            responseParameters.addAll(typicalResponseParameters);
-        }
-        boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-
-        Collection<NoteData> notes = this.clientReadPlatformService.retrieveAllClientNotes(clientId);
+        final Collection<NoteData> notes = this.clientReadPlatformService.retrieveAllClientNotes(clientId);
 
         return this.apiJsonSerializerService.serializeNoteDataToJson(prettyPrint, responseParameters, notes);
     }
@@ -313,9 +305,9 @@ public class ClientsApiResource {
     @Produces({MediaType.APPLICATION_JSON})
     public Response addNewClientNote(@PathParam("clientId") final Long clientId, final String jsonRequestBody) {
 
-        NoteCommand command = this.apiDataConversionService.convertJsonToNoteCommand(null, clientId, jsonRequestBody);
+        final NoteCommand command = this.apiDataConversionService.convertJsonToNoteCommand(null, clientId, jsonRequestBody);
 
-        EntityIdentifier identifier = this.clientWritePlatformService.addClientNote(command);
+        final EntityIdentifier identifier = this.clientWritePlatformService.addClientNote(command);
 
         return Response.ok().entity(identifier).build();
     }
@@ -329,16 +321,10 @@ public class ClientsApiResource {
 
         context.authenticatedUser().validateHasReadPermission("CLIENTNOTE");
 
-        Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "clientId", "loanId", "loanTransactionId",
-                "noteType", "note", "createdById", "createdByUsername", "createdOn", "updatedById", "updatedByUsername", "updatedOn"));
+        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 
-        Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-        if (responseParameters.isEmpty()) {
-            responseParameters.addAll(typicalResponseParameters);
-        }
-        boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-
-        NoteData note = this.clientReadPlatformService.retrieveClientNote(clientId, noteId);
+        final NoteData note = this.clientReadPlatformService.retrieveClientNote(clientId, noteId);
 
         return this.apiJsonSerializerService.serializeNoteDataToJson(prettyPrint, responseParameters, note);
     }
@@ -350,9 +336,9 @@ public class ClientsApiResource {
     public Response updateClientNote(@PathParam("clientId") final Long clientId, @PathParam("noteId") final Long noteId,
             final String jsonRequestBody) {
 
-        NoteCommand command = this.apiDataConversionService.convertJsonToNoteCommand(noteId, clientId, jsonRequestBody);
+        final NoteCommand command = this.apiDataConversionService.convertJsonToNoteCommand(noteId, clientId, jsonRequestBody);
 
-        EntityIdentifier identifier = this.clientWritePlatformService.updateNote(command);
+        final EntityIdentifier identifier = this.clientWritePlatformService.updateNote(command);
 
         return Response.ok().entity(identifier).build();
     }
@@ -375,9 +361,9 @@ public class ClientsApiResource {
         FileUtils.validateImageMimeType(bodyPart.getMediaType().toString());
         FileUtils.validateFileSizeWithinPermissibleRange(fileSize, fileDetails.getFileName(), ApiConstants.MAX_FILE_UPLOAD_SIZE_IN_MB);
 
-        logger.debug(bodyPart.getMediaType().toString());
+//        logger.debug(bodyPart.getMediaType().toString());
 
-        EntityIdentifier entityIdentifier = this.clientWritePlatformService.saveOrUpdateClientImage(clientId, fileDetails.getFileName(),
+        final EntityIdentifier entityIdentifier = this.clientWritePlatformService.saveOrUpdateClientImage(clientId, fileDetails.getFileName(),
                 inputStream);
 
         return Response.ok().entity(entityIdentifier).build();
@@ -392,9 +378,9 @@ public class ClientsApiResource {
     @Produces({MediaType.APPLICATION_JSON})
     public Response addNewClientImage(@PathParam("clientId") final Long clientId, final String jsonRequestBody) {
 
-        Base64EncodedImage base64EncodedImage = FileUtils.extractImageFromDataURL(jsonRequestBody);
+        final Base64EncodedImage base64EncodedImage = FileUtils.extractImageFromDataURL(jsonRequestBody);
 
-        EntityIdentifier entityIdentifier = this.clientWritePlatformService.saveOrUpdateClientImage(clientId, base64EncodedImage);
+        final EntityIdentifier entityIdentifier = this.clientWritePlatformService.saveOrUpdateClientImage(clientId, base64EncodedImage);
 
         return Response.ok().entity(entityIdentifier).build();
     }

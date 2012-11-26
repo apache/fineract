@@ -1,5 +1,8 @@
 package org.mifosng.platform.makerchecker.service;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.joda.time.LocalDate;
 import org.mifosng.platform.api.commands.UserCommand;
 import org.mifosng.platform.api.infrastructure.PortfolioApiDataConversionService;
@@ -109,13 +112,18 @@ public class UserCommandHandler implements CommandSourceHandler {
         Long resourceId = commandSourceResult.resourceId();
         if (commandSourceResult.isUserResource()) {
             if (commandSourceResult.isCreate()) {
+                final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "USER_ADMINISTRATION_SUPER_USER", "CREATE_USER_MAKER");
+                context.authenticatedUser().validateHasPermissionTo("CREATE_USER_MAKER", allowedPermissions);
+                
                 final UserCommand command = this.commandDeserializerService.deserializeUserCommand(resourceId, commandSourceResult.json(), true);
                 resourceId = this.writePlatformService.createUser(command);
                 commandSourceResult.updateResourceId(resourceId);
                 commandSourceResult.markAsChecked(checker, new LocalDate());
             } else if (commandSourceResult.isUpdate()) {
-                final UserCommand command = this.commandDeserializerService.deserializeUserCommand(resourceId, commandSourceResult.json(), true);
+                final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "USER_ADMINISTRATION_SUPER_USER", "UPDATE_USER_MAKER");
+                context.authenticatedUser().validateHasPermissionTo("UPDATE_USER_MAKER", allowedPermissions);
                 
+                final UserCommand command = this.commandDeserializerService.deserializeUserCommand(resourceId, commandSourceResult.json(), true);
                 if (checker.hasIdOf(command.getId())) {
                     this.writePlatformService.updateUsersOwnAccountDetails(command);
                 } else {
@@ -124,6 +132,9 @@ public class UserCommandHandler implements CommandSourceHandler {
                 
                 commandSourceResult.markAsChecked(checker, new LocalDate());
             } else if (commandSourceResult.isDelete()) {
+                final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "USER_ADMINISTRATION_SUPER_USER", "DELETE_USER_MAKER");
+                context.authenticatedUser().validateHasPermissionTo("DELETE_USER_MAKER", allowedPermissions);
+                
                 final UserCommand command = this.commandDeserializerService.deserializeUserCommand(resourceId, commandSourceResult.json(), true);
                 this.writePlatformService.deleteUser(command);
                 commandSourceResult.markAsChecked(checker, new LocalDate());

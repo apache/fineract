@@ -11,27 +11,27 @@ import org.mifosng.platform.api.data.NoteData;
 
 public interface ClientReadPlatformService {
 
-	Collection<ClientData> retrieveAllIndividualClients(String extraCriteria);
+    Collection<ClientData> retrieveAllIndividualClients(String extraCriteria);
 
-	ClientData retrieveIndividualClient(Long clientId);
+    ClientData retrieveIndividualClient(Long clientId);
 
-	ClientData retrieveNewClientDetails();
+    ClientData retrieveNewClientDetails();
 
     Collection<ClientLookup> retrieveAllIndividualClientsForLookup(String extraCriteria);
 
     Collection<ClientLookup> retrieveAllIndividualClientsForLookupByOfficeId(Long officeId);
 
-	ClientAccountSummaryCollectionData retrieveClientAccountDetails(Long clientId);
+    ClientAccountSummaryCollectionData retrieveClientAccountDetails(Long clientId);
 
     Collection<ClientAccountSummaryData> retrieveClientLoanAccountsByLoanOfficerId(Long clientId, Long loanOfficerId);
 
-	Collection<NoteData> retrieveAllClientNotes(Long clientId);
+    Collection<NoteData> retrieveAllClientNotes(Long clientId);
 
-	NoteData retrieveClientNote(Long clientId, Long noteId);
-	
-	Collection<ClientIdentifierData> retrieveClientIdentifiers(Long clientId);
-	
-	ClientIdentifierData retrieveClientIdentifier(Long clientId,Long clientIdentifierId); 
+    NoteData retrieveClientNote(Long clientId, Long noteId);
 
-	ClientData retrieveClientByIdentifier(Long identifierTypeId, String identifierKey);
+    Collection<ClientIdentifierData> retrieveClientIdentifiers(Long clientId);
+
+    ClientIdentifierData retrieveClientIdentifier(Long clientId, Long clientIdentifierId);
+
+    ClientData retrieveClientByIdentifier(Long identifierTypeId, String identifierKey);
 }

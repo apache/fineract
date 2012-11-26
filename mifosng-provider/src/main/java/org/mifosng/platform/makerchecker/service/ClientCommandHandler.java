@@ -1,5 +1,8 @@
 package org.mifosng.platform.makerchecker.service;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.joda.time.LocalDate;
 import org.mifosng.platform.api.commands.ClientCommand;
 import org.mifosng.platform.api.data.EntityIdentifier;
@@ -93,20 +96,28 @@ public class ClientCommandHandler implements CommandSourceHandler {
                     commandSourceResult.resourceId(), commandSourceResult.json(), true);
 
             if (commandSourceResult.isCreate()) {
+                final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "PORTFOLIO_MANAGEMENT_SUPER_USER", "CREATE_CLIENT_CHECKER");
+                context.authenticatedUser().validateHasPermissionTo("CREATE_CLIENT_CHECKER", allowedPermissions);
+                
                 resourceId = this.clientWritePlatformService.createClient(command);
+                commandSourceResult.updateResourceId(resourceId);
                 commandSourceResult.markAsChecked(checker, new LocalDate());
             } else if (commandSourceResult.isUpdate()) {
+                final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "PORTFOLIO_MANAGEMENT_SUPER_USER", "UPDATE_CLIENT_CHECKER");
+                context.authenticatedUser().validateHasPermissionTo("UPDATE_CLIENT_CHECKER", allowedPermissions);
+                
                 EntityIdentifier result = this.clientWritePlatformService.updateClientDetails(command);
                 resourceId = result.getEntityId();
                 commandSourceResult.markAsChecked(checker, new LocalDate());
             } else if (commandSourceResult.isDelete()) {
+                final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "PORTFOLIO_MANAGEMENT_SUPER_USER", "DELETE_CLIENT_CHECKER");
+                context.authenticatedUser().validateHasPermissionTo("DELETE_CLIENT_CHECKER", allowedPermissions);
+                
                 EntityIdentifier result = this.clientWritePlatformService.deleteClient(command);
                 resourceId = result.getEntityId();
                 commandSourceResult.markAsChecked(checker, new LocalDate());
             }
         }
-
-        commandSourceResult.updateResourceId(resourceId);
 
         return commandSourceResult;
     }
