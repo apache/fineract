@@ -1,5 +1,6 @@
 DROP TABLE IF EXISTS `m_acc_coa`;
 
+DROP TABLE IF EXISTS `acc_gl_account`;
 CREATE TABLE `acc_gl_account` (
 	`id` BIGINT(20) NOT NULL AUTO_INCREMENT,
 	`name` VARCHAR(45) NOT NULL,
@@ -16,10 +17,9 @@ CREATE TABLE `acc_gl_account` (
 	CONSTRAINT `FK_ACC_0000000001` FOREIGN KEY (`parent_id`) REFERENCES `acc_gl_account` (`id`)
 )
 COLLATE='utf8_general_ci'
-ENGINE=InnoDB;
+ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `acc_gl_closure`;
-
 CREATE TABLE `acc_gl_closure` (
 	`id` BIGINT(20) NOT NULL AUTO_INCREMENT,
 	`office_id` BIGINT(20) NOT NULL,
@@ -40,8 +40,4 @@ CREATE TABLE `acc_gl_closure` (
 	CONSTRAINT `FK_acc_gl_closure_m_office` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`)
 )
 COLLATE='utf8_general_ci'
-ENGINE=InnoDB;
-
-
-
-
+ENGINE=InnoDB DEFAULT CHARSET=utf8;
