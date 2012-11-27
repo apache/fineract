@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.mifosng.platform.accounting.api.data.ChartOfAccountsData;
 import org.mifosng.platform.api.commands.ClientCommand;
 import org.mifosng.platform.api.data.ChargeData;
 import org.mifosng.platform.api.data.ClientAccountSummaryCollectionData;
@@ -171,9 +170,6 @@ public class GoogleGsonPortfolioApiJsonSerializerService implements PortfolioApi
     private static final Set<String> GUARANTOR_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("externalGuarantor", "existingClientId",
             "firstname", "lastname", "addressLine1", "addressLine2", "city", "state", "zip", "country", "mobileNumber", "housePhoneNumber",
             "comment", "dob"));
-
-    // accounting
-    private static final Set<String> CHART_OF_ACCOUNTS_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "name"));
 
     private final GoogleGsonSerializerHelper helper;
 
@@ -575,14 +571,6 @@ public class GoogleGsonPortfolioApiJsonSerializerService implements PortfolioApi
         final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(SAVINGS_ACCOUNTS_DATA_PARAMETERS,
                 prettyPrint, responseParameters);
         return helper.serializedJsonFrom(gsonDeserializer, accounts.toArray(new SavingAccountData[accounts.size()]));
-    }
-
-    @Override
-    public String serializeChartOfAccountDataToJson(final boolean prettyPrint, final Set<String> responseParameters,
-            final ChartOfAccountsData chartOfAccounts) {
-        final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(
-                CHART_OF_ACCOUNTS_DATA_PARAMETERS, prettyPrint, responseParameters);
-        return helper.serializedJsonFrom(gsonDeserializer, chartOfAccounts);
     }
 
     @Override

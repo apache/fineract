@@ -3,7 +3,6 @@ package org.mifosng.platform.api.infrastructure;
 import java.util.Collection;
 import java.util.Set;
 
-import org.mifosng.platform.accounting.api.data.ChartOfAccountsData;
 import org.mifosng.platform.api.commands.ClientCommand;
 import org.mifosng.platform.api.data.ChargeData;
 import org.mifosng.platform.api.data.ClientAccountSummaryCollectionData;
@@ -156,7 +155,4 @@ public interface PortfolioApiJsonSerializerService {
 
     String serializeGuarantorDataToJson(boolean prettyPrint, Set<String> responseParameters, GuarantorData guarantorData);
 
-    // TODO - KW - might devide serialize up into portfolio and account to
-    // reduce interface
-    String serializeChartOfAccountDataToJson(boolean prettyPrint, Set<String> responseParameters, ChartOfAccountsData chartOfAccounts);
 }
