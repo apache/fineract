@@ -13,13 +13,13 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.mifosng.platform.api.commands.PermissionsCommand;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.infrastructure.PortfolioApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService;
 import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosplatform.infrastructure.user.api.data.PermissionUsageData;
+import org.mifosplatform.infrastructure.user.command.PermissionsCommand;
 import org.mifosplatform.infrastructure.user.service.PermissionReadPlatformService;
 import org.mifosplatform.infrastructure.user.service.PermissionWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;

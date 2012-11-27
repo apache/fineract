@@ -1,6 +1,6 @@
 package org.mifosplatform.infrastructure.user.service;
 
-import org.mifosng.platform.api.commands.UserCommand;
+import org.mifosplatform.infrastructure.user.command.UserCommand;
 
 public interface AppUserWritePlatformService {
 

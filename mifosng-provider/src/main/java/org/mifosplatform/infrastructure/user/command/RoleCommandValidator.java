@@ -1,10 +1,9 @@
-package org.mifosplatform.infrastructure.user.service;
+package org.mifosplatform.infrastructure.user.command;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.mifosng.platform.DataValidatorBuilder;
-import org.mifosng.platform.api.commands.RoleCommand;
 import org.mifosng.platform.api.data.ApiParameterError;
 import org.mifosng.platform.exceptions.PlatformApiDataValidationException;
 

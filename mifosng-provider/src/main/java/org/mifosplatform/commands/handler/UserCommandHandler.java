@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.joda.time.LocalDate;
-import org.mifosng.platform.api.commands.UserCommand;
 import org.mifosng.platform.api.infrastructure.PortfolioApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.PortfolioCommandDeserializerService;
 import org.mifosng.platform.api.infrastructure.PortfolioCommandSerializerService;
@@ -12,6 +11,7 @@ import org.mifosng.platform.client.service.RollbackTransactionAsCommandIsNotAppr
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosplatform.commands.domain.CommandSource;
 import org.mifosplatform.commands.service.ChangeDetectionService;
+import org.mifosplatform.infrastructure.user.command.UserCommand;
 import org.mifosplatform.infrastructure.user.domain.AppUser;
 import org.mifosplatform.infrastructure.user.service.AppUserWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;

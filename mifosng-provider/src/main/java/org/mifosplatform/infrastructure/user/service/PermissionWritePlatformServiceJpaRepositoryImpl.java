@@ -3,9 +3,9 @@ package org.mifosplatform.infrastructure.user.service;
 import java.util.Collection;
 import java.util.Map;
 
-import org.mifosng.platform.api.commands.PermissionsCommand;
 import org.mifosng.platform.exceptions.PermissionNotFoundException;
 import org.mifosng.platform.security.PlatformSecurityContext;
+import org.mifosplatform.infrastructure.user.command.PermissionsCommand;
 import org.mifosplatform.infrastructure.user.domain.Permission;
 import org.mifosplatform.infrastructure.user.domain.PermissionRepository;
 import org.springframework.beans.factory.annotation.Autowired;

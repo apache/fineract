@@ -1,8 +1,8 @@
 package org.mifosng.platform.api.infrastructure;
 
-import org.mifosng.platform.api.commands.RoleCommand;
-import org.mifosng.platform.api.commands.UserCommand;
-import org.mifosng.platform.api.commands.RolePermissionCommand;
+import org.mifosplatform.infrastructure.user.command.RoleCommand;
+import org.mifosplatform.infrastructure.user.command.RolePermissionCommand;
+import org.mifosplatform.infrastructure.user.command.UserCommand;
 
 /**
  * Service for de-serializing JSON for a command into the platforms internal

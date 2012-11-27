@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
-import org.mifosng.platform.api.commands.UserCommand;
 import org.mifosng.platform.api.data.ApiParameterError;
 import org.mifosng.platform.client.service.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
 import org.mifosng.platform.exceptions.OfficeNotFoundException;
@@ -21,6 +20,8 @@ import org.mifosng.platform.infrastructure.PlatformUser;
 import org.mifosng.platform.organisation.domain.Office;
 import org.mifosng.platform.organisation.domain.OfficeRepository;
 import org.mifosng.platform.security.PlatformSecurityContext;
+import org.mifosplatform.infrastructure.user.command.UserCommand;
+import org.mifosplatform.infrastructure.user.command.UserCommandValidator;
 import org.mifosplatform.infrastructure.user.domain.AppUser;
 import org.mifosplatform.infrastructure.user.domain.AppUserRepository;
 import org.mifosplatform.infrastructure.user.domain.Permission;

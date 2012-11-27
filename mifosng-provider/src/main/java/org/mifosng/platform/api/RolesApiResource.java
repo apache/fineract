@@ -17,8 +17,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
-import org.mifosng.platform.api.commands.RoleCommand;
-import org.mifosng.platform.api.commands.RolePermissionCommand;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService;
 import org.mifosng.platform.api.infrastructure.PortfolioCommandDeserializerService;
@@ -30,6 +28,8 @@ import org.mifosplatform.commands.service.PortfolioCommandsReadPlatformService;
 import org.mifosplatform.infrastructure.user.api.data.PermissionUsageData;
 import org.mifosplatform.infrastructure.user.api.data.RoleData;
 import org.mifosplatform.infrastructure.user.api.data.RolePermissionsData;
+import org.mifosplatform.infrastructure.user.command.RoleCommand;
+import org.mifosplatform.infrastructure.user.command.RolePermissionCommand;
 import org.mifosplatform.infrastructure.user.service.PermissionReadPlatformService;
 import org.mifosplatform.infrastructure.user.service.RoleReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -4,8 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.joda.time.LocalDate;
-import org.mifosng.platform.api.commands.RoleCommand;
-import org.mifosng.platform.api.commands.RolePermissionCommand;
 import org.mifosng.platform.api.infrastructure.PortfolioApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.PortfolioCommandDeserializerService;
 import org.mifosng.platform.api.infrastructure.PortfolioCommandSerializerService;
@@ -14,6 +12,8 @@ import org.mifosng.platform.infrastructure.errorhandling.UnsupportedCommandExcep
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosplatform.commands.domain.CommandSource;
 import org.mifosplatform.commands.service.ChangeDetectionService;
+import org.mifosplatform.infrastructure.user.command.RoleCommand;
+import org.mifosplatform.infrastructure.user.command.RolePermissionCommand;
 import org.mifosplatform.infrastructure.user.domain.AppUser;
 import org.mifosplatform.infrastructure.user.service.RoleWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;

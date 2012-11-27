@@ -1,7 +1,7 @@
 package org.mifosplatform.infrastructure.user.service;
 
 
-import org.mifosng.platform.api.commands.PermissionsCommand;
+import org.mifosplatform.infrastructure.user.command.PermissionsCommand;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface PermissionWritePlatformService {

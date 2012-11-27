@@ -1,7 +1,7 @@
 package org.mifosplatform.infrastructure.user.service;
 
-import org.mifosng.platform.api.commands.RoleCommand;
-import org.mifosng.platform.api.commands.RolePermissionCommand;
+import org.mifosplatform.infrastructure.user.command.RoleCommand;
+import org.mifosplatform.infrastructure.user.command.RolePermissionCommand;
 
 public interface RoleWritePlatformService {
 

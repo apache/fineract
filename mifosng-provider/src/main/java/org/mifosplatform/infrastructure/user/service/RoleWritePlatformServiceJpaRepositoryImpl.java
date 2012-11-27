@@ -3,12 +3,13 @@ package org.mifosplatform.infrastructure.user.service;
 import java.util.Collection;
 import java.util.Map;
 
-import org.mifosng.platform.api.commands.RoleCommand;
-import org.mifosng.platform.api.commands.RolePermissionCommand;
 import org.mifosng.platform.client.service.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
 import org.mifosng.platform.exceptions.PermissionNotFoundException;
 import org.mifosng.platform.exceptions.RoleNotFoundException;
 import org.mifosng.platform.security.PlatformSecurityContext;
+import org.mifosplatform.infrastructure.user.command.RoleCommand;
+import org.mifosplatform.infrastructure.user.command.RoleCommandValidator;
+import org.mifosplatform.infrastructure.user.command.RolePermissionCommand;
 import org.mifosplatform.infrastructure.user.domain.Permission;
 import org.mifosplatform.infrastructure.user.domain.PermissionRepository;
 import org.mifosplatform.infrastructure.user.domain.Role;

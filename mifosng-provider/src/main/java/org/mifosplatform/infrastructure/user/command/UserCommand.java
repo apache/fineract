@@ -1,4 +1,4 @@
-package org.mifosng.platform.api.commands;
+package org.mifosplatform.infrastructure.user.command;
 
 import java.util.Set;
 
