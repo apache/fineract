@@ -1,4 +1,4 @@
-package org.mifosng.platform.makerchecker.service;
+package org.mifosplatform.infrastructure.commands.service;
 
 import org.mifosng.platform.api.commands.ClientCommand;
 import org.mifosng.platform.api.data.ClientData;

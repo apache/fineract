@@ -12,7 +12,6 @@ import org.mifosng.platform.api.data.ClientAccountSummaryCollectionData;
 import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.ClientIdentifierData;
 import org.mifosng.platform.api.data.CodeData;
-import org.mifosng.platform.api.data.CommandSourceData;
 import org.mifosng.platform.api.data.ConfigurationData;
 import org.mifosng.platform.api.data.DatatableData;
 import org.mifosng.platform.api.data.DepositAccountData;
@@ -39,6 +38,7 @@ import org.mifosng.platform.api.data.RolePermissionsData;
 import org.mifosng.platform.api.data.SavingAccountData;
 import org.mifosng.platform.api.data.SavingProductData;
 import org.mifosng.platform.api.data.StaffData;
+import org.mifosplatform.infrastructure.commands.api.data.CommandSourceData;
 
 public interface PortfolioApiJsonSerializerService {
 

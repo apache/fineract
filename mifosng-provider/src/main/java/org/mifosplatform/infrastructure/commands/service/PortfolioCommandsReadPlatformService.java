@@ -1,8 +1,8 @@
-package org.mifosng.platform.makerchecker.service;
+package org.mifosplatform.infrastructure.commands.service;
 
 import java.util.Collection;
 
-import org.mifosng.platform.api.data.CommandSourceData;
+import org.mifosplatform.infrastructure.commands.api.data.CommandSourceData;
 
 public interface PortfolioCommandsReadPlatformService {
 

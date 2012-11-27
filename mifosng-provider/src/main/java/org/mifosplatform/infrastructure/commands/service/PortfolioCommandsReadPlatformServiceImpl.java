@@ -1,14 +1,14 @@
-package org.mifosng.platform.makerchecker.service;
+package org.mifosplatform.infrastructure.commands.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
 import org.joda.time.LocalDate;
-import org.mifosng.platform.api.data.CommandSourceData;
 import org.mifosng.platform.infrastructure.JdbcSupport;
 import org.mifosng.platform.infrastructure.TenantAwareRoutingDataSource;
 import org.mifosng.platform.security.PlatformSecurityContext;
+import org.mifosplatform.infrastructure.commands.api.data.CommandSourceData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;

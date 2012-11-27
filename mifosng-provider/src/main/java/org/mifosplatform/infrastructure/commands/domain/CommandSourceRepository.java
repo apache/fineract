@@ -1,4 +1,4 @@
-package org.mifosng.platform.makerchecker.domain;
+package org.mifosplatform.infrastructure.commands.domain;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;

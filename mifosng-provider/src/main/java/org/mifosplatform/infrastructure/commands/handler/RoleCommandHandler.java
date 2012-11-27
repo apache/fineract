@@ -1,4 +1,4 @@
-package org.mifosng.platform.makerchecker.service;
+package org.mifosplatform.infrastructure.commands.handler;
 
 import java.util.Arrays;
 import java.util.List;
@@ -11,10 +11,11 @@ import org.mifosng.platform.api.infrastructure.PortfolioCommandDeserializerServi
 import org.mifosng.platform.api.infrastructure.PortfolioCommandSerializerService;
 import org.mifosng.platform.client.service.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
 import org.mifosng.platform.infrastructure.errorhandling.UnsupportedCommandException;
-import org.mifosng.platform.makerchecker.domain.CommandSource;
 import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosng.platform.user.domain.AppUser;
 import org.mifosng.platform.user.service.RoleWritePlatformService;
+import org.mifosplatform.infrastructure.commands.domain.CommandSource;
+import org.mifosplatform.infrastructure.commands.service.ChangeDetectionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

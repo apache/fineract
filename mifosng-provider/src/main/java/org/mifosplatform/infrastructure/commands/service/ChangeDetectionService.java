@@ -1,4 +1,4 @@
-package org.mifosng.platform.makerchecker.service;
+package org.mifosplatform.infrastructure.commands.service;
 
 public interface ChangeDetectionService {
 

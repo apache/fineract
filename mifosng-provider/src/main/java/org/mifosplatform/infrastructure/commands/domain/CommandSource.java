@@ -1,4 +1,4 @@
-package org.mifosng.platform.makerchecker.domain;
+package org.mifosplatform.infrastructure.commands.domain;
 
 import java.util.Date;
 

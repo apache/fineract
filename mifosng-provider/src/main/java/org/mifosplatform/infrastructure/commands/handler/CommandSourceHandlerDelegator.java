@@ -1,8 +1,8 @@
-package org.mifosng.platform.makerchecker.service;
+package org.mifosplatform.infrastructure.commands.handler;
 
 import org.mifosng.platform.infrastructure.errorhandling.UnsupportedCommandException;
-import org.mifosng.platform.makerchecker.domain.CommandSource;
 import org.mifosng.platform.security.PlatformSecurityContext;
+import org.mifosplatform.infrastructure.commands.domain.CommandSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

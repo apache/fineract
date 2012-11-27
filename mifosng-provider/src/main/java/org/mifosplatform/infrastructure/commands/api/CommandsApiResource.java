@@ -1,4 +1,4 @@
-package org.mifosng.platform.api;
+package org.mifosplatform.infrastructure.commands.api;
 
 import java.util.Collection;
 import java.util.Set;
@@ -17,13 +17,13 @@ import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosng.platform.api.data.EntityIdentifier;
-import org.mifosng.platform.api.data.CommandSourceData;
 import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService;
 import org.mifosng.platform.exceptions.UnrecognizedQueryParamException;
 import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
 import org.mifosng.platform.security.PlatformSecurityContext;
-import org.mifosng.platform.makerchecker.service.PortfolioCommandsReadPlatformService;
-import org.mifosng.platform.makerchecker.service.PortfolioCommandSourceWritePlatformService;
+import org.mifosplatform.infrastructure.commands.api.data.CommandSourceData;
+import org.mifosplatform.infrastructure.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.mifosplatform.infrastructure.commands.service.PortfolioCommandsReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -62,15 +62,15 @@ public class CommandsApiResource {
     }
 
     @POST
-    @Path("{makerCheckerId}")
+    @Path("{commandId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String approveMakerCheckerEntry(@PathParam("makerCheckerId") final Long makerCheckerId,
+    public String approveMakerCheckerEntry(@PathParam("commandId") final Long commandId,
             @QueryParam("command") final String commandParam) {
 
         EntityIdentifier result = null;
         if (is(commandParam, "approve")) {
-            result = this.writePlatformService.approveEntry(makerCheckerId);
+            result = this.writePlatformService.approveEntry(commandId);
         } else {
             throw new UnrecognizedQueryParamException("command", commandParam);
         }
@@ -83,12 +83,12 @@ public class CommandsApiResource {
     }
 
     @DELETE
-    @Path("{makerCheckerId}")
+    @Path("{commandId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String deleteMakerCheckerEntry(@PathParam("makerCheckerId") final Long makerCheckerId) {
+    public String deleteMakerCheckerEntry(@PathParam("commandId") final Long commandId) {
 
-        final Long id = this.writePlatformService.deleteEntry(makerCheckerId);
+        final Long id = this.writePlatformService.deleteEntry(commandId);
 
         return this.apiJsonSerializerService.serializeEntityIdentifier(EntityIdentifier.makerChecker(id));
     }

@@ -1,4 +1,4 @@
-package org.mifosng.platform.api.data;
+package org.mifosplatform.infrastructure.commands.api.data;
 
 import org.joda.time.LocalDate;
 
