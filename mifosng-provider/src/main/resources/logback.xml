@@ -18,8 +18,9 @@
   
   
   <logger name="org.mifosng.platform" level="debug" />
+  <logger name="org.mifosplatform" level="debug" />
   <logger name="org.springframework.web" level="info" />
-  <logger name="org.springframework.beans" level="debug" />
+  <logger name="org.springframework.beans" level="info" />
   <logger name="net.sf.ehcache" level="error" />
   <logger name="org.hibernate.cache" level="error" />
 

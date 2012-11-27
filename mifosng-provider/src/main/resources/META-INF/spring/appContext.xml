@@ -17,7 +17,7 @@
 	
 	<context:component-scan base-package="org.mifosng.platform.security, org.mifosng.platform.infrastructure, 
 										  org.mifosng.platform.*.domain, org.mifosng.platform, 
-										  org.mifosplatform.*.*.service, org.mifosplatform.*.*.domain, org.mifosplatform">
+										  org.mifosplatform.*.*.service, org.mifosplatform.*.*.domain, org.mifosplatform, org.mifosplatform.commands">
 		<context:exclude-filter expression="org.springframework.stereotype.Controller" type="annotation" />
 	</context:component-scan>
 	
@@ -25,7 +25,8 @@
 	<jpa:auditing auditor-aware-ref="auditorAware" />
 	
     <jpa:repositories base-package="org.mifosng.platform.*.domain" />
-    <jpa:repositories base-package="org.mifosplatform.infrastructure.commands.domain" />
+    <jpa:repositories base-package="org.mifosplatform.commands.domain" />
+    <jpa:repositories base-package="org.mifosplatform.infrastructure.*.domain" />
 
     <import resource="infrastructure.xml" />
 		

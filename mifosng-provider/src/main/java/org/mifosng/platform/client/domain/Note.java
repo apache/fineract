@@ -10,7 +10,7 @@ import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
 import org.mifosng.platform.loan.domain.Loan;
 import org.mifosng.platform.loan.domain.LoanTransaction;
 import org.mifosng.platform.saving.domain.DepositAccount;
-import org.mifosng.platform.user.domain.AppUser;
+import org.mifosplatform.infrastructure.user.domain.AppUser;
 
 @Entity
 @Table(name = "m_note")

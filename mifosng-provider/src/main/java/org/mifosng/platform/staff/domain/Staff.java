@@ -11,7 +11,7 @@ import org.apache.commons.lang.StringUtils;
 import org.mifosng.platform.api.commands.StaffCommand;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
 import org.mifosng.platform.organisation.domain.Office;
-import org.mifosng.platform.user.domain.AppUser;
+import org.mifosplatform.infrastructure.user.domain.AppUser;
 
 @Entity
 @Table(name = "m_staff", uniqueConstraints = { @UniqueConstraint(columnNames = { "display_name" }, name = "display_name") })

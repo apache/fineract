@@ -11,7 +11,7 @@ import org.apache.commons.lang.StringUtils;
 import org.mifosng.platform.api.commands.ClientIdentifierCommand;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
 import org.mifosng.platform.organisation.domain.CodeValue;
-import org.mifosng.platform.user.domain.AppUser;
+import org.mifosplatform.infrastructure.user.domain.AppUser;
 
 @Entity
 @Table(name = "m_client_identifier", uniqueConstraints = {

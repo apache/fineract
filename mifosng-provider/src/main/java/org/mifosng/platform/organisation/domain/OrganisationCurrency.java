@@ -5,7 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
-import org.mifosng.platform.user.domain.AppUser;
+import org.mifosplatform.infrastructure.user.domain.AppUser;
 
 @Entity
 @Table(name = "m_organisation_currency")

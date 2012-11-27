@@ -2,7 +2,7 @@ package org.mifosng.platform.charge.domain;
 
 import org.mifosng.platform.api.commands.ChargeCommand;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
-import org.mifosng.platform.user.domain.AppUser;
+import org.mifosplatform.infrastructure.user.domain.AppUser;
 
 import javax.persistence.*;
 import java.math.BigDecimal;

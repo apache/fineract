@@ -18,7 +18,7 @@ import org.mifosng.platform.charge.domain.Charge;
 import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.fund.domain.Fund;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
-import org.mifosng.platform.user.domain.AppUser;
+import org.mifosplatform.infrastructure.user.domain.AppUser;
 
 /**
  * Loan products allow for categorisation of an organisations loans into something meaningful to them.

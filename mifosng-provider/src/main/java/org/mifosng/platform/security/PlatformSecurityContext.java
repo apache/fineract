@@ -1,6 +1,6 @@
 package org.mifosng.platform.security;
 
-import org.mifosng.platform.user.domain.AppUser;
+import org.mifosplatform.infrastructure.user.domain.AppUser;
 
 public interface PlatformSecurityContext {
 

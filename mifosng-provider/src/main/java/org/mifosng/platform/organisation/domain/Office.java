@@ -21,7 +21,7 @@ import org.mifosng.platform.api.commands.OfficeCommand;
 import org.mifosng.platform.exceptions.CannotUpdateOfficeWithParentOfficeSameAsSelf;
 import org.mifosng.platform.exceptions.RootOfficeParentCannotBeUpdated;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
-import org.mifosng.platform.user.domain.AppUser;
+import org.mifosplatform.infrastructure.user.domain.AppUser;
 
 @Entity
 @Table(name = "m_office", uniqueConstraints={

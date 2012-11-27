@@ -3,7 +3,7 @@ package org.mifosng.platform.loan.domain;
 import org.joda.time.LocalDate;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
 import org.mifosng.platform.staff.domain.Staff;
-import org.mifosng.platform.user.domain.AppUser;
+import org.mifosplatform.infrastructure.user.domain.AppUser;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

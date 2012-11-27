@@ -5,8 +5,6 @@ import java.util.Set;
 
 import org.mifosng.platform.accounting.api.data.ChartOfAccountsData;
 import org.mifosng.platform.api.commands.ClientCommand;
-import org.mifosng.platform.api.data.AppUserData;
-import org.mifosng.platform.api.data.AuthenticatedUserData;
 import org.mifosng.platform.api.data.ChargeData;
 import org.mifosng.platform.api.data.ClientAccountSummaryCollectionData;
 import org.mifosng.platform.api.data.ClientData;
@@ -32,13 +30,15 @@ import org.mifosng.platform.api.data.LoanTransactionData;
 import org.mifosng.platform.api.data.NoteData;
 import org.mifosng.platform.api.data.OfficeData;
 import org.mifosng.platform.api.data.OfficeTransactionData;
-import org.mifosng.platform.api.data.PermissionUsageData;
-import org.mifosng.platform.api.data.RoleData;
-import org.mifosng.platform.api.data.RolePermissionsData;
 import org.mifosng.platform.api.data.SavingAccountData;
 import org.mifosng.platform.api.data.SavingProductData;
 import org.mifosng.platform.api.data.StaffData;
-import org.mifosplatform.infrastructure.commands.api.data.CommandSourceData;
+import org.mifosplatform.commands.api.data.CommandSourceData;
+import org.mifosplatform.infrastructure.user.api.data.AppUserData;
+import org.mifosplatform.infrastructure.user.api.data.AuthenticatedUserData;
+import org.mifosplatform.infrastructure.user.api.data.PermissionUsageData;
+import org.mifosplatform.infrastructure.user.api.data.RoleData;
+import org.mifosplatform.infrastructure.user.api.data.RolePermissionsData;
 
 public interface PortfolioApiJsonSerializerService {
 

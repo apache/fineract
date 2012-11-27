@@ -16,7 +16,7 @@ import org.mifosng.platform.api.commands.GroupCommand;
 import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
 import org.mifosng.platform.organisation.domain.Office;
-import org.mifosng.platform.user.domain.AppUser;
+import org.mifosplatform.infrastructure.user.domain.AppUser;
 
 @Entity
 @Table(name = "m_group")

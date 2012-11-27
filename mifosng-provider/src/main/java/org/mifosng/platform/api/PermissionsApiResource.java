@@ -15,13 +15,13 @@ import javax.ws.rs.core.UriInfo;
 
 import org.mifosng.platform.api.commands.PermissionsCommand;
 import org.mifosng.platform.api.data.EntityIdentifier;
-import org.mifosng.platform.api.data.PermissionUsageData;
 import org.mifosng.platform.api.infrastructure.PortfolioApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService;
 import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
 import org.mifosng.platform.security.PlatformSecurityContext;
-import org.mifosng.platform.user.service.PermissionReadPlatformService;
-import org.mifosng.platform.user.service.PermissionWritePlatformService;
+import org.mifosplatform.infrastructure.user.api.data.PermissionUsageData;
+import org.mifosplatform.infrastructure.user.service.PermissionReadPlatformService;
+import org.mifosplatform.infrastructure.user.service.PermissionWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;

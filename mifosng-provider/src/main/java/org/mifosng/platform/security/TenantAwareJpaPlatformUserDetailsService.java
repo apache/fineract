@@ -1,7 +1,7 @@
 package org.mifosng.platform.security;
 
 import org.mifosng.platform.infrastructure.PlatformUser;
-import org.mifosng.platform.user.domain.PlatformUserRepository;
+import org.mifosplatform.infrastructure.user.domain.PlatformUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.security.core.userdetails.UserDetails;

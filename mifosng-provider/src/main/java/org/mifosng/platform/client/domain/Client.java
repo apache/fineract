@@ -15,7 +15,7 @@ import org.joda.time.LocalDate;
 import org.mifosng.platform.api.commands.ClientCommand;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
 import org.mifosng.platform.organisation.domain.Office;
-import org.mifosng.platform.user.domain.AppUser;
+import org.mifosplatform.infrastructure.user.domain.AppUser;
 
 @Entity
 @Table(name = "m_client")
