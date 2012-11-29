@@ -18,42 +18,42 @@ import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.mifosng.platform.api.commands.AdjustLoanTransactionCommand;
-import org.mifosng.platform.api.commands.BranchMoneyTransferCommand;
-import org.mifosng.platform.api.commands.ChargeCommand;
 import org.mifosng.platform.api.commands.ClientCommand;
 import org.mifosng.platform.api.commands.ClientIdentifierCommand;
-import org.mifosng.platform.api.commands.CodeCommand;
 import org.mifosng.platform.api.commands.DepositAccountCommand;
 import org.mifosng.platform.api.commands.DepositAccountWithdrawInterestCommand;
 import org.mifosng.platform.api.commands.DepositAccountWithdrawalCommand;
 import org.mifosng.platform.api.commands.DepositProductCommand;
 import org.mifosng.platform.api.commands.DepositStateTransitionApprovalCommand;
 import org.mifosng.platform.api.commands.DepositStateTransitionCommand;
-import org.mifosng.platform.api.commands.FundCommand;
 import org.mifosng.platform.api.commands.GroupCommand;
 import org.mifosng.platform.api.commands.GuarantorCommand;
 import org.mifosng.platform.api.commands.LoanApplicationCommand;
 import org.mifosng.platform.api.commands.LoanChargeCommand;
 import org.mifosng.platform.api.commands.LoanProductCommand;
-import org.mifosng.platform.api.commands.LoanReassignmentCommand;
 import org.mifosng.platform.api.commands.LoanStateTransitionCommand;
 import org.mifosng.platform.api.commands.LoanTransactionCommand;
 import org.mifosng.platform.api.commands.NoteCommand;
-import org.mifosng.platform.api.commands.OfficeCommand;
-import org.mifosng.platform.api.commands.OrganisationCurrencyCommand;
 import org.mifosng.platform.api.commands.SavingAccountCommand;
 import org.mifosng.platform.api.commands.SavingProductCommand;
-import org.mifosng.platform.api.commands.StaffCommand;
 import org.mifosng.platform.api.data.ApiParameterError;
 import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.exceptions.PlatformApiDataValidationException;
 import org.mifosng.platform.infrastructure.api.JsonParserHelper;
 import org.mifosng.platform.infrastructure.errorhandling.InvalidJsonException;
 import org.mifosng.platform.infrastructure.errorhandling.UnsupportedParameterException;
+import org.mifosplatform.infrastructure.codes.command.CodeCommand;
+import org.mifosplatform.infrastructure.configuration.command.CurrencyCommand;
+import org.mifosplatform.infrastructure.office.command.BranchMoneyTransferCommand;
+import org.mifosplatform.infrastructure.office.command.OfficeCommand;
+import org.mifosplatform.infrastructure.staff.command.BulkTransferLoanOfficerCommand;
+import org.mifosplatform.infrastructure.staff.command.StaffCommand;
 import org.mifosplatform.infrastructure.user.command.PermissionsCommand;
 import org.mifosplatform.infrastructure.user.command.RoleCommand;
 import org.mifosplatform.infrastructure.user.command.RolePermissionCommand;
 import org.mifosplatform.infrastructure.user.command.UserCommand;
+import org.mifosplatform.portfolio.charge.command.ChargeCommand;
+import org.mifosplatform.portfolio.fund.command.FundCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.number.NumberFormatter;
 import org.springframework.stereotype.Service;
@@ -73,16 +73,22 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
      * different to that of the json of a serialized command object.
      */
     private final PortfolioCommandDeserializerService portfolioCommandDeserializerService;
-    
+
     /**
      * Google-gson class for converting to and from json.
      */
     private final Gson gsonConverter;
 
+    /**
+     * Google-gson class for parsing json.
+     */
+    // private final JsonParser parser;
+
     @Autowired
     public PortfolioApiDataConversionServiceImpl(final PortfolioCommandDeserializerService portfolioCommandDeserializerService) {
         this.portfolioCommandDeserializerService = portfolioCommandDeserializerService;
-        gsonConverter = new Gson();
+        this.gsonConverter = new Gson();
+        // this.parser = new JsonParser();
     }
 
     @Override
@@ -116,49 +122,37 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
     }
 
     @Override
-    public FundCommand convertJsonToFundCommand(final Long resourceIdentifier, final String json) {
+    public FundCommand convertApiRequestJsonToFundCommand(final Long resourceIdentifier, final String json) {
 
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
-        Type typeOfMap = new TypeToken<Map<String, String>>() {}.getType();
-        Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
+        final Type typeOfMap = new TypeToken<Map<String, String>>() {}.getType();
+        final Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
 
-        Set<String> supportedParams = new HashSet<String>(Arrays.asList("name", "externalId"));
+        final Set<String> supportedParams = new HashSet<String>(Arrays.asList("name", "externalId"));
 
         checkForUnsupportedParameters(requestMap, supportedParams);
 
-        Set<String> modifiedParameters = new HashSet<String>();
-
-        String name = extractStringParameter("name", requestMap, modifiedParameters);
-        String externalId = extractStringParameter("externalId", requestMap, modifiedParameters);
-
-        return new FundCommand(modifiedParameters, resourceIdentifier, name, externalId);
+        return this.portfolioCommandDeserializerService.deserializeFundCommand(resourceIdentifier, json, false);
     }
 
     @Override
-    public StaffCommand convertJsonToStaffCommand(Long resourceIdentifier, String json) {
+    public StaffCommand convertApiRequestJsonToStaffCommand(final Long resourceIdentifier, final String json) {
 
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
-        Type typeOfMap = new TypeToken<Map<String, String>>() {}.getType();
-        Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
+        final Type typeOfMap = new TypeToken<Map<String, String>>() {}.getType();
+        final Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
 
-        Set<String> supportedParams = new HashSet<String>(Arrays.asList("firstname", "lastname", "officeId", "loanOfficerFlag"));
+        final Set<String> supportedParams = new HashSet<String>(Arrays.asList("firstname", "lastname", "officeId", "isLoanOfficer"));
 
         checkForUnsupportedParameters(requestMap, supportedParams);
 
-        Set<String> modifiedParameters = new HashSet<String>();
-
-        String firstname = extractStringParameter("firstname", requestMap, modifiedParameters);
-        String lastname = extractStringParameter("lastname", requestMap, modifiedParameters);
-        Boolean isLoanOfficer = extractBooleanParameter("loanOfficerFlag", requestMap, modifiedParameters);
-        Long officeId = extractLongParameter("officeId", requestMap, modifiedParameters);
-
-        return new StaffCommand(modifiedParameters, resourceIdentifier, officeId, firstname, lastname, isLoanOfficer);
+        return this.portfolioCommandDeserializerService.deserializeStaffCommand(resourceIdentifier, json, false);
     }
 
     @Override
-    public LoanReassignmentCommand convertJsonToLoanReassignmentCommand(Long resourceIdentifier, String json) {
+    public BulkTransferLoanOfficerCommand convertJsonToLoanReassignmentCommand(Long resourceIdentifier, String json) {
 
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
@@ -176,11 +170,11 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         Long toLoanOfficerId = extractLongParameter("toLoanOfficerId", requestMap, modifiedParameters);
         LocalDate assignmentDate = extractLocalDateParameter("assignmentDate", requestMap, modifiedParameters);
 
-        return new LoanReassignmentCommand(resourceIdentifier, fromLoanOfficerId, toLoanOfficerId, assignmentDate);
+        return new BulkTransferLoanOfficerCommand(resourceIdentifier, fromLoanOfficerId, toLoanOfficerId, assignmentDate);
     }
 
     @Override
-    public LoanReassignmentCommand convertJsonToBulkLoanReassignmentCommand(final String json) {
+    public BulkTransferLoanOfficerCommand convertJsonToBulkLoanReassignmentCommand(final String json) {
 
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
@@ -216,11 +210,11 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         }
         //
 
-        return new LoanReassignmentCommand(fromLoanOfficerId, toLoanOfficerId, assignmentDate, loans);
+        return new BulkTransferLoanOfficerCommand(fromLoanOfficerId, toLoanOfficerId, assignmentDate, loans);
     }
 
     @Override
-    public OfficeCommand convertJsonToOfficeCommand(final Long resourceIdentifier, final String json) {
+    public OfficeCommand convertApiRequestJsonToOfficeCommand(final Long resourceIdentifier, final String json) {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         Type typeOfMap = new TypeToken<Map<String, String>>() {}.getType();
@@ -231,14 +225,18 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
 
         checkForUnsupportedParameters(requestMap, supportedParams);
 
-        Set<String> modifiedParameters = new HashSet<String>();
+        final Set<String> parametersPassedInRequest = new HashSet<String>();
 
-        String name = extractStringParameter("name", requestMap, modifiedParameters);
-        String externalId = extractStringParameter("externalId", requestMap, modifiedParameters);
-        Long parentId = extractLongParameter("parentId", requestMap, modifiedParameters);
-        LocalDate openingLocalDate = extractLocalDateParameter("openingDate", requestMap, modifiedParameters);
+        final JsonParser parser = new JsonParser();
+        final JsonElement element = parser.parse(json);
+        final JsonParserHelper helper = new JsonParserHelper();
 
-        return new OfficeCommand(modifiedParameters, resourceIdentifier, name, externalId, parentId, openingLocalDate);
+        final String name = helper.extractStringNamed("name", element, parametersPassedInRequest);
+        final String externalId = helper.extractStringNamed("externalId", element, parametersPassedInRequest);
+        final Long parentId = helper.extractLongNamed("parentId", element, parametersPassedInRequest);
+        final LocalDate openingLocalDate = helper.extractLocalDateNamed("openingDate", element, parametersPassedInRequest);
+
+        return new OfficeCommand(parametersPassedInRequest, false, resourceIdentifier, name, externalId, parentId, openingLocalDate);
     }
 
     @Override
@@ -262,18 +260,18 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
     public PermissionsCommand convertApiRequestJsonToPermissionsCommand(final String json) {
 
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
-        
+
         final Type typeOfMap = new TypeToken<Map<String, Boolean>>() {}.getType();
         final Map<String, Boolean> permissionsMap = gsonConverter.fromJson(json, typeOfMap);
 
         return new PermissionsCommand(permissionsMap, false);
     }
-    
+
     @Override
     public RolePermissionCommand convertApiRequestJsonToRolePermissionCommand(final Long resourceIdentifier, final String json) {
 
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
-        
+
         final Type typeOfMap = new TypeToken<Map<String, Boolean>>() {}.getType();
         final Map<String, Boolean> permissionsMap = gsonConverter.fromJson(json, typeOfMap);
 
@@ -288,8 +286,8 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         final Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
 
-        final Set<String> supportedParams = new HashSet<String>(Arrays.asList("username", "firstname", "lastname", "password", "repeatPassword",
-                "email", "officeId", "notSelectedRoles", "roles"));
+        final Set<String> supportedParams = new HashSet<String>(Arrays.asList("username", "firstname", "lastname", "password",
+                "repeatPassword", "email", "officeId", "notSelectedRoles", "roles"));
 
         checkForUnsupportedParameters(requestMap, supportedParams);
 
@@ -300,7 +298,7 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
     }
 
     @Override
-    public BranchMoneyTransferCommand convertJsonToBranchMoneyTransferCommand(final String json) {
+    public BranchMoneyTransferCommand convertApiRequestJsonToBranchMoneyTransferCommand(final String json) {
 
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
@@ -321,7 +319,7 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         BigDecimal transactionAmountValue = extractBigDecimalParameter("transactionAmount", requestMap, modifiedParameters);
         String description = extractStringParameter("description", requestMap, modifiedParameters);
 
-        return new BranchMoneyTransferCommand(modifiedParameters, fromOfficeId, toOfficeId, transactionLocalDate, currencyCode,
+        return new BranchMoneyTransferCommand(modifiedParameters, false, fromOfficeId, toOfficeId, transactionLocalDate, currencyCode,
                 transactionAmountValue, description);
     }
 
@@ -424,7 +422,7 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         } else {
             differenceExists = workingCopyValue != null;
         }
-        
+
         return differenceExists;
     }
 
@@ -436,7 +434,7 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         } else {
             differenceExists = StringUtils.isNotBlank(workingCopyValue);
         }
-        
+
         return differenceExists;
     }
 
@@ -815,7 +813,7 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
     }
 
     @Override
-    public OrganisationCurrencyCommand convertJsonToOrganisationCurrencyCommand(final String json) {
+    public CurrencyCommand convertApiRequestJsonToCurrencyCommand(final String json) {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
@@ -825,27 +823,7 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
 
         checkForUnsupportedParameters(requestMap, supportedParams);
 
-        Set<String> modifiedParameters = new HashSet<String>();
-
-        // check array
-        JsonParser parser = new JsonParser();
-
-        String[] currencies = null;
-        JsonElement element = parser.parse(json);
-        if (element.isJsonObject()) {
-            JsonObject object = element.getAsJsonObject();
-            if (object.has("currencies")) {
-                modifiedParameters.add("currencies");
-                JsonArray array = object.get("currencies").getAsJsonArray();
-                currencies = new String[array.size()];
-                for (int i = 0; i < array.size(); i++) {
-                    currencies[i] = array.get(i).getAsString();
-                }
-            }
-        }
-        //
-
-        return new OrganisationCurrencyCommand(currencies);
+        return this.portfolioCommandDeserializerService.deserializeCurrencyCommand(json, false);
     }
 
     private void checkForUnsupportedParameters(Map<String, ?> requestMap, Set<String> supportedParams) {
@@ -1562,7 +1540,7 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
     }
 
     @Override
-    public CodeCommand convertJsonToCodeCommand(Long resourceIdentifier, String json) {
+    public CodeCommand convertApiRequestJsonToCodeCommand(final Long resourceIdentifier, final String json) {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         Type typeOfMap = new TypeToken<Map<String, String>>() {}.getType();
@@ -1572,12 +1550,9 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
 
         checkForUnsupportedParameters(requestMap, supportedParams);
 
-        Set<String> modifiedParameters = new HashSet<String>();
-
-        String name = extractStringParameter("name", requestMap, modifiedParameters);
-
-        return new CodeCommand(modifiedParameters, resourceIdentifier, name);
-
+        // no difference between api request json format and internal command
+        // json format.
+        return this.portfolioCommandDeserializerService.deserializeCodeCommand(resourceIdentifier, json, false);
     }
 
     @Override
@@ -1656,7 +1631,7 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         String housePhoneNumber = extractStringParameter("housePhoneNumber", requestMap, modifiedParameters);
         String comment = extractStringParameter("comment", requestMap, modifiedParameters);
         String dob = extractStringParameter("dob", requestMap, modifiedParameters);
-        
+
         // workaround for passing locale info to data table api
         final String dateFormat = requestMap.get("dateFormat");
         final String locale = requestMap.get("locale");

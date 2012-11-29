@@ -1,19 +1,14 @@
 package org.mifosng.platform.api.infrastructure;
 
 import org.mifosng.platform.api.commands.AdjustLoanTransactionCommand;
-import org.mifosng.platform.api.commands.BranchMoneyTransferCommand;
-import org.mifosng.platform.api.commands.LoanReassignmentCommand;
-import org.mifosng.platform.api.commands.ChargeCommand;
 import org.mifosng.platform.api.commands.ClientCommand;
 import org.mifosng.platform.api.commands.ClientIdentifierCommand;
-import org.mifosng.platform.api.commands.CodeCommand;
 import org.mifosng.platform.api.commands.DepositAccountCommand;
 import org.mifosng.platform.api.commands.DepositAccountWithdrawInterestCommand;
 import org.mifosng.platform.api.commands.DepositAccountWithdrawalCommand;
 import org.mifosng.platform.api.commands.DepositProductCommand;
 import org.mifosng.platform.api.commands.DepositStateTransitionApprovalCommand;
 import org.mifosng.platform.api.commands.DepositStateTransitionCommand;
-import org.mifosng.platform.api.commands.FundCommand;
 import org.mifosng.platform.api.commands.GroupCommand;
 import org.mifosng.platform.api.commands.GuarantorCommand;
 import org.mifosng.platform.api.commands.LoanApplicationCommand;
@@ -22,24 +17,29 @@ import org.mifosng.platform.api.commands.LoanProductCommand;
 import org.mifosng.platform.api.commands.LoanStateTransitionCommand;
 import org.mifosng.platform.api.commands.LoanTransactionCommand;
 import org.mifosng.platform.api.commands.NoteCommand;
-import org.mifosng.platform.api.commands.OfficeCommand;
-import org.mifosng.platform.api.commands.OrganisationCurrencyCommand;
 import org.mifosng.platform.api.commands.SavingAccountCommand;
 import org.mifosng.platform.api.commands.SavingProductCommand;
-import org.mifosng.platform.api.commands.StaffCommand;
 import org.mifosng.platform.api.data.ClientData;
+import org.mifosplatform.infrastructure.codes.command.CodeCommand;
+import org.mifosplatform.infrastructure.configuration.command.CurrencyCommand;
+import org.mifosplatform.infrastructure.office.command.BranchMoneyTransferCommand;
+import org.mifosplatform.infrastructure.office.command.OfficeCommand;
+import org.mifosplatform.infrastructure.staff.command.BulkTransferLoanOfficerCommand;
+import org.mifosplatform.infrastructure.staff.command.StaffCommand;
 import org.mifosplatform.infrastructure.user.command.PermissionsCommand;
 import org.mifosplatform.infrastructure.user.command.RoleCommand;
 import org.mifosplatform.infrastructure.user.command.RolePermissionCommand;
 import org.mifosplatform.infrastructure.user.command.UserCommand;
+import org.mifosplatform.portfolio.charge.command.ChargeCommand;
+import org.mifosplatform.portfolio.fund.command.FundCommand;
 
 public interface PortfolioApiDataConversionService {
 
     ChargeCommand convertJsonToChargeCommand(Long resourceIdentifier, String json);
 
-    FundCommand convertJsonToFundCommand(Long resourceIdentifier, String json);
+    FundCommand convertApiRequestJsonToFundCommand(Long resourceIdentifier, String json);
 
-    OfficeCommand convertJsonToOfficeCommand(Long resourceIdentifier, String json);
+    OfficeCommand convertApiRequestJsonToOfficeCommand(Long resourceIdentifier, String json);
 
     RoleCommand convertApiRequestJsonToRoleCommand(Long resourceIdentifier, String json);
 
@@ -49,7 +49,7 @@ public interface PortfolioApiDataConversionService {
 
     UserCommand convertApiRequestJsonToUserCommand(Long resourceIdentifier, String json);
 
-    BranchMoneyTransferCommand convertJsonToBranchMoneyTransferCommand(String json);
+    BranchMoneyTransferCommand convertApiRequestJsonToBranchMoneyTransferCommand(String json);
 
     LoanProductCommand convertJsonToLoanProductCommand(Long resourceIdentifier, String json);
 
@@ -77,7 +77,7 @@ public interface PortfolioApiDataConversionService {
 
     AdjustLoanTransactionCommand convertJsonToAdjustLoanTransactionCommand(Long loanId, Long transactionId, String json);
 
-    OrganisationCurrencyCommand convertJsonToOrganisationCurrencyCommand(String json);
+    CurrencyCommand convertApiRequestJsonToCurrencyCommand(String json);
 
     NoteCommand convertJsonToNoteCommand(Long resourceIdentifier, Long clientId, String json);
 
@@ -87,11 +87,11 @@ public interface PortfolioApiDataConversionService {
 
     DepositStateTransitionApprovalCommand convertJsonToDepositStateTransitionApprovalCommand(Long resourceIdentifier, String json);
 
-    StaffCommand convertJsonToStaffCommand(Long resourceIdentifier, String json);
+    StaffCommand convertApiRequestJsonToStaffCommand(Long resourceIdentifier, String json);
 
-    LoanReassignmentCommand convertJsonToLoanReassignmentCommand(Long resourceIdentifier, String json);
+    BulkTransferLoanOfficerCommand convertJsonToLoanReassignmentCommand(Long resourceIdentifier, String json);
 
-    LoanReassignmentCommand convertJsonToBulkLoanReassignmentCommand(String json);
+    BulkTransferLoanOfficerCommand convertJsonToBulkLoanReassignmentCommand(String json);
 
     DepositAccountWithdrawalCommand convertJsonToDepositWithdrawalCommand(Long resourceIdentifier, String json);
 
@@ -99,7 +99,7 @@ public interface PortfolioApiDataConversionService {
 
     ClientIdentifierCommand convertJsonToClientIdentifierCommand(Long resourceIdentifier, Long clientId, String json);
 
-    CodeCommand convertJsonToCodeCommand(Long resourceIdentifier, String json);
+    CodeCommand convertApiRequestJsonToCodeCommand(Long resourceIdentifier, String json);
 
     SavingAccountCommand convertJsonToSavingAccountCommand(Long resourceIdentifier, String json);
 

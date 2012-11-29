@@ -3,7 +3,7 @@ package org.mifosplatform.infrastructure.user.api.data;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.mifosng.platform.api.data.OfficeLookup;
+import org.mifosplatform.infrastructure.office.data.OfficeLookup;
 
 /**
  * Immutable data object for application user data.

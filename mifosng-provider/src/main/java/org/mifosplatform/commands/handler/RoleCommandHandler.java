@@ -9,9 +9,9 @@ import org.mifosng.platform.api.infrastructure.PortfolioCommandDeserializerServi
 import org.mifosng.platform.api.infrastructure.PortfolioCommandSerializerService;
 import org.mifosng.platform.client.service.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
 import org.mifosng.platform.infrastructure.errorhandling.UnsupportedCommandException;
-import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosplatform.commands.domain.CommandSource;
 import org.mifosplatform.commands.service.ChangeDetectionService;
+import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.infrastructure.user.command.RoleCommand;
 import org.mifosplatform.infrastructure.user.command.RolePermissionCommand;
 import org.mifosplatform.infrastructure.user.domain.AppUser;

@@ -1,6 +1,6 @@
 package org.mifosng.platform.loan.domain;
 
-import org.mifosng.platform.currency.domain.Money;
+import org.mifosplatform.infrastructure.configuration.domain.Money;
 
 public class TransactionProccessingResult {
 

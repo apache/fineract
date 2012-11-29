@@ -5,10 +5,10 @@ import java.math.MathContext;
 import java.math.RoundingMode;
 
 import org.joda.time.LocalDate;
-import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.savingproduct.domain.SavingFrequencyType;
 import org.mifosng.platform.savingproduct.domain.SavingInterestCalculationMethod;
 import org.mifosng.platform.savingproduct.domain.TenureTypeEnum;
+import org.mifosplatform.infrastructure.configuration.domain.Money;
 import org.springframework.stereotype.Service;
 
 @Service

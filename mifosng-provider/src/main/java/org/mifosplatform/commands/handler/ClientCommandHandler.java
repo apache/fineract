@@ -10,9 +10,9 @@ import org.mifosng.platform.api.infrastructure.PortfolioApiDataConversionService
 import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService;
 import org.mifosng.platform.client.service.ClientWritePlatformService;
 import org.mifosng.platform.client.service.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
-import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosplatform.commands.domain.CommandSource;
 import org.mifosplatform.commands.service.ChangeDetectionService;
+import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.infrastructure.user.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

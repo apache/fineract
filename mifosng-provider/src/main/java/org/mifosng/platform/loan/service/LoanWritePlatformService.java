@@ -1,13 +1,13 @@
 package org.mifosng.platform.loan.service;
 
 import org.mifosng.platform.api.commands.AdjustLoanTransactionCommand;
-import org.mifosng.platform.api.commands.LoanReassignmentCommand;
 import org.mifosng.platform.api.commands.LoanChargeCommand;
 import org.mifosng.platform.api.commands.LoanStateTransitionCommand;
 import org.mifosng.platform.api.commands.LoanTransactionCommand;
 import org.mifosng.platform.api.commands.LoanApplicationCommand;
 import org.mifosng.platform.api.commands.UndoStateTransitionCommand;
 import org.mifosng.platform.api.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.staff.command.BulkTransferLoanOfficerCommand;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface LoanWritePlatformService {
@@ -70,8 +70,8 @@ public interface LoanWritePlatformService {
 	EntityIdentifier waiveLoanCharge(LoanChargeCommand command);
 
     @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'PORTFOLIO_MANAGEMENT_SUPER_USER', 'BULKREASSIGN_LOAN')")
-    EntityIdentifier bulkLoanReassignment(final LoanReassignmentCommand command);
+    EntityIdentifier bulkLoanReassignment(final BulkTransferLoanOfficerCommand command);
 
     @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'PORTFOLIO_MANAGEMENT_SUPER_USER')")
-    EntityIdentifier loanReassignment(final LoanReassignmentCommand command);
+    EntityIdentifier loanReassignment(final BulkTransferLoanOfficerCommand command);
 }

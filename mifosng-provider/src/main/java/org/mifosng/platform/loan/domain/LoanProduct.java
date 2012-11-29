@@ -14,11 +14,11 @@ import javax.persistence.Table;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosng.platform.api.commands.LoanProductCommand;
-import org.mifosng.platform.charge.domain.Charge;
-import org.mifosng.platform.currency.domain.MonetaryCurrency;
-import org.mifosng.platform.fund.domain.Fund;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
+import org.mifosplatform.infrastructure.configuration.domain.MonetaryCurrency;
 import org.mifosplatform.infrastructure.user.domain.AppUser;
+import org.mifosplatform.portfolio.charge.domain.Charge;
+import org.mifosplatform.portfolio.fund.domain.Fund;
 
 /**
  * Loan products allow for categorisation of an organisations loans into something meaningful to them.

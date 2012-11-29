@@ -6,7 +6,7 @@ import java.util.Map;
 import org.mifosng.platform.client.service.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
 import org.mifosng.platform.exceptions.PermissionNotFoundException;
 import org.mifosng.platform.exceptions.RoleNotFoundException;
-import org.mifosng.platform.security.PlatformSecurityContext;
+import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.infrastructure.user.command.RoleCommand;
 import org.mifosplatform.infrastructure.user.command.RoleCommandValidator;
 import org.mifosplatform.infrastructure.user.command.RolePermissionCommand;

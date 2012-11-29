@@ -9,7 +9,6 @@ import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.mifosng.platform.api.commands.AdjustLoanTransactionCommand;
-import org.mifosng.platform.api.commands.LoanReassignmentCommand;
 import org.mifosng.platform.api.commands.CalculateLoanScheduleCommand;
 import org.mifosng.platform.api.commands.LoanApplicationCommand;
 import org.mifosng.platform.api.commands.LoanChargeCommand;
@@ -19,14 +18,10 @@ import org.mifosng.platform.api.commands.UndoStateTransitionCommand;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.LoanScheduleData;
 import org.mifosng.platform.api.data.LoanSchedulePeriodData;
-import org.mifosng.platform.charge.domain.Charge;
-import org.mifosng.platform.charge.domain.ChargeRepository;
 import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.client.domain.ClientRepository;
 import org.mifosng.platform.client.domain.Note;
 import org.mifosng.platform.client.domain.NoteRepository;
-import org.mifosng.platform.currency.domain.MonetaryCurrency;
-import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.exceptions.ChargeIsNotActiveException;
 import org.mifosng.platform.exceptions.ChargeNotFoundException;
 import org.mifosng.platform.exceptions.ClientNotFoundException;
@@ -38,7 +33,6 @@ import org.mifosng.platform.exceptions.LoanOfficerAssignmentException;
 import org.mifosng.platform.exceptions.LoanProductNotFoundException;
 import org.mifosng.platform.exceptions.LoanTransactionNotFoundException;
 import org.mifosng.platform.exceptions.NoAuthorizationException;
-import org.mifosng.platform.fund.domain.Fund;
 import org.mifosng.platform.loan.domain.DefaultLoanLifecycleStateMachine;
 import org.mifosng.platform.loan.domain.Loan;
 import org.mifosng.platform.loan.domain.LoanCharge;
@@ -53,9 +47,16 @@ import org.mifosng.platform.loan.domain.LoanTransaction;
 import org.mifosng.platform.loan.domain.LoanTransactionProcessingStrategy;
 import org.mifosng.platform.loan.domain.LoanTransactionRepository;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
-import org.mifosng.platform.security.PlatformSecurityContext;
-import org.mifosng.platform.staff.domain.Staff;
+import org.mifosplatform.infrastructure.configuration.domain.MonetaryCurrency;
+import org.mifosplatform.infrastructure.configuration.domain.Money;
+import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.infrastructure.staff.command.BulkTransferLoanOfficerCommand;
+import org.mifosplatform.infrastructure.staff.command.BulkTransferLoanOfficerCommandValidator;
+import org.mifosplatform.infrastructure.staff.domain.Staff;
 import org.mifosplatform.infrastructure.user.domain.AppUser;
+import org.mifosplatform.portfolio.charge.domain.Charge;
+import org.mifosplatform.portfolio.charge.domain.ChargeRepository;
+import org.mifosplatform.portfolio.fund.domain.Fund;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -732,11 +733,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
     @Transactional
     @Override
-    public EntityIdentifier loanReassignment(LoanReassignmentCommand command) {
+    public EntityIdentifier loanReassignment(BulkTransferLoanOfficerCommand command) {
 
         this.context.authenticatedUser();
 
-        LoanReassignmentCommandValidator validator = new LoanReassignmentCommandValidator(command);
+        BulkTransferLoanOfficerCommandValidator validator = new BulkTransferLoanOfficerCommandValidator(command);
         validator.validateForLoanReassignment();
 
         final Staff fromLoanOfficer = loanAssembler.findLoanOfficerByIdIfProvided(command.getFromLoanOfficerId());
@@ -757,11 +758,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
     @Transactional
     @Override
-    public EntityIdentifier bulkLoanReassignment(final LoanReassignmentCommand command) {
+    public EntityIdentifier bulkLoanReassignment(final BulkTransferLoanOfficerCommand command) {
 
         this.context.authenticatedUser();
 
-        LoanReassignmentCommandValidator validator = new LoanReassignmentCommandValidator(command);
+        BulkTransferLoanOfficerCommandValidator validator = new BulkTransferLoanOfficerCommandValidator(command);
         validator.validateForBulkLoanReassignment();
 
         Staff fromLoanOfficer = loanAssembler.findLoanOfficerByIdIfProvided(command.getFromLoanOfficerId());

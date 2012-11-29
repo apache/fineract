@@ -26,7 +26,7 @@ import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService
 import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
 import org.mifosng.platform.saving.service.SavingAccountReadPlatformService;
 import org.mifosng.platform.saving.service.SavingAccountWritePlatformService;
-import org.mifosng.platform.security.PlatformSecurityContext;
+import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;

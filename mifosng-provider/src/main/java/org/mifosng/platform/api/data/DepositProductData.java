@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.joda.time.DateTime;
+import org.mifosplatform.infrastructure.configuration.data.CurrencyData;
 
 /**
  * Immutable data object representing details of a deposit product.

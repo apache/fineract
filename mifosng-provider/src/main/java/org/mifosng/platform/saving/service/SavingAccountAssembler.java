@@ -8,8 +8,6 @@ import org.joda.time.LocalDate;
 import org.mifosng.platform.api.commands.SavingAccountCommand;
 import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.client.domain.ClientRepository;
-import org.mifosng.platform.currency.domain.MonetaryCurrency;
-import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.exceptions.ClientNotFoundException;
 import org.mifosng.platform.exceptions.ProductNotFoundException;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
@@ -25,6 +23,8 @@ import org.mifosng.platform.savingproduct.domain.SavingProductRepository;
 import org.mifosng.platform.savingproduct.domain.SavingProductType;
 import org.mifosng.platform.savingproduct.domain.SavingsInterestType;
 import org.mifosng.platform.savingproduct.domain.TenureTypeEnum;
+import org.mifosplatform.infrastructure.configuration.domain.MonetaryCurrency;
+import org.mifosplatform.infrastructure.configuration.domain.Money;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

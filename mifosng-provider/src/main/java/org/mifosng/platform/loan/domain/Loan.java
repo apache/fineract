@@ -31,17 +31,17 @@ import org.mifosng.platform.api.commands.LoanChargeCommand;
 import org.mifosng.platform.api.data.LoanScheduleData;
 import org.mifosng.platform.api.data.LoanSchedulePeriodData;
 import org.mifosng.platform.client.domain.Client;
-import org.mifosng.platform.currency.domain.MonetaryCurrency;
-import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.exceptions.InvalidLoanStateTransitionException;
 import org.mifosng.platform.exceptions.InvalidLoanTransactionTypeException;
 import org.mifosng.platform.exceptions.LoanChargeCannotBeAddedException;
 import org.mifosng.platform.exceptions.LoanOfficerAssignmentException;
-import org.mifosng.platform.fund.domain.Fund;
 import org.mifosng.platform.group.domain.Group;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
-import org.mifosng.platform.staff.domain.Staff;
+import org.mifosplatform.infrastructure.configuration.domain.MonetaryCurrency;
+import org.mifosplatform.infrastructure.configuration.domain.Money;
+import org.mifosplatform.infrastructure.staff.domain.Staff;
 import org.mifosplatform.infrastructure.user.domain.AppUser;
+import org.mifosplatform.portfolio.fund.domain.Fund;
 
 @Entity
 @Table(name = "m_loan", uniqueConstraints = @UniqueConstraint(columnNames = { "external_id" }))

@@ -25,11 +25,11 @@ import org.mifosng.platform.exceptions.OfficeNotFoundException;
 import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
 import org.mifosng.platform.infrastructure.Base64EncodedImage;
 import org.mifosng.platform.infrastructure.FileUtils;
-import org.mifosng.platform.organisation.domain.CodeValue;
-import org.mifosng.platform.organisation.domain.CodeValueRepository;
-import org.mifosng.platform.organisation.domain.Office;
-import org.mifosng.platform.organisation.domain.OfficeRepository;
-import org.mifosng.platform.security.PlatformSecurityContext;
+import org.mifosplatform.infrastructure.codes.domain.CodeValue;
+import org.mifosplatform.infrastructure.codes.domain.CodeValueRepository;
+import org.mifosplatform.infrastructure.office.domain.Office;
+import org.mifosplatform.infrastructure.office.domain.OfficeRepository;
+import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.infrastructure.user.domain.Permission;
 import org.mifosplatform.infrastructure.user.domain.PermissionRepository;
 import org.slf4j.Logger;
@@ -216,7 +216,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             final CodeValue documentType = this.codeValueRepository.findOne(command.getDocumentTypeId());
             if (documentType == null) { throw new CodeValueNotFoundException(command.getDocumentTypeId()); }
             documentTypeId = documentType.getId();
-            documentTypeLabel = documentType.getLabel();
+            documentTypeLabel = documentType.label();
 
             final ClientIdentifier clientIdentifier = ClientIdentifier.createNew(client, documentType, documentKey,
                     command.getDescription());
@@ -250,7 +250,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                 documentType = this.codeValueRepository.findOne(documentTypeId);
                 if (documentType == null) { throw new CodeValueNotFoundException(command.getDocumentTypeId()); }
                 documentTypeId = documentType.getId();
-                documentTypeLabel = documentType.getLabel();
+                documentTypeLabel = documentType.label();
             }
 
             final ClientIdentifier clientIdentifierForUpdate = this.clientIdentifierRepository.findOne(command.getId());

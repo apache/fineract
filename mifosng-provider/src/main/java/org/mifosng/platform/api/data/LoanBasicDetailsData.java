@@ -8,6 +8,8 @@ import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.joda.time.Months;
+import org.mifosplatform.infrastructure.configuration.data.CurrencyData;
+import org.mifosplatform.portfolio.charge.data.ChargeData;
 
 /**
  * Immutable data object for core details of loan to be combined with {@link LoanAccountData} usage.

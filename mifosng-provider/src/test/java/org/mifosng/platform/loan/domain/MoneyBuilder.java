@@ -2,8 +2,8 @@ package org.mifosng.platform.loan.domain;
 
 import java.math.BigDecimal;
 
-import org.mifosng.platform.currency.domain.MonetaryCurrency;
-import org.mifosng.platform.currency.domain.Money;
+import org.mifosplatform.infrastructure.configuration.domain.MonetaryCurrency;
+import org.mifosplatform.infrastructure.configuration.domain.Money;
 
 public class MoneyBuilder {
 

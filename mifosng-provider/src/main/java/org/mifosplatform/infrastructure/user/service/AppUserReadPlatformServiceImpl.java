@@ -7,13 +7,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import org.mifosng.platform.api.data.OfficeData;
-import org.mifosng.platform.api.data.OfficeLookup;
 import org.mifosng.platform.exceptions.UserNotFoundException;
 import org.mifosng.platform.infrastructure.JdbcSupport;
 import org.mifosng.platform.infrastructure.TenantAwareRoutingDataSource;
-import org.mifosng.platform.organisation.service.OfficeReadPlatformService;
-import org.mifosng.platform.security.PlatformSecurityContext;
+import org.mifosplatform.infrastructure.office.data.OfficeData;
+import org.mifosplatform.infrastructure.office.data.OfficeLookup;
+import org.mifosplatform.infrastructure.office.service.OfficeReadPlatformService;
+import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.infrastructure.user.api.data.AppUserData;
 import org.mifosplatform.infrastructure.user.api.data.RoleData;
 import org.mifosplatform.infrastructure.user.domain.AppUser;

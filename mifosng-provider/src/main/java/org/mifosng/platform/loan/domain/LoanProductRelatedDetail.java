@@ -9,8 +9,8 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 
 import org.mifosng.platform.api.commands.LoanProductCommand;
-import org.mifosng.platform.currency.domain.MonetaryCurrency;
-import org.mifosng.platform.currency.domain.Money;
+import org.mifosplatform.infrastructure.configuration.domain.MonetaryCurrency;
+import org.mifosplatform.infrastructure.configuration.domain.Money;
 
 /**
  * LoanRepaymentScheduleDetail encapsulates all the details of a

@@ -17,12 +17,12 @@ import javax.persistence.TemporalType;
 
 import org.joda.time.LocalDate;
 import org.mifosng.platform.api.commands.LoanChargeCommand;
-import org.mifosng.platform.charge.domain.Charge;
-import org.mifosng.platform.charge.domain.ChargeCalculationType;
-import org.mifosng.platform.charge.domain.ChargeTimeType;
-import org.mifosng.platform.currency.domain.MonetaryCurrency;
-import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.exceptions.LoanChargeWithoutMandatoryFieldException;
+import org.mifosplatform.infrastructure.configuration.domain.MonetaryCurrency;
+import org.mifosplatform.infrastructure.configuration.domain.Money;
+import org.mifosplatform.portfolio.charge.domain.Charge;
+import org.mifosplatform.portfolio.charge.domain.ChargeCalculationType;
+import org.mifosplatform.portfolio.charge.domain.ChargeTimeType;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity 

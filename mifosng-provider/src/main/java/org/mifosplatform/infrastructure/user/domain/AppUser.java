@@ -18,8 +18,8 @@ import javax.persistence.UniqueConstraint;
 
 import org.mifosng.platform.exceptions.NoAuthorizationException;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
-import org.mifosng.platform.infrastructure.PlatformUser;
-import org.mifosng.platform.organisation.domain.Office;
+import org.mifosplatform.infrastructure.office.domain.Office;
+import org.mifosplatform.infrastructure.security.domain.PlatformUser;
 import org.mifosplatform.infrastructure.user.command.UserCommand;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

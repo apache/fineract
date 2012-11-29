@@ -8,7 +8,6 @@ import java.util.Map;
 public class PermissionsCommand {
 
     private final Map<String, Boolean> permissions;
-
     private final transient boolean makerCheckerApproval;
 
     public PermissionsCommand(final Map<String, Boolean> permissionsMap, final boolean makerCheckerApproval) {

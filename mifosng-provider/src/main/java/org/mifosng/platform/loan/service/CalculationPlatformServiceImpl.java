@@ -4,8 +4,6 @@ import java.util.Set;
 
 import org.mifosng.platform.api.commands.CalculateLoanScheduleCommand;
 import org.mifosng.platform.api.data.LoanScheduleData;
-import org.mifosng.platform.currency.domain.ApplicationCurrency;
-import org.mifosng.platform.currency.domain.ApplicationCurrencyRepository;
 import org.mifosng.platform.loan.domain.InterestMethod;
 import org.mifosng.platform.loan.domain.LoanCharge;
 import org.mifosng.platform.loan.domain.LoanProductRelatedDetail;
@@ -13,7 +11,9 @@ import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 import org.mifosng.platform.loanschedule.domain.DefaultLoanScheduleGeneratorFactory;
 import org.mifosng.platform.loanschedule.domain.LoanScheduleGenerator;
 import org.mifosng.platform.loanschedule.domain.LoanScheduleGeneratorFactory;
-import org.mifosng.platform.security.PlatformSecurityContext;
+import org.mifosplatform.infrastructure.configuration.domain.ApplicationCurrency;
+import org.mifosplatform.infrastructure.configuration.domain.ApplicationCurrencyRepository;
+import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

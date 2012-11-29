@@ -2,6 +2,8 @@ package org.mifosng.platform.api.data;
 
 import java.util.Collection;
 
+import org.mifosplatform.infrastructure.office.data.OfficeLookup;
+
 /**
  * Immutable data object representing groups.
  */

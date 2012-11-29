@@ -3,8 +3,8 @@ package org.mifosng.platform.loan.domain;
 import java.util.List;
 
 import org.joda.time.LocalDate;
-import org.mifosng.platform.currency.domain.MonetaryCurrency;
-import org.mifosng.platform.currency.domain.Money;
+import org.mifosplatform.infrastructure.configuration.domain.MonetaryCurrency;
+import org.mifosplatform.infrastructure.configuration.domain.Money;
 
 /**
  * Adhikar/RBI style {@link LoanRepaymentScheduleTransactionProcessor}.

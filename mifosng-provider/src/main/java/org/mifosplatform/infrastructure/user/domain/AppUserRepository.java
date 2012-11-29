@@ -1,5 +1,6 @@
 package org.mifosplatform.infrastructure.user.domain;
 
+import org.mifosplatform.infrastructure.security.domain.PlatformUserRepository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 

@@ -1,7 +1,7 @@
 package org.mifosng.platform.loan.domain;
 
 import org.joda.time.LocalDate;
-import org.mifosng.platform.currency.domain.Money;
+import org.mifosplatform.infrastructure.configuration.domain.Money;
 
 public class LoanTransactionBuilder {
 

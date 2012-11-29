@@ -7,7 +7,7 @@ import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
 import org.mifosng.platform.exceptions.SavingAccountNotFoundException;
 import org.mifosng.platform.saving.domain.SavingAccount;
 import org.mifosng.platform.saving.domain.SavingAccountRepository;
-import org.mifosng.platform.security.PlatformSecurityContext;
+import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -7,7 +7,7 @@ import java.util.Collection;
 import org.mifosng.platform.exceptions.RoleNotFoundException;
 import org.mifosng.platform.infrastructure.JdbcSupport;
 import org.mifosng.platform.infrastructure.TenantAwareRoutingDataSource;
-import org.mifosng.platform.security.PlatformSecurityContext;
+import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.infrastructure.user.api.data.RoleData;
 import org.mifosplatform.infrastructure.user.domain.Role;
 import org.mifosplatform.infrastructure.user.domain.RoleRepository;

@@ -11,6 +11,9 @@ import org.mifosng.platform.loan.domain.InterestCalculationPeriodMethod;
 import org.mifosng.platform.loan.domain.InterestMethod;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 import org.mifosng.platform.loanproduct.service.LoanEnumerations;
+import org.mifosplatform.infrastructure.configuration.data.CurrencyData;
+import org.mifosplatform.portfolio.charge.data.ChargeData;
+import org.mifosplatform.portfolio.fund.data.FundData;
 
 /**
  * Immutable data object to represent loan products.

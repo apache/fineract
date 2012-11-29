@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.joda.time.LocalDate;
-import org.mifosng.platform.currency.domain.MonetaryCurrency;
+import org.mifosplatform.infrastructure.configuration.domain.MonetaryCurrency;
 
 /**
  * Helper class for creating loan schedule data suitable for testing.

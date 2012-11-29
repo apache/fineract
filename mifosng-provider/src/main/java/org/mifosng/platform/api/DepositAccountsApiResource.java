@@ -41,7 +41,7 @@ import org.mifosng.platform.saving.service.DepositAccountReadPlatformService;
 import org.mifosng.platform.saving.service.DepositAccountWritePlatformService;
 import org.mifosng.platform.savingproduct.service.DepositProductReadPlatformService;
 import org.mifosng.platform.savingproduct.service.SavingsDepositEnumerations;
-import org.mifosng.platform.security.PlatformSecurityContext;
+import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;

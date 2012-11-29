@@ -5,13 +5,13 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.mifosng.platform.api.commands.LoanChargeCommand;
-import org.mifosng.platform.charge.domain.Charge;
-import org.mifosng.platform.charge.domain.ChargeRepository;
 import org.mifosng.platform.exceptions.ChargeIsNotActiveException;
 import org.mifosng.platform.exceptions.ChargeNotFoundException;
 import org.mifosng.platform.exceptions.LoanChargeNotFoundException;
 import org.mifosng.platform.loan.domain.LoanCharge;
 import org.mifosng.platform.loan.domain.LoanChargeRepository;
+import org.mifosplatform.portfolio.charge.domain.Charge;
+import org.mifosplatform.portfolio.charge.domain.ChargeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

@@ -3,6 +3,7 @@ package org.mifosng.platform.api.data;
 import java.math.BigDecimal;
 
 import org.joda.time.LocalDate;
+import org.mifosplatform.infrastructure.configuration.data.CurrencyData;
 
 /**
  * Immutable data object reprsenting a savings account.

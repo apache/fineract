@@ -157,6 +157,22 @@ public class JsonParserHelper {
         }
         return clientApplicationLocale;
     }
+    
+    public String[] extractArrayNamed(final String parameterName, final JsonElement element, final Set<String> parametersPassedInRequest) {
+        String[] arrayValue = null;
+        if (element.isJsonObject()) {
+            JsonObject object = element.getAsJsonObject();
+            if (object.has(parameterName)) {
+                parametersPassedInRequest.add(parameterName);
+                JsonArray array = object.get(parameterName).getAsJsonArray();
+                arrayValue = new String[array.size()];
+                for (int i = 0; i < array.size(); i++) {
+                    arrayValue[i] = array.get(i).getAsString();
+                }
+            }
+        }
+        return arrayValue;
+    }
 
     /**
      * Used with the local date is in array format
@@ -447,5 +463,4 @@ public class JsonParserHelper {
         }
         return clientApplicationLocale;
     }
-
 }

@@ -2,6 +2,8 @@ package org.mifosng.platform.api.data;
 
 import java.util.Collection;
 
+import org.mifosplatform.infrastructure.codes.data.CodeValueData;
+
 /**
  * Immutable data object represent client identity data.
  */

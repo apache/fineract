@@ -8,7 +8,6 @@ import java.util.Collection;
 
 import org.joda.time.LocalDate;
 import org.mifosng.platform.api.data.ClientData;
-import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.DisbursementData;
 import org.mifosng.platform.api.data.EnumOptionData;
 import org.mifosng.platform.api.data.GroupData;
@@ -20,10 +19,6 @@ import org.mifosng.platform.api.data.LoanScheduleData;
 import org.mifosng.platform.api.data.LoanSchedulePeriodData;
 import org.mifosng.platform.api.data.LoanTransactionData;
 import org.mifosng.platform.client.service.ClientReadPlatformService;
-import org.mifosng.platform.currency.domain.ApplicationCurrency;
-import org.mifosng.platform.currency.domain.ApplicationCurrencyRepository;
-import org.mifosng.platform.currency.domain.MonetaryCurrency;
-import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.exceptions.CurrencyNotFoundException;
 import org.mifosng.platform.exceptions.LoanNotFoundException;
 import org.mifosng.platform.exceptions.LoanTransactionNotFoundException;
@@ -37,7 +32,12 @@ import org.mifosng.platform.loan.domain.LoanTransactionRepository;
 import org.mifosng.platform.loan.domain.LoanTransactionType;
 import org.mifosng.platform.loanproduct.service.LoanEnumerations;
 import org.mifosng.platform.loanproduct.service.LoanProductReadPlatformService;
-import org.mifosng.platform.security.PlatformSecurityContext;
+import org.mifosplatform.infrastructure.configuration.data.CurrencyData;
+import org.mifosplatform.infrastructure.configuration.domain.ApplicationCurrency;
+import org.mifosplatform.infrastructure.configuration.domain.ApplicationCurrencyRepository;
+import org.mifosplatform.infrastructure.configuration.domain.MonetaryCurrency;
+import org.mifosplatform.infrastructure.configuration.domain.Money;
+import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -154,7 +154,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
 			final BigDecimal totalOverdue = wrapper.deriveCumulativeTotalOverdue();
 			
-			final MonetaryCurrency monetaryCurrency = new MonetaryCurrency(currency.getCode(), currency.getDecimalPlaces());
+			final MonetaryCurrency monetaryCurrency = new MonetaryCurrency(currency.code(), currency.decimalPlaces());
 			final Money tolerance = Money.of(monetaryCurrency, inArrearsTolerance);
 			final Money totalOverdueMoney = Money.of(monetaryCurrency, totalOverdue);
 			boolean isWaiveAllowed = totalOverdueMoney.isGreaterThanZero() && (tolerance.isGreaterThan(totalOverdueMoney) || tolerance.isEqualTo(totalOverdueMoney));

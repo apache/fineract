@@ -3,7 +3,6 @@ package org.mifosng.platform.loan.service;
 import java.math.BigDecimal;
 
 import org.mifosng.platform.api.commands.CalculateLoanScheduleCommand;
-import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.exceptions.LoanProductNotFoundException;
 import org.mifosng.platform.loan.domain.AmortizationMethod;
 import org.mifosng.platform.loan.domain.InterestCalculationPeriodMethod;
@@ -13,6 +12,7 @@ import org.mifosng.platform.loan.domain.LoanProductRelatedDetail;
 import org.mifosng.platform.loan.domain.LoanProductRepository;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 import org.mifosng.platform.loanschedule.domain.AprCalculator;
+import org.mifosplatform.infrastructure.configuration.domain.MonetaryCurrency;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

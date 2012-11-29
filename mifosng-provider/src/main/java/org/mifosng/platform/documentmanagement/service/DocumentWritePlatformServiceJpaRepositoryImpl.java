@@ -13,7 +13,7 @@ import org.mifosng.platform.exceptions.DocumentNotFoundException;
 import org.mifosng.platform.exceptions.InvalidEntityTypeForDocumentManagementException;
 import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
 import org.mifosng.platform.infrastructure.FileUtils;
-import org.mifosng.platform.security.PlatformSecurityContext;
+import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

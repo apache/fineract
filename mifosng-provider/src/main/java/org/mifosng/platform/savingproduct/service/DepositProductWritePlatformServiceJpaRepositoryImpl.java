@@ -2,13 +2,13 @@ package org.mifosng.platform.savingproduct.service;
 
 import org.mifosng.platform.api.commands.DepositProductCommand;
 import org.mifosng.platform.api.data.EntityIdentifier;
-import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.exceptions.DepositProductNotFoundException;
 import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 import org.mifosng.platform.savingproduct.domain.DepositProduct;
 import org.mifosng.platform.savingproduct.domain.DepositProductRepository;
-import org.mifosng.platform.security.PlatformSecurityContext;
+import org.mifosplatform.infrastructure.configuration.domain.MonetaryCurrency;
+import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

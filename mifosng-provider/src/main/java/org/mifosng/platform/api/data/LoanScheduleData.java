@@ -3,6 +3,8 @@ package org.mifosng.platform.api.data;
 import java.math.BigDecimal;
 import java.util.Collection;
 
+import org.mifosplatform.infrastructure.configuration.data.CurrencyData;
+
 
 /**
  * Immutable data object to represent aspects of a loan schedule such as:

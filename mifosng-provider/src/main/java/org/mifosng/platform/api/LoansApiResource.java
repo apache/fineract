@@ -24,33 +24,25 @@ import org.mifosng.platform.api.commands.AdjustLoanTransactionCommand;
 import org.mifosng.platform.api.commands.CalculateLoanScheduleCommand;
 import org.mifosng.platform.api.commands.LoanApplicationCommand;
 import org.mifosng.platform.api.commands.LoanChargeCommand;
-import org.mifosng.platform.api.commands.LoanReassignmentCommand;
 import org.mifosng.platform.api.commands.LoanStateTransitionCommand;
 import org.mifosng.platform.api.commands.LoanTransactionCommand;
 import org.mifosng.platform.api.commands.UndoStateTransitionCommand;
-import org.mifosng.platform.api.data.ChargeData;
 import org.mifosng.platform.api.data.DisbursementData;
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.EnumOptionData;
-import org.mifosng.platform.api.data.FundData;
 import org.mifosng.platform.api.data.GuarantorData;
 import org.mifosng.platform.api.data.LoanAccountData;
 import org.mifosng.platform.api.data.LoanBasicDetailsData;
 import org.mifosng.platform.api.data.LoanChargeData;
 import org.mifosng.platform.api.data.LoanPermissionData;
 import org.mifosng.platform.api.data.LoanProductData;
-import org.mifosng.platform.api.data.LoanReassignmentData;
 import org.mifosng.platform.api.data.LoanScheduleData;
 import org.mifosng.platform.api.data.LoanTransactionData;
-import org.mifosng.platform.api.data.StaffData;
+import org.mifosng.platform.api.data.StaffAccountSummaryCollectionData;
 import org.mifosng.platform.api.data.TransactionProcessingStrategyData;
 import org.mifosng.platform.api.infrastructure.PortfolioApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService;
-import org.mifosng.platform.charge.service.ChargeReadPlatformService;
-import org.mifosng.platform.currency.domain.MonetaryCurrency;
-import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.exceptions.UnrecognizedQueryParamException;
-import org.mifosng.platform.fund.service.FundReadPlatformService;
 import org.mifosng.platform.guarantor.GuarantorReadPlatformService;
 import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
 import org.mifosng.platform.loan.service.CalculationPlatformService;
@@ -58,8 +50,19 @@ import org.mifosng.platform.loan.service.LoanReadPlatformService;
 import org.mifosng.platform.loan.service.LoanWritePlatformService;
 import org.mifosng.platform.loanproduct.service.LoanDropdownReadPlatformService;
 import org.mifosng.platform.loanproduct.service.LoanProductReadPlatformService;
-import org.mifosng.platform.security.PlatformSecurityContext;
-import org.mifosng.platform.staff.service.StaffReadPlatformService;
+import org.mifosplatform.infrastructure.configuration.domain.MonetaryCurrency;
+import org.mifosplatform.infrastructure.configuration.domain.Money;
+import org.mifosplatform.infrastructure.office.data.OfficeLookup;
+import org.mifosplatform.infrastructure.office.service.OfficeReadPlatformService;
+import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.infrastructure.staff.command.BulkTransferLoanOfficerCommand;
+import org.mifosplatform.infrastructure.staff.data.BulkTransferLoanOfficerData;
+import org.mifosplatform.infrastructure.staff.data.StaffData;
+import org.mifosplatform.infrastructure.staff.service.StaffReadPlatformService;
+import org.mifosplatform.portfolio.charge.data.ChargeData;
+import org.mifosplatform.portfolio.charge.service.ChargeReadPlatformService;
+import org.mifosplatform.portfolio.fund.data.FundData;
+import org.mifosplatform.portfolio.fund.service.FundReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -99,6 +102,9 @@ public class LoansApiResource {
 
     @Autowired
     private StaffReadPlatformService staffReadPlatformService;
+    
+    @Autowired
+    private OfficeReadPlatformService officeReadPlatformService;
 
     @Autowired
     private PlatformSecurityContext context;
@@ -215,8 +221,8 @@ public class LoansApiResource {
                 // FIXME - KW - Waive feature was changed to waive interest at
                 // anytime so this permission checking is probably not needed -
                 // look into.
-                final MonetaryCurrency currency = new MonetaryCurrency(loanBasicDetails.getCurrency().getCode(), loanBasicDetails
-                        .getCurrency().getDecimalPlaces());
+                final MonetaryCurrency currency = new MonetaryCurrency(loanBasicDetails.getCurrency().code(), loanBasicDetails
+                        .getCurrency().decimalPlaces());
                 final Money tolerance = Money.of(currency, loanBasicDetails.getInArrearsTolerance());
                 final Money totalOutstandingMoney = Money.of(currency, repaymentSchedule.totalOutstanding());
 
@@ -576,7 +582,7 @@ public class LoansApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public Response assignLoanOfficer(@PathParam("loanId") final Long loanId, final String jsonRequestBody) {
 
-        final LoanReassignmentCommand command = this.apiDataConversionService.convertJsonToLoanReassignmentCommand(loanId, jsonRequestBody);
+        final BulkTransferLoanOfficerCommand command = this.apiDataConversionService.convertJsonToLoanReassignmentCommand(loanId, jsonRequestBody);
 
         EntityIdentifier identifier = this.loanWritePlatformService.loanReassignment(command);
 
@@ -593,13 +599,64 @@ public class LoansApiResource {
 
         final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 
-        LoanBasicDetailsData loanBasicDetails = this.loanReadPlatformService.retrieveLoanAccountDetails(loanId);
+        final LoanBasicDetailsData loanBasicDetails = this.loanReadPlatformService.retrieveLoanAccountDetails(loanId);
 
-        Collection<StaffData> allowedLoanOfficers = this.staffReadPlatformService.retrieveAllLoanOfficersByOffice(loanBasicDetails
-                .getOfficeId());
-        Long fromLoanOfficerId = loanBasicDetails.getLoanOfficerId();
+        final Collection<StaffData> allowedLoanOfficers = this.staffReadPlatformService.retrieveAllLoanOfficersByOffice(loanBasicDetails.getOfficeId());
+        final Long fromLoanOfficerId = loanBasicDetails.getLoanOfficerId();
 
-        LoanReassignmentData loanReassignmentData = LoanReassignmentData.template(fromLoanOfficerId, allowedLoanOfficers, new LocalDate());
+        final BulkTransferLoanOfficerData loanReassignmentData = BulkTransferLoanOfficerData.template(fromLoanOfficerId, allowedLoanOfficers, new LocalDate());
+
+        return this.apiJsonSerializerService.serializeLoanReassignmentDataToJson(prettyPrint, responseParameters, loanReassignmentData);
+    }
+    
+    @POST
+    @Path("loanreassignment")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public Response loanReassignment(final String apiRequestBodyAsJson) {
+
+//        final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "PORTFOLIO_MANAGEMENT_SUPER_USER", "BULKREASSIGN_LOAN");
+//        context.authenticatedUser().validateHasPermissionTo("BULKREASSIGN_LOAN", allowedPermissions);
+//
+//        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("BULKREASSIGN_LOAN", "staff", null,
+//                apiRequestBodyAsJson);
+//
+//        return this.apiJsonSerializerService.serializeEntityIdentifier(result);
+
+         final BulkTransferLoanOfficerCommand command = this.apiDataConversionService.convertJsonToBulkLoanReassignmentCommand(apiRequestBodyAsJson);
+
+         final EntityIdentifier loanOfficerIdentifier = this.loanWritePlatformService.bulkLoanReassignment(command);
+
+         return Response.ok().entity(loanOfficerIdentifier).build();
+    }
+
+    @GET
+    @Path("loanreassignment/template")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String loanReassignmentTemplate(@QueryParam("officeId") final Long officeId,
+            @QueryParam("fromLoanOfficerId") final Long loanOfficerId, @Context final UriInfo uriInfo) {
+
+        context.authenticatedUser().validateHasReadPermission("LOAN");
+
+        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+
+        final Collection<OfficeLookup> offices = this.officeReadPlatformService.retrieveAllOfficesForLookup();
+
+        Collection<StaffData> loanOfficers = null;
+        StaffAccountSummaryCollectionData staffAccountSummaryCollectionData = null;
+
+        if (officeId != null) {
+            loanOfficers = this.staffReadPlatformService.retrieveAllLoanOfficersByOffice(officeId);
+        }
+
+        if (loanOfficerId != null) {
+            staffAccountSummaryCollectionData = this.staffReadPlatformService.retrieveLoanOfficerAccountSummary(loanOfficerId);
+        }
+
+        final BulkTransferLoanOfficerData loanReassignmentData = BulkTransferLoanOfficerData.templateForBulk(officeId, loanOfficerId, new LocalDate(),
+                offices, loanOfficers, staffAccountSummaryCollectionData);
 
         return this.apiJsonSerializerService.serializeLoanReassignmentDataToJson(prettyPrint, responseParameters, loanReassignmentData);
     }

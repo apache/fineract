@@ -19,13 +19,13 @@ import javax.ws.rs.core.UriInfo;
 
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
-import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosplatform.accounting.api.commands.GLClosureCommand;
 import org.mifosplatform.accounting.api.data.GLClosureData;
 import org.mifosplatform.accounting.api.infrastructure.AccountingApiDataConversionService;
 import org.mifosplatform.accounting.api.infrastructure.AccountingApiJsonSerializerService;
 import org.mifosplatform.accounting.service.GLClosureReadPlatformService;
 import org.mifosplatform.accounting.service.GLClosureWritePlatformService;
+import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;

@@ -19,12 +19,12 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
 import org.mifosng.platform.api.data.EntityIdentifier;
-import org.mifosng.platform.api.data.OfficeLookup;
 import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService;
 import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
-import org.mifosng.platform.organisation.service.OfficeReadPlatformService;
-import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.mifosplatform.infrastructure.office.data.OfficeLookup;
+import org.mifosplatform.infrastructure.office.service.OfficeReadPlatformService;
+import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.infrastructure.user.api.data.AppUserData;
 import org.mifosplatform.infrastructure.user.service.AppUserReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;

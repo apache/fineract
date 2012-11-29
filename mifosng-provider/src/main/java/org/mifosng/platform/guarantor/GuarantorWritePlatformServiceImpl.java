@@ -18,7 +18,7 @@ import org.mifosng.platform.exceptions.LoanNotFoundException;
 import org.mifosng.platform.exceptions.PlatformApiDataValidationException;
 import org.mifosng.platform.loan.domain.Loan;
 import org.mifosng.platform.loan.domain.LoanRepository;
-import org.mifosng.platform.noncore.ReadWriteNonCoreDataService;
+import org.mifosplatform.infrastructure.dataqueries.service.ReadWriteNonCoreDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

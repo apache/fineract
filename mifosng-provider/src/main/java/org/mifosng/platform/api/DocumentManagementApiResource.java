@@ -31,7 +31,7 @@ import org.mifosng.platform.documentmanagement.service.DocumentReadPlatformServi
 import org.mifosng.platform.documentmanagement.service.DocumentWritePlatformService;
 import org.mifosng.platform.infrastructure.FileUtils;
 import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
-import org.mifosng.platform.security.PlatformSecurityContext;
+import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;

@@ -1,5 +1,6 @@
 package org.mifosng.platform.infrastructure;
 
+import org.mifosplatform.infrastructure.security.domain.PlatformUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.security.authentication.dao.SaltSource;

@@ -8,14 +8,14 @@ import java.util.Set;
 
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
-import org.mifosng.platform.api.data.CurrencyData;
 import org.mifosng.platform.api.data.LoanScheduleData;
 import org.mifosng.platform.api.data.LoanSchedulePeriodData;
-import org.mifosng.platform.currency.domain.ApplicationCurrency;
-import org.mifosng.platform.currency.domain.MonetaryCurrency;
-import org.mifosng.platform.currency.domain.Money;
 import org.mifosng.platform.loan.domain.LoanCharge;
 import org.mifosng.platform.loan.domain.LoanProductRelatedDetail;
+import org.mifosplatform.infrastructure.configuration.data.CurrencyData;
+import org.mifosplatform.infrastructure.configuration.domain.ApplicationCurrency;
+import org.mifosplatform.infrastructure.configuration.domain.MonetaryCurrency;
+import org.mifosplatform.infrastructure.configuration.domain.Money;
 
 public class EqualPrincipalAmortizationLoanScheduleGenerator implements AmortizationLoanScheduleGenerator {
 

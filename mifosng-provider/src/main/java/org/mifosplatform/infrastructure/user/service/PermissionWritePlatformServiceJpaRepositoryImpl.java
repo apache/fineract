@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import org.mifosng.platform.exceptions.PermissionNotFoundException;
-import org.mifosng.platform.security.PlatformSecurityContext;
+import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.infrastructure.user.command.PermissionsCommand;
 import org.mifosplatform.infrastructure.user.domain.Permission;
 import org.mifosplatform.infrastructure.user.domain.PermissionRepository;
@@ -27,7 +27,7 @@ public class PermissionWritePlatformServiceJpaRepositoryImpl implements Permissi
 
     @Transactional
     @Override
-    public Long updateMakerCheckerPermissions(final PermissionsCommand command) {
+    public void updateMakerCheckerPermissions(final PermissionsCommand command) {
         context.authenticatedUser();
 
         final Collection<Permission> allPermissions = this.permissionRepository.findAll();
@@ -44,9 +44,9 @@ public class PermissionWritePlatformServiceJpaRepositoryImpl implements Permissi
             permission.enableMakerChecker(isSelected);
 
             this.permissionRepository.save(permission);
+            
+            // Typical rollback if maker-checker enabled not here - does it make sense to have a maker checker task for enabling maker-checker for other tasks?
         }
-
-        return new Long(0);
     }
 
     private Permission findPermissionByCode(Collection<Permission> allPermissions, String permissionCode) {

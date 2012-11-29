@@ -99,11 +99,11 @@ public class CommandSource extends AbstractPersistable<Long> {
     public String commandName() {
         return this.apiOperation + '-' + this.resource;
     }
-    
+
     public String resourceName() {
         return this.resource;
     }
-    
+
     public String operation() {
         return this.apiOperation;
     }
@@ -113,26 +113,59 @@ public class CommandSource extends AbstractPersistable<Long> {
     }
 
     public boolean isUpdate() {
-        return this.apiOperation.equalsIgnoreCase("UPDATE") && this.resourceId != null;
+        // permissions resource has special update which involves no resource.
+        return (isPermissionResource() && isUpdateOperation()) || (isCurrencyResource() && isUpdateOperation()) || (isUpdateOperation() && this.resourceId != null);
+    }
+
+    private boolean isUpdateOperation() {
+        return this.apiOperation.equalsIgnoreCase("UPDATE");
     }
 
     public boolean isDelete() {
         return this.apiOperation.equalsIgnoreCase("DELETE") && this.resourceId != null;
     }
-    
+
     public boolean isUpdateRolePermissions() {
         return this.apiOperation.equalsIgnoreCase("UPDATEPERMISSIONS") && this.resourceId != null;
     }
-    
-    public boolean isClientResource() {
-        return this.resource.equalsIgnoreCase("CLIENTS");
-    }
 
+    public boolean isPermissionResource() {
+        return this.resource.equalsIgnoreCase("PERMISSIONS");
+    }
+    
     public boolean isRoleResource() {
         return this.resource.equalsIgnoreCase("ROLES");
     }
 
     public boolean isUserResource() {
         return this.resource.equalsIgnoreCase("USERS");
+    }
+
+    public boolean isCurrencyResource() {
+        return this.resource.equalsIgnoreCase("CURRENCIES");
+    }
+    
+    public boolean isCodeResource() {
+        return this.resource.equalsIgnoreCase("CODES");
+    }
+
+    public boolean isStaffResource() {
+        return this.resource.equalsIgnoreCase("STAFF");
+    }
+    
+    public boolean isFundResource() {
+        return this.resource.equalsIgnoreCase("FUNDS");
+    }
+    
+    public boolean isOfficeResource() {
+        return this.resource.equalsIgnoreCase("OFFICES");
+    }
+
+    public boolean isOfficeTransactionResource() {
+        return this.resource.equalsIgnoreCase("OFFICETRANSACTIONS");
+    }
+    
+    public boolean isClientResource() {
+        return this.resource.equalsIgnoreCase("CLIENTS");
     }
 }

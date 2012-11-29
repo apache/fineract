@@ -22,7 +22,7 @@
 		<beans:property name="realmName" value="Mifos Platform API" />
 	</beans:bean>
 
-	<beans:bean id="basicAuthenticationProcessingFilter" class="org.mifosng.platform.infrastructure.TenantAwareBasicAuthenticationFilter">
+	<beans:bean id="basicAuthenticationProcessingFilter" class="org.mifosplatform.infrastructure.security.filter.TenantAwareBasicAuthenticationFilter">
 		<beans:constructor-arg ref="authenticationManager" />
 		<beans:constructor-arg ref="basicAuthenticationEntryPoint" />
 	</beans:bean>

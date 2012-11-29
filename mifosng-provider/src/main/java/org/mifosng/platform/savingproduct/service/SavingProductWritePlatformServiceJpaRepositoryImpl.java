@@ -2,7 +2,6 @@ package org.mifosng.platform.savingproduct.service;
 
 import org.mifosng.platform.api.commands.SavingProductCommand;
 import org.mifosng.platform.api.data.EntityIdentifier;
-import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.exceptions.ProductNotFoundException;
 import org.mifosng.platform.exceptions.SavingProductNotFoundException;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
@@ -13,7 +12,8 @@ import org.mifosng.platform.savingproduct.domain.SavingProductRepository;
 import org.mifosng.platform.savingproduct.domain.SavingProductType;
 import org.mifosng.platform.savingproduct.domain.SavingsInterestType;
 import org.mifosng.platform.savingproduct.domain.TenureTypeEnum;
-import org.mifosng.platform.security.PlatformSecurityContext;
+import org.mifosplatform.infrastructure.configuration.domain.MonetaryCurrency;
+import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -10,7 +10,6 @@ import org.mifosng.platform.api.data.LoanScheduleData;
 import org.mifosng.platform.api.data.LoanSchedulePeriodData;
 import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.client.domain.ClientRepository;
-import org.mifosng.platform.currency.domain.MonetaryCurrency;
 import org.mifosng.platform.exceptions.ClientNotFoundException;
 import org.mifosng.platform.exceptions.FundNotFoundException;
 import org.mifosng.platform.exceptions.GroupNotFoundException;
@@ -18,8 +17,6 @@ import org.mifosng.platform.exceptions.LoanProductNotFoundException;
 import org.mifosng.platform.exceptions.LoanTransactionProcessingStrategyNotFoundException;
 import org.mifosng.platform.exceptions.StaffNotFoundException;
 import org.mifosng.platform.exceptions.StaffRoleException;
-import org.mifosng.platform.fund.domain.Fund;
-import org.mifosng.platform.fund.domain.FundRepository;
 import org.mifosng.platform.group.domain.Group;
 import org.mifosng.platform.group.domain.GroupRepository;
 import org.mifosng.platform.loan.domain.AmortizationMethod;
@@ -38,8 +35,11 @@ import org.mifosng.platform.loan.domain.LoanTransactionProcessingStrategy;
 import org.mifosng.platform.loan.domain.LoanTransactionProcessingStrategyRepository;
 import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 import org.mifosng.platform.loanschedule.domain.AprCalculator;
-import org.mifosng.platform.staff.domain.Staff;
-import org.mifosng.platform.staff.domain.StaffRepository;
+import org.mifosplatform.infrastructure.configuration.domain.MonetaryCurrency;
+import org.mifosplatform.infrastructure.staff.domain.Staff;
+import org.mifosplatform.infrastructure.staff.domain.StaffRepository;
+import org.mifosplatform.portfolio.fund.domain.Fund;
+import org.mifosplatform.portfolio.fund.domain.FundRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -203,7 +203,7 @@ public class LoanAssembler {
 			staff = this.staffRepository.findOne(loanOfficerId);
 			if (staff == null) {
 				throw new StaffNotFoundException(loanOfficerId);
-			} else if (!staff.getLoanOfficerFlag()) {
+			} else if (staff.isNotLoanOfficer()) {
 				throw new StaffRoleException(loanOfficerId,
 						StaffRoleException.STAFF_ROLE.LOAN_OFFICER);
 			}

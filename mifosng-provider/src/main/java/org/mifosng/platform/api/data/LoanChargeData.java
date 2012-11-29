@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.util.Collection;
 
 import org.joda.time.LocalDate;
+import org.mifosplatform.infrastructure.configuration.data.CurrencyData;
+import org.mifosplatform.portfolio.charge.data.ChargeData;
 
 /**
  * Immutable data object for loan charge data.

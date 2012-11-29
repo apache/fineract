@@ -4,40 +4,40 @@ import java.util.Collection;
 import java.util.Set;
 
 import org.mifosng.platform.api.commands.ClientCommand;
-import org.mifosng.platform.api.data.ChargeData;
 import org.mifosng.platform.api.data.ClientAccountSummaryCollectionData;
 import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.ClientIdentifierData;
-import org.mifosng.platform.api.data.CodeData;
-import org.mifosng.platform.api.data.ConfigurationData;
-import org.mifosng.platform.api.data.DatatableData;
 import org.mifosng.platform.api.data.DepositAccountData;
 import org.mifosng.platform.api.data.DepositProductData;
 import org.mifosng.platform.api.data.DocumentData;
 import org.mifosng.platform.api.data.EntityIdentifier;
-import org.mifosng.platform.api.data.FundData;
-import org.mifosng.platform.api.data.GenericResultsetData;
 import org.mifosng.platform.api.data.GroupAccountSummaryCollectionData;
 import org.mifosng.platform.api.data.GroupData;
 import org.mifosng.platform.api.data.GuarantorData;
 import org.mifosng.platform.api.data.LoanAccountData;
 import org.mifosng.platform.api.data.LoanChargeData;
 import org.mifosng.platform.api.data.LoanProductData;
-import org.mifosng.platform.api.data.LoanReassignmentData;
 import org.mifosng.platform.api.data.LoanScheduleData;
 import org.mifosng.platform.api.data.LoanTransactionData;
 import org.mifosng.platform.api.data.NoteData;
-import org.mifosng.platform.api.data.OfficeData;
-import org.mifosng.platform.api.data.OfficeTransactionData;
 import org.mifosng.platform.api.data.SavingAccountData;
 import org.mifosng.platform.api.data.SavingProductData;
-import org.mifosng.platform.api.data.StaffData;
 import org.mifosplatform.commands.api.data.CommandSourceData;
+import org.mifosplatform.infrastructure.codes.data.CodeData;
+import org.mifosplatform.infrastructure.configuration.data.ConfigurationData;
+import org.mifosplatform.infrastructure.dataqueries.data.DatatableData;
+import org.mifosplatform.infrastructure.dataqueries.data.GenericResultsetData;
+import org.mifosplatform.infrastructure.office.data.OfficeData;
+import org.mifosplatform.infrastructure.office.data.OfficeTransactionData;
+import org.mifosplatform.infrastructure.staff.data.BulkTransferLoanOfficerData;
+import org.mifosplatform.infrastructure.staff.data.StaffData;
 import org.mifosplatform.infrastructure.user.api.data.AppUserData;
 import org.mifosplatform.infrastructure.user.api.data.AuthenticatedUserData;
 import org.mifosplatform.infrastructure.user.api.data.PermissionUsageData;
 import org.mifosplatform.infrastructure.user.api.data.RoleData;
 import org.mifosplatform.infrastructure.user.api.data.RolePermissionsData;
+import org.mifosplatform.portfolio.charge.data.ChargeData;
+import org.mifosplatform.portfolio.fund.data.FundData;
 
 public interface PortfolioApiJsonSerializerService {
 
@@ -119,7 +119,7 @@ public interface PortfolioApiJsonSerializerService {
     String serializeLoanTransactionDataToJson(boolean prettyPrint, Set<String> responseParameters, LoanTransactionData newTransactionData);
 
     String serializeLoanReassignmentDataToJson(boolean prettyPrint, Set<String> responseParameters,
-            LoanReassignmentData loanReassignmentData);
+            BulkTransferLoanOfficerData loanReassignmentData);
 
     String serializeChargeDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<ChargeData> charges);
 

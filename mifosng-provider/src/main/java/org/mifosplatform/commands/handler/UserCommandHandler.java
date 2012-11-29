@@ -8,9 +8,9 @@ import org.mifosng.platform.api.infrastructure.PortfolioApiDataConversionService
 import org.mifosng.platform.api.infrastructure.PortfolioCommandDeserializerService;
 import org.mifosng.platform.api.infrastructure.PortfolioCommandSerializerService;
 import org.mifosng.platform.client.service.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
-import org.mifosng.platform.security.PlatformSecurityContext;
 import org.mifosplatform.commands.domain.CommandSource;
 import org.mifosplatform.commands.service.ChangeDetectionService;
+import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.infrastructure.user.command.UserCommand;
 import org.mifosplatform.infrastructure.user.domain.AppUser;
 import org.mifosplatform.infrastructure.user.service.AppUserWritePlatformService;
