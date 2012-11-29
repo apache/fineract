@@ -7,6 +7,7 @@ import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.codes.command.CodeCommand;
 import org.mifosplatform.infrastructure.codes.domain.Code;
 import org.mifosplatform.infrastructure.codes.domain.CodeRepository;
+import org.mifosplatform.infrastructure.codes.exception.SystemDefinedCodeCannotBeChangedException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.infrastructure.user.domain.Permission;
 import org.mifosplatform.infrastructure.user.domain.PermissionRepository;
@@ -27,7 +28,8 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
     private final PermissionRepository permissionRepository;
 
     @Autowired
-    public CodeWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final CodeRepository codeRepository, final PermissionRepository permissionRepository) {
+    public CodeWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final CodeRepository codeRepository,
+            final PermissionRepository permissionRepository) {
         this.context = context;
         this.codeRepository = codeRepository;
         this.permissionRepository = permissionRepository;
@@ -44,7 +46,7 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
             final Code code = Code.createNew(command.getName());
 
             this.codeRepository.save(code);
-            
+
             final Permission thisTask = this.permissionRepository.findOneByCode("CREATE_CODE");
             if (thisTask.hasMakerCheckerEnabled() && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
 
@@ -65,13 +67,14 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
             final Long codeId = command.getId();
             final Code code = this.codeRepository.findOne(codeId);
             if (code == null) { throw new CodeValueNotFoundException(codeId); }
+            
             code.update(command);
 
             this.codeRepository.save(code);
 
             final Permission thisTask = this.permissionRepository.findOneByCode("UPDATE_CODE");
             if (thisTask.hasMakerCheckerEnabled() && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
-            
+
             return code.getId();
         } catch (DataIntegrityViolationException dve) {
             handleCodeDataIntegrityIssues(command, dve);
@@ -100,9 +103,13 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
         context.authenticatedUser();
 
         final Long codeId = command.getId();
-        retrieveCodeBy(codeId);
-        this.codeRepository.delete(codeId);
+        Code code = retrieveCodeBy(codeId);
+        if (code.isSystemDefined()) {
+            throw new SystemDefinedCodeCannotBeChangedException();
+        }
         
+        this.codeRepository.delete(codeId);
+
         final Permission thisTask = this.permissionRepository.findOneByCode("DELETE_CODE");
         if (thisTask.hasMakerCheckerEnabled() && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
 

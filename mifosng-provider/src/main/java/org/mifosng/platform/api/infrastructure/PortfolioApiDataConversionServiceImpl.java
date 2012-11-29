@@ -1543,16 +1543,14 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
     public CodeCommand convertApiRequestJsonToCodeCommand(final Long resourceIdentifier, final String json) {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
-        Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
 
-        Set<String> supportedParams = new HashSet<String>(Arrays.asList("name","is_system_defined"));
+        final Set<String> supportedParams = new HashSet<String>(Arrays.asList("name"));
 
         checkForUnsupportedParameters(requestMap, supportedParams);
 
-
-        // no difference between api request json format and internal command
-        // json format.
+        // no difference between api request json format and internal command json format.
         return this.portfolioCommandDeserializerService.deserializeCodeCommand(resourceIdentifier, json, false);
     }
 

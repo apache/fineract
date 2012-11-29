@@ -18,21 +18,15 @@ public class CodeCommand {
     private final transient Set<String> parametersPassedInRequest;
     private final transient boolean makerCheckerApproval;
     private final transient Long id;
-    private final transient boolean isSystemDefined;
 
-    public CodeCommand(final Set<String> modifiedParameters, final boolean makerCheckerApproval, final Long id, final String name,final boolean isSystemDefined) {
+    public CodeCommand(final Set<String> modifiedParameters, final boolean makerCheckerApproval, final Long id, final String name) {
         this.parametersPassedInRequest = modifiedParameters;
         this.makerCheckerApproval = makerCheckerApproval;
         this.id = id;
         this.name = name;
-        this.isSystemDefined = isSystemDefined;
     }
 
-    public boolean getisSystemDefined() {
-		return isSystemDefined;
-	}
-
-	public String getName() {
+    public String getName() {
         return this.name;
     }
 

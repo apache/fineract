@@ -131,9 +131,8 @@ public class PortfolioCommandDeerializerServiceGoogleGson implements PortfolioCo
         final Set<String> parametersPassedInRequest = new HashSet<String>();
 
         final String name = helper.extractStringNamed("name", element, parametersPassedInRequest);
-        final boolean isSystemDefined = helper.extractBooleanNamed("isSystemDefined", element, parametersPassedInRequest);
 
-        return new CodeCommand(parametersPassedInRequest, makerCheckerApproval, codeId, name,isSystemDefined);
+        return new CodeCommand(parametersPassedInRequest, makerCheckerApproval, codeId, name);
     }
 
     @Override
