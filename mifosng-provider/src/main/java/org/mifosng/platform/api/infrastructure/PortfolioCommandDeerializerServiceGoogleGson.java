@@ -41,14 +41,14 @@ public class PortfolioCommandDeerializerServiceGoogleGson implements PortfolioCo
         parser = new JsonParser();
         gsonConverter = new Gson();
     }
-    
+
     @Override
     public RoleCommand deserializeRoleCommand(final Long roleId, final String commandAsJson, final boolean makerCheckerApproval) {
         if (StringUtils.isBlank(commandAsJson)) { throw new InvalidJsonException(); }
 
         final JsonParserHelper helper = new JsonParserHelper();
         final JsonElement element = parser.parse(commandAsJson);
-       
+
         final Set<String> parametersPassedInRequest = new HashSet<String>();
 
         final String name = helper.extractStringNamed("name", element, parametersPassedInRequest);
@@ -60,16 +60,16 @@ public class PortfolioCommandDeerializerServiceGoogleGson implements PortfolioCo
     @Override
     public RolePermissionCommand deserializeRolePermissionCommand(final Long roleId, final String commandAsJson, final boolean makerCheckerApproval) {
         if (StringUtils.isBlank(commandAsJson)) { throw new InvalidJsonException(); }
-        
+
         final RolePermissionCommand command = gsonConverter.fromJson(commandAsJson, RolePermissionCommand.class);
 
         return new RolePermissionCommand(roleId, command.getPermissions(), makerCheckerApproval);
     }
-    
+
     @Override
     public PermissionsCommand deserializePermissionsCommand(final String commandAsJson, final boolean makerCheckerApproval) {
         if (StringUtils.isBlank(commandAsJson)) { throw new InvalidJsonException(); }
-        
+
         final PermissionsCommand command = gsonConverter.fromJson(commandAsJson, PermissionsCommand.class);
 
         return new PermissionsCommand(command.getPermissions(), makerCheckerApproval);
@@ -81,18 +81,18 @@ public class PortfolioCommandDeerializerServiceGoogleGson implements PortfolioCo
 
         final JsonParserHelper helper = new JsonParserHelper();
         final JsonElement element = parser.parse(commandAsJson);
-       
+
         final Set<String> parametersPassedInRequest = new HashSet<String>();
-        
+
         final String username = helper.extractStringNamed("username", element, parametersPassedInRequest);
         final String firstname = helper.extractStringNamed("firstname", element, parametersPassedInRequest);
-        
+
         final String lastname = helper.extractStringNamed("lastname", element, parametersPassedInRequest);
         final String password = helper.extractStringNamed("password", element, parametersPassedInRequest);
         final String repeatPassword = helper.extractStringNamed("repeatPassword", element, parametersPassedInRequest);
         final String email = helper.extractStringNamed("email", element, parametersPassedInRequest);
         final Long officeId = helper.extractLongNamed("officeId", element, parametersPassedInRequest);
-        
+
         // check array
         String[] notSelectedRoles = null;
         String[] roles = null;
@@ -117,7 +117,7 @@ public class PortfolioCommandDeerializerServiceGoogleGson implements PortfolioCo
             }
         }
 
-        return new UserCommand(parametersPassedInRequest, makerCheckerApproval, userId, username, firstname, lastname, 
+        return new UserCommand(parametersPassedInRequest, makerCheckerApproval, userId, username, firstname, lastname,
                 password, repeatPassword, email, officeId, notSelectedRoles, roles);
     }
 
@@ -127,22 +127,23 @@ public class PortfolioCommandDeerializerServiceGoogleGson implements PortfolioCo
 
         final JsonParserHelper helper = new JsonParserHelper();
         final JsonElement element = parser.parse(commandAsJson);
-       
+
         final Set<String> parametersPassedInRequest = new HashSet<String>();
 
         final String name = helper.extractStringNamed("name", element, parametersPassedInRequest);
+        final boolean isSystemDefined = helper.extractBooleanNamed("isSystemDefined", element, parametersPassedInRequest);
 
-        return new CodeCommand(parametersPassedInRequest, makerCheckerApproval, codeId, name);
+        return new CodeCommand(parametersPassedInRequest, makerCheckerApproval, codeId, name,isSystemDefined);
     }
 
     @Override
     public StaffCommand deserializeStaffCommand(final Long staffId, final String commandAsJson, final boolean makerCheckerApproval) {
-        
+
         if (StringUtils.isBlank(commandAsJson)) { throw new InvalidJsonException(); }
 
         final JsonParserHelper helper = new JsonParserHelper();
         final JsonElement element = parser.parse(commandAsJson);
-       
+
         final Set<String> parametersPassedInRequest = new HashSet<String>();
 
         final String firstname = helper.extractStringNamed("firstname", element, parametersPassedInRequest);
@@ -155,35 +156,35 @@ public class PortfolioCommandDeerializerServiceGoogleGson implements PortfolioCo
 
     @Override
     public FundCommand deserializeFundCommand(final Long fundId, final String commandAsJson, final boolean makerCheckerApproval) {
-        
+
         if (StringUtils.isBlank(commandAsJson)) { throw new InvalidJsonException(); }
 
         final JsonParserHelper helper = new JsonParserHelper();
         final JsonElement element = parser.parse(commandAsJson);
-       
+
         final Set<String> parametersPassedInRequest = new HashSet<String>();
 
         final String name = helper.extractStringNamed("name", element, parametersPassedInRequest);
         final String externalId = helper.extractStringNamed("externalId", element, parametersPassedInRequest);
-        
+
         return new FundCommand(parametersPassedInRequest, makerCheckerApproval, fundId, name, externalId);
     }
 
     @Override
     public OfficeCommand deserializeOfficeCommand(final Long officeId, final String commandAsJson, final boolean makerCheckerApproval) {
-        
+
         if (StringUtils.isBlank(commandAsJson)) { throw new InvalidJsonException(); }
 
         final JsonParserHelper helper = new JsonParserHelper();
         final JsonElement element = parser.parse(commandAsJson);
-       
+
         final Set<String> parametersPassedInRequest = new HashSet<String>();
 
         final String name = helper.extractStringNamed("name", element, parametersPassedInRequest);
         final String externalId = helper.extractStringNamed("externalId", element, parametersPassedInRequest);
         final Long parentId = helper.extractLongNamed("parentId", element, parametersPassedInRequest);
         final LocalDate openingLocalDate = helper.extractLocalDateAsArrayNamed("openingDate", element, parametersPassedInRequest);
-        
+
         return new OfficeCommand(parametersPassedInRequest, makerCheckerApproval, officeId, name, externalId, parentId, openingLocalDate);
     }
 
@@ -194,7 +195,7 @@ public class PortfolioCommandDeerializerServiceGoogleGson implements PortfolioCo
 
         final JsonParserHelper helper = new JsonParserHelper();
         final JsonElement element = parser.parse(commandAsJson);
-       
+
         final Set<String> parametersPassedInRequest = new HashSet<String>();
 
         final Long fromOfficeId = helper.extractLongNamed("fromOfficeId", element, parametersPassedInRequest);
@@ -203,7 +204,7 @@ public class PortfolioCommandDeerializerServiceGoogleGson implements PortfolioCo
         final String currencyCode = helper.extractStringNamed("currencyCode", element, parametersPassedInRequest);
         final BigDecimal transactionAmount = helper.extractBigDecimalNamed("transactionAmount", element.getAsJsonObject(), Locale.US, parametersPassedInRequest);
         final String description = helper.extractStringNamed("description", element, parametersPassedInRequest);
-        
+
         return new BranchMoneyTransferCommand(parametersPassedInRequest, makerCheckerApproval, fromOfficeId, toOfficeId, transactionLocalDate, currencyCode,
                 transactionAmount, description);
     }
@@ -214,11 +215,11 @@ public class PortfolioCommandDeerializerServiceGoogleGson implements PortfolioCo
 
         final JsonParserHelper helper = new JsonParserHelper();
         final JsonElement element = parser.parse(commandAsJson);
-       
+
         final Set<String> parametersPassedInRequest = new HashSet<String>();
 
         final String[] currencies = helper.extractArrayNamed("currencies", element, parametersPassedInRequest);
-        
+
         return new CurrencyCommand(makerCheckerApproval, currencies);
     }
 }

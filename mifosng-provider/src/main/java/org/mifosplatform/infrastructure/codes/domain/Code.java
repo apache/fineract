@@ -18,7 +18,15 @@ public class Code extends AbstractPersistable<Long> {
     @Column(name = "code_name", length = 100)
     private String codeName;
 
-    public static Code createNew(final String codeName) {
+	@SuppressWarnings("unused")
+	@Column(name = "is_system_defined")
+	private boolean isSystemDefined;
+
+    public boolean getisSystemDefined() {
+		return isSystemDefined;
+	}
+
+	public static Code createNew(final String codeName) {
         return new Code(codeName);
     }
 

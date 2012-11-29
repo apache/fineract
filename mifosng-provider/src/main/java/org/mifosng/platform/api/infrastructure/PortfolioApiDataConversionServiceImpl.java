@@ -1083,9 +1083,9 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
     /*
      * private LocalDate convertFrom(final String dateAsString, final String
      * parameterName, final String dateFormat) {
-     * 
+     *
      * if (StringUtils.isBlank(dateFormat)) {
-     * 
+     *
      * List<ApiParameterError> dataValidationErrors = new
      * ArrayList<ApiParameterError>(); String defaultMessage = new
      * StringBuilder("The parameter '" + parameterName +
@@ -1093,11 +1093,11 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
      * ApiParameterError error = ApiParameterError.parameterError(
      * "validation.msg.missing.dateFormat.parameter", defaultMessage,
      * parameterName); dataValidationErrors.add(error);
-     * 
+     *
      * throw new PlatformApiDataValidationException(
      * "validation.msg.validation.errors.exist", "Validation errors exist.",
      * dataValidationErrors); }
-     * 
+     *
      * LocalDate eventLocalDate = null; if
      * (StringUtils.isNotBlank(dateAsString)) { try { Locale locale =
      * LocaleContextHolder.getLocale(); eventLocalDate =
@@ -1110,18 +1110,18 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
      * " is invalid based on the dateFormat provided:" + dateFormat,
      * parameterName, dateAsString, dateFormat);
      * dataValidationErrors.add(error);
-     * 
+     *
      * throw new PlatformApiDataValidationException(
      * "validation.msg.validation.errors.exist", "Validation errors exist.",
      * dataValidationErrors); } }
-     * 
+     *
      * return eventLocalDate; }
-     * 
+     *
      * private Integer convertToInteger(final String numericalValueFormatted,
      * final String parameterName, final Locale clientApplicationLocale) {
-     * 
+     *
      * if (clientApplicationLocale == null) {
-     * 
+     *
      * List<ApiParameterError> dataValidationErrors = new
      * ArrayList<ApiParameterError>(); String defaultMessage = new
      * StringBuilder("The parameter '" + parameterName +
@@ -1129,41 +1129,41 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
      * ApiParameterError error =
      * ApiParameterError.parameterError("validation.msg.missing.locale.parameter"
      * , defaultMessage, parameterName); dataValidationErrors.add(error);
-     * 
+     *
      * throw new PlatformApiDataValidationException(
      * "validation.msg.validation.errors.exist", "Validation errors exist.",
      * dataValidationErrors); }
-     * 
+     *
      * try { Integer number = null;
-     * 
+     *
      * if (StringUtils.isNotBlank(numericalValueFormatted)) {
-     * 
+     *
      * String source = numericalValueFormatted.trim();
-     * 
+     *
      * NumberFormat format = NumberFormat.getInstance(clientApplicationLocale);
      * DecimalFormat df = (DecimalFormat) format; DecimalFormatSymbols symbols =
      * df.getDecimalFormatSymbols(); df.setParseBigDecimal(true);
-     * 
+     *
      * // http://bugs.sun.com/view_bug.do?bug_id=4510618 char groupingSeparator
      * = symbols.getGroupingSeparator(); if (groupingSeparator == '\u00a0') {
      * source = source.replaceAll(" ", Character.toString('\u00a0')); }
-     * 
+     *
      * Number parsedNumber = df.parse(source);
-     * 
+     *
      * double parsedNumberDouble = parsedNumber.doubleValue(); int
      * parsedNumberInteger = parsedNumber.intValue();
-     * 
+     *
      * if (source.contains(Character.toString(symbols.getDecimalSeparator()))) {
      * throw new ParseException(source, 0); }
-     * 
+     *
      * if
      * (!Double.valueOf(parsedNumberDouble).equals(Double.valueOf(Integer.valueOf
      * (parsedNumberInteger)))) { throw new ParseException(source, 0); }
-     * 
+     *
      * number = parsedNumber.intValue(); }
-     * 
+     *
      * return number; } catch (ParseException e) {
-     * 
+     *
      * List<ApiParameterError> dataValidationErrors = new
      * ArrayList<ApiParameterError>(); ApiParameterError error =
      * ApiParameterError.parameterError(
@@ -1173,16 +1173,16 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
      * clientApplicationLocale.toString() + "].", parameterName,
      * numericalValueFormatted, clientApplicationLocale);
      * dataValidationErrors.add(error);
-     * 
+     *
      * throw new PlatformApiDataValidationException(
      * "validation.msg.validation.errors.exist", "Validation errors exist.",
      * dataValidationErrors); } }
-     * 
+     *
      * private BigDecimal convertFrom(final String numericalValueFormatted,
      * final String parameterName, final Locale clientApplicationLocale) {
-     * 
+     *
      * if (clientApplicationLocale == null) {
-     * 
+     *
      * List<ApiParameterError> dataValidationErrors = new
      * ArrayList<ApiParameterError>(); String defaultMessage = new
      * StringBuilder("The parameter '" + parameterName +
@@ -1190,17 +1190,17 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
      * ApiParameterError error =
      * ApiParameterError.parameterError("validation.msg.missing.locale.parameter"
      * , defaultMessage, parameterName); dataValidationErrors.add(error);
-     * 
+     *
      * throw new PlatformApiDataValidationException(
      * "validation.msg.validation.errors.exist", "Validation errors exist.",
      * dataValidationErrors); }
-     * 
+     *
      * try { BigDecimal number = null;
-     * 
+     *
      * if (StringUtils.isNotBlank(numericalValueFormatted)) {
-     * 
+     *
      * String source = numericalValueFormatted.trim();
-     * 
+     *
      * NumberFormat format =
      * NumberFormat.getNumberInstance(clientApplicationLocale); DecimalFormat df
      * = (DecimalFormat) format; DecimalFormatSymbols symbols =
@@ -1208,14 +1208,14 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
      * http://bugs.sun.com/view_bug.do?bug_id=4510618 char groupingSeparator =
      * symbols.getGroupingSeparator(); if (groupingSeparator == '\u00a0') {
      * source = source.replaceAll(" ", Character.toString('\u00a0')); }
-     * 
+     *
      * NumberFormatter numberFormatter = new NumberFormatter(); Number
      * parsedNumber = numberFormatter.parse(source, clientApplicationLocale);
      * number = BigDecimal.valueOf(Double.valueOf(parsedNumber.doubleValue()));
      * }
-     * 
+     *
      * return number; } catch (ParseException e) {
-     * 
+     *
      * List<ApiParameterError> dataValidationErrors = new
      * ArrayList<ApiParameterError>(); ApiParameterError error =
      * ApiParameterError.parameterError(
@@ -1225,7 +1225,7 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
      * clientApplicationLocale.toString() + "].", parameterName,
      * numericalValueFormatted, clientApplicationLocale);
      * dataValidationErrors.add(error);
-     * 
+     *
      * throw new PlatformApiDataValidationException(
      * "validation.msg.validation.errors.exist", "Validation errors exist.",
      * dataValidationErrors); } }
@@ -1543,12 +1543,13 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
     public CodeCommand convertApiRequestJsonToCodeCommand(final Long resourceIdentifier, final String json) {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
-        Type typeOfMap = new TypeToken<Map<String, String>>() {}.getType();
-        Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
+        Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
 
-        Set<String> supportedParams = new HashSet<String>(Arrays.asList("name"));
+        Set<String> supportedParams = new HashSet<String>(Arrays.asList("name","is_system_defined"));
 
         checkForUnsupportedParameters(requestMap, supportedParams);
+
 
         // no difference between api request json format and internal command
         // json format.

@@ -18,15 +18,21 @@ public class CodeCommand {
     private final transient Set<String> parametersPassedInRequest;
     private final transient boolean makerCheckerApproval;
     private final transient Long id;
+    private final transient boolean isSystemDefined;
 
-    public CodeCommand(final Set<String> modifiedParameters, final boolean makerCheckerApproval, final Long id, final String name) {
+    public CodeCommand(final Set<String> modifiedParameters, final boolean makerCheckerApproval, final Long id, final String name,final boolean isSystemDefined) {
         this.parametersPassedInRequest = modifiedParameters;
         this.makerCheckerApproval = makerCheckerApproval;
         this.id = id;
         this.name = name;
+        this.isSystemDefined = isSystemDefined;
     }
 
-    public String getName() {
+    public boolean getisSystemDefined() {
+		return isSystemDefined;
+	}
+
+	public String getName() {
         return this.name;
     }
 
@@ -44,10 +50,10 @@ public class CodeCommand {
 
     public void validateForCreate() {
         List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-        
+
         DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("code");
         baseDataValidator.reset().parameter("name").value(this.name).notBlank();
-        
+
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
                 "Validation errors exist.", dataValidationErrors); }
     }
@@ -55,10 +61,10 @@ public class CodeCommand {
     public void validateForUpdate() {
         List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
         DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("code");
-        
+
         baseDataValidator.reset().parameter("id").value(this.id).notNull();
         baseDataValidator.reset().parameter("name").value(this.name).ignoreIfNull().notBlank();
-        
+
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
                 "Validation errors exist.", dataValidationErrors); }
     }
