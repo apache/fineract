@@ -29,7 +29,7 @@ public class CodeReadPlatformServiceImpl implements CodeReadPlatformService {
     private static final class CodeMapper implements RowMapper<CodeData> {
 
         public String schema() {
-            return " c.id as id, c.code_name as code_name from m_code c ";
+            return " c.id as id, c.code_name as code_name, c.is_system_defined as systemDefined from m_code c ";
         }
 
         @Override
@@ -37,8 +37,9 @@ public class CodeReadPlatformServiceImpl implements CodeReadPlatformService {
 
             final Long id = rs.getLong("id");
             final String code_name = rs.getString("code_name");
-
-            return new CodeData(id, code_name);
+            final boolean systemDefined = rs.getBoolean("systemDefined");
+            
+            return new CodeData(id, code_name, systemDefined);
         }
     }
 

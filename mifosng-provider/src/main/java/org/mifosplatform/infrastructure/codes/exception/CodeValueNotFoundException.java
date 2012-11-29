@@ -1,11 +1,13 @@
-package org.mifosng.platform.exceptions;
+package org.mifosplatform.infrastructure.codes.exception;
+
+import org.mifosng.platform.exceptions.AbstractPlatformResourceNotFoundException;
 
 /**
  * A {@link RuntimeException} thrown when client resources are not found.
  */
 public class CodeValueNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    public CodeValueNotFoundException(Long id) {
+    public CodeValueNotFoundException(final Long id) {
         super("error.msg.codevalue.id.invalid", "Code value with identifier " + id + " does not exist", id);
     }
 }

@@ -22,7 +22,7 @@ public class Code extends AbstractPersistable<Long> {
 
     @SuppressWarnings("unused")
     @Column(name = "code_name", length = 100)
-    private String codeName;
+    private String name;
 
     @Column(name = "is_system_defined")
     private final boolean systemDefined;
@@ -40,8 +40,8 @@ public class Code extends AbstractPersistable<Long> {
         this.systemDefined = false;
     }
 
-    private Code(final String codeName) {
-        this.codeName = codeName;
+    private Code(final String name) {
+        this.name = name;
         this.systemDefined = false;
     }
     
@@ -56,7 +56,7 @@ public class Code extends AbstractPersistable<Long> {
         }
         
         if (command.isNameChanged()) {
-            this.codeName = StringUtils.defaultIfEmpty(command.getName(), null);
+            this.name = StringUtils.defaultIfEmpty(command.getName(), null);
         }
     }
 }

@@ -5,9 +5,9 @@ import org.mifosplatform.infrastructure.codes.command.CodeCommand;
 
 public interface CodeWritePlatformService {
 
-    Long createCode(final CodeCommand command);
+    Long createCode(CodeCommand command);
 
-    Long updateCode(final CodeCommand command);
+    Long updateCode(CodeCommand command);
 
-    EntityIdentifier deleteCode(final CodeCommand command);
+    EntityIdentifier deleteCode(CodeCommand command);
 }

@@ -2,11 +2,11 @@ package org.mifosplatform.infrastructure.codes.service;
 
 import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.client.service.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
-import org.mifosng.platform.exceptions.CodeValueNotFoundException;
 import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.codes.command.CodeCommand;
 import org.mifosplatform.infrastructure.codes.domain.Code;
 import org.mifosplatform.infrastructure.codes.domain.CodeRepository;
+import org.mifosplatform.infrastructure.codes.exception.CodeNotFoundException;
 import org.mifosplatform.infrastructure.codes.exception.SystemDefinedCodeCannotBeChangedException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.infrastructure.user.domain.Permission;
@@ -64,10 +64,7 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
             context.authenticatedUser();
             command.validateForUpdate();
 
-            final Long codeId = command.getId();
-            final Code code = this.codeRepository.findOne(codeId);
-            if (code == null) { throw new CodeValueNotFoundException(codeId); }
-            
+            final Code code = retrieveCodeBy(command.getName());
             code.update(command);
 
             this.codeRepository.save(code);
@@ -102,23 +99,22 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
 
         context.authenticatedUser();
 
-        final Long codeId = command.getId();
-        Code code = retrieveCodeBy(codeId);
+        final Code code = retrieveCodeBy(command.getName());
         if (code.isSystemDefined()) {
             throw new SystemDefinedCodeCannotBeChangedException();
         }
         
-        this.codeRepository.delete(codeId);
+        this.codeRepository.delete(code);
 
         final Permission thisTask = this.permissionRepository.findOneByCode("DELETE_CODE");
         if (thisTask.hasMakerCheckerEnabled() && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
 
-        return new EntityIdentifier(codeId);
+        return new EntityIdentifier(code.getId());
     }
 
-    private Code retrieveCodeBy(final Long codeId) {
-        final Code code = this.codeRepository.findOne(codeId);
-        if (code == null) { throw new CodeValueNotFoundException(codeId); }
+    private Code retrieveCodeBy(final String name) {
+        final Code code = this.codeRepository.findOneByName(name);
+        if (code == null) { throw new CodeNotFoundException(name); }
         return code;
     }
 }
