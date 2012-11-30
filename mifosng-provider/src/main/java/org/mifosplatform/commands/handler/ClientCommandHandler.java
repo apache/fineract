@@ -34,7 +34,8 @@ public class ClientCommandHandler implements CommandSourceHandler {
         this.clientWritePlatformService = clientWritePlatformService;
     }
 
-    public CommandSource handle(final CommandSource commandSource, final String commandSerializedAsJson) {
+    @Override
+    public CommandSource handleCommandWithSupportForRollback(final CommandSource commandSource) {
 
         final AppUser maker = context.authenticatedUser();
         final LocalDate asToday = new LocalDate();
@@ -82,7 +83,8 @@ public class ClientCommandHandler implements CommandSourceHandler {
         return commandSourceResult;
     }
 
-    public CommandSource handle(final CommandSource commandSourceResult) {
+    @Override
+    public CommandSource handleCommandForCheckerApproval(final CommandSource commandSourceResult) {
 
         final AppUser checker = context.authenticatedUser();
 

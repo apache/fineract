@@ -18,9 +18,12 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
 import org.mifosng.platform.api.data.EntityIdentifier;
+import org.mifosng.platform.api.infrastructure.PortfolioApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService;
+import org.mifosng.platform.api.infrastructure.PortfolioCommandSerializerService;
 import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.mifosplatform.infrastructure.codes.command.CodeCommand;
 import org.mifosplatform.infrastructure.codes.data.CodeData;
 import org.mifosplatform.infrastructure.codes.service.CodeReadPlatformService;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
@@ -33,20 +36,26 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class CodesApiResource {
 
-    private CodeReadPlatformService readPlatformService;
-    private PortfolioApiJsonSerializerService apiJsonSerializerService;
-    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-    private final PlatformSecurityContext context;
-
     private final String resourceNameForPermissions = "CODE";
+
+    private final PlatformSecurityContext context;
+    private final CodeReadPlatformService readPlatformService;
+    private final PortfolioApiJsonSerializerService apiJsonSerializerService;
+    private final PortfolioApiDataConversionService apiDataConversionService;
+    private final PortfolioCommandSerializerService commandSerializerService;
+    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @Autowired
     public CodesApiResource(final PlatformSecurityContext context, final CodeReadPlatformService readPlatformService,
             final PortfolioApiJsonSerializerService apiJsonSerializerService,
+            final PortfolioApiDataConversionService apiDataConversionService,
+            final PortfolioCommandSerializerService commandSerializerService,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
         this.context = context;
         this.readPlatformService = readPlatformService;
         this.apiJsonSerializerService = apiJsonSerializerService;
+        this.apiDataConversionService = apiDataConversionService;
+        this.commandSerializerService = commandSerializerService;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
     }
 
@@ -73,8 +82,11 @@ public class CodesApiResource {
         final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "CREATE_CODE");
         context.authenticatedUser().validateHasPermissionTo("CREATE_CODE", allowedPermissions);
 
+        final CodeCommand command = this.apiDataConversionService.convertApiRequestJsonToCodeCommand(null, apiRequestBodyAsJson);
+        final String commandSerializedAsJson = this.commandSerializerService.serializeCommandToJson(command);
+
         final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE", "codes", null,
-                apiRequestBodyAsJson);
+                commandSerializedAsJson);
 
         return this.apiJsonSerializerService.serializeEntityIdentifier(result);
     }
@@ -102,8 +114,11 @@ public class CodesApiResource {
         final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "UPDATE_CODE");
         context.authenticatedUser().validateHasPermissionTo("UPDATE_CODE", allowedPermissions);
 
+        final CodeCommand command = this.apiDataConversionService.convertApiRequestJsonToCodeCommand(codeId, apiRequestBodyAsJson);
+        final String commandSerializedAsJson = this.commandSerializerService.serializeCommandToJson(command);
+
         final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "codes", codeId,
-                apiRequestBodyAsJson);
+                commandSerializedAsJson);
 
         return this.apiJsonSerializerService.serializeEntityIdentifier(result);
     }

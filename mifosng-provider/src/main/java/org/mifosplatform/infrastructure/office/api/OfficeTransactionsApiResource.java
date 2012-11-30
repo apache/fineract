@@ -15,9 +15,12 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
 import org.mifosng.platform.api.data.EntityIdentifier;
+import org.mifosng.platform.api.infrastructure.PortfolioApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService;
+import org.mifosng.platform.api.infrastructure.PortfolioCommandSerializerService;
 import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.mifosplatform.infrastructure.office.command.BranchMoneyTransferCommand;
 import org.mifosplatform.infrastructure.office.data.OfficeTransactionData;
 import org.mifosplatform.infrastructure.office.service.OfficeReadPlatformService;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
@@ -36,16 +39,22 @@ public class OfficeTransactionsApiResource {
     private final PlatformSecurityContext context;
     private final OfficeReadPlatformService readPlatformService;
     private final PortfolioApiJsonSerializerService apiJsonSerializerService;
+    private final PortfolioApiDataConversionService apiDataConversionService;
+    private final PortfolioCommandSerializerService commandSerializerService;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @Autowired
     public OfficeTransactionsApiResource(final PlatformSecurityContext context, 
             final OfficeReadPlatformService readPlatformService,
             final PortfolioApiJsonSerializerService apiJsonSerializerService,
+            final PortfolioApiDataConversionService apiDataConversionService,
+            final PortfolioCommandSerializerService commandSerializerService,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
         this.context = context;
         this.readPlatformService = readPlatformService;
         this.apiJsonSerializerService = apiJsonSerializerService;
+        this.apiDataConversionService = apiDataConversionService;
+        this.commandSerializerService = commandSerializerService;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
     }
 
@@ -92,8 +101,11 @@ public class OfficeTransactionsApiResource {
         final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "ORGANISATION_ADMINISTRATION_SUPER_USER", "CREATE_OFFICETRANSACTION");
         context.authenticatedUser().validateHasPermissionTo("CREATE_OFFICETRANSACTION", allowedPermissions);
 
+        final BranchMoneyTransferCommand command = this.apiDataConversionService.convertApiRequestJsonToBranchMoneyTransferCommand(apiRequestBodyAsJson);
+        final String commandSerializedAsJson = this.commandSerializerService.serializeCommandToJson(command);
+        
         final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE", "officetransactions", null,
-                apiRequestBodyAsJson);
+                commandSerializedAsJson);
 
         return this.apiJsonSerializerService.serializeEntityIdentifier(result);
     }

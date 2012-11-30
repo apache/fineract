@@ -52,32 +52,32 @@ public class CommandSourceHandlerDelegator {
         this.chargeDefinitionCommandHandler = chargeDefinitionCommandHandler;
     }
 
-    public CommandSource handle(final CommandSource commandSource, final String apiRequestBodyInJson) {
+    public CommandSource handleCommandWithSupportForRollback(final CommandSource commandSource) {
 
         context.authenticatedUser();
         CommandSource commandSourceResult = null;
         if (commandSource.isClientResource()) {
-            commandSourceResult = clientCommandHandler.handle(commandSource, apiRequestBodyInJson);
+            commandSourceResult = clientCommandHandler.handleCommandWithSupportForRollback(commandSource);
         } else if (commandSource.isRoleResource()) {
-            commandSourceResult = roleCommandHandler.handle(commandSource, apiRequestBodyInJson);
+            commandSourceResult = roleCommandHandler.handleCommandWithSupportForRollback(commandSource);
         } else if (commandSource.isPermissionResource()) {
-            commandSourceResult = permissionCommandHandler.handle(commandSource, apiRequestBodyInJson);
+            commandSourceResult = permissionCommandHandler.handleCommandWithSupportForRollback(commandSource);
         } else if (commandSource.isUserResource()) {
-            commandSourceResult = userCommandHandler.handle(commandSource, apiRequestBodyInJson);
+            commandSourceResult = userCommandHandler.handleCommandWithSupportForRollback(commandSource);
         } else if (commandSource.isCodeResource()) {
-            commandSourceResult = codeCommandHandler.handle(commandSource, apiRequestBodyInJson);
+            commandSourceResult = codeCommandHandler.handleCommandWithSupportForRollback(commandSource);
         } else if (commandSource.isStaffResource()) {
-            commandSourceResult = staffCommandHandler.handle(commandSource, apiRequestBodyInJson);
+            commandSourceResult = staffCommandHandler.handleCommandWithSupportForRollback(commandSource);
         } else if (commandSource.isFundResource()) {
-            commandSourceResult = fundCommandHandler.handle(commandSource, apiRequestBodyInJson);
+            commandSourceResult = fundCommandHandler.handleCommandWithSupportForRollback(commandSource);
         } else if (commandSource.isOfficeResource()) {
-            commandSourceResult = officeCommandHandler.handle(commandSource, apiRequestBodyInJson);
+            commandSourceResult = officeCommandHandler.handleCommandWithSupportForRollback(commandSource);
         } else if (commandSource.isOfficeTransactionResource()) {
-            commandSourceResult = officeTransactionCommandHandler.handle(commandSource, apiRequestBodyInJson);
+            commandSourceResult = officeTransactionCommandHandler.handleCommandWithSupportForRollback(commandSource);
         } else if (commandSource.isCurrencyResource()) {
-            commandSourceResult = currencyCommandHandler.handle(commandSource, apiRequestBodyInJson);
+            commandSourceResult = currencyCommandHandler.handleCommandWithSupportForRollback(commandSource);
         } else if (commandSource.isChargeDefinitionResource()) {
-            commandSourceResult = chargeDefinitionCommandHandler.handle(commandSource, apiRequestBodyInJson);
+            commandSourceResult = chargeDefinitionCommandHandler.handleCommandWithSupportForRollback(commandSource);
         } else {
             throw new UnsupportedCommandException(commandSource.commandName());
         }
@@ -85,31 +85,31 @@ public class CommandSourceHandlerDelegator {
         return commandSourceResult;
     }
     
-    public CommandSource handleExistingCommand(final CommandSource existingCommandSource) {
+    public CommandSource handleCommandForCheckerApproval(final CommandSource existingCommandSource) {
         
         CommandSource commandSourceResult = null;
         if (existingCommandSource.isClientResource()) {
-            commandSourceResult = clientCommandHandler.handle(existingCommandSource);
+            commandSourceResult = clientCommandHandler.handleCommandForCheckerApproval(existingCommandSource);
         } else if (existingCommandSource.isRoleResource()) {
-            commandSourceResult = roleCommandHandler.handle(existingCommandSource);
+            commandSourceResult = roleCommandHandler.handleCommandForCheckerApproval(existingCommandSource);
         } else if (existingCommandSource.isPermissionResource()) {
-            commandSourceResult = permissionCommandHandler.handle(existingCommandSource);
+            commandSourceResult = permissionCommandHandler.handleCommandForCheckerApproval(existingCommandSource);
         } else if (existingCommandSource.isUserResource()) {
-            commandSourceResult = userCommandHandler.handle(existingCommandSource);
+            commandSourceResult = userCommandHandler.handleCommandForCheckerApproval(existingCommandSource);
         } else if (existingCommandSource.isCodeResource()) {
-            commandSourceResult = codeCommandHandler.handle(existingCommandSource);
+            commandSourceResult = codeCommandHandler.handleCommandForCheckerApproval(existingCommandSource);
         } else if (existingCommandSource.isStaffResource()) {
-            commandSourceResult = staffCommandHandler.handle(existingCommandSource);
+            commandSourceResult = staffCommandHandler.handleCommandForCheckerApproval(existingCommandSource);
         } else if (existingCommandSource.isFundResource()) {
-            commandSourceResult = fundCommandHandler.handle(existingCommandSource);
+            commandSourceResult = fundCommandHandler.handleCommandForCheckerApproval(existingCommandSource);
         } else if (existingCommandSource.isOfficeResource()) {
-            commandSourceResult = officeCommandHandler.handle(existingCommandSource);
+            commandSourceResult = officeCommandHandler.handleCommandForCheckerApproval(existingCommandSource);
         } else if (existingCommandSource.isOfficeTransactionResource()) {
-            commandSourceResult = officeTransactionCommandHandler.handle(existingCommandSource);
+            commandSourceResult = officeTransactionCommandHandler.handleCommandForCheckerApproval(existingCommandSource);
         } else if (existingCommandSource.isCurrencyResource()) {
-            commandSourceResult = currencyCommandHandler.handle(existingCommandSource);
+            commandSourceResult = currencyCommandHandler.handleCommandForCheckerApproval(existingCommandSource);
         } else if (existingCommandSource.isChargeDefinitionResource()) {
-            commandSourceResult = chargeDefinitionCommandHandler.handle(existingCommandSource);
+            commandSourceResult = chargeDefinitionCommandHandler.handleCommandForCheckerApproval(existingCommandSource);
         } else {
             throw new UnsupportedCommandException(existingCommandSource.commandName());
         }

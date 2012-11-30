@@ -43,6 +43,8 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class RolesApiResource {
 
+    private final String resourceNameForPermissions = "ROLE";
+    
     private final PlatformSecurityContext context;
     private final RoleReadPlatformService roleReadPlatformService;
     private final PermissionReadPlatformService permissionReadPlatformService;
@@ -53,8 +55,6 @@ public class RolesApiResource {
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final PortfolioCommandDeserializerService commandDeserializerService;
     
-    private final String resourceNameForPermissions = "ROLE";
-
     @Autowired
     public RolesApiResource(
             final PlatformSecurityContext context, 
@@ -101,7 +101,7 @@ public class RolesApiResource {
         context.authenticatedUser().validateHasPermissionTo("CREATE_ROLE", allowedPermissions);
         
         final RoleCommand command = this.apiDataConversionService.convertApiRequestJsonToRoleCommand(null,apiRequestBodyAsJson);
-        final String commandSerializedAsJson = this.commandSerializerService.serializeRoleCommandToJson(command);
+        final String commandSerializedAsJson = this.commandSerializerService.serializeCommandToJson(command);
 
         final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE", "roles", null,
                 commandSerializedAsJson);
@@ -152,7 +152,7 @@ public class RolesApiResource {
         context.authenticatedUser().validateHasPermissionTo("UPDATE_ROLE", allowedPermissions);
         
         final RoleCommand command = this.apiDataConversionService.convertApiRequestJsonToRoleCommand(roleId, apiRequestBodyAsJson);
-        final String commandSerializedAsJson = this.commandSerializerService.serializeRoleCommandToJson(command);
+        final String commandSerializedAsJson = this.commandSerializerService.serializeCommandToJson(command);
         
         final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "roles", roleId,
                 commandSerializedAsJson);
@@ -215,7 +215,7 @@ public class RolesApiResource {
         context.authenticatedUser().validateHasPermissionTo("PERMISSIONS_ROLE", allowedPermissions);
         
         final RolePermissionCommand command = this.apiDataConversionService.convertApiRequestJsonToRolePermissionCommand(roleId, apiRequestBodyAsJson);
-        final String commandSerializedAsJson = this.commandSerializerService.serializeRolePermissionCommandToJson(command);
+        final String commandSerializedAsJson = this.commandSerializerService.serializeCommandToJson(command);
         
         final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATEPERMISSIONS", "roles", roleId,
                 commandSerializedAsJson);

@@ -15,11 +15,14 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
 import org.mifosng.platform.api.data.EntityIdentifier;
+import org.mifosng.platform.api.infrastructure.PortfolioApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService;
+import org.mifosng.platform.api.infrastructure.PortfolioCommandSerializerService;
 import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.infrastructure.user.api.data.PermissionUsageData;
+import org.mifosplatform.infrastructure.user.command.PermissionsCommand;
 import org.mifosplatform.infrastructure.user.service.PermissionReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -30,22 +33,28 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class PermissionsApiResource {
 
+    private final String resourceNameForPermissions = "PERMISSION";
+    
     private final PlatformSecurityContext context;
     private final PermissionReadPlatformService permissionReadPlatformService;
     private final PortfolioApiJsonSerializerService apiJsonSerializerService;
+    private final PortfolioApiDataConversionService apiDataConversionService;
+    private final PortfolioCommandSerializerService commandSerializerService;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
-    private final String resourceNameForPermissions = "PERMISSION";
-    
     @Autowired
     public PermissionsApiResource(
             final PlatformSecurityContext context, 
             final PermissionReadPlatformService readPlatformService,
             final PortfolioApiJsonSerializerService apiJsonSerializerService,
+            final PortfolioApiDataConversionService apiDataConversionService,
+            final PortfolioCommandSerializerService commandSerializerService,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
         this.context = context;
         this.permissionReadPlatformService = readPlatformService;
         this.apiJsonSerializerService = apiJsonSerializerService;
+        this.apiDataConversionService = apiDataConversionService;
+        this.commandSerializerService = commandSerializerService;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
     }
 
@@ -80,8 +89,11 @@ public class PermissionsApiResource {
         final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "USER_ADMINISTRATION_SUPER_USER", "PERMISSIONS_ROLE");
         context.authenticatedUser().validateHasPermissionTo("PERMISSIONS_ROLE", allowedPermissions);
         
+        final PermissionsCommand command = this.apiDataConversionService.convertApiRequestJsonToPermissionsCommand(apiRequestBodyAsJson);
+        final String commandSerializedAsJson = this.commandSerializerService.serializeCommandToJson(command);
+        
         final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "permissions", null,
-                apiRequestBodyAsJson);
+                commandSerializedAsJson);
 
         return this.apiJsonSerializerService.serializeEntityIdentifier(result);
     }

@@ -4,9 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.joda.time.LocalDate;
-import org.mifosng.platform.api.infrastructure.PortfolioApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.PortfolioCommandDeserializerService;
-import org.mifosng.platform.api.infrastructure.PortfolioCommandSerializerService;
 import org.mifosng.platform.client.service.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
 import org.mifosng.platform.infrastructure.errorhandling.UnsupportedCommandException;
 import org.mifosplatform.commands.domain.CommandSource;
@@ -21,40 +19,27 @@ import org.springframework.stereotype.Service;
 public class OfficeTransactionCommandHandler implements CommandSourceHandler {
 
     private final PlatformSecurityContext context;
-    private final PortfolioApiDataConversionService apiDataConversionService;
-    private final PortfolioCommandSerializerService commandSerializerService;
     private final PortfolioCommandDeserializerService commandDeserializerService;
     private final OfficeWritePlatformService writePlatformService;
 
     @Autowired
     public OfficeTransactionCommandHandler(final PlatformSecurityContext context,
-            final PortfolioApiDataConversionService apiDataConversionService,
-            final PortfolioCommandSerializerService commandSerializerService,
             final PortfolioCommandDeserializerService commandDeserializerService, final OfficeWritePlatformService writePlatformService) {
         this.context = context;
-        this.apiDataConversionService = apiDataConversionService;
-        this.commandSerializerService = commandSerializerService;
         this.commandDeserializerService = commandDeserializerService;
         this.writePlatformService = writePlatformService;
     }
 
-    /*
-     * Used when users with 'create' capability create a command. If
-     * 'maker-checker' is not enabled for this specific command then the
-     * 'creator' is also marked 'as the checker' and command automatically is
-     * processed and changes state of system.
-     */
-    public CommandSource handle(final CommandSource commandSource, final String apiRequestBodyInJson) {
+    @Override
+    public CommandSource handleCommandWithSupportForRollback(final CommandSource commandSource) {
 
         final AppUser maker = context.authenticatedUser();
         final LocalDate asToday = new LocalDate();
 
-        CommandSource commandSourceResult = commandSource.copy();
+        final BranchMoneyTransferCommand command = this.commandDeserializerService.deserializeOfficeTransactionCommand(
+                commandSource.json(), false);
 
-        final BranchMoneyTransferCommand command = this.apiDataConversionService
-                .convertApiRequestJsonToBranchMoneyTransferCommand(apiRequestBodyInJson);
-        final String commandSerializedAsJson = this.commandSerializerService.serializeOfficeTransactionCommandToJson(command);
-        commandSourceResult.updateJsonTo(commandSerializedAsJson);
+        CommandSource commandSourceResult = commandSource.copy();
 
         Long newResourceId = null;
 
@@ -73,10 +58,8 @@ public class OfficeTransactionCommandHandler implements CommandSourceHandler {
         return commandSourceResult;
     }
 
-    /*
-     * Used when users with 'checker' capability approve a command.
-     */
-    public CommandSource handle(final CommandSource commandSourceResult) {
+    @Override
+    public CommandSource handleCommandForCheckerApproval(final CommandSource commandSourceResult) {
 
         final AppUser checker = context.authenticatedUser();
 

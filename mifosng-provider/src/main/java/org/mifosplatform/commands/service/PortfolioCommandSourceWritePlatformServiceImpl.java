@@ -35,7 +35,7 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
         final LocalDate asToday = new LocalDate();
 
         final CommandSource commandSourceInput = CommandSource.createdBy(apiOperation, resource, resourceId, commandSerializedAsJson, maker, asToday);
-        final CommandSource commandSourceResult = this.commandSourceHandlerDelegator.handle(commandSourceInput, commandSerializedAsJson);
+        final CommandSource commandSourceResult = this.commandSourceHandlerDelegator.handleCommandWithSupportForRollback(commandSourceInput);
         commandSourceRepository.save(commandSourceResult);
 
         return EntityIdentifier.makerChecker(commandSourceResult.resourceId(), commandSourceResult.getId());
@@ -48,7 +48,7 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
         context.authenticatedUser();
 
         final CommandSource commandSourceInput = this.commandSourceRepository.findOne(id);
-        final CommandSource commandSourceResult = this.commandSourceHandlerDelegator.handleExistingCommand(commandSourceInput);
+        final CommandSource commandSourceResult = this.commandSourceHandlerDelegator.handleCommandForCheckerApproval(commandSourceInput);
         commandSourceRepository.save(commandSourceResult);
 
         return EntityIdentifier.makerChecker(commandSourceResult.resourceId(), commandSourceResult.getId());

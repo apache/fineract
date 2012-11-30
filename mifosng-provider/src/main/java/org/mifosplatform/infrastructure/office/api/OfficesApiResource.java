@@ -18,9 +18,12 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
 import org.mifosng.platform.api.data.EntityIdentifier;
+import org.mifosng.platform.api.infrastructure.PortfolioApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService;
+import org.mifosng.platform.api.infrastructure.PortfolioCommandSerializerService;
 import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.mifosplatform.infrastructure.office.command.OfficeCommand;
 import org.mifosplatform.infrastructure.office.data.OfficeData;
 import org.mifosplatform.infrastructure.office.data.OfficeLookup;
 import org.mifosplatform.infrastructure.office.service.OfficeReadPlatformService;
@@ -39,16 +42,22 @@ public class OfficesApiResource {
     private final PlatformSecurityContext context;
     private final OfficeReadPlatformService readPlatformService;
     private final PortfolioApiJsonSerializerService apiJsonSerializerService;
+    private final PortfolioApiDataConversionService apiDataConversionService;
+    private final PortfolioCommandSerializerService commandSerializerService;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @Autowired
     public OfficesApiResource(final PlatformSecurityContext context, 
             final OfficeReadPlatformService readPlatformService,
             final PortfolioApiJsonSerializerService apiJsonSerializerService,
+            final PortfolioApiDataConversionService apiDataConversionService,
+            final PortfolioCommandSerializerService commandSerializerService,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
         this.context = context;
         this.readPlatformService = readPlatformService;
         this.apiJsonSerializerService = apiJsonSerializerService;
+        this.apiDataConversionService = apiDataConversionService;
+        this.commandSerializerService = commandSerializerService;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
     }
 
@@ -94,8 +103,11 @@ public class OfficesApiResource {
         final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "ORGANISATION_ADMINISTRATION_SUPER_USER", "CREATE_OFFICE");
         context.authenticatedUser().validateHasPermissionTo("CREATE_OFFICE", allowedPermissions);
 
+        final OfficeCommand command = this.apiDataConversionService.convertApiRequestJsonToOfficeCommand(null, apiRequestBodyAsJson);
+        final String commandSerializedAsJson = this.commandSerializerService.serializeCommandToJson(command);
+        
         final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE", "offices", null,
-                apiRequestBodyAsJson);
+                commandSerializedAsJson);
 
         return this.apiJsonSerializerService.serializeEntityIdentifier(result);
     }
@@ -130,8 +142,11 @@ public class OfficesApiResource {
         final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "ORGANISATION_ADMINISTRATION_SUPER_USER", "UPDATE_OFFICE");
         context.authenticatedUser().validateHasPermissionTo("UPDATE_OFFICE", allowedPermissions);
 
+        final OfficeCommand command = this.apiDataConversionService.convertApiRequestJsonToOfficeCommand(officeId, apiRequestBodyAsJson);
+        final String commandSerializedAsJson = this.commandSerializerService.serializeCommandToJson(command);
+        
         final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "offices", officeId,
-                apiRequestBodyAsJson);
+                commandSerializedAsJson);
 
         return this.apiJsonSerializerService.serializeEntityIdentifier(result);
     }

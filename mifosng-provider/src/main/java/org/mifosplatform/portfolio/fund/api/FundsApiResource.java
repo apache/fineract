@@ -17,10 +17,13 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
 import org.mifosng.platform.api.data.EntityIdentifier;
+import org.mifosng.platform.api.infrastructure.PortfolioApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService;
+import org.mifosng.platform.api.infrastructure.PortfolioCommandSerializerService;
 import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.portfolio.fund.command.FundCommand;
 import org.mifosplatform.portfolio.fund.data.FundData;
 import org.mifosplatform.portfolio.fund.service.FundReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,22 +34,27 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope("singleton")
 public class FundsApiResource {
-    
+
     private final String resourceNameForPermissions = "FUND";
-    
+
     private final PlatformSecurityContext context;
     private final FundReadPlatformService readPlatformService;
     private final PortfolioApiJsonSerializerService apiJsonSerializerService;
+    private final PortfolioApiDataConversionService apiDataConversionService;
+    private final PortfolioCommandSerializerService commandSerializerService;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-    
+
     @Autowired
-    public FundsApiResource(final PlatformSecurityContext context, 
-            final FundReadPlatformService readPlatformService,
+    public FundsApiResource(final PlatformSecurityContext context, final FundReadPlatformService readPlatformService,
             final PortfolioApiJsonSerializerService apiJsonSerializerService,
+            final PortfolioApiDataConversionService apiDataConversionService,
+            final PortfolioCommandSerializerService commandSerializerService,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
         this.context = context;
         this.readPlatformService = readPlatformService;
         this.apiJsonSerializerService = apiJsonSerializerService;
+        this.apiDataConversionService = apiDataConversionService;
+        this.commandSerializerService = commandSerializerService;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
     }
 
@@ -69,13 +77,16 @@ public class FundsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String createFund(final String apiRequestBodyAsJson) {
-        
+
         // FIXME - permissions - is funds a portfolio concept?
         final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "ORGANISATION_ADMINISTRATION_SUPER_USER", "CREATE_FUND");
         context.authenticatedUser().validateHasPermissionTo("CREATE_FUND", allowedPermissions);
 
+        final FundCommand command = this.apiDataConversionService.convertApiRequestJsonToFundCommand(null, apiRequestBodyAsJson);
+        final String commandSerializedAsJson = this.commandSerializerService.serializeCommandToJson(command);
+
         final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE", "funds", null,
-                apiRequestBodyAsJson);
+                commandSerializedAsJson);
 
         return this.apiJsonSerializerService.serializeEntityIdentifier(result);
     }
@@ -105,8 +116,11 @@ public class FundsApiResource {
         final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "ORGANISATION_ADMINISTRATION_SUPER_USER", "UPDATE_FUND");
         context.authenticatedUser().validateHasPermissionTo("UPDATE_FUND", allowedPermissions);
 
+        final FundCommand command = this.apiDataConversionService.convertApiRequestJsonToFundCommand(fundId, apiRequestBodyAsJson);
+        final String commandSerializedAsJson = this.commandSerializerService.serializeCommandToJson(command);
+
         final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "funds", fundId,
-                apiRequestBodyAsJson);
+                commandSerializedAsJson);
 
         return this.apiJsonSerializerService.serializeEntityIdentifier(result);
     }
