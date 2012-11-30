@@ -5,14 +5,13 @@ import org.mifosng.platform.client.service.RollbackTransactionAsCommandIsNotAppr
 import org.mifosng.platform.exceptions.OfficeNotFoundException;
 import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
 import org.mifosng.platform.exceptions.StaffNotFoundException;
+import org.mifosplatform.infrastructure.configuration.service.ConfigurationDomainService;
 import org.mifosplatform.infrastructure.office.domain.Office;
 import org.mifosplatform.infrastructure.office.domain.OfficeRepository;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.infrastructure.staff.command.StaffCommand;
 import org.mifosplatform.infrastructure.staff.domain.Staff;
 import org.mifosplatform.infrastructure.staff.domain.StaffRepository;
-import org.mifosplatform.infrastructure.user.domain.Permission;
-import org.mifosplatform.infrastructure.user.domain.PermissionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,15 +27,15 @@ public class StaffWritePlatformServiceJpaRepositoryImpl implements StaffWritePla
     private final PlatformSecurityContext context;
     private final StaffRepository staffRepository;
     private final OfficeRepository officeRepository;
-    private final PermissionRepository permissionRepository;
+    private final ConfigurationDomainService configurationDomainService;
 
     @Autowired
     public StaffWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final StaffRepository staffRepository,
-            final OfficeRepository officeRepository, final PermissionRepository permissionRepository) {
+            final OfficeRepository officeRepository, final ConfigurationDomainService configurationDomainService) {
         this.context = context;
         this.staffRepository = staffRepository;
         this.officeRepository = officeRepository;
-        this.permissionRepository = permissionRepository;
+        this.configurationDomainService = configurationDomainService;
     }
 
     @Transactional
@@ -54,8 +53,7 @@ public class StaffWritePlatformServiceJpaRepositoryImpl implements StaffWritePla
 
             this.staffRepository.save(staff);
 
-            final Permission thisTask = this.permissionRepository.findOneByCode("CREATE_STAFF");
-            if (thisTask.hasMakerCheckerEnabled() && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
+            if (this.configurationDomainService.isMakerCheckerEnabledForTask("CREATE_STAFF") && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
 
             return staff.getId();
         } catch (DataIntegrityViolationException dve) {
@@ -87,8 +85,7 @@ public class StaffWritePlatformServiceJpaRepositoryImpl implements StaffWritePla
 
             this.staffRepository.save(staff);
 
-            final Permission thisTask = this.permissionRepository.findOneByCode("UPDATE_STAFF");
-            if (thisTask.hasMakerCheckerEnabled() && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
+            if (this.configurationDomainService.isMakerCheckerEnabledForTask("UPDATE_STAFF") && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
 
             return staff.getId();
         } catch (DataIntegrityViolationException dve) {

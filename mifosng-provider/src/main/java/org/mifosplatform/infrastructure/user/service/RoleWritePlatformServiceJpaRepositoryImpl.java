@@ -4,8 +4,8 @@ import java.util.Collection;
 import java.util.Map;
 
 import org.mifosng.platform.client.service.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
-import org.mifosng.platform.exceptions.PermissionNotFoundException;
 import org.mifosng.platform.exceptions.RoleNotFoundException;
+import org.mifosplatform.infrastructure.configuration.service.ConfigurationDomainService;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.infrastructure.user.command.RoleCommand;
 import org.mifosplatform.infrastructure.user.command.RoleCommandValidator;
@@ -14,6 +14,7 @@ import org.mifosplatform.infrastructure.user.domain.Permission;
 import org.mifosplatform.infrastructure.user.domain.PermissionRepository;
 import org.mifosplatform.infrastructure.user.domain.Role;
 import org.mifosplatform.infrastructure.user.domain.RoleRepository;
+import org.mifosplatform.infrastructure.user.exception.PermissionNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,13 +25,16 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
     private final PlatformSecurityContext context;
     private final RoleRepository roleRepository;
     private final PermissionRepository permissionRepository;
+    private final ConfigurationDomainService configurationDomainService;
 
     @Autowired
     public RoleWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final RoleRepository roleRepository,
-            final PermissionRepository permissionRepository) {
+            final PermissionRepository permissionRepository,
+            final ConfigurationDomainService configurationDomainService) {
         this.context = context;
         this.roleRepository = roleRepository;
         this.permissionRepository = permissionRepository;
+        this.configurationDomainService = configurationDomainService;
     }
 
     @Transactional
@@ -46,8 +50,7 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
 
         this.roleRepository.save(entity);
         
-        final Permission thisTask = this.permissionRepository.findOneByCode("CREATE_ROLE");
-        if (thisTask.hasMakerCheckerEnabled() && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
+        if (this.configurationDomainService.isMakerCheckerEnabledForTask("CREATE_ROLE") && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
         
         return entity.getId();
     }
@@ -67,9 +70,8 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
 
         this.roleRepository.save(role);
         
-        final Permission thisTask = this.permissionRepository.findOneByCode("UPDATE_ROLE");
-        if (thisTask.hasMakerCheckerEnabled() && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
-
+        if (this.configurationDomainService.isMakerCheckerEnabledForTask("UPDATE_ROLE") && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
+        
         return role.getId();
     }
 
@@ -97,8 +99,7 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
 
         this.roleRepository.save(role);
         
-        final Permission thisTask = this.permissionRepository.findOneByCode("PERMISSIONS_ROLE");
-        if (thisTask.hasMakerCheckerEnabled() && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
+        if (this.configurationDomainService.isMakerCheckerEnabledForTask("PERMISSIONS_ROLE") && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
         
         return role.getId();
     }

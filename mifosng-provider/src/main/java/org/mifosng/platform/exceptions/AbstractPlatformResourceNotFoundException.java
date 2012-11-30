@@ -10,8 +10,8 @@ public abstract class AbstractPlatformResourceNotFoundException extends RuntimeE
     private final String defaultUserMessage;
     private final Object[] defaultUserMessageArgs;
 
-    public AbstractPlatformResourceNotFoundException(String globalisationMessageCode, String defaultUserMessage,
-            Object... defaultUserMessageArgs) {
+    public AbstractPlatformResourceNotFoundException(final String globalisationMessageCode, final String defaultUserMessage,
+            final Object... defaultUserMessageArgs) {
         this.globalisationMessageCode = globalisationMessageCode;
         this.defaultUserMessage = defaultUserMessage;
         this.defaultUserMessageArgs = defaultUserMessageArgs;

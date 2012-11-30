@@ -1,5 +1,6 @@
 package org.mifosng.platform.api.infrastructure;
 
+import org.mifosng.platform.api.commands.ClientCommand;
 import org.mifosplatform.infrastructure.codes.command.CodeCommand;
 import org.mifosplatform.infrastructure.configuration.command.CurrencyCommand;
 import org.mifosplatform.infrastructure.office.command.BranchMoneyTransferCommand;
@@ -9,6 +10,7 @@ import org.mifosplatform.infrastructure.user.command.PermissionsCommand;
 import org.mifosplatform.infrastructure.user.command.RoleCommand;
 import org.mifosplatform.infrastructure.user.command.RolePermissionCommand;
 import org.mifosplatform.infrastructure.user.command.UserCommand;
+import org.mifosplatform.portfolio.charge.command.ChargeDefinitionCommand;
 import org.mifosplatform.portfolio.fund.command.FundCommand;
 
 /**
@@ -42,4 +44,8 @@ public interface PortfolioCommandDeserializerService {
     BranchMoneyTransferCommand deserializeOfficeTransactionCommand(String commandAsJson, boolean makerCheckerApproval);
 
     CurrencyCommand deserializeCurrencyCommand(String commandAsJson, boolean makerCheckerApproval);
+
+    ChargeDefinitionCommand deserializeChargeDefinitionCommand(Long chargeDefinitionId, String commandAsJson, boolean makerCheckerApproval);
+
+    ClientCommand deserializeClientCommand(Long clientId, String commandAsJson, boolean makerCheckerApproval);
 }

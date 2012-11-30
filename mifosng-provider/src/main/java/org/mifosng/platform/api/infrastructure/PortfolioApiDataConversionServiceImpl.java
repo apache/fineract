@@ -52,7 +52,7 @@ import org.mifosplatform.infrastructure.user.command.PermissionsCommand;
 import org.mifosplatform.infrastructure.user.command.RoleCommand;
 import org.mifosplatform.infrastructure.user.command.RolePermissionCommand;
 import org.mifosplatform.infrastructure.user.command.UserCommand;
-import org.mifosplatform.portfolio.charge.command.ChargeCommand;
+import org.mifosplatform.portfolio.charge.command.ChargeDefinitionCommand;
 import org.mifosplatform.portfolio.fund.command.FundCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.number.NumberFormatter;
@@ -92,7 +92,7 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
     }
 
     @Override
-    public ChargeCommand convertJsonToChargeCommand(final Long resourceIdentifier, final String json) {
+    public ChargeDefinitionCommand convertApiRequestJsonToChargeDefinitionCommand(final Long resourceIdentifier, final String json) {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, String>>() {}.getType();
@@ -103,21 +103,25 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
                 "active"));
 
         checkForUnsupportedParameters(requestMap, supportedParams);
+        
+        final JsonParserHelper helper = new JsonParserHelper();
+        JsonParser parser = new JsonParser();
+        final JsonElement element = parser.parse(json);
 
-        Set<String> modifiedParameters = new HashSet<String>();
+        final Set<String> parametersPassedInRequest = new HashSet<String>();
 
-        final String name = extractStringParameter("name", requestMap, modifiedParameters);
-        final BigDecimal amount = extractBigDecimalParameter("amount", requestMap, modifiedParameters);
-        final String currencyCode = extractStringParameter("currencyCode", requestMap, modifiedParameters);
-
-        final Integer chargeTimeType = extractIntegerParameter("chargeTimeType", requestMap, modifiedParameters);
-        final Integer chargeAppliesTo = extractIntegerParameter("chargeAppliesTo", requestMap, modifiedParameters);
-        final Integer chargeCalculationType = extractIntegerParameter("chargeCalculationType", requestMap, modifiedParameters);
-
-        final boolean penalty = extractBooleanParameter("penalty", requestMap, modifiedParameters);
-        final boolean active = extractBooleanParameter("active", requestMap, modifiedParameters);
-
-        return new ChargeCommand(modifiedParameters, resourceIdentifier, name, amount, currencyCode, chargeTimeType, chargeAppliesTo,
+        final String name = helper.extractStringNamed("name", element, parametersPassedInRequest);
+        final String currencyCode = helper.extractStringNamed("currencyCode", element, parametersPassedInRequest);
+        final BigDecimal amount = helper.extractBigDecimalWithLocaleNamed("amount", element.getAsJsonObject(), parametersPassedInRequest);
+        
+        final Integer chargeTimeType = helper.extractIntegerWithLocaleNamed("chargeTimeType", element, parametersPassedInRequest);
+        final Integer chargeAppliesTo = helper.extractIntegerWithLocaleNamed("chargeAppliesTo", element, parametersPassedInRequest);
+        final Integer chargeCalculationType = helper.extractIntegerWithLocaleNamed("chargeCalculationType", element, parametersPassedInRequest);
+        
+        final Boolean penalty = helper.extractBooleanNamed("penalty", element, parametersPassedInRequest);
+        final Boolean active = helper.extractBooleanNamed("active", element, parametersPassedInRequest);
+        
+        return new ChargeDefinitionCommand(parametersPassedInRequest, false, resourceIdentifier, name, amount, currencyCode, chargeTimeType, chargeAppliesTo,
                 chargeCalculationType, penalty, active);
     }
 
@@ -467,38 +471,9 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
     }
 
     @Override
-    public ClientCommand convertInternalJsonFormatToClientCommand(final Long resourceIdentifier, final String json,
-            final boolean checkerApproved) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
-
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        final Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
-
-        final Set<String> supportedParams = new HashSet<String>(Arrays.asList("id", "externalId", "firstname", "lastname",
-                "clientOrBusinessName", "officeId", "joiningDate"));
-
-        checkForUnsupportedParameters(requestMap, supportedParams);
-
-        final JsonParser parser = new JsonParser();
-        final JsonElement element = parser.parse(json);
-        final JsonParserHelper helper = new JsonParserHelper();
-        final Set<String> parametersPassedInRequest = new HashSet<String>();
-
-        final Long officeId = helper.extractLongNamed("officeId", element, parametersPassedInRequest);
-        final String externalId = helper.extractStringNamed("externalId", element, parametersPassedInRequest);
-        final String firstname = helper.extractStringNamed("firstname", element, parametersPassedInRequest);
-        final String lastname = helper.extractStringNamed("lastname", element, parametersPassedInRequest);
-        final String clientOrBusinessName = helper.extractStringNamed("clientOrBusinessName", element, parametersPassedInRequest);
-        final LocalDate joiningDate = helper.extractLocalDateAsArrayNamed("joiningDate", element, parametersPassedInRequest);
-
-        return new ClientCommand(parametersPassedInRequest, resourceIdentifier, externalId, firstname, lastname, clientOrBusinessName,
-                officeId, joiningDate, checkerApproved);
-    }
-
-    @Override
     public ClientData convertInternalJsonFormatToClientDataChange(final Long resourceIdentifier, final String json) {
 
-        final ClientCommand command = convertInternalJsonFormatToClientCommand(resourceIdentifier, json, false);
+        final ClientCommand command = this.portfolioCommandDeserializerService.deserializeClientCommand(resourceIdentifier, json, false);
 
         return ClientData.dataChangeInstance(resourceIdentifier, command.getOfficeId(), command.getExternalId(), command.getFirstname(),
                 command.getLastname(), command.getClientOrBusinessName(), command.getJoiningDate());
@@ -570,14 +545,14 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
                 .extractLongNamed("transactionProcessingStrategyId", element, modifiedParameters);
 
         final String currencyCode = helper.extractStringNamed("currencyCode", element, modifiedParameters);
-        final Integer digitsAfterDecimal = helper.extractIntegerNamed("digitsAfterDecimal", element, modifiedParameters);
+        final Integer digitsAfterDecimal = helper.extractIntegerWithLocaleNamed("digitsAfterDecimal", element, modifiedParameters);
 
-        final BigDecimal principal = helper.extractBigDecimalNamed("principal", element, modifiedParameters);
-        final BigDecimal inArrearsTolerance = helper.extractBigDecimalNamed("inArrearsTolerance", element, modifiedParameters);
-        final BigDecimal interestRatePerPeriod = helper.extractBigDecimalNamed("interestRatePerPeriod", element, modifiedParameters);
-        final Integer repaymentEvery = helper.extractIntegerNamed("repaymentEvery", element, modifiedParameters);
-        final Integer numberOfRepayments = helper.extractIntegerNamed("numberOfRepayments", element, modifiedParameters);
-        final Integer repaymentFrequencyType = helper.extractIntegerNamed("repaymentFrequencyType", element, modifiedParameters);
+        final BigDecimal principal = helper.extractBigDecimalWithLocaleNamed("principal", element, modifiedParameters);
+        final BigDecimal inArrearsTolerance = helper.extractBigDecimalWithLocaleNamed("inArrearsTolerance", element, modifiedParameters);
+        final BigDecimal interestRatePerPeriod = helper.extractBigDecimalWithLocaleNamed("interestRatePerPeriod", element, modifiedParameters);
+        final Integer repaymentEvery = helper.extractIntegerWithLocaleNamed("repaymentEvery", element, modifiedParameters);
+        final Integer numberOfRepayments = helper.extractIntegerWithLocaleNamed("numberOfRepayments", element, modifiedParameters);
+        final Integer repaymentFrequencyType = helper.extractIntegerWithLocaleNamed("repaymentFrequencyType", element, modifiedParameters);
 
         // FIXME - A - LoanProduct - KW - should loan term fields be part of
         // product also as are basic part of 'loan terms'
@@ -587,10 +562,10 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         // final Integer loanTermFrequencyType =
         // helper.extractIntegerNamed("loanTermFrequencyType", element,
         // modifiedParameters);
-        final Integer interestRateFrequencyType = helper.extractIntegerNamed("interestRateFrequencyType", element, modifiedParameters);
-        final Integer amortizationType = helper.extractIntegerNamed("amortizationType", element, modifiedParameters);
-        final Integer interestType = helper.extractIntegerNamed("interestType", element, modifiedParameters);
-        final Integer interestCalculationPeriodType = helper.extractIntegerNamed("interestCalculationPeriodType", element,
+        final Integer interestRateFrequencyType = helper.extractIntegerWithLocaleNamed("interestRateFrequencyType", element, modifiedParameters);
+        final Integer amortizationType = helper.extractIntegerWithLocaleNamed("amortizationType", element, modifiedParameters);
+        final Integer interestType = helper.extractIntegerWithLocaleNamed("interestType", element, modifiedParameters);
+        final Integer interestCalculationPeriodType = helper.extractIntegerWithLocaleNamed("interestCalculationPeriodType", element,
                 modifiedParameters);
 
         String[] charges = null;
@@ -642,20 +617,20 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         final Long transactionProcessingStrategyId = helper.extractLongNamed("transactionProcessingStrategyId", element,
                 parametersPassedInCommand);
         final String externalId = helper.extractStringNamed("externalId", element, parametersPassedInCommand);
-        final BigDecimal principal = helper.extractBigDecimalNamed("principal", element, parametersPassedInCommand);
-        final BigDecimal inArrearsToleranceValue = helper.extractBigDecimalNamed("inArrearsTolerance", element, parametersPassedInCommand);
-        final BigDecimal interestRatePerPeriod = helper.extractBigDecimalNamed("interestRatePerPeriod", element, parametersPassedInCommand);
+        final BigDecimal principal = helper.extractBigDecimalWithLocaleNamed("principal", element, parametersPassedInCommand);
+        final BigDecimal inArrearsToleranceValue = helper.extractBigDecimalWithLocaleNamed("inArrearsTolerance", element, parametersPassedInCommand);
+        final BigDecimal interestRatePerPeriod = helper.extractBigDecimalWithLocaleNamed("interestRatePerPeriod", element, parametersPassedInCommand);
 
-        final Integer repaymentEvery = helper.extractIntegerNamed("repaymentEvery", element, parametersPassedInCommand);
-        final Integer numberOfRepayments = helper.extractIntegerNamed("numberOfRepayments", element, parametersPassedInCommand);
-        final Integer repaymentFrequencyType = helper.extractIntegerNamed("repaymentFrequencyType", element, parametersPassedInCommand);
-        final Integer loanTermFrequency = helper.extractIntegerNamed("loanTermFrequency", element, parametersPassedInCommand);
-        final Integer loanTermFrequencyType = helper.extractIntegerNamed("loanTermFrequencyType", element, parametersPassedInCommand);
-        final Integer interestRateFrequencyType = helper.extractIntegerNamed("interestRateFrequencyType", element,
+        final Integer repaymentEvery = helper.extractIntegerWithLocaleNamed("repaymentEvery", element, parametersPassedInCommand);
+        final Integer numberOfRepayments = helper.extractIntegerWithLocaleNamed("numberOfRepayments", element, parametersPassedInCommand);
+        final Integer repaymentFrequencyType = helper.extractIntegerWithLocaleNamed("repaymentFrequencyType", element, parametersPassedInCommand);
+        final Integer loanTermFrequency = helper.extractIntegerWithLocaleNamed("loanTermFrequency", element, parametersPassedInCommand);
+        final Integer loanTermFrequencyType = helper.extractIntegerWithLocaleNamed("loanTermFrequencyType", element, parametersPassedInCommand);
+        final Integer interestRateFrequencyType = helper.extractIntegerWithLocaleNamed("interestRateFrequencyType", element,
                 parametersPassedInCommand);
-        final Integer amortizationType = helper.extractIntegerNamed("amortizationType", element, parametersPassedInCommand);
-        final Integer interestType = helper.extractIntegerNamed("interestType", element, parametersPassedInCommand);
-        final Integer interestCalculationPeriodType = helper.extractIntegerNamed("interestCalculationPeriodType", element,
+        final Integer amortizationType = helper.extractIntegerWithLocaleNamed("amortizationType", element, parametersPassedInCommand);
+        final Integer interestType = helper.extractIntegerWithLocaleNamed("interestType", element, parametersPassedInCommand);
+        final Integer interestCalculationPeriodType = helper.extractIntegerWithLocaleNamed("interestCalculationPeriodType", element,
                 parametersPassedInCommand);
 
         final LocalDate expectedDisbursementDate = helper.extractLocalDateNamed("expectedDisbursementDate", element,

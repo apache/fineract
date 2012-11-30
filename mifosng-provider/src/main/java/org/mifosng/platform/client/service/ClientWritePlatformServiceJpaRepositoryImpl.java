@@ -27,11 +27,10 @@ import org.mifosng.platform.infrastructure.FileUtils;
 import org.mifosplatform.infrastructure.codes.domain.CodeValue;
 import org.mifosplatform.infrastructure.codes.domain.CodeValueRepository;
 import org.mifosplatform.infrastructure.codes.exception.CodeValueNotFoundException;
+import org.mifosplatform.infrastructure.configuration.service.ConfigurationDomainService;
 import org.mifosplatform.infrastructure.office.domain.Office;
 import org.mifosplatform.infrastructure.office.domain.OfficeRepository;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.infrastructure.user.domain.Permission;
-import org.mifosplatform.infrastructure.user.domain.PermissionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,19 +49,20 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     private final OfficeRepository officeRepository;
     private final NoteRepository noteRepository;
     private final CodeValueRepository codeValueRepository;
-    private final PermissionRepository permissionRepository;
+    private final ConfigurationDomainService configurationDomainService;
 
     @Autowired
     public ClientWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final ClientRepository clientRepository,
             final ClientIdentifierRepository clientIdentifierRepository, final OfficeRepository officeRepository,
-            NoteRepository noteRepository, final CodeValueRepository codeValueRepository, final PermissionRepository permissionRepository) {
+            final NoteRepository noteRepository, final CodeValueRepository codeValueRepository,
+            final ConfigurationDomainService configurationDomainService) {
         this.context = context;
         this.clientRepository = clientRepository;
         this.clientIdentifierRepository = clientIdentifierRepository;
         this.officeRepository = officeRepository;
         this.noteRepository = noteRepository;
         this.codeValueRepository = codeValueRepository;
-        this.permissionRepository = permissionRepository;
+        this.configurationDomainService = configurationDomainService;
     }
 
     @Transactional
@@ -76,9 +76,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         client.delete();
         this.clientRepository.save(client);
 
-        final Permission thisTask = this.permissionRepository.findOneByCode("DELETE_CLIENT");
-        if (thisTask.hasMakerCheckerEnabled() && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
-        
+        if (this.configurationDomainService.isMakerCheckerEnabledForTask("DELETE_CLIENT") && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
+
         return new EntityIdentifier(client.getId());
     }
 
@@ -121,9 +120,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             final Client newClient = Client.newClient(clientOffice, firstname, lastname, command.getJoiningDate(), command.getExternalId());
 
             this.clientRepository.save(newClient);
-            
-            final Permission thisTask = this.permissionRepository.findOneByCode("CREATE_CLIENT");
-            if (thisTask.hasMakerCheckerEnabled() && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
+
+            if (this.configurationDomainService.isMakerCheckerEnabledForTask("CREATE_CLIENT") && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
 
             return newClient.getId();
         } catch (DataIntegrityViolationException dve) {
@@ -155,9 +153,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
             this.clientRepository.saveAndFlush(clientForUpdate);
 
-            final Permission thisTask = this.permissionRepository.findOneByCode("UPDATE_CLIENT");
-            if (thisTask.hasMakerCheckerEnabled() && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
-            
+            if (this.configurationDomainService.isMakerCheckerEnabledForTask("UPDATE_CLIENT") && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
+
             return new EntityIdentifier(clientForUpdate.getId());
         } catch (DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);

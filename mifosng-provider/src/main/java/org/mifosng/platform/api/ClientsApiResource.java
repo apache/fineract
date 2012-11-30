@@ -23,6 +23,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.StringUtils;
+import org.mifosng.platform.api.commands.ClientCommand;
 import org.mifosng.platform.api.commands.NoteCommand;
 import org.mifosng.platform.api.data.ClientAccountSummaryCollectionData;
 import org.mifosng.platform.api.data.ClientData;
@@ -31,6 +32,7 @@ import org.mifosng.platform.api.data.NoteData;
 import org.mifosng.platform.api.infrastructure.ApiConstants;
 import org.mifosng.platform.api.infrastructure.PortfolioApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService;
+import org.mifosng.platform.api.infrastructure.PortfolioCommandSerializerService;
 import org.mifosng.platform.client.service.ClientReadPlatformService;
 import org.mifosng.platform.client.service.ClientWritePlatformService;
 import org.mifosng.platform.exceptions.ImageNotFoundException;
@@ -61,33 +63,38 @@ public class ClientsApiResource {
 
     private final static Logger logger = LoggerFactory.getLogger(ClientsApiResource.class);
 
-    @Autowired
-    private ClientReadPlatformService clientReadPlatformService;
+    private final PlatformSecurityContext context;
+    private final ClientReadPlatformService clientReadPlatformService;
+    private final ClientWritePlatformService clientWritePlatformService;
+    private final OfficeReadPlatformService officeReadPlatformService;
+    private final PortfolioApiDataConversionService apiDataConversionService;
+    private final PortfolioCommandSerializerService commandSerializerService;
+    private final PortfolioApiJsonSerializerService apiJsonSerializerService;
+    private final PortfolioCommandsReadPlatformService commandSourceReadPlatformService;
+    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @Autowired
-    private ClientWritePlatformService clientWritePlatformService;
-
-    @Autowired
-    private PortfolioCommandsReadPlatformService commandSourceReadPlatformService;
-
-    @Autowired
-    private PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-
-    @Autowired
-    private OfficeReadPlatformService officeReadPlatformService;
-
-    @Autowired
-    private PortfolioApiDataConversionService apiDataConversionService;
-
-    @Autowired
-    private PortfolioApiJsonSerializerService apiJsonSerializerService;
-
-    @Autowired
-    private PlatformSecurityContext context;
+    public ClientsApiResource(final PlatformSecurityContext context, final ClientReadPlatformService readPlatformService,
+            final ClientWritePlatformService clientWritePlatformService, final OfficeReadPlatformService officeReadPlatformService,
+            final PortfolioApiDataConversionService apiDataConversionService,
+            final PortfolioCommandSerializerService commandSerializerService,
+            final PortfolioApiJsonSerializerService apiJsonSerializerService,
+            final PortfolioCommandsReadPlatformService commandsReadPlatformService,
+            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
+        this.context = context;
+        this.clientReadPlatformService = readPlatformService;
+        this.clientWritePlatformService = clientWritePlatformService;
+        this.officeReadPlatformService = officeReadPlatformService;
+        this.apiDataConversionService = apiDataConversionService;
+        this.commandSerializerService = commandSerializerService;
+        this.apiJsonSerializerService = apiJsonSerializerService;
+        this.commandSourceReadPlatformService = commandsReadPlatformService;
+        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
+    }
 
     @GET
-    @Consumes({MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_JSON})
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveAllIndividualClients(@Context final UriInfo uriInfo, @QueryParam("sqlSearch") final String sqlSearch,
             @QueryParam("officeId") final Integer officeId, @QueryParam("externalId") final String externalId,
             @QueryParam("displayName") final String displayName, @QueryParam("firstName") final String firstName,
@@ -150,8 +157,8 @@ public class ClientsApiResource {
 
     @GET
     @Path("{clientId}")
-    @Consumes({MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_JSON})
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveClient(@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
 
         context.authenticatedUser().validateHasReadPermission("CLIENT");
@@ -170,14 +177,16 @@ public class ClientsApiResource {
             clientData = handleRequestToIntegrateProposedChangesFromCommand(clientId, commandId, clientData);
         }
 
-        // pick up possibility of changes by default - might push down a layer into the retrieve client method 
+        // pick up possibility of changes by default - might push down a layer
+        // into the retrieve client method
         final Collection<ClientData> dataChanges = retrieveAllUnprocessedDataChanges(clientId);
         clientData = ClientData.integrateChanges(clientData, clientData.currentChange(), dataChanges);
 
         return this.apiJsonSerializerService.serializeClientDataToJson(prettyPrint, responseParameters, clientData);
     }
 
-    private ClientData handleRequestToIntegrateProposedChangesFromCommand(final Long clientId, final Long commandId, final ClientData clientData) {
+    private ClientData handleRequestToIntegrateProposedChangesFromCommand(final Long clientId, final Long commandId,
+            final ClientData clientData) {
         final CommandSourceData entry = this.commandSourceReadPlatformService.retrieveById(commandId);
         final ClientData currentChange = this.apiDataConversionService.convertInternalJsonFormatToClientDataChange(clientId, entry.json());
 
@@ -205,8 +214,8 @@ public class ClientsApiResource {
 
     @GET
     @Path("template")
-    @Consumes({MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_JSON})
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
     public String newClientDetails(@Context final UriInfo uriInfo) {
 
         context.authenticatedUser().validateHasReadPermission("CLIENT");
@@ -224,43 +233,49 @@ public class ClientsApiResource {
     }
 
     @POST
-    @Consumes({MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_JSON})
-    public String createClient(final String jsonRequestBody) {
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String createClient(final String apiRequestBodyAsJson) {
 
         final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "PORTFOLIO_MANAGEMENT_SUPER_USER", "CREATE_CLIENT");
         context.authenticatedUser().validateHasPermissionTo("CREATE_CLIENT", allowedPermissions);
-        
-        final EntityIdentifier result = this.commandsSourceWritePlatformService
-                .logCommandSource("CREATE", "clients", null, jsonRequestBody);
+
+        final ClientCommand command = this.apiDataConversionService.convertApiRequestJsonToClientCommand(null, apiRequestBodyAsJson);
+        final String commandSerializedAsJson = this.commandSerializerService.serializeCommandToJson(command);
+
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE", "clients", null,
+                commandSerializedAsJson);
 
         return this.apiJsonSerializerService.serializeEntityIdentifier(result);
     }
 
     @PUT
     @Path("{clientId}")
-    @Consumes({MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_JSON})
-    public String updateClient(@PathParam("clientId") final Long clientId, final String jsonRequestBody) {
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String updateClient(@PathParam("clientId") final Long clientId, final String apiRequestBodyAsJson) {
 
         final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "PORTFOLIO_MANAGEMENT_SUPER_USER", "UPDATE_CLIENT");
         context.authenticatedUser().validateHasPermissionTo("UPDATE_CLIENT", allowedPermissions);
-        
+
+        final ClientCommand command = this.apiDataConversionService.convertApiRequestJsonToClientCommand(clientId, apiRequestBodyAsJson);
+        final String commandSerializedAsJson = this.commandSerializerService.serializeCommandToJson(command);
+
         final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "clients", clientId,
-                jsonRequestBody);
+                commandSerializedAsJson);
 
         return this.apiJsonSerializerService.serializeEntityIdentifier(result);
     }
 
     @DELETE
     @Path("{clientId}")
-    @Consumes({MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_JSON})
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
     public String deleteClient(@PathParam("clientId") final Long clientId) {
 
         final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "PORTFOLIO_MANAGEMENT_SUPER_USER", "DELETE_CLIENT");
         context.authenticatedUser().validateHasPermissionTo("DELETE_CLIENT", allowedPermissions);
-        
+
         final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("DELETE", "clients", clientId, "{}");
 
         return this.apiJsonSerializerService.serializeEntityIdentifier(result);
@@ -268,8 +283,8 @@ public class ClientsApiResource {
 
     @GET
     @Path("{clientId}/loans")
-    @Consumes({MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_JSON})
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveClientAccount(@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
 
         context.authenticatedUser().validateHasReadPermission("CLIENT");
@@ -285,8 +300,8 @@ public class ClientsApiResource {
 
     @GET
     @Path("{clientId}/notes")
-    @Consumes({MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_JSON})
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveAllClientNotes(@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
 
         context.authenticatedUser().validateHasReadPermission("CLIENTNOTE");
@@ -301,8 +316,8 @@ public class ClientsApiResource {
 
     @POST
     @Path("{clientId}/notes")
-    @Consumes({MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_JSON})
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
     public Response addNewClientNote(@PathParam("clientId") final Long clientId, final String jsonRequestBody) {
 
         final NoteCommand command = this.apiDataConversionService.convertJsonToNoteCommand(null, clientId, jsonRequestBody);
@@ -314,8 +329,8 @@ public class ClientsApiResource {
 
     @GET
     @Path("{clientId}/notes/{noteId}")
-    @Consumes({MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_JSON})
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveClientNote(@PathParam("clientId") final Long clientId, @PathParam("noteId") final Long noteId,
             @Context final UriInfo uriInfo) {
 
@@ -331,8 +346,8 @@ public class ClientsApiResource {
 
     @PUT
     @Path("{clientId}/notes/{noteId}")
-    @Consumes({MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_JSON})
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
     public Response updateClientNote(@PathParam("clientId") final Long clientId, @PathParam("noteId") final Long noteId,
             final String jsonRequestBody) {
 
@@ -348,8 +363,8 @@ public class ClientsApiResource {
      */
     @POST
     @Path("{clientId}/image")
-    @Consumes({MediaType.MULTIPART_FORM_DATA})
-    @Produces({MediaType.APPLICATION_JSON})
+    @Consumes({ MediaType.MULTIPART_FORM_DATA })
+    @Produces({ MediaType.APPLICATION_JSON })
     public Response addNewClientImage(@PathParam("clientId") final Long clientId, @HeaderParam("Content-Length") Long fileSize,
             @FormDataParam("file") InputStream inputStream, @FormDataParam("file") FormDataContentDisposition fileDetails,
             @FormDataParam("file") FormDataBodyPart bodyPart) {
@@ -361,10 +376,10 @@ public class ClientsApiResource {
         FileUtils.validateImageMimeType(bodyPart.getMediaType().toString());
         FileUtils.validateFileSizeWithinPermissibleRange(fileSize, fileDetails.getFileName(), ApiConstants.MAX_FILE_UPLOAD_SIZE_IN_MB);
 
-//        logger.debug(bodyPart.getMediaType().toString());
+        // logger.debug(bodyPart.getMediaType().toString());
 
-        final EntityIdentifier entityIdentifier = this.clientWritePlatformService.saveOrUpdateClientImage(clientId, fileDetails.getFileName(),
-                inputStream);
+        final EntityIdentifier entityIdentifier = this.clientWritePlatformService.saveOrUpdateClientImage(clientId,
+                fileDetails.getFileName(), inputStream);
 
         return Response.ok().entity(entityIdentifier).build();
     }
@@ -374,8 +389,8 @@ public class ClientsApiResource {
      */
     @POST
     @Path("{clientId}/image")
-    @Consumes({MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_JSON})
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
     public Response addNewClientImage(@PathParam("clientId") final Long clientId, final String jsonRequestBody) {
 
         final Base64EncodedImage base64EncodedImage = FileUtils.extractImageFromDataURL(jsonRequestBody);
@@ -390,8 +405,8 @@ public class ClientsApiResource {
      */
     @GET
     @Path("{clientId}/image")
-    @Consumes({MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_JSON})
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
     public Response retrieveClientImage(@PathParam("clientId") final Long clientId) {
 
         context.authenticatedUser().validateHasReadPermission("CLIENTIMAGE");
@@ -408,8 +423,8 @@ public class ClientsApiResource {
      */
     @PUT
     @Path("{clientId}/image")
-    @Consumes({MediaType.MULTIPART_FORM_DATA})
-    @Produces({MediaType.APPLICATION_JSON})
+    @Consumes({ MediaType.MULTIPART_FORM_DATA })
+    @Produces({ MediaType.APPLICATION_JSON })
     public Response updateClientImage(@PathParam("clientId") final Long clientId, @HeaderParam("Content-Length") Long fileSize,
             @FormDataParam("file") InputStream inputStream, @FormDataParam("file") FormDataContentDisposition fileDetails,
             @FormDataParam("file") FormDataBodyPart bodyPart) {
@@ -418,8 +433,8 @@ public class ClientsApiResource {
 
     @DELETE
     @Path("{clientId}/image")
-    @Consumes({MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_JSON})
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
     public Response deleteClientImage(@PathParam("clientId") final Long clientId) {
         this.clientWritePlatformService.deleteClientImage(clientId);
         return Response.ok(new EntityIdentifier(clientId)).build();
@@ -433,8 +448,8 @@ public class ClientsApiResource {
      */
     @PUT
     @Path("{clientId}/image")
-    @Consumes({MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_JSON})
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
     public Response updateClientImage(@PathParam("clientId") final Long clientId, final String jsonRequestBody) {
         return addNewClientImage(clientId, jsonRequestBody);
     }

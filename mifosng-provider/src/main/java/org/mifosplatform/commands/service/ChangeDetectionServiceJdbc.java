@@ -4,6 +4,7 @@ import org.mifosng.platform.api.commands.ClientCommand;
 import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.infrastructure.PortfolioApiDataConversionService;
 import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService;
+import org.mifosng.platform.api.infrastructure.PortfolioCommandSerializerService;
 import org.mifosng.platform.client.service.ClientReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,11 +15,16 @@ public class ChangeDetectionServiceJdbc implements ChangeDetectionService {
     private final PortfolioApiDataConversionService apiDataConversionService;
     private final PortfolioApiJsonSerializerService apiJsonSerializerService;
     private final ClientReadPlatformService clientReadPlatformService;
+    private final PortfolioCommandSerializerService commandSerializerService;
 
     @Autowired
-    public ChangeDetectionServiceJdbc(final PortfolioApiDataConversionService apiDataConversionService,
-            final PortfolioApiJsonSerializerService apiJsonSerializerService, final ClientReadPlatformService clientReadPlatformService) {
+    public ChangeDetectionServiceJdbc(
+            final PortfolioApiDataConversionService apiDataConversionService,
+            final PortfolioCommandSerializerService commandSerializerService,
+            final PortfolioApiJsonSerializerService apiJsonSerializerService, 
+            final ClientReadPlatformService clientReadPlatformService) {
         this.apiDataConversionService = apiDataConversionService;
+        this.commandSerializerService = commandSerializerService;
         this.apiJsonSerializerService = apiJsonSerializerService;
         this.clientReadPlatformService = clientReadPlatformService;
     }
@@ -40,7 +46,7 @@ public class ChangeDetectionServiceJdbc implements ChangeDetectionService {
             final String workingJson = this.apiJsonSerializerService.serializeClientDataToJson(changedClient);
             final ClientCommand changesOnly = this.apiDataConversionService.detectChanges(resourceId, baseJson, workingJson);
     
-            changesOnlyJson = this.apiJsonSerializerService.serializeClientCommandToJson(changesOnly);
+            changesOnlyJson = this.commandSerializerService.serializeCommandToJson(changesOnly);
         } else {
             changesOnlyJson = commandSerializedAsJson;
         }

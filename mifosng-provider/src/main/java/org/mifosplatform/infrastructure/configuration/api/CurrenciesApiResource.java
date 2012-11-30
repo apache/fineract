@@ -18,7 +18,7 @@ import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService
 import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.mifosplatform.infrastructure.configuration.data.ConfigurationData;
-import org.mifosplatform.infrastructure.configuration.service.ConfigurationReadPlatformService;
+import org.mifosplatform.infrastructure.configuration.service.OrganisationCurrencyReadPlatformService;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -32,13 +32,13 @@ public class CurrenciesApiResource {
     private final String resourceNameForPermissions = "CURRENCY";
     
     private final PlatformSecurityContext context;
-    private final ConfigurationReadPlatformService readPlatformService;
+    private final OrganisationCurrencyReadPlatformService readPlatformService;
     private final PortfolioApiJsonSerializerService apiJsonSerializerService;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @Autowired
     public CurrenciesApiResource(final PlatformSecurityContext context, 
-            final ConfigurationReadPlatformService readPlatformService,
+            final OrganisationCurrencyReadPlatformService readPlatformService,
             final PortfolioApiJsonSerializerService apiJsonSerializerService,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
         this.context = context;

@@ -3,7 +3,6 @@ package org.mifosng.platform.api.infrastructure;
 import java.util.Collection;
 import java.util.Set;
 
-import org.mifosng.platform.api.commands.ClientCommand;
 import org.mifosng.platform.api.data.ClientAccountSummaryCollectionData;
 import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.ClientIdentifierData;
@@ -89,8 +88,6 @@ public interface PortfolioApiJsonSerializerService {
     String serializeDepositAccountDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<DepositAccountData> accounts);
 
     String serializeDepositAccountDataToJson(boolean prettyPrint, Set<String> responseParameters, DepositAccountData account);
-
-    String serializeClientCommandToJson(ClientCommand command);
 
     String serializeClientDataToJson(ClientData clientData);
 

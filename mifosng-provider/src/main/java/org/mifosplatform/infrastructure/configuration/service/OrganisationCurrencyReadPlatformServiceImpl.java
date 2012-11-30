@@ -8,12 +8,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ConfigurationReadPlatformServiceImpl implements ConfigurationReadPlatformService {
+public class OrganisationCurrencyReadPlatformServiceImpl implements OrganisationCurrencyReadPlatformService {
 
     private final CurrencyReadPlatformService currencyReadPlatformService;
 
     @Autowired
-    public ConfigurationReadPlatformServiceImpl(final CurrencyReadPlatformService currencyReadPlatformService) {
+    public OrganisationCurrencyReadPlatformServiceImpl(final CurrencyReadPlatformService currencyReadPlatformService) {
         this.currencyReadPlatformService = currencyReadPlatformService;
     }
 

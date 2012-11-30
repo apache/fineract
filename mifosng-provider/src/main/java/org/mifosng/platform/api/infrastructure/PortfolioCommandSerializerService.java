@@ -38,4 +38,6 @@ public interface PortfolioCommandSerializerService {
     String serializeOfficeTransactionCommandToJson(BranchMoneyTransferCommand command);
 
     String serializeCurrencyCommandToJson(CurrencyCommand command);
+
+    String serializeCommandToJson(Object command);
 }

@@ -30,12 +30,12 @@ import org.mifosplatform.infrastructure.user.command.PermissionsCommand;
 import org.mifosplatform.infrastructure.user.command.RoleCommand;
 import org.mifosplatform.infrastructure.user.command.RolePermissionCommand;
 import org.mifosplatform.infrastructure.user.command.UserCommand;
-import org.mifosplatform.portfolio.charge.command.ChargeCommand;
+import org.mifosplatform.portfolio.charge.command.ChargeDefinitionCommand;
 import org.mifosplatform.portfolio.fund.command.FundCommand;
 
 public interface PortfolioApiDataConversionService {
 
-    ChargeCommand convertJsonToChargeCommand(Long resourceIdentifier, String json);
+    ChargeDefinitionCommand convertApiRequestJsonToChargeDefinitionCommand(Long resourceIdentifier, String json);
 
     FundCommand convertApiRequestJsonToFundCommand(Long resourceIdentifier, String json);
 
@@ -58,8 +58,6 @@ public interface PortfolioApiDataConversionService {
     DepositProductCommand convertJsonToDepositProductCommand(Long resourceIdentifier, String json);
 
     ClientCommand convertApiRequestJsonToClientCommand(Long resourceIdentifier, String json);
-
-    ClientCommand convertInternalJsonFormatToClientCommand(Long resourceIdentifier, String json, boolean checkerApproved);
 
     ClientData convertInternalJsonFormatToClientDataChange(Long clientId, String json);
 

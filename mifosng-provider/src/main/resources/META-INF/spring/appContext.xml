@@ -17,7 +17,7 @@
 	
 	<context:component-scan base-package="org.mifosng.platform.security, org.mifosng.platform.infrastructure, 
 										  org.mifosng.platform.*.domain, org.mifosng.platform, 
-										  org.mifosplatform.*.*.service, org.mifosplatform.*.*.domain, org.mifosplatform, org.mifosplatform.commands">
+										  org.mifosplatform.*.*.service, org.mifosplatform.*.*.domain, org.mifosplatform, org.mifosplatform.commands, org.mifosplatform.infrastructure.*.service">
 		<context:exclude-filter expression="org.springframework.stereotype.Controller" type="annotation" />
 	</context:component-scan>
 	

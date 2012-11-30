@@ -49,20 +49,21 @@ public class CommandSource extends AbstractPersistable<Long> {
     @Temporal(TemporalType.DATE)
     private Date checkedOnDate;
 
-    public static CommandSource createdBy(final String apiOperation, final String resource, final Long resourceId, final AppUser maker,
-            final LocalDate madeOnDate) {
-        return new CommandSource(apiOperation, resource, resourceId, maker, madeOnDate);
+    public static CommandSource createdBy(final String apiOperation, final String resource, final Long resourceId,
+            final String commandSerializedAsJson, final AppUser maker, final LocalDate madeOnDate) {
+        return new CommandSource(apiOperation, resource, resourceId, commandSerializedAsJson, maker, madeOnDate);
     }
 
     protected CommandSource() {
         //
     }
 
-    private CommandSource(final String apiOperation, final String resource, final Long resourceId, final AppUser maker,
+    private CommandSource(final String apiOperation, final String resource, final Long resourceId, final String commandSerializedAsJson, final AppUser maker,
             final LocalDate madeOnDate) {
         this.apiOperation = StringUtils.defaultIfEmpty(apiOperation, null);
         this.resource = StringUtils.defaultIfEmpty(resource, null);
         this.resourceId = resourceId;
+        this.commandAsJson = commandSerializedAsJson;
         this.maker = maker;
         this.madeOnDate = madeOnDate.toDate();
     }
@@ -72,7 +73,7 @@ public class CommandSource extends AbstractPersistable<Long> {
         if (this.madeOnDate != null) {
             madeOnLocalDate = new LocalDate(this.madeOnDate);
         }
-        return new CommandSource(this.apiOperation, this.resource, this.resourceId, this.maker, madeOnLocalDate);
+        return new CommandSource(this.apiOperation, this.resource, this.resourceId, this.commandAsJson, this.maker, madeOnLocalDate);
     }
 
     public void markAsChecked(final AppUser checker, final LocalDate checkedOnDate) {
@@ -114,7 +115,8 @@ public class CommandSource extends AbstractPersistable<Long> {
 
     public boolean isUpdate() {
         // permissions resource has special update which involves no resource.
-        return (isPermissionResource() && isUpdateOperation()) || (isCurrencyResource() && isUpdateOperation()) || (isUpdateOperation() && this.resourceId != null);
+        return (isPermissionResource() && isUpdateOperation()) || (isCurrencyResource() && isUpdateOperation())
+                || (isUpdateOperation() && this.resourceId != null);
     }
 
     private boolean isUpdateOperation() {
@@ -132,7 +134,7 @@ public class CommandSource extends AbstractPersistable<Long> {
     public boolean isPermissionResource() {
         return this.resource.equalsIgnoreCase("PERMISSIONS");
     }
-    
+
     public boolean isRoleResource() {
         return this.resource.equalsIgnoreCase("ROLES");
     }
@@ -144,7 +146,7 @@ public class CommandSource extends AbstractPersistable<Long> {
     public boolean isCurrencyResource() {
         return this.resource.equalsIgnoreCase("CURRENCIES");
     }
-    
+
     public boolean isCodeResource() {
         return this.resource.equalsIgnoreCase("CODES");
     }
@@ -152,11 +154,11 @@ public class CommandSource extends AbstractPersistable<Long> {
     public boolean isStaffResource() {
         return this.resource.equalsIgnoreCase("STAFF");
     }
-    
+
     public boolean isFundResource() {
         return this.resource.equalsIgnoreCase("FUNDS");
     }
-    
+
     public boolean isOfficeResource() {
         return this.resource.equalsIgnoreCase("OFFICES");
     }
@@ -164,8 +166,13 @@ public class CommandSource extends AbstractPersistable<Long> {
     public boolean isOfficeTransactionResource() {
         return this.resource.equalsIgnoreCase("OFFICETRANSACTIONS");
     }
-    
+
+    public boolean isChargeDefinitionResource() {
+        return this.resource.equalsIgnoreCase("CHARGES");
+    }
+
     public boolean isClientResource() {
         return this.resource.equalsIgnoreCase("CLIENTS");
     }
+
 }

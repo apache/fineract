@@ -7,6 +7,7 @@ import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
+import org.mifosng.platform.api.commands.ClientCommand;
 import org.mifosng.platform.infrastructure.api.JsonParserHelper;
 import org.mifosng.platform.infrastructure.errorhandling.InvalidJsonException;
 import org.mifosplatform.infrastructure.codes.command.CodeCommand;
@@ -18,6 +19,7 @@ import org.mifosplatform.infrastructure.user.command.PermissionsCommand;
 import org.mifosplatform.infrastructure.user.command.RoleCommand;
 import org.mifosplatform.infrastructure.user.command.RolePermissionCommand;
 import org.mifosplatform.infrastructure.user.command.UserCommand;
+import org.mifosplatform.portfolio.charge.command.ChargeDefinitionCommand;
 import org.mifosplatform.portfolio.fund.command.FundCommand;
 import org.springframework.stereotype.Service;
 
@@ -220,5 +222,52 @@ public class PortfolioCommandDeerializerServiceGoogleGson implements PortfolioCo
         final String[] currencies = helper.extractArrayNamed("currencies", element, parametersPassedInRequest);
 
         return new CurrencyCommand(makerCheckerApproval, currencies);
+    }
+
+    @Override
+    public ChargeDefinitionCommand deserializeChargeDefinitionCommand(final Long chargeDefinitionId, final String commandAsJson, final boolean makerCheckerApproval) {
+        
+        if (StringUtils.isBlank(commandAsJson)) { throw new InvalidJsonException(); }
+
+        final JsonParserHelper helper = new JsonParserHelper();
+        final JsonElement element = parser.parse(commandAsJson);
+
+        final Set<String> parametersPassedInRequest = new HashSet<String>();
+
+        final String name = helper.extractStringNamed("name", element, parametersPassedInRequest);
+        final String currencyCode = helper.extractStringNamed("currencyCode", element, parametersPassedInRequest);
+        final BigDecimal amount = helper.extractBigDecimalNamed("amount", element.getAsJsonObject(), Locale.US, parametersPassedInRequest);
+        
+        final Integer chargeTimeType = helper.extractIntegerNamed("chargeTimeType", element, Locale.US, parametersPassedInRequest);
+        final Integer chargeAppliesTo = helper.extractIntegerNamed("chargeAppliesTo", element, Locale.US, parametersPassedInRequest);
+        final Integer chargeCalculationType = helper.extractIntegerNamed("chargeCalculationType", element, Locale.US, parametersPassedInRequest);
+        
+        final Boolean penalty = helper.extractBooleanNamed("penalty", element, parametersPassedInRequest);
+        final Boolean active = helper.extractBooleanNamed("active", element, parametersPassedInRequest);
+        
+        return new ChargeDefinitionCommand(parametersPassedInRequest, makerCheckerApproval, chargeDefinitionId, name, amount, currencyCode, chargeTimeType, chargeAppliesTo,
+                chargeCalculationType, penalty, active);
+    }
+
+    @Override
+    public ClientCommand deserializeClientCommand(final Long clientId, final String commandAsJson, final boolean makerCheckerApproval) {
+        
+        if (StringUtils.isBlank(commandAsJson)) { throw new InvalidJsonException(); }
+
+        final JsonParserHelper helper = new JsonParserHelper();
+        final JsonElement element = parser.parse(commandAsJson);
+
+        final Set<String> parametersPassedInRequest = new HashSet<String>();
+
+        final Long officeId = helper.extractLongNamed("officeId", element, parametersPassedInRequest);
+        final String externalId = helper.extractStringNamed("externalId", element, parametersPassedInRequest);
+        final String firstname = helper.extractStringNamed("firstname", element, parametersPassedInRequest);
+        final String lastname = helper.extractStringNamed("lastname", element, parametersPassedInRequest);
+        final String clientOrBusinessName = helper.extractStringNamed("clientOrBusinessName", element, parametersPassedInRequest);
+        final LocalDate joiningDate = helper.extractLocalDateAsArrayNamed("joiningDate", element, parametersPassedInRequest);
+
+        return new ClientCommand(parametersPassedInRequest, clientId, externalId, firstname, lastname, clientOrBusinessName,
+                officeId, joiningDate, makerCheckerApproval);
+        
     }
 }

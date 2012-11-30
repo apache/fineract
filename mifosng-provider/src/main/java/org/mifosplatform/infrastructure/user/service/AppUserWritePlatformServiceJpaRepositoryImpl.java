@@ -15,6 +15,7 @@ import org.mifosng.platform.exceptions.RoleNotFoundException;
 import org.mifosng.platform.exceptions.UserNotFoundException;
 import org.mifosng.platform.infrastructure.PlatformEmailSendException;
 import org.mifosng.platform.infrastructure.PlatformPasswordEncoder;
+import org.mifosplatform.infrastructure.configuration.service.ConfigurationDomainService;
 import org.mifosplatform.infrastructure.office.domain.Office;
 import org.mifosplatform.infrastructure.office.domain.OfficeRepository;
 import org.mifosplatform.infrastructure.security.domain.BasicPasswordEncodablePlatformUser;
@@ -24,8 +25,6 @@ import org.mifosplatform.infrastructure.user.command.UserCommand;
 import org.mifosplatform.infrastructure.user.command.UserCommandValidator;
 import org.mifosplatform.infrastructure.user.domain.AppUser;
 import org.mifosplatform.infrastructure.user.domain.AppUserRepository;
-import org.mifosplatform.infrastructure.user.domain.Permission;
-import org.mifosplatform.infrastructure.user.domain.PermissionRepository;
 import org.mifosplatform.infrastructure.user.domain.Role;
 import org.mifosplatform.infrastructure.user.domain.RoleRepository;
 import org.mifosplatform.infrastructure.user.domain.UserDomainService;
@@ -48,19 +47,19 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
     private final AppUserRepository appUserRepository;
     private final OfficeRepository officeRepository;
     private final RoleRepository roleRepository;
-    private final PermissionRepository permissionRepository;
-    
+    private final ConfigurationDomainService configurationDomainService;
+
     @Autowired
     public AppUserWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final AppUserRepository appUserRepository,
             final UserDomainService userDomainService, final OfficeRepository officeRepository, final RoleRepository roleRepository,
-            final PlatformPasswordEncoder platformPasswordEncoder, final PermissionRepository permissionRepository) {
+            final PlatformPasswordEncoder platformPasswordEncoder, final ConfigurationDomainService configurationDomainService) {
         this.context = context;
         this.appUserRepository = appUserRepository;
         this.userDomainService = userDomainService;
         this.officeRepository = officeRepository;
         this.roleRepository = roleRepository;
         this.platformPasswordEncoder = platformPasswordEncoder;
-        this.permissionRepository = permissionRepository;
+        this.configurationDomainService = configurationDomainService;
     }
 
     @Transactional
@@ -87,7 +86,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
                     command.getLastname(), password);
 
             this.userDomainService.create(appUser, command.isApprovedByChecker());
-            
+
             return appUser.getId();
         } catch (DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
@@ -109,10 +108,10 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 
         try {
             context.authenticatedUser();
-            
+
             UserCommandValidator validator = new UserCommandValidator(command);
             validator.validateForUpdate();
-            
+
             final Set<Role> allRoles = assembleSetOfRoles(command);
 
             Office office = null;
@@ -137,8 +136,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
                 this.appUserRepository.saveAndFlush(userToUpdate);
             }
 
-            final Permission thisTask = this.permissionRepository.findOneByCode("UPDATE_USER");
-            if (thisTask.hasMakerCheckerEnabled() && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
+            if (this.configurationDomainService.isMakerCheckerEnabledForTask("UPDATE_USER") && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
 
             return userToUpdate.getId();
         } catch (DataIntegrityViolationException dve) {
@@ -155,10 +153,10 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
     @Transactional
     @Override
     public Long updateUsersOwnAccountDetails(final UserCommand command) {
-        
+
         try {
             context.authenticatedUser();
-            
+
             UserCommandValidator validator = new UserCommandValidator(command);
             validator.validateForUpdate();
 
@@ -185,7 +183,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
                 userToUpdate.updatePassword(newPasswordEncoded);
                 this.appUserRepository.saveAndFlush(userToUpdate);
             }
-            
+
             return userToUpdate.getId();
         } catch (DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
@@ -213,8 +211,6 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
     @Transactional
     @Override
     public void deleteUser(final UserCommand command) {
-        
-        final Permission permissionForThisTask = this.permissionRepository.findOneByCode("UPDATE_USER");
 
         final Long userId = command.getId();
         AppUser user = this.appUserRepository.findOne(userId);
@@ -222,8 +218,8 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 
         user.delete();
         this.appUserRepository.save(user);
-        
-        if (permissionForThisTask.hasMakerCheckerEnabled() && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
+
+        if (this.configurationDomainService.isMakerCheckerEnabledForTask("DELETE_USER") && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
     }
 
     /*

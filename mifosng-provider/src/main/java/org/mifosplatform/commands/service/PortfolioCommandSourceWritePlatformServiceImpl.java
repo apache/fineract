@@ -29,13 +29,13 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
     // NOT TRANSACTIONAL BY DESIGN FOR NOW
     @Override
     public EntityIdentifier logCommandSource(final String apiOperation, final String resource, final Long resourceId,
-            final String apiRequestBodyInJson) {
+            final String commandSerializedAsJson) {
 
         final AppUser maker = context.authenticatedUser();
         final LocalDate asToday = new LocalDate();
 
-        final CommandSource commandSourceInput = CommandSource.createdBy(apiOperation, resource, resourceId, maker, asToday);
-        final CommandSource commandSourceResult = this.commandSourceHandlerDelegator.handle(commandSourceInput, apiRequestBodyInJson);
+        final CommandSource commandSourceInput = CommandSource.createdBy(apiOperation, resource, resourceId, commandSerializedAsJson, maker, asToday);
+        final CommandSource commandSourceResult = this.commandSourceHandlerDelegator.handle(commandSourceInput, commandSerializedAsJson);
         commandSourceRepository.save(commandSourceResult);
 
         return EntityIdentifier.makerChecker(commandSourceResult.resourceId(), commandSourceResult.getId());

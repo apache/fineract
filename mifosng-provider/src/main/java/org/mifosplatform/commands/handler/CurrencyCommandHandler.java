@@ -12,7 +12,7 @@ import org.mifosng.platform.infrastructure.errorhandling.UnsupportedCommandExcep
 import org.mifosplatform.commands.domain.CommandSource;
 import org.mifosplatform.commands.service.ChangeDetectionService;
 import org.mifosplatform.infrastructure.configuration.command.CurrencyCommand;
-import org.mifosplatform.infrastructure.configuration.service.ConfigurationWritePlatformService;
+import org.mifosplatform.infrastructure.configuration.service.CurrencyWritePlatformService;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.infrastructure.user.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,14 +26,14 @@ public class CurrencyCommandHandler implements CommandSourceHandler {
     private final PortfolioApiDataConversionService apiDataConversionService;
     private final PortfolioCommandSerializerService commandSerializerService;
     private final PortfolioCommandDeserializerService commandDeserializerService;
-    private final ConfigurationWritePlatformService writePlatformService;
+    private final CurrencyWritePlatformService writePlatformService;
 
     @Autowired
     public CurrencyCommandHandler(final PlatformSecurityContext context,
             final ChangeDetectionService changeDetectionService,
             final PortfolioApiDataConversionService apiDataConversionService,
             final PortfolioCommandSerializerService commandSerializerService,
-            final PortfolioCommandDeserializerService commandDeserializerService, final ConfigurationWritePlatformService writePlatformService) {
+            final PortfolioCommandDeserializerService commandDeserializerService, final CurrencyWritePlatformService writePlatformService) {
         this.context = context;
         this.changeDetectionService = changeDetectionService;
         this.apiDataConversionService = apiDataConversionService;

@@ -92,4 +92,10 @@ public class PortfolioCommandSerializerServiceJson implements PortfolioCommandSe
         final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(new HashSet<String>(), false, new HashSet<String>());
         return helper.serializedJsonFrom(gsonDeserializer, command);
     }
+
+    @Override
+    public String serializeCommandToJson(Object command) {
+        final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(new HashSet<String>(), false, new HashSet<String>());
+        return helper.serializedJsonFrom(gsonDeserializer, command);
+    }
 }

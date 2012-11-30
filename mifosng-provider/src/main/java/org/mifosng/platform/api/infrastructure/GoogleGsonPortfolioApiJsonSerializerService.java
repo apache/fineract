@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.mifosng.platform.api.commands.ClientCommand;
 import org.mifosng.platform.api.data.ClientAccountSummaryCollectionData;
 import org.mifosng.platform.api.data.ClientData;
 import org.mifosng.platform.api.data.ClientIdentifierData;
@@ -356,13 +355,6 @@ public class GoogleGsonPortfolioApiJsonSerializerService implements PortfolioApi
         final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(
                 SAVINGS_DEPOSIT_ACCOUNT_DATA_PARAMETERS, prettyPrint, responseParameters);
         return helper.serializedJsonFrom(gsonDeserializer, account);
-    }
-
-    @Override
-    public String serializeClientCommandToJson(final ClientCommand command) {
-        final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(new HashSet<String>(), false,
-                new HashSet<String>());
-        return helper.serializedJsonFrom(gsonDeserializer, command);
     }
 
     @Override

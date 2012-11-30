@@ -15,29 +15,26 @@ import org.mifosplatform.infrastructure.configuration.domain.ApplicationCurrency
 import org.mifosplatform.infrastructure.office.domain.OrganisationCurrency;
 import org.mifosplatform.infrastructure.office.domain.OrganisationCurrencyRepository;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.infrastructure.user.domain.Permission;
-import org.mifosplatform.infrastructure.user.domain.PermissionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class ConfigurationWritePlatformServiceJpaRepositoryImpl implements ConfigurationWritePlatformService {
+public class CurrencyWritePlatformServiceJpaRepositoryImpl implements CurrencyWritePlatformService {
 
     private final PlatformSecurityContext context;
     private final ApplicationCurrencyRepository applicationCurrencyRepository;
     private final OrganisationCurrencyRepository organisationCurrencyRepository;
-    private final PermissionRepository permissionRepository;
+    private final ConfigurationDomainService configurationDomainService;
 
     @Autowired
-    public ConfigurationWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
+    public CurrencyWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
             final ApplicationCurrencyRepository applicationCurrencyRepository,
-            final OrganisationCurrencyRepository organisationCurrencyRepository,
-            final PermissionRepository permissionRepository) {
+            final OrganisationCurrencyRepository organisationCurrencyRepository, final ConfigurationDomainService configurationDomainService) {
         this.context = context;
         this.applicationCurrencyRepository = applicationCurrencyRepository;
         this.organisationCurrencyRepository = organisationCurrencyRepository;
-        this.permissionRepository = permissionRepository;
+        this.configurationDomainService = configurationDomainService;
     }
 
     @Transactional
@@ -72,9 +69,8 @@ public class ConfigurationWritePlatformServiceJpaRepositoryImpl implements Confi
 
         this.organisationCurrencyRepository.deleteAll();
         this.organisationCurrencyRepository.save(allowedCurrencies);
-        
-        final Permission thisTask = this.permissionRepository.findOneByCode("UPDATE_CURRENCY");
-        if (thisTask.hasMakerCheckerEnabled() && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
+
+        if (this.configurationDomainService.isMakerCheckerEnabledForTask("UPDATE_CURRENCY") && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
                 "Validation errors exist.", dataValidationErrors); }

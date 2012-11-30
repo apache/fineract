@@ -3,11 +3,11 @@ package org.mifosplatform.infrastructure.user.service;
 import java.util.Collection;
 import java.util.Map;
 
-import org.mifosng.platform.exceptions.PermissionNotFoundException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.infrastructure.user.command.PermissionsCommand;
 import org.mifosplatform.infrastructure.user.domain.Permission;
 import org.mifosplatform.infrastructure.user.domain.PermissionRepository;
+import org.mifosplatform.infrastructure.user.exception.PermissionNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

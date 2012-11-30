@@ -9,6 +9,7 @@ import org.mifosplatform.infrastructure.configuration.domain.ApplicationCurrency
 import org.mifosplatform.infrastructure.configuration.domain.ApplicationCurrencyRepository;
 import org.mifosplatform.infrastructure.configuration.domain.MonetaryCurrency;
 import org.mifosplatform.infrastructure.configuration.domain.Money;
+import org.mifosplatform.infrastructure.configuration.service.ConfigurationDomainService;
 import org.mifosplatform.infrastructure.office.command.BranchMoneyTransferCommand;
 import org.mifosplatform.infrastructure.office.command.OfficeCommand;
 import org.mifosplatform.infrastructure.office.domain.Office;
@@ -17,8 +18,6 @@ import org.mifosplatform.infrastructure.office.domain.OfficeTransaction;
 import org.mifosplatform.infrastructure.office.domain.OfficeTransactionRepository;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.infrastructure.user.domain.AppUser;
-import org.mifosplatform.infrastructure.user.domain.Permission;
-import org.mifosplatform.infrastructure.user.domain.PermissionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,17 +34,17 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
     private final OfficeRepository officeRepository;
     private final OfficeTransactionRepository officeMonetaryTransferRepository;
     private final ApplicationCurrencyRepository applicationCurrencyRepository;
-    private final PermissionRepository permissionRepository;
+    private final ConfigurationDomainService configurationDomainService;
 
     @Autowired
     public OfficeWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final OfficeRepository officeRepository,
             final OfficeTransactionRepository officeMonetaryTransferRepository,
-            final ApplicationCurrencyRepository applicationCurrencyRepository, final PermissionRepository permissionRepository) {
+            final ApplicationCurrencyRepository applicationCurrencyRepository, final ConfigurationDomainService configurationDomainService) {
         this.context = context;
         this.officeRepository = officeRepository;
         this.officeMonetaryTransferRepository = officeMonetaryTransferRepository;
         this.applicationCurrencyRepository = applicationCurrencyRepository;
-        this.permissionRepository = permissionRepository;
+        this.configurationDomainService = configurationDomainService;
     }
 
     @Transactional
@@ -66,9 +65,8 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
             office.generateHierarchy();
 
             this.officeRepository.save(office);
-            
-            final Permission thisTask = this.permissionRepository.findOneByCode("CREATE_OFFICE");
-            if (thisTask.hasMakerCheckerEnabled() && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
+
+            if (this.configurationDomainService.isMakerCheckerEnabledForTask("CREATE_OFFICE") && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
 
             return office.getId();
         } catch (DataIntegrityViolationException dve) {
@@ -95,9 +93,8 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
             }
 
             this.officeRepository.save(office);
-            
-            final Permission thisTask = this.permissionRepository.findOneByCode("UPDATE_OFFICE");
-            if (thisTask.hasMakerCheckerEnabled() && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
+
+            if (this.configurationDomainService.isMakerCheckerEnabledForTask("UPDATE_OFFICE") && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
 
             return office.getId();
         } catch (DataIntegrityViolationException dve) {
@@ -135,9 +132,8 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
                 command.getDescription());
 
         this.officeMonetaryTransferRepository.save(entity);
-        
-        final Permission thisTask = this.permissionRepository.findOneByCode("CREATE_OFFICETRANSACTION");
-        if (thisTask.hasMakerCheckerEnabled() && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
+
+        if (this.configurationDomainService.isMakerCheckerEnabledForTask("CREATE_OFFICETRANSACTION") && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
 
         return entity.getId();
     }

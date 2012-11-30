@@ -23,6 +23,7 @@ public class CommandSourceHandlerDelegator {
     private final OfficeCommandHandler officeCommandHandler;
     private final OfficeTransactionCommandHandler officeTransactionCommandHandler;
     private final CurrencyCommandHandler currencyCommandHandler;
+    private final ChargeDefinitionCommandHandler chargeDefinitionCommandHandler;
 
     @Autowired
     public CommandSourceHandlerDelegator(final PlatformSecurityContext context, 
@@ -35,7 +36,8 @@ public class CommandSourceHandlerDelegator {
             final FundCommandHandler fundCommandHandler,
             final OfficeCommandHandler officeCommandHandler,
             final OfficeTransactionCommandHandler officeTransactionCommandHandler,
-            final CurrencyCommandHandler currencyCommandHandler) {
+            final CurrencyCommandHandler currencyCommandHandler,
+            final ChargeDefinitionCommandHandler chargeDefinitionCommandHandler) {
         this.context = context;
         this.clientCommandHandler = clientCommandHandler;
         this.roleCommandHandler = roleCommandHandler;
@@ -47,6 +49,7 @@ public class CommandSourceHandlerDelegator {
         this.officeCommandHandler = officeCommandHandler;
         this.officeTransactionCommandHandler = officeTransactionCommandHandler;
         this.currencyCommandHandler = currencyCommandHandler;
+        this.chargeDefinitionCommandHandler = chargeDefinitionCommandHandler;
     }
 
     public CommandSource handle(final CommandSource commandSource, final String apiRequestBodyInJson) {
@@ -73,6 +76,8 @@ public class CommandSourceHandlerDelegator {
             commandSourceResult = officeTransactionCommandHandler.handle(commandSource, apiRequestBodyInJson);
         } else if (commandSource.isCurrencyResource()) {
             commandSourceResult = currencyCommandHandler.handle(commandSource, apiRequestBodyInJson);
+        } else if (commandSource.isChargeDefinitionResource()) {
+            commandSourceResult = chargeDefinitionCommandHandler.handle(commandSource, apiRequestBodyInJson);
         } else {
             throw new UnsupportedCommandException(commandSource.commandName());
         }
@@ -103,6 +108,8 @@ public class CommandSourceHandlerDelegator {
             commandSourceResult = officeTransactionCommandHandler.handle(existingCommandSource);
         } else if (existingCommandSource.isCurrencyResource()) {
             commandSourceResult = currencyCommandHandler.handle(existingCommandSource);
+        } else if (existingCommandSource.isChargeDefinitionResource()) {
+            commandSourceResult = chargeDefinitionCommandHandler.handle(existingCommandSource);
         } else {
             throw new UnsupportedCommandException(existingCommandSource.commandName());
         }

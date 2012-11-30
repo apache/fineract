@@ -3,9 +3,8 @@ package org.mifosplatform.portfolio.fund.service;
 import org.mifosng.platform.client.service.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
 import org.mifosng.platform.exceptions.FundNotFoundException;
 import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
+import org.mifosplatform.infrastructure.configuration.service.ConfigurationDomainService;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.infrastructure.user.domain.Permission;
-import org.mifosplatform.infrastructure.user.domain.PermissionRepository;
 import org.mifosplatform.portfolio.fund.command.FundCommand;
 import org.mifosplatform.portfolio.fund.domain.Fund;
 import org.mifosplatform.portfolio.fund.domain.FundRepository;
@@ -23,15 +22,14 @@ public class FundWritePlatformServiceJpaRepositoryImpl implements FundWritePlatf
 
     private final PlatformSecurityContext context;
     private final FundRepository fundRepository;
-
-    private final PermissionRepository permissionRepository;
+    private final ConfigurationDomainService configurationDomainService;
 
     @Autowired
     public FundWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final FundRepository fundRepository,
-            final PermissionRepository permissionRepository) {
+            final ConfigurationDomainService configurationDomainService) {
         this.context = context;
         this.fundRepository = fundRepository;
-        this.permissionRepository = permissionRepository;
+        this.configurationDomainService = configurationDomainService;
     }
 
     @Transactional
@@ -46,8 +44,7 @@ public class FundWritePlatformServiceJpaRepositoryImpl implements FundWritePlatf
 
             this.fundRepository.save(fund);
 
-            final Permission thisTask = this.permissionRepository.findOneByCode("CREATE_FUND");
-            if (thisTask.hasMakerCheckerEnabled() && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
+            if (this.configurationDomainService.isMakerCheckerEnabledForTask("CREATE_FUND") && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
 
             return fund.getId();
         } catch (DataIntegrityViolationException dve) {
@@ -71,9 +68,8 @@ public class FundWritePlatformServiceJpaRepositoryImpl implements FundWritePlatf
 
             this.fundRepository.save(fund);
 
-            final Permission thisTask = this.permissionRepository.findOneByCode("UPDATE_FUND");
-            if (thisTask.hasMakerCheckerEnabled() && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
-            
+            if (this.configurationDomainService.isMakerCheckerEnabledForTask("UPDATE_FUND") && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
+
             return fund.getId();
         } catch (DataIntegrityViolationException dve) {
             handleFundDataIntegrityIssues(command, dve);
@@ -92,8 +88,7 @@ public class FundWritePlatformServiceJpaRepositoryImpl implements FundWritePlatf
             throw new PlatformDataIntegrityException("error.msg.fund.duplicate.externalId", "A fund with external id '"
                     + command.getExternalId() + "' already exists", "externalId", command.getExternalId());
         } else if (realCause.getMessage().contains("fund_name_org")) { throw new PlatformDataIntegrityException(
-                "error.msg.fund.duplicate.name", "A fund with name '" + command.getName() + "' already exists", "name",
-                command.getName()); }
+                "error.msg.fund.duplicate.name", "A fund with name '" + command.getName() + "' already exists", "name", command.getName()); }
 
         logger.error(dve.getMessage(), dve);
         throw new PlatformDataIntegrityException("error.msg.fund.unknown.data.integrity.issue",

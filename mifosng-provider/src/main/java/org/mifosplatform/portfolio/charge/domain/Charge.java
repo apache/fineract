@@ -2,7 +2,7 @@ package org.mifosplatform.portfolio.charge.domain;
 
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
 import org.mifosplatform.infrastructure.user.domain.AppUser;
-import org.mifosplatform.portfolio.charge.command.ChargeCommand;
+import org.mifosplatform.portfolio.charge.command.ChargeDefinitionCommand;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -93,7 +93,7 @@ public class Charge extends AbstractAuditableCustom<AppUser, Long> {
         return deleted;
     }
 
-    public void update(final ChargeCommand command) {
+    public void update(final ChargeDefinitionCommand command) {
         if (command.isNameChanged()) {
             this.name = command.getName();
         }

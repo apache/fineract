@@ -5,6 +5,7 @@ import org.mifosng.platform.infrastructure.EmailDetail;
 import org.mifosng.platform.infrastructure.PlatformEmailService;
 import org.mifosng.platform.infrastructure.PlatformPasswordEncoder;
 import org.mifosng.platform.infrastructure.RandomPasswordGenerator;
+import org.mifosplatform.infrastructure.configuration.service.ConfigurationDomainService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,21 +16,21 @@ public class JpaUserDomainService implements UserDomainService {
     private final AppUserRepository userRepository;
     private final PlatformPasswordEncoder applicationPasswordEncoder;
     private final PlatformEmailService emailService;
-    private final PermissionRepository permissionRepository;
-    
+    private final ConfigurationDomainService configurationDomainService;
+
     @Autowired
     public JpaUserDomainService(final AppUserRepository userRepository, final PlatformPasswordEncoder applicationPasswordEncoder,
-            final PlatformEmailService emailService, final PermissionRepository permissionRepository) {
+            final PlatformEmailService emailService, final ConfigurationDomainService configurationDomainService) {
         this.userRepository = userRepository;
         this.applicationPasswordEncoder = applicationPasswordEncoder;
         this.emailService = emailService;
-        this.permissionRepository = permissionRepository;
+        this.configurationDomainService = configurationDomainService;
     }
-    
+
     @Transactional
     @Override
     public void create(final AppUser appUser, final boolean isApprovedByChecker) {
-        
+
         generateKeyUsedForPasswordSalting(appUser);
 
         String unencodedPassword = appUser.getPassword();
@@ -42,11 +43,11 @@ public class JpaUserDomainService implements UserDomainService {
         appUser.updatePassword(encodePassword);
 
         this.userRepository.save(appUser);
-        
-        final Permission thisTask = this.permissionRepository.findOneByCode("CREATE_USER");
-        if (thisTask.hasMakerCheckerEnabled() && !isApprovedByChecker) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
 
-        final EmailDetail emailDetail = new EmailDetail(appUser.getFirstname(), appUser.getFirstname(), appUser.getEmail(), appUser.getUsername());
+        if (this.configurationDomainService.isMakerCheckerEnabledForTask("CREATE_USER") && !isApprovedByChecker) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
+
+        final EmailDetail emailDetail = new EmailDetail(appUser.getFirstname(), appUser.getFirstname(), appUser.getEmail(),
+                appUser.getUsername());
 
         this.emailService.sendToUserAccount(emailDetail, unencodedPassword);
     }

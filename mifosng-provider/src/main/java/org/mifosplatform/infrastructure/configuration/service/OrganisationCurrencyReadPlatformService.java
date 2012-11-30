@@ -2,7 +2,7 @@ package org.mifosplatform.infrastructure.configuration.service;
 
 import org.mifosplatform.infrastructure.configuration.data.ConfigurationData;
 
-public interface ConfigurationReadPlatformService {
+public interface OrganisationCurrencyReadPlatformService {
 
     ConfigurationData retrieveCurrencyConfiguration();
 

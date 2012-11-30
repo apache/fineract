@@ -1,16 +1,12 @@
 package org.mifosplatform.portfolio.charge.service;
 
-import org.mifosplatform.portfolio.charge.command.ChargeCommand;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.mifosplatform.portfolio.charge.command.ChargeDefinitionCommand;
 
 public interface ChargeWritePlatformService {
 
-    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'ORGANISATION_ADMINISTRATION_SUPER_USER', 'CREATE_CHARGE')")
-    Long createCharge(final ChargeCommand command);
+    Long createCharge(ChargeDefinitionCommand command);
 
-    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'ORGANISATION_ADMINISTRATION_SUPER_USER', 'UPDATE_CHARGE')")
-    Long updateCharge(final ChargeCommand command);
+    Long updateCharge(ChargeDefinitionCommand command);
 
-    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'ORGANISATION_ADMINISTRATION_SUPER_USER', 'DELETE_CHARGE')")
-    Long deleteCharge(final Long chargeId);
+    Long deleteCharge(ChargeDefinitionCommand command);
 }
