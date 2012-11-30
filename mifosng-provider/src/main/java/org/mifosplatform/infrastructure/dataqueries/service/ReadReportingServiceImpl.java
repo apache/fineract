@@ -142,8 +142,6 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
         return writer;
     }
-    
-    
 
     @Override
     public GenericResultsetData retrieveGenericResultset(final String name, final String type, final Map<String, String> queryParams) {
@@ -342,85 +340,69 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         }
     }
 
-	@Override
-public String retrieveReportPDF(final String reportName,final String type, final Map<String, String> queryParams) {
+    @Override
+    public String retrieveReportPDF(final String reportName, final String type, final Map<String, String> queryParams) {
 
-		    	String fileLocation=FileUtils.MIFOSX_BASE_DIR+File.separator+"";
-		    	if(!new File(fileLocation).isDirectory())
-		    	{
-		    	 new File(fileLocation).mkdirs();	
-		    	}
+        String fileLocation = FileUtils.MIFOSX_BASE_DIR + File.separator + "";
+        if (!new File(fileLocation).isDirectory()) {
+            new File(fileLocation).mkdirs();
+        }
 
-		    	String genaratePdf=fileLocation+File.separator+reportName+".pdf";
-		    	
-		    	
-		    try
-		    {
-		    GenericResultsetData result = retrieveGenericResultset(
-		    		reportName, type, queryParams);
-		    	
+        String genaratePdf = fileLocation + File.separator + reportName + ".pdf";
 
-		    List<ResultsetColumnHeader> columnHeaders = result.getColumnHeaders();
-		    List<ResultsetDataRow> data = result.getData();
-		    List<String> row;
+        try {
+            GenericResultsetData result = retrieveGenericResultset(reportName, type, queryParams);
 
-		    logger.info("NO. of Columns: " + columnHeaders.size());
-		    Integer chSize = columnHeaders.size();
+            List<ResultsetColumnHeader> columnHeaders = result.getColumnHeaders();
+            List<ResultsetDataRow> data = result.getData();
+            List<String> row;
 
-		    Document document = new Document(PageSize.B0.rotate());
+            logger.info("NO. of Columns: " + columnHeaders.size());
+            Integer chSize = columnHeaders.size();
 
-		    PdfWriter.getInstance(document,
-		    	      new FileOutputStream(new File(fileLocation+reportName+".pdf")));
-		    	document.open();
-		     
-		    PdfPTable table = new PdfPTable(chSize);
-		    table.setWidthPercentage(100);
+            Document document = new Document(PageSize.B0.rotate());
 
-		    for (int i = 0; i < chSize; i++) {
-		    	 
-		    	table.addCell(columnHeaders.get(i).getColumnName());
-		    	
-		    }
-		    table.completeRow();
+            PdfWriter.getInstance(document, new FileOutputStream(new File(fileLocation + reportName + ".pdf")));
+            document.open();
 
-		    Integer rSize;
-		    String currColType;
-		    String currVal;
-		    logger.info("NO. of Rows: " + data.size());
-		    for (int i = 0; i < data.size(); i++) {
-		    	row = data.get(i).getRow();
-		    	rSize = row.size();
-		    	for (int j = 0; j < rSize; j++) {
-		    		currColType = columnHeaders.get(j).getColumnType();
-		    		currVal = row.get(j);
-		    		if (currVal != null) {
-		    			if (currColType.equals("DECIMAL")
-		    					|| currColType.equals("DOUBLE")
-		    					|| currColType.equals("BIGINT")
-		    					|| currColType.equals("SMALLINT")
-		    					|| currColType.equals("INT"))
-		    			{
-		    				
-		    			table.addCell(currVal.toString());
-		    		}
-		    			else
-		    			{
-		    				table.addCell(currVal.toString());
-		    			}
-		    		}
-		    	}
-		    }
-		      table.completeRow();
-		      document.add(table);
-		    document.close();
-		    return genaratePdf;
-		    }
-		    				
-		    				catch (Exception e) {
-		    					throw new PlatformDataIntegrityException(
-		    							"error.msg.exception.error", e.getMessage());
-		    				}
+            PdfPTable table = new PdfPTable(chSize);
+            table.setWidthPercentage(100);
 
-		    			}
-	}
+            for (int i = 0; i < chSize; i++) {
 
+                table.addCell(columnHeaders.get(i).getColumnName());
+
+            }
+            table.completeRow();
+
+            Integer rSize;
+            String currColType;
+            String currVal;
+            logger.info("NO. of Rows: " + data.size());
+            for (int i = 0; i < data.size(); i++) {
+                row = data.get(i).getRow();
+                rSize = row.size();
+                for (int j = 0; j < rSize; j++) {
+                    currColType = columnHeaders.get(j).getColumnType();
+                    currVal = row.get(j);
+                    if (currVal != null) {
+                        if (currColType.equals("DECIMAL") || currColType.equals("DOUBLE") || currColType.equals("BIGINT")
+                                || currColType.equals("SMALLINT") || currColType.equals("INT")) {
+
+                            table.addCell(currVal.toString());
+                        } else {
+                            table.addCell(currVal.toString());
+                        }
+                    }
+                }
+            }
+            table.completeRow();
+            document.add(table);
+            document.close();
+            return genaratePdf;
+        }
+        catch (Exception e) {
+            throw new PlatformDataIntegrityException("error.msg.exception.error", e.getMessage());
+        }
+    }
+}
