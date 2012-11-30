@@ -12,6 +12,7 @@ import org.mifosplatform.infrastructure.user.command.RolePermissionCommand;
 import org.mifosplatform.infrastructure.user.command.UserCommand;
 import org.mifosplatform.portfolio.charge.command.ChargeDefinitionCommand;
 import org.mifosplatform.portfolio.fund.command.FundCommand;
+import org.mifosplatform.portfolio.loanproduct.command.LoanProductCommand;
 
 /**
  * Service for de-serializing JSON for a command into the platforms internal
@@ -48,4 +49,6 @@ public interface PortfolioCommandDeserializerService {
     ChargeDefinitionCommand deserializeChargeDefinitionCommand(Long chargeDefinitionId, String commandAsJson, boolean makerCheckerApproval);
 
     ClientCommand deserializeClientCommand(Long clientId, String commandAsJson, boolean makerCheckerApproval);
+
+    LoanProductCommand deserializeLoanProductCommand(Long resourceId, String json, boolean b);
 }

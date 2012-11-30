@@ -1,5 +1,7 @@
 package org.mifosng.platform.loan.domain;
 
+import org.mifosplatform.portfolio.loanproduct.domain.LoanTransactionProcessingStrategy;
+
 
 /**
  *

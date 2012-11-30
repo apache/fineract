@@ -21,6 +21,7 @@ import org.mifosplatform.infrastructure.user.command.RolePermissionCommand;
 import org.mifosplatform.infrastructure.user.command.UserCommand;
 import org.mifosplatform.portfolio.charge.command.ChargeDefinitionCommand;
 import org.mifosplatform.portfolio.fund.command.FundCommand;
+import org.mifosplatform.portfolio.loanproduct.command.LoanProductCommand;
 import org.springframework.stereotype.Service;
 
 import com.google.gson.Gson;
@@ -268,6 +269,55 @@ public class PortfolioCommandDeerializerServiceGoogleGson implements PortfolioCo
 
         return new ClientCommand(parametersPassedInRequest, clientId, externalId, firstname, lastname, clientOrBusinessName,
                 officeId, joiningDate, makerCheckerApproval);
+    }
+
+    @Override
+    public LoanProductCommand deserializeLoanProductCommand(final Long loanProductId, final String commandAsJson, final boolean makerCheckerApproval) {
         
+        if (StringUtils.isBlank(commandAsJson)) { throw new InvalidJsonException(); }
+
+        final JsonParserHelper helper = new JsonParserHelper();
+        final JsonElement element = parser.parse(commandAsJson);
+
+        final Set<String> parametersPassedInRequest = new HashSet<String>();
+        
+        final String name = helper.extractStringNamed("name", element, parametersPassedInRequest);
+        final String description = helper.extractStringNamed("description", element, parametersPassedInRequest);
+        final Long fundId = helper.extractLongNamed("fundId", element, parametersPassedInRequest);
+
+        final Long transactionProcessingStrategyId = helper
+                .extractLongNamed("transactionProcessingStrategyId", element, parametersPassedInRequest);
+
+        final String currencyCode = helper.extractStringNamed("currencyCode", element, parametersPassedInRequest);
+        final Integer digitsAfterDecimal = helper.extractIntegerNamed("digitsAfterDecimal", element, Locale.US, parametersPassedInRequest);
+
+        final BigDecimal principal = helper.extractBigDecimalNamed("principal", element.getAsJsonObject(), Locale.US, parametersPassedInRequest);
+        final BigDecimal inArrearsTolerance = helper.extractBigDecimalNamed("inArrearsTolerance", element.getAsJsonObject(), Locale.US, parametersPassedInRequest);
+        final BigDecimal interestRatePerPeriod = helper.extractBigDecimalNamed("interestRatePerPeriod", element.getAsJsonObject(), Locale.US, parametersPassedInRequest);
+        final Integer repaymentEvery = helper.extractIntegerNamed("repaymentEvery", element, Locale.US, parametersPassedInRequest);
+        final Integer numberOfRepayments = helper.extractIntegerNamed("numberOfRepayments", element, Locale.US, parametersPassedInRequest);
+        final Integer repaymentFrequencyType = helper.extractIntegerNamed("repaymentFrequencyType", element, Locale.US, parametersPassedInRequest);
+        final Integer interestRateFrequencyType = helper.extractIntegerNamed("interestRateFrequencyType", element, Locale.US, parametersPassedInRequest);
+        final Integer amortizationType = helper.extractIntegerNamed("amortizationType", element, Locale.US, parametersPassedInRequest);
+        final Integer interestType = helper.extractIntegerNamed("interestType", element, Locale.US, parametersPassedInRequest);
+        final Integer interestCalculationPeriodType = helper.extractIntegerNamed("interestCalculationPeriodType", element, Locale.US,
+                parametersPassedInRequest);
+
+        String[] charges = null;
+        if (element.isJsonObject()) {
+            JsonObject object = element.getAsJsonObject();
+            if (object.has("charges")) {
+                parametersPassedInRequest.add("charges");
+                JsonArray array = object.get("charges").getAsJsonArray();
+                charges = new String[array.size()];
+                for (int i = 0; i < array.size(); i++) {
+                    charges[i] = array.get(i).getAsString();
+                }
+            }
+        }
+
+        return new LoanProductCommand(parametersPassedInRequest, makerCheckerApproval, loanProductId, name, description, fundId, transactionProcessingStrategyId,
+                currencyCode, digitsAfterDecimal, principal, inArrearsTolerance, numberOfRepayments, repaymentEvery, interestRatePerPeriod,
+                repaymentFrequencyType, interestRateFrequencyType, amortizationType, interestType, interestCalculationPeriodType, charges);
     }
 }

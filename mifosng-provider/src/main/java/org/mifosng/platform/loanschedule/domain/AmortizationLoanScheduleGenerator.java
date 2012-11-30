@@ -7,8 +7,8 @@ import java.util.Set;
 import org.joda.time.LocalDate;
 import org.mifosng.platform.api.data.LoanScheduleData;
 import org.mifosng.platform.loan.domain.LoanCharge;
-import org.mifosng.platform.loan.domain.LoanProductRelatedDetail;
 import org.mifosplatform.infrastructure.configuration.domain.ApplicationCurrency;
+import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 
 public interface AmortizationLoanScheduleGenerator {
 

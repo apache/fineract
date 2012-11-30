@@ -3,8 +3,8 @@ package org.mifosng.platform.loanschedule.domain;
 import java.util.List;
 
 import org.joda.time.LocalDate;
-import org.mifosng.platform.loan.domain.LoanProductMinimumRepaymentScheduleRelatedDetail;
-import org.mifosng.platform.loan.domain.LoanProductRelatedDetail;
+import org.mifosplatform.portfolio.loanproduct.domain.LoanProductMinimumRepaymentScheduleRelatedDetail;
+import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 
 public interface ScheduledDateGenerator {
 

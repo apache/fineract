@@ -2,9 +2,9 @@ package org.mifosng.platform.loanschedule.domain;
 
 import java.math.BigDecimal;
 
-import org.mifosng.platform.loan.domain.LoanProductRelatedDetail;
 import org.mifosplatform.infrastructure.configuration.domain.MonetaryCurrency;
 import org.mifosplatform.infrastructure.configuration.domain.Money;
+import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 
 public class PmtCalculator {
 

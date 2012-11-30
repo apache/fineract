@@ -13,7 +13,6 @@ import org.mifosng.platform.api.commands.GroupCommand;
 import org.mifosng.platform.api.commands.GuarantorCommand;
 import org.mifosng.platform.api.commands.LoanApplicationCommand;
 import org.mifosng.platform.api.commands.LoanChargeCommand;
-import org.mifosng.platform.api.commands.LoanProductCommand;
 import org.mifosng.platform.api.commands.LoanStateTransitionCommand;
 import org.mifosng.platform.api.commands.LoanTransactionCommand;
 import org.mifosng.platform.api.commands.NoteCommand;
@@ -32,6 +31,7 @@ import org.mifosplatform.infrastructure.user.command.RolePermissionCommand;
 import org.mifosplatform.infrastructure.user.command.UserCommand;
 import org.mifosplatform.portfolio.charge.command.ChargeDefinitionCommand;
 import org.mifosplatform.portfolio.fund.command.FundCommand;
+import org.mifosplatform.portfolio.loanproduct.command.LoanProductCommand;
 
 public interface PortfolioApiDataConversionService {
 
@@ -51,7 +51,7 @@ public interface PortfolioApiDataConversionService {
 
     BranchMoneyTransferCommand convertApiRequestJsonToBranchMoneyTransferCommand(String json);
 
-    LoanProductCommand convertJsonToLoanProductCommand(Long resourceIdentifier, String json);
+    LoanProductCommand convertApiRequestJsonToLoanProductCommand(Long resourceIdentifier, String json);
 
     SavingProductCommand convertJsonToSavingProductCommand(Long resourceIdentifier, String json);
 

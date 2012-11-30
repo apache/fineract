@@ -4,9 +4,9 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 
-import org.mifosng.platform.loan.domain.LoanProductRelatedDetail;
-import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 import org.mifosplatform.infrastructure.configuration.domain.Money;
+import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRelatedDetail;
+import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 
 public class PeriodicInterestRateCalculator {
 

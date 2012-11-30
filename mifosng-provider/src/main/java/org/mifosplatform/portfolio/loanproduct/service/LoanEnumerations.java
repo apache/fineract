@@ -1,12 +1,12 @@
-package org.mifosng.platform.loanproduct.service;
+package org.mifosplatform.portfolio.loanproduct.service;
 
 import org.mifosng.platform.api.data.EnumOptionData;
-import org.mifosng.platform.loan.domain.AmortizationMethod;
-import org.mifosng.platform.loan.domain.InterestCalculationPeriodMethod;
-import org.mifosng.platform.loan.domain.InterestMethod;
 import org.mifosng.platform.loan.domain.LoanStatus;
 import org.mifosng.platform.loan.domain.LoanTransactionType;
-import org.mifosng.platform.loan.domain.PeriodFrequencyType;
+import org.mifosplatform.portfolio.loanproduct.domain.AmortizationMethod;
+import org.mifosplatform.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
+import org.mifosplatform.portfolio.loanproduct.domain.InterestMethod;
+import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 
 public class LoanEnumerations {
 

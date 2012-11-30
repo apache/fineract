@@ -29,11 +29,11 @@ import org.mifosng.platform.api.commands.DepositStateTransitionApprovalCommand;
 import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.exceptions.InvalidDepositStateTransitionException;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
-import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 import org.mifosng.platform.savingproduct.domain.DepositProduct;
 import org.mifosplatform.infrastructure.configuration.domain.MonetaryCurrency;
 import org.mifosplatform.infrastructure.configuration.domain.Money;
 import org.mifosplatform.infrastructure.user.domain.AppUser;
+import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 
 @Entity
 @Table(name = "m_deposit_account", uniqueConstraints = @UniqueConstraint(name="deposit_acc_external_id", columnNames = { "external_id" }))

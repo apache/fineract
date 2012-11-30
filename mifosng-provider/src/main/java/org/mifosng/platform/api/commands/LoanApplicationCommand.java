@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.Set;
 
 import org.joda.time.LocalDate;
+import org.mifosplatform.portfolio.loanproduct.command.LoanProductCommand;
 
 /**
  * Immutable command for submitting new loan application.
@@ -209,7 +210,7 @@ public class LoanApplicationCommand {
 	public LoanProductCommand toLoanProductCommand() {
 		
 		// FIXME - KW - CHARGE - FIX UP FOR CHARGES - take look at loan product charges also and align usage with other loan areas.
-		return new LoanProductCommand(modifiedParameters, this.productId, null, null, 
+		return new LoanProductCommand(modifiedParameters, false, this.productId, null, null, 
 				this.fundId, this.transactionProcessingStrategyId, 
 				null, null, 
 				this.principal, this.inArrearsTolerance, 

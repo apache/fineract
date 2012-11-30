@@ -36,12 +36,12 @@ import org.mifosng.platform.api.infrastructure.PortfolioApiDataConversionService
 import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService;
 import org.mifosng.platform.exceptions.UnrecognizedQueryParamException;
 import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
-import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 import org.mifosng.platform.saving.service.DepositAccountReadPlatformService;
 import org.mifosng.platform.saving.service.DepositAccountWritePlatformService;
 import org.mifosng.platform.savingproduct.service.DepositProductReadPlatformService;
 import org.mifosng.platform.savingproduct.service.SavingsDepositEnumerations;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;

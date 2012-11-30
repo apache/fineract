@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
-import org.mifosng.platform.loan.domain.PeriodFrequencyType;
+import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 
 public class DefaultPaymentPeriodsInOneYearCalculator implements
 		PaymentPeriodsInOneYearCalculator {

@@ -2,25 +2,25 @@ package org.mifosng.platform.api.data;
 
 public class EnumOptionData {
 
-	private final Long id;
-	private final String code;
-	private final String value;
+    private final Long id;
+    private final String code;
+    private final String value;
 
-	public EnumOptionData(final Long id, final String code, final String value) {
-		this.id = id;
-		this.code = code;
-		this.value = value;
-	}
+    public EnumOptionData(final Long id, final String code, final String value) {
+        this.id = id;
+        this.code = code;
+        this.value = value;
+    }
 
-	public Long getId() {
-		return id;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public String getCode() {
-		return code;
-	}
+    public String getCode() {
+        return code;
+    }
 
-	public String getValue() {
-		return value;
-	}
+    public String getValue() {
+        return value;
+    }
 }

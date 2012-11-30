@@ -11,7 +11,6 @@ import org.mifosng.platform.client.domain.ClientRepository;
 import org.mifosng.platform.exceptions.ClientNotFoundException;
 import org.mifosng.platform.exceptions.DepositAccounDataValidationtException;
 import org.mifosng.platform.exceptions.DepositProductNotFoundException;
-import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 import org.mifosng.platform.saving.domain.DepositAccount;
 import org.mifosng.platform.saving.domain.DepositAccountStatus;
 import org.mifosng.platform.saving.domain.DepositLifecycleStateMachine;
@@ -20,6 +19,7 @@ import org.mifosng.platform.saving.domain.FixedTermDepositInterestCalculator;
 import org.mifosng.platform.savingproduct.domain.DepositProduct;
 import org.mifosng.platform.savingproduct.domain.DepositProductRepository;
 import org.mifosplatform.infrastructure.configuration.domain.Money;
+import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

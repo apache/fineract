@@ -1,6 +1,6 @@
 package org.mifosng.platform.loanschedule.domain;
 
-import org.mifosng.platform.loan.domain.AmortizationMethod;
+import org.mifosplatform.portfolio.loanproduct.domain.AmortizationMethod;
 
 public class AmortizationLoanScheduleGeneratorFactory {
 

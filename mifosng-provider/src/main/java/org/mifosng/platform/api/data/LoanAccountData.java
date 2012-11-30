@@ -8,6 +8,8 @@ import org.mifosplatform.infrastructure.configuration.data.CurrencyData;
 import org.mifosplatform.infrastructure.staff.data.StaffData;
 import org.mifosplatform.portfolio.charge.data.ChargeData;
 import org.mifosplatform.portfolio.fund.data.FundData;
+import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
+import org.mifosplatform.portfolio.loanproduct.data.TransactionProcessingStrategyData;
 
 /**
  * Immutable data object representing loan account data.

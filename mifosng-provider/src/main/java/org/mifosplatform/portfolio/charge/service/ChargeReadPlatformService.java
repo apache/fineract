@@ -5,6 +5,7 @@ import java.util.Collection;
 import org.mifosng.platform.api.data.LoanChargeData;
 import org.mifosplatform.portfolio.charge.data.ChargeData;
 
+// FIXME - KW - break out methods that belong to product charges and loan charges
 public interface ChargeReadPlatformService {
 
     Collection<ChargeData> retrieveAllCharges();

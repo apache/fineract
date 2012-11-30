@@ -30,7 +30,6 @@ import org.mifosng.platform.api.commands.GroupCommand;
 import org.mifosng.platform.api.commands.GuarantorCommand;
 import org.mifosng.platform.api.commands.LoanApplicationCommand;
 import org.mifosng.platform.api.commands.LoanChargeCommand;
-import org.mifosng.platform.api.commands.LoanProductCommand;
 import org.mifosng.platform.api.commands.LoanStateTransitionCommand;
 import org.mifosng.platform.api.commands.LoanTransactionCommand;
 import org.mifosng.platform.api.commands.NoteCommand;
@@ -54,6 +53,7 @@ import org.mifosplatform.infrastructure.user.command.RolePermissionCommand;
 import org.mifosplatform.infrastructure.user.command.UserCommand;
 import org.mifosplatform.portfolio.charge.command.ChargeDefinitionCommand;
 import org.mifosplatform.portfolio.fund.command.FundCommand;
+import org.mifosplatform.portfolio.loanproduct.command.LoanProductCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.number.NumberFormatter;
 import org.springframework.stereotype.Service;
@@ -518,7 +518,7 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
     }
 
     @Override
-    public LoanProductCommand convertJsonToLoanProductCommand(final Long resourceIdentifier, final String json) {
+    public LoanProductCommand convertApiRequestJsonToLoanProductCommand(final Long resourceIdentifier, final String json) {
 
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
@@ -581,7 +581,7 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
             }
         }
 
-        return new LoanProductCommand(modifiedParameters, resourceIdentifier, name, description, fundId, transactionProcessingStrategyId,
+        return new LoanProductCommand(modifiedParameters, false, resourceIdentifier, name, description, fundId, transactionProcessingStrategyId,
                 currencyCode, digitsAfterDecimal, principal, inArrearsTolerance, numberOfRepayments, repaymentEvery, interestRatePerPeriod,
                 repaymentFrequencyType, interestRateFrequencyType, amortizationType, interestType, interestCalculationPeriodType, charges);
     }

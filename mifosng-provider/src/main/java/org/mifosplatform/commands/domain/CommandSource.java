@@ -171,8 +171,11 @@ public class CommandSource extends AbstractPersistable<Long> {
         return this.resource.equalsIgnoreCase("CHARGES");
     }
 
+    public boolean isLoanProductResource() {
+        return this.resource.equalsIgnoreCase("LOANPRODUCTS");
+    }
+    
     public boolean isClientResource() {
         return this.resource.equalsIgnoreCase("CLIENTS");
     }
-
 }

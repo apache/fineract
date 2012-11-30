@@ -1,9 +1,11 @@
-package org.mifosng.platform.loan.domain;
+package org.mifosplatform.portfolio.loanproduct.domain;
 
 import java.io.Serializable;
 
+
 /**
- * Represents the bare minimum repayment details needed for activities related to generating repayment schedules.
+ * Represents the bare minimum repayment details needed for activities related
+ * to generating repayment schedules.
  */
 public interface LoanProductMinimumRepaymentScheduleRelatedDetail extends Serializable {
 

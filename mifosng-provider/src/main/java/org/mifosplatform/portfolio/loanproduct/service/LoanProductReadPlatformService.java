@@ -1,8 +1,8 @@
-package org.mifosng.platform.loanproduct.service;
+package org.mifosplatform.portfolio.loanproduct.service;
 
 import java.util.Collection;
 
-import org.mifosng.platform.api.data.LoanProductData;
+import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
 
 public interface LoanProductReadPlatformService {
 

@@ -7,8 +7,8 @@ import javax.persistence.Embeddable;
 import javax.persistence.Embedded;
 
 import org.mifosng.platform.api.commands.SavingProductCommand;
-import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 import org.mifosplatform.infrastructure.configuration.domain.MonetaryCurrency;
+import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 
 @Embeddable
 public class SavingProductRelatedDetail {

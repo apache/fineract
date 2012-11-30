@@ -10,9 +10,9 @@ import javax.persistence.Table;
 import org.apache.commons.lang.StringUtils;
 import org.mifosng.platform.api.commands.SavingProductCommand;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
-import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 import org.mifosplatform.infrastructure.configuration.domain.MonetaryCurrency;
 import org.mifosplatform.infrastructure.user.domain.AppUser;
+import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 
 @Entity
 @Table(name = "m_product_savings")

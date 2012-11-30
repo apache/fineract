@@ -17,7 +17,6 @@ import org.mifosng.platform.api.data.GroupData;
 import org.mifosng.platform.api.data.GuarantorData;
 import org.mifosng.platform.api.data.LoanAccountData;
 import org.mifosng.platform.api.data.LoanChargeData;
-import org.mifosng.platform.api.data.LoanProductData;
 import org.mifosng.platform.api.data.LoanScheduleData;
 import org.mifosng.platform.api.data.LoanTransactionData;
 import org.mifosng.platform.api.data.NoteData;
@@ -40,6 +39,7 @@ import org.mifosplatform.infrastructure.user.api.data.RoleData;
 import org.mifosplatform.infrastructure.user.api.data.RolePermissionsData;
 import org.mifosplatform.portfolio.charge.data.ChargeData;
 import org.mifosplatform.portfolio.fund.data.FundData;
+import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

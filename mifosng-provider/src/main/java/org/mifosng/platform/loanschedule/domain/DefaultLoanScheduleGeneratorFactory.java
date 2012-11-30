@@ -1,6 +1,6 @@
 package org.mifosng.platform.loanschedule.domain;
 
-import org.mifosng.platform.loan.domain.InterestMethod;
+import org.mifosplatform.portfolio.loanproduct.domain.InterestMethod;
 
 public class DefaultLoanScheduleGeneratorFactory implements
 		LoanScheduleGeneratorFactory {

@@ -1,4 +1,4 @@
-package org.mifosng.platform.loanproduct.service;
+package org.mifosplatform.portfolio.loanproduct.service;
 
 import java.math.BigDecimal;
 import java.sql.ResultSet;
@@ -7,7 +7,6 @@ import java.util.Collection;
 
 import org.joda.time.DateTime;
 import org.mifosng.platform.api.data.EnumOptionData;
-import org.mifosng.platform.api.data.LoanProductData;
 import org.mifosng.platform.exceptions.LoanProductNotFoundException;
 import org.mifosng.platform.infrastructure.JdbcSupport;
 import org.mifosng.platform.infrastructure.TenantAwareRoutingDataSource;
@@ -15,6 +14,7 @@ import org.mifosplatform.infrastructure.configuration.data.CurrencyData;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.charge.data.ChargeData;
 import org.mifosplatform.portfolio.charge.service.ChargeReadPlatformService;
+import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;

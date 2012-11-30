@@ -42,6 +42,10 @@ import org.mifosplatform.infrastructure.configuration.domain.Money;
 import org.mifosplatform.infrastructure.staff.domain.Staff;
 import org.mifosplatform.infrastructure.user.domain.AppUser;
 import org.mifosplatform.portfolio.fund.domain.Fund;
+import org.mifosplatform.portfolio.loanproduct.domain.LoanProduct;
+import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRelatedDetail;
+import org.mifosplatform.portfolio.loanproduct.domain.LoanTransactionProcessingStrategy;
+import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 
 @Entity
 @Table(name = "m_loan", uniqueConstraints = @UniqueConstraint(columnNames = { "external_id" }))

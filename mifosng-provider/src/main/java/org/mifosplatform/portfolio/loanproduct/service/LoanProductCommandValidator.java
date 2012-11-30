@@ -1,12 +1,12 @@
-package org.mifosng.platform.loanproduct.service;
+package org.mifosplatform.portfolio.loanproduct.service;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.mifosng.platform.DataValidatorBuilder;
-import org.mifosng.platform.api.commands.LoanProductCommand;
 import org.mifosng.platform.api.data.ApiParameterError;
 import org.mifosng.platform.exceptions.PlatformApiDataValidationException;
+import org.mifosplatform.portfolio.loanproduct.command.LoanProductCommand;
 
 public class LoanProductCommandValidator {
 

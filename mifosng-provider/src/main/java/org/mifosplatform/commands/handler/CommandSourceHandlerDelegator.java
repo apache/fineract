@@ -24,6 +24,7 @@ public class CommandSourceHandlerDelegator {
     private final OfficeTransactionCommandHandler officeTransactionCommandHandler;
     private final CurrencyCommandHandler currencyCommandHandler;
     private final ChargeDefinitionCommandHandler chargeDefinitionCommandHandler;
+    private final LoanProductCommandHandler loanProductCommandHandler;
 
     @Autowired
     public CommandSourceHandlerDelegator(final PlatformSecurityContext context, 
@@ -37,7 +38,8 @@ public class CommandSourceHandlerDelegator {
             final OfficeCommandHandler officeCommandHandler,
             final OfficeTransactionCommandHandler officeTransactionCommandHandler,
             final CurrencyCommandHandler currencyCommandHandler,
-            final ChargeDefinitionCommandHandler chargeDefinitionCommandHandler) {
+            final ChargeDefinitionCommandHandler chargeDefinitionCommandHandler,
+            final LoanProductCommandHandler loanProductCommandHandler) {
         this.context = context;
         this.clientCommandHandler = clientCommandHandler;
         this.roleCommandHandler = roleCommandHandler;
@@ -50,6 +52,7 @@ public class CommandSourceHandlerDelegator {
         this.officeTransactionCommandHandler = officeTransactionCommandHandler;
         this.currencyCommandHandler = currencyCommandHandler;
         this.chargeDefinitionCommandHandler = chargeDefinitionCommandHandler;
+        this.loanProductCommandHandler = loanProductCommandHandler;
     }
 
     public CommandSource handleCommandWithSupportForRollback(final CommandSource commandSource) {
@@ -78,6 +81,8 @@ public class CommandSourceHandlerDelegator {
             commandSourceResult = currencyCommandHandler.handleCommandWithSupportForRollback(commandSource);
         } else if (commandSource.isChargeDefinitionResource()) {
             commandSourceResult = chargeDefinitionCommandHandler.handleCommandWithSupportForRollback(commandSource);
+        } else if (commandSource.isLoanProductResource()) {
+                commandSourceResult = loanProductCommandHandler.handleCommandWithSupportForRollback(commandSource);
         } else {
             throw new UnsupportedCommandException(commandSource.commandName());
         }
@@ -110,6 +115,8 @@ public class CommandSourceHandlerDelegator {
             commandSourceResult = currencyCommandHandler.handleCommandForCheckerApproval(existingCommandSource);
         } else if (existingCommandSource.isChargeDefinitionResource()) {
             commandSourceResult = chargeDefinitionCommandHandler.handleCommandForCheckerApproval(existingCommandSource);
+        } else if (existingCommandSource.isLoanProductResource()) {
+            commandSourceResult = loanProductCommandHandler.handleCommandForCheckerApproval(existingCommandSource);
         } else {
             throw new UnsupportedCommandException(existingCommandSource.commandName());
         }

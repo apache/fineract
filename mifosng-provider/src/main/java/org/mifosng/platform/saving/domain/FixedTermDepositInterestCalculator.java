@@ -4,8 +4,8 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 
-import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 import org.mifosplatform.infrastructure.configuration.domain.Money;
+import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 import org.springframework.stereotype.Service;
 
 @Service

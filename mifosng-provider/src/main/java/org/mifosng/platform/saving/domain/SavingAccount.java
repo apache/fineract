@@ -16,7 +16,6 @@ import javax.persistence.UniqueConstraint;
 import org.joda.time.LocalDate;
 import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
-import org.mifosng.platform.loan.domain.PeriodFrequencyType;
 import org.mifosng.platform.savingproduct.domain.SavingFrequencyType;
 import org.mifosng.platform.savingproduct.domain.SavingInterestCalculationMethod;
 import org.mifosng.platform.savingproduct.domain.SavingProduct;
@@ -26,6 +25,7 @@ import org.mifosng.platform.savingproduct.domain.TenureTypeEnum;
 import org.mifosplatform.infrastructure.configuration.domain.MonetaryCurrency;
 import org.mifosplatform.infrastructure.configuration.domain.Money;
 import org.mifosplatform.infrastructure.user.domain.AppUser;
+import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 
 @Entity
 @Table(name = "m_saving_account", uniqueConstraints = @UniqueConstraint(name="saving_acc_external_id", columnNames = { "external_id" }))

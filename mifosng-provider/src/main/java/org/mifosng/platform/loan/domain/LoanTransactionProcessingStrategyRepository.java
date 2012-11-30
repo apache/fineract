@@ -1,5 +1,6 @@
 package org.mifosng.platform.loan.domain;
 
+import org.mifosplatform.portfolio.loanproduct.domain.LoanTransactionProcessingStrategy;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
