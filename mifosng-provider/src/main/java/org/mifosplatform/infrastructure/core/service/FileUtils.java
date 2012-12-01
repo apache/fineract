@@ -9,12 +9,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.mifosng.platform.exceptions.DocumentManagementException;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.domain.Base64EncodedImage;
 import org.mifosplatform.infrastructure.core.exception.ImageDataURLNotValidException;
 import org.mifosplatform.infrastructure.core.exception.ImageUploadException;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.mifosplatform.infrastructure.documentmanagement.exception.DocumentManagementException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -7,7 +7,6 @@ import java.util.Set;
 
 import org.mifosng.platform.api.data.DepositAccountData;
 import org.mifosng.platform.api.data.DepositProductData;
-import org.mifosng.platform.api.data.DocumentData;
 import org.mifosng.platform.api.data.GroupAccountSummaryCollectionData;
 import org.mifosng.platform.api.data.GroupData;
 import org.mifosng.platform.api.data.GuarantorData;
@@ -19,6 +18,7 @@ import org.mifosplatform.infrastructure.configuration.data.ConfigurationData;
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 import org.mifosplatform.infrastructure.dataqueries.data.DatatableData;
 import org.mifosplatform.infrastructure.dataqueries.data.GenericResultsetData;
+import org.mifosplatform.infrastructure.documentmanagement.data.DocumentData;
 import org.mifosplatform.infrastructure.office.data.OfficeData;
 import org.mifosplatform.infrastructure.office.data.OfficeTransactionData;
 import org.mifosplatform.infrastructure.staff.data.BulkTransferLoanOfficerData;
