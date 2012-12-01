@@ -1,16 +1,19 @@
-package org.mifosplatform.portfolio.loanaccount.service;
+package org.mifosplatform.portfolio.loanaccount.loanschedule.service;
 
 import java.util.Set;
 
 import org.mifosplatform.infrastructure.configuration.domain.ApplicationCurrency;
 import org.mifosplatform.infrastructure.configuration.domain.ApplicationCurrencyRepository;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.portfolio.loanaccount.data.LoanScheduleData;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanCharge;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.command.CalculateLoanScheduleCommand;
+import org.mifosplatform.portfolio.loanaccount.loanschedule.command.CalculateLoanScheduleCommandValidator;
+import org.mifosplatform.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.DefaultLoanScheduleGeneratorFactory;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleGenerator;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleGeneratorFactory;
+import org.mifosplatform.portfolio.loanaccount.service.LoanChargeAssembler;
+import org.mifosplatform.portfolio.loanaccount.service.LoanProductRelatedDetailAssembler;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;

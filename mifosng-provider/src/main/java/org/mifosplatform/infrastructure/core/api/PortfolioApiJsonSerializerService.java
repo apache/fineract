@@ -34,8 +34,8 @@ import org.mifosplatform.portfolio.client.data.NoteData;
 import org.mifosplatform.portfolio.fund.data.FundData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanAccountData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanChargeData;
-import org.mifosplatform.portfolio.loanaccount.data.LoanScheduleData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionData;
+import org.mifosplatform.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
 import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
 
 public interface PortfolioApiJsonSerializerService {

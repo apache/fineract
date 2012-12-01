@@ -1,7 +1,7 @@
-package org.mifosplatform.portfolio.loanaccount.service;
+package org.mifosplatform.portfolio.loanaccount.loanschedule.service;
 
-import org.mifosplatform.portfolio.loanaccount.data.LoanScheduleData;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.command.CalculateLoanScheduleCommand;
+import org.mifosplatform.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
 
 public interface CalculationPlatformService {
 

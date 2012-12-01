@@ -7,8 +7,8 @@ import org.mifosplatform.infrastructure.configuration.data.CurrencyData;
 import org.mifosplatform.portfolio.loanaccount.data.DisbursementData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanBasicDetailsData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanPermissionData;
-import org.mifosplatform.portfolio.loanaccount.data.LoanScheduleData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionData;
+import org.mifosplatform.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
 
 public interface LoanReadPlatformService {
 

@@ -1,4 +1,4 @@
-package org.mifosplatform.portfolio.loanaccount.data;
+package org.mifosplatform.portfolio.loanaccount.loanschedule.data;
 
 import java.math.BigDecimal;
 

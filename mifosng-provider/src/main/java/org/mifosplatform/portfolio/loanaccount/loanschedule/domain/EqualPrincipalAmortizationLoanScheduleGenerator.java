@@ -12,9 +12,9 @@ import org.mifosplatform.infrastructure.configuration.data.CurrencyData;
 import org.mifosplatform.infrastructure.configuration.domain.ApplicationCurrency;
 import org.mifosplatform.infrastructure.configuration.domain.MonetaryCurrency;
 import org.mifosplatform.infrastructure.configuration.domain.Money;
-import org.mifosplatform.portfolio.loanaccount.data.LoanScheduleData;
-import org.mifosplatform.portfolio.loanaccount.data.LoanSchedulePeriodData;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanCharge;
+import org.mifosplatform.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
+import org.mifosplatform.portfolio.loanaccount.loanschedule.data.LoanSchedulePeriodData;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 
 public class EqualPrincipalAmortizationLoanScheduleGenerator implements AmortizationLoanScheduleGenerator {

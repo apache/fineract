@@ -3,7 +3,7 @@ package org.mifosplatform.portfolio.loanaccount.service;
 import java.math.BigDecimal;
 import java.util.Collection;
 
-import org.mifosplatform.portfolio.loanaccount.data.LoanSchedulePeriodData;
+import org.mifosplatform.portfolio.loanaccount.loanschedule.data.LoanSchedulePeriodData;
 
 public class LoanSchedulePeriodDataWrapper {
 

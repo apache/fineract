@@ -1,4 +1,4 @@
-package org.mifosplatform.portfolio.loanaccount.service;
+package org.mifosplatform.portfolio.loanaccount.loanschedule.command;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,7 +6,6 @@ import java.util.List;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
-import org.mifosplatform.portfolio.loanaccount.loanschedule.command.CalculateLoanScheduleCommand;
 
 public class CalculateLoanScheduleCommandValidator {
 
