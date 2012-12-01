@@ -6,7 +6,6 @@ import java.util.Map;
 import org.mifosplatform.infrastructure.configuration.service.ConfigurationDomainService;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.infrastructure.user.command.RoleCommand;
-import org.mifosplatform.infrastructure.user.command.RoleCommandValidator;
 import org.mifosplatform.infrastructure.user.command.RolePermissionCommand;
 import org.mifosplatform.infrastructure.user.domain.Permission;
 import org.mifosplatform.infrastructure.user.domain.PermissionRepository;
@@ -42,9 +41,7 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
     public Long createRole(final RoleCommand command) {
 
         context.authenticatedUser();
-
-        final RoleCommandValidator validator = new RoleCommandValidator(command);
-        validator.validateForCreate();
+        command.validateForCreate();
         
         final Role entity = new Role(command.getName(), command.getDescription());
 
@@ -57,12 +54,10 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
 
     @Transactional
     @Override
-    public Long updateRole(RoleCommand command) {
+    public Long updateRole(final RoleCommand command) {
 
         context.authenticatedUser();
-
-        final RoleCommandValidator validator = new RoleCommandValidator(command);
-        validator.validateForUpdate();
+        command.validateForUpdate();
         
         final Role role = this.roleRepository.findOne(command.getId());
         if (role == null) { throw new RoleNotFoundException(command.getId()); }

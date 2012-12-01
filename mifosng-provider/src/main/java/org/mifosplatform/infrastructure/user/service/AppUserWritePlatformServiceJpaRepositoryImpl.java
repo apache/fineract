@@ -19,7 +19,6 @@ import org.mifosplatform.infrastructure.security.domain.PlatformUser;
 import org.mifosplatform.infrastructure.security.service.PlatformPasswordEncoder;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.infrastructure.user.command.UserCommand;
-import org.mifosplatform.infrastructure.user.command.UserCommandValidator;
 import org.mifosplatform.infrastructure.user.domain.AppUser;
 import org.mifosplatform.infrastructure.user.domain.AppUserRepository;
 import org.mifosplatform.infrastructure.user.domain.Role;
@@ -68,9 +67,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 
         try {
             context.authenticatedUser();
-
-            final UserCommandValidator validator = new UserCommandValidator(command);
-            validator.validateForCreate();
+            command.validateForCreate();
 
             final Set<Role> allRoles = assembleSetOfRoles(command);
 
@@ -108,9 +105,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 
         try {
             context.authenticatedUser();
-
-            UserCommandValidator validator = new UserCommandValidator(command);
-            validator.validateForUpdate();
+            command.validateForUpdate();
 
             final Set<Role> allRoles = assembleSetOfRoles(command);
 
@@ -156,9 +151,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 
         try {
             context.authenticatedUser();
-
-            UserCommandValidator validator = new UserCommandValidator(command);
-            validator.validateForUpdate();
+            command.validateForUpdate();
 
             final Set<Role> allRoles = assembleSetOfRoles(command);
 
