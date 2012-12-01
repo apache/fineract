@@ -63,6 +63,15 @@ public class ApiParameterHelper {
         return exportCsv;
     }
 
+    
+    public static boolean exportPdf(final MultivaluedMap<String, String> queryParams) {
+		boolean exportPDF = false;
+		if (queryParams.getFirst("exportPDF") != null) {
+			String exportPdfValue = queryParams.getFirst("exportPDF");
+			exportPDF = "true".equalsIgnoreCase(exportPdfValue);
+		}
+		return exportPDF;
+    }
     public static boolean parameterType(final MultivaluedMap<String, String> queryParams) {
         boolean parameterType = false;
         if (queryParams.getFirst("parameterType") != null) {

@@ -15,5 +15,8 @@ public interface ReadReportingService {
 
     Response processPentahoRequest(String reportName, String outputType, Map<String, String> queryParams);
 
+    String retrieveReportPDF(String name, String type,Map<String, String> extractedQueryParams);
+    
+    
     String getReportType(String reportName);
 }

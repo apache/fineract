@@ -1,5 +1,6 @@
 package org.mifosplatform.infrastructure.dataqueries.api;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -13,6 +14,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriInfo;
 
@@ -50,6 +52,22 @@ public class ReportsApiResource {
 
         boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
         boolean exportCsv = ApiParameterHelper.exportCsv(uriInfo.getQueryParameters());
+        
+        boolean exportPdf = ApiParameterHelper.exportPdf(uriInfo.getQueryParameters());
+
+    			if(exportPdf)
+    		
+    			{	
+    				String result = this.readExtraDataAndReportingService
+    						.retrieveReportPDF(".", ".", extractedQueryParams);
+
+    				return Response
+    						.ok()
+    						.entity(result)
+    						.header("Content-Disposition",
+    								"attachment;filename=ReportList.pdf").build();
+    			
+    			}
 
         if (!exportCsv) {
             GenericResultsetData result = this.readExtraDataAndReportingService.retrieveGenericResultset(".", ".", extractedQueryParams);
@@ -75,6 +93,7 @@ public class ReportsApiResource {
         boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
         boolean exportCsv = ApiParameterHelper.exportCsv(uriInfo.getQueryParameters());
         boolean parameterType = ApiParameterHelper.parameterType(uriInfo.getQueryParameters());
+        boolean exportPdf = ApiParameterHelper.exportPdf(uriInfo.getQueryParameters());
 
         checkUserPermissionForReport(reportName, parameterType);
 
@@ -89,6 +108,28 @@ public class ReportsApiResource {
         } else {
             parameterTypeValue = "parameter";
         }
+        
+        
+     // PDF format
+		
+     		if(exportPdf)
+     		{	
+     			
+     			Map<String, String> reportParams = getReportParams(queryParams, false);
+     			String pdfFileName = this.readExtraDataAndReportingService
+     					.retrieveReportPDF(reportName, parameterTypeValue, reportParams);
+     			
+     			File file=new File(pdfFileName);
+
+     			ResponseBuilder response=Response.ok(file);
+     					response.header("Content-Disposition",
+     							"attachment; filename=\""
+     					+pdfFileName+"\"");
+     					response.header("content-Type","application/pdf");
+     					
+     					return response.build();
+     		
+     		}
 
         if (!exportCsv) {
 

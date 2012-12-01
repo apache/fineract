@@ -2,6 +2,8 @@ package org.mifosplatform.infrastructure.dataqueries.service;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -18,6 +20,7 @@ import javax.ws.rs.core.StreamingOutput;
 import org.apache.commons.lang.StringUtils;
 import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
 import org.mifosng.platform.exceptions.ReportNotFoundException;
+import org.mifosng.platform.infrastructure.FileUtils;
 import org.mifosplatform.infrastructure.dataqueries.data.GenericResultsetData;
 import org.mifosplatform.infrastructure.dataqueries.data.ResultsetColumnHeader;
 import org.mifosplatform.infrastructure.dataqueries.data.ResultsetDataRow;
@@ -40,6 +43,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.lowagie.text.Document;
+import com.lowagie.text.PageSize;
+import com.lowagie.text.pdf.PdfPTable;
+import com.lowagie.text.pdf.PdfWriter;
 
 @Service
 public class ReadReportingServiceImpl implements ReadReportingService {
@@ -134,6 +142,8 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
         return writer;
     }
+    
+    
 
     @Override
     public GenericResultsetData retrieveGenericResultset(final String name, final String type, final Map<String, String> queryParams) {
@@ -332,4 +342,85 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         }
     }
 
-}
+	@Override
+public String retrieveReportPDF(final String reportName,final String type, final Map<String, String> queryParams) {
+
+		    	String fileLocation=FileUtils.MIFOSX_BASE_DIR+File.separator+"";
+		    	if(!new File(fileLocation).isDirectory())
+		    	{
+		    	 new File(fileLocation).mkdirs();	
+		    	}
+
+		    	String genaratePdf=fileLocation+File.separator+reportName+".pdf";
+		    	
+		    	
+		    try
+		    {
+		    GenericResultsetData result = retrieveGenericResultset(
+		    		reportName, type, queryParams);
+		    	
+
+		    List<ResultsetColumnHeader> columnHeaders = result.getColumnHeaders();
+		    List<ResultsetDataRow> data = result.getData();
+		    List<String> row;
+
+		    logger.info("NO. of Columns: " + columnHeaders.size());
+		    Integer chSize = columnHeaders.size();
+
+		    Document document = new Document(PageSize.B0.rotate());
+
+		    PdfWriter.getInstance(document,
+		    	      new FileOutputStream(new File(fileLocation+reportName+".pdf")));
+		    	document.open();
+		     
+		    PdfPTable table = new PdfPTable(chSize);
+		    table.setWidthPercentage(100);
+
+		    for (int i = 0; i < chSize; i++) {
+		    	 
+		    	table.addCell(columnHeaders.get(i).getColumnName());
+		    	
+		    }
+		    table.completeRow();
+
+		    Integer rSize;
+		    String currColType;
+		    String currVal;
+		    logger.info("NO. of Rows: " + data.size());
+		    for (int i = 0; i < data.size(); i++) {
+		    	row = data.get(i).getRow();
+		    	rSize = row.size();
+		    	for (int j = 0; j < rSize; j++) {
+		    		currColType = columnHeaders.get(j).getColumnType();
+		    		currVal = row.get(j);
+		    		if (currVal != null) {
+		    			if (currColType.equals("DECIMAL")
+		    					|| currColType.equals("DOUBLE")
+		    					|| currColType.equals("BIGINT")
+		    					|| currColType.equals("SMALLINT")
+		    					|| currColType.equals("INT"))
+		    			{
+		    				
+		    			table.addCell(currVal.toString());
+		    		}
+		    			else
+		    			{
+		    				table.addCell(currVal.toString());
+		    			}
+		    		}
+		    	}
+		    }
+		      table.completeRow();
+		      document.add(table);
+		    document.close();
+		    return genaratePdf;
+		    }
+		    				
+		    				catch (Exception e) {
+		    					throw new PlatformDataIntegrityException(
+		    							"error.msg.exception.error", e.getMessage());
+		    				}
+
+		    			}
+	}
+
