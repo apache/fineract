@@ -1,17 +1,17 @@
-package org.mifosng.platform.guarantor;
+package org.mifosplatform.portfolio.loanaccount.gaurantor.service;
 
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
-import org.mifosng.platform.api.data.GuarantorData;
-import org.mifosng.platform.exceptions.GuarantorNotFoundException;
 import org.mifosplatform.infrastructure.dataqueries.data.GenericResultsetData;
 import org.mifosplatform.infrastructure.dataqueries.service.ReadWriteNonCoreDataService;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepository;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanNotFoundException;
+import org.mifosplatform.portfolio.loanaccount.gaurantor.data.GuarantorData;
+import org.mifosplatform.portfolio.loanaccount.gaurantor.exception.GuarantorNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +20,7 @@ public class GuarantorReadPlatformServiceImpl implements GuarantorReadPlatformSe
 
     // Table for storing external Guarantor Details
     public static final String EXTERNAL_GUARANTOR_TABLE_NAME = "m_guarantor_external";
-    
+
     private final LoanRepository loanRepository;
     private final ReadWriteNonCoreDataService readWriteNonCoreDataService;
 
@@ -61,8 +61,9 @@ public class GuarantorReadPlatformServiceImpl implements GuarantorReadPlatformSe
     }
 
     private Loan retrieveLoanById(final Long loanId) {
-        
-        // FIXME - KW - On the read side of services - we would prefer not to use the repository/ORM pattern
+
+        // FIXME - KW - On the read side of services - we would prefer not to
+        // use the repository/ORM pattern
         Loan loan = loanRepository.findOne(loanId);
         if (loan == null) { throw new LoanNotFoundException(loanId); }
         return loan;
@@ -70,7 +71,7 @@ public class GuarantorReadPlatformServiceImpl implements GuarantorReadPlatformSe
 
     @Override
     public GuarantorData getExternalGuarantor(final Long loanId) {
-        
+
         GenericResultsetData genericResultDataSet = readWriteNonCoreDataService.retrieveDataTableGenericResultSet(
                 EXTERNAL_GUARANTOR_TABLE_NAME, loanId, null, null);
         if (genericResultDataSet.getData().size() == 1) {

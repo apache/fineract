@@ -1,4 +1,4 @@
-package org.mifosng.platform.guarantor;
+package org.mifosplatform.portfolio.loanaccount.gaurantor.service;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -8,8 +8,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
-import org.mifosng.platform.api.commands.GuarantorCommand;
-import org.mifosng.platform.exceptions.InvalidGuarantorException;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.dataqueries.service.ReadWriteNonCoreDataService;
@@ -19,6 +17,9 @@ import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepository;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanNotFoundException;
+import org.mifosplatform.portfolio.loanaccount.gaurantor.command.GuarantorCommand;
+import org.mifosplatform.portfolio.loanaccount.gaurantor.command.GuarantorCommandValidator;
+import org.mifosplatform.portfolio.loanaccount.gaurantor.exception.InvalidGuarantorException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -90,7 +91,7 @@ public class GuarantorWritePlatformServiceImpl implements GuarantorWritePlatform
         else {
             Set<String> modifiedParameters = command.getModifiedParameters();
             Map<String, String> modifiedParametersMap = new HashMap<String, String>();
-            
+
             /***
              * TODO Vishwas: Check with JW/KW if using reflection here is a good
              * idea

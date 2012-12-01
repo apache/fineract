@@ -1,4 +1,4 @@
-package org.mifosng.platform.exceptions;
+package org.mifosplatform.portfolio.loanaccount.gaurantor.exception;
 
 import org.mifosplatform.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 

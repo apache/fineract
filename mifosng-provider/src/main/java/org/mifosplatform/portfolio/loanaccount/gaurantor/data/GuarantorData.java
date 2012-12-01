@@ -1,4 +1,4 @@
-package org.mifosng.platform.api.data;
+package org.mifosplatform.portfolio.loanaccount.gaurantor.data;
 
 import org.joda.time.LocalDate;
 

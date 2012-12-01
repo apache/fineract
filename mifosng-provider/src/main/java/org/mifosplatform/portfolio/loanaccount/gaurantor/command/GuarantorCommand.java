@@ -1,4 +1,4 @@
-package org.mifosng.platform.api.commands;
+package org.mifosplatform.portfolio.loanaccount.gaurantor.command;
 
 import java.util.Set;
 
@@ -13,7 +13,7 @@ public class GuarantorCommand {
     private final Long existingClientId;
 
     /*** Fields for external persons serving as guarantors ***/
-    // FIXME - kw - what the details for collecting guarantors change? we are using datatable approach but fixing here?
+    // FIXME - kw - what if the details for collecting guarantors change? we are using datatable approach but embedding a structure here?
     private final String firstname;
     private final String lastname;
     private final String addressLine1;
