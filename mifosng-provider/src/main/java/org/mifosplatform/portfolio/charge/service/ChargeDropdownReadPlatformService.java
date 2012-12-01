@@ -2,7 +2,7 @@ package org.mifosplatform.portfolio.charge.service;
 
 import java.util.List;
 
-import org.mifosng.platform.api.data.EnumOptionData;
+import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 
 public interface ChargeDropdownReadPlatformService {
 

@@ -3,8 +3,8 @@ package org.mifosplatform.portfolio.charge.data;
 import java.math.BigDecimal;
 import java.util.List;
 
-import org.mifosng.platform.api.data.EnumOptionData;
 import org.mifosplatform.infrastructure.configuration.data.CurrencyData;
+import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 
 /**
  * Immutable data object for charge data.

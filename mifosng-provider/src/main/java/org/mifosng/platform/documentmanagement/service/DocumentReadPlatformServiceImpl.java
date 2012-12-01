@@ -6,8 +6,8 @@ import java.util.Collection;
 
 import org.mifosng.platform.api.data.DocumentData;
 import org.mifosng.platform.exceptions.DocumentNotFoundException;
-import org.mifosng.platform.infrastructure.JdbcSupport;
-import org.mifosng.platform.infrastructure.TenantAwareRoutingDataSource;
+import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
+import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;

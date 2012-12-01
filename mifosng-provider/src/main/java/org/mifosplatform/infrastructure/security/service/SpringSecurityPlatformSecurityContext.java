@@ -1,7 +1,7 @@
 package org.mifosplatform.infrastructure.security.service;
 
-import org.mifosng.platform.exceptions.UnAuthenticatedUserException;
 import org.mifosplatform.infrastructure.user.domain.AppUser;
+import org.mifosplatform.infrastructure.user.exception.UnAuthenticatedUserException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;

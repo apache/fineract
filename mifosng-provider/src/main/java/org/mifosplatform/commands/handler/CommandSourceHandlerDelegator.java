@@ -1,7 +1,7 @@
 package org.mifosplatform.commands.handler;
 
-import org.mifosng.platform.infrastructure.errorhandling.UnsupportedCommandException;
 import org.mifosplatform.commands.domain.CommandSource;
+import org.mifosplatform.commands.exception.UnsupportedCommandException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,10 +25,12 @@ public class CommandSourceHandlerDelegator {
     private final CurrencyCommandHandler currencyCommandHandler;
     private final ChargeDefinitionCommandHandler chargeDefinitionCommandHandler;
     private final LoanProductCommandHandler loanProductCommandHandler;
+    private final ClientIdentifierCommandHandler clientIdentifierCommandHandler;
 
     @Autowired
     public CommandSourceHandlerDelegator(final PlatformSecurityContext context, 
             final ClientCommandHandler clientCommandHandler,
+            final ClientIdentifierCommandHandler clientIdentifierCommandHandler,
             final RoleCommandHandler roleCommandHandler,
             final PermissionsCommandHandler permissionCommandHandler,
             final UserCommandHandler userCommandHandler,
@@ -42,6 +44,7 @@ public class CommandSourceHandlerDelegator {
             final LoanProductCommandHandler loanProductCommandHandler) {
         this.context = context;
         this.clientCommandHandler = clientCommandHandler;
+        this.clientIdentifierCommandHandler = clientIdentifierCommandHandler;
         this.roleCommandHandler = roleCommandHandler;
         this.permissionCommandHandler = permissionCommandHandler;
         this.userCommandHandler = userCommandHandler;
@@ -61,6 +64,8 @@ public class CommandSourceHandlerDelegator {
         CommandSource commandSourceResult = null;
         if (commandSource.isClientResource()) {
             commandSourceResult = clientCommandHandler.handleCommandWithSupportForRollback(commandSource);
+        } else if (commandSource.isClientIdentifierResource()) {
+            commandSourceResult = clientIdentifierCommandHandler.handleCommandWithSupportForRollback(commandSource);
         } else if (commandSource.isRoleResource()) {
             commandSourceResult = roleCommandHandler.handleCommandWithSupportForRollback(commandSource);
         } else if (commandSource.isPermissionResource()) {
@@ -95,6 +100,8 @@ public class CommandSourceHandlerDelegator {
         CommandSource commandSourceResult = null;
         if (existingCommandSource.isClientResource()) {
             commandSourceResult = clientCommandHandler.handleCommandForCheckerApproval(existingCommandSource);
+        } else if (existingCommandSource.isClientIdentifierResource()) {
+            commandSourceResult = clientIdentifierCommandHandler.handleCommandWithSupportForRollback(existingCommandSource);
         } else if (existingCommandSource.isRoleResource()) {
             commandSourceResult = roleCommandHandler.handleCommandForCheckerApproval(existingCommandSource);
         } else if (existingCommandSource.isPermissionResource()) {

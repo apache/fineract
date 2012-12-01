@@ -9,9 +9,9 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mifosng.platform.infrastructure.InvalidTenantIdentiferException;
-import org.mifosng.platform.infrastructure.MifosPlatformTenant;
-import org.mifosng.platform.infrastructure.ThreadLocalContextUtil;
+import org.mifosplatform.infrastructure.core.domain.MifosPlatformTenant;
+import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
+import org.mifosplatform.infrastructure.security.exception.InvalidTenantIdentiferException;
 import org.mifosplatform.infrastructure.security.service.TenantDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;

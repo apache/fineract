@@ -9,8 +9,8 @@ import javax.persistence.Table;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosng.platform.api.commands.SavingProductCommand;
-import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
 import org.mifosplatform.infrastructure.configuration.domain.MonetaryCurrency;
+import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.infrastructure.user.domain.AppUser;
 import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 

@@ -8,7 +8,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang.StringUtils;
-import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
+import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.infrastructure.office.domain.Office;
 import org.mifosplatform.infrastructure.staff.command.StaffCommand;
 import org.mifosplatform.infrastructure.user.domain.AppUser;

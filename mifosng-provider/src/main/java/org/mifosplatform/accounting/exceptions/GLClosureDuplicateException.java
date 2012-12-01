@@ -1,7 +1,7 @@
 package org.mifosplatform.accounting.exceptions;
 
 import org.joda.time.LocalDate;
-import org.mifosng.platform.exceptions.AbstractPlatformDomainRuleException;
+import org.mifosplatform.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
 /**
  * A {@link RuntimeException} thrown when a GL Closure for a given date and

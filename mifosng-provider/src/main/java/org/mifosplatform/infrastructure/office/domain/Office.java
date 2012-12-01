@@ -17,10 +17,10 @@ import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
-import org.mifosng.platform.exceptions.CannotUpdateOfficeWithParentOfficeSameAsSelf;
-import org.mifosng.platform.exceptions.RootOfficeParentCannotBeUpdated;
-import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
+import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.infrastructure.office.command.OfficeCommand;
+import org.mifosplatform.infrastructure.office.exception.CannotUpdateOfficeWithParentOfficeSameAsSelf;
+import org.mifosplatform.infrastructure.office.exception.RootOfficeParentCannotBeUpdated;
 import org.mifosplatform.infrastructure.user.domain.AppUser;
 
 @Entity

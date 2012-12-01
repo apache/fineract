@@ -1,5 +1,7 @@
 package org.mifosng.platform.exceptions;
 
+import org.mifosplatform.infrastructure.core.exception.AbstractPlatformDomainRuleException;
+
 /**
  * {@link AbstractPlatformDomainRuleException} thrown when a Client is set as a
  * guarantor for his/her own loans

@@ -1,6 +1,6 @@
 package org.mifosplatform.infrastructure.codes.exception;
 
-import org.mifosng.platform.exceptions.AbstractPlatformDomainRuleException;
+import org.mifosplatform.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
 /**
  * A {@link AbstractPlatformDomainRuleException} thrown when someone attempts to update or delete a system defined code.

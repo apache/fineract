@@ -2,7 +2,7 @@ package org.mifosplatform.infrastructure.staff.service;
 
 import java.util.Collection;
 
-import org.mifosng.platform.api.data.StaffAccountSummaryCollectionData;
+import org.mifosplatform.infrastructure.staff.data.StaffAccountSummaryCollectionData;
 import org.mifosplatform.infrastructure.staff.data.StaffData;
 
 public interface StaffReadPlatformService {

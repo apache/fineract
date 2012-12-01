@@ -6,7 +6,7 @@ import org.mifosng.platform.api.commands.LoanStateTransitionCommand;
 import org.mifosng.platform.api.commands.LoanTransactionCommand;
 import org.mifosng.platform.api.commands.LoanApplicationCommand;
 import org.mifosng.platform.api.commands.UndoStateTransitionCommand;
-import org.mifosng.platform.api.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 import org.mifosplatform.infrastructure.staff.command.BulkTransferLoanOfficerCommand;
 import org.springframework.security.access.prepost.PreAuthorize;
 

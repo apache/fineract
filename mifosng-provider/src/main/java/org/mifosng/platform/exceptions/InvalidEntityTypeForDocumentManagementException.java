@@ -1,5 +1,7 @@
 package org.mifosng.platform.exceptions;
 
+import org.mifosplatform.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
+
 /**
  * A {@link RuntimeException} thrown when document management functionality is
  * invoked for invalid Entity Types

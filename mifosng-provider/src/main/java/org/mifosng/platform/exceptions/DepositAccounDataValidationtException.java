@@ -2,6 +2,8 @@ package org.mifosng.platform.exceptions;
 
 import java.math.BigDecimal;
 
+import org.mifosplatform.infrastructure.core.exception.AbstractPlatformDomainRuleException;
+
 public class DepositAccounDataValidationtException extends
 		AbstractPlatformDomainRuleException {
 

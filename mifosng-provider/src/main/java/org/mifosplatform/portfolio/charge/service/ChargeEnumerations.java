@@ -1,6 +1,6 @@
 package org.mifosplatform.portfolio.charge.service;
 
-import org.mifosng.platform.api.data.EnumOptionData;
+import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.portfolio.charge.domain.ChargeAppliesTo;
 import org.mifosplatform.portfolio.charge.domain.ChargeCalculationType;
 import org.mifosplatform.portfolio.charge.domain.ChargeTimeType;

@@ -5,12 +5,12 @@ import java.sql.SQLException;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
-import org.mifosng.platform.infrastructure.TenantAwareRoutingDataSource;
 import org.mifosplatform.accounting.AccountingConstants.GL_ACCOUNT_CLASSIFICATION;
 import org.mifosplatform.accounting.api.data.GLAccountData;
 import org.mifosplatform.accounting.exceptions.GLAccountInvalidClassificationException;
 import org.mifosplatform.accounting.exceptions.GLAccountNotFoundException;
 import org.mifosplatform.accounting.service.GLAccountReadPlatformService;
+import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;

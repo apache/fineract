@@ -6,7 +6,7 @@ import javax.persistence.Table;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosng.platform.api.commands.DocumentCommand;
-import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
+import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.infrastructure.user.domain.AppUser;
 
 @Entity

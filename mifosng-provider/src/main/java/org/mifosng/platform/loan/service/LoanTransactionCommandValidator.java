@@ -3,10 +3,10 @@ package org.mifosng.platform.loan.service;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.mifosng.platform.DataValidatorBuilder;
 import org.mifosng.platform.api.commands.LoanTransactionCommand;
-import org.mifosng.platform.api.data.ApiParameterError;
-import org.mifosng.platform.exceptions.PlatformApiDataValidationException;
+import org.mifosplatform.infrastructure.core.data.ApiParameterError;
+import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
+import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 
 public class LoanTransactionCommandValidator {
 

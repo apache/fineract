@@ -1,7 +1,7 @@
 package org.mifosng.platform.loan.domain;
 
 import org.joda.time.LocalDate;
-import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
+import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.infrastructure.staff.domain.Staff;
 import org.mifosplatform.infrastructure.user.domain.AppUser;
 

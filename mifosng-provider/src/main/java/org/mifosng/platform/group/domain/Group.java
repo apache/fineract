@@ -13,10 +13,10 @@ import javax.persistence.Table;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosng.platform.api.commands.GroupCommand;
-import org.mifosng.platform.client.domain.Client;
-import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
+import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.infrastructure.office.domain.Office;
 import org.mifosplatform.infrastructure.user.domain.AppUser;
+import org.mifosplatform.portfolio.client.domain.Client;
 
 @Entity
 @Table(name = "m_group")

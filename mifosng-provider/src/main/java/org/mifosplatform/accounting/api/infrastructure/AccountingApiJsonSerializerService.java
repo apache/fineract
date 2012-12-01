@@ -3,9 +3,9 @@ package org.mifosplatform.accounting.api.infrastructure;
 import java.util.Collection;
 import java.util.Set;
 
-import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosplatform.accounting.api.data.GLAccountData;
 import org.mifosplatform.accounting.api.data.GLClosureData;
+import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 
 public interface AccountingApiJsonSerializerService {
 

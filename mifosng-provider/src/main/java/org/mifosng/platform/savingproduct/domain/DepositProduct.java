@@ -10,9 +10,9 @@ import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosng.platform.api.commands.DepositProductCommand;
-import org.mifosng.platform.exceptions.ValueOutsideRangeException;
-import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
+import org.mifosng.platform.exceptions.DepositProductValueOutsideRangeException;
 import org.mifosplatform.infrastructure.configuration.domain.MonetaryCurrency;
+import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.infrastructure.user.domain.AppUser;
 import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 
@@ -304,7 +304,7 @@ public class DepositProduct extends AbstractAuditableCustom<AppUser, Long> {
 			final String actualValue = interestRate.toPlainString();
 			final String minValue = (this.maturityMinInterestRate == null) ? "" : this.maturityMinInterestRate.toPlainString();
 			final String maxValue = (this.maturityMaxInterestRate == null) ? "" : this.maturityMaxInterestRate.toPlainString();
-			throw new ValueOutsideRangeException(actualValue, minValue, maxValue, "deposit.account.maturityInterestRate");
+			throw new DepositProductValueOutsideRangeException(actualValue, minValue, maxValue, "deposit.account.maturityInterestRate");
 		}
 	}
 
@@ -322,7 +322,7 @@ public class DepositProduct extends AbstractAuditableCustom<AppUser, Long> {
 			final String actualValue = depositAmount.toPlainString();
 			final String minValue = (this.minimumBalance == null) ? "" : this.minimumBalance.toPlainString();
 			final String maxValue = (this.minimumBalance == null) ? "" : this.minimumBalance.toPlainString();
-			throw new ValueOutsideRangeException(actualValue, minValue, maxValue, "deposit.account.deposit.amount");
+			throw new DepositProductValueOutsideRangeException(actualValue, minValue, maxValue, "deposit.account.deposit.amount");
 		}
 	}
 }

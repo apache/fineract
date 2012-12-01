@@ -1,12 +1,12 @@
 package org.mifosng.platform.savingproduct.service;
 
 import org.mifosng.platform.api.commands.DepositProductCommand;
-import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.exceptions.DepositProductNotFoundException;
-import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
 import org.mifosng.platform.savingproduct.domain.DepositProduct;
 import org.mifosng.platform.savingproduct.domain.DepositProductRepository;
 import org.mifosplatform.infrastructure.configuration.domain.MonetaryCurrency;
+import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 import org.slf4j.Logger;

@@ -6,10 +6,7 @@ import java.util.List;
 
 import org.joda.time.LocalDate;
 import org.mifosng.platform.api.commands.SavingAccountCommand;
-import org.mifosng.platform.client.domain.Client;
-import org.mifosng.platform.client.domain.ClientRepository;
-import org.mifosng.platform.exceptions.ClientNotFoundException;
-import org.mifosng.platform.exceptions.ProductNotFoundException;
+import org.mifosng.platform.exceptions.SavingsProductNotFoundException;
 import org.mifosng.platform.saving.domain.DepositAccountStatus;
 import org.mifosng.platform.saving.domain.DepositLifecycleStateMachine;
 import org.mifosng.platform.saving.domain.DepositLifecycleStateMachineImpl;
@@ -24,6 +21,9 @@ import org.mifosng.platform.savingproduct.domain.SavingsInterestType;
 import org.mifosng.platform.savingproduct.domain.TenureTypeEnum;
 import org.mifosplatform.infrastructure.configuration.domain.MonetaryCurrency;
 import org.mifosplatform.infrastructure.configuration.domain.Money;
+import org.mifosplatform.portfolio.client.domain.Client;
+import org.mifosplatform.portfolio.client.domain.ClientRepository;
+import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
 import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -52,7 +52,7 @@ public class SavingAccountAssembler {
 		
 		SavingProduct product=this.savingProductRepository.findOne(command.getProductId());
 		if(product == null || product.isDeleted()){
-			throw new ProductNotFoundException(command.getProductId());
+			throw new SavingsProductNotFoundException(command.getProductId());
 		}
 		
 		MonetaryCurrency currency = product.getCurrency();
@@ -127,7 +127,7 @@ public class SavingAccountAssembler {
 			if(product.getId() != command.getProductId()){
 				product = this.savingProductRepository.findOne(command.getProductId());
 				if(product == null || product.isDeleted())
-					throw new ProductNotFoundException(command.getProductId());
+					throw new SavingsProductNotFoundException(command.getProductId());
 			}
 		}
 		

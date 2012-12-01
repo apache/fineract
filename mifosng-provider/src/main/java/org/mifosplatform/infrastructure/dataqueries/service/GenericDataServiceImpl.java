@@ -12,8 +12,8 @@ import javax.sql.DataSource;
 import javax.sql.rowset.CachedRowSet;
 
 import org.joda.time.LocalDate;
-import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
-import org.mifosng.platform.infrastructure.TenantAwareRoutingDataSource;
+import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.dataqueries.data.GenericResultsetData;
 import org.mifosplatform.infrastructure.dataqueries.data.ResultsetColumnHeader;
 import org.mifosplatform.infrastructure.dataqueries.data.ResultsetDataRow;

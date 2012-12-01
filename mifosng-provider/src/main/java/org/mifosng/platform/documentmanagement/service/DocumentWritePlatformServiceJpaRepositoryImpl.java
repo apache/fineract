@@ -5,14 +5,14 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.mifosng.platform.api.commands.DocumentCommand;
-import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.documentmanagement.domain.Document;
 import org.mifosng.platform.documentmanagement.domain.DocumentRepository;
 import org.mifosng.platform.exceptions.DocumentManagementException;
 import org.mifosng.platform.exceptions.DocumentNotFoundException;
 import org.mifosng.platform.exceptions.InvalidEntityTypeForDocumentManagementException;
-import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
-import org.mifosng.platform.infrastructure.FileUtils;
+import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.mifosplatform.infrastructure.core.service.FileUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

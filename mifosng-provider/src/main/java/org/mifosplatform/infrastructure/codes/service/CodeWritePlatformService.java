@@ -1,7 +1,7 @@
 package org.mifosplatform.infrastructure.codes.service;
 
-import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosplatform.infrastructure.codes.command.CodeCommand;
+import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 
 public interface CodeWritePlatformService {
 

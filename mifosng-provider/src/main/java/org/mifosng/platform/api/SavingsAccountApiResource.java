@@ -19,13 +19,13 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.mifosng.platform.api.commands.SavingAccountCommand;
-import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosng.platform.api.data.SavingAccountData;
-import org.mifosng.platform.api.infrastructure.PortfolioApiDataConversionService;
-import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService;
-import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
 import org.mifosng.platform.saving.service.SavingAccountReadPlatformService;
 import org.mifosng.platform.saving.service.SavingAccountWritePlatformService;
+import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
+import org.mifosplatform.infrastructure.core.api.PortfolioApiDataConversionService;
+import org.mifosplatform.infrastructure.core.api.PortfolioApiJsonSerializerService;
+import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;

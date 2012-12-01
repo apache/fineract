@@ -1,5 +1,7 @@
 package org.mifosng.platform.exceptions;
 
+import org.mifosplatform.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
+
 public class SavingProductNotFoundException extends
 		AbstractPlatformResourceNotFoundException {
 

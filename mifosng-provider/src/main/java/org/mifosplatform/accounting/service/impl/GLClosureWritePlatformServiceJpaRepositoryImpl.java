@@ -1,7 +1,5 @@
 package org.mifosplatform.accounting.service.impl;
 
-import org.mifosng.platform.exceptions.OfficeNotFoundException;
-import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
 import org.mifosplatform.accounting.api.commands.GLClosureCommand;
 import org.mifosplatform.accounting.domain.GLClosure;
 import org.mifosplatform.accounting.domain.GLClosureRepository;
@@ -9,8 +7,10 @@ import org.mifosplatform.accounting.exceptions.GLClosureDuplicateException;
 import org.mifosplatform.accounting.exceptions.GLClosureNotFoundException;
 import org.mifosplatform.accounting.service.GLClosureCommandValidator;
 import org.mifosplatform.accounting.service.GLClosureWritePlatformService;
+import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.office.domain.Office;
 import org.mifosplatform.infrastructure.office.domain.OfficeRepository;
+import org.mifosplatform.infrastructure.office.exception.OfficeNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

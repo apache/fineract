@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.mifosng.platform.DataValidatorBuilder;
-import org.mifosng.platform.api.data.ApiParameterError;
-import org.mifosng.platform.exceptions.PlatformApiDataValidationException;
+import org.mifosplatform.infrastructure.core.data.ApiParameterError;
+import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
+import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 
 /**
  * Immutable command for creating or updating details of a staff member.

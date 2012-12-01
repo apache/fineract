@@ -1,6 +1,6 @@
 package org.mifosplatform.portfolio.charge.domain;
 
-import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
+import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.infrastructure.user.domain.AppUser;
 import org.mifosplatform.portfolio.charge.command.ChargeDefinitionCommand;
 

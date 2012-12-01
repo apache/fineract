@@ -5,12 +5,12 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.mifosng.platform.api.data.EntityIdentifier;
-import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService;
-import org.mifosng.platform.infrastructure.api.GoogleGsonSerializerHelper;
 import org.mifosplatform.accounting.api.data.GLAccountData;
 import org.mifosplatform.accounting.api.data.GLClosureData;
 import org.mifosplatform.accounting.api.infrastructure.AccountingApiJsonSerializerService;
+import org.mifosplatform.infrastructure.core.api.GoogleGsonSerializerHelper;
+import org.mifosplatform.infrastructure.core.api.PortfolioApiJsonSerializerService;
+import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

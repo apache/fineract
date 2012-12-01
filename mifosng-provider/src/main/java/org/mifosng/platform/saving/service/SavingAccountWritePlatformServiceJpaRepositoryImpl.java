@@ -1,13 +1,13 @@
 package org.mifosng.platform.saving.service;
 
 import org.mifosng.platform.api.commands.SavingAccountCommand;
-import org.mifosng.platform.api.data.EntityIdentifier;
-import org.mifosng.platform.client.domain.NoteRepository;
-import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
 import org.mifosng.platform.exceptions.SavingAccountNotFoundException;
 import org.mifosng.platform.saving.domain.SavingAccount;
 import org.mifosng.platform.saving.domain.SavingAccountRepository;
+import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.portfolio.client.domain.NoteRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

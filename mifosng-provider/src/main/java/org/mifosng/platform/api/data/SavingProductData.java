@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.joda.time.DateTime;
 import org.mifosplatform.infrastructure.configuration.data.CurrencyData;
+import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 
 public class SavingProductData implements Serializable {
 

@@ -3,6 +3,7 @@ package org.mifosng.platform.api.data;
 import java.math.BigDecimal;
 
 import org.joda.time.LocalDate;
+import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 
 /**
  * Immutable data object to represent transactions on a deposit account.

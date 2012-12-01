@@ -1,7 +1,6 @@
 package org.mifosplatform.infrastructure.staff.data;
 
 import org.joda.time.LocalDate;
-import org.mifosng.platform.api.data.StaffAccountSummaryCollectionData;
 import org.mifosplatform.infrastructure.office.data.OfficeLookup;
 
 import java.util.Collection;

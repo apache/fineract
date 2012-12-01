@@ -1,6 +1,6 @@
 package org.mifosplatform.commands.service;
 
-import org.mifosng.platform.api.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 
 public interface PortfolioCommandSourceWritePlatformService {
 

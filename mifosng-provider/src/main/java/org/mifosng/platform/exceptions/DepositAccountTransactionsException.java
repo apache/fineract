@@ -1,5 +1,7 @@
 package org.mifosng.platform.exceptions;
 
+import org.mifosplatform.infrastructure.core.exception.AbstractPlatformDomainRuleException;
+
 
 public class DepositAccountTransactionsException extends AbstractPlatformDomainRuleException {
 

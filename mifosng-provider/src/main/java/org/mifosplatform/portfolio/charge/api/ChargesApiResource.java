@@ -17,12 +17,12 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
-import org.mifosng.platform.api.data.EntityIdentifier;
-import org.mifosng.platform.api.infrastructure.PortfolioApiDataConversionService;
-import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService;
-import org.mifosng.platform.api.infrastructure.PortfolioCommandSerializerService;
-import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
+import org.mifosplatform.infrastructure.core.api.PortfolioApiDataConversionService;
+import org.mifosplatform.infrastructure.core.api.PortfolioApiJsonSerializerService;
+import org.mifosplatform.infrastructure.core.api.PortfolioCommandSerializerService;
+import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.charge.command.ChargeDefinitionCommand;
 import org.mifosplatform.portfolio.charge.data.ChargeData;

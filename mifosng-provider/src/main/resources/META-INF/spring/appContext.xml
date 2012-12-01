@@ -15,13 +15,13 @@
 	
 	<tx:annotation-driven />
 	
-	<context:component-scan base-package="org.mifosng.platform.security, org.mifosng.platform.infrastructure, 
+	<context:component-scan base-package="org.mifosplatform.infrastructure.core.service, org.mifosng.platform.security, org.mifosng.platform.infrastructure, 
 										  org.mifosng.platform.*.domain, org.mifosng.platform, 
 										  org.mifosplatform.*.*.service, org.mifosplatform.*.*.domain, org.mifosplatform, org.mifosplatform.commands, org.mifosplatform.infrastructure.*.service">
 		<context:exclude-filter expression="org.springframework.stereotype.Controller" type="annotation" />
 	</context:component-scan>
 	
-	<bean id="auditorAware" class="org.mifosng.platform.infrastructure.AuditorAwareImpl" />
+	<bean id="auditorAware" class="org.mifosplatform.infrastructure.core.domain.AuditorAwareImpl" />
 	<jpa:auditing auditor-aware-ref="auditorAware" />
 	
     <jpa:repositories base-package="org.mifosng.platform.*.domain" />

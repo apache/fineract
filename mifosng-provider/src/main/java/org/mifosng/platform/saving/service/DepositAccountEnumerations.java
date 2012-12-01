@@ -1,7 +1,7 @@
 package org.mifosng.platform.saving.service;
 
-import org.mifosng.platform.api.data.EnumOptionData;
 import org.mifosng.platform.saving.domain.DepositAccountStatus;
+import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 
 public class DepositAccountEnumerations {
 

@@ -18,11 +18,11 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriInfo;
 
-import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService;
-import org.mifosng.platform.exceptions.NoAuthorizationException;
-import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
+import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
+import org.mifosplatform.infrastructure.core.api.PortfolioApiJsonSerializerService;
 import org.mifosplatform.infrastructure.dataqueries.data.GenericResultsetData;
 import org.mifosplatform.infrastructure.dataqueries.service.ReadReportingService;
+import org.mifosplatform.infrastructure.security.exception.NoAuthorizationException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.infrastructure.user.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;

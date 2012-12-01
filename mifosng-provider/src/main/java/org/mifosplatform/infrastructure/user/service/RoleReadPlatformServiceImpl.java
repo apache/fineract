@@ -4,13 +4,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
-import org.mifosng.platform.exceptions.RoleNotFoundException;
-import org.mifosng.platform.infrastructure.JdbcSupport;
-import org.mifosng.platform.infrastructure.TenantAwareRoutingDataSource;
+import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
+import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.infrastructure.user.api.data.RoleData;
 import org.mifosplatform.infrastructure.user.domain.Role;
 import org.mifosplatform.infrastructure.user.domain.RoleRepository;
+import org.mifosplatform.infrastructure.user.exception.RoleNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;

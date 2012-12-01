@@ -10,7 +10,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService;
+import org.mifosplatform.infrastructure.core.api.PortfolioApiJsonSerializerService;
 import org.mifosplatform.infrastructure.user.api.data.AuthenticatedUserData;
 import org.mifosplatform.infrastructure.user.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;

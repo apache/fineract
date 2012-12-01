@@ -1,7 +1,7 @@
 package org.mifosng.platform.savingproduct.service;
 
 import org.mifosng.platform.api.commands.SavingProductCommand;
-import org.mifosng.platform.api.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface SavingProductWritePlatformService {

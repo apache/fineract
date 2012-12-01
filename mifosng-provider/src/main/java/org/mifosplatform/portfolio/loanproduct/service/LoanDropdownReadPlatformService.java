@@ -3,7 +3,7 @@ package org.mifosplatform.portfolio.loanproduct.service;
 import java.util.Collection;
 import java.util.List;
 
-import org.mifosng.platform.api.data.EnumOptionData;
+import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.portfolio.loanproduct.data.TransactionProcessingStrategyData;
 
 public interface LoanDropdownReadPlatformService {

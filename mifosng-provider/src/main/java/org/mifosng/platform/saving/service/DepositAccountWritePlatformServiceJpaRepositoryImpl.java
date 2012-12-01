@@ -13,14 +13,10 @@ import org.mifosng.platform.api.commands.DepositAccountWithdrawalCommand;
 import org.mifosng.platform.api.commands.DepositStateTransitionApprovalCommand;
 import org.mifosng.platform.api.commands.DepositStateTransitionCommand;
 import org.mifosng.platform.api.commands.UndoStateTransitionCommand;
-import org.mifosng.platform.api.data.EntityIdentifier;
-import org.mifosng.platform.client.domain.Note;
-import org.mifosng.platform.client.domain.NoteRepository;
 import org.mifosng.platform.exceptions.DepositAccountNotFoundException;
 import org.mifosng.platform.exceptions.DepositAccountReopenException;
 import org.mifosng.platform.exceptions.DepositAccountTransactionsException;
-import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
-import org.mifosng.platform.exceptions.ProductNotFoundException;
+import org.mifosng.platform.exceptions.SavingsProductNotFoundException;
 import org.mifosng.platform.saving.domain.DepositAccount;
 import org.mifosng.platform.saving.domain.DepositAccountRepository;
 import org.mifosng.platform.saving.domain.DepositAccountStatus;
@@ -28,7 +24,11 @@ import org.mifosng.platform.saving.domain.DepositLifecycleStateMachine;
 import org.mifosng.platform.saving.domain.DepositLifecycleStateMachineImpl;
 import org.mifosng.platform.saving.domain.FixedTermDepositInterestCalculator;
 import org.mifosplatform.infrastructure.configuration.domain.Money;
+import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.portfolio.client.domain.Note;
+import org.mifosplatform.portfolio.client.domain.NoteRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,7 +103,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 		
 		DepositAccount account = this.depositAccountRepository.findOne(accountId);
 		if (account==null || account.isDeleted()) {
-			throw new ProductNotFoundException(accountId);
+			throw new SavingsProductNotFoundException(accountId);
 		}
 		
 		account.delete();

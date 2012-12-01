@@ -1,13 +1,13 @@
 package org.mifosplatform.portfolio.fund.service;
 
-import org.mifosng.platform.client.service.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
-import org.mifosng.platform.exceptions.FundNotFoundException;
-import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.configuration.service.ConfigurationDomainService;
+import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.portfolio.client.service.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
 import org.mifosplatform.portfolio.fund.command.FundCommand;
 import org.mifosplatform.portfolio.fund.domain.Fund;
 import org.mifosplatform.portfolio.fund.domain.FundRepository;
+import org.mifosplatform.portfolio.fund.exception.FundNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

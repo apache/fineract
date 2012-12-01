@@ -3,7 +3,7 @@ package org.mifosplatform.infrastructure.dataqueries.data;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
+import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 
 public class ResultsetColumnHeader {
 

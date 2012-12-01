@@ -14,8 +14,6 @@ import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 
 import org.joda.time.LocalDate;
-import org.mifosng.platform.client.domain.Client;
-import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
 import org.mifosng.platform.savingproduct.domain.SavingFrequencyType;
 import org.mifosng.platform.savingproduct.domain.SavingInterestCalculationMethod;
 import org.mifosng.platform.savingproduct.domain.SavingProduct;
@@ -24,7 +22,9 @@ import org.mifosng.platform.savingproduct.domain.SavingsInterestType;
 import org.mifosng.platform.savingproduct.domain.TenureTypeEnum;
 import org.mifosplatform.infrastructure.configuration.domain.MonetaryCurrency;
 import org.mifosplatform.infrastructure.configuration.domain.Money;
+import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.infrastructure.user.domain.AppUser;
+import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 
 @Entity

@@ -1,11 +1,11 @@
 package org.mifosplatform.infrastructure.user.domain;
 
-import org.mifosng.platform.client.service.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
-import org.mifosng.platform.infrastructure.EmailDetail;
-import org.mifosng.platform.infrastructure.PlatformEmailService;
-import org.mifosng.platform.infrastructure.PlatformPasswordEncoder;
-import org.mifosng.platform.infrastructure.RandomPasswordGenerator;
 import org.mifosplatform.infrastructure.configuration.service.ConfigurationDomainService;
+import org.mifosplatform.infrastructure.core.domain.EmailDetail;
+import org.mifosplatform.infrastructure.core.service.PlatformEmailService;
+import org.mifosplatform.infrastructure.security.service.PlatformPasswordEncoder;
+import org.mifosplatform.infrastructure.security.service.RandomPasswordGenerator;
+import org.mifosplatform.portfolio.client.service.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

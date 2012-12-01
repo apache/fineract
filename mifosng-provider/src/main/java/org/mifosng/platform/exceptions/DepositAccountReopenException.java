@@ -1,6 +1,7 @@
 package org.mifosng.platform.exceptions;
 
 import org.joda.time.LocalDate;
+import org.mifosplatform.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
 public class DepositAccountReopenException extends AbstractPlatformDomainRuleException{
 

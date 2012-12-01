@@ -1,6 +1,6 @@
 package org.mifosplatform.accounting.exceptions;
 
-import org.mifosng.platform.exceptions.AbstractPlatformDomainRuleException;
+import org.mifosplatform.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
 /**
  * A {@link RuntimeException} thrown when trying to fetch accounts belonging to

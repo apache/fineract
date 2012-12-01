@@ -8,14 +8,14 @@ import java.util.Collection;
 import java.util.List;
 
 import org.joda.time.LocalDate;
-import org.mifosng.platform.exceptions.OfficeNotFoundException;
-import org.mifosng.platform.infrastructure.JdbcSupport;
-import org.mifosng.platform.infrastructure.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.configuration.data.CurrencyData;
 import org.mifosplatform.infrastructure.configuration.service.CurrencyReadPlatformService;
+import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
+import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.office.data.OfficeData;
 import org.mifosplatform.infrastructure.office.data.OfficeLookup;
 import org.mifosplatform.infrastructure.office.data.OfficeTransactionData;
+import org.mifosplatform.infrastructure.office.exception.OfficeNotFoundException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.infrastructure.user.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;

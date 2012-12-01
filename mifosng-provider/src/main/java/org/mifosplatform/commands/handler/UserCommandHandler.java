@@ -4,14 +4,14 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.joda.time.LocalDate;
-import org.mifosng.platform.api.infrastructure.PortfolioCommandDeserializerService;
-import org.mifosng.platform.client.service.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
 import org.mifosplatform.commands.domain.CommandSource;
 import org.mifosplatform.commands.service.ChangeDetectionService;
+import org.mifosplatform.infrastructure.core.api.PortfolioCommandDeserializerService;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.infrastructure.user.command.UserCommand;
 import org.mifosplatform.infrastructure.user.domain.AppUser;
 import org.mifosplatform.infrastructure.user.service.AppUserWritePlatformService;
+import org.mifosplatform.portfolio.client.service.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -99,13 +99,12 @@ public class UserCommandHandler implements CommandSourceHandler {
                 commandSourceResult.updateResourceId(resourceId);
                 commandSourceResult.markAsChecked(checker, new LocalDate());
             } else if (commandSourceResult.isUpdate()) {
-                final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "USER_ADMINISTRATION_SUPER_USER",
-                        "UPDATE_USER_MAKER");
-                context.authenticatedUser().validateHasPermissionTo("UPDATE_USER_MAKER", allowedPermissions);
-
                 if (checker.hasIdOf(command.getId())) {
                     this.writePlatformService.updateUsersOwnAccountDetails(command);
                 } else {
+                    final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "USER_ADMINISTRATION_SUPER_USER","UPDATE_USER_MAKER");
+                    context.authenticatedUser().validateHasPermissionTo("UPDATE_USER_MAKER", allowedPermissions);
+                    
                     this.writePlatformService.updateUser(command);
                 }
 

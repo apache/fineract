@@ -24,13 +24,13 @@ import javax.ws.rs.core.UriInfo;
 
 import org.mifosng.platform.api.commands.DocumentCommand;
 import org.mifosng.platform.api.data.DocumentData;
-import org.mifosng.platform.api.data.EntityIdentifier;
-import org.mifosng.platform.api.infrastructure.ApiConstants;
-import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService;
 import org.mifosng.platform.documentmanagement.service.DocumentReadPlatformService;
 import org.mifosng.platform.documentmanagement.service.DocumentWritePlatformService;
-import org.mifosng.platform.infrastructure.FileUtils;
-import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
+import org.mifosplatform.infrastructure.core.api.ApiConstants;
+import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
+import org.mifosplatform.infrastructure.core.api.PortfolioApiJsonSerializerService;
+import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.service.FileUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;

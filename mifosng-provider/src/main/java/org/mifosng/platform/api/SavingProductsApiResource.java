@@ -20,12 +20,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.mifosng.platform.api.commands.SavingProductCommand;
-import org.mifosng.platform.api.data.EntityIdentifier;
-import org.mifosng.platform.api.data.EnumOptionData;
 import org.mifosng.platform.api.data.SavingProductData;
-import org.mifosng.platform.api.infrastructure.PortfolioApiDataConversionService;
-import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService;
-import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
 import org.mifosng.platform.savingproduct.domain.SavingFrequencyType;
 import org.mifosng.platform.savingproduct.domain.SavingInterestCalculationMethod;
 import org.mifosng.platform.savingproduct.domain.SavingProductType;
@@ -37,6 +32,11 @@ import org.mifosng.platform.savingproduct.service.SavingProductReadPlatformServi
 import org.mifosng.platform.savingproduct.service.SavingProductWritePlatformService;
 import org.mifosplatform.infrastructure.configuration.data.CurrencyData;
 import org.mifosplatform.infrastructure.configuration.service.CurrencyReadPlatformService;
+import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
+import org.mifosplatform.infrastructure.core.api.PortfolioApiDataConversionService;
+import org.mifosplatform.infrastructure.core.api.PortfolioApiJsonSerializerService;
+import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;

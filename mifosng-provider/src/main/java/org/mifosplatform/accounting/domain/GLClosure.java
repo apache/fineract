@@ -13,8 +13,8 @@ import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
-import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
 import org.mifosplatform.accounting.api.commands.GLClosureCommand;
+import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.infrastructure.office.domain.Office;
 import org.mifosplatform.infrastructure.user.domain.AppUser;
 

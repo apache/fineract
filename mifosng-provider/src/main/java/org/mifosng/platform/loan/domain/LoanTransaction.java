@@ -16,12 +16,12 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.joda.time.LocalDate;
-import org.mifosng.platform.api.data.EnumOptionData;
 import org.mifosng.platform.api.data.LoanTransactionData;
-import org.mifosng.platform.infrastructure.AbstractAuditableCustom;
 import org.mifosplatform.infrastructure.configuration.data.CurrencyData;
 import org.mifosplatform.infrastructure.configuration.domain.MonetaryCurrency;
 import org.mifosplatform.infrastructure.configuration.domain.Money;
+import org.mifosplatform.infrastructure.core.data.EnumOptionData;
+import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.infrastructure.user.domain.AppUser;
 import org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations;
 import org.springframework.format.annotation.DateTimeFormat;

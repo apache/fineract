@@ -1,5 +1,7 @@
 package org.mifosng.platform.exceptions;
 
+import org.mifosplatform.infrastructure.core.exception.AbstractPlatformDomainRuleException;
+
 /**
  * {@link AbstractPlatformDomainRuleException} thrown when trying to delete a loan in an invalid state.
  */

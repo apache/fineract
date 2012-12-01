@@ -1,11 +1,11 @@
 package org.mifosplatform.commands.service;
 
-import org.mifosng.platform.api.commands.ClientCommand;
-import org.mifosng.platform.api.data.ClientData;
-import org.mifosng.platform.api.infrastructure.PortfolioApiDataConversionService;
-import org.mifosng.platform.api.infrastructure.PortfolioApiJsonSerializerService;
-import org.mifosng.platform.api.infrastructure.PortfolioCommandSerializerService;
-import org.mifosng.platform.client.service.ClientReadPlatformService;
+import org.mifosplatform.infrastructure.core.api.PortfolioApiDataConversionService;
+import org.mifosplatform.infrastructure.core.api.PortfolioApiJsonSerializerService;
+import org.mifosplatform.infrastructure.core.api.PortfolioCommandSerializerService;
+import org.mifosplatform.portfolio.client.command.ClientCommand;
+import org.mifosplatform.portfolio.client.data.ClientData;
+import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

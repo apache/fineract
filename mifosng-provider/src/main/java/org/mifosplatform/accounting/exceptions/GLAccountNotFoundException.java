@@ -1,6 +1,6 @@
 package org.mifosplatform.accounting.exceptions;
 
-import org.mifosng.platform.exceptions.AbstractPlatformResourceNotFoundException;
+import org.mifosplatform.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 
 /**
  * A {@link RuntimeException} thrown when GL account resources are not found.

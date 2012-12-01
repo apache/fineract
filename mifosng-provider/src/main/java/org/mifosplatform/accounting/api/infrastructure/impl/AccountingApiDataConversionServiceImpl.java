@@ -10,12 +10,12 @@ import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
-import org.mifosng.platform.infrastructure.api.JsonParserHelper;
-import org.mifosng.platform.infrastructure.errorhandling.InvalidJsonException;
-import org.mifosng.platform.infrastructure.errorhandling.UnsupportedParameterException;
 import org.mifosplatform.accounting.api.commands.GLAccountCommand;
 import org.mifosplatform.accounting.api.commands.GLClosureCommand;
 import org.mifosplatform.accounting.api.infrastructure.AccountingApiDataConversionService;
+import org.mifosplatform.infrastructure.core.api.JsonParserHelper;
+import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
+import org.mifosplatform.infrastructure.core.exception.UnsupportedParameterException;
 import org.springframework.stereotype.Service;
 
 import com.google.gson.Gson;

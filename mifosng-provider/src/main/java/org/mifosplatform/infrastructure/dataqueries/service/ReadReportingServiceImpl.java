@@ -18,12 +18,12 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.commons.lang.StringUtils;
-import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
-import org.mifosng.platform.exceptions.ReportNotFoundException;
-import org.mifosng.platform.infrastructure.FileUtils;
+import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.mifosplatform.infrastructure.core.service.FileUtils;
 import org.mifosplatform.infrastructure.dataqueries.data.GenericResultsetData;
 import org.mifosplatform.infrastructure.dataqueries.data.ResultsetColumnHeader;
 import org.mifosplatform.infrastructure.dataqueries.data.ResultsetDataRow;
+import org.mifosplatform.infrastructure.dataqueries.exception.ReportNotFoundException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.infrastructure.user.domain.AppUser;
 import org.pentaho.reporting.engine.classic.core.ClassicEngineBoot;

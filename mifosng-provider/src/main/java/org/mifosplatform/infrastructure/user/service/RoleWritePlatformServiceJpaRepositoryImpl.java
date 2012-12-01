@@ -3,8 +3,6 @@ package org.mifosplatform.infrastructure.user.service;
 import java.util.Collection;
 import java.util.Map;
 
-import org.mifosng.platform.client.service.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
-import org.mifosng.platform.exceptions.RoleNotFoundException;
 import org.mifosplatform.infrastructure.configuration.service.ConfigurationDomainService;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.infrastructure.user.command.RoleCommand;
@@ -15,6 +13,8 @@ import org.mifosplatform.infrastructure.user.domain.PermissionRepository;
 import org.mifosplatform.infrastructure.user.domain.Role;
 import org.mifosplatform.infrastructure.user.domain.RoleRepository;
 import org.mifosplatform.infrastructure.user.exception.PermissionNotFoundException;
+import org.mifosplatform.infrastructure.user.exception.RoleNotFoundException;
+import org.mifosplatform.portfolio.client.service.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

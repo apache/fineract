@@ -1,12 +1,12 @@
 package org.mifosng.platform.savingproduct.service;
 
-import org.mifosng.platform.api.data.EnumOptionData;
 import org.mifosng.platform.savingproduct.domain.SavingFrequencyType;
 import org.mifosng.platform.savingproduct.domain.SavingInterestCalculationMethod;
 import org.mifosng.platform.savingproduct.domain.SavingProductType;
 import org.mifosng.platform.savingproduct.domain.SavingsInterestType;
 import org.mifosng.platform.savingproduct.domain.SavingsLockinPeriodEnum;
 import org.mifosng.platform.savingproduct.domain.TenureTypeEnum;
+import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 
 public class SavingProductEnumerations {
 	

@@ -1,6 +1,6 @@
 package org.mifosplatform.infrastructure.user.exception;
 
-import org.mifosng.platform.exceptions.AbstractPlatformResourceNotFoundException;
+import org.mifosplatform.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 
 /**
  * A {@link RuntimeException} thrown when permission resources are not found.

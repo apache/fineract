@@ -1,8 +1,7 @@
 package org.mifosng.platform.savingproduct.service;
 
 import org.mifosng.platform.api.commands.SavingProductCommand;
-import org.mifosng.platform.api.data.EntityIdentifier;
-import org.mifosng.platform.exceptions.ProductNotFoundException;
+import org.mifosng.platform.exceptions.SavingsProductNotFoundException;
 import org.mifosng.platform.exceptions.SavingProductNotFoundException;
 import org.mifosng.platform.savingproduct.domain.SavingFrequencyType;
 import org.mifosng.platform.savingproduct.domain.SavingInterestCalculationMethod;
@@ -12,6 +11,7 @@ import org.mifosng.platform.savingproduct.domain.SavingProductType;
 import org.mifosng.platform.savingproduct.domain.SavingsInterestType;
 import org.mifosng.platform.savingproduct.domain.TenureTypeEnum;
 import org.mifosplatform.infrastructure.configuration.domain.MonetaryCurrency;
+import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,7 +79,7 @@ public class SavingProductWritePlatformServiceJpaRepositoryImpl implements Savin
 		this.context.authenticatedUser();
 		SavingProduct product=this.savingProductRepository.findOne(productId);
 		if (product==null || product.isDeleted()) {
-			throw new ProductNotFoundException(productId);
+			throw new SavingsProductNotFoundException(productId);
 		}
 		product.delete();
 		this.savingProductRepository.save(product);

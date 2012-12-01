@@ -1,6 +1,6 @@
 package org.mifosplatform.infrastructure.security.service;
 
-import org.mifosng.platform.infrastructure.MifosPlatformTenant;
+import org.mifosplatform.infrastructure.core.domain.MifosPlatformTenant;
 
 public interface TenantDetailsService {
 

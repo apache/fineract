@@ -7,7 +7,7 @@ import static org.mifosplatform.portfolio.charge.service.ChargeEnumerations.char
 import java.util.Arrays;
 import java.util.List;
 
-import org.mifosng.platform.api.data.EnumOptionData;
+import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.portfolio.charge.domain.ChargeAppliesTo;
 import org.mifosplatform.portfolio.charge.domain.ChargeCalculationType;
 import org.mifosplatform.portfolio.charge.domain.ChargeTimeType;

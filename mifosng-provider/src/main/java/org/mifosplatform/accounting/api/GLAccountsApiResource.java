@@ -17,14 +17,14 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.mifosng.platform.api.data.EntityIdentifier;
-import org.mifosng.platform.infrastructure.api.ApiParameterHelper;
 import org.mifosplatform.accounting.api.commands.GLAccountCommand;
 import org.mifosplatform.accounting.api.data.GLAccountData;
 import org.mifosplatform.accounting.api.infrastructure.AccountingApiDataConversionService;
 import org.mifosplatform.accounting.api.infrastructure.AccountingApiJsonSerializerService;
 import org.mifosplatform.accounting.service.GLAccountReadPlatformService;
 import org.mifosplatform.accounting.service.GLAccountWritePlatformService;
+import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
+import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;

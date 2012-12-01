@@ -1,6 +1,6 @@
 package org.mifosng.platform.savingproduct.service;
 
-import org.mifosng.platform.api.data.EnumOptionData;
+import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 
 public class SavingsDepositEnumerations {

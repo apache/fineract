@@ -1,6 +1,5 @@
 package org.mifosplatform.accounting.service.impl;
 
-import org.mifosng.platform.exceptions.PlatformDataIntegrityException;
 import org.mifosplatform.accounting.api.commands.GLAccountCommand;
 import org.mifosplatform.accounting.domain.GLAccount;
 import org.mifosplatform.accounting.domain.GLAccountRepository;
@@ -11,6 +10,7 @@ import org.mifosplatform.accounting.exceptions.GLAccountNotFoundException;
 import org.mifosplatform.accounting.exceptions.GLAccountInvalidDeleteException.GL_ACCOUNT_INVALID_DELETE_REASON;
 import org.mifosplatform.accounting.service.GLAccountCommandValidator;
 import org.mifosplatform.accounting.service.GLAccountWritePlatformService;
+import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,10 +1,10 @@
 package org.mifosplatform.commands.service;
 
 import org.joda.time.LocalDate;
-import org.mifosng.platform.api.data.EntityIdentifier;
 import org.mifosplatform.commands.domain.CommandSource;
 import org.mifosplatform.commands.domain.CommandSourceRepository;
 import org.mifosplatform.commands.handler.CommandSourceHandlerDelegator;
+import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.infrastructure.user.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;

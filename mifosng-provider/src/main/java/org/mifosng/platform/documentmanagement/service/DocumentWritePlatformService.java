@@ -3,7 +3,7 @@ package org.mifosng.platform.documentmanagement.service;
 import java.io.InputStream;
 
 import org.mifosng.platform.api.commands.DocumentCommand;
-import org.mifosng.platform.api.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface DocumentWritePlatformService {
