@@ -63,15 +63,15 @@ public class ApiParameterHelper {
         return exportCsv;
     }
 
-    
     public static boolean exportPdf(final MultivaluedMap<String, String> queryParams) {
-		boolean exportPDF = false;
-		if (queryParams.getFirst("exportPDF") != null) {
-			String exportPdfValue = queryParams.getFirst("exportPDF");
-			exportPDF = "true".equalsIgnoreCase(exportPdfValue);
-		}
-		return exportPDF;
+        boolean exportPDF = false;
+        if (queryParams.getFirst("exportPDF") != null) {
+            String exportPdfValue = queryParams.getFirst("exportPDF");
+            exportPDF = "true".equalsIgnoreCase(exportPdfValue);
+        }
+        return exportPDF;
     }
+
     public static boolean parameterType(final MultivaluedMap<String, String> queryParams) {
         boolean parameterType = false;
         if (queryParams.getFirst("parameterType") != null) {
@@ -89,7 +89,7 @@ public class ApiParameterHelper {
         }
         return template;
     }
-    
+
     public static boolean makerCheckerable(final MultivaluedMap<String, String> queryParams) {
         boolean makerCheckerable = false;
         if (queryParams.getFirst("makerCheckerable") != null) {

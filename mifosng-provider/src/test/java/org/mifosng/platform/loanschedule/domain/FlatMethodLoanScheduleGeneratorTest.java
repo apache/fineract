@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mifosplatform.infrastructure.configuration.data.CurrencyData;
+import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.FlatMethodLoanScheduleGenerator;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.mockito.runners.MockitoJUnitRunner;
 

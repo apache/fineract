@@ -12,8 +12,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import org.mifosng.platform.loan.domain.LoanTransactionProcessingStrategyRepository;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionProcessingStrategyRepository;
 import org.mifosplatform.portfolio.loanproduct.data.TransactionProcessingStrategyData;
 import org.mifosplatform.portfolio.loanproduct.domain.AmortizationMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;

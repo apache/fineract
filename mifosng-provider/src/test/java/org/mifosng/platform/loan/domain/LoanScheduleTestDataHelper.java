@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.configuration.domain.MonetaryCurrency;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 
 /**
  * Helper class for creating loan schedule data suitable for testing.

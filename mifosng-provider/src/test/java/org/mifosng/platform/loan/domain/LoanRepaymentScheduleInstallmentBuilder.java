@@ -3,6 +3,8 @@ package org.mifosng.platform.loan.domain;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.configuration.domain.MonetaryCurrency;
 import org.mifosplatform.infrastructure.configuration.domain.Money;
+import org.mifosplatform.portfolio.loanaccount.domain.Loan;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 
 public class LoanRepaymentScheduleInstallmentBuilder {
 

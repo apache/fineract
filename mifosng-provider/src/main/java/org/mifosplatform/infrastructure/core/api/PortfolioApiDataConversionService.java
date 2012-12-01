@@ -1,6 +1,5 @@
 package org.mifosplatform.infrastructure.core.api;
 
-import org.mifosng.platform.api.commands.AdjustLoanTransactionCommand;
 import org.mifosng.platform.api.commands.DepositAccountCommand;
 import org.mifosng.platform.api.commands.DepositAccountWithdrawInterestCommand;
 import org.mifosng.platform.api.commands.DepositAccountWithdrawalCommand;
@@ -9,10 +8,6 @@ import org.mifosng.platform.api.commands.DepositStateTransitionApprovalCommand;
 import org.mifosng.platform.api.commands.DepositStateTransitionCommand;
 import org.mifosng.platform.api.commands.GroupCommand;
 import org.mifosng.platform.api.commands.GuarantorCommand;
-import org.mifosng.platform.api.commands.LoanApplicationCommand;
-import org.mifosng.platform.api.commands.LoanChargeCommand;
-import org.mifosng.platform.api.commands.LoanStateTransitionCommand;
-import org.mifosng.platform.api.commands.LoanTransactionCommand;
 import org.mifosng.platform.api.commands.SavingAccountCommand;
 import org.mifosng.platform.api.commands.SavingProductCommand;
 import org.mifosplatform.infrastructure.codes.command.CodeCommand;
@@ -31,6 +26,11 @@ import org.mifosplatform.portfolio.client.command.ClientIdentifierCommand;
 import org.mifosplatform.portfolio.client.command.NoteCommand;
 import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.fund.command.FundCommand;
+import org.mifosplatform.portfolio.loanaccount.command.AdjustLoanTransactionCommand;
+import org.mifosplatform.portfolio.loanaccount.command.LoanApplicationCommand;
+import org.mifosplatform.portfolio.loanaccount.command.LoanChargeCommand;
+import org.mifosplatform.portfolio.loanaccount.command.LoanStateTransitionCommand;
+import org.mifosplatform.portfolio.loanaccount.command.LoanTransactionCommand;
 import org.mifosplatform.portfolio.loanproduct.command.LoanProductCommand;
 
 public interface PortfolioApiDataConversionService {
@@ -65,7 +65,7 @@ public interface PortfolioApiDataConversionService {
 
     GroupCommand convertJsonToGroupCommand(Long resourceIdentifier, String json);
 
-    LoanApplicationCommand convertJsonToLoanApplicationCommand(Long resourceIdentifier, String json);
+    LoanApplicationCommand convertApiRequestJsonToLoanApplicationCommand(Long resourceIdentifier, String json);
 
     LoanChargeCommand convertJsonToLoanChargeCommand(Long loanChargeId, Long loanId, String json);
 

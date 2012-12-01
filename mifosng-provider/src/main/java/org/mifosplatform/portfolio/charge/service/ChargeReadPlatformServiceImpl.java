@@ -7,7 +7,6 @@ import java.util.Collection;
 import java.util.List;
 
 import org.joda.time.LocalDate;
-import org.mifosng.platform.api.data.LoanChargeData;
 import org.mifosplatform.infrastructure.configuration.data.CurrencyData;
 import org.mifosplatform.infrastructure.configuration.service.CurrencyReadPlatformService;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
@@ -17,6 +16,7 @@ import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext
 import org.mifosplatform.portfolio.charge.data.ChargeData;
 import org.mifosplatform.portfolio.charge.domain.ChargeAppliesTo;
 import org.mifosplatform.portfolio.charge.exception.ChargeNotFoundException;
+import org.mifosplatform.portfolio.loanaccount.data.LoanChargeData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;

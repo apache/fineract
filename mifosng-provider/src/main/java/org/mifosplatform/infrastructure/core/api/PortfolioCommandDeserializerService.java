@@ -32,7 +32,7 @@ public interface PortfolioCommandDeserializerService {
     RolePermissionCommand deserializeRolePermissionCommand(Long roleId, String commandAsJson, boolean makerCheckerApproval);
 
     PermissionsCommand deserializePermissionsCommand(String commandAsJson, boolean makerCheckerApproval);
-    
+
     UserCommand deserializeUserCommand(Long userId, String commandAsJson, boolean makerCheckerApproval);
 
     CodeCommand deserializeCodeCommand(Long codeId, String commandAsJson, boolean makerCheckerApproval);
@@ -53,5 +53,6 @@ public interface PortfolioCommandDeserializerService {
 
     LoanProductCommand deserializeLoanProductCommand(Long loanProductId, String commandAsJson, boolean makerCheckerApproval);
 
-    ClientIdentifierCommand deserializeClientIdentifierCommand(Long clientIdentifierId, Long clientId, String commandAsJson, boolean makerCheckerApproval);
+    ClientIdentifierCommand deserializeClientIdentifierCommand(Long clientIdentifierId, Long clientId, String commandAsJson,
+            boolean makerCheckerApproval);
 }

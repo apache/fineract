@@ -12,7 +12,6 @@ import org.mifosng.platform.api.commands.DepositAccountWithdrawInterestCommand;
 import org.mifosng.platform.api.commands.DepositAccountWithdrawalCommand;
 import org.mifosng.platform.api.commands.DepositStateTransitionApprovalCommand;
 import org.mifosng.platform.api.commands.DepositStateTransitionCommand;
-import org.mifosng.platform.api.commands.UndoStateTransitionCommand;
 import org.mifosng.platform.exceptions.DepositAccountNotFoundException;
 import org.mifosng.platform.exceptions.DepositAccountReopenException;
 import org.mifosng.platform.exceptions.DepositAccountTransactionsException;
@@ -29,6 +28,7 @@ import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityExce
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.client.domain.Note;
 import org.mifosplatform.portfolio.client.domain.NoteRepository;
+import org.mifosplatform.portfolio.loanaccount.command.UndoStateTransitionCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -6,12 +6,12 @@ import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.mifosng.platform.api.data.GuarantorData;
 import org.mifosng.platform.exceptions.GuarantorNotFoundException;
-import org.mifosng.platform.exceptions.LoanNotFoundException;
-import org.mifosng.platform.loan.domain.Loan;
-import org.mifosng.platform.loan.domain.LoanRepository;
 import org.mifosplatform.infrastructure.dataqueries.data.GenericResultsetData;
 import org.mifosplatform.infrastructure.dataqueries.service.ReadWriteNonCoreDataService;
 import org.mifosplatform.portfolio.client.domain.Client;
+import org.mifosplatform.portfolio.loanaccount.domain.Loan;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanRepository;
+import org.mifosplatform.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

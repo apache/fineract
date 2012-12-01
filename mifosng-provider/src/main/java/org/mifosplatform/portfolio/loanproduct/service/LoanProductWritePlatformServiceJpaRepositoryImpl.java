@@ -4,9 +4,6 @@ import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.mifosng.platform.exceptions.LoanTransactionProcessingStrategyNotFoundException;
-import org.mifosng.platform.loan.domain.LoanTransactionProcessingStrategyRepository;
-import org.mifosng.platform.loanschedule.domain.AprCalculator;
 import org.mifosplatform.infrastructure.configuration.domain.MonetaryCurrency;
 import org.mifosplatform.infrastructure.configuration.service.ConfigurationDomainService;
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
@@ -19,6 +16,9 @@ import org.mifosplatform.portfolio.client.service.RollbackTransactionAsCommandIs
 import org.mifosplatform.portfolio.fund.domain.Fund;
 import org.mifosplatform.portfolio.fund.domain.FundRepository;
 import org.mifosplatform.portfolio.fund.exception.FundNotFoundException;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionProcessingStrategyRepository;
+import org.mifosplatform.portfolio.loanaccount.exception.LoanTransactionProcessingStrategyNotFoundException;
+import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.AprCalculator;
 import org.mifosplatform.portfolio.loanproduct.command.LoanProductCommand;
 import org.mifosplatform.portfolio.loanproduct.domain.AmortizationMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;

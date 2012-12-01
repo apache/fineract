@@ -19,54 +19,51 @@ import com.google.gson.GsonBuilder;
 @Service
 public class GoogleGsonSerializerHelper {
 
-	public Gson createGsonBuilder(final boolean prettyPrint) {
-		final GsonBuilder builder = new GsonBuilder();
-		builder.registerTypeAdapter(LocalDate.class, new JodaLocalDateAdapter());
-		builder.registerTypeAdapter(DateTime.class, new JodaDateTimeAdapter());
-		if (prettyPrint) {
-			builder.setPrettyPrinting();
-		}
-		return builder.create();
-	}
-	
-	public Gson createGsonBuilderWithParameterExclusionSerializationStrategy(
-			final Set<String> supportedParameters, 
-			final boolean prettyPrint,
-			final Set<String> responseParameters) {
+    public Gson createGsonBuilder(final boolean prettyPrint) {
+        final GsonBuilder builder = new GsonBuilder();
+        builder.registerTypeAdapter(LocalDate.class, new JodaLocalDateAdapter());
+        builder.registerTypeAdapter(DateTime.class, new JodaDateTimeAdapter());
+        if (prettyPrint) {
+            builder.setPrettyPrinting();
+        }
+        return builder.create();
+    }
 
-		final Set<String> parameterNamesToSkip = new HashSet<String>();
+    public Gson createGsonBuilderWithParameterExclusionSerializationStrategy(final Set<String> supportedParameters,
+            final boolean prettyPrint, final Set<String> responseParameters) {
 
-		if (!responseParameters.isEmpty()) {
+        final Set<String> parameterNamesToSkip = new HashSet<String>();
 
-			// strip out all known support parameters from expected response to
-			// see if unsupported parameters requested for response.
-			final Set<String> differentParametersDetectedSet = new HashSet<String>(responseParameters);
-			differentParametersDetectedSet.removeAll(supportedParameters);
+        if (!responseParameters.isEmpty()) {
 
-			if (!differentParametersDetectedSet.isEmpty()) {
-				throw new UnsupportedParameterException(new ArrayList<String>(differentParametersDetectedSet));
-			}
+            // strip out all known support parameters from expected response to
+            // see if unsupported parameters requested for response.
+            final Set<String> differentParametersDetectedSet = new HashSet<String>(responseParameters);
+            differentParametersDetectedSet.removeAll(supportedParameters);
 
-			parameterNamesToSkip.addAll(supportedParameters);
-			parameterNamesToSkip.removeAll(responseParameters);
-		}
+            if (!differentParametersDetectedSet.isEmpty()) { throw new UnsupportedParameterException(new ArrayList<String>(
+                    differentParametersDetectedSet)); }
 
-		final ExclusionStrategy strategy = new ParameterListExclusionStrategy(parameterNamesToSkip);
+            parameterNamesToSkip.addAll(supportedParameters);
+            parameterNamesToSkip.removeAll(responseParameters);
+        }
 
-		final GsonBuilder builder = new GsonBuilder().addSerializationExclusionStrategy(strategy);
-		builder.registerTypeAdapter(LocalDate.class, new JodaLocalDateAdapter());
-		builder.registerTypeAdapter(DateTime.class, new JodaDateTimeAdapter());
-		if (prettyPrint) {
-			builder.setPrettyPrinting();
-		}
-		return builder.create();
-	}
+        final ExclusionStrategy strategy = new ParameterListExclusionStrategy(parameterNamesToSkip);
 
-	public String serializedJsonFrom(final Gson serializer, final Object[] dataObjects) {
-		return serializer.toJson(dataObjects);
-	}
+        final GsonBuilder builder = new GsonBuilder().addSerializationExclusionStrategy(strategy);
+        builder.registerTypeAdapter(LocalDate.class, new JodaLocalDateAdapter());
+        builder.registerTypeAdapter(DateTime.class, new JodaDateTimeAdapter());
+        if (prettyPrint) {
+            builder.setPrettyPrinting();
+        }
+        return builder.create();
+    }
 
-	public String serializedJsonFrom(final Gson serializer, final Object singleDataObject) {
-		return serializer.toJson(singleDataObject);
-	}
+    public String serializedJsonFrom(final Gson serializer, final Object[] dataObjects) {
+        return serializer.toJson(dataObjects);
+    }
+
+    public String serializedJsonFrom(final Gson serializer, final Object singleDataObject) {
+        return serializer.toJson(singleDataObject);
+    }
 }

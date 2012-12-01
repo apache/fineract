@@ -74,7 +74,8 @@ public class JsonParserHelper {
         return stringValue;
     }
 
-    public BigDecimal extractBigDecimalWithLocaleNamed(final String parameterName, final JsonElement element, final Set<String> modifiedParameters) {
+    public BigDecimal extractBigDecimalWithLocaleNamed(final String parameterName, final JsonElement element,
+            final Set<String> modifiedParameters) {
         BigDecimal value = null;
         if (element.isJsonObject()) {
             final JsonObject object = element.getAsJsonObject();
@@ -157,7 +158,7 @@ public class JsonParserHelper {
         }
         return clientApplicationLocale;
     }
-    
+
     public String[] extractArrayNamed(final String parameterName, final JsonElement element, final Set<String> parametersPassedInRequest) {
         String[] arrayValue = null;
         if (element.isJsonObject()) {

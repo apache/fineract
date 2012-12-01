@@ -9,10 +9,6 @@ import org.mifosng.platform.api.data.DocumentData;
 import org.mifosng.platform.api.data.GroupAccountSummaryCollectionData;
 import org.mifosng.platform.api.data.GroupData;
 import org.mifosng.platform.api.data.GuarantorData;
-import org.mifosng.platform.api.data.LoanAccountData;
-import org.mifosng.platform.api.data.LoanChargeData;
-import org.mifosng.platform.api.data.LoanScheduleData;
-import org.mifosng.platform.api.data.LoanTransactionData;
 import org.mifosng.platform.api.data.SavingAccountData;
 import org.mifosng.platform.api.data.SavingProductData;
 import org.mifosplatform.commands.api.data.CommandSourceData;
@@ -36,6 +32,10 @@ import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.client.data.ClientIdentifierData;
 import org.mifosplatform.portfolio.client.data.NoteData;
 import org.mifosplatform.portfolio.fund.data.FundData;
+import org.mifosplatform.portfolio.loanaccount.data.LoanAccountData;
+import org.mifosplatform.portfolio.loanaccount.data.LoanChargeData;
+import org.mifosplatform.portfolio.loanaccount.data.LoanScheduleData;
+import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionData;
 import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
 
 public interface PortfolioApiJsonSerializerService {

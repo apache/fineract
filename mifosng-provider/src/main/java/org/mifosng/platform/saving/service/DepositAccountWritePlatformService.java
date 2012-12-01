@@ -5,8 +5,8 @@ import org.mifosng.platform.api.commands.DepositAccountWithdrawInterestCommand;
 import org.mifosng.platform.api.commands.DepositAccountWithdrawalCommand;
 import org.mifosng.platform.api.commands.DepositStateTransitionApprovalCommand;
 import org.mifosng.platform.api.commands.DepositStateTransitionCommand;
-import org.mifosng.platform.api.commands.UndoStateTransitionCommand;
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.portfolio.loanaccount.command.UndoStateTransitionCommand;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface DepositAccountWritePlatformService {

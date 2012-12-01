@@ -17,7 +17,6 @@ import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
-import org.mifosng.platform.api.commands.AdjustLoanTransactionCommand;
 import org.mifosng.platform.api.commands.DepositAccountCommand;
 import org.mifosng.platform.api.commands.DepositAccountWithdrawInterestCommand;
 import org.mifosng.platform.api.commands.DepositAccountWithdrawalCommand;
@@ -26,10 +25,6 @@ import org.mifosng.platform.api.commands.DepositStateTransitionApprovalCommand;
 import org.mifosng.platform.api.commands.DepositStateTransitionCommand;
 import org.mifosng.platform.api.commands.GroupCommand;
 import org.mifosng.platform.api.commands.GuarantorCommand;
-import org.mifosng.platform.api.commands.LoanApplicationCommand;
-import org.mifosng.platform.api.commands.LoanChargeCommand;
-import org.mifosng.platform.api.commands.LoanStateTransitionCommand;
-import org.mifosng.platform.api.commands.LoanTransactionCommand;
 import org.mifosng.platform.api.commands.SavingAccountCommand;
 import org.mifosng.platform.api.commands.SavingProductCommand;
 import org.mifosplatform.infrastructure.codes.command.CodeCommand;
@@ -52,6 +47,11 @@ import org.mifosplatform.portfolio.client.command.ClientIdentifierCommand;
 import org.mifosplatform.portfolio.client.command.NoteCommand;
 import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.fund.command.FundCommand;
+import org.mifosplatform.portfolio.loanaccount.command.AdjustLoanTransactionCommand;
+import org.mifosplatform.portfolio.loanaccount.command.LoanApplicationCommand;
+import org.mifosplatform.portfolio.loanaccount.command.LoanChargeCommand;
+import org.mifosplatform.portfolio.loanaccount.command.LoanStateTransitionCommand;
+import org.mifosplatform.portfolio.loanaccount.command.LoanTransactionCommand;
 import org.mifosplatform.portfolio.loanproduct.command.LoanProductCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.number.NumberFormatter;
@@ -102,7 +102,7 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
                 "active"));
 
         checkForUnsupportedParameters(requestMap, supportedParams);
-        
+
         final JsonParserHelper helper = new JsonParserHelper();
         JsonParser parser = new JsonParser();
         final JsonElement element = parser.parse(json);
@@ -112,16 +112,17 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         final String name = helper.extractStringNamed("name", element, parametersPassedInRequest);
         final String currencyCode = helper.extractStringNamed("currencyCode", element, parametersPassedInRequest);
         final BigDecimal amount = helper.extractBigDecimalWithLocaleNamed("amount", element.getAsJsonObject(), parametersPassedInRequest);
-        
+
         final Integer chargeTimeType = helper.extractIntegerWithLocaleNamed("chargeTimeType", element, parametersPassedInRequest);
         final Integer chargeAppliesTo = helper.extractIntegerWithLocaleNamed("chargeAppliesTo", element, parametersPassedInRequest);
-        final Integer chargeCalculationType = helper.extractIntegerWithLocaleNamed("chargeCalculationType", element, parametersPassedInRequest);
-        
+        final Integer chargeCalculationType = helper.extractIntegerWithLocaleNamed("chargeCalculationType", element,
+                parametersPassedInRequest);
+
         final Boolean penalty = helper.extractBooleanNamed("penalty", element, parametersPassedInRequest);
         final Boolean active = helper.extractBooleanNamed("active", element, parametersPassedInRequest);
-        
-        return new ChargeDefinitionCommand(parametersPassedInRequest, false, resourceIdentifier, name, amount, currencyCode, chargeTimeType, chargeAppliesTo,
-                chargeCalculationType, penalty, active);
+
+        return new ChargeDefinitionCommand(parametersPassedInRequest, false, resourceIdentifier, name, amount, currencyCode,
+                chargeTimeType, chargeAppliesTo, chargeCalculationType, penalty, active);
     }
 
     @Override
@@ -548,7 +549,8 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
 
         final BigDecimal principal = helper.extractBigDecimalWithLocaleNamed("principal", element, modifiedParameters);
         final BigDecimal inArrearsTolerance = helper.extractBigDecimalWithLocaleNamed("inArrearsTolerance", element, modifiedParameters);
-        final BigDecimal interestRatePerPeriod = helper.extractBigDecimalWithLocaleNamed("interestRatePerPeriod", element, modifiedParameters);
+        final BigDecimal interestRatePerPeriod = helper.extractBigDecimalWithLocaleNamed("interestRatePerPeriod", element,
+                modifiedParameters);
         final Integer repaymentEvery = helper.extractIntegerWithLocaleNamed("repaymentEvery", element, modifiedParameters);
         final Integer numberOfRepayments = helper.extractIntegerWithLocaleNamed("numberOfRepayments", element, modifiedParameters);
         final Integer repaymentFrequencyType = helper.extractIntegerWithLocaleNamed("repaymentFrequencyType", element, modifiedParameters);
@@ -561,7 +563,8 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         // final Integer loanTermFrequencyType =
         // helper.extractIntegerNamed("loanTermFrequencyType", element,
         // modifiedParameters);
-        final Integer interestRateFrequencyType = helper.extractIntegerWithLocaleNamed("interestRateFrequencyType", element, modifiedParameters);
+        final Integer interestRateFrequencyType = helper.extractIntegerWithLocaleNamed("interestRateFrequencyType", element,
+                modifiedParameters);
         final Integer amortizationType = helper.extractIntegerWithLocaleNamed("amortizationType", element, modifiedParameters);
         final Integer interestType = helper.extractIntegerWithLocaleNamed("interestType", element, modifiedParameters);
         final Integer interestCalculationPeriodType = helper.extractIntegerWithLocaleNamed("interestCalculationPeriodType", element,
@@ -580,13 +583,14 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
             }
         }
 
-        return new LoanProductCommand(modifiedParameters, false, resourceIdentifier, name, description, fundId, transactionProcessingStrategyId,
-                currencyCode, digitsAfterDecimal, principal, inArrearsTolerance, numberOfRepayments, repaymentEvery, interestRatePerPeriod,
-                repaymentFrequencyType, interestRateFrequencyType, amortizationType, interestType, interestCalculationPeriodType, charges);
+        return new LoanProductCommand(modifiedParameters, false, resourceIdentifier, name, description, fundId,
+                transactionProcessingStrategyId, currencyCode, digitsAfterDecimal, principal, inArrearsTolerance, numberOfRepayments,
+                repaymentEvery, interestRatePerPeriod, repaymentFrequencyType, interestRateFrequencyType, amortizationType, interestType,
+                interestCalculationPeriodType, charges);
     }
 
     @Override
-    public LoanApplicationCommand convertJsonToLoanApplicationCommand(final Long resourceIdentifier, final String json) {
+    public LoanApplicationCommand convertApiRequestJsonToLoanApplicationCommand(final Long resourceIdentifier, final String json) {
 
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
@@ -617,14 +621,18 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
                 parametersPassedInCommand);
         final String externalId = helper.extractStringNamed("externalId", element, parametersPassedInCommand);
         final BigDecimal principal = helper.extractBigDecimalWithLocaleNamed("principal", element, parametersPassedInCommand);
-        final BigDecimal inArrearsToleranceValue = helper.extractBigDecimalWithLocaleNamed("inArrearsTolerance", element, parametersPassedInCommand);
-        final BigDecimal interestRatePerPeriod = helper.extractBigDecimalWithLocaleNamed("interestRatePerPeriod", element, parametersPassedInCommand);
+        final BigDecimal inArrearsToleranceValue = helper.extractBigDecimalWithLocaleNamed("inArrearsTolerance", element,
+                parametersPassedInCommand);
+        final BigDecimal interestRatePerPeriod = helper.extractBigDecimalWithLocaleNamed("interestRatePerPeriod", element,
+                parametersPassedInCommand);
 
         final Integer repaymentEvery = helper.extractIntegerWithLocaleNamed("repaymentEvery", element, parametersPassedInCommand);
         final Integer numberOfRepayments = helper.extractIntegerWithLocaleNamed("numberOfRepayments", element, parametersPassedInCommand);
-        final Integer repaymentFrequencyType = helper.extractIntegerWithLocaleNamed("repaymentFrequencyType", element, parametersPassedInCommand);
+        final Integer repaymentFrequencyType = helper.extractIntegerWithLocaleNamed("repaymentFrequencyType", element,
+                parametersPassedInCommand);
         final Integer loanTermFrequency = helper.extractIntegerWithLocaleNamed("loanTermFrequency", element, parametersPassedInCommand);
-        final Integer loanTermFrequencyType = helper.extractIntegerWithLocaleNamed("loanTermFrequencyType", element, parametersPassedInCommand);
+        final Integer loanTermFrequencyType = helper.extractIntegerWithLocaleNamed("loanTermFrequencyType", element,
+                parametersPassedInCommand);
         final Integer interestRateFrequencyType = helper.extractIntegerWithLocaleNamed("interestRateFrequencyType", element,
                 parametersPassedInCommand);
         final Integer amortizationType = helper.extractIntegerWithLocaleNamed("amortizationType", element, parametersPassedInCommand);
@@ -1057,9 +1065,9 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
     /*
      * private LocalDate convertFrom(final String dateAsString, final String
      * parameterName, final String dateFormat) {
-     *
+     * 
      * if (StringUtils.isBlank(dateFormat)) {
-     *
+     * 
      * List<ApiParameterError> dataValidationErrors = new
      * ArrayList<ApiParameterError>(); String defaultMessage = new
      * StringBuilder("The parameter '" + parameterName +
@@ -1067,11 +1075,11 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
      * ApiParameterError error = ApiParameterError.parameterError(
      * "validation.msg.missing.dateFormat.parameter", defaultMessage,
      * parameterName); dataValidationErrors.add(error);
-     *
+     * 
      * throw new PlatformApiDataValidationException(
      * "validation.msg.validation.errors.exist", "Validation errors exist.",
      * dataValidationErrors); }
-     *
+     * 
      * LocalDate eventLocalDate = null; if
      * (StringUtils.isNotBlank(dateAsString)) { try { Locale locale =
      * LocaleContextHolder.getLocale(); eventLocalDate =
@@ -1084,18 +1092,18 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
      * " is invalid based on the dateFormat provided:" + dateFormat,
      * parameterName, dateAsString, dateFormat);
      * dataValidationErrors.add(error);
-     *
+     * 
      * throw new PlatformApiDataValidationException(
      * "validation.msg.validation.errors.exist", "Validation errors exist.",
      * dataValidationErrors); } }
-     *
+     * 
      * return eventLocalDate; }
-     *
+     * 
      * private Integer convertToInteger(final String numericalValueFormatted,
      * final String parameterName, final Locale clientApplicationLocale) {
-     *
+     * 
      * if (clientApplicationLocale == null) {
-     *
+     * 
      * List<ApiParameterError> dataValidationErrors = new
      * ArrayList<ApiParameterError>(); String defaultMessage = new
      * StringBuilder("The parameter '" + parameterName +
@@ -1103,41 +1111,41 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
      * ApiParameterError error =
      * ApiParameterError.parameterError("validation.msg.missing.locale.parameter"
      * , defaultMessage, parameterName); dataValidationErrors.add(error);
-     *
+     * 
      * throw new PlatformApiDataValidationException(
      * "validation.msg.validation.errors.exist", "Validation errors exist.",
      * dataValidationErrors); }
-     *
+     * 
      * try { Integer number = null;
-     *
+     * 
      * if (StringUtils.isNotBlank(numericalValueFormatted)) {
-     *
+     * 
      * String source = numericalValueFormatted.trim();
-     *
+     * 
      * NumberFormat format = NumberFormat.getInstance(clientApplicationLocale);
      * DecimalFormat df = (DecimalFormat) format; DecimalFormatSymbols symbols =
      * df.getDecimalFormatSymbols(); df.setParseBigDecimal(true);
-     *
+     * 
      * // http://bugs.sun.com/view_bug.do?bug_id=4510618 char groupingSeparator
      * = symbols.getGroupingSeparator(); if (groupingSeparator == '\u00a0') {
      * source = source.replaceAll(" ", Character.toString('\u00a0')); }
-     *
+     * 
      * Number parsedNumber = df.parse(source);
-     *
+     * 
      * double parsedNumberDouble = parsedNumber.doubleValue(); int
      * parsedNumberInteger = parsedNumber.intValue();
-     *
+     * 
      * if (source.contains(Character.toString(symbols.getDecimalSeparator()))) {
      * throw new ParseException(source, 0); }
-     *
+     * 
      * if
      * (!Double.valueOf(parsedNumberDouble).equals(Double.valueOf(Integer.valueOf
      * (parsedNumberInteger)))) { throw new ParseException(source, 0); }
-     *
+     * 
      * number = parsedNumber.intValue(); }
-     *
+     * 
      * return number; } catch (ParseException e) {
-     *
+     * 
      * List<ApiParameterError> dataValidationErrors = new
      * ArrayList<ApiParameterError>(); ApiParameterError error =
      * ApiParameterError.parameterError(
@@ -1147,16 +1155,16 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
      * clientApplicationLocale.toString() + "].", parameterName,
      * numericalValueFormatted, clientApplicationLocale);
      * dataValidationErrors.add(error);
-     *
+     * 
      * throw new PlatformApiDataValidationException(
      * "validation.msg.validation.errors.exist", "Validation errors exist.",
      * dataValidationErrors); } }
-     *
+     * 
      * private BigDecimal convertFrom(final String numericalValueFormatted,
      * final String parameterName, final Locale clientApplicationLocale) {
-     *
+     * 
      * if (clientApplicationLocale == null) {
-     *
+     * 
      * List<ApiParameterError> dataValidationErrors = new
      * ArrayList<ApiParameterError>(); String defaultMessage = new
      * StringBuilder("The parameter '" + parameterName +
@@ -1164,17 +1172,17 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
      * ApiParameterError error =
      * ApiParameterError.parameterError("validation.msg.missing.locale.parameter"
      * , defaultMessage, parameterName); dataValidationErrors.add(error);
-     *
+     * 
      * throw new PlatformApiDataValidationException(
      * "validation.msg.validation.errors.exist", "Validation errors exist.",
      * dataValidationErrors); }
-     *
+     * 
      * try { BigDecimal number = null;
-     *
+     * 
      * if (StringUtils.isNotBlank(numericalValueFormatted)) {
-     *
+     * 
      * String source = numericalValueFormatted.trim();
-     *
+     * 
      * NumberFormat format =
      * NumberFormat.getNumberInstance(clientApplicationLocale); DecimalFormat df
      * = (DecimalFormat) format; DecimalFormatSymbols symbols =
@@ -1182,14 +1190,14 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
      * http://bugs.sun.com/view_bug.do?bug_id=4510618 char groupingSeparator =
      * symbols.getGroupingSeparator(); if (groupingSeparator == '\u00a0') {
      * source = source.replaceAll(" ", Character.toString('\u00a0')); }
-     *
+     * 
      * NumberFormatter numberFormatter = new NumberFormatter(); Number
      * parsedNumber = numberFormatter.parse(source, clientApplicationLocale);
      * number = BigDecimal.valueOf(Double.valueOf(parsedNumber.doubleValue()));
      * }
-     *
+     * 
      * return number; } catch (ParseException e) {
-     *
+     * 
      * List<ApiParameterError> dataValidationErrors = new
      * ArrayList<ApiParameterError>(); ApiParameterError error =
      * ApiParameterError.parameterError(
@@ -1199,7 +1207,7 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
      * clientApplicationLocale.toString() + "].", parameterName,
      * numericalValueFormatted, clientApplicationLocale);
      * dataValidationErrors.add(error);
-     *
+     * 
      * throw new PlatformApiDataValidationException(
      * "validation.msg.validation.errors.exist", "Validation errors exist.",
      * dataValidationErrors); } }
@@ -1493,7 +1501,8 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
     }
 
     @Override
-    public ClientIdentifierCommand convertApiRequestJsonToClientIdentifierCommand(final Long resourceIdentifier, final Long clientId, final String json) {
+    public ClientIdentifierCommand convertApiRequestJsonToClientIdentifierCommand(final Long resourceIdentifier, final Long clientId,
+            final String json) {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         Type typeOfMap = new TypeToken<Map<String, String>>() {}.getType();
@@ -1517,7 +1526,8 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
 
         checkForUnsupportedParameters(requestMap, supportedParams);
 
-        // no difference between api request json format and internal command json format.
+        // no difference between api request json format and internal command
+        // json format.
         return this.portfolioCommandDeserializerService.deserializeCodeCommand(resourceIdentifier, json, false);
     }
 

@@ -6,11 +6,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import org.mifosng.platform.loan.domain.Loan;
-import org.mifosng.platform.loan.domain.LoanTransaction;
 import org.mifosng.platform.saving.domain.DepositAccount;
 import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.infrastructure.user.domain.AppUser;
+import org.mifosplatform.portfolio.loanaccount.domain.Loan;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanTransaction;
 
 @Entity
 @Table(name = "m_note")

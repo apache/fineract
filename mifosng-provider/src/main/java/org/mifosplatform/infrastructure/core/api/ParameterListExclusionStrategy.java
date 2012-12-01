@@ -11,20 +11,20 @@ import com.google.gson.FieldAttributes;
 //        into account the Object its looking at.
 public class ParameterListExclusionStrategy implements ExclusionStrategy {
 
-	private final Set<String> parameterNamesToSkip;
+    private final Set<String> parameterNamesToSkip;
 
-	public ParameterListExclusionStrategy(final Set<String> parameterNamesToSkip) {
-		this.parameterNamesToSkip = parameterNamesToSkip;
-	}
+    public ParameterListExclusionStrategy(final Set<String> parameterNamesToSkip) {
+        this.parameterNamesToSkip = parameterNamesToSkip;
+    }
 
-	@Override
-	public boolean shouldSkipField(FieldAttributes f) {
-		return parameterNamesToSkip.contains(f.getName());
-	}
+    @Override
+    public boolean shouldSkipField(FieldAttributes f) {
+        return parameterNamesToSkip.contains(f.getName());
+    }
 
-	@SuppressWarnings("unused")
-	@Override
-	public boolean shouldSkipClass(Class<?> clazz) {
-		return false;
-	}
+    @SuppressWarnings("unused")
+    @Override
+    public boolean shouldSkipClass(Class<?> clazz) {
+        return false;
+    }
 }
