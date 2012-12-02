@@ -1,12 +1,8 @@
-package org.mifosng.platform.group.service;
+package org.mifosplatform.portfolio.group.service;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import org.mifosng.platform.api.commands.GroupCommand;
-import org.mifosng.platform.exceptions.GroupNotFoundException;
-import org.mifosng.platform.group.domain.Group;
-import org.mifosng.platform.group.domain.GroupRepository;
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.office.domain.Office;
@@ -17,6 +13,11 @@ import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepository;
 import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
+import org.mifosplatform.portfolio.group.command.GroupCommand;
+import org.mifosplatform.portfolio.group.command.GroupCommandValidator;
+import org.mifosplatform.portfolio.group.domain.Group;
+import org.mifosplatform.portfolio.group.domain.GroupRepository;
+import org.mifosplatform.portfolio.group.exception.GroupNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

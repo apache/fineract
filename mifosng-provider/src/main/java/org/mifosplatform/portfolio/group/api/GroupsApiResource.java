@@ -1,4 +1,4 @@
-package org.mifosng.platform.api;
+package org.mifosplatform.portfolio.group.api;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -20,11 +20,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.StringUtils;
-import org.mifosng.platform.api.commands.GroupCommand;
-import org.mifosng.platform.api.data.GroupAccountSummaryCollectionData;
-import org.mifosng.platform.api.data.GroupData;
-import org.mifosng.platform.group.service.GroupReadPlatformService;
-import org.mifosng.platform.group.service.GroupWritePlatformService;
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
 import org.mifosplatform.infrastructure.core.api.PortfolioApiDataConversionService;
 import org.mifosplatform.infrastructure.core.api.PortfolioApiJsonSerializerService;
@@ -34,6 +29,11 @@ import org.mifosplatform.infrastructure.office.service.OfficeReadPlatformService
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.client.data.ClientLookup;
 import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
+import org.mifosplatform.portfolio.group.command.GroupCommand;
+import org.mifosplatform.portfolio.group.data.GroupAccountSummaryCollectionData;
+import org.mifosplatform.portfolio.group.data.GroupData;
+import org.mifosplatform.portfolio.group.service.GroupReadPlatformService;
+import org.mifosplatform.portfolio.group.service.GroupWritePlatformService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

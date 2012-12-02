@@ -1,12 +1,10 @@
 package org.mifosplatform.infrastructure.configuration.domain;
 
-import java.io.Serializable;
-
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
 @Embeddable
-public class MonetaryCurrency implements Serializable {
+public class MonetaryCurrency {
 
     @Column(name = "currency_code", length = 3, nullable = false)
     private final String code;

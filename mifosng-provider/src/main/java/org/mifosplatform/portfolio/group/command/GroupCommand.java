@@ -1,4 +1,4 @@
-package org.mifosng.platform.api.commands;
+package org.mifosplatform.portfolio.group.command;
 
 import java.util.Set;
 

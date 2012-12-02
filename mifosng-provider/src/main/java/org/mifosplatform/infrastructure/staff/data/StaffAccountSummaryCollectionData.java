@@ -3,8 +3,8 @@ package org.mifosplatform.infrastructure.staff.data;
 import java.util.Collection;
 import java.util.List;
 
-import org.mifosng.platform.api.data.GroupAccountSummaryData;
 import org.mifosplatform.portfolio.client.data.ClientAccountSummaryData;
+import org.mifosplatform.portfolio.group.data.GroupAccountSummaryData;
 
 /**
  *

@@ -1,7 +1,7 @@
-package org.mifosng.platform.group.service;
+package org.mifosplatform.portfolio.group.service;
 
-import org.mifosng.platform.api.commands.GroupCommand;
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.portfolio.group.command.GroupCommand;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface GroupWritePlatformService {

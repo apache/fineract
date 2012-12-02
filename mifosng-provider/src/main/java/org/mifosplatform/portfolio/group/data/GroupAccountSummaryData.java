@@ -1,4 +1,4 @@
-package org.mifosng.platform.api.data;
+package org.mifosplatform.portfolio.group.data;
 
 /**
  * Immutable data object for group loan accounts.

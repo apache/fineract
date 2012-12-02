@@ -6,8 +6,6 @@ import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
-import org.mifosng.platform.api.data.GroupAccountSummaryData;
-import org.mifosng.platform.group.service.GroupReadPlatformService;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
@@ -16,6 +14,8 @@ import org.mifosplatform.infrastructure.staff.data.StaffData;
 import org.mifosplatform.infrastructure.staff.exception.StaffNotFoundException;
 import org.mifosplatform.portfolio.client.data.ClientAccountSummaryData;
 import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
+import org.mifosplatform.portfolio.group.data.GroupAccountSummaryData;
+import org.mifosplatform.portfolio.group.service.GroupReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;

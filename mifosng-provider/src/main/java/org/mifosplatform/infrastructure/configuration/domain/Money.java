@@ -1,6 +1,5 @@
 package org.mifosplatform.infrastructure.configuration.domain;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Iterator;
@@ -9,15 +8,15 @@ import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
 @Embeddable
-public class Money implements Comparable<Money>, Serializable {
+public class Money implements Comparable<Money> {
 
-    @Column(name = "currency_code", length=3)
-    private final String     currencyCode;
+    @Column(name = "currency_code", length = 3)
+    private final String currencyCode;
 
     @Column(name = "currency_digits")
-    private final int        currencyDigitsAfterDecimal;
+    private final int currencyDigitsAfterDecimal;
 
-    @Column(name = "amount", scale=6, precision=19)
+    @Column(name = "amount", scale = 6, precision = 19)
     private final BigDecimal amount;
 
     public static Money total(final Money... monies) {
@@ -38,13 +37,13 @@ public class Money implements Comparable<Money>, Serializable {
         }
         return total;
     }
-    
-	public static Money of(final MonetaryCurrency currency, final BigDecimal newAmount) {
-		  return new Money(currency.getCode(), currency.getDigitsAfterDecimal(), defaultToZeroIfNull(newAmount));
-	}
-	
+
+    public static Money of(final MonetaryCurrency currency, final BigDecimal newAmount) {
+        return new Money(currency.getCode(), currency.getDigitsAfterDecimal(), defaultToZeroIfNull(newAmount));
+    }
+
     public static Money zero(final MonetaryCurrency currency) {
-    	return new Money(currency.getCode(), currency.getDigitsAfterDecimal(), BigDecimal.ZERO);
+        return new Money(currency.getCode(), currency.getDigitsAfterDecimal(), BigDecimal.ZERO);
     }
 
     protected Money() {
@@ -56,19 +55,19 @@ public class Money implements Comparable<Money>, Serializable {
     private Money(final String currencyCode, final int digitsAfterDecimal, final BigDecimal amount) {
         this.currencyCode = currencyCode;
         this.currencyDigitsAfterDecimal = digitsAfterDecimal;
-        
+
         final BigDecimal amountZeroed = defaultToZeroIfNull(amount);
         BigDecimal amountStripped = amountZeroed.stripTrailingZeros();
         this.amount = amountStripped.setScale(this.currencyDigitsAfterDecimal, RoundingMode.HALF_EVEN);
     }
-    
+
     private static BigDecimal defaultToZeroIfNull(final BigDecimal value) {
-		BigDecimal result = BigDecimal.ZERO;
-		if (value != null) {
-			result = value;
-		}
-		return result;
-	}
+        BigDecimal result = BigDecimal.ZERO;
+        if (value != null) {
+            result = value;
+        }
+        return result;
+    }
 
     public Money copy() {
         return new Money(this.currencyCode, this.currencyDigitsAfterDecimal, this.amount.stripTrailingZeros());
@@ -83,7 +82,7 @@ public class Money implements Comparable<Money>, Serializable {
         return Money.of(monetaryCurrency(), total);
     }
 
-	public Money plus(final Money moneyToAdd) {
+    public Money plus(final Money moneyToAdd) {
         Money toAdd = this.checkCurrencyEqual(moneyToAdd);
         return this.plus(toAdd.getAmount());
     }
@@ -170,9 +169,8 @@ public class Money implements Comparable<Money>, Serializable {
     @Override
     public int compareTo(final Money other) {
         Money otherMoney = other;
-        if (this.currencyCode.equals(otherMoney.currencyCode) == false) {
-            throw new UnsupportedOperationException("currencies arent different");
-        }
+        if (this.currencyCode.equals(otherMoney.currencyCode) == false) { throw new UnsupportedOperationException(
+                "currencies arent different"); }
         return this.amount.compareTo(otherMoney.amount);
     }
 
@@ -183,7 +181,7 @@ public class Money implements Comparable<Money>, Serializable {
     public boolean isEqualTo(final Money other) {
         return this.compareTo(other) == 0;
     }
-    
+
     public boolean isNotEqualTo(final Money other) {
         return !isEqualTo(other);
     }
@@ -222,17 +220,11 @@ public class Money implements Comparable<Money>, Serializable {
 
     @Override
     public String toString() {
-        return new StringBuilder()
-        .append(this.currencyCode)
-        .append(' ')
-        .append(this.amount.toPlainString())
-        .toString();
+        return new StringBuilder().append(this.currencyCode).append(' ').append(this.amount.toPlainString()).toString();
     }
 
     public Money negated() {
-        if (this.isZero()) {
-            return this;
-        }
+        if (this.isZero()) { return this; }
         return Money.of(monetaryCurrency(), this.amount.negate());
     }
 
@@ -240,11 +232,11 @@ public class Money implements Comparable<Money>, Serializable {
         return this.isLessThanZero() ? this.negated() : this;
     }
 
-	public MonetaryCurrency getCurrency() {
-		return monetaryCurrency();
-	}
-	
+    public MonetaryCurrency getCurrency() {
+        return monetaryCurrency();
+    }
+
     private MonetaryCurrency monetaryCurrency() {
-		return new MonetaryCurrency(this.currencyCode, this.currencyDigitsAfterDecimal);
-	}
+        return new MonetaryCurrency(this.currencyCode, this.currencyDigitsAfterDecimal);
+    }
 }

@@ -1,11 +1,11 @@
-package org.mifosng.platform.group.service;
+package org.mifosplatform.portfolio.group.service;
 
 import java.util.Collection;
 
-import org.mifosng.platform.api.data.GroupAccountSummaryCollectionData;
-import org.mifosng.platform.api.data.GroupAccountSummaryData;
-import org.mifosng.platform.api.data.GroupData;
 import org.mifosplatform.portfolio.client.data.ClientLookup;
+import org.mifosplatform.portfolio.group.data.GroupAccountSummaryCollectionData;
+import org.mifosplatform.portfolio.group.data.GroupAccountSummaryData;
+import org.mifosplatform.portfolio.group.data.GroupData;
 
 public interface GroupReadPlatformService {
 

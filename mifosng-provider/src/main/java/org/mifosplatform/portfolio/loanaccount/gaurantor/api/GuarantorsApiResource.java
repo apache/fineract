@@ -1,4 +1,4 @@
-package org.mifosng.platform.api;
+package org.mifosplatform.portfolio.loanaccount.gaurantor.api;
 
 import java.util.Arrays;
 import java.util.HashSet;

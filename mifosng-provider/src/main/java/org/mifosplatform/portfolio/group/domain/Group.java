@@ -1,4 +1,4 @@
-package org.mifosng.platform.group.domain;
+package org.mifosplatform.portfolio.group.domain;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -12,11 +12,11 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.apache.commons.lang.StringUtils;
-import org.mifosng.platform.api.commands.GroupCommand;
 import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.infrastructure.office.domain.Office;
 import org.mifosplatform.infrastructure.user.domain.AppUser;
 import org.mifosplatform.portfolio.client.domain.Client;
+import org.mifosplatform.portfolio.group.command.GroupCommand;
 
 @Entity
 @Table(name = "m_group")

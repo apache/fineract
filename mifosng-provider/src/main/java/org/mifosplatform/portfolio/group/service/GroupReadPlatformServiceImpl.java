@@ -1,4 +1,4 @@
-package org.mifosng.platform.group.service;
+package org.mifosplatform.portfolio.group.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -7,10 +7,6 @@ import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
-import org.mifosng.platform.api.data.GroupAccountSummaryCollectionData;
-import org.mifosng.platform.api.data.GroupAccountSummaryData;
-import org.mifosng.platform.api.data.GroupData;
-import org.mifosng.platform.exceptions.GroupNotFoundException;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.office.data.OfficeLookup;
@@ -19,6 +15,10 @@ import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext
 import org.mifosplatform.portfolio.client.data.ClientLookup;
 import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
 import org.mifosplatform.portfolio.client.service.LoanStatusMapper;
+import org.mifosplatform.portfolio.group.data.GroupAccountSummaryCollectionData;
+import org.mifosplatform.portfolio.group.data.GroupAccountSummaryData;
+import org.mifosplatform.portfolio.group.data.GroupData;
+import org.mifosplatform.portfolio.group.exception.GroupNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
