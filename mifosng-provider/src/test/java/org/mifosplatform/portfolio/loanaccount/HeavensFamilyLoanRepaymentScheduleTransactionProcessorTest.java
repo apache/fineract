@@ -1,4 +1,4 @@
-package org.mifosng.platform.loan.domain;
+package org.mifosplatform.portfolio.loanaccount;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;

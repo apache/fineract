@@ -1,4 +1,4 @@
-package org.mifosng.platform.loan.domain;
+package org.mifosplatform.portfolio.loanaccount;
 
 import java.util.Arrays;
 import java.util.List;

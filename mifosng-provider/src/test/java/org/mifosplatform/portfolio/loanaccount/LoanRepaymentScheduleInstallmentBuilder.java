@@ -1,4 +1,4 @@
-package org.mifosng.platform.loan.domain;
+package org.mifosplatform.portfolio.loanaccount;
 
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.configuration.domain.MonetaryCurrency;

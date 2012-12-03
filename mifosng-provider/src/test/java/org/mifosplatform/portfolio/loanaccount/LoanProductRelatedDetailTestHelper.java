@@ -1,8 +1,7 @@
-package org.mifosng.platform.loanschedule.domain;
+package org.mifosplatform.portfolio.loanaccount;
 
 import java.math.BigDecimal;
 
-import org.mifosng.platform.loan.domain.MonetaryCurrencyBuilder;
 import org.mifosplatform.infrastructure.configuration.domain.MonetaryCurrency;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleGenerator;
 import org.mifosplatform.portfolio.loanproduct.domain.AmortizationMethod;
