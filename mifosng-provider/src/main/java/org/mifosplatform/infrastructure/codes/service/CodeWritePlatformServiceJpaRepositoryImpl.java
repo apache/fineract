@@ -97,7 +97,7 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
 
         context.authenticatedUser();
 
-        final Code code = retrieveCodeBy(command.getName());
+        final Code code = retrieveCodeBy(command.getId());
         if (code.isSystemDefined()) {
             throw new SystemDefinedCodeCannotBeChangedException();
         }
@@ -112,6 +112,12 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
     private Code retrieveCodeBy(final String name) {
         final Code code = this.codeRepository.findOneByName(name);
         if (code == null) { throw new CodeNotFoundException(name); }
+        return code;
+    }
+    
+    private Code retrieveCodeBy(final Long codeId) {
+        final Code code = this.codeRepository.findOne(codeId);
+        if (code == null) { throw new CodeNotFoundException(codeId.toString()); }
         return code;
     }
 }

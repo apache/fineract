@@ -7,8 +7,8 @@ import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
-import org.mifosplatform.infrastructure.codes.command.CodeCommand;
 import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
+import org.mifosplatform.infrastructure.core.serialization.JsonParserHelper;
 import org.mifosplatform.organisation.monetary.command.CurrencyCommand;
 import org.mifosplatform.organisation.office.command.BranchMoneyTransferCommand;
 import org.mifosplatform.organisation.office.command.OfficeCommand;
@@ -124,20 +124,6 @@ public class PortfolioCommandDeerializerServiceGoogleGson implements PortfolioCo
 
         return new UserCommand(parametersPassedInRequest, makerCheckerApproval, userId, username, firstname, lastname, password,
                 repeatPassword, email, officeId, notSelectedRoles, roles);
-    }
-
-    @Override
-    public CodeCommand deserializeCodeCommand(final Long codeId, final String commandAsJson, final boolean makerCheckerApproval) {
-        if (StringUtils.isBlank(commandAsJson)) { throw new InvalidJsonException(); }
-
-        final JsonParserHelper helper = new JsonParserHelper();
-        final JsonElement element = parser.parse(commandAsJson);
-
-        final Set<String> parametersPassedInRequest = new HashSet<String>();
-
-        final String name = helper.extractStringNamed("name", element, parametersPassedInRequest);
-
-        return new CodeCommand(parametersPassedInRequest, makerCheckerApproval, codeId, name);
     }
 
     @Override

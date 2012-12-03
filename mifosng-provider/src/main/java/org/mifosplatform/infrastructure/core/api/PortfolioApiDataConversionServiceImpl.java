@@ -17,11 +17,11 @@ import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
-import org.mifosplatform.infrastructure.codes.command.CodeCommand;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.exception.UnsupportedParameterException;
+import org.mifosplatform.infrastructure.core.serialization.JsonParserHelper;
 import org.mifosplatform.organisation.monetary.command.CurrencyCommand;
 import org.mifosplatform.organisation.office.command.BranchMoneyTransferCommand;
 import org.mifosplatform.organisation.office.command.OfficeCommand;
@@ -1513,22 +1513,6 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         checkForUnsupportedParameters(requestMap, supportedParams);
 
         return this.portfolioCommandDeserializerService.deserializeClientIdentifierCommand(resourceIdentifier, clientId, json, false);
-    }
-
-    @Override
-    public CodeCommand convertApiRequestJsonToCodeCommand(final Long resourceIdentifier, final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
-
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        final Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
-
-        final Set<String> supportedParams = new HashSet<String>(Arrays.asList("name"));
-
-        checkForUnsupportedParameters(requestMap, supportedParams);
-
-        // no difference between api request json format and internal command
-        // json format.
-        return this.portfolioCommandDeserializerService.deserializeCodeCommand(resourceIdentifier, json, false);
     }
 
     @Override

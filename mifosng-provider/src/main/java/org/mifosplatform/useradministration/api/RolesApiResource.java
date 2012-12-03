@@ -24,8 +24,8 @@ import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
 import org.mifosplatform.infrastructure.core.api.PortfolioApiDataConversionService;
 import org.mifosplatform.infrastructure.core.api.PortfolioApiJsonSerializerService;
 import org.mifosplatform.infrastructure.core.api.PortfolioCommandDeserializerService;
-import org.mifosplatform.infrastructure.core.api.PortfolioCommandSerializerService;
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.serialization.CommandSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.useradministration.command.RoleCommand;
 import org.mifosplatform.useradministration.command.RolePermissionCommand;
@@ -50,7 +50,7 @@ public class RolesApiResource {
     private final PermissionReadPlatformService permissionReadPlatformService;
     private final PortfolioApiJsonSerializerService apiJsonSerializerService;
     private final PortfolioApiDataConversionService apiDataConversionService;
-    private final PortfolioCommandSerializerService commandSerializerService;
+    private final CommandSerializer commandSerializerService;
     private final PortfolioCommandsReadPlatformService commandSourceReadPlatformService;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final PortfolioCommandDeserializerService commandDeserializerService;
@@ -62,7 +62,7 @@ public class RolesApiResource {
             final PermissionReadPlatformService permissionReadPlatformService,
             final PortfolioApiJsonSerializerService apiJsonSerializerService,
             final PortfolioApiDataConversionService apiDataConversionService,
-            final PortfolioCommandSerializerService commandSerializerService,
+            final CommandSerializer commandSerializerService,
             final PortfolioCommandsReadPlatformService commandSourceReadPlatformService,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
             final PortfolioCommandDeserializerService commandDeserializerService) {

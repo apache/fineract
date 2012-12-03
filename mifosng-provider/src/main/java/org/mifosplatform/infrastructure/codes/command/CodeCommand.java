@@ -9,7 +9,9 @@ import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 
 /**
- * Immutable command for creating or updating details of a code.
+ * <p>Immutable command for creating or updating details of a code.</p>
+ * 
+ * <p>Transient fields are not intended for serialization.</p>
  */
 public class CodeCommand {
 
@@ -24,22 +26,6 @@ public class CodeCommand {
         this.makerCheckerApproval = makerCheckerApproval;
         this.id = id;
         this.name = name;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public Long getId() {
-        return this.id;
-    }
-
-    public boolean isNameChanged() {
-        return this.parametersPassedInRequest.contains("name");
-    }
-
-    public boolean isApprovedByChecker() {
-        return this.makerCheckerApproval;
     }
 
     public void validateForCreate() {
@@ -61,5 +47,21 @@ public class CodeCommand {
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
                 "Validation errors exist.", dataValidationErrors); }
+    }
+    
+    public String getName() {
+        return this.name;
+    }
+
+    public Long getId() {
+        return this.id;
+    }
+
+    public boolean isNameChanged() {
+        return this.parametersPassedInRequest.contains("name");
+    }
+
+    public boolean isApprovedByChecker() {
+        return this.makerCheckerApproval;
     }
 }

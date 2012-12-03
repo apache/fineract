@@ -1,4 +1,5 @@
-package org.mifosplatform.infrastructure.core.api;
+package org.mifosplatform.infrastructure.core.serialization;
+
 
 /**
  * Service for serializing commands into another format.
@@ -7,9 +8,9 @@ package org.mifosplatform.infrastructure.core.api;
  * Known implementations:
  * </p>
  * 
- * @see PortfolioCommandSerializerServiceJson
+ * @see CommandSerializerDefaultToJson
  */
-public interface PortfolioCommandSerializerService {
+public interface CommandSerializer {
 
     String serializeCommandToJson(Object command);
 }

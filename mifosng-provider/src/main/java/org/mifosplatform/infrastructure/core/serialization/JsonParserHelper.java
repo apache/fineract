@@ -1,4 +1,4 @@
-package org.mifosplatform.infrastructure.core.api;
+package org.mifosplatform.infrastructure.core.serialization;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;

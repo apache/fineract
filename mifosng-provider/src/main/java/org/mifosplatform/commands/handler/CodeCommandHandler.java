@@ -7,8 +7,8 @@ import org.joda.time.LocalDate;
 import org.mifosplatform.commands.domain.CommandSource;
 import org.mifosplatform.commands.service.ChangeDetectionService;
 import org.mifosplatform.infrastructure.codes.command.CodeCommand;
+import org.mifosplatform.infrastructure.codes.serialization.CodeCommandFromCommandJsonDeserializer;
 import org.mifosplatform.infrastructure.codes.service.CodeWritePlatformService;
-import org.mifosplatform.infrastructure.core.api.PortfolioCommandDeserializerService;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.client.service.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
 import org.mifosplatform.useradministration.domain.AppUser;
@@ -20,15 +20,15 @@ public class CodeCommandHandler implements CommandSourceHandler {
 
     private final PlatformSecurityContext context;
     private final ChangeDetectionService changeDetectionService;
-    private final PortfolioCommandDeserializerService commandDeserializerService;
+    private final CodeCommandFromCommandJsonDeserializer fromCommandJsonDeserializer;
     private final CodeWritePlatformService writePlatformService;
 
     @Autowired
     public CodeCommandHandler(final PlatformSecurityContext context, final ChangeDetectionService changeDetectionService,
-            final PortfolioCommandDeserializerService commandDeserializerService, final CodeWritePlatformService writePlatformService) {
+            final CodeCommandFromCommandJsonDeserializer fromCommandJsonDeserializer, final CodeWritePlatformService writePlatformService) {
         this.context = context;
         this.changeDetectionService = changeDetectionService;
-        this.commandDeserializerService = commandDeserializerService;
+        this.fromCommandJsonDeserializer = fromCommandJsonDeserializer;
         this.writePlatformService = writePlatformService;
     }
 
@@ -39,7 +39,7 @@ public class CodeCommandHandler implements CommandSourceHandler {
         final LocalDate asToday = new LocalDate();
 
         final Long resourceId = commandSource.resourceId();
-        final CodeCommand command = this.commandDeserializerService.deserializeCodeCommand(resourceId, commandSource.json(), false);
+        final CodeCommand command = this.fromCommandJsonDeserializer.commandFromCommandJson(resourceId, commandSource.json());
 
         CommandSource commandSourceResult = commandSource.copy();
 
@@ -57,8 +57,7 @@ public class CodeCommandHandler implements CommandSourceHandler {
                         commandSource.resourceId(), commandSource.json());
                 commandSourceResult.updateJsonTo(jsonOfChangesOnly);
 
-                final CodeCommand changesOnly = this.commandDeserializerService
-                        .deserializeCodeCommand(resourceId, jsonOfChangesOnly, false);
+                final CodeCommand changesOnly = this.fromCommandJsonDeserializer.commandFromCommandJson(resourceId, jsonOfChangesOnly);
                 this.writePlatformService.updateCode(changesOnly);
 
                 commandSourceResult.markAsChecked(maker, asToday);
@@ -83,24 +82,24 @@ public class CodeCommandHandler implements CommandSourceHandler {
         final AppUser checker = context.authenticatedUser();
 
         Long resourceId = commandSourceResult.resourceId();
-        final CodeCommand command = this.commandDeserializerService.deserializeCodeCommand(resourceId, commandSourceResult.json(), true);
+        final CodeCommand command = this.fromCommandJsonDeserializer.commandFromCommandJson(resourceId, commandSourceResult.json(), true);
 
         if (commandSourceResult.isCreate()) {
             final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "CREATE_CODE_MAKER");
-            context.authenticatedUser().validateHasPermissionTo("CREATE_USER_MAKER", allowedPermissions);
+            context.authenticatedUser().validateHasPermissionTo("CREATE_CODE_MAKER", allowedPermissions);
 
             resourceId = this.writePlatformService.createCode(command);
             commandSourceResult.updateResourceId(resourceId);
             commandSourceResult.markAsChecked(checker, new LocalDate());
         } else if (commandSourceResult.isUpdate()) {
             final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "UPDATE_CODE_MAKER");
-            context.authenticatedUser().validateHasPermissionTo("UPDATE_USER_MAKER", allowedPermissions);
+            context.authenticatedUser().validateHasPermissionTo("UPDATE_CODE_MAKER", allowedPermissions);
 
             this.writePlatformService.updateCode(command);
             commandSourceResult.markAsChecked(checker, new LocalDate());
         } else if (commandSourceResult.isDelete()) {
             final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "DELETE_CODE_MAKER");
-            context.authenticatedUser().validateHasPermissionTo("DELETE_USER_MAKER", allowedPermissions);
+            context.authenticatedUser().validateHasPermissionTo("DELETE_CODE_MAKER", allowedPermissions);
 
             this.writePlatformService.deleteCode(command);
             commandSourceResult.markAsChecked(checker, new LocalDate());

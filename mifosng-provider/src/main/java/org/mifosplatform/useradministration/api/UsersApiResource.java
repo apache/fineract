@@ -22,8 +22,8 @@ import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformSer
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
 import org.mifosplatform.infrastructure.core.api.PortfolioApiDataConversionService;
 import org.mifosplatform.infrastructure.core.api.PortfolioApiJsonSerializerService;
-import org.mifosplatform.infrastructure.core.api.PortfolioCommandSerializerService;
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.serialization.CommandSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.office.data.OfficeLookup;
 import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
@@ -46,14 +46,14 @@ public class UsersApiResource {
     private final OfficeReadPlatformService officeReadPlatformService;
     private final PortfolioApiJsonSerializerService apiJsonSerializerService;
     private final PortfolioApiDataConversionService apiDataConversionService;
-    private final PortfolioCommandSerializerService commandSerializerService;
+    private final CommandSerializer commandSerializerService;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @Autowired
     public UsersApiResource(final PlatformSecurityContext context, final AppUserReadPlatformService readPlatformService,
             final OfficeReadPlatformService officeReadPlatformService, final PortfolioApiJsonSerializerService apiJsonSerializerService,
             final PortfolioApiDataConversionService apiDataConversionService,
-            final PortfolioCommandSerializerService commandSerializerService,
+            final CommandSerializer commandSerializerService,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
         this.context = context;
         this.readPlatformService = readPlatformService;

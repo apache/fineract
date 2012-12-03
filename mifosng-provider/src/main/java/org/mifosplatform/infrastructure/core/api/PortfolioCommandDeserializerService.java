@@ -1,6 +1,5 @@
 package org.mifosplatform.infrastructure.core.api;
 
-import org.mifosplatform.infrastructure.codes.command.CodeCommand;
 import org.mifosplatform.organisation.monetary.command.CurrencyCommand;
 import org.mifosplatform.organisation.office.command.BranchMoneyTransferCommand;
 import org.mifosplatform.organisation.office.command.OfficeCommand;
@@ -34,8 +33,6 @@ public interface PortfolioCommandDeserializerService {
     PermissionsCommand deserializePermissionsCommand(String commandAsJson, boolean makerCheckerApproval);
 
     UserCommand deserializeUserCommand(Long userId, String commandAsJson, boolean makerCheckerApproval);
-
-    CodeCommand deserializeCodeCommand(Long codeId, String commandAsJson, boolean makerCheckerApproval);
 
     StaffCommand deserializeStaffCommand(Long staffId, String commandAsJson, boolean makerCheckerApproval);
 

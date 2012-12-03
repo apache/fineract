@@ -6,8 +6,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.mifosplatform.commands.data.CommandSourceData;
-import org.mifosplatform.infrastructure.codes.data.CodeData;
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.serialization.GoogleGsonSerializerHelper;
 import org.mifosplatform.infrastructure.dataqueries.data.DatatableData;
 import org.mifosplatform.infrastructure.dataqueries.data.GenericResultsetData;
 import org.mifosplatform.infrastructure.documentmanagement.data.DocumentData;
@@ -151,8 +151,6 @@ public class GoogleGsonPortfolioApiJsonSerializerService implements PortfolioApi
             "chargeAppliesToOptions", "chargeTimeTypeOptions", "currencyOptions"));
 
     private static final Set<String> LOAN_CHARGES_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("chargeOptions"));
-
-    private static final Set<String> CODE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "codename"));
 
     private static final Set<String> MAKER_CHECKER_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "taskName", "madeOnDate"));
 
@@ -489,6 +487,7 @@ public class GoogleGsonPortfolioApiJsonSerializerService implements PortfolioApi
         return helper.serializedJsonFrom(gsonDeserializer, staff.toArray(new StaffData[staff.size()]));
     }
 
+    @Deprecated
     @Override
     public String serializeEntityIdentifier(final EntityIdentifier identifier) {
         final Set<String> DATA_PARAMETERS = new HashSet<String>(Arrays.asList("entityId"));
@@ -525,20 +524,6 @@ public class GoogleGsonPortfolioApiJsonSerializerService implements PortfolioApi
         final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(DOCUMENT_DATA_PARAMETERS,
                 prettyPrint, responseParameters);
         return helper.serializedJsonFrom(gsonDeserializer, documentData);
-    }
-
-    @Override
-    public String serializeCodeDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final Collection<CodeData> codes) {
-        final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(CODE_DATA_PARAMETERS,
-                prettyPrint, responseParameters);
-        return helper.serializedJsonFrom(gsonDeserializer, codes.toArray(new CodeData[codes.size()]));
-    }
-
-    @Override
-    public String serializeCodeDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final CodeData code) {
-        final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(CODE_DATA_PARAMETERS,
-                prettyPrint, responseParameters);
-        return helper.serializedJsonFrom(gsonDeserializer, code);
     }
 
     @Override

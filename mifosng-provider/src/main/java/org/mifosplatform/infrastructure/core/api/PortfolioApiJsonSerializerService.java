@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.Set;
 
 import org.mifosplatform.commands.data.CommandSourceData;
-import org.mifosplatform.infrastructure.codes.data.CodeData;
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 import org.mifosplatform.infrastructure.dataqueries.data.DatatableData;
 import org.mifosplatform.infrastructure.dataqueries.data.GenericResultsetData;
@@ -128,6 +127,12 @@ public interface PortfolioApiJsonSerializerService {
 
     String serializeStaffDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<StaffData> staff);
 
+    /**
+     * @deprecated see
+     *             {@link CodesToApiJsonSerializer#serialize(EntityIdentifier)}
+     *             for example for what to use now.
+     */
+    @Deprecated
     String serializeEntityIdentifier(EntityIdentifier identifier);
 
     String serializeClientIdentifierDataToJson(boolean prettyPrint, Set<String> responseParameters,
@@ -139,10 +144,6 @@ public interface PortfolioApiJsonSerializerService {
     String serializeDocumentDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<DocumentData> documentDatas);
 
     String serializeDocumentDataToJson(boolean prettyPrint, Set<String> responseParameters, DocumentData documentData);
-
-    String serializeCodeDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<CodeData> codes);
-
-    String serializeCodeDataToJson(boolean prettyPrint, Set<String> responseParameters, CodeData code);
 
     String serializeMakerCheckerDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<CommandSourceData> entries);
 

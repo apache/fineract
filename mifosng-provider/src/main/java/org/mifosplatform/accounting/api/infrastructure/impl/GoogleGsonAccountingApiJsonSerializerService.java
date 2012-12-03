@@ -8,9 +8,9 @@ import java.util.Set;
 import org.mifosplatform.accounting.api.data.GLAccountData;
 import org.mifosplatform.accounting.api.data.GLClosureData;
 import org.mifosplatform.accounting.api.infrastructure.AccountingApiJsonSerializerService;
-import org.mifosplatform.infrastructure.core.api.GoogleGsonSerializerHelper;
 import org.mifosplatform.infrastructure.core.api.PortfolioApiJsonSerializerService;
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.serialization.GoogleGsonSerializerHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

@@ -12,10 +12,10 @@ import java.util.Set;
 import javax.sql.rowset.CachedRowSet;
 
 import org.apache.commons.lang.StringUtils;
-import org.mifosplatform.infrastructure.core.api.JsonParserHelper;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.mifosplatform.infrastructure.core.serialization.JsonParserHelper;
 import org.mifosplatform.infrastructure.dataqueries.data.DatatableData;
 import org.mifosplatform.infrastructure.dataqueries.data.GenericResultsetData;
 import org.mifosplatform.infrastructure.dataqueries.data.ResultsetColumnHeader;

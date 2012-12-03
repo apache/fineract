@@ -30,9 +30,9 @@ import org.mifosplatform.infrastructure.core.api.ApiConstants;
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
 import org.mifosplatform.infrastructure.core.api.PortfolioApiDataConversionService;
 import org.mifosplatform.infrastructure.core.api.PortfolioApiJsonSerializerService;
-import org.mifosplatform.infrastructure.core.api.PortfolioCommandSerializerService;
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 import org.mifosplatform.infrastructure.core.domain.Base64EncodedImage;
+import org.mifosplatform.infrastructure.core.serialization.CommandSerializer;
 import org.mifosplatform.infrastructure.core.service.FileUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.office.data.OfficeLookup;
@@ -68,7 +68,7 @@ public class ClientsApiResource {
     private final ClientWritePlatformService clientWritePlatformService;
     private final OfficeReadPlatformService officeReadPlatformService;
     private final PortfolioApiDataConversionService apiDataConversionService;
-    private final PortfolioCommandSerializerService commandSerializerService;
+    private final CommandSerializer commandSerializerService;
     private final PortfolioApiJsonSerializerService apiJsonSerializerService;
     private final PortfolioCommandsReadPlatformService commandSourceReadPlatformService;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
@@ -77,7 +77,7 @@ public class ClientsApiResource {
     public ClientsApiResource(final PlatformSecurityContext context, final ClientReadPlatformService readPlatformService,
             final ClientWritePlatformService clientWritePlatformService, final OfficeReadPlatformService officeReadPlatformService,
             final PortfolioApiDataConversionService apiDataConversionService,
-            final PortfolioCommandSerializerService commandSerializerService,
+            final CommandSerializer commandSerializerService,
             final PortfolioApiJsonSerializerService apiJsonSerializerService,
             final PortfolioCommandsReadPlatformService commandsReadPlatformService,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {

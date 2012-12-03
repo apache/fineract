@@ -1,4 +1,4 @@
-package org.mifosplatform.infrastructure.core.api;
+package org.mifosplatform.infrastructure.core.serialization;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -6,6 +6,9 @@ import java.util.Set;
 
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
+import org.mifosplatform.infrastructure.core.api.JodaDateTimeAdapter;
+import org.mifosplatform.infrastructure.core.api.JodaLocalDateAdapter;
+import org.mifosplatform.infrastructure.core.api.ParameterListExclusionStrategy;
 import org.mifosplatform.infrastructure.core.exception.UnsupportedParameterException;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +20,7 @@ import com.google.gson.GsonBuilder;
  * Helper class for serialization of java objects into JSON using google-gson.
  */
 @Service
-public class GoogleGsonSerializerHelper {
+public final class GoogleGsonSerializerHelper {
 
     public Gson createGsonBuilder(final boolean prettyPrint) {
         final GsonBuilder builder = new GsonBuilder();

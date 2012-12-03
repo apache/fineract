@@ -2,6 +2,7 @@ package org.mifosplatform.infrastructure.codes.api;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -18,14 +19,13 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.mifosplatform.infrastructure.codes.command.CodeCommand;
 import org.mifosplatform.infrastructure.codes.data.CodeData;
+import org.mifosplatform.infrastructure.codes.serialization.CodeCommandFromApiJsonDeserializer;
 import org.mifosplatform.infrastructure.codes.service.CodeReadPlatformService;
-import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
-import org.mifosplatform.infrastructure.core.api.PortfolioApiDataConversionService;
-import org.mifosplatform.infrastructure.core.api.PortfolioApiJsonSerializerService;
-import org.mifosplatform.infrastructure.core.api.PortfolioCommandSerializerService;
+import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
+import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -36,26 +36,30 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class CodesApiResource {
 
+    /**
+     * The set of parameters that are supported in response for {@link CodeData}
+     * .
+     */
+    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "name", "systemDefined"));
     private final String resourceNameForPermissions = "CODE";
 
     private final PlatformSecurityContext context;
     private final CodeReadPlatformService readPlatformService;
-    private final PortfolioApiJsonSerializerService apiJsonSerializerService;
-    private final PortfolioApiDataConversionService apiDataConversionService;
-    private final PortfolioCommandSerializerService commandSerializerService;
+    private final CodeCommandFromApiJsonDeserializer fromApiJsonDeserializer;
+    private final DefaultToApiJsonSerializer<CodeData> toApiJsonSerializer;
+    private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @Autowired
     public CodesApiResource(final PlatformSecurityContext context, final CodeReadPlatformService readPlatformService,
-            final PortfolioApiJsonSerializerService apiJsonSerializerService,
-            final PortfolioApiDataConversionService apiDataConversionService,
-            final PortfolioCommandSerializerService commandSerializerService,
+            final CodeCommandFromApiJsonDeserializer fromApiJsonDeserializer, final DefaultToApiJsonSerializer<CodeData> toApiJsonSerializer,
+            final ApiRequestParameterHelper apiRequestParameterHelper,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
         this.context = context;
         this.readPlatformService = readPlatformService;
-        this.apiJsonSerializerService = apiJsonSerializerService;
-        this.apiDataConversionService = apiDataConversionService;
-        this.commandSerializerService = commandSerializerService;
+        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
+        this.toApiJsonSerializer = toApiJsonSerializer;
+        this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
     }
 
@@ -66,12 +70,10 @@ public class CodesApiResource {
 
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 
-        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-
         final Collection<CodeData> codes = this.readPlatformService.retrieveAllCodes();
 
-        return this.apiJsonSerializerService.serializeCodeDataToJson(prettyPrint, responseParameters, codes);
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.toApiJsonSerializer.serialize(settings, codes, RESPONSE_DATA_PARAMETERS);
     }
 
     @POST
@@ -82,13 +84,12 @@ public class CodesApiResource {
         final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "CREATE_CODE");
         context.authenticatedUser().validateHasPermissionTo("CREATE_CODE", allowedPermissions);
 
-        final CodeCommand command = this.apiDataConversionService.convertApiRequestJsonToCodeCommand(null, apiRequestBodyAsJson);
-        final String commandSerializedAsJson = this.commandSerializerService.serializeCommandToJson(command);
+        final String commandSerializedAsJson = this.fromApiJsonDeserializer.serializedCommandJsonFromApiJson(apiRequestBodyAsJson);
 
         final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE", "codes", null,
                 commandSerializedAsJson);
 
-        return this.apiJsonSerializerService.serializeEntityIdentifier(result);
+        return this.toApiJsonSerializer.serialize(result);
     }
 
     @GET
@@ -97,12 +98,10 @@ public class CodesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String retreiveOffice(@PathParam("codeId") final Long codeId, @Context final UriInfo uriInfo) {
 
-        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-
         final CodeData code = this.readPlatformService.retrieveCode(codeId);
 
-        return this.apiJsonSerializerService.serializeCodeDataToJson(prettyPrint, responseParameters, code);
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.toApiJsonSerializer.serialize(settings, code, RESPONSE_DATA_PARAMETERS);
     }
 
     @PUT
@@ -114,13 +113,12 @@ public class CodesApiResource {
         final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "UPDATE_CODE");
         context.authenticatedUser().validateHasPermissionTo("UPDATE_CODE", allowedPermissions);
 
-        final CodeCommand command = this.apiDataConversionService.convertApiRequestJsonToCodeCommand(codeId, apiRequestBodyAsJson);
-        final String commandSerializedAsJson = this.commandSerializerService.serializeCommandToJson(command);
+        final String commandSerializedAsJson = this.fromApiJsonDeserializer.serializedCommandJsonFromApiJson(codeId, apiRequestBodyAsJson);
 
         final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "codes", codeId,
                 commandSerializedAsJson);
 
-        return this.apiJsonSerializerService.serializeEntityIdentifier(result);
+        return this.toApiJsonSerializer.serialize(result);
     }
 
     @DELETE
@@ -134,6 +132,6 @@ public class CodesApiResource {
 
         final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("DELETE", "codes", codeId, "{}");
 
-        return this.apiJsonSerializerService.serializeEntityIdentifier(result);
+        return this.toApiJsonSerializer.serialize(result);
     }
 }

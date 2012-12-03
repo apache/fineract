@@ -20,7 +20,6 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 @Table(name = "m_code", uniqueConstraints = { @UniqueConstraint(columnNames = { "code_name" }, name = "code_name") })
 public class Code extends AbstractPersistable<Long> {
 
-    @SuppressWarnings("unused")
     @Column(name = "code_name", length = 100)
     private String name;
 
@@ -43,6 +42,10 @@ public class Code extends AbstractPersistable<Long> {
     private Code(final String name) {
         this.name = name;
         this.systemDefined = false;
+    }
+    
+    public String name() {
+        return this.name;
     }
     
     public boolean isSystemDefined() {

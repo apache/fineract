@@ -24,10 +24,10 @@ import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformSer
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
 import org.mifosplatform.infrastructure.core.api.PortfolioApiDataConversionService;
 import org.mifosplatform.infrastructure.core.api.PortfolioApiJsonSerializerService;
-import org.mifosplatform.infrastructure.core.api.PortfolioCommandSerializerService;
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.exception.UnrecognizedQueryParamException;
+import org.mifosplatform.infrastructure.core.serialization.CommandSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
@@ -90,7 +90,7 @@ public class LoansApiResource {
     private final GuarantorReadPlatformService guarantorReadPlatformService;
     private final PortfolioApiJsonSerializerService apiJsonSerializerService;
     private final PortfolioApiDataConversionService apiDataConversionService;
-    private final PortfolioCommandSerializerService commandSerializerService;
+    private final CommandSerializer commandSerializerService;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @Autowired
@@ -102,7 +102,7 @@ public class LoansApiResource {
             final GuarantorReadPlatformService guarantorReadPlatformService,
             final PortfolioApiJsonSerializerService apiJsonSerializerService,
             final PortfolioApiDataConversionService apiDataConversionService,
-            final PortfolioCommandSerializerService commandSerializerService,
+            final CommandSerializer commandSerializerService,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
         this.context = context;
         this.loanReadPlatformService = loanReadPlatformService;

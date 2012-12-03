@@ -17,8 +17,8 @@ import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformSer
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
 import org.mifosplatform.infrastructure.core.api.PortfolioApiDataConversionService;
 import org.mifosplatform.infrastructure.core.api.PortfolioApiJsonSerializerService;
-import org.mifosplatform.infrastructure.core.api.PortfolioCommandSerializerService;
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.serialization.CommandSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.command.CurrencyCommand;
 import org.mifosplatform.organisation.monetary.data.ConfigurationData;
@@ -38,7 +38,7 @@ public class CurrenciesApiResource {
     private final OrganisationCurrencyReadPlatformService readPlatformService;
     private final PortfolioApiJsonSerializerService apiJsonSerializerService;
     private final PortfolioApiDataConversionService apiDataConversionService;
-    private final PortfolioCommandSerializerService commandSerializerService;
+    private final CommandSerializer commandSerializerService;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @Autowired
@@ -46,7 +46,7 @@ public class CurrenciesApiResource {
             final OrganisationCurrencyReadPlatformService readPlatformService,
             final PortfolioApiJsonSerializerService apiJsonSerializerService,
             final PortfolioApiDataConversionService apiDataConversionService,
-            final PortfolioCommandSerializerService commandSerializerService,
+            final CommandSerializer commandSerializerService,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
         this.context = context;
         this.readPlatformService = readPlatformService;

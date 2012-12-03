@@ -2,7 +2,7 @@ package org.mifosplatform.commands.service;
 
 import org.mifosplatform.infrastructure.core.api.PortfolioApiDataConversionService;
 import org.mifosplatform.infrastructure.core.api.PortfolioApiJsonSerializerService;
-import org.mifosplatform.infrastructure.core.api.PortfolioCommandSerializerService;
+import org.mifosplatform.infrastructure.core.serialization.CommandSerializer;
 import org.mifosplatform.portfolio.client.command.ClientCommand;
 import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
@@ -15,12 +15,12 @@ public class ChangeDetectionServiceJdbc implements ChangeDetectionService {
     private final PortfolioApiDataConversionService apiDataConversionService;
     private final PortfolioApiJsonSerializerService apiJsonSerializerService;
     private final ClientReadPlatformService clientReadPlatformService;
-    private final PortfolioCommandSerializerService commandSerializerService;
+    private final CommandSerializer commandSerializerService;
 
     @Autowired
     public ChangeDetectionServiceJdbc(
             final PortfolioApiDataConversionService apiDataConversionService,
-            final PortfolioCommandSerializerService commandSerializerService,
+            final CommandSerializer commandSerializerService,
             final PortfolioApiJsonSerializerService apiJsonSerializerService, 
             final ClientReadPlatformService clientReadPlatformService) {
         this.apiDataConversionService = apiDataConversionService;

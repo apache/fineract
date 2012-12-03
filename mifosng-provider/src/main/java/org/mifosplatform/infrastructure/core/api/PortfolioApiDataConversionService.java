@@ -1,6 +1,5 @@
 package org.mifosplatform.infrastructure.core.api;
 
-import org.mifosplatform.infrastructure.codes.command.CodeCommand;
 import org.mifosplatform.organisation.monetary.command.CurrencyCommand;
 import org.mifosplatform.organisation.office.command.BranchMoneyTransferCommand;
 import org.mifosplatform.organisation.office.command.OfficeCommand;
@@ -96,8 +95,6 @@ public interface PortfolioApiDataConversionService {
     DepositAccountWithdrawInterestCommand convertJsonToDepositAccountWithdrawInterestCommand(Long resourceIdentifier, String json);
 
     ClientIdentifierCommand convertApiRequestJsonToClientIdentifierCommand(Long resourceIdentifier, Long clientId, String json);
-
-    CodeCommand convertApiRequestJsonToCodeCommand(Long resourceIdentifier, String json);
 
     SavingAccountCommand convertJsonToSavingAccountCommand(Long resourceIdentifier, String json);
 

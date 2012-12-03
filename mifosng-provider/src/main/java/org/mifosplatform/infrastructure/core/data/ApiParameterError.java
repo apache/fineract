@@ -4,117 +4,123 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ApiParameterError {
-	
-	/**
-	 * A developer friendly plain English description of why the HTTP error response was returned from the API.
-	 */
-	private String developerMessage;
-	
-	/**
-	 * A user friendly plain English description of why the HTTP error response was returned from the API that can be presented to end users.
-	 */
-	private String defaultUserMessage;
-	
-	/**
-	 * A code that can be used for globalisation support by client applications of the API.
-	 */
-	private String userMessageGlobalisationCode;
-	
-	/**
-	 * The name of the field or parameter passed to the API that this error relates to.
-	 */
-	private String parameterName;
-	
-	/**
-	 * The actual value of the parameter (if any) as passed to API.
-	 */
-	private Object value;
 
-	/**
-	 * Arguments related to the user error message.
-	 */
-	private List<ApiErrorMessageArg> args = new ArrayList<ApiErrorMessageArg>();
+    /**
+     * A developer friendly plain English description of why the HTTP error
+     * response was returned from the API.
+     */
+    private String developerMessage;
 
-	public static ApiParameterError generalError(String globalisationMessageCode, String defaultUserMessage, Object... defaultUserMessageArgs) {
-		return new ApiParameterError(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs);
-	}
+    /**
+     * A user friendly plain English description of why the HTTP error response
+     * was returned from the API that can be presented to end users.
+     */
+    private String defaultUserMessage;
 
-	public static ApiParameterError resourceIdentifierNotFound(String globalisationMessageCode, String defaultUserMessage, Object... defaultUserMessageArgs) {
-		return new ApiParameterError(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs);
-	}
+    /**
+     * A code that can be used for globalisation support by client applications
+     * of the API.
+     */
+    private String userMessageGlobalisationCode;
 
-	public static ApiParameterError parameterError(final String globalisationMessageCode, final String defaultUserMessage, 
-													final String parameterName, final Object... defaultUserMessageArgs) {
-		ApiParameterError error = new ApiParameterError(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs);
-		error.setParameterName(parameterName);
-		return error;
-	}
-	
-	protected ApiParameterError() {
-		//
-	}
+    /**
+     * The name of the field or parameter passed to the API that this error
+     * relates to.
+     */
+    private String parameterName;
 
-	private ApiParameterError(final String globalisationMessageCode, final String defaultUserMessage, final Object[] defaultUserMessageArgs) {
-		this.userMessageGlobalisationCode = globalisationMessageCode;
-		this.developerMessage = defaultUserMessage;
-		this.defaultUserMessage = defaultUserMessage;
-		
-		List<ApiErrorMessageArg> messageArgs = new ArrayList<ApiErrorMessageArg>();
-		if (defaultUserMessageArgs != null) {
-			for (Object object : defaultUserMessageArgs) {
-				messageArgs.add(ApiErrorMessageArg.from(object));
-			}
-		}
-		this.args = messageArgs;
-		
-		this.parameterName="id";
-	}
+    /**
+     * The actual value of the parameter (if any) as passed to API.
+     */
+    private Object value;
 
-	public String getDeveloperMessage() {
-		return developerMessage;
-	}
+    /**
+     * Arguments related to the user error message.
+     */
+    private List<ApiErrorMessageArg> args = new ArrayList<ApiErrorMessageArg>();
 
-	public void setDeveloperMessage(String developerMessage) {
-		this.developerMessage = developerMessage;
-	}
+    public static ApiParameterError generalError(String globalisationMessageCode, String defaultUserMessage,
+            Object... defaultUserMessageArgs) {
+        return new ApiParameterError(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs);
+    }
 
-	public String getDefaultUserMessage() {
-		return defaultUserMessage;
-	}
+    public static ApiParameterError resourceIdentifierNotFound(String globalisationMessageCode, String defaultUserMessage,
+            Object... defaultUserMessageArgs) {
+        return new ApiParameterError(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs);
+    }
 
-	public void setDefaultUserMessage(String defaultUserMessage) {
-		this.defaultUserMessage = defaultUserMessage;
-	}
+    public static ApiParameterError parameterError(final String globalisationMessageCode, final String defaultUserMessage,
+            final String parameterName, final Object... defaultUserMessageArgs) {
+        ApiParameterError error = new ApiParameterError(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs);
+        error.setParameterName(parameterName);
+        return error;
+    }
 
-	public String getUserMessageGlobalisationCode() {
-		return userMessageGlobalisationCode;
-	}
+    protected ApiParameterError() {
+        //
+    }
 
-	public void setUserMessageGlobalisationCode(String userMessageGlobalisationCode) {
-		this.userMessageGlobalisationCode = userMessageGlobalisationCode;
-	}
+    private ApiParameterError(final String globalisationMessageCode, final String defaultUserMessage, final Object[] defaultUserMessageArgs) {
+        this.userMessageGlobalisationCode = globalisationMessageCode;
+        this.developerMessage = defaultUserMessage;
+        this.defaultUserMessage = defaultUserMessage;
 
-	public String getParameterName() {
-		return parameterName;
-	}
+        List<ApiErrorMessageArg> messageArgs = new ArrayList<ApiErrorMessageArg>();
+        if (defaultUserMessageArgs != null) {
+            for (Object object : defaultUserMessageArgs) {
+                messageArgs.add(ApiErrorMessageArg.from(object));
+            }
+        }
+        this.args = messageArgs;
 
-	public void setParameterName(String parameterName) {
-		this.parameterName = parameterName;
-	}
+        this.parameterName = "id";
+    }
 
-	public Object getValue() {
-		return value;
-	}
+    public String getDeveloperMessage() {
+        return developerMessage;
+    }
 
-	public void setValue(Object value) {
-		this.value = value;
-	}
+    public void setDeveloperMessage(String developerMessage) {
+        this.developerMessage = developerMessage;
+    }
 
-	public List<ApiErrorMessageArg> getArgs() {
-		return args;
-	}
+    public String getDefaultUserMessage() {
+        return defaultUserMessage;
+    }
 
-	public void setArgs(List<ApiErrorMessageArg> args) {
-		this.args = args;
-	}
+    public void setDefaultUserMessage(String defaultUserMessage) {
+        this.defaultUserMessage = defaultUserMessage;
+    }
+
+    public String getUserMessageGlobalisationCode() {
+        return userMessageGlobalisationCode;
+    }
+
+    public void setUserMessageGlobalisationCode(String userMessageGlobalisationCode) {
+        this.userMessageGlobalisationCode = userMessageGlobalisationCode;
+    }
+
+    public String getParameterName() {
+        return parameterName;
+    }
+
+    public void setParameterName(String parameterName) {
+        this.parameterName = parameterName;
+    }
+
+    public Object getValue() {
+        return value;
+    }
+
+    public void setValue(Object value) {
+        this.value = value;
+    }
+
+    public List<ApiErrorMessageArg> getArgs() {
+        return args;
+    }
+
+    public void setArgs(List<ApiErrorMessageArg> args) {
+        this.args = args;
+    }
 }

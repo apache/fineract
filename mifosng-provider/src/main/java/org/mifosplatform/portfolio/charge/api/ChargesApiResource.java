@@ -21,8 +21,8 @@ import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformSer
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
 import org.mifosplatform.infrastructure.core.api.PortfolioApiDataConversionService;
 import org.mifosplatform.infrastructure.core.api.PortfolioApiJsonSerializerService;
-import org.mifosplatform.infrastructure.core.api.PortfolioCommandSerializerService;
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.serialization.CommandSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.charge.command.ChargeDefinitionCommand;
 import org.mifosplatform.portfolio.charge.data.ChargeData;
@@ -41,7 +41,7 @@ public class ChargesApiResource {
     private final PlatformSecurityContext context;
     private final ChargeReadPlatformService readPlatformService;
     private final PortfolioApiDataConversionService apiDataConversionService;
-    private final PortfolioCommandSerializerService commandSerializerService;
+    private final CommandSerializer commandSerializerService;
     private final PortfolioApiJsonSerializerService apiJsonSerializerService;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     
@@ -49,7 +49,7 @@ public class ChargesApiResource {
     public ChargesApiResource(final PlatformSecurityContext context, 
             final ChargeReadPlatformService readPlatformService,
             final PortfolioApiDataConversionService apiDataConversionService,
-            final PortfolioCommandSerializerService commandSerializerService,
+            final CommandSerializer commandSerializerService,
             final PortfolioApiJsonSerializerService apiJsonSerializerService,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
         this.context = context;

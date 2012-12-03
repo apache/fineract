@@ -13,9 +13,9 @@ import org.joda.time.LocalDate;
 import org.mifosplatform.accounting.api.commands.GLAccountCommand;
 import org.mifosplatform.accounting.api.commands.GLClosureCommand;
 import org.mifosplatform.accounting.api.infrastructure.AccountingApiDataConversionService;
-import org.mifosplatform.infrastructure.core.api.JsonParserHelper;
 import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
 import org.mifosplatform.infrastructure.core.exception.UnsupportedParameterException;
+import org.mifosplatform.infrastructure.core.serialization.JsonParserHelper;
 import org.springframework.stereotype.Service;
 
 import com.google.gson.Gson;
