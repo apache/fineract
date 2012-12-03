@@ -15,18 +15,14 @@
 	
 	<tx:annotation-driven />
 	
-	<context:component-scan base-package="org.mifosplatform.accounting.*.service,
-										  org.mifosplatform.commands,
-										  org.mifosplatform.infrastructure.core.api,
-										  org.mifosplatform.infrastructure.core.domain,
-										  org.mifosplatform.infrastructure.core.service,
-										  org.mifosplatform.infrastructure.*.service,
-										  org.mifosplatform.organisation.*.service, 
+	<context:component-scan base-package="org.mifosplatform.accounting.*,
+										  org.mifosplatform.commands.*,
+										  org.mifosplatform.infrastructure.*,
+										  org.mifosplatform.organisation.*, 
 										  org.mifosplatform.portfolio.loanaccount.*,
 										  org.mifosplatform.portfolio.savingsaccount.*,
 										  org.mifosplatform.portfolio.*,
-										  org.mifosplatform.useradministration.domain,
-										  org.mifosplatform.useradministration.service">
+										  org.mifosplatform.useradministration.*">
 		<context:exclude-filter expression="org.springframework.stereotype.Controller" type="annotation" />
 	</context:component-scan>
 	
