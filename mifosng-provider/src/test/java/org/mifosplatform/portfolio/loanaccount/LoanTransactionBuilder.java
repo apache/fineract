@@ -1,7 +1,7 @@
 package org.mifosplatform.portfolio.loanaccount;
 
 import org.joda.time.LocalDate;
-import org.mifosplatform.infrastructure.configuration.domain.Money;
+import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransaction;
 
 public class LoanTransactionBuilder {

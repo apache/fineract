@@ -23,7 +23,7 @@ import org.mifosplatform.infrastructure.dataqueries.data.ResultsetColumnValue;
 import org.mifosplatform.infrastructure.dataqueries.data.ResultsetDataRow;
 import org.mifosplatform.infrastructure.dataqueries.exception.DataTableNotFoundException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.infrastructure.user.domain.AppUser;
+import org.mifosplatform.useradministration.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

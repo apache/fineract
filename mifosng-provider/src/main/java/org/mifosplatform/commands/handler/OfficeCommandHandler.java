@@ -8,11 +8,11 @@ import org.mifosplatform.commands.domain.CommandSource;
 import org.mifosplatform.commands.exception.UnsupportedCommandException;
 import org.mifosplatform.commands.service.ChangeDetectionService;
 import org.mifosplatform.infrastructure.core.api.PortfolioCommandDeserializerService;
-import org.mifosplatform.infrastructure.office.command.OfficeCommand;
-import org.mifosplatform.infrastructure.office.service.OfficeWritePlatformService;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.infrastructure.user.domain.AppUser;
+import org.mifosplatform.organisation.office.command.OfficeCommand;
+import org.mifosplatform.organisation.office.service.OfficeWritePlatformService;
 import org.mifosplatform.portfolio.client.service.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
+import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

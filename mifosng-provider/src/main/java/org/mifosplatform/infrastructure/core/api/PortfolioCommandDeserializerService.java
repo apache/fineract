@@ -1,19 +1,19 @@
 package org.mifosplatform.infrastructure.core.api;
 
 import org.mifosplatform.infrastructure.codes.command.CodeCommand;
-import org.mifosplatform.infrastructure.configuration.command.CurrencyCommand;
-import org.mifosplatform.infrastructure.office.command.BranchMoneyTransferCommand;
-import org.mifosplatform.infrastructure.office.command.OfficeCommand;
-import org.mifosplatform.infrastructure.staff.command.StaffCommand;
-import org.mifosplatform.infrastructure.user.command.PermissionsCommand;
-import org.mifosplatform.infrastructure.user.command.RoleCommand;
-import org.mifosplatform.infrastructure.user.command.RolePermissionCommand;
-import org.mifosplatform.infrastructure.user.command.UserCommand;
+import org.mifosplatform.organisation.monetary.command.CurrencyCommand;
+import org.mifosplatform.organisation.office.command.BranchMoneyTransferCommand;
+import org.mifosplatform.organisation.office.command.OfficeCommand;
+import org.mifosplatform.organisation.staff.command.StaffCommand;
 import org.mifosplatform.portfolio.charge.command.ChargeDefinitionCommand;
 import org.mifosplatform.portfolio.client.command.ClientCommand;
 import org.mifosplatform.portfolio.client.command.ClientIdentifierCommand;
 import org.mifosplatform.portfolio.fund.command.FundCommand;
 import org.mifosplatform.portfolio.loanproduct.command.LoanProductCommand;
+import org.mifosplatform.useradministration.command.PermissionsCommand;
+import org.mifosplatform.useradministration.command.RoleCommand;
+import org.mifosplatform.useradministration.command.RolePermissionCommand;
+import org.mifosplatform.useradministration.command.UserCommand;
 
 /**
  * Service for de-serializing JSON for a command into the platforms internal

@@ -8,15 +8,14 @@ import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
-import org.mifosplatform.infrastructure.configuration.domain.MonetaryCurrency;
-import org.mifosplatform.infrastructure.configuration.domain.Money;
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 import org.mifosplatform.infrastructure.security.exception.NoAuthorizationException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.infrastructure.staff.command.BulkTransferLoanOfficerCommand;
-import org.mifosplatform.infrastructure.staff.command.BulkTransferLoanOfficerCommandValidator;
-import org.mifosplatform.infrastructure.staff.domain.Staff;
-import org.mifosplatform.infrastructure.user.domain.AppUser;
+import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
+import org.mifosplatform.organisation.monetary.domain.Money;
+import org.mifosplatform.organisation.staff.command.BulkTransferLoanOfficerCommand;
+import org.mifosplatform.organisation.staff.command.BulkTransferLoanOfficerCommandValidator;
+import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.portfolio.charge.domain.Charge;
 import org.mifosplatform.portfolio.charge.domain.ChargeRepository;
 import org.mifosplatform.portfolio.charge.exception.ChargeIsNotActiveException;
@@ -63,6 +62,7 @@ import org.mifosplatform.portfolio.loanproduct.domain.LoanTransactionProcessingS
 import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 import org.mifosplatform.portfolio.loanproduct.exception.InvalidCurrencyException;
 import org.mifosplatform.portfolio.loanproduct.exception.LoanProductNotFoundException;
+import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;

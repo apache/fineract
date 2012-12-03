@@ -2,9 +2,9 @@ package org.mifosplatform.portfolio.loanaccount.loanschedule.service;
 
 import java.util.Set;
 
-import org.mifosplatform.infrastructure.configuration.domain.ApplicationCurrency;
-import org.mifosplatform.infrastructure.configuration.domain.ApplicationCurrencyRepository;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
+import org.mifosplatform.organisation.monetary.domain.ApplicationCurrencyRepository;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanCharge;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.command.CalculateLoanScheduleCommand;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.command.CalculateLoanScheduleCommandValidator;

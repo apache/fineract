@@ -1,6 +1,6 @@
 package org.mifosplatform.portfolio.loanaccount;
 
-import org.mifosplatform.infrastructure.configuration.domain.MonetaryCurrency;
+import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 
 public class MonetaryCurrencyBuilder {
 

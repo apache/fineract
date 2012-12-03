@@ -2,7 +2,7 @@ package org.mifosplatform.portfolio.group.data;
 
 import java.util.Collection;
 
-import org.mifosplatform.infrastructure.office.data.OfficeLookup;
+import org.mifosplatform.organisation.office.data.OfficeLookup;
 import org.mifosplatform.portfolio.client.data.ClientLookup;
 
 /**

@@ -3,7 +3,7 @@ package org.mifosplatform.portfolio.loanaccount.loanschedule.data;
 import java.math.BigDecimal;
 import java.util.Collection;
 
-import org.mifosplatform.infrastructure.configuration.data.CurrencyData;
+import org.mifosplatform.organisation.monetary.data.CurrencyData;
 
 
 /**

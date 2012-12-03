@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.joda.time.LocalDate;
-import org.mifosplatform.infrastructure.configuration.domain.MonetaryCurrency;
-import org.mifosplatform.infrastructure.configuration.domain.Money;
+import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
+import org.mifosplatform.organisation.monetary.domain.Money;
 
 /**
  * A wrapper around loan schedule related data exposing needed behaviour by loan.

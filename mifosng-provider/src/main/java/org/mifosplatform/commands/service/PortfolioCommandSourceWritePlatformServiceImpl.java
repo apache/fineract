@@ -6,7 +6,7 @@ import org.mifosplatform.commands.domain.CommandSourceRepository;
 import org.mifosplatform.commands.handler.CommandSourceHandlerDelegator;
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.infrastructure.user.domain.AppUser;
+import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

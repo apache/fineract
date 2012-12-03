@@ -5,11 +5,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-import org.mifosplatform.infrastructure.configuration.domain.MonetaryCurrency;
-import org.mifosplatform.infrastructure.staff.domain.Staff;
-import org.mifosplatform.infrastructure.staff.domain.StaffRepository;
-import org.mifosplatform.infrastructure.staff.exception.StaffNotFoundException;
-import org.mifosplatform.infrastructure.staff.exception.StaffRoleException;
+import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
+import org.mifosplatform.organisation.staff.domain.Staff;
+import org.mifosplatform.organisation.staff.domain.StaffRepository;
+import org.mifosplatform.organisation.staff.exception.StaffNotFoundException;
+import org.mifosplatform.organisation.staff.exception.StaffRoleException;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepository;
 import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;

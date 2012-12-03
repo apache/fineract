@@ -5,7 +5,7 @@ import java.math.MathContext;
 import java.math.RoundingMode;
 
 import org.joda.time.LocalDate;
-import org.mifosplatform.infrastructure.configuration.domain.Money;
+import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.portfolio.savingsaccountproduct.domain.SavingFrequencyType;
 import org.mifosplatform.portfolio.savingsaccountproduct.domain.SavingInterestCalculationMethod;
 import org.mifosplatform.portfolio.savingsdepositproduct.domain.TenureTypeEnum;

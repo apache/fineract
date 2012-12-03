@@ -7,10 +7,10 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
-import org.mifosplatform.infrastructure.user.domain.AppUser;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransaction;
 import org.mifosplatform.portfolio.savingsdepositaccount.domain.DepositAccount;
+import org.mifosplatform.useradministration.domain.AppUser;
 
 @Entity
 @Table(name = "m_note")

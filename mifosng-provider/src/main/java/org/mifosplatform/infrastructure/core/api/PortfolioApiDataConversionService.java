@@ -1,15 +1,11 @@
 package org.mifosplatform.infrastructure.core.api;
 
 import org.mifosplatform.infrastructure.codes.command.CodeCommand;
-import org.mifosplatform.infrastructure.configuration.command.CurrencyCommand;
-import org.mifosplatform.infrastructure.office.command.BranchMoneyTransferCommand;
-import org.mifosplatform.infrastructure.office.command.OfficeCommand;
-import org.mifosplatform.infrastructure.staff.command.BulkTransferLoanOfficerCommand;
-import org.mifosplatform.infrastructure.staff.command.StaffCommand;
-import org.mifosplatform.infrastructure.user.command.PermissionsCommand;
-import org.mifosplatform.infrastructure.user.command.RoleCommand;
-import org.mifosplatform.infrastructure.user.command.RolePermissionCommand;
-import org.mifosplatform.infrastructure.user.command.UserCommand;
+import org.mifosplatform.organisation.monetary.command.CurrencyCommand;
+import org.mifosplatform.organisation.office.command.BranchMoneyTransferCommand;
+import org.mifosplatform.organisation.office.command.OfficeCommand;
+import org.mifosplatform.organisation.staff.command.BulkTransferLoanOfficerCommand;
+import org.mifosplatform.organisation.staff.command.StaffCommand;
 import org.mifosplatform.portfolio.charge.command.ChargeDefinitionCommand;
 import org.mifosplatform.portfolio.client.command.ClientCommand;
 import org.mifosplatform.portfolio.client.command.ClientIdentifierCommand;
@@ -32,6 +28,10 @@ import org.mifosplatform.portfolio.savingsdepositaccount.command.DepositAccountW
 import org.mifosplatform.portfolio.savingsdepositaccount.command.DepositStateTransitionApprovalCommand;
 import org.mifosplatform.portfolio.savingsdepositaccount.command.DepositStateTransitionCommand;
 import org.mifosplatform.portfolio.savingsdepositproduct.command.DepositProductCommand;
+import org.mifosplatform.useradministration.command.PermissionsCommand;
+import org.mifosplatform.useradministration.command.RoleCommand;
+import org.mifosplatform.useradministration.command.RolePermissionCommand;
+import org.mifosplatform.useradministration.command.UserCommand;
 
 public interface PortfolioApiDataConversionService {
 

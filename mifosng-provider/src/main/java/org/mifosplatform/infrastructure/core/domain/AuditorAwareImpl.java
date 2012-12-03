@@ -1,7 +1,7 @@
 package org.mifosplatform.infrastructure.core.domain;
 
-import org.mifosplatform.infrastructure.user.domain.AppUser;
-import org.mifosplatform.infrastructure.user.domain.AppUserRepository;
+import org.mifosplatform.useradministration.domain.AppUser;
+import org.mifosplatform.useradministration.domain.AppUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.core.Authentication;

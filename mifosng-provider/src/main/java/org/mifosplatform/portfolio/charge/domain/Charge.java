@@ -1,8 +1,8 @@
 package org.mifosplatform.portfolio.charge.domain;
 
 import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
-import org.mifosplatform.infrastructure.user.domain.AppUser;
 import org.mifosplatform.portfolio.charge.command.ChargeDefinitionCommand;
+import org.mifosplatform.useradministration.domain.AppUser;
 
 import javax.persistence.*;
 import java.math.BigDecimal;

@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.joda.time.LocalDate;
-import org.mifosplatform.infrastructure.configuration.domain.MonetaryCurrency;
+import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 
 public interface LoanRepaymentScheduleTransactionProcessor {
 

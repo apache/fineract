@@ -5,11 +5,11 @@ import java.util.Set;
 
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
-import org.mifosplatform.infrastructure.office.domain.Office;
-import org.mifosplatform.infrastructure.office.domain.OfficeRepository;
-import org.mifosplatform.infrastructure.office.exception.InvalidOfficeException;
-import org.mifosplatform.infrastructure.office.exception.OfficeNotFoundException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.organisation.office.domain.Office;
+import org.mifosplatform.organisation.office.domain.OfficeRepository;
+import org.mifosplatform.organisation.office.exception.InvalidOfficeException;
+import org.mifosplatform.organisation.office.exception.OfficeNotFoundException;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepository;
 import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;

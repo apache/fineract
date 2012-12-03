@@ -7,8 +7,8 @@ import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
-import org.mifosplatform.infrastructure.user.domain.AppUser;
 import org.mifosplatform.portfolio.fund.command.FundCommand;
+import org.mifosplatform.useradministration.domain.AppUser;
 
 @Entity
 @Table(name = "m_fund", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "fund_name_org"),

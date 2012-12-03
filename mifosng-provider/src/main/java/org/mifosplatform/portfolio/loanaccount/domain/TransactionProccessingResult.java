@@ -1,6 +1,6 @@
 package org.mifosplatform.portfolio.loanaccount.domain;
 
-import org.mifosplatform.infrastructure.configuration.domain.Money;
+import org.mifosplatform.organisation.monetary.domain.Money;
 
 public class TransactionProccessingResult {
 

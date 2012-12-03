@@ -7,7 +7,7 @@ import javax.persistence.Table;
 import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.infrastructure.documentmanagement.command.DocumentCommand;
-import org.mifosplatform.infrastructure.user.domain.AppUser;
+import org.mifosplatform.useradministration.domain.AppUser;
 
 @Entity
 @Table(name = "m_document")

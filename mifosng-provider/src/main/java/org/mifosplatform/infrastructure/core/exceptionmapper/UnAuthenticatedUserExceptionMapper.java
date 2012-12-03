@@ -7,7 +7,7 @@ import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
 import org.mifosplatform.infrastructure.core.data.ApiGlobalErrorResponse;
-import org.mifosplatform.infrastructure.user.exception.UnAuthenticatedUserException;
+import org.mifosplatform.useradministration.exception.UnAuthenticatedUserException;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 

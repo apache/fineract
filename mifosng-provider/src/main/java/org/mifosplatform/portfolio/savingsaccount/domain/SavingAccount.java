@@ -14,10 +14,9 @@ import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 
 import org.joda.time.LocalDate;
-import org.mifosplatform.infrastructure.configuration.domain.MonetaryCurrency;
-import org.mifosplatform.infrastructure.configuration.domain.Money;
 import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
-import org.mifosplatform.infrastructure.user.domain.AppUser;
+import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
+import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 import org.mifosplatform.portfolio.savingsaccountproduct.domain.SavingFrequencyType;
@@ -29,6 +28,7 @@ import org.mifosplatform.portfolio.savingsdepositaccount.domain.DepositAccountEv
 import org.mifosplatform.portfolio.savingsdepositaccount.domain.DepositAccountStatus;
 import org.mifosplatform.portfolio.savingsdepositaccount.domain.DepositLifecycleStateMachine;
 import org.mifosplatform.portfolio.savingsdepositproduct.domain.TenureTypeEnum;
+import org.mifosplatform.useradministration.domain.AppUser;
 
 @Entity
 @Table(name = "m_saving_account", uniqueConstraints = @UniqueConstraint(name = "saving_acc_external_id", columnNames = { "external_id" }))

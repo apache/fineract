@@ -2,8 +2,8 @@ package org.mifosplatform.portfolio.loanaccount.domain;
 
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
-import org.mifosplatform.infrastructure.staff.domain.Staff;
-import org.mifosplatform.infrastructure.user.domain.AppUser;
+import org.mifosplatform.organisation.staff.domain.Staff;
+import org.mifosplatform.useradministration.domain.AppUser;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

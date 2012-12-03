@@ -15,20 +15,30 @@
 	
 	<tx:annotation-driven />
 	
-	<context:component-scan base-package="org.mifosplatform.infrastructure.core.service, org.mifosng.platform.security, org.mifosng.platform.infrastructure, 
-										  org.mifosng.platform.*.domain, org.mifosng.platform, 
-										  org.mifosplatform.*.*.service, org.mifosplatform.*.*.domain, org.mifosplatform, org.mifosplatform.commands, org.mifosplatform.infrastructure.*.service">
+	<context:component-scan base-package="org.mifosplatform.accounting.*.service,
+										  org.mifosplatform.commands,
+										  org.mifosplatform.infrastructure.core.api,
+										  org.mifosplatform.infrastructure.core.domain,
+										  org.mifosplatform.infrastructure.core.service,
+										  org.mifosplatform.infrastructure.*.service,
+										  org.mifosplatform.organisation.*.service, 
+										  org.mifosplatform.portfolio.loanaccount.*,
+										  org.mifosplatform.portfolio.savingsaccount.*,
+										  org.mifosplatform.portfolio.*,
+										  org.mifosplatform.useradministration.domain,
+										  org.mifosplatform.useradministration.service">
 		<context:exclude-filter expression="org.springframework.stereotype.Controller" type="annotation" />
 	</context:component-scan>
 	
 	<bean id="auditorAware" class="org.mifosplatform.infrastructure.core.domain.AuditorAwareImpl" />
 	<jpa:auditing auditor-aware-ref="auditorAware" />
 	
-    <jpa:repositories base-package="org.mifosng.platform.*.domain" />
     <jpa:repositories base-package="org.mifosplatform.commands.domain" />
     <jpa:repositories base-package="org.mifosplatform.infrastructure.*.domain" />
     <jpa:repositories base-package="org.mifosplatform.accounting.domain" />
-    <jpa:repositories base-package="org.mifosplatform.portfolio.*.domain" />
+    <jpa:repositories base-package="org.mifosplatform.useradministration.domain" />
+    <jpa:repositories base-package="org.mifosplatform.organisation.*.domain" />
+    <jpa:repositories base-package="org.mifosplatform.portfolio.*" />
 
     <import resource="infrastructure.xml" />
 		

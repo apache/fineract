@@ -2,7 +2,7 @@ package org.mifosplatform.commands.service;
 
 import java.util.Collection;
 
-import org.mifosplatform.commands.api.data.CommandSourceData;
+import org.mifosplatform.commands.data.CommandSourceData;
 
 public interface PortfolioCommandsReadPlatformService {
 

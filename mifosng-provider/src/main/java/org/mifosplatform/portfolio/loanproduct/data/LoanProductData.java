@@ -6,8 +6,8 @@ import java.util.Collection;
 import java.util.List;
 
 import org.joda.time.DateTime;
-import org.mifosplatform.infrastructure.configuration.data.CurrencyData;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
+import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.portfolio.charge.data.ChargeData;
 import org.mifosplatform.portfolio.fund.data.FundData;
 import org.mifosplatform.portfolio.loanproduct.domain.AmortizationMethod;

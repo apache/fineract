@@ -3,22 +3,17 @@ package org.mifosplatform.infrastructure.core.api;
 import java.util.Collection;
 import java.util.Set;
 
-import org.mifosplatform.commands.api.data.CommandSourceData;
+import org.mifosplatform.commands.data.CommandSourceData;
 import org.mifosplatform.infrastructure.codes.data.CodeData;
-import org.mifosplatform.infrastructure.configuration.data.ConfigurationData;
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 import org.mifosplatform.infrastructure.dataqueries.data.DatatableData;
 import org.mifosplatform.infrastructure.dataqueries.data.GenericResultsetData;
 import org.mifosplatform.infrastructure.documentmanagement.data.DocumentData;
-import org.mifosplatform.infrastructure.office.data.OfficeData;
-import org.mifosplatform.infrastructure.office.data.OfficeTransactionData;
-import org.mifosplatform.infrastructure.staff.data.BulkTransferLoanOfficerData;
-import org.mifosplatform.infrastructure.staff.data.StaffData;
-import org.mifosplatform.infrastructure.user.api.data.AppUserData;
-import org.mifosplatform.infrastructure.user.api.data.AuthenticatedUserData;
-import org.mifosplatform.infrastructure.user.api.data.PermissionUsageData;
-import org.mifosplatform.infrastructure.user.api.data.RoleData;
-import org.mifosplatform.infrastructure.user.api.data.RolePermissionsData;
+import org.mifosplatform.organisation.monetary.data.ConfigurationData;
+import org.mifosplatform.organisation.office.data.OfficeData;
+import org.mifosplatform.organisation.office.data.OfficeTransactionData;
+import org.mifosplatform.organisation.staff.data.BulkTransferLoanOfficerData;
+import org.mifosplatform.organisation.staff.data.StaffData;
 import org.mifosplatform.portfolio.charge.data.ChargeData;
 import org.mifosplatform.portfolio.client.data.ClientAccountSummaryCollectionData;
 import org.mifosplatform.portfolio.client.data.ClientData;
@@ -37,6 +32,11 @@ import org.mifosplatform.portfolio.savingsaccount.data.SavingAccountData;
 import org.mifosplatform.portfolio.savingsaccountproduct.data.SavingProductData;
 import org.mifosplatform.portfolio.savingsdepositaccount.data.DepositAccountData;
 import org.mifosplatform.portfolio.savingsdepositproduct.data.DepositProductData;
+import org.mifosplatform.useradministration.data.AppUserData;
+import org.mifosplatform.useradministration.data.AuthenticatedUserData;
+import org.mifosplatform.useradministration.data.PermissionUsageData;
+import org.mifosplatform.useradministration.data.RoleData;
+import org.mifosplatform.useradministration.data.RolePermissionsData;
 
 public interface PortfolioApiJsonSerializerService {
 

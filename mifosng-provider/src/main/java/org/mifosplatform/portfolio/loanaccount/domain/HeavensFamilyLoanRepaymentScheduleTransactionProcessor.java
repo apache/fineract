@@ -3,8 +3,8 @@ package org.mifosplatform.portfolio.loanaccount.domain;
 import java.util.List;
 
 import org.joda.time.LocalDate;
-import org.mifosplatform.infrastructure.configuration.domain.MonetaryCurrency;
-import org.mifosplatform.infrastructure.configuration.domain.Money;
+import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
+import org.mifosplatform.organisation.monetary.domain.Money;
 
 /**
  * Heavensfamily style {@link LoanRepaymentScheduleTransactionProcessor}.

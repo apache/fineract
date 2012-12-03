@@ -9,10 +9,10 @@ import org.mifosplatform.commands.exception.UnsupportedCommandException;
 import org.mifosplatform.commands.service.ChangeDetectionService;
 import org.mifosplatform.infrastructure.core.api.PortfolioCommandDeserializerService;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.infrastructure.user.command.PermissionsCommand;
-import org.mifosplatform.infrastructure.user.domain.AppUser;
-import org.mifosplatform.infrastructure.user.service.PermissionWritePlatformService;
 import org.mifosplatform.portfolio.client.service.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
+import org.mifosplatform.useradministration.command.PermissionsCommand;
+import org.mifosplatform.useradministration.domain.AppUser;
+import org.mifosplatform.useradministration.service.PermissionWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
