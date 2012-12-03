@@ -1,13 +1,5 @@
 package org.mifosplatform.infrastructure.core.api;
 
-import org.mifosng.platform.api.commands.DepositAccountCommand;
-import org.mifosng.platform.api.commands.DepositAccountWithdrawInterestCommand;
-import org.mifosng.platform.api.commands.DepositAccountWithdrawalCommand;
-import org.mifosng.platform.api.commands.DepositProductCommand;
-import org.mifosng.platform.api.commands.DepositStateTransitionApprovalCommand;
-import org.mifosng.platform.api.commands.DepositStateTransitionCommand;
-import org.mifosng.platform.api.commands.SavingAccountCommand;
-import org.mifosng.platform.api.commands.SavingProductCommand;
 import org.mifosplatform.infrastructure.codes.command.CodeCommand;
 import org.mifosplatform.infrastructure.configuration.command.CurrencyCommand;
 import org.mifosplatform.infrastructure.office.command.BranchMoneyTransferCommand;
@@ -32,6 +24,14 @@ import org.mifosplatform.portfolio.loanaccount.command.LoanStateTransitionComman
 import org.mifosplatform.portfolio.loanaccount.command.LoanTransactionCommand;
 import org.mifosplatform.portfolio.loanaccount.gaurantor.command.GuarantorCommand;
 import org.mifosplatform.portfolio.loanproduct.command.LoanProductCommand;
+import org.mifosplatform.portfolio.savingsaccount.command.SavingAccountCommand;
+import org.mifosplatform.portfolio.savingsaccountproduct.command.SavingProductCommand;
+import org.mifosplatform.portfolio.savingsdepositaccount.command.DepositAccountCommand;
+import org.mifosplatform.portfolio.savingsdepositaccount.command.DepositAccountWithdrawInterestCommand;
+import org.mifosplatform.portfolio.savingsdepositaccount.command.DepositAccountWithdrawalCommand;
+import org.mifosplatform.portfolio.savingsdepositaccount.command.DepositStateTransitionApprovalCommand;
+import org.mifosplatform.portfolio.savingsdepositaccount.command.DepositStateTransitionCommand;
+import org.mifosplatform.portfolio.savingsdepositproduct.command.DepositProductCommand;
 
 public interface PortfolioApiDataConversionService {
 

@@ -3,10 +3,6 @@ package org.mifosplatform.infrastructure.core.api;
 import java.util.Collection;
 import java.util.Set;
 
-import org.mifosng.platform.api.data.DepositAccountData;
-import org.mifosng.platform.api.data.DepositProductData;
-import org.mifosng.platform.api.data.SavingAccountData;
-import org.mifosng.platform.api.data.SavingProductData;
 import org.mifosplatform.commands.api.data.CommandSourceData;
 import org.mifosplatform.infrastructure.codes.data.CodeData;
 import org.mifosplatform.infrastructure.configuration.data.ConfigurationData;
@@ -37,6 +33,10 @@ import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionData;
 import org.mifosplatform.portfolio.loanaccount.gaurantor.data.GuarantorData;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
 import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
+import org.mifosplatform.portfolio.savingsaccount.data.SavingAccountData;
+import org.mifosplatform.portfolio.savingsaccountproduct.data.SavingProductData;
+import org.mifosplatform.portfolio.savingsdepositaccount.data.DepositAccountData;
+import org.mifosplatform.portfolio.savingsdepositproduct.data.DepositProductData;
 
 public interface PortfolioApiJsonSerializerService {
 
