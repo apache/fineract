@@ -1,9 +1,5 @@
 package org.mifosplatform.portfolio.savingsaccount.service;
 
-import java.math.BigDecimal;
-
-import org.joda.time.LocalDate;
-import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.portfolio.savingsaccount.command.CalculateSavingScheduleCommand;
 import org.mifosplatform.portfolio.savingsaccountproduct.domain.SavingProduct;
 import org.mifosplatform.portfolio.savingsaccountproduct.domain.SavingProductRelatedDetail;
@@ -22,17 +18,18 @@ public class SavingProductRelatedDetailAssembler {
         this.savingProductRepository = savingProductRepository;
     }
 
-    public SavingProductRelatedDetail assembleFrom(CalculateSavingScheduleCommand command) {
+    public SavingProductRelatedDetail assembleFrom(final CalculateSavingScheduleCommand command) {
 
-        final BigDecimal depositAmountForPeriod = command.getDeposit();
-        final BigDecimal depositInterestRate = command.getInterestRate();
-        final LocalDate installmentDate = command.getPaymentsStartingFromDate();
-        final Integer payEvery = command.getPayEvery();
-        final Integer paymentFrequencyType = command.getPaymentFrequencyType();
+//        final BigDecimal depositAmountForPeriod = command.getDeposit();
+//        final BigDecimal depositInterestRate = command.getInterestRate();
+//        final LocalDate installmentDate = command.getPaymentsStartingFromDate();
+//        final Integer payEvery = command.getPayEvery();
+//        final Integer paymentFrequencyType = command.getPaymentFrequencyType();
+
         final SavingProduct savingProduct = this.savingProductRepository.findOne(command.getProductId());
         if (savingProduct == null) { throw new SavingProductNotFoundException(command.getProductId()); }
 
-        final MonetaryCurrency currency = savingProduct.getCurrency();
+//        final MonetaryCurrency currency = savingProduct.getCurrency();
 
         return null;
     }

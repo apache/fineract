@@ -2,6 +2,7 @@ package org.mifosplatform.portfolio.loanaccount.api;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
@@ -20,14 +21,15 @@ import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
-import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
+import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.api.PortfolioApiDataConversionService;
 import org.mifosplatform.infrastructure.core.api.PortfolioApiJsonSerializerService;
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.exception.UnrecognizedQueryParamException;
-import org.mifosplatform.infrastructure.core.serialization.CommandSerializer;
+import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
+import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
@@ -75,6 +77,17 @@ import org.springframework.util.CollectionUtils;
 @Scope("singleton")
 public class LoansApiResource {
 
+    private final Set<String> LOAN_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "externalId", "clientId", "groupId",
+            "clientName", "groupName", "fundId", "fundName", "loanProductId", "loanProductName", "loanProductDescription", "currency",
+            "principal", "inArrearsTolerance", "numberOfRepayments", "repaymentEvery", "interestRatePerPeriod", "annualInterestRate",
+            "repaymentFrequencyType", "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType",
+            "submittedOnDate", "approvedOnDate", "expectedDisbursementDate", "actualDisbursementDate", "expectedFirstRepaymentOnDate",
+            "interestChargedFromDate", "closedOnDate", "expectedMaturityDate", "status", "lifeCycleStatusDate", "repaymentSchedule",
+            "transactions", "permissions", "convenienceData", "charges", "productOptions", "amortizationTypeOptions",
+            "interestTypeOptions", "interestCalculationPeriodTypeOptions", "repaymentFrequencyTypeOptions",
+            "interestRateFrequencyTypeOptions", "fundOptions", "repaymentStrategyOptions", "chargeOptions", "loanOfficerId",
+            "loanOfficerName", "loanOfficerOptions", "chargeTemplate"));
+
     // private final String resourceNameForPermissions = "OFFICE";
 
     private final PlatformSecurityContext context;
@@ -90,8 +103,8 @@ public class LoansApiResource {
     private final GuarantorReadPlatformService guarantorReadPlatformService;
     private final PortfolioApiJsonSerializerService apiJsonSerializerService;
     private final PortfolioApiDataConversionService apiDataConversionService;
-    private final CommandSerializer commandSerializerService;
-    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+    private final DefaultToApiJsonSerializer<LoanAccountData> toApiJsonSerializer;
+    private final ApiRequestParameterHelper apiRequestParameterHelper;
 
     @Autowired
     public LoansApiResource(final PlatformSecurityContext context, final LoanReadPlatformService loanReadPlatformService,
@@ -100,10 +113,9 @@ public class LoansApiResource {
             final ChargeReadPlatformService chargeReadPlatformService, final CalculationPlatformService calculationPlatformService,
             final StaffReadPlatformService staffReadPlatformService, final OfficeReadPlatformService officeReadPlatformService,
             final GuarantorReadPlatformService guarantorReadPlatformService,
-            final PortfolioApiJsonSerializerService apiJsonSerializerService,
-            final PortfolioApiDataConversionService apiDataConversionService,
-            final CommandSerializer commandSerializerService,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
+            final DefaultToApiJsonSerializer<LoanAccountData> toApiJsonSerializer,
+            final ApiRequestParameterHelper apiRequestParameterHelper, final PortfolioApiJsonSerializerService apiJsonSerializerService,
+            final PortfolioApiDataConversionService apiDataConversionService) {
         this.context = context;
         this.loanReadPlatformService = loanReadPlatformService;
         this.loanWritePlatformService = loanWritePlatformService;
@@ -115,10 +127,10 @@ public class LoansApiResource {
         this.staffReadPlatformService = staffReadPlatformService;
         this.officeReadPlatformService = officeReadPlatformService;
         this.guarantorReadPlatformService = guarantorReadPlatformService;
+        this.toApiJsonSerializer = toApiJsonSerializer;
+        this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.apiJsonSerializerService = apiJsonSerializerService;
         this.apiDataConversionService = apiDataConversionService;
-        this.commandSerializerService = commandSerializerService;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
     }
 
     @GET
@@ -129,9 +141,6 @@ public class LoansApiResource {
             @QueryParam("groupId") final Long groupId, @QueryParam("productId") final Long productId, @Context final UriInfo uriInfo) {
 
         context.authenticatedUser().validateHasReadPermission("LOAN");
-
-        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 
         // tempate related
         Collection<LoanProductData> productOptions = this.loanProductReadPlatformService.retrieveAllLoanProductsForLookup();
@@ -174,7 +183,8 @@ public class LoansApiResource {
                 interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions,
                 fundOptions, chargeOptions, chargeTemplate, allowedLoanOfficers, null);
 
-        return this.apiJsonSerializerService.serializeLoanAccountDataToJson(prettyPrint, responseParameters, newLoanAccount);
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.toApiJsonSerializer.serialize(settings, newLoanAccount, LOAN_DATA_PARAMETERS);
     }
 
     @GET
@@ -184,9 +194,6 @@ public class LoansApiResource {
     public String retrieveLoanAccountDetails(@PathParam("loanId") final Long loanId, @Context final UriInfo uriInfo) {
 
         context.authenticatedUser().validateHasReadPermission("LOAN");
-
-        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 
         final LoanBasicDetailsData loanBasicDetails = this.loanReadPlatformService.retrieveLoanAccountDetails(loanId);
 
@@ -290,7 +297,8 @@ public class LoansApiResource {
                 repaymentStrategyOptions, interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions,
                 interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, chargeTemplate, null, guarantorData);
 
-        return this.apiJsonSerializerService.serializeLoanAccountDataToJson(prettyPrint, responseParameters, loanAccount);
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.toApiJsonSerializer.serialize(settings, loanAccount, LOAN_DATA_PARAMETERS);
     }
 
     private int retrieveNonDisbursementTransactions(final Collection<LoanTransactionData> loanRepayments) {
@@ -323,7 +331,7 @@ public class LoansApiResource {
 
         final EntityIdentifier identifier = this.loanWritePlatformService.submitLoanApplication(command);
 
-        return this.apiJsonSerializerService.serializeEntityIdentifier(identifier);
+        return this.toApiJsonSerializer.serialize(identifier);
     }
 
     private String calculateLoanSchedule(final UriInfo uriInfo, final CalculateLoanScheduleCommand command) {
@@ -347,7 +355,7 @@ public class LoansApiResource {
 
         final EntityIdentifier identifier = this.loanWritePlatformService.modifyLoanApplication(command);
 
-        return this.apiJsonSerializerService.serializeEntityIdentifier(identifier);
+        return this.toApiJsonSerializer.serialize(identifier);
     }
 
     @DELETE
@@ -554,7 +562,7 @@ public class LoansApiResource {
 
         final EntityIdentifier identifier = this.loanWritePlatformService.updateLoanCharge(command);
 
-        return this.apiJsonSerializerService.serializeEntityIdentifier(identifier);
+        return this.toApiJsonSerializer.serialize(identifier);
     }
 
     @POST
@@ -569,7 +577,7 @@ public class LoansApiResource {
         String json = "";
         if (is(commandParam, "waive")) {
             final EntityIdentifier identifier = this.loanWritePlatformService.waiveLoanCharge(command);
-            json = this.apiJsonSerializerService.serializeEntityIdentifier(identifier);
+            json = this.toApiJsonSerializer.serialize(identifier);
         } else {
             throw new UnrecognizedQueryParamException("command", commandParam);
         }
@@ -584,7 +592,7 @@ public class LoansApiResource {
     public String deleteLoanCharge(@PathParam("loanId") final Long loanId, @PathParam("chargeId") final Long loanChargeId) {
 
         final EntityIdentifier identifier = this.loanWritePlatformService.deleteLoanCharge(loanId, loanChargeId);
-        return this.apiJsonSerializerService.serializeEntityIdentifier(identifier);
+        return this.toApiJsonSerializer.serialize(identifier);
     }
 
     @POST

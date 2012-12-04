@@ -18,27 +18,34 @@ import org.mifosplatform.useradministration.domain.AppUser;
 @Table(name = "m_saving_schedule")
 public class SavingScheduleInstallments extends AbstractAuditableCustom<AppUser, Long> {
 
+    @SuppressWarnings("unused")
     @ManyToOne(optional = false)
     @JoinColumn(name = "saving_account_id", nullable = false)
     private SavingAccount savingAccount;
 
+    @SuppressWarnings("unused")
     @Temporal(TemporalType.DATE)
     @Column(name = "duedate", nullable = false)
     private final Date dueDate;
 
+    @SuppressWarnings("unused")
     @Column(name = "installment", nullable = false)
     private final Integer installmentNumber;
 
+    @SuppressWarnings("unused")
     @Column(name = "deposit", scale = 6, precision = 19, nullable = false)
     private BigDecimal deposit;
 
+    @SuppressWarnings("unused")
     @Temporal(TemporalType.DATE)
     @Column(name = "payment_date", nullable = true)
     private final Date paymentDate;
 
+    @SuppressWarnings("unused")
     @Column(name = "deposit_paid", scale = 6, precision = 19, nullable = true)
     private BigDecimal depositPaid;
 
+    @SuppressWarnings("unused")
     @Column(name = "completed_derived", nullable = false)
     private boolean completed;
 
@@ -55,5 +62,4 @@ public class SavingScheduleInstallments extends AbstractAuditableCustom<AppUser,
     public void updateAccount(SavingAccount account) {
         this.savingAccount = account;
     }
-
 }

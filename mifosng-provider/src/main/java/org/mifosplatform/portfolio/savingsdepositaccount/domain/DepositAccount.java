@@ -752,6 +752,7 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long> {
                     // add transaction entry for each interest posting
                     DepositAccountTransaction depositaccountTransaction = DepositAccountTransaction.postInterest(null,
                             nextInterestPostingDate, futureValueOnMaturity.minus(deposit));
+                    
                     depositaccountTransaction.updateAccount(this);
                     this.depositaccountTransactions.add(depositaccountTransaction);
                 } else {

@@ -2,6 +2,7 @@ package org.mifosplatform.portfolio.charge.api;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -18,11 +19,12 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
+import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.api.PortfolioApiDataConversionService;
-import org.mifosplatform.infrastructure.core.api.PortfolioApiJsonSerializerService;
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.CommandSerializer;
+import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.charge.command.ChargeDefinitionCommand;
 import org.mifosplatform.portfolio.charge.data.ChargeData;
@@ -36,27 +38,35 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class ChargesApiResource {
 
+    private final Set<String> CHARGES_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "name", "amount", "currency",
+            "penalty", "active", "chargeAppliesTo", "chargeTimeType", "chargeCalculationType", "chargeCalculationTypeOptions",
+            "chargeAppliesToOptions", "chargeTimeTypeOptions", "currencyOptions"));
+    
     private final String resourceNameForPermissions = "CHARGE";
     
     private final PlatformSecurityContext context;
     private final ChargeReadPlatformService readPlatformService;
+    private final DefaultToApiJsonSerializer<ChargeData> toApiJsonSerializer;
+    private final ApiRequestParameterHelper apiRequestParameterHelper;
+    
     private final PortfolioApiDataConversionService apiDataConversionService;
     private final CommandSerializer commandSerializerService;
-    private final PortfolioApiJsonSerializerService apiJsonSerializerService;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     
     @Autowired
     public ChargesApiResource(final PlatformSecurityContext context, 
             final ChargeReadPlatformService readPlatformService,
+            final DefaultToApiJsonSerializer<ChargeData> toApiJsonSerializer,
+            final ApiRequestParameterHelper apiRequestParameterHelper, 
             final PortfolioApiDataConversionService apiDataConversionService,
             final CommandSerializer commandSerializerService,
-            final PortfolioApiJsonSerializerService apiJsonSerializerService,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
         this.context = context;
         this.readPlatformService = readPlatformService;
+        this.toApiJsonSerializer = toApiJsonSerializer;
+        this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.apiDataConversionService = apiDataConversionService;
         this.commandSerializerService = commandSerializerService;
-        this.apiJsonSerializerService = apiJsonSerializerService;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
     }
     
@@ -67,12 +77,10 @@ public class ChargesApiResource {
 
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 
-        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-
         final Collection<ChargeData> charges = this.readPlatformService.retrieveAllCharges();
 
-        return this.apiJsonSerializerService.serializeChargeDataToJson(prettyPrint, responseParameters, charges);
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.toApiJsonSerializer.serialize(settings, charges, CHARGES_DATA_PARAMETERS);
     }
 
     @GET
@@ -83,18 +91,15 @@ public class ChargesApiResource {
 
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 
-        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-
-        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-        final boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
-
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        
         ChargeData charge = this.readPlatformService.retrieveCharge(chargeId);
-        if (template) {
+        if (settings.isTemplate()) {
             ChargeData templateData = this.readPlatformService.retrieveNewChargeDetails();
             charge = new ChargeData(charge, templateData);
         }
 
-        return this.apiJsonSerializerService.serializeChargeDataToJson(prettyPrint, responseParameters, charge);
+        return this.toApiJsonSerializer.serialize(settings, charge, CHARGES_DATA_PARAMETERS);
     }
 
     @GET
@@ -105,13 +110,10 @@ public class ChargesApiResource {
 
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 
-        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+        final ChargeData charge = this.readPlatformService.retrieveNewChargeDetails();
 
-        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-
-        final ChargeData chargeData = this.readPlatformService.retrieveNewChargeDetails();
-
-        return this.apiJsonSerializerService.serializeChargeDataToJson(prettyPrint, responseParameters, chargeData);
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.toApiJsonSerializer.serialize(settings, charge, CHARGES_DATA_PARAMETERS);
     }
 
     @POST
@@ -127,7 +129,7 @@ public class ChargesApiResource {
         
         final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE", "charges", null, commandSerializedAsJson);
 
-        return this.apiJsonSerializerService.serializeEntityIdentifier(result);
+        return this.toApiJsonSerializer.serialize(result);
     }
 
     @PUT
@@ -144,7 +146,7 @@ public class ChargesApiResource {
         
         final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "charges", chargeId, commandSerializedAsJson);
 
-        return this.apiJsonSerializerService.serializeEntityIdentifier(result);
+        return this.toApiJsonSerializer.serialize(result);
     }
 
     @DELETE
@@ -158,6 +160,6 @@ public class ChargesApiResource {
         
         final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("DELETE", "charges", chargeId, "{}");
 
-        return this.apiJsonSerializerService.serializeEntityIdentifier(result);
+        return this.toApiJsonSerializer.serialize(result);
     }
 }

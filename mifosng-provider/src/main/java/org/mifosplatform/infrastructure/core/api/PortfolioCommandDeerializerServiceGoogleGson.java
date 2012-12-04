@@ -152,7 +152,7 @@ public class PortfolioCommandDeerializerServiceGoogleGson implements PortfolioCo
 
         Long actualClientId = clientId;
         final Long clientIdInternal = helper.extractLongNamed("clientId", element, parametersPassedInRequest);
-        if (clientId != null) {
+        if (clientIdInternal != null) {
             actualClientId = clientIdInternal;
         }
         final Long documentTypeId = helper.extractLongNamed("documentTypeId", element, parametersPassedInRequest);

@@ -2,6 +2,7 @@ package org.mifosplatform.portfolio.loanproduct.api;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -17,12 +18,13 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
+import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.api.PortfolioApiDataConversionService;
-import org.mifosplatform.infrastructure.core.api.PortfolioApiJsonSerializerService;
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
+import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.CommandSerializer;
+import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.monetary.service.CurrencyReadPlatformService;
@@ -44,6 +46,14 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class LoanProductsApiResource {
 
+    private final Set<String> LOAN_PRODUCT_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "name", "description", "fundId",
+            "fundName", "transactionProcessingStrategyId", "transactionProcessingStrategyName", "principal", "inArrearsTolerance",
+            "numberOfRepayments", "repaymentEvery", "interestRatePerPeriod", "annualInterestRate", "repaymentFrequencyType",
+            "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType", "charges", "createdOn",
+            "lastModifedOn", "currencyOptions", "amortizationTypeOptions", "interestTypeOptions", "interestCalculationPeriodTypeOptions",
+            "repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "fundOptions", "transactionProcessingStrategyOptions",
+            "chargeOptions"));
+
     private final String resourceNameForPermissions = "LOANPRODUCT";
 
     private final PlatformSecurityContext context;
@@ -51,8 +61,9 @@ public class LoanProductsApiResource {
     private final ChargeReadPlatformService chargeReadPlatformService;
     private final CurrencyReadPlatformService currencyReadPlatformService;
     private final FundReadPlatformService fundReadPlatformService;
+    private final DefaultToApiJsonSerializer<LoanProductData> toApiJsonSerializer;
+    private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final LoanDropdownReadPlatformService dropdownReadPlatformService;
-    private final PortfolioApiJsonSerializerService apiJsonSerializerService;
     private final PortfolioApiDataConversionService apiDataConversionService;
     private final CommandSerializer commandSerializerService;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
@@ -61,8 +72,8 @@ public class LoanProductsApiResource {
     public LoanProductsApiResource(final PlatformSecurityContext context, final LoanProductReadPlatformService readPlatformService,
             final ChargeReadPlatformService chargeReadPlatformService, final CurrencyReadPlatformService currencyReadPlatformService,
             final FundReadPlatformService fundReadPlatformService, final LoanDropdownReadPlatformService dropdownReadPlatformService,
-            final PortfolioApiJsonSerializerService apiJsonSerializerService,
-            final PortfolioApiDataConversionService apiDataConversionService,
+            final DefaultToApiJsonSerializer<LoanProductData> toApiJsonSerializer,
+            final ApiRequestParameterHelper apiRequestParameterHelper, final PortfolioApiDataConversionService apiDataConversionService,
             final CommandSerializer commandSerializerService,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
         this.context = context;
@@ -71,7 +82,8 @@ public class LoanProductsApiResource {
         this.currencyReadPlatformService = currencyReadPlatformService;
         this.fundReadPlatformService = fundReadPlatformService;
         this.dropdownReadPlatformService = dropdownReadPlatformService;
-        this.apiJsonSerializerService = apiJsonSerializerService;
+        this.toApiJsonSerializer = toApiJsonSerializer;
+        this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.apiDataConversionService = apiDataConversionService;
         this.commandSerializerService = commandSerializerService;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
@@ -93,7 +105,7 @@ public class LoanProductsApiResource {
         final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE", "loanproducts", null,
                 commandSerializedAsJson);
 
-        return this.apiJsonSerializerService.serializeEntityIdentifier(result);
+        return this.toApiJsonSerializer.serialize(result);
     }
 
     @GET
@@ -103,12 +115,10 @@ public class LoanProductsApiResource {
 
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 
-        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-
         final Collection<LoanProductData> products = this.loanProductReadPlatformService.retrieveAllLoanProducts();
 
-        return this.apiJsonSerializerService.serializeLoanProductDataToJson(prettyPrint, responseParameters, products);
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.toApiJsonSerializer.serialize(settings, products, LOAN_PRODUCT_DATA_PARAMETERS);
     }
 
     @GET
@@ -119,13 +129,11 @@ public class LoanProductsApiResource {
 
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 
-        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-
         LoanProductData loanProduct = this.loanProductReadPlatformService.retrieveNewLoanProductDetails();
         loanProduct = handleTemplate(loanProduct);
 
-        return this.apiJsonSerializerService.serializeLoanProductDataToJson(prettyPrint, responseParameters, loanProduct);
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.toApiJsonSerializer.serialize(settings, loanProduct, LOAN_PRODUCT_DATA_PARAMETERS);
     }
 
     @GET
@@ -136,16 +144,14 @@ public class LoanProductsApiResource {
 
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 
-        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-        final boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
         LoanProductData loanProduct = this.loanProductReadPlatformService.retrieveLoanProduct(productId);
-        if (template) {
+        if (settings.isTemplate()) {
             loanProduct = handleTemplate(loanProduct);
         }
 
-        return this.apiJsonSerializerService.serializeLoanProductDataToJson(prettyPrint, responseParameters, loanProduct);
+        return this.toApiJsonSerializer.serialize(settings, loanProduct, LOAN_PRODUCT_DATA_PARAMETERS);
     }
 
     @PUT
@@ -165,7 +171,7 @@ public class LoanProductsApiResource {
         final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "loanproducts", null,
                 commandSerializedAsJson);
 
-        return this.apiJsonSerializerService.serializeEntityIdentifier(result);
+        return this.toApiJsonSerializer.serialize(result);
     }
 
     private LoanProductData handleTemplate(final LoanProductData productData) {

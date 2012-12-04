@@ -2,6 +2,7 @@ package org.mifosplatform.portfolio.client.api;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -20,11 +21,12 @@ import javax.ws.rs.core.UriInfo;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.infrastructure.codes.service.CodeValueReadPlatformService;
-import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
+import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.api.PortfolioApiDataConversionService;
-import org.mifosplatform.infrastructure.core.api.PortfolioApiJsonSerializerService;
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.CommandSerializer;
+import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.client.command.ClientIdentifierCommand;
 import org.mifosplatform.portfolio.client.data.ClientData;
@@ -40,29 +42,34 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class ClientIdentifiersApiResource {
 
-    private final String entityType = "CLIENTIDENTIFIER";
+    private static final Set<String> CLIENT_IDENTIFIER_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "clientId",
+            "documentTypeId", "documentKey", "description", "documentTypeName", "allowedDocumentTypes"));
+
+    private final String resourceNameForPermissions = "CLIENTIDENTIFIER";
 
     private final PlatformSecurityContext context;
     private final ClientReadPlatformService clientReadPlatformService;
     private final CodeValueReadPlatformService codeValueReadPlatformService;
+    private final DefaultToApiJsonSerializer<ClientIdentifierData> toApiJsonSerializer;
+    private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioApiDataConversionService apiDataConversionService;
     private final CommandSerializer commandSerializerService;
-    private final PortfolioApiJsonSerializerService apiJsonSerializerService;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @Autowired
     public ClientIdentifiersApiResource(final PlatformSecurityContext context, final ClientReadPlatformService readPlatformService,
             final CodeValueReadPlatformService codeValueReadPlatformService,
-            final PortfolioApiDataConversionService apiDataConversionService,
+            final DefaultToApiJsonSerializer<ClientIdentifierData> toApiJsonSerializer,
+            final ApiRequestParameterHelper apiRequestParameterHelper, final PortfolioApiDataConversionService apiDataConversionService,
             final CommandSerializer commandSerializerService,
-            final PortfolioApiJsonSerializerService apiJsonSerializerService,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
         this.context = context;
         this.clientReadPlatformService = readPlatformService;
         this.codeValueReadPlatformService = codeValueReadPlatformService;
+        this.toApiJsonSerializer = toApiJsonSerializer;
+        this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.apiDataConversionService = apiDataConversionService;
         this.commandSerializerService = commandSerializerService;
-        this.apiJsonSerializerService = apiJsonSerializerService;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
     }
 
@@ -71,14 +78,12 @@ public class ClientIdentifiersApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveAllClientIdentifiers(@Context final UriInfo uriInfo, @PathParam("clientId") final Long clientId) {
 
-        context.authenticatedUser().validateHasReadPermission(entityType);
-
-        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+        context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 
         final Collection<ClientIdentifierData> clientIdentifiers = this.clientReadPlatformService.retrieveClientIdentifiers(clientId);
 
-        return this.apiJsonSerializerService.serializeClientIdentifierDataToJson(prettyPrint, responseParameters, clientIdentifiers);
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.toApiJsonSerializer.serialize(settings, clientIdentifiers, CLIENT_IDENTIFIER_DATA_PARAMETERS);
     }
 
     @GET
@@ -87,15 +92,13 @@ public class ClientIdentifiersApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String newClientDetails(@Context final UriInfo uriInfo) {
 
-        context.authenticatedUser().validateHasReadPermission(entityType);
-
-        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+        context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 
         Collection<CodeValueData> codeValues = codeValueReadPlatformService.retrieveCustomIdentifierCodeValues();
         ClientIdentifierData clientIdentifierData = ClientIdentifierData.template(codeValues);
 
-        return this.apiJsonSerializerService.serializeClientIdentifierDataToJson(prettyPrint, responseParameters, clientIdentifierData);
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.toApiJsonSerializer.serialize(settings, clientIdentifierData, CLIENT_IDENTIFIER_DATA_PARAMETERS);
     }
 
     @POST
@@ -116,7 +119,7 @@ public class ClientIdentifiersApiResource {
             final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE", resourceUrl, null,
                     commandSerializedAsJson);
 
-            return this.apiJsonSerializerService.serializeEntityIdentifier(result);
+            return this.toApiJsonSerializer.serialize(result);
         } catch (DuplicateClientIdentifierException e) {
             DuplicateClientIdentifierException rethrowas = e;
             if (e.getDocumentTypeId() != null) {
@@ -137,19 +140,17 @@ public class ClientIdentifiersApiResource {
     public String getClientIdentifier(@PathParam("clientId") final Long clientId, @PathParam("identifierId") final Long clientIdentifierId,
             @Context final UriInfo uriInfo) {
 
-        context.authenticatedUser().validateHasReadPermission(entityType);
+        context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 
-        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-        final boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
         ClientIdentifierData clientIdentifierData = this.clientReadPlatformService.retrieveClientIdentifier(clientId, clientIdentifierId);
-        if (template) {
+        if (settings.isTemplate()) {
             final Collection<CodeValueData> codeValues = codeValueReadPlatformService.retrieveCustomIdentifierCodeValues();
             clientIdentifierData = ClientIdentifierData.template(clientIdentifierData, codeValues);
         }
 
-        return this.apiJsonSerializerService.serializeClientIdentifierDataToJson(prettyPrint, responseParameters, clientIdentifierData);
+        return this.toApiJsonSerializer.serialize(settings, clientIdentifierData, CLIENT_IDENTIFIER_DATA_PARAMETERS);
     }
 
     @PUT
@@ -172,7 +173,7 @@ public class ClientIdentifiersApiResource {
             final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", resourceUrl,
                     clientIdentifierId, commandSerializedAsJson);
 
-            return this.apiJsonSerializerService.serializeEntityIdentifier(result);
+            return this.toApiJsonSerializer.serialize(result);
         } catch (DuplicateClientIdentifierException e) {
             DuplicateClientIdentifierException reThrowAs = e;
             if (e.getDocumentTypeId() != null) {
@@ -200,6 +201,6 @@ public class ClientIdentifiersApiResource {
         final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("DELETE", resourceUrl, clientIdentifierId,
                 "{}");
 
-        return this.apiJsonSerializerService.serializeEntityIdentifier(result);
+        return this.toApiJsonSerializer.serialize(result);
     }
 }

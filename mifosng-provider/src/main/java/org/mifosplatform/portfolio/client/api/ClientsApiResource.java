@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -19,7 +20,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.StringUtils;
@@ -28,11 +28,14 @@ import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformSer
 import org.mifosplatform.commands.service.PortfolioCommandsReadPlatformService;
 import org.mifosplatform.infrastructure.core.api.ApiConstants;
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
+import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.api.PortfolioApiDataConversionService;
 import org.mifosplatform.infrastructure.core.api.PortfolioApiJsonSerializerService;
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 import org.mifosplatform.infrastructure.core.domain.Base64EncodedImage;
+import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.CommandSerializer;
+import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.core.service.FileUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.office.data.OfficeLookup;
@@ -63,10 +66,15 @@ public class ClientsApiResource {
 
     private final static Logger logger = LoggerFactory.getLogger(ClientsApiResource.class);
 
+    private final Set<String> CLIENT_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "officeId", "officeName", "externalId",
+            "firstname", "lastname", "joinedDate", "displayName", "clientOrBusinessName", "allowedOffices", "imagePresent"));
+
     private final PlatformSecurityContext context;
     private final ClientReadPlatformService clientReadPlatformService;
     private final ClientWritePlatformService clientWritePlatformService;
     private final OfficeReadPlatformService officeReadPlatformService;
+    private final DefaultToApiJsonSerializer<ClientData> toApiJsonSerializer;
+    private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioApiDataConversionService apiDataConversionService;
     private final CommandSerializer commandSerializerService;
     private final PortfolioApiJsonSerializerService apiJsonSerializerService;
@@ -76,8 +84,8 @@ public class ClientsApiResource {
     @Autowired
     public ClientsApiResource(final PlatformSecurityContext context, final ClientReadPlatformService readPlatformService,
             final ClientWritePlatformService clientWritePlatformService, final OfficeReadPlatformService officeReadPlatformService,
-            final PortfolioApiDataConversionService apiDataConversionService,
-            final CommandSerializer commandSerializerService,
+            final DefaultToApiJsonSerializer<ClientData> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper,
+            final PortfolioApiDataConversionService apiDataConversionService, final CommandSerializer commandSerializerService,
             final PortfolioApiJsonSerializerService apiJsonSerializerService,
             final PortfolioCommandsReadPlatformService commandsReadPlatformService,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
@@ -85,6 +93,8 @@ public class ClientsApiResource {
         this.clientReadPlatformService = readPlatformService;
         this.clientWritePlatformService = clientWritePlatformService;
         this.officeReadPlatformService = officeReadPlatformService;
+        this.toApiJsonSerializer = toApiJsonSerializer;
+        this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.apiDataConversionService = apiDataConversionService;
         this.commandSerializerService = commandSerializerService;
         this.apiJsonSerializerService = apiJsonSerializerService;
@@ -104,12 +114,10 @@ public class ClientsApiResource {
 
         final String extraCriteria = getClientCriteria(sqlSearch, officeId, externalId, displayName, firstName, lastName, hierarchy);
 
-        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-
         final Collection<ClientData> clients = this.clientReadPlatformService.retrieveAllIndividualClients(extraCriteria);
 
-        return this.apiJsonSerializerService.serializeClientDataToJson(prettyPrint, responseParameters, clients);
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.toApiJsonSerializer.serialize(settings, clients, CLIENT_DATA_PARAMETERS);
     }
 
     private String getClientCriteria(String sqlSearch, Integer officeId, String externalId, String displayName, String firstName,
@@ -163,18 +171,15 @@ public class ClientsApiResource {
 
         context.authenticatedUser().validateHasReadPermission("CLIENT");
 
-        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-        final boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
-        final Long commandId = ApiParameterHelper.commandId(uriInfo.getQueryParameters());
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
         ClientData clientData = this.clientReadPlatformService.retrieveIndividualClient(clientId);
-        if (template) {
+        if (settings.isTemplate()) {
             final List<OfficeLookup> allowedOffices = new ArrayList<OfficeLookup>(officeReadPlatformService.retrieveAllOfficesForLookup());
             clientData = ClientData.templateOnTop(clientData, allowedOffices);
         }
-        if (commandId != null) {
-            clientData = handleRequestToIntegrateProposedChangesFromCommand(clientId, commandId, clientData);
+        if (settings.isCommandIdPassed()) {
+            clientData = handleRequestToIntegrateProposedChangesFromCommand(clientId, settings.getCommandId(), clientData);
         }
 
         // pick up possibility of changes by default - might push down a layer
@@ -182,7 +187,7 @@ public class ClientsApiResource {
         final Collection<ClientData> dataChanges = retrieveAllUnprocessedDataChanges(clientId);
         clientData = ClientData.integrateChanges(clientData, clientData.currentChange(), dataChanges);
 
-        return this.apiJsonSerializerService.serializeClientDataToJson(prettyPrint, responseParameters, clientData);
+        return this.toApiJsonSerializer.serialize(settings, clientData, CLIENT_DATA_PARAMETERS);
     }
 
     private ClientData handleRequestToIntegrateProposedChangesFromCommand(final Long clientId, final Long commandId,
@@ -220,16 +225,14 @@ public class ClientsApiResource {
 
         context.authenticatedUser().validateHasReadPermission("CLIENT");
 
-        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-        final Long makerCheckerId = ApiParameterHelper.commandId(uriInfo.getQueryParameters());
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
         ClientData clientData = this.clientReadPlatformService.retrieveNewClientDetails();
-        if (makerCheckerId != null) {
-            clientData = handleRequestToIntegrateProposedChangesFromCommand(null, makerCheckerId, clientData);
+        if (settings.isCommandIdPassed()) {
+            clientData = handleRequestToIntegrateProposedChangesFromCommand(null, settings.getCommandId(), clientData);
         }
 
-        return this.apiJsonSerializerService.serializeClientDataToJson(prettyPrint, responseParameters, clientData);
+        return this.toApiJsonSerializer.serialize(settings, clientData, CLIENT_DATA_PARAMETERS);
     }
 
     @POST
@@ -246,7 +249,7 @@ public class ClientsApiResource {
         final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE", "clients", null,
                 commandSerializedAsJson);
 
-        return this.apiJsonSerializerService.serializeEntityIdentifier(result);
+        return this.toApiJsonSerializer.serialize(result);
     }
 
     @PUT
@@ -264,7 +267,7 @@ public class ClientsApiResource {
         final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "clients", clientId,
                 commandSerializedAsJson);
 
-        return this.apiJsonSerializerService.serializeEntityIdentifier(result);
+        return this.toApiJsonSerializer.serialize(result);
     }
 
     @DELETE
@@ -278,7 +281,7 @@ public class ClientsApiResource {
 
         final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("DELETE", "clients", clientId, "{}");
 
-        return this.apiJsonSerializerService.serializeEntityIdentifier(result);
+        return this.toApiJsonSerializer.serialize(result);
     }
 
     @GET
@@ -318,13 +321,13 @@ public class ClientsApiResource {
     @Path("{clientId}/notes")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response addNewClientNote(@PathParam("clientId") final Long clientId, final String jsonRequestBody) {
+    public String addNewClientNote(@PathParam("clientId") final Long clientId, final String jsonRequestBody) {
 
         final NoteCommand command = this.apiDataConversionService.convertJsonToNoteCommand(null, clientId, jsonRequestBody);
 
-        final EntityIdentifier identifier = this.clientWritePlatformService.addClientNote(command);
+        final EntityIdentifier result = this.clientWritePlatformService.addClientNote(command);
 
-        return Response.ok().entity(identifier).build();
+        return this.toApiJsonSerializer.serialize(result);
     }
 
     @GET
@@ -348,14 +351,14 @@ public class ClientsApiResource {
     @Path("{clientId}/notes/{noteId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response updateClientNote(@PathParam("clientId") final Long clientId, @PathParam("noteId") final Long noteId,
+    public String updateClientNote(@PathParam("clientId") final Long clientId, @PathParam("noteId") final Long noteId,
             final String jsonRequestBody) {
 
         final NoteCommand command = this.apiDataConversionService.convertJsonToNoteCommand(noteId, clientId, jsonRequestBody);
 
-        final EntityIdentifier identifier = this.clientWritePlatformService.updateNote(command);
+        final EntityIdentifier result = this.clientWritePlatformService.updateNote(command);
 
-        return Response.ok().entity(identifier).build();
+        return this.toApiJsonSerializer.serialize(result);
     }
 
     /**
@@ -365,7 +368,7 @@ public class ClientsApiResource {
     @Path("{clientId}/image")
     @Consumes({ MediaType.MULTIPART_FORM_DATA })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response addNewClientImage(@PathParam("clientId") final Long clientId, @HeaderParam("Content-Length") Long fileSize,
+    public String addNewClientImage(@PathParam("clientId") final Long clientId, @HeaderParam("Content-Length") Long fileSize,
             @FormDataParam("file") InputStream inputStream, @FormDataParam("file") FormDataContentDisposition fileDetails,
             @FormDataParam("file") FormDataBodyPart bodyPart) {
 
@@ -378,10 +381,10 @@ public class ClientsApiResource {
 
         // logger.debug(bodyPart.getMediaType().toString());
 
-        final EntityIdentifier entityIdentifier = this.clientWritePlatformService.saveOrUpdateClientImage(clientId,
-                fileDetails.getFileName(), inputStream);
+        final EntityIdentifier result = this.clientWritePlatformService.saveOrUpdateClientImage(clientId, fileDetails.getFileName(),
+                inputStream);
 
-        return Response.ok().entity(entityIdentifier).build();
+        return this.toApiJsonSerializer.serialize(result);
     }
 
     /**
@@ -391,13 +394,13 @@ public class ClientsApiResource {
     @Path("{clientId}/image")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response addNewClientImage(@PathParam("clientId") final Long clientId, final String jsonRequestBody) {
+    public String addNewClientImage(@PathParam("clientId") final Long clientId, final String jsonRequestBody) {
 
         final Base64EncodedImage base64EncodedImage = FileUtils.extractImageFromDataURL(jsonRequestBody);
 
-        final EntityIdentifier entityIdentifier = this.clientWritePlatformService.saveOrUpdateClientImage(clientId, base64EncodedImage);
+        final EntityIdentifier result = this.clientWritePlatformService.saveOrUpdateClientImage(clientId, base64EncodedImage);
 
-        return Response.ok().entity(entityIdentifier).build();
+        return this.toApiJsonSerializer.serialize(result);
     }
 
     /**
@@ -407,14 +410,15 @@ public class ClientsApiResource {
     @Path("{clientId}/image")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response retrieveClientImage(@PathParam("clientId") final Long clientId) {
+    public String retrieveClientImage(@PathParam("clientId") final Long clientId) {
 
         context.authenticatedUser().validateHasReadPermission("CLIENTIMAGE");
 
         final ClientData clientData = this.clientReadPlatformService.retrieveIndividualClient(clientId);
 
         if (clientData.imageKeyDoesNotExist()) { throw new ImageNotFoundException("clients", clientId); }
-        return Response.ok().entity(Base64.encodeFromFile(clientData.imageKey())).build();
+
+        return Base64.encodeFromFile(clientData.imageKey());
     }
 
     /**
@@ -425,9 +429,10 @@ public class ClientsApiResource {
     @Path("{clientId}/image")
     @Consumes({ MediaType.MULTIPART_FORM_DATA })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response updateClientImage(@PathParam("clientId") final Long clientId, @HeaderParam("Content-Length") Long fileSize,
+    public String updateClientImage(@PathParam("clientId") final Long clientId, @HeaderParam("Content-Length") Long fileSize,
             @FormDataParam("file") InputStream inputStream, @FormDataParam("file") FormDataContentDisposition fileDetails,
             @FormDataParam("file") FormDataBodyPart bodyPart) {
+
         return addNewClientImage(clientId, fileSize, inputStream, fileDetails, bodyPart);
     }
 
@@ -435,9 +440,10 @@ public class ClientsApiResource {
     @Path("{clientId}/image")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response deleteClientImage(@PathParam("clientId") final Long clientId) {
+    public String deleteClientImage(@PathParam("clientId") final Long clientId) {
         this.clientWritePlatformService.deleteClientImage(clientId);
-        return Response.ok(new EntityIdentifier(clientId)).build();
+
+        return this.toApiJsonSerializer.serialize(new EntityIdentifier(clientId));
     }
 
     /**
@@ -450,7 +456,7 @@ public class ClientsApiResource {
     @Path("{clientId}/image")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response updateClientImage(@PathParam("clientId") final Long clientId, final String jsonRequestBody) {
+    public String updateClientImage(@PathParam("clientId") final Long clientId, final String jsonRequestBody) {
         return addNewClientImage(clientId, jsonRequestBody);
     }
 }

@@ -1,6 +1,8 @@
 package org.mifosplatform.commands.api;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
@@ -19,10 +21,11 @@ import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.commands.data.CommandSourceData;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.mifosplatform.commands.service.PortfolioCommandsReadPlatformService;
-import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
-import org.mifosplatform.infrastructure.core.api.PortfolioApiJsonSerializerService;
+import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 import org.mifosplatform.infrastructure.core.exception.UnrecognizedQueryParamException;
+import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
+import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -33,40 +36,45 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class CommandsApiResource {
 
-    @Autowired
-    private PortfolioCommandsReadPlatformService readPlatformService;
+    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "taskName", "madeOnDate"));
+    private final String resourceNameForPermissions = "MAKERCHECKER";
+
+    private final PlatformSecurityContext context;
+    private final PortfolioCommandsReadPlatformService readPlatformService;
+    private final DefaultToApiJsonSerializer<CommandSourceData> toApiJsonSerializer;
+    private final ApiRequestParameterHelper apiRequestParameterHelper;
+    private final PortfolioCommandSourceWritePlatformService writePlatformService;
 
     @Autowired
-    private PortfolioCommandSourceWritePlatformService writePlatformService;
-
-    @Autowired
-    private PortfolioApiJsonSerializerService apiJsonSerializerService;
-
-    private final String entityType = "MAKERCHECKER";
-    @Autowired
-    private PlatformSecurityContext context;
+    public CommandsApiResource(final PlatformSecurityContext context, final PortfolioCommandsReadPlatformService readPlatformService,
+            final DefaultToApiJsonSerializer<CommandSourceData> toApiJsonSerializer,
+            final ApiRequestParameterHelper apiRequestParameterHelper, 
+            final PortfolioCommandSourceWritePlatformService writePlatformService) {
+        this.context = context;
+        this.readPlatformService = readPlatformService;
+        this.toApiJsonSerializer = toApiJsonSerializer;
+        this.apiRequestParameterHelper = apiRequestParameterHelper;
+        this.writePlatformService = writePlatformService;
+    }
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveCodes(@Context final UriInfo uriInfo) {
 
-        context.authenticatedUser().validateHasReadPermission(entityType);
-
-        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+        context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 
         final Collection<CommandSourceData> entries = this.readPlatformService.retrieveAllEntriesToBeChecked();
 
-        return this.apiJsonSerializerService.serializeMakerCheckerDataToJson(prettyPrint, responseParameters, entries);
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.toApiJsonSerializer.serialize(settings, entries, RESPONSE_DATA_PARAMETERS);
     }
 
     @POST
     @Path("{commandId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String approveMakerCheckerEntry(@PathParam("commandId") final Long commandId,
-            @QueryParam("command") final String commandParam) {
+    public String approveMakerCheckerEntry(@PathParam("commandId") final Long commandId, @QueryParam("command") final String commandParam) {
 
         EntityIdentifier result = null;
         if (is(commandParam, "approve")) {
@@ -75,7 +83,7 @@ public class CommandsApiResource {
             throw new UnrecognizedQueryParamException("command", commandParam);
         }
 
-        return this.apiJsonSerializerService.serializeEntityIdentifier(result);
+        return this.toApiJsonSerializer.serialize(result);
     }
 
     private boolean is(final String commandParam, final String commandValue) {
@@ -90,6 +98,6 @@ public class CommandsApiResource {
 
         final Long id = this.writePlatformService.deleteEntry(commandId);
 
-        return this.apiJsonSerializerService.serializeEntityIdentifier(EntityIdentifier.makerChecker(id));
+        return this.toApiJsonSerializer.serialize(EntityIdentifier.makerChecker(id));
     }
 }

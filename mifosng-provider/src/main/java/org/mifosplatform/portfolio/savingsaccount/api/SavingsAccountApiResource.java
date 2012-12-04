@@ -23,6 +23,7 @@ import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
 import org.mifosplatform.infrastructure.core.api.PortfolioApiDataConversionService;
 import org.mifosplatform.infrastructure.core.api.PortfolioApiJsonSerializerService;
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.savingsaccount.command.CalculateSavingScheduleCommand;
 import org.mifosplatform.portfolio.savingsaccount.command.SavingAccountCommand;
@@ -60,6 +61,9 @@ public class SavingsAccountApiResource {
     @Autowired
     private CalculateSavingSchedule calculateSavingSchedule;
 
+    @Autowired
+    private ToApiJsonSerializer<SavingAccountData> toApiJsonSerializer;
+
     private static final Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "status", "externalId",
             "clientId", "clientName", "productId", "productName", "productType", "currencyData", "savingsDepostiAmountPerPeriod",
             "savingsFrequencyType", "totalDepositAmount", "reccuringInterestRate", "savingInterestRate", "interestType",
@@ -83,7 +87,7 @@ public class SavingsAccountApiResource {
 
         EntityIdentifier entityIdentifier = this.savingAccountWritePlatformService.createSavingAccount(command);
 
-        return this.apiJsonSerializerService.serializeEntityIdentifier(entityIdentifier);
+        return this.toApiJsonSerializer.serialize(entityIdentifier);
     }
 
     private String calculateSavingSchedule(final UriInfo uriInfo, final CalculateSavingScheduleCommand command) {
