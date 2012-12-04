@@ -1,4 +1,4 @@
-package org.mifosplatform.useradministration.api;
+package org.mifosplatform.infrastructure.security.api;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -11,7 +11,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import org.mifosplatform.infrastructure.core.api.PortfolioApiJsonSerializerService;
-import org.mifosplatform.useradministration.data.AuthenticatedUserData;
+import org.mifosplatform.infrastructure.security.data.AuthenticatedUserData;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;

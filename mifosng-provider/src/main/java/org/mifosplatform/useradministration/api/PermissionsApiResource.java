@@ -2,6 +2,7 @@ package org.mifosplatform.useradministration.api;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -15,14 +16,13 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
-import org.mifosplatform.infrastructure.core.api.PortfolioApiDataConversionService;
-import org.mifosplatform.infrastructure.core.api.PortfolioApiJsonSerializerService;
+import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
-import org.mifosplatform.infrastructure.core.serialization.CommandSerializer;
+import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
+import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.useradministration.command.PermissionsCommand;
 import org.mifosplatform.useradministration.data.PermissionUsageData;
+import org.mifosplatform.useradministration.serialization.PermissionsCommandFromApiJsonDeserializer;
 import org.mifosplatform.useradministration.service.PermissionReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -33,28 +33,28 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class PermissionsApiResource {
 
+    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("grouping", "code", "entityName", "actionName",
+            "selected", "isMakerChecker"));
     private final String resourceNameForPermissions = "PERMISSION";
-    
+
     private final PlatformSecurityContext context;
     private final PermissionReadPlatformService permissionReadPlatformService;
-    private final PortfolioApiJsonSerializerService apiJsonSerializerService;
-    private final PortfolioApiDataConversionService apiDataConversionService;
-    private final CommandSerializer commandSerializerService;
+    private final PermissionsCommandFromApiJsonDeserializer fromApiJsonDeserializer;
+    private final DefaultToApiJsonSerializer<PermissionUsageData> toApiJsonSerializer;
+    private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @Autowired
-    public PermissionsApiResource(
-            final PlatformSecurityContext context, 
-            final PermissionReadPlatformService readPlatformService,
-            final PortfolioApiJsonSerializerService apiJsonSerializerService,
-            final PortfolioApiDataConversionService apiDataConversionService,
-            final CommandSerializer commandSerializerService,
+    public PermissionsApiResource(final PlatformSecurityContext context, final PermissionReadPlatformService readPlatformService,
+            final PermissionsCommandFromApiJsonDeserializer fromApiJsonDeserializer,
+            final DefaultToApiJsonSerializer<PermissionUsageData> toApiJsonSerializer,
+            final ApiRequestParameterHelper apiRequestParameterHelper,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
         this.context = context;
         this.permissionReadPlatformService = readPlatformService;
-        this.apiJsonSerializerService = apiJsonSerializerService;
-        this.apiDataConversionService = apiDataConversionService;
-        this.commandSerializerService = commandSerializerService;
+        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
+        this.toApiJsonSerializer = toApiJsonSerializer;
+        this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
     }
 
@@ -65,19 +65,16 @@ public class PermissionsApiResource {
 
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 
-        final boolean makerCheckerable = ApiParameterHelper.makerCheckerable(uriInfo.getQueryParameters());
-
-        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
         Collection<PermissionUsageData> permissions = null;
-        if (makerCheckerable) {
+        if (settings.isMakerCheckerable()) {
             permissions = this.permissionReadPlatformService.retrieveAllMakerCheckerablePermissions();
         } else {
             permissions = this.permissionReadPlatformService.retrieveAllPermissions();
         }
 
-        return this.apiJsonSerializerService.serializePermissionDataToJson(prettyPrint, responseParameters, permissions);
+        return this.toApiJsonSerializer.serialize(settings, permissions, RESPONSE_DATA_PARAMETERS);
     }
 
     @PUT
@@ -85,16 +82,14 @@ public class PermissionsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String updatePermissionsDetails(final String apiRequestBodyAsJson) {
 
-        // FIXME - kw/jw - reuse 'PERMISSIONS_ROLE' permission for now
-        final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "USER_ADMINISTRATION_SUPER_USER", "PERMISSIONS_ROLE");
-        context.authenticatedUser().validateHasPermissionTo("PERMISSIONS_ROLE", allowedPermissions);
-        
-        final PermissionsCommand command = this.apiDataConversionService.convertApiRequestJsonToPermissionsCommand(apiRequestBodyAsJson);
-        final String commandSerializedAsJson = this.commandSerializerService.serializeCommandToJson(command);
-        
+        final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "USER_ADMINISTRATION_SUPER_USER", "UPDATE_PERMISSION");
+        context.authenticatedUser().validateHasPermissionTo("UPDATE_PERMISSION", allowedPermissions);
+
+        final String commandSerializedAsJson = this.fromApiJsonDeserializer.serializedCommandJsonFromApiJson(apiRequestBodyAsJson);
+
         final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "permissions", null,
                 commandSerializedAsJson);
 
-        return this.apiJsonSerializerService.serializeEntityIdentifier(result);
+        return this.toApiJsonSerializer.serialize(result);
     }
 }

@@ -7,9 +7,9 @@ import org.joda.time.LocalDate;
 import org.mifosplatform.commands.domain.CommandSource;
 import org.mifosplatform.commands.exception.UnsupportedCommandException;
 import org.mifosplatform.commands.service.ChangeDetectionService;
-import org.mifosplatform.infrastructure.core.api.PortfolioCommandDeserializerService;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.office.command.OfficeCommand;
+import org.mifosplatform.organisation.office.serialization.OfficeCommandFromCommandJsonDeserializer;
 import org.mifosplatform.organisation.office.service.OfficeWritePlatformService;
 import org.mifosplatform.portfolio.client.service.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
 import org.mifosplatform.useradministration.domain.AppUser;
@@ -21,15 +21,16 @@ public class OfficeCommandHandler implements CommandSourceHandler {
 
     private final PlatformSecurityContext context;
     private final ChangeDetectionService changeDetectionService;
-    private final PortfolioCommandDeserializerService commandDeserializerService;
+    private final OfficeCommandFromCommandJsonDeserializer commandFromCommandJsonDeserializer;
     private final OfficeWritePlatformService writePlatformService;
 
     @Autowired
     public OfficeCommandHandler(final PlatformSecurityContext context, final ChangeDetectionService changeDetectionService,
-            final PortfolioCommandDeserializerService commandDeserializerService, final OfficeWritePlatformService writePlatformService) {
+            final OfficeCommandFromCommandJsonDeserializer commandFromCommandJsonDeserializer,
+            final OfficeWritePlatformService writePlatformService) {
         this.context = context;
         this.changeDetectionService = changeDetectionService;
-        this.commandDeserializerService = commandDeserializerService;
+        this.commandFromCommandJsonDeserializer = commandFromCommandJsonDeserializer;
         this.writePlatformService = writePlatformService;
     }
 
@@ -40,7 +41,7 @@ public class OfficeCommandHandler implements CommandSourceHandler {
         final LocalDate asToday = new LocalDate();
 
         final Long resourceId = commandSource.resourceId();
-        final OfficeCommand command = this.commandDeserializerService.deserializeOfficeCommand(resourceId, commandSource.json(), false);
+        final OfficeCommand command = this.commandFromCommandJsonDeserializer.commandFromCommandJson(resourceId, commandSource.json());
 
         CommandSource commandSourceResult = commandSource.copy();
 
@@ -60,9 +61,8 @@ public class OfficeCommandHandler implements CommandSourceHandler {
                         commandSource.resourceId(), commandSource.json());
                 commandSourceResult.updateJsonTo(jsonOfChangesOnly);
 
-                final OfficeCommand changesOnly = this.commandDeserializerService.deserializeOfficeCommand(resourceId, jsonOfChangesOnly,
-                        false);
-
+                final OfficeCommand changesOnly = this.commandFromCommandJsonDeserializer.commandFromCommandJson(resourceId,
+                        jsonOfChangesOnly);
                 this.writePlatformService.updateOffice(changesOnly);
 
                 commandSourceResult.markAsChecked(maker, asToday);
@@ -80,9 +80,8 @@ public class OfficeCommandHandler implements CommandSourceHandler {
         final AppUser checker = context.authenticatedUser();
 
         Long resourceId = commandSourceResult.resourceId();
-        final OfficeCommand command = this.commandDeserializerService
-                .deserializeOfficeCommand(resourceId, commandSourceResult.json(), true);
-
+        final OfficeCommand command = this.commandFromCommandJsonDeserializer.commandFromCommandJson(resourceId,
+                commandSourceResult.json(), true);
         if (commandSourceResult.isCreate()) {
             final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "ORGANISATION_ADMINISTRATION_SUPER_USER",
                     "CREATE_OFFICE_CHECKER");

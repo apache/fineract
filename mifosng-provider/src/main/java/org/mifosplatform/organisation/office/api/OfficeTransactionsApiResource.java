@@ -2,6 +2,7 @@ package org.mifosplatform.organisation.office.api;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -15,14 +16,13 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
-import org.mifosplatform.infrastructure.core.api.PortfolioApiDataConversionService;
-import org.mifosplatform.infrastructure.core.api.PortfolioApiJsonSerializerService;
+import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
-import org.mifosplatform.infrastructure.core.serialization.CommandSerializer;
+import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
+import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.organisation.office.command.BranchMoneyTransferCommand;
 import org.mifosplatform.organisation.office.data.OfficeTransactionData;
+import org.mifosplatform.organisation.office.serialization.BranchMoneyTransferCommandFromApiJsonDeserializer;
 import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -32,29 +32,32 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope("singleton")
 public class OfficeTransactionsApiResource {
-    
+
+    private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "transactionDate", "fromOfficeId",
+            "fromOfficeName", "toOfficeId", "toOfficeIdName", "currencyCode", "digitsAfterDecimal", "transactionAmount", "description",
+            "allowedOffices", "currencyOptions"));
+
     private final String resourceNameForReadPermissions = "OFFICE";
     private final String resourceNameForPermissions = "OFFICETRANSACTION";
-    
+
     private final PlatformSecurityContext context;
     private final OfficeReadPlatformService readPlatformService;
-    private final PortfolioApiJsonSerializerService apiJsonSerializerService;
-    private final PortfolioApiDataConversionService apiDataConversionService;
-    private final CommandSerializer commandSerializerService;
+    private final BranchMoneyTransferCommandFromApiJsonDeserializer fromApiJsonDeserializer;
+    private final DefaultToApiJsonSerializer<OfficeTransactionData> toApiJsonSerializer;
+    private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @Autowired
-    public OfficeTransactionsApiResource(final PlatformSecurityContext context, 
-            final OfficeReadPlatformService readPlatformService,
-            final PortfolioApiJsonSerializerService apiJsonSerializerService,
-            final PortfolioApiDataConversionService apiDataConversionService,
-            final CommandSerializer commandSerializerService,
+    public OfficeTransactionsApiResource(final PlatformSecurityContext context, final OfficeReadPlatformService readPlatformService,
+            final BranchMoneyTransferCommandFromApiJsonDeserializer fromApiJsonDeserializer,
+            final DefaultToApiJsonSerializer<OfficeTransactionData> toApiJsonSerializer,
+            final ApiRequestParameterHelper apiRequestParameterHelper,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
         this.context = context;
         this.readPlatformService = readPlatformService;
-        this.apiJsonSerializerService = apiJsonSerializerService;
-        this.apiDataConversionService = apiDataConversionService;
-        this.commandSerializerService = commandSerializerService;
+        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
+        this.toApiJsonSerializer = toApiJsonSerializer;
+        this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
     }
 
@@ -65,12 +68,10 @@ public class OfficeTransactionsApiResource {
 
         context.authenticatedUser().validateHasReadPermission(resourceNameForReadPermissions);
 
-        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-
         final Collection<OfficeTransactionData> officeTransactions = this.readPlatformService.retrieveAllOfficeTransactions();
 
-        return this.apiJsonSerializerService.serializeOfficeTransactionDataToJson(prettyPrint, responseParameters, officeTransactions);
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.toApiJsonSerializer.serialize(settings, officeTransactions, RESPONSE_DATA_PARAMETERS);
     }
 
     @GET
@@ -81,12 +82,10 @@ public class OfficeTransactionsApiResource {
 
         context.authenticatedUser().validateHasReadPermission(resourceNameForReadPermissions);
 
-        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-
         final OfficeTransactionData officeTransactionData = this.readPlatformService.retrieveNewOfficeTransactionDetails();
 
-        return this.apiJsonSerializerService.serializeOfficeTransactionDataToJson(prettyPrint, responseParameters, officeTransactionData);
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.toApiJsonSerializer.serialize(settings, officeTransactionData, RESPONSE_DATA_PARAMETERS);
     }
 
     @POST
@@ -95,18 +94,19 @@ public class OfficeTransactionsApiResource {
     public String transferMoneyFrom(final String apiRequestBodyAsJson) {
 
         // TODO - complete permissions for office transactions when more
-        // functionality add or it is replaced by simple accounting equivalent (JPW)
+        // functionality add or it is replaced by simple accounting equivalent
+        // (JPW)
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
-        
-        final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "ORGANISATION_ADMINISTRATION_SUPER_USER", "CREATE_OFFICETRANSACTION");
+
+        final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "ORGANISATION_ADMINISTRATION_SUPER_USER",
+                "CREATE_OFFICETRANSACTION");
         context.authenticatedUser().validateHasPermissionTo("CREATE_OFFICETRANSACTION", allowedPermissions);
 
-        final BranchMoneyTransferCommand command = this.apiDataConversionService.convertApiRequestJsonToBranchMoneyTransferCommand(apiRequestBodyAsJson);
-        final String commandSerializedAsJson = this.commandSerializerService.serializeCommandToJson(command);
-        
+        final String commandSerializedAsJson = this.fromApiJsonDeserializer.serializedCommandJsonFromApiJson(apiRequestBodyAsJson);
+
         final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE", "officetransactions", null,
                 commandSerializedAsJson);
 
-        return this.apiJsonSerializerService.serializeEntityIdentifier(result);
+        return this.toApiJsonSerializer.serialize(result);
     }
 }

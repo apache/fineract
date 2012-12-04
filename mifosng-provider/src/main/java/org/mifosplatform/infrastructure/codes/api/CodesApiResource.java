@@ -38,7 +38,6 @@ public class CodesApiResource {
 
     /**
      * The set of parameters that are supported in response for {@link CodeData}
-     * .
      */
     private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "name", "systemDefined"));
     private final String resourceNameForPermissions = "CODE";
@@ -52,8 +51,8 @@ public class CodesApiResource {
 
     @Autowired
     public CodesApiResource(final PlatformSecurityContext context, final CodeReadPlatformService readPlatformService,
-            final CodeCommandFromApiJsonDeserializer fromApiJsonDeserializer, final DefaultToApiJsonSerializer<CodeData> toApiJsonSerializer,
-            final ApiRequestParameterHelper apiRequestParameterHelper,
+            final CodeCommandFromApiJsonDeserializer fromApiJsonDeserializer,
+            final DefaultToApiJsonSerializer<CodeData> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
         this.context = context;
         this.readPlatformService = readPlatformService;

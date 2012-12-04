@@ -11,9 +11,7 @@ import org.mifosplatform.infrastructure.core.serialization.GoogleGsonSerializerH
 import org.mifosplatform.infrastructure.dataqueries.data.DatatableData;
 import org.mifosplatform.infrastructure.dataqueries.data.GenericResultsetData;
 import org.mifosplatform.infrastructure.documentmanagement.data.DocumentData;
-import org.mifosplatform.organisation.monetary.data.ConfigurationData;
-import org.mifosplatform.organisation.office.data.OfficeData;
-import org.mifosplatform.organisation.office.data.OfficeTransactionData;
+import org.mifosplatform.infrastructure.security.data.AuthenticatedUserData;
 import org.mifosplatform.organisation.staff.data.BulkTransferLoanOfficerData;
 import org.mifosplatform.organisation.staff.data.StaffData;
 import org.mifosplatform.portfolio.charge.data.ChargeData;
@@ -21,7 +19,6 @@ import org.mifosplatform.portfolio.client.data.ClientAccountSummaryCollectionDat
 import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.client.data.ClientIdentifierData;
 import org.mifosplatform.portfolio.client.data.NoteData;
-import org.mifosplatform.portfolio.fund.data.FundData;
 import org.mifosplatform.portfolio.group.data.GroupAccountSummaryCollectionData;
 import org.mifosplatform.portfolio.group.data.GroupData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanAccountData;
@@ -35,11 +32,6 @@ import org.mifosplatform.portfolio.savingsaccount.data.SavingScheduleData;
 import org.mifosplatform.portfolio.savingsaccountproduct.data.SavingProductData;
 import org.mifosplatform.portfolio.savingsdepositaccount.data.DepositAccountData;
 import org.mifosplatform.portfolio.savingsdepositproduct.data.DepositProductData;
-import org.mifosplatform.useradministration.data.AppUserData;
-import org.mifosplatform.useradministration.data.AuthenticatedUserData;
-import org.mifosplatform.useradministration.data.PermissionUsageData;
-import org.mifosplatform.useradministration.data.RoleData;
-import org.mifosplatform.useradministration.data.RolePermissionsData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -52,22 +44,6 @@ import com.google.gson.Gson;
 @Service
 public class GoogleGsonPortfolioApiJsonSerializerService implements PortfolioApiJsonSerializerService {
 
-    private static final Set<String> PERMISSION_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("grouping", "code", "entityName",
-            "actionName", "selected", "isMakerChecker"));
-    private static final Set<String> ROLE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "name", "description",
-            "availablePermissions", "selectedPermissions"));
-    private static final Set<String> ROLE_PERMISSION_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "name", "description",
-            "permissionUsageData"));
-    private static final Set<String> APP_USER_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "officeId", "officeName",
-            "username", "firstname", "lastname", "email", "allowedOffices", "availableRoles", "selectedRoles"));
-    private static final Set<String> OFFICE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "name", "nameDecorated",
-            "externalId", "openingDate", "hierarchy", "parentId", "parentName", "allowedParents"));
-    private static final Set<String> OFFICE_TRANSACTIONS_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "transactionDate",
-            "fromOfficeId", "fromOfficeName", "toOfficeId", "toOfficeIdName", "currencyCode", "digitsAfterDecimal", "transactionAmount",
-            "description", "allowedOffices", "currencyOptions"));
-    private static final Set<String> CONFIGURATION_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("selectedCurrencyOptions",
-            "currencyOptions"));
-    private static final Set<String> FUND_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "name", "externalId"));
     private static final Set<String> STAFF_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "firstname", "lastname",
             "displayName", "officeId", "officeName", "loanOfficerFlag", "allowedOffices"));
     private static final Set<String> LOAN_PRODUCT_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "name", "description",
@@ -194,104 +170,6 @@ public class GoogleGsonPortfolioApiJsonSerializerService implements PortfolioApi
     public String serializeDatatableDataToJson(final boolean prettyPrint, final Collection<DatatableData> datatables) {
         final Gson gsonDeserializer = helper.createGsonBuilder(prettyPrint);
         return helper.serializedJsonFrom(gsonDeserializer, datatables.toArray(new DatatableData[datatables.size()]));
-    }
-
-    @Override
-    public String serializePermissionDataToJson(final boolean prettyPrint, final Set<String> responseParameters,
-            final Collection<PermissionUsageData> permissions) {
-        final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(PERMISSION_DATA_PARAMETERS,
-                prettyPrint, responseParameters);
-        return helper.serializedJsonFrom(gsonDeserializer, permissions.toArray(new PermissionUsageData[permissions.size()]));
-    }
-
-    @Override
-    public String serializeRoleDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final Collection<RoleData> roles) {
-        final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(ROLE_DATA_PARAMETERS,
-                prettyPrint, responseParameters);
-        return helper.serializedJsonFrom(gsonDeserializer, roles.toArray(new RoleData[roles.size()]));
-    }
-
-    @Override
-    public String serializeRoleDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final RoleData role) {
-        final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(ROLE_DATA_PARAMETERS,
-                prettyPrint, responseParameters);
-        return helper.serializedJsonFrom(gsonDeserializer, role);
-    }
-
-    @Override
-    public String serializeRolePermissionDataToJson(final boolean prettyPrint, final Set<String> responseParameters,
-            final RolePermissionsData rolePermissionData) {
-        final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(ROLE_PERMISSION_DATA_PARAMETERS,
-                prettyPrint, responseParameters);
-        return helper.serializedJsonFrom(gsonDeserializer, rolePermissionData);
-    }
-
-    @Override
-    public String serializeAppUserDataToJson(final boolean prettyPrint, final Set<String> responseParameters,
-            final Collection<AppUserData> users) {
-        final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(APP_USER_DATA_PARAMETERS,
-                prettyPrint, responseParameters);
-        return helper.serializedJsonFrom(gsonDeserializer, users.toArray(new AppUserData[users.size()]));
-    }
-
-    @Override
-    public String serializeAppUserDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final AppUserData user) {
-        final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(APP_USER_DATA_PARAMETERS,
-                prettyPrint, responseParameters);
-        return helper.serializedJsonFrom(gsonDeserializer, user);
-    }
-
-    @Override
-    public String serializeOfficeDataToJson(final boolean prettyPrint, final Set<String> responseParameters,
-            final Collection<OfficeData> offices) {
-        final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(OFFICE_DATA_PARAMETERS,
-                prettyPrint, responseParameters);
-        return helper.serializedJsonFrom(gsonDeserializer, offices.toArray(new OfficeData[offices.size()]));
-    }
-
-    @Override
-    public String serializeOfficeDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final OfficeData office) {
-        final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(OFFICE_DATA_PARAMETERS,
-                prettyPrint, responseParameters);
-        return helper.serializedJsonFrom(gsonDeserializer, office);
-    }
-
-    @Override
-    public String serializeOfficeTransactionDataToJson(final boolean prettyPrint, final Set<String> responseParameters,
-            final Collection<OfficeTransactionData> officeTransactions) {
-        final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(
-                OFFICE_TRANSACTIONS_DATA_PARAMETERS, prettyPrint, responseParameters);
-        return helper.serializedJsonFrom(gsonDeserializer, officeTransactions);
-    }
-
-    @Override
-    public String serializeOfficeTransactionDataToJson(final boolean prettyPrint, final Set<String> responseParameters,
-            final OfficeTransactionData officeTransaction) {
-        final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(
-                OFFICE_TRANSACTIONS_DATA_PARAMETERS, prettyPrint, responseParameters);
-        return helper.serializedJsonFrom(gsonDeserializer, officeTransaction);
-    }
-
-    @Override
-    public String serializeConfigurationDataToJson(final boolean prettyPrint, final Set<String> responseParameters,
-            final ConfigurationData configuration) {
-        final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(CONFIGURATION_DATA_PARAMETERS,
-                prettyPrint, responseParameters);
-        return helper.serializedJsonFrom(gsonDeserializer, configuration);
-    }
-
-    @Override
-    public String serializeFundDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final Collection<FundData> funds) {
-        final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(FUND_DATA_PARAMETERS,
-                prettyPrint, responseParameters);
-        return helper.serializedJsonFrom(gsonDeserializer, funds.toArray(new FundData[funds.size()]));
-    }
-
-    @Override
-    public String serializeFundDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final FundData fund) {
-        final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(FUND_DATA_PARAMETERS,
-                prettyPrint, responseParameters);
-        return helper.serializedJsonFrom(gsonDeserializer, fund);
     }
 
     @Override

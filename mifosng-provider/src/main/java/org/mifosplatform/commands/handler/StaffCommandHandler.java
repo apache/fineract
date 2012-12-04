@@ -7,9 +7,9 @@ import org.joda.time.LocalDate;
 import org.mifosplatform.commands.domain.CommandSource;
 import org.mifosplatform.commands.exception.UnsupportedCommandException;
 import org.mifosplatform.commands.service.ChangeDetectionService;
-import org.mifosplatform.infrastructure.core.api.PortfolioCommandDeserializerService;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.staff.command.StaffCommand;
+import org.mifosplatform.organisation.staff.serialization.StaffCommandFromCommandJsonDeserializer;
 import org.mifosplatform.organisation.staff.service.StaffWritePlatformService;
 import org.mifosplatform.portfolio.client.service.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
 import org.mifosplatform.useradministration.domain.AppUser;
@@ -21,15 +21,17 @@ public class StaffCommandHandler implements CommandSourceHandler {
 
     private final PlatformSecurityContext context;
     private final ChangeDetectionService changeDetectionService;
-    private final PortfolioCommandDeserializerService commandDeserializerService;
+    private final StaffCommandFromCommandJsonDeserializer fromCommandJsonDeserializer;
     private final StaffWritePlatformService writePlatformService;
 
     @Autowired
-    public StaffCommandHandler(final PlatformSecurityContext context, final ChangeDetectionService changeDetectionService,
-            final PortfolioCommandDeserializerService commandDeserializerService, final StaffWritePlatformService writePlatformService) {
+    public StaffCommandHandler(final PlatformSecurityContext context, 
+            final ChangeDetectionService changeDetectionService,
+            final StaffCommandFromCommandJsonDeserializer fromCommandJsonDeserializer, 
+            final StaffWritePlatformService writePlatformService) {
         this.context = context;
         this.changeDetectionService = changeDetectionService;
-        this.commandDeserializerService = commandDeserializerService;
+        this.fromCommandJsonDeserializer = fromCommandJsonDeserializer;
         this.writePlatformService = writePlatformService;
     }
 
@@ -40,7 +42,7 @@ public class StaffCommandHandler implements CommandSourceHandler {
         final LocalDate asToday = new LocalDate();
 
         final Long resourceId = commandSource.resourceId();
-        final StaffCommand command = this.commandDeserializerService.deserializeStaffCommand(resourceId, commandSource.json(), false);
+        final StaffCommand command = this.fromCommandJsonDeserializer.commandFromCommandJson(resourceId, commandSource.json());
         CommandSource commandSourceResult = commandSource.copy();
 
         Long newResourceId = null;
@@ -58,8 +60,7 @@ public class StaffCommandHandler implements CommandSourceHandler {
                         commandSource.resourceId(), commandSource.json());
                 commandSourceResult.updateJsonTo(jsonOfChangesOnly);
 
-                final StaffCommand changesOnly = this.commandDeserializerService.deserializeStaffCommand(resourceId, jsonOfChangesOnly,
-                        false);
+                final StaffCommand changesOnly = this.fromCommandJsonDeserializer.commandFromCommandJson(resourceId, jsonOfChangesOnly);
 
                 this.writePlatformService.updateStaff(changesOnly);
 
@@ -78,8 +79,8 @@ public class StaffCommandHandler implements CommandSourceHandler {
         final AppUser checker = context.authenticatedUser();
 
         Long resourceId = commandSourceResult.resourceId();
-        final StaffCommand command = this.commandDeserializerService.deserializeStaffCommand(resourceId, commandSourceResult.json(), true);
-
+        final StaffCommand command = this.fromCommandJsonDeserializer.commandFromCommandJson(resourceId, commandSourceResult.json(), true);
+        
         if (commandSourceResult.isCreate()) {
             final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "ORGANISATION_ADMINISTRATION_SUPER_USER",
                     "CREATE_STAFF_CHECKER");

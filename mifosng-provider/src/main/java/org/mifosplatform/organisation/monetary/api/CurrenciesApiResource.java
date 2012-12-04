@@ -1,6 +1,7 @@
 package org.mifosplatform.organisation.monetary.api;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -14,14 +15,13 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
-import org.mifosplatform.infrastructure.core.api.PortfolioApiDataConversionService;
-import org.mifosplatform.infrastructure.core.api.PortfolioApiJsonSerializerService;
+import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
-import org.mifosplatform.infrastructure.core.serialization.CommandSerializer;
+import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
+import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.organisation.monetary.command.CurrencyCommand;
 import org.mifosplatform.organisation.monetary.data.ConfigurationData;
+import org.mifosplatform.organisation.monetary.serialization.CurrencyCommandFromApiJsonDeserializer;
 import org.mifosplatform.organisation.monetary.service.OrganisationCurrencyReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -31,28 +31,29 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope("singleton")
 public class CurrenciesApiResource {
-    
+
+    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("selectedCurrencyOptions", "currencyOptions"));
+
     private final String resourceNameForPermissions = "CURRENCY";
-    
+
     private final PlatformSecurityContext context;
     private final OrganisationCurrencyReadPlatformService readPlatformService;
-    private final PortfolioApiJsonSerializerService apiJsonSerializerService;
-    private final PortfolioApiDataConversionService apiDataConversionService;
-    private final CommandSerializer commandSerializerService;
+    private final CurrencyCommandFromApiJsonDeserializer fromApiJsonDeserializer;
+    private final DefaultToApiJsonSerializer<ConfigurationData> toApiJsonSerializer;
+    private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @Autowired
-    public CurrenciesApiResource(final PlatformSecurityContext context, 
-            final OrganisationCurrencyReadPlatformService readPlatformService,
-            final PortfolioApiJsonSerializerService apiJsonSerializerService,
-            final PortfolioApiDataConversionService apiDataConversionService,
-            final CommandSerializer commandSerializerService,
+    public CurrenciesApiResource(final PlatformSecurityContext context, final OrganisationCurrencyReadPlatformService readPlatformService,
+            final CurrencyCommandFromApiJsonDeserializer fromApiJsonDeserializer,
+            final DefaultToApiJsonSerializer<ConfigurationData> toApiJsonSerializer,
+            final ApiRequestParameterHelper apiRequestParameterHelper,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
         this.context = context;
         this.readPlatformService = readPlatformService;
-        this.apiJsonSerializerService = apiJsonSerializerService;
-        this.apiDataConversionService = apiDataConversionService;
-        this.commandSerializerService = commandSerializerService;
+        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
+        this.toApiJsonSerializer = toApiJsonSerializer;
+        this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
     }
 
@@ -63,12 +64,10 @@ public class CurrenciesApiResource {
 
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 
-        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-
         final ConfigurationData configurationData = this.readPlatformService.retrieveCurrencyConfiguration();
 
-        return this.apiJsonSerializerService.serializeConfigurationDataToJson(prettyPrint, responseParameters, configurationData);
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.toApiJsonSerializer.serialize(settings, configurationData, RESPONSE_DATA_PARAMETERS);
     }
 
     @PUT
@@ -79,12 +78,11 @@ public class CurrenciesApiResource {
         final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "ORGANISATION_ADMINISTRATION_SUPER_USER", "UPDATE_CURRENCY");
         context.authenticatedUser().validateHasPermissionTo("UPDATE_CURRENCY", allowedPermissions);
 
-        final CurrencyCommand command = this.apiDataConversionService.convertApiRequestJsonToCurrencyCommand(apiRequestBodyAsJson);
-        final String commandSerializedAsJson = this.commandSerializerService.serializeCommandToJson(command);
-        
+        final String commandSerializedAsJson = this.fromApiJsonDeserializer.serializedCommandJsonFromApiJson(apiRequestBodyAsJson);
+
         final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "currencies", null,
                 commandSerializedAsJson);
 
-        return this.apiJsonSerializerService.serializeEntityIdentifier(result);
+        return this.toApiJsonSerializer.serialize(result);
     }
 }

@@ -25,7 +25,10 @@ public class ApiRequestParameterHelper {
 
         final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(queryParameters);
         final boolean prettyPrint = ApiParameterHelper.prettyPrint(queryParameters);
-
-        return ApiRequestJsonSerializationSettings.from(prettyPrint, responseParameters);
+        final boolean template = ApiParameterHelper.template(queryParameters);
+        final Long commandId = ApiParameterHelper.commandId(queryParameters);
+        final boolean makerCheckerable = ApiParameterHelper.makerCheckerable(queryParameters);
+        
+        return ApiRequestJsonSerializationSettings.from(prettyPrint, responseParameters, template, commandId, makerCheckerable);
     }
 }

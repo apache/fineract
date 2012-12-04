@@ -6,9 +6,9 @@ import java.util.List;
 import org.joda.time.LocalDate;
 import org.mifosplatform.commands.domain.CommandSource;
 import org.mifosplatform.commands.exception.UnsupportedCommandException;
-import org.mifosplatform.infrastructure.core.api.PortfolioCommandDeserializerService;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.office.command.BranchMoneyTransferCommand;
+import org.mifosplatform.organisation.office.serialization.BranchMoneyTransferCommandFromCommandJsonDeserializer;
 import org.mifosplatform.organisation.office.service.OfficeWritePlatformService;
 import org.mifosplatform.portfolio.client.service.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
 import org.mifosplatform.useradministration.domain.AppUser;
@@ -19,14 +19,15 @@ import org.springframework.stereotype.Service;
 public class OfficeTransactionCommandHandler implements CommandSourceHandler {
 
     private final PlatformSecurityContext context;
-    private final PortfolioCommandDeserializerService commandDeserializerService;
+    private final BranchMoneyTransferCommandFromCommandJsonDeserializer commandFromCommandJsonDeserializer;
     private final OfficeWritePlatformService writePlatformService;
 
     @Autowired
     public OfficeTransactionCommandHandler(final PlatformSecurityContext context,
-            final PortfolioCommandDeserializerService commandDeserializerService, final OfficeWritePlatformService writePlatformService) {
+            final BranchMoneyTransferCommandFromCommandJsonDeserializer commandFromCommandJsonDeserializer,
+            final OfficeWritePlatformService writePlatformService) {
         this.context = context;
-        this.commandDeserializerService = commandDeserializerService;
+        this.commandFromCommandJsonDeserializer = commandFromCommandJsonDeserializer;
         this.writePlatformService = writePlatformService;
     }
 
@@ -36,13 +37,12 @@ public class OfficeTransactionCommandHandler implements CommandSourceHandler {
         final AppUser maker = context.authenticatedUser();
         final LocalDate asToday = new LocalDate();
 
-        final BranchMoneyTransferCommand command = this.commandDeserializerService.deserializeOfficeTransactionCommand(
-                commandSource.json(), false);
-
+        Long resourceId = commandSource.resourceId();
+        final BranchMoneyTransferCommand command = this.commandFromCommandJsonDeserializer.commandFromCommandJson(resourceId,
+                commandSource.json());
         CommandSource commandSourceResult = commandSource.copy();
 
         Long newResourceId = null;
-
         if (commandSource.isCreate()) {
             try {
                 newResourceId = this.writePlatformService.externalBranchMoneyTransfer(command);
@@ -64,7 +64,7 @@ public class OfficeTransactionCommandHandler implements CommandSourceHandler {
         final AppUser checker = context.authenticatedUser();
 
         Long resourceId = commandSourceResult.resourceId();
-        final BranchMoneyTransferCommand command = this.commandDeserializerService.deserializeOfficeTransactionCommand(
+        final BranchMoneyTransferCommand command = this.commandFromCommandJsonDeserializer.commandFromCommandJson(resourceId,
                 commandSourceResult.json(), true);
 
         if (commandSourceResult.isCreate()) {

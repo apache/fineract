@@ -7,11 +7,11 @@ import org.joda.time.LocalDate;
 import org.mifosplatform.commands.domain.CommandSource;
 import org.mifosplatform.commands.exception.UnsupportedCommandException;
 import org.mifosplatform.commands.service.ChangeDetectionService;
-import org.mifosplatform.infrastructure.core.api.PortfolioCommandDeserializerService;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.client.service.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
 import org.mifosplatform.useradministration.command.PermissionsCommand;
 import org.mifosplatform.useradministration.domain.AppUser;
+import org.mifosplatform.useradministration.serialization.PermissionsCommandFromCommandJsonDeserializer;
 import org.mifosplatform.useradministration.service.PermissionWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,16 +21,16 @@ public class PermissionsCommandHandler implements CommandSourceHandler {
 
     private final PlatformSecurityContext context;
     private final ChangeDetectionService changeDetectionService;
-    private final PortfolioCommandDeserializerService commandDeserializerService;
+    private final PermissionsCommandFromCommandJsonDeserializer commandFromCommandJsonDeserializer;
     private final PermissionWritePlatformService permissionWritePlatformService;
 
     @Autowired
     public PermissionsCommandHandler(final PlatformSecurityContext context, final ChangeDetectionService changeDetectionService,
-            final PortfolioCommandDeserializerService commandDeserializerService,
+            final PermissionsCommandFromCommandJsonDeserializer commandFromCommandJsonDeserializer,
             final PermissionWritePlatformService permissionWritePlatformService) {
         this.context = context;
         this.changeDetectionService = changeDetectionService;
-        this.commandDeserializerService = commandDeserializerService;
+        this.commandFromCommandJsonDeserializer = commandFromCommandJsonDeserializer;
         this.permissionWritePlatformService = permissionWritePlatformService;
     }
 
@@ -48,8 +48,8 @@ public class PermissionsCommandHandler implements CommandSourceHandler {
                         commandSource.resourceId(), commandSource.json());
                 commandSourceResult.updateJsonTo(jsonOfChangesOnly);
 
-                final PermissionsCommand changesOnly = this.commandDeserializerService.deserializePermissionsCommand(jsonOfChangesOnly,
-                        false);
+                final PermissionsCommand changesOnly = this.commandFromCommandJsonDeserializer.commandFromCommandJson(
+                        commandSource.resourceId(), jsonOfChangesOnly);
 
                 this.permissionWritePlatformService.updateMakerCheckerPermissions(changesOnly);
 
@@ -70,11 +70,13 @@ public class PermissionsCommandHandler implements CommandSourceHandler {
         final AppUser checker = context.authenticatedUser();
 
         if (commandSourceResult.isUpdate()) {
-            final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "USER_ADMINISTRATION_SUPER_USER", "PERMISSIONS_ROLE");
-            context.authenticatedUser().validateHasPermissionTo("PERMISSIONS_ROLE", allowedPermissions);
+            final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "USER_ADMINISTRATION_SUPER_USER",
+                    "UPDATE_PERMISSION_CHECKER");
+            context.authenticatedUser().validateHasPermissionTo("UPDATE_PERMISSION_CHECKER", allowedPermissions);
 
-            final PermissionsCommand command = this.commandDeserializerService.deserializePermissionsCommand(commandSourceResult.json(),
-                    true);
+            final PermissionsCommand command = this.commandFromCommandJsonDeserializer.commandFromCommandJson(
+                    commandSourceResult.resourceId(), commandSourceResult.json(), true);
+
             this.permissionWritePlatformService.updateMakerCheckerPermissions(command);
             commandSourceResult.markAsChecked(checker, new LocalDate());
         } else {

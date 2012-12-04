@@ -48,7 +48,21 @@ public final class DefaultToApiJsonSerializer<T> implements ToApiJsonSerializer<
         return serializeWithSettings(delegatedSerializer, settings, singleObject);
     }
 
-    private String serializeWithSettings(final Gson gson, final ApiRequestJsonSerializationSettings settings, final Object... dataObject) {
+    private String serializeWithSettings(final Gson gson, final ApiRequestJsonSerializationSettings settings, final Object[] dataObject) {
+        String json = null;
+        if (gson != null) {
+            json = helper.serializedJsonFrom(gson, dataObject);
+        } else {
+            if (settings.isPrettyPrint()) {
+                json = this.excludeNothingWithPrettyPrintingOn.serialize(dataObject);
+            } else {
+                json = serialize(dataObject);
+            }
+        }
+        return json;
+    }
+    
+    private String serializeWithSettings(final Gson gson, final ApiRequestJsonSerializationSettings settings, final Object dataObject) {
         String json = null;
         if (gson != null) {
             json = helper.serializedJsonFrom(gson, dataObject);

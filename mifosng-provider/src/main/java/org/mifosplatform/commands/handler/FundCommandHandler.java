@@ -7,10 +7,10 @@ import org.joda.time.LocalDate;
 import org.mifosplatform.commands.domain.CommandSource;
 import org.mifosplatform.commands.exception.UnsupportedCommandException;
 import org.mifosplatform.commands.service.ChangeDetectionService;
-import org.mifosplatform.infrastructure.core.api.PortfolioCommandDeserializerService;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.client.service.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
 import org.mifosplatform.portfolio.fund.command.FundCommand;
+import org.mifosplatform.portfolio.fund.serialization.FundCommandFromCommandJsonDeserializer;
 import org.mifosplatform.portfolio.fund.service.FundWritePlatformService;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,15 +21,15 @@ public class FundCommandHandler implements CommandSourceHandler {
 
     private final PlatformSecurityContext context;
     private final ChangeDetectionService changeDetectionService;
-    private final PortfolioCommandDeserializerService commandDeserializerService;
+    private final FundCommandFromCommandJsonDeserializer fromCommandJsonDeserializer;
     private final FundWritePlatformService writePlatformService;
 
     @Autowired
     public FundCommandHandler(final PlatformSecurityContext context, final ChangeDetectionService changeDetectionService,
-            final PortfolioCommandDeserializerService commandDeserializerService, final FundWritePlatformService writePlatformService) {
+            final FundCommandFromCommandJsonDeserializer fromCommandJsonDeserializer, final FundWritePlatformService writePlatformService) {
         this.context = context;
         this.changeDetectionService = changeDetectionService;
-        this.commandDeserializerService = commandDeserializerService;
+        this.fromCommandJsonDeserializer = fromCommandJsonDeserializer;
         this.writePlatformService = writePlatformService;
     }
 
@@ -40,7 +40,7 @@ public class FundCommandHandler implements CommandSourceHandler {
         final LocalDate asToday = new LocalDate();
 
         final Long resourceId = commandSource.resourceId();
-        final FundCommand command = this.commandDeserializerService.deserializeFundCommand(resourceId, commandSource.json(), false);
+        final FundCommand command = this.fromCommandJsonDeserializer.commandFromCommandJson(resourceId, commandSource.json());
 
         CommandSource commandSourceResult = commandSource.copy();
 
@@ -60,8 +60,7 @@ public class FundCommandHandler implements CommandSourceHandler {
                         commandSource.resourceId(), commandSource.json());
                 commandSourceResult.updateJsonTo(jsonOfChangesOnly);
 
-                final FundCommand changesOnly = this.commandDeserializerService
-                        .deserializeFundCommand(resourceId, jsonOfChangesOnly, false);
+                final FundCommand changesOnly = this.fromCommandJsonDeserializer.commandFromCommandJson(resourceId, jsonOfChangesOnly);
 
                 this.writePlatformService.updateFund(changesOnly);
 
@@ -80,7 +79,7 @@ public class FundCommandHandler implements CommandSourceHandler {
         final AppUser checker = context.authenticatedUser();
 
         Long resourceId = commandSourceResult.resourceId();
-        final FundCommand command = this.commandDeserializerService.deserializeFundCommand(resourceId, commandSourceResult.json(), true);
+        final FundCommand command = this.fromCommandJsonDeserializer.commandFromCommandJson(resourceId, commandSourceResult.json(), true);
 
         if (commandSourceResult.isCreate()) {
             final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "ORGANISATION_ADMINISTRATION_SUPER_USER",

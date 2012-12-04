@@ -22,17 +22,12 @@ import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.exception.UnsupportedParameterException;
 import org.mifosplatform.infrastructure.core.serialization.JsonParserHelper;
-import org.mifosplatform.organisation.monetary.command.CurrencyCommand;
-import org.mifosplatform.organisation.office.command.BranchMoneyTransferCommand;
-import org.mifosplatform.organisation.office.command.OfficeCommand;
 import org.mifosplatform.organisation.staff.command.BulkTransferLoanOfficerCommand;
-import org.mifosplatform.organisation.staff.command.StaffCommand;
 import org.mifosplatform.portfolio.charge.command.ChargeDefinitionCommand;
 import org.mifosplatform.portfolio.client.command.ClientCommand;
 import org.mifosplatform.portfolio.client.command.ClientIdentifierCommand;
 import org.mifosplatform.portfolio.client.command.NoteCommand;
 import org.mifosplatform.portfolio.client.data.ClientData;
-import org.mifosplatform.portfolio.fund.command.FundCommand;
 import org.mifosplatform.portfolio.group.command.GroupCommand;
 import org.mifosplatform.portfolio.loanaccount.command.AdjustLoanTransactionCommand;
 import org.mifosplatform.portfolio.loanaccount.command.LoanApplicationCommand;
@@ -49,10 +44,6 @@ import org.mifosplatform.portfolio.savingsdepositaccount.command.DepositAccountW
 import org.mifosplatform.portfolio.savingsdepositaccount.command.DepositStateTransitionApprovalCommand;
 import org.mifosplatform.portfolio.savingsdepositaccount.command.DepositStateTransitionCommand;
 import org.mifosplatform.portfolio.savingsdepositproduct.command.DepositProductCommand;
-import org.mifosplatform.useradministration.command.PermissionsCommand;
-import org.mifosplatform.useradministration.command.RoleCommand;
-import org.mifosplatform.useradministration.command.RolePermissionCommand;
-import org.mifosplatform.useradministration.command.UserCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.number.NumberFormatter;
 import org.springframework.stereotype.Service;
@@ -126,36 +117,6 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
     }
 
     @Override
-    public FundCommand convertApiRequestJsonToFundCommand(final Long resourceIdentifier, final String json) {
-
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
-
-        final Type typeOfMap = new TypeToken<Map<String, String>>() {}.getType();
-        final Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
-
-        final Set<String> supportedParams = new HashSet<String>(Arrays.asList("name", "externalId"));
-
-        checkForUnsupportedParameters(requestMap, supportedParams);
-
-        return this.portfolioCommandDeserializerService.deserializeFundCommand(resourceIdentifier, json, false);
-    }
-
-    @Override
-    public StaffCommand convertApiRequestJsonToStaffCommand(final Long resourceIdentifier, final String json) {
-
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
-
-        final Type typeOfMap = new TypeToken<Map<String, String>>() {}.getType();
-        final Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
-
-        final Set<String> supportedParams = new HashSet<String>(Arrays.asList("firstname", "lastname", "officeId", "isLoanOfficer"));
-
-        checkForUnsupportedParameters(requestMap, supportedParams);
-
-        return this.portfolioCommandDeserializerService.deserializeStaffCommand(resourceIdentifier, json, false);
-    }
-
-    @Override
     public BulkTransferLoanOfficerCommand convertJsonToLoanReassignmentCommand(Long resourceIdentifier, String json) {
 
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
@@ -215,116 +176,6 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         //
 
         return new BulkTransferLoanOfficerCommand(fromLoanOfficerId, toLoanOfficerId, assignmentDate, loans);
-    }
-
-    @Override
-    public OfficeCommand convertApiRequestJsonToOfficeCommand(final Long resourceIdentifier, final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
-
-        Type typeOfMap = new TypeToken<Map<String, String>>() {}.getType();
-        Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
-
-        Set<String> supportedParams = new HashSet<String>(Arrays.asList("name", "externalId", "parentId", "openingDate", "locale",
-                "dateFormat"));
-
-        checkForUnsupportedParameters(requestMap, supportedParams);
-
-        final Set<String> parametersPassedInRequest = new HashSet<String>();
-
-        final JsonParser parser = new JsonParser();
-        final JsonElement element = parser.parse(json);
-        final JsonParserHelper helper = new JsonParserHelper();
-
-        final String name = helper.extractStringNamed("name", element, parametersPassedInRequest);
-        final String externalId = helper.extractStringNamed("externalId", element, parametersPassedInRequest);
-        final Long parentId = helper.extractLongNamed("parentId", element, parametersPassedInRequest);
-        final LocalDate openingLocalDate = helper.extractLocalDateNamed("openingDate", element, parametersPassedInRequest);
-
-        return new OfficeCommand(parametersPassedInRequest, false, resourceIdentifier, name, externalId, parentId, openingLocalDate);
-    }
-
-    @Override
-    public RoleCommand convertApiRequestJsonToRoleCommand(final Long resourceIdentifier, final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
-
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        final Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
-
-        final Set<String> supportedParams = new HashSet<String>(Arrays.asList("id", "name", "description"));
-
-        checkForUnsupportedParameters(requestMap, supportedParams);
-
-        // no difference between the api json and internal command
-        // representation of json so reuse this code to de-serialize into
-        // command object
-        return this.portfolioCommandDeserializerService.deserializeRoleCommand(resourceIdentifier, json, false);
-    }
-
-    @Override
-    public PermissionsCommand convertApiRequestJsonToPermissionsCommand(final String json) {
-
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
-
-        final Type typeOfMap = new TypeToken<Map<String, Boolean>>() {}.getType();
-        final Map<String, Boolean> permissionsMap = gsonConverter.fromJson(json, typeOfMap);
-
-        return new PermissionsCommand(permissionsMap, false);
-    }
-
-    @Override
-    public RolePermissionCommand convertApiRequestJsonToRolePermissionCommand(final Long resourceIdentifier, final String json) {
-
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
-
-        final Type typeOfMap = new TypeToken<Map<String, Boolean>>() {}.getType();
-        final Map<String, Boolean> permissionsMap = gsonConverter.fromJson(json, typeOfMap);
-
-        return new RolePermissionCommand(resourceIdentifier, permissionsMap, false);
-    }
-
-    @Override
-    public UserCommand convertApiRequestJsonToUserCommand(final Long resourceIdentifier, final String json) {
-
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
-
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        final Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
-
-        final Set<String> supportedParams = new HashSet<String>(Arrays.asList("username", "firstname", "lastname", "password",
-                "repeatPassword", "email", "officeId", "notSelectedRoles", "roles"));
-
-        checkForUnsupportedParameters(requestMap, supportedParams);
-
-        // no difference between the api json and internal command
-        // representation of json so reuse this code to de-serialize into
-        // command object
-        return this.portfolioCommandDeserializerService.deserializeUserCommand(resourceIdentifier, json, false);
-    }
-
-    @Override
-    public BranchMoneyTransferCommand convertApiRequestJsonToBranchMoneyTransferCommand(final String json) {
-
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
-
-        Type typeOfMap = new TypeToken<Map<String, String>>() {}.getType();
-        Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
-
-        Set<String> supportedParams = new HashSet<String>(Arrays.asList("fromOfficeId", "toOfficeId", "transactionDate", "currencyCode",
-                "transactionAmount", "description", "locale", "dateFormat"));
-
-        checkForUnsupportedParameters(requestMap, supportedParams);
-
-        Set<String> modifiedParameters = new HashSet<String>();
-
-        Long fromOfficeId = extractLongParameter("fromOfficeId", requestMap, modifiedParameters);
-        Long toOfficeId = extractLongParameter("toOfficeId", requestMap, modifiedParameters);
-        LocalDate transactionLocalDate = extractLocalDateParameter("transactionDate", requestMap, modifiedParameters);
-        String currencyCode = extractStringParameter("currencyCode", requestMap, modifiedParameters);
-        BigDecimal transactionAmountValue = extractBigDecimalParameter("transactionAmount", requestMap, modifiedParameters);
-        String description = extractStringParameter("description", requestMap, modifiedParameters);
-
-        return new BranchMoneyTransferCommand(modifiedParameters, false, fromOfficeId, toOfficeId, transactionLocalDate, currencyCode,
-                transactionAmountValue, description);
     }
 
     @Override
@@ -792,20 +643,6 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         String note = extractStringParameter("note", requestMap, modifiedParameters);
 
         return new NoteCommand(noteId, clientId, note);
-    }
-
-    @Override
-    public CurrencyCommand convertApiRequestJsonToCurrencyCommand(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
-
-        Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
-
-        Set<String> supportedParams = new HashSet<String>(Arrays.asList("currencies"));
-
-        checkForUnsupportedParameters(requestMap, supportedParams);
-
-        return this.portfolioCommandDeserializerService.deserializeCurrencyCommand(json, false);
     }
 
     private void checkForUnsupportedParameters(Map<String, ?> requestMap, Set<String> supportedParams) {

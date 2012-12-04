@@ -2,6 +2,7 @@ package org.mifosplatform.organisation.staff.api;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -19,16 +20,16 @@ import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
-import org.mifosplatform.infrastructure.core.api.PortfolioApiDataConversionService;
-import org.mifosplatform.infrastructure.core.api.PortfolioApiJsonSerializerService;
+import org.mifosplatform.infrastructure.codes.data.CodeData;
+import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
-import org.mifosplatform.infrastructure.core.serialization.CommandSerializer;
+import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
+import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.office.data.OfficeLookup;
 import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
-import org.mifosplatform.organisation.staff.command.StaffCommand;
 import org.mifosplatform.organisation.staff.data.StaffData;
+import org.mifosplatform.organisation.staff.serialization.StaffCommandFromApiJsonDeserializer;
 import org.mifosplatform.organisation.staff.service.StaffReadPlatformService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,30 +44,33 @@ public class StaffApiResource {
 
     private final static Logger logger = LoggerFactory.getLogger(StaffApiResource.class);
 
+    /**
+     * The set of parameters that are supported in response for {@link CodeData}
+     */
+    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "firstname", "lastname", "displayName",
+            "officeId", "officeName", "loanOfficerFlag", "allowedOffices"));
+
     private final String resourceNameForPermissions = "STAFF";
 
     private final PlatformSecurityContext context;
     private final StaffReadPlatformService readPlatformService;
     private final OfficeReadPlatformService officeReadPlatformService;
-    private final PortfolioApiJsonSerializerService apiJsonSerializerService;
+    private final StaffCommandFromApiJsonDeserializer fromApiJsonDeserializer;
+    private final DefaultToApiJsonSerializer<StaffData> toApiJsonSerializer;
+    private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-
-    private final PortfolioApiDataConversionService apiDataConversionService;
-
-    private final CommandSerializer commandSerializerService;
 
     @Autowired
     public StaffApiResource(final PlatformSecurityContext context, final StaffReadPlatformService readPlatformService,
-            final OfficeReadPlatformService officeReadPlatformService, final PortfolioApiJsonSerializerService apiJsonSerializerService,
-            final PortfolioApiDataConversionService apiDataConversionService,
-            final CommandSerializer commandSerializerService,
+            final OfficeReadPlatformService officeReadPlatformService, final StaffCommandFromApiJsonDeserializer fromApiJsonDeserializer,
+            final DefaultToApiJsonSerializer<StaffData> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
         this.context = context;
         this.readPlatformService = readPlatformService;
         this.officeReadPlatformService = officeReadPlatformService;
-        this.apiJsonSerializerService = apiJsonSerializerService;
-        this.apiDataConversionService = apiDataConversionService;
-        this.commandSerializerService = commandSerializerService;
+        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
+        this.toApiJsonSerializer = toApiJsonSerializer;
+        this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
     }
 
@@ -78,13 +82,11 @@ public class StaffApiResource {
 
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 
-        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-
         final String extraCriteria = getStaffCriteria(sqlSearch, officeId);
         final Collection<StaffData> staff = this.readPlatformService.retrieveAllStaff(extraCriteria);
 
-        return this.apiJsonSerializerService.serializeStaffDataToJson(prettyPrint, responseParameters, staff);
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.toApiJsonSerializer.serialize(settings, staff, RESPONSE_DATA_PARAMETERS);
     }
 
     @POST
@@ -95,13 +97,12 @@ public class StaffApiResource {
         final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "ORGANISATION_ADMINISTRATION_SUPER_USER", "CREATE_STAFF");
         context.authenticatedUser().validateHasPermissionTo("CREATE_STAFF", allowedPermissions);
 
-        final StaffCommand command = this.apiDataConversionService.convertApiRequestJsonToStaffCommand(null, apiRequestBodyAsJson);
-        final String commandSerializedAsJson = this.commandSerializerService.serializeCommandToJson(command);
+        final String commandSerializedAsJson = this.fromApiJsonDeserializer.serializedCommandJsonFromApiJson(apiRequestBodyAsJson);
 
         final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE", "staff", null,
                 commandSerializedAsJson);
 
-        return this.apiJsonSerializerService.serializeEntityIdentifier(result);
+        return this.toApiJsonSerializer.serialize(result);
     }
 
     @GET
@@ -112,17 +113,15 @@ public class StaffApiResource {
 
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 
-        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-        boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
         StaffData staff = this.readPlatformService.retrieveStaff(staffId);
-        if (template) {
+        if (settings.isTemplate()) {
             final Collection<OfficeLookup> allowedOffices = officeReadPlatformService.retrieveAllOfficesForLookup();
             staff = StaffData.templateData(staff, allowedOffices);
         }
 
-        return this.apiJsonSerializerService.serializeStaffDataToJson(prettyPrint, responseParameters, staff);
+        return this.toApiJsonSerializer.serialize(settings, staff, RESPONSE_DATA_PARAMETERS);
     }
 
     @PUT
@@ -134,13 +133,12 @@ public class StaffApiResource {
         final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "ORGANISATION_ADMINISTRATION_SUPER_USER", "UPDATE_STAFF");
         context.authenticatedUser().validateHasPermissionTo("UPDATE_STAFF", allowedPermissions);
 
-        final StaffCommand command = this.apiDataConversionService.convertApiRequestJsonToStaffCommand(staffId, apiRequestBodyAsJson);
-        final String commandSerializedAsJson = this.commandSerializerService.serializeCommandToJson(command);
+        final String commandSerializedAsJson = this.fromApiJsonDeserializer.serializedCommandJsonFromApiJson(staffId, apiRequestBodyAsJson);
 
         final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "staff", staffId,
                 commandSerializedAsJson);
 
-        return this.apiJsonSerializerService.serializeEntityIdentifier(result);
+        return this.toApiJsonSerializer.serialize(result);
     }
 
     private String getStaffCriteria(final String sqlSearch, final Integer officeId) {

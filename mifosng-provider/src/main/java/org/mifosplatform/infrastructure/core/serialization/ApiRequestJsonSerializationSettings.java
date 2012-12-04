@@ -10,22 +10,42 @@ public class ApiRequestJsonSerializationSettings {
 
     private final boolean prettyPrint;
     private final Set<String> parametersForPartialResponse;
+    private final boolean template;
+    private final Long commandId;
+    private final boolean makerCheckerable;
 
-    public ApiRequestJsonSerializationSettings(final boolean prettyPrint, final Set<String> parametersForPartialResponse) {
+    public ApiRequestJsonSerializationSettings(final boolean prettyPrint, final Set<String> parametersForPartialResponse,
+            final boolean template, final Long commandId, final boolean makerCheckerable) {
         this.prettyPrint = prettyPrint;
         this.parametersForPartialResponse = parametersForPartialResponse;
+        this.template = template;
+        this.commandId = commandId;
+        this.makerCheckerable = makerCheckerable;
     }
 
-    public static ApiRequestJsonSerializationSettings from(final boolean prettyPrint, final Set<String> parametersForPartialResponse) {
+    public static ApiRequestJsonSerializationSettings from(final boolean prettyPrint, final Set<String> parametersForPartialResponse,
+            final boolean template, final Long commandId, final boolean makerCheckerable) {
 
         // FIXME - kw - rather than always creating new objects for this could
         // just send by common ones like, prettyprint=false, empty response
         // parameters
-        return new ApiRequestJsonSerializationSettings(prettyPrint, parametersForPartialResponse);
+        return new ApiRequestJsonSerializationSettings(prettyPrint, parametersForPartialResponse, template, commandId, makerCheckerable);
     }
 
     public boolean isPrettyPrint() {
         return this.prettyPrint;
+    }
+
+    public boolean isTemplate() {
+        return this.template;
+    }
+    
+    public boolean isMakerCheckerable() {
+        return this.makerCheckerable;
+    }
+
+    public Long getCommandId() {
+        return this.commandId;
     }
 
     public Set<String> getParametersForPartialResponse() {
@@ -34,5 +54,9 @@ public class ApiRequestJsonSerializationSettings {
 
     public boolean isPartialResponseRequired() {
         return !this.parametersForPartialResponse.isEmpty();
+    }
+
+    public boolean isCommandIdPassed() {
+        return this.commandId != null;
     }
 }

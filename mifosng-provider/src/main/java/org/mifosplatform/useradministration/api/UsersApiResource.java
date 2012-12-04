@@ -3,6 +3,7 @@ package org.mifosplatform.useradministration.api;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -19,16 +20,16 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
-import org.mifosplatform.infrastructure.core.api.PortfolioApiDataConversionService;
-import org.mifosplatform.infrastructure.core.api.PortfolioApiJsonSerializerService;
+import org.mifosplatform.infrastructure.codes.data.CodeData;
+import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
-import org.mifosplatform.infrastructure.core.serialization.CommandSerializer;
+import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
+import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.office.data.OfficeLookup;
 import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
-import org.mifosplatform.useradministration.command.UserCommand;
 import org.mifosplatform.useradministration.data.AppUserData;
+import org.mifosplatform.useradministration.serialization.UserCommandFromApiJsonDeserializer;
 import org.mifosplatform.useradministration.service.AppUserReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -39,28 +40,33 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class UsersApiResource {
 
+    /**
+     * The set of parameters that are supported in response for {@link CodeData}
+     */
+    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "officeId", "officeName", "username",
+            "firstname", "lastname", "email", "allowedOffices", "availableRoles", "selectedRoles"));
+
     private final String resourceNameForPermissions = "USER";
 
     private final PlatformSecurityContext context;
     private final AppUserReadPlatformService readPlatformService;
     private final OfficeReadPlatformService officeReadPlatformService;
-    private final PortfolioApiJsonSerializerService apiJsonSerializerService;
-    private final PortfolioApiDataConversionService apiDataConversionService;
-    private final CommandSerializer commandSerializerService;
+    private final UserCommandFromApiJsonDeserializer fromApiJsonDeserializer;
+    private final DefaultToApiJsonSerializer<AppUserData> toApiJsonSerializer;
+    private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @Autowired
     public UsersApiResource(final PlatformSecurityContext context, final AppUserReadPlatformService readPlatformService,
-            final OfficeReadPlatformService officeReadPlatformService, final PortfolioApiJsonSerializerService apiJsonSerializerService,
-            final PortfolioApiDataConversionService apiDataConversionService,
-            final CommandSerializer commandSerializerService,
+            final OfficeReadPlatformService officeReadPlatformService, final UserCommandFromApiJsonDeserializer fromApiJsonDeserializer,
+            final DefaultToApiJsonSerializer<AppUserData> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
         this.context = context;
         this.readPlatformService = readPlatformService;
         this.officeReadPlatformService = officeReadPlatformService;
-        this.apiJsonSerializerService = apiJsonSerializerService;
-        this.apiDataConversionService = apiDataConversionService;
-        this.commandSerializerService = commandSerializerService;
+        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
+        this.toApiJsonSerializer = toApiJsonSerializer;
+        this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
     }
 
@@ -71,12 +77,10 @@ public class UsersApiResource {
 
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 
-        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-
         final Collection<AppUserData> users = this.readPlatformService.retrieveAllUsers();
 
-        return this.apiJsonSerializerService.serializeAppUserDataToJson(prettyPrint, responseParameters, users);
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.toApiJsonSerializer.serialize(settings, users, RESPONSE_DATA_PARAMETERS);
     }
 
     @GET
@@ -87,17 +91,15 @@ public class UsersApiResource {
 
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 
-        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-        final boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
         AppUserData user = this.readPlatformService.retrieveUser(userId);
-        if (template) {
+        if (settings.isTemplate()) {
             List<OfficeLookup> offices = new ArrayList<OfficeLookup>(this.officeReadPlatformService.retrieveAllOfficesForLookup());
             user = new AppUserData(user, offices);
         }
 
-        return this.apiJsonSerializerService.serializeAppUserDataToJson(prettyPrint, responseParameters, user);
+        return this.toApiJsonSerializer.serialize(settings, user, RESPONSE_DATA_PARAMETERS);
     }
 
     @GET
@@ -108,12 +110,10 @@ public class UsersApiResource {
 
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 
-        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-
         final AppUserData user = this.readPlatformService.retrieveNewUserDetails();
 
-        return this.apiJsonSerializerService.serializeAppUserDataToJson(prettyPrint, responseParameters, user);
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.toApiJsonSerializer.serialize(settings, user, RESPONSE_DATA_PARAMETERS);
     }
 
     @POST
@@ -124,13 +124,12 @@ public class UsersApiResource {
         final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "USER_ADMINISTRATION_SUPER_USER", "CREATE_USER");
         context.authenticatedUser().validateHasPermissionTo("CREATE_USER", allowedPermissions);
 
-        final UserCommand command = this.apiDataConversionService.convertApiRequestJsonToUserCommand(null, apiRequestBodyAsJson);
-        final String commandSerializedAsJson = this.commandSerializerService.serializeCommandToJson(command);
+        final String commandSerializedAsJson = this.fromApiJsonDeserializer.serializedCommandJsonFromApiJson(apiRequestBodyAsJson);
 
         final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE", "users", null,
                 commandSerializedAsJson);
 
-        return this.apiJsonSerializerService.serializeEntityIdentifier(result);
+        return this.toApiJsonSerializer.serialize(result);
     }
 
     @PUT
@@ -142,13 +141,12 @@ public class UsersApiResource {
         final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "USER_ADMINISTRATION_SUPER_USER", "UPDATE_USER");
         context.authenticatedUser().validateHasPermissionTo("UPDATE_USER", allowedPermissions);
 
-        final UserCommand command = this.apiDataConversionService.convertApiRequestJsonToUserCommand(null, apiRequestBodyAsJson);
-        final String commandSerializedAsJson = this.commandSerializerService.serializeCommandToJson(command);
+        final String commandSerializedAsJson = this.fromApiJsonDeserializer.serializedCommandJsonFromApiJson(apiRequestBodyAsJson);
 
         final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "users", userId,
                 commandSerializedAsJson);
 
-        return this.apiJsonSerializerService.serializeEntityIdentifier(result);
+        return this.toApiJsonSerializer.serialize(result);
     }
 
     @DELETE
@@ -162,6 +160,6 @@ public class UsersApiResource {
 
         final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("DELETE", "users", userId, "{}");
 
-        return this.apiJsonSerializerService.serializeEntityIdentifier(result);
+        return this.toApiJsonSerializer.serialize(result);
     }
 }

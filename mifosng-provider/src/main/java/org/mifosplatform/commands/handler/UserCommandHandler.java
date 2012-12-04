@@ -6,11 +6,11 @@ import java.util.List;
 import org.joda.time.LocalDate;
 import org.mifosplatform.commands.domain.CommandSource;
 import org.mifosplatform.commands.service.ChangeDetectionService;
-import org.mifosplatform.infrastructure.core.api.PortfolioCommandDeserializerService;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.client.service.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
 import org.mifosplatform.useradministration.command.UserCommand;
 import org.mifosplatform.useradministration.domain.AppUser;
+import org.mifosplatform.useradministration.serialization.UserCommandFromCommandJsonDeserializer;
 import org.mifosplatform.useradministration.service.AppUserWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,15 +20,15 @@ public class UserCommandHandler implements CommandSourceHandler {
 
     private final PlatformSecurityContext context;
     private final ChangeDetectionService changeDetectionService;
-    private final PortfolioCommandDeserializerService commandDeserializerService;
+    private final UserCommandFromCommandJsonDeserializer fromCommandJsonDeserializer;
     private final AppUserWritePlatformService writePlatformService;
 
     @Autowired
     public UserCommandHandler(final PlatformSecurityContext context, final ChangeDetectionService changeDetectionService,
-            final PortfolioCommandDeserializerService commandDeserializerService, final AppUserWritePlatformService writePlatformService) {
+            final UserCommandFromCommandJsonDeserializer fromCommandJsonDeserializer, final AppUserWritePlatformService writePlatformService) {
         this.context = context;
         this.changeDetectionService = changeDetectionService;
-        this.commandDeserializerService = commandDeserializerService;
+        this.fromCommandJsonDeserializer = fromCommandJsonDeserializer;
         this.writePlatformService = writePlatformService;
     }
 
@@ -39,8 +39,7 @@ public class UserCommandHandler implements CommandSourceHandler {
         final LocalDate asToday = new LocalDate();
 
         final Long resourceId = commandSource.resourceId();
-        final UserCommand command = this.commandDeserializerService.deserializeUserCommand(resourceId, commandSource.json(), false);
-
+        final UserCommand command = this.fromCommandJsonDeserializer.commandFromCommandJson(resourceId, commandSource.json());
         CommandSource commandSourceResult = commandSource.copy();
         if (commandSource.isCreate()) {
             try {
@@ -57,9 +56,7 @@ public class UserCommandHandler implements CommandSourceHandler {
                         commandSource.resourceId(), commandSource.json());
                 commandSourceResult.updateJsonTo(jsonOfChangesOnly);
 
-                final UserCommand changesOnly = this.commandDeserializerService
-                        .deserializeUserCommand(resourceId, jsonOfChangesOnly, false);
-
+                final UserCommand changesOnly = this.fromCommandJsonDeserializer.commandFromCommandJson(resourceId, jsonOfChangesOnly);
                 if (maker.hasIdOf(command.getId())) {
                     this.writePlatformService.updateUsersOwnAccountDetails(changesOnly);
                 } else {
@@ -88,7 +85,7 @@ public class UserCommandHandler implements CommandSourceHandler {
         final AppUser checker = context.authenticatedUser();
 
         Long resourceId = commandSourceResult.resourceId();
-        final UserCommand command = this.commandDeserializerService.deserializeUserCommand(resourceId, commandSourceResult.json(), true);
+        final UserCommand command = this.fromCommandJsonDeserializer.commandFromCommandJson(resourceId, commandSourceResult.json(), true);
         if (commandSourceResult.isUserResource()) {
             if (commandSourceResult.isCreate()) {
                 final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "USER_ADMINISTRATION_SUPER_USER",
@@ -102,9 +99,10 @@ public class UserCommandHandler implements CommandSourceHandler {
                 if (checker.hasIdOf(command.getId())) {
                     this.writePlatformService.updateUsersOwnAccountDetails(command);
                 } else {
-                    final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "USER_ADMINISTRATION_SUPER_USER","UPDATE_USER_MAKER");
+                    final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "USER_ADMINISTRATION_SUPER_USER",
+                            "UPDATE_USER_MAKER");
                     context.authenticatedUser().validateHasPermissionTo("UPDATE_USER_MAKER", allowedPermissions);
-                    
+
                     this.writePlatformService.updateUser(command);
                 }
 

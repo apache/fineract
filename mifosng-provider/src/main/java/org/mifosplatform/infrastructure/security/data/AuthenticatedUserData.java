@@ -1,4 +1,4 @@
-package org.mifosplatform.useradministration.data;
+package org.mifosplatform.infrastructure.security.data;
 
 import java.util.Collection;
 

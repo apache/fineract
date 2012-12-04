@@ -7,9 +7,9 @@ import org.joda.time.LocalDate;
 import org.mifosplatform.commands.domain.CommandSource;
 import org.mifosplatform.commands.exception.UnsupportedCommandException;
 import org.mifosplatform.commands.service.ChangeDetectionService;
-import org.mifosplatform.infrastructure.core.api.PortfolioCommandDeserializerService;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.command.CurrencyCommand;
+import org.mifosplatform.organisation.monetary.serialization.CurrencyCommandFromCommandJsonDeserializer;
 import org.mifosplatform.organisation.monetary.service.CurrencyWritePlatformService;
 import org.mifosplatform.portfolio.client.service.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
 import org.mifosplatform.useradministration.domain.AppUser;
@@ -21,15 +21,16 @@ public class CurrencyCommandHandler implements CommandSourceHandler {
 
     private final PlatformSecurityContext context;
     private final ChangeDetectionService changeDetectionService;
-    private final PortfolioCommandDeserializerService commandDeserializerService;
+    private final CurrencyCommandFromCommandJsonDeserializer fromApiJsonDeserializer;
     private final CurrencyWritePlatformService writePlatformService;
 
     @Autowired
     public CurrencyCommandHandler(final PlatformSecurityContext context, final ChangeDetectionService changeDetectionService,
-            final PortfolioCommandDeserializerService commandDeserializerService, final CurrencyWritePlatformService writePlatformService) {
+            final CurrencyCommandFromCommandJsonDeserializer fromApiJsonDeserializer,
+            final CurrencyWritePlatformService writePlatformService) {
         this.context = context;
         this.changeDetectionService = changeDetectionService;
-        this.commandDeserializerService = commandDeserializerService;
+        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.writePlatformService = writePlatformService;
     }
 
@@ -49,7 +50,7 @@ public class CurrencyCommandHandler implements CommandSourceHandler {
                         commandSource.resourceId(), commandSource.json());
                 commandSourceResult.updateJsonTo(jsonOfChangesOnly);
 
-                final CurrencyCommand changesOnly = this.commandDeserializerService.deserializeCurrencyCommand(jsonOfChangesOnly, false);
+                final CurrencyCommand changesOnly = this.fromApiJsonDeserializer.commandFromCommandJson(jsonOfChangesOnly);
 
                 this.writePlatformService.updateAllowedCurrencies(changesOnly);
                 commandSourceResult.markAsChecked(maker, asToday);
@@ -66,8 +67,8 @@ public class CurrencyCommandHandler implements CommandSourceHandler {
 
         final AppUser checker = context.authenticatedUser();
 
-        final CurrencyCommand command = this.commandDeserializerService.deserializeCurrencyCommand(commandSourceResult.json(), true);
-
+        final CurrencyCommand command = this.fromApiJsonDeserializer.commandFromCommandJson(commandSourceResult.resourceId(),
+                commandSourceResult.json(), true);
         if (commandSourceResult.isCreate()) {
             throw new UnsupportedCommandException(commandSourceResult.commandName());
         } else if (commandSourceResult.isUpdate()) {

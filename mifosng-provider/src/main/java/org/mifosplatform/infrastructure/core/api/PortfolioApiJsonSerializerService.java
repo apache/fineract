@@ -9,9 +9,7 @@ import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 import org.mifosplatform.infrastructure.dataqueries.data.DatatableData;
 import org.mifosplatform.infrastructure.dataqueries.data.GenericResultsetData;
 import org.mifosplatform.infrastructure.documentmanagement.data.DocumentData;
-import org.mifosplatform.organisation.monetary.data.ConfigurationData;
-import org.mifosplatform.organisation.office.data.OfficeData;
-import org.mifosplatform.organisation.office.data.OfficeTransactionData;
+import org.mifosplatform.infrastructure.security.data.AuthenticatedUserData;
 import org.mifosplatform.organisation.staff.data.BulkTransferLoanOfficerData;
 import org.mifosplatform.organisation.staff.data.StaffData;
 import org.mifosplatform.portfolio.charge.data.ChargeData;
@@ -19,7 +17,6 @@ import org.mifosplatform.portfolio.client.data.ClientAccountSummaryCollectionDat
 import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.client.data.ClientIdentifierData;
 import org.mifosplatform.portfolio.client.data.NoteData;
-import org.mifosplatform.portfolio.fund.data.FundData;
 import org.mifosplatform.portfolio.group.data.GroupAccountSummaryCollectionData;
 import org.mifosplatform.portfolio.group.data.GroupData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanAccountData;
@@ -33,11 +30,6 @@ import org.mifosplatform.portfolio.savingsaccount.data.SavingScheduleData;
 import org.mifosplatform.portfolio.savingsaccountproduct.data.SavingProductData;
 import org.mifosplatform.portfolio.savingsdepositaccount.data.DepositAccountData;
 import org.mifosplatform.portfolio.savingsdepositproduct.data.DepositProductData;
-import org.mifosplatform.useradministration.data.AppUserData;
-import org.mifosplatform.useradministration.data.AuthenticatedUserData;
-import org.mifosplatform.useradministration.data.PermissionUsageData;
-import org.mifosplatform.useradministration.data.RoleData;
-import org.mifosplatform.useradministration.data.RolePermissionsData;
 
 public interface PortfolioApiJsonSerializerService {
 
@@ -46,33 +38,6 @@ public interface PortfolioApiJsonSerializerService {
     String serializeGenericResultsetDataToJson(boolean prettyPrint, GenericResultsetData result);
 
     String serializeDatatableDataToJson(boolean prettyPrint, Collection<DatatableData> result);
-
-    String serializePermissionDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<PermissionUsageData> permissions);
-
-    String serializeRoleDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<RoleData> roles);
-
-    String serializeRoleDataToJson(boolean prettyPrint, Set<String> responseParameters, RoleData role);
-
-    String serializeRolePermissionDataToJson(boolean prettyPrint, Set<String> responseParameters, RolePermissionsData rolePermissionData);
-
-    String serializeAppUserDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<AppUserData> users);
-
-    String serializeAppUserDataToJson(boolean prettyPrint, Set<String> responseParameters, AppUserData user);
-
-    String serializeOfficeDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<OfficeData> offices);
-
-    String serializeOfficeDataToJson(boolean prettyPrint, Set<String> responseParameters, OfficeData office);
-
-    String serializeOfficeTransactionDataToJson(boolean prettyPrint, Set<String> responseParameters,
-            Collection<OfficeTransactionData> officeTransactions);
-
-    String serializeOfficeTransactionDataToJson(boolean prettyPrint, Set<String> responseParameters, OfficeTransactionData officeTransaction);
-
-    String serializeConfigurationDataToJson(boolean prettyPrint, Set<String> responseParameters, ConfigurationData configuration);
-
-    String serializeFundDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<FundData> funds);
-
-    String serializeFundDataToJson(boolean prettyPrint, Set<String> responseParameters, FundData fund);
 
     String serializeLoanProductDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<LoanProductData> products);
 
