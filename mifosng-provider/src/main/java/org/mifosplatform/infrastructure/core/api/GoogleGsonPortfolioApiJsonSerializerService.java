@@ -31,6 +31,7 @@ import org.mifosplatform.portfolio.loanaccount.gaurantor.data.GuarantorData;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
 import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
 import org.mifosplatform.portfolio.savingsaccount.data.SavingAccountData;
+import org.mifosplatform.portfolio.savingsaccount.data.SavingScheduleData;
 import org.mifosplatform.portfolio.savingsaccountproduct.data.SavingProductData;
 import org.mifosplatform.portfolio.savingsdepositaccount.data.DepositAccountData;
 import org.mifosplatform.portfolio.savingsdepositproduct.data.DepositProductData;
@@ -166,6 +167,9 @@ public class GoogleGsonPortfolioApiJsonSerializerService implements PortfolioApi
     private static final Set<String> GUARANTOR_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("externalGuarantor", "existingClientId",
             "firstname", "lastname", "addressLine1", "addressLine2", "city", "state", "zip", "country", "mobileNumber", "housePhoneNumber",
             "comment", "dob"));
+    
+    private static final Set<String> SAVING_SCHEDULE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("periods",
+            "cumulativeDepositDue"));
 
     private final GoogleGsonSerializerHelper helper;
 
@@ -555,4 +559,11 @@ public class GoogleGsonPortfolioApiJsonSerializerService implements PortfolioApi
                 prettyPrint, responseParameters);
         return helper.serializedJsonFrom(gsonDeserializer, guarantorData);
     }
+
+	@Override
+	public String serializeSavingScheduleDataToJson(boolean prettyPrint, Set<String> responseParameters, SavingScheduleData savingScheduleData) {
+		 final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(SAVING_SCHEDULE_DATA_PARAMETERS,
+	                prettyPrint, responseParameters);
+	        return helper.serializedJsonFrom(gsonDeserializer, savingScheduleData);
+	}
 }

@@ -1,5 +1,7 @@
 package org.mifosplatform.portfolio.savingsdepositaccount.service;
 
+import java.util.Collection;
+
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 import org.mifosplatform.portfolio.loanaccount.command.UndoStateTransitionCommand;
 import org.mifosplatform.portfolio.savingsdepositaccount.command.DepositAccountCommand;
@@ -7,6 +9,7 @@ import org.mifosplatform.portfolio.savingsdepositaccount.command.DepositAccountW
 import org.mifosplatform.portfolio.savingsdepositaccount.command.DepositAccountWithdrawalCommand;
 import org.mifosplatform.portfolio.savingsdepositaccount.command.DepositStateTransitionApprovalCommand;
 import org.mifosplatform.portfolio.savingsdepositaccount.command.DepositStateTransitionCommand;
+import org.mifosplatform.portfolio.savingsdepositaccount.data.DepositAccountsForLookup;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface DepositAccountWritePlatformService {
@@ -49,4 +52,7 @@ public interface DepositAccountWritePlatformService {
 
     @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'ORGANISATION_ADMINISTRATION_SUPER_USER', 'RENEW_DEPOSITACCOUNT')")
     EntityIdentifier renewDepositAccount(DepositAccountCommand command);
+    
+    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'PORTFOLIO_MANAGEMENT_SUPER_USER')")
+	EntityIdentifier postInterestToDepositAccount(Collection<DepositAccountsForLookup> accounts);
 }

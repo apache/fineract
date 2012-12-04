@@ -2,6 +2,7 @@ package org.mifosplatform.portfolio.savingsdepositaccount.service;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -24,6 +25,7 @@ import org.mifosplatform.portfolio.savingsdepositaccount.command.DepositStateTra
 import org.mifosplatform.portfolio.savingsdepositaccount.command.DepositStateTransitionApprovalCommandValidator;
 import org.mifosplatform.portfolio.savingsdepositaccount.command.DepositStateTransitionCommand;
 import org.mifosplatform.portfolio.savingsdepositaccount.command.WithDrawDepositAccountInterestCommandValidator;
+import org.mifosplatform.portfolio.savingsdepositaccount.data.DepositAccountsForLookup;
 import org.mifosplatform.portfolio.savingsdepositaccount.domain.DepositAccount;
 import org.mifosplatform.portfolio.savingsdepositaccount.domain.DepositAccountRepository;
 import org.mifosplatform.portfolio.savingsdepositaccount.domain.DepositAccountStatus;
@@ -303,9 +305,9 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
                     "deposit.transaction.canot.withdraw.before.lockinperiod.reached",
                     "You can not withdraw your application before maturity date reached"); }
         }
-        if (eventDate.isBefore(account.maturesOnDate())) {
-            this.depositAccountAssembler.adjustTotalAmountForPreclosureInterest(account, eventDate);
-        }
+       // if (eventDate.isBefore(account.maturesOnDate())) {
+       //     this.depositAccountAssembler.adjustTotalAmountForPreclosureInterest(account, eventDate);
+       // }
         account.withdrawDepositAccountMoney(defaultDepositLifecycleStateMachine(), fixedTermDepositInterestCalculator, eventDate);
         this.depositAccountRepository.save(account);
         String noteText = command.getNote();
@@ -419,4 +421,26 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
             return new EntityIdentifier(Long.valueOf(-1));
         }
     }
+    
+	@Transactional
+	@Override
+	public EntityIdentifier postInterestToDepositAccount(Collection<DepositAccountsForLookup> accounts) {
+		
+		try {
+			
+			for (DepositAccountsForLookup accountData : accounts)
+			{
+				 DepositAccount account = this.depositAccountRepository.findOne(accountData.getId());
+				if (account == null || account.isDeleted()) {
+					throw new DepositAccountNotFoundException(accountData.getId());
+				}
+				this.depositAccountAssembler.postInterest(account);
+				this.depositAccountRepository.save(account);
+			}
+			return new EntityIdentifier(new Long(accounts.size()));
+		} catch (Exception e) {
+			return new EntityIdentifier(Long.valueOf(-1));
+		}
+		
+	}
 }

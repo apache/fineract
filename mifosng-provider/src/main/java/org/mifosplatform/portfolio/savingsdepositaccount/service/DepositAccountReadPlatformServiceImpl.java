@@ -18,6 +18,7 @@ import org.mifosplatform.portfolio.loanproduct.exception.LoanProductNotFoundExce
 import org.mifosplatform.portfolio.savingsaccountproduct.service.SavingsDepositEnumerations;
 import org.mifosplatform.portfolio.savingsdepositaccount.data.DepositAccountData;
 import org.mifosplatform.portfolio.savingsdepositaccount.data.DepositAccountTransactionData;
+import org.mifosplatform.portfolio.savingsdepositaccount.data.DepositAccountsForLookup;
 import org.mifosplatform.portfolio.savingsdepositaccount.data.DepositPermissionData;
 import org.mifosplatform.portfolio.savingsdepositproduct.data.DepositProductData;
 import org.mifosplatform.portfolio.savingsdepositproduct.data.DepositProductLookup;
@@ -143,6 +144,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
                     + " da.withdrawnon_date as withdrawnonDate, da.rejectedon_date as rejectedonDate, da.closedon_date as closedonDate, "
                     + " da.interest_paid as interestPaid, da.is_interest_withdrawable as isInterestWithdrawable, da.is_compounding_interest_allowed as interestCompoundingAllowed, "
                     + " da.is_lock_in_period_allowed as isLockinPeriodAllowed, da.lock_in_period as lockinPeriod, da.lock_in_period_type lockinPeriodType, "
+                    + " da.available_interest as availableInterest, da.interest_posted_amount as interestPostedAmount, da.last_interest_posted_date as lastInterestPostedDate, da.next_interest_posting_date as nextInterestPostedDate,"
                     + " c.firstname as firstname, c.lastname as lastname, pd.name as productName,"
                     + " curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, curr.display_symbol as currencyDisplaySymbol "
                     + " from m_deposit_account da " + " join m_currency curr on curr.code = da.currency_code "
@@ -206,13 +208,18 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             Integer lockinPeriod = JdbcSupport.getInteger(rs, "lockinPeriod");
             Integer lockinPeriodTypeValue = JdbcSupport.getInteger(rs, "lockinPeriodType");
             EnumOptionData lockinPeriodType = SavingsDepositEnumerations.interestCompoundingPeriodType(lockinPeriodTypeValue);
+            
+            BigDecimal availableInterest = rs.getBigDecimal("availableInterest");
+			BigDecimal interestPostedAmount = rs.getBigDecimal("interestPostedAmount");
+			LocalDate lastInterestPostedDate = JdbcSupport.getLocalDate(rs, "lastInterestPostedDate");
+			LocalDate nextInterestPostedDate = JdbcSupport.getLocalDate(rs, "nextInterestPostedDate");
 
             return new DepositAccountData(id, externalId, status, clientId, clientName, productId, productName, currencyData,
                     depositAmount, interestRate, termInMonths, projectedCommencementDate, actualCommencementDate, maturedOn,
                     projectedInterestAccrued, actualInterestAccrued, projectedMaturityAmount, actualMaturityAmount,
                     interestCompoundedEvery, interestCompoundedEveryPeriodType, renewalAllowed, preClosureAllowed, preClosureInterestRate,
                     withdrawnonDate, rejectedonDate, closedonDate, isInterestWithdrawable, interestPaid, interestCompoundingAllowed,
-                    isLockinPeriodAllowed, lockinPeriod, lockinPeriodType);
+                    isLockinPeriodAllowed, lockinPeriod, lockinPeriodType, availableInterest, interestPostedAmount, lastInterestPostedDate, nextInterestPostedDate);
         }
     }
 
@@ -247,18 +254,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
         boolean undoApprovalAllowed = (depositAccountData.getStatus().getId().equals(300L));
         boolean renewelAllowed = false;
         if (depositAccountData.getMaturedOn() != null) {
-            if (new LocalDate().isAfter(depositAccountData.getMaturedOn())/*
-                                                                           * ||
-                                                                           * depositAccountData
-                                                                           * .
-                                                                           * getMaturedOn
-                                                                           * ().
-                                                                           * isEqual
-                                                                           * (
-                                                                           * new
-                                                                           * LocalDate
-                                                                           * ())
-                                                                           */) {
+            if (new LocalDate().isAfter(depositAccountData.getMaturedOn())/* || depositAccountData.getMaturedOn().isEqual(new LocalDate()) */) {
                 renewelAllowed = depositAccountData.isRenewalAllowed();
             }
         }
@@ -280,4 +276,28 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
         return BigDecimal.valueOf(interstGettingForPeriod.multiply(new BigDecimal(noOfPeriods)).doubleValue()
                 - account.getInterestPaid().doubleValue());
     }
+    
+    @Override
+	public Collection<DepositAccountsForLookup> retrieveDepositAccountForLookup() {
+
+		this.context.authenticatedUser();
+		DepositAccountLookupMapper mapper = new DepositAccountLookupMapper();
+		String sql = "select "+mapper.depositAccountLookupSchema();
+		return this.jdbcTemplate.query(sql, mapper, new Object[]{});
+		
+	}
+	
+	private static final class DepositAccountLookupMapper implements RowMapper<DepositAccountsForLookup> {
+		
+		public String depositAccountLookupSchema(){
+			return " da.id as id from m_deposit_account da where da.status_enum=300 and da.is_deleted=0";
+		}
+
+		@Override
+		public DepositAccountsForLookup mapRow(ResultSet rs, int rowNum) throws SQLException {
+			Long id = rs.getLong("id");
+			return new DepositAccountsForLookup(id);
+		}
+		
+	}
 }

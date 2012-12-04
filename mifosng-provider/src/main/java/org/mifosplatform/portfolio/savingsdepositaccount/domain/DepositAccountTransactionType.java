@@ -5,7 +5,8 @@ public enum DepositAccountTransactionType {
 	INVALID(0, "depositTransactionType.invalid"), //
 	DEPOSIT(1, "depositTransactionType.deposit"), //
 	WITHDRAW(2, "depositTransactionType.withdraw"), //
-	REVERSAL(3, "depositTransactionType.reversal");
+	REVERSAL(3, "depositTransactionType.reversal"),
+	INTEREST_POSTING(4,"depositTransactionType.interestPosting");
 
     private final Integer value;
     private final String code;
@@ -42,6 +43,10 @@ public enum DepositAccountTransactionType {
 		case 3:
 			depositTransactionType=DepositAccountTransactionType.REVERSAL;
 			break;
+			
+		case 4:
+			depositTransactionType=DepositAccountTransactionType.INTEREST_POSTING;
+			break;	
 			
 		default :
 			depositTransactionType=DepositAccountTransactionType.INVALID;

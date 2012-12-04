@@ -102,6 +102,10 @@ public class DepositAccountTransaction extends AbstractPersistable<Long> {
 		return new DepositAccountTransaction(DepositAccountTransactionType.WITHDRAW, amount == null ? new BigDecimal(0) : amount.getAmount(), paymentDate, interest==null ? new BigDecimal(0) : interest.getAmount());
 	}
 	
+	public static DepositAccountTransaction postInterest(Money depositAmount, LocalDate paymentDate, Money interest) {
+		return new DepositAccountTransaction(DepositAccountTransactionType.INTEREST_POSTING, depositAmount == null ? new BigDecimal(0) : depositAmount.getAmount(), paymentDate, interest==null ? new BigDecimal(0) : interest.getAmount());
+	}
+	
 	public void updateAccount(DepositAccount depositAccount) {
 		this.depositAccount=depositAccount;
 	}

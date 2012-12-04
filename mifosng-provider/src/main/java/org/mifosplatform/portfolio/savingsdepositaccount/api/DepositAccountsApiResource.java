@@ -37,6 +37,7 @@ import org.mifosplatform.portfolio.savingsdepositaccount.command.DepositAccountW
 import org.mifosplatform.portfolio.savingsdepositaccount.command.DepositStateTransitionApprovalCommand;
 import org.mifosplatform.portfolio.savingsdepositaccount.command.DepositStateTransitionCommand;
 import org.mifosplatform.portfolio.savingsdepositaccount.data.DepositAccountData;
+import org.mifosplatform.portfolio.savingsdepositaccount.data.DepositAccountsForLookup;
 import org.mifosplatform.portfolio.savingsdepositaccount.data.DepositPermissionData;
 import org.mifosplatform.portfolio.savingsdepositaccount.service.DepositAccountReadPlatformService;
 import org.mifosplatform.portfolio.savingsdepositaccount.service.DepositAccountWritePlatformService;
@@ -257,5 +258,16 @@ public class DepositAccountsApiResource {
 
     private boolean is(final String commandParam, final String commandValue) {
         return StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase(commandValue);
+    }    
+	@POST
+	@Path("postinterest")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public Response postInterest(){
+		Collection<DepositAccountsForLookup> accounts = this.depositAccountReadPlatformService.retrieveDepositAccountForLookup();
+		@SuppressWarnings("unused")
+		EntityIdentifier entityIdentifier = this.depositAccountWritePlatformService.postInterestToDepositAccount(accounts);
+		return Response.ok().entity(entityIdentifier).build();
+		
     }
 }

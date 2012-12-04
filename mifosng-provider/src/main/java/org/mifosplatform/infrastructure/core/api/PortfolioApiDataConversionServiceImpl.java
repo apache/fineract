@@ -1528,7 +1528,7 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
                 "digitsAfterDecimal", "savingsDepositAmountPerPeriod", "recurringInterestRate", "savingInterestRate", "tenure",
                 "commencementDate", "locale", "dateFormat", "isLockinPeriodAllowed", "lockinPeriod", "lockinPeriodType",
                 "savingProductType", "tenureType", "frequency", "interestType", "interestCalculationMethod", "minimumBalanceForWithdrawal",
-                "isPartialDepositAllowed"));
+                "isPartialDepositAllowed","payEvery"));
         checkForUnsupportedParameters(requestMap, supportedParams);
         Set<String> modifiedParameters = new HashSet<String>();
 
@@ -1554,11 +1554,12 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         Integer interestCalculationMethod = extractIntegerParameter("interestCalculationMethod", requestMap, modifiedParameters);
         BigDecimal minimumBalanceForWithdrawal = extractBigDecimalParameter("minimumBalanceForWithdrawal", requestMap, modifiedParameters);
         boolean isPartialDepositAllowed = extractBooleanParameter("isPartialDepositAllowed", requestMap, modifiedParameters);
+        Integer payEvery = extractIntegerParameter("payEvery", requestMap, modifiedParameters);
 
         return new SavingAccountCommand(modifiedParameters, resourceIdentifier, clientId, productId, externalId, currencyCode,
                 digitsAfterDecimalValue, savingsDepositAmount, recurringInterestRate, savingInterestRate, tenure, commencementDate,
                 savingProductType, tenureType, frequency, interestType, minimumBalanceForWithdrawal, interestCalculationMethod,
-                isLockinPeriodAllowed, isPartialDepositAllowed, lockinPeriod, lockinPeriodType);
+                isLockinPeriodAllowed, isPartialDepositAllowed, lockinPeriod, lockinPeriodType,payEvery);
     }
 
     @Override

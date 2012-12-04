@@ -152,6 +152,21 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 	@Column(name = "lock_in_period_type", nullable=false)
 	private PeriodFrequencyType lockinPeriodType;
 	
+	//for interest posting
+	@Column(name = "available_interest", scale = 6, precision = 19)
+	private BigDecimal availableInterest;
+	
+	@Column(name = "interest_posted_amount", scale = 6, precision = 19)
+	private BigDecimal interestPostedAmount;
+	
+	@Temporal(TemporalType.DATE)
+	@Column(name = "last_interest_posted_date")
+	private Date lastInterestPostedDate;
+	
+	@Temporal(TemporalType.DATE)
+	@Column(name = "next_interest_posting_date")
+	private Date nextInterestPostingDate;
+	
     
 	public DepositAccount openNew(
 			final Client client, final DepositProduct product,
@@ -324,6 +339,12 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 		DepositAccountTransaction depositaccountTransaction = DepositAccountTransaction.deposit(getDeposit(), getActualCommencementDate(),getAccuredInterest());
 		depositaccountTransaction.updateAccount(this);
 		this.depositaccountTransactions.add(depositaccountTransaction);
+		
+		//for interest posting initializing
+		this.lastInterestPostedDate = this.actualCommencementDate;
+		this.nextInterestPostingDate = new LocalDate(this.lastInterestPostedDate).plusMonths(this.interestCompoundedEvery).toDate();
+		this.availableInterest = BigDecimal.ZERO;
+		this.interestPostedAmount = BigDecimal.ZERO;
 		
 		LocalDate submittalDate = new LocalDate(this.projectedCommencementDate);
 		if (actualCommencementDate.isBefore(submittalDate)) {
@@ -545,46 +566,44 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 
 	public void withdrawDepositAccountMoney(DepositLifecycleStateMachine depositLifecycleStateMachine, FixedTermDepositInterestCalculator fixedTermDepositInterestCalculator,LocalDate eventDate) {
 		
+		if (eventDate.isBefore(getLastInterestPostedDate())) {
+			final String errorMessage = "Deposit Account Preclosed date \"" +eventDate+ "\"cannot before last interest posted date \""	+ getLastInterestPostedDate()+"\"";
+			throw new InvalidDepositStateTransitionException("withdraw", "event.date.cannot.before.last.interest.posted.date",errorMessage, getLastInterestPostedDate(), eventDate);
+		}
 		if (eventDate.isAfter(maturesOnDate()) || eventDate.equals(maturesOnDate())) {
-				
 			DepositAccountStatus statusEnum = depositLifecycleStateMachine.transition(DepositAccountEvent.DEPOSIT_CLOSED, DepositAccountStatus.fromInt(this.depositStatus));
 			this.depositStatus = statusEnum.getValue();
-			
-			Integer days = Days.daysBetween(maturesOnDate(), eventDate).getDays();
-			Money accuredInterestAfterMaturityToTillDate = fixedTermDepositInterestCalculator.calculateRemainInterest(getDeposit(), days, preClosureInterestRate);
-			this.interestAccrued = this.interestAccrued.add(accuredInterestAfterMaturityToTillDate.getAmount());
-			
-			DepositAccountTransaction depositaccountTransaction = DepositAccountTransaction.withdraw(getDeposit(), eventDate,getAccuredInterest());
-			depositaccountTransaction.updateAccount(this);
-			this.depositaccountTransactions.add(depositaccountTransaction);
-			
-			this.closedOnDate = eventDate.toDate();
-			this.withdrawnOnDate = null;
-			this.rejectedOnDate = null;
-				
-		}else if(new LocalDate().isBefore(maturesOnDate())){
-			
+		} else if(eventDate.isBefore(maturesOnDate())){
 			DepositAccountStatus statusEnum = depositLifecycleStateMachine.transition(DepositAccountEvent.DEPOSIT_PRECLOSED, DepositAccountStatus.fromInt(this.depositStatus));
 			this.depositStatus = statusEnum.getValue();
-			
-			DepositAccountTransaction depositaccountTransaction = DepositAccountTransaction.withdraw(getDeposit(), eventDate, getAccuredInterest());
-			depositaccountTransaction.updateAccount(this);
-			this.depositaccountTransactions.add(depositaccountTransaction);
-				
-			this.closedOnDate = eventDate.toDate();
-			this.withdrawnOnDate = null;
-			this.rejectedOnDate = null;
-			
 		}
+		
+		Integer days = Days.daysBetween(getLastInterestPostedDate(), eventDate).getDays();
+		Money accuredInterestAfterMaturityToTillDate = fixedTermDepositInterestCalculator.calculateRemainInterest(getDeposit(), days, preClosureInterestRate);
+		this.interestAccrued = this.interestAccrued.add(accuredInterestAfterMaturityToTillDate.getAmount());
+		
+		DepositAccountTransaction depositaccountTransaction = DepositAccountTransaction.withdraw(getDeposit(), eventDate,getAccuredInterest());
+		depositaccountTransaction.updateAccount(this);
+		this.depositaccountTransactions.add(depositaccountTransaction);
+		
+		this.closedOnDate = eventDate.toDate();
+		this.withdrawnOnDate = null;
+		this.rejectedOnDate = null;
+						
 	}
 
-	public void adjustTotalAmountForPreclosureInterest(DepositAccount account, FixedTermDepositInterestCalculator fixedTermDepositInterestCalculator,LocalDate eventDate) {
+	/*public void adjustTotalAmountForPreclosureInterest(DepositAccount account, FixedTermDepositInterestCalculator fixedTermDepositInterestCalculator,LocalDate eventDate) {
 		
 		LocalDate commnencementDate = getActualCommencementDate();
+		LocalDate lastInterestPosedDate = getLastInterestPostedDate();
 		LocalDate preClosedDate = eventDate;
 		
-		Integer tenure = Months.monthsBetween(commnencementDate, preClosedDate).getMonths();
-		LocalDate actualPrecloseCalculationDate = commnencementDate.plusMonths(tenure);
+		if (preClosedDate.isBefore(lastInterestPosedDate)) {
+			throw new DepositAccountTransactionsException("deposit.account.preclosed.date.should.be.after.last.interest.posted.date", null);
+		} 
+		
+		Integer tenure = Months.monthsBetween(lastInterestPosedDate, preClosedDate).getMonths();
+		LocalDate actualPrecloseCalculationDate = lastInterestPosedDate.plusMonths(tenure);
 		Integer missedDays = Days.daysBetween(actualPrecloseCalculationDate, preClosedDate).getDays();
 		
 		Money deposit = Money.of(account.getDeposit().getCurrency(), account.getDeposit().getAmount());
@@ -607,15 +626,17 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 		this.total = account.isInterestCompoundingAllowed()?accuredtotalAmount.getAmount():BigDecimal.valueOf(accuredtotalAmount.getAmount().doubleValue()-this.interstPaid.doubleValue());
 		this.interestAccrued = accuredtotalAmount.minus(deposit).getAmount();
 		
-	}
+	}*/
 
 	public void withdrawInterest(Money interest) {
-		
-		if(this.depositStatus == 300 ){
+		@SuppressWarnings("unused")
+		boolean statustest = isActive();
+		if(isActive()){
 			DepositAccountTransaction depositAccountTransaction = DepositAccountTransaction.withdraw(null, new LocalDate(), interest);
 			depositAccountTransaction.updateAccount(this);
 			this.depositaccountTransactions.add(depositAccountTransaction);
 			this.interstPaid = this.interstPaid.add(interest.getAmount());
+			this.availableInterest = this.availableInterest.subtract(interest.getAmount());
 			this.total = this.total.subtract(interest.getAmount());
 		}
 		
@@ -639,7 +660,6 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 			final boolean renewalAllowed, final boolean preClosureAllowed,
 			final boolean isInterestWithdrawable, final boolean isInterestCompoundingAllowed,
 			final FixedTermDepositInterestCalculator fixedTermDepositInterestCalculator, 
-			@SuppressWarnings("unused") final DepositLifecycleStateMachine depositLifecycleStateMachine,
 			final boolean isLockinPeriodAllowed,
 			final Integer lockinPeriod,
 			final PeriodFrequencyType lockinPeriodType) {
@@ -695,4 +715,120 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 	public boolean isActive() {
 		return DepositAccountStatus.fromInt(this.depositStatus).isActive();
 	}
+
+	public void postInterestForDepositAccount(DepositAccount account, FixedTermDepositInterestCalculator fixedTermDepositInterestCalculator) {
+		
+		LocalDate lastInterestPostedDate = getLastInterestPostedDate();
+		LocalDate nextInterestPostingDate = getNextInterestPostedDate();
+		Integer monthsForInterestCalculation = Months.monthsBetween(lastInterestPostedDate, new LocalDate()).getMonths();
+		Integer postInterestItereations = monthsForInterestCalculation/this.interestCompoundedEvery;
+		Money deposit = Money.of(this.currency, this.depositAmount);
+		
+		  while (postInterestItereations > 0) {
+			  
+			lastInterestPostedDate = getLastInterestPostedDate();
+			nextInterestPostingDate = getNextInterestPostedDate();
+			if (lastInterestPostedDate.isBefore(getMaturityDate())){
+				if (nextInterestPostingDate.isAfter(getMaturityDate())){
+					Integer noofRemainMonthsAfterMaturity = Months.monthsBetween(getMaturityDate(), nextInterestPostingDate).getMonths();
+					Integer noOfMonthsBeforeMaturity = Months.monthsBetween(lastInterestPostedDate, getMaturityDate()).getMonths();
+					Money futureValueOnMaturity =null;
+					if (noOfMonthsBeforeMaturity >0) {
+						
+						if (this.interestCompoundingAllowed) {
+							futureValueOnMaturity = fixedTermDepositInterestCalculator.calculateInterestOnMaturityFor(deposit, noOfMonthsBeforeMaturity,this.interestRate, this.interestCompoundedEvery,	getInterestCompoundedFrequencyType());
+						} else {
+							futureValueOnMaturity = fixedTermDepositInterestCalculator.calculateInterestOnMaturityForSimpleInterest(deposit, noOfMonthsBeforeMaturity, this.interestRate,	this.interestCompoundedEvery, getInterestCompoundedFrequencyType());
+						}
+						this.interestPostedAmount = this.interestPostedAmount.add(futureValueOnMaturity.minus(deposit).getAmount());
+						this.availableInterest = this.availableInterest.add(futureValueOnMaturity.minus(deposit).getAmount());
+						this.lastInterestPostedDate = nextInterestPostingDate.toDate();
+						this.nextInterestPostingDate = nextInterestPostingDate.plusMonths(this.interestCompoundedEvery).toDate();
+						
+					}
+					if (noofRemainMonthsAfterMaturity >0){
+						
+						if (this.interestCompoundingAllowed) {
+							futureValueOnMaturity = fixedTermDepositInterestCalculator.calculateInterestOnMaturityFor(deposit, noofRemainMonthsAfterMaturity,	this.preClosureInterestRate, this.interestCompoundedEvery,	getInterestCompoundedFrequencyType());
+						} else {
+							futureValueOnMaturity = fixedTermDepositInterestCalculator.calculateInterestOnMaturityForSimpleInterest(deposit, noofRemainMonthsAfterMaturity, this.preClosureInterestRate,	this.interestCompoundedEvery, getInterestCompoundedFrequencyType());
+						}
+						this.interestPostedAmount = this.interestPostedAmount.add(futureValueOnMaturity.minus(deposit).getAmount());
+						this.availableInterest = this.availableInterest.add(futureValueOnMaturity.minus(deposit).getAmount());
+						this.lastInterestPostedDate = nextInterestPostingDate.toDate();
+						this.nextInterestPostingDate = nextInterestPostingDate.plusMonths(this.interestCompoundedEvery).toDate();
+					}
+					
+					// add transaction entry for each interest posting
+					DepositAccountTransaction depositaccountTransaction = DepositAccountTransaction.postInterest(null, nextInterestPostingDate,futureValueOnMaturity.minus(deposit));
+					depositaccountTransaction.updateAccount(this);
+					this.depositaccountTransactions.add(depositaccountTransaction);
+				} else {
+					Money futureValueOnMaturity =null;
+					if (this.interestCompoundingAllowed) {
+						futureValueOnMaturity = fixedTermDepositInterestCalculator.calculateInterestOnMaturityFor(deposit, this.interestCompoundedEvery,	this.interestRate, this.interestCompoundedEvery,	getInterestCompoundedFrequencyType());
+					} else {
+						futureValueOnMaturity = fixedTermDepositInterestCalculator.calculateInterestOnMaturityForSimpleInterest(deposit, this.interestCompoundedEvery, this.interestRate, this.interestCompoundedEvery, getInterestCompoundedFrequencyType());
+					}
+					this.interestPostedAmount = this.interestPostedAmount.add(futureValueOnMaturity.minus(deposit).getAmount());
+					this.availableInterest = this.availableInterest.add(futureValueOnMaturity.minus(deposit).getAmount());
+					this.lastInterestPostedDate = nextInterestPostingDate.toDate();
+					this.nextInterestPostingDate = nextInterestPostingDate.plusMonths(this.interestCompoundedEvery).toDate();
+					
+					// add transaction entry for each interest posting
+					DepositAccountTransaction depositaccountTransaction = DepositAccountTransaction.postInterest(null, nextInterestPostingDate,futureValueOnMaturity.minus(deposit));
+					depositaccountTransaction.updateAccount(this);
+					this.depositaccountTransactions.add(depositaccountTransaction);
+				}
+			} else{
+				Money futureValueOnMaturity =null;
+				if (this.interestCompoundingAllowed) {
+					futureValueOnMaturity = fixedTermDepositInterestCalculator.calculateInterestOnMaturityFor(deposit, this.interestCompoundedEvery, this.preClosureInterestRate, this.interestCompoundedEvery,	getInterestCompoundedFrequencyType());
+				} else {
+					futureValueOnMaturity = fixedTermDepositInterestCalculator.calculateInterestOnMaturityForSimpleInterest(deposit, this.interestCompoundedEvery, this.preClosureInterestRate,	this.interestCompoundedEvery, getInterestCompoundedFrequencyType());
+				}
+				this.interestPostedAmount = this.interestPostedAmount.add(futureValueOnMaturity.minus(deposit).getAmount());
+				this.availableInterest = this.availableInterest.add(futureValueOnMaturity.minus(deposit).getAmount());
+				this.lastInterestPostedDate = nextInterestPostingDate.toDate();
+				this.nextInterestPostingDate = nextInterestPostingDate.plusMonths(this.interestCompoundedEvery).toDate();
+				
+				// add transaction entry for each interest posting
+				DepositAccountTransaction depositaccountTransaction = DepositAccountTransaction.postInterest(null, nextInterestPostingDate,futureValueOnMaturity.minus(deposit));
+				depositaccountTransaction.updateAccount(this);
+				this.depositaccountTransactions.add(depositaccountTransaction);
+			}
+			postInterestItereations--;
+		 }
+			
+	}
+
+	private final LocalDate getLastInterestPostedDate() {
+		LocalDate lastInterestPostedDate;
+		if (this.lastInterestPostedDate == null){
+			lastInterestPostedDate = new LocalDate(this.actualCommencementDate);
+		} else {
+			lastInterestPostedDate = new LocalDate(this.lastInterestPostedDate);
+		}
+		return lastInterestPostedDate;
+	}
+	
+	private final LocalDate getNextInterestPostedDate() {
+		LocalDate nextInterestPostingDate;
+		if (this.nextInterestPostingDate == null){
+			nextInterestPostingDate = new LocalDate(this.nextInterestPostingDate).plusMonths(this.interestCompoundedEvery);
+		} else {
+			nextInterestPostingDate = new LocalDate(this.nextInterestPostingDate);
+		}
+		return nextInterestPostingDate;
+	}
+
+	public BigDecimal getAvailableInterest() {
+		return availableInterest;
+	}
+
+	public BigDecimal getInterestPostedAmount() {
+		return interestPostedAmount;
+	}
+	
+	
 }

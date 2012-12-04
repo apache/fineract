@@ -230,9 +230,9 @@ public class DepositAccountAssembler {
 		return newAccount;
 	}
 
-	public void adjustTotalAmountForPreclosureInterest(DepositAccount account,LocalDate eventDate) {
+	/*public void adjustTotalAmountForPreclosureInterest(DepositAccount account,LocalDate eventDate) {
 		account.adjustTotalAmountForPreclosureInterest(account,this.fixedTermDepositInterestCalculator,eventDate);
-	}
+	}*/
 
 	public void assembleUpdatedDepositAccount(DepositAccount account,DepositAccountCommand command) {
 		
@@ -323,7 +323,7 @@ public class DepositAccountAssembler {
 			lockinPeriodType = PeriodFrequencyType.fromInt(command.getLockinPeriodType());
 		}
 		account.update(product,externalId,commencementDate,deposit,tenureInMonths,maturityInterestRate,preClosureInterestRate,compoundingInterestEvery,compoundingInterestFrequency,renewalAllowed,
-				preClosureAllowed,isInterestWithdrawable,isInterestCompoundingAllowed,this.fixedTermDepositInterestCalculator,defaultDepositLifecycleStateMachine(),isLockinPeriodAllowed,lockinPeriod,lockinPeriodType);
+				preClosureAllowed,isInterestWithdrawable,isInterestCompoundingAllowed,this.fixedTermDepositInterestCalculator,isLockinPeriodAllowed,lockinPeriod,lockinPeriodType);
 	}
 
 	public void updateApprovedDepositAccount(DepositAccount account, DepositAccountCommand command) {
@@ -339,5 +339,9 @@ public class DepositAccountAssembler {
 		}
 		account.update(renewalAllowed,isInterestWithdrawable);
 		
+	}
+
+	public void postInterest(DepositAccount account) {
+		account.postInterestForDepositAccount(account,this.fixedTermDepositInterestCalculator);
 	}
 }
