@@ -52,7 +52,7 @@ public interface DepositAccountWritePlatformService {
 
     @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'ORGANISATION_ADMINISTRATION_SUPER_USER', 'RENEW_DEPOSITACCOUNT')")
     EntityIdentifier renewDepositAccount(DepositAccountCommand command);
-    
+
     @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'PORTFOLIO_MANAGEMENT_SUPER_USER')")
-	EntityIdentifier postInterestToDepositAccount(Collection<DepositAccountsForLookup> accounts);
+    EntityIdentifier postInterestToDepositAccount(Collection<DepositAccountsForLookup> accounts);
 }

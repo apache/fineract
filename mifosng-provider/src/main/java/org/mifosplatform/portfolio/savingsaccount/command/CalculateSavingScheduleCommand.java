@@ -6,58 +6,54 @@ import org.joda.time.LocalDate;
 
 public class CalculateSavingScheduleCommand {
 
-	private final Long productId;
-	private final BigDecimal deposit;
-	private final Integer payEvery;
-	private final Integer paymentFrequencyType;
-	private final BigDecimal interestRate;
-	private final LocalDate paymentsStartingFromDate;
-	private final Integer tenure;
-	
-	public CalculateSavingScheduleCommand(final Long productId,
-			final BigDecimal deposit,
-			final Integer payEvery,
-			final Integer paymentFrequencyType,
-			final BigDecimal interestRate,
-			final LocalDate paymentsStartingFromDate,
-			final Integer tenure) {
-		
-		this.productId = productId;
-		this.deposit = deposit;
-		this.payEvery = payEvery;
-		this.paymentFrequencyType=paymentFrequencyType;
-		this.interestRate= interestRate;
-		this.paymentsStartingFromDate=paymentsStartingFromDate;
-		this.tenure = tenure;
-		
-	}
+    private final Long productId;
+    private final BigDecimal deposit;
+    private final Integer payEvery;
+    private final Integer paymentFrequencyType;
+    private final BigDecimal interestRate;
+    private final LocalDate paymentsStartingFromDate;
+    private final Integer tenure;
 
-	public Long getProductId() {
-		return this.productId;
-	}
+    public CalculateSavingScheduleCommand(final Long productId, final BigDecimal deposit, final Integer payEvery,
+            final Integer paymentFrequencyType, final BigDecimal interestRate, final LocalDate paymentsStartingFromDate,
+            final Integer tenure) {
 
-	public BigDecimal getDeposit() {
-		return this.deposit;
-	}
+        this.productId = productId;
+        this.deposit = deposit;
+        this.payEvery = payEvery;
+        this.paymentFrequencyType = paymentFrequencyType;
+        this.interestRate = interestRate;
+        this.paymentsStartingFromDate = paymentsStartingFromDate;
+        this.tenure = tenure;
 
-	public Integer getPayEvery() {
-		return this.payEvery;
-	}
+    }
 
-	public Integer getPaymentFrequencyType() {
-		return this.paymentFrequencyType;
-	}
+    public Long getProductId() {
+        return this.productId;
+    }
 
-	public BigDecimal getInterestRate() {
-		return this.interestRate;
-	}
+    public BigDecimal getDeposit() {
+        return this.deposit;
+    }
 
-	public LocalDate getPaymentsStartingFromDate() {
-		return this.paymentsStartingFromDate;
-	}
+    public Integer getPayEvery() {
+        return this.payEvery;
+    }
 
-	public Integer getTenure() {
-		return this.tenure;
-	}
-	
+    public Integer getPaymentFrequencyType() {
+        return this.paymentFrequencyType;
+    }
+
+    public BigDecimal getInterestRate() {
+        return this.interestRate;
+    }
+
+    public LocalDate getPaymentsStartingFromDate() {
+        return this.paymentsStartingFromDate;
+    }
+
+    public Integer getTenure() {
+        return this.tenure;
+    }
+
 }

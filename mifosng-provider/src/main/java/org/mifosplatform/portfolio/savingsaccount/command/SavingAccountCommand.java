@@ -6,245 +6,239 @@ import java.util.Set;
 import org.joda.time.LocalDate;
 
 public class SavingAccountCommand {
-	
-	
-	private final Long id;
-	private final Long clientId;
-	private final Long productId;
-	private final String externalId;
 
-	private final String currencyCode;
-	private final Integer digitsAfterDecimal;
-	private final BigDecimal savingsDepositAmount;
-	private final BigDecimal recurringInterestRate;
-	private final BigDecimal savingInterestRate;
-	private final Integer tenure;
-	
-	private final boolean isLockinPeriodAllowed;
-	private final Integer lockinPeriod;
-	private final Integer lockinPeriodType;
-	
-	private final LocalDate commencementDate;
-	private final Integer savingProductType;
-	private final Integer tenureType;
-	private final Integer frequency;
-	private final Integer interestType;
-	
-	private final Integer interestCalculationMethod;
-	private final BigDecimal minimumBalanceForWithdrawal;
-	private final boolean isPartialDepositAllowed; 
-	private final Integer payEvery;
-	
-	private final Set<String> modifiedParameters;
-	
-	public SavingAccountCommand(final Set<String> modifiedParameters,
-			final Long id,
-			final Long clientId, 
-			final Long productId, 
-			final String externalId,final String currencyCode, final Integer digitsAfterDecimal,
-			final BigDecimal savingsDepositAmount, 
-			final BigDecimal recurringInterestRate, final BigDecimal savingInterestRate,
-			final Integer tenure, final LocalDate commencementDate,
-			final Integer savingProductType, final Integer tenureType, final Integer frequency, final Integer interestType,
-			final BigDecimal minimumBalanceForWithdrawal, final Integer interestCalculationMethod,
-			final boolean isLockinPeriodAllowed, final boolean isPartialDepositAllowed, final Integer lockInPeriod, final Integer lockinPeriodType,
-			final Integer payEvery) {
-		this.id = id;
-		this.clientId = clientId;
-		this.productId = productId;
-		this.externalId = externalId;
-		
-		this.currencyCode = currencyCode;
-		this.digitsAfterDecimal = digitsAfterDecimal;
-		this.savingsDepositAmount = savingsDepositAmount;
-		this.recurringInterestRate = recurringInterestRate;
-		this.savingInterestRate = savingInterestRate;
-		this.tenure = tenure;
-		
-		this.modifiedParameters = modifiedParameters;
-		this.commencementDate = commencementDate;
-		
-		this.savingProductType=savingProductType;
-		this.tenureType=tenureType;
-		this.frequency=frequency;
-		this.interestType=interestType;
-		this.isPartialDepositAllowed=isPartialDepositAllowed;
-		
-		
-		this.isLockinPeriodAllowed = isLockinPeriodAllowed;
-		this.lockinPeriod = lockInPeriod;
-		this.lockinPeriodType = lockinPeriodType;
-		this.minimumBalanceForWithdrawal=minimumBalanceForWithdrawal;
-		this.interestCalculationMethod=interestCalculationMethod;
-		this.payEvery = payEvery;
-	}
+    private final Long id;
+    private final Long clientId;
+    private final Long productId;
+    private final String externalId;
 
-	public Long getId() {
-		return id;
-	}
+    private final String currencyCode;
+    private final Integer digitsAfterDecimal;
+    private final BigDecimal savingsDepositAmount;
+    private final BigDecimal recurringInterestRate;
+    private final BigDecimal savingInterestRate;
+    private final Integer tenure;
 
-	public Long getClientId() {
-		return clientId;
-	}
+    private final boolean isLockinPeriodAllowed;
+    private final Integer lockinPeriod;
+    private final Integer lockinPeriodType;
 
-	public Long getProductId() {
-		return productId;
-	}
+    private final LocalDate commencementDate;
+    private final Integer savingProductType;
+    private final Integer tenureType;
+    private final Integer frequency;
+    private final Integer interestType;
 
-	public String getExternalId() {
-		return externalId;
-	}
+    private final Integer interestCalculationMethod;
+    private final BigDecimal minimumBalanceForWithdrawal;
+    private final boolean isPartialDepositAllowed;
+    private final Integer payEvery;
 
-	public String getCurrencyCode() {
-		return currencyCode;
-	}
+    private final Set<String> modifiedParameters;
 
-	public Integer getDigitsAfterDecimal() {
-		return digitsAfterDecimal;
-	}
+    public SavingAccountCommand(final Set<String> modifiedParameters, final Long id, final Long clientId, final Long productId,
+            final String externalId, final String currencyCode, final Integer digitsAfterDecimal, final BigDecimal savingsDepositAmount,
+            final BigDecimal recurringInterestRate, final BigDecimal savingInterestRate, final Integer tenure,
+            final LocalDate commencementDate, final Integer savingProductType, final Integer tenureType, final Integer frequency,
+            final Integer interestType, final BigDecimal minimumBalanceForWithdrawal, final Integer interestCalculationMethod,
+            final boolean isLockinPeriodAllowed, final boolean isPartialDepositAllowed, final Integer lockInPeriod,
+            final Integer lockinPeriodType, final Integer payEvery) {
+        this.id = id;
+        this.clientId = clientId;
+        this.productId = productId;
+        this.externalId = externalId;
 
-	public BigDecimal getSavingsDepositAmount() {
-		return savingsDepositAmount;
-	}
+        this.currencyCode = currencyCode;
+        this.digitsAfterDecimal = digitsAfterDecimal;
+        this.savingsDepositAmount = savingsDepositAmount;
+        this.recurringInterestRate = recurringInterestRate;
+        this.savingInterestRate = savingInterestRate;
+        this.tenure = tenure;
 
-	public BigDecimal getRecurringInterestRate() {
-		return recurringInterestRate;
-	}
+        this.modifiedParameters = modifiedParameters;
+        this.commencementDate = commencementDate;
 
-	public BigDecimal getSavingInterestRate() {
-		return savingInterestRate;
-	}
+        this.savingProductType = savingProductType;
+        this.tenureType = tenureType;
+        this.frequency = frequency;
+        this.interestType = interestType;
+        this.isPartialDepositAllowed = isPartialDepositAllowed;
 
-	public Integer getTenure() {
-		return tenure;
-	}
+        this.isLockinPeriodAllowed = isLockinPeriodAllowed;
+        this.lockinPeriod = lockInPeriod;
+        this.lockinPeriodType = lockinPeriodType;
+        this.minimumBalanceForWithdrawal = minimumBalanceForWithdrawal;
+        this.interestCalculationMethod = interestCalculationMethod;
+        this.payEvery = payEvery;
+    }
 
-	public boolean isLockinPeriodAllowed() {
-		return isLockinPeriodAllowed;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public Integer getLockinPeriod() {
-		return lockinPeriod;
-	}
+    public Long getClientId() {
+        return clientId;
+    }
 
-	public Integer getLockinPeriodType() {
-		return lockinPeriodType;
-	}
+    public Long getProductId() {
+        return productId;
+    }
 
-	public LocalDate getCommencementDate() {
-		return commencementDate;
-	}
+    public String getExternalId() {
+        return externalId;
+    }
 
-	public Integer getSavingProductType() {
-		return savingProductType;
-	}
+    public String getCurrencyCode() {
+        return currencyCode;
+    }
 
-	public Integer getTenureType() {
-		return tenureType;
-	}
+    public Integer getDigitsAfterDecimal() {
+        return digitsAfterDecimal;
+    }
 
-	public Integer getFrequency() {
-		return frequency;
-	}
+    public BigDecimal getSavingsDepositAmount() {
+        return savingsDepositAmount;
+    }
 
-	public Integer getInterestType() {
-		return interestType;
-	}
+    public BigDecimal getRecurringInterestRate() {
+        return recurringInterestRate;
+    }
 
-	public Integer getInterestCalculationMethod() {
-		return interestCalculationMethod;
-	}
+    public BigDecimal getSavingInterestRate() {
+        return savingInterestRate;
+    }
 
-	public BigDecimal getMinimumBalanceForWithdrawal() {
-		return minimumBalanceForWithdrawal;
-	}
+    public Integer getTenure() {
+        return tenure;
+    }
 
-	public boolean isPartialDepositAllowed() {
-		return isPartialDepositAllowed;
-	}
+    public boolean isLockinPeriodAllowed() {
+        return isLockinPeriodAllowed;
+    }
 
-	public Integer getPayEvery() {
-		return this.payEvery;
-	}
+    public Integer getLockinPeriod() {
+        return lockinPeriod;
+    }
 
-	public boolean isNoFieldChanged() {
-		return this.modifiedParameters.isEmpty();
-	}
-	
-	public boolean isProductIdChanged(){
-		return this.modifiedParameters.contains("productId");
-	}
-	
-	public boolean isExternalIdChanged(){
-		return this.modifiedParameters.contains("externalId");
-	}
-	
-	public boolean isDepositAmountChanged(){
-		return this.modifiedParameters.contains("deposit");
-	}
+    public Integer getLockinPeriodType() {
+        return lockinPeriodType;
+    }
 
-	public boolean isTenureInMonthsChanged() {
-		return this.modifiedParameters.contains("tenureInMonths");
-	}
-	
-	public boolean isLockinPeriodChanged() {
-		return this.modifiedParameters.contains("lockinPeriod");
-	}
-	
-	public boolean isPreClosureInterestRateChanged(){
-		return this.modifiedParameters.contains("preClosureInterestRate");
-	}
-	
-	public boolean isPreClosureAllowedChanged() {
-		return this.modifiedParameters.contains("preClosureAllowed");
-	}
-	
-	public boolean isCommencementDateChanged() {
-		return this.modifiedParameters.contains("commencementDate");
-	}
+    public LocalDate getCommencementDate() {
+        return commencementDate;
+    }
 
-	public boolean isTenureTypeEnumChanged() {
-		return this.modifiedParameters.contains("tenureType");
-	}
+    public Integer getSavingProductType() {
+        return savingProductType;
+    }
 
-	public boolean isSavingProductTypeChanged() {
-		return this.modifiedParameters.contains("savingProductType");
-	}
+    public Integer getTenureType() {
+        return tenureType;
+    }
 
-	public boolean isSavingFrequencyTypeChanged() {
-		return this.modifiedParameters.contains("frequency");
-	}
+    public Integer getFrequency() {
+        return frequency;
+    }
 
-	public boolean isSavingInterestCalculationMethodChanged() {
-		return this.modifiedParameters.contains("interestCalculationMethod");
-	}
+    public Integer getInterestType() {
+        return interestType;
+    }
 
-	public boolean isReccuringInterestRateChanged() {
-		return this.modifiedParameters.contains("recurringInterestRate");
-	}
+    public Integer getInterestCalculationMethod() {
+        return interestCalculationMethod;
+    }
 
-	public boolean isSavingInterestRateChanged() {
-		return this.modifiedParameters.contains("savingInterestRate");
-	}
+    public BigDecimal getMinimumBalanceForWithdrawal() {
+        return minimumBalanceForWithdrawal;
+    }
 
-	public boolean isLockinPeriodAllowedChanged() {
-		return this.modifiedParameters.contains("isLockinPeriodAllowed");
-	}
+    public boolean isPartialDepositAllowed() {
+        return isPartialDepositAllowed;
+    }
 
-	public boolean isLockinPeriodTypeChanged() {
-		return this.modifiedParameters.contains("lockinPeriodType");
-	}
+    public Integer getPayEvery() {
+        return this.payEvery;
+    }
 
-	public boolean isPartialDepositAllowedChanged() {
-		return this.modifiedParameters.contains("isPartialDepositAllowed");
-	}
-	
-	public boolean isPayEveryChanged(){
-		return this.modifiedParameters.contains("payEvery");
-	}
+    public boolean isNoFieldChanged() {
+        return this.modifiedParameters.isEmpty();
+    }
 
-	public CalculateSavingScheduleCommand toCalculateSavingScheduleCommand() {
-		return new CalculateSavingScheduleCommand(productId, savingsDepositAmount, payEvery, frequency, recurringInterestRate, commencementDate,tenure);
-	}
+    public boolean isProductIdChanged() {
+        return this.modifiedParameters.contains("productId");
+    }
+
+    public boolean isExternalIdChanged() {
+        return this.modifiedParameters.contains("externalId");
+    }
+
+    public boolean isDepositAmountChanged() {
+        return this.modifiedParameters.contains("deposit");
+    }
+
+    public boolean isTenureInMonthsChanged() {
+        return this.modifiedParameters.contains("tenureInMonths");
+    }
+
+    public boolean isLockinPeriodChanged() {
+        return this.modifiedParameters.contains("lockinPeriod");
+    }
+
+    public boolean isPreClosureInterestRateChanged() {
+        return this.modifiedParameters.contains("preClosureInterestRate");
+    }
+
+    public boolean isPreClosureAllowedChanged() {
+        return this.modifiedParameters.contains("preClosureAllowed");
+    }
+
+    public boolean isCommencementDateChanged() {
+        return this.modifiedParameters.contains("commencementDate");
+    }
+
+    public boolean isTenureTypeEnumChanged() {
+        return this.modifiedParameters.contains("tenureType");
+    }
+
+    public boolean isSavingProductTypeChanged() {
+        return this.modifiedParameters.contains("savingProductType");
+    }
+
+    public boolean isSavingFrequencyTypeChanged() {
+        return this.modifiedParameters.contains("frequency");
+    }
+
+    public boolean isSavingInterestCalculationMethodChanged() {
+        return this.modifiedParameters.contains("interestCalculationMethod");
+    }
+
+    public boolean isReccuringInterestRateChanged() {
+        return this.modifiedParameters.contains("recurringInterestRate");
+    }
+
+    public boolean isSavingInterestRateChanged() {
+        return this.modifiedParameters.contains("savingInterestRate");
+    }
+
+    public boolean isLockinPeriodAllowedChanged() {
+        return this.modifiedParameters.contains("isLockinPeriodAllowed");
+    }
+
+    public boolean isLockinPeriodTypeChanged() {
+        return this.modifiedParameters.contains("lockinPeriodType");
+    }
+
+    public boolean isPartialDepositAllowedChanged() {
+        return this.modifiedParameters.contains("isPartialDepositAllowed");
+    }
+
+    public boolean isPayEveryChanged() {
+        return this.modifiedParameters.contains("payEvery");
+    }
+
+    public CalculateSavingScheduleCommand toCalculateSavingScheduleCommand() {
+        return new CalculateSavingScheduleCommand(productId, savingsDepositAmount, payEvery, frequency, recurringInterestRate,
+                commencementDate, tenure);
+    }
 
 }

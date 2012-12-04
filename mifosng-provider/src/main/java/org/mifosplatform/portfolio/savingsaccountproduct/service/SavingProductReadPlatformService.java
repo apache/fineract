@@ -7,11 +7,11 @@ import org.mifosplatform.portfolio.savingsaccountproduct.data.SavingProductLooku
 
 public interface SavingProductReadPlatformService {
 
-	Collection<SavingProductData> retrieveAllSavingProducts();
+    Collection<SavingProductData> retrieveAllSavingProducts();
 
-	Collection<SavingProductLookup> retrieveAllSavingProductsForLookup();
+    Collection<SavingProductLookup> retrieveAllSavingProductsForLookup();
 
-	SavingProductData retrieveSavingProduct(Long productId);
+    SavingProductData retrieveSavingProduct(Long productId);
 
-	SavingProductData retrieveNewSavingProductDetails();	
+    SavingProductData retrieveNewSavingProductDetails();
 }

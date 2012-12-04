@@ -3,32 +3,33 @@ package org.mifosplatform.portfolio.savingsaccountproduct.data;
 import java.io.Serializable;
 
 public class SavingProductLookup implements Serializable {
-	private Long id;
-	private String name;
 
-	public SavingProductLookup() {
-		//
-	}
+    private Long id;
+    private String name;
 
-	public SavingProductLookup(Long id, String name) {
-		this.id = id;
-		this.name = name;
-	}
+    public SavingProductLookup() {
+        //
+    }
 
-	public Long getId() {
-		return id;
-	}
+    public SavingProductLookup(Long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
 }

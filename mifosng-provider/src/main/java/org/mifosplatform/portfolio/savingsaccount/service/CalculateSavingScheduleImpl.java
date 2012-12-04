@@ -17,46 +17,44 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class CalculateSavingScheduleImpl implements CalculateSavingSchedule {
-	
-	private final PlatformSecurityContext context;
-	private final SavingProductRepository savingProductRepository;
-	private final SavingScheduleGenerator savingScheduleGenerator;
-	private final ApplicationCurrencyRepository applicationCurrencyRepository;
-	
-	@Autowired
-	public CalculateSavingScheduleImpl(
-			final PlatformSecurityContext context,
-			final SavingProductRepository savingProductRepository,
-			final ApplicationCurrencyRepository applicationCurrencyRepository) {
-		this.context = context;
-		this.savingProductRepository = savingProductRepository;
-		this.savingScheduleGenerator = new SavingScheduleGenerator();
-		this.applicationCurrencyRepository = applicationCurrencyRepository;
-	}
 
-	@Override
-	public SavingScheduleData calculateSavingSchedule(CalculateSavingScheduleCommand command) {
-		
-		context.authenticatedUser();
-		
-		// FIXME Validations should write here 
-		final SavingProduct savingProduct = this.savingProductRepository.findOne(command.getProductId());
-		if (savingProduct == null) 
-			throw new SavingProductNotFoundException(command.getProductId());
-		
-		final Integer depositFrequency = command.getPayEvery();
-		final PeriodFrequencyType depositFrequencyType = PeriodFrequencyType.fromInt(command.getPaymentFrequencyType());
-		final LocalDate scheduleStartDate = command.getPaymentsStartingFromDate();
-		@SuppressWarnings("unused")
-		final BigDecimal interestRate = command.getInterestRate();
-		final BigDecimal depositAmountPerPeriod = command.getDeposit();
-		final Integer tenure = command.getTenure();
-		final ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneByCode(savingProduct.getCurrency().getCode());
-		
-		SavingScheduleData savingScheduleData = savingScheduleGenerator.generate(scheduleStartDate,depositAmountPerPeriod,
-				depositFrequency,depositFrequencyType,savingProduct,tenure,applicationCurrency);
-		
-		return savingScheduleData;
-	}
+    private final PlatformSecurityContext context;
+    private final SavingProductRepository savingProductRepository;
+    private final SavingScheduleGenerator savingScheduleGenerator;
+    private final ApplicationCurrencyRepository applicationCurrencyRepository;
+
+    @Autowired
+    public CalculateSavingScheduleImpl(final PlatformSecurityContext context, final SavingProductRepository savingProductRepository,
+            final ApplicationCurrencyRepository applicationCurrencyRepository) {
+        this.context = context;
+        this.savingProductRepository = savingProductRepository;
+        this.savingScheduleGenerator = new SavingScheduleGenerator();
+        this.applicationCurrencyRepository = applicationCurrencyRepository;
+    }
+
+    @Override
+    public SavingScheduleData calculateSavingSchedule(CalculateSavingScheduleCommand command) {
+
+        context.authenticatedUser();
+
+        // FIXME Validations should write here
+        final SavingProduct savingProduct = this.savingProductRepository.findOne(command.getProductId());
+        if (savingProduct == null) throw new SavingProductNotFoundException(command.getProductId());
+
+        final Integer depositFrequency = command.getPayEvery();
+        final PeriodFrequencyType depositFrequencyType = PeriodFrequencyType.fromInt(command.getPaymentFrequencyType());
+        final LocalDate scheduleStartDate = command.getPaymentsStartingFromDate();
+        @SuppressWarnings("unused")
+        final BigDecimal interestRate = command.getInterestRate();
+        final BigDecimal depositAmountPerPeriod = command.getDeposit();
+        final Integer tenure = command.getTenure();
+        final ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneByCode(savingProduct.getCurrency()
+                .getCode());
+
+        SavingScheduleData savingScheduleData = savingScheduleGenerator.generate(scheduleStartDate, depositAmountPerPeriod,
+                depositFrequency, depositFrequencyType, savingProduct, tenure, applicationCurrency);
+
+        return savingScheduleData;
+    }
 
 }

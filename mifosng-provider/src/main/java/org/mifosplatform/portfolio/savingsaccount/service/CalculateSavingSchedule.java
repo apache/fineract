@@ -4,7 +4,6 @@ import org.mifosplatform.portfolio.savingsaccount.command.CalculateSavingSchedul
 import org.mifosplatform.portfolio.savingsaccount.data.SavingScheduleData;
 
 public interface CalculateSavingSchedule {
-	
-	SavingScheduleData calculateSavingSchedule(CalculateSavingScheduleCommand command);
 
+    SavingScheduleData calculateSavingSchedule(CalculateSavingScheduleCommand command);
 }

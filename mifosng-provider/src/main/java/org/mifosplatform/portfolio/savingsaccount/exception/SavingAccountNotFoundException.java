@@ -4,8 +4,7 @@ import org.mifosplatform.infrastructure.core.exception.AbstractPlatformResourceN
 
 public class SavingAccountNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-	public SavingAccountNotFoundException(final Long id) {
-		super("error.msg.saving.account.id.invalid", "Saving account with identifier " + id + " does not exist", id);
-	}
-
+    public SavingAccountNotFoundException(final Long id) {
+        super("error.msg.saving.account.id.invalid", "Saving account with identifier " + id + " does not exist", id);
+    }
 }

@@ -305,9 +305,10 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
                     "deposit.transaction.canot.withdraw.before.lockinperiod.reached",
                     "You can not withdraw your application before maturity date reached"); }
         }
-       // if (eventDate.isBefore(account.maturesOnDate())) {
-       //     this.depositAccountAssembler.adjustTotalAmountForPreclosureInterest(account, eventDate);
-       // }
+        // if (eventDate.isBefore(account.maturesOnDate())) {
+        // this.depositAccountAssembler.adjustTotalAmountForPreclosureInterest(account,
+        // eventDate);
+        // }
         account.withdrawDepositAccountMoney(defaultDepositLifecycleStateMachine(), fixedTermDepositInterestCalculator, eventDate);
         this.depositAccountRepository.save(account);
         String noteText = command.getNote();
@@ -421,26 +422,23 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
             return new EntityIdentifier(Long.valueOf(-1));
         }
     }
-    
-	@Transactional
-	@Override
-	public EntityIdentifier postInterestToDepositAccount(Collection<DepositAccountsForLookup> accounts) {
-		
-		try {
-			
-			for (DepositAccountsForLookup accountData : accounts)
-			{
-				 DepositAccount account = this.depositAccountRepository.findOne(accountData.getId());
-				if (account == null || account.isDeleted()) {
-					throw new DepositAccountNotFoundException(accountData.getId());
-				}
-				this.depositAccountAssembler.postInterest(account);
-				this.depositAccountRepository.save(account);
-			}
-			return new EntityIdentifier(new Long(accounts.size()));
-		} catch (Exception e) {
-			return new EntityIdentifier(Long.valueOf(-1));
-		}
-		
-	}
+
+    @Transactional
+    @Override
+    public EntityIdentifier postInterestToDepositAccount(Collection<DepositAccountsForLookup> accounts) {
+
+        try {
+
+            for (DepositAccountsForLookup accountData : accounts) {
+                DepositAccount account = this.depositAccountRepository.findOne(accountData.getId());
+                if (account == null || account.isDeleted()) { throw new DepositAccountNotFoundException(accountData.getId()); }
+                this.depositAccountAssembler.postInterest(account);
+                this.depositAccountRepository.save(account);
+            }
+            return new EntityIdentifier(new Long(accounts.size()));
+        } catch (Exception e) {
+            return new EntityIdentifier(Long.valueOf(-1));
+        }
+
+    }
 }

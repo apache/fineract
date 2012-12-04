@@ -4,216 +4,210 @@ import java.math.BigDecimal;
 import java.util.Set;
 
 public class SavingProductCommand {
-	private final Long id;
-	private final String name;
-	private final String description;
 
-	private final String currencyCode;
-	private final Integer digitsAfterDecimal;
-	private final BigDecimal interestRate;
-	private final BigDecimal minInterestRate;
-	private final BigDecimal maxInterestRate;
-	
-	private final BigDecimal savingsDepositAmount;
-	private final Integer savingProductType;
-	private final Integer tenureType;
-	private final Integer tenure;
-	private final Integer frequency;
-	private final Integer interestType;
-	private final Integer interestCalculationMethod;
-	private final BigDecimal minimumBalanceForWithdrawal;
-	private final boolean isPartialDepositAllowed;
-	private final boolean isLockinPeriodAllowed;
-	private final Integer lockinPeriod; 
-	private final Integer lockinPeriodType;
-	
+    private final Long id;
+    private final String name;
+    private final String description;
 
-	private final Set<String> modifiedParameters;
-	
-	public SavingProductCommand(Set<String> modifiedParameters,
-			Long id, String name, String description,
-			String currencyCode, Integer digitsAfterDecimal,
-			BigDecimal interestRate, BigDecimal minInterestRate,
-			BigDecimal maxInterestRate, BigDecimal savingsDepositAmount,
-			Integer savingProductType, Integer tenureType, Integer tenure,
-			Integer frequency, Integer interestType,
-			Integer interestCalculationMethod,
-			BigDecimal minimumBalanceForWithdrawal,
-			boolean isPartialDepositAllowed, boolean isLockinPeriodAllowed,
-			Integer lockinPeriod, Integer lockinPeriodType) {
-		
-		this.id = id;
-		this.name = name;
-		this.description = description;
+    private final String currencyCode;
+    private final Integer digitsAfterDecimal;
+    private final BigDecimal interestRate;
+    private final BigDecimal minInterestRate;
+    private final BigDecimal maxInterestRate;
 
-		this.currencyCode = currencyCode;
-		this.digitsAfterDecimal = digitsAfterDecimal;
-		this.interestRate = interestRate;
-		this.minInterestRate = minInterestRate;
-		this.maxInterestRate = maxInterestRate;
-		
-		this.savingsDepositAmount=savingsDepositAmount;
-		this.savingProductType=savingProductType;
-		this.tenureType=tenureType;
-		this.tenure=tenure;
-		this.frequency=frequency;
-		this.interestType=interestType;
-		this.interestCalculationMethod=interestCalculationMethod;
-		this.minimumBalanceForWithdrawal=minimumBalanceForWithdrawal;
-		this.isPartialDepositAllowed=isPartialDepositAllowed;
-		this.isLockinPeriodAllowed=isLockinPeriodAllowed;
-		this.lockinPeriod=lockinPeriod;
-		this.lockinPeriodType=lockinPeriodType;
+    private final BigDecimal savingsDepositAmount;
+    private final Integer savingProductType;
+    private final Integer tenureType;
+    private final Integer tenure;
+    private final Integer frequency;
+    private final Integer interestType;
+    private final Integer interestCalculationMethod;
+    private final BigDecimal minimumBalanceForWithdrawal;
+    private final boolean isPartialDepositAllowed;
+    private final boolean isLockinPeriodAllowed;
+    private final Integer lockinPeriod;
+    private final Integer lockinPeriodType;
 
-		this.modifiedParameters = modifiedParameters;
-	}
+    private final Set<String> modifiedParameters;
 
-	public Long getId() {
-		return id;
-	}
+    public SavingProductCommand(Set<String> modifiedParameters, Long id, String name, String description, String currencyCode,
+            Integer digitsAfterDecimal, BigDecimal interestRate, BigDecimal minInterestRate, BigDecimal maxInterestRate,
+            BigDecimal savingsDepositAmount, Integer savingProductType, Integer tenureType, Integer tenure, Integer frequency,
+            Integer interestType, Integer interestCalculationMethod, BigDecimal minimumBalanceForWithdrawal,
+            boolean isPartialDepositAllowed, boolean isLockinPeriodAllowed, Integer lockinPeriod, Integer lockinPeriodType) {
 
-	public String getName() {
-		return name;
-	}
+        this.id = id;
+        this.name = name;
+        this.description = description;
 
-	public String getDescription() {
-		return description;
-	}
+        this.currencyCode = currencyCode;
+        this.digitsAfterDecimal = digitsAfterDecimal;
+        this.interestRate = interestRate;
+        this.minInterestRate = minInterestRate;
+        this.maxInterestRate = maxInterestRate;
 
-	public String getCurrencyCode() {
-		return currencyCode;
-	}
+        this.savingsDepositAmount = savingsDepositAmount;
+        this.savingProductType = savingProductType;
+        this.tenureType = tenureType;
+        this.tenure = tenure;
+        this.frequency = frequency;
+        this.interestType = interestType;
+        this.interestCalculationMethod = interestCalculationMethod;
+        this.minimumBalanceForWithdrawal = minimumBalanceForWithdrawal;
+        this.isPartialDepositAllowed = isPartialDepositAllowed;
+        this.isLockinPeriodAllowed = isLockinPeriodAllowed;
+        this.lockinPeriod = lockinPeriod;
+        this.lockinPeriodType = lockinPeriodType;
 
-	public Integer getDigitsAfterDecimal() {
-		return digitsAfterDecimal;
-	}
+        this.modifiedParameters = modifiedParameters;
+    }
 
-	public BigDecimal getInterestRate() {
-		return interestRate;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public BigDecimal getMinInterestRate() {
-		return minInterestRate;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public BigDecimal getMaxInterestRate() {
-		return maxInterestRate;
-	}
+    public String getDescription() {
+        return description;
+    }
 
-	public BigDecimal getSavingsDepositAmount() {
-		return savingsDepositAmount;
-	}
+    public String getCurrencyCode() {
+        return currencyCode;
+    }
 
-	public Integer getSavingProductType() {
-		return savingProductType;
-	}
+    public Integer getDigitsAfterDecimal() {
+        return digitsAfterDecimal;
+    }
 
-	public Integer getTenureType() {
-		return tenureType;
-	}
+    public BigDecimal getInterestRate() {
+        return interestRate;
+    }
 
-	public Integer getTenure() {
-		return tenure;
-	}
+    public BigDecimal getMinInterestRate() {
+        return minInterestRate;
+    }
 
-	public Integer getFrequency() {
-		return frequency;
-	}
+    public BigDecimal getMaxInterestRate() {
+        return maxInterestRate;
+    }
 
-	public Integer getInterestType() {
-		return interestType;
-	}
+    public BigDecimal getSavingsDepositAmount() {
+        return savingsDepositAmount;
+    }
 
-	public Integer getInterestCalculationMethod() {
-		return interestCalculationMethod;
-	}
+    public Integer getSavingProductType() {
+        return savingProductType;
+    }
 
-	public BigDecimal getMinimumBalanceForWithdrawal() {
-		return minimumBalanceForWithdrawal;
-	}
+    public Integer getTenureType() {
+        return tenureType;
+    }
 
-	public boolean isPartialDepositAllowed() {
-		return isPartialDepositAllowed;
-	}
+    public Integer getTenure() {
+        return tenure;
+    }
 
-	public boolean isLockinPeriodAllowed() {
-		return isLockinPeriodAllowed;
-	}
+    public Integer getFrequency() {
+        return frequency;
+    }
 
-	public Integer getLockinPeriod() {
-		return lockinPeriod;
-	}
+    public Integer getInterestType() {
+        return interestType;
+    }
 
-	public Integer getLockinPeriodType() {
-		return lockinPeriodType;
-	}
+    public Integer getInterestCalculationMethod() {
+        return interestCalculationMethod;
+    }
 
-	public boolean isNameChanged() {
-		return this.modifiedParameters.contains("name");
-	}
+    public BigDecimal getMinimumBalanceForWithdrawal() {
+        return minimumBalanceForWithdrawal;
+    }
 
-	public boolean isDescriptionChanged() {
-		return this.modifiedParameters.contains("description");
-	}
-	
-	public boolean isCurrencyCodeChanged() {
-		return this.modifiedParameters.contains("currencyCode");
-	}
+    public boolean isPartialDepositAllowed() {
+        return isPartialDepositAllowed;
+    }
 
-	public boolean isDigitsAfterDecimalChanged() {
-		return this.modifiedParameters.contains("digitsAfterDecimal");
-	}
-	
-	public boolean isInterestRateChanged() {
-		return this.modifiedParameters.contains("interestRate");
-	}
-	
-	public boolean isSavingsDepositAmountChanged(){
-		return this.modifiedParameters.contains("savingsDepositAmount");
-	}
-	
-	public boolean isSavingProductTypeChanged() {
-	    return this.modifiedParameters.contains("savingProductType");
-	}
+    public boolean isLockinPeriodAllowed() {
+        return isLockinPeriodAllowed;
+    }
 
-	public boolean isTenureTypeChanged() {
-		return this.modifiedParameters.contains("tenureType");
-	}
+    public Integer getLockinPeriod() {
+        return lockinPeriod;
+    }
 
-	public boolean isTenureChanged() {
-		return this.modifiedParameters.contains("tenure");
-	}
+    public Integer getLockinPeriodType() {
+        return lockinPeriodType;
+    }
 
-	public boolean isFrequencyChanged() {
-		return this.modifiedParameters.contains("frequency");
-	}
+    public boolean isNameChanged() {
+        return this.modifiedParameters.contains("name");
+    }
 
-	public boolean isInterestTypeChanged() {
-		return this.modifiedParameters.contains("interestType");
-	}
+    public boolean isDescriptionChanged() {
+        return this.modifiedParameters.contains("description");
+    }
 
-	public boolean isInterestCalculationMethodChanged() {
-		return this.modifiedParameters.contains("interestCalculationMethod");
-	}
+    public boolean isCurrencyCodeChanged() {
+        return this.modifiedParameters.contains("currencyCode");
+    }
 
-	public boolean isMinimumBalanceForWithdrawalChanged() {
-		return this.modifiedParameters.contains("minimumBalanceForWithdrawal");
-	}
+    public boolean isDigitsAfterDecimalChanged() {
+        return this.modifiedParameters.contains("digitsAfterDecimal");
+    }
 
-	public boolean isPartialDepositAllowedChanged() {
-		return this.modifiedParameters.contains("isPartialDepositAllowed");
-	}
+    public boolean isInterestRateChanged() {
+        return this.modifiedParameters.contains("interestRate");
+    }
 
-	public boolean isLockinPeriodAllowedChanged() {
-		return this.modifiedParameters.contains("isLockinPeriodAllowed");
-	}
+    public boolean isSavingsDepositAmountChanged() {
+        return this.modifiedParameters.contains("savingsDepositAmount");
+    }
 
-	public boolean isLockinPeriodChanged() {
-		return this.modifiedParameters.contains("lockinPeriod");
-	}
+    public boolean isSavingProductTypeChanged() {
+        return this.modifiedParameters.contains("savingProductType");
+    }
 
-	public boolean isLockinPeriodTypeChanged() {
-		return this.modifiedParameters.contains("lockinPeriodType");
-	}
-	 
+    public boolean isTenureTypeChanged() {
+        return this.modifiedParameters.contains("tenureType");
+    }
+
+    public boolean isTenureChanged() {
+        return this.modifiedParameters.contains("tenure");
+    }
+
+    public boolean isFrequencyChanged() {
+        return this.modifiedParameters.contains("frequency");
+    }
+
+    public boolean isInterestTypeChanged() {
+        return this.modifiedParameters.contains("interestType");
+    }
+
+    public boolean isInterestCalculationMethodChanged() {
+        return this.modifiedParameters.contains("interestCalculationMethod");
+    }
+
+    public boolean isMinimumBalanceForWithdrawalChanged() {
+        return this.modifiedParameters.contains("minimumBalanceForWithdrawal");
+    }
+
+    public boolean isPartialDepositAllowedChanged() {
+        return this.modifiedParameters.contains("isPartialDepositAllowed");
+    }
+
+    public boolean isLockinPeriodAllowedChanged() {
+        return this.modifiedParameters.contains("isLockinPeriodAllowed");
+    }
+
+    public boolean isLockinPeriodChanged() {
+        return this.modifiedParameters.contains("lockinPeriod");
+    }
+
+    public boolean isLockinPeriodTypeChanged() {
+        return this.modifiedParameters.contains("lockinPeriodType");
+    }
+
 }

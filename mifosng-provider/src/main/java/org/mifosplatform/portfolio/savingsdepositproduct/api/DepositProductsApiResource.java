@@ -43,7 +43,7 @@ import org.springframework.stereotype.Component;
 public class DepositProductsApiResource {
 
     private final String entityType = "DEPOSITPRODUCT";
-    
+
     @Autowired
     private DepositProductReadPlatformService depositProductReadPlatformService;
 

@@ -258,16 +258,16 @@ public class DepositAccountsApiResource {
 
     private boolean is(final String commandParam, final String commandValue) {
         return StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase(commandValue);
-    }    
-	@POST
-	@Path("postinterest")
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public Response postInterest(){
-		Collection<DepositAccountsForLookup> accounts = this.depositAccountReadPlatformService.retrieveDepositAccountForLookup();
-		@SuppressWarnings("unused")
-		EntityIdentifier entityIdentifier = this.depositAccountWritePlatformService.postInterestToDepositAccount(accounts);
-		return Response.ok().entity(entityIdentifier).build();
-		
+    }
+
+    @POST
+    @Path("postinterest")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public Response postInterest() {
+        Collection<DepositAccountsForLookup> accounts = this.depositAccountReadPlatformService.retrieveDepositAccountForLookup();
+        EntityIdentifier entityIdentifier = this.depositAccountWritePlatformService.postInterestToDepositAccount(accounts);
+        return Response.ok().entity(entityIdentifier).build();
+
     }
 }

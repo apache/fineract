@@ -18,6 +18,6 @@ public interface DepositAccountReadPlatformService {
     DepositPermissionData retrieveDepositAccountsPermissions(DepositAccountData depositAccountData);
 
     BigDecimal retrieveAvailableInterestForWithdrawal(DepositAccountData account);
-    
+
     Collection<DepositAccountsForLookup> retrieveDepositAccountForLookup();
 }

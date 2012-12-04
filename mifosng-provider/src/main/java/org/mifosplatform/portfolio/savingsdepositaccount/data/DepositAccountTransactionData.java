@@ -9,52 +9,51 @@ import org.mifosplatform.infrastructure.core.data.EnumOptionData;
  * Immutable data object to represent transactions on a deposit account.
  */
 public class DepositAccountTransactionData {
-	
-	private final Long transactionId;
-	private final EnumOptionData transactionType;
-	private final LocalDate transactionDate;
-	private final BigDecimal transactionAmount;
-	private final Long accountId;
-	private final BigDecimal interestAmount;
-	private final BigDecimal total;
-	
-	public DepositAccountTransactionData(
-			final Long transactionId, final Long accountId, final EnumOptionData transactionType, 
-			final LocalDate transactionDate, final BigDecimal transactionAmount, final BigDecimal interstAmount, final BigDecimal total ) {
-		this.transactionId = transactionId;
-		this.accountId = accountId;
-		this.transactionType = transactionType;
-		this.transactionDate = transactionDate;
-		this.transactionAmount = transactionAmount;
-		this.interestAmount = interstAmount;
-		this.total = total;
-	}
 
-	public Long getAccountId() {
-		return accountId;
-	}
+    private final Long transactionId;
+    private final EnumOptionData transactionType;
+    private final LocalDate transactionDate;
+    private final BigDecimal transactionAmount;
+    private final Long accountId;
+    private final BigDecimal interestAmount;
+    private final BigDecimal total;
 
-	public Long getTransactionId() {
-		return transactionId;
-	}
+    public DepositAccountTransactionData(final Long transactionId, final Long accountId, final EnumOptionData transactionType,
+            final LocalDate transactionDate, final BigDecimal transactionAmount, final BigDecimal interstAmount, final BigDecimal total) {
+        this.transactionId = transactionId;
+        this.accountId = accountId;
+        this.transactionType = transactionType;
+        this.transactionDate = transactionDate;
+        this.transactionAmount = transactionAmount;
+        this.interestAmount = interstAmount;
+        this.total = total;
+    }
 
-	public EnumOptionData getTransactionType() {
-		return transactionType;
-	}
+    public Long getAccountId() {
+        return accountId;
+    }
 
-	public LocalDate getTransactionDate() {
-		return transactionDate;
-	}
+    public Long getTransactionId() {
+        return transactionId;
+    }
 
-	public BigDecimal getTransactionAmount() {
-		return transactionAmount;
-	}
+    public EnumOptionData getTransactionType() {
+        return transactionType;
+    }
 
-	public BigDecimal getInterestAmount() {
-		return interestAmount;
-	}
+    public LocalDate getTransactionDate() {
+        return transactionDate;
+    }
 
-	public BigDecimal getTotal() {
-		return total;
-	}
+    public BigDecimal getTransactionAmount() {
+        return transactionAmount;
+    }
+
+    public BigDecimal getInterestAmount() {
+        return interestAmount;
+    }
+
+    public BigDecimal getTotal() {
+        return total;
+    }
 }

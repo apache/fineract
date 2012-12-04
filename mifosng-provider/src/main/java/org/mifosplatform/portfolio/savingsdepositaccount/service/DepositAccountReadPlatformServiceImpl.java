@@ -208,18 +208,19 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             Integer lockinPeriod = JdbcSupport.getInteger(rs, "lockinPeriod");
             Integer lockinPeriodTypeValue = JdbcSupport.getInteger(rs, "lockinPeriodType");
             EnumOptionData lockinPeriodType = SavingsDepositEnumerations.interestCompoundingPeriodType(lockinPeriodTypeValue);
-            
+
             BigDecimal availableInterest = rs.getBigDecimal("availableInterest");
-			BigDecimal interestPostedAmount = rs.getBigDecimal("interestPostedAmount");
-			LocalDate lastInterestPostedDate = JdbcSupport.getLocalDate(rs, "lastInterestPostedDate");
-			LocalDate nextInterestPostedDate = JdbcSupport.getLocalDate(rs, "nextInterestPostedDate");
+            BigDecimal interestPostedAmount = rs.getBigDecimal("interestPostedAmount");
+            LocalDate lastInterestPostedDate = JdbcSupport.getLocalDate(rs, "lastInterestPostedDate");
+            LocalDate nextInterestPostedDate = JdbcSupport.getLocalDate(rs, "nextInterestPostedDate");
 
             return new DepositAccountData(id, externalId, status, clientId, clientName, productId, productName, currencyData,
                     depositAmount, interestRate, termInMonths, projectedCommencementDate, actualCommencementDate, maturedOn,
                     projectedInterestAccrued, actualInterestAccrued, projectedMaturityAmount, actualMaturityAmount,
                     interestCompoundedEvery, interestCompoundedEveryPeriodType, renewalAllowed, preClosureAllowed, preClosureInterestRate,
                     withdrawnonDate, rejectedonDate, closedonDate, isInterestWithdrawable, interestPaid, interestCompoundingAllowed,
-                    isLockinPeriodAllowed, lockinPeriod, lockinPeriodType, availableInterest, interestPostedAmount, lastInterestPostedDate, nextInterestPostedDate);
+                    isLockinPeriodAllowed, lockinPeriod, lockinPeriodType, availableInterest, interestPostedAmount, lastInterestPostedDate,
+                    nextInterestPostedDate);
         }
     }
 
@@ -254,7 +255,18 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
         boolean undoApprovalAllowed = (depositAccountData.getStatus().getId().equals(300L));
         boolean renewelAllowed = false;
         if (depositAccountData.getMaturedOn() != null) {
-            if (new LocalDate().isAfter(depositAccountData.getMaturedOn())/* || depositAccountData.getMaturedOn().isEqual(new LocalDate()) */) {
+            if (new LocalDate().isAfter(depositAccountData.getMaturedOn())/*
+                                                                           * ||
+                                                                           * depositAccountData
+                                                                           * .
+                                                                           * getMaturedOn
+                                                                           * ().
+                                                                           * isEqual
+                                                                           * (
+                                                                           * new
+                                                                           * LocalDate
+                                                                           * ())
+                                                                           */) {
                 renewelAllowed = depositAccountData.isRenewalAllowed();
             }
         }
@@ -276,28 +288,28 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
         return BigDecimal.valueOf(interstGettingForPeriod.multiply(new BigDecimal(noOfPeriods)).doubleValue()
                 - account.getInterestPaid().doubleValue());
     }
-    
+
     @Override
-	public Collection<DepositAccountsForLookup> retrieveDepositAccountForLookup() {
+    public Collection<DepositAccountsForLookup> retrieveDepositAccountForLookup() {
 
-		this.context.authenticatedUser();
-		DepositAccountLookupMapper mapper = new DepositAccountLookupMapper();
-		String sql = "select "+mapper.depositAccountLookupSchema();
-		return this.jdbcTemplate.query(sql, mapper, new Object[]{});
-		
-	}
-	
-	private static final class DepositAccountLookupMapper implements RowMapper<DepositAccountsForLookup> {
-		
-		public String depositAccountLookupSchema(){
-			return " da.id as id from m_deposit_account da where da.status_enum=300 and da.is_deleted=0";
-		}
+        this.context.authenticatedUser();
+        DepositAccountLookupMapper mapper = new DepositAccountLookupMapper();
+        String sql = "select " + mapper.depositAccountLookupSchema();
+        return this.jdbcTemplate.query(sql, mapper, new Object[] {});
 
-		@Override
-		public DepositAccountsForLookup mapRow(ResultSet rs, int rowNum) throws SQLException {
-			Long id = rs.getLong("id");
-			return new DepositAccountsForLookup(id);
-		}
-		
-	}
+    }
+
+    private static final class DepositAccountLookupMapper implements RowMapper<DepositAccountsForLookup> {
+
+        public String depositAccountLookupSchema() {
+            return " da.id as id from m_deposit_account da where da.status_enum=300 and da.is_deleted=0";
+        }
+
+        @Override
+        public DepositAccountsForLookup mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
+            Long id = rs.getLong("id");
+            return new DepositAccountsForLookup(id);
+        }
+
+    }
 }

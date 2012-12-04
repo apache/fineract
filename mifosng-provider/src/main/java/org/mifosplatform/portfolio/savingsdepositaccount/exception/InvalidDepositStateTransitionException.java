@@ -8,5 +8,4 @@ public class InvalidDepositStateTransitionException extends AbstractPlatformDoma
             Object... defaultUserMessageArgs) {
         super("error.msg.deposit." + action + "." + postFix, defaultUserMessage, defaultUserMessageArgs);
     }
-
 }
