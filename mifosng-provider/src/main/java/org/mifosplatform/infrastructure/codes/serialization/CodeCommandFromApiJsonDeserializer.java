@@ -7,9 +7,10 @@ import java.util.Map;
 import java.util.Set;
 
 import org.mifosplatform.infrastructure.codes.command.CodeCommand;
+import org.mifosplatform.infrastructure.core.serialization.AbstractFromApiJsonDeserializer;
+import org.mifosplatform.infrastructure.core.serialization.CommandSerializer;
 import org.mifosplatform.infrastructure.core.serialization.FromApiJsonDeserializer;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
-import org.mifosplatform.infrastructure.core.serialization.CommandSerializer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,29 +20,22 @@ import com.google.gson.reflect.TypeToken;
  * Implementation of {@link FromApiJsonDeserializer} for {@link CodeCommand}'s.
  */
 @Component
-public final class CodeCommandFromApiJsonDeserializer implements FromApiJsonDeserializer<CodeCommand> {
+public final class CodeCommandFromApiJsonDeserializer extends AbstractFromApiJsonDeserializer<CodeCommand> {
 
     /**
      * The parameters supported for this command.
      */
     private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("name"));
-    
+
     private final FromJsonHelper fromApiJsonHelper;
     private final CodeCommandFromCommandJsonDeserializer fromCommandJsonDeserializer;
-    private final CommandSerializer commandSerializerService;
 
     @Autowired
     public CodeCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper,
-            final CodeCommandFromCommandJsonDeserializer fromCommandJsonDeserializer,
-            final CommandSerializer commandSerializerService) {
+            final CodeCommandFromCommandJsonDeserializer fromCommandJsonDeserializer, final CommandSerializer commandSerializerService) {
+        super(commandSerializerService);
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.fromCommandJsonDeserializer = fromCommandJsonDeserializer;
-        this.commandSerializerService = commandSerializerService;
-    }
-
-    @Override
-    public CodeCommand commandFromApiJson(final String json) {
-        return commandFromApiJson(null, json);
     }
 
     @Override
@@ -52,17 +46,5 @@ public final class CodeCommandFromApiJsonDeserializer implements FromApiJsonDese
         fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
 
         return this.fromCommandJsonDeserializer.commandFromCommandJson(codeId, json);
-    }
-
-    @Override
-    public String serializedCommandJsonFromApiJson(final String json) {
-        final CodeCommand command = commandFromApiJson(json);
-        return this.commandSerializerService.serializeCommandToJson(command);
-    }
-
-    @Override
-    public String serializedCommandJsonFromApiJson(final Long codeId, final String json) {
-        final CodeCommand command = commandFromApiJson(codeId, json);
-        return this.commandSerializerService.serializeCommandToJson(command);
     }
 }

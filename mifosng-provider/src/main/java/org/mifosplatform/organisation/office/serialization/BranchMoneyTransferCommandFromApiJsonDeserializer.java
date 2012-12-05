@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.joda.time.LocalDate;
+import org.mifosplatform.infrastructure.core.serialization.AbstractFromApiJsonDeserializer;
 import org.mifosplatform.infrastructure.core.serialization.CommandSerializer;
 import org.mifosplatform.infrastructure.core.serialization.FromApiJsonDeserializer;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
@@ -23,7 +24,7 @@ import com.google.gson.reflect.TypeToken;
  * {@link BranchMoneyTransferCommand} 's.
  */
 @Component
-public final class BranchMoneyTransferCommandFromApiJsonDeserializer implements FromApiJsonDeserializer<BranchMoneyTransferCommand> {
+public final class BranchMoneyTransferCommandFromApiJsonDeserializer extends AbstractFromApiJsonDeserializer<BranchMoneyTransferCommand> {
 
     /**
      * The parameters supported for this command.
@@ -32,18 +33,12 @@ public final class BranchMoneyTransferCommandFromApiJsonDeserializer implements 
             "currencyCode", "transactionAmount", "description", "locale", "dateFormat"));
 
     private final FromJsonHelper fromApiJsonHelper;
-    private final CommandSerializer commandSerializerService;
 
     @Autowired
     public BranchMoneyTransferCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper,
             final CommandSerializer commandSerializerService) {
+        super(commandSerializerService);
         this.fromApiJsonHelper = fromApiJsonHelper;
-        this.commandSerializerService = commandSerializerService;
-    }
-
-    @Override
-    public BranchMoneyTransferCommand commandFromApiJson(final String json) {
-        return commandFromApiJson(null, json);
     }
 
     @Override
@@ -68,17 +63,5 @@ public final class BranchMoneyTransferCommandFromApiJsonDeserializer implements 
 
         return new BranchMoneyTransferCommand(parametersPassedInRequest, false, fromOfficeId, toOfficeId, transactionLocalDate,
                 currencyCode, transactionAmountValue, description);
-    }
-
-    @Override
-    public String serializedCommandJsonFromApiJson(final String json) {
-        final BranchMoneyTransferCommand command = commandFromApiJson(json);
-        return this.commandSerializerService.serializeCommandToJson(command);
-    }
-
-    @Override
-    public String serializedCommandJsonFromApiJson(final Long roleId, final String json) {
-        final BranchMoneyTransferCommand command = commandFromApiJson(roleId, json);
-        return this.commandSerializerService.serializeCommandToJson(command);
     }
 }

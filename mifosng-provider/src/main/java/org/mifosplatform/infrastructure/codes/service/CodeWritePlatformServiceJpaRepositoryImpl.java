@@ -63,7 +63,7 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
             context.authenticatedUser();
             command.validateForUpdate();
 
-            final Code code = retrieveCodeBy(command.getName());
+            final Code code = retrieveCodeBy(command.getId());
             code.update(command);
 
             this.codeRepository.save(code);
@@ -109,12 +109,6 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
         return new EntityIdentifier(code.getId());
     }
 
-    private Code retrieveCodeBy(final String name) {
-        final Code code = this.codeRepository.findOneByName(name);
-        if (code == null) { throw new CodeNotFoundException(name); }
-        return code;
-    }
-    
     private Code retrieveCodeBy(final Long codeId) {
         final Code code = this.codeRepository.findOne(codeId);
         if (code == null) { throw new CodeNotFoundException(codeId.toString()); }

@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.joda.time.LocalDate;
+import org.mifosplatform.infrastructure.core.serialization.AbstractFromApiJsonDeserializer;
 import org.mifosplatform.infrastructure.core.serialization.CommandSerializer;
 import org.mifosplatform.infrastructure.core.serialization.FromApiJsonDeserializer;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
@@ -22,27 +23,19 @@ import com.google.gson.reflect.TypeToken;
  * 's.
  */
 @Component
-public final class OfficeCommandFromApiJsonDeserializer implements FromApiJsonDeserializer<OfficeCommand> {
+public final class OfficeCommandFromApiJsonDeserializer extends AbstractFromApiJsonDeserializer<OfficeCommand> {
 
     /**
      * The parameters supported for this command.
      */
-    private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("transactionDate", "fromOfficeId",
-            "toOfficeId", "currencyCode", "transactionAmount", "description",
-            "locale", "dateFormat"));
+    private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("name", "parentId", "openingDate", "externalId", "locale", "dateFormat"));
 
     private final FromJsonHelper fromApiJsonHelper;
-    private final CommandSerializer commandSerializerService;
 
     @Autowired
     public OfficeCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper, final CommandSerializer commandSerializerService) {
+        super(commandSerializerService);
         this.fromApiJsonHelper = fromApiJsonHelper;
-        this.commandSerializerService = commandSerializerService;
-    }
-
-    @Override
-    public OfficeCommand commandFromApiJson(final String json) {
-        return commandFromApiJson(null, json);
     }
 
     @Override
@@ -61,17 +54,5 @@ public final class OfficeCommandFromApiJsonDeserializer implements FromApiJsonDe
         final LocalDate openingLocalDate = fromApiJsonHelper.extractLocalDateNamed("openingDate", element, parametersPassedInRequest);
 
         return new OfficeCommand(parametersPassedInRequest, false, officeId, name, externalId, parentId, openingLocalDate);
-    }
-
-    @Override
-    public String serializedCommandJsonFromApiJson(final String json) {
-        final OfficeCommand command = commandFromApiJson(json);
-        return this.commandSerializerService.serializeCommandToJson(command);
-    }
-
-    @Override
-    public String serializedCommandJsonFromApiJson(final Long roleId, final String json) {
-        final OfficeCommand command = commandFromApiJson(roleId, json);
-        return this.commandSerializerService.serializeCommandToJson(command);
     }
 }
