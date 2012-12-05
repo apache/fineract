@@ -26,11 +26,13 @@ public class CommandSourceHandlerDelegator {
     private final ChargeDefinitionCommandHandler chargeDefinitionCommandHandler;
     private final LoanProductCommandHandler loanProductCommandHandler;
     private final ClientIdentifierCommandHandler clientIdentifierCommandHandler;
+    private final ClientNoteCommandHandler clientNoteCommandHandler;
 
     @Autowired
     public CommandSourceHandlerDelegator(final PlatformSecurityContext context, 
             final ClientCommandHandler clientCommandHandler,
             final ClientIdentifierCommandHandler clientIdentifierCommandHandler,
+            final ClientNoteCommandHandler clientNoteCommandHandler,
             final RoleCommandHandler roleCommandHandler,
             final PermissionsCommandHandler permissionCommandHandler,
             final UserCommandHandler userCommandHandler,
@@ -45,6 +47,7 @@ public class CommandSourceHandlerDelegator {
         this.context = context;
         this.clientCommandHandler = clientCommandHandler;
         this.clientIdentifierCommandHandler = clientIdentifierCommandHandler;
+        this.clientNoteCommandHandler = clientNoteCommandHandler;
         this.roleCommandHandler = roleCommandHandler;
         this.permissionCommandHandler = permissionCommandHandler;
         this.userCommandHandler = userCommandHandler;
@@ -66,6 +69,8 @@ public class CommandSourceHandlerDelegator {
             commandSourceResult = clientCommandHandler.handleCommandWithSupportForRollback(commandSource);
         } else if (commandSource.isClientIdentifierResource()) {
             commandSourceResult = clientIdentifierCommandHandler.handleCommandWithSupportForRollback(commandSource);
+        } else if (commandSource.isClientNoteResource()) {
+            commandSourceResult = clientNoteCommandHandler.handleCommandWithSupportForRollback(commandSource);
         } else if (commandSource.isRoleResource()) {
             commandSourceResult = roleCommandHandler.handleCommandWithSupportForRollback(commandSource);
         } else if (commandSource.isPermissionResource()) {
@@ -102,6 +107,8 @@ public class CommandSourceHandlerDelegator {
             commandSourceResult = clientCommandHandler.handleCommandForCheckerApproval(existingCommandSource);
         } else if (existingCommandSource.isClientIdentifierResource()) {
             commandSourceResult = clientIdentifierCommandHandler.handleCommandWithSupportForRollback(existingCommandSource);
+        } else if (existingCommandSource.isClientNoteResource()) {
+            commandSourceResult = clientNoteCommandHandler.handleCommandWithSupportForRollback(existingCommandSource);
         } else if (existingCommandSource.isRoleResource()) {
             commandSourceResult = roleCommandHandler.handleCommandForCheckerApproval(existingCommandSource);
         } else if (existingCommandSource.isPermissionResource()) {

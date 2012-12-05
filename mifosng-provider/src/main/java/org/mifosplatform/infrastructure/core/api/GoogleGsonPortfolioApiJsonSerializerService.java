@@ -13,7 +13,6 @@ import org.mifosplatform.infrastructure.security.data.AuthenticatedUserData;
 import org.mifosplatform.organisation.staff.data.BulkTransferLoanOfficerData;
 import org.mifosplatform.organisation.staff.data.StaffData;
 import org.mifosplatform.portfolio.client.data.ClientAccountSummaryCollectionData;
-import org.mifosplatform.portfolio.client.data.NoteData;
 import org.mifosplatform.portfolio.group.data.GroupAccountSummaryCollectionData;
 import org.mifosplatform.portfolio.group.data.GroupData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanChargeData;
@@ -78,10 +77,6 @@ public class GoogleGsonPortfolioApiJsonSerializerService implements PortfolioApi
 
     private static final Set<String> GROUP_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "officeId", "name", "externalId",
             "clientMembers", "allowedClients", "allowedOffices"));
-
-    private static final Set<String> NOTE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "clientId", "loanId",
-            "loanTransactionId", "noteType", "note", "createdById", "createdByUsername", "createdOn", "updatedById", "updatedByUsername",
-            "updatedOn"));
 
     private static final Set<String> LOAN_SCHEDULE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("periods",
             "cumulativePrincipalDisbursed"));
@@ -211,20 +206,6 @@ public class GoogleGsonPortfolioApiJsonSerializerService implements PortfolioApi
         final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(GROUP_DATA_PARAMETERS,
                 prettyPrint, responseParameters);
         return helper.serializedJsonFrom(gsonDeserializer, group);
-    }
-
-    @Override
-    public String serializeNoteDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<NoteData> notes) {
-        final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(NOTE_DATA_PARAMETERS,
-                prettyPrint, responseParameters);
-        return helper.serializedJsonFrom(gsonDeserializer, notes.toArray(new NoteData[notes.size()]));
-    }
-
-    @Override
-    public String serializeNoteDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final NoteData note) {
-        final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(NOTE_DATA_PARAMETERS,
-                prettyPrint, responseParameters);
-        return helper.serializedJsonFrom(gsonDeserializer, note);
     }
 
     @Override

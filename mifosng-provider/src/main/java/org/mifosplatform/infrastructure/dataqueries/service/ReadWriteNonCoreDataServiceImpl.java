@@ -45,9 +45,9 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     private GenericDataService genericDataService;
 
     @Override
-    public List<DatatableData> retrieveDatatableNames(String appTable) {
+    public List<DatatableData> retrieveDatatableNames(final String appTable) {
 
-        long startTime = System.currentTimeMillis();
+        // long startTime = System.currentTimeMillis();
 
         String andClause;
         if (appTable == null) {
@@ -76,16 +76,17 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             throw new PlatformDataIntegrityException("error.msg.sql.error", e.getMessage(), sqlErrorMsg);
         }
 
-        long elapsed = System.currentTimeMillis() - startTime;
-        //logger.info("FINISHING retrieveDatatableNames:      Elapsed Time: " + elapsed);
+        // long elapsed = System.currentTimeMillis() - startTime;
+        // logger.info("FINISHING retrieveDatatableNames:      Elapsed Time: " +
+        // elapsed);
 
         return datatables;
     }
 
     @Override
-    public void registerDatatable(String datatable, String appTable) {
+    public void registerDatatable(final String datatable, final String appTable) {
 
-        long startTime = System.currentTimeMillis();
+        // long startTime = System.currentTimeMillis();
 
         validateAppTable(appTable);
 
@@ -115,14 +116,15 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
         genericDataService.updateSQL(sql, "SQL: " + sql);
 
-        long elapsed = System.currentTimeMillis() - startTime;
-        //logger.info("FINISHING registerDatatable:      Elapsed Time: " + elapsed + "       - datatable: " + datatable
-        //        + "  application table: " + appTable);
+        // long elapsed = System.currentTimeMillis() - startTime;
+        // logger.info("FINISHING registerDatatable:      Elapsed Time: " +
+        // elapsed + "       - datatable: " + datatable
+        // + "  application table: " + appTable);
     }
 
     @Override
-    public void deregisterDatatable(String datatable) {
-        long startTime = System.currentTimeMillis();
+    public void deregisterDatatable(final String datatable) {
+        // long startTime = System.currentTimeMillis();
 
         // TODO - put in batch command later
 
@@ -139,13 +141,14 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         sql = "delete from x_registered_table where registered_table_name = '" + datatable + "'";
         genericDataService.updateSQL(sql, "SQL: " + sql);
 
-        long elapsed = System.currentTimeMillis() - startTime;
-        //logger.info("FINISHING deregisterDatatable:      Elapsed Time: " + elapsed + "       - datatable: " + datatable);
+        // long elapsed = System.currentTimeMillis() - startTime;
+        // logger.info("FINISHING deregisterDatatable:      Elapsed Time: " +
+        // elapsed + "       - datatable: " + datatable);
     }
 
     @Override
-    public void newDatatableEntry(String datatable, Long appTableId, Map<String, String> queryParams) {
-        long startTime = System.currentTimeMillis();
+    public void newDatatableEntry(final String datatable, final Long appTableId, final Map<String, String> queryParams) {
+        // long startTime = System.currentTimeMillis();
 
         String appTable = getWithinScopeApplicationTableName(datatable, appTableId);
 
@@ -155,15 +158,16 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
         genericDataService.updateSQL(sql, "SQL: " + sql);
 
-        long elapsed = System.currentTimeMillis() - startTime;
-        //logger.info("FINISHING newDatatableEntry:      Elapsed Time: " + elapsed + "       - datatable: " + datatable + "  id: "
-        //        + appTableId);
+        // long elapsed = System.currentTimeMillis() - startTime;
+        // logger.info("FINISHING newDatatableEntry:      Elapsed Time: " +
+        // elapsed + "       - datatable: " + datatable + "  id: "
+        // + appTableId);
 
     }
 
     @Override
-    public void updateDatatableEntryOnetoOne(String datatable, Long appTableId, Map<String, String> queryParams) {
-        long startTime = System.currentTimeMillis();
+    public void updateDatatableEntryOnetoOne(final String datatable, final Long appTableId, final Map<String, String> queryParams) {
+        // long startTime = System.currentTimeMillis();
 
         GenericResultsetData grs = retrieveDataTableGenericResultSet(datatable, appTableId, null, null);
 
@@ -176,20 +180,23 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         String fkName = getFKField(getApplicationTableName(datatable));
         String sql = getUpdateSql(grs, datatable, fkName, appTableId, queryParams);
 
-        if (sql != null)
+        if (sql != null) {
             genericDataService.updateSQL(sql, "SQL: " + sql);
-        else
+        } else {
             logger.info("No Changes");
+        }
 
-        long elapsed = System.currentTimeMillis() - startTime;
-        //logger.info("FINISHING updateDatatableEntryOnetoOne:      Elapsed Time: " + elapsed + "       - datatable: " + datatable + fkName
-        //        + ": " + appTableId);
+        // long elapsed = System.currentTimeMillis() - startTime;
+        // logger.info("FINISHING updateDatatableEntryOnetoOne:      Elapsed Time: "
+        // + elapsed + "       - datatable: " + datatable + fkName
+        // + ": " + appTableId);
 
     }
 
     @Override
-    public void updateDatatableEntryOnetoMany(String datatable, Long appTableId, Long datatableId, Map<String, String> queryParams) {
-        long startTime = System.currentTimeMillis();
+    public void updateDatatableEntryOnetoMany(final String datatable, final Long appTableId, final Long datatableId,
+            final Map<String, String> queryParams) {
+        // long startTime = System.currentTimeMillis();
 
         GenericResultsetData grs = retrieveDataTableGenericResultSet(datatable, appTableId, null, datatableId);
 
@@ -197,19 +204,21 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
         String sql = getUpdateSql(grs, datatable, "id", datatableId, queryParams);
 
-        if (sql != null)
+        if (sql != null) {
             genericDataService.updateSQL(sql, "SQL: " + sql);
-        else
+        } else {
             logger.info("No Changes");
+        }
 
-        long elapsed = System.currentTimeMillis() - startTime;
-        //logger.info("FINISHING updateDatatableEntryOnetoOne:      Elapsed Time: " + elapsed + "       - datatable: " + datatable + "  id: "
-        //        + datatableId);
+        // long elapsed = System.currentTimeMillis() - startTime;
+        // logger.info("FINISHING updateDatatableEntryOnetoOne:      Elapsed Time: "
+        // + elapsed + "       - datatable: " + datatable + "  id: "
+        // + datatableId);
     }
 
     @Override
-    public void deleteDatatableEntries(String datatable, Long appTableId) {
-        long startTime = System.currentTimeMillis();
+    public void deleteDatatableEntries(final String datatable, final Long appTableId) {
+        // long startTime = System.currentTimeMillis();
 
         String appTable = getWithinScopeApplicationTableName(datatable, appTableId);
 
@@ -217,15 +226,16 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
         genericDataService.updateSQL(sql, "SQL: " + sql);
 
-        long elapsed = System.currentTimeMillis() - startTime;
-        //logger.info("FINISHING deleteDatatableEntries:      Elapsed Time: " + elapsed + "       - datatable: " + datatable
-        //        + "  App Table Id: " + appTableId);
+        // long elapsed = System.currentTimeMillis() - startTime;
+        // logger.info("FINISHING deleteDatatableEntries:      Elapsed Time: " +
+        // elapsed + "       - datatable: " + datatable
+        // + "  App Table Id: " + appTableId);
 
     }
 
     @Override
-    public void deleteDatatableEntry(String datatable, Long appTableId, Long datatableId) {
-        long startTime = System.currentTimeMillis();
+    public void deleteDatatableEntry(final String datatable, final Long appTableId, final Long datatableId) {
+        // long startTime = System.currentTimeMillis();
 
         getWithinScopeApplicationTableName(datatable, appTableId);
 
@@ -233,16 +243,19 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
         genericDataService.updateSQL(sql, "SQL: " + sql);
 
-        long elapsed = System.currentTimeMillis() - startTime;
-        //logger.info("FINISHING deleteDatatableEntry:      Elapsed Time: " + elapsed + "       - datatable: " + datatable
-        //        + "  App Table Id: " + appTableId + "   Data Table Id: " + datatableId);
+        // long elapsed = System.currentTimeMillis() - startTime;
+        // logger.info("FINISHING deleteDatatableEntry:      Elapsed Time: " +
+        // elapsed + "       - datatable: " + datatable
+        // + "  App Table Id: " + appTableId + "   Data Table Id: " +
+        // datatableId);
 
     }
 
     @Override
-    public GenericResultsetData retrieveDataTableGenericResultSet(String datatable, Long appTableId, String order, Long id) {
+    public GenericResultsetData retrieveDataTableGenericResultSet(final String datatable, final Long appTableId, final String order,
+            final Long id) {
 
-        long startTime = System.currentTimeMillis();
+        // long startTime = System.currentTimeMillis();
 
         String appTable = getWithinScopeApplicationTableName(datatable, appTableId);
 
@@ -262,14 +275,15 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
         List<ResultsetDataRow> result = fillDatatableResultSetDataRows(sql);
 
-        long elapsed = System.currentTimeMillis() - startTime;
-        //logger.info("FINISHING DATATABLE: " + datatable + "     Elapsed Time: " + elapsed + "    SQL: " + sql);
+        // long elapsed = System.currentTimeMillis() - startTime;
+        // logger.info("FINISHING DATATABLE: " + datatable +
+        // "     Elapsed Time: " + elapsed + "    SQL: " + sql);
 
         return new GenericResultsetData(columnHeaders, result);
 
     }
 
-    private void checkMainResourceExistsWithinScope(String appTable, Long appTableId) {
+    private void checkMainResourceExistsWithinScope(final String appTable, final Long appTableId) {
 
         String unscopedSql = "select t.id from `" + appTable + "` t ${dataScopeCriteria} where t.id = " + appTableId;
 
@@ -280,7 +294,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         if (rs.size() == 0) throw new DataTableNotFoundException(appTable, appTableId);
     }
 
-    private String dataScopedSQL(String unscopedSQL, String appTable) {
+    private String dataScopedSQL(final String unscopedSQL, final String appTable) {
         String dataScopeCriteria = null;
         /*
          * unfortunately have to, one way or another, be able to restrict data
@@ -307,7 +321,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
     }
 
-    private void validateAppTable(String appTable) {
+    private void validateAppTable(final String appTable) {
 
         if (appTable.equalsIgnoreCase("m_client")) return;
         if (appTable.equalsIgnoreCase("m_loan")) return;
@@ -348,7 +362,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         }
     }
 
-    private String getWithinScopeApplicationTableName(String datatable, Long appTableId) {
+    private String getWithinScopeApplicationTableName(final String datatable, final Long appTableId) {
         String sql = "SELECT application_table_name FROM x_registered_table where registered_table_name = '" + datatable + "'";
 
         CachedRowSet rs = genericDataService.getCachedResultSet(sql, "SQL : " + sql);
@@ -367,7 +381,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         }
     }
 
-    private String getApplicationTableName(String datatable) {
+    private String getApplicationTableName(final String datatable) {
         // TODO - only used for update... can probably remove this after as its
         // a reread
         String sql = "SELECT application_table_name FROM x_registered_table where registered_table_name = '" + datatable + "'";
@@ -384,12 +398,12 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         }
     }
 
-    private String getFKField(String applicationTableName) {
+    private String getFKField(final String applicationTableName) {
 
         return applicationTableName.substring(2) + "_id";
     }
 
-    private CachedRowSet getDatatableMetaData(String datatable) {
+    private CachedRowSet getDatatableMetaData(final String datatable) {
 
         String sql = "select COLUMN_NAME, IS_NULLABLE, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH, COLUMN_KEY"
                 + " from INFORMATION_SCHEMA.COLUMNS " + " where TABLE_SCHEMA = schema() and TABLE_NAME = '" + datatable
@@ -402,7 +416,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         throw new DataTableNotFoundException(datatable);
     }
 
-    private List<ResultsetColumnHeader> getDatatableResultsetColumnHeaders(String datatable) {
+    private List<ResultsetColumnHeader> getDatatableResultsetColumnHeaders(final String datatable) {
 
         CachedRowSet columnDefinitions = getDatatableMetaData(datatable);
 
@@ -450,7 +464,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
     }
 
-    private void addCodesValueIfNecessary(ResultsetColumnHeader rsch, String code_suffix) {
+    private void addCodesValueIfNecessary(final ResultsetColumnHeader rsch, final String code_suffix) {
         int codePosition = rsch.getColumnName().indexOf(code_suffix);
         if (codePosition > 0) {
             String codeName = rsch.getColumnName().substring(0, codePosition);
@@ -471,10 +485,10 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
     }
 
-    private String getAddSql(List<ResultsetColumnHeader> columnHeaders, String datatable, String fkName, Long appTableId,
-            Map<String, String> queryParams) {
+    private String getAddSql(final List<ResultsetColumnHeader> columnHeaders, final String datatable, final String fkName,
+            final Long appTableId, final Map<String, String> queryParams) {
 
-        Map<String, String> affectedColumns = getAffectedColumns(columnHeaders, queryParams, fkName);
+        final Map<String, String> affectedColumns = getAffectedColumns(columnHeaders, queryParams, fkName);
 
         String pValueWrite = "";
         String addSql = "";
@@ -503,10 +517,10 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         return addSql;
     }
 
-    private String getUpdateSql(GenericResultsetData grs, String datatable, String keyFieldName, Long keyFieldValue,
-            Map<String, String> queryParams) {
+    private String getUpdateSql(final GenericResultsetData grs, final String datatable, final String keyFieldName,
+            final Long keyFieldValue, final Map<String, String> queryParams) {
 
-        Map<String, String> affectedAndChangedColumns = getAffectedAndChangedColumns(grs, queryParams, keyFieldName);
+        final Map<String, String> affectedAndChangedColumns = getAffectedAndChangedColumns(grs, queryParams, keyFieldName);
 
         // just updating fields that have changed since pre-update read - though
         // its possible these values are different from the page the user was
@@ -545,7 +559,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         return sql;
     }
 
-    private Map<String, String> getAffectedAndChangedColumns(GenericResultsetData grs, Map<String, String> queryParams, String fkName) {
+    private Map<String, String> getAffectedAndChangedColumns(final GenericResultsetData grs, final Map<String, String> queryParams,
+            final String fkName) {
 
         Map<String, String> affectedColumns = getAffectedColumns(grs.getColumnHeaders(), queryParams, fkName);
         Map<String, String> affectedAndChangedColumns = new HashMap<String, String>();
@@ -561,7 +576,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         return affectedAndChangedColumns;
     }
 
-    private boolean columnChanged(String key, String keyValue, GenericResultsetData grs) {
+    private boolean columnChanged(final String key, final String keyValue, final GenericResultsetData grs) {
 
         List<String> columnValues = grs.getData().get(0).getRow();
 
@@ -583,8 +598,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         throw new PlatformDataIntegrityException("error.msg.invalid.columnName", "Parameter Column Name: " + key + " not found");
     }
 
-    private Map<String, String> getAffectedColumns(List<ResultsetColumnHeader> columnHeaders, Map<String, String> queryParams,
-            String keyFieldName) {
+    private Map<String, String> getAffectedColumns(final List<ResultsetColumnHeader> columnHeaders, final Map<String, String> queryParams,
+            final String keyFieldName) {
 
         String dateFormat = queryParams.get("dateFormat");
         Locale clientApplicationLocale = null;
@@ -628,7 +643,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         return affectedColumns;
     }
 
-    private String validateColumn(ResultsetColumnHeader columnHeader, String pValue, String dateFormat, Locale clientApplicationLocale) {
+    private String validateColumn(final ResultsetColumnHeader columnHeader, final String pValue, final String dateFormat,
+            final Locale clientApplicationLocale) {
 
         String paramValue = pValue;
 
@@ -693,19 +709,19 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         return paramValue;
     }
 
-    private String getDeleteEntriesSql(String datatable, String FKField, Long appTableId) {
+    private String getDeleteEntriesSql(final String datatable, final String FKField, final Long appTableId) {
 
         return "delete from `" + datatable + "` where `" + FKField + "` = " + appTableId;
 
     }
 
-    private String getDeleteEntrySql(String datatable, Long datatableId) {
+    private String getDeleteEntrySql(final String datatable, final Long datatableId) {
 
         return "delete from `" + datatable + "` where `id` = " + datatableId;
 
     }
 
-    private boolean notTheSame(String currValue, String pValue) {
+    private boolean notTheSame(final String currValue, final String pValue) {
         if (StringUtils.isEmpty(currValue) && StringUtils.isEmpty(pValue)) return false;
 
         if (StringUtils.isEmpty(currValue)) return true;
@@ -716,5 +732,4 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
         return true;
     }
-
 }

@@ -17,8 +17,6 @@ import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSourc
 import org.mifosplatform.infrastructure.dataqueries.data.GenericResultsetData;
 import org.mifosplatform.infrastructure.dataqueries.data.ResultsetColumnHeader;
 import org.mifosplatform.infrastructure.dataqueries.data.ResultsetDataRow;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,8 +25,6 @@ import com.sun.rowset.CachedRowSetImpl;
 //TODO - Performance Item - most items (code values etc) can be cached but not doing that yet
 @Service
 public class GenericDataServiceImpl implements GenericDataService {
-
-    private final static Logger logger = LoggerFactory.getLogger(GenericDataServiceImpl.class);
 
     private final DataSource dataSource;
 
@@ -39,11 +35,11 @@ public class GenericDataServiceImpl implements GenericDataService {
     }
 
     @Override
-    public CachedRowSet getCachedResultSet(String sql, String sqlErrorMsg) {
+    public CachedRowSet getCachedResultSet(final String sql, final String sqlErrorMsg) {
         // TODO - Need to reimplement this away from Sun library - could be
         // mixture of Lists and jdbcTemplate.query
 
-        long startTime = System.currentTimeMillis();
+        // long startTime = System.currentTimeMillis();
         Connection db_connection = null;
         Statement db_statement = null;
         CachedRowSet crs = null;
@@ -63,15 +59,15 @@ public class GenericDataServiceImpl implements GenericDataService {
 
         }
 
-        long elapsed = System.currentTimeMillis() - startTime;
-        //logger.info("Elapsed Time: " + elapsed + "    SQL: " + sql);
+        // long elapsed = System.currentTimeMillis() - startTime;
+        // logger.info("Elapsed Time: " + elapsed + "    SQL: " + sql);
         return crs;
     }
 
     @Override
-    public void updateSQL(String sql, String sqlErrorMsg) {
+    public void updateSQL(final String sql, final String sqlErrorMsg) {
 
-        long startTime = System.currentTimeMillis();
+        // long startTime = System.currentTimeMillis();
         Connection db_connection = null;
         Statement db_statement = null;
         try {
@@ -84,8 +80,9 @@ public class GenericDataServiceImpl implements GenericDataService {
             dbClose(db_statement, db_connection);
         }
 
-        long elapsed = System.currentTimeMillis() - startTime;
-        //logger.info("Elapsed Time FOR UPDATE: " + elapsed + "    SQL: " + sql);
+        // long elapsed = System.currentTimeMillis() - startTime;
+        // logger.info("Elapsed Time FOR UPDATE: " + elapsed + "    SQL: " +
+        // sql);
     }
 
     @Override
@@ -129,7 +126,7 @@ public class GenericDataServiceImpl implements GenericDataService {
     }
 
     @Override
-    public String replace(String str, String pattern, String replace) {
+    public String replace(final String str, final String pattern, final String replace) {
         // JPW - this replace may / may not be any better or quicker than the
         // apache stringutils equivalent. It works, but if someone shows the
         // apache one to be about the same then this can be removed.
@@ -147,7 +144,7 @@ public class GenericDataServiceImpl implements GenericDataService {
     }
 
     @Override
-    public String wrapSQL(String sql) {
+    public String wrapSQL(final String sql) {
         // wrap sql to prevent JDBC sql errors, prevent malicious sql and a
         // CachedRowSetImpl bug
 
@@ -158,21 +155,21 @@ public class GenericDataServiceImpl implements GenericDataService {
     }
 
     @Override
-    public String generateJsonFromGenericResultsetData(GenericResultsetData grs) {
+    public String generateJsonFromGenericResultsetData(final GenericResultsetData grs) {
 
         StringBuffer writer = new StringBuffer();
 
         writer.append("[");
 
         List<ResultsetColumnHeader> columnHeaders = grs.getColumnHeaders();
-        //logger.info("NO. of Columns: " + columnHeaders.size());
+        // logger.info("NO. of Columns: " + columnHeaders.size());
 
         List<ResultsetDataRow> data = grs.getData();
         List<String> row;
         Integer rSize;
         String currColType;
         String currVal;
-        //logger.info("NO. of Rows: " + data.size());
+        // logger.info("NO. of Rows: " + data.size());
         for (int i = 0; i < data.size(); i++) {
             writer.append("\n{");
 
@@ -212,7 +209,7 @@ public class GenericDataServiceImpl implements GenericDataService {
     }
 
     private void dbClose(Statement db_statement, Connection db_connection) {
-        //logger.debug("dbClose");
+        // logger.debug("dbClose");
         try {
             if (db_statement != null) {
                 db_statement.close();

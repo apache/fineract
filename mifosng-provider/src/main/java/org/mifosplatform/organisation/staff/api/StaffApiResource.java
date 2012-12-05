@@ -31,8 +31,6 @@ import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
 import org.mifosplatform.organisation.staff.data.StaffData;
 import org.mifosplatform.organisation.staff.serialization.StaffCommandFromApiJsonDeserializer;
 import org.mifosplatform.organisation.staff.service.StaffReadPlatformService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -41,8 +39,6 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope("singleton")
 public class StaffApiResource {
-
-    private final static Logger logger = LoggerFactory.getLogger(StaffApiResource.class);
 
     /**
      * The set of parameters that are supported in response for {@link CodeData}
@@ -155,7 +151,6 @@ public class StaffApiResource {
         if (StringUtils.isNotBlank(extraCriteria)) {
             extraCriteria = extraCriteria.substring(4);
         }
-        //logger.debug("extraCriteria; " + extraCriteria);
 
         return extraCriteria;
     }

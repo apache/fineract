@@ -182,4 +182,8 @@ public class CommandSource extends AbstractPersistable<Long> {
     public boolean isClientIdentifierResource() {
         return this.resource.toUpperCase().startsWith("CLIENTS") && this.resource.toUpperCase().endsWith("IDENTIFIERS");
     }
+
+    public boolean isClientNoteResource() {
+        return this.resource.toUpperCase().startsWith("CLIENTS") && this.resource.toUpperCase().endsWith("NOTES");
+    }
 }

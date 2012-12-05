@@ -10,7 +10,6 @@ import org.mifosplatform.infrastructure.security.data.AuthenticatedUserData;
 import org.mifosplatform.organisation.staff.data.BulkTransferLoanOfficerData;
 import org.mifosplatform.organisation.staff.data.StaffData;
 import org.mifosplatform.portfolio.client.data.ClientAccountSummaryCollectionData;
-import org.mifosplatform.portfolio.client.data.NoteData;
 import org.mifosplatform.portfolio.group.data.GroupAccountSummaryCollectionData;
 import org.mifosplatform.portfolio.group.data.GroupData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanChargeData;
@@ -52,10 +51,6 @@ public interface PortfolioApiJsonSerializerService {
     String serializeGroupDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<GroupData> groups);
 
     String serializeGroupDataToJson(boolean prettyPrint, Set<String> responseParameters, GroupData group);
-
-    String serializeNoteDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<NoteData> notes);
-
-    String serializeNoteDataToJson(boolean prettyPrint, Set<String> responseParameters, NoteData note);
 
     String serializeLoanScheduleDataToJson(boolean prettyPrint, Set<String> responseParameters, LoanScheduleData loanSchedule);
 

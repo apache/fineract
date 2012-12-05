@@ -22,7 +22,7 @@ import org.mifosplatform.portfolio.client.command.ClientCommand;
 import org.mifosplatform.portfolio.client.command.ClientCommandValidator;
 import org.mifosplatform.portfolio.client.command.ClientIdentifierCommand;
 import org.mifosplatform.portfolio.client.command.ClientIdentifierCommandValidator;
-import org.mifosplatform.portfolio.client.command.NoteCommand;
+import org.mifosplatform.portfolio.client.command.ClientNoteCommand;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientIdentifier;
 import org.mifosplatform.portfolio.client.domain.ClientIdentifierRepository;
@@ -166,7 +166,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
     @Transactional
     @Override
-    public EntityIdentifier addClientNote(final NoteCommand command) {
+    public EntityIdentifier addClientNote(final ClientNoteCommand command) {
 
         context.authenticatedUser();
 
@@ -182,7 +182,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
     @Transactional
     @Override
-    public EntityIdentifier updateNote(final NoteCommand command) {
+    public EntityIdentifier updateNote(final ClientNoteCommand command) {
 
         context.authenticatedUser();
 

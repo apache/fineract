@@ -6,7 +6,7 @@ import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 import org.mifosplatform.infrastructure.core.domain.Base64EncodedImage;
 import org.mifosplatform.portfolio.client.command.ClientCommand;
 import org.mifosplatform.portfolio.client.command.ClientIdentifierCommand;
-import org.mifosplatform.portfolio.client.command.NoteCommand;
+import org.mifosplatform.portfolio.client.command.ClientNoteCommand;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface ClientWritePlatformService {
@@ -26,11 +26,9 @@ public interface ClientWritePlatformService {
     @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'PORTFOLIO_MANAGEMENT_SUPER_USER', 'DELETE_CLIENTIMAGE')")
     EntityIdentifier deleteClientImage(Long clientId);
 
-    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'PORTFOLIO_MANAGEMENT_SUPER_USER', 'CREATE_CLIENTNOTE')")
-    EntityIdentifier addClientNote(NoteCommand command);
+    EntityIdentifier addClientNote(ClientNoteCommand command);
 
-    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'PORTFOLIO_MANAGEMENT_SUPER_USER', 'UPDATE_CLIENTNOTE')")
-    EntityIdentifier updateNote(NoteCommand command);
+    EntityIdentifier updateNote(ClientNoteCommand command);
 
     Long addClientIdentifier(ClientIdentifierCommand command);
 

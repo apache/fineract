@@ -39,16 +39,12 @@ import org.mifosplatform.infrastructure.core.service.FileUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.office.data.OfficeLookup;
 import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
-import org.mifosplatform.portfolio.client.command.NoteCommand;
 import org.mifosplatform.portfolio.client.data.ClientAccountSummaryCollectionData;
 import org.mifosplatform.portfolio.client.data.ClientData;
-import org.mifosplatform.portfolio.client.data.NoteData;
 import org.mifosplatform.portfolio.client.exception.ImageNotFoundException;
 import org.mifosplatform.portfolio.client.serialization.ClientCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
 import org.mifosplatform.portfolio.client.service.ClientWritePlatformService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -62,8 +58,6 @@ import com.sun.jersey.multipart.FormDataParam;
 @Component
 @Scope("singleton")
 public class ClientsApiResource {
-
-    private final static Logger logger = LoggerFactory.getLogger(ClientsApiResource.class);
 
     private final Set<String> CLIENT_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "officeId", "officeName", "externalId",
             "firstname", "lastname", "joinedDate", "displayName", "clientOrBusinessName", "allowedOffices", "imagePresent"));
@@ -85,7 +79,7 @@ public class ClientsApiResource {
             final ClientWritePlatformService clientWritePlatformService, final OfficeReadPlatformService officeReadPlatformService,
             final ClientCommandFromApiJsonDeserializer fromApiJsonDeserializer,
             final DefaultToApiJsonSerializer<ClientData> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper,
-            final PortfolioApiDataConversionService apiDataConversionService, 
+            final PortfolioApiDataConversionService apiDataConversionService,
             final PortfolioApiJsonSerializerService apiJsonSerializerService,
             final PortfolioCommandsReadPlatformService commandsReadPlatformService,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
@@ -158,7 +152,7 @@ public class ClientsApiResource {
             extraCriteria = extraCriteria.substring(4);
         }
 
-        //logger.info("extraCriteria; " + extraCriteria);
+        // logger.info("extraCriteria; " + extraCriteria);
 
         return extraCriteria;
     }
@@ -260,8 +254,9 @@ public class ClientsApiResource {
         final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "PORTFOLIO_MANAGEMENT_SUPER_USER", "UPDATE_CLIENT");
         context.authenticatedUser().validateHasPermissionTo("UPDATE_CLIENT", allowedPermissions);
 
-        final String commandSerializedAsJson = this.fromApiJsonDeserializer.serializedCommandJsonFromApiJson(clientId, apiRequestBodyAsJson);
-        
+        final String commandSerializedAsJson = this.fromApiJsonDeserializer
+                .serializedCommandJsonFromApiJson(clientId, apiRequestBodyAsJson);
+
         final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "clients", clientId,
                 commandSerializedAsJson);
 
@@ -297,66 +292,6 @@ public class ClientsApiResource {
 
         return this.apiJsonSerializerService.serializeClientAccountSummaryCollectionDataToJson(prettyPrint, responseParameters,
                 clientAccount);
-    }
-
-    @GET
-    @Path("{clientId}/notes")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveAllClientNotes(@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
-
-        context.authenticatedUser().validateHasReadPermission("CLIENTNOTE");
-
-        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-
-        final Collection<NoteData> notes = this.clientReadPlatformService.retrieveAllClientNotes(clientId);
-
-        return this.apiJsonSerializerService.serializeNoteDataToJson(prettyPrint, responseParameters, notes);
-    }
-
-    @POST
-    @Path("{clientId}/notes")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String addNewClientNote(@PathParam("clientId") final Long clientId, final String jsonRequestBody) {
-
-        final NoteCommand command = this.apiDataConversionService.convertJsonToNoteCommand(null, clientId, jsonRequestBody);
-
-        final EntityIdentifier result = this.clientWritePlatformService.addClientNote(command);
-
-        return this.toApiJsonSerializer.serialize(result);
-    }
-
-    @GET
-    @Path("{clientId}/notes/{noteId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveClientNote(@PathParam("clientId") final Long clientId, @PathParam("noteId") final Long noteId,
-            @Context final UriInfo uriInfo) {
-
-        context.authenticatedUser().validateHasReadPermission("CLIENTNOTE");
-
-        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-
-        final NoteData note = this.clientReadPlatformService.retrieveClientNote(clientId, noteId);
-
-        return this.apiJsonSerializerService.serializeNoteDataToJson(prettyPrint, responseParameters, note);
-    }
-
-    @PUT
-    @Path("{clientId}/notes/{noteId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String updateClientNote(@PathParam("clientId") final Long clientId, @PathParam("noteId") final Long noteId,
-            final String jsonRequestBody) {
-
-        final NoteCommand command = this.apiDataConversionService.convertJsonToNoteCommand(noteId, clientId, jsonRequestBody);
-
-        final EntityIdentifier result = this.clientWritePlatformService.updateNote(command);
-
-        return this.toApiJsonSerializer.serialize(result);
     }
 
     /**

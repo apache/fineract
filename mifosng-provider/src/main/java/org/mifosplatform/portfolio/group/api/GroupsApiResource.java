@@ -34,8 +34,6 @@ import org.mifosplatform.portfolio.group.data.GroupAccountSummaryCollectionData;
 import org.mifosplatform.portfolio.group.data.GroupData;
 import org.mifosplatform.portfolio.group.service.GroupReadPlatformService;
 import org.mifosplatform.portfolio.group.service.GroupWritePlatformService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -44,8 +42,6 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope("singleton")
 public class GroupsApiResource {
-
-    private final static Logger logger = LoggerFactory.getLogger(GroupsApiResource.class);
 
     @Autowired
     private GroupReadPlatformService groupReadPlatformService;
@@ -62,27 +58,23 @@ public class GroupsApiResource {
     @Autowired
     private OfficeReadPlatformService officeReadPlatformService;
 
-	@Autowired
-	private PortfolioApiJsonSerializerService apiJsonSerializerService;
+    @Autowired
+    private PortfolioApiJsonSerializerService apiJsonSerializerService;
 
     @Autowired
     private PlatformSecurityContext context;
 
-    private static final Set<String> typicalResponseParameters = new HashSet<String>(
-            Arrays.asList("id", "officeId", "name", "externalId", "clientMembers")
-    );
+    private static final Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "officeId", "name", "externalId",
+            "clientMembers"));
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveAllGroups(@Context final UriInfo uriInfo,
-                                    @QueryParam("sqlSearch") final String sqlSearch,
-                                    @QueryParam("officeId") final Long officeId,
-                                    @QueryParam("externalId") final String externalId,
-                                    @QueryParam("name") final String name,
-                                    @QueryParam("underHierarchy") final String hierarchy){
-    	
-    	context.authenticatedUser().validateHasReadPermission("GROUP");
+    public String retrieveAllGroups(@Context final UriInfo uriInfo, @QueryParam("sqlSearch") final String sqlSearch,
+            @QueryParam("officeId") final Long officeId, @QueryParam("externalId") final String externalId,
+            @QueryParam("name") final String name, @QueryParam("underHierarchy") final String hierarchy) {
+
+        context.authenticatedUser().validateHasReadPermission("GROUP");
 
         final String extraCriteria = getGroupExtraCriteria(sqlSearch, officeId, externalId, name, hierarchy);
 
@@ -102,14 +94,12 @@ public class GroupsApiResource {
     @Path("{groupId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveGroupData(@Context final UriInfo uriInfo,
-                                    @PathParam("groupId") final Long groupId,
-                                    @QueryParam("officeId") final Long officeId) {
+    public String retrieveGroupData(@Context final UriInfo uriInfo, @PathParam("groupId") final Long groupId,
+            @QueryParam("officeId") final Long officeId) {
 
-    	context.authenticatedUser().validateHasReadPermission("GROUP");
+        context.authenticatedUser().validateHasReadPermission("GROUP");
 
-                Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo
-                .getQueryParameters());
+        Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
         if (responseParameters.isEmpty()) {
             responseParameters.addAll(typicalResponseParameters);
         }
@@ -124,34 +114,33 @@ public class GroupsApiResource {
         group = new GroupData(group, clientMembers, availableClients, allowedOffices);
 
         boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
-		if (template) {
-			responseParameters.add("allowedClients");
-			responseParameters.add("allowedOffices");
+        if (template) {
+            responseParameters.add("allowedClients");
+            responseParameters.add("allowedOffices");
 
-            if (officeId != null){
+            if (officeId != null) {
                 availableClients = this.clientReadPlatformService.retrieveAllIndividualClientsForLookupByOfficeId(officeId);
             } else {
                 availableClients = this.clientReadPlatformService.retrieveAllIndividualClientsForLookupByOfficeId(group.getOfficeId());
             }
 
-			availableClients.removeAll(group.clientMembers());
+            availableClients.removeAll(group.clientMembers());
 
-			allowedOffices = officeReadPlatformService.retrieveAllOfficesForLookup();
+            allowedOffices = officeReadPlatformService.retrieveAllOfficesForLookup();
 
-			group = new GroupData(group, group.clientMembers(), availableClients, allowedOffices);
-		}
+            group = new GroupData(group, group.clientMembers(), availableClients, allowedOffices);
+        }
 
         return this.apiJsonSerializerService.serializeGroupDataToJson(prettyPrint, responseParameters, group);
     }
 
     @GET
     @Path("template")
-    @Consumes({MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_JSON})
-    public String newGroupDetails(@Context final UriInfo uriInfo,
-                                  @QueryParam("officeId") final Long officeId) {
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String newGroupDetails(@Context final UriInfo uriInfo, @QueryParam("officeId") final Long officeId) {
 
-    	context.authenticatedUser().validateHasReadPermission("GROUP");
+        context.authenticatedUser().validateHasReadPermission("GROUP");
 
         Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
         if (responseParameters.isEmpty()) {
@@ -162,7 +151,7 @@ public class GroupsApiResource {
         responseParameters.addAll(Arrays.asList("officeId", "allowedClients", "allowedOffices"));
 
         GroupData groupData;
-        if (officeId != null){
+        if (officeId != null) {
             groupData = this.groupReadPlatformService.retrieveNewGroupDetails(officeId);
         } else {
             groupData = this.groupReadPlatformService.retrieveNewGroupDetails(context.authenticatedUser().getOffice().getId());
@@ -195,12 +184,12 @@ public class GroupsApiResource {
 
         return Response.ok().entity(entityIdentifier).build();
     }
-    
+
     @DELETE
     @Path("{groupId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response deleteGroup(@PathParam("groupId") final Long groupId){
+    public Response deleteGroup(@PathParam("groupId") final Long groupId) {
 
         EntityIdentifier entityIdentifier = this.groupWritePlatformService.deleteGroup(groupId);
 
@@ -209,18 +198,15 @@ public class GroupsApiResource {
 
     @GET
     @Path("{groupId}/loans")
-    @Consumes({MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_JSON})
-    public String retrieveGroupAccount(@PathParam("groupId") final Long groupId,
-                                       @Context final UriInfo uriInfo) {
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String retrieveGroupAccount(@PathParam("groupId") final Long groupId, @Context final UriInfo uriInfo) {
 
-    	context.authenticatedUser().validateHasReadPermission("GROUP");
+        context.authenticatedUser().validateHasReadPermission("GROUP");
 
-        Set<String> typicalResponseParameters = new HashSet<String>(
-                Arrays.asList("pendingApprovalLoans", "awaitingDisbursalLoans", "openLoans", "closedLoans",
-                        "anyLoanCount", "pendingApprovalLoanCount", "awaitingDisbursalLoanCount",
-                        "activeLoanCount", "closedLoanCount")
-        );
+        Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("pendingApprovalLoans", "awaitingDisbursalLoans",
+                "openLoans", "closedLoans", "anyLoanCount", "pendingApprovalLoanCount", "awaitingDisbursalLoanCount", "activeLoanCount",
+                "closedLoanCount"));
 
         Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
         if (responseParameters.isEmpty()) {
@@ -230,14 +216,14 @@ public class GroupsApiResource {
 
         GroupAccountSummaryCollectionData clientAccount = this.groupReadPlatformService.retrieveGroupAccountDetails(groupId);
 
-        return this.apiJsonSerializerService.serializeGroupAccountSummaryCollectionDataToJson(prettyPrint, responseParameters, clientAccount);
+        return this.apiJsonSerializerService.serializeGroupAccountSummaryCollectionDataToJson(prettyPrint, responseParameters,
+                clientAccount);
     }
 
-    // 'g.' preffix because of ERROR 1052 (23000): Column 'column_name' in where clause is ambiguous
+    // 'g.' preffix because of ERROR 1052 (23000): Column 'column_name' in where
+    // clause is ambiguous
     // caused by the same name of columns in m_office and m_group tables
-    private String getGroupExtraCriteria(String sqlSearch, Long officeId,
-                                         String externalId, String name,
-                                         String hierarchy){
+    private String getGroupExtraCriteria(String sqlSearch, Long officeId, String externalId, String name, String hierarchy) {
 
         String extraCriteria = "";
 
@@ -266,8 +252,6 @@ public class GroupsApiResource {
         if (StringUtils.isNotBlank(extraCriteria)) {
             extraCriteria = extraCriteria.substring(4);
         }
-
-        //logger.info("extraCriteria; " + extraCriteria);
 
         return extraCriteria;
     }
