@@ -171,7 +171,7 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
                 final String baseExternalId = helper.extractStringNamed(externalIdParamName, baseElement, ignoreParameters);
                 final String workingExternalId = helper.extractStringNamed(externalIdParamName, workingElement, ignoreParameters);
                 if (differenceExists(baseExternalId, workingExternalId)) {
-                    firstname = workingExternalId;
+                    externalId = workingExternalId;
                     parametersPassedInRequest.add(externalIdParamName);
                 }
             }

@@ -16,13 +16,13 @@ import com.google.gson.Gson;
 public final class DefaultToApiJsonSerializer<T> implements ToApiJsonSerializer<T> {
 
     private final ExcludeNothingWithPrettyPrintingOffJsonSerializerGoogleGson excludeNothingWithPrettyPrintingOff;
-    private final ExcludeNothingWithPrettyPrintingOffJsonSerializerGoogleGson excludeNothingWithPrettyPrintingOn;
+    private final ExcludeNothingWithPrettyPrintingOnJsonSerializerGoogleGson excludeNothingWithPrettyPrintingOn;
     private final GoogleGsonSerializerHelper helper;
 
     @Autowired
     public DefaultToApiJsonSerializer(
             final ExcludeNothingWithPrettyPrintingOffJsonSerializerGoogleGson excludeNothingWithPrettyPrintingOff,
-            final ExcludeNothingWithPrettyPrintingOffJsonSerializerGoogleGson excludeNothingWithPrettyPrintingOn,
+            final ExcludeNothingWithPrettyPrintingOnJsonSerializerGoogleGson excludeNothingWithPrettyPrintingOn,
             final GoogleGsonSerializerHelper helper) {
         this.excludeNothingWithPrettyPrintingOff = excludeNothingWithPrettyPrintingOff;
         this.excludeNothingWithPrettyPrintingOn = excludeNothingWithPrettyPrintingOn;
