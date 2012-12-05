@@ -93,4 +93,14 @@ public class FromJsonHelper {
             final Set<String> parametersPassedInRequest) {
         return helperDelegator.extractBigDecimalNamed(parameterName, element.getAsJsonObject(), Locale.US, parametersPassedInRequest);
     }
+
+    public Integer extractIntegerWithLocaleNamed(final String parameterName, final JsonElement element,
+            final Set<String> parametersPassedInRequest) {
+        return helperDelegator.extractIntegerWithLocaleNamed(parameterName, element.getAsJsonObject(), parametersPassedInRequest);
+    }
+
+    public Integer extractIntegerNamed(final String parameterName, final JsonElement element,
+            final Set<String> parametersPassedInRequest) {
+        return helperDelegator.extractIntegerNamed(parameterName, element.getAsJsonObject(), Locale.US, parametersPassedInRequest);
+    }
 }

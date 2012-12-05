@@ -18,6 +18,10 @@ public class ClientIdentifierCommand {
     private final transient boolean makerCheckerApproval;
     private final transient Long id;
     
+    public static ClientIdentifierCommand clientSubResource(final ClientIdentifierCommand command, final Long providedClientId) {
+        return new ClientIdentifierCommand(command.modifiedParameters, command.makerCheckerApproval, command.id, providedClientId, command.documentTypeId, command.documentKey, command.description);
+    }
+    
     public ClientIdentifierCommand(final Set<String> modifiedParameters, final boolean makerCheckerApproval, final Long id, final Long clientId, final Long documentTypeId,
             final String documentKey, final String description) {
         this.modifiedParameters = modifiedParameters;

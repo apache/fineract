@@ -1,9 +1,7 @@
 package org.mifosplatform.infrastructure.core.api;
 
 import org.mifosplatform.organisation.staff.command.BulkTransferLoanOfficerCommand;
-import org.mifosplatform.portfolio.charge.command.ChargeDefinitionCommand;
 import org.mifosplatform.portfolio.client.command.ClientCommand;
-import org.mifosplatform.portfolio.client.command.ClientIdentifierCommand;
 import org.mifosplatform.portfolio.client.command.NoteCommand;
 import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.group.command.GroupCommand;
@@ -13,7 +11,6 @@ import org.mifosplatform.portfolio.loanaccount.command.LoanChargeCommand;
 import org.mifosplatform.portfolio.loanaccount.command.LoanStateTransitionCommand;
 import org.mifosplatform.portfolio.loanaccount.command.LoanTransactionCommand;
 import org.mifosplatform.portfolio.loanaccount.gaurantor.command.GuarantorCommand;
-import org.mifosplatform.portfolio.loanproduct.command.LoanProductCommand;
 import org.mifosplatform.portfolio.savingsaccount.command.SavingAccountCommand;
 import org.mifosplatform.portfolio.savingsaccountproduct.command.SavingProductCommand;
 import org.mifosplatform.portfolio.savingsdepositaccount.command.DepositAccountCommand;
@@ -25,15 +22,9 @@ import org.mifosplatform.portfolio.savingsdepositproduct.command.DepositProductC
 
 public interface PortfolioApiDataConversionService {
 
-    ChargeDefinitionCommand convertApiRequestJsonToChargeDefinitionCommand(Long resourceIdentifier, String json);
-
-    LoanProductCommand convertApiRequestJsonToLoanProductCommand(Long resourceIdentifier, String json);
-
     SavingProductCommand convertJsonToSavingProductCommand(Long resourceIdentifier, String json);
 
     DepositProductCommand convertJsonToDepositProductCommand(Long resourceIdentifier, String json);
-
-    ClientCommand convertApiRequestJsonToClientCommand(Long resourceIdentifier, String json);
 
     ClientData convertInternalJsonFormatToClientDataChange(Long clientId, String json);
 
@@ -66,8 +57,6 @@ public interface PortfolioApiDataConversionService {
     DepositAccountWithdrawalCommand convertJsonToDepositWithdrawalCommand(Long resourceIdentifier, String json);
 
     DepositAccountWithdrawInterestCommand convertJsonToDepositAccountWithdrawInterestCommand(Long resourceIdentifier, String json);
-
-    ClientIdentifierCommand convertApiRequestJsonToClientIdentifierCommand(Long resourceIdentifier, Long clientId, String json);
 
     SavingAccountCommand convertJsonToSavingAccountCommand(Long resourceIdentifier, String json);
 

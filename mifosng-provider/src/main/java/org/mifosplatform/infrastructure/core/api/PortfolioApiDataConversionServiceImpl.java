@@ -23,11 +23,10 @@ import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidation
 import org.mifosplatform.infrastructure.core.exception.UnsupportedParameterException;
 import org.mifosplatform.infrastructure.core.serialization.JsonParserHelper;
 import org.mifosplatform.organisation.staff.command.BulkTransferLoanOfficerCommand;
-import org.mifosplatform.portfolio.charge.command.ChargeDefinitionCommand;
 import org.mifosplatform.portfolio.client.command.ClientCommand;
-import org.mifosplatform.portfolio.client.command.ClientIdentifierCommand;
 import org.mifosplatform.portfolio.client.command.NoteCommand;
 import org.mifosplatform.portfolio.client.data.ClientData;
+import org.mifosplatform.portfolio.client.serialization.ClientCommandFromCommandJsonDeserializer;
 import org.mifosplatform.portfolio.group.command.GroupCommand;
 import org.mifosplatform.portfolio.loanaccount.command.AdjustLoanTransactionCommand;
 import org.mifosplatform.portfolio.loanaccount.command.LoanApplicationCommand;
@@ -35,7 +34,6 @@ import org.mifosplatform.portfolio.loanaccount.command.LoanChargeCommand;
 import org.mifosplatform.portfolio.loanaccount.command.LoanStateTransitionCommand;
 import org.mifosplatform.portfolio.loanaccount.command.LoanTransactionCommand;
 import org.mifosplatform.portfolio.loanaccount.gaurantor.command.GuarantorCommand;
-import org.mifosplatform.portfolio.loanproduct.command.LoanProductCommand;
 import org.mifosplatform.portfolio.savingsaccount.command.SavingAccountCommand;
 import org.mifosplatform.portfolio.savingsaccountproduct.command.SavingProductCommand;
 import org.mifosplatform.portfolio.savingsdepositaccount.command.DepositAccountCommand;
@@ -59,61 +57,16 @@ import com.google.gson.reflect.TypeToken;
 public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataConversionService {
 
     /**
-     * Used in places where the support json of the api request is not any
-     * different to that of the json of a serialized command object.
-     */
-    private final PortfolioCommandDeserializerService portfolioCommandDeserializerService;
-
-    /**
      * Google-gson class for converting to and from json.
      */
     private final Gson gsonConverter;
 
-    /**
-     * Google-gson class for parsing json.
-     */
-    // private final JsonParser parser;
+    private final ClientCommandFromCommandJsonDeserializer commandFromCommandJsonDeserializer;
 
     @Autowired
-    public PortfolioApiDataConversionServiceImpl(final PortfolioCommandDeserializerService portfolioCommandDeserializerService) {
-        this.portfolioCommandDeserializerService = portfolioCommandDeserializerService;
+    public PortfolioApiDataConversionServiceImpl(final ClientCommandFromCommandJsonDeserializer commandFromCommandJsonDeserializer) {
+        this.commandFromCommandJsonDeserializer = commandFromCommandJsonDeserializer;
         this.gsonConverter = new Gson();
-        // this.parser = new JsonParser();
-    }
-
-    @Override
-    public ChargeDefinitionCommand convertApiRequestJsonToChargeDefinitionCommand(final Long resourceIdentifier, final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
-
-        final Type typeOfMap = new TypeToken<Map<String, String>>() {}.getType();
-        final Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
-
-        final Set<String> supportedParams = new HashSet<String>(Arrays.asList("name", "amount", "locale", "currencyCode",
-                "currencyOptions", "chargeAppliesTo", "chargeTimeType", "chargeCalculationType", "chargeCalculationTypeOptions", "penalty",
-                "active"));
-
-        checkForUnsupportedParameters(requestMap, supportedParams);
-
-        final JsonParserHelper helper = new JsonParserHelper();
-        JsonParser parser = new JsonParser();
-        final JsonElement element = parser.parse(json);
-
-        final Set<String> parametersPassedInRequest = new HashSet<String>();
-
-        final String name = helper.extractStringNamed("name", element, parametersPassedInRequest);
-        final String currencyCode = helper.extractStringNamed("currencyCode", element, parametersPassedInRequest);
-        final BigDecimal amount = helper.extractBigDecimalWithLocaleNamed("amount", element.getAsJsonObject(), parametersPassedInRequest);
-
-        final Integer chargeTimeType = helper.extractIntegerWithLocaleNamed("chargeTimeType", element, parametersPassedInRequest);
-        final Integer chargeAppliesTo = helper.extractIntegerWithLocaleNamed("chargeAppliesTo", element, parametersPassedInRequest);
-        final Integer chargeCalculationType = helper.extractIntegerWithLocaleNamed("chargeCalculationType", element,
-                parametersPassedInRequest);
-
-        final Boolean penalty = helper.extractBooleanNamed("penalty", element, parametersPassedInRequest);
-        final Boolean active = helper.extractBooleanNamed("active", element, parametersPassedInRequest);
-
-        return new ChargeDefinitionCommand(parametersPassedInRequest, false, resourceIdentifier, name, amount, currencyCode,
-                chargeTimeType, chargeAppliesTo, chargeCalculationType, penalty, active);
     }
 
     @Override
@@ -294,37 +247,9 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
     }
 
     @Override
-    public ClientCommand convertApiRequestJsonToClientCommand(final Long resourceIdentifier, final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
-
-        final Type typeOfMap = new TypeToken<Map<String, String>>() {}.getType();
-        final Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
-
-        final Set<String> supportedParams = new HashSet<String>(Arrays.asList("id", "externalId", "firstname", "lastname",
-                "clientOrBusinessName", "officeId", "joiningDate", "locale", "dateFormat"));
-
-        checkForUnsupportedParameters(requestMap, supportedParams);
-
-        final JsonParser parser = new JsonParser();
-        final JsonElement element = parser.parse(json);
-        final JsonParserHelper helper = new JsonParserHelper();
-        final Set<String> parametersPassedInRequest = new HashSet<String>();
-
-        final Long officeId = helper.extractLongNamed("officeId", element, parametersPassedInRequest);
-        final String externalId = helper.extractStringNamed("externalId", element, parametersPassedInRequest);
-        final String firstname = helper.extractStringNamed("firstname", element, parametersPassedInRequest);
-        final String lastname = helper.extractStringNamed("lastname", element, parametersPassedInRequest);
-        final String clientOrBusinessName = helper.extractStringNamed("clientOrBusinessName", element, parametersPassedInRequest);
-        final LocalDate joiningDate = helper.extractLocalDateNamed("joiningDate", element, parametersPassedInRequest);
-
-        return new ClientCommand(parametersPassedInRequest, resourceIdentifier, externalId, firstname, lastname, clientOrBusinessName,
-                officeId, joiningDate, false);
-    }
-
-    @Override
     public ClientData convertInternalJsonFormatToClientDataChange(final Long resourceIdentifier, final String json) {
 
-        final ClientCommand command = this.portfolioCommandDeserializerService.deserializeClientCommand(resourceIdentifier, json, false);
+        final ClientCommand command = this.commandFromCommandJsonDeserializer.commandFromCommandJson(resourceIdentifier, json);
 
         return ClientData.dataChangeInstance(resourceIdentifier, command.getOfficeId(), command.getExternalId(), command.getFirstname(),
                 command.getLastname(), command.getClientOrBusinessName(), command.getJoiningDate());
@@ -366,78 +291,6 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         //
 
         return new GroupCommand(modifiedParameters, resourceIdentifier, externalId, name, officeId, clientMembers);
-    }
-
-    @Override
-    public LoanProductCommand convertApiRequestJsonToLoanProductCommand(final Long resourceIdentifier, final String json) {
-
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
-
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        final Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
-
-        final Set<String> supportedParams = new HashSet<String>(Arrays.asList("name", "description", "fundId",
-                "transactionProcessingStrategyId", "currencyCode", "digitsAfterDecimal", "principal", "inArrearsTolerance",
-                "interestRatePerPeriod", "repaymentEvery", "numberOfRepayments", "repaymentFrequencyType", "interestRateFrequencyType",
-                "amortizationType", "interestType", "interestCalculationPeriodType", "charges", "locale"));
-
-        checkForUnsupportedParameters(requestMap, supportedParams);
-
-        final JsonParser parser = new JsonParser();
-        final JsonElement element = parser.parse(json);
-        final JsonParserHelper helper = new JsonParserHelper();
-
-        final Set<String> modifiedParameters = new HashSet<String>();
-        final String name = helper.extractStringNamed("name", element, modifiedParameters);
-        final String description = helper.extractStringNamed("description", element, modifiedParameters);
-        final Long fundId = helper.extractLongNamed("fundId", element, modifiedParameters);
-
-        final Long transactionProcessingStrategyId = helper
-                .extractLongNamed("transactionProcessingStrategyId", element, modifiedParameters);
-
-        final String currencyCode = helper.extractStringNamed("currencyCode", element, modifiedParameters);
-        final Integer digitsAfterDecimal = helper.extractIntegerWithLocaleNamed("digitsAfterDecimal", element, modifiedParameters);
-
-        final BigDecimal principal = helper.extractBigDecimalWithLocaleNamed("principal", element, modifiedParameters);
-        final BigDecimal inArrearsTolerance = helper.extractBigDecimalWithLocaleNamed("inArrearsTolerance", element, modifiedParameters);
-        final BigDecimal interestRatePerPeriod = helper.extractBigDecimalWithLocaleNamed("interestRatePerPeriod", element,
-                modifiedParameters);
-        final Integer repaymentEvery = helper.extractIntegerWithLocaleNamed("repaymentEvery", element, modifiedParameters);
-        final Integer numberOfRepayments = helper.extractIntegerWithLocaleNamed("numberOfRepayments", element, modifiedParameters);
-        final Integer repaymentFrequencyType = helper.extractIntegerWithLocaleNamed("repaymentFrequencyType", element, modifiedParameters);
-
-        // FIXME - A - LoanProduct - KW - should loan term fields be part of
-        // product also as are basic part of 'loan terms'
-        // final Integer loanTermFrequency =
-        // helper.extractIntegerNamed("loanTermFrequency", element,
-        // modifiedParameters);
-        // final Integer loanTermFrequencyType =
-        // helper.extractIntegerNamed("loanTermFrequencyType", element,
-        // modifiedParameters);
-        final Integer interestRateFrequencyType = helper.extractIntegerWithLocaleNamed("interestRateFrequencyType", element,
-                modifiedParameters);
-        final Integer amortizationType = helper.extractIntegerWithLocaleNamed("amortizationType", element, modifiedParameters);
-        final Integer interestType = helper.extractIntegerWithLocaleNamed("interestType", element, modifiedParameters);
-        final Integer interestCalculationPeriodType = helper.extractIntegerWithLocaleNamed("interestCalculationPeriodType", element,
-                modifiedParameters);
-
-        String[] charges = null;
-        if (element.isJsonObject()) {
-            JsonObject object = element.getAsJsonObject();
-            if (object.has("charges")) {
-                modifiedParameters.add("charges");
-                JsonArray array = object.get("charges").getAsJsonArray();
-                charges = new String[array.size()];
-                for (int i = 0; i < array.size(); i++) {
-                    charges[i] = array.get(i).getAsString();
-                }
-            }
-        }
-
-        return new LoanProductCommand(modifiedParameters, false, resourceIdentifier, name, description, fundId,
-                transactionProcessingStrategyId, currencyCode, digitsAfterDecimal, principal, inArrearsTolerance, numberOfRepayments,
-                repaymentEvery, interestRatePerPeriod, repaymentFrequencyType, interestRateFrequencyType, amortizationType, interestType,
-                interestCalculationPeriodType, charges);
     }
 
     @Override
@@ -1338,21 +1191,6 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
     }
 
     @Override
-    public ClientIdentifierCommand convertApiRequestJsonToClientIdentifierCommand(final Long resourceIdentifier, final Long clientId,
-            final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
-
-        Type typeOfMap = new TypeToken<Map<String, String>>() {}.getType();
-        Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
-
-        Set<String> supportedParams = new HashSet<String>(Arrays.asList("clientId", "documentTypeId", "documentKey", "description"));
-
-        checkForUnsupportedParameters(requestMap, supportedParams);
-
-        return this.portfolioCommandDeserializerService.deserializeClientIdentifierCommand(resourceIdentifier, clientId, json, false);
-    }
-
-    @Override
     public SavingAccountCommand convertJsonToSavingAccountCommand(Long resourceIdentifier, String json) {
 
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
@@ -1365,7 +1203,7 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
                 "digitsAfterDecimal", "savingsDepositAmountPerPeriod", "recurringInterestRate", "savingInterestRate", "tenure",
                 "commencementDate", "locale", "dateFormat", "isLockinPeriodAllowed", "lockinPeriod", "lockinPeriodType",
                 "savingProductType", "tenureType", "frequency", "interestType", "interestCalculationMethod", "minimumBalanceForWithdrawal",
-                "isPartialDepositAllowed","payEvery"));
+                "isPartialDepositAllowed", "payEvery"));
         checkForUnsupportedParameters(requestMap, supportedParams);
         Set<String> modifiedParameters = new HashSet<String>();
 
@@ -1396,7 +1234,7 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         return new SavingAccountCommand(modifiedParameters, resourceIdentifier, clientId, productId, externalId, currencyCode,
                 digitsAfterDecimalValue, savingsDepositAmount, recurringInterestRate, savingInterestRate, tenure, commencementDate,
                 savingProductType, tenureType, frequency, interestType, minimumBalanceForWithdrawal, interestCalculationMethod,
-                isLockinPeriodAllowed, isPartialDepositAllowed, lockinPeriod, lockinPeriodType,payEvery);
+                isLockinPeriodAllowed, isPartialDepositAllowed, lockinPeriod, lockinPeriodType, payEvery);
     }
 
     @Override

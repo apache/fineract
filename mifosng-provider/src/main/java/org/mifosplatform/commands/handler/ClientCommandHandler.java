@@ -6,10 +6,10 @@ import java.util.List;
 import org.joda.time.LocalDate;
 import org.mifosplatform.commands.domain.CommandSource;
 import org.mifosplatform.commands.service.ChangeDetectionService;
-import org.mifosplatform.infrastructure.core.api.PortfolioCommandDeserializerService;
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.client.command.ClientCommand;
+import org.mifosplatform.portfolio.client.serialization.ClientCommandFromCommandJsonDeserializer;
 import org.mifosplatform.portfolio.client.service.ClientWritePlatformService;
 import org.mifosplatform.portfolio.client.service.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
 import org.mifosplatform.useradministration.domain.AppUser;
@@ -21,16 +21,16 @@ public class ClientCommandHandler implements CommandSourceHandler {
 
     private final PlatformSecurityContext context;
     private final ChangeDetectionService changeDetectionService;
+    private final ClientCommandFromCommandJsonDeserializer commandFromCommandJsonDeserializer;
     private final ClientWritePlatformService clientWritePlatformService;
-    private final PortfolioCommandDeserializerService commandDeserializerService;
 
     @Autowired
     public ClientCommandHandler(final PlatformSecurityContext context, final ChangeDetectionService changeDetectionService,
-            final PortfolioCommandDeserializerService commandDeserializerService,
+            final ClientCommandFromCommandJsonDeserializer commandFromCommandJsonDeserializer,
             final ClientWritePlatformService clientWritePlatformService) {
         this.context = context;
         this.changeDetectionService = changeDetectionService;
-        this.commandDeserializerService = commandDeserializerService;
+        this.commandFromCommandJsonDeserializer = commandFromCommandJsonDeserializer;
         this.clientWritePlatformService = clientWritePlatformService;
     }
 
@@ -40,8 +40,8 @@ public class ClientCommandHandler implements CommandSourceHandler {
         final AppUser maker = context.authenticatedUser();
         final LocalDate asToday = new LocalDate();
 
-        final ClientCommand command = this.commandDeserializerService.deserializeClientCommand(commandSource.resourceId(),
-                commandSource.json(), false);
+        final ClientCommand command = this.commandFromCommandJsonDeserializer.commandFromCommandJson(commandSource.resourceId(),
+                commandSource.json());
 
         CommandSource commandSourceResult = commandSource.copy();
         Long newResourceId = null;
@@ -60,9 +60,8 @@ public class ClientCommandHandler implements CommandSourceHandler {
                         commandSource.resourceId(), commandSource.json());
                 commandSourceResult.updateJsonTo(jsonOfChangesOnly);
 
-                final ClientCommand changesOnly = this.commandDeserializerService.deserializeClientCommand(commandSource.resourceId(),
-                        jsonOfChangesOnly, false);
-
+                final ClientCommand changesOnly = this.commandFromCommandJsonDeserializer.commandFromCommandJson(
+                        commandSource.resourceId(), jsonOfChangesOnly);
                 EntityIdentifier result = this.clientWritePlatformService.updateClientDetails(changesOnly);
                 newResourceId = result.getEntityId();
 
@@ -88,8 +87,7 @@ public class ClientCommandHandler implements CommandSourceHandler {
 
         final AppUser checker = context.authenticatedUser();
 
-        Long resourceId = null;
-        final ClientCommand command = this.commandDeserializerService.deserializeClientCommand(commandSourceResult.resourceId(),
+        final ClientCommand command = this.commandFromCommandJsonDeserializer.commandFromCommandJson(commandSourceResult.resourceId(),
                 commandSourceResult.json(), true);
 
         if (commandSourceResult.isCreate()) {
@@ -97,7 +95,7 @@ public class ClientCommandHandler implements CommandSourceHandler {
                     "CREATE_CLIENT_CHECKER");
             context.authenticatedUser().validateHasPermissionTo("CREATE_CLIENT_CHECKER", allowedPermissions);
 
-            resourceId = this.clientWritePlatformService.createClient(command);
+            Long resourceId = this.clientWritePlatformService.createClient(command);
             commandSourceResult.updateResourceId(resourceId);
             commandSourceResult.markAsChecked(checker, new LocalDate());
         } else if (commandSourceResult.isUpdate()) {
@@ -105,16 +103,14 @@ public class ClientCommandHandler implements CommandSourceHandler {
                     "UPDATE_CLIENT_CHECKER");
             context.authenticatedUser().validateHasPermissionTo("UPDATE_CLIENT_CHECKER", allowedPermissions);
 
-            EntityIdentifier result = this.clientWritePlatformService.updateClientDetails(command);
-            resourceId = result.getEntityId();
+            this.clientWritePlatformService.updateClientDetails(command);
             commandSourceResult.markAsChecked(checker, new LocalDate());
         } else if (commandSourceResult.isDelete()) {
             final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "PORTFOLIO_MANAGEMENT_SUPER_USER",
                     "DELETE_CLIENT_CHECKER");
             context.authenticatedUser().validateHasPermissionTo("DELETE_CLIENT_CHECKER", allowedPermissions);
 
-            EntityIdentifier result = this.clientWritePlatformService.deleteClient(command);
-            resourceId = result.getEntityId();
+            this.clientWritePlatformService.deleteClient(command);
             commandSourceResult.markAsChecked(checker, new LocalDate());
         }
 

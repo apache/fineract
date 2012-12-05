@@ -44,13 +44,13 @@ public final class FundCommandFromApiJsonDeserializer implements FromApiJsonDese
     }
 
     @Override
-    public FundCommand commandFromApiJson(final Long roleId, final String json) {
+    public FundCommand commandFromApiJson(final Long fundId, final String json) {
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
 
         fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
 
-        return this.fromCommandJsonDeserializer.commandFromCommandJson(roleId, json);
+        return this.fromCommandJsonDeserializer.commandFromCommandJson(fundId, json);
     }
 
     @Override
@@ -60,8 +60,8 @@ public final class FundCommandFromApiJsonDeserializer implements FromApiJsonDese
     }
 
     @Override
-    public String serializedCommandJsonFromApiJson(final Long roleId, final String json) {
-        final FundCommand command = commandFromApiJson(roleId, json);
+    public String serializedCommandJsonFromApiJson(final Long fundId, final String json) {
+        final FundCommand command = commandFromApiJson(fundId, json);
         return this.commandSerializerService.serializeCommandToJson(command);
     }
 }

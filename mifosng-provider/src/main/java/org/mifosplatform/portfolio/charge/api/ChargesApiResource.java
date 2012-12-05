@@ -20,14 +20,12 @@ import javax.ws.rs.core.UriInfo;
 
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
-import org.mifosplatform.infrastructure.core.api.PortfolioApiDataConversionService;
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
-import org.mifosplatform.infrastructure.core.serialization.CommandSerializer;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.portfolio.charge.command.ChargeDefinitionCommand;
 import org.mifosplatform.portfolio.charge.data.ChargeData;
+import org.mifosplatform.portfolio.charge.serialization.ChargeDefinitionCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.charge.service.ChargeReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -38,38 +36,32 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class ChargesApiResource {
 
-    private final Set<String> CHARGES_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "name", "amount", "currency",
-            "penalty", "active", "chargeAppliesTo", "chargeTimeType", "chargeCalculationType", "chargeCalculationTypeOptions",
+    private final Set<String> CHARGES_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "name", "amount", "currency", "penalty",
+            "active", "chargeAppliesTo", "chargeTimeType", "chargeCalculationType", "chargeCalculationTypeOptions",
             "chargeAppliesToOptions", "chargeTimeTypeOptions", "currencyOptions"));
-    
+
     private final String resourceNameForPermissions = "CHARGE";
-    
+
     private final PlatformSecurityContext context;
     private final ChargeReadPlatformService readPlatformService;
     private final DefaultToApiJsonSerializer<ChargeData> toApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
-    
-    private final PortfolioApiDataConversionService apiDataConversionService;
-    private final CommandSerializer commandSerializerService;
+    private final ChargeDefinitionCommandFromApiJsonDeserializer fromApiJsonDeserializer;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-    
+
     @Autowired
-    public ChargesApiResource(final PlatformSecurityContext context, 
-            final ChargeReadPlatformService readPlatformService,
-            final DefaultToApiJsonSerializer<ChargeData> toApiJsonSerializer,
-            final ApiRequestParameterHelper apiRequestParameterHelper, 
-            final PortfolioApiDataConversionService apiDataConversionService,
-            final CommandSerializer commandSerializerService,
+    public ChargesApiResource(final PlatformSecurityContext context, final ChargeReadPlatformService readPlatformService,
+            final ChargeDefinitionCommandFromApiJsonDeserializer fromApiJsonDeserializer,
+            final DefaultToApiJsonSerializer<ChargeData> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
         this.context = context;
         this.readPlatformService = readPlatformService;
+        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.apiDataConversionService = apiDataConversionService;
-        this.commandSerializerService = commandSerializerService;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
     }
-    
+
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
@@ -92,7 +84,7 @@ public class ChargesApiResource {
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        
+
         ChargeData charge = this.readPlatformService.retrieveCharge(chargeId);
         if (settings.isTemplate()) {
             ChargeData templateData = this.readPlatformService.retrieveNewChargeDetails();
@@ -120,14 +112,14 @@ public class ChargesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String createCharge(final String apiRequestBodyAsJson) {
-        
+
         final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "ORGANISATION_ADMINISTRATION_SUPER_USER", "CREATE_CHARGE");
         context.authenticatedUser().validateHasPermissionTo("CREATE_CHARGE", allowedPermissions);
 
-        final ChargeDefinitionCommand command = this.apiDataConversionService.convertApiRequestJsonToChargeDefinitionCommand(null, apiRequestBodyAsJson);
-        final String commandSerializedAsJson = this.commandSerializerService.serializeCommandToJson(command);
-        
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE", "charges", null, commandSerializedAsJson);
+        final String commandSerializedAsJson = this.fromApiJsonDeserializer.serializedCommandJsonFromApiJson(apiRequestBodyAsJson);
+
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE", "charges", null,
+                commandSerializedAsJson);
 
         return this.toApiJsonSerializer.serialize(result);
     }
@@ -137,14 +129,15 @@ public class ChargesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String updateCharge(@PathParam("chargeId") final Long chargeId, final String apiRequestBodyAsJson) {
-        
+
         final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "ORGANISATION_ADMINISTRATION_SUPER_USER", "UPDATE_CHARGE");
         context.authenticatedUser().validateHasPermissionTo("UPDATE_CHARGE", allowedPermissions);
-        
-        final ChargeDefinitionCommand command = this.apiDataConversionService.convertApiRequestJsonToChargeDefinitionCommand(chargeId, apiRequestBodyAsJson);
-        final String commandSerializedAsJson = this.commandSerializerService.serializeCommandToJson(command);
-        
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "charges", chargeId, commandSerializedAsJson);
+
+        final String commandSerializedAsJson = this.fromApiJsonDeserializer
+                .serializedCommandJsonFromApiJson(chargeId, apiRequestBodyAsJson);
+
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "charges", chargeId,
+                commandSerializedAsJson);
 
         return this.toApiJsonSerializer.serialize(result);
     }
@@ -157,7 +150,7 @@ public class ChargesApiResource {
 
         final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "ORGANISATION_ADMINISTRATION_SUPER_USER", "DELETE_CHARGE");
         context.authenticatedUser().validateHasPermissionTo("DELETE_CHARGE", allowedPermissions);
-        
+
         final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("DELETE", "charges", chargeId, "{}");
 
         return this.toApiJsonSerializer.serialize(result);

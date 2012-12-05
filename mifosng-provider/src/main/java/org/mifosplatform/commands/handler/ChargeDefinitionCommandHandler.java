@@ -6,9 +6,9 @@ import java.util.List;
 import org.joda.time.LocalDate;
 import org.mifosplatform.commands.domain.CommandSource;
 import org.mifosplatform.commands.service.ChangeDetectionService;
-import org.mifosplatform.infrastructure.core.api.PortfolioCommandDeserializerService;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.charge.command.ChargeDefinitionCommand;
+import org.mifosplatform.portfolio.charge.serialization.ChargeCommandFromCommandJsonDeserializer;
 import org.mifosplatform.portfolio.charge.service.ChargeWritePlatformService;
 import org.mifosplatform.portfolio.client.service.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
 import org.mifosplatform.useradministration.domain.AppUser;
@@ -20,15 +20,16 @@ public class ChargeDefinitionCommandHandler implements CommandSourceHandler {
 
     private final PlatformSecurityContext context;
     private final ChangeDetectionService changeDetectionService;
-    private final PortfolioCommandDeserializerService commandDeserializerService;
+    private final ChargeCommandFromCommandJsonDeserializer commandFromCommandJsonDeserializer;
     private final ChargeWritePlatformService writePlatformService;
 
     @Autowired
     public ChargeDefinitionCommandHandler(final PlatformSecurityContext context, final ChangeDetectionService changeDetectionService,
-            final PortfolioCommandDeserializerService commandDeserializerService, final ChargeWritePlatformService writePlatformService) {
+            final ChargeCommandFromCommandJsonDeserializer commandFromCommandJsonDeserializer,
+            final ChargeWritePlatformService writePlatformService) {
         this.context = context;
         this.changeDetectionService = changeDetectionService;
-        this.commandDeserializerService = commandDeserializerService;
+        this.commandFromCommandJsonDeserializer = commandFromCommandJsonDeserializer;
         this.writePlatformService = writePlatformService;
     }
 
@@ -41,8 +42,8 @@ public class ChargeDefinitionCommandHandler implements CommandSourceHandler {
         CommandSource commandSourceResult = commandSource.copy();
 
         final Long resourceId = commandSource.resourceId();
-        final ChargeDefinitionCommand command = this.commandDeserializerService.deserializeChargeDefinitionCommand(resourceId,
-                commandSourceResult.json(), false);
+        final ChargeDefinitionCommand command = this.commandFromCommandJsonDeserializer.commandFromCommandJson(resourceId,
+                commandSourceResult.json());
 
         if (commandSource.isCreate()) {
             try {
@@ -58,9 +59,8 @@ public class ChargeDefinitionCommandHandler implements CommandSourceHandler {
                         commandSource.resourceId(), commandSource.json());
                 commandSourceResult.updateJsonTo(jsonOfChangesOnly);
 
-                final ChargeDefinitionCommand changesOnly = this.commandDeserializerService.deserializeChargeDefinitionCommand(resourceId,
-                        jsonOfChangesOnly, false);
-
+                final ChargeDefinitionCommand changesOnly = this.commandFromCommandJsonDeserializer.commandFromCommandJson(resourceId,
+                        jsonOfChangesOnly);
                 this.writePlatformService.updateCharge(changesOnly);
 
                 commandSourceResult.markAsChecked(maker, asToday);
@@ -85,7 +85,7 @@ public class ChargeDefinitionCommandHandler implements CommandSourceHandler {
         final AppUser checker = context.authenticatedUser();
 
         Long resourceId = commandSourceResult.resourceId();
-        final ChargeDefinitionCommand command = this.commandDeserializerService.deserializeChargeDefinitionCommand(resourceId,
+        final ChargeDefinitionCommand command = this.commandFromCommandJsonDeserializer.commandFromCommandJson(resourceId,
                 commandSourceResult.json(), true);
 
         if (commandSourceResult.isCreate()) {

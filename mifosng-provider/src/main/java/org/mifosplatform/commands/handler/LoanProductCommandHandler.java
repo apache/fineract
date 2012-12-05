@@ -7,11 +7,11 @@ import org.joda.time.LocalDate;
 import org.mifosplatform.commands.domain.CommandSource;
 import org.mifosplatform.commands.exception.UnsupportedCommandException;
 import org.mifosplatform.commands.service.ChangeDetectionService;
-import org.mifosplatform.infrastructure.core.api.PortfolioCommandDeserializerService;
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.client.service.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
 import org.mifosplatform.portfolio.loanproduct.command.LoanProductCommand;
+import org.mifosplatform.portfolio.loanproduct.serialization.LoanProductCommandFromCommandJsonDeserializer;
 import org.mifosplatform.portfolio.loanproduct.service.LoanProductWritePlatformService;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,15 +22,16 @@ public class LoanProductCommandHandler implements CommandSourceHandler {
 
     private final PlatformSecurityContext context;
     private final ChangeDetectionService changeDetectionService;
-    private final PortfolioCommandDeserializerService commandDeserializerService;
+    private final LoanProductCommandFromCommandJsonDeserializer commandFromCommandJsonDeserializer;
     private final LoanProductWritePlatformService writePlatformService;
 
     @Autowired
     public LoanProductCommandHandler(final PlatformSecurityContext context, final ChangeDetectionService changeDetectionService,
-            final PortfolioCommandDeserializerService commandDeserializerService, final LoanProductWritePlatformService writePlatformService) {
+            final LoanProductCommandFromCommandJsonDeserializer commandFromCommandJsonDeserializer,
+            final LoanProductWritePlatformService writePlatformService) {
         this.context = context;
         this.changeDetectionService = changeDetectionService;
-        this.commandDeserializerService = commandDeserializerService;
+        this.commandFromCommandJsonDeserializer = commandFromCommandJsonDeserializer;
         this.writePlatformService = writePlatformService;
     }
 
@@ -41,9 +42,7 @@ public class LoanProductCommandHandler implements CommandSourceHandler {
         final LocalDate asToday = new LocalDate();
 
         final Long resourceId = commandSource.resourceId();
-        final LoanProductCommand command = this.commandDeserializerService.deserializeLoanProductCommand(resourceId, commandSource.json(),
-                false);
-
+        final LoanProductCommand command = this.commandFromCommandJsonDeserializer.commandFromCommandJson(resourceId, commandSource.json());
         CommandSource commandSourceResult = commandSource.copy();
 
         if (commandSource.isCreate()) {
@@ -60,9 +59,8 @@ public class LoanProductCommandHandler implements CommandSourceHandler {
                         commandSource.resourceId(), commandSource.json());
                 commandSourceResult.updateJsonTo(jsonOfChangesOnly);
 
-                final LoanProductCommand changesOnly = this.commandDeserializerService.deserializeLoanProductCommand(resourceId,
-                        jsonOfChangesOnly, false);
-
+                final LoanProductCommand changesOnly = this.commandFromCommandJsonDeserializer.commandFromCommandJson(resourceId,
+                        jsonOfChangesOnly);
                 this.writePlatformService.updateLoanProduct(changesOnly);
 
                 commandSourceResult.markAsChecked(maker, asToday);
@@ -80,7 +78,7 @@ public class LoanProductCommandHandler implements CommandSourceHandler {
         final AppUser checker = context.authenticatedUser();
 
         Long resourceId = commandSourceResult.resourceId();
-        final LoanProductCommand command = this.commandDeserializerService.deserializeLoanProductCommand(resourceId,
+        final LoanProductCommand command = this.commandFromCommandJsonDeserializer.commandFromCommandJson(resourceId,
                 commandSourceResult.json(), true);
 
         if (commandSourceResult.isCreate()) {

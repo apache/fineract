@@ -8,43 +8,35 @@ import java.util.Set;
  */
 public class LoanProductCommand {
 
-    
     private final String name;
     private final String description;
-
     private final Long fundId;
     private final Long transactionProcessingStrategyId;
-
     private final String currencyCode;
     private final Integer digitsAfterDecimal;
     private final BigDecimal principal;
     private final BigDecimal inArrearsTolerance;
-
     private final Integer numberOfRepayments;
     private final Integer repaymentEvery;
-
     private final BigDecimal interestRatePerPeriod;
-
     private final Integer repaymentFrequencyType;
     private final Integer interestRateFrequencyType;
     private final Integer amortizationType;
     private final Integer interestType;
     private final Integer interestCalculationPeriodType;
-
     private final String[] charges;
 
-    private final transient Set<String> modifiedParameters;
+    private final transient Set<String> parametersPassedInRequest;
     private final transient boolean makerCheckerApproval;
     private final transient Long id;
 
-    public LoanProductCommand(final Set<String> modifiedParameters, 
-            final boolean makerCheckerApproval, final Long id, final String name, final String description,
-            final Long fundId, final Long transactionProcessingStrategyId, final String currencyCode, final Integer digitsAfterDecimal,
-            final BigDecimal principal, final BigDecimal inArrearsTolerance, final Integer numberOfRepayments,
-            final Integer repaymentEvery, final BigDecimal interestRatePerPeriod, final Integer repaymentFrequencyType,
-            final Integer interestRateFrequencyType, final Integer amortizationType, final Integer interestType,
-            final Integer interestCalculationPeriodType, final String[] charges) {
-        this.modifiedParameters = modifiedParameters;
+    public LoanProductCommand(final Set<String> parametersPassedInRequest, final boolean makerCheckerApproval, final Long id,
+            final String name, final String description, final Long fundId, final Long transactionProcessingStrategyId,
+            final String currencyCode, final Integer digitsAfterDecimal, final BigDecimal principal, final BigDecimal inArrearsTolerance,
+            final Integer numberOfRepayments, final Integer repaymentEvery, final BigDecimal interestRatePerPeriod,
+            final Integer repaymentFrequencyType, final Integer interestRateFrequencyType, final Integer amortizationType,
+            final Integer interestType, final Integer interestCalculationPeriodType, final String[] charges) {
+        this.parametersPassedInRequest = parametersPassedInRequest;
         this.makerCheckerApproval = makerCheckerApproval;
         this.id = id;
         this.name = name;
@@ -143,73 +135,73 @@ public class LoanProductCommand {
     }
 
     public boolean isNameChanged() {
-        return this.modifiedParameters.contains("name");
+        return this.parametersPassedInRequest.contains("name");
     }
 
     public boolean isDescriptionChanged() {
-        return this.modifiedParameters.contains("description");
+        return this.parametersPassedInRequest.contains("description");
     }
 
     public boolean isFundChanged() {
-        return this.modifiedParameters.contains("fundId");
+        return this.parametersPassedInRequest.contains("fundId");
     }
 
     public boolean isTransactionProcessingStrategyChanged() {
-        return this.modifiedParameters.contains("transactionProcessingStrategyId");
+        return this.parametersPassedInRequest.contains("transactionProcessingStrategyId");
     }
 
     public boolean isCurrencyCodeChanged() {
-        return this.modifiedParameters.contains("currencyCode");
+        return this.parametersPassedInRequest.contains("currencyCode");
     }
 
     public boolean isDigitsAfterDecimalChanged() {
-        return this.modifiedParameters.contains("digitsAfterDecimal");
+        return this.parametersPassedInRequest.contains("digitsAfterDecimal");
     }
 
     public boolean isPrincipalChanged() {
-        return this.modifiedParameters.contains("principal");
+        return this.parametersPassedInRequest.contains("principal");
     }
 
     public boolean isInArrearsToleranceChanged() {
-        return this.modifiedParameters.contains("inArrearsTolerance");
+        return this.parametersPassedInRequest.contains("inArrearsTolerance");
     }
 
     public boolean isNumberOfRepaymentsChanged() {
-        return this.modifiedParameters.contains("numberOfRepayments");
+        return this.parametersPassedInRequest.contains("numberOfRepayments");
     }
 
     public boolean isRepaymentEveryChanged() {
-        return this.modifiedParameters.contains("repaymentEvery");
+        return this.parametersPassedInRequest.contains("repaymentEvery");
     }
 
     public boolean isRepaymentFrequencyTypeChanged() {
-        return this.modifiedParameters.contains("repaymentFrequencyType");
+        return this.parametersPassedInRequest.contains("repaymentFrequencyType");
     }
 
     public boolean isAmortizationTypeChanged() {
-        return this.modifiedParameters.contains("amortizationType");
+        return this.parametersPassedInRequest.contains("amortizationType");
     }
 
     public boolean isInterestTypeChanged() {
-        return this.modifiedParameters.contains("interestType");
+        return this.parametersPassedInRequest.contains("interestType");
     }
 
     public boolean isInterestRatePerPeriodChanged() {
-        return this.modifiedParameters.contains("interestRatePerPeriod");
+        return this.parametersPassedInRequest.contains("interestRatePerPeriod");
     }
 
     public boolean isInterestRateFrequencyTypeChanged() {
-        return this.modifiedParameters.contains("interestRateFrequencyType");
+        return this.parametersPassedInRequest.contains("interestRateFrequencyType");
     }
 
     public boolean isInterestCalculationPeriodTypeChanged() {
-        return this.modifiedParameters.contains("interestCalculationPeriodType");
+        return this.parametersPassedInRequest.contains("interestCalculationPeriodType");
     }
 
     public boolean isChargesChanged() {
-        return this.modifiedParameters.contains("charges");
+        return this.parametersPassedInRequest.contains("charges");
     }
-    
+
     public boolean isApprovedByChecker() {
         return this.makerCheckerApproval;
     }

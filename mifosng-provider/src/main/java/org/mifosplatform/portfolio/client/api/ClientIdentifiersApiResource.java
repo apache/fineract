@@ -22,16 +22,14 @@ import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformSer
 import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
-import org.mifosplatform.infrastructure.core.api.PortfolioApiDataConversionService;
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
-import org.mifosplatform.infrastructure.core.serialization.CommandSerializer;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.portfolio.client.command.ClientIdentifierCommand;
 import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.client.data.ClientIdentifierData;
 import org.mifosplatform.portfolio.client.exception.DuplicateClientIdentifierException;
+import org.mifosplatform.portfolio.client.serialization.ClientIdentifierCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -50,26 +48,24 @@ public class ClientIdentifiersApiResource {
     private final PlatformSecurityContext context;
     private final ClientReadPlatformService clientReadPlatformService;
     private final CodeValueReadPlatformService codeValueReadPlatformService;
+    private final ClientIdentifierCommandFromApiJsonDeserializer commandFromApiJsonDeserializer;
     private final DefaultToApiJsonSerializer<ClientIdentifierData> toApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
-    private final PortfolioApiDataConversionService apiDataConversionService;
-    private final CommandSerializer commandSerializerService;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @Autowired
     public ClientIdentifiersApiResource(final PlatformSecurityContext context, final ClientReadPlatformService readPlatformService,
             final CodeValueReadPlatformService codeValueReadPlatformService,
+            final ClientIdentifierCommandFromApiJsonDeserializer commandFromApiJsonDeserializer,
             final DefaultToApiJsonSerializer<ClientIdentifierData> toApiJsonSerializer,
-            final ApiRequestParameterHelper apiRequestParameterHelper, final PortfolioApiDataConversionService apiDataConversionService,
-            final CommandSerializer commandSerializerService,
+            final ApiRequestParameterHelper apiRequestParameterHelper,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
         this.context = context;
         this.clientReadPlatformService = readPlatformService;
         this.codeValueReadPlatformService = codeValueReadPlatformService;
+        this.commandFromApiJsonDeserializer = commandFromApiJsonDeserializer;
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.apiDataConversionService = apiDataConversionService;
-        this.commandSerializerService = commandSerializerService;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
     }
 
@@ -111,9 +107,8 @@ public class ClientIdentifiersApiResource {
                     "CREATE_CLIENTIDENTIFIER");
             context.authenticatedUser().validateHasPermissionTo("CREATE_CLIENTIDENTIFIER", allowedPermissions);
 
-            final ClientIdentifierCommand command = this.apiDataConversionService.convertApiRequestJsonToClientIdentifierCommand(null,
-                    clientId, apiRequestBodyAsJson);
-            final String commandSerializedAsJson = this.commandSerializerService.serializeCommandToJson(command);
+            final String commandSerializedAsJson = this.commandFromApiJsonDeserializer.serializedCommandJsonFromApiJsonWithSubResource(
+                    apiRequestBodyAsJson, clientId);
 
             final String resourceUrl = "clients/" + clientId + "/identifiers";
             final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE", resourceUrl, null,
@@ -165,9 +160,8 @@ public class ClientIdentifiersApiResource {
                     "UPDATE_CLIENTIDENTIFIER");
             context.authenticatedUser().validateHasPermissionTo("UPDATE_CLIENTIDENTIFIER", allowedPermissions);
 
-            final ClientIdentifierCommand command = this.apiDataConversionService.convertApiRequestJsonToClientIdentifierCommand(
-                    clientIdentifierId, clientId, apiRequestBodyAsJson);
-            final String commandSerializedAsJson = this.commandSerializerService.serializeCommandToJson(command);
+            final String commandSerializedAsJson = this.commandFromApiJsonDeserializer.serializedCommandJsonFromApiJsonWithSubResource(
+                    clientIdentifierId, apiRequestBodyAsJson, clientId);
 
             final String resourceUrl = "clients/" + clientId + "/identifiers";
             final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", resourceUrl,
