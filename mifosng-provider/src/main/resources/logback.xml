@@ -18,6 +18,7 @@
   
   
   <logger name="org.mifosng.platform" level="debug" />
+  <logger name="org.mifosplatform.infrastructure.security.filter" level="info" />
   <logger name="org.mifosplatform" level="debug" />
   <logger name="org.springframework.web" level="info" />
   <logger name="org.springframework.beans" level="info" />

@@ -64,7 +64,7 @@ public class GenericDataServiceImpl implements GenericDataService {
         }
 
         long elapsed = System.currentTimeMillis() - startTime;
-        logger.info("Elapsed Time: " + elapsed + "    SQL: " + sql);
+        //logger.info("Elapsed Time: " + elapsed + "    SQL: " + sql);
         return crs;
     }
 
@@ -85,7 +85,7 @@ public class GenericDataServiceImpl implements GenericDataService {
         }
 
         long elapsed = System.currentTimeMillis() - startTime;
-        logger.info("Elapsed Time FOR UPDATE: " + elapsed + "    SQL: " + sql);
+        //logger.info("Elapsed Time FOR UPDATE: " + elapsed + "    SQL: " + sql);
     }
 
     @Override
@@ -165,14 +165,14 @@ public class GenericDataServiceImpl implements GenericDataService {
         writer.append("[");
 
         List<ResultsetColumnHeader> columnHeaders = grs.getColumnHeaders();
-        logger.info("NO. of Columns: " + columnHeaders.size());
+        //logger.info("NO. of Columns: " + columnHeaders.size());
 
         List<ResultsetDataRow> data = grs.getData();
         List<String> row;
         Integer rSize;
         String currColType;
         String currVal;
-        logger.info("NO. of Rows: " + data.size());
+        //logger.info("NO. of Rows: " + data.size());
         for (int i = 0; i < data.size(); i++) {
             writer.append("\n{");
 
@@ -212,7 +212,7 @@ public class GenericDataServiceImpl implements GenericDataService {
     }
 
     private void dbClose(Statement db_statement, Connection db_connection) {
-        logger.debug("dbClose");
+        //logger.debug("dbClose");
         try {
             if (db_statement != null) {
                 db_statement.close();

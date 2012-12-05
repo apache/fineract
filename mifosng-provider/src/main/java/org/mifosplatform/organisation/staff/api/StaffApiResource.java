@@ -155,7 +155,7 @@ public class StaffApiResource {
         if (StringUtils.isNotBlank(extraCriteria)) {
             extraCriteria = extraCriteria.substring(4);
         }
-        logger.debug("extraCriteria; " + extraCriteria);
+        //logger.debug("extraCriteria; " + extraCriteria);
 
         return extraCriteria;
     }

@@ -3,15 +3,20 @@ package org.mifosplatform.commands.service;
 import org.mifosplatform.infrastructure.core.api.PortfolioApiDataConversionService;
 import org.mifosplatform.infrastructure.core.serialization.CommandSerializer;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.mifosplatform.infrastructure.dataqueries.service.ReadWriteNonCoreDataServiceImpl;
 import org.mifosplatform.portfolio.client.command.ClientCommand;
 import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ChangeDetectionServiceJdbc implements ChangeDetectionService {
 
+    private final static Logger logger = LoggerFactory.getLogger(ChangeDetectionServiceJdbc.class);
+    
     private final PortfolioApiDataConversionService apiDataConversionService;
     private final ClientReadPlatformService clientReadPlatformService;
     private final CommandSerializer commandSerializerService;
@@ -29,7 +34,7 @@ public class ChangeDetectionServiceJdbc implements ChangeDetectionService {
 
     @Override
     public String detectChangesOnUpdate(final String resourceName, final Long resourceId, final String commandSerializedAsJson) {
-
+logger.info(resourceName + ": ID: " + resourceId + "  JSON: " + commandSerializedAsJson);
         String changesOnlyJson = "";
 
         if ("clients".equalsIgnoreCase(resourceName)) {

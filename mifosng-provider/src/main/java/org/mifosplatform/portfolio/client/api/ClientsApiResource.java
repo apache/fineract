@@ -158,7 +158,7 @@ public class ClientsApiResource {
             extraCriteria = extraCriteria.substring(4);
         }
 
-        logger.info("extraCriteria; " + extraCriteria);
+        //logger.info("extraCriteria; " + extraCriteria);
 
         return extraCriteria;
     }
