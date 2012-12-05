@@ -77,7 +77,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         }
 
         long elapsed = System.currentTimeMillis() - startTime;
-        logger.info("FINISHING retrieveDatatableNames:      Elapsed Time: " + elapsed);
+        //logger.info("FINISHING retrieveDatatableNames:      Elapsed Time: " + elapsed);
 
         return datatables;
     }
@@ -116,8 +116,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         genericDataService.updateSQL(sql, "SQL: " + sql);
 
         long elapsed = System.currentTimeMillis() - startTime;
-        logger.info("FINISHING registerDatatable:      Elapsed Time: " + elapsed + "       - datatable: " + datatable
-                + "  application table: " + appTable);
+        //logger.info("FINISHING registerDatatable:      Elapsed Time: " + elapsed + "       - datatable: " + datatable
+        //        + "  application table: " + appTable);
     }
 
     @Override
@@ -140,7 +140,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         genericDataService.updateSQL(sql, "SQL: " + sql);
 
         long elapsed = System.currentTimeMillis() - startTime;
-        logger.info("FINISHING deregisterDatatable:      Elapsed Time: " + elapsed + "       - datatable: " + datatable);
+        //logger.info("FINISHING deregisterDatatable:      Elapsed Time: " + elapsed + "       - datatable: " + datatable);
     }
 
     @Override
@@ -156,8 +156,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         genericDataService.updateSQL(sql, "SQL: " + sql);
 
         long elapsed = System.currentTimeMillis() - startTime;
-        logger.info("FINISHING newDatatableEntry:      Elapsed Time: " + elapsed + "       - datatable: " + datatable + "  id: "
-                + appTableId);
+        //logger.info("FINISHING newDatatableEntry:      Elapsed Time: " + elapsed + "       - datatable: " + datatable + "  id: "
+        //        + appTableId);
 
     }
 
@@ -182,8 +182,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             logger.info("No Changes");
 
         long elapsed = System.currentTimeMillis() - startTime;
-        logger.info("FINISHING updateDatatableEntryOnetoOne:      Elapsed Time: " + elapsed + "       - datatable: " + datatable + fkName
-                + ": " + appTableId);
+        //logger.info("FINISHING updateDatatableEntryOnetoOne:      Elapsed Time: " + elapsed + "       - datatable: " + datatable + fkName
+        //        + ": " + appTableId);
 
     }
 
@@ -203,8 +203,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             logger.info("No Changes");
 
         long elapsed = System.currentTimeMillis() - startTime;
-        logger.info("FINISHING updateDatatableEntryOnetoOne:      Elapsed Time: " + elapsed + "       - datatable: " + datatable + "  id: "
-                + datatableId);
+        //logger.info("FINISHING updateDatatableEntryOnetoOne:      Elapsed Time: " + elapsed + "       - datatable: " + datatable + "  id: "
+        //        + datatableId);
     }
 
     @Override
@@ -218,8 +218,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         genericDataService.updateSQL(sql, "SQL: " + sql);
 
         long elapsed = System.currentTimeMillis() - startTime;
-        logger.info("FINISHING deleteDatatableEntries:      Elapsed Time: " + elapsed + "       - datatable: " + datatable
-                + "  App Table Id: " + appTableId);
+        //logger.info("FINISHING deleteDatatableEntries:      Elapsed Time: " + elapsed + "       - datatable: " + datatable
+        //        + "  App Table Id: " + appTableId);
 
     }
 
@@ -234,8 +234,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         genericDataService.updateSQL(sql, "SQL: " + sql);
 
         long elapsed = System.currentTimeMillis() - startTime;
-        logger.info("FINISHING deleteDatatableEntry:      Elapsed Time: " + elapsed + "       - datatable: " + datatable
-                + "  App Table Id: " + appTableId + "   Data Table Id: " + datatableId);
+        //logger.info("FINISHING deleteDatatableEntry:      Elapsed Time: " + elapsed + "       - datatable: " + datatable
+        //        + "  App Table Id: " + appTableId + "   Data Table Id: " + datatableId);
 
     }
 
@@ -263,7 +263,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         List<ResultsetDataRow> result = fillDatatableResultSetDataRows(sql);
 
         long elapsed = System.currentTimeMillis() - startTime;
-        logger.info("FINISHING DATATABLE: " + datatable + "     Elapsed Time: " + elapsed + "    SQL: " + sql);
+        //logger.info("FINISHING DATATABLE: " + datatable + "     Elapsed Time: " + elapsed + "    SQL: " + sql);
 
         return new GenericResultsetData(columnHeaders, result);
 
