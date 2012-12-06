@@ -22,7 +22,6 @@ import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSeriali
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.useradministration.data.PermissionUsageData;
-import org.mifosplatform.useradministration.serialization.PermissionsCommandFromApiJsonDeserializer;
 import org.mifosplatform.useradministration.service.PermissionReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -39,20 +38,17 @@ public class PermissionsApiResource {
 
     private final PlatformSecurityContext context;
     private final PermissionReadPlatformService permissionReadPlatformService;
-    private final PermissionsCommandFromApiJsonDeserializer fromApiJsonDeserializer;
     private final DefaultToApiJsonSerializer<PermissionUsageData> toApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @Autowired
     public PermissionsApiResource(final PlatformSecurityContext context, final PermissionReadPlatformService readPlatformService,
-            final PermissionsCommandFromApiJsonDeserializer fromApiJsonDeserializer,
             final DefaultToApiJsonSerializer<PermissionUsageData> toApiJsonSerializer,
             final ApiRequestParameterHelper apiRequestParameterHelper,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
         this.context = context;
         this.permissionReadPlatformService = readPlatformService;
-        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
@@ -85,10 +81,8 @@ public class PermissionsApiResource {
         final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "USER_ADMINISTRATION_SUPER_USER", "UPDATE_PERMISSION");
         context.authenticatedUser().validateHasPermissionTo("UPDATE_PERMISSION", allowedPermissions);
 
-        final String commandSerializedAsJson = this.fromApiJsonDeserializer.serializedCommandJsonFromApiJson(apiRequestBodyAsJson);
-
         final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "permissions", null,
-                commandSerializedAsJson);
+                apiRequestBodyAsJson);
 
         return this.toApiJsonSerializer.serialize(result);
     }

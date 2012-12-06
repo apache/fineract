@@ -1,7 +1,8 @@
 package org.mifosplatform.useradministration.service;
 
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 import org.mifosplatform.useradministration.command.RoleCommand;
-import org.mifosplatform.useradministration.command.RolePermissionCommand;
 
 public interface RoleWritePlatformService {
 
@@ -9,5 +10,5 @@ public interface RoleWritePlatformService {
 
     Long updateRole(RoleCommand command);
 
-    Long updateRolePermissions(RolePermissionCommand command);
+    EntityIdentifier updateRolePermissions(Long roleId, JsonCommand command);
 }

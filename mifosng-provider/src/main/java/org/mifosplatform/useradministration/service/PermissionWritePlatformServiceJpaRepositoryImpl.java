@@ -1,13 +1,17 @@
 package org.mifosplatform.useradministration.service;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.useradministration.command.PermissionsCommand;
 import org.mifosplatform.useradministration.domain.Permission;
 import org.mifosplatform.useradministration.domain.PermissionRepository;
 import org.mifosplatform.useradministration.exception.PermissionNotFoundException;
+import org.mifosplatform.useradministration.serialization.PermissionsCommandFromApiJsonDeserializer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,39 +21,52 @@ public class PermissionWritePlatformServiceJpaRepositoryImpl implements Permissi
 
     private final PlatformSecurityContext context;
     private final PermissionRepository permissionRepository;
+    private final PermissionsCommandFromApiJsonDeserializer fromApiJsonDeserializer;
 
     @Autowired
     public PermissionWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
-            final PermissionRepository permissionRepository) {
+            final PermissionRepository permissionRepository,
+            final PermissionsCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
         this.context = context;
         this.permissionRepository = permissionRepository;
+        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
     }
 
     @Transactional
     @Override
-    public void updateMakerCheckerPermissions(final PermissionsCommand command) {
+    public EntityIdentifier updateMakerCheckerPermissions(final JsonCommand command) {
         context.authenticatedUser();
 
         final Collection<Permission> allPermissions = this.permissionRepository.findAll();
+        
+        final PermissionsCommand permissionsCommand = this.fromApiJsonDeserializer.commandFromApiJson(command.json());
 
-        final Map<String, Boolean> commandPermissions = command.getPermissions();
+        final Map<String, Boolean> commandPermissions = permissionsCommand.getPermissions();
+        final Map<String, Object> changes = new HashMap<String, Object>();
+        final Map<String, Boolean> changedPermissions = new HashMap<String, Boolean>();
         for (final String permissionCode : commandPermissions.keySet()) {
 
-            final Permission permission = findPermissionByCode(allPermissions, permissionCode);
+            final Permission permission = findPermissionInCollectionByCode(allPermissions, permissionCode);
 
             if (permission.getCode().endsWith("_CHECKER") || permission.getCode().startsWith("READ_")
                     || permission.getGrouping().equalsIgnoreCase("special")) { throw new PermissionNotFoundException(permissionCode); }
 
             final boolean isSelected = commandPermissions.get(permissionCode).booleanValue();
-            permission.enableMakerChecker(isSelected);
-
-            this.permissionRepository.save(permission);
-            
-            // Typical rollback if maker-checker enabled not here - does it make sense to have a maker checker task for enabling maker-checker for other tasks?
+            boolean changed = permission.enableMakerChecker(isSelected);
+            if (changed) {
+                changedPermissions.put(permissionCode, isSelected);
+                this.permissionRepository.save(permission);
+            }
         }
+        
+        if (!changedPermissions.isEmpty()) {
+            changes.put("permissions", changedPermissions);
+        }
+
+        return EntityIdentifier.withChanges(null, changes);
     }
 
-    private Permission findPermissionByCode(Collection<Permission> allPermissions, String permissionCode) {
+    private Permission findPermissionInCollectionByCode(final Collection<Permission> allPermissions, final String permissionCode) {
 
         if (allPermissions != null) {
             for (Permission permission : allPermissions) {

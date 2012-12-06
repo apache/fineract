@@ -1,6 +1,5 @@
 package org.mifosplatform.useradministration.api;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -28,12 +27,10 @@ import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSeriali
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.useradministration.command.RoleCommand;
-import org.mifosplatform.useradministration.command.RolePermissionCommand;
 import org.mifosplatform.useradministration.data.PermissionUsageData;
 import org.mifosplatform.useradministration.data.RoleData;
 import org.mifosplatform.useradministration.data.RolePermissionsData;
 import org.mifosplatform.useradministration.serialization.RoleCommandFromApiJsonDeserializer;
-import org.mifosplatform.useradministration.serialization.RolePermissionsCommandFromApiJsonDeserializer;
 import org.mifosplatform.useradministration.service.PermissionReadPlatformService;
 import org.mifosplatform.useradministration.service.RoleReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,10 +59,8 @@ public class RolesApiResource {
     private final PlatformSecurityContext context;
     private final RoleReadPlatformService roleReadPlatformService;
     private final PermissionReadPlatformService permissionReadPlatformService;
-
     private final RoleCommandFromApiJsonDeserializer fromApiJsonDeserializer;
     private final DefaultToApiJsonSerializer<RoleData> toApiJsonSerializer;
-    private final RolePermissionsCommandFromApiJsonDeserializer permissionsfromApiJsonDeserializer;
     private final DefaultToApiJsonSerializer<RolePermissionsData> permissionsToApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandsReadPlatformService commandSourceReadPlatformService;
@@ -75,7 +70,6 @@ public class RolesApiResource {
     public RolesApiResource(final PlatformSecurityContext context, final RoleReadPlatformService readPlatformService,
             final PermissionReadPlatformService permissionReadPlatformService,
             final RoleCommandFromApiJsonDeserializer fromApiJsonDeserializer,
-            final RolePermissionsCommandFromApiJsonDeserializer permissionsfromApiJsonDeserializer,
             final DefaultToApiJsonSerializer<RoleData> toApiJsonSerializer,
             final DefaultToApiJsonSerializer<RolePermissionsData> permissionsToApiJsonSerializer,
             final ApiRequestParameterHelper apiRequestParameterHelper,
@@ -85,7 +79,6 @@ public class RolesApiResource {
         this.roleReadPlatformService = readPlatformService;
         this.permissionReadPlatformService = permissionReadPlatformService;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
-        this.permissionsfromApiJsonDeserializer = permissionsfromApiJsonDeserializer;
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.permissionsToApiJsonSerializer = permissionsToApiJsonSerializer;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
@@ -182,33 +175,9 @@ public class RolesApiResource {
         final RoleData role = this.roleReadPlatformService.retrieveRole(roleId);
         final Collection<PermissionUsageData> permissionUsageData = this.permissionReadPlatformService.retrieveAllRolePermissions(roleId);
         Collection<PermissionUsageData> currentChanges = null;
-        if (settings.isCommandIdPassed()) {
-            currentChanges = handleRequestToIntegrateProposedChangesFromCommand(roleId, settings.getCommandId());
-        }
 
         final RolePermissionsData permissionsData = role.toRolePermissionData(permissionUsageData, currentChanges);
         return this.permissionsToApiJsonSerializer.serialize(settings, permissionsData, PERMISSIONS_RESPONSE_DATA_PARAMETERS);
-    }
-
-    private Collection<PermissionUsageData> handleRequestToIntegrateProposedChangesFromCommand(final Long roleId, final Long commandId) {
-        final CommandSourceData entry = this.commandSourceReadPlatformService.retrieveById(commandId);
-        return assemblePermissionChanges(roleId, entry);
-    }
-
-    private Collection<PermissionUsageData> assemblePermissionChanges(final Long roleId, final CommandSourceData entry) {
-
-        final RolePermissionCommand changesOnly = this.permissionsfromApiJsonDeserializer.commandFromApiJson(roleId, entry.json());
-
-        // assemble map of string/booleans into PermissionUsageData
-        Collection<PermissionUsageData> proposedChanges = new ArrayList<PermissionUsageData>();
-        for (final String permissionCode : changesOnly.getPermissions().keySet()) {
-            final boolean isSelected = changesOnly.getPermissions().get(permissionCode).booleanValue();
-            final PermissionUsageData item = PermissionUsageData.from(permissionCode, isSelected);
-
-            proposedChanges.add(item);
-        }
-
-        return proposedChanges;
     }
 
     @PUT
@@ -220,11 +189,8 @@ public class RolesApiResource {
         final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "USER_ADMINISTRATION_SUPER_USER", "PERMISSIONS_ROLE");
         context.authenticatedUser().validateHasPermissionTo("PERMISSIONS_ROLE", allowedPermissions);
 
-        final String commandSerializedAsJson = this.permissionsfromApiJsonDeserializer
-                .serializedCommandJsonFromApiJson(apiRequestBodyAsJson);
-
         final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATEPERMISSIONS", "roles", roleId,
-                commandSerializedAsJson);
+                apiRequestBodyAsJson);
 
         return this.toApiJsonSerializer.serialize(result);
     }

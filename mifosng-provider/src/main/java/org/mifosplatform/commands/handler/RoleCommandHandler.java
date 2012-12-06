@@ -6,16 +6,20 @@ import java.util.List;
 import org.joda.time.LocalDate;
 import org.mifosplatform.commands.domain.CommandSource;
 import org.mifosplatform.commands.exception.UnsupportedCommandException;
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.serialization.ExcludeNothingWithPrettyPrintingOffJsonSerializerGoogleGson;
+import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.client.service.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
 import org.mifosplatform.useradministration.command.RoleCommand;
-import org.mifosplatform.useradministration.command.RolePermissionCommand;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.mifosplatform.useradministration.serialization.RoleCommandFromCommandJsonDeserializer;
-import org.mifosplatform.useradministration.serialization.RolePermissionsCommandFromCommandJsonDeserializer;
 import org.mifosplatform.useradministration.service.RoleWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.google.gson.JsonElement;
 
 @Service
 public class RoleCommandHandler implements CommandSourceHandler {
@@ -23,16 +27,19 @@ public class RoleCommandHandler implements CommandSourceHandler {
     private final PlatformSecurityContext context;
     private final RoleWritePlatformService writePlatformService;
     private final RoleCommandFromCommandJsonDeserializer commandFromCommandJsonDeserializer;
-    private final RolePermissionsCommandFromCommandJsonDeserializer permissionsCommandFromCommandJsonDeserializer;
-
+    private final FromJsonHelper fromApiJsonHelper;
+    private final ExcludeNothingWithPrettyPrintingOffJsonSerializerGoogleGson toApiJsonSerializer;
+    
     @Autowired
     public RoleCommandHandler(final PlatformSecurityContext context, 
             final RoleCommandFromCommandJsonDeserializer commandFromCommandJsonDeserializer,
-            final RolePermissionsCommandFromCommandJsonDeserializer permissionsCommandFromCommandJsonDeserializer,
+            final FromJsonHelper fromApiJsonHelper,
+            final ExcludeNothingWithPrettyPrintingOffJsonSerializerGoogleGson toApiJsonSerializer,
             final RoleWritePlatformService writePlatformService) {
         this.context = context;
         this.commandFromCommandJsonDeserializer = commandFromCommandJsonDeserializer;
-        this.permissionsCommandFromCommandJsonDeserializer = permissionsCommandFromCommandJsonDeserializer;
+        this.fromApiJsonHelper = fromApiJsonHelper;
+        this.toApiJsonSerializer = toApiJsonSerializer;
         this.writePlatformService = writePlatformService;
     }
 
@@ -72,10 +79,14 @@ public class RoleCommandHandler implements CommandSourceHandler {
             }
         } else if (commandSource.isUpdateRolePermissions()) {
             try {
-                final RolePermissionCommand command = this.permissionsCommandFromCommandJsonDeserializer.commandFromCommandJson(
-                        resourceId, commandSource.json());
-
-                newResourceId = this.writePlatformService.updateRolePermissions(command);
+                
+                final JsonElement parsedCommand = this.fromApiJsonHelper.parse(commandSource.json());
+                final JsonCommand command = JsonCommand.from(commandSource.json(), parsedCommand, this.fromApiJsonHelper);
+                
+                EntityIdentifier result = this.writePlatformService.updateRolePermissions(resourceId, command);
+                
+                final String jsonOfChangesOnly = toApiJsonSerializer.serialize(result.getChanges());
+                commandSourceResult.updateJsonTo(jsonOfChangesOnly);
 
                 commandSourceResult.markAsChecked(maker, asToday);
             } catch (RollbackTransactionAsCommandIsNotApprovedByCheckerException e) {
@@ -117,10 +128,14 @@ public class RoleCommandHandler implements CommandSourceHandler {
                     "PERMISSIONS_ROLE_CHECKER");
             context.authenticatedUser().validateHasPermissionTo("PERMISSIONS_ROLE_CHECKER", allowedPermissions);
 
-            final RolePermissionCommand command = this.permissionsCommandFromCommandJsonDeserializer.commandFromCommandJson(resourceId,
-                    commandSourceResult.json());
-
-            resourceId = this.writePlatformService.updateRolePermissions(command);
+            final JsonElement parsedCommand = this.fromApiJsonHelper.parse(commandSourceResult.json());
+            final JsonCommand command = JsonCommand.from(commandSourceResult.json(), parsedCommand, this.fromApiJsonHelper);
+            
+            EntityIdentifier result = this.writePlatformService.updateRolePermissions(resourceId, command);
+            
+            final String jsonOfChangesOnly = toApiJsonSerializer.serialize(result.getChanges());
+            commandSourceResult.updateJsonTo(jsonOfChangesOnly);
+            
             commandSourceResult.markAsChecked(checker, new LocalDate());
         } else if (commandSourceResult.isDelete()) { throw new UnsupportedCommandException(commandSourceResult.commandName()); }
 

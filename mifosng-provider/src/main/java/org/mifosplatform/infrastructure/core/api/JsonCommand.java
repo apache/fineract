@@ -1,10 +1,14 @@
 package org.mifosplatform.infrastructure.core.api;
 
+import java.lang.reflect.Type;
+import java.util.Map;
+
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 
 import com.google.gson.JsonElement;
+import com.google.gson.reflect.TypeToken;
 
 /**
  * Immutable representation of a command.
@@ -90,6 +94,16 @@ public final class JsonCommand {
 
     public String locale() {
         return stringValueOfParameterNamed("locale");
+    }
+    
+    public Map<String, Boolean> mapValueOfParameterNamed(final String parameterName) {
+        final Type typeOfMap = new TypeToken<Map<String, Boolean>>() {}.getType();
+        
+        if (parsedCommand.getAsJsonObject().has(parameterName)) {
+            parsedCommand.getAsJsonObject().get(parameterName);
+        }
+        
+        return this.fromApiJsonHelper.extractMap(typeOfMap, jsonCommand);
     }
 
     public boolean isChangeInLongParameterNamed(final String parameterName, final Long existingValue) {

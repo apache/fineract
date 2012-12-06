@@ -38,7 +38,7 @@ public class Role extends AbstractAuditableCustom<AppUser, Long> {
         this.name = name.trim();
         this.description = description.trim();
     }
-    
+
     public void update(final RoleCommand command) {
         if (command.isNameChanged()) {
             this.name = command.getName();
@@ -48,11 +48,11 @@ public class Role extends AbstractAuditableCustom<AppUser, Long> {
             this.description = command.getDescription();
         }
     }
-    
+
     public boolean addPermission(final Permission permission) {
         return this.permissions.add(permission);
     }
-    
+
     public boolean removePermission(final Permission permission) {
         return this.permissions.remove(permission);
     }
@@ -74,5 +74,16 @@ public class Role extends AbstractAuditableCustom<AppUser, Long> {
 
     public RoleData toData() {
         return new RoleData(this.getId(), this.name, this.description, null);
+    }
+
+    public boolean updatePermission(final Permission permission, final boolean isSelected) {
+        boolean changed = false;
+        if (isSelected) {
+            changed = addPermission(permission);
+        } else {
+            changed = removePermission(permission);
+        }
+
+        return changed;
     }
 }

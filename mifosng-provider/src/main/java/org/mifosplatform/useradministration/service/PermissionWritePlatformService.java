@@ -1,8 +1,9 @@
 package org.mifosplatform.useradministration.service;
 
-import org.mifosplatform.useradministration.command.PermissionsCommand;
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 
 public interface PermissionWritePlatformService {
 
-    void updateMakerCheckerPermissions(PermissionsCommand command);
+    EntityIdentifier updateMakerCheckerPermissions(JsonCommand command);
 }

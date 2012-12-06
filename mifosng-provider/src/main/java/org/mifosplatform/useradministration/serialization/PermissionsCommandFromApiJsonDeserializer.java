@@ -1,8 +1,14 @@
 package org.mifosplatform.useradministration.serialization;
 
 import java.lang.reflect.Type;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
+import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
+import org.mifosplatform.infrastructure.core.serialization.AbstractFromApiJsonDeserializer;
 import org.mifosplatform.infrastructure.core.serialization.CommandSerializer;
 import org.mifosplatform.infrastructure.core.serialization.FromApiJsonDeserializer;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
@@ -17,41 +23,29 @@ import com.google.gson.reflect.TypeToken;
  * {@link PermissionsCommand}'s.
  */
 @Component
-public final class PermissionsCommandFromApiJsonDeserializer implements FromApiJsonDeserializer<PermissionsCommand> {
+public final class PermissionsCommandFromApiJsonDeserializer extends AbstractFromApiJsonDeserializer<PermissionsCommand> {
 
+    /**
+     * The parameters supported for this command.
+     */
+    private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("permissions"));
     private final FromJsonHelper fromApiJsonHelper;
-    private final CommandSerializer commandSerializerService;
 
     @Autowired
     public PermissionsCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper,
             final CommandSerializer commandSerializerService) {
+        super(commandSerializerService);
         this.fromApiJsonHelper = fromApiJsonHelper;
-        this.commandSerializerService = commandSerializerService;
-    }
-
-    @Override
-    public PermissionsCommand commandFromApiJson(final String json) {
-        return commandFromApiJson(null, json);
     }
 
     @Override
     public PermissionsCommand commandFromApiJson(@SuppressWarnings("unused") final Long resourceId, final String json) {
-
-        final Type typeOfMap = new TypeToken<Map<String, Boolean>>() {}.getType();
-        final Map<String, Boolean> permissionsMap = fromApiJsonHelper.extractMap(typeOfMap, json);
-
-        return new PermissionsCommand(permissionsMap, false);
-    }
-
-    @Override
-    public String serializedCommandJsonFromApiJson(final String json) {
-        final PermissionsCommand command = commandFromApiJson(json);
-        return this.commandSerializerService.serializeCommandToJson(command);
-    }
-
-    @Override
-    public String serializedCommandJsonFromApiJson(final Long roleId, final String json) {
-        final PermissionsCommand command = commandFromApiJson(roleId, json);
-        return this.commandSerializerService.serializeCommandToJson(command);
+        
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
+        
+        return fromApiJsonHelper.fromJson(json, PermissionsCommand.class);
     }
 }

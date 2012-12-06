@@ -24,8 +24,8 @@ public class EntityIdentifier {
         return new EntityIdentifier(resourceId, makerCheckerId, null);
     }
 
-    public static EntityIdentifier withChanges(final Long resourceId, final Map<String, Object> changesOnly) {
-        return new EntityIdentifier(resourceId, null, changesOnly);
+    public static EntityIdentifier withChanges(final Long resourceId, final Map<String, Object> changes) {
+        return new EntityIdentifier(resourceId, null, changes);
     }
 
     public EntityIdentifier() {

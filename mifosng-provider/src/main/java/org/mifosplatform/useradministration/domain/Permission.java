@@ -51,7 +51,10 @@ public class Permission extends AbstractPersistable<Long> {
         return this.grouping;
     }
 
-    public void enableMakerChecker(final boolean canMakerChecker) {
+    public boolean enableMakerChecker(final boolean canMakerChecker) {
+        final boolean isUpdatedValueSame = (this.canMakerChecker == canMakerChecker);
         this.canMakerChecker = canMakerChecker;
+        
+        return !isUpdatedValueSame;
     }
 }
