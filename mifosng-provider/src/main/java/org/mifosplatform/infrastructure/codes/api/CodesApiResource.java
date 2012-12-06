@@ -20,7 +20,6 @@ import javax.ws.rs.core.UriInfo;
 
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.mifosplatform.infrastructure.codes.data.CodeData;
-import org.mifosplatform.infrastructure.codes.serialization.CodeCommandFromApiJsonDeserializer;
 import org.mifosplatform.infrastructure.codes.service.CodeReadPlatformService;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
@@ -44,19 +43,16 @@ public class CodesApiResource {
 
     private final PlatformSecurityContext context;
     private final CodeReadPlatformService readPlatformService;
-    private final CodeCommandFromApiJsonDeserializer fromApiJsonDeserializer;
     private final DefaultToApiJsonSerializer<CodeData> toApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @Autowired
     public CodesApiResource(final PlatformSecurityContext context, final CodeReadPlatformService readPlatformService,
-            final CodeCommandFromApiJsonDeserializer fromApiJsonDeserializer,
             final DefaultToApiJsonSerializer<CodeData> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
         this.context = context;
         this.readPlatformService = readPlatformService;
-        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
@@ -83,10 +79,8 @@ public class CodesApiResource {
         final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "CREATE_CODE");
         context.authenticatedUser().validateHasPermissionTo("CREATE_CODE", allowedPermissions);
 
-        final String commandSerializedAsJson = this.fromApiJsonDeserializer.serializedCommandJsonFromApiJson(apiRequestBodyAsJson);
-
         final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE", "codes", null,
-                commandSerializedAsJson);
+                apiRequestBodyAsJson);
 
         return this.toApiJsonSerializer.serialize(result);
     }
@@ -112,10 +106,8 @@ public class CodesApiResource {
         final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "UPDATE_CODE");
         context.authenticatedUser().validateHasPermissionTo("UPDATE_CODE", allowedPermissions);
 
-        final String commandSerializedAsJson = this.fromApiJsonDeserializer.serializedCommandJsonFromApiJson(codeId, apiRequestBodyAsJson);
-
         final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "codes", codeId,
-                commandSerializedAsJson);
+                apiRequestBodyAsJson);
 
         return this.toApiJsonSerializer.serialize(result);
     }

@@ -1,5 +1,7 @@
 package org.mifosplatform.infrastructure.codes.domain;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -12,8 +14,8 @@ import javax.persistence.UniqueConstraint;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
-import org.mifosplatform.infrastructure.codes.command.CodeCommand;
 import org.mifosplatform.infrastructure.codes.exception.SystemDefinedCodeCannotBeChangedException;
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
@@ -25,14 +27,15 @@ public class Code extends AbstractPersistable<Long> {
 
     @Column(name = "is_system_defined")
     private final boolean systemDefined;
-    
+
     @SuppressWarnings("unused")
     @LazyCollection(LazyCollectionOption.FALSE)
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "code", orphanRemoval = true)
     private Set<CodeValue> values;
 
-    public static Code createNew(final String codeName) {
-        return new Code(codeName);
+    public static Code fromJson(final JsonCommand command) {
+        final String name = command.stringValueOfParameterNamed("name");
+        return new Code(name);
     }
 
     protected Code() {
@@ -43,23 +46,28 @@ public class Code extends AbstractPersistable<Long> {
         this.name = name;
         this.systemDefined = false;
     }
-    
+
     public String name() {
         return this.name;
     }
-    
+
     public boolean isSystemDefined() {
         return this.systemDefined;
     }
 
-    public void update(final CodeCommand command) {
-        
-        if (systemDefined) {
-            throw new SystemDefinedCodeCannotBeChangedException();
+    public Map<String, Object> update(final JsonCommand command) {
+
+        if (systemDefined) { throw new SystemDefinedCodeCannotBeChangedException(); }
+
+        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(1);
+
+        final String firstnameParamName = "name";
+        if (command.isChangeInStringParameterNamed(firstnameParamName, this.name)) {
+            final String newValue = command.stringValueOfParameterNamed(firstnameParamName);
+            actualChanges.put(firstnameParamName, newValue);
+            this.name = StringUtils.defaultIfEmpty(newValue, null);
         }
         
-        if (command.isNameChanged()) {
-            this.name = StringUtils.defaultIfEmpty(command.getName(), null);
-        }
+        return actualChanges;
     }
 }

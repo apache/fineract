@@ -1,10 +1,14 @@
 package org.mifosplatform.infrastructure.codes.service;
 
+import java.util.Map;
+
 import org.mifosplatform.infrastructure.codes.command.CodeCommand;
 import org.mifosplatform.infrastructure.codes.domain.Code;
 import org.mifosplatform.infrastructure.codes.domain.CodeRepository;
 import org.mifosplatform.infrastructure.codes.exception.CodeNotFoundException;
 import org.mifosplatform.infrastructure.codes.exception.SystemDefinedCodeCannotBeChangedException;
+import org.mifosplatform.infrastructure.codes.serialization.CodeCommandFromApiJsonDeserializer;
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
@@ -24,27 +28,30 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
 
     private final PlatformSecurityContext context;
     private final CodeRepository codeRepository;
-
     private final ConfigurationDomainService configurationDomainService;
+    private final CodeCommandFromApiJsonDeserializer fromApiJsonDeserializer;
 
     @Autowired
     public CodeWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final CodeRepository codeRepository,
-            final ConfigurationDomainService configurationDomainService) {
+            final ConfigurationDomainService configurationDomainService,
+            final CodeCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
         this.context = context;
         this.codeRepository = codeRepository;
         this.configurationDomainService = configurationDomainService;
+        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
     }
 
     @Transactional
     @Override
-    public Long createCode(final CodeCommand command) {
+    public Long createCode(final JsonCommand command) {
 
         try {
             context.authenticatedUser();
-            command.validateForCreate();
+            
+            final CodeCommand codeCommand = this.fromApiJsonDeserializer.commandFromApiJson(command.json());
+            codeCommand.validateForCreate();
 
-            final Code code = Code.createNew(command.getName());
-
+            final Code code = Code.fromJson(command);
             this.codeRepository.save(code);
 
             if (this.configurationDomainService.isMakerCheckerEnabledForTask("CREATE_CODE") && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
@@ -57,47 +64,36 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
 
     @Transactional
     @Override
-    public Long updateCode(final CodeCommand command) {
+    public EntityIdentifier updateCode(final Long codeId, final JsonCommand command) {
 
         try {
             context.authenticatedUser();
-            command.validateForUpdate();
+            final CodeCommand codeCommand = this.fromApiJsonDeserializer.commandFromApiJson(command.json());
+            codeCommand.validateForUpdate();
 
-            final Code code = retrieveCodeBy(command.getId());
-            code.update(command);
+            final Code code = retrieveCodeBy(codeId);
+            Map<String, Object> changes = code.update(command);
 
-            this.codeRepository.save(code);
+            if (!changes.isEmpty()) {
+                this.codeRepository.save(code);
+            }
 
             if (this.configurationDomainService.isMakerCheckerEnabledForTask("UPDATE_CODE") && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
             
-            return code.getId();
+            return EntityIdentifier.withChanges(codeId, changes);
         } catch (DataIntegrityViolationException dve) {
             handleCodeDataIntegrityIssues(command, dve);
-            return Long.valueOf(-1);
+            return null;
         }
-    }
-
-    /*
-     * Guaranteed to throw an exception no matter what the data integrity issue
-     * is.
-     */
-    private void handleCodeDataIntegrityIssues(final CodeCommand command, final DataIntegrityViolationException dve) {
-        Throwable realCause = dve.getMostSpecificCause();
-        if (realCause.getMessage().contains("code_name_org")) { throw new PlatformDataIntegrityException("error.msg.code.duplicate.name",
-                "A code with name '" + command.getName() + "' already exists"); }
-
-        logger.error(dve.getMessage(), dve);
-        throw new PlatformDataIntegrityException("error.msg.cund.unknown.data.integrity.issue",
-                "Unknown data integrity issue with resource: " + realCause.getMessage());
     }
 
     @Transactional
     @Override
-    public EntityIdentifier deleteCode(final CodeCommand command) {
+    public EntityIdentifier deleteCode(final Long codeId, final JsonCommand command) {
 
         context.authenticatedUser();
 
-        final Code code = retrieveCodeBy(command.getId());
+        final Code code = retrieveCodeBy(codeId);
         if (code.isSystemDefined()) {
             throw new SystemDefinedCodeCannotBeChangedException();
         }
@@ -113,5 +109,21 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
         final Code code = this.codeRepository.findOne(codeId);
         if (code == null) { throw new CodeNotFoundException(codeId.toString()); }
         return code;
+    }
+    
+    /*
+     * Guaranteed to throw an exception no matter what the data integrity issue
+     * is.
+     */
+    private void handleCodeDataIntegrityIssues(final JsonCommand command, final DataIntegrityViolationException dve) {
+        Throwable realCause = dve.getMostSpecificCause();
+        if (realCause.getMessage().contains("code_name_org")) { 
+            final String name = command.stringValueOfParameterNamed("name");
+            throw new PlatformDataIntegrityException("error.msg.code.duplicate.name",
+                "A code with name '" + name + "' already exists"); }
+
+        logger.error(dve.getMessage(), dve);
+        throw new PlatformDataIntegrityException("error.msg.cund.unknown.data.integrity.issue",
+                "Unknown data integrity issue with resource: " + realCause.getMessage());
     }
 }

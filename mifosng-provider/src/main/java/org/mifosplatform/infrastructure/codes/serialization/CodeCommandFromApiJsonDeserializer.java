@@ -14,6 +14,7 @@ import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 
 /**
@@ -26,25 +27,24 @@ public final class CodeCommandFromApiJsonDeserializer extends AbstractFromApiJso
      * The parameters supported for this command.
      */
     private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("name"));
-
     private final FromJsonHelper fromApiJsonHelper;
-    private final CodeCommandFromCommandJsonDeserializer fromCommandJsonDeserializer;
 
     @Autowired
-    public CodeCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper,
-            final CodeCommandFromCommandJsonDeserializer fromCommandJsonDeserializer, final CommandSerializer commandSerializerService) {
+    public CodeCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper, final CommandSerializer commandSerializerService) {
         super(commandSerializerService);
         this.fromApiJsonHelper = fromApiJsonHelper;
-        this.fromCommandJsonDeserializer = fromCommandJsonDeserializer;
     }
 
     @Override
-    public CodeCommand commandFromApiJson(final Long codeId, final String json) {
+    public CodeCommand commandFromApiJson(@SuppressWarnings("unused") final Long codeId, final String json) {
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
 
         fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
 
-        return this.fromCommandJsonDeserializer.commandFromCommandJson(codeId, json);
+        final JsonElement element = fromApiJsonHelper.parse(json);
+        final String name = fromApiJsonHelper.extractStringNamed("name", element);
+
+        return new CodeCommand(name);
     }
 }

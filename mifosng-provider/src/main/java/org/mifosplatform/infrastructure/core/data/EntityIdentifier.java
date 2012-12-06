@@ -23,7 +23,7 @@ public class EntityIdentifier {
     public static EntityIdentifier makerChecker(final Long resourceId, final Long makerCheckerId) {
         return new EntityIdentifier(resourceId, makerCheckerId, null);
     }
-    
+
     public static EntityIdentifier withChanges(final Long resourceId, final Map<String, Object> changesOnly) {
         return new EntityIdentifier(resourceId, null, changesOnly);
     }
@@ -51,6 +51,10 @@ public class EntityIdentifier {
     }
 
     public Map<String, Object> getChanges() {
-        return this.changes;
+        Map<String, Object> checkIfEmpty = null;
+        if (!this.changes.isEmpty()) {
+            checkIfEmpty = this.changes;
+        }
+        return checkIfEmpty;
     }
 }

@@ -1,13 +1,13 @@
 package org.mifosplatform.infrastructure.codes.service;
 
-import org.mifosplatform.infrastructure.codes.command.CodeCommand;
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 
 public interface CodeWritePlatformService {
 
-    Long createCode(CodeCommand command);
+    Long createCode(JsonCommand command);
 
-    Long updateCode(CodeCommand command);
+    EntityIdentifier updateCode(Long codeId, JsonCommand command);
 
-    EntityIdentifier deleteCode(CodeCommand command);
+    EntityIdentifier deleteCode(Long codeId, JsonCommand command);
 }

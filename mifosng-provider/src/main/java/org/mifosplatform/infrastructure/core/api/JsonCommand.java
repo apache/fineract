@@ -7,7 +7,10 @@ import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import com.google.gson.JsonElement;
 
 /**
- * Represents JSON based command.
+ * Immutable representation of a command.
+ * 
+ * Wraps the provided JSON with convenience functions for extracting parameter
+ * values and checking for changes against an existing value.
  */
 public final class JsonCommand {
 
@@ -19,12 +22,14 @@ public final class JsonCommand {
     public static JsonCommand from(final String jsonCommand, final JsonElement parsedCommand, final FromJsonHelper fromApiJsonHelper) {
         return new JsonCommand(jsonCommand, parsedCommand, fromApiJsonHelper, false);
     }
-    
-    public static JsonCommand withMakerCheckerApproval(final String jsonCommand, final JsonElement parsedCommand, final FromJsonHelper fromApiJsonHelper) {
+
+    public static JsonCommand withMakerCheckerApproval(final String jsonCommand, final JsonElement parsedCommand,
+            final FromJsonHelper fromApiJsonHelper) {
         return new JsonCommand(jsonCommand, parsedCommand, fromApiJsonHelper, true);
     }
 
-    public JsonCommand(final String jsonCommand, final JsonElement parsedCommand, final FromJsonHelper fromApiJsonHelper, final boolean approvedByChecker) {
+    public JsonCommand(final String jsonCommand, final JsonElement parsedCommand, final FromJsonHelper fromApiJsonHelper,
+            final boolean approvedByChecker) {
         this.jsonCommand = jsonCommand;
         this.parsedCommand = parsedCommand;
         this.fromApiJsonHelper = fromApiJsonHelper;
@@ -38,7 +43,7 @@ public final class JsonCommand {
     public boolean isApprovedByChecker() {
         return this.approvedByChecker;
     }
-    
+
     private boolean differenceExists(LocalDate baseValue, LocalDate workingCopyValue) {
         boolean differenceExists = false;
 
@@ -62,7 +67,7 @@ public final class JsonCommand {
 
         return differenceExists;
     }
-    
+
     private boolean differenceExists(final Long baseValue, final Long workingCopyValue) {
         boolean differenceExists = false;
 
@@ -74,11 +79,11 @@ public final class JsonCommand {
 
         return differenceExists;
     }
-    
+
     private boolean parameterExists(final String parameterName) {
         return this.fromApiJsonHelper.parameterExists(parameterName, parsedCommand);
     }
-    
+
     public String dateFormat() {
         return stringValueOfParameterNamed("dateFormat");
     }
@@ -97,7 +102,7 @@ public final class JsonCommand {
     }
 
     public Long longValueOfParameterNamed(final String parameterName) {
-       return this.fromApiJsonHelper.extractLongNamed(parameterName, parsedCommand);
+        return this.fromApiJsonHelper.extractLongNamed(parameterName, parsedCommand);
     }
 
     public boolean isChangeInLocalDateParameterNamed(final String parameterName, final LocalDate existingValue) {
@@ -108,7 +113,7 @@ public final class JsonCommand {
         }
         return isChanged;
     }
-    
+
     public LocalDate localDateValueOfParameterNamed(final String parameterName) {
         return this.fromApiJsonHelper.extractLocalDateNamed(parameterName, parsedCommand);
     }
@@ -121,7 +126,7 @@ public final class JsonCommand {
         }
         return isChanged;
     }
-    
+
     public String stringValueOfParameterNamed(final String parameterName) {
         final String value = this.fromApiJsonHelper.extractStringNamed(parameterName, parsedCommand);
         return StringUtils.defaultIfEmpty(value, "");

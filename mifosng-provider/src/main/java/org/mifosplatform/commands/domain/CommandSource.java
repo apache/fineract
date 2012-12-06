@@ -92,6 +92,10 @@ public class CommandSource extends AbstractPersistable<Long> {
     public Long resourceId() {
         return this.resourceId;
     }
+    
+    public boolean hasJson() {
+        return StringUtils.isNotBlank(this.commandAsJson);
+    }
 
     public String json() {
         return this.commandAsJson;

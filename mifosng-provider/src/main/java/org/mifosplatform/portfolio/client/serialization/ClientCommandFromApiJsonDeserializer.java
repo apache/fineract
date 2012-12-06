@@ -46,16 +46,13 @@ public final class ClientCommandFromApiJsonDeserializer extends AbstractFromApiJ
 
         fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
 
-        final Set<String> parametersPassedInRequest = new HashSet<String>();
-
         final JsonElement element = fromApiJsonHelper.parse(json);
-        final Long officeId = fromApiJsonHelper.extractLongNamed("officeId", element, parametersPassedInRequest);
-        final String externalId = fromApiJsonHelper.extractStringNamed("externalId", element, parametersPassedInRequest);
-        final String firstname = fromApiJsonHelper.extractStringNamed("firstname", element, parametersPassedInRequest);
-        final String lastname = fromApiJsonHelper.extractStringNamed("lastname", element, parametersPassedInRequest);
-        final String clientOrBusinessName = fromApiJsonHelper
-                .extractStringNamed("clientOrBusinessName", element, parametersPassedInRequest);
-        final LocalDate joiningDate = fromApiJsonHelper.extractLocalDateNamed("joiningDate", element, parametersPassedInRequest);
+        final Long officeId = fromApiJsonHelper.extractLongNamed("officeId", element);
+        final String externalId = fromApiJsonHelper.extractStringNamed("externalId", element);
+        final String firstname = fromApiJsonHelper.extractStringNamed("firstname", element);
+        final String lastname = fromApiJsonHelper.extractStringNamed("lastname", element);
+        final String clientOrBusinessName = fromApiJsonHelper.extractStringNamed("clientOrBusinessName", element);
+        final LocalDate joiningDate = fromApiJsonHelper.extractLocalDateNamed("joiningDate", element);
 
         return new ClientCommand(externalId, firstname, lastname, clientOrBusinessName, officeId, joiningDate);
     }

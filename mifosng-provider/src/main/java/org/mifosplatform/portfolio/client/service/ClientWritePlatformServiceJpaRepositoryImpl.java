@@ -155,7 +155,9 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                 clientForUpdate.changeOffice(newOffice);
             }
 
-            this.clientRepository.save(clientForUpdate);
+            if (!changesOnly.isEmpty()) {
+                this.clientRepository.save(clientForUpdate);
+            }
 
             if (this.configurationDomainService.isMakerCheckerEnabledForTask("UPDATE_CLIENT") && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
 

@@ -5,27 +5,35 @@ import java.util.List;
 
 import org.joda.time.LocalDate;
 import org.mifosplatform.commands.domain.CommandSource;
-import org.mifosplatform.infrastructure.codes.command.CodeCommand;
-import org.mifosplatform.infrastructure.codes.serialization.CodeCommandFromCommandJsonDeserializer;
 import org.mifosplatform.infrastructure.codes.service.CodeWritePlatformService;
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.serialization.ExcludeNothingWithPrettyPrintingOffJsonSerializerGoogleGson;
+import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.client.service.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.google.gson.JsonElement;
+
 @Service
 public class CodeCommandHandler implements CommandSourceHandler {
 
     private final PlatformSecurityContext context;
-    private final CodeCommandFromCommandJsonDeserializer fromCommandJsonDeserializer;
+    private final FromJsonHelper fromApiJsonHelper;
+    private final ExcludeNothingWithPrettyPrintingOffJsonSerializerGoogleGson toApiJsonSerializer;
     private final CodeWritePlatformService writePlatformService;
 
     @Autowired
     public CodeCommandHandler(final PlatformSecurityContext context,
-            final CodeCommandFromCommandJsonDeserializer fromCommandJsonDeserializer, final CodeWritePlatformService writePlatformService) {
+            final FromJsonHelper fromApiJsonHelper,
+            final ExcludeNothingWithPrettyPrintingOffJsonSerializerGoogleGson toApiJsonSerializer,
+            final CodeWritePlatformService writePlatformService) {
         this.context = context;
-        this.fromCommandJsonDeserializer = fromCommandJsonDeserializer;
+        this.fromApiJsonHelper = fromApiJsonHelper;
+        this.toApiJsonSerializer = toApiJsonSerializer;
         this.writePlatformService = writePlatformService;
     }
 
@@ -36,8 +44,9 @@ public class CodeCommandHandler implements CommandSourceHandler {
         final LocalDate asToday = new LocalDate();
 
         final Long resourceId = commandSource.resourceId();
-        final CodeCommand command = this.fromCommandJsonDeserializer.commandFromCommandJson(resourceId, commandSource.json());
-
+        final JsonElement parsedCommand = this.fromApiJsonHelper.parse(commandSource.json());
+        final JsonCommand command = JsonCommand.from(commandSource.json(), parsedCommand, this.fromApiJsonHelper);
+        
         CommandSource commandSourceResult = commandSource.copy();
 
         if (commandSource.isCreate()) {
@@ -50,7 +59,10 @@ public class CodeCommandHandler implements CommandSourceHandler {
             }
         } else if (commandSource.isUpdate()) {
             try {
-                this.writePlatformService.updateCode(command);
+                EntityIdentifier result = this.writePlatformService.updateCode(resourceId, command);
+                
+                final String jsonOfChangesOnly = toApiJsonSerializer.serialize(result.getChanges());
+                commandSourceResult.updateJsonTo(jsonOfChangesOnly);
 
                 commandSourceResult.markAsChecked(maker, asToday);
             } catch (RollbackTransactionAsCommandIsNotApprovedByCheckerException e) {
@@ -58,7 +70,7 @@ public class CodeCommandHandler implements CommandSourceHandler {
             }
         } else if (commandSource.isDelete()) {
             try {
-                this.writePlatformService.deleteCode(command);
+                this.writePlatformService.deleteCode(resourceId, command);
                 commandSourceResult.markAsChecked(maker, asToday);
             } catch (RollbackTransactionAsCommandIsNotApprovedByCheckerException e) {
                 // swallow this rollback transaction by design
@@ -74,7 +86,8 @@ public class CodeCommandHandler implements CommandSourceHandler {
         final AppUser checker = context.authenticatedUser();
 
         Long resourceId = commandSourceResult.resourceId();
-        final CodeCommand command = this.fromCommandJsonDeserializer.commandFromCommandJson(resourceId, commandSourceResult.json(), true);
+        final JsonElement parsedCommand = this.fromApiJsonHelper.parse(commandSourceResult.json());
+        final JsonCommand command = JsonCommand.withMakerCheckerApproval(commandSourceResult.json(), parsedCommand, this.fromApiJsonHelper);
 
         if (commandSourceResult.isCreate()) {
             final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "CREATE_CODE_MAKER");
@@ -87,13 +100,17 @@ public class CodeCommandHandler implements CommandSourceHandler {
             final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "UPDATE_CODE_MAKER");
             context.authenticatedUser().validateHasPermissionTo("UPDATE_CODE_MAKER", allowedPermissions);
 
-            this.writePlatformService.updateCode(command);
+            EntityIdentifier result = this.writePlatformService.updateCode(resourceId, command);
+            
+            final String jsonOfChangesOnly = toApiJsonSerializer.serialize(result.getChanges());
+            commandSourceResult.updateJsonTo(jsonOfChangesOnly);
+            
             commandSourceResult.markAsChecked(checker, new LocalDate());
         } else if (commandSourceResult.isDelete()) {
             final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "DELETE_CODE_MAKER");
             context.authenticatedUser().validateHasPermissionTo("DELETE_CODE_MAKER", allowedPermissions);
 
-            this.writePlatformService.deleteCode(command);
+            this.writePlatformService.deleteCode(resourceId, command);
             commandSourceResult.markAsChecked(checker, new LocalDate());
         }
 

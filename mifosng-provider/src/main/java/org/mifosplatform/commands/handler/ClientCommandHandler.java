@@ -46,11 +46,9 @@ public class ClientCommandHandler implements CommandSourceHandler {
         final JsonCommand command = JsonCommand.from(commandSource.json(), parsedCommand, this.fromApiJsonHelper);
 
         CommandSource commandSourceResult = commandSource.copy();
-        Long newResourceId = null;
-
         if (commandSource.isCreate()) {
             try {
-                newResourceId = this.clientWritePlatformService.createClient(command);
+                Long newResourceId = this.clientWritePlatformService.createClient(command);
                 commandSourceResult.markAsChecked(maker, asToday);
                 commandSourceResult.updateResourceId(newResourceId);
             } catch (RollbackTransactionAsCommandIsNotApprovedByCheckerException e) {
@@ -59,8 +57,6 @@ public class ClientCommandHandler implements CommandSourceHandler {
         } else if (commandSource.isUpdate()) {
             try {
                 EntityIdentifier result = this.clientWritePlatformService.updateClientDetails(commandSource.resourceId(), command);
-                newResourceId = result.getEntityId();
-                
                 final String jsonOfChangesOnly = toApiJsonSerializer.serialize(result.getChanges());
                 commandSourceResult.updateJsonTo(jsonOfChangesOnly);
 
@@ -70,8 +66,7 @@ public class ClientCommandHandler implements CommandSourceHandler {
             }
         } else if (commandSource.isDelete()) {
             try {
-                EntityIdentifier result = this.clientWritePlatformService.deleteClient(commandSource.resourceId(), command);
-                newResourceId = result.getEntityId();
+                this.clientWritePlatformService.deleteClient(commandSource.resourceId(), command);
                 commandSourceResult.markAsChecked(maker, asToday);
             } catch (RollbackTransactionAsCommandIsNotApprovedByCheckerException e) {
                 // swallow this rollback transaction by design
@@ -102,7 +97,11 @@ public class ClientCommandHandler implements CommandSourceHandler {
                     "UPDATE_CLIENT_CHECKER");
             context.authenticatedUser().validateHasPermissionTo("UPDATE_CLIENT_CHECKER", allowedPermissions);
 
-            this.clientWritePlatformService.updateClientDetails(commandSourceResult.resourceId(), command);
+            EntityIdentifier result = this.clientWritePlatformService.updateClientDetails(commandSourceResult.resourceId(), command);
+            
+            final String jsonOfChangesOnly = toApiJsonSerializer.serialize(result.getChanges());
+            commandSourceResult.updateJsonTo(jsonOfChangesOnly);
+            
             commandSourceResult.markAsChecked(checker, new LocalDate());
         } else if (commandSourceResult.isDelete()) {
             final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "PORTFOLIO_MANAGEMENT_SUPER_USER",
