@@ -26,7 +26,7 @@ import org.mifosplatform.organisation.staff.command.BulkTransferLoanOfficerComma
 import org.mifosplatform.portfolio.client.command.ClientCommand;
 import org.mifosplatform.portfolio.client.command.NoteCommand;
 import org.mifosplatform.portfolio.client.data.ClientData;
-import org.mifosplatform.portfolio.client.serialization.ClientCommandFromCommandJsonDeserializer;
+import org.mifosplatform.portfolio.client.serialization.ClientCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.group.command.GroupCommand;
 import org.mifosplatform.portfolio.loanaccount.command.AdjustLoanTransactionCommand;
 import org.mifosplatform.portfolio.loanaccount.command.LoanApplicationCommand;
@@ -61,11 +61,11 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
      */
     private final Gson gsonConverter;
 
-    private final ClientCommandFromCommandJsonDeserializer commandFromCommandJsonDeserializer;
+    private final ClientCommandFromApiJsonDeserializer clientCommandFromApiJsonDeserializer;
 
     @Autowired
-    public PortfolioApiDataConversionServiceImpl(final ClientCommandFromCommandJsonDeserializer commandFromCommandJsonDeserializer) {
-        this.commandFromCommandJsonDeserializer = commandFromCommandJsonDeserializer;
+    public PortfolioApiDataConversionServiceImpl(final ClientCommandFromApiJsonDeserializer clientCommandFromApiJsonDeserializer) {
+        this.clientCommandFromApiJsonDeserializer = clientCommandFromApiJsonDeserializer;
         this.gsonConverter = new Gson();
     }
 
@@ -132,124 +132,9 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
     }
 
     @Override
-    public ClientCommand detectChanges(final Long resourceIdentifier, final String baseJson, final String workingJson) {
-
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        final Map<String, Object> workingVersion = gsonConverter.fromJson(workingJson, typeOfMap);
-
-        final Set<String> workingParameters = workingVersion.keySet();
-
-        final JsonParser parser = new JsonParser();
-        final JsonElement baseElement = parser.parse(baseJson);
-        final JsonElement workingElement = parser.parse(workingJson);
-
-        final JsonParserHelper helper = new JsonParserHelper();
-        final Set<String> ignoreParameters = new HashSet<String>();
-        final Set<String> parametersPassedInRequest = new HashSet<String>();
-
-        Long officeId = null;
-        String externalId = null;
-        String firstname = null;
-        String lastname = null;
-        String clientOrBusinessName = null;
-        LocalDate joiningDate = null;
-
-        for (final String parameter : workingParameters) {
-
-            final String officeIdParameterName = "officeId";
-            if (officeIdParameterName.equalsIgnoreCase(parameter)) {
-                final Long baseOfficeId = helper.extractLongNamed(officeIdParameterName, baseElement, ignoreParameters);
-                final Long workingOfficeId = helper.extractLongNamed(officeIdParameterName, workingElement, ignoreParameters);
-                if (!workingOfficeId.equals(baseOfficeId)) {
-                    officeId = workingOfficeId;
-                    parametersPassedInRequest.add(officeIdParameterName);
-                }
-            }
-
-            final String externalIdParamName = "externalId";
-            if (externalIdParamName.equalsIgnoreCase(parameter)) {
-                final String baseExternalId = helper.extractStringNamed(externalIdParamName, baseElement, ignoreParameters);
-                final String workingExternalId = helper.extractStringNamed(externalIdParamName, workingElement, ignoreParameters);
-                if (differenceExists(baseExternalId, workingExternalId)) {
-                    externalId = workingExternalId;
-                    parametersPassedInRequest.add(externalIdParamName);
-                }
-            }
-
-            final String firstnameParamName = "firstname";
-            if (firstnameParamName.equalsIgnoreCase(parameter)) {
-                final String baseValue = helper.extractStringNamed(firstnameParamName, baseElement, ignoreParameters);
-                final String workingCopyValue = helper.extractStringNamed(firstnameParamName, workingElement, ignoreParameters);
-                if (differenceExists(baseValue, workingCopyValue)) {
-                    firstname = workingCopyValue;
-                    parametersPassedInRequest.add(firstnameParamName);
-                }
-            }
-
-            final String lastnameParamName = "lastname";
-            if (lastnameParamName.equalsIgnoreCase(parameter)) {
-                final String baseValue = helper.extractStringNamed(lastnameParamName, baseElement, ignoreParameters);
-                final String workingCopyValue = helper.extractStringNamed(lastnameParamName, workingElement, ignoreParameters);
-                if (differenceExists(baseValue, workingCopyValue)) {
-                    lastname = workingCopyValue;
-                    parametersPassedInRequest.add(lastnameParamName);
-                }
-            }
-
-            final String clientOrBusinessNameParamName = "clientOrBusinessName";
-            if (clientOrBusinessNameParamName.equalsIgnoreCase(parameter)) {
-                final String baseValue = helper.extractStringNamed(clientOrBusinessNameParamName, baseElement, ignoreParameters);
-                final String workingCopyValue = helper.extractStringNamed(clientOrBusinessNameParamName, workingElement, ignoreParameters);
-                if (differenceExists(baseValue, workingCopyValue)) {
-                    clientOrBusinessName = workingCopyValue;
-                    parametersPassedInRequest.add(clientOrBusinessNameParamName);
-                }
-            }
-
-            final String joinedDateParamName = "joinedDate";
-            if (joinedDateParamName.equalsIgnoreCase(parameter)) {
-                final LocalDate baseValue = helper.extractLocalDateAsArrayNamed(joinedDateParamName, baseElement, ignoreParameters);
-                final LocalDate workingCopyValue = helper.extractLocalDateAsArrayNamed(joinedDateParamName, workingElement,
-                        ignoreParameters);
-                if (differenceExists(baseValue, workingCopyValue)) {
-                    joiningDate = workingCopyValue;
-                    parametersPassedInRequest.add(joinedDateParamName);
-                }
-            }
-        }
-
-        return new ClientCommand(parametersPassedInRequest, resourceIdentifier, externalId, firstname, lastname, clientOrBusinessName,
-                officeId, joiningDate, false);
-    }
-
-    private boolean differenceExists(LocalDate baseValue, LocalDate workingCopyValue) {
-        boolean differenceExists = false;
-
-        if (baseValue != null) {
-            differenceExists = !baseValue.equals(workingCopyValue);
-        } else {
-            differenceExists = workingCopyValue != null;
-        }
-
-        return differenceExists;
-    }
-
-    private boolean differenceExists(final String baseValue, final String workingCopyValue) {
-        boolean differenceExists = false;
-
-        if (StringUtils.isNotBlank(baseValue)) {
-            differenceExists = !baseValue.equals(workingCopyValue);
-        } else {
-            differenceExists = StringUtils.isNotBlank(workingCopyValue);
-        }
-
-        return differenceExists;
-    }
-
-    @Override
     public ClientData convertInternalJsonFormatToClientDataChange(final Long resourceIdentifier, final String json) {
 
-        final ClientCommand command = this.commandFromCommandJsonDeserializer.commandFromCommandJson(resourceIdentifier, json);
+        final ClientCommand command = this.clientCommandFromApiJsonDeserializer.commandFromApiJson(resourceIdentifier, json);
 
         return ClientData.dataChangeInstance(resourceIdentifier, command.getOfficeId(), command.getExternalId(), command.getFirstname(),
                 command.getLastname(), command.getClientOrBusinessName(), command.getJoiningDate());

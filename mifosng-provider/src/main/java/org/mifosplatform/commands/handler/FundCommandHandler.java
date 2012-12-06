@@ -6,7 +6,6 @@ import java.util.List;
 import org.joda.time.LocalDate;
 import org.mifosplatform.commands.domain.CommandSource;
 import org.mifosplatform.commands.exception.UnsupportedCommandException;
-import org.mifosplatform.commands.service.ChangeDetectionService;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.client.service.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
 import org.mifosplatform.portfolio.fund.command.FundCommand;
@@ -20,15 +19,13 @@ import org.springframework.stereotype.Service;
 public class FundCommandHandler implements CommandSourceHandler {
 
     private final PlatformSecurityContext context;
-    private final ChangeDetectionService changeDetectionService;
     private final FundCommandFromCommandJsonDeserializer fromCommandJsonDeserializer;
     private final FundWritePlatformService writePlatformService;
 
     @Autowired
-    public FundCommandHandler(final PlatformSecurityContext context, final ChangeDetectionService changeDetectionService,
+    public FundCommandHandler(final PlatformSecurityContext context,
             final FundCommandFromCommandJsonDeserializer fromCommandJsonDeserializer, final FundWritePlatformService writePlatformService) {
         this.context = context;
-        this.changeDetectionService = changeDetectionService;
         this.fromCommandJsonDeserializer = fromCommandJsonDeserializer;
         this.writePlatformService = writePlatformService;
     }
@@ -56,13 +53,7 @@ public class FundCommandHandler implements CommandSourceHandler {
             }
         } else if (commandSource.isUpdate()) {
             try {
-                final String jsonOfChangesOnly = this.changeDetectionService.detectChangesOnUpdate(commandSource.resourceName(),
-                        commandSource.resourceId(), commandSource.json());
-                commandSourceResult.updateJsonTo(jsonOfChangesOnly);
-
-                final FundCommand changesOnly = this.fromCommandJsonDeserializer.commandFromCommandJson(resourceId, jsonOfChangesOnly);
-
-                this.writePlatformService.updateFund(changesOnly);
+                this.writePlatformService.updateFund(command);
 
                 commandSourceResult.markAsChecked(maker, asToday);
             } catch (RollbackTransactionAsCommandIsNotApprovedByCheckerException e) {

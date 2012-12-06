@@ -6,7 +6,6 @@ import java.util.List;
 import org.joda.time.LocalDate;
 import org.mifosplatform.commands.domain.CommandSource;
 import org.mifosplatform.commands.exception.UnsupportedCommandException;
-import org.mifosplatform.commands.service.ChangeDetectionService;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.command.CurrencyCommand;
 import org.mifosplatform.organisation.monetary.serialization.CurrencyCommandFromCommandJsonDeserializer;
@@ -20,16 +19,14 @@ import org.springframework.stereotype.Service;
 public class CurrencyCommandHandler implements CommandSourceHandler {
 
     private final PlatformSecurityContext context;
-    private final ChangeDetectionService changeDetectionService;
     private final CurrencyCommandFromCommandJsonDeserializer fromApiJsonDeserializer;
     private final CurrencyWritePlatformService writePlatformService;
 
     @Autowired
-    public CurrencyCommandHandler(final PlatformSecurityContext context, final ChangeDetectionService changeDetectionService,
+    public CurrencyCommandHandler(final PlatformSecurityContext context, 
             final CurrencyCommandFromCommandJsonDeserializer fromApiJsonDeserializer,
             final CurrencyWritePlatformService writePlatformService) {
         this.context = context;
-        this.changeDetectionService = changeDetectionService;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.writePlatformService = writePlatformService;
     }
@@ -46,13 +43,8 @@ public class CurrencyCommandHandler implements CommandSourceHandler {
             throw new UnsupportedCommandException(commandSource.commandName());
         } else if (commandSource.isUpdate()) {
             try {
-                final String jsonOfChangesOnly = this.changeDetectionService.detectChangesOnUpdate(commandSource.resourceName(),
-                        commandSource.resourceId(), commandSource.json());
-                commandSourceResult.updateJsonTo(jsonOfChangesOnly);
-
-                final CurrencyCommand changesOnly = this.fromApiJsonDeserializer.commandFromCommandJson(jsonOfChangesOnly);
-
-                this.writePlatformService.updateAllowedCurrencies(changesOnly);
+                final CurrencyCommand command = this.fromApiJsonDeserializer.commandFromCommandJson(commandSource.json());
+                this.writePlatformService.updateAllowedCurrencies(command);
                 commandSourceResult.markAsChecked(maker, asToday);
             } catch (RollbackTransactionAsCommandIsNotApprovedByCheckerException e) {
                 // swallow this rollback transaction by design

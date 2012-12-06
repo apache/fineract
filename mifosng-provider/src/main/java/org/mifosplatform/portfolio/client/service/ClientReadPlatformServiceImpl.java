@@ -130,7 +130,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
         public String clientSchema() {
             return "c.office_id as officeId, o.name as officeName, c.id as id, c.firstname as firstname, c.lastname as lastname, c.display_name as displayName, "
-                    + "c.external_id as externalId, c.joining_date as joinedDate, c.image_key as imagekey from m_client c join m_office o on o.id = c.office_id "
+                    + "c.external_id as externalId, c.joined_date as joinedDate, c.image_key as imagekey from m_client c join m_office o on o.id = c.office_id "
                     + " where o.hierarchy like ? and c.is_deleted=0 ";
         }
 

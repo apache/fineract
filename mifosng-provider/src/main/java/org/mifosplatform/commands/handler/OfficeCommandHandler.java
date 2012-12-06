@@ -6,7 +6,6 @@ import java.util.List;
 import org.joda.time.LocalDate;
 import org.mifosplatform.commands.domain.CommandSource;
 import org.mifosplatform.commands.exception.UnsupportedCommandException;
-import org.mifosplatform.commands.service.ChangeDetectionService;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.office.command.OfficeCommand;
 import org.mifosplatform.organisation.office.serialization.OfficeCommandFromCommandJsonDeserializer;
@@ -20,16 +19,14 @@ import org.springframework.stereotype.Service;
 public class OfficeCommandHandler implements CommandSourceHandler {
 
     private final PlatformSecurityContext context;
-    private final ChangeDetectionService changeDetectionService;
     private final OfficeCommandFromCommandJsonDeserializer commandFromCommandJsonDeserializer;
     private final OfficeWritePlatformService writePlatformService;
 
     @Autowired
-    public OfficeCommandHandler(final PlatformSecurityContext context, final ChangeDetectionService changeDetectionService,
+    public OfficeCommandHandler(final PlatformSecurityContext context,
             final OfficeCommandFromCommandJsonDeserializer commandFromCommandJsonDeserializer,
             final OfficeWritePlatformService writePlatformService) {
         this.context = context;
-        this.changeDetectionService = changeDetectionService;
         this.commandFromCommandJsonDeserializer = commandFromCommandJsonDeserializer;
         this.writePlatformService = writePlatformService;
     }
@@ -57,13 +54,7 @@ public class OfficeCommandHandler implements CommandSourceHandler {
             }
         } else if (commandSource.isUpdate()) {
             try {
-                final String jsonOfChangesOnly = this.changeDetectionService.detectChangesOnUpdate(commandSource.resourceName(),
-                        commandSource.resourceId(), commandSource.json());
-                commandSourceResult.updateJsonTo(jsonOfChangesOnly);
-
-                final OfficeCommand changesOnly = this.commandFromCommandJsonDeserializer.commandFromCommandJson(resourceId,
-                        jsonOfChangesOnly);
-                this.writePlatformService.updateOffice(changesOnly);
+                this.writePlatformService.updateOffice(command);
 
                 commandSourceResult.markAsChecked(maker, asToday);
             } catch (RollbackTransactionAsCommandIsNotApprovedByCheckerException e) {

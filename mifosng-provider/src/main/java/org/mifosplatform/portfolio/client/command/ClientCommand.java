@@ -1,8 +1,13 @@
 package org.mifosplatform.portfolio.client.command;
 
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
+import org.mifosplatform.infrastructure.core.data.ApiParameterError;
+import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
+import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 
 /**
  *
@@ -14,80 +19,87 @@ public class ClientCommand {
     private final String lastname;
     private final String clientOrBusinessName;
     private final Long officeId;
-    private final LocalDate joiningDate;
+    private final LocalDate joinedDate;
 
-    // made transient as dont want them to be serialized/converted to JSON
-    private final transient Long id;
-    private final transient boolean makerCheckerApproval;
-    private final transient Set<String> parametersPassedInRequest;
-
-    public ClientCommand(final Set<String> modifiedParameters, final Long id, final String externalId, final String firstname,
-            final String lastname, final String clientOrBusinessName, final Long officeId, final LocalDate joiningDate,
-            final boolean makerCheckerApproval) {
-        this.parametersPassedInRequest = modifiedParameters;
-        this.id = id;
+    public ClientCommand(final String externalId, final String firstname, final String lastname, final String clientOrBusinessName,
+            final Long officeId, final LocalDate joinedDate) {
         this.externalId = externalId;
         this.firstname = firstname;
         this.lastname = lastname;
         this.clientOrBusinessName = clientOrBusinessName;
         this.officeId = officeId;
-        this.joiningDate = joiningDate;
-        this.makerCheckerApproval = makerCheckerApproval;
+        this.joinedDate = joinedDate;
     }
 
-    public Long getId() {
-        return id;
+    public void validateForCreate() {
+        List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+
+        DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("client");
+
+        if (StringUtils.isNotBlank(this.clientOrBusinessName)) {
+            baseDataValidator.reset().parameter("firstname").value(this.firstname)
+                    .mustBeBlankWhenParameterProvided("clientOrBusinessName", this.clientOrBusinessName);
+            baseDataValidator.reset().parameter("lastname").value(this.lastname)
+                    .mustBeBlankWhenParameterProvided("clientOrBusinessName", this.clientOrBusinessName);
+        } else {
+            baseDataValidator.reset().parameter("firstname").value(this.firstname).notBlank();
+            baseDataValidator.reset().parameter("lastname").value(this.lastname).notBlank();
+        }
+
+        baseDataValidator.reset().parameter("joinedDate").value(this.joinedDate).notBlank();
+        baseDataValidator.reset().parameter("externalId").value(this.externalId).notExceedingLengthOf(100);
+        baseDataValidator.reset().parameter("officeId").value(this.officeId).notNull().integerGreaterThanZero();
+
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
+                "Validation errors exist.", dataValidationErrors); }
+    }
+
+    public void validateForUpdate() {
+        List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+
+        DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("client");
+
+        if (this.clientOrBusinessName != null && StringUtils.isNotBlank(this.clientOrBusinessName)) {
+            baseDataValidator.reset().parameter("firstname").value(this.firstname)
+                    .mustBeBlankWhenParameterProvided("clientOrBusinessName", this.clientOrBusinessName);
+            baseDataValidator.reset().parameter("lastname").value(this.lastname)
+                    .mustBeBlankWhenParameterProvided("clientOrBusinessName", this.clientOrBusinessName);
+        } else if (StringUtils.isBlank(this.clientOrBusinessName)) {
+            baseDataValidator.reset().parameter("firstname").value(this.firstname).ignoreIfNull().notBlank();
+            baseDataValidator.reset().parameter("lastname").value(this.lastname).ignoreIfNull().notBlank();
+        }
+
+        baseDataValidator.reset().parameter("joinedDate").value(this.joinedDate).ignoreIfNull().notBlank();
+        baseDataValidator.reset().parameter("externalId").value(this.externalId).ignoreIfNull().notExceedingLengthOf(100);
+
+        baseDataValidator.reset().anyOfNotNull(this.firstname, this.lastname, this.clientOrBusinessName, this.joinedDate, this.externalId,
+                this.officeId);
+
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
+                "Validation errors exist.", dataValidationErrors); }
     }
 
     public String getExternalId() {
-        return externalId;
+        return this.externalId;
     }
 
     public String getFirstname() {
-        return firstname;
+        return this.firstname;
     }
 
     public String getLastname() {
-        return lastname;
+        return this.lastname;
     }
 
     public String getClientOrBusinessName() {
-        return clientOrBusinessName;
+        return this.clientOrBusinessName;
     }
 
     public Long getOfficeId() {
-        return officeId;
+        return this.officeId;
     }
 
     public LocalDate getJoiningDate() {
-        return joiningDate;
-    }
-
-    public boolean isFirstnameChanged() {
-        return this.parametersPassedInRequest.contains("firstname");
-    }
-
-    public boolean isLastnameChanged() {
-        return this.parametersPassedInRequest.contains("lastname");
-    }
-
-    public boolean isClientOrBusinessNameChanged() {
-        return this.parametersPassedInRequest.contains("clientOrBusinessName");
-    }
-
-    public boolean isExternalIdChanged() {
-        return this.parametersPassedInRequest.contains("externalId");
-    }
-
-    public boolean isJoiningDateChanged() {
-        return this.parametersPassedInRequest.contains("joiningDate");
-    }
-
-    public boolean isOfficeChanged() {
-        return this.parametersPassedInRequest.contains("officeId");
-    }
-
-    public boolean isApprovedByChecker() {
-        return this.makerCheckerApproval;
+        return this.joinedDate;
     }
 }

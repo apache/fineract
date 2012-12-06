@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.joda.time.LocalDate;
 import org.mifosplatform.commands.domain.CommandSource;
-import org.mifosplatform.commands.service.ChangeDetectionService;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.client.service.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
 import org.mifosplatform.useradministration.command.UserCommand;
@@ -19,15 +18,13 @@ import org.springframework.stereotype.Service;
 public class UserCommandHandler implements CommandSourceHandler {
 
     private final PlatformSecurityContext context;
-    private final ChangeDetectionService changeDetectionService;
     private final UserCommandFromCommandJsonDeserializer fromCommandJsonDeserializer;
     private final AppUserWritePlatformService writePlatformService;
 
     @Autowired
-    public UserCommandHandler(final PlatformSecurityContext context, final ChangeDetectionService changeDetectionService,
+    public UserCommandHandler(final PlatformSecurityContext context,
             final UserCommandFromCommandJsonDeserializer fromCommandJsonDeserializer, final AppUserWritePlatformService writePlatformService) {
         this.context = context;
-        this.changeDetectionService = changeDetectionService;
         this.fromCommandJsonDeserializer = fromCommandJsonDeserializer;
         this.writePlatformService = writePlatformService;
     }
@@ -52,15 +49,10 @@ public class UserCommandHandler implements CommandSourceHandler {
             }
         } else if (commandSource.isUpdate()) {
             try {
-                final String jsonOfChangesOnly = this.changeDetectionService.detectChangesOnUpdate(commandSource.resourceName(),
-                        commandSource.resourceId(), commandSource.json());
-                commandSourceResult.updateJsonTo(jsonOfChangesOnly);
-
-                final UserCommand changesOnly = this.fromCommandJsonDeserializer.commandFromCommandJson(resourceId, jsonOfChangesOnly);
                 if (maker.hasIdOf(command.getId())) {
-                    this.writePlatformService.updateUsersOwnAccountDetails(changesOnly);
+                    this.writePlatformService.updateUsersOwnAccountDetails(command);
                 } else {
-                    this.writePlatformService.updateUser(changesOnly);
+                    this.writePlatformService.updateUser(command);
                 }
 
                 commandSourceResult.markAsChecked(maker, asToday);

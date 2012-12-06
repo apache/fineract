@@ -3,11 +3,13 @@ package org.mifosplatform.portfolio.client.service;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.infrastructure.codes.domain.CodeValue;
 import org.mifosplatform.infrastructure.codes.domain.CodeValueRepository;
 import org.mifosplatform.infrastructure.codes.exception.CodeValueNotFoundException;
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 import org.mifosplatform.infrastructure.core.domain.Base64EncodedImage;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
@@ -19,7 +21,6 @@ import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.office.domain.OfficeRepository;
 import org.mifosplatform.organisation.office.exception.OfficeNotFoundException;
 import org.mifosplatform.portfolio.client.command.ClientCommand;
-import org.mifosplatform.portfolio.client.command.ClientCommandValidator;
 import org.mifosplatform.portfolio.client.command.ClientIdentifierCommand;
 import org.mifosplatform.portfolio.client.command.ClientIdentifierCommandValidator;
 import org.mifosplatform.portfolio.client.command.ClientNoteCommand;
@@ -33,6 +34,7 @@ import org.mifosplatform.portfolio.client.exception.ClientIdentifierNotFoundExce
 import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
 import org.mifosplatform.portfolio.client.exception.DuplicateClientIdentifierException;
 import org.mifosplatform.portfolio.client.exception.NoteNotFoundException;
+import org.mifosplatform.portfolio.client.serialization.ClientCommandFromApiJsonDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,12 +54,13 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     private final NoteRepository noteRepository;
     private final CodeValueRepository codeValueRepository;
     private final ConfigurationDomainService configurationDomainService;
+    private final ClientCommandFromApiJsonDeserializer fromApiJsonDeserializer;
 
     @Autowired
     public ClientWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final ClientRepository clientRepository,
             final ClientIdentifierRepository clientIdentifierRepository, final OfficeRepository officeRepository,
             final NoteRepository noteRepository, final CodeValueRepository codeValueRepository,
-            final ConfigurationDomainService configurationDomainService) {
+            final ConfigurationDomainService configurationDomainService, final ClientCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
         this.context = context;
         this.clientRepository = clientRepository;
         this.clientIdentifierRepository = clientIdentifierRepository;
@@ -65,13 +68,13 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         this.noteRepository = noteRepository;
         this.codeValueRepository = codeValueRepository;
         this.configurationDomainService = configurationDomainService;
+        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
     }
 
     @Transactional
     @Override
-    public EntityIdentifier deleteClient(final ClientCommand command) {
+    public EntityIdentifier deleteClient(final Long clientId, final JsonCommand command) {
 
-        final Long clientId = command.getId();
         final Client client = this.clientRepository.findOne(clientId);
         if (client == null || client.isDeleted()) { throw new ClientNotFoundException(clientId); }
 
@@ -87,12 +90,15 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
      * Guaranteed to throw an exception no matter what the data integrity issue
      * is.
      */
-    private void handleDataIntegrityIssues(final ClientCommand command, final DataIntegrityViolationException dve) {
+    private void handleDataIntegrityIssues(final JsonCommand command, final DataIntegrityViolationException dve) {
 
         Throwable realCause = dve.getMostSpecificCause();
-        if (realCause.getMessage().contains("external_id")) { throw new PlatformDataIntegrityException(
-                "error.msg.client.duplicate.externalId", "Client with externalId `" + command.getExternalId() + "` already exists",
-                "externalId", command.getExternalId()); }
+        if (realCause.getMessage().contains("external_id")) {
+
+            final String externalId = command.stringValueOfParameterNamed("externalId");
+            throw new PlatformDataIntegrityException("error.msg.client.duplicate.externalId", "Client with externalId `" + externalId
+                    + "` already exists", "externalId", externalId);
+        }
 
         logAsErrorUnexpectedDataIntegrityException(dve);
         throw new PlatformDataIntegrityException("error.msg.client.unknown.data.integrity.issue",
@@ -101,26 +107,21 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
     @Transactional
     @Override
-    public Long createClient(final ClientCommand command) {
+    public Long createClient(final JsonCommand command) {
 
         try {
             context.authenticatedUser();
 
-            final ClientCommandValidator validator = new ClientCommandValidator(command);
-            validator.validateForCreate();
+            final ClientCommand clientCommand = this.fromApiJsonDeserializer.commandFromApiJson(command.json());
+            clientCommand.validateForCreate();
 
-            final Office clientOffice = this.officeRepository.findOne(command.getOfficeId());
-            if (clientOffice == null) { throw new OfficeNotFoundException(command.getOfficeId()); }
+            final String officeIdParamName = "officeId";
+            final Long officeId = command.longValueOfParameterNamed(officeIdParamName);
 
-            String firstname = command.getFirstname();
-            String lastname = command.getLastname();
-            if (StringUtils.isNotBlank(command.getClientOrBusinessName())) {
-                lastname = command.getClientOrBusinessName();
-                firstname = null;
-            }
+            final Office clientOffice = this.officeRepository.findOne(officeId);
+            if (clientOffice == null) { throw new OfficeNotFoundException(officeId); }
 
-            final Client newClient = Client.newClient(clientOffice, firstname, lastname, command.getJoiningDate(), command.getExternalId());
-
+            final Client newClient = Client.fromJson(clientOffice, command);
             this.clientRepository.save(newClient);
 
             if (this.configurationDomainService.isMakerCheckerEnabledForTask("CREATE_CLIENT") && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
@@ -134,30 +135,31 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
     @Transactional
     @Override
-    public EntityIdentifier updateClientDetails(final ClientCommand command) {
+    public EntityIdentifier updateClientDetails(final Long clientId, final JsonCommand command) {
 
         try {
             context.authenticatedUser();
 
-            final ClientCommandValidator validator = new ClientCommandValidator(command);
-            validator.validateForUpdate();
+            final ClientCommand clientCommand = this.fromApiJsonDeserializer.commandFromApiJson(command.json());
+            clientCommand.validateForUpdate();
 
-            Office clientOffice = null;
-            Long officeId = command.getOfficeId();
-            if (command.isOfficeChanged() && officeId != null) {
-                clientOffice = this.officeRepository.findOne(officeId);
-                if (clientOffice == null) { throw new OfficeNotFoundException(command.getOfficeId()); }
+            final Client clientForUpdate = this.clientRepository.findOne(clientId);
+            if (clientForUpdate == null || clientForUpdate.isDeleted()) { throw new ClientNotFoundException(clientId); }
+            final Map<String, Object> changesOnly = clientForUpdate.update(command);
+
+            if (changesOnly.containsKey("officeId")) {
+                final Long officeId = (Long) changesOnly.get("officeId");
+                Office newOffice = this.officeRepository.findOne(officeId);
+                if (newOffice == null) { throw new OfficeNotFoundException(officeId); }
+
+                clientForUpdate.changeOffice(newOffice);
             }
 
-            final Client clientForUpdate = this.clientRepository.findOne(command.getId());
-            if (clientForUpdate == null || clientForUpdate.isDeleted()) { throw new ClientNotFoundException(command.getId()); }
-            clientForUpdate.update(clientOffice, command);
-
-            this.clientRepository.saveAndFlush(clientForUpdate);
+            this.clientRepository.save(clientForUpdate);
 
             if (this.configurationDomainService.isMakerCheckerEnabledForTask("UPDATE_CLIENT") && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
 
-            return new EntityIdentifier(clientForUpdate.getId());
+            return EntityIdentifier.withChanges(clientId, changesOnly);
         } catch (DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
             return new EntityIdentifier(Long.valueOf(-1));

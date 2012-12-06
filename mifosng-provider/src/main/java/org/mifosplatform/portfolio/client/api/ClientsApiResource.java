@@ -42,7 +42,6 @@ import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
 import org.mifosplatform.portfolio.client.data.ClientAccountSummaryCollectionData;
 import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.client.exception.ImageNotFoundException;
-import org.mifosplatform.portfolio.client.serialization.ClientCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
 import org.mifosplatform.portfolio.client.service.ClientWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,7 +65,6 @@ public class ClientsApiResource {
     private final ClientReadPlatformService clientReadPlatformService;
     private final ClientWritePlatformService clientWritePlatformService;
     private final OfficeReadPlatformService officeReadPlatformService;
-    private final ClientCommandFromApiJsonDeserializer fromApiJsonDeserializer;
     private final DefaultToApiJsonSerializer<ClientData> toApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioApiDataConversionService apiDataConversionService;
@@ -77,7 +75,6 @@ public class ClientsApiResource {
     @Autowired
     public ClientsApiResource(final PlatformSecurityContext context, final ClientReadPlatformService readPlatformService,
             final ClientWritePlatformService clientWritePlatformService, final OfficeReadPlatformService officeReadPlatformService,
-            final ClientCommandFromApiJsonDeserializer fromApiJsonDeserializer,
             final DefaultToApiJsonSerializer<ClientData> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper,
             final PortfolioApiDataConversionService apiDataConversionService,
             final PortfolioApiJsonSerializerService apiJsonSerializerService,
@@ -87,7 +84,6 @@ public class ClientsApiResource {
         this.clientReadPlatformService = readPlatformService;
         this.clientWritePlatformService = clientWritePlatformService;
         this.officeReadPlatformService = officeReadPlatformService;
-        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.apiDataConversionService = apiDataConversionService;
@@ -151,8 +147,6 @@ public class ClientsApiResource {
         if (StringUtils.isNotBlank(extraCriteria)) {
             extraCriteria = extraCriteria.substring(4);
         }
-
-        // logger.info("extraCriteria; " + extraCriteria);
 
         return extraCriteria;
     }
@@ -237,10 +231,8 @@ public class ClientsApiResource {
         final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "PORTFOLIO_MANAGEMENT_SUPER_USER", "CREATE_CLIENT");
         context.authenticatedUser().validateHasPermissionTo("CREATE_CLIENT", allowedPermissions);
 
-        final String commandSerializedAsJson = this.fromApiJsonDeserializer.serializedCommandJsonFromApiJson(apiRequestBodyAsJson);
-
         final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE", "clients", null,
-                commandSerializedAsJson);
+                apiRequestBodyAsJson);
 
         return this.toApiJsonSerializer.serialize(result);
     }
@@ -254,11 +246,13 @@ public class ClientsApiResource {
         final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "PORTFOLIO_MANAGEMENT_SUPER_USER", "UPDATE_CLIENT");
         context.authenticatedUser().validateHasPermissionTo("UPDATE_CLIENT", allowedPermissions);
 
-        final String commandSerializedAsJson = this.fromApiJsonDeserializer
-                .serializedCommandJsonFromApiJson(clientId, apiRequestBodyAsJson);
+        // 1. check json request body for create client
+        
+//        final String commandSerializedAsJson = this.fromApiJsonDeserializer
+//                .serializedCommandJsonFromApiJson(clientId, apiRequestBodyAsJson);
 
         final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "clients", clientId,
-                commandSerializedAsJson);
+                apiRequestBodyAsJson);
 
         return this.toApiJsonSerializer.serialize(result);
     }

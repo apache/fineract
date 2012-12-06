@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.joda.time.LocalDate;
 import org.mifosplatform.commands.domain.CommandSource;
-import org.mifosplatform.commands.service.ChangeDetectionService;
 import org.mifosplatform.infrastructure.codes.command.CodeCommand;
 import org.mifosplatform.infrastructure.codes.serialization.CodeCommandFromCommandJsonDeserializer;
 import org.mifosplatform.infrastructure.codes.service.CodeWritePlatformService;
@@ -19,15 +18,13 @@ import org.springframework.stereotype.Service;
 public class CodeCommandHandler implements CommandSourceHandler {
 
     private final PlatformSecurityContext context;
-    private final ChangeDetectionService changeDetectionService;
     private final CodeCommandFromCommandJsonDeserializer fromCommandJsonDeserializer;
     private final CodeWritePlatformService writePlatformService;
 
     @Autowired
-    public CodeCommandHandler(final PlatformSecurityContext context, final ChangeDetectionService changeDetectionService,
+    public CodeCommandHandler(final PlatformSecurityContext context,
             final CodeCommandFromCommandJsonDeserializer fromCommandJsonDeserializer, final CodeWritePlatformService writePlatformService) {
         this.context = context;
-        this.changeDetectionService = changeDetectionService;
         this.fromCommandJsonDeserializer = fromCommandJsonDeserializer;
         this.writePlatformService = writePlatformService;
     }
@@ -53,12 +50,7 @@ public class CodeCommandHandler implements CommandSourceHandler {
             }
         } else if (commandSource.isUpdate()) {
             try {
-                final String jsonOfChangesOnly = this.changeDetectionService.detectChangesOnUpdate(commandSource.resourceName(),
-                        commandSource.resourceId(), commandSource.json());
-                commandSourceResult.updateJsonTo(jsonOfChangesOnly);
-
-                final CodeCommand changesOnly = this.fromCommandJsonDeserializer.commandFromCommandJson(resourceId, jsonOfChangesOnly);
-                this.writePlatformService.updateCode(changesOnly);
+                this.writePlatformService.updateCode(command);
 
                 commandSourceResult.markAsChecked(maker, asToday);
             } catch (RollbackTransactionAsCommandIsNotApprovedByCheckerException e) {

@@ -6,7 +6,6 @@ import java.util.List;
 import org.joda.time.LocalDate;
 import org.mifosplatform.commands.domain.CommandSource;
 import org.mifosplatform.commands.exception.UnsupportedCommandException;
-import org.mifosplatform.commands.service.ChangeDetectionService;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.staff.command.StaffCommand;
 import org.mifosplatform.organisation.staff.serialization.StaffCommandFromCommandJsonDeserializer;
@@ -20,17 +19,13 @@ import org.springframework.stereotype.Service;
 public class StaffCommandHandler implements CommandSourceHandler {
 
     private final PlatformSecurityContext context;
-    private final ChangeDetectionService changeDetectionService;
     private final StaffCommandFromCommandJsonDeserializer fromCommandJsonDeserializer;
     private final StaffWritePlatformService writePlatformService;
 
     @Autowired
-    public StaffCommandHandler(final PlatformSecurityContext context, 
-            final ChangeDetectionService changeDetectionService,
-            final StaffCommandFromCommandJsonDeserializer fromCommandJsonDeserializer, 
-            final StaffWritePlatformService writePlatformService) {
+    public StaffCommandHandler(final PlatformSecurityContext context,
+            final StaffCommandFromCommandJsonDeserializer fromCommandJsonDeserializer, final StaffWritePlatformService writePlatformService) {
         this.context = context;
-        this.changeDetectionService = changeDetectionService;
         this.fromCommandJsonDeserializer = fromCommandJsonDeserializer;
         this.writePlatformService = writePlatformService;
     }
@@ -56,13 +51,7 @@ public class StaffCommandHandler implements CommandSourceHandler {
             }
         } else if (commandSource.isUpdate()) {
             try {
-                final String jsonOfChangesOnly = this.changeDetectionService.detectChangesOnUpdate(commandSource.resourceName(),
-                        commandSource.resourceId(), commandSource.json());
-                commandSourceResult.updateJsonTo(jsonOfChangesOnly);
-
-                final StaffCommand changesOnly = this.fromCommandJsonDeserializer.commandFromCommandJson(resourceId, jsonOfChangesOnly);
-
-                this.writePlatformService.updateStaff(changesOnly);
+                this.writePlatformService.updateStaff(command);
 
                 commandSourceResult.markAsChecked(maker, asToday);
             } catch (RollbackTransactionAsCommandIsNotApprovedByCheckerException e) {
@@ -80,7 +69,7 @@ public class StaffCommandHandler implements CommandSourceHandler {
 
         Long resourceId = commandSourceResult.resourceId();
         final StaffCommand command = this.fromCommandJsonDeserializer.commandFromCommandJson(resourceId, commandSourceResult.json(), true);
-        
+
         if (commandSourceResult.isCreate()) {
             final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "ORGANISATION_ADMINISTRATION_SUPER_USER",
                     "CREATE_STAFF_CHECKER");

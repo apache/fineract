@@ -27,6 +27,10 @@ import com.google.gson.JsonPrimitive;
  * Helper class to extract values of json named attributes.
  */
 public class JsonParserHelper {
+    
+    public boolean parameterExists(final String parameterName, final JsonElement element) {
+        return element.getAsJsonObject().has(parameterName);
+    }
 
     public Boolean extractBooleanNamed(final String parameterName, final JsonElement element, final Set<String> requestParamatersDetected) {
         Boolean value = null;

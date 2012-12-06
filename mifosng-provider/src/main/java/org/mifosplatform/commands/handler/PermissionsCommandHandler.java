@@ -6,7 +6,6 @@ import java.util.List;
 import org.joda.time.LocalDate;
 import org.mifosplatform.commands.domain.CommandSource;
 import org.mifosplatform.commands.exception.UnsupportedCommandException;
-import org.mifosplatform.commands.service.ChangeDetectionService;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.client.service.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
 import org.mifosplatform.useradministration.command.PermissionsCommand;
@@ -20,16 +19,14 @@ import org.springframework.stereotype.Service;
 public class PermissionsCommandHandler implements CommandSourceHandler {
 
     private final PlatformSecurityContext context;
-    private final ChangeDetectionService changeDetectionService;
     private final PermissionsCommandFromCommandJsonDeserializer commandFromCommandJsonDeserializer;
     private final PermissionWritePlatformService permissionWritePlatformService;
 
     @Autowired
-    public PermissionsCommandHandler(final PlatformSecurityContext context, final ChangeDetectionService changeDetectionService,
+    public PermissionsCommandHandler(final PlatformSecurityContext context,
             final PermissionsCommandFromCommandJsonDeserializer commandFromCommandJsonDeserializer,
             final PermissionWritePlatformService permissionWritePlatformService) {
         this.context = context;
-        this.changeDetectionService = changeDetectionService;
         this.commandFromCommandJsonDeserializer = commandFromCommandJsonDeserializer;
         this.permissionWritePlatformService = permissionWritePlatformService;
     }
@@ -44,14 +41,10 @@ public class PermissionsCommandHandler implements CommandSourceHandler {
 
         if (commandSource.isUpdate()) {
             try {
-                final String jsonOfChangesOnly = this.changeDetectionService.detectChangesOnUpdate(commandSource.resourceName(),
+                final PermissionsCommand command = this.commandFromCommandJsonDeserializer.commandFromCommandJson(
                         commandSource.resourceId(), commandSource.json());
-                commandSourceResult.updateJsonTo(jsonOfChangesOnly);
 
-                final PermissionsCommand changesOnly = this.commandFromCommandJsonDeserializer.commandFromCommandJson(
-                        commandSource.resourceId(), jsonOfChangesOnly);
-
-                this.permissionWritePlatformService.updateMakerCheckerPermissions(changesOnly);
+                this.permissionWritePlatformService.updateMakerCheckerPermissions(command);
 
                 commandSourceResult.markAsChecked(maker, asToday);
             } catch (RollbackTransactionAsCommandIsNotApprovedByCheckerException e) {

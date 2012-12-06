@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.joda.time.LocalDate;
 import org.mifosplatform.commands.domain.CommandSource;
-import org.mifosplatform.commands.service.ChangeDetectionService;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.client.command.ClientIdentifierCommand;
 import org.mifosplatform.portfolio.client.serialization.ClientIdentifierCommandFromCommandJsonDeserializer;
@@ -19,16 +18,14 @@ import org.springframework.stereotype.Service;
 public class ClientIdentifierCommandHandler implements CommandSourceHandler {
 
     private final PlatformSecurityContext context;
-    private final ChangeDetectionService changeDetectionService;
     private final ClientWritePlatformService clientWritePlatformService;
     private final ClientIdentifierCommandFromCommandJsonDeserializer commandFromCommandJsonDeserializer;
 
     @Autowired
-    public ClientIdentifierCommandHandler(final PlatformSecurityContext context, final ChangeDetectionService changeDetectionService,
+    public ClientIdentifierCommandHandler(final PlatformSecurityContext context,
             final ClientIdentifierCommandFromCommandJsonDeserializer commandFromCommandJsonDeserializer,
             final ClientWritePlatformService clientWritePlatformService) {
         this.context = context;
-        this.changeDetectionService = changeDetectionService;
         this.commandFromCommandJsonDeserializer = commandFromCommandJsonDeserializer;
         this.clientWritePlatformService = clientWritePlatformService;
     }
@@ -53,14 +50,7 @@ public class ClientIdentifierCommandHandler implements CommandSourceHandler {
             }
         } else if (commandSource.isUpdate()) {
             try {
-                final String jsonOfChangesOnly = this.changeDetectionService.detectChangesOnUpdate(commandSource.resourceName(),
-                        commandSource.resourceId(), commandSource.json());
-                commandSourceResult.updateJsonTo(jsonOfChangesOnly);
-
-                final ClientIdentifierCommand changesOnly = this.commandFromCommandJsonDeserializer.commandFromCommandJson(
-                        commandSource.resourceId(), jsonOfChangesOnly);
-
-                this.clientWritePlatformService.updateClientIdentifier(changesOnly);
+                this.clientWritePlatformService.updateClientIdentifier(command);
                 commandSourceResult.markAsChecked(maker, asToday);
             } catch (RollbackTransactionAsCommandIsNotApprovedByCheckerException e) {
                 // swallow this rollback transaction by design

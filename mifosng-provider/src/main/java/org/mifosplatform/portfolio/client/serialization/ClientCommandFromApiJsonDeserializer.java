@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.joda.time.LocalDate;
+import org.mifosplatform.infrastructure.core.serialization.AbstractFromApiJsonDeserializer;
 import org.mifosplatform.infrastructure.core.serialization.CommandSerializer;
 import org.mifosplatform.infrastructure.core.serialization.FromApiJsonDeserializer;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
@@ -22,30 +23,24 @@ import com.google.gson.reflect.TypeToken;
  * 's.
  */
 @Component
-public final class ClientCommandFromApiJsonDeserializer implements FromApiJsonDeserializer<ClientCommand> {
+public final class ClientCommandFromApiJsonDeserializer extends AbstractFromApiJsonDeserializer<ClientCommand> {
 
     /**
      * The parameters supported for this command.
      */
     private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("id", "externalId", "firstname", "lastname",
-            "clientOrBusinessName", "officeId", "joiningDate", "locale", "dateFormat"));
+            "clientOrBusinessName", "officeId", "joinedDate", "locale", "dateFormat"));
 
     private final FromJsonHelper fromApiJsonHelper;
-    private final CommandSerializer commandSerializerService;
 
     @Autowired
     public ClientCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper, final CommandSerializer commandSerializerService) {
+        super(commandSerializerService);
         this.fromApiJsonHelper = fromApiJsonHelper;
-        this.commandSerializerService = commandSerializerService;
     }
 
     @Override
-    public ClientCommand commandFromApiJson(final String json) {
-        return commandFromApiJson(null, json);
-    }
-
-    @Override
-    public ClientCommand commandFromApiJson(final Long clientId, final String json) {
+    public ClientCommand commandFromApiJson(@SuppressWarnings("unused") final Long clientId, final String json) {
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
 
@@ -62,19 +57,6 @@ public final class ClientCommandFromApiJsonDeserializer implements FromApiJsonDe
                 .extractStringNamed("clientOrBusinessName", element, parametersPassedInRequest);
         final LocalDate joiningDate = fromApiJsonHelper.extractLocalDateNamed("joiningDate", element, parametersPassedInRequest);
 
-        return new ClientCommand(parametersPassedInRequest, clientId, externalId, firstname, lastname, clientOrBusinessName, officeId,
-                joiningDate, false);
-    }
-
-    @Override
-    public String serializedCommandJsonFromApiJson(final String json) {
-        final ClientCommand command = commandFromApiJson(json);
-        return this.commandSerializerService.serializeCommandToJson(command);
-    }
-
-    @Override
-    public String serializedCommandJsonFromApiJson(final Long fundId, final String json) {
-        final ClientCommand command = commandFromApiJson(fundId, json);
-        return this.commandSerializerService.serializeCommandToJson(command);
+        return new ClientCommand(externalId, firstname, lastname, clientOrBusinessName, officeId, joiningDate);
     }
 }

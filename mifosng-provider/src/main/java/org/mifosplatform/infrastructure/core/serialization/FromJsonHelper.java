@@ -3,6 +3,7 @@ package org.mifosplatform.infrastructure.core.serialization;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -57,11 +58,23 @@ public class FromJsonHelper {
     public JsonElement parse(final String json) {
         return parser.parse(json);
     }
+    
+    public boolean parameterExists(final String parameterName, final JsonElement element) {
+        return helperDelegator.parameterExists(parameterName, element);
+    }
+    
+    public String extractStringNamed(final String parameterName, final JsonElement element) {
+        return helperDelegator.extractStringNamed(parameterName, element, new HashSet<String>());
+    }
 
     public String extractStringNamed(final String parameterName, final JsonElement element, final Set<String> parametersPassedInRequest) {
         return helperDelegator.extractStringNamed(parameterName, element, parametersPassedInRequest);
     }
 
+    public Long extractLongNamed(final String parameterName, final JsonElement element) {
+        return helperDelegator.extractLongNamed(parameterName, element, new HashSet<String>());
+    }
+    
     public Long extractLongNamed(final String parameterName, final JsonElement element, final Set<String> parametersPassedInRequest) {
         return helperDelegator.extractLongNamed(parameterName, element, parametersPassedInRequest);
     }
@@ -72,6 +85,10 @@ public class FromJsonHelper {
 
     public Boolean extractBooleanNamed(final String parameterName, final JsonElement element, final Set<String> parametersPassedInRequest) {
         return helperDelegator.extractBooleanNamed(parameterName, element, parametersPassedInRequest);
+    }
+    
+    public LocalDate extractLocalDateNamed(final String parameterName, JsonElement element) {
+        return helperDelegator.extractLocalDateNamed(parameterName, element, new HashSet<String>());
     }
 
     public LocalDate extractLocalDateNamed(final String parameterName, final JsonElement element,

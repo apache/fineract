@@ -6,7 +6,6 @@ import java.util.List;
 import org.joda.time.LocalDate;
 import org.mifosplatform.commands.domain.CommandSource;
 import org.mifosplatform.commands.exception.UnsupportedCommandException;
-import org.mifosplatform.commands.service.ChangeDetectionService;
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.client.service.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
@@ -21,16 +20,14 @@ import org.springframework.stereotype.Service;
 public class LoanProductCommandHandler implements CommandSourceHandler {
 
     private final PlatformSecurityContext context;
-    private final ChangeDetectionService changeDetectionService;
     private final LoanProductCommandFromCommandJsonDeserializer commandFromCommandJsonDeserializer;
     private final LoanProductWritePlatformService writePlatformService;
 
     @Autowired
-    public LoanProductCommandHandler(final PlatformSecurityContext context, final ChangeDetectionService changeDetectionService,
+    public LoanProductCommandHandler(final PlatformSecurityContext context,
             final LoanProductCommandFromCommandJsonDeserializer commandFromCommandJsonDeserializer,
             final LoanProductWritePlatformService writePlatformService) {
         this.context = context;
-        this.changeDetectionService = changeDetectionService;
         this.commandFromCommandJsonDeserializer = commandFromCommandJsonDeserializer;
         this.writePlatformService = writePlatformService;
     }
@@ -55,13 +52,7 @@ public class LoanProductCommandHandler implements CommandSourceHandler {
             }
         } else if (commandSource.isUpdate()) {
             try {
-                final String jsonOfChangesOnly = this.changeDetectionService.detectChangesOnUpdate(commandSource.resourceName(),
-                        commandSource.resourceId(), commandSource.json());
-                commandSourceResult.updateJsonTo(jsonOfChangesOnly);
-
-                final LoanProductCommand changesOnly = this.commandFromCommandJsonDeserializer.commandFromCommandJson(resourceId,
-                        jsonOfChangesOnly);
-                this.writePlatformService.updateLoanProduct(changesOnly);
+                this.writePlatformService.updateLoanProduct(command);
 
                 commandSourceResult.markAsChecked(maker, asToday);
             } catch (RollbackTransactionAsCommandIsNotApprovedByCheckerException e) {
