@@ -197,7 +197,7 @@ CREATE TABLE `m_permission` (
   `code` varchar(100) NOT NULL,
   `entity_name` varchar(100) DEFAULT NULL,
   `action_name` varchar(100) DEFAULT NULL,
-  `is_maker_checker` TINYINT(1) NOT NULL,
+  `is_maker_checker` TINYINT(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `code` (`code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

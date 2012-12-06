@@ -225,7 +225,7 @@ CREATE TABLE `m_guarantor_external` (
   CONSTRAINT `FK_m_guarantor_m_loan` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-INSERT INTO `mifostenant-default`.`x_registered_table` (`registered_table_name`, `application_table_name`)
+INSERT INTO `x_registered_table` (`registered_table_name`, `application_table_name`)
 VALUES ('m_guarantor_external','m_loan');
 
 -- Add in permissions for any special datatables or reports added in base reference data
