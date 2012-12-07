@@ -3,15 +3,15 @@ package org.mifosplatform.useradministration.service;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang.StringUtils;
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
+import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.core.service.PlatformEmailSendException;
-import org.mifosplatform.infrastructure.security.domain.BasicPasswordEncodablePlatformUser;
-import org.mifosplatform.infrastructure.security.domain.PlatformUser;
 import org.mifosplatform.infrastructure.security.service.PlatformPasswordEncoder;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.service.ConfigurationDomainService;
@@ -27,6 +27,7 @@ import org.mifosplatform.useradministration.domain.RoleRepository;
 import org.mifosplatform.useradministration.domain.UserDomainService;
 import org.mifosplatform.useradministration.exception.RoleNotFoundException;
 import org.mifosplatform.useradministration.exception.UserNotFoundException;
+import org.mifosplatform.useradministration.serialization.UserCommandFromApiJsonDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,11 +48,13 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
     private final OfficeRepository officeRepository;
     private final RoleRepository roleRepository;
     private final ConfigurationDomainService configurationDomainService;
+    private final UserCommandFromApiJsonDeserializer fromApiJsonDeserializer;
 
     @Autowired
     public AppUserWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final AppUserRepository appUserRepository,
             final UserDomainService userDomainService, final OfficeRepository officeRepository, final RoleRepository roleRepository,
-            final PlatformPasswordEncoder platformPasswordEncoder, final ConfigurationDomainService configurationDomainService) {
+            final PlatformPasswordEncoder platformPasswordEncoder, final ConfigurationDomainService configurationDomainService,
+            final UserCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
         this.context = context;
         this.appUserRepository = appUserRepository;
         this.userDomainService = userDomainService;
@@ -59,29 +62,29 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
         this.roleRepository = roleRepository;
         this.platformPasswordEncoder = platformPasswordEncoder;
         this.configurationDomainService = configurationDomainService;
+        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
     }
 
     @Transactional
     @Override
-    public Long createUser(final UserCommand command) {
+    public Long createUser(final JsonCommand command) {
 
         try {
             context.authenticatedUser();
-            command.validateForCreate();
 
-            final Set<Role> allRoles = assembleSetOfRoles(command);
+            final UserCommand userCommand = this.fromApiJsonDeserializer.commandFromApiJson(command.json());
+            userCommand.validateForCreate();
 
-            final Office office = this.officeRepository.findOne(command.getOfficeId());
-            if (office == null) { throw new OfficeNotFoundException(command.getOfficeId()); }
+            final String officeIdParamName = "officeId";
+            final Long officeId = command.longValueOfParameterNamed(officeIdParamName);
 
-            String password = command.getPassword();
-            if (StringUtils.isBlank(password)) {
-                password = "autogenerate";
-            }
+            final Office userOffice = this.officeRepository.findOne(officeId);
+            if (userOffice == null) { throw new OfficeNotFoundException(officeId); }
 
-            final AppUser appUser = AppUser.createNew(office, allRoles, command.getUsername(), command.getEmail(), command.getFirstname(),
-                    command.getLastname(), password);
+            final String[] roles = command.arrayValueOfParameterNamed("roles");
+            final Set<Role> allRoles = assembleSetOfRoles(roles);
 
+            final AppUser appUser = AppUser.fromJson(userOffice, allRoles, command);
             this.userDomainService.create(appUser, command.isApprovedByChecker());
 
             return appUser.getId();
@@ -90,8 +93,10 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
             return Long.valueOf(-1);
         } catch (PlatformEmailSendException e) {
             final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+
+            final String email = command.stringValueOfParameterNamed("email");
             ApiParameterError error = ApiParameterError.parameterError("error.msg.user.email.invalid", "The parameter email is invalid.",
-                    "email", command.getEmail());
+                    "email", email);
             dataValidationErrors.add(error);
 
             throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
@@ -101,42 +106,44 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 
     @Transactional
     @Override
-    public Long updateUser(final UserCommand command) {
+    public EntityIdentifier updateUser(final Long userId, final JsonCommand command) {
 
         try {
             context.authenticatedUser();
-            command.validateForUpdate();
 
-            final Set<Role> allRoles = assembleSetOfRoles(command);
+            final UserCommand userCommand = this.fromApiJsonDeserializer.commandFromApiJson(command.json());
+            userCommand.validateForUpdate();
 
-            Office office = null;
-            if (command.isOfficeChanged()) {
-                office = this.officeRepository.findOne(command.getOfficeId());
-                if (office == null) { throw new OfficeNotFoundException(command.getOfficeId()); }
+            final AppUser userToUpdate = this.appUserRepository.findOne(userId);
+            if (userToUpdate == null) { throw new UserNotFoundException(userId); }
+
+            final Map<String, Object> changes = userToUpdate.update(command, this.platformPasswordEncoder);
+
+            if (changes.containsKey("officeId")) {
+                final Long officeId = (Long) changes.get("officeId");
+                final Office office = this.officeRepository.findOne(officeId);
+                if (office == null) { throw new OfficeNotFoundException(officeId); }
+
+                userToUpdate.changeOffice(office);
             }
 
-            final AppUser userToUpdate = this.appUserRepository.findOne(command.getId());
-            if (userToUpdate == null) { throw new UserNotFoundException(command.getId()); }
+            if (changes.containsKey("roles")) {
+                final String[] roleIds = (String[]) changes.get("roles");
+                final Set<Role> allRoles = assembleSetOfRoles(roleIds);
 
-            userToUpdate.update(allRoles, office, command);
-            this.appUserRepository.saveAndFlush(userToUpdate);
+                userToUpdate.updateRoles(allRoles);
+            }
 
-            if (command.isPasswordChanged()) {
-                PlatformUser dummyPlatformUser = new BasicPasswordEncodablePlatformUser(userToUpdate.getId(), userToUpdate.getUsername(),
-                        command.getPassword());
-
-                String newPasswordEncoded = this.platformPasswordEncoder.encode(dummyPlatformUser);
-
-                userToUpdate.updatePassword(newPasswordEncoded);
-                this.appUserRepository.saveAndFlush(userToUpdate);
+            if (!changes.isEmpty()) {
+                this.appUserRepository.save(userToUpdate);
             }
 
             if (this.configurationDomainService.isMakerCheckerEnabledForTask("UPDATE_USER") && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
 
-            return userToUpdate.getId();
+            return EntityIdentifier.withChanges(userId, changes);
         } catch (DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
-            return Long.valueOf(-1);
+            return EntityIdentifier.empty();
         }
     }
 
@@ -147,52 +154,53 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
      */
     @Transactional
     @Override
-    public Long updateUsersOwnAccountDetails(final UserCommand command) {
+    public EntityIdentifier updateUsersOwnAccountDetails(final Long userId, final JsonCommand command) {
 
         try {
             context.authenticatedUser();
-            command.validateForUpdate();
 
-            final Set<Role> allRoles = assembleSetOfRoles(command);
+            final UserCommand userCommand = this.fromApiJsonDeserializer.commandFromApiJson(command.json());
+            userCommand.validateForUpdate();
 
-            Office office = null;
-            if (command.isOfficeChanged()) {
-                office = this.officeRepository.findOne(command.getOfficeId());
-                if (office == null) { throw new OfficeNotFoundException(command.getOfficeId()); }
+            final AppUser userToUpdate = this.appUserRepository.findOne(userId);
+            if (userToUpdate == null) { throw new UserNotFoundException(userId); }
+
+            final Map<String, Object> changes = userToUpdate.update(command, this.platformPasswordEncoder);
+
+            if (changes.containsKey("officeId")) {
+                final Long officeId = (Long) changes.get("officeId");
+                final Office office = this.officeRepository.findOne(officeId);
+                if (office == null) { throw new OfficeNotFoundException(officeId); }
+
+                userToUpdate.changeOffice(office);
             }
 
-            final AppUser userToUpdate = this.appUserRepository.findOne(command.getId());
-            if (userToUpdate == null) { throw new UserNotFoundException(command.getId()); }
+            if (changes.containsKey("roles")) {
+                final String[] roleIds = (String[]) changes.get("roles");
+                final Set<Role> allRoles = assembleSetOfRoles(roleIds);
 
-            userToUpdate.update(allRoles, office, command);
-            this.appUserRepository.saveAndFlush(userToUpdate);
+                userToUpdate.updateRoles(allRoles);
+            }
 
-            if (command.isPasswordChanged()) {
-                PlatformUser dummyPlatformUser = new BasicPasswordEncodablePlatformUser(userToUpdate.getId(), userToUpdate.getUsername(),
-                        command.getPassword());
-
-                String newPasswordEncoded = this.platformPasswordEncoder.encode(dummyPlatformUser);
-
-                userToUpdate.updatePassword(newPasswordEncoded);
+            if (!changes.isEmpty()) {
                 this.appUserRepository.saveAndFlush(userToUpdate);
             }
 
-            return userToUpdate.getId();
+            return EntityIdentifier.withChanges(userId, changes);
         } catch (DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
-            return Long.valueOf(-1);
+            return EntityIdentifier.empty();
         }
     }
 
-    private Set<Role> assembleSetOfRoles(final UserCommand command) {
+    private Set<Role> assembleSetOfRoles(final String[] rolesArray) {
 
         final Set<Role> allRoles = new HashSet<Role>();
 
-        String[] rolesArray = command.getRoles();
-        if (command.isRolesChanged() && !ObjectUtils.isEmpty(rolesArray)) {
+        if (!ObjectUtils.isEmpty(rolesArray)) {
             for (String roleId : rolesArray) {
-                Long id = Long.valueOf(roleId);
-                Role role = this.roleRepository.findOne(id);
+                final Long id = Long.valueOf(roleId);
+                final Role role = this.roleRepository.findOne(id);
                 if (role == null) { throw new RoleNotFoundException(id); }
                 allRoles.add(role);
             }
@@ -203,10 +211,9 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 
     @Transactional
     @Override
-    public void deleteUser(final UserCommand command) {
+    public void deleteUser(final Long userId, final JsonCommand command) {
 
-        final Long userId = command.getId();
-        AppUser user = this.appUserRepository.findOne(userId);
+        final AppUser user = this.appUserRepository.findOne(userId);
         if (user == null || user.isDeleted()) { throw new UserNotFoundException(userId); }
 
         user.delete();
@@ -219,14 +226,14 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
      * Guaranteed to throw an exception no matter what the data integrity issue
      * is.
      */
-    private void handleDataIntegrityIssues(final UserCommand command, final DataIntegrityViolationException dve) {
+    private void handleDataIntegrityIssues(final JsonCommand command, final DataIntegrityViolationException dve) {
 
         Throwable realCause = dve.getMostSpecificCause();
         if (realCause.getMessage().contains("username_org")) {
-            StringBuilder defaultMessageBuilder = new StringBuilder("User with username ").append(command.getUsername()).append(
-                    " already exists.");
+            final String username = command.stringValueOfParameterNamed("username");
+            StringBuilder defaultMessageBuilder = new StringBuilder("User with username ").append(username).append(" already exists.");
             throw new PlatformDataIntegrityException("error.msg.user.duplicate.username", defaultMessageBuilder.toString(), "username",
-                    command.getUsername());
+                    username);
         }
 
         logger.error(dve.getMessage(), dve);

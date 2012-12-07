@@ -28,7 +28,8 @@ public class RoleCommandHandler implements CommandSourceHandler {
     private final ExcludeNothingWithPrettyPrintingOffJsonSerializerGoogleGson toApiJsonSerializer;
 
     @Autowired
-    public RoleCommandHandler(final PlatformSecurityContext context, final FromJsonHelper fromApiJsonHelper,
+    public RoleCommandHandler(final PlatformSecurityContext context, 
+            final FromJsonHelper fromApiJsonHelper,
             final ExcludeNothingWithPrettyPrintingOffJsonSerializerGoogleGson toApiJsonSerializer,
             final RoleWritePlatformService writePlatformService) {
         this.context = context;
@@ -45,11 +46,11 @@ public class RoleCommandHandler implements CommandSourceHandler {
 
         CommandSource commandSourceResult = commandSource.copy();
 
+        final JsonElement parsedCommand = this.fromApiJsonHelper.parse(commandSource.json());
+        final JsonCommand command = JsonCommand.from(commandSource.json(), parsedCommand, this.fromApiJsonHelper);
         final Long resourceId = commandSource.resourceId();
         if (commandSource.isCreate()) {
             try {
-                final JsonElement parsedCommand = this.fromApiJsonHelper.parse(commandSource.json());
-                final JsonCommand command = JsonCommand.from(commandSource.json(), parsedCommand, this.fromApiJsonHelper);
 
                 final Long newResourceId = this.writePlatformService.createRole(command);
 
@@ -60,24 +61,16 @@ public class RoleCommandHandler implements CommandSourceHandler {
             }
         } else if (commandSource.isUpdate()) {
             try {
-                final JsonElement parsedCommand = this.fromApiJsonHelper.parse(commandSource.json());
-                final JsonCommand command = JsonCommand.from(commandSource.json(), parsedCommand, this.fromApiJsonHelper);
-
                 final EntityIdentifier result = this.writePlatformService.updateRole(resourceId, command);
 
                 final String jsonOfChangesOnly = toApiJsonSerializer.serialize(result.getChanges());
                 commandSourceResult.updateJsonTo(jsonOfChangesOnly);
-
                 commandSourceResult.markAsChecked(maker, asToday);
             } catch (RollbackTransactionAsCommandIsNotApprovedByCheckerException e) {
                 // swallow this rollback transaction by design
             }
         } else if (commandSource.isUpdateRolePermissions()) {
             try {
-
-                final JsonElement parsedCommand = this.fromApiJsonHelper.parse(commandSource.json());
-                final JsonCommand command = JsonCommand.from(commandSource.json(), parsedCommand, this.fromApiJsonHelper);
-
                 final EntityIdentifier result = this.writePlatformService.updateRolePermissions(resourceId, command);
 
                 final String jsonOfChangesOnly = toApiJsonSerializer.serialize(result.getChanges());

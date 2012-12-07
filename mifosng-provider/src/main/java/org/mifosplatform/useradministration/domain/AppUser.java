@@ -3,7 +3,9 @@ package org.mifosplatform.useradministration.domain;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -16,11 +18,13 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.apache.commons.lang.StringUtils;
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.infrastructure.security.domain.PlatformUser;
 import org.mifosplatform.infrastructure.security.exception.NoAuthorizationException;
+import org.mifosplatform.infrastructure.security.service.PlatformPasswordEncoder;
 import org.mifosplatform.organisation.office.domain.Office;
-import org.mifosplatform.useradministration.command.UserCommand;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -71,8 +75,13 @@ public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements P
     @JoinTable(name = "m_appuser_role", joinColumns = @JoinColumn(name = "appuser_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles;
 
-    public static AppUser createNew(final Office office, final Set<Role> allRoles, final String username, final String email,
-            final String firstname, final String lastname, final String password) {
+    public static AppUser fromJson(final Office userOffice, final Set<Role> allRoles, final JsonCommand command) {
+
+        final String username = command.stringValueOfParameterNamed("username");
+        String password = command.stringValueOfParameterNamed("password");
+        if (StringUtils.isBlank(password)) {
+            password = "autogenerate";
+        }
 
         boolean userEnabled = true;
         boolean userAccountNonExpired = true;
@@ -84,20 +93,18 @@ public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements P
 
         User user = new User(username, password, userEnabled, userAccountNonExpired, userCredentialsNonExpired, userAccountNonLocked,
                 authorities);
-        return new AppUser(office, user, allRoles, email, firstname, lastname);
+
+        final String email = command.stringValueOfParameterNamed("email");
+        final String firstname = command.stringValueOfParameterNamed("firstname");
+        final String lastname = command.stringValueOfParameterNamed("lastname");
+
+        return new AppUser(userOffice, user, allRoles, email, firstname, lastname);
     }
 
     protected AppUser() {
-        this.office = null;
-        this.email = null;
-        this.username = null;
-        this.password = null;
-        this.accountNonExpired = false;
         this.accountNonLocked = false;
         this.credentialsNonExpired = false;
-        this.enabled = false;
         this.roles = new HashSet<Role>();
-        this.firstTimeLoginRemaining = true;
     }
 
     public AppUser(final Office office, final User user, final Set<Role> roles, final String email, final String firstname,
@@ -121,27 +128,92 @@ public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements P
         this.firstTimeLoginRemaining = false;
     }
 
-    public void update(final Set<Role> allRoles, final Office office, final UserCommand userCommand) {
+    public void changeOffice(final Office differentOffice) {
+        this.office = differentOffice;
+    }
 
-        if (userCommand.isRolesChanged() && !allRoles.isEmpty()) {
+    public void updateRoles(final Set<Role> allRoles) {
+        if (!allRoles.isEmpty()) {
             this.roles.clear();
             this.roles = allRoles;
         }
-        if (userCommand.isOfficeChanged()) {
-            this.office = office;
+    }
+
+    public Map<String, Object> update(final JsonCommand command, final PlatformPasswordEncoder platformPasswordEncoder) {
+
+        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(7);
+
+        // unencoded password provided
+        final String passwordParamName = "password";
+        final String passwordEncodedParamName = "passwordEncoded";
+        if (command.hasParameter(passwordParamName)) {
+            if (command.isChangeInPasswordParameterNamed(passwordParamName, this.password, platformPasswordEncoder, this.getId())) {
+                final String passwordEncodedValue = command.passwordValueOfParameterNamed(passwordParamName, platformPasswordEncoder,
+                        this.getId());
+                actualChanges.put(passwordEncodedParamName, passwordEncodedValue);
+                updatePassword(passwordEncodedValue);
+            }
         }
-        if (userCommand.isUsernameChanged()) {
-            this.username = userCommand.getUsername();
+
+        if (command.hasParameter(passwordEncodedParamName)) {
+            if (command.isChangeInStringParameterNamed(passwordEncodedParamName, this.password)) {
+                final String newValue = command.stringValueOfParameterNamed(passwordEncodedParamName);
+                actualChanges.put(passwordEncodedParamName, newValue);
+                updatePassword(newValue);
+            }
         }
-        if (userCommand.isFirstnameChanged()) {
-            this.firstname = userCommand.getFirstname();
+
+        final String officeIdParamName = "officeId";
+        if (command.isChangeInLongParameterNamed(officeIdParamName, this.office.getId())) {
+            final Long newValue = command.longValueOfParameterNamed(officeIdParamName);
+            actualChanges.put(officeIdParamName, newValue);
         }
-        if (userCommand.isLastnameChanged()) {
-            this.lastname = userCommand.getLastname();
+
+        final String rolesParamName = "roles";
+        if (command.isChangeInArrayParameterNamed(rolesParamName, getRolesAsIdStringArray())) {
+            final String[] newValue = command.arrayValueOfParameterNamed(rolesParamName);
+            actualChanges.put(rolesParamName, newValue);
         }
-        if (userCommand.isEmailChanged()) {
-            this.email = userCommand.getEmail();
+
+        final String usernameParamName = "username";
+        if (command.isChangeInStringParameterNamed(usernameParamName, this.username)) {
+            final String newValue = command.stringValueOfParameterNamed(usernameParamName);
+            actualChanges.put(usernameParamName, newValue);
+            this.username = newValue;
         }
+
+        final String firstnameParamName = "firstname";
+        if (command.isChangeInStringParameterNamed(firstnameParamName, this.firstname)) {
+            final String newValue = command.stringValueOfParameterNamed(firstnameParamName);
+            actualChanges.put(firstnameParamName, newValue);
+            this.firstname = newValue;
+        }
+
+        final String lastnameParamName = "lastname";
+        if (command.isChangeInStringParameterNamed(lastnameParamName, this.lastname)) {
+            final String newValue = command.stringValueOfParameterNamed(lastnameParamName);
+            actualChanges.put(lastnameParamName, newValue);
+            this.lastname = newValue;
+        }
+
+        final String emailParamName = "email";
+        if (command.isChangeInStringParameterNamed(emailParamName, this.email)) {
+            final String newValue = command.stringValueOfParameterNamed(emailParamName);
+            actualChanges.put(emailParamName, newValue);
+            this.email = newValue;
+        }
+
+        return actualChanges;
+    }
+
+    private String[] getRolesAsIdStringArray() {
+        List<String> roleIds = new ArrayList<String>();
+
+        for (Role role : this.roles) {
+            roleIds.add(role.getId().toString());
+        }
+
+        return roleIds.toArray(new String[roleIds.size()]);
     }
 
     /**
@@ -352,7 +424,7 @@ public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements P
         }
         return match;
     }
-    
+
     public boolean hasIdOf(final Long userId) {
         return getId().equals(userId);
     }
@@ -360,7 +432,7 @@ public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements P
     private boolean hasNotAnyPermission(final List<String> permissions) {
         return !hasAnyPermission(permissions);
     }
-    
+
     private boolean hasAnyPermission(final List<String> permissions) {
         boolean hasAtLeastOneOf = false;
 
@@ -370,7 +442,7 @@ public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements P
                 break;
             }
         }
- 
+
         return hasAtLeastOneOf;
     }
 

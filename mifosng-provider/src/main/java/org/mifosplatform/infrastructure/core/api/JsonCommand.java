@@ -1,11 +1,15 @@
 package org.mifosplatform.infrastructure.core.api;
 
 import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.infrastructure.security.domain.BasicPasswordEncodablePlatformUser;
+import org.mifosplatform.infrastructure.security.domain.PlatformUser;
+import org.mifosplatform.infrastructure.security.service.PlatformPasswordEncoder;
 
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
@@ -72,6 +76,12 @@ public final class JsonCommand {
         return differenceExists;
     }
 
+    private boolean differenceExists(final String[] baseValue, final String[] workingCopyValue) {
+        Arrays.sort(baseValue);
+        Arrays.sort(workingCopyValue);
+        return !Arrays.equals(baseValue, workingCopyValue);
+    }
+
     private boolean differenceExists(final Long baseValue, final Long workingCopyValue) {
         boolean differenceExists = false;
 
@@ -87,6 +97,10 @@ public final class JsonCommand {
     private boolean parameterExists(final String parameterName) {
         return this.fromApiJsonHelper.parameterExists(parameterName, parsedCommand);
     }
+    
+    public boolean hasParameter(final String parameterName) {
+        return parameterExists(parameterName);
+    }
 
     public String dateFormat() {
         return stringValueOfParameterNamed("dateFormat");
@@ -95,14 +109,14 @@ public final class JsonCommand {
     public String locale() {
         return stringValueOfParameterNamed("locale");
     }
-    
+
     public Map<String, Boolean> mapValueOfParameterNamed(final String parameterName) {
         final Type typeOfMap = new TypeToken<Map<String, Boolean>>() {}.getType();
-        
+
         if (parsedCommand.getAsJsonObject().has(parameterName)) {
             parsedCommand.getAsJsonObject().get(parameterName);
         }
-        
+
         return this.fromApiJsonHelper.extractMap(typeOfMap, jsonCommand);
     }
 
@@ -144,5 +158,34 @@ public final class JsonCommand {
     public String stringValueOfParameterNamed(final String parameterName) {
         final String value = this.fromApiJsonHelper.extractStringNamed(parameterName, parsedCommand);
         return StringUtils.defaultIfEmpty(value, "");
+    }
+
+    public boolean isChangeInArrayParameterNamed(final String parameterName, final String[] existingValue) {
+        boolean isChanged = false;
+        if (parameterExists(parameterName)) {
+            final String[] workingValue = arrayValueOfParameterNamed(parameterName);
+            isChanged = differenceExists(existingValue, workingValue);
+        }
+        return isChanged;
+    }
+
+    public String[] arrayValueOfParameterNamed(final String parameterName) {
+        return this.fromApiJsonHelper.extractArrayNamed(parameterName, parsedCommand);
+    }
+
+    public boolean isChangeInPasswordParameterNamed(final String parameterName, final String existingValue, final PlatformPasswordEncoder platformPasswordEncoder, final Long saltValue) {
+        boolean isChanged = false;
+        if (parameterExists(parameterName)) {
+            final String workingValue = passwordValueOfParameterNamed(parameterName, platformPasswordEncoder, saltValue);
+            isChanged = differenceExists(existingValue, workingValue);
+        }
+        return isChanged;
+    }
+    
+    public String passwordValueOfParameterNamed(final String parameterName, final PlatformPasswordEncoder platformPasswordEncoder, final Long saltValue) {
+        final String passwordPlainText = stringValueOfParameterNamed(parameterName);
+        
+        final PlatformUser dummyPlatformUser = new BasicPasswordEncodablePlatformUser(saltValue, "", passwordPlainText);
+        return platformPasswordEncoder.encode(dummyPlatformUser);
     }
 }

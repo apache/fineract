@@ -78,6 +78,10 @@ public class FromJsonHelper {
     public Long extractLongNamed(final String parameterName, final JsonElement element, final Set<String> parametersPassedInRequest) {
         return helperDelegator.extractLongNamed(parameterName, element, parametersPassedInRequest);
     }
+    
+    public String[] extractArrayNamed(final String parameterName, final JsonElement element) {
+        return helperDelegator.extractArrayNamed(parameterName, element, new HashSet<String>());
+    }
 
     public String[] extractArrayNamed(final String parameterName, final JsonElement element, final Set<String> parametersPassedInRequest) {
         return helperDelegator.extractArrayNamed(parameterName, element, parametersPassedInRequest);

@@ -27,6 +27,10 @@ public class EntityIdentifier {
     public static EntityIdentifier withChanges(final Long resourceId, final Map<String, Object> changes) {
         return new EntityIdentifier(resourceId, null, changes);
     }
+    
+    public static EntityIdentifier empty() {
+        return new EntityIdentifier(Long.valueOf(-1), null, null);
+    }
 
     public EntityIdentifier() {
         //

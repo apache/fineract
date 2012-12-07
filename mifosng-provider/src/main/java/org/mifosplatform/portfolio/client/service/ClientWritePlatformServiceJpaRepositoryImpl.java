@@ -145,6 +145,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
             final Client clientForUpdate = this.clientRepository.findOne(clientId);
             if (clientForUpdate == null || clientForUpdate.isDeleted()) { throw new ClientNotFoundException(clientId); }
+            
             final Map<String, Object> changesOnly = clientForUpdate.update(command);
 
             if (changesOnly.containsKey("officeId")) {
