@@ -12,9 +12,7 @@ import org.mifosplatform.infrastructure.core.serialization.ExcludeNothingWithPre
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.client.service.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
-import org.mifosplatform.useradministration.command.RoleCommand;
 import org.mifosplatform.useradministration.domain.AppUser;
-import org.mifosplatform.useradministration.serialization.RoleCommandFromCommandJsonDeserializer;
 import org.mifosplatform.useradministration.service.RoleWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,18 +24,14 @@ public class RoleCommandHandler implements CommandSourceHandler {
 
     private final PlatformSecurityContext context;
     private final RoleWritePlatformService writePlatformService;
-    private final RoleCommandFromCommandJsonDeserializer commandFromCommandJsonDeserializer;
     private final FromJsonHelper fromApiJsonHelper;
     private final ExcludeNothingWithPrettyPrintingOffJsonSerializerGoogleGson toApiJsonSerializer;
-    
+
     @Autowired
-    public RoleCommandHandler(final PlatformSecurityContext context, 
-            final RoleCommandFromCommandJsonDeserializer commandFromCommandJsonDeserializer,
-            final FromJsonHelper fromApiJsonHelper,
+    public RoleCommandHandler(final PlatformSecurityContext context, final FromJsonHelper fromApiJsonHelper,
             final ExcludeNothingWithPrettyPrintingOffJsonSerializerGoogleGson toApiJsonSerializer,
             final RoleWritePlatformService writePlatformService) {
         this.context = context;
-        this.commandFromCommandJsonDeserializer = commandFromCommandJsonDeserializer;
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.writePlatformService = writePlatformService;
@@ -52,14 +46,12 @@ public class RoleCommandHandler implements CommandSourceHandler {
         CommandSource commandSourceResult = commandSource.copy();
 
         final Long resourceId = commandSource.resourceId();
-        Long newResourceId = null;
-
         if (commandSource.isCreate()) {
             try {
-                final RoleCommand command = this.commandFromCommandJsonDeserializer
-                        .commandFromCommandJson(resourceId, commandSource.json());
+                final JsonElement parsedCommand = this.fromApiJsonHelper.parse(commandSource.json());
+                final JsonCommand command = JsonCommand.from(commandSource.json(), parsedCommand, this.fromApiJsonHelper);
 
-                newResourceId = this.writePlatformService.createRole(command);
+                final Long newResourceId = this.writePlatformService.createRole(command);
 
                 commandSourceResult.markAsChecked(maker, asToday);
                 commandSourceResult.updateResourceId(newResourceId);
@@ -68,10 +60,13 @@ public class RoleCommandHandler implements CommandSourceHandler {
             }
         } else if (commandSource.isUpdate()) {
             try {
-                final RoleCommand command = this.commandFromCommandJsonDeserializer.commandFromCommandJson(resourceId,
-                        commandSource.json());
+                final JsonElement parsedCommand = this.fromApiJsonHelper.parse(commandSource.json());
+                final JsonCommand command = JsonCommand.from(commandSource.json(), parsedCommand, this.fromApiJsonHelper);
 
-                newResourceId = this.writePlatformService.updateRole(command);
+                final EntityIdentifier result = this.writePlatformService.updateRole(resourceId, command);
+
+                final String jsonOfChangesOnly = toApiJsonSerializer.serialize(result.getChanges());
+                commandSourceResult.updateJsonTo(jsonOfChangesOnly);
 
                 commandSourceResult.markAsChecked(maker, asToday);
             } catch (RollbackTransactionAsCommandIsNotApprovedByCheckerException e) {
@@ -79,12 +74,12 @@ public class RoleCommandHandler implements CommandSourceHandler {
             }
         } else if (commandSource.isUpdateRolePermissions()) {
             try {
-                
+
                 final JsonElement parsedCommand = this.fromApiJsonHelper.parse(commandSource.json());
                 final JsonCommand command = JsonCommand.from(commandSource.json(), parsedCommand, this.fromApiJsonHelper);
-                
-                EntityIdentifier result = this.writePlatformService.updateRolePermissions(resourceId, command);
-                
+
+                final EntityIdentifier result = this.writePlatformService.updateRolePermissions(resourceId, command);
+
                 final String jsonOfChangesOnly = toApiJsonSerializer.serialize(result.getChanges());
                 commandSourceResult.updateJsonTo(jsonOfChangesOnly);
 
@@ -102,40 +97,37 @@ public class RoleCommandHandler implements CommandSourceHandler {
 
         final AppUser checker = context.authenticatedUser();
 
-        Long resourceId = commandSourceResult.resourceId();
+        final JsonElement parsedCommand = this.fromApiJsonHelper.parse(commandSourceResult.json());
+        final JsonCommand command = JsonCommand.withMakerCheckerApproval(commandSourceResult.json(), parsedCommand, this.fromApiJsonHelper);
+        final Long resourceId = commandSourceResult.resourceId();
+
         if (commandSourceResult.isCreate()) {
             final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "USER_ADMINISTRATION_SUPER_USER", "CREATE_ROLE_CHECKER");
             context.authenticatedUser().validateHasPermissionTo("CREATE_ROLE_CHECKER", allowedPermissions);
 
-            final RoleCommand command = this.commandFromCommandJsonDeserializer.commandFromCommandJson(resourceId,
-                    commandSourceResult.json(), true);
+            final Long newResourceId = this.writePlatformService.createRole(command);
 
-            resourceId = this.writePlatformService.createRole(command);
-            commandSourceResult.updateResourceId(resourceId);
+            commandSourceResult.updateResourceId(newResourceId);
             commandSourceResult.markAsChecked(checker, new LocalDate());
 
         } else if (commandSourceResult.isUpdate()) {
             final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "USER_ADMINISTRATION_SUPER_USER", "UPDATE_ROLE_CHECKER");
             context.authenticatedUser().validateHasPermissionTo("UPDATE_ROLE_CHECKER", allowedPermissions);
 
-            final RoleCommand command = this.commandFromCommandJsonDeserializer.commandFromCommandJson(resourceId,
-                    commandSourceResult.json(), true);
+            final EntityIdentifier result = this.writePlatformService.updateRole(resourceId, command);
 
-            resourceId = this.writePlatformService.updateRole(command);
+            final String jsonOfChangesOnly = toApiJsonSerializer.serialize(result.getChanges());
+            commandSourceResult.updateJsonTo(jsonOfChangesOnly);
             commandSourceResult.markAsChecked(checker, new LocalDate());
         } else if (commandSourceResult.isUpdateRolePermissions()) {
             final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "USER_ADMINISTRATION_SUPER_USER",
                     "PERMISSIONS_ROLE_CHECKER");
             context.authenticatedUser().validateHasPermissionTo("PERMISSIONS_ROLE_CHECKER", allowedPermissions);
 
-            final JsonElement parsedCommand = this.fromApiJsonHelper.parse(commandSourceResult.json());
-            final JsonCommand command = JsonCommand.from(commandSourceResult.json(), parsedCommand, this.fromApiJsonHelper);
-            
             EntityIdentifier result = this.writePlatformService.updateRolePermissions(resourceId, command);
-            
+
             final String jsonOfChangesOnly = toApiJsonSerializer.serialize(result.getChanges());
             commandSourceResult.updateJsonTo(jsonOfChangesOnly);
-            
             commandSourceResult.markAsChecked(checker, new LocalDate());
         } else if (commandSourceResult.isDelete()) { throw new UnsupportedCommandException(commandSourceResult.commandName()); }
 

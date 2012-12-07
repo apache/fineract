@@ -2,6 +2,8 @@ package org.mifosplatform.useradministration.domain;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -12,8 +14,8 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
-import org.mifosplatform.useradministration.command.RoleCommand;
 import org.mifosplatform.useradministration.data.RoleData;
 
 @Entity
@@ -30,6 +32,12 @@ public class Role extends AbstractAuditableCustom<AppUser, Long> {
     @JoinTable(name = "m_role_permission", joinColumns = @JoinColumn(name = "role_id"), inverseJoinColumns = @JoinColumn(name = "permission_id"))
     private Set<Permission> permissions = new HashSet<Permission>();
 
+    public static Role fromJson(final JsonCommand command) {
+        final String name = command.stringValueOfParameterNamed("name");
+        final String description = command.stringValueOfParameterNamed("description");
+        return new Role(name, description);
+    }
+
     protected Role() {
         //
     }
@@ -39,21 +47,43 @@ public class Role extends AbstractAuditableCustom<AppUser, Long> {
         this.description = description.trim();
     }
 
-    public void update(final RoleCommand command) {
-        if (command.isNameChanged()) {
-            this.name = command.getName();
+    public Map<String, Object> update(final JsonCommand command) {
+
+        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(7);
+
+        final String nameParamName = "name";
+        if (command.isChangeInStringParameterNamed(nameParamName, this.name)) {
+            final String newValue = command.stringValueOfParameterNamed(nameParamName);
+            actualChanges.put(nameParamName, newValue);
+            this.name = newValue;
         }
 
-        if (command.isDescriptionChanged()) {
-            this.description = command.getDescription();
+        final String descriptionParamName = "description";
+        if (command.isChangeInStringParameterNamed(descriptionParamName, this.description)) {
+            final String newValue = command.stringValueOfParameterNamed(descriptionParamName);
+            actualChanges.put(descriptionParamName, newValue);
+            this.description = newValue;
         }
+
+        return actualChanges;
     }
 
-    public boolean addPermission(final Permission permission) {
+    public boolean updatePermission(final Permission permission, final boolean isSelected) {
+        boolean changed = false;
+        if (isSelected) {
+            changed = addPermission(permission);
+        } else {
+            changed = removePermission(permission);
+        }
+
+        return changed;
+    }
+
+    private boolean addPermission(final Permission permission) {
         return this.permissions.add(permission);
     }
 
-    public boolean removePermission(final Permission permission) {
+    private boolean removePermission(final Permission permission) {
         return this.permissions.remove(permission);
     }
 
@@ -74,16 +104,5 @@ public class Role extends AbstractAuditableCustom<AppUser, Long> {
 
     public RoleData toData() {
         return new RoleData(this.getId(), this.name, this.description, null);
-    }
-
-    public boolean updatePermission(final Permission permission, final boolean isSelected) {
-        boolean changed = false;
-        if (isSelected) {
-            changed = addPermission(permission);
-        } else {
-            changed = removePermission(permission);
-        }
-
-        return changed;
     }
 }

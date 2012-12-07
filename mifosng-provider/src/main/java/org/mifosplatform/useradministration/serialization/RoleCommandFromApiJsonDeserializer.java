@@ -6,6 +6,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
+import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
+import org.mifosplatform.infrastructure.core.serialization.AbstractFromApiJsonDeserializer;
 import org.mifosplatform.infrastructure.core.serialization.CommandSerializer;
 import org.mifosplatform.infrastructure.core.serialization.FromApiJsonDeserializer;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
@@ -13,13 +16,14 @@ import org.mifosplatform.useradministration.command.RoleCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 
 /**
  * Implementation of {@link FromApiJsonDeserializer} for {@link RoleCommand}'s.
  */
 @Component
-public final class RoleCommandFromApiJsonDeserializer implements FromApiJsonDeserializer<RoleCommand> {
+public final class RoleCommandFromApiJsonDeserializer extends AbstractFromApiJsonDeserializer<RoleCommand> {
 
     /**
      * The parameters supported for this command.
@@ -27,41 +31,25 @@ public final class RoleCommandFromApiJsonDeserializer implements FromApiJsonDese
     private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("id", "name", "description"));
 
     private final FromJsonHelper fromApiJsonHelper;
-    private final RoleCommandFromCommandJsonDeserializer fromCommandJsonDeserializer;
-    private final CommandSerializer commandSerializerService;
 
     @Autowired
-    public RoleCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper,
-            final RoleCommandFromCommandJsonDeserializer fromCommandJsonDeserializer, final CommandSerializer commandSerializerService) {
+    public RoleCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper, final CommandSerializer commandSerializerService) {
+        super(commandSerializerService);
         this.fromApiJsonHelper = fromApiJsonHelper;
-        this.fromCommandJsonDeserializer = fromCommandJsonDeserializer;
-        this.commandSerializerService = commandSerializerService;
     }
 
     @Override
-    public RoleCommand commandFromApiJson(final String json) {
-        return commandFromApiJson(null, json);
-    }
+    public RoleCommand commandFromApiJson(@SuppressWarnings("unused") final Long roleId, final String json) {
 
-    @Override
-    public RoleCommand commandFromApiJson(final Long roleId, final String json) {
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-
         fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
 
-        return this.fromCommandJsonDeserializer.commandFromCommandJson(roleId, json);
-    }
+        final JsonElement element = fromApiJsonHelper.parse(json);
+        final String name = fromApiJsonHelper.extractStringNamed("name", element);
+        final String description = fromApiJsonHelper.extractStringNamed("description", element);
 
-    @Override
-    public String serializedCommandJsonFromApiJson(final String json) {
-        final RoleCommand command = commandFromApiJson(json);
-        return this.commandSerializerService.serializeCommandToJson(command);
-    }
-
-    @Override
-    public String serializedCommandJsonFromApiJson(final Long roleId, final String json) {
-        final RoleCommand command = commandFromApiJson(roleId, json);
-        return this.commandSerializerService.serializeCommandToJson(command);
+        return new RoleCommand(name, description);
     }
 }

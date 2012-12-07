@@ -18,6 +18,7 @@ import org.mifosplatform.useradministration.domain.RoleRepository;
 import org.mifosplatform.useradministration.exception.PermissionNotFoundException;
 import org.mifosplatform.useradministration.exception.RoleNotFoundException;
 import org.mifosplatform.useradministration.serialization.PermissionsCommandFromApiJsonDeserializer;
+import org.mifosplatform.useradministration.serialization.RoleCommandFromApiJsonDeserializer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,52 +30,59 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
     private final RoleRepository roleRepository;
     private final PermissionRepository permissionRepository;
     private final ConfigurationDomainService configurationDomainService;
-    private final PermissionsCommandFromApiJsonDeserializer fromApiJsonDeserializer;
+    private final RoleCommandFromApiJsonDeserializer roleCommandFromApiJsonDeserializer;
+    private final PermissionsCommandFromApiJsonDeserializer permissionsFromApiJsonDeserializer;
 
     @Autowired
     public RoleWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final RoleRepository roleRepository,
-            final PermissionRepository permissionRepository,
-            final ConfigurationDomainService configurationDomainService,
+            final PermissionRepository permissionRepository, final ConfigurationDomainService configurationDomainService,
+            final RoleCommandFromApiJsonDeserializer roleCommandFromApiJsonDeserializer,
             final PermissionsCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
         this.context = context;
         this.roleRepository = roleRepository;
         this.permissionRepository = permissionRepository;
         this.configurationDomainService = configurationDomainService;
-        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
+        this.roleCommandFromApiJsonDeserializer = roleCommandFromApiJsonDeserializer;
+        this.permissionsFromApiJsonDeserializer = fromApiJsonDeserializer;
     }
 
     @Transactional
     @Override
-    public Long createRole(final RoleCommand command) {
+    public Long createRole(final JsonCommand command) {
 
         context.authenticatedUser();
-        command.validateForCreate();
-        
-        final Role entity = new Role(command.getName(), command.getDescription());
 
+        final RoleCommand roleCommand = this.roleCommandFromApiJsonDeserializer.commandFromApiJson(command.json());
+        roleCommand.validateForCreate();
+
+        final Role entity = Role.fromJson(command);
         this.roleRepository.save(entity);
-        
+
         if (this.configurationDomainService.isMakerCheckerEnabledForTask("CREATE_ROLE") && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
-        
+
         return entity.getId();
     }
 
     @Transactional
     @Override
-    public Long updateRole(final RoleCommand command) {
+    public EntityIdentifier updateRole(final Long roleId, final JsonCommand command) {
 
         context.authenticatedUser();
-        command.validateForUpdate();
-        
-        final Role role = this.roleRepository.findOne(command.getId());
-        if (role == null) { throw new RoleNotFoundException(command.getId()); }
-        role.update(command);
 
-        this.roleRepository.save(role);
-        
+        final RoleCommand roleCommand = this.roleCommandFromApiJsonDeserializer.commandFromApiJson(command.json());
+        roleCommand.validateForUpdate();
+
+        final Role role = this.roleRepository.findOne(roleId);
+        if (role == null) { throw new RoleNotFoundException(roleId); }
+
+        final Map<String, Object> changes = role.update(command);
+        if (!changes.isEmpty()) {
+            this.roleRepository.save(role);
+        }
+
         if (this.configurationDomainService.isMakerCheckerEnabledForTask("UPDATE_ROLE") && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
-        
-        return role.getId();
+
+        return EntityIdentifier.withChanges(role.getId(), changes);
     }
 
     @Transactional
@@ -87,8 +95,8 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
 
         final Collection<Permission> allPermissions = this.permissionRepository.findAll();
 
-        final PermissionsCommand permissionsCommand = this.fromApiJsonDeserializer.commandFromApiJson(command.json());
-        
+        final PermissionsCommand permissionsCommand = this.permissionsFromApiJsonDeserializer.commandFromApiJson(command.json());
+
         final Map<String, Boolean> commandPermissions = permissionsCommand.getPermissions();
         final Map<String, Object> changes = new HashMap<String, Object>();
         final Map<String, Boolean> changedPermissions = new HashMap<String, Boolean>();
@@ -106,9 +114,9 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
             changes.put("permissions", changedPermissions);
             this.roleRepository.save(role);
         }
-        
+
         if (this.configurationDomainService.isMakerCheckerEnabledForTask("PERMISSIONS_ROLE") && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
-        
+
         return EntityIdentifier.withChanges(role.getId(), changes);
     }
 
@@ -116,7 +124,7 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
 
         if (allPermissions != null) {
             for (Permission permission : allPermissions) {
-                if (permission.hasCode(permissionCode)) {return permission;}
+                if (permission.hasCode(permissionCode)) { return permission; }
             }
         }
 
