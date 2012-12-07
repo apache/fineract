@@ -56,7 +56,7 @@ public class EntityIdentifier {
 
     public Map<String, Object> getChanges() {
         Map<String, Object> checkIfEmpty = null;
-        if (!this.changes.isEmpty()) {
+        if (this.changes != null && !this.changes.isEmpty()) {
             checkIfEmpty = this.changes;
         }
         return checkIfEmpty;
