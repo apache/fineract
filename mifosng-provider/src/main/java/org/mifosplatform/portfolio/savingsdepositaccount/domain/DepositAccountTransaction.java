@@ -70,6 +70,14 @@ public class DepositAccountTransaction extends AbstractPersistable<Long> {
         this.interest = interest;
         this.total = amount.doubleValue() == 0 ? new BigDecimal(0) : amount.add(interest);
     }
+    
+	private DepositAccountTransaction(DepositAccountTransactionType type, final BigDecimal amount, final LocalDate date, final BigDecimal interest, final BigDecimal total) {
+		this.typeOf = type;
+        this.amount = amount;
+		this.dateOf = date.toDateMidnight().toDate();
+		this.interest = interest;
+		this.total = total;
+	}
 
     public Date getDateOf() {
         return dateOf;
@@ -101,7 +109,7 @@ public class DepositAccountTransaction extends AbstractPersistable<Long> {
                         : interest.getAmount());
     }
 
-    public static DepositAccountTransaction withdraw(Money amount, LocalDate paymentDate, Money interest) {
+   /* public static DepositAccountTransaction withdraw(Money amount, LocalDate paymentDate, Money interest) {
         return new DepositAccountTransaction(DepositAccountTransactionType.WITHDRAW, amount == null ? new BigDecimal(0)
                 : amount.getAmount(), paymentDate, interest == null ? new BigDecimal(0) : interest.getAmount());
     }
@@ -109,9 +117,20 @@ public class DepositAccountTransaction extends AbstractPersistable<Long> {
     public static DepositAccountTransaction postInterest(Money depositAmount, LocalDate paymentDate, Money interest) {
         return new DepositAccountTransaction(DepositAccountTransactionType.INTEREST_POSTING, depositAmount == null ? new BigDecimal(0)
                 : depositAmount.getAmount(), paymentDate, interest == null ? new BigDecimal(0) : interest.getAmount());
-    }
+    }*/
+    
+    public static DepositAccountTransaction withdraw(Money amount, LocalDate paymentDate, Money interest, BigDecimal total) {
+		return new DepositAccountTransaction(DepositAccountTransactionType.WITHDRAW, amount == null ? new BigDecimal(0) : amount.getAmount(), paymentDate, interest==null ? new BigDecimal(0) : interest.getAmount(),total);
+
+	}
+	
+	public static DepositAccountTransaction postInterest(Money depositAmount, LocalDate paymentDate, Money interest, BigDecimal total) {
+		return new DepositAccountTransaction(DepositAccountTransactionType.INTEREST_POSTING, depositAmount == null ? new BigDecimal(0) : depositAmount.getAmount(), paymentDate, interest==null ? new BigDecimal(0) : interest.getAmount(),total);
+
+	}
 
     public void updateAccount(DepositAccount depositAccount) {
         this.depositAccount = depositAccount;
     }
+
 }

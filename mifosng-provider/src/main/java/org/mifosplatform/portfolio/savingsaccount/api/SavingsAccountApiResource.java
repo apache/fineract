@@ -143,37 +143,41 @@ public class SavingsAccountApiResource {
         if (responseParameters.isEmpty()) {
             responseParameters.addAll(typicalResponseParameters);
         }
-        boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+		
+		
+		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+		
+		SavingAccountData account = this.savingAccountReadPlatformService.retrieveSavingsAccount(accountId);
+		
+		return this.apiJsonSerializerService.serializeSavingAccountsDataToJson(prettyPrint, responseParameters, account);
+	}
 
-        SavingAccountData account = this.savingAccountReadPlatformService.retrieveSavingsAccount(accountId);
+	@SuppressWarnings("unused")
+	@GET
+	@Path("template")
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
+	public String retrieveNewDepositAccountDetails(
+			@QueryParam("clientId") final Long clientId,
+			@QueryParam("productId") final Long productId,
+			@Context final UriInfo uriInfo) {
 
-        return this.apiJsonSerializerService.serializeSavingAccountsDataToJson(prettyPrint, responseParameters, account);
-    }
-
-    @SuppressWarnings("unused")
-    @GET
-    @Path("template")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveNewDepositAccountDetails(@QueryParam("clientId") final Long clientId,
-            @QueryParam("productId") final Long productId, @Context final UriInfo uriInfo) {
-
-        context.authenticatedUser().validateHasReadPermission(entityType);
-
-        Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-        if (responseParameters.isEmpty()) {
-            responseParameters.addAll(typicalResponseParameters);
-        }
-        boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-
-        SavingAccountData account = null;
-        // this.savingAccountReadPlatformService.retrieveNewSavingsAccountDetails(clientId,
-        // productId);
-
-        return this.apiJsonSerializerService.serializeSavingAccountsDataToJson(prettyPrint, responseParameters, account);
-    }
-
+    	context.authenticatedUser().validateHasReadPermission(entityType);
+    	
+		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+		if (responseParameters.isEmpty()) {
+			responseParameters.addAll(typicalResponseParameters);
+		}
+		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+		
+		SavingAccountData account = null;
+//				this.savingAccountReadPlatformService.retrieveNewSavingsAccountDetails(clientId, productId);
+		
+		return this.apiJsonSerializerService.serializeSavingAccountsDataToJson(prettyPrint, responseParameters, account);
+	}
+	
     private boolean is(final String commandParam, final String commandValue) {
         return StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase(commandValue);
     }
+
 }

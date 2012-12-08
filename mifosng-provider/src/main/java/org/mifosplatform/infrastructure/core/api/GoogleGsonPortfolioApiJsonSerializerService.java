@@ -59,7 +59,8 @@ public class GoogleGsonPortfolioApiJsonSerializerService implements PortfolioApi
             "interestCompoundedEveryPeriodType", "renewalAllowed", "preClosureAllowed", "preClosureInterestRate", "withdrawnonDate",
             "rejectedonDate", "closedonDate", "transactions", "permissions", "isInterestWithdrawable", "interestPaid",
             "interestCompoundingAllowed", "availableInterestForWithdrawal", "availableWithdrawalAmount", "todaysDate",
-            "isLockinPeriodAllowed", "lockinPeriod", "lockinPeriodType"));
+            "isLockinPeriodAllowed", "lockinPeriod", "lockinPeriodType", "printFDdetailsLocation","availableInterest", "interestPostedAmount",
+            "lastInterestPostedDate", "nextInterestPostedDate","fatherName","address","imageKey"));
 
     private static final Set<String> DOCUMENT_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "parentEntityType",
             "parentEntityId", "name", "fileName", "type", "size", "description"));
@@ -101,7 +102,7 @@ public class GoogleGsonPortfolioApiJsonSerializerService implements PortfolioApi
     private static final Set<String> GUARANTOR_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("externalGuarantor", "existingClientId",
             "firstname", "lastname", "addressLine1", "addressLine2", "city", "state", "zip", "country", "mobileNumber", "housePhoneNumber",
             "comment", "dob"));
-
+    
     private static final Set<String> SAVING_SCHEDULE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("periods", "cumulativeDepositDue"));
 
     private final GoogleGsonSerializerHelper helper;
@@ -296,4 +297,5 @@ public class GoogleGsonPortfolioApiJsonSerializerService implements PortfolioApi
                 prettyPrint, responseParameters);
         return helper.serializedJsonFrom(gsonDeserializer, savingScheduleData);
     }
+
 }

@@ -48,4 +48,5 @@ public class SavingScheduleGenerator {
         return new SavingScheduleData(currencyData, totalDeposit.getAmount(), periods);
     }
 
+
 }

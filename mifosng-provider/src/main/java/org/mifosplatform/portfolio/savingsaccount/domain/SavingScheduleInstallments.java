@@ -63,3 +63,4 @@ public class SavingScheduleInstallments extends AbstractAuditableCustom<AppUser,
         this.savingAccount = account;
     }
 }
+

@@ -1,3 +1,4 @@
+
 DROP TABLE IF EXISTS `m_saving_schedule`;
 CREATE TABLE `m_saving_schedule` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,

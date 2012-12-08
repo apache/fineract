@@ -37,7 +37,7 @@ import org.mifosplatform.portfolio.savingsdepositproduct.domain.TenureTypeEnum;
 import org.mifosplatform.useradministration.domain.AppUser;
 
 @Entity
-@Table(name = "m_saving_account", uniqueConstraints = @UniqueConstraint(name = "saving_acc_external_id", columnNames = { "external_id" }))
+@Table(name = "m_saving_account", uniqueConstraints = @UniqueConstraint(name="saving_acc_external_id", columnNames = { "external_id" }))
 public class SavingAccount extends AbstractAuditableCustom<AppUser, Long> {
 
     @ManyToOne

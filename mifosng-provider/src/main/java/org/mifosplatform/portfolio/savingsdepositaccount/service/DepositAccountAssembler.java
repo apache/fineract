@@ -334,4 +334,5 @@ public class DepositAccountAssembler {
     public void postInterest(DepositAccount account) {
         account.postInterestForDepositAccount(account, this.fixedTermDepositInterestCalculator);
     }
+
 }

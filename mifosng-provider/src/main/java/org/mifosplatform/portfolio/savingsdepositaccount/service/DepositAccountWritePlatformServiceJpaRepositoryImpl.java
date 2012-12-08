@@ -333,9 +333,9 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         if (account == null || account.isDeleted()) { throw new DepositAccountNotFoundException(command.getAccountId()); }
         if (account.isInterestWithdrawable() && !account.isInterestCompoundingAllowed()) {
 
-            BigDecimal totalAvailableInterestForWithdrawal = getTotalWithdrawableInterestAvailable(account);
-            BigDecimal interestPaid = account.getInterstPaid();
-            BigDecimal remainInterestForWithdrawal = totalAvailableInterestForWithdrawal.subtract(interestPaid);
+           // BigDecimal totalAvailableInterestForWithdrawal = getTotalWithdrawableInterestAvailable(account);
+           // BigDecimal interestPaid = account.getInterstPaid();
+            BigDecimal remainInterestForWithdrawal = account.getAvailableInterest(); //totalAvailableInterestForWithdrawal.subtract(interestPaid);
 
             if (remainInterestForWithdrawal.doubleValue() > 0) {
                 if (remainInterestForWithdrawal.doubleValue() >= command.getWithdrawInterest().doubleValue()
@@ -357,13 +357,13 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         return new EntityIdentifier(account.getId());
     }
 
-    private BigDecimal getTotalWithdrawableInterestAvailable(DepositAccount account) {
+/*    private BigDecimal getTotalWithdrawableInterestAvailable(DepositAccount account) {
         BigDecimal interstGettingForPeriod = BigDecimal.valueOf(account.getAccuredInterest().getAmount().doubleValue()
                 / new Double(account.getTenureInMonths()));
         Integer noOfMonthsforInterestCal = Months.monthsBetween(account.getActualCommencementDate(), new LocalDate()).getMonths();
         Integer noOfPeriods = noOfMonthsforInterestCal / account.getInterestCompoundedEvery();
         return interstGettingForPeriod.multiply(new BigDecimal(noOfPeriods));
-    }
+    }*/
 
     @Transactional
     @Override

@@ -1,5 +1,6 @@
 package org.mifosplatform.infrastructure.core.data;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -38,6 +39,7 @@ public class EntityIdentifier {
 
     public EntityIdentifier(final Long entityId) {
         this.entityId = entityId;
+        this.changes = new HashMap<String, Object>();
     }
 
     private EntityIdentifier(final Long entityId, final Long makerCheckerId, final Map<String, Object> changesOnly) {
