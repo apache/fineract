@@ -38,11 +38,10 @@ public class Note extends AbstractAuditableCustom<AppUser, Long> {
     @Column(name = "note_type_enum")
     private Integer noteTypeId;
 
-    // FIXME - madhukar - disabled relationship to DespositAccount as missing patch on fields on deposit account table that break functionality.
-//    @SuppressWarnings("unused")
-//    @ManyToOne
-//    @JoinColumn(name = "deposit_account_id", nullable = true)
-//    private DepositAccount depositAccount;
+    @SuppressWarnings("unused")
+    @ManyToOne
+    @JoinColumn(name = "deposit_account_id", nullable = true)
+    private DepositAccount depositAccount;
 
     public enum NoteType {
         CLIENT(100, "noteType.client"), LOAN(200, "noteType.loan"), LOAN_TRANSACTION(300, "noteType.loan.transaction"), DEPOSIT(400,
@@ -76,16 +75,20 @@ public class Note extends AbstractAuditableCustom<AppUser, Long> {
         }
     }
 
-    public static Note clientNote(Client client, String note) {
+    public static Note clientNote(final Client client, final String note) {
         return new Note(client, note);
     }
 
-    public static Note loanNote(Loan loan, String note) {
+    public static Note loanNote(final Loan loan, final String note) {
         return new Note(loan, note);
     }
 
-    public static Note loanTransactionNote(Loan loan, LoanTransaction loanTransaction, String note) {
+    public static Note loanTransactionNote(final Loan loan, final LoanTransaction loanTransaction, final String note) {
         return new Note(loan, loanTransaction, note);
+    }
+    
+    public static Note depositNote(final DepositAccount account, final String noteText) {
+        return new Note(account, noteText);
     }
 
     private Note(Client client, String note) {
@@ -117,8 +120,8 @@ public class Note extends AbstractAuditableCustom<AppUser, Long> {
         this.noteTypeId = null;
     }
 
-    public Note(DepositAccount account, String note) {
-//        this.depositAccount = account;
+    public Note(final DepositAccount account, final String note) {
+        this.depositAccount = account;
         this.client = account.client();
         this.note = note;
         this.noteTypeId = NoteType.DEPOSIT.getValue();
@@ -130,9 +133,5 @@ public class Note extends AbstractAuditableCustom<AppUser, Long> {
 
     public boolean isNotAgainstClientWithIdOf(Long clientId) {
         return !this.client.identifiedBy(clientId);
-    }
-
-    public static Note depositNote(DepositAccount account, String noteText) {
-        return new Note(account, noteText);
     }
 }
