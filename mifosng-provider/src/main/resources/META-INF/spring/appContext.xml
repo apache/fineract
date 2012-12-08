@@ -17,6 +17,7 @@
 	
 	<context:component-scan base-package="org.mifosplatform.accounting.*,
 										  org.mifosplatform.commands.*,
+										  org.mifosplatform.audit.*,
 										  org.mifosplatform.infrastructure.*,
 										  org.mifosplatform.organisation.*, 
 										  org.mifosplatform.portfolio.loanaccount.*,

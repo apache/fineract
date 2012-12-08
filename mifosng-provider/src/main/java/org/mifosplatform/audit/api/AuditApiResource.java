@@ -26,46 +26,38 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class AuditApiResource {
 
-	private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(
-			Arrays.asList("id", "apiOperation", "resource", "resourceId",
-					"makerId", "madeOnDate", "checkerId", "checkedOnDate",
-					"commandAsJson"));
-	private final String resourceNameForPermissions = "AUDIT";
+    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "apiOperation", "resource", "resourceId",
+            "makerId", "madeOnDate", "checkerId", "checkedOnDate", "commandAsJson"));
+    private final String resourceNameForPermissions = "AUDIT";
 
-	private final PlatformSecurityContext context;
-	private final AuditReadPlatformService auditReadPlatformService;
-	private final ApiRequestParameterHelper apiRequestParameterHelper;
-	private final DefaultToApiJsonSerializer<AuditData> toApiJsonSerializer;
+    private final PlatformSecurityContext context;
+    private final AuditReadPlatformService auditReadPlatformService;
+    private final ApiRequestParameterHelper apiRequestParameterHelper;
+    private final DefaultToApiJsonSerializer<AuditData> toApiJsonSerializer;
 
-	@Autowired
-	public AuditApiResource(final PlatformSecurityContext context,
-			final AuditReadPlatformService auditReadPlatformService,
-			final ApiRequestParameterHelper apiRequestParameterHelper,
-			final DefaultToApiJsonSerializer<AuditData> toApiJsonSerializer) {
-		this.context = context;
-		this.auditReadPlatformService = auditReadPlatformService;
-		this.apiRequestParameterHelper = apiRequestParameterHelper;
-		this.toApiJsonSerializer = toApiJsonSerializer;
-	}
+    @Autowired
+    public AuditApiResource(final PlatformSecurityContext context, final AuditReadPlatformService auditReadPlatformService,
+            final ApiRequestParameterHelper apiRequestParameterHelper, final DefaultToApiJsonSerializer<AuditData> toApiJsonSerializer) {
+        this.context = context;
+        this.auditReadPlatformService = auditReadPlatformService;
+        this.apiRequestParameterHelper = apiRequestParameterHelper;
+        this.toApiJsonSerializer = toApiJsonSerializer;
+    }
 
-	@GET
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrieveAuditEntries(@Context final UriInfo uriInfo) {
+    @GET
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String retrieveAuditEntries(@Context final UriInfo uriInfo) {
 
-		context.authenticatedUser().validateHasReadPermission(
-				resourceNameForPermissions);
+        context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 
-		// final String extraCriteria = getCriteria(sqlSearch, officeId,
-		// externalId, displayName, firstName, lastName, hierarchy);
+        // final String extraCriteria = getCriteria(sqlSearch, officeId,
+        // externalId, displayName, firstName, lastName, hierarchy);
 
-		final Collection<AuditData> auditEntries = this.auditReadPlatformService
-				.retrieveAuditEntries();
+        final Collection<AuditData> auditEntries = this.auditReadPlatformService.retrieveAuditEntries();
 
-		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper
-				.process(uriInfo.getQueryParameters());
-		return this.toApiJsonSerializer.serialize(settings, auditEntries,
-				RESPONSE_DATA_PARAMETERS);
-	}
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.toApiJsonSerializer.serialize(settings, auditEntries, RESPONSE_DATA_PARAMETERS);
+    }
 
 }
