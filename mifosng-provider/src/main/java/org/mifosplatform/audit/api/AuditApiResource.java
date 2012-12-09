@@ -27,7 +27,7 @@ import org.springframework.stereotype.Component;
 public class AuditApiResource {
 
     private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "apiOperation", "resource", "resourceId",
-            "makerId", "madeOnDate", "checkerId", "checkedOnDate", "commandAsJson"));
+            "maker", "madeOnDate", "checker", "checkedOnDate", "commandAsJson"));    
     private final String resourceNameForPermissions = "AUDIT";
 
     private final PlatformSecurityContext context;
