@@ -54,9 +54,10 @@ public class AuditApiResource {
         // final String extraCriteria = getCriteria(sqlSearch, officeId,
         // externalId, displayName, firstName, lastName, hierarchy);
 
-        final Collection<AuditData> auditEntries = this.auditReadPlatformService.retrieveAuditEntries();
-
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        
+        final Collection<AuditData> auditEntries = this.auditReadPlatformService.retrieveAuditEntries(settings.isIncludeJson());
+
         return this.toApiJsonSerializer.serialize(settings, auditEntries, RESPONSE_DATA_PARAMETERS);
     }
 

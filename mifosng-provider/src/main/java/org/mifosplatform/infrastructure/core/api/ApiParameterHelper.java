@@ -98,6 +98,15 @@ public class ApiParameterHelper {
         }
         return makerCheckerable;
     }
+    
+    public static boolean includeJson(final MultivaluedMap<String, String> queryParams) {
+        boolean includeJson = false;
+        if (queryParams.getFirst("includeJson") != null) {
+            String includeJsonValue = queryParams.getFirst("includeJson");
+            includeJson = "true".equalsIgnoreCase(includeJsonValue);
+        }
+        return includeJson;
+    }
 
     public static boolean genericResultSet(final MultivaluedMap<String, String> queryParams) {
         boolean genericResultSet = false;

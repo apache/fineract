@@ -28,7 +28,8 @@ public class ApiRequestParameterHelper {
         final boolean template = ApiParameterHelper.template(queryParameters);
         final Long commandId = ApiParameterHelper.commandId(queryParameters);
         final boolean makerCheckerable = ApiParameterHelper.makerCheckerable(queryParameters);
+        final boolean includeJson = ApiParameterHelper.includeJson(queryParameters);
         
-        return ApiRequestJsonSerializationSettings.from(prettyPrint, responseParameters, template, commandId, makerCheckerable);
+        return ApiRequestJsonSerializationSettings.from(prettyPrint, responseParameters, template, commandId, makerCheckerable, includeJson);
     }
 }

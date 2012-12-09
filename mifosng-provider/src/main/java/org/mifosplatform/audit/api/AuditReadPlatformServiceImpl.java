@@ -27,9 +27,14 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 
     private static final class AuditMapper implements RowMapper<AuditData> {
 
-        public String schema() {
+        public String schema(boolean includeJson) {
+        	
+        	String commandAsJsonString = "";
+        	if (includeJson) commandAsJsonString = ", mc.command_as_json as commandAsJson ";
+        	
             return " mc.id as id, mc.api_operation as apiOperation, mc.api_resource as resource, mc.resource_id as resourceId,"
-                    + " mk.username as maker, mc.made_on_date as madeOnDate, ck.username as checker, mc.checked_on_date as checkedOnDate, mc.command_as_json as commandAsJson "
+                    + " mk.username as maker, mc.made_on_date as madeOnDate, ck.username as checker, mc.checked_on_date as checkedOnDate"
+                    + commandAsJsonString
                     + " from m_portfolio_command_source mc " + " left join m_appuser mk on mk.id = mc.maker_id"
                     + " left join m_appuser ck on ck.id = mc.checker_id";
         }
@@ -45,18 +50,25 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
             final LocalDate madeOnDate = JdbcSupport.getLocalDate(rs, "madeOnDate");
             final String checker = rs.getString("checker");
             final LocalDate checkedOnDate = JdbcSupport.getLocalDate(rs, "checkedOnDate");
-            final String commandAsJson = rs.getString("commandAsJson");
+            String commandAsJson;
+            //commandAsJson might not be on the select list of columns
+            try {
+            	commandAsJson = rs.getString("commandAsJson");
+            } catch (SQLException e) {
+            	commandAsJson = null;
+            }
             return new AuditData(id, apiOperation, resource, resourceId, maker, madeOnDate, checker, checkedOnDate, commandAsJson);
         }
     }
 
     @Override
-    public Collection<AuditData> retrieveAuditEntries() {
+    public Collection<AuditData> retrieveAuditEntries(boolean includeJson) {
         context.authenticatedUser();
 
         final AuditMapper rm = new AuditMapper();
-        final String sql = "select " + rm.schema()
-                + " where mc.checker_id is null order by mc.made_on_date DESC, mc.api_resource ASC, mc.api_operation ASC";
+        final String sql = "select " + rm.schema(includeJson)
+        // + " where mc.checker_id is null order by mc.made_on_date DESC, mc.api_resource ASC, mc.api_operation ASC";
+        + " order by id DESC";
 
         return this.jdbcTemplate.query(sql, rm, new Object[] {});
     }

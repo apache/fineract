@@ -4,6 +4,6 @@ import java.util.Collection;
 
 public interface AuditReadPlatformService {
 
-    Collection<AuditData> retrieveAuditEntries();
+    Collection<AuditData> retrieveAuditEntries(boolean includeJson);
 
 }

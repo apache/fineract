@@ -13,23 +13,25 @@ public class ApiRequestJsonSerializationSettings {
     private final boolean template;
     private final Long commandId;
     private final boolean makerCheckerable;
+    private final boolean includeJson;
 
     public ApiRequestJsonSerializationSettings(final boolean prettyPrint, final Set<String> parametersForPartialResponse,
-            final boolean template, final Long commandId, final boolean makerCheckerable) {
+            final boolean template, final Long commandId, final boolean makerCheckerable, final boolean includeJson) {
         this.prettyPrint = prettyPrint;
         this.parametersForPartialResponse = parametersForPartialResponse;
         this.template = template;
         this.commandId = commandId;
         this.makerCheckerable = makerCheckerable;
+        this.includeJson = includeJson;
     }
 
     public static ApiRequestJsonSerializationSettings from(final boolean prettyPrint, final Set<String> parametersForPartialResponse,
-            final boolean template, final Long commandId, final boolean makerCheckerable) {
+            final boolean template, final Long commandId, final boolean makerCheckerable, final boolean includeJson) {
 
         // FIXME - kw - rather than always creating new objects for this could
         // just send by common ones like, prettyprint=false, empty response
         // parameters
-        return new ApiRequestJsonSerializationSettings(prettyPrint, parametersForPartialResponse, template, commandId, makerCheckerable);
+        return new ApiRequestJsonSerializationSettings(prettyPrint, parametersForPartialResponse, template, commandId, makerCheckerable, includeJson);
     }
 
     public boolean isPrettyPrint() {
@@ -39,9 +41,13 @@ public class ApiRequestJsonSerializationSettings {
     public boolean isTemplate() {
         return this.template;
     }
-    
+
     public boolean isMakerCheckerable() {
         return this.makerCheckerable;
+    }
+    
+    public boolean isIncludeJson() {
+        return this.includeJson;
     }
 
     public Long getCommandId() {
