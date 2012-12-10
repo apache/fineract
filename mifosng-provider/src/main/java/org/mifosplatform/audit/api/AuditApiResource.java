@@ -8,6 +8,7 @@ import java.util.Set;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
@@ -74,18 +75,39 @@ public class AuditApiResource {
 				RESPONSE_DATA_PARAMETERS);
 	}
 
+	@GET
+    @Path("{auditId}")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String retrieveAuditEntry(@PathParam("auditId") final Long auditId, @Context final UriInfo uriInfo) {
+
+		context.authenticatedUser().validateHasReadPermission(
+				resourceNameForPermissions);
+
+
+		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper
+				.process(uriInfo.getQueryParameters());
+
+		final AuditData auditEntry = this.auditReadPlatformService
+				.retrieveAuditEntry(auditId);
+
+		return this.toApiJsonSerializer.serialize(settings, auditEntry,
+				RESPONSE_DATA_PARAMETERS);
+	}
+	
+	
     private String getExtraCriteria(String apiOperation, String resource, Long resourceId) {
 
         String extraCriteria = "";
 
         if (apiOperation != null) {
-            extraCriteria += " and api_operation like " + ApiParameterHelper.sqlEncodeString(apiOperation);
+            extraCriteria += " and aud.api_operation like " + ApiParameterHelper.sqlEncodeString(apiOperation);
         }
         if (resource != null) {
-            extraCriteria += " and api_resource like " + ApiParameterHelper.sqlEncodeString(resource);
+            extraCriteria += " and aud.api_resource like " + ApiParameterHelper.sqlEncodeString(resource);
         }
         if (resourceId != null) {
-            extraCriteria += " and resource_id = " + resourceId;
+            extraCriteria += " and aud.resource_id = " + resourceId;
         }
 
 

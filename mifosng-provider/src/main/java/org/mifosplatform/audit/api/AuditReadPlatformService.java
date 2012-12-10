@@ -4,6 +4,9 @@ import java.util.Collection;
 
 public interface AuditReadPlatformService {
 
-    Collection<AuditData> retrieveAuditEntries(String extraCriteria, boolean includeJson);
+	Collection<AuditData> retrieveAuditEntries(String extraCriteria,
+			boolean includeJson);
+
+	AuditData retrieveAuditEntry(Long auditId);
 
 }
