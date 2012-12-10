@@ -81,7 +81,7 @@ public class ClientsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveAllIndividualClients(@Context final UriInfo uriInfo, @QueryParam("sqlSearch") final String sqlSearch,
-            @QueryParam("officeId") final Integer officeId, @QueryParam("externalId") final String externalId,
+            @QueryParam("officeId") final Long officeId, @QueryParam("externalId") final String externalId,
             @QueryParam("displayName") final String displayName, @QueryParam("firstName") final String firstName,
             @QueryParam("lastName") final String lastName, @QueryParam("underHierarchy") final String hierarchy) {
 
@@ -95,7 +95,7 @@ public class ClientsApiResource {
         return this.toApiJsonSerializer.serialize(settings, clients, CLIENT_DATA_PARAMETERS);
     }
 
-    private String getClientCriteria(String sqlSearch, Integer officeId, String externalId, String displayName, String firstName,
+    private String getClientCriteria(String sqlSearch, Long officeId, String externalId, String displayName, String firstName,
             String lastName, String hierarchy) {
 
         String extraCriteria = "";

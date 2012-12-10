@@ -74,7 +74,7 @@ public class StaffApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveStaff(@Context final UriInfo uriInfo, @QueryParam("sqlSearch") final String sqlSearch,
-            @QueryParam("officeId") final Integer officeId) {
+            @QueryParam("officeId") final Long officeId) {
 
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 
@@ -137,7 +137,7 @@ public class StaffApiResource {
         return this.toApiJsonSerializer.serialize(result);
     }
 
-    private String getStaffCriteria(final String sqlSearch, final Integer officeId) {
+    private String getStaffCriteria(final String sqlSearch, final Long officeId) {
 
         String extraCriteria = "";
 

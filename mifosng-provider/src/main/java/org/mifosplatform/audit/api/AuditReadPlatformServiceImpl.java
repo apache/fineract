@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
@@ -62,13 +63,19 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
     }
 
     @Override
-    public Collection<AuditData> retrieveAuditEntries(boolean includeJson) {
+    public Collection<AuditData> retrieveAuditEntries(String extraCriteria, boolean includeJson) {
         context.authenticatedUser();
 
         final AuditMapper rm = new AuditMapper();
-        final String sql = "select " + rm.schema(includeJson)
+
+
+
+        
+        
+        String sql = "select " + rm.schema(includeJson);
+        if (StringUtils.isNotBlank(extraCriteria)) sql += " where (" + extraCriteria + ")";
         // + " where mc.checker_id is null order by mc.made_on_date DESC, mc.api_resource ASC, mc.api_operation ASC";
-        + " order by id DESC";
+        sql += " order by id DESC";
 
         return this.jdbcTemplate.query(sql, rm, new Object[] {});
     }
