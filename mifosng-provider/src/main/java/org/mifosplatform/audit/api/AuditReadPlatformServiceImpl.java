@@ -3,12 +3,15 @@ package org.mifosplatform.audit.api;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.useradministration.data.AppUserLookup;
+import org.mifosplatform.useradministration.service.AppUserReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -19,12 +22,13 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 
 	private final JdbcTemplate jdbcTemplate;
 	private final PlatformSecurityContext context;
-
+	private final AppUserReadPlatformService appUserReadPlatformService;
 	@Autowired
 	public AuditReadPlatformServiceImpl(final PlatformSecurityContext context,
-			final TenantAwareRoutingDataSource dataSource) {
+			final TenantAwareRoutingDataSource dataSource, final AppUserReadPlatformService appUserReadPlatformService) {
 		this.context = context;
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
+		this.appUserReadPlatformService = appUserReadPlatformService;
 	}
 
 	private static final class AuditMapper implements RowMapper<AuditData> {
@@ -70,6 +74,8 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 		}
 	}
 
+
+
 	@Override
 	public Collection<AuditData> retrieveAuditEntries(String extraCriteria,
 			boolean includeJson) {
@@ -95,6 +101,14 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 		sql += " where aud.id = " + auditId;
 
 		return this.jdbcTemplate.queryForObject(sql, rm, new Object[] {});
+	}
+
+	@Override
+	public AuditSearchData retrieveSearchTemplate() {
+		Collection<AppUserLookup> appUsers = appUserReadPlatformService.retrieveSearchTemplate();
+		List<String> apiOperations = null;
+		List<String> resources = null;
+		return new AuditSearchData(appUsers, apiOperations, resources);
 	}
 
 }

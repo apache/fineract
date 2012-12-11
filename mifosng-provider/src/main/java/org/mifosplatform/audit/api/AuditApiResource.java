@@ -40,16 +40,20 @@ public class AuditApiResource {
 	private final AuditReadPlatformService auditReadPlatformService;
 	private final ApiRequestParameterHelper apiRequestParameterHelper;
 	private final DefaultToApiJsonSerializer<AuditData> toApiJsonSerializer;
+	private final DefaultToApiJsonSerializer<AuditSearchData> toApiJsonSerializerSearchTemplate;
 
 	@Autowired
-	public AuditApiResource(final PlatformSecurityContext context,
+	public AuditApiResource(
+			final PlatformSecurityContext context,
 			final AuditReadPlatformService auditReadPlatformService,
 			final ApiRequestParameterHelper apiRequestParameterHelper,
-			final DefaultToApiJsonSerializer<AuditData> toApiJsonSerializer) {
+			final DefaultToApiJsonSerializer<AuditData> toApiJsonSerializer,
+			final DefaultToApiJsonSerializer<AuditSearchData> toApiJsonSerializerSearchTemplate) {
 		this.context = context;
 		this.auditReadPlatformService = auditReadPlatformService;
 		this.apiRequestParameterHelper = apiRequestParameterHelper;
 		this.toApiJsonSerializer = toApiJsonSerializer;
+		this.toApiJsonSerializerSearchTemplate = toApiJsonSerializerSearchTemplate;
 	}
 
 	@GET
@@ -58,12 +62,15 @@ public class AuditApiResource {
 	public String retrieveAuditEntries(@Context final UriInfo uriInfo,
 			@QueryParam("apiOperation") final String apiOperation,
 			@QueryParam("resource") final String resource,
-			@QueryParam("resourceId") final Long resourceId) {
+			@QueryParam("resourceId") final Long resourceId,
+			@QueryParam("makerId") final Long makerId,
+			@QueryParam("checkerId") final Long checkerId) {
 
 		context.authenticatedUser().validateHasReadPermission(
 				resourceNameForPermissions);
 
-        final String extraCriteria = getExtraCriteria(apiOperation, resource, resourceId);
+		final String extraCriteria = getExtraCriteria(apiOperation, resource,
+				resourceId, makerId, checkerId);
 
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper
 				.process(uriInfo.getQueryParameters());
@@ -76,14 +83,14 @@ public class AuditApiResource {
 	}
 
 	@GET
-    @Path("{auditId}")
+	@Path("{auditId}")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrieveAuditEntry(@PathParam("auditId") final Long auditId, @Context final UriInfo uriInfo) {
+	public String retrieveAuditEntry(@PathParam("auditId") final Long auditId,
+			@Context final UriInfo uriInfo) {
 
 		context.authenticatedUser().validateHasReadPermission(
 				resourceNameForPermissions);
-
 
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper
 				.process(uriInfo.getQueryParameters());
@@ -94,28 +101,57 @@ public class AuditApiResource {
 		return this.toApiJsonSerializer.serialize(settings, auditEntry,
 				RESPONSE_DATA_PARAMETERS);
 	}
-	
-	
-    private String getExtraCriteria(String apiOperation, String resource, Long resourceId) {
 
-        String extraCriteria = "";
+	@GET
+	@Path("/searchtemplate")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String retrieveAuditSearchTemplate(@Context final UriInfo uriInfo) {
 
-        if (apiOperation != null) {
-            extraCriteria += " and aud.api_operation like " + ApiParameterHelper.sqlEncodeString(apiOperation);
-        }
-        if (resource != null) {
-            extraCriteria += " and aud.api_resource like " + ApiParameterHelper.sqlEncodeString(resource);
-        }
-        if (resourceId != null) {
-            extraCriteria += " and aud.resource_id = " + resourceId;
-        }
+		context.authenticatedUser().validateHasReadPermission(
+				resourceNameForPermissions);
 
+		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper
+				.process(uriInfo.getQueryParameters());
 
-        if (StringUtils.isNotBlank(extraCriteria)) {
-            extraCriteria = extraCriteria.substring(4);
-        }
+		final AuditSearchData auditSearchData = this.auditReadPlatformService
+				.retrieveSearchTemplate();
 
-        return extraCriteria;
-    }
+		final Set<String> RESPONSE_DATA_PARAMETERS_SEARCH_TEMPLATE = new HashSet<String>(
+				Arrays.asList("appUsers", "apiOperations", "resources"));
+
+		return this.toApiJsonSerializerSearchTemplate.serialize(settings, auditSearchData,
+				RESPONSE_DATA_PARAMETERS_SEARCH_TEMPLATE);
+	}
+
+	private String getExtraCriteria(String apiOperation, String resource,
+			Long resourceId, Long makerId, Long checkerId) {
+
+		String extraCriteria = "";
+
+		if (apiOperation != null) {
+			extraCriteria += " and aud.api_operation like "
+					+ ApiParameterHelper.sqlEncodeString(apiOperation);
+		}
+		if (resource != null) {
+			extraCriteria += " and aud.api_resource like "
+					+ ApiParameterHelper.sqlEncodeString(resource);
+		}
+		if (resourceId != null) {
+			extraCriteria += " and aud.resource_id = " + resourceId;
+		}
+		if (makerId != null) {
+			extraCriteria += " and aud.maker_id = " + makerId;
+		}
+		if (checkerId != null) {
+			extraCriteria += " and aud.checker_id = " + checkerId;
+		}
+
+		if (StringUtils.isNotBlank(extraCriteria)) {
+			extraCriteria = extraCriteria.substring(4);
+		}
+
+		return extraCriteria;
+	}
 
 }
