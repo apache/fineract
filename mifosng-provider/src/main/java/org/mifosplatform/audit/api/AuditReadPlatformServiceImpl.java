@@ -23,9 +23,11 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 	private final JdbcTemplate jdbcTemplate;
 	private final PlatformSecurityContext context;
 	private final AppUserReadPlatformService appUserReadPlatformService;
+
 	@Autowired
 	public AuditReadPlatformServiceImpl(final PlatformSecurityContext context,
-			final TenantAwareRoutingDataSource dataSource, final AppUserReadPlatformService appUserReadPlatformService) {
+			final TenantAwareRoutingDataSource dataSource,
+			final AppUserReadPlatformService appUserReadPlatformService) {
 		this.context = context;
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 		this.appUserReadPlatformService = appUserReadPlatformService;
@@ -74,8 +76,6 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 		}
 	}
 
-
-
 	@Override
 	public Collection<AuditData> retrieveAuditEntries(String extraCriteria,
 			boolean includeJson) {
@@ -105,10 +105,53 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 
 	@Override
 	public AuditSearchData retrieveSearchTemplate() {
-		Collection<AppUserLookup> appUsers = appUserReadPlatformService.retrieveSearchTemplate();
-		List<String> apiOperations = null;
-		List<String> resources = null;
+		Collection<AppUserLookup> appUsers = appUserReadPlatformService
+				.retrieveSearchTemplate();
+
+		ApiOperationsMapper mapper = new ApiOperationsMapper();
+		List<String> apiOperations = this.jdbcTemplate.query(mapper.schema(),
+				mapper, new Object[] {});
+
+		ApiResourcesMapper mapper2 = new ApiResourcesMapper();
+		List<String> resources = this.jdbcTemplate.query(mapper2.schema(),
+				mapper2, new Object[] {});
+		
 		return new AuditSearchData(appUsers, apiOperations, resources);
 	}
 
+	private static final class ApiOperationsMapper implements RowMapper<String> {
+
+		@Override
+		public String mapRow(final ResultSet rs,
+				@SuppressWarnings("unused") final int rowNum)
+				throws SQLException {
+
+			return rs.getString("apiOperation");
+		}
+
+		public String schema() {
+
+			return " SELECT distinct(action_name) as apiOperation FROM m_permission "
+					+ " where action_name is not null and action_name <> 'READ' "
+					+ " order by if(action_name in ('CREATE', 'DELETE', 'UPDATE'), action_name, 'ZZZ'), action_name";
+		}
+
+	}
+
+	private static final class ApiResourcesMapper implements RowMapper<String> {
+
+		@Override
+		public String mapRow(final ResultSet rs,
+				@SuppressWarnings("unused") final int rowNum)
+				throws SQLException {
+
+			return rs.getString("resource");
+		}
+
+		public String schema() {
+
+			return " select distinct(api_resource) as resource from m_portfolio_command_source order by api_resource";
+		}
+
+	}
 }

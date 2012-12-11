@@ -130,11 +130,11 @@ public class AuditApiResource {
 		String extraCriteria = "";
 
 		if (apiOperation != null) {
-			extraCriteria += " and aud.api_operation like "
+			extraCriteria += " and aud.api_operation = "
 					+ ApiParameterHelper.sqlEncodeString(apiOperation);
 		}
 		if (resource != null) {
-			extraCriteria += " and aud.api_resource like "
+			extraCriteria += " and aud.api_resource = "
 					+ ApiParameterHelper.sqlEncodeString(resource);
 		}
 		if (resourceId != null) {
