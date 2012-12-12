@@ -1,7 +1,12 @@
 package org.mifosplatform.portfolio.loanproduct.command;
 
 import java.math.BigDecimal;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.mifosplatform.infrastructure.core.data.ApiParameterError;
+import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
+import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 
 /**
  * Immutable command for creating or updating details of a loan product.
@@ -26,19 +31,11 @@ public class LoanProductCommand {
     private final Integer interestCalculationPeriodType;
     private final String[] charges;
 
-    private final transient Set<String> parametersPassedInRequest;
-    private final transient boolean makerCheckerApproval;
-    private final transient Long id;
-
-    public LoanProductCommand(final Set<String> parametersPassedInRequest, final boolean makerCheckerApproval, final Long id,
-            final String name, final String description, final Long fundId, final Long transactionProcessingStrategyId,
+    public LoanProductCommand(final String name, final String description, final Long fundId, final Long transactionProcessingStrategyId,
             final String currencyCode, final Integer digitsAfterDecimal, final BigDecimal principal, final BigDecimal inArrearsTolerance,
             final Integer numberOfRepayments, final Integer repaymentEvery, final BigDecimal interestRatePerPeriod,
             final Integer repaymentFrequencyType, final Integer interestRateFrequencyType, final Integer amortizationType,
             final Integer interestType, final Integer interestCalculationPeriodType, final String[] charges) {
-        this.parametersPassedInRequest = parametersPassedInRequest;
-        this.makerCheckerApproval = makerCheckerApproval;
-        this.id = id;
         this.name = name;
         this.description = description;
         this.fundId = fundId;
@@ -60,10 +57,6 @@ public class LoanProductCommand {
         this.interestType = interestType;
         this.interestCalculationPeriodType = interestCalculationPeriodType;
         this.charges = charges;
-    }
-
-    public Long getId() {
-        return id;
     }
 
     public String getName() {
@@ -134,75 +127,77 @@ public class LoanProductCommand {
         return charges;
     }
 
-    public boolean isNameChanged() {
-        return this.parametersPassedInRequest.contains("name");
+    public void validateForCreate() {
+
+        List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+
+        DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("product");
+
+        baseDataValidator.reset().parameter("name").value(this.name).notBlank();
+        baseDataValidator.reset().parameter("description").value(this.description).notExceedingLengthOf(500);
+        baseDataValidator.reset().parameter("currencyCode").value(this.currencyCode).notBlank();
+        baseDataValidator.reset().parameter("digitsAfterDecimal").value(this.digitsAfterDecimal).notNull().inMinMaxRange(0, 6);
+
+        baseDataValidator.reset().parameter("principal").value(this.principal).notNull().positiveAmount();
+        baseDataValidator.reset().parameter("inArrearsTolerance").value(this.inArrearsTolerance).ignoreIfNull().zeroOrPositiveAmount();
+
+        baseDataValidator.reset().parameter("repaymentFrequencyType").value(this.repaymentFrequencyType).notNull().inMinMaxRange(0, 3);
+        baseDataValidator.reset().parameter("repaymentEvery").value(this.repaymentEvery).notNull().integerGreaterThanZero();
+        baseDataValidator.reset().parameter("numberOfRepayments").value(this.numberOfRepayments).notNull().integerGreaterThanZero();
+
+        baseDataValidator.reset().parameter("interestRatePerPeriod").value(this.interestRatePerPeriod).notNull();
+        baseDataValidator.reset().parameter("interestRateFrequencyType").value(this.interestRateFrequencyType).notNull()
+                .inMinMaxRange(0, 3);
+
+        baseDataValidator.reset().parameter("amortizationType").value(this.amortizationType).notNull().inMinMaxRange(0, 1);
+        baseDataValidator.reset().parameter("interestType").value(this.interestType).notNull().inMinMaxRange(0, 1);
+        baseDataValidator.reset().parameter("interestCalculationPeriodType").value(this.interestCalculationPeriodType).notNull()
+                .inMinMaxRange(0, 1);
+
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
+                "Validation errors exist.", dataValidationErrors); }
     }
 
-    public boolean isDescriptionChanged() {
-        return this.parametersPassedInRequest.contains("description");
-    }
+    public void validateForUpdate() {
 
-    public boolean isFundChanged() {
-        return this.parametersPassedInRequest.contains("fundId");
-    }
+        List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 
-    public boolean isTransactionProcessingStrategyChanged() {
-        return this.parametersPassedInRequest.contains("transactionProcessingStrategyId");
-    }
+        DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("product");
 
-    public boolean isCurrencyCodeChanged() {
-        return this.parametersPassedInRequest.contains("currencyCode");
-    }
+        baseDataValidator.reset().parameter("name").value(this.name).ignoreIfNull().notBlank();
+        baseDataValidator.reset().parameter("description").value(this.description).ignoreIfNull().notExceedingLengthOf(500);
+        baseDataValidator.reset().parameter("currencyCode").value(this.currencyCode).ignoreIfNull().notBlank();
+        baseDataValidator.reset().parameter("digitsAfterDecimal").value(this.digitsAfterDecimal).ignoreIfNull().notNull()
+                .inMinMaxRange(0, 6);
 
-    public boolean isDigitsAfterDecimalChanged() {
-        return this.parametersPassedInRequest.contains("digitsAfterDecimal");
-    }
+        baseDataValidator.reset().parameter("principal").value(this.principal).ignoreIfNull().notNull().positiveAmount();
+        baseDataValidator.reset().parameter("inArrearsTolerance").value(this.inArrearsTolerance).ignoreIfNull().notNull()
+                .zeroOrPositiveAmount();
 
-    public boolean isPrincipalChanged() {
-        return this.parametersPassedInRequest.contains("principal");
-    }
+        baseDataValidator.reset().parameter("repaymentFrequencyType").value(this.repaymentFrequencyType).ignoreIfNull().notNull()
+                .inMinMaxRange(0, 3);
 
-    public boolean isInArrearsToleranceChanged() {
-        return this.parametersPassedInRequest.contains("inArrearsTolerance");
-    }
+        baseDataValidator.reset().parameter("repaymentEvery").value(this.repaymentEvery).ignoreIfNull().notNull().integerGreaterThanZero();
+        baseDataValidator.reset().parameter("numberOfRepayments").value(this.numberOfRepayments).ignoreIfNull().notNull()
+                .integerGreaterThanZero();
 
-    public boolean isNumberOfRepaymentsChanged() {
-        return this.parametersPassedInRequest.contains("numberOfRepayments");
-    }
+        baseDataValidator.reset().parameter("interestRatePerPeriod").value(this.interestRatePerPeriod).ignoreIfNull().notBlank();
+        baseDataValidator.reset().parameter("interestRateFrequencyType").value(this.interestRateFrequencyType).ignoreIfNull()
+                .notNull().inMinMaxRange(0, 3);
 
-    public boolean isRepaymentEveryChanged() {
-        return this.parametersPassedInRequest.contains("repaymentEvery");
-    }
+        baseDataValidator.reset().parameter("amortizationType").value(this.amortizationType).ignoreIfNull().notNull()
+                .inMinMaxRange(0, 1);
+        baseDataValidator.reset().parameter("interestType").value(this.interestType).ignoreIfNull().notNull().inMinMaxRange(0, 1);
+        baseDataValidator.reset().parameter("interestCalculationPeriodType").value(this.interestCalculationPeriodType)
+                .ignoreIfNull().notNull().inMinMaxRange(0, 1);
 
-    public boolean isRepaymentFrequencyTypeChanged() {
-        return this.parametersPassedInRequest.contains("repaymentFrequencyType");
-    }
+        baseDataValidator.reset().anyOfNotNull(this.fundId, this.transactionProcessingStrategyId, this.name,
+                this.description, this.currencyCode, this.digitsAfterDecimal, this.principal,
+                this.inArrearsTolerance, this.repaymentFrequencyType, this.repaymentEvery,
+                this.numberOfRepayments, this.interestRatePerPeriod, this.interestRateFrequencyType,
+                this.amortizationType, this.interestType, this.interestCalculationPeriodType, this.charges);
 
-    public boolean isAmortizationTypeChanged() {
-        return this.parametersPassedInRequest.contains("amortizationType");
-    }
-
-    public boolean isInterestTypeChanged() {
-        return this.parametersPassedInRequest.contains("interestType");
-    }
-
-    public boolean isInterestRatePerPeriodChanged() {
-        return this.parametersPassedInRequest.contains("interestRatePerPeriod");
-    }
-
-    public boolean isInterestRateFrequencyTypeChanged() {
-        return this.parametersPassedInRequest.contains("interestRateFrequencyType");
-    }
-
-    public boolean isInterestCalculationPeriodTypeChanged() {
-        return this.parametersPassedInRequest.contains("interestCalculationPeriodType");
-    }
-
-    public boolean isChargesChanged() {
-        return this.parametersPassedInRequest.contains("charges");
-    }
-
-    public boolean isApprovedByChecker() {
-        return this.makerCheckerApproval;
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
+                "Validation errors exist.", dataValidationErrors); }
     }
 }

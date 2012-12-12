@@ -1,10 +1,11 @@
 package org.mifosplatform.organisation.staff.service;
 
-import org.mifosplatform.organisation.staff.command.StaffCommand;
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 
 public interface StaffWritePlatformService {
 
-    Long createStaff(final StaffCommand command);
+    EntityIdentifier createStaff(final JsonCommand command);
 
-    Long updateStaff(final StaffCommand command);
+    EntityIdentifier updateStaff(final Long staffId, final JsonCommand command);
 }

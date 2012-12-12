@@ -1,11 +1,16 @@
 package org.mifosplatform.portfolio.client.domain;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.apache.commons.lang.StringUtils;
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransaction;
@@ -30,7 +35,6 @@ public class Note extends AbstractAuditableCustom<AppUser, Long> {
     @JoinColumn(name = "loan_transaction_id", nullable = true)
     private LoanTransaction loanTransaction;
 
-    @SuppressWarnings("unused")
     @Column(name = "note", length = 1000)
     private String note;
 
@@ -75,7 +79,8 @@ public class Note extends AbstractAuditableCustom<AppUser, Long> {
         }
     }
 
-    public static Note clientNote(final Client client, final String note) {
+    public static Note clientNoteFromJson(final Client client, final JsonCommand command) {
+        final String note = command.stringValueOfParameterNamed("note");
         return new Note(client, note);
     }
 
@@ -86,7 +91,7 @@ public class Note extends AbstractAuditableCustom<AppUser, Long> {
     public static Note loanTransactionNote(final Loan loan, final LoanTransaction loanTransaction, final String note) {
         return new Note(loan, loanTransaction, note);
     }
-    
+
     public static Note depositNote(final DepositAccount account, final String noteText) {
         return new Note(account, noteText);
     }
@@ -127,8 +132,16 @@ public class Note extends AbstractAuditableCustom<AppUser, Long> {
         this.noteTypeId = NoteType.DEPOSIT.getValue();
     }
 
-    public void update(final String note) {
-        this.note = note;
+    public Map<String, Object> update(final JsonCommand command) {
+        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(7);
+
+        final String noteParamName = "note";
+        if (command.isChangeInStringParameterNamed(noteParamName, this.note)) {
+            final String newValue = command.stringValueOfParameterNamed(noteParamName);
+            actualChanges.put(noteParamName, newValue);
+            this.note = StringUtils.defaultIfEmpty(newValue, null);
+        }
+        return actualChanges;
     }
 
     public boolean isNotAgainstClientWithIdOf(Long clientId) {

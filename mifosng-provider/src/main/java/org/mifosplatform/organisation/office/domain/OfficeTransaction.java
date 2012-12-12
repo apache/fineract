@@ -14,6 +14,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.joda.time.LocalDate;
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
@@ -23,53 +24,54 @@ import org.mifosplatform.useradministration.domain.AppUser;
 @Table(name = "m_office_transaction")
 public class OfficeTransaction extends AbstractAuditableCustom<AppUser, Long> {
 
-	@SuppressWarnings("unused")
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "from_office_id")
-	private Office from;
+    @SuppressWarnings("unused")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "from_office_id")
+    private Office from;
 
-	@SuppressWarnings("unused")
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "to_office_id")
-	private Office to;
+    @SuppressWarnings("unused")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "to_office_id")
+    private Office to;
 
-	@SuppressWarnings("unused")
-	@Column(name = "transaction_date", nullable = false)
-	@Temporal(TemporalType.DATE)
-	private Date transactionDate;
+    @SuppressWarnings("unused")
+    @Column(name = "transaction_date", nullable = false)
+    @Temporal(TemporalType.DATE)
+    private Date transactionDate;
 
-	@SuppressWarnings("unused")
-	@Embedded
-	private MonetaryCurrency currency;
+    @SuppressWarnings("unused")
+    @Embedded
+    private MonetaryCurrency currency;
 
-	@SuppressWarnings("unused")
-	@Column(name = "transaction_amount", scale = 6, precision = 19, nullable = false)
-	private BigDecimal transactionAmount;
-	
-	@SuppressWarnings("unused")
-	@Column(name = "description", nullable=true, length=100)
-	private String description;
+    @SuppressWarnings("unused")
+    @Column(name = "transaction_amount", scale = 6, precision = 19, nullable = false)
+    private BigDecimal transactionAmount;
 
-	protected OfficeTransaction() {
-		this.transactionDate = null;
-	}
+    @SuppressWarnings("unused")
+    @Column(name = "description", nullable = true, length = 100)
+    private String description;
 
-	public static OfficeTransaction create(Office fromOffice, Office toOffice, LocalDate transactionLocalDate, Money amount, String description) {
+    public static OfficeTransaction fromJson(final Office fromOffice, final Office toOffice, final Money amount, final JsonCommand command) {
 
-		Date transactionDate = null;
-		if (transactionLocalDate != null) {
-			transactionDate = transactionLocalDate.toDate();
-		}
+        final LocalDate transactionLocalDate = command.localDateValueOfParameterNamed("transactionDate");
+        final String description = command.stringValueOfParameterNamed("description");
 
-		return new OfficeTransaction(fromOffice, toOffice, transactionDate, amount, description);
-	}
+        return new OfficeTransaction(fromOffice, toOffice, transactionLocalDate, amount, description);
+    }
 
-	private OfficeTransaction(final Office fromOffice,final Office toOffice, final Date transactionDate, final Money amount, String description) {
-		this.from = fromOffice;
-		this.to = toOffice;
-		this.transactionDate = transactionDate;
-		this.currency = amount.getCurrency();
-		this.transactionAmount = amount.getAmount();
-		this.description = description;
-	}
+    protected OfficeTransaction() {
+        this.transactionDate = null;
+    }
+
+    private OfficeTransaction(final Office fromOffice, final Office toOffice, final LocalDate transactionLocalDate, final Money amount,
+            final String description) {
+        this.from = fromOffice;
+        this.to = toOffice;
+        if (transactionLocalDate != null) {
+            this.transactionDate = transactionLocalDate.toDate();
+        }
+        this.currency = amount.getCurrency();
+        this.transactionAmount = amount.getAmount();
+        this.description = description;
+    }
 }

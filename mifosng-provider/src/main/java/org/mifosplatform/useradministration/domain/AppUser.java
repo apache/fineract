@@ -25,6 +25,8 @@ import org.mifosplatform.infrastructure.security.domain.PlatformUser;
 import org.mifosplatform.infrastructure.security.exception.NoAuthorizationException;
 import org.mifosplatform.infrastructure.security.service.PlatformPasswordEncoder;
 import org.mifosplatform.organisation.office.domain.Office;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -32,6 +34,8 @@ import org.springframework.security.core.userdetails.User;
 @Entity
 @Table(name = "m_appuser", uniqueConstraints = @UniqueConstraint(columnNames = { "username" }, name = "username_org"))
 public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements PlatformUser {
+
+    private final static Logger logger = LoggerFactory.getLogger(AppUser.class);
 
     @Column(name = "email", nullable = false, length = 100)
     private String email;
@@ -327,7 +331,7 @@ public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements P
         return false;
     }
 
-    public boolean hasNotPermissionForDatatable(String datatable, String accessType) {
+    public boolean hasNotPermissionForDatatable(final String datatable, final String accessType) {
 
         String matchPermission = accessType + "_" + datatable;
 
@@ -414,10 +418,27 @@ public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements P
         }
     }
 
+    private boolean hasNotPermissionTo(final String permissionCode) {
+        return !hasPermissionTo(permissionCode);
+    }
+
     private boolean hasPermissionTo(final String permissionCode) {
+        boolean hasPermission = hasAllFunctionsPermission();
+        if (!hasPermission) {
+            for (Role role : this.roles) {
+                if (role.hasPermissionTo(permissionCode)) {
+                    hasPermission = true;
+                    break;
+                }
+            }
+        }
+        return hasPermission;
+    }
+    
+    private boolean hasAllFunctionsPermission() {
         boolean match = false;
         for (Role role : this.roles) {
-            if (role.hasPermissionTo(permissionCode)) {
+            if (role.hasPermissionTo("ALL_FUNCTIONS")) {
                 match = true;
                 break;
             }
@@ -449,6 +470,23 @@ public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements P
     public void validateHasPermissionTo(final String function, final List<String> allowedPermissions) {
         if (hasNotAnyPermission(allowedPermissions)) {
             final String authorizationMessage = "User has no authority to: " + function;
+            throw new NoAuthorizationException(authorizationMessage);
+        }
+    }
+
+    public void validateHasPermissionTo(final String function) {
+        if (hasNotPermissionTo(function)) {
+            final String authorizationMessage = "User has no authority to: " + function;
+            logger.info("Unauthorized access: userId: " + this.getId() + " action: " + function + " allowed: " + getAuthorities());
+            throw new NoAuthorizationException(authorizationMessage);
+        }
+    }
+
+    public void validateHasCheckerPermissionTo(final String function) {
+
+        final String checkerPermissionName = function.toUpperCase() + "_CHECKER";
+        if (hasNotPermissionTo(checkerPermissionName)) {
+            final String authorizationMessage = "User has no authority to be a checker for: " + function;
             throw new NoAuthorizationException(authorizationMessage);
         }
     }

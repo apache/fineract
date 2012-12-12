@@ -5,7 +5,7 @@ import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 
 public interface RoleWritePlatformService {
 
-    Long createRole(JsonCommand command);
+    EntityIdentifier createRole(JsonCommand command);
 
     EntityIdentifier updateRole(Long roleId, JsonCommand command);
 

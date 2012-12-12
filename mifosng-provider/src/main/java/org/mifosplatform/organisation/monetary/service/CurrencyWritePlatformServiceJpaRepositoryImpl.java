@@ -2,19 +2,21 @@ package org.mifosplatform.organisation.monetary.service;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
-import org.mifosplatform.infrastructure.core.data.ApiParameterError;
-import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
-import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.command.CurrencyCommand;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrencyRepository;
+import org.mifosplatform.organisation.monetary.exception.CurrencyNotFoundException;
+import org.mifosplatform.organisation.monetary.serialization.CurrencyCommandFromApiJsonDeserializer;
 import org.mifosplatform.organisation.office.domain.OrganisationCurrency;
 import org.mifosplatform.organisation.office.domain.OrganisationCurrencyRepository;
-import org.mifosplatform.portfolio.client.service.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,54 +27,48 @@ public class CurrencyWritePlatformServiceJpaRepositoryImpl implements CurrencyWr
     private final PlatformSecurityContext context;
     private final ApplicationCurrencyRepository applicationCurrencyRepository;
     private final OrganisationCurrencyRepository organisationCurrencyRepository;
-    private final ConfigurationDomainService configurationDomainService;
+    private final CurrencyCommandFromApiJsonDeserializer fromApiJsonDeserializer;
 
     @Autowired
     public CurrencyWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
+            final CurrencyCommandFromApiJsonDeserializer fromApiJsonDeserializer,
             final ApplicationCurrencyRepository applicationCurrencyRepository,
-            final OrganisationCurrencyRepository organisationCurrencyRepository, final ConfigurationDomainService configurationDomainService) {
+            final OrganisationCurrencyRepository organisationCurrencyRepository) {
         this.context = context;
+        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.applicationCurrencyRepository = applicationCurrencyRepository;
         this.organisationCurrencyRepository = organisationCurrencyRepository;
-        this.configurationDomainService = configurationDomainService;
     }
 
     @Transactional
     @Override
-    public void updateAllowedCurrencies(final CurrencyCommand command) {
+    public EntityIdentifier updateAllowedCurrencies(final JsonCommand command) {
 
         context.authenticatedUser();
 
-        List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-        DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("configuration");
+        final CurrencyCommand currencyCommand = this.fromApiJsonDeserializer.commandFromApiJson(command.json());
+        currencyCommand.validateForUpdate();
 
-        baseDataValidator.reset().parameter("currencies").value(command.getCurrencies()).arrayNotEmpty();
+        final Map<String, Object> changes = new LinkedHashMap<String, Object>();
+        final List<String> allowedCurrencyCodes = new ArrayList<String>();
+        final Set<OrganisationCurrency> allowedCurrencies = new HashSet<OrganisationCurrency>();
+        for (final String currencyCode : currencyCommand.getCurrencies()) {
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
-                "Validation errors exist.", dataValidationErrors); }
+            final ApplicationCurrency currency = this.applicationCurrencyRepository.findOneByCode(currencyCode);
+            if (currency == null) { throw new CurrencyNotFoundException(currencyCode); }
 
-        Set<OrganisationCurrency> allowedCurrencies = new HashSet<OrganisationCurrency>();
+            final OrganisationCurrency allowedCurrency = new OrganisationCurrency(currency.getCode(), currency.getName(),
+                    currency.getDecimalPlaces(), currency.getNameCode(), currency.getDisplaySymbol());
 
-        for (String currencyCode : command.getCurrencies()) {
-
-            ApplicationCurrency currency = this.applicationCurrencyRepository.findOneByCode(currencyCode);
-            if (currency == null) {
-                baseDataValidator.reset().parameter("currencies").value(command.getCurrencies())
-                        .inValidValue("currency.code", currencyCode);
-            } else {
-                OrganisationCurrency allowedCurrency = new OrganisationCurrency(currency.getCode(), currency.getName(),
-                        currency.getDecimalPlaces(), currency.getNameCode(), currency.getDisplaySymbol());
-
-                allowedCurrencies.add(allowedCurrency);
-            }
+            allowedCurrencyCodes.add(currencyCode);
+            allowedCurrencies.add(allowedCurrency);
         }
+
+        changes.put("currencies", allowedCurrencyCodes.toArray(new String[allowedCurrencyCodes.size()]));
 
         this.organisationCurrencyRepository.deleteAll();
         this.organisationCurrencyRepository.save(allowedCurrencies);
 
-        if (this.configurationDomainService.isMakerCheckerEnabledForTask("UPDATE_CURRENCY") && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
-
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
-                "Validation errors exist.", dataValidationErrors); }
+        return EntityIdentifier.withChanges(null, changes);
     }
 }

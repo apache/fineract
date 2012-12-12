@@ -3,7 +3,6 @@ package org.mifosplatform.portfolio.charge.command;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
@@ -23,28 +22,16 @@ public class ChargeDefinitionCommand {
     private final Boolean penalty;
     private final Boolean active;
 
-    private final transient Set<String> parametersPassedInRequest;
-    private final transient boolean makerCheckerApproval;
-    private final transient Long id;
-
-    public ChargeDefinitionCommand(final Set<String> parametersPassedInRequest, final boolean makerCheckerApproval, final Long id,
-            final String name, final BigDecimal amount, final String currencyCode, final Integer chargeTimeType,
+    public ChargeDefinitionCommand(final String name, final BigDecimal amount, final String currencyCode, final Integer chargeTimeType,
             final Integer chargeAppliesTo, final Integer chargeCalculationType, final Boolean penalty, final Boolean active) {
-        this.makerCheckerApproval = makerCheckerApproval;
-        this.id = id;
         this.name = name;
         this.amount = amount;
         this.currencyCode = currencyCode;
         this.chargeTimeType = chargeTimeType;
         this.chargeAppliesTo = chargeAppliesTo;
         this.chargeCalculationType = chargeCalculationType;
-        this.parametersPassedInRequest = parametersPassedInRequest;
         this.penalty = penalty;
         this.active = active;
-    }
-
-    public Long getId() {
-        return id;
     }
 
     public String getName() {
@@ -53,10 +40,6 @@ public class ChargeDefinitionCommand {
 
     public BigDecimal getAmount() {
         return amount;
-    }
-
-    public Set<String> getModifiedParameters() {
-        return parametersPassedInRequest;
     }
 
     public String getCurrencyCode() {
@@ -87,42 +70,6 @@ public class ChargeDefinitionCommand {
         return active;
     }
 
-    public boolean isNameChanged() {
-        return this.parametersPassedInRequest.contains("name");
-    }
-
-    public boolean isAmountChanged() {
-        return this.parametersPassedInRequest.contains("amount");
-    }
-
-    public boolean isCurrencyCodeChanged() {
-        return this.parametersPassedInRequest.contains("currencyCode");
-    }
-
-    public boolean isChargeTimeTypeChanged() {
-        return this.parametersPassedInRequest.contains("chargeTimeType");
-    }
-
-    public boolean isChargeAppliesToChanged() {
-        return this.parametersPassedInRequest.contains("chargeAppliesTo");
-    }
-
-    public boolean isChargeCalculationTypeChanged() {
-        return this.parametersPassedInRequest.contains("chargeCalculationType");
-    }
-
-    public boolean isPenaltyChanged() {
-        return this.parametersPassedInRequest.contains("penalty");
-    }
-
-    public boolean isActiveChanged() {
-        return this.parametersPassedInRequest.contains("active");
-    }
-
-    public boolean isApprovedByChecker() {
-        return this.makerCheckerApproval;
-    }
-
     public void validateForCreate() {
         List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 
@@ -148,10 +95,11 @@ public class ChargeDefinitionCommand {
 
         DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("charge");
 
-        baseDataValidator.reset().parameter("id").value(this.id).notNull();
         baseDataValidator.reset().parameter("name").value(this.name).ignoreIfNull().notBlank().notExceedingLengthOf(100);
         baseDataValidator.reset().parameter("amount").value(this.amount).ignoreIfNull().positiveAmount();
         baseDataValidator.reset().parameter("currencyCode").value(this.currencyCode).ignoreIfNull().notBlank();
+
+        // FIXME - kw - need to check if parameter exists in update and if so that its not null
         baseDataValidator.reset().parameter("chargeAppliesTo").value(this.chargeAppliesTo).ignoreIfNull().notNull().inMinMaxRange(1, 1);
         baseDataValidator.reset().parameter("chargeTimeType").value(this.chargeTimeType).ignoreIfNull().notNull().inMinMaxRange(1, 2);
         baseDataValidator.reset().parameter("chargeCalculationType").value(this.chargeCalculationType).ignoreIfNull().notNull()

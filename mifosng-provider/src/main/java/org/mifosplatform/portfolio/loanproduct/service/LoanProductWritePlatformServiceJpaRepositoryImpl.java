@@ -1,18 +1,16 @@
 package org.mifosplatform.portfolio.loanproduct.service;
 
-import java.math.BigDecimal;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
-import org.mifosplatform.organisation.monetary.service.ConfigurationDomainService;
 import org.mifosplatform.portfolio.charge.domain.Charge;
 import org.mifosplatform.portfolio.charge.domain.ChargeRepository;
 import org.mifosplatform.portfolio.charge.exception.ChargeIsNotActiveException;
 import org.mifosplatform.portfolio.charge.exception.ChargeNotFoundException;
-import org.mifosplatform.portfolio.client.service.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
 import org.mifosplatform.portfolio.fund.domain.Fund;
 import org.mifosplatform.portfolio.fund.domain.FundRepository;
 import org.mifosplatform.portfolio.fund.exception.FundNotFoundException;
@@ -20,15 +18,12 @@ import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionProcessingS
 import org.mifosplatform.portfolio.loanaccount.exception.LoanTransactionProcessingStrategyNotFoundException;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.AprCalculator;
 import org.mifosplatform.portfolio.loanproduct.command.LoanProductCommand;
-import org.mifosplatform.portfolio.loanproduct.domain.AmortizationMethod;
-import org.mifosplatform.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
-import org.mifosplatform.portfolio.loanproduct.domain.InterestMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProduct;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRepository;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanTransactionProcessingStrategy;
-import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 import org.mifosplatform.portfolio.loanproduct.exception.InvalidCurrencyException;
 import org.mifosplatform.portfolio.loanproduct.exception.LoanProductNotFoundException;
+import org.mifosplatform.portfolio.loanproduct.serialization.LoanProductCommandFromApiJsonDeserializer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,69 +33,49 @@ import org.springframework.util.ObjectUtils;
 public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanProductWritePlatformService {
 
     private final PlatformSecurityContext context;
+    private final LoanProductCommandFromApiJsonDeserializer fromApiJsonDeserializer;
     private final LoanProductRepository loanProductRepository;
     private final AprCalculator aprCalculator;
     private final FundRepository fundRepository;
     private final LoanTransactionProcessingStrategyRepository loanTransactionProcessingStrategyRepository;
     private final ChargeRepository chargeRepository;
-    private final ConfigurationDomainService configurationDomainService;
 
     @Autowired
     public LoanProductWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
-            final LoanProductRepository loanProductRepository, final AprCalculator aprCalculator, final FundRepository fundRepository,
+            final LoanProductCommandFromApiJsonDeserializer fromApiJsonDeserializer, final LoanProductRepository loanProductRepository,
+            final AprCalculator aprCalculator, final FundRepository fundRepository,
             final LoanTransactionProcessingStrategyRepository loanTransactionProcessingStrategyRepository,
-            final ChargeRepository chargeRepository,
-            final ConfigurationDomainService configurationDomainService) {
+            final ChargeRepository chargeRepository) {
         this.context = context;
+        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.loanProductRepository = loanProductRepository;
         this.aprCalculator = aprCalculator;
         this.fundRepository = fundRepository;
         this.loanTransactionProcessingStrategyRepository = loanTransactionProcessingStrategyRepository;
         this.chargeRepository = chargeRepository;
-        this.configurationDomainService = configurationDomainService;
     }
 
     @Transactional
     @Override
-    public EntityIdentifier createLoanProduct(final LoanProductCommand command) {
+    public EntityIdentifier createLoanProduct(final JsonCommand command) {
 
         this.context.authenticatedUser();
 
-        LoanProductCommandValidator validator = new LoanProductCommandValidator(command);
-        validator.validateForCreate();
-
-        // assemble LoanProduct from data
-        InterestMethod interestMethod = InterestMethod.fromInt(command.getInterestType());
-        InterestCalculationPeriodMethod interestCalculationPeriodMethod = InterestCalculationPeriodMethod.fromInt(command
-                .getInterestCalculationPeriodType());
-
-        AmortizationMethod amortizationMethod = AmortizationMethod.fromInt(command.getAmortizationType());
-
-        PeriodFrequencyType repaymentFrequencyType = PeriodFrequencyType.fromInt(command.getRepaymentFrequencyType());
-
-        PeriodFrequencyType interestFrequencyType = PeriodFrequencyType.fromInt(command.getInterestRateFrequencyType());
-
-        MonetaryCurrency currency = new MonetaryCurrency(command.getCurrencyCode(), command.getDigitsAfterDecimal());
-
-        BigDecimal annualInterestRate = this.aprCalculator.calculateFrom(interestFrequencyType, command.getInterestRatePerPeriod());
+        final LoanProductCommand loanProductCommand = this.fromApiJsonDeserializer.commandFromApiJson(command.json());
+        loanProductCommand.validateForCreate();
 
         // associating fund with loan product at creation is optional for now.
-        Fund fund = findFundByIdIfProvided(command.getFundId());
-        LoanTransactionProcessingStrategy loanTransactionProcessingStrategy = findStrategyByIdIfProvided(command
-                .getTransactionProcessingStrategyId());
-
+        final Fund fund = findFundByIdIfProvided(command.longValueOfParameterNamed("fundId"));
+        final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy = findStrategyByIdIfProvided(command
+                .longValueOfParameterNamed("transactionProcessingStrategyId"));
         final Set<Charge> charges = this.assembleSetOfCharges(command, null);
 
-        LoanProduct loanproduct = new LoanProduct(fund, loanTransactionProcessingStrategy, command.getName(), command.getDescription(),
-                currency, command.getPrincipal(), command.getInterestRatePerPeriod(), interestFrequencyType, annualInterestRate,
-                interestMethod, interestCalculationPeriodMethod, command.getRepaymentEvery(), repaymentFrequencyType,
-                command.getNumberOfRepayments(), amortizationMethod, command.getInArrearsTolerance(), charges);
+        final LoanProduct loanproduct = LoanProduct.assembleFromJson(fund, loanTransactionProcessingStrategy, charges, command,
+                this.aprCalculator);
 
         this.loanProductRepository.save(loanproduct);
-        
-        if (this.configurationDomainService.isMakerCheckerEnabledForTask("CREATE_LOANPRODUCT") && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
 
-        return new EntityIdentifier(loanproduct.getId());
+        return EntityIdentifier.resourceResult(loanproduct.getId(), null);
     }
 
     private LoanTransactionProcessingStrategy findStrategyByIdIfProvided(final Long transactionProcessingStrategyId) {
@@ -123,54 +98,61 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
 
     @Transactional
     @Override
-    public EntityIdentifier updateLoanProduct(final LoanProductCommand command) {
+    public EntityIdentifier updateLoanProduct(final Long loanProductId, final JsonCommand command) {
 
         this.context.authenticatedUser();
+        
+        final LoanProductCommand loanProductCommand = this.fromApiJsonDeserializer.commandFromApiJson(command.json());
+        loanProductCommand.validateForUpdate();
 
-        LoanProductCommandValidator validator = new LoanProductCommandValidator(command);
-        validator.validateForUpdate();
-
-        LoanProduct product = this.loanProductRepository.findOne(command.getId());
-        if (product == null) { throw new LoanProductNotFoundException(command.getId()); }
+        final LoanProduct product = this.loanProductRepository.findOne(loanProductId);
+        if (product == null) { throw new LoanProductNotFoundException(loanProductId); }
+        
+        final Map<String, Object> changes = product.update(command);
 
         // associating fund with loan product at creation is optional for now.
-        Fund fund = null;
-        if (command.isFundChanged()) {
-            fund = findFundByIdIfProvided(command.getFundId());
+        if (changes.containsKey("fundId")) {
+            final Long fundId = (Long) changes.get("fundId");
+            final Fund fund = findFundByIdIfProvided(fundId);
+            product.update(fund);
         }
 
-        LoanTransactionProcessingStrategy loanTransactionProcessingStrategy = null;
-        if (command.isTransactionProcessingStrategyChanged()) {
-            loanTransactionProcessingStrategy = findStrategyByIdIfProvided(command.getTransactionProcessingStrategyId());
+        if (changes.containsKey("transactionProcessingStrategyId")) {
+            final Long transactionProcessingStrategyId = (Long) changes.get("transactionProcessingStrategyId");
+            final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy = findStrategyByIdIfProvided(transactionProcessingStrategyId);
+            product.update(loanTransactionProcessingStrategy);
         }
-
-        final Set<Charge> charges = this.assembleSetOfCharges(command, product.getCurrency().getCode());
-
-        product.update(command, fund, loanTransactionProcessingStrategy, charges);
-
-        this.loanProductRepository.save(product);
         
-        if (this.configurationDomainService.isMakerCheckerEnabledForTask("UPDATE_LOANPRODUCT") && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
+        if (changes.containsKey("charges")) {
+            final Set<Charge> charges = this.assembleSetOfCharges(command, product.getCurrency().getCode());
+            product.update(charges);
+        }
 
-        return new EntityIdentifier(Long.valueOf(product.getId()));
+        if (!changes.isEmpty()) {
+            this.loanProductRepository.save(product);
+        }
+        
+        return EntityIdentifier.withChanges(product.getId(), changes);
     }
 
-    private Set<Charge> assembleSetOfCharges(final LoanProductCommand command, final String currencyCode) {
+    private Set<Charge> assembleSetOfCharges(final JsonCommand command, final String currencyCode) {
 
-        Set<Charge> charges = new HashSet<Charge>();
-        String[] chargesArray = command.getCharges();
+        final Set<Charge> charges = new HashSet<Charge>();
+        final String[] chargesArray = command.arrayValueOfParameterNamed("charges");
 
-        String loanProductCurrencyCode = command.getCurrencyCode();
+        String loanProductCurrencyCode = command.stringValueOfParameterNamed("currencyCode");
         if (loanProductCurrencyCode == null) {
             loanProductCurrencyCode = currencyCode;
         }
 
-        if (command.isChargesChanged() && !ObjectUtils.isEmpty(chargesArray)) {
-            for (String chargeId : chargesArray) {
-                Long id = Long.valueOf(chargeId);
-                Charge charge = this.chargeRepository.findOne(id);
+        if (!ObjectUtils.isEmpty(chargesArray)) {
+            for (final String chargeId : chargesArray) {
+
+                final Long id = Long.valueOf(chargeId);
+                final Charge charge = this.chargeRepository.findOne(id);
                 if (charge == null || charge.isDeleted()) { throw new ChargeNotFoundException(id); }
                 if (!charge.isActive()) { throw new ChargeIsNotActiveException(id, charge.getName()); }
+
                 if (!loanProductCurrencyCode.equals(charge.getCurrencyCode())) {
                     String errorMessage = "Charge and Loan Product must have the same currency.";
                     throw new InvalidCurrencyException("charge", "attach.to.loan.product", errorMessage);
@@ -181,5 +163,4 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
 
         return charges;
     }
-
 }

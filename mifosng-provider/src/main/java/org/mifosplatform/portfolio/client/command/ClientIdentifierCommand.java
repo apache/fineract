@@ -1,40 +1,25 @@
 package org.mifosplatform.portfolio.client.command;
 
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.mifosplatform.infrastructure.core.data.ApiParameterError;
+import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
+import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 
 /**
  * Immutable command for creating or updating details of a client identifier.
  */
 public class ClientIdentifierCommand {
 
-    
-    private final Long clientId;
     private final Long documentTypeId;
-
     private final String documentKey;
     private final String description;
 
-    private final transient Set<String> modifiedParameters;
-    private final transient boolean makerCheckerApproval;
-    private final transient Long id;
-    
-    public static ClientIdentifierCommand clientSubResource(final ClientIdentifierCommand command, final Long providedClientId) {
-        return new ClientIdentifierCommand(command.modifiedParameters, command.makerCheckerApproval, command.id, providedClientId, command.documentTypeId, command.documentKey, command.description);
-    }
-    
-    public ClientIdentifierCommand(final Set<String> modifiedParameters, final boolean makerCheckerApproval, final Long id, final Long clientId, final Long documentTypeId,
-            final String documentKey, final String description) {
-        this.modifiedParameters = modifiedParameters;
-        this.makerCheckerApproval = makerCheckerApproval;
-        this.id = id;
-        this.clientId = clientId;
+    public ClientIdentifierCommand(final Long documentTypeId, final String documentKey, final String description) {
         this.documentTypeId = documentTypeId;
         this.documentKey = documentKey;
         this.description = description;
-    }
-
-    public Long getId() {
-        return id;
     }
 
     public Long getDocumentTypeId() {
@@ -49,27 +34,33 @@ public class ClientIdentifierCommand {
         return description;
     }
 
-    public Set<String> getModifiedParameters() {
-        return modifiedParameters;
-    }
+    public void validateForCreate() {
+        List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 
-    public Long getClientId() {
-        return clientId;
-    }
+        DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("clientIdentifier");
 
-    public boolean isDocumentTypeChanged() {
-        return this.modifiedParameters.contains("documentTypeId");
-    }
+        baseDataValidator.reset().parameter("documentTypeId").value(this.documentTypeId).notNull().integerGreaterThanZero();
+        baseDataValidator.reset().parameter("documentKey").value(this.documentKey).notBlank();
 
-    public boolean isDocumentKeyChanged() {
-        return this.modifiedParameters.contains("documentKey");
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
+                "Validation errors exist.", dataValidationErrors); }
     }
+    
+    public void validateForUpdate() {
+        List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 
-    public boolean isDescriptionChanged() {
-        return this.modifiedParameters.contains("description");
-    }
+        DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("clientIdentifier");
 
-    public boolean isApprovedByChecker() {
-        return this.makerCheckerApproval;
+        baseDataValidator.reset().parameter("documentKey").value(this.documentKey).ignoreIfNull().notBlank();
+
+        // FIXME - kw
+//        if (command.isDocumentTypeChanged()) {
+//            baseDataValidator.reset().parameter("documentTypeId").value(command.getDocumentTypeId()).notNull().integerGreaterThanZero();
+//        }
+
+        baseDataValidator.reset().anyOfNotNull(this.documentTypeId, this.documentKey);
+
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
+                "Validation errors exist.", dataValidationErrors); }
     }
 }

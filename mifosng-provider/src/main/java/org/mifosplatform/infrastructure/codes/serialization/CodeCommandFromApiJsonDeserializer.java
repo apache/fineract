@@ -6,9 +6,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.infrastructure.codes.command.CodeCommand;
+import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
 import org.mifosplatform.infrastructure.core.serialization.AbstractFromApiJsonDeserializer;
-import org.mifosplatform.infrastructure.core.serialization.CommandSerializer;
 import org.mifosplatform.infrastructure.core.serialization.FromApiJsonDeserializer;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,16 +31,16 @@ public final class CodeCommandFromApiJsonDeserializer extends AbstractFromApiJso
     private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired
-    public CodeCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper, final CommandSerializer commandSerializerService) {
-        super(commandSerializerService);
+    public CodeCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper) {
         this.fromApiJsonHelper = fromApiJsonHelper;
     }
 
     @Override
-    public CodeCommand commandFromApiJson(@SuppressWarnings("unused") final Long codeId, final String json) {
-
+    public CodeCommand commandFromApiJson(final String json) {
+        
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-
         fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
 
         final JsonElement element = fromApiJsonHelper.parse(json);

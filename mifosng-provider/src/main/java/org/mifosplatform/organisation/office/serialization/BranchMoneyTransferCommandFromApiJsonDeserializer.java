@@ -7,9 +7,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
+import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
 import org.mifosplatform.infrastructure.core.serialization.AbstractFromApiJsonDeserializer;
-import org.mifosplatform.infrastructure.core.serialization.CommandSerializer;
 import org.mifosplatform.infrastructure.core.serialization.FromApiJsonDeserializer;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.organisation.office.command.BranchMoneyTransferCommand;
@@ -35,33 +36,28 @@ public final class BranchMoneyTransferCommandFromApiJsonDeserializer extends Abs
     private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired
-    public BranchMoneyTransferCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper,
-            final CommandSerializer commandSerializerService) {
-        super(commandSerializerService);
+    public BranchMoneyTransferCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper) {
         this.fromApiJsonHelper = fromApiJsonHelper;
     }
 
     @Override
-    public BranchMoneyTransferCommand commandFromApiJson(@SuppressWarnings("unused") final Long resourceId, final String json) {
+    public BranchMoneyTransferCommand commandFromApiJson(final String json) {
+
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-
         fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
 
-        final Set<String> parametersPassedInRequest = new HashSet<String>();
-
         final JsonElement element = fromApiJsonHelper.parse(json);
-        final Long fromOfficeId = fromApiJsonHelper.extractLongNamed("fromOfficeId", element, parametersPassedInRequest);
-        final Long toOfficeId = fromApiJsonHelper.extractLongNamed("toOfficeId", element, parametersPassedInRequest);
-        final LocalDate transactionLocalDate = fromApiJsonHelper.extractLocalDateNamed("transactionDate", element,
-                parametersPassedInRequest);
+        final Long fromOfficeId = fromApiJsonHelper.extractLongNamed("fromOfficeId", element);
+        final Long toOfficeId = fromApiJsonHelper.extractLongNamed("toOfficeId", element);
+        final LocalDate transactionLocalDate = fromApiJsonHelper.extractLocalDateNamed("transactionDate", element);
 
-        final String currencyCode = fromApiJsonHelper.extractStringNamed("currencyCode", element, parametersPassedInRequest);
-        final BigDecimal transactionAmountValue = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("transactionAmount", element,
-                parametersPassedInRequest);
-        final String description = fromApiJsonHelper.extractStringNamed("description", element, parametersPassedInRequest);
+        final String currencyCode = fromApiJsonHelper.extractStringNamed("currencyCode", element);
+        final BigDecimal transactionAmountValue = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("transactionAmount", element);
+        final String description = fromApiJsonHelper.extractStringNamed("description", element);
 
-        return new BranchMoneyTransferCommand(parametersPassedInRequest, false, fromOfficeId, toOfficeId, transactionLocalDate,
-                currencyCode, transactionAmountValue, description);
+        return new BranchMoneyTransferCommand(fromOfficeId, toOfficeId, transactionLocalDate, currencyCode, transactionAmountValue,
+                description);
     }
 }

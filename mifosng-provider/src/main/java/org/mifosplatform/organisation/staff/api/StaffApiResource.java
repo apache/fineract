@@ -3,7 +3,6 @@ package org.mifosplatform.organisation.staff.api;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
@@ -20,7 +19,6 @@ import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.mifosplatform.infrastructure.codes.data.CodeData;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
@@ -29,7 +27,6 @@ import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext
 import org.mifosplatform.organisation.office.data.OfficeLookup;
 import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
 import org.mifosplatform.organisation.staff.data.StaffData;
-import org.mifosplatform.organisation.staff.serialization.StaffCommandFromApiJsonDeserializer;
 import org.mifosplatform.organisation.staff.service.StaffReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -41,7 +38,8 @@ import org.springframework.stereotype.Component;
 public class StaffApiResource {
 
     /**
-     * The set of parameters that are supported in response for {@link CodeData}
+     * The set of parameters that are supported in response for
+     * {@link StaffData}.
      */
     private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "firstname", "lastname", "displayName",
             "officeId", "officeName", "loanOfficerFlag", "allowedOffices"));
@@ -51,20 +49,18 @@ public class StaffApiResource {
     private final PlatformSecurityContext context;
     private final StaffReadPlatformService readPlatformService;
     private final OfficeReadPlatformService officeReadPlatformService;
-    private final StaffCommandFromApiJsonDeserializer fromApiJsonDeserializer;
     private final DefaultToApiJsonSerializer<StaffData> toApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @Autowired
     public StaffApiResource(final PlatformSecurityContext context, final StaffReadPlatformService readPlatformService,
-            final OfficeReadPlatformService officeReadPlatformService, final StaffCommandFromApiJsonDeserializer fromApiJsonDeserializer,
-            final DefaultToApiJsonSerializer<StaffData> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper,
+            final OfficeReadPlatformService officeReadPlatformService, final DefaultToApiJsonSerializer<StaffData> toApiJsonSerializer,
+            final ApiRequestParameterHelper apiRequestParameterHelper,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
         this.context = context;
         this.readPlatformService = readPlatformService;
         this.officeReadPlatformService = officeReadPlatformService;
-        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
@@ -90,13 +86,8 @@ public class StaffApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String createStaff(final String apiRequestBodyAsJson) {
 
-        final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "ORGANISATION_ADMINISTRATION_SUPER_USER", "CREATE_STAFF");
-        context.authenticatedUser().validateHasPermissionTo("CREATE_STAFF", allowedPermissions);
-
-        final String commandSerializedAsJson = this.fromApiJsonDeserializer.serializedCommandJsonFromApiJson(apiRequestBodyAsJson);
-
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE", "staff", null,
-                commandSerializedAsJson);
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE_STAFF", "CREATE", "staff", null,
+                apiRequestBodyAsJson);
 
         return this.toApiJsonSerializer.serialize(result);
     }
@@ -126,13 +117,8 @@ public class StaffApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String updateStaff(@PathParam("staffId") final Long staffId, final String apiRequestBodyAsJson) {
 
-        final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "ORGANISATION_ADMINISTRATION_SUPER_USER", "UPDATE_STAFF");
-        context.authenticatedUser().validateHasPermissionTo("UPDATE_STAFF", allowedPermissions);
-
-        final String commandSerializedAsJson = this.fromApiJsonDeserializer.serializedCommandJsonFromApiJson(staffId, apiRequestBodyAsJson);
-
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "staff", staffId,
-                commandSerializedAsJson);
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE_STAFF", "UPDATE", "staff",
+                staffId, apiRequestBodyAsJson);
 
         return this.toApiJsonSerializer.serialize(result);
     }

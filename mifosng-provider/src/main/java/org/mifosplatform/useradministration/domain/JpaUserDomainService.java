@@ -4,8 +4,6 @@ import org.mifosplatform.infrastructure.core.domain.EmailDetail;
 import org.mifosplatform.infrastructure.core.service.PlatformEmailService;
 import org.mifosplatform.infrastructure.security.service.PlatformPasswordEncoder;
 import org.mifosplatform.infrastructure.security.service.RandomPasswordGenerator;
-import org.mifosplatform.organisation.monetary.service.ConfigurationDomainService;
-import org.mifosplatform.portfolio.client.service.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,20 +14,18 @@ public class JpaUserDomainService implements UserDomainService {
     private final AppUserRepository userRepository;
     private final PlatformPasswordEncoder applicationPasswordEncoder;
     private final PlatformEmailService emailService;
-    private final ConfigurationDomainService configurationDomainService;
 
     @Autowired
     public JpaUserDomainService(final AppUserRepository userRepository, final PlatformPasswordEncoder applicationPasswordEncoder,
-            final PlatformEmailService emailService, final ConfigurationDomainService configurationDomainService) {
+            final PlatformEmailService emailService) {
         this.userRepository = userRepository;
         this.applicationPasswordEncoder = applicationPasswordEncoder;
         this.emailService = emailService;
-        this.configurationDomainService = configurationDomainService;
     }
 
     @Transactional
     @Override
-    public void create(final AppUser appUser, final boolean isApprovedByChecker) {
+    public void create(final AppUser appUser) {
 
         generateKeyUsedForPasswordSalting(appUser);
 
@@ -43,8 +39,6 @@ public class JpaUserDomainService implements UserDomainService {
         appUser.updatePassword(encodePassword);
 
         this.userRepository.save(appUser);
-
-        if (this.configurationDomainService.isMakerCheckerEnabledForTask("CREATE_USER") && !isApprovedByChecker) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
 
         final EmailDetail emailDetail = new EmailDetail(appUser.getFirstname(), appUser.getFirstname(), appUser.getEmail(),
                 appUser.getUsername());

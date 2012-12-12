@@ -16,13 +16,11 @@ import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityExce
 import org.mifosplatform.infrastructure.core.service.FileUtils;
 import org.mifosplatform.infrastructure.documentmanagement.exception.DocumentManagementException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.organisation.monetary.service.ConfigurationDomainService;
 import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.office.domain.OfficeRepository;
 import org.mifosplatform.organisation.office.exception.OfficeNotFoundException;
 import org.mifosplatform.portfolio.client.command.ClientCommand;
 import org.mifosplatform.portfolio.client.command.ClientIdentifierCommand;
-import org.mifosplatform.portfolio.client.command.ClientIdentifierCommandValidator;
 import org.mifosplatform.portfolio.client.command.ClientNoteCommand;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientIdentifier;
@@ -35,6 +33,8 @@ import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
 import org.mifosplatform.portfolio.client.exception.DuplicateClientIdentifierException;
 import org.mifosplatform.portfolio.client.exception.NoteNotFoundException;
 import org.mifosplatform.portfolio.client.serialization.ClientCommandFromApiJsonDeserializer;
+import org.mifosplatform.portfolio.client.serialization.ClientIdentifierCommandFromApiJsonDeserializer;
+import org.mifosplatform.portfolio.client.serialization.ClientNoteCommandFromApiJsonDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,27 +53,31 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     private final OfficeRepository officeRepository;
     private final NoteRepository noteRepository;
     private final CodeValueRepository codeValueRepository;
-    private final ConfigurationDomainService configurationDomainService;
     private final ClientCommandFromApiJsonDeserializer fromApiJsonDeserializer;
+    private final ClientNoteCommandFromApiJsonDeserializer clientNoteFromApiJsonDeserializer;
+    private final ClientIdentifierCommandFromApiJsonDeserializer clientIdentifierCommandFromApiJsonDeserializer;
 
     @Autowired
     public ClientWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final ClientRepository clientRepository,
             final ClientIdentifierRepository clientIdentifierRepository, final OfficeRepository officeRepository,
             final NoteRepository noteRepository, final CodeValueRepository codeValueRepository,
-            final ConfigurationDomainService configurationDomainService, final ClientCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
+            final ClientCommandFromApiJsonDeserializer fromApiJsonDeserializer,
+            final ClientNoteCommandFromApiJsonDeserializer clientNoteFromApiJsonDeserializer,
+            final ClientIdentifierCommandFromApiJsonDeserializer clientIdentifierCommandFromApiJsonDeserializer) {
         this.context = context;
         this.clientRepository = clientRepository;
         this.clientIdentifierRepository = clientIdentifierRepository;
         this.officeRepository = officeRepository;
         this.noteRepository = noteRepository;
         this.codeValueRepository = codeValueRepository;
-        this.configurationDomainService = configurationDomainService;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
+        this.clientNoteFromApiJsonDeserializer = clientNoteFromApiJsonDeserializer;
+        this.clientIdentifierCommandFromApiJsonDeserializer = clientIdentifierCommandFromApiJsonDeserializer;
     }
 
     @Transactional
     @Override
-    public EntityIdentifier deleteClient(final Long clientId, final JsonCommand command) {
+    public EntityIdentifier deleteClient(final Long clientId) {
 
         final Client client = this.clientRepository.findOne(clientId);
         if (client == null || client.isDeleted()) { throw new ClientNotFoundException(clientId); }
@@ -81,9 +85,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         client.delete();
         this.clientRepository.save(client);
 
-        if (this.configurationDomainService.isMakerCheckerEnabledForTask("DELETE_CLIENT") && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
-
-        return new EntityIdentifier(client.getId());
+        return EntityIdentifier.resourceResult(clientId, null);
     }
 
     /*
@@ -107,7 +109,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
     @Transactional
     @Override
-    public Long createClient(final JsonCommand command) {
+    public EntityIdentifier createClient(final JsonCommand command) {
 
         try {
             context.authenticatedUser();
@@ -124,18 +126,16 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             final Client newClient = Client.fromJson(clientOffice, command);
             this.clientRepository.save(newClient);
 
-            if (this.configurationDomainService.isMakerCheckerEnabledForTask("CREATE_CLIENT") && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
-
-            return newClient.getId();
+            return EntityIdentifier.resourceResult(newClient.getId(), null);
         } catch (DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
-            return Long.valueOf(-1);
+            return EntityIdentifier.empty();
         }
     }
 
     @Transactional
     @Override
-    public EntityIdentifier updateClientDetails(final Long clientId, final JsonCommand command) {
+    public EntityIdentifier updateClient(final Long clientId, final JsonCommand command) {
 
         try {
             context.authenticatedUser();
@@ -145,24 +145,22 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
             final Client clientForUpdate = this.clientRepository.findOne(clientId);
             if (clientForUpdate == null || clientForUpdate.isDeleted()) { throw new ClientNotFoundException(clientId); }
-            
-            final Map<String, Object> changesOnly = clientForUpdate.update(command);
 
-            if (changesOnly.containsKey("officeId")) {
-                final Long officeId = (Long) changesOnly.get("officeId");
-                Office newOffice = this.officeRepository.findOne(officeId);
+            final Map<String, Object> changes = clientForUpdate.update(command);
+
+            if (changes.containsKey("officeId")) {
+                final Long officeId = (Long) changes.get("officeId");
+                final Office newOffice = this.officeRepository.findOne(officeId);
                 if (newOffice == null) { throw new OfficeNotFoundException(officeId); }
 
                 clientForUpdate.changeOffice(newOffice);
             }
 
-            if (!changesOnly.isEmpty()) {
+            if (!changes.isEmpty()) {
                 this.clientRepository.save(clientForUpdate);
             }
 
-            if (this.configurationDomainService.isMakerCheckerEnabledForTask("UPDATE_CLIENT") && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
-
-            return EntityIdentifier.withChanges(clientId, changesOnly);
+            return EntityIdentifier.withChanges(clientId, changes);
         } catch (DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
             return new EntityIdentifier(Long.valueOf(-1));
@@ -171,113 +169,122 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
     @Transactional
     @Override
-    public EntityIdentifier addClientNote(final ClientNoteCommand command) {
+    public EntityIdentifier addClientNote(final Long clientId, final JsonCommand command) {
 
         context.authenticatedUser();
 
-        final Client clientForUpdate = this.clientRepository.findOne(command.getClientId());
-        if (clientForUpdate == null) { throw new ClientNotFoundException(command.getClientId()); }
+        final ClientNoteCommand clientNoteCommand = this.clientNoteFromApiJsonDeserializer.commandFromApiJson(command.json());
+        // FIXME - KW - no validation of note
 
-        final Note note = Note.clientNote(clientForUpdate, command.getNote());
+        final Client clientForUpdate = this.clientRepository.findOne(clientId);
+        if (clientForUpdate == null) { throw new ClientNotFoundException(clientId); }
+
+        final Note note = Note.clientNoteFromJson(clientForUpdate, command);
 
         this.noteRepository.save(note);
 
-        return new EntityIdentifier(note.getId());
+        return EntityIdentifier.subResourceResult(clientId, note.getId(), command.commandId());
     }
 
     @Transactional
     @Override
-    public EntityIdentifier updateNote(final ClientNoteCommand command) {
+    public EntityIdentifier updateClientNote(final Long clientId, final Long noteId, final JsonCommand command) {
 
         context.authenticatedUser();
 
-        final Note noteForUpdate = this.noteRepository.findOne(command.getId());
-        if (noteForUpdate == null || noteForUpdate.isNotAgainstClientWithIdOf(command.getClientId())) { throw new NoteNotFoundException(
-                command.getId(), command.getClientId(), "client"); }
+        final ClientNoteCommand clientNoteCommand = this.clientNoteFromApiJsonDeserializer.commandFromApiJson(command.json());
+        // FIXME - KW - no validation of note
 
-        noteForUpdate.update(command.getNote());
+        final Note noteForUpdate = this.noteRepository.findOne(noteId);
+        if (noteForUpdate == null || noteForUpdate.isNotAgainstClientWithIdOf(clientId)) { throw new NoteNotFoundException(noteId,
+                clientId, "client"); }
 
-        return new EntityIdentifier(noteForUpdate.getId());
+        final Map<String, Object> changes = noteForUpdate.update(command);
+
+        if (!changes.isEmpty()) {
+            this.noteRepository.save(noteForUpdate);
+        }
+
+        return EntityIdentifier.subResourceResult(clientId, noteId, command.commandId(), changes);
     }
 
     @Transactional
     @Override
-    public Long addClientIdentifier(final ClientIdentifierCommand command) {
+    public EntityIdentifier addClientIdentifier(final Long clientId, final JsonCommand command) {
 
+        context.authenticatedUser();
+        final ClientIdentifierCommand clientIdentifierCommand = this.clientIdentifierCommandFromApiJsonDeserializer
+                .commandFromApiJson(command.json());
+        clientIdentifierCommand.validateForCreate();
+
+        String documentKey = clientIdentifierCommand.getDocumentKey();
         String documentTypeLabel = null;
         Long documentTypeId = null;
-        final String documentKey = command.getDocumentKey();
-
         try {
-            context.authenticatedUser();
+            final Client client = this.clientRepository.findOne(clientId);
+            if (client == null || client.isDeleted()) { throw new ClientNotFoundException(clientId); }
 
-            final ClientIdentifierCommandValidator validator = new ClientIdentifierCommandValidator(command);
-            validator.validateForCreate();
+            final CodeValue documentType = this.codeValueRepository.findOne(clientIdentifierCommand.getDocumentTypeId());
+            if (documentType == null) { throw new CodeValueNotFoundException(clientIdentifierCommand.getDocumentTypeId()); }
 
-            final Client client = this.clientRepository.findOne(command.getClientId());
-            if (client == null || client.isDeleted()) { throw new ClientNotFoundException(command.getClientId()); }
-
-            final CodeValue documentType = this.codeValueRepository.findOne(command.getDocumentTypeId());
-            if (documentType == null) { throw new CodeValueNotFoundException(command.getDocumentTypeId()); }
             documentTypeId = documentType.getId();
             documentTypeLabel = documentType.label();
 
-            final ClientIdentifier clientIdentifier = ClientIdentifier.createNew(client, documentType, documentKey,
-                    command.getDescription());
+            final ClientIdentifier clientIdentifier = ClientIdentifier.fromJson(client, documentType, command);
 
             this.clientIdentifierRepository.save(clientIdentifier);
 
-            return clientIdentifier.getId();
+            return EntityIdentifier.subResourceResult(clientId, clientIdentifier.getId(), command.commandId());
         } catch (DataIntegrityViolationException dve) {
             handleClientIdentifierDataIntegrityViolation(documentTypeLabel, documentTypeId, documentKey, dve);
-            return Long.valueOf(-1);
+            return EntityIdentifier.empty();
         }
     }
 
     @Transactional
     @Override
-    public EntityIdentifier updateClientIdentifier(final ClientIdentifierCommand command) {
+    public EntityIdentifier updateClientIdentifier(final Long clientId, final Long identifierId, final JsonCommand command) {
+
+        context.authenticatedUser();
+        final ClientIdentifierCommand clientIdentifierCommand = this.clientIdentifierCommandFromApiJsonDeserializer
+                .commandFromApiJson(command.json());
+        clientIdentifierCommand.validateForUpdate();
 
         String documentTypeLabel = null;
-        Long documentTypeId = null;
-        String documentKey = command.getDocumentKey();
-
+        String documentKey = null;
+        Long documentTypeId = clientIdentifierCommand.getDocumentTypeId();
         try {
-            context.authenticatedUser();
-
-            final ClientIdentifierCommandValidator validator = new ClientIdentifierCommandValidator(command);
-            validator.validateForUpdate();
-
             CodeValue documentType = null;
-            documentTypeId = command.getDocumentTypeId();
-            if (command.isDocumentTypeChanged() && documentTypeId != null) {
+
+            final ClientIdentifier clientIdentifierForUpdate = this.clientIdentifierRepository.findOne(identifierId);
+            if (clientIdentifierForUpdate == null) { throw new ClientIdentifierNotFoundException(identifierId); }
+
+            final Map<String, Object> changes = clientIdentifierForUpdate.update(command);
+
+            if (changes.containsKey("documentTypeId")) {
                 documentType = this.codeValueRepository.findOne(documentTypeId);
-                if (documentType == null) { throw new CodeValueNotFoundException(command.getDocumentTypeId()); }
+                if (documentType == null) { throw new CodeValueNotFoundException(documentTypeId); }
+
                 documentTypeId = documentType.getId();
                 documentTypeLabel = documentType.label();
+                clientIdentifierForUpdate.update(documentType);
             }
 
-            final ClientIdentifier clientIdentifierForUpdate = this.clientIdentifierRepository.findOne(command.getId());
-            if (clientIdentifierForUpdate == null) { throw new ClientIdentifierNotFoundException(command.getId()); }
-
-            // TODO - KW - why need to check what changed when integrity
-            // violation occurs?
-            if (command.isDocumentTypeChanged() && command.isDocumentKeyChanged()) {
-                documentTypeId = command.getDocumentTypeId();
-                documentKey = command.getDocumentKey();
-            } else if (command.isDocumentTypeChanged() && !command.isDocumentKeyChanged()) {
-                documentTypeId = command.getDocumentTypeId();
-                documentKey = clientIdentifierForUpdate.getDocumentKey();
-            } else if (!command.isDocumentTypeChanged() && command.isDocumentKeyChanged()) {
-                documentTypeId = clientIdentifierForUpdate.getDocumentType().getId();
-                documentKey = clientIdentifierForUpdate.getDocumentKey();
+            if (changes.containsKey("documentTypeId") && changes.containsKey("documentKey")) {
+                documentTypeId = clientIdentifierCommand.getDocumentTypeId();
+                documentKey = clientIdentifierCommand.getDocumentKey();
+            } else if (changes.containsKey("documentTypeId") && !changes.containsKey("documentKey")) {
+                documentTypeId = clientIdentifierCommand.getDocumentTypeId();
+                documentKey = clientIdentifierForUpdate.documentKey();
+            } else if (!changes.containsKey("documentTypeId") && changes.containsKey("documentKey")) {
+                documentTypeId = clientIdentifierForUpdate.documentTypeId();
+                documentKey = clientIdentifierForUpdate.documentKey();
             }
 
-            clientIdentifierForUpdate.update(command, documentType);
-
-            this.clientIdentifierRepository.saveAndFlush(clientIdentifierForUpdate);
-
-            return new EntityIdentifier(clientIdentifierForUpdate.getId());
+            if (!changes.isEmpty()) {
+                this.clientIdentifierRepository.saveAndFlush(clientIdentifierForUpdate);
+            }
+            return EntityIdentifier.subResourceResult(clientId, identifierId, command.commandId(), changes);
         } catch (DataIntegrityViolationException dve) {
             handleClientIdentifierDataIntegrityViolation(documentTypeLabel, documentTypeId, documentKey, dve);
             return new EntityIdentifier(Long.valueOf(-1));
@@ -303,12 +310,12 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
     @Transactional
     @Override
-    public EntityIdentifier deleteClientIdentifier(final ClientIdentifierCommand command) {
-        final ClientIdentifier clientIdentifier = this.clientIdentifierRepository.findOne(command.getId());
-        if (clientIdentifier == null) { throw new ClientIdentifierNotFoundException(command.getId()); }
+    public EntityIdentifier deleteClientIdentifier(final Long clientId, final Long identifierId, final Long commandId) {
+        final ClientIdentifier clientIdentifier = this.clientIdentifierRepository.findOne(identifierId);
+        if (clientIdentifier == null) { throw new ClientIdentifierNotFoundException(identifierId); }
         this.clientIdentifierRepository.delete(clientIdentifier);
 
-        return new EntityIdentifier(command.getId());
+        return EntityIdentifier.subResourceResult(clientId, identifierId, commandId);
     }
 
     @Transactional

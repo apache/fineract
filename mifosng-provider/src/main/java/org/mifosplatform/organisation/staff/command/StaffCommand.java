@@ -2,7 +2,6 @@ package org.mifosplatform.organisation.staff.command;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
@@ -18,59 +17,11 @@ public class StaffCommand {
     private final Long officeId;
     private final Boolean isLoanOfficer;
 
-    private final transient Set<String> parametersPassedInRequest;
-    private final transient boolean makerCheckerApproval;
-    private final transient Long id;
-
-    public StaffCommand(final Set<String> parametersPassedInRequest, final boolean makerCheckerApproval, final Long id,
-            final Long officeId, final String firstName, final String lastName, final Boolean isLoanOfficer) {
-        this.parametersPassedInRequest = parametersPassedInRequest;
-        this.makerCheckerApproval = makerCheckerApproval;
-        this.id = id;
+    public StaffCommand(final Long officeId, final String firstName, final String lastName, final Boolean isLoanOfficer) {
         this.firstname = firstName;
         this.lastname = lastName;
         this.officeId = officeId;
         this.isLoanOfficer = isLoanOfficer;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getFirstname() {
-        return this.firstname;
-    }
-
-    public String getLastname() {
-        return this.lastname;
-    }
-
-    public Long getOfficeId() {
-        return officeId;
-    }
-
-    public Boolean getIsLoanOfficer() {
-        return this.isLoanOfficer;
-    }
-
-    public boolean isFirstnameChanged() {
-        return this.parametersPassedInRequest.contains("firstname");
-    }
-
-    public boolean isLastnameChanged() {
-        return this.parametersPassedInRequest.contains("lastname");
-    }
-
-    public boolean isLoanOfficerFlagChanged() {
-        return this.parametersPassedInRequest.contains("isLoanOfficer");
-    }
-
-    public boolean isOfficeChanged() {
-        return this.parametersPassedInRequest.contains("officeId");
-    }
-
-    public boolean isApprovedByChecker() {
-        return this.makerCheckerApproval;
     }
 
     public void validateForCreate() {
@@ -91,7 +42,6 @@ public class StaffCommand {
 
         DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("staff");
 
-        baseDataValidator.reset().parameter("id").value(this.id).notNull();
         baseDataValidator.reset().parameter("officeId").value(this.officeId).ignoreIfNull().integerGreaterThanZero();
         baseDataValidator.reset().parameter("firstname").value(this.firstname).ignoreIfNull().notBlank().notExceedingLengthOf(50);
         baseDataValidator.reset().parameter("lastname").value(this.lastname).ignoreIfNull().notBlank().notExceedingLengthOf(50);
@@ -101,6 +51,6 @@ public class StaffCommand {
         baseDataValidator.reset().anyOfNotNull(this.firstname, this.lastname, this.officeId, this.isLoanOfficer);
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
-                "Validation errors exist.", dataValidationErrors); }        
+                "Validation errors exist.", dataValidationErrors); }
     }
 }

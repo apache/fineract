@@ -1,5 +1,8 @@
 package org.mifosplatform.portfolio.client.domain;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -9,8 +12,8 @@ import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.infrastructure.codes.domain.CodeValue;
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
-import org.mifosplatform.portfolio.client.command.ClientIdentifierCommand;
 import org.mifosplatform.useradministration.domain.AppUser;
 
 @Entity
@@ -19,6 +22,7 @@ import org.mifosplatform.useradministration.domain.AppUser;
         @UniqueConstraint(columnNames = { "client_id", "document_type_id" }, name = "unique_client_identifier") })
 public class ClientIdentifier extends AbstractAuditableCustom<AppUser, Long> {
 
+    @SuppressWarnings("unused")
     @ManyToOne
     @JoinColumn(name = "client_id", nullable = false)
     private Client client;
@@ -33,16 +37,14 @@ public class ClientIdentifier extends AbstractAuditableCustom<AppUser, Long> {
     @Column(name = "description", length = 1000)
     private String description;
 
-    public ClientIdentifier() {
-        this.client = null;
-        this.documentType = null;
-        this.documentKey = null;
-        this.description = null;
+    public static ClientIdentifier fromJson(final Client client, final CodeValue documentType, final JsonCommand command) {
+        final String documentKey = command.stringValueOfParameterNamed("documentKey");
+        final String description = command.stringValueOfParameterNamed("description");
+        return new ClientIdentifier(client, documentType, documentKey, description);
     }
 
-    public static ClientIdentifier createNew(final Client client, final CodeValue documentType, final String documentKey,
-            final String description) {
-        return new ClientIdentifier(client, documentType, documentKey, description);
+    protected ClientIdentifier() {
+        //
     }
 
     private ClientIdentifier(final Client client, final CodeValue documentType, final String documentKey, final String description) {
@@ -52,34 +54,42 @@ public class ClientIdentifier extends AbstractAuditableCustom<AppUser, Long> {
         this.description = StringUtils.defaultIfEmpty(description, null);
     }
 
-    public void update(final ClientIdentifierCommand command, final CodeValue documentType) {
+    public void update(final CodeValue documentType) {
+        this.documentType = documentType;
+    }
 
-        if (command.isDocumentTypeChanged()) {
-            this.documentType = documentType;
+    public Map<String, Object> update(final JsonCommand command) {
+
+        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(7);
+
+        final String documentTypeIdParamName = "documentTypeId";
+        if (command.isChangeInLongParameterNamed(documentTypeIdParamName, this.documentType.getId())) {
+            final Long newValue = command.longValueOfParameterNamed(documentTypeIdParamName);
+            actualChanges.put(documentTypeIdParamName, newValue);
         }
 
-        if (command.isDocumentKeyChanged()) {
-            this.documentKey = StringUtils.defaultIfEmpty(command.getDocumentKey(), null);
+        final String documentKeyParamName = "documentKey";
+        if (command.isChangeInStringParameterNamed(documentKeyParamName, this.documentKey)) {
+            final String newValue = command.stringValueOfParameterNamed(documentKeyParamName);
+            actualChanges.put(documentKeyParamName, newValue);
+            this.documentKey = StringUtils.defaultIfEmpty(newValue, null);
         }
 
-        if (command.isDescriptionChanged()) {
-            this.description = StringUtils.defaultIfEmpty(command.getDescription(), null);
+        final String descriptionParamName = "description";
+        if (command.isChangeInStringParameterNamed(descriptionParamName, this.description)) {
+            final String newValue = command.stringValueOfParameterNamed(descriptionParamName);
+            actualChanges.put(descriptionParamName, newValue);
+            this.description = StringUtils.defaultIfEmpty(newValue, null);
         }
+
+        return actualChanges;
     }
 
-    public Client getClient() {
-        return client;
+    public String documentKey() {
+        return this.documentKey;
     }
 
-    public CodeValue getDocumentType() {
-        return documentType;
-    }
-
-    public String getDocumentKey() {
-        return documentKey;
-    }
-
-    public String getDescription() {
-        return description;
+    public Long documentTypeId() {
+        return this.documentType.getId();
     }
 }

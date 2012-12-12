@@ -79,9 +79,8 @@ public class DepositAccountsApiResource {
             "interestCompoundedEvery", "interestCompoundingAllowed", "interestCompoundedEveryPeriodType", "renewalAllowed",
             "preClosureAllowed", "preClosureInterestRate", "withdrawnonDate", "rejectedonDate", "closedonDate", "transactions",
             "interestPaid", "isInterestWithdrawable", "availableInterestForWithdrawal", "availableWithdrawalAmount", "todaysDate",
-            "isLockinPeriodAllowed", "lockinPeriod", "lockinPeriodType","printFDdetailsLocation", "availableInterest", "interestPostedAmount",
-            "lastInterestPostedDate", "nextInterestPostedDate","fatherName","address","imageKey"));
-
+            "isLockinPeriodAllowed", "lockinPeriod", "lockinPeriodType", "printFDdetailsLocation", "availableInterest",
+            "interestPostedAmount", "lastInterestPostedDate", "nextInterestPostedDate", "fatherName", "address", "imageKey"));
 
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -263,8 +262,7 @@ public class DepositAccountsApiResource {
 
     private boolean is(final String commandParam, final String commandValue) {
         return StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase(commandValue);
-    }    
-
+    }
 
     @POST
     @Path("postinterest")
@@ -276,23 +274,22 @@ public class DepositAccountsApiResource {
         return Response.ok().entity(entityIdentifier).build();
 
     }
-    
+
     @GET
-	@Path("{accountId}/print")
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
-	public Response printDepositAccount(@PathParam("accountId") final Long accountId, @Context final UriInfo uriInfo) {
-		
-		DepositAccountData account = this.depositAccountReadPlatformService.retrieveDepositAccount(accountId);
-		String printFileName=null;
-		if (account != null)
-	    printFileName = new GeneratePDF(account).generatePDF();
-		account.setPrintFDdetailsLocation(printFileName);
-		
-		File file = new File(printFileName);
-		ResponseBuilder response = Response.ok(file);
-		response.header("Content-Disposition", "attachment; filename=\""+ printFileName + "\"");
-		response.header("Content-Type", "applicatio/pdf");
-		return response.build();
-	}
+    @Path("{accountId}/print")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public Response printDepositAccount(@PathParam("accountId") final Long accountId) {
+
+        DepositAccountData account = this.depositAccountReadPlatformService.retrieveDepositAccount(accountId);
+        String printFileName = null;
+        if (account != null) printFileName = new GeneratePDF(account).generatePDF();
+        account.setPrintFDdetailsLocation(printFileName);
+
+        File file = new File(printFileName);
+        ResponseBuilder response = Response.ok(file);
+        response.header("Content-Disposition", "attachment; filename=\"" + printFileName + "\"");
+        response.header("Content-Type", "applicatio/pdf");
+        return response.build();
+    }
 }

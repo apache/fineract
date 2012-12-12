@@ -27,7 +27,6 @@ import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSeria
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.office.data.OfficeData;
 import org.mifosplatform.organisation.office.data.OfficeLookup;
-import org.mifosplatform.organisation.office.serialization.OfficeCommandFromApiJsonDeserializer;
 import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -48,19 +47,16 @@ public class OfficesApiResource {
 
     private final PlatformSecurityContext context;
     private final OfficeReadPlatformService readPlatformService;
-    private final OfficeCommandFromApiJsonDeserializer fromApiJsonDeserializer;
     private final DefaultToApiJsonSerializer<OfficeData> toApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @Autowired
     public OfficesApiResource(final PlatformSecurityContext context, final OfficeReadPlatformService readPlatformService,
-            final OfficeCommandFromApiJsonDeserializer fromApiJsonDeserializer,
             final DefaultToApiJsonSerializer<OfficeData> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
         this.context = context;
         this.readPlatformService = readPlatformService;
-        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
@@ -101,13 +97,8 @@ public class OfficesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String createOffice(final String apiRequestBodyAsJson) {
 
-        final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "ORGANISATION_ADMINISTRATION_SUPER_USER", "CREATE_OFFICE");
-        context.authenticatedUser().validateHasPermissionTo("CREATE_OFFICE", allowedPermissions);
-
-        final String commandSerializedAsJson = this.fromApiJsonDeserializer.serializedCommandJsonFromApiJson(apiRequestBodyAsJson);
-
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE", "offices", null,
-                commandSerializedAsJson);
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE_OFFICE", "CREATE", "offices",
+                null, apiRequestBodyAsJson);
 
         return this.toApiJsonSerializer.serialize(result);
     }
@@ -137,13 +128,8 @@ public class OfficesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String updateOffice(@PathParam("officeId") final Long officeId, final String apiRequestBodyAsJson) {
 
-        final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "ORGANISATION_ADMINISTRATION_SUPER_USER", "UPDATE_OFFICE");
-        context.authenticatedUser().validateHasPermissionTo("UPDATE_OFFICE", allowedPermissions);
-
-        final String commandSerializedAsJson = this.fromApiJsonDeserializer.serializedCommandJsonFromApiJson(apiRequestBodyAsJson);
-
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "offices", officeId,
-                commandSerializedAsJson);
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE_OFFICE", "UPDATE", "offices",
+                officeId, apiRequestBodyAsJson);
 
         return this.toApiJsonSerializer.serialize(result);
     }

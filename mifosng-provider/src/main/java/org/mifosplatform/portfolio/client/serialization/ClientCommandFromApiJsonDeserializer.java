@@ -6,9 +6,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
+import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
 import org.mifosplatform.infrastructure.core.serialization.AbstractFromApiJsonDeserializer;
-import org.mifosplatform.infrastructure.core.serialization.CommandSerializer;
 import org.mifosplatform.infrastructure.core.serialization.FromApiJsonDeserializer;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.portfolio.client.command.ClientCommand;
@@ -34,16 +35,16 @@ public final class ClientCommandFromApiJsonDeserializer extends AbstractFromApiJ
     private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired
-    public ClientCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper, final CommandSerializer commandSerializerService) {
-        super(commandSerializerService);
+    public ClientCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper) {
         this.fromApiJsonHelper = fromApiJsonHelper;
     }
 
     @Override
-    public ClientCommand commandFromApiJson(@SuppressWarnings("unused") final Long clientId, final String json) {
+    public ClientCommand commandFromApiJson(final String json) {
+
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-
         fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
 
         final JsonElement element = fromApiJsonHelper.parse(json);
@@ -52,7 +53,7 @@ public final class ClientCommandFromApiJsonDeserializer extends AbstractFromApiJ
         final String firstname = fromApiJsonHelper.extractStringNamed("firstname", element);
         final String lastname = fromApiJsonHelper.extractStringNamed("lastname", element);
         final String clientOrBusinessName = fromApiJsonHelper.extractStringNamed("clientOrBusinessName", element);
-        final LocalDate joiningDate = fromApiJsonHelper.extractLocalDateNamed("joiningDate", element);
+        final LocalDate joiningDate = fromApiJsonHelper.extractLocalDateNamed("joinedDate", element);
 
         return new ClientCommand(externalId, firstname, lastname, clientOrBusinessName, officeId, joiningDate);
     }

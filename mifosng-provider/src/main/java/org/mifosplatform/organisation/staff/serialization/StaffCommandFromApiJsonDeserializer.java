@@ -6,20 +6,23 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.mifosplatform.infrastructure.core.serialization.CommandSerializer;
+import org.apache.commons.lang.StringUtils;
+import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
+import org.mifosplatform.infrastructure.core.serialization.AbstractFromApiJsonDeserializer;
 import org.mifosplatform.infrastructure.core.serialization.FromApiJsonDeserializer;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.organisation.staff.command.StaffCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 
 /**
  * Implementation of {@link FromApiJsonDeserializer} for {@link StaffCommand}'s.
  */
 @Component
-public final class StaffCommandFromApiJsonDeserializer implements FromApiJsonDeserializer<StaffCommand> {
+public final class StaffCommandFromApiJsonDeserializer extends AbstractFromApiJsonDeserializer<StaffCommand> {
 
     /**
      * The parameters supported for this command.
@@ -27,42 +30,26 @@ public final class StaffCommandFromApiJsonDeserializer implements FromApiJsonDes
     private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("firstname", "lastname", "officeId", "isLoanOfficer"));
 
     private final FromJsonHelper fromApiJsonHelper;
-    private final StaffCommandFromCommandJsonDeserializer fromCommandJsonDeserializer;
-    private final CommandSerializer commandSerializerService;
 
     @Autowired
-    public StaffCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper,
-            final StaffCommandFromCommandJsonDeserializer fromCommandJsonDeserializer, 
-            final CommandSerializer commandSerializerService) {
+    public StaffCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper) {
         this.fromApiJsonHelper = fromApiJsonHelper;
-        this.fromCommandJsonDeserializer = fromCommandJsonDeserializer;
-        this.commandSerializerService = commandSerializerService;
     }
 
     @Override
     public StaffCommand commandFromApiJson(final String json) {
-        return commandFromApiJson(null, json);
-    }
-
-    @Override
-    public StaffCommand commandFromApiJson(final Long roleId, final String json) {
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-
         fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
 
-        return this.fromCommandJsonDeserializer.commandFromCommandJson(roleId, json);
-    }
+        final JsonElement element = fromApiJsonHelper.parse(json);
 
-    @Override
-    public String serializedCommandJsonFromApiJson(final String json) {
-        final StaffCommand command = commandFromApiJson(json);
-        return this.commandSerializerService.serializeCommandToJson(command);
-    }
+        final String firstname = fromApiJsonHelper.extractStringNamed("firstname", element);
+        final String lastname = fromApiJsonHelper.extractStringNamed("lastname", element);
+        final Boolean isLoanOfficer = fromApiJsonHelper.extractBooleanNamed("isLoanOfficer", element);
+        final Long officeId = fromApiJsonHelper.extractLongNamed("officeId", element);
 
-    @Override
-    public String serializedCommandJsonFromApiJson(final Long roleId, final String json) {
-        final StaffCommand command = commandFromApiJson(roleId, json);
-        return this.commandSerializerService.serializeCommandToJson(command);
+        return new StaffCommand(officeId, firstname, lastname, isLoanOfficer);
     }
 }

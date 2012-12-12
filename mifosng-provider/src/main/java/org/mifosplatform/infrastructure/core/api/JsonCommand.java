@@ -1,9 +1,11 @@
 package org.mifosplatform.infrastructure.core.api;
 
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Map;
 
+import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
@@ -23,36 +25,49 @@ import com.google.gson.reflect.TypeToken;
 public final class JsonCommand {
 
     private final String jsonCommand;
-    private final transient boolean approvedByChecker;
     private final JsonElement parsedCommand;
     private final FromJsonHelper fromApiJsonHelper;
+    private final Long commandId;
+    private final Long resourceId;
+    private final Long subResourceId;
 
-    public static JsonCommand from(final String jsonCommand, final JsonElement parsedCommand, final FromJsonHelper fromApiJsonHelper) {
-        return new JsonCommand(jsonCommand, parsedCommand, fromApiJsonHelper, false);
+    public static JsonCommand from(final String jsonCommand, final JsonElement parsedCommand, final FromJsonHelper fromApiJsonHelper,
+            final Long resourceId, final Long subResourceId) {
+        return new JsonCommand(null, jsonCommand, parsedCommand, fromApiJsonHelper, resourceId, subResourceId);
+    }
+    
+    public static JsonCommand fromExistingCommand(final Long commandId, final String jsonCommand, final JsonElement parsedCommand, final FromJsonHelper fromApiJsonHelper,
+            final Long resourceId, final Long subResourceId) {
+        return new JsonCommand(commandId, jsonCommand, parsedCommand, fromApiJsonHelper, resourceId, subResourceId);
     }
 
-    public static JsonCommand withMakerCheckerApproval(final String jsonCommand, final JsonElement parsedCommand,
-            final FromJsonHelper fromApiJsonHelper) {
-        return new JsonCommand(jsonCommand, parsedCommand, fromApiJsonHelper, true);
-    }
-
-    public JsonCommand(final String jsonCommand, final JsonElement parsedCommand, final FromJsonHelper fromApiJsonHelper,
-            final boolean approvedByChecker) {
+    public JsonCommand(final Long commandId, final String jsonCommand, final JsonElement parsedCommand, final FromJsonHelper fromApiJsonHelper,
+            final Long resourceId, final Long subResourceId) {
+        this.commandId = commandId;
         this.jsonCommand = jsonCommand;
         this.parsedCommand = parsedCommand;
         this.fromApiJsonHelper = fromApiJsonHelper;
-        this.approvedByChecker = approvedByChecker;
+        this.resourceId = resourceId;
+        this.subResourceId = subResourceId;
     }
 
     public String json() {
         return this.jsonCommand;
     }
-
-    public boolean isApprovedByChecker() {
-        return this.approvedByChecker;
+    
+    public Long commandId() {
+        return this.commandId;
+    }
+    
+    public Long resourceId() {
+        return this.resourceId;
+    }
+    
+    public Long subResourceId() {
+        return this.subResourceId;
     }
 
-    private boolean differenceExists(LocalDate baseValue, LocalDate workingCopyValue) {
+    private boolean differenceExists(final LocalDate baseValue, final LocalDate workingCopyValue) {
         boolean differenceExists = false;
 
         if (baseValue != null) {
@@ -82,7 +97,31 @@ public final class JsonCommand {
         return !Arrays.equals(baseValue, workingCopyValue);
     }
 
-    private boolean differenceExists(final Long baseValue, final Long workingCopyValue) {
+    private boolean differenceExists(final Number baseValue, final Number workingCopyValue) {
+        boolean differenceExists = false;
+
+        if (baseValue != null) {
+            differenceExists = !baseValue.equals(workingCopyValue);
+        } else {
+            differenceExists = workingCopyValue != null;
+        }
+
+        return differenceExists;
+    }
+
+    private boolean differenceExists(final BigDecimal baseValue, final BigDecimal workingCopyValue) {
+        boolean differenceExists = false;
+
+        if (baseValue != null) {
+            differenceExists = baseValue.compareTo(workingCopyValue) != 0;
+        } else {
+            differenceExists = workingCopyValue != null;
+        }
+
+        return differenceExists;
+    }
+
+    private boolean differenceExists(final Boolean baseValue, final Boolean workingCopyValue) {
         boolean differenceExists = false;
 
         if (baseValue != null) {
@@ -97,7 +136,7 @@ public final class JsonCommand {
     private boolean parameterExists(final String parameterName) {
         return this.fromApiJsonHelper.parameterExists(parameterName, parsedCommand);
     }
-    
+
     public boolean hasParameter(final String parameterName) {
         return parameterExists(parameterName);
     }
@@ -160,6 +199,56 @@ public final class JsonCommand {
         return StringUtils.defaultIfEmpty(value, "");
     }
 
+    public boolean isChangeInBigDecimalParameterNamed(final String parameterName, final BigDecimal existingValue) {
+        boolean isChanged = false;
+        if (parameterExists(parameterName)) {
+            final BigDecimal workingValue = bigDecimalValueOfParameterNamed(parameterName);
+            isChanged = differenceExists(existingValue, workingValue);
+        }
+        return isChanged;
+    }
+
+    public BigDecimal bigDecimalValueOfParameterNamed(final String parameterName) {
+        return this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(parameterName, parsedCommand);
+    }
+
+    public boolean isChangeInIntegerParameterNamed(final String parameterName, final Integer existingValue) {
+        boolean isChanged = false;
+        if (parameterExists(parameterName)) {
+            final Integer workingValue = integerValueOfParameterNamed(parameterName);
+            isChanged = differenceExists(existingValue, workingValue);
+        }
+        return isChanged;
+    }
+
+    public Integer integerValueOfParameterNamed(final String parameterName) {
+        return this.fromApiJsonHelper.extractIntegerWithLocaleNamed(parameterName, parsedCommand);
+    }
+
+    public boolean isChangeInBooleanParameterNamed(final String parameterName, final Boolean existingValue) {
+        boolean isChanged = false;
+        if (parameterExists(parameterName)) {
+            final Boolean workingValue = booleanObjectValueOfParameterNamed(parameterName);
+            isChanged = differenceExists(existingValue, workingValue);
+        }
+        return isChanged;
+    }
+
+    /**
+     * Returns {@link Boolean} that could possibly be null.
+     */
+    public Boolean booleanObjectValueOfParameterNamed(final String parameterName) {
+        return this.fromApiJsonHelper.extractBooleanNamed(parameterName, parsedCommand);
+    }
+
+    /**
+     * always returns true or false
+     */
+    public boolean booleanPrimitiveValueOfParameterNamed(final String parameterName) {
+        final Boolean value = this.fromApiJsonHelper.extractBooleanNamed(parameterName, parsedCommand);
+        return (Boolean) ObjectUtils.defaultIfNull(value, Boolean.FALSE);
+    }
+
     public boolean isChangeInArrayParameterNamed(final String parameterName, final String[] existingValue) {
         boolean isChanged = false;
         if (parameterExists(parameterName)) {
@@ -173,7 +262,8 @@ public final class JsonCommand {
         return this.fromApiJsonHelper.extractArrayNamed(parameterName, parsedCommand);
     }
 
-    public boolean isChangeInPasswordParameterNamed(final String parameterName, final String existingValue, final PlatformPasswordEncoder platformPasswordEncoder, final Long saltValue) {
+    public boolean isChangeInPasswordParameterNamed(final String parameterName, final String existingValue,
+            final PlatformPasswordEncoder platformPasswordEncoder, final Long saltValue) {
         boolean isChanged = false;
         if (parameterExists(parameterName)) {
             final String workingValue = passwordValueOfParameterNamed(parameterName, platformPasswordEncoder, saltValue);
@@ -181,10 +271,11 @@ public final class JsonCommand {
         }
         return isChanged;
     }
-    
-    public String passwordValueOfParameterNamed(final String parameterName, final PlatformPasswordEncoder platformPasswordEncoder, final Long saltValue) {
+
+    public String passwordValueOfParameterNamed(final String parameterName, final PlatformPasswordEncoder platformPasswordEncoder,
+            final Long saltValue) {
         final String passwordPlainText = stringValueOfParameterNamed(parameterName);
-        
+
         final PlatformUser dummyPlatformUser = new BasicPasswordEncodablePlatformUser(saltValue, "", passwordPlainText);
         return platformPasswordEncoder.encode(dummyPlatformUser);
     }

@@ -32,7 +32,6 @@ import org.mifosplatform.portfolio.fund.data.FundData;
 import org.mifosplatform.portfolio.fund.service.FundReadPlatformService;
 import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
 import org.mifosplatform.portfolio.loanproduct.data.TransactionProcessingStrategyData;
-import org.mifosplatform.portfolio.loanproduct.serialization.LoanProductCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.loanproduct.service.LoanDropdownReadPlatformService;
 import org.mifosplatform.portfolio.loanproduct.service.LoanProductReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +58,6 @@ public class LoanProductsApiResource {
     private final ChargeReadPlatformService chargeReadPlatformService;
     private final CurrencyReadPlatformService currencyReadPlatformService;
     private final FundReadPlatformService fundReadPlatformService;
-    private final LoanProductCommandFromApiJsonDeserializer fromApiJsonDeserializer;
     private final DefaultToApiJsonSerializer<LoanProductData> toApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final LoanDropdownReadPlatformService dropdownReadPlatformService;
@@ -69,7 +67,6 @@ public class LoanProductsApiResource {
     public LoanProductsApiResource(final PlatformSecurityContext context, final LoanProductReadPlatformService readPlatformService,
             final ChargeReadPlatformService chargeReadPlatformService, final CurrencyReadPlatformService currencyReadPlatformService,
             final FundReadPlatformService fundReadPlatformService, final LoanDropdownReadPlatformService dropdownReadPlatformService,
-            final LoanProductCommandFromApiJsonDeserializer fromApiJsonDeserializer,
             final DefaultToApiJsonSerializer<LoanProductData> toApiJsonSerializer,
             final ApiRequestParameterHelper apiRequestParameterHelper,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
@@ -79,7 +76,6 @@ public class LoanProductsApiResource {
         this.currencyReadPlatformService = currencyReadPlatformService;
         this.fundReadPlatformService = fundReadPlatformService;
         this.dropdownReadPlatformService = dropdownReadPlatformService;
-        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
@@ -90,14 +86,8 @@ public class LoanProductsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String createLoanProduct(final String apiRequestBodyAsJson) {
 
-        final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "ORGANISATION_ADMINISTRATION_SUPER_USER",
-                "CREATE_LOANPRODUCT");
-        context.authenticatedUser().validateHasPermissionTo("CREATE_LOANPRODUCT", allowedPermissions);
-
-        final String commandSerializedAsJson = this.fromApiJsonDeserializer.serializedCommandJsonFromApiJson(apiRequestBodyAsJson);
-
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE", "loanproducts", null,
-                commandSerializedAsJson);
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE_LOANPRODUCT", "CREATE",
+                "loanproducts", null, apiRequestBodyAsJson);
 
         return this.toApiJsonSerializer.serialize(result);
     }
@@ -154,15 +144,8 @@ public class LoanProductsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String updateLoanProduct(@PathParam("productId") final Long productId, final String apiRequestBodyAsJson) {
 
-        final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "ORGANISATION_ADMINISTRATION_SUPER_USER",
-                "UPDATE_LOANPRODUCT");
-        context.authenticatedUser().validateHasPermissionTo("UPDATE_LOANPRODUCT", allowedPermissions);
-
-        final String commandSerializedAsJson = this.fromApiJsonDeserializer.serializedCommandJsonFromApiJson(productId,
-                apiRequestBodyAsJson);
-
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "loanproducts", productId,
-                commandSerializedAsJson);
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE_LOANPRODUCT", "UPDATE",
+                "loanproducts", productId, apiRequestBodyAsJson);
 
         return this.toApiJsonSerializer.serialize(result);
     }

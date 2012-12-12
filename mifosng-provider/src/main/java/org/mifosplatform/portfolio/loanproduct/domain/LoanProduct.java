@@ -1,6 +1,9 @@
 package org.mifosplatform.portfolio.loanproduct.domain;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -13,11 +16,12 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.apache.commons.lang.StringUtils;
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.portfolio.charge.domain.Charge;
 import org.mifosplatform.portfolio.fund.domain.Fund;
-import org.mifosplatform.portfolio.loanproduct.command.LoanProductCommand;
+import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.AprCalculator;
 import org.mifosplatform.useradministration.domain.AppUser;
 
 /**
@@ -33,21 +37,17 @@ import org.mifosplatform.useradministration.domain.AppUser;
 @Table(name = "m_product_loan")
 public class LoanProduct extends AbstractAuditableCustom<AppUser, Long> {
 
-    @SuppressWarnings("unused")
     @ManyToOne
     @JoinColumn(name = "fund_id", nullable = true)
     private Fund fund;
 
-    @SuppressWarnings("unused")
     @ManyToOne
     @JoinColumn(name = "loan_transaction_strategy_id", nullable = true)
     private LoanTransactionProcessingStrategy transactionProcessingStrategy;
 
-    @SuppressWarnings("unused")
     @Column(name = "name", nullable = false)
     private String name;
 
-    @SuppressWarnings("unused")
     @Column(name = "description")
     private String description;
 
@@ -57,6 +57,37 @@ public class LoanProduct extends AbstractAuditableCustom<AppUser, Long> {
 
     @Embedded
     private final LoanProductRelatedDetail loanProductRelatedDetail;
+
+    public static LoanProduct assembleFromJson(final Fund fund, final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy,
+            final Set<Charge> productCharges, final JsonCommand command, final AprCalculator aprCalculator) {
+
+        final String name = command.stringValueOfParameterNamed("name");
+        final String description = command.stringValueOfParameterNamed("description");
+        final String currencyCode = command.stringValueOfParameterNamed("currencyCode");
+        final Integer digitsAfterDecimal = command.integerValueOfParameterNamed("digitsAfterDecimal");
+
+        final MonetaryCurrency currency = new MonetaryCurrency(currencyCode, digitsAfterDecimal);
+        final BigDecimal principal = command.bigDecimalValueOfParameterNamed("principal");
+
+        final InterestMethod interestMethod = InterestMethod.fromInt(command.integerValueOfParameterNamed("interestType"));
+        final InterestCalculationPeriodMethod interestCalculationPeriodMethod = InterestCalculationPeriodMethod.fromInt(command
+                .integerValueOfParameterNamed("interestCalculationPeriodType"));
+        final AmortizationMethod amortizationMethod = AmortizationMethod.fromInt(command.integerValueOfParameterNamed("interestType"));
+        final PeriodFrequencyType repaymentFrequencyType = PeriodFrequencyType.fromInt(command
+                .integerValueOfParameterNamed("repaymentFrequencyType"));
+        final PeriodFrequencyType interestFrequencyType = PeriodFrequencyType.fromInt(command
+                .integerValueOfParameterNamed("interestRateFrequencyType"));
+        final BigDecimal interestRatePerPeriod = command.bigDecimalValueOfParameterNamed("interestRatePerPeriod");
+        final BigDecimal annualInterestRate = aprCalculator.calculateFrom(interestFrequencyType, interestRatePerPeriod);
+
+        final Integer repaymentEvery = command.integerValueOfParameterNamed("repaymentEvery");
+        final Integer numberOfRepayments = command.integerValueOfParameterNamed("numberOfRepayments");
+        final BigDecimal inArrearsTolerance = command.bigDecimalValueOfParameterNamed("inArrearsTolerance");
+
+        return new LoanProduct(fund, loanTransactionProcessingStrategy, name, description, currency, principal, interestRatePerPeriod,
+                interestFrequencyType, annualInterestRate, interestMethod, interestCalculationPeriodMethod, repaymentEvery,
+                repaymentFrequencyType, numberOfRepayments, amortizationMethod, inArrearsTolerance, productCharges);
+    }
 
     protected LoanProduct() {
         this.loanProductRelatedDetail = null;
@@ -94,30 +125,75 @@ public class LoanProduct extends AbstractAuditableCustom<AppUser, Long> {
     public Set<Charge> getCharges() {
         return charges;
     }
+    
+    public void update(final Fund fund) {
+        this.fund = fund;
+    }
 
-    public void update(final LoanProductCommand command, final Fund fund, final LoanTransactionProcessingStrategy strategy,
-            final Set<Charge> charges) {
+    public void update(final LoanTransactionProcessingStrategy strategy) {
+        this.transactionProcessingStrategy = strategy;
+    }
 
-        if (command.isNameChanged()) {
-            this.name = command.getName();
+    public void update(final Set<Charge> charges) {
+        this.charges = charges;
+    }
+
+    public Map<String, Object> update(final JsonCommand command) {
+
+        final Map<String, Object> actualChanges = this.loanProductRelatedDetail.update(command);
+
+        final String nameParamName = "name";
+        if (command.isChangeInStringParameterNamed(nameParamName, this.name)) {
+            final String newValue = command.stringValueOfParameterNamed(nameParamName);
+            actualChanges.put(nameParamName, newValue);
+            this.name = newValue;
         }
 
-        if (command.isDescriptionChanged()) {
-            this.description = command.getDescription();
+        final String descriptionParamName = "description";
+        if (command.isChangeInStringParameterNamed(descriptionParamName, this.description)) {
+            final String newValue = command.stringValueOfParameterNamed(descriptionParamName);
+            actualChanges.put(descriptionParamName, newValue);
+            this.description = newValue;
         }
 
-        if (command.isFundChanged()) {
-            this.fund = fund;
+        Long existingFundId = null;
+        if (this.fund != null) {
+            existingFundId = this.fund.getId();
+        }
+        final String fundIdParamName = "fundId";
+        if (command.isChangeInLongParameterNamed(fundIdParamName, existingFundId)) {
+            final Long newValue = command.longValueOfParameterNamed(fundIdParamName);
+            actualChanges.put(fundIdParamName, newValue);
         }
 
-        if (command.isTransactionProcessingStrategyChanged()) {
-            this.transactionProcessingStrategy = strategy;
+        Long existingStrategyId = null;
+        if (this.transactionProcessingStrategy != null) {
+            existingStrategyId = this.transactionProcessingStrategy.getId();
+        }
+        final String transactionProcessingStrategyParamName = "transactionProcessingStrategyId";
+        if (command.isChangeInLongParameterNamed(transactionProcessingStrategyParamName, existingStrategyId)) {
+            final Long newValue = command.longValueOfParameterNamed(transactionProcessingStrategyParamName);
+            actualChanges.put(transactionProcessingStrategyParamName, newValue);
         }
 
-        if (command.isChargesChanged()) {
-            this.charges = charges;
+        final String chargesParamName = "charges";
+        if (command.isChangeInArrayParameterNamed(chargesParamName, getChargesIds())) {
+            final String[] newValue = command.arrayValueOfParameterNamed(chargesParamName);
+            actualChanges.put(chargesParamName, newValue);
         }
 
-        this.loanProductRelatedDetail.update(command);
+        return actualChanges;
+    }
+
+    private String[] getChargesIds() {
+        final List<String> chargeIds = new ArrayList<String>();
+
+        if (this.charges != null) {
+            for (Charge charge : this.charges) {
+                chargeIds.add(charge.getId().toString());
+            }
+        }
+
+        return chargeIds.toArray(new String[chargeIds.size()]);
     }
 }

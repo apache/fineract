@@ -1,9 +1,10 @@
 package org.mifosplatform.organisation.monetary.service;
 
-import org.mifosplatform.organisation.monetary.command.CurrencyCommand;
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 
 public interface CurrencyWritePlatformService {
 
-    void updateAllowedCurrencies(CurrencyCommand command);
+    EntityIdentifier updateAllowedCurrencies(JsonCommand command);
 
 }

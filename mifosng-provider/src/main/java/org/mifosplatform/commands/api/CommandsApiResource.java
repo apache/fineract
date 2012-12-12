@@ -98,6 +98,6 @@ public class CommandsApiResource {
 
         final Long id = this.writePlatformService.deleteEntry(commandId);
 
-        return this.toApiJsonSerializer.serialize(EntityIdentifier.makerChecker(id));
+        return this.toApiJsonSerializer.serialize(EntityIdentifier.commandOnlyResult(id));
     }
 }

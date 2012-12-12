@@ -1,6 +1,8 @@
 package org.mifosplatform.portfolio.loanproduct.domain;
 
 import java.math.BigDecimal;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
@@ -8,10 +10,10 @@ import javax.persistence.Embedded;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
-import org.mifosplatform.portfolio.loanproduct.command.LoanProductCommand;
 
 /**
  * LoanRepaymentScheduleDetail encapsulates all the details of a
@@ -140,51 +142,113 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
         return amortizationMethod;
     }
 
-    public void update(final LoanProductCommand command) {
+    public Map<String, Object> update(final JsonCommand command) {
 
-        Integer digitsAfterDecimalChanged = this.currency.getDigitsAfterDecimal();
-        if (command.isDigitsAfterDecimalChanged()) {
-            digitsAfterDecimalChanged = command.getDigitsAfterDecimal();
+        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(20);
+
+        final String localeAsInput = command.locale();
+
+        String currencyCode = this.currency.getCode();
+        Integer digitsAfterDecimal = this.currency.getDigitsAfterDecimal();
+
+        final String digitsAfterDecimalParamName = "digitsAfterDecimal";
+        if (command.isChangeInIntegerParameterNamed(digitsAfterDecimalParamName, digitsAfterDecimal)) {
+            final Integer newValue = command.integerValueOfParameterNamed(digitsAfterDecimalParamName);
+            actualChanges.put(digitsAfterDecimalParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            digitsAfterDecimal = newValue;
+            this.currency = new MonetaryCurrency(currencyCode, digitsAfterDecimal);
         }
 
-        String currencyCodeChanged = this.currency.getCode();
-        if (command.isCurrencyCodeChanged()) {
-            currencyCodeChanged = command.getCurrencyCode();
+        final String currencyCodeParamName = "currencyCode";
+        if (command.isChangeInStringParameterNamed(currencyCodeParamName, currencyCode)) {
+            final String newValue = command.stringValueOfParameterNamed(currencyCodeParamName);
+            actualChanges.put(currencyCodeParamName, newValue);
+            currencyCode = newValue;
+            this.currency = new MonetaryCurrency(currencyCode, digitsAfterDecimal);
         }
 
-        if (command.isDigitsAfterDecimalChanged() || command.isCurrencyCodeChanged()) {
-            this.currency = new MonetaryCurrency(currencyCodeChanged, digitsAfterDecimalChanged);
+        final String principalParamName = "principal";
+        if (command.isChangeInBigDecimalParameterNamed(principalParamName, this.principal)) {
+            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(principalParamName);
+            actualChanges.put(principalParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.principal = newValue;
         }
 
-        if (command.isPrincipalChanged()) {
-            this.principal = command.getPrincipal();
+        final String repaymentEveryParamName = "repaymentEvery";
+        if (command.isChangeInIntegerParameterNamed(repaymentEveryParamName, this.repayEvery)) {
+            final Integer newValue = command.integerValueOfParameterNamed(repaymentEveryParamName);
+            actualChanges.put(repaymentEveryParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.repayEvery = newValue;
         }
-        if (command.isRepaymentEveryChanged()) {
-            this.repayEvery = command.getRepaymentEvery();
+
+        final String repaymentFrequencyTypeParamName = "repaymentFrequencyType";
+        if (command.isChangeInIntegerParameterNamed(repaymentFrequencyTypeParamName, this.repaymentPeriodFrequencyType.getValue())) {
+            final Integer newValue = command.integerValueOfParameterNamed(repaymentFrequencyTypeParamName);
+            actualChanges.put(repaymentFrequencyTypeParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.repaymentPeriodFrequencyType = PeriodFrequencyType.fromInt(newValue);
         }
-        if (command.isRepaymentFrequencyTypeChanged()) {
-            this.repaymentPeriodFrequencyType = PeriodFrequencyType.fromInt(command.getRepaymentFrequencyType());
+
+        final String numberOfRepaymentsParamName = "numberOfRepayments";
+        if (command.isChangeInIntegerParameterNamed(numberOfRepaymentsParamName, this.numberOfRepayments)) {
+            final Integer newValue = command.integerValueOfParameterNamed(numberOfRepaymentsParamName);
+            actualChanges.put(numberOfRepaymentsParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.numberOfRepayments = newValue;
         }
-        if (command.isNumberOfRepaymentsChanged()) {
-            this.numberOfRepayments = command.getNumberOfRepayments();
+
+        final String amortizationTypeParamName = "amortizationType";
+        if (command.isChangeInIntegerParameterNamed(amortizationTypeParamName, this.amortizationMethod.getValue())) {
+            final Integer newValue = command.integerValueOfParameterNamed(amortizationTypeParamName);
+            actualChanges.put(amortizationTypeParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.amortizationMethod = AmortizationMethod.fromInt(newValue);
         }
-        if (command.isAmortizationTypeChanged()) {
-            this.amortizationMethod = AmortizationMethod.fromInt(command.getAmortizationType());
+
+        final String inArrearsToleranceParamName = "inArrearsTolerance";
+        if (command.isChangeInBigDecimalParameterNamed(inArrearsToleranceParamName, this.inArrearsTolerance)) {
+            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(inArrearsToleranceParamName);
+            actualChanges.put(inArrearsToleranceParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.inArrearsTolerance = newValue;
         }
-        if (command.isInArrearsToleranceChanged()) {
-            this.inArrearsTolerance = command.getInArrearsTolerance();
+
+        final String interestRatePerPeriodParamName = "interestRatePerPeriod";
+        if (command.isChangeInBigDecimalParameterNamed(interestRatePerPeriodParamName, this.nominalInterestRatePerPeriod)) {
+            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(interestRatePerPeriodParamName);
+            actualChanges.put(interestRatePerPeriodParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.nominalInterestRatePerPeriod = newValue;
         }
-        if (command.isInterestRatePerPeriodChanged()) {
-            this.nominalInterestRatePerPeriod = command.getInterestRatePerPeriod();
+
+        final String interestRateFrequencyTypeParamName = "interestRateFrequencyType";
+        if (command.isChangeInIntegerParameterNamed(interestRateFrequencyTypeParamName, this.interestPeriodFrequencyType.getValue())) {
+            final Integer newValue = command.integerValueOfParameterNamed(interestRateFrequencyTypeParamName);
+            actualChanges.put(interestRateFrequencyTypeParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.interestPeriodFrequencyType = PeriodFrequencyType.fromInt(newValue);
         }
-        if (command.isInterestRateFrequencyTypeChanged()) {
-            this.interestPeriodFrequencyType = PeriodFrequencyType.fromInt(command.getInterestRateFrequencyType());
+
+        final String interestTypeParamName = "interestType";
+        if (command.isChangeInIntegerParameterNamed(interestTypeParamName, this.interestMethod.getValue())) {
+            final Integer newValue = command.integerValueOfParameterNamed(interestTypeParamName);
+            actualChanges.put(interestTypeParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.interestMethod = InterestMethod.fromInt(newValue);
         }
-        if (command.isInterestTypeChanged()) {
-            this.interestMethod = InterestMethod.fromInt(command.getInterestType());
+
+        final String interestCalculationPeriodTypeParamName = "interestCalculationPeriodType";
+        if (command
+                .isChangeInIntegerParameterNamed(interestCalculationPeriodTypeParamName, this.interestCalculationPeriodMethod.getValue())) {
+            final Integer newValue = command.integerValueOfParameterNamed(interestCalculationPeriodTypeParamName);
+            actualChanges.put(interestCalculationPeriodTypeParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.interestCalculationPeriodMethod = InterestCalculationPeriodMethod.fromInt(newValue);
         }
-        if (command.isInterestCalculationPeriodTypeChanged()) {
-            this.interestCalculationPeriodMethod = InterestCalculationPeriodMethod.fromInt(command.getInterestCalculationPeriodType());
-        }
+
+        return actualChanges;
     }
 }

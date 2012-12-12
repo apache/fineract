@@ -6,6 +6,8 @@ import java.util.Set;
 public interface ToApiJsonSerializer<T> {
 
     String serialize(final Object object);
+    
+    String serializeResult(final Object object);
 
     String serialize(final ApiRequestJsonSerializationSettings settings, Collection<T> collection, Set<String> supportedResponseParameters);
 

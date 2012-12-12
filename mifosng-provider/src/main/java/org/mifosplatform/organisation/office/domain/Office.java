@@ -1,8 +1,10 @@
 package org.mifosplatform.organisation.office.domain;
 
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -17,17 +19,15 @@ import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
-import org.mifosplatform.organisation.office.command.OfficeCommand;
 import org.mifosplatform.organisation.office.exception.CannotUpdateOfficeWithParentOfficeSameAsSelf;
 import org.mifosplatform.organisation.office.exception.RootOfficeParentCannotBeUpdated;
 import org.mifosplatform.useradministration.domain.AppUser;
 
 @Entity
-@Table(name = "m_office", uniqueConstraints={
-												@UniqueConstraint(columnNames = {"name"}, name="name_org"), 
-												@UniqueConstraint(columnNames = {"external_id"}, name="externalid_org")
-})
+@Table(name = "m_office", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "name_org"),
+        @UniqueConstraint(columnNames = { "external_id" }, name = "externalid_org") })
 public class Office extends AbstractAuditableCustom<AppUser, Long> {
 
     @OneToMany(fetch = FetchType.EAGER)
@@ -36,30 +36,32 @@ public class Office extends AbstractAuditableCustom<AppUser, Long> {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
-    private Office       parent;
+    private Office parent;
 
-    @Column(name = "name", nullable = false, length=100)
-	private String name;
-    
-    @Column(name = "hierarchy", nullable = false, length=50)
-	private String hierarchy;
+    @Column(name = "name", nullable = false, length = 100)
+    private String name;
 
-    @SuppressWarnings("unused")
-	@Column(name = "opening_date", nullable = false)
+    @Column(name = "hierarchy", nullable = false, length = 50)
+    private String hierarchy;
+
+    @Column(name = "opening_date", nullable = false)
     @Temporal(TemporalType.DATE)
-	private Date openingDate;
+    private Date openingDate;
 
-    @SuppressWarnings("unused")
-	@Column(name = "external_id", length=100)
-	private String externalId;
+    @Column(name = "external_id", length = 100)
+    private String externalId;
 
     public static Office headOffice(final String name, final LocalDate openingDate, final String externalId) {
         return new Office(null, name, openingDate, externalId);
     }
-    
-    public static Office createNew(final Office parent, final String name, final LocalDate openingDate, final String externalId) {
-		return new Office(parent, name, openingDate, externalId);
-	}
+
+    public static Office fromJson(final Office parentOffice, final JsonCommand command) {
+
+        final String name = command.stringValueOfParameterNamed("name");
+        final LocalDate openingDate = command.localDateValueOfParameterNamed("openingDate");
+        final String externalId = command.stringValueOfParameterNamed("externalId");
+        return new Office(parentOffice, name, openingDate, externalId);
+    }
 
     protected Office() {
         this.openingDate = null;
@@ -73,113 +75,139 @@ public class Office extends AbstractAuditableCustom<AppUser, Long> {
         this.openingDate = openingDate.toDateMidnight().toDate();
         if (parent != null) {
             this.parent.addChild(this);
-        } 
-        
-        if (StringUtils.isNotBlank(name)) {
-        	this.name = name.trim();
-        } else {
-        	this.name = null;
         }
-		if (StringUtils.isNotBlank(externalId)) {
-			this.externalId = externalId.trim();
-		} else {
-			this.externalId = null;
-		}
+
+        if (StringUtils.isNotBlank(name)) {
+            this.name = name.trim();
+        } else {
+            this.name = null;
+        }
+        if (StringUtils.isNotBlank(externalId)) {
+            this.externalId = externalId.trim();
+        } else {
+            this.externalId = null;
+        }
     }
 
-	private void addChild(final Office office) {
+    private void addChild(final Office office) {
         this.children.add(office);
     }
-    
-	public void update(final OfficeCommand command) {
-		
-		if (command.isNameChanged()) {
-			this.name = StringUtils.defaultIfEmpty(command.getName(), null);
-		}
-		
-		if (command.isExternalIdChanged()) {
-			this.externalId = StringUtils.defaultIfEmpty(command.getExternalId(), null);
-		}
-		
-		if (command.isOpeningDateChanged()) {
-			if (command.getOpeningDate() != null) {
-				this.openingDate = command.getOpeningDate().toDate();
-			} else {
-				this.openingDate = null;
-			}
-		}
-	}
-	
-	public void update(final Office newParent) {
-		
-		if (this.parent == null) {
-			throw new RootOfficeParentCannotBeUpdated();
-		}
-		
-		if (this.identifiedBy(newParent.getId())) {
-			throw new CannotUpdateOfficeWithParentOfficeSameAsSelf(this.getId(), newParent.getId());
-		}
-		
-		this.parent = newParent;
-		generateHierarchy();
-	}
 
-	public boolean identifiedBy(final Long id) {
-		return getId().equals(id);
-	}
+    public Map<String, Object> update(final JsonCommand command) {
 
-	public void generateHierarchy() {
-		
-		if (parent != null) {
-			this.hierarchy = this.parent.hierarchyOf(this.getId());
-		} else {
-			this.hierarchy = ".";
-		}
-	}
+        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(7);
 
-	private String hierarchyOf(Long id) {
-		return this.hierarchy + id.toString() + ".";
-	}
-	
-    public String getName() {
-    	return this.name;
+        final String dateFormatAsInput = command.dateFormat();
+        final String localeAsInput = command.locale();
+
+        final String parentIdParamName = "parentId";
+        if (command.isChangeInLongParameterNamed(parentIdParamName, this.parent.getId())) {
+            final Long newValue = command.longValueOfParameterNamed(parentIdParamName);
+            actualChanges.put(parentIdParamName, newValue);
+        }
+
+        final String openingDateParamName = "openingDate";
+        if (command.isChangeInLocalDateParameterNamed(openingDateParamName, getOpeningLocalDate())) {
+            final String valueAsInput = command.stringValueOfParameterNamed(openingDateParamName);
+            actualChanges.put(openingDateParamName, valueAsInput);
+            actualChanges.put("dateFormat", dateFormatAsInput);
+            actualChanges.put("locale", localeAsInput);
+
+            final LocalDate newValue = command.localDateValueOfParameterNamed(openingDateParamName);
+            this.openingDate = newValue.toDate();
+        }
+
+        final String nameParamName = "name";
+        if (command.isChangeInStringParameterNamed(nameParamName, this.name)) {
+            final String newValue = command.stringValueOfParameterNamed(nameParamName);
+            actualChanges.put(nameParamName, newValue);
+            this.name = newValue;
+        }
+
+        final String externalIdParamName = "externalId";
+        if (command.isChangeInStringParameterNamed(externalIdParamName, this.externalId)) {
+            final String newValue = command.stringValueOfParameterNamed(externalIdParamName);
+            actualChanges.put(externalIdParamName, newValue);
+            this.externalId = StringUtils.defaultIfEmpty(newValue, null);
+        }
+
+        return actualChanges;
     }
 
-	public String getHierarchy() {
-		return hierarchy;
-	}
+    private LocalDate getOpeningLocalDate() {
+        LocalDate openingLocalDate = null;
+        if (this.openingDate != null) {
+            openingLocalDate = LocalDate.fromDateFields(this.openingDate);
+        }
+        return openingLocalDate;
+    }
 
-	public boolean hasParentOf(final Office office) {
-		boolean isParent = false;
-		if (this.parent != null) {
-			isParent = this.parent.equals(office);
-		}
-		return isParent;
-	}
-	
-	public boolean doesNotHaveAnOfficeInHierarchyWithId(Long officeId) {
-		return !this.hasAnOfficeInHierarchyWithId(officeId);
-	}
-	
-	private boolean hasAnOfficeInHierarchyWithId(Long officeId) {
-		
-		boolean match = false;
-		
-		if (identifiedBy(officeId)) {
-			match = true;
-		}
-		
-		if (!match) {
-			for (Office child : this.children) {
-				boolean result = child.hasAnOfficeInHierarchyWithId(officeId);
-				
-				if (result) {
-					match = result;
-					break;
-				}
-			}
-		}
-		
-		return match;
-	}
+    public void update(final Office newParent) {
+
+        if (this.parent == null) { throw new RootOfficeParentCannotBeUpdated(); }
+
+        if (this.identifiedBy(newParent.getId())) { throw new CannotUpdateOfficeWithParentOfficeSameAsSelf(this.getId(), newParent.getId()); }
+
+        this.parent = newParent;
+        generateHierarchy();
+    }
+
+    public boolean identifiedBy(final Long id) {
+        return getId().equals(id);
+    }
+
+    public void generateHierarchy() {
+
+        if (parent != null) {
+            this.hierarchy = this.parent.hierarchyOf(this.getId());
+        } else {
+            this.hierarchy = ".";
+        }
+    }
+
+    private String hierarchyOf(Long id) {
+        return this.hierarchy + id.toString() + ".";
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public String getHierarchy() {
+        return hierarchy;
+    }
+
+    public boolean hasParentOf(final Office office) {
+        boolean isParent = false;
+        if (this.parent != null) {
+            isParent = this.parent.equals(office);
+        }
+        return isParent;
+    }
+
+    public boolean doesNotHaveAnOfficeInHierarchyWithId(Long officeId) {
+        return !this.hasAnOfficeInHierarchyWithId(officeId);
+    }
+
+    private boolean hasAnOfficeInHierarchyWithId(Long officeId) {
+
+        boolean match = false;
+
+        if (identifiedBy(officeId)) {
+            match = true;
+        }
+
+        if (!match) {
+            for (Office child : this.children) {
+                boolean result = child.hasAnOfficeInHierarchyWithId(officeId);
+
+                if (result) {
+                    match = result;
+                    break;
+                }
+            }
+        }
+
+        return match;
+    }
 }

@@ -17,20 +17,18 @@ public class UserCommand {
     private final String lastname;
     private final String password;
     private final String repeatPassword;
-    private final String passwordEncoded;
     private final String email;
     private final Long officeId;
     private final String[] notSelectedRoles;
     private final String[] roles;
 
     public UserCommand(final String username, final String firstname, final String lastname, final String password,
-            final String repeatPassword, final String passwordEncoded, final String email, final Long officeId, final String[] notSelectedRoles, final String[] roles) {
+            final String repeatPassword, final String email, final Long officeId, final String[] notSelectedRoles, final String[] roles) {
         this.username = username;
         this.firstname = firstname;
         this.lastname = lastname;
         this.password = password;
         this.repeatPassword = repeatPassword;
-        this.passwordEncoded = passwordEncoded;
         this.email = email;
         this.officeId = officeId;
         this.notSelectedRoles = notSelectedRoles;

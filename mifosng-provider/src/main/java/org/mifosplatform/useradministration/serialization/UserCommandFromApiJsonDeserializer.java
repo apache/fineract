@@ -9,7 +9,6 @@ import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
 import org.mifosplatform.infrastructure.core.serialization.AbstractFromApiJsonDeserializer;
-import org.mifosplatform.infrastructure.core.serialization.CommandSerializer;
 import org.mifosplatform.infrastructure.core.serialization.FromApiJsonDeserializer;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.useradministration.command.UserCommand;
@@ -34,18 +33,16 @@ public final class UserCommandFromApiJsonDeserializer extends AbstractFromApiJso
     private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired
-    public UserCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper, final CommandSerializer commandSerializerService) {
-        super(commandSerializerService);
+    public UserCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper) {
         this.fromApiJsonHelper = fromApiJsonHelper;
     }
 
     @Override
-    public UserCommand commandFromApiJson(@SuppressWarnings("unused") final Long userId, final String json) {
+    public UserCommand commandFromApiJson(final String json) {
 
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-
         fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
 
         final JsonElement element = fromApiJsonHelper.parse(json);
@@ -55,13 +52,12 @@ public final class UserCommandFromApiJsonDeserializer extends AbstractFromApiJso
         final String lastname = fromApiJsonHelper.extractStringNamed("lastname", element);
         final String password = fromApiJsonHelper.extractStringNamed("password", element);
         final String repeatPassword = fromApiJsonHelper.extractStringNamed("repeatPassword", element);
-        final String passwordEncoded = fromApiJsonHelper.extractStringNamed("passwordEncoded", element);
         final String email = fromApiJsonHelper.extractStringNamed("email", element);
         final Long officeId = fromApiJsonHelper.extractLongNamed("officeId", element);
 
         final String[] notSelectedRoles = fromApiJsonHelper.extractArrayNamed("notSelectedRoles", element);
         final String[] roles = fromApiJsonHelper.extractArrayNamed("roles", element);
 
-        return new UserCommand(username, firstname, lastname, password, repeatPassword, passwordEncoded, email, officeId, notSelectedRoles, roles);
+        return new UserCommand(username, firstname, lastname, password, repeatPassword, email, officeId, notSelectedRoles, roles);
     }
 }

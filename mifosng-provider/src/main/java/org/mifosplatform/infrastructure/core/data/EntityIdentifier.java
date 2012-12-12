@@ -5,55 +5,71 @@ import java.util.Map;
 
 /**
  * Represents the successful result of an REST API call.
+ * 
+ * FIXME - KW - Rename to CommandProcessingResult - make immutable
  */
 public class EntityIdentifier {
 
-    private Long entityId;
-
-    // TODO - Rename variable to commandId or taskId or something that shows
-    // this is the id of a command in a table/queue for processing.
-    @SuppressWarnings("unused")
-    private Long makerCheckerId;
+    private Long commandId;
+    private Long resourceId;
+    private Long subResourceId;
 
     private Map<String, Object> changes;
 
-    public static EntityIdentifier makerChecker(final Long makerCheckerId) {
-        return new EntityIdentifier(null, makerCheckerId, null);
+    public static EntityIdentifier commandOnlyResult(final Long commandId) {
+        return new EntityIdentifier(null, null, commandId, null);
     }
 
-    public static EntityIdentifier makerChecker(final Long resourceId, final Long makerCheckerId) {
-        return new EntityIdentifier(resourceId, makerCheckerId, null);
+    public static EntityIdentifier resourceResult(final Long resourceId, final Long commandId) {
+        return new EntityIdentifier(resourceId, null, commandId, null);
+    }
+    
+    public static EntityIdentifier resourceResult(final Long resourceId, final Long commandId, final Map<String, Object> changes) {
+        return new EntityIdentifier(resourceId, null, commandId, changes);
+    }
+    
+    public static EntityIdentifier subResourceResult(final Long resourceId, final Long subResourceId, final Long commandId) {
+        return new EntityIdentifier(resourceId, subResourceId, commandId, null);
+    }
+    
+    public static EntityIdentifier subResourceResult(final Long resourceId, final Long subResourceId, final Long commandId, final Map<String, Object> changes) {
+        return new EntityIdentifier(resourceId, subResourceId, commandId, changes);
     }
 
     public static EntityIdentifier withChanges(final Long resourceId, final Map<String, Object> changes) {
-        return new EntityIdentifier(resourceId, null, changes);
-    }
-    
-    public static EntityIdentifier empty() {
-        return new EntityIdentifier(Long.valueOf(-1), null, null);
+        return new EntityIdentifier(resourceId, null, null, changes);
     }
 
-    public EntityIdentifier() {
+    public static EntityIdentifier empty() {
+        return new EntityIdentifier(Long.valueOf(-1), Long.valueOf(-1), Long.valueOf(-1), null);
+    }
+
+    protected EntityIdentifier() {
         //
     }
 
     public EntityIdentifier(final Long entityId) {
-        this.entityId = entityId;
+        this.resourceId = entityId;
         this.changes = new HashMap<String, Object>();
     }
 
-    private EntityIdentifier(final Long entityId, final Long makerCheckerId, final Map<String, Object> changesOnly) {
-        this.entityId = entityId;
-        this.makerCheckerId = makerCheckerId;
+    private EntityIdentifier(final Long resourceId, final Long subResourceId, final Long commandId, final Map<String, Object> changesOnly) {
+        this.resourceId = resourceId;
+        this.subResourceId = subResourceId;
+        this.commandId = commandId;
         this.changes = changesOnly;
     }
 
-    public Long getEntityId() {
-        return this.entityId;
+    public Long commandId() {
+        return this.commandId;
     }
 
-    public void setEntityId(final Long entityId) {
-        this.entityId = entityId;
+    public Long resourceId() {
+        return this.resourceId;
+    }
+
+    public Long subResourceId() {
+        return this.subResourceId;
     }
 
     public Map<String, Object> getChanges() {
@@ -62,5 +78,10 @@ public class EntityIdentifier {
             checkIfEmpty = this.changes;
         }
         return checkIfEmpty;
+    }
+
+    public boolean hasChanges() {
+        final boolean noChanges = this.changes == null || this.changes.isEmpty();
+        return !noChanges;
     }
 }

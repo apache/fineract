@@ -1,13 +1,16 @@
 package org.mifosplatform.portfolio.fund.domain;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang.StringUtils;
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
-import org.mifosplatform.portfolio.fund.command.FundCommand;
 import org.mifosplatform.useradministration.domain.AppUser;
 
 @Entity
@@ -15,16 +18,21 @@ import org.mifosplatform.useradministration.domain.AppUser;
         @UniqueConstraint(columnNames = { "external_id" }, name = "fund_externalid_org") })
 public class Fund extends AbstractAuditableCustom<AppUser, Long> {
 
-    @SuppressWarnings("unused")
     @Column(name = "name")
     private String name;
 
-    @SuppressWarnings("unused")
     @Column(name = "external_id", length = 100)
     private String externalId;
 
-    public static Fund createNew(final String fundName, final String externalId) {
-        return new Fund(fundName, externalId);
+    public static Fund fromJson(final JsonCommand command) {
+
+        final String firstnameParamName = "name";
+        final String name = command.stringValueOfParameterNamed(firstnameParamName);
+
+        final String lastnameParamName = "externalId";
+        final String externalId = command.stringValueOfParameterNamed(lastnameParamName);
+
+        return new Fund(name, externalId);
     }
 
     protected Fund() {
@@ -36,14 +44,24 @@ public class Fund extends AbstractAuditableCustom<AppUser, Long> {
         this.externalId = StringUtils.defaultIfEmpty(externalId, null);
     }
 
-    public void update(final FundCommand command) {
+    public Map<String, Object> update(final JsonCommand command) {
 
-        if (command.isNameChanged()) {
-            this.name = StringUtils.defaultIfEmpty(command.getName(), null);
+        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(7);
+
+        final String nameParamName = "name";
+        if (command.isChangeInStringParameterNamed(nameParamName, this.name)) {
+            final String newValue = command.stringValueOfParameterNamed(nameParamName);
+            actualChanges.put(nameParamName, newValue);
+            this.name = StringUtils.defaultIfEmpty(newValue, null);
         }
 
-        if (command.isExternalIdChanged()) {
-            this.externalId = StringUtils.defaultIfEmpty(command.getExternalId(), null);
+        final String externalIdParamName = "externalId";
+        if (command.isChangeInStringParameterNamed(externalIdParamName, this.externalId)) {
+            final String newValue = command.stringValueOfParameterNamed(externalIdParamName);
+            actualChanges.put(externalIdParamName, newValue);
+            this.externalId = StringUtils.defaultIfEmpty(newValue, null);
         }
+
+        return actualChanges;
     }
 }

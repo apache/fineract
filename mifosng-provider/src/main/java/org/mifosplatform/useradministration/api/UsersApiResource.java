@@ -39,7 +39,8 @@ import org.springframework.stereotype.Component;
 public class UsersApiResource {
 
     /**
-     * The set of parameters that are supported in response for {@link AppUserData}.
+     * The set of parameters that are supported in response for
+     * {@link AppUserData}.
      */
     private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "officeId", "officeName", "username",
             "firstname", "lastname", "email", "allowedOffices", "availableRoles", "selectedRoles"));
@@ -55,8 +56,8 @@ public class UsersApiResource {
 
     @Autowired
     public UsersApiResource(final PlatformSecurityContext context, final AppUserReadPlatformService readPlatformService,
-            final OfficeReadPlatformService officeReadPlatformService, 
-            final DefaultToApiJsonSerializer<AppUserData> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper,
+            final OfficeReadPlatformService officeReadPlatformService, final DefaultToApiJsonSerializer<AppUserData> toApiJsonSerializer,
+            final ApiRequestParameterHelper apiRequestParameterHelper,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
         this.context = context;
         this.readPlatformService = readPlatformService;
@@ -117,10 +118,7 @@ public class UsersApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String createUser(final String apiRequestBodyAsJson) {
 
-        final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "USER_ADMINISTRATION_SUPER_USER", "CREATE_USER");
-        context.authenticatedUser().validateHasPermissionTo("CREATE_USER", allowedPermissions);
-
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE", "users", null,
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE_USER", "CREATE", "users", null,
                 apiRequestBodyAsJson);
 
         return this.toApiJsonSerializer.serialize(result);
@@ -132,10 +130,7 @@ public class UsersApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String updateUser(@PathParam("userId") final Long userId, final String apiRequestBodyAsJson) {
 
-        final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "USER_ADMINISTRATION_SUPER_USER", "UPDATE_USER");
-        context.authenticatedUser().validateHasPermissionTo("UPDATE_USER", allowedPermissions);
-
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "users", userId,
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE_USER", "UPDATE", "users", userId,
                 apiRequestBodyAsJson);
 
         return this.toApiJsonSerializer.serialize(result);
@@ -147,10 +142,8 @@ public class UsersApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String deleteUser(@PathParam("userId") final Long userId) {
 
-        final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "USER_ADMINISTRATION_SUPER_USER", "DELETE_USER");
-        context.authenticatedUser().validateHasPermissionTo("DELETE_USER", allowedPermissions);
-
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("DELETE", "users", userId, "{}");
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("DELETE_USER", "DELETE", "users", userId,
+                "{}");
 
         return this.toApiJsonSerializer.serialize(result);
     }

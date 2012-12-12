@@ -1,13 +1,16 @@
 package org.mifosplatform.portfolio.fund.service;
 
+import java.util.Map;
+
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.organisation.monetary.service.ConfigurationDomainService;
-import org.mifosplatform.portfolio.client.service.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
 import org.mifosplatform.portfolio.fund.command.FundCommand;
 import org.mifosplatform.portfolio.fund.domain.Fund;
 import org.mifosplatform.portfolio.fund.domain.FundRepository;
 import org.mifosplatform.portfolio.fund.exception.FundNotFoundException;
+import org.mifosplatform.portfolio.fund.serialization.FundCommandFromApiJsonDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,59 +24,61 @@ public class FundWritePlatformServiceJpaRepositoryImpl implements FundWritePlatf
     private final static Logger logger = LoggerFactory.getLogger(FundWritePlatformServiceJpaRepositoryImpl.class);
 
     private final PlatformSecurityContext context;
+    private final FundCommandFromApiJsonDeserializer fromApiJsonDeserializer;
     private final FundRepository fundRepository;
-    private final ConfigurationDomainService configurationDomainService;
 
     @Autowired
-    public FundWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final FundRepository fundRepository,
-            final ConfigurationDomainService configurationDomainService) {
+    public FundWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
+            final FundCommandFromApiJsonDeserializer fromApiJsonDeserializer,
+            final FundRepository fundRepository) {
         this.context = context;
+        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.fundRepository = fundRepository;
-        this.configurationDomainService = configurationDomainService;
     }
 
     @Transactional
     @Override
-    public Long createFund(final FundCommand command) {
+    public EntityIdentifier createFund(final JsonCommand command) {
 
         try {
             context.authenticatedUser();
-            command.validateForCreate();
+            
+            final FundCommand fundCommand = this.fromApiJsonDeserializer.commandFromApiJson(command.json());
+            fundCommand.validateForCreate();
 
-            Fund fund = Fund.createNew(command.getName(), command.getExternalId());
+            Fund fund = Fund.fromJson(command);
 
             this.fundRepository.save(fund);
 
-            if (this.configurationDomainService.isMakerCheckerEnabledForTask("CREATE_FUND") && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
-
-            return fund.getId();
+            return EntityIdentifier.resourceResult(fund.getId(), null);
         } catch (DataIntegrityViolationException dve) {
             handleFundDataIntegrityIssues(command, dve);
-            return Long.valueOf(-1);
+            return EntityIdentifier.empty();
         }
     }
 
     @Transactional
     @Override
-    public Long updateFund(final FundCommand command) {
+    public EntityIdentifier updateFund(final Long fundId, final JsonCommand command) {
 
         try {
             context.authenticatedUser();
-            command.validateForUpdate();
+            
+            final FundCommand fundCommand = this.fromApiJsonDeserializer.commandFromApiJson(command.json());
+            fundCommand.validateForUpdate();
 
-            final Long fundId = command.getId();
-            Fund fund = this.fundRepository.findOne(fundId);
+            final Fund fund = this.fundRepository.findOne(fundId);
             if (fund == null) { throw new FundNotFoundException(fundId); }
-            fund.update(command);
+            
+            final Map<String, Object> changes = fund.update(command);
+            if (!changes.isEmpty()) {
+                this.fundRepository.saveAndFlush(fund);
+            }
 
-            this.fundRepository.save(fund);
-
-            if (this.configurationDomainService.isMakerCheckerEnabledForTask("UPDATE_FUND") && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
-
-            return fund.getId();
+            return EntityIdentifier.withChanges(fund.getId(), changes);
         } catch (DataIntegrityViolationException dve) {
             handleFundDataIntegrityIssues(command, dve);
-            return Long.valueOf(-1);
+            return EntityIdentifier.empty();
         }
     }
 
@@ -81,14 +86,18 @@ public class FundWritePlatformServiceJpaRepositoryImpl implements FundWritePlatf
      * Guaranteed to throw an exception no matter what the data integrity issue
      * is.
      */
-    private void handleFundDataIntegrityIssues(final FundCommand command, DataIntegrityViolationException dve) {
+    private void handleFundDataIntegrityIssues(final JsonCommand command, DataIntegrityViolationException dve) {
 
         Throwable realCause = dve.getMostSpecificCause();
         if (realCause.getMessage().contains("fund_externalid_org")) {
-            throw new PlatformDataIntegrityException("error.msg.fund.duplicate.externalId", "A fund with external id '"
-                    + command.getExternalId() + "' already exists", "externalId", command.getExternalId());
-        } else if (realCause.getMessage().contains("fund_name_org")) { throw new PlatformDataIntegrityException(
-                "error.msg.fund.duplicate.name", "A fund with name '" + command.getName() + "' already exists", "name", command.getName()); }
+            final String externalId = command.stringValueOfParameterNamed("externalId");
+            throw new PlatformDataIntegrityException("error.msg.fund.duplicate.externalId", "A fund with external id '" + externalId
+                    + "' already exists", "externalId", externalId);
+        } else if (realCause.getMessage().contains("fund_name_org")) {
+            final String name = command.stringValueOfParameterNamed("name");
+            throw new PlatformDataIntegrityException("error.msg.fund.duplicate.name", "A fund with name '" + name + "' already exists",
+                    "name", name);
+        }
 
         logger.error(dve.getMessage(), dve);
         throw new PlatformDataIntegrityException("error.msg.fund.unknown.data.integrity.issue",

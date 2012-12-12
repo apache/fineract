@@ -1,5 +1,6 @@
 package org.mifosplatform.organisation.monetary.service;
 
+import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.useradministration.domain.Permission;
 import org.mifosplatform.useradministration.domain.PermissionRepository;
 import org.mifosplatform.useradministration.exception.PermissionNotFoundException;
@@ -10,7 +11,7 @@ import org.springframework.stereotype.Service;
 public class ConfigurationDomainServiceJpa implements ConfigurationDomainService {
 
     private final PermissionRepository permissionRepository;
-    
+
     /*
      * hard code to false to disable maker checker across the board.
      */
@@ -20,14 +21,14 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
     public ConfigurationDomainServiceJpa(final PermissionRepository permissionRepository) {
         this.permissionRepository = permissionRepository;
     }
-    
+
     @Override
     public boolean isMakerCheckerEnabledForTask(final String taskPermissionCode) {
+        if (StringUtils.isBlank(taskPermissionCode)) { throw new PermissionNotFoundException(taskPermissionCode); }
+
         final Permission thisTask = this.permissionRepository.findOneByCode(taskPermissionCode);
-        if (thisTask == null) {
-            throw new PermissionNotFoundException(taskPermissionCode);
-        }
-        
+        if (thisTask == null) { throw new PermissionNotFoundException(taskPermissionCode); }
+
         return thisTask.hasMakerCheckerEnabled() && this.makerCheckerGloablConfigurationEnabled;
     }
 }

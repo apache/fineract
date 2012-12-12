@@ -213,10 +213,7 @@ public class ClientsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String createClient(final String apiRequestBodyAsJson) {
 
-        final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "PORTFOLIO_MANAGEMENT_SUPER_USER", "CREATE_CLIENT");
-        context.authenticatedUser().validateHasPermissionTo("CREATE_CLIENT", allowedPermissions);
-
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE", "clients", null,
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE_CLIENT", "CREATE", "clients", null,
                 apiRequestBodyAsJson);
 
         return this.toApiJsonSerializer.serialize(result);
@@ -228,10 +225,7 @@ public class ClientsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String updateClient(@PathParam("clientId") final Long clientId, final String apiRequestBodyAsJson) {
 
-        final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "PORTFOLIO_MANAGEMENT_SUPER_USER", "UPDATE_CLIENT");
-        context.authenticatedUser().validateHasPermissionTo("UPDATE_CLIENT", allowedPermissions);
-
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "clients", clientId,
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE_CLIENT", "UPDATE", "clients", clientId,
                 apiRequestBodyAsJson);
 
         return this.toApiJsonSerializer.serialize(result);
@@ -243,10 +237,7 @@ public class ClientsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String deleteClient(@PathParam("clientId") final Long clientId) {
 
-        final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "PORTFOLIO_MANAGEMENT_SUPER_USER", "DELETE_CLIENT");
-        context.authenticatedUser().validateHasPermissionTo("DELETE_CLIENT", allowedPermissions);
-
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("DELETE", "clients", clientId, "{}");
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("DELETE_CLIENT", "DELETE", "clients", clientId, "{}");
 
         return this.toApiJsonSerializer.serialize(result);
     }

@@ -1,62 +1,107 @@
 package org.mifosplatform.commands.service;
 
-import org.joda.time.LocalDate;
+import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.commands.domain.CommandSource;
 import org.mifosplatform.commands.domain.CommandSourceRepository;
-import org.mifosplatform.commands.handler.CommandSourceHandlerDelegator;
+import org.mifosplatform.commands.domain.CommandWrapper;
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.useradministration.domain.AppUser;
+import org.mifosplatform.portfolio.client.service.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.google.gson.JsonElement;
 
 @Service
 public class PortfolioCommandSourceWritePlatformServiceImpl implements PortfolioCommandSourceWritePlatformService {
 
     private final PlatformSecurityContext context;
     private final CommandSourceRepository commandSourceRepository;
-    private final CommandSourceHandlerDelegator commandSourceHandlerDelegator;
+    private final FromJsonHelper fromApiJsonHelper;
+    private final CommandProcessingService processAndLogCommandService;
 
     @Autowired
     public PortfolioCommandSourceWritePlatformServiceImpl(final PlatformSecurityContext context,
-            final CommandSourceRepository makerCheckerRepository, final CommandSourceHandlerDelegator commandSourceHandlerDelegator) {
+            final CommandSourceRepository commandSourceRepository, final FromJsonHelper fromApiJsonHelper,
+            final CommandProcessingService processAndLogCommandService) {
         this.context = context;
-        this.commandSourceRepository = makerCheckerRepository;
-        this.commandSourceHandlerDelegator = commandSourceHandlerDelegator;
+        this.commandSourceRepository = commandSourceRepository;
+        this.fromApiJsonHelper = fromApiJsonHelper;
+        this.processAndLogCommandService = processAndLogCommandService;
     }
-
-    // NOT TRANSACTIONAL BY DESIGN FOR NOW
+    
     @Override
-    public EntityIdentifier logCommandSource(final String apiOperation, final String resource, final Long resourceId,
-            final String commandSerializedAsJson) {
-
-        final AppUser maker = context.authenticatedUser();
-        final LocalDate asToday = new LocalDate();
-
-        final CommandSource commandSourceInput = CommandSource.createdBy(apiOperation, resource, resourceId, commandSerializedAsJson, maker, asToday);
-        final CommandSource commandSourceResult = this.commandSourceHandlerDelegator.handleCommandWithSupportForRollback(commandSourceInput);
+    public EntityIdentifier logCommandSource(final String taskPermissionName, final String apiOperation, final String resource,
+            final Long resourceId, final String subResource, final Long subRescourceId, final String json) {
         
-        if (commandSourceResult.hasJson()) {
-            commandSourceRepository.save(commandSourceResult);
+        context.authenticatedUser().validateHasPermissionTo(taskPermissionName);
+
+        final CommandWrapper wrapper = CommandWrapper.wrap(taskPermissionName, apiOperation, resource, resourceId, subResource, subRescourceId);
+        EntityIdentifier result = null;
+        try {
+            final JsonElement parsedCommand = this.fromApiJsonHelper.parse(json);
+            final JsonCommand command = JsonCommand.from(json, parsedCommand, this.fromApiJsonHelper, resourceId, subRescourceId);
+            final boolean isApprovedByChecker = false;
+            result = this.processAndLogCommandService.processAndLogCommand(wrapper, command, isApprovedByChecker);
+        } catch (RollbackTransactionAsCommandIsNotApprovedByCheckerException e) {
+            
+            final String jsonToUse = StringUtils.defaultIfEmpty(e.getJsonOfChangesOnly(), json);
+            
+            final JsonElement parsedCommand = this.fromApiJsonHelper.parse(jsonToUse);
+            final JsonCommand command = JsonCommand.from(jsonToUse, parsedCommand, this.fromApiJsonHelper, resourceId, subRescourceId);
+            
+            result = this.processAndLogCommandService.logCommand(wrapper, command);
         }
 
-        return EntityIdentifier.makerChecker(commandSourceResult.resourceId(), commandSourceResult.getId());
+        return result;
     }
 
-    @Transactional
     @Override
-    public EntityIdentifier approveEntry(final Long id) {
+    public EntityIdentifier logCommandSource(final String taskPermissionName, final String apiOperation, final String resource,
+            final Long resourceId, final String json) {
 
-        context.authenticatedUser();
+        context.authenticatedUser().validateHasPermissionTo(taskPermissionName);
 
-        final CommandSource commandSourceInput = this.commandSourceRepository.findOne(id);
-        final CommandSource commandSourceResult = this.commandSourceHandlerDelegator.handleCommandForCheckerApproval(commandSourceInput);
-        if (commandSourceResult.hasJson()) {
-            commandSourceRepository.save(commandSourceResult);
+        final CommandWrapper wrapper = CommandWrapper.wrap(taskPermissionName, apiOperation, resource, resourceId);
+
+        EntityIdentifier result = null;
+        try {
+            final JsonElement parsedCommand = this.fromApiJsonHelper.parse(json);
+            final JsonCommand command = JsonCommand.from(json, parsedCommand, this.fromApiJsonHelper, resourceId, null);
+            
+            final boolean isApprovedByChecker = false;
+            result = this.processAndLogCommandService.processAndLogCommand(wrapper, command, isApprovedByChecker);
+        } catch (RollbackTransactionAsCommandIsNotApprovedByCheckerException e) {
+            
+            final String jsonToUse = StringUtils.defaultIfEmpty(e.getJsonOfChangesOnly(), json);
+            
+            final JsonElement parsedCommand = this.fromApiJsonHelper.parse(jsonToUse);
+            final JsonCommand command = JsonCommand.from(jsonToUse, parsedCommand, this.fromApiJsonHelper, resourceId, null);
+            
+            result = this.processAndLogCommandService.logCommand(wrapper, command);
         }
 
-        return EntityIdentifier.makerChecker(commandSourceResult.resourceId(), commandSourceResult.getId());
+        return result;
+    }
+    
+    @Override
+    public EntityIdentifier approveEntry(final Long commandId) {
+
+        final CommandSource commandSourceInput = this.commandSourceRepository.findOne(commandId);
+
+        context.authenticatedUser().validateHasCheckerPermissionTo(commandSourceInput.getPermissionCode());
+
+        final CommandWrapper wrapper = CommandWrapper.fromExistingCommand(commandId, commandSourceInput.getPermissionCode(), commandSourceInput.operation(),
+                commandSourceInput.resourceName(), commandSourceInput.resourceId(), commandSourceInput.getSubResource(), commandSourceInput.getSubResourceId());
+        
+        final JsonElement parsedCommand = this.fromApiJsonHelper.parse(commandSourceInput.json());
+        final JsonCommand command = JsonCommand.fromExistingCommand(commandId, commandSourceInput.json(), parsedCommand, this.fromApiJsonHelper, commandSourceInput.resourceId(), commandSourceInput.getSubResourceId());
+
+        final boolean makerCheckerApproval = true;
+        return this.processAndLogCommandService.processAndLogCommand(wrapper, command, makerCheckerApproval);
     }
 
     @Transactional

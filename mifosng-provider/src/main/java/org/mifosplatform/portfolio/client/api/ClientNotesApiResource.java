@@ -3,7 +3,6 @@ package org.mifosplatform.portfolio.client.api;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
@@ -24,7 +23,6 @@ import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSeriali
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.client.data.NoteData;
-import org.mifosplatform.portfolio.client.serialization.ClientNoteCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -40,19 +38,16 @@ public class ClientNotesApiResource {
 
     private final PlatformSecurityContext context;
     private final ClientReadPlatformService clientReadPlatformService;
-    private final ClientNoteCommandFromApiJsonDeserializer fromApiJsonDeserializer;
     private final DefaultToApiJsonSerializer<NoteData> toApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @Autowired
     public ClientNotesApiResource(final PlatformSecurityContext context, final ClientReadPlatformService readPlatformService,
-            final ClientNoteCommandFromApiJsonDeserializer fromApiJsonDeserializer,
             final DefaultToApiJsonSerializer<NoteData> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
         this.context = context;
         this.clientReadPlatformService = readPlatformService;
-        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
@@ -76,14 +71,8 @@ public class ClientNotesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String addNewClientNote(@PathParam("clientId") final Long clientId, final String apiRequestBodyAsJson) {
 
-        final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "PORTFOLIO_MANAGEMENT_SUPER_USER", "CREATE_CLIENTNOTE");
-        context.authenticatedUser().validateHasPermissionTo("CREATE_CLIENTNOTE", allowedPermissions);
-        
-        final String commandSerializedAsJson = this.fromApiJsonDeserializer.serializedCommandJsonFromApiJsonWithSubResource(apiRequestBodyAsJson, clientId);
-
-        final String resourceUrl = "clients/" + clientId + "/notes";
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE", resourceUrl, null,
-                commandSerializedAsJson);
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE_CLIENTNOTE", "CREATE",
+                "clients", clientId, "notes", null, apiRequestBodyAsJson);
 
         return this.toApiJsonSerializer.serialize(result);
     }
@@ -110,14 +99,8 @@ public class ClientNotesApiResource {
     public String updateClientNote(@PathParam("clientId") final Long clientId, @PathParam("noteId") final Long noteId,
             final String apiRequestBodyAsJson) {
 
-        final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "PORTFOLIO_MANAGEMENT_SUPER_USER", "UPDATE_CLIENTNOTE");
-        context.authenticatedUser().validateHasPermissionTo("UPDATE_CLIENTNOTE", allowedPermissions);
-        
-        final String commandSerializedAsJson = this.fromApiJsonDeserializer.serializedCommandJsonFromApiJsonWithSubResource(noteId, apiRequestBodyAsJson, clientId);
-
-        final String resourceUrl = "clients/" + clientId + "/notes";
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", resourceUrl, noteId,
-                commandSerializedAsJson);
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE_CLIENTNOTE", "UPDATE",
+                "clients", clientId, "notes", noteId, apiRequestBodyAsJson);
 
         return this.toApiJsonSerializer.serialize(result);
     }

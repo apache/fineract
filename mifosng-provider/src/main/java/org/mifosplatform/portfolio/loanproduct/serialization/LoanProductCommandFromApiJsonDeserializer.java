@@ -7,7 +7,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.mifosplatform.infrastructure.core.serialization.CommandSerializer;
+import org.apache.commons.lang.StringUtils;
+import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
+import org.mifosplatform.infrastructure.core.serialization.AbstractFromApiJsonDeserializer;
 import org.mifosplatform.infrastructure.core.serialization.FromApiJsonDeserializer;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.portfolio.loanproduct.command.LoanProductCommand;
@@ -22,7 +24,7 @@ import com.google.gson.reflect.TypeToken;
  * {@link LoanProductCommand}'s.
  */
 @Component
-public final class LoanProductCommandFromApiJsonDeserializer implements FromApiJsonDeserializer<LoanProductCommand> {
+public final class LoanProductCommandFromApiJsonDeserializer extends AbstractFromApiJsonDeserializer<LoanProductCommand> {
 
     /**
      * The parameters supported for this command.
@@ -33,76 +35,45 @@ public final class LoanProductCommandFromApiJsonDeserializer implements FromApiJ
             "amortizationType", "interestType", "interestCalculationPeriodType", "charges", "locale"));
 
     private final FromJsonHelper fromApiJsonHelper;
-    private final CommandSerializer commandSerializerService;
 
     @Autowired
-    public LoanProductCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper,
-            final CommandSerializer commandSerializerService) {
+    public LoanProductCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper) {
         this.fromApiJsonHelper = fromApiJsonHelper;
-        this.commandSerializerService = commandSerializerService;
     }
 
     @Override
     public LoanProductCommand commandFromApiJson(final String json) {
-        return commandFromApiJson(null, json);
-    }
 
-    @Override
-    public LoanProductCommand commandFromApiJson(final Long loanProductId, final String json) {
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-
         fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
 
-        final Set<String> parametersPassedInRequest = new HashSet<String>();
-
         final JsonElement element = fromApiJsonHelper.parse(json);
-        final String name = fromApiJsonHelper.extractStringNamed("name", element, parametersPassedInRequest);
-        final String description = fromApiJsonHelper.extractStringNamed("description", element, parametersPassedInRequest);
-        final Long fundId = fromApiJsonHelper.extractLongNamed("fundId", element, parametersPassedInRequest);
+        final String name = fromApiJsonHelper.extractStringNamed("name", element);
+        final String description = fromApiJsonHelper.extractStringNamed("description", element);
+        final Long fundId = fromApiJsonHelper.extractLongNamed("fundId", element);
 
-        final Long transactionProcessingStrategyId = fromApiJsonHelper.extractLongNamed("transactionProcessingStrategyId", element,
-                parametersPassedInRequest);
+        final Long transactionProcessingStrategyId = fromApiJsonHelper.extractLongNamed("transactionProcessingStrategyId", element);
 
-        final String currencyCode = fromApiJsonHelper.extractStringNamed("currencyCode", element, parametersPassedInRequest);
-        final Integer digitsAfterDecimal = fromApiJsonHelper.extractIntegerWithLocaleNamed("digitsAfterDecimal", element,
-                parametersPassedInRequest);
+        final String currencyCode = fromApiJsonHelper.extractStringNamed("currencyCode", element);
+        final Integer digitsAfterDecimal = fromApiJsonHelper.extractIntegerWithLocaleNamed("digitsAfterDecimal", element);
 
-        final BigDecimal principal = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("principal", element, parametersPassedInRequest);
-        final BigDecimal inArrearsTolerance = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("inArrearsTolerance", element,
-                parametersPassedInRequest);
-        final BigDecimal interestRatePerPeriod = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("interestRatePerPeriod", element,
-                parametersPassedInRequest);
-        final Integer repaymentEvery = fromApiJsonHelper
-                .extractIntegerWithLocaleNamed("repaymentEvery", element, parametersPassedInRequest);
-        final Integer numberOfRepayments = fromApiJsonHelper.extractIntegerWithLocaleNamed("numberOfRepayments", element,
-                parametersPassedInRequest);
-        final Integer repaymentFrequencyType = fromApiJsonHelper.extractIntegerWithLocaleNamed("repaymentFrequencyType", element,
-                parametersPassedInRequest);
-        final Integer interestRateFrequencyType = fromApiJsonHelper.extractIntegerWithLocaleNamed("interestRateFrequencyType", element,
-                parametersPassedInRequest);
-        final Integer amortizationType = fromApiJsonHelper.extractIntegerWithLocaleNamed("amortizationType", element,
-                parametersPassedInRequest);
-        final Integer interestType = fromApiJsonHelper.extractIntegerWithLocaleNamed("interestType", element, parametersPassedInRequest);
+        final BigDecimal principal = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("principal", element);
+        final BigDecimal inArrearsTolerance = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("inArrearsTolerance", element);
+        final BigDecimal interestRatePerPeriod = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("interestRatePerPeriod", element);
+        final Integer repaymentEvery = fromApiJsonHelper.extractIntegerWithLocaleNamed("repaymentEvery", element);
+        final Integer numberOfRepayments = fromApiJsonHelper.extractIntegerWithLocaleNamed("numberOfRepayments", element);
+        final Integer repaymentFrequencyType = fromApiJsonHelper.extractIntegerWithLocaleNamed("repaymentFrequencyType", element);
+        final Integer interestRateFrequencyType = fromApiJsonHelper.extractIntegerWithLocaleNamed("interestRateFrequencyType", element);
+        final Integer amortizationType = fromApiJsonHelper.extractIntegerWithLocaleNamed("amortizationType", element);
+        final Integer interestType = fromApiJsonHelper.extractIntegerWithLocaleNamed("interestType", element);
         final Integer interestCalculationPeriodType = fromApiJsonHelper.extractIntegerWithLocaleNamed("interestCalculationPeriodType",
-                element, parametersPassedInRequest);
-        final String[] charges = fromApiJsonHelper.extractArrayNamed("charges", element, parametersPassedInRequest);
+                element);
+        final String[] charges = fromApiJsonHelper.extractArrayNamed("charges", element);
 
-        return new LoanProductCommand(parametersPassedInRequest, false, loanProductId, name, description, fundId,
-                transactionProcessingStrategyId, currencyCode, digitsAfterDecimal, principal, inArrearsTolerance, numberOfRepayments,
-                repaymentEvery, interestRatePerPeriod, repaymentFrequencyType, interestRateFrequencyType, amortizationType, interestType,
-                interestCalculationPeriodType, charges);
-    }
-
-    @Override
-    public String serializedCommandJsonFromApiJson(final String json) {
-        final LoanProductCommand command = commandFromApiJson(json);
-        return this.commandSerializerService.serializeCommandToJson(command);
-    }
-
-    @Override
-    public String serializedCommandJsonFromApiJson(final Long loanProductId, final String json) {
-        final LoanProductCommand command = commandFromApiJson(loanProductId, json);
-        return this.commandSerializerService.serializeCommandToJson(command);
+        return new LoanProductCommand(name, description, fundId, transactionProcessingStrategyId, currencyCode, digitsAfterDecimal,
+                principal, inArrearsTolerance, numberOfRepayments, repaymentEvery, interestRatePerPeriod, repaymentFrequencyType,
+                interestRateFrequencyType, amortizationType, interestType, interestCalculationPeriodType, charges);
     }
 }

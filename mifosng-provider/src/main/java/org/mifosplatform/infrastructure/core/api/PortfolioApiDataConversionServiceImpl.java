@@ -134,7 +134,7 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
     @Override
     public ClientData convertInternalJsonFormatToClientDataChange(final Long resourceIdentifier, final String json) {
 
-        final ClientCommand command = this.clientCommandFromApiJsonDeserializer.commandFromApiJson(resourceIdentifier, json);
+        final ClientCommand command = this.clientCommandFromApiJsonDeserializer.commandFromApiJson(json);
 
         return ClientData.dataChangeInstance(resourceIdentifier, command.getOfficeId(), command.getExternalId(), command.getFirstname(),
                 command.getLastname(), command.getClientOrBusinessName(), command.getJoiningDate());

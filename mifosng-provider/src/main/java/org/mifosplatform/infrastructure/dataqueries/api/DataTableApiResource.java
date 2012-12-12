@@ -77,8 +77,7 @@ public class DataTableApiResource {
 
         this.readWriteNonCoreDataService.registerDatatable(datatable, apptable);
 
-        EntityIdentifier entityIdentifier = new EntityIdentifier();
-        return Response.ok().entity(entityIdentifier).build();
+        return Response.ok().entity(EntityIdentifier.empty()).build();
     }
 
     @POST
@@ -89,8 +88,7 @@ public class DataTableApiResource {
 
         this.readWriteNonCoreDataService.deregisterDatatable(datatable);
 
-        EntityIdentifier entityIdentifier = new EntityIdentifier();
-        return Response.ok().entity(entityIdentifier).build();
+        return Response.ok().entity(EntityIdentifier.empty()).build();
     }
 
     @GET

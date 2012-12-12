@@ -3,7 +3,6 @@ package org.mifosplatform.useradministration.api;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
@@ -78,10 +77,7 @@ public class PermissionsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String updatePermissionsDetails(final String apiRequestBodyAsJson) {
 
-        final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "USER_ADMINISTRATION_SUPER_USER", "UPDATE_PERMISSION");
-        context.authenticatedUser().validateHasPermissionTo("UPDATE_PERMISSION", allowedPermissions);
-
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "permissions", null,
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE_PERMISSION", "UPDATE", "permissions", null,
                 apiRequestBodyAsJson);
 
         return this.toApiJsonSerializer.serialize(result);

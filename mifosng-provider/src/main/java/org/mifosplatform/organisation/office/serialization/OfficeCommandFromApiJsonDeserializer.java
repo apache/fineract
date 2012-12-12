@@ -6,9 +6,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
+import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
 import org.mifosplatform.infrastructure.core.serialization.AbstractFromApiJsonDeserializer;
-import org.mifosplatform.infrastructure.core.serialization.CommandSerializer;
 import org.mifosplatform.infrastructure.core.serialization.FromApiJsonDeserializer;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.organisation.office.command.OfficeCommand;
@@ -28,31 +29,29 @@ public final class OfficeCommandFromApiJsonDeserializer extends AbstractFromApiJ
     /**
      * The parameters supported for this command.
      */
-    private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("name", "parentId", "openingDate", "externalId", "locale", "dateFormat"));
+    private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("name", "parentId", "openingDate", "externalId",
+            "locale", "dateFormat"));
 
     private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired
-    public OfficeCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper, final CommandSerializer commandSerializerService) {
-        super(commandSerializerService);
+    public OfficeCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper) {
         this.fromApiJsonHelper = fromApiJsonHelper;
     }
 
     @Override
-    public OfficeCommand commandFromApiJson(final Long officeId, final String json) {
+    public OfficeCommand commandFromApiJson(final String json) {
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-
         fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
 
-        final Set<String> parametersPassedInRequest = new HashSet<String>();
-
         final JsonElement element = fromApiJsonHelper.parse(json);
-        final String name = fromApiJsonHelper.extractStringNamed("name", element, parametersPassedInRequest);
-        final String externalId = fromApiJsonHelper.extractStringNamed("externalId", element, parametersPassedInRequest);
-        final Long parentId = fromApiJsonHelper.extractLongNamed("parentId", element, parametersPassedInRequest);
-        final LocalDate openingLocalDate = fromApiJsonHelper.extractLocalDateNamed("openingDate", element, parametersPassedInRequest);
+        final String name = fromApiJsonHelper.extractStringNamed("name", element);
+        final String externalId = fromApiJsonHelper.extractStringNamed("externalId", element);
+        final Long parentId = fromApiJsonHelper.extractLongNamed("parentId", element);
+        final LocalDate openingLocalDate = fromApiJsonHelper.extractLocalDateNamed("openingDate", element);
 
-        return new OfficeCommand(parametersPassedInRequest, false, officeId, name, externalId, parentId, openingLocalDate);
+        return new OfficeCommand(name, externalId, parentId, openingLocalDate);
     }
 }

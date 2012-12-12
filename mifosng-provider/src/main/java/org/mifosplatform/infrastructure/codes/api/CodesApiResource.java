@@ -3,7 +3,6 @@ package org.mifosplatform.infrastructure.codes.api;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
@@ -76,10 +75,7 @@ public class CodesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String createCode(final String apiRequestBodyAsJson) {
 
-        final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "CREATE_CODE");
-        context.authenticatedUser().validateHasPermissionTo("CREATE_CODE", allowedPermissions);
-
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE", "codes", null,
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE_CODE", "CREATE", "codes", null,
                 apiRequestBodyAsJson);
 
         return this.toApiJsonSerializer.serialize(result);
@@ -103,10 +99,7 @@ public class CodesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String updateCode(@PathParam("codeId") final Long codeId, final String apiRequestBodyAsJson) {
 
-        final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "UPDATE_CODE");
-        context.authenticatedUser().validateHasPermissionTo("UPDATE_CODE", allowedPermissions);
-
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "codes", codeId,
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE_CODE", "UPDATE", "codes", codeId,
                 apiRequestBodyAsJson);
 
         return this.toApiJsonSerializer.serialize(result);
@@ -118,10 +111,8 @@ public class CodesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String deleteCodeApplication(@PathParam("codeId") final Long codeId) {
 
-        final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "DELETE_CODE");
-        context.authenticatedUser().validateHasPermissionTo("DELETE_CODE", allowedPermissions);
-
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("DELETE", "codes", codeId, "{}");
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("DELETE_CODE", "DELETE", "codes", codeId,
+                "{}");
 
         return this.toApiJsonSerializer.serialize(result);
     }

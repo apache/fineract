@@ -1,5 +1,9 @@
 package org.mifosplatform.organisation.office.service;
 
+import java.util.Map;
+
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.security.exception.NoAuthorizationException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
@@ -8,7 +12,6 @@ import org.mifosplatform.organisation.monetary.domain.ApplicationCurrencyReposit
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.organisation.monetary.exception.CurrencyNotFoundException;
-import org.mifosplatform.organisation.monetary.service.ConfigurationDomainService;
 import org.mifosplatform.organisation.office.command.BranchMoneyTransferCommand;
 import org.mifosplatform.organisation.office.command.OfficeCommand;
 import org.mifosplatform.organisation.office.domain.Office;
@@ -16,7 +19,8 @@ import org.mifosplatform.organisation.office.domain.OfficeRepository;
 import org.mifosplatform.organisation.office.domain.OfficeTransaction;
 import org.mifosplatform.organisation.office.domain.OfficeTransactionRepository;
 import org.mifosplatform.organisation.office.exception.OfficeNotFoundException;
-import org.mifosplatform.portfolio.client.service.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
+import org.mifosplatform.organisation.office.serialization.BranchMoneyTransferCommandFromApiJsonDeserializer;
+import org.mifosplatform.organisation.office.serialization.OfficeCommandFromApiJsonDeserializer;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,33 +35,39 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
     private final static Logger logger = LoggerFactory.getLogger(OfficeWritePlatformServiceJpaRepositoryImpl.class);
 
     private final PlatformSecurityContext context;
+    private final OfficeCommandFromApiJsonDeserializer fromApiJsonDeserializer;
+    private final BranchMoneyTransferCommandFromApiJsonDeserializer moneyTransferCommandFromApiJsonDeserializer;
     private final OfficeRepository officeRepository;
     private final OfficeTransactionRepository officeMonetaryTransferRepository;
     private final ApplicationCurrencyRepository applicationCurrencyRepository;
-    private final ConfigurationDomainService configurationDomainService;
 
     @Autowired
-    public OfficeWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final OfficeRepository officeRepository,
-            final OfficeTransactionRepository officeMonetaryTransferRepository,
-            final ApplicationCurrencyRepository applicationCurrencyRepository, final ConfigurationDomainService configurationDomainService) {
+    public OfficeWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
+            final OfficeCommandFromApiJsonDeserializer fromApiJsonDeserializer,
+            final BranchMoneyTransferCommandFromApiJsonDeserializer moneyTransferCommandFromApiJsonDeserializer,
+            final OfficeRepository officeRepository, final OfficeTransactionRepository officeMonetaryTransferRepository,
+            final ApplicationCurrencyRepository applicationCurrencyRepository) {
         this.context = context;
+        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
+        this.moneyTransferCommandFromApiJsonDeserializer = moneyTransferCommandFromApiJsonDeserializer;
         this.officeRepository = officeRepository;
         this.officeMonetaryTransferRepository = officeMonetaryTransferRepository;
         this.applicationCurrencyRepository = applicationCurrencyRepository;
-        this.configurationDomainService = configurationDomainService;
     }
 
     @Transactional
     @Override
-    public Long createOffice(final OfficeCommand command) {
+    public EntityIdentifier createOffice(final JsonCommand command) {
 
         try {
             final AppUser currentUser = context.authenticatedUser();
-            command.validateForCreate();
 
-            final Office parent = validateUserPriviledgeOnOfficeAndRetrieve(currentUser, command.getParentId());
+            final OfficeCommand officeCommand = this.fromApiJsonDeserializer.commandFromApiJson(command.json());
+            officeCommand.validateForCreate();
 
-            final Office office = Office.createNew(parent, command.getName(), command.getOpeningDate(), command.getExternalId());
+            final Office parent = validateUserPriviledgeOnOfficeAndRetrieve(currentUser, officeCommand.getParentId());
+
+            final Office office = Office.fromJson(parent, command);
 
             // pre save to generate id for use in office hierarchy
             this.officeRepository.save(office);
@@ -66,90 +76,94 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
 
             this.officeRepository.save(office);
 
-            if (this.configurationDomainService.isMakerCheckerEnabledForTask("CREATE_OFFICE") && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
-
-            return office.getId();
+            return EntityIdentifier.resourceResult(office.getId(), null);
         } catch (DataIntegrityViolationException dve) {
             handleOfficeDataIntegrityIssues(command, dve);
-            return Long.valueOf(-1);
+            return EntityIdentifier.empty();
         }
     }
 
     @Transactional
     @Override
-    public Long updateOffice(final OfficeCommand command) {
+    public EntityIdentifier updateOffice(final Long officeId, final JsonCommand command) {
 
         try {
             final AppUser currentUser = context.authenticatedUser();
-            command.validateForUpdate();
 
-            final Office office = validateUserPriviledgeOnOfficeAndRetrieve(currentUser, command.getId());
+            final OfficeCommand officeCommand = this.fromApiJsonDeserializer.commandFromApiJson(command.json());
+            officeCommand.validateForUpdate();
 
-            office.update(command);
+            final Office office = validateUserPriviledgeOnOfficeAndRetrieve(currentUser, officeId);
 
-            if (command.isParentChanged()) {
-                final Office parent = validateUserPriviledgeOnOfficeAndRetrieve(currentUser, command.getParentId());
+            final Map<String, Object> changes = office.update(command);
+
+            if (changes.containsKey("parentId")) {
+                final Office parent = validateUserPriviledgeOnOfficeAndRetrieve(currentUser, officeCommand.getParentId());
                 office.update(parent);
             }
 
-            this.officeRepository.save(office);
+            if (!changes.isEmpty()) {
+                this.officeRepository.saveAndFlush(office);
+            }
 
-            if (this.configurationDomainService.isMakerCheckerEnabledForTask("UPDATE_OFFICE") && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
-
-            return office.getId();
+            return EntityIdentifier.withChanges(office.getId(), changes);
         } catch (DataIntegrityViolationException dve) {
             handleOfficeDataIntegrityIssues(command, dve);
-            return Long.valueOf(-1);
+            return EntityIdentifier.empty();
         }
     }
 
     @Transactional
     @Override
-    public Long externalBranchMoneyTransfer(final BranchMoneyTransferCommand command) {
+    public EntityIdentifier externalBranchMoneyTransfer(final JsonCommand command) {
 
         context.authenticatedUser();
-        command.validateBranchTransfer();
+
+        final BranchMoneyTransferCommand moneyTransferCommand = this.moneyTransferCommandFromApiJsonDeserializer.commandFromApiJson(command
+                .json());
+        moneyTransferCommand.validateBranchTransfer();
 
         Office fromOffice = null;
-        if (command.getFromOfficeId() != null) {
-            fromOffice = this.officeRepository.findOne(command.getFromOfficeId());
+        if (moneyTransferCommand.getFromOfficeId() != null) {
+            fromOffice = this.officeRepository.findOne(moneyTransferCommand.getFromOfficeId());
         }
         Office toOffice = null;
-        if (command.getToOfficeId() != null) {
-            toOffice = this.officeRepository.findOne(command.getToOfficeId());
+        if (moneyTransferCommand.getToOfficeId() != null) {
+            toOffice = this.officeRepository.findOne(moneyTransferCommand.getToOfficeId());
         }
 
-        if (fromOffice == null && toOffice == null) { throw new OfficeNotFoundException(command.getToOfficeId()); }
+        if (fromOffice == null && toOffice == null) { throw new OfficeNotFoundException(moneyTransferCommand.getToOfficeId()); }
 
-        final String currencyCode = command.getCurrencyCode();
+        final String currencyCode = moneyTransferCommand.getCurrencyCode();
         final ApplicationCurrency appCurrency = this.applicationCurrencyRepository.findOneByCode(currencyCode);
         if (appCurrency == null) { throw new CurrencyNotFoundException(currencyCode); }
 
         final MonetaryCurrency currency = new MonetaryCurrency(appCurrency.getCode(), appCurrency.getDecimalPlaces());
-        final Money amount = Money.of(currency, command.getTransactionAmount());
+        final Money amount = Money.of(currency, moneyTransferCommand.getTransactionAmount());
 
-        final OfficeTransaction entity = OfficeTransaction.create(fromOffice, toOffice, command.getTransactionDate(), amount,
-                command.getDescription());
+        final OfficeTransaction entity = OfficeTransaction.fromJson(fromOffice, toOffice, amount, command);
 
         this.officeMonetaryTransferRepository.save(entity);
 
-        if (this.configurationDomainService.isMakerCheckerEnabledForTask("CREATE_OFFICETRANSACTION") && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
-
-        return entity.getId();
+        return EntityIdentifier.resourceResult(entity.getId(), null);
     }
 
     /*
      * Guaranteed to throw an exception no matter what the data integrity issue
      * is.
      */
-    private void handleOfficeDataIntegrityIssues(final OfficeCommand command, DataIntegrityViolationException dve) {
+    private void handleOfficeDataIntegrityIssues(final JsonCommand command, DataIntegrityViolationException dve) {
 
         Throwable realCause = dve.getMostSpecificCause();
         if (realCause.getMessage().contains("externalid_org")) {
-            throw new PlatformDataIntegrityException("error.msg.office.duplicate.externalId", "Office with externalId {0} already exists",
-                    "externalId", command.getExternalId());
-        } else if (realCause.getMessage().contains("name_org")) { throw new PlatformDataIntegrityException(
-                "error.msg.office.duplicate.name", "Office with name {0} already exists", "name", command.getName()); }
+            final String externalId = command.stringValueOfParameterNamed("externalId");
+            throw new PlatformDataIntegrityException("error.msg.office.duplicate.externalId", "Office with externalId `" + externalId
+                    + "` already exists", "externalId", externalId);
+        } else if (realCause.getMessage().contains("name_org")) {
+            final String name = command.stringValueOfParameterNamed("name");
+            throw new PlatformDataIntegrityException("error.msg.office.duplicate.name", "Office with name `" + name + "` already exists",
+                    "name", name);
+        }
 
         logger.error(dve.getMessage(), dve);
         throw new PlatformDataIntegrityException("error.msg.office.unknown.data.integrity.issue",
@@ -160,10 +174,11 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
      * used to restrict modifying operations to office that are either the users
      * office or lower (child) in the office hierarchy
      */
-    private Office validateUserPriviledgeOnOfficeAndRetrieve(AppUser currentUser, Long officeId) {
+    private Office validateUserPriviledgeOnOfficeAndRetrieve(final AppUser currentUser, final Long officeId) {
 
-        Office userOffice = this.officeRepository.findOne(currentUser.getOffice().getId());
-        if (userOffice == null) { throw new OfficeNotFoundException(currentUser.getOffice().getId()); }
+        final Long userOfficeId = currentUser.getOffice().getId();
+        final Office userOffice = this.officeRepository.findOne(userOfficeId);
+        if (userOffice == null) { throw new OfficeNotFoundException(userOfficeId); }
 
         if (userOffice.doesNotHaveAnOfficeInHierarchyWithId(officeId)) { throw new NoAuthorizationException(
                 "User does not have sufficient priviledges to act on the provided office."); }

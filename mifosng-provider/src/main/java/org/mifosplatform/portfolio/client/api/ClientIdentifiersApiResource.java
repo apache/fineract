@@ -3,7 +3,6 @@ package org.mifosplatform.portfolio.client.api;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
@@ -29,7 +28,6 @@ import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext
 import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.client.data.ClientIdentifierData;
 import org.mifosplatform.portfolio.client.exception.DuplicateClientIdentifierException;
-import org.mifosplatform.portfolio.client.serialization.ClientIdentifierCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -48,7 +46,6 @@ public class ClientIdentifiersApiResource {
     private final PlatformSecurityContext context;
     private final ClientReadPlatformService clientReadPlatformService;
     private final CodeValueReadPlatformService codeValueReadPlatformService;
-    private final ClientIdentifierCommandFromApiJsonDeserializer commandFromApiJsonDeserializer;
     private final DefaultToApiJsonSerializer<ClientIdentifierData> toApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
@@ -56,14 +53,12 @@ public class ClientIdentifiersApiResource {
     @Autowired
     public ClientIdentifiersApiResource(final PlatformSecurityContext context, final ClientReadPlatformService readPlatformService,
             final CodeValueReadPlatformService codeValueReadPlatformService,
-            final ClientIdentifierCommandFromApiJsonDeserializer commandFromApiJsonDeserializer,
             final DefaultToApiJsonSerializer<ClientIdentifierData> toApiJsonSerializer,
             final ApiRequestParameterHelper apiRequestParameterHelper,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
         this.context = context;
         this.clientReadPlatformService = readPlatformService;
         this.codeValueReadPlatformService = codeValueReadPlatformService;
-        this.commandFromApiJsonDeserializer = commandFromApiJsonDeserializer;
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
@@ -103,16 +98,8 @@ public class ClientIdentifiersApiResource {
     public String createClientIdentifier(@PathParam("clientId") final Long clientId, final String apiRequestBodyAsJson) {
 
         try {
-            final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "PORTFOLIO_MANAGEMENT_SUPER_USER",
-                    "CREATE_CLIENTIDENTIFIER");
-            context.authenticatedUser().validateHasPermissionTo("CREATE_CLIENTIDENTIFIER", allowedPermissions);
-
-            final String commandSerializedAsJson = this.commandFromApiJsonDeserializer.serializedCommandJsonFromApiJsonWithSubResource(
-                    apiRequestBodyAsJson, clientId);
-
-            final String resourceUrl = "clients/" + clientId + "/identifiers";
-            final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE", resourceUrl, null,
-                    commandSerializedAsJson);
+            final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE_CLIENTIDENTIFIER", "CREATE",
+                    "clients", clientId, "identifiers", null, apiRequestBodyAsJson);
 
             return this.toApiJsonSerializer.serialize(result);
         } catch (DuplicateClientIdentifierException e) {
@@ -156,16 +143,8 @@ public class ClientIdentifiersApiResource {
             @PathParam("identifierId") final Long clientIdentifierId, final String apiRequestBodyAsJson) {
 
         try {
-            final List<String> allowedPermissions = Arrays.asList("ALL_FUNCTIONS", "PORTFOLIO_MANAGEMENT_SUPER_USER",
-                    "UPDATE_CLIENTIDENTIFIER");
-            context.authenticatedUser().validateHasPermissionTo("UPDATE_CLIENTIDENTIFIER", allowedPermissions);
-
-            final String commandSerializedAsJson = this.commandFromApiJsonDeserializer.serializedCommandJsonFromApiJsonWithSubResource(
-                    clientIdentifierId, apiRequestBodyAsJson, clientId);
-
-            final String resourceUrl = "clients/" + clientId + "/identifiers";
-            final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", resourceUrl,
-                    clientIdentifierId, commandSerializedAsJson);
+            final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE_CLIENTIDENTIFIER", "UPDATE",
+                    "clients", clientId, "identifiers", clientIdentifierId, apiRequestBodyAsJson);
 
             return this.toApiJsonSerializer.serialize(result);
         } catch (DuplicateClientIdentifierException e) {
@@ -187,13 +166,8 @@ public class ClientIdentifiersApiResource {
     public String deleteClientIdentifier(@PathParam("clientId") final Long clientId,
             @PathParam("identifierId") final Long clientIdentifierId) {
 
-        final List<String> allowedPermissions = Arrays
-                .asList("ALL_FUNCTIONS", "PORTFOLIO_MANAGEMENT_SUPER_USER", "DELETE_CLIENTIDENTIFIER");
-        context.authenticatedUser().validateHasPermissionTo("DELETE_CLIENTIDENTIFIER", allowedPermissions);
-
-        final String resourceUrl = "clients/" + clientId + "/identifiers";
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("DELETE", resourceUrl, clientIdentifierId,
-                "{}");
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("DELETE_CLIENTIDENTIFIER", "DELETE",
+                "clients", clientId, "identifiers", clientIdentifierId, "{}");
 
         return this.toApiJsonSerializer.serialize(result);
     }

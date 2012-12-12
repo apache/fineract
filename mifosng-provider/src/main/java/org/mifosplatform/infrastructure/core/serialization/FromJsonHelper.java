@@ -86,6 +86,10 @@ public class FromJsonHelper {
     public String[] extractArrayNamed(final String parameterName, final JsonElement element, final Set<String> parametersPassedInRequest) {
         return helperDelegator.extractArrayNamed(parameterName, element, parametersPassedInRequest);
     }
+    
+    public Boolean extractBooleanNamed(final String parameterName, final JsonElement element) {
+        return helperDelegator.extractBooleanNamed(parameterName, element, new HashSet<String>());
+    }
 
     public Boolean extractBooleanNamed(final String parameterName, final JsonElement element, final Set<String> parametersPassedInRequest) {
         return helperDelegator.extractBooleanNamed(parameterName, element, parametersPassedInRequest);
@@ -105,6 +109,10 @@ public class FromJsonHelper {
         return helperDelegator.extractLocalDateAsArrayNamed(parameterName, element, parametersPassedInRequest);
     }
 
+    public BigDecimal extractBigDecimalWithLocaleNamed(final String parameterName, final JsonElement element) {
+        return helperDelegator.extractBigDecimalWithLocaleNamed(parameterName, element, new HashSet<String>());
+    }
+    
     public BigDecimal extractBigDecimalWithLocaleNamed(final String parameterName, final JsonElement element,
             final Set<String> parametersPassedInRequest) {
         return helperDelegator.extractBigDecimalWithLocaleNamed(parameterName, element, parametersPassedInRequest);
@@ -115,6 +123,10 @@ public class FromJsonHelper {
         return helperDelegator.extractBigDecimalNamed(parameterName, element.getAsJsonObject(), Locale.US, parametersPassedInRequest);
     }
 
+    public Integer extractIntegerWithLocaleNamed(final String parameterName, final JsonElement element) {
+        return helperDelegator.extractIntegerWithLocaleNamed(parameterName, element.getAsJsonObject(), new HashSet<String>());
+    }
+    
     public Integer extractIntegerWithLocaleNamed(final String parameterName, final JsonElement element,
             final Set<String> parametersPassedInRequest) {
         return helperDelegator.extractIntegerWithLocaleNamed(parameterName, element.getAsJsonObject(), parametersPassedInRequest);

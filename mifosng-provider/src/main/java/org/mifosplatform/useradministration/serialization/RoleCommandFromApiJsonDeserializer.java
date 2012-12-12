@@ -9,7 +9,6 @@ import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
 import org.mifosplatform.infrastructure.core.serialization.AbstractFromApiJsonDeserializer;
-import org.mifosplatform.infrastructure.core.serialization.CommandSerializer;
 import org.mifosplatform.infrastructure.core.serialization.FromApiJsonDeserializer;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.useradministration.command.RoleCommand;
@@ -33,13 +32,12 @@ public final class RoleCommandFromApiJsonDeserializer extends AbstractFromApiJso
     private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired
-    public RoleCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper, final CommandSerializer commandSerializerService) {
-        super(commandSerializerService);
+    public RoleCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper) {
         this.fromApiJsonHelper = fromApiJsonHelper;
     }
 
     @Override
-    public RoleCommand commandFromApiJson(@SuppressWarnings("unused") final Long roleId, final String json) {
+    public RoleCommand commandFromApiJson(final String json) {
 
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 

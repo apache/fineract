@@ -1,11 +1,17 @@
 package org.mifosplatform.portfolio.charge.domain;
 
-import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
-import org.mifosplatform.portfolio.charge.command.ChargeDefinitionCommand;
-import org.mifosplatform.useradministration.domain.AppUser;
-
-import javax.persistence.*;
 import java.math.BigDecimal;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
+import org.mifosplatform.useradministration.domain.AppUser;
 
 @Entity
 @Table(name = "m_charge", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "name") })
@@ -20,7 +26,6 @@ public class Charge extends AbstractAuditableCustom<AppUser, Long> {
     @Column(name = "currency_code", length = 3)
     private String currencyCode;
 
-    @SuppressWarnings("unused")
     @Column(name = "charge_applies_to_enum", nullable = false)
     private Integer chargeAppliesTo;
 
@@ -39,10 +44,21 @@ public class Charge extends AbstractAuditableCustom<AppUser, Long> {
     @Column(name = "is_deleted", nullable = false)
     private boolean deleted = false;
 
-    public static Charge createNew(final String name, final BigDecimal amount, final String currencyCode,
-            final ChargeAppliesTo chargeAppliesTo, final ChargeTimeType chargeTime, final ChargeCalculationType chargeCalculationType,
-            final boolean penalty, final boolean active) {
-        return new Charge(name, amount, currencyCode, chargeAppliesTo, chargeTime, chargeCalculationType, penalty, active);
+    public static Charge fromJson(final JsonCommand command) {
+
+        final String name = command.stringValueOfParameterNamed("name");
+        final BigDecimal amount = command.bigDecimalValueOfParameterNamed("amount");
+        final String currencyCode = command.stringValueOfParameterNamed("currencyCode");
+
+        final ChargeAppliesTo chargeAppliesTo = ChargeAppliesTo.fromInt(command.integerValueOfParameterNamed("chargeAppliesTo"));
+        final ChargeTimeType chargeTimeType = ChargeTimeType.fromInt(command.integerValueOfParameterNamed("chargeTimeType"));
+        final ChargeCalculationType chargeCalculationType = ChargeCalculationType.fromInt(command
+                .integerValueOfParameterNamed("chargeCalculationType"));
+
+        final boolean penalty = command.booleanPrimitiveValueOfParameterNamed("penalty");
+        final boolean active = command.booleanPrimitiveValueOfParameterNamed("active");
+
+        return new Charge(name, amount, currencyCode, chargeAppliesTo, chargeTimeType, chargeCalculationType, penalty, active);
     }
 
     protected Charge() {
@@ -93,34 +109,73 @@ public class Charge extends AbstractAuditableCustom<AppUser, Long> {
         return deleted;
     }
 
-    public void update(final ChargeDefinitionCommand command) {
-        if (command.isNameChanged()) {
-            this.name = command.getName();
+    public Map<String, Object> update(final JsonCommand command) {
+
+        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(7);
+
+        final String localeAsInput = command.locale();
+
+        final String nameParamName = "name";
+        if (command.isChangeInStringParameterNamed(nameParamName, this.name)) {
+            final String newValue = command.stringValueOfParameterNamed(nameParamName);
+            actualChanges.put(nameParamName, newValue);
+            this.name = newValue;
         }
 
-        if (command.isAmountChanged()) {
-            this.amount = command.getAmount();
+        final String currencyCodeParamName = "currencyCode";
+        if (command.isChangeInStringParameterNamed(currencyCodeParamName, this.currencyCode)) {
+            final String newValue = command.stringValueOfParameterNamed(currencyCodeParamName);
+            actualChanges.put(currencyCodeParamName, newValue);
+            this.currencyCode = newValue;
         }
 
-        if (command.isCurrencyCodeChanged()) {
-            this.currencyCode = command.getCurrencyCode();
+        final String amountParamName = "amount";
+        if (command.isChangeInBigDecimalParameterNamed(amountParamName, this.amount)) {
+            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(amountParamName);
+            actualChanges.put(amountParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.amount = newValue;
         }
 
-        if (command.isChargeTimeTypeChanged()) {
-            this.chargeTime = ChargeTimeType.fromInt(command.getChargeTimeType()).getValue();
+        final String chargeTimeParamName = "chargeTime";
+        if (command.isChangeInIntegerParameterNamed(chargeTimeParamName, this.chargeTime)) {
+            final Integer newValue = command.integerValueOfParameterNamed(chargeTimeParamName);
+            actualChanges.put(chargeTimeParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.chargeTime = ChargeTimeType.fromInt(newValue).getValue();
         }
 
-        if (command.isChargeAppliesToChanged()) {
-            this.chargeAppliesTo = ChargeAppliesTo.fromInt(command.getChargeAppliesTo()).getValue();
+        final String chargeAppliesToParamName = "chargeAppliesTo";
+        if (command.isChangeInIntegerParameterNamed(chargeAppliesToParamName, this.chargeAppliesTo)) {
+            final Integer newValue = command.integerValueOfParameterNamed(chargeAppliesToParamName);
+            actualChanges.put(chargeAppliesToParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.chargeAppliesTo = ChargeAppliesTo.fromInt(newValue).getValue();
         }
 
-        if (command.isChargeCalculationTypeChanged()) {
-            this.chargeCalculation = ChargeCalculationType.fromInt(command.getChargeCalculationType()).getValue();
+        final String chargeCalculationParamName = "chargeCalculation";
+        if (command.isChangeInIntegerParameterNamed(chargeCalculationParamName, this.chargeCalculation)) {
+            final Integer newValue = command.integerValueOfParameterNamed(chargeCalculationParamName);
+            actualChanges.put(chargeCalculationParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.chargeCalculation = ChargeCalculationType.fromInt(newValue).getValue();
         }
 
-        if (command.isActiveChanged()) {
-            this.active = command.isActive();
+        final String penaltyParamName = "penalty";
+        if (command.isChangeInBooleanParameterNamed(penaltyParamName, this.penalty)) {
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(penaltyParamName);
+            actualChanges.put(penaltyParamName, newValue);
+            this.penalty = newValue;
         }
+
+        final String activeParamName = "active";
+        if (command.isChangeInBooleanParameterNamed(activeParamName, this.active)) {
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(activeParamName);
+            actualChanges.put(activeParamName, newValue);
+            this.active = newValue;
+        }
+
+        return actualChanges;
     }
 
     /**

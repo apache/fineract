@@ -6,20 +6,23 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.mifosplatform.infrastructure.core.serialization.CommandSerializer;
+import org.apache.commons.lang.StringUtils;
+import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
+import org.mifosplatform.infrastructure.core.serialization.AbstractFromApiJsonDeserializer;
 import org.mifosplatform.infrastructure.core.serialization.FromApiJsonDeserializer;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.portfolio.fund.command.FundCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 
 /**
  * Implementation of {@link FromApiJsonDeserializer} for {@link FundCommand}'s.
  */
 @Component
-public final class FundCommandFromApiJsonDeserializer implements FromApiJsonDeserializer<FundCommand> {
+public final class FundCommandFromApiJsonDeserializer extends AbstractFromApiJsonDeserializer<FundCommand> {
 
     /**
      * The parameters supported for this command.
@@ -27,41 +30,24 @@ public final class FundCommandFromApiJsonDeserializer implements FromApiJsonDese
     private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("name", "externalId"));
 
     private final FromJsonHelper fromApiJsonHelper;
-    private final FundCommandFromCommandJsonDeserializer fromCommandJsonDeserializer;
-    private final CommandSerializer commandSerializerService;
 
     @Autowired
-    public FundCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper,
-            final FundCommandFromCommandJsonDeserializer fromCommandJsonDeserializer, final CommandSerializer commandSerializerService) {
+    public FundCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper) {
         this.fromApiJsonHelper = fromApiJsonHelper;
-        this.fromCommandJsonDeserializer = fromCommandJsonDeserializer;
-        this.commandSerializerService = commandSerializerService;
     }
 
     @Override
     public FundCommand commandFromApiJson(final String json) {
-        return commandFromApiJson(null, json);
-    }
 
-    @Override
-    public FundCommand commandFromApiJson(final Long fundId, final String json) {
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-
         fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
 
-        return this.fromCommandJsonDeserializer.commandFromCommandJson(fundId, json);
-    }
+        final JsonElement element = fromApiJsonHelper.parse(json);
+        final String name = fromApiJsonHelper.extractStringNamed("name", element);
+        final String externalId = fromApiJsonHelper.extractStringNamed("externalId", element);
 
-    @Override
-    public String serializedCommandJsonFromApiJson(final String json) {
-        final FundCommand command = commandFromApiJson(json);
-        return this.commandSerializerService.serializeCommandToJson(command);
-    }
-
-    @Override
-    public String serializedCommandJsonFromApiJson(final Long fundId, final String json) {
-        final FundCommand command = commandFromApiJson(fundId, json);
-        return this.commandSerializerService.serializeCommandToJson(command);
+        return new FundCommand(name, externalId);
     }
 }

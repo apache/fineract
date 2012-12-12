@@ -6,13 +6,16 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.mifosplatform.infrastructure.core.serialization.CommandSerializer;
+import org.apache.commons.lang.StringUtils;
+import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
+import org.mifosplatform.infrastructure.core.serialization.AbstractFromApiJsonDeserializer;
 import org.mifosplatform.infrastructure.core.serialization.FromApiJsonDeserializer;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.organisation.monetary.command.CurrencyCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 
 /**
@@ -20,7 +23,7 @@ import com.google.gson.reflect.TypeToken;
  * 's.
  */
 @Component
-public final class CurrencyCommandFromApiJsonDeserializer implements FromApiJsonDeserializer<CurrencyCommand> {
+public final class CurrencyCommandFromApiJsonDeserializer extends AbstractFromApiJsonDeserializer<CurrencyCommand> {
 
     /**
      * The parameters supported for this command.
@@ -28,42 +31,22 @@ public final class CurrencyCommandFromApiJsonDeserializer implements FromApiJson
     private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("currencies"));
 
     private final FromJsonHelper fromApiJsonHelper;
-    private final CurrencyCommandFromCommandJsonDeserializer commandFromCommandJsonDeserializer;
-    private final CommandSerializer commandSerializerService;
 
     @Autowired
-    public CurrencyCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper,
-            final CurrencyCommandFromCommandJsonDeserializer commandFromCommandJsonDeserializer,
-            final CommandSerializer commandSerializerService) {
+    public CurrencyCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper) {
         this.fromApiJsonHelper = fromApiJsonHelper;
-        this.commandFromCommandJsonDeserializer = commandFromCommandJsonDeserializer;
-        this.commandSerializerService = commandSerializerService;
     }
 
     @Override
     public CurrencyCommand commandFromApiJson(final String json) {
-        return commandFromApiJson(null, json);
-    }
 
-    @Override
-    public CurrencyCommand commandFromApiJson(final Long resourceId, final String json) {
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-
         fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
 
-        return this.commandFromCommandJsonDeserializer.commandFromCommandJson(resourceId, json);
-    }
-
-    @Override
-    public String serializedCommandJsonFromApiJson(final String json) {
-        final CurrencyCommand command = commandFromApiJson(json);
-        return this.commandSerializerService.serializeCommandToJson(command);
-    }
-
-    @Override
-    public String serializedCommandJsonFromApiJson(final Long roleId, final String json) {
-        final CurrencyCommand command = commandFromApiJson(roleId, json);
-        return this.commandSerializerService.serializeCommandToJson(command);
+        final JsonElement element = fromApiJsonHelper.parse(json);
+        final String[] currencies = fromApiJsonHelper.extractArrayNamed("currencies", element);
+        return new CurrencyCommand(currencies);
     }
 }

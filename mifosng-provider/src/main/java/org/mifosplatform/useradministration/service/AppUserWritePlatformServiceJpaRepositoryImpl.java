@@ -14,11 +14,9 @@ import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityExce
 import org.mifosplatform.infrastructure.core.service.PlatformEmailSendException;
 import org.mifosplatform.infrastructure.security.service.PlatformPasswordEncoder;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.organisation.monetary.service.ConfigurationDomainService;
 import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.office.domain.OfficeRepository;
 import org.mifosplatform.organisation.office.exception.OfficeNotFoundException;
-import org.mifosplatform.portfolio.client.service.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
 import org.mifosplatform.useradministration.command.UserCommand;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.mifosplatform.useradministration.domain.AppUserRepository;
@@ -47,27 +45,24 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
     private final AppUserRepository appUserRepository;
     private final OfficeRepository officeRepository;
     private final RoleRepository roleRepository;
-    private final ConfigurationDomainService configurationDomainService;
     private final UserCommandFromApiJsonDeserializer fromApiJsonDeserializer;
 
     @Autowired
     public AppUserWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final AppUserRepository appUserRepository,
             final UserDomainService userDomainService, final OfficeRepository officeRepository, final RoleRepository roleRepository,
-            final PlatformPasswordEncoder platformPasswordEncoder, final ConfigurationDomainService configurationDomainService,
-            final UserCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
+            final PlatformPasswordEncoder platformPasswordEncoder, final UserCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
         this.context = context;
         this.appUserRepository = appUserRepository;
         this.userDomainService = userDomainService;
         this.officeRepository = officeRepository;
         this.roleRepository = roleRepository;
         this.platformPasswordEncoder = platformPasswordEncoder;
-        this.configurationDomainService = configurationDomainService;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
     }
 
     @Transactional
     @Override
-    public Long createUser(final JsonCommand command) {
+    public EntityIdentifier createUser(final JsonCommand command) {
 
         try {
             context.authenticatedUser();
@@ -85,12 +80,12 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
             final Set<Role> allRoles = assembleSetOfRoles(roles);
 
             final AppUser appUser = AppUser.fromJson(userOffice, allRoles, command);
-            this.userDomainService.create(appUser, command.isApprovedByChecker());
+            this.userDomainService.create(appUser);
 
-            return appUser.getId();
+            return EntityIdentifier.resourceResult(appUser.getId(), null);
         } catch (DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
-            return Long.valueOf(-1);
+            return EntityIdentifier.empty();
         } catch (PlatformEmailSendException e) {
             final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 
@@ -137,8 +132,6 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
             if (!changes.isEmpty()) {
                 this.appUserRepository.save(userToUpdate);
             }
-
-            if (this.configurationDomainService.isMakerCheckerEnabledForTask("UPDATE_USER") && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
 
             return EntityIdentifier.withChanges(userId, changes);
         } catch (DataIntegrityViolationException dve) {
@@ -211,7 +204,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 
     @Transactional
     @Override
-    public void deleteUser(final Long userId, final JsonCommand command) {
+    public EntityIdentifier deleteUser(final Long userId) {
 
         final AppUser user = this.appUserRepository.findOne(userId);
         if (user == null || user.isDeleted()) { throw new UserNotFoundException(userId); }
@@ -219,7 +212,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
         user.delete();
         this.appUserRepository.save(user);
 
-        if (this.configurationDomainService.isMakerCheckerEnabledForTask("DELETE_USER") && !command.isApprovedByChecker()) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(); }
+        return EntityIdentifier.resourceResult(userId, null);
     }
 
     /*

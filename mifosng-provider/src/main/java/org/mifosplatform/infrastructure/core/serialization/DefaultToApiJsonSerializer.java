@@ -17,16 +17,24 @@ public final class DefaultToApiJsonSerializer<T> implements ToApiJsonSerializer<
 
     private final ExcludeNothingWithPrettyPrintingOffJsonSerializerGoogleGson excludeNothingWithPrettyPrintingOff;
     private final ExcludeNothingWithPrettyPrintingOnJsonSerializerGoogleGson excludeNothingWithPrettyPrintingOn;
+    private final CommandProcessingResultJsonSerializer commandProcessingResultSerializer;
     private final GoogleGsonSerializerHelper helper;
 
     @Autowired
     public DefaultToApiJsonSerializer(
             final ExcludeNothingWithPrettyPrintingOffJsonSerializerGoogleGson excludeNothingWithPrettyPrintingOff,
             final ExcludeNothingWithPrettyPrintingOnJsonSerializerGoogleGson excludeNothingWithPrettyPrintingOn,
+            final CommandProcessingResultJsonSerializer commandProcessingResultSerializer,
             final GoogleGsonSerializerHelper helper) {
         this.excludeNothingWithPrettyPrintingOff = excludeNothingWithPrettyPrintingOff;
         this.excludeNothingWithPrettyPrintingOn = excludeNothingWithPrettyPrintingOn;
+        this.commandProcessingResultSerializer = commandProcessingResultSerializer;
         this.helper = helper;
+    }
+    
+    @Override
+    public String serializeResult(final Object object) {
+        return this.commandProcessingResultSerializer.serialize(object);
     }
 
     @Override

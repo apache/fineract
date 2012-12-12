@@ -134,6 +134,17 @@ public class Client extends AbstractAuditableCustom<AppUser, Long> {
             final LocalDate newValue = command.localDateValueOfParameterNamed(joiningDateParamName);
             this.joinedDate = newValue.toDate();
         }
+
+        final String clientOrBusinessNameParamName = "clientOrBusinessName";
+        final String lastnameParamName = "lastname";
+        if (command.isChangeInStringParameterNamed(lastnameParamName, getLastnameIfNotClientOrBusinessName())) {
+            final String newValue = command.stringValueOfParameterNamed(lastnameParamName);
+            actualChanges.put(lastnameParamName, newValue);
+            if (StringUtils.isNotBlank(getClientOrBusinessName())) {
+                actualChanges.put(clientOrBusinessNameParamName, "");
+            }
+            this.lastName = newValue;
+        }
         
         final String firstnameParamName = "firstname";
         if (command.isChangeInStringParameterNamed(firstnameParamName, this.firstName)) {
@@ -142,14 +153,7 @@ public class Client extends AbstractAuditableCustom<AppUser, Long> {
             this.firstName = newValue;
         }
         
-        final String lastnameParamName = "lastname";
-        if (command.isChangeInStringParameterNamed(lastnameParamName, this.lastName)) {
-            final String newValue = command.stringValueOfParameterNamed(lastnameParamName);
-            actualChanges.put(lastnameParamName, newValue);
-            this.lastName = newValue;
-        }
         
-        final String clientOrBusinessNameParamName = "clientOrBusinessName";
         if (command.isChangeInStringParameterNamed(clientOrBusinessNameParamName, getClientOrBusinessName())) {
             final String newValue = command.stringValueOfParameterNamed(clientOrBusinessNameParamName);
             actualChanges.put(clientOrBusinessNameParamName, newValue);
@@ -183,6 +187,18 @@ public class Client extends AbstractAuditableCustom<AppUser, Long> {
         }
         return joiningLocalDate;
     }
+
+    /*
+     * 
+     */
+    private String getLastnameIfNotClientOrBusinessName() {
+        String lastname = null;
+        if (StringUtils.isNotBlank(this.firstName) && StringUtils.isNotBlank(this.lastName)) {
+            lastname = this.lastName;
+        }
+        return lastname;
+    }
+
     
     private String getClientOrBusinessName() {
         String clientOrBusinessName = null;

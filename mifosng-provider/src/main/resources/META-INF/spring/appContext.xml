@@ -16,6 +16,8 @@
 	<tx:annotation-driven />
 	
 	<context:component-scan base-package="org.mifosplatform.accounting.*,
+									      org.mifosplatform.commands.handler.*,
+										  org.mifosplatform.commands.service.*,
 										  org.mifosplatform.commands.*,
 										  org.mifosplatform.audit.*,
 										  org.mifosplatform.infrastructure.*,

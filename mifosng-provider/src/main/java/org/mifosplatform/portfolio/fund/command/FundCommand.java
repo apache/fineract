@@ -2,7 +2,6 @@ package org.mifosplatform.portfolio.fund.command;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
@@ -16,41 +15,9 @@ public class FundCommand {
     private final String name;
     private final String externalId;
 
-    private final transient Set<String> parametersPassedInRequest;
-    private final transient boolean makerCheckerApproval;
-    private final transient Long id;
-
-    public FundCommand(final Set<String> parametersPassedInRequest, final boolean makerCheckerApproval, final Long id,
-            final String fundName, final String externalId) {
-        this.parametersPassedInRequest = parametersPassedInRequest;
-        this.makerCheckerApproval = makerCheckerApproval;
-        this.id = id;
+    public FundCommand(final String fundName, final String externalId) {
         this.name = fundName;
         this.externalId = externalId;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getExternalId() {
-        return externalId;
-    }
-
-    public boolean isNameChanged() {
-        return this.parametersPassedInRequest.contains("name");
-    }
-
-    public boolean isExternalIdChanged() {
-        return this.parametersPassedInRequest.contains("externalId");
-    }
-
-    public boolean isApprovedByChecker() {
-        return this.makerCheckerApproval;
     }
 
     public void validateForCreate() {
@@ -70,7 +37,6 @@ public class FundCommand {
 
         DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("fund");
 
-        baseDataValidator.reset().parameter("id").value(this.id).notNull();
         baseDataValidator.reset().parameter("name").value(this.name).ignoreIfNull().notBlank();
         baseDataValidator.reset().parameter("externalId").value(this.externalId).ignoreIfNull().notExceedingLengthOf(100);
 

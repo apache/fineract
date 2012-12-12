@@ -3,7 +3,6 @@ package org.mifosplatform.organisation.office.command;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
@@ -22,14 +21,8 @@ public class BranchMoneyTransferCommand {
     private final BigDecimal transactionAmount;
     private final String description;
 
-    private final transient Set<String> parametersPassedInRequest;
-    private final transient boolean makerCheckerApproval;
-
-    public BranchMoneyTransferCommand(final Set<String> parametersPassedInRequest, final boolean makerCheckerApproval,
-            final Long fromOfficeId, final Long toOfficeId, final LocalDate transactionDate, final String currencyCode,
-            final BigDecimal transactionAmount, final String description) {
-        this.parametersPassedInRequest = parametersPassedInRequest;
-        this.makerCheckerApproval = makerCheckerApproval;
+    public BranchMoneyTransferCommand(final Long fromOfficeId, final Long toOfficeId, final LocalDate transactionDate,
+            final String currencyCode, final BigDecimal transactionAmount, final String description) {
         this.fromOfficeId = fromOfficeId;
         this.toOfficeId = toOfficeId;
         this.transactionDate = transactionDate;
@@ -60,14 +53,6 @@ public class BranchMoneyTransferCommand {
 
     public String getDescription() {
         return description;
-    }
-
-    public boolean isFromOfficeIdChanged() {
-        return this.parametersPassedInRequest.contains("fromOfficeId");
-    }
-
-    public boolean isApprovedByChecker() {
-        return this.makerCheckerApproval;
     }
 
     public void validateBranchTransfer() {
