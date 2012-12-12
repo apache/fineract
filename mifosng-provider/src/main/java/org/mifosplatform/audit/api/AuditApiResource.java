@@ -116,6 +116,7 @@ public class AuditApiResource {
         if (resource != null) {
             extraCriteria += " and aud.api_resource = " + ApiParameterHelper.sqlEncodeString(resource);
         }
+        
         if (resourceId != null) {
             extraCriteria += " and aud.resource_id = " + resourceId;
         }

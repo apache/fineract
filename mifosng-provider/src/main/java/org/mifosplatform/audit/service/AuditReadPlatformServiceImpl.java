@@ -78,7 +78,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
         String sql = "select " + rm.schema(includeJson);
         if (StringUtils.isNotBlank(extraCriteria)) sql += " where (" + extraCriteria + ")";
         sql += " order by aud.id DESC";
-
+        
         return this.jdbcTemplate.query(sql, rm, new Object[] {});
     }
 
