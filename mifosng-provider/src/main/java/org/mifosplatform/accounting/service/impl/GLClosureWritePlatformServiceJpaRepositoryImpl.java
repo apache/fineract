@@ -1,9 +1,15 @@
 package org.mifosplatform.accounting.service.impl;
 
+
+import java.util.Date;
+
 import org.mifosplatform.accounting.api.commands.GLClosureCommand;
 import org.mifosplatform.accounting.domain.GLClosure;
 import org.mifosplatform.accounting.domain.GLClosureRepository;
 import org.mifosplatform.accounting.exceptions.GLClosureDuplicateException;
+import org.mifosplatform.accounting.exceptions.GLClosureInvalidDeleteException;
+import org.mifosplatform.accounting.exceptions.GLClosureInvalidException;
+import org.mifosplatform.accounting.exceptions.GLClosureInvalidException.GL_CLOSURE_INVALID_REASON;
 import org.mifosplatform.accounting.exceptions.GLClosureNotFoundException;
 import org.mifosplatform.accounting.service.GLClosureCommandValidator;
 import org.mifosplatform.accounting.service.GLClosureWritePlatformService;
@@ -44,6 +50,16 @@ public class GLClosureWritePlatformServiceJpaRepositoryImpl implements GLClosure
             final Office office = this.officeRepository.findOne(command.getOfficeId());
             if (office == null) { throw new OfficeNotFoundException(command.getOfficeId()); }
 
+            // ensure closure date is not in the future
+            Date todaysDate = new Date();
+            Date closureDate = command.getClosingDate().toDateMidnight().toDate();
+            if (closureDate.after(todaysDate)) { throw new GLClosureInvalidException(GL_CLOSURE_INVALID_REASON.FUTURE_DATE, closureDate); }
+            // shouldn't be before an existing accounting closure
+            GLClosure latestGLClosure = glClosureRepository.getLatestGLClosureByBranch(command.getOfficeId());
+            if (latestGLClosure != null) {
+                if (latestGLClosure.getClosingDate().after(closureDate)) { throw new GLClosureInvalidException(
+                        GL_CLOSURE_INVALID_REASON.ACCOUNTING_CLOSED, latestGLClosure.getClosingDate()); }
+            }
             GLClosure glClosure = GLClosure.createNew(office, command.getClosingDate(), command.getComments());
 
             this.glClosureRepository.saveAndFlush(glClosure);
@@ -79,8 +95,14 @@ public class GLClosureWritePlatformServiceJpaRepositoryImpl implements GLClosure
 
         if (glClosure == null) { throw new GLClosureNotFoundException(glClosureId); }
 
-        // TODO: check if any closures are present for this branch at a later
-        // date than this closure
+        /**
+         * check if any closures are present for this branch at a later date
+         * than this closure date
+         **/
+        Date closureDate = glClosure.getClosingDate();
+        GLClosure latestGLClosure = glClosureRepository.getLatestGLClosureByBranch(glClosure.getOffice().getId());
+        if (latestGLClosure.getClosingDate().after(closureDate)) { throw new GLClosureInvalidDeleteException(latestGLClosure.getOffice()
+                .getId(), latestGLClosure.getOffice().getName(), latestGLClosure.getClosingDate()); }
 
         this.glClosureRepository.delete(glClosure);
 

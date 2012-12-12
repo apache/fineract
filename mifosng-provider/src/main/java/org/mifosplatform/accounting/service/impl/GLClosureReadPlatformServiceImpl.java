@@ -2,6 +2,7 @@ package org.mifosplatform.accounting.service.impl;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.List;
 
 import org.joda.time.LocalDate;
@@ -10,7 +11,6 @@ import org.mifosplatform.accounting.exceptions.GLClosureNotFoundException;
 import org.mifosplatform.accounting.service.GLClosureReadPlatformService;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
-import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -21,12 +21,9 @@ import org.springframework.stereotype.Service;
 public class GLClosureReadPlatformServiceImpl implements GLClosureReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
-    @SuppressWarnings("unused")
-    private final PlatformSecurityContext context;
 
     @Autowired
-    public GLClosureReadPlatformServiceImpl(final PlatformSecurityContext context, final TenantAwareRoutingDataSource dataSource) {
-        this.context = context;
+    public GLClosureReadPlatformServiceImpl(final TenantAwareRoutingDataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
@@ -36,9 +33,9 @@ public class GLClosureReadPlatformServiceImpl implements GLClosureReadPlatformSe
             return " glClosure.id as id, glClosure.office_id as officeId,office.name as officeName ,glClosure.closing_date as closingDate,"
                     + " glClosure.is_deleted as isDeleted, creatingUser.id as creatingUserId,creatingUser.username as creatingUserName,"
                     + " updatingUser.id as updatingUserId,updatingUser.username as updatingUserName, glClosure.created_date as createdDate,"
-                    + " glClosure.lastmodified_date as updatedDate from acc_gl_Closure as glClosure, m_appuser as creatingUser, "
-                    + " glClosure.comments as comments "
-                    + " m_appuser as updatingUser,m_office as office where glClosure.createdby_id=creatingUser.id and "
+                    + " glClosure.lastmodified_date as updatedDate, glClosure.comments as comments "
+                    + " from acc_gl_Closure as glClosure, m_appuser as creatingUser, m_appuser as updatingUser,m_office as office"
+                    + " where glClosure.createdby_id=creatingUser.id and "
                     + " glClosure.lastmodifiedby_id=updatingUser.id and glClosure.office_id=office.id";
         }
 
@@ -53,11 +50,13 @@ public class GLClosureReadPlatformServiceImpl implements GLClosureReadPlatformSe
             LocalDate createdDate = JdbcSupport.getLocalDate(rs, "createdDate");
             LocalDate lastUpdatedDate = JdbcSupport.getLocalDate(rs, "updatedDate");
             Long creatingByUserId = rs.getLong("creatingUserId");
+            String createdByUserName = rs.getString("creatingUserName");
             Long lastUpdatedByUserId = rs.getLong("updatingUserId");
+            String lastUpdatedByUserName = rs.getString("updatingUserName");
             String comments = rs.getString("comments");
 
             return new GLClosureData(id, officeId, officeName, closingDate, deleted, createdDate, lastUpdatedDate, creatingByUserId,
-                    lastUpdatedByUserId, comments);
+                    createdByUserName, lastUpdatedByUserId, lastUpdatedByUserName, comments);
         }
     }
 
@@ -66,12 +65,18 @@ public class GLClosureReadPlatformServiceImpl implements GLClosureReadPlatformSe
         GLClosureMapper rm = new GLClosureMapper();
 
         String sql = "select " + rm.schema() + " and glClosure.is_deleted = 0";
+        Object[] objectArray = new Object[1];
+        int arrayPos = 0;
         if (officeId != null && officeId != 0) {
             sql += " and glClosure.office_id = ?";
+            objectArray[arrayPos] = officeId;
+            arrayPos = arrayPos + 1;
         }
 
-        sql = sql + " glClosure.closing_date";
-        return this.jdbcTemplate.query(sql, rm, new Object[] { officeId });
+        sql = sql + " order by glClosure.closing_date";
+
+        Object[] finalObjectArray = Arrays.copyOf(objectArray, arrayPos);
+        return this.jdbcTemplate.query(sql, rm, finalObjectArray);
     }
 
     @Override
@@ -79,7 +84,7 @@ public class GLClosureReadPlatformServiceImpl implements GLClosureReadPlatformSe
         try {
 
             GLClosureMapper rm = new GLClosureMapper();
-            String sql = "select " + rm.schema() + " and glClosure,id = ?";
+            String sql = "select " + rm.schema() + " and glClosure.id = ?";
 
             GLClosureData glAccountData = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { glClosureId });
 

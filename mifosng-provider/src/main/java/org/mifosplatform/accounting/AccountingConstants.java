@@ -4,7 +4,17 @@ public class AccountingConstants {
 
     /*** Categories for Accounting **/
     public static enum GL_ACCOUNT_CLASSIFICATION {
-        ASSETS, LIABILITIES, INCOME, EXPENDITURE, EQUITY;
+        ASSET, LIABILITY, INCOME, EXPENSE, EQUITY;
+
+        @Override
+        public String toString() {
+            return name().toString();
+        }
+    }
+
+    /** Types of Journal Entries **/
+    public static enum JOURNAL_ENTRY_TYPE {
+        DEBIT, CREDIT;
 
         @Override
         public String toString() {

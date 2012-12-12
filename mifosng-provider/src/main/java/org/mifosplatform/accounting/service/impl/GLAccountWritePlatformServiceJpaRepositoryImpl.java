@@ -1,13 +1,20 @@
 package org.mifosplatform.accounting.service.impl;
 
+import java.util.List;
+
+import org.apache.commons.lang.StringUtils;
+import org.mifosplatform.accounting.AccountingConstants.GL_ACCOUNT_CLASSIFICATION;
 import org.mifosplatform.accounting.api.commands.GLAccountCommand;
 import org.mifosplatform.accounting.domain.GLAccount;
 import org.mifosplatform.accounting.domain.GLAccountRepository;
+import org.mifosplatform.accounting.domain.GLJournalEntry;
+import org.mifosplatform.accounting.domain.GLJournalEntryRepository;
 import org.mifosplatform.accounting.exceptions.GLAccountDuplicateException;
+import org.mifosplatform.accounting.exceptions.GLAccountInvalidClassificationException;
 import org.mifosplatform.accounting.exceptions.GLAccountInvalidDeleteException;
+import org.mifosplatform.accounting.exceptions.GLAccountInvalidDeleteException.GL_ACCOUNT_INVALID_DELETE_REASON;
 import org.mifosplatform.accounting.exceptions.GLAccountInvalidParentException;
 import org.mifosplatform.accounting.exceptions.GLAccountNotFoundException;
-import org.mifosplatform.accounting.exceptions.GLAccountInvalidDeleteException.GL_ACCOUNT_INVALID_DELETE_REASON;
 import org.mifosplatform.accounting.service.GLAccountCommandValidator;
 import org.mifosplatform.accounting.service.GLAccountWritePlatformService;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
@@ -24,10 +31,13 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
     private final static Logger logger = LoggerFactory.getLogger(GLAccountWritePlatformServiceJpaRepositoryImpl.class);
 
     private final GLAccountRepository glAccountRepository;
+    private final GLJournalEntryRepository glJournalEntryRepository;
 
     @Autowired
-    public GLAccountWritePlatformServiceJpaRepositoryImpl(final GLAccountRepository glAccountRepository) {
+    public GLAccountWritePlatformServiceJpaRepositoryImpl(final GLAccountRepository glAccountRepository,
+            final GLJournalEntryRepository glJournalEntryRepository) {
         this.glAccountRepository = glAccountRepository;
+        this.glJournalEntryRepository = glJournalEntryRepository;
     }
 
     @Transactional
@@ -37,12 +47,17 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
             GLAccountCommandValidator validator = new GLAccountCommandValidator(command);
             validator.validateForCreate();
 
+            if (StringUtils.isNotBlank(command.getClassification())) {
+                if (!checkValidGLAccountClassification(command.getClassification())) { throw new GLAccountInvalidClassificationException(
+                        command.getClassification()); }
+            }
+
             // check parent is valid
             GLAccount parentGLAccount = null;
             if (command.getParentId() != null) {
                 parentGLAccount = validateParentGLAccount(command);
             }
-            GLAccount glAccount = GLAccount.createNew(parentGLAccount, command.getName(), command.getGlCode(), command.getDisabled(),
+            GLAccount glAccount = GLAccount.createNew(parentGLAccount, command.getName(), command.getGlCode(), false,
                     command.getManualEntriesAllowed(), command.getClassification(), command.getHeaderAccount(), command.getDescription());
 
             this.glAccountRepository.saveAndFlush(glAccount);
@@ -70,11 +85,37 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
             parentGLAccount = validateParentGLAccount(command);
         }
 
+        // validate new classification
+        if (command.isClassificationChanged()) {
+            if (!checkValidGLAccountClassification(command.getClassification())) { throw new GLAccountInvalidClassificationException(
+                    command.getClassification()); }
+        }
+
         glAccount.update(command, parentGLAccount);
 
         this.glAccountRepository.saveAndFlush(glAccount);
 
         return glAccount.getId();
+    }
+
+    @Transactional
+    @Override
+    public Long deleteGLAccount(Long glAccountId) {
+        final GLAccount glAccount = this.glAccountRepository.findOne(glAccountId);
+
+        if (glAccount == null) { throw new GLAccountNotFoundException(glAccountId); }
+
+        // validate this isn't a header account that has children
+        if (glAccount.isHeaderAccount() && glAccount.getChildren().size() > 0) { throw new GLAccountInvalidDeleteException(
+                GL_ACCOUNT_INVALID_DELETE_REASON.HAS_CHILDREN, glAccountId); }
+
+        // TODO: does this account have transactions logged against it
+        List<GLJournalEntry> journalEntriesForAccount = glJournalEntryRepository.findFirstJournalEntryForAccount(glAccountId);
+        if (journalEntriesForAccount.size() > 0) { throw new GLAccountInvalidDeleteException(
+                GL_ACCOUNT_INVALID_DELETE_REASON.TRANSANCTIONS_LOGGED, glAccountId); }
+        this.glAccountRepository.delete(glAccount);
+
+        return glAccountId;
     }
 
     /**
@@ -106,21 +147,10 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
                 "Unknown data integrity issue with resource GL Account: " + realCause.getMessage());
     }
 
-    @Transactional
-    @Override
-    public Long deleteGLAccount(Long glAccountId) {
-        final GLAccount glAccount = this.glAccountRepository.findOne(glAccountId);
-
-        if (glAccount == null) { throw new GLAccountNotFoundException(glAccountId); }
-
-        // validate this isn't a header account that has children
-        if (glAccount.isHeaderAccount() && glAccount.getChildren().size() > 0) { throw new GLAccountInvalidDeleteException(
-                GL_ACCOUNT_INVALID_DELETE_REASON.HAS_CHILDREN, glAccountId); }
-
-        // TODO: does this account have transactions logged against it
-
-        this.glAccountRepository.delete(glAccount);
-
-        return glAccountId;
+    private static boolean checkValidGLAccountClassification(final String entityType) {
+        for (GL_ACCOUNT_CLASSIFICATION classification : GL_ACCOUNT_CLASSIFICATION.values()) {
+            if (classification.name().toString().equalsIgnoreCase(entityType)) { return true; }
+        }
+        return false;
     }
 }

@@ -43,7 +43,7 @@ public class GLAccount extends AbstractPersistable<Long> {
     private boolean disabled = false;
 
     @SuppressWarnings("unused")
-    @Column(name = "manual_entries_allowed", nullable = false)
+    @Column(name = "manual_journal_entries_allowed", nullable = false)
     private boolean manualEntriesAllowed = true;
 
     @SuppressWarnings("unused")

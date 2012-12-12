@@ -22,7 +22,6 @@ import org.mifosplatform.useradministration.domain.AppUser;
 @Table(name = "acc_gl_closure", uniqueConstraints = { @UniqueConstraint(columnNames = { "office_id", "closing_date" }, name = "office_id_closing_date") })
 public class GLClosure extends AbstractAuditableCustom<AppUser, Long> {
 
-    @SuppressWarnings("unused")
     @ManyToOne
     @JoinColumn(name = "office_id", nullable = false)
     private Office office;
@@ -31,7 +30,6 @@ public class GLClosure extends AbstractAuditableCustom<AppUser, Long> {
     @Column(name = "is_deleted", nullable = false)
     private boolean deleted = true;
 
-    @SuppressWarnings("unused")
     @Column(name = "closing_date")
     @Temporal(TemporalType.DATE)
     private Date closingDate;
@@ -64,4 +62,13 @@ public class GLClosure extends AbstractAuditableCustom<AppUser, Long> {
             this.comments = command.getComments().trim();
         }
     }
+
+    public Date getClosingDate() {
+        return this.closingDate;
+    }
+
+    public Office getOffice() {
+        return this.office;
+    }
+
 }

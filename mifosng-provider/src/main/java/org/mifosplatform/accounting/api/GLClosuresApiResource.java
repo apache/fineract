@@ -1,5 +1,6 @@
 package org.mifosplatform.accounting.api;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -26,6 +27,8 @@ import org.mifosplatform.accounting.service.GLClosureWritePlatformService;
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.organisation.office.data.OfficeLookup;
+import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -40,6 +43,9 @@ public class GLClosuresApiResource {
 
     @Autowired
     private GLClosureWritePlatformService glClosureWritePlatformService;
+
+    @Autowired
+    private OfficeReadPlatformService officeReadPlatformService;
 
     @Autowired
     private AccountingApiDataConversionService accountingApiDataConversionService;
@@ -84,7 +90,7 @@ public class GLClosuresApiResource {
 
         final GLClosureData glClosureData = this.glClosureReadPlatformService.retrieveGLClosureById(glClosureId);
         if (template) {
-            // TODO: define templates
+            glClosureData.setAllowedOffices(new ArrayList<OfficeLookup>(officeReadPlatformService.retrieveAllOfficesForLookup()));
         }
 
         return this.apiJsonSerializerService.serializeGLClosureDataToJson(prettyPrint, responseParameters, glClosureData);

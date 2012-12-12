@@ -2,6 +2,7 @@ package org.mifosplatform.accounting.service.impl;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -11,7 +12,6 @@ import org.mifosplatform.accounting.exceptions.GLAccountInvalidClassificationExc
 import org.mifosplatform.accounting.exceptions.GLAccountNotFoundException;
 import org.mifosplatform.accounting.service.GLAccountReadPlatformService;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
-import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -22,19 +22,16 @@ import org.springframework.stereotype.Service;
 public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
-    @SuppressWarnings("unused")
-    private final PlatformSecurityContext context;
 
     @Autowired
-    public GLAccountReadPlatformServiceImpl(final PlatformSecurityContext context, final TenantAwareRoutingDataSource dataSource) {
-        this.context = context;
+    public GLAccountReadPlatformServiceImpl(final TenantAwareRoutingDataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
     private static final class GLAccountMapper implements RowMapper<GLAccountData> {
 
         public String schema() {
-            return " id as id, name as name, parent_id as parentId, gl_code as glCode, disabled as disabled, manual_entries_allowed as manualEntriesAllowed, "
+            return " id as id, name as name, parent_id as parentId, gl_code as glCode, disabled as disabled, manual_journal_entries_allowed as manualEntriesAllowed, "
                     + "classification as classification, header_account as headerAccount, description as description "
                     + "from acc_gl_account";
         }
@@ -65,15 +62,30 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
 
         GLAccountMapper rm = new GLAccountMapper();
         String sql = "select " + rm.schema();
+        Object[] paramaterArray = new Object[3];
+        int arrayPos = 0;
         if (StringUtils.isNotBlank(accountClassification) && searchParam != null) {
             sql += " where classification like ? and ( name like %?% or glCode like %?% )";
+            paramaterArray[arrayPos] = accountClassification;
+            arrayPos = arrayPos++;
+            paramaterArray[arrayPos] = searchParam;
+            arrayPos = arrayPos++;
+            paramaterArray[arrayPos] = searchParam;
+            arrayPos = arrayPos++;
         } else if (StringUtils.isNotBlank(accountClassification)) {
             sql += " where classification like ?";
+            paramaterArray[arrayPos] = accountClassification;
+            arrayPos++;
         } else if (searchParam != null) {
             sql += " where ( name like %?% or glCode like %?% )";
+            paramaterArray[arrayPos] = searchParam;
+            arrayPos++;
+            paramaterArray[arrayPos] = searchParam;
+            arrayPos++;
         }
         sql = sql + " order by glCode";
-        return this.jdbcTemplate.query(sql, rm, new Object[] { accountClassification, searchParam });
+        Object[] finalObjectArray = Arrays.copyOf(paramaterArray, arrayPos);
+        return this.jdbcTemplate.query(sql, rm, finalObjectArray);
     }
 
     @Override
@@ -93,7 +105,7 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
 
     private static boolean checkValidGLAccountClassification(final String entityType) {
         for (GL_ACCOUNT_CLASSIFICATION classification : GL_ACCOUNT_CLASSIFICATION.values()) {
-            if (classification.name().equalsIgnoreCase(entityType)) { return true; }
+            if (classification.name().toString().equalsIgnoreCase(entityType)) { return true; }
         }
         return false;
     }
