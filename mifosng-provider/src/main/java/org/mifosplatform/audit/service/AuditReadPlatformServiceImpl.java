@@ -6,7 +6,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
-import org.joda.time.LocalDate;
+import org.joda.time.DateTime;
 import org.mifosplatform.audit.data.AuditData;
 import org.mifosplatform.audit.data.AuditSearchData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
@@ -55,9 +55,9 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
             final String resource = rs.getString("resource");
             final Long resourceId = JdbcSupport.getLong(rs, "resourceId");
             final String maker = rs.getString("maker");
-            final LocalDate madeOnDate = JdbcSupport.getLocalDate(rs, "madeOnDate");
+            final DateTime madeOnDate = JdbcSupport.getDateTime(rs, "madeOnDate");
             final String checker = rs.getString("checker");
-            final LocalDate checkedOnDate = JdbcSupport.getLocalDate(rs, "checkedOnDate");
+            final DateTime checkedOnDate = JdbcSupport.getDateTime(rs, "checkedOnDate");
             String commandAsJson;
             // commandAsJson might not be on the select list of columns
             try {
