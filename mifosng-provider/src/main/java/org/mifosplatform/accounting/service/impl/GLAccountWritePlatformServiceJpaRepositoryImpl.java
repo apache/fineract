@@ -13,7 +13,9 @@ import org.mifosplatform.accounting.exceptions.GLAccountDuplicateException;
 import org.mifosplatform.accounting.exceptions.GLAccountInvalidClassificationException;
 import org.mifosplatform.accounting.exceptions.GLAccountInvalidDeleteException;
 import org.mifosplatform.accounting.exceptions.GLAccountInvalidDeleteException.GL_ACCOUNT_INVALID_DELETE_REASON;
+import org.mifosplatform.accounting.exceptions.GLAccountInvalidUpdateException.GL_ACCOUNT_INVALID_UPDATE_REASON;
 import org.mifosplatform.accounting.exceptions.GLAccountInvalidParentException;
+import org.mifosplatform.accounting.exceptions.GLAccountInvalidUpdateException;
 import org.mifosplatform.accounting.exceptions.GLAccountNotFoundException;
 import org.mifosplatform.accounting.service.GLAccountCommandValidator;
 import org.mifosplatform.accounting.service.GLAccountWritePlatformService;
@@ -91,6 +93,18 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
                     command.getClassification()); }
         }
 
+        /**
+         * a detail account cannot be changed to a header account if
+         * transactions are already logged against it
+         **/
+        if (command.isHeaderAccountFlagChanged()) {
+            if (command.getHeaderAccount() == true) {
+                List<GLJournalEntry> journalEntriesForAccount = glJournalEntryRepository.findFirstJournalEntryForAccount(glAccountId);
+                if (journalEntriesForAccount.size() > 0) { throw new GLAccountInvalidUpdateException(
+                        GL_ACCOUNT_INVALID_UPDATE_REASON.TRANSANCTIONS_LOGGED, glAccountId); }
+            }
+        }
+
         glAccount.update(command, parentGLAccount);
 
         this.glAccountRepository.saveAndFlush(glAccount);
@@ -109,7 +123,7 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
         if (glAccount.isHeaderAccount() && glAccount.getChildren().size() > 0) { throw new GLAccountInvalidDeleteException(
                 GL_ACCOUNT_INVALID_DELETE_REASON.HAS_CHILDREN, glAccountId); }
 
-        // TODO: does this account have transactions logged against it
+        // does this account have transactions logged against it
         List<GLJournalEntry> journalEntriesForAccount = glJournalEntryRepository.findFirstJournalEntryForAccount(glAccountId);
         if (journalEntriesForAccount.size() > 0) { throw new GLAccountInvalidDeleteException(
                 GL_ACCOUNT_INVALID_DELETE_REASON.TRANSANCTIONS_LOGGED, glAccountId); }

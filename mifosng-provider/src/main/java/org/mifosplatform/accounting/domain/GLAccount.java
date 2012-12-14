@@ -30,19 +30,15 @@ public class GLAccount extends AbstractPersistable<Long> {
     @JoinColumn(name = "parent_id")
     private List<GLAccount> children = new LinkedList<GLAccount>();
 
-    @SuppressWarnings("unused")
     @Column(name = "name", nullable = false, length = 45)
     private String name;
 
-    @SuppressWarnings("unused")
     @Column(name = "gl_code", nullable = false, length = 100)
     private String glCode;
 
-    @SuppressWarnings("unused")
     @Column(name = "disabled", nullable = false)
     private boolean disabled = false;
 
-    @SuppressWarnings("unused")
     @Column(name = "manual_journal_entries_allowed", nullable = false)
     private boolean manualEntriesAllowed = true;
 
@@ -111,6 +107,26 @@ public class GLAccount extends AbstractPersistable<Long> {
 
     public List<GLAccount> getChildren() {
         return this.children;
+    }
+
+    public boolean isDisabled() {
+        return this.disabled;
+    }
+
+    public boolean isManualEntriesAllowed() {
+        return this.manualEntriesAllowed;
+    }
+
+    public String getGlCode() {
+        return this.glCode;
+    }
+
+    public void setGlCode(String glCode) {
+        this.glCode = glCode;
+    }
+
+    public String getName() {
+        return this.name;
     }
 
 }

@@ -66,14 +66,16 @@ public class GLAccountsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveAllAccounts(@Context final UriInfo uriInfo, @QueryParam("classification") final String classification,
-            @QueryParam("searchParam") final String searchParam) {
+            @QueryParam("searchParam") final String searchParam, @QueryParam("usage") final String usage,
+            @QueryParam("manualAdjustmentsAllowed") final Boolean manualTransactionsAllowed, @QueryParam("disabled") final Boolean disabled) {
 
         context.authenticatedUser().validateHasReadPermission(entityType);
 
         final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
         final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 
-        final List<GLAccountData> glAccountDatas = this.glAccountReadPlatformService.retrieveAllGLAccounts(classification, searchParam);
+        final List<GLAccountData> glAccountDatas = this.glAccountReadPlatformService.retrieveAllGLAccounts(classification, searchParam,
+                usage, manualTransactionsAllowed, disabled);
 
         return this.apiJsonSerializerService.serializeGLAccountDataToJson(prettyPrint, responseParameters, glAccountDatas);
     }

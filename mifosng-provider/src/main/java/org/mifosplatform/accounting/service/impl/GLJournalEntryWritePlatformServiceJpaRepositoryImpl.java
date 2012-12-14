@@ -115,6 +115,9 @@ public class GLJournalEntryWritePlatformServiceJpaRepositoryImpl implements GLJo
         return reversalTransactionId;
     }
 
+    /**
+     * @param command
+     */
     private void validateBusinessRulesForJournalEntries(GLJournalEntryCommand command) {
 
         /** check if date of Journal entry is valid ***/
@@ -122,12 +125,13 @@ public class GLJournalEntryWritePlatformServiceJpaRepositoryImpl implements GLJo
         Date entryDate = entryLocalDate.toDateMidnight().toDate();
         // shouldn't be in the future
         Date todaysDate = new Date();
-        if (entryDate.after(todaysDate)) { throw new GLJournalEntryInvalidException(GL_JOURNAL_ENTRY_INVALID_REASON.FUTURE_DATE, entryDate); }
+        if (entryDate.after(todaysDate)) { throw new GLJournalEntryInvalidException(GL_JOURNAL_ENTRY_INVALID_REASON.FUTURE_DATE, entryDate,
+                null, null); }
         // shouldn't be before an accounting closure
         GLClosure latestGLClosure = glClosureRepository.getLatestGLClosureByBranch(command.getOfficeId());
         if (latestGLClosure != null) {
             if (latestGLClosure.getClosingDate().after(entryDate)) { throw new GLJournalEntryInvalidException(
-                    GL_JOURNAL_ENTRY_INVALID_REASON.ACCOUNTING_CLOSED, latestGLClosure.getClosingDate()); }
+                    GL_JOURNAL_ENTRY_INVALID_REASON.ACCOUNTING_CLOSED, latestGLClosure.getClosingDate(), null, null); }
         }
         /*** check if credits and debits are valid **/
         SingleDebitOrCreditEntryCommand[] credits = command.getCredits();
@@ -135,23 +139,23 @@ public class GLJournalEntryWritePlatformServiceJpaRepositoryImpl implements GLJo
 
         // atleast one debit or credit must be present
         if ((credits == null || credits.length <= 0) || (debits == null || debits.length <= 0)) { throw new GLJournalEntryInvalidException(
-                GL_JOURNAL_ENTRY_INVALID_REASON.NO_DEBITS_OR_CREDITS, null); }
+                GL_JOURNAL_ENTRY_INVALID_REASON.NO_DEBITS_OR_CREDITS, null, null, null); }
 
         // sum of all debits must be = sum of all credits
         BigDecimal creditsSum = BigDecimal.ZERO;
         BigDecimal debitsSum = BigDecimal.ZERO;
         for (SingleDebitOrCreditEntryCommand creditEntryCommand : credits) {
             if (creditEntryCommand.getAmount() == null || creditEntryCommand.getGlAccountId() == null) { throw new GLJournalEntryInvalidException(
-                    GL_JOURNAL_ENTRY_INVALID_REASON.DEBIT_CREDIT_ACCOUNT_OR_AMOUNT_EMPTY, null); }
+                    GL_JOURNAL_ENTRY_INVALID_REASON.DEBIT_CREDIT_ACCOUNT_OR_AMOUNT_EMPTY, null, null, null); }
             creditsSum = creditsSum.add(creditEntryCommand.getAmount());
         }
         for (SingleDebitOrCreditEntryCommand debitEntryCommand : debits) {
             if (debitEntryCommand.getAmount() == null || debitEntryCommand.getGlAccountId() == null) { throw new GLJournalEntryInvalidException(
-                    GL_JOURNAL_ENTRY_INVALID_REASON.DEBIT_CREDIT_ACCOUNT_OR_AMOUNT_EMPTY, null); }
+                    GL_JOURNAL_ENTRY_INVALID_REASON.DEBIT_CREDIT_ACCOUNT_OR_AMOUNT_EMPTY, null, null, null); }
             debitsSum = debitsSum.add(debitEntryCommand.getAmount());
         }
         if (creditsSum.compareTo(debitsSum) != 0) { throw new GLJournalEntryInvalidException(
-                GL_JOURNAL_ENTRY_INVALID_REASON.DEBIT_CREDIT_SUM_MISMATCH, null); }
+                GL_JOURNAL_ENTRY_INVALID_REASON.DEBIT_CREDIT_SUM_MISMATCH, null, null, null); }
     }
 
     /**
@@ -166,6 +170,18 @@ public class GLJournalEntryWritePlatformServiceJpaRepositoryImpl implements GLJo
         for (SingleDebitOrCreditEntryCommand singleDebitOrCreditEntryCommand : singleDebitOrCreditEntryCommands) {
             GLAccount glAccount = glAccountRepository.findOne(singleDebitOrCreditEntryCommand.getGlAccountId());
             if (glAccount == null) { throw new GLAccountNotFoundException(singleDebitOrCreditEntryCommand.getGlAccountId()); }
+
+            /***
+             * validate that the account allows manual adjustments and is not
+             * disabled
+             **/
+            if (glAccount.isDisabled()) {
+                throw new GLJournalEntryInvalidException(GL_JOURNAL_ENTRY_INVALID_REASON.GL_ACCOUNT_DISABLED, null, glAccount.getName(),
+                        glAccount.getGlCode());
+            } else if (!glAccount.isManualEntriesAllowed()) { throw new GLJournalEntryInvalidException(
+                    GL_JOURNAL_ENTRY_INVALID_REASON.GL_ACCOUNT_MANUAL_ENTRIES_NOT_PERMITTED, null, glAccount.getName(),
+                    glAccount.getGlCode()); }
+
             String comments = command.getComments();
             if (!StringUtils.isBlank(singleDebitOrCreditEntryCommand.getComments())) {
                 comments = singleDebitOrCreditEntryCommand.getComments();

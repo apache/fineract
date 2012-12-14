@@ -31,7 +31,7 @@ public class GLAccountCommandValidator {
         baseDataValidator.reset().parameter("classification").value(command.getClassification()).notBlank().notExceedingLengthOf(45);
 
         baseDataValidator.reset().parameter("description").value(command.getDescription()).ignoreIfNull().notExceedingLengthOf(500);
-        
+
         baseDataValidator.reset().parameter("manualEntriesAllowed").value(command.getManualEntriesAllowed()).notBlank();
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
@@ -55,8 +55,10 @@ public class GLAccountCommandValidator {
         baseDataValidator.reset().parameter("description").value(command.getDescription()).ignoreIfNull().notBlank()
                 .notExceedingLengthOf(500);
 
+        baseDataValidator.reset().parameter("disabled").value(command.getDisabled()).ignoreIfNull();
+
         baseDataValidator.reset().anyOfNotNull(command.getName(), command.getGlCode(), command.getParentId(), command.getClassification(),
-                command.getDescription());
+                command.getDescription(), command.getDisabled());
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
                 "Validation errors exist.", dataValidationErrors); }

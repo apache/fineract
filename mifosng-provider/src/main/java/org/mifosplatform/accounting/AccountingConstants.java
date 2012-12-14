@@ -22,4 +22,14 @@ public class AccountingConstants {
         }
     }
 
+    /** USAGES of Accounts **/
+    public static enum GL_ACCOUNT_USAGE {
+        HEADER, DETAIL;
+
+        @Override
+        public String toString() {
+            return name().toString();
+        }
+    }
+
 }

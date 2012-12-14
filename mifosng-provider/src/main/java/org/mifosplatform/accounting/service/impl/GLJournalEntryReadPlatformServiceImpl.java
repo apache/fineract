@@ -129,6 +129,8 @@ public class GLJournalEntryReadPlatformServiceImpl implements GLJournalEntryRead
             }
         }
 
+        sql += " order by journalEntry.entry_date";
+
         Object[] finalObjectArray = Arrays.copyOf(objectArray, arrayPos);
         return this.jdbcTemplate.query(sql, rm, finalObjectArray);
     }

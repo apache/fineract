@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.accounting.AccountingConstants.GL_ACCOUNT_CLASSIFICATION;
+import org.mifosplatform.accounting.AccountingConstants.GL_ACCOUNT_USAGE;
 import org.mifosplatform.accounting.api.data.GLAccountData;
 import org.mifosplatform.accounting.exceptions.GLAccountInvalidClassificationException;
 import org.mifosplatform.accounting.exceptions.GLAccountNotFoundException;
@@ -54,7 +55,8 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
     }
 
     @Override
-    public List<GLAccountData> retrieveAllGLAccounts(String accountClassification, String searchParam) {
+    public List<GLAccountData> retrieveAllGLAccounts(String accountClassification, String searchParam, String usage,
+            Boolean manualTransactionsAllowed, Boolean disabled) {
         if (StringUtils.isNotBlank(accountClassification)) {
             if (!checkValidGLAccountClassification(accountClassification)) { throw new GLAccountInvalidClassificationException(
                     accountClassification); }
@@ -64,25 +66,71 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
         String sql = "select " + rm.schema();
         Object[] paramaterArray = new Object[3];
         int arrayPos = 0;
-        if (StringUtils.isNotBlank(accountClassification) && searchParam != null) {
-            sql += " where classification like ? and ( name like %?% or glCode like %?% )";
-            paramaterArray[arrayPos] = accountClassification;
-            arrayPos = arrayPos++;
-            paramaterArray[arrayPos] = searchParam;
-            arrayPos = arrayPos++;
-            paramaterArray[arrayPos] = searchParam;
-            arrayPos = arrayPos++;
-        } else if (StringUtils.isNotBlank(accountClassification)) {
-            sql += " where classification like ?";
-            paramaterArray[arrayPos] = accountClassification;
-            arrayPos++;
-        } else if (searchParam != null) {
-            sql += " where ( name like %?% or glCode like %?% )";
-            paramaterArray[arrayPos] = searchParam;
-            arrayPos++;
-            paramaterArray[arrayPos] = searchParam;
-            arrayPos++;
+        boolean filtersPresent = false;
+        if (StringUtils.isNotBlank(accountClassification) || StringUtils.isNotBlank(searchParam) || StringUtils.isNotBlank(usage)
+                || (manualTransactionsAllowed != null) || (disabled != null)) {
+            filtersPresent = true;
+            sql += " where";
         }
+
+        if (filtersPresent) {
+            boolean firstWhereConditionAdded = false;
+            if (StringUtils.isNotBlank(accountClassification)) {
+                sql += " classification like ?";
+                paramaterArray[arrayPos] = accountClassification;
+                arrayPos = arrayPos + 1;
+                firstWhereConditionAdded = true;
+            }
+            if (StringUtils.isNotBlank(searchParam)) {
+                if (firstWhereConditionAdded) {
+                    sql += " and ";
+                }
+                sql += " ( name like %?% or gl_code like %?% )";
+                paramaterArray[arrayPos] = searchParam;
+                arrayPos = arrayPos + 1;
+                paramaterArray[arrayPos] = searchParam;
+                arrayPos = arrayPos + 1;
+                firstWhereConditionAdded = true;
+            }
+            if (StringUtils.isNotBlank(usage)) {
+                if (firstWhereConditionAdded) {
+                    sql += " and ";
+                }
+                if (usage.equalsIgnoreCase(GL_ACCOUNT_USAGE.HEADER.toString())) {
+                    sql += " header_account = 1 ";
+                } else if (usage.equalsIgnoreCase(GL_ACCOUNT_USAGE.DETAIL.toString())) {
+                    sql += " header_account = 0 ";
+                } else {
+
+                }
+                firstWhereConditionAdded = true;
+            }
+            if (manualTransactionsAllowed != null) {
+                if (firstWhereConditionAdded) {
+                    sql += " and ";
+                }
+
+                if (manualTransactionsAllowed) {
+                    sql += " manual_journal_entries_allowed = 1";
+                } else {
+                    sql += " manual_journal_entries_allowed = 0";
+                }
+                firstWhereConditionAdded = true;
+            }
+            if (disabled != null) {
+                if (firstWhereConditionAdded) {
+                    sql += " and ";
+                }
+
+                if (disabled) {
+                    sql += " disabled = 1";
+                } else {
+                    sql += " disabled = 0";
+                }
+                firstWhereConditionAdded = true;
+            }
+        }
+
         sql = sql + " order by glCode";
         Object[] finalObjectArray = Arrays.copyOf(paramaterArray, arrayPos);
         return this.jdbcTemplate.query(sql, rm, finalObjectArray);

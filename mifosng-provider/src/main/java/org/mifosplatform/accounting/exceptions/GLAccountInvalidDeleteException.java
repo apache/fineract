@@ -28,6 +28,6 @@ public class GLAccountInvalidDeleteException extends AbstractPlatformDomainRuleE
     }
 
     public GLAccountInvalidDeleteException(final GL_ACCOUNT_INVALID_DELETE_REASON reason, final Long glAccountId) {
-        super("error.msg.glaccount.glcode.invalid.delete", reason.errorMessage(), glAccountId);
+        super(reason.errorCode(), reason.errorMessage(), glAccountId);
     }
 }

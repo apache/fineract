@@ -11,7 +11,7 @@ public class GLJournalEntryInvalidException extends AbstractPlatformDomainRuleEx
 
     /*** enum of reasons for invalid Journal Entry **/
     public static enum GL_JOURNAL_ENTRY_INVALID_REASON {
-        FUTURE_DATE, ACCOUNTING_CLOSED, NO_DEBITS_OR_CREDITS, DEBIT_CREDIT_SUM_MISMATCH, DEBIT_CREDIT_ACCOUNT_OR_AMOUNT_EMPTY;
+        FUTURE_DATE, ACCOUNTING_CLOSED, NO_DEBITS_OR_CREDITS, DEBIT_CREDIT_SUM_MISMATCH, DEBIT_CREDIT_ACCOUNT_OR_AMOUNT_EMPTY, GL_ACCOUNT_DISABLED, GL_ACCOUNT_MANUAL_ENTRIES_NOT_PERMITTED;
 
         public String errorMessage() {
             if (name().toString().equalsIgnoreCase("FUTURE_DATE")) {
@@ -22,7 +22,11 @@ public class GLJournalEntryInvalidException extends AbstractPlatformDomainRuleEx
                 return "Journal Entry must have atleast one Debit and one Credit";
             } else if (name().toString().equalsIgnoreCase("DEBIT_CREDIT_SUM_MISMATCH")) {
                 return "Sum of All Debits must equal the sum of all Credits for a Journal Entry";
-            } else if (name().toString().equalsIgnoreCase("DEBIT_CREDIT_ACCOUNT_OR_AMOUNT_EMPTY")) { return "Both account and amount must be specified for all Debits and Credits"; }
+            } else if (name().toString().equalsIgnoreCase("DEBIT_CREDIT_ACCOUNT_OR_AMOUNT_EMPTY")) {
+                return "Both account and amount must be specified for all Debits and Credits";
+            } else if (name().toString().equalsIgnoreCase("GL_ACCOUNT_DISABLED")) {
+                return "Target account has been disabled";
+            } else if (name().toString().equalsIgnoreCase("GL_ACCOUNT_MANUAL_ENTRIES_NOT_PERMITTED")) { return "Target account does not allow maual adjustments"; }
             return name().toString();
         }
 
@@ -35,12 +39,17 @@ public class GLJournalEntryInvalidException extends AbstractPlatformDomainRuleEx
                 return "error.msg.glJournalEntry.invalid.no.debits.or.credits";
             } else if (name().toString().equalsIgnoreCase("DEBIT_CREDIT_SUM_MISMATCH")) {
                 return "error.msg.glJournalEntry.invalid.mismatch.debits.credits";
-            } else if (name().toString().equalsIgnoreCase("DEBIT_CREDIT_ACCOUNT_OR_AMOUNT_EMPTY")) { return "error.msg.glJournalEntry.invalid.empty.account.or.amount"; }
+            } else if (name().toString().equalsIgnoreCase("DEBIT_CREDIT_ACCOUNT_OR_AMOUNT_EMPTY")) {
+                return "error.msg.glJournalEntry.invalid.empty.account.or.amount";
+            } else if (name().toString().equalsIgnoreCase("GL_ACCOUNT_DISABLED")) {
+                return "error.msg.glJournalEntry.invalid.account.disabled";
+            } else if (name().toString().equalsIgnoreCase("GL_ACCOUNT_MANUAL_ENTRIES_NOT_PERMITTED")) { return "error.msg.glJournalEntry.invalid.account.manual.adjustments.not.permitted"; }
             return name().toString();
         }
     }
 
-    public GLJournalEntryInvalidException(final GL_JOURNAL_ENTRY_INVALID_REASON reason, final Date date) {
-        super(reason.errorCode(), reason.errorMessage(), date);
+    public GLJournalEntryInvalidException(final GL_JOURNAL_ENTRY_INVALID_REASON reason, final Date date, final String accountName,
+            final String accountGLCode) {
+        super(reason.errorCode(), reason.errorMessage(), date, accountName, accountGLCode);
     }
 }
