@@ -32,14 +32,16 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.processAndLogCommandService = processAndLogCommandService;
     }
-    
+
     @Override
-    public EntityIdentifier logCommandSource(final String taskPermissionName, final String apiOperation, final String resource,
-            final Long resourceId, final String subResource, final Long subRescourceId, final String json) {
-        
+    public EntityIdentifier logCommandSource(final String actionName, final String entityName, final String apiOperation,
+            final String resource, final Long resourceId, final String subResource, final Long subRescourceId, final String json) {
+
+        final String taskPermissionName = actionName + "_" + entityName;
         context.authenticatedUser().validateHasPermissionTo(taskPermissionName);
 
-        final CommandWrapper wrapper = CommandWrapper.wrap(taskPermissionName, apiOperation, resource, resourceId, subResource, subRescourceId);
+        final CommandWrapper wrapper = CommandWrapper.wrap(actionName, entityName, apiOperation, resource, resourceId, subResource,
+                subRescourceId);
         EntityIdentifier result = null;
         try {
             final JsonElement parsedCommand = this.fromApiJsonHelper.parse(json);
@@ -47,12 +49,12 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
             final boolean isApprovedByChecker = false;
             result = this.processAndLogCommandService.processAndLogCommand(wrapper, command, isApprovedByChecker);
         } catch (RollbackTransactionAsCommandIsNotApprovedByCheckerException e) {
-            
+
             final String jsonToUse = StringUtils.defaultIfEmpty(e.getJsonOfChangesOnly(), json);
-            
+
             final JsonElement parsedCommand = this.fromApiJsonHelper.parse(jsonToUse);
             final JsonCommand command = JsonCommand.from(jsonToUse, parsedCommand, this.fromApiJsonHelper, resourceId, subRescourceId);
-            
+
             result = this.processAndLogCommandService.logCommand(wrapper, command);
         }
 
@@ -60,33 +62,34 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
     }
 
     @Override
-    public EntityIdentifier logCommandSource(final String taskPermissionName, final String apiOperation, final String resource,
+    public EntityIdentifier logCommandSource(final String actionName, final String entityName, final String apiOperation, final String resource,
             final Long resourceId, final String json) {
 
+        final String taskPermissionName = actionName + "_" + entityName;
         context.authenticatedUser().validateHasPermissionTo(taskPermissionName);
 
-        final CommandWrapper wrapper = CommandWrapper.wrap(taskPermissionName, apiOperation, resource, resourceId);
-
+        final CommandWrapper wrapper = CommandWrapper.wrap(actionName, entityName, apiOperation, resource, resourceId);
+        
         EntityIdentifier result = null;
         try {
             final JsonElement parsedCommand = this.fromApiJsonHelper.parse(json);
             final JsonCommand command = JsonCommand.from(json, parsedCommand, this.fromApiJsonHelper, resourceId, null);
-            
+
             final boolean isApprovedByChecker = false;
             result = this.processAndLogCommandService.processAndLogCommand(wrapper, command, isApprovedByChecker);
         } catch (RollbackTransactionAsCommandIsNotApprovedByCheckerException e) {
-            
+
             final String jsonToUse = StringUtils.defaultIfEmpty(e.getJsonOfChangesOnly(), json);
-            
+
             final JsonElement parsedCommand = this.fromApiJsonHelper.parse(jsonToUse);
             final JsonCommand command = JsonCommand.from(jsonToUse, parsedCommand, this.fromApiJsonHelper, resourceId, null);
-            
+
             result = this.processAndLogCommandService.logCommand(wrapper, command);
         }
 
         return result;
     }
-    
+
     @Override
     public EntityIdentifier approveEntry(final Long commandId) {
 
@@ -94,11 +97,13 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
 
         context.authenticatedUser().validateHasCheckerPermissionTo(commandSourceInput.getPermissionCode());
 
-        final CommandWrapper wrapper = CommandWrapper.fromExistingCommand(commandId, commandSourceInput.getPermissionCode(), commandSourceInput.operation(),
-                commandSourceInput.resourceName(), commandSourceInput.resourceId(), commandSourceInput.getSubResource(), commandSourceInput.getSubResourceId());
-        
+        final CommandWrapper wrapper = CommandWrapper.fromExistingCommand(commandId, commandSourceInput.getActionName(),
+                commandSourceInput.getEntityName(), commandSourceInput.operation(), commandSourceInput.resourceName(),
+                commandSourceInput.resourceId(), commandSourceInput.getSubResource(), commandSourceInput.getSubResourceId());
+
         final JsonElement parsedCommand = this.fromApiJsonHelper.parse(commandSourceInput.json());
-        final JsonCommand command = JsonCommand.fromExistingCommand(commandId, commandSourceInput.json(), parsedCommand, this.fromApiJsonHelper, commandSourceInput.resourceId(), commandSourceInput.getSubResourceId());
+        final JsonCommand command = JsonCommand.fromExistingCommand(commandId, commandSourceInput.json(), parsedCommand,
+                this.fromApiJsonHelper, commandSourceInput.resourceId(), commandSourceInput.getSubResourceId());
 
         final boolean makerCheckerApproval = true;
         return this.processAndLogCommandService.processAndLogCommand(wrapper, command, makerCheckerApproval);

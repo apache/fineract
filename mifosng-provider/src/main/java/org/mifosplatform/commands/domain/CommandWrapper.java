@@ -3,32 +3,34 @@ package org.mifosplatform.commands.domain;
 public class CommandWrapper {
 
     private final Long commandId;
+    private final String actionName;
+    private final String entityName;
     private final String apiOperation;
     private final String resource;
     private final Long resourceId;
-    private final String taskPermissionName;
     private final String subResource;
     private final Long subResourceId;
 
-    public static CommandWrapper wrap(final String taskPermissionName, final String apiOperation, final String resource,
+    public static CommandWrapper wrap(final String actionName, final String enityName, final String apiOperation, final String resource,
             final Long resourceId) {
-        return new CommandWrapper(null, taskPermissionName, apiOperation, resource, resourceId, null, null);
+        return new CommandWrapper(null, actionName, enityName, apiOperation, resource, resourceId, null, null);
     }
 
-    public static CommandWrapper wrap(final String taskPermissionName, final String apiOperation, final String resource,
+    public static CommandWrapper wrap(final String actionName, final String enityName, final String apiOperation, final String resource,
             final Long resourceId, final String subResource, final Long subRescourceId) {
-        return new CommandWrapper(null, taskPermissionName, apiOperation, resource, resourceId, subResource, subRescourceId);
-    }
-    
-    public static CommandWrapper fromExistingCommand(final Long commandId, final String taskPermissionName, final String apiOperation, final String resource,
-            final Long resourceId, final String subResource, final Long subRescourceId) {
-        return new CommandWrapper(commandId, taskPermissionName, apiOperation, resource, resourceId, subResource, subRescourceId);
+        return new CommandWrapper(null, actionName, enityName, apiOperation, resource, resourceId, subResource, subRescourceId);
     }
 
-    private CommandWrapper(final Long commandId, final String taskPermissionName, final String apiOperation, final String resource,
-            final Long resourceId, final String subResource, final Long subResourceId) {
+    public static CommandWrapper fromExistingCommand(final Long commandId, final String actionName, final String enityName,
+            final String apiOperation, final String resource, final Long resourceId, final String subResource, final Long subRescourceId) {
+        return new CommandWrapper(commandId, actionName, enityName, apiOperation, resource, resourceId, subResource, subRescourceId);
+    }
+
+    private CommandWrapper(final Long commandId, final String actionName, final String enityName, final String apiOperation,
+            final String resource, final Long resourceId, final String subResource, final Long subResourceId) {
         this.commandId = commandId;
-        this.taskPermissionName = taskPermissionName;
+        this.actionName = actionName;
+        this.entityName = enityName;
         this.apiOperation = apiOperation;
         this.resource = resource;
         this.resourceId = resourceId;
@@ -42,6 +44,14 @@ public class CommandWrapper {
 
     public Long commandId() {
         return this.commandId;
+    }
+
+    public String actionName() {
+        return this.actionName;
+    }
+
+    public String entityName() {
+        return this.entityName;
     }
 
     public Long resourceId() {
@@ -61,7 +71,7 @@ public class CommandWrapper {
     }
 
     public String taskPermissionName() {
-        return this.taskPermissionName;
+        return this.actionName + "_" + this.entityName;
     }
 
     public String operation() {
@@ -149,7 +159,7 @@ public class CommandWrapper {
     public boolean isNotesSubResource() {
         return "NOTES".equalsIgnoreCase(this.subResource);
     }
-    
+
     public boolean isIdentifiersSubResource() {
         return "IDENTIFIERS".equalsIgnoreCase(this.subResource);
     }

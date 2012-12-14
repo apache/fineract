@@ -103,7 +103,7 @@ public class RolesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String createRole(final String apiRequestBodyAsJson) {
 
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE_ROLE", "CREATE", "roles", null,
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE", "ROLE", "CREATE", "roles", null,
                 apiRequestBodyAsJson);
 
         return this.toApiJsonSerializer.serialize(result);
@@ -145,8 +145,8 @@ public class RolesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String updateRole(@PathParam("roleId") final Long roleId, final String apiRequestBodyAsJson) {
 
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE_ROLE", "UPDATE", "roles", roleId,
-                apiRequestBodyAsJson);
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "ROLE", "UPDATE", "roles",
+                roleId, apiRequestBodyAsJson);
 
         return this.toApiJsonSerializer.serialize(result);
     }
@@ -175,8 +175,8 @@ public class RolesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String updateRolePermissions(@PathParam("roleId") final Long roleId, final String apiRequestBodyAsJson) {
 
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("PERMISSIONS_ROLE", "UPDATEPERMISSIONS",
-                "roles", roleId, apiRequestBodyAsJson);
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("PERMISSIONS", "ROLE",
+                "UPDATEPERMISSIONS", "roles", roleId, apiRequestBodyAsJson);
 
         return this.toApiJsonSerializer.serialize(result);
     }

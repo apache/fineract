@@ -108,8 +108,8 @@ public class ChargesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String createCharge(final String apiRequestBodyAsJson) {
 
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE_CHARGE", "CREATE", "charges", null,
-                apiRequestBodyAsJson);
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE", "CHARGE", "CREATE", "charges",
+                null, apiRequestBodyAsJson);
 
         return this.toApiJsonSerializer.serialize(result);
     }
@@ -120,8 +120,8 @@ public class ChargesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String updateCharge(@PathParam("chargeId") final Long chargeId, final String apiRequestBodyAsJson) {
 
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE_CHARGE", "UPDATE", "charges", chargeId,
-                apiRequestBodyAsJson);
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "CHARGE", "UPDATE", "charges",
+                chargeId, apiRequestBodyAsJson);
 
         return this.toApiJsonSerializer.serialize(result);
     }
@@ -132,7 +132,8 @@ public class ChargesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String deleteCharge(@PathParam("chargeId") final Long chargeId) {
 
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("DELETE_CHARGE", "DELETE", "charges", chargeId, "{}");
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("DELETE", "CHARGE", "DELETE", "charges",
+                chargeId, "{}");
 
         return this.toApiJsonSerializer.serialize(result);
     }

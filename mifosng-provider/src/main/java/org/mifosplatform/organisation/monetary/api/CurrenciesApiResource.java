@@ -70,7 +70,7 @@ public class CurrenciesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String updateCurrencies(final String apiRequestBodyAsJson) {
 
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE_CURRENCY", "UPDATE", "currencies",
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "CURRENCY", "UPDATE", "currencies",
                 null, apiRequestBodyAsJson);
 
         return this.toApiJsonSerializer.serialize(result);

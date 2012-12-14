@@ -77,8 +77,8 @@ public class PermissionsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String updatePermissionsDetails(final String apiRequestBodyAsJson) {
 
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE_PERMISSION", "UPDATE", "permissions", null,
-                apiRequestBodyAsJson);
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "PERMISSION", "UPDATE",
+                "permissions", null, apiRequestBodyAsJson);
 
         return this.toApiJsonSerializer.serialize(result);
     }

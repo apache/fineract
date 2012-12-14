@@ -71,7 +71,7 @@ public class ClientNotesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String addNewClientNote(@PathParam("clientId") final Long clientId, final String apiRequestBodyAsJson) {
 
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE_CLIENTNOTE", "CREATE",
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE", "CLIENTNOTE", "CREATE",
                 "clients", clientId, "notes", null, apiRequestBodyAsJson);
 
         return this.toApiJsonSerializer.serialize(result);
@@ -99,7 +99,7 @@ public class ClientNotesApiResource {
     public String updateClientNote(@PathParam("clientId") final Long clientId, @PathParam("noteId") final Long noteId,
             final String apiRequestBodyAsJson) {
 
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE_CLIENTNOTE", "UPDATE",
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "CLIENTNOTE", "UPDATE",
                 "clients", clientId, "notes", noteId, apiRequestBodyAsJson);
 
         return this.toApiJsonSerializer.serialize(result);

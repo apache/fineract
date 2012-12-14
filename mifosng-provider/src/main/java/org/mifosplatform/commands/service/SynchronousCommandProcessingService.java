@@ -88,6 +88,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 
         final CommandSource commandSourceResult = CommandSource.fullEntryFrom(wrapper, command, maker);
         if (commandSourceResult.hasJson()) {
+            commandSourceResult.markAsAwaitingApproval();
             commandSourceRepository.save(commandSourceResult);
         }
 

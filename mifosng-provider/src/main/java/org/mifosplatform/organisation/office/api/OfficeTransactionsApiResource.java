@@ -87,7 +87,7 @@ public class OfficeTransactionsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String transferMoneyFrom(final String apiRequestBodyAsJson) {
 
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE_OFFICETRANSACTION", "CREATE",
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE", "OFFICETRANSACTION", "CREATE",
                 "officetransactions", null, apiRequestBodyAsJson);
 
         return this.toApiJsonSerializer.serialize(result);

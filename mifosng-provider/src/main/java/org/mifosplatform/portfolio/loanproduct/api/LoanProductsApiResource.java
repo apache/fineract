@@ -86,7 +86,7 @@ public class LoanProductsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String createLoanProduct(final String apiRequestBodyAsJson) {
 
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE_LOANPRODUCT", "CREATE",
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE", "LOANPRODUCT", "CREATE",
                 "loanproducts", null, apiRequestBodyAsJson);
 
         return this.toApiJsonSerializer.serialize(result);
@@ -144,7 +144,7 @@ public class LoanProductsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String updateLoanProduct(@PathParam("productId") final Long productId, final String apiRequestBodyAsJson) {
 
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE_LOANPRODUCT", "UPDATE",
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "LOANPRODUCT", "UPDATE",
                 "loanproducts", productId, apiRequestBodyAsJson);
 
         return this.toApiJsonSerializer.serialize(result);

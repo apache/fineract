@@ -86,8 +86,8 @@ public class StaffApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String createStaff(final String apiRequestBodyAsJson) {
 
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE_STAFF", "CREATE", "staff", null,
-                apiRequestBodyAsJson);
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE", "STAFF", "CREATE", "staff",
+                null, apiRequestBodyAsJson);
 
         return this.toApiJsonSerializer.serialize(result);
     }
@@ -117,7 +117,7 @@ public class StaffApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String updateStaff(@PathParam("staffId") final Long staffId, final String apiRequestBodyAsJson) {
 
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE_STAFF", "UPDATE", "staff",
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "STAFF", "UPDATE", "staff",
                 staffId, apiRequestBodyAsJson);
 
         return this.toApiJsonSerializer.serialize(result);

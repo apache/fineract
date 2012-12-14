@@ -54,7 +54,7 @@ public class PortfolioCommandsReadPlatformServiceImpl implements PortfolioComman
 
         final CommandSourceMapper rm = new CommandSourceMapper();
         final String sql = "select " + rm.schema()
-                + " where mc.checker_id is null order by mc.made_on_date DESC, mc.api_resource ASC, mc.api_operation ASC";
+                + " where mc.checker_id is null and mc.processing_result_enum = 2 order by mc.made_on_date DESC, mc.api_resource ASC, mc.api_operation ASC";
 
         return this.jdbcTemplate.query(sql, rm, new Object[] {});
     }
@@ -74,7 +74,7 @@ public class PortfolioCommandsReadPlatformServiceImpl implements PortfolioComman
         final CommandSourceMapper rm = new CommandSourceMapper();
         final String sql = "select "
                 + rm.schema()
-                + " where mc.api_resource like ? and mc.resource_id = ? and mc.checker_id is null order by mc.made_on_date DESC, mc.api_operation ASC";
+                + " where mc.api_resource like ? and mc.resource_id = ? and mc.checker_id is null and mc.processing_result_enum = 2 order by mc.made_on_date DESC, mc.api_operation ASC";
 
         return this.jdbcTemplate.query(sql, rm, new Object[] { apiResource, resourceId });
     }

@@ -118,7 +118,7 @@ public class UsersApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String createUser(final String apiRequestBodyAsJson) {
 
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE_USER", "CREATE", "users", null,
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE", "USER", "CREATE", "users", null,
                 apiRequestBodyAsJson);
 
         return this.toApiJsonSerializer.serialize(result);
@@ -130,8 +130,8 @@ public class UsersApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String updateUser(@PathParam("userId") final Long userId, final String apiRequestBodyAsJson) {
 
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE_USER", "UPDATE", "users", userId,
-                apiRequestBodyAsJson);
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "USER", "UPDATE", "users",
+                userId, apiRequestBodyAsJson);
 
         return this.toApiJsonSerializer.serialize(result);
     }
@@ -142,8 +142,8 @@ public class UsersApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String deleteUser(@PathParam("userId") final Long userId) {
 
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("DELETE_USER", "DELETE", "users", userId,
-                "{}");
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("DELETE", "USER", "DELETE", "users",
+                userId, "{}");
 
         return this.toApiJsonSerializer.serialize(result);
     }

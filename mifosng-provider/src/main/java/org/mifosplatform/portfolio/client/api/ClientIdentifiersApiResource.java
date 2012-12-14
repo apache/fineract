@@ -98,7 +98,7 @@ public class ClientIdentifiersApiResource {
     public String createClientIdentifier(@PathParam("clientId") final Long clientId, final String apiRequestBodyAsJson) {
 
         try {
-            final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE_CLIENTIDENTIFIER", "CREATE",
+            final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE", "CLIENTIDENTIFIER", "CREATE",
                     "clients", clientId, "identifiers", null, apiRequestBodyAsJson);
 
             return this.toApiJsonSerializer.serialize(result);
@@ -143,7 +143,7 @@ public class ClientIdentifiersApiResource {
             @PathParam("identifierId") final Long clientIdentifierId, final String apiRequestBodyAsJson) {
 
         try {
-            final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE_CLIENTIDENTIFIER", "UPDATE",
+            final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "CLIENTIDENTIFIER", "UPDATE",
                     "clients", clientId, "identifiers", clientIdentifierId, apiRequestBodyAsJson);
 
             return this.toApiJsonSerializer.serialize(result);
@@ -166,7 +166,7 @@ public class ClientIdentifiersApiResource {
     public String deleteClientIdentifier(@PathParam("clientId") final Long clientId,
             @PathParam("identifierId") final Long clientIdentifierId) {
 
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("DELETE_CLIENTIDENTIFIER", "DELETE",
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("DELETE", "CLIENTIDENTIFIER", "DELETE",
                 "clients", clientId, "identifiers", clientIdentifierId, "{}");
 
         return this.toApiJsonSerializer.serialize(result);

@@ -76,7 +76,7 @@ public class FundsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String createFund(final String apiRequestBodyAsJson) {
 
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE_FUND", "CREATE", "funds", null,
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE", "FUND", "CREATE", "funds", null,
                 apiRequestBodyAsJson);
 
         return this.toApiJsonSerializer.serialize(result);
@@ -102,8 +102,8 @@ public class FundsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String updateFund(@PathParam("fundId") final Long fundId, final String apiRequestBodyAsJson) {
 
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE_FUND", "UPDATE", "funds", fundId,
-                apiRequestBodyAsJson);
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "FUND", "UPDATE", "funds",
+                fundId, apiRequestBodyAsJson);
 
         return this.toApiJsonSerializer.serialize(result);
     }

@@ -75,7 +75,7 @@ public class CodesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String createCode(final String apiRequestBodyAsJson) {
 
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE_CODE", "CREATE", "codes", null,
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE", "CODE", "CREATE", "codes", null,
                 apiRequestBodyAsJson);
 
         return this.toApiJsonSerializer.serialize(result);
@@ -99,8 +99,8 @@ public class CodesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String updateCode(@PathParam("codeId") final Long codeId, final String apiRequestBodyAsJson) {
 
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE_CODE", "UPDATE", "codes", codeId,
-                apiRequestBodyAsJson);
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "CODE", "UPDATE", "codes",
+                codeId, apiRequestBodyAsJson);
 
         return this.toApiJsonSerializer.serialize(result);
     }
@@ -111,8 +111,8 @@ public class CodesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String deleteCodeApplication(@PathParam("codeId") final Long codeId) {
 
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("DELETE_CODE", "DELETE", "codes", codeId,
-                "{}");
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("DELETE", "CODE", "DELETE", "codes",
+                codeId, "{}");
 
         return this.toApiJsonSerializer.serialize(result);
     }

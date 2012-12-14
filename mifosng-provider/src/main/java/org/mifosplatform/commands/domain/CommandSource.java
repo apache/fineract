@@ -20,8 +20,11 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 @Table(name = "m_portfolio_command_source")
 public class CommandSource extends AbstractPersistable<Long> {
 
-    @Column(name = "permission_code", length = 50)
-    private String permissionCode;
+    @Column(name = "action_name", nullable = true, length = 100)
+    private String actionName;
+    
+    @Column(name = "entity_name", nullable = true, length = 100)
+    private String entityName;
 
     @Column(name = "api_operation", length = 30)
     private String apiOperation;
@@ -60,9 +63,12 @@ public class CommandSource extends AbstractPersistable<Long> {
     @Column(name = "checked_on_date", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date checkedOnDate;
+    
+    @Column(name = "processing_result_enum", nullable = false)
+    private Integer processingResult;
 
     public static CommandSource fullEntryFrom(final CommandWrapper wrapper, final JsonCommand command, final AppUser maker) {
-        return new CommandSource(wrapper.taskPermissionName(), wrapper.operation(), wrapper.resourceName(), command.resourceId(),
+        return new CommandSource(wrapper.actionName(), wrapper.entityName(), wrapper.operation(), wrapper.resourceName(), command.resourceId(),
                 wrapper.subResourceName(), command.subResourceId(), command.json(), maker, DateTime.now());
     }
 
@@ -70,10 +76,11 @@ public class CommandSource extends AbstractPersistable<Long> {
         //
     }
 
-    private CommandSource(final String permissionCode, final String apiOperation, final String resource, final Long resourceId,
+    private CommandSource(final String actionName, final String entityName, final String apiOperation, final String resource, final Long resourceId,
             final String subResource, final Long subResourceId, final String commandSerializedAsJson, final AppUser maker,
             final DateTime madeOnDateTime) {
-        this.permissionCode = permissionCode;
+        this.actionName = actionName;
+        this.entityName = entityName;
         this.apiOperation = StringUtils.defaultIfEmpty(apiOperation, null);
         this.resource = StringUtils.defaultIfEmpty(resource, null);
         this.resourceId = resourceId;
@@ -82,11 +89,13 @@ public class CommandSource extends AbstractPersistable<Long> {
         this.commandAsJson = commandSerializedAsJson;
         this.maker = maker;
         this.madeOnDate = madeOnDateTime.toDate();
+        this.processingResult = CommandProcessingResultType.PROCESSED.getValue();
     }
 
     public void markAsChecked(final AppUser checker, final DateTime checkedOnDate) {
         this.checker = checker;
         this.checkedOnDate = checkedOnDate.toDate();
+        this.processingResult = CommandProcessingResultType.PROCESSED.getValue();
     }
 
     public void updateResourceId(final Long resourceId) {
@@ -124,9 +133,17 @@ public class CommandSource extends AbstractPersistable<Long> {
     public String operation() {
         return this.apiOperation;
     }
+    
+    public String getActionName() {
+        return this.actionName;
+    }
+    
+    public String getEntityName() {
+        return this.entityName;
+    }
 
     public String getPermissionCode() {
-        return this.permissionCode;
+        return this.actionName + "_" + this.entityName;
     }
 
     public String getResource() {
@@ -143,5 +160,9 @@ public class CommandSource extends AbstractPersistable<Long> {
 
     public Long getSubResourceId() {
         return this.subResourceId;
+    }
+
+    public void markAsAwaitingApproval() {
+        this.processingResult = CommandProcessingResultType.AWAITING_APPROVAL.getValue();
     }
 }

@@ -97,7 +97,7 @@ public class OfficesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String createOffice(final String apiRequestBodyAsJson) {
 
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE_OFFICE", "CREATE", "offices",
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE", "OFFICE", "CREATE", "offices",
                 null, apiRequestBodyAsJson);
 
         return this.toApiJsonSerializer.serialize(result);
@@ -128,7 +128,7 @@ public class OfficesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String updateOffice(@PathParam("officeId") final Long officeId, final String apiRequestBodyAsJson) {
 
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE_OFFICE", "UPDATE", "offices",
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "OFFICE", "UPDATE", "offices",
                 officeId, apiRequestBodyAsJson);
 
         return this.toApiJsonSerializer.serialize(result);
