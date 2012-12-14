@@ -11,9 +11,12 @@ import org.mifosplatform.audit.data.AuditData;
 import org.mifosplatform.audit.data.AuditSearchData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
+import org.mifosplatform.infrastructure.dataqueries.service.ReadWriteNonCoreDataServiceImpl;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.useradministration.data.AppUserLookup;
 import org.mifosplatform.useradministration.service.AppUserReadPlatformService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -22,6 +25,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 
+    private final static Logger logger = LoggerFactory.getLogger(AuditReadPlatformServiceImpl.class);
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
     private final AppUserReadPlatformService appUserReadPlatformService;
@@ -78,7 +82,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
         String sql = "select " + rm.schema(includeJson);
         if (StringUtils.isNotBlank(extraCriteria)) sql += " where (" + extraCriteria + ")";
         sql += " order by aud.id DESC";
-        
+        logger.info("sql: " + sql);
         return this.jdbcTemplate.query(sql, rm, new Object[] {});
     }
 

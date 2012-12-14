@@ -63,20 +63,24 @@ public class AuditApiResource {
 	@GET
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrieveAuditEntries(@Context final UriInfo uriInfo,
+	public String retrieveAuditEntries(
+			@Context final UriInfo uriInfo,
 			@QueryParam("apiOperation") final String apiOperation,
 			@QueryParam("resource") final String resource,
 			@QueryParam("resourceId") final Long resourceId,
 			@QueryParam("makerId") final Long makerId,
-			@QueryParam("makerDateTime") final String makerDateTime,
+			@QueryParam("makerDateTimeFrom") final String makerDateTimeFrom,
+			@QueryParam("makerDateTimeTo") final String makerDateTimeTo,
 			@QueryParam("checkerId") final Long checkerId,
-			@QueryParam("checkerDateTime") final String checkerDateTime) {
+			@QueryParam("checkerDateTimeFrom") final String checkerDateTimeFrom,
+			@QueryParam("checkerDateTimeTo") final String checkerDateTimeTo) {
 
 		context.authenticatedUser().validateHasReadPermission(
 				resourceNameForPermissions);
 
 		final String extraCriteria = getExtraCriteria(apiOperation, resource,
-				resourceId, makerId, makerDateTime, checkerId, checkerDateTime);
+				resourceId, makerId, makerDateTimeFrom, makerDateTimeTo,
+				checkerId, checkerDateTimeFrom, checkerDateTimeTo);
 
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper
 				.process(uriInfo.getQueryParameters());
@@ -130,8 +134,10 @@ public class AuditApiResource {
 	}
 
 	private String getExtraCriteria(final String apiOperation,
-			final String resource, final Long resourceId, final Long makerId, final String makerDateTime,
-			final Long checkerId, final String checkerDateTime) {
+			final String resource, final Long resourceId, final Long makerId,
+			final String makerDateTimeFrom, final String makerDateTimeTo,
+			final Long checkerId, final String checkerDateTimeFrom,
+			final String checkerDateTimeTo) {
 
 		String extraCriteria = "";
 
@@ -153,11 +159,21 @@ public class AuditApiResource {
 		if (checkerId != null) {
 			extraCriteria += " and aud.checker_id = " + checkerId;
 		}
-		if (makerDateTime != null) {
-			extraCriteria += " and aud.made_on_date >= " + ApiParameterHelper.sqlEncodeString(makerDateTime);
+		if (makerDateTimeFrom != null) {
+			extraCriteria += " and aud.made_on_date >= "
+					+ ApiParameterHelper.sqlEncodeString(makerDateTimeFrom);
 		}
-		if (checkerDateTime != null) {
-			extraCriteria += " and aud.checked_on_date >= " + ApiParameterHelper.sqlEncodeString(checkerDateTime);
+		if (makerDateTimeTo != null) {
+			extraCriteria += " and aud.made_on_date <= "
+					+ ApiParameterHelper.sqlEncodeString(makerDateTimeTo);
+		}
+		if (checkerDateTimeFrom != null) {
+			extraCriteria += " and aud.checked_on_date >= "
+					+ ApiParameterHelper.sqlEncodeString(checkerDateTimeFrom);
+		}
+		if (checkerDateTimeTo != null) {
+			extraCriteria += " and aud.checked_on_date <= "
+					+ ApiParameterHelper.sqlEncodeString(checkerDateTimeTo);
 		}
 
 		if (StringUtils.isNotBlank(extraCriteria)) {
