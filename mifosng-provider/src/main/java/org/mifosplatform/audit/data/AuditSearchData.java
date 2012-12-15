@@ -13,13 +13,13 @@ public final class AuditSearchData {
     @SuppressWarnings("unused")
     private final Collection<AppUserLookup> appUsers;
     @SuppressWarnings("unused")
-    private final List<String> apiOperations;
+    private final List<String> actionNames;
     @SuppressWarnings("unused")
-    private final List<String> resources;
+    private final List<String> entityNames;
 
     public AuditSearchData(final Collection<AppUserLookup> appUsers, final List<String> apiOperations, final List<String> resources) {
         this.appUsers = appUsers;
-        this.apiOperations = apiOperations;
-        this.resources = resources;
+        this.actionNames = apiOperations;
+        this.entityNames = resources;
     }
 }

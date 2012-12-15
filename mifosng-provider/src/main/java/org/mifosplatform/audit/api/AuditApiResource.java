@@ -65,8 +65,8 @@ public class AuditApiResource {
 	@Produces({ MediaType.APPLICATION_JSON })
 	public String retrieveAuditEntries(
 			@Context final UriInfo uriInfo,
-			@QueryParam("apiOperation") final String apiOperation,
-			@QueryParam("resource") final String resource,
+			@QueryParam("actionName") final String actionName,
+			@QueryParam("entityName") final String entityName,
 			@QueryParam("resourceId") final Long resourceId,
 			@QueryParam("makerId") final Long makerId,
 			@QueryParam("makerDateTimeFrom") final String makerDateTimeFrom,
@@ -78,7 +78,7 @@ public class AuditApiResource {
 		context.authenticatedUser().validateHasReadPermission(
 				resourceNameForPermissions);
 
-		final String extraCriteria = getExtraCriteria(apiOperation, resource,
+		final String extraCriteria = getExtraCriteria(actionName, entityName,
 				resourceId, makerId, makerDateTimeFrom, makerDateTimeTo,
 				checkerId, checkerDateTimeFrom, checkerDateTimeTo);
 
@@ -133,21 +133,21 @@ public class AuditApiResource {
 				auditSearchData, RESPONSE_DATA_PARAMETERS_SEARCH_TEMPLATE);
 	}
 
-	private String getExtraCriteria(final String apiOperation,
-			final String resource, final Long resourceId, final Long makerId,
+	private String getExtraCriteria(final String actionName,
+			final String entityName, final Long resourceId, final Long makerId,
 			final String makerDateTimeFrom, final String makerDateTimeTo,
 			final Long checkerId, final String checkerDateTimeFrom,
 			final String checkerDateTimeTo) {
 
 		String extraCriteria = "";
 
-		if (apiOperation != null) {
-			extraCriteria += " and aud.api_operation = "
-					+ ApiParameterHelper.sqlEncodeString(apiOperation);
+		if (actionName != null) {
+			extraCriteria += " and aud.action_name = "
+					+ ApiParameterHelper.sqlEncodeString(actionName);
 		}
-		if (resource != null) {
-			extraCriteria += " and aud.api_resource = "
-					+ ApiParameterHelper.sqlEncodeString(resource);
+		if (entityName != null) {
+			extraCriteria += " and aud.entity_name like "
+					+ ApiParameterHelper.sqlEncodeString(entityName + "%");
 		}
 
 		if (resourceId != null) {
