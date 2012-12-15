@@ -101,7 +101,12 @@ public class Office extends AbstractAuditableCustom<AppUser, Long> {
         final String localeAsInput = command.locale();
 
         final String parentIdParamName = "parentId";
-        if (command.isChangeInLongParameterNamed(parentIdParamName, this.parent.getId())) {
+        
+        if (command.parameterExists(parentIdParamName) && this.parent == null) {
+            throw new RootOfficeParentCannotBeUpdated();
+        }
+        
+        if (this.parent != null && command.isChangeInLongParameterNamed(parentIdParamName, this.parent.getId())) {
             final Long newValue = command.longValueOfParameterNamed(parentIdParamName);
             actualChanges.put(parentIdParamName, newValue);
         }

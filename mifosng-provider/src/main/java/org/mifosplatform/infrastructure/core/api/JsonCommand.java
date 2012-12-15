@@ -133,7 +133,7 @@ public final class JsonCommand {
         return differenceExists;
     }
 
-    private boolean parameterExists(final String parameterName) {
+    public boolean parameterExists(final String parameterName) {
         return this.fromApiJsonHelper.parameterExists(parameterName, parsedCommand);
     }
 
