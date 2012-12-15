@@ -19,7 +19,12 @@ VALUES
 ('loan_transaction_strategy_id',1,'mifos-standard-strategy','Mifos style'),
 ('loan_transaction_strategy_id',2,'heavensfamily-strategy','Heavensfamily'),
 ('loan_transaction_strategy_id',3,'creocore-strategy','Creocore'),
-('loan_transaction_strategy_id',4,'rbi-india-strategy','RBI (India)');
+('loan_transaction_strategy_id',4,'rbi-india-strategy','RBI (India)'),
+('processing_result_enum', '0', 'invalid', 'Invalid'),
+('processing_result_enum', '1', 'processed', 'Processed'), 
+('processing_result_enum', '2', 'awaiting.approval', 'Awaiting Approval'), 
+('processing_result_enum', '3', 'rejected', 'Rejected'); 
+
 
 
 INSERT INTO `m_currency`

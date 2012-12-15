@@ -73,14 +73,15 @@ public class AuditApiResource {
 			@QueryParam("makerDateTimeTo") final String makerDateTimeTo,
 			@QueryParam("checkerId") final Long checkerId,
 			@QueryParam("checkerDateTimeFrom") final String checkerDateTimeFrom,
-			@QueryParam("checkerDateTimeTo") final String checkerDateTimeTo) {
+			@QueryParam("checkerDateTimeTo") final String checkerDateTimeTo,
+			@QueryParam("processingResult") final Integer processingResult) {
 
 		context.authenticatedUser().validateHasReadPermission(
 				resourceNameForPermissions);
 
 		final String extraCriteria = getExtraCriteria(actionName, entityName,
 				resourceId, makerId, makerDateTimeFrom, makerDateTimeTo,
-				checkerId, checkerDateTimeFrom, checkerDateTimeTo);
+				checkerId, checkerDateTimeFrom, checkerDateTimeTo, processingResult);
 
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper
 				.process(uriInfo.getQueryParameters());
@@ -137,7 +138,7 @@ public class AuditApiResource {
 			final String entityName, final Long resourceId, final Long makerId,
 			final String makerDateTimeFrom, final String makerDateTimeTo,
 			final Long checkerId, final String checkerDateTimeFrom,
-			final String checkerDateTimeTo) {
+			final String checkerDateTimeTo, final Integer processingResult) {
 
 		String extraCriteria = "";
 
@@ -176,6 +177,10 @@ public class AuditApiResource {
 					+ ApiParameterHelper.sqlEncodeString(checkerDateTimeTo);
 		}
 
+		if (processingResult != null) {
+			extraCriteria += " and aud.processing_result_enum = " + processingResult;
+		}
+		
 		if (StringUtils.isNotBlank(extraCriteria)) {
 			extraCriteria = extraCriteria.substring(4);
 		}

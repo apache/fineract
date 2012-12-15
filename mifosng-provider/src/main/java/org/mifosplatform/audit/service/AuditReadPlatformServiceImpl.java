@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
+import org.mifosplatform.audit.api.ProcessingResultLookup;
 import org.mifosplatform.audit.data.AuditData;
 import org.mifosplatform.audit.data.AuditSearchData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
@@ -49,11 +50,12 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 
 			return " aud.id as id, aud.action_name as actionName, aud.entity_name as entityName, aud.api_operation as apiOperation, "
 					+ " aud.api_resource as resource, aud.resource_id as resourceId, aud.api_subresource as subResource, aud.subresource_id as subResourceId,"
-					+ " mk.username as maker, aud.made_on_date as madeOnDate, ck.username as checker, aud.checked_on_date as checkedOnDate"
+					+ " mk.username as maker, aud.made_on_date as madeOnDate, ck.username as checker, aud.checked_on_date as checkedOnDate, ev.enum_message_property as processingResult "
 					+ commandAsJsonString
 					+ " from m_portfolio_command_source aud "
 					+ " left join m_appuser mk on mk.id = aud.maker_id"
-					+ " left join m_appuser ck on ck.id = aud.checker_id";
+					+ " left join m_appuser ck on ck.id = aud.checker_id"
+					+ " left join r_enum_value ev on ev.enum_name = 'processing_result_enum' and ev.enum_id = aud.processing_result_enum";
 		}
 
 		@Override
@@ -75,6 +77,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 			final String checker = rs.getString("checker");
 			final DateTime checkedOnDate = JdbcSupport.getDateTime(rs,
 					"checkedOnDate");
+			final String processingResult = rs.getString("processingResult");
 			String commandAsJson;
 			// commandAsJson might not be on the select list of columns
 			try {
@@ -84,7 +87,8 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 			}
 			return new AuditData(id, actionName, entityName, apiOperation,
 					resource, resourceId, subResource, subResourceId, maker,
-					madeOnDate, checker, checkedOnDate, commandAsJson);
+					madeOnDate, checker, checkedOnDate, processingResult,
+					commandAsJson);
 		}
 	}
 
@@ -128,7 +132,12 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 		List<String> entityNames = this.jdbcTemplate.query(mapper2.schema(),
 				mapper2, new Object[] {});
 
-		return new AuditSearchData(appUsers, actionNames, entityNames);
+		ProcessingResultsMapper mapper3 = new ProcessingResultsMapper();
+		Collection<ProcessingResultLookup> processingResults = this.jdbcTemplate
+				.query(mapper3.schema(), mapper3, new Object[] {});
+
+		return new AuditSearchData(appUsers, actionNames, entityNames,
+				processingResults);
 	}
 
 	private static final class ActionNamesMapper implements RowMapper<String> {
@@ -162,6 +171,25 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 		public String schema() {
 			return " select distinct(entity_name) as entityName from m_permission where action_name is not null and action_name <> 'READ' "
 					+ " order by if(grouping = 'datatable', 'ZZZ', entity_name), entity_name";
+		}
+	}
+
+	private static final class ProcessingResultsMapper implements
+			RowMapper<ProcessingResultLookup> {
+
+		@Override
+		public ProcessingResultLookup mapRow(final ResultSet rs,
+				@SuppressWarnings("unused") final int rowNum)
+				throws SQLException {
+			Long id = JdbcSupport.getLong(rs, "id");
+			String processingResult = rs.getString("processingResult");
+
+			return new ProcessingResultLookup(id, processingResult);
+		}
+
+		public String schema() {
+			return " select enum_id as id, enum_message_property as processingResult from r_enum_value where enum_name = 'processing_result_enum' "
+					+ " order by enum_id";
 		}
 	}
 }

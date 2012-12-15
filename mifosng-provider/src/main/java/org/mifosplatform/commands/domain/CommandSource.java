@@ -63,7 +63,8 @@ public class CommandSource extends AbstractPersistable<Long> {
     @Column(name = "checked_on_date", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date checkedOnDate;
-    
+
+    @SuppressWarnings("unused")
     @Column(name = "processing_result_enum", nullable = false)
     private Integer processingResult;
 

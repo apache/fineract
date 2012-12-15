@@ -32,6 +32,8 @@ public final class AuditData {
 	@SuppressWarnings("unused")
 	private final DateTime checkedOnDate;
 	@SuppressWarnings("unused")
+	private final String processingResult;
+	@SuppressWarnings("unused")
 	private final String commandAsJson;
 
 	public AuditData(final Long id, final String actionName,
@@ -40,7 +42,7 @@ public final class AuditData {
 			final String subResource, final Long subResourceId,
 			final String maker, final DateTime madeOnDate,
 			final String checker, final DateTime checkedOnDate,
-			final String commandAsJson) {
+			final String processingResult, final String commandAsJson) {
 
 		this.id = id;
 		this.actionName = actionName;
@@ -55,5 +57,6 @@ public final class AuditData {
 		this.checker = checker;
 		this.checkedOnDate = checkedOnDate;
 		this.commandAsJson = commandAsJson;
+		this.processingResult = processingResult;
 	}
 }
