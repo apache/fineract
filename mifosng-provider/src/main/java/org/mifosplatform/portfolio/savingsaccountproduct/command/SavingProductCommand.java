@@ -16,6 +16,7 @@ public class SavingProductCommand {
     private final BigDecimal maxInterestRate;
 
     private final BigDecimal savingsDepositAmount;
+    private final Integer depositEvery;
     private final Integer savingProductType;
     private final Integer tenureType;
     private final Integer tenure;
@@ -32,7 +33,7 @@ public class SavingProductCommand {
 
     public SavingProductCommand(Set<String> modifiedParameters, Long id, String name, String description, String currencyCode,
             Integer digitsAfterDecimal, BigDecimal interestRate, BigDecimal minInterestRate, BigDecimal maxInterestRate,
-            BigDecimal savingsDepositAmount, Integer savingProductType, Integer tenureType, Integer tenure, Integer frequency,
+            BigDecimal savingsDepositAmount, Integer depositEvery,Integer savingProductType, Integer tenureType, Integer tenure, Integer frequency,
             Integer interestType, Integer interestCalculationMethod, BigDecimal minimumBalanceForWithdrawal,
             boolean isPartialDepositAllowed, boolean isLockinPeriodAllowed, Integer lockinPeriod, Integer lockinPeriodType) {
 
@@ -47,6 +48,7 @@ public class SavingProductCommand {
         this.maxInterestRate = maxInterestRate;
 
         this.savingsDepositAmount = savingsDepositAmount;
+        this.depositEvery = depositEvery;
         this.savingProductType = savingProductType;
         this.tenureType = tenureType;
         this.tenure = tenure;
@@ -98,7 +100,11 @@ public class SavingProductCommand {
         return savingsDepositAmount;
     }
 
-    public Integer getSavingProductType() {
+    public Integer getDepositEvery() {
+		return this.depositEvery;
+	}
+
+	public Integer getSavingProductType() {
         return savingProductType;
     }
 
@@ -166,6 +172,10 @@ public class SavingProductCommand {
         return this.modifiedParameters.contains("savingsDepositAmount");
     }
 
+    public boolean isDepositEveryChanged() {
+        return this.modifiedParameters.contains("depositEvery");
+    }
+    
     public boolean isSavingProductTypeChanged() {
         return this.modifiedParameters.contains("savingProductType");
     }

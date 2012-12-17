@@ -114,11 +114,13 @@ public class SavingAccountAssembler {
         if (command.getLockinPeriodType() != null) {
             lockinPeriodType = PeriodFrequencyType.fromInt(command.getLockinPeriodType());
         }
+        
+        Integer payEvery = command.getPayEvery();
 
         SavingAccount account = SavingAccount.openNew(client, product, command.getExternalId(), savingsDeposit, reccuringInterestRate,
                 savingInterestRate, tenure, command.getCommencementDate(), tenureTypeEnum, savingProductType, savingFrequencyType,
                 interestType, savingInterestCalculationMethod, isLockinPeriodAllowed, lockinPeriod, lockinPeriodType,
-                this.reccuringDepositInterestCalculator, defaultDepositLifecycleStateMachine());
+                this.reccuringDepositInterestCalculator, defaultDepositLifecycleStateMachine(),payEvery);
 
         SavingScheduleData savingScheduleData = this.calculateSavingSchedule.calculateSavingSchedule(command
                 .toCalculateSavingScheduleCommand());
@@ -205,9 +207,14 @@ public class SavingAccountAssembler {
         if (command.isLockinPeriodTypeChanged()) {
             lockinPeriodType = PeriodFrequencyType.fromInt(command.getLockinPeriodType());
         }
+        
+        Integer payEvery = account.getPayEvery();
+        if(command.isPayEveryChanged()){
+        	payEvery = command.getPayEvery();
+        }
         account.modifyAccount(product, externalId, savingsDeposit, reccuringInterestRate, savingInterestRate, tenure, commencementDate,
                 tenureTypeEnum, savingProductType, savingFrequencyType, savingInterestCalculationMethod, isLockinPeriodAllowed,
-                lockinPeriod, lockinPeriodType, this.reccuringDepositInterestCalculator);
+                lockinPeriod, lockinPeriodType, this.reccuringDepositInterestCalculator,payEvery);
 
     }
 

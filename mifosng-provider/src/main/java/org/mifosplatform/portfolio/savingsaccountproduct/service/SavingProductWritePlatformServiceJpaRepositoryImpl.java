@@ -49,7 +49,7 @@ public class SavingProductWritePlatformServiceJpaRepositoryImpl implements Savin
         MonetaryCurrency currency = new MonetaryCurrency(command.getCurrencyCode(), command.getDigitsAfterDecimal());
 
         SavingProduct product = new SavingProduct(command.getName(), command.getDescription(), currency, command.getInterestRate(),
-                command.getMinInterestRate(), command.getMaxInterestRate(), command.getSavingsDepositAmount(), savingProductType,
+                command.getMinInterestRate(), command.getMaxInterestRate(), command.getSavingsDepositAmount(),command.getDepositEvery(), savingProductType,
                 tenureType, command.getTenure(), savingFrequencyType, interestType, savingInterestCalculationMethod,
                 command.getMinimumBalanceForWithdrawal(), command.isPartialDepositAllowed(), command.isLockinPeriodAllowed(),
                 command.getLockinPeriod(), lockinPeriodType);

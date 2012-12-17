@@ -30,6 +30,9 @@ public class SavingProductRelatedDetail {
 
     @Column(name = "savings_deposit_amount", scale = 6, precision = 19, nullable = false)
     private BigDecimal savingsDepositAmount;
+    
+    @Column(name = "deposit_every")
+    private Integer depositEvery;
 
     @Column(name = "savings_product_type", nullable = false)
     private SavingProductType savingProductType;
@@ -70,7 +73,7 @@ public class SavingProductRelatedDetail {
     }
 
     public SavingProductRelatedDetail(final MonetaryCurrency currency, final BigDecimal interestRate, final BigDecimal minInterestRate,
-            final BigDecimal maxInterestRate, final BigDecimal savingsDepositAmount, final SavingProductType savingProductType,
+            final BigDecimal maxInterestRate, final BigDecimal savingsDepositAmount,final Integer depositEvery, final SavingProductType savingProductType,
             final TenureTypeEnum tenureType, final Integer tenure, final SavingFrequencyType frequency,
             final SavingsInterestType interestType, final SavingInterestCalculationMethod interestCalculationMethod,
             final BigDecimal minimumBalanceForWithdrawal, final boolean isPartialDepositAllowed, final boolean isLockinPeriodAllowed,
@@ -80,6 +83,7 @@ public class SavingProductRelatedDetail {
         this.minInterestRate = minInterestRate;
         this.maxInterestRate = maxInterestRate;
         this.savingsDepositAmount = savingsDepositAmount;
+        this.depositEvery=depositEvery;
         this.savingProductType = savingProductType;
         this.tenureType = tenureType;
         this.tenure = tenure;
@@ -127,6 +131,10 @@ public class SavingProductRelatedDetail {
         if (command.isSavingsDepositAmountChanged()) {
             this.savingsDepositAmount = command.getSavingsDepositAmount();
         }
+        
+        if (command.isDepositEveryChanged()) {
+			this.depositEvery=command.getDepositEvery();
+		}
 
         if (command.isSavingProductTypeChanged()) {
             this.savingProductType = SavingProductType.fromInt(command.getSavingProductType());
@@ -177,7 +185,11 @@ public class SavingProductRelatedDetail {
         return savingsDepositAmount;
     }
 
-    public SavingProductType getSavingProductType() {
+    public Integer getDepositEvery() {
+		return this.depositEvery;
+	}
+
+	public SavingProductType getSavingProductType() {
         return savingProductType;
     }
 

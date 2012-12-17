@@ -120,7 +120,7 @@ public class SavingProductEnumerations {
             break;
             case MONTHLY:
                 optionData = new EnumOptionData(SavingFrequencyType.MONTHLY.getValue().longValue(), codePrefix
-                        + SavingFrequencyType.MONTHLY.getCode(), "Weeks");
+                        + SavingFrequencyType.MONTHLY.getCode(), "Months");
             break;
             case QUATERLY:
                 optionData = new EnumOptionData(SavingFrequencyType.QUATERLY.getValue().longValue(), codePrefix

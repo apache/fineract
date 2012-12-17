@@ -11,8 +11,13 @@ import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
+import org.mifosplatform.portfolio.client.data.ClientData;
+import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
 import org.mifosplatform.portfolio.savingsaccount.data.SavingAccountData;
+import org.mifosplatform.portfolio.savingsaccountproduct.data.SavingProductData;
+import org.mifosplatform.portfolio.savingsaccountproduct.data.SavingProductLookup;
 import org.mifosplatform.portfolio.savingsaccountproduct.service.SavingProductEnumerations;
+import org.mifosplatform.portfolio.savingsaccountproduct.service.SavingProductReadPlatformService;
 import org.mifosplatform.portfolio.savingsdepositaccount.service.DepositAccountEnumerations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -24,11 +29,16 @@ public class SavingAccountReadPlatformServiceImpl implements SavingAccountReadPl
 
     private final PlatformSecurityContext context;
     private final JdbcTemplate jdbcTemplate;
+    private final ClientReadPlatformService clientReadPlatformService;
+    private final SavingProductReadPlatformService savingProductReadPlatformService; 
 
     @Autowired
-    public SavingAccountReadPlatformServiceImpl(final PlatformSecurityContext context, final TenantAwareRoutingDataSource dataSource) {
+    public SavingAccountReadPlatformServiceImpl(final PlatformSecurityContext context, final TenantAwareRoutingDataSource dataSource, 
+    		ClientReadPlatformService clientReadPlatformService, SavingProductReadPlatformService savingProductReadPlatformService) {
         this.context = context;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.clientReadPlatformService = clientReadPlatformService;
+        this.savingProductReadPlatformService=savingProductReadPlatformService;
     }
 
     @Override
@@ -66,7 +76,7 @@ public class SavingAccountReadPlatformServiceImpl implements SavingAccountReadPl
                     + " sa.actual_total_amount AS actualTotalAmount, sa.is_preclosure_allowed AS isPreclosureAllowed,"
                     + " sa.pre_closure_interest_rate AS preClosureInterestRate, sa.is_lock_in_period_allowed AS isLockinPeriodAllowed,"
                     + " sa.lock_in_period AS lockinPeriod, sa.lock_in_period_type AS lockinPeriodType, sa.withdrawnon_date AS withdrawnonDate,"
-                    + " sa.rejectedon_date AS rejectedonDate, sa.closedon_date AS closedonDate, ps.name AS productName,"
+                    + " sa.rejectedon_date AS rejectedonDate, sa.closedon_date AS closedonDate, ps.name AS productName, sa.deposit_every as depositEvery, "
                     + " c.firstname AS firstname, c.lastname AS lastname, curr.name AS currencyName, "
                     + " curr.internationalized_name_code AS currencyNameCode, curr.display_symbol AS currencyDisplaySymbol "
                     + " FROM m_saving_account sa " + " JOIN m_client c ON c.id = sa.client_id"
@@ -130,13 +140,52 @@ public class SavingAccountReadPlatformServiceImpl implements SavingAccountReadPl
             Integer lockinPeriod = JdbcSupport.getInteger(rs, "lockinPeriod");
             Integer lockinPeriodTypeValue = JdbcSupport.getInteger(rs, "lockinPeriodType");
             EnumOptionData lockinPeriodType = SavingProductEnumerations.savingsLockinPeriod(lockinPeriodTypeValue);
+            Integer depositEvery = JdbcSupport.getInteger(rs, "depositEvery");
 
             return new SavingAccountData(id, status, externalId, clientId, clientName, productId, productName, productType, currencyData,
                     savingsDepostiAmountPerPeriod, savingsFrequencyType, totalDepositAmount, reccuringInterestRate, savingInterestRate,
                     interestType, interestCalculationMethod, tenure, tenureType, projectedCommencementDate, actualCommencementDate,
                     maturesOnDate, projectedInterestAccuredOnMaturity, actualInterestAccured, projectedMaturityAmount,
                     actualMaturityAmount, preClosureAllowed, preClosureInterestRate, withdrawnonDate, rejectedonDate, closedonDate,
-                    isLockinPeriodAllowed, lockinPeriod, lockinPeriodType);
+                    isLockinPeriodAllowed, lockinPeriod, lockinPeriodType,depositEvery);
         }
     }
+
+	@Override
+	public SavingAccountData retrieveNewSavingsAccountDetails(Long clientId, Long productId) {
+		
+		 context.authenticatedUser();
+		 ClientData clientAccount = this.clientReadPlatformService.retrieveIndividualClient(clientId);
+		 SavingAccountData accountData = null;
+		 Collection<SavingProductLookup> savingProducts = this.savingProductReadPlatformService.retrieveAllSavingProductsForLookup();
+		 
+		 if (productId != null && productId != -1) {
+	            SavingProductData selectedProduct = findSavingProductById(savingProducts, productId);
+
+	            CurrencyData currency = selectedProduct.getCurrency();
+
+	            accountData = new SavingAccountData(clientAccount.id(), clientAccount.displayName(), selectedProduct.getId(),
+	                    selectedProduct.getName(), currency, selectedProduct.getInterestRate(), selectedProduct.getSavingsDepositAmount(),
+	                    selectedProduct.getSavingProductType(), selectedProduct.getTenureType(), selectedProduct.getTenure(), selectedProduct.getSavingFrequencyType(),
+	                    selectedProduct.getInterestType(), selectedProduct.getInterestCalculationMethod(),selectedProduct.getMinimumBalanceForWithdrawal(),
+	                    selectedProduct.isPartialDepositAllowed(), selectedProduct.isLockinPeriodAllowed(),selectedProduct.getLockinPeriod(),
+	                    selectedProduct.getLockinPeriodType(),selectedProduct.getDepositEvery());
+	            
+	        } else {
+	            accountData = SavingAccountData.createFrom(clientAccount.id(), clientAccount.displayName());
+	        }
+		return accountData;
+	}
+
+	private SavingProductData findSavingProductById( Collection<SavingProductLookup> savingProducts, Long productId) {
+		SavingProductData match = this.savingProductReadPlatformService.retrieveNewSavingProductDetails();
+	        for (SavingProductLookup savingProductLookup : savingProducts) {
+	            if (savingProductLookup.hasId(productId)) {
+	                match = this.savingProductReadPlatformService.retrieveSavingProduct(savingProductLookup.getId());
+	                break;
+	            }
+	        }
+	        return match;
+	    }
+
 }

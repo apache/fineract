@@ -859,7 +859,7 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         Set<String> supportedParams = new HashSet<String>(Arrays.asList("locale", "name", "description", "currencyCode",
                 "digitsAfterDecimal", "interestRate", "minInterestRate", "maxInterestRate", "savingsDepositAmount", "savingProductType",
                 "tenureType", "tenure", "frequency", "interestType", "interestCalculationMethod", "minimumBalanceForWithdrawal",
-                "isPartialDepositAllowed", "isLockinPeriodAllowed", "lockinPeriod", "lockinPeriodType"));
+                "isPartialDepositAllowed", "isLockinPeriodAllowed", "lockinPeriod", "lockinPeriodType","depositEvery"));
 
         checkForUnsupportedParameters(requestMap, supportedParams);
         Set<String> modifiedParameters = new HashSet<String>();
@@ -871,6 +871,7 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         BigDecimal minInterestRate = extractBigDecimalParameter("minInterestRate", requestMap, modifiedParameters);
         BigDecimal maxInterestRate = extractBigDecimalParameter("maxInterestRate", requestMap, modifiedParameters);
         BigDecimal savingsDepositAmount = extractBigDecimalParameter("savingsDepositAmount", requestMap, modifiedParameters);
+        Integer depositEvery = extractIntegerParameter("depositEvery", requestMap, modifiedParameters);
         Integer savingProductType = extractIntegerParameter("savingProductType", requestMap, modifiedParameters);
         Integer tenureType = extractIntegerParameter("tenureType", requestMap, modifiedParameters);
         Integer tenure = extractIntegerParameter("tenure", requestMap, modifiedParameters);
@@ -884,7 +885,7 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         Integer lockinPeriodType = extractIntegerParameter("lockinPeriodType", requestMap, modifiedParameters);
 
         return new SavingProductCommand(modifiedParameters, resourceIdentifier, name, description, currencyCode, digitsAfterDecimalValue,
-                interestRate, minInterestRate, maxInterestRate, savingsDepositAmount, savingProductType, tenureType, tenure, frequency,
+                interestRate, minInterestRate, maxInterestRate, savingsDepositAmount, depositEvery, savingProductType, tenureType, tenure, frequency,
                 interestType, interestCalculationMethod, minimumBalanceForWithdrawal, isPartialDepositAllowed, isLockinPeriodAllowed,
                 lockinPeriod, lockinPeriodType);
     }

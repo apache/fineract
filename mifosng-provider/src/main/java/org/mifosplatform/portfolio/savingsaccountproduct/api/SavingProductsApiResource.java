@@ -100,7 +100,7 @@ public class SavingProductsApiResource {
                 "description", "currencyCode", "digitsAfterDecimal", "interstRate", "minInterestRate", "maxInterestRate",
                 "savingsDepositAmount", "savingProductType", "tenureType", "tenure", "frequency", "interestType",
                 "interestCalculationMethod", "minimumBalanceForWithdrawal", "isPartialDepositAllowed", "isLockinPeriodAllowed",
-                "lockinPeriod", "lockinPeriodType"));
+                "lockinPeriod", "lockinPeriodType","depositEvery"));
 
         Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
         if (responseParameters.isEmpty()) {
@@ -125,19 +125,20 @@ public class SavingProductsApiResource {
                 "description", "currencyCode", "digitsAfterDecimal", "interstRate", "minInterestRate", "maxInterestRate",
                 "savingsDepositAmount", "savingProductType", "tenureType", "tenure", "frequency", "interestType",
                 "interestCalculationMethod", "minimumBalanceForWithdrawal", "isPartialDepositAllowed", "isLockinPeriodAllowed",
-                "lockinPeriod", "lockinPeriodType"));
+                "lockinPeriod", "lockinPeriodType","depositEvery"));
 
         Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
         if (responseParameters.isEmpty()) {
             responseParameters.addAll(typicalResponseParameters);
         }
+        
+        SavingProductData savingProduct = this.savingProductReadPlatformService.retrieveSavingProduct(productId);
+        
         boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
         boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
         if (template) {
-            responseParameters.addAll(Arrays.asList("currencyOptions"));
+            savingProduct = handleTemplateRelatedData(responseParameters, savingProduct);
         }
-
-        SavingProductData savingProduct = this.savingProductReadPlatformService.retrieveSavingProduct(productId);
 
         return this.apiJsonSerializerService.serializeSavingProductDataToJson(prettyPrint, responseParameters, savingProduct);
     }
@@ -153,7 +154,7 @@ public class SavingProductsApiResource {
         Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "createdOn", "lastModifedOn", "locale", "name",
                 "description", "currencyCode", "digitsAfterDecimal", "interstRate", "savingsDepositAmount", "savingProductType",
                 "tenureType", "tenure", "frequency", "interestType", "interestCalculationMethod", "minimumBalanceForWithdrawal",
-                "isPartialDepositAllowed", "isLockinPeriodAllowed", "lockinPeriod", "lockinPeriodType", "currencyOptions"));
+                "isPartialDepositAllowed", "isLockinPeriodAllowed", "lockinPeriod", "lockinPeriodType", "currencyOptions","depositEvery"));
 
         Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
         if (responseParameters.isEmpty()) {

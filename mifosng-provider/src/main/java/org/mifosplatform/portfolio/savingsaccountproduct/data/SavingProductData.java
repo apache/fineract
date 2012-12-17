@@ -8,6 +8,13 @@ import java.util.List;
 import org.joda.time.DateTime;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
+import org.mifosplatform.portfolio.savingsaccountproduct.domain.SavingFrequencyType;
+import org.mifosplatform.portfolio.savingsaccountproduct.domain.SavingInterestCalculationMethod;
+import org.mifosplatform.portfolio.savingsaccountproduct.domain.SavingProductType;
+import org.mifosplatform.portfolio.savingsaccountproduct.domain.SavingsInterestType;
+import org.mifosplatform.portfolio.savingsaccountproduct.domain.SavingsLockinPeriodEnum;
+import org.mifosplatform.portfolio.savingsaccountproduct.service.SavingProductEnumerations;
+import org.mifosplatform.portfolio.savingsdepositproduct.domain.TenureTypeEnum;
 
 public class SavingProductData implements Serializable {
 
@@ -35,6 +42,7 @@ public class SavingProductData implements Serializable {
 
     private DateTime createdOn;
     private DateTime lastModifedOn;
+    private final Integer depositEvery;
 
     private List<CurrencyData> currencyOptions = new ArrayList<CurrencyData>();
     List<EnumOptionData> savingsProductTypeOptions = new ArrayList<EnumOptionData>();
@@ -45,7 +53,7 @@ public class SavingProductData implements Serializable {
     List<EnumOptionData> interestCalculationOptions = new ArrayList<EnumOptionData>();
 
     public SavingProductData() {
-        this.createdOn = new DateTime();
+    	this.createdOn = new DateTime();
         this.lastModifedOn = new DateTime();
         this.id = null;
         this.name = null;
@@ -53,20 +61,21 @@ public class SavingProductData implements Serializable {
         this.interestRate = BigDecimal.ZERO;
         this.minInterestRate = BigDecimal.ZERO;
         this.maxInterestRate = BigDecimal.ZERO;
-        this.currency = null;
-        this.digitsAfterDecimal = null;
-        this.savingsDepositAmount = null;
-        this.savingProductType = null;
-        this.tenureType = null;
-        this.tenure = null;
-        this.savingFrequencyType = null;
-        this.interestType = null;
-        this.interestCalculationMethod = null;
-        this.minimumBalanceForWithdrawal = null;
-        this.isPartialDepositAllowed = true;
-        this.isLockinPeriodAllowed = true;
-        this.lockinPeriod = null;
-        this.lockinPeriodType = null;
+        this.currency = new CurrencyData("USD", "US Dollar", 2, "$", "currency.USD");
+        this.digitsAfterDecimal = Integer.valueOf(2);
+        this.savingsDepositAmount = BigDecimal.ZERO;
+        this.savingProductType = SavingProductEnumerations.savingProductType(SavingProductType.RECCURING);
+        this.tenureType = SavingProductEnumerations.tenureTypeEnum(TenureTypeEnum.FIXED_PERIOD);
+        this.tenure = Integer.valueOf(12);
+        this.savingFrequencyType = SavingProductEnumerations.interestFrequencyType(SavingFrequencyType.MONTHLY);
+        this.interestType = SavingProductEnumerations.savingInterestType(SavingsInterestType.COMPOUNDING);
+        this.interestCalculationMethod = SavingProductEnumerations.savingInterestCalculationMethod(SavingInterestCalculationMethod.AVERAGEBAL);
+        this.minimumBalanceForWithdrawal = BigDecimal.valueOf(100);
+        this.isPartialDepositAllowed = false;
+        this.isLockinPeriodAllowed = false;
+        this.lockinPeriod = Integer.valueOf(0);
+        this.lockinPeriodType = SavingProductEnumerations.savingsLockinPeriod(SavingsLockinPeriodEnum.MONTHS);
+        this.depositEvery=Integer.valueOf(3);
     }
 
     public SavingProductData(DateTime createdOn, DateTime lastModifedOn, Long id, String name, String description, BigDecimal interestRate,
@@ -74,7 +83,7 @@ public class SavingProductData implements Serializable {
             BigDecimal savingsDepositAmount, EnumOptionData savingProductType, EnumOptionData tenureType, Integer tenure,
             EnumOptionData savingFrequencyType, EnumOptionData savingInterestType, EnumOptionData interestCalculationMethod,
             BigDecimal minimumBalanceForWithdrawal, boolean isPartialDepositAllowed, boolean isLockinPeriodAllowed, Integer lockinPeriod,
-            EnumOptionData lockinPeriodType) {
+            EnumOptionData lockinPeriodType, Integer depositEvery) {
         this.createdOn = createdOn;
         this.lastModifedOn = lastModifedOn;
         this.id = id;
@@ -97,6 +106,7 @@ public class SavingProductData implements Serializable {
         this.isLockinPeriodAllowed = isLockinPeriodAllowed;
         this.lockinPeriod = lockinPeriod;
         this.lockinPeriodType = lockinPeriodType;
+        this.depositEvery = depositEvery;
     }
 
     public SavingProductData(SavingProductData product, List<CurrencyData> currencyOptions, List<EnumOptionData> savingsProductTypeOptions,
@@ -126,6 +136,7 @@ public class SavingProductData implements Serializable {
         this.isLockinPeriodAllowed = product.isLockinPeriodAllowed();
         this.lockinPeriod = product.getLockinPeriod();
         this.lockinPeriodType = product.getLockinPeriodType();
+        this.depositEvery = product.getDepositEvery();
 
         this.currencyOptions = currencyOptions;
         this.savingsProductTypeOptions = savingsProductTypeOptions;
@@ -256,5 +267,9 @@ public class SavingProductData implements Serializable {
     public List<EnumOptionData> getInterestCalculationOptions() {
         return interestCalculationOptions;
     }
+
+	public Integer getDepositEvery() {
+		return this.depositEvery;
+	}
 
 }

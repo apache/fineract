@@ -60,7 +60,7 @@ public class SavingProductReadPlatformServiceImpl implements SavingProductReadPl
 
         SavingProductLookupMapper savingProductLookupMapper = new SavingProductLookupMapper();
 
-        String sql = "select" + savingProductLookupMapper.savingProductLookupSchema();
+        String sql = "select " + savingProductLookupMapper.savingProductLookupSchema() +  " where sp.is_deleted=0";
 
         return this.jdbcTemplate.query(sql, savingProductLookupMapper, new Object[] {});
     }
@@ -95,7 +95,7 @@ public class SavingProductReadPlatformServiceImpl implements SavingProductReadPl
 
         public String savingProductSchema() {
             return "sp.id as id,sp.name as name, sp.description as description,sp.currency_code as currencyCode, sp.currency_digits as currencyDigits,sp.interest_rate as interestRate, "
-                    + "sp.min_interest_rate as minInterestRate, sp.max_interest_rate as maxInterstRate, "
+                    + "sp.min_interest_rate as minInterestRate, sp.max_interest_rate as maxInterstRate, sp.deposit_every as depositEvery, "
                     + " sp.savings_deposit_amount as savingsDepositAmount, sp.savings_product_type as savingProductType, sp.tenure_type as tenureType, sp.tenure as tenure, sp.frequency as frequency, "
                     + " sp.interest_type as interestType, sp.interest_calculation_method as interestCalculationMethod, sp.min_bal_for_withdrawal as minimumBalanceForWithdrawal, "
                     + " sp.is_partial_deposit_allowed as isPartialDepositAllowed, sp.is_lock_in_period_allowed as isLockinPeriodAllowed, sp.lock_in_period as lockinPeriod, sp.lock_in_period_type as lockinPeriodType, "
@@ -126,6 +126,7 @@ public class SavingProductReadPlatformServiceImpl implements SavingProductReadPl
             DateTime createdOn = JdbcSupport.getDateTime(rs, "createdon");
             DateTime lastModifedOn = JdbcSupport.getDateTime(rs, "modifiedon");
 
+            Integer depositEvery = JdbcSupport.getInteger(rs, "depositEvery");
             BigDecimal savingsDepositAmount = rs.getBigDecimal("savingsDepositAmount");
             EnumOptionData savingProductTypeEnum = SavingProductEnumerations.savingProductType(SavingProductType.fromInt(JdbcSupport
                     .getInteger(rs, "savingProductType")));
@@ -145,14 +146,14 @@ public class SavingProductReadPlatformServiceImpl implements SavingProductReadPl
             return new SavingProductData(createdOn, lastModifedOn, id, name, description, interestRate, minInterestRate, maxInterestRate,
                     currencyData, currencyDigits, savingsDepositAmount, savingProductTypeEnum, tenureTypeEnum, tenure, savingFrequencyType,
                     savingInterestType, interestCalculationMethodEnum, minimumBalanceForWithdrawal, isPartialDepositAllowed,
-                    isLockinPeriodAllowed, lockinPeriod, lockinPeriodType);
+                    isLockinPeriodAllowed, lockinPeriod, lockinPeriodType,depositEvery);
         }
     }
 
     private static final class SavingProductLookupMapper implements RowMapper<SavingProductLookup> {
 
         public String savingProductLookupSchema() {
-            return "sp.id as id, sp.name as name from m_product_savings sp";
+            return " sp.id as id, sp.name as name from m_product_savings sp";
         }
 
         @Override

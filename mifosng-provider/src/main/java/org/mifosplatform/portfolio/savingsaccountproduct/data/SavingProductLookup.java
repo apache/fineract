@@ -4,11 +4,12 @@ import java.io.Serializable;
 
 public class SavingProductLookup implements Serializable {
 
-    private Long id;
-    private String name;
+    private final Long id;
+    private final String name;
 
     public SavingProductLookup() {
-        //
+        this.id=null;
+        this.name=null;
     }
 
     public SavingProductLookup(Long id, String name) {
@@ -20,16 +21,12 @@ public class SavingProductLookup implements Serializable {
         return id;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public boolean hasId(final Long matchingId) {
+        return this.id.equals(matchingId);
     }
 
 }

@@ -158,6 +158,9 @@ public class SavingAccount extends AbstractAuditableCustom<AppUser, Long> {
 
     @Column(name = "lock_in_period_type", nullable = false)
     private PeriodFrequencyType lockinPeriodType;
+    
+    @Column(name = "deposit_every", nullable = false)
+    private Integer payEvery;
 
     // see
     // http://stackoverflow.com/questions/4334970/hibernate-cannot-simultaneously-fetch-multiple-bags
@@ -170,7 +173,8 @@ public class SavingAccount extends AbstractAuditableCustom<AppUser, Long> {
             TenureTypeEnum tenureTypeEnum, SavingProductType savingProductType, SavingFrequencyType savingFrequencyType,
             SavingsInterestType interestType, SavingInterestCalculationMethod savingInterestCalculationMethod,
             boolean isLockinPeriodAllowed, Integer lockinPeriod, PeriodFrequencyType lockinPeriodType,
-            ReccuringDepositInterestCalculator reccuringDepositInterestCalculator, final DepositLifecycleStateMachine lifecycleStateMachine) {
+            ReccuringDepositInterestCalculator reccuringDepositInterestCalculator, final DepositLifecycleStateMachine lifecycleStateMachine,
+            Integer payEvery) {
 
         Money futureValueOnMaturity = null;
         if (savingProductType.isReccuring()) {
@@ -183,14 +187,14 @@ public class SavingAccount extends AbstractAuditableCustom<AppUser, Long> {
 
         return new SavingAccount(client, externalId, product, savingsDeposit, reccuringInterestRate, savingInterestRate, tenure,
                 commencementDate, tenureTypeEnum, savingProductType, savingFrequencyType, interestType, savingInterestCalculationMethod,
-                isLockinPeriodAllowed, lockinPeriod, lockinPeriodType, futureValueOnMaturity, lifecycleStateMachine);
+                isLockinPeriodAllowed, lockinPeriod, lockinPeriodType, futureValueOnMaturity, lifecycleStateMachine,payEvery);
     }
 
     public SavingAccount(Client client, String externalId, SavingProduct product, Money savingsDeposit, BigDecimal reccuringInterestRate,
             BigDecimal savingInterestRate, Integer tenure, LocalDate commencementDate, TenureTypeEnum tenureTypeEnum,
             SavingProductType savingProductType, SavingFrequencyType savingFrequencyType, SavingsInterestType interestType,
             SavingInterestCalculationMethod savingInterestCalculationMethod, boolean isLockinPeriodAllowed, Integer lockinPeriod,
-            PeriodFrequencyType lockinPeriodType, Money futureValueOnMaturity, final DepositLifecycleStateMachine lifecycleStateMachine) {
+            PeriodFrequencyType lockinPeriodType, Money futureValueOnMaturity, final DepositLifecycleStateMachine lifecycleStateMachine,Integer payEvery) {
 
         DepositAccountStatus from = null;
         if (accountStatus != null) {
@@ -225,13 +229,14 @@ public class SavingAccount extends AbstractAuditableCustom<AppUser, Long> {
         this.projectedTotalOnMaturity = futureValueOnMaturity.getAmount();
         this.projectedInterestAccruedOnMaturity = futureValueOnMaturity.getAmount().subtract(
                 BigDecimal.valueOf(savingsDeposit.getAmount().doubleValue() * tenure.doubleValue()));
+        this.payEvery = payEvery;
     }
 
     public void modifyAccount(SavingProduct product, String externalId, Money savingsDeposit, BigDecimal reccuringInterestRate,
             BigDecimal savingInterestRate, Integer tenure, LocalDate commencementDate, TenureTypeEnum tenureTypeEnum,
             SavingProductType savingProductType, SavingFrequencyType savingFrequencyType,
             SavingInterestCalculationMethod savingInterestCalculationMethod, boolean isLockinPeriodAllowed, Integer lockinPeriod,
-            PeriodFrequencyType lockinPeriodType, ReccuringDepositInterestCalculator reccuringDepositInterestCalculator) {
+            PeriodFrequencyType lockinPeriodType, ReccuringDepositInterestCalculator reccuringDepositInterestCalculator,Integer payEvery) {
 
         Money futureValueOnMaturity = null;
         if (savingProductType.isReccuring()) {
@@ -256,6 +261,7 @@ public class SavingAccount extends AbstractAuditableCustom<AppUser, Long> {
         this.isLockinPeriodAllowed = isLockinPeriodAllowed;
         this.lockinPeriod = lockinPeriod;
         this.lockinPeriodType = lockinPeriodType;
+        this.payEvery = payEvery;
 
         // FIXME - MADHUKAR - futureValueOnMaturity is possibly null
         this.projectedTotalOnMaturity = futureValueOnMaturity.getAmount();
@@ -347,7 +353,11 @@ public class SavingAccount extends AbstractAuditableCustom<AppUser, Long> {
         return lockinPeriodType;
     }
 
-    public void addSavingScheduleInstallment(final SavingScheduleInstallments installment) {
+    public Integer getPayEvery() {
+		return this.payEvery;
+	}
+
+	public void addSavingScheduleInstallment(final SavingScheduleInstallments installment) {
         installment.updateAccount(this);
         this.savingScheduleInstallments.add(installment);
     }

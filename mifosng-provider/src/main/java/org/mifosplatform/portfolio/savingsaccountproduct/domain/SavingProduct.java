@@ -38,7 +38,7 @@ public class SavingProduct extends AbstractAuditableCustom<AppUser, Long> {
     }
 
     public SavingProduct(final String name, final String description, final MonetaryCurrency currency, final BigDecimal interestRate,
-            final BigDecimal minInterestRate, final BigDecimal maxInterestRate, final BigDecimal savingsDepositAmount,
+            final BigDecimal minInterestRate, final BigDecimal maxInterestRate, final BigDecimal savingsDepositAmount,Integer depositEvery,
             final SavingProductType savingProductType, final TenureTypeEnum tenureType, final Integer tenure,
             final SavingFrequencyType savingFrequencyType, final SavingsInterestType savingsInterestType,
             SavingInterestCalculationMethod savingInterestCalculationMethod, final BigDecimal minimumBalanceForWithdrawal,
@@ -52,7 +52,7 @@ public class SavingProduct extends AbstractAuditableCustom<AppUser, Long> {
             this.description = null;
         }
         this.savingProductRelatedDetail = new SavingProductRelatedDetail(currency, interestRate, minInterestRate, maxInterestRate,
-                savingsDepositAmount, savingProductType, tenureType, tenure, savingFrequencyType, savingsInterestType,
+                savingsDepositAmount, depositEvery, savingProductType, tenureType, tenure, savingFrequencyType, savingsInterestType,
                 savingInterestCalculationMethod, minimumBalanceForWithdrawal, isPartialDepositAllowed, isLockinPeriodAllowed, lockinPeriod,
                 lockinPeriodType);
     }
