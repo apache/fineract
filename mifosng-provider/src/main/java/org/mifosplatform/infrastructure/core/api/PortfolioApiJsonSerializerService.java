@@ -15,7 +15,6 @@ import org.mifosplatform.portfolio.group.data.GroupData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanChargeData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionData;
 import org.mifosplatform.portfolio.loanaccount.gaurantor.data.GuarantorData;
-import org.mifosplatform.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
 import org.mifosplatform.portfolio.savingsaccount.data.SavingAccountData;
 import org.mifosplatform.portfolio.savingsaccount.data.SavingScheduleData;
 import org.mifosplatform.portfolio.savingsaccountproduct.data.SavingProductData;
@@ -52,8 +51,6 @@ public interface PortfolioApiJsonSerializerService {
 
     String serializeGroupDataToJson(boolean prettyPrint, Set<String> responseParameters, GroupData group);
 
-    String serializeLoanScheduleDataToJson(boolean prettyPrint, Set<String> responseParameters, LoanScheduleData loanSchedule);
-
     String serializeLoanTransactionDataToJson(boolean prettyPrint, Set<String> responseParameters, LoanTransactionData newTransactionData);
 
     String serializeLoanReassignmentDataToJson(boolean prettyPrint, Set<String> responseParameters,
@@ -76,6 +73,5 @@ public interface PortfolioApiJsonSerializerService {
     String serializeGuarantorDataToJson(boolean prettyPrint, Set<String> responseParameters, GuarantorData guarantorData);
 
     String serializeSavingScheduleDataToJson(boolean prettyPrint, Set<String> responseParameters, SavingScheduleData savingScheduleData);
-
 
 }

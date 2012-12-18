@@ -108,7 +108,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
         final LoanProduct product = this.loanProductRepository.findOne(loanProductId);
         if (product == null) { throw new LoanProductNotFoundException(loanProductId); }
         
-        final Map<String, Object> changes = product.update(command);
+        final Map<String, Object> changes = product.update(command, this.aprCalculator);
 
         // associating fund with loan product at creation is optional for now.
         if (changes.containsKey("fundId")) {

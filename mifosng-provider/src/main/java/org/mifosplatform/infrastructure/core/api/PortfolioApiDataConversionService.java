@@ -5,9 +5,7 @@ import org.mifosplatform.portfolio.client.command.NoteCommand;
 import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.group.command.GroupCommand;
 import org.mifosplatform.portfolio.loanaccount.command.AdjustLoanTransactionCommand;
-import org.mifosplatform.portfolio.loanaccount.command.LoanApplicationCommand;
 import org.mifosplatform.portfolio.loanaccount.command.LoanChargeCommand;
-import org.mifosplatform.portfolio.loanaccount.command.LoanStateTransitionCommand;
 import org.mifosplatform.portfolio.loanaccount.command.LoanTransactionCommand;
 import org.mifosplatform.portfolio.loanaccount.gaurantor.command.GuarantorCommand;
 import org.mifosplatform.portfolio.savingsaccount.command.SavingAccountCommand;
@@ -29,11 +27,7 @@ public interface PortfolioApiDataConversionService {
 
     GroupCommand convertJsonToGroupCommand(Long resourceIdentifier, String json);
 
-    LoanApplicationCommand convertApiRequestJsonToLoanApplicationCommand(Long resourceIdentifier, String json);
-
     LoanChargeCommand convertJsonToLoanChargeCommand(Long loanChargeId, Long loanId, String json);
-
-    LoanStateTransitionCommand convertJsonToLoanStateTransitionCommand(Long resourceIdentifier, String json);
 
     LoanTransactionCommand convertJsonToLoanTransactionCommand(Long resourceIdentifier, String json);
 

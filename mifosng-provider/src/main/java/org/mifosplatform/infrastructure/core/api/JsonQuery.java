@@ -17,58 +17,33 @@ import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 
 /**
- * Immutable representation of a command.
+ * Immutable representation of a query.
  * 
  * Wraps the provided JSON with convenience functions for extracting parameter
- * values and checking for changes against an existing value.
+ * values.
  */
-public final class JsonCommand {
+public final class JsonQuery {
 
-    private final String jsonCommand;
-    private final JsonElement parsedCommand;
+    private final String jsonQuery;
+    private final JsonElement parsedQuery;
     private final FromJsonHelper fromApiJsonHelper;
-    private final Long commandId;
-    private final Long resourceId;
-    private final Long subResourceId;
 
-    public static JsonCommand from(final String jsonCommand, final JsonElement parsedCommand, final FromJsonHelper fromApiJsonHelper,
-            final Long resourceId, final Long subResourceId) {
-        return new JsonCommand(null, jsonCommand, parsedCommand, fromApiJsonHelper, resourceId, subResourceId);
-    }
-    
-    public static JsonCommand fromExistingCommand(final Long commandId, final String jsonCommand, final JsonElement parsedCommand, final FromJsonHelper fromApiJsonHelper,
-            final Long resourceId, final Long subResourceId) {
-        return new JsonCommand(commandId, jsonCommand, parsedCommand, fromApiJsonHelper, resourceId, subResourceId);
+    public static JsonQuery from(final String jsonCommand, final JsonElement parsedQuery, final FromJsonHelper fromApiJsonHelper) {
+        return new JsonQuery(jsonCommand, parsedQuery, fromApiJsonHelper);
     }
 
-    public JsonCommand(final Long commandId, final String jsonCommand, final JsonElement parsedCommand, final FromJsonHelper fromApiJsonHelper,
-            final Long resourceId, final Long subResourceId) {
-        this.commandId = commandId;
-        this.jsonCommand = jsonCommand;
-        this.parsedCommand = parsedCommand;
+    public JsonQuery(final String jsonCommand, final JsonElement parsedCommand, final FromJsonHelper fromApiJsonHelper) {
+        this.jsonQuery = jsonCommand;
+        this.parsedQuery = parsedCommand;
         this.fromApiJsonHelper = fromApiJsonHelper;
-        this.resourceId = resourceId;
-        this.subResourceId = subResourceId;
     }
 
     public String json() {
-        return this.jsonCommand;
+        return this.jsonQuery;
     }
     
     public JsonElement parsedJson() {
-        return this.parsedCommand;
-    }
-    
-    public Long commandId() {
-        return this.commandId;
-    }
-    
-    public Long resourceId() {
-        return this.resourceId;
-    }
-    
-    public Long subResourceId() {
-        return this.subResourceId;
+        return this.parsedQuery;
     }
 
     private boolean differenceExists(final LocalDate baseValue, final LocalDate workingCopyValue) {
@@ -137,8 +112,8 @@ public final class JsonCommand {
         return differenceExists;
     }
 
-    public boolean parameterExists(final String parameterName) {
-        return this.fromApiJsonHelper.parameterExists(parameterName, parsedCommand);
+    private boolean parameterExists(final String parameterName) {
+        return this.fromApiJsonHelper.parameterExists(parameterName, parsedQuery);
     }
 
     public boolean hasParameter(final String parameterName) {
@@ -156,11 +131,11 @@ public final class JsonCommand {
     public Map<String, Boolean> mapValueOfParameterNamed(final String parameterName) {
         final Type typeOfMap = new TypeToken<Map<String, Boolean>>() {}.getType();
 
-        if (parsedCommand.getAsJsonObject().has(parameterName)) {
-            parsedCommand.getAsJsonObject().get(parameterName);
+        if (parsedQuery.getAsJsonObject().has(parameterName)) {
+            parsedQuery.getAsJsonObject().get(parameterName);
         }
 
-        return this.fromApiJsonHelper.extractMap(typeOfMap, jsonCommand);
+        return this.fromApiJsonHelper.extractMap(typeOfMap, jsonQuery);
     }
 
     public boolean isChangeInLongParameterNamed(final String parameterName, final Long existingValue) {
@@ -173,7 +148,7 @@ public final class JsonCommand {
     }
 
     public Long longValueOfParameterNamed(final String parameterName) {
-        return this.fromApiJsonHelper.extractLongNamed(parameterName, parsedCommand);
+        return this.fromApiJsonHelper.extractLongNamed(parameterName, parsedQuery);
     }
 
     public boolean isChangeInLocalDateParameterNamed(final String parameterName, final LocalDate existingValue) {
@@ -186,7 +161,7 @@ public final class JsonCommand {
     }
 
     public LocalDate localDateValueOfParameterNamed(final String parameterName) {
-        return this.fromApiJsonHelper.extractLocalDateNamed(parameterName, parsedCommand);
+        return this.fromApiJsonHelper.extractLocalDateNamed(parameterName, parsedQuery);
     }
 
     public boolean isChangeInStringParameterNamed(final String parameterName, final String existingValue) {
@@ -199,7 +174,7 @@ public final class JsonCommand {
     }
 
     public String stringValueOfParameterNamed(final String parameterName) {
-        final String value = this.fromApiJsonHelper.extractStringNamed(parameterName, parsedCommand);
+        final String value = this.fromApiJsonHelper.extractStringNamed(parameterName, parsedQuery);
         return StringUtils.defaultIfEmpty(value, "");
     }
 
@@ -213,7 +188,7 @@ public final class JsonCommand {
     }
 
     public BigDecimal bigDecimalValueOfParameterNamed(final String parameterName) {
-        return this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(parameterName, parsedCommand);
+        return this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(parameterName, parsedQuery);
     }
 
     public boolean isChangeInIntegerParameterNamed(final String parameterName, final Integer existingValue) {
@@ -226,7 +201,7 @@ public final class JsonCommand {
     }
 
     public Integer integerValueOfParameterNamed(final String parameterName) {
-        return this.fromApiJsonHelper.extractIntegerWithLocaleNamed(parameterName, parsedCommand);
+        return this.fromApiJsonHelper.extractIntegerWithLocaleNamed(parameterName, parsedQuery);
     }
 
     public boolean isChangeInBooleanParameterNamed(final String parameterName, final Boolean existingValue) {
@@ -242,14 +217,14 @@ public final class JsonCommand {
      * Returns {@link Boolean} that could possibly be null.
      */
     public Boolean booleanObjectValueOfParameterNamed(final String parameterName) {
-        return this.fromApiJsonHelper.extractBooleanNamed(parameterName, parsedCommand);
+        return this.fromApiJsonHelper.extractBooleanNamed(parameterName, parsedQuery);
     }
 
     /**
      * always returns true or false
      */
     public boolean booleanPrimitiveValueOfParameterNamed(final String parameterName) {
-        final Boolean value = this.fromApiJsonHelper.extractBooleanNamed(parameterName, parsedCommand);
+        final Boolean value = this.fromApiJsonHelper.extractBooleanNamed(parameterName, parsedQuery);
         return (Boolean) ObjectUtils.defaultIfNull(value, Boolean.FALSE);
     }
 
@@ -263,7 +238,7 @@ public final class JsonCommand {
     }
 
     public String[] arrayValueOfParameterNamed(final String parameterName) {
-        return this.fromApiJsonHelper.extractArrayNamed(parameterName, parsedCommand);
+        return this.fromApiJsonHelper.extractArrayNamed(parameterName, parsedQuery);
     }
 
     public boolean isChangeInPasswordParameterNamed(final String parameterName, final String existingValue,

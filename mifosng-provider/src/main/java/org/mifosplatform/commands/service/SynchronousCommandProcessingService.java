@@ -210,6 +210,29 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
             } else {
                 throw new UnsupportedCommandException(wrapper.commandName());
             }
+        } else if (wrapper.isLoanResource()) {
+            
+            if (wrapper.isApproveLoanApplication()) {
+                handler = applicationContext.getBean("approveLoanApplicationCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isUndoApprovalOfLoanApplication()) {
+                handler = applicationContext.getBean("undoApprovalLoanApplicationCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isApplicantWithdrawalFromLoanApplication()) {
+                handler = applicationContext.getBean("applicantWithdrawsFromLoanApplicationCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isRejectionOfLoanApplication()) {
+                handler = applicationContext.getBean("rejectLoanApplicationCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isDisbursementOfLoan()) {
+                handler = applicationContext.getBean("disburseLoanCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isUndoDisbursementOfLoan()) {
+                handler = applicationContext.getBean("undoDisbursalLoanCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isCreate()) {
+                handler = applicationContext.getBean("createLoanApplicationCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isUpdate()) {
+                handler = applicationContext.getBean("updateLoanApplicationCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isDelete()) {
+                handler = applicationContext.getBean("deleteLoanApplicationCommandHandler", NewCommandSourceHandler.class);
+            } else {
+                throw new UnsupportedCommandException(wrapper.commandName());
+            }
         } else {
             throw new UnsupportedCommandException(wrapper.commandName());
         }

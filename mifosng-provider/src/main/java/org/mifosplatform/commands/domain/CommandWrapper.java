@@ -163,4 +163,32 @@ public class CommandWrapper {
     public boolean isIdentifiersSubResource() {
         return "IDENTIFIERS".equalsIgnoreCase(this.subResource);
     }
+
+    public boolean isLoanResource() {
+        return this.resource.equalsIgnoreCase("LOANS");
+    }
+    
+    public boolean isApproveLoanApplication() {
+        return this.actionName.equalsIgnoreCase("APPROVE") && this.entityName.equalsIgnoreCase("LOAN");
+    }
+
+    public boolean isUndoApprovalOfLoanApplication() {
+        return this.actionName.equalsIgnoreCase("APPROVALUNDO") && this.entityName.equalsIgnoreCase("LOAN");
+    }
+
+    public boolean isApplicantWithdrawalFromLoanApplication() {
+        return this.actionName.equalsIgnoreCase("WITHDRAW") && this.entityName.equalsIgnoreCase("LOAN");
+    }
+
+    public boolean isRejectionOfLoanApplication() {
+        return this.actionName.equalsIgnoreCase("REJECT") && this.entityName.equalsIgnoreCase("LOAN");
+    }
+
+    public boolean isDisbursementOfLoan() {
+        return this.actionName.equalsIgnoreCase("DISBURSE") && this.entityName.equalsIgnoreCase("LOAN");
+    }
+
+    public boolean isUndoDisbursementOfLoan() {
+        return this.actionName.equalsIgnoreCase("DISBURSALUNDO") && this.entityName.equalsIgnoreCase("LOAN");
+    }
 }

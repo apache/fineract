@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 @Component
@@ -98,6 +99,11 @@ public class FromJsonHelper {
     public LocalDate extractLocalDateNamed(final String parameterName, JsonElement element) {
         return helperDelegator.extractLocalDateNamed(parameterName, element, new HashSet<String>());
     }
+    
+    public LocalDate extractLocalDateNamed(final String parameterName, final JsonElement element, final String dateFormat,
+            final Locale locale) {
+        return helperDelegator.extractLocalDateNamed(parameterName, element.getAsJsonObject(), dateFormat, locale, new HashSet<String>());
+    }
 
     public LocalDate extractLocalDateNamed(final String parameterName, final JsonElement element,
             final Set<String> parametersPassedInRequest) {
@@ -118,11 +124,15 @@ public class FromJsonHelper {
         return helperDelegator.extractBigDecimalWithLocaleNamed(parameterName, element, parametersPassedInRequest);
     }
 
+    public BigDecimal extractBigDecimalNamed(final String parameterName, final JsonElement element, final Locale locale) {
+        return helperDelegator.extractBigDecimalNamed(parameterName, element.getAsJsonObject(), locale, new HashSet<String>());
+    }
+    
     public BigDecimal extractBigDecimalNamed(final String parameterName, final JsonElement element,
             final Set<String> parametersPassedInRequest) {
         return helperDelegator.extractBigDecimalNamed(parameterName, element.getAsJsonObject(), Locale.US, parametersPassedInRequest);
     }
-
+    
     public Integer extractIntegerWithLocaleNamed(final String parameterName, final JsonElement element) {
         return helperDelegator.extractIntegerWithLocaleNamed(parameterName, element.getAsJsonObject(), new HashSet<String>());
     }
@@ -131,9 +141,21 @@ public class FromJsonHelper {
             final Set<String> parametersPassedInRequest) {
         return helperDelegator.extractIntegerWithLocaleNamed(parameterName, element.getAsJsonObject(), parametersPassedInRequest);
     }
+    
+    public Integer extractIntegerNamed(final String parameterName, final JsonElement element, final Locale locale) {
+        return helperDelegator.extractIntegerNamed(parameterName, element.getAsJsonObject(), locale, new HashSet<String>());
+    }
 
     public Integer extractIntegerNamed(final String parameterName, final JsonElement element,
             final Set<String> parametersPassedInRequest) {
         return helperDelegator.extractIntegerNamed(parameterName, element.getAsJsonObject(), Locale.US, parametersPassedInRequest);
+    }
+
+    public Locale extractLocaleParameter(final JsonObject element) {
+        return helperDelegator.extractLocaleParameter(element);
+    }
+
+    public String extractDateFormatParameter(final JsonObject element) {
+        return helperDelegator.extractDateFormatParameter(element);
     }
 }

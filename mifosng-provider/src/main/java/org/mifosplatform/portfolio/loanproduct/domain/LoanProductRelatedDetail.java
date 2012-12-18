@@ -14,6 +14,7 @@ import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
+import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.AprCalculator;
 
 /**
  * LoanRepaymentScheduleDetail encapsulates all the details of a
@@ -31,6 +32,8 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     @Column(name = "nominal_interest_rate_per_period", scale = 6, precision = 19, nullable = false)
     private BigDecimal nominalInterestRatePerPeriod;
 
+    // FIXME - move away form JPA ordinal use for enums using just integer -
+    // requires sql patch for existing users of software.
     @Enumerated(EnumType.ORDINAL)
     @Column(name = "interest_period_frequency_enum", nullable = false)
     private PeriodFrequencyType interestPeriodFrequencyType;
@@ -38,10 +41,14 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     @Column(name = "annual_nominal_interest_rate", scale = 6, precision = 19, nullable = false)
     private BigDecimal annualNominalInterestRate;
 
+    // FIXME - move away form JPA ordinal use for enums using just integer -
+    // requires sql patch for existing users of software.
     @Enumerated(EnumType.ORDINAL)
     @Column(name = "interest_method_enum", nullable = false)
     private InterestMethod interestMethod;
 
+    // FIXME - move away form JPA ordinal use for enums using just integer -
+    // requires sql patch for existing users of software.
     @Enumerated(EnumType.ORDINAL)
     @Column(name = "interest_calculated_in_period_enum", nullable = false)
     private InterestCalculationPeriodMethod interestCalculationPeriodMethod;
@@ -49,6 +56,8 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     @Column(name = "repay_every", nullable = false)
     private Integer repayEvery;
 
+    // FIXME - move away form JPA ordinal use for enums using just integer -
+    // requires sql patch for existing users of software.
     @Enumerated(EnumType.ORDINAL)
     @Column(name = "repayment_period_frequency_enum", nullable = false)
     private PeriodFrequencyType repaymentPeriodFrequencyType;
@@ -56,12 +65,26 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     @Column(name = "number_of_repayments", nullable = false)
     private Integer numberOfRepayments;
 
+    // FIXME - move away form JPA ordinal use for enums using just integer -
+    // requires sql patch for existing users of software.
     @Enumerated(EnumType.ORDINAL)
     @Column(name = "amortization_method_enum", nullable = false)
     private AmortizationMethod amortizationMethod;
 
     @Column(name = "arrearstolerance_amount", scale = 6, precision = 19, nullable = true)
     private BigDecimal inArrearsTolerance;
+
+    public static LoanProductRelatedDetail createFrom(final MonetaryCurrency currency, final BigDecimal principal,
+            final BigDecimal nominalInterestRatePerPeriod, final PeriodFrequencyType interestRatePeriodFrequencyType,
+            final BigDecimal nominalAnnualInterestRate, final InterestMethod interestMethod,
+            final InterestCalculationPeriodMethod interestCalculationPeriodMethod, final Integer repaymentEvery,
+            final PeriodFrequencyType repaymentPeriodFrequencyType, final Integer numberOfRepayments,
+            final AmortizationMethod amortizationMethod, final BigDecimal inArrearsTolerance) {
+
+        return new LoanProductRelatedDetail(currency, principal, nominalInterestRatePerPeriod, interestRatePeriodFrequencyType,
+                nominalAnnualInterestRate, interestMethod, interestCalculationPeriodMethod, repaymentEvery, repaymentPeriodFrequencyType,
+                numberOfRepayments, amortizationMethod, inArrearsTolerance);
+    }
 
     protected LoanProductRelatedDetail() {
         //
@@ -142,7 +165,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
         return amortizationMethod;
     }
 
-    public Map<String, Object> update(final JsonCommand command) {
+    public Map<String, Object> update(final JsonCommand command, final AprCalculator aprCalculator) {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(20);
 
@@ -167,6 +190,18 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             currencyCode = newValue;
             this.currency = new MonetaryCurrency(currencyCode, digitsAfterDecimal);
         }
+
+        final Map<String, Object> loanApplicationAttributeChanges = updateLoanApplicationAttributes(command, aprCalculator);
+
+        actualChanges.putAll(loanApplicationAttributeChanges);
+
+        return actualChanges;
+    }
+
+    public Map<String, Object> updateLoanApplicationAttributes(final JsonCommand command, final AprCalculator aprCalculator) {
+        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(20);
+
+        final String localeAsInput = command.locale();
 
         final String principalParamName = "principal";
         if (command.isChangeInBigDecimalParameterNamed(principalParamName, this.principal)) {
@@ -222,6 +257,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             actualChanges.put(interestRatePerPeriodParamName, newValue);
             actualChanges.put("locale", localeAsInput);
             this.nominalInterestRatePerPeriod = newValue;
+            updateInterestRateDerivedFields(aprCalculator);
         }
 
         final String interestRateFrequencyTypeParamName = "interestRateFrequencyType";
@@ -230,6 +266,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             actualChanges.put(interestRateFrequencyTypeParamName, newValue);
             actualChanges.put("locale", localeAsInput);
             this.interestPeriodFrequencyType = PeriodFrequencyType.fromInt(newValue);
+            updateInterestRateDerivedFields(aprCalculator);
         }
 
         final String interestTypeParamName = "interestType";
@@ -250,5 +287,9 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
         }
 
         return actualChanges;
+    }
+
+    private void updateInterestRateDerivedFields(final AprCalculator aprCalculator) {
+        this.annualNominalInterestRate = aprCalculator.calculateFrom(this.interestPeriodFrequencyType, this.nominalInterestRatePerPeriod);
     }
 }

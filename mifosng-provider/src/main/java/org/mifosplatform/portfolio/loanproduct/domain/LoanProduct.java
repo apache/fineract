@@ -138,9 +138,9 @@ public class LoanProduct extends AbstractAuditableCustom<AppUser, Long> {
         this.charges = charges;
     }
 
-    public Map<String, Object> update(final JsonCommand command) {
+    public Map<String, Object> update(final JsonCommand command, final AprCalculator aprCalculator) {
 
-        final Map<String, Object> actualChanges = this.loanProductRelatedDetail.update(command);
+        final Map<String, Object> actualChanges = this.loanProductRelatedDetail.update(command, aprCalculator);
 
         final String nameParamName = "name";
         if (command.isChangeInStringParameterNamed(nameParamName, this.name)) {

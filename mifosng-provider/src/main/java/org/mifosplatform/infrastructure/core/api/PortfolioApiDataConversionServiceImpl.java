@@ -21,7 +21,6 @@ import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.exception.UnsupportedParameterException;
-import org.mifosplatform.infrastructure.core.serialization.JsonParserHelper;
 import org.mifosplatform.organisation.staff.command.BulkTransferLoanOfficerCommand;
 import org.mifosplatform.portfolio.client.command.ClientCommand;
 import org.mifosplatform.portfolio.client.command.NoteCommand;
@@ -29,9 +28,7 @@ import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.client.serialization.ClientCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.group.command.GroupCommand;
 import org.mifosplatform.portfolio.loanaccount.command.AdjustLoanTransactionCommand;
-import org.mifosplatform.portfolio.loanaccount.command.LoanApplicationCommand;
 import org.mifosplatform.portfolio.loanaccount.command.LoanChargeCommand;
-import org.mifosplatform.portfolio.loanaccount.command.LoanStateTransitionCommand;
 import org.mifosplatform.portfolio.loanaccount.command.LoanTransactionCommand;
 import org.mifosplatform.portfolio.loanaccount.gaurantor.command.GuarantorCommand;
 import org.mifosplatform.portfolio.savingsaccount.command.SavingAccountCommand;
@@ -178,106 +175,10 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         return new GroupCommand(modifiedParameters, resourceIdentifier, externalId, name, officeId, clientMembers);
     }
 
-    @Override
-    public LoanApplicationCommand convertApiRequestJsonToLoanApplicationCommand(final Long resourceIdentifier, final String json) {
-
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
-
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        final Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
-
-        final Set<String> supportedParams = new HashSet<String>(Arrays.asList("clientId", "groupId", "productId", "externalId", "fundId",
-                "transactionProcessingStrategyId", "principal", "inArrearsTolerance", "interestRatePerPeriod", "repaymentEvery",
-                "numberOfRepayments", "loanTermFrequency", "loanTermFrequencyType", "charges", "repaymentFrequencyType",
-                "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType",
-                "expectedDisbursementDate", "repaymentsStartingFromDate", "interestChargedFromDate", "submittedOnDate", "submittedOnNote",
-                "locale", "dateFormat", "loanOfficerId", "id"));
-
-        checkForUnsupportedParameters(requestMap, supportedParams);
-
-        final Set<String> parametersPassedInCommand = new HashSet<String>();
-
-        final JsonParser parser = new JsonParser();
-        final JsonElement element = parser.parse(json);
-        final JsonParserHelper helper = new JsonParserHelper();
-
-        final Long clientId = helper.extractLongNamed("clientId", element, parametersPassedInCommand);
-        final Long groupId = helper.extractLongNamed("groupId", element, parametersPassedInCommand);
-        final Long productId = helper.extractLongNamed("productId", element, parametersPassedInCommand);
-        final Long fundId = helper.extractLongNamed("fundId", element, parametersPassedInCommand);
-        final Long loanOfficerId = helper.extractLongNamed("loanOfficerId", element, parametersPassedInCommand);
-        final Long transactionProcessingStrategyId = helper.extractLongNamed("transactionProcessingStrategyId", element,
-                parametersPassedInCommand);
-        final String externalId = helper.extractStringNamed("externalId", element, parametersPassedInCommand);
-        final BigDecimal principal = helper.extractBigDecimalWithLocaleNamed("principal", element, parametersPassedInCommand);
-        final BigDecimal inArrearsToleranceValue = helper.extractBigDecimalWithLocaleNamed("inArrearsTolerance", element,
-                parametersPassedInCommand);
-        final BigDecimal interestRatePerPeriod = helper.extractBigDecimalWithLocaleNamed("interestRatePerPeriod", element,
-                parametersPassedInCommand);
-
-        final Integer repaymentEvery = helper.extractIntegerWithLocaleNamed("repaymentEvery", element, parametersPassedInCommand);
-        final Integer numberOfRepayments = helper.extractIntegerWithLocaleNamed("numberOfRepayments", element, parametersPassedInCommand);
-        final Integer repaymentFrequencyType = helper.extractIntegerWithLocaleNamed("repaymentFrequencyType", element,
-                parametersPassedInCommand);
-        final Integer loanTermFrequency = helper.extractIntegerWithLocaleNamed("loanTermFrequency", element, parametersPassedInCommand);
-        final Integer loanTermFrequencyType = helper.extractIntegerWithLocaleNamed("loanTermFrequencyType", element,
-                parametersPassedInCommand);
-        final Integer interestRateFrequencyType = helper.extractIntegerWithLocaleNamed("interestRateFrequencyType", element,
-                parametersPassedInCommand);
-        final Integer amortizationType = helper.extractIntegerWithLocaleNamed("amortizationType", element, parametersPassedInCommand);
-        final Integer interestType = helper.extractIntegerWithLocaleNamed("interestType", element, parametersPassedInCommand);
-        final Integer interestCalculationPeriodType = helper.extractIntegerWithLocaleNamed("interestCalculationPeriodType", element,
-                parametersPassedInCommand);
-
-        final LocalDate expectedDisbursementDate = helper.extractLocalDateNamed("expectedDisbursementDate", element,
-                parametersPassedInCommand);
-        final LocalDate repaymentsStartingFromDate = helper.extractLocalDateNamed("repaymentsStartingFromDate", element,
-                parametersPassedInCommand);
-        final LocalDate interestChargedFromDate = helper.extractLocalDateNamed("interestChargedFromDate", element,
-                parametersPassedInCommand);
-        final LocalDate submittedOnDate = helper.extractLocalDateNamed("submittedOnDate", element, parametersPassedInCommand);
-
-        final String submittedOnNote = helper.extractStringNamed("submittedOnNote", element, parametersPassedInCommand);
-
-        LoanChargeCommand[] charges = null;
-        if (element.isJsonObject()) {
-            final JsonObject topLevelJsonElement = element.getAsJsonObject();
-            final String dateFormat = helper.extractDateFormatParameter(topLevelJsonElement);
-            final Locale locale = helper.extractLocaleParameter(topLevelJsonElement);
-            if (topLevelJsonElement.has("charges") && topLevelJsonElement.get("charges").isJsonArray()) {
-
-                parametersPassedInCommand.add("charges");
-                final JsonArray array = topLevelJsonElement.get("charges").getAsJsonArray();
-                charges = new LoanChargeCommand[array.size()];
-                for (int i = 0; i < array.size(); i++) {
-
-                    final JsonObject loanChargeElement = array.get(i).getAsJsonObject();
-                    final Set<String> parametersPassedInForChargesCommand = new HashSet<String>();
-
-                    final Long id = helper.extractLongNamed("id", loanChargeElement, parametersPassedInForChargesCommand);
-                    final Long chargeId = helper.extractLongNamed("chargeId", loanChargeElement, parametersPassedInForChargesCommand);
-                    final BigDecimal amount = helper.extractBigDecimalNamed("amount", loanChargeElement, locale,
-                            parametersPassedInForChargesCommand);
-                    final Integer chargeTimeType = helper.extractIntegerNamed("chargeTimeType", loanChargeElement, locale,
-                            parametersPassedInForChargesCommand);
-                    final Integer chargeCalculationType = helper.extractIntegerNamed("chargeCalculationType", loanChargeElement, locale,
-                            parametersPassedInForChargesCommand);
-                    final LocalDate specifiedDueDate = helper.extractLocalDateNamed("specifiedDueDate", loanChargeElement, dateFormat,
-                            locale, parametersPassedInForChargesCommand);
-
-                    charges[i] = new LoanChargeCommand(parametersPassedInForChargesCommand, id, null, chargeId, amount, chargeTimeType,
-                            chargeCalculationType, specifiedDueDate);
-                }
-            }
-        }
-
-        return new LoanApplicationCommand(parametersPassedInCommand, resourceIdentifier, clientId, groupId, productId, externalId, fundId,
-                transactionProcessingStrategyId, submittedOnDate, submittedOnNote, expectedDisbursementDate, repaymentsStartingFromDate,
-                interestChargedFromDate, principal, interestRatePerPeriod, interestRateFrequencyType, interestType,
-                interestCalculationPeriodType, repaymentEvery, repaymentFrequencyType, numberOfRepayments, amortizationType,
-                loanTermFrequency, loanTermFrequencyType, inArrearsToleranceValue, charges, loanOfficerId);
-    }
-
+    /**
+     * @deprecated - to be removed soon
+     */
+    @Deprecated
     @Override
     public LoanChargeCommand convertJsonToLoanChargeCommand(final Long loanChargeId, final Long loanId, final String json) {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
@@ -300,25 +201,6 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
 
         return new LoanChargeCommand(modifiedParameters, loanChargeId, loanId, chargeId, amount, chargeTimeType, chargeCalculationType,
                 submittedOnDate);
-    }
-
-    @Override
-    public LoanStateTransitionCommand convertJsonToLoanStateTransitionCommand(final Long resourceIdentifier, final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
-
-        Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
-
-        Set<String> supportedParams = new HashSet<String>(Arrays.asList("eventDate", "note", "locale", "dateFormat"));
-
-        checkForUnsupportedParameters(requestMap, supportedParams);
-
-        Set<String> modifiedParameters = new HashSet<String>();
-
-        LocalDate eventDate = extractLocalDateParameter("eventDate", requestMap, modifiedParameters);
-        String note = extractStringParameter("note", requestMap, modifiedParameters);
-
-        return new LoanStateTransitionCommand(resourceIdentifier, eventDate, note);
     }
 
     @Override

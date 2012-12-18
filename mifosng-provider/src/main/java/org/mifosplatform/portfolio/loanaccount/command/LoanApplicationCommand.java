@@ -1,11 +1,15 @@
 package org.mifosplatform.portfolio.loanaccount.command;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import org.joda.time.LocalDate;
-import org.mifosplatform.portfolio.loanaccount.loanschedule.command.CalculateLoanScheduleCommand;
-import org.mifosplatform.portfolio.loanproduct.command.LoanProductCommand;
+import org.mifosplatform.infrastructure.core.data.ApiParameterError;
+import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
+import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.mifosplatform.portfolio.loanaccount.loanschedule.query.CalculateLoanScheduleQuery;
 
 /**
  * Immutable command for submitting new loan application.
@@ -90,8 +94,8 @@ public class LoanApplicationCommand {
         this.charges = charges;
     }
 
-    public CalculateLoanScheduleCommand toCalculateLoanScheduleCommand() {
-        return new CalculateLoanScheduleCommand(this.productId, this.principal, this.interestRatePerPeriod, this.interestRateFrequencyType,
+    public CalculateLoanScheduleQuery toCalculateLoanScheduleCommand() {
+        return new CalculateLoanScheduleQuery(this.productId, this.principal, this.interestRatePerPeriod, this.interestRateFrequencyType,
                 this.interestType, this.interestCalculationPeriodType, this.repaymentEvery, this.repaymentFrequencyType,
                 this.numberOfRepayments, this.amortizationType, this.loanTermFrequency, this.loanTermFrequencyType,
                 this.expectedDisbursementDate, this.repaymentsStartingFromDate, this.interestChargedFromDate, this.charges);
@@ -197,16 +201,6 @@ public class LoanApplicationCommand {
         return charges;
     }
 
-    public LoanProductCommand toLoanProductCommand() {
-
-        // FIXME - KW - CHARGE - FIX UP FOR CHARGES - take look at loan product
-        // charges also and align usage with other loan areas.
-        return new LoanProductCommand(null, null, this.fundId, this.transactionProcessingStrategyId, null, null, this.principal,
-                this.inArrearsTolerance, this.numberOfRepayments, this.repaymentEvery, this.interestRatePerPeriod,
-                this.repaymentFrequencyType, this.interestRateFrequencyType, this.amortizationType, this.interestType,
-                this.interestCalculationPeriodType, null);
-    }
-
     public boolean isClientChanged() {
         return this.modifiedParameters.contains("clientId");
     }
@@ -257,5 +251,53 @@ public class LoanApplicationCommand {
 
     public Long getLoanOfficerId() {
         return loanOfficerId;
+    }
+
+    public void validate() {
+        List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+
+        DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");
+
+        if (this.groupId != null) {
+            baseDataValidator.reset().parameter("clientId").value(this.clientId).mustBeBlankWhenParameterProvided("groupId", this.groupId)
+                    .longGreaterThanZero();
+        }
+        if (this.clientId != null) {
+            baseDataValidator.reset().parameter("groupId").value(this.groupId).mustBeBlankWhenParameterProvided("clientId", this.clientId)
+                    .longGreaterThanZero();
+        }
+
+        if (this.submittedOnDate == null) {
+            ApiParameterError error = ApiParameterError.parameterError("validation.msg.loan.submitted.on.date.cannot.be.blank",
+                    "The parameter submittedOnDate cannot be empty.", "submittedOnDate");
+            dataValidationErrors.add(error);
+        } else {
+            if (this.submittedOnDate.isAfter(this.expectedDisbursementDate)) {
+                ApiParameterError error = ApiParameterError.parameterError(
+                        "validation.msg.loan.submitted.on.date.cannot.be.after.expectedDisbursementDate",
+                        "The date of parameter submittedOnDate cannot fall after the date given for expectedDisbursementDate.",
+                        "submittedOnDate", this.submittedOnDate, this.expectedDisbursementDate);
+                dataValidationErrors.add(error);
+            }
+        }
+
+        if (this.transactionProcessingStrategyId == null) {
+            baseDataValidator.reset().parameter("transactionProcessingStrategyId").value(this.transactionProcessingStrategyId).notNull()
+                    .inMinMaxRange(2, 2);
+        }
+
+        if (this.charges != null) {
+            for (LoanChargeCommand loanChargeCommand : this.charges) {
+                try {
+                    LoanChargeCommandValidator validator = new LoanChargeCommandValidator(loanChargeCommand);
+                    validator.validateForCreate();
+                } catch (PlatformApiDataValidationException e) {
+                    dataValidationErrors.addAll(e.getErrors());
+                }
+            }
+        }
+
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
+                "Validation errors exist.", dataValidationErrors); }
     }
 }

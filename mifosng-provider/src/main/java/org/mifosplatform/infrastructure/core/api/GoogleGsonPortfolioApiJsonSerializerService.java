@@ -18,7 +18,6 @@ import org.mifosplatform.portfolio.group.data.GroupData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanChargeData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionData;
 import org.mifosplatform.portfolio.loanaccount.gaurantor.data.GuarantorData;
-import org.mifosplatform.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
 import org.mifosplatform.portfolio.savingsaccount.data.SavingAccountData;
 import org.mifosplatform.portfolio.savingsaccount.data.SavingScheduleData;
 import org.mifosplatform.portfolio.savingsaccountproduct.data.SavingProductData;
@@ -59,8 +58,8 @@ public class GoogleGsonPortfolioApiJsonSerializerService implements PortfolioApi
             "interestCompoundedEveryPeriodType", "renewalAllowed", "preClosureAllowed", "preClosureInterestRate", "withdrawnonDate",
             "rejectedonDate", "closedonDate", "transactions", "permissions", "isInterestWithdrawable", "interestPaid",
             "interestCompoundingAllowed", "availableInterestForWithdrawal", "availableWithdrawalAmount", "todaysDate",
-            "isLockinPeriodAllowed", "lockinPeriod", "lockinPeriodType", "printFDdetailsLocation","availableInterest", "interestPostedAmount",
-            "lastInterestPostedDate", "nextInterestPostedDate","fatherName","address","imageKey"));
+            "isLockinPeriodAllowed", "lockinPeriod", "lockinPeriodType", "printFDdetailsLocation", "availableInterest",
+            "interestPostedAmount", "lastInterestPostedDate", "nextInterestPostedDate", "fatherName", "address", "imageKey"));
 
     private static final Set<String> DOCUMENT_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "parentEntityType",
             "parentEntityId", "name", "fileName", "type", "size", "description"));
@@ -78,9 +77,6 @@ public class GoogleGsonPortfolioApiJsonSerializerService implements PortfolioApi
 
     private static final Set<String> GROUP_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "officeId", "name", "externalId",
             "clientMembers", "allowedClients", "allowedOffices"));
-
-    private static final Set<String> LOAN_SCHEDULE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("periods",
-            "cumulativePrincipalDisbursed"));
 
     private static final Set<String> LOAN_TRANSACTION_NEW_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "type", "date",
             "currency", "amount"));
@@ -103,7 +99,7 @@ public class GoogleGsonPortfolioApiJsonSerializerService implements PortfolioApi
     private static final Set<String> GUARANTOR_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("externalGuarantor", "existingClientId",
             "firstname", "lastname", "addressLine1", "addressLine2", "city", "state", "zip", "country", "mobileNumber", "housePhoneNumber",
             "comment", "dob"));
-    
+
     private static final Set<String> SAVING_SCHEDULE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("periods", "cumulativeDepositDue"));
 
     private final GoogleGsonSerializerHelper helper;
@@ -208,14 +204,6 @@ public class GoogleGsonPortfolioApiJsonSerializerService implements PortfolioApi
         final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(GROUP_DATA_PARAMETERS,
                 prettyPrint, responseParameters);
         return helper.serializedJsonFrom(gsonDeserializer, group);
-    }
-
-    @Override
-    public String serializeLoanScheduleDataToJson(final boolean prettyPrint, final Set<String> responseParameters,
-            final LoanScheduleData loanSchedule) {
-        final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(LOAN_SCHEDULE_DATA_PARAMETERS,
-                prettyPrint, responseParameters);
-        return helper.serializedJsonFrom(gsonDeserializer, loanSchedule);
     }
 
     @Override

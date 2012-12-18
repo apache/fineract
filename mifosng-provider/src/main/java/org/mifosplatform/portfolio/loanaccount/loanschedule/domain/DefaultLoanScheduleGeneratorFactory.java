@@ -1,26 +1,27 @@
 package org.mifosplatform.portfolio.loanaccount.loanschedule.domain;
 
 import org.mifosplatform.portfolio.loanproduct.domain.InterestMethod;
+import org.springframework.stereotype.Component;
 
-public class DefaultLoanScheduleGeneratorFactory implements
-		LoanScheduleGeneratorFactory {
+@Component
+public class DefaultLoanScheduleGeneratorFactory implements LoanScheduleGeneratorFactory {
 
-	@Override
-	public LoanScheduleGenerator create(final InterestMethod interestMethod) {
+    @Override
+    public LoanScheduleGenerator create(final InterestMethod interestMethod) {
 
-		LoanScheduleGenerator loanScheduleGenerator = null;
+        LoanScheduleGenerator loanScheduleGenerator = null;
 
-		switch (interestMethod) {
-		case FLAT:
-			loanScheduleGenerator = new FlatMethodLoanScheduleGenerator();
-			break;
-		case DECLINING_BALANCE:
-			loanScheduleGenerator = new DecliningBalanceMethodLoanScheduleGenerator();
-			break;
-		case INVALID:
-			break;
-		}
-		
-		return loanScheduleGenerator;
-	}
+        switch (interestMethod) {
+            case FLAT:
+                loanScheduleGenerator = new FlatMethodLoanScheduleGenerator();
+            break;
+            case DECLINING_BALANCE:
+                loanScheduleGenerator = new DecliningBalanceMethodLoanScheduleGenerator();
+            break;
+            case INVALID:
+            break;
+        }
+
+        return loanScheduleGenerator;
+    }
 }

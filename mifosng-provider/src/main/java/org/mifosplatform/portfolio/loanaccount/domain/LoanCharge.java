@@ -86,6 +86,14 @@ public class LoanCharge extends AbstractPersistable<Long> {
         return new LoanCharge(chargeDefinition, command, loanPrincipal);
     }
 
+    /*
+     * loanPrincipal is required for charges that are percentage based
+     */
+    public static LoanCharge createNewWithoutLoan(final Charge chargeDefinition, final BigDecimal loanPrincipal, final BigDecimal amount,
+            final ChargeTimeType chargeTime, final ChargeCalculationType chargeCalculation, final LocalDate specifiedDueDate) {
+        return new LoanCharge(chargeDefinition, loanPrincipal, amount, chargeTime, chargeCalculation, specifiedDueDate);
+    }
+
     public static LoanCharge createNew(final Charge chargeDefinition) {
         return new LoanCharge(null, chargeDefinition);
     }
@@ -94,6 +102,45 @@ public class LoanCharge extends AbstractPersistable<Long> {
         //
     }
 
+    public LoanCharge(final Charge chargeDefinition, final BigDecimal loanPrincipal, final BigDecimal amount,
+            final ChargeTimeType chargeTime, final ChargeCalculationType chargeCalculation, final LocalDate specifiedDueDate) {
+        this.loan = null;
+        this.charge = chargeDefinition;
+        this.penaltyCharge = chargeDefinition.isPenalty();
+
+        this.chargeTime = chargeDefinition.getChargeTime();
+        if (chargeTime != null) {
+            this.chargeTime = chargeTime.getValue();
+        }
+
+        if (ChargeTimeType.fromInt(this.chargeTime).equals(ChargeTimeType.SPECIFIED_DUE_DATE)) {
+
+            if (specifiedDueDate == null) {
+                final String defaultUserMessage = "Loan charge is missing specified due date";
+                throw new LoanChargeWithoutMandatoryFieldException("loancharge", "specifiedDueDate", defaultUserMessage,
+                        chargeDefinition.getId(), chargeDefinition.getName());
+            }
+
+            this.dueForCollectionAsOfDate = specifiedDueDate.toDate();
+        } else {
+            this.dueForCollectionAsOfDate = null;
+        }
+
+        this.chargeCalculation = chargeDefinition.getChargeCalculation();
+        if (chargeCalculation != null) {
+            this.chargeCalculation = chargeCalculation.getValue();
+        }
+
+        BigDecimal chargeAmount = chargeDefinition.getAmount();
+        if (amount != null) {
+            chargeAmount = amount;
+        }
+
+        populateDerivedFields(loanPrincipal, chargeAmount);
+        this.paid = determineIfFullyPaid();
+    }
+
+    @Deprecated
     public LoanCharge(final Charge chargeDefinition, final LoanChargeCommand command, final BigDecimal loanPrincipal) {
         this.loan = null;
         this.charge = chargeDefinition;
@@ -133,6 +180,7 @@ public class LoanCharge extends AbstractPersistable<Long> {
         this.paid = determineIfFullyPaid();
     }
 
+    @Deprecated
     private LoanCharge(final Loan loan, final Charge chargeDefinition, final LoanChargeCommand command) {
         this.loan = loan;
         this.charge = chargeDefinition;
@@ -269,6 +317,40 @@ public class LoanCharge extends AbstractPersistable<Long> {
 
     public void update(final Loan loan) {
         this.loan = loan;
+    }
+    
+    public void update(final BigDecimal amount, final LocalDate specifiedDueDate, final BigDecimal loanPrincipal) {
+        if (specifiedDueDate != null) {
+            this.dueForCollectionAsOfDate = specifiedDueDate.toDate();
+        }
+
+        if (amount != null) {
+            switch (ChargeCalculationType.fromInt(this.chargeCalculation)) {
+                case INVALID:
+                break;
+                case FLAT:
+                    this.amount = amount;
+                break;
+                case PERCENT_OF_AMOUNT:
+                    this.percentage = amount;
+                    this.amountPercentageAppliedTo = loanPrincipal;
+                    this.amount = percentageOf(this.amountPercentageAppliedTo, this.percentage);
+                    this.amountOutstanding = calculateOutstanding();
+                break;
+                case PERCENT_OF_AMOUNT_AND_INTEREST:
+                    this.percentage = amount;
+                    this.amount = null;
+                    this.amountPercentageAppliedTo = null;
+                    this.amountOutstanding = null;
+                break;
+                case PERCENT_OF_INTEREST:
+                    this.percentage = amount;
+                    this.amount = null;
+                    this.amountPercentageAppliedTo = null;
+                    this.amountOutstanding = null;
+                break;
+            }
+        }
     }
 
     public void update(final LoanChargeCommand command, final BigDecimal loanPrincipal) {

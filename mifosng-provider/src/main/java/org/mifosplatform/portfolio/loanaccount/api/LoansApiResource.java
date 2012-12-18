@@ -21,8 +21,10 @@ import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
+import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
+import org.mifosplatform.infrastructure.core.api.JsonQuery;
 import org.mifosplatform.infrastructure.core.api.PortfolioApiDataConversionService;
 import org.mifosplatform.infrastructure.core.api.PortfolioApiJsonSerializerService;
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
@@ -30,6 +32,7 @@ import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
@@ -45,11 +48,8 @@ import org.mifosplatform.portfolio.charge.service.ChargeReadPlatformService;
 import org.mifosplatform.portfolio.fund.data.FundData;
 import org.mifosplatform.portfolio.fund.service.FundReadPlatformService;
 import org.mifosplatform.portfolio.loanaccount.command.AdjustLoanTransactionCommand;
-import org.mifosplatform.portfolio.loanaccount.command.LoanApplicationCommand;
 import org.mifosplatform.portfolio.loanaccount.command.LoanChargeCommand;
-import org.mifosplatform.portfolio.loanaccount.command.LoanStateTransitionCommand;
 import org.mifosplatform.portfolio.loanaccount.command.LoanTransactionCommand;
-import org.mifosplatform.portfolio.loanaccount.command.UndoStateTransitionCommand;
 import org.mifosplatform.portfolio.loanaccount.data.DisbursementData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanAccountData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanBasicDetailsData;
@@ -58,9 +58,8 @@ import org.mifosplatform.portfolio.loanaccount.data.LoanPermissionData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionData;
 import org.mifosplatform.portfolio.loanaccount.gaurantor.data.GuarantorData;
 import org.mifosplatform.portfolio.loanaccount.gaurantor.service.GuarantorReadPlatformService;
-import org.mifosplatform.portfolio.loanaccount.loanschedule.command.CalculateLoanScheduleCommand;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
-import org.mifosplatform.portfolio.loanaccount.loanschedule.service.CalculationPlatformService;
+import org.mifosplatform.portfolio.loanaccount.loanschedule.service.LoanScheduleCalculationPlatformService;
 import org.mifosplatform.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.mifosplatform.portfolio.loanaccount.service.LoanWritePlatformService;
 import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
@@ -71,6 +70,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+
+import com.google.gson.JsonElement;
 
 @Path("/loans")
 @Component
@@ -88,7 +89,7 @@ public class LoansApiResource {
             "interestRateFrequencyTypeOptions", "fundOptions", "repaymentStrategyOptions", "chargeOptions", "loanOfficerId",
             "loanOfficerName", "loanOfficerOptions", "chargeTemplate"));
 
-    // private final String resourceNameForPermissions = "OFFICE";
+    private final String resourceNameForPermissions = "LOAN";
 
     private final PlatformSecurityContext context;
     private final LoanReadPlatformService loanReadPlatformService;
@@ -97,25 +98,31 @@ public class LoansApiResource {
     private final LoanDropdownReadPlatformService dropdownReadPlatformService;
     private final FundReadPlatformService fundReadPlatformService;
     private final ChargeReadPlatformService chargeReadPlatformService;
-    private final CalculationPlatformService calculationPlatformService;
+    private final LoanScheduleCalculationPlatformService calculationPlatformService;
     private final StaffReadPlatformService staffReadPlatformService;
     private final OfficeReadPlatformService officeReadPlatformService;
     private final GuarantorReadPlatformService guarantorReadPlatformService;
     private final PortfolioApiJsonSerializerService apiJsonSerializerService;
     private final PortfolioApiDataConversionService apiDataConversionService;
     private final DefaultToApiJsonSerializer<LoanAccountData> toApiJsonSerializer;
+    private final DefaultToApiJsonSerializer<LoanScheduleData> loanScheduleToApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
+    private final FromJsonHelper fromJsonHelper;
+    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @Autowired
     public LoansApiResource(final PlatformSecurityContext context, final LoanReadPlatformService loanReadPlatformService,
             final LoanWritePlatformService loanWritePlatformService, final LoanProductReadPlatformService loanProductReadPlatformService,
             final LoanDropdownReadPlatformService dropdownReadPlatformService, final FundReadPlatformService fundReadPlatformService,
-            final ChargeReadPlatformService chargeReadPlatformService, final CalculationPlatformService calculationPlatformService,
+            final ChargeReadPlatformService chargeReadPlatformService,
+            final LoanScheduleCalculationPlatformService calculationPlatformService,
             final StaffReadPlatformService staffReadPlatformService, final OfficeReadPlatformService officeReadPlatformService,
             final GuarantorReadPlatformService guarantorReadPlatformService,
             final DefaultToApiJsonSerializer<LoanAccountData> toApiJsonSerializer,
+            final DefaultToApiJsonSerializer<LoanScheduleData> loanScheduleToApiJsonSerializer,
             final ApiRequestParameterHelper apiRequestParameterHelper, final PortfolioApiJsonSerializerService apiJsonSerializerService,
-            final PortfolioApiDataConversionService apiDataConversionService) {
+            final PortfolioApiDataConversionService apiDataConversionService, final FromJsonHelper fromJsonHelper,
+            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
         this.context = context;
         this.loanReadPlatformService = loanReadPlatformService;
         this.loanWritePlatformService = loanWritePlatformService;
@@ -128,9 +135,12 @@ public class LoansApiResource {
         this.officeReadPlatformService = officeReadPlatformService;
         this.guarantorReadPlatformService = guarantorReadPlatformService;
         this.toApiJsonSerializer = toApiJsonSerializer;
+        this.loanScheduleToApiJsonSerializer = loanScheduleToApiJsonSerializer;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.apiJsonSerializerService = apiJsonSerializerService;
         this.apiDataConversionService = apiDataConversionService;
+        this.fromJsonHelper = fromJsonHelper;
+        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
     }
 
     @GET
@@ -140,7 +150,7 @@ public class LoansApiResource {
     public String retrieveDetailsForNewLoanApplicationStepOne(@QueryParam("clientId") final Long clientId,
             @QueryParam("groupId") final Long groupId, @QueryParam("productId") final Long productId, @Context final UriInfo uriInfo) {
 
-        context.authenticatedUser().validateHasReadPermission("LOAN");
+        context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 
         // tempate related
         Collection<LoanProductData> productOptions = this.loanProductReadPlatformService.retrieveAllLoanProductsForLookup();
@@ -193,7 +203,7 @@ public class LoansApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveLoanAccountDetails(@PathParam("loanId") final Long loanId, @Context final UriInfo uriInfo) {
 
-        context.authenticatedUser().validateHasReadPermission("LOAN");
+        context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 
         final LoanBasicDetailsData loanBasicDetails = this.loanReadPlatformService.retrieveLoanAccountDetails(loanId);
 
@@ -319,94 +329,83 @@ public class LoansApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String calculateLoanScheduleOrSubmitLoanApplication(@QueryParam("command") final String commandParam,
-            @Context final UriInfo uriInfo, final String jsonRequestBody) {
-
-        final LoanApplicationCommand command = this.apiDataConversionService.convertApiRequestJsonToLoanApplicationCommand(null,
-                jsonRequestBody);
+            @Context final UriInfo uriInfo, final String apiRequestBodyAsJson) {
 
         if (is(commandParam, "calculateLoanSchedule")) {
-            CalculateLoanScheduleCommand calculateLoanScheduleCommand = command.toCalculateLoanScheduleCommand();
-            return calculateLoanSchedule(uriInfo, calculateLoanScheduleCommand);
+
+            final JsonElement parsedQuery = this.fromJsonHelper.parse(apiRequestBodyAsJson);
+            final JsonQuery query = JsonQuery.from(apiRequestBodyAsJson, parsedQuery, this.fromJsonHelper);
+
+            final LoanScheduleData loanSchedule = this.calculationPlatformService.calculateLoanSchedule(query);
+
+            final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+            return this.loanScheduleToApiJsonSerializer.serialize(settings, loanSchedule, new HashSet<String>());
         }
 
-        final EntityIdentifier identifier = this.loanWritePlatformService.submitLoanApplication(command);
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE", "LOAN", "CREATE", "loans", null,
+                apiRequestBodyAsJson);
 
-        return this.toApiJsonSerializer.serialize(identifier);
-    }
-
-    private String calculateLoanSchedule(final UriInfo uriInfo, final CalculateLoanScheduleCommand command) {
-
-        final LoanScheduleData loanSchedule = this.calculationPlatformService.calculateLoanSchedule(command);
-
-        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-        boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-
-        return this.apiJsonSerializerService.serializeLoanScheduleDataToJson(prettyPrint, responseParameters, loanSchedule);
+        return this.toApiJsonSerializer.serialize(result);
     }
 
     @PUT
     @Path("{loanId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String modifyLoanApplication(@PathParam("loanId") final Long loanId, final String jsonRequestBody) {
+    public String modifyLoanApplication(@PathParam("loanId") final Long loanId, final String apiRequestBodyAsJson) {
 
-        final LoanApplicationCommand command = this.apiDataConversionService.convertApiRequestJsonToLoanApplicationCommand(loanId,
-                jsonRequestBody);
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "LOAN", "UPDATE", "loans",
+                loanId, apiRequestBodyAsJson);
 
-        final EntityIdentifier identifier = this.loanWritePlatformService.modifyLoanApplication(command);
-
-        return this.toApiJsonSerializer.serialize(identifier);
+        return this.toApiJsonSerializer.serialize(result);
     }
 
     @DELETE
     @Path("{loanId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response deleteLoanApplication(@PathParam("loanId") final Long loanId) {
+    public String deleteLoanApplication(@PathParam("loanId") final Long loanId) {
 
-        EntityIdentifier identifier = this.loanWritePlatformService.deleteLoan(loanId);
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("DELETE", "LOAN", "DELETE", "loans",
+                loanId, "{}");
 
-        return Response.ok().entity(identifier).build();
+        return this.toApiJsonSerializer.serialize(result);
     }
 
     @POST
     @Path("{loanId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response stateTransitions(@PathParam("loanId") final Long loanId, @QueryParam("command") final String commandParam,
-            final String jsonRequestBody) {
+    public String stateTransitions(@PathParam("loanId") final Long loanId, @QueryParam("command") final String commandParam,
+            final String apiRequestBodyAsJson) {
 
-        LoanStateTransitionCommand command = this.apiDataConversionService.convertJsonToLoanStateTransitionCommand(loanId, jsonRequestBody);
-
-        Response response = null;
+        EntityIdentifier result = null;
 
         if (is(commandParam, "reject")) {
-            EntityIdentifier identifier = this.loanWritePlatformService.rejectLoan(command);
-            response = Response.ok().entity(identifier).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource("REJECT", "LOAN", "N/A", "loans", loanId,
+                    apiRequestBodyAsJson);
         } else if (is(commandParam, "withdrewbyclient")) {
-            EntityIdentifier identifier = this.loanWritePlatformService.withdrawLoan(command);
-            response = Response.ok().entity(identifier).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource("WITHDRAW", "LOAN", "N/A", "loans", loanId,
+                    apiRequestBodyAsJson);
         } else if (is(commandParam, "approve")) {
-            EntityIdentifier identifier = this.loanWritePlatformService.approveLoanApplication(command);
-            response = Response.ok().entity(identifier).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource("APPROVE", "LOAN", "N/A", "loans", loanId,
+                    apiRequestBodyAsJson);
         } else if (is(commandParam, "disburse")) {
-            EntityIdentifier identifier = this.loanWritePlatformService.disburseLoan(command);
-            response = Response.ok().entity(identifier).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource("DISBURSE", "LOAN", "N/A", "loans", loanId,
+                    apiRequestBodyAsJson);
         }
-
-        UndoStateTransitionCommand undoCommand = new UndoStateTransitionCommand(loanId, command.getNote());
 
         if (is(commandParam, "undoapproval")) {
-            EntityIdentifier identifier = this.loanWritePlatformService.undoLoanApproval(undoCommand);
-            response = Response.ok().entity(identifier).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource("APPROVALUNDO", "LOAN", "N/A", "loans", loanId,
+                    apiRequestBodyAsJson);
         } else if (is(commandParam, "undodisbursal")) {
-            EntityIdentifier identifier = this.loanWritePlatformService.undoLoanDisbursal(undoCommand);
-            response = Response.ok().entity(identifier).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource("DISBURSALUNDO", "LOAN", "N/A", "loans", loanId,
+                    apiRequestBodyAsJson);
         }
 
-        if (response == null) { throw new UnrecognizedQueryParamException("command", commandParam); }
+        if (result == null) { throw new UnrecognizedQueryParamException("command", commandParam); }
 
-        return response;
+        return this.toApiJsonSerializer.serialize(result);
     }
 
     private boolean is(final String commandParam, final String commandValue) {

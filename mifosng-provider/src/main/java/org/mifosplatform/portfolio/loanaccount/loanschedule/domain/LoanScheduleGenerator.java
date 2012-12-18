@@ -11,10 +11,8 @@ import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 
 public interface LoanScheduleGenerator {
 
-	LoanScheduleData generate(ApplicationCurrency applicationCurrency, 
-			LoanProductRelatedDetail loanScheduleInfo,
-			Integer loanTermFrequency, 
-			PeriodFrequencyType loanTermFrequencyType, 
-			LocalDate disbursementDate, LocalDate firstRepaymentDate, LocalDate interestCalculatedFrom, Set<LoanCharge> loanCharges);
+    LoanScheduleData generate(ApplicationCurrency applicationCurrency, LoanProductRelatedDetail loanScheduleInfo,
+            Integer loanTermFrequency, PeriodFrequencyType loanTermFrequencyType, LocalDate disbursementDate, LocalDate firstRepaymentDate,
+            LocalDate interestCalculatedFrom, Set<LoanCharge> loanCharges);
 
 }
