@@ -2,7 +2,9 @@ package org.mifosplatform.portfolio.savingsaccountproduct.domain;
 
 public enum SavingProductType {
 
-    INVALID(0, "savingProductType.invalid"), RECCURING(1, "savingProductType.reccuring"), REGULAR(2, "savingProductType.regular");
+    INVALID(0, "savingProductType.invalid"), //
+    RECCURING(1, "savingProductType.reccuring"), //
+    REGULAR(2, "savingProductType.regular");
 
     private final Integer value;
     private final String code;

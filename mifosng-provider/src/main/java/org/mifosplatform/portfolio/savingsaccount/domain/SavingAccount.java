@@ -76,6 +76,7 @@ public class SavingAccount extends AbstractAuditableCustom<AppUser, Long> {
     @Column(name = "tenure", nullable = false)
     private Integer tenure;
 
+    // FIXME - MADHUKAR - Do not use the actual enum type here use integer representation
     @Column(name = "tenure_type", nullable = false)
     private TenureTypeEnum tenureType;
 

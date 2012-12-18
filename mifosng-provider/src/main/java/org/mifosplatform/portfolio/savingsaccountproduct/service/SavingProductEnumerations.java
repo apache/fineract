@@ -166,6 +166,7 @@ public class SavingProductEnumerations {
         final String codePrefix = "savings.product.";
         EnumOptionData optionData = null;
         switch (type) {
+        // FIXME - Madhukar - spelling mistake on 'Recurring'
             case RECCURING:
                 optionData = new EnumOptionData(SavingProductType.RECCURING.getValue().longValue(), codePrefix
                         + SavingProductType.RECCURING.getCode(), "Reccuring");
@@ -185,5 +186,4 @@ public class SavingProductEnumerations {
         }
         return optionData;
     }
-
 }
