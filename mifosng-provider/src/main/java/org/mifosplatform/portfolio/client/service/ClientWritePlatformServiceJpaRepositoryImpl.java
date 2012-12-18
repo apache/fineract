@@ -174,8 +174,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         context.authenticatedUser();
 
         final ClientNoteCommand clientNoteCommand = this.clientNoteFromApiJsonDeserializer.commandFromApiJson(command.json());
-        // FIXME - KW - no validation of note
-
+        clientNoteCommand.validate();
+        
         final Client clientForUpdate = this.clientRepository.findOne(clientId);
         if (clientForUpdate == null) { throw new ClientNotFoundException(clientId); }
 
@@ -193,7 +193,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         context.authenticatedUser();
 
         final ClientNoteCommand clientNoteCommand = this.clientNoteFromApiJsonDeserializer.commandFromApiJson(command.json());
-        // FIXME - KW - no validation of note
+        clientNoteCommand.validate();
 
         final Note noteForUpdate = this.noteRepository.findOne(noteId);
         if (noteForUpdate == null || noteForUpdate.isNotAgainstClientWithIdOf(clientId)) { throw new NoteNotFoundException(noteId,
