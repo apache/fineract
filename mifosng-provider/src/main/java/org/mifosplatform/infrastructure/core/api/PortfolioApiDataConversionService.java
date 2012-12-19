@@ -4,9 +4,7 @@ import org.mifosplatform.organisation.staff.command.BulkTransferLoanOfficerComma
 import org.mifosplatform.portfolio.client.command.NoteCommand;
 import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.group.command.GroupCommand;
-import org.mifosplatform.portfolio.loanaccount.command.AdjustLoanTransactionCommand;
 import org.mifosplatform.portfolio.loanaccount.command.LoanChargeCommand;
-import org.mifosplatform.portfolio.loanaccount.command.LoanTransactionCommand;
 import org.mifosplatform.portfolio.loanaccount.gaurantor.command.GuarantorCommand;
 import org.mifosplatform.portfolio.savingsaccount.command.SavingAccountCommand;
 import org.mifosplatform.portfolio.savingsaccountproduct.command.SavingProductCommand;
@@ -28,10 +26,6 @@ public interface PortfolioApiDataConversionService {
     GroupCommand convertJsonToGroupCommand(Long resourceIdentifier, String json);
 
     LoanChargeCommand convertJsonToLoanChargeCommand(Long loanChargeId, Long loanId, String json);
-
-    LoanTransactionCommand convertJsonToLoanTransactionCommand(Long resourceIdentifier, String json);
-
-    AdjustLoanTransactionCommand convertJsonToAdjustLoanTransactionCommand(Long loanId, Long transactionId, String json);
 
     NoteCommand convertJsonToNoteCommand(Long resourceIdentifier, Long clientId, String json);
 

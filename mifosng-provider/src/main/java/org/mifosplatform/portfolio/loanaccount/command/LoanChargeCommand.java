@@ -9,7 +9,7 @@ import org.joda.time.LocalDate;
 /**
  * Immutable command for creating and updating loan charges.
  */
-public class LoanChargeCommand {
+public class LoanChargeCommand implements Comparable<LoanChargeCommand> {
 
     private final Long id;
     private final Long chargeId;
@@ -42,6 +42,15 @@ public class LoanChargeCommand {
         this.chargeTimeType = chargeTimeType;
         this.chargeCalculationType = chargeCalculationType;
         this.specifiedDueDate = specifiedDueDate;
+    }
+    
+    @Override
+    public int compareTo(final LoanChargeCommand o) {
+        int comparison = this.chargeId.compareTo(o.chargeId);
+        if (comparison == 0) {
+            comparison = this.amount.compareTo(o.amount);
+        }
+        return comparison;
     }
 
     public Long getId() {

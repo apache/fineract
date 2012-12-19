@@ -1,6 +1,8 @@
 package org.mifosplatform.portfolio.loanaccount.service;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -15,8 +17,6 @@ import org.mifosplatform.infrastructure.security.exception.NoAuthorizationExcept
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrencyRepository;
-import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
-import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.organisation.staff.command.BulkTransferLoanOfficerCommand;
 import org.mifosplatform.organisation.staff.command.BulkTransferLoanOfficerCommandValidator;
 import org.mifosplatform.organisation.staff.domain.Staff;
@@ -31,14 +31,11 @@ import org.mifosplatform.portfolio.client.domain.Note;
 import org.mifosplatform.portfolio.client.domain.NoteRepository;
 import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
 import org.mifosplatform.portfolio.fund.domain.Fund;
-import org.mifosplatform.portfolio.loanaccount.command.AdjustLoanTransactionCommand;
-import org.mifosplatform.portfolio.loanaccount.command.AdjustLoanTransactionCommandValidator;
 import org.mifosplatform.portfolio.loanaccount.command.LoanApplicationCommand;
 import org.mifosplatform.portfolio.loanaccount.command.LoanChargeCommand;
 import org.mifosplatform.portfolio.loanaccount.command.LoanChargeCommandValidator;
 import org.mifosplatform.portfolio.loanaccount.command.LoanStateTransitionCommand;
 import org.mifosplatform.portfolio.loanaccount.command.LoanTransactionCommand;
-import org.mifosplatform.portfolio.loanaccount.command.LoanTransactionCommandValidator;
 import org.mifosplatform.portfolio.loanaccount.domain.DefaultLoanLifecycleStateMachine;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanCharge;
@@ -59,6 +56,7 @@ import org.mifosplatform.portfolio.loanaccount.loanschedule.service.LoanSchedule
 import org.mifosplatform.portfolio.loanaccount.serialization.CalculateLoanScheduleQueryFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.loanaccount.serialization.LoanApplicationCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.loanaccount.serialization.LoanStateTransitionCommandFromApiJsonDeserializer;
+import org.mifosplatform.portfolio.loanaccount.serialization.LoanTransactionCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProduct;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRepository;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanTransactionProcessingStrategy;
@@ -79,6 +77,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private final LoanApplicationCommandFromApiJsonDeserializer fromApiJsonDeserializer;
     private final CalculateLoanScheduleQueryFromApiJsonDeserializer calculateLoanScheduleQueryFromApiJsonDeserializer;
     private final LoanStateTransitionCommandFromApiJsonDeserializer loanStateTransitionCommandFromApiJsonDeserializer;
+    private final LoanTransactionCommandFromApiJsonDeserializer loanTransactionCommandFromApiJsonDeserializer;
     private final LoanRepository loanRepository;
     private final NoteRepository noteRepository;
     private final LoanScheduleCalculationPlatformService calculationPlatformService;
@@ -96,6 +95,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     public LoanWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final FromJsonHelper fromJsonHelper,
             final LoanApplicationCommandFromApiJsonDeserializer fromApiJsonDeserializer,
             final LoanStateTransitionCommandFromApiJsonDeserializer loanStateTransitionCommandFromApiJsonDeserializer,
+            final LoanTransactionCommandFromApiJsonDeserializer loanTransactionCommandFromApiJsonDeserializer,
             final CalculateLoanScheduleQueryFromApiJsonDeserializer calculateLoanScheduleQueryFromApiJsonDeserializer,
             final AprCalculator aprCalculator, final LoanAssembler loanAssembler, final LoanChargeAssembler loanChargeAssembler,
             final LoanRepository loanRepository, final LoanTransactionRepository loanTransactionRepository,
@@ -107,6 +107,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.fromJsonHelper = fromJsonHelper;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.loanStateTransitionCommandFromApiJsonDeserializer = loanStateTransitionCommandFromApiJsonDeserializer;
+        this.loanTransactionCommandFromApiJsonDeserializer = loanTransactionCommandFromApiJsonDeserializer;
         this.calculateLoanScheduleQueryFromApiJsonDeserializer = calculateLoanScheduleQueryFromApiJsonDeserializer;
         this.aprCalculator = aprCalculator;
         this.loanAssembler = loanAssembler;
@@ -412,179 +413,222 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
     @Transactional
     @Override
-    public EntityIdentifier makeLoanRepayment(final LoanTransactionCommand command) {
+    public EntityIdentifier makeLoanRepayment(final Long loanId, final JsonCommand command) {
 
-        AppUser currentUser = context.authenticatedUser();
+        final AppUser currentUser = context.authenticatedUser();
 
-        LoanTransactionCommandValidator validator = new LoanTransactionCommandValidator(command);
-        validator.validate();
+        final LoanTransactionCommand loanTransactionCommand = this.loanTransactionCommandFromApiJsonDeserializer.commandFromApiJson(command
+                .json());
+        loanTransactionCommand.validate();
+        
+        final LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
+        final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed("transactionAmount");
+        
+        final Map<String, Object> changes = new LinkedHashMap<String, Object>();
+        changes.put("transactionDate", command.stringValueOfParameterNamed("transactionDate"));
+        changes.put("transactionAmount", command.stringValueOfParameterNamed("transactionAmount"));
+        
+        final Loan loan = retrieveLoanBy(loanId);
 
-        Loan loan = this.loanRepository.findOne(command.getLoanId());
-        if (loan == null) { throw new LoanNotFoundException(command.getLoanId()); }
-
-        LocalDate transactionDate = command.getTransactionDate();
         if (this.isBeforeToday(transactionDate) && currentUser.canNotMakeRepaymentOnLoanInPast()) { throw new NoAuthorizationException(
                 "error.msg.no.permission.to.make.repayment.on.loan.in.past"); }
 
-        Money repayment = Money.of(loan.repaymentScheduleDetail().getPrincipal().getCurrency(), command.getTransactionAmount());
-
-        LoanTransaction loanRepayment = LoanTransaction.repayment(repayment, transactionDate);
-        loan.makeRepayment(loanRepayment, defaultLoanLifecycleStateMachine());
+        final LoanTransaction loanRepayment = loan.makeRepayment(transactionDate, transactionAmount, defaultLoanLifecycleStateMachine());
         this.loanTransactionRepository.save(loanRepayment);
         this.loanRepository.save(loan);
 
-        String noteText = command.getNote();
+        final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
+            changes.put("note", noteText);
             Note note = Note.loanTransactionNote(loan, loanRepayment, noteText);
             this.noteRepository.save(note);
         }
+        
+        changes.put("locale", command.locale());
+        changes.put("dateFormat", command.dateFormat());
 
-        return new EntityIdentifier(loan.getId());
+        return EntityIdentifier.subResourceResult(loanId, loanRepayment.getId(), command.commandId(), changes);
     }
 
     @Transactional
     @Override
-    public EntityIdentifier adjustLoanTransaction(final AdjustLoanTransactionCommand command) {
+    public EntityIdentifier adjustLoanTransaction(final Long loanId, final Long transactionId, final JsonCommand command) {
 
         context.authenticatedUser();
 
-        AdjustLoanTransactionCommandValidator validator = new AdjustLoanTransactionCommandValidator(command);
-        validator.validate();
+        final LoanTransactionCommand loanTransactionCommand = this.loanTransactionCommandFromApiJsonDeserializer.commandFromApiJson(command
+                .json());
+        loanTransactionCommand.validate();
+        
+        final Loan loan = retrieveLoanBy(loanId);
 
-        Loan loan = this.loanRepository.findOne(command.getLoanId());
-        if (loan == null) { throw new LoanNotFoundException(command.getLoanId()); }
+        final LoanTransaction transactionToAdjust = this.loanTransactionRepository.findOne(transactionId);
+        if (transactionToAdjust == null) { throw new LoanTransactionNotFoundException(transactionId); }
 
-        LoanTransaction transactionToAdjust = this.loanTransactionRepository.findOne(command.getTransactionId());
-        if (transactionToAdjust == null) { throw new LoanTransactionNotFoundException(command.getTransactionId()); }
-
-        final MonetaryCurrency currency = loan.repaymentScheduleDetail().getPrincipal().getCurrency();
-        final Money transactionAmount = Money.of(currency, command.getTransactionAmount());
-
-        // adjustment is only supported for repayments and waivers at present
-        LocalDate transactionDate = command.getTransactionDate();
-        LoanTransaction newTransactionDetail = LoanTransaction.repayment(transactionAmount, transactionDate);
-        if (transactionToAdjust.isInterestWaiver()) {
-            newTransactionDetail = LoanTransaction.waiver(loan, transactionAmount, transactionDate);
-        }
-
-        loan.adjustExistingTransaction(transactionToAdjust, newTransactionDetail, defaultLoanLifecycleStateMachine());
-
-        if (newTransactionDetail.isGreaterThanZero(currency)) {
+        final LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
+        final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed("transactionAmount");
+        
+        final Map<String, Object> changes = new LinkedHashMap<String, Object>();
+        changes.put("transactionDate", command.stringValueOfParameterNamed("transactionDate"));
+        changes.put("transactionAmount", command.stringValueOfParameterNamed("transactionAmount"));
+        
+        final LoanTransaction newTransactionDetail = loan.adjustExistingTransaction(transactionDate, transactionAmount, defaultLoanLifecycleStateMachine(),
+                transactionToAdjust);
+        if (newTransactionDetail.isGreaterThanZero(loan.getPrincpal().getCurrency())) {
             this.loanTransactionRepository.save(newTransactionDetail);
         }
 
         this.loanRepository.save(loan);
 
-        String noteText = command.getNote();
+        final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
+            changes.put("note", noteText);
             Note note = Note.loanTransactionNote(loan, newTransactionDetail, noteText);
             this.noteRepository.save(note);
         }
 
-        return new EntityIdentifier(loan.getId());
+        changes.put("locale", command.locale());
+        changes.put("dateFormat", command.dateFormat());
+        
+        return EntityIdentifier.subResourceResult(loanId, transactionId, command.commandId(), changes);
     }
 
     @Transactional
     @Override
-    public EntityIdentifier waiveInterestOnLoan(final LoanTransactionCommand command) {
+    public EntityIdentifier waiveInterestOnLoan(final Long loanId, final JsonCommand command) {
 
         context.authenticatedUser();
 
-        final LoanTransactionCommandValidator validator = new LoanTransactionCommandValidator(command);
-        validator.validate();
+        final LoanTransactionCommand loanTransactionCommand = this.loanTransactionCommandFromApiJsonDeserializer.commandFromApiJson(command
+                .json());
+        loanTransactionCommand.validate();
+        
+        final Map<String, Object> changes = new LinkedHashMap<String, Object>();
+        changes.put("transactionDate", command.stringValueOfParameterNamed("transactionDate"));
+        changes.put("transactionAmount", command.stringValueOfParameterNamed("transactionAmount"));
 
-        final Loan loan = this.loanRepository.findOne(command.getLoanId());
-        if (loan == null) { throw new LoanNotFoundException(command.getLoanId()); }
+        final Loan loan = retrieveLoanBy(loanId);
 
-        final LoanTransaction waiveTransaction = loan.waiveInterest(command.getTransactionAmount(), command.getTransactionDate(),
-                defaultLoanLifecycleStateMachine());
+        final LoanTransaction waiveTransaction = loan.waiveInterest(command, defaultLoanLifecycleStateMachine());
 
         this.loanTransactionRepository.save(waiveTransaction);
         this.loanRepository.save(loan);
 
-        final String noteText = command.getNote();
+        final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
+            changes.put("note", noteText);
             final Note note = Note.loanTransactionNote(loan, waiveTransaction, noteText);
             this.noteRepository.save(note);
         }
+        
+        changes.put("locale", command.locale());
+        changes.put("dateFormat", command.dateFormat());
 
-        return new EntityIdentifier(loan.getId());
+        return EntityIdentifier.subResourceResult(loanId, waiveTransaction.getId(), command.commandId(), changes);
     }
 
     @Transactional
     @Override
-    public EntityIdentifier writeOff(final LoanTransactionCommand command) {
+    public EntityIdentifier writeOff(final Long loanId, final JsonCommand command) {
         context.authenticatedUser();
 
-        final LoanTransactionCommandValidator validator = new LoanTransactionCommandValidator(command);
-        validator.validateNonMonetaryTransaction();
+        final LoanTransactionCommand loanTransactionCommand = this.loanTransactionCommandFromApiJsonDeserializer.commandFromApiJson(command
+                .json());
+        loanTransactionCommand.validateNonMonetaryTransaction();
+        
+        final Map<String, Object> changes = new LinkedHashMap<String, Object>();
+        changes.put("transactionDate", command.stringValueOfParameterNamed("transactionDate"));
 
-        final Loan loan = this.loanRepository.findOne(command.getLoanId());
-        if (loan == null) { throw new LoanNotFoundException(command.getLoanId()); }
+        final Loan loan = retrieveLoanBy(loanId);
 
-        final LoanTransaction writeoff = loan.closeAsWrittenOff(command.getTransactionDate(), defaultLoanLifecycleStateMachine());
+        final LoanTransaction writeoff = loan.closeAsWrittenOff(command, defaultLoanLifecycleStateMachine(), changes);
 
         this.loanTransactionRepository.save(writeoff);
         this.loanRepository.save(loan);
 
-        final String noteText = command.getNote();
+        final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
+            changes.put("note", noteText);
             final Note note = Note.loanTransactionNote(loan, writeoff, noteText);
             this.noteRepository.save(note);
         }
 
-        return new EntityIdentifier(loan.getId());
+        changes.put("locale", command.locale());
+        changes.put("dateFormat", command.dateFormat());
+
+        return EntityIdentifier.subResourceResult(loanId, writeoff.getId(), command.commandId(), changes);
     }
 
     @Transactional
     @Override
-    public EntityIdentifier closeLoan(final LoanTransactionCommand command) {
+    public EntityIdentifier closeLoan(final Long loanId, final JsonCommand command) {
 
         context.authenticatedUser();
 
-        final LoanTransactionCommandValidator validator = new LoanTransactionCommandValidator(command);
-        validator.validateNonMonetaryTransaction();
+        final LoanTransactionCommand loanTransactionCommand = this.loanTransactionCommandFromApiJsonDeserializer.commandFromApiJson(command
+                .json());
+        loanTransactionCommand.validateNonMonetaryTransaction();
 
-        final Loan loan = this.loanRepository.findOne(command.getLoanId());
-        if (loan == null) { throw new LoanNotFoundException(command.getLoanId()); }
+        final Loan loan = retrieveLoanBy(loanId);
+        
+        final Map<String, Object> changes = new LinkedHashMap<String, Object>();
+        changes.put("transactionDate", command.stringValueOfParameterNamed("transactionDate"));
 
-        final LoanTransaction possibleClosingTransaction = loan.close(command.getTransactionDate(), defaultLoanLifecycleStateMachine());
+        final LoanTransaction possibleClosingTransaction = loan.close(command, defaultLoanLifecycleStateMachine(), changes);
         if (possibleClosingTransaction != null) {
             this.loanTransactionRepository.save(possibleClosingTransaction);
         }
         this.loanRepository.save(loan);
 
-        final String noteText = command.getNote();
+        final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
+            changes.put("note", noteText);
             final Note note = Note.loanNote(loan, noteText);
             this.noteRepository.save(note);
         }
-
-        return new EntityIdentifier(loan.getId());
+        
+        changes.put("locale", command.locale());
+        changes.put("dateFormat", command.dateFormat());
+        
+        EntityIdentifier result = null;
+        if (possibleClosingTransaction != null) {
+            result = EntityIdentifier.subResourceResult(loanId, possibleClosingTransaction.getId(), command.commandId(), changes);
+        } else {
+            result = EntityIdentifier.resourceResult(loanId, command.commandId(), changes);
+        }
+        
+        return result;
     }
 
     @Transactional
     @Override
-    public EntityIdentifier closeAsRescheduled(final LoanTransactionCommand command) {
+    public EntityIdentifier closeAsRescheduled(final Long loanId, final JsonCommand command) {
         context.authenticatedUser();
 
-        final LoanTransactionCommandValidator validator = new LoanTransactionCommandValidator(command);
-        validator.validateNonMonetaryTransaction();
+        final LoanTransactionCommand loanTransactionCommand = this.loanTransactionCommandFromApiJsonDeserializer.commandFromApiJson(command
+                .json());
+        loanTransactionCommand.validateNonMonetaryTransaction();
 
-        final Loan loan = this.loanRepository.findOne(command.getLoanId());
-        if (loan == null) { throw new LoanNotFoundException(command.getLoanId()); }
+        final Loan loan = retrieveLoanBy(loanId);
+        
+        final Map<String, Object> changes = new LinkedHashMap<String, Object>();
+        changes.put("transactionDate", command.stringValueOfParameterNamed("transactionDate"));
 
-        loan.closeAsMarkedForReschedule(command.getTransactionDate(), defaultLoanLifecycleStateMachine());
+        loan.closeAsMarkedForReschedule(command, defaultLoanLifecycleStateMachine(), changes);
 
         this.loanRepository.save(loan);
 
-        final String noteText = command.getNote();
+        final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
+            changes.put("note", noteText);
             final Note note = Note.loanNote(loan, noteText);
             this.noteRepository.save(note);
         }
+        
+        changes.put("locale", command.locale());
+        changes.put("dateFormat", command.dateFormat());
 
-        return new EntityIdentifier(loan.getId());
+        return EntityIdentifier.resourceResult(loanId, command.commandId(), changes);
     }
 
     @Transactional

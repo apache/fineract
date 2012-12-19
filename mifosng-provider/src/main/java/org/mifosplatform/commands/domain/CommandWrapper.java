@@ -167,7 +167,7 @@ public class CommandWrapper {
     public boolean isLoanResource() {
         return this.resource.equalsIgnoreCase("LOANS");
     }
-    
+
     public boolean isApproveLoanApplication() {
         return this.actionName.equalsIgnoreCase("APPROVE") && this.entityName.equalsIgnoreCase("LOAN");
     }
@@ -190,5 +190,29 @@ public class CommandWrapper {
 
     public boolean isUndoDisbursementOfLoan() {
         return this.actionName.equalsIgnoreCase("DISBURSALUNDO") && this.entityName.equalsIgnoreCase("LOAN");
+    }
+
+    public boolean isLoanRepayment() {
+        return this.actionName.equalsIgnoreCase("REPAYMENT") && this.entityName.equalsIgnoreCase("LOAN");
+    }
+
+    public boolean isLoanRepaymentAdjustment() {
+        return this.actionName.equalsIgnoreCase("ADJUST") && this.entityName.equalsIgnoreCase("LOAN");
+    }
+
+    public boolean isWaiveInterestPortionOnLoan() {
+        return this.actionName.equalsIgnoreCase("WAIVEINTERESTPORTION") && this.entityName.equalsIgnoreCase("LOAN");
+    }
+
+    public boolean isLoanWriteOff() {
+        return this.actionName.equalsIgnoreCase("WRITEOFF") && this.entityName.equalsIgnoreCase("LOAN");
+    }
+
+    public boolean isCloseLoanAsObligationsMet() {
+        return this.actionName.equalsIgnoreCase("CLOSE") && this.entityName.equalsIgnoreCase("LOAN");
+    }
+
+    public boolean isCloseLoanAsRescheduled() {
+        return this.actionName.equalsIgnoreCase("CLOSEASRESCHEDULED") && this.entityName.equalsIgnoreCase("LOAN");
     }
 }

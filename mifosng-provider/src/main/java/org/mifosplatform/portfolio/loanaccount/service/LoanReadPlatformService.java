@@ -12,25 +12,25 @@ import org.mifosplatform.portfolio.loanaccount.loanschedule.data.LoanScheduleDat
 
 public interface LoanReadPlatformService {
 
-	LoanBasicDetailsData retrieveLoanAccountDetails(Long loanId);
+    LoanBasicDetailsData retrieveLoanAccountDetails(Long loanId);
 
-	LoanScheduleData retrieveRepaymentSchedule(Long loanId, CurrencyData currency, DisbursementData disbursement, BigDecimal totalChargesAtDisbursement, BigDecimal inArrearsTolerance);
+    LoanScheduleData retrieveRepaymentSchedule(Long loanId, CurrencyData currency, DisbursementData disbursement,
+            BigDecimal totalChargesAtDisbursement, BigDecimal inArrearsTolerance);
 
-	Collection<LoanTransactionData> retrieveLoanTransactions(Long loanId);
+    Collection<LoanTransactionData> retrieveLoanTransactions(Long loanId);
 
-	LoanPermissionData retrieveLoanPermissions(
-			LoanBasicDetailsData loanBasicDetails, boolean isWaiverAllowed,
-			int repaymentAndWaiveCount, boolean existsGuarantor);
+    LoanPermissionData retrieveLoanPermissions(LoanBasicDetailsData loanBasicDetails, boolean isWaiverAllowed, int repaymentAndWaiveCount,
+            boolean existsGuarantor);
 
-	LoanBasicDetailsData retrieveClientAndProductDetails(Long clientId, Long productId);
+    LoanBasicDetailsData retrieveClientAndProductDetails(Long clientId, Long productId);
 
     LoanBasicDetailsData retrieveGroupAndProductDetails(Long groupId, Long productId);
 
-    LoanTransactionData retrieveNewLoanRepaymentDetails(Long loanId);
+    LoanTransactionData retrieveLoanTransactionTemplate(Long loanId);
 
-	LoanTransactionData retrieveNewLoanWaiveInterestDetails(Long loanId);
+    LoanTransactionData retrieveWaiveInterestDetails(Long loanId);
 
-	LoanTransactionData retrieveLoanTransactionDetails(Long loanId, Long transactionId);
+    LoanTransactionData retrieveLoanTransaction(Long loanId, Long transactionId);
 
-	LoanTransactionData retrieveNewClosureDetails();
+    LoanTransactionData retrieveNewClosureDetails();
 }

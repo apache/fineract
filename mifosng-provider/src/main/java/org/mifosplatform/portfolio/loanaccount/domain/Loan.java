@@ -850,13 +850,10 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
             approvedOn = command.localDateValueOfParameterNamed("eventDate");
         }
 
-        final Locale locale = new Locale(command.locale());
-        final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
-
         this.approvedOnDate = approvedOn.toDate();
         actualChanges.put("locale", command.locale());
         actualChanges.put("dateFormat", command.dateFormat());
-        actualChanges.put("approvedOnDate", approvedOn.toString(fmt));
+        actualChanges.put("approvedOnDate", command.stringValueOfParameterNamed("approvedOnDate"));
 
         final LocalDate submittalDate = new LocalDate(this.submittedOnDate);
         if (approvedOn.isBefore(submittalDate)) {
@@ -901,7 +898,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
     private void disburse(final LocalDate expectedDisbursedOnLocalDate) {
         this.disbursedOnDate = expectedDisbursedOnLocalDate.toDate();
         this.expectedMaturityDate = determineExpectedMaturityDate().toDate();
-                
+
         handleDisbursementTransaction(expectedDisbursedOnLocalDate);
     }
 
@@ -928,7 +925,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 
         this.disbursedOnDate = disbursedOn.toDate();
         this.expectedMaturityDate = determineExpectedMaturityDate().toDate();
-                
+
         actualChanges.put("locale", command.locale());
         actualChanges.put("dateFormat", command.dateFormat());
         actualChanges.put("disbursedOnDate", disbursedOn.toString(fmt));
@@ -1059,21 +1056,12 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         wrapper.reprocess(getCurrency(), getDisbursementDate(), this.repaymentScheduleInstallments, this.charges);
     }
 
-    /**
-     * 
-     * @param amount
-     *            The amount of interest to be waived.
-     * @param transactionDate
-     *            The date on which the interest waiver is to be processed
-     *            against.
-     * @param defaultLoanLifecycleStateMachine
-     * 
-     * @return {@link LoanTransaction} details of executed transaction
-     */
-    public LoanTransaction waiveInterest(final BigDecimal amount, final LocalDate transactionDate,
-            final LoanLifecycleStateMachine loanLifecycleStateMachine) {
+    public LoanTransaction waiveInterest(final JsonCommand command, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
 
-        final Money amountToWaive = Money.of(loanCurrency(), amount);
+        final LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
+        final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed("transactionAmount");
+
+        final Money amountToWaive = Money.of(loanCurrency(), transactionAmount);
         final LoanTransaction waiveInterestTransaction = LoanTransaction.waiver(this, amountToWaive, transactionDate);
 
         handleRepaymentOrWaiverTransaction(waiveInterestTransaction, loanLifecycleStateMachine, null);
@@ -1081,8 +1069,15 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         return waiveInterestTransaction;
     }
 
-    public void makeRepayment(final LoanTransaction loanTransaction, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
+    public LoanTransaction makeRepayment(final LocalDate transactionDate, final BigDecimal transactionAmount,
+            final LoanLifecycleStateMachine loanLifecycleStateMachine) {
+
+        final Money repayment = Money.of(loanCurrency(), transactionAmount);
+        final LoanTransaction loanTransaction = LoanTransaction.repayment(repayment, transactionDate);
+
         handleRepaymentOrWaiverTransaction(loanTransaction, loanLifecycleStateMachine, null);
+
+        return loanTransaction;
     }
 
     private void handleRepaymentOrWaiverTransaction(final LoanTransaction loanTransaction,
@@ -1286,8 +1281,14 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         return LoanTransaction.waiver(this, possibleInterestToWaive, transactionDate);
     }
 
-    public void adjustExistingTransaction(final LoanTransaction transactionForAdjustment, final LoanTransaction newTransactionDetail,
-            final LoanLifecycleStateMachine loanLifecycleStateMachine) {
+    public LoanTransaction adjustExistingTransaction(final LocalDate transactionDate, final BigDecimal transactionAmountValue,
+            final LoanLifecycleStateMachine loanLifecycleStateMachine, final LoanTransaction transactionForAdjustment) {
+
+        final Money transactionAmount = Money.of(loanCurrency(), transactionAmountValue);
+        LoanTransaction newTransactionDetail = LoanTransaction.repayment(transactionAmount, transactionDate);
+        if (transactionForAdjustment.isInterestWaiver()) {
+            newTransactionDetail = LoanTransaction.waiver(this, transactionAmount, transactionDate);
+        }
 
         if (transactionForAdjustment.isNotRepayment() && transactionForAdjustment.isNotWaiver()) {
             final String errorMessage = "Only transactions of type repayment or waiver can be adjusted.";
@@ -1304,6 +1305,8 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         if (newTransactionDetail.isRepayment() || newTransactionDetail.isInterestWaiver()) {
             handleRepaymentOrWaiverTransaction(newTransactionDetail, loanLifecycleStateMachine, transactionForAdjustment);
         }
+
+        return newTransactionDetail;
     }
 
     private boolean isRepaidInFull() {
@@ -1365,16 +1368,21 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         return this.loanRepaymentScheduleDetail.getCurrency();
     }
 
-    public LoanTransaction closeAsWrittenOff(final LocalDate writtenOffOnLocalDate,
-            final LoanLifecycleStateMachine loanLifecycleStateMachine) {
+    public LoanTransaction closeAsWrittenOff(final JsonCommand command, final LoanLifecycleStateMachine loanLifecycleStateMachine, final Map<String, Object> changes) {
 
-        final LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.WRITE_OFF_OUTSTANDING,
-                LoanStatus.fromInt(this.loanStatus));
-        this.loanStatus = statusEnum.getValue();
+        final LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.WRITE_OFF_OUTSTANDING, LoanStatus.fromInt(this.loanStatus));
+        if (!statusEnum.hasStateOf(LoanStatus.fromInt(this.loanStatus))) {
+            this.loanStatus = statusEnum.getValue();
+            changes.put("status", LoanEnumerations.status(this.loanStatus));
+        }
+
+        final LocalDate writtenOffOnLocalDate = command.localDateValueOfParameterNamed("transactionDate");
 
         this.closedOnDate = writtenOffOnLocalDate.toDate();
         this.writtenOffOnDate = writtenOffOnLocalDate.toDate();
-
+        changes.put("closedOnDate", command.stringValueOfParameterNamed("transactionDate"));
+        changes.put("writtenOffOnDate", command.stringValueOfParameterNamed("transactionDate"));
+        
         if (writtenOffOnLocalDate.isBefore(this.getDisbursementDate())) {
             final String errorMessage = "The date on which a loan is written off cannot be before the loan disbursement date: "
                     + getDisbursementDate().toString();
@@ -1404,7 +1412,12 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         return loanTransaction;
     }
 
-    public LoanTransaction close(final LocalDate closureDate, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
+    public LoanTransaction close(final JsonCommand command, final LoanLifecycleStateMachine loanLifecycleStateMachine, final Map<String, Object> changes) {
+
+        final LocalDate closureDate = command.localDateValueOfParameterNamed("transactionDate");
+
+        this.closedOnDate = closureDate.toDate();
+        changes.put("closedOnDate", command.stringValueOfParameterNamed("transactionDate"));
 
         if (closureDate.isBefore(this.getDisbursementDate())) {
             final String errorMessage = "The date on which a loan is closed cannot be before the loan disbursement date: "
@@ -1424,7 +1437,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
             final Money outstanding = getTotalOutstanding();
             if (outstanding.isGreaterThanZero() && getInArrearsTolerance().isGreaterThanOrEqualTo(outstanding)) {
 
-                updateLoanForClosure(closureDate, loanLifecycleStateMachine);
+                updateLoanForClosure(closureDate, loanLifecycleStateMachine, changes);
 
                 loanTransaction = LoanTransaction.writeoff(this, closureDate);
                 boolean isLastTransaction = isChronologicallyLatestTransaction(loanTransaction, loanTransactions);
@@ -1454,7 +1467,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
             if (totalLoanOverpayment.isGreaterThanZero() && getInArrearsTolerance().isGreaterThanOrEqualTo(totalLoanOverpayment)) {
                 // TODO - technically should set somewhere that this loan has
                 // 'overpaid' amount
-                updateLoanForClosure(closureDate, loanLifecycleStateMachine);
+                updateLoanForClosure(closureDate, loanLifecycleStateMachine, changes);
             } else if (totalLoanOverpayment.isGreaterThanZero()) {
                 final String errorMessage = "The loan is marked as 'Overpaid' and cannot be moved to 'Closed (obligations met).";
                 throw new InvalidLoanStateTransitionException("close", "loan.is.overpaid", errorMessage, totalLoanOverpayment.toString());
@@ -1474,23 +1487,35 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         return totalOutstanding;
     }
 
-    private void updateLoanForClosure(final LocalDate closureDate, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
+    private void updateLoanForClosure(final LocalDate closureDate, final LoanLifecycleStateMachine loanLifecycleStateMachine, final Map<String, Object> changes) {
+        
         final LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.REPAID_IN_FULL, LoanStatus.fromInt(this.loanStatus));
-        this.loanStatus = statusEnum.getValue();
+        if (!statusEnum.hasStateOf(LoanStatus.fromInt(this.loanStatus))) {
+            this.loanStatus = statusEnum.getValue();
+            changes.put("status", LoanEnumerations.status(this.loanStatus));
+        }
         this.closedOnDate = closureDate.toDate();
     }
 
     /**
      * Behaviour added to comply with capability of previous mifos product to
      * support easier transition to mifosx platform.
+     * @param changes 
      */
-    public void closeAsMarkedForReschedule(final LocalDate rescheduledOn, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
+    public void closeAsMarkedForReschedule(final JsonCommand command, final LoanLifecycleStateMachine loanLifecycleStateMachine, final Map<String, Object> changes) {
 
+        final LocalDate rescheduledOn = command.localDateValueOfParameterNamed("transactionDate");
+        
         final LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_RESCHEDULE, LoanStatus.fromInt(this.loanStatus));
-        this.loanStatus = statusEnum.getValue();
+        if (!statusEnum.hasStateOf(LoanStatus.fromInt(this.loanStatus))) {
+            this.loanStatus = statusEnum.getValue();
+            changes.put("status", LoanEnumerations.status(this.loanStatus));
+        }
 
         this.closedOnDate = rescheduledOn.toDate();
         this.rescheduledOnDate = rescheduledOn.toDate();
+        changes.put("closedOnDate", command.stringValueOfParameterNamed("transactionDate"));
+        changes.put("rescheduledOnDate", command.stringValueOfParameterNamed("transactionDate"));
 
         LocalDate rescheduledOnLocalDate = new LocalDate(rescheduledOnDate);
         if (rescheduledOnLocalDate.isBefore(this.getDisbursementDate())) {

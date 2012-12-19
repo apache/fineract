@@ -3,9 +3,7 @@ package org.mifosplatform.portfolio.loanaccount.service;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 import org.mifosplatform.organisation.staff.command.BulkTransferLoanOfficerCommand;
-import org.mifosplatform.portfolio.loanaccount.command.AdjustLoanTransactionCommand;
 import org.mifosplatform.portfolio.loanaccount.command.LoanChargeCommand;
-import org.mifosplatform.portfolio.loanaccount.command.LoanTransactionCommand;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface LoanWritePlatformService {
@@ -26,25 +24,19 @@ public interface LoanWritePlatformService {
 
     EntityIdentifier disburseLoan(Long loanId, JsonCommand command);
 
-    public EntityIdentifier undoLoanDisbursal(Long loanId, JsonCommand command);
+    EntityIdentifier undoLoanDisbursal(Long loanId, JsonCommand command);
 
-    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'PORTFOLIO_MANAGEMENT_SUPER_USER', 'REPAYMENT_LOAN', 'REPAYMENTINPAST_LOAN')")
-    public EntityIdentifier makeLoanRepayment(LoanTransactionCommand command);
+    EntityIdentifier makeLoanRepayment(Long loanId, JsonCommand command);
 
-    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'PORTFOLIO_MANAGEMENT_SUPER_USER', 'ADJUST_LOAN')")
-    EntityIdentifier adjustLoanTransaction(AdjustLoanTransactionCommand command);
+    EntityIdentifier adjustLoanTransaction(Long loanId, Long transactionId, JsonCommand command);
 
-    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'PORTFOLIO_MANAGEMENT_SUPER_USER', 'WAIVEINTERESTPORTION_LOAN')")
-    EntityIdentifier waiveInterestOnLoan(LoanTransactionCommand command);
+    EntityIdentifier waiveInterestOnLoan(Long loanId, JsonCommand command);
 
-    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'PORTFOLIO_MANAGEMENT_SUPER_USER', 'WRITEOFF_LOAN')")
-    EntityIdentifier writeOff(LoanTransactionCommand command);
+    EntityIdentifier writeOff(Long loanId, JsonCommand command);
 
-    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'PORTFOLIO_MANAGEMENT_SUPER_USER', 'CLOSE_LOAN')")
-    EntityIdentifier closeLoan(LoanTransactionCommand command);
+    EntityIdentifier closeLoan(Long loanId, JsonCommand command);
 
-    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'PORTFOLIO_MANAGEMENT_SUPER_USER', 'CLOSEASRESCHEDULED_LOAN')")
-    EntityIdentifier closeAsRescheduled(LoanTransactionCommand command);
+    EntityIdentifier closeAsRescheduled(Long loanId, JsonCommand command);
 
     @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'PORTFOLIO_MANAGEMENT_SUPER_USER', 'CREATE_LOANCHARGE')")
     EntityIdentifier addLoanCharge(LoanChargeCommand command);

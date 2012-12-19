@@ -27,9 +27,7 @@ import org.mifosplatform.portfolio.client.command.NoteCommand;
 import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.client.serialization.ClientCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.group.command.GroupCommand;
-import org.mifosplatform.portfolio.loanaccount.command.AdjustLoanTransactionCommand;
 import org.mifosplatform.portfolio.loanaccount.command.LoanChargeCommand;
-import org.mifosplatform.portfolio.loanaccount.command.LoanTransactionCommand;
 import org.mifosplatform.portfolio.loanaccount.gaurantor.command.GuarantorCommand;
 import org.mifosplatform.portfolio.savingsaccount.command.SavingAccountCommand;
 import org.mifosplatform.portfolio.savingsaccountproduct.command.SavingProductCommand;
@@ -201,50 +199,6 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
 
         return new LoanChargeCommand(modifiedParameters, loanChargeId, loanId, chargeId, amount, chargeTimeType, chargeCalculationType,
                 submittedOnDate);
-    }
-
-    @Override
-    public LoanTransactionCommand convertJsonToLoanTransactionCommand(final Long resourceIdentifier, final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
-
-        Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
-
-        Set<String> supportedParams = new HashSet<String>(Arrays.asList("transactionDate", "transactionAmount", "note", "dateFormat",
-                "locale"));
-
-        checkForUnsupportedParameters(requestMap, supportedParams);
-
-        Set<String> modifiedParameters = new HashSet<String>();
-
-        LocalDate transactionDate = extractLocalDateParameter("transactionDate", requestMap, modifiedParameters);
-        BigDecimal transactionAmount = extractBigDecimalParameter("transactionAmount", requestMap, modifiedParameters);
-        String note = extractStringParameter("note", requestMap, modifiedParameters);
-
-        return new LoanTransactionCommand(resourceIdentifier, transactionDate, transactionAmount, note);
-    }
-
-    @Override
-    public AdjustLoanTransactionCommand convertJsonToAdjustLoanTransactionCommand(final Long loanId, final Long transactionId,
-            final String json) {
-
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
-
-        Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
-
-        Set<String> supportedParams = new HashSet<String>(Arrays.asList("transactionDate", "transactionAmount", "note", "dateFormat",
-                "locale"));
-
-        checkForUnsupportedParameters(requestMap, supportedParams);
-
-        Set<String> modifiedParameters = new HashSet<String>();
-
-        LocalDate transactionDate = extractLocalDateParameter("transactionDate", requestMap, modifiedParameters);
-        BigDecimal transactionAmount = extractBigDecimalParameter("transactionAmount", requestMap, modifiedParameters);
-        String note = extractStringParameter("note", requestMap, modifiedParameters);
-
-        return new AdjustLoanTransactionCommand(loanId, transactionId, transactionDate, note, transactionAmount);
     }
 
     @Override
@@ -741,7 +695,7 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         Set<String> supportedParams = new HashSet<String>(Arrays.asList("locale", "name", "description", "currencyCode",
                 "digitsAfterDecimal", "interestRate", "minInterestRate", "maxInterestRate", "savingsDepositAmount", "savingProductType",
                 "tenureType", "tenure", "frequency", "interestType", "interestCalculationMethod", "minimumBalanceForWithdrawal",
-                "isPartialDepositAllowed", "isLockinPeriodAllowed", "lockinPeriod", "lockinPeriodType","depositEvery"));
+                "isPartialDepositAllowed", "isLockinPeriodAllowed", "lockinPeriod", "lockinPeriodType", "depositEvery"));
 
         checkForUnsupportedParameters(requestMap, supportedParams);
         Set<String> modifiedParameters = new HashSet<String>();
@@ -767,9 +721,9 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         Integer lockinPeriodType = extractIntegerParameter("lockinPeriodType", requestMap, modifiedParameters);
 
         return new SavingProductCommand(modifiedParameters, resourceIdentifier, name, description, currencyCode, digitsAfterDecimalValue,
-                interestRate, minInterestRate, maxInterestRate, savingsDepositAmount, depositEvery, savingProductType, tenureType, tenure, frequency,
-                interestType, interestCalculationMethod, minimumBalanceForWithdrawal, isPartialDepositAllowed, isLockinPeriodAllowed,
-                lockinPeriod, lockinPeriodType);
+                interestRate, minInterestRate, maxInterestRate, savingsDepositAmount, depositEvery, savingProductType, tenureType, tenure,
+                frequency, interestType, interestCalculationMethod, minimumBalanceForWithdrawal, isPartialDepositAllowed,
+                isLockinPeriodAllowed, lockinPeriod, lockinPeriodType);
     }
 
     @Override
