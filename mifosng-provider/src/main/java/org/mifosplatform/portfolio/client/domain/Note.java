@@ -14,6 +14,7 @@ import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransaction;
+import org.mifosplatform.portfolio.savingsaccount.domain.SavingAccount;
 import org.mifosplatform.portfolio.savingsdepositaccount.domain.DepositAccount;
 import org.mifosplatform.useradministration.domain.AppUser;
 
@@ -46,10 +47,15 @@ public class Note extends AbstractAuditableCustom<AppUser, Long> {
     @ManyToOne
     @JoinColumn(name = "deposit_account_id", nullable = true)
     private DepositAccount depositAccount;
+    
+    @SuppressWarnings("unused")
+    @ManyToOne
+    @JoinColumn(name = "saving_account_id", nullable = true)
+    private SavingAccount savingAccount;
 
     public enum NoteType {
         CLIENT(100, "noteType.client"), LOAN(200, "noteType.loan"), LOAN_TRANSACTION(300, "noteType.loan.transaction"), DEPOSIT(400,
-                "noteType.deposit");
+                "noteType.deposit"), SAVING(500,"noteType.saving");
 
         private Integer value;
         private String code;
@@ -132,7 +138,14 @@ public class Note extends AbstractAuditableCustom<AppUser, Long> {
         this.noteTypeId = NoteType.DEPOSIT.getValue();
     }
 
-    public Map<String, Object> update(final JsonCommand command) {
+    public Note(SavingAccount account, String note) {
+    	this.savingAccount = account;
+		this.client = account.getClient();
+		this.note = note;
+		this.noteTypeId = NoteType.SAVING.getValue();
+	}
+
+	public Map<String, Object> update(final JsonCommand command) {
         final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(7);
 
         final String noteParamName = "note";
@@ -146,5 +159,9 @@ public class Note extends AbstractAuditableCustom<AppUser, Long> {
 
     public boolean isNotAgainstClientWithIdOf(Long clientId) {
         return !this.client.identifiedBy(clientId);
+    }
+    
+    public static Note savingNote(final SavingAccount account, final String noteText) {
+        return new Note(account, noteText);
     }
 }

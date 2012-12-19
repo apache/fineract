@@ -24,8 +24,12 @@ public class NoteEnumerations {
 		case DEPOSIT:
 			optionData = new EnumOptionData(type.getValue().longValue(), type.getCode(), "Deposit transaction note");
 			break;
+		case SAVING:
+			optionData = new EnumOptionData(type.getValue().longValue(), type.getCode(), "Saving transaction note");
+			break;
 		default:
 			break;
+		
 		}
 		return optionData;
 	}

@@ -41,7 +41,7 @@ public class CalculateSavingScheduleImpl implements CalculateSavingSchedule {
         final SavingProduct savingProduct = this.savingProductRepository.findOne(command.getProductId());
         if (savingProduct == null) throw new SavingProductNotFoundException(command.getProductId());
 
-        final Integer depositFrequency = command.getPayEvery();
+        final Integer depositFrequency = command.getDepositEvery();
         final PeriodFrequencyType depositFrequencyType = PeriodFrequencyType.fromInt(command.getPaymentFrequencyType());
         final LocalDate scheduleStartDate = command.getPaymentsStartingFromDate();
         @SuppressWarnings("unused")

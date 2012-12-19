@@ -32,7 +32,10 @@ public class SavingAccountCommand {
     private final Integer interestCalculationMethod;
     private final BigDecimal minimumBalanceForWithdrawal;
     private final boolean isPartialDepositAllowed;
-    private final Integer payEvery;
+    private final Integer depositEvery;
+    
+    private final Integer interestPostEvery; 
+    private final Integer interestPostFrequency;
 
     private final Set<String> modifiedParameters;
 
@@ -42,7 +45,7 @@ public class SavingAccountCommand {
             final LocalDate commencementDate, final Integer savingProductType, final Integer tenureType, final Integer frequency,
             final Integer interestType, final BigDecimal minimumBalanceForWithdrawal, final Integer interestCalculationMethod,
             final boolean isLockinPeriodAllowed, final boolean isPartialDepositAllowed, final Integer lockInPeriod,
-            final Integer lockinPeriodType, final Integer payEvery) {
+            final Integer lockinPeriodType, final Integer depositEvery,final Integer interestPostEvery,final Integer interestPostFrequency) {
         this.id = id;
         this.clientId = clientId;
         this.productId = productId;
@@ -69,7 +72,10 @@ public class SavingAccountCommand {
         this.lockinPeriodType = lockinPeriodType;
         this.minimumBalanceForWithdrawal = minimumBalanceForWithdrawal;
         this.interestCalculationMethod = interestCalculationMethod;
-        this.payEvery = payEvery;
+        this.depositEvery = depositEvery;
+        
+        this.interestPostEvery = interestPostEvery;
+        this.interestPostFrequency = interestPostFrequency;
     }
 
     public Long getId() {
@@ -156,11 +162,19 @@ public class SavingAccountCommand {
         return isPartialDepositAllowed;
     }
 
-    public Integer getPayEvery() {
-        return this.payEvery;
+    public Integer getDepositEvery() {
+        return this.depositEvery;
     }
 
-    public boolean isNoFieldChanged() {
+    public Integer getInterestPostEvery() {
+		return this.interestPostEvery;
+	}
+
+	public Integer getInterestPostFrequency() {
+		return this.interestPostFrequency;
+	}
+
+	public boolean isNoFieldChanged() {
         return this.modifiedParameters.isEmpty();
     }
 
@@ -231,13 +245,23 @@ public class SavingAccountCommand {
     public boolean isPartialDepositAllowedChanged() {
         return this.modifiedParameters.contains("isPartialDepositAllowed");
     }
-    public boolean isPayEveryChanged() {
-        return this.modifiedParameters.contains("payEvery");
+    
+    public boolean isDepositEveryChanged() {
+        return this.modifiedParameters.contains("depositEvery");
     }
+    
+    public boolean isInterestPostedEveryChanged(){
+    	return this.modifiedParameters.contains(interestPostEvery);
+    }
+    
+    public boolean isInterestPostingChanged(){
+    	return this.modifiedParameters.contains(interestPostFrequency);
+    }
+    
 
     public CalculateSavingScheduleCommand toCalculateSavingScheduleCommand() {
-        return new CalculateSavingScheduleCommand(productId, savingsDepositAmount, payEvery, frequency, recurringInterestRate,
-                commencementDate, tenure);
+        return new CalculateSavingScheduleCommand(productId, savingsDepositAmount, depositEvery, frequency, recurringInterestRate,
+                commencementDate, tenure, interestPostEvery, interestPostFrequency);
     }
 
 }

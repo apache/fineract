@@ -44,9 +44,18 @@ public class SavingProductWritePlatformServiceJpaRepositoryImpl implements Savin
         SavingFrequencyType savingFrequencyType = SavingFrequencyType.fromInt(command.getFrequency());
         SavingsInterestType interestType = SavingsInterestType.fromInt(command.getInterestType());
         PeriodFrequencyType lockinPeriodType = PeriodFrequencyType.fromInt(command.getLockinPeriodType());
-        SavingInterestCalculationMethod savingInterestCalculationMethod = SavingInterestCalculationMethod.fromInt(command
-                .getInterestCalculationMethod());
+        SavingInterestCalculationMethod savingInterestCalculationMethod = SavingInterestCalculationMethod.fromInt(command.getInterestCalculationMethod());
         MonetaryCurrency currency = new MonetaryCurrency(command.getCurrencyCode(), command.getDigitsAfterDecimal());
+        
+        if ( savingProductType.equals(SavingProductType.INVALID) ||
+        	 tenureType.equals(TenureTypeEnum.INVALID) ||
+        	 savingFrequencyType.equals(SavingFrequencyType.INVALID) ||
+        	 interestType.equals(SavingsInterestType.INVALID) ||
+        	 lockinPeriodType.equals(PeriodFrequencyType.INVALID)||
+        	 savingInterestCalculationMethod.equals(SavingInterestCalculationMethod.INVALID)
+        		) {
+			throw new RuntimeException("Please select a valid types"); 
+		}
 
         SavingProduct product = new SavingProduct(command.getName(), command.getDescription(), currency, command.getInterestRate(),
                 command.getMinInterestRate(), command.getMaxInterestRate(), command.getSavingsDepositAmount(),command.getDepositEvery(), savingProductType,

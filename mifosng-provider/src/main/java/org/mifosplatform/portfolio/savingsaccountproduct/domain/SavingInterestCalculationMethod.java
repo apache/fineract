@@ -40,4 +40,12 @@ public enum SavingInterestCalculationMethod {
         }
         return savingInterestCalculationMethod;
     }
+
+	public boolean isAverageBalance() {
+		return this.value.equals(SavingInterestCalculationMethod.AVERAGEBAL.value);
+	}
+
+	public boolean isMonthlyCollection() {
+		return this.value.equals(SavingInterestCalculationMethod.MONTHLYCOLLECTION.value);
+	}
 }

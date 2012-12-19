@@ -35,22 +35,22 @@ public class SavingProductRelatedDetail {
     private Integer depositEvery;
 
     @Column(name = "savings_product_type", nullable = false)
-    private SavingProductType savingProductType;
+    private Integer savingProductType;
 
     @Column(name = "tenure_type", nullable = false)
-    private TenureTypeEnum tenureType;
+    private Integer tenureType;
 
     @Column(name = "tenure", nullable = false)
     private Integer tenure;
 
     @Column(name = "frequency", nullable = false)
-    private SavingFrequencyType frequency;
+    private Integer frequency;
 
     @Column(name = "interest_type", nullable = false)
-    private SavingsInterestType interestType;
+    private Integer interestType;
 
     @Column(name = "interest_calculation_method")
-    private SavingInterestCalculationMethod interestCalculationMethod;
+    private Integer interestCalculationMethod;
 
     @Column(name = "min_bal_for_withdrawal", scale = 6, precision = 19, nullable = false)
     private BigDecimal minimumBalanceForWithdrawal;
@@ -65,7 +65,7 @@ public class SavingProductRelatedDetail {
     private Integer lockinPeriod;
 
     @Column(name = "lock_in_period_type", nullable = false)
-    private PeriodFrequencyType lockinPeriodType;
+    private Integer lockinPeriodType;
 
     public SavingProductRelatedDetail() {
         this.interestRate = null;
@@ -84,17 +84,17 @@ public class SavingProductRelatedDetail {
         this.maxInterestRate = maxInterestRate;
         this.savingsDepositAmount = savingsDepositAmount;
         this.depositEvery=depositEvery;
-        this.savingProductType = savingProductType;
-        this.tenureType = tenureType;
+        this.savingProductType = savingProductType.getValue();
+        this.tenureType = tenureType.getValue();
         this.tenure = tenure;
-        this.frequency = frequency;
-        this.interestType = interestType;
-        this.interestCalculationMethod = interestCalculationMethod;
+        this.frequency = frequency.getValue();
+        this.interestType = interestType.getValue();
+        this.interestCalculationMethod = interestCalculationMethod.getValue();
         this.minimumBalanceForWithdrawal = minimumBalanceForWithdrawal;
         this.isPartialDepositAllowed = isPartialDepositAllowed;
         this.isLockinPeriodAllowed = isLockinPeriodAllowed;
         this.lockinPeriod = lockinPeriod;
-        this.lockinPeriodType = lockinPeriodType;
+        this.lockinPeriodType = lockinPeriodType.getValue();
     }
 
     public MonetaryCurrency getCurrency() {
@@ -137,11 +137,11 @@ public class SavingProductRelatedDetail {
 		}
 
         if (command.isSavingProductTypeChanged()) {
-            this.savingProductType = SavingProductType.fromInt(command.getSavingProductType());
+            this.savingProductType = SavingProductType.fromInt(command.getSavingProductType()).getValue();
         }
 
         if (command.isTenureTypeChanged()) {
-            this.tenureType = TenureTypeEnum.fromInt(command.getTenureType());
+            this.tenureType = TenureTypeEnum.fromInt(command.getTenureType()).getValue();
         }
 
         if (command.isTenureChanged()) {
@@ -149,15 +149,15 @@ public class SavingProductRelatedDetail {
         }
 
         if (command.isFrequencyChanged()) {
-            this.frequency = SavingFrequencyType.fromInt(command.getFrequency());
+            this.frequency = SavingFrequencyType.fromInt(command.getFrequency()).getValue();
         }
 
         if (command.isInterestTypeChanged()) {
-            this.interestType = SavingsInterestType.fromInt(command.getInterestType());
+            this.interestType = SavingsInterestType.fromInt(command.getInterestType()).getValue();
         }
 
         if (command.isInterestCalculationMethodChanged()) {
-            this.interestCalculationMethod = SavingInterestCalculationMethod.fromInt(command.getInterestCalculationMethod());
+            this.interestCalculationMethod = SavingInterestCalculationMethod.fromInt(command.getInterestCalculationMethod()).getValue();
         }
 
         if (command.isMinimumBalanceForWithdrawalChanged()) {
@@ -177,7 +177,7 @@ public class SavingProductRelatedDetail {
         }
 
         if (command.isLockinPeriodTypeChanged()) {
-            this.lockinPeriodType = PeriodFrequencyType.fromInt(command.getLockinPeriodType());
+            this.lockinPeriodType = PeriodFrequencyType.fromInt(command.getLockinPeriodType()).getValue();
         }
     }
 
@@ -189,11 +189,11 @@ public class SavingProductRelatedDetail {
 		return this.depositEvery;
 	}
 
-	public SavingProductType getSavingProductType() {
+	public Integer getSavingProductType() {
         return savingProductType;
     }
 
-    public TenureTypeEnum getTenureType() {
+    public Integer getTenureType() {
         return tenureType;
     }
 
@@ -201,15 +201,15 @@ public class SavingProductRelatedDetail {
         return tenure;
     }
 
-    public SavingFrequencyType getFrequency() {
+    public Integer getFrequency() {
         return frequency;
     }
 
-    public SavingsInterestType getInterestType() {
+    public Integer getInterestType() {
         return interestType;
     }
 
-    public SavingInterestCalculationMethod getInterestCalculationMethod() {
+    public Integer getInterestCalculationMethod() {
         return interestCalculationMethod;
     }
 
@@ -229,7 +229,7 @@ public class SavingProductRelatedDetail {
         return lockinPeriod;
     }
 
-    public PeriodFrequencyType getLockinPeriodType() {
+    public Integer getLockinPeriodType() {
         return lockinPeriodType;
     }
 

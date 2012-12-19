@@ -1507,7 +1507,7 @@ CREATE TABLE `m_saving_account` (
   `lastmodified_date` datetime DEFAULT NULL,
   `lastmodifiedby_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `deposit_acc_external_id` (`external_id`),
+  UNIQUE KEY `saving_acc_external_id` (`external_id`),
   KEY `FKSA0000000000001` (`client_id`),
   KEY `FKSA0000000000002` (`product_id`),
   CONSTRAINT `FKSA0000000000001` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`),

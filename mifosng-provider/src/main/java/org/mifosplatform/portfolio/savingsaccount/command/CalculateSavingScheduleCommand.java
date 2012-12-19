@@ -8,23 +8,27 @@ public class CalculateSavingScheduleCommand {
 
     private final Long productId;
     private final BigDecimal deposit;
-    private final Integer payEvery;
+    private final Integer depositEvery;
     private final Integer paymentFrequencyType;
     private final BigDecimal interestRate;
     private final LocalDate paymentsStartingFromDate;
     private final Integer tenure;
+    private final Integer interestPostEvery; 
+    private final Integer interestPostFrequency;
 
-    public CalculateSavingScheduleCommand(final Long productId, final BigDecimal deposit, final Integer payEvery,
+    public CalculateSavingScheduleCommand(final Long productId, final BigDecimal deposit, final Integer depositEvery,
             final Integer paymentFrequencyType, final BigDecimal interestRate, final LocalDate paymentsStartingFromDate,
-            final Integer tenure) {
+            final Integer tenure,final Integer interestPostEvery, final Integer interestPostFrequency) {
 
         this.productId = productId;
         this.deposit = deposit;
-        this.payEvery = payEvery;
+        this.depositEvery = depositEvery;
         this.paymentFrequencyType = paymentFrequencyType;
         this.interestRate = interestRate;
         this.paymentsStartingFromDate = paymentsStartingFromDate;
         this.tenure = tenure;
+        this.interestPostEvery = interestPostEvery;
+        this.interestPostFrequency = interestPostFrequency;
 
     }
 
@@ -36,8 +40,8 @@ public class CalculateSavingScheduleCommand {
         return this.deposit;
     }
 
-    public Integer getPayEvery() {
-        return this.payEvery;
+    public Integer getDepositEvery() {
+        return this.depositEvery;
     }
 
     public Integer getPaymentFrequencyType() {
@@ -56,5 +60,12 @@ public class CalculateSavingScheduleCommand {
         return this.tenure;
     }
 
+	public Integer getInterestPostEvery() {
+		return this.interestPostEvery;
+	}
+
+	public Integer getInterestPostFrequency() {
+		return this.interestPostFrequency;
+	}
 
 }

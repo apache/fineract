@@ -11,7 +11,10 @@ import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepository;
 import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
 import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
+import org.mifosplatform.portfolio.savingsaccount.command.CalculateSavingScheduleCommand;
+import org.mifosplatform.portfolio.savingsaccount.command.SavingAccountApprovalCommand;
 import org.mifosplatform.portfolio.savingsaccount.command.SavingAccountCommand;
+import org.mifosplatform.portfolio.savingsaccount.command.SavingAccountWithdrawalCommand;
 import org.mifosplatform.portfolio.savingsaccount.data.SavingScheduleData;
 import org.mifosplatform.portfolio.savingsaccount.data.SavingSchedulePeriodData;
 import org.mifosplatform.portfolio.savingsaccount.domain.ReccuringDepositInterestCalculator;
@@ -27,6 +30,7 @@ import org.mifosplatform.portfolio.savingsaccountproduct.exception.SavingProduct
 import org.mifosplatform.portfolio.savingsdepositaccount.domain.DepositAccountStatus;
 import org.mifosplatform.portfolio.savingsdepositaccount.domain.DepositLifecycleStateMachine;
 import org.mifosplatform.portfolio.savingsdepositaccount.domain.DepositLifecycleStateMachineImpl;
+import org.mifosplatform.portfolio.savingsdepositaccount.exception.DepositAccountTransactionsException;
 import org.mifosplatform.portfolio.savingsdepositproduct.domain.TenureTypeEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -70,28 +74,28 @@ public class SavingAccountAssembler {
             tenure = command.getTenure();
         }
 
-        TenureTypeEnum tenureTypeEnum = product.getSavingProductRelatedDetail().getTenureType();
+        TenureTypeEnum tenureTypeEnum = TenureTypeEnum.fromInt(product.getSavingProductRelatedDetail().getTenureType());
         if (command.getTenureType() != null) {
             tenureTypeEnum = TenureTypeEnum.fromInt(command.getTenureType());
         }
 
-        SavingProductType savingProductType = product.getSavingProductRelatedDetail().getSavingProductType();
+        SavingProductType savingProductType = SavingProductType.fromInt(product.getSavingProductRelatedDetail().getSavingProductType());
         if (command.getSavingProductType() != null) {
             savingProductType = SavingProductType.fromInt(command.getSavingProductType());
         }
 
-        SavingFrequencyType savingFrequencyType = product.getSavingProductRelatedDetail().getFrequency();
+        SavingFrequencyType savingFrequencyType = SavingFrequencyType.fromInt(product.getSavingProductRelatedDetail().getFrequency());
         if (command.getFrequency() != null) {
             savingFrequencyType = SavingFrequencyType.fromInt(command.getFrequency());
         }
 
-        SavingInterestCalculationMethod savingInterestCalculationMethod = product.getSavingProductRelatedDetail()
-                .getInterestCalculationMethod();
+        SavingInterestCalculationMethod savingInterestCalculationMethod = SavingInterestCalculationMethod.fromInt(product.getSavingProductRelatedDetail()
+                .getInterestCalculationMethod());
         if (command.getInterestCalculationMethod() != null) {
             savingInterestCalculationMethod = SavingInterestCalculationMethod.fromInt(command.getInterestCalculationMethod());
         }
 
-        SavingsInterestType interestType = product.getSavingProductRelatedDetail().getInterestType();
+        SavingsInterestType interestType = SavingsInterestType.fromInt(product.getSavingProductRelatedDetail().getInterestType());
         if (command.getInterestType() != null) {
             interestType = SavingsInterestType.fromInt(command.getInterestType());
         }
@@ -110,17 +114,21 @@ public class SavingAccountAssembler {
             lockinPeriod = command.getLockinPeriod();
         }
 
-        PeriodFrequencyType lockinPeriodType = product.getSavingProductRelatedDetail().getLockinPeriodType();
+        PeriodFrequencyType lockinPeriodType = PeriodFrequencyType.fromInt(product.getSavingProductRelatedDetail().getLockinPeriodType());
         if (command.getLockinPeriodType() != null) {
             lockinPeriodType = PeriodFrequencyType.fromInt(command.getLockinPeriodType());
         }
         
-        Integer payEvery = command.getPayEvery();
+        Integer depositEvery = command.getDepositEvery();
+        
+        Integer interestPostEvery = command.getInterestPostEvery();
+
+        Integer interestPostFrequency =command.getInterestPostFrequency();
 
         SavingAccount account = SavingAccount.openNew(client, product, command.getExternalId(), savingsDeposit, reccuringInterestRate,
                 savingInterestRate, tenure, command.getCommencementDate(), tenureTypeEnum, savingProductType, savingFrequencyType,
                 interestType, savingInterestCalculationMethod, isLockinPeriodAllowed, lockinPeriod, lockinPeriodType,
-                this.reccuringDepositInterestCalculator, defaultDepositLifecycleStateMachine(),payEvery);
+                this.reccuringDepositInterestCalculator, defaultDepositLifecycleStateMachine(),depositEvery,interestPostEvery, interestPostFrequency);
 
         SavingScheduleData savingScheduleData = this.calculateSavingSchedule.calculateSavingSchedule(command
                 .toCalculateSavingScheduleCommand());
@@ -163,22 +171,22 @@ public class SavingAccountAssembler {
             commencementDate = command.getCommencementDate();
         }
 
-        TenureTypeEnum tenureTypeEnum = account.getTenureType();
+        TenureTypeEnum tenureTypeEnum = TenureTypeEnum.fromInt(account.getTenureType());
         if (command.isTenureTypeEnumChanged()) {
             tenureTypeEnum = TenureTypeEnum.fromInt(command.getTenureType());
         }
 
-        SavingProductType savingProductType = account.getSavingProductType();
+        SavingProductType savingProductType = SavingProductType.fromInt(account.getSavingProductType());
         if (command.isSavingProductTypeChanged()) {
             savingProductType = SavingProductType.fromInt(command.getSavingProductType());
         }
 
-        SavingFrequencyType savingFrequencyType = account.getFrequency();
+        SavingFrequencyType savingFrequencyType = SavingFrequencyType.fromInt(account.getFrequency());
         if (command.isSavingFrequencyTypeChanged()) {
             savingFrequencyType = SavingFrequencyType.fromInt(command.getFrequency());
         }
 
-        SavingInterestCalculationMethod savingInterestCalculationMethod = account.getInterestCalculationMethod();
+        SavingInterestCalculationMethod savingInterestCalculationMethod = SavingInterestCalculationMethod.fromInt(account.getInterestCalculationMethod());
         if (command.isSavingInterestCalculationMethodChanged()) {
             savingInterestCalculationMethod = SavingInterestCalculationMethod.fromInt(command.getInterestCalculationMethod());
         }
@@ -203,14 +211,14 @@ public class SavingAccountAssembler {
             lockinPeriod = command.getLockinPeriod();
         }
 
-        PeriodFrequencyType lockinPeriodType = account.getLockinPeriodType();
+        PeriodFrequencyType lockinPeriodType = PeriodFrequencyType.fromInt(account.getLockinPeriodType());
         if (command.isLockinPeriodTypeChanged()) {
             lockinPeriodType = PeriodFrequencyType.fromInt(command.getLockinPeriodType());
         }
         
         Integer payEvery = account.getPayEvery();
-        if(command.isPayEveryChanged()){
-        	payEvery = command.getPayEvery();
+        if(command.isDepositEveryChanged()){
+        	payEvery = command.getDepositEvery();
         }
         account.modifyAccount(product, externalId, savingsDeposit, reccuringInterestRate, savingInterestRate, tenure, commencementDate,
                 tenureTypeEnum, savingProductType, savingFrequencyType, savingInterestCalculationMethod, isLockinPeriodAllowed,
@@ -222,5 +230,92 @@ public class SavingAccountAssembler {
         List<DepositAccountStatus> allowedDepositStatuses = Arrays.asList(DepositAccountStatus.values());
         return new DepositLifecycleStateMachineImpl(allowedDepositStatuses);
     }
+
+	public void approveSavingAccount(SavingAccountApprovalCommand command, SavingAccount account) {
+		
+		LocalDate approvalDate = account.projectedCommencementDate();
+		if (command.getApprovalDate() != null) {
+			approvalDate = command.getApprovalDate();
+		}
+		
+		BigDecimal savingsDepositAmountPerPeriod=account.getSavingsDepositAmountPerPeriod();
+		if (command.getDepositAmountPerPeriod() != null) {
+			savingsDepositAmountPerPeriod = command.getDepositAmountPerPeriod();
+		}
+		
+		BigDecimal recurringInterestRate = account.getReccuringInterestRate();
+		if (command.getRecurringInterestRate() != null) {
+			recurringInterestRate = command.getRecurringInterestRate();
+		}
+		
+		BigDecimal savingInterestRate = account.getSavingInterestRate();
+		if (command.getSavingInterestRate() != null) {
+			savingInterestRate = command.getSavingInterestRate(); 
+		}
+		
+		Integer interestType = account.getInterestType();
+		if (command.getInterestType() != null) {
+			interestType = SavingsInterestType.fromInt(command.getInterestType()).getValue();
+		}
+		
+		Integer tenure = account.getTenure();
+		if (command.getTenure() != null) {
+			tenure = command.getTenure();
+		}
+		
+		Integer tenureType = account.getTenureType();
+		if (command.getTenureType() != null) {
+			tenureType = TenureTypeEnum.fromInt(command.getTenureType()).getValue();
+		}
+		
+		Integer frequency = account.getFrequency();
+		if (command.getDepositFrequencyType() != null) {
+			frequency = SavingFrequencyType.fromInt(command.getDepositFrequencyType()).getValue();
+		}
+		
+		Integer payEvery = account.getPayEvery();
+		if (command.getDepositEvery() != null) {
+			payEvery = command.getDepositEvery();
+		}
+		
+		Integer interestPostEvery = account.getInterestPostEvery();
+		if (command.getInterestPostEvery() != null) {
+			interestPostEvery = command.getInterestPostEvery();
+		}
+		Integer interestPostFrequency =account.getInterestPostFrequency();
+		if (command.getInterestPostFrequency() != null) {
+			interestPostFrequency = command.getInterestPostFrequency();
+		}
+		
+		account.approveSavingAccount(approvalDate, savingsDepositAmountPerPeriod, recurringInterestRate, savingInterestRate, interestType,
+				tenure, tenureType, frequency, payEvery,defaultDepositLifecycleStateMachine(),this.reccuringDepositInterestCalculator, interestPostEvery, interestPostFrequency);
+		
+		
+		CalculateSavingScheduleCommand calculateSavingScheduleCommand = new CalculateSavingScheduleCommand(account.getProduct().getId(), savingsDepositAmountPerPeriod, payEvery,
+				frequency, recurringInterestRate, approvalDate, tenure,interestPostEvery,interestPostFrequency);
+		
+		SavingScheduleData savingScheduleData = this.calculateSavingSchedule.calculateSavingSchedule(calculateSavingScheduleCommand);
+        for (SavingSchedulePeriodData savingSchedulePeriodData : savingScheduleData.getPeriods()) {
+
+            final SavingScheduleInstallments installment = new SavingScheduleInstallments(account, savingSchedulePeriodData.getDueDate()
+                    .toDate(), savingSchedulePeriodData.getPeriod(), savingSchedulePeriodData.getDepositDue());
+            account.addSavingScheduleInstallment(installment);
+        }
+	}
+
+	public void withdrawSavingAccountMoney(	SavingAccountWithdrawalCommand command, SavingAccount account) {
+		
+		if (command.getAmount().doubleValue() > account.getOutstandingAmount().doubleValue()) {
+			throw new DepositAccountTransactionsException("deposit.transaction.interest.withdrawal.exceed", "You can Withdraw "
+                    + account.getOutstandingAmount() + " only"); 
+		}
+		
+		account.withdrawAmount(command.getAmount(),command.getTransactionDate());
+		
+	}
+
+	public void postInterest(SavingAccount account) {
+		account.postInterest(this.reccuringDepositInterestCalculator);
+	}
 
 }

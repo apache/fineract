@@ -39,7 +39,7 @@ public class SavingScheduleInstallments extends AbstractAuditableCustom<AppUser,
     @SuppressWarnings("unused")
     @Temporal(TemporalType.DATE)
     @Column(name = "payment_date", nullable = true)
-    private final Date paymentDate;
+    private Date paymentDate;
 
     @SuppressWarnings("unused")
     @Column(name = "deposit_paid", scale = 6, precision = 19, nullable = true)
@@ -48,6 +48,12 @@ public class SavingScheduleInstallments extends AbstractAuditableCustom<AppUser,
     @SuppressWarnings("unused")
     @Column(name = "completed_derived", nullable = false)
     private boolean completed;
+    
+    public SavingScheduleInstallments() {
+		this.dueDate = null;
+		this.installmentNumber = null;
+		this.paymentDate = null;
+	}
 
     public SavingScheduleInstallments(SavingAccount account, Date dueDate, Integer installmentNumber, BigDecimal deposit) {
         this.savingAccount = account;
@@ -62,5 +68,38 @@ public class SavingScheduleInstallments extends AbstractAuditableCustom<AppUser,
     public void updateAccount(SavingAccount account) {
         this.savingAccount = account;
     }
+
+	public Date getPaymentDate() {
+		return this.paymentDate;
+	}
+
+	public void setPaymentDate(Date paymentDate) {
+		this.paymentDate = paymentDate;
+	}
+
+	public BigDecimal getDepositPaid() {
+		return this.depositPaid;
+	}
+
+	public void setDepositPaid(BigDecimal depositPaid) {
+		this.depositPaid = depositPaid;
+	}
+
+	public Date getDueDate() {
+		return this.dueDate;
+	}
+
+	public BigDecimal getDeposit() {
+		return this.deposit;
+	}
+
+	public boolean isCompleted() {
+		return this.completed;
+	}
+
+	public void setCompleted(boolean completed) {
+		this.completed = completed;
+	}
+
 }
 

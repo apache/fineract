@@ -167,9 +167,9 @@ public class SavingProductEnumerations {
         EnumOptionData optionData = null;
         switch (type) {
         // FIXME - Madhukar - spelling mistake on 'Recurring'
-            case RECCURING:
-                optionData = new EnumOptionData(SavingProductType.RECCURING.getValue().longValue(), codePrefix
-                        + SavingProductType.RECCURING.getCode(), "Reccuring");
+            case RECURRING:
+                optionData = new EnumOptionData(SavingProductType.RECURRING.getValue().longValue(), codePrefix
+                        + SavingProductType.RECURRING.getCode(), "Recurring");
             break;
             case REGULAR:
                 optionData = new EnumOptionData(SavingProductType.REGULAR.getValue().longValue(), codePrefix

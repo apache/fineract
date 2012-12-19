@@ -64,7 +64,7 @@ public class SavingProductData implements Serializable {
         this.currency = new CurrencyData("USD", "US Dollar", 2, "$", "currency.USD");
         this.digitsAfterDecimal = Integer.valueOf(2);
         this.savingsDepositAmount = BigDecimal.ZERO;
-        this.savingProductType = SavingProductEnumerations.savingProductType(SavingProductType.RECCURING);
+        this.savingProductType = SavingProductEnumerations.savingProductType(SavingProductType.RECURRING);
         this.tenureType = SavingProductEnumerations.tenureTypeEnum(TenureTypeEnum.FIXED_PERIOD);
         this.tenure = Integer.valueOf(12);
         this.savingFrequencyType = SavingProductEnumerations.interestFrequencyType(SavingFrequencyType.MONTHLY);

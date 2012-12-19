@@ -58,4 +58,12 @@ public enum DepositAccountTransactionType {
     	return depositTransactionType;
     }
 
+	public boolean isDeposit() {
+		return this.value.equals(DepositAccountTransactionType.DEPOSIT.value);
+	}
+
+	public boolean isWithdraw() {
+		return this.value.equals(DepositAccountTransactionType.WITHDRAW.value);
+	}
+
 }

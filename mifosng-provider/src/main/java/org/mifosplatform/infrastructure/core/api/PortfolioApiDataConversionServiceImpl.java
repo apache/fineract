@@ -26,7 +26,11 @@ import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.client.serialization.ClientCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.group.command.GroupCommand;
 import org.mifosplatform.portfolio.loanaccount.gaurantor.command.GuarantorCommand;
+import org.mifosplatform.portfolio.savingsaccount.command.SavingAccountApprovalCommand;
 import org.mifosplatform.portfolio.savingsaccount.command.SavingAccountCommand;
+import org.mifosplatform.portfolio.savingsaccount.command.SavingAccountDepositCommand;
+import org.mifosplatform.portfolio.savingsaccount.command.SavingAccountWithdrawalCommand;
+import org.mifosplatform.portfolio.savingsaccount.command.SavingStateTransitionsCommand;
 import org.mifosplatform.portfolio.savingsaccountproduct.command.SavingProductCommand;
 import org.mifosplatform.portfolio.savingsdepositaccount.command.DepositAccountCommand;
 import org.mifosplatform.portfolio.savingsdepositaccount.command.DepositAccountWithdrawInterestCommand;
@@ -813,8 +817,8 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         Set<String> supportedParams = new HashSet<String>(Arrays.asList("clientId", "productId", "externalId", "currencyCode",
                 "digitsAfterDecimal", "savingsDepositAmountPerPeriod", "recurringInterestRate", "savingInterestRate", "tenure",
                 "commencementDate", "locale", "dateFormat", "isLockinPeriodAllowed", "lockinPeriod", "lockinPeriodType",
-                "savingProductType", "tenureType", "frequency", "interestType", "interestCalculationMethod", "minimumBalanceForWithdrawal",
-                "isPartialDepositAllowed", "payEvery"));
+                "savingProductType", "tenureType", "depositfrequency", "interestType", "interestCalculationMethod", "minimumBalanceForWithdrawal",
+                "isPartialDepositAllowed", "depositEvery","interestPostEvery","interestPostFrequency"));
         checkForUnsupportedParameters(requestMap, supportedParams);
         Set<String> modifiedParameters = new HashSet<String>();
 
@@ -835,17 +839,20 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         LocalDate commencementDate = extractLocalDateParameter("commencementDate", requestMap, modifiedParameters);
         Integer savingProductType = extractIntegerParameter("savingProductType", requestMap, modifiedParameters);
         Integer tenureType = extractIntegerParameter("tenureType", requestMap, modifiedParameters);
-        Integer frequency = extractIntegerParameter("frequency", requestMap, modifiedParameters);
+        Integer depositfrequency = extractIntegerParameter("depositfrequency", requestMap, modifiedParameters);
         Integer interestType = extractIntegerParameter("interestType", requestMap, modifiedParameters);
         Integer interestCalculationMethod = extractIntegerParameter("interestCalculationMethod", requestMap, modifiedParameters);
         BigDecimal minimumBalanceForWithdrawal = extractBigDecimalParameter("minimumBalanceForWithdrawal", requestMap, modifiedParameters);
         boolean isPartialDepositAllowed = extractBooleanParameter("isPartialDepositAllowed", requestMap, modifiedParameters);
-        Integer payEvery = extractIntegerParameter("payEvery", requestMap, modifiedParameters);
+        Integer depositEvery = extractIntegerParameter("depositEvery", requestMap, modifiedParameters);
+        
+        Integer interestPostEvery = extractIntegerParameter("interestPostEvery", requestMap, modifiedParameters);
+        Integer interestPostFrequency = extractIntegerParameter("interestPostFrequency", requestMap, modifiedParameters);
 
         return new SavingAccountCommand(modifiedParameters, resourceIdentifier, clientId, productId, externalId, currencyCode,
                 digitsAfterDecimalValue, savingsDepositAmount, recurringInterestRate, savingInterestRate, tenure, commencementDate,
-                savingProductType, tenureType, frequency, interestType, minimumBalanceForWithdrawal, interestCalculationMethod,
-                isLockinPeriodAllowed, isPartialDepositAllowed, lockinPeriod, lockinPeriodType, payEvery);
+                savingProductType, tenureType, depositfrequency, interestType, minimumBalanceForWithdrawal, interestCalculationMethod,
+                isLockinPeriodAllowed, isPartialDepositAllowed, lockinPeriod, lockinPeriodType, depositEvery, interestPostEvery, interestPostFrequency);
     }
 
     @Override
@@ -889,4 +896,93 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         command.setLocale(locale);
         return command;
     }
+
+	@Override
+	public SavingStateTransitionsCommand convertJsonToSavingStateTransitionCommand( Long accountId, String json) {
+		
+       if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+
+        Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
+
+        Set<String> supportedParams = new HashSet<String>(Arrays.asList("eventDate", "locale", "dateFormat", "note"));
+
+        checkForUnsupportedParameters(requestMap, supportedParams);
+
+        Set<String> modifiedParameters = new HashSet<String>();
+
+        LocalDate eventDate = extractLocalDateParameter("eventDate", requestMap, modifiedParameters);
+        String note = extractStringParameter("note", requestMap, modifiedParameters);
+
+        return new SavingStateTransitionsCommand(accountId, eventDate, note);
+		
+	}
+
+	@Override
+	public SavingAccountApprovalCommand convertJsonToSavingApprovalCommand( Long accountId, String json) {
+		
+		if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+		
+		Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
+        
+        Set<String> supportedParams = new HashSet<String>(Arrays.asList("locale", "dateFormat", "commencementDate", "savingsDepositAmountPerPeriod",
+        		"minimumBalanceForWithdrawal", "recurringInterestRate", "savingInterestRate", "interestType", "tenure", "tenureType", "frequency", "payEvery", "note",
+        		"interestPostEvery", "interestPostFrequency"));
+        
+        checkForUnsupportedParameters(requestMap, supportedParams);
+        Set<String> modifiedParameters = new HashSet<String>();
+        
+        LocalDate commencementDate = extractLocalDateParameter("commencementDate", requestMap, modifiedParameters);
+        BigDecimal savingsDepositAmountPerPeriod = extractBigDecimalParameter("savingsDepositAmountPerPeriod", requestMap, modifiedParameters);
+        BigDecimal minimumBalanceForWithdrawal = extractBigDecimalParameter("minimumBalanceForWithdrawal", requestMap, modifiedParameters);
+        BigDecimal recurringInterestRate = extractBigDecimalParameter("recurringInterestRate", requestMap, modifiedParameters);
+        BigDecimal savingInterestRate = extractBigDecimalParameter("savingInterestRate", requestMap, modifiedParameters);
+        Integer interestType = extractIntegerParameter("interestType", requestMap, modifiedParameters);
+        Integer tenure = extractIntegerParameter("tenure", requestMap, modifiedParameters);
+        Integer tenureType = extractIntegerParameter("tenureType", requestMap, modifiedParameters);
+        Integer frequency = extractIntegerParameter("frequency", requestMap, modifiedParameters);
+        Integer payEvery = extractIntegerParameter("payEvery", requestMap, modifiedParameters);
+        String note = extractStringParameter("note", requestMap, modifiedParameters);
+        Integer interestPostEvery = extractIntegerParameter("interestPostEvery", requestMap, modifiedParameters);
+        Integer interestPostFrequency = extractIntegerParameter("interestPostFrequency", requestMap, modifiedParameters);
+		return new SavingAccountApprovalCommand(accountId, commencementDate, savingsDepositAmountPerPeriod, minimumBalanceForWithdrawal, recurringInterestRate,
+				savingInterestRate, interestType, tenure, tenureType, frequency, payEvery, note, interestPostEvery, interestPostFrequency);
+	}
+
+	@Override
+	public SavingAccountDepositCommand convertJsonToSavingAccountDepositCommand(Long accountId, String json) {
+		if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+		
+		Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
+        
+        Set<String> supportedParams = new HashSet<String>(Arrays.asList("locale", "dateFormat", "depositDate", "savingsDepositAmountPerPeriod", "note"));
+        
+        checkForUnsupportedParameters(requestMap, supportedParams);
+        Set<String> modifiedParameters = new HashSet<String>();
+        
+        LocalDate depositDate = extractLocalDateParameter("depositDate", requestMap, modifiedParameters);
+        BigDecimal savingsDepositAmountPerPeriod = extractBigDecimalParameter("savingsDepositAmountPerPeriod", requestMap, modifiedParameters);
+        String note = extractStringParameter("note", requestMap, modifiedParameters);
+		return new SavingAccountDepositCommand(accountId, savingsDepositAmountPerPeriod, depositDate, note);
+	}
+
+	@Override
+	public SavingAccountWithdrawalCommand convertJsonToSavingAccountWithdrawalCommand(Long accountId, String json) {
+		if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+		
+		Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
+        
+        Set<String> supportedParams = new HashSet<String>(Arrays.asList("locale", "dateFormat", "transactionDate", "amount", "note"));
+        
+        checkForUnsupportedParameters(requestMap, supportedParams);
+        Set<String> modifiedParameters = new HashSet<String>();
+        
+        LocalDate transactionDate = extractLocalDateParameter("transactionDate", requestMap, modifiedParameters);
+        BigDecimal amount = extractBigDecimalParameter("amount", requestMap, modifiedParameters);
+        String note = extractStringParameter("note", requestMap, modifiedParameters);
+		return new SavingAccountWithdrawalCommand(accountId, transactionDate, amount, note);
+	}
 }

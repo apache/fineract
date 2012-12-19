@@ -22,7 +22,7 @@ public class SavingAccountCommandValidator {
 
         baseDataValidator.reset().parameter("clientId").value(command.getClientId()).notNull();
         baseDataValidator.reset().parameter("productId").value(command.getProductId()).notNull();
-        baseDataValidator.reset().parameter("externalId").value(command.getExternalId()).ignoreIfNull().notExceedingLengthOf(100);
+        baseDataValidator.reset().parameter("externalId").value(command.getExternalId()).notNull().notExceedingLengthOf(100);
         baseDataValidator.reset().parameter("currencyCode").value(command.getCurrencyCode()).notBlank();
         baseDataValidator.reset().parameter("digitsAfterDecimal").value(command.getDigitsAfterDecimal()).notNull().inMinMaxRange(0, 6);
         baseDataValidator.reset().parameter("savingsDepositAmountPerPeriod").value(command.getSavingsDepositAmount()).notNull()
