@@ -21,7 +21,6 @@ import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.exception.UnsupportedParameterException;
-import org.mifosplatform.organisation.staff.command.BulkTransferLoanOfficerCommand;
 import org.mifosplatform.portfolio.client.command.ClientCommand;
 import org.mifosplatform.portfolio.client.command.NoteCommand;
 import org.mifosplatform.portfolio.client.data.ClientData;
@@ -61,68 +60,6 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
     public PortfolioApiDataConversionServiceImpl(final ClientCommandFromApiJsonDeserializer clientCommandFromApiJsonDeserializer) {
         this.clientCommandFromApiJsonDeserializer = clientCommandFromApiJsonDeserializer;
         this.gsonConverter = new Gson();
-    }
-
-    @Override
-    public BulkTransferLoanOfficerCommand convertJsonToLoanReassignmentCommand(Long resourceIdentifier, String json) {
-
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
-
-        Type typeOfMap = new TypeToken<Map<String, String>>() {}.getType();
-        Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
-
-        Set<String> supportedParams = new HashSet<String>(Arrays.asList("fromLoanOfficerId", "toLoanOfficerId", "assignmentDate", "locale",
-                "dateFormat"));
-
-        checkForUnsupportedParameters(requestMap, supportedParams);
-
-        Set<String> modifiedParameters = new HashSet<String>();
-
-        Long fromLoanOfficerId = extractLongParameter("fromLoanOfficerId", requestMap, modifiedParameters);
-        Long toLoanOfficerId = extractLongParameter("toLoanOfficerId", requestMap, modifiedParameters);
-        LocalDate assignmentDate = extractLocalDateParameter("assignmentDate", requestMap, modifiedParameters);
-
-        return new BulkTransferLoanOfficerCommand(resourceIdentifier, fromLoanOfficerId, toLoanOfficerId, assignmentDate);
-    }
-
-    @Override
-    public BulkTransferLoanOfficerCommand convertJsonToBulkLoanReassignmentCommand(final String json) {
-
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
-
-        Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
-
-        Set<String> supportedParams = new HashSet<String>(Arrays.asList("fromLoanOfficerId", "toLoanOfficerId", "assignmentDate", "locale",
-                "dateFormat", "loans"));
-
-        checkForUnsupportedParameters(requestMap, supportedParams);
-
-        Set<String> modifiedParameters = new HashSet<String>();
-
-        Long fromLoanOfficerId = extractLongParameter("fromLoanOfficerId", requestMap, modifiedParameters);
-        Long toLoanOfficerId = extractLongParameter("toLoanOfficerId", requestMap, modifiedParameters);
-        LocalDate assignmentDate = extractLocalDateParameter("assignmentDate", requestMap, modifiedParameters);
-
-        // check array
-        JsonParser parser = new JsonParser();
-
-        String[] loans = null;
-        JsonElement element = parser.parse(json);
-        if (element.isJsonObject()) {
-            JsonObject object = element.getAsJsonObject();
-            if (object.has("loans")) {
-                modifiedParameters.add("loans");
-                JsonArray array = object.get("loans").getAsJsonArray();
-                loans = new String[array.size()];
-                for (int i = 0; i < array.size(); i++) {
-                    loans[i] = array.get(i).getAsString();
-                }
-            }
-        }
-        //
-
-        return new BulkTransferLoanOfficerCommand(fromLoanOfficerId, toLoanOfficerId, assignmentDate, loans);
     }
 
     @Override

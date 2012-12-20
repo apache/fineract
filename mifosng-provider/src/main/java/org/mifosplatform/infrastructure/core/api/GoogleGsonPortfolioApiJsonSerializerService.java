@@ -10,8 +10,6 @@ import org.mifosplatform.infrastructure.dataqueries.data.DatatableData;
 import org.mifosplatform.infrastructure.dataqueries.data.GenericResultsetData;
 import org.mifosplatform.infrastructure.documentmanagement.data.DocumentData;
 import org.mifosplatform.infrastructure.security.data.AuthenticatedUserData;
-import org.mifosplatform.organisation.staff.data.BulkTransferLoanOfficerData;
-import org.mifosplatform.organisation.staff.data.StaffData;
 import org.mifosplatform.portfolio.client.data.ClientAccountSummaryCollectionData;
 import org.mifosplatform.portfolio.group.data.GroupAccountSummaryCollectionData;
 import org.mifosplatform.portfolio.group.data.GroupData;
@@ -32,9 +30,6 @@ import com.google.gson.Gson;
  */
 @Service
 public class GoogleGsonPortfolioApiJsonSerializerService implements PortfolioApiJsonSerializerService {
-
-    private static final Set<String> STAFF_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "firstname", "lastname",
-            "displayName", "officeId", "officeName", "loanOfficerFlag", "allowedOffices"));
 
     private static final Set<String> SAVINGS_PRODUCT_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("currencyOptions", "id",
             "createdOn", "lastModifedOn", "locale", "name", "description", "currencyCode", "digitsAfterDecimal", "interstRate",
@@ -75,9 +70,6 @@ public class GoogleGsonPortfolioApiJsonSerializerService implements PortfolioApi
 
     private static final Set<String> GROUP_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "officeId", "name", "externalId",
             "clientMembers", "allowedClients", "allowedOffices"));
-
-    private static final Set<String> LOAN_REASSIGNMENT_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("officeId", "fromLoanOfficerId",
-            "assignmentDate", "officeOptions", "loanOfficerOptions", "accountSummaryCollection"));
 
     private static final Set<String> SAVINGS_ACCOUNTS_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "status", "externalId",
             "clientId", "clientName", "productId", "productName", "productType", "currencyData", "savingsDepostiAmountPerPeriod",
@@ -197,28 +189,6 @@ public class GoogleGsonPortfolioApiJsonSerializerService implements PortfolioApi
         final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(GROUP_DATA_PARAMETERS,
                 prettyPrint, responseParameters);
         return helper.serializedJsonFrom(gsonDeserializer, group);
-    }
-
-    @Override
-    public String serializeLoanReassignmentDataToJson(boolean prettyPrint, Set<String> responseParameters,
-            BulkTransferLoanOfficerData loanReassignmentData) {
-        final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(
-                LOAN_REASSIGNMENT_DATA_PARAMETERS, prettyPrint, responseParameters);
-        return helper.serializedJsonFrom(gsonDeserializer, loanReassignmentData);
-    }
-
-    @Override
-    public String serializeStaffDataToJson(boolean prettyPrint, Set<String> responseParameters, StaffData staff) {
-        final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(STAFF_DATA_PARAMETERS,
-                prettyPrint, responseParameters);
-        return helper.serializedJsonFrom(gsonDeserializer, staff);
-    }
-
-    @Override
-    public String serializeStaffDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<StaffData> staff) {
-        final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(STAFF_DATA_PARAMETERS,
-                prettyPrint, responseParameters);
-        return helper.serializedJsonFrom(gsonDeserializer, staff.toArray(new StaffData[staff.size()]));
     }
 
     @Override

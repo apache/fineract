@@ -7,8 +7,6 @@ import org.mifosplatform.infrastructure.dataqueries.data.DatatableData;
 import org.mifosplatform.infrastructure.dataqueries.data.GenericResultsetData;
 import org.mifosplatform.infrastructure.documentmanagement.data.DocumentData;
 import org.mifosplatform.infrastructure.security.data.AuthenticatedUserData;
-import org.mifosplatform.organisation.staff.data.BulkTransferLoanOfficerData;
-import org.mifosplatform.organisation.staff.data.StaffData;
 import org.mifosplatform.portfolio.client.data.ClientAccountSummaryCollectionData;
 import org.mifosplatform.portfolio.group.data.GroupAccountSummaryCollectionData;
 import org.mifosplatform.portfolio.group.data.GroupData;
@@ -48,13 +46,6 @@ public interface PortfolioApiJsonSerializerService {
     String serializeGroupDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<GroupData> groups);
 
     String serializeGroupDataToJson(boolean prettyPrint, Set<String> responseParameters, GroupData group);
-
-    String serializeLoanReassignmentDataToJson(boolean prettyPrint, Set<String> responseParameters,
-            BulkTransferLoanOfficerData loanReassignmentData);
-
-    String serializeStaffDataToJson(boolean prettyPrint, Set<String> responseParameters, StaffData staff);
-
-    String serializeStaffDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<StaffData> staff);
 
     String serializeDocumentDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<DocumentData> documentDatas);
 

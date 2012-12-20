@@ -16,7 +16,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.StringUtils;
@@ -25,8 +24,6 @@ import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformSer
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.api.JsonQuery;
-import org.mifosplatform.infrastructure.core.api.PortfolioApiDataConversionService;
-import org.mifosplatform.infrastructure.core.api.PortfolioApiJsonSerializerService;
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.exception.UnrecognizedQueryParamException;
@@ -36,11 +33,7 @@ import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
-import org.mifosplatform.organisation.office.data.OfficeLookup;
-import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
-import org.mifosplatform.organisation.staff.command.BulkTransferLoanOfficerCommand;
 import org.mifosplatform.organisation.staff.data.BulkTransferLoanOfficerData;
-import org.mifosplatform.organisation.staff.data.StaffAccountSummaryCollectionData;
 import org.mifosplatform.organisation.staff.data.StaffData;
 import org.mifosplatform.organisation.staff.service.StaffReadPlatformService;
 import org.mifosplatform.portfolio.charge.data.ChargeData;
@@ -58,7 +51,6 @@ import org.mifosplatform.portfolio.loanaccount.gaurantor.service.GuarantorReadPl
 import org.mifosplatform.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.service.LoanScheduleCalculationPlatformService;
 import org.mifosplatform.portfolio.loanaccount.service.LoanReadPlatformService;
-import org.mifosplatform.portfolio.loanaccount.service.LoanWritePlatformService;
 import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
 import org.mifosplatform.portfolio.loanproduct.data.TransactionProcessingStrategyData;
 import org.mifosplatform.portfolio.loanproduct.service.LoanDropdownReadPlatformService;
@@ -90,52 +82,45 @@ public class LoansApiResource {
 
     private final PlatformSecurityContext context;
     private final LoanReadPlatformService loanReadPlatformService;
-    private final LoanWritePlatformService loanWritePlatformService;
     private final LoanProductReadPlatformService loanProductReadPlatformService;
     private final LoanDropdownReadPlatformService dropdownReadPlatformService;
     private final FundReadPlatformService fundReadPlatformService;
     private final ChargeReadPlatformService chargeReadPlatformService;
     private final LoanScheduleCalculationPlatformService calculationPlatformService;
     private final StaffReadPlatformService staffReadPlatformService;
-    private final OfficeReadPlatformService officeReadPlatformService;
     private final GuarantorReadPlatformService guarantorReadPlatformService;
-    private final PortfolioApiJsonSerializerService apiJsonSerializerService;
-    private final PortfolioApiDataConversionService apiDataConversionService;
     private final DefaultToApiJsonSerializer<LoanAccountData> toApiJsonSerializer;
     private final DefaultToApiJsonSerializer<LoanScheduleData> loanScheduleToApiJsonSerializer;
+    private final DefaultToApiJsonSerializer<BulkTransferLoanOfficerData> loanOfficeTransferToApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final FromJsonHelper fromJsonHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @Autowired
     public LoansApiResource(final PlatformSecurityContext context, final LoanReadPlatformService loanReadPlatformService,
-            final LoanWritePlatformService loanWritePlatformService, final LoanProductReadPlatformService loanProductReadPlatformService,
+            final LoanProductReadPlatformService loanProductReadPlatformService,
             final LoanDropdownReadPlatformService dropdownReadPlatformService, final FundReadPlatformService fundReadPlatformService,
             final ChargeReadPlatformService chargeReadPlatformService,
             final LoanScheduleCalculationPlatformService calculationPlatformService,
-            final StaffReadPlatformService staffReadPlatformService, final OfficeReadPlatformService officeReadPlatformService,
-            final GuarantorReadPlatformService guarantorReadPlatformService,
+            final StaffReadPlatformService staffReadPlatformService, final GuarantorReadPlatformService guarantorReadPlatformService,
             final DefaultToApiJsonSerializer<LoanAccountData> toApiJsonSerializer,
             final DefaultToApiJsonSerializer<LoanScheduleData> loanScheduleToApiJsonSerializer,
-            final ApiRequestParameterHelper apiRequestParameterHelper, final PortfolioApiJsonSerializerService apiJsonSerializerService,
-            final PortfolioApiDataConversionService apiDataConversionService, final FromJsonHelper fromJsonHelper,
+            final DefaultToApiJsonSerializer<BulkTransferLoanOfficerData> loanOfficeTransferToApiJsonSerializer,
+            final ApiRequestParameterHelper apiRequestParameterHelper, final FromJsonHelper fromJsonHelper,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
         this.context = context;
         this.loanReadPlatformService = loanReadPlatformService;
-        this.loanWritePlatformService = loanWritePlatformService;
         this.loanProductReadPlatformService = loanProductReadPlatformService;
         this.dropdownReadPlatformService = dropdownReadPlatformService;
         this.fundReadPlatformService = fundReadPlatformService;
         this.chargeReadPlatformService = chargeReadPlatformService;
         this.calculationPlatformService = calculationPlatformService;
         this.staffReadPlatformService = staffReadPlatformService;
-        this.officeReadPlatformService = officeReadPlatformService;
         this.guarantorReadPlatformService = guarantorReadPlatformService;
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.loanScheduleToApiJsonSerializer = loanScheduleToApiJsonSerializer;
+        this.loanOfficeTransferToApiJsonSerializer = loanOfficeTransferToApiJsonSerializer;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.apiJsonSerializerService = apiJsonSerializerService;
-        this.apiDataConversionService = apiDataConversionService;
         this.fromJsonHelper = fromJsonHelper;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
     }
@@ -409,29 +394,11 @@ public class LoansApiResource {
         return StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase(commandValue);
     }
 
-    @POST
-    @Path("{loanId}/assign")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public Response assignLoanOfficer(@PathParam("loanId") final Long loanId, final String jsonRequestBody) {
-
-        final BulkTransferLoanOfficerCommand command = this.apiDataConversionService.convertJsonToLoanReassignmentCommand(loanId,
-                jsonRequestBody);
-
-        EntityIdentifier identifier = this.loanWritePlatformService.loanReassignment(command);
-
-        return Response.ok().entity(identifier).build();
-    }
-
     @GET
     @Path("{loanId}/assign/template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String assignLoanOfficerTemplate(@PathParam("loanId") final Long loanId, @Context final UriInfo uriInfo) {
-
-        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-
-        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 
         final LoanBasicDetailsData loanBasicDetails = this.loanReadPlatformService.retrieveLoanAccountDetails(loanId);
 
@@ -442,65 +409,22 @@ public class LoansApiResource {
         final BulkTransferLoanOfficerData loanReassignmentData = BulkTransferLoanOfficerData.template(fromLoanOfficerId,
                 allowedLoanOfficers, new LocalDate());
 
-        return this.apiJsonSerializerService.serializeLoanReassignmentDataToJson(prettyPrint, responseParameters, loanReassignmentData);
+        final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("officeId", "fromLoanOfficerId", "assignmentDate",
+                "officeOptions", "loanOfficerOptions", "accountSummaryCollection"));
+
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.loanOfficeTransferToApiJsonSerializer.serialize(settings, loanReassignmentData, RESPONSE_DATA_PARAMETERS);
     }
 
     @POST
-    @Path("loanreassignment")
+    @Path("{loanId}/assign")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response loanReassignment(final String apiRequestBodyAsJson) {
+    public String assignLoanOfficer(@PathParam("loanId") final Long loanId, final String apiRequestBodyAsJson) {
 
-        // final List<String> allowedPermissions =
-        // Arrays.asList("ALL_FUNCTIONS", "PORTFOLIO_MANAGEMENT_SUPER_USER",
-        // "BULKREASSIGN_LOAN");
-        // context.authenticatedUser().validateHasPermissionTo("BULKREASSIGN_LOAN",
-        // allowedPermissions);
-        //
-        // final EntityIdentifier result =
-        // this.commandsSourceWritePlatformService.logCommandSource("BULKREASSIGN_LOAN",
-        // "staff", null,
-        // apiRequestBodyAsJson);
-        //
-        // return
-        // this.apiJsonSerializerService.serializeEntityIdentifier(result);
+        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATELOANOFFICER", "LOAN", "N/A",
+                "loans", loanId, apiRequestBodyAsJson);
 
-        final BulkTransferLoanOfficerCommand command = this.apiDataConversionService
-                .convertJsonToBulkLoanReassignmentCommand(apiRequestBodyAsJson);
-
-        final EntityIdentifier loanOfficerIdentifier = this.loanWritePlatformService.bulkLoanReassignment(command);
-
-        return Response.ok().entity(loanOfficerIdentifier).build();
-    }
-
-    @GET
-    @Path("loanreassignment/template")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String loanReassignmentTemplate(@QueryParam("officeId") final Long officeId,
-            @QueryParam("fromLoanOfficerId") final Long loanOfficerId, @Context final UriInfo uriInfo) {
-
-        context.authenticatedUser().validateHasReadPermission("LOAN");
-
-        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-
-        final Collection<OfficeLookup> offices = this.officeReadPlatformService.retrieveAllOfficesForLookup();
-
-        Collection<StaffData> loanOfficers = null;
-        StaffAccountSummaryCollectionData staffAccountSummaryCollectionData = null;
-
-        if (officeId != null) {
-            loanOfficers = this.staffReadPlatformService.retrieveAllLoanOfficersByOffice(officeId);
-        }
-
-        if (loanOfficerId != null) {
-            staffAccountSummaryCollectionData = this.staffReadPlatformService.retrieveLoanOfficerAccountSummary(loanOfficerId);
-        }
-
-        final BulkTransferLoanOfficerData loanReassignmentData = BulkTransferLoanOfficerData.templateForBulk(officeId, loanOfficerId,
-                new LocalDate(), offices, loanOfficers, staffAccountSummaryCollectionData);
-
-        return this.apiJsonSerializerService.serializeLoanReassignmentDataToJson(prettyPrint, responseParameters, loanReassignmentData);
+        return this.toApiJsonSerializer.serialize(result);
     }
 }

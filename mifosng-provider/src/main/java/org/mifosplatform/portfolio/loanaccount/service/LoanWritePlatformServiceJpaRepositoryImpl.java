@@ -17,8 +17,6 @@ import org.mifosplatform.infrastructure.security.exception.NoAuthorizationExcept
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrencyRepository;
-import org.mifosplatform.organisation.staff.command.BulkTransferLoanOfficerCommand;
-import org.mifosplatform.organisation.staff.command.BulkTransferLoanOfficerCommandValidator;
 import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.portfolio.charge.domain.Charge;
 import org.mifosplatform.portfolio.charge.domain.ChargeRepository;
@@ -657,7 +655,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
 
         this.loanChargeRepository.save(loanCharge);
-        
+
         loan.addLoanCharge(loanCharge);
         this.loanRepository.save(loan);
 
@@ -694,7 +692,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final Loan loan = retrieveLoanBy(loanId);
         final LoanCharge loanCharge = retrieveLoanChargeBy(loanId, loanChargeId);
-        
+
         final Map<String, Object> changes = new LinkedHashMap<String, Object>(3);
 
         final LoanTransaction waiveTransaction = loan.waiveLoanCharge(loanCharge, defaultLoanLifecycleStateMachine(), changes);
@@ -742,52 +740,55 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
     @Transactional
     @Override
-    public EntityIdentifier loanReassignment(BulkTransferLoanOfficerCommand command) {
+    public EntityIdentifier loanReassignment(final Long loanId, final JsonCommand command) {
 
         this.context.authenticatedUser();
 
-        BulkTransferLoanOfficerCommandValidator validator = new BulkTransferLoanOfficerCommandValidator(command);
-        validator.validateForLoanReassignment();
+        final Long fromLoanOfficerId = command.longValueOfParameterNamed("fromLoanOfficerId");
+        final Long toLoanOfficerId = command.longValueOfParameterNamed("toLoanOfficerId");
 
-        final Staff fromLoanOfficer = loanAssembler.findLoanOfficerByIdIfProvided(command.getFromLoanOfficerId());
-        final Staff toLoanOfficer = loanAssembler.findLoanOfficerByIdIfProvided(command.getToLoanOfficerId());
+        final Staff fromLoanOfficer = loanAssembler.findLoanOfficerByIdIfProvided(fromLoanOfficerId);
+        final Staff toLoanOfficer = loanAssembler.findLoanOfficerByIdIfProvided(toLoanOfficerId);
+        final LocalDate dateOfLoanOfficerAssignment = command.localDateValueOfParameterNamed("assignmentDate");
 
-        final Loan loan = retrieveLoanBy(command.getLoanId());
+        final Loan loan = retrieveLoanBy(loanId);
 
-        if (!loan.hasLoanOfficer(fromLoanOfficer)) { throw new LoanOfficerAssignmentException(loan.getId(), fromLoanOfficer.getId()); }
+        if (!loan.hasLoanOfficer(fromLoanOfficer)) { throw new LoanOfficerAssignmentException(loanId, fromLoanOfficerId); }
 
-        loan.reassignLoanOfficer(toLoanOfficer, command.getAssignmentDate());
+        loan.reassignLoanOfficer(toLoanOfficer, dateOfLoanOfficerAssignment);
 
         this.loanRepository.saveAndFlush(loan);
 
-        return new EntityIdentifier(loan.getId());
+        return EntityIdentifier.resourceResult(loanId, command.commandId());
     }
 
     @Transactional
     @Override
-    public EntityIdentifier bulkLoanReassignment(final BulkTransferLoanOfficerCommand command) {
+    public EntityIdentifier bulkLoanReassignment(final JsonCommand command) {
 
         this.context.authenticatedUser();
 
-        BulkTransferLoanOfficerCommandValidator validator = new BulkTransferLoanOfficerCommandValidator(command);
-        validator.validateForBulkLoanReassignment();
+        final Long fromLoanOfficerId = command.longValueOfParameterNamed("fromLoanOfficerId");
+        final Long toLoanOfficerId = command.longValueOfParameterNamed("toLoanOfficerId");
+        final String[] loanIds = command.arrayValueOfParameterNamed("loans");
 
-        Staff fromLoanOfficer = loanAssembler.findLoanOfficerByIdIfProvided(command.getFromLoanOfficerId());
-        Staff toLoanOfficer = loanAssembler.findLoanOfficerByIdIfProvided(command.getToLoanOfficerId());
+        final LocalDate dateOfLoanOfficerAssignment = command.localDateValueOfParameterNamed("assignmentDate");
 
-        for (String loanIdString : command.getLoans()) {
+        final Staff fromLoanOfficer = loanAssembler.findLoanOfficerByIdIfProvided(fromLoanOfficerId);
+        final Staff toLoanOfficer = loanAssembler.findLoanOfficerByIdIfProvided(toLoanOfficerId);
+
+        for (final String loanIdString : loanIds) {
             final Long loanId = Long.valueOf(loanIdString);
-
             final Loan loan = retrieveLoanBy(loanId);
 
-            if (!loan.hasLoanOfficer(fromLoanOfficer)) { throw new LoanOfficerAssignmentException(loan.getId(), fromLoanOfficer.getId()); }
+            if (!loan.hasLoanOfficer(fromLoanOfficer)) { throw new LoanOfficerAssignmentException(loanId, fromLoanOfficerId); }
 
-            loan.reassignLoanOfficer(toLoanOfficer, command.getAssignmentDate());
+            loan.reassignLoanOfficer(toLoanOfficer, dateOfLoanOfficerAssignment);
             this.loanRepository.save(loan);
         }
 
         this.loanRepository.flush();
 
-        return new EntityIdentifier(toLoanOfficer.getId());
+        return EntityIdentifier.resourceResult(null, command.commandId());
     }
 }

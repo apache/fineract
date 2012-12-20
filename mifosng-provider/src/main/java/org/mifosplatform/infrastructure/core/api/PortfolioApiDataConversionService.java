@@ -1,6 +1,5 @@
 package org.mifosplatform.infrastructure.core.api;
 
-import org.mifosplatform.organisation.staff.command.BulkTransferLoanOfficerCommand;
 import org.mifosplatform.portfolio.client.command.NoteCommand;
 import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.group.command.GroupCommand;
@@ -31,10 +30,6 @@ public interface PortfolioApiDataConversionService {
     DepositStateTransitionCommand convertJsonToDepositStateTransitionCommand(Long resourceIdentifier, String json);
 
     DepositStateTransitionApprovalCommand convertJsonToDepositStateTransitionApprovalCommand(Long resourceIdentifier, String json);
-
-    BulkTransferLoanOfficerCommand convertJsonToLoanReassignmentCommand(Long resourceIdentifier, String json);
-
-    BulkTransferLoanOfficerCommand convertJsonToBulkLoanReassignmentCommand(String json);
 
     DepositAccountWithdrawalCommand convertJsonToDepositWithdrawalCommand(Long resourceIdentifier, String json);
 

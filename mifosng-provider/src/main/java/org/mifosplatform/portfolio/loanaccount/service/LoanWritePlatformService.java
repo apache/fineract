@@ -2,8 +2,6 @@ package org.mifosplatform.portfolio.loanaccount.service;
 
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
-import org.mifosplatform.organisation.staff.command.BulkTransferLoanOfficerCommand;
-import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface LoanWritePlatformService {
 
@@ -45,9 +43,7 @@ public interface LoanWritePlatformService {
 
     EntityIdentifier waiveLoanCharge(Long loanId, Long loanChargeId, JsonCommand command);
 
-    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'PORTFOLIO_MANAGEMENT_SUPER_USER', 'BULKREASSIGN_LOAN')")
-    EntityIdentifier bulkLoanReassignment(final BulkTransferLoanOfficerCommand command);
+    EntityIdentifier loanReassignment(Long loanId, JsonCommand command);
 
-    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'PORTFOLIO_MANAGEMENT_SUPER_USER')")
-    EntityIdentifier loanReassignment(final BulkTransferLoanOfficerCommand command);
+    EntityIdentifier bulkLoanReassignment(JsonCommand command);
 }
