@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -165,7 +166,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 
     @LazyCollection(LazyCollectionOption.FALSE)
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true)
-    private Set<LoanCharge> charges;
+    private Set<LoanCharge> charges = new HashSet<LoanCharge>();
 
     @LazyCollection(LazyCollectionOption.FALSE)
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true)
@@ -276,7 +277,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 
         Money chargesDue = Money.of(getCurrency(), BigDecimal.ZERO);
 
-        for (LoanCharge charge : this.charges) {
+        for (LoanCharge charge : getNullPointerSafeLoanCharges()) {
             if (charge.isDueAtDisbursement()) {
                 chargesDue = chargesDue.plus(charge.amount());
             }
@@ -319,7 +320,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         validateChargeHasValidSpecifiedDateIfApplicable(loanCharge, getDisbursementDate(), getLastRepaymentPeriodDueDate());
 
         loanCharge.update(this);
-        this.charges.add(loanCharge);
+        getNullPointerSafeLoanCharges().add(loanCharge);
 
         updateTotalChargesDueAtDisbursement();
 
@@ -334,11 +335,11 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
                                                  // transaction.
             final List<LoanTransaction> allNonContraTransactionsPostDisbursement = retreiveListOfTransactionsPostDisbursement();
             loanRepaymentScheduleTransactionProcessor.handleTransaction(getDisbursementDate(), allNonContraTransactionsPostDisbursement,
-                    getCurrency(), this.repaymentScheduleInstallments, this.charges);
+                    getCurrency(), this.repaymentScheduleInstallments, getNullPointerSafeLoanCharges());
         } else {
             // just reprocess the loan schedule only for now.
             LoanScheduleWrapper wrapper = new LoanScheduleWrapper();
-            wrapper.reprocess(getCurrency(), getDisbursementDate(), this.repaymentScheduleInstallments, this.charges);
+            wrapper.reprocess(getCurrency(), getDisbursementDate(), this.repaymentScheduleInstallments, getNullPointerSafeLoanCharges());
         }
     }
 
@@ -378,7 +379,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         // if you want ability to remove loan charges that are waived.
         validateLoanChargeIsNotWaived(loanCharge);
 
-        boolean removed = this.charges.remove(loanCharge);
+        boolean removed = getNullPointerSafeLoanCharges().remove(loanCharge);
         if (removed) {
             updateTotalChargesDueAtDisbursement();
         }
@@ -390,7 +391,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         if (!loanCharge.isDueAtDisbursement() && loanCharge.isPaidOrPartiallyPaid(loanCurrency())) {
             final List<LoanTransaction> allNonContraTransactionsPostDisbursement = retreiveListOfTransactionsPostDisbursement();
             loanRepaymentScheduleTransactionProcessor.handleTransaction(getDisbursementDate(), allNonContraTransactionsPostDisbursement,
-                    getCurrency(), this.repaymentScheduleInstallments, this.charges);
+                    getCurrency(), this.repaymentScheduleInstallments, getNullPointerSafeLoanCharges());
         }
     }
 
@@ -427,7 +428,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 
         validateLoanIsNotClosed(loanCharge);
 
-        if (this.charges.contains(loanCharge)) {
+        if (getNullPointerSafeLoanCharges().contains(loanCharge)) {
             final Map<String, Object> loanChargeChanges = loanCharge.update(command, getPrincpal().getAmount());
             actualChanges.putAll(loanChargeChanges);
             updateTotalChargesDueAtDisbursement();
@@ -438,11 +439,11 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         if (!loanCharge.isDueAtDisbursement()) {
             final List<LoanTransaction> allNonContraTransactionsPostDisbursement = retreiveListOfTransactionsPostDisbursement();
             loanRepaymentScheduleTransactionProcessor.handleTransaction(getDisbursementDate(), allNonContraTransactionsPostDisbursement,
-                    getCurrency(), this.repaymentScheduleInstallments, this.charges);
+                    getCurrency(), this.repaymentScheduleInstallments, getNullPointerSafeLoanCharges());
         } else {
             // reprocess loan schedule based on charge been waived.
             LoanScheduleWrapper wrapper = new LoanScheduleWrapper();
-            wrapper.reprocess(getCurrency(), getDisbursementDate(), this.repaymentScheduleInstallments, this.charges);
+            wrapper.reprocess(getCurrency(), getDisbursementDate(), this.repaymentScheduleInstallments, getNullPointerSafeLoanCharges());
         }
 
         return actualChanges;
@@ -480,11 +481,11 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         if (!loanCharge.isDueAtDisbursement() && loanCharge.isPaidOrPartiallyPaid(loanCurrency())) {
             final List<LoanTransaction> allNonContraTransactionsPostDisbursement = retreiveListOfTransactionsPostDisbursement();
             loanRepaymentScheduleTransactionProcessor.handleTransaction(getDisbursementDate(), allNonContraTransactionsPostDisbursement,
-                    getCurrency(), this.repaymentScheduleInstallments, this.charges);
+                    getCurrency(), this.repaymentScheduleInstallments, getNullPointerSafeLoanCharges());
         } else {
             // reprocess loan schedule based on charge been waived.
             LoanScheduleWrapper wrapper = new LoanScheduleWrapper();
-            wrapper.reprocess(getCurrency(), getDisbursementDate(), this.repaymentScheduleInstallments, this.charges);
+            wrapper.reprocess(getCurrency(), getDisbursementDate(), this.repaymentScheduleInstallments, getNullPointerSafeLoanCharges());
         }
 
         doPostLoanTransactionChecks(waiveLoanChargeTransaction.getTransactionDate(), loanLifecycleStateMachine);
@@ -521,8 +522,8 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
     }
 
     public void updateLoanCharges(final Set<LoanCharge> loanCharges) {
-        this.charges.clear();
-        this.charges.addAll(associateChargesWithThisLoan(loanCharges));
+        getNullPointerSafeLoanCharges().clear();
+        getNullPointerSafeLoanCharges().addAll(associateChargesWithThisLoan(loanCharges));
         this.totalChargesDueAtDisbursement = deriveSumTotalOfChargesDueAtDisbursement();
     }
 
@@ -548,7 +549,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessor
                 .determineProcessor(this.transactionProcessingStrategy);
         loanRepaymentScheduleTransactionProcessor.handleTransaction(getDisbursementDate(), repaymentsOrWaivers, getCurrency(),
-                this.repaymentScheduleInstallments, this.charges);
+                this.repaymentScheduleInstallments, getNullPointerSafeLoanCharges());
     }
 
     public void updateLoanScheduleDependentDerivedFields() {
@@ -677,14 +678,22 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         Arrays.sort(newLoanChargeData);
         return !Arrays.equals(existingLoanChargeData, newLoanChargeData);
     }
+    
+    private Set<LoanCharge> getNullPointerSafeLoanCharges() {
+        Set<LoanCharge> loanCharges = this.charges;
+        if (this.charges == null) {
+            loanCharges = new HashSet<LoanCharge>();
+        }
+        return loanCharges;
+    }
 
     private LoanChargeCommand[] getLoanCharges() {
 
         LoanChargeCommand[] existingLoanCharges = null;
 
-        if (this.charges != null && !this.charges.isEmpty()) {
+        if (!getNullPointerSafeLoanCharges().isEmpty()) {
             List<LoanChargeCommand> loanChargesList = new ArrayList<LoanChargeCommand>();
-            for (LoanCharge loanCharge : this.charges) {
+            for (LoanCharge loanCharge : getNullPointerSafeLoanCharges()) {
                 loanChargesList.add(loanCharge.toCommand());
             }
 
@@ -748,10 +757,8 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         }
 
         // charges are optional
-        if (this.charges != null) {
-            for (LoanCharge loanCharge : this.charges) {
-                validateChargeHasValidSpecifiedDateIfApplicable(loanCharge, getDisbursementDate(), getLastRepaymentPeriodDueDate());
-            }
+        for (LoanCharge loanCharge : getNullPointerSafeLoanCharges()) {
+            validateChargeHasValidSpecifiedDateIfApplicable(loanCharge, getDisbursementDate(), getLastRepaymentPeriodDueDate());
         }
 
         this.externalId = externalId;
@@ -974,7 +981,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         final LoanSchedule loanSchedule = new LoanSchedule(loanScheduleGenerator, applicationCurrency, principal, interestRatePerPeriod,
                 interestRatePeriodFrequencyType, defaultAnnualNominalInterestRate, interestMethod, interestCalculationPeriodMethod,
                 repaymentEvery, repaymentPeriodFrequencyType, numberOfRepayments, amortizationMethod, loanTermFrequency,
-                loanTermPeriodFrequencyType, this.charges, this.getDisbursementDate(), this.getExpectedFirstRepaymentOnDate(),
+                loanTermPeriodFrequencyType, getNullPointerSafeLoanCharges(), this.getDisbursementDate(), this.getExpectedFirstRepaymentOnDate(),
                 this.getInterestChargedFromDate(), inArrearsTolerance);
 
         final LoanScheduleData generatedData = loanSchedule.generate();
@@ -982,7 +989,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         updateLoanSchedule(generatedData);
     }
 
-    private void handleDisbursementTransaction(LocalDate disbursedOn) {
+    private void handleDisbursementTransaction(final LocalDate disbursedOn) {
         // track disbursement transaction
         final LoanTransaction loanTransaction = LoanTransaction.disbursement(this.loanRepaymentScheduleDetail.getPrincipal(), disbursedOn);
         loanTransaction.updateLoan(this);
@@ -998,7 +1005,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
             chargesPayment.updateLoan(this);
             this.loanTransactions.add(chargesPayment);
 
-            for (LoanCharge charge : this.charges) {
+            for (LoanCharge charge : getNullPointerSafeLoanCharges()) {
                 if (charge.isDueAtDisbursement()) {
                     charge.markAsFullyPaid();
                 }
@@ -1051,7 +1058,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         this.loanTransactions.clear();
         this.disbursedOnDate = null;
 
-        for (LoanCharge charge : this.charges) {
+        for (LoanCharge charge : getNullPointerSafeLoanCharges()) {
             charge.resetToOriginal(loanCurrency());
         }
 
@@ -1060,7 +1067,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         }
 
         LoanScheduleWrapper wrapper = new LoanScheduleWrapper();
-        wrapper.reprocess(getCurrency(), getDisbursementDate(), this.repaymentScheduleInstallments, this.charges);
+        wrapper.reprocess(getCurrency(), getDisbursementDate(), this.repaymentScheduleInstallments, getNullPointerSafeLoanCharges());
     }
 
     public LoanTransaction waiveInterest(final JsonCommand command, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
@@ -1136,11 +1143,11 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
                 .determineProcessor(this.transactionProcessingStrategy);
         if (isTransactionChronologicallyLatest && adjustedTransaction == null) {
             loanRepaymentScheduleTransactionProcessor.handleTransaction(loanTransaction, getCurrency(), this.repaymentScheduleInstallments,
-                    this.charges);
+                    getNullPointerSafeLoanCharges());
         } else {
             final List<LoanTransaction> allNonContraTransactionsPostDisbursement = retreiveListOfTransactionsPostDisbursement();
             loanRepaymentScheduleTransactionProcessor.handleTransaction(getDisbursementDate(), allNonContraTransactionsPostDisbursement,
-                    getCurrency(), this.repaymentScheduleInstallments, this.charges);
+                    getCurrency(), this.repaymentScheduleInstallments, getNullPointerSafeLoanCharges());
         }
 
         doPostLoanTransactionChecks(loanTransaction.getTransactionDate(), loanLifecycleStateMachine);
