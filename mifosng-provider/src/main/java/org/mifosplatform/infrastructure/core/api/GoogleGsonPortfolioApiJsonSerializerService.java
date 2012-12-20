@@ -15,7 +15,6 @@ import org.mifosplatform.organisation.staff.data.StaffData;
 import org.mifosplatform.portfolio.client.data.ClientAccountSummaryCollectionData;
 import org.mifosplatform.portfolio.group.data.GroupAccountSummaryCollectionData;
 import org.mifosplatform.portfolio.group.data.GroupData;
-import org.mifosplatform.portfolio.loanaccount.data.LoanChargeData;
 import org.mifosplatform.portfolio.loanaccount.gaurantor.data.GuarantorData;
 import org.mifosplatform.portfolio.savingsaccount.data.SavingAccountData;
 import org.mifosplatform.portfolio.savingsaccount.data.SavingScheduleData;
@@ -79,8 +78,6 @@ public class GoogleGsonPortfolioApiJsonSerializerService implements PortfolioApi
 
     private static final Set<String> LOAN_REASSIGNMENT_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("officeId", "fromLoanOfficerId",
             "assignmentDate", "officeOptions", "loanOfficerOptions", "accountSummaryCollection"));
-
-    private static final Set<String> LOAN_CHARGES_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("chargeOptions"));
 
     private static final Set<String> SAVINGS_ACCOUNTS_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "status", "externalId",
             "clientId", "clientName", "productId", "productName", "productType", "currencyData", "savingsDepostiAmountPerPeriod",
@@ -208,13 +205,6 @@ public class GoogleGsonPortfolioApiJsonSerializerService implements PortfolioApi
         final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(
                 LOAN_REASSIGNMENT_DATA_PARAMETERS, prettyPrint, responseParameters);
         return helper.serializedJsonFrom(gsonDeserializer, loanReassignmentData);
-    }
-
-    @Override
-    public String serializeLoanChargeDataToJson(boolean prettyPrint, Set<String> responseParameters, LoanChargeData charge) {
-        final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(LOAN_CHARGES_DATA_PARAMETERS,
-                prettyPrint, responseParameters);
-        return helper.serializedJsonFrom(gsonDeserializer, charge);
     }
 
     @Override

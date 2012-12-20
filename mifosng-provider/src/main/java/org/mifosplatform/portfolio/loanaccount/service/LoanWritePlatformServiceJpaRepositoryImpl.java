@@ -33,7 +33,6 @@ import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
 import org.mifosplatform.portfolio.fund.domain.Fund;
 import org.mifosplatform.portfolio.loanaccount.command.LoanApplicationCommand;
 import org.mifosplatform.portfolio.loanaccount.command.LoanChargeCommand;
-import org.mifosplatform.portfolio.loanaccount.command.LoanChargeCommandValidator;
 import org.mifosplatform.portfolio.loanaccount.command.LoanStateTransitionCommand;
 import org.mifosplatform.portfolio.loanaccount.command.LoanTransactionCommand;
 import org.mifosplatform.portfolio.loanaccount.domain.DefaultLoanLifecycleStateMachine;
@@ -55,6 +54,7 @@ import org.mifosplatform.portfolio.loanaccount.loanschedule.query.CalculateLoanS
 import org.mifosplatform.portfolio.loanaccount.loanschedule.service.LoanScheduleCalculationPlatformService;
 import org.mifosplatform.portfolio.loanaccount.serialization.CalculateLoanScheduleQueryFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.loanaccount.serialization.LoanApplicationCommandFromApiJsonDeserializer;
+import org.mifosplatform.portfolio.loanaccount.serialization.LoanChargeCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.loanaccount.serialization.LoanStateTransitionCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.loanaccount.serialization.LoanTransactionCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProduct;
@@ -78,6 +78,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private final CalculateLoanScheduleQueryFromApiJsonDeserializer calculateLoanScheduleQueryFromApiJsonDeserializer;
     private final LoanStateTransitionCommandFromApiJsonDeserializer loanStateTransitionCommandFromApiJsonDeserializer;
     private final LoanTransactionCommandFromApiJsonDeserializer loanTransactionCommandFromApiJsonDeserializer;
+    private final LoanChargeCommandFromApiJsonDeserializer loanChargeCommandFromApiJsonDeserializer;
     private final LoanRepository loanRepository;
     private final NoteRepository noteRepository;
     private final LoanScheduleCalculationPlatformService calculationPlatformService;
@@ -96,6 +97,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final LoanApplicationCommandFromApiJsonDeserializer fromApiJsonDeserializer,
             final LoanStateTransitionCommandFromApiJsonDeserializer loanStateTransitionCommandFromApiJsonDeserializer,
             final LoanTransactionCommandFromApiJsonDeserializer loanTransactionCommandFromApiJsonDeserializer,
+            final LoanChargeCommandFromApiJsonDeserializer loanChargeCommandFromApiJsonDeserializer,
             final CalculateLoanScheduleQueryFromApiJsonDeserializer calculateLoanScheduleQueryFromApiJsonDeserializer,
             final AprCalculator aprCalculator, final LoanAssembler loanAssembler, final LoanChargeAssembler loanChargeAssembler,
             final LoanRepository loanRepository, final LoanTransactionRepository loanTransactionRepository,
@@ -108,6 +110,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.loanStateTransitionCommandFromApiJsonDeserializer = loanStateTransitionCommandFromApiJsonDeserializer;
         this.loanTransactionCommandFromApiJsonDeserializer = loanTransactionCommandFromApiJsonDeserializer;
+        this.loanChargeCommandFromApiJsonDeserializer = loanChargeCommandFromApiJsonDeserializer;
         this.calculateLoanScheduleQueryFromApiJsonDeserializer = calculateLoanScheduleQueryFromApiJsonDeserializer;
         this.aprCalculator = aprCalculator;
         this.loanAssembler = loanAssembler;
@@ -420,14 +423,14 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final LoanTransactionCommand loanTransactionCommand = this.loanTransactionCommandFromApiJsonDeserializer.commandFromApiJson(command
                 .json());
         loanTransactionCommand.validate();
-        
+
         final LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
         final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed("transactionAmount");
-        
+
         final Map<String, Object> changes = new LinkedHashMap<String, Object>();
         changes.put("transactionDate", command.stringValueOfParameterNamed("transactionDate"));
         changes.put("transactionAmount", command.stringValueOfParameterNamed("transactionAmount"));
-        
+
         final Loan loan = retrieveLoanBy(loanId);
 
         if (this.isBeforeToday(transactionDate) && currentUser.canNotMakeRepaymentOnLoanInPast()) { throw new NoAuthorizationException(
@@ -443,7 +446,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             Note note = Note.loanTransactionNote(loan, loanRepayment, noteText);
             this.noteRepository.save(note);
         }
-        
+
         changes.put("locale", command.locale());
         changes.put("dateFormat", command.dateFormat());
 
@@ -459,7 +462,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final LoanTransactionCommand loanTransactionCommand = this.loanTransactionCommandFromApiJsonDeserializer.commandFromApiJson(command
                 .json());
         loanTransactionCommand.validate();
-        
+
         final Loan loan = retrieveLoanBy(loanId);
 
         final LoanTransaction transactionToAdjust = this.loanTransactionRepository.findOne(transactionId);
@@ -467,13 +470,13 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
         final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed("transactionAmount");
-        
+
         final Map<String, Object> changes = new LinkedHashMap<String, Object>();
         changes.put("transactionDate", command.stringValueOfParameterNamed("transactionDate"));
         changes.put("transactionAmount", command.stringValueOfParameterNamed("transactionAmount"));
-        
-        final LoanTransaction newTransactionDetail = loan.adjustExistingTransaction(transactionDate, transactionAmount, defaultLoanLifecycleStateMachine(),
-                transactionToAdjust);
+
+        final LoanTransaction newTransactionDetail = loan.adjustExistingTransaction(transactionDate, transactionAmount,
+                defaultLoanLifecycleStateMachine(), transactionToAdjust);
         if (newTransactionDetail.isGreaterThanZero(loan.getPrincpal().getCurrency())) {
             this.loanTransactionRepository.save(newTransactionDetail);
         }
@@ -489,7 +492,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         changes.put("locale", command.locale());
         changes.put("dateFormat", command.dateFormat());
-        
+
         return EntityIdentifier.subResourceResult(loanId, transactionId, command.commandId(), changes);
     }
 
@@ -502,7 +505,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final LoanTransactionCommand loanTransactionCommand = this.loanTransactionCommandFromApiJsonDeserializer.commandFromApiJson(command
                 .json());
         loanTransactionCommand.validate();
-        
+
         final Map<String, Object> changes = new LinkedHashMap<String, Object>();
         changes.put("transactionDate", command.stringValueOfParameterNamed("transactionDate"));
         changes.put("transactionAmount", command.stringValueOfParameterNamed("transactionAmount"));
@@ -520,7 +523,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final Note note = Note.loanTransactionNote(loan, waiveTransaction, noteText);
             this.noteRepository.save(note);
         }
-        
+
         changes.put("locale", command.locale());
         changes.put("dateFormat", command.dateFormat());
 
@@ -535,7 +538,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final LoanTransactionCommand loanTransactionCommand = this.loanTransactionCommandFromApiJsonDeserializer.commandFromApiJson(command
                 .json());
         loanTransactionCommand.validateNonMonetaryTransaction();
-        
+
         final Map<String, Object> changes = new LinkedHashMap<String, Object>();
         changes.put("transactionDate", command.stringValueOfParameterNamed("transactionDate"));
 
@@ -570,7 +573,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         loanTransactionCommand.validateNonMonetaryTransaction();
 
         final Loan loan = retrieveLoanBy(loanId);
-        
+
         final Map<String, Object> changes = new LinkedHashMap<String, Object>();
         changes.put("transactionDate", command.stringValueOfParameterNamed("transactionDate"));
 
@@ -586,17 +589,17 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final Note note = Note.loanNote(loan, noteText);
             this.noteRepository.save(note);
         }
-        
+
         changes.put("locale", command.locale());
         changes.put("dateFormat", command.dateFormat());
-        
+
         EntityIdentifier result = null;
         if (possibleClosingTransaction != null) {
             result = EntityIdentifier.subResourceResult(loanId, possibleClosingTransaction.getId(), command.commandId(), changes);
         } else {
             result = EntityIdentifier.resourceResult(loanId, command.commandId(), changes);
         }
-        
+
         return result;
     }
 
@@ -610,7 +613,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         loanTransactionCommand.validateNonMonetaryTransaction();
 
         final Loan loan = retrieveLoanBy(loanId);
-        
+
         final Map<String, Object> changes = new LinkedHashMap<String, Object>();
         changes.put("transactionDate", command.stringValueOfParameterNamed("transactionDate"));
 
@@ -624,7 +627,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final Note note = Note.loanNote(loan, noteText);
             this.noteRepository.save(note);
         }
-        
+
         changes.put("locale", command.locale());
         changes.put("dateFormat", command.dateFormat());
 
@@ -633,72 +636,68 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
     @Transactional
     @Override
-    public EntityIdentifier addLoanCharge(final LoanChargeCommand command) {
+    public EntityIdentifier addLoanCharge(final Long loanId, final JsonCommand command) {
         this.context.authenticatedUser();
 
-        LoanChargeCommandValidator validator = new LoanChargeCommandValidator(command);
-        validator.validateForCreate();
+        final LoanChargeCommand loanChargeCommand = this.loanChargeCommandFromApiJsonDeserializer.commandFromApiJson(command.json());
+        loanChargeCommand.validateForCreate();
 
-        final Loan loan = this.loanRepository.findOne(command.getLoanId());
-        if (loan == null) { throw new LoanNotFoundException(command.getLoanId()); }
+        final Loan loan = retrieveLoanBy(loanId);
 
-        final Charge chargeDefinition = this.chargeRepository.findOne(command.getChargeId());
-        if (chargeDefinition == null || chargeDefinition.isDeleted()) { throw new ChargeNotFoundException(command.getChargeId()); }
-
+        final Long chargeDefinitionId = command.longValueOfParameterNamed("chargeId");
+        final Charge chargeDefinition = this.chargeRepository.findOne(chargeDefinitionId);
+        if (chargeDefinition == null || chargeDefinition.isDeleted()) { throw new ChargeNotFoundException(chargeDefinitionId); }
         if (!chargeDefinition.isActive()) { throw new ChargeIsNotActiveException(chargeDefinition.getId(), chargeDefinition.getName()); }
 
-        final LoanCharge loanCharge = LoanCharge.createNew(loan, chargeDefinition, command);
+        final LoanCharge loanCharge = LoanCharge.createNewFromJson(loan, chargeDefinition, command);
 
         if (!loan.hasCurrencyCodeOf(chargeDefinition.getCurrencyCode())) {
             String errorMessage = "Charge and Loan must have the same currency.";
             throw new InvalidCurrencyException("charge", "attach.to.loan", errorMessage);
         }
 
+        this.loanChargeRepository.save(loanCharge);
+        
         loan.addLoanCharge(loanCharge);
-        this.loanRepository.saveAndFlush(loan);
+        this.loanRepository.save(loan);
 
-        return new EntityIdentifier(loanCharge.getId());
+        return EntityIdentifier.subResourceResult(loanId, loanCharge.getId(), command.commandId());
     }
 
     @Transactional
     @Override
-    public EntityIdentifier updateLoanCharge(final LoanChargeCommand command) {
+    public EntityIdentifier updateLoanCharge(final Long loanId, final Long loanChargeId, final JsonCommand command) {
 
         this.context.authenticatedUser();
 
-        LoanChargeCommandValidator validator = new LoanChargeCommandValidator(command);
-        validator.validateForUpdate();
+        final LoanChargeCommand loanChargeCommand = this.loanChargeCommandFromApiJsonDeserializer.commandFromApiJson(command.json());
+        loanChargeCommand.validateForUpdate();
 
-        final Long loanId = command.getLoanId();
         final Loan loan = retrieveLoanBy(loanId);
-
-        final Long loanChargeId = command.getId();
         final LoanCharge loanCharge = retrieveLoanChargeBy(loanId, loanChargeId);
 
-        loan.updateLoanCharge(loanCharge, command);
+        final Map<String, Object> changes = loan.updateLoanCharge(loanCharge, command);
 
         this.loanRepository.save(loan);
 
-        return new EntityIdentifier(loanCharge.getId());
+        return EntityIdentifier.subResourceResult(loanId, loanChargeId, command.commandId(), changes);
     }
 
     @Transactional
     @Override
-    public EntityIdentifier waiveLoanCharge(final LoanChargeCommand command) {
+    public EntityIdentifier waiveLoanCharge(final Long loanId, final Long loanChargeId, final JsonCommand command) {
 
         this.context.authenticatedUser();
 
-        // LoanChargeCommandValidator validator = new
-        // LoanChargeCommandValidator(command);
-        // validator.validateForUpdate();
+        final LoanChargeCommand loanChargeCommand = this.loanChargeCommandFromApiJsonDeserializer.commandFromApiJson(command.json());
+        loanChargeCommand.validateForUpdate();
 
-        final Long loanId = command.getLoanId();
         final Loan loan = retrieveLoanBy(loanId);
-
-        final Long loanChargeId = command.getId();
         final LoanCharge loanCharge = retrieveLoanChargeBy(loanId, loanChargeId);
+        
+        final Map<String, Object> changes = new LinkedHashMap<String, Object>(3);
 
-        final LoanTransaction waiveTransaction = loan.waiveLoanCharge(loanCharge, defaultLoanLifecycleStateMachine());
+        final LoanTransaction waiveTransaction = loan.waiveLoanCharge(loanCharge, defaultLoanLifecycleStateMachine(), changes);
 
         this.loanTransactionRepository.save(waiveTransaction);
         this.loanRepository.save(loan);
@@ -709,23 +708,22 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             this.noteRepository.save(note);
         }
 
-        return new EntityIdentifier(loanCharge.getId());
+        return EntityIdentifier.subResourceResult(loanId, loanChargeId, command.commandId(), changes);
     }
 
     @Transactional
     @Override
-    public EntityIdentifier deleteLoanCharge(final Long loanId, final Long loanChargeId) {
+    public EntityIdentifier deleteLoanCharge(final Long loanId, final Long loanChargeId, final JsonCommand command) {
 
         this.context.authenticatedUser();
 
         final Loan loan = retrieveLoanBy(loanId);
-
         final LoanCharge loanCharge = retrieveLoanChargeBy(loanId, loanChargeId);
 
         loan.removeLoanCharge(loanCharge);
         this.loanRepository.save(loan);
 
-        return new EntityIdentifier(loanCharge.getId());
+        return EntityIdentifier.subResourceResult(loanId, loanChargeId, command.commandId());
     }
 
     private Loan retrieveLoanBy(final Long loanId) {

@@ -289,8 +289,7 @@ public class LoanApplicationCommand {
         if (this.charges != null) {
             for (LoanChargeCommand loanChargeCommand : this.charges) {
                 try {
-                    LoanChargeCommandValidator validator = new LoanChargeCommandValidator(loanChargeCommand);
-                    validator.validateForCreate();
+                    loanChargeCommand.validateForCreate();
                 } catch (PlatformApiDataValidationException e) {
                     dataValidationErrors.addAll(e.getErrors());
                 }

@@ -3,7 +3,6 @@ package org.mifosplatform.portfolio.loanaccount.service;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 import org.mifosplatform.organisation.staff.command.BulkTransferLoanOfficerCommand;
-import org.mifosplatform.portfolio.loanaccount.command.LoanChargeCommand;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface LoanWritePlatformService {
@@ -38,17 +37,13 @@ public interface LoanWritePlatformService {
 
     EntityIdentifier closeAsRescheduled(Long loanId, JsonCommand command);
 
-    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'PORTFOLIO_MANAGEMENT_SUPER_USER', 'CREATE_LOANCHARGE')")
-    EntityIdentifier addLoanCharge(LoanChargeCommand command);
+    EntityIdentifier addLoanCharge(Long loanId, JsonCommand command);
 
-    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'PORTFOLIO_MANAGEMENT_SUPER_USER', 'UPDATE_LOANCHARGE')")
-    EntityIdentifier updateLoanCharge(LoanChargeCommand command);
+    EntityIdentifier updateLoanCharge(Long loanId, Long loanChargeId, JsonCommand command);
 
-    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'PORTFOLIO_MANAGEMENT_SUPER_USER', 'DELETE_LOANCHARGE')")
-    EntityIdentifier deleteLoanCharge(final Long loanId, final Long loanChargeId);
+    EntityIdentifier deleteLoanCharge(Long loanId, Long loanChargeId, JsonCommand command);
 
-    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'PORTFOLIO_MANAGEMENT_SUPER_USER', 'WAIVE_LOANCHARGE')")
-    EntityIdentifier waiveLoanCharge(LoanChargeCommand command);
+    EntityIdentifier waiveLoanCharge(Long loanId, Long loanChargeId, JsonCommand command);
 
     @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'PORTFOLIO_MANAGEMENT_SUPER_USER', 'BULKREASSIGN_LOAN')")
     EntityIdentifier bulkLoanReassignment(final BulkTransferLoanOfficerCommand command);

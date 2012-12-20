@@ -4,8 +4,8 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -16,6 +16,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.joda.time.LocalDate;
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.portfolio.charge.domain.Charge;
@@ -74,16 +75,24 @@ public class LoanCharge extends AbstractPersistable<Long> {
     @Column(name = "is_paid_derived", nullable = false)
     private boolean paid = false;
 
-    public static LoanCharge createNew(final Loan loan, final Charge chargeDefinition, final LoanChargeCommand command) {
-        return new LoanCharge(loan, chargeDefinition, command);
-    }
+    public static LoanCharge createNewFromJson(final Loan loan, final Charge chargeDefinition, final JsonCommand command) {
 
-    /*
-     * loanPrincipal is required for charges that are percentage based
-     */
-    public static LoanCharge createNewWithoutLoan(final Charge chargeDefinition, final LoanChargeCommand command,
-            final BigDecimal loanPrincipal) {
-        return new LoanCharge(chargeDefinition, command, loanPrincipal);
+        final BigDecimal amount = command.bigDecimalValueOfParameterNamed("amount");
+        final Integer chargeTimeType = command.integerValueOfParameterNamed("chargeTimeType");
+        final Integer chargeCalculationType = command.integerValueOfParameterNamed("chargeCalculationType");
+        final LocalDate specifiedDueDate = command.localDateValueOfParameterNamed("specifiedDueDate");
+
+        ChargeTimeType chargeTime = null;
+        if (chargeTimeType != null) {
+            chargeTime = ChargeTimeType.fromInt(chargeTimeType);
+        }
+        ChargeCalculationType chargeCalculation = null;
+        if (chargeCalculationType != null) {
+            chargeCalculation = ChargeCalculationType.fromInt(chargeCalculationType);
+        }
+
+        return new LoanCharge(loan, chargeDefinition, loan.getPrincpal().getAmount(), amount, chargeTime, chargeCalculation,
+                specifiedDueDate);
     }
 
     /*
@@ -91,20 +100,16 @@ public class LoanCharge extends AbstractPersistable<Long> {
      */
     public static LoanCharge createNewWithoutLoan(final Charge chargeDefinition, final BigDecimal loanPrincipal, final BigDecimal amount,
             final ChargeTimeType chargeTime, final ChargeCalculationType chargeCalculation, final LocalDate specifiedDueDate) {
-        return new LoanCharge(chargeDefinition, loanPrincipal, amount, chargeTime, chargeCalculation, specifiedDueDate);
-    }
-
-    public static LoanCharge createNew(final Charge chargeDefinition) {
-        return new LoanCharge(null, chargeDefinition);
+        return new LoanCharge(null, chargeDefinition, loanPrincipal, amount, chargeTime, chargeCalculation, specifiedDueDate);
     }
 
     protected LoanCharge() {
         //
     }
 
-    public LoanCharge(final Charge chargeDefinition, final BigDecimal loanPrincipal, final BigDecimal amount,
+    public LoanCharge(final Loan loan, final Charge chargeDefinition, final BigDecimal loanPrincipal, final BigDecimal amount,
             final ChargeTimeType chargeTime, final ChargeCalculationType chargeCalculation, final LocalDate specifiedDueDate) {
-        this.loan = null;
+        this.loan = loan;
         this.charge = chargeDefinition;
         this.penaltyCharge = chargeDefinition.isPenalty();
 
@@ -137,85 +142,6 @@ public class LoanCharge extends AbstractPersistable<Long> {
         }
 
         populateDerivedFields(loanPrincipal, chargeAmount);
-        this.paid = determineIfFullyPaid();
-    }
-
-    @Deprecated
-    public LoanCharge(final Charge chargeDefinition, final LoanChargeCommand command, final BigDecimal loanPrincipal) {
-        this.loan = null;
-        this.charge = chargeDefinition;
-        this.penaltyCharge = chargeDefinition.isPenalty();
-
-        if (command.isChargeTimeTypeChanged()) {
-            this.chargeTime = command.getChargeTimeType();
-        } else {
-            this.chargeTime = chargeDefinition.getChargeTime();
-        }
-
-        if (ChargeTimeType.fromInt(this.chargeTime).equals(ChargeTimeType.SPECIFIED_DUE_DATE)) {
-
-            if (command.getSpecifiedDueDate() == null) {
-                final String defaultUserMessage = "Loan charge is missing specified due date";
-                throw new LoanChargeWithoutMandatoryFieldException("loancharge", "specifiedDueDate", defaultUserMessage, command.getId(),
-                        chargeDefinition.getName());
-            }
-
-            this.dueForCollectionAsOfDate = command.getSpecifiedDueDate().toDate();
-        } else {
-            this.dueForCollectionAsOfDate = null;
-        }
-
-        if (command.isChargeCalculationTypeChanged()) {
-            this.chargeCalculation = command.getChargeCalculationType();
-        } else {
-            this.chargeCalculation = chargeDefinition.getChargeCalculation();
-        }
-
-        BigDecimal chargeAmount = chargeDefinition.getAmount();
-        if (command.isAmountChanged()) {
-            chargeAmount = command.getAmount();
-        }
-
-        populateDerivedFields(loanPrincipal, chargeAmount);
-        this.paid = determineIfFullyPaid();
-    }
-
-    @Deprecated
-    private LoanCharge(final Loan loan, final Charge chargeDefinition, final LoanChargeCommand command) {
-        this.loan = loan;
-        this.charge = chargeDefinition;
-        this.penaltyCharge = chargeDefinition.isPenalty();
-        if (command.isChargeTimeTypeChanged()) {
-            this.chargeTime = command.getChargeTimeType();
-        } else {
-            this.chargeTime = chargeDefinition.getChargeTime();
-        }
-
-        if (ChargeTimeType.fromInt(this.chargeTime).equals(ChargeTimeType.SPECIFIED_DUE_DATE)) {
-
-            if (command.getSpecifiedDueDate() == null) {
-                final String defaultUserMessage = "Loan charge is missing specified due date";
-                throw new LoanChargeWithoutMandatoryFieldException("loancharge", "specifiedDueDate", defaultUserMessage, command.getId(),
-                        chargeDefinition.getName());
-            }
-
-            this.dueForCollectionAsOfDate = command.getSpecifiedDueDate().toDate();
-        } else {
-            this.dueForCollectionAsOfDate = null;
-        }
-
-        if (command.isChargeCalculationTypeChanged()) {
-            this.chargeCalculation = command.getChargeCalculationType();
-        } else {
-            this.chargeCalculation = chargeDefinition.getChargeCalculation();
-        }
-
-        BigDecimal chargeAmount = chargeDefinition.getAmount();
-        if (command.isAmountChanged()) {
-            chargeAmount = command.getAmount();
-        }
-
-        populateDerivedFields(loan.getPrincpal().getAmount(), chargeAmount);
         this.paid = determineIfFullyPaid();
     }
 
@@ -270,20 +196,6 @@ public class LoanCharge extends AbstractPersistable<Long> {
         }
     }
 
-    private LoanCharge(final Loan loan, final Charge chargeDefinition) {
-        this(loan, chargeDefinition, chargeDefinition.getAmount(), chargeDefinition.getChargeTime(), chargeDefinition
-                .getChargeCalculation());
-    }
-
-    private LoanCharge(final Loan loan, final Charge charge, final BigDecimal amount, final Integer chargeTime,
-            final Integer chargeCalculation) {
-        this.loan = loan;
-        this.charge = charge;
-        this.amount = amount;
-        this.chargeTime = chargeTime;
-        this.chargeCalculation = chargeCalculation;
-    }
-
     public void markAsFullyPaid() {
         this.amountPaid = this.amount;
         this.amountOutstanding = BigDecimal.ZERO;
@@ -318,7 +230,7 @@ public class LoanCharge extends AbstractPersistable<Long> {
     public void update(final Loan loan) {
         this.loan = loan;
     }
-    
+
     public void update(final BigDecimal amount, final LocalDate specifiedDueDate, final BigDecimal loanPrincipal) {
         if (specifiedDueDate != null) {
             this.dueForCollectionAsOfDate = specifiedDueDate.toDate();
@@ -353,47 +265,73 @@ public class LoanCharge extends AbstractPersistable<Long> {
         }
     }
 
-    public void update(final LoanChargeCommand command, final BigDecimal loanPrincipal) {
+    public Map<String, Object> update(final JsonCommand command, final BigDecimal loanPrincipal) {
 
-        if (command.isChargeTimeTypeChanged()) {
-            this.chargeTime = ChargeTimeType.fromInt(command.getChargeTimeType()).getValue();
+        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(7);
+
+        final String dateFormatAsInput = command.dateFormat();
+        final String localeAsInput = command.locale();
+
+        final String chargeTimeParamName = "chargeTime";
+        if (command.isChangeInIntegerParameterNamed(chargeTimeParamName, this.chargeTime)) {
+            final Integer newValue = command.integerValueOfParameterNamed(chargeTimeParamName);
+            actualChanges.put(chargeTimeParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.chargeTime = ChargeTimeType.fromInt(newValue).getValue();
         }
 
-        if (command.isChargeCalculationTypeChanged()) {
-            this.chargeCalculation = ChargeCalculationType.fromInt(command.getChargeCalculationType()).getValue();
+        final String chargeCalculationParamName = "chargeCalculation";
+        if (command.isChangeInIntegerParameterNamed(chargeCalculationParamName, this.chargeCalculation)) {
+            final Integer newValue = command.integerValueOfParameterNamed(chargeCalculationParamName);
+            actualChanges.put(chargeCalculationParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.chargeCalculation = ChargeCalculationType.fromInt(newValue).getValue();
         }
 
-        if (command.isSpecifiedDueDateChanged()) {
-            this.dueForCollectionAsOfDate = command.getSpecifiedDueDate().toDate();
+        final String specifiedDueDateParamName = "specifiedDueDate";
+        if (command.isChangeInLocalDateParameterNamed(specifiedDueDateParamName, getDueForCollectionAsOfLocalDate())) {
+            final String valueAsInput = command.stringValueOfParameterNamed(specifiedDueDateParamName);
+            actualChanges.put(specifiedDueDateParamName, valueAsInput);
+            actualChanges.put("dateFormat", dateFormatAsInput);
+            actualChanges.put("locale", localeAsInput);
+
+            final LocalDate newValue = command.localDateValueOfParameterNamed(specifiedDueDateParamName);
+            this.dueForCollectionAsOfDate = newValue.toDate();
         }
 
-        if (command.isAmountChanged()) {
+        final String amountParamName = "amount";
+        if (command.isChangeInBigDecimalParameterNamed(amountParamName, this.amount)) {
+            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(amountParamName);
+            actualChanges.put(amountParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
             switch (ChargeCalculationType.fromInt(this.chargeCalculation)) {
                 case INVALID:
                 break;
                 case FLAT:
-                    this.amount = command.getAmount();
+                    this.amount = newValue;
                 break;
                 case PERCENT_OF_AMOUNT:
-                    this.percentage = command.getAmount();
+                    this.percentage = newValue;
                     this.amountPercentageAppliedTo = loanPrincipal;
                     this.amount = percentageOf(this.amountPercentageAppliedTo, this.percentage);
                     this.amountOutstanding = calculateOutstanding();
                 break;
                 case PERCENT_OF_AMOUNT_AND_INTEREST:
-                    this.percentage = command.getAmount();
+                    this.percentage = newValue;
                     this.amount = null;
                     this.amountPercentageAppliedTo = null;
                     this.amountOutstanding = null;
                 break;
                 case PERCENT_OF_INTEREST:
-                    this.percentage = command.getAmount();
+                    this.percentage = newValue;
                     this.amount = null;
                     this.amountPercentageAppliedTo = null;
                     this.amountOutstanding = null;
                 break;
             }
         }
+
+        return actualChanges;
     }
 
     public boolean isDueAtDisbursement() {
@@ -411,9 +349,7 @@ public class LoanCharge extends AbstractPersistable<Long> {
     public LoanChargeCommand toCommand() {
 
         final LocalDate specifiedDueDate = getDueForCollectionAsOfLocalDate();
-        final Set<String> modifiedParameters = new HashSet<String>();
-        return new LoanChargeCommand(modifiedParameters, this.getId(), this.loan.getId(), this.charge.getId(), this.amount,
-                this.chargeTime, this.chargeCalculation, specifiedDueDate);
+        return new LoanChargeCommand(this.charge.getId(), this.amount, this.chargeTime, this.chargeCalculation, specifiedDueDate);
     }
 
     public LocalDate getDueForCollectionAsOfLocalDate() {

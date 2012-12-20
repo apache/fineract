@@ -1,49 +1,34 @@
 package org.mifosplatform.portfolio.loanaccount.command;
 
 import java.math.BigDecimal;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.joda.time.LocalDate;
+import org.mifosplatform.infrastructure.core.data.ApiParameterError;
+import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
+import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 
 /**
  * Immutable command for creating and updating loan charges.
  */
 public class LoanChargeCommand implements Comparable<LoanChargeCommand> {
 
-    private final Long id;
     private final Long chargeId;
-    private final Long loanId;
     private final BigDecimal amount;
-
     private final Integer chargeTimeType;
     private final LocalDate specifiedDueDate;
     private final Integer chargeCalculationType;
 
-    /**
-     * Used to capture what parameters were passed in the json api request. It
-     * does not indicate that these values are modified from their original
-     * values when tyring to update.
-     */
-    private final Set<String> requestParameters;
-
-    public static LoanChargeCommand forWaiver(final Long id, final Long loanId) {
-        final Set<String> parametersPassedInCommand = new HashSet<String>();
-        return new LoanChargeCommand(parametersPassedInCommand, id, loanId, null, null, null, null, null);
-    }
-
-    public LoanChargeCommand(final Set<String> parametersPassedInCommand, final Long id, final Long loanId, final Long chargeId,
-            final BigDecimal amount, final Integer chargeTimeType, final Integer chargeCalculationType, final LocalDate specifiedDueDate) {
-        this.requestParameters = parametersPassedInCommand;
-        this.id = id;
+    public LoanChargeCommand(final Long chargeId, final BigDecimal amount, final Integer chargeTimeType,
+            final Integer chargeCalculationType, final LocalDate specifiedDueDate) {
         this.chargeId = chargeId;
-        this.loanId = loanId;
         this.amount = amount;
         this.chargeTimeType = chargeTimeType;
         this.chargeCalculationType = chargeCalculationType;
         this.specifiedDueDate = specifiedDueDate;
     }
-    
+
     @Override
     public int compareTo(final LoanChargeCommand o) {
         int comparison = this.chargeId.compareTo(o.chargeId);
@@ -53,47 +38,38 @@ public class LoanChargeCommand implements Comparable<LoanChargeCommand> {
         return comparison;
     }
 
-    public Long getId() {
-        return id;
+    public void validateForCreate() {
+        List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+
+        DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("charge");
+
+        baseDataValidator.reset().parameter("chargeId").value(this.chargeId).notNull().longGreaterThanZero();
+        baseDataValidator.reset().parameter("amount").value(this.amount).notNull().positiveAmount();
+        // baseDataValidator.reset().parameter("chargeTimeType").value(command.getChargeTimeType()).ignoreIfNull().inMinMaxRange(1,
+        // 2);
+        //
+        // if (command.getChargeTimeType().equals(Integer.valueOf(2))) {
+        // // date must be provided
+        // baseDataValidator.reset().parameter("specifiedDueDate").value(command.getSpecifiedDueDate()).notNull();
+        // }
+        //
+        // baseDataValidator.reset().parameter("chargeCalculationType").value(command.getChargeCalculationType()).ignoreIfNull().inMinMaxRange(1,
+        // 4);
+
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
+                "Validation errors exist.", dataValidationErrors); }
     }
 
-    public Long getChargeId() {
-        return chargeId;
-    }
+    public void validateForUpdate() {
+        List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 
-    public Long getLoanId() {
-        return loanId;
-    }
+        DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("charge");
 
-    public BigDecimal getAmount() {
-        return amount;
-    }
+        baseDataValidator.reset().parameter("amount").value(this.amount).ignoreIfNull().positiveAmount();
+        baseDataValidator.reset().parameter("chargeTimeType").value(this.chargeTimeType).ignoreIfNull().inMinMaxRange(1, 2);
+        baseDataValidator.reset().parameter("chargeCalculationType").value(this.chargeCalculationType).ignoreIfNull().inMinMaxRange(1, 4);
 
-    public Integer getChargeTimeType() {
-        return chargeTimeType;
-    }
-
-    public LocalDate getSpecifiedDueDate() {
-        return specifiedDueDate;
-    }
-
-    public Integer getChargeCalculationType() {
-        return chargeCalculationType;
-    }
-
-    public boolean isAmountChanged() {
-        return this.requestParameters.contains("amount");
-    }
-
-    public boolean isChargeTimeTypeChanged() {
-        return this.requestParameters.contains("chargeTimeType");
-    }
-
-    public boolean isSpecifiedDueDateChanged() {
-        return this.requestParameters.contains("specifiedDueDate");
-    }
-
-    public boolean isChargeCalculationTypeChanged() {
-        return this.requestParameters.contains("chargeCalculationType");
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
+                "Validation errors exist.", dataValidationErrors); }
     }
 }

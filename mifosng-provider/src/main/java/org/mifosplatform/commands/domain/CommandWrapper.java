@@ -215,4 +215,20 @@ public class CommandWrapper {
     public boolean isCloseLoanAsRescheduled() {
         return this.actionName.equalsIgnoreCase("CLOSEASRESCHEDULED") && this.entityName.equalsIgnoreCase("LOAN");
     }
+
+    public boolean isAddLoanCharge() {
+        return this.actionName.equalsIgnoreCase("CREATE") && this.entityName.equalsIgnoreCase("LOANCHARGE");
+    }
+
+    public boolean isDeleteLoanCharge() {
+        return this.actionName.equalsIgnoreCase("DELETE") && this.entityName.equalsIgnoreCase("LOANCHARGE");
+    }
+    
+    public boolean isUpdateLoanCharge() {
+        return this.actionName.equalsIgnoreCase("UPDATE") && this.entityName.equalsIgnoreCase("LOANCHARGE");
+    }
+
+    public boolean isWaiveLoanCharge() {
+        return this.actionName.equalsIgnoreCase("WAIVE") && this.entityName.equalsIgnoreCase("LOANCHARGE");
+    }
 }

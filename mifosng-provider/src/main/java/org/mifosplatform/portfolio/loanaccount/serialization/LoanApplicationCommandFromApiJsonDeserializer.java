@@ -116,9 +116,9 @@ public final class LoanApplicationCommandFromApiJsonDeserializer extends Abstrac
                 for (int i = 0; i < array.size(); i++) {
 
                     final JsonObject loanChargeElement = array.get(i).getAsJsonObject();
-                    final Set<String> parametersPassedInForChargesCommand = new HashSet<String>();
 
-                    final Long id = fromApiJsonHelper.extractLongNamed("id", loanChargeElement);
+                    // final Long id = fromApiJsonHelper.extractLongNamed("id",
+                    // loanChargeElement);
                     final Long chargeId = fromApiJsonHelper.extractLongNamed("chargeId", loanChargeElement);
                     final BigDecimal amount = fromApiJsonHelper.extractBigDecimalNamed("amount", loanChargeElement, locale);
                     final Integer chargeTimeType = fromApiJsonHelper.extractIntegerNamed("chargeTimeType", loanChargeElement, locale);
@@ -127,8 +127,7 @@ public final class LoanApplicationCommandFromApiJsonDeserializer extends Abstrac
                     final LocalDate specifiedDueDate = fromApiJsonHelper.extractLocalDateNamed("specifiedDueDate", loanChargeElement,
                             dateFormat, locale);
 
-                    charges[i] = new LoanChargeCommand(parametersPassedInForChargesCommand, id, null, chargeId, amount, chargeTimeType,
-                            chargeCalculationType, specifiedDueDate);
+                    charges[i] = new LoanChargeCommand(chargeId, amount, chargeTimeType, chargeCalculationType, specifiedDueDate);
                 }
             }
         }

@@ -27,7 +27,6 @@ import org.mifosplatform.portfolio.client.command.NoteCommand;
 import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.client.serialization.ClientCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.group.command.GroupCommand;
-import org.mifosplatform.portfolio.loanaccount.command.LoanChargeCommand;
 import org.mifosplatform.portfolio.loanaccount.gaurantor.command.GuarantorCommand;
 import org.mifosplatform.portfolio.savingsaccount.command.SavingAccountCommand;
 import org.mifosplatform.portfolio.savingsaccountproduct.command.SavingProductCommand;
@@ -171,34 +170,6 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         //
 
         return new GroupCommand(modifiedParameters, resourceIdentifier, externalId, name, officeId, clientMembers);
-    }
-
-    /**
-     * @deprecated - to be removed soon
-     */
-    @Deprecated
-    @Override
-    public LoanChargeCommand convertJsonToLoanChargeCommand(final Long loanChargeId, final Long loanId, final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
-
-        Type typeOfMap = new TypeToken<Map<String, String>>() {}.getType();
-        Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
-
-        final Set<String> supportedParams = new HashSet<String>(Arrays.asList("chargeId", "amount", "chargeTimeType",
-                "chargeCalculationType", "specifiedDueDate", "locale", "dateFormat"));
-
-        checkForUnsupportedParameters(requestMap, supportedParams);
-
-        Set<String> modifiedParameters = new HashSet<String>();
-
-        Long chargeId = extractLongParameter("chargeId", requestMap, modifiedParameters);
-        BigDecimal amount = extractBigDecimalParameter("amount", requestMap, modifiedParameters);
-        Integer chargeTimeType = extractIntegerParameter("chargeTimeType", requestMap, modifiedParameters);
-        Integer chargeCalculationType = extractIntegerParameter("chargeCalculationType", requestMap, modifiedParameters);
-        final LocalDate submittedOnDate = extractLocalDateParameter("specifiedDueDate", requestMap, modifiedParameters);
-
-        return new LoanChargeCommand(modifiedParameters, loanChargeId, loanId, chargeId, amount, chargeTimeType, chargeCalculationType,
-                submittedOnDate);
     }
 
     @Override
