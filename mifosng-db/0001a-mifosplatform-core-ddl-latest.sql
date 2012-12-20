@@ -2,7 +2,9 @@
 SET foreign_key_checks = 0;
 
 -- drop accounting subsystem
-DROP TABLE IF EXISTS `m_acc_coa`;
+DROP TABLE IF EXISTS `acc_gl_account`;
+DROP TABLE IF EXISTS `acc_gl_closure`;
+DROP TABLE IF EXISTS `acc_gl_journal_entry`;
 
 -- drop portfolio subsystem
 DROP TABLE IF EXISTS `m_appuser`;
@@ -37,6 +39,7 @@ DROP TABLE IF EXISTS `m_product_savings`;
 DROP TABLE IF EXISTS `m_role`;
 DROP TABLE IF EXISTS `m_role_permission`;
 DROP TABLE IF EXISTS `m_saving_account`;
+DROP TABLE IF EXISTS `m_saving_schedule`;
 DROP TABLE IF EXISTS `m_staff`;
 DROP TABLE IF EXISTS `ref_loan_transaction_processing_strategy`;
 DROP TABLE IF EXISTS `x_registered_table`;
@@ -52,6 +55,14 @@ DROP TABLE IF EXISTS `stretchy_report_parameter`;
 DROP TABLE IF EXISTS `stretchydata_dataset`;
 DROP TABLE IF EXISTS `stretchydata_dataset_fields`;
 DROP TABLE IF EXISTS `stretchydata_datasettype`;
+
+-- drop deprecated a 'additional data' tables
+drop table IF EXISTS `m_client_xadditional information`;
+drop table IF EXISTS `m_client_xhighly improbable info`;
+drop table IF EXISTS `m_loan_xadditional information`;
+
+-- drop deprecated a 'accounting' tables
+DROP TABLE IF EXISTS `m_acc_coa`;
 
 SET foreign_key_checks = 1;
 
@@ -197,7 +208,7 @@ CREATE TABLE `m_permission` (
   `code` varchar(100) NOT NULL,
   `entity_name` varchar(100) DEFAULT NULL,
   `action_name` varchar(100) DEFAULT NULL,
-  `is_maker_checker` TINYINT(1) NOT NULL DEFAULT '0',
+  `can_maker_checker` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   UNIQUE KEY `code` (`code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -262,14 +273,19 @@ CREATE TABLE `m_appuser_role` (
 -- DDL for organisation wide related concepts
 CREATE TABLE `m_portfolio_command_source` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `api_operation` varchar(20) NOT NULL,
-  `api_resource` varchar(20) NOT NULL,
+  `action_name` varchar(50) NOT NULL,
+  `entity_name` varchar(50) NOT NULL,
+  `api_operation` varchar(30) NOT NULL,
+  `api_resource` varchar(100) NOT NULL,
   `resource_id` bigint(20) DEFAULT NULL,
-  `command_as_json` varchar(5000) NOT NULL,
+  `api_subresource` varchar(100) DEFAULT NULL,
+  `subresource_id` bigint(20) DEFAULT NULL,
+  `command_as_json` text NOT NULL,
   `maker_id` bigint(20) NOT NULL,
-  `made_on_date` date NOT NULL,
+  `made_on_date` datetime NOT NULL,
   `checker_id` bigint(20) DEFAULT NULL,
-  `checked_on_date` date DEFAULT NULL,
+  `checked_on_date` datetime DEFAULT NULL,
+  `processing_result_enum` smallint(5) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_m_maker_m_appuser` (`maker_id`),
   KEY `FK_m_checker_m_appuser` (`checker_id`),
@@ -358,7 +374,7 @@ CREATE TABLE `m_client` (
   `lastname` varchar(50) DEFAULT NULL,
   `display_name` varchar(100) NOT NULL,
   `image_key` varchar(500) DEFAULT NULL,
-  `joining_date` date DEFAULT NULL,
+  `joined_date` date DEFAULT NULL,
   `createdby_id` bigint(20) DEFAULT NULL,
   `created_date` datetime DEFAULT NULL,
   `lastmodified_date` datetime DEFAULT NULL,
@@ -441,6 +457,7 @@ CREATE TABLE `m_product_deposit` (
   CONSTRAINT `FKJPX0000000000004` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+
 CREATE TABLE `m_product_savings` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(100) NOT NULL,
@@ -453,6 +470,7 @@ CREATE TABLE `m_product_savings` (
   `savings_deposit_amount` decimal(19,6) NOT NULL,
   `savings_product_type` smallint(5) DEFAULT NULL,
   `tenure_type` smallint(5) DEFAULT NULL,
+  `deposit_every` bigint(20) DEFAULT NULL,
   `tenure` int(11) DEFAULT NULL,
   `frequency` int(11) DEFAULT NULL,
   `interest_type` smallint(5) DEFAULT NULL,
@@ -530,11 +548,10 @@ CREATE TABLE `m_loan` (
   `loan_officer_id` bigint(20) DEFAULT NULL,
   `guarantor_id` bigint(20) DEFAULT NULL,
   `loan_status_id` smallint(5) NOT NULL,
-  `loan_transaction_strategy_id` bigint(20) DEFAULT NULL,
   `currency_code` varchar(3) NOT NULL,
   `currency_digits` smallint(5) NOT NULL,
   `principal_amount` decimal(19,6) NOT NULL,
-  `arrearstolerance_amount` decimal(19,6) NOT NULL,
+  `arrearstolerance_amount` decimal(19,6) DEFAULT NULL,
   `nominal_interest_rate_per_period` decimal(19,6) NOT NULL,
   `interest_period_frequency_enum` smallint(5) NOT NULL,
   `annual_nominal_interest_rate` decimal(19,6) NOT NULL,
@@ -564,6 +581,7 @@ CREATE TABLE `m_loan` (
   `created_date` datetime DEFAULT NULL,
   `lastmodified_date` datetime DEFAULT NULL,
   `lastmodifiedby_id` bigint(20) DEFAULT NULL,
+  `loan_transaction_strategy_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `org_id` (`external_id`),
   KEY `FKB6F935D87179A0CB` (`client_id`),
@@ -702,6 +720,10 @@ CREATE TABLE `m_deposit_account` (
   `is_compounding_interest_allowed` tinyint(1) NOT NULL DEFAULT '0',
   `interest_paid` decimal(19,6) NOT NULL DEFAULT '0.000000',
   `is_interest_withdrawable` tinyint(1) NOT NULL DEFAULT '0',
+  `available_interest` decimal(19,6) DEFAULT '0.000000',
+  `interest_posted_amount` decimal(19,6) DEFAULT '0.000000',
+  `last_interest_posted_date` date DEFAULT NULL,
+  `next_interest_posting_date` date DEFAULT NULL,
   `is_renewal_allowed` tinyint(1) NOT NULL DEFAULT '0',
   `renewed_account_id` bigint(20) DEFAULT NULL,
   `is_preclosure_allowed` tinyint(1) NOT NULL DEFAULT '0',
@@ -761,6 +783,7 @@ CREATE TABLE `m_saving_account` (
   `regular_saving_nominal_interest_rate` decimal(19,6) NOT NULL,
   `tenure` int(11) NOT NULL,
   `tenure_type` smallint(5) DEFAULT NULL,
+  `deposit_every` bigint(20) DEFAULT NULL,
   `frequency` int(11) DEFAULT NULL,
   `interest_type` smallint(5) DEFAULT NULL,
   `interest_calculation_method` smallint(5) DEFAULT NULL,
@@ -789,6 +812,24 @@ CREATE TABLE `m_saving_account` (
   KEY `FKSA0000000000002` (`product_id`),
   CONSTRAINT `FKSA0000000000001` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`),
   CONSTRAINT `FKSA0000000000002` FOREIGN KEY (`product_id`) REFERENCES `m_product_savings` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `m_saving_schedule` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `saving_account_id` bigint(20) NOT NULL,
+  `duedate` date NOT NULL,
+  `installment` smallint(5) NOT NULL,
+  `deposit` decimal(21,4) NOT NULL,
+  `payment_date` date DEFAULT NULL,
+  `deposit_paid` decimal(21,4) DEFAULT NULL,
+  `completed_derived` bit(1) NOT NULL,
+  `createdby_id` bigint(20) DEFAULT NULL,
+  `created_date` datetime DEFAULT NULL,
+  `lastmodified_date` datetime DEFAULT NULL,
+  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FKSS00000000001` (`saving_account_id`),
+  CONSTRAINT `FKSS00000000001` FOREIGN KEY (`saving_account_id`) REFERENCES `m_saving_account` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 -- end of savings account related tables
 
@@ -822,22 +863,73 @@ CREATE TABLE `m_note` (
 
 
 -- DDL for accounting sub system related tables
-CREATE TABLE `m_acc_coa` (
+CREATE TABLE `acc_gl_account` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(45) NOT NULL,
   `parent_id` bigint(20) DEFAULT NULL,
   `gl_code` varchar(45) NOT NULL,
-  `is_disabled` tinyint(1) NOT NULL DEFAULT '0',
-  `manual_entries_allowed` tinyint(1) NOT NULL DEFAULT '0',
-  `category` varchar(45) NOT NULL,
-  `ledger_type` varchar(45) NOT NULL,
-  `description` varchar(500) NOT NULL,
+  `disabled` tinyint(1) NOT NULL DEFAULT '0',
+  `manual_journal_entries_allowed` tinyint(1) NOT NULL DEFAULT '1',
+  `header_account` tinyint(1) NOT NULL DEFAULT '0',
+  `classification` varchar(45) NOT NULL,
+  `description` varchar(500) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `acc_gl_code` (`gl_code`),
   KEY `FK_ACC_0000000001` (`parent_id`),
-  CONSTRAINT `FK_ACC_0000000001` FOREIGN KEY (`parent_id`) REFERENCES `m_acc_coa` (`id`)
+  CONSTRAINT `FK_ACC_0000000001` FOREIGN KEY (`parent_id`) REFERENCES `acc_gl_account` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+
+CREATE TABLE `acc_gl_closure` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `office_id` bigint(20) NOT NULL,
+  `closing_date` date NOT NULL,
+  `is_deleted` int(20) NOT NULL DEFAULT '0',
+  `createdby_id` bigint(20) DEFAULT NULL,
+  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
+  `created_date` datetime DEFAULT NULL,
+  `lastmodified_date` datetime DEFAULT NULL,
+  `comments` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `office_id_closing_date` (`office_id`,`closing_date`),
+  KEY `FK_acc_gl_closure_m_office` (`office_id`),
+  KEY `FK_acc_gl_closure_m_appuser` (`createdby_id`),
+  KEY `FK_acc_gl_closure_m_appuser_2` (`lastmodifiedby_id`),
+  CONSTRAINT `FK_acc_gl_closure_m_appuser` FOREIGN KEY (`createdby_id`) REFERENCES `m_appuser` (`id`),
+  CONSTRAINT `FK_acc_gl_closure_m_appuser_2` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`),
+  CONSTRAINT `FK_acc_gl_closure_m_office` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `acc_gl_journal_entry` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `account_id` bigint(20) NOT NULL,
+  `office_id` bigint(20) NOT NULL,
+  `reversal_id` bigint(20) DEFAULT NULL,
+  `transaction_id` varchar(50) NOT NULL,
+  `reversed` tinyint(1) NOT NULL DEFAULT '0',
+  `portfolio_generated` tinyint(1) NOT NULL DEFAULT '0',
+  `entry_date` date NOT NULL,
+  `type` varchar(50) NOT NULL,
+  `amount` decimal(19,6) NOT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  `entity_type` varchar(50) DEFAULT NULL,
+  `entity_id` bigint(20) DEFAULT NULL,
+  `createdby_id` bigint(20) NOT NULL,
+  `lastmodifiedby_id` bigint(20) NOT NULL,
+  `created_date` datetime NOT NULL,
+  `lastmodified_date` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK_acc_gl_journal_entry_m_office` (`office_id`),
+  KEY `FK_acc_gl_journal_entry_m_appuser` (`createdby_id`),
+  KEY `FK_acc_gl_journal_entry_m_appuser_2` (`lastmodifiedby_id`),
+  KEY `FK_acc_gl_journal_entry_acc_gl_journal_entry` (`reversal_id`),
+  KEY `FK_acc_gl_journal_entry_acc_gl_account` (`account_id`),
+  CONSTRAINT `FK_acc_gl_journal_entry_acc_gl_account` FOREIGN KEY (`account_id`) REFERENCES `acc_gl_account` (`id`),
+  CONSTRAINT `FK_acc_gl_journal_entry_acc_gl_journal_entry` FOREIGN KEY (`reversal_id`) REFERENCES `acc_gl_journal_entry` (`id`),
+  CONSTRAINT `FK_acc_gl_journal_entry_m_appuser` FOREIGN KEY (`createdby_id`) REFERENCES `m_appuser` (`id`),
+  CONSTRAINT `FK_acc_gl_journal_entry_m_appuser_2` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`),
+  CONSTRAINT `FK_acc_gl_journal_entry_m_office` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 -- =========== end of accounting related tables ==========
 
 -- DDL for reporting related tables
