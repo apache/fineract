@@ -3,18 +3,18 @@ package org.mifosplatform.portfolio.loanaccount.handler;
 import org.mifosplatform.commands.handler.NewCommandSourceHandler;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
-import org.mifosplatform.portfolio.loanaccount.service.LoanWritePlatformService;
+import org.mifosplatform.portfolio.loanaccount.service.LoanApplicationWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class DeleteLoanApplicationCommandHandler implements NewCommandSourceHandler {
+public class LoanApplicationApprovalUndoCommandHandler implements NewCommandSourceHandler {
 
-    private final LoanWritePlatformService writePlatformService;
+    private final LoanApplicationWritePlatformService writePlatformService;
 
     @Autowired
-    public DeleteLoanApplicationCommandHandler(final LoanWritePlatformService writePlatformService) {
+    public LoanApplicationApprovalUndoCommandHandler(final LoanApplicationWritePlatformService writePlatformService) {
         this.writePlatformService = writePlatformService;
     }
 
@@ -22,6 +22,6 @@ public class DeleteLoanApplicationCommandHandler implements NewCommandSourceHand
     @Override
     public EntityIdentifier processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.deleteLoan(command.resourceId());
+        return this.writePlatformService.undoLoanApplicationApproval(command.resourceId(), command);
     }
 }

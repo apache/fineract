@@ -213,13 +213,13 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
         } else if (wrapper.isLoanResource()) {
             
             if (wrapper.isApproveLoanApplication()) {
-                handler = applicationContext.getBean("approveLoanApplicationCommandHandler", NewCommandSourceHandler.class);
+                handler = applicationContext.getBean("loanApplicationApprovalCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isUndoApprovalOfLoanApplication()) {
-                handler = applicationContext.getBean("undoApprovalLoanApplicationCommandHandler", NewCommandSourceHandler.class);
+                handler = applicationContext.getBean("loanApplicationApprovalUndoCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isApplicantWithdrawalFromLoanApplication()) {
-                handler = applicationContext.getBean("applicantWithdrawsFromLoanApplicationCommandHandler", NewCommandSourceHandler.class);
+                handler = applicationContext.getBean("loanApplicationWithdrawnByApplicantCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isRejectionOfLoanApplication()) {
-                handler = applicationContext.getBean("rejectLoanApplicationCommandHandler", NewCommandSourceHandler.class);
+                handler = applicationContext.getBean("loanApplicationRejectedCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isDisbursementOfLoan()) {
                 handler = applicationContext.getBean("disburseLoanCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isUndoDisbursementOfLoan()) {
@@ -249,11 +249,11 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
             } else if (wrapper.isBulkUpdateLoanOfficer()) {
                 handler = applicationContext.getBean("bulkUpdateLoanOfficerCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isCreate()) {
-                handler = applicationContext.getBean("createLoanApplicationCommandHandler", NewCommandSourceHandler.class);
+                handler = applicationContext.getBean("loanApplicationSubmittalCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isUpdate()) {
-                handler = applicationContext.getBean("updateLoanApplicationCommandHandler", NewCommandSourceHandler.class);
+                handler = applicationContext.getBean("loanApplicationModificationCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isDelete()) {
-                handler = applicationContext.getBean("deleteLoanApplicationCommandHandler", NewCommandSourceHandler.class);
+                handler = applicationContext.getBean("loanApplicationDeletionCommandHandler", NewCommandSourceHandler.class);
             } else {
                 throw new UnsupportedCommandException(wrapper.commandName());
             }

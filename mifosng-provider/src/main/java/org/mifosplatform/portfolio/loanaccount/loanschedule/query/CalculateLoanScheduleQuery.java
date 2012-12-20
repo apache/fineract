@@ -7,7 +7,6 @@ import java.util.List;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
-import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.portfolio.loanaccount.command.LoanChargeCommand;
 
 /**
@@ -122,9 +121,9 @@ public class CalculateLoanScheduleQuery {
         return charges;
     }
 
-    public void validate() {
+    public List<ApiParameterError> validate() {
 
-        List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 
         DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");
 
@@ -200,8 +199,7 @@ public class CalculateLoanScheduleQuery {
             }
         }
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
-                "Validation errors exist.", dataValidationErrors); }
+        return dataValidationErrors;
 
     }
 }

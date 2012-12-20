@@ -1,6 +1,10 @@
 package org.mifosplatform.portfolio.loanaccount.loanschedule.service;
 
+import java.util.List;
+
 import org.mifosplatform.infrastructure.core.api.JsonQuery;
+import org.mifosplatform.infrastructure.core.data.ApiParameterError;
+import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanSchedule;
@@ -29,8 +33,12 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
     public LoanScheduleData calculateLoanSchedule(final JsonQuery query) {
         context.authenticatedUser();
 
-        CalculateLoanScheduleQuery calculateLoanScheduleQuery = this.fromApiJsonDeserializer.commandFromApiJson(query.json());
-        calculateLoanScheduleQuery.validate();
+        final CalculateLoanScheduleQuery calculateLoanScheduleQuery = this.fromApiJsonDeserializer.commandFromApiJson(query.json());
+        final List<ApiParameterError> dataValidationErrors = calculateLoanScheduleQuery.validate();
+        
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors); 
+        }
 
         final LoanSchedule loanSchedule = this.loanScheduleAssembler.fromJson(query.parsedJson());
         return loanSchedule.generate();

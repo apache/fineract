@@ -5,20 +5,6 @@ import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 
 public interface LoanWritePlatformService {
 
-    EntityIdentifier submitLoanApplication(JsonCommand command);
-
-    EntityIdentifier modifyLoanApplication(Long loanId, JsonCommand command);
-
-    EntityIdentifier deleteLoan(Long loanId);
-
-    EntityIdentifier approveLoanApplication(Long loanId, JsonCommand command);
-
-    EntityIdentifier undoLoanApplicationApproval(Long loanId, JsonCommand command);
-
-    EntityIdentifier rejectLoanApplication(Long loanId, JsonCommand command);
-
-    EntityIdentifier applicantWithdrawsFromLoanApplication(Long loanId, JsonCommand command);
-
     EntityIdentifier disburseLoan(Long loanId, JsonCommand command);
 
     EntityIdentifier undoLoanDisbursal(Long loanId, JsonCommand command);

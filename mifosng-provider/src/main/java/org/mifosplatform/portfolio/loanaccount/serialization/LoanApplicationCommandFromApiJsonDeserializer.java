@@ -132,10 +132,10 @@ public final class LoanApplicationCommandFromApiJsonDeserializer extends Abstrac
             }
         }
 
-        return new LoanApplicationCommand(new HashSet<String>(), null, clientId, groupId, productId, externalId, fundId,
-                transactionProcessingStrategyId, submittedOnDate, submittedOnNote, expectedDisbursementDate, repaymentsStartingFromDate,
-                interestChargedFromDate, principal, interestRatePerPeriod, interestRateFrequencyType, interestType,
-                interestCalculationPeriodType, repaymentEvery, repaymentFrequencyType, numberOfRepayments, amortizationType,
-                loanTermFrequency, loanTermFrequencyType, inArrearsTolerance, charges, loanOfficerId);
+        return new LoanApplicationCommand(clientId, groupId, productId, externalId, fundId, transactionProcessingStrategyId,
+                submittedOnDate, submittedOnNote, expectedDisbursementDate, repaymentsStartingFromDate, interestChargedFromDate, principal,
+                interestRatePerPeriod, interestRateFrequencyType, interestType, interestCalculationPeriodType, repaymentEvery,
+                repaymentFrequencyType, numberOfRepayments, amortizationType, loanTermFrequency, loanTermFrequencyType, inArrearsTolerance,
+                charges, loanOfficerId);
     }
 }
