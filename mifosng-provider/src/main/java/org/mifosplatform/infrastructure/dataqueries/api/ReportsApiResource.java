@@ -19,7 +19,7 @@ import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriInfo;
 
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
-import org.mifosplatform.infrastructure.core.api.PortfolioApiJsonSerializerService;
+import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.mifosplatform.infrastructure.dataqueries.data.GenericResultsetData;
 import org.mifosplatform.infrastructure.dataqueries.service.ReadReportingService;
 import org.mifosplatform.infrastructure.security.exception.NoAuthorizationException;
@@ -34,14 +34,17 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class ReportsApiResource {
 
-    @Autowired
-    private PlatformSecurityContext context;
+    private final PlatformSecurityContext context;
+    private final ToApiJsonSerializer<GenericResultsetData> toApiJsonSerializer;
+    private final ReadReportingService readExtraDataAndReportingService;
 
     @Autowired
-    private ReadReportingService readExtraDataAndReportingService;
-
-    @Autowired
-    private PortfolioApiJsonSerializerService apiJsonSerializerService;
+    public ReportsApiResource(final PlatformSecurityContext context, final ReadReportingService readExtraDataAndReportingService,
+            final ToApiJsonSerializer<GenericResultsetData> toApiJsonSerializer) {
+        this.context = context;
+        this.readExtraDataAndReportingService = readExtraDataAndReportingService;
+        this.toApiJsonSerializer = toApiJsonSerializer;
+    }
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -55,8 +58,7 @@ public class ReportsApiResource {
 
         boolean exportPdf = ApiParameterHelper.exportPdf(uriInfo.getQueryParameters());
 
-        if (exportPdf)
-        {
+        if (exportPdf) {
             String result = this.readExtraDataAndReportingService.retrieveReportPDF(".", ".", extractedQueryParams);
             return Response.ok().entity(result).header("Content-Disposition", "attachment;filename=ReportList.pdf").build();
         }
@@ -64,7 +66,7 @@ public class ReportsApiResource {
         if (!exportCsv) {
             GenericResultsetData result = this.readExtraDataAndReportingService.retrieveGenericResultset(".", ".", extractedQueryParams);
 
-            final String json = this.apiJsonSerializerService.serializeGenericResultsetDataToJson(prettyPrint, result);
+            final String json = this.toApiJsonSerializer.serializePretty(prettyPrint, result);
 
             return Response.ok().entity(json).build();
         }
@@ -123,7 +125,7 @@ public class ReportsApiResource {
             GenericResultsetData result = this.readExtraDataAndReportingService.retrieveGenericResultset(reportName, parameterTypeValue,
                     reportParams);
 
-            final String json = this.apiJsonSerializerService.serializeGenericResultsetDataToJson(prettyPrint, result);
+            final String json = this.toApiJsonSerializer.serializePretty(prettyPrint, result);
 
             return Response.ok().entity(json).type(MediaType.APPLICATION_JSON).build();
         }
@@ -136,7 +138,7 @@ public class ReportsApiResource {
                 .header("Content-Disposition", "attachment;filename=" + reportName.replaceAll(" ", "") + ".csv").build();
     }
 
-    private void checkUserPermissionForReport(String reportName, boolean parameterType) {
+    private void checkUserPermissionForReport(final String reportName, final boolean parameterType) {
 
         // Anyone can run a 'report' that is simply getting possible parameter
         // (dropdown listbox) values.

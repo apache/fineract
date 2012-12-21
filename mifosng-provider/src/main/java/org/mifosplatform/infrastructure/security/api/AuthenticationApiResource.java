@@ -10,7 +10,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import org.mifosplatform.infrastructure.core.api.PortfolioApiJsonSerializerService;
+import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.data.AuthenticatedUserData;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,12 +29,16 @@ import com.sun.jersey.core.util.Base64;
 @Scope("singleton")
 public class AuthenticationApiResource {
 
-    @Qualifier("customAuthenticationProvider")
-    @Autowired
-    private DaoAuthenticationProvider customAuthenticationProvider;
+    private final DaoAuthenticationProvider customAuthenticationProvider;
+    private final ToApiJsonSerializer<AuthenticatedUserData> apiJsonSerializerService;
 
     @Autowired
-    private PortfolioApiJsonSerializerService apiJsonSerializerService;
+    public AuthenticationApiResource(
+            @Qualifier("customAuthenticationProvider") final DaoAuthenticationProvider customAuthenticationProvider,
+            final ToApiJsonSerializer<AuthenticatedUserData> apiJsonSerializerService) {
+        this.customAuthenticationProvider = customAuthenticationProvider;
+        this.apiJsonSerializerService = apiJsonSerializerService;
+    }
 
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -59,6 +63,6 @@ public class AuthenticationApiResource {
                     base64EncodedAuthenticationKey));
         }
 
-        return this.apiJsonSerializerService.serializeAuthenticatedUserDataToJson(false, authenticatedUserData);
+        return this.apiJsonSerializerService.serialize(authenticatedUserData);
     }
 }

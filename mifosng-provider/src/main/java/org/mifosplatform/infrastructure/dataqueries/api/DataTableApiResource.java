@@ -24,8 +24,8 @@ import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
-import org.mifosplatform.infrastructure.core.api.PortfolioApiJsonSerializerService;
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.mifosplatform.infrastructure.dataqueries.data.DatatableData;
 import org.mifosplatform.infrastructure.dataqueries.data.GenericResultsetData;
 import org.mifosplatform.infrastructure.dataqueries.service.GenericDataService;
@@ -45,18 +45,20 @@ import org.springframework.stereotype.Component;
 public class DataTableApiResource {
 
     private final static Logger logger = LoggerFactory.getLogger(DataTableApiResource.class);
+    
+    private final PlatformSecurityContext context;
+    private final GenericDataService genericDataService;
+    private final ReadWriteNonCoreDataService readWriteNonCoreDataService;
+    private final ToApiJsonSerializer<GenericResultsetData> toApiJsonSerializer;
 
     @Autowired
-    private PlatformSecurityContext context;
-
-    @Autowired
-    private GenericDataService genericDataService;
-
-    @Autowired
-    private ReadWriteNonCoreDataService readWriteNonCoreDataService;
-
-    @Autowired
-    private PortfolioApiJsonSerializerService apiJsonSerializerService;
+    public DataTableApiResource(final PlatformSecurityContext context, final GenericDataService genericDataService,
+            final ReadWriteNonCoreDataService readWriteNonCoreDataService, ToApiJsonSerializer<GenericResultsetData> toApiJsonSerializer) {
+        this.context = context;
+        this.genericDataService = genericDataService;
+        this.readWriteNonCoreDataService = readWriteNonCoreDataService;
+        this.toApiJsonSerializer = toApiJsonSerializer;
+    }
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -66,29 +68,29 @@ public class DataTableApiResource {
         final List<DatatableData> result = this.readWriteNonCoreDataService.retrieveDatatableNames(apptable);
 
         final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-        return this.apiJsonSerializerService.serializeDatatableDataToJson(prettyPrint, result);
+        return this.toApiJsonSerializer.serializePretty(prettyPrint, result);
     }
 
     @POST
     @Path("register/{datatable}/{apptable}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response registerDatatable(@PathParam("datatable") final String datatable, @PathParam("apptable") final String apptable) {
+    public String registerDatatable(@PathParam("datatable") final String datatable, @PathParam("apptable") final String apptable) {
 
         this.readWriteNonCoreDataService.registerDatatable(datatable, apptable);
 
-        return Response.ok().entity(EntityIdentifier.empty()).build();
+        return this.toApiJsonSerializer.serialize(EntityIdentifier.empty());
     }
 
     @POST
     @Path("deregister/{datatable}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response deregisterDatatable(@PathParam("datatable") final String datatable) {
+    public String deregisterDatatable(@PathParam("datatable") final String datatable) {
 
         this.readWriteNonCoreDataService.deregisterDatatable(datatable);
 
-        return Response.ok().entity(EntityIdentifier.empty()).build();
+        return this.toApiJsonSerializer.serialize(EntityIdentifier.empty());
     }
 
     @GET
@@ -106,8 +108,8 @@ public class DataTableApiResource {
         String json = "";
         final boolean genericResultSet = ApiParameterHelper.genericResultSet(uriInfo.getQueryParameters());
         if (genericResultSet) {
-            boolean prettyPrints = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-            json = this.apiJsonSerializerService.serializeGenericResultsetDataToJson(prettyPrints, results);
+            final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+            json = this.toApiJsonSerializer.serializePretty(prettyPrint, results);
         } else {
             json = this.genericDataService.generateJsonFromGenericResultsetData(results);
         }
@@ -119,7 +121,7 @@ public class DataTableApiResource {
     @Path("{datatable}/{apptableId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response newDatatableEntry(@PathParam("datatable") final String datatable, @PathParam("apptableId") final Long apptableId,
+    public String newDatatableEntry(@PathParam("datatable") final String datatable, @PathParam("apptableId") final Long apptableId,
             final String jsonRequestBody) {
 
         checkUserPermissionForDatatable(datatable, "CREATE");
@@ -127,17 +129,16 @@ public class DataTableApiResource {
 
         this.readWriteNonCoreDataService.newDatatableEntry(datatable, apptableId, queryParams);
 
-        EntityIdentifier entityIdentifier = new EntityIdentifier(Long.valueOf(apptableId));
+        EntityIdentifier entityIdentifier = EntityIdentifier.resourceResult(Long.valueOf(apptableId), null);
 
-        return Response.ok().entity(entityIdentifier).build();
-
+        return this.toApiJsonSerializer.serialize(entityIdentifier);
     }
 
     @PUT
     @Path("{datatable}/{apptableId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response updateDatatableEntryOnetoOne(@PathParam("datatable") final String datatable,
+    public String updateDatatableEntryOnetoOne(@PathParam("datatable") final String datatable,
             @PathParam("apptableId") final Long apptableId, final String jsonRequestBody) {
         /*
          * for updating one to one relationships (where foreign key is the
@@ -148,17 +149,16 @@ public class DataTableApiResource {
 
         this.readWriteNonCoreDataService.updateDatatableEntryOnetoOne(datatable, apptableId, queryParams);
 
-        EntityIdentifier entityIdentifier = new EntityIdentifier(Long.valueOf(apptableId));
+        EntityIdentifier entityIdentifier = EntityIdentifier.resourceResult(Long.valueOf(apptableId), null);
 
-        return Response.ok().entity(entityIdentifier).build();
-
+        return this.toApiJsonSerializer.serialize(entityIdentifier);
     }
 
     @PUT
     @Path("{datatable}/{apptableId}/{datatableId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response updateDatatableEntryOnetoOne(@PathParam("datatable") final String datatable,
+    public String updateDatatableEntryOnetoOne(@PathParam("datatable") final String datatable,
             @PathParam("apptableId") final Long apptableId, @PathParam("datatableId") final Long datatableId, final String jsonRequestBody) {
         /*
          * for updating one to many relationships (where foreign key isn't the
@@ -169,25 +169,24 @@ public class DataTableApiResource {
 
         this.readWriteNonCoreDataService.updateDatatableEntryOnetoMany(datatable, apptableId, datatableId, queryParams);
 
-        EntityIdentifier entityIdentifier = new EntityIdentifier(Long.valueOf(apptableId));
+        EntityIdentifier entityIdentifier = EntityIdentifier.resourceResult(Long.valueOf(apptableId), null);
 
-        return Response.ok().entity(entityIdentifier).build();
-
+        return this.toApiJsonSerializer.serialize(entityIdentifier);
     }
 
     @DELETE
     @Path("{datatable}/{apptableId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response deleteDatatableEntries(@PathParam("datatable") final String datatable, @PathParam("apptableId") final Long apptableId) {
+    public String deleteDatatableEntries(@PathParam("datatable") final String datatable, @PathParam("apptableId") final Long apptableId) {
 
         checkUserPermissionForDatatable(datatable, "DELETE");
 
         this.readWriteNonCoreDataService.deleteDatatableEntries(datatable, apptableId);
 
-        EntityIdentifier entityIdentifier = new EntityIdentifier(Long.valueOf(apptableId));
+        EntityIdentifier entityIdentifier = EntityIdentifier.resourceResult(Long.valueOf(apptableId), null);
 
-        return Response.ok().entity(entityIdentifier).build();
+        return this.toApiJsonSerializer.serialize(entityIdentifier);
 
     }
 
@@ -195,20 +194,19 @@ public class DataTableApiResource {
     @Path("{datatable}/{apptableId}/{datatableId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response deleteDatatableEntries(@PathParam("datatable") final String datatable, @PathParam("apptableId") final Long apptableId,
+    public String deleteDatatableEntries(@PathParam("datatable") final String datatable, @PathParam("apptableId") final Long apptableId,
             @PathParam("datatableId") final Long datatableId) {
 
         checkUserPermissionForDatatable(datatable, "DELETE");
 
         this.readWriteNonCoreDataService.deleteDatatableEntry(datatable, apptableId, datatableId);
 
-        EntityIdentifier entityIdentifier = new EntityIdentifier(Long.valueOf(apptableId));
+        EntityIdentifier entityIdentifier = EntityIdentifier.resourceResult(Long.valueOf(apptableId), null);
 
-        return Response.ok().entity(entityIdentifier).build();
-
+        return this.toApiJsonSerializer.serialize(entityIdentifier);
     }
 
-    private Map<String, String> getQueryParamsFromJsonRequestBody(String jsonRequestBody) {
+    private Map<String, String> getQueryParamsFromJsonRequestBody(final String jsonRequestBody) {
 
         Map<String, String> queryParams = new HashMap<String, String>();
 
@@ -234,7 +232,7 @@ public class DataTableApiResource {
 
     }
 
-    private void checkUserPermissionForDatatable(String datatable, String accessType) {
+    private void checkUserPermissionForDatatable(final String datatable, final String accessType) {
         AppUser currentUser = context.authenticatedUser();
         if (currentUser.hasNotPermissionForDatatable(datatable, accessType)) { throw new NoAuthorizationException("Not Authorised to "
                 + accessType + " Data Table: " + datatable); }

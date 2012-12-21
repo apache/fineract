@@ -41,6 +41,18 @@ public final class DefaultToApiJsonSerializer<T> implements ToApiJsonSerializer<
     public String serialize(final Object object) {
         return this.excludeNothingWithPrettyPrintingOff.serialize(object);
     }
+    
+    @Override
+    public String serializePretty(boolean prettyOn, final Object object) {
+        String json = "";
+        
+        if (prettyOn) {
+            json = this.excludeNothingWithPrettyPrintingOn.serialize(object);
+        } else {
+            json = serialize(object);
+        }
+        return json;
+    }
 
     @Override
     public String serialize(final ApiRequestJsonSerializationSettings settings, final Collection<T> collection,

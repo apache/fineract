@@ -6,13 +6,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.mifosplatform.infrastructure.core.serialization.GoogleGsonSerializerHelper;
-import org.mifosplatform.infrastructure.dataqueries.data.DatatableData;
-import org.mifosplatform.infrastructure.dataqueries.data.GenericResultsetData;
-import org.mifosplatform.infrastructure.documentmanagement.data.DocumentData;
-import org.mifosplatform.infrastructure.security.data.AuthenticatedUserData;
-import org.mifosplatform.portfolio.client.data.ClientAccountSummaryCollectionData;
-import org.mifosplatform.portfolio.group.data.GroupAccountSummaryCollectionData;
-import org.mifosplatform.portfolio.group.data.GroupData;
 import org.mifosplatform.portfolio.loanaccount.gaurantor.data.GuarantorData;
 import org.mifosplatform.portfolio.savingsaccount.data.SavingAccountData;
 import org.mifosplatform.portfolio.savingsaccount.data.SavingScheduleData;
@@ -54,23 +47,6 @@ public class GoogleGsonPortfolioApiJsonSerializerService implements PortfolioApi
             "isLockinPeriodAllowed", "lockinPeriod", "lockinPeriodType", "printFDdetailsLocation", "availableInterest",
             "interestPostedAmount", "lastInterestPostedDate", "nextInterestPostedDate", "fatherName", "address", "imageKey"));
 
-    private static final Set<String> DOCUMENT_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "parentEntityType",
-            "parentEntityId", "name", "fileName", "type", "size", "description"));
-
-    private static final Set<String> CLIENT_ACCOUNTS_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("pendingApprovalLoans",
-            "awaitingDisbursalLoans", "openLoans", "closedLoans", "anyLoanCount", "pendingApprovalLoanCount", "awaitingDisbursalLoanCount",
-            "activeLoanCount", "closedLoanCount", "pendingApprovalDespositAccountsCount", "pendingApprovalDespositAccounts",
-            "approvedDespositAccountsCount", "approvedDespositAccounts", "withdrawnByClientDespositAccountsCount",
-            "withdrawnByClientDespositAccounts", "closedDepositAccountsCount", "closedDepositAccounts", "rejectedDepositAccountsCount",
-            "rejectedDepositAccounts", "preclosedDepositAccountsCount", "preclosedDepositAccounts"));
-
-    private static final Set<String> GROUP_ACCOUNTS_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("pendingApprovalLoans",
-            "awaitingDisbursalLoans", "openLoans", "closedLoans", "anyLoanCount", "pendingApprovalLoanCount", "awaitingDisbursalLoanCount",
-            "activeLoanCount", "closedLoanCount"));
-
-    private static final Set<String> GROUP_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "officeId", "name", "externalId",
-            "clientMembers", "allowedClients", "allowedOffices"));
-
     private static final Set<String> SAVINGS_ACCOUNTS_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "status", "externalId",
             "clientId", "clientName", "productId", "productName", "productType", "currencyData", "savingsDepostiAmountPerPeriod",
             "savingsFrequencyType", "totalDepositAmount", "reccuringInterestRate", "savingInterestRate", "interestType",
@@ -92,24 +68,6 @@ public class GoogleGsonPortfolioApiJsonSerializerService implements PortfolioApi
     @Autowired
     public GoogleGsonPortfolioApiJsonSerializerService(final GoogleGsonSerializerHelper helper) {
         this.helper = helper;
-    }
-
-    @Override
-    public String serializeAuthenticatedUserDataToJson(final boolean prettyPrint, final AuthenticatedUserData authenticatedUserData) {
-        final Gson gsonDeserializer = helper.createGsonBuilder(prettyPrint);
-        return helper.serializedJsonFrom(gsonDeserializer, authenticatedUserData);
-    }
-
-    @Override
-    public String serializeGenericResultsetDataToJson(final boolean prettyPrint, final GenericResultsetData resultsetData) {
-        final Gson gsonDeserializer = helper.createGsonBuilder(prettyPrint);
-        return helper.serializedJsonFrom(gsonDeserializer, resultsetData);
-    }
-
-    @Override
-    public String serializeDatatableDataToJson(final boolean prettyPrint, final Collection<DatatableData> datatables) {
-        final Gson gsonDeserializer = helper.createGsonBuilder(prettyPrint);
-        return helper.serializedJsonFrom(gsonDeserializer, datatables.toArray(new DatatableData[datatables.size()]));
     }
 
     @Override
@@ -161,51 +119,6 @@ public class GoogleGsonPortfolioApiJsonSerializerService implements PortfolioApi
     }
 
     @Override
-    public String serializeClientAccountSummaryCollectionDataToJson(final boolean prettyPrint, final Set<String> responseParameters,
-            final ClientAccountSummaryCollectionData clientAccount) {
-        final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(CLIENT_ACCOUNTS_DATA_PARAMETERS,
-                prettyPrint, responseParameters);
-        return helper.serializedJsonFrom(gsonDeserializer, clientAccount);
-    }
-
-    @Override
-    public String serializeGroupAccountSummaryCollectionDataToJson(final boolean prettyPrint, final Set<String> responseParameters,
-            final GroupAccountSummaryCollectionData groupAccount) {
-        final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(GROUP_ACCOUNTS_DATA_PARAMETERS,
-                prettyPrint, responseParameters);
-        return helper.serializedJsonFrom(gsonDeserializer, groupAccount);
-    }
-
-    @Override
-    public String serializeGroupDataToJson(final boolean prettyPrint, final Set<String> responseParameters,
-            final Collection<GroupData> groups) {
-        final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(GROUP_DATA_PARAMETERS,
-                prettyPrint, responseParameters);
-        return helper.serializedJsonFrom(gsonDeserializer, groups.toArray(new GroupData[groups.size()]));
-    }
-
-    @Override
-    public String serializeGroupDataToJson(final boolean prettyPrint, final Set<String> responseParameters, final GroupData group) {
-        final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(GROUP_DATA_PARAMETERS,
-                prettyPrint, responseParameters);
-        return helper.serializedJsonFrom(gsonDeserializer, group);
-    }
-
-    @Override
-    public String serializeDocumentDataToJson(boolean prettyPrint, Set<String> responseParameters, Collection<DocumentData> documentDatas) {
-        final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(DOCUMENT_DATA_PARAMETERS,
-                prettyPrint, responseParameters);
-        return helper.serializedJsonFrom(gsonDeserializer, documentDatas.toArray(new DocumentData[documentDatas.size()]));
-    }
-
-    @Override
-    public String serializeDocumentDataToJson(boolean prettyPrint, Set<String> responseParameters, DocumentData documentData) {
-        final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(DOCUMENT_DATA_PARAMETERS,
-                prettyPrint, responseParameters);
-        return helper.serializedJsonFrom(gsonDeserializer, documentData);
-    }
-
-    @Override
     public String serializeSavingAccountsDataToJson(boolean prettyPrint, Set<String> responseParameters, SavingAccountData account) {
         final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(SAVINGS_ACCOUNTS_DATA_PARAMETERS,
                 prettyPrint, responseParameters);
@@ -234,5 +147,4 @@ public class GoogleGsonPortfolioApiJsonSerializerService implements PortfolioApi
                 prettyPrint, responseParameters);
         return helper.serializedJsonFrom(gsonDeserializer, savingScheduleData);
     }
-
 }

@@ -27,10 +27,9 @@ import org.mifosplatform.commands.service.PortfolioCommandsReadPlatformService;
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.api.PortfolioApiDataConversionService;
-import org.mifosplatform.infrastructure.core.api.PortfolioApiJsonSerializerService;
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
-import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.office.data.OfficeLookup;
 import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
@@ -52,27 +51,27 @@ public class ClientsApiResource {
     private final PlatformSecurityContext context;
     private final ClientReadPlatformService clientReadPlatformService;
     private final OfficeReadPlatformService officeReadPlatformService;
-    private final DefaultToApiJsonSerializer<ClientData> toApiJsonSerializer;
+    private final ToApiJsonSerializer<ClientData> toApiJsonSerializer;
+    private final ToApiJsonSerializer<ClientAccountSummaryCollectionData> clientAccountSummaryToApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioApiDataConversionService apiDataConversionService;
-    private final PortfolioApiJsonSerializerService apiJsonSerializerService;
     private final PortfolioCommandsReadPlatformService commandSourceReadPlatformService;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @Autowired
     public ClientsApiResource(final PlatformSecurityContext context, final ClientReadPlatformService readPlatformService,
-            final OfficeReadPlatformService officeReadPlatformService, final DefaultToApiJsonSerializer<ClientData> toApiJsonSerializer,
+            final OfficeReadPlatformService officeReadPlatformService, final ToApiJsonSerializer<ClientData> toApiJsonSerializer,
+            final ToApiJsonSerializer<ClientAccountSummaryCollectionData> clientAccountSummaryToApiJsonSerializer,
             final ApiRequestParameterHelper apiRequestParameterHelper, final PortfolioApiDataConversionService apiDataConversionService,
-            final PortfolioApiJsonSerializerService apiJsonSerializerService,
             final PortfolioCommandsReadPlatformService commandsReadPlatformService,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
         this.context = context;
         this.clientReadPlatformService = readPlatformService;
         this.officeReadPlatformService = officeReadPlatformService;
         this.toApiJsonSerializer = toApiJsonSerializer;
+        this.clientAccountSummaryToApiJsonSerializer = clientAccountSummaryToApiJsonSerializer;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.apiDataConversionService = apiDataConversionService;
-        this.apiJsonSerializerService = apiJsonSerializerService;
         this.commandSourceReadPlatformService = commandsReadPlatformService;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
     }
@@ -251,12 +250,17 @@ public class ClientsApiResource {
 
         context.authenticatedUser().validateHasReadPermission("CLIENT");
 
-        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-
         final ClientAccountSummaryCollectionData clientAccount = this.clientReadPlatformService.retrieveClientAccountDetails(clientId);
 
-        return this.apiJsonSerializerService.serializeClientAccountSummaryCollectionDataToJson(prettyPrint, responseParameters,
-                clientAccount);
+        final Set<String> CLIENT_ACCOUNTS_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("pendingApprovalLoans",
+                "awaitingDisbursalLoans", "openLoans", "closedLoans", "anyLoanCount", "pendingApprovalLoanCount",
+                "awaitingDisbursalLoanCount", "activeLoanCount", "closedLoanCount", "pendingApprovalDespositAccountsCount",
+                "pendingApprovalDespositAccounts", "approvedDespositAccountsCount", "approvedDespositAccounts",
+                "withdrawnByClientDespositAccountsCount", "withdrawnByClientDespositAccounts", "closedDepositAccountsCount",
+                "closedDepositAccounts", "rejectedDepositAccountsCount", "rejectedDepositAccounts", "preclosedDepositAccountsCount",
+                "preclosedDepositAccounts"));
+
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.clientAccountSummaryToApiJsonSerializer.serialize(settings, clientAccount, CLIENT_ACCOUNTS_DATA_PARAMETERS);
     }
 }

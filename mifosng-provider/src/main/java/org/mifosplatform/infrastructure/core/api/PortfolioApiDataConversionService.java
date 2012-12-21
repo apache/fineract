@@ -1,6 +1,5 @@
 package org.mifosplatform.infrastructure.core.api;
 
-import org.mifosplatform.portfolio.client.command.NoteCommand;
 import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.group.command.GroupCommand;
 import org.mifosplatform.portfolio.loanaccount.gaurantor.command.GuarantorCommand;
@@ -22,8 +21,6 @@ public interface PortfolioApiDataConversionService {
     ClientData convertInternalJsonFormatToClientDataChange(Long clientId, String json);
 
     GroupCommand convertJsonToGroupCommand(Long resourceIdentifier, String json);
-
-    NoteCommand convertJsonToNoteCommand(Long resourceIdentifier, Long clientId, String json);
 
     DepositAccountCommand convertJsonToDepositAccountCommand(Long resourceIdentifier, String json);
 

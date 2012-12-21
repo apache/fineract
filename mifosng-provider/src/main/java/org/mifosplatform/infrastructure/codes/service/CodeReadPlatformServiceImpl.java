@@ -5,9 +5,9 @@ import java.sql.SQLException;
 import java.util.Collection;
 
 import org.mifosplatform.infrastructure.codes.data.CodeData;
+import org.mifosplatform.infrastructure.codes.exception.CodeNotFoundException;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.portfolio.fund.exception.FundNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -38,7 +38,7 @@ public class CodeReadPlatformServiceImpl implements CodeReadPlatformService {
             final Long id = rs.getLong("id");
             final String code_name = rs.getString("code_name");
             final boolean systemDefined = rs.getBoolean("systemDefined");
-            
+
             return new CodeData(id, code_name, systemDefined);
         }
     }
@@ -54,7 +54,7 @@ public class CodeReadPlatformServiceImpl implements CodeReadPlatformService {
     }
 
     @Override
-    public CodeData retrieveCode(Long codeId) {
+    public CodeData retrieveCode(final Long codeId) {
         try {
             context.authenticatedUser();
 
@@ -63,7 +63,7 @@ public class CodeReadPlatformServiceImpl implements CodeReadPlatformService {
 
             return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { codeId });
         } catch (EmptyResultDataAccessException e) {
-            throw new FundNotFoundException(codeId);
+            throw new CodeNotFoundException(codeId);
         }
     }
 }

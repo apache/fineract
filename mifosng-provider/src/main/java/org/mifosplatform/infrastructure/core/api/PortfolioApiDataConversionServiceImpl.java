@@ -22,7 +22,6 @@ import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.exception.UnsupportedParameterException;
 import org.mifosplatform.portfolio.client.command.ClientCommand;
-import org.mifosplatform.portfolio.client.command.NoteCommand;
 import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.client.serialization.ClientCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.group.command.GroupCommand;
@@ -107,24 +106,6 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         //
 
         return new GroupCommand(modifiedParameters, resourceIdentifier, externalId, name, officeId, clientMembers);
-    }
-
-    @Override
-    public NoteCommand convertJsonToNoteCommand(final Long noteId, final Long clientId, final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
-
-        Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
-
-        Set<String> supportedParams = new HashSet<String>(Arrays.asList("note"));
-
-        checkForUnsupportedParameters(requestMap, supportedParams);
-
-        Set<String> modifiedParameters = new HashSet<String>();
-
-        String note = extractStringParameter("note", requestMap, modifiedParameters);
-
-        return new NoteCommand(noteId, clientId, note);
     }
 
     private void checkForUnsupportedParameters(Map<String, ?> requestMap, Set<String> supportedParams) {

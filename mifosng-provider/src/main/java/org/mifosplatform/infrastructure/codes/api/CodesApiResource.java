@@ -85,7 +85,7 @@ public class CodesApiResource {
     @Path("{codeId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retreiveOffice(@PathParam("codeId") final Long codeId, @Context final UriInfo uriInfo) {
+    public String retrieveCode(@PathParam("codeId") final Long codeId, @Context final UriInfo uriInfo) {
 
         final CodeData code = this.readPlatformService.retrieveCode(codeId);
 
@@ -109,7 +109,7 @@ public class CodesApiResource {
     @Path("{codeId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String deleteCodeApplication(@PathParam("codeId") final Long codeId) {
+    public String deleteCode(@PathParam("codeId") final Long codeId) {
 
         final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("DELETE", "CODE", "DELETE", "codes",
                 codeId, "{}");

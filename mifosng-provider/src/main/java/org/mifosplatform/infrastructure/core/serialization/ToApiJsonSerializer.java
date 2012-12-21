@@ -5,11 +5,13 @@ import java.util.Set;
 
 public interface ToApiJsonSerializer<T> {
 
-    String serialize(final Object object);
+    String serialize(Object object);
     
-    String serializeResult(final Object object);
+    String serializePretty(boolean prettyOn, Object object);
+    
+    String serializeResult(Object object);
 
-    String serialize(final ApiRequestJsonSerializationSettings settings, Collection<T> collection, Set<String> supportedResponseParameters);
+    String serialize(ApiRequestJsonSerializationSettings settings, Collection<T> collection, Set<String> supportedResponseParameters);
 
-    String serialize(final ApiRequestJsonSerializationSettings settings, T single, Set<String> supportedResponseParameters);
+    String serialize(ApiRequestJsonSerializationSettings settings, T single, Set<String> supportedResponseParameters);
 }
