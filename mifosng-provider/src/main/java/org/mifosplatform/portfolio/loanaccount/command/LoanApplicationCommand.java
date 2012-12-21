@@ -116,6 +116,12 @@ public class LoanApplicationCommand {
             baseDataValidator.reset().parameter("groupId").value(this.groupId).mustBeBlankWhenParameterProvided("clientId", this.clientId)
                     .longGreaterThanZero();
         }
+        
+        if (this.clientId == null && this.groupId == null) {
+            baseDataValidator.reset().parameter("clientId").value(this.clientId).notNull().integerGreaterThanZero();
+        }
+        
+        baseDataValidator.reset().parameter("productId").value(this.productId).notNull().integerGreaterThanZero();
 
         if (this.submittedOnDate == null) {
             ApiParameterError error = ApiParameterError.parameterError("validation.msg.loan.submitted.on.date.cannot.be.blank",

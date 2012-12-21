@@ -626,7 +626,7 @@ Request Body:
 </code>
 <code class="method-response">
 {
- "entityId":23
+ "resourceId":23
 }
 </code>
     </div>
@@ -644,7 +644,7 @@ Request Body:
 </code>
 <code class="method-response">
 {
- "entityId":26
+ "resourceId":26
 }
 </code>
     </div>
@@ -666,7 +666,7 @@ Request Body:
  "joiningDate": "09 June 2006"
 }
 </code>
-<code class="method-response">{ "entityId": 23}</code>
+<code class="method-response">{ "resourceId": 23}</code>
     </div>
 </div>
         
@@ -794,7 +794,7 @@ Request Body:
 }
 </code>
 <code class="method-response">{
- "entityId": 40
+ "resourceId": 40
 }
 </code>
     </div>
@@ -848,7 +848,7 @@ Request Body:
 }
 </code>
 <code class="method-response">{
- "entityId": 20
+ "resourceId": 20
 }
 </code>
     </div>
@@ -1150,70 +1150,67 @@ Request Body:
     <div class="method-example">
         <code class="method-declaration">GET https://Domain Name/api/v1/loans/{loanId}</code>
         <code class="method-response">{
-  "id" : 1,
-  "externalId" : null,
-  "loanProductName" : "Agricultural Loan",
-  "submittedOnDate" : [ 2009, 1, 5 ],
-  "approvedOnDate" : [ 2009, 1, 8 ],
-  "expectedDisbursementDate" : [ 2009, 1, 15 ],
-  "actualDisbursementDate" : [ 2009, 1, 15 ],
-  "expectedFirstRepaymentOnDate" : null,
-  "interestChargedFromDate" : null,
-  "closedOnDate" : [ 2009, 11, 13 ],
-  "expectedMaturityDate" : [ 2009, 11, 15 ],
-  "principal" : {
-    "currencyCode" : "XOF",
-    "digitsAfterDecimal" : 0,
-    "amount" : 100000,
-    "defaultName" : "CFA Franc BCEAO",
-    "nameCode" : "currency.XOF",
-    "displaySymbol" : "CFA",
-    "zero" : false,
-    "greaterThanZero" : true,
-    "displaySymbolValue" : "100000 CFA"
+{
+  "id": 1,
+  "clientId": 1,
+  "clientName": "Willie O'Meara",
+  "loanProductId": 1,
+  "loanProductName": "Agricultural Loan",
+  "loanProductDescription": "An agricultural loan given to farmers to help buy crop, stock and machinery. With an arrears tolerance setting of 1,000 CFA, loans are not marked as 'in arrears' or 'in bad standing' if the amount outstanding is less than this. Interest rate is described using monthly percentage rate (MPR) even though the loan typically lasts a year and requires one repayment (typically at time when farmer sells crop)",
+  "status": {
+    "id": 100,
+    "code": "loanStatusType.submitted.and.pending.approval",
+    "value": "Submitted and pending approval"
   },
-  "inArrearsTolerance" : {
-    "currencyCode" : "XOF",
-    "digitsAfterDecimal" : 0,
-    "amount" : 1000,
-    "defaultName" : "CFA Franc BCEAO",
-    "nameCode" : "currency.XOF",
-    "displaySymbol" : "CFA",
-    "zero" : false,
-    "greaterThanZero" : true,
-    "displaySymbolValue" : "1000 CFA"
+  "currency": {
+    "code": "XOF",
+    "name": "CFA Franc BCEAO",
+    "decimalPlaces": 0,
+    "displaySymbol": "CFA",
+    "nameCode": "currency.XOF",
+    "displayLabel": "CFA Franc BCEAO (CFA)"
   },
-  "numberOfRepayments" : 1,
-  "repaymentEvery" : 10,
-  "interestRatePerPeriod" : 1.75,
-  "annualInterestRate" : 21.0,
-  "repaymentFrequencyType" : {
-    "id" : 2,
-    "code" : "repaymentFrequency.periodFrequencyType.months",
-    "value" : "Months"
+  "principal": 100000,
+  "termFrequency": 12,
+  "termPeriodFrequencyType": {
+    "id": 2,
+    "code": "termFrequency.periodFrequencyType.months",
+    "value": "Months"
   },
-  "interestRateFrequencyType" : {
-    "id" : 2,
-    "code" : "interestRateFrequency.periodFrequencyType.months",
-    "value" : "Per month"
+  "numberOfRepayments": 12,
+  "repaymentEvery": 1,
+  "repaymentFrequencyType": {
+    "id": 2,
+    "code": "repaymentFrequency.periodFrequencyType.months",
+    "value": "Months"
   },
-  "amortizationType" : {
-    "id" : 1,
-    "code" : "amortizationType.equal.installments",
-    "value" : "Equal installments"
+  "transactionProcessingStrategyId": 1,
+  "amortizationType": {
+    "id": 1,
+    "code": "amortizationType.equal.installments",
+    "value": "Equal installments"
   },
-  "interestType" : {
-    "id" : 0,
-    "code" : "interestType.declining.balance",
-    "value" : "Declining Balance"
+  "interestRatePerPeriod": 2,
+  "interestRateFrequencyType": {
+    "id": 2,
+    "code": "interestRateFrequency.periodFrequencyType.months",
+    "value": "Per month"
   },
-  "interestCalculationPeriodType" : {
-    "id" : 1,
-    "code" : "interestCalculationPeriodType.same.as.repayment.period",
-    "value" : "Same as repayment period"
+  "annualInterestRate": 24,
+  "interestType": {
+    "id": 0,
+    "code": "interestType.declining.balance",
+    "value": "Declining Balance"
   },
-  "lifeCycleStatusText" : "Closed",
-  "lifeCycleStatusDate" : [ 2009, 11, 13 ]
+  "interestCalculationPeriodType": {
+    "id": 1,
+    "code": "interestCalculationPeriodType.same.as.repayment.period",
+    "value": "Same as repayment period"
+  },
+  "submittedOnDate": [2011,9,20],
+  "expectedDisbursementDate": [2011,9,20],
+  "expectedMaturityDate": [2012,9,20],
+  "lifeCycleStatusDate": [2011,9,20]
 }
         </code>
     </div>
@@ -1235,9 +1232,9 @@ Request Body:
         <br>
         <table class=matrixHeading>
             <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields</div></td></tr>
-            <tr class=alt><td>clientId, productId, inArrearsTolerance, submittedOnDate, principal,
-            repaymentFrequencyType, repaymentEvery, numberOfRepayments, interestRatePerPeriod, interestRateFrequencyType, amortizationType,
-            interestType, interestCalculationPeriodType, expectedDisbursementDate</td></tr>
+            <tr class=alt><td>clientId, productId, principal, loanTermFrequency, loanTermFrequencyType, numberOfRepayments,
+            repaymentEvery, repaymentFrequencyType, interestRatePerPeriod, interestRateFrequencyType, amortizationType,
+            interestType, interestCalculationPeriodType, expectedDisbursementDate, submittedOnDate, transactionProcessingStrategyId</td></tr>
         </table>
     </div>
     <div class="method-example">
@@ -1246,26 +1243,29 @@ Request Body:
 Content-Type: application/json
 Request Body:
 {
- "clientId": 1,
- "productId": 1,
- "locale": "en_GB",
- "principal": "100,000.00",
- "inArrearsTolerance": "1,000.00",
- "repaymentFrequencyType": 2,
- "repaymentEvery": "1",
- "numberOfRepayments": "12",
- "interestRatePerPeriod": "1.75",
- "interestRateFrequencyType": 2,
- "amortizationType": 1,
- "interestCalculationPeriodType": 1,
- "interestType": 0,
- "dateFormat": "dd MMMM yyyy",
- "expectedDisbursementDate": "01 July 2007",
- "submittedOnDate": "25 June 2007"
+"dateFormat": "dd MMMM yyyy",
+"locale": "en_GB", 
+"clientId": 1,
+"productId": 1,
+"principal": "100,000.00",
+"loanTermFrequency": 12,
+"loanTermFrequencyType": 2,
+"numberOfRepayments": 12,
+"repaymentEvery": 1,
+"repaymentFrequencyType": 2,
+"interestRatePerPeriod": 2,
+"interestRateFrequencyType": 2,
+"amortizationType": 1,
+"interestType": 0,
+"interestCalculationPeriodType": 1,
+"expectedDisbursementDate": "20 September 2011",
+"submittedOnDate": "20 September 2011",
+"transactionProcessingStrategyId": 1
 }
+
         </code>
         <code class="method-response">{
- "entityId": 42
+ "resourceId": 42
 }
         </code>
     </div>
@@ -1274,7 +1274,7 @@ Request Body:
         <a id="loans_approve_etc" name="loans_approve_etc" class="old-syle-anchor">&nbsp;</a>
         <div class="method-section">
             <div class="method-description">
-                <h4>Approve, Undo Approval, Disburse, Undo Disbursal, Reject a Loan or Withdraw a Loan Application</h4>
+                <h4>Approve, Undo Approval, Disburse, Undo Disbursal, Reject or Withdraw a Loan Application</h4>
                 <h5>Arguments</h5> 
                 <dl class="argument-list">
                     <dt>command</dt>
@@ -1302,8 +1302,9 @@ Request Body:
  "eventDate": "07 May 2012",
  "note": "and event note is added"
 }                </code>
-                <code class="method-response">{
-"entityId": 37
+                <code class="method-response">
+{
+"resourceId": 37
 }
                 </code>
             </div>
@@ -1323,7 +1324,7 @@ Content-Type: application/json
 No Request Body:
                 </code>
                 <code class="method-response">{
-"entityId": 1
+"resourceId": 1
 }
                 </code>
             </div>
@@ -1403,7 +1404,7 @@ Request Body:
 }
                 </code>
                 <code class="method-response">{
-"entityId": 37
+"resourceId": 37
 }
                 </code>
             </div>
@@ -1465,7 +1466,7 @@ Request Body:
 }
                 </code>
                 <code class="method-response">{
-    "entityId": 16
+    "resourceId": 16
 }
                 </code>
             </div>
@@ -1618,7 +1619,7 @@ Request Body:
 }
 </code>
 <code class="method-response">{
-  "entityId": 9
+  "resourceId": 9
 }
 </code>
             </div>
@@ -1639,7 +1640,7 @@ Request Body:
 }
 </code>
 <code class="method-response">{
-  "entityId": 1
+  "resourceId": 1
 }
 </code>
             </div>
@@ -2105,7 +2106,7 @@ Request Body:
 }
 </code>
 <code class="method-response">{
-  "entityId": 9
+  "resourceId": 9
 }
 </code>
             </div>
@@ -2128,7 +2129,7 @@ Request Body:
 }
 </code>
 <code class="method-response">{
-  "entityId": 1
+  "resourceId": 1
 }
 </code>
             </div>
@@ -2299,7 +2300,7 @@ Request Body:
 }
 </code>
                 <code class="method-response">{
-  "entityId": null
+  "resourceId": null
 }
                 </code>
             </div>
@@ -2323,7 +2324,7 @@ Request Body:
 }
 </code>
                 <code class="method-response">{
-  "entityId": null
+  "resourceId": null
 }
                 </code>
             </div>
@@ -2361,7 +2362,7 @@ Request Body:
 }
 </code>
                 <code class="method-response">{
-  "entityId": 1
+  "resourceId": 1
 }
                 </code>
             </div>
@@ -2439,7 +2440,7 @@ Request Body:
 }
 </code>
                 <code class="method-response">{
-  "entityId": 1
+  "resourceId": 1
 }
                 </code>
             </div>
@@ -2469,7 +2470,7 @@ Request Body:
 }
 </code>
                 <code class="method-response">{
-  "entityId": 1
+  "resourceId": 1
 }
                 </code>
             </div>
@@ -2493,7 +2494,7 @@ Request Body:
 }
 </code>
                 <code class="method-response">{
-  "entityId": 1
+  "resourceId": 1
 }
                 </code>
             </div>
@@ -2516,7 +2517,7 @@ Request Body:
 }
 </code>
                 <code class="method-response">{
-  "entityId": 1
+  "resourceId": 1
 }
                 </code>
             </div>
@@ -2992,7 +2993,7 @@ Request body:
 </code>
 <code class="method-response">
 {
-  "entityId": 11
+  "resourceId": 11
 }
 </code>
 	    </div>
@@ -3019,7 +3020,7 @@ Request body:
 </code>
 <code class="method-response">
 {
-  "entityId": 3
+  "resourceId": 3
 }
 </code>
 	    </div>
@@ -3038,7 +3039,7 @@ Content-Type: application/json
 No Request Body
 </code>
 <code class="method-response">{
- "entityId": 20
+ "resourceId": 20
 }
 </code>
 	    </div>
@@ -3131,7 +3132,7 @@ Request body:
 }
 </code>
 <code class="method-response">{
-  "entityId": 8
+  "resourceId": 8
 }
 </code>
 	    </div>
@@ -3152,7 +3153,7 @@ Request body:
 }
 </code>
 <code class="method-response">{
-  "entityId": 8
+  "resourceId": 8
 }
 </code>
 	    </div>
@@ -3218,7 +3219,7 @@ ALL_FUNCTIONS_READ: "true"
 }
 </code>
 <code class="method-response">{
-  "entityId": 8
+  "resourceId": 8
 }
 </code>
 	    </div>

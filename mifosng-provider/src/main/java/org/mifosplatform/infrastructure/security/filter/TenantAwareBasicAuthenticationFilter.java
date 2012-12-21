@@ -9,10 +9,15 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang.time.StopWatch;
 import org.mifosplatform.infrastructure.core.domain.MifosPlatformTenant;
+import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
+import org.mifosplatform.infrastructure.security.data.PlatformRequestLog;
 import org.mifosplatform.infrastructure.security.exception.InvalidTenantIdentiferException;
 import org.mifosplatform.infrastructure.security.service.TenantDetailsService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -36,8 +41,13 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
  */
 public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFilter {
 
+    private final static Logger logger = LoggerFactory.getLogger(TenantAwareBasicAuthenticationFilter.class);
+
     @Autowired
     private TenantDetailsService tenantDetailsService;
+
+    @Autowired
+    private ToApiJsonSerializer<PlatformRequestLog> toApiJsonSerializer;
 
     private String tenantRequestHeader = "X-Mifos-Platform-TenantId";
     private boolean exceptionIfHeaderMissing = true;
@@ -52,6 +62,9 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
 
         HttpServletRequest request = (HttpServletRequest) req;
         HttpServletResponse response = (HttpServletResponse) res;
+
+        StopWatch task = new StopWatch();
+        task.start();
 
         try {
 
@@ -83,7 +96,9 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
             response.addHeader("WWW-Authenticate", "Basic realm=\"" + "Mifos Platform API" + "\"");
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
         } finally {
-
+            task.stop();
+            final PlatformRequestLog log = PlatformRequestLog.from(task, request);
+            logger.info(toApiJsonSerializer.serialize(log));
         }
     }
 }
