@@ -513,7 +513,7 @@ var jqxhr = $.ajax({
   "firstname" : "Patrick",
   "lastname" : "Asare-Frimpong",
   "displayName" : "Patrick Asare-Frimpong",
-  "externalId" : null,
+  "externalId" : "123AB",
   "joinedDate" : [ 2012, 4, 18 ]
 }, {
   "officeId" : 5,
@@ -522,7 +522,6 @@ var jqxhr = $.ajax({
   "firstname" : "firstMajmoua",
   "lastname" : "client",
   "displayName" : "firstMajmoua client",
-  "externalId" : null,
   "joinedDate" : [ 2011, 12, 1 ]
 }... ]
 </code>
@@ -589,7 +588,6 @@ var jqxhr = $.ajax({
   "firstname" : "Patrick",
   "lastname" : "O'Meara",
   "displayName" : "Patrick O'Meara",
-  "externalId" : null,
   "joinedDate" : [ 2009, 1, 4 ]
 }
 </code>
@@ -602,12 +600,11 @@ var jqxhr = $.ajax({
         <h4>Create a Client</h4>
         <p> <b>Note:</b> You can enter either:<br>
         firstname/lastname - for a person OR<br>
-        clientOrBusinessName - for a business or organisation (or person known by one name).<br><br>
-        If you use clientOrBusinessName, the value is placed in the lastname field when you retrieve clients.
+        clientOrBusinessName - for a business or organisation (or person known by one name).<br>
         </p>
         <table class=matrixHeading>
             <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields</div></td></tr>
-            <tr class=alt><td>firstname and lastname OR clientOrBusinessName<br>, joiningDate, officeId</td></tr>
+            <tr class=alt><td>firstname and lastname OR clientOrBusinessName<br>, joinedDate, officeId</td></tr>
         </table>
     </div>
     <div class="method-example">
@@ -620,8 +617,9 @@ Request Body:
  "firstname": "Petra", 
  "lastname": "Yton", 
  "externalId": "786YYH7",
- "dateFormat": "dd MMMM yyyy", 
- "joiningDate": "04 March 2009"
+ "dateFormat": "dd MMMM yyyy",
+ "locale": "en",
+ "joinedDate": "04 March 2009"
 }
 </code>
 <code class="method-response">
@@ -639,7 +637,8 @@ Request Body:
  "clientOrBusinessName": "New Business to Create",
  "externalId": "one/78",
  "dateFormat": "dd MMMM yyyy", 
- "joiningDate": "13 June 2006"
+ "locale": "en",
+ "joinedDate": "13 June 2006"
 }
 </code>
 <code class="method-response">
@@ -663,7 +662,8 @@ Request Body:
 { 
  "externalId": "786444UUUYYH7",
  "dateFormat": "dd MMMM yyyy", 
- "joiningDate": "09 June 2006"
+ "locale": "en",
+ "joinedDate": "09 June 2006"
 }
 </code>
 <code class="method-response">{ "resourceId": 23}</code>
@@ -682,44 +682,48 @@ Request Body:
         <p>Example Requests: </p>
         <div class=apiClick>clients/1/loans</div>
         <br><br>
-        <div class=apiClick>clients/1/loans?fields=openLoans,%20closedLoans,activeLoanCount</div>
+        <div class=apiClick>clients/1/loans?fields=openLoans,closedLoans,activeLoanCount</div>
     </div>
     <div class="method-example">
         <code class="method-declaration">GET https://Domain Name/api/v1/clients/{clientId}/loans</code>
 <code class="method-response">{
-  "pendingApprovalLoans" : [ ],
-  "awaitingDisbursalLoans" : [ {
-    "id" : 17,
-    "externalId" : null,
-    "loanProductId" : 1,
-    "loanProductName" : "Agricultural Loan",
-    "loanStatusId" : 200,
-    "pendingApproval" : false,
-    "waitingForDisbursal" : true,
-    "open" : false,
-    "closed" : false,
-    "lifeCycleStatusText" : "Approved",
-    "lifeCycleStatusDate" : null
-  } ],
-  "openLoans" : [ ],
-  "closedLoans" : [ {
-    "id" : 1,
-    "externalId" : null,
-    "loanProductId" : 1,
-    "loanProductName" : "Agricultural Loan",
-    "loanStatusId" : 600,
-    "pendingApproval" : false,
-    "waitingForDisbursal" : false,
-    "open" : false,
-    "closed" : true,
-    "lifeCycleStatusText" : "Closed",
-    "lifeCycleStatusDate" : null
-  } ],
-  "anyLoanCount" : 2,
-  "pendingApprovalLoanCount" : 0,
-  "awaitingDisbursalLoanCount" : 1,
-  "activeLoanCount" : 0,
-  "closedLoanCount" : 1
+  "anyLoanCount": 3,
+  "activeLoanCount": 2,
+  "openLoans": [
+    {
+      "id": 22,
+      "productId": 1,
+      "productName": "Agricultural Loan",
+      "status": {
+        "id": 300,
+        "code": "loanStatusType.active",
+        "value": "Active"
+      }
+    },
+    {
+      "id": 44,
+      "productId": 1,
+      "productName": "Agricultural Loan",
+      "status": {
+        "id": 300,
+        "code": "loanStatusType.active",
+        "value": "Active"
+      }
+    }
+  ],
+  "closedLoanCount": 1,
+  "closedLoans": [
+    {
+      "id": 33,
+      "productId": 1,
+      "productName": "Agricultural Loan",
+      "status": {
+        "id": 601,
+        "code": "loanStatusType.closed.written.off",
+        "value": "Closed (written off)"
+      }
+    }
+  ]
 }
 </code>
     </div>
@@ -743,8 +747,6 @@ Request Body:
 <code class="method-response">[ {
   "id" : 20,
   "clientId" : 2,
-  "loanId" : null,
-  "loanTransactionId" : null,
   "noteType" : {
     "id" : 100,
     "code" : "noteType.client",
@@ -760,8 +762,6 @@ Request Body:
 }, {
   "id" : 16,
   "clientId" : 2,
-  "loanId" : null,
-  "loanTransactionId" : null,
   "noteType" : {
     "id" : 100,
     "code" : "noteType.client",
@@ -814,8 +814,6 @@ Request Body:
         <code class="method-response">{
   "id" : 20,
   "clientId" : 2,
-  "loanId" : null,
-  "loanTransactionId" : null,
   "noteType" : {
     "id" : 100,
     "code" : "noteType.client",
@@ -1422,8 +1420,6 @@ Request Body:
                 <code class="method-response">{
   "id" : 10,
   "date" : [ 2009, 1, 29 ],
-  "principal" : null,
-  "interest" : null,
   "total" : {
     "currencyCode" : "XOF",
     "digitsAfterDecimal" : 0,
@@ -1435,8 +1431,6 @@ Request Body:
     "greaterThanZero" : true,
     "displaySymbolValue" : "300000 CFA"
   },
-  "totalWaived" : null,
-  "overpaid" : null,
   "transactionOffsetFromToday" : -1218
 }
                 </code>
@@ -1514,13 +1508,10 @@ Request Body:
   "name" : "Demo MFI Head Office",
   "externalId" : "1",
   "openingDate" : [ 2009, 1, 1 ],
-  "hierarchy" : ".",
-  "parentName" : null,
-  "parentId" : null
+  "hierarchy" : "."
 }, {
   "id" : 2,
   "name" : "B1",
-  "externalId" : null,
   "openingDate" : [ 2012, 4, 1 ],
   "hierarchy" : ".2.",
   "parentName" : "Demo MFI Head Office",
@@ -1528,7 +1519,6 @@ Request Body:
 }, {
   "id" : 3,
   "name" : "B2",
-  "externalId" : null,
   "openingDate" : [ 2012, 4, 4 ],
   "hierarchy" : ".3.",
   "parentName" : "Demo MFI Head Office",
@@ -1588,9 +1578,7 @@ Request Body:
   "name" : "Demo MFI Head Office",
   "externalId" : "1",
   "openingDate" : [ 2009, 1, 1 ],
-  "hierarchy" : ".",
-  "parentName" : null,
-  "parentId" : null
+  "hierarchy" : "."
 }
 </code>
             </div>
@@ -1775,7 +1763,6 @@ Request Body:
 }, {
   "id" : 2,
   "name" : "Brunei Loan",
-  "description" : null,
   "principal" : {
     "currencyCode" : "BND",
     "digitsAfterDecimal" : 2,
@@ -2169,7 +2156,6 @@ Request Body:
     "code" : "ETB",
     "name" : "Ethiopian Birr",
     "decimalPlaces" : 2,
-    "displaySymbol" : null,
     "nameCode" : "currency.ETB",
     "displayLabel" : "Ethiopian Birr [ETB]"
   } ],
@@ -2177,14 +2163,12 @@ Request Body:
     "code" : "AED",
     "name" : "UAE Dirham",
     "decimalPlaces" : 2,
-    "displaySymbol" : null,
     "nameCode" : "currency.AED",
     "displayLabel" : "UAE Dirham [AED]"
   }, {
     "code" : "AFN",
     "name" : "Afghanistan Afghani",
     "decimalPlaces" : 2,
-    "displaySymbol" : null,
     "nameCode" : "currency.AFN",
     "displayLabel" : "Afghanistan Afghani [AFN]"
   }, ...

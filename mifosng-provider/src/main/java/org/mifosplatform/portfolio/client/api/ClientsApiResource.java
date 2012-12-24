@@ -254,11 +254,15 @@ public class ClientsApiResource {
 
         final Set<String> CLIENT_ACCOUNTS_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("pendingApprovalLoans",
                 "awaitingDisbursalLoans", "openLoans", "closedLoans", "anyLoanCount", "pendingApprovalLoanCount",
-                "awaitingDisbursalLoanCount", "activeLoanCount", "closedLoanCount", "pendingApprovalDespositAccountsCount",
-                "pendingApprovalDespositAccounts", "approvedDespositAccountsCount", "approvedDespositAccounts",
-                "withdrawnByClientDespositAccountsCount", "withdrawnByClientDespositAccounts", "closedDepositAccountsCount",
-                "closedDepositAccounts", "rejectedDepositAccountsCount", "rejectedDepositAccounts", "preclosedDepositAccountsCount",
-                "preclosedDepositAccounts"));
+                "awaitingDisbursalLoanCount", "activeLoanCount", "closedLoanCount", "pendingApprovalDepositAccountsCount",
+                "pendingApprovalDepositAccounts", "approvedDepositAccountsCount", "approvedDepositAccounts",
+                "withdrawnByClientDepositAccountsCount", "withdrawnByClientDepositAccounts", "closedDepositAccountsCount",
+                "closedDepositAccounts", "maturedDepositAccountsCount", "maturedDepositAccounts", "rejectedDepositAccountsCount",
+                "rejectedDepositAccounts", "preclosedDepositAccountsCount", "preclosedDepositAccounts",
+
+                "pendingApprovalSavingAccountsCount", "pendingApprovalSavingAccounts", "approvedSavingAccountsCount",
+                "approvedSavingAccounts", "withdrawnByClientSavingAccountsCount", "withdrawnByClientSavingAccounts",
+                "rejectedSavingAccountsCount", "rejectedSavingAccounts", "closedSavingAccountsCount", "closedSavingAccounts"));
 
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.clientAccountSummaryToApiJsonSerializer.serialize(settings, clientAccount, CLIENT_ACCOUNTS_DATA_PARAMETERS);

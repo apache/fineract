@@ -103,7 +103,7 @@ final public class ClientData {
         this.officeId = officeId;
         this.officeName = officeName;
         this.id = id;
-        this.firstname = firstname;
+        this.firstname = StringUtils.defaultIfEmpty(firstname, null);
 
         /*** unset last name for business name **/
         if (StringUtils.isBlank(firstname)) {
@@ -114,7 +114,7 @@ final public class ClientData {
             this.clientOrBusinessName = null;
         }
         this.displayName = displayName;
-        this.externalId = externalId;
+        this.externalId = StringUtils.defaultIfEmpty(externalId, null);
         this.joinedDate = joinedDate;
         this.imageKey = imageKey;
         if (imageKey != null) {

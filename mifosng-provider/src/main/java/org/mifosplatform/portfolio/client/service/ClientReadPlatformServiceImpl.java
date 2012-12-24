@@ -25,6 +25,7 @@ import org.mifosplatform.portfolio.client.domain.NoteEnumerations;
 import org.mifosplatform.portfolio.client.exception.ClientIdentifierNotFoundException;
 import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
 import org.mifosplatform.portfolio.client.exception.NoteNotFoundException;
+import org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations;
 import org.mifosplatform.useradministration.data.AppUserData;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.mifosplatform.useradministration.service.AppUserReadPlatformService;
@@ -314,13 +315,14 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         @Override
         public ClientAccountSummaryData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
-            Long id = JdbcSupport.getLong(rs, "id");
-            String externalId = rs.getString("externalId");
-            Long productId = JdbcSupport.getLong(rs, "productId");
-            String loanProductName = rs.getString("productName");
-            Integer loanStatusId = JdbcSupport.getInteger(rs, "statusId");
+            final Long id = JdbcSupport.getLong(rs, "id");
+            final String externalId = rs.getString("externalId");
+            final Long productId = JdbcSupport.getLong(rs, "productId");
+            final String loanProductName = rs.getString("productName");
+            final Integer loanStatusId = JdbcSupport.getInteger(rs, "statusId");
+            final EnumOptionData loanStatus = LoanEnumerations.status(loanStatusId);
 
-            return new ClientAccountSummaryData(id, externalId, productId, loanProductName, loanStatusId);
+            return new ClientAccountSummaryData(id, externalId, productId, loanProductName, loanStatus);
         }
     }
 

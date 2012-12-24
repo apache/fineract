@@ -1,189 +1,152 @@
 package org.mifosplatform.portfolio.client.data;
 
-import java.util.List;
+import java.util.Collection;
 
 /**
- * Immutable data object representing a summary of a clients various accounts. 
+ * Immutable data object representing a summary of a clients various accounts.
  */
 public class ClientAccountSummaryCollectionData {
 
-	private final int anyLoanCount;
-	private final int pendingApprovalLoanCount;
-	private final List<ClientAccountSummaryData> pendingApprovalLoans;
-	private final int awaitingDisbursalLoanCount;
-	private final List<ClientAccountSummaryData> awaitingDisbursalLoans;
-	private final int activeLoanCount;
-	private final List<ClientAccountSummaryData> openLoans;
-	private final int closedLoanCount;
-	private final List<ClientAccountSummaryData> closedLoans;
-	private final int pendingApprovalDespositAccountsCount;
-	private final List<ClientAccountSummaryData> pendingApprovalDepositAccounts;
-	private final int approvedDespositAccountsCount;
-	private final List<ClientAccountSummaryData> approvedDepositAccounts;
-	private final int withdrawnByClientDespositAccountsCount;
-	private final List<ClientAccountSummaryData> withdrawnByClientDespositAccounts;
-	private final int closedDepositAccountsCount;
-	private final List<ClientAccountSummaryData> closedDepositAccounts;
-	private final int rejectedDepositAccountsCount;
-	private final List<ClientAccountSummaryData> rejectedDepositAccounts;
-	private final int preclosedDepositAccountsCount;
-	private final List<ClientAccountSummaryData> preclosedDepositAccounts;
-	private final int maturedDepositAccountsCount;
-	private final List<ClientAccountSummaryData> maturedDepositAccounts;
-	private final int pendingApprovalSavingAccountsCount;
-	private final List<ClientAccountSummaryData> pendingApprovalSavingAccounts;
-	private final int approvedSavingAccountsCount;
-	private final List<ClientAccountSummaryData> approvedSavingAccounts;
-	private final int withdrawnByClientSavingAccountsCount;
-	private final List<ClientAccountSummaryData> withdrawnByClientSavingAccounts;
-	private final int rejectedSavingAccountsCount;
-	private final List<ClientAccountSummaryData> rejectedSavingAccounts;
-	private final int closedSavingAccountsCount;
-	private final List<ClientAccountSummaryData> closedSavingAccounts;
-	
-	public ClientAccountSummaryCollectionData(
-			final List<ClientAccountSummaryData> pendingApprovalLoans,
-			final List<ClientAccountSummaryData> awaitingDisbursalLoans,
-			final List<ClientAccountSummaryData> openLoans,
-			final List<ClientAccountSummaryData> closedLoans, 
-			final List<ClientAccountSummaryData> pendingApprovalDepositAccounts, 
-			final List<ClientAccountSummaryData> approvedDepositAccounts,
-			final List<ClientAccountSummaryData> withdrawnByClientDespositAccounts,
-			final List<ClientAccountSummaryData> rejectedDepositAccounts,
-			final List<ClientAccountSummaryData> closedDepositAccounts,
-			final List<ClientAccountSummaryData> preclosedDepositAccounts,
-			final List<ClientAccountSummaryData> maturedDepositAccounts,
-			final List<ClientAccountSummaryData> pendingApprovalSavingAccounts,
-			final List<ClientAccountSummaryData> approvedSavingAccounts,
-			final List<ClientAccountSummaryData> withdrawnByClientSavingAccounts,
-			final List<ClientAccountSummaryData> rejectedSavingAccounts,
-			final List<ClientAccountSummaryData> closedSavingAccounts) {
-		this.pendingApprovalLoans = pendingApprovalLoans;
-		this.awaitingDisbursalLoans = awaitingDisbursalLoans;
-		this.openLoans = openLoans;
-		this.closedLoans = closedLoans;
-		this.pendingApprovalDepositAccounts = pendingApprovalDepositAccounts;
-		this.approvedDepositAccounts = approvedDepositAccounts;
-		this.withdrawnByClientDespositAccounts = withdrawnByClientDespositAccounts;
-		this.closedDepositAccounts = closedDepositAccounts;
-		this.rejectedDepositAccounts = rejectedDepositAccounts;
-		this.preclosedDepositAccounts = preclosedDepositAccounts;
-		this.maturedDepositAccounts = maturedDepositAccounts;
-		
-		// saving accounts
-		this.pendingApprovalSavingAccounts = pendingApprovalSavingAccounts;
-		this.approvedSavingAccounts = approvedSavingAccounts;
-		this.withdrawnByClientSavingAccounts = withdrawnByClientSavingAccounts;
-		this.rejectedSavingAccounts = rejectedSavingAccounts;
-		this.closedSavingAccounts = closedSavingAccounts;
-		
-		this.pendingApprovalLoanCount = this.pendingApprovalLoans.size();
-		this.awaitingDisbursalLoanCount = this.awaitingDisbursalLoans.size();
-		this.activeLoanCount = this.openLoans.size();
-		this.closedLoanCount = this.closedLoans.size();
-		
-		this.pendingApprovalDespositAccountsCount = this.pendingApprovalDepositAccounts.size();
-		this.approvedDespositAccountsCount = this.approvedDepositAccounts.size();
-		this.withdrawnByClientDespositAccountsCount = this.withdrawnByClientDespositAccounts.size();
-		this.closedDepositAccountsCount = this.closedDepositAccounts.size();
-		this.rejectedDepositAccountsCount = this.rejectedDepositAccounts.size();
-		this.preclosedDepositAccountsCount = this.preclosedDepositAccounts.size();
-		this.maturedDepositAccountsCount = this.maturedDepositAccounts.size();
-		this.pendingApprovalSavingAccountsCount = this.pendingApprovalSavingAccounts.size();
-		this.approvedSavingAccountsCount = this.approvedSavingAccounts.size();
-		this.withdrawnByClientSavingAccountsCount = this.withdrawnByClientSavingAccounts.size();
-		this.rejectedSavingAccountsCount = this.rejectedSavingAccounts.size();
-		this.closedSavingAccountsCount = this.closedSavingAccounts.size();
-		
-		this.anyLoanCount = this.pendingApprovalLoanCount + this.awaitingDisbursalLoanCount + this.activeLoanCount + this.closedLoanCount
-				+this.pendingApprovalDespositAccountsCount+this.approvedDespositAccountsCount+this.withdrawnByClientDespositAccountsCount+this.closedDepositAccountsCount
-				+this.rejectedDepositAccountsCount+this.preclosedDepositAccountsCount+this.maturedDepositAccountsCount
-				+this.pendingApprovalSavingAccountsCount+this.approvedSavingAccountsCount+this.withdrawnByClientSavingAccountsCount
-				+this.rejectedSavingAccountsCount+this.closedSavingAccountsCount;
-		
-	}
+    @SuppressWarnings("unused")
+    private final Integer anyLoanCount;
+    private final Integer pendingApprovalLoanCount;
+    private final Collection<ClientAccountSummaryData> pendingApprovalLoans;
+    private final Integer awaitingDisbursalLoanCount;
+    private final Collection<ClientAccountSummaryData> awaitingDisbursalLoans;
+    private final Integer activeLoanCount;
+    private final Collection<ClientAccountSummaryData> openLoans;
+    private final Integer closedLoanCount;
+    private final Collection<ClientAccountSummaryData> closedLoans;
+    @SuppressWarnings("unused")
+    private final Integer pendingApprovalDepositAccountsCount;
+    private final Collection<ClientAccountSummaryData> pendingApprovalDepositAccounts;
+    @SuppressWarnings("unused")
+    private final Integer approvedDepositAccountsCount;
+    private final Collection<ClientAccountSummaryData> approvedDepositAccounts;
+    @SuppressWarnings("unused")
+    private final Integer withdrawnByClientDepositAccountsCount;
+    private final Collection<ClientAccountSummaryData> withdrawnByClientDepositAccounts;
+    @SuppressWarnings("unused")
+    private final Integer closedDepositAccountsCount;
+    private final Collection<ClientAccountSummaryData> closedDepositAccounts;
+    @SuppressWarnings("unused")
+    private final Integer rejectedDepositAccountsCount;
+    private final Collection<ClientAccountSummaryData> rejectedDepositAccounts;
+    @SuppressWarnings("unused")
+    private final Integer preclosedDepositAccountsCount;
+    private final Collection<ClientAccountSummaryData> preclosedDepositAccounts;
+    @SuppressWarnings("unused")
+    private final Integer maturedDepositAccountsCount;
+    private final Collection<ClientAccountSummaryData> maturedDepositAccounts;
+    @SuppressWarnings("unused")
+    private final Integer pendingApprovalSavingAccountsCount;
+    private final Collection<ClientAccountSummaryData> pendingApprovalSavingAccounts;
+    @SuppressWarnings("unused")
+    private final Integer approvedSavingAccountsCount;
+    private final Collection<ClientAccountSummaryData> approvedSavingAccounts;
+    @SuppressWarnings("unused")
+    private final Integer withdrawnByClientSavingAccountsCount;
+    private final Collection<ClientAccountSummaryData> withdrawnByClientSavingAccounts;
+    @SuppressWarnings("unused")
+    private final Integer rejectedSavingAccountsCount;
+    private final Collection<ClientAccountSummaryData> rejectedSavingAccounts;
+    @SuppressWarnings("unused")
+    private final Integer closedSavingAccountsCount;
+    private final Collection<ClientAccountSummaryData> closedSavingAccounts;
 
-	public int getAnyLoanCount() {
-		return anyLoanCount;
-	}
+    public ClientAccountSummaryCollectionData(final Collection<ClientAccountSummaryData> pendingApprovalLoans,
+            final Collection<ClientAccountSummaryData> awaitingDisbursalLoans, final Collection<ClientAccountSummaryData> openLoans,
+            final Collection<ClientAccountSummaryData> closedLoans,
+            final Collection<ClientAccountSummaryData> pendingApprovalDepositAccounts,
+            final Collection<ClientAccountSummaryData> approvedDepositAccounts,
+            final Collection<ClientAccountSummaryData> withdrawnByClientDepositAccounts,
+            final Collection<ClientAccountSummaryData> rejectedDepositAccounts,
+            final Collection<ClientAccountSummaryData> closedDepositAccounts,
+            final Collection<ClientAccountSummaryData> preclosedDepositAccounts,
+            final Collection<ClientAccountSummaryData> maturedDepositAccounts,
+            final Collection<ClientAccountSummaryData> pendingApprovalSavingAccounts,
+            final Collection<ClientAccountSummaryData> approvedSavingAccounts,
+            final Collection<ClientAccountSummaryData> withdrawnByClientSavingAccounts,
+            final Collection<ClientAccountSummaryData> rejectedSavingAccounts,
+            final Collection<ClientAccountSummaryData> closedSavingAccounts) {
 
-	public int getPendingApprovalLoanCount() {
-		return pendingApprovalLoanCount;
-	}
+        this.pendingApprovalLoans = defaultIfEmpty(pendingApprovalLoans);
+        this.awaitingDisbursalLoans = defaultIfEmpty(awaitingDisbursalLoans);
+        this.openLoans = defaultIfEmpty(openLoans);
+        this.closedLoans = defaultIfEmpty(closedLoans);
 
-	public List<ClientAccountSummaryData> getPendingApprovalLoans() {
-		return pendingApprovalLoans;
-	}
+        this.pendingApprovalDepositAccounts = defaultIfEmpty(pendingApprovalDepositAccounts);
+        this.approvedDepositAccounts = defaultIfEmpty(approvedDepositAccounts);
+        this.withdrawnByClientDepositAccounts = defaultIfEmpty(withdrawnByClientDepositAccounts);
+        this.closedDepositAccounts = defaultIfEmpty(closedDepositAccounts);
+        this.rejectedDepositAccounts = defaultIfEmpty(rejectedDepositAccounts);
+        this.preclosedDepositAccounts = defaultIfEmpty(preclosedDepositAccounts);
+        this.maturedDepositAccounts = defaultIfEmpty(maturedDepositAccounts);
 
-	public int getAwaitingDisbursalLoanCount() {
-		return awaitingDisbursalLoanCount;
-	}
+        this.pendingApprovalSavingAccounts = defaultIfEmpty(pendingApprovalSavingAccounts);
+        this.approvedSavingAccounts = defaultIfEmpty(approvedSavingAccounts);
+        this.withdrawnByClientSavingAccounts = defaultIfEmpty(withdrawnByClientSavingAccounts);
+        this.rejectedSavingAccounts = defaultIfEmpty(rejectedSavingAccounts);
+        this.closedSavingAccounts = defaultIfEmpty(closedSavingAccounts);
 
-	public List<ClientAccountSummaryData> getAwaitingDisbursalLoans() {
-		return awaitingDisbursalLoans;
-	}
+        this.pendingApprovalLoanCount = defaultToNullIfEmpty(this.pendingApprovalLoans);
+        this.awaitingDisbursalLoanCount = defaultToNullIfEmpty(this.awaitingDisbursalLoans);
+        this.activeLoanCount = defaultToNullIfEmpty(this.openLoans);
+        this.closedLoanCount = defaultToNullIfEmpty(this.closedLoans);
 
-	public int getActiveLoanCount() {
-		return activeLoanCount;
-	}
+        this.pendingApprovalDepositAccountsCount = defaultToNullIfEmpty(this.pendingApprovalDepositAccounts);
+        this.approvedDepositAccountsCount = defaultToNullIfEmpty(this.approvedDepositAccounts);
+        this.withdrawnByClientDepositAccountsCount = defaultToNullIfEmpty(this.withdrawnByClientDepositAccounts);
+        this.closedDepositAccountsCount = defaultToNullIfEmpty(this.closedDepositAccounts);
+        this.rejectedDepositAccountsCount = defaultToNullIfEmpty(this.rejectedDepositAccounts);
+        this.preclosedDepositAccountsCount = defaultToNullIfEmpty(this.preclosedDepositAccounts);
+        this.maturedDepositAccountsCount = defaultToNullIfEmpty(this.maturedDepositAccounts);
+        this.pendingApprovalSavingAccountsCount = defaultToNullIfEmpty(this.pendingApprovalSavingAccounts);
+        this.approvedSavingAccountsCount = defaultToNullIfEmpty(this.approvedSavingAccounts);
+        this.withdrawnByClientSavingAccountsCount = defaultToNullIfEmpty(this.withdrawnByClientSavingAccounts);
+        this.rejectedSavingAccountsCount = defaultToNullIfEmpty(this.rejectedSavingAccounts);
+        this.closedSavingAccountsCount = defaultToNullIfEmpty(this.closedSavingAccounts);
 
-	public List<ClientAccountSummaryData> getOpenLoans() {
-		return openLoans;
-	}
+        this.anyLoanCount = countOf(this.pendingApprovalLoanCount, this.awaitingDisbursalLoanCount, this.activeLoanCount,
+                this.closedLoanCount);
+        //
+        // , this.pendingApprovalDepositAccountsCount,
+        // this.approvedDepositAccountsCount
+        // , this.withdrawnByClientDepositAccountsCount,
+        // this.closedDepositAccountsCount, this.rejectedDepositAccountsCount
+        // , this.preclosedDepositAccountsCount,
+        // this.maturedDepositAccountsCount,
+        // this.pendingApprovalSavingAccountsCount
+        // , this.approvedSavingAccountsCount,
+        // this.withdrawnByClientSavingAccountsCount,
+        // this.rejectedSavingAccountsCount
+        // , this.closedSavingAccountsCount);
 
-	public int getClosedLoanCount() {
-		return closedLoanCount;
-	}
+    }
 
-	public List<ClientAccountSummaryData> getClosedLoans() {
-		return closedLoans;
-	}
+    private Integer countOf(final Integer... objects) {
+        Integer count = Integer.valueOf(0);
+        for (Integer value : objects) {
+            if (value != null) {
+                count = count + value;
+            }
+        }
+        return count;
+    }
 
-	public int getPendingApprovalDespositAccountsCount() {
-		return pendingApprovalDespositAccountsCount;
-	}
+    private Integer defaultToNullIfEmpty(final Collection<ClientAccountSummaryData> collection) {
+        Integer count = null;
+        if (defaultIfEmpty(collection) != null) {
+            count = collection.size();
+        }
+        return count;
+    }
 
-	public List<ClientAccountSummaryData> getPendingApprovalDepositAccounts() {
-		return pendingApprovalDepositAccounts;
-	}
-
-	public int getApprovedDespositAccountsCount() {
-		return approvedDespositAccountsCount;
-	}
-
-	public List<ClientAccountSummaryData> getApprovedDepositAccounts() {
-		return approvedDepositAccounts;
-	}
-
-	public int getWithdrawnByClientDespositAccountsCount() {
-		return withdrawnByClientDespositAccountsCount;
-	}
-
-	public List<ClientAccountSummaryData> getWithdrawnByClientDespositAccounts() {
-		return withdrawnByClientDespositAccounts;
-	}
-
-	public int getClosedDepositAccountsCount() {
-		return closedDepositAccountsCount;
-	}
-
-	public List<ClientAccountSummaryData> getClosedDepositAccounts() {
-		return closedDepositAccounts;
-	}
-
-	public int getRejectedDepositAccountsCount() {
-		return rejectedDepositAccountsCount;
-	}
-
-	public List<ClientAccountSummaryData> getRejectedDepositAccounts() {
-		return rejectedDepositAccounts;
-	}
-
-	public int getPreclosedDepositAccountsCount() {
-		return preclosedDepositAccountsCount;
-	}
-
-	public List<ClientAccountSummaryData> getPreclosedDepositAccounts() {
-		return preclosedDepositAccounts;
-	}
+    private Collection<ClientAccountSummaryData> defaultIfEmpty(final Collection<ClientAccountSummaryData> collection) {
+        Collection<ClientAccountSummaryData> returnCollection = null;
+        if (collection != null && !collection.isEmpty()) {
+            returnCollection = collection;
+        }
+        return returnCollection;
+    }
 }
