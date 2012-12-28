@@ -41,14 +41,11 @@ Launch instance <a target="_blank" href="https://console.aws.amazon.com/ec2/home
 
 Roadmap
 ==============
+
+- Round out Individual Lending platform and application cababilities:
+     - GK-maarg http://www.gfspl.in/maarg) - see see https://mifosforge.jira.com/browse/MIFOSX-31
+     - Elevate Africa, Heavens Family, CEDA Microfinance
+     
+- Solidatory Groups (Joint Liability Groups) & Linking loan functionality to these groups (@michal-At-soldevho - see https://mifosforge.jira.com/browse/MIFOSX-127, https://mifosforge.jira.com/browse/MIFOSX-5)
+ 
 - Add spine of Fixed-Term Deposit Accounts and Savings Accounts (@madhukar-At-hugo - see https://mifosforge.jira.com/browse/MIFOSX-1)
- 
-- Solidatory Groups & Linking loan functionality to these groups (@michal-At-soldevho - see https://mifosforge.jira.com/browse/MIFOSX-5)
- 
-- Round out **Individual Lending** platform and application cababilities through working with (ENDA, Al Majmoua, GK-maarg http://www.gfspl.in/maarg) - see see https://mifosforge.jira.com/browse/MIFOSX-31
-     - One-Time Charges on loans (@michal-At-soldevho see https://mifosforge.jira.com/browse/MIFOSX-55)
-     - Staff and associated relationship to loans (@vishwas-At-conflux see https://mifosforge.jira.com/browse/MIFOSX-54)
- 
-- API improvements from feedback
-    - paging support
-    - Ability to refine retrieval of single/list resources
