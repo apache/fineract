@@ -30,23 +30,25 @@ public final class JsonCommand {
     private final Long commandId;
     private final Long resourceId;
     private final Long subResourceId;
+	private final String entityName;
 
     public static JsonCommand from(final String jsonCommand, final JsonElement parsedCommand, final FromJsonHelper fromApiJsonHelper,
-            final Long resourceId, final Long subResourceId) {
-        return new JsonCommand(null, jsonCommand, parsedCommand, fromApiJsonHelper, resourceId, subResourceId);
+            final String entityName, final Long resourceId, final Long subResourceId) {
+        return new JsonCommand(null, jsonCommand, parsedCommand, fromApiJsonHelper, entityName, resourceId, subResourceId);
     }
     
     public static JsonCommand fromExistingCommand(final Long commandId, final String jsonCommand, final JsonElement parsedCommand, final FromJsonHelper fromApiJsonHelper,
             final Long resourceId, final Long subResourceId) {
-        return new JsonCommand(commandId, jsonCommand, parsedCommand, fromApiJsonHelper, resourceId, subResourceId);
+        return new JsonCommand(commandId, jsonCommand, parsedCommand, fromApiJsonHelper, null, resourceId, subResourceId);
     }
 
     public JsonCommand(final Long commandId, final String jsonCommand, final JsonElement parsedCommand, final FromJsonHelper fromApiJsonHelper,
-            final Long resourceId, final Long subResourceId) {
+            final String entityName, final Long resourceId, final Long subResourceId) {
         this.commandId = commandId;
         this.jsonCommand = jsonCommand;
         this.parsedCommand = parsedCommand;
         this.fromApiJsonHelper = fromApiJsonHelper;
+		this.entityName = entityName;
         this.resourceId = resourceId;
         this.subResourceId = subResourceId;
     }
@@ -61,6 +63,10 @@ public final class JsonCommand {
     
     public Long commandId() {
         return this.commandId;
+    }
+    
+    public String entityName() {
+    	return this.entityName;
     }
     
     public Long resourceId() {

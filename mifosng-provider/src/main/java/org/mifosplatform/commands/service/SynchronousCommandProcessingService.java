@@ -98,7 +98,22 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
     private NewCommandSourceHandler findCommandHandler(final CommandWrapper wrapper) {
         NewCommandSourceHandler handler = null;
 
-        if (wrapper.isClientNoteResource()) {
+        if (wrapper.isDatatableResource()) {
+        	if (wrapper.isCreate()) {
+        		handler = applicationContext.getBean("createDatatableEntryCommandHandler", NewCommandSourceHandler.class);
+        	} else if (wrapper.isUpdateMultiple()) {
+                handler = applicationContext.getBean("updateOneToManyDatatableEntryCommandHandler", NewCommandSourceHandler.class);
+        	 } else if (wrapper.isUpdate()) {
+                 handler = applicationContext.getBean("updateOneToOneDatatableEntryCommandHandler", NewCommandSourceHandler.class);
+        	 } else if (wrapper.isDeleteMultiple()) {
+                 handler = applicationContext.getBean("deleteOneToManyDatatableEntryCommandHandler", NewCommandSourceHandler.class);
+             } else if (wrapper.isDelete()) {
+                 handler = applicationContext.getBean("deleteOneToOneDatatableEntryCommandHandler", NewCommandSourceHandler.class);
+        	} else {
+                throw new UnsupportedCommandException(wrapper.commandName());
+            }
+        }
+        else if (wrapper.isClientNoteResource()) {
             if (wrapper.isCreate()) {
                 handler = applicationContext.getBean("createClientNoteCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isUpdate()) {

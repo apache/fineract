@@ -15,6 +15,8 @@ VALUES
 ('loan_status_id',400,'Withdrawn by client','Withdrawn by client'),
 ('loan_status_id',500,'Rejected','Rejected'),
 ('loan_status_id',600,'Closed','Closed'),
+('loan_status_id',601,'Closed - Written Off','Closed - Written Off'),
+('loan_status_id',602,'Closed - Reschedule Outstanding Amount','Closed - Reschedule Outstanding Amount'),
 ('loan_status_id',700,'Overpaid','Overpaid'),
 ('loan_transaction_strategy_id',1,'mifos-standard-strategy','Mifos style'),
 ('loan_transaction_strategy_id',2,'heavensfamily-strategy','Heavensfamily'),

@@ -36,6 +36,10 @@ public class FromJsonHelper {
     public Map<String, Boolean> extractMap(final Type typeOfMap, final String json) {
         return this.gsonConverter.fromJson(json, typeOfMap);
     }
+    
+    public Map<String, String> extractDataMap(final Type typeOfMap, final String json) {
+        return this.gsonConverter.fromJson(json, typeOfMap);
+    }
 
     public <T> T fromJson(final String json, Class<T> classOfT) {
         return this.gsonConverter.fromJson(json, classOfT);

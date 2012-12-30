@@ -45,7 +45,7 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
         EntityIdentifier result = null;
         try {
             final JsonElement parsedCommand = this.fromApiJsonHelper.parse(json);
-            final JsonCommand command = JsonCommand.from(json, parsedCommand, this.fromApiJsonHelper, resourceId, subRescourceId);
+            final JsonCommand command = JsonCommand.from(json, parsedCommand, this.fromApiJsonHelper, entityName, resourceId, subRescourceId);
             final boolean isApprovedByChecker = false;
             result = this.processAndLogCommandService.processAndLogCommand(wrapper, command, isApprovedByChecker);
         } catch (RollbackTransactionAsCommandIsNotApprovedByCheckerException e) {
@@ -53,7 +53,7 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
             final String jsonToUse = StringUtils.defaultIfEmpty(e.getJsonOfChangesOnly(), json);
 
             final JsonElement parsedCommand = this.fromApiJsonHelper.parse(jsonToUse);
-            final JsonCommand command = JsonCommand.from(jsonToUse, parsedCommand, this.fromApiJsonHelper, resourceId, subRescourceId);
+            final JsonCommand command = JsonCommand.from(jsonToUse, parsedCommand, this.fromApiJsonHelper, entityName, resourceId, subRescourceId);
 
             result = this.processAndLogCommandService.logCommand(wrapper, command);
         }
@@ -73,7 +73,7 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
         EntityIdentifier result = null;
         try {
             final JsonElement parsedCommand = this.fromApiJsonHelper.parse(json);
-            final JsonCommand command = JsonCommand.from(json, parsedCommand, this.fromApiJsonHelper, resourceId, null);
+            final JsonCommand command = JsonCommand.from(json, parsedCommand, this.fromApiJsonHelper, entityName, resourceId, null);
 
             final boolean isApprovedByChecker = false;
             result = this.processAndLogCommandService.processAndLogCommand(wrapper, command, isApprovedByChecker);
@@ -82,7 +82,7 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
             final String jsonToUse = StringUtils.defaultIfEmpty(e.getJsonOfChangesOnly(), json);
 
             final JsonElement parsedCommand = this.fromApiJsonHelper.parse(jsonToUse);
-            final JsonCommand command = JsonCommand.from(jsonToUse, parsedCommand, this.fromApiJsonHelper, resourceId, null);
+            final JsonCommand command = JsonCommand.from(jsonToUse, parsedCommand, this.fromApiJsonHelper, entityName, resourceId, null);
 
             result = this.processAndLogCommandService.logCommand(wrapper, command);
         }

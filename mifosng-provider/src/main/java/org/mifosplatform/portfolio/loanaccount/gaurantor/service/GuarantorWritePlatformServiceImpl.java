@@ -125,9 +125,10 @@ public class GuarantorWritePlatformServiceImpl implements GuarantorWritePlatform
             modifiedParametersMap.put("locale", command.getLocale());
             modifiedParametersMap.put("dateFormat", command.getDateFormat());
             if (guarantorReadPlatformService.getExternalGuarantor(loanId) != null) {
-                readWriteNonCoreDataService.updateDatatableEntryOnetoOne(EXTERNAL_GUARANTOR_TABLE_NAME, loanId, modifiedParametersMap);
+//                readWriteNonCoreDataService.updateDatatableEntryOnetoOne(EXTERNAL_GUARANTOR_TABLE_NAME, loanId, modifiedParametersMap);
             } else {
-                readWriteNonCoreDataService.newDatatableEntry(EXTERNAL_GUARANTOR_TABLE_NAME, loanId, modifiedParametersMap);
+            	// FIXME - put back in call to datatable passing JsonCommand
+//                readWriteNonCoreDataService.newDatatableEntry(EXTERNAL_GUARANTOR_TABLE_NAME, loanId, modifiedParametersMap);
             }
             // finally unset any existing internal guarantors
             if (loan.getGuarantor() != null) {

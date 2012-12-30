@@ -1,5 +1,6 @@
 package org.mifosplatform.infrastructure.dataqueries.service;
 
+import java.lang.reflect.Type;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -12,9 +13,11 @@ import java.util.Set;
 import javax.sql.rowset.CachedRowSet;
 
 import org.apache.commons.lang.StringUtils;
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.core.serialization.JsonParserHelper;
 import org.mifosplatform.infrastructure.dataqueries.data.DatatableData;
 import org.mifosplatform.infrastructure.dataqueries.data.GenericResultsetData;
@@ -29,16 +32,20 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.google.gson.reflect.TypeToken;
+
 @Service
 public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataService {
 
+	private final static Logger logger = LoggerFactory.getLogger(ReadWriteNonCoreDataServiceImpl.class);
+	
     private final PlatformSecurityContext context;
-
-    private final static Logger logger = LoggerFactory.getLogger(ReadWriteNonCoreDataServiceImpl.class);
+	private final FromJsonHelper fromJsonHelper;
 
     @Autowired
-    public ReadWriteNonCoreDataServiceImpl(final PlatformSecurityContext context) {
+    public ReadWriteNonCoreDataServiceImpl(final PlatformSecurityContext context, final FromJsonHelper fromJsonHelper) {
         this.context = context;
+		this.fromJsonHelper = fromJsonHelper;
     }
 
     @Autowired
@@ -147,14 +154,17 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     }
 
     @Override
-    public void newDatatableEntry(final String datatable, final Long appTableId, final Map<String, String> queryParams) {
+    public void newDatatableEntry(final String datatable, final Long appTableId, final JsonCommand command) {
         // long startTime = System.currentTimeMillis();
 
         String appTable = getWithinScopeApplicationTableName(datatable, appTableId);
 
         List<ResultsetColumnHeader> columnHeaders = getDatatableResultsetColumnHeaders(datatable);
+        
+        final Type typeOfMap = new TypeToken<Map<String, String>>() {}.getType();
+        Map<String, String> dataParams = this.fromJsonHelper.extractDataMap(typeOfMap, command.json());
 
-        String sql = getAddSql(columnHeaders, datatable, getFKField(appTable), appTableId, queryParams);
+        String sql = getAddSql(columnHeaders, datatable, getFKField(appTable), appTableId, dataParams);
 
         genericDataService.updateSQL(sql, "SQL: " + sql);
 
@@ -166,7 +176,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     }
 
     @Override
-    public void updateDatatableEntryOnetoOne(final String datatable, final Long appTableId, final Map<String, String> queryParams) {
+    public void updateDatatableEntryOneToOne(final String datatable, final Long appTableId, final JsonCommand command) {
         // long startTime = System.currentTimeMillis();
 
         GenericResultsetData grs = retrieveDataTableGenericResultSet(datatable, appTableId, null, null);
@@ -178,7 +188,11 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                     + "   Foreign Key Id: " + appTableId);
 
         String fkName = getFKField(getApplicationTableName(datatable));
-        String sql = getUpdateSql(grs, datatable, fkName, appTableId, queryParams);
+        
+        final Type typeOfMap = new TypeToken<Map<String, String>>() {}.getType();
+        Map<String, String> dataParams = this.fromJsonHelper.extractDataMap(typeOfMap, command.json());
+        
+        String sql = getUpdateSql(grs, datatable, fkName, appTableId, dataParams);
 
         if (sql != null) {
             genericDataService.updateSQL(sql, "SQL: " + sql);
@@ -194,15 +208,18 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     }
 
     @Override
-    public void updateDatatableEntryOnetoMany(final String datatable, final Long appTableId, final Long datatableId,
-            final Map<String, String> queryParams) {
+    public void updateDatatableEntryOneToMany(final String datatable, final Long appTableId, final Long datatableId,
+            final JsonCommand command) {
         // long startTime = System.currentTimeMillis();
 
         GenericResultsetData grs = retrieveDataTableGenericResultSet(datatable, appTableId, null, datatableId);
 
         if (grs.getData().size() == 0) throw new DataTableNotFoundException(datatable, appTableId);
 
-        String sql = getUpdateSql(grs, datatable, "id", datatableId, queryParams);
+        final Type typeOfMap = new TypeToken<Map<String, String>>() {}.getType();
+        Map<String, String> dataParams = this.fromJsonHelper.extractDataMap(typeOfMap, command.json());
+        
+        String sql = getUpdateSql(grs, datatable, "id", datatableId, dataParams);
 
         if (sql != null) {
             genericDataService.updateSQL(sql, "SQL: " + sql);

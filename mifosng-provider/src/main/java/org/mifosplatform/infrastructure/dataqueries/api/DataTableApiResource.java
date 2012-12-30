@@ -23,6 +23,7 @@ import javax.ws.rs.core.UriInfo;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
 import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
@@ -44,197 +45,242 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class DataTableApiResource {
 
-    private final static Logger logger = LoggerFactory.getLogger(DataTableApiResource.class);
-    
-    private final PlatformSecurityContext context;
-    private final GenericDataService genericDataService;
-    private final ReadWriteNonCoreDataService readWriteNonCoreDataService;
-    private final ToApiJsonSerializer<GenericResultsetData> toApiJsonSerializer;
+	private final static Logger logger = LoggerFactory
+			.getLogger(DataTableApiResource.class);
 
-    @Autowired
-    public DataTableApiResource(final PlatformSecurityContext context, final GenericDataService genericDataService,
-            final ReadWriteNonCoreDataService readWriteNonCoreDataService, ToApiJsonSerializer<GenericResultsetData> toApiJsonSerializer) {
-        this.context = context;
-        this.genericDataService = genericDataService;
-        this.readWriteNonCoreDataService = readWriteNonCoreDataService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-    }
+	private final PlatformSecurityContext context;
+	private final GenericDataService genericDataService;
+	private final ReadWriteNonCoreDataService readWriteNonCoreDataService;
+	private final ToApiJsonSerializer<GenericResultsetData> toApiJsonSerializer;
+	private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
-    @GET
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String getDatatables(@QueryParam("apptable") final String apptable, @Context final UriInfo uriInfo) {
+	@Autowired
+	public DataTableApiResource(
+			final PlatformSecurityContext context,
+			final GenericDataService genericDataService,
+			final ReadWriteNonCoreDataService readWriteNonCoreDataService,
+			ToApiJsonSerializer<GenericResultsetData> toApiJsonSerializer,
+			final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
+		this.context = context;
+		this.genericDataService = genericDataService;
+		this.readWriteNonCoreDataService = readWriteNonCoreDataService;
+		this.toApiJsonSerializer = toApiJsonSerializer;
+		this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
+	}
 
-        final List<DatatableData> result = this.readWriteNonCoreDataService.retrieveDatatableNames(apptable);
+	@GET
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String getDatatables(@QueryParam("apptable") final String apptable,
+			@Context final UriInfo uriInfo) {
 
-        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serializePretty(prettyPrint, result);
-    }
+		final List<DatatableData> result = this.readWriteNonCoreDataService
+				.retrieveDatatableNames(apptable);
 
-    @POST
-    @Path("register/{datatable}/{apptable}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String registerDatatable(@PathParam("datatable") final String datatable, @PathParam("apptable") final String apptable) {
+		final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo
+				.getQueryParameters());
+		return this.toApiJsonSerializer.serializePretty(prettyPrint, result);
+	}
 
-        this.readWriteNonCoreDataService.registerDatatable(datatable, apptable);
+	@POST
+	@Path("register/{datatable}/{apptable}")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String registerDatatable(
+			@PathParam("datatable") final String datatable,
+			@PathParam("apptable") final String apptable) {
 
-        return this.toApiJsonSerializer.serialize(EntityIdentifier.empty());
-    }
+		this.readWriteNonCoreDataService.registerDatatable(datatable, apptable);
 
-    @POST
-    @Path("deregister/{datatable}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String deregisterDatatable(@PathParam("datatable") final String datatable) {
+		return this.toApiJsonSerializer.serialize(EntityIdentifier.empty());
+	}
 
-        this.readWriteNonCoreDataService.deregisterDatatable(datatable);
+	@POST
+	@Path("deregister/{datatable}")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String deregisterDatatable(
+			@PathParam("datatable") final String datatable) {
 
-        return this.toApiJsonSerializer.serialize(EntityIdentifier.empty());
-    }
+		this.readWriteNonCoreDataService.deregisterDatatable(datatable);
 
-    @GET
-    @Path("{datatable}/{apptableId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String getDatatable(@PathParam("datatable") final String datatable, @PathParam("apptableId") final Long apptableId,
-            @QueryParam("order") final String order, @Context final UriInfo uriInfo) {
+		return this.toApiJsonSerializer.serialize(EntityIdentifier.empty());
+	}
 
-        checkUserPermissionForDatatable(datatable, "READ");
+	@GET
+	@Path("{datatable}/{apptableId}")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String getDatatable(@PathParam("datatable") final String datatable,
+			@PathParam("apptableId") final Long apptableId,
+			@QueryParam("order") final String order,
+			@Context final UriInfo uriInfo) {
 
-        GenericResultsetData results = this.readWriteNonCoreDataService.retrieveDataTableGenericResultSet(datatable, apptableId, order,
-                null);
+		checkUserPermissionForDatatable(datatable, "READ");
 
-        String json = "";
-        final boolean genericResultSet = ApiParameterHelper.genericResultSet(uriInfo.getQueryParameters());
-        if (genericResultSet) {
-            final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-            json = this.toApiJsonSerializer.serializePretty(prettyPrint, results);
-        } else {
-            json = this.genericDataService.generateJsonFromGenericResultsetData(results);
-        }
+		GenericResultsetData results = this.readWriteNonCoreDataService
+				.retrieveDataTableGenericResultSet(datatable, apptableId,
+						order, null);
 
-        return json;
-    }
+		String json = "";
+		final boolean genericResultSet = ApiParameterHelper
+				.genericResultSet(uriInfo.getQueryParameters());
+		if (genericResultSet) {
+			final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo
+					.getQueryParameters());
+			json = this.toApiJsonSerializer.serializePretty(prettyPrint,
+					results);
+		} else {
+			json = this.genericDataService
+					.generateJsonFromGenericResultsetData(results);
+		}
 
-    @POST
-    @Path("{datatable}/{apptableId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String newDatatableEntry(@PathParam("datatable") final String datatable, @PathParam("apptableId") final Long apptableId,
-            final String jsonRequestBody) {
+		return json;
+	}
 
-        checkUserPermissionForDatatable(datatable, "CREATE");
-        Map<String, String> queryParams = getQueryParamsFromJsonRequestBody(jsonRequestBody);
+	@POST
+	@Path("{datatable}/{apptableId}")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String newDatatableEntry(
+			@PathParam("datatable") final String datatable,
+			@PathParam("apptableId") final Long apptableId,
+			final String apiRequestBodyAsJson) {
 
-        this.readWriteNonCoreDataService.newDatatableEntry(datatable, apptableId, queryParams);
+		final EntityIdentifier entityIdentifier = this.commandsSourceWritePlatformService
+				.logCommandSource("CREATE", datatable, "CREATE", "datatables/"+datatable,
+						apptableId, apiRequestBodyAsJson);
 
-        EntityIdentifier entityIdentifier = EntityIdentifier.resourceResult(Long.valueOf(apptableId), null);
+		return this.toApiJsonSerializer.serialize(entityIdentifier);
+	}
 
-        return this.toApiJsonSerializer.serialize(entityIdentifier);
-    }
+	@PUT
+	@Path("{datatable}/{apptableId}")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String updateDatatableEntryOnetoOne(
+			@PathParam("datatable") final String datatable,
+			@PathParam("apptableId") final Long apptableId,
+			final String apiRequestBodyAsJson) {
+		/*
+		 * for updating one to one relationships (where foreign key is the
+		 * primary key)
+		 */
+//		checkUserPermissionForDatatable(datatable, "UPDATE");
+//		Map<String, String> queryParams = getQueryParamsFromJsonRequestBody(jsonRequestBody);
+		
+		final EntityIdentifier entityIdentifier = this.commandsSourceWritePlatformService
+				.logCommandSource("UPDATE", datatable, "UPDATE", "datatables/"+datatable,
+						apptableId, apiRequestBodyAsJson);
 
-    @PUT
-    @Path("{datatable}/{apptableId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String updateDatatableEntryOnetoOne(@PathParam("datatable") final String datatable,
-            @PathParam("apptableId") final Long apptableId, final String jsonRequestBody) {
-        /*
-         * for updating one to one relationships (where foreign key is the
-         * primary key)
-         */
-        checkUserPermissionForDatatable(datatable, "UPDATE");
-        Map<String, String> queryParams = getQueryParamsFromJsonRequestBody(jsonRequestBody);
+//		this.readWriteNonCoreDataService.updateDatatableEntryOnetoOne(
+//				datatable, apptableId, queryParams);
+//
+//		EntityIdentifier entityIdentifier = EntityIdentifier.resourceResult(
+//				Long.valueOf(apptableId), null);
 
-        this.readWriteNonCoreDataService.updateDatatableEntryOnetoOne(datatable, apptableId, queryParams);
+		return this.toApiJsonSerializer.serialize(entityIdentifier);
+	}
 
-        EntityIdentifier entityIdentifier = EntityIdentifier.resourceResult(Long.valueOf(apptableId), null);
+	@PUT
+	@Path("{datatable}/{apptableId}/{datatableId}")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String updateDatatableEntryOnetoOne(
+			@PathParam("datatable") final String datatable,
+			@PathParam("apptableId") final Long apptableId,
+			@PathParam("datatableId") final Long datatableId,
+			final String apiRequestBodyAsJson) {
+		/*
+		 * for updating one to many relationships (where foreign key isn't the
+		 * primary key)
+		 */
+		
+		final EntityIdentifier entityIdentifier = this.commandsSourceWritePlatformService
+				.logCommandSource("UPDATE", datatable, "UPDATE_MULTIPLE", "datatables/"+datatable, apptableId, "datatables/"+datatable, datatableId, apiRequestBodyAsJson);
 
-        return this.toApiJsonSerializer.serialize(entityIdentifier);
-    }
+		return this.toApiJsonSerializer.serialize(entityIdentifier);
+		
+//		checkUserPermissionForDatatable(datatable, "UPDATE");
+//		Map<String, String> queryParams = getQueryParamsFromJsonRequestBody(jsonRequestBody);
+//
+//		this.readWriteNonCoreDataService.updateDatatableEntryOnetoMany(
+//				datatable, apptableId, datatableId, queryParams);
+//
+//		EntityIdentifier entityIdentifier = EntityIdentifier.resourceResult(
+//				Long.valueOf(apptableId), null);
+//
+//		return this.toApiJsonSerializer.serialize(entityIdentifier);
+	}
 
-    @PUT
-    @Path("{datatable}/{apptableId}/{datatableId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String updateDatatableEntryOnetoOne(@PathParam("datatable") final String datatable,
-            @PathParam("apptableId") final Long apptableId, @PathParam("datatableId") final Long datatableId, final String jsonRequestBody) {
-        /*
-         * for updating one to many relationships (where foreign key isn't the
-         * primary key)
-         */
-        checkUserPermissionForDatatable(datatable, "UPDATE");
-        Map<String, String> queryParams = getQueryParamsFromJsonRequestBody(jsonRequestBody);
+	@DELETE
+	@Path("{datatable}/{apptableId}")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String deleteDatatableEntries(
+			@PathParam("datatable") final String datatable,
+			@PathParam("apptableId") final Long apptableId) {
 
-        this.readWriteNonCoreDataService.updateDatatableEntryOnetoMany(datatable, apptableId, datatableId, queryParams);
+		final EntityIdentifier entityIdentifier = this.commandsSourceWritePlatformService
+				.logCommandSource("DELETE", datatable, "DELETE", "datatables/"+datatable,
+						apptableId, "{}");
+		
+		return this.toApiJsonSerializer.serialize(entityIdentifier);
+	}
 
-        EntityIdentifier entityIdentifier = EntityIdentifier.resourceResult(Long.valueOf(apptableId), null);
+	@DELETE
+	@Path("{datatable}/{apptableId}/{datatableId}")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String deleteDatatableEntries(
+			@PathParam("datatable") final String datatable,
+			@PathParam("apptableId") final Long apptableId,
+			@PathParam("datatableId") final Long datatableId) {
 
-        return this.toApiJsonSerializer.serialize(entityIdentifier);
-    }
+		final EntityIdentifier entityIdentifier = this.commandsSourceWritePlatformService
+				.logCommandSource("DELETE", datatable, "DELETE_MULTIPLE", "datatables/"+datatable, apptableId, "datatables/"+datatable, datatableId, "{}");
 
-    @DELETE
-    @Path("{datatable}/{apptableId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String deleteDatatableEntries(@PathParam("datatable") final String datatable, @PathParam("apptableId") final Long apptableId) {
+		return this.toApiJsonSerializer.serialize(entityIdentifier);
+	}
 
-        checkUserPermissionForDatatable(datatable, "DELETE");
+	private Map<String, String> getQueryParamsFromJsonRequestBody(
+			final String jsonRequestBody) {
 
-        this.readWriteNonCoreDataService.deleteDatatableEntries(datatable, apptableId);
+		Map<String, String> queryParams = new HashMap<String, String>();
 
-        EntityIdentifier entityIdentifier = EntityIdentifier.resourceResult(Long.valueOf(apptableId), null);
+		String pValue = "";
+		String pName;
+		try {
+			JSONObject jsonObj = new JSONObject(jsonRequestBody);
+			JSONArray jsonArr = jsonObj.names();
+			if (jsonArr != null) {
+				for (int i = 0; i < jsonArr.length(); i++) {
+					pName = (String) jsonArr.get(i);
+					pValue = jsonObj.getString(pName);
+					logger.info("getQueryParamsFromJsonRequestBody: " + pName
+							+ " - " + pValue);
+					queryParams.put(pName, pValue);
+				}
+				return queryParams;
+			}
+			throw new WebApplicationException(Response
+					.status(Status.BAD_REQUEST).entity("JSON body empty")
+					.build());
 
-        return this.toApiJsonSerializer.serialize(entityIdentifier);
+		} catch (JSONException e) {
+			throw new WebApplicationException(Response
+					.status(Status.BAD_REQUEST).entity("JSON body is wrong")
+					.build());
+		}
 
-    }
+	}
 
-    @DELETE
-    @Path("{datatable}/{apptableId}/{datatableId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String deleteDatatableEntries(@PathParam("datatable") final String datatable, @PathParam("apptableId") final Long apptableId,
-            @PathParam("datatableId") final Long datatableId) {
-
-        checkUserPermissionForDatatable(datatable, "DELETE");
-
-        this.readWriteNonCoreDataService.deleteDatatableEntry(datatable, apptableId, datatableId);
-
-        EntityIdentifier entityIdentifier = EntityIdentifier.resourceResult(Long.valueOf(apptableId), null);
-
-        return this.toApiJsonSerializer.serialize(entityIdentifier);
-    }
-
-    private Map<String, String> getQueryParamsFromJsonRequestBody(final String jsonRequestBody) {
-
-        Map<String, String> queryParams = new HashMap<String, String>();
-
-        String pValue = "";
-        String pName;
-        try {
-            JSONObject jsonObj = new JSONObject(jsonRequestBody);
-            JSONArray jsonArr = jsonObj.names();
-            if (jsonArr != null) {
-                for (int i = 0; i < jsonArr.length(); i++) {
-                    pName = (String) jsonArr.get(i);
-                    pValue = jsonObj.getString(pName);
-                    logger.info("getQueryParamsFromJsonRequestBody: " + pName + " - " + pValue);
-                    queryParams.put(pName, pValue);
-                }
-                return queryParams;
-            }
-            throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity("JSON body empty").build());
-
-        } catch (JSONException e) {
-            throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity("JSON body is wrong").build());
-        }
-
-    }
-
-    private void checkUserPermissionForDatatable(final String datatable, final String accessType) {
-        AppUser currentUser = context.authenticatedUser();
-        if (currentUser.hasNotPermissionForDatatable(datatable, accessType)) { throw new NoAuthorizationException("Not Authorised to "
-                + accessType + " Data Table: " + datatable); }
-    }
+	private void checkUserPermissionForDatatable(final String datatable,
+			final String accessType) {
+		AppUser currentUser = context.authenticatedUser();
+		if (currentUser.hasNotPermissionForDatatable(datatable, accessType)) {
+			throw new NoAuthorizationException("Not Authorised to "
+					+ accessType + " Data Table: " + datatable);
+		}
+	}
 }

@@ -239,4 +239,16 @@ public class CommandWrapper {
     public boolean isBulkUpdateLoanOfficer() {
         return this.actionName.equalsIgnoreCase("BULKREASSIGN") && this.entityName.equalsIgnoreCase("LOAN");
     }
+
+	public boolean isDatatableResource() {
+		return this.resource.toUpperCase().startsWith("DATATABLES");
+	}
+
+	public boolean isDeleteMultiple() {
+		return isDatatableResource() && this.apiOperation.equalsIgnoreCase("DELETE_MULTIPLE");
+	}
+
+	public boolean isUpdateMultiple() {
+		return isDatatableResource() && this.apiOperation.equalsIgnoreCase("UPDATE_MULTIPLE");
+	}
 }
