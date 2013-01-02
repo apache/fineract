@@ -324,7 +324,7 @@ public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements P
         return hasNotPermissionForAnyOf("ALL_FUNCTIONS", "REPAYMENTINPAST_LOAN", "PORTFOLIO_MANAGEMENT_SUPER_USER");
     }
 
-    public boolean hasNotPermissionForReport(String reportName) {
+    public boolean hasNotPermissionForReport(final String reportName) {
 
         if (hasNotPermissionForAnyOf("ALL_FUNCTIONS", "ALL_FUNCTIONS_READ", "REPORTING_SUPER_USER", "READ_" + reportName)) return true;
 
@@ -488,6 +488,12 @@ public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements P
         if (hasNotPermissionTo(checkerPermissionName)) {
             final String authorizationMessage = "User has no authority to be a checker for: " + function;
             throw new NoAuthorizationException(authorizationMessage);
+        }
+    }
+
+    public void validateHasDatatableReadPermission(final String datatable) {
+        if (hasNotPermissionForDatatable(datatable, "READ")) { 
+            throw new NoAuthorizationException("Not authorised to read datatable: " + datatable); 
         }
     }
 }
