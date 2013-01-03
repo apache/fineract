@@ -223,7 +223,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         return new Loan(null, group, fund, officer, transactionProcessingStrategy, loanProduct, loanRepaymentScheduleDetail, status, loanCharges);
     }
 
-    public static Loan newMemberLoanApplication(final Client client, final Group group, final LoanProduct loanProduct, final Fund fund,
+    public static Loan newIndividualLoanApplicationFromGroup(final Client client, final Group group, final LoanProduct loanProduct, final Fund fund,
             final Staff officer, final LoanTransactionProcessingStrategy transactionProcessingStrategy, final LoanSchedule loanSchedule,
             final Set<LoanCharge> loanCharges) {
         final LoanStatus status = null;

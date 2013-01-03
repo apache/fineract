@@ -117,9 +117,11 @@ public class LoanAssembler {
                     loanSchedule, loanCharges);
         }
 
-        if (clientId != null && groupId != null){
+        if (client != null && group != null){
+            
             if (!group.hasClientAsMember(client)) { throw new ClientNotInGroupException(clientId, groupId); }
-            loanApplication = Loan.newMemberLoanApplication(client, group, loanProduct, fund, loanOfficer, loanTransactionProcessingStrategy,
+            
+            loanApplication = Loan.newIndividualLoanApplicationFromGroup(client, group, loanProduct, fund, loanOfficer, loanTransactionProcessingStrategy,
                     loanSchedule, loanCharges);
         }
 
