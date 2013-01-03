@@ -195,7 +195,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
     public static Loan createNew(final Fund fund, final Staff loanOfficer,
             final LoanTransactionProcessingStrategy transactionProcessingStrategy, final LoanProduct loanProduct, final Client client,
             final LoanProductRelatedDetail loanRepaymentScheduleDetail, final Set<LoanCharge> loanCharges) {
-        return new Loan(client, fund, loanOfficer, transactionProcessingStrategy, loanProduct, loanRepaymentScheduleDetail, null,
+        return new Loan(client, null, fund, loanOfficer, transactionProcessingStrategy, loanProduct, loanRepaymentScheduleDetail, null,
                 loanCharges);
     }
 
@@ -203,7 +203,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
     public static Loan createNew(final Fund fund, final Staff loanOfficer,
             final LoanTransactionProcessingStrategy transactionProcessingStrategy, final LoanProduct loanProduct, final Group group,
             final LoanProductRelatedDetail loanRepaymentScheduleDetail, final Set<LoanCharge> loanCharges) {
-        return new Loan(group, fund, loanOfficer, transactionProcessingStrategy, loanProduct, loanRepaymentScheduleDetail, null,
+        return new Loan(null, group, fund, loanOfficer, transactionProcessingStrategy, loanProduct, loanRepaymentScheduleDetail, null,
                 loanCharges);
     }
 
@@ -212,7 +212,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
             final Set<LoanCharge> loanCharges) {
         final LoanStatus status = null;
         LoanProductRelatedDetail loanRepaymentScheduleDetail = loanSchedule.loanProductRelatedDetail();
-        return new Loan(client, fund, officer, transactionProcessingStrategy, loanProduct, loanRepaymentScheduleDetail, status, loanCharges);
+        return new Loan(client, null, fund, officer, transactionProcessingStrategy, loanProduct, loanRepaymentScheduleDetail, status, loanCharges);
     }
 
     public static Loan newGroupLoanApplication(final Group group, final LoanProduct loanProduct, final Fund fund, final Staff officer,
@@ -220,39 +220,26 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
             final Set<LoanCharge> loanCharges) {
         final LoanStatus status = null;
         LoanProductRelatedDetail loanRepaymentScheduleDetail = loanSchedule.loanProductRelatedDetail();
-        return new Loan(group, fund, officer, transactionProcessingStrategy, loanProduct, loanRepaymentScheduleDetail, status, loanCharges);
+        return new Loan(null, group, fund, officer, transactionProcessingStrategy, loanProduct, loanRepaymentScheduleDetail, status, loanCharges);
+    }
+
+    public static Loan newMemberLoanApplication(final Client client, final Group group, final LoanProduct loanProduct, final Fund fund,
+            final Staff officer, final LoanTransactionProcessingStrategy transactionProcessingStrategy, final LoanSchedule loanSchedule,
+            final Set<LoanCharge> loanCharges) {
+        final LoanStatus status = null;
+        LoanProductRelatedDetail loanRepaymentScheduleDetail = loanSchedule.loanProductRelatedDetail();
+        return new Loan(client, group, fund, officer, transactionProcessingStrategy, loanProduct, loanRepaymentScheduleDetail, status,
+                loanCharges);
     }
 
     protected Loan() {
         //
     }
 
-    private Loan(final Client client, Fund fund, Staff loanOfficer, final LoanTransactionProcessingStrategy transactionProcessingStrategy,
+    private Loan(final Client client, final Group group, Fund fund, Staff loanOfficer, final LoanTransactionProcessingStrategy transactionProcessingStrategy,
             final LoanProduct loanProduct, final LoanProductRelatedDetail loanRepaymentScheduleDetail, final LoanStatus loanStatus,
             final Set<LoanCharge> loanCharges) {
         this.client = client;
-        this.fund = fund;
-        this.loanofficer = loanOfficer;
-        this.transactionProcessingStrategy = transactionProcessingStrategy;
-        this.loanProduct = loanProduct;
-        this.loanRepaymentScheduleDetail = loanRepaymentScheduleDetail;
-        if (loanStatus != null) {
-            this.loanStatus = loanStatus.getValue();
-        } else {
-            this.loanStatus = null;
-        }
-        if (loanCharges != null && !loanCharges.isEmpty()) {
-            this.charges = associateChargesWithThisLoan(loanCharges);
-            this.totalChargesDueAtDisbursement = deriveSumTotalOfChargesDueAtDisbursement();
-        } else {
-            this.charges = null;
-        }
-        this.loanOfficerHistory = null;
-    }
-
-    private Loan(final Group group, Fund fund, Staff loanOfficer, final LoanTransactionProcessingStrategy transactionProcessingStrategy,
-            final LoanProduct loanProduct, final LoanProductRelatedDetail loanRepaymentScheduleDetail, final LoanStatus loanStatus,
-            final Set<LoanCharge> loanCharges) {
         this.group = group;
         this.fund = fund;
         this.loanofficer = loanOfficer;

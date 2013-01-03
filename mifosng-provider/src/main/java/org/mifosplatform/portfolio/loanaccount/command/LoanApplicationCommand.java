@@ -108,13 +108,11 @@ public class LoanApplicationCommand {
 
         DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");
 
-        if (this.groupId != null) {
-            baseDataValidator.reset().parameter("clientId").value(this.clientId).mustBeBlankWhenParameterProvided("groupId", this.groupId)
-                    .longGreaterThanZero();
-        }
         if (this.clientId != null) {
-            baseDataValidator.reset().parameter("groupId").value(this.groupId).mustBeBlankWhenParameterProvided("clientId", this.clientId)
-                    .longGreaterThanZero();
+            baseDataValidator.reset().parameter("clientId").value(this.clientId).longGreaterThanZero();
+        }
+        if (this.groupId != null) {
+            baseDataValidator.reset().parameter("groupId").value(this.groupId).longGreaterThanZero();
         }
         
         if (this.clientId == null && this.groupId == null) {

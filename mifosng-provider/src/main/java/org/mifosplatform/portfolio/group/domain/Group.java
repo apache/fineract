@@ -90,6 +90,10 @@ public class Group extends AbstractAuditableCustom<AppUser, Long> {
     public void addClientMember(final Client member){
         this.clientMembers.add(member);
     }
+
+    public boolean hasClientAsMember(final Client client){
+        return this.clientMembers.contains(client);
+    }
     
     /**
      * Delete is a <i>soft delete</i>. Updates flag on group so it wont appear in query/report results.

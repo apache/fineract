@@ -20,6 +20,7 @@ import org.mifosplatform.portfolio.fund.domain.FundRepository;
 import org.mifosplatform.portfolio.fund.exception.FundNotFoundException;
 import org.mifosplatform.portfolio.group.domain.Group;
 import org.mifosplatform.portfolio.group.domain.GroupRepository;
+import org.mifosplatform.portfolio.group.exception.ClientNotInGroupException;
 import org.mifosplatform.portfolio.group.exception.GroupNotFoundException;
 import org.mifosplatform.portfolio.loanaccount.domain.DefaultLoanLifecycleStateMachine;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
@@ -98,8 +99,10 @@ public class LoanAssembler {
         LoanSchedule loanSchedule = this.loanScheduleAssembler.fromJson(element, inArrearsTolerance);
 
         Loan loanApplication = null;
+        Client client = null;
+        Group group = null;
         if (clientId != null) {
-            final Client client = this.clientRepository.findOne(clientId);
+            client = this.clientRepository.findOne(clientId);
             if (client == null || client.isDeleted()) { throw new ClientNotFoundException(clientId); }
 
             loanApplication = Loan.newIndividualLoanApplication(client, loanProduct, fund, loanOfficer, loanTransactionProcessingStrategy,
@@ -107,10 +110,16 @@ public class LoanAssembler {
         }
 
         if (groupId != null) {
-            final Group group = this.groupRepository.findOne(groupId);
+            group = this.groupRepository.findOne(groupId);
             if (group == null || group.isDeleted()) { throw new GroupNotFoundException(groupId); }
 
             loanApplication = Loan.newGroupLoanApplication(group, loanProduct, fund, loanOfficer, loanTransactionProcessingStrategy,
+                    loanSchedule, loanCharges);
+        }
+
+        if (clientId != null && groupId != null){
+            if (!group.hasClientAsMember(client)) { throw new ClientNotInGroupException(clientId, groupId); }
+            loanApplication = Loan.newMemberLoanApplication(client, group, loanProduct, fund, loanOfficer, loanTransactionProcessingStrategy,
                     loanSchedule, loanCharges);
         }
 

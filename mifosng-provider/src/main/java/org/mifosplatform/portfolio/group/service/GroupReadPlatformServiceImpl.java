@@ -154,7 +154,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
 
             GroupLoanAccountSummaryDataMapper rm = new GroupLoanAccountSummaryDataMapper();
 
-            String sql = "select " + rm.loanAccountSummarySchema() + " where l.group_id = ?";
+            String sql = "select " + rm.loanAccountSummarySchema() + " where l.group_id = ? and l.client_id is null";
 
             List<GroupAccountSummaryData> results = this.jdbcTemplate.query(sql, rm, new Object[] {groupId});
             if (results != null) {
@@ -191,7 +191,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
 
         GroupLoanAccountSummaryDataMapper rm = new GroupLoanAccountSummaryDataMapper();
 
-        String sql = "select " + rm.loanAccountSummarySchema() + " where l.group_id = ? and l.loan_officer_id = ?";
+        String sql = "select " + rm.loanAccountSummarySchema() + " where l.group_id = ? and l.client_id is null and l.loan_officer_id = ?";
 
         List<GroupAccountSummaryData> loanAccounts = this.jdbcTemplate.query(sql, rm, new Object[] {groupId, loanOfficerId});
 
