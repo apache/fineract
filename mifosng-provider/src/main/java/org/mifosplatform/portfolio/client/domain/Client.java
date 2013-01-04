@@ -15,14 +15,17 @@ import javax.persistence.TemporalType;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
+import org.mifosplatform.infrastructure.security.service.RandomPasswordGenerator;
 import org.mifosplatform.organisation.office.domain.Office;
-import org.mifosplatform.useradministration.domain.AppUser;
+import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
 @Table(name = "m_client")
-public class Client extends AbstractAuditableCustom<AppUser, Long> {
+public class Client extends AbstractPersistable<Long> {
 
+    @Column(name = "account_no", length=40, unique=true, nullable=false)
+    private String accountNumber;
+    
     @ManyToOne
     @JoinColumn(name = "office_id", nullable = false)
     private Office office;
@@ -78,6 +81,7 @@ public class Client extends AbstractAuditableCustom<AppUser, Long> {
     }
 
     private Client(final Office office, final String firstName, final String lastName, final LocalDate openingDate, final String externalId) {
+        this.accountNumber = new RandomPasswordGenerator(25).generate();
         this.office = office;
         if (StringUtils.isNotBlank(externalId)) {
             this.externalId = externalId.trim();
@@ -109,6 +113,10 @@ public class Client extends AbstractAuditableCustom<AppUser, Long> {
     
     public void changeOffice(final Office newOffice) {
         this.office = newOffice;
+    }
+    
+    public void updateAccountIdentifier(final String accountIdentifier) {
+        this.accountNumber = accountIdentifier;
     }
 
     public Map<String, Object> update(final JsonCommand command) {

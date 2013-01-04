@@ -130,7 +130,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     private static final class ClientMapper implements RowMapper<ClientData> {
 
         public String clientSchema() {
-            return "c.office_id as officeId, o.name as officeName, c.id as id, c.firstname as firstname, c.lastname as lastname, c.display_name as displayName, "
+            return "c.account_no as accountNo, c.office_id as officeId, o.name as officeName, c.id as id, c.firstname as firstname, c.lastname as lastname, c.display_name as displayName, "
                     + "c.external_id as externalId, c.joined_date as joinedDate, c.image_key as imagekey from m_client c join m_office o on o.id = c.office_id "
                     + " where o.hierarchy like ? and c.is_deleted=0 ";
         }
@@ -138,6 +138,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         @Override
         public ClientData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
+            final String accountNo = rs.getString("accountNo");
             final Long officeId = JdbcSupport.getLong(rs, "officeId");
             final Long id = JdbcSupport.getLong(rs, "id");
             String firstname = rs.getString("firstname");
@@ -151,7 +152,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final String imageKey = rs.getString("imageKey");
             final String officeName = rs.getString("officeName");
 
-            return new ClientData(officeId, officeName, id, firstname, lastname, displayName, externalId, joinedDate, imageKey, null, null,
+            return new ClientData(accountNo, officeId, officeName, id, firstname, lastname, displayName, externalId, joinedDate, imageKey, null, null,
                     null);
         }
 
@@ -523,7 +524,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     private static final class ClientIdentifierMapper implements RowMapper<ClientData> {
 
         public String clientLookupByIdentifierSchema() {
-            return "c.id as id, c.firstname as firstname, c.lastname as lastname, " + "c.office_id as officeId, o.name as officeName "
+            return "c.id as id, c.account_no as accountNo, c.firstname as firstname, c.lastname as lastname, " + "c.office_id as officeId, o.name as officeName "
                     + "from m_client c, m_office o, m_client_identifier ci " + "where o.id = c.office_id and c.id=ci.client_id "
                     + "and ci.document_type_id= ? and ci.document_key like ?";
         }
@@ -532,6 +533,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         public ClientData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
             final Long id = rs.getLong("id");
+            final String accountNo = rs.getString("accountNo");
             String firstname = rs.getString("firstname");
             if (StringUtils.isBlank(firstname)) {
                 firstname = "";
@@ -541,7 +543,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final Long officeId = rs.getLong("officeId");
             final String officeName = rs.getString("officeName");
 
-            return ClientData.clientIdentifier(id, firstname, lastname, officeId, officeName);
+            return ClientData.clientIdentifier(id, accountNo, firstname, lastname, officeId, officeName);
         }
     }
     

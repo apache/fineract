@@ -13,6 +13,7 @@ import org.mifosplatform.organisation.office.data.OfficeLookup;
 final public class ClientData {
 
     private final Long id;
+    private final String accountNo;
     private final String firstname;
     private final String lastname;
     private final String clientOrBusinessName;
@@ -55,7 +56,7 @@ final public class ClientData {
         }
         final String displayName = buildDisplayNameFrom(firstnameValue, lastnameValue);
 
-        return new ClientData(officeId, null, id, firstnameValue, lastnameValue, displayName, externalId, joiningDate, null, null, null,
+        return new ClientData(null, officeId, null, id, firstnameValue, lastnameValue, displayName, externalId, joiningDate, null, null, null,
                 null);
     }
 
@@ -67,12 +68,12 @@ final public class ClientData {
             lastname = clientData.clientOrBusinessName;
         }
         final String displayName = buildDisplayNameFrom(firstname, lastname);
-        return new ClientData(clientData.officeId, clientData.officeName, clientData.id, firstname, lastname, displayName,
+        return new ClientData(clientData.accountNo, clientData.officeId, clientData.officeName, clientData.id, firstname, lastname, displayName,
                 clientData.externalId, clientData.joinedDate, clientData.imageKey, clientData.allowedOffices, currentChange, allChanges);
     }
 
     public static ClientData template(final Long officeId, final LocalDate joinedDate, final List<OfficeLookup> allowedOffices) {
-        return new ClientData(officeId, null, null, null, null, null, null, joinedDate, null, allowedOffices, null, null);
+        return new ClientData(null, officeId, null, null, null, null, null, null, joinedDate, null, allowedOffices, null, null);
     }
 
     public static ClientData templateOnTop(final ClientData clientData, final List<OfficeLookup> allowedOffices) {
@@ -84,22 +85,23 @@ final public class ClientData {
             lastname = clientData.clientOrBusinessName;
         }
         final String displayName = buildDisplayNameFrom(firstname, lastname);
-        return new ClientData(clientData.officeId, clientData.officeName, clientData.id, firstname, lastname, displayName,
+        return new ClientData(clientData.accountNo, clientData.officeId, clientData.officeName, clientData.id, firstname, lastname, displayName,
                 clientData.externalId, clientData.joinedDate, clientData.imageKey, allowedOffices, clientData.currentChange,
                 clientData.allChanges);
     }
 
-    public static ClientData clientIdentifier(final Long id, final String firstname, final String lastname, final Long officeId,
+    public static ClientData clientIdentifier(final Long id, final String accountIdentifier, final String firstname, final String lastname, final Long officeId,
             final String officeName) {
 
         final String displayName = buildDisplayNameFrom(firstname, lastname);
 
-        return new ClientData(officeId, officeName, id, firstname, lastname, displayName, null, null, null, null, null, null);
+        return new ClientData(accountIdentifier, officeId, officeName, id, firstname, lastname, displayName, null, null, null, null, null, null);
     }
 
-    public ClientData(final Long officeId, final String officeName, final Long id, final String firstname, final String lastname,
+    public ClientData(final String accountNo, final Long officeId, final String officeName, final Long id, final String firstname, final String lastname,
             final String displayName, final String externalId, final LocalDate joinedDate, final String imageKey,
             final List<OfficeLookup> allowedOffices, final ClientData currentChange, final Collection<ClientData> allChanges) {
+        this.accountNo = accountNo;
         this.officeId = officeId;
         this.officeName = officeName;
         this.id = id;

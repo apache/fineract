@@ -22,7 +22,9 @@ import org.mifosplatform.organisation.office.exception.OfficeNotFoundException;
 import org.mifosplatform.portfolio.client.command.ClientCommand;
 import org.mifosplatform.portfolio.client.command.ClientIdentifierCommand;
 import org.mifosplatform.portfolio.client.command.ClientNoteCommand;
+import org.mifosplatform.portfolio.client.domain.AccountIdentifierGenerator;
 import org.mifosplatform.portfolio.client.domain.Client;
+import org.mifosplatform.portfolio.client.domain.ClientAccountIdentifierGenerator;
 import org.mifosplatform.portfolio.client.domain.ClientIdentifier;
 import org.mifosplatform.portfolio.client.domain.ClientIdentifierRepository;
 import org.mifosplatform.portfolio.client.domain.ClientRepository;
@@ -125,7 +127,12 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
             final Client newClient = Client.fromJson(clientOffice, command);
             this.clientRepository.save(newClient);
-
+            
+            // now use client account identifier generator to generate proper account number
+            AccountIdentifierGenerator generator = new ClientAccountIdentifierGenerator(newClient.getId(), 9);
+            newClient.updateAccountIdentifier(generator.generate());
+            this.clientRepository.save(newClient);
+            
             return EntityIdentifier.resourceResult(newClient.getId(), null);
         } catch (DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);

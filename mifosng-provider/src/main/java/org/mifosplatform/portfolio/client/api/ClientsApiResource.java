@@ -86,7 +86,10 @@ public class ClientsApiResource {
 
         context.authenticatedUser().validateHasReadPermission("CLIENT");
 
-        final String extraCriteria = getClientCriteria(sqlSearch, officeId, externalId, displayName, firstName, lastName, hierarchy);
+        // FIXME - kw - rather than exposing SQL through the api can we not just
+        // pass parameter we want to search by and build up sql like is done for
+        // other parameters?
+        final String extraCriteria = buildSqlStringFromClientCriteria(sqlSearch, officeId, externalId, displayName, firstName, lastName, hierarchy);
 
         final Collection<ClientData> clients = this.clientReadPlatformService.retrieveAllIndividualClients(extraCriteria);
 
@@ -94,8 +97,8 @@ public class ClientsApiResource {
         return this.toApiJsonSerializer.serialize(settings, clients, CLIENT_DATA_PARAMETERS);
     }
 
-    private String getClientCriteria(String sqlSearch, Long officeId, String externalId, String displayName, String firstName,
-            String lastName, String hierarchy) {
+    private String buildSqlStringFromClientCriteria(final String sqlSearch, final Long officeId, final String externalId,
+            final String displayName, final String firstName, final String lastName, final String hierarchy) {
 
         String extraCriteria = "";
 
@@ -147,6 +150,7 @@ public class ClientsApiResource {
 
         ClientData clientData = this.clientReadPlatformService.retrieveIndividualClient(clientId);
         if (settings.isTemplate()) {
+            // FIXME - KW - no need for special OfficeLookup object, just use OfficeData and only populate with id, name, nameDecorated
             final List<OfficeLookup> allowedOffices = new ArrayList<OfficeLookup>(officeReadPlatformService.retrieveAllOfficesForLookup());
             clientData = ClientData.templateOnTop(clientData, allowedOffices);
         }
