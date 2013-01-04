@@ -1,5 +1,7 @@
 package org.mifosplatform.infrastructure.dataqueries.handler;
 
+import java.util.Map;
+
 import org.mifosplatform.commands.handler.NewCommandSourceHandler;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
@@ -24,9 +26,9 @@ public class UpdateOneToManyDatatableEntryCommandHandler implements
 	@Override
 	public EntityIdentifier processCommand(final JsonCommand command) {
 
-		this.writePlatformService.updateDatatableEntryOneToMany(command.entityName(), command.resourceId(), command.subResourceId(), command);
+		Map<String, Object> changes = this.writePlatformService.updateDatatableEntryOneToMany(command.entityName(), command.resourceId(), command.subResourceId(), command);
 
 		return EntityIdentifier.subResourceResult(command.resourceId(), command.subResourceId(),
-				command.commandId());
+				command.commandId(), changes);
 	}
 }

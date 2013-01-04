@@ -24,7 +24,7 @@ public interface ReadWriteNonCoreDataService {
 
     Map<String, Object> updateDatatableEntryOneToOne(String datatable, Long appTableId, JsonCommand command);
 
-    void updateDatatableEntryOneToMany(String datatable, Long appTableId, Long datatableId, JsonCommand command);
+    Map<String, Object> updateDatatableEntryOneToMany(String datatable, Long appTableId, Long datatableId, JsonCommand command);
 
     void deleteDatatableEntries(String datatable, Long appTableId);
 

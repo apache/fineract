@@ -24,7 +24,6 @@ public class UpdateOneToOneDatatableEntryCommandHandler implements NewCommandSou
     @Override
     public EntityIdentifier processCommand(final JsonCommand command) {
 
-        // TODO - return only detected changes
         Map<String, Object> changes = this.writePlatformService.updateDatatableEntryOneToOne(command.entityName(), command.resourceId(), command);
 
         return EntityIdentifier.resourceResult(command.resourceId(), command.commandId(), changes);
