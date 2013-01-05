@@ -15,24 +15,43 @@ public class GroupAccountSummaryCollectionData {
 	private final int closedLoanCount;
 	private final List<GroupAccountSummaryData> closedLoans;
 
+    private final int anyIndividualLoanCount;
+    private final int pendingApprovalIndividualLoanCount;
+    private final List<GroupAccountSummaryData> pendingApprovalIndividualLoans;
+    private final int awaitingDisbursalIndividualLoanCount;
+    private final List<GroupAccountSummaryData> awaitingDisbursalIndividualLoans;
+    private final int activeIndividualLoanCount;
+    private final List<GroupAccountSummaryData> openIndividualLoans;
+    private final int closedIndividualLoanCount;
+    private final List<GroupAccountSummaryData> closedIndividualLoans;
 
     public GroupAccountSummaryCollectionData(List<GroupAccountSummaryData> pendingApprovalLoans,
-                                             List<GroupAccountSummaryData> awaitingDisbursalLoans,
-                                             List<GroupAccountSummaryData> openLoans,
-                                             List<GroupAccountSummaryData> closedLoans) {
+            List<GroupAccountSummaryData> awaitingDisbursalLoans, List<GroupAccountSummaryData> openLoans,
+            List<GroupAccountSummaryData> closedLoans, List<GroupAccountSummaryData> pendingApprovalIndividualLoans,
+            List<GroupAccountSummaryData> awaitingDisbursalIndividualLoans, List<GroupAccountSummaryData> openIndividualLoans,
+            List<GroupAccountSummaryData> closedIndividualLoans) {
         this.pendingApprovalLoans = pendingApprovalLoans;
         this.pendingApprovalLoanCount = pendingApprovalLoans.size();
-
         this.awaitingDisbursalLoans = awaitingDisbursalLoans;
         this.awaitingDisbursalLoanCount = awaitingDisbursalLoans.size();
-
         this.openLoans = openLoans;
         this.activeLoanCount = openLoans.size();
-
         this.closedLoans = closedLoans;
         this.closedLoanCount = closedLoans.size();
 
         this.anyLoanCount = pendingApprovalLoanCount + awaitingDisbursalLoanCount + activeLoanCount + closedLoanCount;
+
+        this.pendingApprovalIndividualLoans = pendingApprovalIndividualLoans;
+        this.pendingApprovalIndividualLoanCount = pendingApprovalIndividualLoans.size();
+        this.awaitingDisbursalIndividualLoans = awaitingDisbursalIndividualLoans;
+        this.awaitingDisbursalIndividualLoanCount = awaitingDisbursalIndividualLoans.size();
+        this.openIndividualLoans = openIndividualLoans;
+        this.activeIndividualLoanCount = openIndividualLoans.size();
+        this.closedIndividualLoans = closedIndividualLoans;
+        this.closedIndividualLoanCount = closedIndividualLoans.size();
+
+        this.anyIndividualLoanCount = pendingApprovalIndividualLoanCount + awaitingDisbursalIndividualLoanCount + activeIndividualLoanCount
+                + closedIndividualLoanCount;
     }
 
     public int getAnyLoanCount() {

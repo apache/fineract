@@ -174,8 +174,33 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
                 }
             }
 
-            return new GroupAccountSummaryCollectionData(pendingApprovalLoans,
-                    awaitingDisbursalLoans, openLoans, closedLoans);
+            List<GroupAccountSummaryData> pendingApprovalIndividualLoans = new ArrayList<GroupAccountSummaryData>();
+            List<GroupAccountSummaryData> awaitingDisbursalIndividualLoans = new ArrayList<GroupAccountSummaryData>();
+            List<GroupAccountSummaryData> openIndividualLoans = new ArrayList<GroupAccountSummaryData>();
+            List<GroupAccountSummaryData> closedIndividualLoans = new ArrayList<GroupAccountSummaryData>();
+
+            sql = "select " + rm.loanAccountSummarySchema() + " where l.group_id = ? and l.client_id is not null";
+
+            results = this.jdbcTemplate.query(sql, rm, new Object[] {groupId});
+            if (results != null) {
+                for (GroupAccountSummaryData row : results) {
+
+                    LoanStatusMapper statusMapper = new LoanStatusMapper(row.getAccountStatusId());
+
+                    if (statusMapper.isOpen()) {
+                        openIndividualLoans.add(row);
+                    } else if (statusMapper.isAwaitingDisbursal()) {
+                        awaitingDisbursalIndividualLoans.add(row);
+                    } else if (statusMapper.isPendingApproval()) {
+                        pendingApprovalIndividualLoans.add(row);
+                    } else {
+                        closedIndividualLoans.add(row);
+                    }
+                }
+            }
+
+            return new GroupAccountSummaryCollectionData(pendingApprovalLoans, awaitingDisbursalLoans, openLoans, closedLoans,
+                    pendingApprovalIndividualLoans, awaitingDisbursalIndividualLoans, openIndividualLoans, closedIndividualLoans);
         } catch (EmptyResultDataAccessException e) {
             throw new GroupNotFoundException(groupId);
         }
