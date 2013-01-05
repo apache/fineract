@@ -220,29 +220,36 @@ public class LoansApiResource {
                 }
             }
 
-            if (associationParameters.contains("repaymentSchedule")) {
+            if (associationParameters.contains("repaymentSchedule") || associationParameters.contains("permissions")) {
 
                 DisbursementData singleDisbursement = loanBasicDetails.toDisburementData();
                 repaymentSchedule = this.loanReadPlatformService.retrieveRepaymentSchedule(loanId, loanBasicDetails.getCurrency(),
                         singleDisbursement, loanBasicDetails.getTotalDisbursementCharges(), loanBasicDetails.getInArrearsTolerance());
 
+                convenienceDataRequired = true;
+            }
+
+            if (associationParameters.contains("permissions")) {
                 // FIXME - KW - Waive feature was changed to waive interest at
                 // anytime so this permission checking is probably not needed -
                 // look into.
                 final MonetaryCurrency currency = new MonetaryCurrency(loanBasicDetails.getCurrency().code(), loanBasicDetails
                         .getCurrency().decimalPlaces());
                 final Money tolerance = Money.of(currency, loanBasicDetails.getInArrearsTolerance());
+
                 final Money totalOutstandingMoney = Money.of(currency, repaymentSchedule.totalOutstanding());
 
                 boolean isWaiveAllowed = totalOutstandingMoney.isGreaterThanZero()
                         && (tolerance.isGreaterThan(totalOutstandingMoney) || tolerance.isEqualTo(totalOutstandingMoney));
 
-                if (associationParameters.contains("permissions")) {
-                    loanRepaymentsCount = retrieveNonDisbursementTransactions(loanRepayments);
-                    permissions = this.loanReadPlatformService.retrieveLoanPermissions(loanBasicDetails, isWaiveAllowed,
-                            loanRepaymentsCount, existsGuarantor);
+                loanRepaymentsCount = retrieveNonDisbursementTransactions(loanRepayments);
+                permissions = this.loanReadPlatformService.retrieveLoanPermissions(loanBasicDetails, isWaiveAllowed,
+                        loanRepaymentsCount, existsGuarantor);
+
+                // clear parent data which wasn't requested
+                if (!associationParameters.contains("repaymentSchedule")) {
+                    repaymentSchedule = null;
                 }
-                convenienceDataRequired = true;
             }
 
             if (associationParameters.contains("charges")) {
